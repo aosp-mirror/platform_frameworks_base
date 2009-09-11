@@ -159,7 +159,8 @@ public class TelephonyManager {
 
     /**
      * Returns the software version number for the device, for example,
-     * the IMEI/SV for GSM phones.
+     * the IMEI/SV for GSM phones. Return null if the software version is
+     * not available.
      *
      * <p>Requires Permission:
      *   {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
@@ -168,13 +169,15 @@ public class TelephonyManager {
         try {
             return getSubscriberInfo().getDeviceSvn();
         } catch (RemoteException ex) {
+            return null;
+        } catch (NullPointerException ex) {
+            return null;
         }
-        return null;
     }
 
     /**
-     * Returns the unique device ID, for example, the IMEI for GSM and the MEID for CDMA
-     * phones.
+     * Returns the unique device ID, for example, the IMEI for GSM and the MEID
+     * for CDMA phones. Return null if device ID is not available.
      *
      * <p>Requires Permission:
      *   {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
@@ -183,12 +186,15 @@ public class TelephonyManager {
         try {
             return getSubscriberInfo().getDeviceId();
         } catch (RemoteException ex) {
+            return null;
+        } catch (NullPointerException ex) {
+            return null;
         }
-        return null;
     }
 
     /**
      * Returns the current location of the device.
+     * Return null if current location is not available.
      *
      * <p>Requires Permission:
      * {@link android.Manifest.permission#ACCESS_COARSE_LOCATION ACCESS_COARSE_LOCATION} or
@@ -199,8 +205,10 @@ public class TelephonyManager {
             Bundle bundle = getITelephony().getCellLocation();
             return CellLocation.newFromBundle(bundle);
         } catch (RemoteException ex) {
+            return null;
+        } catch (NullPointerException ex) {
+            return null;
         }
-        return null;
     }
 
     /**
@@ -216,6 +224,7 @@ public class TelephonyManager {
         try {
             getITelephony().enableLocationUpdates();
         } catch (RemoteException ex) {
+        } catch (NullPointerException ex) {
         }
     }
 
@@ -232,6 +241,7 @@ public class TelephonyManager {
         try {
             getITelephony().disableLocationUpdates();
         } catch (RemoteException ex) {
+        } catch (NullPointerException ex) {
         }
     }
 
@@ -247,9 +257,10 @@ public class TelephonyManager {
        try {
            return getITelephony().getNeighboringCellInfo();
        } catch (RemoteException ex) {
+           return null;
+       } catch (NullPointerException ex) {
+           return null;
        }
-       return null;
-
     }
 
     /**
@@ -289,7 +300,11 @@ public class TelephonyManager {
                 // This can happen when the ITelephony interface is not up yet.
                 return getPhoneTypeFromProperty();
             }
-        } catch(RemoteException ex){
+        } catch (RemoteException ex) {
+            // This shouldn't happen in the normal case, as a backup we
+            // read from the system property.
+            return getPhoneTypeFromProperty();
+        } catch (NullPointerException ex) {
             // This shouldn't happen in the normal case, as a backup we
             // read from the system property.
             return getPhoneTypeFromProperty();
@@ -418,8 +433,11 @@ public class TelephonyManager {
                 // This can happen when the ITelephony interface is not up yet.
                 return NETWORK_TYPE_UNKNOWN;
             }
-        } catch(RemoteException ex){
+        } catch(RemoteException ex) {
             // This shouldn't happen in the normal case
+            return NETWORK_TYPE_UNKNOWN;
+        } catch (NullPointerException ex) {
+            // This could happen before phone restarts due to crashing
             return NETWORK_TYPE_UNKNOWN;
         }
     }
@@ -489,6 +507,9 @@ public class TelephonyManager {
         } catch (RemoteException ex) {
             // Assume no ICC card if remote exception which shouldn't happen
             return false;
+        } catch (NullPointerException ex) {
+            // This could happen before phone restarts due to crashing
+            return false;
         }
     }
 
@@ -556,7 +577,8 @@ public class TelephonyManager {
     }
 
     /**
-     * Returns the serial number of the SIM, if applicable.
+     * Returns the serial number of the SIM, if applicable. Return null if it is
+     * unavailable.
      * <p>
      * Requires Permission:
      *   {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
@@ -565,8 +587,11 @@ public class TelephonyManager {
         try {
             return getSubscriberInfo().getIccSerialNumber();
         } catch (RemoteException ex) {
+            return null;
+        } catch (NullPointerException ex) {
+            // This could happen before phone restarts due to crashing
+            return null;
         }
-        return null;
     }
 
     //
@@ -577,6 +602,7 @@ public class TelephonyManager {
 
     /**
      * Returns the unique subscriber ID, for example, the IMSI for a GSM phone.
+     * Return null if it is unavailable.
      * <p>
      * Requires Permission:
      *   {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
@@ -585,13 +611,16 @@ public class TelephonyManager {
         try {
             return getSubscriberInfo().getSubscriberId();
         } catch (RemoteException ex) {
+            return null;
+        } catch (NullPointerException ex) {
+            // This could happen before phone restarts due to crashing
+            return null;
         }
-        return null;
     }
 
     /**
      * Returns the phone number string for line 1, for example, the MSISDN
-     * for a GSM phone.
+     * for a GSM phone. Return null if it is unavailable.
      * <p>
      * Requires Permission:
      *   {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
@@ -600,12 +629,16 @@ public class TelephonyManager {
         try {
             return getSubscriberInfo().getLine1Number();
         } catch (RemoteException ex) {
+            return null;
+        } catch (NullPointerException ex) {
+            // This could happen before phone restarts due to crashing
+            return null;
         }
-        return null;
     }
 
     /**
      * Returns the alphabetic identifier associated with the line 1 number.
+     * Return null if it is unavailable.
      * <p>
      * Requires Permission:
      *   {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
@@ -616,12 +649,15 @@ public class TelephonyManager {
         try {
             return getSubscriberInfo().getLine1AlphaTag();
         } catch (RemoteException ex) {
+            return null;
+        } catch (NullPointerException ex) {
+            // This could happen before phone restarts due to crashing
+            return null;
         }
-        return null;
     }
 
     /**
-     * Returns the voice mail number.
+     * Returns the voice mail number. Return null if it is unavailable.
      * <p>
      * Requires Permission:
      *   {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
@@ -630,12 +666,15 @@ public class TelephonyManager {
         try {
             return getSubscriberInfo().getVoiceMailNumber();
         } catch (RemoteException ex) {
+            return null;
+        } catch (NullPointerException ex) {
+            // This could happen before phone restarts due to crashing
+            return null;
         }
-        return null;
     }
 
     /**
-     * Returns the voice mail count.
+     * Returns the voice mail count. Return 0 if unavailable.
      * <p>
      * Requires Permission:
      *   {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
@@ -645,8 +684,11 @@ public class TelephonyManager {
         try {
             return getITelephony().getVoiceMessageCount();
         } catch (RemoteException ex) {
+            return 0;
+        } catch (NullPointerException ex) {
+            // This could happen before phone restarts due to crashing
+            return 0;
         }
-        return 0;
     }
 
     /**
@@ -660,8 +702,11 @@ public class TelephonyManager {
         try {
             return getSubscriberInfo().getVoiceMailAlphaTag();
         } catch (RemoteException ex) {
+            return null;
+        } catch (NullPointerException ex) {
+            // This could happen before phone restarts due to crashing
+            return null;
         }
-        return null;
     }
 
     private IPhoneSubInfo getSubscriberInfo() {
@@ -759,6 +804,8 @@ public class TelephonyManager {
         } catch (RemoteException ex) {
             // the phone process is restarting.
             return DATA_DISCONNECTED;
+        } catch (NullPointerException ex) {
+            return DATA_DISCONNECTED;
         }
     }
 
@@ -802,6 +849,8 @@ public class TelephonyManager {
             mRegistry.listen(pkgForDebug, listener.callback, events, notifyNow);
         } catch (RemoteException ex) {
             // system process dead
+        } catch (NullPointerException ex) {
+            // system process dead
         }
     }
 
@@ -815,6 +864,8 @@ public class TelephonyManager {
             return getITelephony().getCdmaEriIconIndex();
         } catch (RemoteException ex) {
             // the phone process is restarting.
+            return -1;
+        } catch (NullPointerException ex) {
             return -1;
         }
     }
@@ -832,6 +883,8 @@ public class TelephonyManager {
         } catch (RemoteException ex) {
             // the phone process is restarting.
             return -1;
+        } catch (NullPointerException ex) {
+            return -1;
         }
     }
 
@@ -845,6 +898,8 @@ public class TelephonyManager {
             return getITelephony().getCdmaEriText();
         } catch (RemoteException ex) {
             // the phone process is restarting.
+            return null;
+        } catch (NullPointerException ex) {
             return null;
         }
     }
