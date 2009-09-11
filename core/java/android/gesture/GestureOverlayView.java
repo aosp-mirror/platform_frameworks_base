@@ -29,6 +29,7 @@ import android.view.animation.AnimationUtils;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.FrameLayout;
 import android.os.SystemClock;
+import android.annotation.Widget;
 import com.android.internal.R;
 
 import java.util.ArrayList;
@@ -50,6 +51,7 @@ import java.util.ArrayList;
  * @attr ref android.R.styleable#GestureOverlayView_orientation
  * @attr ref android.R.styleable#GestureOverlayView_uncertainGestureColor
  */
+@Widget
 public class GestureOverlayView extends FrameLayout {
     public static final int GESTURE_STROKE_TYPE_SINGLE = 0;
     public static final int GESTURE_STROKE_TYPE_MULTIPLE = 1;
