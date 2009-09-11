@@ -52,6 +52,12 @@ public class PixelFormat
      * by the hardware.
      */
     public static final int YCbCr_422_SP= 0x10;
+
+    /** YCbCr format used for images, which uses the NV21 encoding format.   
+     *  This is the default format for camera preview images, when not
+     *  otherwise set with 
+     *  {@link android.hardware.Camera.Parameters#setPreviewFormat(int)}.
+     */
     public static final int YCbCr_420_SP= 0x11;
 
     /**
