@@ -53,19 +53,18 @@ uint32_t SharedClient::getIdentity(size_t token) const {
     return uint32_t(surfaces[token].identity);
 }
 
-status_t SharedClient::setIdentity(size_t token, uint32_t identity) {
-    if (token >= NUM_LAYERS_MAX)
-        return BAD_INDEX;
-    surfaces[token].identity = identity;
-    return NO_ERROR;
-}
-
 // ----------------------------------------------------------------------------
 
 
 SharedBufferStack::SharedBufferStack()
-    : inUse(-1), status(NO_ERROR), identity(-1)
 {
+}
+
+void SharedBufferStack::init(int32_t i)
+{
+    inUse = -1;
+    status = NO_ERROR;
+    identity = i;
 }
 
 status_t SharedBufferStack::setDirtyRegion(int buffer, const Region& dirty)
@@ -312,9 +311,10 @@ status_t SharedBufferClient::setDirtyRegion(int buffer, const Region& reg)
 // ----------------------------------------------------------------------------
 
 SharedBufferServer::SharedBufferServer(SharedClient* sharedClient,
-        int surface, int num)
+        int surface, int num, int32_t identity)
     : SharedBufferBase(sharedClient, surface, num)
 {
+    mSharedStack->init(identity);
     mSharedStack->head = num-1;
     mSharedStack->available = num;
     mSharedStack->queued = 0;

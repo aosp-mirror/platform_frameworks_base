@@ -85,6 +85,7 @@ class SharedBufferStack
 
 public:
     SharedBufferStack();
+    void init(int32_t identity);
     status_t setDirtyRegion(int buffer, const Region& reg);
     Region getDirtyRegion(int buffer) const;
 
@@ -114,7 +115,6 @@ public:
 
     status_t validate(size_t token) const;
     uint32_t getIdentity(size_t token) const;
-    status_t setIdentity(size_t token, uint32_t identity);
 
 private:
     friend class SharedBufferBase;
@@ -262,7 +262,8 @@ private:
 class SharedBufferServer : public SharedBufferBase
 {
 public:
-    SharedBufferServer(SharedClient* sharedClient, int surface, int num);
+    SharedBufferServer(SharedClient* sharedClient, int surface, int num,
+            int32_t identity);
 
     ssize_t retireAndLock();
     status_t unlock(int buffer);

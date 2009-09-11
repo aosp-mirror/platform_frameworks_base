@@ -292,13 +292,16 @@ public:
     virtual char const* getTypeID() const { return typeID; }
     virtual uint32_t getTypeInfo() const { return typeInfo; }
 
+    // lcblk is (almost) only accessed from the main SF thread, in the places
+    // where it's not, a reference to Client must be held
+    SharedBufferServer*     lcblk;
+
     LayerBaseClient(SurfaceFlinger* flinger, DisplayID display, 
             const sp<Client>& client, int32_t i);
     virtual ~LayerBaseClient();
     virtual void onFirstRef();
 
-    wp<Client>              client;
-//    SharedBufferServer*     lcblk;
+    const wp<Client>    client;
 
     inline  uint32_t    getIdentity() const { return mIdentity; }
     inline  int32_t     clientIndex() const { return mIndex; }
@@ -308,6 +311,7 @@ public:
             sp<Surface> getSurface();
     virtual sp<Surface> createSurface() const;
     
+    virtual void onRemoved() { }
 
     class Surface : public BnSurface 
     {

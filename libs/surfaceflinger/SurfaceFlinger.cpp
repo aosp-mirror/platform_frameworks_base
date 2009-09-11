@@ -654,6 +654,7 @@ void SurfaceFlinger::handleTransactionLocked(
         // some layers might have been removed, so
         // we need to update the regions they're exposing.
         if (mLayersRemoved) {
+            mLayersRemoved = false;
             mVisibleRegionsDirty = true;
             const LayerVector& previousLayers(mDrawingState.layersSortedByZ);
             const size_t count = previousLayers.size();
@@ -1093,9 +1094,6 @@ status_t SurfaceFlinger::purgatorizeLayer_l(const sp<LayerBase>& layerBase)
 
 void SurfaceFlinger::free_resources_l()
 {
-    // Destroy layers that were removed
-    mLayersRemoved = false;
-    
     // free resources associated with disconnected clients
     Vector< sp<Client> >& disconnectedClients(mDisconnectedClients);
     const size_t count = disconnectedClients.size();
@@ -1321,11 +1319,15 @@ status_t SurfaceFlinger::removeSurface(SurfaceID index)
      * to wait for all client's references to go away first).
      */
 
+    status_t err = NAME_NOT_FOUND;
     Mutex::Autolock _l(mStateLock);
     sp<LayerBaseClient> layer = getLayerUser_l(index);
-    status_t err = purgatorizeLayer_l(layer);
-    if (err == NO_ERROR) {
-        setTransactionFlags(eTransactionNeeded);
+    if (layer != 0) {
+        err = purgatorizeLayer_l(layer);
+        if (err == NO_ERROR) {
+            layer->onRemoved();
+            setTransactionFlags(eTransactionNeeded);
+        }
     }
     return err;
 }
