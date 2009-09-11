@@ -93,12 +93,12 @@ public:
     volatile int32_t available; // number of dequeue-able buffers
     volatile int32_t queued;    // number of buffers waiting for post
     volatile int32_t inUse;     // buffer currently in use by SF
+    volatile status_t status;   // surface's status code
 
     // not part of the conditions
     volatile int32_t reallocMask;
 
     int32_t     identity;       // surface's identity (const)
-    status_t    status;         // surface's status code
     int32_t     reserved32[13];
     FlatRegion  dirtyRegion[NUM_BUFFER_MAX];    // 12*4=48 bytes
 };
@@ -168,10 +168,11 @@ protected:
 template <typename T>
 status_t SharedBufferBase::waitForCondition(T condition) 
 {
+    const SharedBufferStack& stack( *mSharedStack );
     SharedClient& client( *mSharedClient );
     const nsecs_t TIMEOUT = s2ns(1); 
     Mutex::Autolock _l(client.lock);
-    while (!condition()) {
+    while ((condition()==false) && (stack.status == NO_ERROR)) {
         status_t err = client.cv.waitRelative(client.lock, TIMEOUT);
         
         // handle errors and timeouts
@@ -195,7 +196,7 @@ status_t SharedBufferBase::waitForCondition(T condition)
             }
         }
     }
-    return NO_ERROR;
+    return stack.status;
 }
 
 
@@ -265,9 +266,10 @@ public:
 
     ssize_t retireAndLock();
     status_t unlock(int buffer);
+    void setStatus(status_t status);
     status_t reallocate();
     status_t assertReallocate(int buffer);
-
+    
     Region getDirtyRegion(int buffer) const;
 
 private:
@@ -280,6 +282,12 @@ private:
     struct RetireUpdate : public UpdateBase {
         const int numBuffers;
         inline RetireUpdate(SharedBufferBase* sbb, int numBuffers);
+        inline ssize_t operator()();
+    };
+
+    struct StatusUpdate : public UpdateBase {
+        const status_t status;
+        inline StatusUpdate(SharedBufferBase* sbb, status_t status);
         inline ssize_t operator()();
     };
 
