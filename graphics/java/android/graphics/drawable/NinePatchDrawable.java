@@ -21,6 +21,7 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.util.TypedValue;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -170,6 +171,11 @@ public class NinePatchDrawable extends Drawable {
 
     @Override
     public void draw(Canvas canvas) {
+        if (false) {
+            float[] pts = new float[2];
+            canvas.getMatrix().mapPoints(pts);
+            Log.v("9patch", "Drawing 9-patch @ " + pts[0] + "," + pts[1] + ": " + getBounds());
+        }
         mNinePatch.draw(canvas, getBounds(), mPaint);
     }
 

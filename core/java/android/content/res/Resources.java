@@ -66,8 +66,6 @@ public class Resources {
             = new SparseArray<ColorStateList>();
     private static boolean mPreloaded;
 
-    private final LongSparseArray<Drawable.ConstantState> mPreloadedDrawables;
-
     /*package*/ final TypedValue mTmpValue = new TypedValue();
 
     // These are protected by the mTmpValue lock.
@@ -158,11 +156,6 @@ public class Resources {
         }
         updateConfiguration(config, metrics);
         assets.ensureStringBlocks();
-        if (mCompatibilityInfo.isScalingRequired()) {
-            mPreloadedDrawables = emptySparseArray();
-        } else {
-            mPreloadedDrawables = sPreloadedDrawables;
-        }
     }
 
     /**
@@ -1669,7 +1662,7 @@ public class Resources {
             return dr;
         }
 
-        Drawable.ConstantState cs = mPreloadedDrawables.get(key);
+        Drawable.ConstantState cs = sPreloadedDrawables.get(key);
         if (cs != null) {
             dr = cs.newDrawable();
         } else {
@@ -1976,7 +1969,6 @@ public class Resources {
         mMetrics.setToDefaults();
         updateConfiguration(null, null);
         mAssets.ensureStringBlocks();
-        mPreloadedDrawables = sPreloadedDrawables;
         mCompatibilityInfo = CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO;
     }
 }
