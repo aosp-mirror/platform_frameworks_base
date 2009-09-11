@@ -1266,5 +1266,4 @@ public class BluetoothService extends IBluetooth.Stub {
     private native boolean setPairingConfirmationNative(String address, boolean confirm,
             int nativeData);
     private native boolean setDevicePropertyBooleanNative(String objectPath, String key, int value);
-
 }
