@@ -49,13 +49,12 @@ const char* const Layer::typeID = "Layer";
 
 Layer::Layer(SurfaceFlinger* flinger, DisplayID display, 
         const sp<Client>& c, int32_t i)
-    :   LayerBaseClient(flinger, display, c, i), lcblk(NULL),
+    :   LayerBaseClient(flinger, display, c, i),
         mSecure(false),
         mNeedsBlending(true)
 {
     // no OpenGL operation is possible here, since we might not be
     // in the OpenGL thread.
-    lcblk = new SharedBufferServer(c->ctrlblk, i, NUM_BUFFERS);
     mFrontBufferIndex = lcblk->getFrontBuffer();
 }
 
@@ -63,8 +62,14 @@ Layer::~Layer()
 {
     destroy();
     // the actual buffers will be destroyed here
-    delete lcblk;
+}
 
+// called with SurfaceFlinger::mStateLock as soon as the layer is entered
+// in the purgatory list
+void Layer::onRemoved()
+{
+    // wake up the condition
+    lcblk->setStatus(NO_INIT);
 }
 
 void Layer::destroy()
@@ -79,7 +84,9 @@ void Layer::destroy()
             eglDestroyImageKHR(dpy, mTextures[i].image);
             mTextures[i].image = EGL_NO_IMAGE_KHR;
         }
+        Mutex::Autolock _l(mLock);
         mBuffers[i].clear();
+        mWidth = mHeight = 0;
     }
     mSurface.clear();
 }
@@ -213,6 +220,16 @@ void Layer::onDraw(const Region& clip) const
 
 sp<SurfaceBuffer> Layer::requestBuffer(int index, int usage)
 {
+    sp<Buffer> buffer;
+
+    // this ensures our client doesn't go away while we're accessing
+    // the shared area.
+    sp<Client> ourClient(client.promote());
+    if (ourClient == 0) {
+        // oops, the client is already gone
+        return buffer;
+    }
+
     /*
      * This is called from the client's Surface::dequeue(). This can happen
      * at any time, especially while we're in the middle of using the
@@ -225,12 +242,21 @@ sp<SurfaceBuffer> Layer::requestBuffer(int index, int usage)
      */
     status_t err = lcblk->assertReallocate(index);
     LOGE_IF(err, "assertReallocate(%d) failed (%s)", index, strerror(-err));
+    if (err != NO_ERROR) {
+        // the surface may have died
+        return buffer;
+    }
 
-    Mutex::Autolock _l(mLock);
-    uint32_t w = mWidth;
-    uint32_t h = mHeight;
-    
-    sp<Buffer>& buffer(mBuffers[index]);
+    uint32_t w, h;
+    { // scope for the lock
+        Mutex::Autolock _l(mLock);
+        w = mWidth;
+        h = mHeight;
+        buffer = mBuffers[index];
+        mBuffers[index].clear();
+    }
+
+
     if (buffer->getStrongCount() == 1) {
         err = buffer->reallocate(w, h, mFormat, usage, mBufferFlags);
     } else {
@@ -253,8 +279,16 @@ sp<SurfaceBuffer> Layer::requestBuffer(int index, int usage)
     }
 
     if (err == NO_ERROR && buffer->handle != 0) {
-        // texture is now dirty...
-        mTextures[index].dirty = true;
+        Mutex::Autolock _l(mLock);
+        if (mWidth && mHeight) {
+            // and we have new buffer
+            mBuffers[index] = buffer;
+            // texture is now dirty...
+            mTextures[index].dirty = true;
+        } else {
+            // oops we got killed while we were allocating the buffer
+            buffer.clear();
+        }
     }
     return buffer;
 }
