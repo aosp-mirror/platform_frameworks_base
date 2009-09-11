@@ -3438,6 +3438,10 @@
         <attr name="label"/>
         <!-- the icon of the authenticator. -->
         <attr name="icon"/>
+        <!-- smaller icon of the authenticator -->
+        <attr name="smallIcon" format="reference"/>
+        <!-- a preferences.xml file for authenticator-specific settings -->
+        <attr name="accountPreferences" format="reference"/>
     </declare-styleable>
 
     <!-- =============================== -->

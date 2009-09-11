@@ -6,16 +6,21 @@ import android.os.Parcel;
 public class AuthenticatorDescription implements Parcelable {
     final public String type;
     final public int labelId;
-    final public int iconId;
+    final public int iconId; 
+    final public int smallIconId; 
+    final public int accountPreferencesId;
     final public String packageName;
 
-    public AuthenticatorDescription(String type, String packageName, int labelId, int iconId) {
+    public AuthenticatorDescription(String type, String packageName, int labelId, int iconId, 
+            int smallIconId, int prefId) {
         if (type == null) throw new IllegalArgumentException("type cannot be null");
         if (packageName == null) throw new IllegalArgumentException("packageName cannot be null");
         this.type = type;
         this.packageName = packageName;
         this.labelId = labelId;
         this.iconId = iconId;
+        this.smallIconId = smallIconId;
+        this.accountPreferencesId = prefId;
     }
 
     public static AuthenticatorDescription newKey(String type) {
@@ -28,6 +33,8 @@ public class AuthenticatorDescription implements Parcelable {
         this.packageName = null;
         this.labelId = 0;
         this.iconId = 0;
+        this.smallIconId = 0;
+        this.accountPreferencesId = 0;
     }
 
     private AuthenticatorDescription(Parcel source) {
@@ -35,6 +42,8 @@ public class AuthenticatorDescription implements Parcelable {
         this.packageName = source.readString();
         this.labelId = source.readInt();
         this.iconId = source.readInt();
+        this.smallIconId = source.readInt();
+        this.accountPreferencesId = source.readInt();
     }
 
     public int describeContents() {
@@ -57,6 +66,8 @@ public class AuthenticatorDescription implements Parcelable {
         dest.writeString(packageName);
         dest.writeInt(labelId);
         dest.writeInt(iconId);
+        dest.writeInt(smallIconId);
+        dest.writeInt(accountPreferencesId);
     }
 
     public static final Creator<AuthenticatorDescription> CREATOR =
