@@ -1434,10 +1434,10 @@ public class WifiService extends IWifiManager.Stub {
                     return;
                 }
                 mPluggedType = pluggedType;
-            } else if (action.equals(BluetoothA2dp.SINK_STATE_CHANGED_ACTION)) {
+            } else if (action.equals(BluetoothA2dp.ACTION_SINK_STATE_CHANGED)) {
                 boolean isBluetoothPlaying =
                         intent.getIntExtra(
-                                BluetoothA2dp.SINK_STATE,
+                                BluetoothA2dp.EXTRA_SINK_STATE,
                                 BluetoothA2dp.STATE_DISCONNECTED) == BluetoothA2dp.STATE_PLAYING;
                 mWifiStateTracker.setBluetoothScanMode(isBluetoothPlaying);
             } else {
@@ -1556,7 +1556,7 @@ public class WifiService extends IWifiManager.Stub {
         intentFilter.addAction(Intent.ACTION_SCREEN_OFF);
         intentFilter.addAction(Intent.ACTION_BATTERY_CHANGED);
         intentFilter.addAction(ACTION_DEVICE_IDLE);
-        intentFilter.addAction(BluetoothA2dp.SINK_STATE_CHANGED_ACTION);
+        intentFilter.addAction(BluetoothA2dp.ACTION_SINK_STATE_CHANGED);
         mContext.registerReceiver(mReceiver, intentFilter);
     }
     

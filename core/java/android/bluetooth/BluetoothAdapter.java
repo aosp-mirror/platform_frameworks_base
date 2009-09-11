@@ -36,8 +36,6 @@ import java.util.HashSet;
  *
  * <p>Use the {@link BluetoothDevice} class for operations on remote Bluetooth
  * devices.
- *
- * <p>TODO: unhide more of this class
  */
 public final class BluetoothAdapter {
     private static final String TAG = "BluetoothAdapter";
@@ -49,20 +47,20 @@ public final class BluetoothAdapter {
      * <p><code>Intent.getIntExtra(BluetoothAdapter.EXTRA_STATE,
      * BluetoothAdapter.ERROR)</code>
      */
-    public static final int ERROR = -1;
+    public static final int ERROR = Integer.MIN_VALUE;
 
     /**
      * Broadcast Action: The state of the local Bluetooth adapter has been
      * changed.
      * <p>For example, Bluetooth has been turned on or off.
-     * <p>Contains the extra fields {@link #EXTRA_STATE} and {@link
+     * <p>Always contains the extra fields {@link #EXTRA_STATE} and {@link
      * #EXTRA_PREVIOUS_STATE} containing the new and old states
      * respectively.
      * <p>Requires {@link android.Manifest.permission#BLUETOOTH} to receive.
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_STATE_CHANGED =
-            "android.bluetooth.intent.action.STATE_CHANGED";
+            "android.bluetooth.adapter.action.STATE_CHANGED";
 
     /**
      * Used as an int extra field in {@link #ACTION_STATE_CHANGED}
@@ -73,7 +71,7 @@ public final class BluetoothAdapter {
      * {@link #STATE_TURNING_OFF},
      */
     public static final String EXTRA_STATE =
-            "android.bluetooth.intent.extra.STATE";
+            "android.bluetooth.adapter.extra.STATE";
     /**
      * Used as an int extra field in {@link #ACTION_STATE_CHANGED}
      * intents to request the previous power state. Possible values are:
@@ -83,39 +81,39 @@ public final class BluetoothAdapter {
      * {@link #STATE_TURNING_OFF},
      */
     public static final String EXTRA_PREVIOUS_STATE =
-            "android.bluetooth.intent.extra.PREVIOUS_STATE";
+            "android.bluetooth.adapter.extra.PREVIOUS_STATE";
 
     /**
      * Indicates the local Bluetooth adapter is off.
      */
-    public static final int STATE_OFF = 40;
+    public static final int STATE_OFF = 10;
     /**
      * Indicates the local Bluetooth adapter is turning on. However local
      * clients should wait for {@link #STATE_ON} before attempting to
      * use the adapter.
      */
-    public static final int STATE_TURNING_ON = 41;
+    public static final int STATE_TURNING_ON = 11;
     /**
      * Indicates the local Bluetooth adapter is on, and ready for use.
      */
-    public static final int STATE_ON = 42;
+    public static final int STATE_ON = 12;
     /**
      * Indicates the local Bluetooth adapter is turning off. Local clients
      * should immediately attempt graceful disconnection of any remote links.
      */
-    public static final int STATE_TURNING_OFF = 43;
+    public static final int STATE_TURNING_OFF = 13;
 
     /**
      * Broadcast Action: Indicates the Bluetooth scan mode of the local Adapter
      * has changed.
-     * <p>Contains the extra fields {@link #EXTRA_SCAN_MODE} and {@link
+     * <p>Always contains the extra fields {@link #EXTRA_SCAN_MODE} and {@link
      * #EXTRA_PREVIOUS_SCAN_MODE} containing the new and old scan modes
      * respectively.
      * <p>Requires {@link android.Manifest.permission#BLUETOOTH}
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_SCAN_MODE_CHANGED =
-            "android.bluetooth.intent.action.SCAN_MODE_CHANGED";
+            "android.bluetooth.adapter.action.SCAN_MODE_CHANGED";
 
     /**
      * Used as an int extra field in {@link #ACTION_SCAN_MODE_CHANGED}
@@ -124,7 +122,7 @@ public final class BluetoothAdapter {
      * {@link #SCAN_MODE_CONNECTABLE},
      * {@link #SCAN_MODE_CONNECTABLE_DISCOVERABLE},
      */
-    public static final String EXTRA_SCAN_MODE = "android.bluetooth.intent.extra.SCAN_MODE";
+    public static final String EXTRA_SCAN_MODE = "android.bluetooth.adapter.extra.SCAN_MODE";
     /**
      * Used as an int extra field in {@link #ACTION_SCAN_MODE_CHANGED}
      * intents to request the previous scan mode. Possible values are:
@@ -133,37 +131,73 @@ public final class BluetoothAdapter {
      * {@link #SCAN_MODE_CONNECTABLE_DISCOVERABLE},
      */
     public static final String EXTRA_PREVIOUS_SCAN_MODE =
-            "android.bluetooth.intent.extra.PREVIOUS_SCAN_MODE";
+            "android.bluetooth.adapter.extra.PREVIOUS_SCAN_MODE";
 
     /**
      * Indicates that both inquiry scan and page scan are disabled on the local
      * Bluetooth adapter. Therefore this device is neither discoverable
      * nor connectable from remote Bluetooth devices.
      */
-    public static final int SCAN_MODE_NONE = 50;
+    public static final int SCAN_MODE_NONE = 20;
     /**
      * Indicates that inquiry scan is disabled, but page scan is enabled on the
      * local Bluetooth adapter. Therefore this device is not discoverable from
      * remote Bluetooth devices, but is connectable from remote devices that
      * have previously discovered this device.
      */
-    public static final int SCAN_MODE_CONNECTABLE = 51;
+    public static final int SCAN_MODE_CONNECTABLE = 21;
     /**
      * Indicates that both inquiry scan and page scan are enabled on the local
      * Bluetooth adapter. Therefore this device is both discoverable and
      * connectable from remote Bluetooth devices.
      */
-    public static final int SCAN_MODE_CONNECTABLE_DISCOVERABLE = 53;
+    public static final int SCAN_MODE_CONNECTABLE_DISCOVERABLE = 23;
 
-    /** The user will be prompted to enter a pin
-     * @hide */
-    public static final int PAIRING_VARIANT_PIN = 0;
-    /** The user will be prompted to enter a passkey
-     * @hide */
-    public static final int PAIRING_VARIANT_PASSKEY = 1;
-    /** The user will be prompted to confirm the passkey displayed on the screen
-     * @hide */
-    public static final int PAIRING_VARIANT_CONFIRMATION = 2;
+
+    /**
+     * Broadcast Action: The local Bluetooth adapter has started the remote
+     * device discovery process.
+     * <p>This usually involves an inquiry scan of about 12 seconds, followed
+     * by a page scan of each new device to retrieve its Bluetooth name.
+     * <p>Register for {@link BluetoothDevice#ACTION_FOUND} to be notified as
+     * remote Bluetooth devices are found.
+     * <p>Device discovery is a heavyweight procedure. New connections to
+     * remote Bluetooth devices should not be attempted while discovery is in
+     * progress, and existing connections will experience limited bandwidth
+     * and high latency. Use {@link #cancelDiscovery()} to cancel an ongoing
+     * discovery.
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} to receive.
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_DISCOVERY_STARTED =
+            "android.bluetooth.adapter.action.DISCOVERY_STARTED";
+    /**
+     * Broadcast Action: The local Bluetooth adapter has finished the device
+     * discovery process.
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} to receive.
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_DISCOVERY_FINISHED =
+            "android.bluetooth.adapter.action.DISCOVERY_FINISHED";
+
+    /**
+     * Broadcast Action: The local Bluetooth adapter has changed its friendly
+     * Bluetooth name.
+     * <p>This name is visible to remote Bluetooth devices.
+     * <p>Always contains the extra field {@link #EXTRA_LOCAL_NAME} containing
+     * the name.
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} to receive.
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_LOCAL_NAME_CHANGED =
+            "android.bluetooth.adapter.action.LOCAL_NAME_CHANGED";
+    /**
+     * Used as a String extra field in {@link #ACTION_LOCAL_NAME_CHANGED}
+     * intents to request the local Bluetooth name.
+     */
+    public static final String EXTRA_LOCAL_NAME = "android.bluetooth.adapter.extra.LOCAL_NAME";
+
+    private static final int ADDRESS_LENGTH = 17;
 
     private final IBluetooth mService;
 
@@ -182,7 +216,8 @@ public final class BluetoothAdapter {
      * Get a {@link BluetoothDevice} object for the given Bluetooth hardware
      * address.
      * <p>Valid Bluetooth hardware addresses must be upper case, in a format
-     * such as "00:11:22:33:AA:BB".
+     * such as "00:11:22:33:AA:BB". The helper {@link #checkBluetoothAddress} is
+     * available to validate a Bluetooth address.
      * <p>A {@link BluetoothDevice} will always be returned for a valid
      * hardware address, even if this adapter has never seen that device.
      *
@@ -380,7 +415,29 @@ public final class BluetoothAdapter {
         } catch (RemoteException e) {Log.e(TAG, "", e);}
     }
 
-    /** @hide */
+    /**
+     * Start the remote device discovery process.
+     * <p>The discovery process usually involves an inquiry scan of about 12
+     * seconds, followed by a page scan of each new device to retrieve its
+     * Bluetooth name.
+     * <p>This is an asynchronous call, it will return immediately. Register
+     * for {@link #ACTION_DISCOVERY_STARTED} and {@link
+     * #ACTION_DISCOVERY_FINISHED} intents to determine exactly when the
+     * discovery starts and completes. Register for {@link
+     * BluetoothDevice#ACTION_FOUND} to be notified as remote Bluetooth devices
+     * are found.
+     * <p>Device discovery is a heavyweight procedure. New connections to
+     * remote Bluetooth devices should not be attempted while discovery is in
+     * progress, and existing connections will experience limited bandwidth
+     * and high latency. Use {@link #cancelDiscovery()} to cancel an ongoing
+     * discovery.
+     * <p>Device discovery will only find remote devices that are currently
+     * <i>discoverable</i> (inquiry scan enabled). Many Bluetooth devices are
+     * not discoverable by default, and need to be entered into a special mode.
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN}.
+     *
+     * @return true on success, false on error
+     */
     public boolean startDiscovery() {
         try {
             return mService.startDiscovery();
@@ -388,14 +445,33 @@ public final class BluetoothAdapter {
         return false;
     }
 
-    /** @hide */
-    public void cancelDiscovery() {
+    /**
+     * Cancel the current device discovery process.
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN}.
+     *
+     * @return true on success, false on error
+     */
+    public boolean cancelDiscovery() {
         try {
             mService.cancelDiscovery();
         } catch (RemoteException e) {Log.e(TAG, "", e);}
+        return false;
     }
 
-    /** @hide */
+    /**
+     * Return true if the local Bluetooth adapter is currently in the device
+     * discovery process.
+     * <p>Device discovery is a heavyweight procedure. New connections to
+     * remote Bluetooth devices should not be attempted while discovery is in
+     * progress, and existing connections will experience limited bandwidth
+     * and high latency. Use {@link #cancelDiscovery()} to cancel an ongoing
+     * discovery.
+     * <p>Applications can also register for {@link #ACTION_DISCOVERY_STARTED}
+     * or {@link #ACTION_DISCOVERY_FINISHED} to be notified when discovery
+     * starts or completes.
+     *
+     * @return true if discovering
+     */
     public boolean isDiscovering() {
         try {
             return mService.isDiscovering();
@@ -404,27 +480,10 @@ public final class BluetoothAdapter {
     }
 
     /**
-     * List remote devices that are bonded (paired) to the local adapter.
+     * Return the set of {@link BluetoothDevice} objects that are bonded
+     * (paired) to the local adapter.
      *
-     * Bonding (pairing) is the process by which the user enters a pin code for
-     * the device, which generates a shared link key, allowing for
-     * authentication and encryption of future connections. In Android we
-     * require bonding before RFCOMM or SCO connections can be made to a remote
-     * device.
-     *
-     * This function lists which remote devices we have a link key for. It does
-     * not cause any RF transmission, and does not check if the remote device
-     * still has it's link key with us. If the other side no longer has its
-     * link key then the RFCOMM or SCO connection attempt will result in an
-     * error.
-     *
-     * This function does not check if the remote device is in range.
-     *
-     * Remote devices that have an in-progress bonding attempt are not
-     * returned.
-     *
-     * @return unmodifiable set of bonded devices, or null on error
-     * @hide
+     * @return unmodifiable set of {@link BluetoothDevice}, or null on error
      */
     public Set<BluetoothDevice> getBondedDevices() {
         try {
@@ -510,5 +569,34 @@ public final class BluetoothAdapter {
             devices.add(getRemoteDevice(addresses[i]));
         }
         return Collections.unmodifiableSet(devices);
+    }
+
+    /**
+     * Validate a Bluetooth address, such as "00:43:A8:23:10:F0"
+     *
+     * @param address Bluetooth address as string
+     * @return true if the address is valid, false otherwise
+     */
+    public static boolean checkBluetoothAddress(String address) {
+        if (address == null || address.length() != ADDRESS_LENGTH) {
+            return false;
+        }
+        for (int i = 0; i < ADDRESS_LENGTH; i++) {
+            char c = address.charAt(i);
+            switch (i % 3) {
+            case 0:
+            case 1:
+                if (Character.digit(c, 16) != -1) {
+                    break;  // hex character, OK
+                }
+                return false;
+            case 2:
+                if (c == ':') {
+                    break;  // OK
+                }
+                return false;
+            }
+        }
+        return true;
     }
 }

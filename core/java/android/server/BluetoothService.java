@@ -28,7 +28,6 @@ import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothHeadset;
-import android.bluetooth.BluetoothIntent;
 import android.bluetooth.IBluetooth;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
@@ -183,7 +182,7 @@ public class BluetoothService extends IBluetooth.Stub {
 
         // mark in progress bondings as cancelled
         for (String address : mBondState.listInState(BluetoothDevice.BOND_BONDING)) {
-            mBondState.setBondState(address, BluetoothDevice.BOND_NOT_BONDED,
+            mBondState.setBondState(address, BluetoothDevice.BOND_NONE,
                                     BluetoothDevice.UNBOND_REASON_AUTH_CANCELED);
         }
 
@@ -441,17 +440,17 @@ public class BluetoothService extends IBluetooth.Stub {
             }
             if (DBG) log(address + " bond state " + oldState + " -> " + state + " (" +
                          reason + ")");
-            Intent intent = new Intent(BluetoothIntent.BOND_STATE_CHANGED_ACTION);
-            intent.putExtra(BluetoothIntent.DEVICE, mAdapter.getRemoteDevice(address));
-            intent.putExtra(BluetoothIntent.BOND_STATE, state);
-            intent.putExtra(BluetoothIntent.BOND_PREVIOUS_STATE, oldState);
-            if (state == BluetoothDevice.BOND_NOT_BONDED) {
+            Intent intent = new Intent(BluetoothDevice.ACTION_BOND_STATE_CHANGED);
+            intent.putExtra(BluetoothDevice.EXTRA_DEVICE, mAdapter.getRemoteDevice(address));
+            intent.putExtra(BluetoothDevice.EXTRA_BOND_STATE, state);
+            intent.putExtra(BluetoothDevice.EXTRA_PREVIOUS_BOND_STATE, oldState);
+            if (state == BluetoothDevice.BOND_NONE) {
                 if (reason <= 0) {
                     Log.w(TAG, "setBondState() called to unbond device, but reason code is " +
                           "invalid. Overriding reason code with BOND_RESULT_REMOVED");
                     reason = BluetoothDevice.UNBOND_REASON_REMOVED;
                 }
-                intent.putExtra(BluetoothIntent.REASON, reason);
+                intent.putExtra(BluetoothDevice.EXTRA_REASON, reason);
                 mState.remove(address);
             } else {
                 mState.put(address, state);
@@ -470,7 +469,7 @@ public class BluetoothService extends IBluetooth.Stub {
         public synchronized int getBondState(String address) {
             Integer state = mState.get(address);
             if (state == null) {
-                return BluetoothDevice.BOND_NOT_BONDED;
+                return BluetoothDevice.BOND_NONE;
             }
             return state.intValue();
         }
@@ -526,7 +525,7 @@ public class BluetoothService extends IBluetooth.Stub {
 
     private static String toBondStateString(int bondState) {
         switch (bondState) {
-        case BluetoothDevice.BOND_NOT_BONDED:
+        case BluetoothDevice.BOND_NONE:
             return "not bonded";
         case BluetoothDevice.BOND_BONDING:
             return "bonding";
@@ -642,9 +641,11 @@ public class BluetoothService extends IBluetooth.Stub {
         case BluetoothAdapter.SCAN_MODE_CONNECTABLE:
             pairable = true;
             discoverable = false;
+            break;
         case BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE:
             pairable = true;
             discoverable = true;
+            break;
         default:
             Log.w(TAG, "Requested invalid scan mode " + mode);
             return false;
@@ -685,7 +686,7 @@ public class BluetoothService extends IBluetooth.Stub {
      */
     public synchronized String getRemoteName(String address) {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
-        if (!BluetoothDevice.checkBluetoothAddress(address)) {
+        if (!BluetoothAdapter.checkBluetoothAddress(address)) {
             return null;
         }
         Map <String, String> properties = mDeviceProperties.get(address);
@@ -747,7 +748,7 @@ public class BluetoothService extends IBluetooth.Stub {
     public synchronized boolean createBond(String address) {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
                                                 "Need BLUETOOTH_ADMIN permission");
-        if (!BluetoothDevice.checkBluetoothAddress(address)) {
+        if (!BluetoothAdapter.checkBluetoothAddress(address)) {
             return false;
         }
         address = address.toUpperCase();
@@ -762,7 +763,7 @@ public class BluetoothService extends IBluetooth.Stub {
         // Check for bond state only if we are not performing auto
         // pairing exponential back-off attempts.
         if (!mBondState.isAutoPairingAttemptsInProgress(address) &&
-                mBondState.getBondState(address) != BluetoothDevice.BOND_NOT_BONDED) {
+                mBondState.getBondState(address) != BluetoothDevice.BOND_NONE) {
             log("Ignoring createBond(): this device is already bonding or bonded");
             return false;
         }
@@ -778,7 +779,7 @@ public class BluetoothService extends IBluetooth.Stub {
     public synchronized boolean cancelBondProcess(String address) {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
                                                 "Need BLUETOOTH_ADMIN permission");
-        if (!BluetoothDevice.checkBluetoothAddress(address)) {
+        if (!BluetoothAdapter.checkBluetoothAddress(address)) {
             return false;
         }
         address = address.toUpperCase();
@@ -786,7 +787,7 @@ public class BluetoothService extends IBluetooth.Stub {
             return false;
         }
 
-        mBondState.setBondState(address, BluetoothDevice.BOND_NOT_BONDED,
+        mBondState.setBondState(address, BluetoothDevice.BOND_NONE,
                                 BluetoothDevice.UNBOND_REASON_AUTH_CANCELED);
         cancelDeviceCreationNative(address);
         return true;
@@ -795,7 +796,7 @@ public class BluetoothService extends IBluetooth.Stub {
     public synchronized boolean removeBond(String address) {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
                                                 "Need BLUETOOTH_ADMIN permission");
-        if (!BluetoothDevice.checkBluetoothAddress(address)) {
+        if (!BluetoothAdapter.checkBluetoothAddress(address)) {
             return false;
         }
         return removeDeviceNative(getObjectPathFromAddress(address));
@@ -808,7 +809,7 @@ public class BluetoothService extends IBluetooth.Stub {
 
     public synchronized int getBondState(String address) {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
-        if (!BluetoothDevice.checkBluetoothAddress(address)) {
+        if (!BluetoothAdapter.checkBluetoothAddress(address)) {
             return BluetoothDevice.ERROR;
         }
         return mBondState.getBondState(address.toUpperCase());
@@ -898,7 +899,7 @@ public class BluetoothService extends IBluetooth.Stub {
      * @return boolean to indicate operation success or fail
      */
     public synchronized boolean setTrust(String address, boolean value) {
-        if (!BluetoothDevice.checkBluetoothAddress(address)) {
+        if (!BluetoothAdapter.checkBluetoothAddress(address)) {
             mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
             return false;
         }
@@ -915,7 +916,7 @@ public class BluetoothService extends IBluetooth.Stub {
      * @return boolean to indicate trust or untrust state
      */
     public synchronized boolean getTrustState(String address) {
-        if (!BluetoothDevice.checkBluetoothAddress(address)) {
+        if (!BluetoothAdapter.checkBluetoothAddress(address)) {
             mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
             return false;
         }
@@ -939,7 +940,7 @@ public class BluetoothService extends IBluetooth.Stub {
      *         classes.
      */
     public synchronized int getRemoteClass(String address) {
-        if (!BluetoothDevice.checkBluetoothAddress(address)) {
+        if (!BluetoothAdapter.checkBluetoothAddress(address)) {
             mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
             return BluetoothClass.ERROR;
         }
@@ -961,7 +962,7 @@ public class BluetoothService extends IBluetooth.Stub {
      */
     public synchronized String[] getRemoteUuids(String address) {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
-        if (!BluetoothDevice.checkBluetoothAddress(address)) {
+        if (!BluetoothAdapter.checkBluetoothAddress(address)) {
             return null;
         }
         String value = getRemoteDeviceProperty(address, "UUIDs");
@@ -982,7 +983,7 @@ public class BluetoothService extends IBluetooth.Stub {
      */
     public int getRemoteServiceChannel(String address, String uuid) {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
-        if (!BluetoothDevice.checkBluetoothAddress(address)) {
+        if (!BluetoothAdapter.checkBluetoothAddress(address)) {
             return BluetoothDevice.ERROR;
         }
         return getDeviceServiceChannelNative(getObjectPathFromAddress(address), uuid, 0x0004);
@@ -992,7 +993,7 @@ public class BluetoothService extends IBluetooth.Stub {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
                                                 "Need BLUETOOTH_ADMIN permission");
         if (pin == null || pin.length <= 0 || pin.length > 16 ||
-            !BluetoothDevice.checkBluetoothAddress(address)) {
+            !BluetoothAdapter.checkBluetoothAddress(address)) {
             return false;
         }
         address = address.toUpperCase();
@@ -1017,7 +1018,7 @@ public class BluetoothService extends IBluetooth.Stub {
     public synchronized boolean setPasskey(String address, int passkey) {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
                                                 "Need BLUETOOTH_ADMIN permission");
-        if (passkey < 0 || passkey > 999999 || !BluetoothDevice.checkBluetoothAddress(address)) {
+        if (passkey < 0 || passkey > 999999 || !BluetoothAdapter.checkBluetoothAddress(address)) {
             return false;
         }
         address = address.toUpperCase();
@@ -1048,10 +1049,10 @@ public class BluetoothService extends IBluetooth.Stub {
     public synchronized boolean cancelPairingUserInput(String address) {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
                                                 "Need BLUETOOTH_ADMIN permission");
-        if (!BluetoothDevice.checkBluetoothAddress(address)) {
+        if (!BluetoothAdapter.checkBluetoothAddress(address)) {
             return false;
         }
-        mBondState.setBondState(address, BluetoothDevice.BOND_NOT_BONDED,
+        mBondState.setBondState(address, BluetoothDevice.BOND_NONE,
                 BluetoothDevice.UNBOND_REASON_AUTH_CANCELED);
         address = address.toUpperCase();
         Integer data = mEventLoop.getPasskeyAgentRequestData().remove(address);
