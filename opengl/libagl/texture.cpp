@@ -118,10 +118,10 @@ void invalidate_texture(ogles_context_t* c, int tmu, uint8_t flags = 0xFF) {
 
 /*
  * If the active textures are EGLImage, they need to be locked before
- * they can be used. 
- * 
+ * they can be used.
+ *
  * FIXME: code below is far from being optimal
- * 
+ *
  */
 
 void ogles_lock_textures(ogles_context_t* c)
@@ -409,6 +409,49 @@ int createTextureSurface(ogles_context_t* c,
     return 0;
 }
 
+static size_t dataSizePalette4(int numLevels, int width, int height, int format)
+{
+    int indexBits = 8;
+    int entrySize = 0;
+    switch (format) {
+    case GL_PALETTE4_RGB8_OES:
+        indexBits = 4;
+        /* FALLTHROUGH */
+    case GL_PALETTE8_RGB8_OES:
+        entrySize = 3;
+        break;
+
+    case GL_PALETTE4_RGBA8_OES:
+        indexBits = 4;
+        /* FALLTHROUGH */
+    case GL_PALETTE8_RGBA8_OES:
+        entrySize = 4;
+        break;
+
+    case GL_PALETTE4_R5_G6_B5_OES:
+    case GL_PALETTE4_RGBA4_OES:
+    case GL_PALETTE4_RGB5_A1_OES:
+        indexBits = 4;
+        /* FALLTHROUGH */
+    case GL_PALETTE8_R5_G6_B5_OES:
+    case GL_PALETTE8_RGBA4_OES:
+    case GL_PALETTE8_RGB5_A1_OES:
+        entrySize = 2;
+        break;
+    }
+
+    size_t size = (1 << indexBits) * entrySize; // palette size
+
+    for (int i=0 ; i< numLevels ; i++) {
+        int w = (width  >> i) ? : 1;
+        int h = (height >> i) ? : 1;
+        int levelSize = h * ((w * indexBits) / 8) ? : 1;
+        size += levelSize;
+    }
+
+    return size;
+}
+
 static void decodePalette4(const GLvoid *data, int level, int width, int height,
                            void *surface, int stride, int format)
 
@@ -443,6 +486,7 @@ static void decodePalette4(const GLvoid *data, int level, int width, int height,
     }
 
     const int paletteSize = (1 << indexBits) * entrySize;
+
     uint8_t const* pixels = (uint8_t *)data + paletteSize;
     for (int i=0 ; i<level ; i++) {
         int w = (width  >> i) ? : 1;
@@ -652,7 +696,7 @@ static void drawTexxOESImp(GLfixed x, GLfixed y, GLfixed z, GLfixed w, GLfixed h
         ogles_context_t* c)
 {
     ogles_lock_textures(c);
-    
+
     const GGLSurface& cbSurface = c->rasterizer.state.buffers.color.s;
     y = gglIntToFixed(cbSurface.height) - (y + h);
     w >>= FIXED_BITS;
@@ -799,7 +843,7 @@ static void drawTexiOES(GLint x, GLint y, GLint z, GLint w, GLint h, ogles_conte
             c->rasterizer.procs.disable(c, GGL_AA);
             c->rasterizer.procs.shadeModel(c, GL_FLAT);
             c->rasterizer.procs.recti(c, x, y, x+w, y+h);
-            
+
             ogles_unlock_textures(c);
 
             return;
@@ -1091,6 +1135,12 @@ void glCompressedTexImage2D(
     GGLSurface* surface;
     // all mipmap levels are specified at once.
     const int numLevels = level<0 ? -level : 1;
+
+    if (dataSizePalette4(numLevels, width, height, format) > imageSize) {
+        ogles_error(c, GL_INVALID_VALUE);
+        return;
+    }
+
     for (int i=0 ; i<numLevels ; i++) {
         int lod_w = (width  >> i) ? : 1;
         int lod_h = (height >> i) ? : 1;
