@@ -1137,6 +1137,11 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
         String action = mGlobalSearchMode ? Intent.ACTION_WEB_SEARCH : Intent.ACTION_SEARCH;
         Intent intent = createIntent(action, null, null, query, null,
                 actionKey, actionMsg);
+        // Allow GlobalSearch to log and create shortcut for searches launched by
+        // the search button, enter key or an action key.
+        if (mGlobalSearchMode) {
+            mSuggestionsAdapter.reportSearch(query);
+        }
         launchIntent(intent);
     }
     
