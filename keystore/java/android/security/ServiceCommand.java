@@ -141,10 +141,18 @@ public class ServiceCommand {
         return reply;
     }
 
-    private boolean writeCommand(int cmd, String _data) {
+    private byte[] convert(String... data) {
+        StringBuilder sb = new StringBuilder();
+        if (data.length >=1) sb.append(data[0]).append("\0");
+        if (data.length >=2) sb.append(data[1]).append("\0");
+        if (data.length >=3) sb.append(data[2]);
+        return sb.toString().getBytes();
+    }
+
+    private boolean writeCommand(int cmd, String... data) {
         byte buf[] = new byte[8];
-        byte[] data = (_data == null) ? new byte[0] : _data.getBytes();
-        int len = data.length;
+        byte[] dataBytes = convert(data);
+        int len = dataBytes.length;
         // the length of data
         buf[0] = (byte) ((len >> 24) & 0xff);
         buf[1] = (byte) ((len >> 16) & 0xff);
@@ -157,7 +165,7 @@ public class ServiceCommand {
         buf[7] = (byte) (cmd & 0xff);
         try {
             mOut.write(buf, 0, 8);
-            mOut.write(data, 0, len);
+            mOut.write(dataBytes, 0, len);
         } catch (IOException ex) {
             Log.e(mTag,"write error", ex);
             disconnect();
@@ -166,7 +174,7 @@ public class ServiceCommand {
         return true;
     }
 
-    private Reply executeCommand(int cmd, String data) {
+    private Reply executeCommand(int cmd, String... data) {
         if (!writeCommand(cmd, data)) {
             /* If service died and restarted in the background
              * (unlikely but possible) we'll fail on the next
@@ -181,7 +189,7 @@ public class ServiceCommand {
         return readReply();
     }
 
-    public synchronized Reply execute(int cmd, String data) {
+    public synchronized Reply execute(int cmd, String... data) {
       Reply result;
       if (!connect()) {
           Log.e(mTag, "connection failed");

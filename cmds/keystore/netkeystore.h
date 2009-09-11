@@ -25,6 +25,10 @@
 
 #include "common.h"
 
+// for testing
+int parse_cmd(int argc, const char **argv, LPC_MARSHAL *cmd);
+void execute(LPC_MARSHAL *cmd, LPC_MARSHAL *reply);
+
 static inline int readx(int s, void *_buf, int count)
 {
     char *buf = _buf;
