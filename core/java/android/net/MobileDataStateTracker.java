@@ -145,12 +145,14 @@ public class MobileDataStateTracker extends NetworkStateTracker {
                     if (DBG) Log.d(TAG, mApnType + " Received " + intent.getAction() +
                             " broadcast - state = " + state + ", oldstate = " + mMobileDataState +
                             ", unavailable = " + unavailable + ", reason = " +
-                            (reason == null ? "(unspecified)" : reason));
+                            (reason == null ? "(unspecified)" : reason) +
+                            ", apnTypeList = " + apnTypeList);
 
+                    // set this regardless of the apnTypeList.  It's all the same radio/network
+                    // underneath
+                    mNetworkInfo.setIsAvailable(!unavailable);
 
                     if (isApnTypeIncluded(apnTypeList)) {
-                        // set this even if the apn isn't Enabled
-                        mNetworkInfo.setIsAvailable(!unavailable);
                         if (mEnabled == false) {
                             // if we're not enabled but the APN Type is supported by this connection
                             // we should record the interface name if one's provided.  If the user
