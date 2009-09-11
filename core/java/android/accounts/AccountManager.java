@@ -21,11 +21,13 @@ import android.content.Intent;
 import android.content.Context;
 import android.content.IntentFilter;
 import android.content.BroadcastReceiver;
+import android.database.SQLException;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.os.Parcelable;
+import android.util.Log;
 
 import java.io.IOException;
 import java.util.concurrent.Callable;
@@ -364,7 +366,13 @@ public class AccountManager {
         handler = (handler == null) ? mMainHandler : handler;
         handler.post(new Runnable() {
             public void run() {
-                listener.onAccountsUpdated(accountsCopy);
+                try {
+                    listener.onAccountsUpdated(accountsCopy);
+                } catch (SQLException e) {
+                    // Better luck next time.  If the problem was disk-full,
+                    // the STORAGE_OK intent will re-trigger the update.
+                    Log.e(TAG, "Can't update accounts", e);
+                }
             }
         });
     }
@@ -824,6 +832,8 @@ public class AccountManager {
                 // Register a broadcast receiver to monitor account changes
                 IntentFilter intentFilter = new IntentFilter();
                 intentFilter.addAction(Constants.LOGIN_ACCOUNTS_CHANGED_ACTION);
+                // To recover from disk-full.
+                intentFilter.addAction(Intent.ACTION_DEVICE_STORAGE_OK); 
                 mContext.registerReceiver(mAccountsChangedBroadcastReceiver, intentFilter);
             }
         }
