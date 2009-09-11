@@ -25,6 +25,7 @@
 #include <media/IMediaPlayerService.h>
 #include <media/stagefright/CachingDataSource.h>
 #include <media/stagefright/HTTPDataSource.h>
+#include <media/stagefright/JPEGSource.h>
 #include <media/stagefright/MediaDebug.h>
 #include <media/stagefright/MediaDefs.h>
 #include <media/stagefright/MediaPlayerImpl.h>
@@ -34,8 +35,6 @@
 #include <media/stagefright/MmapSource.h>
 #include <media/stagefright/OMXClient.h>
 #include <media/stagefright/OMXCodec.h>
-
-#include "JPEGSource.h"
 
 using namespace android;
 
