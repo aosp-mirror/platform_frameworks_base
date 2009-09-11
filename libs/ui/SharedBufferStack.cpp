@@ -64,7 +64,7 @@ status_t SharedClient::setIdentity(size_t token, uint32_t identity) {
 
 
 SharedBufferStack::SharedBufferStack()
-    : inUse(-1), identity(-1), status(NO_ERROR)
+    : inUse(-1), status(NO_ERROR), identity(-1)
 {
 }
 
@@ -231,6 +231,16 @@ ssize_t SharedBufferServer::RetireUpdate::operator()() {
     return head;
 }
 
+SharedBufferServer::StatusUpdate::StatusUpdate(
+        SharedBufferBase* sbb, status_t status)
+    : UpdateBase(sbb), status(status) {
+}
+
+ssize_t SharedBufferServer::StatusUpdate::operator()() {
+    android_atomic_write(status, &stack.status);
+    return NO_ERROR;
+}
+
 // ============================================================================
 
 SharedBufferClient::SharedBufferClient(SharedClient* sharedClient,
@@ -325,6 +335,12 @@ status_t SharedBufferServer::unlock(int buffer)
     UnlockUpdate update(this, buffer);
     status_t err = updateCondition( update );
     return err;
+}
+
+void SharedBufferServer::setStatus(status_t status)
+{
+    StatusUpdate update(this, status);
+    updateCondition( update );
 }
 
 status_t SharedBufferServer::reallocate()
