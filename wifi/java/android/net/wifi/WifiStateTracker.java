@@ -784,6 +784,9 @@ public class WifiStateTracker extends NetworkStateTracker {
                     mBluetoothA2dp = new BluetoothA2dp(mContext);
                 }
                 checkIsBluetoothPlaying();
+
+                // initialize this after the supplicant is alive
+                setNumAllowedChannels();
                 break;
 
             case EVENT_SUPPLICANT_DISCONNECT:
