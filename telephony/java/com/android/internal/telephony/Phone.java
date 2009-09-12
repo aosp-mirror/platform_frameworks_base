@@ -154,6 +154,7 @@ public interface Phone {
     static final String REASON_CDMA_DATA_DETACHED = "cdmaDataDetached";
     static final String REASON_APN_CHANGED = "apnChanged";
     static final String REASON_APN_SWITCHED = "apnSwitched";
+    static final String REASON_APN_FAILED = "apnFailed";
     static final String REASON_RESTORE_DEFAULT_APN = "restoreDefaultApn";
     static final String REASON_RADIO_TURNED_OFF = "radioTurnedOff";
     static final String REASON_PDP_RESET = "pdpReset";
