@@ -97,6 +97,7 @@ public class MediaPlayerStressTest extends ActivityInstrumentationTestCase2<Medi
         int video_duration = MediaNames.VIDEO_H263_AAC_DURATION;
         int random_play_time = 0;
         int random_seek_time = 0;
+        int random_no_of_seek = 0;
 
         mSurfaceHolder = MediaFrameworkTest.mSurfaceView.getHolder();
         try {
@@ -106,8 +107,13 @@ public class MediaPlayerStressTest extends ActivityInstrumentationTestCase2<Medi
                 mp.setDisplay(MediaFrameworkTest.mSurfaceView.getHolder());
                 mp.prepare();
                 mp.start();
+                random_no_of_seek = generator.nextInt(10);
+                // make sure the seek at least run once.
+                if (random_no_of_seek == 0) {
+                    random_no_of_seek = 1;
+                }
                 // Random seek and play
-                for (int j = 0; j < generator.nextInt(10); j++) {
+                for (int j = 0; j < random_no_of_seek; j++) {
                     random_play_time =
                         generator.nextInt(video_duration / 2);
                     Log.v(TAG, "Play time = " + random_play_time);
