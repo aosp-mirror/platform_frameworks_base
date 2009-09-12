@@ -150,6 +150,11 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
     static final String APN_ID = "apn_id";
     private boolean canSetPreferApn = false;
 
+    // for tracking retrys on the default APN
+    private RetryManager mDefaultRetryManager;
+    // for tracking retrys on a secondary APN
+    private RetryManager mSecondaryRetryManager;
+
     BroadcastReceiver mIntentReceiver = new BroadcastReceiver ()
     {
         @Override
@@ -251,6 +256,19 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
                 Log.e(LOG_TAG, "Could not configure using DEFAULT_DATA_RETRY_CONFIG="
                         + DEFAULT_DATA_RETRY_CONFIG);
                 mRetryMgr.configure(20, 2000, 1000);
+            }
+        }
+
+        mDefaultRetryManager = mRetryMgr;
+        mSecondaryRetryManager = new RetryManager();
+
+        if (!mSecondaryRetryManager.configure(SystemProperties.get(
+                "ro.gsm.2nd_data_retry_config"))) {
+            if (!mSecondaryRetryManager.configure(SECONDARY_DATA_RETRY_CONFIG)) {
+                // Should never happen, log an error and default to a simple sequence.
+                Log.e(LOG_TAG, "Could note configure using SECONDARY_DATA_RETRY_CONFIG="
+                        + SECONDARY_DATA_RETRY_CONFIG);
+                mSecondaryRetryManager.configure("max_retries=3, 333, 333, 333");
             }
         }
     }
@@ -1019,6 +1037,12 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
     private void reconnectAfterFail(FailCause lastFailCauseCode, String reason) {
         if (state == State.FAILED) {
             if (!mRetryMgr.isRetryNeeded()) {
+                if (!mRequestedApnType.equals(Phone.APN_TYPE_DEFAULT)) {
+                    // if no more retries on a secondary APN attempt, tell the world and revert.
+                    phone.notifyDataConnection(Phone.REASON_APN_FAILED);
+                    onEnableApn(apnTypeToId(mRequestedApnType), APN_DISABLED);
+                    return;
+                }
                 if (mReregisterOnReconnectFailure) {
                     // We've re-registerd once now just retry forever.
                     mRetryMgr.retryForeverUsingLastTimeout();
@@ -1069,7 +1093,16 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
         sendMessage(obtainMessage(EVENT_TRY_SETUP_DATA, Phone.REASON_SIM_LOADED));
     }
 
+    @Override
     protected void onEnableNewApn() {
+        // change our retry manager to use the appropriate numbers for the new APN
+        if (mRequestedApnType.equals(Phone.APN_TYPE_DEFAULT)) {
+            mRetryMgr = mDefaultRetryManager;
+        } else {
+            mRetryMgr = mSecondaryRetryManager;
+        }
+        mRetryMgr.resetRetryCount();
+
         // TODO:  To support simultaneous PDP contexts, this should really only call
         // cleanUpConnection if it needs to free up a PdpConnection.
         cleanUpConnection(true, Phone.REASON_APN_SWITCHED);
@@ -1189,6 +1222,10 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
             // No try for permanent failure
             if (cause.isPermanentFail()) {
                 notifyNoData(cause);
+                if (!mRequestedApnType.equals(Phone.APN_TYPE_DEFAULT)) {
+                    phone.notifyDataConnection(Phone.REASON_APN_FAILED);
+                    onEnableApn(apnTypeToId(mRequestedApnType), APN_DISABLED);
+                }
                 return;
             }
 
@@ -1381,9 +1418,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
 
     private void startDelayedRetry(PdpConnection.FailCause cause, String reason) {
         notifyNoData(cause);
-        if (mRequestedApnType == Phone.APN_TYPE_DEFAULT) {
-            reconnectAfterFail(cause, reason);
-        }
+        reconnectAfterFail(cause, reason);
     }
 
     private void setPreferredApn(int pos) {
@@ -1440,10 +1475,6 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
         switch (msg.what) {
             case EVENT_RECORDS_LOADED:
                 onRecordsLoaded();
-                break;
-
-            case EVENT_ENABLE_NEW_APN:
-                onEnableNewApn();
                 break;
 
             case EVENT_GPRS_DETACHED:

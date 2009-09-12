@@ -100,7 +100,6 @@ public abstract class DataConnectionTracker extends Handler {
     public static final int EVENT_CLEAN_UP_CONNECTION = 34;
     protected static final int EVENT_CDMA_OTA_PROVISION = 35;
     protected static final int EVENT_RESTART_RADIO = 36;
-    private static final int EVENT_ENABLE_APN_REQUEST = 37;
 
     /***** Constants *****/
 
@@ -125,6 +124,10 @@ public abstract class DataConnectionTracker extends Handler {
     protected static final String DEFAULT_DATA_RETRY_CONFIG = "default_randomization=2000,"
         + "5000,10000,20000,40000,80000:5000,160000:5000,"
         + "320000:5000,640000:5000,1280000:5000,1800000:5000";
+
+    /** Retry configuration for secondary networks: 4 tries in 20 sec */
+    protected static final String SECONDARY_DATA_RETRY_CONFIG =
+            "max_retries=3; 5000, 5000, 5000";
 
     /** Slow poll when attempting connection recovery. */
     protected static final int POLL_NETSTAT_SLOW_MILLIS = 5000;
@@ -171,7 +174,7 @@ public abstract class DataConnectionTracker extends Handler {
     protected boolean netStatPollEnabled = false;
 
     /** Manage the behavior of data retry after failure */
-    protected final RetryManager mRetryMgr = new RetryManager();
+    protected RetryManager mRetryMgr = new RetryManager();
 
     // wifi connection status will be updated by sticky intent
     protected boolean mIsWifiConnected = false;
@@ -266,33 +269,8 @@ public abstract class DataConnectionTracker extends Handler {
     public void handleMessage (Message msg) {
         switch (msg.what) {
 
-            case EVENT_ENABLE_APN_REQUEST:
-                int apnId = msg.arg1;
-                synchronized (this) {
-                    if (DBG) {
-                        Log.d(LOG_TAG, "got EVENT_ENABLE_APN_REQUEST with apnType = " + apnId +
-                                " and enable = " + msg.arg2);
-                        Log.d(LOG_TAG, "dataEnabled[apnId] = " + dataEnabled[apnId] +
-                                ", enabledCount = " + enabledCount);
-                    }
-                    if (msg.arg2 == APN_ENABLED) {
-                        // enable
-                        if (!dataEnabled[apnId]) {
-                            dataEnabled[apnId] = true;
-                            enabledCount++;
-                        }
-                        onTrySetupData(null);
-                    } else {
-                        // disable
-                        if (dataEnabled[apnId]) {
-                            dataEnabled[apnId] = false;
-                            enabledCount--;
-                            if (enabledCount == 0) {
-                                onCleanUpConnection(true, Phone.REASON_DATA_DISABLED);
-                            }
-                        }
-                    }
-                }
+            case EVENT_ENABLE_NEW_APN:
+                onEnableApn(msg.arg1, msg.arg2);
                 break;
 
             case EVENT_TRY_SETUP_DATA:
@@ -392,6 +370,24 @@ public abstract class DataConnectionTracker extends Handler {
         }
     }
 
+    protected String apnIdToType(int id) {
+        switch (id) {
+        case APN_DEFAULT_ID:
+            return Phone.APN_TYPE_DEFAULT;
+        case APN_MMS_ID:
+            return Phone.APN_TYPE_MMS;
+        case APN_SUPL_ID:
+            return Phone.APN_TYPE_SUPL;
+        case APN_DUN_ID:
+            return Phone.APN_TYPE_DUN;
+        case APN_HIPRI_ID:
+            return Phone.APN_TYPE_HIPRI;
+        default:
+            Log.e(LOG_TAG, "Unknown id (" + id + ") in apnIdToType");
+            return Phone.APN_TYPE_DEFAULT;
+        }
+    }
+
     protected abstract boolean isApnTypeActive(String type);
 
     protected abstract boolean isApnTypeAvailable(String type);
@@ -449,8 +445,6 @@ public abstract class DataConnectionTracker extends Handler {
         }
 
         setEnabled(id, true);
-        mRequestedApnType = type;
-        sendMessage(obtainMessage(EVENT_ENABLE_NEW_APN));
         return Phone.APN_REQUEST_STARTED;
     }
 
@@ -471,7 +465,6 @@ public abstract class DataConnectionTracker extends Handler {
         if (isEnabled(id)) {
             setEnabled(id, false);
             if (isApnTypeActive(Phone.APN_TYPE_DEFAULT)) {
-                mRequestedApnType = Phone.APN_TYPE_DEFAULT;
                 if (dataEnabled[APN_DEFAULT_ID]) {
                     return Phone.APN_ALREADY_ACTIVE;
                 } else {
@@ -485,14 +478,54 @@ public abstract class DataConnectionTracker extends Handler {
         }
     }
 
-    protected void setEnabled(int id, boolean enable) {
+    private void setEnabled(int id, boolean enable) {
         if (DBG) Log.d(LOG_TAG, "setEnabled(" + id + ", " + enable + ") with old state = " +
                 dataEnabled[id] + " and enabledCount = " + enabledCount);
 
-        Message msg = obtainMessage(EVENT_ENABLE_APN_REQUEST);
+        Message msg = obtainMessage(EVENT_ENABLE_NEW_APN);
         msg.arg1 = id;
         msg.arg2 = (enable ? APN_ENABLED : APN_DISABLED);
         sendMessage(msg);
+    }
+
+    protected synchronized void onEnableApn(int apnId, int enabled) {
+        if (DBG) {
+            Log.d(LOG_TAG, "got EVENT_APN_ENABLE_REQUEST with apnType = " + apnId +
+                    " and enable = " + enabled);
+            Log.d(LOG_TAG, "dataEnabled[apnId] = " + dataEnabled[apnId] +
+                    ", enabledCount = " + enabledCount);
+        }
+        if (enabled == APN_ENABLED) {
+            if (!dataEnabled[apnId]) {
+                mRequestedApnType = apnIdToType(apnId);
+                onEnableNewApn();
+
+                dataEnabled[apnId] = true;
+                enabledCount++;
+            }
+            onTrySetupData(null);
+        } else {
+            // disable
+            if (dataEnabled[apnId]) {
+                dataEnabled[apnId] = false;
+                enabledCount--;
+                if (enabledCount == 0) {
+                    onCleanUpConnection(true, Phone.REASON_DATA_DISABLED);
+                } else if (dataEnabled[APN_DEFAULT_ID] == true) {
+                    mRequestedApnType = Phone.APN_TYPE_DEFAULT;
+                    onEnableNewApn();
+                }
+            }
+        }
+    }
+
+    /**
+     * Called when we switch APNs.
+     *
+     * mRequestedApnType is set prior to call
+     * To be overridden.
+     */
+    protected void onEnableNewApn() {
     }
 
     /**
