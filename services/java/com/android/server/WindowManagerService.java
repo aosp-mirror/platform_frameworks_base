@@ -418,6 +418,17 @@ public class WindowManagerService extends IWindowManager.Stub
     int mWallpaperAnimLayerAdjustment;
     float mLastWallpaperX;
     float mLastWallpaperY;
+    // Lock for waiting for the wallpaper.
+    final Object mWaitingOnWallpaperLock = new Object();
+    // This is set when we are waiting for a wallpaper to tell us it is done
+    // changing its scroll position.
+    WindowState mWaitingOnWallpaper;
+    // The last time we had a timeout when waiting for a wallpaper.
+    long mLastWallpaperTimeoutTime;
+    // We give a wallpaper up to 150ms to finish scrolling.
+    static final long WALLPAPER_TIMEOUT = 150;
+    // Time we wait after a timeout before trying to wait again.
+    static final long WALLPAPER_TIMEOUT_RECOVERY = 10000;
     
     AppWindowToken mFocusedApp = null;
 
@@ -1427,7 +1438,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 WindowState wallpaper = token.windows.get(curWallpaperIndex);
                 
                 if (visible) {
-                    updateWallpaperOffsetLocked(wallpaper, dw, dh);                        
+                    updateWallpaperOffsetLocked(wallpaper, dw, dh, false);
                 }
                 
                 // First, make sure the client has the current visibility
@@ -1498,7 +1509,8 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    boolean updateWallpaperOffsetLocked(WindowState wallpaperWin, int dw, int dh) {
+    boolean updateWallpaperOffsetLocked(WindowState wallpaperWin, int dw, int dh,
+            boolean sync) {
         boolean changed = false;
         boolean rawChanged = false;
         if (mLastWallpaperX >= 0) {
@@ -1536,8 +1548,37 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (DEBUG_WALLPAPER) Log.v(TAG, "Report new wp offset "
                         + wallpaperWin + " x=" + wallpaperWin.mWallpaperX
                         + " y=" + wallpaperWin.mWallpaperY);
+                if (sync) {
+                    synchronized (mWaitingOnWallpaperLock) {
+                        mWaitingOnWallpaper = wallpaperWin;
+                    }
+                }
                 wallpaperWin.mClient.dispatchWallpaperOffsets(
-                        wallpaperWin.mWallpaperX, wallpaperWin.mWallpaperY);
+                        wallpaperWin.mWallpaperX, wallpaperWin.mWallpaperY, sync);
+                if (sync) {
+                    synchronized (mWaitingOnWallpaperLock) {
+                        if (mWaitingOnWallpaper != null) {
+                            long start = SystemClock.uptimeMillis();
+                            if ((mLastWallpaperTimeoutTime+WALLPAPER_TIMEOUT_RECOVERY)
+                                    < start) {
+                                try {
+                                    if (DEBUG_WALLPAPER) Log.v(TAG,
+                                            "Waiting for offset complete...");
+                                    mWaitingOnWallpaperLock.wait(WALLPAPER_TIMEOUT);
+                                } catch (InterruptedException e) {
+                                }
+                                if (DEBUG_WALLPAPER) Log.v(TAG, "Offset complete!");
+                                if ((start+WALLPAPER_TIMEOUT)
+                                        < SystemClock.uptimeMillis()) {
+                                    Log.i(TAG, "Timeout waiting for wallpaper to offset: "
+                                            + wallpaperWin);
+                                    mLastWallpaperTimeoutTime = start;
+                                }
+                            }
+                            mWaitingOnWallpaper = null;
+                        }
+                    }
+                }
             } catch (RemoteException e) {
             }
         }
@@ -1545,7 +1586,17 @@ public class WindowManagerService extends IWindowManager.Stub
         return changed;
     }
     
-    boolean updateWallpaperOffsetLocked() {
+    void wallpaperOffsetsComplete(IBinder window) {
+        synchronized (mWaitingOnWallpaperLock) {
+            if (mWaitingOnWallpaper != null &&
+                    mWaitingOnWallpaper.mClient.asBinder() == window) {
+                mWaitingOnWallpaper = null;
+                mWaitingOnWallpaperLock.notifyAll();
+            }
+        }
+    }
+    
+    boolean updateWallpaperOffsetLocked(boolean sync) {
         final int dw = mDisplay.getWidth();
         final int dh = mDisplay.getHeight();
         
@@ -1563,9 +1614,11 @@ public class WindowManagerService extends IWindowManager.Stub
                 while (curWallpaperIndex > 0) {
                     curWallpaperIndex--;
                     WindowState wallpaper = token.windows.get(curWallpaperIndex);
-                    if (updateWallpaperOffsetLocked(wallpaper, dw, dh)) {
+                    if (updateWallpaperOffsetLocked(wallpaper, dw, dh, sync)) {
                         wallpaper.computeShownFrameLocked();
                         changed = true;
+                        // We only want to be synchronous with one wallpaper.
+                        sync = false;
                     }
                 }
             }
@@ -1595,7 +1648,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 curWallpaperIndex--;
                 WindowState wallpaper = token.windows.get(curWallpaperIndex);
                 if (visible) {
-                    updateWallpaperOffsetLocked(wallpaper, dw, dh);                        
+                    updateWallpaperOffsetLocked(wallpaper, dw, dh, false);
                 }
                 
                 if (wallpaper.mWallpaperVisible != visible) {
@@ -1782,8 +1835,10 @@ public class WindowManagerService extends IWindowManager.Stub
                 imMayMove = false;
             } else {
                 addWindowToListInOrderLocked(win, true);
-                if (attrs.type == TYPE_WALLPAPER ||
-                        (attrs.flags&FLAG_SHOW_WALLPAPER) != 0) {
+                if (attrs.type == TYPE_WALLPAPER) {
+                    mLastWallpaperTimeoutTime = 0;
+                    adjustWallpaperWindowsLocked();
+                } else if ((attrs.flags&FLAG_SHOW_WALLPAPER) != 0) {
                     adjustWallpaperWindowsLocked();
                 }
             }
@@ -1992,8 +2047,10 @@ public class WindowManagerService extends IWindowManager.Stub
             }
         }
 
-        if (win.mAttrs.type == TYPE_WALLPAPER ||
-                (win.mAttrs.flags&FLAG_SHOW_WALLPAPER) != 0) {
+        if (win.mAttrs.type == TYPE_WALLPAPER) {
+            mLastWallpaperTimeoutTime = 0;
+            adjustWallpaperWindowsLocked();
+        } else if ((win.mAttrs.flags&FLAG_SHOW_WALLPAPER) != 0) {
             adjustWallpaperWindowsLocked();
         }
         
@@ -2070,7 +2127,7 @@ public class WindowManagerService extends IWindowManager.Stub
             window.mWallpaperY = y;
             
             if (mWallpaperTarget == window) {
-                if (updateWallpaperOffsetLocked()) {
+                if (updateWallpaperOffsetLocked(true)) {
                     performLayoutAndPlaceSurfacesLocked();
                 }
             }
@@ -2258,7 +2315,7 @@ public class WindowManagerService extends IWindowManager.Stub
             performLayoutAndPlaceSurfacesLocked();
             if (displayed && win.mIsWallpaper) {
                 updateWallpaperOffsetLocked(win, mDisplay.getWidth(),
-                        mDisplay.getHeight());
+                        mDisplay.getHeight(), false);
             }
             if (win.mAppToken != null) {
                 win.mAppToken.updateReportedVisibilityLocked();
@@ -6303,6 +6360,10 @@ public class WindowManagerService extends IWindowManager.Stub
             }
         }
         
+        public void wallpaperOffsetsComplete(IBinder window) {
+            WindowManagerService.this.wallpaperOffsetsComplete(window);
+        }
+        
         void windowAddedLocked() {
             if (mSurfaceSession == null) {
                 if (localLOGV) Log.v(
@@ -6698,7 +6759,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
             if (mIsWallpaper && (fw != frame.width() || fh != frame.height())) {
                 updateWallpaperOffsetLocked(this, mDisplay.getWidth(),
-                        mDisplay.getHeight());
+                        mDisplay.getHeight(), false);
             }
             
             if (localLOGV) {

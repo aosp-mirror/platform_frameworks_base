@@ -2868,7 +2868,13 @@ public final class ViewRoot extends Handler implements ViewParent,
             }
         }
         
-        public void dispatchWallpaperOffsets(float x, float y) {
+        public void dispatchWallpaperOffsets(float x, float y, boolean sync) {
+            if (sync) {
+                try {
+                    sWindowSession.wallpaperOffsetsComplete(asBinder());
+                } catch (RemoteException e) {
+                }
+            }
         }
     }
 
