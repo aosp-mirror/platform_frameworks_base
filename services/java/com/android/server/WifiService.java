@@ -374,13 +374,6 @@ public class WifiService extends IWifiManager.Stub {
         }
         setWifiEnabledState(eventualWifiState, uid);
 
-        /*
-         * Initialize the number of allowed radio channels if Wi-Fi is being turned on.
-         */
-        if (enable) {
-            mWifiStateTracker.setNumAllowedChannels();
-        }
-
         return true;
     }
 
