@@ -24,6 +24,7 @@ import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.os.PerformanceCollector;
 import android.os.RemoteException;
 import android.os.Debug;
 import android.os.IBinder;
@@ -83,10 +84,8 @@ public class Instrumentation {
     private List<ActivityWaiter> mWaitingActivities;
     private List<ActivityMonitor> mActivityMonitors;
     private IInstrumentationWatcher mWatcher;
-    private long mPreCpuTime;
-    private long mStart;
     private boolean mAutomaticPerformanceSnapshots = false;
-    private Bundle mPrePerfMetrics = new Bundle();
+    private PerformanceCollector mPerformanceCollector;
     private Bundle mPerfMetrics = new Bundle();
 
     public Instrumentation() {
@@ -191,94 +190,19 @@ public class Instrumentation {
     
     public void setAutomaticPerformanceSnapshots() {
         mAutomaticPerformanceSnapshots = true;
+        mPerformanceCollector = new PerformanceCollector();
     }
 
     public void startPerformanceSnapshot() {
-        mStart = 0;
         if (!isProfiling()) {
-            // Add initial binder counts
-            Bundle binderCounts = getBinderCounts();
-            for (String key: binderCounts.keySet()) {
-                addPerfMetricLong("pre_" + key, binderCounts.getLong(key));
-            }
-
-            // Force a GC and zero out the performance counters.  Do this
-            // before reading initial CPU/wall-clock times so we don't include
-            // the cost of this setup in our final metrics.
-            startAllocCounting();
-
-            // Record CPU time up to this point, and start timing.  Note:  this
-            // must happen at the end of this method, otherwise the timing will
-            // include noise.
-            mStart = SystemClock.uptimeMillis();
-            mPreCpuTime = Process.getElapsedCpuTime();
+            mPerformanceCollector.beginSnapshot(null);
         }
     }
     
     public void endPerformanceSnapshot() {
         if (!isProfiling()) {
-            // Stop the timing. This must be done first before any other counting is stopped.
-            long cpuTime = Process.getElapsedCpuTime();
-            long duration = SystemClock.uptimeMillis();
-            
-            stopAllocCounting();
-            
-            long nativeMax = Debug.getNativeHeapSize() / 1024;
-            long nativeAllocated = Debug.getNativeHeapAllocatedSize() / 1024;
-            long nativeFree = Debug.getNativeHeapFreeSize() / 1024;
-
-            Debug.MemoryInfo memInfo = new Debug.MemoryInfo();
-            Debug.getMemoryInfo(memInfo);
-
-            Runtime runtime = Runtime.getRuntime();
-
-            long dalvikMax = runtime.totalMemory() / 1024;
-            long dalvikFree = runtime.freeMemory() / 1024;
-            long dalvikAllocated = dalvikMax - dalvikFree;
-            
-            // Add final binder counts
-            Bundle binderCounts = getBinderCounts();
-            for (String key: binderCounts.keySet()) {
-                addPerfMetricLong(key, binderCounts.getLong(key));
-            }
-            
-            // Add alloc counts
-            Bundle allocCounts = getAllocCounts();
-            for (String key: allocCounts.keySet()) {
-                addPerfMetricLong(key, allocCounts.getLong(key));
-            }
-            
-            addPerfMetricLong("execution_time", duration - mStart);
-            addPerfMetricLong("pre_cpu_time", mPreCpuTime);
-            addPerfMetricLong("cpu_time", cpuTime - mPreCpuTime);
-
-            addPerfMetricLong("native_size", nativeMax);
-            addPerfMetricLong("native_allocated", nativeAllocated);
-            addPerfMetricLong("native_free", nativeFree);
-            addPerfMetricInt("native_pss", memInfo.nativePss);
-            addPerfMetricInt("native_private_dirty", memInfo.nativePrivateDirty);
-            addPerfMetricInt("native_shared_dirty", memInfo.nativeSharedDirty);
-            
-            addPerfMetricLong("java_size", dalvikMax);
-            addPerfMetricLong("java_allocated", dalvikAllocated);
-            addPerfMetricLong("java_free", dalvikFree);
-            addPerfMetricInt("java_pss", memInfo.dalvikPss);
-            addPerfMetricInt("java_private_dirty", memInfo.dalvikPrivateDirty);
-            addPerfMetricInt("java_shared_dirty", memInfo.dalvikSharedDirty);
-            
-            addPerfMetricInt("other_pss", memInfo.otherPss);
-            addPerfMetricInt("other_private_dirty", memInfo.otherPrivateDirty);
-            addPerfMetricInt("other_shared_dirty", memInfo.otherSharedDirty);
-            
+            mPerfMetrics = mPerformanceCollector.endSnapshot();
         }
-    }
-    
-    private void addPerfMetricLong(String key, long value) {
-        mPerfMetrics.putLong("performance." + key, value);
-    }
-    
-    private void addPerfMetricInt(String key, int value) {
-        mPerfMetrics.putInt("performance." + key, value);
     }
     
     /**
