@@ -246,10 +246,30 @@ SharedBufferClient::SharedBufferClient(SharedClient* sharedClient,
         int surface, int num)
     : SharedBufferBase(sharedClient, surface, num), tail(0)
 {
+    SharedBufferStack& stack( *mSharedStack );
+    int32_t avail;
+    int32_t head;
+    // we need to make sure we read available and head coherently,
+    // w.r.t RetireUpdate.
+    do {
+        avail = stack.available;
+        head = stack.head;
+    } while (stack.available != avail);
+    tail = head - avail + 1;
+    if (tail < 0) {
+        tail += num;
+    }
 }
 
 ssize_t SharedBufferClient::dequeue()
 {
+    SharedBufferStack& stack( *mSharedStack );
+
+    if (stack.head == tail && stack.available == 2) {
+        LOGW("dequeue: tail=%d, head=%d, avail=%d, queued=%d",
+                tail, stack.head, stack.available, stack.queued);
+    }
+
     //LOGD("[%d] about to dequeue a buffer",
     //        mSharedStack->identity);
     DequeueCondition condition(this);
@@ -257,8 +277,6 @@ ssize_t SharedBufferClient::dequeue()
     if (err != NO_ERROR)
         return ssize_t(err);
 
-
-    SharedBufferStack& stack( *mSharedStack );
     // NOTE: 'stack.available' is part of the conditions, however
     // decrementing it, never changes any conditions, so we don't need
     // to do this as part of an update.
@@ -270,6 +288,7 @@ ssize_t SharedBufferClient::dequeue()
     tail = ((tail+1 >= mNumBuffers) ? 0 : tail+1);
     LOGD_IF(DEBUG_ATOMICS, "dequeued=%d, tail=%d, %s",
             dequeued, tail, dump("").string());
+
     return dequeued;
 }
 
@@ -326,7 +345,7 @@ ssize_t SharedBufferServer::retireAndLock()
 {
     RetireUpdate update(this, mNumBuffers);
     ssize_t buf = updateCondition( update );
-    LOGD_IF(DEBUG_ATOMICS, "retire=%d, %s", int(buf), dump("").string());
+    LOGD_IF(DEBUG_ATOMICS && buf>=0, "retire=%d, %s", int(buf), dump("").string());
     return buf;
 }
 
