@@ -50,6 +50,7 @@ import android.util.Log;
  * List of settings that are backed up are stored in the Settings.java file
  */
 public class SettingsBackupAgent extends BackupHelperAgent {
+    private static final boolean DEBUG = true;
 
     private static final String KEY_SYSTEM = "system";
     private static final String KEY_SECURE = "secure";
@@ -242,6 +243,13 @@ public class SettingsBackupAgent extends BackupHelperAgent {
             pos += length;
             if (!TextUtils.isEmpty(settingName) && !TextUtils.isEmpty(settingValue)) {
                 //Log.i(TAG, "Restore " + settingName + " = " + settingValue);
+
+                // TODO: versioning rather than just an ad hoc blacklist to handle
+                // older varieties of backed-up data
+                if (invalidSavedSetting(contentUri, settingName, settingValue)) {
+                    continue;
+                }
+
                 if (mSettingsHelper.restoreValue(settingName, settingValue)) {
                     cv.clear();
                     cv.put(Settings.NameValueTable.NAME, settingName);
@@ -250,6 +258,22 @@ public class SettingsBackupAgent extends BackupHelperAgent {
                 }
             }
         }
+    }
+
+    private boolean invalidSavedSetting(Uri contentUri, String settingName, String settingValue) {
+        // Even if these settings were stored, don't use them on restore
+        if (contentUri.equals(Settings.Secure.CONTENT_URI)) {
+            if (settingName.equals(Settings.Secure.PREFERRED_NETWORK_MODE)
+                    || settingName.equals(Settings.Secure.PREFERRED_TTY_MODE)
+                    || settingName.equals(Settings.Secure.CDMA_CELL_BROADCAST_SMS)
+                    || settingName.equals(Settings.Secure.PREFERRED_CDMA_SUBSCRIPTION)
+                    || settingName.equals(Settings.Secure.ENHANCED_VOICE_PRIVACY_ENABLED)) {
+                if (DEBUG) Log.v(TAG, "Ignoring restore datum: " + settingName);
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private String[] copyAndSort(String[] keys) {
