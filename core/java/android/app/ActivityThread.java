@@ -4246,12 +4246,9 @@ public final class ActivityThread {
         }
 
         thread.detach();
-        String name;
-        if (thread.mInitialApplication != null) {
-            name = thread.mInitialApplication.getPackageName();
-        } else {
-            name = "<unknown>";
-        }
+        String name = (thread.mInitialApplication != null)
+            ? thread.mInitialApplication.getPackageName()
+            : "<unknown>";
         Log.i(TAG, "Main thread of " + name + " is now exiting");
     }
 }
