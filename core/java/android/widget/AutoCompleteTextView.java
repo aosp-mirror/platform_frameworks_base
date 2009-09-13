@@ -132,6 +132,8 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
 
     private AutoCompleteTextView.PassThroughClickListener mPassThroughClickListener;
 
+    private int mDownKeyCode;
+    
     public AutoCompleteTextView(Context context) {
         this(context, null);
     }
@@ -603,12 +605,19 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
 
     @Override
     public boolean onKeyPreIme(int keyCode, KeyEvent event) {
+        if (event.getAction() == KeyEvent.ACTION_DOWN
+                && event.getRepeatCount() == 0) {
+            mDownKeyCode = keyCode;
+        }
         if (isPopupShowing()) {
             // special case for the back key, we do not even try to send it
             // to the drop down list but instead, consume it immediately
             if (keyCode == KeyEvent.KEYCODE_BACK && !mDropDownAlwaysVisible) {
-                dismissDropDown();
-                return true;
+                if (event.getAction() == KeyEvent.ACTION_UP
+                        && mDownKeyCode == keyCode && !event.isCanceled()) {
+                    dismissDropDown();
+                    return true;
+                }
             }
         }
         return super.onKeyPreIme(keyCode, event);
@@ -1017,6 +1026,7 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
     @Override
     public void onWindowFocusChanged(boolean hasWindowFocus) {
         super.onWindowFocusChanged(hasWindowFocus);
+        mDownKeyCode = 0;
         performValidation();
         if (!hasWindowFocus && !mDropDownAlwaysVisible) {
             dismissDropDown();
@@ -1026,6 +1036,7 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
     @Override
     protected void onFocusChanged(boolean focused, int direction, Rect previouslyFocusedRect) {
         super.onFocusChanged(focused, direction, previouslyFocusedRect);
+        mDownKeyCode = 0;
         performValidation();
         if (!focused && !mDropDownAlwaysVisible) {
             dismissDropDown();

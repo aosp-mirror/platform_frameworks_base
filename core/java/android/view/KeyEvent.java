@@ -18,6 +18,7 @@ package android.view;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.SparseIntArray;
 import android.view.KeyCharacterMap;
 import android.view.KeyCharacterMap.KeyData;
 
@@ -277,6 +278,32 @@ public class KeyEvent implements Parcelable {
     public static final int FLAG_VIRTUAL_HARD_KEY = 0x40;
     
     /**
+     * This flag is set for the first key repeat that occurs after the
+     * long press timeout.
+     */
+    public static final int FLAG_LONG_PRESS = 0x80;
+    
+    /**
+     * Set when a key event has {@link #FLAG_CANCELED} set because a long
+     * press action was executed while it was down. 
+     */
+    public static final int FLAG_CANCELED_LONG_PRESS = 0x100;
+    
+    /**
+     * Set for {@link #ACTION_UP} when this event's key code is still being
+     * tracked from its initial down.  That is, somebody requested that tracking
+     * started on the key down and a long press has not caused
+     * the tracking to be canceled.
+     */
+    public static final int FLAG_TRACKING = 0x200;
+    
+    /**
+     * Private control to determine when an app is tracking a key sequence.
+     * @hide
+     */
+    public static final int FLAG_START_TRACKING = 0x40000000;
+    
+    /**
      * Returns the maximum keycode.
      */
     public static int getMaxKeyCode() {
@@ -305,7 +332,11 @@ public class KeyEvent implements Parcelable {
 
     public interface Callback {
         /**
-         * Called when a key down event has occurred.
+         * Called when a key down event has occurred.  If you return true,
+         * you can first call {@link KeyEvent#startTracking()
+         * KeyEvent.startTracking()} to have the framework track the event
+         * through its {@link #onKeyUp(int, KeyEvent)} and also call your
+         * {@link #onKeyLongPress(int, KeyEvent)} if it occurs.
          * 
          * @param keyCode The value in event.getKeyCode().
          * @param event Description of the key event.
@@ -314,6 +345,22 @@ public class KeyEvent implements Parcelable {
          *         the event to be handled by the next receiver, return false.
          */
         boolean onKeyDown(int keyCode, KeyEvent event);
+
+        /**
+         * Called when a long press has occurred.  If you return true,
+         * the final key up will have {@link KeyEvent#FLAG_CANCELED} and
+         * {@link KeyEvent#FLAG_CANCELED_LONG_PRESS} set.  Note that in
+         * order to receive this callback, someone in the event change
+         * <em>must</em> return true from {@link #onKeyDown} <em>and</em>
+         * call {@link KeyEvent#startTracking()} on the event.
+         * 
+         * @param keyCode The value in event.getKeyCode().
+         * @param event Description of the key event.
+         * 
+         * @return If you handled the event, return true.  If you want to allow
+         *         the event to be handled by the next receiver, return false.
+         */
+        boolean onKeyLongPress(int keyCode, KeyEvent event);
 
         /**
          * Called when a key up event has occurred.
@@ -500,11 +547,15 @@ public class KeyEvent implements Parcelable {
     /**
      * Copy an existing key event, modifying its time and repeat count.
      * 
+     * @deprecated Use {@link #changeTimeRepeat(KeyEvent, long, int)}
+     * instead.
+     * 
      * @param origEvent The existing event to be copied.
      * @param eventTime The new event time
      * (in {@link android.os.SystemClock#uptimeMillis}) of the event.
      * @param newRepeat The new repeat count of the event.
      */
+    @Deprecated
     public KeyEvent(KeyEvent origEvent, long eventTime, int newRepeat) {
         mDownTime = origEvent.mDownTime;
         mEventTime = eventTime;
@@ -530,6 +581,26 @@ public class KeyEvent implements Parcelable {
     public static KeyEvent changeTimeRepeat(KeyEvent event, long eventTime,
             int newRepeat) {
         return new KeyEvent(event, eventTime, newRepeat);
+    }
+    
+    /**
+     * Create a new key event that is the same as the given one, but whose
+     * event time and repeat count are replaced with the given value.
+     * 
+     * @param event The existing event to be copied.  This is not modified.
+     * @param eventTime The new event time
+     * (in {@link android.os.SystemClock#uptimeMillis}) of the event.
+     * @param newRepeat The new repeat count of the event.
+     * @param newFlags New flags for the event, replacing the entire value
+     * in the original event.
+     */
+    public static KeyEvent changeTimeRepeat(KeyEvent event, long eventTime,
+            int newRepeat, int newFlags) {
+        KeyEvent ret = new KeyEvent(event);
+        ret.mEventTime = eventTime;
+        ret.mRepeatCount = newRepeat;
+        ret.mFlags = newFlags;
+        return ret;
     }
     
     /**
@@ -721,6 +792,34 @@ public class KeyEvent implements Parcelable {
     }
     
     /**
+     * Call this during {@link Callback#onKeyDown} to have the system track
+     * the key through its final up (possibly including a long press).  Note
+     * that only one key can be tracked at a time -- if another key down
+     * event is received while a previous one is being tracked, tracking is
+     * stopped on the previous event.
+     */
+    public final void startTracking() {
+        mFlags |= FLAG_START_TRACKING;
+    }
+    
+    /**
+     * For {@link #ACTION_UP} events, indicates that the event is still being
+     * tracked from its initial down event as per
+     * {@link #FLAG_TRACKING}.
+     */
+    public final boolean isTracking() {
+        return (mFlags&FLAG_TRACKING) != 0;
+    }
+    
+    /**
+     * For {@link #ACTION_DOWN} events, indicates that the event has been
+     * canceled as per {@link #FLAG_LONG_PRESS}.
+     */
+    public final boolean isLongPress() {
+        return (mFlags&FLAG_LONG_PRESS) != 0;
+    }
+    
+    /**
      * Retrieve the key code of the key event.  This is the physical key that
      * was pressed, <em>not</em> the Unicode character.
      * 
@@ -906,19 +1005,49 @@ public class KeyEvent implements Parcelable {
     }
     
     /**
+     * @deprecated Use {@link #dispatch(Callback, DispatcherState, Object)} instead.
+     */
+    @Deprecated
+    public final boolean dispatch(Callback receiver) {
+        return dispatch(receiver, null, null);
+    }
+    
+    /**
      * Deliver this key event to a {@link Callback} interface.  If this is
      * an ACTION_MULTIPLE event and it is not handled, then an attempt will
      * be made to deliver a single normal event.
      * 
      * @param receiver The Callback that will be given the event.
+     * @param state State information retained across events.
+     * @param target The target of the dispatch, for use in tracking.
      * 
      * @return The return value from the Callback method that was called.
      */
-    public final boolean dispatch(Callback receiver) {
+    public final boolean dispatch(Callback receiver, DispatcherState state,
+            Object target) {
         switch (mAction) {
-            case ACTION_DOWN:
-                return receiver.onKeyDown(mKeyCode, this);
+            case ACTION_DOWN: {
+                mFlags &= ~FLAG_START_TRACKING;
+                boolean res = receiver.onKeyDown(mKeyCode, this);
+                if (state != null) {
+                    if (res && mRepeatCount == 0 && (mFlags&FLAG_START_TRACKING) != 0) {
+                        state.startTracking(this, target);
+                    } else if (isLongPress() && state.isTracking(this)) {
+                        try {
+                            if (receiver.onKeyLongPress(mKeyCode, this)) {
+                                state.performedLongPress(this);
+                                res = true;
+                            }
+                        } catch (AbstractMethodError e) {
+                        }
+                    }
+                }
+                return res;
+            }
             case ACTION_UP:
+                if (state != null) {
+                    state.handleUpEvent(this);
+                }
                 return receiver.onKeyUp(mKeyCode, this);
             case ACTION_MULTIPLE:
                 final int count = mRepeatCount;
@@ -938,10 +1067,97 @@ public class KeyEvent implements Parcelable {
                     mRepeatCount = count;
                     return handled;
                 }
+                return false;
         }
         return false;
     }
 
+    /**
+     * Use with {@link KeyEvent#dispatch(Callback, DispatcherState, Object)}
+     * for more advanced key dispatching, such as long presses.
+     */
+    public static class DispatcherState {
+        int mDownKeyCode;
+        Object mDownTarget;
+        SparseIntArray mActiveLongPresses = new SparseIntArray();
+        
+        /**
+         * Reset back to initial state.
+         */
+        public void reset() {
+            mDownKeyCode = 0;
+            mDownTarget = null;
+            mActiveLongPresses.clear();
+        }
+        
+        /**
+         * Stop any tracking associated with this target.
+         */
+        public void reset(Object target) {
+            if (mDownTarget == target) {
+                mDownKeyCode = 0;
+                mDownTarget = null;
+            }
+        }
+        
+        /**
+         * Start tracking the key code associated with the given event.  This
+         * can only be called on a key down.  It will allow you to see any
+         * long press associated with the key, and will result in
+         * {@link KeyEvent#isTracking} return true on the long press and up
+         * events.
+         * 
+         * <p>This is only needed if you are directly dispatching events, rather
+         * than handling them in {@link Callback#onKeyDown}.
+         */
+        public void startTracking(KeyEvent event, Object target) {
+            if (event.getAction() != ACTION_DOWN) {
+                throw new IllegalArgumentException(
+                        "Can only start tracking on a down event");
+            }
+            mDownKeyCode = event.getKeyCode();
+            mDownTarget = target;
+        }
+        
+        /**
+         * Return true if the key event is for a key code that is currently
+         * being tracked by the dispatcher.
+         */
+        public boolean isTracking(KeyEvent event) {
+            return mDownKeyCode == event.getKeyCode();
+        }
+        
+        /**
+         * Keep track of the given event's key code as having performed an
+         * action with a long press, so no action should occur on the up.
+         * <p>This is only needed if you are directly dispatching events, rather
+         * than handling them in {@link Callback#onKeyLongPress}.
+         */
+        public void performedLongPress(KeyEvent event) {
+            mActiveLongPresses.put(event.getKeyCode(), 1);
+        }
+        
+        /**
+         * Handle key up event to stop tracking.  This resets the dispatcher state,
+         * and updates the key event state based on it.
+         * <p>This is only needed if you are directly dispatching events, rather
+         * than handling them in {@link Callback#onKeyUp}.
+         */
+        public void handleUpEvent(KeyEvent event) {
+            final int keyCode = event.getKeyCode();
+            int index = mActiveLongPresses.indexOfKey(keyCode);
+            if (index >= 0) {
+                event.mFlags |= FLAG_CANCELED | FLAG_CANCELED_LONG_PRESS;
+                mActiveLongPresses.removeAt(index);
+            }
+            if (mDownKeyCode == keyCode) {
+                event.mFlags |= FLAG_TRACKING;
+                mDownKeyCode = 0;
+                mDownTarget = null;
+            }
+        }
+    }
+    
     public String toString() {
         return "KeyEvent{action=" + mAction + " code=" + mKeyCode
             + " repeat=" + mRepeatCount

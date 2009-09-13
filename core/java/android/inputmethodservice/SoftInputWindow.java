@@ -21,6 +21,7 @@ import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.os.IBinder;
 import android.view.Gravity;
+import android.view.KeyEvent;
 import android.view.WindowManager;
 
 /**
@@ -30,7 +31,8 @@ import android.view.WindowManager;
  * always visible.
  */
 class SoftInputWindow extends Dialog {
-
+    final KeyEvent.DispatcherState mDispatcherState;
+    
     public void setToken(IBinder token) {
         WindowManager.LayoutParams lp = getWindow().getAttributes();
         lp.token = token;
@@ -49,9 +51,17 @@ class SoftInputWindow extends Dialog {
      *        using styles. This theme is applied on top of the current theme in
      *        <var>context</var>. If 0, the default dialog theme will be used.
      */
-    public SoftInputWindow(Context context, int theme) {
+    public SoftInputWindow(Context context, int theme,
+            KeyEvent.DispatcherState dispatcherState) {
         super(context, theme);
+        mDispatcherState = dispatcherState;
         initDockWindow();
+    }
+
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        mDispatcherState.reset();
     }
 
     /**

@@ -981,6 +981,29 @@ public abstract class KeyInputQueue {
         }
     }
 
+    /**
+     * Return true if the queue has an up event pending that corresponds
+     * to the same key as the given key event.
+     */
+    boolean hasKeyUpEvent(KeyEvent origEvent) {
+        synchronized (mFirst) {
+            final int keyCode = origEvent.getKeyCode();
+            QueuedEvent cur = mLast.prev;
+            while (cur.prev != null) {
+                if (cur.classType == RawInputEvent.CLASS_KEYBOARD) {
+                    KeyEvent ke = (KeyEvent)cur.event;
+                    if (ke.getAction() == KeyEvent.ACTION_UP
+                            && ke.getKeyCode() == keyCode) {
+                        return true;
+                    }
+                }
+                cur = cur.prev;
+            }
+        }
+        
+        return false;
+    }
+    
     void recycleEvent(QueuedEvent ev) {
         synchronized (mFirst) {
             //Log.i(TAG, "Recycle event: " + ev);

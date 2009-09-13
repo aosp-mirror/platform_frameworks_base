@@ -1752,8 +1752,9 @@ public class Activity extends ContextThemeWrapper
      * 
      * <p>If the focused view didn't want this event, this method is called.
      *
-     * <p>The default implementation handles KEYCODE_BACK to stop the activity
-     * and go back, and other default key handling if configured with {@link #setDefaultKeyMode}.
+     * <p>The default implementation sets up state to call
+     * {@link #onKeyLongPress}, and does other default key handling
+     * if configured with {@link #setDefaultKeyMode}.
      * 
      * @return Return <code>true</code> to prevent this event from being propagated
      * further, or <code>false</code> to indicate that you have not handled 
@@ -1762,16 +1763,19 @@ public class Activity extends ContextThemeWrapper
      * @see android.view.KeyEvent
      */
     public boolean onKeyDown(int keyCode, KeyEvent event)  {
-        if (keyCode == KeyEvent.KEYCODE_BACK && event.getRepeatCount() == 0) {
-            finish();
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            event.startTracking();
             return true;
         }
         
         if (mDefaultKeyMode == DEFAULT_KEYS_DISABLE) {
             return false;
         } else if (mDefaultKeyMode == DEFAULT_KEYS_SHORTCUT) {
-            return getWindow().performPanelShortcut(Window.FEATURE_OPTIONS_PANEL, 
-                                                    keyCode, event, Menu.FLAG_ALWAYS_PERFORM_CLOSE);
+            if (getWindow().performPanelShortcut(Window.FEATURE_OPTIONS_PANEL, 
+                    keyCode, event, Menu.FLAG_ALWAYS_PERFORM_CLOSE)) {
+                return true;
+            }
+            return false;
         } else {
             // Common code for DEFAULT_KEYS_DIALER & DEFAULT_KEYS_SEARCH_*
             boolean clearSpannable = false;
@@ -1780,8 +1784,8 @@ public class Activity extends ContextThemeWrapper
                 clearSpannable = true;
                 handled = false;
             } else {
-                handled = TextKeyListener.getInstance().onKeyDown(null, mDefaultKeySsb, 
-                                                                  keyCode, event);
+                handled = TextKeyListener.getInstance().onKeyDown(
+                        null, mDefaultKeySsb, keyCode, event);
                 if (handled && mDefaultKeySsb.length() > 0) {
                     // something useable has been typed - dispatch it now.
 
@@ -1813,10 +1817,22 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
+     * Default implementation of {@link KeyEvent.Callback#onKeyLongPress(int, KeyEvent)
+     * KeyEvent.Callback.onKeyLongPress()}: always returns false (doesn't handle
+     * the event).
+     */
+    public boolean onKeyLongPress(int keyCode, KeyEvent event) {
+        return false;
+    }
+
+    /**
      * Called when a key was released and not handled by any of the views
      * inside of the activity. So, for example, key presses while the cursor 
      * is inside a TextView will not trigger the event (unless it is a navigation
      * to another object) because TextView handles its own key presses.
+     * 
+     * <p>The default implementation handles KEYCODE_BACK to stop the activity
+     * and go back.
      * 
      * @return Return <code>true</code> to prevent this event from being propagated
      * further, or <code>false</code> to indicate that you have not handled 
@@ -1825,6 +1841,11 @@ public class Activity extends ContextThemeWrapper
      * @see KeyEvent
      */
     public boolean onKeyUp(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK && event.isTracking()
+                && !event.isCanceled()) {
+            onBackPressed();
+            return true;
+        }
         return false;
     }
 
@@ -1835,6 +1856,15 @@ public class Activity extends ContextThemeWrapper
      */
     public boolean onKeyMultiple(int keyCode, int repeatCount, KeyEvent event) {
         return false;
+    }
+    
+    /**
+     * Called when the activity has detected the user's press of the back
+     * key.  The default implementation simply finishes the current activity,
+     * but you can override this to do whatever you want.
+     */
+    public void onBackPressed() {
+        finish();
     }
     
     /**
@@ -1909,9 +1939,10 @@ public class Activity extends ContextThemeWrapper
     /**
      * Called when the current {@link Window} of the activity gains or loses
      * focus.  This is the best indicator of whether this activity is visible
-     * to the user.
+     * to the user.  The default implementation clears the key tracking
+     * state, so should always be called.
      * 
-     * <p>Note that this provides information what global focus state, which
+     * <p>Note that this provides information about global focus state, which
      * is managed independently of activity lifecycles.  As such, while focus
      * changes will generally have some relation to lifecycle changes (an
      * activity that is stopped will not generally get window focus), you
@@ -1988,7 +2019,8 @@ public class Activity extends ContextThemeWrapper
         if (getWindow().superDispatchKeyEvent(event)) {
             return true;
         }
-        return event.dispatch(this);
+        return event.dispatch(this, mDecor != null
+                ? mDecor.getKeyDispatcherState() : null, this);
     }
 
     /**

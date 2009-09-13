@@ -2945,10 +2945,14 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             okToSend = false;
             break;
         case KeyEvent.KEYCODE_BACK:
-            if (mFiltered && mPopup != null && mPopup.isShowing() &&
-                    event.getAction() == KeyEvent.ACTION_DOWN) {
-                handled = true;
-                mTextFilter.setText("");
+            if (mFiltered && mPopup != null && mPopup.isShowing()) {
+                if (event.getAction() == KeyEvent.ACTION_DOWN) {
+                    handled = true;
+                } else if (event.getAction() == KeyEvent.ACTION_UP
+                        && event.isTracking() && !event.isCanceled()) {
+                    handled = true;
+                    mTextFilter.setText("");
+                }
             }
             okToSend = false;
             break;
