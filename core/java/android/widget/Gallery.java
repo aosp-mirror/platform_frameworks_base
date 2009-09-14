@@ -23,7 +23,6 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Rect;
 import android.util.AttributeSet;
-import android.util.Config;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.Gravity;
@@ -36,8 +35,6 @@ import android.view.ViewGroup;
 import android.view.SoundEffectConstants;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.animation.Transformation;
-import android.widget.AbsSpinner;
-import android.widget.Scroller;
 
 /**
  * A view that shows items in a center-locked, horizontally scrolling list.
@@ -59,7 +56,7 @@ public class Gallery extends AbsSpinner implements GestureDetector.OnGestureList
 
     private static final String TAG = "Gallery";
 
-    private static final boolean localLOGV = Config.LOGV;
+    private static final boolean localLOGV = false;
 
     /**
      * Duration in milliseconds from the start of a scroll during which we're
@@ -514,6 +511,7 @@ public class Gallery extends AbsSpinner implements GestureDetector.OnGestureList
             // We haven't been callbacking during the fling, so do it now
             super.selectionChanged();
         }
+        invalidate();
     }
     
     @Override
@@ -534,12 +532,9 @@ public class Gallery extends AbsSpinner implements GestureDetector.OnGestureList
         
         int galleryCenter = getCenterOfGallery();
         
-        if (selView != null) {
-
-            // Common case where the current selected position is correct
-            if (selView.getLeft() <= galleryCenter && selView.getRight() >= galleryCenter) {
-                return;
-            }
+        // Common case where the current selected position is correct
+        if (selView.getLeft() <= galleryCenter && selView.getRight() >= galleryCenter) {
+            return;
         }
         
         // TODO better search
@@ -627,7 +622,6 @@ public class Gallery extends AbsSpinner implements GestureDetector.OnGestureList
         View sel = makeAndAddView(mSelectedPosition, 0, 0, true);
         
         // Put the selected child in the center
-        Gallery.LayoutParams lp = (Gallery.LayoutParams) sel.getLayoutParams();
         int selectedOffset = childrenLeft + (childrenWidth / 2) - (sel.getWidth() / 2);
         sel.offsetLeftAndRight(selectedOffset);
 
@@ -733,9 +727,6 @@ public class Gallery extends AbsSpinner implements GestureDetector.OnGestureList
             child = mRecycler.get(position);
             if (child != null) {
                 // Can reuse an existing view
-                Gallery.LayoutParams lp = (Gallery.LayoutParams) 
-                    child.getLayoutParams();
-
                 int childLeft = child.getLeft();
                 
                 // Remember left and right edges of where views have been placed
@@ -798,7 +789,7 @@ public class Gallery extends AbsSpinner implements GestureDetector.OnGestureList
         int childRight;
 
         // Position vertically based on gravity setting
-        int childTop = calculateTop(child, lp, true);
+        int childTop = calculateTop(child, true);
         int childBottom = childTop + child.getMeasuredHeight();
 
         int width = child.getMeasuredWidth();
@@ -817,11 +808,9 @@ public class Gallery extends AbsSpinner implements GestureDetector.OnGestureList
      * Figure out vertical placement based on mGravity
      * 
      * @param child Child to place
-     * @param lp LayoutParams for this view (just so we don't keep looking them
-     *        up)
      * @return Where the top of the child should be
      */
-    private int calculateTop(View child, Gallery.LayoutParams lp, boolean duringLayout) {
+    private int calculateTop(View child, boolean duringLayout) {
         int myHeight = duringLayout ? mMeasuredHeight : getHeight();
         int childHeight = duringLayout ? child.getMeasuredHeight() : child.getHeight(); 
         
