@@ -385,7 +385,10 @@ int reset_keystore()
         return -1;
     }
     while ((de = readdir(d))) {
-        if (unlink(de->d_name) != 0) ret = -1;
+        char *dirname = de->d_name;
+        if (strcmp(".", dirname) == 0) continue;
+        if (strcmp("..", dirname) == 0) continue;
+        if (unlink(dirname) != 0) ret = -1;
     }
     closedir(d);
     state = UNINITIALIZED;

@@ -4,7 +4,7 @@ LOCAL_PATH:= $(call my-dir)
 include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES:= \
-    netkeystore.c keymgmt.c
+    netkeystore.c netkeystore_main.c keymgmt.c
 
 LOCAL_C_INCLUDES := \
     $(call include-path-for, system-core)/cutils \
