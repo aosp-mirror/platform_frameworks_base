@@ -6042,12 +6042,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
         int height = mBottom - mTop;
 
         final AttachInfo attachInfo = mAttachInfo;
-        final float scale = attachInfo.mApplicationScale;
+        final float scale = attachInfo != null ? attachInfo.mApplicationScale : 1.0f;
         width = (int) ((width * scale) + 0.5f);
         height = (int) ((height * scale) + 0.5f);
         
-        Bitmap bitmap = Bitmap.createBitmap(width > 0 ? width : 1,
-                height > 0 ? height : 1, quality);
+        Bitmap bitmap = Bitmap.createBitmap(width > 0 ? width : 1, height > 0 ? height : 1, quality);
         if (bitmap == null) {
             throw new OutOfMemoryError();
         }
