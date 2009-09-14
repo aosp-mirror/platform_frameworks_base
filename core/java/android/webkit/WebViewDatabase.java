@@ -39,7 +39,7 @@ public class WebViewDatabase {
     // log tag
     protected static final String LOGTAG = "webviewdatabase";
 
-    private static final int DATABASE_VERSION = 9;
+    private static final int DATABASE_VERSION = 10;
     // 2 -> 3 Modified Cache table to allow cache of redirects
     // 3 -> 4 Added Oma-Downloads table
     // 4 -> 5 Modified Cache table to support persistent contentLength
@@ -48,6 +48,7 @@ public class WebViewDatabase {
     // 6 -> 7 Change cache localPath from int to String
     // 7 -> 8 Move cache to its own db
     // 8 -> 9 Store both scheme and host when storing passwords
+    // 9 -> 10 Update httpauth table UNIQUE
     private static final int CACHE_DATABASE_VERSION = 3;
     // 1 -> 2 Add expires String
     // 2 -> 3 Add content-disposition
@@ -256,6 +257,20 @@ public class WebViewDatabase {
                     + DATABASE_VERSION + ", which will destroy old data");
         }
         boolean justPasswords = 8 == oldVersion && 9 == DATABASE_VERSION;
+        boolean justAuth = 9 == oldVersion && 10 == DATABASE_VERSION;
+        if (justAuth) {
+            mDatabase.execSQL("DROP TABLE IF EXISTS "
+                    + mTableNames[TABLE_HTTPAUTH_ID]);
+            mDatabase.execSQL("CREATE TABLE " + mTableNames[TABLE_HTTPAUTH_ID]
+                    + " (" + ID_COL + " INTEGER PRIMARY KEY, "
+                    + HTTPAUTH_HOST_COL + " TEXT, " + HTTPAUTH_REALM_COL
+                    + " TEXT, " + HTTPAUTH_USERNAME_COL + " TEXT, "
+                    + HTTPAUTH_PASSWORD_COL + " TEXT," + " UNIQUE ("
+                    + HTTPAUTH_HOST_COL + ", " + HTTPAUTH_REALM_COL
+                    + ") ON CONFLICT REPLACE);");
+            return;
+        }
+
         if (!justPasswords) {
             mDatabase.execSQL("DROP TABLE IF EXISTS "
                     + mTableNames[TABLE_COOKIES_ID]);
@@ -302,8 +317,8 @@ public class WebViewDatabase {
                     + HTTPAUTH_HOST_COL + " TEXT, " + HTTPAUTH_REALM_COL
                     + " TEXT, " + HTTPAUTH_USERNAME_COL + " TEXT, "
                     + HTTPAUTH_PASSWORD_COL + " TEXT," + " UNIQUE ("
-                    + HTTPAUTH_HOST_COL + ", " + HTTPAUTH_REALM_COL + ", "
-                    + HTTPAUTH_USERNAME_COL + ") ON CONFLICT REPLACE);");
+                    + HTTPAUTH_HOST_COL + ", " + HTTPAUTH_REALM_COL
+                    + ") ON CONFLICT REPLACE);");
         }
         // passwords
         mDatabase.execSQL("CREATE TABLE " + mTableNames[TABLE_PASSWORD_ID]
