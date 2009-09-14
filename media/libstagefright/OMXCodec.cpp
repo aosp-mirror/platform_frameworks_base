@@ -232,6 +232,16 @@ sp<OMXCodec> OMXCodec::Create(
         quirks |= kRequiresAllocateBufferOnOutputPorts;
     }
 
+    if (!strncmp(componentName, "OMX.TI.", 7)) {
+        // Apparently I must not use OMX_UseBuffer on either input or
+        // output ports on any of the TI components or quote:
+        // "(I) may have unexpected problem (sic) which can be timing related
+        //  and hard to reproduce."
+
+        quirks |= kRequiresAllocateBufferOnInputPorts;
+        quirks |= kRequiresAllocateBufferOnOutputPorts;
+    }
+
     sp<OMXCodec> codec = new OMXCodec(
             omx, node, quirks, createEncoder, mime, componentName,
             source);
@@ -840,8 +850,8 @@ status_t OMXCodec::allocateBuffersOnPort(OMX_U32 portIndex) {
                     mNode, portIndex, mem, &buffer);
         } else if (portIndex == kPortIndexOutput
                 && (mQuirks & kRequiresAllocateBufferOnOutputPorts)) {
-            err = mOMX->allocate_buffer(
-                    mNode, portIndex, def.nBufferSize, &buffer);
+            err = mOMX->allocate_buffer_with_backup(
+                    mNode, portIndex, mem, &buffer);
         } else {
             err = mOMX->use_buffer(mNode, portIndex, mem, &buffer);
         }
