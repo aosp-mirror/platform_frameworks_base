@@ -1524,13 +1524,24 @@ status_t SurfaceFlinger::dump(int fd, const Vector<String16>& args)
                 result.append( l->lcblk->dump("      ") );
                 sp<const Buffer> buf0(l->getBuffer(0));
                 sp<const Buffer> buf1(l->getBuffer(1));
+                uint32_t w0=0, h0=0, s0=0;
+                uint32_t w1=0, h1=0, s1=0;
+                if (buf0 != 0) {
+                    w0 = buf0->getWidth();
+                    h0 = buf0->getHeight();
+                    s0 = buf0->getStride();
+                }
+                if (buf1 != 0) {
+                    w1 = buf1->getWidth();
+                    h1 = buf1->getHeight();
+                    s1 = buf1->getStride();
+                }
                 snprintf(buffer, SIZE,
                         "      "
                         "format=%2d, [%3ux%3u:%3u] [%3ux%3u:%3u],"
                         " freezeLock=%p\n",
                         l->pixelFormat(),
-                        buf0->getWidth(), buf0->getHeight(), buf0->getStride(),
-                        buf1->getWidth(), buf1->getHeight(), buf1->getStride(),
+                        w0, h0, s0, w1, h1, s1,
                         l->getFreezeLock().get());
                 result.append(buffer);
                 buffer[0] = 0;
