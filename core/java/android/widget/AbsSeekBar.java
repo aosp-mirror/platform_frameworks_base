@@ -301,11 +301,16 @@ public abstract class AbsSeekBar extends ProgressBar {
                 trackTouchEvent(event);
                 onStopTrackingTouch();
                 setPressed(false);
+                // ProgressBar doesn't know to repaint the thumb drawable
+                // in its inactive state when the touch stops (because the
+                // value has not apparently changed)
+                invalidate();
                 break;
                 
             case MotionEvent.ACTION_CANCEL:
                 onStopTrackingTouch();
                 setPressed(false);
+                invalidate(); // see above explanation
                 break;
         }
         return true;
