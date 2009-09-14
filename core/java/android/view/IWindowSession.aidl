@@ -114,4 +114,6 @@ interface IWindowSession {
      * larger than the screen, set the offset within the screen.
      */
     void setWallpaperPosition(IBinder windowToken, float x, float y);
+    
+    void wallpaperOffsetsComplete(IBinder window);
 }

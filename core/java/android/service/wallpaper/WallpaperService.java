@@ -28,9 +28,11 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Rect;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
 import android.util.Log;
+import android.util.LogPrinter;
 import android.view.Gravity;
 import android.view.IWindowSession;
 import android.view.MotionEvent;
@@ -73,6 +75,8 @@ public abstract class WallpaperService extends Service {
     private static final int MSG_WALLPAPER_OFFSETS = 10020;
     private static final int MSG_WINDOW_RESIZED = 10030;
     private static final int MSG_TOUCH_EVENT = 10040;
+    
+    private Looper mCallbackLooper;
     
     /**
      * The actual implementation of a wallpaper.  A wallpaper service may
@@ -120,6 +124,7 @@ public abstract class WallpaperService extends Service {
         boolean mOffsetMessageEnqueued;
         float mPendingXOffset;
         float mPendingYOffset;
+        boolean mPendingSync;
         MotionEvent mPendingMove;
         
         final BroadcastReceiver mReceiver = new BroadcastReceiver() {
@@ -212,10 +217,14 @@ public abstract class WallpaperService extends Service {
             }
 
             @Override
-            public void dispatchWallpaperOffsets(float x, float y) {
+            public void dispatchWallpaperOffsets(float x, float y, boolean sync) {
                 synchronized (mLock) {
+                    if (DEBUG) Log.v(TAG, "Dispatch wallpaper offsets: " + x + ", " + y);
                     mPendingXOffset = x;
                     mPendingYOffset = y;
+                    if (sync) {
+                        mPendingSync = true;
+                    }
                     if (!mOffsetMessageEnqueued) {
                         mOffsetMessageEnqueued = true;
                         Message msg = mCaller.obtainMessage(MSG_WALLPAPER_OFFSETS);
@@ -551,9 +560,12 @@ public abstract class WallpaperService extends Service {
             
             float xOffset;
             float yOffset;
+            boolean sync;
             synchronized (mLock) {
                 xOffset = mPendingXOffset;
                 yOffset = mPendingYOffset;
+                sync = mPendingSync;
+                mPendingSync = false;
                 mOffsetMessageEnqueued = false;
             }
             if (DEBUG) Log.v(TAG, "Offsets change in " + this
@@ -563,6 +575,14 @@ public abstract class WallpaperService extends Service {
             final int availh = mIWallpaperEngine.mReqHeight-mCurHeight;
             final int yPixels = availh > 0 ? -(int)(availh*yOffset+.5f) : 0;
             onOffsetsChanged(xOffset, yOffset, xPixels, yPixels);
+            
+            if (sync) {
+                try {
+                    if (DEBUG) Log.v(TAG, "Reporting offsets change complete");
+                    mSession.wallpaperOffsetsComplete(mWindow.asBinder());
+                } catch (RemoteException e) {
+                }
+            }
         }
         
         void detach() {
@@ -622,7 +642,13 @@ public abstract class WallpaperService extends Service {
         IWallpaperEngineWrapper(WallpaperService context,
                 IWallpaperConnection conn, IBinder windowToken,
                 int windowType, boolean isPreview, int reqWidth, int reqHeight) {
-            mCaller = new HandlerCaller(context, this);
+            if (DEBUG && mCallbackLooper != null) {
+                mCallbackLooper.setMessageLogging(new LogPrinter(Log.VERBOSE, TAG));
+            }
+            mCaller = new HandlerCaller(context,
+                    mCallbackLooper != null
+                            ? mCallbackLooper : context.getMainLooper(),
+                    this);
             mConnection = conn;
             mWindowToken = windowToken;
             mWindowType = windowType;
@@ -734,6 +760,19 @@ public abstract class WallpaperService extends Service {
     @Override
     public final IBinder onBind(Intent intent) {
         return new IWallpaperServiceWrapper(this);
+    }
+    
+    /**
+     * This allows subclasses to change the thread that most callbacks
+     * occur on.  Currently hidden because it is mostly needed for the
+     * image wallpaper (which runs in the system process and doesn't want
+     * to get stuck running on that seriously in use main thread).  Not
+     * exposed right now because the semantics of this are not totally
+     * well defined and some callbacks can still happen on the main thread).
+     * @hide
+     */
+    public void setCallbackLooper(Looper looper) {
+        mCallbackLooper = looper;
     }
     
     public abstract Engine onCreateEngine();

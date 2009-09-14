@@ -22,7 +22,9 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.ColorFilter;
 import android.graphics.Paint;
+import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -56,9 +58,96 @@ public class WallpaperManager {
     
     private final Context mContext;
     
+    /**
+     * Special drawable that draws a wallpaper as fast as possible.  Assumes
+     * no scaling or placement off (0,0) of the wallpaper (this should be done
+     * at the time the bitmap is loaded).
+     */
+    static class FastBitmapDrawable extends Drawable {
+        private final Bitmap mBitmap;
+        private final int mWidth;
+        private final int mHeight;
+        private int mDrawLeft;
+        private int mDrawTop;
+
+        private FastBitmapDrawable(Bitmap bitmap) {
+            mBitmap = bitmap;
+            mWidth = bitmap.getWidth();
+            mHeight = bitmap.getHeight();
+            setBounds(0, 0, mWidth, mHeight);
+        }
+
+        @Override
+        public void draw(Canvas canvas) {
+            canvas.drawBitmap(mBitmap, mDrawLeft, mDrawTop, null);
+        }
+
+        @Override
+        public int getOpacity() {
+            return PixelFormat.OPAQUE;
+        }
+
+        @Override
+        public void setBounds(int left, int top, int right, int bottom) {
+            mDrawLeft = left + (right-left - mWidth) / 2;
+            mDrawTop = top + (bottom-top - mHeight) / 2;
+        }
+
+        @Override
+        public void setBounds(Rect bounds) {
+            // TODO Auto-generated method stub
+            super.setBounds(bounds);
+        }
+
+        @Override
+        public void setAlpha(int alpha) {
+            throw new UnsupportedOperationException(
+                    "Not supported with this drawable");
+        }
+
+        @Override
+        public void setColorFilter(ColorFilter cf) {
+            throw new UnsupportedOperationException(
+                    "Not supported with this drawable");
+        }
+
+        @Override
+        public void setDither(boolean dither) {
+            throw new UnsupportedOperationException(
+                    "Not supported with this drawable");
+        }
+
+        @Override
+        public void setFilterBitmap(boolean filter) {
+            throw new UnsupportedOperationException(
+                    "Not supported with this drawable");
+        }
+
+        @Override
+        public int getIntrinsicWidth() {
+            return mWidth;
+        }
+
+        @Override
+        public int getIntrinsicHeight() {
+            return mHeight;
+        }
+
+        @Override
+        public int getMinimumWidth() {
+            return mWidth;
+        }
+
+        @Override
+        public int getMinimumHeight() {
+            return mHeight;
+        }
+    }
+    
     static class Globals extends IWallpaperManagerCallback.Stub {
         private IWallpaperManager mService;
         private Bitmap mWallpaper;
+        private Bitmap mDefaultWallpaper;
         
         private static final int MSG_CLEAR_WALLPAPER = 1;
         
@@ -74,6 +163,7 @@ public class WallpaperManager {
                         case MSG_CLEAR_WALLPAPER:
                             synchronized (this) {
                                 mWallpaper = null;
+                                mDefaultWallpaper = null;
                             }
                             break;
                     }
@@ -90,12 +180,19 @@ public class WallpaperManager {
             mHandler.sendEmptyMessage(MSG_CLEAR_WALLPAPER);
         }
         
-        public Bitmap peekWallpaperBitmap(Context context) {
+        public Bitmap peekWallpaperBitmap(Context context, boolean returnDefault) {
             synchronized (this) {
                 if (mWallpaper != null) {
                     return mWallpaper;
                 }
+                if (mDefaultWallpaper != null) {
+                    return mDefaultWallpaper;
+                }
                 mWallpaper = getCurrentWallpaperLocked(context);
+                if (mWallpaper == null && returnDefault) {
+                    mDefaultWallpaper = getDefaultWallpaperLocked(context);
+                    return mDefaultWallpaper;
+                }
                 return mWallpaper;
             }
         }
@@ -134,48 +231,48 @@ public class WallpaperManager {
                         fd.close();
                     } catch (IOException e) {
                     }
-                    if (bm == null) {
+                    
+                    return generateBitmap(context, bm, width, height);
+                }
+            } catch (RemoteException e) {
+            }
+            return null;
+        }
+        
+        private Bitmap getDefaultWallpaperLocked(Context context) {
+            try {
+                InputStream is = context.getResources().openRawResource(
+                        com.android.internal.R.drawable.default_wallpaper);
+                if (is != null) {
+                    int width = mService.getWidthHint();
+                    int height = mService.getHeightHint();
+                    
+                    if (width <= 0 || height <= 0) {
+                        // Degenerate case: no size requested, just load
+                        // bitmap as-is.
+                        Bitmap bm = BitmapFactory.decodeStream(is, null, null);
+                        try {
+                            is.close();
+                        } catch (IOException e) {
+                        }
+                        if (bm != null) {
+                            bm.setDensity(DisplayMetrics.DENSITY_DEVICE);
+                        }
                         return bm;
                     }
-                    bm.setDensity(DisplayMetrics.DENSITY_DEVICE);
                     
-                    // This is the final bitmap we want to return.
-                    Bitmap newbm = Bitmap.createBitmap(width, height,
-                            bm.getConfig());
-                    newbm.setDensity(DisplayMetrics.DENSITY_DEVICE);
-                    Canvas c = new Canvas(newbm);
-                    c.setDensity(DisplayMetrics.DENSITY_DEVICE);
-                    Rect targetRect = new Rect();
-                    targetRect.left = targetRect.top = 0;
-                    targetRect.right = bm.getWidth();
-                    targetRect.bottom = bm.getHeight();
-                    
-                    int deltaw = width - targetRect.right;
-                    int deltah = height - targetRect.bottom;
-                    
-                    if (deltaw > 0 || deltah > 0) {
-                        // We need to scale up so it covers the entire
-                        // area.
-                        float scale = 1.0f;
-                        if (deltaw > deltah) {
-                            scale = width / (float)targetRect.right;
-                        } else {
-                            scale = height / (float)targetRect.bottom;
-                        }
-                        targetRect.right = (int)(targetRect.right*scale);
-                        targetRect.bottom = (int)(targetRect.bottom*scale);
-                        deltaw = width - targetRect.right;
-                        deltah = height - targetRect.bottom;
+                    // Load the bitmap with full color depth, to preserve
+                    // quality for later processing.
+                    BitmapFactory.Options options = new BitmapFactory.Options();
+                    options.inDither = false;
+                    options.inPreferredConfig = Bitmap.Config.ARGB_8888;
+                    Bitmap bm = BitmapFactory.decodeStream(is, null, options);
+                    try {
+                        is.close();
+                    } catch (IOException e) {
                     }
                     
-                    targetRect.offset(deltaw/2, deltah/2);
-                    Paint paint = new Paint();
-                    paint.setFilterBitmap(true);
-                    paint.setDither(true);
-                    c.drawBitmap(bm, null, targetRect, paint);
-                    
-                    bm.recycle();
-                    return newbm;
+                    return generateBitmap(context, bm, width, height);
                 }
             } catch (RemoteException e) {
             }
@@ -219,9 +316,13 @@ public class WallpaperManager {
      * @return Returns a Drawable object that will draw the wallpaper.
      */
     public Drawable getDrawable() {
-        Drawable dr = peekDrawable();
-        return dr != null ? dr : Resources.getSystem().getDrawable(
-                com.android.internal.R.drawable.default_wallpaper);
+        Bitmap bm = sGlobals.peekWallpaperBitmap(mContext, true);
+        if (bm != null) {
+            Drawable dr = new BitmapDrawable(mContext.getResources(), bm);
+            dr.setDither(false);
+            return dr;
+        }
+        return null;
     }
 
     /**
@@ -234,8 +335,51 @@ public class WallpaperManager {
      * null pointer if these is none.
      */
     public Drawable peekDrawable() {
-        Bitmap bm = sGlobals.peekWallpaperBitmap(mContext);
-        return bm != null ? new BitmapDrawable(mContext.getResources(), bm) : null;
+        Bitmap bm = sGlobals.peekWallpaperBitmap(mContext, false);
+        if (bm != null) {
+            Drawable dr = new BitmapDrawable(mContext.getResources(), bm);
+            dr.setDither(false);
+            return dr;
+        }
+        return null;
+    }
+
+    /**
+     * Like {@link #peekFastDrawable}, but always returns a valid Drawable.  If
+     * no wallpaper is set, the system default wallpaper is returned.
+     *
+     * @return Returns a Drawable object that will draw the wallpaper.
+     */
+    public Drawable getFastDrawable() {
+        Bitmap bm = sGlobals.peekWallpaperBitmap(mContext, true);
+        if (bm != null) {
+            Drawable dr = new FastBitmapDrawable(bm);
+            return dr;
+        }
+        return null;
+    }
+
+    /**
+     * Like {@link #peekDrawable()}, but the returned Drawable has a number
+     * of limitations to reduce its overhead as much as possible: it will
+     * never scale the wallpaper (only centering it if the requested bounds
+     * do match the bitmap bounds, which should not be typical), doesn't
+     * allow setting an alpha, color filter, or other attributes, etc.  The
+     * bounds of the returned drawable will be initialized to the same bounds
+     * as the wallpaper, so normally you will not need to touch it.  The
+     * drawable also assumes that it will be used in a context running in
+     * the same density as the screen (not in density compatibility mode).
+     *
+     * @return Returns an optimized Drawable object that will draw the
+     * wallpaper or a null pointer if these is none.
+     */
+    public Drawable peekFastDrawable() {
+        Bitmap bm = sGlobals.peekWallpaperBitmap(mContext, false);
+        if (bm != null) {
+            Drawable dr = new FastBitmapDrawable(bm);
+            return dr;
+        }
+        return null;
     }
 
     /**
@@ -429,8 +573,10 @@ public class WallpaperManager {
      */
     public void setWallpaperOffsets(IBinder windowToken, float xOffset, float yOffset) {
         try {
+            //Log.v(TAG, "Sending new wallpaper offsets from app...");
             ViewRoot.getWindowSession(mContext.getMainLooper()).setWallpaperPosition(
                     windowToken, xOffset, yOffset);
+            //Log.v(TAG, "...app returning after sending offsets!");
         } catch (RemoteException e) {
             // Ignore.
         }
@@ -465,5 +611,52 @@ public class WallpaperManager {
      */
     public void clear() throws IOException {
         setResource(com.android.internal.R.drawable.default_wallpaper);
+    }
+    
+    static Bitmap generateBitmap(Context context, Bitmap bm, int width, int height) {
+        if (bm == null) {
+            return bm;
+        }
+        bm.setDensity(DisplayMetrics.DENSITY_DEVICE);
+        
+        // This is the final bitmap we want to return.
+        // XXX We should get the pixel depth from the system (to match the
+        // physical display depth), when there is a way.
+        Bitmap newbm = Bitmap.createBitmap(width, height,
+                Bitmap.Config.RGB_565);
+        newbm.setDensity(DisplayMetrics.DENSITY_DEVICE);
+        Canvas c = new Canvas(newbm);
+        c.setDensity(DisplayMetrics.DENSITY_DEVICE);
+        Rect targetRect = new Rect();
+        targetRect.left = targetRect.top = 0;
+        targetRect.right = bm.getWidth();
+        targetRect.bottom = bm.getHeight();
+        
+        int deltaw = width - targetRect.right;
+        int deltah = height - targetRect.bottom;
+        
+        if (deltaw > 0 || deltah > 0) {
+            // We need to scale up so it covers the entire
+            // area.
+            float scale = 1.0f;
+            if (deltaw > deltah) {
+                scale = width / (float)targetRect.right;
+            } else {
+                scale = height / (float)targetRect.bottom;
+            }
+            targetRect.right = (int)(targetRect.right*scale);
+            targetRect.bottom = (int)(targetRect.bottom*scale);
+            deltaw = width - targetRect.right;
+            deltah = height - targetRect.bottom;
+        }
+        
+        targetRect.offset(deltaw/2, deltah/2);
+        Paint paint = new Paint();
+        paint.setFilterBitmap(true);
+        paint.setDither(true);
+        c.drawBitmap(bm, null, targetRect, paint);
+        
+        bm.recycle();
+        return newbm;
     }
 }

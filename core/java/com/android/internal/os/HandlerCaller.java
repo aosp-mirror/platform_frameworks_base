@@ -57,6 +57,13 @@ public class HandlerCaller {
         mCallback = callback;
     }
 
+    public HandlerCaller(Context context, Looper looper, Callback callback) {
+        mContext = context;
+        mMainLooper = looper;
+        mH = new MyHandler(mMainLooper);
+        mCallback = callback;
+    }
+
     public SomeArgs obtainArgs() {
         synchronized (mH) {
             SomeArgs args = mArgsPool;

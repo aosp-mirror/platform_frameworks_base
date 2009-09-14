@@ -90,6 +90,12 @@ public class BaseIWindow extends IWindow.Stub {
     public void executeCommand(String command, String parameters, ParcelFileDescriptor out) {
     }
     
-    public void dispatchWallpaperOffsets(float x, float y) {
+    public void dispatchWallpaperOffsets(float x, float y, boolean sync) {
+        if (sync) {
+            try {
+                mSession.wallpaperOffsetsComplete(asBinder());
+            } catch (RemoteException e) {
+            }
+        }
     }
 }
