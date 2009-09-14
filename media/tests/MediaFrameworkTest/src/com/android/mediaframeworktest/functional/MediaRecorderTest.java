@@ -29,7 +29,7 @@ import android.test.ActivityInstrumentationTestCase;
 import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
-
+import com.android.mediaframeworktest.MediaProfileReader;
 
 import android.test.suitebuilder.annotation.LargeTest;
 import android.test.suitebuilder.annotation.Suppress;
@@ -46,6 +46,9 @@ public class MediaRecorderTest extends ActivityInstrumentationTestCase<MediaFram
     
     private SurfaceHolder mSurfaceHolder = null;
     private MediaRecorder mRecorder;
+
+    private int MIN_VIDEO_FPS = 5;
+
     Context mContext;
     Camera mCamera;
   
@@ -96,7 +99,70 @@ public class MediaRecorderTest extends ActivityInstrumentationTestCase<MediaFram
         }
     }
     
-    
+    private boolean recordVideoWithPara(String encoder, String audio, String quality){
+        boolean recordSuccess = false;
+        int videoEncoder = MediaProfileReader.OUTPUT_FORMAT_TABLE.get(encoder);
+        int audioEncoder = MediaProfileReader.OUTPUT_FORMAT_TABLE.get(audio);
+        int videoWidth = MediaProfileReader.OUTPUT_FORMAT_TABLE.get(encoder + ".width_" + quality);
+        int videoHeight =
+                MediaProfileReader.OUTPUT_FORMAT_TABLE.get(encoder + ".height_" + quality);
+        int videoFps = MediaProfileReader.OUTPUT_FORMAT_TABLE.get(encoder + ".fps_" + quality);
+        int videoBitrate = MediaProfileReader.OUTPUT_FORMAT_TABLE.get(encoder + ".bps_" + quality);
+        int audioBitrate = MediaProfileReader.OUTPUT_FORMAT_TABLE.get(audio + ".bps_" + quality);
+        int audioChannels = MediaProfileReader.OUTPUT_FORMAT_TABLE.get(audio + ".ch_" + quality);
+        int audioSamplingRate =
+                MediaProfileReader.OUTPUT_FORMAT_TABLE.get(audio + ".hz_" + quality);
+
+        if (videoFps < MIN_VIDEO_FPS) {
+            videoFps = MIN_VIDEO_FPS;
+        }
+        mSurfaceHolder = MediaFrameworkTest.mSurfaceView.getHolder();
+        String filename = ("/sdcard/" + encoder + "_" + audio + "_" + quality + ".3gp");
+        try {
+            Log.v(TAG, "video encoder :" + videoEncoder);
+            Log.v(TAG, "audio encoder :" + audioEncoder);
+            Log.v(TAG, "quality : " + quality);
+            Log.v(TAG, "encoder : " + encoder);
+            Log.v(TAG, "audio : " + audio);
+            Log.v(TAG, "videoWidth : " + videoWidth);
+            Log.v(TAG, "videoHeight : " + videoHeight);
+            Log.v(TAG, "videoFPS : " + videoFps);
+            Log.v(TAG, "videobitrate : " + videoBitrate);
+            Log.v(TAG, "audioBitrate : " + audioBitrate);
+            Log.v(TAG, "audioChannel : " + audioChannels);
+            Log.v(TAG, "AudioSampleRate : " + audioSamplingRate);
+
+            MediaRecorder mMediaRecorder = new MediaRecorder();
+            mMediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+            mMediaRecorder.setVideoSource(MediaRecorder.VideoSource.CAMERA);
+            mMediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
+            mMediaRecorder.setOutputFile(filename);
+            mMediaRecorder.setVideoFrameRate(videoFps);
+            mMediaRecorder.setVideoSize(videoWidth, videoHeight);
+            mMediaRecorder.setParameters(String.format("video-param-encoding-bitrate=%d",
+                    videoBitrate));
+            mMediaRecorder.setParameters(String.format("audio-param-encoding-bitrate=%d",
+                    audioBitrate));
+            mMediaRecorder.setParameters(String.format("audio-param-number-of-channels=%d",
+                    audioChannels));
+            mMediaRecorder.setParameters(String.format("audio-param-sampling-rate=%d",
+                    audioSamplingRate));
+            mMediaRecorder.setVideoEncoder(videoEncoder);
+            mMediaRecorder.setAudioEncoder(audioEncoder);
+            mMediaRecorder.setPreviewDisplay(mSurfaceHolder.getSurface());
+            mMediaRecorder.prepare();
+            mMediaRecorder.start();
+            Thread.sleep(MediaNames.RECORDED_TIME);
+            mMediaRecorder.stop();
+            mMediaRecorder.release();
+            recordSuccess = validateVideo(filename, videoWidth, videoHeight);
+        } catch (Exception e) {
+            Log.v(TAG, e.toString());
+            return false;
+        }
+        return recordSuccess;
+    }
+
     private boolean invalidRecordSetting(int frameRate, int width, int height, 
             int videoFormat, int outFormat, String outFile, boolean videoOnly) {
         try {
@@ -356,6 +422,35 @@ public class MediaRecorderTest extends ActivityInstrumentationTestCase<MediaFram
                MediaRecorder.OutputFormat.THREE_GPP, MediaNames.RECORDED_VIDEO_3GP, false);      
         assertTrue("Invalid FrameRate", isTestInvalidFrameRateSuccessful);
     }
-    
+
+    @LargeTest
+    //est cases for the new codec
+    public void testDeviceSpecificCodec() throws Exception {
+        boolean recordSuccess = false;
+        String deviceType = MediaProfileReader.getDeviceType();
+        Log.v(TAG, "deviceType = " + deviceType);
+        if (deviceType.compareTo("voles") == 0) {
+            // Test cases are device specified
+            MediaProfileReader.createVideoProfileTable();
+            MediaProfileReader.createAudioProfileTable();
+            MediaProfileReader.createEncoderTable();
+            String encoderType = MediaProfileReader.getVideoCodecProperty();
+            String encoder[] = encoderType.split(",");
+            String audioType = MediaProfileReader.getAudioCodecProperty();
+            String audio[] = audioType.split(",");
+            for (int k = 0; k < 2; k++) {
+                for (int i = 0; i < encoder.length; i++) {
+                    for (int j = 0; j < audio.length; j++) {
+                        if (k == 0) {
+                            recordSuccess = recordVideoWithPara(encoder[i], audio[j], "high");
+                        } else {
+                            recordSuccess = recordVideoWithPara(encoder[i], audio[j], "low");
+                        }
+                        assertTrue((encoder[i] + audio[j]), recordSuccess);
+                    }
+                }
+            }
+        }
+    }
 }
 
