@@ -290,7 +290,7 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
      */
     void callCursorOnClick(Cursor cursor, int position) {
         if (!mGlobalSearchMode) return;
-        final Bundle request = new Bundle(1);
+        final Bundle request = new Bundle(3);
         request.putInt(DialogCursorProtocol.METHOD, DialogCursorProtocol.CLICK);
         request.putInt(DialogCursorProtocol.CLICK_SEND_POSITION, position);
         request.putInt(DialogCursorProtocol.CLICK_SEND_MAX_DISPLAY_POS, mMaxDisplayed);
@@ -298,6 +298,23 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
         mMaxDisplayed = -1;
         mListItemToSelect = response.getInt(
                 DialogCursorProtocol.CLICK_RECEIVE_SELECTED_POS, SuggestionsAdapter.NONE);
+    }
+
+    /**
+     * Tell the cursor that a search was started without using a suggestion.
+     *
+     * @param query The search query.
+     */
+    void reportSearch(String query) {
+        if (!mGlobalSearchMode) return;
+        Cursor cursor = getCursor();
+        if (cursor == null) return;
+        final Bundle request = new Bundle(3);
+        request.putInt(DialogCursorProtocol.METHOD, DialogCursorProtocol.SEARCH);
+        request.putString(DialogCursorProtocol.SEARCH_SEND_QUERY, query);
+        request.putInt(DialogCursorProtocol.SEARCH_SEND_MAX_DISPLAY_POS, mMaxDisplayed);
+        // the response is always empty
+        cursor.respond(request);
     }
 
     /**
