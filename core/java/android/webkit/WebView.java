@@ -25,8 +25,6 @@ import android.database.DataSetObserver;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.Paint;
-import android.graphics.Path;
 import android.graphics.Picture;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -59,7 +57,6 @@ import android.view.ViewGroup;
 import android.view.ViewParent;
 import android.view.ViewTreeObserver;
 import android.view.animation.AlphaAnimation;
-import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.webkit.WebTextView.AutoCompleteAdapter;
 import android.webkit.WebViewCore.EventHub;
@@ -68,9 +65,7 @@ import android.widget.Adapter;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.FrameLayout;
-import android.widget.ImageView;
 import android.widget.ListView;
-import android.widget.ScrollBarDrawable;
 import android.widget.Scroller;
 import android.widget.Toast;
 import android.widget.ZoomButtonsController;
@@ -219,13 +214,13 @@ public class WebView extends AbsoluteLayout
             inflater.inflate(com.android.internal.R.layout.zoom_magnify, this, true);
             mPlusMinusZoomControls = (ZoomControls) findViewById(
                     com.android.internal.R.id.zoomControls);
-            mZoomMagnify = (ImageView) findViewById(com.android.internal.R.id.zoomMagnify);
+            findViewById(com.android.internal.R.id.zoomMagnify).setVisibility(
+                    View.GONE);
         }
 
         public void show(boolean showZoom, boolean canZoomOut) {
             mPlusMinusZoomControls.setVisibility(
                     showZoom ? View.VISIBLE : View.GONE);
-            mZoomMagnify.setVisibility(canZoomOut ? View.VISIBLE : View.GONE);
             fade(View.VISIBLE, 0.0f, 1.0f);
         }
 
@@ -240,12 +235,8 @@ public class WebView extends AbsoluteLayout
             setVisibility(visibility);
         }
 
-        public void setIsZoomMagnifyEnabled(boolean isEnabled) {
-            mZoomMagnify.setEnabled(isEnabled);
-        }
-
         public boolean hasFocus() {
-            return mPlusMinusZoomControls.hasFocus() || mZoomMagnify.hasFocus();
+            return mPlusMinusZoomControls.hasFocus();
         }
 
         public void setOnZoomInClickListener(OnClickListener listener) {
@@ -256,12 +247,7 @@ public class WebView extends AbsoluteLayout
             mPlusMinusZoomControls.setOnZoomOutClickListener(listener);
         }
 
-        public void setOnZoomMagnifyClickListener(OnClickListener listener) {
-            mZoomMagnify.setOnClickListener(listener);
-        }
-
         ZoomControls    mPlusMinusZoomControls;
-        ImageView       mZoomMagnify;
     }
 
     /**
@@ -351,9 +337,6 @@ public class WebView extends AbsoluteLayout
     private float mLastVelX;
     private float mLastVelY;
 
-    // use this flag to control whether enabling the new double tap zoom
-    static final boolean ENABLE_DOUBLETAP_ZOOM = true;
-
     /**
      * Touch mode
      */
@@ -363,17 +346,9 @@ public class WebView extends AbsoluteLayout
     private static final int TOUCH_DRAG_MODE = 3;
     private static final int TOUCH_SHORTPRESS_START_MODE = 4;
     private static final int TOUCH_SHORTPRESS_MODE = 5;
-    private static final int TOUCH_DOUBLECLICK_MODE = 6;
+    private static final int TOUCH_DOUBLE_TAP_MODE = 6;
     private static final int TOUCH_DONE_MODE = 7;
     private static final int TOUCH_SELECT_MODE = 8;
-    // touch mode values specific to scale+scroll
-    private static final int FIRST_SCROLL_ZOOM = 9;
-    private static final int SCROLL_ZOOM_ANIMATION_IN = 9;
-    private static final int SCROLL_ZOOM_ANIMATION_OUT = 10;
-    private static final int SCROLL_ZOOM_OUT = 11;
-    private static final int LAST_SCROLL_ZOOM = 11;
-    // end of touch mode values specific to scale+scroll
-    private static final int TOUCH_DOUBLE_TAP_MODE = 12;
 
     // Whether to forward the touch events to WebCore
     private boolean mForwardTouchEvents = false;
@@ -2702,32 +2677,19 @@ public class WebView extends AbsoluteLayout
         if (mNativeClass == 0) {
             return;
         }
-        if (mWebViewCore.mEndScaleZoom) {
-            mWebViewCore.mEndScaleZoom = false;
-            if (mTouchMode >= FIRST_SCROLL_ZOOM
-                    && mTouchMode <= LAST_SCROLL_ZOOM) {
-                setHorizontalScrollBarEnabled(true);
-                setVerticalScrollBarEnabled(true);
-                mTouchMode = TOUCH_DONE_MODE;
-            }
-        }
         canvas.save();
-        if (mTouchMode >= FIRST_SCROLL_ZOOM && mTouchMode <= LAST_SCROLL_ZOOM) {
-            scrollZoomDraw(canvas);
-        } else {
-            // Update the buttons in the picture, so when we draw the picture
-            // to the screen, they are in the correct state.
-            // Tell the native side if user is a) touching the screen,
-            // b) pressing the trackball down, or c) pressing the enter key
-            // If the cursor is on a button, we need to draw it in the pressed
-            // state.
-            // If mNativeClass is 0, we should not reach here, so we do not
-            // need to check it again.
-            nativeRecordButtons(hasFocus() && hasWindowFocus(),
-                    mTouchMode == TOUCH_SHORTPRESS_START_MODE
-                    || mTrackballDown || mGotCenterDown, false);
-            drawCoreAndCursorRing(canvas, mBackgroundColor, mDrawCursorRing);
-        }
+        // Update the buttons in the picture, so when we draw the picture
+        // to the screen, they are in the correct state.
+        // Tell the native side if user is a) touching the screen,
+        // b) pressing the trackball down, or c) pressing the enter key
+        // If the cursor is on a button, we need to draw it in the pressed
+        // state.
+        // If mNativeClass is 0, we should not reach here, so we do not
+        // need to check it again.
+        nativeRecordButtons(hasFocus() && hasWindowFocus(),
+                mTouchMode == TOUCH_SHORTPRESS_START_MODE
+                || mTrackballDown || mGotCenterDown, false);
+        drawCoreAndCursorRing(canvas, mBackgroundColor, mDrawCursorRing);
         canvas.restoreToCount(saveCount);
 
         if (AUTO_REDRAW_HACK && mAutoRedraw) {
@@ -2865,371 +2827,6 @@ public class WebView extends AbsoluteLayout
         }
     }
 
-    private float scrollZoomGridScale(float invScale) {
-        float griddedInvScale = (int) (invScale * SCROLL_ZOOM_GRID)
-            / (float) SCROLL_ZOOM_GRID;
-        return 1.0f / griddedInvScale;
-    }
-
-    private float scrollZoomX(float scale) {
-        int width = getViewWidth();
-        float maxScrollZoomX = mContentWidth * scale - width;
-        int maxX = mContentWidth - width;
-        return -(maxScrollZoomX > 0 ? mZoomScrollX * maxScrollZoomX / maxX
-                : maxScrollZoomX / 2);
-    }
-
-    private float scrollZoomY(float scale) {
-        int height = getViewHeight();
-        float maxScrollZoomY = mContentHeight * scale - height;
-        int maxY = mContentHeight - height;
-        return -(maxScrollZoomY > 0 ? mZoomScrollY * maxScrollZoomY / maxY
-                : maxScrollZoomY / 2);
-    }
-
-    private void drawMagnifyFrame(Canvas canvas, Rect frame, Paint paint) {
-        final float ADORNMENT_LEN = 16.0f;
-        float width = frame.width();
-        float height = frame.height();
-        Path path = new Path();
-        path.moveTo(-ADORNMENT_LEN, -ADORNMENT_LEN);
-        path.lineTo(0, 0);
-        path.lineTo(width, 0);
-        path.lineTo(width + ADORNMENT_LEN, -ADORNMENT_LEN);
-        path.moveTo(-ADORNMENT_LEN, height + ADORNMENT_LEN);
-        path.lineTo(0, height);
-        path.lineTo(width, height);
-        path.lineTo(width + ADORNMENT_LEN, height + ADORNMENT_LEN);
-        path.moveTo(0, 0);
-        path.lineTo(0, height);
-        path.moveTo(width, 0);
-        path.lineTo(width, height);
-        path.offset(frame.left, frame.top);
-        canvas.drawPath(path, paint);
-    }
-
-    // Returns frame surrounding magified portion of screen while
-    // scroll-zoom is enabled. The frame is also used to center the
-    // zoom-in zoom-out points at the start and end of the animation.
-    private Rect scrollZoomFrame(int width, int height, float halfScale) {
-        Rect scrollFrame = new Rect();
-        scrollFrame.set(mZoomScrollX, mZoomScrollY,
-                mZoomScrollX + width, mZoomScrollY + height);
-        if (mContentWidth * mZoomScrollLimit < width) {
-            float scale = zoomFrameScaleX(width, halfScale, 1.0f);
-            float offsetX = (width * scale - width) * 0.5f;
-            scrollFrame.left -= offsetX;
-            scrollFrame.right += offsetX;
-        }
-        if (mContentHeight * mZoomScrollLimit < height) {
-            float scale = zoomFrameScaleY(height, halfScale, 1.0f);
-            float offsetY = (height * scale - height) * 0.5f;
-            scrollFrame.top -= offsetY;
-            scrollFrame.bottom += offsetY;
-        }
-        return scrollFrame;
-    }
-
-    private float zoomFrameScaleX(int width, float halfScale, float noScale) {
-        // mContentWidth > width > mContentWidth * mZoomScrollLimit
-        if (mContentWidth <= width) {
-            return halfScale;
-        }
-        float part = (width - mContentWidth * mZoomScrollLimit)
-                / (width * (1 - mZoomScrollLimit));
-        return halfScale * part + noScale * (1.0f - part);
-    }
-
-    private float zoomFrameScaleY(int height, float halfScale, float noScale) {
-        if (mContentHeight <= height) {
-            return halfScale;
-        }
-        float part = (height - mContentHeight * mZoomScrollLimit)
-                / (height * (1 - mZoomScrollLimit));
-        return halfScale * part + noScale * (1.0f - part);
-    }
-
-    private float scrollZoomMagScale(float invScale) {
-        return (invScale * 2 + mInvActualScale) / 3;
-    }
-
-    private void scrollZoomDraw(Canvas canvas) {
-        float invScale = mZoomScrollInvLimit;
-        int elapsed = 0;
-        if (mTouchMode != SCROLL_ZOOM_OUT) {
-            elapsed = (int) Math.min(System.currentTimeMillis()
-                - mZoomScrollStart, SCROLL_ZOOM_DURATION);
-            float transitionScale = (mZoomScrollInvLimit - mInvActualScale)
-                    * elapsed / SCROLL_ZOOM_DURATION;
-            if (mTouchMode == SCROLL_ZOOM_ANIMATION_OUT) {
-                invScale = mInvActualScale + transitionScale;
-            } else { /* if (mTouchMode == SCROLL_ZOOM_ANIMATION_IN) */
-                invScale = mZoomScrollInvLimit - transitionScale;
-            }
-        }
-        float scale = scrollZoomGridScale(invScale);
-        invScale = 1.0f / scale;
-        int width = getViewWidth();
-        int height = getViewHeight();
-        float halfScale = scrollZoomMagScale(invScale);
-        Rect scrollFrame = scrollZoomFrame(width, height, halfScale);
-        if (elapsed == SCROLL_ZOOM_DURATION) {
-            if (mTouchMode == SCROLL_ZOOM_ANIMATION_IN) {
-                setHorizontalScrollBarEnabled(true);
-                setVerticalScrollBarEnabled(true);
-                rebuildWebTextView();
-                scrollTo((int) (scrollFrame.centerX() * mActualScale)
-                        - (width >> 1), (int) (scrollFrame.centerY()
-                        * mActualScale) - (height >> 1));
-                mTouchMode = TOUCH_DONE_MODE;
-                // Show all the child views once we are done.
-                mViewManager.showAll();
-            } else {
-                mTouchMode = SCROLL_ZOOM_OUT;
-            }
-        }
-        float newX = scrollZoomX(scale);
-        float newY = scrollZoomY(scale);
-        if (DebugFlags.WEB_VIEW) {
-            Log.v(LOGTAG, "scrollZoomDraw scale=" + scale + " + (" + newX
-                    + ", " + newY + ") mZoomScroll=(" + mZoomScrollX + ", "
-                    + mZoomScrollY + ")" + " invScale=" + invScale + " scale="
-                    + scale);
-        }
-        canvas.translate(newX, newY);
-        canvas.scale(scale, scale);
-        boolean animating = mTouchMode != SCROLL_ZOOM_OUT;
-        if (mDrawHistory) {
-            int sc = canvas.save(Canvas.CLIP_SAVE_FLAG);
-            Rect clip = new Rect(0, 0, mHistoryPicture.getWidth(),
-                    mHistoryPicture.getHeight());
-            canvas.clipRect(clip, Region.Op.DIFFERENCE);
-            canvas.drawColor(mBackgroundColor);
-            canvas.restoreToCount(sc);
-            canvas.drawPicture(mHistoryPicture);
-        } else {
-            mWebViewCore.drawContentPicture(canvas, mBackgroundColor,
-                    animating, true);
-        }
-        if (mTouchMode == TOUCH_DONE_MODE) {
-            return;
-        }
-        Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        paint.setStyle(Paint.Style.STROKE);
-        paint.setStrokeWidth(30.0f);
-        paint.setARGB(0x50, 0, 0, 0);
-        int maxX = mContentWidth - width;
-        int maxY = mContentHeight - height;
-        if (true) { // experiment: draw hint to place finger off magnify area
-            drawMagnifyFrame(canvas, scrollFrame, paint);
-        } else {
-            canvas.drawRect(scrollFrame, paint);
-        }
-        int sc = canvas.save();
-        canvas.clipRect(scrollFrame);
-        float halfX = (float) mZoomScrollX / maxX;
-        if (mContentWidth * mZoomScrollLimit < width) {
-            halfX = zoomFrameScaleX(width, 0.5f, halfX);
-        }
-        float halfY = (float) mZoomScrollY / maxY;
-        if (mContentHeight * mZoomScrollLimit < height) {
-            halfY = zoomFrameScaleY(height, 0.5f, halfY);
-        }
-        canvas.scale(halfScale, halfScale, mZoomScrollX + width * halfX
-                , mZoomScrollY + height * halfY);
-        if (DebugFlags.WEB_VIEW) {
-            Log.v(LOGTAG, "scrollZoomDraw halfScale=" + halfScale + " w/h=("
-                    + width + ", " + height + ") half=(" + halfX + ", "
-                    + halfY + ")");
-        }
-        if (mDrawHistory) {
-            canvas.drawPicture(mHistoryPicture);
-        } else {
-            mWebViewCore.drawContentPicture(canvas, mBackgroundColor,
-                    animating, false);
-        }
-        canvas.restoreToCount(sc);
-        if (mTouchMode != SCROLL_ZOOM_OUT) {
-            invalidate();
-        }
-    }
-
-    private void zoomScrollTap(float x, float y) {
-        float scale = scrollZoomGridScale(mZoomScrollInvLimit);
-        float left = scrollZoomX(scale);
-        float top = scrollZoomY(scale);
-        int width = getViewWidth();
-        int height = getViewHeight();
-        x -= width * scale / 2;
-        y -= height * scale / 2;
-        mZoomScrollX = Math.min(mContentWidth - width
-                , Math.max(0, (int) ((x - left) / scale)));
-        mZoomScrollY = Math.min(mContentHeight - height
-                , Math.max(0, (int) ((y - top) / scale)));
-        if (DebugFlags.WEB_VIEW) {
-            Log.v(LOGTAG, "zoomScrollTap scale=" + scale + " + (" + left
-                    + ", " + top + ") mZoomScroll=(" + mZoomScrollX + ", "
-                    + mZoomScrollY + ")" + " x=" + x + " y=" + y);
-        }
-    }
-
-    /**
-     * @hide
-     */
-    public boolean canZoomScrollOut() {
-        if (mContentWidth == 0 || mContentHeight == 0) {
-            return false;
-        }
-        int width = getViewWidth();
-        int height = getViewHeight();
-        float x = (float) width / (float) mContentWidth;
-        float y = (float) height / (float) mContentHeight;
-        mZoomScrollLimit = Math.max(DEFAULT_MIN_ZOOM_SCALE, Math.min(x, y));
-        mZoomScrollInvLimit = 1.0f / mZoomScrollLimit;
-        if (DebugFlags.WEB_VIEW) {
-            Log.v(LOGTAG, "canZoomScrollOut"
-                    + " mInvActualScale=" + mInvActualScale
-                    + " mZoomScrollLimit=" + mZoomScrollLimit
-                    + " mZoomScrollInvLimit=" + mZoomScrollInvLimit
-                    + " mContentWidth=" + mContentWidth
-                    + " mContentHeight=" + mContentHeight
-                    );
-        }
-        // don't zoom out unless magnify area is at least half as wide
-        // or tall as content
-        float limit = mZoomScrollLimit * 2;
-        return mContentWidth >= width * limit
-                || mContentHeight >= height * limit;
-    }
-
-    private void startZoomScrollOut() {
-        setHorizontalScrollBarEnabled(false);
-        setVerticalScrollBarEnabled(false);
-        if (getSettings().getBuiltInZoomControls()) {
-            if (mZoomButtonsController.isVisible()) {
-                mZoomButtonsController.setVisible(false);
-            }
-        } else {
-            if (mZoomControlRunnable != null) {
-                mPrivateHandler.removeCallbacks(mZoomControlRunnable);
-            }
-            if (mZoomControls != null) {
-                mZoomControls.hide();
-            }
-        }
-        int width = getViewWidth();
-        int height = getViewHeight();
-        int halfW = width >> 1;
-        mLastTouchX = halfW;
-        int halfH = height >> 1;
-        mLastTouchY = halfH;
-        abortAnimation();
-        mZoomScrollStart = System.currentTimeMillis();
-        Rect zoomFrame = scrollZoomFrame(width, height
-                , scrollZoomMagScale(mZoomScrollInvLimit));
-        mZoomScrollX = Math.max(0, (int) ((mScrollX + halfW) * mInvActualScale)
-                - (zoomFrame.width() >> 1));
-        mZoomScrollY = Math.max(0, (int) ((mScrollY + halfH) * mInvActualScale)
-                - (zoomFrame.height() >> 1));
-        scrollTo(0, 0); // triggers inval, starts animation
-        clearTextEntry();
-        if (DebugFlags.WEB_VIEW) {
-            Log.v(LOGTAG, "startZoomScrollOut mZoomScroll=("
-                    + mZoomScrollX + ", " + mZoomScrollY +")");
-        }
-    }
-
-    /**
-     * @hide
-     */
-    public void zoomScrollOut() {
-        if (canZoomScrollOut() == false) {
-            mTouchMode = TOUCH_DONE_MODE;
-            return;
-        }
-        // Hide the child views while in this mode.
-        mViewManager.hideAll();
-        startZoomScrollOut();
-        mTouchMode = SCROLL_ZOOM_ANIMATION_OUT;
-        invalidate();
-    }
-
-    private void moveZoomScrollWindow(float x, float y) {
-        if (Math.abs(x - mLastZoomScrollRawX) < 1.5f
-                && Math.abs(y - mLastZoomScrollRawY) < 1.5f) {
-            return;
-        }
-        mLastZoomScrollRawX = x;
-        mLastZoomScrollRawY = y;
-        int oldX = mZoomScrollX;
-        int oldY = mZoomScrollY;
-        int width = getViewWidth();
-        int height = getViewHeight();
-        int maxZoomX = mContentWidth - width;
-        if (maxZoomX > 0) {
-            int maxScreenX = width - (int) Math.ceil(width
-                    * mZoomScrollLimit) - SCROLL_ZOOM_FINGER_BUFFER;
-            if (DebugFlags.WEB_VIEW) {
-                Log.v(LOGTAG, "moveZoomScrollWindow-X"
-                        + " maxScreenX=" + maxScreenX + " width=" + width
-                        + " mZoomScrollLimit=" + mZoomScrollLimit + " x=" + x);
-            }
-            x += maxScreenX * mLastScrollX / maxZoomX - mLastTouchX;
-            x *= Math.max(maxZoomX / maxScreenX, mZoomScrollInvLimit);
-            mZoomScrollX = Math.max(0, Math.min(maxZoomX, (int) x));
-        }
-        int maxZoomY = mContentHeight - height;
-        if (maxZoomY > 0) {
-            int maxScreenY = height - (int) Math.ceil(height
-                    * mZoomScrollLimit) - SCROLL_ZOOM_FINGER_BUFFER;
-            if (DebugFlags.WEB_VIEW) {
-                Log.v(LOGTAG, "moveZoomScrollWindow-Y"
-                        + " maxScreenY=" + maxScreenY + " height=" + height
-                        + " mZoomScrollLimit=" + mZoomScrollLimit + " y=" + y);
-            }
-            y += maxScreenY * mLastScrollY / maxZoomY - mLastTouchY;
-            y *= Math.max(maxZoomY / maxScreenY, mZoomScrollInvLimit);
-            mZoomScrollY = Math.max(0, Math.min(maxZoomY, (int) y));
-        }
-        if (oldX != mZoomScrollX || oldY != mZoomScrollY) {
-            invalidate();
-        }
-        if (DebugFlags.WEB_VIEW) {
-            Log.v(LOGTAG, "moveZoomScrollWindow"
-                    + " scrollTo=(" + mZoomScrollX + ", " + mZoomScrollY + ")"
-                    + " mLastTouch=(" + mLastTouchX + ", " + mLastTouchY + ")"
-                    + " maxZoom=(" + maxZoomX + ", " + maxZoomY + ")"
-                    + " last=("+mLastScrollX+", "+mLastScrollY+")"
-                    + " x=" + x + " y=" + y);
-        }
-    }
-
-    private void setZoomScrollIn() {
-        mZoomScrollStart = System.currentTimeMillis();
-    }
-
-    private float mZoomScrollLimit;
-    private float mZoomScrollInvLimit;
-    private int mLastScrollX;
-    private int mLastScrollY;
-    private long mZoomScrollStart;
-    private int mZoomScrollX;
-    private int mZoomScrollY;
-    private float mLastZoomScrollRawX = -1000.0f;
-    private float mLastZoomScrollRawY = -1000.0f;
-    // The zoomed scale varies from 1.0 to DEFAULT_MIN_ZOOM_SCALE == 0.25.
-    // The zoom animation duration SCROLL_ZOOM_DURATION == 0.5.
-    // Two pressures compete for gridding; a high frame rate (e.g. 20 fps)
-    // and minimizing font cache allocations (fewer frames is better).
-    // A SCROLL_ZOOM_GRID of 6 permits about 20 zoom levels over 0.5 seconds:
-    // the inverse of: 1.0, 1.16, 1.33, 1.5, 1.67, 1.84, 2.0, etc. to 4.0
-    private static final int SCROLL_ZOOM_GRID = 6;
-    private static final int SCROLL_ZOOM_DURATION = 500;
-    // Make it easier to get to the bottom of a document by reserving a 32
-    // pixel buffer, for when the starting drag is a bit below the bottom of
-    // the magnify frame.
-    private static final int SCROLL_ZOOM_FINGER_BUFFER = 32;
-
     // draw history
     private boolean mDrawHistory = false;
     private Picture mHistoryPicture = null;
@@ -3339,9 +2936,7 @@ public class WebView extends AbsoluteLayout
      */
     /* package */ void rebuildWebTextView() {
         // If the WebView does not have focus, do nothing until it gains focus.
-        if (!hasFocus() && (null == mWebTextView || !mWebTextView.hasFocus())
-                || (mTouchMode >= FIRST_SCROLL_ZOOM
-                && mTouchMode <= LAST_SCROLL_ZOOM)) {
+        if (!hasFocus() && (null == mWebTextView || !mWebTextView.hasFocus())) {
             return;
         }
         boolean alreadyThere = inEditingMode();
@@ -3506,11 +3101,9 @@ public class WebView extends AbsoluteLayout
 
         // Bubble up the key event if
         // 1. it is a system key; or
-        // 2. the host application wants to handle it; or
-        // 3. webview is in scroll-zoom state;
+        // 2. the host application wants to handle it;
         if (event.isSystem()
-                || mCallbackProxy.uiOverrideKeyEvent(event)
-                || (mTouchMode >= FIRST_SCROLL_ZOOM && mTouchMode <= LAST_SCROLL_ZOOM)) {
+                || mCallbackProxy.uiOverrideKeyEvent(event)) {
             return false;
         }
 
@@ -3654,18 +3247,6 @@ public class WebView extends AbsoluteLayout
         // 1. it is a system key; or
         // 2. the host application wants to handle it;
         if (event.isSystem() || mCallbackProxy.uiOverrideKeyEvent(event)) {
-            return false;
-        }
-
-        // special handling in scroll_zoom state
-        if (mTouchMode >= FIRST_SCROLL_ZOOM && mTouchMode <= LAST_SCROLL_ZOOM) {
-            if (KeyEvent.KEYCODE_DPAD_CENTER == keyCode
-                    && mTouchMode != SCROLL_ZOOM_ANIMATION_IN) {
-                setZoomScrollIn();
-                mTouchMode = SCROLL_ZOOM_ANIMATION_IN;
-                invalidate();
-                return true;
-            }
             return false;
         }
 
@@ -3989,11 +3570,8 @@ public class WebView extends AbsoluteLayout
         }
 
         // pass the touch events from UI thread to WebCore thread
-        if (mForwardTouchEvents && mTouchMode != SCROLL_ZOOM_OUT
-                && mTouchMode != SCROLL_ZOOM_ANIMATION_IN
-                && mTouchMode != SCROLL_ZOOM_ANIMATION_OUT
-                && (action != MotionEvent.ACTION_MOVE ||
-                        eventTime - mLastSentTouchTime > TOUCH_SENT_INTERVAL)) {
+        if (mForwardTouchEvents && (action != MotionEvent.ACTION_MOVE
+                || eventTime - mLastSentTouchTime > TOUCH_SENT_INTERVAL)) {
             WebViewCore.TouchEventData ted = new WebViewCore.TouchEventData();
             ted.mAction = action;
             ted.mX = viewToContentX((int) x + mScrollX);
@@ -4007,15 +3585,7 @@ public class WebView extends AbsoluteLayout
 
         switch (action) {
             case MotionEvent.ACTION_DOWN: {
-                if (mTouchMode == SCROLL_ZOOM_ANIMATION_IN
-                        || mTouchMode == SCROLL_ZOOM_ANIMATION_OUT) {
-                    // no interaction while animation is in progress
-                    break;
-                } else if (mTouchMode == SCROLL_ZOOM_OUT) {
-                    mLastScrollX = mZoomScrollX;
-                    mLastScrollY = mZoomScrollY;
-                    // If two taps are close, ignore the first tap
-                } else if (!mScroller.isFinished()) {
+                if (!mScroller.isFinished()) {
                     // stop the current scroll animation, but if this is
                     // the start of a fling, allow it to add to the current
                     // fling's velocity
@@ -4066,15 +3636,8 @@ public class WebView extends AbsoluteLayout
                 break;
             }
             case MotionEvent.ACTION_MOVE: {
-                if (mTouchMode == TOUCH_DONE_MODE
-                        || mTouchMode == SCROLL_ZOOM_ANIMATION_IN
-                        || mTouchMode == SCROLL_ZOOM_ANIMATION_OUT) {
+                if (mTouchMode == TOUCH_DONE_MODE) {
                     // no dragging during scroll zoom animation
-                    break;
-                }
-                if (mTouchMode == SCROLL_ZOOM_OUT) {
-                    // while fully zoomed out, move the virtual window
-                    moveZoomScrollWindow(x, y);
                     break;
                 }
                 mVelocityTracker.addMovement(ev);
@@ -4124,8 +3687,7 @@ public class WebView extends AbsoluteLayout
                     if (settings.supportZoom()
                             && settings.getBuiltInZoomControls()
                             && !mZoomButtonsController.isVisible()
-                            && (canZoomScrollOut() ||
-                                    mMinZoomScale < mMaxZoomScale)) {
+                            && mMinZoomScale < mMaxZoomScale) {
                         mZoomButtonsController.setVisible(true);
                     }
                 }
@@ -4192,12 +3754,11 @@ public class WebView extends AbsoluteLayout
 
                 if (!getSettings().getBuiltInZoomControls()) {
                     boolean showPlusMinus = mMinZoomScale < mMaxZoomScale;
-                    boolean showMagnify = canZoomScrollOut();
-                    if (mZoomControls != null && (showPlusMinus || showMagnify)) {
+                    if (mZoomControls != null && showPlusMinus) {
                         if (mZoomControls.getVisibility() == View.VISIBLE) {
                             mPrivateHandler.removeCallbacks(mZoomControlRunnable);
                         } else {
-                            mZoomControls.show(showPlusMinus, showMagnify);
+                            mZoomControls.show(showPlusMinus, false);
                         }
                         mPrivateHandler.postDelayed(mZoomControlRunnable,
                                 ZOOM_CONTROLS_TIMEOUT);
@@ -4220,17 +3781,14 @@ public class WebView extends AbsoluteLayout
                         doDoubleTap();
                         break;
                     case TOUCH_INIT_MODE: // tap
-                        if (ENABLE_DOUBLETAP_ZOOM) {
-                            mPrivateHandler.removeMessages(SWITCH_TO_SHORTPRESS);
-                            if (!mPreventDrag) {
-                                mPrivateHandler.sendMessageDelayed(
-                                        mPrivateHandler.obtainMessage(
-                                        RELEASE_SINGLE_TAP),
-                                        ViewConfiguration.getDoubleTapTimeout());
-                            }
-                            break;
+                        mPrivateHandler.removeMessages(SWITCH_TO_SHORTPRESS);
+                        if (!mPreventDrag) {
+                            mPrivateHandler.sendMessageDelayed(
+                                    mPrivateHandler.obtainMessage(
+                                    RELEASE_SINGLE_TAP),
+                                    ViewConfiguration.getDoubleTapTimeout());
                         }
-                        // fall through
+                        break;
                     case TOUCH_SHORTPRESS_START_MODE:
                     case TOUCH_SHORTPRESS_MODE:
                         mPrivateHandler.removeMessages(SWITCH_TO_SHORTPRESS);
@@ -4241,28 +3799,6 @@ public class WebView extends AbsoluteLayout
                     case TOUCH_SELECT_MODE:
                         commitCopy();
                         mTouchSelection = false;
-                        break;
-                    case SCROLL_ZOOM_ANIMATION_IN:
-                    case SCROLL_ZOOM_ANIMATION_OUT:
-                        // no action during scroll animation
-                        break;
-                    case SCROLL_ZOOM_OUT:
-                        if (DebugFlags.WEB_VIEW) {
-                            Log.v(LOGTAG, "ACTION_UP SCROLL_ZOOM_OUT"
-                                    + " eventTime - mLastTouchTime="
-                                    + (eventTime - mLastTouchTime));
-                        }
-                        // for now, always zoom back when the drag completes
-                        if (true || eventTime - mLastTouchTime < TAP_TIMEOUT) {
-                            // but if we tap, zoom in where we tap
-                            if (eventTime - mLastTouchTime < TAP_TIMEOUT) {
-                                zoomScrollTap(x, y);
-                            }
-                            // start zooming in back to the original view
-                            setZoomScrollIn();
-                            mTouchMode = SCROLL_ZOOM_ANIMATION_IN;
-                            invalidate();
-                        }
                         break;
                     case TOUCH_DRAG_MODE:
                         // if the user waits a while w/o moving before the
@@ -4297,10 +3833,7 @@ public class WebView extends AbsoluteLayout
                     mVelocityTracker.recycle();
                     mVelocityTracker = null;
                 }
-                if (mTouchMode == SCROLL_ZOOM_OUT ||
-                        mTouchMode == SCROLL_ZOOM_ANIMATION_IN) {
-                    scrollTo(mZoomScrollX, mZoomScrollY);
-                } else if (mTouchMode == TOUCH_DRAG_MODE) {
+                if (mTouchMode == TOUCH_DRAG_MODE) {
                     WebViewCore.resumeUpdate(mWebViewCore);
                 }
                 mPrivateHandler.removeMessages(SWITCH_TO_SHORTPRESS);
@@ -4398,11 +3931,6 @@ public class WebView extends AbsoluteLayout
         if (mMapTrackballToArrowKeys && mShiftIsPressed == false) {
             if (DebugFlags.WEB_VIEW) Log.v(LOGTAG, "onTrackballEvent gmail quit");
             return false;
-        }
-        // no move if we're still waiting on SWITCH_TO_CLICK timeout
-        if (mTouchMode == TOUCH_DOUBLECLICK_MODE) {
-            if (DebugFlags.WEB_VIEW) Log.v(LOGTAG, "onTrackballEvent 2 click quit");
-            return true;
         }
         if (mTrackballDown) {
             if (DebugFlags.WEB_VIEW) Log.v(LOGTAG, "onTrackballEvent down quit");
@@ -4539,25 +4067,6 @@ public class WebView extends AbsoluteLayout
         int height = mContentHeight - getViewHeight();
         if (width < 0) width = 0;
         if (height < 0) height = 0;
-        if (mTouchMode == SCROLL_ZOOM_OUT) {
-            int oldX = mZoomScrollX;
-            int oldY = mZoomScrollY;
-            int maxWH = Math.max(width, height);
-            mZoomScrollX += scaleTrackballX(xRate, maxWH);
-            mZoomScrollY += scaleTrackballY(yRate, maxWH);
-            if (DebugFlags.WEB_VIEW) {
-                Log.v(LOGTAG, "doTrackball SCROLL_ZOOM_OUT"
-                        + " mZoomScrollX=" + mZoomScrollX
-                        + " mZoomScrollY=" + mZoomScrollY);
-            }
-            mZoomScrollX = Math.min(width, Math.max(0, mZoomScrollX));
-            mZoomScrollY = Math.min(height, Math.max(0, mZoomScrollY));
-            if (oldX != mZoomScrollX || oldY != mZoomScrollY) {
-                invalidate();
-            }
-            mTrackballRemainsX = mTrackballRemainsY = 0;
-            return;
-        }
         ax = Math.abs(mTrackballRemainsX * TRACKBALL_MULTIPLIER);
         ay = Math.abs(mTrackballRemainsY * TRACKBALL_MULTIPLIER);
         maxA = Math.max(ax, ay);
@@ -4777,14 +4286,6 @@ public class WebView extends AbsoluteLayout
                 zoomOut();
             }
         });
-        zoomControls.setOnZoomMagnifyClickListener(new OnClickListener() {
-            public void onClick(View v) {
-                mPrivateHandler.removeCallbacks(mZoomControlRunnable);
-                mPrivateHandler.postDelayed(mZoomControlRunnable,
-                        ZOOM_CONTROLS_TIMEOUT);
-                zoomScrollOut();
-            }
-        });
         return zoomControls;
     }
 
@@ -4829,7 +4330,7 @@ public class WebView extends AbsoluteLayout
         // TODO: alternatively we can disallow this during draw history mode
         switchOutDrawHistory();
         float scale = mActualScale * 0.8f;
-        if (scale < (mMinZoomScale + 0.1f) && WebView.ENABLE_DOUBLETAP_ZOOM
+        if (scale < (mMinZoomScale + 0.1f)
                 && mWebViewCore.getSettings().getUseWideViewPort()) {
             // when zoom out to min scale, switch to overview mode
             doDoubleTap();
@@ -5289,7 +4790,7 @@ public class WebView extends AbsoluteLayout
                         setNewZoomScale(mLastScale, false);
                         setContentScrollTo(restoreState.mScrollX,
                                 restoreState.mScrollY);
-                        if (ENABLE_DOUBLETAP_ZOOM && useWideViewport
+                        if (useWideViewport
                                 && settings.getLoadWithOverviewMode()) {
                             if (restoreState.mViewScale == 0
                                     || (restoreState.mMobileSite
