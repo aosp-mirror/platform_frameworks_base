@@ -4885,6 +4885,9 @@ public class WebView extends AbsoluteLayout
         }
         int x = viewToContentX((int) event.getX() + mWebTextView.getLeft());
         int y = viewToContentY((int) event.getY() + mWebTextView.getTop());
+        // In case the soft keyboard has been dismissed, bring it back up.
+        InputMethodManager.getInstance(getContext()).showSoftInput(mWebTextView,
+                0);
         nativeTextInputMotionUp(x, y);
     }
 
