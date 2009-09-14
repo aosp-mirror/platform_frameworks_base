@@ -1394,6 +1394,7 @@ public class WebView extends AbsoluteLayout
      * Reload the current url.
      */
     public void reload() {
+        clearTextEntry();
         switchOutDrawHistory();
         mWebViewCore.sendMessage(EventHub.RELOAD);
     }
