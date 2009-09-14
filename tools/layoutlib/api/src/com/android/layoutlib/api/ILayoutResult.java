@@ -23,13 +23,17 @@ import java.awt.image.BufferedImage;
  * {@link ILayoutLibBridge#computeLayout(IXmlPullParser, int, int, String, java.util.Map, java.util.Map, java.util.Map, IFontLoader, ILayoutLibLog, ICustomViewLoader)}
  */
 public interface ILayoutResult {
-    /** Sucess return code */
+    /**
+     * Success return code
+     */
     final static int SUCCESS = 0;
-    /** Error return code.
-     *  <p/>See {@link #getErrorMessage()}
-     */ 
+
+    /**
+     * Error return code, in which case an error message is guaranteed to be defined.
+     * @See {@link #getErrorMessage()}
+     */
     final static int ERROR = 1;
-    
+
     /**
      * Returns the result code.
      * @see #SUCCESS
@@ -62,18 +66,18 @@ public interface ILayoutResult {
          * Returns the list of children views.
          */
         ILayoutViewInfo[] getChildren();
-        
+
         /**
          * Returns the key associated with the node.
          * @see IXmlPullParser#getViewKey()
          */
         Object getViewKey();
-        
+
         /**
          * Returns the name of the view.
          */
         String getName();
-        
+
         /**
          * Returns the left of the view bounds.
          */
