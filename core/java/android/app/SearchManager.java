@@ -1350,6 +1350,14 @@ public class SearchManager
          * When the threshold received in {@link #POST_REFRESH_RECEIVE_DISPLAY_NOTIFY} is displayed.
          */
         public final static int THRESH_HIT = 3;
+
+        /**
+         * When a search is started without using a suggestion.
+         */
+        public final static int SEARCH = 4;
+        public final static String SEARCH_SEND_MAX_DISPLAY_POS
+                = "DialogCursorProtocol.SEARCH.sendDisplayPosition";
+        public final static String SEARCH_SEND_QUERY = "DialogCursorProtocol.SEARCH.query";
     }
 
     /**
