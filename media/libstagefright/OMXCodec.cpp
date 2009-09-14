@@ -1266,6 +1266,8 @@ status_t OMXCodec::freeBuffersOnPort(
 
         CHECK_EQ(info->mOwnedByComponent, false);
 
+        CODEC_LOGV("freeing buffer %p on port %ld", info->mBuffer, portIndex);
+
         status_t err =
             mOMX->free_buffer(mNode, portIndex, info->mBuffer);
 
