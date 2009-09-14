@@ -197,7 +197,17 @@ def main(options, args):
     logging.error("DumpRenderTree crashed, output:\n" + adb_output)
 
     shell_cmd_str = adb_cmd + " shell cat /sdcard/android/running_test.txt"
-    crashed_test = subprocess.Popen(shell_cmd_str, shell=True, stdout=subprocess.PIPE).communicate()[0]
+    crashed_test = ""
+    while not crashed_test:
+      (crashed_test, err) = subprocess.Popen(
+          shell_cmd_str, shell=True, stdout=subprocess.PIPE,
+          stderr=subprocess.PIPE).communicate()
+      crashed_test = crashed_test.strip()
+      if not crashed_test:
+        logging.error('Cannot get crashed test name, device offline?')
+        logging.error('stderr: ' + err)
+        logging.error('retrying in 10s...')
+        time.sleep(10)
 
     logging.info(crashed_test + " CRASHED");
     crashed_tests.append(crashed_test);
