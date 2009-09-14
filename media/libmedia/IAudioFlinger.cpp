@@ -83,6 +83,7 @@ public:
                                 status_t *status)
     {
         Parcel data, reply;
+        sp<IAudioTrack> track;
         data.writeInterfaceToken(IAudioFlinger::getInterfaceDescriptor());
         data.writeInt32(pid);
         data.writeInt32(streamType);
@@ -96,12 +97,14 @@ public:
         status_t lStatus = remote()->transact(CREATE_TRACK, data, &reply);
         if (lStatus != NO_ERROR) {
             LOGE("createTrack error: %s", strerror(-lStatus));
+        } else {
+            lStatus = reply.readInt32();
+            track = interface_cast<IAudioTrack>(reply.readStrongBinder());
         }
-        lStatus = reply.readInt32();
         if (status) {
             *status = lStatus;
         }
-        return interface_cast<IAudioTrack>(reply.readStrongBinder());
+        return track;
     }
 
     virtual sp<IAudioRecord> openRecord(
@@ -115,6 +118,7 @@ public:
                                 status_t *status)
     {
         Parcel data, reply;
+        sp<IAudioRecord> record;
         data.writeInterfaceToken(IAudioFlinger::getInterfaceDescriptor());
         data.writeInt32(pid);
         data.writeInt32(input);
@@ -123,12 +127,17 @@ public:
         data.writeInt32(channelCount);
         data.writeInt32(frameCount);
         data.writeInt32(flags);
-        remote()->transact(OPEN_RECORD, data, &reply);
-        status_t lStatus = reply.readInt32();
+        status_t lStatus = remote()->transact(OPEN_RECORD, data, &reply);
+        if (lStatus != NO_ERROR) {
+            LOGE("openRecord error: %s", strerror(-lStatus));
+        } else {
+            lStatus = reply.readInt32();
+            record = interface_cast<IAudioRecord>(reply.readStrongBinder());
+        }
         if (status) {
             *status = lStatus;
         }
-        return interface_cast<IAudioRecord>(reply.readStrongBinder());
+        return record;
     }
 
     virtual uint32_t sampleRate(int output) const

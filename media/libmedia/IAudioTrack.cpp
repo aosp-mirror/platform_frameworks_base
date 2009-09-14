@@ -81,9 +81,13 @@ public:
     virtual sp<IMemory> getCblk() const
     {
         Parcel data, reply;
+        sp<IMemory> cblk;
         data.writeInterfaceToken(IAudioTrack::getInterfaceDescriptor());
-        remote()->transact(GET_CBLK, data, &reply);
-        return interface_cast<IMemory>(reply.readStrongBinder());
+        status_t status = remote()->transact(GET_CBLK, data, &reply);
+        if (status == NO_ERROR) {
+            cblk = interface_cast<IMemory>(reply.readStrongBinder());
+        }
+        return cblk;
     }    
 };
 
