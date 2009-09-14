@@ -54,7 +54,7 @@ public class RotateDrawable extends Drawable implements Drawable.Callback {
      * <p>Create a new rotating drawable with an empty state.</p>
      */
     public RotateDrawable() {
-        this(null);
+        this(null, null);
     }
 
     /**
@@ -64,8 +64,8 @@ public class RotateDrawable extends Drawable implements Drawable.Callback {
      *
      * @param rotateState the state for this drawable
      */
-    private RotateDrawable(RotateState rotateState) {
-        mState = new RotateState(rotateState, this);
+    private RotateDrawable(RotateState rotateState, Resources res) {
+        mState = new RotateState(rotateState, this, res);
     }
 
     public void draw(Canvas canvas) {
@@ -291,9 +291,13 @@ public class RotateDrawable extends Drawable implements Drawable.Callback {
         private boolean mCanConstantState;
         private boolean mCheckedConstantState;        
 
-        public RotateState(RotateState source, RotateDrawable owner) {
+        public RotateState(RotateState source, RotateDrawable owner, Resources res) {
             if (source != null) {
-                mDrawable = source.mDrawable.getConstantState().newDrawable();
+                if (res != null) {
+                    mDrawable = source.mDrawable.getConstantState().newDrawable(res);
+                } else {
+                    mDrawable = source.mDrawable.getConstantState().newDrawable();
+                }
                 mDrawable.setCallback(owner);
                 mPivotXRel = source.mPivotXRel;
                 mPivotX = source.mPivotX;
@@ -307,7 +311,12 @@ public class RotateDrawable extends Drawable implements Drawable.Callback {
 
         @Override
         public Drawable newDrawable() {
-            return new RotateDrawable(this);
+            return new RotateDrawable(this, null);
+        }
+        
+        @Override
+        public Drawable newDrawable(Resources res) {
+            return new RotateDrawable(this, res);
         }
         
         @Override

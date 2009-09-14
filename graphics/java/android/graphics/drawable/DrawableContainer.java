@@ -16,6 +16,7 @@
 
 package android.graphics.drawable;
 
+import android.content.res.Resources;
 import android.graphics.*;
 
 public class DrawableContainer extends Drawable implements Drawable.Callback {
@@ -285,7 +286,8 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
 
         boolean     mPaddingChecked = false;
 
-        DrawableContainerState(DrawableContainerState orig, DrawableContainer owner) {
+        DrawableContainerState(DrawableContainerState orig, DrawableContainer owner,
+                Resources res) {
             mOwner = owner;
 
             if (orig != null) {
@@ -299,7 +301,11 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
 
                 final int N = mNumChildren;
                 for (int i=0; i<N; i++) {
-                    mDrawables[i] = origDr[i].getConstantState().newDrawable();
+                    if (res != null) {
+                        mDrawables[i] = origDr[i].getConstantState().newDrawable(res);
+                    } else {
+                        mDrawables[i] = origDr[i].getConstantState().newDrawable();
+                    }
                     mDrawables[i].setCallback(owner);
                 }
 

@@ -57,7 +57,7 @@ public class LevelListDrawable extends DrawableContainer {
     private boolean mMutated;
 
     public LevelListDrawable() {
-        this(null);
+        this(null, null);
     }
 
     public void addLevel(int low, int high, Drawable drawable) {
@@ -154,8 +154,8 @@ public class LevelListDrawable extends DrawableContainer {
         private int[] mLows;
         private int[] mHighs;
 
-        LevelListState(LevelListState orig, LevelListDrawable owner) {
-            super(orig, owner);
+        LevelListState(LevelListState orig, LevelListDrawable owner, Resources res) {
+            super(orig, owner, res);
 
             if (orig != null) {
                 mLows = orig.mLows;
@@ -186,7 +186,12 @@ public class LevelListDrawable extends DrawableContainer {
 
         @Override
         public Drawable newDrawable() {
-            return new LevelListDrawable(this);
+            return new LevelListDrawable(this, null);
+        }
+
+        @Override
+        public Drawable newDrawable(Resources res) {
+            return new LevelListDrawable(this, res);
         }
 
         @Override
@@ -201,8 +206,8 @@ public class LevelListDrawable extends DrawableContainer {
         }
     }
 
-    private LevelListDrawable(LevelListState state) {
-        LevelListState as = new LevelListState(state, this);
+    private LevelListDrawable(LevelListState state, Resources res) {
+        LevelListState as = new LevelListState(state, this, res);
         mLevelListState = as;
         setConstantState(as);
         onLevelChange(getLevel());

@@ -47,11 +47,11 @@ public class ScaleDrawable extends Drawable implements Drawable.Callback {
     private final Rect mTmpRect = new Rect();
 
     ScaleDrawable() {
-        this(null);
+        this(null, null);
     }
 
     public ScaleDrawable(Drawable drawable, int gravity, float scaleWidth, float scaleHeight) {
-        this(null);
+        this(null, null);
 
         mScaleState.mDrawable = drawable;
         mScaleState.mGravity = gravity;
@@ -260,9 +260,13 @@ public class ScaleDrawable extends Drawable implements Drawable.Callback {
         private boolean mCheckedConstantState;
         private boolean mCanConstantState;
 
-        ScaleState(ScaleState orig, ScaleDrawable owner) {
+        ScaleState(ScaleState orig, ScaleDrawable owner, Resources res) {
             if (orig != null) {
-                mDrawable = orig.mDrawable.getConstantState().newDrawable();
+                if (res != null) {
+                    mDrawable = orig.mDrawable.getConstantState().newDrawable(res);
+                } else {
+                    mDrawable = orig.mDrawable.getConstantState().newDrawable();
+                }
                 mDrawable.setCallback(owner);
                 mScaleWidth = orig.mScaleWidth;
                 mScaleHeight = orig.mScaleHeight;
@@ -273,7 +277,12 @@ public class ScaleDrawable extends Drawable implements Drawable.Callback {
 
         @Override
         public Drawable newDrawable() {
-            return new ScaleDrawable(this);
+            return new ScaleDrawable(this, null);
+        }
+
+        @Override
+        public Drawable newDrawable(Resources res) {
+            return new ScaleDrawable(this, res);
         }
 
         @Override
@@ -291,8 +300,8 @@ public class ScaleDrawable extends Drawable implements Drawable.Callback {
         }
     }
 
-    private ScaleDrawable(ScaleState state) {
-        mScaleState = new ScaleState(state, this);
+    private ScaleDrawable(ScaleState state, Resources res) {
+        mScaleState = new ScaleState(state, this, res);
     }
 }
 

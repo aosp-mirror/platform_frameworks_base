@@ -49,7 +49,7 @@ public class InsetDrawable extends Drawable implements Drawable.Callback
     private boolean mMutated;
 
     /*package*/ InsetDrawable() {
-        this(null);
+        this(null, null);
     }
 
     public InsetDrawable(Drawable drawable, int inset) {
@@ -58,7 +58,7 @@ public class InsetDrawable extends Drawable implements Drawable.Callback
 
     public InsetDrawable(Drawable drawable, int insetLeft, int insetTop,
                          int insetRight, int insetBottom) {
-        this(null);
+        this(null, null);
         
         mInsetState.mDrawable = drawable;
         mInsetState.mInsetLeft = insetLeft;
@@ -263,9 +263,13 @@ public class InsetDrawable extends Drawable implements Drawable.Callback
         boolean mCheckedConstantState;
         boolean mCanConstantState;
 
-        InsetState(InsetState orig, InsetDrawable owner) {
+        InsetState(InsetState orig, InsetDrawable owner, Resources res) {
             if (orig != null) {
-                mDrawable = orig.mDrawable.getConstantState().newDrawable();
+                if (res != null) {
+                    mDrawable = orig.mDrawable.getConstantState().newDrawable(res);
+                } else {
+                    mDrawable = orig.mDrawable.getConstantState().newDrawable();
+                }
                 mDrawable.setCallback(owner);
                 mInsetLeft = orig.mInsetLeft;
                 mInsetTop = orig.mInsetTop;
@@ -277,7 +281,12 @@ public class InsetDrawable extends Drawable implements Drawable.Callback
 
         @Override
         public Drawable newDrawable() {
-            return new InsetDrawable(this);
+            return new InsetDrawable(this, null);
+        }
+        
+        @Override
+        public Drawable newDrawable(Resources res) {
+            return new InsetDrawable(this, res);
         }
         
         @Override
@@ -295,8 +304,8 @@ public class InsetDrawable extends Drawable implements Drawable.Callback
         }
     }
 
-    private InsetDrawable(InsetState state) {
-        mInsetState = new InsetState(state, this);
+    private InsetDrawable(InsetState state, Resources res) {
+        mInsetState = new InsetState(state, this, res);
     }
 }
 

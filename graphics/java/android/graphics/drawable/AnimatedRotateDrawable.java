@@ -45,11 +45,11 @@ public class AnimatedRotateDrawable extends Drawable implements Drawable.Callbac
     private boolean mRunning;
 
     public AnimatedRotateDrawable() {
-        this(null);
+        this(null, null);
     }
 
-    private AnimatedRotateDrawable(AnimatedRotateState rotateState) {
-        mState = new AnimatedRotateState(rotateState, this);
+    private AnimatedRotateDrawable(AnimatedRotateState rotateState, Resources res) {
+        mState = new AnimatedRotateState(rotateState, this, res);
         init();
     }
 
@@ -296,9 +296,14 @@ public class AnimatedRotateDrawable extends Drawable implements Drawable.Callbac
         private boolean mCanConstantState;
         private boolean mCheckedConstantState;        
 
-        public AnimatedRotateState(AnimatedRotateState source, AnimatedRotateDrawable owner) {
+        public AnimatedRotateState(AnimatedRotateState source, AnimatedRotateDrawable owner,
+                Resources res) {
             if (source != null) {
-                mDrawable = source.mDrawable.getConstantState().newDrawable();
+                if (res != null) {
+                    mDrawable = source.mDrawable.getConstantState().newDrawable(res);
+                } else {
+                    mDrawable = source.mDrawable.getConstantState().newDrawable();
+                }
                 mDrawable.setCallback(owner);
                 mPivotXRel = source.mPivotXRel;
                 mPivotX = source.mPivotX;
@@ -312,7 +317,12 @@ public class AnimatedRotateDrawable extends Drawable implements Drawable.Callbac
 
         @Override
         public Drawable newDrawable() {
-            return new AnimatedRotateDrawable(this);
+            return new AnimatedRotateDrawable(this, null);
+        }
+        
+        @Override
+        public Drawable newDrawable(Resources res) {
+            return new AnimatedRotateDrawable(this, res);
         }
         
         @Override
