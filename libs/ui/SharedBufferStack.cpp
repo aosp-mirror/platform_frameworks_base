@@ -246,19 +246,26 @@ SharedBufferClient::SharedBufferClient(SharedClient* sharedClient,
         int surface, int num)
     : SharedBufferBase(sharedClient, surface, num), tail(0)
 {
+    tail = computeTail();
+}
+
+int32_t SharedBufferClient::computeTail() const
+{
     SharedBufferStack& stack( *mSharedStack );
-    int32_t avail;
-    int32_t head;
     // we need to make sure we read available and head coherently,
     // w.r.t RetireUpdate.
+    int32_t newTail;
+    int32_t avail;
+    int32_t head;
     do {
         avail = stack.available;
         head = stack.head;
     } while (stack.available != avail);
-    tail = head - avail + 1;
-    if (tail < 0) {
-        tail += num;
+    newTail = head - avail + 1;
+    if (newTail < 0) {
+        newTail += mNumBuffers;
     }
+    return newTail;
 }
 
 ssize_t SharedBufferClient::dequeue()
@@ -296,6 +303,9 @@ status_t SharedBufferClient::undoDequeue(int buf)
 {
     UndoDequeueUpdate update(this);
     status_t err = updateCondition( update );
+    if (err == NO_ERROR) {
+        tail = computeTail();
+    }
     return err;
 }
 
