@@ -228,6 +228,8 @@ private:
     friend struct Condition;
     friend struct DequeueCondition;
     friend struct LockCondition;
+    
+    int32_t computeTail() const;
 
     struct QueueUpdate : public UpdateBase {
         inline QueueUpdate(SharedBufferBase* sbb);
