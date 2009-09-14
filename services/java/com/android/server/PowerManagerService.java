@@ -63,7 +63,7 @@ import java.util.Observable;
 import java.util.Observer;
 
 class PowerManagerService extends IPowerManager.Stub
-        implements LocalPowerManager,Watchdog.Monitor, SensorEventListener {
+        implements LocalPowerManager, Watchdog.Monitor, SensorEventListener {
 
     private static final String TAG = "PowerManagerService";
     static final String PARTIAL_NAME = "PowerManagerService";
@@ -1848,7 +1848,17 @@ class PowerManagerService extends IPowerManager.Stub
     }
     
     public void setKeyboardVisibility(boolean visible) {
-        mKeyboardVisible = visible;
+        synchronized (mLocks) {
+            if (mSpew) {
+                Log.d(TAG, "setKeyboardVisibility: " + visible);
+            }
+            mKeyboardVisible = visible;
+            // don't signal user activity when closing keyboard if the screen is off.
+            // otherwise, we want to make sure the backlights are adjusted.
+            if (visible || (mPowerState & SCREEN_ON_BIT) != 0) {
+                userActivity(SystemClock.uptimeMillis(), false, BUTTON_EVENT, true);
+            }
+        }
     }
 
     /**
