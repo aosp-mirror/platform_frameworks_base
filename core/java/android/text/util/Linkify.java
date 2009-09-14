@@ -208,7 +208,7 @@ public class Linkify {
 
         if ((mask & WEB_URLS) != 0) {
             gatherLinks(links, text, Regex.WEB_URL_PATTERN,
-                new String[] { "http://", "https://" },
+                new String[] { "http://", "https://", "rtsp://" },
                 sUrlMatchFilter, null);
         }
 
