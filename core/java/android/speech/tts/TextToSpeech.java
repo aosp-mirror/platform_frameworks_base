@@ -35,9 +35,13 @@ import java.util.Locale;
 /**
  *
  * Synthesizes speech from text for immediate playback or to create a sound file.
+ * <p>A TextToSpeech instance can only be used to synthesize text once it has completed its
+ * initialization. Implement the {@link TextToSpeech.OnInitListener} to be
+ * notified of the completion of the initialization.<br>
+ * When you are done using the TextToSpeech instance, call the {@link #shutdown()} method
+ * to release the native resources used by the TextToSpeech engine.
  *
  */
-//TODO complete javadoc + add links to constants
 public class TextToSpeech {
 
     /**
@@ -85,7 +89,7 @@ public class TextToSpeech {
     public static final int LANG_MISSING_DATA = -1;
 
     /**
-     * Denotes the language is not supported by the current TTS engine.
+     * Denotes the language is not supported.
      */
     public static final int LANG_NOT_SUPPORTED = -2;
 
@@ -100,29 +104,38 @@ public class TextToSpeech {
 
 
     /**
-     * Called when the TTS has initialized.
-     *
-     * The InitListener must implement the onInit function. onInit is passed a
-     * status code indicating the result of the TTS initialization.
+     * Interface definition of a callback to be invoked indicating the completion of the
+     * TextToSpeech engine initialization.
      */
     public interface OnInitListener {
+        /**
+         * Called to signal the completion of the TextToSpeech engine initialization.
+         * @param status {@link TextToSpeech#SUCCESS} or {@link TextToSpeech#ERROR}.
+         */
         public void onInit(int status);
     }
 
     /**
-     * Called when the TTS has completed saying something that has an utterance ID set.
+     * Interface definition of a callback to be invoked indicating the TextToSpeech engine has
+     * completed synthesizing an utterance with an utterance ID set.
      *
-     * The OnUtteranceCompletedListener must implement the onUtteranceCompleted function.
-     * onUtteranceCompleted is passed a String that is the utteranceId given in
-     * the original speak call.
      */
     public interface OnUtteranceCompletedListener {
+        /**
+         * Called to signal the completion of the synthesis of the utterance that was identified
+         * with the string parameter. This identifier is the one originally passed in the
+         * parameter hashmap of the synthesis request in
+         * {@link TextToSpeech#speak(String, int, HashMap)} or
+         * {@link TextToSpeech#synthesizeToFile(String, HashMap, String)} with the
+         * {@link TextToSpeech.Engine#KEY_PARAM_UTTERANCE_ID} key.
+         * @param utteranceId the identifier of the utterance.
+         */
         public void onUtteranceCompleted(String utteranceId);
     }
 
 
     /**
-     * Internal constants for the TTS functionality
+     * Internal constants for the TextToSpeech functionality
      *
      */
     public class Engine {
@@ -145,38 +158,41 @@ public class TextToSpeech {
         public static final String DEFAULT_SYNTH = "com.svox.pico";
 
         // default values for rendering
+        /**
+         * Default audio stream used when playing synthesized speech.
+         */
         public static final int DEFAULT_STREAM = AudioManager.STREAM_MUSIC;
 
         // return codes for a TTS engine's check data activity
         /**
          * Indicates success when checking the installation status of the resources used by the
-         * text-to-speech engine with the {@link #ACTION_CHECK_TTS_DATA} intent.
+         * TextToSpeech engine with the {@link #ACTION_CHECK_TTS_DATA} intent.
          */
         public static final int CHECK_VOICE_DATA_PASS = 1;
         /**
          * Indicates failure when checking the installation status of the resources used by the
-         * text-to-speech engine with the {@link #ACTION_CHECK_TTS_DATA} intent.
+         * TextToSpeech engine with the {@link #ACTION_CHECK_TTS_DATA} intent.
          */
         public static final int CHECK_VOICE_DATA_FAIL = 0;
         /**
          * Indicates erroneous data when checking the installation status of the resources used by
-         * the text-to-speech engine with the {@link #ACTION_CHECK_TTS_DATA} intent.
+         * the TextToSpeech engine with the {@link #ACTION_CHECK_TTS_DATA} intent.
          */
         public static final int CHECK_VOICE_DATA_BAD_DATA = -1;
         /**
          * Indicates missing resources when checking the installation status of the resources used
-         * by the text-to-speech engine with the {@link #ACTION_CHECK_TTS_DATA} intent.
+         * by the TextToSpeech engine with the {@link #ACTION_CHECK_TTS_DATA} intent.
          */
         public static final int CHECK_VOICE_DATA_MISSING_DATA = -2;
         /**
          * Indicates missing storage volume when checking the installation status of the resources
-         * used by the text-to-speech engine with the {@link #ACTION_CHECK_TTS_DATA} intent.
+         * used by the TextToSpeech engine with the {@link #ACTION_CHECK_TTS_DATA} intent.
          */
         public static final int CHECK_VOICE_DATA_MISSING_VOLUME = -3;
 
         // intents to ask engine to install data or check its data
         /**
-         * Activity Action: Triggers the platform Text-To-Speech engine to
+         * Activity Action: Triggers the platform TextToSpeech engine to
          * start the activity that installs the resource files on the device
          * that are required for TTS to be operational. Since the installation
          * of the data can be interrupted or declined by the user, the application
@@ -197,7 +213,7 @@ public class TextToSpeech {
         public static final String ACTION_TTS_DATA_INSTALLED =
                 "android.speech.tts.engine.TTS_DATA_INSTALLED";
         /**
-         * Activity Action: Starts the activity from the platform Text-To-Speech
+         * Activity Action: Starts the activity from the platform TextToSpeech
          * engine to verify the proper installation and availability of the
          * resource files on the system. Upon completion, the activity will
          * return one of the following codes:
@@ -210,9 +226,9 @@ public class TextToSpeech {
          * fields:
          * <ul>
          *   <li>{@link #EXTRA_VOICE_DATA_ROOT_DIRECTORY} which
-         *       indicates the path to the location of the resource files</li>,
+         *       indicates the path to the location of the resource files,</li>
          *   <li>{@link #EXTRA_VOICE_DATA_FILES} which contains
-         *       the list of all the resource files</li>,
+         *       the list of all the resource files,</li>
          *   <li>and {@link #EXTRA_VOICE_DATA_FILES_INFO} which
          *       contains, for each resource file, the description of the language covered by
          *       the file in the xxx-YYY format, where xxx is the 3-letter ISO language code,
@@ -226,18 +242,18 @@ public class TextToSpeech {
         // extras for a TTS engine's check data activity
         /**
          * Extra information received with the {@link #ACTION_CHECK_TTS_DATA} intent where
-         * the text-to-speech engine specifies the path to its resources.
+         * the TextToSpeech engine specifies the path to its resources.
          */
         public static final String EXTRA_VOICE_DATA_ROOT_DIRECTORY = "dataRoot";
         /**
          * Extra information received with the {@link #ACTION_CHECK_TTS_DATA} intent where
-         * the text-to-speech engine specifies the file names of its resources under the
+         * the TextToSpeech engine specifies the file names of its resources under the
          * resource path.
          */
         public static final String EXTRA_VOICE_DATA_FILES = "dataFiles";
         /**
          * Extra information received with the {@link #ACTION_CHECK_TTS_DATA} intent where
-         * the text-to-speech engine specifies the locale associated with each resource file.
+         * the TextToSpeech engine specifies the locale associated with each resource file.
          */
         public static final String EXTRA_VOICE_DATA_FILES_INFO = "dataFilesInfo";
 
@@ -272,11 +288,17 @@ public class TextToSpeech {
         /**
          * Parameter key to specify the audio stream type to be used when speaking text
          * or playing back a file.
+         * @see TextToSpeech#speak(String, int, HashMap)
+         * @see TextToSpeech#playEarcon(String, int, HashMap)
          */
         public static final String KEY_PARAM_STREAM = "streamType";
         /**
-         * Parameter key to identify an utterance in the completion listener after text has been
+         * Parameter key to identify an utterance in the
+         * {@link TextToSpeech.OnUtteranceCompletedListener} after text has been
          * spoken, a file has been played back or a silence duration has elapsed.
+         * @see TextToSpeech#speak(String, int, HashMap)
+         * @see TextToSpeech#playEarcon(String, int, HashMap)
+         * @see TextToSpeech#synthesizeToFile(String, HashMap, String)
          */
         public static final String KEY_PARAM_UTTERANCE_ID = "utteranceId";
 
@@ -330,13 +352,14 @@ public class TextToSpeech {
     private String[] mCachedParams;
 
     /**
-     * The constructor for the TTS.
+     * The constructor for the TextToSpeech class.
+     * This will also initialize the associated TextToSpeech engine if it isn't already running.
      *
      * @param context
-     *            The context
+     *            The context this instance is running in.
      * @param listener
-     *            The InitListener that will be called when the TTS has
-     *            initialized successfully.
+     *            The {@link TextToSpeech.OnInitListener} that will be called when the
+     *            TextToSpeech engine has initialized.
      */
     public TextToSpeech(Context context, OnInitListener listener) {
         mContext = context;
@@ -402,9 +425,9 @@ public class TextToSpeech {
 
 
     /**
-     * Shuts down the TTS. It is good practice to call this in the onDestroy
-     * method of the Activity that is using the TTS so that the TTS is stopped
-     * cleanly.
+     * Releases the resources used by the TextToSpeech engine.
+     * It is good practice for instance to call this method in the onDestroy() method of an Activity
+     * so the TextToSpeech engine can be cleanly stopped.
      */
     public void shutdown() {
         try {
@@ -418,11 +441,12 @@ public class TextToSpeech {
 
     /**
      * Adds a mapping between a string of text and a sound resource in a
-     * package.
-     * @see #speak(String, int, HashMap)
+     * package. After a call to this method, subsequent calls to
+     * {@link #speak(String, int, HashMap)} will play the specified sound resource
+     * if it is available, or synthesize the text it is missing.
      *
      * @param text
-     *            Example: <b><code>"south_south_east"</code></b><br/>
+     *            The string of text. Example: <code>"south_south_east"</code>
      *
      * @param packagename
      *            Pass the packagename of the application that contains the
@@ -438,7 +462,7 @@ public class TextToSpeech {
      *            </p>
      *
      * @param resourceId
-     *            Example: <b><code>R.raw.south_south_east</code></b>
+     *            Example: <code>R.raw.south_south_east</code>
      *
      * @return Code indicating success or failure. See {@link #ERROR} and {@link #SUCCESS}.
      */
@@ -476,10 +500,13 @@ public class TextToSpeech {
 
     /**
      * Adds a mapping between a string of text and a sound file. Using this, it
-     * is possible to add custom pronounciations for text.
+     * is possible to add custom pronounciations for a string of text.
+     * After a call to this method, subsequent calls to {@link #speak(String, int, HashMap)}
+     * will play the specified sound resource if it is available, or synthesize the text it is
+     * missing.
      *
      * @param text
-     *            The string of text
+     *            The string of text. Example: <code>"south_south_east"</code>
      * @param filename
      *            The full path to the sound file (for example:
      *            "/sdcard/mysounds/hello.wav")
@@ -520,28 +547,26 @@ public class TextToSpeech {
 
     /**
      * Adds a mapping between a string of text and a sound resource in a
-     * package.
+     * package. Use this to add custom earcons.
      *
      * @see #playEarcon(String, int, HashMap)
      *
-     * @param earcon The name of the earcon
-     *            Example: <b><code>"[tick]"</code></b><br/>
+     * @param earcon The name of the earcon.
+     *            Example: <code>"[tick]"</code><br/>
      *
      * @param packagename
-     *            Pass the packagename of the application that contains the
-     *            resource. If the resource is in your own application (this is
-     *            the most common case), then put the packagename of your
-     *            application here.<br/>
+     *            the package name of the application that contains the
+     *            resource. This can for instance be the package name of your own application.
      *            Example: <b>"com.google.marvin.compass"</b><br/>
-     *            The packagename can be found in the AndroidManifest.xml of
-     *            your application.
+     *            The package name can be found in the AndroidManifest.xml of
+     *            the application containing the resource.
      *            <p>
      *            <code>&lt;manifest xmlns:android=&quot;...&quot;
      *      package=&quot;<b>com.google.marvin.compass</b>&quot;&gt;</code>
      *            </p>
      *
      * @param resourceId
-     *            Example: <b><code>R.raw.tick_snd</code></b>
+     *            Example: <code>R.raw.tick_snd</code>
      *
      * @return Code indicating success or failure. See {@link #ERROR} and {@link #SUCCESS}.
      */
@@ -578,11 +603,14 @@ public class TextToSpeech {
 
 
     /**
-     * Adds a mapping between a string of text and a sound file. Using this, it
-     * is possible to add custom earcons.
+     * Adds a mapping between a string of text and a sound file.
+     * Use this to add custom earcons.
+     *
+     * @see #playEarcon(String, int, HashMap)
      *
      * @param earcon
-     *            The name of the earcon
+     *            The name of the earcon.
+     *            Example: <code>"[tick]"</code>
      * @param filename
      *            The full path to the sound file (for example:
      *            "/sdcard/mysounds/tick.wav")
@@ -623,18 +651,18 @@ public class TextToSpeech {
 
     /**
      * Speaks the string using the specified queuing strategy and speech
-     * parameters. Note that the speech parameters are not universally supported
-     * by all engines and will be treated as a hint. The TTS library will try to
-     * fulfill these parameters as much as possible, but there is no guarantee
-     * that the voice used will have the properties specified.
+     * parameters.
      *
      * @param text
      *            The string of text to be spoken.
      * @param queueMode
      *            The queuing strategy to use.
-     *            See QUEUE_ADD and QUEUE_FLUSH.
+     *            {@link #QUEUE_ADD} or {@link #QUEUE_FLUSH}.
      * @param params
-     *            The hashmap of speech parameters to be used.
+     *            The list of parameters to be used. Can be null if no parameters are given.
+     *            They are specified using a (key, value) pair, where the key can be
+     *            {@link Engine#KEY_PARAM_STREAM} or
+     *            {@link Engine#KEY_PARAM_UTTERANCE_ID}.
      *
      * @return Code indicating success or failure. See {@link #ERROR} and {@link #SUCCESS}.
      */
@@ -690,9 +718,12 @@ public class TextToSpeech {
      * @param earcon
      *            The earcon that should be played
      * @param queueMode
-     *            See QUEUE_ADD and QUEUE_FLUSH.
+     *            {@link #QUEUE_ADD} or {@link #QUEUE_FLUSH}.
      * @param params
-     *            The hashmap of parameters to be used.
+     *            The list of parameters to be used. Can be null if no parameters are given.
+     *            They are specified using a (key, value) pair, where the key can be
+     *            {@link Engine#KEY_PARAM_STREAM} or
+     *            {@link Engine#KEY_PARAM_UTTERANCE_ID}.
      *
      * @return Code indicating success or failure. See {@link #ERROR} and {@link #SUCCESS}.
      */
@@ -747,7 +778,11 @@ public class TextToSpeech {
      * @param durationInMs
      *            A long that indicates how long the silence should last.
      * @param queueMode
-     *            See QUEUE_ADD and QUEUE_FLUSH.
+     *            {@link #QUEUE_ADD} or {@link #QUEUE_FLUSH}.
+     * @param params
+     *            The list of parameters to be used. Can be null if no parameters are given.
+     *            They are specified using a (key, value) pair, where the key can be
+     *            {@link Engine#KEY_PARAM_UTTERANCE_ID}.
      *
      * @return Code indicating success or failure. See {@link #ERROR} and {@link #SUCCESS}.
      */
@@ -791,9 +826,9 @@ public class TextToSpeech {
 
 
     /**
-     * Returns whether or not the TTS is busy speaking.
+     * Returns whether or not the TextToSpeech engine is busy speaking.
      *
-     * @return Whether or not the TTS is busy speaking.
+     * @return Whether or not the TextToSpeech engine is busy speaking.
      */
     public boolean isSpeaking() {
         synchronized (mStartLock) {
@@ -827,7 +862,8 @@ public class TextToSpeech {
 
 
     /**
-     * Stops speech from the TTS.
+     * Interrupts the current utterance (whether played or rendered to file) and discards other
+     * utterances in the queue.
      *
      * @return Code indicating success or failure. See {@link #ERROR} and {@link #SUCCESS}.
      */
@@ -865,15 +901,12 @@ public class TextToSpeech {
 
 
     /**
-     * Sets the speech rate for the TTS engine.
+     * Sets the speech rate for the TextToSpeech engine.
      *
-     * Note that the speech rate is not universally supported by all engines and
-     * will be treated as a hint. The TTS library will try to use the specified
-     * speech rate, but there is no guarantee.
      * This has no effect on any pre-recorded speech.
      *
      * @param speechRate
-     *            The speech rate for the TTS engine. 1 is the normal speed,
+     *            The speech rate for the TextToSpeech engine. 1 is the normal speed,
      *            lower values slow down the speech (0.5 is half the normal speech rate),
      *            greater values accelerate it (2 is twice the normal speech rate).
      *
@@ -917,15 +950,12 @@ public class TextToSpeech {
 
 
     /**
-     * Sets the speech pitch for the TTS engine.
+     * Sets the speech pitch for the TextToSpeech engine.
      *
-     * Note that the pitch is not universally supported by all engines and
-     * will be treated as a hint. The TTS library will try to use the specified
-     * pitch, but there is no guarantee.
      * This has no effect on any pre-recorded speech.
      *
      * @param pitch
-     *            The pitch for the TTS engine. 1 is the normal pitch,
+     *            The pitch for the TextToSpeech engine. 1 is the normal pitch,
      *            lower values lower the tone of the synthesized voice,
      *            greater values increase it.
      *
@@ -967,11 +997,11 @@ public class TextToSpeech {
 
 
     /**
-     * Sets the language for the TTS engine.
-     *
-     * Note that the language is not universally supported by all engines and
-     * will be treated as a hint. The TTS library will try to use the specified
-     * language as represented by the Locale, but there is no guarantee.
+     * Sets the language for the TextToSpeech engine.
+     * The TextToSpeech engine will try to use the closest match to the specified
+     * language as represented by the Locale, but there is no guarantee that the exact same Locale
+     * will be used. Use {@link #isLanguageAvailable(Locale)} to check the level of support
+     * before choosing the language to use for the next utterances.
      *
      * @param loc
      *            The locale describing the language to be used.
@@ -1023,9 +1053,10 @@ public class TextToSpeech {
 
 
     /**
-     * Returns a Locale instance describing the language currently being used by the TTS engine.
+     * Returns a Locale instance describing the language currently being used by the TextToSpeech
+     * engine.
      * @return language, country (if any) and variant (if any) used by the engine stored in a Locale
-     *     instance, or null is the TTS engine has failed.
+     *     instance, or null is the TextToSpeech engine has failed.
      */
     public Locale getLanguage() {
         synchronized (mStartLock) {
@@ -1063,7 +1094,7 @@ public class TextToSpeech {
     }
 
     /**
-     * Checks if the specified language as represented by the Locale is available.
+     * Checks if the specified language as represented by the Locale is available and supported.
      *
      * @param loc
      *            The Locale describing the language to be used.
@@ -1112,7 +1143,9 @@ public class TextToSpeech {
      * @param text
      *            The String of text that should be synthesized
      * @param params
-     *            A hashmap of parameters.
+     *            The list of parameters to be used. Can be null if no parameters are given.
+     *            They are specified using a (key, value) pair, where the key can be
+     *            {@link Engine#KEY_PARAM_UTTERANCE_ID}.
      * @param filename
      *            The string that gives the full output filename; it should be
      *            something like "/sdcard/myappsounds/mysound.wav".
