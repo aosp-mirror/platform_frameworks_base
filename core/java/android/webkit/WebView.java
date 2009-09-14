@@ -458,8 +458,7 @@ public class WebView extends AbsoluteLayout
     private static final int SWITCH_TO_LONGPRESS        = 4;
     private static final int RELEASE_SINGLE_TAP         = 5;
     private static final int REQUEST_FORM_DATA          = 6;
-    private static final int SWITCH_TO_CLICK            = 7;
-    private static final int RESUME_WEBCORE_UPDATE      = 8;
+    private static final int RESUME_WEBCORE_UPDATE      = 7;
 
     //! arg1=x, arg2=y
     static final int SCROLL_TO_MSG_ID                   = 10;
@@ -3664,16 +3663,27 @@ public class WebView extends AbsoluteLayout
             if (mShiftIsPressed) {
                 return false;
             }
-            if (getSettings().supportZoom()
-                    && mTouchMode == TOUCH_DOUBLECLICK_MODE) {
-                zoomScrollOut();
-            } else {
-                mPrivateHandler.sendMessageDelayed(mPrivateHandler
-                        .obtainMessage(SWITCH_TO_CLICK), TAP_TIMEOUT);
-                if (DebugFlags.WEB_VIEW) {
-                    Log.v(LOGTAG, "TOUCH_DOUBLECLICK_MODE");
-                }
-                mTouchMode = TOUCH_DOUBLECLICK_MODE;
+
+            // perform the single click
+            Rect visibleRect = sendOurVisibleRect();
+            // Note that sendOurVisibleRect calls viewToContent, so the
+            // coordinates should be in content coordinates.
+            if (!nativeCursorIntersects(visibleRect)) {
+                return false;
+            }
+            nativeSetFollowedLink(true);
+            nativeUpdatePluginReceivesEvents();
+            WebViewCore.CursorData data = cursorData();
+            mWebViewCore.sendMessage(EventHub.SET_MOVE_MOUSE, data);
+            playSoundEffect(SoundEffectConstants.CLICK);
+            boolean isTextInput = nativeCursorIsTextInput();
+            if (isTextInput || !mCallbackProxy.uiOverrideUrlLoading(
+                        nativeCursorText())) {
+                mWebViewCore.sendMessage(EventHub.CLICK, data.mFrame,
+                        nativeCursorNodePointer());
+            }
+            if (isTextInput) {
+                rebuildWebTextView();
             }
             return true;
         }
@@ -4321,7 +4331,6 @@ public class WebView extends AbsoluteLayout
             return true;
         }
         if (ev.getAction() == MotionEvent.ACTION_DOWN) {
-            mPrivateHandler.removeMessages(SWITCH_TO_CLICK);
             mTrackballDown = true;
             if (mNativeClass == 0) {
                 return false;
@@ -5184,32 +5193,6 @@ public class WebView extends AbsoluteLayout
                     }
                     break;
                 }
-                case SWITCH_TO_CLICK:
-                    // The user clicked with the trackball, and did not click a
-                    // second time, so perform the action of a trackball single
-                    // click
-                    mTouchMode = TOUCH_DONE_MODE;
-                    Rect visibleRect = sendOurVisibleRect();
-                    // Note that sendOurVisibleRect calls viewToContent, so the
-                    // coordinates should be in content coordinates.
-                    if (!nativeCursorIntersects(visibleRect)) {
-                        break;
-                    }
-                    nativeSetFollowedLink(true);
-                    nativeUpdatePluginReceivesEvents();
-                    WebViewCore.CursorData data = cursorData();
-                    mWebViewCore.sendMessage(EventHub.SET_MOVE_MOUSE, data);
-                    playSoundEffect(SoundEffectConstants.CLICK);
-                    boolean isTextInput = nativeCursorIsTextInput();
-                    if (isTextInput || !mCallbackProxy.uiOverrideUrlLoading(
-                                nativeCursorText())) {
-                        mWebViewCore.sendMessage(EventHub.CLICK, data.mFrame,
-                                nativeCursorNodePointer());
-                    }
-                    if (isTextInput) {
-                        rebuildWebTextView();
-                    }
-                    break;
                 case SCROLL_BY_MSG_ID:
                     setContentScrollBy(msg.arg1, msg.arg2, (Boolean) msg.obj);
                     break;
