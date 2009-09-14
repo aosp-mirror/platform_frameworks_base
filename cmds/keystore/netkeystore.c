@@ -14,8 +14,6 @@
 ** limitations under the License.
 */
 
-#define LOG_TAG "keystore"
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/stat.h>
@@ -247,7 +245,7 @@ static void do_reset_keystore(LPC_MARSHAL *cmd, LPC_MARSHAL *reply)
     reply->retcode = reset_keystore();
 }
 
-static void execute(LPC_MARSHAL *cmd, LPC_MARSHAL *reply)
+void execute(LPC_MARSHAL *cmd, LPC_MARSHAL *reply)
 {
     uint32_t cmd_max = sizeof(cmds)/sizeof(struct cmdinfo);
 
@@ -309,7 +307,7 @@ static int flatten_str_args(int argc, const char **argv, LPC_MARSHAL *cmd)
     return 0;
 }
 
-static int parse_cmd(int argc, const char **argv, LPC_MARSHAL *cmd)
+int parse_cmd(int argc, const char **argv, LPC_MARSHAL *cmd)
 {
     uint32_t i, len = 0;
     uint32_t cmd_max = sizeof(cmds)/sizeof(cmds[0]);
@@ -335,30 +333,30 @@ static int parse_cmd(int argc, const char **argv, LPC_MARSHAL *cmd)
     }
 }
 
-static int shell_command(const int argc, const char **argv)
+int shell_command(const int argc, const char **argv)
 {
     int fd, i;
     LPC_MARSHAL  cmd;
 
-    if (parse_cmd(argc, argv , &cmd)) {
+    if (parse_cmd(argc, argv, &cmd)) {
         fprintf(stderr, "Incorrect command or command line is too long.\n");
-        exit(1);
+        return -1;
     }
     fd = socket_local_client(SOCKET_PATH,
                              ANDROID_SOCKET_NAMESPACE_RESERVED,
                              SOCK_STREAM);
     if (fd == -1) {
         fprintf(stderr, "Keystore service is not up and running.\n");
-        exit(1);
+        return -1;
     }
 
     if (write_marshal(fd, &cmd)) {
         fprintf(stderr, "Incorrect command or command line is too long.\n");
-        exit(1);
+        return -1;
     }
     if (read_marshal(fd, &cmd)) {
         fprintf(stderr, "Failed to read the result.\n");
-        exit(1);
+        return -1;
     }
     cmd.data[cmd.len] = 0;
     fprintf(stdout, "%s\n", (cmd.retcode == 0) ? "Succeeded!" : "Failed!");
@@ -367,30 +365,26 @@ static int shell_command(const int argc, const char **argv)
     return 0;
 }
 
-int main(const int argc, const char *argv[])
+int server_main(const int argc, const char *argv[])
 {
     struct sockaddr addr;
     socklen_t alen;
     int lsocket, s;
     LPC_MARSHAL  cmd, reply;
 
-    if (argc > 1) {
-        return shell_command(argc - 1, argv + 1);
-    }
-
     if (init_keystore(KEYSTORE_DIR)) {
         LOGE("Can not initialize the keystore, the directory exist?\n");
-        exit(1);
+        return -1;
     }
 
     lsocket = android_get_control_socket(SOCKET_PATH);
     if (lsocket < 0) {
         LOGE("Failed to get socket from environment: %s\n", strerror(errno));
-        exit(1);
+        return -1;
     }
     if (listen(lsocket, 5)) {
         LOGE("Listen on socket failed: %s\n", strerror(errno));
-        exit(1);
+        return -1;
     }
     fcntl(lsocket, F_SETFD, FD_CLOEXEC);
     memset(&reply, 0, sizeof(LPC_MARSHAL));

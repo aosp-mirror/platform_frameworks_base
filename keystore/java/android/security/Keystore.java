@@ -60,7 +60,7 @@ public abstract class Keystore {
 
         @Override
         public int lock() {
-            Reply result = mServiceCommand.execute(ServiceCommand.LOCK, null);
+            Reply result = mServiceCommand.execute(ServiceCommand.LOCK);
             return (result != null) ? result.returnCode : -1;
         }
 
@@ -73,15 +73,14 @@ public abstract class Keystore {
 
         @Override
         public int getState() {
-            Reply result = mServiceCommand.execute(ServiceCommand.GET_STATE,
-                    null);
+            Reply result = mServiceCommand.execute(ServiceCommand.GET_STATE);
             return (result != null) ? result.returnCode : -1;
         }
 
         @Override
         public int changePassword(String oldPassword, String newPassword) {
             Reply result = mServiceCommand.execute(ServiceCommand.PASSWD,
-                    oldPassword + "\0" + newPassword + "\0");
+                    oldPassword, newPassword);
             return (result != null) ? result.returnCode : -1;
         }
 
@@ -106,14 +105,14 @@ public abstract class Keystore {
         @Override
         public int put(String namespace, String keyname, String value) {
             Reply result = mServiceCommand.execute(ServiceCommand.PUT_KEY,
-                    namespace + "\0" + keyname + "\0" + value);
+                    namespace, keyname, value);
             return (result != null) ? result.returnCode : -1;
         }
 
         @Override
         public String get(String namespace, String keyname) {
             Reply result = mServiceCommand.execute(ServiceCommand.GET_KEY,
-                    namespace + "\0" + keyname + "\0");
+                    namespace, keyname);
             return (result != null) ? ((result.returnCode != 0) ? null :
                     new String(result.data, 0, result.len)) : null;
         }
@@ -121,13 +120,13 @@ public abstract class Keystore {
         @Override
         public int remove(String namespace, String keyname) {
             Reply result = mServiceCommand.execute(ServiceCommand.REMOVE_KEY,
-                    namespace + "\0" + keyname + "\0");
+                    namespace, keyname);
             return (result != null) ? result.returnCode : -1;
         }
 
         @Override
         public int reset() {
-            Reply result = mServiceCommand.execute(ServiceCommand.RESET, null);
+            Reply result = mServiceCommand.execute(ServiceCommand.RESET);
             return (result != null) ? result.returnCode : -1;
         }
     }
