@@ -20,6 +20,8 @@ import android.app.WallpaperManager;
 import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.os.HandlerThread;
+import android.os.Process;
 import android.service.wallpaper.WallpaperService;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
@@ -33,20 +35,29 @@ import android.content.BroadcastReceiver;
  */
 public class ImageWallpaper extends WallpaperService {
     WallpaperManager mWallpaperManager;
+    private HandlerThread mThread;
 
     @Override
     public void onCreate() {
         super.onCreate();
         mWallpaperManager = (WallpaperManager) getSystemService(WALLPAPER_SERVICE);
+        mThread = new HandlerThread("Wallpaper", Process.THREAD_PRIORITY_FOREGROUND);
+        mThread.start();
+        setCallbackLooper(mThread.getLooper());
     }
 
     public Engine onCreateEngine() {
         return new DrawableEngine();
     }
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        mThread.quit();
+    }
+
     class DrawableEngine extends Engine {
         private final Object mLock = new Object();
-        private final Rect mBounds = new Rect();
         private WallpaperObserver mReceiver;
         Drawable mBackground;
         float mXOffset;
@@ -56,6 +67,9 @@ public class ImageWallpaper extends WallpaperService {
             public void onReceive(Context context, Intent intent) {
                 updateWallpaper();
                 drawFrame();
+                // Assume we are the only one using the wallpaper in this
+                // process, and force a GC now to release the old wallpaper.
+                System.gc();
             }
         }
 
@@ -67,7 +81,6 @@ public class ImageWallpaper extends WallpaperService {
             registerReceiver(mReceiver, filter);
             updateWallpaper();
             surfaceHolder.setSizeFromLayout();
-            //setTouchEventsEnabled(true);
         }
 
         @Override
@@ -137,11 +150,7 @@ public class ImageWallpaper extends WallpaperService {
 
         void updateWallpaper() {
             synchronized (mLock) {
-                mBackground = mWallpaperManager.getDrawable();
-                mBounds.left = mBounds.top = 0;
-                mBounds.right = mBackground.getIntrinsicWidth();
-                mBounds.bottom = mBackground.getIntrinsicHeight();
-                mBackground.setBounds(mBounds);
+                mBackground = mWallpaperManager.getFastDrawable();
             }
         }
     }
