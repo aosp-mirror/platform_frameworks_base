@@ -71,7 +71,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // database gets upgraded properly. At a minimum, please confirm that 'upgradeVersion'
     // is properly propagated through your change.  Not doing so will result in a loss of user
     // settings.
-    private static final int DATABASE_VERSION = 39;
+    private static final int DATABASE_VERSION = 40;
 
     private Context mContext;
 
@@ -465,6 +465,22 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             upgradeVersion = 39;
         }
 
+        if (upgradeVersion == 39) {
+            db.beginTransaction();
+            try {
+                String value =
+                        mContext.getResources().getBoolean(
+                        R.bool.def_screen_brightness_automatic_mode) ? "1" : "0";
+                db.execSQL("INSERT OR IGNORE INTO system(name,value) values('" +
+                        Settings.System.SCREEN_BRIGHTNESS_MODE + "','" + value + "');");
+                db.setTransactionSuccessful();
+            } finally {
+                db.endTransaction();
+            }
+
+            upgradeVersion = 40;
+        }
+
         if (upgradeVersion != currentVersion) {
             Log.w(TAG, "Got stuck trying to upgrade from version " + upgradeVersion
                     + ", must wipe the settings provider");
@@ -700,6 +716,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         loadIntegerSetting(stmt, Settings.System.SCREEN_BRIGHTNESS,
                 R.integer.def_screen_brightness);
+
+        loadBooleanSetting(stmt, Settings.System.SCREEN_BRIGHTNESS_MODE,
+                R.bool.def_screen_brightness_automatic_mode);
 
         loadDefaultAnimationSettings(stmt);
 

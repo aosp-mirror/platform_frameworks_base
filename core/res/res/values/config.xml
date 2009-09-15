@@ -81,4 +81,6 @@
         <item>30</item>
     </integer-array>
     
+    <!-- Flag indicating whether the device supports automatic brightness mode. -->
+    <bool name="config_automatic_brightness_available">false</bool>
 </resources>
