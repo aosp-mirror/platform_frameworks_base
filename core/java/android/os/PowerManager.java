@@ -379,6 +379,21 @@ public class PowerManager
         }
     }
 
+    /**
+     * sets the brightness of the backlights (screen, keyboard, button).
+     *
+     * @param brightness value from 0 to 255
+     *
+     * {@hide}
+     */
+    public void setBacklightBrightness(int brightness)
+    {
+        try {
+            mService.setBacklightBrightness(brightness);
+        } catch (RemoteException e) {
+        }
+    }
+
    /**
      * Returns the set of flags for {@link #newWakeLock(int, String) newWakeLock()}
      * that are supported on the device.
