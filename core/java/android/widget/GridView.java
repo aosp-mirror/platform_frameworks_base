@@ -1148,9 +1148,12 @@ public class GridView extends AbsListView {
             if (sel != null) {
                positionSelector(sel);
                mSelectedTop = sel.getTop();
+            } else if (mTouchMode > TOUCH_MODE_DOWN && mTouchMode < TOUCH_MODE_SCROLL) {
+                View child = getChildAt(mMotionPosition - mFirstPosition);
+                positionSelector(child);
             } else {
-               mSelectedTop = 0;
-               mSelectorRect.setEmpty();
+                mSelectedTop = 0;
+                mSelectorRect.setEmpty();
             }
 
             mLayoutMode = LAYOUT_NORMAL;
@@ -1231,8 +1234,12 @@ public class GridView extends AbsListView {
     private void setupChild(View child, int position, int y, boolean flow, int childrenLeft,
             boolean selected, boolean recycled, int where) {
         boolean isSelected = selected && shouldShowSelector();
-
         final boolean updateChildSelected = isSelected != child.isSelected();
+        final int mode = mTouchMode;
+        final boolean isPressed = mode > TOUCH_MODE_DOWN && mode < TOUCH_MODE_SCROLL &&
+                mMotionPosition == position;
+        final boolean updateChildPressed = isPressed != child.isPressed();
+        
         boolean needToMeasure = !recycled || updateChildSelected || child.isLayoutRequested();
 
         // Respect layout params that are already in the view. Otherwise make
@@ -1255,6 +1262,10 @@ public class GridView extends AbsListView {
             if (isSelected) {
                 requestFocus();
             }
+        }
+
+        if (updateChildPressed) {
+            child.setPressed(isPressed);
         }
 
         if (needToMeasure) {

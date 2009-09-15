@@ -1542,37 +1542,42 @@ public class ListView extends AbsListView {
             recycleBin.scrapActiveViews();
 
             if (sel != null) {
-               // the current selected item should get focus if items
-               // are focusable
-               if (mItemsCanFocus && hasFocus() && !sel.hasFocus()) {
-                   final boolean focusWasTaken = (sel == focusLayoutRestoreDirectChild &&
-                           focusLayoutRestoreView.requestFocus()) || sel.requestFocus();
-                   if (!focusWasTaken) {
-                       // selected item didn't take focus, fine, but still want
-                       // to make sure something else outside of the selected view
-                       // has focus
-                       final View focused = getFocusedChild();
-                       if (focused != null) {
-                           focused.clearFocus();
-                       }
-                       positionSelector(sel);
-                   } else {
-                       sel.setSelected(false);
-                       mSelectorRect.setEmpty();
-                   }
-               } else {
-                   positionSelector(sel);
-               }
-               mSelectedTop = sel.getTop();
+                // the current selected item should get focus if items
+                // are focusable
+                if (mItemsCanFocus && hasFocus() && !sel.hasFocus()) {
+                    final boolean focusWasTaken = (sel == focusLayoutRestoreDirectChild &&
+                            focusLayoutRestoreView.requestFocus()) || sel.requestFocus();
+                    if (!focusWasTaken) {
+                        // selected item didn't take focus, fine, but still want
+                        // to make sure something else outside of the selected view
+                        // has focus
+                        final View focused = getFocusedChild();
+                        if (focused != null) {
+                            focused.clearFocus();
+                        }
+                        positionSelector(sel);
+                    } else {
+                        sel.setSelected(false);
+                        mSelectorRect.setEmpty();
+                    }
+                } else {
+                    positionSelector(sel);
+                }
+                mSelectedTop = sel.getTop();
             } else {
-               mSelectedTop = 0;
-               mSelectorRect.setEmpty();
+                if (mTouchMode > TOUCH_MODE_DOWN && mTouchMode < TOUCH_MODE_SCROLL) {
+                    View child = getChildAt(mMotionPosition - mFirstPosition);
+                    positionSelector(child);
+                } else {
+                    mSelectedTop = 0;
+                    mSelectorRect.setEmpty();
+                }
 
-               // even if there is not selected position, we may need to restore
-               // focus (i.e. something focusable in touch mode)
-               if (hasFocus() && focusLayoutRestoreView != null) {
-                   focusLayoutRestoreView.requestFocus();
-               }
+                // even if there is not selected position, we may need to restore
+                // focus (i.e. something focusable in touch mode)
+                if (hasFocus() && focusLayoutRestoreView != null) {
+                    focusLayoutRestoreView.requestFocus();
+                }
             }
 
             // tell focus view we are done mucking with it, if it is still in
@@ -1686,6 +1691,10 @@ public class ListView extends AbsListView {
             boolean selected, boolean recycled) {
         final boolean isSelected = selected && shouldShowSelector();
         final boolean updateChildSelected = isSelected != child.isSelected();
+        final int mode = mTouchMode;
+        final boolean isPressed = mode > TOUCH_MODE_DOWN && mode < TOUCH_MODE_SCROLL &&
+                mMotionPosition == position;
+        final boolean updateChildPressed = isPressed != child.isPressed();
         final boolean needToMeasure = !recycled || updateChildSelected || child.isLayoutRequested();
 
         // Respect layout params that are already in the view. Otherwise make some up...
@@ -1709,6 +1718,10 @@ public class ListView extends AbsListView {
 
         if (updateChildSelected) {
             child.setSelected(isSelected);
+        }
+
+        if (updateChildPressed) {
+            child.setPressed(isPressed);
         }
 
         if (mChoiceMode != CHOICE_MODE_NONE && mCheckStates != null) {
