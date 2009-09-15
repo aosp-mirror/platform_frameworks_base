@@ -45,6 +45,31 @@ sp<IOMXRenderer> IOMX::createRenderer(
             displayWidth, displayHeight);
 }
 
+sp<IOMXRenderer> IOMX::createRendererFromJavaSurface(
+        JNIEnv *env, jobject javaSurface,
+        const char *componentName,
+        OMX_COLOR_FORMATTYPE colorFormat,
+        size_t encodedWidth, size_t encodedHeight,
+        size_t displayWidth, size_t displayHeight) {
+    jclass surfaceClass = env->FindClass("android/view/Surface");
+    if (surfaceClass == NULL) {
+        LOGE("Can't find android/view/Surface");
+        return NULL;
+    }
+
+    jfieldID surfaceID = env->GetFieldID(surfaceClass, "mSurface", "I");
+    if (surfaceID == NULL) {
+        LOGE("Can't find Surface.mSurface");
+        return NULL;
+    }
+
+    sp<Surface> surface = (Surface *)env->GetIntField(javaSurface, surfaceID);
+
+    return createRenderer(
+            surface, componentName, colorFormat, encodedWidth,
+            encodedHeight, displayWidth, displayHeight);
+}
+
 class BpOMX : public BpInterface<IOMX> {
 public:
     BpOMX(const sp<IBinder> &impl)
