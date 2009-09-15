@@ -395,7 +395,7 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
             Drawable.ConstantState cachedBg = mBackgroundsCache.get(backgroundColor);
             if (cachedBg != null) {
                 if (DBG) Log.d(LOG_TAG, "Background cache hit for color " + backgroundColor);
-                return cachedBg.newDrawable();
+                return cachedBg.newDrawable(mProviderContext.getResources());
             }
             if (DBG) Log.d(LOG_TAG, "Creating new background for color " + backgroundColor);
             ColorDrawable transparent = new ColorDrawable(0);
@@ -572,7 +572,7 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
         Drawable.ConstantState cached = mOutsideDrawablesCache.get(drawableId);
         if (cached != null) {
             if (DBG) Log.d(LOG_TAG, "Found icon in cache: " + drawableId);
-            return cached.newDrawable();
+            return cached.newDrawable(mProviderContext.getResources());
         }
 
         Drawable drawable = null;
@@ -663,7 +663,7 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
         // Using containsKey() since we also store null values.
         if (mOutsideDrawablesCache.containsKey(componentIconKey)) {
             Drawable.ConstantState cached = mOutsideDrawablesCache.get(componentIconKey);
-            return cached == null ? null : cached.newDrawable();
+            return cached == null ? null : cached.newDrawable(mProviderContext.getResources());
         }
         // Then try the activity or application icon
         Drawable drawable = getActivityIcon(component);

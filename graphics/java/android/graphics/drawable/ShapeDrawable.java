@@ -396,6 +396,11 @@ public class ShapeDrawable extends Drawable {
         }
         
         @Override
+        public Drawable newDrawable(Resources res) {
+            return new ShapeDrawable(this);
+        }
+        
+        @Override
         public int getChangingConfigurations() {
             return mChangingConfigurations;
         }

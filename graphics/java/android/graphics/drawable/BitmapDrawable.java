@@ -60,15 +60,15 @@ public class BitmapDrawable extends Drawable {
             Paint.FILTER_BITMAP_FLAG | Paint.DITHER_FLAG;
     private BitmapState mBitmapState;
     private Bitmap mBitmap;
+    private int mTargetDensity;
+
     private final Rect mDstRect = new Rect();   // Gravity.apply() sets this
 
     private boolean mApplyGravity;
     private boolean mRebuildShader;
     private boolean mMutated;
     
-    private int mTargetDensity = DisplayMetrics.DENSITY_DEFAULT;
-
-    // These are scaled to match the target density.
+     // These are scaled to match the target density.
     private int mBitmapWidth;
     private int mBitmapHeight;
     
@@ -88,10 +88,7 @@ public class BitmapDrawable extends Drawable {
      */
     public BitmapDrawable(Resources res) {
         mBitmapState = new BitmapState((Bitmap) null);
-        if (res != null) {
-            setTargetDensity(res.getDisplayMetrics());
-            mBitmapState.mTargetDensity = mTargetDensity;
-        }
+        mBitmapState.mTargetDensity = mTargetDensity;
     }
 
     /**
@@ -101,7 +98,7 @@ public class BitmapDrawable extends Drawable {
      */
     @Deprecated
     public BitmapDrawable(Bitmap bitmap) {
-        this(new BitmapState(bitmap));
+        this(new BitmapState(bitmap), null);
     }
 
     /**
@@ -109,22 +106,51 @@ public class BitmapDrawable extends Drawable {
      * the display metrics of the resources.
      */
     public BitmapDrawable(Resources res, Bitmap bitmap) {
-        this(new BitmapState(bitmap));
-        if (res != null) {
-            setTargetDensity(res.getDisplayMetrics());
-            mBitmapState.mTargetDensity = mTargetDensity;
-        }
+        this(new BitmapState(bitmap), res);
+        mBitmapState.mTargetDensity = mTargetDensity;
     }
 
+    /**
+     * Create a drawable by opening a given file path and decoding the bitmap.
+     * @deprecated Use {@link #BitmapDrawable(Resources, String)} to ensure
+     * that the drawable has correctly set its target density.
+     */
     public BitmapDrawable(String filepath) {
-        this(new BitmapState(BitmapFactory.decodeFile(filepath)));
+        this(new BitmapState(BitmapFactory.decodeFile(filepath)), null);
         if (mBitmap == null) {
             android.util.Log.w("BitmapDrawable", "BitmapDrawable cannot decode " + filepath);
         }
     }
 
+    /**
+     * Create a drawable by opening a given file path and decoding the bitmap.
+     */
+    public BitmapDrawable(Resources res, String filepath) {
+        this(new BitmapState(BitmapFactory.decodeFile(filepath)), null);
+        mBitmapState.mTargetDensity = mTargetDensity;
+        if (mBitmap == null) {
+            android.util.Log.w("BitmapDrawable", "BitmapDrawable cannot decode " + filepath);
+        }
+    }
+
+    /**
+     * Create a drawable by decoding a bitmap from the given input stream.
+     * @deprecated Use {@link #BitmapDrawable(Resources, java.io.InputStream)} to ensure
+     * that the drawable has correctly set its target density.
+     */
     public BitmapDrawable(java.io.InputStream is) {
-        this(new BitmapState(BitmapFactory.decodeStream(is)));
+        this(new BitmapState(BitmapFactory.decodeStream(is)), null);
+        if (mBitmap == null) {
+            android.util.Log.w("BitmapDrawable", "BitmapDrawable cannot decode " + is);
+        }
+    }
+
+    /**
+     * Create a drawable by decoding a bitmap from the given input stream.
+     */
+    public BitmapDrawable(Resources res, java.io.InputStream is) {
+        this(new BitmapState(BitmapFactory.decodeStream(is)), null);
+        mBitmapState.mTargetDensity = mTargetDensity;
         if (mBitmap == null) {
             android.util.Log.w("BitmapDrawable", "BitmapDrawable cannot decode " + is);
         }
@@ -425,7 +451,12 @@ public class BitmapDrawable extends Drawable {
 
         @Override
         public Drawable newDrawable() {
-            return new BitmapDrawable(this);
+            return new BitmapDrawable(this, null);
+        }
+        
+        @Override
+        public Drawable newDrawable(Resources res) {
+            return new BitmapDrawable(this, res);
         }
         
         @Override
@@ -434,9 +465,15 @@ public class BitmapDrawable extends Drawable {
         }
     }
 
-    private BitmapDrawable(BitmapState state) {
+    private BitmapDrawable(BitmapState state, Resources res) {
         mBitmapState = state;
-        mTargetDensity = state.mTargetDensity;
+        if (res != null) {
+            mTargetDensity = res.getDisplayMetrics().densityDpi;
+        } else if (state != null) {
+            mTargetDensity = state.mTargetDensity;
+        } else {
+            mTargetDensity = DisplayMetrics.DENSITY_DEFAULT;
+        }
         setBitmap(state.mBitmap);
     }
 }

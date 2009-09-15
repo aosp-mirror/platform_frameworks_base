@@ -61,7 +61,7 @@ public class NinePatchDrawable extends Drawable {
      */
     @Deprecated
     public NinePatchDrawable(Bitmap bitmap, byte[] chunk, Rect padding, String srcName) {
-        this(new NinePatchState(new NinePatch(bitmap, chunk, srcName), padding));
+        this(new NinePatchState(new NinePatch(bitmap, chunk, srcName), padding), null);
     }
     
     /**
@@ -70,11 +70,8 @@ public class NinePatchDrawable extends Drawable {
      */
     public NinePatchDrawable(Resources res, Bitmap bitmap, byte[] chunk,
             Rect padding, String srcName) {
-        this(new NinePatchState(new NinePatch(bitmap, chunk, srcName), padding));
-        if (res != null) {
-            setTargetDensity(res.getDisplayMetrics());
-            mNinePatchState.mTargetDensity = mTargetDensity;
-        }
+        this(new NinePatchState(new NinePatch(bitmap, chunk, srcName), padding), res);
+        mNinePatchState.mTargetDensity = mTargetDensity;
     }
     
     /**
@@ -84,7 +81,7 @@ public class NinePatchDrawable extends Drawable {
      */
     @Deprecated
     public NinePatchDrawable(NinePatch patch) {
-        this(new NinePatchState(patch, null));
+        this(new NinePatchState(patch, null), null);
     }
 
     /**
@@ -92,18 +89,16 @@ public class NinePatchDrawable extends Drawable {
      * based on the display metrics of the resources.
      */
     public NinePatchDrawable(Resources res, NinePatch patch) {
-        this(new NinePatchState(patch, null));
-        if (res != null) {
-            setTargetDensity(res.getDisplayMetrics());
-            mNinePatchState.mTargetDensity = mTargetDensity;
-        }
+        this(new NinePatchState(patch, null), res);
+        mNinePatchState.mTargetDensity = mTargetDensity;
     }
 
-    private void setNinePatchState(NinePatchState state) {
+    private void setNinePatchState(NinePatchState state, Resources res) {
         mNinePatchState = state;
         mNinePatch = state.mNinePatch;
         mPadding = state.mPadding;
-        mTargetDensity = state.mTargetDensity;
+        mTargetDensity = res != null ? res.getDisplayMetrics().densityDpi
+                : state.mTargetDensity;
         if (DEFAULT_DITHER != state.mDither) {
             // avoid calling the setter unless we need to, since it does a
             // lazy allocation of a paint
@@ -258,7 +253,8 @@ public class NinePatchDrawable extends Drawable {
         }
 
         setNinePatchState(new NinePatchState(
-                new NinePatch(bitmap, bitmap.getNinePatchChunk(), "XML 9-patch"), padding, dither));
+                new NinePatch(bitmap, bitmap.getNinePatchChunk(), "XML 9-patch"),
+                padding, dither), r);
         mNinePatchState.mTargetDensity = mTargetDensity;
 
         a.recycle();
@@ -357,7 +353,12 @@ public class NinePatchDrawable extends Drawable {
 
         @Override
         public Drawable newDrawable() {
-            return new NinePatchDrawable(this);
+            return new NinePatchDrawable(this, null);
+        }
+        
+        @Override
+        public Drawable newDrawable(Resources res) {
+            return new NinePatchDrawable(this, res);
         }
         
         @Override
@@ -366,8 +367,7 @@ public class NinePatchDrawable extends Drawable {
         }
     }
 
-    private NinePatchDrawable(NinePatchState state) {
-        setNinePatchState(state);
+    private NinePatchDrawable(NinePatchState state, Resources res) {
+        setNinePatchState(state, res);
     }
 }
-

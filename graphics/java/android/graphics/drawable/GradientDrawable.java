@@ -917,6 +917,11 @@ public class GradientDrawable extends Drawable {
         }
         
         @Override
+        public Drawable newDrawable(Resources res) {
+            return new GradientDrawable(this);
+        }
+        
+        @Override
         public int getChangingConfigurations() {
             return mChangingConfigurations;
         }

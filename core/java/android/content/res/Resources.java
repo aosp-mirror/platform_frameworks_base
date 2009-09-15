@@ -1662,7 +1662,7 @@ public class Resources {
 
         Drawable.ConstantState cs = sPreloadedDrawables.get(key);
         if (cs != null) {
-            dr = cs.newDrawable();
+            dr = cs.newDrawable(this);
         } else {
             if (value.type >= TypedValue.TYPE_FIRST_COLOR_INT &&
                     value.type <= TypedValue.TYPE_LAST_COLOR_INT) {
@@ -1743,7 +1743,7 @@ public class Resources {
                     //Log.i(TAG, "Returning cached drawable @ #" +
                     //        Integer.toHexString(((Integer)key).intValue())
                     //        + " in " + this + ": " + entry);
-                    return entry.newDrawable();
+                    return entry.newDrawable(this);
                 }
                 else {  // our entry has been purged
                     mDrawableCache.delete(key);
