@@ -5772,7 +5772,7 @@ public class WebView extends AbsoluteLayout
         // FIXME the divisor should be retrieved from somewhere
         // the closest thing today is hard-coded into ScrollView.java
         // (from ScrollView.java, line 363)   int maxJump = height/2;
-        return viewToContentY(height);
+        return Math.round(height * mInvActualScale);
     }
 
     /**
