@@ -616,7 +616,7 @@ private:
               MixerThread *checkMixerThread_l(int output) const;
               RecordThread *checkRecordThread_l(int input) const;
               float streamVolumeInternal(int stream) const { return mStreamTypes[stream].volume; }
-              void audioConfigChanged(int event, const sp<ThreadBase>& thread, void *param2);
+              void audioConfigChanged_l(int event, const sp<ThreadBase>& thread, void *param2);
 
     friend class AudioBuffer;
 
