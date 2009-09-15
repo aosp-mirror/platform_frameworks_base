@@ -33,7 +33,7 @@ import java.util.Map;
 public class FileObserverTest extends AndroidTestCase {
     private Observer mObserver;
     private File mTestFile;
-    
+
     private static class Observer extends FileObserver {
         public List<Map> events = Lists.newArrayList();
         public int totalEvents = 0;
@@ -56,10 +56,10 @@ public class FileObserverTest extends AndroidTestCase {
             }
         }
     }
-    
+
     @Override
     protected void setUp() throws Exception {
-        mTestFile = File.createTempFile(".file_observer_test", ".txt"); 
+        mTestFile = File.createTempFile(".file_observer_test", ".txt");
     }
 
     @Override
@@ -68,13 +68,13 @@ public class FileObserverTest extends AndroidTestCase {
             mTestFile.delete();
         }
     }
-    
+
     @LargeTest
     public void testRun() throws Exception {
         // make file changes and wait for them
         assertTrue(mTestFile.exists());
         assertNotNull(mTestFile.getParent());
-        
+
         mObserver = new Observer(mTestFile.getParent());
         mObserver.startWatching();
 
@@ -85,10 +85,11 @@ public class FileObserverTest extends AndroidTestCase {
             waitForEvent(); // modify
 
             mTestFile.delete();
+            waitForEvent(); // modify
             waitForEvent(); // delete
 
             mObserver.stopWatching();
-            
+
             // Ensure that we have seen at least 3 events.
             assertTrue(mObserver.totalEvents > 3);
         } finally {
@@ -111,10 +112,41 @@ public class FileObserverTest extends AndroidTestCase {
 
             while (it.hasNext()) {
                 Map map = it.next();
-                Log.i("FileObserverTest", "event: " + map.get("event").toString() + " path: " + map.get("path"));
+                Log.i("FileObserverTest", "event: " + getEventString((Integer)map.get("event")) + " path: " + map.get("path"));
             }
 
             mObserver.events.clear();
+        }
+    }
+
+    private String getEventString(int event) {
+        switch (event) {
+            case  FileObserver.ACCESS:
+                return "ACCESS";
+            case FileObserver.MODIFY:
+                return "MODIFY";
+            case FileObserver.ATTRIB:
+                return "ATTRIB";
+            case FileObserver.CLOSE_WRITE:
+                return "CLOSE_WRITE";
+            case FileObserver.CLOSE_NOWRITE:
+                return "CLOSE_NOWRITE";
+            case FileObserver.OPEN:
+                return "OPEN";
+            case FileObserver.MOVED_FROM:
+                return "MOVED_FROM";
+            case FileObserver.MOVED_TO:
+                return "MOVED_TO";
+            case FileObserver.CREATE:
+                return "CREATE";
+            case FileObserver.DELETE:
+                return "DELETE";
+            case FileObserver.DELETE_SELF:
+                return "DELETE_SELF";
+            case FileObserver.MOVE_SELF:
+                return "MOVE_SELF";
+            default:
+                return "UNKNOWN";
         }
     }
 }
