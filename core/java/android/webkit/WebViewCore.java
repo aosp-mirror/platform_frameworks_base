@@ -837,9 +837,11 @@ final class WebViewCore {
                         case DESTROY:
                             // Time to take down the world. Cancel all pending
                             // loads and destroy the native view and frame.
-                            mBrowserFrame.destroy();
-                            mBrowserFrame = null;
-                            mNativeClass = 0;
+                            synchronized (WebViewCore.this) {
+                                mBrowserFrame.destroy();
+                                mBrowserFrame = null;
+                                mNativeClass = 0;
+                            }
                             break;
 
                         case UPDATE_FRAME_CACHE_IF_LOADING:
@@ -1623,11 +1625,11 @@ final class WebViewCore {
         }
     }
 
-    /* package */ boolean pictureReady() {
+    /* package */ synchronized boolean pictureReady() {
         return nativePictureReady();
     }
 
-    /*package*/ Picture copyContentPicture() {
+    /*package*/ synchronized Picture copyContentPicture() {
         Picture result = new Picture();
         nativeCopyContentToPicture(result);
         return result;
