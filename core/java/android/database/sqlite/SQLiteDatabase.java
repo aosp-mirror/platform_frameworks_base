@@ -22,10 +22,11 @@ import android.database.DatabaseUtils;
 import android.database.SQLException;
 import android.os.Debug;
 import android.os.SystemClock;
+import android.os.SystemProperties;
 import android.text.TextUtils;
 import android.util.Config;
-import android.util.Log;
 import android.util.EventLog;
+import android.util.Log;
 
 import java.io.File;
 import java.util.HashMap;
@@ -220,6 +221,10 @@ public class SQLiteDatabase extends SQLiteClosable {
     // package visible, since callers will access directly to minimize overhead in the case
     // that logging is not enabled.
     /* package */ final boolean mLogStats;
+
+    // System property that enables logging of slow queries. Specify the threshold in ms.
+    private static final String LOG_SLOW_QUERIES_PROPERTY = "db.log.slow_query_threshold";
+    private final int mSlowQueryThreshold;
 
     /**
      * @param closable
@@ -1202,27 +1207,38 @@ public class SQLiteDatabase extends SQLiteClosable {
             String editTable) {
         long timeStart = 0;
 
-        if (Config.LOGV) {
+        if (Config.LOGV || mSlowQueryThreshold != -1) {
             timeStart = System.currentTimeMillis();
         }
 
         SQLiteCursorDriver driver = new SQLiteDirectCursorDriver(this, sql, editTable);
 
+        Cursor cursor = null;
         try {
-            return driver.query(
+            cursor = driver.query(
                     cursorFactory != null ? cursorFactory : mFactory,
                     selectionArgs);
         } finally {
-            if (Config.LOGV) {
+            if (Config.LOGV || mSlowQueryThreshold != -1) {
+
+                // Force query execution
+                if (cursor != null) {
+                    cursor.moveToFirst();
+                    cursor.moveToPosition(-1);
+                }
+
                 long duration = System.currentTimeMillis() - timeStart;
 
-                Log.v(SQLiteCursor.TAG,
-                      "query (" + duration + " ms): " + driver.toString() + ", args are "
-                              + (selectionArgs != null
-                              ? TextUtils.join(",", selectionArgs)
-                              : "<null>"));
+                if (Config.LOGV || duration >= mSlowQueryThreshold) {
+                    Log.v(SQLiteCursor.TAG,
+                          "query (" + duration + " ms): " + driver.toString() + ", args are "
+                                  + (selectionArgs != null
+                                  ? TextUtils.join(",", selectionArgs)
+                                  : "<null>"));
+                }
             }
         }
+        return cursor;
     }
 
     /**
@@ -1671,6 +1687,7 @@ public class SQLiteDatabase extends SQLiteClosable {
         mFlags = flags;
         mPath = path;
         mLogStats = "1".equals(android.os.SystemProperties.get("db.logstats"));
+        mSlowQueryThreshold = SystemProperties.getInt(LOG_SLOW_QUERIES_PROPERTY, -1);
 
         mLeakedException = new IllegalStateException(path +
             " SQLiteDatabase created and never closed");
