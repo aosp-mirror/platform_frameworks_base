@@ -16,7 +16,7 @@
 
 package com.android.frameworktest.settings;
 
-import android.os.IHardwareService;
+import android.os.IPowerManager;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -45,11 +45,11 @@ public class BrightnessLimit extends Activity implements OnClickListener {
     }
 
     public void onClick(View v) {
-        IHardwareService hardware = IHardwareService.Stub.asInterface(
-                ServiceManager.getService("hardware"));
-        if (hardware != null) {
+        IPowerManager power = IPowerManager.Stub.asInterface(
+                ServiceManager.getService("power"));
+        if (power != null) {
             try {
-                hardware.setBacklights(0);
+                power.setBacklightBrightness(0);
             } catch (RemoteException darn) {
                 
             }

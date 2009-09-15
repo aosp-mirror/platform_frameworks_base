@@ -2061,6 +2061,42 @@ class PowerManagerService extends IPowerManager.Stub
         return result;
     }
 
+    public void setBacklightBrightness(int brightness) {
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.DEVICE_POWER, null);
+        // Don't let applications turn the screen all the way off
+        brightness = Math.max(brightness, Power.BRIGHTNESS_DIM);
+        mHardware.setLightBrightness_UNCHECKED(HardwareService.LIGHT_ID_BACKLIGHT, brightness);
+        mHardware.setLightBrightness_UNCHECKED(HardwareService.LIGHT_ID_KEYBOARD, brightness);
+        mHardware.setLightBrightness_UNCHECKED(HardwareService.LIGHT_ID_BUTTONS, brightness);
+        long identity = Binder.clearCallingIdentity();
+        try {
+            mBatteryStats.noteScreenBrightness(brightness);
+        } catch (RemoteException e) {
+            Log.w(TAG, "RemoteException calling noteScreenBrightness on BatteryStatsService", e);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+
+        // update our animation state
+        if (ANIMATE_SCREEN_LIGHTS) {
+            mScreenBrightness.curValue = brightness;
+            mScreenBrightness.animating = false;
+        }
+        if (ANIMATE_KEYBOARD_LIGHTS) {
+            mKeyboardBrightness.curValue = brightness;
+            mKeyboardBrightness.animating = false;
+        }
+        if (ANIMATE_BUTTON_LIGHTS) {
+            mButtonBrightness.curValue = brightness;
+            mButtonBrightness.animating = false;
+        }
+    }
+
+    public void setAutoBrightness(boolean on) {
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.DEVICE_POWER, null);
+        mHardware.setAutoBrightness_UNCHECKED(on);
+    }
+
     private SensorManager getSensorManager() {
         if (mSensorManager == null) {
             mSensorManager = new SensorManager(mHandlerThread.getLooper());
