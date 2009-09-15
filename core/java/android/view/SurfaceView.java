@@ -236,6 +236,10 @@ public class SurfaceView extends View {
 
     @Override
     public boolean gatherTransparentRegion(Region region) {
+        if (mWindowType == WindowManager.LayoutParams.TYPE_APPLICATION_PANEL) {
+            return super.gatherTransparentRegion(region);
+        }
+        
         boolean opaque = true;
         if ((mPrivateFlags & SKIP_DRAW) == 0) {
             // this view draws, remove it from the transparent region
@@ -259,20 +263,24 @@ public class SurfaceView extends View {
 
     @Override
     public void draw(Canvas canvas) {
-        // draw() is not called when SKIP_DRAW is set
-        if ((mPrivateFlags & SKIP_DRAW) == 0) {
-            // punch a whole in the view-hierarchy below us
-            canvas.drawColor(0, PorterDuff.Mode.CLEAR);
+        if (mWindowType != WindowManager.LayoutParams.TYPE_APPLICATION_PANEL) {
+            // draw() is not called when SKIP_DRAW is set
+            if ((mPrivateFlags & SKIP_DRAW) == 0) {
+                // punch a whole in the view-hierarchy below us
+                canvas.drawColor(0, PorterDuff.Mode.CLEAR);
+            }
         }
         super.draw(canvas);
     }
 
     @Override
     protected void dispatchDraw(Canvas canvas) {
-        // if SKIP_DRAW is cleared, draw() has already punched a hole
-        if ((mPrivateFlags & SKIP_DRAW) == SKIP_DRAW) {
-            // punch a whole in the view-hierarchy below us
-            canvas.drawColor(0, PorterDuff.Mode.CLEAR);
+        if (mWindowType != WindowManager.LayoutParams.TYPE_APPLICATION_PANEL) {
+            // if SKIP_DRAW is cleared, draw() has already punched a hole
+            if ((mPrivateFlags & SKIP_DRAW) == SKIP_DRAW) {
+                // punch a whole in the view-hierarchy below us
+                canvas.drawColor(0, PorterDuff.Mode.CLEAR);
+            }
         }
         // reposition ourselves where the surface is 
         mHaveFrame = true;
@@ -280,6 +288,22 @@ public class SurfaceView extends View {
         super.dispatchDraw(canvas);
     }
 
+    /**
+     * Control whether the surface view's surface is placed on top of its
+     * window.  Normally it is placed behind the window, to allow it to
+     * (for the most part) appear to composite with the views in the
+     * hierarchy.  By setting this, you cause it to be placed above the
+     * window.  This means that none of the contents of the window this
+     * SurfaceView is in will be visible on top of its surface.
+     * 
+     * <p>Note that this must be set before the surface view's containing
+     * window is attached to the window manager.
+     */
+    public void setOnTop(boolean onTop) {
+        mWindowType = onTop ? WindowManager.LayoutParams.TYPE_APPLICATION_PANEL
+                : WindowManager.LayoutParams.TYPE_APPLICATION_MEDIA;
+    }
+    
     /**
      * Hack to allow special layering of windows.  The type is one of the
      * types in WindowManager.LayoutParams.  This is a hack so:
@@ -345,7 +369,9 @@ public class SurfaceView extends View {
                 }
                 
                 mLayout.format = mRequestedFormat;
-                mLayout.flags |=WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
+                mLayout.flags |=WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
+                              | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+                              | WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
                               | WindowManager.LayoutParams.FLAG_SCALED
                               | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
                               | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
