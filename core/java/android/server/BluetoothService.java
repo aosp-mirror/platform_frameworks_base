@@ -398,14 +398,14 @@ public class BluetoothService extends IBluetooth.Stub {
         // Parrot, Zhongshan General K-mate Electronics, Great Well
         // Electronics, Flaircomm Electronics, Jatty Electronics, Delphi,
         // Clarion, Novero, Denso (Lexus, Toyota), Johnson Controls (Acura),
-        // Continental Automotive, Harman/Becker
+        // Continental Automotive, Harman/Becker, Panasonic/Kyushu Ten
         private final ArrayList<String>  mAutoPairingAddressBlacklist =
                 new ArrayList<String>(Arrays.asList(
                         "00:02:C7", "00:16:FE", "00:19:C1", "00:1B:FB", "00:1E:3D", "00:21:4F",
                         "00:23:06", "00:24:33", "00:A0:79", "00:0E:6D", "00:13:E0", "00:21:E8",
                         "00:60:57", "00:0E:9F", "00:12:1C", "00:18:91", "00:18:96", "00:13:04",
                         "00:16:FD", "00:22:A0", "00:0B:4C", "00:60:6F", "00:23:3D", "00:C0:59",
-                        "00:0A:30", "00:1E:AE", "00:1C:D7"
+                        "00:0A:30", "00:1E:AE", "00:1C:D7", "00:80:F0"
                         ));
 
         // List of names of Bluetooth devices for which auto pairing should be
