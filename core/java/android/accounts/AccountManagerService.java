@@ -1445,13 +1445,18 @@ public class AccountManagerService extends IAccountManager.Stub {
                             intent.getComponent().getClassName())) {
                 createNoCredentialsPermissionNotification(account, intent);
             } else {
+                final Integer notificationId = getSigninRequiredNotificationId(account);
+                intent.addCategory(String.valueOf(notificationId));
                 Notification n = new Notification(android.R.drawable.stat_sys_warning, null,
                         0 /* when */);
-                n.setLatestEventInfo(mContext, mContext.getText(R.string.notification_title),
+                final String notificationTitleFormat =
+                        mContext.getText(R.string.notification_title).toString();
+                n.setLatestEventInfo(mContext,
+                        String.format(notificationTitleFormat, account.name),
                         message, PendingIntent.getActivity(
                         mContext, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT));
                 ((NotificationManager) mContext.getSystemService(Context.NOTIFICATION_SERVICE))
-                        .notify(getSigninRequiredNotificationId(account), n);
+                        .notify(notificationId, n);
             }
         } finally {
             restoreCallingIdentity(identityToken);

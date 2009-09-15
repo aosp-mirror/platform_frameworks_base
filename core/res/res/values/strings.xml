@@ -234,7 +234,7 @@
     supply an auth token without prompting the user to re-enter the
     password.  This is the text that will scroll through the
     notification bar (will be seen by the user as he uses another application). -->
-    <string name="notification_title">Sign-in error</string>
+    <string name="notification_title">Sign-in error for <xliff:g id="account" example="foo@gmail.com">%1$s</xliff:g></string>
 
     <!-- Sync notifications --> <skip />
     <!-- A notification is shown when there is a sync error.  This is the text that will scroll through the notification bar (will be seen by the user as he uses another application). -->
