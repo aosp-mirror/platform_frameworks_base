@@ -16,33 +16,31 @@
 
 package com.android.providers.settings;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
-import java.io.EOFException;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.zip.CRC32;
 
 import android.backup.BackupDataInput;
 import android.backup.BackupDataOutput;
 import android.backup.BackupHelperAgent;
-import android.bluetooth.BluetoothAdapter;
-import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
-import android.media.AudioManager;
 import android.net.Uri;
 import android.net.wifi.WifiManager;
 import android.os.FileUtils;
 import android.os.ParcelFileDescriptor;
 import android.os.Process;
-import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
@@ -72,7 +70,6 @@ public class SettingsBackupAgent extends BackupHelperAgent {
 
     private static final String TAG = "SettingsBackupAgent";
 
-    private static final int COLUMN_ID = 0;
     private static final int COLUMN_NAME = 1;
     private static final int COLUMN_VALUE = 2;
 
@@ -83,12 +80,12 @@ public class SettingsBackupAgent extends BackupHelperAgent {
     };
 
     private static final String FILE_WIFI_SUPPLICANT = "/data/misc/wifi/wpa_supplicant.conf";
+    private static final String FILE_WIFI_SUPPLICANT_TEMPLATE =
+            "/system/etc/wifi/wpa_supplicant.conf";
 
     // the key to store the WIFI data under, should be sorted as last, so restore happens last.
     // use very late unicode character to quasi-guarantee last sort position.
-    private static final String KEY_WIFI_SUPPLICANT = "\uffeeWIFI";
-
-    private static final String FILE_BT_ROOT = "/data/misc/hcid/";
+    private static final String KEY_WIFI_SUPPLICANT = "\uffedWIFI";
 
     private SettingsHelper mSettingsHelper;
 
@@ -105,7 +102,7 @@ public class SettingsBackupAgent extends BackupHelperAgent {
         byte[] secureSettingsData = getSecureSettings();
         byte[] syncProviders = mSettingsHelper.getSyncProviders();
         byte[] locale = mSettingsHelper.getLocaleData();
-        byte[] wifiData = getFileData(FILE_WIFI_SUPPLICANT);
+        byte[] wifiData = getWifiSupplicant(FILE_WIFI_SUPPLICANT);
 
         long[] stateChecksums = readOldChecksums(oldState);
 
@@ -127,9 +124,6 @@ public class SettingsBackupAgent extends BackupHelperAgent {
     public void onRestore(BackupDataInput data, int appVersionCode,
             ParcelFileDescriptor newState) throws IOException {
 
-
-        enableBluetooth(false);
-
         while (data.readNextHeader()) {
             final String key = data.getKey();
             final int size = data.getDataSize();
@@ -140,7 +134,7 @@ public class SettingsBackupAgent extends BackupHelperAgent {
                 restoreSettings(data, Settings.Secure.CONTENT_URI);
             } else if (KEY_WIFI_SUPPLICANT.equals(key)) {
                 int retainedWifiState = enableWifi(false);
-                restoreFile(FILE_WIFI_SUPPLICANT, data);
+                restoreWifiSupplicant(FILE_WIFI_SUPPLICANT, data);
                 FileUtils.setPermissions(FILE_WIFI_SUPPLICANT,
                         FileUtils.S_IRUSR | FileUtils.S_IWUSR |
                         FileUtils.S_IRGRP | FileUtils.S_IWGRP,
@@ -319,19 +313,27 @@ public class SettingsBackupAgent extends BackupHelperAgent {
         return result;
     }
 
-    private byte[] getFileData(String filename) {
+    private byte[] getWifiSupplicant(String filename) {
         try {
             File file = new File(filename);
             if (file.exists()) {
-                byte[] bytes = new byte[(int) file.length()];
-                FileInputStream fis = new FileInputStream(file);
-                int offset = 0;
-                int got = 0;
-                do {
-                    got = fis.read(bytes, offset, bytes.length - offset);
-                    if (got > 0) offset += got;
-                } while (offset < bytes.length && got > 0);
-                return bytes;
+                BufferedReader br = new BufferedReader(new FileReader(file));
+                StringBuffer relevantLines = new StringBuffer();
+                boolean started = false;
+                String line;
+                while ((line = br.readLine()) != null) {
+                    if (!started && line.startsWith("network")) {
+                        started = true;
+                    }
+                    if (started) {
+                        relevantLines.append(line).append("\n");
+                    }
+                }
+                if (relevantLines.length() > 0) {
+                    return relevantLines.toString().getBytes();
+                } else {
+                    return EMPTY_DATA;
+                }
             } else {
                 return EMPTY_DATA;
             }
@@ -341,15 +343,36 @@ public class SettingsBackupAgent extends BackupHelperAgent {
         }
     }
 
-    private void restoreFile(String filename, BackupDataInput data) {
+    private void restoreWifiSupplicant(String filename, BackupDataInput data) {
         byte[] bytes = new byte[data.getDataSize()];
         if (bytes.length <= 0) return;
         try {
             data.readEntityData(bytes, 0, bytes.length);
-            FileOutputStream fos = new FileOutputStream(filename);
+            File supplicantFile = new File(FILE_WIFI_SUPPLICANT);
+            if (supplicantFile.exists()) supplicantFile.delete();
+            copyWifiSupplicantTemplate();
+
+            FileOutputStream fos = new FileOutputStream(filename, true);
+            fos.write("\n".getBytes());
             fos.write(bytes);
         } catch (IOException ioe) {
             Log.w(TAG, "Couldn't restore " + filename);
+        }
+    }
+
+    private void copyWifiSupplicantTemplate() {
+        try {
+            BufferedReader br = new BufferedReader(new FileReader(FILE_WIFI_SUPPLICANT_TEMPLATE));
+            BufferedWriter bw = new BufferedWriter(new FileWriter(FILE_WIFI_SUPPLICANT));
+            char[] temp = new char[1024];
+            int size;
+            while ((size = br.read(temp)) > 0) {
+                bw.write(temp, 0, size);
+            }
+            bw.close();
+            br.close();
+        } catch (IOException ioe) {
+            Log.w(TAG, "Couldn't copy wpa_supplicant file");
         }
     }
 
@@ -390,16 +413,5 @@ public class SettingsBackupAgent extends BackupHelperAgent {
             return state;
         }
         return WifiManager.WIFI_STATE_UNKNOWN;
-    }
-
-    private void enableBluetooth(boolean enable) {
-        BluetoothAdapter bt = (BluetoothAdapter) getSystemService(Context.BLUETOOTH_SERVICE);
-        if (bt != null) {
-            if (!enable) {
-                bt.disable();
-            } else {
-                bt.enable();
-            }
-        }
     }
 }
