@@ -455,8 +455,8 @@ static jboolean setPairingConfirmationNative(JNIEnv *env, jobject object,
         }
 
         if (!reply) {
-            LOGE("%s: Cannot create message reply to RequestConfirmation to "
-                 "D-Bus\n", __FUNCTION__);
+            LOGE("%s: Cannot create message reply to RequestPasskeyConfirmation or"
+                  "RequestPairingConsent to D-Bus\n", __FUNCTION__);
             dbus_message_unref(msg);
             return JNI_FALSE;
         }
