@@ -242,6 +242,14 @@ status_t Camera::autoFocus()
     return c->autoFocus();
 }
 
+status_t Camera::cancelAutoFocus()
+{
+    LOGV("cancelAutoFocus");
+    sp <ICamera> c = mCamera;
+    if (c == 0) return NO_INIT;
+    return c->cancelAutoFocus();
+}
+
 // take a picture
 status_t Camera::takePicture()
 {

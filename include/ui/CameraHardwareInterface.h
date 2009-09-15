@@ -161,6 +161,14 @@ public:
     virtual status_t    autoFocus() = 0;
 
     /**
+     * Cancels auto-focus function. If the auto-focus is still in progress,
+     * this function will cancel it. Whether the auto-focus is in progress
+     * or not, this function will return the focus position to the default.
+     * If the camera does not support auto-focus, this is a no-op.
+     */
+    virtual status_t    cancelAutoFocus() = 0;
+
+    /**
      * Take a picture.
      */
     virtual status_t    takePicture() = 0;
