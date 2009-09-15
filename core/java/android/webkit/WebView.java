@@ -4916,6 +4916,9 @@ public class WebView extends AbsoluteLayout
         // In case the soft keyboard has been dismissed, bring it back up.
         InputMethodManager.getInstance(getContext()).showSoftInput(mWebTextView,
                 0);
+        if (nativeFocusNodePointer() != nativeCursorNodePointer()) {
+            nativeMotionUp(x, y, mNavSlop);
+        }
         nativeTextInputMotionUp(x, y);
     }
 
