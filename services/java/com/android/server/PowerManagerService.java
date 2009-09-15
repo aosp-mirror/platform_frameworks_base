@@ -88,6 +88,9 @@ class PowerManagerService extends IPowerManager.Stub
     private static final int LONG_KEYLIGHT_DELAY = 6000;        // t+6 sec
     private static final int LONG_DIM_TIME = 7000;              // t+N-5 sec
 
+    // trigger proximity if distance is less than 5 cm
+    private static final float PROXIMITY_THRESHOLD = 5.0f;
+
     // Cached Gservices settings; see updateGservicesValues()
     private int mShortKeylightDelay = SHORT_KEYLIGHT_DELAY_DEFAULT;
 
@@ -2084,18 +2087,19 @@ class PowerManagerService extends IPowerManager.Stub
     public void onSensorChanged(SensorEvent event) {
         long milliseconds = event.timestamp / 1000000;
         synchronized (mLocks) {
-            if (event.values[0] == 0.0) {
+            float distance = event.values[0];
+            if (distance >= 0.0 && distance < PROXIMITY_THRESHOLD) {
                 if (mSpew) {
-                    Log.d(TAG, "onSensorChanged: proximity active");
+                    Log.d(TAG, "onSensorChanged: proximity active, distance: " + distance);
                 }
                 goToSleepLocked(milliseconds);
                 mProximitySensorActive = true;
             } else {
-                // proximity sensor negative events user activity.
+                // proximity sensor negative events trigger as user activity.
                 // temporarily set mUserActivityAllowed to true so this will work
                 // even when the keyguard is on.
                 if (mSpew) {
-                    Log.d(TAG, "onSensorChanged: proximity inactive");
+                    Log.d(TAG, "onSensorChanged: proximity inactive, distance: " + distance);
                 }
                 mProximitySensorActive = false;
                 boolean savedActivityAllowed = mUserActivityAllowed;
