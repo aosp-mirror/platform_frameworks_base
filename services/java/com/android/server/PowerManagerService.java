@@ -52,6 +52,7 @@ import android.util.Log;
 import android.view.WindowManagerPolicy;
 import static android.provider.Settings.System.DIM_SCREEN;
 import static android.provider.Settings.System.SCREEN_BRIGHTNESS;
+import static android.provider.Settings.System.SCREEN_BRIGHTNESS_MODE;
 import static android.provider.Settings.System.SCREEN_OFF_TIMEOUT;
 import static android.provider.Settings.System.STAY_ON_WHILE_PLUGGED_IN;
 
@@ -442,7 +443,11 @@ class PowerManagerService extends IPowerManager.Stub
 
         // turn everything on
         setPowerState(ALL_BRIGHT);
-        
+
+        // set auto brightness mode to user setting
+        boolean brightnessMode = Settings.System.getInt(resolver, SCREEN_BRIGHTNESS_MODE, 1) != 0;
+        mHardware.setAutoBrightness_UNCHECKED(brightnessMode);
+
         synchronized (mHandlerThread) {
             mInitComplete = true;
             mHandlerThread.notifyAll();
