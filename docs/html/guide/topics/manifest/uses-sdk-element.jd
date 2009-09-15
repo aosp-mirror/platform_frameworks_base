@@ -36,30 +36,27 @@ and minor versions).</p>
 <dd>
 <dl class="attr">
   <dt><a name="min"></a>{@code android:minSdkVersion}</dt>
-  <dd>An integer designating the minimum level of the Android API that's required 
-  for the application to run.
+  <dd>An integer designating the minimum API Level required
+  for the application to run. The Android system will prevent the user from installing
+  the application if the system's API Level is lower than the value specified in
+  this attribute. You should always declare this attribute.
   
-  <p>Prior to installing an application, the Android system checks the value of this
-  attribute and allows the installation only if it
-  is less than or equal to the API Level used by the system itself.</p>
-  
-  <p>If you do not declare this attribute, then a value of "1" is assumed, which
+  <p class="caution"><strong>Caution:</strong>
+  If you do not declare this attribute, then a value of "1" is assumed, which
   indicates that your application is compatible with all versions of Android. If your
-  application is <em>not</em> universally compatible (for instance if it uses APIs
-  introduced in Android 1.5) and you have not declared the proper <code>minSdkVersion</code>, 
-  then when installed on a system with a lower API Level, the application 
-  will crash during runtime. For this reason, be certain to declare the appropriate API Level
+  application is <em>not</em> compatible with all versions (for instance, it uses APIs
+  introduced in API Level 3) and you have not declared the proper <code>minSdkVersion</code>,
+  then when installed on a system with an API Level less than 3, the application will crash
+  during runtime when attempting to access the unavailable APIs. For this reason, 
+  be certain to declare the appropriate API Level
   in the <code>minSdkVersion</code> attribute.</p>
   </dd>
   
   <dt><a name="max"></a>{@code android:maxSdkVersion}</dt>
-  <dd>An integer designating the maximum level of the Android API that the application is 
-  compatible with. You can use this to ensure your application is filtered out
-  of later versions of the platform when you know you have incompatibility with them.</p>
-  
-  <p>Prior to installing an application, the Android system checks the value of this
-  attribute and allows the installation only it
-  is greater than or equal to the API Level used by the system itself.</p>
+  <dd>An integer designating the maximum API Level on which the application is 
+  designed to run. The Android system will prevent the user from installing the 
+  application if the system's API Level is higher than the value specified
+  in this attribute. 
   
   <p>Introduced in: API Level 4</p>
   </dd>
