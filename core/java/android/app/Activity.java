@@ -34,6 +34,7 @@ import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -1752,8 +1753,16 @@ public class Activity extends ContextThemeWrapper
      * 
      * <p>If the focused view didn't want this event, this method is called.
      *
-     * <p>The default implementation sets up state to call
-     * {@link #onKeyLongPress}, and does other default key handling
+     * <p>The default implementation takes care of {@link KeyEvent#KEYCODE_BACK}
+     * by calling {@link #onBackPressed()}, though the behavior varies based
+     * on the application compatibility mode: for
+     * {@link android.os.Build.VERSION_CODES#ECLAIR} or later applications,
+     * it will set up the dispatch to call {@link #onKeyUp} where the action
+     * will be performed; for earlier applications, it will perform the
+     * action immediately in on-down, as those versions of the platform
+     * behaved.
+     * 
+     * <p>Other additional default key handling may be performed
      * if configured with {@link #setDefaultKeyMode}.
      * 
      * @return Return <code>true</code> to prevent this event from being propagated
@@ -1764,7 +1773,12 @@ public class Activity extends ContextThemeWrapper
      */
     public boolean onKeyDown(int keyCode, KeyEvent event)  {
         if (keyCode == KeyEvent.KEYCODE_BACK) {
-            event.startTracking();
+            if (getApplicationInfo().targetSdkVersion
+                    >= Build.VERSION_CODES.ECLAIR) {
+                event.startTracking();
+            } else {
+                onBackPressed();
+            }
             return true;
         }
         
@@ -1841,10 +1855,13 @@ public class Activity extends ContextThemeWrapper
      * @see KeyEvent
      */
     public boolean onKeyUp(int keyCode, KeyEvent event) {
-        if (keyCode == KeyEvent.KEYCODE_BACK && event.isTracking()
-                && !event.isCanceled()) {
-            onBackPressed();
-            return true;
+        if (getApplicationInfo().targetSdkVersion
+                >= Build.VERSION_CODES.ECLAIR) {
+            if (keyCode == KeyEvent.KEYCODE_BACK && event.isTracking()
+                    && !event.isCanceled()) {
+                onBackPressed();
+                return true;
+            }
         }
         return false;
     }
@@ -2016,11 +2033,14 @@ public class Activity extends ContextThemeWrapper
      */
     public boolean dispatchKeyEvent(KeyEvent event) {
         onUserInteraction();
-        if (getWindow().superDispatchKeyEvent(event)) {
+        Window win = getWindow();
+        if (win.superDispatchKeyEvent(event)) {
             return true;
         }
-        return event.dispatch(this, mDecor != null
-                ? mDecor.getKeyDispatcherState() : null, this);
+        View decor = mDecor;
+        if (decor == null) decor = win.getDecorView();
+        return event.dispatch(this, decor != null
+                ? decor.getKeyDispatcherState() : null, this);
     }
 
     /**
