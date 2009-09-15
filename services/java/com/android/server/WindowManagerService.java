@@ -99,6 +99,7 @@ import android.view.RawInputEvent;
 import android.view.Surface;
 import android.view.SurfaceSession;
 import android.view.View;
+import android.view.ViewConfiguration;
 import android.view.ViewTreeObserver;
 import android.view.WindowManager;
 import android.view.WindowManagerImpl;
@@ -150,9 +151,6 @@ public class WindowManagerService extends IWindowManager.Stub
     static final boolean localLOGV = DEBUG;
 
     static final int LOG_WM_NO_SURFACE_MEMORY = 31000;
-
-    /** How long to wait for first key repeat, in milliseconds */
-    static final int KEY_REPEAT_FIRST_DELAY = 750;
 
     /** How long to wait for subsequent key repeats, in milliseconds */
     static final int KEY_REPEAT_DELAY = 50;
@@ -4900,6 +4898,16 @@ public class WindowManagerService extends IWindowManager.Stub
             return INJECT_SUCCEEDED;
         }
 
+        // Okay we have finished waiting for the last event to be processed.
+        // First off, if this is a repeat event, check to see if there is
+        // a corresponding up event in the queue.  If there is, we will
+        // just drop the repeat, because it makes no sense to repeat after
+        // the user has released a key.  (This is especially important for
+        // long presses.)
+        if (event.getRepeatCount() > 0 && mQueue.hasKeyUpEvent(event)) {
+            return INJECT_SUCCEEDED;
+        }
+        
         WindowState focus = (WindowState)focusObj;
 
         if (DEBUG_INPUT) Log.v(
@@ -6018,6 +6026,7 @@ public class WindowManagerService extends IWindowManager.Stub
             // Last keydown time for auto-repeating keys
             long lastKeyTime = SystemClock.uptimeMillis();
             long nextKeyTime = lastKeyTime+LONG_WAIT;
+            long downTime = 0;
 
             // How many successive repeats we generated
             int keyRepeatCount = 0;
@@ -6088,15 +6097,17 @@ public class WindowManagerService extends IWindowManager.Stub
                                 KeyEvent ke = (KeyEvent)ev.event;
                                 if (ke.isDown()) {
                                     lastKey = ke;
+                                    downTime = curTime;
                                     keyRepeatCount = 0;
                                     lastKeyTime = curTime;
                                     nextKeyTime = lastKeyTime
-                                            + KEY_REPEAT_FIRST_DELAY;
+                                            + ViewConfiguration.getLongPressTimeout();
                                     if (DEBUG_INPUT) Log.v(
                                         TAG, "Received key down: first repeat @ "
                                         + nextKeyTime);
                                 } else {
                                     lastKey = null;
+                                    downTime = 0;
                                     // Arbitrary long timeout.
                                     lastKeyTime = curTime;
                                     nextKeyTime = curTime + LONG_WAIT;
@@ -6144,7 +6155,19 @@ public class WindowManagerService extends IWindowManager.Stub
                         if (DEBUG_INPUT) Log.v(
                             TAG, "Key repeat: count=" + keyRepeatCount
                             + ", next @ " + nextKeyTime);
-                        dispatchKey(KeyEvent.changeTimeRepeat(lastKey, curTime, keyRepeatCount), 0, 0);
+                        KeyEvent newEvent;
+                        if (downTime != 0 && (downTime
+                                + ViewConfiguration.getLongPressTimeout())
+                                <= curTime) {
+                            newEvent = KeyEvent.changeTimeRepeat(lastKey,
+                                    curTime, keyRepeatCount,
+                                    lastKey.getFlags() | KeyEvent.FLAG_LONG_PRESS);
+                            downTime = 0;
+                        } else {
+                            newEvent = KeyEvent.changeTimeRepeat(lastKey,
+                                    curTime, keyRepeatCount);
+                        }
+                        dispatchKey(newEvent, 0, 0);
 
                     } else {
                         curTime = SystemClock.uptimeMillis();
