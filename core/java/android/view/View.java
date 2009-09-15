@@ -6038,16 +6038,23 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * some form of this public, but should think about the API.
      */
     Bitmap createSnapshot(Bitmap.Config quality, int backgroundColor) {
-        final int width = mRight - mLeft;
-        final int height = mBottom - mTop;
+        int width = mRight - mLeft;
+        int height = mBottom - mTop;
 
-        Bitmap bitmap = Bitmap.createBitmap(width, height, quality);
+        final AttachInfo attachInfo = mAttachInfo;
+        final float scale = attachInfo.mApplicationScale;
+        width = (int) ((width * scale) + 0.5f);
+        height = (int) ((height * scale) + 0.5f);
+        
+        Bitmap bitmap = Bitmap.createBitmap(width > 0 ? width : 1,
+                height > 0 ? height : 1, quality);
         if (bitmap == null) {
             throw new OutOfMemoryError();
         }
 
+        bitmap.setDensity(getResources().getDisplayMetrics().densityDpi);
+        
         Canvas canvas;
-        final AttachInfo attachInfo = mAttachInfo;
         if (attachInfo != null) {
             canvas = attachInfo.mCanvas;
             if (canvas == null) {
@@ -6070,6 +6077,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
 
         computeScroll();
         final int restoreCount = canvas.save();
+        canvas.scale(scale, scale);
         canvas.translate(-mScrollX, -mScrollY);
 
         // Temporarily remove the dirty mask

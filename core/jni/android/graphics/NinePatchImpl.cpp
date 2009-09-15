@@ -16,8 +16,10 @@
 */
 
 #define LOG_TAG "NinePatch"
+#define LOG_NDEBUG 1
 
 #include <utils/ResourceTypes.h>
+#include <utils/Log.h>
 
 #include "SkBitmap.h"
 #include "SkCanvas.h"
@@ -25,7 +27,7 @@
 #include "SkPaint.h"
 #include "SkUnPreMultiply.h"
 
-#define USE_TRACEx
+#define USE_TRACE
 
 #ifdef USE_TRACE
     static bool gTrace;
@@ -130,10 +132,10 @@ void NinePatch_Draw(SkCanvas* canvas, const SkRect& bounds,
 
     SkASSERT(canvas || outRegion);
 
-#if 0
+#ifdef USE_TRACE
     if (canvas) {
         const SkMatrix& m = canvas->getTotalMatrix();
-        SkDebugf("ninepatch [%g %g %g] [%g %g %g]\n",
+        LOGV("ninepatch [%g %g %g] [%g %g %g]\n",
                  SkScalarToFloat(m[0]), SkScalarToFloat(m[1]), SkScalarToFloat(m[2]),
                  SkScalarToFloat(m[3]), SkScalarToFloat(m[4]), SkScalarToFloat(m[5]));
     }
@@ -141,10 +143,10 @@ void NinePatch_Draw(SkCanvas* canvas, const SkRect& bounds,
 
 #ifdef USE_TRACE
     if (gTrace) {
-        SkDEBUGF(("======== ninepatch bounds [%g %g]\n", SkScalarToFloat(bounds.width()), SkScalarToFloat(bounds.height())));
-        SkDEBUGF(("======== ninepatch paint bm [%d,%d]\n", bitmap.width(), bitmap.height()));
-        SkDEBUGF(("======== ninepatch xDivs [%d,%d]\n", chunk.xDivs[0], chunk.xDivs[1]));
-        SkDEBUGF(("======== ninepatch yDivs [%d,%d]\n", chunk.yDivs[0], chunk.yDivs[1]));
+        LOGV("======== ninepatch bounds [%g %g]\n", SkScalarToFloat(bounds.width()), SkScalarToFloat(bounds.height()));
+        LOGV("======== ninepatch paint bm [%d,%d]\n", bitmap.width(), bitmap.height());
+        LOGV("======== ninepatch xDivs [%d,%d]\n", chunk.xDivs[0], chunk.xDivs[1]);
+        LOGV("======== ninepatch yDivs [%d,%d]\n", chunk.yDivs[0], chunk.yDivs[1]);
     }
 #endif
 
@@ -153,7 +155,7 @@ void NinePatch_Draw(SkCanvas* canvas, const SkRect& bounds,
         (paint && paint->getXfermode() == NULL && paint->getAlpha() == 0))
     {
 #ifdef USE_TRACE
-        if (gTrace) SkDEBUGF(("======== abort ninepatch draw\n"));
+        if (gTrace) LOGV("======== abort ninepatch draw\n");
 #endif
         return;
     }
@@ -198,8 +200,8 @@ void NinePatch_Draw(SkCanvas* canvas, const SkRect& bounds,
     }
     int numFixedYPixelsRemaining = bitmapHeight - numStretchyYPixelsRemaining;
 
-#if 0
-    SkDebugf("NinePatch [%d %d] bounds [%g %g %g %g] divs [%d %d]\n",
+#ifdef USE_TRACE
+    LOGV("NinePatch [%d %d] bounds [%g %g %g %g] divs [%d %d]\n",
              bitmap.width(), bitmap.height(),
              SkScalarToFloat(bounds.fLeft), SkScalarToFloat(bounds.fTop),
              SkScalarToFloat(bounds.width()), SkScalarToFloat(bounds.height()),
@@ -302,13 +304,13 @@ void NinePatch_Draw(SkCanvas* canvas, const SkRect& bounds,
                 goto nextDiv;
             }
             if (canvas) {
-#if 0
-                SkDebugf("-- src [%d %d %d %d] dst [%g %g %g %g]\n",
+#ifdef USE_TRACE
+                LOGV("-- src [%d %d %d %d] dst [%g %g %g %g]\n",
                          src.fLeft, src.fTop, src.width(), src.height(),
                          SkScalarToFloat(dst.fLeft), SkScalarToFloat(dst.fTop),
                          SkScalarToFloat(dst.width()), SkScalarToFloat(dst.height()));
                 if (2 == src.width() && SkIntToScalar(5) == dst.width()) {
-                    SkDebugf("--- skip patch\n");
+                    LOGV("--- skip patch\n");
                 }
 #endif
                 drawStretchyPatch(canvas, src, dst, bitmap, *paint, initColor,
