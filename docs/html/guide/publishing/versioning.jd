@@ -117,7 +117,7 @@ and <code>android:versionName</code> attributes in the
 <p>In this example, note that <code>android:versionCode</code> value indicates
 that the current .apk contains the second release of the application code, which
 corresponds to a minor follow-on release, as shown by the
-<code>android:codeName</code> string. </p>
+<code>android:versionName</code> string. </p>
 
 <p>The Android framework provides an API to let applications query the system
 for version information about your application. To obtain version information,
