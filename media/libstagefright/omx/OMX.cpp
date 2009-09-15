@@ -609,6 +609,7 @@ sp<IOMXRenderer> OMX::createRenderer(
     } else {
         LOGW("Using software renderer.");
         impl = new SoftwareRenderer(
+                colorFormat,
                 surface,
                 displayWidth, displayHeight,
                 encodedWidth, encodedHeight);
