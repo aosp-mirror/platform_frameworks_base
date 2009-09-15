@@ -37,7 +37,6 @@ import android.view.SurfaceView;
 
 import java.util.ArrayList;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 
 import junit.framework.Assert;
@@ -1528,9 +1527,6 @@ final class WebViewCore {
     // Used to suspend drawing.
     private boolean mDrawIsPaused;
 
-    // Used to end scale+scroll mode, accessed by both threads
-    boolean mEndScaleZoom = false;
-
     // mRestoreState is set in didFirstLayout(), and reset in the next
     // webkitDraw after passing it to the UI thread.
     private RestoreState mRestoreState = null;
@@ -1571,7 +1567,7 @@ final class WebViewCore {
             // Send the native view size that was used during the most recent
             // layout.
             draw.mViewPoint = new Point(mCurrentViewWidth, mCurrentViewHeight);
-            if (WebView.ENABLE_DOUBLETAP_ZOOM && mSettings.getUseWideViewPort()) {
+            if (mSettings.getUseWideViewPort()) {
                 draw.mMinPrefWidth = Math.max(
                         mViewportWidth == -1 ? DEFAULT_VIEWPORT_WIDTH
                                 : (mViewportWidth == 0 ? mCurrentViewWidth
@@ -1977,7 +1973,7 @@ final class WebViewCore {
 
     // called by JNI
     private void restoreScreenWidthScale(int scale) {
-        if (!WebView.ENABLE_DOUBLETAP_ZOOM || !mSettings.getUseWideViewPort()) {
+        if (!mSettings.getUseWideViewPort()) {
             return;
         }
 
