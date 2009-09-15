@@ -253,10 +253,39 @@ static void * SF_LoadFloat(JNIEnv *_env, jobject _obj, jfieldID _field, void *bu
     return ((uint8_t *)buffer) + 4;
 }
 
+static void * SF_SaveInt(JNIEnv *_env, jobject _obj, jfieldID _field, void *buffer)
+{
+    LOGE("Save Int");
+    _env->SetIntField(_obj, _field, ((int32_t *)buffer)[0]);
+    return ((uint8_t *)buffer) + 4;
+}
+
+static void * SF_SaveShort(JNIEnv *_env, jobject _obj, jfieldID _field, void *buffer)
+{
+    LOGE("Save Short");
+    _env->SetShortField(_obj, _field, ((int16_t *)buffer)[0]);
+    return ((uint8_t *)buffer) + 2;
+}
+
+static void * SF_SaveByte(JNIEnv *_env, jobject _obj, jfieldID _field, void *buffer)
+{
+    LOGE("Save Byte");
+    _env->SetByteField(_obj, _field, ((int8_t *)buffer)[0]);
+    return ((uint8_t *)buffer) + 1;
+}
+
+static void * SF_SaveFloat(JNIEnv *_env, jobject _obj, jfieldID _field, void *buffer)
+{
+    LOGE("Save Float");
+    _env->SetFloatField(_obj, _field, ((float *)buffer)[0]);
+    return ((uint8_t *)buffer) + 4;
+}
+
 struct TypeFieldCache {
     jfieldID field;
     int bits;
     void * (*ptr)(JNIEnv *, jobject, jfieldID, void *buffer);
+    void * (*readPtr)(JNIEnv *, jobject, jfieldID, void *buffer);
 };
 
 struct TypeCache {
@@ -296,13 +325,23 @@ nTypeSetupFields(JNIEnv *_env, jobject _this, jobject _type, jintArray _types, j
         switch(fType[ct]) {
         case RS_TYPE_FLOAT:
             tfc[ct].ptr = SF_LoadFloat;
+            tfc[ct].readPtr = SF_SaveFloat;
             break;
         case RS_TYPE_UNSIGNED:
         case RS_TYPE_SIGNED:
             switch(tfc[ct].bits) {
-            case 32:    tfc[ct].ptr = SF_LoadInt;   break;
-            case 16:    tfc[ct].ptr = SF_LoadShort; break;
-            case 8:     tfc[ct].ptr = SF_LoadByte;  break;
+            case 32:
+                tfc[ct].ptr = SF_LoadInt;
+                tfc[ct].readPtr = SF_SaveInt;
+                break;
+            case 16:
+                tfc[ct].ptr = SF_LoadShort;
+                tfc[ct].readPtr = SF_SaveShort;
+                break;
+            case 8:
+                tfc[ct].ptr = SF_LoadByte;
+                tfc[ct].readPtr = SF_SaveByte;
+                break;
             }
             break;
         }
@@ -545,7 +584,30 @@ nAllocationSubDataFromObject(JNIEnv *_env, jobject _this, jint alloc, jobject _t
         buf = tfc->ptr(_env, _o, tfc->field, buf);
     }
     rsAllocation1DSubData(con, (RsAllocation)alloc, offset, 1, bufAlloc, tc->size);
-    const uint32_t * tmp = (const uint32_t *)bufAlloc;
+    free(bufAlloc);
+}
+
+static void
+nAllocationSubReadFromObject(JNIEnv *_env, jobject _this, jint alloc, jobject _type, jint offset, jobject _o)
+{
+    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
+    LOG_API("nAllocationReadFromObject con(%p), alloc(%p)", con, (RsAllocation)alloc);
+
+    assert(offset == 0);
+
+    const TypeCache *tc = (TypeCache *)_env->GetIntField(_type, gTypeNativeCache);
+
+    void * bufAlloc = malloc(tc->size);
+    void * buf = bufAlloc;
+    rsAllocationRead(con, (RsAllocation)alloc, bufAlloc);
+
+    LOGE("size %i, ", tc->size);
+
+    for (int ct=0; ct < tc->fieldCount; ct++) {
+        const TypeFieldCache *tfc = &tc->fields[ct];
+        LOGE("ct=%i, buf=%p", ct, buf);
+        buf = tfc->readPtr(_env, _o, tfc->field, buf);
+    }
     free(bufAlloc);
 }
 
@@ -1270,6 +1332,7 @@ static JNINativeMethod methods[] = {
 {"nAllocationRead",                "(I[I)V",                               (void*)nAllocationRead_i },
 {"nAllocationRead",                "(I[F)V",                               (void*)nAllocationRead_f },
 {"nAllocationSubDataFromObject",   "(ILandroid/renderscript/Type;ILjava/lang/Object;)V",   (void*)nAllocationSubDataFromObject },
+{"nAllocationSubReadFromObject",   "(ILandroid/renderscript/Type;ILjava/lang/Object;)V",   (void*)nAllocationSubReadFromObject },
 
 {"nTriangleMeshBegin",             "(II)V",                                (void*)nTriangleMeshBegin },
 {"nTriangleMeshAddVertex_XY",      "(FF)V",                                (void*)nTriangleMeshAddVertex_XY },
