@@ -602,11 +602,13 @@ void MediaPlayerService::Client::disconnect()
 }
 
 static player_type getDefaultPlayerType() {
+#if BUILD_WITH_FULL_STAGEFRIGHT
     char value[PROPERTY_VALUE_MAX];
     if (property_get("media.stagefright.enable-player", value, NULL)
         && (!strcmp(value, "1") || !strcasecmp(value, "true"))) {
         return STAGEFRIGHT_PLAYER;
     }
+#endif
 
     return PV_PLAYER;
 }
@@ -684,10 +686,12 @@ static sp<MediaPlayerBase> createPlayer(player_type playerType, void* cookie,
             LOGV(" create VorbisPlayer");
             p = new VorbisPlayer();
             break;
+#if BUILD_WITH_FULL_STAGEFRIGHT
         case STAGEFRIGHT_PLAYER:
             LOGV(" create StagefrightPlayer");
             p = new StagefrightPlayer;
             break;
+#endif
         case TEST_PLAYER:
             LOGV("Create Test Player stub");
             p = new TestPlayerStub();

@@ -10,12 +10,20 @@ LOCAL_SRC_FILES:=               \
     MediaRecorderClient.cpp     \
     MediaPlayerService.cpp      \
     MetadataRetrieverClient.cpp \
-    StagefrightPlayer.cpp       \
     TestPlayerStub.cpp          \
     VorbisPlayer.cpp            \
     VorbisMetadataRetriever.cpp \
     MidiMetadataRetriever.cpp \
     MidiFile.cpp
+
+ifeq ($(BUILD_WITH_FULL_STAGEFRIGHT),true)
+
+LOCAL_SRC_FILES +=              \
+    StagefrightPlayer.cpp
+
+LOCAL_CFLAGS += -DBUILD_WITH_FULL_STAGEFRIGHT=1
+
+endif
 
 ifeq ($(TARGET_OS)-$(TARGET_SIMULATOR),linux-true)
 LOCAL_LDLIBS += -ldl -lpthread

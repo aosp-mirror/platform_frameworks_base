@@ -1,3 +1,5 @@
+ifeq ($(BUILD_WITH_FULL_STAGEFRIGHT),true)
+
 LOCAL_PATH:= $(call my-dir)
 
 include $(CLEAR_VARS)
@@ -38,3 +40,5 @@ LOCAL_CFLAGS += -Wno-multichar
 LOCAL_MODULE:= record
 
 include $(BUILD_EXECUTABLE)
+
+endif
