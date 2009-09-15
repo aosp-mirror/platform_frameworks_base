@@ -271,7 +271,8 @@ public class BitmapDrawable extends Drawable {
 
     public void setTileModeXY(Shader.TileMode xmode, Shader.TileMode ymode) {
         final BitmapState state = mBitmapState;
-        if (state.mTileModeX != xmode || state.mTileModeY != ymode) {
+        if (state.mPaint.getShader() == null ||
+                state.mTileModeX != xmode || state.mTileModeY != ymode) {
             state.mTileModeX = xmode;
             state.mTileModeY = ymode;
             mRebuildShader = true;
