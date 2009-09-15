@@ -11,6 +11,7 @@ LOCAL_SHARED_LIBRARIES := \
 	libstagefright
 
 LOCAL_C_INCLUDES:= \
+	$(JNI_H_INCLUDE) \
 	frameworks/base/media/libstagefright \
 	$(TOP)/external/opencore/extern_libs_v2/khronos/openmax/include
 
@@ -32,6 +33,7 @@ LOCAL_SHARED_LIBRARIES := \
 	libstagefright
 
 LOCAL_C_INCLUDES:= \
+	$(JNI_H_INCLUDE) \
 	frameworks/base/media/libstagefright \
 	$(TOP)/external/opencore/extern_libs_v2/khronos/openmax/include
 

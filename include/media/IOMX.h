@@ -25,6 +25,8 @@
 #include <OMX_Core.h>
 #include <OMX_Video.h>
 
+#include "jni.h"
+
 namespace android {
 
 class IMemory;
@@ -102,11 +104,18 @@ public:
             size_t encodedWidth, size_t encodedHeight,
             size_t displayWidth, size_t displayHeight) = 0;
 
-    // Note: This method is _not_ virtual, it exists as a wrapper around
+    // Note: These methods are _not_ virtual, it exists as a wrapper around
     // the virtual "createRenderer" method above facilitating extraction
-    // of the ISurface from a regular Surface.
+    // of the ISurface from a regular Surface or a java Surface object.
     sp<IOMXRenderer> createRenderer(
             const sp<Surface> &surface,
+            const char *componentName,
+            OMX_COLOR_FORMATTYPE colorFormat,
+            size_t encodedWidth, size_t encodedHeight,
+            size_t displayWidth, size_t displayHeight);
+
+    sp<IOMXRenderer> createRendererFromJavaSurface(
+            JNIEnv *env, jobject javaSurface,
             const char *componentName,
             OMX_COLOR_FORMATTYPE colorFormat,
             size_t encodedWidth, size_t encodedHeight,
