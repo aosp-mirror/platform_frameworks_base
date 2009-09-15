@@ -42,6 +42,7 @@ import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.CheckBox;
+import android.widget.FasttrackBadgeWidget;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -64,15 +65,13 @@ public class ContactHeaderWidget extends FrameLayout implements View.OnClickList
     private TextView mDisplayNameView;
     private TextView mPhoneticNameView;
     private CheckBox mStarredView;
-    private ImageView mPhotoView;
+    private FasttrackBadgeWidget mPhotoView;
     private ImageView mPresenceView;
     private TextView mStatusView;
     private int mNoPhotoResource;
     private QueryHandler mQueryHandler;
 
-    protected long mContactId;
     protected Uri mContactUri;
-    protected Uri mStatusUri;
 
     protected String[] mExcludeMimes = null;
 
@@ -94,6 +93,8 @@ public class ContactHeaderWidget extends FrameLayout implements View.OnClickList
         Contacts.STARRED,
         Contacts.PHOTO_ID,
         Contacts.PRESENCE_STATUS,
+        Contacts._ID,
+        Contacts.LOOKUP_KEY,
     };
     protected static final int HEADER_DISPLAY_NAME_COLUMN_INDEX = 0;
     //TODO: We need to figure out how we're going to get the phonetic name.
@@ -101,6 +102,8 @@ public class ContactHeaderWidget extends FrameLayout implements View.OnClickList
     protected static final int HEADER_STARRED_COLUMN_INDEX = 1;
     protected static final int HEADER_PHOTO_ID_COLUMN_INDEX = 2;
     protected static final int HEADER_PRESENCE_STATUS_COLUMN_INDEX = 3;
+    protected static final int HEADER_CONTACT_ID_COLUMN_INDEX = 4;
+    protected static final int HEADER_LOOKUP_KEY_COLUMN_INDEX = 5;
 
     //Projection used for finding the most recent social status.
     protected static final String[] SOCIAL_PROJECTION = new String[] {
@@ -113,18 +116,29 @@ public class ContactHeaderWidget extends FrameLayout implements View.OnClickList
     //Projection used for looking up contact id from phone number
     protected static final String[] PHONE_LOOKUP_PROJECTION = new String[] {
         PhoneLookup._ID,
+        PhoneLookup.LOOKUP_KEY,
     };
     protected static final int PHONE_LOOKUP_CONTACT_ID_COLUMN_INDEX = 0;
+    protected static final int PHONE_LOOKUP_CONTACT_LOOKUP_KEY_COLUMN_INDEX = 1;
 
     //Projection used for looking up contact id from email address
     protected static final String[] EMAIL_LOOKUP_PROJECTION = new String[] {
         RawContacts.CONTACT_ID,
+        Contacts.LOOKUP_KEY,
     };
     protected static final int EMAIL_LOOKUP_CONTACT_ID_COLUMN_INDEX = 0;
+    protected static final int EMAIL_LOOKUP_CONTACT_LOOKUP_KEY_COLUMN_INDEX = 1;
 
+    protected static final String[] CONTACT_LOOKUP_PROJECTION = new String[] {
+        Contacts._ID,
+    };
+    protected static final int CONTACT_LOOKUP_ID_COLUMN_INDEX = 0;
 
     private static final int TOKEN_CONTACT_INFO = 0;
     private static final int TOKEN_SOCIAL = 1;
+    private static final int TOKEN_PHONE_LOOKUP = 2;
+    private static final int TOKEN_EMAIL_LOOKUP = 3;
+    private static final int TOKEN_LOOKUP_CONTACT_FOR_SOCIAL_QUERY = 4;
 
     public ContactHeaderWidget(Context context) {
         this(context, null);
@@ -151,8 +165,7 @@ public class ContactHeaderWidget extends FrameLayout implements View.OnClickList
         mStarredView = (CheckBox)findViewById(R.id.star);
         mStarredView.setOnClickListener(this);
 
-        mPhotoView = (ImageView)findViewById(R.id.photo);
-        mPhotoView.setOnClickListener(this);
+        mPhotoView = (FasttrackBadgeWidget) findViewById(R.id.photo);
         mPhotoView.setOnLongClickListener(this);
 
         mPresenceView = (ImageView) findViewById(R.id.presence);
@@ -217,12 +230,46 @@ public class ContactHeaderWidget extends FrameLayout implements View.OnClickList
         @Override
         protected void onQueryComplete(int token, Object cookie, Cursor cursor) {
             try{
-                if (token == TOKEN_CONTACT_INFO) {
-                    bindContactInfo(cursor);
-                    invalidate();
-                } else if (token == TOKEN_SOCIAL) {
-                    bindSocial(cursor);
-                    invalidate();
+                switch (token) {
+                    case TOKEN_CONTACT_INFO: {
+                        bindContactInfo(cursor);
+                        invalidate();
+                        break;
+                    }
+                    case TOKEN_SOCIAL: {
+                        bindSocial(cursor);
+                        invalidate();
+                        break;
+                    }
+                    case TOKEN_PHONE_LOOKUP: {
+                        if (cursor != null && cursor.moveToFirst()) {
+                            long contactId = cursor.getLong(PHONE_LOOKUP_CONTACT_ID_COLUMN_INDEX);
+                            String lookupKey = cursor.getString(
+                                    PHONE_LOOKUP_CONTACT_LOOKUP_KEY_COLUMN_INDEX);
+                            bindFromContactUri(Contacts.getLookupUri(contactId, lookupKey));
+                        } else {
+                            setDisplayName((String) cookie, null);
+                        }
+                        break;
+                    }
+                    case TOKEN_EMAIL_LOOKUP: {
+                        if (cursor != null && cursor.moveToFirst()) {
+                            long contactId = cursor.getLong(EMAIL_LOOKUP_CONTACT_ID_COLUMN_INDEX);
+                            String lookupKey = cursor.getString(
+                                    EMAIL_LOOKUP_CONTACT_LOOKUP_KEY_COLUMN_INDEX);
+                            bindFromContactUri(Contacts.getLookupUri(contactId, lookupKey));
+                        } else {
+                            setDisplayName((String) cookie, null);
+                        }
+                        break;
+                    }
+                    case TOKEN_LOOKUP_CONTACT_FOR_SOCIAL_QUERY: {
+                        if (cursor != null && cursor.moveToFirst()) {
+                            long contactId = cursor.getLong(CONTACT_LOOKUP_ID_COLUMN_INDEX);
+                            startSocialQuery(ContentUris.withAppendedId(
+                                    Activities.CONTENT_CONTACT_STATUS_URI, contactId));
+                        }
+                    }
                 }
             } finally {
                 if (cursor != null) {
@@ -300,33 +347,31 @@ public class ContactHeaderWidget extends FrameLayout implements View.OnClickList
      * Convenience method for binding all available data from an existing
      * contact.
      *
-     * @param contactId the contact id of the contact whose info should be displayed.
+     * @param conatctUri a {Contacts.CONTENT_LOOKUP_URI} style URI.
      */
-    public void bindFromContactId(long contactId) {
-        mContactId = contactId;
-        mContactUri = ContentUris.withAppendedId(Contacts.CONTENT_URI, mContactId);
+    public void bindFromContactLookupUri(Uri contactLookupUri) {
+        mContactUri = contactLookupUri;
 
-        bindContactUri(mContactUri);
-        bindSocialUri(ContentUris.withAppendedId(Activities.CONTENT_CONTACT_STATUS_URI, mContactId));
+        // Query for the contactId so we can do the social query.
+        mQueryHandler.startQuery(TOKEN_LOOKUP_CONTACT_FOR_SOCIAL_QUERY, null, contactLookupUri,
+                CONTACT_LOOKUP_PROJECTION, null, null, null);
+
+        startContactQuery(contactLookupUri);
     }
 
     /**
-     * Convenience method for binding {@link Contacts} header details from a
-     * {@link Contacts#CONTENT_URI} reference.
+     * Convenience method for binding all available data from an existing
+     * contact.
+     *
+     * @param conatctUri a {Contacts.CONTENT_URI} style URI.
      */
-    public void bindContactUri(Uri contactUri) {
-        mQueryHandler.startQuery(TOKEN_CONTACT_INFO, null, contactUri, HEADER_PROJECTION,
-                null, null, null);
-    }
+    public void bindFromContactUri(Uri contactUri) {
+        mContactUri = contactUri;
+        long contactId = ContentUris.parseId(contactUri);
 
-    /**
-     * Convenience method for binding {@link Activities} header details from a
-     * {@link Activities#CONTENT_CONTACT_STATUS_URI}.
-     */
-    public void bindSocialUri(Uri contactSocial) {
-        mStatusUri = contactSocial;
-        mQueryHandler.startQuery(TOKEN_SOCIAL, null, mStatusUri, SOCIAL_PROJECTION, null, null,
-                null);
+        startContactQuery(contactUri);
+        startSocialQuery(ContentUris.withAppendedId(
+                Activities.CONTENT_CONTACT_STATUS_URI, contactId));
     }
 
     /**
@@ -338,21 +383,9 @@ public class ContactHeaderWidget extends FrameLayout implements View.OnClickList
      * address, one of them will be chosen to bind to.
      */
     public void bindFromEmail(String emailAddress) {
-        Cursor c = null;
-        try {
-            c = mContentResolver.query(Uri.withAppendedPath(Email.CONTENT_FILTER_EMAIL_URI, Uri
-                    .encode(emailAddress)), EMAIL_LOOKUP_PROJECTION, null, null, null);
-            if (c != null && c.moveToFirst()) {
-                long contactId = c.getLong(EMAIL_LOOKUP_CONTACT_ID_COLUMN_INDEX);
-                bindFromContactId(contactId);
-            } else {
-                setDisplayName(emailAddress, null);
-            }
-        } finally {
-            if (c != null) {
-                c.close();
-            }
-        }
+        mQueryHandler.startQuery(TOKEN_EMAIL_LOOKUP, emailAddress,
+                Uri.withAppendedPath(Email.CONTENT_LOOKUP_URI, Uri.encode(emailAddress)),
+                EMAIL_LOOKUP_PROJECTION, null, null, null);
     }
 
     /**
@@ -364,22 +397,19 @@ public class ContactHeaderWidget extends FrameLayout implements View.OnClickList
      * number, one of them will be chosen to bind to.
      */
     public void bindFromPhoneNumber(String number) {
-        Cursor c = null;
-        try {
-            c = mContentResolver.query(
-                    Uri.withAppendedPath(PhoneLookup.CONTENT_FILTER_URI, Uri.encode(number)),
-                    PHONE_LOOKUP_PROJECTION, null, null, null);
-            if (c != null && c.moveToFirst()) {
-                long contactId = c.getLong(PHONE_LOOKUP_CONTACT_ID_COLUMN_INDEX);
-                bindFromContactId(contactId);
-            } else {
-                setDisplayName(number, null);
-            }
-        } finally {
-            if (c != null) {
-                c.close();
-            }
-        }
+        mQueryHandler.startQuery(TOKEN_PHONE_LOOKUP, number,
+                Uri.withAppendedPath(PhoneLookup.CONTENT_FILTER_URI, number),
+                PHONE_LOOKUP_PROJECTION, null, null, null);
+    }
+
+    private void startSocialQuery(Uri contactSocial) {
+        mQueryHandler.startQuery(TOKEN_SOCIAL, null, contactSocial, SOCIAL_PROJECTION, null, null,
+                null);
+    }
+
+    private void startContactQuery(Uri contactUri) {
+        mQueryHandler.startQuery(TOKEN_CONTACT_INFO, null, contactUri, HEADER_PROJECTION,
+                null, null, null);
     }
 
     /**
@@ -390,6 +420,8 @@ public class ContactHeaderWidget extends FrameLayout implements View.OnClickList
 
         // TODO: Bring back phonetic name
         final String displayName = c.getString(HEADER_DISPLAY_NAME_COLUMN_INDEX);
+        final long contactId = c.getLong(HEADER_CONTACT_ID_COLUMN_INDEX);
+        final String lookupKey = c.getString(HEADER_LOOKUP_KEY_COLUMN_INDEX);
         final String phoneticName = null;
         this.setDisplayName(displayName, null);
 
@@ -402,6 +434,7 @@ public class ContactHeaderWidget extends FrameLayout implements View.OnClickList
             photoBitmap = loadPlaceholderPhoto(null);
         }
         mPhotoView.setImageBitmap(photoBitmap);
+        mPhotoView.assignContactUri(Contacts.getLookupUri(contactId, lookupKey));
 
         //Set the presence status
         int presence = c.getInt(HEADER_PRESENCE_STATUS_COLUMN_INDEX);
@@ -423,27 +456,11 @@ public class ContactHeaderWidget extends FrameLayout implements View.OnClickList
             return;
         }
 
-        switch (view.getId()) {
-            case R.id.star: {
-                // Toggle "starred" state
-                final ContentValues values = new ContentValues(1);
-                values.put(Contacts.STARRED, mStarredView.isChecked());
-                mContentResolver.update(mContactUri, values, null, null);
-                break;
-            }
-            case R.id.photo: {
-                // Photo launches contact detail action
-                final Intent intent = new Intent(Intents.SHOW_OR_CREATE_CONTACT, mContactUri);
-                final Rect target = getTargetRect(view);
-                intent.putExtra(Intents.EXTRA_TARGET_RECT, target);
-                intent.putExtra(Intents.EXTRA_MODE, Intents.MODE_SMALL);
-                if (mExcludeMimes != null) {
-                    // Exclude specific MIME-types when requested
-                    intent.putExtra(Intents.EXTRA_EXCLUDE_MIMES, mExcludeMimes);
-                }
-                mContext.startActivity(intent);
-                break;
-            }
+        if (view.getId() == R.id.star) {
+            // Toggle "starred" state
+            final ContentValues values = new ContentValues(1);
+            values.put(Contacts.STARRED, mStarredView.isChecked());
+            mContentResolver.update(mContactUri, values, null, null);
         }
     }
 
