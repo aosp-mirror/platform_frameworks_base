@@ -2600,6 +2600,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
         if (mOnFocusChangeListener != null) {
             mOnFocusChangeListener.onFocusChange(this, gainFocus);
         }
+        
+        if (mAttachInfo != null) {
+            mAttachInfo.mKeyDispatchState.reset(this);
+        }
     }
 
     /**
@@ -3609,6 +3613,16 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     }
 
     /**
+     * Return the global {@link KeyEvent.DispatcherState KeyEvent.DispatcherState}
+     * for this view's window.  Returns null if the view is not currently attached
+     * to the window.  Normally you will not need to use this directly, but
+     * just use the standard high-level event callbacks like {@link #onKeyDown}.
+     */
+    public KeyEvent.DispatcherState getKeyDispatcherState() {
+        return mAttachInfo != null ? mAttachInfo.mKeyDispatchState : null;
+    }
+    
+    /**
      * Dispatch a key event before it is processed by any input method
      * associated with the view hierarchy.  This can be used to intercept
      * key events in special situations before the IME consumes them; a
@@ -3645,7 +3659,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
             return true;
         }
 
-        return event.dispatch(this);
+        return event.dispatch(this, mAttachInfo != null
+                ? mAttachInfo.mKeyDispatchState : null, this);
     }
 
     /**
@@ -3907,6 +3922,15 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
             }
         }
         return result;
+    }
+
+    /**
+     * Default implementation of {@link KeyEvent.Callback#onKeyLongPress(int, KeyEvent)
+     * KeyEvent.Callback.onKeyLongPress()}: always returns false (doesn't handle
+     * the event).
+     */
+    public boolean onKeyLongPress(int keyCode, KeyEvent event) {
+        return false;
     }
 
     /**
@@ -8571,6 +8595,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
          * to adjust for a soft input area.
          */
         final ArrayList<View> mScrollContainers = new ArrayList<View>();
+
+        final KeyEvent.DispatcherState mKeyDispatchState
+                = new KeyEvent.DispatcherState();
 
         /**
          * Indicates whether the view's window currently has the focus.

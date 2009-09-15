@@ -745,11 +745,9 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
             return true;
         }
         
-        if (keyCode == KeyEvent.KEYCODE_SEARCH && event.getRepeatCount() < 1) {
-            // If the search key is pressed, toggle between global and in-app search. If we are
-            // currently doing global search and there is no in-app search context to toggle to,
-            // just don't do anything.
-            return toggleGlobalSearch();
+        if (keyCode == KeyEvent.KEYCODE_SEARCH) {
+            // Consume search key for later use.
+            return true;
         }
 
         // if it's an action specified by the searchable activity, launch the
@@ -758,6 +756,29 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
         if ((actionKey != null) && (actionKey.getQueryActionMsg() != null)) {
             launchQuerySearch(keyCode, actionKey.getQueryActionMsg());
             return true;
+        }
+        
+        return false;
+    }
+    
+    @Override
+    public boolean onKeyUp(int keyCode, KeyEvent event) {
+        if (DBG) Log.d(LOG_TAG, "onKeyUp(" + keyCode + "," + event + ")");
+        if (mSearchable == null) {
+            return false;
+        }
+
+        // handle back key to go back to previous searchable, etc.
+        if (handleBackKey(keyCode, event)) {
+            return true;
+        }
+        
+        if (keyCode == KeyEvent.KEYCODE_SEARCH && event.isTracking()
+                && !event.isCanceled()) {
+            // If the search key is pressed, toggle between global and in-app search. If we are
+            // currently doing global search and there is no in-app search context to toggle to,
+            // just don't do anything.
+            return toggleGlobalSearch();
         }
         
         return false;
@@ -1500,21 +1521,24 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
      * 
      * @return <code>true</code> if there was a previous component that we could go back to.
      */
-    private boolean backToPreviousComponent() {
+    private boolean backToPreviousComponent(boolean doIt) {
         ComponentName previous = popPreviousComponent();
         if (previous == null) {
             return false;
         }
-        if (!show(previous, mAppSearchData, false)) {
-            Log.w(LOG_TAG, "Failed to switch to source " + previous);
-            return false;
-        }
         
-        // must touch text to trigger suggestions
-        // TODO: should this be the text as it was when the user left
-        // the source that we are now going back to?
-        String query = mSearchAutoComplete.getText().toString();
-        setUserQuery(query);
+        if (doIt) {
+            if (!show(previous, mAppSearchData, false)) {
+                Log.w(LOG_TAG, "Failed to switch to source " + previous);
+                return false;
+            }
+            
+            // must touch text to trigger suggestions
+            // TODO: should this be the text as it was when the user left
+            // the source that we are now going back to?
+            String query = mSearchAutoComplete.getText().toString();
+            setUserQuery(query);
+        }
         
         return true;
     }
@@ -1660,6 +1684,7 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
     public static class SearchAutoComplete extends AutoCompleteTextView {
 
         private int mThreshold;
+        private int mLastKeyDown;
         private SearchDialog mSearchDialog;
         
         public SearchAutoComplete(Context context) {
@@ -1740,27 +1765,44 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
          */
         @Override
         public boolean onKeyPreIme(int keyCode, KeyEvent event) {
+            mLastKeyDown = keyCode;
             if (mSearchDialog.mSearchable == null) {
                 return false;
             }
-            if (keyCode == KeyEvent.KEYCODE_BACK && event.getAction() == KeyEvent.ACTION_DOWN) {
-                if (mSearchDialog.backToPreviousComponent()) {
-                    return true;
+            if (keyCode == KeyEvent.KEYCODE_BACK) {
+                if (event.getAction() == KeyEvent.ACTION_DOWN
+                        && event.getRepeatCount() == 0) {
+                    // We releae the back key, might we want to do
+                    // something before the IME?
+                    if (mSearchDialog.backToPreviousComponent(false)) {
+                        return true;
+                    }
+                    if (isInputMethodNotNeeded() ||
+                            (isEmpty() && getDropDownChildCount() >= getAdapterCount())) {
+                        return true;
+                    }
+                    mLastKeyDown = 0;
+                    return false; // will dismiss soft keyboard if necessary
+                } else if (event.getAction() == KeyEvent.ACTION_UP
+                        && mLastKeyDown == keyCode && !event.isCanceled()) {
+                    if (mSearchDialog.backToPreviousComponent(true)) {
+                        return true;
+                    }
+                    // If the drop-down obscures the keyboard, the user wouldn't see anything
+                    // happening when pressing back, so we dismiss the entire dialog instead.
+                    //
+                    // also: if there is no text entered, we also want to dismiss the whole dialog,
+                    // not just the soft keyboard.  the exception to this is if there are shortcuts
+                    // that aren't displayed (e.g are being obscured by the soft keyboard); in that
+                    // case we want to dismiss the soft keyboard so the user can see the rest of the
+                    // shortcuts.
+                    if (isInputMethodNotNeeded() ||
+                            (isEmpty() && getDropDownChildCount() >= getAdapterCount())) {
+                        mSearchDialog.cancel();
+                        return true;
+                    }
+                    return false; // will dismiss soft keyboard if necessary
                 }
-                // If the drop-down obscures the keyboard, the user wouldn't see anything
-                // happening when pressing back, so we dismiss the entire dialog instead.
-                //
-                // also: if there is no text entered, we also want to dismiss the whole dialog,
-                // not just the soft keyboard.  the exception to this is if there are shortcuts
-                // that aren't displayed (e.g are being obscured by the soft keyboard); in that
-                // case we want to dismiss the soft keyboard so the user can see the rest of the
-                // shortcuts.
-                if (isInputMethodNotNeeded() ||
-                        (isEmpty() && getDropDownChildCount() >= getAdapterCount())) {
-                    mSearchDialog.cancel();
-                    return true;
-                }
-                return false; // will dismiss soft keyboard if necessary
             }
             return false;
         }
@@ -1772,11 +1814,18 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
     }
     
     protected boolean handleBackKey(int keyCode, KeyEvent event) {
-        if (keyCode == KeyEvent.KEYCODE_BACK && event.getAction() == KeyEvent.ACTION_DOWN) {
-            if (backToPreviousComponent()) {
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            if (event.getAction() == KeyEvent.ACTION_DOWN) {
+                // Consume the event, to get an up at which point we execute.
                 return true;
             }
-            cancel();
+            if (event.getAction() == KeyEvent.ACTION_UP && event.isTracking()
+                    && !event.isCanceled()) {
+                if (backToPreviousComponent(true)) {
+                    return true;
+                }
+                cancel();
+            }
             return true;
         }
         return false;

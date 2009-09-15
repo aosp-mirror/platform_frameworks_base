@@ -481,17 +481,15 @@ public class Dialog implements DialogInterface, Window.Callback,
      * 
      * <p>If the focused view didn't want this event, this method is called.
      *
-     * <p>The default implementation handles KEYCODE_BACK to close the
-     * dialog.
+     * <p>The default implementation consumed the KEYCODE_BACK to later
+     * handle it in {@link #onKeyUp}.
      *
      * @see #onKeyUp
      * @see android.view.KeyEvent
      */
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK) {
-            if (mCancelable) {
-                cancel();
-            }
+            event.startTracking();
             return true;
         }
 
@@ -499,12 +497,29 @@ public class Dialog implements DialogInterface, Window.Callback,
     }
 
     /**
+     * Default implementation of {@link KeyEvent.Callback#onKeyLongPress(int, KeyEvent)
+     * KeyEvent.Callback.onKeyLongPress()}: always returns false (doesn't handle
+     * the event).
+     */
+    public boolean onKeyLongPress(int keyCode, KeyEvent event) {
+        return false;
+    }
+
+    /**
      * A key was released.
      * 
+     * <p>The default implementation handles KEYCODE_BACK to close the
+     * dialog.
+     *
      * @see #onKeyDown
      * @see KeyEvent
      */
     public boolean onKeyUp(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK && event.isTracking()
+                && !event.isCanceled()) {
+            onBackPressed();
+            return true;
+        }
         return false;
     }
 
@@ -515,6 +530,17 @@ public class Dialog implements DialogInterface, Window.Callback,
      */
     public boolean onKeyMultiple(int keyCode, int repeatCount, KeyEvent event) {
         return false;
+    }
+    
+    /**
+     * Called when the dialog has detected the user's press of the back
+     * key.  The default implementation simply cancels the dialog (only if
+     * it is cancelable), but you can override this to do whatever you want.
+     */
+    public void onBackPressed() {
+        if (mCancelable) {
+            cancel();
+        }
     }
     
     /**
@@ -599,7 +625,8 @@ public class Dialog implements DialogInterface, Window.Callback,
         if (mWindow.superDispatchKeyEvent(event)) {
             return true;
         }
-        return event.dispatch(this);
+        return event.dispatch(this, mDecor != null
+                ? mDecor.getKeyDispatcherState() : null, this);
     }
 
     /**
