@@ -27,7 +27,7 @@ import android.content.IContentService;
 import android.content.res.Configuration;
 import android.location.LocationManager;
 import android.media.AudioManager;
-import android.os.IHardwareService;
+import android.os.IPowerManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.provider.Settings;
@@ -94,10 +94,10 @@ public class SettingsHelper {
 
     private void setBrightness(int brightness) {
         try {
-            IHardwareService hardware = IHardwareService.Stub
-                    .asInterface(ServiceManager.getService("hardware"));
-            if (hardware != null) {
-                hardware.setBacklights(brightness);
+            IPowerManager power = IPowerManager.Stub.asInterface(
+                    ServiceManager.getService("power"));
+            if (power != null) {
+                power.setBacklightBrightness(brightness);
             }
         } catch (RemoteException doe) {
 

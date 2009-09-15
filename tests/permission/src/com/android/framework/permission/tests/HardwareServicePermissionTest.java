@@ -117,20 +117,4 @@ public class HardwareServicePermissionTest extends TestCase {
             // expected
         }
     }
-
-    /**
-     * Test that calling {@link android.os.IHardwareService#setBacklights(int)} requires
-     * permissions.
-     * <p>Tests permission:
-     *   {@link android.Manifest.permission#HARDWARE_TEST}
-     * @throws RemoteException
-     */
-    public void testSetBacklights() throws RemoteException {
-        try {
-            mHardwareService.setBacklights(0);
-            fail("setBacklights did not throw SecurityException as expected");
-        } catch (SecurityException e) {
-            // expected
-        }
-    }
 }

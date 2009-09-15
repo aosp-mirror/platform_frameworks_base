@@ -63,6 +63,8 @@ public class PowerManagerTest extends AndroidTestCase {
         wl = mPm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "PARTIAL_WAKE_LOCK");
         doTestWakeLock(wl);
         
+        doTestSetBacklightBrightness();
+
         // TODO: Some sort of functional test (maybe not in the unit test here?) 
         // that confirms that things are really happening e.g. screen power, keyboard power.
 }
@@ -121,5 +123,20 @@ public class PowerManagerTest extends AndroidTestCase {
         // TODO: Threaded test (needs handler) to make sure timed wakelocks work too
     }
     
-    
+ 
+    /**
+     * Test that calling {@link android.os.IHardwareService#setBacklights(int)} requires
+     * permissions.
+     * <p>Tests permission:
+     *   {@link android.Manifest.permission#DEVICE_POWER}
+     */
+    private void doTestSetBacklightBrightness() {
+        try {
+            mPm.setBacklightBrightness(0);
+            fail("setBacklights did not throw SecurityException as expected");
+        } catch (SecurityException e) {
+            // expected
+        }
+    }
+
 }
