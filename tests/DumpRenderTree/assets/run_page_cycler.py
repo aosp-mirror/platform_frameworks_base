@@ -88,8 +88,15 @@ def main(options, args):
 
   result_file = "/sdcard/load_test_result.txt"
   shell_cmd_str = adb_cmd + " pull " + result_file + " " + results_dir
-  adb_output = subprocess.Popen(shell_cmd_str, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()[0]
-  logging.info(adb_output)
+  (adb_output, err) = subprocess.Popen(
+      shell_cmd_str, shell=True,
+      stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
+  if not os.path.isfile(os.path.join(results_dir, "load_test_result.txt")):
+    logging.error("Failed to pull result file.")
+    logging.error("adb stdout:")
+    logging.error(adb_output)
+    logging.error("adb stderr:")
+    logging.error(err)
   logging.info("Results are stored under: " + results_dir + "/load_test_result.txt\n")
 
 if '__main__' == __name__:
