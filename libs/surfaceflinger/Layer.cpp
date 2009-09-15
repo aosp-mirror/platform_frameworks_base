@@ -176,6 +176,9 @@ void Layer::reloadTexture(const Region& dirty)
                     // this failed, for instance, because we don't support
                     // NPOT.
                     // FIXME: do something!
+                    LOGD("layer=%p, glEGLImageTargetTexture2DOES(%d) "
+                         "failed err=0x%04x",
+                         this, mTextures[index].image, error);
                     mFlags &= ~DisplayHardware::DIRECT_TEXTURE;
                 } else {
                     // Everything went okay!

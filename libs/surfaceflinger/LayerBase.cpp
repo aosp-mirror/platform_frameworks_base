@@ -590,7 +590,8 @@ regular:
             glTexImage2D(GL_TEXTURE_2D, 0,
                     GL_RGBA, texture_w, texture_h, 0,
                     GL_RGBA, GL_UNSIGNED_SHORT_4_4_4_4, data);
-        } else if (t.format == GGL_PIXEL_FORMAT_RGBA_8888) {
+        } else if (t.format == GGL_PIXEL_FORMAT_RGBA_8888 || 
+                   t.format == GGL_PIXEL_FORMAT_RGBX_8888) {
             glTexImage2D(GL_TEXTURE_2D, 0,
                     GL_RGBA, texture_w, texture_h, 0,
                     GL_RGBA, GL_UNSIGNED_BYTE, data);
@@ -620,7 +621,8 @@ regular:
                     0, bounds.top, t.width, bounds.height(),
                     GL_RGBA, GL_UNSIGNED_SHORT_4_4_4_4,
                     t.data + bounds.top*t.stride*2);
-        } else if (t.format == GGL_PIXEL_FORMAT_RGBA_8888) {
+        } else if (t.format == GGL_PIXEL_FORMAT_RGBA_8888 ||
+                   t.format == GGL_PIXEL_FORMAT_RGBX_8888) {
             glTexSubImage2D(GL_TEXTURE_2D, 0,
                     0, bounds.top, t.width, bounds.height(),
                     GL_RGBA, GL_UNSIGNED_BYTE,
