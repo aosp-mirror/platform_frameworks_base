@@ -32,6 +32,7 @@ enum {
     START_PREVIEW,
     STOP_PREVIEW,
     AUTO_FOCUS,
+    CANCEL_AUTO_FOCUS,
     TAKE_PICTURE,
     SET_PARAMETERS,
     GET_PARAMETERS,
@@ -158,6 +159,17 @@ public:
         Parcel data, reply;
         data.writeInterfaceToken(ICamera::getInterfaceDescriptor());
         remote()->transact(AUTO_FOCUS, data, &reply);
+        status_t ret = reply.readInt32();
+        return ret;
+    }
+
+    // cancel focus
+    status_t cancelAutoFocus()
+    {
+        LOGV("cancelAutoFocus");
+        Parcel data, reply;
+        data.writeInterfaceToken(ICamera::getInterfaceDescriptor());
+        remote()->transact(CANCEL_AUTO_FOCUS, data, &reply);
         status_t ret = reply.readInt32();
         return ret;
     }
@@ -292,6 +304,12 @@ status_t BnCamera::onTransact(
             LOGV("AUTO_FOCUS");
             CHECK_INTERFACE(ICamera, data, reply);
             reply->writeInt32(autoFocus());
+            return NO_ERROR;
+        } break;
+        case CANCEL_AUTO_FOCUS: {
+            LOGV("CANCEL_AUTO_FOCUS");
+            CHECK_INTERFACE(ICamera, data, reply);
+            reply->writeInt32(cancelAutoFocus());
             return NO_ERROR;
         } break;
         case TAKE_PICTURE: {

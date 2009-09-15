@@ -51,6 +51,7 @@ public:
     virtual void        releaseRecordingFrame(const sp<IMemory>& mem);
 
     virtual status_t    autoFocus();
+    virtual status_t    cancelAutoFocus();
     virtual status_t    takePicture();
     virtual status_t    cancelPicture();
     virtual status_t    dump(int fd, const Vector<String16>& args) const;

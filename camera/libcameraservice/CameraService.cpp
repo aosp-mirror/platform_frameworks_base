@@ -798,7 +798,6 @@ static void dump_to_file(const char *fname,
 }
 #endif
 
-// take a picture - image is returned in callback
 status_t CameraService::Client::autoFocus()
 {
     LOGD("autoFocus (pid %d)", getCallingPid());
@@ -813,6 +812,22 @@ status_t CameraService::Client::autoFocus()
     }
 
     return mHardware->autoFocus();
+}
+
+status_t CameraService::Client::cancelAutoFocus()
+{
+    LOGD("cancelAutoFocus (pid %d)", getCallingPid());
+
+    Mutex::Autolock lock(mLock);
+    status_t result = checkPid();
+    if (result != NO_ERROR) return result;
+
+    if (mHardware == 0) {
+        LOGE("mHardware is NULL, returning.");
+        return INVALID_OPERATION;
+    }
+
+    return mHardware->cancelAutoFocus();
 }
 
 // take a picture - image is returned in callback

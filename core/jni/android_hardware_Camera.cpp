@@ -327,6 +327,18 @@ static void android_hardware_Camera_autoFocus(JNIEnv *env, jobject thiz)
     }
 }
 
+static void android_hardware_Camera_cancelAutoFocus(JNIEnv *env, jobject thiz)
+{
+    LOGV("cancelAutoFocus");
+    JNICameraContext* context;
+    sp<Camera> c = get_native_camera(env, thiz, &context);
+    if (c == 0) return;
+
+    if (c->cancelAutoFocus() != NO_ERROR) {
+        jniThrowException(env, "java/lang/RuntimeException", "cancelAutoFocus failed");
+    }
+}
+
 static void android_hardware_Camera_takePicture(JNIEnv *env, jobject thiz)
 {
     LOGV("takePicture");
@@ -422,6 +434,9 @@ static JNINativeMethod camMethods[] = {
   { "native_autoFocus",
     "()V",
     (void *)android_hardware_Camera_autoFocus },
+  { "native_cancelAutoFocus",
+    "()V",
+    (void *)android_hardware_Camera_cancelAutoFocus },
   { "native_takePicture",
     "()V",
     (void *)android_hardware_Camera_takePicture },
