@@ -69,7 +69,7 @@ import static android.telephony.SmsMessage.MessageClass;
  */
 public class SmsMessage extends SmsMessageBase {
     static final String LOG_TAG = "CDMA";
-    private final static Boolean DBG_SMS = false;
+    static private final String LOGGABLE_TAG = "CDMA:SMS";
 
     /**
      *  Status of a previously submitted SMS.
@@ -533,7 +533,7 @@ public class SmsMessage extends SmsMessageBase {
             return;
         }
         mBearerData = BearerData.decode(mEnvelope.bearerData);
-        if (DBG_SMS) {
+        if (Log.isLoggable(LOGGABLE_TAG, Log.VERBOSE)) {
             Log.d(LOG_TAG, "MT raw BearerData = '" +
                       HexDump.toHexString(mEnvelope.bearerData) + "'");
             Log.d(LOG_TAG, "MT (decoded) BearerData = " + mBearerData);
@@ -614,7 +614,7 @@ public class SmsMessage extends SmsMessageBase {
         int msgId = SystemProperties.getInt(TelephonyProperties.PROPERTY_CDMA_MSG_ID, 1);
         String nextMsgId = Integer.toString((msgId % 0xFFFF) + 1);
         SystemProperties.set(TelephonyProperties.PROPERTY_CDMA_MSG_ID, nextMsgId);
-        if (DBG_SMS) {
+        if (Log.isLoggable(LOGGABLE_TAG, Log.VERBOSE)) {
             Log.d(LOG_TAG, "next " + TelephonyProperties.PROPERTY_CDMA_MSG_ID + " = " + nextMsgId);
             Log.d(LOG_TAG, "readback gets " +
                     SystemProperties.get(TelephonyProperties.PROPERTY_CDMA_MSG_ID));
@@ -655,7 +655,7 @@ public class SmsMessage extends SmsMessageBase {
         bearerData.userData = userData;
 
         byte[] encodedBearerData = BearerData.encode(bearerData);
-        if (DBG_SMS) {
+        if (Log.isLoggable(LOGGABLE_TAG, Log.VERBOSE)) {
             Log.d(LOG_TAG, "MO (encoded) BearerData = " + bearerData);
             Log.d(LOG_TAG, "MO raw BearerData = '" + HexDump.toHexString(encodedBearerData) + "'");
         }
