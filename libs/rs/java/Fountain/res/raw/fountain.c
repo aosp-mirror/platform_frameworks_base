@@ -20,20 +20,21 @@ int main(int launchID) {
         char r = Control->r * 255.f;
         char g = Control->g * 255.f;
         char b = Control->b * 255.f;
-        char a = 0xf0;
+        struct point_s * np = &p[newPart];
 
         while (rate--) {
-            vec2Rand((float *)(p + newPart), rMax);
-            p[newPart].x = x;
-            p[newPart].y = y;
-            p[newPart].r = r;
-            p[newPart].g = g;
-            p[newPart].b = b;
-            p[newPart].a = a;
+            vec2Rand((float *)np, rMax);
+            np->x = x;
+            np->y = y;
+            np->r = r;
+            np->g = g;
+            np->b = b;
+            np->a = 0xf0;
             newPart++;
             if (newPart >= count) {
                 newPart = 0;
             }
+            np++;
         }
     }
 
