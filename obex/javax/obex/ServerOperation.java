@@ -169,10 +169,10 @@ public final class ServerOperation implements Operation, BaseStream {
                 mHasBody = true;
             }
 
-            if (requestHeader.mConnectionID != null) {
+            if (mListener.getConnectionId() != -1 && requestHeader.mConnectionID != null) {
                 mListener.setConnectionId(ObexHelper.convertToLong(requestHeader.mConnectionID));
             } else {
-                mListener.setConnectionId(0);
+                mListener.setConnectionId(1);
             }
 
             if (requestHeader.mAuthResp != null) {
@@ -438,7 +438,7 @@ public final class ServerOperation implements Operation, BaseStream {
                     if (body != null) {
                         mHasBody = true;
                     }
-                    if (requestHeader.mConnectionID != null) {
+                    if (mListener.getConnectionId() != -1 && requestHeader.mConnectionID != null) {
                         mListener.setConnectionId(ObexHelper
                                 .convertToLong(requestHeader.mConnectionID));
                     } else {
