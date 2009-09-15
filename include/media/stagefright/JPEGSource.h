@@ -26,7 +26,6 @@ class DataSource;
 class MediaBufferGroup;
 
 struct JPEGSource : public MediaSource {
-    // Assumes ownership of "source".
     JPEGSource(const sp<DataSource> &source);
 
     virtual status_t start(MetaData *params = NULL);

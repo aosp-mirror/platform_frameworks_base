@@ -8,6 +8,7 @@ LOCAL_SRC_FILES:=                 \
         FileSource.cpp            \
         HTTPDataSource.cpp        \
         HTTPStream.cpp            \
+        JPEGSource.cpp            \
         MP3Extractor.cpp          \
         MPEG4Extractor.cpp        \
         MPEG4Writer.cpp           \
