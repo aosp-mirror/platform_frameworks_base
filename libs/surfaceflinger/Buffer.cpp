@@ -106,6 +106,9 @@ status_t Buffer::initSize(uint32_t w, uint32_t h, PixelFormat format,
         // the requested flags should be honored.
         usage = reqUsage | BufferAllocator::USAGE_HW_TEXTURE;
     }
+    
+    if (format == PIXEL_FORMAT_RGBX_8888)
+        format = PIXEL_FORMAT_RGBA_8888;
 
     err = allocator.alloc(w, h, format, usage, &handle, &stride);
     if (err == NO_ERROR) {
