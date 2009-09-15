@@ -188,9 +188,9 @@ public class ContentProviderOperationTest extends TestCase {
         previousResults[3] = new ContentProviderResult(103);
 
         ContentValues expectedValues = new ContentValues(values);
-        expectedValues.put("a1", "103");
-        expectedValues.put("a2", "101");
-        expectedValues.put("a3", "102");
+        expectedValues.put("a1", (long) 103);
+        expectedValues.put("a2", (long) 101);
+        expectedValues.put("a3", (long) 102);
 
         ContentProviderOperation op1 = ContentProviderOperation.newInsert(sTestUri1)
                 .withValues(values)
