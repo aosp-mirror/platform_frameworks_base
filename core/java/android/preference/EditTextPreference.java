@@ -169,6 +169,13 @@ public class EditTextPreference extends DialogPreference {
         return mEditText;
     }
 
+    /** @hide */
+    @Override
+    protected boolean needInputMethod() {
+        // We want the input method to show, if possible, when dialog is displayed
+        return true;
+    }
+
     @Override
     protected Parcelable onSaveInstanceState() {
         final Parcelable superState = super.onSaveInstanceState();
