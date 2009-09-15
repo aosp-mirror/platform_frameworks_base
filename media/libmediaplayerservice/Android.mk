@@ -47,6 +47,7 @@ LOCAL_SHARED_LIBRARIES += libdl
 endif
 
 LOCAL_C_INCLUDES := external/tremor/Tremor                              \
+	$(JNI_H_INCLUDE)                                                \
 	$(call include-path-for, graphics corecg)                       \
 	$(TOP)/external/opencore/extern_libs_v2/khronos/openmax/include \
 	$(TOP)/frameworks/base/media/libstagefright/omx
