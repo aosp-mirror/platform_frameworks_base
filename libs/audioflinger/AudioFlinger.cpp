@@ -677,8 +677,8 @@ void AudioFlinger::binderDied(const wp<IBinder>& who) {
     }
 }
 
-void AudioFlinger::audioConfigChanged(int event, const sp<ThreadBase>& thread, void *param2) {
-    Mutex::Autolock _l(mLock);
+// audioConfigChanged_l() must be called with AudioFlinger::mLock held
+void AudioFlinger::audioConfigChanged_l(int event, const sp<ThreadBase>& thread, void *param2) {
     int ioHandle = 0;
 
     for (size_t i = 0; i < mPlaybackThreads.size(); i++) {
@@ -700,7 +700,7 @@ void AudioFlinger::audioConfigChanged(int event, const sp<ThreadBase>& thread, v
         size_t size = mNotificationClients.size();
         for (size_t i = 0; i < size; i++) {
             sp<IBinder> binder = mNotificationClients.itemAt(i);
-            LOGV("audioConfigChanged() Notifying change to client %p", binder.get());
+            LOGV("audioConfigChanged_l() Notifying change to client %p", binder.get());
             sp<IAudioFlingerClient> client = interface_cast<IAudioFlingerClient> (binder);
             client->ioConfigChanged(event, ioHandle, param2);
         }
@@ -803,8 +803,8 @@ void AudioFlinger::ThreadBase::processConfigEvents()
         LOGV("processConfigEvents() remaining events %d", mConfigEvents.size());
         ConfigEvent *configEvent = mConfigEvents[0];
         mConfigEvents.removeAt(0);
-        // release mLock because audioConfigChanged() will call
-        // Audioflinger::audioConfigChanged() which locks AudioFlinger mLock thus creating
+        // release mLock because audioConfigChanged() will lock AudioFlinger mLock
+        // before calling Audioflinger::audioConfigChanged_l() thus creating
         // potential cross deadlock between AudioFlinger::mLock and mLock
         mLock.unlock();
         audioConfigChanged(configEvent->mEvent, configEvent->mParam);
@@ -1118,7 +1118,8 @@ void AudioFlinger::PlaybackThread::audioConfigChanged(int event, int param) {
     default:
         break;
     }
-    mAudioFlinger->audioConfigChanged(event, this, param2);
+    Mutex::Autolock _l(mAudioFlinger->mLock);
+    mAudioFlinger->audioConfigChanged_l(event, this, param2);
 }
 
 void AudioFlinger::PlaybackThread::readOutputParameters()
@@ -1272,8 +1273,6 @@ bool AudioFlinger::MixerThread::threadLoop()
     if (!mStandby) {
         mOutput->standby();
     }
-    sendConfigEvent(AudioSystem::OUTPUT_CLOSED);
-    processConfigEvents();
 
     LOGV("MixerThread %p exiting", this);
     return false;
@@ -1772,8 +1771,6 @@ bool AudioFlinger::DirectOutputThread::threadLoop()
     if (!mStandby) {
         mOutput->standby();
     }
-    sendConfigEvent(AudioSystem::OUTPUT_CLOSED);
-    processConfigEvents();
 
     LOGV("DirectOutputThread %p exiting", this);
     return false;
@@ -1964,9 +1961,6 @@ bool AudioFlinger::DuplicatingThread::threadLoop()
             }
         }
     }
-
-    sendConfigEvent(AudioSystem::OUTPUT_CLOSED);
-    processConfigEvents();
 
     return false;
 }
@@ -3047,9 +3041,6 @@ bool AudioFlinger::RecordThread::threadLoop()
     }
     mActiveTrack.clear();
 
-    sendConfigEvent(AudioSystem::INPUT_CLOSED);
-    processConfigEvents();
-
     LOGV("RecordThread %p exiting", this);
     return false;
 }
@@ -3234,7 +3225,8 @@ void AudioFlinger::RecordThread::audioConfigChanged(int event, int param) {
     default:
         break;
     }
-    mAudioFlinger->audioConfigChanged(event, this, param2);
+    Mutex::Autolock _l(mAudioFlinger->mLock);
+    mAudioFlinger->audioConfigChanged_l(event, this, param2);
 }
 
 void AudioFlinger::RecordThread::readInputParameters()
@@ -3379,6 +3371,8 @@ status_t AudioFlinger::closeOutput(int output)
                 }
             }
         }
+        void *param2 = 0;
+        audioConfigChanged_l(AudioSystem::OUTPUT_CLOSED, thread, param2);
         mPlaybackThreads.removeItem(output);
     }
     thread->exit();
@@ -3498,6 +3492,8 @@ status_t AudioFlinger::closeInput(int input)
         }
 
         LOGV("closeInput() %d", input);
+        void *param2 = 0;
+        audioConfigChanged_l(AudioSystem::INPUT_CLOSED, thread, param2);
         mRecordThreads.removeItem(input);
     }
     thread->exit();
