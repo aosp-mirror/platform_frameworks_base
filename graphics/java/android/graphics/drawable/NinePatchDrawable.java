@@ -36,6 +36,8 @@ import java.io.InputStream;
  *
  */
 public class NinePatchDrawable extends Drawable {
+    // dithering helps a lot, and is pretty cheap, so default is true
+    private static final boolean DEFAULT_DITHER = true;
     private NinePatchState mNinePatchState;
     private NinePatch mNinePatch;
     private Rect mPadding;
@@ -101,7 +103,11 @@ public class NinePatchDrawable extends Drawable {
         mNinePatch = state.mNinePatch;
         mPadding = state.mPadding;
         mTargetDensity = state.mTargetDensity;
-        if (state.mDither) setDither(state.mDither);
+        if (DEFAULT_DITHER != state.mDither) {
+            // avoid calling the setter unless we need to, since it does a
+            // lazy allocation of a paint
+            setDither(state.mDither);
+        }
         if (mNinePatch != null) {
             computeBitmapSize();
         }
@@ -215,7 +221,8 @@ public class NinePatchDrawable extends Drawable {
         }
 
         final boolean dither = a.getBoolean(
-                com.android.internal.R.styleable.NinePatchDrawable_dither, false);
+                com.android.internal.R.styleable.NinePatchDrawable_dither,
+                DEFAULT_DITHER);
         final BitmapFactory.Options options = new BitmapFactory.Options();
         if (dither) {
             options.inDither = false;
@@ -251,12 +258,10 @@ public class NinePatchDrawable extends Drawable {
         a.recycle();
     }
 
-
     public Paint getPaint() {
         if (mPaint == null) {
             mPaint = new Paint();
-            // dithering helps a lot, and is pretty cheap, so default on
-            mPaint.setDither(true);
+            mPaint.setDither(DEFAULT_DITHER);
         }
         return mPaint;
     }
@@ -327,7 +332,7 @@ public class NinePatchDrawable extends Drawable {
         int mTargetDensity = DisplayMetrics.DENSITY_DEFAULT;
 
         NinePatchState(NinePatch ninePatch, Rect padding) {
-            this(ninePatch, padding, false);
+            this(ninePatch, padding, DEFAULT_DITHER);
         }
 
         NinePatchState(NinePatch ninePatch, Rect rect, boolean dither) {
