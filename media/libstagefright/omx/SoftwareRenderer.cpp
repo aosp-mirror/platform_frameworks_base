@@ -27,17 +27,20 @@ namespace android {
 #define QCOM_YUV        0
 
 SoftwareRenderer::SoftwareRenderer(
+        OMX_COLOR_FORMATTYPE colorFormat,
         const sp<ISurface> &surface,
         size_t displayWidth, size_t displayHeight,
         size_t decodedWidth, size_t decodedHeight)
-    : mISurface(surface),
+    : mColorFormat(colorFormat),
+      mISurface(surface),
       mDisplayWidth(displayWidth),
       mDisplayHeight(displayHeight),
       mDecodedWidth(decodedWidth),
       mDecodedHeight(decodedHeight),
       mFrameSize(mDecodedWidth * mDecodedHeight * 2),  // RGB565
       mMemoryHeap(new MemoryHeapBase(2 * mFrameSize)),
-      mIndex(0) {
+      mIndex(0),
+      mClip(NULL) {
     CHECK(mISurface.get() != NULL);
     CHECK(mDecodedWidth > 0);
     CHECK(mDecodedHeight > 0);
@@ -55,29 +58,37 @@ SoftwareRenderer::SoftwareRenderer(
 
 SoftwareRenderer::~SoftwareRenderer() {
     mISurface->unregisterBuffers();
+
+    delete[] mClip;
+    mClip = NULL;
 }
 
 void SoftwareRenderer::render(
         const void *data, size_t size, void *platformPrivate) {
+    switch (mColorFormat) {
+        case OMX_COLOR_FormatYUV420Planar:
+            return renderYUV420Planar(data, size);
+
+        case OMX_COLOR_FormatCbYCrY:
+            return renderCbYCrY(data, size);
+
+        default:
+        {
+            LOGW("Cannot render color format %ld", mColorFormat);
+            break;
+        }
+    }
+}
+
+void SoftwareRenderer::renderYUV420Planar(
+        const void *data, size_t size) {
     if (size != (mDecodedHeight * mDecodedWidth * 3) / 2) {
         LOGE("size is %d, expected %d",
                 size, (mDecodedHeight * mDecodedWidth * 3) / 2);
     }
     CHECK(size >= (mDecodedWidth * mDecodedHeight * 3) / 2);
 
-    static const signed kClipMin = -278;
-    static const signed kClipMax = 535;
-    static uint8_t kClip[kClipMax - kClipMin + 1];
-    static uint8_t *kAdjustedClip = &kClip[-kClipMin];
-
-    static bool clipInitialized = false;
-
-    if (!clipInitialized) {
-        for (signed i = kClipMin; i <= kClipMax; ++i) {
-            kClip[i - kClipMin] = (i < 0) ? 0 : (i > 255) ? 255 : (uint8_t)i;
-        }
-        clipInitialized = true;
-    }
+    uint8_t *kAdjustedClip = initClip();
 
     size_t offset = mIndex * mFrameSize;
 
@@ -170,6 +181,80 @@ void SoftwareRenderer::render(
 
     mISurface->postBuffer(offset);
     mIndex = 1 - mIndex;
+}
+
+void SoftwareRenderer::renderCbYCrY(
+        const void *data, size_t size) {
+    if (size != (mDecodedHeight * mDecodedWidth * 2)) {
+        LOGE("size is %d, expected %d",
+                size, (mDecodedHeight * mDecodedWidth * 2));
+    }
+    CHECK(size >= (mDecodedWidth * mDecodedHeight * 2));
+
+    uint8_t *kAdjustedClip = initClip();
+
+    size_t offset = mIndex * mFrameSize;
+    void *dst = (uint8_t *)mMemoryHeap->getBase() + offset;
+    uint32_t *dst_ptr = (uint32_t *)dst;
+
+    const uint8_t *src = (const uint8_t *)data;
+
+    for (size_t y = 0; y < mDecodedHeight; ++y) {
+        for (size_t x = 0; x < mDecodedWidth; x += 2) {
+            signed y1 = (signed)src[2 * x + 1] - 16;
+            signed y2 = (signed)src[2 * x + 3] - 16;
+            signed u = (signed)src[2 * x] - 128;
+            signed v = (signed)src[2 * x + 2] - 128;
+
+            signed u_b = u * 517;
+            signed u_g = -u * 100;
+            signed v_g = -v * 208;
+            signed v_r = v * 409;
+
+            signed tmp1 = y1 * 298;
+            signed b1 = (tmp1 + u_b) / 256;
+            signed g1 = (tmp1 + v_g + u_g) / 256;
+            signed r1 = (tmp1 + v_r) / 256;
+
+            signed tmp2 = y2 * 298;
+            signed b2 = (tmp2 + u_b) / 256;
+            signed g2 = (tmp2 + v_g + u_g) / 256;
+            signed r2 = (tmp2 + v_r) / 256;
+
+            uint32_t rgb1 =
+                ((kAdjustedClip[r1] >> 3) << 11)
+                | ((kAdjustedClip[g1] >> 2) << 5)
+                | (kAdjustedClip[b1] >> 3);
+
+            uint32_t rgb2 =
+                ((kAdjustedClip[r2] >> 3) << 11)
+                | ((kAdjustedClip[g2] >> 2) << 5)
+                | (kAdjustedClip[b2] >> 3);
+
+            dst_ptr[x / 2] = (rgb2 << 16) | rgb1;
+        }
+
+        src += mDecodedWidth * 2;
+        dst_ptr += mDecodedWidth / 2;
+    }
+
+    mISurface->postBuffer(offset);
+    mIndex = 1 - mIndex;
+}
+
+uint8_t *SoftwareRenderer::initClip() {
+    static const signed kClipMin = -278;
+    static const signed kClipMax = 535;
+
+    if (mClip == NULL) {
+        mClip = new uint8_t[kClipMax - kClipMin + 1];
+
+        for (signed i = kClipMin; i <= kClipMax; ++i) {
+            mClip[i - kClipMin] = (i < 0) ? 0 : (i > 255) ? 255 : (uint8_t)i;
+        }
+    }
+
+    return &mClip[-kClipMin];
 }
 
 }  // namespace android
