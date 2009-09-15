@@ -113,6 +113,10 @@ public class Allocation extends BaseObj {
         mRS.nAllocationSubDataFromObject(mID, mType, 0, o);
     }
 
+    public void read(Object o) {
+        mRS.nAllocationSubReadFromObject(mID, mType, 0, o);
+    }
+
     public void subData(int offset, Object o) {
         mRS.nAllocationSubDataFromObject(mID, mType, offset, o);
     }
