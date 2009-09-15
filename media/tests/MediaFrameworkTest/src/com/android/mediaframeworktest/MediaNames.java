@@ -415,7 +415,7 @@ public class MediaNames {
           null, null, "231180", "1", null},
       {"/sdcard/media_api/metaDataTestMedias/M4A/Jaws Of Life_ver1.m4a", "1/8", "Suspended Animation",
           "John Petrucci", null, null, "20070510T125223.000Z", 
-          "13", "Jaws Of Life", "2005", "19815424", "1", "m4a composer"},
+          "13", "Jaws Of Life", "2005", "449329", "1", "m4a composer"},
       {"/sdcard/media_api/metaDataTestMedias/M4V/sample_iPod.m4v", null, null, 
           null, null, null, "20051220T202015.000Z", 
           null, null, null, "85500", "2", null},
