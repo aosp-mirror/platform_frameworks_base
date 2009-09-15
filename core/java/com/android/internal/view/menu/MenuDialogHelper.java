@@ -22,6 +22,7 @@ import android.content.DialogInterface;
 import android.os.IBinder;
 import android.view.KeyEvent;
 import android.view.View;
+import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ListAdapter;
 
@@ -86,18 +87,26 @@ public class MenuDialogHelper implements DialogInterface.OnKeyListener, DialogIn
     }
     
     public boolean onKey(DialogInterface dialog, int keyCode, KeyEvent event) {
-        /*
-         * Close menu on key down (more responsive, and there's no way to cancel
-         * a key press so no point having it on key up. Note: This is also
-         * needed because when a top-level menu item that shows a submenu is
-         * invoked by chording, this onKey method will be called with the menu
-         * up event.
-         */
-        if (event.getAction() == KeyEvent.ACTION_DOWN && (keyCode == KeyEvent.KEYCODE_MENU)
-                || (keyCode == KeyEvent.KEYCODE_BACK)) {
-            mMenu.close(true);
-            dialog.dismiss();
-            return true;
+        if (keyCode == KeyEvent.KEYCODE_MENU || keyCode == KeyEvent.KEYCODE_BACK) {
+            if (event.getAction() == KeyEvent.ACTION_DOWN
+                    && event.getRepeatCount() == 0) {
+                Window win = mDialog.getWindow();
+                if (win != null) {
+                    View decor = win.getDecorView();
+                    if (decor != null) {
+                        KeyEvent.DispatcherState ds = decor.getKeyDispatcherState();
+                        if (ds != null) {
+                            ds.startTracking(event, this);
+                            return true;
+                        }
+                    }
+                }
+            } else if (event.getAction() == KeyEvent.ACTION_UP
+                    && event.isTracking() && !event.isCanceled()) {
+                mMenu.close(true);
+                dialog.dismiss();
+                return true;
+            }
         }
 
         // Menu shortcut matching

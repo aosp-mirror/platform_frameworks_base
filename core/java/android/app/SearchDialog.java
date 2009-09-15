@@ -51,7 +51,6 @@ import android.util.Log;
 import android.view.ContextThemeWrapper;
 import android.view.Gravity;
 import android.view.KeyEvent;
-import android.view.Menu;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
@@ -1684,7 +1683,6 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
     public static class SearchAutoComplete extends AutoCompleteTextView {
 
         private int mThreshold;
-        private int mLastKeyDown;
         private SearchDialog mSearchDialog;
         
         public SearchAutoComplete(Context context) {
@@ -1765,26 +1763,26 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
          */
         @Override
         public boolean onKeyPreIme(int keyCode, KeyEvent event) {
-            mLastKeyDown = keyCode;
             if (mSearchDialog.mSearchable == null) {
                 return false;
             }
             if (keyCode == KeyEvent.KEYCODE_BACK) {
                 if (event.getAction() == KeyEvent.ACTION_DOWN
                         && event.getRepeatCount() == 0) {
-                    // We releae the back key, might we want to do
+                    // We release the back key, might we want to do
                     // something before the IME?
                     if (mSearchDialog.backToPreviousComponent(false)) {
+                        getKeyDispatcherState().startTracking(event, this);
                         return true;
                     }
                     if (isInputMethodNotNeeded() ||
                             (isEmpty() && getDropDownChildCount() >= getAdapterCount())) {
+                        getKeyDispatcherState().startTracking(event, this);
                         return true;
                     }
-                    mLastKeyDown = 0;
                     return false; // will dismiss soft keyboard if necessary
                 } else if (event.getAction() == KeyEvent.ACTION_UP
-                        && mLastKeyDown == keyCode && !event.isCanceled()) {
+                        && event.isTracking() && !event.isCanceled()) {
                     if (mSearchDialog.backToPreviousComponent(true)) {
                         return true;
                     }
@@ -1815,8 +1813,10 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
     
     protected boolean handleBackKey(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK) {
-            if (event.getAction() == KeyEvent.ACTION_DOWN) {
+            if (event.getAction() == KeyEvent.ACTION_DOWN
+                    && event.getRepeatCount() == 0) {
                 // Consume the event, to get an up at which point we execute.
+                event.startTracking();
                 return true;
             }
             if (event.getAction() == KeyEvent.ACTION_UP && event.isTracking()

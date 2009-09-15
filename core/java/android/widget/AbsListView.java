@@ -2946,7 +2946,9 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             break;
         case KeyEvent.KEYCODE_BACK:
             if (mFiltered && mPopup != null && mPopup.isShowing()) {
-                if (event.getAction() == KeyEvent.ACTION_DOWN) {
+                if (event.getAction() == KeyEvent.ACTION_DOWN
+                        && event.getRepeatCount() == 0) {
+                    getKeyDispatcherState().startTracking(event, this);
                     handled = true;
                 } else if (event.getAction() == KeyEvent.ACTION_UP
                         && event.isTracking() && !event.isCanceled()) {
