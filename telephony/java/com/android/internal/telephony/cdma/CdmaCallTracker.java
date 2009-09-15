@@ -436,7 +436,9 @@ public final class CdmaCallTracker extends CallTracker {
             voiceCallStartedRegistrants.notifyRegistrants (
                     new AsyncResult(null, null, null));
         }
-
+        if (Phone.DEBUG_PHONE) {
+            log("update phone state, old= , new= , " + oldState + state);
+        }
         if (state != oldState) {
             phone.notifyPhoneStateChanged();
         }
@@ -519,27 +521,12 @@ public final class CdmaCallTracker extends CallTracker {
                         return;
                     }
                 } else {
-                    connections[i] = new CdmaConnection(phone.getContext(), dc, this, i);
-
-                    // it's a ringing call
-                    if (connections[i].getCall() == ringingCall) {
-                        newRinging = connections[i];
-                    } else {
-                        // Something strange happened: a call appeared
-                        // which is neither a ringing call or one we created.
-                        // Either we've crashed and re-attached to an existing
-                        // call, or something else (eg, SIM) initiated the call.
-
-                        Log.i(LOG_TAG,"Phantom call appeared " + dc);
-
-                        // If it's a connected call, set the connect time so that
-                        // it's non-zero.  It may not be accurate, but at least
-                        // it won't appear as a Missed Call.
-                        if (dc.state != DriverCall.State.ALERTING
-                                && dc.state != DriverCall.State.DIALING) {
-                            connections[i].connectTime = System.currentTimeMillis();
-                        }
-
+                    if (Phone.DEBUG_PHONE) {
+                        log("pending Mo= , dc= " + pendingMO + dc);
+                    }
+                    // find if the MT call is a new ring or unknown connection
+                    newRinging = checkMtFindNewRinging(dc,i);
+                    if (newRinging == null) {
                         unknownConnectionAppeared = true;
                     }
                 }
@@ -571,9 +558,28 @@ public final class CdmaCallTracker extends CallTracker {
                 // list but kept in the Call list
                 connections[i] = null;
             } else if (conn != null && dc != null) { /* implicit conn.compareTo(dc) */
-                boolean changed;
-                changed = conn.update(dc);
-                hasNonHangupStateChanged = hasNonHangupStateChanged || changed;
+                // Call collision case
+                if (conn.isIncoming != dc.isMT) {
+                    if (dc.isMT == true){
+                        // Mt call takes precedence than Mo,drops Mo
+                        droppedDuringPoll.add(conn);
+                        // find if the MT call is a new ring or unknown connection
+                        newRinging = checkMtFindNewRinging(dc,i);
+                        if (newRinging == null) {
+                            unknownConnectionAppeared = true;
+                        }
+                    } else {
+                        // Call info stored in conn is not consistent with the call info from dc.
+                        // We should follow the rule of MT calls taking precedence over MO calls
+                        // when there is conflict, so here we drop the call info from dc and
+                        // continue to use the call info from conn, and only take a log.
+                        Log.e(LOG_TAG,"Error in RIL, Phantom call appeared " + dc);
+                    }
+                } else {
+                    boolean changed;
+                    changed = conn.update(dc);
+                    hasNonHangupStateChanged = hasNonHangupStateChanged || changed;
+                }
             }
 
             if (REPEAT_POLLING) {
@@ -1027,6 +1033,34 @@ public final class CdmaCallTracker extends CallTracker {
             phone.disableDataConnectivity();
             mIsInEmergencyCall = true;
         }
+    }
+    /**
+     * Check the MT call to see if it's a new ring or
+     * a unknown connection.
+     */
+    private Connection checkMtFindNewRinging(DriverCall dc, int i) {
+
+        Connection newRinging = null;
+
+        connections[i] = new CdmaConnection(phone.getContext(), dc, this, i);
+        // it's a ringing call
+        if (connections[i].getCall() == ringingCall) {
+            newRinging = connections[i];
+            if (Phone.DEBUG_PHONE) log("Notify new ring " + dc);
+        } else {
+            // Something strange happened: a call which is neither
+            // a ringing call nor the one we created. It could be the
+            // call collision result from RIL
+            Log.e(LOG_TAG,"Phantom call appeared " + dc);
+            // If it's a connected call, set the connect time so that
+            // it's non-zero.  It may not be accurate, but at least
+            // it won't appear as a Missed Call.
+            if (dc.state != DriverCall.State.ALERTING
+                && dc.state != DriverCall.State.DIALING) {
+                connections[i].connectTime = System.currentTimeMillis();
+            }
+        }
+        return newRinging;
     }
 
     /**
