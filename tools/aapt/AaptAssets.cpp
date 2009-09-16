@@ -187,6 +187,13 @@ AaptGroupEntry::parseNamePart(const String8& part, int* axis, uint32_t* value)
         return 0;
     }
 
+    // navigation hidden
+    if (getNavHiddenName(part.string(), &config)) {
+        *axis = AXIS_NAVHIDDEN;
+        *value = config.inputFlags;
+        return 0;
+    }
+
     // navigation
     if (getNavigationName(part.string(), &config)) {
         *axis = AXIS_NAVIGATION;
@@ -217,7 +224,7 @@ AaptGroupEntry::initFromDirName(const char* dir, String8* resType)
     Vector<String8> parts;
 
     String8 mcc, mnc, loc, layoutsize, layoutlong, orient, den;
-    String8 touch, key, keysHidden, nav, size, vers;
+    String8 touch, key, keysHidden, nav, navHidden, size, vers;
 
     const char *p = dir;
     const char *q;
@@ -393,6 +400,19 @@ AaptGroupEntry::initFromDirName(const char* dir, String8* resType)
         //printf("not keyboard: %s\n", part.string());
     }
 
+    // navigation hidden
+    if (getNavHiddenName(part.string())) {
+        navHidden = part;
+
+        index++;
+        if (index == N) {
+            goto success;
+        }
+        part = parts[index];
+    } else {
+        //printf("not navHidden: %s\n", part.string());
+    }
+
     if (getNavigationName(part.string())) {
         nav = part;
 
@@ -443,6 +463,7 @@ success:
     this->touchscreen = touch;
     this->keysHidden = keysHidden;
     this->keyboard = key;
+    this->navHidden = navHidden;
     this->navigation = nav;
     this->screenSize = size;
     this->version = vers;
@@ -475,6 +496,8 @@ AaptGroupEntry::toString() const
     s += keysHidden;
     s += ",";
     s += keyboard;
+    s += ",";
+    s += navHidden;
     s += ",";
     s += navigation;
     s += ",";
@@ -527,6 +550,10 @@ AaptGroupEntry::toDirName(const String8& resType) const
     if (this->keyboard != "") {
         s += "-";
         s += keyboard;
+    }
+    if (this->navHidden != "") {
+        s += "-";
+        s += navHidden;
     }
     if (this->navigation != "") {
         s += "-";
@@ -852,6 +879,30 @@ bool AaptGroupEntry::getKeyboardName(const char* name,
     return false;
 }
 
+bool AaptGroupEntry::getNavHiddenName(const char* name,
+                                       ResTable_config* out)
+{
+    uint8_t mask = 0;
+    uint8_t value = 0;
+    if (strcmp(name, kWildcardName) == 0) {
+        mask = out->MASK_NAVHIDDEN;
+        value = out->NAVHIDDEN_ANY;
+    } else if (strcmp(name, "navexposed") == 0) {
+        mask = out->MASK_NAVHIDDEN;
+        value = out->NAVHIDDEN_NO;
+    } else if (strcmp(name, "navhidden") == 0) {
+        mask = out->MASK_NAVHIDDEN;
+        value = out->NAVHIDDEN_YES;
+    }
+
+    if (mask != 0) {
+        if (out) out->inputFlags = (out->inputFlags&~mask) | value;
+        return true;
+    }
+
+    return false;
+}
+
 bool AaptGroupEntry::getNavigationName(const char* name,
                                      ResTable_config* out)
 {
@@ -953,6 +1004,7 @@ int AaptGroupEntry::compare(const AaptGroupEntry& o) const
     if (v == 0) v = touchscreen.compare(o.touchscreen);
     if (v == 0) v = keysHidden.compare(o.keysHidden);
     if (v == 0) v = keyboard.compare(o.keyboard);
+    if (v == 0) v = navHidden.compare(o.navHidden);
     if (v == 0) v = navigation.compare(o.navigation);
     if (v == 0) v = screenSize.compare(o.screenSize);
     if (v == 0) v = version.compare(o.version);
@@ -973,6 +1025,7 @@ ResTable_config AaptGroupEntry::toParams() const
     getTouchscreenName(touchscreen.string(), &params);
     getKeysHiddenName(keysHidden.string(), &params);
     getKeyboardName(keyboard.string(), &params);
+    getNavHiddenName(navHidden.string(), &params);
     getNavigationName(navigation.string(), &params);
     getScreenSizeName(screenSize.string(), &params);
     getVersionName(version.string(), &params);
