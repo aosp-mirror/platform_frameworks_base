@@ -794,5 +794,20 @@ public class SmsMessage extends SmsMessageBase {
         return mBearerData.numberOfMessages;
     }
 
+    /**
+     * Returns a byte array that can be use to uniquely identify a received SMS message.
+     * C.S0015-B  4.3.1.6 Unique Message Identification.
+     *
+     * @return byte array uniquely identifying the message.
+     * @hide
+     */
+    /* package */ byte[] getIncomingSmsFingerprint() {
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
 
+        output.write(mEnvelope.teleService);
+        output.write(mEnvelope.origAddress.origBytes, 0, mEnvelope.origAddress.origBytes.length);
+        output.write(mEnvelope.bearerData, 0, mEnvelope.bearerData.length);
+
+        return output.toByteArray();
+    }
 }

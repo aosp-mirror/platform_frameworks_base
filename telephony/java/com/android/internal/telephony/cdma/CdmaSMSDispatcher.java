@@ -48,6 +48,7 @@ import com.android.internal.util.HexDump;
 
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.lang.Boolean;
 
@@ -56,6 +57,9 @@ final class CdmaSMSDispatcher extends SMSDispatcher {
     private static final String TAG = "CDMA";
 
     private CDMAPhone mCdmaPhone;
+
+    private byte[] mLastDispatchedSmsFingerprint;
+    private byte[] mLastAcknowledgedSmsFingerprint;
 
     CdmaSMSDispatcher(CDMAPhone phone) {
         super(phone);
@@ -104,8 +108,14 @@ final class CdmaSMSDispatcher extends SMSDispatcher {
             return Intents.RESULT_SMS_GENERIC_ERROR;
         }
 
-        // Decode BD stream and set sms variables.
+        // See if we have a network duplicate SMS.
         SmsMessage sms = (SmsMessage) smsb;
+        mLastDispatchedSmsFingerprint = sms.getIncomingSmsFingerprint();
+        if (mLastAcknowledgedSmsFingerprint != null &&
+                Arrays.equals(mLastDispatchedSmsFingerprint, mLastAcknowledgedSmsFingerprint)) {
+            return Intents.RESULT_SMS_HANDLED;
+        }
+        // Decode BD stream and set sms variables.
         sms.parseSms();
         int teleService = sms.getTeleService();
         boolean handled = false;
@@ -433,7 +443,13 @@ final class CdmaSMSDispatcher extends SMSDispatcher {
         }
 
         if (mCm != null) {
-            mCm.acknowledgeLastIncomingCdmaSms(success, resultToCause(result), response);
+            int causeCode = resultToCause(result);
+            mCm.acknowledgeLastIncomingCdmaSms(success, causeCode, response);
+
+            if (causeCode == 0) {
+                mLastAcknowledgedSmsFingerprint = mLastDispatchedSmsFingerprint;
+            }
+            mLastDispatchedSmsFingerprint = null;
         }
     }
 
