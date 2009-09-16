@@ -387,7 +387,6 @@ public class Camera {
      * this function will cancel it. Whether the auto-focus is in progress
      * or not, this function will return the focus position to the default.
      * If the camera does not support auto-focus, this is a no-op.
-     * @hide
      */
     public final void cancelAutoFocus()
     {
