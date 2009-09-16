@@ -542,7 +542,7 @@ public class Contacts {
                 }
                 return new ByteArrayInputStream(data);
             } finally {
-                cursor.close();
+                if (cursor != null) cursor.close();
             }
         }
 
