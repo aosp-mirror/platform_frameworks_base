@@ -2843,7 +2843,9 @@
              is also used as an icon to the left of the search box and you cannot modify this
              behavior, so including the icon attribute is unecessary and this may be
              deprecated in the future.
-             <i>Optional attribute.</i> -->
+             <i>Optional attribute.</i>
+             {@deprecated This will create a non-standard UI appearance, because the search bar UI
+              now puts the activity or application icon beside the search box.} -->
         <attr name="icon" />
         <!-- This is the user-displayed name of the searchable activity.  <i>Required
             attribute.</i> -->
@@ -2868,7 +2870,10 @@
           <flag name="showSearchLabelAsBadge" value="0x04" />
           <!-- If set, this flag enables the display of the search target (icon) within the
                search bar.  (Note, overrides showSearchLabel)  If neither bad mode is selected,
-               no badge will be shown.-->
+               no badge will be shown.
+              {@deprecated This will create a non-standard UI appearance, because the search bar UI
+              now puts the activity or application icon beside the search box.}
+               -->
           <flag name="showSearchIconAsBadge" value="0x08" />
           <!-- If set, this flag causes the suggestion column SUGGEST_COLUMN_INTENT_DATA to
                be considered as the text for suggestion query rewriting.  This should only
