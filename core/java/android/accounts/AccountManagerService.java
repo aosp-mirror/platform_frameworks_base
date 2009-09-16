@@ -714,11 +714,14 @@ public class AccountManagerService extends IAccountManager.Stub {
 
         Notification n = new Notification(android.R.drawable.stat_sys_warning, null,
                 0 /* when */);
-        final CharSequence subtitleFormatString =
-                mContext.getText(R.string.permission_request_notification_subtitle);
+        final String titleAndSubtitle =
+                mContext.getString(R.string.permission_request_notification_with_subtitle,
+                account.name);
+        final int index = titleAndSubtitle.indexOf('\n');
+        final String title = titleAndSubtitle.substring(0, index);
+        final String subtitle = titleAndSubtitle.substring(index + 1);
         n.setLatestEventInfo(mContext,
-                mContext.getText(R.string.permission_request_notification_title),
-                String.format(subtitleFormatString.toString(), account.name),
+                title, subtitle,
                 PendingIntent.getActivity(mContext, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT));
         ((NotificationManager) mContext.getSystemService(Context.NOTIFICATION_SERVICE))
                 .notify(getCredentialPermissionNotificationId(account, authTokenType, uid), n);
