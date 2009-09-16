@@ -25,7 +25,6 @@ import java.util.Map;
 
 /**
  * This is a class for reading and writing Exif tags in a JPEG file.
- * {@hide}
  */
 public class ExifInterface {
 
