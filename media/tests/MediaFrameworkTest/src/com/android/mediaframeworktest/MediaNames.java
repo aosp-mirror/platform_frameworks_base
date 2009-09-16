@@ -406,7 +406,7 @@ public class MediaNames {
   public static final String META_DATA_OTHERS [][] = {
       {"/sdcard/media_api/metaDataTestMedias/3GP/cat.3gp", null, null, null,
           null, null, "20080309T002415.000Z", null,
-          null, null, "1404928", "2", null},
+          null, null, "63916", "2", null},
       {"/sdcard/media_api/metaDataTestMedias/AMR/AMR_NB.amr", null, null, null,
           null, null, null, null,
           null, null, "126540", "1", null},
@@ -424,7 +424,7 @@ public class MediaNames {
           null, null, "2005", "231180", "1", null},
       {"/sdcard/media_api/metaDataTestMedias/MP4/kung_fu_panda_h264.mp4", "2/0", "mp4 album Kung Fu Panda",
           "mp4 artist Kung Fu Panda", null, null, "20080517T091451.000Z", 
-          "41", "Kung Fu Panda", "2008", "77113", "2", "mp4 composer"},
+          "41", "Kung Fu Panda", "2008", "128521", "2", "mp4 composer"},
       {"/sdcard/media_api/metaDataTestMedias/OGG/Ring_Classic_02.ogg", null, "Suspended Animation", 
           "John Petrucci", null, null, "20070510T125223.000Z", 
           null, null, "2005", "231180", "1", null},
