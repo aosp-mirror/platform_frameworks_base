@@ -303,6 +303,32 @@
         <item name="android:windowContentOverlay">@null</item>
     </style>
 
+    <!-- Theme for a wallpaper's setting activity that is designed to be on
+         top of a dark background. -->
+    <style name="Theme.WallpaperSettings">
+        <item name="android:windowBackground">@android:drawable/screen_background_dark_transparent</item>
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowAnimationStyle">@android:style/Animation.Translucent</item>
+    </style>
+
+    <!-- Theme for a wallpaper's setting activity that is designed to be on
+         top of a light background. -->
+    <style name="Theme.Light.WallpaperSettings">
+        <item name="android:windowBackground">@android:drawable/screen_background_light_transparent</item>
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowAnimationStyle">@android:style/Animation.Translucent</item>
+    </style>
+
+    <!-- Style to apply on top of a wallpaper settings theme when it is being
+         shown on top of the real wallpaper -->
+    <style name="ActiveWallpaperSettings">
+    </style>
+    
+    <!-- Style to apply on top of a wallpaper settings theme when it is being
+         shown on top of the real wallpaper -->
+    <style name="PreviewWallpaperSettings">
+    </style>
+    
     <!-- Default theme for translucent activities, that is windows that allow you
          to see through them to the windows behind.  This sets up the translucent
          flag and appropriate animations for your windows.  -->
