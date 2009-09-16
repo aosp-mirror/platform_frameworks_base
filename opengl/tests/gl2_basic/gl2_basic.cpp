@@ -33,11 +33,45 @@ using namespace android;
 
 static void printGLString(const char *name, GLenum s)
 {
+     fprintf(stderr, "printGLString %s, %d\n", name, s);
      const char *v = (const char *)glGetString(s);
-     if (v)
-         printf("GL %s = %s\n", name, v);
+     int error = glGetError();
+     fprintf(stderr, "glGetError() = %d, result of glGetString = %x\n", error,
+         (unsigned int)v);
+     if ((v < (const char*) 0) || (v > (const char*) 0x1000))
+         fprintf(stderr, "GL %s = %s\n", name, v);
      else
-         printf("GL %s = (null)\n", name);
+         fprintf(stderr, "GL %s = (null)\n", name);
+}
+
+static const char* eglErrorToString[] = {
+    "EGL_SUCCESS",      // 0x3000 12288
+    "EGL_NOT_INITIALIZED",
+    "EGL_BAD_ACCESS",   // 0x3002 12290
+    "EGL_BAD_ALLOC",
+    "EGL_BAD_ATTRIBUTE",
+    "EGL_BAD_CONFIG",
+    "EGL_BAD_CONTEXT",  // 0x3006 12294
+    "EGL_BAD_CURRENT_SURFACE",
+    "EGL_BAD_DISPLAY",
+    "EGL_BAD_MATCH",
+    "EGL_BAD_NATIVE_PIXMAP",
+    "EGL_BAD_NATIVE_WINDOW",
+    "EGL_BAD_PARAMETER",  // 0x300c 12300
+    "EGL_BAD_SURFACE"
+};
+
+static void checkEglError(const char* op) {
+    for(EGLint error = eglGetError();
+		error != EGL_SUCCESS;
+	error = eglGetError()) {
+        const char* errorString = "unknown";
+        if (error >= EGL_SUCCESS && error <= EGL_BAD_SURFACE) {
+            errorString = eglErrorToString[error - EGL_SUCCESS];
+        }
+        fprintf(stderr, "%s() returned eglError %s (0x%x)\n", op,
+            errorString, error);
+    }
 }
 
 int main(int argc, char** argv)
@@ -63,18 +97,32 @@ int main(int argc, char** argv)
      EGLNativeWindowType window = 0;
      window = android_createDisplaySurface();
 
+     checkEglError("<init>");
      dpy = eglGetDisplay(EGL_DEFAULT_DISPLAY);
+     checkEglError("eglGetDisplay");
      eglInitialize(dpy, &majorVersion, &minorVersion);
+     checkEglError("eglInitialize");
+     fprintf(stderr, "EGL version %d.%d\n", majorVersion, minorVersion);
      EGLUtils::selectConfigForNativeWindow(dpy, s_configAttribs, window, &config);
-     surface = eglCreateWindowSurface(dpy, config, window, NULL);
+     fprintf(stderr, "Chosen config: 0x%08x\n", (unsigned long) config);
 
-    EGLint gl2_0Attribs[] = {EGL_CONTEXT_CLIENT_VERSION, 2, EGL_NONE};
+     checkEglError("EGLUtils::selectConfigForNativeWindow");
+     surface = eglCreateWindowSurface(dpy, config, window, NULL);
+     checkEglError("eglCreateWindowSurface");
+
+     EGLint gl2_0Attribs[] = {EGL_CONTEXT_CLIENT_VERSION, 2, EGL_NONE};
 
      context = eglCreateContext(dpy, config, NULL, gl2_0Attribs);
+     checkEglError("eglCreateContext");
      eglMakeCurrent(dpy, surface, surface, context);
+     checkEglError("eglMakeCurrent");
      eglQuerySurface(dpy, surface, EGL_WIDTH, &w);
+     checkEglError("eglQuerySurface");
      eglQuerySurface(dpy, surface, EGL_HEIGHT, &h);
+     checkEglError("eglQuerySurface");
      GLint dim = w<h ? w : h;
+
+     fprintf(stderr, "Window dimensions: %d x %d\n", w, h);
 
      printGLString("Version", GL_VERSION);
      printGLString("Vendor", GL_VENDOR);
