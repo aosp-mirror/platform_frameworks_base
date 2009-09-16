@@ -719,16 +719,20 @@ public class MediaScanner
                 values.put(Audio.Media.IS_MUSIC, music);
                 values.put(Audio.Media.IS_PODCAST, podcasts);
             } else if (mFileType == MediaFile.FILE_TYPE_JPEG) {
-                HashMap<String, String> exifData =
-                        ExifInterface.loadExifData(entry.mPath);
-                if (exifData != null) {
-                    float[] latlng = ExifInterface.getLatLng(exifData);
+                ExifInterface exif = null;
+                try {
+                    exif = new ExifInterface(entry.mPath);
+                } catch (IOException ex) {
+                    // exif is null
+                }
+                if (exif != null) {
+                    float[] latlng = exif.getLatLong();
                     if (latlng != null) {
                         values.put(Images.Media.LATITUDE, latlng[0]);
                         values.put(Images.Media.LONGITUDE, latlng[1]);
                     }
 
-                    long time = ExifInterface.getDateTime(exifData);
+                    long time = exif.getDateTime();
                     if (time != -1) {
                         values.put(Images.Media.DATE_TAKEN, time);
                     }
