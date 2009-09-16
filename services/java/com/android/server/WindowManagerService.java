@@ -442,6 +442,8 @@ public class WindowManagerService extends IWindowManager.Stub
     // Who is holding the screen on.
     Session mHoldingScreenOn;
 
+    boolean mTurnOnScreen;
+    
     /**
      * Whether the UI is currently running in touch mode (not showing
      * navigational focus because the user is directly pressing the screen).
@@ -2207,6 +2209,10 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (displayed && win.mSurface != null && !win.mDrawPending
                         && !win.mCommitDrawPending && !mDisplayFrozen) {
                     applyEnterAnimationLocked(win);
+                }
+                if (displayed && (win.mAttrs.flags
+                        & WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON) != 0) {
+                    win.mTurnOnScreen = true;
                 }
                 if ((attrChanges&WindowManager.LayoutParams.FORMAT_CHANGED) != 0) {
                     // To change the format, we need to re-build the surface.
@@ -6479,6 +6485,7 @@ public class WindowManagerService extends IWindowManager.Stub
         int mLastLayer;
         boolean mHaveFrame;
         boolean mObscured;
+        boolean mTurnOnScreen;
 
         WindowState mNextOutsideTouch;
 
@@ -7710,10 +7717,11 @@ public class WindowManagerService extends IWindowManager.Stub
                         pw.print(" mDestroying="); pw.print(mDestroying);
                         pw.print(" mRemoved="); pw.println(mRemoved);
             }
-            if (mOrientationChanging || mAppFreezing) {
+            if (mOrientationChanging || mAppFreezing || mTurnOnScreen) {
                 pw.print(prefix); pw.print("mOrientationChanging=");
                         pw.print(mOrientationChanging);
-                        pw.print(" mAppFreezing="); pw.println(mAppFreezing);
+                        pw.print(" mAppFreezing="); pw.print(mAppFreezing);
+                        pw.print(" mTurnOnScreen="); pw.println(mTurnOnScreen);
             }
             if (mHScale != 1 || mVScale != 1) {
                 pw.print(prefix); pw.print("mHScale="); pw.print(mHScale);
@@ -9782,6 +9790,12 @@ public class WindowManagerService extends IWindowManager.Stub
             Message m = mH.obtainMessage(H.HOLD_SCREEN_CHANGED, holdScreen);
             mH.sendMessage(m);
         }
+        
+        if (mTurnOnScreen) {
+            mPowerManager.userActivity(SystemClock.uptimeMillis(), false,
+                    LocalPowerManager.BUTTON_EVENT, true);
+            mTurnOnScreen = false;
+        }
     }
 
     void requestAnimationLocked(long delay) {
@@ -9803,6 +9817,10 @@ public class WindowManagerService extends IWindowManager.Stub
         try {
             if (win.mSurface != null) {
                 win.mSurface.show();
+                if (win.mTurnOnScreen) {
+                    win.mTurnOnScreen = false;
+                    mTurnOnScreen = true;
+                }
             }
             return true;
         } catch (RuntimeException e) {
