@@ -291,13 +291,20 @@ public class TestShellActivity extends Activity implements LayoutTestController 
     }
 
     public void finished() {
-        if (mUiAutoTestPath != null) {
-            //don't really finish here
-            moveToNextTest();
-        } else {
-            if (mCallback != null) {
-                mCallback.finished();
+        if (mTestPageLoaded) {
+            if (mUiAutoTestPath != null) {
+                //don't really finish here
+                moveToNextTest();
+            } else {
+                if (mCallback != null) {
+                    mCallback.finished();
+                }
             }
+        } else {
+            // The test is complete but the page has not completed loading. We
+            // can't continue to the next test until both the test is finished
+            // and the page has stopped loading.
+            mReadyForNextTest = true;
         }
     }
 
@@ -445,12 +452,14 @@ public class TestShellActivity extends Activity implements LayoutTestController 
         @Override
         public void onPageFinished(WebView view, String url) {
             Log.v(LOGTAG, "onPageFinished, url=" + url);
+            mTestPageLoaded = true;
             super.onPageFinished(view, url);
         }
 
         @Override
         public void onPageStarted(WebView view, String url, Bitmap favicon) {
             Log.v(LOGTAG, "onPageStarted, url=" + url);
+            mTestPageLoaded = false;
             super.onPageStarted(view, url, favicon);
         }
 
@@ -480,6 +489,17 @@ public class TestShellActivity extends Activity implements LayoutTestController 
         @Override
         public void onProgressChanged(WebView view, int newProgress) {
             if (newProgress == 100) {
+
+                if (mReadyForNextTest) {
+                    // In this case, the test has completed (i.e. called
+                    // layoutTestController.notifyDone) before the page finished loading. This
+                    // usually happens if the test is not invoked by an onload handler, rather
+                    // directly in a script tag. Now that the page has finished loading, it is
+                    // safe for DRT to go to the next test.
+                    finished();
+                    return;
+                }
+
                 if (!mTimedOut && !mWaitUntilDone && !mRequestedWebKitData) {
                     String url = mWebView.getUrl();
                     Log.v(LOGTAG, "Finished: "+ url);
@@ -655,6 +675,8 @@ public class TestShellActivity extends Activity implements LayoutTestController 
         mDumpDatabaseCallbacks = false;
         mCanOpenWindows = false;
         mEventSender.resetMouse();
+        mTestPageLoaded = false;
+        mReadyForNextTest = false;
     }
 
     private void setupWebViewForLayoutTests(WebView webview, CallbackProxy callbackProxy) {
@@ -710,6 +732,9 @@ public class TestShellActivity extends Activity implements LayoutTestController 
     private StringBuffer mDatabaseCallbackStrings;
     private StringBuffer mConsoleMessages;
     private boolean mCanOpenWindows;
+
+    private boolean mTestPageLoaded = false;
+    private boolean mReadyForNextTest = false;
 
     static final String TIMEOUT_STR = "**Test timeout";
 
