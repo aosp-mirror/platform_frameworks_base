@@ -18,7 +18,7 @@
 */
 -->
 <resources>
-	<drawable name="screen_background_light">#fff9f9f9</drawable>
+	<drawable name="screen_background_light">#ffffffff</drawable>
 	<drawable name="screen_background_dark">#ff202020</drawable>
     <drawable name="status_bar_closed_default_background">#ff000000</drawable>
     <drawable name="status_bar_opened_default_background">#ff000000</drawable>
@@ -45,7 +45,7 @@
     <color name="dim_foreground_dark_inverse">#323232</color>
     <color name="dim_foreground_dark_inverse_disabled">#80323232</color>
     <color name="hint_foreground_dark">#808080</color>
-    <color name="background_light">#fff9f9f9</color>
+    <color name="background_light">#ffffffff</color>
     <color name="bright_foreground_light">#ff000000</color>
     <color name="bright_foreground_light_inverse">#ffffffff</color>
     <color name="bright_foreground_light_disabled">#80000000</color>
