@@ -129,6 +129,8 @@ public class PhoneNumberUtils
             return uri.getSchemeSpecificPart();
         }
 
+        // TODO: We don't check for SecurityException here (requires
+        // READ_PHONE_STATE permission).
         if (scheme.equals("voicemail")) {
             return TelephonyManager.getDefault().getVoiceMailNumber();
         }
@@ -1176,6 +1178,35 @@ public class PhoneNumberUtils
 
         //no ecclist system property, so use our own list.
         return (number.equals("112") || number.equals("911"));
+    }
+
+    /**
+     * isVoiceMailNumber: checks a given number against the voicemail
+     *   number provided by the RIL and SIM card. The caller must have
+     *   the READ_PHONE_STATE credential.
+     *
+     * @param number the number to look up.
+     * @return true if the number is in the list of voicemail. False
+     * otherwise, including if the caller does not have the permission
+     * to read the VM number.
+     * @hide TODO: pending API Council approval
+     */
+    public static boolean isVoiceMailNumber(String number) {
+        String vmNumber;
+
+        try {
+            vmNumber = TelephonyManager.getDefault().getVoiceMailNumber();
+        } catch (SecurityException ex) {
+            return false;
+        }
+
+        // Strip the separators from the number before comparing it
+        // to the list.
+        number = extractNetworkPortion(number);
+
+        // compare tolerates null so we need to make sure that we
+        // don't return true when both are null.
+        return !TextUtils.isEmpty(number) && compare(number, vmNumber);
     }
 
     /**
