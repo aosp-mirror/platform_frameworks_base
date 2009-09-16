@@ -739,11 +739,6 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
             return false;
         }
 
-        // handle back key to go back to previous searchable, etc.
-        if (handleBackKey(keyCode, event)) {
-            return true;
-        }
-        
         if (keyCode == KeyEvent.KEYCODE_SEARCH) {
             // Consume search key for later use.
             return true;
@@ -756,8 +751,8 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
             launchQuerySearch(keyCode, actionKey.getQueryActionMsg());
             return true;
         }
-        
-        return false;
+
+        return super.onKeyDown(keyCode, event);
     }
     
     @Override
@@ -767,11 +762,6 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
             return false;
         }
 
-        // handle back key to go back to previous searchable, etc.
-        if (handleBackKey(keyCode, event)) {
-            return true;
-        }
-        
         if (keyCode == KeyEvent.KEYCODE_SEARCH && event.isTracking()
                 && !event.isCanceled()) {
             // If the search key is pressed, toggle between global and in-app search. If we are
@@ -779,8 +769,8 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
             // just don't do anything.
             return toggleGlobalSearch();
         }
-        
-        return false;
+
+        return super.onKeyUp(keyCode, event);
     }
     
     /**
@@ -1488,6 +1478,13 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
     }
 
     /**
+     * Checks if there are any previous searchable components in the history stack.
+     */
+    private boolean hasPreviousComponent() {
+        return mPreviousComponents != null && !mPreviousComponents.isEmpty();
+    }
+
+    /**
      * Saves the previous component that was searched, so that we can go
      * back to it.
      */
@@ -1505,14 +1502,10 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
      *         no previous component.
      */
     private ComponentName popPreviousComponent() {
-        if (mPreviousComponents == null) {
+        if (!hasPreviousComponent()) {
             return null;
         }
-        int size = mPreviousComponents.size();
-        if (size == 0) {
-            return null;
-        }
-        return mPreviousComponents.remove(size - 1);
+        return mPreviousComponents.remove(mPreviousComponents.size() - 1);
     }
     
     /**
@@ -1520,25 +1513,22 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
      * 
      * @return <code>true</code> if there was a previous component that we could go back to.
      */
-    private boolean backToPreviousComponent(boolean doIt) {
+    private boolean backToPreviousComponent() {
         ComponentName previous = popPreviousComponent();
         if (previous == null) {
             return false;
         }
-        
-        if (doIt) {
-            if (!show(previous, mAppSearchData, false)) {
-                Log.w(LOG_TAG, "Failed to switch to source " + previous);
-                return false;
-            }
-            
-            // must touch text to trigger suggestions
-            // TODO: should this be the text as it was when the user left
-            // the source that we are now going back to?
-            String query = mSearchAutoComplete.getText().toString();
-            setUserQuery(query);
+
+        if (!show(previous, mAppSearchData, false)) {
+            Log.w(LOG_TAG, "Failed to switch to source " + previous);
+            return false;
         }
-        
+
+        // must touch text to trigger suggestions
+        // TODO: should this be the text as it was when the user left
+        // the source that we are now going back to?
+        String query = mSearchAutoComplete.getText().toString();
+        setUserQuery(query);
         return true;
     }
     
@@ -1763,46 +1753,34 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
          */
         @Override
         public boolean onKeyPreIme(int keyCode, KeyEvent event) {
+            if (DBG) Log.d(LOG_TAG, "onKeyPreIme(" + keyCode + "," + event + ")");
             if (mSearchDialog.mSearchable == null) {
                 return false;
             }
             if (keyCode == KeyEvent.KEYCODE_BACK) {
                 if (event.getAction() == KeyEvent.ACTION_DOWN
                         && event.getRepeatCount() == 0) {
-                    // We release the back key, might we want to do
-                    // something before the IME?
-                    if (mSearchDialog.backToPreviousComponent(false)) {
+                    if (mSearchDialog.hasPreviousComponent() || isDismissingKeyboardPointless()) {
                         getKeyDispatcherState().startTracking(event, this);
                         return true;
                     }
-                    if (isInputMethodNotNeeded() ||
-                            (isEmpty() && getDropDownChildCount() >= getAdapterCount())) {
-                        getKeyDispatcherState().startTracking(event, this);
-                        return true;
-                    }
-                    return false; // will dismiss soft keyboard if necessary
                 } else if (event.getAction() == KeyEvent.ACTION_UP
                         && event.isTracking() && !event.isCanceled()) {
-                    if (mSearchDialog.backToPreviousComponent(true)) {
+                    if (mSearchDialog.backToPreviousComponent()) {
                         return true;
-                    }
-                    // If the drop-down obscures the keyboard, the user wouldn't see anything
-                    // happening when pressing back, so we dismiss the entire dialog instead.
-                    //
-                    // also: if there is no text entered, we also want to dismiss the whole dialog,
-                    // not just the soft keyboard.  the exception to this is if there are shortcuts
-                    // that aren't displayed (e.g are being obscured by the soft keyboard); in that
-                    // case we want to dismiss the soft keyboard so the user can see the rest of the
-                    // shortcuts.
-                    if (isInputMethodNotNeeded() ||
-                            (isEmpty() && getDropDownChildCount() >= getAdapterCount())) {
+                    } else if (isDismissingKeyboardPointless()) {
                         mSearchDialog.cancel();
                         return true;
                     }
-                    return false; // will dismiss soft keyboard if necessary
                 }
             }
             return false;
+        }
+
+        // If the drop-down obscures the keyboard, or if the drop-down shows all suggestions,
+        // dismissing the keyboard is pointless, so we dismiss the entire dialog instead.
+        private boolean isDismissingKeyboardPointless() {
+            return (isInputMethodNotNeeded() || getDropDownChildCount() >= getAdapterCount());
         }
 
         private int getAdapterCount() {
@@ -1810,27 +1788,14 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
             return adapter == null ? 0 : adapter.getCount();
         }
     }
-    
-    protected boolean handleBackKey(int keyCode, KeyEvent event) {
-        if (keyCode == KeyEvent.KEYCODE_BACK) {
-            if (event.getAction() == KeyEvent.ACTION_DOWN
-                    && event.getRepeatCount() == 0) {
-                // Consume the event, to get an up at which point we execute.
-                event.startTracking();
-                return true;
-            }
-            if (event.getAction() == KeyEvent.ACTION_UP && event.isTracking()
-                    && !event.isCanceled()) {
-                if (backToPreviousComponent(true)) {
-                    return true;
-                }
-                cancel();
-            }
-            return true;
+
+    @Override
+    public void onBackPressed() {
+        if (!backToPreviousComponent()) {
+            cancel();
         }
-        return false;
     }
-    
+
     /**
      * Implements OnItemClickListener
      */
