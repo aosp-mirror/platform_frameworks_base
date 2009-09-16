@@ -16,8 +16,7 @@
 
 package android.media;
 
-import android.util.Log;
-
+import java.io.IOException;
 import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -25,171 +24,103 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Wrapper for native Exif library
+ * This is a class for reading and writing Exif tags in a JPEG file.
  * {@hide}
  */
 public class ExifInterface {
-    private static final String TAG = "ExifInterface";
-    private String mFilename;
-
-    // Constants used for the Orientation Exif tag.
-    public static final int ORIENTATION_UNDEFINED = 0;
-    public static final int ORIENTATION_NORMAL = 1;
-
-    // Constants used for white balance
-    public static final int WHITEBALANCE_AUTO = 0;
-    public static final int WHITEBALANCE_MANUAL = 1;
-
-    // left right reversed mirror
-    public static final int ORIENTATION_FLIP_HORIZONTAL = 2;
-    public static final int ORIENTATION_ROTATE_180 = 3;
-
-    // upside down mirror
-    public static final int ORIENTATION_FLIP_VERTICAL = 4;
-
-    // flipped about top-left <--> bottom-right axis
-    public static final int ORIENTATION_TRANSPOSE = 5;
-
-    // rotate 90 cw to right it
-    public static final int ORIENTATION_ROTATE_90 = 6;
-
-    // flipped about top-right <--> bottom-left axis
-    public static final int ORIENTATION_TRANSVERSE = 7;
-
-    // rotate 270 to right it
-    public static final int ORIENTATION_ROTATE_270 = 8;
 
     // The Exif tag names
     public static final String TAG_ORIENTATION = "Orientation";
-
     public static final String TAG_DATETIME = "DateTime";
     public static final String TAG_MAKE = "Make";
     public static final String TAG_MODEL = "Model";
     public static final String TAG_FLASH = "Flash";
     public static final String TAG_IMAGE_WIDTH = "ImageWidth";
     public static final String TAG_IMAGE_LENGTH = "ImageLength";
-
     public static final String TAG_GPS_LATITUDE = "GPSLatitude";
     public static final String TAG_GPS_LONGITUDE = "GPSLongitude";
-
     public static final String TAG_GPS_LATITUDE_REF = "GPSLatitudeRef";
     public static final String TAG_GPS_LONGITUDE_REF = "GPSLongitudeRef";
     public static final String TAG_WHITE_BALANCE = "WhiteBalance";
 
-    private boolean mSavedAttributes = false;
-    private boolean mHasThumbnail = false;
-    private HashMap<String, String> mCachedAttributes = null;
+    // Constants used for the Orientation Exif tag.
+    public static final int ORIENTATION_UNDEFINED = 0;
+    public static final int ORIENTATION_NORMAL = 1;
+    public static final int ORIENTATION_FLIP_HORIZONTAL = 2;  // left right reversed mirror
+    public static final int ORIENTATION_ROTATE_180 = 3;
+    public static final int ORIENTATION_FLIP_VERTICAL = 4;  // upside down mirror
+    public static final int ORIENTATION_TRANSPOSE = 5;  // flipped about top-left <--> bottom-right axis
+    public static final int ORIENTATION_ROTATE_90 = 6;  // rotate 90 cw to right it
+    public static final int ORIENTATION_TRANSVERSE = 7;  // flipped about top-right <--> bottom-left axis
+    public static final int ORIENTATION_ROTATE_270 = 8;  // rotate 270 to right it
+
+    // Constants used for white balance
+    public static final int WHITEBALANCE_AUTO = 0;
+    public static final int WHITEBALANCE_MANUAL = 1;
 
     static {
         System.loadLibrary("exif");
     }
 
-    private static ExifInterface sExifObj = null;
-    /**
-     * Since the underlying jhead native code is not thread-safe,
-     * ExifInterface should use singleton interface instead of public
-     * constructor.
-     */
-    private static synchronized ExifInterface instance() {
-        if (sExifObj == null) {
-            sExifObj = new ExifInterface();
-        }
+    private String mFilename;
+    private HashMap<String, String> mAttributes;
+    private boolean mHasThumbnail = false;
 
-        return sExifObj;
-    }
+    // Because the underlying implementation (jhead) uses static variables,
+    // there can only be one user at a time for the native functions (and
+    // they cannot keep state in the native code across function calls). We
+    // use sLock the serialize the accesses.
+    private static Object sLock = new Object();
 
     /**
-     * The following 3 static methods are handy routines for atomic operation
-     * of underlying jhead library. It retrieves EXIF data and then release
-     * ExifInterface immediately.
+     * Reads Exif tags from the specified JPEG file.
      */
-    public static synchronized HashMap<String, String> loadExifData(String filename) {
-        ExifInterface exif = instance();
-        HashMap<String, String> exifData = null;
-        if (exif != null) {
-            exif.setFilename(filename);
-            exifData = exif.getAttributes();
-        }
-        return exifData;
-    }
-
-    public static synchronized void saveExifData(String filename, HashMap<String, String> exifData) {
-        ExifInterface exif = instance();
-        if (exif != null) {
-            exif.setFilename(filename);
-            exif.saveAttributes(exifData);
-        }
-    }
-
-    public static synchronized byte[] getExifThumbnail(String filename) {
-        ExifInterface exif = instance();
-        if (exif != null) {
-            exif.setFilename(filename);
-            return exif.getThumbnail();
-        }
-        return null;
-    }
-
-    public void setFilename(String filename) {
-        if (mFilename == null || !mFilename.equals(filename)) {
-            mFilename = filename;
-            mCachedAttributes = null;
-        }
+    public ExifInterface(String filename) throws IOException {
+        mFilename = filename;
+        loadAttributes();
     }
 
     /**
-     * Given a HashMap of Exif tags and associated values, an Exif section in
-     * the JPG file is created and loaded with the tag data. saveAttributes()
-     * is expensive because it involves copying all the JPG data from one file
-     * to another and deleting the old file and renaming the other. It's best
-     * to collect all the attributes to write and make a single call rather
-     * than multiple calls for each attribute. You must call "commitChanges()"
-     * at some point to commit the changes.
+     * Returns the value of the specified tag or {@code null} if there
+     * is no such tag in the file.
+     *
+     * @param tag the name of the tag.
      */
-    public void saveAttributes(HashMap<String, String> attributes) {
-        // format of string passed to native C code:
-        // "attrCnt attr1=valueLen value1attr2=value2Len value2..."
-        // example:
-        // "4 attrPtr ImageLength=4 1024Model=6 FooImageWidth=4 1280Make=3 FOO"
-        StringBuilder sb = new StringBuilder();
-        int size = attributes.size();
-        if (attributes.containsKey("hasThumbnail")) {
-            --size;
-        }
-        sb.append(size + " ");
-        for (Map.Entry<String, String> iter : attributes.entrySet()) {
-            String key = iter.getKey();
-            if (key.equals("hasThumbnail")) {
-                // this is a fake attribute not saved as an exif tag
-                continue;
-            }
-            String val = iter.getValue();
-            sb.append(key + "=");
-            sb.append(val.length() + " ");
-            sb.append(val);
-        }
-        String s = sb.toString();
-        saveAttributesNative(mFilename, s);
-        commitChangesNative(mFilename);
-        mSavedAttributes = true;
+    public String getAttribute(String tag) {
+        return mAttributes.get(tag);
     }
 
     /**
-     * Returns a HashMap loaded with the Exif attributes of the file. The key
-     * is the standard tag name and the value is the tag's value: e.g.
-     * Model -> Nikon. Numeric values are returned as strings.
+     * Set the value of the specified tag.
+     *
+     * @param tag the name of the tag.
+     * @param value the value of the tag.
      */
-    public HashMap<String, String> getAttributes() {
-        if (mCachedAttributes != null) {
-            return mCachedAttributes;
-        }
+    public void setAttribute(String tag, String value) {
+        mAttributes.put(tag, value);
+    }
+
+    /**
+     * Initialize mAttributes with the attributes from the file mFilename.
+     *
+     * mAttributes is a HashMap which stores the Exif attributes of the file.
+     * The key is the standard tag name and the value is the tag's value: e.g.
+     * Model -> Nikon. Numeric values are stored as strings.
+     *
+     * This function also initialize mHasThumbnail to indicate whether the
+     * file has a thumbnail inside.
+     */
+    private void loadAttributes() {
         // format of string passed from native C code:
         // "attrCnt attr1=valueLen value1attr2=value2Len value2..."
         // example:
         // "4 attrPtr ImageLength=4 1024Model=6 FooImageWidth=4 1280Make=3 FOO"
-        mCachedAttributes = new HashMap<String, String>();
+        mAttributes = new HashMap<String, String>();
 
-        String attrStr = getAttributesNative(mFilename);
+        String attrStr;
+        synchronized (sLock) {
+            attrStr = getAttributesNative(mFilename);
+        }
 
         // get count
         int ptr = attrStr.indexOf(' ');
@@ -215,17 +146,78 @@ public class ExifInterface {
             if (attrName.equals("hasThumbnail")) {
                 mHasThumbnail = attrValue.equalsIgnoreCase("true");
             } else {
-                mCachedAttributes.put(attrName, attrValue);
+                mAttributes.put(attrName, attrValue);
             }
         }
-        return mCachedAttributes;
     }
 
     /**
-     * Given a numerical white balance value, return a
-     * human-readable string describing it.
+     * Save the tag data into the JPEG file. This is expensive because it involves
+     * copying all the JPG data from one file to another and deleting the old file
+     * and renaming the other. It's best to use {@link setAttribute()} to set all
+     * attributes to write and make a single call rather than multiple calls for
+     * each attribute.
      */
-    public static String whiteBalanceToString(int whitebalance) {
+    public void saveAttributes() throws IOException {
+        // format of string passed to native C code:
+        // "attrCnt attr1=valueLen value1attr2=value2Len value2..."
+        // example:
+        // "4 attrPtr ImageLength=4 1024Model=6 FooImageWidth=4 1280Make=3 FOO"
+        StringBuilder sb = new StringBuilder();
+        int size = mAttributes.size();
+        if (mAttributes.containsKey("hasThumbnail")) {
+            --size;
+        }
+        sb.append(size + " ");
+        for (Map.Entry<String, String> iter : mAttributes.entrySet()) {
+            String key = iter.getKey();
+            if (key.equals("hasThumbnail")) {
+                // this is a fake attribute not saved as an exif tag
+                continue;
+            }
+            String val = iter.getValue();
+            sb.append(key + "=");
+            sb.append(val.length() + " ");
+            sb.append(val);
+        }
+        String s = sb.toString();
+        synchronized (sLock) {
+            saveAttributesNative(mFilename, s);
+            commitChangesNative(mFilename);
+        }
+    }
+
+    /**
+     * Returns true if the JPEG file has a thumbnail.
+     */
+    public boolean hasThumbnail() {
+        return mHasThumbnail;
+    }
+
+    /**
+     * Returns the thumbnail inside the JPEG file, or {@code null} if there is no thumbnail.
+     */
+    public byte[] getThumbnail() {
+        synchronized (sLock) {
+            return getThumbnailNative(mFilename);
+        }
+    }
+
+    /**
+     * Returns a human-readable string describing the white balance value. Returns empty
+     * string if there is no white balance value or it is not recognized.
+     */
+    public String getWhiteBalanceString() {
+        String value = getAttribute(TAG_WHITE_BALANCE);
+        if (value == null) return "";
+
+        int whitebalance;
+        try {
+            whitebalance = Integer.parseInt(value);
+        } catch (NumberFormatException ex) {
+            return "";
+        }
+
         switch (whitebalance) {
             case WHITEBALANCE_AUTO:
                 return "Auto";
@@ -237,12 +229,21 @@ public class ExifInterface {
     }
 
     /**
-     * Given a numerical orientation, return a human-readable string describing
-     * the orientation.
+     * Returns a human-readable string describing the orientation value. Returns empty
+     * string if there is no orientation value or it it not recognized.
      */
-    public static String orientationToString(int orientation) {
-        // TODO: this function needs to be localized and use string resource ids
-        // rather than strings
+    public String getOrientationString() {
+        // TODO: this function needs to be localized.
+        String value = getAttribute(TAG_ORIENTATION);
+        if (value == null) return "";
+
+        int orientation;
+        try {
+            orientation = Integer.parseInt(value);
+        } catch (NumberFormatException ex) {
+            return "";
+        }
+
         String orientationString;
         switch (orientation) {
             case ORIENTATION_NORMAL:
@@ -277,48 +278,21 @@ public class ExifInterface {
     }
 
     /**
-     * Copies the thumbnail data out of the filename and puts it in the Exif
-     * data associated with the file used to create this object. You must call
-     * "commitChanges()" at some point to commit the changes.
+     * Returns the latitude and longitude value in a float array. The first element is
+     * the latitude, and the second element is the longitude.
      */
-    public boolean appendThumbnail(String thumbnailFileName) {
-        if (!mSavedAttributes) {
-            throw new RuntimeException("Must call saveAttributes "
-                    + "before calling appendThumbnail");
-        }
-        mHasThumbnail = appendThumbnailNative(mFilename, thumbnailFileName);
-        return mHasThumbnail;
-    }
-
-    public boolean hasThumbnail() {
-        if (!mSavedAttributes) {
-            getAttributes();
-        }
-        return mHasThumbnail;
-    }
-
-    public byte[] getThumbnail() {
-        return getThumbnailNative(mFilename);
-    }
-
-    public static float[] getLatLng(HashMap<String, String> exifData) {
-        if (exifData == null) {
-            return null;
-        }
-
-        String latValue = exifData.get(ExifInterface.TAG_GPS_LATITUDE);
-        String latRef = exifData.get(ExifInterface.TAG_GPS_LATITUDE_REF);
-        String lngValue = exifData.get(ExifInterface.TAG_GPS_LONGITUDE);
-        String lngRef = exifData.get(ExifInterface.TAG_GPS_LONGITUDE_REF);
+    public float[] getLatLong() {
+        String latValue = mAttributes.get(ExifInterface.TAG_GPS_LATITUDE);
+        String latRef = mAttributes.get(ExifInterface.TAG_GPS_LATITUDE_REF);
+        String lngValue = mAttributes.get(ExifInterface.TAG_GPS_LONGITUDE);
+        String lngRef = mAttributes.get(ExifInterface.TAG_GPS_LONGITUDE_REF);
         float[] latlng = null;
 
         if (latValue != null && latRef != null
                 && lngValue != null && lngRef != null) {
             latlng = new float[2];
-            latlng[0] = ExifInterface.convertRationalLatLonToFloat(
-                    latValue, latRef);
-            latlng[1] = ExifInterface.convertRationalLatLonToFloat(
-                    lngValue, lngRef);
+            latlng[0] = convertRationalLatLonToFloat(latValue, latRef);
+            latlng[1] = convertRationalLatLonToFloat(lngValue, lngRef);
         }
 
         return latlng;
@@ -327,14 +301,12 @@ public class ExifInterface {
     private static SimpleDateFormat sFormatter =
             new SimpleDateFormat("yyyy:MM:dd HH:mm:ss");
 
-    // Returns number of milliseconds since Jan. 1, 1970, midnight GMT.
-    // Returns -1 if the date time information if not available.
-    public static long getDateTime(HashMap<String, String> exifData) {
-        if (exifData == null) {
-            return -1;
-        }
-
-        String dateTimeString = exifData.get(ExifInterface.TAG_DATETIME);
+    /**
+     * Returns number of milliseconds since Jan. 1, 1970, midnight GMT.
+     * Returns -1 if the date time information if not available.
+     */
+    public long getDateTime() {
+        String dateTimeString = mAttributes.get(TAG_DATETIME);
         if (dateTimeString == null) return -1;
 
         ParsePosition pos = new ParsePosition(0);
@@ -347,7 +319,7 @@ public class ExifInterface {
         }
     }
 
-    public static float convertRationalLatLonToFloat(
+    private static float convertRationalLatLonToFloat(
             String rationalString, String ref) {
         try {
             String [] parts = rationalString.split(",");
@@ -375,42 +347,6 @@ public class ExifInterface {
             // null
             return 0f;
         }
-    }
-
-    public static String convertRationalLatLonToDecimalString(
-            String rationalString, String ref, boolean usePositiveNegative) {
-            float result = convertRationalLatLonToFloat(rationalString, ref);
-
-            String preliminaryResult = String.valueOf(result);
-            if (usePositiveNegative) {
-                String neg = (ref.equals("S") || ref.equals("E")) ? "-" : "";
-                return neg + preliminaryResult;
-            } else {
-                return preliminaryResult + String.valueOf((char) 186) + " "
-                        + ref;
-            }
-    }
-
-    public static String makeLatLongString(double d) {
-        d = Math.abs(d);
-
-        int degrees = (int) d;
-
-        double remainder = d - degrees;
-        int minutes = (int) (remainder * 60D);
-        // really seconds * 1000
-        int seconds = (int) (((remainder * 60D) - minutes) * 60D * 1000D);
-
-        String retVal = degrees + "/1," + minutes + "/1," + seconds + "/1000";
-        return retVal;
-    }
-
-    public static String makeLatStringRef(double lat) {
-        return lat >= 0D ? "N" : "S";
-    }
-
-    public static String makeLonStringRef(double lon) {
-        return lon >= 0D ? "W" : "E";
     }
 
     private native boolean appendThumbnailNative(String fileName,
