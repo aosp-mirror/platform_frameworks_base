@@ -29,7 +29,7 @@ public interface PluginStub {
 
     /**
      * Return a custom embedded view to draw the plugin.
-     * @param npp The native NPP instance.
+     * @param NPP The native NPP instance.
      * @param context The current application's Context.
      * @return A custom View that will be managed by WebView.
      */
@@ -39,7 +39,7 @@ public interface PluginStub {
      * Return a custom full-screen view to be displayed when the user requests
      * a plugin display as full-screen. Note that the application may choose not
      * to display this View as completely full-screen.
-     * @param npp The native NPP instance.
+     * @param NPP The native NPP instance.
      * @param context The current application's Context.
      * @return A custom View that will be managed by the application.
      */
