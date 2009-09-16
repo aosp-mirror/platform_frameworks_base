@@ -32,19 +32,16 @@ class PluginUtil {
      * @param className the fully qualified name of a subclass of PluginStub
      */
     /* package */
-    static PluginStub getPluginStub(Context context, String packageName,
-            String className, int NPP) {
+    static PluginStub getPluginStub(Context context, String packageName, 
+            String className) {
         try {
             Context pluginContext = context.createPackageContext(packageName,
                     Context.CONTEXT_INCLUDE_CODE |
                     Context.CONTEXT_IGNORE_SECURITY);
             ClassLoader pluginCL = pluginContext.getClassLoader();
 
-            Class<?> stubClass =
-                    pluginCL.loadClass(className);
-            Constructor<?> stubConstructor =
-                    stubClass.getConstructor(int.class);
-            Object stubObject = stubConstructor.newInstance(NPP);
+            Class<?> stubClass = pluginCL.loadClass(className);
+            Object stubObject = stubClass.newInstance();
 
             if (stubObject instanceof PluginStub) {
                 return (PluginStub) stubObject;
