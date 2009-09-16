@@ -529,6 +529,8 @@ import java.util.Set;
  *     <li> {@link #CATEGORY_HOME}
  *     <li> {@link #CATEGORY_PREFERENCE}
  *     <li> {@link #CATEGORY_TEST}
+ *     <li> {@link #CATEGORY_CAR_DOCK}
+ *     <li> {@link #CATEGORY_DESK_DOCK}
  * </ul>
  *
  * <h3>Standard Extra Data</h3>
@@ -1861,12 +1863,29 @@ public class Intent implements Parcelable {
      */
     public static final String CATEGORY_FRAMEWORK_INSTRUMENTATION_TEST =
             "android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST";
+    /**
+     * An activity to run when device is inserted into a car dock.
+    * Used with {@link #ACTION_MAIN} to launch an activity.
+     * To monitor dock state, use {@link #ACTION_DOCK_EVENT} instead.
+     */
+    @SdkConstant(SdkConstantType.INTENT_CATEGORY)
+    public static final String CATEGORY_CAR_DOCK = "android.intent.category.CAR_DOCK";
+    /**
+     * An activity to run when device is inserted into a car dock.
+     * Used with {@link #ACTION_MAIN} to launch an activity.
+     * To monitor dock state, use {@link #ACTION_DOCK_EVENT} instead.
+     */
+    @SdkConstant(SdkConstantType.INTENT_CATEGORY)
+    public static final String CATEGORY_DESK_DOCK = "android.intent.category.DESK_DOCK";
 
     /**
      * Broadcast Action:  The phone was docked or undocked.  Includes the extra
      * field {@link #EXTRA_DOCK_STATE}, containing the current dock state.
-     * @hide
+     * This is intended for monitoring the current dock state.
+     * To launch an activity from a dock state change, use {@link #CATEGORY_CAR_DOCK}
+     * or {@link #CATEGORY_DESK_DOCK} instead.
      */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_DOCK_EVENT = "android.intent.action.DOCK_EVENT";
 
     // ---------------------------------------------------------------------
@@ -2005,28 +2024,24 @@ public class Intent implements Parcelable {
      * {@link android.content.Intent#EXTRA_DOCK_STATE_UNDOCKED},
      * {@link android.content.Intent#EXTRA_DOCK_STATE_DESK}, or
      * {@link android.content.Intent#EXTRA_DOCK_STATE_CAR}.
-     * @hide
      */
     public static final String EXTRA_DOCK_STATE = "android.intent.extra.DOCK_STATE";
 
     /**
      * Used as an int value for {@link android.content.Intent#EXTRA_DOCK_STATE}
      * to represent that the phone is not in any dock.
-     * @hide
      */
     public static final int EXTRA_DOCK_STATE_UNDOCKED = 0;
 
     /**
      * Used as an int value for {@link android.content.Intent#EXTRA_DOCK_STATE}
      * to represent that the phone is in a desk dock.
-     * @hide
      */
     public static final int EXTRA_DOCK_STATE_DESK = 1;
 
     /**
      * Used as an int value for {@link android.content.Intent#EXTRA_DOCK_STATE}
      * to represent that the phone is in a car dock.
-     * @hide
      */
     public static final int EXTRA_DOCK_STATE_CAR = 2;
 

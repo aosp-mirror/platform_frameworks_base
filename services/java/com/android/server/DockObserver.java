@@ -16,6 +16,7 @@
 
 package com.android.server;
 
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
@@ -111,6 +112,30 @@ class DockObserver extends UEventObserver {
                 Intent intent = new Intent(Intent.ACTION_DOCK_EVENT);
                 intent.putExtra(Intent.EXTRA_DOCK_STATE, mDockState);
                 mContext.sendStickyBroadcast(intent);
+
+                // Launch a dock activity
+                String category;
+                switch (mDockState) {
+                    case Intent.EXTRA_DOCK_STATE_CAR:
+                        category = Intent.CATEGORY_CAR_DOCK;
+                        break;
+                    case Intent.EXTRA_DOCK_STATE_DESK:
+                        category = Intent.CATEGORY_DESK_DOCK;
+                        break;
+                    default:
+                        category = null;
+                        break;
+                }
+                if (category != null) {
+                    intent = new Intent(Intent.ACTION_MAIN);
+                    intent.addCategory(category);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    try {
+                        mContext.startActivity(intent);
+                    } catch (ActivityNotFoundException e) {
+                        Log.w(TAG, e.getCause());
+                    }
+                }
             }
         }
     };
