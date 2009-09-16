@@ -15,6 +15,7 @@
  */
 package android.pim.vcard;
 
+import android.accounts.Account;
 import android.content.ContentProviderOperation;
 import android.content.ContentResolver;
 import android.content.ContentValues;
@@ -416,7 +417,8 @@ public class ContactStruct {
     private List<String> mWebsiteList;
     
     private final int mVCardType;
-    
+    private final Account mAccount;
+
     // Each Column of four properties has ISPRIMARY field
     // (See android.provider.Contacts)
     // If false even after the parsing loop, we choose the first entry as a "primary"
@@ -429,9 +431,14 @@ public class ContactStruct {
     public ContactStruct() {
         this(VCardConfig.VCARD_TYPE_V21_GENERIC);
     }
-    
+
     public ContactStruct(int vcardType) {
+        this(vcardType, null);
+    }
+
+    public ContactStruct(int vcardType, Account account) {
         mVCardType = vcardType;
+        mAccount = account;
     }
 
     /**
@@ -1021,7 +1028,12 @@ public class ContactStruct {
             new ArrayList<ContentProviderOperation>();  
         ContentProviderOperation.Builder builder =
             ContentProviderOperation.newInsert(RawContacts.CONTENT_URI);
-        builder.withValues(new ContentValues());
+        if (mAccount != null) {
+            builder.withValue(RawContacts.ACCOUNT_NAME, mAccount.name);
+            builder.withValue(RawContacts.ACCOUNT_TYPE, mAccount.type);
+        } else {
+            builder.withValues(new ContentValues());
+        }
         operationList.add(builder.build());
 
         {
@@ -1183,7 +1195,7 @@ public class ContactStruct {
             builder.withValue(Miscellaneous.BIRTHDAY, mBirthday);
             operationList.add(builder.build());
         }
-        
+
         try {
             resolver.applyBatch(ContactsContract.AUTHORITY, operationList);
         } catch (RemoteException e) {
