@@ -153,7 +153,7 @@ public class ExifInterface {
     /**
      * Save the tag data into the JPEG file. This is expensive because it involves
      * copying all the JPG data from one file to another and deleting the old file
-     * and renaming the other. It's best to use {@link setAttribute()} to set all
+     * and renaming the other. It's best to use {@link setAttribute(String,String)} to set all
      * attributes to write and make a single call rather than multiple calls for
      * each attribute.
      */
