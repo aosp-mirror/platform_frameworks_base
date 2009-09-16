@@ -101,13 +101,12 @@ public class CallerInfo {
     public boolean isCachedPhotoCurrent;
 
     private boolean mIsEmergency;
-
-    // Don't keep checking VM if it's going to throw an exception for this proc.
-    private static boolean sSkipVmCheck = false;
+    private boolean mIsVoiceMail;
 
     public CallerInfo() {
         // TODO: Move all the basic initialization here?
         mIsEmergency = false;
+        mIsVoiceMail = false;
     }
 
     /**
@@ -220,32 +219,15 @@ public class CallerInfo {
     public static CallerInfo getCallerInfo(Context context, String number) {
         if (TextUtils.isEmpty(number)) {
             return null;
-        } else {
-            // Change the callerInfo number ONLY if it is an emergency number
-            // or if it is the voicemail number.  If it is either, take a
-            // shortcut and skip the query.
-            if (PhoneNumberUtils.isEmergencyNumber(number)) {
-                return new CallerInfo().markAsEmergency(context);
-            } else {
-                try {
-                    if (!sSkipVmCheck && PhoneNumberUtils.compare(number,
-                                TelephonyManager.getDefault().getVoiceMailNumber())) {
-                        CallerInfo ci = new CallerInfo();
+        }
 
-                        // Note we're setting the phone number here (refer to javadoc
-                        // comments at the top of CallerInfo class).
-                        ci.phoneNumber = TelephonyManager.getDefault().getVoiceMailAlphaTag();
-                        // TODO: FIND ANOTHER ICON
-                        //info.photoResource = android.R.drawable.badge_voicemail;
-                        return ci;
-                    }
-                } catch (SecurityException ex) {
-                    // Don't crash if this process doesn't have permission to
-                    // retrieve VM number.  It's still allowed to look up caller info.
-                    // But don't try it again.
-                    sSkipVmCheck = true;
-                }
-            }
+        // Change the callerInfo number ONLY if it is an emergency number
+        // or if it is the voicemail number.  If it is either, take a
+        // shortcut and skip the query.
+        if (PhoneNumberUtils.isEmergencyNumber(number)) {
+            return new CallerInfo().markAsEmergency(context);
+        } else if (PhoneNumberUtils.isVoiceMailNumber(number)) {
+            return new CallerInfo().markAsVoiceMail();
         }
 
         Uri contactUri = Uri.withAppendedPath(PhoneLookup.CONTENT_FILTER_URI, Uri.encode(number));
@@ -304,6 +286,13 @@ public class CallerInfo {
     }
 
     /**
+     * @return true if the caller info is a voicemail number.
+     */
+    public boolean isVoiceMailNumber() {
+        return mIsVoiceMail;
+    }
+
+    /**
      * Mark this CallerInfo as an emergency call.
      * @param context To lookup the localized 'Emergency Number' string.
      * @return this instance.
@@ -323,11 +312,69 @@ public class CallerInfo {
         return this;
     }
 
+
+    /**
+     * Mark this CallerInfo as a voicemail call. The voicemail label
+     * is obtained from the telephony manager. Caller must hold the
+     * READ_PHONE_STATE permission otherwise the phoneNumber will be
+     * set to null.
+     * @return this instance.
+     */
+    // TODO: As in the emergency number handling, we end up writing a
+    // string in the phone number field.
+    /* package */ CallerInfo markAsVoiceMail() {
+        mIsVoiceMail = true;
+
+        try {
+            String voiceMailLabel = TelephonyManager.getDefault().getVoiceMailAlphaTag();
+
+            phoneNumber = voiceMailLabel;
+        } catch (SecurityException se) {
+            // Should never happen: if this process does not have
+            // permission to retrieve VM tag, it should not have
+            // permission to retrieve VM number and would not call
+            // this method.
+            // Leave phoneNumber untouched.
+            Log.e(TAG, "Cannot access VoiceMail.", se);
+        }
+        // TODO: There is no voicemail picture?
+        // FIXME: FIND ANOTHER ICON
+        // photoResource = android.R.drawable.badge_voicemail;
+        return this;
+    }
+
     private static String normalize(String s) {
         if (s == null || s.length() > 0) {
             return s;
         } else {
             return null;
         }
+    }
+
+    /**
+     * @return a string debug representation of this instance.
+     */
+    public String toString() {
+        return new StringBuilder(384)
+                .append("\nname: " + name)
+                .append("\nphoneNumber: " + phoneNumber)
+                .append("\ncnapName: " + cnapName)
+                .append("\nnumberPresentation: " + numberPresentation)
+                .append("\nnamePresentation: " + namePresentation)
+                .append("\ncontactExits: " + contactExists)
+                .append("\nphoneLabel: " + phoneLabel)
+                .append("\nnumberType: " + numberType)
+                .append("\nnumberLabel: " + numberLabel)
+                .append("\nphotoResource: " + photoResource)
+                .append("\nperson_id: " + person_id)
+                .append("\nneedUpdate: " + needUpdate)
+                .append("\ncontactRefUri: " + contactRefUri)
+                .append("\ncontactRingtoneUri: " + contactRefUri)
+                .append("\nshouldSendToVoicemail: " + shouldSendToVoicemail)
+                .append("\ncachedPhoto: " + cachedPhoto)
+                .append("\nisCachedPhotoCurrent: " + isCachedPhotoCurrent)
+                .append("\nemergency: " + mIsEmergency)
+                .append("\nvoicemail " + mIsVoiceMail)
+                .toString();
     }
 }
