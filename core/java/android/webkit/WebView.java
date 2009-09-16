@@ -4791,8 +4791,11 @@ public class WebView extends AbsoluteLayout
                             mMaxZoomScale = restoreState.mMaxScale;
                         }
                         setNewZoomScale(mLastScale, false);
-                        setContentScrollTo(restoreState.mScrollX,
-                                restoreState.mScrollY);
+                        if (getVisibleTitleHeight() == 0
+                                || restoreState.mScrollY != 0) {
+                            setContentScrollTo(restoreState.mScrollX,
+                                    restoreState.mScrollY);
+                        }
                         if (useWideViewport
                                 && settings.getLoadWithOverviewMode()) {
                             if (restoreState.mViewScale == 0
