@@ -1101,8 +1101,7 @@ status_t CameraService::Client::setParameters(const String8& params)
     }
 
     CameraParameters p(params);
-    mHardware->setParameters(p);
-    return NO_ERROR;
+    return mHardware->setParameters(p);
 }
 
 // get preview/capture parameters - key/value pairs
