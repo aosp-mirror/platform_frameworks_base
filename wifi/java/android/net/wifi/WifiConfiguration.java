@@ -42,24 +42,50 @@ public class WifiConfiguration implements Parcelable {
     public static final String priorityVarName = "priority";
     /** {@hide} */
     public static final String hiddenSSIDVarName = "scan_ssid";
+
+    public class EnterpriseField {
+        private String varName;
+        private String value;
+
+        private EnterpriseField(String varName) {
+            this.varName = varName;
+            this.value = null;
+        }
+
+        public void setValue(String value) {
+            this.value = value;
+        }
+
+        public String varName() {
+            return varName;
+        }
+
+        public String value() {
+            return value;
+        }
+    }
+
     /** {@hide} */
-    public static final String eapVarName = "eap";
+    public EnterpriseField eap = new EnterpriseField("eap");
     /** {@hide} */
-    public static final String phase2VarName = "phase2";
+    public EnterpriseField phase2 = new EnterpriseField("phase2");
     /** {@hide} */
-    public static final String identityVarName = "identity";
+    public EnterpriseField identity = new EnterpriseField("anonymous_identity");
     /** {@hide} */
-    public static final String anonymousIdentityVarName = "anonymous_identity";
+    public EnterpriseField anonymous_identity = new EnterpriseField("anonymous_identity");
     /** {@hide} */
-    public static final String passwordVarName = "password";
+    public EnterpriseField password = new EnterpriseField("password");
     /** {@hide} */
-    public static final String clientCertVarName = "client_cert";
+    public EnterpriseField client_cert = new EnterpriseField("client_cert");
     /** {@hide} */
-    public static final String caCertVarName = "ca_cert";
+    public EnterpriseField private_key = new EnterpriseField("private_key");
     /** {@hide} */
-    public static final String privateKeyVarName = "private_key";
+    public EnterpriseField ca_cert = new EnterpriseField("ca_cert");
+
     /** {@hide} */
-    public static final String privateKeyPasswdVarName = "private_key_passwd";
+    public EnterpriseField[] enterpriseFields = {
+            eap, phase2, identity, anonymous_identity, password, client_cert,
+            private_key, ca_cert };
 
     /**
      * Recognized key management schemes.
@@ -267,44 +293,6 @@ public class WifiConfiguration implements Parcelable {
      */
     public BitSet allowedGroupCiphers;
 
-    /* The following fields are used for EAP/IEEE8021X authentication */
-
-    /**
-     * The eap mode should be PEAP, TLS or TTLS.
-     * {@hide}
-     */
-    public String eap;
-    /**
-     * The phase2 authenication could be PAP, MSCHAP, MSCHAP2, GTC.
-     * {@hide}
-     */
-    public String phase2;
-    /**
-     * The identity of the user in string,
-     * which is used for the authentication.
-     * {@hide}
-     */
-    public String identity;
-    /** {@hide} */
-    public String anonymousIdentity;
-    /** {@hide} */
-    public String password;
-    /** The path of the client certificate file.
-     * {@hide}
-     */
-    public String clientCert;
-    /** The path of the CA certificate file.
-     * {@hide}
-     */
-    public String caCert;
-    /** The path of the private key file.
-     * {@hide}
-     */
-    public String privateKey;
-    /** The password of the private key file if encrypted.
-     * {@hide}
-     */
-    public String privateKeyPasswd;
 
     public WifiConfiguration() {
         networkId = -1;
@@ -320,15 +308,9 @@ public class WifiConfiguration implements Parcelable {
         wepKeys = new String[4];
         for (int i = 0; i < wepKeys.length; i++)
             wepKeys[i] = null;
-        eap = null;
-        phase2 = null;
-        identity = null;
-        anonymousIdentity = null;
-        password = null;
-        clientCert = null;
-        caCert = null;
-        privateKey = null;
-        privateKeyPasswd = null;
+        for (EnterpriseField field : enterpriseFields) {
+            field.setValue(null);
+        }
     }
 
     public String toString() {
@@ -403,41 +385,11 @@ public class WifiConfiguration implements Parcelable {
         if (this.preSharedKey != null) {
             sbuf.append('*');
         }
-        sbuf.append('\n').append(" eap: ");
-        if (this.eap != null) {
-            sbuf.append(eap);
-        }
-        sbuf.append('\n').append(" phase2: ");
-        if (this.phase2 != null) {
-            sbuf.append(phase2);
-        }
-        sbuf.append('\n').append(" Identity: ");
-        if (this.identity != null) {
-            sbuf.append(identity);
-        }
-        sbuf.append('\n').append(" AnonymousIdentity: ");
-        if (this.anonymousIdentity != null) {
-            sbuf.append(anonymousIdentity);
-        }
-        sbuf.append('\n').append(" Password: ");
-        if (this.password != null) {
-            sbuf.append(password);
-        }
-        sbuf.append('\n').append(" ClientCert: ");
-        if (this.clientCert != null) {
-            sbuf.append(clientCert);
-        }
-        sbuf.append('\n').append(" CaCert: ");
-        if (this.caCert != null) {
-            sbuf.append(caCert);
-        }
-        sbuf.append('\n').append(" PrivateKey: ");
-        if (this.privateKey != null) {
-            sbuf.append(privateKey);
-        }
-        sbuf.append('\n').append(" PrivateKeyPasswd: ");
-        if (this.privateKeyPasswd != null) {
-            sbuf.append(privateKeyPasswd);
+
+        for (EnterpriseField field : enterpriseFields) {
+            sbuf.append('\n').append(" " + field.varName() + ": ");
+            String value = field.value();
+            if (value != null) sbuf.append(value);
         }
         sbuf.append('\n');
         return sbuf.toString();
@@ -497,15 +449,10 @@ public class WifiConfiguration implements Parcelable {
         writeBitSet(dest, allowedAuthAlgorithms);
         writeBitSet(dest, allowedPairwiseCiphers);
         writeBitSet(dest, allowedGroupCiphers);
-        dest.writeString(eap);
-        dest.writeString(phase2);
-        dest.writeString(identity);
-        dest.writeString(anonymousIdentity);
-        dest.writeString(password);
-        dest.writeString(clientCert);
-        dest.writeString(caCert);
-        dest.writeString(privateKey);
-        dest.writeString(privateKeyPasswd);
+
+        for (EnterpriseField field : enterpriseFields) {
+            dest.writeString(field.value());
+        }
     }
 
     /** Implement the Parcelable interface {@hide} */
@@ -528,15 +475,10 @@ public class WifiConfiguration implements Parcelable {
                 config.allowedAuthAlgorithms  = readBitSet(in);
                 config.allowedPairwiseCiphers = readBitSet(in);
                 config.allowedGroupCiphers    = readBitSet(in);
-                config.eap = in.readString();
-                config.phase2 = in.readString();
-                config.identity = in.readString();
-                config.anonymousIdentity = in.readString();
-                config.password = in.readString();
-                config.clientCert = in.readString();
-                config.caCert = in.readString();
-                config.privateKey = in.readString();
-                config.privateKeyPasswd = in.readString();
+
+                for (EnterpriseField field : config.enterpriseFields) {
+                    field.setValue(in.readString());
+                }
                 return config;
             }
 
