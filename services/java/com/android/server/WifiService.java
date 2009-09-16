@@ -665,6 +665,15 @@ public class WifiService extends IWifiManager.Stub {
                 }
             }
         }
+
+        for (WifiConfiguration.EnterpriseField field :
+                config.enterpriseFields) {
+            value = WifiNative.getNetworkVariableCommand(netId,
+                    field.varName());
+            if (!TextUtils.isEmpty(value)) {
+                field.setValue(value);
+            }
+        }
     }
 
     /**
@@ -877,103 +886,20 @@ public class WifiService extends IWifiManager.Stub {
                 break setVariables;
             }
 
-            if ((config.eap != null) && !WifiNative.setNetworkVariableCommand(
+            for (WifiConfiguration.EnterpriseField field
+                    : config.enterpriseFields) {
+                String varName = field.varName();
+                String value = field.value();
+                if ((value != null) && !WifiNative.setNetworkVariableCommand(
                     netId,
-                    WifiConfiguration.eapVarName,
-                    config.eap)) {
-                if (DBG) {
-                    Log.d(TAG, config.SSID + ": failed to set eap: "+
-                          config.eap);
+                    varName,
+                    value)) {
+                    if (DBG) {
+                        Log.d(TAG, config.SSID + ": failed to set " + varName +
+                              ": " + value);
+                    }
+                    break setVariables;
                 }
-                break setVariables;
-            }
-
-            if ((config.phase2 != null) && !WifiNative.setNetworkVariableCommand(
-                    netId,
-                    WifiConfiguration.phase2VarName,
-                    config.phase2)) {
-                if (DBG) {
-                    Log.d(TAG, config.SSID + ": failed to set phase2: "+
-                          config.phase2);
-                }
-                break setVariables;
-            }
-
-            if ((config.identity != null) && !WifiNative.setNetworkVariableCommand(
-                    netId,
-                    WifiConfiguration.identityVarName,
-                    config.identity)) {
-                if (DBG) {
-                    Log.d(TAG, config.SSID + ": failed to set identity: "+
-                          config.identity);
-                }
-                break setVariables;
-            }
-
-            if ((config.anonymousIdentity != null) && !WifiNative.setNetworkVariableCommand(
-                    netId,
-                    WifiConfiguration.anonymousIdentityVarName,
-                    config.anonymousIdentity)) {
-                if (DBG) {
-                    Log.d(TAG, config.SSID + ": failed to set anonymousIdentity: "+
-                          config.anonymousIdentity);
-                }
-                break setVariables;
-            }
-
-            if ((config.password != null) && !WifiNative.setNetworkVariableCommand(
-                    netId,
-                    WifiConfiguration.passwordVarName,
-                    config.password)) {
-                if (DBG) {
-                    Log.d(TAG, config.SSID + ": failed to set password: "+
-                          config.password);
-                }
-                break setVariables;
-            }
-
-            if ((config.clientCert != null) && !WifiNative.setNetworkVariableCommand(
-                    netId,
-                    WifiConfiguration.clientCertVarName,
-                    config.clientCert)) {
-                if (DBG) {
-                    Log.d(TAG, config.SSID + ": failed to set clientCert: "+
-                          config.clientCert);
-                }
-                break setVariables;
-            }
-
-            if ((config.caCert != null) && !WifiNative.setNetworkVariableCommand(
-                    netId,
-                    WifiConfiguration.caCertVarName,
-                    config.caCert)) {
-                if (DBG) {
-                    Log.d(TAG, config.SSID + ": failed to set caCert: "+
-                          config.caCert);
-                }
-                break setVariables;
-            }
-
-            if ((config.privateKey != null) && !WifiNative.setNetworkVariableCommand(
-                    netId,
-                    WifiConfiguration.privateKeyVarName,
-                    config.privateKey)) {
-                if (DBG) {
-                    Log.d(TAG, config.SSID + ": failed to set privateKey: "+
-                          config.privateKey);
-                }
-                break setVariables;
-            }
-
-            if ((config.privateKeyPasswd != null) && !WifiNative.setNetworkVariableCommand(
-                    netId,
-                    WifiConfiguration.privateKeyPasswdVarName,
-                    config.privateKeyPasswd)) {
-                if (DBG) {
-                    Log.d(TAG, config.SSID + ": failed to set privateKeyPasswd: "+
-                          config.privateKeyPasswd);
-                }
-                break setVariables;
             }
 
             return netId;
