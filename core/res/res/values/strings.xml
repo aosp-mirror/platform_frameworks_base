@@ -1962,7 +1962,7 @@
     <string name="allow">Allow</string>
     <string name="deny">Deny</string>
     <string name="permission_request_notification_title">Permission Requested</string>
-    <string name="permission_request_notification_subtitle">for account <xliff:g id="account" example="foo@gmail.com">%s</xliff:g></string>
+    <string name="permission_request_notification_with_subtitle">Permission Requested\nfor account <xliff:g id="account" example="foo@gmail.com">%s</xliff:g></string>
 
     <!-- Label to show for a service that is running because it is an input method. -->
     <string name="input_method_binding_label">Input method</string>
