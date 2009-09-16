@@ -176,9 +176,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     Handler mHandler;
 
     boolean mLidOpen;
-    boolean mDocked;
+    int mDockState = Intent.EXTRA_DOCK_STATE_UNDOCKED;
     int mLidOpenRotation;
-    int mDockedRotation;
+    int mCarDockRotation;
+    int mDeskDockRotation;
     int mLidKeyboardAccessibility;
     int mLidNavigationAccessibility;
     boolean mScreenOn = false;
@@ -460,9 +461,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 "PhoneWindowManager.mBroadcastWakeLock");
         mEnableShiftMenuBugReports = "1".equals(SystemProperties.get("ro.debuggable"));
         mLidOpenRotation = readRotation(
-                com.android.internal.R.integer.config_lidOpenRotation, Surface.ROTATION_90);
-        mDockedRotation = readRotation(
-                com.android.internal.R.integer.config_dockedRotation, Surface.ROTATION_90);
+                com.android.internal.R.integer.config_lidOpenRotation);
+        mCarDockRotation = readRotation(
+                com.android.internal.R.integer.config_carDockRotation);
+        mDeskDockRotation = readRotation(
+                com.android.internal.R.integer.config_deskDockRotation);
         mLidKeyboardAccessibility = mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_lidKeyboardAccessibility);
         mLidNavigationAccessibility = mContext.getResources().getInteger(
@@ -471,7 +474,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         context.registerReceiver(mDockReceiver, new IntentFilter(Intent.ACTION_DOCK_EVENT));
     }
 
-    private int readRotation(int resID, int defaultRotation) {
+    private int readRotation(int resID) {
         try {
             int rotation = mContext.getResources().getInteger(resID);
             switch (rotation) {
@@ -483,12 +486,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     return Surface.ROTATION_180;
                 case 270:
                     return Surface.ROTATION_270;
-                default:
-                    return defaultRotation;
             }
         } catch (Resources.NotFoundException e) {
-            return defaultRotation;
+            // fall through
         }
+        return -1;
     }
 
     /** {@inheritDoc} */
@@ -1685,9 +1687,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     BroadcastReceiver mDockReceiver = new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {
-            int state = intent.getIntExtra(Intent.EXTRA_DOCK_STATE,
+            mDockState = intent.getIntExtra(Intent.EXTRA_DOCK_STATE,
                     Intent.EXTRA_DOCK_STATE_UNDOCKED);
-            mDocked = (state != Intent.EXTRA_DOCK_STATE_UNDOCKED);
             updateRotation(Surface.FLAGS_ORIENTATION_ANIMATION_DISABLE);
         }
     };
@@ -1808,8 +1809,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             //or case.unspecified
             if (mLidOpen) {
                 return mLidOpenRotation;
-            } else if (mDocked) {
-                return mDockedRotation;
+            } else if (mDockState == Intent.EXTRA_DOCK_STATE_CAR && mCarDockRotation >= 0) {
+                return mCarDockRotation;
+            } else if (mDockState == Intent.EXTRA_DOCK_STATE_DESK && mDeskDockRotation >= 0) {
+                return mDeskDockRotation;
             } else {
                 if (useSensorForOrientationLp(orientation)) {
                     // If the user has enabled auto rotation by default, do it.
@@ -1881,8 +1884,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         int rotation = Surface.ROTATION_0;
         if (mLidOpen) {
             rotation = mLidOpenRotation;
-        } else if (mDocked) {
-            rotation = mDockedRotation;
+        } else if (mDockState == Intent.EXTRA_DOCK_STATE_CAR && mCarDockRotation >= 0) {
+            rotation = mCarDockRotation;
+        } else if (mDockState == Intent.EXTRA_DOCK_STATE_DESK && mDeskDockRotation >= 0) {
+            rotation = mDeskDockRotation;
         }
         //if lid is closed orientation will be portrait
         try {
