@@ -794,8 +794,10 @@ public class MediaPlayer
      * Returns the width of the video.
      *
      * @return the width of the video, or 0 if there is no video,
-     * no display surface was set, or prepare()/prepareAsync()
-     * have not completed yet
+     * no display surface was set, or the width has not been determined
+     * yet. The OnVideoSizeChangedListener can be registered via
+     * {@link #setOnVideoSizeChangedListener(OnVideoSizeChangedListener)}
+     * to provide a notification when the width is available.
      */
     public native int getVideoWidth();
 
@@ -803,8 +805,10 @@ public class MediaPlayer
      * Returns the height of the video.
      *
      * @return the height of the video, or 0 if there is no video,
-     * no display surface was set, or prepare()/prepareAsync()
-     * have not completed yet
+     * no display surface was set, or the height has not been determined
+     * yet. The OnVideoSizeChangedListener can be registered via
+     * {@link #setOnVideoSizeChangedListener(OnVideoSizeChangedListener)}
+     * to provide a notification when the height is available.
      */
     public native int getVideoHeight();
 
