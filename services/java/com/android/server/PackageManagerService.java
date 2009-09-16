@@ -3611,9 +3611,18 @@ class PackageManagerService extends IPackageManager.Stub {
         mHandler.post(new Runnable() {
             public void run() {
                 mHandler.removeCallbacks(this);
-                PackageInstalledInfo res;
-                synchronized (mInstallLock) {
-                    res = installPackageLI(packageURI, flags, true, installerPackageName);
+                 // Result object to be returned
+                PackageInstalledInfo res = new PackageInstalledInfo();
+                res.returnCode = PackageManager.INSTALL_SUCCEEDED;
+                res.uid = -1;
+                res.pkg = null;
+                res.removedInfo = new PackageRemovedInfo();
+                // Make a temporary copy of file from given packageURI
+                File tmpPackageFile = copyTempInstallFile(packageURI, res);
+                if (tmpPackageFile != null) {
+                    synchronized (mInstallLock) {
+                        installPackageLI(packageURI, flags, true, installerPackageName, tmpPackageFile, res);
+                    }
                 }
                 if (observer != null) {
                     try {
@@ -3828,11 +3837,30 @@ class PackageManagerService extends IPackageManager.Stub {
             // Since we failed to install the new package we need to restore the old
             // package that we deleted.
             if(deletedPkg) {
+                File restoreFile = new File(deletedPackage.mPath);
+                if (restoreFile == null) {
+                    Log.e(TAG, "Failed allocating storage when restoring pkg : " + pkgName);
+                    return;
+                }
+                File restoreTmpFile = createTempPackageFile();
+                if (restoreTmpFile == null) {
+                    Log.e(TAG, "Failed creating temp file when restoring pkg :  " + pkgName);
+                    return;
+                }
+                if (!FileUtils.copyFile(restoreFile, restoreTmpFile)) {
+                    Log.e(TAG, "Failed copying temp file when restoring pkg : " + pkgName);
+                    return;
+                }
+                PackageInstalledInfo restoreRes = new PackageInstalledInfo();
+                restoreRes.removedInfo = new PackageRemovedInfo();
                 installPackageLI(
-                        Uri.fromFile(new File(deletedPackage.mPath)),
+                        Uri.fromFile(restoreFile),
                         isForwardLocked(deletedPackage)
                         ? PackageManager.INSTALL_FORWARD_LOCK
-                                : 0, false, oldInstallerPackageName);
+                                : 0, false, oldInstallerPackageName, restoreTmpFile, restoreRes);
+                if (restoreRes.returnCode != PackageManager.INSTALL_SUCCEEDED) {
+                    Log.e(TAG, "Failed restoring pkg : " + pkgName + " after failed upgrade");
+                }
             }
         }
     }
@@ -3995,50 +4023,36 @@ class PackageManagerService extends IPackageManager.Stub {
         return new File(mAppInstallDir, publicZipFileName);
     }
 
-    private PackageInstalledInfo installPackageLI(Uri pPackageURI,
-            int pFlags, boolean newInstall, String installerPackageName) {
-        File tmpPackageFile = null;
-        String pkgName = null;
-        boolean forwardLocked = false;
-        boolean replacingExistingPackage = false;
-        // Result object to be returned
-        PackageInstalledInfo res = new PackageInstalledInfo();
-        res.returnCode = PackageManager.INSTALL_SUCCEEDED;
-        res.uid = -1;
-        res.pkg = null;
-        res.removedInfo = new PackageRemovedInfo();
+    private File copyTempInstallFile(Uri pPackageURI,
+            PackageInstalledInfo res) {
+        File tmpPackageFile = createTempPackageFile();
+        int retCode = PackageManager.INSTALL_SUCCEEDED;
+        if (tmpPackageFile == null) {
+            res.returnCode = PackageManager.INSTALL_FAILED_INSUFFICIENT_STORAGE;
+            return null;
+        }
 
-        main_flow: try {
-            tmpPackageFile = createTempPackageFile();
-            if (tmpPackageFile == null) {
-                res.returnCode = PackageManager.INSTALL_FAILED_INSUFFICIENT_STORAGE;
-                break main_flow;
+        if (pPackageURI.getScheme().equals("file")) {
+            final File srcPackageFile = new File(pPackageURI.getPath());
+            // We copy the source package file to a temp file and then rename it to the
+            // destination file in order to eliminate a window where the package directory
+            // scanner notices the new package file but it's not completely copied yet.
+            if (!FileUtils.copyFile(srcPackageFile, tmpPackageFile)) {
+                Log.e(TAG, "Couldn't copy package file to temp file.");
+                retCode = PackageManager.INSTALL_FAILED_INSUFFICIENT_STORAGE;
             }
-            tmpPackageFile.deleteOnExit();  // paranoia
-            if (pPackageURI.getScheme().equals("file")) {
-                final File srcPackageFile = new File(pPackageURI.getPath());
-                // We copy the source package file to a temp file and then rename it to the
-                // destination file in order to eliminate a window where the package directory
-                // scanner notices the new package file but it's not completely copied yet.
-                if (!FileUtils.copyFile(srcPackageFile, tmpPackageFile)) {
-                    Log.e(TAG, "Couldn't copy package file to temp file.");
-                    res.returnCode = PackageManager.INSTALL_FAILED_INSUFFICIENT_STORAGE;
-                    break main_flow;
-                }
-            } else if (pPackageURI.getScheme().equals("content")) {
-                ParcelFileDescriptor fd;
-                try {
-                    fd = mContext.getContentResolver().openFileDescriptor(pPackageURI, "r");
-                } catch (FileNotFoundException e) {
-                    Log.e(TAG, "Couldn't open file descriptor from download service.");
-                    res.returnCode = PackageManager.INSTALL_FAILED_INSUFFICIENT_STORAGE;
-                    break main_flow;
-                }
-                if (fd == null) {
-                    Log.e(TAG, "Couldn't open file descriptor from download service (null).");
-                    res.returnCode = PackageManager.INSTALL_FAILED_INSUFFICIENT_STORAGE;
-                    break main_flow;
-                }
+        } else if (pPackageURI.getScheme().equals("content")) {
+            ParcelFileDescriptor fd = null;
+            try {
+                fd = mContext.getContentResolver().openFileDescriptor(pPackageURI, "r");
+            } catch (FileNotFoundException e) {
+                Log.e(TAG, "Couldn't open file descriptor from download service. Failed with exception " + e);
+                retCode = PackageManager.INSTALL_FAILED_INSUFFICIENT_STORAGE;
+            }
+            if (fd == null) {
+                Log.e(TAG, "Couldn't open file descriptor from download service (null).");
+                retCode = PackageManager.INSTALL_FAILED_INSUFFICIENT_STORAGE;
+            } else {
                 if (Config.LOGV) {
                     Log.v(TAG, "Opened file descriptor from download service.");
                 }
@@ -4049,14 +4063,34 @@ class PackageManagerService extends IPackageManager.Stub {
                 // scanner notices the new package file but it's not completely copied yet.
                 if (!FileUtils.copyToFile(dlStream, tmpPackageFile)) {
                     Log.e(TAG, "Couldn't copy package stream to temp file.");
-                    res.returnCode = PackageManager.INSTALL_FAILED_INSUFFICIENT_STORAGE;
-                    break main_flow;
+                    retCode = PackageManager.INSTALL_FAILED_INSUFFICIENT_STORAGE;
                 }
-            } else {
-                Log.e(TAG, "Package URI is not 'file:' or 'content:' - " + pPackageURI);
-                res.returnCode = PackageManager.INSTALL_FAILED_INVALID_URI;
-                break main_flow;
             }
+        } else {
+            Log.e(TAG, "Package URI is not 'file:' or 'content:' - " + pPackageURI);
+            retCode = PackageManager.INSTALL_FAILED_INVALID_URI;
+        }
+
+        res.returnCode = retCode;
+        if (retCode != PackageManager.INSTALL_SUCCEEDED) {
+            if (tmpPackageFile != null && tmpPackageFile.exists()) {
+                tmpPackageFile.delete();
+            }
+            return null;
+        }
+        return tmpPackageFile;
+    }
+
+    private void installPackageLI(Uri pPackageURI,
+            int pFlags, boolean newInstall, String installerPackageName,
+            File tmpPackageFile, PackageInstalledInfo res) {
+        String pkgName = null;
+        boolean forwardLocked = false;
+        boolean replacingExistingPackage = false;
+        // Result object to be returned
+        res.returnCode = PackageManager.INSTALL_SUCCEEDED;
+
+        main_flow: try {
             pkgName = PackageParser.parsePackageName(
                     tmpPackageFile.getAbsolutePath(), 0);
             if (pkgName == null) {
@@ -4128,7 +4162,6 @@ class PackageManagerService extends IPackageManager.Stub {
                 tmpPackageFile.delete();
             }
         }
-        return res;
     }
     
     private int setPermissionsLI(String pkgName,
