@@ -18,18 +18,18 @@ package com.android.internal.policy.impl;
 
 import com.android.internal.R;
 import com.android.internal.widget.LockPatternUtils;
+import com.android.internal.widget.RotarySelector;
 
 import android.content.Context;
 import android.text.format.DateFormat;
-import android.text.TextUtils;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.TextView;
+import android.widget.*;
+import android.graphics.drawable.Drawable;
+import android.util.Log;
+import android.media.AudioManager;
 import com.android.internal.telephony.IccCard;
 
 import java.util.Date;
@@ -40,39 +40,26 @@ import java.util.Date;
  * past it, as applicable.
  */
 class LockScreen extends LinearLayout implements KeyguardScreen, KeyguardUpdateMonitor.InfoCallback,
-        KeyguardUpdateMonitor.SimStateCallback, KeyguardUpdateMonitor.ConfigurationChangeCallback {
+        KeyguardUpdateMonitor.SimStateCallback, KeyguardUpdateMonitor.ConfigurationChangeCallback,
+        RotarySelector.OnDialTriggerListener {
+
+    static private final boolean DBG = false;
+    static private final String TAG = "LockScreen";
+
+    private Status mStatus = Status.Normal;
+
     private final LockPatternUtils mLockPatternUtils;
     private final KeyguardUpdateMonitor mUpdateMonitor;
     private final KeyguardScreenCallback mCallback;
 
-    private TextView mHeaderSimOk1;
-    private TextView mHeaderSimOk2;
-
-    private TextView mHeaderSimBad1;
-    private TextView mHeaderSimBad2;
-
+    private TextView mCarrier;
+    private RotarySelector mRotary;
     private TextView mTime;
     private TextView mDate;
-
-    private ViewGroup mBatteryInfoGroup;
-    private ImageView mBatteryInfoIcon;
-    private TextView mBatteryInfoText;
-    private View mBatteryInfoSpacer;
-
-    private ViewGroup mNextAlarmGroup;
-    private TextView mAlarmText;
-    private View mAlarmSpacer;
-
-    private ViewGroup mScreenLockedMessageGroup;
-
-    private TextView mLockInstructions;
-
+    private TextView mStatus1;
+    private TextView mStatus2;
+    private TextView mScreenLocked;
     private Button mEmergencyCallButton;
-
-    /**
-     * false means sim is missing or PUK'd
-     */
-    private boolean mSimOk = true;
 
     // are we showing battery information?
     private boolean mShowingBatteryInfo = false;
@@ -83,10 +70,65 @@ class LockScreen extends LinearLayout implements KeyguardScreen, KeyguardUpdateM
     // last known battery level
     private int mBatteryLevel = 100;
 
+    private String mNextAlarm = null;
+    private Drawable mAlarmIcon = null;
+    private String mCharging = null;
+    private Drawable mChargingIcon = null;
 
-    private View[] mOnlyVisibleWhenSimOk;
+    private boolean mSilentMode;
+    private AudioManager mAudioManager;    
 
-    private View[] mOnlyVisibleWhenSimNotOk;
+    /**
+     * The status of this lock screen.
+     */
+    enum Status {
+        /**
+         * Normal case (sim card present, it's not locked)
+         */
+        Normal(true),
+
+        /**
+         * The sim card is 'network locked'.
+         */
+        NetworkLocked(true),
+
+        /**
+         * The sim card is missing.
+         */
+        SimMissing(false),
+
+        /**
+         * The sim card is missing, and this is the device isn't provisioned, so we don't let
+         * them get past the screen.
+         */
+        SimMissingLocked(false),
+
+        /**
+         * The sim card is PUK locked, meaning they've entered the wrong sim unlock code too many
+         * times.
+         */
+        SimPukLocked(false),
+
+        /**
+         * The sim card is locked.
+         */
+        SimLocked(true);
+
+        private final boolean mShowStatusLines;
+
+        Status(boolean mShowStatusLines) {
+            this.mShowStatusLines = mShowStatusLines;
+        }
+
+        /**
+         * @return Whether the status lines (battery level and / or next alarm) are shown while
+         *         in this state.  Mostly dictated by whether this is room for them.
+         */
+        public boolean showStatusLines() {
+            return mShowStatusLines;
+        }
+    }
+
 
     /**
      * @param context Used to setup the view.
@@ -104,76 +146,51 @@ class LockScreen extends LinearLayout implements KeyguardScreen, KeyguardUpdateM
         mCallback = callback;
 
         final LayoutInflater inflater = LayoutInflater.from(context);
-        inflater.inflate(R.layout.keyguard_screen_lock, this, true);
+        inflater.inflate(R.layout.keyguard_screen_rotary_unlock, this, true);
 
-        mSimOk = isSimOk(updateMonitor.getSimState());
         mShowingBatteryInfo = updateMonitor.shouldShowBatteryInfo();
         mPluggedIn = updateMonitor.isDevicePluggedIn();
         mBatteryLevel = updateMonitor.getBatteryLevel();
 
-        mHeaderSimOk1 = (TextView) findViewById(R.id.headerSimOk1);
-        mHeaderSimOk2 = (TextView) findViewById(R.id.headerSimOk2);
-
-        mHeaderSimBad1 = (TextView) findViewById(R.id.headerSimBad1);
-        mHeaderSimBad2 = (TextView) findViewById(R.id.headerSimBad2);
-
+        mCarrier = (TextView) findViewById(R.id.carrier);
         mTime = (TextView) findViewById(R.id.time);
         mDate = (TextView) findViewById(R.id.date);
-
-        mBatteryInfoGroup = (ViewGroup) findViewById(R.id.batteryInfo);
-        mBatteryInfoIcon = (ImageView) findViewById(R.id.batteryInfoIcon);
-        mBatteryInfoText = (TextView) findViewById(R.id.batteryInfoText);
-        mBatteryInfoSpacer = findViewById(R.id.batteryInfoSpacer);
-
-        mNextAlarmGroup = (ViewGroup) findViewById(R.id.nextAlarmInfo);
-        mAlarmText = (TextView) findViewById(R.id.nextAlarmText);
-        mAlarmSpacer = findViewById(R.id.nextAlarmSpacer);
-
-        mScreenLockedMessageGroup = (ViewGroup) findViewById(R.id.screenLockedInfo);
-
-        mLockInstructions = (TextView) findViewById(R.id.lockInstructions);
+        mStatus1 = (TextView) findViewById(R.id.status1);
+        mStatus2 = (TextView) findViewById(R.id.status2);
 
         mEmergencyCallButton = (Button) findViewById(R.id.emergencyCallButton);
-
+        mEmergencyCallButton.setText(R.string.lockscreen_emergency_call);
+        mScreenLocked = (TextView) findViewById(R.id.screenLocked);
+        mRotary = (RotarySelector) findViewById(R.id.rotary);
         mEmergencyCallButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 mCallback.takeEmergencyCallAction();
             }
         });
 
-        mOnlyVisibleWhenSimOk = new View[] {
-            mHeaderSimOk1,
-            mHeaderSimOk2,
-            mBatteryInfoGroup,
-            mBatteryInfoSpacer,
-            mNextAlarmGroup,
-            mAlarmSpacer,
-            mScreenLockedMessageGroup,
-            mLockInstructions
-        };
-
-        mOnlyVisibleWhenSimNotOk = new View[] {
-            mHeaderSimBad1,
-            mHeaderSimBad2,
-            mEmergencyCallButton
-        };
-
         setFocusable(true);
         setFocusableInTouchMode(true);
         setDescendantFocusability(ViewGroup.FOCUS_BLOCK_DESCENDANTS);
 
-        refreshBatteryDisplay();
+        mStatus = getCurrentStatus(updateMonitor.getSimState());
+        updateLayout(mStatus);
+
+        refreshBatteryStringAndIcon();
         refreshAlarmDisplay();
         refreshTimeAndDateDisplay();
-        refreshUnlockIntructions();
-        refreshViewsWRTSimOk();
-        refreshSimOkHeaders(mUpdateMonitor.getTelephonyPlmn(), mUpdateMonitor.getTelephonySpn());
+        updateStatusLines();
 
         updateMonitor.registerInfoCallback(this);
         updateMonitor.registerSimStateCallback(this);
         updateMonitor.registerConfigurationChangeCallback(this);
-    }
 
+        mAudioManager = (AudioManager) getContext().getSystemService(Context.AUDIO_SERVICE);
+        mSilentMode = mAudioManager.getRingerMode() == AudioManager.RINGER_MODE_SILENT;
+
+        mRotary.setOnDialTriggerListener(this);
+        mRotary.setLeftHandleResource(R.drawable.ic_jog_dial_unlock);
+        mRotary.setRightHandleResource(R.drawable.ic_jog_dial_turn_ring_vol_off);
+    }
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
@@ -183,114 +200,67 @@ class LockScreen extends LinearLayout implements KeyguardScreen, KeyguardUpdateM
         return false;
     }
 
-    private void refreshViewsWRTSimOk() {
-        if (mSimOk) {
-            for (int i = 0; i < mOnlyVisibleWhenSimOk.length; i++) {
-                final View view = mOnlyVisibleWhenSimOk[i];
-                if (view == null) throw new RuntimeException("index " + i + " null");
-                view.setVisibility(View.VISIBLE);
-            }
-            for (int i = 0; i < mOnlyVisibleWhenSimNotOk.length; i++) {
-                final View view = mOnlyVisibleWhenSimNotOk[i];
-                view.setVisibility(View.GONE);
-            }
-            refreshSimOkHeaders(mUpdateMonitor.getTelephonyPlmn(), 
-                                    mUpdateMonitor.getTelephonySpn());
-            refreshAlarmDisplay();
-            refreshBatteryDisplay();
-        } else {
-            for (int i = 0; i < mOnlyVisibleWhenSimOk.length; i++) {
-                final View view = mOnlyVisibleWhenSimOk[i];
-                view.setVisibility(View.GONE);
-            }
-            for (int i = 0; i < mOnlyVisibleWhenSimNotOk.length; i++) {
-                final View view = mOnlyVisibleWhenSimNotOk[i];
-                view.setVisibility(View.VISIBLE);
-            }
-            refreshSimBadInfo();
+    /** {@inheritDoc} */
+    public boolean onDialTrigger(View v, int whichHandle) {
+        if (whichHandle == RotarySelector.OnDialTriggerListener.LEFT_HANDLE) {
+            mCallback.goToUnlockScreen();
+            return mStatus == Status.Normal; // only want to freeze drawing when actually unlocking
+        } else if (whichHandle == RotarySelector.OnDialTriggerListener.RIGHT_HANDLE) {
+            // toggle silent mode
+            mSilentMode = !mSilentMode;
+            mAudioManager.setRingerMode(mSilentMode ? AudioManager.RINGER_MODE_SILENT
+                        : AudioManager.RINGER_MODE_NORMAL);
+            mRotary.setRightHandleResource(mSilentMode ?
+                    R.drawable.ic_jog_dial_turn_ring_vol_on :
+                    R.drawable.ic_jog_dial_turn_ring_vol_off);
+            mCallback.pokeWakelock();
         }
-    }
-
-    private void refreshSimBadInfo() {
-        final IccCard.State simState = mUpdateMonitor.getSimState();
-        if (simState == IccCard.State.PUK_REQUIRED) {
-            mHeaderSimBad1.setText(R.string.lockscreen_sim_puk_locked_message);
-            mHeaderSimBad2.setText(R.string.lockscreen_sim_puk_locked_instructions);
-        } else if (simState == IccCard.State.ABSENT) {
-            mHeaderSimBad1.setText(R.string.lockscreen_missing_sim_message);
-            mHeaderSimBad2.setVisibility(View.GONE);
-            //mHeaderSimBad2.setText(R.string.lockscreen_missing_sim_instructions);
-        } else {
-            mHeaderSimBad1.setVisibility(View.GONE);
-            mHeaderSimBad2.setVisibility(View.GONE);
-        }
-    }
-
-    private void refreshUnlockIntructions() {
-        if (mLockPatternUtils.isLockPatternEnabled()
-                || mUpdateMonitor.getSimState() == IccCard.State.PIN_REQUIRED
-                || mUpdateMonitor.getSimState() == IccCard.State.ABSENT) {
-            mLockInstructions.setText(R.string.lockscreen_instructions_when_pattern_enabled);
-        } else {
-            mLockInstructions.setText(R.string.lockscreen_instructions_when_pattern_disabled);
-        }
+        return false;
     }
 
     private void refreshAlarmDisplay() {
-        final String nextAlarmText = mLockPatternUtils.getNextAlarm();
-
-        // bug 1685880: if we are in landscape and showing plmn, the information can end up not
-        // fitting on screen.  in this case, the alarm will get cut.
-        final CharSequence plmn = mUpdateMonitor.getTelephonyPlmn();
-        final boolean showingPlmn = plmn != null && !TextUtils.isEmpty(plmn);
-        final boolean wontFit = !mUpdateMonitor.isInPortrait() && showingPlmn;
-        if (nextAlarmText != null && mSimOk && !wontFit) {
-            setAlarmInfoVisible(true);
-            mAlarmText.setText(nextAlarmText);
-        } else {
-            setAlarmInfoVisible(false);
+        mNextAlarm = mLockPatternUtils.getNextAlarm();
+        if (mNextAlarm != null) {
+            mAlarmIcon = getContext().getResources().getDrawable(R.drawable.ic_lock_idle_alarm);
         }
+        updateStatusLines();
     }
 
-    private void setAlarmInfoVisible(boolean visible) {
-        final int visibilityFlag = visible ? View.VISIBLE : View.GONE;
-        mNextAlarmGroup.setVisibility(visibilityFlag);
-        mAlarmSpacer.setVisibility(visibilityFlag);
-    }
-
-
+    /** {@inheritDoc} */
     public void onRefreshBatteryInfo(boolean showBatteryInfo, boolean pluggedIn,
             int batteryLevel) {
+        if (DBG) Log.d(TAG, "onRefreshBatteryInfo(" + showBatteryInfo + ", " + pluggedIn + ")");
         mShowingBatteryInfo = showBatteryInfo;
         mPluggedIn = pluggedIn;
         mBatteryLevel = batteryLevel;
 
-        refreshBatteryDisplay();
+        refreshBatteryStringAndIcon();
+        updateStatusLines();
     }
 
-    private void refreshBatteryDisplay() {
-        if (!mShowingBatteryInfo || !mSimOk) {
-            mBatteryInfoGroup.setVisibility(View.GONE);
-            mBatteryInfoSpacer.setVisibility(View.GONE);
+    private void refreshBatteryStringAndIcon() {
+        if (!mShowingBatteryInfo) {
+            mCharging = null;
             return;
         }
-        mBatteryInfoGroup.setVisibility(View.VISIBLE);
-        mBatteryInfoSpacer.setVisibility(View.VISIBLE);
+
+        if (mChargingIcon == null) {
+            mChargingIcon =
+                    getContext().getResources().getDrawable(R.drawable.ic_lock_idle_low_battery);
+        }
 
         if (mPluggedIn) {
-            mBatteryInfoIcon.setImageResource(R.drawable.ic_lock_idle_charging);
             if (mBatteryLevel >= 100) {
-                mBatteryInfoText.setText(R.string.lockscreen_charged);
+                mCharging = getContext().getString(R.string.lockscreen_charged);
             } else {
-                mBatteryInfoText.setText(
-                        getContext().getString(R.string.lockscreen_plugged_in, mBatteryLevel));
+                mCharging = getContext().getString(R.string.lockscreen_plugged_in, mBatteryLevel);
             }
         } else {
-            mBatteryInfoIcon.setImageResource(R.drawable.ic_lock_idle_low_battery);
-            mBatteryInfoText.setText(R.string.lockscreen_low_battery);
+            mCharging = getContext().getString(R.string.lockscreen_low_battery);
         }
     }
 
+    /** {@inheritDoc} */
     public void onTimeChanged() {
         refreshTimeAndDateDisplay();
     }
@@ -298,61 +268,173 @@ class LockScreen extends LinearLayout implements KeyguardScreen, KeyguardUpdateM
     private void refreshTimeAndDateDisplay() {
         Date now = new Date();
         mTime.setText(DateFormat.getTimeFormat(getContext()).format(now));
-        mDate.setText(DateFormat.getDateFormat(getContext()).format(now));
+        mDate.setText(DateFormat.getMediumDateFormat(getContext()).format(now));
     }
 
+    private void updateStatusLines() {
+        if (!mStatus.showStatusLines()) {
+            mStatus1.setVisibility(View.INVISIBLE);
+            mStatus2.setVisibility(View.INVISIBLE);
+        } else if (mCharging != null && mNextAlarm == null) {
+            // charging only
+            mStatus1.setVisibility(View.VISIBLE);
+            mStatus2.setVisibility(View.INVISIBLE);
+
+            mStatus1.setText(mCharging);
+            mStatus1.setCompoundDrawables(mChargingIcon, null, null, null);
+        } else if (mNextAlarm != null && mCharging == null) {
+            // next alarm only
+            mStatus1.setVisibility(View.VISIBLE);
+            mStatus2.setVisibility(View.INVISIBLE);
+
+            mStatus1.setText(mNextAlarm);
+            mStatus1.setCompoundDrawables(mAlarmIcon, null, null, null);
+        } else if (mCharging != null && mNextAlarm != null) {
+            // both charging and next alarm
+            mStatus1.setVisibility(View.VISIBLE);
+            mStatus2.setVisibility(View.VISIBLE);
+
+            mStatus1.setText(mCharging);
+            mStatus1.setCompoundDrawables(mChargingIcon, null, null, null);
+            mStatus2.setText(mNextAlarm);
+            mStatus2.setCompoundDrawables(mAlarmIcon, null, null, null);
+        }
+    }
+
+    /** {@inheritDoc} */
     public void onRefreshCarrierInfo(CharSequence plmn, CharSequence spn) {
-        refreshSimOkHeaders(plmn, spn);
-        refreshAlarmDisplay();  // in case alarm won't fit anymore
+        if (DBG) Log.d(TAG, "onRefreshCarrierInfo(" + plmn + ", " + spn + ")");
+        updateLayout(mStatus);
     }
 
-    private void refreshSimOkHeaders(CharSequence plmn, CharSequence spn) {
-        final IccCard.State simState = mUpdateMonitor.getSimState();
-        if (simState == IccCard.State.READY) {
-            if (plmn != null && !TextUtils.isEmpty(plmn)) {
-                mHeaderSimOk1.setVisibility(View.VISIBLE);
-                mHeaderSimOk1.setText(plmn);
-            } else {
-                mHeaderSimOk1.setVisibility(View.GONE);
-            }
+    private void putEmergencyBelow(int viewId) {
+        final RelativeLayout.LayoutParams layoutParams =
+                (RelativeLayout.LayoutParams) mEmergencyCallButton.getLayoutParams();
+        layoutParams.addRule(RelativeLayout.BELOW, viewId);
+        mEmergencyCallButton.setLayoutParams(layoutParams);
+    }
 
-            if (spn != null && !TextUtils.isEmpty(spn)) {
-                mHeaderSimOk2.setVisibility(View.VISIBLE);
-                mHeaderSimOk2.setText(spn);
-            } else {
-                mHeaderSimOk2.setVisibility(View.GONE);
-            }
-        } else if (simState == IccCard.State.PIN_REQUIRED) {
-            mHeaderSimOk1.setVisibility(View.VISIBLE);
-            mHeaderSimOk1.setText(R.string.lockscreen_sim_locked_message);
-            mHeaderSimOk2.setVisibility(View.GONE);
-        } else if (simState == IccCard.State.ABSENT) {
-            mHeaderSimOk1.setVisibility(View.VISIBLE);
-            mHeaderSimOk1.setText(R.string.lockscreen_missing_sim_message_short);
-            mHeaderSimOk2.setVisibility(View.GONE);
-        } else if (simState == IccCard.State.NETWORK_LOCKED) {
-            mHeaderSimOk1.setVisibility(View.VISIBLE);
-            mHeaderSimOk1.setText(R.string.lockscreen_network_locked_message);
-            mHeaderSimOk2.setVisibility(View.GONE);
+    /**
+     * Determine the current status of the lock screen given the sim state and other stuff.
+     */
+    private Status getCurrentStatus(IccCard.State simState) {
+        boolean missingAndNotProvisioned = (!mUpdateMonitor.isDeviceProvisioned()
+                && simState == IccCard.State.ABSENT);
+        if (missingAndNotProvisioned) {
+            return Status.SimMissingLocked;
+        }
+
+        switch (simState) {
+            case ABSENT:
+                return Status.SimMissing;
+            case NETWORK_LOCKED:
+                return Status.SimMissingLocked;
+            case NOT_READY:
+                return Status.SimMissing;
+            case PIN_REQUIRED:
+                return Status.SimLocked;
+            case PUK_REQUIRED:
+                return Status.SimPukLocked;
+            case READY:
+                return Status.Normal;
+            case UNKNOWN:
+                return Status.SimMissing;
+        }
+        return Status.SimMissing;
+    }
+
+    /**
+     * Update the layout to match the current status.
+     */
+    private void updateLayout(Status status) {
+        switch (status) {
+            case Normal:
+                // text
+                mCarrier.setText(
+                        getCarrierString(
+                                mUpdateMonitor.getTelephonyPlmn(),
+                                mUpdateMonitor.getTelephonySpn()));
+                mScreenLocked.setText(R.string.lockscreen_screen_locked);
+
+                // layout
+                mScreenLocked.setVisibility(View.VISIBLE);
+                mRotary.setVisibility(View.VISIBLE);
+                mEmergencyCallButton.setVisibility(View.GONE);
+                break;
+            case NetworkLocked:
+                //  text
+                mCarrier.setText(R.string.lockscreen_network_locked_message);
+                mScreenLocked.setText(R.string.lockscreen_instructions_when_pattern_disabled);
+
+                // layout
+                mScreenLocked.setVisibility(View.VISIBLE);
+                mRotary.setVisibility(View.VISIBLE);
+                mEmergencyCallButton.setVisibility(View.GONE);
+                break;
+            case SimMissing:
+                // text
+                mCarrier.setText(R.string.lockscreen_missing_sim_message_short);
+                mScreenLocked.setText(R.string.lockscreen_instructions_when_pattern_disabled);
+
+                // layout
+                mScreenLocked.setVisibility(View.INVISIBLE);
+                mRotary.setVisibility(View.VISIBLE);
+                mEmergencyCallButton.setVisibility(View.VISIBLE);
+                putEmergencyBelow(R.id.divider);
+                break;
+            case SimMissingLocked:
+                // text
+                mCarrier.setText(R.string.lockscreen_missing_sim_message_short);
+                mScreenLocked.setText(R.string.lockscreen_missing_sim_instructions);
+
+                // layout
+                mScreenLocked.setVisibility(View.VISIBLE);
+                mRotary.setVisibility(View.INVISIBLE);
+                mEmergencyCallButton.setVisibility(View.VISIBLE);
+                putEmergencyBelow(R.id.screenLocked);
+                break;
+            case SimLocked:
+                // text
+                mCarrier.setText(R.string.lockscreen_sim_locked_message);
+
+                // layout
+                mScreenLocked.setVisibility(View.INVISIBLE);
+                mRotary.setVisibility(View.VISIBLE);
+                mEmergencyCallButton.setVisibility(View.GONE);
+                break;
+            case SimPukLocked:
+                // text
+                mCarrier.setText(R.string.lockscreen_sim_puk_locked_message);
+                mScreenLocked.setText(R.string.lockscreen_sim_puk_locked_instructions);
+
+                // layout
+                mScreenLocked.setVisibility(View.VISIBLE);
+                mRotary.setVisibility(View.INVISIBLE);
+                mEmergencyCallButton.setVisibility(View.VISIBLE);
+                putEmergencyBelow(R.id.screenLocked);
+                break;
+        }
+    }
+
+    private CharSequence getCarrierString(CharSequence telephonyPlmn, CharSequence telephonySpn) {
+        if (telephonyPlmn != null && telephonySpn == null) {
+            return telephonyPlmn;
+        } else if (telephonyPlmn != null && telephonySpn != null) {
+            return telephonyPlmn + "\n" + telephonySpn;
+        } else if (telephonyPlmn == null && telephonySpn != null) {
+            return telephonySpn;
+        } else {
+            return "";
         }
     }
 
     public void onSimStateChanged(IccCard.State simState) {
-        mSimOk = isSimOk(simState);
-        refreshViewsWRTSimOk();
-        refreshUnlockIntructions();
+        if (DBG) Log.d(TAG, "onSimStateChanged(" + simState + ")");
+        mStatus = getCurrentStatus(simState);
+        updateLayout(mStatus);
+        updateStatusLines();
     }
 
-    /**
-     * @return Whether the sim state is ok, meaning we don't need to show
-     *   a special screen with the emergency call button and keep them from
-     *   doing anything else.
-     */
-    private boolean isSimOk(IccCard.State simState) {
-        boolean missingAndNotProvisioned = (!mUpdateMonitor.isDeviceProvisioned()
-                && simState == IccCard.State.ABSENT);
-        return !(missingAndNotProvisioned || simState == IccCard.State.PUK_REQUIRED);
-    }
 
     public void onOrientationChange(boolean inPortrait) {
     }
