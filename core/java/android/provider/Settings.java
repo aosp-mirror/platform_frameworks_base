@@ -2758,9 +2758,17 @@ public final class Settings {
 
         /**
          * Controls whether Gmail will discard uphill operations that repeatedly fail. Value must be
-         * an integer where non-zero means true. Defaults to 1.
+         * an integer where non-zero means true. Defaults to 1. This flag controls Donut devices.
          */
         public static final String GMAIL_DISCARD_ERROR_UPHILL_OP = "gmail_discard_error_uphill_op";
+
+        /**
+         * Controls whether Gmail will discard uphill operations that repeatedly fail. Value must be
+         * an integer where non-zero means true. Defaults to 1. This flag controls Eclair and
+         * future devices.
+         */
+        public static final String GMAIL_DISCARD_ERROR_UPHILL_OP_NEW =
+            "gmail_discard_error_uphill_op_new";
 
         /**
          * Controls how many attempts Gmail will try to upload an uphill operations before it
