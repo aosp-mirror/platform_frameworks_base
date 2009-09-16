@@ -1244,12 +1244,6 @@ public class WindowManagerService extends IWindowManager.Stub
                             "Skipping hidden or animating token: " + w);
                     continue;
                 }
-                // If this window's app token is ot fullscreen, also irrelevant.
-                if (!w.mAppToken.appFullscreen) {
-                    if (DEBUG_WALLPAPER) Log.v(TAG,
-                            "Skipping non-fullscreen token: " + w);
-                    continue;
-                }
             }
             if (DEBUG_WALLPAPER) Log.v(TAG, "Win " + w + ": readyfordisplay="
                     + w.isReadyForDisplay() + " drawpending=" + w.mDrawPending
