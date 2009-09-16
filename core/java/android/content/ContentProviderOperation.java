@@ -221,26 +221,30 @@ public class ContentProviderOperation implements Parcelable {
         } else if (mType == TYPE_UPDATE) {
             numRows = provider.update(mUri, values, mSelection, selectionArgs);
         } else if (mType == TYPE_ASSERT) {
-            // Build projection map from expected values
-            final ArrayList<String> projectionList = new ArrayList<String>();
-            for (Map.Entry<String, Object> entry : values.valueSet()) {
-                projectionList.add(entry.getKey());
-            }
-
             // Assert that all rows match expected values
-            final String[] projection = projectionList.toArray(new String[projectionList.size()]);
+            String[] projection =  null;
+            if (values != null) {
+                // Build projection map from expected values
+                final ArrayList<String> projectionList = new ArrayList<String>();
+                for (Map.Entry<String, Object> entry : values.valueSet()) {
+                    projectionList.add(entry.getKey());
+                }
+                projection = projectionList.toArray(new String[projectionList.size()]);
+            }
             final Cursor cursor = provider.query(mUri, projection, mSelection, selectionArgs, null);
-            numRows = cursor.getCount();
             try {
-                while (cursor.moveToNext()) {
-                    for (int i = 0; i < projection.length; i++) {
-                        final String cursorValue = cursor.getString(i);
-                        final String expectedValue = values.getAsString(projection[i]);
-                        if (!TextUtils.equals(cursorValue, expectedValue)) {
-                            // Throw exception when expected values don't match
-                            throw new OperationApplicationException("Found value " + cursorValue
-                                    + " when expected " + expectedValue + " for column "
-                                    + projection[i]);
+                numRows = cursor.getCount();
+                if (projection != null) {
+                    while (cursor.moveToNext()) {
+                        for (int i = 0; i < projection.length; i++) {
+                            final String cursorValue = cursor.getString(i);
+                            final String expectedValue = values.getAsString(projection[i]);
+                            if (!TextUtils.equals(cursorValue, expectedValue)) {
+                                // Throw exception when expected values don't match
+                                throw new OperationApplicationException("Found value " + cursorValue
+                                        + " when expected " + expectedValue + " for column "
+                                        + projection[i]);
+                            }
                         }
                     }
                 }
@@ -395,9 +399,16 @@ public class ContentProviderOperation implements Parcelable {
 
         /** Create a ContentProviderOperation from this {@link Builder}. */
         public ContentProviderOperation build() {
-            if (mType == TYPE_UPDATE || mType == TYPE_ASSERT) {
+            if (mType == TYPE_UPDATE) {
                 if ((mValues == null || mValues.size() == 0)
                         && (mValuesBackReferences == null || mValuesBackReferences.size() == 0)) {
+                    throw new IllegalArgumentException("Empty values");
+                }
+            }
+            if (mType == TYPE_ASSERT) {
+                if ((mValues == null || mValues.size() == 0)
+                        && (mValuesBackReferences == null || mValuesBackReferences.size() == 0)
+                        && (mExpectedCount == null)) {
                     throw new IllegalArgumentException("Empty values");
                 }
             }
