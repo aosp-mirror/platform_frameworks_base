@@ -420,6 +420,7 @@ public class WebView extends AbsoluteLayout
     private static final int STD_SPEED = 480;  // pixels per second
     // time for the longest scroll animation
     private static final int MAX_DURATION = 750;   // milliseconds
+    private static final int SLIDE_TITLE_DURATION = 300;   // milliseconds
     private Scroller mScroller;
 
     private boolean mWrapContent;
@@ -2416,10 +2417,18 @@ public class WebView extends AbsoluteLayout
         if ((dx | dy) == 0) {
             return false;
         }
-
-        if (true && animate) {
+        // mobile sites prefer to scroll to (0, 1), thus the + 1 below
+        boolean slideTitle = getVisibleTitleHeight() > 0
+            && y <= getTitleHeight() + 1;
+        if (DebugFlags.WEB_VIEW) {
+            Log.v(LOGTAG, "pinScrollTo slideTitle=" + slideTitle
+                    + " getVisibleTitleHeight()=" + getVisibleTitleHeight()
+                    + " animationDuration=" + animationDuration + " y=" + y);
+        }
+        if (slideTitle || animate) {
             //        Log.d(LOGTAG, "startScroll: " + dx + " " + dy);
-
+            if (slideTitle && animationDuration < SLIDE_TITLE_DURATION)
+                animationDuration = SLIDE_TITLE_DURATION;
             mScroller.startScroll(mScrollX, mScrollY, dx, dy,
                     animationDuration > 0 ? animationDuration : computeDuration(dx, dy));
             invalidate();
