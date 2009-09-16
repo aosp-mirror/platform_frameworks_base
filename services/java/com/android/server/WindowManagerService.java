@@ -7056,7 +7056,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         + " attHidden=" + mAttachedHidden
                         + " tok.hiddenRequested="
                         + (mAppToken != null ? mAppToken.hiddenRequested : false)
-                        + " tok.idden="
+                        + " tok.hidden="
                         + (mAppToken != null ? mAppToken.hidden : false)
                         + " animating=" + mAnimating
                         + " tok animating="
@@ -7085,10 +7085,20 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (mAttrs.type != TYPE_APPLICATION_STARTING
                         && mAppToken != null) {
                     mAppToken.firstWindowDrawn = true;
-                    if (mAnimation == null && mAppToken.startingData != null) {
+                    
+                    if (mAppToken.startingData != null) {
                         if (DEBUG_STARTING_WINDOW) Log.v(TAG, "Finish starting "
                                 + mToken
                                 + ": first real window is shown, no animation");
+                        // If this initial window is animating, stop it -- we
+                        // will do an animation to reveal it from behind the
+                        // starting window, so there is no need for it to also
+                        // be doing its own stuff.
+                        if (mAnimation != null) {
+                            mAnimation = null;
+                            // Make sure we clean up the animation.
+                            mAnimating = true;
+                        }
                         mFinishedStarting.add(mAppToken);
                         mH.sendEmptyMessage(H.FINISHED_STARTING);
                     }
