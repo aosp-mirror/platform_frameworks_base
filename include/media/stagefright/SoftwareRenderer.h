@@ -45,6 +45,7 @@ private:
 
     void renderCbYCrY(const void *data, size_t size);
     void renderYUV420Planar(const void *data, size_t size);
+    void renderQCOMYUV420SemiPlanar(const void *data, size_t size);
 
     OMX_COLOR_FORMATTYPE mColorFormat;
     sp<ISurface> mISurface;
