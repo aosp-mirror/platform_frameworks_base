@@ -37,6 +37,7 @@ enum {
     AXIS_TOUCHSCREEN,
     AXIS_KEYSHIDDEN,
     AXIS_KEYBOARD,
+    AXIS_NAVHIDDEN,
     AXIS_NAVIGATION,
     AXIS_SCREENSIZE,
     AXIS_VERSION
@@ -64,6 +65,7 @@ public:
     String8 touchscreen;
     String8 keysHidden;
     String8 keyboard;
+    String8 navHidden;
     String8 navigation;
     String8 screenSize;
     String8 version;
@@ -83,6 +85,7 @@ public:
     static bool getKeysHiddenName(const char* name, ResTable_config* out = NULL);
     static bool getKeyboardName(const char* name, ResTable_config* out = NULL);
     static bool getNavigationName(const char* name, ResTable_config* out = NULL);
+    static bool getNavHiddenName(const char* name, ResTable_config* out = NULL);
     static bool getScreenSizeName(const char* name, ResTable_config* out = NULL);
     static bool getVersionName(const char* name, ResTable_config* out = NULL);
 
