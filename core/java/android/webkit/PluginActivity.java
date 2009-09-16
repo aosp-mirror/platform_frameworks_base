@@ -49,10 +49,10 @@ public class PluginActivity extends Activity {
         final int npp = intent.getIntExtra(INTENT_EXTRA_NPP_INSTANCE, -1);
         // Retrieve the PluginStub implemented in packageName.className
         PluginStub stub =
-                PluginUtil.getPluginStub(this, packageName, className, npp);
+                PluginUtil.getPluginStub(this, packageName, className);
 
         if (stub != null) {
-            View pluginView = stub.getFullScreenView(this);
+            View pluginView = stub.getFullScreenView(npp, this);
             if (pluginView != null) {
                 setContentView(pluginView);
             } else {
