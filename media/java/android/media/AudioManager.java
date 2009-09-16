@@ -345,6 +345,9 @@ public class AudioManager {
 
     /**
      * Adjusts the volume of a particular stream by one step in a direction.
+     * <p>
+     * This method should only be used by applications that replace the platform-wide
+     * management of audio settings or the main telephony application.
      *
      * @param streamType The stream type to adjust. One of {@link #STREAM_VOICE_CALL},
      * {@link #STREAM_SYSTEM}, {@link #STREAM_RING}, {@link #STREAM_MUSIC} or
@@ -370,6 +373,9 @@ public class AudioManager {
      * active, it will have the highest priority regardless of if the in-call
      * screen is showing. Another example, if music is playing in the background
      * and a call is not active, the music stream will be adjusted.
+     * <p>
+     * This method should only be used by applications that replace the platform-wide
+     * management of audio settings or the main telephony application.
      *
      * @param direction The direction to adjust the volume. One of
      *            {@link #ADJUST_LOWER}, {@link #ADJUST_RAISE}, or
@@ -391,6 +397,9 @@ public class AudioManager {
     /**
      * Adjusts the volume of the most relevant stream, or the given fallback
      * stream.
+     * <p>
+     * This method should only be used by applications that replace the platform-wide
+     * management of audio settings or the main telephony application.
      *
      * @param direction The direction to adjust the volume. One of
      *            {@link #ADJUST_LOWER}, {@link #ADJUST_RAISE}, or
@@ -541,6 +550,9 @@ public class AudioManager {
      * <p>
      * For a better user experience, applications MUST unmute a muted stream
      * in onPause() and mute is again in onResume() if appropriate.
+     * <p>
+     * This method should only be used by applications that replace the platform-wide
+     * management of audio settings or the main telephony application.
      *
      * @param streamType The stream to be muted/unmuted.
      * @param state The required mute state: true for mute ON, false for mute OFF
@@ -608,6 +620,9 @@ public class AudioManager {
 
     /**
      * Sets the setting for when the vibrate type should vibrate.
+     * <p>
+     * This method should only be used by applications that replace the platform-wide
+     * management of audio settings or the main telephony application.
      *
      * @param vibrateType The type of vibrate. One of
      *            {@link #VIBRATE_TYPE_NOTIFICATION} or
@@ -630,6 +645,9 @@ public class AudioManager {
 
     /**
      * Sets the speakerphone on or off.
+     * <p>
+     * This method should only be used by applications that replace the platform-wide
+     * management of audio settings or the main telephony application.
      *
      * @param on set <var>true</var> to turn on speakerphone;
      *           <var>false</var> to turn it off
@@ -660,6 +678,9 @@ public class AudioManager {
 
     /**
      * Request use of Bluetooth SCO headset for communications.
+     * <p>
+     * This method should only be used by applications that replace the platform-wide
+     * management of audio settings or the main telephony application.
      *
      * @param on set <var>true</var> to use bluetooth SCO for communications;
      *               <var>false</var> to not use bluetooth SCO for communications
@@ -739,6 +760,9 @@ public class AudioManager {
 
     /**
      * Sets the microphone mute on or off.
+     * <p>
+     * This method should only be used by applications that replace the platform-wide
+     * management of audio settings or the main telephony application.
      *
      * @param on set <var>true</var> to mute the microphone;
      *           <var>false</var> to turn mute off
@@ -758,6 +782,13 @@ public class AudioManager {
 
     /**
      * Sets the audio mode.
+     * <p>
+     * The audio mode encompasses audio routing AND the behavior of
+     * the telephony layer. Therefore this method should only be used by applications that
+     * replace the platform-wide management of audio settings or the main telephony application.
+     * In particular, the {@link #MODE_IN_CALL} mode should only be used by the telephony
+     * application when it places a phone call, as it will cause signals from the radio layer
+     * to feed the platform mixer.
      *
      * @param mode  the requested audio mode (NORMAL, RINGTONE, or IN_CALL).
      *              Informs the HAL about the current audio state so that
