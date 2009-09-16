@@ -52,6 +52,23 @@
     <protected-broadcast android:name="android.intent.action.NEW_OUTGOING_CALL" />
     <protected-broadcast android:name="android.intent.action.REBOOT" />
 
+    <protected-broadcast android:name="android.bluetooth.adapter.action.STATE_CHANGED" />
+    <protected-broadcast android:name="android.bluetooth.adapter.action.SCAN_MODE_CHANGED" />
+    <protected-broadcast android:name="android.bluetooth.adapter.action.DISCOVERY_STARTED" />
+    <protected-broadcast android:name="android.bluetooth.adapter.action.DISCOVERY_FINISHED" />
+    <protected-broadcast android:name="android.bluetooth.adapter.action.LOCAL_NAME_CHANGED" />
+    <protected-broadcast android:name="android.bluetooth.device.action.FOUND" />
+    <protected-broadcast android:name="android.bluetooth.device.action.DISAPPEARED" />
+    <protected-broadcast android:name="android.bluetooth.device.action.CLASS_CHANGED" />
+    <protected-broadcast android:name="android.bluetooth.device.action.ACL_CONNECTED" />
+    <protected-broadcast android:name="android.bluetooth.device.action.ACL_DISCONNECT_REQUESTED" />
+    <protected-broadcast android:name="android.bluetooth.device.action.ACL_DISCONNECTED" />
+    <protected-broadcast android:name="android.bluetooth.device.action.NAME_CHANGED" />
+    <protected-broadcast android:name="android.bluetooth.device.action.BOND_STATE_CHANGED" />
+    <protected-broadcast android:name="android.bluetooth.device.action.NAME_FAILED" />
+    <protected-broadcast android:name="android.bluetooth.device.action.PAIRING_REQUEST" />
+    <protected-broadcast android:name="android.bluetooth.device.action.PAIRING_CANCEL" />
+
     <!-- ====================================== -->
     <!-- Permissions for things that cost money -->
     <!-- ====================================== -->
