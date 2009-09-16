@@ -891,6 +891,29 @@ nScriptSetType(JNIEnv *_env, jobject _this, jint type, jboolean writable, jstrin
 }
 
 static void
+nScriptSetInvoke(JNIEnv *_env, jobject _this, jstring _str, jint slot)
+{
+    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
+    LOG_API("nScriptSetInvoke, con(%p)", con);
+    const char* n = NULL;
+    if (_str) {
+        n = _env->GetStringUTFChars(_str, NULL);
+    }
+    rsScriptSetInvoke(con, n, slot);
+    if (n) {
+        _env->ReleaseStringUTFChars(_str, n);
+    }
+}
+
+static void
+nScriptInvoke(JNIEnv *_env, jobject _this, jint obj, jint slot)
+{
+    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
+    LOG_API("nScriptInvoke, con(%p), script(%p)", con, (void *)obj);
+    rsScriptInvoke(con, (RsScript)obj, slot);
+}
+
+static void
 nScriptSetRoot(JNIEnv *_env, jobject _this, jboolean isRoot)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
@@ -1366,6 +1389,8 @@ static JNINativeMethod methods[] = {
 {"nScriptSetTimeZone",             "(I[B)V",                               (void*)nScriptSetTimeZone },
 {"nScriptSetType",                 "(IZLjava/lang/String;I)V",             (void*)nScriptSetType },
 {"nScriptSetRoot",                 "(Z)V",                                 (void*)nScriptSetRoot },
+{"nScriptSetInvokable",            "(Ljava/lang/String;I)V",               (void*)nScriptSetInvoke },
+{"nScriptInvoke",                  "(II)V",                                (void*)nScriptInvoke },
 
 {"nScriptCBegin",                  "()V",                                  (void*)nScriptCBegin },
 {"nScriptCSetScript",              "([BII)V",                              (void*)nScriptCSetScript },

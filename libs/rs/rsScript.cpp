@@ -27,6 +27,8 @@ Script::Script()
     mEnviroment.mClearColor[2] = 0;
     mEnviroment.mClearColor[3] = 1;
     mEnviroment.mClearDepth = 1;
+    mEnviroment.mClearStencil = 0;
+    mEnviroment.mIsRoot = false;
 }
 
 Script::~Script()
@@ -83,10 +85,23 @@ void rsi_ScriptSetType(Context * rsc, RsType vt, uint32_t slot, bool writable, c
     }
 }
 
+void rsi_ScriptSetInvoke(Context *rsc, const char *name, uint32_t slot)
+{
+    ScriptCState *ss = &rsc->mScriptC;
+    ss->mInvokableNames[slot] = name;
+}
+
+void rsi_ScriptInvoke(Context *rsc, RsScript vs, uint32_t slot)
+{
+    Script *s = static_cast<Script *>(vs);
+    s->mEnviroment.mInvokables[slot]();
+}
+
+
 void rsi_ScriptSetRoot(Context * rsc, bool isRoot)
 {
     ScriptCState *ss = &rsc->mScriptC;
-    ss->mEnviroment.mIsRoot = isRoot;
+    ss->mScript->mEnviroment.mIsRoot = isRoot;
 }
 
 

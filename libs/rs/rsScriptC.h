@@ -67,17 +67,15 @@ public:
     ScriptCState();
     ~ScriptCState();
 
-    ACCscript* mAccScript;
-
-    ScriptC::Program_t mProgram;
-    Script::Enviroment_t mEnviroment;
+    ScriptC *mScript;
 
     ObjectBaseRef<const Type> mConstantBufferTypes[MAX_SCRIPT_BANKS];
     String8 mSlotNames[MAX_SCRIPT_BANKS];
     bool mSlotWritable[MAX_SCRIPT_BANKS];
+    String8 mInvokableNames[MAX_SCRIPT_BANKS];
 
     void clear();
-    void runCompiler(Context *rsc);
+    void runCompiler(Context *rsc, ScriptC *s);
     void appendVarDefines(String8 *str);
     void appendTypes(String8 *str);
 
