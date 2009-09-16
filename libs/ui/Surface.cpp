@@ -361,6 +361,7 @@ void Surface::init()
     const_cast<uint32_t&>(android_native_window_t::flags) = 0;
     // be default we request a hardware surface
     mUsage = GRALLOC_USAGE_HW_RENDER;
+    mUsageChanged = true;
     mNeedFullUpdate = false;
 }
 
@@ -498,12 +499,13 @@ int Surface::dequeueBuffer(android_native_buffer_t** buffer)
         return bufIdx;
     }
     
-    const uint32_t usage(getUsage());
+    // FIXME: in case of failure below, we need to undo the dequeue
+    
+    uint32_t usage;
+    const bool usageChanged = getUsage(&usage);
     const sp<SurfaceBuffer>& backBuffer(mBuffers[bufIdx]);
-    if (backBuffer == 0 || 
-        uint32_t(backBuffer->usage) != usage ||
-        mSharedBufferClient->needNewBuffer(bufIdx)) 
-    {
+    if ((backBuffer == 0) || usageChanged || 
+            mSharedBufferClient->needNewBuffer(bufIdx)) {
         err = getBufferLocked(bufIdx, usage);
         LOGE_IF(err, "getBufferLocked(%ld, %08x) failed (%s)",
                 bufIdx, usage, strerror(-err));
@@ -598,13 +600,21 @@ int Surface::perform(int operation, va_list args)
 void Surface::setUsage(uint32_t reqUsage)
 {
     Mutex::Autolock _l(mSurfaceLock);
-    mUsage = reqUsage;
+    if (mUsage != reqUsage) {
+        mUsageChanged = true;
+        mUsage = reqUsage;
+    }
 }
 
-uint32_t Surface::getUsage() const
+bool Surface::getUsage(uint32_t* usage)
 {
     Mutex::Autolock _l(mSurfaceLock);
-    return mUsage;
+    *usage = mUsage;
+    if (mUsageChanged) {
+        mUsageChanged = false;
+        return true;
+    }
+    return false;
 }
 
 // ----------------------------------------------------------------------------

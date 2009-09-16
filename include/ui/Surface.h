@@ -212,7 +212,7 @@ private:
 
     
     void setUsage(uint32_t reqUsage);
-    uint32_t getUsage() const;
+    bool getUsage(uint32_t* usage);
     
     // constants
     sp<SurfaceComposerClient>   mClient;
@@ -227,6 +227,7 @@ private:
     // protected by mSurfaceLock
     Rect                        mSwapRectangle;
     uint32_t                    mUsage;
+    int32_t                     mUsageChanged;
     
     // protected by mSurfaceLock. These are also used from lock/unlock
     // but in that case, they must be called form the same thread.
