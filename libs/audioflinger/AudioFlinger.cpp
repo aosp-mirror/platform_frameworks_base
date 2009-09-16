@@ -2069,7 +2069,7 @@ AudioFlinger::ThreadBase::TrackBase::TrackBase(
    }
 }
 
-AudioFlinger::PlaybackThread::TrackBase::~TrackBase()
+AudioFlinger::ThreadBase::TrackBase::~TrackBase()
 {
     if (mCblk) {
         mCblk->~audio_track_cblk_t();   // destroy our shared-structure.
@@ -2081,7 +2081,7 @@ AudioFlinger::PlaybackThread::TrackBase::~TrackBase()
     mClient.clear();
 }
 
-void AudioFlinger::PlaybackThread::TrackBase::releaseBuffer(AudioBufferProvider::Buffer* buffer)
+void AudioFlinger::ThreadBase::TrackBase::releaseBuffer(AudioBufferProvider::Buffer* buffer)
 {
     buffer->raw = 0;
     mFrameCount = buffer->frameCount;
@@ -2089,7 +2089,7 @@ void AudioFlinger::PlaybackThread::TrackBase::releaseBuffer(AudioBufferProvider:
     buffer->frameCount = 0;
 }
 
-bool AudioFlinger::PlaybackThread::TrackBase::step() {
+bool AudioFlinger::ThreadBase::TrackBase::step() {
     bool result;
     audio_track_cblk_t* cblk = this->cblk();
 
@@ -2101,7 +2101,7 @@ bool AudioFlinger::PlaybackThread::TrackBase::step() {
     return result;
 }
 
-void AudioFlinger::PlaybackThread::TrackBase::reset() {
+void AudioFlinger::ThreadBase::TrackBase::reset() {
     audio_track_cblk_t* cblk = this->cblk();
 
     cblk->user = 0;
@@ -2112,20 +2112,20 @@ void AudioFlinger::PlaybackThread::TrackBase::reset() {
     LOGV("TrackBase::reset");
 }
 
-sp<IMemory> AudioFlinger::PlaybackThread::TrackBase::getCblk() const
+sp<IMemory> AudioFlinger::ThreadBase::TrackBase::getCblk() const
 {
     return mCblkMemory;
 }
 
-int AudioFlinger::PlaybackThread::TrackBase::sampleRate() const {
+int AudioFlinger::ThreadBase::TrackBase::sampleRate() const {
     return (int)mCblk->sampleRate;
 }
 
-int AudioFlinger::PlaybackThread::TrackBase::channelCount() const {
+int AudioFlinger::ThreadBase::TrackBase::channelCount() const {
     return (int)mCblk->channels;
 }
 
-void* AudioFlinger::PlaybackThread::TrackBase::getBuffer(uint32_t offset, uint32_t frames) const {
+void* AudioFlinger::ThreadBase::TrackBase::getBuffer(uint32_t offset, uint32_t frames) const {
     audio_track_cblk_t* cblk = this->cblk();
     int8_t *bufferStart = (int8_t *)mBuffer + (offset-cblk->serverBase)*cblk->frameSize;
     int8_t *bufferEnd = bufferStart + frames * cblk->frameSize;
