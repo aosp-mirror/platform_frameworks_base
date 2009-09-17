@@ -36,27 +36,18 @@ extern NPNetscapeFuncs*        browser;
 extern ANPCanvasInterfaceV0    gCanvasI;
 extern ANPLogInterfaceV0       gLogI;
 extern ANPPaintInterfaceV0     gPaintI;
-extern ANPSurfaceInterfaceV0   gSurfaceI;
 extern ANPTypefaceInterfaceV0  gTypefaceI;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-EventPlugin::EventPlugin(NPP inst) : SubPlugin(inst) {
+EventPlugin::EventPlugin(NPP inst) : SubPlugin(inst) { }
 
-    // initialize the drawing surface
-    m_surfaceReady = false;
-    m_surface = gSurfaceI.newRasterSurface(inst, kRGB_565_ANPBitmapFormat, false);
-    if(!m_surface)
-        gLogI.log(inst, kError_ANPLogType, "----%p Unable to create Raster surface", inst);
-}
+EventPlugin::~EventPlugin() { }
 
-EventPlugin::~EventPlugin() {
-    gSurfaceI.deleteSurface(m_surface);
-}
+void EventPlugin::drawPlugin(const ANPBitmap& bitmap, const ANPRectI& clip) {
 
-void EventPlugin::drawPlugin(int surfaceWidth, int surfaceHeight) {
-
-    gLogI.log(inst(), kDebug_ANPLogType, " ------ %p drawing the plugin (%d,%d)", inst(), surfaceWidth, surfaceHeight);
+    gLogI.log(inst(), kDebug_ANPLogType, " ------ %p drawing the plugin (%d,%d)",
+              inst(), bitmap.width, bitmap.height);
 
     // get the plugin's dimensions according to the DOM
     PluginObject *obj = (PluginObject*) inst()->pdata;
@@ -64,8 +55,8 @@ void EventPlugin::drawPlugin(int surfaceWidth, int surfaceHeight) {
     const int H = obj->window->height;
 
     // compute the current zoom level
-    const float zoomFactorW = static_cast<float>(surfaceWidth) / W;
-    const float zoomFactorH = static_cast<float>(surfaceHeight) / H;
+    const float zoomFactorW = static_cast<float>(bitmap.width) / W;
+    const float zoomFactorH = static_cast<float>(bitmap.height) / H;
 
     // check to make sure the zoom level is uniform
     if (zoomFactorW + .01 < zoomFactorH && zoomFactorW - .01 > zoomFactorH)
@@ -76,15 +67,16 @@ void EventPlugin::drawPlugin(int surfaceWidth, int surfaceHeight) {
     const int fontSize = (int)(zoomFactorW * 16);
     const int leftMargin = (int)(zoomFactorW * 10);
 
-    // lock the surface
-    ANPBitmap bitmap;
-    if (!m_surfaceReady || !gSurfaceI.lock(m_surface, &bitmap, NULL)) {
-        gLogI.log(inst(), kError_ANPLogType, " ------ %p unable to lock the plugin", inst());
-        return;
-    }
-
-    // create a canvas
+    // create and clip a canvas
     ANPCanvas* canvas = gCanvasI.newCanvas(&bitmap);
+
+    ANPRectF clipR;
+    clipR.left = clip.left;
+    clipR.top = clip.top;
+    clipR.right = clip.right;
+    clipR.bottom = clip.bottom;
+    gCanvasI.clipRect(canvas, &clipR);
+
     gCanvasI.drawColor(canvas, 0xFFFFFFFF);
 
     // configure the paint
@@ -106,10 +98,9 @@ void EventPlugin::drawPlugin(int surfaceWidth, int surfaceHeight) {
     const char c[] = "Browser Test Plugin";
     gCanvasI.drawText(canvas, c, sizeof(c)-1, leftMargin, -fm.fTop, paint);
 
-    // clean up variables and unlock the surface
+    // clean up variables
     gPaintI.deletePaint(paint);
     gCanvasI.deleteCanvas(canvas);
-    gSurfaceI.unlock(m_surface);
 }
 
 void EventPlugin::printToDiv(const char* text, int length) {
@@ -149,23 +140,16 @@ void EventPlugin::printToDiv(const char* text, int length) {
 
 int16 EventPlugin::handleEvent(const ANPEvent* evt) {
     switch (evt->eventType) {
-        case kDraw_ANPEventType:
-            gLogI.log(inst(), kError_ANPLogType, " ------ %p the plugin did not request draw events", inst());
-            break;
-        case kSurface_ANPEventType:
-            switch (evt->data.surface.action) {
-                case kCreated_ANPSurfaceAction:
-                    m_surfaceReady = true;
+
+        case kDraw_ANPEventType: {
+            switch (evt->data.draw.model) {
+                case kBitmap_ANPDrawingModel:
+                    drawPlugin(evt->data.draw.data.bitmap, evt->data.draw.clip);
                     return 1;
-                case kDestroyed_ANPSurfaceAction:
-                    m_surfaceReady = false;
-                    return 1;
-                case kChanged_ANPSurfaceAction:
-                    drawPlugin(evt->data.surface.data.changed.width,
-                               evt->data.surface.data.changed.height);
-                    return 1;
+                default:
+                    break;   // unknown drawing model
             }
-            break;
+        }
         case kLifecycle_ANPEventType:
             switch (evt->data.lifecycle.action) {
                 case kOnLoad_ANPLifecycleAction: {

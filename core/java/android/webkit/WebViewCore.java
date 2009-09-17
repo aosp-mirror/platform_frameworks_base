@@ -34,6 +34,7 @@ import android.util.SparseBooleanArray;
 import android.view.KeyEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.view.View;
 
 import java.util.ArrayList;
 import java.util.Map;
@@ -2060,83 +2061,31 @@ final class WebViewCore {
         }
     }
 
-    // This class looks like a SurfaceView to native code. In java, we can
-    // assume the passed in SurfaceView is this class so we can talk to the
-    // ViewManager through the ChildView.
-    private class SurfaceViewProxy extends SurfaceView
-            implements SurfaceHolder.Callback {
-        private final ViewManager.ChildView mChildView;
-        private int mPointer;
-        private final boolean mIsFixedSize;
-        SurfaceViewProxy(Context context, ViewManager.ChildView childView,
-                int pointer, int pixelFormat, boolean isFixedSize) {
-            super(context);
-            setWillNotDraw(false); // this prevents the black box artifact
-            getHolder().addCallback(this);
-            getHolder().setFormat(pixelFormat);
-            mChildView = childView;
-            mChildView.mView = this;
-            mPointer = pointer;
-            mIsFixedSize = isFixedSize;
-        }
-        void destroy() {
-            mPointer = 0;
-            mChildView.removeView();
-        }
-        void attach(int x, int y, int width, int height) {
-            mChildView.attachView(x, y, width, height);
-
-            if (mIsFixedSize) {
-                getHolder().setFixedSize(width, height);
-            }
-        }
-
-        // SurfaceHolder.Callback methods
-        public void surfaceCreated(SurfaceHolder holder) {
-            if (mPointer != 0) {
-                nativeSurfaceChanged(mPointer, 0, 0, 0, 0);
-            }
-        }
-        public void surfaceChanged(SurfaceHolder holder, int format, int width,
-                int height) {
-            if (mPointer != 0) {
-                nativeSurfaceChanged(mPointer, 1, format, width, height);
-            }
-        }
-        public void surfaceDestroyed(SurfaceHolder holder) {
-            if (mPointer != 0) {
-                nativeSurfaceChanged(mPointer, 2, 0, 0, 0);
-            }
-        }
-    }
-
-    // PluginWidget functions for mainting SurfaceViews for the Surface drawing
+    // PluginWidget functions for creating SurfaceViews for the Surface drawing
     // model.
-    private SurfaceView createSurface(int nativePointer, int pixelFormat,
-                                      boolean isFixedSize) {
+    private ViewManager.ChildView createSurface(String packageName, String className,
+            int npp, int x, int y, int width, int height) {
         if (mWebView == null) {
             return null;
         }
-        return new SurfaceViewProxy(mContext, mWebView.mViewManager.createView(),
-                                    nativePointer, pixelFormat, isFixedSize);
+        PluginStub stub = PluginUtil.getPluginStub(mWebView.getContext(), packageName, className);
+        if (stub == null) {
+            Log.e(LOGTAG, "Unable to find plugin class (" + className + 
+                    ") in the apk (" + packageName + ")");
+            return null;
+        }
+        
+        View pluginView = stub.getEmbeddedView(npp, mWebView.getContext());
+        
+        ViewManager.ChildView view = mWebView.mViewManager.createView();
+        view.mView = pluginView;
+        view.attachView(x, y, width, height);
+        return view;
     }
-
-    private void destroySurface(SurfaceView surface) {
-        SurfaceViewProxy proxy = (SurfaceViewProxy) surface;
-        proxy.destroy();
+    
+    private void destroySurface(ViewManager.ChildView childView) {
+        childView.removeView();
     }
-
-    private void attachSurface(SurfaceView surface, int x, int y,
-            int width, int height) {
-        SurfaceViewProxy proxy = (SurfaceViewProxy) surface;
-        proxy.attach(x, y, width, height);
-    }
-
-    // Callback for the SurfaceHolder.Callback. Called for all the surface
-    // callbacks. The state parameter is one of Created(0), Changed(1),
-    // Destroyed(2).
-    private native void nativeSurfaceChanged(int pointer, int state, int format,
-            int width, int height);
 
     private native void nativePause();
     private native void nativeResume();

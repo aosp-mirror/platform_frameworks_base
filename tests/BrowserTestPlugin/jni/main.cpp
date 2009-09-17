@@ -65,7 +65,6 @@ ANPCanvasInterfaceV0        gCanvasI;
 ANPLogInterfaceV0           gLogI;
 ANPPaintInterfaceV0         gPaintI;
 ANPPathInterfaceV0          gPathI;
-ANPSurfaceInterfaceV0       gSurfaceI;
 ANPSystemInterfaceV0        gSystemI;
 ANPTypefaceInterfaceV0      gTypefaceI;
 ANPWindowInterfaceV0        gWindowI;
@@ -105,16 +104,10 @@ NPError NP_Initialize(NPNetscapeFuncs* browserFuncs, NPPluginFuncs* pluginFuncs,
         uint32_t        size;
         ANPInterface*   i;
     } gPairs[] = {
-        { kAudioTrackInterfaceV0_ANPGetValue,   sizeof(gSoundI),    &gSoundI },
-        { kBitmapInterfaceV0_ANPGetValue,       sizeof(gBitmapI),   &gBitmapI },
         { kCanvasInterfaceV0_ANPGetValue,       sizeof(gCanvasI),   &gCanvasI },
         { kLogInterfaceV0_ANPGetValue,          sizeof(gLogI),      &gLogI },
         { kPaintInterfaceV0_ANPGetValue,        sizeof(gPaintI),    &gPaintI },
-        { kPathInterfaceV0_ANPGetValue,         sizeof(gPathI),     &gPathI },
-        { kSurfaceInterfaceV0_ANPGetValue,      sizeof(gSurfaceI),  &gSurfaceI },
-        { kSystemInterfaceV0_ANPGetValue,       sizeof(gSystemI),   &gSystemI },
         { kTypefaceInterfaceV0_ANPGetValue,     sizeof(gTypefaceI), &gTypefaceI },
-        { kWindowInterfaceV0_ANPGetValue,       sizeof(gWindowI),   &gWindowI },
     };
     for (size_t i = 0; i < ARRAY_COUNT(gPairs); i++) {
         gPairs[i].i->inSize = gPairs[i].size;
@@ -156,7 +149,7 @@ NPError NPP_New(NPMIMEType pluginType, NPP instance, uint16 mode, int16 argc,
     }
 
     // select the drawing model
-    ANPDrawingModel model = kSurface_ANPDrawingModel;
+    ANPDrawingModel model = kBitmap_ANPDrawingModel;
 
     // notify the plugin API of the drawing model we wish to use. This must be
     // done prior to creating certain subPlugin objects (e.g. surfaceViews)

@@ -19,32 +19,29 @@ import android.content.Context;
 import android.view.View;
 
 /**
- * This abstract class is used to implement plugins in a WebView. A plugin
+ * This interface is used to implement plugins in a WebView. A plugin
  * package may extend this class and implement the abstract functions to create
  * embedded or fullscreeen views displayed in a WebView. The PluginStub
  * implementation will be provided the same NPP instance that is created
  * through the native interface.
  */
-public abstract class PluginStub {
-    /**
-     * Construct a new PluginStub implementation for the given NPP instance.
-     * @param npp The native NPP instance.
-     */
-    public PluginStub(int npp) { }
+public interface PluginStub {
 
     /**
      * Return a custom embedded view to draw the plugin.
+     * @param npp The native NPP instance.
      * @param context The current application's Context.
      * @return A custom View that will be managed by WebView.
      */
-    public abstract View getEmbeddedView(Context context);
+    public abstract View getEmbeddedView(int NPP, Context context);
 
     /**
      * Return a custom full-screen view to be displayed when the user requests
      * a plugin display as full-screen. Note that the application may choose not
      * to display this View as completely full-screen.
+     * @param npp The native NPP instance.
      * @param context The current application's Context.
      * @return A custom View that will be managed by the application.
      */
-    public abstract View getFullScreenView(Context context);
+    public abstract View getFullScreenView(int NPP, Context context);
 }
