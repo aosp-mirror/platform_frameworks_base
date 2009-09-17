@@ -174,6 +174,13 @@ void DisplayHardware::init(uint32_t dpy)
 
     surface = eglCreateWindowSurface(display, config, mNativeWindow.get(), NULL);
 
+    if (mFlags & UPDATE_ON_DEMAND) {
+        // if we have update on demand, we definitely don't need to
+        // preserve the backbuffer, which is usually costly.
+        eglSurfaceAttrib(display, surface,
+                EGL_SWAP_BEHAVIOR, EGL_BUFFER_DESTROYED);
+    }
+
     if (eglQuerySurface(display, surface, EGL_SWAP_BEHAVIOR, &dummy) == EGL_TRUE) {
         if (dummy == EGL_BUFFER_PRESERVED) {
             mFlags |= BUFFER_PRESERVED;
