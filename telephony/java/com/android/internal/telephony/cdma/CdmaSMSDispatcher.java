@@ -299,13 +299,15 @@ final class CdmaSMSDispatcher extends SMSDispatcher {
 
         // Build up the data stream
         ByteArrayOutputStream output = new ByteArrayOutputStream();
-        for (int i = 0; i < totalSegments-1; i++) {
+        for (int i = 0; i < totalSegments; i++) {
             // reassemble the (WSP-)pdu
-            output.write(pdus[i], 0, pdus[i].length);
+            if (i == segment) {
+                // This one isn't in the DB, so add it
+                output.write(pdu, index, pdu.length - index);
+            } else {
+                output.write(pdus[i], 0, pdus[i].length);
+            }
         }
-
-        // This one isn't in the DB, so add it
-        output.write(pdu, index, pdu.length - index);
 
         byte[] datagram = output.toByteArray();
         // Dispatch the PDU to applications
