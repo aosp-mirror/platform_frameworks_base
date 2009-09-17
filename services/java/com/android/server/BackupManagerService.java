@@ -1018,7 +1018,15 @@ class BackupManagerService extends IBackupManager.Stub {
                     backupData = ParcelFileDescriptor.open(backupDataName,
                             ParcelFileDescriptor.MODE_READ_ONLY);
 
-                    if (!transport.performBackup(packInfo, backupData)) throw new Exception();
+                    // TODO - We call finishBackup() for each application backed up, because
+                    // we need to know now whether it succeeded or failed.  Instead, we should
+                    // hold off on finishBackup() until the end, which implies holding off on
+                    // renaming *all* the output state files (see below) until that happens.
+
+                    if (!transport.performBackup(packInfo, backupData) ||
+                        !transport.finishBackup()) {
+                        throw new Exception("Backup transport failed");
+                    }
                 } else {
                     if (DEBUG) Log.i(TAG, "no backup data written; not calling transport");
                 }
@@ -1417,11 +1425,13 @@ class BackupManagerService extends IBackupManager.Stub {
                 stateFile.delete();
 
                 // Tell the transport to remove all the persistent storage for the app
+                // STOPSHIP TODO - need to handle failures
                 mTransport.clearBackupData(mPackage);
             } catch (RemoteException e) {
                 // can't happen; the transport is local
             } finally {
                 try {
+                    // STOPSHIP TODO - need to handle failures
                     mTransport.finishBackup();
                 } catch (RemoteException e) {
                     // can't happen; the transport is local
