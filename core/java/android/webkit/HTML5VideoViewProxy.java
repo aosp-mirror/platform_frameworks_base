@@ -47,11 +47,14 @@ import android.widget.VideoView;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * <p>Proxy for HTML5 video views.
  */
-class HTML5VideoViewProxy extends Handler {
+class HTML5VideoViewProxy extends Handler
+                          implements MediaPlayer.OnPreparedListener,
+                          MediaPlayer.OnCompletionListener {
     // Logging tag.
     private static final String LOGTAG = "HTML5VideoViewProxy";
 
@@ -59,9 +62,15 @@ class HTML5VideoViewProxy extends Handler {
     private static final int INIT              = 100;
     private static final int PLAY              = 101;
     private static final int SET_POSTER        = 102;
+    private static final int SEEK              = 103;
+    private static final int PAUSE             = 104;
 
     // Message Ids to be handled on the WebCore thread
+    private static final int PREPARED          = 200;
+    private static final int ENDED             = 201;
 
+    // The C++ MediaPlayerPrivateAndroid object.
+    int mNativePointer;
     // The handler for WebCore thread messages;
     private Handler mWebCoreHandler;
     // The WebView instance that created this view.
@@ -72,6 +81,8 @@ class HTML5VideoViewProxy extends Handler {
     private ImageView mPosterView;
     // The poster downloader.
     private PosterDownloader mPosterDownloader;
+    // The seek position.
+    private int mSeekPosition;
     // A helper class to control the playback. This executes on the UI thread!
     private static final class VideoPlayer {
         // The proxy that is currently playing (if any).
@@ -94,7 +105,8 @@ class HTML5VideoViewProxy extends Handler {
                 }
             };
 
-        public static void play(String url, HTML5VideoViewProxy proxy, WebChromeClient client) {
+        public static void play(String url, int time, HTML5VideoViewProxy proxy,
+                WebChromeClient client) {
             if (mCurrentProxy != null) {
                 // Some other video is already playing. Notify the caller that its playback ended.
                 proxy.playbackEnded();
@@ -105,9 +117,46 @@ class HTML5VideoViewProxy extends Handler {
             mVideoView.setWillNotDraw(false);
             mVideoView.setMediaController(new MediaController(proxy.getContext()));
             mVideoView.setVideoURI(Uri.parse(url));
+            mVideoView.setOnCompletionListener(proxy);
+            mVideoView.setOnPreparedListener(proxy);
+            mVideoView.seekTo(time);
             mVideoView.start();
             client.onShowCustomView(mVideoView, mCallback);
         }
+
+        public static void seek(int time, HTML5VideoViewProxy proxy) {
+            if (mCurrentProxy == proxy && time >= 0 && mVideoView != null) {
+                mVideoView.seekTo(time);
+            }
+        }
+
+        public static void pause(HTML5VideoViewProxy proxy) {
+            if (mCurrentProxy == proxy && mVideoView != null) {
+                mVideoView.pause();
+            }
+        }
+    }
+
+    // A bunch event listeners for our VideoView
+    // MediaPlayer.OnPreparedListener
+    public void onPrepared(MediaPlayer mp) {
+        Message msg = Message.obtain(mWebCoreHandler, PREPARED);
+        Map<String, Object> map = new HashMap<String, Object>();
+        map.put("dur", new Integer(mp.getDuration()));
+        map.put("width", new Integer(mp.getVideoWidth()));
+        map.put("height", new Integer(mp.getVideoHeight()));
+        msg.obj = map;
+        mWebCoreHandler.sendMessage(msg);
+    }
+
+    // MediaPlayer.OnCompletionListener;
+    public void onCompletion(MediaPlayer mp) {
+        playbackEnded();
+    }
+
+    public void playbackEnded() {
+        Message msg = Message.obtain(mWebCoreHandler, ENDED);
+        mWebCoreHandler.sendMessage(msg);
     }
 
     // Handler for the messages from WebCore thread to the UI thread.
@@ -124,7 +173,7 @@ class HTML5VideoViewProxy extends Handler {
                 String url = (String) msg.obj;
                 WebChromeClient client = mWebView.getWebChromeClient();
                 if (client != null) {
-                    VideoPlayer.play(url, this, client);
+                    VideoPlayer.play(url, mSeekPosition, this, client);
                 }
                 break;
             }
@@ -133,11 +182,17 @@ class HTML5VideoViewProxy extends Handler {
                 mPosterView.setImageBitmap(poster);
                 break;
             }
+            case SEEK: {
+                Integer time = (Integer) msg.obj;
+                mSeekPosition = time;
+                VideoPlayer.seek(mSeekPosition, this);
+                break;
+            }
+            case PAUSE: {
+                VideoPlayer.pause(this);
+                break;
+            }
         }
-    }
-
-    public void playbackEnded() {
-        // TODO: notify WebKit
     }
 
     // Everything below this comment executes on the WebCore thread, except for
@@ -273,13 +328,16 @@ class HTML5VideoViewProxy extends Handler {
 
     /**
      * Private constructor.
-     * @param context is the application context.
+     * @param webView is the WebView that hosts the video.
+     * @param nativePtr is the C++ pointer to the MediaPlayerPrivate object.
      */
-    private HTML5VideoViewProxy(WebView webView) {
+    private HTML5VideoViewProxy(WebView webView, int nativePtr) {
         // This handler is for the main (UI) thread.
         super(Looper.getMainLooper());
         // Save the WebView object.
         mWebView = webView;
+        // Save the native ptr
+        mNativePointer = nativePtr;
         // create the message handler for this thread
         createWebCoreHandler();
     }
@@ -289,8 +347,18 @@ class HTML5VideoViewProxy extends Handler {
             @Override
             public void handleMessage(Message msg) {
                 switch (msg.what) {
-                    // TODO here we will process the messages from the VideoPlayer
-                    // and will call native WebKit methods.
+                    case PREPARED: {
+                        Map<String, Object> map = (Map<String, Object>) msg.obj;
+                        Integer duration = (Integer) map.get("dur");
+                        Integer width = (Integer) map.get("width");
+                        Integer height = (Integer) map.get("height");
+                        nativeOnPrepared(duration.intValue(), width.intValue(),
+                                height.intValue(), mNativePointer);
+                        break;
+                    }
+                    case ENDED:
+                        nativeOnEnded(mNativePointer);
+                        break;
                 }
             }
         };
@@ -314,15 +382,31 @@ class HTML5VideoViewProxy extends Handler {
     /**
      * Play a video stream.
      * @param url is the URL of the video stream.
-     * @param webview is the WebViewCore that is requesting the playback.
      */
     public void play(String url) {
         if (url == null) {
             return;
         }
-         // We need to know the webview that is requesting the playback.
         Message message = obtainMessage(PLAY);
         message.obj = url;
+        sendMessage(message);
+    }
+
+    /**
+     * Seek into the video stream.
+     * @param  time is the position in the video stream.
+     */
+    public void seek(int time) {
+        Message message = obtainMessage(SEEK);
+        message.obj = new Integer(time);
+        sendMessage(message);
+    }
+
+    /**
+     * Pause the playback.
+     */
+    public void pause() {
+        Message message = obtainMessage(PAUSE);
         sendMessage(message);
     }
 
@@ -384,7 +468,10 @@ class HTML5VideoViewProxy extends Handler {
      *
      * @return a new HTML5VideoViewProxy object.
      */
-    public static HTML5VideoViewProxy getInstance(WebViewCore webViewCore) {
-        return new HTML5VideoViewProxy(webViewCore.getWebView());
+    public static HTML5VideoViewProxy getInstance(WebViewCore webViewCore, int nativePtr) {
+        return new HTML5VideoViewProxy(webViewCore.getWebView(), nativePtr);
     }
+
+    private native void nativeOnPrepared(int duration, int width, int height, int nativePointer);
+    private native void nativeOnEnded(int nativePointer);
 }
