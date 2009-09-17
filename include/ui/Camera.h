@@ -143,6 +143,9 @@ public:
             // autoFocus - status returned from callback
             status_t    autoFocus();
 
+            // cancel auto focus
+            status_t    cancelAutoFocus();
+
             // take a picture - picture returned from callback
             status_t    takePicture();
 

@@ -383,6 +383,20 @@ public class Camera {
     private native final void native_autoFocus();
 
     /**
+     * Cancels auto-focus function. If the auto-focus is still in progress,
+     * this function will cancel it. Whether the auto-focus is in progress
+     * or not, this function will return the focus position to the default.
+     * If the camera does not support auto-focus, this is a no-op.
+     * @hide
+     */
+    public final void cancelAutoFocus()
+    {
+        mAutoFocusCallback = null;
+        native_cancelAutoFocus();
+    }
+    private native final void native_cancelAutoFocus();
+
+    /**
      * An interface which contains a callback for the shutter closing after taking a picture.
      */
     public interface ShutterCallback
@@ -1338,5 +1352,3 @@ public class Camera {
         }
     };
 }
-
-

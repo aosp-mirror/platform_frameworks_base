@@ -76,6 +76,9 @@ public:
     // auto focus
     virtual status_t        autoFocus() = 0;
 
+    // cancel auto focus
+    virtual status_t        cancelAutoFocus() = 0;
+
     // take a picture
     virtual status_t        takePicture() = 0;
 

@@ -110,6 +110,9 @@ private:
         // auto focus
         virtual status_t        autoFocus();
 
+        // cancel auto focus
+        virtual status_t        cancelAutoFocus();
+
         // take a picture - returns an IMemory (ref-counted mmap)
         virtual status_t        takePicture();
 

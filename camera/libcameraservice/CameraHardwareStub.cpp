@@ -265,6 +265,11 @@ status_t CameraHardwareStub::autoFocus()
     return NO_ERROR;
 }
 
+status_t CameraHardwareStub::cancelAutoFocus()
+{
+    return NO_ERROR;
+}
+
 /*static*/ int CameraHardwareStub::beginPictureThread(void *cookie)
 {
     CameraHardwareStub *c = (CameraHardwareStub *)cookie;
