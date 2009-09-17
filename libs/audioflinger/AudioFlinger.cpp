@@ -1239,7 +1239,7 @@ bool AudioFlinger::MixerThread::threadLoop()
                 // active tracks were late. Sleep a little bit to give
                 // them another chance. If we're too late, write 0s to audio
                 // hardware to avoid underrun.
-                if (sleepTime < kMaxBufferRecoveryInUsecs) {
+                if (mBytesWritten == 0 || sleepTime < kMaxBufferRecoveryInUsecs) {
                     usleep(kBufferRecoveryInUsecs);
                 } else {
                     memset (curBuf, 0, mixBufferSize);
@@ -1741,7 +1741,8 @@ bool AudioFlinger::DirectOutputThread::threadLoop()
                 standbyTime = systemTime() + kStandbyTimeInNsecs;
             } else {
                 sleepTime += kBufferRecoveryInUsecs;
-                if (sleepTime < kMaxBufferRecoveryInUsecs) {
+                if (mBytesWritten == 0 || !AudioSystem::isLinearPCM(mFormat) ||
+                    sleepTime < kMaxBufferRecoveryInUsecs) {
                     usleep(kBufferRecoveryInUsecs);
                 } else {
                     memset (mMixBuffer, 0, mFrameCount * mFrameSize);
