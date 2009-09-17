@@ -36,7 +36,6 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
     private Drawable mCurrDrawable;
     private int mAlpha = 0xFF;
     private ColorFilter mColorFilter;
-    private boolean mDither = DEFAULT_DITHER;
 
     private int mCurIndex = -1;
     private boolean mMutated;
@@ -83,10 +82,10 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
 
     @Override
     public void setDither(boolean dither) {
-        if (mDither != dither) {
-            mDither = dither;
+        if (mDrawableContainerState.mDither != dither) {
+            mDrawableContainerState.mDither = dither;
             if (mCurrDrawable != null) {
-                mCurrDrawable.setDither(mDither);
+                mCurrDrawable.setDither(mDrawableContainerState.mDither);
             }
         }
     }
@@ -212,7 +211,7 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
             if (d != null) {
                 d.setVisible(isVisible(), true);
                 d.setAlpha(mAlpha);
-                d.setDither(mDither);
+                d.setDither(mDrawableContainerState.mDither);
                 d.setColorFilter(mColorFilter);
                 d.setState(getState());
                 d.setLevel(getLevel());
@@ -285,6 +284,8 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
         boolean     mCanConstantState;
 
         boolean     mPaddingChecked = false;
+        
+        boolean     mDither = DEFAULT_DITHER;        
 
         DrawableContainerState(DrawableContainerState orig, DrawableContainer owner,
                 Resources res) {
@@ -323,6 +324,8 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
                 mOpacity = orig.mOpacity;
                 mHaveStateful = orig.mHaveStateful;
                 mStateful = orig.mStateful;
+                
+                mDither = orig.mDither;
 
             } else {
                 mDrawables = new Drawable[10];
