@@ -595,6 +595,7 @@ LayerBuffer::OverlaySource::OverlaySource(LayerBuffer& layer,
 
     *overlayRef = new OverlayRef(mOverlayHandle, channel,
             mWidth, mHeight, mFormat, mWidthStride, mHeightStride);
+    mLayer.mFlinger->signalEvent();
 }
 
 LayerBuffer::OverlaySource::~OverlaySource()
