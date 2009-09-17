@@ -1923,7 +1923,8 @@ public class WebView extends AbsoluteLayout
                 int oldY = mScrollY;
                 float ratio = scale * mInvActualScale;   // old inverse
                 float sx = ratio * oldX + (ratio - 1) * mZoomCenterX;
-                float sy = ratio * oldY + (ratio - 1) * mZoomCenterY;
+                float sy = ratio * oldY + (ratio - 1)
+                        * (mZoomCenterY - getTitleHeight());
 
                 // now update our new scale and inverse
                 if (scale != mActualScale && !mPreviewZoomOnly) {
@@ -2781,15 +2782,20 @@ public class WebView extends AbsoluteLayout
                     }
                 }
             }
+            // calculate the intermediate scroll position. As we need to use
+            // zoomScale, we can't use pinLocX/Y directly. Copy the logic here.
             float scale = zoomScale * mInvInitialZoomScale;
             int tx = Math.round(scale * (mInitialScrollX + mZoomCenterX)
                     - mZoomCenterX);
             tx = -pinLoc(tx, getViewWidth(), Math.round(mContentWidth
                     * zoomScale)) + mScrollX;
-            int ty = Math.round(scale * (mInitialScrollY + mZoomCenterY)
-                    - mZoomCenterY);
-            ty = -pinLoc(ty, getViewHeight(), Math.round(mContentHeight
-                    * zoomScale)) + mScrollY;
+            int titleHeight = getTitleHeight();
+            int ty = Math.round(scale
+                    * (mInitialScrollY + mZoomCenterY - titleHeight)
+                    - (mZoomCenterY - titleHeight));
+            ty = -(ty <= titleHeight ? Math.max(ty, 0) : pinLoc(ty
+                    - titleHeight, getViewHeight(), Math.round(mContentHeight
+                    * zoomScale)) + titleHeight) + mScrollY;
             canvas.translate(tx, ty);
             canvas.scale(zoomScale, zoomScale);
             if (inEditingMode() && !mNeedToAdjustWebTextView
