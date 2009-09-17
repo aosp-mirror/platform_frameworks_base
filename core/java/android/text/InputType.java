@@ -146,6 +146,15 @@ public interface InputType {
      */
     public static final int TYPE_TEXT_FLAG_IME_MULTI_LINE = 0x00040000;
     
+    /**
+     * Flag for {@link #TYPE_CLASS_TEXT}: the input method does not need to
+     * display any dictionary-based candidates. This is useful for text views that
+     * do not contain words from the language and do not benefit from any
+     * dictionary-based completions or corrections. It overrides the
+     * {@link #TYPE_TEXT_FLAG_AUTO_CORRECT} value when set.
+     */
+    public static final int TYPE_TEXT_FLAG_NO_SUGGESTIONS = 0x00080000;
+
     // ----------------------------------------------------------------------
     
     /**
