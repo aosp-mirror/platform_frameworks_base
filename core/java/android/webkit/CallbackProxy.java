@@ -65,7 +65,8 @@ class CallbackProxy extends Handler {
     // Keep track of multiple progress updates.
     private boolean mProgressUpdatePending;
     // Keep track of the last progress amount.
-    private volatile int mLatestProgress;
+    // Start with 100 to indicate it is not in load for the empty page.
+    private volatile int mLatestProgress = 100;
     // Back/Forward list
     private final WebBackForwardList mBackForwardList;
     // Used to call startActivity during url override.
