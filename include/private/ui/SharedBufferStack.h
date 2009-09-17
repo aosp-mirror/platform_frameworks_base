@@ -69,12 +69,6 @@ class SharedClient;
 
 // ----------------------------------------------------------------------------
 
-struct FlatRegion { // 12 bytes
-    static const unsigned int NUM_RECT_MAX = 1;
-    uint32_t    count;
-    uint16_t    rects[4*NUM_RECT_MAX];
-};
-
 // should be 128 bytes (32 longs)
 class SharedBufferStack
 {
@@ -84,6 +78,18 @@ class SharedBufferStack
     friend class SharedBufferServer;
 
 public:
+    struct FlatRegion { // 12 bytes
+        static const unsigned int NUM_RECT_MAX = 1;
+        uint32_t    count;
+        uint16_t    rects[4*NUM_RECT_MAX];
+    };
+    
+    struct Statistics { // 4 longs
+        typedef int32_t usecs_t;
+        usecs_t  totalTime;
+        usecs_t  reserved[3];
+    };
+    
     SharedBufferStack();
     void init(int32_t identity);
     status_t setDirtyRegion(int buffer, const Region& reg);
@@ -100,7 +106,8 @@ public:
     volatile int32_t reallocMask;
 
     int32_t     identity;       // surface's identity (const)
-    int32_t     reserved32[13];
+    int32_t     reserved32[9];
+    Statistics  stats;
     FlatRegion  dirtyRegion[NUM_BUFFER_MAX];    // 12*4=48 bytes
 };
 
@@ -223,7 +230,7 @@ public:
     status_t queue(int buf);
     bool needNewBuffer(int buffer) const;
     status_t setDirtyRegion(int buffer, const Region& reg);
-
+    
 private:
     friend struct Condition;
     friend struct DequeueCondition;
@@ -257,6 +264,8 @@ private:
     };
 
     int32_t tail;
+    // statistics...
+    nsecs_t mDequeueTime[NUM_BUFFER_MAX];
 };
 
 // ----------------------------------------------------------------------------
@@ -274,6 +283,9 @@ public:
     status_t assertReallocate(int buffer);
     
     Region getDirtyRegion(int buffer) const;
+
+    SharedBufferStack::Statistics getStats() const;
+    
 
 private:
     struct UnlockUpdate : public UpdateBase {
