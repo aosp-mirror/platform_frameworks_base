@@ -297,6 +297,16 @@ ScriptSetType {
 	param const char * name
 	}
 
+ScriptSetInvoke {
+	param const char * name
+	param uint32_t slot
+	}
+
+ScriptInvoke {
+	param RsScript s
+	param uint32_t slot
+	}
+
 ScriptSetRoot {
 	param bool isRoot
 	}

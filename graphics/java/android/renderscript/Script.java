@@ -25,6 +25,22 @@ public class Script extends BaseObj {
     boolean mIsRoot;
     Type[] mTypes;
     boolean[] mWritable;
+    Invokable[] mInvokables;
+
+    public static class Invokable {
+        RenderScript mRS;
+        Script mScript;
+        int mSlot;
+        String mName;
+
+        Invokable() {
+            mSlot = -1;
+        }
+
+        public void execute() {
+            mRS.nScriptInvoke(mScript.mID, mSlot);
+        }
+    }
 
     Script(int id, RenderScript rs) {
         super(rs);
@@ -61,12 +77,15 @@ public class Script extends BaseObj {
         Type[] mTypes;
         String[] mNames;
         boolean[] mWritable;
+        int mInvokableCount = 0;
+        Invokable[] mInvokables;
 
         Builder(RenderScript rs) {
             mRS = rs;
             mTypes = new Type[MAX_SLOT];
             mNames = new String[MAX_SLOT];
             mWritable = new boolean[MAX_SLOT];
+            mInvokables = new Invokable[MAX_SLOT];
         }
 
         public void setType(Type t, int slot) {
@@ -77,6 +96,15 @@ public class Script extends BaseObj {
         public void setType(Type t, String name, int slot) {
             mTypes[slot] = t;
             mNames[slot] = name;
+        }
+
+        public Invokable addInvokable(String func) {
+            Invokable i = new Invokable();
+            i.mName = func;
+            i.mRS = mRS;
+            i.mSlot = mInvokableCount;
+            mInvokables[mInvokableCount++] = i;
+            return i;
         }
 
         public void setType(boolean writable, int slot) {
@@ -90,11 +118,20 @@ public class Script extends BaseObj {
                     mRS.nScriptSetType(mTypes[ct].mID, mWritable[ct], mNames[ct], ct);
                 }
             }
+            for(int ct=0; ct < mInvokableCount; ct++) {
+                mRS.nScriptSetInvokable(mInvokables[ct].mName, ct);
+            }
         }
 
         void transferObject(Script s) {
             s.mIsRoot = mIsRoot;
             s.mTypes = mTypes;
+            s.mInvokables = new Invokable[mInvokableCount];
+            for(int ct=0; ct < mInvokableCount; ct++) {
+                s.mInvokables[ct] = mInvokables[ct];
+                s.mInvokables[ct].mScript = s;
+            }
+            s.mInvokables = null;
         }
 
         public void setRoot(boolean r) {
