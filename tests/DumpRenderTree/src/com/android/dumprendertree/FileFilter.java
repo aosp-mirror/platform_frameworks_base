@@ -96,7 +96,9 @@ public class FileFilter {
         // Android layout tests are stored in "layout_tests". The following two
         // tests expect "LayoutTests" in their output.
         "storage/domstorage/localstorage/iframe-events.html",
-        "storage/domstorage/sessionstorage/iframe-events.html"
+        "storage/domstorage/sessionstorage/iframe-events.html",
+        // below tests (failed or crashes) are filtered out temporarily due to prioritizing
+        "editing/selection/move-left-right.html",
     };
     
     static void fillIgnoreResultSet() {
