@@ -143,6 +143,9 @@ public class Build {
          * Service.onStartCommand} function will return the new
          * {@link android.app.Service#START_STICKY} behavior instead of the
          * old compatibility {@link android.app.Service#START_STICKY_COMPATIBILITY}.
+         * <li> The {@link android.app.Activity} class will now execute back
+         * key presses on the key up instead of key down, to be able to detect
+         * canceled presses from virtual keys.
          * </ul>
          */
         public static final int ECLAIR = CUR_DEVELOPMENT;
