@@ -408,6 +408,8 @@ public class KeyboardView extends View implements View.OnClickListener {
         if (mKeyboard != null) {
             showPreview(NOT_A_KEY);
         }
+        // Remove any pending messages
+        removeMessages();
         mKeyboard = keyboard;
         List<Key> keys = mKeyboard.getKeys();
         mKeys = keys.toArray(new Key[keys.size()]);
@@ -828,6 +830,7 @@ public class KeyboardView extends View implements View.OnClickListener {
     private void showKey(final int keyIndex) {
         final PopupWindow previewPopup = mPreviewPopup;
         final Key[] keys = mKeys;
+        if (keyIndex < 0 || keyIndex >= mKeys.length) return;
         Key key = keys[keyIndex];
         if (key.icon != null) {
             mPreviewText.setCompoundDrawables(null, null, null, 
@@ -1145,9 +1148,7 @@ public class KeyboardView extends View implements View.OnClickListener {
                 break;
 
             case MotionEvent.ACTION_UP:
-                mHandler.removeMessages(MSG_SHOW_PREVIEW);
-                mHandler.removeMessages(MSG_REPEAT);
-                mHandler.removeMessages(MSG_LONGPRESS);
+                removeMessages();
                 if (keyIndex == mCurrentKey) {
                     mCurrentKeyTime += eventTime - mLastMoveTime;
                 } else {
@@ -1203,16 +1204,20 @@ public class KeyboardView extends View implements View.OnClickListener {
         if (mPreviewPopup.isShowing()) {
             mPreviewPopup.dismiss();
         }
-        mHandler.removeMessages(MSG_REPEAT);
-        mHandler.removeMessages(MSG_LONGPRESS);
-        mHandler.removeMessages(MSG_SHOW_PREVIEW);
+        removeMessages();
         
         dismissPopupKeyboard();
         mBuffer = null;
         mCanvas = null;
         mMiniKeyboardCache.clear();
     }
-    
+
+    private void removeMessages() {
+        mHandler.removeMessages(MSG_REPEAT);
+        mHandler.removeMessages(MSG_LONGPRESS);
+        mHandler.removeMessages(MSG_SHOW_PREVIEW);
+    }
+
     @Override
     public void onDetachedFromWindow() {
         super.onDetachedFromWindow();
