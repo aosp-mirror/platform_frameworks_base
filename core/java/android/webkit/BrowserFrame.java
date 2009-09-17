@@ -222,7 +222,6 @@ class BrowserFrame extends Handler {
 
     private void resetLoadingStates() {
         mCommitted = true;
-        mWebViewCore.mEndScaleZoom = mFirstLayoutDone == false;
         mFirstLayoutDone = true;
     }
 
@@ -245,7 +244,6 @@ class BrowserFrame extends Handler {
             // blocking the update in {@link #loadStarted}
             mWebViewCore.contentDraw();
         }
-        mWebViewCore.mEndScaleZoom = true;
     }
 
     /**
