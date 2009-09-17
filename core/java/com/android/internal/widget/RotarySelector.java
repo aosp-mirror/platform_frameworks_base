@@ -19,8 +19,6 @@ package com.android.internal.widget;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Canvas;
-import android.graphics.Paint;
-import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Vibrator;
 import android.util.AttributeSet;
@@ -28,7 +26,7 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.AccelerateInterpolator;
-
+import static android.view.animation.AnimationUtils.currentAnimationTimeMillis;
 import com.android.internal.R;
 
 
@@ -69,7 +67,7 @@ public class RotarySelector extends View {
     private boolean mAnimating = false;
     private long mAnimationEndTime;
     private int mAnimatingDelta;
-    AccelerateInterpolator mInterpolator;
+    private AccelerateInterpolator mInterpolator;
 
     /**
      * True after triggering an action if the user of {@link OnDialTriggerListener} wants to
@@ -96,12 +94,6 @@ public class RotarySelector extends View {
     private static final long VIBRATE_SHORT = 60;  // msec
     private static final long VIBRATE_LONG = 100;  // msec
 
-    // Various tweakable layout or behavior parameters:
-
-    // How close to the edge of the screen, we let the handle get before
-    // triggering an action:
-    private static final int EDGE_THRESHOLD_DIP = 70;
-
     /**
      * The drawable for the arrows need to be scrunched this many dips towards the rotary bg below
      * it.
@@ -122,6 +114,11 @@ public class RotarySelector extends View {
 
     private static final boolean DRAW_CENTER_DIMPLE = false;
 
+    public RotarySelector(Context context) {
+        this(context, null);
+    }
+
+
     /**
      * Constructor used when this widget is created from a layout file.
      */
@@ -132,8 +129,6 @@ public class RotarySelector extends View {
         Resources r = getResources();
         mDensity = r.getDisplayMetrics().density;
         if (DBG) log("- Density: " + mDensity);
-        // Density is 1.0 on HVGA (like Dream), and 1.5 on WVGA.
-        // Usage: raw_pixel_value = (int) (dpi_value * mDensity + 0.5f)
 
         // Assets (all are BitmapDrawables).
         mBackground = r.getDrawable(R.drawable.jog_dial_bg_cropped);
@@ -142,6 +137,15 @@ public class RotarySelector extends View {
         mArrowLongLeft = r.getDrawable(R.drawable.jog_dial_arrow_long_left_green);
         mArrowLongRight = r.getDrawable(R.drawable.jog_dial_arrow_long_right_red);
         mArrowShortLeftAndRight = r.getDrawable(R.drawable.jog_dial_arrow_short_left_and_right);
+
+        // Arrows:
+        // All arrow assets are the same size (they're the full width of
+        // the screen) regardless of which arrows are actually visible.
+        int arrowW = mArrowShortLeftAndRight.getIntrinsicWidth();
+        int arrowH = mArrowShortLeftAndRight.getIntrinsicHeight();
+        mArrowShortLeftAndRight.setBounds(0, 0, arrowW, arrowH);
+        mArrowLongLeft.setBounds(0, 0, arrowW, arrowH);
+        mArrowLongRight.setBounds(0, 0, arrowW, arrowH);
 
         mInterpolator = new AccelerateInterpolator();
     }
@@ -237,7 +241,7 @@ public class RotarySelector extends View {
 
         // update animating state before we draw anything
         if (mAnimating && !mFrozen) {
-            long millisLeft = mAnimationEndTime - System.currentTimeMillis();
+            long millisLeft = mAnimationEndTime - currentAnimationTimeMillis();
             if (DBG) log("millisleft for animating: " + millisLeft);
             if (millisLeft <= 0) {
                 reset();
@@ -259,11 +263,6 @@ public class RotarySelector extends View {
         if (DBG) log("  Background BOUNDS: " + mBackground.getBounds());
         mBackground.draw(canvas);
 
-        // Arrows:
-        // All arrow assets are the same size (they're the full width of
-        // the screen) regardless of which arrows are actually visible.
-        int arrowW = mArrowShortLeftAndRight.getIntrinsicWidth();
-        int arrowH = mArrowShortLeftAndRight.getIntrinsicHeight();
 
         // Draw the correct arrow(s) depending on the current state:
         Drawable currentArrow;
@@ -280,7 +279,6 @@ public class RotarySelector extends View {
             default:
                 throw new IllegalStateException("invalid mGrabbedState: " + mGrabbedState);
         }
-        currentArrow.setBounds(0, 0, arrowW, arrowH);
         currentArrow.draw(canvas);
 
         // debug: draw circle that should match the outer arc (good sanity check)
@@ -382,63 +380,70 @@ public class RotarySelector extends View {
         final int eventX = (int) event.getX();
         final int hitWindow = mDimple.getIntrinsicWidth();
 
-        if (event.getAction() == MotionEvent.ACTION_DOWN) {
-            if (DBG) log("touch-down");
-            mTriggered = false;
-            if (mGrabbedState != RotarySelector.NOTHING_GRABBED) {
+        final int action = event.getAction();
+        switch (action) {
+            case MotionEvent.ACTION_DOWN:
+                if (DBG) log("touch-down");
+                mTriggered = false;
+                if (mGrabbedState != NOTHING_GRABBED) {
+                    reset();
+                    invalidate();
+                }
+                if (eventX < mLeftHandleX + hitWindow) {
+                    mTouchDragOffset = eventX - mLeftHandleX;
+                    mGrabbedState = LEFT_HANDLE_GRABBED;
+                    invalidate();
+                    vibrate(VIBRATE_SHORT);
+                } else if (eventX > mRightHandleX - hitWindow) {
+                    mTouchDragOffset = eventX - mRightHandleX;
+                    mGrabbedState = RIGHT_HANDLE_GRABBED;
+                    invalidate();
+                    vibrate(VIBRATE_SHORT);
+                }
+                break;
+
+            case MotionEvent.ACTION_MOVE:
+                if (DBG) log("touch-move");
+                if (mGrabbedState == LEFT_HANDLE_GRABBED) {
+                    mTouchDragOffset = eventX - mLeftHandleX;
+                    invalidate();
+                    if (eventX >= mRightHandleX - EDGE_PADDING_DIP && !mTriggered) {
+                        mTriggered = true;
+                        mFrozen = dispatchTriggerEvent(OnDialTriggerListener.LEFT_HANDLE);
+                    }
+                } else if (mGrabbedState == RIGHT_HANDLE_GRABBED) {
+                    mTouchDragOffset = eventX - mRightHandleX;
+                    invalidate();
+                    if (eventX <= mLeftHandleX + EDGE_PADDING_DIP && !mTriggered) {
+                        mTriggered = true;
+                        mFrozen = dispatchTriggerEvent(OnDialTriggerListener.RIGHT_HANDLE);
+                    }
+                }
+                break;
+            case MotionEvent.ACTION_UP:
+                if (DBG) log("touch-up");
+                // handle animating back to start if they didn't trigger
+                if (mGrabbedState == LEFT_HANDLE_GRABBED
+                        && Math.abs(eventX - mLeftHandleX) > 5) {
+                    mAnimating = true;
+                    mAnimationEndTime = currentAnimationTimeMillis() + ANIMATION_DURATION_MILLIS;
+                    mAnimatingDelta = eventX - mLeftHandleX;
+                } else if (mGrabbedState == RIGHT_HANDLE_GRABBED
+                        && Math.abs(eventX - mRightHandleX) > 5) {
+                    mAnimating = true;
+                    mAnimationEndTime = currentAnimationTimeMillis() + ANIMATION_DURATION_MILLIS;
+                    mAnimatingDelta = eventX - mRightHandleX;
+                }
+
+                mTouchDragOffset = 0;
+                mGrabbedState = NOTHING_GRABBED;
+                invalidate();
+                break;
+            case MotionEvent.ACTION_CANCEL:
+                if (DBG) log("touch-cancel");
                 reset();
                 invalidate();
-            }
-            if (eventX < mLeftHandleX + hitWindow) {
-                mTouchDragOffset = eventX - mLeftHandleX;
-                mGrabbedState = RotarySelector.LEFT_HANDLE_GRABBED;
-                invalidate();
-                vibrate(VIBRATE_SHORT);
-            } else if (eventX > mRightHandleX - hitWindow) {
-                mTouchDragOffset = eventX - mRightHandleX;
-                mGrabbedState = RotarySelector.RIGHT_HANDLE_GRABBED;
-                invalidate();
-                vibrate(VIBRATE_SHORT);
-            }
-        } else if (event.getAction() == MotionEvent.ACTION_MOVE) {
-            if (DBG) log("touch-move");
-            if (mGrabbedState == RotarySelector.LEFT_HANDLE_GRABBED) {
-                mTouchDragOffset = eventX - mLeftHandleX;
-                invalidate();
-                if (eventX >= mRightHandleX - EDGE_PADDING_DIP && !mTriggered) {
-                    mTriggered = true;
-                    mFrozen = dispatchTriggerEvent(OnDialTriggerListener.LEFT_HANDLE);
-                }
-            } else if (mGrabbedState == RotarySelector.RIGHT_HANDLE_GRABBED) {
-                mTouchDragOffset = eventX - mRightHandleX;
-                invalidate();
-                if (eventX <= mLeftHandleX + EDGE_PADDING_DIP && !mTriggered) {
-                    mTriggered = true;
-                    mFrozen = dispatchTriggerEvent(OnDialTriggerListener.RIGHT_HANDLE);
-                }
-            }
-        } else if ((event.getAction() == MotionEvent.ACTION_UP)) {
-            if (DBG) log("touch-up");
-            // handle animating back to start if they didn't trigger
-            if (mGrabbedState == RotarySelector.LEFT_HANDLE_GRABBED
-                    && Math.abs(eventX - mLeftHandleX) > 5) {
-                mAnimating = true;
-                mAnimationEndTime = System.currentTimeMillis() + ANIMATION_DURATION_MILLIS;
-                mAnimatingDelta = eventX - mLeftHandleX;
-            } else if (mGrabbedState == RotarySelector.RIGHT_HANDLE_GRABBED
-                    && Math.abs(eventX - mRightHandleX) > 5) {
-                mAnimating = true;
-                mAnimationEndTime = System.currentTimeMillis() + ANIMATION_DURATION_MILLIS;
-                mAnimatingDelta = eventX - mRightHandleX;
-            }
-
-            mTouchDragOffset = 0;
-            mGrabbedState = RotarySelector.NOTHING_GRABBED;
-            invalidate();
-        } else if (event.getAction() == MotionEvent.ACTION_CANCEL) {
-            if (DBG) log("touch-cancel");
-            reset();
-            invalidate();
+                break;
         }
         return true;
     }
@@ -446,7 +451,7 @@ public class RotarySelector extends View {
     private void reset() {
         mAnimating = false;
         mTouchDragOffset = 0;
-        mGrabbedState = RotarySelector.NOTHING_GRABBED;
+        mGrabbedState = NOTHING_GRABBED;
         mTriggered = false;
     }
 
