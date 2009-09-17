@@ -1182,7 +1182,7 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
             // report back about the click
             if (mGlobalSearchMode) {
                 // in global search mode, do it via cursor
-                mSuggestionsAdapter.callCursorOnClick(c, position);
+                mSuggestionsAdapter.callCursorOnClick(c, position, actionKey, actionMsg);
             } else if (intent != null
                     && mPreviousComponents != null
                     && !mPreviousComponents.isEmpty()) {
