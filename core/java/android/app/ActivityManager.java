@@ -22,6 +22,7 @@ import android.content.Intent;
 import android.content.pm.ConfigurationInfo;
 import android.content.pm.IPackageDataObserver;
 import android.graphics.Bitmap;
+import android.os.Debug;
 import android.os.RemoteException;
 import android.os.Handler;
 import android.os.Parcel;
@@ -848,6 +849,22 @@ public class ActivityManager {
     public List<RunningAppProcessInfo> getRunningAppProcesses() {
         try {
             return ActivityManagerNative.getDefault().getRunningAppProcesses();
+        } catch (RemoteException e) {
+            return null;
+        }
+    }
+    
+    /**
+     * Return information about the memory usage of one or more processes.
+     * 
+     * @param pids The pids of the processes whose memory usage is to be
+     * retrieved.
+     * @return Returns an array of memory information, one for each
+     * requested pid.
+     */
+    public Debug.MemoryInfo[] getProcessMemoryInfo(int[] pids) {
+        try {
+            return ActivityManagerNative.getDefault().getProcessMemoryInfo(pids);
         } catch (RemoteException e) {
             return null;
         }
