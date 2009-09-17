@@ -133,23 +133,13 @@ static jboolean connectSinkNative(JNIEnv *env, jobject object, jstring path) {
     LOGV(__FUNCTION__);
     if (nat) {
         const char *c_path = env->GetStringUTFChars(path, NULL);
-        DBusError err;
-        dbus_error_init(&err);
 
-        DBusMessage *reply =
-                dbus_func_args_timeout(env, nat->conn, -1, c_path,
-                               "org.bluez.AudioSink", "Connect",
-                                DBUS_TYPE_INVALID);
+        bool ret = dbus_func_args_async(env, nat->conn, -1, NULL, NULL, nat,
+                                    c_path, "org.bluez.AudioSink", "Connect",
+                                    DBUS_TYPE_INVALID);
+
         env->ReleaseStringUTFChars(path, c_path);
-
-        if (!reply && dbus_error_is_set(&err)) {
-            LOG_AND_FREE_DBUS_ERROR_WITH_MSG(&err, reply);
-            return JNI_FALSE;
-        } else if (!reply) {
-            LOGE("DBus reply is NULL in function %s", __FUNCTION__);
-            return JNI_FALSE;
-        }
-        return JNI_TRUE;
+        return ret ? JNI_TRUE : JNI_FALSE;
     }
 #endif
     return JNI_FALSE;
@@ -161,23 +151,13 @@ static jboolean disconnectSinkNative(JNIEnv *env, jobject object,
     LOGV(__FUNCTION__);
     if (nat) {
         const char *c_path = env->GetStringUTFChars(path, NULL);
-        DBusError err;
-        dbus_error_init(&err);
 
-        DBusMessage *reply =
-              dbus_func_args_timeout(env, nat->conn, -1, c_path,
-                                     "org.bluez.AudioSink", "Disconnect",
-                                     DBUS_TYPE_INVALID);
+        bool ret = dbus_func_args_async(env, nat->conn, -1, NULL, NULL, nat,
+                                    c_path, "org.bluez.AudioSink", "Disconnect",
+                                    DBUS_TYPE_INVALID);
+
         env->ReleaseStringUTFChars(path, c_path);
-
-        if (!reply && dbus_error_is_set(&err)) {
-            LOG_AND_FREE_DBUS_ERROR_WITH_MSG(&err, reply);
-            return JNI_FALSE;
-        } else if (!reply) {
-            LOGE("DBus reply is NULL in function %s", __FUNCTION__);
-            return JNI_FALSE;
-        }
-        return JNI_TRUE;
+        return ret ? JNI_TRUE : JNI_FALSE;
     }
 #endif
     return JNI_FALSE;
