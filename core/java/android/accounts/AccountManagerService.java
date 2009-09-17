@@ -1398,9 +1398,8 @@ public class AccountManagerService extends IAccountManager.Stub {
             }
 
             if (!imsi.equals(storedImsi) && !TextUtils.isEmpty(storedImsi)) {
-                if (Log.isLoggable(TAG, Log.VERBOSE)) {
-                    Log.v(TAG, "wiping all passwords and authtokens");
-                }
+                Log.w(TAG, "wiping all passwords and authtokens because IMSI changed ("
+                        + "stored=" + storedImsi + ", current=" + imsi + ")");
                 SQLiteDatabase db = mOpenHelper.getWritableDatabase();
                 db.beginTransaction();
                 try {
