@@ -26,10 +26,12 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.BitmapFactory;
+import android.graphics.Rect;
 import android.net.Uri;
 import android.os.RemoteException;
 import android.text.TextUtils;
 import android.util.Pair;
+import android.view.View;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -38,7 +40,7 @@ import java.io.InputStream;
  * The contract between the contacts provider and applications. Contains definitions
  * for the supported URIs and columns.
  *
- * @hide
+ * @hide pending API council approval
  */
 public final class ContactsContract {
     /** The authority for the contacts provider */
@@ -278,27 +280,25 @@ public final class ContactsContract {
                 "lookup");
 
         /**
-         * Computes a complete lookup URI (see {@link #CONTENT_LOOKUP_URI}).
-         * Pass either a basic content URI with a contact ID to obtain an
-         * equivalent lookup URI. Pass a possibly stale lookup URI to get a fresh
-         * lookup URI for the same contact.
-         * <p>
-         * Returns null if the contact cannot be found.
+         * Builds a {@link #CONTENT_LOOKUP_URI} style {@link Uri} describing the
+         * requested {@link Contacts} entry.
+         *
+         * @param contactUri A {@link #CONTENT_URI} row, or an existing
+         *            {@link #CONTENT_LOOKUP_URI} to attempt refreshing.
          */
-        public static Uri getLookupUri(ContentResolver resolver, Uri contentUri) {
-            Cursor c = resolver.query(contentUri,
-                    new String[]{Contacts.LOOKUP_KEY, Contacts._ID}, null, null, null);
+        public static Uri getLookupUri(ContentResolver resolver, Uri contactUri) {
+            final Cursor c = resolver.query(contactUri, new String[] {
+                    Contacts.LOOKUP_KEY, Contacts._ID
+            }, null, null, null);
             if (c == null) {
                 return null;
             }
 
             try {
                 if (c.moveToFirst()) {
-                    String lookupKey = c.getString(0);
-                    long contactId = c.getLong(1);
-                    return ContentUris.withAppendedId(
-                            Uri.withAppendedPath(Contacts.CONTENT_LOOKUP_URI, lookupKey),
-                            contactId);
+                    final String lookupKey = c.getString(0);
+                    final long contactId = c.getLong(1);
+                    return getLookupUri(contactId, lookupKey);
                 }
             } finally {
                 c.close();
@@ -553,6 +553,30 @@ public final class ContactsContract {
         public static final int AGGREGATION_MODE_DISABLED = 3;
 
         /**
+         * Build a {@link Contacts#CONTENT_LOOKUP_URI} style {@link Uri} for the
+         * parent {@link Contacts} entry of the given {@link RawContacts} entry.
+         */
+        public static Uri getContactLookupUri(ContentResolver resolver, Uri rawContactUri) {
+            // TODO: use a lighter query by joining rawcontacts with contacts in provider
+            final Uri dataUri = Uri.withAppendedPath(rawContactUri, Data.CONTENT_DIRECTORY);
+            final Cursor cursor = resolver.query(dataUri, new String[] {
+                    RawContacts.CONTACT_ID, Contacts.LOOKUP_KEY
+            }, null, null, null);
+
+            Uri lookupUri = null;
+            try {
+                if (cursor != null && cursor.moveToFirst()) {
+                    final long contactId = cursor.getLong(0);
+                    final String lookupKey = cursor.getString(1);
+                    return Contacts.getLookupUri(contactId, lookupKey);
+                }
+            } finally {
+                if (cursor != null) cursor.close();
+            }
+            return lookupUri;
+        }
+
+        /**
          * A sub-directory of a single raw contact that contains all of their {@link Data} rows.
          * To access this directory append {@link Data#CONTENT_DIRECTORY} to the contact URI.
          */
@@ -682,6 +706,28 @@ public final class ContactsContract {
          * The MIME type of {@link #CONTENT_URI} providing a directory of data.
          */
         public static final String CONTENT_TYPE = "vnd.android.cursor.dir/data";
+
+        /**
+         * Build a {@link Contacts#CONTENT_LOOKUP_URI} style {@link Uri} for the
+         * parent {@link Contacts} entry of the given {@link Data} entry.
+         */
+        public static Uri getContactLookupUri(ContentResolver resolver, Uri dataUri) {
+            final Cursor cursor = resolver.query(dataUri, new String[] {
+                    RawContacts.CONTACT_ID, Contacts.LOOKUP_KEY
+            }, null, null, null);
+
+            Uri lookupUri = null;
+            try {
+                if (cursor != null && cursor.moveToFirst()) {
+                    final long contactId = cursor.getLong(0);
+                    final String lookupKey = cursor.getString(1);
+                    return Contacts.getLookupUri(contactId, lookupKey);
+                }
+            } finally {
+                if (cursor != null) cursor.close();
+            }
+            return lookupUri;
+        }
     }
 
     private interface PhoneLookupColumns {
@@ -1739,6 +1785,130 @@ public final class ContactsContract {
     }
 
     /**
+     * Helper methods to display FastTrack dialogs that allow users to pivot on
+     * a specific {@link Contacts} entry.
+     */
+    public static final class FastTrack {
+        /**
+         * Action used to trigger person pivot dialog.
+         * @hide
+         */
+        public static final String ACTION_FAST_TRACK =
+                "com.android.contacts.ACTION_FAST_TRACK";
+
+        /**
+         * Extra used to specify pivot dialog location in screen coordinates.
+         * @hide
+         */
+        public static final String EXTRA_TARGET_RECT = "target_rect";
+
+        /**
+         * Extra used to specify size of pivot dialog.
+         * @hide
+         */
+        public static final String EXTRA_MODE = "mode";
+
+        /**
+         * Extra used to indicate a list of specific MIME-types to exclude and
+         * not display. Stored as a {@link String} array.
+         * @hide
+         */
+        public static final String EXTRA_EXCLUDE_MIMES = "exclude_mimes";
+
+        /**
+         * Small FastTrack mode, usually presented with minimal actions.
+         */
+        public static final int MODE_SMALL = 1;
+
+        /**
+         * Medium FastTrack mode, includes actions and light summary describing
+         * the {@link Contacts} entry being shown. This may include social
+         * status and presence details.
+         */
+        public static final int MODE_MEDIUM = 2;
+
+        /**
+         * Large FastTrack mode, includes actions and larger, card-like summary
+         * of the {@link Contacts} entry being shown. This may include detailed
+         * information, such as a photo.
+         */
+        public static final int MODE_LARGE = 3;
+
+        /**
+         * Trigger a dialog that lists the various methods of interacting with
+         * the requested {@link Contacts} entry. This may be based on available
+         * {@link Data} rows under that contact, and may also include social
+         * status and presence details.
+         *
+         * @param context The parent {@link Context} that may be used as the
+         *            parent for this dialog.
+         * @param target Specific {@link View} from your layout that this dialog
+         *            should be centered around. In particular, if the dialog
+         *            has a "callout" arrow, it will be pointed and centered
+         *            around this {@link View}.
+         * @param lookupUri A {@link Contacts#CONTENT_LOOKUP_URI} style
+         *            {@link Uri} that describes a specific contact to feature
+         *            in this dialog.
+         * @param mode Any of {@link #MODE_SMALL}, {@link #MODE_MEDIUM}, or
+         *            {@link #MODE_LARGE}, indicating the desired dialog size,
+         *            when supported.
+         * @param excludeMimes Optional list of {@link Data#MIMETYPE} MIME-types
+         *            to exclude when showing this dialog. For example, when
+         *            already viewing the contact details card, this can be used
+         *            to omit the details entry from the dialog.
+         */
+        public static void showFastTrack(Context context, View target, Uri lookupUri, int mode,
+                String[] excludeMimes) {
+            // Find location and bounds of target view
+            final int[] location = new int[2];
+            target.getLocationOnScreen(location);
+
+            final Rect rect = new Rect();
+            rect.left = location[0];
+            rect.top = location[1];
+            rect.right = rect.left + target.getWidth();
+            rect.bottom = rect.top + target.getHeight();
+
+            // Trigger with obtained rectangle
+            showFastTrack(context, rect, lookupUri, mode, excludeMimes);
+        }
+
+        /**
+         * Trigger a dialog that lists the various methods of interacting with
+         * the requested {@link Contacts} entry. This may be based on available
+         * {@link Data} rows under that contact, and may also include social
+         * status and presence details.
+         *
+         * @param context The parent {@link Context} that may be used as the
+         *            parent for this dialog.
+         * @param target Specific {@link Rect} that this dialog should be
+         *            centered around, in screen coordinates. In particular, if
+         *            the dialog has a "callout" arrow, it will be pointed and
+         *            centered around this {@link Rect}.
+         * @param lookupUri A {@link Contacts#CONTENT_LOOKUP_URI} style
+         *            {@link Uri} that describes a specific contact to feature
+         *            in this dialog.
+         * @param mode Any of {@link #MODE_SMALL}, {@link #MODE_MEDIUM}, or
+         *            {@link #MODE_LARGE}, indicating the desired dialog size,
+         *            when supported.
+         * @param excludeMimes Optional list of {@link Data#MIMETYPE} MIME-types
+         *            to exclude when showing this dialog. For example, when
+         *            already viewing the contact details card, this can be used
+         *            to omit the details entry from the dialog.
+         */
+        public static void showFastTrack(Context context, Rect target, Uri lookupUri, int mode,
+                String[] excludeMimes) {
+            // Launch pivot dialog through intent for now
+            final Intent intent = new Intent(ACTION_FAST_TRACK);
+            intent.setData(lookupUri);
+            intent.putExtra(EXTRA_TARGET_RECT, target);
+            intent.putExtra(EXTRA_MODE, mode);
+            intent.putExtra(EXTRA_EXCLUDE_MIMES, excludeMimes);
+            context.startActivity(intent);
+        }
+    }
+
+    /**
      * Contains helper classes used to create or manage {@link android.content.Intent Intents}
      * that involve contacts.
      */
@@ -1821,6 +1991,7 @@ public final class ContactsContract {
          * dialog location using screen coordinates. When not specified, the
          * dialog will be centered.
          */
+        @Deprecated
         public static final String EXTRA_TARGET_RECT = "target_rect";
 
         /**
@@ -1828,21 +1999,25 @@ public final class ContactsContract {
          * desired dialog style, usually a variation on size. One of
          * {@link #MODE_SMALL}, {@link #MODE_MEDIUM}, or {@link #MODE_LARGE}.
          */
+        @Deprecated
         public static final String EXTRA_MODE = "mode";
 
         /**
          * Value for {@link #EXTRA_MODE} to show a small-sized dialog.
          */
+        @Deprecated
         public static final int MODE_SMALL = 1;
 
         /**
          * Value for {@link #EXTRA_MODE} to show a medium-sized dialog.
          */
+        @Deprecated
         public static final int MODE_MEDIUM = 2;
 
         /**
          * Value for {@link #EXTRA_MODE} to show a large-sized dialog.
          */
+        @Deprecated
         public static final int MODE_LARGE = 3;
 
         /**
@@ -1850,6 +2025,7 @@ public final class ContactsContract {
          * a list of specific MIME-types to exclude and not display. Stored as a
          * {@link String} array.
          */
+        @Deprecated
         public static final String EXTRA_EXCLUDE_MIMES = "exclude_mimes";
 
         /**
