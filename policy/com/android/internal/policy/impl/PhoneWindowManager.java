@@ -179,6 +179,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     boolean mDocked;
     int mLidOpenRotation;
     int mDockedRotation;
+    int mLidKeyboardAccessibility;
+    int mLidNavigationAccessibility;
     boolean mScreenOn = false;
     boolean mOrientationSensorEnabled = false;
     int mCurrentAppOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
@@ -457,10 +459,14 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mBroadcastWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
                 "PhoneWindowManager.mBroadcastWakeLock");
         mEnableShiftMenuBugReports = "1".equals(SystemProperties.get("ro.debuggable"));
-        mLidOpenRotation = readRotation(com.android.internal.R.integer.config_lidOpenRotation,
-                Surface.ROTATION_90);
-        mDockedRotation = readRotation(com.android.internal.R.integer.config_dockedRotation,
-                Surface.ROTATION_90);
+        mLidOpenRotation = readRotation(
+                com.android.internal.R.integer.config_lidOpenRotation, Surface.ROTATION_90);
+        mDockedRotation = readRotation(
+                com.android.internal.R.integer.config_dockedRotation, Surface.ROTATION_90);
+        mLidKeyboardAccessibility = mContext.getResources().getInteger(
+                com.android.internal.R.integer.config_lidKeyboardAccessibility);
+        mLidNavigationAccessibility = mContext.getResources().getInteger(
+                com.android.internal.R.integer.config_lidNavigationAccessibility);
         // register for dock events
         context.registerReceiver(mDockReceiver, new IntentFilter(Intent.ACTION_DOCK_EVENT));
     }
@@ -545,17 +551,32 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     }
     
+    private int determineHiddenState(boolean lidOpen,
+            int mode, int hiddenValue, int visibleValue) {
+        switch (mode) {
+            case 1:
+                return lidOpen ? visibleValue : hiddenValue;
+            case 2:
+                return lidOpen ? hiddenValue : visibleValue;
+        }
+        return visibleValue;
+    }
+    
     /** {@inheritDoc} */
     public void adjustConfigurationLw(Configuration config) {
         readLidState();
         final boolean lidOpen = !KEYBOARD_ALWAYS_HIDDEN && mLidOpen;
         mPowerManager.setKeyboardVisibility(lidOpen);
-        config.keyboardHidden = (lidOpen || mHasSoftInput)
-            ? Configuration.KEYBOARDHIDDEN_NO
-            : Configuration.KEYBOARDHIDDEN_YES;
-        config.hardKeyboardHidden = lidOpen
-            ? Configuration.KEYBOARDHIDDEN_NO
-            : Configuration.KEYBOARDHIDDEN_YES;
+        config.hardKeyboardHidden = determineHiddenState(lidOpen,
+                mLidKeyboardAccessibility, Configuration.HARDKEYBOARDHIDDEN_YES,
+                Configuration.HARDKEYBOARDHIDDEN_NO);
+        config.navigationHidden = determineHiddenState(lidOpen,
+                mLidNavigationAccessibility, Configuration.NAVIGATIONHIDDEN_YES,
+                Configuration.NAVIGATIONHIDDEN_NO);
+        config.keyboardHidden = (config.hardKeyboardHidden
+                        == Configuration.HARDKEYBOARDHIDDEN_NO || mHasSoftInput)
+                ? Configuration.KEYBOARDHIDDEN_NO
+                : Configuration.KEYBOARDHIDDEN_YES;
     }
     
     public boolean isCheekPressedAgainstScreen(MotionEvent ev) {
