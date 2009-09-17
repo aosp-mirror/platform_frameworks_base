@@ -23,6 +23,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.IIntentSender;
 import android.content.IIntentReceiver;
+import android.content.IntentSender;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ConfigurationInfo;
 import android.content.pm.IPackageDataObserver;
@@ -83,8 +84,8 @@ public interface IActivityManager extends IInterface {
             Intent intent, String resolvedType, Uri[] grantedUriPermissions,
             int grantedMode, IBinder resultTo, String resultWho, int requestCode,
             boolean onlyIfNeeded, boolean debug) throws RemoteException;
-    public int startActivityPendingIntent(IApplicationThread caller,
-            PendingIntent intent, Intent fillInIntent, String resolvedType,
+    public int startActivityIntentSender(IApplicationThread caller,
+            IntentSender intent, Intent fillInIntent, String resolvedType,
             IBinder resultTo, String resultWho, int requestCode,
             int flagsMask, int flagsValues) throws RemoteException;
     public boolean startNextMatchingActivity(IBinder callingActivity,
@@ -442,5 +443,5 @@ public interface IActivityManager extends IInterface {
     int CLOSE_SYSTEM_DIALOGS_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+96;
     int GET_PROCESS_MEMORY_INFO_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+97;
     int KILL_APPLICATION_PROCESS_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+98;
-    int START_ACTIVITY_PENDING_INTENT_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+99;
+    int START_ACTIVITY_INTENT_SENDER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+99;
 }

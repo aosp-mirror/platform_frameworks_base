@@ -559,6 +559,27 @@ public abstract class Context {
     public abstract void startActivity(Intent intent);
 
     /**
+     * Like {@link #startActivity(Intent)}, but taking a IntentSender
+     * to start.  If the IntentSender is for an activity, that activity will be started
+     * as if you had called the regular {@link #startActivityForResult(Intent, int)}
+     * here; otherwise, its associated action will be executed (such as
+     * sending a broadcast) as if you had called
+     * {@link IntentSender#sendIntent IntentSender.sendIntent} on it.
+     * 
+     * @param intent The IntentSender to launch.
+     * @param fillInIntent If non-null, this will be provided as the
+     * intent parameter to {@link IntentSender#sendIntent}.
+     * @param flagsMask Intent flags in the original IntentSender that you
+     * would like to change.
+     * @param flagsValues Desired values for any bits set in
+     * <var>flagsMask</var>
+     * @param extraFlags Always set to 0.
+     */
+    public abstract void startIntentSender(IntentSender intent,
+            Intent fillInIntent, int flagsMask, int flagsValues, int extraFlags)
+            throws IntentSender.SendIntentException;
+
+    /**
      * Broadcast the given intent to all interested BroadcastReceivers.  This
      * call is asynchronous; it returns immediately, and you will continue
      * executing while the receivers are run.  No results are propagated from

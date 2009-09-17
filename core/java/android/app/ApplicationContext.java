@@ -561,6 +561,27 @@ class ApplicationContext extends Context {
     }
 
     @Override
+    public void startIntentSender(IntentSender intent,
+            Intent fillInIntent, int flagsMask, int flagsValues, int extraFlags)
+            throws IntentSender.SendIntentException {
+        try {
+            String resolvedType = null;
+            if (fillInIntent != null) {
+                resolvedType = fillInIntent.resolveTypeIfNeeded(getContentResolver());
+            }
+            int result = ActivityManagerNative.getDefault()
+                .startActivityIntentSender(mMainThread.getApplicationThread(), intent,
+                        fillInIntent, resolvedType, null, null,
+                        0, flagsMask, flagsValues);
+            if (result == IActivityManager.START_CANCELED) {
+                throw new IntentSender.SendIntentException();
+            }
+            Instrumentation.checkStartActivityResult(result, null);
+        } catch (RemoteException e) {
+        }
+    }
+    
+    @Override
     public void sendBroadcast(Intent intent) {
         String resolvedType = intent.resolveTypeIfNeeded(getContentResolver());
         try {
