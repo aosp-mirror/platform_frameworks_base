@@ -724,6 +724,7 @@ com.ibm.icu4jni.text.DecimalFormatSymbols
 com.ibm.icu4jni.text.NativeDecimalFormat$UNumberFormatAttribute
 com.ibm.icu4jni.text.NativeDecimalFormat$UNumberFormatSymbol
 com.ibm.icu4jni.text.RuleBasedCollator
+com.ibm.icu4jni.util.Resources$DefaultTimeZones
 dalvik.system.DexFile
 dalvik.system.PathClassLoader
 java.beans.PropertyChangeEvent
