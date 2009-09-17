@@ -1148,6 +1148,13 @@ void OMXCodec::onCmdComplete(OMX_COMMANDTYPE cmd, OMX_U32 data) {
                     CODEC_LOGV("Finished flushing both ports, now continuing from"
                          " seek-time.");
 
+                    // Clear this flag in case the decoder sent us either
+                    // the EVENT_BUFFER_FLAG(1) or an output buffer with
+                    // the EOS flag set _while_ flushing. Since we're going
+                    // to submit "fresh" input data now, this flag no longer
+                    // applies to our future.
+                    mNoMoreOutputData = false;
+
                     drainInputBuffers();
                     fillOutputBuffers();
                 }

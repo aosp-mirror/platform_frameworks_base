@@ -61,6 +61,66 @@ static void playSource(OMXClient *client, const sp<MediaSource> &source) {
 
     decoder->start();
 
+    if (gReproduceBug == 3) {
+        status_t err;
+        MediaBuffer *buffer;
+        MediaSource::ReadOptions options;
+        int64_t seekTimeUs = -1;
+        for (;;) {
+            err = decoder->read(&buffer, &options);
+            options.clearSeekTo();
+
+            bool shouldSeek = false;
+            if (err != OK) {
+                printf("reached EOF.\n");
+
+                shouldSeek = true;
+            } else {
+                int32_t units, scale;
+                CHECK(buffer->meta_data()->findInt32(kKeyTimeUnits, &units));
+                CHECK(buffer->meta_data()->findInt32(kKeyTimeScale, &scale));
+                int64_t timestamp = ((OMX_TICKS)units * 1000000) / scale;
+
+                bool failed = false;
+                if (seekTimeUs >= 0) {
+                    int64_t diff = timestamp - seekTimeUs;
+
+                    if (diff > 500000) {
+                        printf("ERROR: ");
+                        failed = true;
+                    }
+                }
+
+                printf("buffer has timestamp %lld us (%.2f secs)\n",
+                       timestamp, timestamp / 1E6);
+
+                buffer->release();
+                buffer = NULL;
+
+                if (failed) {
+                    break;
+                }
+
+                shouldSeek = ((double)rand() / RAND_MAX) < 0.1;
+                shouldSeek = false;
+            }
+
+            seekTimeUs = -1;
+
+            if (shouldSeek) {
+                seekTimeUs = (rand() * 30E6) / RAND_MAX;
+                options.setSeekTo(seekTimeUs);
+
+                printf("seeking to %lld us (%.2f secs)\n",
+                       seekTimeUs, seekTimeUs / 1E6);
+            }
+        }
+
+        decoder->stop();
+
+        return;
+    }
+
     int n = 0;
     int64_t startTime = getNowUs();
 
