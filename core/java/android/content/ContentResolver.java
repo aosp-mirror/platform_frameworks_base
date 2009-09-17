@@ -527,12 +527,22 @@ public abstract class ContentResolver {
         }
     }
 
-    class OpenResourceIdResult {
-        Resources r;
-        int id;
+    /**
+     * A resource identified by the {@link Resources} that contains it, and a resource id.
+     *
+     * @hide
+     */
+    public class OpenResourceIdResult {
+        public Resources r;
+        public int id;
     }
-    
-    OpenResourceIdResult getResourceId(Uri uri) throws FileNotFoundException {
+
+    /**
+     * Resolves an android.resource URI to a {@link Resources} and a resource id.
+     *
+     * @hide
+     */
+    public OpenResourceIdResult getResourceId(Uri uri) throws FileNotFoundException {
         String authority = uri.getAuthority();
         Resources r;
         if (TextUtils.isEmpty(authority)) {
