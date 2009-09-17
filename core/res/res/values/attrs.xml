@@ -530,6 +530,11 @@
              lines, the IME should provide multiple lines if it can.  Corresponds to
              {@link android.text.InputType#TYPE_TEXT_FLAG_IME_MULTI_LINE}. -->
         <flag name="textImeMultiLine" value="0x00040001" />
+        <!-- Can be combined with <var>text</var> and its variations to
+             indicate that the IME should not show any
+             dictionary-based word suggestions.  Corresponds to
+             {@link android.text.InputType#TYPE_TEXT_FLAG_NO_SUGGESTIONS}. -->
+        <flag name="textNoSuggestions" value="0x00080001" />
         <!-- Text that will be used as a URI.  Corresponds to
              {@link android.text.InputType#TYPE_CLASS_TEXT} |
              {@link android.text.InputType#TYPE_TEXT_VARIATION_URI}. -->
