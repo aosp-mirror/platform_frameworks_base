@@ -43,6 +43,7 @@ public class WifiConfiguration implements Parcelable {
     /** {@hide} */
     public static final String hiddenSSIDVarName = "scan_ssid";
 
+    /** {@hide} */
     public class EnterpriseField {
         private String varName;
         private String value;
