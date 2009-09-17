@@ -87,13 +87,37 @@ class SyncManager implements OnAccountsUpdatedListener {
     private static final long MILLIS_IN_4WEEKS = MILLIS_IN_WEEK * 4;
 
     /** Delay a sync due to local changes this long. In milliseconds */
-    private static final long LOCAL_SYNC_DELAY = 30 * 1000; // 30 seconds
+    private static final long LOCAL_SYNC_DELAY;
 
     /**
      * If a sync takes longer than this and the sync queue is not empty then we will
      * cancel it and add it back to the end of the sync queue. In milliseconds.
      */
-    private static final long MAX_TIME_PER_SYNC = 5 * 60 * 1000; // 5 minutes
+    private static final long MAX_TIME_PER_SYNC;
+
+    static {
+        String localSyncDelayString = SystemProperties.get("sync.local_sync_delay");
+        long localSyncDelay = 30 * 1000; // 30 seconds
+        if (localSyncDelayString != null) {
+            try {
+                localSyncDelay = Long.parseLong(localSyncDelayString);
+            } catch (NumberFormatException nfe) {
+                // ignore, use default
+            }
+        }
+        LOCAL_SYNC_DELAY = localSyncDelay;
+
+        String maxTimePerSyncString = SystemProperties.get("sync.max_time_per_sync");
+        long maxTimePerSync = 5 * 60 * 1000; // 5 minutes
+        if (maxTimePerSyncString != null) {
+            try {
+                maxTimePerSync = Long.parseLong(maxTimePerSyncString);
+            } catch (NumberFormatException nfe) {
+                // ignore, use default
+            }
+        }
+        MAX_TIME_PER_SYNC = maxTimePerSync;
+    }
 
     private static final long SYNC_NOTIFICATION_DELAY = 30 * 1000; // 30 seconds
 
