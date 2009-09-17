@@ -24,11 +24,12 @@
 
 package android.server;
 
-import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothHeadset;
 import android.bluetooth.IBluetooth;
+import android.bluetooth.ParcelUuid;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -51,7 +52,6 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 public class BluetoothService extends IBluetooth.Stub {
@@ -967,22 +967,26 @@ public class BluetoothService extends IBluetooth.Stub {
 
 
     /**
-     * Gets the remote features encoded as bit mask.
+     * Gets the UUIDs supported by the remote device
      *
-     * Note: This method may be obsoleted soon.
-     *
-     * @return String array of 128bit UUIDs
+     * @return array of 128bit ParcelUuids
      */
-    public synchronized String[] getRemoteUuids(String address) {
+    public synchronized ParcelUuid[] getRemoteUuids(String address) {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
         if (!BluetoothAdapter.checkBluetoothAddress(address)) {
             return null;
         }
         String value = getRemoteDeviceProperty(address, "UUIDs");
-        String[] uuids = null;
+        if (value == null) return null;
+
+        String[] uuidStrings = null;
         // The UUIDs are stored as a "," separated string.
-        if (value != null)
-             uuids = value.split(",");
+        uuidStrings = value.split(",");
+        ParcelUuid[] uuids = new ParcelUuid[uuidStrings.length];
+
+        for (int i = 0; i < uuidStrings.length; i++) {
+            uuids[i] = ParcelUuid.fromString(uuidStrings[i]);
+        }
         return uuids;
     }
 
@@ -990,16 +994,17 @@ public class BluetoothService extends IBluetooth.Stub {
      * Gets the rfcomm channel associated with the UUID.
      *
      * @param address Address of the remote device
-     * @param uuid UUID of the service attribute
+     * @param uuid ParcelUuid of the service attribute
      *
      * @return rfcomm channel associated with the service attribute
      */
-    public int getRemoteServiceChannel(String address, String uuid) {
+    public int getRemoteServiceChannel(String address, ParcelUuid uuid) {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
         if (!BluetoothAdapter.checkBluetoothAddress(address)) {
             return BluetoothDevice.ERROR;
         }
-        return getDeviceServiceChannelNative(getObjectPathFromAddress(address), uuid, 0x0004);
+        return getDeviceServiceChannelNative(getObjectPathFromAddress(address), uuid.toString(),
+                0x0004);
     }
 
     public synchronized boolean setPin(String address, byte[] pin) {
@@ -1148,11 +1153,11 @@ public class BluetoothService extends IBluetooth.Stub {
                        mBondState.getAttempt(address),
                        getRemoteName(address));
             if (bondState == BluetoothDevice.BOND_BONDED) {
-                String[] uuids = getRemoteUuids(address);
+                ParcelUuid[] uuids = getRemoteUuids(address);
                 if (uuids == null) {
                     pw.printf("\tuuids = null\n");
                 } else {
-                    for (String uuid : uuids) {
+                    for (ParcelUuid uuid : uuids) {
                         pw.printf("\t" + uuid + "\n");
                     }
                 }

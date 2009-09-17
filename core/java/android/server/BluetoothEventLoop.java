@@ -21,6 +21,7 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothUuid;
+import android.bluetooth.ParcelUuid;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
@@ -28,7 +29,6 @@ import android.os.Message;
 import android.util.Log;
 
 import java.util.HashMap;
-import java.util.UUID;
 
 /**
  * TODO: Move this to
@@ -501,7 +501,7 @@ class BluetoothEventLoop {
         }
 
         boolean authorized = false;
-        UUID uuid = UUID.fromString(deviceUuid);
+        ParcelUuid uuid = ParcelUuid.fromString(deviceUuid);
         // Bluez sends the UUID of the local service being accessed, _not_ the
         // remote service
         if (mBluetoothService.isEnabled() &&
