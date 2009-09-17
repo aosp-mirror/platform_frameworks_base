@@ -111,7 +111,8 @@
     <string name="httpErrorFile" msgid="8250549644091165175">"Не удается получить доступ к файлу."</string>
     <string name="httpErrorFileNotFound" msgid="5588380756326017105">"Не удалось найти указанные файлы."</string>
     <string name="httpErrorTooManyRequests" msgid="1235396927087188253">"Обрабатывается слишком много запросов. Повторите попытку позднее."</string>
-    <string name="notification_title" msgid="4254304601929719937">"Ошибка входа"</string>
+    <!-- no translation found for notification_title (1259940370369187045) -->
+    <skip />
     <string name="contentServiceSync" msgid="8353523060269335667">"Синхр."</string>
     <string name="contentServiceSyncNotificationTitle" msgid="397743349191901458">"Синхр."</string>
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"Слишком много удалений <xliff:g id="CONTENT_TYPE">%s</xliff:g>."</string>
@@ -210,12 +211,9 @@
     <string name="permlab_batteryStats" msgid="7863923071360031652">"изменять статистику батареи"</string>
     <string name="permdesc_batteryStats" msgid="5847319823772230560">"Позволяет изменять собранную статистику батареи. Не предназначено для использования обычными приложениями."</string>
     <string name="permlab_backup" msgid="470013022865453920">"управление резервным копированием и восстановлением системы"</string>
-    <!-- no translation found for permdesc_backup (4837493065154256525) -->
-    <skip />
-    <!-- no translation found for permlab_backup_data (4057625941707926463) -->
-    <skip />
-    <!-- no translation found for permdesc_backup_data (8274426305151227766) -->
-    <skip />
+    <string name="permdesc_backup" msgid="4837493065154256525">"Разрешает приложению контролировать механизмы резервного копирования и восстановления системы. Не используется обычными приложениями."</string>
+    <string name="permlab_backup_data" msgid="4057625941707926463">"создать резервную копию и восстановить данные приложения"</string>
+    <string name="permdesc_backup_data" msgid="8274426305151227766">"Позволяет приложению участвовать в механизме резервного копирования и восстановления системы."</string>
     <string name="permlab_internalSystemWindow" msgid="2148563628140193231">"показывать неавторизованные окна"</string>
     <string name="permdesc_internalSystemWindow" msgid="5895082268284998469">"Разрешает создание окон, предназначенных для использования внутренним пользовательским интерфейсом системы. Не предназначено для использования обычными приложениями."</string>
     <string name="permlab_systemAlertWindow" msgid="3372321942941168324">"показывать оповещения системного уровня"</string>
@@ -261,8 +259,7 @@
     <string name="permlab_writeSettings" msgid="1365523497395143704">"изменять общие настройки системы"</string>
     <string name="permdesc_writeSettings" msgid="838789419871034696">"Позволяет приложению изменять данные настроек системы. Вредоносные приложения могут повредить конфигурацию системы."</string>
     <string name="permlab_writeSecureSettings" msgid="204676251876718288">"изменять настройки системы безопасности"</string>
-    <!-- no translation found for permdesc_writeSecureSettings (5497873143539034724) -->
-    <skip />
+    <string name="permdesc_writeSecureSettings" msgid="5497873143539034724">"Позволяет приложению изменять данные настроек безопасности системы. Не предназначено для использования обычными приложениями."</string>
     <string name="permlab_writeGservices" msgid="2149426664226152185">"изменять карту служб Google"</string>
     <string name="permdesc_writeGservices" msgid="6602362746516676175">"Позволяет приложению изменять карту служб Google. Не предназначено для использования обычными приложениями."</string>
     <string name="permlab_receiveBootCompleted" msgid="7776779842866993377">"автоматически запускать при загрузке"</string>
@@ -319,10 +316,8 @@
     <string name="permdesc_callPhone" msgid="3369867353692722456">"Позволяет приложению вызывать телефонные номера без вмешательства пользователя. Вредоносные приложения могут осуществлять нежелательные вызовы. Это разрешение не позволяет приложению совершать вызовы служб экстренной помощи."</string>
     <string name="permlab_callPrivileged" msgid="4198349211108497879">"посылать прямые вызовы на любые номера"</string>
     <string name="permdesc_callPrivileged" msgid="244405067160028452">"Позволяет приложению осуществлять вызов любого номера, включая номера экстренной помощи, без вмешательства пользователя. Вредоносные приложения могут осуществить нежелательные или незаконные вызовы служб экстренной помощи."</string>
-    <!-- no translation found for permlab_performCdmaProvisioning (5604848095315421425) -->
-    <skip />
-    <!-- no translation found for permdesc_performCdmaProvisioning (6457447676108355905) -->
-    <skip />
+    <string name="permlab_performCdmaProvisioning" msgid="5604848095315421425">"прямой запуск настройки телефона CDMA"</string>
+    <string name="permdesc_performCdmaProvisioning" msgid="6457447676108355905">"Позволяет приложению запустить настройку CDMA. Вредоносное ПО может запустить настройку CDMA"</string>
     <string name="permlab_locationUpdates" msgid="7785408253364335740">"управлять уведомлениями об обновлении местоположения"</string>
     <string name="permdesc_locationUpdates" msgid="2300018303720930256">"Позволяет включать/отключать отправку уведомлений об обновлениях местоположения по радиосвязи. Не предназначено для использования обычными приложениями."</string>
     <string name="permlab_checkinProperties" msgid="7855259461268734914">"получать доступ к свойствам регистрации"</string>
@@ -465,16 +460,14 @@
     <string name="lockscreen_failed_attempts_almost_glogin" msgid="3351013842320127827">"Количество неудачных попыток ввода графического ключа разблокировки: <xliff:g id="NUMBER_0">%d</xliff:g>. После <xliff:g id="NUMBER_1">%d</xliff:g> неудачных попыток вам будет предложено разблокировать телефон с помощью учетных данных Google.\n "\n\n" Повторите попытку через <xliff:g id="NUMBER_2">%d</xliff:g> с."</string>
     <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6251480343394389665">"Повторите попытку через <xliff:g id="NUMBER">%d</xliff:g> с."</string>
     <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"Забыли графический ключ?"</string>
-    <!-- no translation found for lockscreen_glogin_forgot_pattern (2588521501166032747) -->
-    <skip />
+    <string name="lockscreen_glogin_forgot_pattern" msgid="2588521501166032747">"Снятие блокировки аккаунта"</string>
     <string name="lockscreen_glogin_too_many_attempts" msgid="2446246026221678244">"Слишком много попыток ввода графического ключа!"</string>
     <string name="lockscreen_glogin_instructions" msgid="1816635201812207709">"Для разблокировки войдите с помощью своего аккаунта Google"</string>
     <string name="lockscreen_glogin_username_hint" msgid="8846881424106484447">"Имя пользователя (электронная почта)"</string>
     <string name="lockscreen_glogin_password_hint" msgid="5958028383954738528">"Пароль"</string>
     <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"Вход"</string>
     <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"Неверное имя пользователя или пароль."</string>
-    <!-- no translation found for lockscreen_glogin_checking_password (6758890536332363322) -->
-    <skip />
+    <string name="lockscreen_glogin_checking_password" msgid="6758890536332363322">"Проверка..."</string>
     <string name="hour_ampm" msgid="4329881288269772723">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%P</xliff:g>"</string>
     <string name="hour_cap_ampm" msgid="1829009197680861107">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%p</xliff:g>"</string>
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"Очистить"</string>
@@ -486,8 +479,7 @@
     <string name="battery_low_title" msgid="7923774589611311406">"Подключите зарядное устройство"</string>
     <string name="battery_low_subtitle" msgid="7388781709819722764">"Батарея разряжена:"</string>
     <string name="battery_low_percent_format" msgid="6564958083485073855">"осталось менее <xliff:g id="NUMBER">%d%%</xliff:g>"</string>
-    <!-- no translation found for battery_low_why (7279169609518386372) -->
-    <skip />
+    <string name="battery_low_why" msgid="7279169609518386372">"Расход заряда батареи"</string>
     <string name="factorytest_failed" msgid="5410270329114212041">"Не удалось провести стандартный тест"</string>
     <string name="factorytest_not_system" msgid="4435201656767276723">"Действие FACTORY_TEST поддерживается только для пакетов, установленных в /system/app."</string>
     <string name="factorytest_no_action" msgid="872991874799998561">"Пакет, обеспечивающий действие FACTORY_TEST, не найден."</string>
@@ -578,12 +570,9 @@
     <item quantity="one" msgid="2178576254385739855">"завтра"</item>
     <item quantity="other" msgid="2973062968038355991">"через <xliff:g id="COUNT">%d</xliff:g> дн."</item>
   </plurals>
-    <!-- no translation found for preposition_for_date (9093949757757445117) -->
-    <skip />
-    <!-- no translation found for preposition_for_time (5506831244263083793) -->
-    <skip />
-    <!-- no translation found for preposition_for_year (5040395640711867177) -->
-    <skip />
+    <string name="preposition_for_date" msgid="9093949757757445117">"<xliff:g id="DATE">%s</xliff:g>"</string>
+    <string name="preposition_for_time" msgid="5506831244263083793">"в <xliff:g id="TIME">%s</xliff:g>"</string>
+    <string name="preposition_for_year" msgid="5040395640711867177">"в <xliff:g id="YEAR">%s</xliff:g> г."</string>
     <string name="day" msgid="8144195776058119424">"дн."</string>
     <string name="days" msgid="4774547661021344602">"дн."</string>
     <string name="hour" msgid="2126771916426189481">"ч."</string>
@@ -621,10 +610,8 @@
     <string name="copyAll" msgid="2590829068100113057">"Копировать все"</string>
     <string name="paste" msgid="5629880836805036433">"Вставить"</string>
     <string name="copyUrl" msgid="2538211579596067402">"Копировать URL"</string>
-    <!-- no translation found for inputMethod (1653630062304567879) -->
-    <skip />
-    <!-- no translation found for addToDictionary (8793624991686948709) -->
-    <skip />
+    <string name="inputMethod" msgid="1653630062304567879">"Способ ввода"</string>
+    <string name="addToDictionary" msgid="8793624991686948709">"Добавить \"<xliff:g id="WORD">%s</xliff:g>\" в словарь"</string>
     <string name="editTextMenuTitle" msgid="1672989176958581452">"Изменить текст"</string>
     <string name="low_internal_storage_view_title" msgid="1399732408701697546">"Недостаточно места"</string>
     <string name="low_internal_storage_view_text" msgid="635106544616378836">"Заканчивается место в памяти телефона."</string>
@@ -700,14 +687,15 @@
     <string name="usb_storage_stop_message" msgid="2390958966725232848">"Перед выключением USB-накопителя обязательно отключите USB-хост. Выберите \"Выключить\", чтобы выключить USB-накопитель."</string>
     <string name="usb_storage_stop_button_mount" msgid="1181858854166273345">"Выключить"</string>
     <string name="usb_storage_stop_button_unmount" msgid="3774611918660582898">"Отмена"</string>
-    <!-- no translation found for usb_storage_stop_error_message (3746037090369246731) -->
-    <skip />
+    <string name="usb_storage_stop_error_message" msgid="3746037090369246731">"При выключении USB-накопителя произошла неполадка. Убедитесь, что USB-хост отключен, и повторите попытку."</string>
     <string name="extmedia_format_title" msgid="8663247929551095854">"Форматировать карту SD"</string>
     <string name="extmedia_format_message" msgid="3621369962433523619">"Отформатировать карту SD? Все данные, находящиеся на карте, будут уничтожены."</string>
     <string name="extmedia_format_button_format" msgid="4131064560127478695">"Формат"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Отладка USB подключена"</string>
-    <string name="adb_active_notification_message" msgid="4661997077344501389">"Компьютер подключен к телефону."</string>
-    <string name="select_input_method" msgid="2086499663193509436">"Выберите способ ввода"</string>
+    <!-- no translation found for adb_active_notification_message (8470296818270110396) -->
+    <skip />
+    <!-- no translation found for select_input_method (6865512749462072765) -->
+    <skip />
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"варианты"</u></string>
@@ -738,23 +726,16 @@
     <string name="create_contact_using" msgid="4947405226788104538">"Создать контакт"\n"с номером <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <string name="accessibility_compound_button_selected" msgid="5612776946036285686">"отмечено"</string>
     <string name="accessibility_compound_button_unselected" msgid="8864512895673924091">"не проверено"</string>
-    <!-- no translation found for grant_credentials_permission_message_desc (6883276587034335667) -->
-    <skip />
-    <!-- no translation found for grant_credentials_permission_message_with_authtokenlabel_desc (3159007601893584687) -->
-    <skip />
+    <string name="grant_credentials_permission_message_desc" msgid="6883276587034335667">"Перечисленные приложения запрашивают разрешение на доступ к регистрационном данным аккаунта <xliff:g id="ACCOUNT">%1$s</xliff:g> из <xliff:g id="APPLICATION">%2$s</xliff:g>. Разрешить доступ? Если да, ваш ответ будет сохранен и это сообщение больше не будет выводиться."</string>
+    <string name="grant_credentials_permission_message_with_authtokenlabel_desc" msgid="3159007601893584687">"Перечисленные приложения запрашивают разрешение на доступ к регистрационном данным <xliff:g id="TYPE">%1$s</xliff:g> аккаунта <xliff:g id="ACCOUNT">%2$s</xliff:g> из <xliff:g id="APPLICATION">%3$s</xliff:g>. Разрешить доступ? Если да, ваш ответ будет сохранен и это сообщение больше не будет выводиться."</string>
     <string name="allow" msgid="7225948811296386551">"Разрешить"</string>
     <string name="deny" msgid="2081879885755434506">"Отклонить"</string>
     <string name="permission_request_notification_title" msgid="5390555465778213840">"Разрешение запрошено"</string>
-    <!-- no translation found for permission_request_notification_subtitle (21911977892390675) -->
+    <!-- no translation found for permission_request_notification_with_subtitle (4325409589686688000) -->
     <skip />
-    <!-- no translation found for input_method_binding_label (1283557179944992649) -->
-    <skip />
-    <!-- no translation found for sync_binding_label (3687969138375092423) -->
-    <skip />
-    <!-- no translation found for accessibility_binding_label (4148120742096474641) -->
-    <skip />
-    <!-- no translation found for wallpaper_binding_label (1240087844304687662) -->
-    <skip />
-    <!-- no translation found for chooser_wallpaper (7873476199295190279) -->
-    <skip />
+    <string name="input_method_binding_label" msgid="1283557179944992649">"Способ ввода"</string>
+    <string name="sync_binding_label" msgid="3687969138375092423">"Синхр."</string>
+    <string name="accessibility_binding_label" msgid="4148120742096474641">"Специальные возможности"</string>
+    <string name="wallpaper_binding_label" msgid="1240087844304687662">"Фоновый рисунок"</string>
+    <string name="chooser_wallpaper" msgid="7873476199295190279">"Изменить фоновый рисунок"</string>
 </resources>

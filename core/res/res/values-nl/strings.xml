@@ -111,7 +111,8 @@
     <string name="httpErrorFile" msgid="8250549644091165175">"Het bestand kan niet worden geopend."</string>
     <string name="httpErrorFileNotFound" msgid="5588380756326017105">"Het opgevraagde bestand is niet gevonden."</string>
     <string name="httpErrorTooManyRequests" msgid="1235396927087188253">"Er worden te veel aanvragen verwerkt. Probeer het later opnieuw."</string>
-    <string name="notification_title" msgid="4254304601929719937">"Fout bij aanmelding"</string>
+    <!-- no translation found for notification_title (1259940370369187045) -->
+    <skip />
     <string name="contentServiceSync" msgid="8353523060269335667">"Synchroniseren"</string>
     <string name="contentServiceSyncNotificationTitle" msgid="397743349191901458">"Synchroniseren"</string>
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"Te veel verwijderen voor <xliff:g id="CONTENT_TYPE">%s</xliff:g>."</string>
@@ -210,12 +211,9 @@
     <string name="permlab_batteryStats" msgid="7863923071360031652">"accustatistieken aanpassen"</string>
     <string name="permdesc_batteryStats" msgid="5847319823772230560">"Hiermee kunnen verzamelde accustatistieken worden gewijzigd. Niet voor gebruik door normale toepassingen."</string>
     <string name="permlab_backup" msgid="470013022865453920">"systeemback-up en -herstel beheren"</string>
-    <!-- no translation found for permdesc_backup (4837493065154256525) -->
-    <skip />
-    <!-- no translation found for permlab_backup_data (4057625941707926463) -->
-    <skip />
-    <!-- no translation found for permdesc_backup_data (8274426305151227766) -->
-    <skip />
+    <string name="permdesc_backup" msgid="4837493065154256525">"Hiermee kan de toepassing het mechanisme voor systeemback-up en -herstel beheren. Niet voor gebruik door normale toepassingen."</string>
+    <string name="permlab_backup_data" msgid="4057625941707926463">"back-up maken en de gegevens van de toepassing herstellen"</string>
+    <string name="permdesc_backup_data" msgid="8274426305151227766">"Hiermee kan de toepassing deelnemen aan het beheer van het mechanisme voor systeemback-up en -herstel."</string>
     <string name="permlab_internalSystemWindow" msgid="2148563628140193231">"niet-geautoriseerde vensters weergeven"</string>
     <string name="permdesc_internalSystemWindow" msgid="5895082268284998469">"Hiermee kunnen vensters worden gemaakt die door de interne systeemgebruikersinterface worden gebruikt. Niet voor gebruik door normale toepassingen."</string>
     <string name="permlab_systemAlertWindow" msgid="3372321942941168324">"waarschuwingen op systeemniveau weergeven"</string>
@@ -261,8 +259,7 @@
     <string name="permlab_writeSettings" msgid="1365523497395143704">"algemene systeeminstellingen wijzigen"</string>
     <string name="permdesc_writeSettings" msgid="838789419871034696">"Hiermee kan een toepassing de systeeminstellingen wijzigen. Schadelijke toepassingen kunnen hiermee uw systeemconfiguratie beschadigen."</string>
     <string name="permlab_writeSecureSettings" msgid="204676251876718288">"beveiligde systeeminstellingen wijzigen"</string>
-    <!-- no translation found for permdesc_writeSecureSettings (5497873143539034724) -->
-    <skip />
+    <string name="permdesc_writeSecureSettings" msgid="5497873143539034724">"Hiermee kan een toepassing beveiligde systeeminstellingen wijzigen. Niet voor gebruik door normale toepassingen."</string>
     <string name="permlab_writeGservices" msgid="2149426664226152185">"de Google-serviceskaart wijzigen"</string>
     <string name="permdesc_writeGservices" msgid="6602362746516676175">"Hiermee kan een toepassing de Google-serviceskaart wijzigen. Niet voor gebruik door normale toepassingen."</string>
     <string name="permlab_receiveBootCompleted" msgid="7776779842866993377">"automatisch starten bij opstarten"</string>
@@ -319,10 +316,8 @@
     <string name="permdesc_callPhone" msgid="3369867353692722456">"Hiermee kan de toepassing telefoonnummers bellen zonder uw tussenkomst. Door schadelijke toepassingen kunnen onverwachte oproepen op uw telefoonrekening verschijnen. De toepassing kan hiermee geen alarmnummers bellen."</string>
     <string name="permlab_callPrivileged" msgid="4198349211108497879">"alle telefoonnummers rechtstreeks bellen"</string>
     <string name="permdesc_callPrivileged" msgid="244405067160028452">"Hiermee kan een toepassing elk telefoonnummer, inclusief alarmnummers, bellen zonder uw tussenkomst. Schadelijke toepassingen kunnen onnodige en illegale oproepen uitvoeren naar alarmdiensten."</string>
-    <!-- no translation found for permlab_performCdmaProvisioning (5604848095315421425) -->
-    <skip />
-    <!-- no translation found for permdesc_performCdmaProvisioning (6457447676108355905) -->
-    <skip />
+    <string name="permlab_performCdmaProvisioning" msgid="5604848095315421425">"meteen starten met CDMA-telefooninstelling"</string>
+    <string name="permdesc_performCdmaProvisioning" msgid="6457447676108355905">"Hiermee kan de toepassing starten met CDMA-levering. Schadelijke toepassingen kunnen de CDMA-levering onnodig starten"</string>
     <string name="permlab_locationUpdates" msgid="7785408253364335740">"meldingen over locatie-updates beheren"</string>
     <string name="permdesc_locationUpdates" msgid="2300018303720930256">"Hiermee kunnen updatemeldingen voor locaties van de radio worden ingeschakeld/uitgeschakeld. Niet voor gebruik door normale toepassingen."</string>
     <string name="permlab_checkinProperties" msgid="7855259461268734914">"toegang tot checkin-eigenschappen"</string>
@@ -465,16 +460,14 @@
     <string name="lockscreen_failed_attempts_almost_glogin" msgid="3351013842320127827">"U heeft uw ontgrendelingspatroon <xliff:g id="NUMBER_0">%d</xliff:g> keer onjuist getekend. Na nog eens <xliff:g id="NUMBER_1">%d</xliff:g> mislukte pogingen, wordt u gevraagd om uw telefoon te ontgrendelen met uw Google aanmelding."\n\n" Probeer het over <xliff:g id="NUMBER_2">%d</xliff:g> seconden opnieuw."</string>
     <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6251480343394389665">"Probeer het over <xliff:g id="NUMBER">%d</xliff:g> seconden opnieuw."</string>
     <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"Patroon vergeten?"</string>
-    <!-- no translation found for lockscreen_glogin_forgot_pattern (2588521501166032747) -->
-    <skip />
+    <string name="lockscreen_glogin_forgot_pattern" msgid="2588521501166032747">"Account ontgrendelen"</string>
     <string name="lockscreen_glogin_too_many_attempts" msgid="2446246026221678244">"Te veel patroonpogingen!"</string>
     <string name="lockscreen_glogin_instructions" msgid="1816635201812207709">"Om te ontgrendelen, moet U zich eerst bij uw Google-account aanmelden"</string>
     <string name="lockscreen_glogin_username_hint" msgid="8846881424106484447">"Gebruikersnaam (e-mail)"</string>
     <string name="lockscreen_glogin_password_hint" msgid="5958028383954738528">"Wachtwoord"</string>
     <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"Aanmelden"</string>
     <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"Gebruikersnaam of wachtwoord ongeldig."</string>
-    <!-- no translation found for lockscreen_glogin_checking_password (6758890536332363322) -->
-    <skip />
+    <string name="lockscreen_glogin_checking_password" msgid="6758890536332363322">"Controleren..."</string>
     <string name="hour_ampm" msgid="4329881288269772723">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%P</xliff:g>"</string>
     <string name="hour_cap_ampm" msgid="1829009197680861107">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%p</xliff:g>"</string>
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"Wissen"</string>
@@ -486,8 +479,7 @@
     <string name="battery_low_title" msgid="7923774589611311406">"Sluit de oplader aan"</string>
     <string name="battery_low_subtitle" msgid="7388781709819722764">"De accu raakt op:"</string>
     <string name="battery_low_percent_format" msgid="6564958083485073855">"minder dan <xliff:g id="NUMBER">%d%%</xliff:g> resterend."</string>
-    <!-- no translation found for battery_low_why (7279169609518386372) -->
-    <skip />
+    <string name="battery_low_why" msgid="7279169609518386372">"Accugebruik"</string>
     <string name="factorytest_failed" msgid="5410270329114212041">"Fabriekstest mislukt"</string>
     <string name="factorytest_not_system" msgid="4435201656767276723">"De actie FACTORY_TEST wordt alleen ondersteund voor pakketten die zijn geïnstalleerd in /system/app."</string>
     <string name="factorytest_no_action" msgid="872991874799998561">"Er is geen pakket gevonden dat de actie FACTORY_TEST levert."</string>
@@ -578,12 +570,9 @@
     <item quantity="one" msgid="2178576254385739855">"morgen"</item>
     <item quantity="other" msgid="2973062968038355991">"over <xliff:g id="COUNT">%d</xliff:g> dagen"</item>
   </plurals>
-    <!-- no translation found for preposition_for_date (9093949757757445117) -->
-    <skip />
-    <!-- no translation found for preposition_for_time (5506831244263083793) -->
-    <skip />
-    <!-- no translation found for preposition_for_year (5040395640711867177) -->
-    <skip />
+    <string name="preposition_for_date" msgid="9093949757757445117">"op <xliff:g id="DATE">%s</xliff:g>"</string>
+    <string name="preposition_for_time" msgid="5506831244263083793">"om <xliff:g id="TIME">%s</xliff:g>"</string>
+    <string name="preposition_for_year" msgid="5040395640711867177">"in <xliff:g id="YEAR">%s</xliff:g>"</string>
     <string name="day" msgid="8144195776058119424">"dag"</string>
     <string name="days" msgid="4774547661021344602">"dagen"</string>
     <string name="hour" msgid="2126771916426189481">"uur"</string>
@@ -621,10 +610,8 @@
     <string name="copyAll" msgid="2590829068100113057">"Alles kopiëren"</string>
     <string name="paste" msgid="5629880836805036433">"Plakken"</string>
     <string name="copyUrl" msgid="2538211579596067402">"URL kopiëren"</string>
-    <!-- no translation found for inputMethod (1653630062304567879) -->
-    <skip />
-    <!-- no translation found for addToDictionary (8793624991686948709) -->
-    <skip />
+    <string name="inputMethod" msgid="1653630062304567879">"Invoermethode"</string>
+    <string name="addToDictionary" msgid="8793624991686948709">"\' <xliff:g id="WORD">%s</xliff:g>\' toevoegen aan woordenboek"</string>
     <string name="editTextMenuTitle" msgid="1672989176958581452">"Tekst bewerken"</string>
     <string name="low_internal_storage_view_title" msgid="1399732408701697546">"Weinig ruimte"</string>
     <string name="low_internal_storage_view_text" msgid="635106544616378836">"Opslagruimte van telefoon raakt op."</string>
@@ -700,14 +687,15 @@
     <string name="usb_storage_stop_message" msgid="2390958966725232848">"Voordat u de USB-opslag uitschakelt, moet u de koppeling met de USB-host verbreken. Selecteer \'Uitschakelen\' om USB-opslag uit te schakelen."</string>
     <string name="usb_storage_stop_button_mount" msgid="1181858854166273345">"Uitschakelen"</string>
     <string name="usb_storage_stop_button_unmount" msgid="3774611918660582898">"Annuleren"</string>
-    <!-- no translation found for usb_storage_stop_error_message (3746037090369246731) -->
-    <skip />
+    <string name="usb_storage_stop_error_message" msgid="3746037090369246731">"Er is een probleem opgetreden tijdens het uitschakelen van de USB-opslag. Controleer of u de USB-host heeft losgekoppeld en probeer het opnieuw."</string>
     <string name="extmedia_format_title" msgid="8663247929551095854">"SD-kaart formatteren"</string>
     <string name="extmedia_format_message" msgid="3621369962433523619">"Weet u zeker dat u de SD-kaart wilt formatteren? Alle gegevens op uw kaart gaan dan verloren."</string>
     <string name="extmedia_format_button_format" msgid="4131064560127478695">"Formatteren"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB-foutopsporing verbonden"</string>
-    <string name="adb_active_notification_message" msgid="4661997077344501389">"Uw telefoon heeft verbinding met een computer."</string>
-    <string name="select_input_method" msgid="2086499663193509436">"Invoermethode selecteren"</string>
+    <!-- no translation found for adb_active_notification_message (8470296818270110396) -->
+    <skip />
+    <!-- no translation found for select_input_method (6865512749462072765) -->
+    <skip />
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"kandidaten"</u></string>
@@ -738,23 +726,16 @@
     <string name="create_contact_using" msgid="4947405226788104538">"Contact maken"\n"met <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <string name="accessibility_compound_button_selected" msgid="5612776946036285686">"aangevinkt"</string>
     <string name="accessibility_compound_button_unselected" msgid="8864512895673924091">"niet aangevinkt"</string>
-    <!-- no translation found for grant_credentials_permission_message_desc (6883276587034335667) -->
-    <skip />
-    <!-- no translation found for grant_credentials_permission_message_with_authtokenlabel_desc (3159007601893584687) -->
-    <skip />
+    <string name="grant_credentials_permission_message_desc" msgid="6883276587034335667">"De weergegeven toepassingen vragen toestemming voor toegang tot de aanmeldingsgegevens voor account \'<xliff:g id="ACCOUNT">%1$s</xliff:g>\' van <xliff:g id="APPLICATION">%2$s</xliff:g>. Wilt u deze toestemming verlenen? Als u dit wilt doen, wordt uw antwoord onthouden en wordt dit niet opnieuw gevraagd."</string>
+    <string name="grant_credentials_permission_message_with_authtokenlabel_desc" msgid="3159007601893584687">"De weergegeven toepassingen vragen toestemming voor toegang tot de aanmeldingsgegevens voor <xliff:g id="TYPE">%1$s</xliff:g> van het account \'<xliff:g id="ACCOUNT">%2$s</xliff:g>\' van <xliff:g id="APPLICATION">%3$s</xliff:g>. Wilt u deze toestemming verlenen? Als u dit wilt doen, wordt uw antwoord onthouden en wordt dit niet opnieuw gevraagd."</string>
     <string name="allow" msgid="7225948811296386551">"Toestaan"</string>
     <string name="deny" msgid="2081879885755434506">"Weigeren"</string>
     <string name="permission_request_notification_title" msgid="5390555465778213840">"Toestemming gevraagd"</string>
-    <!-- no translation found for permission_request_notification_subtitle (21911977892390675) -->
+    <!-- no translation found for permission_request_notification_with_subtitle (4325409589686688000) -->
     <skip />
-    <!-- no translation found for input_method_binding_label (1283557179944992649) -->
-    <skip />
-    <!-- no translation found for sync_binding_label (3687969138375092423) -->
-    <skip />
-    <!-- no translation found for accessibility_binding_label (4148120742096474641) -->
-    <skip />
-    <!-- no translation found for wallpaper_binding_label (1240087844304687662) -->
-    <skip />
-    <!-- no translation found for chooser_wallpaper (7873476199295190279) -->
-    <skip />
+    <string name="input_method_binding_label" msgid="1283557179944992649">"Invoermethode"</string>
+    <string name="sync_binding_label" msgid="3687969138375092423">"Synchroniseren"</string>
+    <string name="accessibility_binding_label" msgid="4148120742096474641">"Toegankelijkheid"</string>
+    <string name="wallpaper_binding_label" msgid="1240087844304687662">"Achtergrond"</string>
+    <string name="chooser_wallpaper" msgid="7873476199295190279">"Achtergrond wijzigen"</string>
 </resources>

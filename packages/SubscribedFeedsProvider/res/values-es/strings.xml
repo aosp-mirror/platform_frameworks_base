@@ -16,6 +16,5 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="5400580392303600842">"Sincronización de feeds"</string>
-    <!-- no translation found for provider_label (3669714991966737047) -->
-    <skip />
+    <string name="provider_label" msgid="3669714991966737047">"Enviar suscripciones"</string>
 </resources>
