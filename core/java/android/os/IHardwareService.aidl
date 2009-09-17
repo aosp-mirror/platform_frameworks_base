@@ -32,6 +32,9 @@ interface IHardwareService
     // sets the brightness of the backlights (screen, keyboard, button) 0-255
     void setBacklights(int brightness);
 
+    // enables or disables automatic brightness mode
+    void setAutoBrightness(boolean on);
+
     // for the phone
     void setAttentionLight(boolean on);
 }
