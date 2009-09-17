@@ -297,9 +297,9 @@ uint32_t DisplayHardware::getPageFlipCount() const {
     return mPageFlipCount;
 }
 
-/*
- * "Flip" the front and back buffers.
- */
+status_t DisplayHardware::compositionComplete() const {
+    return mNativeWindow->compositionComplete();
+}
 
 void DisplayHardware::flip(const Region& dirty) const
 {
