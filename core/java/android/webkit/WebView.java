@@ -2763,7 +2763,8 @@ public class WebView extends AbsoluteLayout
                 zoomScale = mZoomScale;
                 // set mZoomScale to be 0 as we have done animation
                 mZoomScale = 0;
-                animateZoom = false;    // inform drawContentPicture we're done
+                // call invalidate() again to draw with the final filters
+                invalidate();
                 if (mNeedToAdjustWebTextView) {
                     mNeedToAdjustWebTextView = false;
                     mWebTextView.setTextSize(TypedValue.COMPLEX_UNIT_PX,
