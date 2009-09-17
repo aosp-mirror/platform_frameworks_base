@@ -908,7 +908,7 @@ res/layout/<em>some_file</em>.xml.</p>
 </p>
 <pre>
 &lt;<em>ViewGroupClass</em> xmlns:android="http://schemas.android.com/apk/res/android"
-                id="@+id/<em>string_name</em>" (attributes)&gt;
+                android:id="@+id/<em>string_name</em>" (attributes)&gt;
    &lt;<em>widget</em> or other nested <em>ViewGroupClass</em>&gt;+
    &lt;requestFocus/&gt;(0 or 1 per layout file, assigned to any element)
 &lt;/<em>ViewGroupClass</em>&gt;
@@ -919,7 +919,7 @@ res/layout/<em>some_file</em>.xml.</p>
     </dt>
     <dd>
         <p>The file must have a single root element. This can be a ViewGroup class that contains other elements, or a widget (or custom item) if it's only one object. By default, you can use any (case-sensitive) Android {@link android.widget widget} or {@link android.view.ViewGroup ViewGroup} class name as an element. These elements support attributes that apply to the underlying class, but the naming is not as clear. How to discover what attributes are supported for what tags is discussed below. You should not assume that any nesting is valid (for example you cannot enclose <code>&lt;TextView&gt;</code> elements inside a <code>&lt;ListLayout&gt;</code>).</p>
-        <p>If a class derives from another class, the XML element inherits all the attributes from the element that it "derives" from. So, for example, <code>&lt;EditText&gt;</code> is the corresponding XML element for the EditText class. It exposes its own unique attributes (<code>EditText_numeric</code>), as well as all attributes supported by <code>&lt;TextView&gt;</code> and <code>&lt;View&gt;</code>. For the <em>id</em> attribute of a tag in XML, you should use a special syntax: "@+id/<em>somestringvalue</em>". The "@+" syntax creates a resource number in the R.id class, if one doesn't exist, or uses it, if it does exist. When declaring an ID value for an XML tag, use this syntax. Example: <code>&lt;TextView id="@+id/nameTextbox"/&gt;</code>, and refer to it this way in Java: <code>findViewById(R.id.nameTextbox)</code>. All elements support the following values:</p>
+        <p>If a class derives from another class, the XML element inherits all the attributes from the element that it "derives" from. So, for example, <code>&lt;EditText&gt;</code> is the corresponding XML element for the EditText class. It exposes its own unique attributes (<code>EditText_numeric</code>), as well as all attributes supported by <code>&lt;TextView&gt;</code> and <code>&lt;View&gt;</code>. For the <em>id</em> attribute of a tag in XML, you should use a special syntax: "@+id/<em>somestringvalue</em>". The "@+" syntax creates a resource number in the R.id class, if one doesn't exist, or uses it, if it does exist. When declaring an ID value for an XML tag, use this syntax. Example: <code>&lt;TextView android:id="@+id/nameTextbox"/&gt;</code>, and refer to it this way in Java: <code>findViewById(R.id.nameTextbox)</code>. All elements support the following values:</p>
         <ul>
             <li>
                 <em>id</em> - An ID value used to access this element in Java. Typically you will use the syntax @+id/<em>string_name</em> to generate an ID for you in the id.xml file if you haven't created one yourself.
@@ -1007,7 +1007,7 @@ res/layout/<em>some_file</em>.xml.</p>
              android:paddingBottom="4"            // TextView.paddingBottom
              android:text="@string/redirect_getter"/&gt; // TextView.text
 
-   &lt;EditText id="@+id/text"
+   &lt;EditText android:id="@+id/text"
              android:layout_width="fill_parent"   // EditText.LayoutParams.width
              android:layout_height="wrap_content" // EditText.LayoutParams.height
              android:layout_weight="0"            // EditText.LinearLayoutParams.weight
@@ -1015,7 +1015,7 @@ res/layout/<em>some_file</em>.xml.</p>
        &lt;requestFocus /&gt;
    &lt;/EditText&gt;
 
-   &lt;Button id="@+id/apply"
+   &lt;Button android:id="@+id/apply"
            android:layout_width="wrap_content"  // Button.LayoutParams.width
            android:layout_height="wrap_content" // Button.LayoutParams.height
            android:text="@string/apply" /&gt;      // TextView.text
@@ -1047,7 +1047,7 @@ setContentView(R.layout.main_screen);
         <strong>Java implementation file</strong> - The implementation file. The class must extend {@link android.view.View View} or a subclass. See LabelView.java in ApiDemos.
     </li>
     <li>
-        <strong>res/values/attrs.xml</strong> - Defines the XML element, and the attributes that it supports, for clients to use to instantiate your object in their layout XML file. Define your element in a <code>&lt;declare-styleable id=<em>your_java_class_name</em>&gt;</code>. See res/layout/attrs.xml in ApiDemos.
+        <strong>res/values/attrs.xml</strong> - Defines the XML element, and the attributes that it supports, for clients to use to instantiate your object in their layout XML file. Define your element in a <code>&lt;declare-styleable name=<em>your_java_class_name</em>&gt;</code>. See res/values/attrs.xml in ApiDemos.
     </li>
     <li>
         <strong>res/layout/<em>your_class</em>.xml</strong> [<em>optional</em>] - An optional XML file to describe the layout of your object. This could also be done in Java. See custom_view_1.xml in ApiDemos.
