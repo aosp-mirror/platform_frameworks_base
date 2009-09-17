@@ -16,6 +16,7 @@
 
 package com.android.mediaframeworktest.stress;
 
+
 import com.android.mediaframeworktest.MediaFrameworkTest;
 
 import java.io.BufferedWriter;
@@ -26,6 +27,7 @@ import java.io.Writer;
 import android.hardware.Camera;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
+import android.os.Looper;
 import android.test.ActivityInstrumentationTestCase2;
 import android.test.suitebuilder.annotation.LargeTest;
 import android.util.Log;
@@ -54,7 +56,14 @@ public class MediaRecorderStressTest extends ActivityInstrumentationTestCase2<Me
     private static final String OUTPUT_FILE_EXT = ".3gp";
     private static final String MEDIA_STRESS_OUTPUT =
         "/sdcard/mediaStressOutput.txt";
-    
+    private Looper mCameraLooper = null;
+    private Looper mRecorderLooper = null;
+    private final Object lock = new Object();
+    private final Object recorderlock = new Object();
+    private static int WAIT_FOR_COMMAND_TO_COMPLETE = 10000;  // Milliseconds.
+    private final CameraErrorCallback mCameraErrorCallback = new CameraErrorCallback();
+    private final RecorderErrorCallback mRecorderErrorCallback = new RecorderErrorCallback();
+
     public MediaRecorderStressTest() {
         super("com.android.mediaframeworktest", MediaFrameworkTest.class);
     }
@@ -63,41 +72,129 @@ public class MediaRecorderStressTest extends ActivityInstrumentationTestCase2<Me
         getActivity();
         super.setUp();      
     }
-       
+
+    private final class CameraErrorCallback implements android.hardware.Camera.ErrorCallback {
+        public void onError(int error, android.hardware.Camera camera) {
+            if (error == android.hardware.Camera.CAMERA_ERROR_SERVER_DIED) {
+                assertTrue("Camera test mediaserver died", false);
+            }
+        }
+    }
+
+    private final class RecorderErrorCallback implements MediaRecorder.OnErrorListener {
+        public void onError(MediaRecorder mr, int what, int extra) {
+            // fail the test case no matter what error come up
+            assertTrue("mediaRecorder error", false);
+        }
+    }
+
+    private void initializeCameraMessageLooper() {
+        Log.v(TAG, "start looper");
+        new Thread() {
+            @Override
+            public void run() {
+                // Set up a looper to be used by camera.
+                Looper.prepare();
+                Log.v(TAG, "start loopRun");
+                mCameraLooper = Looper.myLooper();
+                mCamera = Camera.open();
+                synchronized (lock) {
+                    lock.notify();
+                }
+                Looper.loop();
+                Log.v(TAG, "initializeMessageLooper: quit.");
+            }
+        }.start();
+    }
+
+    private void initializeRecorderMessageLooper() {
+        Log.v(TAG, "start looper");
+        new Thread() {
+            @Override
+            public void run() {
+                Looper.prepare();
+                Log.v(TAG, "start loopRun");
+                mRecorderLooper = Looper.myLooper();
+                mRecorder = new MediaRecorder();
+                synchronized (recorderlock) {
+                    recorderlock.notify();
+                }
+                Looper.loop();  // Blocks forever until Looper.quit() is called.
+                Log.v(TAG, "initializeMessageLooper: quit.");
+            }
+        }.start();
+    }
+
+    /*
+     * Terminates the message looper thread.
+     */
+    private void terminateCameraMessageLooper() {
+        mCameraLooper.quit();
+        try {
+            Thread.sleep(1000);
+        } catch (Exception e){
+            Log.v(TAG, e.toString());
+        }
+        mCamera.release();
+    }
+
+    /*
+     * Terminates the message looper thread.
+     */
+    private void terminateRecorderMessageLooper() {
+        mRecorderLooper.quit();
+        try {
+            Thread.sleep(1000);
+        } catch (Exception e){
+            Log.v(TAG, e.toString());
+        }
+        mRecorder.release();
+    }
+
     //Test case for stressing the camera preview.
     @LargeTest
     public void testStressCamera() throws Exception {
-        SurfaceHolder mSurfaceHolder;             
+        SurfaceHolder mSurfaceHolder;
         mSurfaceHolder = MediaFrameworkTest.mSurfaceView.getHolder();
         File stressOutFile = new File(MEDIA_STRESS_OUTPUT);
         Writer output = new BufferedWriter(new FileWriter(stressOutFile, true));
         output.write("Camera start preview stress:\n");
-        output.write("Total number of loops:" + 
+        output.write("Total number of loops:" +
                 NUMBER_OF_CAMERA_STRESS_LOOPS + "\n");
-        try {        
+        try {
             Log.v(TAG, "Start preview");
             output.write("No of loop: ");
+
             for (int i = 0; i< NUMBER_OF_CAMERA_STRESS_LOOPS; i++){
-                mCamera = Camera.open();
+                synchronized (lock) {
+                    initializeCameraMessageLooper();
+                    try {
+                        lock.wait(WAIT_FOR_COMMAND_TO_COMPLETE);
+                    } catch(Exception e) {
+                        Log.v(TAG, "wait was interrupted.");
+                    }
+                }
+                mCamera.setErrorCallback(mCameraErrorCallback);
                 mCamera.setPreviewDisplay(mSurfaceHolder);
                 mCamera.startPreview();
                 Thread.sleep(WAIT_TIME_CAMERA_TEST);
                 mCamera.stopPreview();
-                mCamera.release();
+                terminateCameraMessageLooper();
                 output.write(" ," + i);
             }
         } catch (Exception e) {
-                Log.v(TAG, e.toString());
+            assertTrue("CameraStressTest", false);
+            Log.v(TAG, e.toString());
         }
         output.write("\n\n");
         output.close();
     }
-    
+
     //Test case for stressing the camera preview.
     @LargeTest
     public void testStressRecorder() throws Exception {
         String filename;
-        SurfaceHolder mSurfaceHolder;             
+        SurfaceHolder mSurfaceHolder;
         mSurfaceHolder = MediaFrameworkTest.mSurfaceView.getHolder();
         File stressOutFile = new File(MEDIA_STRESS_OUTPUT);
         Writer output = new BufferedWriter(new FileWriter(stressOutFile, true));
@@ -108,12 +205,20 @@ public class MediaRecorderStressTest extends ActivityInstrumentationTestCase2<Me
             output.write("No of loop: ");
             Log.v(TAG, "Start preview");
             for (int i = 0; i < NUMBER_OF_RECORDER_STRESS_LOOPS; i++){
+                synchronized (recorderlock) {
+                    initializeRecorderMessageLooper();
+                    try {
+                        recorderlock.wait(WAIT_FOR_COMMAND_TO_COMPLETE);
+                    } catch(Exception e) {
+                        Log.v(TAG, "wait was interrupted.");
+                    }
+                }
                 Log.v(TAG, "counter = " + i);
                 filename = OUTPUT_FILE + i + OUTPUT_FILE_EXT;
                 Log.v(TAG, filename);
-                mRecorder = new MediaRecorder();
+                mRecorder.setOnErrorListener(mRecorderErrorCallback);
                 mRecorder.setVideoSource(MediaRecorder.VideoSource.CAMERA);
-                mRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);          
+                mRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
                 mRecorder.setOutputFile(filename);
                 mRecorder.setVideoFrameRate(20);
                 mRecorder.setVideoSize(176,144);
@@ -125,47 +230,63 @@ public class MediaRecorderStressTest extends ActivityInstrumentationTestCase2<Me
                 Log.v(TAG, "prepare");
                 mRecorder.prepare();
                 Log.v(TAG, "before release");
-                Thread.sleep(WAIT_TIME_RECORDER_TEST);  
+                Thread.sleep(WAIT_TIME_RECORDER_TEST);
                 mRecorder.reset();
-                mRecorder.release();
+                terminateRecorderMessageLooper();
                 output.write(", " + i);
             }
         } catch (Exception e) {
-                Log.v(TAG, e.toString());
+            assertTrue("Recorder Stress test", false);
+            Log.v(TAG, e.toString());
         }
         output.write("\n\n");
         output.close();
     }
-    
-    
+
     //Stress test case for switching camera and video recorder preview.
     @LargeTest
     public void testStressCameraSwitchRecorder() throws Exception {
         String filename;
-        SurfaceHolder mSurfaceHolder;             
+        SurfaceHolder mSurfaceHolder;
         mSurfaceHolder = MediaFrameworkTest.mSurfaceView.getHolder();
         File stressOutFile = new File(MEDIA_STRESS_OUTPUT);
         Writer output = new BufferedWriter(new FileWriter(stressOutFile, true));
         output.write("Camera and video recorder preview switching\n");
         output.write("Total number of loops:"
                 + NUMBER_OF_SWTICHING_LOOPS_BW_CAMERA_AND_RECORDER + "\n");
-        try {    
+        try {
             Log.v(TAG, "Start preview");
             output.write("No of loop: ");
             for (int i = 0; i < NUMBER_OF_SWTICHING_LOOPS_BW_CAMERA_AND_RECORDER; i++){
-                mCamera = Camera.open();
+                synchronized (lock) {
+                    initializeCameraMessageLooper();
+                    try {
+                        lock.wait(WAIT_FOR_COMMAND_TO_COMPLETE);
+                    } catch(Exception e) {
+                        Log.v(TAG, "wait was interrupted.");
+                    }
+                }
+                mCamera.setErrorCallback(mCameraErrorCallback);
                 mCamera.setPreviewDisplay(mSurfaceHolder);
                 mCamera.startPreview();
                 Thread.sleep(WAIT_TIME_CAMERA_TEST);
                 mCamera.stopPreview();
-                mCamera.release();
+                terminateCameraMessageLooper();
                 mCamera = null;
                 Log.v(TAG, "release camera");
                 filename = OUTPUT_FILE + i + OUTPUT_FILE_EXT;
                 Log.v(TAG, filename);
-                mRecorder = new MediaRecorder();
+                synchronized (recorderlock) {
+                    initializeRecorderMessageLooper();
+                    try {
+                        recorderlock.wait(WAIT_FOR_COMMAND_TO_COMPLETE);
+                    } catch(Exception e) {
+                        Log.v(TAG, "wait was interrupted.");
+                    }
+                }
+                mRecorder.setOnErrorListener(mRecorderErrorCallback);
                 mRecorder.setVideoSource(MediaRecorder.VideoSource.CAMERA);
-                mRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);          
+                mRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
                 mRecorder.setOutputFile(filename);
                 mRecorder.setVideoFrameRate(20);
                 mRecorder.setVideoSize(176,144);
@@ -176,23 +297,24 @@ public class MediaRecorderStressTest extends ActivityInstrumentationTestCase2<Me
                 Log.v(TAG, "prepare");
                 mRecorder.prepare();
                 Log.v(TAG, "before release");
-                Thread.sleep(WAIT_TIME_CAMERA_TEST);  
-                mRecorder.release();
+                Thread.sleep(WAIT_TIME_CAMERA_TEST);
+                terminateRecorderMessageLooper();
                 Log.v(TAG, "release video recorder");
                 output.write(", " + i);
             }
         } catch (Exception e) {
+            assertTrue("Camer and recorder switch mode", false);
                 Log.v(TAG, e.toString());
         }
         output.write("\n\n");
         output.close();
     }
-    
+
     //Stress test case for record a video and play right away.
     @LargeTest
     public void testStressRecordVideoAndPlayback() throws Exception {
         String filename;
-        SurfaceHolder mSurfaceHolder;             
+        SurfaceHolder mSurfaceHolder;
         mSurfaceHolder = MediaFrameworkTest.mSurfaceView.getHolder();
         File stressOutFile = new File(MEDIA_STRESS_OUTPUT);
         Writer output = new BufferedWriter(new FileWriter(stressOutFile, true));
@@ -204,10 +326,18 @@ public class MediaRecorderStressTest extends ActivityInstrumentationTestCase2<Me
             for (int i = 0; i < NUMBER_OF_RECORDERANDPLAY_STRESS_LOOPS; i++){
                 filename = OUTPUT_FILE + i + OUTPUT_FILE_EXT;
                 Log.v(TAG, filename);
-                mRecorder = new MediaRecorder();
+                synchronized (recorderlock) {
+                    initializeRecorderMessageLooper();
+                    try {
+                        recorderlock.wait(WAIT_FOR_COMMAND_TO_COMPLETE);
+                    } catch(Exception e) {
+                        Log.v(TAG, "wait was interrupted.");
+                    }
+                }
+                mRecorder.setOnErrorListener(mRecorderErrorCallback);
                 mRecorder.setVideoSource(MediaRecorder.VideoSource.CAMERA);
                 mRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
-                mRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);          
+                mRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
                 mRecorder.setOutputFile(filename);
                 mRecorder.setVideoFrameRate(20);
                 mRecorder.setVideoSize(352,288);
@@ -216,11 +346,11 @@ public class MediaRecorderStressTest extends ActivityInstrumentationTestCase2<Me
                 Log.v(TAG, "mediaRecorder setPreview");
                 mRecorder.setPreviewDisplay(mSurfaceHolder.getSurface());
                 mRecorder.prepare();
-                mRecorder.start();               
+                mRecorder.start();
                 Thread.sleep(WAIT_TIME_RECORD);
                 Log.v(TAG, "Before stop");
                 mRecorder.stop();
-                mRecorder.release();
+                terminateRecorderMessageLooper();
                 //start the playback
                 MediaPlayer mp = new MediaPlayer();
                 mp.setDataSource(filename);
@@ -232,10 +362,10 @@ public class MediaRecorderStressTest extends ActivityInstrumentationTestCase2<Me
                 output.write(", " + i);
             }
         } catch (Exception e) {
+            assertTrue("record and playback", false);
                 Log.v(TAG, e.toString());
         }
         output.write("\n\n");
         output.close();
-    }   
+    }
 }
-
