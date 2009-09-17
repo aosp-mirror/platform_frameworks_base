@@ -307,6 +307,9 @@ sp<IAudioTrack> AudioFlinger::createTrack(
     if (lStatus == NO_ERROR) {
         trackHandle = new TrackHandle(track);
     } else {
+        // remove local strong reference to Client before deleting the Track so that the Client
+        // destructor is called by the TrackBase destructor with mLock held
+        client.clear();
         track.clear();
     }
 
@@ -707,10 +710,10 @@ void AudioFlinger::audioConfigChanged_l(int event, const sp<ThreadBase>& thread,
     }
 }
 
-void AudioFlinger::removeClient(pid_t pid)
+// removeClient_l() must be called with AudioFlinger::mLock held
+void AudioFlinger::removeClient_l(pid_t pid)
 {
-    LOGV("removeClient() pid %d, tid %d, calling tid %d", pid, gettid(), IPCThreadState::self()->getCallingPid());
-    Mutex::Autolock _l(mLock);
+    LOGV("removeClient_l() pid %d, tid %d, calling tid %d", pid, gettid(), IPCThreadState::self()->getCallingPid());
     mClients.removeItem(pid);
 }
 
@@ -2078,7 +2081,10 @@ AudioFlinger::ThreadBase::TrackBase::~TrackBase()
         }
     }
     mCblkMemory.clear();            // and free the shared memory
-    mClient.clear();
+    if (mClient != NULL) {
+        Mutex::Autolock _l(mClient->audioFlinger()->mLock);
+        mClient.clear();
+    }
 }
 
 void AudioFlinger::ThreadBase::TrackBase::releaseBuffer(AudioBufferProvider::Buffer* buffer)
@@ -2712,9 +2718,10 @@ AudioFlinger::Client::Client(const sp<AudioFlinger>& audioFlinger, pid_t pid)
     // 1 MB of address space is good for 32 tracks, 8 buffers each, 4 KB/buffer
 }
 
+// Client destructor must be called with AudioFlinger::mLock held
 AudioFlinger::Client::~Client()
 {
-    mAudioFlinger->removeClient(mPid);
+    mAudioFlinger->removeClient_l(mPid);
 }
 
 const sp<MemoryDealer>& AudioFlinger::Client::heap() const
@@ -2820,6 +2827,9 @@ sp<IAudioRecord> AudioFlinger::openRecord(
                                                    format, channelCount, frameCount, flags);
     }
     if (recordTrack->getCblk() == NULL) {
+        // remove local strong reference to Client before deleting the RecordTrack so that the Client
+        // destructor is called by the TrackBase destructor with mLock held
+        client.clear();
         recordTrack.clear();
         lStatus = NO_MEMORY;
         goto Exit;
