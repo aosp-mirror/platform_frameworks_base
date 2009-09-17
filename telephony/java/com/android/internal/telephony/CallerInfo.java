@@ -100,10 +100,14 @@ public class CallerInfo {
     public Drawable cachedPhoto;
     public boolean isCachedPhotoCurrent;
 
+    private boolean mIsEmergency;
+
     // Don't keep checking VM if it's going to throw an exception for this proc.
     private static boolean sSkipVmCheck = false;
 
     public CallerInfo() {
+        // TODO: Move all the basic initialization here?
+        mIsEmergency = false;
     }
 
     /**
@@ -221,13 +225,7 @@ public class CallerInfo {
             // or if it is the voicemail number.  If it is either, take a
             // shortcut and skip the query.
             if (PhoneNumberUtils.isEmergencyNumber(number)) {
-                CallerInfo ci = new CallerInfo();
-
-                // Note we're setting the phone number here (refer to javadoc
-                // comments at the top of CallerInfo class).
-                ci.phoneNumber = context.getString(
-                        com.android.internal.R.string.emergency_call_dialog_number_for_display);
-                return ci;
+                return new CallerInfo().markAsEmergency(context);
             } else {
                 try {
                     if (!sSkipVmCheck && PhoneNumberUtils.compare(number,
@@ -294,6 +292,35 @@ public class CallerInfo {
         }
 
         return callerID;
+    }
+
+    // Accessors
+
+    /**
+     * @return true if the caller info is an emergency number.
+     */
+    public boolean isEmergencyNumber() {
+        return mIsEmergency;
+    }
+
+    /**
+     * Mark this CallerInfo as an emergency call.
+     * @param context To lookup the localized 'Emergency Number' string.
+     * @return this instance.
+     */
+    // TODO: Note we're setting the phone number here (refer to
+    // javadoc comments at the top of CallerInfo class) to a localized
+    // string 'Emergency Number'. This is pretty bad because we are
+    // making UI work here instead of just packaging the data. We
+    // should set the phone number to the dialed number and name to
+    // 'Emergency Number' and let the UI make the decision about what
+    // should be displayed.
+    /* package */ CallerInfo markAsEmergency(Context context) {
+        phoneNumber = context.getString(
+            com.android.internal.R.string.emergency_call_dialog_number_for_display);
+        photoResource = com.android.internal.R.drawable.picture_emergency;
+        mIsEmergency = true;
+        return this;
     }
 
     private static String normalize(String s) {

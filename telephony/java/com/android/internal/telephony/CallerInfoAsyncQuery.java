@@ -37,7 +37,7 @@ import android.util.Log;
 public class CallerInfoAsyncQuery {
 
     private static final boolean DBG = false;
-    private static final String LOG_TAG = "PHONE";
+    private static final String LOG_TAG = "CallerInfoAsyncQuery";
 
     private static final int EVENT_NEW_QUERY = 1;
     private static final int EVENT_ADD_LISTENER = 2;
@@ -223,13 +223,9 @@ public class CallerInfoAsyncQuery {
                 // voicemail number, and adjust other data (including photoResource)
                 // accordingly.
                 if (cw.event == EVENT_EMERGENCY_NUMBER) {
-                    mCallerInfo = new CallerInfo();
                     // Note we're setting the phone number here (refer to javadoc
                     // comments at the top of CallerInfo class).
-                    mCallerInfo.phoneNumber = mQueryContext.getString(com.android.internal
-                            .R.string.emergency_call_dialog_number_for_display);
-                    mCallerInfo.photoResource = com.android.internal.R.drawable.picture_emergency;
-
+                    mCallerInfo = new CallerInfo().markAsEmergency(mQueryContext);
                 } else if (cw.event == EVENT_VOICEMAIL_NUMBER) {
                     mCallerInfo = new CallerInfo();
                     try {
@@ -390,4 +386,3 @@ public class CallerInfoAsyncQuery {
         Log.d(LOG_TAG, msg);
     }
 }
-
