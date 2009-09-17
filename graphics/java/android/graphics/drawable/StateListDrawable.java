@@ -65,7 +65,7 @@ public class StateListDrawable extends DrawableContainer {
     private boolean mMutated;
 
     public StateListDrawable() {
-        this(null);
+        this(null, null);
     }
 
     /**
@@ -248,8 +248,8 @@ public class StateListDrawable extends DrawableContainer {
     static final class StateListState extends DrawableContainerState {
         private int[][] mStateSets;
 
-        StateListState(StateListState orig, StateListDrawable owner) {
-            super(orig, owner);
+        StateListState(StateListState orig, StateListDrawable owner, Resources res) {
+            super(orig, owner, res);
 
             if (orig != null) {
                 mStateSets = orig.mStateSets;
@@ -277,7 +277,12 @@ public class StateListDrawable extends DrawableContainer {
 
         @Override
         public Drawable newDrawable() {
-            return new StateListDrawable(this);
+            return new StateListDrawable(this, null);
+        }
+
+        @Override
+        public Drawable newDrawable(Resources res) {
+            return new StateListDrawable(this, res);
         }
 
         @Override
@@ -289,8 +294,8 @@ public class StateListDrawable extends DrawableContainer {
         }
     }
 
-    private StateListDrawable(StateListState state) {
-        StateListState as = new StateListState(state, this);
+    private StateListDrawable(StateListState state, Resources res) {
+        StateListState as = new StateListState(state, this, res);
         mStateListState = as;
         setConstantState(as);
         onStateChange(getState());

@@ -70,7 +70,7 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
      * @param state The constant drawable state.
      */
     LayerDrawable(Drawable[] layers, LayerState state) {
-        this(state);
+        this(state, null);
         int length = layers.length;
         ChildDrawable[] r = new ChildDrawable[length];
 
@@ -87,19 +87,19 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
     }
     
     LayerDrawable() {
-        this((LayerState) null);
+        this((LayerState) null, null);
     }
 
-    LayerDrawable(LayerState state) {
-        LayerState as = createConstantState(state);
+    LayerDrawable(LayerState state, Resources res) {
+        LayerState as = createConstantState(state, res);
         mLayerState = as;
         if (as.mNum > 0) {
             ensurePadding();
         }
     }
 
-    LayerState createConstantState(LayerState state) {
-        return new LayerState(state, this);
+    LayerState createConstantState(LayerState state, Resources res) {
+        return new LayerState(state, this, res);
     }
 
     @Override
@@ -563,7 +563,7 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
         private boolean mCheckedConstantState;
         private boolean mCanConstantState;
 
-        LayerState(LayerState orig, LayerDrawable owner) {
+        LayerState(LayerState orig, LayerDrawable owner, Resources res) {
             if (orig != null) {
                 final ChildDrawable[] origChildDrawable = orig.mChildren;
                 final int N = orig.mNum;
@@ -577,7 +577,11 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
                 for (int i = 0; i < N; i++) {
                     final ChildDrawable r = mChildren[i] = new ChildDrawable();
                     final ChildDrawable or = origChildDrawable[i];
-                    r.mDrawable = or.mDrawable.getConstantState().newDrawable();
+                    if (res != null) {
+                        r.mDrawable = or.mDrawable.getConstantState().newDrawable(res);
+                    } else {
+                        r.mDrawable = or.mDrawable.getConstantState().newDrawable();
+                    }
                     r.mDrawable.setCallback(owner);
                     r.mInsetL = or.mInsetL;
                     r.mInsetT = or.mInsetT;
@@ -599,7 +603,12 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
 
         @Override
         public Drawable newDrawable() {
-            return new LayerDrawable(this);
+            return new LayerDrawable(this, null);
+        }
+        
+        @Override
+        public Drawable newDrawable(Resources res) {
+            return new LayerDrawable(this, res);
         }
         
         @Override

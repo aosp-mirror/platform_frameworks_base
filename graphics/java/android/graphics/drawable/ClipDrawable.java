@@ -48,14 +48,14 @@ public class ClipDrawable extends Drawable implements Drawable.Callback {
     public static final int VERTICAL = 2;
     
     ClipDrawable() {
-        this(null);
+        this(null, null);
     }
 
     /**
      * @param orientation Bitwise-or of {@link #HORIZONTAL} and/or {@link #VERTICAL}
      */
     public ClipDrawable(Drawable drawable, int gravity, int orientation) {
-        this(null);
+        this(null, null);
 
         mClipState.mDrawable = drawable;
         mClipState.mGravity = gravity;
@@ -241,9 +241,13 @@ public class ClipDrawable extends Drawable implements Drawable.Callback {
         private boolean mCheckedConstantState;
         private boolean mCanConstantState;
 
-        ClipState(ClipState orig, ClipDrawable owner) {
+        ClipState(ClipState orig, ClipDrawable owner, Resources res) {
             if (orig != null) {
-                mDrawable = orig.mDrawable.getConstantState().newDrawable();
+                if (res != null) {
+                    mDrawable = orig.mDrawable.getConstantState().newDrawable(res);
+                } else {
+                    mDrawable = orig.mDrawable.getConstantState().newDrawable();
+                }
                 mDrawable.setCallback(owner);
                 mOrientation = orig.mOrientation;
                 mGravity = orig.mGravity;
@@ -253,7 +257,12 @@ public class ClipDrawable extends Drawable implements Drawable.Callback {
 
         @Override
         public Drawable newDrawable() {
-            return new ClipDrawable(this);
+            return new ClipDrawable(this, null);
+        }
+
+        @Override
+        public Drawable newDrawable(Resources res) {
+            return new ClipDrawable(this, res);
         }
 
         @Override
@@ -271,8 +280,8 @@ public class ClipDrawable extends Drawable implements Drawable.Callback {
         }
     }
 
-    private ClipDrawable(ClipState state) {
-        mClipState = new ClipState(state, this);
+    private ClipDrawable(ClipState state, Resources res) {
+        mClipState = new ClipState(state, this, res);
     }
 }
 

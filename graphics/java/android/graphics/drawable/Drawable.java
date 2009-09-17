@@ -822,7 +822,26 @@ public abstract class Drawable {
     }
 
     public static abstract class ConstantState {
+        /**
+         * Create a new drawable without supplying resources the caller
+         * is running in.  Note that using this means the density-dependent
+         * drawables (like bitmaps) will not be able to update their target
+         * density correctly.
+         */
         public abstract Drawable newDrawable();
+        /**
+         * Create a new Drawable instance from its constant state.  This
+         * must be implemented for drawables that change based on the target
+         * density of their caller (that is depending on whether it is
+         * in compatibility mode).
+         */
+        public Drawable newDrawable(Resources res) {
+            return newDrawable();
+        }
+        /**
+         * Return a bit mask of configuration changes that will impact
+         * this drawable (and thus require completely reloading it).
+         */
         public abstract int getChangingConfigurations();
     }
 
