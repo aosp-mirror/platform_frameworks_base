@@ -506,6 +506,13 @@ public final class Calendar {
          * <P>Type: INTEGER (boolean, readonly)</P>
          */
         public static final String CAN_INVITE_OTHERS = "canInviteOthers";
+
+        /**
+         * The owner account for this calendar, based on the calendar (foreign
+         * key into the calendars table).
+         * <P>Type: String</P>
+         */
+        public static final String OWNER_ACCOUNT = "ownerAccount";
     }
 
     /**
