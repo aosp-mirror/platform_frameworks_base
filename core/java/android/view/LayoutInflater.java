@@ -458,11 +458,12 @@ public abstract class LayoutInflater {
     public final View createView(String name, String prefix, AttributeSet attrs)
             throws ClassNotFoundException, InflateException {
         Constructor constructor = sConstructorMap.get(name);
+        Class clazz = null;
 
         try {
             if (constructor == null) {
                 // Class not found in the cache, see if it's real, and try to add it
-                Class clazz = mContext.getClassLoader().loadClass(
+                clazz = mContext.getClassLoader().loadClass(
                         prefix != null ? (prefix + name) : name);
                 
                 if (mFilter != null && clazz != null) {
@@ -480,7 +481,7 @@ public abstract class LayoutInflater {
                     Boolean allowedState = mFilterMap.get(name);
                     if (allowedState == null) {
                         // New class -- remember whether it is allowed
-                        Class clazz = mContext.getClassLoader().loadClass(
+                        clazz = mContext.getClassLoader().loadClass(
                                 prefix != null ? (prefix + name) : name);
                         
                         boolean allowed = clazz != null && mFilter.onLoadClass(clazz);
@@ -511,7 +512,7 @@ public abstract class LayoutInflater {
         } catch (Exception e) {
             InflateException ie = new InflateException(attrs.getPositionDescription()
                     + ": Error inflating class "
-                    + (constructor == null ? "<unknown>" : constructor.getClass().getName()));
+                    + (clazz == null ? "<unknown>" : clazz.getName()));
             ie.initCause(e);
             throw ie;
         }
