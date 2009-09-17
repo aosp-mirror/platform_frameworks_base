@@ -321,7 +321,7 @@ public abstract class WallpaperService extends Service {
          * Called as the user performs touch-screen interaction with the
          * window that is currently showing this wallpaper.  Note that the
          * events you receive here are driven by the actual application the
-         * user is interacting with, so if it is slow you will get viewer
+         * user is interacting with, so if it is slow you will get fewer
          * move events.
          */
         public void onTouchEvent(MotionEvent event) {
