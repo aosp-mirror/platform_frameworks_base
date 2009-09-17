@@ -59,6 +59,9 @@ private:
     mutable GLfloat mWidthScale;
     mutable GLfloat mHeightScale;
     mutable GLfloat mYOffset;
+    mutable GLint   mReadFormat;
+    mutable GLint   mReadType;
+    mutable uint32_t mBlurFormat;
 };
 
 // ---------------------------------------------------------------------------
