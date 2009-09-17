@@ -21,7 +21,8 @@
      the user how to unlock their device, or make an emergency call.  This
      is the portrait layout.  -->
 
-<com.android.internal.widget.LinearLayoutWithDefaultTouchRecepient xmlns:android="http://schemas.android.com/apk/res/android"
+<com.android.internal.widget.LinearLayoutWithDefaultTouchRecepient
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="horizontal"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
@@ -34,31 +35,70 @@
             android:layout_width="0dip"
             android:layout_height="fill_parent"
             android:layout_weight="1.0"
+            android:gravity="center_horizontal"
             >
+        <TextView
+            android:id="@+id/carrier"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dip"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textColor="?android:attr/textColorSecondary"
+            />
+        <TextView
+            android:id="@+id/centerDot"
+            android:visibility="gone"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dip"
+            android:layout_marginRight="5dip"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textColor="?android:attr/textColorSecondary"
+            android:textSize="17sp"
+            />
+        <TextView
+            android:id="@+id/time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="5dip"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:textSize="35sp"
+            />
+        <TextView
+            android:id="@+id/date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_marginTop="-12dip"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textColor="?android:attr/textColorSecondary"
+            android:textSize="17sp"
+            />
 
-        <!-- lock icon next to header text -->
-        <LinearLayout
-                android:orientation="horizontal"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="3dip"
-                android:gravity="center"
-                >
-            <ImageView android:id="@+id/unlockLockIcon"
-                       android:layout_width="wrap_content"
-                       android:layout_height="wrap_content"
-                       android:layout_marginRight="3dip"
-                       android:baselineAligned="true"
-                       android:gravity="center"
-                       android:src="@android:drawable/ic_lock_idle_lock"
-                    />
 
-            <TextView android:id="@+id/headerText"
-                      android:layout_width="wrap_content"
-                      android:layout_height="wrap_content"
-                      android:gravity="center"
-                      android:textSize="18sp"/>
-        </LinearLayout>
+        <View
+            android:id="@+id/divider"
+            android:layout_width="fill_parent"
+            android:layout_height="1dip"
+            android:layout_centerHorizontal="true"
+            android:background="@android:drawable/divider_horizontal_dark"
+                />
+
+        <!-- lock icon and header message -->
+        <TextView
+            android:id="@+id/headerText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dip"
+            android:layout_centerHorizontal="true"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textColor="?android:attr/textColorSecondary"
+            android:textSize="17sp"
+            android:drawableLeft="@drawable/ic_lock_idle_lock"
+            android:drawablePadding="4dip"
+            android:gravity="center"
+            />
 
 
         <!-- fill space between header and button below -->
@@ -82,7 +122,7 @@
                 <Button android:id="@+id/emergencyCallAlone"
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
-                    android:text="@android:string/lockscreen_emergency_call"
+                    android:text="@string/lockscreen_emergency_call"
                     android:textSize="14sp"
                     android:drawableLeft="@drawable/ic_emergency"
                     android:drawablePadding="8dip"
@@ -105,7 +145,7 @@
                 <Button android:id="@+id/emergencyCallTogether"
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
-                    android:text="@android:string/lockscreen_emergency_call"
+                    android:text="@string/lockscreen_emergency_call"
                     android:textSize="14sp"
                     android:drawableLeft="@drawable/ic_emergency"
                     android:drawablePadding="8dip"
@@ -115,7 +155,7 @@
     </LinearLayout>
 
     <View
-         android:background="@android:drawable/code_lock_left"
+         android:background="@drawable/code_lock_left"
          android:layout_width="2dip"
          android:layout_height="fill_parent" />
 
