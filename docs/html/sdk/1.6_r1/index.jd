@@ -5,16 +5,16 @@ sdk.version=1.6
 sdk.date=September 2009
 
 sdk.win_download=android-sdk-windows-1.6_r1.zip
-sdk.win_bytes=251325064
-sdk.win_checksum=efd6fccd5a6ff6b57585b49393d221d9
+sdk.win_bytes=260529085
+sdk.win_checksum=2bcbacbc7af0363058ca1cac6abad848
 
 sdk.mac_download=android-sdk-mac_x86-1.6_r1.zip
-sdk.mac_bytes=238229779
-sdk.mac_checksum=2be1a1ae5d33272be841c97e8a3a3b1c
+sdk.mac_bytes=247412515
+sdk.mac_checksum=eb13cc79602d492e89103efcf48ac1f6
 
 sdk.linux_download=android-sdk-linux_x86-1.6_r1.tgz
-sdk.linux_bytes=229032773
-sdk.linux_checksum=02ff0d0e38d4f464108a5a7f7567b207
+sdk.linux_bytes=238224860
+sdk.linux_checksum=b4bf0e610ff6db2fb6fb09c49cba1e79
 
 adt.zip_download=ADT-0.9.3.zip
 adt.zip_version=0.9.3
