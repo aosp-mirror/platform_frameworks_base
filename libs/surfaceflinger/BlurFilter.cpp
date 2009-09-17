@@ -111,6 +111,50 @@ struct BlurColor565
     }
 };
 
+template <int FACTOR = 0>
+struct BlurColor888X
+{
+    typedef uint32_t type;
+    int r, g, b;    
+    inline BlurColor888X() { }
+    inline BlurColor888X(uint32_t v) {
+        v = BLUR_RGBA_TO_HOST(v);
+        r = v & 0xFF;
+        g = (v >>  8) & 0xFF;
+        b = (v >> 16) & 0xFF;
+    }
+    inline void clear() { r=g=b=0; }
+    inline uint32_t to(int shift, int last, int dither) const {
+        int R = r;
+        int G = g;
+        int B = b;
+        if  (UNLIKELY(last)) {
+            if (FACTOR>0) {
+                int L = (R+G+G+B)>>2;
+                R += ((L - R) * FACTOR) >> 8;
+                G += ((L - G) * FACTOR) >> 8;
+                B += ((L - B) * FACTOR) >> 8;
+            }
+        }
+        R >>= shift;
+        G >>= shift;
+        B >>= shift;
+        return BLUR_HOST_TO_RGBA((0xFF<<24) | (B<<16) | (G<<8) | R);
+    }    
+    inline BlurColor888X& operator += (const BlurColor888X& rhs) {
+        r += rhs.r;
+        g += rhs.g;
+        b += rhs.b;
+        return *this;
+    }
+    inline BlurColor888X& operator -= (const BlurColor888X& rhs) {
+        r -= rhs.r;
+        g -= rhs.g;
+        b -= rhs.b;
+        return *this;
+    }
+};
+
 struct BlurGray565
 {
     typedef uint16_t type;
@@ -316,7 +360,13 @@ status_t blurFilter(
         int kernelSizeUser,
         int repeat)
 {
-    return blurFilter< BlurColor565<0x80> >(image, image, kernelSizeUser, repeat);
+    status_t err = BAD_VALUE;
+    if (image->format == GGL_PIXEL_FORMAT_RGB_565) {
+        err = blurFilter< BlurColor565<0x80> >(image, image, kernelSizeUser, repeat);
+    } else if (image->format == GGL_PIXEL_FORMAT_RGBX_8888) {
+        err = blurFilter< BlurColor888X<0x80> >(image, image, kernelSizeUser, repeat);
+    }
+    return err;
 }
 
 } // namespace android
