@@ -111,7 +111,8 @@
     <string name="httpErrorFile" msgid="8250549644091165175">"Auf die Datei konnte nicht zugegriffen werden."</string>
     <string name="httpErrorFileNotFound" msgid="5588380756326017105">"Die angeforderte Datei wurde nicht gefunden."</string>
     <string name="httpErrorTooManyRequests" msgid="1235396927087188253">"Es werden zurzeit zu viele Anfragen verarbeitet. Versuchen Sie es später erneut."</string>
-    <string name="notification_title" msgid="4254304601929719937">"Fehler bei der Anmeldung"</string>
+    <!-- no translation found for notification_title (1259940370369187045) -->
+    <skip />
     <string name="contentServiceSync" msgid="8353523060269335667">"Synchronisieren"</string>
     <string name="contentServiceSyncNotificationTitle" msgid="397743349191901458">"Synchronisieren"</string>
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"Zu viele <xliff:g id="CONTENT_TYPE">%s</xliff:g> gelöscht."</string>
@@ -210,12 +211,9 @@
     <string name="permlab_batteryStats" msgid="7863923071360031652">"Akku-Daten ändern"</string>
     <string name="permdesc_batteryStats" msgid="5847319823772230560">"Ermöglicht die Änderung von gesammelten Akku-Daten. Nicht für normale Anwendungen vorgesehen."</string>
     <string name="permlab_backup" msgid="470013022865453920">"Systemsicherung und -wiederherstellung kontrollieren"</string>
-    <!-- no translation found for permdesc_backup (4837493065154256525) -->
-    <skip />
-    <!-- no translation found for permlab_backup_data (4057625941707926463) -->
-    <skip />
-    <!-- no translation found for permdesc_backup_data (8274426305151227766) -->
-    <skip />
+    <string name="permdesc_backup" msgid="4837493065154256525">"Der Anwendung wird die Steuerung des Sicherungs- und Wiederherstellungsmechanismus des Systems ermöglicht. Nicht für normale Anwendungen vorgesehen."</string>
+    <string name="permlab_backup_data" msgid="4057625941707926463">"Anwendungsdaten sichern und wiederherstellen"</string>
+    <string name="permdesc_backup_data" msgid="8274426305151227766">"Der Anwendung wird die Teilnahme am Sicherungs- und Wiederherstellungsmechanismus des Systems ermöglicht."</string>
     <string name="permlab_internalSystemWindow" msgid="2148563628140193231">"nicht autorisierte Fenster anzeigen"</string>
     <string name="permdesc_internalSystemWindow" msgid="5895082268284998469">"Ermöglicht die Erstellung von Fenstern, die von der Benutzeroberfläche des internen Systems verwendet werden. Nicht für normale Anwendungen geeignet."</string>
     <string name="permlab_systemAlertWindow" msgid="3372321942941168324">"Warnungen auf Systemebene anzeigen"</string>
@@ -261,8 +259,7 @@
     <string name="permlab_writeSettings" msgid="1365523497395143704">"Allgemeine Systemeinstellungen ändern"</string>
     <string name="permdesc_writeSettings" msgid="838789419871034696">"Ermöglicht einer Anwendung, die Einstellungsdaten des Systems zu ändern. Schädliche Anwendungen können so die Systemkonfiguration beschädigen."</string>
     <string name="permlab_writeSecureSettings" msgid="204676251876718288">"Sicherheitseinstellungen für das System ändern"</string>
-    <!-- no translation found for permdesc_writeSecureSettings (5497873143539034724) -->
-    <skip />
+    <string name="permdesc_writeSecureSettings" msgid="5497873143539034724">"Der Anwendung wird das Ändern der Sicherheitseinstellungsdaten des Systems ermöglicht. Nicht für normale Anwendungen vorgesehen."</string>
     <string name="permlab_writeGservices" msgid="2149426664226152185">"Google Services Map ändern"</string>
     <string name="permdesc_writeGservices" msgid="6602362746516676175">"Ermöglicht einer Anwendung, Änderungen an der Google Services Map vorzunehmen. Nicht für normale Anwendungen vorgesehen."</string>
     <string name="permlab_receiveBootCompleted" msgid="7776779842866993377">"Automatisch nach dem Booten starten"</string>
@@ -319,10 +316,8 @@
     <string name="permdesc_callPhone" msgid="3369867353692722456">"Ermöglicht dem Anwendungen, Rufnummern ohne Ihr Eingreifen zu wählen. Schädliche Anwendungen können für unerwartete Anrufe auf Ihrer Telefonrechnung verantwortlich sein. Das Wählen von Notrufnummern ist allerdings nicht möglich."</string>
     <string name="permlab_callPrivileged" msgid="4198349211108497879">"Alle Telefonnummern direkt anrufen"</string>
     <string name="permdesc_callPrivileged" msgid="244405067160028452">"Ermöglicht der Anwendung, ohne Ihr Eingreifen eine beliebige Telefonnummer zu wählen, einschließlich Notfallnummern. Schädliche Anwendungen können so unnötige und illegale Anrufe an Notdienste tätigen."</string>
-    <!-- no translation found for permlab_performCdmaProvisioning (5604848095315421425) -->
-    <skip />
-    <!-- no translation found for permdesc_performCdmaProvisioning (6457447676108355905) -->
-    <skip />
+    <string name="permlab_performCdmaProvisioning" msgid="5604848095315421425">"CDMA-Telefoneinrichtung direkt starten"</string>
+    <string name="permdesc_performCdmaProvisioning" msgid="6457447676108355905">"Der Anwendung wird der Start der CDMA-Bereitstellung ermöglicht. Schädliche Anwendungen können die CDMA-Bereitstellung unnötigerweise starten."</string>
     <string name="permlab_locationUpdates" msgid="7785408253364335740">"Benachrichtigungen für Standortaktualisierung steuern"</string>
     <string name="permdesc_locationUpdates" msgid="2300018303720930256">"Ermöglicht die Aktivierung/Deaktivierung der Mobilfunkbenachrichtigungen über Standort-Updates. Nicht für normale Anwendungen vorgesehen."</string>
     <string name="permlab_checkinProperties" msgid="7855259461268734914">"Auf Check-In-Eigenschaften zugreifen"</string>
@@ -465,16 +460,14 @@
     <string name="lockscreen_failed_attempts_almost_glogin" msgid="3351013842320127827">"Sie haben Ihr Entsperrungsmuster <xliff:g id="NUMBER_0">%d</xliff:g>-mal falsch gezeichnet. Nach <xliff:g id="NUMBER_1">%d</xliff:g> weiteren erfolglosen Versuchen werden Sie aufgefordert, Ihr Telefon mithilfe Ihrer Google-Anmeldeinformationen zu entsperren. "\n\n"Versuchen Sie es in <xliff:g id="NUMBER_2">%d</xliff:g> Sekunden erneut."</string>
     <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6251480343394389665">"Versuchen Sie es in <xliff:g id="NUMBER">%d</xliff:g> Sekunden erneut."</string>
     <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"Muster vergessen?"</string>
-    <!-- no translation found for lockscreen_glogin_forgot_pattern (2588521501166032747) -->
-    <skip />
+    <string name="lockscreen_glogin_forgot_pattern" msgid="2588521501166032747">"Kontoentsperrung"</string>
     <string name="lockscreen_glogin_too_many_attempts" msgid="2446246026221678244">"Zu viele Versuche!"</string>
     <string name="lockscreen_glogin_instructions" msgid="1816635201812207709">"Melden Sie sich zum Entsperren mit Ihrem Google-Konto an."</string>
     <string name="lockscreen_glogin_username_hint" msgid="8846881424106484447">"Nutzername (E-Mail)"</string>
     <string name="lockscreen_glogin_password_hint" msgid="5958028383954738528">"Passwort"</string>
     <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"Anmelden"</string>
     <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"Ungültiger  Nutzername oder ungültiges Passwort."</string>
-    <!-- no translation found for lockscreen_glogin_checking_password (6758890536332363322) -->
-    <skip />
+    <string name="lockscreen_glogin_checking_password" msgid="6758890536332363322">"Überprüfung..."</string>
     <string name="hour_ampm" msgid="4329881288269772723">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%P</xliff:g>"</string>
     <string name="hour_cap_ampm" msgid="1829009197680861107">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%p</xliff:g>"</string>
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"Löschen"</string>
@@ -486,8 +479,7 @@
     <string name="battery_low_title" msgid="7923774589611311406">"Ladegerät anschließen"</string>
     <string name="battery_low_subtitle" msgid="7388781709819722764">"Akku ist fast leer."</string>
     <string name="battery_low_percent_format" msgid="6564958083485073855">"Nur noch weniger als <xliff:g id="NUMBER">%d%%</xliff:g> vorhanden."</string>
-    <!-- no translation found for battery_low_why (7279169609518386372) -->
-    <skip />
+    <string name="battery_low_why" msgid="7279169609518386372">"Akkuverbrauch"</string>
     <string name="factorytest_failed" msgid="5410270329114212041">"Werkstest fehlgeschlagen"</string>
     <string name="factorytest_not_system" msgid="4435201656767276723">"Die Aktion FACTORY_TEST wird nur für unter \"/system/app\" gespeicherte Pakete unterstützt."</string>
     <string name="factorytest_no_action" msgid="872991874799998561">"Es wurden kein Paket mit der Aktion FACTORY_TEST gefunden."</string>
@@ -578,12 +570,9 @@
     <item quantity="one" msgid="2178576254385739855">"morgen"</item>
     <item quantity="other" msgid="2973062968038355991">"in <xliff:g id="COUNT">%d</xliff:g> Tagen"</item>
   </plurals>
-    <!-- no translation found for preposition_for_date (9093949757757445117) -->
-    <skip />
-    <!-- no translation found for preposition_for_time (5506831244263083793) -->
-    <skip />
-    <!-- no translation found for preposition_for_year (5040395640711867177) -->
-    <skip />
+    <string name="preposition_for_date" msgid="9093949757757445117">"am <xliff:g id="DATE">%s</xliff:g>"</string>
+    <string name="preposition_for_time" msgid="5506831244263083793">"um <xliff:g id="TIME">%s</xliff:g>"</string>
+    <string name="preposition_for_year" msgid="5040395640711867177">"im Jahr <xliff:g id="YEAR">%s</xliff:g>"</string>
     <string name="day" msgid="8144195776058119424">"Tag"</string>
     <string name="days" msgid="4774547661021344602">"Tage"</string>
     <string name="hour" msgid="2126771916426189481">"Stunde"</string>
@@ -621,10 +610,8 @@
     <string name="copyAll" msgid="2590829068100113057">"Alles kopieren"</string>
     <string name="paste" msgid="5629880836805036433">"Einfügen"</string>
     <string name="copyUrl" msgid="2538211579596067402">"URL kopieren"</string>
-    <!-- no translation found for inputMethod (1653630062304567879) -->
-    <skip />
-    <!-- no translation found for addToDictionary (8793624991686948709) -->
-    <skip />
+    <string name="inputMethod" msgid="1653630062304567879">"Eingabemethode"</string>
+    <string name="addToDictionary" msgid="8793624991686948709">"\"<xliff:g id="WORD">%s</xliff:g>\" zum Wörterbuch hinzufügen"</string>
     <string name="editTextMenuTitle" msgid="1672989176958581452">"Text bearbeiten"</string>
     <string name="low_internal_storage_view_title" msgid="1399732408701697546">"Geringer Speicher"</string>
     <string name="low_internal_storage_view_text" msgid="635106544616378836">"Kaum noch freier Telefonspeicher verfügbar."</string>
@@ -700,14 +687,15 @@
     <string name="usb_storage_stop_message" msgid="2390958966725232848">"Bevor Sie den USB-Speicher deaktivieren, stellen Sie sicher, dass Sie Ihn vom USB-Host getrennt haben. Wählen Sie \"Deaktivieren\", um den USB-Speicher zu deaktivieren."</string>
     <string name="usb_storage_stop_button_mount" msgid="1181858854166273345">"Ausschalten"</string>
     <string name="usb_storage_stop_button_unmount" msgid="3774611918660582898">"Abbrechen"</string>
-    <!-- no translation found for usb_storage_stop_error_message (3746037090369246731) -->
-    <skip />
+    <string name="usb_storage_stop_error_message" msgid="3746037090369246731">"Beim Deaktivieren des USB-Speichers wurde ein Problem festgestellt. Überprüfen Sie, ob Sie den USB-Host getrennt haben, und versuchen Sie es erneut."</string>
     <string name="extmedia_format_title" msgid="8663247929551095854">"SD-Karte formatieren"</string>
     <string name="extmedia_format_message" msgid="3621369962433523619">"Möchten Sie die SD-Karte wirklich formatieren? Alle Daten auf Ihrer Karte gehen dann verloren."</string>
     <string name="extmedia_format_button_format" msgid="4131064560127478695">"Format"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB-Debugging verbunden"</string>
-    <string name="adb_active_notification_message" msgid="4661997077344501389">"Ihr Telefon ist mit einem Computer verbunden."</string>
-    <string name="select_input_method" msgid="2086499663193509436">"Eingabemethode auswählen"</string>
+    <!-- no translation found for adb_active_notification_message (8470296818270110396) -->
+    <skip />
+    <!-- no translation found for select_input_method (6865512749462072765) -->
+    <skip />
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"Kandidaten"</u></string>
@@ -738,23 +726,16 @@
     <string name="create_contact_using" msgid="4947405226788104538">"Neuer Kontakt"\n"mit <xliff:g id="NUMBER">%s</xliff:g> erstellen"</string>
     <string name="accessibility_compound_button_selected" msgid="5612776946036285686">"aktiviert"</string>
     <string name="accessibility_compound_button_unselected" msgid="8864512895673924091">"nicht aktiviert"</string>
-    <!-- no translation found for grant_credentials_permission_message_desc (6883276587034335667) -->
-    <skip />
-    <!-- no translation found for grant_credentials_permission_message_with_authtokenlabel_desc (3159007601893584687) -->
-    <skip />
+    <string name="grant_credentials_permission_message_desc" msgid="6883276587034335667">"Die aufgelisteten Anwendungen fordern eine Berechtigung zum Zugriff auf die Anmeldeinformationen für das Konto <xliff:g id="ACCOUNT">%1$s</xliff:g> von <xliff:g id="APPLICATION">%2$s</xliff:g> an. Möchten Sie diese Berechtigung erteilen? Wenn ja, wird Ihre Antwort gespeichert und Sie erhalten keine erneute Aufforderung."</string>
+    <string name="grant_credentials_permission_message_with_authtokenlabel_desc" msgid="3159007601893584687">"Die aufgelisteten Anwendungen fordern eine Berechtigung zum Zugriff auf die <xliff:g id="TYPE">%1$s</xliff:g>-Anmeldeinformationen für das Konto <xliff:g id="APPLICATION">%3$s</xliff:g> von <xliff:g id="ACCOUNT">%2$s</xliff:g> an. Möchten Sie diese Berechtigung erteilen? Wenn ja, wird Ihre Antwort gespeichert und Sie erhalten keine erneute Aufforderung."</string>
     <string name="allow" msgid="7225948811296386551">"Zulassen"</string>
     <string name="deny" msgid="2081879885755434506">"Ablehnen"</string>
     <string name="permission_request_notification_title" msgid="5390555465778213840">"Berechtigung angefordert"</string>
-    <!-- no translation found for permission_request_notification_subtitle (21911977892390675) -->
+    <!-- no translation found for permission_request_notification_with_subtitle (4325409589686688000) -->
     <skip />
-    <!-- no translation found for input_method_binding_label (1283557179944992649) -->
-    <skip />
-    <!-- no translation found for sync_binding_label (3687969138375092423) -->
-    <skip />
-    <!-- no translation found for accessibility_binding_label (4148120742096474641) -->
-    <skip />
-    <!-- no translation found for wallpaper_binding_label (1240087844304687662) -->
-    <skip />
-    <!-- no translation found for chooser_wallpaper (7873476199295190279) -->
-    <skip />
+    <string name="input_method_binding_label" msgid="1283557179944992649">"Eingabemethode"</string>
+    <string name="sync_binding_label" msgid="3687969138375092423">"Synchronisieren"</string>
+    <string name="accessibility_binding_label" msgid="4148120742096474641">"Eingabehilfen"</string>
+    <string name="wallpaper_binding_label" msgid="1240087844304687662">"Hintergrund"</string>
+    <string name="chooser_wallpaper" msgid="7873476199295190279">"Hintergrundbild ändern"</string>
 </resources>

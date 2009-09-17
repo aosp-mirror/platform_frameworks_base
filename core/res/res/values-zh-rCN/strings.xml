@@ -111,7 +111,8 @@
     <string name="httpErrorFile" msgid="8250549644091165175">"无法访问该文件。"</string>
     <string name="httpErrorFileNotFound" msgid="5588380756326017105">"找不到请求的文件。"</string>
     <string name="httpErrorTooManyRequests" msgid="1235396927087188253">"正在处理的请求太多，请稍后重试。"</string>
-    <string name="notification_title" msgid="4254304601929719937">"登录错误"</string>
+    <!-- no translation found for notification_title (1259940370369187045) -->
+    <skip />
     <string name="contentServiceSync" msgid="8353523060269335667">"同步"</string>
     <string name="contentServiceSyncNotificationTitle" msgid="397743349191901458">"同步"</string>
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"太多<xliff:g id="CONTENT_TYPE">%s</xliff:g>删除项。"</string>
@@ -210,12 +211,9 @@
     <string name="permlab_batteryStats" msgid="7863923071360031652">"修改电池使用情况统计信息"</string>
     <string name="permdesc_batteryStats" msgid="5847319823772230560">"允许修改收集的电池使用情况统计信息。普通应用程序不能使用此权限。"</string>
     <string name="permlab_backup" msgid="470013022865453920">"控制系统备份和还原"</string>
-    <!-- no translation found for permdesc_backup (4837493065154256525) -->
-    <skip />
-    <!-- no translation found for permlab_backup_data (4057625941707926463) -->
-    <skip />
-    <!-- no translation found for permdesc_backup_data (8274426305151227766) -->
-    <skip />
+    <string name="permdesc_backup" msgid="4837493065154256525">"允许应用程序控制系统的备份和还原机制。不适用于普通应用程序。"</string>
+    <string name="permlab_backup_data" msgid="4057625941707926463">"备份与还原应用程序数据"</string>
+    <string name="permdesc_backup_data" msgid="8274426305151227766">"允许应用程序参与系统的备份和还原机制。"</string>
     <string name="permlab_internalSystemWindow" msgid="2148563628140193231">"显示未授权的窗口"</string>
     <string name="permdesc_internalSystemWindow" msgid="5895082268284998469">"允许创建专供内部系统用户界面使用的窗口。普通应用程序不能使用此权限。"</string>
     <string name="permlab_systemAlertWindow" msgid="3372321942941168324">"显示系统级警报"</string>
@@ -261,8 +259,7 @@
     <string name="permlab_writeSettings" msgid="1365523497395143704">"修改全局系统设置"</string>
     <string name="permdesc_writeSettings" msgid="838789419871034696">"允许应用程序修改系统的设置数据。恶意应用程序可借此破坏您的系统配置。"</string>
     <string name="permlab_writeSecureSettings" msgid="204676251876718288">"修改安全系统设置"</string>
-    <!-- no translation found for permdesc_writeSecureSettings (5497873143539034724) -->
-    <skip />
+    <string name="permdesc_writeSecureSettings" msgid="5497873143539034724">"允许应用程序修改系统的安全设置数据。不适用于普通应用程序。"</string>
     <string name="permlab_writeGservices" msgid="2149426664226152185">"修改 Google 服务地图"</string>
     <string name="permdesc_writeGservices" msgid="6602362746516676175">"允许应用程序修改 Google 服务地图。普通应用程序不能使用此权限。"</string>
     <string name="permlab_receiveBootCompleted" msgid="7776779842866993377">"开机时自动启动"</string>
@@ -319,10 +316,8 @@
     <string name="permdesc_callPhone" msgid="3369867353692722456">"允许应用程序在没有您干预的情况下呼叫电话号码。恶意应用程序可借此在您的话费单上产生意外通话费。请注意，此权限不允许应用程序呼叫紧急电话号码。"</string>
     <string name="permlab_callPrivileged" msgid="4198349211108497879">"直接呼叫任何电话号码"</string>
     <string name="permdesc_callPrivileged" msgid="244405067160028452">"允许应用程序在没有您干预的情况下呼叫任何电话号码（包括紧急电话号码）。恶意应用程序可借此对紧急服务拨打骚扰电话和非法电话。"</string>
-    <!-- no translation found for permlab_performCdmaProvisioning (5604848095315421425) -->
-    <skip />
-    <!-- no translation found for permdesc_performCdmaProvisioning (6457447676108355905) -->
-    <skip />
+    <string name="permlab_performCdmaProvisioning" msgid="5604848095315421425">"直接启动 CDMA 电话设置"</string>
+    <string name="permdesc_performCdmaProvisioning" msgid="6457447676108355905">"允许应用程序启动 CDMA 服务。恶意应用程序可能会无端启动 CDMA 服务"</string>
     <string name="permlab_locationUpdates" msgid="7785408253364335740">"控制位置更新通知"</string>
     <string name="permdesc_locationUpdates" msgid="2300018303720930256">"允许启用/停用收音机的位置更新通知。普通应用程序不能使用此权限。"</string>
     <string name="permlab_checkinProperties" msgid="7855259461268734914">"访问检入属性"</string>
@@ -465,16 +460,14 @@
     <string name="lockscreen_failed_attempts_almost_glogin" msgid="3351013842320127827">"您已经 <xliff:g id="NUMBER_0">%d</xliff:g> 次错误地绘制了解锁图案。如果再尝试 <xliff:g id="NUMBER_1">%d</xliff:g> 次后仍不成功，系统会要求您使用自己的 Google 登录信息解锁手机。"\n\n"请在 <xliff:g id="NUMBER_2">%d</xliff:g> 秒后重试。"</string>
     <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6251480343394389665">"<xliff:g id="NUMBER">%d</xliff:g> 秒后重试。"</string>
     <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"忘记了图案？"</string>
-    <!-- no translation found for lockscreen_glogin_forgot_pattern (2588521501166032747) -->
-    <skip />
+    <string name="lockscreen_glogin_forgot_pattern" msgid="2588521501166032747">"帐户解锁"</string>
     <string name="lockscreen_glogin_too_many_attempts" msgid="2446246026221678244">"图案尝试次数过多！"</string>
     <string name="lockscreen_glogin_instructions" msgid="1816635201812207709">"要解除锁定，请使用您的 Google 帐户登录"</string>
     <string name="lockscreen_glogin_username_hint" msgid="8846881424106484447">"用户名（电子邮件）"</string>
     <string name="lockscreen_glogin_password_hint" msgid="5958028383954738528">"密码"</string>
     <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"登录"</string>
     <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"用户名或密码无效。"</string>
-    <!-- no translation found for lockscreen_glogin_checking_password (6758890536332363322) -->
-    <skip />
+    <string name="lockscreen_glogin_checking_password" msgid="6758890536332363322">"正在检查..."</string>
     <string name="hour_ampm" msgid="4329881288269772723">"<xliff:g id="AMPM">%P</xliff:g><xliff:g id="HOUR">%-l</xliff:g>点"</string>
     <string name="hour_cap_ampm" msgid="1829009197680861107">"<xliff:g id="AMPM">%p</xliff:g><xliff:g id="HOUR">%-l</xliff:g>点"</string>
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"清除"</string>
@@ -486,8 +479,7 @@
     <string name="battery_low_title" msgid="7923774589611311406">"请连接充电器"</string>
     <string name="battery_low_subtitle" msgid="7388781709819722764">"电量在减少："</string>
     <string name="battery_low_percent_format" msgid="6564958083485073855">"剩余电量不足 <xliff:g id="NUMBER">%d%%</xliff:g>。"</string>
-    <!-- no translation found for battery_low_why (7279169609518386372) -->
-    <skip />
+    <string name="battery_low_why" msgid="7279169609518386372">"电量使用情况"</string>
     <string name="factorytest_failed" msgid="5410270329114212041">"出厂测试失败"</string>
     <string name="factorytest_not_system" msgid="4435201656767276723">"只有 /system/app 中安装的包支持 FACTORY_TEST 操作。"</string>
     <string name="factorytest_no_action" msgid="872991874799998561">"未发现支持 FACTORY_TEST 操作的包。"</string>
@@ -578,12 +570,9 @@
     <item quantity="one" msgid="2178576254385739855">"明天"</item>
     <item quantity="other" msgid="2973062968038355991">"<xliff:g id="COUNT">%d</xliff:g> 天后"</item>
   </plurals>
-    <!-- no translation found for preposition_for_date (9093949757757445117) -->
-    <skip />
-    <!-- no translation found for preposition_for_time (5506831244263083793) -->
-    <skip />
-    <!-- no translation found for preposition_for_year (5040395640711867177) -->
-    <skip />
+    <string name="preposition_for_date" msgid="9093949757757445117">"日期：<xliff:g id="DATE">%s</xliff:g>"</string>
+    <string name="preposition_for_time" msgid="5506831244263083793">"时间：<xliff:g id="TIME">%s</xliff:g>"</string>
+    <string name="preposition_for_year" msgid="5040395640711867177">"年份：<xliff:g id="YEAR">%s</xliff:g>"</string>
     <string name="day" msgid="8144195776058119424">"天"</string>
     <string name="days" msgid="4774547661021344602">"天"</string>
     <string name="hour" msgid="2126771916426189481">"小时"</string>
@@ -621,10 +610,8 @@
     <string name="copyAll" msgid="2590829068100113057">"全部复制"</string>
     <string name="paste" msgid="5629880836805036433">"粘贴"</string>
     <string name="copyUrl" msgid="2538211579596067402">"复制网址"</string>
-    <!-- no translation found for inputMethod (1653630062304567879) -->
-    <skip />
-    <!-- no translation found for addToDictionary (8793624991686948709) -->
-    <skip />
+    <string name="inputMethod" msgid="1653630062304567879">"输入法"</string>
+    <string name="addToDictionary" msgid="8793624991686948709">"将“<xliff:g id="WORD">%s</xliff:g>”添加到词典"</string>
     <string name="editTextMenuTitle" msgid="1672989176958581452">"编辑文字"</string>
     <string name="low_internal_storage_view_title" msgid="1399732408701697546">"空间不足"</string>
     <string name="low_internal_storage_view_text" msgid="635106544616378836">"手机存储空间正在减少。"</string>
@@ -700,14 +687,15 @@
     <string name="usb_storage_stop_message" msgid="2390958966725232848">"在关闭 USB 存储设备前，请确保您已卸载了 USB 主设备。选择“关闭”关闭 USB 存储设备。"</string>
     <string name="usb_storage_stop_button_mount" msgid="1181858854166273345">"关闭"</string>
     <string name="usb_storage_stop_button_unmount" msgid="3774611918660582898">"取消"</string>
-    <!-- no translation found for usb_storage_stop_error_message (3746037090369246731) -->
-    <skip />
+    <string name="usb_storage_stop_error_message" msgid="3746037090369246731">"关闭 USB 存储设备时遇到问题。请检查是否卸载了 USB 主设备，然后重试。"</string>
     <string name="extmedia_format_title" msgid="8663247929551095854">"格式化 SD 卡"</string>
     <string name="extmedia_format_message" msgid="3621369962433523619">"您确定要格式化 SD 卡？卡上的所有数据都会丢失。"</string>
     <string name="extmedia_format_button_format" msgid="4131064560127478695">"格式化"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"已连接 USB 调试接口"</string>
-    <string name="adb_active_notification_message" msgid="4661997077344501389">"计算机已与手机相连。"</string>
-    <string name="select_input_method" msgid="2086499663193509436">"选择输入法"</string>
+    <!-- no translation found for adb_active_notification_message (8470296818270110396) -->
+    <skip />
+    <!-- no translation found for select_input_method (6865512749462072765) -->
+    <skip />
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"候选"</u></string>
@@ -738,23 +726,16 @@
     <string name="create_contact_using" msgid="4947405226788104538">"创建电话号码为"\n"<xliff:g id="NUMBER">%s</xliff:g> 的联系人"</string>
     <string name="accessibility_compound_button_selected" msgid="5612776946036285686">"已选中"</string>
     <string name="accessibility_compound_button_unselected" msgid="8864512895673924091">"未选中"</string>
-    <!-- no translation found for grant_credentials_permission_message_desc (6883276587034335667) -->
-    <skip />
-    <!-- no translation found for grant_credentials_permission_message_with_authtokenlabel_desc (3159007601893584687) -->
-    <skip />
+    <string name="grant_credentials_permission_message_desc" msgid="6883276587034335667">"所列应用程序正在请求相应的权限，以便从<xliff:g id="APPLICATION">%2$s</xliff:g>访问 <xliff:g id="ACCOUNT">%1$s</xliff:g> 帐户的登录凭据。是否要授予这种权限？如果授予，系统会记住您所做的选择，且不再提示。"</string>
+    <string name="grant_credentials_permission_message_with_authtokenlabel_desc" msgid="3159007601893584687">"所列应用程序正在请求相应的权限，以便从<xliff:g id="APPLICATION">%3$s</xliff:g>访问 <xliff:g id="ACCOUNT">%2$s</xliff:g> 帐户的<xliff:g id="TYPE">%1$s</xliff:g>登录凭据。是否要授予这种权限？如果授予，系统会记住您所做的选择，且不再提示。"</string>
     <string name="allow" msgid="7225948811296386551">"允许"</string>
     <string name="deny" msgid="2081879885755434506">"拒绝"</string>
     <string name="permission_request_notification_title" msgid="5390555465778213840">"已请求权限"</string>
-    <!-- no translation found for permission_request_notification_subtitle (21911977892390675) -->
+    <!-- no translation found for permission_request_notification_with_subtitle (4325409589686688000) -->
     <skip />
-    <!-- no translation found for input_method_binding_label (1283557179944992649) -->
-    <skip />
-    <!-- no translation found for sync_binding_label (3687969138375092423) -->
-    <skip />
-    <!-- no translation found for accessibility_binding_label (4148120742096474641) -->
-    <skip />
-    <!-- no translation found for wallpaper_binding_label (1240087844304687662) -->
-    <skip />
-    <!-- no translation found for chooser_wallpaper (7873476199295190279) -->
-    <skip />
+    <string name="input_method_binding_label" msgid="1283557179944992649">"输入法"</string>
+    <string name="sync_binding_label" msgid="3687969138375092423">"同步"</string>
+    <string name="accessibility_binding_label" msgid="4148120742096474641">"辅助功能"</string>
+    <string name="wallpaper_binding_label" msgid="1240087844304687662">"壁纸"</string>
+    <string name="chooser_wallpaper" msgid="7873476199295190279">"更改壁纸"</string>
 </resources>
