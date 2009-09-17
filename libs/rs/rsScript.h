@@ -34,6 +34,7 @@ class ProgramFragmentStore;
 class Script : public ObjectBase
 {
 public:
+    typedef void (* InvokeFunc_t)(void);
 
     Script();
     virtual ~Script();
@@ -52,16 +53,21 @@ public:
         ObjectBaseRef<ProgramFragment> mFragment;
         //ObjectBaseRef<ProgramRaster> mRaster;
         ObjectBaseRef<ProgramFragmentStore> mFragmentStore;
-
+        InvokeFunc_t mInvokables[MAX_SCRIPT_BANKS];
+        const char * mScriptText;
+        uint32_t mScriptTextLength;
     };
     Enviroment_t mEnviroment;
 
     uint32_t mCounstantBufferCount;
 
+
     ObjectBaseRef<Allocation> mSlots[MAX_SCRIPT_BANKS];
     ObjectBaseRef<const Type> mTypes[MAX_SCRIPT_BANKS];
     String8 mSlotNames[MAX_SCRIPT_BANKS];
     bool mSlotWritable[MAX_SCRIPT_BANKS];
+
+
 
     virtual bool run(Context *, uint32_t launchID) = 0;
 };

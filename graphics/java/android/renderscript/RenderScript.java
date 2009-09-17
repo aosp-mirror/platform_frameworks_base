@@ -140,6 +140,8 @@ public class RenderScript {
     native void nScriptSetTimeZone(int script, byte[] timeZone);
     native void nScriptSetType(int type, boolean writable, String name, int slot);
     native void nScriptSetRoot(boolean isRoot);
+    native void nScriptSetInvokable(String name, int slot);
+    native void nScriptInvoke(int id, int slot);
 
     native void nScriptCBegin();
     native void nScriptCSetScript(byte[] script, int offset, int length);
