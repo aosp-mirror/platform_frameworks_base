@@ -1039,6 +1039,7 @@ public final class ContactsContract {
             public static final int TYPE_WORK_MOBILE = 17;
             public static final int TYPE_WORK_PAGER = 18;
             public static final int TYPE_ASSISTANT = 19;
+            public static final int TYPE_MMS = 20;
 
             /**
              * The phone number as the user entered it.
