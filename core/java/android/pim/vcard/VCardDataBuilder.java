@@ -15,6 +15,7 @@
  */
 package android.pim.vcard;
 
+import android.accounts.Account;
 import android.util.CharsetUtils;
 import android.util.Log;
 
@@ -59,7 +60,8 @@ public class VCardDataBuilder implements VCardBuilder {
     private String mTargetCharset;
     private boolean mStrictLineBreakParsing;
     
-    private int mVCardType;
+    final private int mVCardType;
+    final private Account mAccount;
     
     // Just for testing.
     private long mTimePushIntoContentResolver;
@@ -67,21 +69,22 @@ public class VCardDataBuilder implements VCardBuilder {
     private List<EntryHandler> mEntryHandlers = new ArrayList<EntryHandler>();
     
     public VCardDataBuilder() {
-        this(null, null, false, VCardConfig.VCARD_TYPE_V21_GENERIC);
+        this(null, null, false, VCardConfig.VCARD_TYPE_V21_GENERIC, null);
     }
 
     /**
      * @hide 
      */
     public VCardDataBuilder(int vcardType) {
-        this(null, null, false, vcardType);
+        this(null, null, false, vcardType, null);
     }
 
     /**
      * @hide 
      */
-    public VCardDataBuilder(String charset, boolean strictLineBreakParsing, int vcardType) {
-        this(null, charset, strictLineBreakParsing, vcardType);
+    public VCardDataBuilder(String charset,
+            boolean strictLineBreakParsing, int vcardType, Account account) {
+        this(null, charset, strictLineBreakParsing, vcardType, account);
     }
     
     /**
@@ -90,7 +93,8 @@ public class VCardDataBuilder implements VCardBuilder {
     public VCardDataBuilder(String sourceCharset,
             String targetCharset,
             boolean strictLineBreakParsing,
-            int vcardType) {
+            int vcardType,
+            Account account) {
         if (sourceCharset != null) {
             mSourceCharset = sourceCharset;
         } else {
@@ -103,6 +107,7 @@ public class VCardDataBuilder implements VCardBuilder {
         }
         mStrictLineBreakParsing = strictLineBreakParsing;
         mVCardType = vcardType;
+        mAccount = account;
     }
     
     public void addEntryHandler(EntryHandler entryHandler) {
@@ -136,7 +141,7 @@ public class VCardDataBuilder implements VCardBuilder {
             Log.e(LOG_TAG, "This is not VCARD!");
         }
 
-        mCurrentContactStruct = new ContactStruct(mVCardType);
+        mCurrentContactStruct = new ContactStruct(mVCardType, mAccount);
     }
 
     public void endRecord() {
