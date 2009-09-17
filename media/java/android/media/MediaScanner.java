@@ -726,8 +726,8 @@ public class MediaScanner
                     // exif is null
                 }
                 if (exif != null) {
-                    float[] latlng = exif.getLatLong();
-                    if (latlng != null) {
+                    float[] latlng = new float[2];
+                    if (exif.getLatLong(latlng)) {
                         values.put(Images.Media.LATITUDE, latlng[0]);
                         values.put(Images.Media.LONGITUDE, latlng[1]);
                     }
