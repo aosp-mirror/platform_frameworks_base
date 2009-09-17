@@ -3204,6 +3204,24 @@ public final class Settings {
                 "vending_carrier_ref_freq_ms";
 
         /**
+         * Interval in milliseconds after which a failed provisioning request should be retried.
+         */
+        public static final String VENDING_CARRIER_PROVISIONING_RETRY_MS =
+            "vending_carrier_prov_retry_ms";
+
+        /**
+         * Buffer in milliseconds for carrier credentials to be considered valid.
+         */
+        public static final String VENDING_CARRIER_CREDENTIALS_BUFFER_MS =
+            "vending_carrier_cred_buf_ms";
+
+        /**
+         * Setting which states if German Direct Debit support should be enabled.
+         */
+        public static final String VENDING_GDD_ENABLE =
+            "vending_gdd_enable";
+
+        /**
          * URL that points to the legal terms of service to display in Settings.
          * <p>
          * This should be a https URL. For a pretty user-friendly URL, use
