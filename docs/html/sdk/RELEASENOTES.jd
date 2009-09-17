@@ -24,6 +24,11 @@ your <a href="{@docRoot}guide/developing/tools/avd.html">Android Virtual
 Devices</a> and download new SDK packages (such as platform versions and 
 add-ons) into your environment.</li>
     <li>Improved support for test packages in New Project Wizard</li>
+    <li>The reference documentation now offers a "Filter by API Level" 
+capability that lets you display only the parts of the API that are actually 
+available to your application, based on the <code>android:minSdkVersion</code>
+value the application declares in its manifest. For more information, see
+<a href="{@docRoot}guide/appendix/api-levels.html">Android API Levels</a></li>
   </ul>
 
 <p>For details about the Android platforms included in the SDK &mdash; including
@@ -71,8 +76,8 @@ Your Eclipse Plugin</a>. </p>
 
 <h3>Android SDK and AVD Manager</h3>
 
-<p>The SDK offers a new tool called Android AVD Manager that lets you manage
-your SDK and AVD environments more efficiently. </p>
+<p>The SDK offers a new tool called Android SDK and AVD Manager that lets you 
+manage your SDK and AVD environments more efficiently. </p>
 
 <p>Using the tool, you can quickly check what Android platforms, add-ons,
 extras, and documentation packages are available in your SDK environment, what
@@ -181,7 +186,7 @@ skins, including: </p>
 <p>Besides these defaults, You can also create an AVD that overrides the default
 density for each skin, to create any combination of resolution/density (WVGA
 with medium density, for instance).  To do so, use the <code>android</code> tool
-command line to create a new AVD that uses a custom hardare configuration. See
+command line to create a new AVD that uses a custom hardware configuration. See
 <a href="{@docRoot}guide/developing/tools/avd.html#createavd">Creating an
 AVD</a> for more information.</p>
 
