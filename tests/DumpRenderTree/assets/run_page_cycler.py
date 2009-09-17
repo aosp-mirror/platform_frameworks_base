@@ -59,8 +59,18 @@ def main(options, args):
   run_load_test_cmd = run_load_test_cmd_prefix + " -e class com.android.dumprendertree.LoadTestsAutoTest#runPageCyclerTest -e path \"" + path + "\" -e timeout " + timeout_ms + run_load_test_cmd_postfix
 
   (adb_output, adb_error) = subprocess.Popen(run_load_test_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
-  if adb_output.find('INSTRUMENTATION_FAILED') != -1 or \
-      adb_output.find('Process crashed.') != -1:
+  fail_flag = False
+  for line in adb_output.splitlines():
+    line = line.strip()
+    if line.find('INSTRUMENTATION_CODE') == 0:
+      if not line[22:] == '-1':
+        fail_flag = True
+        break
+    if (line.find('INSTRUMENTATION_FAILED') != -1 or
+        line.find('Process crashed.') != -1):
+      fail_flag = True
+      break
+  if fail_flag:
     logging.error("Error happened : " + adb_output)
     sys.exit(1)
 
@@ -80,7 +90,6 @@ def main(options, args):
   shell_cmd_str = adb_cmd + " pull " + result_file + " " + results_dir
   adb_output = subprocess.Popen(shell_cmd_str, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()[0]
   logging.info(adb_output)
-    
   logging.info("Results are stored under: " + results_dir + "/load_test_result.txt\n")
 
 if '__main__' == __name__:
