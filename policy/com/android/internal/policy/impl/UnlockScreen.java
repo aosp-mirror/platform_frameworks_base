@@ -58,6 +58,11 @@ class UnlockScreen extends LinearLayoutWithDefaultTouchRecepient
     private final KeyguardUpdateMonitor mUpdateMonitor;
     private final KeyguardScreenCallback mCallback;
 
+    /**
+     * whether there is a fallback option available when the pattern is forgotten.
+     */
+    private final boolean mEnableFallback;
+
     private boolean mCreatedInPortrait;
 
     private ImageView mUnlockIcon;
@@ -85,9 +90,6 @@ class UnlockScreen extends LinearLayoutWithDefaultTouchRecepient
     };
 
     private Button mForgotPatternButton;
-
-    private ServiceConnection mServiceConnection;
-
 
     enum FooterMode {
         Normal,
@@ -118,17 +120,22 @@ class UnlockScreen extends LinearLayoutWithDefaultTouchRecepient
      * @param updateMonitor Used to lookup state affecting keyguard.
      * @param callback Used to notify the manager when we're done, etc.
      * @param totalFailedAttempts The current number of failed attempts.
+     * @param enableFallback True if a backup unlock option is available when the user has forgotten
+     *        their pattern (e.g they have a google account so we can show them the account based
+     *        backup option).
      */
     UnlockScreen(Context context,
-            LockPatternUtils lockPatternUtils,
-            KeyguardUpdateMonitor updateMonitor,
-            KeyguardScreenCallback callback,
-            int totalFailedAttempts) {
+                 LockPatternUtils lockPatternUtils,
+                 KeyguardUpdateMonitor updateMonitor,
+                 KeyguardScreenCallback callback,
+                 int totalFailedAttempts,
+                 boolean enableFallback) {
         super(context);
         mLockPatternUtils = lockPatternUtils;
         mUpdateMonitor = updateMonitor;
         mCallback = callback;
         mTotalFailedPatternAttempts = totalFailedAttempts;
+        mEnableFallback = enableFallback;
         mFailedPatternAttemptsSinceLastTimeout = totalFailedAttempts % LockPatternUtils.FAILED_ATTEMPTS_BEFORE_TIMEOUT;
 
         if (mUpdateMonitor.isInPortrait()) {
@@ -189,15 +196,6 @@ class UnlockScreen extends LinearLayoutWithDefaultTouchRecepient
         mCreatedInPortrait = updateMonitor.isInPortrait();
         updateMonitor.registerConfigurationChangeCallback(this);
         setFocusableInTouchMode(true);
-    }
-
-    @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if (keyCode == KeyEvent.KEYCODE_BACK) {
-            mCallback.goToLockScreen();
-            return true;
-        }
-        return false;        
     }
 
     @Override
@@ -262,10 +260,11 @@ class UnlockScreen extends LinearLayoutWithDefaultTouchRecepient
         // the footer depends on how many total attempts the user has failed
         if (mCallback.isVerifyUnlockOnly()) {
             updateFooter(FooterMode.VerifyUnlocked);
-        } else if (mTotalFailedPatternAttempts < LockPatternUtils.FAILED_ATTEMPTS_BEFORE_TIMEOUT) {
-            updateFooter(FooterMode.Normal);
-        } else {
+        } else if (mEnableFallback &&
+                (mTotalFailedPatternAttempts >= LockPatternUtils.FAILED_ATTEMPTS_BEFORE_TIMEOUT)) {
             updateFooter(FooterMode.ForgotLockPattern);
+        } else {
+            updateFooter(FooterMode.Normal);
         }
     }
 
@@ -342,7 +341,11 @@ class UnlockScreen extends LinearLayoutWithDefaultTouchRecepient
                 mUnlockHeader.setText(R.string.lockscreen_pattern_instructions);
                 mUnlockIcon.setVisibility(View.VISIBLE);
                 mFailedPatternAttemptsSinceLastTimeout = 0;
-                updateFooter(FooterMode.ForgotLockPattern);
+                if (mEnableFallback) {
+                    updateFooter(FooterMode.ForgotLockPattern);
+                } else {
+                    updateFooter(FooterMode.Normal);
+                }
             }
         }.start();
     }
