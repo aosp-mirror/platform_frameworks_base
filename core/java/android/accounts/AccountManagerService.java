@@ -25,6 +25,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.RegisteredServicesCache;
 import android.content.pm.PackageInfo;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.RegisteredServicesCacheListener;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
@@ -69,7 +70,9 @@ import com.android.internal.R;
  *      (AccountManager)context.getSystemService(Context.ACCOUNT_SERVICE)
  * @hide
  */
-public class AccountManagerService extends IAccountManager.Stub {
+public class AccountManagerService
+        extends IAccountManager.Stub
+        implements RegisteredServicesCacheListener {
     private static final String TAG = "AccountManagerService";
 
     private static final int TIMEOUT_DELAY_MS = 1000 * 60;
@@ -209,11 +212,41 @@ public class AccountManagerService extends IAccountManager.Stub {
         mMessageHandler = new MessageHandler(mMessageThread.getLooper());
 
         mAuthenticatorCache = new AccountAuthenticatorCache(mContext);
+        mAuthenticatorCache.setListener(this);
         mBindHelper = new AuthenticatorBindHelper(mContext, mAuthenticatorCache, mMessageHandler,
                 MESSAGE_CONNECTED, MESSAGE_DISCONNECTED);
 
         mSimWatcher = new SimWatcher(mContext);
         sThis.set(this);
+
+        onRegisteredServicesCacheChanged();
+    }
+
+    public void onRegisteredServicesCacheChanged() {
+        boolean accountDeleted = false;
+        SQLiteDatabase db = mOpenHelper.getWritableDatabase();
+        Cursor cursor = db.query(TABLE_ACCOUNTS,
+                new String[]{ACCOUNTS_ID, ACCOUNTS_TYPE, ACCOUNTS_NAME},
+                null, null, null, null, null);
+        try {
+            while (cursor.moveToNext()) {
+                final long accountId = cursor.getLong(0);
+                final String accountType = cursor.getString(1);
+                final String accountName = cursor.getString(2);
+                if (mAuthenticatorCache.getServiceInfo(AuthenticatorDescription.newKey(accountType))
+                        == null) {
+                    Log.d(TAG, "deleting account " + accountName + " because type "
+                            + accountType + " no longer has a registered authenticator");
+                    db.delete(TABLE_ACCOUNTS, ACCOUNTS_ID + "=" + accountId, null);
+                    accountDeleted= true;
+                }
+            }
+        } finally {
+            cursor.close();
+            if (accountDeleted) {
+                sendAccountsChangedBroadcast();
+            }
+        }
     }
 
     public String getPassword(Account account) {
@@ -533,15 +566,19 @@ public class AccountManagerService extends IAccountManager.Stub {
         checkAuthenticateAccountsPermission(account);
         long identityToken = clearCallingIdentity();
         try {
-            ContentValues values = new ContentValues();
-            values.put(ACCOUNTS_PASSWORD, password);
-            mOpenHelper.getWritableDatabase().update(TABLE_ACCOUNTS, values,
-                    ACCOUNTS_NAME + "=? AND " + ACCOUNTS_TYPE+ "=?",
-                    new String[]{account.name, account.type});
-            sendAccountsChangedBroadcast();
+            setPasswordInDB(account, password);
         } finally {
             restoreCallingIdentity(identityToken);
         }
+    }
+
+    private void setPasswordInDB(Account account, String password) {
+        ContentValues values = new ContentValues();
+        values.put(ACCOUNTS_PASSWORD, password);
+        mOpenHelper.getWritableDatabase().update(TABLE_ACCOUNTS, values,
+                ACCOUNTS_NAME + "=? AND " + ACCOUNTS_TYPE+ "=?",
+                new String[]{account.name, account.type});
+        sendAccountsChangedBroadcast();
     }
 
     private void sendAccountsChangedBroadcast() {
@@ -552,7 +589,7 @@ public class AccountManagerService extends IAccountManager.Stub {
         checkManageAccountsPermission();
         long identityToken = clearCallingIdentity();
         try {
-            setPassword(account, null);
+            setPasswordInDB(account, null);
         } finally {
             restoreCallingIdentity(identityToken);
         }
