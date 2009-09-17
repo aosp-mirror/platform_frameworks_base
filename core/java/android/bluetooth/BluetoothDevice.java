@@ -503,7 +503,7 @@ public final class BluetoothDevice implements Parcelable {
     }
 
     /** @hide */
-     public String[] getUuids() {
+     public ParcelUuid[] getUuids() {
         try {
             return sService.getRemoteUuids(mAddress);
         } catch (RemoteException e) {Log.e(TAG, "", e);}
@@ -511,7 +511,7 @@ public final class BluetoothDevice implements Parcelable {
     }
 
     /** @hide */
-    public int getServiceChannel(String uuid) {
+    public int getServiceChannel(ParcelUuid uuid) {
          try {
              return sService.getRemoteServiceChannel(mAddress, uuid);
          } catch (RemoteException e) {Log.e(TAG, "", e);}

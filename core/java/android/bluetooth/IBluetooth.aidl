@@ -16,6 +16,8 @@
 
 package android.bluetooth;
 
+import android.bluetooth.ParcelUuid;
+
 /**
  * System private API for talking with the Bluetooth service.
  *
@@ -50,8 +52,8 @@ interface IBluetooth
 
     String getRemoteName(in String address);
     int getRemoteClass(in String address);
-    String[] getRemoteUuids(in String address);
-    int getRemoteServiceChannel(in String address, String uuid);
+    ParcelUuid[] getRemoteUuids(in String address);
+    int getRemoteServiceChannel(in String address,in ParcelUuid uuid);
 
     boolean setPin(in String address, in byte[] pin);
     boolean setPasskey(in String address, int passkey);
