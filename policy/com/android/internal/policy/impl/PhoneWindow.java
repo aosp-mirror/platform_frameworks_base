@@ -1195,19 +1195,10 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             }
 
             case KeyEvent.KEYCODE_BACK: {
-                // Currently don't do anything with long presses.
                 if (event.getRepeatCount() > 0) break;
                 if (featureId < 0) break;
-                if (featureId == FEATURE_OPTIONS_PANEL) {
-                    PanelFeatureState st = getPanelState(featureId, false);
-                    if (st != null && st.isInExpandedMode) {
-                        // If the user is in an expanded menu and hits back, it
-                        // should go back to the icon menu
-                        reopenMenu(true);
-                        return true;
-                    }
-                }
-                closePanel(featureId);
+                // Currently don't do anything with long press.
+                dispatcher.startTracking(event, this);
                 return true;
             }
 
@@ -1321,17 +1312,20 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
             case KeyEvent.KEYCODE_BACK: {
                 if (featureId < 0) break;
-                if (featureId == FEATURE_OPTIONS_PANEL) {
-                    PanelFeatureState st = getPanelState(featureId, false);
-                    if (st != null && st.isInExpandedMode) {
-                        // If the user is in an expanded menu and hits back, it
-                        // should go back to the icon menu
-                        reopenMenu(true);
-                        return true;
+                if (event.isTracking() && !event.isCanceled()) {
+                    if (featureId == FEATURE_OPTIONS_PANEL) {
+                        PanelFeatureState st = getPanelState(featureId, false);
+                        if (st != null && st.isInExpandedMode) {
+                            // If the user is in an expanded menu and hits back, it
+                            // should go back to the icon menu
+                            reopenMenu(true);
+                            return true;
+                        }
                     }
+                    closePanel(featureId);
+                    return true;
                 }
-                closePanel(featureId);
-                return true;
+                break;
             }
 
             case KeyEvent.KEYCODE_HEADSETHOOK:
