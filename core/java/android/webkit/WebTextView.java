@@ -38,6 +38,7 @@ import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
@@ -430,16 +431,24 @@ import java.util.ArrayList;
             mGotTouchDown = true;
             break;
         case MotionEvent.ACTION_MOVE:
+            int slop = ViewConfiguration.get(mContext).getScaledTouchSlop();
             Spannable buffer = getText();
             int initialScrollX = Touch.getInitialScrollX(this, buffer);
             int initialScrollY = Touch.getInitialScrollY(this, buffer);
             super.onTouchEvent(event);
-            if (mScrollX != initialScrollX
-                    || mScrollY != initialScrollY) {
+            if (Math.abs(mScrollX - initialScrollX) > slop
+                    || Math.abs(mScrollY - initialScrollY) > slop) {
                 if (mWebView != null) {
                     mWebView.scrollFocusedTextInput(mScrollX, mScrollY);
                 }
                 mScrolled = true;
+                return true;
+            }
+            if (Math.abs((int) event.getX() - mDragStartX) < slop
+                    && Math.abs((int) event.getY() - mDragStartY) < slop) {
+                // If the user has not scrolled further than slop, we should not
+                // send the drag.  Instead, do nothing, and when the user lifts
+                // their finger, we will change the selection.
                 return true;
             }
             if (mWebView != null) {
