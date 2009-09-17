@@ -49,8 +49,6 @@ public class ServiceCommand {
 
     public static final int BUFFER_LENGTH = 4096;
 
-    private static final boolean DBG = true;
-
     private String mServiceName;
     private String mTag;
     private InputStream mIn;
@@ -61,7 +59,6 @@ public class ServiceCommand {
         if (mSocket != null) {
             return true;
         }
-        if (DBG) Log.d(mTag, "connecting...");
         try {
             mSocket = new LocalSocket();
 
@@ -80,7 +77,6 @@ public class ServiceCommand {
     }
 
     private void disconnect() {
-        if (DBG) Log.d(mTag,"disconnecting...");
         try {
             if (mSocket != null) mSocket.close();
         } catch (IOException ex) { }

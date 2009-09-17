@@ -116,10 +116,13 @@ static int parse_strings(char *data, int data_len, int ntokens, ...)
 
 static int is_alnum_string(char *s)
 {
+    char *s0 = s;
     while (*s != 0) {
-        if (!isalnum(*s++)) return 0;
+        if (!isalnum(*s++)) {
+            LOGE("The string '%s' is not an alphanumeric string\n", s0);
+            return 0;
+        }
     }
-    LOGE("The string %s is not an alphanumeric string\n", s);
     return 1;
 }
 
@@ -159,7 +162,9 @@ static void do_unlock(LPC_MARSHAL *cmd, LPC_MARSHAL *reply)
 // no argument
 static void do_get_state(LPC_MARSHAL *cmd, LPC_MARSHAL *reply)
 {
-    reply->retcode = get_state();
+    int s = get_state();
+    if (DBG) LOGD("keystore state = %d\n", s);
+    reply->retcode = s;
 }
 
 // args of listkeys():
@@ -413,12 +418,10 @@ int server_main(const int argc, const char *argv[])
 
         // read the command, execute and send the result back.
         if(read_marshal(s, &cmd)) goto err;
-        if (DBG) LOGD("new connection\n");
         execute(&cmd, &reply);
         write_marshal(s, &reply);
 err:
         memset(&reply, 0, sizeof(LPC_MARSHAL));
-        if (DBG) LOGD("closing connection\n");
         close(s);
     }
 
