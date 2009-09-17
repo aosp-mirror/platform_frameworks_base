@@ -20,6 +20,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
 import android.os.Message;
+import android.os.SystemClock;
 import android.os.UEventObserver;
 import android.util.Log;
 
@@ -41,8 +42,11 @@ class DockObserver extends UEventObserver {
 
     private final Context mContext;
 
-    public DockObserver(Context context) {
+    private PowerManagerService mPowerManager;
+
+    public DockObserver(Context context, PowerManagerService pm) {
         mContext = context;
+        mPowerManager = pm;
         init();  // set initial status
         startObserving(DOCK_UEVENT_MATCH);
     }
@@ -103,6 +107,7 @@ class DockObserver extends UEventObserver {
             synchronized (this) {
                 Log.d(TAG, "Broadcasting dock state " + mDockState);
                 // Pack up the values and broadcast them to everyone
+                mPowerManager.userActivityWithForce(SystemClock.uptimeMillis(), false, true);
                 Intent intent = new Intent(Intent.ACTION_DOCK_EVENT);
                 intent.putExtra(Intent.EXTRA_DOCK_STATE, mDockState);
                 mContext.sendStickyBroadcast(intent);
