@@ -40,9 +40,9 @@ const char* const LayerBlur::typeID = "LayerBlur";
 
 LayerBlur::LayerBlur(SurfaceFlinger* flinger, DisplayID display,
         const sp<Client>& client, int32_t i)
-     : LayerBaseClient(flinger, display, client, i), mCacheDirty(true),
-     mRefreshCache(true), mCacheAge(0), mTextureName(-1U), 
-     mWidthScale(1.0f), mHeightScale(1.0f)
+: LayerBaseClient(flinger, display, client, i), mCacheDirty(true),
+mRefreshCache(true), mCacheAge(0), mTextureName(-1U), 
+mWidthScale(1.0f), mHeightScale(1.0f)
 {
 }
 
@@ -136,6 +136,13 @@ void LayerBlur::onDraw(const Region& clip) const
         // create the texture name the first time
         // can't do that in the ctor, because it runs in another thread.
         glGenTextures(1, &mTextureName);
+        glGetIntegerv(GL_IMPLEMENTATION_COLOR_READ_FORMAT_OES, &mReadFormat);
+        glGetIntegerv(GL_IMPLEMENTATION_COLOR_READ_TYPE_OES, &mReadType);
+        if (mReadFormat != GL_RGB || mReadType != GL_UNSIGNED_SHORT_5_6_5) {
+            mReadFormat = GL_RGBA;
+            mReadType = GL_UNSIGNED_BYTE;
+            mBlurFormat = GGL_PIXEL_FORMAT_RGBX_8888;
+        }
     }
 
     Region::const_iterator it = clip.begin();
@@ -143,33 +150,39 @@ void LayerBlur::onDraw(const Region& clip) const
     if (it != end) {
         glEnable(GL_TEXTURE_2D);
         glBindTexture(GL_TEXTURE_2D, mTextureName);
-    
+
         if (mRefreshCache) {
             mRefreshCache = false;
             mAutoRefreshPending = false;
-            
-            // allocate enough memory for 4-bytes (2 pixels) aligned data
-            const int32_t s = (w + 1) & ~1;
-            uint16_t* const pixels = (uint16_t*)malloc(s*h*2);
+
+            int32_t pixelSize = 4;
+            int32_t s = w;
+            if (mReadType == GL_UNSIGNED_SHORT_5_6_5) {
+                // allocate enough memory for 4-bytes (2 pixels) aligned data
+                s = (w + 1) & ~1;
+                pixelSize = 2;
+            }
+
+            uint16_t* const pixels = (uint16_t*)malloc(s*h*pixelSize);
 
             // This reads the frame-buffer, so a h/w GL would have to
             // finish() its rendering first. we don't want to do that
             // too often. Read data is 4-bytes aligned.
-            glReadPixels(X, Y, w, h, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, pixels);
-            
+            glReadPixels(X, Y, w, h, mReadFormat, mReadType, pixels);
+
             // blur that texture.
             GGLSurface bl;
             bl.version = sizeof(GGLSurface);
             bl.width = w;
             bl.height = h;
             bl.stride = s;
-            bl.format = GGL_PIXEL_FORMAT_RGB_565;
+            bl.format = mBlurFormat;
             bl.data = (GGLubyte*)pixels;            
             blurFilter(&bl, 8, 2);
 
             if (mFlags & (DisplayHardware::NPOT_EXTENSION)) {
-                glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, w, h, 0,
-                        GL_RGB, GL_UNSIGNED_SHORT_5_6_5, pixels);
+                glTexImage2D(GL_TEXTURE_2D, 0, mReadFormat, w, h, 0,
+                        mReadFormat, mReadType, pixels);
                 mWidthScale  = 1.0f / w;
                 mHeightScale =-1.0f / h;
                 mYOffset = 0;
@@ -178,10 +191,10 @@ void LayerBlur::onDraw(const Region& clip) const
                 GLuint th = 1 << (31 - clz(h));
                 if (tw < w) tw <<= 1;
                 if (th < h) th <<= 1;
-                glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, tw, th, 0,
-                        GL_RGB, GL_UNSIGNED_SHORT_5_6_5, NULL);
+                glTexImage2D(GL_TEXTURE_2D, 0, mReadFormat, tw, th, 0,
+                        mReadFormat, mReadType, NULL);
                 glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, w, h, 
-                        GL_RGB, GL_UNSIGNED_SHORT_5_6_5, pixels);
+                        mReadFormat, mReadType, pixels);
                 mWidthScale  = 1.0f / tw;
                 mHeightScale =-1.0f / th;
                 mYOffset = th-h;
@@ -189,7 +202,7 @@ void LayerBlur::onDraw(const Region& clip) const
 
             free((void*)pixels);
         }
-        
+
         const State& s = drawingState();
         if (UNLIKELY(s.alpha < 0xFF)) {
             const GGLfixed alpha = (s.alpha << 16)/255;
