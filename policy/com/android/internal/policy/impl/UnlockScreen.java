@@ -43,7 +43,8 @@ import java.util.Date;
  * the user how to unlock their device, or make an emergency call.
  */
 class UnlockScreen extends LinearLayoutWithDefaultTouchRecepient
-        implements KeyguardScreen, KeyguardUpdateMonitor.ConfigurationChangeCallback, KeyguardUpdateMonitor.InfoCallback, KeyguardUpdateMonitor.SimStateCallback {
+        implements KeyguardScreen, KeyguardUpdateMonitor.ConfigurationChangeCallback,
+        KeyguardUpdateMonitor.InfoCallback, KeyguardUpdateMonitor.SimStateCallback {
 
     private static final String TAG = "UnlockScreen";
 
@@ -156,7 +157,6 @@ class UnlockScreen extends LinearLayoutWithDefaultTouchRecepient
         mDate = (TextView) findViewById(R.id.date);
         mTime = (TextView) findViewById(R.id.time);
 
-        mCarrier.setText("Verizon Wireless");
         mCenterDot.setText("|");
         refreshTimeAndDateDisplay();
 
@@ -217,7 +217,7 @@ class UnlockScreen extends LinearLayoutWithDefaultTouchRecepient
         mCarrier.setText(
                 LockScreen.getCarrierString(
                         mUpdateMonitor.getTelephonyPlmn(),
-                        mUpdateMonitor.getTelephonySpn()));        
+                        mUpdateMonitor.getTelephonySpn()));
     }
 
     private void refreshTimeAndDateDisplay() {
