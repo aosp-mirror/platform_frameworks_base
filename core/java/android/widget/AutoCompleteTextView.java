@@ -1325,7 +1325,7 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
         final int maxHeight = mPopup.getMaxAvailableHeight(
                 getDropDownAnchorView(), mDropDownVerticalOffset, ignoreBottomDecorations);
 
-        if (mDropDownAlwaysVisible) {
+        if (mDropDownAlwaysVisible || mDropDownHeight == ViewGroup.LayoutParams.FILL_PARENT) {
             // getMaxAvailableHeight() subtracts the padding, so we put it back,
             // to get the available height for the whole window
             int padding = 0;
