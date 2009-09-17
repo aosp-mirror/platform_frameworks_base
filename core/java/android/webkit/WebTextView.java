@@ -16,6 +16,8 @@
 
 package android.webkit;
 
+import com.android.internal.widget.EditableInputConnection;
+
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -347,6 +349,16 @@ import java.util.ArrayList;
 
     @Override
     protected void onSelectionChanged(int selStart, int selEnd) {
+        // This code is copied from TextView.onDraw().  That code does not get
+        // executed, however, because the WebTextView does not draw, allowing
+        // webkit's drawing to show through.
+        InputMethodManager imm = InputMethodManager.peekInstance();
+        if (imm != null && imm.isActive(this)) {
+            Spannable sp = (Spannable) getText();
+            int candStart = EditableInputConnection.getComposingSpanStart(sp);
+            int candEnd = EditableInputConnection.getComposingSpanEnd(sp);
+            imm.updateSelection(this, selStart, selEnd, candStart, candEnd);
+        }
         if (!mFromWebKit && mWebView != null) {
             if (DebugFlags.WEB_TEXT_VIEW) {
                 Log.v(LOGTAG, "onSelectionChanged selStart=" + selStart
