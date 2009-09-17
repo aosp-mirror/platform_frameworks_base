@@ -53,6 +53,16 @@ public abstract class RegisteredServicesCache<V> {
     private final String mMetaDataName;
     private final String mAttributesName;
 
+    public RegisteredServicesCacheListener getListener() {
+        return mListener;
+    }
+
+    public void setListener(RegisteredServicesCacheListener listener) {
+        mListener = listener;
+    }
+
+    private volatile RegisteredServicesCacheListener mListener;
+
     // no need to be synchronized since the map is never changed once mService is written
     volatile Map<V, ServiceInfo<V>> mServices;
 
@@ -84,6 +94,10 @@ public abstract class RegisteredServicesCache<V> {
                         @Override
                         public void onReceive(Context context, Intent intent) {
                             mServices = generateServicesMap();
+                            RegisteredServicesCacheListener listener = mListener;
+                            if (listener != null) {
+                                listener.onRegisteredServicesCacheChanged();
+                            }
                         }
                     };
                 }
