@@ -16,6 +16,7 @@
 
 package com.android.internal.policy.impl;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.StatusBarManager;
 import android.content.BroadcastReceiver;
@@ -26,6 +27,7 @@ import android.content.IntentFilter;
 import android.media.AudioManager;
 import android.os.Handler;
 import android.os.Message;
+import android.os.SystemProperties;
 import android.provider.Settings;
 import android.telephony.PhoneStateListener;
 import android.telephony.ServiceState;
@@ -40,6 +42,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import com.android.internal.R;
 import com.android.internal.app.ShutdownThread;
+import com.android.internal.telephony.TelephonyIntents;
+import com.android.internal.telephony.TelephonyProperties;
 import com.google.android.collect.Lists;
 
 import java.util.ArrayList;
@@ -69,6 +73,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
     private boolean mKeyguardShowing = false;
     private boolean mDeviceProvisioned = false;
     private ToggleAction.State mAirplaneState = ToggleAction.State.Off;
+    private boolean mIsWaitingForEcmExit = false;
 
     /**
      * @param context everything needs a context :(
@@ -81,6 +86,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
         filter.addAction(Intent.ACTION_SCREEN_OFF);
+        filter.addAction(TelephonyIntents.ACTION_EMERGENCY_CALLBACK_MODE_CHANGED);
         context.registerReceiver(mBroadcastReceiver, filter);
 
         // get notified of phone state changes
@@ -141,20 +147,27 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
                 R.string.global_actions_airplane_mode_off_status) {
 
             void onToggle(boolean on) {
-                // Change the system setting
-                Settings.System.putInt(
-                        mContext.getContentResolver(),
-                        Settings.System.AIRPLANE_MODE_ON,
-                        on ? 1 : 0);
-                Intent intent = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
-                intent.putExtra("state", on);
-                mContext.sendBroadcast(intent);
+                if (Boolean.parseBoolean(
+                        SystemProperties.get(TelephonyProperties.PROPERTY_INECM_MODE))) {
+                    mIsWaitingForEcmExit = true;
+                    // Launch ECM exit dialog
+                    Intent ecmDialogIntent =
+                            new Intent(TelephonyIntents.ACTION_SHOW_NOTICE_ECM_BLOCK_OTHERS, null);
+                    ecmDialogIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    mContext.startActivity(ecmDialogIntent);
+                } else {
+                    changeAirplaneModeSystemSetting(on);
+                }
             }
 
             @Override
             protected void changeStateFromPress(boolean buttonOn) {
-                mState = buttonOn ? State.TurningOn : State.TurningOff;
-                mAirplaneState = mState;
+                // In ECM mode airplane state cannot be changed
+                if (!(Boolean.parseBoolean(
+                        SystemProperties.get(TelephonyProperties.PROPERTY_INECM_MODE)))) {
+                    mState = buttonOn ? State.TurningOn : State.TurningOff;
+                    mAirplaneState = mState;
+                }
             }
 
             public boolean showDuringKeyguard() {
@@ -201,7 +214,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
         final AlertDialog dialog = ab.create();
         dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_DIALOG);
         dialog.getWindow().setFlags(WindowManager.LayoutParams.FLAG_BLUR_BEHIND,
-                WindowManager.LayoutParams.FLAG_BLUR_BEHIND);        
+                WindowManager.LayoutParams.FLAG_BLUR_BEHIND);
 
         dialog.setOnDismissListener(this);
 
@@ -218,7 +231,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
         if (mKeyguardShowing) {
             mDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG);
         } else {
-            mDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_DIALOG);            
+            mDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_DIALOG);
         }
     }
 
@@ -490,6 +503,14 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
                 if (!PhoneWindowManager.SYSTEM_DIALOG_REASON_GLOBAL_ACTIONS.equals(reason)) {
                     mHandler.sendEmptyMessage(MESSAGE_DISMISS);
                 }
+            } else if (TelephonyIntents.ACTION_EMERGENCY_CALLBACK_MODE_CHANGED.equals(action)) {
+                // Airplane mode can be changed after ECM exits if airplane toggle button
+                // is pressed during ECM mode
+                if (!(intent.getBooleanExtra("PHONE_IN_ECM_STATE", false)) &&
+                        mIsWaitingForEcmExit) {
+                    mIsWaitingForEcmExit = false;
+                    changeAirplaneModeSystemSetting(true);
+                }
             }
         }
     };
@@ -514,4 +535,17 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
             }
         }
     };
+
+    /**
+     * Change the airplane mode system setting
+     */
+    private void changeAirplaneModeSystemSetting(boolean on) {
+        Settings.System.putInt(
+                mContext.getContentResolver(),
+                Settings.System.AIRPLANE_MODE_ON,
+                on ? 1 : 0);
+        Intent intent = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
+        intent.putExtra("state", on);
+        mContext.sendBroadcast(intent);
+    }
 }
