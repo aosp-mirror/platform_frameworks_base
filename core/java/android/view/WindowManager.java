@@ -500,6 +500,12 @@ public interface WindowManager extends ViewManager {
          */
         public static final int FLAG_SHOW_WALLPAPER = 0x00100000;
         
+        /** Window flag: when set as a window is being added or made
+         * visible, once the window has been shown then the system will
+         * poke the power manager's user activity (as if the user had woken
+         * up the device) to turn the screen on. */
+        public static final int FLAG_TURN_SCREEN_ON = 0x00200000;
+        
         /** Window flag: special flag to limit the size of the window to be
          * original size ([320x480] x density). Used to create window for applications
          * running under compatibility mode.

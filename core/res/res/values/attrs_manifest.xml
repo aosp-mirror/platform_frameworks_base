@@ -504,8 +504,10 @@
         <!-- The keyboard type has changed, for example the user has plugged
              in an external keyboard. -->
         <flag name="keyboard" value="0x0010" />
-        <!-- The keyboard accessibility has changed, for example the user has
-             slid the keyboard out to expose it. -->
+        <!-- The keyboard or navigation accessibility has changed, for example
+             the user has slid the keyboard out to expose it.  Note that
+             inspite of its name, this applied to any accessibility: keyboard
+             or navigation. -->
         <flag name="keyboardHidden" value="0x0020" />
         <!-- The navigation type has changed.  Should never normally happen. -->
         <flag name="navigation" value="0x0040" />

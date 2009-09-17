@@ -441,7 +441,7 @@ resources for a fully specified configuration would look like this:</p>
 <pre>
 MyApp/
     res/
-        drawable-en-rUS-large-long-port-mdpi-finger-keysexposed-qwerty-dpad-480x320/
+        drawable-en-rUS-large-long-port-mdpi-finger-keysexposed-qwerty-navexposed-dpad-480x320/
 </pre>
 
 <p>More typically, you will only specify a few specific configuration options. You may drop any of the values from the
@@ -573,6 +573,14 @@ MyApp/
     <tr>
         <td>Primary text input method</td>
         <td><code>nokeys</code>, <code>qwerty</code>, <code>12key</code> </td>
+    </tr>
+    <tr>
+        <td>Whether the navigation keys are available to the user</td>
+        <td><p><code>navexposed</code>, <code>navhidden</code>
+        </p><p>
+          If the hardware's navigation keys are currently available to
+          the user, the navexposed resources will be used; if they are not
+          available (such as behind a closed lid), navhidden will be used.</p></td>
     </tr>
     <tr>
         <td>Primary non-touchscreen<br />

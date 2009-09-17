@@ -217,7 +217,9 @@ public class ActivityInfo extends ComponentInfo
     public static final int CONFIG_KEYBOARD = 0x0010;
     /**
      * Bit in {@link #configChanges} that indicates that the activity
-     * can itself handle changes to the keyboard being hidden/exposed. 
+     * can itself handle changes to the keyboard or navigation being hidden/exposed.
+     * Note that inspite of the name, this applies to the changes to any
+     * hidden states: keyboard or navigation.
      * Set from the {@link android.R.attr#configChanges} attribute.
      */
     public static final int CONFIG_KEYBOARD_HIDDEN = 0x0020;
