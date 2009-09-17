@@ -105,7 +105,7 @@ final class CdmaSMSDispatcher extends SMSDispatcher {
 
         String inEcm=SystemProperties.get(TelephonyProperties.PROPERTY_INECM_MODE, "false");
         if (inEcm.equals("true")) {
-            return Intents.RESULT_SMS_GENERIC_ERROR;
+            return Activity.RESULT_OK;
         }
 
         // See if we have a network duplicate SMS.
