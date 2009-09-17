@@ -72,12 +72,10 @@ public final class BluetoothClass implements Parcelable {
         return Integer.toHexString(mClass);
     }
 
-    /** @hide */
     public int describeContents() {
         return 0;
     }
 
-    /** @hide */
     public static final Parcelable.Creator<BluetoothClass> CREATOR =
             new Parcelable.Creator<BluetoothClass>() {
         public BluetoothClass createFromParcel(Parcel in) {
@@ -88,7 +86,6 @@ public final class BluetoothClass implements Parcelable {
         }
     };
 
-    /** @hide */
     public void writeToParcel(Parcel out, int flags) {
         out.writeInt(mClass);
     }
