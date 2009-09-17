@@ -251,9 +251,7 @@ abstract class Connection {
                             pipe.addLast(req);
                         }
                         exception = null;
-                        state = (clearPipe(pipe) ||
-                                 !mConnectionManager.isNetworkConnected()) ?
-                                DONE : SEND;
+                        state = clearPipe(pipe) ? DONE : SEND;
                         minPipe = maxPipe = 1;
                         break;
                     }
@@ -314,9 +312,7 @@ abstract class Connection {
                         mHttpContext.removeAttribute(HTTP_CONNECTION);
                         clearPipe(pipe);
                         minPipe = maxPipe = 1;
-                        /* If network active continue to service this queue */
-                        state = mConnectionManager.isNetworkConnected() ?
-                                SEND : DONE;
+                        state = SEND;
                     }
                     break;
                 }
@@ -408,8 +404,7 @@ abstract class Connection {
         if (error == EventHandler.OK) {
             return true;
         } else {
-            if (mConnectionManager.isNetworkConnected() == false ||
-                req.mFailCount < RETRY_REQUEST_LIMIT) {
+            if (req.mFailCount < RETRY_REQUEST_LIMIT) {
                 // requeue
                 mRequestFeeder.requeueRequest(req);
                 req.mFailCount++;
@@ -432,14 +427,13 @@ abstract class Connection {
      */
     private boolean httpFailure(Request req, int errorId, Exception e) {
         boolean ret = true;
-        boolean networkConnected = mConnectionManager.isNetworkConnected();
 
         // e.printStackTrace();
         if (HttpLog.LOGV) HttpLog.v(
                 "httpFailure() ******* " + e + " count " + req.mFailCount +
-                " networkConnected " + networkConnected + " " + mHost + " " + req.getUri());
+                " " + mHost + " " + req.getUri());
 
-        if (networkConnected && ++req.mFailCount >= RETRY_REQUEST_LIMIT) {
+        if (++req.mFailCount >= RETRY_REQUEST_LIMIT) {
             ret = false;
             String error;
             if (errorId < 0) {
