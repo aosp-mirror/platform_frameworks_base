@@ -399,7 +399,7 @@ public class BluetoothService extends IBluetooth.Stub {
         // Electronics, Flaircomm Electronics, Jatty Electronics, Delphi,
         // Clarion, Novero, Denso (Lexus, Toyota), Johnson Controls (Acura),
         // Continental Automotive, Harman/Becker
-        private final ArrayList<String>  mAutoPairingBlacklisted =
+        private final ArrayList<String>  mAutoPairingAddressBlacklist =
                 new ArrayList<String>(Arrays.asList(
                         "00:02:C7", "00:16:FE", "00:19:C1", "00:1B:FB", "00:1E:3D", "00:21:4F",
                         "00:23:06", "00:24:33", "00:A0:79", "00:0E:6D", "00:13:E0", "00:21:E8",
@@ -407,6 +407,12 @@ public class BluetoothService extends IBluetooth.Stub {
                         "00:16:FD", "00:22:A0", "00:0B:4C", "00:60:6F", "00:23:3D", "00:C0:59",
                         "00:0A:30", "00:1E:AE", "00:1C:D7"
                         ));
+
+        // List of names of Bluetooth devices for which auto pairing should be
+        // disabled.
+        private final ArrayList<String> mAutoPairingNameBlacklist =
+                new ArrayList<String>(Arrays.asList(
+                        "Motorola IHF1000", "i.TechBlueBAND", "X5 Stereo v1.3"));
 
         public synchronized void loadBondState() {
             if (mBluetoothState != BluetoothAdapter.STATE_TURNING_ON) {
@@ -460,8 +466,15 @@ public class BluetoothService extends IBluetooth.Stub {
         }
 
         public boolean isAutoPairingBlacklisted(String address) {
-            for (String blacklistAddress : mAutoPairingBlacklisted) {
+            for (String blacklistAddress : mAutoPairingAddressBlacklist) {
                 if (address.startsWith(blacklistAddress)) return true;
+            }
+
+            String name = getRemoteName(address);
+            if (name != null) {
+                for (String blacklistName : mAutoPairingNameBlacklist) {
+                    if (name.equals(blacklistName)) return true;
+                }
             }
             return false;
         }
