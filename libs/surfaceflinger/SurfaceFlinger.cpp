@@ -1521,6 +1521,7 @@ status_t SurfaceFlinger::dump(int fd, const Vector<String16>& args)
             /*** Layer ***/
             sp<Layer> l = LayerBase::dynamicCast< Layer* >(layer.get());
             if (l != 0) {
+                SharedBufferStack::Statistics stats = l->lcblk->getStats();
                 result.append( l->lcblk->dump("      ") );
                 sp<const Buffer> buf0(l->getBuffer(0));
                 sp<const Buffer> buf1(l->getBuffer(1));
@@ -1539,10 +1540,10 @@ status_t SurfaceFlinger::dump(int fd, const Vector<String16>& args)
                 snprintf(buffer, SIZE,
                         "      "
                         "format=%2d, [%3ux%3u:%3u] [%3ux%3u:%3u],"
-                        " freezeLock=%p\n",
+                        " freezeLock=%p, dq-q-time=%u us\n",
                         l->pixelFormat(),
                         w0, h0, s0, w1, h1, s1,
-                        l->getFreezeLock().get());
+                        l->getFreezeLock().get(), stats.totalTime);
                 result.append(buffer);
                 buffer[0] = 0;
             }

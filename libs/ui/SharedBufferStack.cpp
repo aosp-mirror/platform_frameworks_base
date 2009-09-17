@@ -276,6 +276,8 @@ ssize_t SharedBufferClient::dequeue()
         LOGW("dequeue: tail=%d, head=%d, avail=%d, queued=%d",
                 tail, stack.head, stack.available, stack.queued);
     }
+        
+    const nsecs_t dequeueTime = systemTime(SYSTEM_TIME_THREAD);
 
     //LOGD("[%d] about to dequeue a buffer",
     //        mSharedStack->identity);
@@ -296,6 +298,8 @@ ssize_t SharedBufferClient::dequeue()
     LOGD_IF(DEBUG_ATOMICS, "dequeued=%d, tail=%d, %s",
             dequeued, tail, dump("").string());
 
+    mDequeueTime[dequeued] = dequeueTime; 
+
     return dequeued;
 }
 
@@ -312,7 +316,7 @@ status_t SharedBufferClient::undoDequeue(int buf)
 status_t SharedBufferClient::lock(int buf)
 {
     LockCondition condition(this, buf);
-    status_t err = waitForCondition(condition);    
+    status_t err = waitForCondition(condition);
     return err;
 }
 
@@ -321,6 +325,9 @@ status_t SharedBufferClient::queue(int buf)
     QueueUpdate update(this);
     status_t err = updateCondition( update );
     LOGD_IF(DEBUG_ATOMICS, "queued=%d, %s", buf, dump("").string());
+    SharedBufferStack& stack( *mSharedStack );
+    const nsecs_t now = systemTime(SYSTEM_TIME_THREAD);
+    stack.stats.totalTime = ns2us(now - mDequeueTime[buf]);
     return err;
 }
 
@@ -392,6 +399,13 @@ Region SharedBufferServer::getDirtyRegion(int buffer) const
     SharedBufferStack& stack( *mSharedStack );
     return stack.getDirtyRegion(buffer);
 }
+
+SharedBufferStack::Statistics SharedBufferServer::getStats() const
+{
+    SharedBufferStack& stack( *mSharedStack );
+    return stack.stats;
+}
+
 
 // ---------------------------------------------------------------------------
 }; // namespace android
