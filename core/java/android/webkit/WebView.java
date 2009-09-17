@@ -1835,23 +1835,50 @@ public class WebView extends AbsoluteLayout
         return contentToViewDimension(y) + getTitleHeight();
     }
 
+    private Rect contentToViewRect(Rect x) {
+        return new Rect(contentToViewX(x.left), contentToViewY(x.top),
+                        contentToViewX(x.right), contentToViewY(x.bottom));
+    }
+
+    /*  To invalidate a rectangle in content coordinates, we need to transform
+        the rect into view coordinates, so we can then call invalidate(...).
+
+        Normally, we would just call contentToView[XY](...), which eventually
+        calls Math.round(coordinate * mActualScale). However, for invalidates,
+        we need to account for the slop that occurs with antialiasing. To
+        address that, we are a little more liberal in the size of the rect that
+        we invalidate.
+
+        This liberal calculation calls floor() for the top/left, and ceil() for
+        the bottom/right coordinates. This catches the possible extra pixels of
+        antialiasing that we might have missed with just round().
+     */
+
     // Called by JNI to invalidate the View, given rectangle coordinates in
     // content space
     private void viewInvalidate(int l, int t, int r, int b) {
-        invalidate(contentToViewX(l), contentToViewY(t), contentToViewX(r),
-                contentToViewY(b));
+        final float scale = mActualScale;
+        final int dy = getTitleHeight();
+        invalidate((int)Math.floor(l * scale),
+                   (int)Math.floor(t * scale) + dy,
+                   (int)Math.ceil(r * scale),
+                   (int)Math.ceil(b * scale) + dy);
     }
 
     // Called by JNI to invalidate the View after a delay, given rectangle
     // coordinates in content space
     private void viewInvalidateDelayed(long delay, int l, int t, int r, int b) {
-        postInvalidateDelayed(delay, contentToViewX(l), contentToViewY(t),
-                contentToViewX(r), contentToViewY(b));
+        final float scale = mActualScale;
+        final int dy = getTitleHeight();
+        postInvalidateDelayed(delay,
+                              (int)Math.floor(l * scale),
+                              (int)Math.floor(t * scale) + dy,
+                              (int)Math.ceil(r * scale),
+                              (int)Math.ceil(b * scale) + dy);
     }
 
-    private Rect contentToView(Rect x) {
-        return new Rect(contentToViewX(x.left), contentToViewY(x.top)
-                , contentToViewX(x.right), contentToViewY(x.bottom));
+    private void invalidateContentRect(Rect r) {
+        viewInvalidate(r.left, r.top, r.right, r.bottom);
     }
 
     // stop the scroll animation, and don't let a subsequent fling add
@@ -2771,7 +2798,7 @@ public class WebView extends AbsoluteLayout
                             contentToViewDimension(
                             nativeFocusCandidateTextSize()));
                     Rect bounds = nativeFocusCandidateNodeBounds();
-                    Rect vBox = contentToView(bounds);
+                    Rect vBox = contentToViewRect(bounds);
                     mWebTextView.setRect(vBox.left, vBox.top, vBox.width(),
                             vBox.height());
                     // If it is a password field, start drawing the
@@ -3365,7 +3392,7 @@ public class WebView extends AbsoluteLayout
                 Selection.setSelection(spannable, start, end);
             }
         } else {
-            Rect vBox = contentToView(bounds);
+            Rect vBox = contentToViewRect(bounds);
             mWebTextView.setRect(vBox.left, vBox.top, vBox.width(),
                     vBox.height());
             mWebTextView.setGravity(nativeFocusCandidateIsRtlText() ?
@@ -5286,7 +5313,7 @@ public class WebView extends AbsoluteLayout
                         Log.v(LOGTAG, "NEW_PICTURE_MSG_ID {" +
                                 b.left+","+b.top+","+b.right+","+b.bottom+"}");
                     }
-                    invalidate(contentToView(draw.mInvalRegion.getBounds()));
+                    invalidateContentRect(draw.mInvalRegion.getBounds());
                     if (mPictureListener != null) {
                         mPictureListener.onNewPicture(WebView.this, capturePicture());
                     }
@@ -5785,7 +5812,7 @@ public class WebView extends AbsoluteLayout
         }
         Rect contentCursorRingBounds = nativeGetCursorRingBounds();
         if (contentCursorRingBounds.isEmpty()) return keyHandled;
-        Rect viewCursorRingBounds = contentToView(contentCursorRingBounds);
+        Rect viewCursorRingBounds = contentToViewRect(contentCursorRingBounds);
         Rect visRect = new Rect();
         calcOurVisibleRect(visRect);
         Rect outset = new Rect(visRect);
