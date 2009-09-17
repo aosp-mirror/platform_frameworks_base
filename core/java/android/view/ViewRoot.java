@@ -1812,6 +1812,7 @@ public final class ViewRoot extends Handler implements ViewParent,
                     if (hasWindowFocus && imm != null && mLastWasImTarget) {
                         imm.startGettingWindowFocus(mView);
                     }
+                    mAttachInfo.mKeyDispatchState.reset();
                     mView.dispatchWindowFocusChanged(hasWindowFocus);
                 }
 
