@@ -22,6 +22,7 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.entity.InputStreamEntity;
 import org.apache.http.entity.AbstractHttpEntity;
+import org.apache.http.entity.ByteArrayEntity;
 
 import android.content.ContentResolver;
 import android.content.Context;
@@ -29,6 +30,7 @@ import android.net.http.AndroidHttpClient;
 import android.text.TextUtils;
 import android.util.Config;
 import android.util.Log;
+import android.os.SystemProperties;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -59,6 +61,9 @@ public class AndroidGDataClient implements GDataClient {
     private static final int MAX_REDIRECTS = 10;
     private static String DEFAULT_GDATA_VERSION = "2.0";
 
+    // boolean system property that can be used to control whether or not
+    // requests/responses are gzip'd.
+    private static final String NO_GZIP_SYSTEM_PROPERTY = "sync.nogzip";
 
     private String mGDataVersion; 
     private final GoogleHttpClient mHttpClient;
@@ -213,7 +218,7 @@ public class AndroidGDataClient implements GDataClient {
         HttpResponse response = null;
         int status = 500;
         int redirectsLeft = MAX_REDIRECTS;
-        
+
         URI uri;
         try {
             uri = new URI(uriString);
@@ -230,7 +235,10 @@ public class AndroidGDataClient implements GDataClient {
 
             HttpUriRequest request = creator.createRequest(uri);
 
-            AndroidHttpClient.modifyRequestToAcceptGzipResponse(request);
+            if (!SystemProperties.getBoolean(NO_GZIP_SYSTEM_PROPERTY, false)) {
+                AndroidHttpClient.modifyRequestToAcceptGzipResponse(request);
+            }
+
             // only add the auth token if not null (to allow for GData feeds that do not require
             // authentication.)
             if (!TextUtils.isEmpty(authToken)) {
@@ -547,7 +555,13 @@ public class AndroidGDataClient implements GDataClient {
             }
         }
 
-        AbstractHttpEntity entity = AndroidHttpClient.getCompressedEntity(entryBytes, mResolver);
+        AbstractHttpEntity entity;
+        if (SystemProperties.getBoolean(NO_GZIP_SYSTEM_PROPERTY, false)) {
+            entity = new ByteArrayEntity(entryBytes);
+        } else {
+            entity = AndroidHttpClient.getCompressedEntity(entryBytes, mResolver);
+        }
+
         entity.setContentType(entry.getContentType());
         return entity;
     }
@@ -587,4 +601,3 @@ public class AndroidGDataClient implements GDataClient {
         throw new IOException("Unable to process batch request.");
     }
 }   
-
