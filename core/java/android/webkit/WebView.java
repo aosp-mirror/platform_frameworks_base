@@ -2908,6 +2908,8 @@ public class WebView extends AbsoluteLayout
                 getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
 
         if (isTextView) {
+            if (mWebTextView == null) return;
+
             imm.showSoftInput(mWebTextView, 0);
             // Now we need to fake a touch event to place the cursor where the
             // user touched.
