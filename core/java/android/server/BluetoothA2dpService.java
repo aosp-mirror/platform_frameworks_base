@@ -27,6 +27,7 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothUuid;
 import android.bluetooth.IBluetoothA2dp;
+import android.bluetooth.ParcelUuid;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -42,7 +43,6 @@ import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.UUID;
 
 public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
     private static final String TAG = "BluetoothA2dpService";
@@ -188,15 +188,9 @@ public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
     }
 
     private boolean isSinkDevice(BluetoothDevice device) {
-        String uuids[] = mBluetoothService.getRemoteUuids(device.getAddress());
-        UUID uuid;
-        if (uuids != null) {
-            for (String deviceUuid: uuids) {
-                uuid = UUID.fromString(deviceUuid);
-                if (BluetoothUuid.isAudioSink(uuid)) {
-                    return true;
-                }
-            }
+        ParcelUuid[] uuids = mBluetoothService.getRemoteUuids(device.getAddress());
+        if (uuids != null && BluetoothUuid.isUuidPresent(uuids, BluetoothUuid.AudioSink)) {
+            return true;
         }
         return false;
     }
@@ -229,18 +223,14 @@ public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
             for (String path: paths) {
                 String address = mBluetoothService.getAddressFromObjectPath(path);
                 BluetoothDevice device = mAdapter.getRemoteDevice(address);
-                String []uuids = mBluetoothService.getRemoteUuids(address);
-                if (uuids != null)
-                    for (String uuid: uuids) {
-                        UUID remoteUuid = UUID.fromString(uuid);
-                        if (BluetoothUuid.isAudioSink(remoteUuid) ||
-                            BluetoothUuid.isAudioSource(remoteUuid) ||
-                            BluetoothUuid.isAdvAudioDist(remoteUuid)) {
-                            addAudioSink(device);
-                            break;
-                        }
+                ParcelUuid[] remoteUuids = mBluetoothService.getRemoteUuids(address);
+                if (remoteUuids != null)
+                    if (BluetoothUuid.containsAnyUuid(remoteUuids,
+                            new ParcelUuid[] {BluetoothUuid.AudioSink,
+                                                BluetoothUuid.AdvAudioDist})) {
+                        addAudioSink(device);
                     }
-            }
+                }
         }
         mAudioManager.setParameters(BLUETOOTH_ENABLED+"=true");
     }
