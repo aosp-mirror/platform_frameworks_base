@@ -36,8 +36,11 @@ public class HandlerThreadTest extends TestCase {
     public void testHandlerThread() throws Exception {
         HandlerThread th1 =  new HandlerThread("HandlerThreadTest") {
             protected void onLooperPrepared() {
-                mDidSetup = true;
-                mLooperTid = Process.myTid();
+                synchronized (HandlerThreadTest.this) {
+                    mDidSetup = true;
+                    mLooperTid = Process.myTid();
+                    HandlerThreadTest.this.notify();
+                }
             }
         };
         
@@ -49,14 +52,23 @@ public class HandlerThreadTest extends TestCase {
         assertTrue(th1.isAlive());
         assertNotNull(th1.getLooper());
        
-        /* 
-         * Since getLooper() will block until the HandlerThread is setup, we are guaranteed
-         * that mDidSetup and mLooperTid will have been initalized. If they have not, then 
-         * this test should fail
-         */
+        // The call to getLooper() internally blocks until the looper is
+        // available, but will call onLooperPrepared() after that.  So we
+        // need to block here to wait for our onLooperPrepared() to complete
+        // and fill in the values we expect.
+        synchronized (this) {
+            while (!mDidSetup) {
+                try {
+                    wait();
+                } catch (InterruptedException e) {
+                }
+            }
+        }
+        
+        // Make sure that the process was set.
+        assertNotSame(-1, mLooperTid);
         // Make sure that the onLooperPrepared() was called on a different thread.
         assertNotSame(Process.myTid(), mLooperTid);
-        assertTrue(mDidSetup);
         
         final Handler h1 = new Handler(th1.getLooper()) {
             public void handleMessage(Message msg) {
