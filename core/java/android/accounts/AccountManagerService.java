@@ -46,7 +46,6 @@ import android.util.Pair;
 import android.app.PendingIntent;
 import android.app.NotificationManager;
 import android.app.Notification;
-import android.app.Activity;
 import android.Manifest;
 
 import java.io.FileDescriptor;
@@ -471,6 +470,7 @@ public class AccountManagerService extends IAccountManager.Stub {
     }
 
     private boolean saveAuthTokenToDatabase(Account account, String type, String authToken) {
+        cancelNotification(getSigninRequiredNotificationId(account));
         SQLiteDatabase db = mOpenHelper.getWritableDatabase();
         db.beginTransaction();
         try {
@@ -523,7 +523,7 @@ public class AccountManagerService extends IAccountManager.Stub {
         checkAuthenticateAccountsPermission(account);
         long identityToken = clearCallingIdentity();
         try {
-            cacheAuthToken(account, authTokenType, authToken);
+            saveAuthTokenToDatabase(account, authTokenType, authToken);
         } finally {
             restoreCallingIdentity(identityToken);
         }
@@ -686,7 +686,8 @@ public class AccountManagerService extends IAccountManager.Stub {
                                         "the type and name should not be empty");
                                 return;
                             }
-                            cacheAuthToken(new Account(name, type), authTokenType, authToken);
+                            saveAuthTokenToDatabase(new Account(name, type),
+                                    authTokenType, authToken);
                         }
 
                         Intent intent = result.getParcelable(Constants.INTENT_KEY);
@@ -1002,10 +1003,6 @@ public class AccountManagerService extends IAccountManager.Stub {
         } finally {
             restoreCallingIdentity(identityToken);
         }
-    }
-
-    private boolean cacheAuthToken(Account account, String authTokenType, String authToken) {
-        return saveAuthTokenToDatabase(account, authTokenType, authToken);
     }
 
     private long getAccountId(SQLiteDatabase db, Account account) {
