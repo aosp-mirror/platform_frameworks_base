@@ -6376,7 +6376,10 @@ class PackageManagerService extends IPackageManager.Stub {
                 if (mBackupSettingsFilename.exists()) {
                     mBackupSettingsFilename.delete();
                 }
-                mSettingsFilename.renameTo(mBackupSettingsFilename);
+                if (!mSettingsFilename.renameTo(mBackupSettingsFilename)) {
+                    Log.w(TAG, "Unable to backup package manager settings, current changes will be lost at reboot");
+                    return;
+                }
             }
 
             mPastSignatures.clear();
