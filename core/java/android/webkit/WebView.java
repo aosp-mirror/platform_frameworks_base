@@ -1747,6 +1747,14 @@ public class WebView extends AbsoluteLayout
     private View mTitleBar;
 
     /**
+     * Since we draw the title bar ourselves, we removed the shadow from the
+     * browser's activity.  We do want a shadow at the bottom of the title bar,
+     * or at the top of the screen if the title bar is not visible.  This
+     * drawable serves that purpose.
+     */
+    private Drawable mTitleShadow;
+
+    /**
      * Add or remove a title bar to be embedded into the WebView, and scroll
      * along with it vertically, while remaining in view horizontally. Pass
      * null to remove the title bar from the WebView, and return to drawing
@@ -1762,6 +1770,10 @@ public class WebView extends AbsoluteLayout
             addView(v, new AbsoluteLayout.LayoutParams(
                     ViewGroup.LayoutParams.FILL_PARENT,
                     ViewGroup.LayoutParams.WRAP_CONTENT, 0, 0));
+            if (mTitleShadow == null) {
+                mTitleShadow = (Drawable) mContext.getResources().getDrawable(
+                        com.android.internal.R.drawable.title_bar_shadow);
+            }
         }
         mTitleBar = v;
     }
@@ -2676,16 +2688,14 @@ public class WebView extends AbsoluteLayout
 
     @Override
     protected void onDraw(Canvas canvas) {
-        int saveCount = canvas.getSaveCount();
-        if (mTitleBar != null) {
-            canvas.save();
-            canvas.translate(0, (int) mTitleBar.getHeight());
-        }
         // if mNativeClass is 0, the WebView has been destroyed. Do nothing.
         if (mNativeClass == 0) {
             return;
         }
-        canvas.save();
+        int saveCount = canvas.save();
+        if (mTitleBar != null) {
+            canvas.translate(0, (int) mTitleBar.getHeight());
+        }
         // Update the buttons in the picture, so when we draw the picture
         // to the screen, they are in the correct state.
         // Tell the native side if user is a) touching the screen,
@@ -2700,6 +2710,15 @@ public class WebView extends AbsoluteLayout
         drawCoreAndCursorRing(canvas, mBackgroundColor, mDrawCursorRing);
         canvas.restoreToCount(saveCount);
 
+        // Now draw the shadow.
+        if (mTitleBar != null) {
+            int y = mScrollY + getVisibleTitleHeight();
+            int height = (int) (5f * getContext().getResources()
+                    .getDisplayMetrics().density);
+            mTitleShadow.setBounds(mScrollX, y, mScrollX + getWidth(),
+                    y + height);
+            mTitleShadow.draw(canvas);
+        }
         if (AUTO_REDRAW_HACK && mAutoRedraw) {
             invalidate();
         }
