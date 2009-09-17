@@ -269,26 +269,6 @@ public class HardwareService extends IHardwareService.Stub {
         Hardware.enableCameraFlash(milliseconds);
     }
 
-    public void setBacklights(int brightness) {
-        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.HARDWARE_TEST) 
-                != PackageManager.PERMISSION_GRANTED) {
-            throw new SecurityException("Requires HARDWARE_TEST permission");
-        }
-        // Don't let applications turn the screen all the way off
-        brightness = Math.max(brightness, Power.BRIGHTNESS_DIM);
-        setLightBrightness_UNCHECKED(LIGHT_ID_BACKLIGHT, brightness);
-        setLightBrightness_UNCHECKED(LIGHT_ID_KEYBOARD, brightness);
-        setLightBrightness_UNCHECKED(LIGHT_ID_BUTTONS, brightness);
-        long identity = Binder.clearCallingIdentity();
-        try {
-            mBatteryStats.noteScreenBrightness(brightness);
-        } catch (RemoteException e) {
-            Log.w(TAG, "RemoteException calling noteScreenBrightness on BatteryStatsService", e);
-        } finally {
-            Binder.restoreCallingIdentity(identity);
-        }
-    }
-
     void setLightOff_UNCHECKED(int light) {
         setLight_native(mNativePointer, light, 0, LIGHT_FLASH_NONE, 0, 0);
     }
@@ -305,14 +285,6 @@ public class HardwareService extends IHardwareService.Stub {
 
     void setLightFlashing_UNCHECKED(int light, int color, int mode, int onMS, int offMS) {
         setLight_native(mNativePointer, light, color, mode, onMS, offMS);
-    }
-
-    public void setAutoBrightness(boolean on) {
-        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.HARDWARE_TEST)
-                != PackageManager.PERMISSION_GRANTED) {
-            throw new SecurityException("Requires HARDWARE_TEST permission");
-        }
-        setAutoBrightness_UNCHECKED(on);
     }
 
     void setAutoBrightness_UNCHECKED(boolean on) {
