@@ -1529,7 +1529,7 @@ public final class ContactsContract {
          * called on a raw contact, it is marked for deletion and removed from its
          * aggregate contact. The sync adaptor deletes the raw contact on the server and
          * then calls ContactResolver.delete once more, this time setting the the
-         * {@link ContactsContract#CALLER_IS_SYNCADAPTER} query parameter to finalize 
+         * {@link ContactsContract#CALLER_IS_SYNCADAPTER} query parameter to finalize
          * the data removal.
          * <P>Type: INTEGER</P>
          */
@@ -1684,6 +1684,13 @@ public final class ContactsContract {
          * Type: INTEGER (boolean)
          */
         public static final String UNGROUPED_VISIBLE = "ungrouped_visible";
+
+        /**
+         * Read-only flag indicating if this {@link #SHOULD_SYNC} or any
+         * {@link Groups#SHOULD_SYNC} under this account have been marked as
+         * unsynced.
+         */
+        public static final String ANY_UNSYNCED = "any_unsynced";
 
         /**
          * Read-only count of {@link Contacts} from a specific source that have
