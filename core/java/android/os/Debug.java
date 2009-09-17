@@ -129,6 +129,27 @@ public final class Debug
         public MemoryInfo() {
         }
 
+        /**
+         * Return total PSS memory usage in kB.
+         */
+        public int getTotalPss() {
+            return dalvikPss + nativePss + otherPss;
+        }
+        
+        /**
+         * Return total private dirty memory usage in kB.
+         */
+        public int getTotalPrivateDirty() {
+            return dalvikPrivateDirty + nativePrivateDirty + otherPrivateDirty;
+        }
+        
+        /**
+         * Return total shared dirty memory usage in kB.
+         */
+        public int getTotalSharedDirty() {
+            return dalvikSharedDirty + nativeSharedDirty + otherSharedDirty;
+        }
+        
         public int describeContents() {
             return 0;
         }
