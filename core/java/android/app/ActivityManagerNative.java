@@ -1137,11 +1137,10 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
         
         case GET_PROCESS_MEMORY_INFO_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
-            int pid = data.readInt();
-            Debug.MemoryInfo mi = new Debug.MemoryInfo();
-            getProcessMemoryInfo(pid, mi);
+            int[] pids = data.createIntArray();
+            Debug.MemoryInfo[] res =  getProcessMemoryInfo(pids);
             reply.writeNoException();
-            mi.writeToParcel(reply, 0);
+            reply.writeTypedArray(res, Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
             return true;
         }
 
@@ -2504,17 +2503,18 @@ class ActivityManagerProxy implements IActivityManager
         reply.recycle();
     }
     
-    public void getProcessMemoryInfo(int pid, Debug.MemoryInfo outInfo)
+    public Debug.MemoryInfo[] getProcessMemoryInfo(int[] pids)
             throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IActivityManager.descriptor);
-        data.writeInt(pid);
+        data.writeIntArray(pids);
         mRemote.transact(GET_PROCESS_MEMORY_INFO_TRANSACTION, data, reply, 0);
         reply.readException();
-        outInfo.readFromParcel(reply);
+        Debug.MemoryInfo[] res = reply.createTypedArray(Debug.MemoryInfo.CREATOR);
         data.recycle();
         reply.recycle();
+        return res;
     }
 
     public void killApplicationProcess(String processName, int uid) throws RemoteException {

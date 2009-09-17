@@ -4921,23 +4921,14 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         Binder.restoreCallingIdentity(origId);
     }
     
-    public void getProcessMemoryInfo(int pid, Debug.MemoryInfo mi)
+    public Debug.MemoryInfo[] getProcessMemoryInfo(int[] pids)
             throws RemoteException {
-        ProcessRecord proc;
-        synchronized (mPidsSelfLocked) {
-            proc = mPidsSelfLocked.get(pid);
+        Debug.MemoryInfo[] infos = new Debug.MemoryInfo[pids.length];
+        for (int i=pids.length-1; i>=0; i--) {
+            infos[i] = new Debug.MemoryInfo();
+            Debug.getMemoryInfo(pids[i], infos[i]);
         }
-        
-        if (proc == null) {
-            throw new RemoteException();
-        }
-        
-        IApplicationThread thread = proc.thread;
-        if (thread == null) {
-            throw new RemoteException();
-        }
-        
-        thread.getMemoryInfo(mi);
+        return infos;
     }
 
     public void killApplicationProcess(String processName, int uid) {

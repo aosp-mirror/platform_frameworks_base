@@ -281,7 +281,7 @@ public interface IActivityManager extends IInterface {
     
     public void closeSystemDialogs(String reason) throws RemoteException;
     
-    public void getProcessMemoryInfo(int pid, Debug.MemoryInfo outInfo)
+    public Debug.MemoryInfo[] getProcessMemoryInfo(int[] pids)
             throws RemoteException;
     
     /*
