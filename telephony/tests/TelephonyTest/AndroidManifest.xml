@@ -28,8 +28,9 @@
             </intent-filter>
         </activity>
     </application>
-     <instrumentation android:name=".TelephonyUnitTestRunner"
-         android:targetPackage="com.android.telephonytest"
-         android:label="Telephony unit tests InstrumentationRunner">
-     </instrumentation>
+    <instrumentation android:name=".TelephonyUnitTestRunner"
+        android:targetPackage="com.android.telephonytest"
+        android:label="Telephony unit tests InstrumentationRunner">
+    </instrumentation>
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
 </manifest>

@@ -37,6 +37,7 @@ public class TelephonyUnitTestRunner extends InstrumentationTestRunner {
     public TestSuite getAllTests() {
         TestSuite suite = new InstrumentationTestSuite(this);
         suite.addTestSuite(com.android.telephonytest.unit.CallerInfoUnitTest.class);
+        suite.addTestSuite(com.android.telephonytest.unit.PhoneNumberUtilsUnitTest.class);
         return suite;
     }
 

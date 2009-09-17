@@ -107,6 +107,16 @@ public class CallerInfoUnitTest extends AndroidTestCase {
         assertIsValidEmergencyCallerInfo();
     }
 
+    // TODO: Add more tests:
+    /**
+     * Check if the voice mail number cannot be retrieved that the
+     * original phone number is preserved.
+     */
+    /**
+     * Check the markAs* methods work.
+     */
+
+
     //
     // Helpers
     //
