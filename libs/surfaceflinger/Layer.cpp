@@ -303,7 +303,6 @@ uint32_t Layer::doTransaction(uint32_t flags)
 
     // Index of the back buffer
     const bool backbufferChanged = (front.w != temp.w) || (front.h != temp.h);
-
     if (backbufferChanged) {
         // the size changed, we need to ask our client to request a new buffer
         LOGD_IF(DEBUG_RESIZE,
@@ -318,17 +317,6 @@ uint32_t Layer::doTransaction(uint32_t flags)
         // buffer, it'll get the new size.
         setDrawingSize(temp.w, temp.h);
 
-        // all buffers need reallocation
-        lcblk->reallocate();
-
-        // recompute the visible region
-        // FIXME: ideally we would do that only when we have received
-        // a buffer of the right size
-        flags |= Layer::eVisibleRegion;
-        this->contentDirty = true;
-        
-#if 0 
-        // FIXME: handle freeze lock
         // we're being resized and there is a freeze display request,
         // acquire a freeze lock, so that the screen stays put
         // until we've redrawn at the new size; this is to avoid
@@ -340,7 +328,12 @@ uint32_t Layer::doTransaction(uint32_t flags)
                 mFreezeLock = mFlinger->getFreezeLock();
             }
         }
-#endif
+
+        // recompute the visible region
+        flags |= Layer::eVisibleRegion;
+        this->contentDirty = true;
+        // all buffers need reallocation
+        lcblk->reallocate();
     }
 
     if (temp.sequence != front.sequence) {
@@ -381,6 +374,13 @@ void Layer::lockPageFlip(bool& recomputeVisibleRegions)
     sp<Buffer> newFrontBuffer(getBuffer(buf));
     const Region dirty(lcblk->getDirtyRegion(buf));
     mPostedDirtyRegion = dirty.intersect( newFrontBuffer->getBounds() );
+
+
+    const Layer::State& front(drawingState());
+    if (newFrontBuffer->getWidth() == front.w &&
+        newFrontBuffer->getHeight() ==front.h) {
+        mFreezeLock.clear();
+    }
 
     // FIXME: signal an event if we have more buffers waiting
     // mFlinger->signalEvent();
