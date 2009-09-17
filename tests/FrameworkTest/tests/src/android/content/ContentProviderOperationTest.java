@@ -29,7 +29,6 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.Set;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -145,7 +144,7 @@ public class ContentProviderOperationTest extends TestCase {
                 public Cursor query(Uri uri, String[] projection, String selection,
                         String[] selectionArgs, String sortOrder) {
                     // Return cursor over specific set of values
-                    return getCursor(sTestValues1);
+                    return getCursor(sTestValues1, 1);
                 }
             }, null, 0);
         } catch (OperationApplicationException e) {
@@ -153,11 +152,62 @@ public class ContentProviderOperationTest extends TestCase {
         }
     }
 
+    public void testAssertNoValues() {
+        // Build an operation to assert values match provider
+        ContentProviderOperation op1 = ContentProviderOperation.newAssertQuery(sTestUri1)
+                .withExpectedCount(1).build();
+
+        try {
+            // Assert that values match from cursor
+            ContentProviderResult result = op1.apply(new TestContentProvider() {
+                public Cursor query(Uri uri, String[] projection, String selection,
+                        String[] selectionArgs, String sortOrder) {
+                    // Return cursor over specific set of values
+                    return getCursor(sTestValues1, 1);
+                }
+            }, null, 0);
+        } catch (OperationApplicationException e) {
+            fail("newAssert() failed");
+        }
+
+        ContentProviderOperation op2 = ContentProviderOperation.newAssertQuery(sTestUri1)
+                .withExpectedCount(0).build();
+
+        try {
+            // Assert that values match from cursor
+            ContentProviderResult result = op2.apply(new TestContentProvider() {
+                public Cursor query(Uri uri, String[] projection, String selection,
+                        String[] selectionArgs, String sortOrder) {
+                    // Return cursor over specific set of values
+                    return getCursor(sTestValues1, 0);
+                }
+            }, null, 0);
+        } catch (OperationApplicationException e) {
+            fail("newAssert() failed");
+        }
+
+        ContentProviderOperation op3 = ContentProviderOperation.newAssertQuery(sTestUri1)
+                .withExpectedCount(2).build();
+
+        try {
+            // Assert that values match from cursor
+            ContentProviderResult result = op3.apply(new TestContentProvider() {
+                public Cursor query(Uri uri, String[] projection, String selection,
+                        String[] selectionArgs, String sortOrder) {
+                    // Return cursor over specific set of values
+                    return getCursor(sTestValues1, 5);
+                }
+            }, null, 0);
+            fail("we expect the exception to be thrown");
+        } catch (OperationApplicationException e) {
+        }
+    }
+
     /**
      * Build a {@link Cursor} with a single row that contains all values
      * provided through the given {@link ContentValues}.
      */
-    private Cursor getCursor(ContentValues contentValues) {
+    private Cursor getCursor(ContentValues contentValues, int numRows) {
         final Set<Entry<String, Object>> valueSet = contentValues.valueSet();
         final String[] keys = new String[valueSet.size()];
         final Object[] values = new Object[valueSet.size()];
@@ -170,7 +220,9 @@ public class ContentProviderOperationTest extends TestCase {
         }
 
         final MatrixCursor cursor = new MatrixCursor(keys);
-        cursor.addRow(values);
+        for (i = 0; i < numRows; i++) {
+            cursor.addRow(values);
+        }
         return cursor;
     }
 
