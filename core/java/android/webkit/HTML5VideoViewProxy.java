@@ -17,8 +17,18 @@
 package android.webkit;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnPreparedListener;
+import android.media.MediaPlayer.OnCompletionListener;
+import android.media.MediaPlayer.OnErrorListener;
+import android.net.http.EventHandler;
+import android.net.http.Headers;
+import android.net.http.RequestHandle;
+import android.net.http.RequestQueue;
+import android.net.http.SslCertificate;
+import android.net.http.SslError;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -30,9 +40,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.ViewManager.ChildView;
 import android.widget.AbsoluteLayout;
+import android.widget.ImageView;
 import android.widget.MediaController;
 import android.widget.VideoView;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.HashMap;
 
 /**
@@ -45,108 +58,216 @@ class HTML5VideoViewProxy extends Handler {
     // Message Ids for WebCore thread -> UI thread communication.
     private static final int INIT              = 100;
     private static final int PLAY              = 101;
+    private static final int SET_POSTER        = 102;
 
+    // Message Ids to be handled on the WebCore thread
+
+    // The handler for WebCore thread messages;
+    private Handler mWebCoreHandler;
     // The WebView instance that created this view.
     private WebView mWebView;
     // The ChildView instance used by the ViewManager.
     private ChildView mChildView;
-    // The VideoView instance. Note that we could
-    // also access this via mChildView.mView but it would
-    // always require cast, so it is more convenient to store
-    // it here as well.
-    private HTML5VideoView mVideoView;
+    // The poster image to be shown when the video is not playing.
+    private ImageView mPosterView;
+    // The poster downloader.
+    private PosterDownloader mPosterDownloader;
+    // A helper class to control the playback. This executes on the UI thread!
+    private static final class VideoPlayer {
+        // The proxy that is currently playing (if any).
+        private static HTML5VideoViewProxy mCurrentProxy;
+        // The VideoView instance. This is a singleton for now, at least until
+        // http://b/issue?id=1973663 is fixed.
+        private static VideoView mVideoView;
 
-    // A VideoView subclass that responds to double-tap
-    // events by going fullscreen.
-    class HTML5VideoView extends VideoView {
-        // Used to save the layout parameters if the view
-        // is changed to fullscreen.
-        private AbsoluteLayout.LayoutParams mEmbeddedLayoutParams;
-        // Flag that denotes whether the view is fullscreen or not.
-        private boolean mIsFullscreen;
-        // Used to save the current playback position when
-        // transitioning to/from fullscreen.
-        private int mPlaybackPosition;
-        // The callback object passed to the host application. This callback
-        // is invoked when the host application dismisses our VideoView
-        // (e.g. the user presses the back key).
-        private WebChromeClient.CustomViewCallback mCallback =
-                new WebChromeClient.CustomViewCallback() {
-            public void onCustomViewHidden() {
-                playEmbedded();
-            }
-        };
+        private static final WebChromeClient.CustomViewCallback mCallback =
+            new WebChromeClient.CustomViewCallback() {
+                public void onCustomViewHidden() {
+                    // At this point the videoview is pretty much destroyed.
+                    // It listens to SurfaceHolder.Callback.SurfaceDestroyed event
+                    // which happens when the video view is detached from its parent
+                    // view. This happens in the WebChromeClient before this method
+                    // is invoked.
+                    mCurrentProxy.playbackEnded();
+                    mCurrentProxy = null;
+                    mVideoView = null;
+                }
+            };
 
-        // The OnPreparedListener, used to automatically resume
-        // playback when transitioning to/from fullscreen.
-        private MediaPlayer.OnPreparedListener mPreparedListener =
-                new MediaPlayer.OnPreparedListener() {
-            public void onPrepared(MediaPlayer mp) {
-                resumePlayback();
-            }
-        };
-
-        HTML5VideoView(Context context) {
-            super(context);
-        }
-
-        void savePlaybackPosition() {
-            if (isPlaying()) {
-                mPlaybackPosition = getCurrentPosition();
-            }
-        }
-
-        void resumePlayback() {
-            seekTo(mPlaybackPosition);
-            start();
-            setOnPreparedListener(null);
-        }
-
-        void playEmbedded() {
-            // Attach to the WebView.
-            mChildView.attachViewOnUIThread(mEmbeddedLayoutParams);
-            // Make sure we're visible
-            setVisibility(View.VISIBLE);
-            // Set the onPrepared listener so we start
-            // playing when the video view is reattached
-            // and its surface is recreated.
-            setOnPreparedListener(mPreparedListener);
-            mIsFullscreen = false;
-        }
-
-        void playFullScreen() {
-            WebChromeClient client = mWebView.getWebChromeClient();
-            if (client == null) {
+        public static void play(String url, HTML5VideoViewProxy proxy, WebChromeClient client) {
+            if (mCurrentProxy != null) {
+                // Some other video is already playing. Notify the caller that its playback ended.
+                proxy.playbackEnded();
                 return;
             }
-            // Save the current layout params.
-            mEmbeddedLayoutParams =
-                    (AbsoluteLayout.LayoutParams) getLayoutParams();
-            // Detach from the WebView.
-            mChildView.removeViewOnUIThread();
-            // Attach to the browser UI.
-            client.onShowCustomView(this, mCallback);
-            // Set the onPrepared listener so we start
-            // playing when after the video view is reattached
-            // and its surface is recreated.
-            setOnPreparedListener(mPreparedListener);
-            mIsFullscreen = true;
+            mCurrentProxy = proxy;
+            mVideoView = new VideoView(proxy.getContext());
+            mVideoView.setWillNotDraw(false);
+            mVideoView.setMediaController(new MediaController(proxy.getContext()));
+            mVideoView.setVideoURI(Uri.parse(url));
+            mVideoView.start();
+            client.onShowCustomView(mVideoView, mCallback);
         }
+    }
 
-        @Override
-        public boolean onTouchEvent(MotionEvent ev) {
-            // TODO: implement properly (i.e. detect double tap)
-            if (mIsFullscreen || !isPlaying()) {
-                return super.onTouchEvent(ev);
+    // Handler for the messages from WebCore thread to the UI thread.
+    @Override
+    public void handleMessage(Message msg) {
+        // This executes on the UI thread.
+        switch (msg.what) {
+            case INIT: {
+                mPosterView = new ImageView(mWebView.getContext());
+                mChildView.mView = mPosterView;
+                break;
             }
-            playFullScreen();
-            return true;
+            case PLAY: {
+                String url = (String) msg.obj;
+                WebChromeClient client = mWebView.getWebChromeClient();
+                if (client != null) {
+                    VideoPlayer.play(url, this, client);
+                }
+                break;
+            }
+            case SET_POSTER: {
+                Bitmap poster = (Bitmap) msg.obj;
+                mPosterView.setImageBitmap(poster);
+                break;
+            }
+        }
+    }
+
+    public void playbackEnded() {
+        // TODO: notify WebKit
+    }
+
+    // Everything below this comment executes on the WebCore thread, except for
+    // the EventHandler methods, which are called on the network thread.
+
+    // A helper class that knows how to download posters
+    private static final class PosterDownloader implements EventHandler {
+        // The request queue. This is static as we have one queue for all posters.
+        private static RequestQueue mRequestQueue;
+        private static int mQueueRefCount = 0;
+        // The poster URL
+        private String mUrl;
+        // The proxy we're doing this for.
+        private final HTML5VideoViewProxy mProxy;
+        // The poster bytes. We only touch this on the network thread.
+        private ByteArrayOutputStream mPosterBytes;
+        // The request handle. We only touch this on the WebCore thread.
+        private RequestHandle mRequestHandle;
+        // The response status code.
+        private int mStatusCode;
+        // The response headers.
+        private Headers mHeaders;
+        // The handler to handle messages on the WebCore thread.
+        private Handler mHandler;
+
+        public PosterDownloader(String url, HTML5VideoViewProxy proxy) {
+            mUrl = url;
+            mProxy = proxy;
+            mHandler = new Handler();
+        }
+        // Start the download. Called on WebCore thread.
+        public void start() {
+            retainQueue();
+            mRequestHandle = mRequestQueue.queueRequest(mUrl, "GET", null, this, null, 0);
+        }
+        // Cancel the download if active and release the queue. Called on WebCore thread.
+        public void cancelAndReleaseQueue() {
+            if (mRequestHandle != null) {
+                mRequestHandle.cancel();
+                mRequestHandle = null;
+            }
+            releaseQueue();
+        }
+        // EventHandler methods. Executed on the network thread.
+        public void status(int major_version,
+                int minor_version,
+                int code,
+                String reason_phrase) {
+            mStatusCode = code;
         }
 
-        @Override
-        public void onDetachedFromWindow() {
-            super.onDetachedFromWindow();
-            savePlaybackPosition();
+        public void headers(Headers headers) {
+            mHeaders = headers;
+        }
+
+        public void data(byte[] data, int len) {
+            if (mPosterBytes == null) {
+                mPosterBytes = new ByteArrayOutputStream();
+            }
+            mPosterBytes.write(data, 0, len);
+        }
+
+        public void endData() {
+            if (mStatusCode == 200) {
+                if (mPosterBytes.size() > 0) {
+                    Bitmap poster = BitmapFactory.decodeByteArray(
+                            mPosterBytes.toByteArray(), 0, mPosterBytes.size());
+                    if (poster != null) {
+                        mProxy.doSetPoster(poster);
+                    }
+                }
+                cleanup();
+            } else if (mStatusCode >= 300 && mStatusCode < 400) {
+                // We have a redirect.
+                mUrl = mHeaders.getLocation();
+                if (mUrl != null) {
+                    mHandler.post(new Runnable() {
+                       public void run() {
+                           if (mRequestHandle != null) {
+                               mRequestHandle.setupRedirect(mUrl, mStatusCode,
+                                       new HashMap<String, String>());
+                           }
+                       }
+                    });
+                }
+            }
+        }
+
+        public void certificate(SslCertificate certificate) {
+            // Don't care.
+        }
+
+        public void error(int id, String description) {
+            cleanup();
+        }
+
+        public boolean handleSslErrorRequest(SslError error) {
+            // Don't care. If this happens, data() will never be called so
+            // mPosterBytes will never be created, so no need to call cleanup.
+            return false;
+        }
+        // Tears down the poster bytes stream. Called on network thread.
+        private void cleanup() {
+            if (mPosterBytes != null) {
+                try {
+                    mPosterBytes.close();
+                } catch (IOException ignored) {
+                    // Ignored.
+                } finally {
+                    mPosterBytes = null;
+                }
+            }
+        }
+
+        // Queue management methods. Called on WebCore thread.
+        private void retainQueue() {
+            if (mRequestQueue == null) {
+                mRequestQueue = new RequestQueue(mProxy.getContext());
+            }
+            mQueueRefCount++;
+        }
+
+        private void releaseQueue() {
+            if (mQueueRefCount == 0) {
+                return;
+            }
+            if (--mQueueRefCount == 0) {
+                mRequestQueue.shutdown();
+                mRequestQueue = null;
+            }
         }
     }
 
@@ -159,53 +280,65 @@ class HTML5VideoViewProxy extends Handler {
         super(Looper.getMainLooper());
         // Save the WebView object.
         mWebView = webView;
+        // create the message handler for this thread
+        createWebCoreHandler();
     }
 
-    @Override
-    public void handleMessage(Message msg) {
-        // This executes on the UI thread.
-        switch (msg.what) {
-            case INIT:
-                // Create the video view and set a default controller.
-                mVideoView = new HTML5VideoView(mWebView.getContext());
-                // This is needed because otherwise there will be a black square
-                // stuck on the screen.
-                mVideoView.setWillNotDraw(false);
-                mVideoView.setMediaController(new MediaController(mWebView.getContext()));
-                mChildView.mView = mVideoView;
-                break;
-            case PLAY:
-                if (mVideoView == null) {
-                    return;
+    private void createWebCoreHandler() {
+        mWebCoreHandler = new Handler() {
+            @Override
+            public void handleMessage(Message msg) {
+                switch (msg.what) {
+                    // TODO here we will process the messages from the VideoPlayer
+                    // and will call native WebKit methods.
                 }
-                HashMap<String, Object> map =
-                        (HashMap<String, Object>) msg.obj;
-                String url = (String) map.get("url");
-                mVideoView.setVideoURI(Uri.parse(url));
-                mVideoView.start();
-                break;
-        }
+            }
+        };
     }
 
+    private void doSetPoster(Bitmap poster) {
+        if (poster == null) {
+            return;
+        }
+        // Send the bitmap over to the UI thread.
+        Message message = obtainMessage(SET_POSTER);
+        message.obj = poster;
+        sendMessage(message);
+    }
+
+    public Context getContext() {
+        return mWebView.getContext();
+    }
+
+    // The public methods below are all called from WebKit only.
     /**
      * Play a video stream.
      * @param url is the URL of the video stream.
      * @param webview is the WebViewCore that is requesting the playback.
      */
     public void play(String url) {
+        if (url == null) {
+            return;
+        }
          // We need to know the webview that is requesting the playback.
         Message message = obtainMessage(PLAY);
-        HashMap<String, Object> map = new HashMap();
-        map.put("url", url);
-        message.obj = map;
+        message.obj = url;
         sendMessage(message);
     }
 
+    /**
+     * Create the child view that will cary the poster.
+     */
     public void createView() {
         mChildView = mWebView.mViewManager.createView();
         sendMessage(obtainMessage(INIT));
     }
 
+    /**
+     * Attach the poster view.
+     * @param x, y are the screen coordinates where the poster should be hung.
+     * @param width, height denote the size of the poster.
+     */
     public void attachView(int x, int y, int width, int height) {
         if (mChildView == null) {
             return;
@@ -213,11 +346,36 @@ class HTML5VideoViewProxy extends Handler {
         mChildView.attachView(x, y, width, height);
     }
 
+    /**
+     * Remove the child view and, thus, the poster.
+     */
     public void removeView() {
         if (mChildView == null) {
             return;
         }
         mChildView.removeView();
+        // This is called by the C++ MediaPlayerPrivate dtor.
+        // Cancel any active poster download.
+        if (mPosterDownloader != null) {
+            mPosterDownloader.cancelAndReleaseQueue();
+        }
+    }
+
+    /**
+     * Load the poster image.
+     * @param url is the URL of the poster image.
+     */
+    public void loadPoster(String url) {
+        if (url == null) {
+            return;
+        }
+        // Cancel any active poster download.
+        if (mPosterDownloader != null) {
+            mPosterDownloader.cancelAndReleaseQueue();
+        }
+        // Load the poster asynchronously
+        mPosterDownloader = new PosterDownloader(url, this);
+        mPosterDownloader.start();
     }
 
     /**
