@@ -583,13 +583,8 @@ class SyncManager implements OnAccountsUpdatedListener {
             return;
         }
 
-        if (!getConnectivityManager().getBackgroundDataSetting()) {
-            if (isLoggable) {
-                Log.v(TAG, "not syncing because background data usage isn't allowed");
-            }
-            setStatusText("Sync is disabled.");
-            return;
-        }
+        final boolean backgroundDataUsageAllowed =
+                getConnectivityManager().getBackgroundDataSetting();
 
         if (mAccounts == null) setStatusText("The accounts aren't known yet.");
         if (!mDataConnectionIsConnected) setStatusText("No data connection");
@@ -686,7 +681,8 @@ class SyncManager implements OnAccountsUpdatedListener {
                     } else {
                         final boolean syncAutomatically = masterSyncAutomatically
                                 && mSyncStorageEngine.getSyncAutomatically(account, authority);
-                        boolean syncAllowed = manualSync || syncAutomatically;
+                        boolean syncAllowed =
+                                manualSync || (backgroundDataUsageAllowed && syncAutomatically);
                         if (!syncAllowed) {
                             if (isLoggable) {
                                 Log.d(TAG, "scheduleSync: sync of " + account + ", " + authority
