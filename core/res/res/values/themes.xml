@@ -176,6 +176,9 @@
         <item name="spinnerItemStyle">@android:style/Widget.TextView.SpinnerItem</item>
         <item name="dropDownHintAppearance">@android:style/TextAppearance.Widget.DropDownHint</item>
         <item name="keyboardViewStyle">@android:style/Widget.KeyboardView</item>
+        <item name="fasttrackBadgeWidgetStyleWindowSmall">@android:style/Widget.FasttrackBadgeWidget.WindowSmall</item>
+        <item name="fasttrackBadgeWidgetStyleWindowMedium">@android:style/Widget.FasttrackBadgeWidget.WindowMedium</item>
+        <item name="fasttrackBadgeWidgetStyleWindowLarge">@android:style/Widget.FasttrackBadgeWidget.WindowLarge</item>
         
         <!-- Preference styles -->
         <item name="preferenceScreenStyle">@android:style/Preference.PreferenceScreen</item>

@@ -517,6 +517,26 @@
         <item name="android:shadowRadius">2.75</item>
     </style>
 
+    <style name="Widget.FasttrackBadgeWidget">
+        <item name="android:layout_width">48dip</item>
+        <item name="android:layout_height">52dip</item>
+        <item name="android:background">@android:drawable/fasttrack_badge_dark</item>
+        <item name="android:clickable">true</item>
+        <item name="android:scaleType">fitCenter</item>
+    </style>
+
+    <style name="Widget.FasttrackBadgeWidget.WindowSmall">
+        <item name="android:fasttrackWindowSize">modeSmall</item>
+    </style>
+
+    <style name="Widget.FasttrackBadgeWidget.WindowMedium">
+        <item name="android:fasttrackWindowSize">modeMedium</item>
+    </style>
+
+    <style name="Widget.FasttrackBadgeWidget.WindowLarge">
+        <item name="android:fasttrackWindowSize">modeLarge</item>
+    </style>
+
     <!-- Text Appearances -->
     <eat-comment />
 

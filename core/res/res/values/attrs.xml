@@ -396,6 +396,14 @@
         <attr name="spinnerItemStyle" format="reference" />
         <!-- Default MapView style. -->
         <attr name="mapViewStyle" format="reference" />
+        <!-- Dark Fasttrack badge style. -->
+        <attr name="fasttrackBadgeWidgetStyle" format="reference" />
+        <!-- Dark Fasttrack badge style with small fasttrack window. -->
+        <attr name="fasttrackBadgeWidgetStyleWindowSmall" format="reference" />
+        <!-- Dark Fasttrack badge style with medium fasttrack window. -->
+        <attr name="fasttrackBadgeWidgetStyleWindowMedium" format="reference" />
+        <!-- Dark Fasttrack badge style with large fasttrack window. -->
+        <attr name="fasttrackBadgeWidgetStyleWindowLarge" format="reference" />
 
         <!-- =================== -->
         <!-- Preference styles   -->
@@ -2195,6 +2203,14 @@
         <!-- Indicates whether horizontal (when the orientation is vertical) or vertical
              (when orientation is horizontal) strokes automatically define a gesture. -->
         <attr name="orientation" />
+    </declare-styleable>
+
+    <declare-styleable name="FasttrackBadgeWidget">
+        <attr name="fasttrackWindowSize">
+            <enum name="modeSmall" value="1" />
+            <enum name="modeMedium" value="2" />
+            <enum name="modeLarge" value="3" />
+        </attr>
     </declare-styleable>
 
     <!-- ======================================= -->
