@@ -349,12 +349,10 @@ public final class BluetoothDevice implements Parcelable {
         return mAddress;
     }
 
-    /** @hide */
     public int describeContents() {
         return 0;
     }
 
-    /** @hide */
     public static final Parcelable.Creator<BluetoothDevice> CREATOR =
             new Parcelable.Creator<BluetoothDevice>() {
         public BluetoothDevice createFromParcel(Parcel in) {
@@ -365,7 +363,6 @@ public final class BluetoothDevice implements Parcelable {
         }
     };
 
-    /** @hide */
     public void writeToParcel(Parcel out, int flags) {
         out.writeString(mAddress);
     }
