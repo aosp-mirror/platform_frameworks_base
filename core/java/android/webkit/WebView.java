@@ -2754,6 +2754,7 @@ public class WebView extends AbsoluteLayout
                 zoomScale = mZoomScale;
                 // set mZoomScale to be 0 as we have done animation
                 mZoomScale = 0;
+                animateZoom = false;    // inform drawContentPicture we're done
                 if (mNeedToAdjustWebTextView) {
                     mNeedToAdjustWebTextView = false;
                     mWebTextView.setTextSize(TypedValue.COMPLEX_UNIT_PX,
@@ -3801,6 +3802,8 @@ public class WebView extends AbsoluteLayout
                         mTouchSelection = false;
                         break;
                     case TOUCH_DRAG_MODE:
+                        // redraw in high-quality, as we're done dragging
+                        invalidate();
                         // if the user waits a while w/o moving before the
                         // up, we don't want to do a fling
                         if (eventTime - mLastTouchTime <= MIN_FLING_TIME) {
