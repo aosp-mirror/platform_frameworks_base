@@ -46,6 +46,15 @@ public final class ContactsContract {
     /** A content:// style uri to the authority for the contacts provider */
     public static final Uri AUTHORITY_URI = Uri.parse("content://" + AUTHORITY);
 
+    /**
+     * An optional insert, update or delete URI parameter that allows the caller
+     * to specify that it is a sync adapter. The default value is false. If true
+     * the dirty flag is not automatically set and the "syncToNetwork" parameter
+     * is set to false when calling
+     * {@link ContentResolver#notifyChange(android.net.Uri, android.database.ContentObserver, boolean)}.
+     */
+    public static final String CALLER_IS_SYNCADAPTER = "caller_is_syncadapter";
+
     public interface SyncStateColumns extends SyncStateContract.Columns {
     }
 
@@ -480,7 +489,8 @@ public final class ContactsContract {
          * called on a raw contact, it is marked for deletion and removed from its
          * aggregate contact. The sync adaptor deletes the raw contact on the server and
          * then calls ContactResolver.delete once more, this time passing the
-         * {@link RawContacts#DELETE_PERMANENTLY} query parameter to finalize the data removal.
+         * {@link ContactsContract#CALLER_IS_SYNCADAPTER} query parameter to finalize
+         * the data removal.
          * <P>Type: INTEGER</P>
          */
         public static final String DELETED = "deleted";
@@ -515,14 +525,6 @@ public final class ContactsContract {
          * person.
          */
         public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/raw_contact";
-
-        /**
-         * Query parameter that can be passed with the {@link #CONTENT_URI} URI
-         * to the {@link android.content.ContentResolver#delete} method to
-         * indicate that the raw contact can be deleted physically, rather than
-         * merely marked as deleted.
-         */
-        public static final String DELETE_PERMANENTLY = "delete_permanently";
 
         /**
          * Aggregation mode: aggregate asynchronously.
@@ -648,13 +650,6 @@ public final class ContactsContract {
         public static final String SYNC3 = "data_sync3";
         /** Generic column for use by sync adapters. */
         public static final String SYNC4 = "data_sync4";
-
-        /**
-         * An optional insert, update or delete URI parameter that determines if
-         * the corresponding raw contact should be marked as dirty. The default
-         * value is true.
-         */
-        public static final String MARK_AS_DIRTY = "mark_as_dirty";
     }
 
     /**
@@ -1533,8 +1528,9 @@ public final class ContactsContract {
          * for deletion. When {@link android.content.ContentResolver#delete} is
          * called on a raw contact, it is marked for deletion and removed from its
          * aggregate contact. The sync adaptor deletes the raw contact on the server and
-         * then calls ContactResolver.delete once more, this time passing the
-         * {@link RawContacts#DELETE_PERMANENTLY} query parameter to finalize the data removal.
+         * then calls ContactResolver.delete once more, this time setting the the
+         * {@link ContactsContract#CALLER_IS_SYNCADAPTER} query parameter to finalize 
+         * the data removal.
          * <P>Type: INTEGER</P>
          */
         public static final String DELETED = "deleted";
@@ -1579,20 +1575,6 @@ public final class ContactsContract {
          * The MIME type of a single group.
          */
         public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/group";
-
-        /**
-         * Query parameter that can be passed with the {@link #CONTENT_URI} URI
-         * to the {@link android.content.ContentResolver#delete} method to
-         * indicate that the raw contact can be deleted physically, rather than
-         * merely marked as deleted.
-         */
-        public static final String DELETE_PERMANENTLY = "delete_permanently";
-
-        /**
-         * An optional update or insert URI parameter that determines if the
-         * group should be marked as dirty. The default value is true.
-         */
-        public static final String MARK_AS_DIRTY = "mark_as_dirty";
     }
 
     /**
