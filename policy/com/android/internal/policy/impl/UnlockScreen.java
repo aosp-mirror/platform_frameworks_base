@@ -28,19 +28,22 @@ import android.view.MotionEvent;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.text.format.DateFormat;
 import com.android.internal.R;
+import com.android.internal.telephony.IccCard;
 import com.android.internal.widget.LinearLayoutWithDefaultTouchRecepient;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.LockPatternView;
 
 import java.util.List;
+import java.util.Date;
 
 /**
  * This is the screen that shows the 9 circle unlock widget and instructs
  * the user how to unlock their device, or make an emergency call.
  */
 class UnlockScreen extends LinearLayoutWithDefaultTouchRecepient
-        implements KeyguardScreen, KeyguardUpdateMonitor.ConfigurationChangeCallback {
+        implements KeyguardScreen, KeyguardUpdateMonitor.ConfigurationChangeCallback, KeyguardUpdateMonitor.InfoCallback, KeyguardUpdateMonitor.SimStateCallback {
 
     private static final String TAG = "UnlockScreen";
 
@@ -65,7 +68,11 @@ class UnlockScreen extends LinearLayoutWithDefaultTouchRecepient
 
     private boolean mCreatedInPortrait;
 
-    private ImageView mUnlockIcon;
+    private TextView mCarrier;
+    private TextView mCenterDot;
+    private TextView mDate;
+    private TextView mTime;
+
     private TextView mUnlockHeader;
     private LockPatternView mLockPatternView;
 
@@ -144,7 +151,14 @@ class UnlockScreen extends LinearLayoutWithDefaultTouchRecepient
             LayoutInflater.from(context).inflate(R.layout.keyguard_screen_unlock_landscape, this, true);
         }
 
-        mUnlockIcon = (ImageView) findViewById(R.id.unlockLockIcon);
+        mCarrier = (TextView) findViewById(R.id.carrier);
+        mCenterDot = (TextView) findViewById(R.id.centerDot);
+        mDate = (TextView) findViewById(R.id.date);
+        mTime = (TextView) findViewById(R.id.time);
+
+        mCarrier.setText("Verizon Wireless");
+        mCenterDot.setText("|");
+        refreshTimeAndDateDisplay();
 
         mLockPatternView = (LockPatternView) findViewById(R.id.lockPattern);
         mUnlockHeader = (TextView) findViewById(R.id.headerText);
@@ -194,9 +208,24 @@ class UnlockScreen extends LinearLayoutWithDefaultTouchRecepient
         updateFooter(FooterMode.Normal);
 
         mCreatedInPortrait = updateMonitor.isInPortrait();
+        updateMonitor.registerInfoCallback(this);
+        updateMonitor.registerSimStateCallback(this);
         updateMonitor.registerConfigurationChangeCallback(this);
         setFocusableInTouchMode(true);
+
+        // until we get an update...
+        mCarrier.setText(
+                LockScreen.getCarrierString(
+                        mUpdateMonitor.getTelephonyPlmn(),
+                        mUpdateMonitor.getTelephonySpn()));        
     }
+
+    private void refreshTimeAndDateDisplay() {
+        Date now = new Date();
+        mTime.setText(DateFormat.getTimeFormat(getContext()).format(now));
+        mDate.setText(DateFormat.getMediumDateFormat(getContext()).format(now));
+    }
+
 
     @Override
     public boolean dispatchTouchEvent(MotionEvent ev) {
@@ -212,6 +241,32 @@ class UnlockScreen extends LinearLayoutWithDefaultTouchRecepient
         }
         return result;
     }
+
+
+    // ---------- InfoCallback
+
+    /** {@inheritDoc} */
+    public void onRefreshBatteryInfo(boolean showBatteryInfo, boolean pluggedIn, int batteryLevel) {
+    }
+
+    /** {@inheritDoc} */
+    public void onTimeChanged() {
+        refreshTimeAndDateDisplay();
+    }
+
+    /** {@inheritDoc} */
+    public void onRefreshCarrierInfo(CharSequence plmn, CharSequence spn) {
+        mCarrier.setText(LockScreen.getCarrierString(plmn, spn));
+    }
+
+    // ---------- SimStateCallback
+
+    /** {@inheritDoc} */
+    public void onSimStateChanged(IccCard.State simState) {
+    }
+
+
+
 
     /** {@inheritDoc} */
     public void onOrientationChange(boolean inPortrait) {
@@ -240,7 +295,7 @@ class UnlockScreen extends LinearLayoutWithDefaultTouchRecepient
     public void onResume() {
         // reset header
         mUnlockHeader.setText(R.string.lockscreen_pattern_instructions);
-        mUnlockIcon.setVisibility(View.VISIBLE);
+        // TODO mUnlockIcon.setVisibility(View.VISIBLE);
 
         // reset lock pattern
         mLockPatternView.enableInput();
@@ -296,7 +351,7 @@ class UnlockScreen extends LinearLayoutWithDefaultTouchRecepient
             if (mLockPatternUtils.checkPattern(pattern)) {
                 mLockPatternView
                         .setDisplayMode(LockPatternView.DisplayMode.Correct);
-                mUnlockIcon.setVisibility(View.GONE);
+                // TODO mUnlockIcon.setVisibility(View.GONE);
                 mUnlockHeader.setText("");
                 mCallback.keyguardDone(true);
             } else {
@@ -312,7 +367,7 @@ class UnlockScreen extends LinearLayoutWithDefaultTouchRecepient
                     handleAttemptLockout(deadline);
                     return;
                 }
-                mUnlockIcon.setVisibility(View.VISIBLE);
+                // TODO mUnlockIcon.setVisibility(View.VISIBLE);
                 mUnlockHeader.setText(R.string.lockscreen_pattern_wrong);
                 mLockPatternView.postDelayed(
                         mCancelPatternRunnable,
@@ -339,7 +394,7 @@ class UnlockScreen extends LinearLayoutWithDefaultTouchRecepient
             public void onFinish() {
                 mLockPatternView.setEnabled(true);
                 mUnlockHeader.setText(R.string.lockscreen_pattern_instructions);
-                mUnlockIcon.setVisibility(View.VISIBLE);
+                // TODO mUnlockIcon.setVisibility(View.VISIBLE);
                 mFailedPatternAttemptsSinceLastTimeout = 0;
                 if (mEnableFallback) {
                     updateFooter(FooterMode.ForgotLockPattern);
