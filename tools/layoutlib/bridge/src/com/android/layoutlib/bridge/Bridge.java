@@ -1051,15 +1051,22 @@ public final class Bridge implements ILayoutBridge {
             // pass for now.
         }
 
+        @SuppressWarnings("unused")
         public void setInsets(IWindow window, int touchable, Rect contentInsets,
                 Rect visibleInsets) {
             // pass for now.
         }
 
+        @SuppressWarnings("unused")
         public void setWallpaperPosition(IBinder window, float x, float y) {
             // pass for now.
         }
 
+        @SuppressWarnings("unused")
+        public void wallpaperOffsetsComplete(IBinder window) {
+            // pass for now.
+        }
+        
         public IBinder asBinder() {
             // pass for now.
             return null;
@@ -1114,7 +1121,7 @@ public final class Bridge implements ILayoutBridge {
         }
 
         @SuppressWarnings("unused")
-        public void dispatchWallpaperOffsets(float x, float y) {
+        public void dispatchWallpaperOffsets(float x, float y, boolean sync) {
             // pass for now.
         }
 

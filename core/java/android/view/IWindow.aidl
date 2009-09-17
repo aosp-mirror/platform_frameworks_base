@@ -60,5 +60,5 @@ oneway interface IWindow {
     /**
      * Called for wallpaper windows when their offsets change.
      */
-    void dispatchWallpaperOffsets(float x, float y);
+    void dispatchWallpaperOffsets(float x, float y, boolean sync);
 }
