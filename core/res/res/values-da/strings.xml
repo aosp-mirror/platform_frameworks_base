@@ -111,7 +111,8 @@
     <string name="httpErrorFile" msgid="8250549644091165175">"Der kunne ikke oprettes adgang til filen."</string>
     <string name="httpErrorFileNotFound" msgid="5588380756326017105">"Den anmodede fil blev ikke fundet."</string>
     <string name="httpErrorTooManyRequests" msgid="1235396927087188253">"Der behandles for mange anmodninger. Prøv igen senere."</string>
-    <string name="notification_title" msgid="4254304601929719937">"Loginfejl"</string>
+    <!-- no translation found for notification_title (1259940370369187045) -->
+    <skip />
     <string name="contentServiceSync" msgid="8353523060269335667">"Synkroniser"</string>
     <string name="contentServiceSyncNotificationTitle" msgid="397743349191901458">"Synkroniser"</string>
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"For mange <xliff:g id="CONTENT_TYPE">%s</xliff:g> sletninger"</string>
@@ -210,12 +211,9 @@
     <string name="permlab_batteryStats" msgid="7863923071360031652">"rediger batteristatistikker"</string>
     <string name="permdesc_batteryStats" msgid="5847319823772230560">"Tillader ændring af indsamlede batteristatistikker. Ikke til brug for normale programmer."</string>
     <string name="permlab_backup" msgid="470013022865453920">"kontroller sikkerhedskopiering af system, og gendan"</string>
-    <!-- no translation found for permdesc_backup (4837493065154256525) -->
-    <skip />
-    <!-- no translation found for permlab_backup_data (4057625941707926463) -->
-    <skip />
-    <!-- no translation found for permdesc_backup_data (8274426305151227766) -->
-    <skip />
+    <string name="permdesc_backup" msgid="4837493065154256525">"Tillader et program at kontrollere systemets sikkerhedskopierings- og gendannelsesmekanisme. Ikke til brug til normale programmer."</string>
+    <string name="permlab_backup_data" msgid="4057625941707926463">"Sikkerhedskopier og gendan programmets data"</string>
+    <string name="permdesc_backup_data" msgid="8274426305151227766">"Tillader et program at kontrollere systemets sikkerhedskopierings- og gendannelsesmekanisme."</string>
     <string name="permlab_internalSystemWindow" msgid="2148563628140193231">"vis uautoriserede vinduer"</string>
     <string name="permdesc_internalSystemWindow" msgid="5895082268284998469">"Tillader oprettelse af vinduer, der er beregnet til at blive brugt af den interne systembrugergrænseflade. Ikke til brug for normale programmer."</string>
     <string name="permlab_systemAlertWindow" msgid="3372321942941168324">"vis underretninger på systemniveau"</string>
@@ -261,8 +259,7 @@
     <string name="permlab_writeSettings" msgid="1365523497395143704">"rediger globale systemindstillinger"</string>
     <string name="permdesc_writeSettings" msgid="838789419871034696">"Tillader et program at ændre systemets indstillingsdata. Ondsindede programmer kan skade systemets konfiguration."</string>
     <string name="permlab_writeSecureSettings" msgid="204676251876718288">"rediger sikre systemindstillinger"</string>
-    <!-- no translation found for permdesc_writeSecureSettings (5497873143539034724) -->
-    <skip />
+    <string name="permdesc_writeSecureSettings" msgid="5497873143539034724">"Tillader et program at ændre systemernes sikre indstillingsdata. Ikke til brug til almindelige programmer."</string>
     <string name="permlab_writeGservices" msgid="2149426664226152185">"rediger kortet over Google-tjenester"</string>
     <string name="permdesc_writeGservices" msgid="6602362746516676175">"Tillader et program at ændre kortet over Google-tjenester. Ikke til brug til normale programmer."</string>
     <string name="permlab_receiveBootCompleted" msgid="7776779842866993377">"start automatisk ved opstart"</string>
@@ -319,10 +316,8 @@
     <string name="permdesc_callPhone" msgid="3369867353692722456">"Tillader programmet at ringe til telefonnumre uden din indgriben. Ondsindede programmer kan forårsage uventede opkald på din telefonregning. Vær opmærksom på, at det ikke tillader programmet at ringe til nødnumre."</string>
     <string name="permlab_callPrivileged" msgid="4198349211108497879">"ring direkte op til alle telefonnumre"</string>
     <string name="permdesc_callPrivileged" msgid="244405067160028452">"Tillader programmet at ringe til alle telefonnumre inklusive nødnumre uden din indgriben. Ondsindede programmer kan eventuelt foretage unødvendige og ulovlige opkald til nødtjenester."</string>
-    <!-- no translation found for permlab_performCdmaProvisioning (5604848095315421425) -->
-    <skip />
-    <!-- no translation found for permdesc_performCdmaProvisioning (6457447676108355905) -->
-    <skip />
+    <string name="permlab_performCdmaProvisioning" msgid="5604848095315421425">"start CDMA-telefonopsætning direkte"</string>
+    <string name="permdesc_performCdmaProvisioning" msgid="6457447676108355905">"Tillader, at programmet starter CDMA-levering. Onsindede programmer kan starte unødvendig CDMA-levering"</string>
     <string name="permlab_locationUpdates" msgid="7785408253364335740">"kontroller meddelelser om placeringsopdatering"</string>
     <string name="permdesc_locationUpdates" msgid="2300018303720930256">"Tillader aktivering/deaktivering af placeringsdata fra radioen. Ikke til brug til normale programmer."</string>
     <string name="permlab_checkinProperties" msgid="7855259461268734914">"egenskaber for adgangskontrol"</string>
@@ -465,16 +460,14 @@
     <string name="lockscreen_failed_attempts_almost_glogin" msgid="3351013842320127827">"Du har tegnet dit mønster til at låse op forkert <xliff:g id="NUMBER_0">%d</xliff:g> gange. Efter <xliff:g id="NUMBER_1">%d</xliff:g> forsøg mere vil du blive bedt om at låse din telefon op ved hjælp af dit Google-login"\n\n" Prøv igen om <xliff:g id="NUMBER_2">%d</xliff:g> sekunder."</string>
     <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6251480343394389665">"Prøv igen om <xliff:g id="NUMBER">%d</xliff:g> sekunder."</string>
     <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"Har du glemt mønster?"</string>
-    <!-- no translation found for lockscreen_glogin_forgot_pattern (2588521501166032747) -->
-    <skip />
+    <string name="lockscreen_glogin_forgot_pattern" msgid="2588521501166032747">"Oplåsning af konto"</string>
     <string name="lockscreen_glogin_too_many_attempts" msgid="2446246026221678244">"For mange mønsterforsøg!"</string>
     <string name="lockscreen_glogin_instructions" msgid="1816635201812207709">"For at låse op skal du logge ind med din Google-konto"</string>
     <string name="lockscreen_glogin_username_hint" msgid="8846881424106484447">"Brugernavn (e-mail)"</string>
     <string name="lockscreen_glogin_password_hint" msgid="5958028383954738528">"Adgangskode"</string>
     <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"Log ind"</string>
     <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"Ugyldigt brugernavn eller ugyldig adgangskode."</string>
-    <!-- no translation found for lockscreen_glogin_checking_password (6758890536332363322) -->
-    <skip />
+    <string name="lockscreen_glogin_checking_password" msgid="6758890536332363322">"Kontrollerer ..."</string>
     <string name="hour_ampm" msgid="4329881288269772723">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%P</xliff:g>"</string>
     <string name="hour_cap_ampm" msgid="1829009197680861107">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%p</xliff:g>"</string>
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"Ryd"</string>
@@ -486,8 +479,7 @@
     <string name="battery_low_title" msgid="7923774589611311406">"Forbind oplader"</string>
     <string name="battery_low_subtitle" msgid="7388781709819722764">"Batteriet er ved at blive tomt:"</string>
     <string name="battery_low_percent_format" msgid="6564958083485073855">"mindre end <xliff:g id="NUMBER">%d%%</xliff:g> tilbage."</string>
-    <!-- no translation found for battery_low_why (7279169609518386372) -->
-    <skip />
+    <string name="battery_low_why" msgid="7279169609518386372">"Batteriforbrug"</string>
     <string name="factorytest_failed" msgid="5410270329114212041">"Fabrikstest mislykkedes"</string>
     <string name="factorytest_not_system" msgid="4435201656767276723">"Handlingen FACTORY_TEST understøttes kun af pakker installeret i /system/app."</string>
     <string name="factorytest_no_action" msgid="872991874799998561">"Der blev ikke fundet nogen pakke, som leverer handlingen FACTORY_TEST."</string>
@@ -578,12 +570,9 @@
     <item quantity="one" msgid="2178576254385739855">"i morgen"</item>
     <item quantity="other" msgid="2973062968038355991">"om <xliff:g id="COUNT">%d</xliff:g> dage"</item>
   </plurals>
-    <!-- no translation found for preposition_for_date (9093949757757445117) -->
-    <skip />
-    <!-- no translation found for preposition_for_time (5506831244263083793) -->
-    <skip />
-    <!-- no translation found for preposition_for_year (5040395640711867177) -->
-    <skip />
+    <string name="preposition_for_date" msgid="9093949757757445117">"til <xliff:g id="DATE">%s</xliff:g>"</string>
+    <string name="preposition_for_time" msgid="5506831244263083793">"kl. <xliff:g id="TIME">%s</xliff:g>"</string>
+    <string name="preposition_for_year" msgid="5040395640711867177">"i <xliff:g id="YEAR">%s</xliff:g>"</string>
     <string name="day" msgid="8144195776058119424">"dag"</string>
     <string name="days" msgid="4774547661021344602">"dage"</string>
     <string name="hour" msgid="2126771916426189481">"time"</string>
@@ -621,10 +610,8 @@
     <string name="copyAll" msgid="2590829068100113057">"Kopier alle"</string>
     <string name="paste" msgid="5629880836805036433">"Indsæt"</string>
     <string name="copyUrl" msgid="2538211579596067402">"Kopier webadresse"</string>
-    <!-- no translation found for inputMethod (1653630062304567879) -->
-    <skip />
-    <!-- no translation found for addToDictionary (8793624991686948709) -->
-    <skip />
+    <string name="inputMethod" msgid="1653630062304567879">"Inputmetode"</string>
+    <string name="addToDictionary" msgid="8793624991686948709">"Føj \"<xliff:g id="WORD">%s</xliff:g>\" til ordbog"</string>
     <string name="editTextMenuTitle" msgid="1672989176958581452">"Rediger tekst"</string>
     <string name="low_internal_storage_view_title" msgid="1399732408701697546">"Der er ikke så meget plads tilbage"</string>
     <string name="low_internal_storage_view_text" msgid="635106544616378836">"Der er næsten ikke mere plads på telefonen."</string>
@@ -700,14 +687,15 @@
     <string name="usb_storage_stop_message" msgid="2390958966725232848">"Inden du slår USB-lagringen fra, skal du sørge for, at du demonterer USB-værten. Vælg \"Slå fra\" for at slå USB-lagringen fra."</string>
     <string name="usb_storage_stop_button_mount" msgid="1181858854166273345">"Slå fra"</string>
     <string name="usb_storage_stop_button_unmount" msgid="3774611918660582898">"Annuller"</string>
-    <!-- no translation found for usb_storage_stop_error_message (3746037090369246731) -->
-    <skip />
+    <string name="usb_storage_stop_error_message" msgid="3746037090369246731">"Der opstod et problem med at slå USB-lagringen fra. Sørg for, at du har demonteret USB-værten, og prøv så igen."</string>
     <string name="extmedia_format_title" msgid="8663247929551095854">"Formater SD-kort"</string>
     <string name="extmedia_format_message" msgid="3621369962433523619">"Er du sikker på, du ønsker at formatere SD-kortet? Alle data på kortet mistes."</string>
     <string name="extmedia_format_button_format" msgid="4131064560127478695">"Formater"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB-fejlretning forbundet"</string>
-    <string name="adb_active_notification_message" msgid="4661997077344501389">"Der er forbundet en computer til din telefon."</string>
-    <string name="select_input_method" msgid="2086499663193509436">"Vælg inputmetode"</string>
+    <!-- no translation found for adb_active_notification_message (8470296818270110396) -->
+    <skip />
+    <!-- no translation found for select_input_method (6865512749462072765) -->
+    <skip />
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"kandidater"</u></string>
@@ -738,23 +726,16 @@
     <string name="create_contact_using" msgid="4947405226788104538">"Opret kontakt"\n"ved hjælp af <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <string name="accessibility_compound_button_selected" msgid="5612776946036285686">"kontrolleret"</string>
     <string name="accessibility_compound_button_unselected" msgid="8864512895673924091">"ikke kontrolleret"</string>
-    <!-- no translation found for grant_credentials_permission_message_desc (6883276587034335667) -->
-    <skip />
-    <!-- no translation found for grant_credentials_permission_message_with_authtokenlabel_desc (3159007601893584687) -->
-    <skip />
+    <string name="grant_credentials_permission_message_desc" msgid="6883276587034335667">"De nævnte programmer beder om tilladelse til at få adgang til loginoplysningerne til kontoen <xliff:g id="ACCOUNT">%1$s</xliff:g> fra <xliff:g id="APPLICATION">%2$s</xliff:g>. Ønsker du at give denne tilladelse? Hvis ja, så huskes dit svar, og du vil ikke blive spurgt om det igen."</string>
+    <string name="grant_credentials_permission_message_with_authtokenlabel_desc" msgid="3159007601893584687">"De nævnte programmer beder om tilladelse til at få adgang til <xliff:g id="TYPE">%1$s</xliff:g>-loginoplysningerne til kontoen <xliff:g id="ACCOUNT">%2$s</xliff:g> fra <xliff:g id="APPLICATION">%3$s</xliff:g>. Vil du give denne tilladelse? Hvis ja, så huskes dit svar, og du vil ikke blive spurgt om det igen."</string>
     <string name="allow" msgid="7225948811296386551">"Tillad"</string>
     <string name="deny" msgid="2081879885755434506">"Afvis"</string>
     <string name="permission_request_notification_title" msgid="5390555465778213840">"Der er anmodet om tilladelse"</string>
-    <!-- no translation found for permission_request_notification_subtitle (21911977892390675) -->
+    <!-- no translation found for permission_request_notification_with_subtitle (4325409589686688000) -->
     <skip />
-    <!-- no translation found for input_method_binding_label (1283557179944992649) -->
-    <skip />
-    <!-- no translation found for sync_binding_label (3687969138375092423) -->
-    <skip />
-    <!-- no translation found for accessibility_binding_label (4148120742096474641) -->
-    <skip />
-    <!-- no translation found for wallpaper_binding_label (1240087844304687662) -->
-    <skip />
-    <!-- no translation found for chooser_wallpaper (7873476199295190279) -->
-    <skip />
+    <string name="input_method_binding_label" msgid="1283557179944992649">"Inputmetode"</string>
+    <string name="sync_binding_label" msgid="3687969138375092423">"Synkroniser"</string>
+    <string name="accessibility_binding_label" msgid="4148120742096474641">"Tilgængelighed"</string>
+    <string name="wallpaper_binding_label" msgid="1240087844304687662">"Tapet"</string>
+    <string name="chooser_wallpaper" msgid="7873476199295190279">"Skift tapet"</string>
 </resources>
