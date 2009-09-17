@@ -649,11 +649,21 @@ class BackupManagerService extends IBackupManager.Stub {
         int N = packages.size();
         for (int a = N-1; a >= 0; a--) {
             PackageInfo pkg = packages.get(a);
-            ApplicationInfo app = pkg.applicationInfo;
-            if (((app.flags&ApplicationInfo.FLAG_ALLOW_BACKUP) == 0)
-                    || app.backupAgentName == null
-                    || (mPackageManager.checkPermission(android.Manifest.permission.BACKUP_DATA,
-                            pkg.packageName) != PackageManager.PERMISSION_GRANTED)) {
+            try {
+                ApplicationInfo app = pkg.applicationInfo;
+                if (((app.flags&ApplicationInfo.FLAG_ALLOW_BACKUP) == 0)
+                        || app.backupAgentName == null
+                        || (mPackageManager.checkPermission(android.Manifest.permission.BACKUP_DATA,
+                                pkg.packageName) != PackageManager.PERMISSION_GRANTED)) {
+                    packages.remove(a);
+                }
+                else {
+                    // we will need the shared library path, so look that up and store it here
+                    app = mPackageManager.getApplicationInfo(pkg.packageName,
+                            PackageManager.GET_SHARED_LIBRARY_FILES);
+                    pkg.applicationInfo.sharedLibraryFiles = app.sharedLibraryFiles;
+                }
+            } catch (NameNotFoundException e) {
                 packages.remove(a);
             }
         }
