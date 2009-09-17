@@ -181,7 +181,7 @@ public class IccProvider extends ContentProvider {
             return null;
         }
 
-        StringBuilder buf = new StringBuilder("content://im/");
+        StringBuilder buf = new StringBuilder("content://icc/");
         switch (match) {
             case ADN:
                 buf.append("adn/");
