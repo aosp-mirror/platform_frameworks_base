@@ -19,6 +19,7 @@ package com.android.dumprendertree;
 import com.android.dumprendertree.TestShellActivity.DumpDataType;
 import com.android.dumprendertree.forwarder.AdbUtils;
 import com.android.dumprendertree.forwarder.ForwardServer;
+import com.android.dumprendertree.forwarder.ForwardService;
 
 import android.app.Instrumentation;
 import android.content.Intent;
@@ -143,17 +144,6 @@ public class LayoutTestsAutoTest extends ActivityInstrumentationTestCase2<TestSh
     static final String LAYOUT_RESULTS_CRASHED_RESULT_FILE = "results/layout_tests_crashed.txt";
     static final String LAYOUT_TESTS_RUNNER = "run_layout_tests.py";
 
-    static final String HTTP_TESTS_PREFIX = "/sdcard/android/layout_tests/http/tests/";
-    static final String HTTPS_TESTS_PREFIX = "/sdcard/android/layout_tests/http/tests/ssl/";
-    static final String HTTP_LOCAL_TESTS_PREFIX = "/sdcard/android/layout_tests/http/tests/local/";
-    static final String HTTP_MEDIA_TESTS_PREFIX = "/sdcard/android/layout_tests/http/tests/media/";
-    static final String HTTP_WML_TESTS_PREFIX = "/sdcard/android/layout_tests/http/tests/wml/";
-
-
-    static final String DEFAULT_TEST_HOST = "android-browser-test.mtv.corp.google.com";
-    static final String FORWARD_HOST_CONF = "/sdcard/drt_forward_host.txt";
-    private ForwardServer fs8000, fs8080, fs8443;
-
     private MyTestRecorder mResultRecorder;
     private Vector<String> mTestList;
     private boolean mRebaselineResults;
@@ -162,45 +152,6 @@ public class LayoutTestsAutoTest extends ActivityInstrumentationTestCase2<TestSh
 
     public LayoutTestsAutoTest() {
       super("com.android.dumprendertree", TestShellActivity.class);
-
-      int addr = getForwardHostAddr();
-      if(addr != -1) {
-          fs8000 = new ForwardServer(8000, addr, 8000);
-          fs8080 = new ForwardServer(8080, addr, 8080);
-          fs8443 = new ForwardServer(8443, addr, 8443);
-      }
-    }
-
-    private int getForwardHostAddr() {
-        int addr = -1;
-        String host = null;
-        File forwardHostConf = new File(FORWARD_HOST_CONF);
-        if (forwardHostConf.isFile()) {
-            BufferedReader hostReader = null;
-            try {
-                hostReader = new BufferedReader(new FileReader(forwardHostConf));
-                host = hostReader.readLine();
-                Log.v(LOGTAG, "read forward host from file: " + host);
-            } catch (IOException ioe) {
-                Log.v(LOGTAG, "cannot read forward host from file", ioe);
-            } finally {
-                if (hostReader != null) {
-                    try {
-                        hostReader.close();
-                    } catch (IOException ioe) {
-                        // burn!!!
-                    }
-                }
-            }
-        }
-        if (host == null || host.length() == 0)
-            host = DEFAULT_TEST_HOST;
-        try {
-            addr = AdbUtils.resolve(host);
-        } catch (IOException ioe) {
-            Log.e(LOGTAG, "failed to resolve server address", ioe);
-        }
-        return addr;
     }
 
     // This function writes the result of the layout test to
@@ -366,7 +317,7 @@ public class LayoutTestsAutoTest extends ActivityInstrumentationTestCase2<TestSh
         Intent intent = new Intent(Intent.ACTION_VIEW);
         intent.setClass(activity, TestShellActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-        intent.putExtra(TestShellActivity.TEST_URL, getTestUrl(test));
+        intent.putExtra(TestShellActivity.TEST_URL, FsUtils.getTestUrl(test));
         intent.putExtra(TestShellActivity.RESULT_FILE, resultFile);
         intent.putExtra(TestShellActivity.TIMEOUT_IN_MILLIS, timeout);
         activity.startActivity(intent);
@@ -450,47 +401,8 @@ public class LayoutTestsAutoTest extends ActivityInstrumentationTestCase2<TestSh
         }
 
         FsUtils.updateTestStatus(TEST_STATUS_FILE, "#DONE");
-        if(fs8000 != null)
-            fs8000.stop();
-        if(fs8080 != null)
-            fs8080.stop();
-        if(fs8443 != null)
-            fs8443.stop();
-
+        ForwardService.getForwardService().stopForwardService();
         activity.finish();
-    }
-
-    private void startForwardServerIfNeeded() {
-        try {
-            if(fs8000 != null)
-                fs8000.start();
-            if(fs8080 != null)
-                fs8080.start();
-            if(fs8443 != null)
-                fs8443.start();
-        } catch (IOException ioe) {
-            Log.w(LOGTAG, "failed to start forwarder. http tests will fail.", ioe);
-        }
-    }
-
-    private String getTestUrl(String path) {
-        String url = null;
-        if (!path.startsWith(HTTP_TESTS_PREFIX)) {
-            url = "file://" + path;
-        } else {
-            startForwardServerIfNeeded();
-            if (path.startsWith(HTTPS_TESTS_PREFIX)) {
-                // still cut the URL after "http/tests/"
-                url = "https://127.0.0.1:8443/" + path.substring(HTTP_TESTS_PREFIX.length());
-            } else if (!path.startsWith(HTTP_LOCAL_TESTS_PREFIX)
-                    && !path.startsWith(HTTP_MEDIA_TESTS_PREFIX)
-                    && !path.startsWith(HTTP_WML_TESTS_PREFIX)) {
-                url = "http://127.0.0.1:8000/" + path.substring(HTTP_TESTS_PREFIX.length());
-            } else {
-                url = "file://" + path;
-            }
-        }
-        return url;
     }
 
     private String getTestPath() {

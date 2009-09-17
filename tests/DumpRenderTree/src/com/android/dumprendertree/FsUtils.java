@@ -1,4 +1,22 @@
+/*
+ * Copyright (C) 2009 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.android.dumprendertree;
+
+import com.android.dumprendertree.forwarder.ForwardService;
 
 import android.util.Log;
 
@@ -12,6 +30,12 @@ import java.io.IOException;
 public class FsUtils {
 
     private static final String LOGTAG = "FsUtils";
+    static final String HTTP_TESTS_PREFIX = "/sdcard/android/layout_tests/http/tests/";
+    static final String HTTPS_TESTS_PREFIX = "/sdcard/android/layout_tests/http/tests/ssl/";
+    static final String HTTP_LOCAL_TESTS_PREFIX = "/sdcard/android/layout_tests/http/tests/local/";
+    static final String HTTP_MEDIA_TESTS_PREFIX = "/sdcard/android/layout_tests/http/tests/media/";
+    static final String HTTP_WML_TESTS_PREFIX = "/sdcard/android/layout_tests/http/tests/wml/";
+
     private FsUtils() {
         //no creation of instances
     }
@@ -75,6 +99,26 @@ public class FsUtils {
             }
         }
         return status;
+    }
+
+    public static String getTestUrl(String path) {
+        String url = null;
+        if (!path.startsWith(HTTP_TESTS_PREFIX)) {
+            url = "file://" + path;
+        } else {
+            ForwardService.getForwardService().startForwardService();
+            if (path.startsWith(HTTPS_TESTS_PREFIX)) {
+                // still cut the URL after "http/tests/"
+                url = "https://127.0.0.1:8443/" + path.substring(HTTP_TESTS_PREFIX.length());
+            } else if (!path.startsWith(HTTP_LOCAL_TESTS_PREFIX)
+                    && !path.startsWith(HTTP_MEDIA_TESTS_PREFIX)
+                    && !path.startsWith(HTTP_WML_TESTS_PREFIX)) {
+                url = "http://127.0.0.1:8000/" + path.substring(HTTP_TESTS_PREFIX.length());
+            } else {
+                url = "file://" + path;
+            }
+        }
+        return url;
     }
 
 }

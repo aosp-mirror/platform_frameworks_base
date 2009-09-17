@@ -16,6 +16,8 @@
 
 package com.android.dumprendertree;
 
+import com.android.dumprendertree.forwarder.ForwardService;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
@@ -184,6 +186,7 @@ public class TestShellActivity extends Activity implements LayoutTestController 
         } catch (IOException ioe) {
             Log.w(LOGTAG, "Failed to close test list file.", ioe);
         }
+        ForwardService.getForwardService().stopForwardService();
         finished();
     }
 
@@ -215,10 +218,9 @@ public class TestShellActivity extends Activity implements LayoutTestController 
             builder.create().show();
             return;
         }
-        url = "file://" + url;
         Intent intent = new Intent(Intent.ACTION_VIEW);
         intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-        intent.putExtra(TestShellActivity.TEST_URL, url);
+        intent.putExtra(TestShellActivity.TEST_URL, FsUtils.getTestUrl(url));
         intent.putExtra(TIMEOUT_IN_MILLIS, 10000);
         executeIntent(intent);
     }
