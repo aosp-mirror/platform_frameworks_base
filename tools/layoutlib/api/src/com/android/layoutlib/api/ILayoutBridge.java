@@ -88,7 +88,7 @@ public interface ILayoutBridge {
      * @param projectCallback The {@link IProjectCallback} object to get information from
      * the project.
      * @param logger the object responsible for displaying warning/errors to the user.
-     * @return an {@link ILayoutResult} object that contains the result of the layout.
+     * @return a new {@link ILayoutResult} object that contains the result of the layout.
      * @since 4
      */
     ILayoutResult computeLayout(IXmlPullParser layoutDescription,
@@ -123,7 +123,7 @@ public interface ILayoutBridge {
      * @param projectCallback The {@link IProjectCallback} object to get information from
      * the project.
      * @param logger the object responsible for displaying warning/errors to the user.
-     * @return an {@link ILayoutResult} object that contains the result of the layout.
+     * @return a new {@link ILayoutResult} object that contains the result of the layout.
      * @since 3
      */
     @Deprecated
@@ -155,7 +155,7 @@ public interface ILayoutBridge {
      * @param projectCallback The {@link IProjectCallback} object to get information from
      * the project.
      * @param logger the object responsible for displaying warning/errors to the user.
-     * @return an {@link ILayoutResult} object that contains the result of the layout.
+     * @return a new {@link ILayoutResult} object that contains the result of the layout.
      * @deprecated Use {@link #computeLayout(IXmlPullParser, Object, int, int, int, float, float, String, boolean, Map, Map, IProjectCallback, ILayoutLog)}
      * @since 2
      */
@@ -187,7 +187,7 @@ public interface ILayoutBridge {
      * @param projectCallback The {@link IProjectCallback} object to get information from
      * the project.
      * @param logger the object responsible for displaying warning/errors to the user.
-     * @return an {@link ILayoutResult} object that contains the result of the layout.
+     * @return a new {@link ILayoutResult} object that contains the result of the layout.
      * @deprecated Use {@link #computeLayout(IXmlPullParser, Object, int, int, int, float, float, String, boolean, Map, Map, IProjectCallback, ILayoutLog)}
      * @since 1
      */
@@ -205,7 +205,7 @@ public interface ILayoutBridge {
      * until this method is called.
      * <p/>The cache is not configuration dependent and should only be cleared when a
      * resource changes (at this time only bitmaps and 9 patches go into the cache).
-     * @param objectKey the key for the project.
+     * @param projectKey the key for the project.
      * @since 1
      */
     void clearCaches(Object projectKey);
