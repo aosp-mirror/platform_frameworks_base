@@ -20,8 +20,7 @@ import android.os.Bundle;
 import android.telephony.CellLocation;
 
 /**
- * Represents the cell location on a GSM phone.
- * @hide
+ * Represents the cell location on a CDMA phone.
  */
 public class CdmaCellLocation extends CellLocation {
     private int mBaseStationId = -1;
@@ -31,7 +30,8 @@ public class CdmaCellLocation extends CellLocation {
     private int mNetworkId = -1;
 
     /**
-     * Empty constructor.  Initializes the LAC and CID to -1.
+     * Empty constructor.
+     * Initializes the BID, SID, NID and base station latitude and longitude to -1.
      */
     public CdmaCellLocation() {
         this.mBaseStationId = -1;
