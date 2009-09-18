@@ -3599,6 +3599,14 @@ public final class Settings {
                 "search_per_source_concurrent_query_limit";
 
         /**
+         * Flag for allowing ActivityManagerService to send ACTION_APP_ERROR intents
+         * on application crashes and ANRs. If this is disabled, the crash/ANR dialog
+         * will never display the "Report" button.
+         * Type: int ( 0 = disallow, 1 = allow )
+         */
+        public static final String SEND_ACTION_APP_ERROR = "send_action_app_error";
+
+        /**
          * @deprecated
          * @hide
          */
