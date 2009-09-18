@@ -54,6 +54,7 @@ public:
 
     bool isUpdateOnDemand() const { return mUpdateOnDemand; }
     status_t setUpdateRectangle(const Rect& updateRect);
+    status_t compositionComplete();
     
 private:
     friend class LightRefBase<FramebufferNativeWindow>;    

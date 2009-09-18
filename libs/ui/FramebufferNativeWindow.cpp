@@ -158,6 +158,14 @@ status_t FramebufferNativeWindow::setUpdateRectangle(const Rect& r)
     return fbDev->setUpdateRect(fbDev, r.left, r.top, r.width(), r.height());
 }
 
+status_t FramebufferNativeWindow::compositionComplete()
+{
+    if (fbDev->compositionComplete) {
+        return fbDev->compositionComplete(fbDev);
+    }
+    return INVALID_OPERATION;
+}
+
 int FramebufferNativeWindow::setSwapInterval(
         android_native_window_t* window, int interval) 
 {
