@@ -809,6 +809,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                     intent.putExtra(ConnectivityManager.
                             EXTRA_OTHER_NETWORK_INFO, switchTo);
                 } else {
+                    intent.putExtra(ConnectivityManager.EXTRA_NO_CONNECTIVITY,
+                            true);
                     newNet.reconnect();
                 }
             } else {
