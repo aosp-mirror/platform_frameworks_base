@@ -191,7 +191,10 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
         mSearchPlate = findViewById(com.android.internal.R.id.search_plate);
         mWorkingSpinner = getContext().getResources().
                 getDrawable(com.android.internal.R.drawable.search_spinner);
-        
+        mSearchAutoComplete.setCompoundDrawablesWithIntrinsicBounds(
+                null, null, mWorkingSpinner, null);
+        setWorking(false);
+
         // attach listeners
         mSearchAutoComplete.addTextChangedListener(mTextWatcher);
         mSearchAutoComplete.setOnKeyListener(mTextKeyListener);
@@ -407,15 +410,9 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
      * @param working true to show spinner, false to hide spinner
      */
     public void setWorking(boolean working) {
-        if (working) {
-            mSearchAutoComplete.setCompoundDrawablesWithIntrinsicBounds(
-                    null, null, mWorkingSpinner, null);
-            ((Animatable) mWorkingSpinner).start();
-        } else {
-            mSearchAutoComplete.setCompoundDrawablesWithIntrinsicBounds(
-                    null, null, null, null);
-            ((Animatable) mWorkingSpinner).stop();
-        }
+        mWorkingSpinner.setAlpha(working ? 255 : 0);
+        mWorkingSpinner.setVisible(working, false);
+        mWorkingSpinner.invalidateSelf();
     }
     
     /**
