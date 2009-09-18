@@ -33,6 +33,7 @@ import android.media.AudioManager;
 import com.android.internal.telephony.IccCard;
 
 import java.util.Date;
+import java.text.SimpleDateFormat;
 
 /**
  * The screen within {@link LockPatternKeyguardView} that shows general
@@ -76,7 +77,9 @@ class LockScreen extends LinearLayout implements KeyguardScreen, KeyguardUpdateM
     private Drawable mChargingIcon = null;
 
     private boolean mSilentMode;
-    private AudioManager mAudioManager;    
+    private AudioManager mAudioManager;
+    private java.text.DateFormat mDateFormat;
+    private java.text.DateFormat mTimeFormat;
 
     /**
      * The status of this lock screen.
@@ -177,6 +180,9 @@ class LockScreen extends LinearLayout implements KeyguardScreen, KeyguardUpdateM
 
         refreshBatteryStringAndIcon();
         refreshAlarmDisplay();
+
+        mTimeFormat = DateFormat.getTimeFormat(getContext());
+        mDateFormat = getLockScreenDateFormat();
         refreshTimeAndDateDisplay();
         updateStatusLines();
 
@@ -303,8 +309,29 @@ class LockScreen extends LinearLayout implements KeyguardScreen, KeyguardUpdateM
 
     private void refreshTimeAndDateDisplay() {
         Date now = new Date();
-        mTime.setText(DateFormat.getTimeFormat(getContext()).format(now));
-        mDate.setText(DateFormat.getMediumDateFormat(getContext()).format(now));
+        mTime.setText(mTimeFormat.format(now));
+        mDate.setText(mDateFormat.format(now));
+    }
+
+    /**
+     * @return A localized format like "Fri, Sep 18, 2009"
+     */
+    private java.text.DateFormat getLockScreenDateFormat() {
+        SimpleDateFormat adjusted = null;
+        try {
+            // this call gives us the localized order
+            final SimpleDateFormat dateFormat = (SimpleDateFormat)
+                    java.text.DateFormat.getDateInstance(java.text.DateFormat.FULL);
+            adjusted = new SimpleDateFormat(dateFormat.toPattern()
+                    .replace("MMMM", "MMM")    // we want "Sep", not "September"
+                    .replace("EEEE", "EEE"));  // we want "Fri", no "Friday"
+        } catch (ClassCastException e) {
+            // in case the library implementation changes and this throws a class cast exception
+            // or anything else that is funky
+            Log.e("LockScreen", "couldn't finnagle our custom date format :(", e);
+            return java.text.DateFormat.getDateInstance(java.text.DateFormat.MEDIUM);
+        }
+        return adjusted;
     }
 
     private void updateStatusLines() {
