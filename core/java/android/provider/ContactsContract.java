@@ -682,8 +682,7 @@ public final class ContactsContract {
      * definition and some generic columns. Each data type can define the meaning for each of
      * the generic columns.
      */
-    public static final class Data implements BaseColumns, DataColumns, RawContactsColumns,
-            ContactsColumns, SyncColumns {
+    public static final class Data implements BaseColumns, DataColumns {
         /**
          * This utility class cannot be instantiated
          */
