@@ -248,7 +248,9 @@ public class ContactHeaderWidget extends FrameLayout implements View.OnClickList
                                     PHONE_LOOKUP_CONTACT_LOOKUP_KEY_COLUMN_INDEX);
                             bindFromContactUri(Contacts.getLookupUri(contactId, lookupKey));
                         } else {
-                            setDisplayName((String) cookie, null);
+                            String phoneNumber = (String) cookie;
+                            setDisplayName(phoneNumber, null);
+                            mPhotoView.assignContactFromPhone(phoneNumber, true);
                         }
                         break;
                     }
@@ -259,7 +261,9 @@ public class ContactHeaderWidget extends FrameLayout implements View.OnClickList
                                     EMAIL_LOOKUP_CONTACT_LOOKUP_KEY_COLUMN_INDEX);
                             bindFromContactUri(Contacts.getLookupUri(contactId, lookupKey));
                         } else {
-                            setDisplayName((String) cookie, null);
+                            String emailAddress = (String) cookie;
+                            setDisplayName(emailAddress, null);
+                            mPhotoView.assignContactFromEmail(emailAddress, true);
                         }
                         break;
                     }
