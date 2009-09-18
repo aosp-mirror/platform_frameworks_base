@@ -341,6 +341,7 @@ framework_docs_LOCAL_DROIDDOC_OPTIONS := \
     -since ./frameworks/base/api/2.xml 2 \
     -since ./frameworks/base/api/3.xml 3 \
     -since ./frameworks/base/api/4.xml 4 \
+    -since ./frameworks/base/api/current.xml Eclair \
 		-error 1 -error 2 -warning 3 -error 4 -error 6 -error 8 \
 		-overview $(LOCAL_PATH)/core/java/overview.html
 
