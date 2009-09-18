@@ -561,7 +561,7 @@ public abstract class Context {
     /**
      * Like {@link #startActivity(Intent)}, but taking a IntentSender
      * to start.  If the IntentSender is for an activity, that activity will be started
-     * as if you had called the regular {@link #startActivityForResult(Intent, int)}
+     * as if you had called the regular {@link #startActivity(Intent)}
      * here; otherwise, its associated action will be executed (such as
      * sending a broadcast) as if you had called
      * {@link IntentSender#sendIntent IntentSender.sendIntent} on it.

@@ -2861,7 +2861,7 @@ public class Activity extends ContextThemeWrapper
     /**
      * Like {@link #startActivity(Intent)}, but taking a IntentSender
      * to start; see
-     * {@link #startIntentSenderForResult(IntentSender, int, Intent, int, int)}
+     * {@link #startIntentSenderForResult(IntentSender, int, Intent, int, int, int)}
      * for more information.
      * 
      * @param intent The IntentSender to launch.
@@ -3003,7 +3003,7 @@ public class Activity extends ContextThemeWrapper
     /**
      * Like {@link #startActivityFromChild(Activity, Intent, int)}, but
      * taking a IntentSender; see
-     * {@link #startIntentSenderForResult(IntentSender, int, Intent, int, int)}
+     * {@link #startIntentSenderForResult(IntentSender, int, Intent, int, int, int)}
      * for more information.
      */
     public void startIntentSenderFromChild(Activity child, IntentSender intent,
