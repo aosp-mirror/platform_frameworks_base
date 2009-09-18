@@ -22,9 +22,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.TypedArray;
 import android.database.Cursor;
-import android.graphics.Rect;
 import android.net.Uri;
 import android.provider.ContactsContract.Contacts;
+import android.provider.ContactsContract.FastTrack;
 import android.provider.ContactsContract.Intents;
 import android.provider.ContactsContract.PhoneLookup;
 import android.provider.ContactsContract.RawContacts;
@@ -32,7 +32,6 @@ import android.provider.ContactsContract.CommonDataKinds.Email;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.widget.ImageView;
 
 /**
  * Widget used to show an image with the standard fasttrack badge
@@ -87,7 +86,7 @@ public class FasttrackBadgeWidget extends ImageView implements OnClickListener {
                     com.android.internal.R.styleable.FasttrackBadgeWidget, defStyle, 0);
 
         mMode = a.getInt(com.android.internal.R.styleable.FasttrackBadgeWidget_fasttrackWindowSize,
-                Intents.MODE_MEDIUM);
+                FastTrack.MODE_MEDIUM);
 
         a.recycle();
 
@@ -100,12 +99,12 @@ public class FasttrackBadgeWidget extends ImageView implements OnClickListener {
     }
 
     /**
-     * Assign the contact uri that this fasttrack badge should be associated with.
-     * Note that this is only used for displaying the fasttrack window and won't
-     * bind the contact's photo for you.
+     * Assign the contact uri that this fasttrack badge should be associated
+     * with. Note that this is only used for displaying the fasttrack window and
+     * won't bind the contact's photo for you.
      *
-     * @param conatctUri Either a {Contacts.CONTENT_URI} or {Contacts.CONTENT_LOOKUP_URI}
-     * style URI.
+     * @param contactUri Either a {@link Contacts#CONTENT_URI} or
+     *            {@link Contacts#CONTENT_LOOKUP_URI} style URI.
      */
     public void assignContactUri(Uri contactUri) {
         mContactUri = contactUri;
@@ -126,6 +125,8 @@ public class FasttrackBadgeWidget extends ImageView implements OnClickListener {
             mQueryHandler.startQuery(TOKEN_EMAIL_LOOKUP, null,
                     Uri.withAppendedPath(Email.CONTENT_LOOKUP_URI, Uri.encode(mContactEmail)),
                     EMAIL_LOOKUP_PROJECTION, null, null, null);
+        } else {
+            mContactUri = null;
         }
     }
 
@@ -144,12 +145,14 @@ public class FasttrackBadgeWidget extends ImageView implements OnClickListener {
             mQueryHandler.startQuery(TOKEN_PHONE_LOOKUP, null,
                     Uri.withAppendedPath(PhoneLookup.CONTENT_FILTER_URI, mContactPhone),
                     PHONE_LOOKUP_PROJECTION, null, null, null);
+        } else {
+            mContactUri = null;
         }
     }
 
     /**
-     * Set the fasttrack window mode. Options are {@link Intents.MODE_SMALL},
-     * {@link Intents.MODE_MEDIUM}, {@link Intents.MODE_LARGE}.
+     * Set the fasttrack window mode. Options are {@link FastTrack#MODE_SMALL},
+     * {@link FastTrack#MODE_MEDIUM}, {@link FastTrack#MODE_LARGE}.
      * @param size
      */
     public void setMode(int size) {
@@ -157,16 +160,16 @@ public class FasttrackBadgeWidget extends ImageView implements OnClickListener {
     }
 
     public void onClick(View v) {
-        final Rect target = getTargetRect(v);
-
         if (mContactUri != null) {
-            trigger(mContactUri, target);
+            final ContentResolver resolver = getContext().getContentResolver();
+            final Uri lookupUri = Contacts.getLookupUri(resolver, mContactUri);
+            trigger(lookupUri);
         } else if (mContactEmail != null) {
-            mQueryHandler.startQuery(TOKEN_EMAIL_LOOKUP_AND_TRIGGER, target,
+            mQueryHandler.startQuery(TOKEN_EMAIL_LOOKUP_AND_TRIGGER, mContactEmail,
                     Uri.withAppendedPath(Email.CONTENT_LOOKUP_URI, Uri.encode(mContactEmail)),
                     EMAIL_LOOKUP_PROJECTION, null, null, null);
         } else if (mContactPhone != null) {
-            mQueryHandler.startQuery(TOKEN_PHONE_LOOKUP_AND_TRIGGER, target,
+            mQueryHandler.startQuery(TOKEN_PHONE_LOOKUP_AND_TRIGGER, mContactPhone,
                     Uri.withAppendedPath(PhoneLookup.CONTENT_FILTER_URI, mContactPhone),
                     PHONE_LOOKUP_PROJECTION, null, null, null);
         } else {
@@ -184,23 +187,8 @@ public class FasttrackBadgeWidget extends ImageView implements OnClickListener {
         mExcludeMimes = excludeMimes;
     }
 
-    private void trigger(Uri contactUri, Rect target) {
-        Intent intent = new Intent(Intents.SHOW_OR_CREATE_CONTACT, contactUri);
-        intent.putExtra(Intents.EXTRA_TARGET_RECT, target);
-        intent.putExtra(Intents.EXTRA_MODE, mMode);
-        mContext.startActivity(intent);
-    }
-
-    private Rect getTargetRect(View anchor) {
-        final int[] location = new int[2];
-        anchor.getLocationOnScreen(location);
-
-        final Rect rect = new Rect();
-        rect.left = location[0];
-        rect.top = location[1];
-        rect.right = rect.left + anchor.getWidth();
-        rect.bottom = rect.top + anchor.getHeight();
-        return rect;
+    private void trigger(Uri lookupUri) {
+        FastTrack.showFastTrack(getContext(), this, lookupUri, mMode, mExcludeMimes);
     }
 
     private class QueryHandler extends AsyncQueryHandler {
@@ -211,28 +199,34 @@ public class FasttrackBadgeWidget extends ImageView implements OnClickListener {
 
         @Override
         protected void onQueryComplete(int token, Object cookie, Cursor cursor) {
-            Uri contactUri = null;
+            Uri lookupUri = null;
+            Uri createUri = null;
             boolean trigger = false;
 
-            try{
+            try {
                 switch(token) {
                     case TOKEN_PHONE_LOOKUP_AND_TRIGGER:
                         trigger = true;
+                        createUri = Uri.fromParts("tel", (String)cookie, null);
+
                     case TOKEN_PHONE_LOOKUP: {
                         if (cursor != null && cursor.moveToFirst()) {
                             long contactId = cursor.getLong(PHONE_ID_COLUMN_INDEX);
                             String lookupKey = cursor.getString(PHONE_LOOKUP_STRING_COLUMN_INDEX);
-                            contactUri = Contacts.getLookupUri(contactId, lookupKey);
+                            lookupUri = Contacts.getLookupUri(contactId, lookupKey);
                         }
+
                         break;
                     }
                     case TOKEN_EMAIL_LOOKUP_AND_TRIGGER:
                         trigger = true;
+                        createUri = Uri.fromParts("mailto", (String)cookie, null);
+
                     case TOKEN_EMAIL_LOOKUP: {
                         if (cursor != null && cursor.moveToFirst()) {
                             long contactId = cursor.getLong(EMAIL_ID_COLUMN_INDEX);
                             String lookupKey = cursor.getString(EMAIL_LOOKUP_STRING_COLUMN_INDEX);
-                            contactUri = Contacts.getLookupUri(contactId, lookupKey);
+                            lookupUri = Contacts.getLookupUri(contactId, lookupKey);
                         }
                     }
                 }
@@ -242,11 +236,15 @@ public class FasttrackBadgeWidget extends ImageView implements OnClickListener {
                 }
             }
 
-            if (contactUri != null) {
-                mContactUri = contactUri;
-                if (trigger && cookie != null) {
-                    trigger(contactUri, (Rect) cookie);
-                }
+            mContactUri = lookupUri;
+
+            if (trigger && lookupUri != null) {
+                // Found contact, so trigger track
+                trigger(lookupUri);
+            } else if (createUri != null) {
+                // Prompt user to add this person to contacts
+                final Intent intent = new Intent(Intents.SHOW_OR_CREATE_CONTACT, createUri);
+                getContext().startActivity(intent);
             }
         }
     }
