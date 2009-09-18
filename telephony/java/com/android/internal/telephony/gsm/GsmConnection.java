@@ -180,11 +180,6 @@ public class GsmConnection extends Connection {
         return isIncoming == c.isMT && equalsHandlesNulls(address, cAddress);
     }
 
-    public String
-    toString() {
-        return (isIncoming ? "incoming" : "outgoing");
-    }
-
     public String getAddress() {
         return address;
     }

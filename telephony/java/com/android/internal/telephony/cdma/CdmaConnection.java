@@ -221,10 +221,6 @@ public class CdmaConnection extends Connection {
         return isIncoming == c.isMT && equalsHandlesNulls(address, cAddress);
     }
 
-    public String
-    toString() {
-        return (isIncoming ? "incoming" : "outgoing");
-    }
 
     public String getOrigDialString(){
         return dialString;
