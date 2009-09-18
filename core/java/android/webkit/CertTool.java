@@ -36,10 +36,12 @@ class CertTool {
     private static final AlgorithmIdentifier MD5_WITH_RSA =
             new AlgorithmIdentifier(PKCSObjectIdentifiers.md5WithRSAEncryption);
 
-    static final String[] KEY_STRENGTH_LIST = {"High Grade", "Medium Grade"};
-
     static final String CERT = Credentials.CERTIFICATE;
     static final String PKCS12 = Credentials.PKCS12;
+
+    static String[] getKeyStrengthList() {
+        return new String[] {"High Grade", "Medium Grade"};
+    }
 
     static String getSignedPublicKey(Context context, int index, String challenge) {
         try {
