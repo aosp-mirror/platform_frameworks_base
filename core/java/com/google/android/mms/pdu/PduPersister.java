@@ -810,7 +810,7 @@ public class PduPersister {
     public void updateHeaders(Uri uri, SendReq sendReq) {
         PDU_CACHE_INSTANCE.purge(uri);
 
-        ContentValues values = new ContentValues(9);
+        ContentValues values = new ContentValues(10);
         byte[] contentType = sendReq.getContentType();
         if (contentType != null) {
             values.put(Mms.CONTENT_TYPE, toIsoString(contentType));
@@ -855,6 +855,11 @@ public class PduPersister {
         if (subject != null) {
             values.put(Mms.SUBJECT, toIsoString(subject.getTextString()));
             values.put(Mms.SUBJECT_CHARSET, subject.getCharacterSet());
+        }
+        
+        long messageSize = sendReq.getMessageSize();
+        if (messageSize > 0) {
+            values.put(Mms.MESSAGE_SIZE, messageSize);
         }
 
         PduHeaders headers = sendReq.getPduHeaders();
