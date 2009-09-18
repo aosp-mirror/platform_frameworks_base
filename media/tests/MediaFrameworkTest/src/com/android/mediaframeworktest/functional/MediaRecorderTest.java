@@ -417,6 +417,7 @@ public class MediaRecorderTest extends ActivityInstrumentationTestCase<MediaFram
         assertTrue("Invalid video Size", isTestInvalidVideoSizeSuccessful);
     }
     
+    @Suppress
     @LargeTest
     public void testInvalidFrameRate() throws Exception {       
         boolean isTestInvalidFrameRateSuccessful = false;
