@@ -25,9 +25,9 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.provider.ContactsContract.Contacts;
 import android.provider.ContactsContract.FastTrack;
-import android.provider.ContactsContract.Data;
 import android.provider.ContactsContract.Intents;
 import android.provider.ContactsContract.PhoneLookup;
+import android.provider.ContactsContract.RawContacts;
 import android.provider.ContactsContract.CommonDataKinds.Email;
 import android.util.AttributeSet;
 import android.view.View;
@@ -55,7 +55,7 @@ public class FasttrackBadgeWidget extends ImageView implements OnClickListener {
     static final private int TOKEN_PHONE_LOOKUP_AND_TRIGGER = 3;
 
     static final String[] EMAIL_LOOKUP_PROJECTION = new String[] {
-        Data.CONTACT_ID,
+        RawContacts.CONTACT_ID,
         Contacts.LOOKUP_KEY,
     };
     static int EMAIL_ID_COLUMN_INDEX = 0;
