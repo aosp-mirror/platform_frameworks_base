@@ -106,6 +106,11 @@ public class RotarySelector extends View {
     private static final int EDGE_PADDING_DIP = 9;
 
     /**
+     * How far from the edge of the screen the user must drag to trigger the event.
+     */
+    private static final int EDGE_TRIGGER_DIP = 65;
+
+    /**
      * Dimensions of arc in background drawable.
      */
     static final int OUTER_ROTARY_RADIUS_DIP = 390;
@@ -113,11 +118,11 @@ public class RotarySelector extends View {
     private static final int ANIMATION_DURATION_MILLIS = 300;
 
     private static final boolean DRAW_CENTER_DIMPLE = false;
+    private int mEdgeTriggerThresh;
 
     public RotarySelector(Context context) {
         this(context, null);
     }
-
 
     /**
      * Constructor used when this widget is created from a layout file.
@@ -148,6 +153,8 @@ public class RotarySelector extends View {
         mArrowLongRight.setBounds(0, 0, arrowW, arrowH);
 
         mInterpolator = new AccelerateInterpolator();
+
+        mEdgeTriggerThresh = (int) (mDensity * EDGE_TRIGGER_DIP);
     }
 
     /**
@@ -252,7 +259,6 @@ public class RotarySelector extends View {
             }
         }
 
-
         // Background:
         final int backgroundW = mBackground.getIntrinsicWidth();
         final int backgroundH = mBackground.getIntrinsicHeight();
@@ -268,7 +274,7 @@ public class RotarySelector extends View {
         Drawable currentArrow;
         switch (mGrabbedState) {
             case NOTHING_GRABBED:
-                currentArrow  = mArrowShortLeftAndRight;
+                currentArrow  = null; //mArrowShortLeftAndRight;
                 break;
             case LEFT_HANDLE_GRABBED:
                 currentArrow = mArrowLongLeft;
@@ -279,7 +285,7 @@ public class RotarySelector extends View {
             default:
                 throw new IllegalStateException("invalid mGrabbedState: " + mGrabbedState);
         }
-        currentArrow.draw(canvas);
+        if (currentArrow != null) currentArrow.draw(canvas);
 
         // debug: draw circle that should match the outer arc (good sanity check)
 //        mPaint.setColor(Color.RED);
@@ -300,7 +306,9 @@ public class RotarySelector extends View {
                     xOffset);
 
             drawCentered(mDimple, canvas, xOffset, drawableY + bgTop);
-            drawCentered(mLeftHandleIcon, canvas, xOffset, drawableY + bgTop);
+            if (mGrabbedState != RIGHT_HANDLE_GRABBED) {
+                drawCentered(mLeftHandleIcon, canvas, xOffset, drawableY + bgTop);
+            }
         }
 
         if (DRAW_CENTER_DIMPLE) {
@@ -323,7 +331,9 @@ public class RotarySelector extends View {
                     xOffset);
 
             drawCentered(mDimple, canvas, xOffset, drawableY + bgTop);
-            drawCentered(mRightHandleIcon, canvas, xOffset, drawableY + bgTop);
+            if (mGrabbedState != LEFT_HANDLE_GRABBED) {
+                drawCentered(mRightHandleIcon, canvas, xOffset, drawableY + bgTop);
+            }
         }
 
         if (mAnimating) invalidate();
@@ -407,14 +417,14 @@ public class RotarySelector extends View {
                 if (mGrabbedState == LEFT_HANDLE_GRABBED) {
                     mTouchDragOffset = eventX - mLeftHandleX;
                     invalidate();
-                    if (eventX >= mRightHandleX - EDGE_PADDING_DIP && !mTriggered) {
+                    if (eventX >= getRight() - mEdgeTriggerThresh && !mTriggered) {
                         mTriggered = true;
                         mFrozen = dispatchTriggerEvent(OnDialTriggerListener.LEFT_HANDLE);
                     }
                 } else if (mGrabbedState == RIGHT_HANDLE_GRABBED) {
                     mTouchDragOffset = eventX - mRightHandleX;
                     invalidate();
-                    if (eventX <= mLeftHandleX + EDGE_PADDING_DIP && !mTriggered) {
+                    if (eventX <= mEdgeTriggerThresh && !mTriggered) {
                         mTriggered = true;
                         mFrozen = dispatchTriggerEvent(OnDialTriggerListener.RIGHT_HANDLE);
                     }
