@@ -1794,7 +1794,7 @@ public final class ContactsContract {
          * @hide
          */
         public static final String ACTION_FAST_TRACK =
-                "com.android.contacts.ACTION_FAST_TRACK";
+                "com.android.contacts.action.FAST_TRACK";
 
         /**
          * Extra used to specify pivot dialog location in screen coordinates.
