@@ -36,10 +36,12 @@ import android.os.Looper;
 import android.os.Message;
 import android.util.Log;
 import android.view.MotionEvent;
+import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.ViewManager.ChildView;
 import android.widget.AbsoluteLayout;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.MediaController;
 import android.widget.VideoView;
@@ -90,6 +92,10 @@ class HTML5VideoViewProxy extends Handler
         // The VideoView instance. This is a singleton for now, at least until
         // http://b/issue?id=1973663 is fixed.
         private static VideoView mVideoView;
+        // The progress view.
+        private static View mProgressView;
+        // The container for the progress view and video view
+        private static FrameLayout mLayout;
 
         private static final WebChromeClient.CustomViewCallback mCallback =
             new WebChromeClient.CustomViewCallback() {
@@ -101,7 +107,13 @@ class HTML5VideoViewProxy extends Handler
                     // is invoked.
                     mCurrentProxy.playbackEnded();
                     mCurrentProxy = null;
+                    mLayout.removeView(mVideoView);
                     mVideoView = null;
+                    if (mProgressView != null) {
+                        mLayout.removeView(mProgressView);
+                        mProgressView = null;
+                    }
+                    mLayout = null;
                 }
             };
 
@@ -113,6 +125,13 @@ class HTML5VideoViewProxy extends Handler
                 return;
             }
             mCurrentProxy = proxy;
+            // Create a FrameLayout that will contain the VideoView and the
+            // progress view (if any).
+            mLayout = new FrameLayout(proxy.getContext());
+            FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(
+                    ViewGroup.LayoutParams.WRAP_CONTENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT,
+                    Gravity.CENTER);
             mVideoView = new VideoView(proxy.getContext());
             mVideoView.setWillNotDraw(false);
             mVideoView.setMediaController(new MediaController(proxy.getContext()));
@@ -120,8 +139,15 @@ class HTML5VideoViewProxy extends Handler
             mVideoView.setOnCompletionListener(proxy);
             mVideoView.setOnPreparedListener(proxy);
             mVideoView.seekTo(time);
+            mLayout.addView(mVideoView, layoutParams);
+            mProgressView = client.getVideoLoadingProgressView();
+            if (mProgressView != null) {
+                mLayout.addView(mProgressView, layoutParams);
+                mProgressView.setVisibility(View.VISIBLE);
+            }
+            mLayout.setVisibility(View.VISIBLE);
             mVideoView.start();
-            client.onShowCustomView(mVideoView, mCallback);
+            client.onShowCustomView(mLayout, mCallback);
         }
 
         public static void seek(int time, HTML5VideoViewProxy proxy) {
@@ -135,11 +161,20 @@ class HTML5VideoViewProxy extends Handler
                 mVideoView.pause();
             }
         }
+
+        public static void onPrepared() {
+            if (mProgressView != null) {
+                mProgressView.setVisibility(View.GONE);
+                mLayout.removeView(mProgressView);
+                mProgressView = null;
+            }
+        }
     }
 
     // A bunch event listeners for our VideoView
     // MediaPlayer.OnPreparedListener
     public void onPrepared(MediaPlayer mp) {
+        VideoPlayer.onPrepared();
         Message msg = Message.obtain(mWebCoreHandler, PREPARED);
         Map<String, Object> map = new HashMap<String, Object>();
         map.put("dur", new Integer(mp.getDuration()));
@@ -166,6 +201,13 @@ class HTML5VideoViewProxy extends Handler
         switch (msg.what) {
             case INIT: {
                 mPosterView = new ImageView(mWebView.getContext());
+                WebChromeClient client = mWebView.getWebChromeClient();
+                if (client != null) {
+                    Bitmap poster = client.getDefaultVideoPoster();
+                    if (poster != null) {
+                        mPosterView.setImageBitmap(poster);
+                    }
+                }
                 mChildView.mView = mPosterView;
                 break;
             }
