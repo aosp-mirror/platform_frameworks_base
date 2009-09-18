@@ -321,6 +321,16 @@ static int SC_sqr(int v)
     return v * v;
 }
 
+static float SC_fracf(float v)
+{
+    return v - floorf(v);
+}
+
+static float SC_roundf(float v)
+{
+    return floorf(v + 0.4999999999);
+}
+
 static float SC_distf2(float x1, float y1, float x2, float y2)
 {
     float x = x2 - x1;
@@ -1014,7 +1024,11 @@ ScriptCState::SymbolTable_t ScriptCState::gSyms[] = {
         "float", "(float, float)" },
     { "floorf", (void *)&floorf,
         "float", "(float)" },
+    { "fracf", (void *)&SC_fracf,
+        "float", "(float)" },
     { "ceilf", (void *)&ceilf,
+        "float", "(float)" },
+    { "roundf", (void *)&SC_roundf,
         "float", "(float)" },
     { "expf", (void *)&expf,
         "float", "(float)" },
