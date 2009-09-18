@@ -255,28 +255,24 @@ static void * SF_LoadFloat(JNIEnv *_env, jobject _obj, jfieldID _field, void *bu
 
 static void * SF_SaveInt(JNIEnv *_env, jobject _obj, jfieldID _field, void *buffer)
 {
-    LOGE("Save Int");
     _env->SetIntField(_obj, _field, ((int32_t *)buffer)[0]);
     return ((uint8_t *)buffer) + 4;
 }
 
 static void * SF_SaveShort(JNIEnv *_env, jobject _obj, jfieldID _field, void *buffer)
 {
-    LOGE("Save Short");
     _env->SetShortField(_obj, _field, ((int16_t *)buffer)[0]);
     return ((uint8_t *)buffer) + 2;
 }
 
 static void * SF_SaveByte(JNIEnv *_env, jobject _obj, jfieldID _field, void *buffer)
 {
-    LOGE("Save Byte");
     _env->SetByteField(_obj, _field, ((int8_t *)buffer)[0]);
     return ((uint8_t *)buffer) + 1;
 }
 
 static void * SF_SaveFloat(JNIEnv *_env, jobject _obj, jfieldID _field, void *buffer)
 {
-    LOGE("Save Float");
     _env->SetFloatField(_obj, _field, ((float *)buffer)[0]);
     return ((uint8_t *)buffer) + 4;
 }
@@ -601,11 +597,8 @@ nAllocationSubReadFromObject(JNIEnv *_env, jobject _this, jint alloc, jobject _t
     void * buf = bufAlloc;
     rsAllocationRead(con, (RsAllocation)alloc, bufAlloc);
 
-    LOGE("size %i, ", tc->size);
-
     for (int ct=0; ct < tc->fieldCount; ct++) {
         const TypeFieldCache *tfc = &tc->fields[ct];
-        LOGE("ct=%i, buf=%p", ct, buf);
         buf = tfc->readPtr(_env, _o, tfc->field, buf);
     }
     free(bufAlloc);
