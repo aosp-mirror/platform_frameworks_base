@@ -87,7 +87,7 @@ public class ScoSocket {
      *  Does not block.
      */
     public synchronized boolean connect(String address) {
-        if (VDBG) log("connect() " + this);
+        if (DBG) log("connect() " + this);
         if (mState != STATE_READY) {
             if (DBG) log("connect(): Bad state");
             return false;
