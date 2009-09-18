@@ -490,17 +490,17 @@ public class MediaNames {
   
   //Streaming test files
   public static final String STREAM_H264_480_360_1411k = 
-      "http://sridharg.googlejunta.com/yslau/stress_media/h264_regular.mp4"; 
+      "http://75.17.48.204:10088/yslau/stress_media/h264_regular.mp4";
   public static final String STREAM_WMV = 
-      "http://sridharg.googlejunta.com/yslau/stress_media/bugs.wmv"; 
+      "http://75.17.48.204:10088/yslau/stress_media/bugs.wmv";
   public static final String STREAM_H263_176x144_325k = 
-      "http://sridharg.googlejunta.com/yslau/stress_media/h263_regular.3gp";
+      "http://75.17.48.204:10088/yslau/stress_media/h263_regular.3gp";
   public static final String STREAM_H264_352x288_1536k = 
-      "http://sridharg.googlejunta.com/yslau/stress_media/h264_highBitRate.mp4";
+      "http://75.17.48.204:10088/yslau/stress_media/h264_highBitRate.mp4";
   public static final String STREAM_MP3= 
-      "http://sridharg.googlejunta.com/yslau/stress_media/mp3_regular.mp3";
+      "http://75.17.48.204:10088/yslau/stress_media/mp3_regular.mp3";
   public static final String STREAM_MPEG4_QVGA_128k = 
-      "http://sridharg.googlejunta.com/yslau/stress_media/mpeg4_qvga_24fps.3gp";
+      "http://75.17.48.204:10088/yslau/stress_media/mpeg4_qvga_24fps.3gp";
   public static final int STREAM_H264_480_360_1411k_DURATION = 46000;
   public static final int VIDEO_H263_AAC_DURATION = 501000;
 }
