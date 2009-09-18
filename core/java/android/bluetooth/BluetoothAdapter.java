@@ -573,6 +573,7 @@ public final class BluetoothAdapter {
 
     /**
      * Validate a Bluetooth address, such as "00:43:A8:23:10:F0"
+     * <p>Alphabetic characters must be uppercase to be valid.
      *
      * @param address Bluetooth address as string
      * @return true if the address is valid, false otherwise
@@ -586,8 +587,9 @@ public final class BluetoothAdapter {
             switch (i % 3) {
             case 0:
             case 1:
-                if (Character.digit(c, 16) != -1) {
-                    break;  // hex character, OK
+                if ((c >= '0' && c <= '9') || (c >= 'A' && c <= 'F')) {
+                    // hex character, OK
+                    break;
                 }
                 return false;
             case 2:
