@@ -2484,8 +2484,11 @@ public class WebView extends AbsoluteLayout
     }
 
     // scale from content to view coordinates, and pin
-    // return true if pin caused the final x/y different than the request cx/cy;
-    // return false if the view scroll to the exact position as it is requested.
+    // return true if pin caused the final x/y different than the request cx/cy,
+    // and a future scroll may reach the request cx/cy after our size has
+    // changed
+    // return false if the view scroll to the exact position as it is requested,
+    // where negative numbers are taken to mean 0
     private boolean setContentScrollTo(int cx, int cy) {
         if (mDrawHistory) {
             // disallow WebView to change the scroll position as History Picture
@@ -2500,7 +2503,9 @@ public class WebView extends AbsoluteLayout
 //        Log.d(LOGTAG, "content scrollTo [" + cx + " " + cy + "] view=[" +
 //                      vx + " " + vy + "]");
         pinScrollTo(vx, vy, false, 0);
-        if (mScrollX != vx || mScrollY != vy) {
+        // If the request was to scroll to a negative coordinate, treat it as if
+        // it was a request to scroll to 0
+        if ((mScrollX != vx && cx >= 0) || (mScrollY != vy && cy >= 0)) {
             return true;
         } else {
             return false;
