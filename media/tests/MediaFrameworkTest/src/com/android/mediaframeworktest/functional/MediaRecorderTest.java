@@ -214,8 +214,10 @@ public class MediaRecorderTest extends ActivityInstrumentationTestCase<MediaFram
             Log.v(TAG, "before getduration");
             mOutputDuration = mediaPlayer.getDuration();
             Log.v(TAG, "get video dimension");
-            mOutputVideoHeight = CodecTest.videoHeight(outputFilePath);
-            mOutputVideoWidth = CodecTest.videoWidth(outputFilePath);
+            mOutputVideoHeight = mediaPlayer.getVideoHeight();
+            mOutputVideoWidth = mediaPlayer.getVideoWidth();
+            //mOutputVideoHeight = CodecTest.videoHeight(outputFilePath);
+            //mOutputVideoWidth = CodecTest.videoWidth(outputFilePath);
             mediaPlayer.release();    
         } catch (Exception e) {
             Log.v(TAG, e.toString());
@@ -321,10 +323,10 @@ public class MediaRecorderTest extends ActivityInstrumentationTestCase<MediaFram
             recordVideo(15, 352, 288, MediaRecorder.VideoEncoder.H263,
                     MediaRecorder.OutputFormat.THREE_GPP, 
                     MediaNames.RECORDED_PORTRAIT_H263, true);
-            videoRecordedResult = 
-                validateVideo(MediaNames.RECORDED_PORTRAIT_H263, 352, 288);
             mCamera.lock();
             mCamera.release();
+            videoRecordedResult =
+                validateVideo(MediaNames.RECORDED_PORTRAIT_H263, 352, 288);
         } catch (Exception e) {
             Log.v(TAG, e.toString());
         }
@@ -453,4 +455,3 @@ public class MediaRecorderTest extends ActivityInstrumentationTestCase<MediaFram
         }
     }
 }
-
