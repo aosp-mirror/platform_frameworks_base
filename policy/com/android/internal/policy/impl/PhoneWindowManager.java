@@ -650,6 +650,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         return 0;
     }
 
+    public int getMaxWallpaperLayer() {
+        return STATUS_BAR_LAYER;
+    }
+
     /** {@inheritDoc} */
     public View addStartingWindow(IBinder appToken, String packageName,
                                   int theme, CharSequence nonLocalizedLabel,

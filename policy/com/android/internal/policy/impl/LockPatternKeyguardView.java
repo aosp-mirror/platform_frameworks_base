@@ -285,9 +285,11 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
         setDescendantFocusability(FOCUS_AFTER_DESCENDANTS);
 
         // wall paper background
-        final BitmapDrawable drawable = (BitmapDrawable) context.getWallpaper();
-        setBackgroundDrawable(
-                new FastBitmapDrawable(drawable.getBitmap()));
+        if (false) {
+            final BitmapDrawable drawable = (BitmapDrawable) context.getWallpaper();
+            setBackgroundDrawable(
+                    new FastBitmapDrawable(drawable.getBitmap()));
+        }
 
         // create both the lock and unlock screen so they are quickly available
         // when the screen turns on
