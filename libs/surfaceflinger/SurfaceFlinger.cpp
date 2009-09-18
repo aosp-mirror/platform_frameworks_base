@@ -495,6 +495,9 @@ bool SurfaceFlinger::threadLoop()
         // repaint the framebuffer (if needed)
         handleRepaint();
 
+        // inform the h/w that we're done compositing
+        hw.compositionComplete();
+
         // release the clients before we flip ('cause flip might block)
         unlockClients();
 
