@@ -63,12 +63,12 @@ public class ExifInterface {
 
     private String mFilename;
     private HashMap<String, String> mAttributes;
-    private boolean mHasThumbnail = false;
+    private boolean mHasThumbnail;
 
     // Because the underlying implementation (jhead) uses static variables,
     // there can only be one user at a time for the native functions (and
     // they cannot keep state in the native code across function calls). We
-    // use sLock the serialize the accesses.
+    // use sLock to serialize the accesses.
     private static Object sLock = new Object();
 
     /**
@@ -81,12 +81,30 @@ public class ExifInterface {
 
     /**
      * Returns the value of the specified tag or {@code null} if there
-     * is no such tag in the file.
+     * is no such tag in the JPEG file.
      *
      * @param tag the name of the tag.
      */
     public String getAttribute(String tag) {
         return mAttributes.get(tag);
+    }
+
+    /**
+     * Returns the integer value of the specified tag. If there is no such tag
+     * in the JPEG file or the value cannot be parsed as integer, return
+     * @{code defaultValue}.
+     *
+     * @param tag the name of the tag.
+     * @param defaultValue the value to return if the tag is not available.
+     */
+    public int getAttributeInt(String tag, int defaultValue) {
+        String value = mAttributes.get(tag);
+        if (value == null) return defaultValue;
+        try {
+            return Integer.valueOf(value);
+        } catch (NumberFormatException ex) {
+            return defaultValue;
+        }
     }
 
     /**
@@ -109,7 +127,7 @@ public class ExifInterface {
      * This function also initialize mHasThumbnail to indicate whether the
      * file has a thumbnail inside.
      */
-    private void loadAttributes() {
+    private void loadAttributes() throws IOException {
         // format of string passed from native C code:
         // "attrCnt attr1=valueLen value1attr2=value2Len value2..."
         // example:
@@ -153,9 +171,9 @@ public class ExifInterface {
     /**
      * Save the tag data into the JPEG file. This is expensive because it involves
      * copying all the JPG data from one file to another and deleting the old file
-     * and renaming the other. It's best to use {@link #setAttribute(String,String)} to set all
-     * attributes to write and make a single call rather than multiple calls for
-     * each attribute.
+     * and renaming the other. It's best to use {@link #setAttribute(String,String)}
+     * to set all attributes to write and make a single call rather than multiple
+     * calls for each attribute.
      */
     public void saveAttributes() throws IOException {
         // format of string passed to native C code:
@@ -195,6 +213,8 @@ public class ExifInterface {
 
     /**
      * Returns the thumbnail inside the JPEG file, or {@code null} if there is no thumbnail.
+     * The returned data is in JPEG format and can be decoded using
+     * {@link android.graphics.BitmapFactory#decodeByteArray(byte[],int,int)}
      */
     public byte[] getThumbnail() {
         synchronized (sLock) {
@@ -203,98 +223,23 @@ public class ExifInterface {
     }
 
     /**
-     * Returns a human-readable string describing the white balance value. Returns empty
-     * string if there is no white balance value or it is not recognized.
+     * Stores the latitude and longitude value in a float array. The first element is
+     * the latitude, and the second element is the longitude. Returns false if the
+     * Exif tags are not available.
      */
-    public String getWhiteBalanceString() {
-        String value = getAttribute(TAG_WHITE_BALANCE);
-        if (value == null) return "";
-
-        int whitebalance;
-        try {
-            whitebalance = Integer.parseInt(value);
-        } catch (NumberFormatException ex) {
-            return "";
-        }
-
-        switch (whitebalance) {
-            case WHITEBALANCE_AUTO:
-                return "Auto";
-            case WHITEBALANCE_MANUAL:
-                return "Manual";
-            default:
-                return "";
-        }
-    }
-
-    /**
-     * Returns a human-readable string describing the orientation value. Returns empty
-     * string if there is no orientation value or it it not recognized.
-     */
-    public String getOrientationString() {
-        // TODO: this function needs to be localized.
-        String value = getAttribute(TAG_ORIENTATION);
-        if (value == null) return "";
-
-        int orientation;
-        try {
-            orientation = Integer.parseInt(value);
-        } catch (NumberFormatException ex) {
-            return "";
-        }
-
-        String orientationString;
-        switch (orientation) {
-            case ORIENTATION_NORMAL:
-                orientationString = "Normal";
-                break;
-            case ORIENTATION_FLIP_HORIZONTAL:
-                orientationString = "Flipped horizontal";
-                break;
-            case ORIENTATION_ROTATE_180:
-                orientationString = "Rotated 180 degrees";
-                break;
-            case ORIENTATION_FLIP_VERTICAL:
-                orientationString = "Upside down mirror";
-                break;
-            case ORIENTATION_TRANSPOSE:
-                orientationString = "Transposed";
-                break;
-            case ORIENTATION_ROTATE_90:
-                orientationString = "Rotated 90 degrees";
-                break;
-            case ORIENTATION_TRANSVERSE:
-                orientationString = "Transversed";
-                break;
-            case ORIENTATION_ROTATE_270:
-                orientationString = "Rotated 270 degrees";
-                break;
-            default:
-                orientationString = "Undefined";
-                break;
-        }
-        return orientationString;
-    }
-
-    /**
-     * Returns the latitude and longitude value in a float array. The first element is
-     * the latitude, and the second element is the longitude.
-     */
-    public float[] getLatLong() {
+    public boolean getLatLong(float output[]) {
         String latValue = mAttributes.get(ExifInterface.TAG_GPS_LATITUDE);
         String latRef = mAttributes.get(ExifInterface.TAG_GPS_LATITUDE_REF);
         String lngValue = mAttributes.get(ExifInterface.TAG_GPS_LONGITUDE);
         String lngRef = mAttributes.get(ExifInterface.TAG_GPS_LONGITUDE_REF);
-        float[] latlng = null;
 
-        if (latValue != null && latRef != null
-                && lngValue != null && lngRef != null) {
-            latlng = new float[2];
-            latlng[0] = convertRationalLatLonToFloat(latValue, latRef);
-            latlng[1] = convertRationalLatLonToFloat(lngValue, lngRef);
+        if (latValue != null && latRef != null && lngValue != null && lngRef != null) {
+            output[0] = convertRationalLatLonToFloat(latValue, latRef);
+            output[1] = convertRationalLatLonToFloat(lngValue, lngRef);
+            return true;
+        } else {
+            return false;
         }
-
-        return latlng;
     }
 
     private static SimpleDateFormat sFormatter =
@@ -303,6 +248,7 @@ public class ExifInterface {
     /**
      * Returns number of milliseconds since Jan. 1, 1970, midnight GMT.
      * Returns -1 if the date time information if not available.
+     * @hide
      */
     public long getDateTime() {
         String dateTimeString = mAttributes.get(TAG_DATETIME);
