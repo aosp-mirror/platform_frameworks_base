@@ -206,6 +206,26 @@ public class SendReq extends MultimediaMessagePdu {
     }
 
     /**
+     * Get X-Mms-MessageSize value.
+     *
+     * Expiry-value = size of message
+     *
+     * @return the value
+     */
+    public long getMessageSize() {
+        return mPduHeaders.getLongInteger(PduHeaders.MESSAGE_SIZE);
+    }
+
+    /**
+     * Set X-Mms-MessageSize value.
+     *
+     * @param value the value
+     */
+    public void setMessageSize(long value) {
+        mPduHeaders.setLongInteger(value, PduHeaders.MESSAGE_SIZE);
+    }
+
+    /**
      * Get From value.
      * From-value = Value-length
      *      (Address-present-token Encoded-string-value | Insert-address-token)
