@@ -233,7 +233,7 @@ final class JWebCoreJavaBridge extends Handler {
     }
 
     private String[] getKeyStrengthList() {
-        return CertTool.KEY_STRENGTH_LIST;
+        return CertTool.getKeyStrengthList();
     }
 
     private String getSignedPublicKey(int index, String challenge, String url) {
