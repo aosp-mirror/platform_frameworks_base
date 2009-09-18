@@ -127,7 +127,7 @@ public abstract class DataConnectionTracker extends Handler {
 
     /** Retry configuration for secondary networks: 4 tries in 20 sec */
     protected static final String SECONDARY_DATA_RETRY_CONFIG =
-            "max_retries=3; 5000, 5000, 5000";
+            "max_retries=3, 5000, 5000, 5000";
 
     /** Slow poll when attempting connection recovery. */
     protected static final int POLL_NETSTAT_SLOW_MILLIS = 5000;
