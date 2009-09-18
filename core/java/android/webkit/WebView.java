@@ -4517,6 +4517,8 @@ public class WebView extends AbsoluteLayout
             }
         }
         if (mInZoomOverview) {
+            // Force the titlebar fully reveal in overview mode
+            if (mScrollY < getTitleHeight()) mScrollY = 0;
             zoomWithPreview((float) getViewWidth() / mZoomOverviewWidth);
         } else {
             // mLastTouchX and mLastTouchY are the point in the current viewport
