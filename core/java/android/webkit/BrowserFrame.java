@@ -605,8 +605,8 @@ class BrowserFrame extends Handler {
     }
 
     // Called by JNI when an apple-touch-icon attribute was found.
-    private void didReceiveTouchIconUrl(String url) {
-        mCallbackProxy.onReceivedTouchIconUrl(url);
+    private void didReceiveTouchIconUrl(String url, boolean precomposed) {
+        mCallbackProxy.onReceivedTouchIconUrl(url, precomposed);
     }
 
     /**

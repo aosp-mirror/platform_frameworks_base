@@ -48,9 +48,11 @@ public class WebChromeClient {
      * Notify the host application of the url for an apple-touch-icon.
      * @param view The WebView that initiated the callback.
      * @param url The icon url.
+     * @param precomposed True if the url is for a precomposed touch icon.
      * @hide pending council approval
      */
-    public void onReceivedTouchIconUrl(WebView view, String url) {}
+    public void onReceivedTouchIconUrl(WebView view, String url,
+            boolean precomposed) {}
 
     /**
      * A callback interface used by the host application to notify
