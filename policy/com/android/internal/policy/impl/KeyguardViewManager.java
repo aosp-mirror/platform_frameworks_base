@@ -101,6 +101,7 @@ public class KeyguardViewManager implements KeyguardWindowController {
 
             final int stretch = ViewGroup.LayoutParams.FILL_PARENT;
             int flags = WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN
+                    | WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER
                     /*| WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
                     | WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR*/ ;
             if (!mNeedsInput) {
@@ -108,9 +109,9 @@ public class KeyguardViewManager implements KeyguardWindowController {
             }
             WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
                     stretch, stretch, WindowManager.LayoutParams.TYPE_KEYGUARD,
-                    flags, PixelFormat.OPAQUE);
+                    flags, PixelFormat.TRANSLUCENT);
             lp.softInputMode = WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN;
-            lp.windowAnimations = com.android.internal.R.style.Animation_LockScreen;
+            //lp.windowAnimations = com.android.internal.R.style.Animation_LockScreen;
             lp.screenOrientation = ActivityInfo.SCREEN_ORIENTATION_NOSENSOR;
             lp.setTitle("Keyguard");
             mWindowLayoutParams = lp;

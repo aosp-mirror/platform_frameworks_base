@@ -20,7 +20,6 @@ import android.app.ActivityManager;
 import android.app.Dialog;
 import android.app.StatusBarManager;
 import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -30,13 +29,10 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.View.OnClickListener;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.util.List;
@@ -59,7 +55,7 @@ public class RecentApplicationsDialog extends Dialog implements OnClickListener 
     private int mIconSize;
 
     public RecentApplicationsDialog(Context context) {
-        super(context);
+        super(context, com.android.internal.R.style.Theme_Dialog_RecentApplications);
 
         final Resources resources = context.getResources();
         mIconSize = (int) resources.getDimension(android.R.dimen.app_icon_size);
@@ -84,8 +80,8 @@ public class RecentApplicationsDialog extends Dialog implements OnClickListener 
         Window theWindow = getWindow();
         theWindow.requestFeature(Window.FEATURE_NO_TITLE);
         theWindow.setType(WindowManager.LayoutParams.TYPE_SYSTEM_DIALOG);
-        theWindow.setFlags(WindowManager.LayoutParams.FLAG_BLUR_BEHIND,
-                WindowManager.LayoutParams.FLAG_BLUR_BEHIND);
+        theWindow.setFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND,
+                WindowManager.LayoutParams.FLAG_DIM_BEHIND);
         theWindow.setFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM,
                 WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
         theWindow.setTitle("Recents");
