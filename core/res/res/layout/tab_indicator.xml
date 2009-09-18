@@ -18,8 +18,8 @@
     android:layout_width="0dip"
     android:layout_height="64dip"
     android:layout_weight="1"
-    android:layout_marginLeft="-4px"
-    android:layout_marginRight="-4px"
+    android:layout_marginLeft="-3dip"
+    android:layout_marginRight="-3dip"
     android:orientation="vertical"
     android:background="@android:drawable/tab_indicator">
 
