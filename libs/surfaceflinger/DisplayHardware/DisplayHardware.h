@@ -80,6 +80,8 @@ public:
     EGLDisplay getEGLDisplay() const { return mDisplay; }
     overlay_control_device_t* getOverlayEngine() const { return mOverlayEngine; }
     
+    status_t compositionComplete() const;
+    
     Rect bounds() const {
         return Rect(mWidth, mHeight);
     }
