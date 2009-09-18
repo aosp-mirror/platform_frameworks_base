@@ -189,6 +189,8 @@ private:
         virtual             ~Client();
         const sp<MemoryDealer>&     heap() const;
         pid_t               pid() const { return mPid; }
+        sp<AudioFlinger>    audioFlinger() { return mAudioFlinger; }
+
     private:
                             Client(const Client&);
                             Client& operator = (const Client&);
@@ -641,7 +643,7 @@ private:
     friend class PlaybackThread::Track;
 
 
-                void        removeClient(pid_t pid);
+                void        removeClient_l(pid_t pid);
 
 
     // record thread
