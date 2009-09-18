@@ -357,10 +357,12 @@ public class Camera {
 
     /**
      * Starts auto-focus function and registers a callback function to run when
-     * camera is focused. Only valid after startPreview() has been called. If
-     * the camera does not support auto-focus, it is a no-op and {@link
-     * AutoFocusCallback#onAutoFocus(boolean, Camera)} callback will be called
-     * immediately.
+     * camera is focused. Only valid after startPreview() has been called.
+     * Applications should call {@link
+     * android.hardware.Camera.Parameters#getFocusMode()} to determine if this
+     * method should be called. If the camera does not support auto-focus, it is
+     * a no-op and {@link AutoFocusCallback#onAutoFocus(boolean, Camera)}
+     * callback will be called immediately.
      * <p>If your application should not be installed
      * on devices without auto-focus, you must declare that your application
      * uses auto-focus with the
@@ -598,6 +600,7 @@ public class Camera {
         private static final String KEY_ANTIBANDING = "antibanding";
         private static final String KEY_SCENE_MODE = "scene-mode";
         private static final String KEY_FLASH_MODE = "flash-mode";
+        private static final String KEY_FOCUS_MODE = "focus-mode";
         // Parameter key suffix for supported values.
         private static final String SUPPORTED_VALUES_SUFFIX = "-values";
 
@@ -646,6 +649,10 @@ public class Camera {
          * Flash will be fired in red-eye reduction mode.
          */
         public static final String FLASH_MODE_RED_EYE = "red-eye";
+        /**
+         * Constant emission of light. This can be used for video recording.
+         */
+        public static final String FLASH_MODE_VIDEO_LIGHT = "video-light";
 
         // Values for scene mode settings.
         public static final String SCENE_MODE_AUTO = "auto";
@@ -663,6 +670,25 @@ public class Camera {
         public static final String SCENE_MODE_SPORTS = "sports";
         public static final String SCENE_MODE_PARTY = "party";
         public static final String SCENE_MODE_CANDLELIGHT = "candlelight";
+
+        // Values for focus mode settings.
+        /**
+         * Auto-focus mode.
+         */
+        public static final String FOCUS_MODE_AUTO = "auto";
+        /**
+         * Focus is set at infinity. Applications should not call
+         * {@link #autoFocus(AutoFocusCallback)} in this mode.
+         */
+        public static final String FOCUS_MODE_INFINITY = "infinity";
+        public static final String FOCUS_MODE_MACRO = "macro";
+        /**
+         * Focus is fixed. The camera is always in this mode if the focus is not
+         * adjustable. If the camera has auto-focus, this mode can fix the
+         * focus, which is usually at hyperfocal distance. Applications should
+         * not call {@link #autoFocus(AutoFocusCallback)} in this mode.
+         */
+        public static final String FOCUS_MODE_FIXED = "fixed";
 
         // Formats for setPreviewFormat and setPictureFormat.
         private static final String PIXEL_FORMAT_YUV422SP = "yuv422sp";
@@ -1292,6 +1318,39 @@ public class Camera {
          */
         public List<String> getSupportedFlashModes() {
             String str = get(KEY_FLASH_MODE + SUPPORTED_VALUES_SUFFIX);
+            return split(str);
+        }
+
+        /**
+         * Gets the current focus mode setting.
+         *
+         * @return one of FOCUS_MODE_XXX string constant. If the camera does not
+         *         support auto-focus, this should return {@link
+         *         #FOCUS_MODE_FIXED}. If the focus mode is not FOCUS_MODE_FIXED
+         *         or {@link #FOCUS_MODE_INFINITY}, applications should call
+         *         {@link #autoFocus(AutoFocusCallback)} to start the focus.
+         */
+        public String getFocusMode() {
+            return get(KEY_FOCUS_MODE);
+        }
+
+        /**
+         * Sets the focus mode.
+         *
+         * @param value FOCUS_MODE_XXX string constants.
+         */
+        public void setFocusMode(String value) {
+            set(KEY_FOCUS_MODE, value);
+        }
+
+        /**
+         * Gets the supported focus modes.
+         *
+         * @return a List of FOCUS_MODE_XXX string constants. null if focus mode
+         *         setting is not supported.
+         */
+        public List<String> getSupportedFocusModes() {
+            String str = get(KEY_FOCUS_MODE + SUPPORTED_VALUES_SUFFIX);
             return split(str);
         }
 
