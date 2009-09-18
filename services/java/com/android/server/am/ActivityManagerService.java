@@ -8432,6 +8432,13 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
     }
 
     private ComponentName getErrorReportReceiver(ProcessRecord app) {
+        // check if error reporting is enabled in Gservices
+        int enabled = Settings.Gservices.getInt(mContext.getContentResolver(),
+                Settings.Gservices.SEND_ACTION_APP_ERROR, 0);
+        if (enabled == 0) {
+            return null;
+        }
+
         IPackageManager pm = ActivityThread.getPackageManager();
 
         try {
