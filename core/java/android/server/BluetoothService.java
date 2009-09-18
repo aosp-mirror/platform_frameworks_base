@@ -76,9 +76,16 @@ public class BluetoothService extends IBluetooth.Stub {
 
     private static final int MESSAGE_REGISTER_SDP_RECORDS = 1;
     private static final int MESSAGE_FINISH_DISABLE = 2;
+    private static final int MESSAGE_UUID_INTENT = 3;
+
+    // The timeout used to sent the UUIDs Intent
+    // This timeout should be greater than the page timeout
+    private static final int UUID_INTENT_DELAY = 6000;
 
     private final Map<String, String> mAdapterProperties;
     private final HashMap <String, Map<String, String>> mDeviceProperties;
+
+    private final ArrayList <String> mUuidIntentTracker;
 
     static {
         classInitNative();
@@ -104,6 +111,7 @@ public class BluetoothService extends IBluetooth.Stub {
         mIsDiscovering = false;
         mAdapterProperties = new HashMap<String, String>();
         mDeviceProperties = new HashMap<String, Map<String,String>>();
+        mUuidIntentTracker = new ArrayList<String>();
         registerForAirplaneMode();
     }
 
@@ -290,6 +298,11 @@ public class BluetoothService extends IBluetooth.Stub {
                 break;
             case MESSAGE_FINISH_DISABLE:
                 finishDisable(msg.arg1 != 0);
+                break;
+            case MESSAGE_UUID_INTENT:
+                String address = (String)msg.obj;
+                if (address != null)
+                    sendUuidIntent(address);
                 break;
             }
         }
@@ -976,6 +989,10 @@ public class BluetoothService extends IBluetooth.Stub {
         if (!BluetoothAdapter.checkBluetoothAddress(address)) {
             return null;
         }
+        return getUuidFromCache(address);
+    }
+
+    private ParcelUuid[] getUuidFromCache(String address) {
         String value = getRemoteDeviceProperty(address, "UUIDs");
         if (value == null) return null;
 
@@ -988,6 +1005,36 @@ public class BluetoothService extends IBluetooth.Stub {
             uuids[i] = ParcelUuid.fromString(uuidStrings[i]);
         }
         return uuids;
+    }
+
+    public synchronized boolean fetchRemoteUuidsWithSdp(String address) {
+        mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
+        if (!BluetoothAdapter.checkBluetoothAddress(address)) {
+            return false;
+        }
+
+        if (mUuidIntentTracker.contains(address)) {
+            // An SDP query for this address is already in progress
+            return true;
+        }
+
+        boolean ret;
+        if (getBondState(address) == BluetoothDevice.BOND_BONDED) {
+            String path = getObjectPathFromAddress(address);
+            if (path == null) return false;
+
+            // Use an empty string for the UUID pattern
+            ret = discoverServicesNative(path, "");
+        } else {
+            ret = createDeviceNative(address);
+        }
+
+        mUuidIntentTracker.add(address);
+
+        Message message = mHandler.obtainMessage(MESSAGE_UUID_INTENT);
+        message.obj = address;
+        mHandler.sendMessageDelayed(message, UUID_INTENT_DELAY);
+        return ret;
     }
 
     /**
@@ -1119,6 +1166,18 @@ public class BluetoothService extends IBluetooth.Stub {
     private final boolean isAirplaneModeOn() {
         return Settings.System.getInt(mContext.getContentResolver(),
                 Settings.System.AIRPLANE_MODE_ON, 0) == 1;
+    }
+
+    /* Broadcast the Uuid intent */
+    /*package*/ synchronized void sendUuidIntent(String address) {
+        if (mUuidIntentTracker.contains(address)) {
+            ParcelUuid[] uuid = getUuidFromCache(address);
+            Intent intent = new Intent(BluetoothDevice.ACTION_UUID);
+            intent.putExtra(BluetoothDevice.EXTRA_UUID, uuid);
+            mContext.sendBroadcast(intent, BLUETOOTH_ADMIN_PERM);
+
+            mUuidIntentTracker.remove(address);
+        }
     }
 
     @Override
@@ -1284,4 +1343,6 @@ public class BluetoothService extends IBluetooth.Stub {
     private native boolean setPairingConfirmationNative(String address, boolean confirm,
             int nativeData);
     private native boolean setDevicePropertyBooleanNative(String objectPath, String key, int value);
+    private native boolean createDeviceNative(String address);
+    private native boolean discoverServicesNative(String objectPath, String pattern);
 }
