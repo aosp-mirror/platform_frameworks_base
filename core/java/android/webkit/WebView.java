@@ -905,8 +905,9 @@ public class WebView extends AbsoluteLayout
     /*
      * Return the width of the view where the content of WebView should render
      * to.
+     * Note: this can be called from WebCoreThread.
      */
-    private int getViewWidth() {
+    /* package */ int getViewWidth() {
         if (!isVerticalScrollBarEnabled() || mOverlayVerticalScrollbar) {
             return getWidth();
         } else {
@@ -932,8 +933,9 @@ public class WebView extends AbsoluteLayout
     /*
      * Return the height of the view where the content of WebView should render
      * to.  Note that this excludes mTitleBar, if there is one.
+     * Note: this can be called from WebCoreThread.
      */
-    private int getViewHeight() {
+    /* package */ int getViewHeight() {
         int height = getHeight();
         if (isHorizontalScrollBarEnabled() && !mOverlayHorizontalScrollbar) {
             height -= getHorizontalScrollbarHeight();

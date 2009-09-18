@@ -1890,7 +1890,22 @@ final class WebViewCore {
         if (mViewportWidth != 0 && !updateRestoreState) return;
 
         // now notify webview
-        int webViewWidth = Math.round(mCurrentViewWidth * mCurrentViewScale);
+        // webViewWidth refers to the width in the view system
+        int webViewWidth;
+        // viewportWidth refers to the width in the document system
+        int viewportWidth = mCurrentViewWidth;
+        if (viewportWidth == 0) {
+            // this may happen when WebView just starts. This is not perfect as
+            // we call WebView method from WebCore thread. But not perfect
+            // reference is better than no reference.
+            webViewWidth = mWebView.getViewWidth();
+            viewportWidth = webViewWidth * 100 / WebView.DEFAULT_SCALE_PERCENT;
+            if (viewportWidth == 0) {
+                Log.w(LOGTAG, "Can't get the viewWidth after the first layout");
+            }
+        } else {
+            webViewWidth = Math.round(viewportWidth * mCurrentViewScale);
+        }
         mRestoreState = new RestoreState();
         mRestoreState.mMinScale = mViewportMinimumScale / 100.0f;
         mRestoreState.mMaxScale = mViewportMaximumScale / 100.0f;
@@ -1942,7 +1957,7 @@ final class WebViewCore {
             mEventHub.sendMessageAtFrontOfQueue(Message.obtain(null,
                     EventHub.VIEW_SIZE_CHANGED, data));
         } else if (mSettings.getUseWideViewPort()) {
-            if (mCurrentViewWidth == 0) {
+            if (viewportWidth == 0) {
                 // Trick to ensure VIEW_SIZE_CHANGED will be sent from WebView
                 // to WebViewCore
                 mWebView.mLastWidthSent = 0;
@@ -1956,8 +1971,7 @@ final class WebViewCore {
                                 : mRestoreState.mTextWrapScale)
                         : mRestoreState.mViewScale;
                 data.mWidth = Math.round(webViewWidth / data.mScale);
-                data.mHeight = mCurrentViewHeight * data.mWidth
-                        / mCurrentViewWidth;
+                data.mHeight = mCurrentViewHeight * data.mWidth / viewportWidth;
                 data.mTextWrapWidth = Math.round(webViewWidth
                         / mRestoreState.mTextWrapScale);
                 data.mIgnoreHeight = false;
