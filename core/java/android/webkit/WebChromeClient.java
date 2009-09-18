@@ -273,4 +273,26 @@ public class WebChromeClient {
      * @hide pending API council.
      */
     public void addMessageToConsole(String message, int lineNumber, String sourceID) {}
+
+    /**
+     * Ask the host application for an icon to represent a <video> element.
+     * This icon will be used if the Web page did not specify a poster attribute.
+     *
+     * @return Bitmap The icon or null if no such icon is available.
+     * @hide pending API Council approval
+     */
+    public Bitmap getDefaultVideoPoster() {
+        return null;
+    }
+
+    /**
+     * Ask the host application for a custom progress view to show while
+     * a <video> is loading.
+     *
+     * @return View The progress view.
+     * @hide pending API Council approval
+     */
+    public View getVideoLoadingProgressView() {
+        return null;
+    }
 }
