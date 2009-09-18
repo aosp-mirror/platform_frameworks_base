@@ -492,6 +492,8 @@ public class CdmaConnection extends Connection {
 
         newParent = parentFromDCState(dc.state);
 
+        if (Phone.DEBUG_PHONE) log("parent= " +parent +", newParent= " + newParent);
+
         if (!equalsHandlesNulls(address, dc.number)) {
             if (Phone.DEBUG_PHONE) log("update: phone # changed!");
             address = dc.number;
@@ -509,7 +511,7 @@ public class CdmaConnection extends Connection {
             cnapName = dc.name;
         }
 
-        log("--dssds----"+cnapName);
+        if (Phone.DEBUG_PHONE) log("--dssds----"+cnapName);
         cnapNamePresentation = dc.namePresentation;
         numberPresentation = dc.numberPresentation;
 
@@ -529,9 +531,7 @@ public class CdmaConnection extends Connection {
         /** Some state-transition events */
 
         if (Phone.DEBUG_PHONE) log(
-                "update: parent=" + parent +
-                ", hasNewParent=" + (newParent != parent) +
-                ", wasConnectingInOrOut=" + wasConnectingInOrOut +
+                "Update, wasConnectingInOrOut=" + wasConnectingInOrOut +
                 ", wasHolding=" + wasHolding +
                 ", isConnectingInOrOut=" + isConnectingInOrOut() +
                 ", changed=" + changed);
@@ -860,10 +860,13 @@ public class CdmaConnection extends Connection {
         // Append the PW char
         ret = (isPause(c)) ? PhoneNumberUtils.PAUSE : PhoneNumberUtils.WAIT;
 
-        // if there is a PAUSE in at the beginning of PW character sequences, and this
-        // PW character sequences has more than 2 PAUSE and WAIT Characters,skip PAUSE,
-        // append WAIT.
-        if (isPause(c) && (nextNonPwCharIndex > (currPwIndex + 2))) {
+        // If the nextNonPwCharIndex is greater than currPwIndex + 1,
+        // it means the PW sequence contains not only P characters.
+        // Since for the sequence that only contains P character,
+        // the P character is handled one by one, the nextNonPwCharIndex
+        // equals to currPwIndex + 1.
+        // In this case, skip P, append W.
+        if (nextNonPwCharIndex > (currPwIndex + 1)) {
             ret = PhoneNumberUtils.WAIT;
         }
         return ret;
@@ -882,6 +885,11 @@ public class CdmaConnection extends Connection {
      *    and if there is any WAIT in PAUSE/WAIT sequence, treat them like WAIT.
      */
     public static String formatDialString(String phoneNumber) {
+        /**
+         * TODO(cleanup): This function should move to PhoneNumberUtils, and
+         * tests should be added.
+         */
+
         if (phoneNumber == null) {
             return null;
         }
@@ -901,9 +909,9 @@ public class CdmaConnection extends Connection {
                         char pC = findPOrWCharToAppend(phoneNumber, currIndex, nextIndex);
                         ret.append(pC);
                         // If PW char sequence has more than 2 PW characters,
-                        // skip to the last character since the sequence already be
+                        // skip to the last PW character since the sequence already be
                         // converted to WAIT character
-                        if (nextIndex > (currIndex + 2)) {
+                        if (nextIndex > (currIndex + 1)) {
                             currIndex = nextIndex - 1;
                         }
                     } else if (nextIndex == length) {
