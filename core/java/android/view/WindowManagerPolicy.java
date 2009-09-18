@@ -436,6 +436,12 @@ public interface WindowManagerPolicy {
     public int subWindowTypeToLayerLw(int type);
 
     /**
+     * Get the highest layer (actually one more than) that the wallpaper is
+     * allowed to be in.
+     */
+    public int getMaxWallpaperLayer();
+    
+    /**
      * Called when the system would like to show a UI to indicate that an
      * application is starting.  You can use this to add a
      * APPLICATION_STARTING_TYPE window with the given appToken to the window
