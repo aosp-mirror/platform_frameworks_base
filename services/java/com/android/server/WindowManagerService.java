@@ -1384,12 +1384,18 @@ public class WindowManagerService extends IWindowManager.Stub
                     (mLowerWallpaperTarget == null && foundW.mAppToken != null)
                     ? foundW.mAppToken.animLayerAdjustment : 0;
             
+            final int maxLayer = mPolicy.getMaxWallpaperLayer()
+                    * TYPE_LAYER_MULTIPLIER
+                    + TYPE_LAYER_OFFSET;
+            
             // Now w is the window we are supposed to be behind...  but we
             // need to be sure to also be behind any of its attached windows,
-            // AND any starting window associated with it.
+            // AND any starting window associated with it, AND below the
+            // maximum layer the policy allows for wallpapers.
             while (foundI > 0) {
                 WindowState wb = (WindowState)localmWindows.get(foundI-1);
-                if (wb.mAttachedWindow != foundW &&
+                if (wb.mBaseLayer < maxLayer &&
+                        wb.mAttachedWindow != foundW &&
                         (wb.mAttrs.type != TYPE_APPLICATION_STARTING ||
                                 wb.mToken != foundW.mToken)) {
                     // This window is not related to the previous one in any
@@ -2266,6 +2272,12 @@ public class WindowManagerService extends IWindowManager.Stub
                             // Currently in a hide animation... turn this into
                             // an exit.
                             win.mExiting = true;
+                        } else if (win == mWallpaperTarget) {
+                            // If the wallpaper is currently behind this
+                            // window, we need to change both of them inside
+                            // of a transaction to avoid artifacts.
+                            win.mExiting = true;
+                            win.mAnimating = true;
                         } else {
                             if (mInputMethodWindow == win) {
                                 mInputMethodWindow = null;
@@ -3155,6 +3167,10 @@ public class WindowManagerService extends IWindowManager.Stub
                         com.android.internal.R.styleable.Window);
                 if (ent.array.getBoolean(
                         com.android.internal.R.styleable.Window_windowIsTranslucent, false)) {
+                    return;
+                }
+                if (ent.array.getBoolean(
+                        com.android.internal.R.styleable.Window_windowIsFloating, false)) {
                     return;
                 }
                 if (ent.array.getBoolean(
@@ -7087,8 +7103,8 @@ public class WindowManagerService extends IWindowManager.Stub
                     mAppToken.firstWindowDrawn = true;
                     
                     if (mAppToken.startingData != null) {
-                        if (DEBUG_STARTING_WINDOW) Log.v(TAG, "Finish starting "
-                                + mToken
+                        if (DEBUG_STARTING_WINDOW || DEBUG_ANIM) Log.v(TAG,
+                                "Finish starting " + mToken
                                 + ": first real window is shown, no animation");
                         // If this initial window is animating, stop it -- we
                         // will do an animation to reveal it from behind the
@@ -7305,13 +7321,13 @@ public class WindowManagerService extends IWindowManager.Stub
                 // Compute the desired transformation.
                 tmpMatrix.setTranslate(frame.left, frame.top);
                 if (selfTransformation) {
-                    tmpMatrix.preConcat(mTransformation.getMatrix());
+                    tmpMatrix.postConcat(mTransformation.getMatrix());
                 }
                 if (attachedTransformation != null) {
-                    tmpMatrix.preConcat(attachedTransformation.getMatrix());
+                    tmpMatrix.postConcat(attachedTransformation.getMatrix());
                 }
                 if (appTransformation != null) {
-                    tmpMatrix.preConcat(appTransformation.getMatrix());
+                    tmpMatrix.postConcat(appTransformation.getMatrix());
                 }
 
                 // "convert" it into SurfaceFlinger's format
@@ -8928,11 +8944,14 @@ public class WindowManagerService extends IWindowManager.Stub
                                 wallpaperMayChange = true;
                             }
                         }
+                        boolean wasAnimating = w.mAnimating;
                         if (w.stepAnimationLocked(currentTime, dw, dh)) {
                             animating = true;
                             //w.dump("  ");
                         }
-
+                        if (wasAnimating && !w.mAnimating && mWallpaperTarget == w) {
+                            wallpaperMayChange = true;
+                        }
                         mPolicy.animatingWindowLw(w, attrs);
                     }
 
@@ -9269,6 +9288,7 @@ public class WindowManagerService extends IWindowManager.Stub
             boolean covered = false;
             boolean syswin = false;
             boolean backgroundFillerShown = false;
+            boolean forceHiding = false;
 
             final int N = mWindows.size();
             
@@ -9401,7 +9421,10 @@ public class WindowManagerService extends IWindowManager.Stub
                         }
                     }
 
-                    if (w.mAttachedHidden) {
+                    if ((forceHiding
+                            && attrs.type != WindowManager.LayoutParams.TYPE_STATUS_BAR
+                            && attrs.type != WindowManager.LayoutParams.TYPE_WALLPAPER)
+                            || w.mAttachedHidden) {
                         if (!w.mLastHidden) {
                             //dump();
                             w.mLastHidden = true;
@@ -9515,6 +9538,9 @@ public class WindowManagerService extends IWindowManager.Stub
                     }
 
                     if (displayed) {
+                        if (attrs.type == WindowManager.LayoutParams.TYPE_KEYGUARD) {
+                            forceHiding = true;
+                        }
                         if (!covered) {
                             if (attrs.width == LayoutParams.FILL_PARENT
                                     && attrs.height == LayoutParams.FILL_PARENT) {
@@ -9597,7 +9623,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         }
                         backgroundFillerShown = true;
                         mBackgroundFillerShown = true;
-                    } else if (canBeSeen && !obscured &&
+                    } else if (canBeSeen && !obscured && !forceHiding &&
                             (attrFlags&FLAG_BLUR_BEHIND|FLAG_DIM_BEHIND) != 0) {
                         if (localLOGV) Log.v(TAG, "Win " + w
                                 + ": blurring=" + blurring

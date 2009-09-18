@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-/* //device/apps/common/res/anim/fade_in.xml
-**
-** Copyright 2007, The Android Open Source Project
+/*
+** Copyright 2009, The Android Open Source Project
 **
 ** Licensed under the Apache License, Version 2.0 (the "License"); 
 ** you may not use this file except in compliance with the License. 
@@ -20,10 +19,10 @@
 
 <set xmlns:android="http://schemas.android.com/apk/res/android"
         android:interpolator="@anim/decelerate_interpolator">
-    <scale android:fromXScale="0.9" android:toXScale="1.0"
-           android:fromYScale="0.9" android:toYScale="1.0"
+    <scale android:fromXScale="2.0" android:toXScale="1.0"
+           android:fromYScale="2.0" android:toYScale="1.0"
            android:pivotX="50%p" android:pivotY="50%p"
-           android:duration="@android:integer/config_shortAnimTime" />
+           android:duration="@android:integer/config_mediumAnimTime" />
     <alpha android:fromAlpha="0.0" android:toAlpha="1.0"
-            android:duration="@android:integer/config_shortAnimTime" />
+            android:duration="@android:integer/config_mediumAnimTime"/>
 </set>
