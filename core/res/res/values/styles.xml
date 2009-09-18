@@ -177,6 +177,13 @@
         <item name="windowExitAnimation">@anim/wallpaper_exit</item>
     </style>
 
+    <!-- A special animation we can use for recent applications,
+         for devices that can support it (do alpha transformations). -->
+    <style name="Animation.RecentApplications">
+        <item name="windowEnterAnimation">@anim/recent_enter</item>
+        <item name="windowExitAnimation">@anim/recent_exit</item>
+    </style>
+
     <!-- Status Bar Styles -->
 
     <style name="TextAppearance.StatusBarTitle">

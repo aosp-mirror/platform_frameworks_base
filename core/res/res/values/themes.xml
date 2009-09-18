@@ -500,4 +500,10 @@
         <item name="windowContentOverlay">@null</item>
         <item name="textAppearance">@style/TextAppearance.Theme.Dialog.AppError</item>
     </style>
+    
+    <!-- Special theme for the recent apps dialog, to allow customization
+         with overlays. -->
+    <style name="Theme.Dialog.RecentApplications">
+    </style>
+    
 </resources>
