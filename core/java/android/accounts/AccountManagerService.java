@@ -287,25 +287,18 @@ public class AccountManagerService
 
     private String readUserDataFromDatabase(Account account, String key) {
         SQLiteDatabase db = mOpenHelper.getReadableDatabase();
-        db.beginTransaction();
+        Cursor cursor = db.query(TABLE_EXTRAS, new String[]{EXTRAS_VALUE},
+                EXTRAS_ACCOUNTS_ID
+                        + "=(select _id FROM accounts WHERE name=? AND type=?) AND "
+                        + EXTRAS_KEY + "=?",
+                new String[]{account.name, account.type, key}, null, null, null);
         try {
-            long accountId = getAccountId(db, account);
-            if (accountId < 0) {
-                return null;
+            if (cursor.moveToNext()) {
+                return cursor.getString(0);
             }
-            Cursor cursor = db.query(TABLE_EXTRAS, new String[]{EXTRAS_VALUE},
-                    EXTRAS_ACCOUNTS_ID + "=" + accountId + " AND " + EXTRAS_KEY + "=?",
-                    new String[]{key}, null, null, null);
-            try {
-                if (cursor.moveToNext()) {
-                    return cursor.getString(0);
-                }
-                return null;
-            } finally {
-                cursor.close();
-            }
+            return null;
         } finally {
-            db.endTransaction();
+            cursor.close();
         }
     }
 
@@ -530,15 +523,18 @@ public class AccountManagerService
 
     public String readAuthTokenFromDatabase(Account account, String authTokenType) {
         SQLiteDatabase db = mOpenHelper.getReadableDatabase();
-        db.beginTransaction();
+        Cursor cursor = db.query(TABLE_AUTHTOKENS, new String[]{AUTHTOKENS_AUTHTOKEN},
+                AUTHTOKENS_ACCOUNTS_ID + "=(select _id FROM accounts WHERE name=? AND type=?) AND "
+                        + AUTHTOKENS_TYPE + "=?",
+                new String[]{account.name, account.type, authTokenType},
+                null, null, null);
         try {
-            long accountId = getAccountId(db, account);
-            if (accountId < 0) {
-                return null;
+            if (cursor.moveToNext()) {
+                return cursor.getString(0);
             }
-            return getAuthToken(db, accountId, authTokenType);
+            return null;
         } finally {
-            db.endTransaction();
+            cursor.close();
         }
     }
 
@@ -1064,21 +1060,6 @@ public class AccountManagerService
                 return cursor.getLong(0);
             }
             return -1;
-        } finally {
-            cursor.close();
-        }
-    }
-
-    private String getAuthToken(SQLiteDatabase db, long accountId, String authTokenType) {
-        Cursor cursor = db.query(TABLE_AUTHTOKENS, new String[]{AUTHTOKENS_AUTHTOKEN},
-                AUTHTOKENS_ACCOUNTS_ID + "=" + accountId + " AND " + AUTHTOKENS_TYPE + "=?",
-                new String[]{authTokenType},
-                null, null, null);
-        try {
-            if (cursor.moveToNext()) {
-                return cursor.getString(0);
-            }
-            return null;
         } finally {
             cursor.close();
         }
