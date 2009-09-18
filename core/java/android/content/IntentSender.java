@@ -249,6 +249,11 @@ public class IntentSender implements Parcelable {
     }
 
     /** @hide */
+    public IIntentSender getTarget() {
+        return mTarget;
+    }
+
+    /** @hide */
     public IntentSender(IIntentSender target) {
         mTarget = target;
     }

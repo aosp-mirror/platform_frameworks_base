@@ -198,6 +198,7 @@ class PendingIntentRecord extends IIntentSender.Stub {
                 } else {
                     resolvedType = key.requestResolvedType;
                 }
+                flagsMask &= ~Intent.IMMUTABLE_FLAGS;
                 flagsValues &= flagsMask;
                 finalIntent.setFlags((finalIntent.getFlags()&~flagsMask) | flagsValues);
                 

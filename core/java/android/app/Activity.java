@@ -24,6 +24,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IIntentSender;
+import android.content.IntentSender;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
@@ -2774,48 +2775,50 @@ public class Activity extends ContextThemeWrapper
 
     /**
      * Like {@link #startActivityForResult(Intent, int)}, but allowing you
-     * to use a PendingIntent to describe the activity to be started.  Note
-     * that the given PendingIntent <em>must</em> have been created with
-     * {@link PendingIntent#getActivity PendingIntent.getActivity}; all other
-     * types will result in an IllegalArgumentException being thrown.
+     * to use a IntentSender to describe the activity to be started.  If
+     * the IntentSender is for an activity, that activity will be started
+     * as if you had called the regular {@link #startActivityForResult(Intent, int)}
+     * here; otherwise, its associated action will be executed (such as
+     * sending a broadcast) as if you had called
+     * {@link IntentSender#sendIntent IntentSender.sendIntent} on it.
      * 
-     * @param intent The PendingIntent to launch.
+     * @param intent The IntentSender to launch.
      * @param requestCode If >= 0, this code will be returned in
      *                    onActivityResult() when the activity exits.
      * @param fillInIntent If non-null, this will be provided as the
-     * intent parameter to {@link PendingIntent#send(Context, int, Intent)
-     * PendingIntent.send(Context, int, Intent)}.
-     * @param flagsMask Intent flags in the original PendingIntent that you
+     * intent parameter to {@link IntentSender#sendIntent}.
+     * @param flagsMask Intent flags in the original IntentSender that you
      * would like to change.
      * @param flagsValues Desired values for any bits set in
      * <var>flagsMask</var>
+     * @param extraFlags Always set to 0.
      */
-    public void startActivityForResult(PendingIntent intent, int requestCode,
-            Intent fillInIntent, int flagsMask, int flagsValues)
-            throws PendingIntent.CanceledException {
+    public void startIntentSenderForResult(IntentSender intent, int requestCode,
+            Intent fillInIntent, int flagsMask, int flagsValues, int extraFlags)
+            throws IntentSender.SendIntentException {
         if (mParent == null) {
-            startActivityForResultInner(intent, requestCode, fillInIntent,
+            startIntentSenderForResultInner(intent, requestCode, fillInIntent,
                     flagsMask, flagsValues, this);
         } else {
-            mParent.startActivityFromChild(this, intent, requestCode,
-                    fillInIntent, flagsMask, flagsValues);
+            mParent.startIntentSenderFromChild(this, intent, requestCode,
+                    fillInIntent, flagsMask, flagsValues, extraFlags);
         }
     }
 
-    private void startActivityForResultInner(PendingIntent intent, int requestCode,
+    private void startIntentSenderForResultInner(IntentSender intent, int requestCode,
             Intent fillInIntent, int flagsMask, int flagsValues, Activity activity)
-            throws PendingIntent.CanceledException {
+            throws IntentSender.SendIntentException {
         try {
             String resolvedType = null;
             if (fillInIntent != null) {
                 resolvedType = fillInIntent.resolveTypeIfNeeded(getContentResolver());
             }
             int result = ActivityManagerNative.getDefault()
-                .startActivityPendingIntent(mMainThread.getApplicationThread(), intent,
+                .startActivityIntentSender(mMainThread.getApplicationThread(), intent,
                         fillInIntent, resolvedType, mToken, activity.mEmbeddedID,
                         requestCode, flagsMask, flagsValues);
             if (result == IActivityManager.START_CANCELED) {
-                throw new PendingIntent.CanceledException();
+                throw new IntentSender.SendIntentException();
             }
             Instrumentation.checkStartActivityResult(result, null);
         } catch (RemoteException e) {
@@ -2856,24 +2859,25 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
-     * Like {@link #startActivity(Intent)}, but taking a PendingIntent
+     * Like {@link #startActivity(Intent)}, but taking a IntentSender
      * to start; see
-     * {@link #startActivityForResult(PendingIntent, int, Intent, int, int)}
+     * {@link #startIntentSenderForResult(IntentSender, int, Intent, int, int)}
      * for more information.
      * 
-     * @param intent The PendingIntent to launch.
+     * @param intent The IntentSender to launch.
      * @param fillInIntent If non-null, this will be provided as the
-     * intent parameter to {@link PendingIntent#send(Context, int, Intent)
-     * PendingIntent.send(Context, int, Intent)}.
-     * @param flagsMask Intent flags in the original PendingIntent that you
+     * intent parameter to {@link IntentSender#sendIntent}.
+     * @param flagsMask Intent flags in the original IntentSender that you
      * would like to change.
      * @param flagsValues Desired values for any bits set in
      * <var>flagsMask</var>
+     * @param extraFlags Always set to 0.
      */
-    public void startActivity(PendingIntent intent,
-            Intent fillInIntent, int flagsMask, int flagsValues)
-            throws PendingIntent.CanceledException {
-        startActivityForResult(intent, -1, fillInIntent, flagsMask, flagsValues);
+    public void startIntentSender(IntentSender intent,
+            Intent fillInIntent, int flagsMask, int flagsValues, int extraFlags)
+            throws IntentSender.SendIntentException {
+        startIntentSenderForResult(intent, -1, fillInIntent, flagsMask,
+                flagsValues, extraFlags);
     }
 
     /**
@@ -2998,14 +3002,15 @@ public class Activity extends ContextThemeWrapper
 
     /**
      * Like {@link #startActivityFromChild(Activity, Intent, int)}, but
-     * taking a PendingIntent; see
-     * {@link #startActivityForResult(PendingIntent, int, Intent, int, int)}
+     * taking a IntentSender; see
+     * {@link #startIntentSenderForResult(IntentSender, int, Intent, int, int)}
      * for more information.
      */
-    public void startActivityFromChild(Activity child, PendingIntent intent,
-            int requestCode, Intent fillInIntent, int flagsMask, int flagsValues)
-            throws PendingIntent.CanceledException {
-        startActivityForResultInner(intent, requestCode, fillInIntent,
+    public void startIntentSenderFromChild(Activity child, IntentSender intent,
+            int requestCode, Intent fillInIntent, int flagsMask, int flagsValues,
+            int extraFlags)
+            throws IntentSender.SendIntentException {
+        startIntentSenderForResultInner(intent, requestCode, fillInIntent,
                 flagsMask, flagsValues, child);
     }
 

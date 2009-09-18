@@ -21,6 +21,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.IIntentSender;
 import android.content.IIntentReceiver;
+import android.content.IntentSender;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ConfigurationInfo;
 import android.content.pm.IPackageDataObserver;
@@ -145,12 +146,12 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             return true;
         }
 
-        case START_ACTIVITY_PENDING_INTENT_TRANSACTION:
+        case START_ACTIVITY_INTENT_SENDER_TRANSACTION:
         {
             data.enforceInterface(IActivityManager.descriptor);
             IBinder b = data.readStrongBinder();
             IApplicationThread app = ApplicationThreadNative.asInterface(b);
-            PendingIntent intent = PendingIntent.CREATOR.createFromParcel(data);
+            IntentSender intent = IntentSender.CREATOR.createFromParcel(data);
             Intent fillInIntent = null;
             if (data.readInt() != 0) {
                 fillInIntent = Intent.CREATOR.createFromParcel(data);
@@ -161,7 +162,7 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             int requestCode = data.readInt();
             int flagsMask = data.readInt();
             int flagsValues = data.readInt();
-            int result = startActivityPendingIntent(app, intent,
+            int result = startActivityIntentSender(app, intent,
                     fillInIntent, resolvedType, resultTo, resultWho,
                     requestCode, flagsMask, flagsValues);
             reply.writeNoException();
@@ -1202,8 +1203,8 @@ class ActivityManagerProxy implements IActivityManager
         data.recycle();
         return result;
     }
-    public int startActivityPendingIntent(IApplicationThread caller,
-            PendingIntent intent, Intent fillInIntent, String resolvedType,
+    public int startActivityIntentSender(IApplicationThread caller,
+            IntentSender intent, Intent fillInIntent, String resolvedType,
             IBinder resultTo, String resultWho, int requestCode,
             int flagsMask, int flagsValues) throws RemoteException {
         Parcel data = Parcel.obtain();
@@ -1223,7 +1224,7 @@ class ActivityManagerProxy implements IActivityManager
         data.writeInt(requestCode);
         data.writeInt(flagsMask);
         data.writeInt(flagsValues);
-        mRemote.transact(START_ACTIVITY_PENDING_INTENT_TRANSACTION, data, reply, 0);
+        mRemote.transact(START_ACTIVITY_INTENT_SENDER_TRANSACTION, data, reply, 0);
         reply.readException();
         int result = reply.readInt();
         reply.recycle();
