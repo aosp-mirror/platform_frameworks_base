@@ -16,9 +16,9 @@
 
 package android.webkit;
 
+import android.content.Context;
 import android.os.Handler;
 import android.os.Message;
-import android.security.CertTool;
 import android.util.Log;
 
 final class JWebCoreJavaBridge extends Handler {
@@ -41,6 +41,8 @@ final class JWebCoreJavaBridge extends Handler {
     private boolean mTimerPaused;
     private boolean mHasDeferredTimers;
 
+    private Context mContext;
+
     /* package */
     static final int REFRESH_PLUGINS = 100;
 
@@ -48,7 +50,8 @@ final class JWebCoreJavaBridge extends Handler {
      * Construct a new JWebCoreJavaBridge to interface with
      * WebCore timers and cookies.
      */
-    public JWebCoreJavaBridge() {
+    public JWebCoreJavaBridge(Context context) {
+        mContext = context;
         nativeConstructor();
     }
 
@@ -230,12 +233,12 @@ final class JWebCoreJavaBridge extends Handler {
     }
 
     private String[] getKeyStrengthList() {
-        return CertTool.getInstance().getSupportedKeyStrenghs();
+        return CertTool.KEY_STRENGTH_LIST;
     }
 
     private String getSignedPublicKey(int index, String challenge, String url) {
         // generateKeyPair expects organizations which we don't have. Ignore url.
-        return CertTool.getInstance().generateKeyPair(index, challenge, null);
+        return CertTool.getSignedPublicKey(mContext, index, challenge);
     }
 
     private native void nativeConstructor();
