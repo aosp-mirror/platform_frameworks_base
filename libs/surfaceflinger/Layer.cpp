@@ -176,7 +176,7 @@ void Layer::reloadTexture(const Region& dirty)
                     // this failed, for instance, because we don't support
                     // NPOT.
                     // FIXME: do something!
-                    LOGD("layer=%p, glEGLImageTargetTexture2DOES(%d) "
+                    LOGD("layer=%p, glEGLImageTargetTexture2DOES(%p) "
                          "failed err=0x%04x",
                          this, mTextures[index].image, error);
                     mFlags &= ~DisplayHardware::DIRECT_TEXTURE;
@@ -256,11 +256,17 @@ sp<SurfaceBuffer> Layer::requestBuffer(int index, int usage)
         w = mWidth;
         h = mHeight;
         buffer = mBuffers[index];
+        
+        // destroy() could have been called before we get here, we log it
+        // because it's uncommon, and the code below should handle it
+        LOGW_IF(buffer==0, 
+                "mBuffers[%d] is null (mWidth=%d, mHeight=%d)",
+                index, w, h);
+        
         mBuffers[index].clear();
     }
 
-
-    if (buffer->getStrongCount() == 1) {
+    if (buffer!=0 && buffer->getStrongCount() == 1) {
         err = buffer->reallocate(w, h, mFormat, usage, mBufferFlags);
     } else {
         // here we have to reallocate a new buffer because we could have a
