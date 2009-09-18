@@ -213,10 +213,46 @@ class LockScreen extends LinearLayout implements KeyguardScreen, KeyguardUpdateM
             mRotary.setRightHandleResource(mSilentMode ?
                     R.drawable.ic_jog_dial_turn_ring_vol_on :
                     R.drawable.ic_jog_dial_turn_ring_vol_off);
+            String message = mSilentMode ?
+                    getContext().getString(R.string.global_action_silent_mode_on_status) :
+                    getContext().getString(R.string.global_action_silent_mode_off_status);
+            toastMessage(mScreenLocked, message);
             mCallback.pokeWakelock();
         }
         return false;
     }
+
+    /**
+     * Displays a message in a text view and then removes it.
+     * @param textView The text view.
+     * @param text The text.
+     */
+    private void toastMessage(final TextView textView, final String text) {
+        if (mPendingR1 != null) {
+            textView.removeCallbacks(mPendingR1);
+            mPendingR1 = null;
+        }
+        if (mPendingR2 != null) {
+            textView.removeCallbacks(mPendingR2);
+            mPendingR2 = null;
+        }
+
+        mPendingR1 = new Runnable() {
+            public void run() {
+                textView.setText(text);
+            }
+        };
+        textView.postDelayed(mPendingR1, 400);
+        mPendingR2 = new Runnable() {
+            public void run() {
+                textView.setText("");
+            }
+        };
+        textView.postDelayed(mPendingR2, 2000);
+    }
+    private Runnable mPendingR1;
+    private Runnable mPendingR2;
+    
 
     private void refreshAlarmDisplay() {
         mNextAlarm = mLockPatternUtils.getNextAlarm();
@@ -354,7 +390,7 @@ class LockScreen extends LinearLayout implements KeyguardScreen, KeyguardUpdateM
                         getCarrierString(
                                 mUpdateMonitor.getTelephonyPlmn(),
                                 mUpdateMonitor.getTelephonySpn()));
-                mScreenLocked.setText(R.string.lockscreen_screen_locked);
+//                mScreenLocked.setText(R.string.lockscreen_screen_locked);
 
                 // layout
                 mScreenLocked.setVisibility(View.VISIBLE);
