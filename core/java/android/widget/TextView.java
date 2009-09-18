@@ -3408,7 +3408,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         if (mPopup != null) {
             TextView tv = (TextView) mPopup.getContentView();
             chooseSize(mPopup, mError, tv);
-            mPopup.update(this, getErrorX(), getErrorY(), -1, -1);
+            mPopup.update(this, getErrorX(), getErrorY(),
+                          mPopup.getWidth(), mPopup.getHeight());
         }
 
         restartMarqueeIfNeeded();
