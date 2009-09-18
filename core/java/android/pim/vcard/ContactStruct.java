@@ -20,11 +20,14 @@ import android.content.ContentProviderOperation;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.OperationApplicationException;
+import android.database.Cursor;
 import android.os.RemoteException;
 import android.provider.ContactsContract;
 import android.provider.ContactsContract.Data;
+import android.provider.ContactsContract.Groups;
 import android.provider.ContactsContract.RawContacts;
 import android.provider.ContactsContract.CommonDataKinds.Email;
+import android.provider.ContactsContract.CommonDataKinds.GroupMembership;
 import android.provider.ContactsContract.CommonDataKinds.Im;
 import android.provider.ContactsContract.CommonDataKinds.Miscellaneous;
 import android.provider.ContactsContract.CommonDataKinds.Nickname;
@@ -1023,14 +1026,37 @@ public class ContactStruct {
         }
     }
     
+    // From HardCodedSources.java in Contacts app.
+    // TODO: fix this.
+    private static final String ACCOUNT_TYPE_GOOGLE = "com.google.GAIA";
+    private static final String GOOGLE_MY_CONTACTS_GROUP = "System Group: My Contacts";
+
     public void pushIntoContentResolver(ContentResolver resolver) {
         ArrayList<ContentProviderOperation> operationList =
             new ArrayList<ContentProviderOperation>();  
         ContentProviderOperation.Builder builder =
             ContentProviderOperation.newInsert(RawContacts.CONTENT_URI);
+        String myGroupsId = null;
         if (mAccount != null) {
             builder.withValue(RawContacts.ACCOUNT_NAME, mAccount.name);
             builder.withValue(RawContacts.ACCOUNT_TYPE, mAccount.type);
+
+            // TODO: temporal fix for "My Groups" issue. Need to be refactored.
+            if (ACCOUNT_TYPE_GOOGLE.equals(mAccount.type)) {
+                final Cursor cursor = resolver.query(Groups.CONTENT_URI, new String[] {
+                        Groups.SOURCE_ID },
+                        Groups.TITLE + "=?", new String[] {
+                        GOOGLE_MY_CONTACTS_GROUP }, null);
+                try {
+                    if (cursor != null && cursor.moveToFirst()) {
+                        myGroupsId = cursor.getString(0);
+                    }
+                } finally {
+                    if (cursor != null) {
+                        cursor.close();
+                    }
+                }
+            }
         } else {
             builder.withValues(new ContentValues());
         }
@@ -1193,6 +1219,14 @@ public class ContactStruct {
             builder.withValueBackReference(Miscellaneous.RAW_CONTACT_ID, 0);
             builder.withValue(Data.MIMETYPE, Miscellaneous.CONTENT_ITEM_TYPE);
             builder.withValue(Miscellaneous.BIRTHDAY, mBirthday);
+            operationList.add(builder.build());
+        }
+
+        if (myGroupsId != null) {
+            builder = ContentProviderOperation.newInsert(Data.CONTENT_URI);
+            builder.withValueBackReference(GroupMembership.RAW_CONTACT_ID, 0);
+            builder.withValue(Data.MIMETYPE, GroupMembership.CONTENT_ITEM_TYPE);
+            builder.withValue(GroupMembership.GROUP_SOURCE_ID, myGroupsId);
             operationList.add(builder.build());
         }
 
