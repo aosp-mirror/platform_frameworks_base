@@ -2334,6 +2334,13 @@ public class Intent implements Parcelable {
      */
     public static final int FLAG_RECEIVER_BOOT_UPGRADE = 0x10000000;
 
+    /**
+     * @hide Flags that can't be changed with PendingIntent.
+     */
+    public static final int IMMUTABLE_FLAGS =
+            FLAG_GRANT_READ_URI_PERMISSION
+            | FLAG_GRANT_WRITE_URI_PERMISSION;
+    
     // ---------------------------------------------------------------------
     // ---------------------------------------------------------------------
     // toUri() and parseUri() options.

@@ -33,7 +33,6 @@ import android.app.AlertDialog;
 import android.app.ApplicationErrorReport;
 import android.app.Dialog;
 import android.app.IActivityController;
-import android.app.IActivityManager;
 import android.app.IActivityWatcher;
 import android.app.IApplicationThread;
 import android.app.IInstrumentationWatcher;
@@ -53,6 +52,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.IIntentReceiver;
 import android.content.IIntentSender;
+import android.content.IntentSender;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ConfigurationInfo;
@@ -3613,8 +3613,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         }
     }
 
-    public int startActivityPendingIntent(IApplicationThread caller,
-            PendingIntent intent, Intent fillInIntent, String resolvedType,
+    public int startActivityIntentSender(IApplicationThread caller,
+            IntentSender intent, Intent fillInIntent, String resolvedType,
             IBinder resultTo, String resultWho, int requestCode,
             int flagsMask, int flagsValues) {
         // Refuse possible leaked file descriptors
@@ -3628,8 +3628,15 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         }
         
         PendingIntentRecord pir = (PendingIntentRecord)sender;
-        if (pir.key.type != IActivityManager.INTENT_SENDER_ACTIVITY) {
-            return START_NOT_ACTIVITY;
+        
+        synchronized (this) {
+            // If this is coming from the currently resumed activity, it is
+            // effectively saying that app switches are allowed at this point.
+            if (mResumedActivity != null
+                    && mResumedActivity.info.applicationInfo.uid ==
+                            Binder.getCallingUid()) {
+                mAppSwitchesAllowedTime = 0;
+            }
         }
         
         return pir.sendInner(0, fillInIntent, resolvedType,

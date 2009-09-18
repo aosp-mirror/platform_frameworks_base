@@ -22,6 +22,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.BroadcastReceiver;
+import android.content.IntentSender;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
@@ -227,6 +228,13 @@ public class MockContext extends Context {
         throw new UnsupportedOperationException();
     }
 
+    @Override
+    public void startIntentSender(IntentSender intent,
+            Intent fillInIntent, int flagsMask, int flagsValues, int extraFlags)
+            throws IntentSender.SendIntentException {
+        throw new UnsupportedOperationException();
+    }
+    
     @Override
     public void sendBroadcast(Intent intent) {
         throw new UnsupportedOperationException();
