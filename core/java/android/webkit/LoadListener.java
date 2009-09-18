@@ -28,7 +28,6 @@ import android.net.http.SslError;
 
 import android.os.Handler;
 import android.os.Message;
-import android.security.CertTool;
 import android.util.Log;
 import android.webkit.CacheManager.CacheResult;
 
@@ -37,7 +36,6 @@ import com.android.internal.R;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Vector;
 import java.util.regex.Pattern;
@@ -70,12 +68,12 @@ class LoadListener extends Handler implements EventHandler {
     private static final int HTTP_NOT_FOUND = 404;
     private static final int HTTP_PROXY_AUTH = 407;
 
-    private static HashSet<String> sCertificateMimeTypeMap;
+    private static HashMap<String, String> sCertificateTypeMap;
     static {
-        sCertificateMimeTypeMap = new HashSet<String>();
-        sCertificateMimeTypeMap.add("application/x-x509-ca-cert");
-        sCertificateMimeTypeMap.add("application/x-x509-user-cert");
-        sCertificateMimeTypeMap.add("application/x-pkcs12");
+        sCertificateTypeMap = new HashMap<String, String>();
+        sCertificateTypeMap.put("application/x-x509-ca-cert", CertTool.CERT);
+        sCertificateTypeMap.put("application/x-x509-user-cert", CertTool.CERT);
+        sCertificateTypeMap.put("application/x-pkcs12", CertTool.PKCS12);
     }
 
     private static int sNativeLoaderCount;
@@ -964,9 +962,9 @@ class LoadListener extends Handler implements EventHandler {
 
     // This commits the headers without checking the response status code.
     private void commitHeaders() {
-        if (mIsMainPageLoader && sCertificateMimeTypeMap.contains(mMimeType)) {
+        if (mIsMainPageLoader && sCertificateTypeMap.containsKey(mMimeType)) {
             // In the case of downloading certificate, we will save it to the
-            // Keystore in commitLoad. Do not call webcore.
+            // KeyStore in commitLoad. Do not call webcore.
             return;
         }
 
@@ -1009,26 +1007,28 @@ class LoadListener extends Handler implements EventHandler {
     private void commitLoad() {
         if (mCancelled) return;
 
-        if (mIsMainPageLoader && sCertificateMimeTypeMap.contains(mMimeType)) {
-            // In the case of downloading certificate, we will save it to the
-            // Keystore and stop the current loading so that it will not
-            // generate a new history page
-            byte[] cert = new byte[mDataBuilder.getByteSize()];
-            int position = 0;
-            ByteArrayBuilder.Chunk c;
-            while (true) {
-                c = mDataBuilder.getFirstChunk();
-                if (c == null) break;
+        if (mIsMainPageLoader) {
+            String type = sCertificateTypeMap.get(mMimeType);
+            if (type != null) {
+                // In the case of downloading certificate, we will save it to
+                // the KeyStore and stop the current loading so that it will not
+                // generate a new history page
+                byte[] cert = new byte[mDataBuilder.getByteSize()];
+                int offset = 0;
+                while (true) {
+                    ByteArrayBuilder.Chunk c = mDataBuilder.getFirstChunk();
+                    if (c == null) break;
 
-                if (c.mLength != 0) {
-                    System.arraycopy(c.mArray, 0, cert, position, c.mLength);
-                    position += c.mLength;
+                    if (c.mLength != 0) {
+                        System.arraycopy(c.mArray, 0, cert, offset, c.mLength);
+                        offset += c.mLength;
+                    }
+                    mDataBuilder.releaseChunk(c);
                 }
-                mDataBuilder.releaseChunk(c);
+                CertTool.addCertificate(mContext, type, cert);
+                mBrowserFrame.stopLoading();
+                return;
             }
-            CertTool.getInstance().addCertificate(cert, mContext);
-            mBrowserFrame.stopLoading();
-            return;
         }
 
         // Give the data to WebKit now
