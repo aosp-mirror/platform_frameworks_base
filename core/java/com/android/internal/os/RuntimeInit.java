@@ -25,6 +25,7 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemProperties;
+import android.os.Build;
 import android.server.data.CrashData;
 import android.util.Config;
 import android.util.Log;
@@ -111,6 +112,12 @@ public class RuntimeInit {
         new AndroidConfig();
 
         /*
+         * Sets the default HTTP User-Agent used by HttpURLConnection.
+         */
+        String userAgent = getDefaultUserAgent();
+        System.setProperty("http.agent", userAgent);
+
+        /*
          * If we're running in an emulator launched with "-trace", put the
          * VM into emulator trace profiling mode so that the user can hit
          * F9/F10 at any time to capture traces.  This has performance
@@ -123,6 +130,36 @@ public class RuntimeInit {
         }
 
         initialized = true;
+    }
+
+    /**
+     * Returns an HTTP user agent of the form
+     * "Dalvik/1.1.0 (Linux; U; Android Eclair Build/MASTER)".
+     */
+    private static String getDefaultUserAgent() {
+        StringBuilder result = new StringBuilder(64);
+        result.append("Dalvik/");
+        result.append(System.getProperty("java.vm.version")); // such as 1.1.0
+        result.append(" (Linux; U; Android ");
+
+        String version = Build.VERSION.RELEASE; // "1.0" or "3.4b5"
+        result.append(version.length() > 0 ? version : "1.0");
+
+        // add the model for the release build
+        if ("REL".equals(Build.VERSION.CODENAME)) {
+            String model = Build.MODEL;
+            if (model.length() > 0) {
+                result.append("; ");
+                result.append(model);
+            }
+        }
+        String id = Build.ID; // "MASTER" or "M4-rc20"
+        if (id.length() > 0) {
+            result.append(" Build/");
+            result.append(id);
+        }
+        result.append(")");
+        return result.toString();
     }
 
     /**
