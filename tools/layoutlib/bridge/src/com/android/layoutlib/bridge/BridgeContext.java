@@ -1099,6 +1099,13 @@ public final class BridgeContext extends Context {
     }
 
     @Override
+    public void sendStickyOrderedBroadcast(Intent intent,
+            BroadcastReceiver resultReceiver, Handler scheduler, int initialCode, String initialData,
+           Bundle initialExtras) {
+        // TODO Auto-generated method stub
+    }
+    
+    @Override
     public void setTheme(int arg0) {
         // TODO Auto-generated method stub
 
