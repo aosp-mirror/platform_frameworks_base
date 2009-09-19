@@ -1138,6 +1138,11 @@ public final class ContactsContract {
             public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/email_v2";
 
             /**
+             * The MIME type of {@link #CONTENT_URI} providing a directory of email addresses.
+             */
+            public static final String CONTENT_TYPE = "vnd.android.cursor.dir/email_v2";
+
+            /**
              * The content:// style URI for all data records of the
              * {@link Email#CONTENT_ITEM_TYPE} MIME type, combined with the
              * associated raw contact and aggregate contact data.
@@ -1152,9 +1157,6 @@ public final class ContactsContract {
              */
             public static final Uri CONTENT_LOOKUP_URI = Uri.withAppendedPath(CONTENT_URI,
                     "lookup");
-
-            @Deprecated
-            public static final Uri CONTENT_FILTER_EMAIL_URI = CONTENT_LOOKUP_URI;
 
             /**
              * The content:// style URL for email lookup using a filter. The filter returns
@@ -1680,23 +1682,11 @@ public final class ContactsContract {
          */
         public static final int TYPE_KEEP_TOGETHER = 1;
 
-        @Deprecated
-        public static final int TYPE_KEEP_IN = 1;
-
         /**
          * Makes sure that the specified raw contacts are NOT included in the same
          * aggregate contact.
          */
         public static final int TYPE_KEEP_SEPARATE = 2;
-
-        @Deprecated
-        public static final int TYPE_KEEP_OUT = 2;
-
-        @Deprecated
-        public static final String CONTACT_ID = "contact_id";
-
-        @Deprecated
-        public static final String RAW_CONTACT_ID = "raw_contact_id";
 
         /**
          * A reference to the {@link RawContacts#_ID} of the raw contact that the rule applies to.
