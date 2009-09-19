@@ -26,7 +26,6 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.BatteryManager;
 import android.os.Binder;
-import android.os.Debug;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -333,16 +332,16 @@ class BatteryService extends Binder {
         
         int icon = getIcon(mBatteryLevel);
 
-        intent.putExtra("status", mBatteryStatus);
-        intent.putExtra("health", mBatteryHealth);
-        intent.putExtra("present", mBatteryPresent);
-        intent.putExtra("level", mBatteryLevel);
-        intent.putExtra("scale", BATTERY_SCALE);
-        intent.putExtra("icon-small", icon);
-        intent.putExtra("plugged", mPlugType);
-        intent.putExtra("voltage", mBatteryVoltage);
-        intent.putExtra("temperature", mBatteryTemperature);
-        intent.putExtra("technology", mBatteryTechnology);
+        intent.putExtra(BatteryManager.EXTRA_STATUS, mBatteryStatus);
+        intent.putExtra(BatteryManager.EXTRA_HEALTH, mBatteryHealth);
+        intent.putExtra(BatteryManager.EXTRA_PRESENT, mBatteryPresent);
+        intent.putExtra(BatteryManager.EXTRA_LEVEL, mBatteryLevel);
+        intent.putExtra(BatteryManager.EXTRA_SCALE, BATTERY_SCALE);
+        intent.putExtra(BatteryManager.EXTRA_ICON_SMALL, icon);
+        intent.putExtra(BatteryManager.EXTRA_PLUGGED, mPlugType);
+        intent.putExtra(BatteryManager.EXTRA_VOLTAGE, mBatteryVoltage);
+        intent.putExtra(BatteryManager.EXTRA_TEMPERATURE, mBatteryTemperature);
+        intent.putExtra(BatteryManager.EXTRA_TECHNOLOGY, mBatteryTechnology);
 
         if (false) {
             Log.d(TAG, "updateBattery level:" + mBatteryLevel +

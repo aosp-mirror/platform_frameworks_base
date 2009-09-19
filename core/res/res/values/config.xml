@@ -78,6 +78,14 @@
          A value of -1 means no change in orientation by default. -->
     <integer name="config_carDockRotation">-1</integer>
 
+    <!-- Control whether being in the desk dock (and powered) always
+         keeps the screen on.  By default it doesn't.  Set to true to make it. -->
+    <bool name="config_deskDockKeepsScreenOn">false</bool>
+
+    <!-- Control whether being in the car dock (and powered) always
+         keeps the screen on.  By default it does.  Set to false to not keep on. -->
+    <bool name="config_carDockKeepsScreenOn">true</bool>
+
     <!-- Indicate whether the lid state impacts the accessibility of
          the physical keyboard.  0 means it doesn't, 1 means it is accessible
          when the lid is open, 2 means it is accessible when the lid is
