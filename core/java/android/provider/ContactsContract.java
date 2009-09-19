@@ -677,13 +677,20 @@ public final class ContactsContract {
     }
 
     /**
+     * Combines all columns returned by {@link Data} table queries.
+     */
+    private interface DataColumnsWithJoins extends BaseColumns, DataColumns, RawContactsColumns,
+            ContactsColumns, ContactOptionsColumns {
+
+    }
+
+    /**
      * Constants for the data table, which contains data points tied to a raw contact.
      * For example, a phone number or email address. Each row in this table contains a type
      * definition and some generic columns. Each data type can define the meaning for each of
      * the generic columns.
      */
-    public static final class Data implements BaseColumns, DataColumns, RawContactsColumns,
-            ContactsColumns {
+    public final static class Data implements DataColumnsWithJoins {
         /**
          * This utility class cannot be instantiated
          */
@@ -951,7 +958,7 @@ public final class ContactsContract {
         /**
          * Parts of the name.
          */
-        public static final class StructuredName implements BaseCommonColumns {
+        public static final class StructuredName implements DataColumnsWithJoins {
             private StructuredName() {}
 
             /** MIME type used when storing this in data table. */
@@ -1017,7 +1024,7 @@ public final class ContactsContract {
         /**
          * A nickname.
          */
-        public static final class Nickname implements CommonColumns, BaseCommonColumns {
+        public static final class Nickname implements DataColumnsWithJoins, CommonColumns {
             private Nickname() {}
 
             /** MIME type used when storing this in data table. */
@@ -1038,7 +1045,7 @@ public final class ContactsContract {
         /**
          * Common data definition for telephone numbers.
          */
-        public static final class Phone implements BaseCommonColumns, CommonColumns {
+        public static final class Phone implements DataColumnsWithJoins, CommonColumns {
             private Phone() {}
 
             /** MIME type used when storing this in data table. */
@@ -1124,7 +1131,7 @@ public final class ContactsContract {
         /**
          * Common data definition for email addresses.
          */
-        public static final class Email implements BaseCommonColumns, CommonColumns {
+        public static final class Email implements DataColumnsWithJoins, CommonColumns {
             private Email() {}
 
             /** MIME type used when storing this in data table. */
@@ -1173,7 +1180,7 @@ public final class ContactsContract {
         /**
          * Common data definition for postal addresses.
          */
-        public static final class StructuredPostal implements BaseCommonColumns, CommonColumns {
+        public static final class StructuredPostal implements DataColumnsWithJoins, CommonColumns {
             private StructuredPostal() {
             }
 
@@ -1267,7 +1274,7 @@ public final class ContactsContract {
         /**
          * Common data definition for IM addresses.
          */
-        public static final class Im implements BaseCommonColumns, CommonColumns {
+        public static final class Im implements DataColumnsWithJoins, CommonColumns {
             private Im() {}
 
             /** MIME type used when storing this in data table. */
@@ -1305,7 +1312,7 @@ public final class ContactsContract {
         /**
          * Common data definition for organizations.
          */
-        public static final class Organization implements BaseCommonColumns, CommonColumns {
+        public static final class Organization implements DataColumnsWithJoins, CommonColumns {
             private Organization() {}
 
             /** MIME type used when storing this in data table. */
@@ -1354,7 +1361,7 @@ public final class ContactsContract {
         /**
          * Common data definition for miscellaneous information.
          */
-        public static final class Miscellaneous implements BaseCommonColumns {
+        public static final class Miscellaneous implements DataColumnsWithJoins {
             private Miscellaneous() {}
 
             /** MIME type used when storing this in data table. */
@@ -1376,7 +1383,7 @@ public final class ContactsContract {
         /**
          * Common data definition for relations.
          */
-        public static final class Relation implements BaseCommonColumns, CommonColumns {
+        public static final class Relation implements DataColumnsWithJoins, CommonColumns {
             private Relation() {}
 
             /** MIME type used when storing this in data table. */
@@ -1407,7 +1414,7 @@ public final class ContactsContract {
         /**
          * Common data definition for events.
          */
-        public static final class Event implements BaseCommonColumns, CommonColumns {
+        public static final class Event implements DataColumnsWithJoins, CommonColumns {
             private Event() {}
 
             /** MIME type used when storing this in data table. */
@@ -1426,7 +1433,7 @@ public final class ContactsContract {
         /**
          * Photo of the contact.
          */
-        public static final class Photo implements BaseCommonColumns {
+        public static final class Photo implements DataColumnsWithJoins {
             private Photo() {}
 
             /** MIME type used when storing this in data table. */
@@ -1444,7 +1451,7 @@ public final class ContactsContract {
         /**
          * Notes about the contact.
          */
-        public static final class Note implements BaseCommonColumns {
+        public static final class Note implements DataColumnsWithJoins {
             private Note() {}
 
             /** MIME type used when storing this in data table. */
@@ -1460,7 +1467,7 @@ public final class ContactsContract {
         /**
          * Group Membership.
          */
-        public static final class GroupMembership implements BaseCommonColumns {
+        public static final class GroupMembership implements DataColumnsWithJoins {
             private GroupMembership() {}
 
             /** MIME type used when storing this in data table. */
@@ -1485,7 +1492,7 @@ public final class ContactsContract {
         /**
          * Website related to the contact.
          */
-        public static final class Website implements BaseCommonColumns, CommonColumns {
+        public static final class Website implements DataColumnsWithJoins, CommonColumns {
             private Website() {}
 
             /** MIME type used when storing this in data table. */
