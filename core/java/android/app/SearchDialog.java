@@ -1206,7 +1206,7 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
         cv.put(SearchManager.SUGGEST_COLUMN_INTENT_ACTION, intent.getAction());
         cv.put(SearchManager.SUGGEST_COLUMN_INTENT_DATA, intent.getDataString());
         cv.put(SearchManager.SUGGEST_COLUMN_INTENT_COMPONENT_NAME,
-                        intent.getStringExtra(SearchManager.COMPONENT_NAME_KEY));
+                intent.getComponent().flattenToShortString());
 
         // ensure the icons will work for global search
         cv.put(SearchManager.SUGGEST_COLUMN_ICON_1,
