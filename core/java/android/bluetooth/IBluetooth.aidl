@@ -53,6 +53,7 @@ interface IBluetooth
     String getRemoteName(in String address);
     int getRemoteClass(in String address);
     ParcelUuid[] getRemoteUuids(in String address);
+    boolean fetchRemoteUuidsWithSdp(in String address);
     int getRemoteServiceChannel(in String address,in ParcelUuid uuid);
 
     boolean setPin(in String address, in byte[] pin);

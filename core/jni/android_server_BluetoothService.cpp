@@ -66,6 +66,8 @@ extern DBusHandlerResult agent_event_filter(DBusConnection *conn,
                                             DBusMessage *msg,
                                             void *data);
 void onCreatePairedDeviceResult(DBusMessage *msg, void *user, void *nat);
+void onDiscoverServicesResult(DBusMessage *msg, void *user, void *nat);
+void onCreateDeviceResult(DBusMessage *msg, void *user, void *nat);
 
 
 /** Get native data stored in the opaque (Java code maintained) pointer mNativeData
@@ -757,6 +759,75 @@ static jboolean setDevicePropertyBooleanNative(JNIEnv *env, jobject object,
 #endif
 }
 
+
+static jboolean createDeviceNative(JNIEnv *env, jobject object,
+                                                jstring address) {
+    LOGV(__FUNCTION__);
+#ifdef HAVE_BLUETOOTH
+    native_data_t *nat = get_native_data(env, object);
+    jobject eventLoop = env->GetObjectField(object, field_mEventLoop);
+    struct event_loop_native_data_t *eventLoopNat =
+            get_EventLoop_native_data(env, eventLoop);
+
+    if (nat && eventLoopNat) {
+        const char *c_address = env->GetStringUTFChars(address, NULL);
+        LOGV("... address = %s", c_address);
+        char *context_address = (char *)calloc(BTADDR_SIZE, sizeof(char));
+        strlcpy(context_address, c_address, BTADDR_SIZE);  // for callback
+
+        bool ret = dbus_func_args_async(env, nat->conn, -1,
+                                        onCreateDeviceResult,
+                                        context_address,
+                                        eventLoopNat,
+                                        get_adapter_path(env, object),
+                                        DBUS_ADAPTER_IFACE,
+                                        "CreateDevice",
+                                        DBUS_TYPE_STRING, &c_address,
+                                        DBUS_TYPE_INVALID);
+        env->ReleaseStringUTFChars(address, c_address);
+        return ret ? JNI_TRUE : JNI_FALSE;
+    }
+#endif
+    return JNI_FALSE;
+}
+
+static jboolean discoverServicesNative(JNIEnv *env, jobject object,
+                                               jstring path, jstring pattern) {
+    LOGV(__FUNCTION__);
+#ifdef HAVE_BLUETOOTH
+    native_data_t *nat = get_native_data(env, object);
+    jobject eventLoop = env->GetObjectField(object, field_mEventLoop);
+    struct event_loop_native_data_t *eventLoopNat =
+            get_EventLoop_native_data(env, eventLoop);
+
+    if (nat && eventLoopNat) {
+        const char *c_path = env->GetStringUTFChars(path, NULL);
+        const char *c_pattern = env->GetStringUTFChars(pattern, NULL);
+        int len = env->GetStringLength(path) + 1;
+        char *context_path = (char *)calloc(len, sizeof(char));
+        strlcpy(context_path, c_path, len);  // for callback
+
+        LOGV("... Object Path = %s", c_path);
+        LOGV("... Pattern = %s, strlen = %d", c_pattern, strlen(c_pattern));
+
+        bool ret = dbus_func_args_async(env, nat->conn, -1,
+                                        onDiscoverServicesResult,
+                                        context_path,
+                                        eventLoopNat,
+                                        c_path,
+                                        DBUS_DEVICE_IFACE,
+                                        "DiscoverServices",
+                                        DBUS_TYPE_STRING, &c_pattern,
+                                        DBUS_TYPE_INVALID);
+        env->ReleaseStringUTFChars(path, c_path);
+        env->ReleaseStringUTFChars(pattern, c_pattern);
+        return ret ? JNI_TRUE : JNI_FALSE;
+    }
+#endif
+    return JNI_FALSE;
+}
+
+
 static JNINativeMethod sMethods[] = {
      /* name, signature, funcPtr */
     {"classInitNative", "()V", (void*)classInitNative},
@@ -797,6 +868,8 @@ static JNINativeMethod sMethods[] = {
             (void *)cancelPairingUserInputNative},
     {"setDevicePropertyBooleanNative", "(Ljava/lang/String;Ljava/lang/String;I)Z",
             (void *)setDevicePropertyBooleanNative},
+    {"createDeviceNative", "(Ljava/lang/String;)Z", (void *)createDeviceNative},
+    {"discoverServicesNative", "(Ljava/lang/String;Ljava/lang/String;)Z", (void *)discoverServicesNative},
 };
 
 int register_android_server_BluetoothService(JNIEnv *env) {

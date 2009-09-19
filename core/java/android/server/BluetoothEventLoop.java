@@ -330,6 +330,9 @@ class BluetoothEventLoop {
             Log.e(TAG, "onDevicePropertyChanged: Address of the remote device in null");
             return;
         }
+        if (DBG) {
+            log("Device property changed:" + address + "property:" + name);
+        }
         BluetoothDevice device = mAdapter.getRemoteDevice(address);
         if (name.equals("Name")) {
             Intent intent = new Intent(BluetoothDevice.ACTION_NAME_CHANGED);
@@ -366,6 +369,7 @@ class BluetoothEventLoop {
                 uuid = str.toString();
             }
             mBluetoothService.setRemoteDeviceProperty(address, name, uuid);
+            mBluetoothService.sendUuidIntent(address);
         } else if (name.equals("Paired")) {
             if (propValues[1].equals("true")) {
                 mBluetoothService.getBondState().setBondState(address, BluetoothDevice.BOND_BONDED);
@@ -526,6 +530,25 @@ class BluetoothEventLoop {
         Intent intent = new Intent(BluetoothDevice.ACTION_PAIRING_CANCEL);
         mContext.sendBroadcast(intent, BLUETOOTH_ADMIN_PERM);
         return;
+    }
+
+    private void onDiscoverServicesResult(String deviceObjectPath, boolean result) {
+        String address = mBluetoothService.getAddressFromObjectPath(deviceObjectPath);
+        // We don't parse the xml here, instead just query Bluez for the properties.
+        if (result) {
+            String[] properties = mBluetoothService.getRemoteDeviceProperties(address);
+            mBluetoothService.addRemoteDeviceProperties(address, properties);
+        }
+        mBluetoothService.sendUuidIntent(address);
+    }
+
+    private void onCreateDeviceResult(String address, boolean result) {
+        if (DBG) {
+            log("Result of onCreateDeviceResult:" + result);
+        }
+        if (!result) {
+            mBluetoothService.sendUuidIntent(address);
+        }
     }
 
     private void onRestartRequired() {
