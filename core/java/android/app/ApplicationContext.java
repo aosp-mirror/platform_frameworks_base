@@ -659,6 +659,38 @@ class ApplicationContext extends Context {
     }
 
     @Override
+    public void sendStickyOrderedBroadcast(Intent intent,
+            BroadcastReceiver resultReceiver,
+            Handler scheduler, int initialCode, String initialData,
+            Bundle initialExtras) {
+        IIntentReceiver rd = null;
+        if (resultReceiver != null) {
+            if (mPackageInfo != null) {
+                if (scheduler == null) {
+                    scheduler = mMainThread.getHandler();
+                }
+                rd = mPackageInfo.getReceiverDispatcher(
+                    resultReceiver, getOuterContext(), scheduler,
+                    mMainThread.getInstrumentation(), false);
+            } else {
+                if (scheduler == null) {
+                    scheduler = mMainThread.getHandler();
+                }
+                rd = new ActivityThread.PackageInfo.ReceiverDispatcher(
+                        resultReceiver, getOuterContext(), scheduler, null, false).getIIntentReceiver();
+            }
+        }
+        String resolvedType = intent.resolveTypeIfNeeded(getContentResolver());
+        try {
+            ActivityManagerNative.getDefault().broadcastIntent(
+                mMainThread.getApplicationThread(), intent, resolvedType, rd,
+                initialCode, initialData, initialExtras, null,
+                true, true);
+        } catch (RemoteException e) {
+        }
+    }
+
+    @Override
     public void removeStickyBroadcast(Intent intent) {
         String resolvedType = intent.resolveTypeIfNeeded(getContentResolver());
         if (resolvedType != null) {
