@@ -214,6 +214,7 @@ public class MediaRecorderTest extends ActivityInstrumentationTestCase<MediaFram
             Log.v(TAG, "before getduration");
             mOutputDuration = mediaPlayer.getDuration();
             Log.v(TAG, "get video dimension");
+            Thread.sleep(1000);
             mOutputVideoHeight = mediaPlayer.getVideoHeight();
             mOutputVideoWidth = mediaPlayer.getVideoWidth();
             //mOutputVideoHeight = CodecTest.videoHeight(outputFilePath);
@@ -416,7 +417,7 @@ public class MediaRecorderTest extends ActivityInstrumentationTestCase<MediaFram
                MediaRecorder.OutputFormat.THREE_GPP, MediaNames.RECORDED_VIDEO_3GP, false);      
         assertTrue("Invalid video Size", isTestInvalidVideoSizeSuccessful);
     }
-    
+
     @Suppress
     @LargeTest
     public void testInvalidFrameRate() throws Exception {       
