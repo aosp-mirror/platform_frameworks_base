@@ -48,6 +48,8 @@ static jmethodID method_onDeviceRemoved;
 static jmethodID method_onDeviceDisconnectRequested;
 
 static jmethodID method_onCreatePairedDeviceResult;
+static jmethodID method_onCreateDeviceResult;
+static jmethodID method_onDiscoverServicesResult;
 static jmethodID method_onGetDeviceServiceChannelResult;
 
 static jmethodID method_onRequestPinCode;
@@ -92,6 +94,10 @@ static void classInitNative(JNIEnv* env, jclass clazz) {
 
     method_onCreatePairedDeviceResult = env->GetMethodID(clazz, "onCreatePairedDeviceResult",
                                                          "(Ljava/lang/String;I)V");
+    method_onCreateDeviceResult = env->GetMethodID(clazz, "onCreateDeviceResult",
+                                                         "(Ljava/lang/String;Z)V");
+    method_onDiscoverServicesResult = env->GetMethodID(clazz, "onDiscoverServicesResult",
+                                                         "(Ljava/lang/String;Z)V");
 
     method_onAgentAuthorize = env->GetMethodID(clazz, "onAgentAuthorize",
                                                "(Ljava/lang/String;Ljava/lang/String;)Z");
@@ -1094,6 +1100,54 @@ void onCreatePairedDeviceResult(DBusMessage *msg, void *user, void *n) {
                         result);
 done:
     dbus_error_free(&err);
+    free(user);
+}
+
+void onCreateDeviceResult(DBusMessage *msg, void *user, void *n) {
+    LOGV(__FUNCTION__);
+
+    native_data_t *nat = (native_data_t *)n;
+    const char *address= (const char *)user;
+    DBusError err;
+    dbus_error_init(&err);
+    JNIEnv *env;
+    nat->vm->GetEnv((void**)&env, nat->envVer);
+
+    LOGV("... Address = %s", address);
+
+    bool result = JNI_TRUE;
+    if (dbus_set_error_from_message(&err, msg)) {
+        LOG_AND_FREE_DBUS_ERROR(&err);
+        result = JNI_FALSE;
+    }
+    env->CallVoidMethod(nat->me,
+                        method_onCreateDeviceResult,
+                        env->NewStringUTF(address),
+                        result);
+    free(user);
+}
+
+void onDiscoverServicesResult(DBusMessage *msg, void *user, void *n) {
+    LOGV(__FUNCTION__);
+
+    native_data_t *nat = (native_data_t *)n;
+    const char *path = (const char *)user;
+    DBusError err;
+    dbus_error_init(&err);
+    JNIEnv *env;
+    nat->vm->GetEnv((void**)&env, nat->envVer);
+
+    LOGV("... Device Path = %s", path);
+
+    bool result = JNI_TRUE;
+    if (dbus_set_error_from_message(&err, msg)) {
+        LOG_AND_FREE_DBUS_ERROR(&err);
+        result = JNI_FALSE;
+    }
+    env->CallVoidMethod(nat->me,
+                        method_onDiscoverServicesResult,
+                        env->NewStringUTF(path),
+                        result);
     free(user);
 }
 
