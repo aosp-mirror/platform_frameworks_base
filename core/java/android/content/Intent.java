@@ -1352,14 +1352,20 @@ public class Intent implements Parcelable {
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_CONFIGURATION_CHANGED = "android.intent.action.CONFIGURATION_CHANGED";
     /**
-     * Broadcast Action:  The charging state, or charge level of the battery has
-     * changed.
+     * Broadcast Action:  This is a <em>sticky broadcast</em> containing the
+     * charging state, level, and other information about the battery.
+     * See {@link android.os.BatteryManager} for documentation on the
+     * contents of the Intent.
      *
      * <p class="note">
      * You can <em>not</em> receive this through components declared
      * in manifests, only by explicitly registering for it with
      * {@link Context#registerReceiver(BroadcastReceiver, IntentFilter)
-     * Context.registerReceiver()}.
+     * Context.registerReceiver()}.  See {@link #ACTION_BATTERY_LOW},
+     * {@link #ACTION_BATTERY_OKAY}, {@link #ACTION_POWER_CONNECTED},
+     * and {@link #ACTION_POWER_DISCONNECTED} for distinct battery-related
+     * broadcasts that are sent and can be received through manifest
+     * receivers.
      * 
      * <p class="note">This is a protected intent that can only be sent
      * by the system.
@@ -1434,7 +1440,8 @@ public class Intent implements Parcelable {
      */
     public static final String ACTION_REQUEST_SHUTDOWN = "android.intent.action.ACTION_REQUEST_SHUTDOWN";
     /**
-     * Broadcast Action:  Indicates low memory condition on the device
+     * Broadcast Action:  A sticky broadcast that indicates low memory
+     * condition on the device
      * 
      * <p class="note">This is a protected intent that can only be sent
      * by the system.
@@ -1711,6 +1718,18 @@ public class Intent implements Parcelable {
             "android.intent.action.REBOOT";
 
     /**
+     * Broadcast Action:  A sticky broadcast indicating the phone was docked
+     * or undocked.  Includes the extra
+     * field {@link #EXTRA_DOCK_STATE}, containing the current dock state.
+     * This is intended for monitoring the current dock state.
+     * To launch an activity from a dock state change, use {@link #CATEGORY_CAR_DOCK}
+     * or {@link #CATEGORY_DESK_DOCK} instead.
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_DOCK_EVENT =
+            "android.intent.action.DOCK_EVENT";
+
+    /**
      * Broadcast Action: a remote intent is to be broadcasted.
      *
      * A remote intent is used for remote RPC between devices. The remote intent
@@ -1720,6 +1739,7 @@ public class Intent implements Parcelable {
      * does not trust intent broadcasts from arbitrary intent senders, it should require
      * the sender to hold certain permissions so only trusted sender's broadcast will be
      * let through.
+     * @hide
      */
     public static final String ACTION_REMOTE_INTENT =
             "android.intent.action.REMOTE_INTENT";
@@ -1877,16 +1897,6 @@ public class Intent implements Parcelable {
      */
     @SdkConstant(SdkConstantType.INTENT_CATEGORY)
     public static final String CATEGORY_DESK_DOCK = "android.intent.category.DESK_DOCK";
-
-    /**
-     * Broadcast Action:  The phone was docked or undocked.  Includes the extra
-     * field {@link #EXTRA_DOCK_STATE}, containing the current dock state.
-     * This is intended for monitoring the current dock state.
-     * To launch an activity from a dock state change, use {@link #CATEGORY_CAR_DOCK}
-     * or {@link #CATEGORY_DESK_DOCK} instead.
-     */
-    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    public static final String ACTION_DOCK_EVENT = "android.intent.action.DOCK_EVENT";
 
     // ---------------------------------------------------------------------
     // ---------------------------------------------------------------------
