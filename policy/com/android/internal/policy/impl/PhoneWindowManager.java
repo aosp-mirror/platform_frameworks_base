@@ -21,7 +21,6 @@ import android.app.ActivityManagerNative;
 import android.app.IActivityManager;
 import android.app.IStatusBar;
 import android.content.BroadcastReceiver;
-import android.content.ContentQueryMap;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
@@ -32,6 +31,7 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.graphics.Rect;
+import android.os.BatteryManager;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.LocalPowerManager;
@@ -176,10 +176,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     Handler mHandler;
 
     boolean mLidOpen;
+    boolean mPlugged;
     int mDockState = Intent.EXTRA_DOCK_STATE_UNDOCKED;
     int mLidOpenRotation;
     int mCarDockRotation;
     int mDeskDockRotation;
+    boolean mCarDockKeepsScreenOn;
+    boolean mDeskDockKeepsScreenOn;
     int mLidKeyboardAccessibility;
     int mLidNavigationAccessibility;
     boolean mScreenOn = false;
@@ -232,6 +235,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     ShortcutManager mShortcutManager;
     PowerManager.WakeLock mBroadcastWakeLock;
+    PowerManager.WakeLock mDockWakeLock;
 
     class SettingsObserver extends ContentObserver {
         SettingsObserver(Handler handler) {
@@ -459,6 +463,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         PowerManager pm = (PowerManager)context.getSystemService(Context.POWER_SERVICE);
         mBroadcastWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
                 "PhoneWindowManager.mBroadcastWakeLock");
+        mDockWakeLock = pm.newWakeLock(PowerManager.FULL_WAKE_LOCK,
+                "PhoneWindowManager.mDockWakeLock");
+        mDockWakeLock.setReferenceCounted(false);
         mEnableShiftMenuBugReports = "1".equals(SystemProperties.get("ro.debuggable"));
         mLidOpenRotation = readRotation(
                 com.android.internal.R.integer.config_lidOpenRotation);
@@ -466,10 +473,25 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 com.android.internal.R.integer.config_carDockRotation);
         mDeskDockRotation = readRotation(
                 com.android.internal.R.integer.config_deskDockRotation);
+        mCarDockKeepsScreenOn = mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_carDockKeepsScreenOn);
+        mDeskDockKeepsScreenOn = mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_deskDockKeepsScreenOn);
         mLidKeyboardAccessibility = mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_lidKeyboardAccessibility);
         mLidNavigationAccessibility = mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_lidNavigationAccessibility);
+        // register for battery events
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(Intent.ACTION_POWER_CONNECTED);
+        intentFilter.addAction(Intent.ACTION_POWER_DISCONNECTED);
+        context.registerReceiver(mPowerReceiver, intentFilter);
+        Intent powerIntent = context.registerReceiver(null,
+                new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
+        mPlugged = false;
+        if (powerIntent != null) {
+            mPlugged = powerIntent.getIntExtra(BatteryManager.EXTRA_PLUGGED, 0) != 0;
+        }
         // register for dock events
         context.registerReceiver(mDockReceiver, new IntentFilter(Intent.ACTION_DOCK_EVENT));
     }
@@ -1689,11 +1711,23 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     };
 
+    BroadcastReceiver mPowerReceiver = new BroadcastReceiver() {
+        public void onReceive(Context context, Intent intent) {
+            if (Intent.ACTION_POWER_CONNECTED.equals(intent.getAction())) {
+                mPlugged = true;
+            } else if (Intent.ACTION_POWER_DISCONNECTED.equals(intent.getAction())) {
+                mPlugged = false;
+            }
+            updateKeepScreenOn();
+        }
+    };
+
     BroadcastReceiver mDockReceiver = new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {
             mDockState = intent.getIntExtra(Intent.EXTRA_DOCK_STATE,
                     Intent.EXTRA_DOCK_STATE_UNDOCKED);
             updateRotation(Surface.FLAGS_ORIENTATION_ANIMATION_DISABLE);
+            updateKeepScreenOn();
         }
     };
 
@@ -1883,6 +1917,28 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         updateRotation(Surface.FLAGS_ORIENTATION_ANIMATION_DISABLE);
     }
     
+    void updateKeepScreenOn() {
+        if (mPlugged) {
+            if (mDockState == Intent.EXTRA_DOCK_STATE_CAR
+                    && mCarDockKeepsScreenOn) {
+                if (!mDockWakeLock.isHeld()) {
+                    mDockWakeLock.acquire();
+                }
+                return;
+            } else if (mDockState == Intent.EXTRA_DOCK_STATE_DESK
+                    && mDeskDockKeepsScreenOn) {
+                if (!mDockWakeLock.isHeld()) {
+                    mDockWakeLock.acquire();
+                }
+                return;
+            }
+        }
+        
+        if (mDockWakeLock.isHeld()) {
+            mDockWakeLock.release();
+        }
+    }
+
     void updateRotation(int animFlags) {
         mPowerManager.setKeyboardVisibility(mLidOpen);
         int rotation = Surface.ROTATION_0;
