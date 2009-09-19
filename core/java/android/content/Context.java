@@ -657,8 +657,7 @@ public abstract class Context {
      * supplying your own BroadcastReceiver when calling, which will be
      * treated as a final receiver at the end of the broadcast -- its
      * {@link BroadcastReceiver#onReceive} method will be called with
-     * the result values collected from the other receivers.  If you use
-     * an <var>resultReceiver</var> with this method, then the broadcast will
+     * the result values collected from the other receivers.  The broadcast will
      * be serialized in the same way as calling
      * {@link #sendOrderedBroadcast(Intent, String)}.
      *
@@ -689,6 +688,7 @@ public abstract class Context {
      * @see #sendBroadcast(Intent, String)
      * @see #sendOrderedBroadcast(Intent, String)
      * @see #sendStickyBroadcast(Intent)
+     * @see #sendStickyOrderedBroadcast(Intent, BroadcastReceiver, Handler, int, String, Bundle)
      * @see android.content.BroadcastReceiver
      * @see #registerReceiver
      * @see android.app.Activity#RESULT_OK
@@ -715,8 +715,55 @@ public abstract class Context {
      * be re-broadcast to future receivers.
      *
      * @see #sendBroadcast(Intent)
+     * @see #sendStickyOrderedBroadcast(Intent, BroadcastReceiver, Handler, int, String, Bundle)
      */
     public abstract void sendStickyBroadcast(Intent intent);
+    
+    /**
+     * Version of {@link #sendStickyBroadcast} that allows you to
+     * receive data back from the broadcast.  This is accomplished by
+     * supplying your own BroadcastReceiver when calling, which will be
+     * treated as a final receiver at the end of the broadcast -- its
+     * {@link BroadcastReceiver#onReceive} method will be called with
+     * the result values collected from the other receivers.  The broadcast will
+     * be serialized in the same way as calling
+     * {@link #sendOrderedBroadcast(Intent, String)}.
+     *
+     * <p>Like {@link #sendBroadcast(Intent)}, this method is
+     * asynchronous; it will return before
+     * resultReceiver.onReceive() is called.  Note that the sticky data
+     * stored is only the data you initially supply to the broadcast, not
+     * the result of any changes made by the receivers.
+     *
+     * <p>See {@link BroadcastReceiver} for more information on Intent broadcasts.
+     *
+     * @param intent The Intent to broadcast; all receivers matching this
+     *               Intent will receive the broadcast.
+     * @param resultReceiver Your own BroadcastReceiver to treat as the final
+     *                       receiver of the broadcast.
+     * @param scheduler A custom Handler with which to schedule the
+     *                  resultReceiver callback; if null it will be
+     *                  scheduled in the Context's main thread.
+     * @param initialCode An initial value for the result code.  Often
+     *                    Activity.RESULT_OK.
+     * @param initialData An initial value for the result data.  Often
+     *                    null.
+     * @param initialExtras An initial value for the result extras.  Often
+     *                      null.
+     *
+     * @see #sendBroadcast(Intent)
+     * @see #sendBroadcast(Intent, String)
+     * @see #sendOrderedBroadcast(Intent, String)
+     * @see #sendStickyBroadcast(Intent)
+     * @see android.content.BroadcastReceiver
+     * @see #registerReceiver
+     * @see android.app.Activity#RESULT_OK
+     */
+    public abstract void sendStickyOrderedBroadcast(Intent intent,
+            BroadcastReceiver resultReceiver,
+            Handler scheduler, int initialCode, String initialData,
+            Bundle initialExtras);
+
 
     /**
      * Remove the data previously sent with {@link #sendStickyBroadcast},
