@@ -7319,10 +7319,11 @@ public class WindowManagerService extends IWindowManager.Stub
                 final Matrix tmpMatrix = mTmpMatrix;
 
                 // Compute the desired transformation.
-                tmpMatrix.setTranslate(frame.left, frame.top);
+                tmpMatrix.setTranslate(0, 0);
                 if (selfTransformation) {
                     tmpMatrix.postConcat(mTransformation.getMatrix());
                 }
+                tmpMatrix.postTranslate(frame.left, frame.top);
                 if (attachedTransformation != null) {
                     tmpMatrix.postConcat(attachedTransformation.getMatrix());
                 }
