@@ -102,9 +102,9 @@
         <!-- Text color, typeface, size, and style for "small" inverse text. Defaults to secondary inverse text color. -->
         <attr name="textAppearanceSmallInverse" format="reference" />
 
-        <!-- Text color, typeface, size, and style for system search result title. Defaults to primary inverse text color. @hide -->
+        <!-- Text color, typeface, size, and style for system search result title. Defaults to primary inverse text color. -->
         <attr name="textAppearanceSearchResultTitle" format="reference" />
-        <!-- Text color, typeface, size, and style for system search result subtitle. Defaults to primary inverse text color. @hide -->
+        <!-- Text color, typeface, size, and style for system search result subtitle. Defaults to primary inverse text color. -->
         <attr name="textAppearanceSearchResultSubtitle" format="reference" />
 
 
