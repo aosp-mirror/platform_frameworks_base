@@ -383,7 +383,7 @@ public abstract class SmsMessageBase {
          * 2. [x@y][ ]/[body]
          */
          String[] parts = messageBody.split("( /)|( )", 2);
-         if (parts.length < 1) return;
+         if (parts.length < 2) return;
          emailFrom = parts[0];
          emailBody = parts[1];
          isEmail = true;
