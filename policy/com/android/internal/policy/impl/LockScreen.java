@@ -255,18 +255,18 @@ class LockScreen extends LinearLayout implements KeyguardScreen, KeyguardUpdateM
                 textView.setCompoundDrawablePadding(4);
             }
         };
-        textView.postDelayed(mPendingR1, 400);
+        textView.postDelayed(mPendingR1, 0);
         mPendingR2 = new Runnable() {
             public void run() {
                 textView.setText("");
                 textView.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
             }
         };
-        textView.postDelayed(mPendingR2, 2000);
+        textView.postDelayed(mPendingR2, 3500);
     }
     private Runnable mPendingR1;
     private Runnable mPendingR2;
-    
+
 
     private void refreshAlarmDisplay() {
         mNextAlarm = mLockPatternUtils.getNextAlarm();
