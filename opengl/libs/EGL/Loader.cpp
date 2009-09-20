@@ -222,19 +222,28 @@ void Loader::init_api(void* dso,
     }
 }
 
-void *Loader::load_driver(const char* driver, gl_hooks_t* hooks, uint32_t mask)
+void *Loader::load_driver(const char* driver_absolute_path,
+        gl_hooks_t* hooks, uint32_t mask)
 {
-    void* dso = dlopen(driver, RTLD_NOW | RTLD_LOCAL);
-    if (dso == 0)
+    if (access(driver_absolute_path, R_OK)) {
+        // this happens often, we don't want to log an error
         return 0;
+    }
 
-    LOGD("loaded %s", driver);
+    void* dso = dlopen(driver_absolute_path, RTLD_NOW | RTLD_LOCAL);
+    if (dso == 0) {
+        const char* err = dlerror();
+        LOGE("load_driver(%s): %s", driver_absolute_path, err?err:"unknown");
+        return 0;
+    }
+
+    LOGD("loaded %s", driver_absolute_path);
 
     if (mask & EGL) {
         getProcAddress = (getProcAddressType)dlsym(dso, "eglGetProcAddress");
 
         LOGE_IF(!getProcAddress, 
-                "can't find eglGetProcAddress() in %s", driver);        
+                "can't find eglGetProcAddress() in %s", driver_absolute_path);
 
         gl_hooks_t::egl_t* egl = &hooks->egl;
         __eglMustCastToProperFunctionPointerType* curr =
