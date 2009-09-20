@@ -125,6 +125,12 @@ static int recv_message(uint8_t *message, int length)
     return length;
 }
 
+static int recv_end_of_file()
+{
+    uint8_t byte;
+    return recv(the_socket, &byte, 1, 0) == 0;
+}
+
 static void send_code(int8_t code)
 {
     send(the_socket, &code, 1, 0);
@@ -358,7 +364,8 @@ static int8_t password()
         }
         if (n != NO_ERROR || blob.length != MASTER_KEY_SIZE) {
             if (retry <= 0) {
-                return reset();
+                reset();
+                return UNINITIALIZED;
             }
             return WRONG_PASSWORD + --retry;
         }
@@ -421,9 +428,9 @@ static struct action {
     {test,     't', 0,        TEST,     {0}},
     {get,      'g', NO_ERROR, GET,      {KEY_SIZE}},
     {insert,   'i', NO_ERROR, INSERT,   {KEY_SIZE, VALUE_SIZE}},
-    {delete,   'd', NO_ERROR, DELETE,   {KEY_SIZE}},
-    {exist,    'e', NO_ERROR, EXIST,    {KEY_SIZE}},
-    {scan,     's', NO_ERROR, SCAN,     {KEY_SIZE}},
+    {delete,   'd', 0,        DELETE,   {KEY_SIZE}},
+    {exist,    'e', 0,        EXIST,    {KEY_SIZE}},
+    {scan,     's', 0,        SCAN,     {KEY_SIZE}},
     {reset,    'r', 0,        RESET,    {0}},
     {password, 'p', 0,        PASSWORD, {PASSWORD_SIZE, PASSWORD_SIZE}},
     {lock,     'l', NO_ERROR, LOCK,     {0}},
@@ -470,6 +477,9 @@ static int8_t process(int8_t code) {
         if (params[i].length == -1) {
             return PROTOCOL_ERROR;
         }
+    }
+    if (!recv_end_of_file()) {
+        return PROTOCOL_ERROR;
     }
     return action->run();
 }
