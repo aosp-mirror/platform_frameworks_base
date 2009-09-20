@@ -295,7 +295,11 @@ public class WifiService extends IWifiManager.Stub {
         if (mWifiHandler == null) return false;
 
         synchronized (mWifiHandler) {
+            // caller may not have WAKE_LOCK permission - it's not required here
+            long ident = Binder.clearCallingIdentity();
             sWakeLock.acquire();
+            Binder.restoreCallingIdentity(ident);
+
             mLastEnableUid = Binder.getCallingUid();
             // set a flag if the user is enabling Wifi while in airplane mode
             mAirplaneModeOverwridden = (enable && isAirplaneModeOn() && isAirplaneToggleable());
