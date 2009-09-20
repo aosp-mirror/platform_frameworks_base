@@ -1192,14 +1192,13 @@ public class BluetoothService extends IBluetooth.Stub {
 
     /* Broadcast the Uuid intent */
     /*package*/ synchronized void sendUuidIntent(String address) {
-        if (mUuidIntentTracker.contains(address)) {
-            ParcelUuid[] uuid = getUuidFromCache(address);
-            Intent intent = new Intent(BluetoothDevice.ACTION_UUID);
-            intent.putExtra(BluetoothDevice.EXTRA_UUID, uuid);
-            mContext.sendBroadcast(intent, BLUETOOTH_ADMIN_PERM);
+        ParcelUuid[] uuid = getUuidFromCache(address);
+        Intent intent = new Intent(BluetoothDevice.ACTION_UUID);
+        intent.putExtra(BluetoothDevice.EXTRA_UUID, uuid);
+        mContext.sendBroadcast(intent, BLUETOOTH_ADMIN_PERM);
 
+        if (mUuidIntentTracker.contains(address))
             mUuidIntentTracker.remove(address);
-        }
     }
 
     @Override
