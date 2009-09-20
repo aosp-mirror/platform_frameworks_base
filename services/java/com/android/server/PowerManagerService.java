@@ -304,10 +304,7 @@ class PowerManagerService extends IPowerManager.Stub
                     // temporarily set mUserActivityAllowed to true so this will work
                     // even when the keyguard is on.
                     synchronized (mLocks) {
-                        boolean savedActivityAllowed = mUserActivityAllowed;
-                        mUserActivityAllowed = true;
-                        userActivity(SystemClock.uptimeMillis(), false);
-                        mUserActivityAllowed = savedActivityAllowed;
+                        forceUserActivityLocked();
                     }
                 }
             }
@@ -1714,6 +1711,13 @@ class PowerManagerService extends IPowerManager.Stub
         }
     }
 
+    private void forceUserActivityLocked() {
+        boolean savedActivityAllowed = mUserActivityAllowed;
+        mUserActivityAllowed = true;
+        userActivity(SystemClock.uptimeMillis(), false);
+        mUserActivityAllowed = savedActivityAllowed;
+    }
+
     public void userActivityWithForce(long time, boolean noChangeLights, boolean force) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.DEVICE_POWER, null);
         userActivity(time, noChangeLights, OTHER_EVENT, force);
@@ -2114,7 +2118,12 @@ class PowerManagerService extends IPowerManager.Stub
             Log.d(TAG, "disableProximityLockLocked");
         }
         mSensorManager.unregisterListener(this);
-        mProximitySensorActive = false;
+        synchronized (mLocks) {
+            if (mProximitySensorActive) {
+                mProximitySensorActive = false;
+                forceUserActivityLocked();
+            }
+        }
     }
 
     public void onSensorChanged(SensorEvent event) {
@@ -2135,10 +2144,7 @@ class PowerManagerService extends IPowerManager.Stub
                     Log.d(TAG, "onSensorChanged: proximity inactive, distance: " + distance);
                 }
                 mProximitySensorActive = false;
-                boolean savedActivityAllowed = mUserActivityAllowed;
-                mUserActivityAllowed = true;
-                userActivity(milliseconds, false);
-                mUserActivityAllowed = savedActivityAllowed;
+                forceUserActivityLocked();
             }
         }
     }
