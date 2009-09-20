@@ -266,8 +266,8 @@ class BluetoothEventLoop {
         }
         String name = propValues[0];
         if (name.equals("Name")) {
-            Intent intent = new Intent(BluetoothDevice.ACTION_NAME_CHANGED);
-            intent.putExtra(BluetoothDevice.EXTRA_NAME, propValues[1]);
+            Intent intent = new Intent(BluetoothAdapter.ACTION_LOCAL_NAME_CHANGED);
+            intent.putExtra(BluetoothAdapter.EXTRA_LOCAL_NAME, propValues[1]);
             mContext.sendBroadcast(intent, BLUETOOTH_PERM);
             mBluetoothService.setProperty(name, propValues[1]);
         } else if (name.equals("Pairable") || name.equals("Discoverable")) {
