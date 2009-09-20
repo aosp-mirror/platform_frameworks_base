@@ -4868,7 +4868,7 @@ public class WebView extends AbsoluteLayout
                                             / draw.mMinPrefWidth;
                                     mMinZoomScaleFixed = false;
                                 } else {
-                                    mMinZoomScale = mDefaultScale;
+                                    mMinZoomScale = restoreState.mDefaultScale;
                                     mMinZoomScaleFixed = true;
                                 }
                             } else {
@@ -4891,7 +4891,7 @@ public class WebView extends AbsoluteLayout
                                 && settings.getLoadWithOverviewMode()) {
                             if (restoreState.mViewScale == 0
                                     || (restoreState.mMobileSite
-                                            && mMinZoomScale < mDefaultScale)) {
+                                    && mMinZoomScale < restoreState.mDefaultScale)) {
                                 mInZoomOverview = true;
                             }
                         }
