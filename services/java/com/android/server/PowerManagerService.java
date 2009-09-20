@@ -1862,9 +1862,10 @@ class PowerManagerService extends IPowerManager.Stub
                 Log.d(TAG, "setKeyboardVisibility: " + visible);
             }
             mKeyboardVisible = visible;
-            // don't signal user activity when closing keyboard if the screen is off.
-            // otherwise, we want to make sure the backlights are adjusted.
-            if (visible || (mPowerState & SCREEN_ON_BIT) != 0) {
+            // don't signal user activity if the screen is off; other code
+            // will take care of turning on due to a true change to the lid
+            // switch and synchronized with the lock screen.
+            if ((mPowerState & SCREEN_ON_BIT) != 0) {
                 userActivity(SystemClock.uptimeMillis(), false, BUTTON_EVENT, true);
             }
         }
