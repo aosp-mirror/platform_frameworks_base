@@ -113,5 +113,7 @@
         <item>20</item>
         <item>30</item>
     </integer-array>
-    
+
+    <bool name="config_use_strict_phone_number_comparation">false</bool>
+
 </resources>
