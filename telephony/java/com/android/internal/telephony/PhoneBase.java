@@ -482,6 +482,16 @@ public abstract class PhoneBase extends Handler implements Phone {
         mServiceStateRegistrants.remove(h);
     }
 
+    // Inherited documentation suffices.
+    public void registerForRingbackTone(Handler h, int what, Object obj) {
+        mCM.registerForRingbackTone(h,what,obj);
+    }
+
+    // Inherited documentation suffices.
+    public void unregisterForRingbackTone(Handler h) {
+        mCM.unregisterForRingbackTone(h);
+    }
+
     /**
      * Subclasses of Phone probably want to replace this with a
      * version scoped to their packages

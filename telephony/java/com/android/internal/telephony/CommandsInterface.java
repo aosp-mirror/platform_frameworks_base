@@ -525,6 +525,17 @@ public interface CommandsInterface {
      void registerForCdmaOtaProvision(Handler h,int what, Object obj);
      void unregisterForCdmaOtaProvision(Handler h);
 
+     /**
+      * Registers the handler when out-band ringback tone is needed.<p>
+      *
+      *  Messages received from this:
+      *  Message.obj will be an AsyncResult
+      *  AsyncResult.userObj = obj
+      *  AsyncResult.result = boolean. <p>
+      */
+     void registerForRingbackTone(Handler h, int what, Object obj);
+     void unregisterForRingbackTone(Handler h);
+
     /**
      * Supply the ICC PIN to the ICC card
      *
