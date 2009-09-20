@@ -183,6 +183,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     int mDeskDockRotation;
     boolean mCarDockKeepsScreenOn;
     boolean mDeskDockKeepsScreenOn;
+    boolean mCarDockEnablesAccelerometer;
+    boolean mDeskDockEnablesAccelerometer;
     int mLidKeyboardAccessibility;
     int mLidNavigationAccessibility;
     boolean mScreenOn = false;
@@ -317,8 +319,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (appOrientation == ActivityInfo.SCREEN_ORIENTATION_SENSOR) {
             return true;
         }
-        if (mAccelerometerDefault != 0 && (
-                appOrientation == ActivityInfo.SCREEN_ORIENTATION_USER ||
+        if ((mAccelerometerDefault != 0 ||
+            (mCarDockEnablesAccelerometer && mDockState == Intent.EXTRA_DOCK_STATE_CAR) ||
+            (mDeskDockEnablesAccelerometer && mDockState == Intent.EXTRA_DOCK_STATE_DESK))
+            && (appOrientation == ActivityInfo.SCREEN_ORIENTATION_USER ||
                 appOrientation == ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED)) {
             return true;
         }
@@ -334,6 +338,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (mCurrentAppOrientation == ActivityInfo.SCREEN_ORIENTATION_SENSOR) {
             // If the application has explicitly requested to follow the
             // orientation, then we need to turn the sensor or.
+            return true;
+        }
+        if ((mCarDockEnablesAccelerometer && mDockState == Intent.EXTRA_DOCK_STATE_CAR) ||
+            (mDeskDockEnablesAccelerometer && mDockState == Intent.EXTRA_DOCK_STATE_DESK)) {
+            // enable accelerometer if we are docked in a dock that enables accelerometer
+            // orientation management,
             return true;
         }
         if (mAccelerometerDefault == 0) {
@@ -477,6 +487,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 com.android.internal.R.bool.config_carDockKeepsScreenOn);
         mDeskDockKeepsScreenOn = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_deskDockKeepsScreenOn);
+        mCarDockEnablesAccelerometer = mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_carDockEnablesAccelerometer);
+        mDeskDockEnablesAccelerometer = mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_deskDockEnablesAccelerometer);
         mLidKeyboardAccessibility = mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_lidKeyboardAccessibility);
         mLidNavigationAccessibility = mContext.getResources().getInteger(
@@ -1728,6 +1742,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     Intent.EXTRA_DOCK_STATE_UNDOCKED);
             updateRotation(Surface.FLAGS_ORIENTATION_ANIMATION_DISABLE);
             updateKeepScreenOn();
+            updateOrientationListenerLp();
         }
     };
 
