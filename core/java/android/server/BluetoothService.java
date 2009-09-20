@@ -427,6 +427,18 @@ public class BluetoothService extends IBluetooth.Stub {
                 new ArrayList<String>(Arrays.asList(
                         "Motorola IHF1000", "i.TechBlueBAND", "X5 Stereo v1.3"));
 
+        // If this is an outgoing connection, store the address.
+        // There can be only 1 pending outgoing connection at a time,
+        private String mPendingOutgoingBonding;
+
+        private synchronized void setPendingOutgoingBonding(String address) {
+            mPendingOutgoingBonding = address;
+        }
+
+        public synchronized String getPendingOutgoingBonding() {
+            return mPendingOutgoingBonding;
+        }
+
         public synchronized void loadBondState() {
             if (mBluetoothState != BluetoothAdapter.STATE_TURNING_ON) {
                 return;
@@ -457,6 +469,15 @@ public class BluetoothService extends IBluetooth.Stub {
             if (oldState == state) {
                 return;
             }
+
+            // Check if this was an pending outgoing bonding.
+            // If yes, reset the state.
+            if (oldState == BluetoothDevice.BOND_BONDING) {
+                if (address.equals(mPendingOutgoingBonding)) {
+                    mPendingOutgoingBonding = null;
+                }
+            }
+
             if (DBG) log(address + " bond state " + oldState + " -> " + state + " (" +
                          reason + ")");
             Intent intent = new Intent(BluetoothDevice.ACTION_BOND_STATE_CHANGED);
@@ -779,8 +800,7 @@ public class BluetoothService extends IBluetooth.Stub {
         }
         address = address.toUpperCase();
 
-        String[] bonding = mBondState.listInState(BluetoothDevice.BOND_BONDING);
-        if (bonding.length > 0 && !bonding[0].equals(address)) {
+        if (mBondState.getPendingOutgoingBonding() != null) {
             log("Ignoring createBond(): another device is bonding");
             // a different device is currently bonding, fail
             return false;
@@ -798,7 +818,9 @@ public class BluetoothService extends IBluetooth.Stub {
             return false;
         }
 
+        mBondState.setPendingOutgoingBonding(address);
         mBondState.setBondState(address, BluetoothDevice.BOND_BONDING);
+
         return true;
     }
 

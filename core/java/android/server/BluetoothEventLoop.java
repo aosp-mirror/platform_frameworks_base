@@ -457,8 +457,9 @@ class BluetoothEventLoop {
         String address = checkPairingRequestAndGetAddress(objectPath, nativeData);
         if (address == null) return;
 
-        if (mBluetoothService.getBondState().getBondState(address) ==
-                BluetoothDevice.BOND_BONDING) {
+        String pendingOutgoingAddress =
+                mBluetoothService.getBondState().getPendingOutgoingBonding();
+        if (address.equals(pendingOutgoingAddress)) {
             // we initiated the bonding
             BluetoothClass btClass = new BluetoothClass(mBluetoothService.getRemoteClass(address));
 
