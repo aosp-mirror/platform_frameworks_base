@@ -86,6 +86,12 @@
          keeps the screen on.  By default it does.  Set to false to not keep on. -->
     <bool name="config_carDockKeepsScreenOn">true</bool>
 
+    <!-- Control whether being in the desk dock should enable accelerometer based screen orientation -->
+    <bool name="config_deskDockEnablesAccelerometer">false</bool>
+
+    <!-- Control whether being in the car dock should enable accelerometer based screen orientation -->
+    <bool name="config_carDockEnablesAccelerometer">false</bool>
+
     <!-- Indicate whether the lid state impacts the accessibility of
          the physical keyboard.  0 means it doesn't, 1 means it is accessible
          when the lid is open, 2 means it is accessible when the lid is
