@@ -712,7 +712,8 @@ int doDump(Bundle* bundle)
                                 LARGE_SCREEN_ATTR, NULL, 1);
                     } else if (tag == "uses-feature") {
                         String8 name = getAttribute(tree, NAME_ATTR, &error);
-                        if (error == "") {
+
+                        if (name != "" && error == "") {
                             int req = getIntegerAttribute(tree,
                                     REQUIRED_ATTR, NULL, 1);
                             if (name == "android.hardware.camera") {
@@ -729,7 +730,7 @@ int doDump(Bundle* bundle)
                         }
                     } else if (tag == "uses-permission") {
                         String8 name = getAttribute(tree, NAME_ATTR, &error);
-                        if (error == "") {
+                        if (name != "" && error == "") {
                             if (name == "android.permission.CAMERA") {
                                 hasCameraPermission = true;
                             }
