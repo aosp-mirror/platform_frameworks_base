@@ -17,6 +17,7 @@
 package android.webkit;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Handler;
@@ -193,12 +194,20 @@ public class WebSettings {
     // with Google' and the browser.
     static GoogleLocationSettingManager sGoogleLocationSettingManager;
 
+    // private WebSettings, not accessible by the host activity
+    private int             mDoubleTapToastCount = 3;
+
+    private static final String PREF_FILE = "WebViewSettings";
+    private static final String DOUBLE_TAP_TOAST_COUNT = "double_tap_toast_count";
+
     // Class to handle messages before WebCore is ready.
     private class EventHandler {
         // Message id for syncing
         static final int SYNC = 0;
         // Message id for setting priority
         static final int PRIORITY = 1;
+        // Message id for writing double-tap toast count
+        static final int SET_DOUBLE_TAP_TOAST_COUNT = 2;
         // Actual WebCore thread handler
         private Handler mHandler;
 
@@ -222,6 +231,16 @@ public class WebSettings {
 
                         case PRIORITY: {
                             setRenderPriority();
+                            break;
+                        }
+
+                        case SET_DOUBLE_TAP_TOAST_COUNT: {
+                            SharedPreferences.Editor editor = mContext
+                                    .getSharedPreferences(PREF_FILE,
+                                            Context.MODE_PRIVATE).edit();
+                            editor.putInt(DOUBLE_TAP_TOAST_COUNT,
+                                    mDoubleTapToastCount);
+                            editor.commit();
                             break;
                         }
                     }
@@ -1311,6 +1330,19 @@ public class WebSettings {
         }
      }
 
+    int getDoubleTapToastCount() {
+        return mDoubleTapToastCount;
+    }
+
+    void setDoubleTapToastCount(int count) {
+        if (mDoubleTapToastCount != count) {
+            mDoubleTapToastCount = count;
+            // write the settings in the non-UI thread
+            mEventHandler.sendMessage(Message.obtain(null,
+                    EventHandler.SET_DOUBLE_TAP_TOAST_COUNT));
+        }
+    }
+
     /**
      * Transfer messages from the queue to the new WebCoreThread. Called from
      * WebCore thread.
@@ -1323,6 +1355,10 @@ public class WebSettings {
         }
         sGoogleLocationSettingManager = new GoogleLocationSettingManager(mContext);
         sGoogleLocationSettingManager.start();
+        SharedPreferences sp = mContext.getSharedPreferences(PREF_FILE,
+                Context.MODE_PRIVATE);
+        mDoubleTapToastCount = sp.getInt(DOUBLE_TAP_TOAST_COUNT,
+                mDoubleTapToastCount);
         nativeSync(frame.mNativeFrame);
         mSyncPending = false;
         mEventHandler.createHandler();

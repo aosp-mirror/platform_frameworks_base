@@ -3750,6 +3750,13 @@ public class WebView extends AbsoluteLayout
                             && !mZoomButtonsController.isVisible()
                             && mMinZoomScale < mMaxZoomScale) {
                         mZoomButtonsController.setVisible(true);
+                        int count = settings.getDoubleTapToastCount();
+                        if (mInZoomOverview && count > 0) {
+                            settings.setDoubleTapToastCount(count--);
+                            Toast.makeText(mContext,
+                                    com.android.internal.R.string.double_tap_toast,
+                                    Toast.LENGTH_SHORT).show();
+                        }
                     }
                 }
 
@@ -4522,7 +4529,8 @@ public class WebView extends AbsoluteLayout
         mZoomCenterY = mLastTouchY;
         mInZoomOverview = !mInZoomOverview;
         // remove the zoom control after double tap
-        if (getSettings().getBuiltInZoomControls()) {
+        WebSettings settings = getSettings();
+        if (settings.getBuiltInZoomControls()) {
             if (mZoomButtonsController.isVisible()) {
                 mZoomButtonsController.setVisible(false);
             }
@@ -4534,6 +4542,7 @@ public class WebView extends AbsoluteLayout
                 mZoomControls.hide();
             }
         }
+        settings.setDoubleTapToastCount(0);
         if (mInZoomOverview) {
             // Force the titlebar fully reveal in overview mode
             if (mScrollY < getTitleHeight()) mScrollY = 0;

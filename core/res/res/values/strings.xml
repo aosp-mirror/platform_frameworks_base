@@ -1391,6 +1391,9 @@
     <!-- Title of the WebView save password dialog.  If the user enters a password in a form on a website, a dialog will come up asking if they want to save the password. -->
     <string name="save_password_label">Confirm</string>
 
+    <!-- Toast for double-tap -->
+    <string name="double_tap_toast">Tip: double-tap to zoom in and out.</string>
+
     <!-- Title of an application permission, listed so the user can choose whether
         they want to allow the application to do this. -->
     <string name="permlab_readHistoryBookmarks">read Browser\'s history and bookmarks</string>
