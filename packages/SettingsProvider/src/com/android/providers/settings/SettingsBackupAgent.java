@@ -54,15 +54,17 @@ public class SettingsBackupAgent extends BackupHelperAgent {
 
     private static final String KEY_SYSTEM = "system";
     private static final String KEY_SECURE = "secure";
-    private static final String KEY_SYNC = "sync_providers";
     private static final String KEY_LOCALE = "locale";
+
+    // Versioning of the state file.  Increment this version
+    // number any time the set of state items is altered.
+    private static final int STATE_VERSION = 1;
 
     private static final int STATE_SYSTEM = 0;
     private static final int STATE_SECURE = 1;
-    private static final int STATE_SYNC   = 2;
-    private static final int STATE_LOCALE = 3;
-    private static final int STATE_WIFI   = 4;
-    private static final int STATE_SIZE   = 5; // The number of state items
+    private static final int STATE_LOCALE = 2;
+    private static final int STATE_WIFI   = 3;
+    private static final int STATE_SIZE   = 4; // The number of state items
 
     private static String[] sortedSystemKeys = null;
     private static String[] sortedSecureKeys = null;
@@ -101,7 +103,6 @@ public class SettingsBackupAgent extends BackupHelperAgent {
 
         byte[] systemSettingsData = getSystemSettings();
         byte[] secureSettingsData = getSecureSettings();
-        byte[] syncProviders = mSettingsHelper.getSyncProviders();
         byte[] locale = mSettingsHelper.getLocaleData();
         byte[] wifiData = getWifiSupplicant(FILE_WIFI_SUPPLICANT);
 
@@ -111,8 +112,6 @@ public class SettingsBackupAgent extends BackupHelperAgent {
                 writeIfChanged(stateChecksums[STATE_SYSTEM], KEY_SYSTEM, systemSettingsData, data);
         stateChecksums[STATE_SECURE] =
                 writeIfChanged(stateChecksums[STATE_SECURE], KEY_SECURE, secureSettingsData, data);
-        stateChecksums[STATE_SYNC] =
-                writeIfChanged(stateChecksums[STATE_SYNC], KEY_SYNC, syncProviders, data);
         stateChecksums[STATE_LOCALE] =
                 writeIfChanged(stateChecksums[STATE_LOCALE], KEY_LOCALE, locale, data);
         stateChecksums[STATE_WIFI] =
@@ -143,8 +142,6 @@ public class SettingsBackupAgent extends BackupHelperAgent {
                 // retain the previous WIFI state.
                 enableWifi(retainedWifiState == WifiManager.WIFI_STATE_ENABLED ||
                         retainedWifiState == WifiManager.WIFI_STATE_ENABLING);
-            } else if (KEY_SYNC.equals(key)) {
-                mSettingsHelper.setSyncProviders(data);
             } else if (KEY_LOCALE.equals(key)) {
                 byte[] localeData = new byte[size];
                 data.readEntityData(localeData, 0, size);
@@ -160,12 +157,17 @@ public class SettingsBackupAgent extends BackupHelperAgent {
 
         DataInputStream dataInput = new DataInputStream(
                 new FileInputStream(oldState.getFileDescriptor()));
-        for (int i = 0; i < STATE_SIZE; i++) {
-            try {
-                stateChecksums[i] = dataInput.readLong();
-            } catch (EOFException eof) {
-                break;
+
+        try {
+            int stateVersion = dataInput.readInt();
+            if (stateVersion == STATE_VERSION) {
+                for (int i = 0; i < STATE_SIZE; i++) {
+                    stateChecksums[i] = dataInput.readLong();
+                }
             }
+        } catch (EOFException eof) {
+            // With the default 0 checksum we'll wind up forcing a backup of
+            // any unhandled data sets, which is appropriate.
         }
         dataInput.close();
         return stateChecksums;
@@ -175,6 +177,8 @@ public class SettingsBackupAgent extends BackupHelperAgent {
             throws IOException {
         DataOutputStream dataOutput = new DataOutputStream(
                 new FileOutputStream(newState.getFileDescriptor()));
+
+        dataOutput.writeInt(STATE_VERSION);
         for (int i = 0; i < STATE_SIZE; i++) {
             dataOutput.writeLong(checksums[i]);
         }

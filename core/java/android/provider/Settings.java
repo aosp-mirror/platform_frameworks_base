@@ -2406,7 +2406,6 @@ public final class Settings {
             WIFI_NETWORKS_AVAILABLE_REPEAT_DELAY,
             WIFI_NUM_ALLOWED_CHANNELS,
             WIFI_NUM_OPEN_NETWORKS_KEPT,
-            BACKGROUND_DATA,
         };
 
         /**

@@ -116,43 +116,6 @@ public class SettingsHelper {
         }
     }
 
-    byte[] getSyncProviders() {
-        byte[] sync = new byte[1 + PROVIDERS.length];
-        // TODO: Sync backup needs to be moved to SystemBackupAgent
-        /*
-        try {
-            sync[0] = (byte) (mContentService.getListenForNetworkTickles() ? 1 : 0);
-            for (int i = 0; i < PROVIDERS.length; i++) {
-                sync[i + 1] = (byte) 
-                        (mContentService.getSyncAutomatically(PROVIDERS[i]) ? 1 : 0);
-            }
-        } catch (RemoteException re) {
-            Log.w(TAG, "Unable to backup sync providers");
-            return sync;
-        }
-        */
-        return sync;
-    }
-
-    void setSyncProviders(BackupDataInput backup) {
-        byte[] sync = new byte[backup.getDataSize()];
-
-        try {
-            backup.readEntityData(sync, 0, sync.length);
-            // TODO: Sync backup needs to be moved to SystemBackupAgent
-            /*
-            mContentService.setListenForNetworkTickles(sync[0] == 1);
-            for (int i = 0; i < PROVIDERS.length; i++) {
-                mContentService.setSyncProviderAutomatically(PROVIDERS[i], sync[i + 1] > 0);
-            }
-        } catch (RemoteException re) {
-            Log.w(TAG, "Unable to restore sync providers");
-            */
-        } catch (java.io.IOException ioe) {
-            Log.w(TAG, "Unable to read sync settings");
-        }
-    }
-
     byte[] getLocaleData() {
         Configuration conf = mContext.getResources().getConfiguration();
         final Locale loc = conf.locale;

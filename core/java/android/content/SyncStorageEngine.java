@@ -346,16 +346,6 @@ public class SyncStorageEngine extends Handler {
                 }
             }
         }
-        // Inform the backup manager about a data change
-        IBackupManager ibm = IBackupManager.Stub.asInterface(
-                ServiceManager.getService(Context.BACKUP_SERVICE));
-        if (ibm != null) {
-            try {
-                ibm.dataChanged("com.android.providers.settings");
-            } catch (RemoteException e) {
-                // Try again later
-            }
-        }
     }
 
     public boolean getSyncAutomatically(Account account, String providerName) {
