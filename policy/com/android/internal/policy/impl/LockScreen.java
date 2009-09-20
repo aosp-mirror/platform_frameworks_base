@@ -195,7 +195,9 @@ class LockScreen extends LinearLayout implements KeyguardScreen, KeyguardUpdateM
 
         mRotary.setOnDialTriggerListener(this);
         mRotary.setLeftHandleResource(R.drawable.ic_jog_dial_unlock);
-        mRotary.setRightHandleResource(R.drawable.ic_jog_dial_turn_ring_vol_off);
+        mRotary.setRightHandleResource(mSilentMode ?
+                R.drawable.ic_jog_dial_turn_ring_vol_off :
+                R.drawable.ic_jog_dial_turn_ring_vol_on);
     }
 
     @Override
@@ -207,33 +209,36 @@ class LockScreen extends LinearLayout implements KeyguardScreen, KeyguardUpdateM
     }
 
     /** {@inheritDoc} */
-    public boolean onDialTrigger(View v, int whichHandle) {
+    public void onDialTrigger(View v, int whichHandle) {
         if (whichHandle == RotarySelector.OnDialTriggerListener.LEFT_HANDLE) {
             mCallback.goToUnlockScreen();
-            return mStatus == Status.Normal; // only want to freeze drawing when actually unlocking
         } else if (whichHandle == RotarySelector.OnDialTriggerListener.RIGHT_HANDLE) {
             // toggle silent mode
             mSilentMode = !mSilentMode;
             mAudioManager.setRingerMode(mSilentMode ? AudioManager.RINGER_MODE_SILENT
                         : AudioManager.RINGER_MODE_NORMAL);
-            mRotary.setRightHandleResource(mSilentMode ?
-                    R.drawable.ic_jog_dial_turn_ring_vol_on :
-                    R.drawable.ic_jog_dial_turn_ring_vol_off);
+            final int handleIcon = mSilentMode ?
+                    R.drawable.ic_jog_dial_turn_ring_vol_off :
+                    R.drawable.ic_jog_dial_turn_ring_vol_on;
+            final int toastIcon = mSilentMode ?
+                    R.drawable.ic_lock_ringer_off :
+                    R.drawable.ic_lock_ringer_on;
+            mRotary.setRightHandleResource(handleIcon);
             String message = mSilentMode ?
                     getContext().getString(R.string.global_action_silent_mode_on_status) :
                     getContext().getString(R.string.global_action_silent_mode_off_status);
-            toastMessage(mScreenLocked, message);
+            toastMessage(mScreenLocked, message, toastIcon);
             mCallback.pokeWakelock();
         }
-        return false;
     }
 
     /**
      * Displays a message in a text view and then removes it.
      * @param textView The text view.
      * @param text The text.
+     * @param iconResourceId The left hand icon.
      */
-    private void toastMessage(final TextView textView, final String text) {
+    private void toastMessage(final TextView textView, final String text, final int iconResourceId) {
         if (mPendingR1 != null) {
             textView.removeCallbacks(mPendingR1);
             mPendingR1 = null;
@@ -246,12 +251,15 @@ class LockScreen extends LinearLayout implements KeyguardScreen, KeyguardUpdateM
         mPendingR1 = new Runnable() {
             public void run() {
                 textView.setText(text);
+                textView.setCompoundDrawablesWithIntrinsicBounds(iconResourceId, 0, 0, 0);
+                textView.setCompoundDrawablePadding(4);
             }
         };
         textView.postDelayed(mPendingR1, 400);
         mPendingR2 = new Runnable() {
             public void run() {
                 textView.setText("");
+                textView.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
             }
         };
         textView.postDelayed(mPendingR2, 2000);
@@ -288,7 +296,7 @@ class LockScreen extends LinearLayout implements KeyguardScreen, KeyguardUpdateM
 
         if (mChargingIcon == null) {
             mChargingIcon =
-                    getContext().getResources().getDrawable(R.drawable.ic_lock_idle_low_battery);
+                    getContext().getResources().getDrawable(R.drawable.ic_lock_idle_charging);
         }
 
         if (mPluggedIn) {
@@ -344,23 +352,23 @@ class LockScreen extends LinearLayout implements KeyguardScreen, KeyguardUpdateM
             mStatus2.setVisibility(View.INVISIBLE);
 
             mStatus1.setText(mCharging);
-            mStatus1.setCompoundDrawables(mChargingIcon, null, null, null);
+            mStatus1.setCompoundDrawablesWithIntrinsicBounds(mChargingIcon, null, null, null);
         } else if (mNextAlarm != null && mCharging == null) {
             // next alarm only
             mStatus1.setVisibility(View.VISIBLE);
             mStatus2.setVisibility(View.INVISIBLE);
 
             mStatus1.setText(mNextAlarm);
-            mStatus1.setCompoundDrawables(mAlarmIcon, null, null, null);
+            mStatus1.setCompoundDrawablesWithIntrinsicBounds(mAlarmIcon, null, null, null);
         } else if (mCharging != null && mNextAlarm != null) {
             // both charging and next alarm
             mStatus1.setVisibility(View.VISIBLE);
             mStatus2.setVisibility(View.VISIBLE);
 
             mStatus1.setText(mCharging);
-            mStatus1.setCompoundDrawables(mChargingIcon, null, null, null);
+            mStatus1.setCompoundDrawablesWithIntrinsicBounds(mChargingIcon, null, null, null);
             mStatus2.setText(mNextAlarm);
-            mStatus2.setCompoundDrawables(mAlarmIcon, null, null, null);
+            mStatus2.setCompoundDrawablesWithIntrinsicBounds(mAlarmIcon, null, null, null);
         }
     }
 
