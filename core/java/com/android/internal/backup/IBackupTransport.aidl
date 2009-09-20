@@ -77,10 +77,15 @@ interface IBackupTransport {
      * @param data The data stream that resulted from invoking the application's
      *   BackupService.doBackup() method.  This may be a pipe rather than a file on
      *   persistent media, so it may not be seekable.
+     * @param wipeAllFirst When true, <i>all</i> backed-up data for the current device/account
+     *   will be erased prior to the storage of the data provided here.  The purpose of this
+     *   is to provide a guarantee that no stale data exists in the restore set when the
+     *   device begins providing backups.
      * @return false if errors occurred (the backup should be aborted and rescheduled),
      *   true if everything is OK so far (but {@link #finishBackup} must be called).
      */
-    boolean performBackup(in PackageInfo packageInfo, in ParcelFileDescriptor inFd);
+    boolean performBackup(in PackageInfo packageInfo, in ParcelFileDescriptor inFd,
+            boolean wipeAllFirst);
 
     /**
      * Erase the give application's data from the backup destination.  This clears

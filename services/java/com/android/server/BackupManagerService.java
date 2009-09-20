@@ -949,11 +949,11 @@ class BackupManagerService extends IBackupManager.Stub {
             }
         }
 
-        void processOneBackup(BackupRequest request, IBackupAgent agent, IBackupTransport transport) {
+        void processOneBackup(BackupRequest request, IBackupAgent agent,
+                IBackupTransport transport) {
             final String packageName = request.appInfo.packageName;
             if (DEBUG) Log.d(TAG, "processOneBackup doBackup() on " + packageName);
 
-            // !!! TODO: get the state file dir from the transport
             File savedStateName = new File(mStateDir, packageName);
             File backupDataName = new File(mDataDir, packageName + ".data");
             File newStateName = new File(mStateDir, packageName + ".new");
@@ -961,6 +961,12 @@ class BackupManagerService extends IBackupManager.Stub {
             ParcelFileDescriptor savedState = null;
             ParcelFileDescriptor backupData = null;
             ParcelFileDescriptor newState = null;
+
+            // Usually we won't force a server-side init, except the first time
+            // we ever back up following enable of backup.  To keep the bookkeeping
+            // simple, we detect this here rather than maintain state throughout
+            // the backup manager.
+            boolean doInit = false;
 
             PackageInfo packInfo;
             try {
@@ -971,6 +977,13 @@ class BackupManagerService extends IBackupManager.Stub {
                     // The metadata 'package' is synthetic
                     packInfo = new PackageInfo();
                     packInfo.packageName = packageName;
+
+                    // if there's no metadata backup state, this must be the
+                    // first time we've done one since enabling it.
+                    if (savedStateName.exists() == false) {
+                        if (DEBUG) Log.i(TAG, "First backup pass, issuing init");
+                        doInit = true;
+                    }
                 } else {
                     packInfo = mPackageManager.getPackageInfo(packageName,
                         PackageManager.GET_SIGNATURES);
@@ -1023,7 +1036,7 @@ class BackupManagerService extends IBackupManager.Stub {
                     // hold off on finishBackup() until the end, which implies holding off on
                     // renaming *all* the output state files (see below) until that happens.
 
-                    if (!transport.performBackup(packInfo, backupData) ||
+                    if (!transport.performBackup(packInfo, backupData, doInit) ||
                         !transport.finishBackup()) {
                         throw new Exception("Backup transport failed");
                     }
