@@ -110,6 +110,7 @@ public final class Calendar {
         public static final int EDITOR_ACCESS = 600;
         /** Full access to the calendar */
         public static final int OWNER_ACCESS = 700;
+        /** Domain admin */
         public static final int ROOT_ACCESS = 800;
 
         /**
