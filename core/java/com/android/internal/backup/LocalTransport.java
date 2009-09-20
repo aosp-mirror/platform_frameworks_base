@@ -56,12 +56,16 @@ public class LocalTransport extends IBackupTransport.Stub {
         return 0;
     }
 
-    public boolean performBackup(PackageInfo packageInfo, ParcelFileDescriptor data)
-            throws RemoteException {
+    public boolean performBackup(PackageInfo packageInfo, ParcelFileDescriptor data,
+            boolean wipeAllFirst) throws RemoteException {
         if (DEBUG) Log.v(TAG, "performBackup() pkg=" + packageInfo.packageName);
 
         File packageDir = new File(mDataDir, packageInfo.packageName);
         packageDir.mkdirs();
+        if (wipeAllFirst) {
+            if (DEBUG) Log.v(TAG, "wiping all data first");
+            deleteContents(mDataDir);
+        }
 
         // Each 'record' in the restore set is kept in its own file, named by
         // the record key.  Wind through the data file, extracting individual
@@ -108,6 +112,21 @@ public class LocalTransport extends IBackupTransport.Stub {
             // oops, something went wrong.  abort the operation and return error.
             Log.v(TAG, "Exception reading backup input:", e);
             return false;
+        }
+    }
+
+    // Deletes the contents but not the given directory
+    private void deleteContents(File dirname) {
+        File[] contents = dirname.listFiles();
+        if (contents != null) {
+            for (File f : contents) {
+                if (f.isDirectory()) {
+                    // delete the directory's contents then fall through
+                    // and delete the directory itself.
+                    deleteContents(f);
+                }
+                f.delete();
+            }
         }
     }
 
