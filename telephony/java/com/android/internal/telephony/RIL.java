@@ -2313,6 +2313,7 @@ public final class RIL extends BaseCommands implements CommandsInterface {
             case RIL_UNSOL_CDMA_OTA_PROVISION_STATUS: ret = responseInts(p); break;
             case RIL_UNSOL_CDMA_INFO_REC: ret = responseCdmaInformationRecord(p); break;
             case RIL_UNSOL_OEM_HOOK_RAW: ret = responseRaw(p); break;
+            case RIL_UNSOL_RINGBACK_TONE: ret = responseInts(p); break;
 
             default:
                 throw new RuntimeException("Unrecognized unsol response: " + response);
@@ -2597,6 +2598,14 @@ public final class RIL extends BaseCommands implements CommandsInterface {
                     mUnsolOemHookRawRegistrant.notifyRegistrant(new AsyncResult(null, ret, null));
                 }
                 break;
+
+            case RIL_UNSOL_RINGBACK_TONE:
+                if (RILJ_LOGD) unsljLogvRet(response, ret);
+                if (mRingbackToneRegistrants != null) {
+                    boolean playtone = (((int[])ret)[0] == 1);
+                    mRingbackToneRegistrants.notifyRegistrants(
+                                        new AsyncResult (null, playtone, null));
+                }
         }
     }
 
@@ -3209,6 +3218,7 @@ public final class RIL extends BaseCommands implements CommandsInterface {
             case RIL_UNSOL_CDMA_OTA_PROVISION_STATUS: return "UNSOL_CDMA_OTA_PROVISION_STATUS";
             case RIL_UNSOL_CDMA_INFO_REC: return "UNSOL_CDMA_INFO_REC";
             case RIL_UNSOL_OEM_HOOK_RAW: return "UNSOL_OEM_HOOK_RAW";
+            case RIL_UNSOL_RINGBACK_TONE: return "UNSOL_RINGBACK_TONG";
             default: return "<unknown reponse>";
         }
     }

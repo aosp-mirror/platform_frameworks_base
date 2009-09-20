@@ -331,6 +331,14 @@ public class PhoneProxy extends Handler implements Phone {
         mActivePhone.unregisterForEcmTimerReset(h);
     }
 
+    public void registerForRingbackTone(Handler h, int what, Object obj) {
+        mActivePhone.registerForRingbackTone(h,what,obj);
+    }
+
+    public void unregisterForRingbackTone(Handler h) {
+        mActivePhone.unregisterForRingbackTone(h);
+    }
+
     public boolean getIccRecordsLoaded() {
         return mActivePhone.getIccRecordsLoaded();
     }

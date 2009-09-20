@@ -379,6 +379,23 @@ public interface Phone {
 
     void unregisterForIncomingRing(Handler h);
 
+    /**
+     * Notifies when out-band ringback tone is needed.<p>
+     *
+     *  Messages received from this:
+     *  Message.obj will be an AsyncResult
+     *  AsyncResult.userObj = obj
+     *  AsyncResult.result = boolean, true to start play ringback tone
+     *                       and false to stop. <p>
+     */
+    void registerForRingbackTone(Handler h, int what, Object obj);
+
+    /**
+     * Unregisters for ringback tone notification.
+     */
+
+    void unregisterForRingbackTone(Handler h);
+
 
     /**
      * Notifies when a voice connection has disconnected, either due to local
