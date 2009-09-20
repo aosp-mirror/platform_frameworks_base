@@ -2531,6 +2531,7 @@ public class Intent implements Parcelable {
      *
      * @param uri The URI to turn into an Intent.
      * @param flags Additional processing flags.  Either 0 or
+     * {@link #URI_INTENT_SCHEME}.
      *
      * @return Intent The newly created Intent object.
      *
@@ -2664,24 +2665,24 @@ public class Intent implements Parcelable {
 
         int i = uri.lastIndexOf('#');
         if (i >= 0) {
-            Uri data = null;
             String action = null;
-            if (i > 0) {
-                data = Uri.parse(uri.substring(0, i));
-            }
+            final int intentFragmentStart = i;
+            boolean isIntentFragment = false;
 
             i++;
 
             if (uri.regionMatches(i, "action(", 0, 7)) {
+                isIntentFragment = true;
                 i += 7;
                 int j = uri.indexOf(')', i);
                 action = uri.substring(i, j);
                 i = j + 1;
             }
 
-            intent = new Intent(action, data);
+            intent = new Intent(action);
 
             if (uri.regionMatches(i, "categories(", 0, 11)) {
+                isIntentFragment = true;
                 i += 11;
                 int j = uri.indexOf(')', i);
                 while (i < j) {
@@ -2696,6 +2697,7 @@ public class Intent implements Parcelable {
             }
 
             if (uri.regionMatches(i, "type(", 0, 5)) {
+                isIntentFragment = true;
                 i += 5;
                 int j = uri.indexOf(')', i);
                 intent.mType = uri.substring(i, j);
@@ -2703,6 +2705,7 @@ public class Intent implements Parcelable {
             }
 
             if (uri.regionMatches(i, "launchFlags(", 0, 12)) {
+                isIntentFragment = true;
                 i += 12;
                 int j = uri.indexOf(')', i);
                 intent.mFlags = Integer.decode(uri.substring(i, j)).intValue();
@@ -2710,6 +2713,7 @@ public class Intent implements Parcelable {
             }
 
             if (uri.regionMatches(i, "component(", 0, 10)) {
+                isIntentFragment = true;
                 i += 10;
                 int j = uri.indexOf(')', i);
                 int sep = uri.indexOf('!', i);
@@ -2722,6 +2726,7 @@ public class Intent implements Parcelable {
             }
 
             if (uri.regionMatches(i, "extras(", 0, 7)) {
+                isIntentFragment = true;
                 i += 7;
 
                 final int closeParen = uri.indexOf(')', i);
@@ -2793,6 +2798,12 @@ public class Intent implements Parcelable {
                 }
             }
 
+            if (isIntentFragment) {
+                intent.mData = Uri.parse(uri.substring(0, intentFragmentStart));
+            } else {
+                intent.mData = Uri.parse(uri);
+            }
+            
             if (intent.mAction == null) {
                 // By default, if no action is specified, then use VIEW.
                 intent.mAction = ACTION_VIEW;
