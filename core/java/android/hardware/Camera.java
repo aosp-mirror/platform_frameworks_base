@@ -673,6 +673,7 @@ public class Camera {
         // Formats for setPreviewFormat and setPictureFormat.
         private static final String PIXEL_FORMAT_YUV422SP = "yuv422sp";
         private static final String PIXEL_FORMAT_YUV420SP = "yuv420sp";
+        private static final String PIXEL_FORMAT_YUV422I = "yuv422i-yuyv";
         private static final String PIXEL_FORMAT_RGB565 = "rgb565";
         private static final String PIXEL_FORMAT_JPEG = "jpeg";
 
@@ -957,7 +958,13 @@ public class Camera {
          */
         public List<Integer> getSupportedPreviewFormats() {
             String str = get(KEY_PREVIEW_FORMAT + SUPPORTED_VALUES_SUFFIX);
-            return splitInt(str);
+            ArrayList<Integer> formats = new ArrayList<Integer>();
+            for (String s : split(str)) {
+                int f = pixelFormatForCameraFormat(s);
+                if (f == PixelFormat.UNKNOWN) continue;
+                formats.add(f);
+            }
+            return formats;
         }
 
         /**
@@ -1036,6 +1043,7 @@ public class Camera {
             switch(pixel_format) {
             case PixelFormat.YCbCr_422_SP: return PIXEL_FORMAT_YUV422SP;
             case PixelFormat.YCbCr_420_SP: return PIXEL_FORMAT_YUV420SP;
+            case PixelFormat.YCbCr_422_I:  return PIXEL_FORMAT_YUV422I;
             case PixelFormat.RGB_565:      return PIXEL_FORMAT_RGB565;
             case PixelFormat.JPEG:         return PIXEL_FORMAT_JPEG;
             default:                       return null;
@@ -1051,6 +1059,9 @@ public class Camera {
 
             if (format.equals(PIXEL_FORMAT_YUV420SP))
                 return PixelFormat.YCbCr_420_SP;
+
+            if (format.equals(PIXEL_FORMAT_YUV422I))
+                return PixelFormat.YCbCr_422_I;
 
             if (format.equals(PIXEL_FORMAT_RGB565))
                 return PixelFormat.RGB_565;
