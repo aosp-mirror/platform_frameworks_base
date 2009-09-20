@@ -887,8 +887,12 @@ class BackupManagerService extends IBackupManager.Stub {
                         mPackageManager, allAgentPackages());
                 BackupRequest pmRequest = new BackupRequest(new ApplicationInfo(), false);
                 pmRequest.appInfo.packageName = PACKAGE_MANAGER_SENTINEL;
-                processOneBackup(pmRequest,
-                        IBackupAgent.Stub.asInterface(pmAgent.onBind()), mTransport);
+
+                // If we haven't stored anything yet, we need to do an init
+                // operation along with recording the metadata blob.
+                boolean needInit = (mEverStoredApps.size() == 0);
+                processOneBackup(pmRequest, IBackupAgent.Stub.asInterface(pmAgent.onBind()),
+                        mTransport, needInit);
 
                 // Now run all the backups in our queue
                 int count = mQueue.size();
@@ -934,7 +938,7 @@ class BackupManagerService extends IBackupManager.Stub {
                 try {
                     agent = bindToAgentSynchronous(request.appInfo, mode);
                     if (agent != null) {
-                        processOneBackup(request, agent, transport);
+                        processOneBackup(request, agent, transport, false);
                     }
 
                     // unbind even on timeout, just in case
@@ -950,9 +954,9 @@ class BackupManagerService extends IBackupManager.Stub {
         }
 
         void processOneBackup(BackupRequest request, IBackupAgent agent,
-                IBackupTransport transport) {
+                IBackupTransport transport, boolean doInit) {
             final String packageName = request.appInfo.packageName;
-            if (DEBUG) Log.d(TAG, "processOneBackup doBackup() on " + packageName);
+            if (DEBUG) Log.d(TAG, "processOneBackup doBackup(" + doInit + ") on " + packageName);
 
             File savedStateName = new File(mStateDir, packageName);
             File backupDataName = new File(mDataDir, packageName + ".data");
@@ -961,12 +965,6 @@ class BackupManagerService extends IBackupManager.Stub {
             ParcelFileDescriptor savedState = null;
             ParcelFileDescriptor backupData = null;
             ParcelFileDescriptor newState = null;
-
-            // Usually we won't force a server-side init, except the first time
-            // we ever back up following enable of backup.  To keep the bookkeeping
-            // simple, we detect this here rather than maintain state throughout
-            // the backup manager.
-            boolean doInit = false;
 
             PackageInfo packInfo;
             try {
@@ -977,13 +975,6 @@ class BackupManagerService extends IBackupManager.Stub {
                     // The metadata 'package' is synthetic
                     packInfo = new PackageInfo();
                     packInfo.packageName = packageName;
-
-                    // if there's no metadata backup state, this must be the
-                    // first time we've done one since enabling it.
-                    if (savedStateName.exists() == false) {
-                        if (DEBUG) Log.i(TAG, "First backup pass, issuing init");
-                        doInit = true;
-                    }
                 } else {
                     packInfo = mPackageManager.getPackageInfo(packageName,
                         PackageManager.GET_SIGNATURES);
@@ -1400,7 +1391,21 @@ class BackupManagerService extends IBackupManager.Stub {
                 agent.doRestore(backupData, appVersionCode, newState);
 
                 // if everything went okay, remember the recorded state now
-                newStateName.renameTo(savedStateName);
+                //
+                // !!! TODO: the restored data should be migrated on the server
+                // side into the current dataset.  In that case the new state file
+                // we just created would reflect the data already extant in the
+                // backend, so there'd be nothing more to do.  Until that happens,
+                // however, we need to make sure that we record the data to the
+                // current backend dataset.  (Yes, this means shipping the data over
+                // the wire in both directions.  That's bad, but consistency comes
+                // first, then efficiency.)  Once we introduce server-side data
+                // migration to the newly-restored device's dataset, we will change
+                // the following from a discard of the newly-written state to the
+                // "correct" operation of renaming into the canonical state blob.
+                newStateName.delete();                      // TODO: remove; see above comment
+                //newStateName.renameTo(savedStateName);    // TODO: replace with this
+
                 int size = (int) backupDataName.length();
                 EventLog.writeEvent(RESTORE_PACKAGE_EVENT, packageName, size);
             } catch (Exception e) {
