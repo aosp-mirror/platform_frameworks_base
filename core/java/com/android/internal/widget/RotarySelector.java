@@ -25,6 +25,7 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.SoundEffectConstants;
 import android.view.animation.AccelerateInterpolator;
 import static android.view.animation.AnimationUtils.currentAnimationTimeMillis;
 import com.android.internal.R;
@@ -65,8 +66,9 @@ public class RotarySelector extends View {
     // state of the animation used to bring the handle back to its start position when
     // the user lets go before triggering an action
     private boolean mAnimating = false;
-    private long mAnimationEndTime;
-    private int mAnimatingDelta;
+    private long mAnimationStartTime; // set to the end point of the animatino
+    private long mAnimationDuration;
+    private int mAnimatingDeltaXStart;   // the animation will interpolate from this delta down to zero
     private AccelerateInterpolator mInterpolator;
 
     /**
@@ -102,14 +104,15 @@ public class RotarySelector extends View {
     /**
      * How far from the edge of the screen the user must drag to trigger the event.
      */
-    private static final int EDGE_TRIGGER_DIP = 65;
+    private static final int EDGE_TRIGGER_DIP = 100;
 
     /**
      * Dimensions of arc in background drawable.
      */
     static final int OUTER_ROTARY_RADIUS_DIP = 390;
     static final int ROTARY_STROKE_WIDTH_DIP = 83;
-    private static final int ANIMATION_DURATION_MILLIS = 300;
+    static final int SNAP_BACK_ANIMATION_DURATION_MILLIS = 300;
+    static final int SPIN_ANIMATION_DURATION_MILLIS = 800;
 
     private static final boolean DRAW_CENTER_DIMPLE = false;
     private int mEdgeTriggerThresh;
@@ -249,14 +252,19 @@ public class RotarySelector extends View {
 
         // update animating state before we draw anything
         if (mAnimating) {
-            long millisLeft = mAnimationEndTime - currentAnimationTimeMillis();
+            final long millisSoFar = currentAnimationTimeMillis() - mAnimationStartTime;
+            final long millisLeft = mAnimationDuration - millisSoFar;
             if (DBG) log("millisleft for animating: " + millisLeft);
             if (millisLeft <= 0) {
                 reset();
             } else {
+                // we always use the snap back duration as the denominator for interpolation
+                // to get a consistent velocity (bascially this makes us happy for the snap back
+                // and the spin around one).
+                final long denom = SNAP_BACK_ANIMATION_DURATION_MILLIS; // mAnimationDuration
                 float interpolation = mInterpolator.getInterpolation(
-                        (float) millisLeft / ANIMATION_DURATION_MILLIS);
-                mTouchDragOffset = (int) (mAnimatingDelta * interpolation);
+                        (float) millisLeft / denom);
+                mTouchDragOffset = (int) (mAnimatingDeltaXStart * interpolation);
             }
         }
 
@@ -423,8 +431,9 @@ public class RotarySelector extends View {
                         dispatchTriggerEvent(OnDialTriggerListener.LEFT_HANDLE);
                         // set up "spin around animation"
                         mAnimating = true;
-                        mAnimationEndTime = currentAnimationTimeMillis() + ANIMATION_DURATION_MILLIS;
-                        mAnimatingDelta = -mBackgroundWidth;
+                        mAnimationStartTime = currentAnimationTimeMillis();
+                        mAnimationDuration = SPIN_ANIMATION_DURATION_MILLIS;
+                        mAnimatingDeltaXStart = -mBackgroundWidth*3;
                         mTouchDragOffset = 0;
                         mGrabbedState = NOTHING_GRABBED;
                         invalidate();
@@ -438,8 +447,9 @@ public class RotarySelector extends View {
                         dispatchTriggerEvent(OnDialTriggerListener.RIGHT_HANDLE);
                         // set up "spin around animation"
                         mAnimating = true;
-                        mAnimationEndTime = currentAnimationTimeMillis() + ANIMATION_DURATION_MILLIS;
-                        mAnimatingDelta = mBackgroundWidth;
+                        mAnimationStartTime = currentAnimationTimeMillis();
+                        mAnimationDuration = SPIN_ANIMATION_DURATION_MILLIS;
+                        mAnimatingDeltaXStart = mBackgroundWidth*3;
                         mTouchDragOffset = 0;
                         mGrabbedState = NOTHING_GRABBED;
                         invalidate();
@@ -453,14 +463,16 @@ public class RotarySelector extends View {
                         && Math.abs(eventX - mLeftHandleX) > 5) {
                     // set up "snap back" animation
                     mAnimating = true;
-                    mAnimationEndTime = currentAnimationTimeMillis() + ANIMATION_DURATION_MILLIS;
-                    mAnimatingDelta = eventX - mLeftHandleX;
+                    mAnimationStartTime = currentAnimationTimeMillis();
+                    mAnimationDuration = SNAP_BACK_ANIMATION_DURATION_MILLIS;
+                    mAnimatingDeltaXStart = eventX - mLeftHandleX;
                 } else if (mGrabbedState == RIGHT_HANDLE_GRABBED
                         && Math.abs(eventX - mRightHandleX) > 5) {
                     // set up "snap back" animation
                     mAnimating = true;
-                    mAnimationEndTime = currentAnimationTimeMillis() + ANIMATION_DURATION_MILLIS;
-                    mAnimatingDelta = eventX - mRightHandleX;
+                    mAnimationStartTime = currentAnimationTimeMillis();
+                    mAnimationDuration = SNAP_BACK_ANIMATION_DURATION_MILLIS;
+                    mAnimatingDeltaXStart = eventX - mRightHandleX;
                 }
 
                 mTouchDragOffset = 0;
