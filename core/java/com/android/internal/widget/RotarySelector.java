@@ -70,12 +70,6 @@ public class RotarySelector extends View {
     private AccelerateInterpolator mInterpolator;
 
     /**
-     * True after triggering an action if the user of {@link OnDialTriggerListener} wants to
-     * freeze the UI (until they transition to another screen).
-     */
-    private boolean mFrozen = false;
-
-    /**
      * If the user is currently dragging something.
      */
     private int mGrabbedState = NOTHING_GRABBED;
@@ -119,6 +113,9 @@ public class RotarySelector extends View {
 
     private static final boolean DRAW_CENTER_DIMPLE = false;
     private int mEdgeTriggerThresh;
+    private int mDimpleWidth;
+    private int mBackgroundWidth;
+    private int mBackgroundHeight;
 
     public RotarySelector(Context context) {
         this(context, null);
@@ -155,6 +152,11 @@ public class RotarySelector extends View {
         mInterpolator = new AccelerateInterpolator();
 
         mEdgeTriggerThresh = (int) (mDensity * EDGE_TRIGGER_DIP);
+
+        mDimpleWidth = mDimple.getIntrinsicWidth();
+
+        mBackgroundWidth = mBackground.getIntrinsicWidth();
+        mBackgroundHeight = mBackground.getIntrinsicHeight();
     }
 
     /**
@@ -214,7 +216,7 @@ public class RotarySelector extends View {
         final int width = MeasureSpec.getSize(widthMeasureSpec);  // screen width
 
         final int arrowH = mArrowShortLeftAndRight.getIntrinsicHeight();
-        final int backgroundH = mBackground.getIntrinsicHeight();
+        final int backgroundH = mBackgroundHeight;
 
         // by making the height less than arrow + bg, arrow and bg will be scrunched together,
         // overlaying somewhat (though on transparent portions of the drawable).
@@ -228,9 +230,9 @@ public class RotarySelector extends View {
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
 
-        mLeftHandleX = (int) (EDGE_PADDING_DIP * mDensity) + mDimple.getIntrinsicWidth() / 2;
+        mLeftHandleX = (int) (EDGE_PADDING_DIP * mDensity) + mDimpleWidth / 2;
         mRightHandleX =
-                getWidth() - (int) (EDGE_PADDING_DIP * mDensity) - mDimple.getIntrinsicWidth() / 2;
+                getWidth() - (int) (EDGE_PADDING_DIP * mDensity) - mDimpleWidth / 2;
     }
 
 //    private Paint mPaint = new Paint();
@@ -239,15 +241,14 @@ public class RotarySelector extends View {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
         if (DBG) {
-            log(String.format("onDraw: mAnimating=%s, mTouchDragOffset=%d, mGrabbedState=%d," +
-                    "mFrozen=%s",
-                    mAnimating, mTouchDragOffset, mGrabbedState, mFrozen));
+            log(String.format("onDraw: mAnimating=%s, mTouchDragOffset=%d, mGrabbedState=%d",
+                    mAnimating, mTouchDragOffset, mGrabbedState));
         }
 
         final int height = getHeight();
 
         // update animating state before we draw anything
-        if (mAnimating && !mFrozen) {
+        if (mAnimating) {
             long millisLeft = mAnimationEndTime - currentAnimationTimeMillis();
             if (DBG) log("millisleft for animating: " + millisLeft);
             if (millisLeft <= 0) {
@@ -260,8 +261,8 @@ public class RotarySelector extends View {
         }
 
         // Background:
-        final int backgroundW = mBackground.getIntrinsicWidth();
-        final int backgroundH = mBackground.getIntrinsicHeight();
+        final int backgroundW = mBackgroundWidth;
+        final int backgroundH = mBackgroundHeight;
         final int backgroundY = height - backgroundH;
         if (DBG) log("- Background INTRINSIC: " + backgroundW + " x " + backgroundH);
         mBackground.setBounds(0, backgroundY,
@@ -383,12 +384,12 @@ public class RotarySelector extends View {
      */
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        if (mAnimating || mFrozen) {
+        if (mAnimating) {
             return true;
         }
 
         final int eventX = (int) event.getX();
-        final int hitWindow = mDimple.getIntrinsicWidth();
+        final int hitWindow = mDimpleWidth;
 
         final int action = event.getAction();
         switch (action) {
@@ -419,14 +420,29 @@ public class RotarySelector extends View {
                     invalidate();
                     if (eventX >= getRight() - mEdgeTriggerThresh && !mTriggered) {
                         mTriggered = true;
-                        mFrozen = dispatchTriggerEvent(OnDialTriggerListener.LEFT_HANDLE);
+                        dispatchTriggerEvent(OnDialTriggerListener.LEFT_HANDLE);
+                        // set up "spin around animation"
+                        mAnimating = true;
+                        mAnimationEndTime = currentAnimationTimeMillis() + ANIMATION_DURATION_MILLIS;
+                        mAnimatingDelta = -mBackgroundWidth;
+                        mTouchDragOffset = 0;
+                        mGrabbedState = NOTHING_GRABBED;
+                        invalidate();
+
                     }
                 } else if (mGrabbedState == RIGHT_HANDLE_GRABBED) {
                     mTouchDragOffset = eventX - mRightHandleX;
                     invalidate();
                     if (eventX <= mEdgeTriggerThresh && !mTriggered) {
                         mTriggered = true;
-                        mFrozen = dispatchTriggerEvent(OnDialTriggerListener.RIGHT_HANDLE);
+                        dispatchTriggerEvent(OnDialTriggerListener.RIGHT_HANDLE);
+                        // set up "spin around animation"
+                        mAnimating = true;
+                        mAnimationEndTime = currentAnimationTimeMillis() + ANIMATION_DURATION_MILLIS;
+                        mAnimatingDelta = mBackgroundWidth;
+                        mTouchDragOffset = 0;
+                        mGrabbedState = NOTHING_GRABBED;
+                        invalidate();
                     }
                 }
                 break;
@@ -435,11 +451,13 @@ public class RotarySelector extends View {
                 // handle animating back to start if they didn't trigger
                 if (mGrabbedState == LEFT_HANDLE_GRABBED
                         && Math.abs(eventX - mLeftHandleX) > 5) {
+                    // set up "snap back" animation
                     mAnimating = true;
                     mAnimationEndTime = currentAnimationTimeMillis() + ANIMATION_DURATION_MILLIS;
                     mAnimatingDelta = eventX - mLeftHandleX;
                 } else if (mGrabbedState == RIGHT_HANDLE_GRABBED
                         && Math.abs(eventX - mRightHandleX) > 5) {
+                    // set up "snap back" animation
                     mAnimating = true;
                     mAnimationEndTime = currentAnimationTimeMillis() + ANIMATION_DURATION_MILLIS;
                     mAnimatingDelta = eventX - mRightHandleX;
@@ -504,12 +522,11 @@ public class RotarySelector extends View {
     /**
      * Dispatches a trigger event to our listener.
      */
-    private boolean dispatchTriggerEvent(int whichHandle) {
+    private void dispatchTriggerEvent(int whichHandle) {
         vibrate(VIBRATE_LONG);
         if (mOnDialTriggerListener != null) {
-            return mOnDialTriggerListener.onDialTrigger(this, whichHandle);
+            mOnDialTriggerListener.onDialTrigger(this, whichHandle);
         }
-        return false;
     }
 
     /**
@@ -530,22 +547,13 @@ public class RotarySelector extends View {
         public static final int RIGHT_HANDLE = 2;
 
         /**
-         * @hide
-         * The center handle is currently unused.
-         */
-        public static final int CENTER_HANDLE = 3;
-
-        /**
          * Called when the dial is triggered.
          *
          * @param v The view that was triggered
          * @param whichHandle  Which "dial handle" the user grabbed,
-         *        either {@link #LEFT_HANDLE}, {@link #RIGHT_HANDLE}, or
-         *        {@link #CENTER_HANDLE}.
-         * @return Whether the widget should freeze (e.g when the action goes to another screen,
-         *         you want the UI to stay put until the transition occurs).
+         *        either {@link #LEFT_HANDLE}, {@link #RIGHT_HANDLE}.
          */
-        boolean onDialTrigger(View v, int whichHandle);
+        void onDialTrigger(View v, int whichHandle);
     }
 
 
