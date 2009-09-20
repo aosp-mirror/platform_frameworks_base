@@ -83,6 +83,7 @@
         android:layout_marginTop="6dip"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:textColor="?android:attr/textColorSecondary"
+        android:drawablePadding="4dip"
         />
 
     <TextView
@@ -94,6 +95,7 @@
         android:layout_marginTop="6dip"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:textColor="?android:attr/textColorSecondary"
+        android:drawablePadding="4dip"
         />
 
     <TextView
@@ -108,15 +110,15 @@
         android:layout_marginTop="12dip"
         />
 
-    <!-- By having the rotary selector hang below "screen locked" text, we get a layout more
-         robust for different screen sizes.  On wvga, the widget should be flush with the bottom.-->
+    <!-- By having the rotary selector hang from the top, we get a layout more
+         robust for different screen sizes.  On hvga, the widget should be flush with the bottom.-->
     <com.android.internal.widget.RotarySelector
         android:id="@+id/rotary"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/screenLocked"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="24dip"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="286dip"
         />
 
     <!-- emergency call button shown when sim is missing or PUKd -->
