@@ -16,7 +16,9 @@
 
 package com.android.server;
 
+import android.app.Activity;
 import android.content.ActivityNotFoundException;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
@@ -44,6 +46,43 @@ class DockObserver extends UEventObserver {
     private final Context mContext;
 
     private PowerManagerService mPowerManager;
+    
+    // The broadcast receiver which receives the result of the ordered broadcast sent when
+    // the dock state changes. The original ordered broadcast is sent with an initial result
+    // code of RESULT_OK. If any of the registered broadcast receivers changes this value, e.g.,
+    // to RESULT_CANCELED, then the intent to start a dock app will not be sent.
+    private final BroadcastReceiver mResultReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (getResultCode() != Activity.RESULT_OK) {
+                return;
+            }
+            
+            // Launch a dock activity
+            String category;
+            switch (mDockState) {
+                case Intent.EXTRA_DOCK_STATE_CAR:
+                    category = Intent.CATEGORY_CAR_DOCK;
+                    break;
+                case Intent.EXTRA_DOCK_STATE_DESK:
+                    category = Intent.CATEGORY_DESK_DOCK;
+                    break;
+                default:
+                    category = null;
+                    break;
+            }
+            if (category != null) {
+                intent = new Intent(Intent.ACTION_MAIN);
+                intent.addCategory(category);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                try {
+                    mContext.startActivity(intent);
+                } catch (ActivityNotFoundException e) {
+                    Log.w(TAG, e.getCause());
+                }
+            }
+        }
+    };
 
     public DockObserver(Context context, PowerManagerService pm) {
         mContext = context;
@@ -111,31 +150,15 @@ class DockObserver extends UEventObserver {
                 mPowerManager.userActivityWithForce(SystemClock.uptimeMillis(), false, true);
                 Intent intent = new Intent(Intent.ACTION_DOCK_EVENT);
                 intent.putExtra(Intent.EXTRA_DOCK_STATE, mDockState);
-                mContext.sendStickyBroadcast(intent);
-
-                // Launch a dock activity
-                String category;
-                switch (mDockState) {
-                    case Intent.EXTRA_DOCK_STATE_CAR:
-                        category = Intent.CATEGORY_CAR_DOCK;
-                        break;
-                    case Intent.EXTRA_DOCK_STATE_DESK:
-                        category = Intent.CATEGORY_DESK_DOCK;
-                        break;
-                    default:
-                        category = null;
-                        break;
-                }
-                if (category != null) {
-                    intent = new Intent(Intent.ACTION_MAIN);
-                    intent.addCategory(category);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    try {
-                        mContext.startActivity(intent);
-                    } catch (ActivityNotFoundException e) {
-                        Log.w(TAG, e.getCause());
-                    }
-                }
+                
+                // Send the ordered broadcast; the result receiver will receive after all
+                // broadcasts have been sent. If any broadcast receiver changes the result
+                // code from the initial value of RESULT_OK, then the result receiver will
+                // not launch the corresponding dock application. This gives apps a chance
+                // to override the behavior and stay in their app even when the device is
+                // placed into a dock.
+                mContext.sendStickyOrderedBroadcast(
+                        intent, mResultReceiver, null, Activity.RESULT_OK, null, null);
             }
         }
     };
