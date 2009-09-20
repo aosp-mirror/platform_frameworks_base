@@ -1494,4 +1494,9 @@ public class MediaPlayer
     }
 
     private OnInfoListener mOnInfoListener;
+
+    /**
+     * @hide
+     */
+    public native static int snoop(short [] outData, int kind);
 }

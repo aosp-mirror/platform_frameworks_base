@@ -41,6 +41,7 @@
 #include <binder/MemoryBase.h>
 #include <utils/Errors.h>  // for status_t
 #include <utils/String8.h>
+#include <utils/SystemClock.h>
 #include <utils/Vector.h>
 #include <cutils/properties.h>
 
@@ -1185,6 +1186,117 @@ Exit:
     return mem;
 }
 
+/*
+ * Avert your eyes, ugly hack ahead.
+ * The following is to support music visualizations.
+ */
+
+static const int NUMVIZBUF = 32;
+static const int VIZBUFFRAMES = 1024;
+static const int TOTALBUFTIMEMSEC = NUMVIZBUF * VIZBUFFRAMES * 1000 / 44100;
+
+static bool gotMem = false;
+static sp<MemoryBase> mem[NUMVIZBUF];
+static uint64_t timeStamp[NUMVIZBUF];
+static uint64_t lastReadTime;
+static uint64_t lastWriteTime;
+static int writeIdx = 0;
+
+static void allocVizBufs() {
+    if (!gotMem) {
+        for (int i=0;i<NUMVIZBUF;i++) {
+            sp<MemoryHeapBase> heap = new MemoryHeapBase(VIZBUFFRAMES*2, 0, "snooper");
+            mem[i] = new MemoryBase(heap, 0, heap->getSize());
+            timeStamp[i] = 0;
+        }
+        gotMem = true;
+    }
+}
+
+
+/*
+ * Get a buffer of audio data that is about to be played.
+ * We don't synchronize this because in practice the writer
+ * is ahead of the reader, and even if we did happen to catch
+ * a buffer while it's being written, it's just a visualization,
+ * so no harm done.
+ */
+static sp<MemoryBase> getVizBuffer() {
+
+    allocVizBufs();
+
+    lastReadTime = uptimeMillis() + 100; // account for renderer delay (we shouldn't be doing this here)
+
+    // if there is no recent buffer (yet), just return empty handed
+    if (lastWriteTime + TOTALBUFTIMEMSEC < lastReadTime) {
+        //LOGI("@@@@    no audio data to look at yet");
+        return NULL;
+    }
+
+    char buf[200];
+
+    int closestIdx = -1;
+    uint32_t closestTime = 0x7ffffff;
+
+    for (int i = 0; i < NUMVIZBUF; i++) {
+        uint64_t tsi = timeStamp[i];
+        uint64_t diff = tsi > lastReadTime ? tsi - lastReadTime : lastReadTime - tsi;
+        if (diff < closestTime) {
+            closestIdx = i;
+            closestTime = diff;
+        }
+    }
+
+
+    if (closestIdx >= 0) {
+        //LOGI("@@@ return buffer %d, %d/%d", closestIdx, uint32_t(lastReadTime), uint32_t(timeStamp[closestIdx]));
+        return mem[closestIdx];
+    }
+
+    // we won't get here, since we either bailed out early, or got a buffer
+    LOGD("Didn't expect to be here");
+    return NULL;
+}
+
+static void storeVizBuf(const void *data, int len, uint64_t time) {
+    // Copy the data in to the visualizer buffer
+    // Assume a 16 bit stereo source for now.
+    short *viz = (short*)mem[writeIdx]->pointer();
+    short *src = (short*)data;
+    for (int i = 0; i < VIZBUFFRAMES; i++) {
+        // Degrade quality by mixing to mono and clearing the lowest 3 bits.
+        // This should still be good enough for a visualization
+        *viz++ = ((int(src[0]) + int(src[1])) >> 1) & ~0x7;
+        src += 2;
+    }
+    timeStamp[writeIdx++] = time;
+    if (writeIdx >= NUMVIZBUF) {
+        writeIdx = 0;
+    }
+}
+
+static void makeVizBuffers(const char *data, int len, uint64_t time) {
+
+    allocVizBufs();
+
+    uint64_t startTime = time;
+    const int frameSize = 4; // 16 bit stereo sample is 4 bytes
+    while (len >= VIZBUFFRAMES * frameSize) {
+        storeVizBuf(data, len, time);
+        data += VIZBUFFRAMES * frameSize;
+        len -= VIZBUFFRAMES * frameSize;
+        time += 1000 * VIZBUFFRAMES / 44100;
+    }
+    //LOGI("@@@ stored buffers from %d to %d", uint32_t(startTime), uint32_t(time));
+}
+
+sp<IMemory> MediaPlayerService::snoop()
+{
+    sp<MemoryBase> mem = getVizBuffer();
+    return mem;
+}
+
+
 #undef LOG_TAG
 #define LOG_TAG "AudioSink"
 MediaPlayerService::AudioOutput::AudioOutput()
@@ -1196,6 +1308,7 @@ MediaPlayerService::AudioOutput::AudioOutput()
     mRightVolume = 1.0;
     mLatency = 0;
     mMsecsPerFrame = 0;
+    mNumFramesWritten = 0;
     setMinBufferCount();
 }
 
@@ -1327,6 +1440,7 @@ void MediaPlayerService::AudioOutput::start()
     if (mTrack) {
         mTrack->setVolume(mLeftVolume, mRightVolume);
         mTrack->start();
+        mTrack->getPosition(&mNumFramesWritten);
     }
 }
 
@@ -1335,7 +1449,29 @@ ssize_t MediaPlayerService::AudioOutput::write(const void* buffer, size_t size)
     LOG_FATAL_IF(mCallback != NULL, "Don't call write if supplying a callback.");
 
     //LOGV("write(%p, %u)", buffer, size);
-    if (mTrack) return mTrack->write(buffer, size);
+    if (mTrack) {
+        // Only make visualization buffers if anyone recently requested visualization data
+        uint64_t now = uptimeMillis();
+        if (lastReadTime + TOTALBUFTIMEMSEC >= now) {
+            // Based on the current play counter, the number of frames written and
+            // the current real time we can calculate the approximate real start
+            // time of the buffer we're about to write.
+            uint32_t pos;
+            mTrack->getPosition(&pos);
+
+            // we're writing ahead by this many frames:
+            int ahead = mNumFramesWritten - pos;
+            //LOGI("@@@ written: %d, playpos: %d, latency: %d", mNumFramesWritten, pos, mTrack->latency());
+            // which is this many milliseconds, assuming 44100 Hz:
+            ahead /= 44;
+
+            makeVizBuffers((const char*)buffer, size, now + ahead + mTrack->latency());
+            lastWriteTime = now;
+        }
+        ssize_t ret = mTrack->write(buffer, size);
+        mNumFramesWritten += ret / 4; // assume 16 bit stereo
+        return ret;
+    }
     return NO_INIT;
 }
 
@@ -1343,6 +1479,7 @@ void MediaPlayerService::AudioOutput::stop()
 {
     LOGV("stop");
     if (mTrack) mTrack->stop();
+    lastWriteTime = 0;
 }
 
 void MediaPlayerService::AudioOutput::flush()

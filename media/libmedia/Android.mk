@@ -37,8 +37,12 @@ LOCAL_SHARED_LIBRARIES += libdl
 endif
 
 LOCAL_C_INCLUDES := \
-	$(JNI_H_INCLUDE) \
-	$(call include-path-for, graphics corecg) \
-        $(TOP)/external/opencore/extern_libs_v2/khronos/openmax/include
+    $(JNI_H_INCLUDE) \
+    $(call include-path-for, graphics corecg) \
+        $(TOP)/external/opencore/extern_libs_v2/khronos/openmax/include \
+        external/speex/include \
+        external/speex/libspeex
+
+LOCAL_STATIC_LIBRARIES := libspeex
 
 include $(BUILD_SHARED_LIBRARY)
