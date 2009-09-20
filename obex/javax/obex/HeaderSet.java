@@ -35,7 +35,7 @@ package javax.obex;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Calendar;
-import java.util.Random;
+import java.security.SecureRandom;
 
 /**
  * This class implements the javax.obex.HeaderSet interface for OBEX over
@@ -209,7 +209,7 @@ public final class HeaderSet {
 
     private Long[] mIntegerUserDefined; // 4 byte unsigned integer
 
-    private final Random mRandom;
+    private final SecureRandom mRandom;
 
     /*package*/ byte[] nonce;
 
@@ -231,7 +231,7 @@ public final class HeaderSet {
         mByteUserDefined = new Byte[16];
         mIntegerUserDefined = new Long[16];
         responseCode = -1;
-        mRandom = new Random();
+        mRandom = new SecureRandom();
     }
 
     /**
