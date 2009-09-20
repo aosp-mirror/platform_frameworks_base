@@ -387,33 +387,24 @@ static jboolean cancelDeviceCreationNative(JNIEnv *env, jobject object,
 
 static jboolean removeDeviceNative(JNIEnv *env, jobject object, jstring object_path) {
     LOGV(__FUNCTION__);
-    jboolean result = JNI_FALSE;
 #ifdef HAVE_BLUETOOTH
     native_data_t *nat = get_native_data(env, object);
     if (nat) {
         const char *c_object_path = env->GetStringUTFChars(object_path, NULL);
-        DBusError err;
-        dbus_error_init(&err);
-        DBusMessage *reply =
-            dbus_func_args_error(env, nat->conn, &err,
-                                 get_adapter_path(env, object),
-                                 DBUS_ADAPTER_IFACE, "RemoveDevice",
-                                 DBUS_TYPE_OBJECT_PATH, &c_object_path,
-                                 DBUS_TYPE_INVALID);
-        if (!reply) {
-            if (dbus_error_is_set(&err)) {
-                LOG_AND_FREE_DBUS_ERROR(&err);
-            } else
-                LOGE("DBus reply is NULL in function %s", __FUNCTION__);
-            result = JNI_FALSE;
-        } else {
-            result = JNI_TRUE;
-        }
+        bool ret = dbus_func_args_async(env, nat->conn, -1,
+                                        NULL,
+                                        NULL,
+                                        NULL,
+                                        get_adapter_path(env, object),
+                                        DBUS_ADAPTER_IFACE,
+                                        "RemoveDevice",
+                                        DBUS_TYPE_OBJECT_PATH, &c_object_path,
+                                        DBUS_TYPE_INVALID);
         env->ReleaseStringUTFChars(object_path, c_object_path);
-        if (reply) dbus_message_unref(reply);
+        return ret ? JNI_TRUE : JNI_FALSE;
     }
 #endif
-    return result;
+    return JNI_FALSE;
 }
 
 static jint enableNative(JNIEnv *env, jobject object) {
