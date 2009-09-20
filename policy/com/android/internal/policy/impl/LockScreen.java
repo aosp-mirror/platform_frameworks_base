@@ -343,7 +343,8 @@ class LockScreen extends LinearLayout implements KeyguardScreen, KeyguardUpdateM
     }
 
     private void updateStatusLines() {
-        if (!mStatus.showStatusLines()) {
+        if (!mStatus.showStatusLines()
+                || (mCharging == null && mNextAlarm == null)) {
             mStatus1.setVisibility(View.INVISIBLE);
             mStatus2.setVisibility(View.INVISIBLE);
         } else if (mCharging != null && mNextAlarm == null) {
