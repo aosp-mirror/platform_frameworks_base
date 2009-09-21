@@ -56,7 +56,7 @@ public class LocalTransport extends IBackupTransport.Stub {
         return 0;
     }
 
-    public boolean performBackup(PackageInfo packageInfo, ParcelFileDescriptor data,
+    public int performBackup(PackageInfo packageInfo, ParcelFileDescriptor data,
             boolean wipeAllFirst) throws RemoteException {
         if (DEBUG) Log.v(TAG, "performBackup() pkg=" + packageInfo.packageName);
 
@@ -99,7 +99,7 @@ public class LocalTransport extends IBackupTransport.Stub {
                         entity.write(buf, 0, dataSize);
                     } catch (IOException e) {
                         Log.e(TAG, "Unable to update key file " + entityFile.getAbsolutePath());
-                        return false;
+                        return BackupConstants.TRANSPORT_ERROR;
                     } finally {
                         entity.close();
                     }
@@ -107,11 +107,11 @@ public class LocalTransport extends IBackupTransport.Stub {
                     entityFile.delete();
                 }
             }
-            return true;
+            return BackupConstants.TRANSPORT_OK;
         } catch (IOException e) {
             // oops, something went wrong.  abort the operation and return error.
             Log.v(TAG, "Exception reading backup input:", e);
-            return false;
+            return BackupConstants.TRANSPORT_ERROR;
         }
     }
 
