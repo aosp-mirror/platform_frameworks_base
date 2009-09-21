@@ -323,6 +323,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             (mCarDockEnablesAccelerometer && mDockState == Intent.EXTRA_DOCK_STATE_CAR) ||
             (mDeskDockEnablesAccelerometer && mDockState == Intent.EXTRA_DOCK_STATE_DESK))
             && (appOrientation == ActivityInfo.SCREEN_ORIENTATION_USER ||
+                // dock overrides SCREEN_ORIENTATION_NOSENSOR
+                appOrientation == ActivityInfo. SCREEN_ORIENTATION_NOSENSOR ||
                 appOrientation == ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED)) {
             return true;
         }
