@@ -32,23 +32,33 @@ import java.io.File;
 import java.io.IOException;
 
 /**
- * Backup agent for various system-managed data
+ * Backup agent for various system-managed data, currently just the system wallpaper
  */
 public class SystemBackupAgent extends BackupHelperAgent {
     private static final String TAG = "SystemBackupAgent";
 
+    // These paths must match what the WallpaperManagerService uses
     private static final String WALLPAPER_IMAGE = "/data/data/com.android.settings/files/wallpaper";
     private static final String WALLPAPER_INFO = "/data/system/wallpaper_info.xml";
 
     @Override
-    public void onCreate() {
+    public void onBackup(ParcelFileDescriptor oldState, BackupDataOutput data,
+            ParcelFileDescriptor newState) throws IOException {
+        // We only back up the data under the current "wallpaper" schema with metadata
         addHelper("wallpaper", new AbsoluteFileBackupHelper(SystemBackupAgent.this,
                 new String[] { WALLPAPER_IMAGE, WALLPAPER_INFO }));
+        super.onBackup(oldState, data, newState);
     }
 
     @Override
     public void onRestore(BackupDataInput data, int appVersionCode, ParcelFileDescriptor newState)
             throws IOException {
+        // On restore, we also support a previous data schema "system_files"
+        addHelper("wallpaper", new AbsoluteFileBackupHelper(SystemBackupAgent.this,
+                new String[] { WALLPAPER_IMAGE, WALLPAPER_INFO }));
+        addHelper("system_files", new AbsoluteFileBackupHelper(SystemBackupAgent.this,
+                new String[] { WALLPAPER_IMAGE }));
+
         boolean success = false;
         try {
             super.onRestore(data, appVersionCode, newState);
