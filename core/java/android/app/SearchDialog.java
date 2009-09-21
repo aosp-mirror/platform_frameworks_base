@@ -736,7 +736,8 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
             return false;
         }
 
-        if (keyCode == KeyEvent.KEYCODE_SEARCH) {
+        if (keyCode == KeyEvent.KEYCODE_SEARCH && event.getRepeatCount() == 0) {
+            event.startTracking();
             // Consume search key for later use.
             return true;
         }
