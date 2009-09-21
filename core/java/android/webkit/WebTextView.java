@@ -448,8 +448,13 @@ import java.util.ArrayList;
             int initialScrollX = Touch.getInitialScrollX(this, buffer);
             int initialScrollY = Touch.getInitialScrollY(this, buffer);
             super.onTouchEvent(event);
-            if (Math.abs(mScrollX - initialScrollX) > slop
-                    || Math.abs(mScrollY - initialScrollY) > slop) {
+            int dx = Math.abs(mScrollX - initialScrollX);
+            int dy = Math.abs(mScrollY - initialScrollY);
+            // Use a smaller slop when checking to see if we've moved far enough
+            // to scroll the text, because experimentally, slop has shown to be
+            // to big for the case of a small textfield.
+            int smallerSlop = slop/2;
+            if (dx > smallerSlop || dy > smallerSlop) {
                 if (mWebView != null) {
                     mWebView.scrollFocusedTextInput(mScrollX, mScrollY);
                 }

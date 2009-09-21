@@ -1782,12 +1782,22 @@ public class WebView extends AbsoluteLayout
     }
 
     /**
+     * Given a distance in view space, convert it to content space. Note: this
+     * does not reflect translation, just scaling, so this should not be called
+     * with coordinates, but should be called for dimensions like width or
+     * height.
+     */
+    private int viewToContentDimension(int d) {
+        return Math.round(d * mInvActualScale);
+    }
+
+    /**
      * Given an x coordinate in view space, convert it to content space.  Also
      * may be used for absolute heights (such as for the WebTextView's
      * textSize, which is unaffected by the height of the title bar).
      */
     /*package*/ int viewToContentX(int x) {
-        return Math.round(x * mInvActualScale);
+        return viewToContentDimension(x);
     }
 
     /**
@@ -1796,7 +1806,7 @@ public class WebView extends AbsoluteLayout
      * embedded into the WebView.
      */
     /*package*/ int viewToContentY(int y) {
-        return viewToContentX(y - getTitleHeight());
+        return viewToContentDimension(y - getTitleHeight());
     }
 
     /**
@@ -1811,7 +1821,7 @@ public class WebView extends AbsoluteLayout
 
     /**
      * Given an x coordinate in content space, convert it to view
-     * space.  Also used for absolute heights.
+     * space.
      */
     /*package*/ int contentToViewX(int x) {
         return contentToViewDimension(x);
@@ -4445,7 +4455,10 @@ public class WebView extends AbsoluteLayout
             return;
         }
         mWebViewCore.sendMessage(EventHub.SCROLL_TEXT_INPUT, viewToContentX(x),
-                viewToContentY(y));
+                // Since this position is relative to the top of the text input
+                // field, we do not need to take the title bar's height into
+                // consideration.
+                viewToContentDimension(y));
     }
 
     /**
