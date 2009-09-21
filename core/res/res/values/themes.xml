@@ -59,11 +59,7 @@
         <item name="textAppearanceLargeInverse">@android:style/TextAppearance.Large.Inverse</item>
         <item name="textAppearanceMediumInverse">@android:style/TextAppearance.Medium.Inverse</item>
         <item name="textAppearanceSmallInverse">@android:style/TextAppearance.Small.Inverse</item>
-
-        <!-- @hide -->
         <item name="textAppearanceSearchResultTitle">@android:style/TextAppearance.SearchResult.Title</item>
-        
-        <!-- @hide -->
         <item name="textAppearanceSearchResultSubtitle">@android:style/TextAppearance.SearchResult.Subtitle</item>
         
         <item name="textAppearanceButton">@android:style/TextAppearance.Widget.Button</item>
