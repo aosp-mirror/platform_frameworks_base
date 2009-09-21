@@ -1172,6 +1172,8 @@
   <public type="style" name="Theme.Wallpaper.NoTitleBar.Fullscreen" />
   <public type="style" name="Theme.WallpaperSettings" />
   <public type="style" name="Theme.Light.WallpaperSettings" />
+  <public type="style" name="TextAppearance.SearchResult.Title" />
+  <public type="style" name="TextAppearance.SearchResult.Subtitle" />
   
   <!-- Semi-transparent background that can be used when placing a dark
        themed UI on top of some arbitrary background (such as the
