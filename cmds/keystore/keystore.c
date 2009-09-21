@@ -291,7 +291,7 @@ static int8_t exist()
     return NO_ERROR;
 }
 
-static int8_t scan()
+static int8_t saw()
 {
     DIR *dir = opendir(".");
     struct dirent *file;
@@ -411,7 +411,7 @@ enum perm {
     INSERT   =   4,
     DELETE   =   8,
     EXIST    =  16,
-    SCAN     =  32,
+    SAW      =  32,
     RESET    =  64,
     PASSWORD = 128,
     LOCK     = 256,
@@ -430,7 +430,7 @@ static struct action {
     {insert,   'i', NO_ERROR, INSERT,   {KEY_SIZE, VALUE_SIZE}},
     {delete,   'd', 0,        DELETE,   {KEY_SIZE}},
     {exist,    'e', 0,        EXIST,    {KEY_SIZE}},
-    {scan,     's', 0,        SCAN,     {KEY_SIZE}},
+    {saw,      's', 0,        SAW,      {KEY_SIZE}},
     {reset,    'r', 0,        RESET,    {0}},
     {password, 'p', 0,        PASSWORD, {PASSWORD_SIZE, PASSWORD_SIZE}},
     {lock,     'l', NO_ERROR, LOCK,     {0}},
@@ -446,7 +446,7 @@ static struct user {
     {AID_SYSTEM,   0,          ~GET},
     {AID_VPN,      AID_SYSTEM, GET},
     {AID_WIFI,     AID_SYSTEM, GET},
-    {0,            0,          TEST | GET | INSERT | DELETE | EXIST | SCAN},
+    {0,            0,          TEST | GET | INSERT | DELETE | EXIST | SAW},
 };
 
 static int8_t process(int8_t code) {
