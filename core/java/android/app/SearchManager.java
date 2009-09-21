@@ -1289,6 +1289,25 @@ public class SearchManager
     public final static String SOURCE = "source";
 
     /**
+     * Intent extra data key: Use {@link android.content.Intent#getBundleExtra
+     * content.Intent.getBundleExtra(SEARCH_MODE)} to get the search mode used
+     * to launch the intent.
+     * The only current value for this is {@link #MODE_GLOBAL_SEARCH_SUGGESTION}.
+     *
+     * @hide
+     */
+    public final static String SEARCH_MODE = "search_mode";
+
+    /**
+     * Value for the {@link #SEARCH_MODE} key.
+     * This is used if the intent was launched by clicking a suggestion in global search
+     * mode (Quick Search Box).
+     *
+     * @hide
+     */
+    public static final String MODE_GLOBAL_SEARCH_SUGGESTION = "global_search_suggestion";
+
+    /**
      * Intent extra data key: Use this key with Intent.ACTION_SEARCH and
      * {@link android.content.Intent#getIntExtra content.Intent.getIntExtra()}
      * to obtain the keycode that the user used to trigger this query.  It will be zero if the
