@@ -420,6 +420,7 @@ public class WebView extends AbsoluteLayout
     private static final int STD_SPEED = 480;  // pixels per second
     // time for the longest scroll animation
     private static final int MAX_DURATION = 750;   // milliseconds
+    private static final int SLIDE_TITLE_DURATION = 500;   // milliseconds
     private Scroller mScroller;
 
     private boolean mWrapContent;
@@ -2419,7 +2420,6 @@ public class WebView extends AbsoluteLayout
     private boolean pinScrollBy(int dx, int dy, boolean animate, int animationDuration) {
         return pinScrollTo(mScrollX + dx, mScrollY + dy, animate, animationDuration);
     }
-
     // helper to pin the scrollTo parameters (already in view coordinates)
     // returns true if the scroll was changed
     private boolean pinScrollTo(int x, int y, boolean animate, int animationDuration) {
@@ -2430,15 +2430,6 @@ public class WebView extends AbsoluteLayout
 
         if ((dx | dy) == 0) {
             return false;
-        }
-        // By this point we have added in the title bar's height.  If the site
-        // is trying to scroll to the top of the page, scroll it to the top
-        // of the WebView including showing the title bar.
-        // mobile sites prefer to scroll to (0, 1), thus the + 1 below
-        if (getVisibleTitleHeight() > 0 && x == 0
-                && y <= getTitleHeight() + 1) {
-            y = 0;
-            animate = false;
         }
         if (animate) {
             //        Log.d(LOGTAG, "startScroll: " + dx + " " + dy);
@@ -2502,6 +2493,17 @@ public class WebView extends AbsoluteLayout
         int vy = contentToViewY(cy);
 //        Log.d(LOGTAG, "content scrollTo [" + cx + " " + cy + "] view=[" +
 //                      vx + " " + vy + "]");
+        // Some mobile sites attempt to scroll the title bar off the page by
+        // scrolling to (0,0) or (0,1).  If we are at the top left corner of the
+        // page, assume this is an attempt to scroll off the title bar, and
+        // animate the title bar off screen slowly enough that the user can see
+        // it.
+        if (cx == 0 && cy <= 1 && mScrollX == 0 && mScrollY == 0) {
+            pinScrollTo(vx, vy, true, SLIDE_TITLE_DURATION);
+            // Since we are animating, we have not yet reached the desired
+            // scroll position.  Do not return true to request another attempt
+            return false;
+        }
         pinScrollTo(vx, vy, false, 0);
         // If the request was to scroll to a negative coordinate, treat it as if
         // it was a request to scroll to 0
