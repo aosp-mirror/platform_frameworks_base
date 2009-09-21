@@ -92,12 +92,12 @@ public class KeyStore {
         return contains(key.getBytes());
     }
 
-    public byte[][] scan(byte[] prefix) {
+    public byte[][] saw(byte[] prefix) {
         return execute('s', prefix);
     }
 
-    public String[] scan(String prefix) {
-        byte[][] values = scan(prefix.getBytes());
+    public String[] saw(String prefix) {
+        byte[][] values = saw(prefix.getBytes());
         if (values == null) {
             return null;
         }
