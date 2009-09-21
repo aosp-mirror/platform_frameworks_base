@@ -317,7 +317,7 @@ public class PhoneNumberUtils
      * enough for caller ID purposes.
      *
      * - Compares from right to left
-     * - requires MIN_MATCH (5) characters to match
+     * - requires MIN_MATCH (7) characters to match
      * - handles common trunk prefixes and international prefixes
      *   (basically, everything except the Russian trunk prefix)
      *
@@ -1202,10 +1202,24 @@ public class PhoneNumberUtils
         JapanesePhoneNumberFormatter.format(text);
     }
 
-    // Three and four digit phone numbers for either special services
-    // or from the network (eg carrier-originated SMS messages) should
-    // not match
-    static final int MIN_MATCH = 5;
+    // Three and four digit phone numbers for either special services,
+    // or 3-6 digit addresses from the network (eg carrier-originated SMS messages) should
+    // not match.
+    //
+    // This constant used to be 5, but SMS short codes has increased in length and
+    // can be easily 6 digits now days. Most countries have SMS short code length between
+    // 3 to 6 digits. The exceptions are
+    //
+    // Australia: Short codes are six or eight digits in length, starting with the prefix "19"
+    //            followed by an additional four or six digits and two.
+    // Czech Republic: Codes are seven digits in length for MO and five (not billed) or
+    //            eight (billed) for MT direction
+    //
+    // see http://en.wikipedia.org/wiki/Short_code#Regional_differences for reference
+    //
+    // However, in order to loose match 650-555-1212 and 555-1212, we need to set the min match
+    // to 7.
+    static final int MIN_MATCH = 7;
 
     /**
      * isEmergencyNumber: checks a given number against the list of
