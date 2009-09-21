@@ -26,7 +26,6 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources;
 import android.database.Cursor;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.StateListDrawable;
@@ -48,7 +47,6 @@ import android.widget.TextView;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.List;
 import java.util.WeakHashMap;
 
 /**
@@ -574,69 +572,91 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
         if (drawableId == null || drawableId.length() == 0 || "0".equals(drawableId)) {
             return null;
         }
-
-        // First, check the cache.
-        Drawable.ConstantState cached = mOutsideDrawablesCache.get(drawableId);
-        if (cached != null) {
-            if (DBG) Log.d(LOG_TAG, "Found icon in cache: " + drawableId);
-            return cached.newDrawable(mProviderContext.getResources());
-        }
-
-        Drawable drawable = null;
         try {
-            // Not cached, try using it as a plain resource ID in the provider's context.
+            // First, see if it's just an integer
             int resourceId = Integer.parseInt(drawableId);
+            // It's an int, look for it in the cache
+            String drawableUri = ContentResolver.SCHEME_ANDROID_RESOURCE
+                    + "://" + mProviderContext.getPackageName() + "/" + resourceId;
+            // Must use URI as cache key, since ints are app-specific
+            Drawable drawable = checkIconCache(drawableUri);
+            if (drawable != null) {
+                return drawable;
+            }
+            // Not cached, find it by resource ID
             drawable = mProviderContext.getResources().getDrawable(resourceId);
+            // Stick it in the cache, using the URI as key
+            storeInIconCache(drawableUri, drawable);
+            return drawable;
         } catch (NumberFormatException nfe) {
-            // The id was not an integer resource id, use it as a URI
-            try {
-                Uri uri = Uri.parse(drawableId);
-                String scheme = uri.getScheme();
-                if (ContentResolver.SCHEME_ANDROID_RESOURCE.equals(scheme)) {
-                    // Load drawables through Resources, to get the source density information
-                    OpenResourceIdResult r =
-                            mProviderContext.getContentResolver().getResourceId(uri);
+            // It's not an integer, use it as a URI
+            Drawable drawable = checkIconCache(drawableId);
+            if (drawable != null) {
+                return drawable;
+            }
+            Uri uri = Uri.parse(drawableId);
+            drawable = getDrawable(uri);
+            storeInIconCache(drawableId, drawable);
+            return drawable;
+        } catch (Resources.NotFoundException nfe) {
+            // It was an integer, but it couldn't be found, bail out
+            Log.w(LOG_TAG, "Icon resource not found: " + drawableId);
+            return null;
+        }
+    }
+
+    /**
+     * Gets a drawable by URI, without using the cache.
+     *
+     * @return A drawable, or {@code null} if the drawable could not be loaded.
+     */
+    private Drawable getDrawable(Uri uri) {
+        try {
+            String scheme = uri.getScheme();
+            if (ContentResolver.SCHEME_ANDROID_RESOURCE.equals(scheme)) {
+                // Load drawables through Resources, to get the source density information
+                OpenResourceIdResult r =
+                    mProviderContext.getContentResolver().getResourceId(uri);
+                try {
+                    return r.r.getDrawable(r.id);
+                } catch (Resources.NotFoundException ex) {
+                    throw new FileNotFoundException("Resource does not exist: " + uri);
+                }
+            } else {
+                // Let the ContentResolver handle content and file URIs.
+                InputStream stream = mProviderContext.getContentResolver().openInputStream(uri);
+                if (stream == null) {
+                    throw new FileNotFoundException("Failed to open " + uri);
+                }
+                try {
+                    return Drawable.createFromStream(stream, null);
+                } finally {
                     try {
-                        drawable = r.r.getDrawable(r.id);
-                    } catch (Resources.NotFoundException ex) {
-                        throw new FileNotFoundException("Resource does not exist: " + uri);
-                    }
-                } else {
-                    // Let the ContentResolver handle content and file URIs.
-                    InputStream stream = mProviderContext.getContentResolver().openInputStream(uri);
-                    if (stream == null) {
-                        throw new FileNotFoundException("Failed to open " + uri);
-                    }
-                    try {
-                        drawable = Drawable.createFromStream(stream, null);
-                    } finally {
-                        try {
-                            stream.close();
-                        } catch (IOException ex) {
-                            Log.e(LOG_TAG, "Error closing icon stream for " + uri, ex);
-                        }
+                        stream.close();
+                    } catch (IOException ex) {
+                        Log.e(LOG_TAG, "Error closing icon stream for " + uri, ex);
                     }
                 }
-            } catch (FileNotFoundException fnfe) {
-                Log.w(LOG_TAG, "Icon not found: " + drawableId + ", " + fnfe.getMessage());
-                // drawable = null;
             }
-        } catch (Resources.NotFoundException nfe) {
-            Log.w(LOG_TAG, "Icon resource not found: " + drawableId);
-            // drawable = null;
+        } catch (FileNotFoundException fnfe) {
+            Log.w(LOG_TAG, "Icon not found: " + uri + ", " + fnfe.getMessage());
+            return null;
         }
+    }
 
-        if (drawable == null) {
-            if (DBG) Log.d(LOG_TAG, "Didn't find icon: " + drawableId);
-        } else {
-            if (DBG) {
-                Log.d(LOG_TAG, "Found icon: " + drawableId);
-            }
-            // Cache it so we don't do this lookup again
-            mOutsideDrawablesCache.put(drawableId, drawable.getConstantState());
+    private Drawable checkIconCache(String resourceUri) {
+        Drawable.ConstantState cached = mOutsideDrawablesCache.get(resourceUri);
+        if (cached == null) {
+            return null;
         }
+        if (DBG) Log.d(LOG_TAG, "Found icon in cache: " + resourceUri);
+        return cached.newDrawable();
+    }
 
-        return drawable;
+    private void storeInIconCache(String resourceUri, Drawable drawable) {
+        if (drawable != null) {
+            mOutsideDrawablesCache.put(resourceUri, drawable.getConstantState());
+        }
     }
 
     /**
