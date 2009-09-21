@@ -98,7 +98,14 @@ public final class BluetoothUuid {
      */
     public static boolean containsAnyUuid(ParcelUuid[] uuidA, ParcelUuid[] uuidB) {
         if (uuidA == null && uuidB == null) return true;
-        if (uuidA == null || uuidB == null) return false;
+
+        if (uuidA == null) {
+            return uuidB.length == 0 ? true : false;
+        }
+
+        if (uuidB == null) {
+            return uuidA.length == 0 ? true : false;
+        }
 
         HashSet<ParcelUuid> uuidSet = new HashSet<ParcelUuid> (Arrays.asList(uuidA));
         for (ParcelUuid uuid: uuidB) {
@@ -117,7 +124,12 @@ public final class BluetoothUuid {
      */
     public static boolean containsAllUuids(ParcelUuid[] uuidA, ParcelUuid[] uuidB) {
         if (uuidA == null && uuidB == null) return true;
-        if (uuidA == null || uuidB == null) return false;
+
+        if (uuidA == null) {
+            return uuidB.length == 0 ? true : false;
+        }
+
+        if (uuidB == null) return true;
 
         HashSet<ParcelUuid> uuidSet = new HashSet<ParcelUuid> (Arrays.asList(uuidA));
         for (ParcelUuid uuid: uuidB) {
