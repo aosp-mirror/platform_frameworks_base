@@ -257,19 +257,19 @@ public class PhoneNumberUtilsTest extends TestCase {
 
     @SmallTest
     public void testToCallerIDIndexable() throws Exception {
-        assertEquals("14145", PhoneNumberUtils.toCallerIDMinMatch("17005554141"));
-        assertEquals("14145", PhoneNumberUtils.toCallerIDMinMatch("1-700-555-4141"));
-        assertEquals("14145", PhoneNumberUtils.toCallerIDMinMatch("1-700-555-4141,1234"));
-        assertEquals("14145", PhoneNumberUtils.toCallerIDMinMatch("1-700-555-4141;1234"));
+        assertEquals("1414555", PhoneNumberUtils.toCallerIDMinMatch("17005554141"));
+        assertEquals("1414555", PhoneNumberUtils.toCallerIDMinMatch("1-700-555-4141"));
+        assertEquals("1414555", PhoneNumberUtils.toCallerIDMinMatch("1-700-555-4141,1234"));
+        assertEquals("1414555", PhoneNumberUtils.toCallerIDMinMatch("1-700-555-4141;1234"));
 
         //this seems wrong, or at least useless
-        assertEquals("NN145", PhoneNumberUtils.toCallerIDMinMatch("1-700-555-41NN"));
+        assertEquals("NN14555", PhoneNumberUtils.toCallerIDMinMatch("1-700-555-41NN"));
 
         //<shrug> -- these are all not useful, but not terribly wrong
         assertEquals("", PhoneNumberUtils.toCallerIDMinMatch(""));
         assertEquals("0032", PhoneNumberUtils.toCallerIDMinMatch("2300"));
         assertEquals("0032+", PhoneNumberUtils.toCallerIDMinMatch("+2300"));
-        assertEquals("#130#", PhoneNumberUtils.toCallerIDMinMatch("*#031#"));
+        assertEquals("#130#*", PhoneNumberUtils.toCallerIDMinMatch("*#031#"));
     }
 
     @SmallTest
