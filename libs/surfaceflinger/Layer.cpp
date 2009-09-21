@@ -88,7 +88,6 @@ void Layer::destroy()
         mBuffers[i].clear();
         mWidth = mHeight = 0;
     }
-    mSurface.clear();
 }
 
 sp<LayerBaseClient::Surface> Layer::createSurface() const
@@ -99,7 +98,8 @@ sp<LayerBaseClient::Surface> Layer::createSurface() const
 status_t Layer::ditch()
 {
     // the layer is not on screen anymore. free as much resources as possible
-    destroy();
+    //destroy();
+    mSurface.clear();
     return NO_ERROR;
 }
 
