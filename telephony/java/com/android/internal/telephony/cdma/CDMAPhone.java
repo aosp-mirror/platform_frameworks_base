@@ -60,7 +60,6 @@ import com.android.internal.telephony.PhoneBase;
 import com.android.internal.telephony.PhoneNotifier;
 import com.android.internal.telephony.PhoneProxy;
 import com.android.internal.telephony.PhoneSubInfo;
-import com.android.internal.telephony.RILConstants;
 import com.android.internal.telephony.TelephonyIntents;
 import com.android.internal.telephony.TelephonyProperties;
 
@@ -143,7 +142,7 @@ public class CDMAPhone extends PhoneBase {
             boolean unitTestMode) {
         super(notifier, context, ci, unitTestMode);
 
-        mCM.setPhoneType(RILConstants.CDMA_PHONE);
+        mCM.setPhoneType(Phone.PHONE_TYPE_CDMA);
         mCT = new CdmaCallTracker(this);
         mSST = new CdmaServiceStateTracker (this);
         mSMS = new CdmaSMSDispatcher(this);
@@ -171,7 +170,7 @@ public class CDMAPhone extends PhoneBase {
 
         //Change the system setting
         SystemProperties.set(TelephonyProperties.CURRENT_ACTIVE_PHONE,
-                new Integer(RILConstants.CDMA_PHONE).toString());
+                new Integer(Phone.PHONE_TYPE_CDMA).toString());
 
         // This is needed to handle phone process crashes
         String inEcm=SystemProperties.get(TelephonyProperties.PROPERTY_INECM_MODE, "false");
@@ -261,14 +260,16 @@ public class CDMAPhone extends PhoneBase {
         return mSST.ss;
     }
 
-    public Phone.State
-    getState() {
+    public Phone.State getState() {
         return mCT.state;
     }
 
-    public String
-    getPhoneName() {
+    public String getPhoneName() {
         return "CDMA";
+    }
+
+    public int getPhoneType() {
+        return Phone.PHONE_TYPE_CDMA;
     }
 
     public boolean canTransfer() {
@@ -276,8 +277,7 @@ public class CDMAPhone extends PhoneBase {
         return false;
     }
 
-    public CdmaCall
-    getRingingCall() {
+    public CdmaCall getRingingCall() {
         return mCT.ringingCall;
     }
 

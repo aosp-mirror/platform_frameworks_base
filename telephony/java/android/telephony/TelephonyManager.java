@@ -263,22 +263,12 @@ public class TelephonyManager {
        }
     }
 
-    /**
-     * No phone module
-     *
-     */
-    public static final int PHONE_TYPE_NONE = RILConstants.NO_PHONE;
-
-    /**
-     * GSM phone
-     */
-    public static final int PHONE_TYPE_GSM = RILConstants.GSM_PHONE;
-
-    /**
-     * CDMA phone
-     * @hide
-     */
-    public static final int PHONE_TYPE_CDMA = RILConstants.CDMA_PHONE;
+    /** No phone radio. */
+    public static final int PHONE_TYPE_NONE = Phone.PHONE_TYPE_NONE;
+    /** Phone radio is GSM. */
+    public static final int PHONE_TYPE_GSM = Phone.PHONE_TYPE_GSM;
+    /** Phone radio is CDMA. */
+    public static final int PHONE_TYPE_CDMA = Phone.PHONE_TYPE_CDMA;
 
     /**
      * Returns a constant indicating the device phone type.
@@ -291,11 +281,7 @@ public class TelephonyManager {
         try{
             ITelephony telephony = getITelephony();
             if (telephony != null) {
-                if(telephony.getActivePhoneType() == RILConstants.CDMA_PHONE) {
-                    return PHONE_TYPE_CDMA;
-                } else {
-                    return PHONE_TYPE_GSM;
-                }
+                return telephony.getActivePhoneType();
             } else {
                 // This can happen when the ITelephony interface is not up yet.
                 return getPhoneTypeFromProperty();

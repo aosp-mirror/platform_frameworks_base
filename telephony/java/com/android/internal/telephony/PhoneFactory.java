@@ -108,11 +108,11 @@ public class PhoneFactory {
                 sCommandsInterface = new RIL(context, networkMode, cdmaSubscription);
 
                 int phoneType = getPhoneType(networkMode);
-                if (phoneType == RILConstants.GSM_PHONE) {
+                if (phoneType == Phone.PHONE_TYPE_GSM) {
                     sProxyPhone = new PhoneProxy(new GSMPhone(context,
                             sCommandsInterface, sPhoneNotifier));
                     Log.i(LOG_TAG, "Creating GSMPhone");
-                } else if (phoneType == RILConstants.CDMA_PHONE) {
+                } else if (phoneType == Phone.PHONE_TYPE_CDMA) {
                     sProxyPhone = new PhoneProxy(new CDMAPhone(context,
                             sCommandsInterface, sPhoneNotifier));
                     Log.i(LOG_TAG, "Creating CDMAPhone");
@@ -135,18 +135,18 @@ public class PhoneFactory {
         case RILConstants.NETWORK_MODE_CDMA:
         case RILConstants.NETWORK_MODE_CDMA_NO_EVDO:
         case RILConstants.NETWORK_MODE_EVDO_NO_CDMA:
-            return RILConstants.CDMA_PHONE;
+            return Phone.PHONE_TYPE_CDMA;
 
         case RILConstants.NETWORK_MODE_WCDMA_PREF:
         case RILConstants.NETWORK_MODE_GSM_ONLY:
         case RILConstants.NETWORK_MODE_WCDMA_ONLY:
         case RILConstants.NETWORK_MODE_GSM_UMTS:
-            return RILConstants.GSM_PHONE;
+            return Phone.PHONE_TYPE_GSM;
 
         case RILConstants.NETWORK_MODE_GLOBAL:
-            return RILConstants.CDMA_PHONE;
+            return Phone.PHONE_TYPE_CDMA;
         default:
-            return RILConstants.GSM_PHONE;
+            return Phone.PHONE_TYPE_GSM;
         }
     }
 
