@@ -369,6 +369,10 @@ class BluetoothEventLoop {
                 uuid = str.toString();
             }
             mBluetoothService.setRemoteDeviceProperty(address, name, uuid);
+
+            // UUIDs have changed, query remote service channel and update cache.
+            mBluetoothService.updateDeviceServiceChannelCache(address);
+
             mBluetoothService.sendUuidIntent(address);
         } else if (name.equals("Paired")) {
             if (propValues[1].equals("true")) {
@@ -537,8 +541,7 @@ class BluetoothEventLoop {
         String address = mBluetoothService.getAddressFromObjectPath(deviceObjectPath);
         // We don't parse the xml here, instead just query Bluez for the properties.
         if (result) {
-            String[] properties = mBluetoothService.getRemoteDeviceProperties(address);
-            mBluetoothService.addRemoteDeviceProperties(address, properties);
+            mBluetoothService.updateRemoteDevicePropertiesCache(address);
         }
         mBluetoothService.sendUuidIntent(address);
     }
