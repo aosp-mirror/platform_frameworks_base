@@ -1200,6 +1200,106 @@
         <item>Jabber</item>
     </string-array>
 
+    <!-- Custom phone number type -->
+    <string name="phoneTypeCustom">Custom</string>
+    <!-- Home phone number type -->
+    <string name="phoneTypeHome">Home</string>
+    <!-- Mobile phone number type -->
+    <string name="phoneTypeMobile">Mobile</string>
+    <!-- Work phone number type -->
+    <string name="phoneTypeWork">Work</string>
+    <!-- Work fax phone number type -->
+    <string name="phoneTypeFaxWork">Work Fax</string>
+    <!-- Home fax phone number type -->
+    <string name="phoneTypeFaxHome">Home Fax</string>
+    <!-- Pager phone number type -->
+    <string name="phoneTypePager">Pager</string>
+    <!-- Other phone number type -->
+    <string name="phoneTypeOther">Other</string>
+    <!-- Callback phone number type -->
+    <string name="phoneTypeCallback">Callback</string>
+    <!-- Car phone number type -->
+    <string name="phoneTypeCar">Car</string>
+    <!-- Company main phone number type -->
+    <string name="phoneTypeCompanyMain">Company Main</string>
+    <!-- ISDN phone number type -->
+    <string name="phoneTypeIsdn">ISDN</string>
+    <!-- Main phone number type -->
+    <string name="phoneTypeMain">Main</string>
+    <!-- Other fax phone number type -->
+    <string name="phoneTypeOtherFax">Other Fax</string>
+    <!-- Radio phone number type -->
+    <string name="phoneTypeRadio">Radio</string>
+    <!-- Telex phone number type -->
+    <string name="phoneTypeTelex">Telex</string>
+    <!-- TTY TDD phone number type -->
+    <string name="phoneTypeTtyTdd">TTY TDD</string>
+    <!-- Work mobile phone number type -->
+    <string name="phoneTypeWorkMobile">Work Mobile</string>
+    <!-- Work pager phone number type -->
+    <string name="phoneTypeWorkPager">Work Pager</string>
+    <!-- Assistant phone number type -->
+    <string name="phoneTypeAssistant">Assistant</string>
+    <!-- MMS phone number type -->
+    <string name="phoneTypeMms">MMS</string>
+
+    <!-- Custom email type -->
+    <string name="emailTypeCustom">Custom</string>
+    <!-- Home email type -->
+    <string name="emailTypeHome">Home</string>
+    <!-- Work email type -->
+    <string name="emailTypeWork">Work</string>
+    <!-- Other email type -->
+    <string name="emailTypeOther">Other</string>
+    <!-- Mobile email type -->
+    <string name="emailTypeMobile">Mobile</string>
+
+    <!-- Custom postal address type -->
+    <string name="postalTypeCustom">Custom</string>
+    <!-- Home postal address type -->
+    <string name="postalTypeHome">Home</string>
+    <!-- Work postal address type -->
+    <string name="postalTypeWork">Work</string>
+    <!-- Other postal address type -->
+    <string name="postalTypeOther">Other</string>
+
+    <!-- Custom IM address type -->
+    <string name="imTypeCustom">Custom</string>
+    <!-- Home IM address type -->
+    <string name="imTypeHome">Home</string>
+    <!-- Work IM address type -->
+    <string name="imTypeWork">Work</string>
+    <!-- Other IM address type -->
+    <string name="imTypeOther">Other</string>
+
+    <!-- Custom IM address type -->
+    <string name="imProtocolCustom">Custom</string>
+    <!-- AIM IM protocol type -->
+    <string name="imProtocolAim">AIM</string>
+    <!-- MSN IM protocol type -->
+    <string name="imProtocolMsn">Windows Live</string>
+    <!-- Yahoo IM protocol type -->
+    <string name="imProtocolYahoo">Yahoo</string>
+    <!-- Skype IM protocol type -->
+    <string name="imProtocolSkype">Skype</string>
+    <!-- QQ IM protocol type -->
+    <string name="imProtocolQq">QQ</string>
+    <!-- Google Talk IM protocol type -->
+    <string name="imProtocolGoogleTalk">Google Talk</string>
+    <!-- ICQ IM protocol type -->
+    <string name="imProtocolIcq">ICQ</string>
+    <!-- Jabber IM protocol type -->
+    <string name="imProtocolJabber">Jabber</string>
+    <!-- NetMeeting IM protocol type -->
+    <string name="imProtocolNetMeeting">NetMeeting</string>
+
+    <!-- Work organization type -->
+    <string name="orgTypeWork">Work</string>
+    <!-- Other organization type -->
+    <string name="orgTypeOther">Other</string>
+    <!-- Custom organization type -->
+    <string name="orgTypeCustom">Custom</string>
+
     <!-- Instructions telling the user to enter their pin to unlock the keyguard.
          Displayed in one line in a large font.  -->
     <string name="keyguard_password_enter_pin_code">Enter PIN code</string>
