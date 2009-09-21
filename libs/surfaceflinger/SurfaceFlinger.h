@@ -250,7 +250,9 @@ private:
           GraphicPlane&     graphicPlane(int dpy);
 
             void        waitForEvent();
+public:     // hack to work around gcc 4.0.3 bug
             void        signalEvent();
+private:
             void        signalDelayedEvent(nsecs_t delay);
 
             void        handleConsoleEvents();
