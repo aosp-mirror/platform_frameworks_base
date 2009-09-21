@@ -437,7 +437,7 @@ public final class CdmaCallTracker extends CallTracker {
                     new AsyncResult(null, null, null));
         }
         if (Phone.DEBUG_PHONE) {
-            log("update phone state, old= , new= , " + oldState + state);
+            log("update phone state, old=" + oldState + " new="+ state);
         }
         if (state != oldState) {
             phone.notifyPhoneStateChanged();
@@ -522,37 +522,44 @@ public final class CdmaCallTracker extends CallTracker {
                     }
                 } else {
                     if (Phone.DEBUG_PHONE) {
-                        log("pending Mo= , dc= " + pendingMO + dc);
+                        log("pendingMo=" + pendingMO + ", dc=" + dc);
                     }
                     // find if the MT call is a new ring or unknown connection
                     newRinging = checkMtFindNewRinging(dc,i);
                     if (newRinging == null) {
                         unknownConnectionAppeared = true;
                     }
+                    checkAndEnableDataCallAfterEmergencyCallDropped();
                 }
                 hasNonHangupStateChanged = true;
             } else if (conn != null && dc == null) {
+                // This case means the RIL has no more active call anymore and
+                // we need to clean up the foregroundCall and ringingCall.
+                // Loop through foreground call connections as
+                // it contains the known logical connections.
                 int count = foregroundCall.connections.size();
-                if (count == 0) {
-                    // Handle an unanswered MO/MT call, there is no
-                    // foregroundCall connections at this time.
-                    droppedDuringPoll.add(conn);
-                } else {
-                    // Loop through foreground call connections as
-                    // it contains the known logical connections.
-                    for (int n = 0; n < count; n++) {
-                        CdmaConnection cn = (CdmaConnection)foregroundCall.connections.get(n);
-                        droppedDuringPoll.add(cn);
-                    }
+                for (int n = 0; n < count; n++) {
+                    if (Phone.DEBUG_PHONE) log("adding fgCall cn " + n + " to droppedDuringPoll");
+                    CdmaConnection cn = (CdmaConnection)foregroundCall.connections.get(n);
+                    droppedDuringPoll.add(cn);
+                }
+                count = ringingCall.connections.size();
+                // Loop through ringing call connections as
+                // it may contain the known logical connections.
+                for (int n = 0; n < count; n++) {
+                    if (Phone.DEBUG_PHONE) log("adding rgCall cn " + n + " to droppedDuringPoll");
+                    CdmaConnection cn = (CdmaConnection)ringingCall.connections.get(n);
+                    droppedDuringPoll.add(cn);
                 }
                 foregroundCall.setGeneric(false);
+                ringingCall.setGeneric(false);
 
                 // Re-start Ecm timer when the connected emergency call ends
                 if (mIsEcmTimerCanceled) {
                     handleEcmTimer(phone.RESTART_ECM_TIMER);
-                } else {
-                    mIsInEmergencyCall = false;
                 }
+                // If emergency call is not going through while dialing
+                checkAndEnableDataCallAfterEmergencyCallDropped();
 
                 // Dropped connections are removed from the CallTracker
                 // list but kept in the Call list
@@ -568,6 +575,7 @@ public final class CdmaCallTracker extends CallTracker {
                         if (newRinging == null) {
                             unknownConnectionAppeared = true;
                         }
+                        checkAndEnableDataCallAfterEmergencyCallDropped();
                     } else {
                         // Call info stored in conn is not consistent with the call info from dc.
                         // We should follow the rule of MT calls taking precedence over MO calls
@@ -1030,10 +1038,30 @@ public final class CdmaCallTracker extends CallTracker {
      */
     private void disableDataCallInEmergencyCall(String dialString) {
         if (PhoneNumberUtils.isEmergencyNumber(dialString)) {
+            if (Phone.DEBUG_PHONE) log("disableDataCallInEmergencyCall");
             phone.disableDataConnectivity();
             mIsInEmergencyCall = true;
         }
     }
+
+    /**
+     * Check and enable data call after an emergency call is dropped if it's
+     * not in ECM
+     */
+    private void checkAndEnableDataCallAfterEmergencyCallDropped() {
+        if (mIsInEmergencyCall) {
+            String inEcm=SystemProperties.get(TelephonyProperties.PROPERTY_INECM_MODE, "false");
+            if (Phone.DEBUG_PHONE) {
+                log("checkAndEnableDataCallAfterEmergencyCallDropped,inEcm=" + inEcm);
+            }
+            if (inEcm.compareTo("false") == 0) {
+                // Re-initiate data connection
+                phone.mDataConnection.setDataEnabled(true);
+            }
+            mIsInEmergencyCall = false;
+        }
+    }
+
     /**
      * Check the MT call to see if it's a new ring or
      * a unknown connection.
