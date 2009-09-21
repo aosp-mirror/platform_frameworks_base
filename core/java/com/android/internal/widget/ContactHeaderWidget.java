@@ -310,6 +310,7 @@ public class ContactHeaderWidget extends FrameLayout implements View.OnClickList
      */
     public void setContactUri(Uri uri) {
         mContactUri = uri;
+        mPhotoView.assignContactUri(uri);
     }
 
     /**
