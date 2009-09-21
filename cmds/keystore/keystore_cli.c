@@ -53,8 +53,8 @@ int main(int argc, char **argv)
         return 0;
     }
 
-    sock = socket_local_client("keystore",
-            ANDROID_SOCKET_NAMESPACE_RESERVED, SOCK_STREAM);
+    sock = socket_local_client("keystore", ANDROID_SOCKET_NAMESPACE_RESERVED,
+                               SOCK_STREAM);
     if (sock == -1) {
         puts("Failed to connect");
         return 1;
