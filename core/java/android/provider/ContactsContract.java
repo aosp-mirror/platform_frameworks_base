@@ -937,22 +937,22 @@ public final class ContactsContract {
          */
         private interface CommonColumns extends BaseTypes{
             /**
-             * The type of data, for example Home or Work.
-             * <P>Type: INTEGER</P>
-             */
-            public static final String TYPE = "data1";
-
-            /**
              * The data for the contact method.
              * <P>Type: TEXT</P>
              */
-            public static final String DATA = "data2";
+            public static final String DATA = DataColumns.DATA1;
+
+            /**
+             * The type of data, for example Home or Work.
+             * <P>Type: INTEGER</P>
+             */
+            public static final String TYPE = DataColumns.DATA2;
 
             /**
              * The user defined label for the the contact method.
              * <P>Type: TEXT</P>
              */
-            public static final String LABEL = "data3";
+            public static final String LABEL = DataColumns.DATA3;
         }
 
         /**
@@ -965,60 +965,60 @@ public final class ContactsContract {
             public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/name";
 
             /**
-             * The given name for the contact.
-             * <P>Type: TEXT</P>
-             */
-            public static final String GIVEN_NAME = "data1";
-
-            /**
-             * The family name for the contact.
-             * <P>Type: TEXT</P>
-             */
-            public static final String FAMILY_NAME = "data2";
-
-            /**
-             * The contact's honorific prefix, e.g. "Sir"
-             * <P>Type: TEXT</P>
-             */
-            public static final String PREFIX = "data3";
-
-            /**
-             * The contact's middle name
-             * <P>Type: TEXT</P>
-             */
-            public static final String MIDDLE_NAME = "data4";
-
-            /**
-             * The contact's honorific suffix, e.g. "Jr"
-             */
-            public static final String SUFFIX = "data5";
-
-            /**
-             * The phonetic version of the given name for the contact.
-             * <P>Type: TEXT</P>
-             */
-            public static final String PHONETIC_GIVEN_NAME = "data6";
-
-            /**
-             * The phonetic version of the additional name for the contact.
-             * <P>Type: TEXT</P>
-             */
-            public static final String PHONETIC_MIDDLE_NAME = "data7";
-
-            /**
-             * The phonetic version of the family name for the contact.
-             * <P>Type: TEXT</P>
-             */
-            public static final String PHONETIC_FAMILY_NAME = "data8";
-
-            /**
              * The name that should be used to display the contact.
              * <i>Unstructured component of the name should be consistent with
              * its structured representation.</i>
              * <p>
              * Type: TEXT
              */
-            public static final String DISPLAY_NAME = "data9";
+            public static final String DISPLAY_NAME = DATA1;
+
+            /**
+             * The given name for the contact.
+             * <P>Type: TEXT</P>
+             */
+            public static final String GIVEN_NAME = DATA2;
+
+            /**
+             * The family name for the contact.
+             * <P>Type: TEXT</P>
+             */
+            public static final String FAMILY_NAME = DATA3;
+
+            /**
+             * The contact's honorific prefix, e.g. "Sir"
+             * <P>Type: TEXT</P>
+             */
+            public static final String PREFIX = DATA4;
+
+            /**
+             * The contact's middle name
+             * <P>Type: TEXT</P>
+             */
+            public static final String MIDDLE_NAME = DATA5;
+
+            /**
+             * The contact's honorific suffix, e.g. "Jr"
+             */
+            public static final String SUFFIX = DATA6;
+
+            /**
+             * The phonetic version of the given name for the contact.
+             * <P>Type: TEXT</P>
+             */
+            public static final String PHONETIC_GIVEN_NAME = DATA7;
+
+            /**
+             * The phonetic version of the additional name for the contact.
+             * <P>Type: TEXT</P>
+             */
+            public static final String PHONETIC_MIDDLE_NAME = DATA8;
+
+            /**
+             * The phonetic version of the family name for the contact.
+             * <P>Type: TEXT</P>
+             */
+            public static final String PHONETIC_FAMILY_NAME = DATA9;
         }
 
         /**
@@ -1176,7 +1176,7 @@ public final class ContactsContract {
              * The display name for the email address
              * <P>Type: TEXT</P>
              */
-            public static final String DISPLAY_NAME = "data4";
+            public static final String DISPLAY_NAME = DATA4;
         }
 
         /**
@@ -1221,7 +1221,7 @@ public final class ContactsContract {
              * <p>
              * Type: TEXT
              */
-            public static final String STREET = "data6";
+            public static final String STREET = DATA4;
 
             /**
              * Covers actual P.O. boxes, drawers, locked bags, etc. This is
@@ -1229,7 +1229,7 @@ public final class ContactsContract {
              * <p>
              * Type: TEXT
              */
-            public static final String POBOX = "data7";
+            public static final String POBOX = DATA5;
 
             /**
              * This is used to disambiguate a street address when a city
@@ -1239,7 +1239,7 @@ public final class ContactsContract {
              * <p>
              * Type: TEXT
              */
-            public static final String NEIGHBORHOOD = "data8";
+            public static final String NEIGHBORHOOD = DATA6;
 
             /**
              * Can be city, village, town, borough, etc. This is the postal town
@@ -1247,7 +1247,7 @@ public final class ContactsContract {
              * <p>
              * Type: TEXT
              */
-            public static final String CITY = "data9";
+            public static final String CITY = DATA7;
 
             /**
              * A state, province, county (in Ireland), Land (in Germany),
@@ -1255,7 +1255,7 @@ public final class ContactsContract {
              * <p>
              * Type: TEXT
              */
-            public static final String REGION = "data11";
+            public static final String REGION = DATA8;
 
             /**
              * Postal code. Usually country-wide, but sometimes specific to the
@@ -1263,14 +1263,14 @@ public final class ContactsContract {
              * <p>
              * Type: TEXT
              */
-            public static final String POSTCODE = "data12";
+            public static final String POSTCODE = DATA9;
 
             /**
              * The name or code of the country.
              * <p>
              * Type: TEXT
              */
-            public static final String COUNTRY = "data13";
+            public static final String COUNTRY = DATA10;
         }
 
         /**
@@ -1292,9 +1292,9 @@ public final class ContactsContract {
              * column is {@link #PROTOCOL_CUSTOM}, the {@link #CUSTOM_PROTOCOL}
              * should contain the name of the custom protocol.
              */
-            public static final String PROTOCOL = "data5";
+            public static final String PROTOCOL = DATA5;
 
-            public static final String CUSTOM_PROTOCOL = "data6";
+            public static final String CUSTOM_PROTOCOL = DATA6;
 
             /*
              * The predefined IM protocol types.
@@ -1333,31 +1333,31 @@ public final class ContactsContract {
              * The position title at this company as the user entered it.
              * <P>Type: TEXT</P>
              */
-            public static final String TITLE = "data4";
+            public static final String TITLE = DATA4;
 
             /**
              * The department at this company as the user entered it.
              * <P>Type: TEXT</P>
              */
-            public static final String DEPARTMENT = "data5";
+            public static final String DEPARTMENT = DATA5;
 
             /**
              * The job description at this company as the user entered it.
              * <P>Type: TEXT</P>
              */
-            public static final String JOB_DESCRIPTION = "data6";
+            public static final String JOB_DESCRIPTION = DATA6;
 
             /**
              * The symbol of this company as the user entered it.
              * <P>Type: TEXT</P>
              */
-            public static final String SYMBOL = "data7";
+            public static final String SYMBOL = DATA7;
 
             /**
              * The phonetic name of this company as the user entered it.
              * <P>Type: TEXT</P>
              */
-            public static final String PHONETIC_NAME = "data8";
+            public static final String PHONETIC_NAME = DATA8;
         }
 
         /**
@@ -1373,13 +1373,13 @@ public final class ContactsContract {
              * The birthday as the user entered it.
              * <P>Type: TEXT</P>
              */
-            public static final String BIRTHDAY = "data1";
+            public static final String BIRTHDAY = DATA1;
 
             /**
              * The nickname as the user entered it.
              * <P>Type: TEXT</P>
              */
-            public static final String NICKNAME = "data2";
+            public static final String NICKNAME = DATA2;
         }
 
         /**
@@ -1447,7 +1447,7 @@ public final class ContactsContract {
              * <p>
              * Type: BLOB
              */
-            public static final String PHOTO = "data1";
+            public static final String PHOTO = DATA15;
         }
 
         /**
@@ -1463,7 +1463,7 @@ public final class ContactsContract {
              * The note text.
              * <P>Type: TEXT</P>
              */
-            public static final String NOTE = "data1";
+            public static final String NOTE = DATA1;
         }
 
         /**
@@ -1481,7 +1481,7 @@ public final class ContactsContract {
              * this or {@link #GROUP_SOURCE_ID} must be set when inserting a row.
              * <P>Type: INTEGER</P>
              */
-            public static final String GROUP_ROW_ID = "data1";
+            public static final String GROUP_ROW_ID = DATA1;
 
             /**
              * The sourceid of the group that this group membership refers to.  Exactly one of
@@ -1512,7 +1512,7 @@ public final class ContactsContract {
              * The website URL string.
              * <P>Type: TEXT</P>
              */
-            public static final String URL = "data1";
+            public static final String URL = DATA;
         }
     }
 
