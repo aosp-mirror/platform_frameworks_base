@@ -900,32 +900,9 @@ public final class ContactsContract {
         public static final String PACKAGE_COMMON = "common";
 
         /**
-         * Columns common across the specific types.
-         */
-        private interface BaseCommonColumns {
-            /**
-             * The package name to use when creating {@link Resources} objects for
-             * this data row. This value is only designed for use when building user
-             * interfaces, and should not be used to infer the owner.
-             */
-            public static final String RES_PACKAGE = "res_package";
-
-            /**
-             * The MIME type of the item represented by this row.
-             */
-            public static final String MIMETYPE = "mimetype";
-
-            /**
-             * The {@link RawContacts#_ID} that this data belongs to.
-             */
-            public static final String RAW_CONTACT_ID = "raw_contact_id";
-        }
-
-        /**
          * The base types that all "Typed" data kinds support.
          */
         public interface BaseTypes {
-
             /**
              * A custom type. The custom label should be supplied by user.
              */
@@ -935,7 +912,7 @@ public final class ContactsContract {
         /**
          * Columns common across the specific types.
          */
-        private interface CommonColumns extends BaseTypes{
+        private interface CommonColumns extends BaseTypes {
             /**
              * The data for the contact method.
              * <P>Type: TEXT</P>
@@ -1101,30 +1078,67 @@ public final class ContactsContract {
              */
             public static final String NUMBER = DATA;
 
+            /**
+             * @deprecated use {@link #getTypeLabel(Resources, int, CharSequence)} instead.
+             */
+            @Deprecated
             public static final CharSequence getDisplayLabel(Context context, int type,
                     CharSequence label, CharSequence[] labelArray) {
-                CharSequence display = "";
-
-                if (type != Phone.TYPE_CUSTOM) {
-                    CharSequence[] labels = labelArray != null? labelArray
-                            : context.getResources().getTextArray(
-                                    com.android.internal.R.array.phoneTypes);
-                    try {
-                        display = labels[type - 1];
-                    } catch (ArrayIndexOutOfBoundsException e) {
-                        display = labels[Phone.TYPE_CUSTOM];
-                    }
-                } else {
-                    if (!TextUtils.isEmpty(label)) {
-                        display = label;
-                    }
-                }
-                return display;
+                return getTypeLabel(context.getResources(), type, label);
             }
 
+            /**
+             * @deprecated use {@link #getTypeLabel(Resources, int, CharSequence)} instead.
+             */
+            @Deprecated
             public static final CharSequence getDisplayLabel(Context context, int type,
                     CharSequence label) {
-                return getDisplayLabel(context, type, label, null);
+                return getTypeLabel(context.getResources(), type, label);
+            }
+
+            /**
+             * Return the string resource that best describes the given
+             * {@link CommonColumns#TYPE}. Will always return a valid resource.
+             */
+            public static final int getTypeLabelResource(int type) {
+                switch (type) {
+                    case TYPE_HOME: return com.android.internal.R.string.phoneTypeHome;
+                    case TYPE_MOBILE: return com.android.internal.R.string.phoneTypeMobile;
+                    case TYPE_WORK: return com.android.internal.R.string.phoneTypeWork;
+                    case TYPE_FAX_WORK: return com.android.internal.R.string.phoneTypeFaxWork;
+                    case TYPE_FAX_HOME: return com.android.internal.R.string.phoneTypeFaxHome;
+                    case TYPE_PAGER: return com.android.internal.R.string.phoneTypePager;
+                    case TYPE_OTHER: return com.android.internal.R.string.phoneTypeOther;
+                    case TYPE_CALLBACK: return com.android.internal.R.string.phoneTypeCallback;
+                    case TYPE_CAR: return com.android.internal.R.string.phoneTypeCar;
+                    case TYPE_COMPANY_MAIN: return com.android.internal.R.string.phoneTypeCompanyMain;
+                    case TYPE_ISDN: return com.android.internal.R.string.phoneTypeIsdn;
+                    case TYPE_MAIN: return com.android.internal.R.string.phoneTypeMain;
+                    case TYPE_OTHER_FAX: return com.android.internal.R.string.phoneTypeOtherFax;
+                    case TYPE_RADIO: return com.android.internal.R.string.phoneTypeRadio;
+                    case TYPE_TELEX: return com.android.internal.R.string.phoneTypeTelex;
+                    case TYPE_TTY_TDD: return com.android.internal.R.string.phoneTypeTtyTdd;
+                    case TYPE_WORK_MOBILE: return com.android.internal.R.string.phoneTypeWorkMobile;
+                    case TYPE_WORK_PAGER: return com.android.internal.R.string.phoneTypeWorkPager;
+                    case TYPE_ASSISTANT: return com.android.internal.R.string.phoneTypeAssistant;
+                    case TYPE_MMS: return com.android.internal.R.string.phoneTypeMms;
+                    default: return com.android.internal.R.string.phoneTypeCustom;
+                }
+            }
+
+            /**
+             * Return a {@link CharSequence} that best describes the given type,
+             * possibly substituting the given {@link CommonColumns#LABEL} value
+             * for {@link BaseTypes#TYPE_CUSTOM}.
+             */
+            public static final CharSequence getTypeLabel(Resources res, int type,
+                    CharSequence label) {
+                if ((type == TYPE_CUSTOM || type == TYPE_ASSISTANT) && !TextUtils.isEmpty(label)) {
+                    return label;
+                } else {
+                    final int labelRes = getTypeLabelResource(type);
+                    return res.getText(labelRes);
+                }
             }
         }
 
@@ -1177,6 +1191,35 @@ public final class ContactsContract {
              * <P>Type: TEXT</P>
              */
             public static final String DISPLAY_NAME = DATA4;
+
+            /**
+             * Return the string resource that best describes the given
+             * {@link CommonColumns#TYPE}. Will always return a valid resource.
+             */
+            public static final int getTypeLabelResource(int type) {
+                switch (type) {
+                    case TYPE_HOME: return com.android.internal.R.string.emailTypeHome;
+                    case TYPE_WORK: return com.android.internal.R.string.emailTypeWork;
+                    case TYPE_OTHER: return com.android.internal.R.string.emailTypeOther;
+                    case TYPE_MOBILE: return com.android.internal.R.string.emailTypeMobile;
+                    default: return com.android.internal.R.string.emailTypeCustom;
+                }
+            }
+
+            /**
+             * Return a {@link CharSequence} that best describes the given type,
+             * possibly substituting the given {@link CommonColumns#LABEL} value
+             * for {@link BaseTypes#TYPE_CUSTOM}.
+             */
+            public static final CharSequence getTypeLabel(Resources res, int type,
+                    CharSequence label) {
+                if (type == TYPE_CUSTOM && !TextUtils.isEmpty(label)) {
+                    return label;
+                } else {
+                    final int labelRes = getTypeLabelResource(type);
+                    return res.getText(labelRes);
+                }
+            }
         }
 
         /**
@@ -1271,6 +1314,34 @@ public final class ContactsContract {
              * Type: TEXT
              */
             public static final String COUNTRY = DATA10;
+
+            /**
+             * Return the string resource that best describes the given
+             * {@link CommonColumns#TYPE}. Will always return a valid resource.
+             */
+            public static final int getTypeLabelResource(int type) {
+                switch (type) {
+                    case TYPE_HOME: return com.android.internal.R.string.postalTypeHome;
+                    case TYPE_WORK: return com.android.internal.R.string.postalTypeWork;
+                    case TYPE_OTHER: return com.android.internal.R.string.postalTypeOther;
+                    default: return com.android.internal.R.string.postalTypeCustom;
+                }
+            }
+
+            /**
+             * Return a {@link CharSequence} that best describes the given type,
+             * possibly substituting the given {@link CommonColumns#LABEL} value
+             * for {@link BaseTypes#TYPE_CUSTOM}.
+             */
+            public static final CharSequence getTypeLabel(Resources res, int type,
+                    CharSequence label) {
+                if (type == TYPE_CUSTOM && !TextUtils.isEmpty(label)) {
+                    return label;
+                } else {
+                    final int labelRes = getTypeLabelResource(type);
+                    return res.getText(labelRes);
+                }
+            }
         }
 
         /**
@@ -1309,6 +1380,68 @@ public final class ContactsContract {
             public static final int PROTOCOL_ICQ = 6;
             public static final int PROTOCOL_JABBER = 7;
             public static final int PROTOCOL_NETMEETING = 8;
+
+            /**
+             * Return the string resource that best describes the given
+             * {@link CommonColumns#TYPE}. Will always return a valid resource.
+             */
+            public static final int getTypeLabelResource(int type) {
+                switch (type) {
+                    case TYPE_HOME: return com.android.internal.R.string.imTypeHome;
+                    case TYPE_WORK: return com.android.internal.R.string.imTypeWork;
+                    case TYPE_OTHER: return com.android.internal.R.string.imTypeOther;
+                    default: return com.android.internal.R.string.imTypeCustom;
+                }
+            }
+
+            /**
+             * Return a {@link CharSequence} that best describes the given type,
+             * possibly substituting the given {@link CommonColumns#LABEL} value
+             * for {@link BaseTypes#TYPE_CUSTOM}.
+             */
+            public static final CharSequence getTypeLabel(Resources res, int type,
+                    CharSequence label) {
+                if (type == TYPE_CUSTOM && !TextUtils.isEmpty(label)) {
+                    return label;
+                } else {
+                    final int labelRes = getTypeLabelResource(type);
+                    return res.getText(labelRes);
+                }
+            }
+
+            /**
+             * Return the string resource that best describes the given
+             * {@link Im#PROTOCOL}. Will always return a valid resource.
+             */
+            public static final int getProtocolLabelResource(int type) {
+                switch (type) {
+                    case PROTOCOL_AIM: return com.android.internal.R.string.imProtocolAim;
+                    case PROTOCOL_MSN: return com.android.internal.R.string.imProtocolMsn;
+                    case PROTOCOL_YAHOO: return com.android.internal.R.string.imProtocolYahoo;
+                    case PROTOCOL_SKYPE: return com.android.internal.R.string.imProtocolSkype;
+                    case PROTOCOL_QQ: return com.android.internal.R.string.imProtocolQq;
+                    case PROTOCOL_GOOGLE_TALK: return com.android.internal.R.string.imProtocolGoogleTalk;
+                    case PROTOCOL_ICQ: return com.android.internal.R.string.imProtocolIcq;
+                    case PROTOCOL_JABBER: return com.android.internal.R.string.imProtocolJabber;
+                    case PROTOCOL_NETMEETING: return com.android.internal.R.string.imProtocolNetMeeting;
+                    default: return com.android.internal.R.string.imProtocolCustom;
+                }
+            }
+
+            /**
+             * Return a {@link CharSequence} that best describes the given
+             * protocol, possibly substituting the given
+             * {@link #CUSTOM_PROTOCOL} value for {@link #PROTOCOL_CUSTOM}.
+             */
+            public static final CharSequence getProtocolLabel(Resources res, int type,
+                    CharSequence label) {
+                if (type == PROTOCOL_CUSTOM && !TextUtils.isEmpty(label)) {
+                    return label;
+                } else {
+                    final int labelRes = getProtocolLabelResource(type);
+                    return res.getText(labelRes);
+                }
+            }
         }
 
         /**
@@ -1358,6 +1491,33 @@ public final class ContactsContract {
              * <P>Type: TEXT</P>
              */
             public static final String PHONETIC_NAME = DATA8;
+
+            /**
+             * Return the string resource that best describes the given
+             * {@link CommonColumns#TYPE}. Will always return a valid resource.
+             */
+            public static final int getTypeLabelResource(int type) {
+                switch (type) {
+                    case TYPE_WORK: return com.android.internal.R.string.orgTypeWork;
+                    case TYPE_OTHER: return com.android.internal.R.string.orgTypeOther;
+                    default: return com.android.internal.R.string.orgTypeCustom;
+                }
+            }
+
+            /**
+             * Return a {@link CharSequence} that best describes the given type,
+             * possibly substituting the given {@link CommonColumns#LABEL} value
+             * for {@link BaseTypes#TYPE_CUSTOM}.
+             */
+            public static final CharSequence getTypeLabel(Resources res, int type,
+                    CharSequence label) {
+                if (type == TYPE_CUSTOM && !TextUtils.isEmpty(label)) {
+                    return label;
+                } else {
+                    final int labelRes = getTypeLabelResource(type);
+                    return res.getText(labelRes);
+                }
+            }
         }
 
         /**
