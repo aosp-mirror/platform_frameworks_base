@@ -28,9 +28,12 @@ import java.security.KeyPair;
  */
 public class Credentials {
     private static final String LOGTAG = "Credentials";
-    private static final String UNLOCK_ACTION = "android.credentials.UNLOCK";
-    private static final String INSTALL_ACTION = "android.credentials.INSTALL";
-    private static Credentials singleton;
+
+    public static final String UNLOCK_ACTION = "android.credentials.UNLOCK";
+
+    public static final String INSTALL_ACTION = "android.credentials.INSTALL";
+
+    public static final String SYSTEM_INSTALL_ACTION = "android.credentials.SYSTEM_INSTALL";
 
     /** Key prefix for CA certificates. */
     public static final String CA_CERTIFICATE = "CACERT_";
@@ -58,6 +61,8 @@ public class Credentials {
 
     /** Data type for PKCS12. */
     public static final String PKCS12 = "PKCS12";
+
+    private static Credentials singleton;
 
     public static Credentials getInstance() {
         if (singleton == null) {
@@ -91,6 +96,14 @@ public class Credentials {
             Intent intent = new Intent(INSTALL_ACTION);
             intent.putExtra(type, value);
             context.startActivity(intent);
+        } catch (ActivityNotFoundException e) {
+            Log.w(LOGTAG, e.toString());
+        }
+    }
+
+    public void installFromSdCard(Context context) {
+        try {
+            context.startActivity(new Intent(INSTALL_ACTION));
         } catch (ActivityNotFoundException e) {
             Log.w(LOGTAG, e.toString());
         }
