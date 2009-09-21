@@ -204,16 +204,18 @@ public class DatabaseGeneralTest extends TestCase implements PerformanceTestCase
         assertEquals("+" + PHONE_NUMBER, number);
         c.close();
     }
-
-
-    private void phoneNumberCompare(String phone1, String phone2, boolean equal)
-        throws Exception {
+    
+    private void phoneNumberCompare(String phone1, String phone2, boolean equal, 
+            boolean useStrictComparation) {
         String[] temporalPhoneNumbers = new String[2];
         temporalPhoneNumbers[0] = phone1;
         temporalPhoneNumbers[1] = phone2;
 
         Cursor cursor = mDatabase.rawQuery(
-                "SELECT CASE WHEN PHONE_NUMBERS_EQUAL(?, ?) THEN 'equal' ELSE 'not equal' END",
+                String.format(
+                        "SELECT CASE WHEN PHONE_NUMBERS_EQUAL(?, ?, %d) " +
+                        "THEN 'equal' ELSE 'not equal' END",
+                        (useStrictComparation ? 1 : 0)),
                 temporalPhoneNumbers);
         try {
             assertNotNull(cursor);
@@ -233,11 +235,23 @@ public class DatabaseGeneralTest extends TestCase implements PerformanceTestCase
     }
 
     private void assertPhoneNumberEqual(String phone1, String phone2) throws Exception {
-        phoneNumberCompare(phone1, phone2, true);
+        assertPhoneNumberEqual(phone1, phone2, true);
+        assertPhoneNumberEqual(phone1, phone2, false);
+    }
+    
+    private void assertPhoneNumberEqual(String phone1, String phone2, boolean useStrict)
+            throws Exception {
+        phoneNumberCompare(phone1, phone2, true, useStrict);
     }
 
     private void assertPhoneNumberNotEqual(String phone1, String phone2) throws Exception {
-        phoneNumberCompare(phone1, phone2, false);
+        assertPhoneNumberNotEqual(phone1, phone2, true);
+        assertPhoneNumberNotEqual(phone1, phone2, false);
+    }
+    
+    private void assertPhoneNumberNotEqual(String phone1, String phone2, boolean useStrict)
+            throws Exception {
+        phoneNumberCompare(phone1, phone2, false, useStrict);
     }
 
     /**
@@ -252,7 +266,8 @@ public class DatabaseGeneralTest extends TestCase implements PerformanceTestCase
         assertPhoneNumberNotEqual("123123", "923123");
         assertPhoneNumberNotEqual("123123", "123129");
         assertPhoneNumberNotEqual("123123", "1231234");
-        assertPhoneNumberNotEqual("123123", "0123123");
+        assertPhoneNumberEqual("123123", "0123123", false);
+        assertPhoneNumberNotEqual("123123", "0123123", true);
         assertPhoneNumberEqual("650-253-0000", "6502530000");
         assertPhoneNumberEqual("650-253-0000", "650 253 0000");
         assertPhoneNumberEqual("650 253 0000", "6502530000");
@@ -291,11 +306,13 @@ public class DatabaseGeneralTest extends TestCase implements PerformanceTestCase
         assertPhoneNumberEqual("+593-2-1234-123", "21234123");
 
         // Two continuous 0 at the beginning of the phone string should not be
-        // treated as trunk prefix.
-        assertPhoneNumberNotEqual("008001231234", "8001231234");
+        // treated as trunk prefix in the strict comparation.
+        assertPhoneNumberEqual("008001231234", "8001231234", false);
+        assertPhoneNumberNotEqual("008001231234", "8001231234", true);
 
-        // Confirm that the bug found before does not re-appear.
-        assertPhoneNumberNotEqual("080-1234-5678", "+819012345678");
+        // Confirm that the bug found before does not re-appear in the strict compalation
+        assertPhoneNumberEqual("080-1234-5678", "+819012345678", false);
+        assertPhoneNumberNotEqual("080-1234-5678", "+819012345678", true);
     }
 
     @MediumTest
