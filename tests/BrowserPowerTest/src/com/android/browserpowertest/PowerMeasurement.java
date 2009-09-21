@@ -12,7 +12,8 @@ public class PowerMeasurement extends ActivityInstrumentationTestCase2<PowerTest
 
     private static final String LOGTAG = "PowerMeasurement";
     private static final String PKG_NAME = "com.android.browserpowertest";
-    private static final String TESTING_URL = "http://www.espn.com";
+    private static final String TESTING_URL =
+        "http://75.17.48.204:10088/nyt/index.html";
     private static final int TIME_OUT = 2 * 60 * 1000;
     private static final int DELAY = 0;
 
@@ -46,6 +47,24 @@ public class PowerMeasurement extends ActivityInstrumentationTestCase2<PowerTest
                 pageErrorFlag);
         Log.v(LOGTAG, "Page is loaded in " + activity.getPageLoadTime() + " ms.");
 
+        // Force to clean up the cache dir so that it get back to the clean
+        // state
+        Runtime fileRemoval = Runtime.getRuntime();
+        String cmdBecomeSu = "su";
+        boolean clearCacheSuccess = false;
+        try{
+            Process runsum = fileRemoval.exec(cmdBecomeSu);
+            int exitVal = runsum.waitFor();
+            String rmfile = "rm -r /data/data/com.android.browserpowertest/cache";
+            Process removal = fileRemoval.exec(rmfile);
+            exitVal = removal.waitFor();
+            if (exitVal == 0) {
+                clearCacheSuccess = true;
+            }
+        } catch ( Exception e){
+            assertTrue("Fails to clear the cahche", false);   
+        }
+        assertTrue("Fails to clear the cahche", clearCacheSuccess);
         activity.finish();
     }
 }
