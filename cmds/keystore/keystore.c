@@ -217,8 +217,10 @@ static int8_t decrypt_blob(char *name, AES_KEY *aes_key)
 /* Here are the actions. Each of them is a function without arguments. All
  * information is defined in global variables, which are set properly before
  * performing an action. The number of parameters required by each action is
- * fixed and defined in a table. Note that the lengths of parameters are checked
- * when they are received, so boundary checks on parameters are omitted. */
+ * fixed and defined in a table. If the return value of an action is positive,
+ * it will be treated as a response code and transmitted to the client. Note
+ * that the lengths of parameters are checked when they are received, so
+ * boundary checks on parameters are omitted. */
 
 #define MAX_PARAM   2
 #define MAX_RETRY   4
@@ -321,12 +323,10 @@ static int8_t reset()
         return SYSTEM_ERROR;
     }
     while ((file = readdir(dir)) != NULL) {
-        if (strcmp(".", file->d_name) || strcmp("..", file->d_name)) {
-            unlink(file->d_name);
-        }
+        unlink(file->d_name);
     }
     closedir(dir);
-    return UNINITIALIZED;
+    return NO_ERROR;
 }
 
 #define MASTER_KEY_FILE ".masterkey"
@@ -387,7 +387,7 @@ static int8_t lock()
     memset(&encryption_key, 0, sizeof(encryption_key));
     memset(&decryption_key, 0, sizeof(decryption_key));
     state = LOCKED;
-    return LOCKED;
+    return NO_ERROR;
 }
 
 static int8_t unlock()
