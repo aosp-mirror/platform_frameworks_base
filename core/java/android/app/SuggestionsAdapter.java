@@ -37,6 +37,7 @@ import android.text.Html;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.SparseArray;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Filter;
@@ -290,12 +291,16 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
      * @param cursor The cursor
      * @param position The position that was clicked.
      */
-    void callCursorOnClick(Cursor cursor, int position) {
+    void callCursorOnClick(Cursor cursor, int position, int actionKey, String actionMsg) {
         if (!mGlobalSearchMode) return;
-        final Bundle request = new Bundle(3);
+        final Bundle request = new Bundle(5);
         request.putInt(DialogCursorProtocol.METHOD, DialogCursorProtocol.CLICK);
         request.putInt(DialogCursorProtocol.CLICK_SEND_POSITION, position);
         request.putInt(DialogCursorProtocol.CLICK_SEND_MAX_DISPLAY_POS, mMaxDisplayed);
+        if (actionKey != KeyEvent.KEYCODE_UNKNOWN) {
+            request.putInt(DialogCursorProtocol.CLICK_SEND_ACTION_KEY, actionKey);
+            request.putString(DialogCursorProtocol.CLICK_SEND_ACTION_MSG, actionMsg);
+        }
         final Bundle response = cursor.respond(request);
         mMaxDisplayed = -1;
         mListItemToSelect = response.getInt(

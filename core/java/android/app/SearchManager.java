@@ -1343,6 +1343,10 @@ public class SearchManager
                 = "DialogCursorProtocol.CLICK.sendPosition";
         public final static String CLICK_SEND_MAX_DISPLAY_POS
                 = "DialogCursorProtocol.CLICK.sendDisplayPosition";
+        public final static String CLICK_SEND_ACTION_KEY
+                = "DialogCursorProtocol.CLICK.sendActionKey";
+        public final static String CLICK_SEND_ACTION_MSG
+                = "DialogCursorProtocol.CLICK.sendActionMsg";
         public final static String CLICK_RECEIVE_SELECTED_POS
                 = "DialogCursorProtocol.CLICK.receiveSelectedPosition";
 
