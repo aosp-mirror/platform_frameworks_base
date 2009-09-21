@@ -57,6 +57,7 @@ import android.backup.IRestoreObserver;
 import android.backup.IRestoreSession;
 import android.backup.RestoreSet;
 
+import com.android.internal.backup.BackupConstants;
 import com.android.internal.backup.LocalTransport;
 import com.android.internal.backup.IBackupTransport;
 
@@ -101,6 +102,7 @@ class BackupManagerService extends IBackupManager.Stub {
     private static final int BACKUP_AGENT_FAILURE_EVENT = 2823;
     private static final int BACKUP_PACKAGE_EVENT = 2824;
     private static final int BACKUP_SUCCESS_EVENT = 2825;
+    private static final int BACKUP_RESET_EVENT = 2826;
 
     private static final int RESTORE_START_EVENT = 2830;
     private static final int RESTORE_TRANSPORT_FAILURE_EVENT = 2831;
@@ -400,6 +402,47 @@ class BackupManagerService extends IBackupManager.Stub {
                     } finally {
                         // close/delete the file
                         f.delete();
+                    }
+                }
+            }
+        }
+    }
+
+    // Reset all of our bookkeeping, in response to having been told that
+    // the backend data has been wiped [due to idle expiry, for example],
+    // so we must re-upload all saved settings.
+    void resetBackupState(File stateFileDir) {
+        synchronized (mQueueLock) {
+            // Wipe the "what we've ever backed up" tracking
+            try {
+                // close the ever-stored journal...
+                if (mEverStoredStream != null) {
+                    mEverStoredStream.close();
+                }
+                // ... so we can delete it and start over
+                mEverStored.delete();
+                mEverStoredStream = new RandomAccessFile(mEverStored, "rwd");
+            } catch (IOException e) {
+                Log.e(TAG, "Unable to open known-stored file!");
+                mEverStoredStream = null;
+            }
+            mEverStoredApps.clear();
+
+            // Remove all the state files
+            for (File sf : stateFileDir.listFiles()) {
+                sf.delete();
+            }
+
+            // Enqueue a new backup of every participant
+            int N = mBackupParticipants.size();
+            for (int i=0; i<N; i++) {
+                int uid = mBackupParticipants.keyAt(i);
+                HashSet<ApplicationInfo> participants = mBackupParticipants.valueAt(i);
+                for (ApplicationInfo app: participants) {
+                    try {
+                        dataChanged(app.packageName);
+                    } catch (RemoteException e) {
+                        // can't happen; we're in the same process
                     }
                 }
             }
@@ -891,8 +934,22 @@ class BackupManagerService extends IBackupManager.Stub {
                 // If we haven't stored anything yet, we need to do an init
                 // operation along with recording the metadata blob.
                 boolean needInit = (mEverStoredApps.size() == 0);
-                processOneBackup(pmRequest, IBackupAgent.Stub.asInterface(pmAgent.onBind()),
+                int result = processOneBackup(pmRequest,
+                        IBackupAgent.Stub.asInterface(pmAgent.onBind()),
                         mTransport, needInit);
+                if (result == BackupConstants.TRANSPORT_NOT_INITIALIZED) {
+                    // The backend reports that our dataset has been wiped.  We need to
+                    // reset all of our bookkeeping and instead run a new backup pass for
+                    // everything.
+                    EventLog.writeEvent(BACKUP_RESET_EVENT, mTransport.transportDirName());
+                    resetBackupState(mStateDir);
+                    backupNow();
+                    return;
+                } else if (result != BackupConstants.TRANSPORT_OK) {
+                    // Give up if we couldn't even process the metadata
+                    Log.e(TAG, "Meta backup err " + result);
+                    return;
+                }
 
                 // Now run all the backups in our queue
                 int count = mQueue.size();
@@ -953,7 +1010,7 @@ class BackupManagerService extends IBackupManager.Stub {
             }
         }
 
-        void processOneBackup(BackupRequest request, IBackupAgent agent,
+        int processOneBackup(BackupRequest request, IBackupAgent agent,
                 IBackupTransport transport, boolean doInit) {
             final String packageName = request.appInfo.packageName;
             if (DEBUG) Log.d(TAG, "processOneBackup doBackup(" + doInit + ") on " + packageName);
@@ -1007,7 +1064,7 @@ class BackupManagerService extends IBackupManager.Stub {
                 EventLog.writeEvent(BACKUP_AGENT_FAILURE_EVENT, packageName, e.toString());
                 backupDataName.delete();
                 newStateName.delete();
-                return;
+                return BackupConstants.TRANSPORT_ERROR;
             } finally {
                 try { if (savedState != null) savedState.close(); } catch (IOException e) {}
                 try { if (backupData != null) backupData.close(); } catch (IOException e) {}
@@ -1027,7 +1084,13 @@ class BackupManagerService extends IBackupManager.Stub {
                     // hold off on finishBackup() until the end, which implies holding off on
                     // renaming *all* the output state files (see below) until that happens.
 
-                    if (!transport.performBackup(packInfo, backupData, doInit) ||
+                    int performOkay = transport.performBackup(packInfo, backupData, doInit);
+                    if (performOkay == BackupConstants.TRANSPORT_NOT_INITIALIZED) {
+                        Log.i(TAG, "Backend not initialized");
+                        return performOkay;
+                    }
+
+                    if ((performOkay != 0) ||
                         !transport.finishBackup()) {
                         throw new Exception("Backup transport failed");
                     }
@@ -1044,10 +1107,12 @@ class BackupManagerService extends IBackupManager.Stub {
             } catch (Exception e) {
                 Log.e(TAG, "Transport error backing up " + packageName, e);
                 EventLog.writeEvent(BACKUP_TRANSPORT_FAILURE_EVENT, packageName);
-                return;
+                return BackupConstants.TRANSPORT_ERROR;
             } finally {
                 try { if (backupData != null) backupData.close(); } catch (IOException e) {}
             }
+
+            return BackupConstants.TRANSPORT_OK;
         }
     }
 
@@ -1590,7 +1655,6 @@ class BackupManagerService extends IBackupManager.Stub {
         if (DEBUG) Log.v(TAG, "Scheduling immediate backup pass");
         synchronized (mQueueLock) {
             try {
-                if (DEBUG) Log.v(TAG, "sending immediate backup broadcast");
                 mRunBackupIntent.send();
             } catch (PendingIntent.CanceledException e) {
                 // should never happen
