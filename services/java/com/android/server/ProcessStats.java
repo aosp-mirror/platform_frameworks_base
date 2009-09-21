@@ -30,6 +30,7 @@ import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.StringTokenizer;
 
 public class ProcessStats {
     private static final String TAG = "ProcessStats";
@@ -138,7 +139,22 @@ public class ProcessStats {
     private boolean mFirst = true;
 
     private byte[] mBuffer = new byte[256];
-     
+
+    /**
+     * The time in microseconds that the CPU has been running at each speed.
+     */
+    private long[] mCpuSpeedTimes;
+
+    /**
+     * The relative time in microseconds that the CPU has been running at each speed.
+     */
+    private long[] mRelCpuSpeedTimes;
+
+    /**
+     * The different speeds that the CPU can be running at.
+     */
+    private long[] mCpuSpeeds;
+
     public static class Stats {
         public final int pid;
         final String statFile;
@@ -458,6 +474,67 @@ public class ProcessStats {
             return time;
         }
         return 0;
+    }
+
+    /**
+     * Returns the times spent at each CPU speed, since the last call to this method. If this
+     * is the first time, it will return 1 for each value.
+     * @return relative times spent at different speed steps.
+     */
+    public long[] getLastCpuSpeedTimes() {
+        if (mCpuSpeedTimes == null) {
+            mCpuSpeedTimes = getCpuSpeedTimes(null);
+            mRelCpuSpeedTimes = new long[mCpuSpeedTimes.length];
+            for (int i = 0; i < mCpuSpeedTimes.length; i++) {
+                mRelCpuSpeedTimes[i] = 1; // Initialize
+            }
+        } else {
+            getCpuSpeedTimes(mRelCpuSpeedTimes);
+            for (int i = 0; i < mCpuSpeedTimes.length; i++) {
+                long temp = mRelCpuSpeedTimes[i];
+                mRelCpuSpeedTimes[i] -= mCpuSpeedTimes[i];
+                mCpuSpeedTimes[i] = temp;
+            }
+        }
+        return mRelCpuSpeedTimes;
+    }
+
+    private long[] getCpuSpeedTimes(long[] out) {
+        long[] tempTimes = out;
+        long[] tempSpeeds = mCpuSpeeds;
+        final int MAX_SPEEDS = 20;
+        if (out == null) {
+            tempTimes = new long[MAX_SPEEDS]; // Hopefully no more than that
+            tempSpeeds = new long[MAX_SPEEDS];
+        }
+        int speed = 0;
+        String file = readFile("/sys/devices/system/cpu/cpu0/cpufreq/stats/time_in_state", '\0');
+        StringTokenizer st = new StringTokenizer(file, "\n ");
+        while (st.hasMoreElements()) {
+            String token = st.nextToken();
+            try {
+                long val = Long.parseLong(token);
+                tempSpeeds[speed] = val;
+                token = st.nextToken();
+                val = Long.parseLong(token);
+                tempTimes[speed] = val;
+                speed++;
+                if (speed == MAX_SPEEDS) break; // No more
+                if (localLOGV && out == null) {
+                    Log.v(TAG, "First time : Speed/Time = " + tempSpeeds[speed - 1]
+                            + "\t" + tempTimes[speed - 1]);
+                }
+            } catch (NumberFormatException nfe) {
+                Log.i(TAG, "Unable to parse time_in_state");
+            }
+        }
+        if (out == null) {
+            out = new long[speed];
+            mCpuSpeeds = new long[speed];
+            System.arraycopy(tempSpeeds, 0, mCpuSpeeds, 0, speed);
+            System.arraycopy(tempTimes, 0, out, 0, speed);
+        }
+        return out;
     }
 
     final public int getLastUserTime() {

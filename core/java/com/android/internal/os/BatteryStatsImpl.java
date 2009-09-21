@@ -56,7 +56,9 @@ public final class BatteryStatsImpl extends BatteryStats {
     private static final int MAGIC = 0xBA757475; // 'BATSTATS' 
 
     // Current on-disk Parcel version
-    private static final int VERSION = 39;
+    private static final int VERSION = 40;
+
+    private static int sNumSpeedSteps;
 
     private final File mFile;
     private final File mBackupFile;
@@ -213,7 +215,7 @@ public final class BatteryStatsImpl extends BatteryStats {
     /**
      * State for keeping track of counting information.
      */
-    public static final class Counter extends BatteryStats.Counter implements Unpluggable {
+    public static class Counter extends BatteryStats.Counter implements Unpluggable {
         int mCount;
         int mLoadedCount;
         int mLastCount;
@@ -302,7 +304,22 @@ public final class BatteryStatsImpl extends BatteryStats {
             mUnpluggedCount = mPluggedCount = mCount;
         }
     }
-    
+
+    public static class SamplingCounter extends Counter {
+
+        SamplingCounter(ArrayList<Unpluggable> unpluggables, Parcel in) {
+            super(unpluggables, in);
+        }
+
+        SamplingCounter(ArrayList<Unpluggable> unpluggables) {
+            super(unpluggables);
+        }
+
+        public void addCountLocked(long count) {
+            mCount += count;
+        }
+    }
+
     /**
      * State for keeping track of timing information.
      */
@@ -1940,10 +1957,16 @@ public final class BatteryStatsImpl extends BatteryStats {
              */
             long mUnpluggedForegroundTime;
 
+            SamplingCounter[] mSpeedBins;
+
             Proc() {
                 mUnpluggables.add(this);
+                mSpeedBins = new SamplingCounter[getCpuSpeedSteps()];
+                for (int i = 0; i < mSpeedBins.length; i++) {
+                    mSpeedBins[i] = new SamplingCounter(mUnpluggables);
+                }
             }
-            
+
             public void unplug(long batteryUptime, long batteryRealtime) {
                 mUnpluggedUserTime = mUserTime;
                 mUnpluggedSystemTime = mSystemTime;
@@ -1974,6 +1997,11 @@ public final class BatteryStatsImpl extends BatteryStats {
                 out.writeLong(mUnpluggedSystemTime);
                 out.writeLong(mUnpluggedForegroundTime);
                 out.writeInt(mUnpluggedStarts);
+
+                out.writeInt(mSpeedBins.length);
+                for (int i = 0; i < mSpeedBins.length; i++) {
+                    mSpeedBins[i].writeToParcel(out);
+                }
             }
 
             void readFromParcelLocked(Parcel in) {
@@ -1993,6 +2021,12 @@ public final class BatteryStatsImpl extends BatteryStats {
                 mUnpluggedSystemTime = in.readLong();
                 mUnpluggedForegroundTime = in.readLong();
                 mUnpluggedStarts = in.readInt();
+
+                int bins = in.readInt();
+                mSpeedBins = new SamplingCounter[bins];
+                for (int i = 0; i < bins; i++) {
+                    mSpeedBins[i] = new SamplingCounter(mUnpluggables, in);
+                }
             }
 
             public BatteryStatsImpl getBatteryStats() {
@@ -2074,6 +2108,22 @@ public final class BatteryStatsImpl extends BatteryStats {
                     }
                 }
                 return val;
+            }
+
+            /* Called by ActivityManagerService when CPU times are updated. */
+            public void addSpeedStepTimes(long[] values) {
+                for (int i = 0; i < mSpeedBins.length && i < values.length; i++) {
+                    mSpeedBins[i].addCountLocked(values[i]);
+                }
+            }
+
+            @Override
+            public long getTimeAtCpuSpeedStep(int speedStep, int which) {
+                if (speedStep < mSpeedBins.length) {
+                    return mSpeedBins[speedStep].getCountLocked(which);
+                } else {
+                    return 0;
+                }
             }
         }
 
@@ -2625,6 +2675,10 @@ public final class BatteryStatsImpl extends BatteryStats {
         readFromParcel(p);
     }
 
+    public void setNumSpeedSteps(int steps) {
+        if (sNumSpeedSteps == 0) sNumSpeedSteps = steps;
+    }
+
     @Override
     public int getStartCount() {
         return mStartCount;
@@ -2853,6 +2907,11 @@ public final class BatteryStatsImpl extends BatteryStats {
             return mDischargeCurrentLevel;
     }
 
+    @Override
+    public int getCpuSpeedSteps() {
+        return sNumSpeedSteps;
+    }
+
     /**
      * Retrieve the statistics object for a particular uid, creating if needed.
      */
@@ -3063,7 +3122,9 @@ public final class BatteryStatsImpl extends BatteryStats {
                 getKernelWakelockTimerLocked(kwltName).readSummaryFromParcelLocked(in);
             }
         }
-        
+
+        sNumSpeedSteps = in.readInt();
+
         final int NU = in.readInt();
         for (int iu = 0; iu < NU; iu++) {
             int uid = in.readInt();
@@ -3206,6 +3267,7 @@ public final class BatteryStatsImpl extends BatteryStats {
             }
         }
         
+        out.writeInt(sNumSpeedSteps);
         final int NU = mUidStats.size();
         out.writeInt(NU);
         for (int iu = 0; iu < NU; iu++) {
@@ -3404,6 +3466,8 @@ public final class BatteryStatsImpl extends BatteryStats {
         mFullTimers.clear();
         mWindowTimers.clear();
 
+        sNumSpeedSteps = in.readInt();
+
         int numUids = in.readInt();
         mUidStats.clear();
         for (int i = 0; i < numUids; i++) {
@@ -3484,7 +3548,9 @@ public final class BatteryStatsImpl extends BatteryStats {
                 out.writeInt(0);
             }
         }
-        
+
+        out.writeInt(sNumSpeedSteps);
+
         int size = mUidStats.size();
         out.writeInt(size);
         for (int i = 0; i < size; i++) {

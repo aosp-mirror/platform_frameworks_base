@@ -121,6 +121,9 @@ public class VolumePreference extends SeekBarPreference implements
        if (mSeekBarVolumizer != null) {
            Dialog dialog = getDialog();
            if (dialog != null && dialog.isShowing()) {
+               View view = dialog.getWindow().getDecorView()
+                       .findViewById(com.android.internal.R.id.seekbar);
+               if (view != null) view.setOnKeyListener(null);
                // Stopped while dialog was showing, revert changes
                mSeekBarVolumizer.revertVolume();
            }
