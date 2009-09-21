@@ -137,7 +137,6 @@ public class Camera {
      *
      * @throws IOException if the method fails.
      *
-     * FIXME: Unhide after approval
      * @hide
      */
     public native final void reconnect() throws IOException;
@@ -150,25 +149,20 @@ public class Camera {
      * Camera object is locked. Locking it again from the same process will
      * have no effect. Attempting to lock it from another process if it has
      * not been unlocked will fail.
-     * Returns 0 if lock was successful.
      *
-     * FIXME: Unhide after approval
-     * @hide
+     * @throws RuntimeException if the method fails.
      */
-    public native final int lock();
+    public native final void lock();
 
     /**
      * Unlock the camera to allow another process to access it. To save
      * setup/teardown time, a client of Camera can pass an initialized Camera
      * object to another process. This method is used to unlock the Camera
      * object before handing off the Camera object to the other process.
-
-     * Returns 0 if unlock was successful.
      *
-     * FIXME: Unhide after approval
-     * @hide
+     * @throws RuntimeException if the method fails.
      */
-    public native final int unlock();
+    public native final void unlock();
 
     /**
      * Sets the SurfaceHolder to be used for a picture preview. If the surface

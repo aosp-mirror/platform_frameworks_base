@@ -55,7 +55,7 @@ private:
 
     jobject     mCameraJObjectWeak;     // weak reference to java object
     jclass      mCameraJClass;          // strong reference to java class
-    sp<Camera>  mCamera;                // strong reference to native object 
+    sp<Camera>  mCamera;                // strong reference to native object
     Mutex       mLock;
 };
 
@@ -391,20 +391,26 @@ static void android_hardware_Camera_reconnect(JNIEnv *env, jobject thiz)
     }
 }
 
-static jint android_hardware_Camera_lock(JNIEnv *env, jobject thiz)
+static void android_hardware_Camera_lock(JNIEnv *env, jobject thiz)
 {
     LOGV("lock");
     sp<Camera> camera = get_native_camera(env, thiz, NULL);
-    if (camera == 0) return INVALID_OPERATION;
-    return (jint) camera->lock();
+    if (camera == 0) return;
+
+    if (camera->lock() != NO_ERROR) {
+        jniThrowException(env, "java/lang/RuntimeException", "lock failed");
+    }
 }
 
-static jint android_hardware_Camera_unlock(JNIEnv *env, jobject thiz)
+static void android_hardware_Camera_unlock(JNIEnv *env, jobject thiz)
 {
     LOGV("unlock");
     sp<Camera> camera = get_native_camera(env, thiz, NULL);
-    if (camera == 0) return INVALID_OPERATION;
-    return (jint) camera->unlock();
+    if (camera == 0) return;
+
+    if (camera->unlock() != NO_ERROR) {
+        jniThrowException(env, "java/lang/RuntimeException", "unlock failed");
+    }
 }
 
 //-------------------------------------------------
@@ -450,10 +456,10 @@ static JNINativeMethod camMethods[] = {
     "()V",
     (void*)android_hardware_Camera_reconnect },
   { "lock",
-    "()I",
+    "()V",
     (void*)android_hardware_Camera_lock },
   { "unlock",
-    "()I",
+    "()V",
     (void*)android_hardware_Camera_unlock },
 };
 
