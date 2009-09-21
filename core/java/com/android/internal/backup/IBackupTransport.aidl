@@ -81,10 +81,14 @@ interface IBackupTransport {
      *   will be erased prior to the storage of the data provided here.  The purpose of this
      *   is to provide a guarantee that no stale data exists in the restore set when the
      *   device begins providing backups.
-     * @return false if errors occurred (the backup should be aborted and rescheduled),
-     *   true if everything is OK so far (but {@link #finishBackup} must be called).
+     * @return If everything is okay so far, returns zero (but {@link #finishBackup} must
+     *   still be called).  If the backend dataset has unexpectedly become unavailable,
+     *   such as when it is deleted after a period of device inactivity, returns {@link
+     *   BackupManager#DATASET_UNAVAILABLE}; in this case, the transport should be
+     *   reinitalized and the entire backup pass restarted.  Any other nonzero value is a
+     *   fatal error requiring that this package's backup be aborted and rescheduled.
      */
-    boolean performBackup(in PackageInfo packageInfo, in ParcelFileDescriptor inFd,
+    int performBackup(in PackageInfo packageInfo, in ParcelFileDescriptor inFd,
             boolean wipeAllFirst);
 
     /**
