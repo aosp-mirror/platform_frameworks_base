@@ -2001,7 +2001,7 @@ public class WebView extends AbsoluteLayout
         getGlobalVisibleRect(r, p);
         r.offset(-p.x, -p.y);
         if (mFindIsUp) {
-            r.bottom -= FIND_HEIGHT;
+            r.bottom -= mFindHeight;
         }
     }
 
@@ -2072,9 +2072,6 @@ public class WebView extends AbsoluteLayout
             return (int) Math.floor(mContentWidth * mActualScale);
         }
     }
-
-    // Make sure this stays in sync with the actual height of the FindDialog.
-    private static final int FIND_HEIGHT = 79;
 
     @Override
     protected int computeVerticalScrollRange() {
@@ -2306,7 +2303,11 @@ public class WebView extends AbsoluteLayout
      *              that were found.
      */
     public int findAll(String find) {
-        mFindIsUp = true;
+        if (mFindIsUp == false) {
+            recordNewContentSize(mContentWidth, mContentHeight + mFindHeight,
+                    false);
+            mFindIsUp = true;
+        }
         int result = nativeFindAll(find.toLowerCase(), find.toUpperCase());
         invalidate();
         return result;
@@ -2315,6 +2316,7 @@ public class WebView extends AbsoluteLayout
     // Used to know whether the find dialog is open.  Affects whether
     // or not we draw the highlights for matches.
     private boolean mFindIsUp;
+    private int mFindHeight;
 
     /**
      * Return the first substring consisting of the address of a physical
@@ -2370,12 +2372,26 @@ public class WebView extends AbsoluteLayout
      * Clear the highlighting surrounding text matches created by findAll.
      */
     public void clearMatches() {
-        mFindIsUp = false;
+        if (mFindIsUp) {
+            recordNewContentSize(mContentWidth, mContentHeight - mFindHeight,
+                    false);
+            mFindIsUp = false;
+        }
         nativeSetFindIsDown();
         // Now that the dialog has been removed, ensure that we scroll to a
         // location that is not beyond the end of the page.
         pinScrollTo(mScrollX, mScrollY, false, 0);
         invalidate();
+    }
+
+    /**
+     * @hide
+     */
+    public void setFindDialogHeight(int height) {
+        if (DebugFlags.WEB_VIEW) {
+            Log.v(LOGTAG, "setFindDialogHeight height=" + height);
+        }
+        mFindHeight = height;
     }
 
     /**
@@ -4869,7 +4885,8 @@ public class WebView extends AbsoluteLayout
                     final boolean updateLayout = viewSize.x == mLastWidthSent
                             && viewSize.y == mLastHeightSent;
                     recordNewContentSize(draw.mWidthHeight.x,
-                            draw.mWidthHeight.y, updateLayout);
+                            draw.mWidthHeight.y
+                            + (mFindIsUp ? mFindHeight : 0), updateLayout);
                     if (DebugFlags.WEB_VIEW) {
                         Rect b = draw.mInvalRegion.getBounds();
                         Log.v(LOGTAG, "NEW_PICTURE_MSG_ID {" +
