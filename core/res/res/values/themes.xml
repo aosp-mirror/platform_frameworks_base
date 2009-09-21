@@ -354,7 +354,7 @@
     <style name="Theme.NoDisplay">
         <item name="android:windowBackground">@null</item>
         <item name="android:windowContentOverlay">@null</item>
-        <item name="android:windowIsTranslucent">false</item>
+        <item name="android:windowIsTranslucent">true</item>
         <item name="android:windowAnimationStyle">@null</item>
         <item name="android:windowDisablePreview">true</item>
         <item name="android:windowNoDisplay">true</item>
