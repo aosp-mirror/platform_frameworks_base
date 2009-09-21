@@ -514,7 +514,7 @@ class SyncManager implements OnAccountsUpdatedListener {
     public SyncStorageEngine getSyncStorageEngine() {
         return mSyncStorageEngine;
     }
-    
+
     private void ensureAlarmService() {
         if (mAlarmService == null) {
             mAlarmService = (AlarmManager)mContext.getSystemService(Context.ALARM_SERVICE);
@@ -1125,7 +1125,7 @@ class SyncManager implements OnAccountsUpdatedListener {
         tobj.set(time);
         return tobj.format("%Y-%m-%d %H:%M:%S");
     }
-    
+
     protected void dumpSyncState(PrintWriter pw, StringBuilder sb) {
         pw.print("sync enabled: "); pw.println(isSyncEnabled());
         pw.print("data connected: "); pw.println(mDataConnectionIsConnected);
@@ -1219,13 +1219,13 @@ class SyncManager implements OnAccountsUpdatedListener {
                         = mSyncStorageEngine.getAuthority(status.authorityId);
                 if (authority != null) {
                     Account curAccount = authority.account;
-                    
+
                     if (processedAccounts.contains(curAccount)) {
                         continue;
                     }
-                    
+
                     processedAccounts.add(curAccount);
-                    
+
                     pw.print("  Account "); pw.print(authority.account.name);
                             pw.print(" "); pw.print(authority.account.type);
                             pw.println(":");
@@ -1271,7 +1271,7 @@ class SyncManager implements OnAccountsUpdatedListener {
         pw.print(time/1000); pw.print('.'); pw.print((time/100)%10);
         pw.print('s');
     }
-    
+
     private void dumpDayStatistic(PrintWriter pw, SyncStorageEngine.DayStats ds) {
         pw.print("Success ("); pw.print(ds.successCount);
         if (ds.successCount > 0) {
@@ -1285,7 +1285,7 @@ class SyncManager implements OnAccountsUpdatedListener {
         }
         pw.println(")");
     }
-    
+
     protected void dumpSyncHistory(PrintWriter pw, StringBuilder sb) {
         SyncStorageEngine.DayStats dses[] = mSyncStorageEngine.getDayStatistics();
         if (dses != null && dses[0] != null) {
@@ -1295,18 +1295,18 @@ class SyncManager implements OnAccountsUpdatedListener {
             int today = dses[0].day;
             int i;
             SyncStorageEngine.DayStats ds;
-            
+
             // Print each day in the current week.
             for (i=1; i<=6 && i < dses.length; i++) {
                 ds = dses[i];
                 if (ds == null) break;
                 int delta = today-ds.day;
                 if (delta > 6) break;
-                
+
                 pw.print("  Day-"); pw.print(delta); pw.print(":  ");
                 dumpDayStatistic(pw, ds);
             }
-            
+
             // Aggregate all following days into weeks and print totals.
             int weekDay = today;
             while (i < dses.length) {
@@ -1321,7 +1321,7 @@ class SyncManager implements OnAccountsUpdatedListener {
                     int delta = weekDay-ds.day;
                     if (delta > 6) break;
                     i++;
-                    
+
                     if (aggr == null) {
                         aggr = new SyncStorageEngine.DayStats(weekDay);
                     }
@@ -1336,7 +1336,7 @@ class SyncManager implements OnAccountsUpdatedListener {
                 }
             }
         }
-        
+
         ArrayList<SyncStorageEngine.SyncHistoryItem> items
                 = mSyncStorageEngine.getSyncHistory();
         if (items != null && items.size() > 0) {
@@ -2132,7 +2132,8 @@ class SyncManager implements OnAccountsUpdatedListener {
             final long now = System.currentTimeMillis();
 
             EventLog.writeEvent(2720, syncOperation.authority,
-                    SyncStorageEngine.EVENT_START, source);
+                                SyncStorageEngine.EVENT_START, source,
+                                syncOperation.account.name.hashCode());
 
             return mSyncStorageEngine.insertStartSyncEvent(
                     syncOperation.account, syncOperation.authority, now, source);
@@ -2141,7 +2142,8 @@ class SyncManager implements OnAccountsUpdatedListener {
         public void stopSyncEvent(long rowId, SyncOperation syncOperation, String resultMessage,
                 int upstreamActivity, int downstreamActivity, long elapsedTime) {
             EventLog.writeEvent(2720, syncOperation.authority,
-                    SyncStorageEngine.EVENT_STOP, syncOperation.syncSource);
+                                SyncStorageEngine.EVENT_STOP, syncOperation.syncSource,
+                                syncOperation.account.name.hashCode());
 
             mSyncStorageEngine.stopSyncEvent(rowId, elapsedTime, resultMessage,
                     downstreamActivity, upstreamActivity);
@@ -2173,7 +2175,7 @@ class SyncManager implements OnAccountsUpdatedListener {
                 syncOperation.pendingOperation = op;
                 add(syncOperation, op);
             }
-            
+
             if (DEBUG_CHECK_DATA_CONSISTENCY) debugCheckDataStructures(true /* check the DB */);
         }
 
