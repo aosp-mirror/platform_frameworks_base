@@ -402,7 +402,7 @@ public class ContactHeaderWidget extends FrameLayout implements View.OnClickList
      */
     public void bindFromPhoneNumber(String number) {
         mQueryHandler.startQuery(TOKEN_PHONE_LOOKUP, number,
-                Uri.withAppendedPath(PhoneLookup.CONTENT_FILTER_URI, number),
+                Uri.withAppendedPath(PhoneLookup.CONTENT_FILTER_URI, Uri.encode(number)),
                 PHONE_LOOKUP_PROJECTION, null, null, null);
     }
 
