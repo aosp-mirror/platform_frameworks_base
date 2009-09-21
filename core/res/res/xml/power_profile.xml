@@ -26,15 +26,24 @@
   <item name="wifi.on">0.1</item>
   <item name="wifi.active">0.1</item>
   <item name="wifi.scan">0.1</item>
-  <item name="cpu.idle">0.1</item>
-  <item name="cpu.normal">0.2</item>
-  <item name="cpu.full">1</item>
   <item name="dsp.audio">0.1</item>
   <item name="dsp.video">0.1</item>
   <item name="radio.active">1</item>
   <item name="gps.on">1</item>
+  <!-- Current consumed by the radio at different signal strengths, when paging -->
   <array name="radio.on"> <!-- Strength 0 to BINS-1 -->
       <value>1</value>
       <value>0.1</value>
+  </array>
+  <!-- Different CPU speeds as reported in
+       /sys/devices/system/cpu/cpu0/cpufreq/stats/time_in_state -->
+  <array name="cpu.speeds">
+      <value>400000</value> <!-- 400 MHz CPU speed -->
+  </array>
+  <!-- Power consumption when CPU is idle -->
+  <item name="cpu.idle">0.1</item>
+  <!-- Power consumption at different speeds -->
+  <array name="cpu.active">
+      <value>0.2</value>
   </array>
 </device>

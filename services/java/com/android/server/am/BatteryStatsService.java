@@ -28,6 +28,7 @@ import android.util.Log;
 
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.os.BatteryStatsImpl;
+import com.android.internal.os.PowerProfile;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -49,6 +50,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
     public void publish(Context context) {
         mContext = context;
         ServiceManager.addService("batteryinfo", asBinder());
+        mStats.setNumSpeedSteps(new PowerProfile(mContext).getNumSpeedSteps());
     }
     
     public void shutdown() {
