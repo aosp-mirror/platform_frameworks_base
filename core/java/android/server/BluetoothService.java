@@ -28,6 +28,7 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothHeadset;
+import android.bluetooth.BluetoothUuid;
 import android.bluetooth.IBluetooth;
 import android.bluetooth.ParcelUuid;
 import android.content.BroadcastReceiver;
@@ -85,6 +86,7 @@ public class BluetoothService extends IBluetooth.Stub {
     private final Map<String, String> mAdapterProperties;
     private final HashMap <String, Map<String, String>> mDeviceProperties;
 
+    private final HashMap <String, Map<ParcelUuid, Integer>> mDeviceServiceChannelCache;
     private final ArrayList <String> mUuidIntentTracker;
 
     static {
@@ -111,6 +113,8 @@ public class BluetoothService extends IBluetooth.Stub {
         mIsDiscovering = false;
         mAdapterProperties = new HashMap<String, String>();
         mDeviceProperties = new HashMap<String, Map<String,String>>();
+
+        mDeviceServiceChannelCache = new HashMap<String, Map<ParcelUuid, Integer>>();
         mUuidIntentTracker = new ArrayList<String>();
         registerForAirplaneMode();
     }
@@ -880,14 +884,20 @@ public class BluetoothService extends IBluetooth.Stub {
             // Query for remote device properties, again.
             // We will need to reload the cache when we switch Bluetooth on / off
             // or if we crash.
-            String[] propValues = getRemoteDeviceProperties(address);
-            if (propValues != null) {
-                addRemoteDeviceProperties(address, propValues);
+            if (updateRemoteDevicePropertiesCache(address))
                 return getRemoteDeviceProperty(address, property);
-            }
         }
         Log.e(TAG, "getRemoteDeviceProperty: " + property + "not present:" + address);
         return null;
+    }
+
+    /* package */ synchronized boolean updateRemoteDevicePropertiesCache(String address) {
+        String[] propValues = getRemoteDeviceProperties(address);
+        if (propValues != null) {
+            addRemoteDeviceProperties(address, propValues);
+            return true;
+        }
+        return false;
     }
 
     /* package */ synchronized void addRemoteDeviceProperties(String address, String[] properties) {
@@ -924,6 +934,10 @@ public class BluetoothService extends IBluetooth.Stub {
             propertyValues.put(name, newValue);
         }
         mDeviceProperties.put(address, propertyValues);
+
+        // We have added a new remote device or updated its properties.
+        // Also update the serviceChannel cache.
+        updateDeviceServiceChannelCache(address);
     }
 
     /* package */ void removeRemoteDeviceProperties(String address) {
@@ -1066,14 +1080,23 @@ public class BluetoothService extends IBluetooth.Stub {
      * @param uuid ParcelUuid of the service attribute
      *
      * @return rfcomm channel associated with the service attribute
+     *         -1 on error
      */
     public int getRemoteServiceChannel(String address, ParcelUuid uuid) {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
         if (!BluetoothAdapter.checkBluetoothAddress(address)) {
             return BluetoothDevice.ERROR;
         }
-        return getDeviceServiceChannelNative(getObjectPathFromAddress(address), uuid.toString(),
-                0x0004);
+        // Check if we are recovering from a crash.
+        if (mDeviceProperties.isEmpty()) {
+            if (!updateRemoteDevicePropertiesCache(address))
+                return -1;
+        }
+
+        Map<ParcelUuid, Integer> value = mDeviceServiceChannelCache.get(address);
+        if (value != null && value.containsKey(uuid))
+            return value.get(uuid);
+        return -1;
     }
 
     public synchronized boolean setPin(String address, byte[] pin) {
@@ -1150,6 +1173,27 @@ public class BluetoothService extends IBluetooth.Stub {
             return false;
         }
         return cancelPairingUserInputNative(address, data.intValue());
+    }
+
+    public void updateDeviceServiceChannelCache(String address) {
+        ParcelUuid[] deviceUuids = getRemoteUuids(address);
+        // We are storing the rfcomm channel numbers only for the uuids
+        // we are interested in.
+        int channel;
+        ParcelUuid[] interestedUuids = {BluetoothUuid.Handsfree,
+                                        BluetoothUuid.HSP,
+                                        BluetoothUuid.ObexObjectPush};
+
+        Map <ParcelUuid, Integer> value = new HashMap<ParcelUuid, Integer>();
+        for (ParcelUuid uuid: interestedUuids) {
+            if (BluetoothUuid.isUuidPresent(deviceUuids, uuid)) {
+                channel =
+                   getDeviceServiceChannelNative(getObjectPathFromAddress(address), uuid.toString(),
+                                                 0x0004);
+                value.put(uuid, channel);
+            }
+        }
+        mDeviceServiceChannelCache.put(address, value);
     }
 
     private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
@@ -1366,4 +1410,5 @@ public class BluetoothService extends IBluetooth.Stub {
     private native boolean setDevicePropertyBooleanNative(String objectPath, String key, int value);
     private native boolean createDeviceNative(String address);
     private native boolean discoverServicesNative(String objectPath, String pattern);
+
 }
