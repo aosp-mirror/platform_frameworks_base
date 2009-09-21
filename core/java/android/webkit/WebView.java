@@ -2505,16 +2505,26 @@ public class WebView extends AbsoluteLayout
             // saved scroll position, it is ok to skip this.
             return false;
         }
-        int vx = contentToViewX(cx);
-        int vy = contentToViewY(cy);
+        int vx;
+        int vy;
+        if ((cx | cy) == 0) {
+            // If the page is being scrolled to (0,0), do not add in the title
+            // bar's height, and simply scroll to (0,0). (The only other work
+            // in contentToView_ is to multiply, so this would not change 0.)
+            vx = 0;
+            vy = 0;
+        } else {
+            vx = contentToViewX(cx);
+            vy = contentToViewY(cy);
+        }
 //        Log.d(LOGTAG, "content scrollTo [" + cx + " " + cy + "] view=[" +
 //                      vx + " " + vy + "]");
         // Some mobile sites attempt to scroll the title bar off the page by
-        // scrolling to (0,0) or (0,1).  If we are at the top left corner of the
+        // scrolling to (0,1).  If we are at the top left corner of the
         // page, assume this is an attempt to scroll off the title bar, and
         // animate the title bar off screen slowly enough that the user can see
         // it.
-        if (cx == 0 && cy <= 1 && mScrollX == 0 && mScrollY == 0) {
+        if (cx == 0 && cy == 1 && mScrollX == 0 && mScrollY == 0) {
             pinScrollTo(vx, vy, true, SLIDE_TITLE_DURATION);
             // Since we are animating, we have not yet reached the desired
             // scroll position.  Do not return true to request another attempt
@@ -4862,17 +4872,8 @@ public class WebView extends AbsoluteLayout
                             mMaxZoomScale = restoreState.mMaxScale;
                         }
                         setNewZoomScale(mLastScale, false);
-                        if (getTitleHeight() != 0 && restoreState.mScrollX == 0
-                                && restoreState.mScrollY == 0) {
-                            // If there is a title bar, and the page is being
-                            // restored to (0,0), do not scroll the title bar
-                            // off the page.
-                            abortAnimation();
-                            scrollTo(0,0);
-                        } else {
-                            setContentScrollTo(restoreState.mScrollX,
-                                    restoreState.mScrollY);
-                        }
+                        setContentScrollTo(restoreState.mScrollX,
+                                restoreState.mScrollY);
                         if (useWideViewport
                                 && settings.getLoadWithOverviewMode()) {
                             if (restoreState.mViewScale == 0
