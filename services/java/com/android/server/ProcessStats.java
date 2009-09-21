@@ -509,23 +509,26 @@ public class ProcessStats {
         }
         int speed = 0;
         String file = readFile("/sys/devices/system/cpu/cpu0/cpufreq/stats/time_in_state", '\0');
-        StringTokenizer st = new StringTokenizer(file, "\n ");
-        while (st.hasMoreElements()) {
-            String token = st.nextToken();
-            try {
-                long val = Long.parseLong(token);
-                tempSpeeds[speed] = val;
-                token = st.nextToken();
-                val = Long.parseLong(token);
-                tempTimes[speed] = val;
-                speed++;
-                if (speed == MAX_SPEEDS) break; // No more
-                if (localLOGV && out == null) {
-                    Log.v(TAG, "First time : Speed/Time = " + tempSpeeds[speed - 1]
-                            + "\t" + tempTimes[speed - 1]);
+        // Note: file may be null on kernels without cpufreq (i.e. the emulator's)
+        if (file != null) {
+            StringTokenizer st = new StringTokenizer(file, "\n ");
+            while (st.hasMoreElements()) {
+                String token = st.nextToken();
+                try {
+                    long val = Long.parseLong(token);
+                    tempSpeeds[speed] = val;
+                    token = st.nextToken();
+                    val = Long.parseLong(token);
+                    tempTimes[speed] = val;
+                    speed++;
+                    if (speed == MAX_SPEEDS) break; // No more
+                    if (localLOGV && out == null) {
+                        Log.v(TAG, "First time : Speed/Time = " + tempSpeeds[speed - 1]
+                              + "\t" + tempTimes[speed - 1]);
+                    }
+                } catch (NumberFormatException nfe) {
+                    Log.i(TAG, "Unable to parse time_in_state");
                 }
-            } catch (NumberFormatException nfe) {
-                Log.i(TAG, "Unable to parse time_in_state");
             }
         }
         if (out == null) {
