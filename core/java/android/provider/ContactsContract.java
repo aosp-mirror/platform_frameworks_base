@@ -410,7 +410,8 @@ public final class ContactsContract {
             private AggregationSuggestions() {}
 
             /**
-             * The directory twig for this sub-table
+             * The directory twig for this sub-table. The URI can be followed by an optional
+             * type-to-filter, similar to {@link Contacts#CONTENT_FILTER_URI}.
              */
             public static final String CONTENT_DIRECTORY = "suggestions";
         }
