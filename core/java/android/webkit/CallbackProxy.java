@@ -249,7 +249,7 @@ class CallbackProxy extends Handler {
             case RECEIVED_TOUCH_ICON_URL:
                 if (mWebChromeClient != null) {
                     mWebChromeClient.onReceivedTouchIconUrl(mWebView,
-                            (String) msg.obj);
+                            (String) msg.obj, msg.arg1 == 1);
                 }
                 break;
 
@@ -1065,19 +1065,22 @@ class CallbackProxy extends Handler {
         sendMessage(obtainMessage(RECEIVED_ICON, icon));
     }
 
-    /* package */ void onReceivedTouchIconUrl(String url) {
+    /* package */ void onReceivedTouchIconUrl(String url, boolean precomposed) {
         // We should have a current item but we do not want to crash so check
         // for null.
         WebHistoryItem i = mBackForwardList.getCurrentItem();
         if (i != null) {
-            i.setTouchIconUrl(url);
+            if (precomposed || i.getTouchIconUrl() != null) {
+                i.setTouchIconUrl(url);
+            }
         }
         // Do an unsynchronized quick check to avoid posting if no callback has
         // been set.
         if (mWebChromeClient == null) {
             return;
         }
-        sendMessage(obtainMessage(RECEIVED_TOUCH_ICON_URL, url));
+        sendMessage(obtainMessage(RECEIVED_TOUCH_ICON_URL,
+                precomposed ? 1 : 0, 0, url));
     }
 
     public void onReceivedTitle(String title) {
