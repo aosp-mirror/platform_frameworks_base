@@ -807,6 +807,10 @@ public class AccountManager {
      * Add a {@link OnAccountsUpdatedListener} to this instance of the {@link AccountManager}.
      * The listener is guaranteed to be invoked on the thread of the Handler that is passed
      * in or the main thread's Handler if handler is null.
+     * <p>
+     * You must remove this listener before the context that was used to retrieve this
+     * {@link AccountManager} instance goes away. This generally means when the Activity
+     * or Service you are running is stopped.
      * @param listener the listener to add
      * @param handler the Handler whose thread will be used to invoke the listener. If null
      * the AccountManager context's main thread will be used.
