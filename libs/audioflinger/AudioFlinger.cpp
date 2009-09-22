@@ -1227,44 +1227,46 @@ bool AudioFlinger::MixerThread::threadLoop()
             enabledTracks = prepareTracks_l(activeTracks, &tracksToRemove);
        }
 
-
-        // output audio to hardware
-        if (mSuspended) {
-            usleep(kMaxBufferRecoveryInUsecs);
+        if (LIKELY(enabledTracks)) {
+            // mix buffers...
+            mAudioMixer->process(curBuf);
+            sleepTime = 0;
+            standbyTime = systemTime() + kStandbyTimeInNsecs;
         } else {
-            if (LIKELY(enabledTracks)) {
-                // mix buffers...
-                mAudioMixer->process(curBuf);
+            sleepTime += kBufferRecoveryInUsecs;
+            if (sleepTime > kMaxBufferRecoveryInUsecs) {
+                sleepTime = kMaxBufferRecoveryInUsecs;
+            }
+            // There was nothing to mix this round, which means all
+            // active tracks were late. Sleep a little bit to give
+            // them another chance. If we're too late, write 0s to audio
+            // hardware to avoid underrun.
+            if (mBytesWritten != 0 && sleepTime >= kMaxBufferRecoveryInUsecs) {
+                memset (curBuf, 0, mixBufferSize);
                 sleepTime = 0;
-                standbyTime = systemTime() + kStandbyTimeInNsecs;
-            } else {
-                sleepTime += kBufferRecoveryInUsecs;
-                // There was nothing to mix this round, which means all
-                // active tracks were late. Sleep a little bit to give
-                // them another chance. If we're too late, write 0s to audio
-                // hardware to avoid underrun.
-                if (mBytesWritten == 0 || sleepTime < kMaxBufferRecoveryInUsecs) {
-                    usleep(kBufferRecoveryInUsecs);
-                } else {
-                    memset (curBuf, 0, mixBufferSize);
-                    sleepTime = 0;
-                }
             }
-            // sleepTime == 0 means PCM data were written to mMixBuffer[]
-            if (sleepTime == 0) {
-                mLastWriteTime = systemTime();
-                mInWrite = true;
-                int bytesWritten = (int)mOutput->write(curBuf, mixBufferSize);
-                if (bytesWritten > 0) mBytesWritten += bytesWritten;
-                mNumWrites++;
-                mInWrite = false;
-                mStandby = false;
-                nsecs_t delta = systemTime() - mLastWriteTime;
-                if (delta > maxPeriod) {
-                    LOGW("write blocked for %llu msecs", ns2ms(delta));
-                    mNumDelayedWrites++;
-                }
+        }
+
+        if (mSuspended) {
+            sleepTime = kMaxBufferRecoveryInUsecs;
+        }
+        // sleepTime == 0 means we must write to audio hardware
+        if (sleepTime == 0) {
+            mLastWriteTime = systemTime();
+            mInWrite = true;
+            LOGV("mOutput->write() thread %p frames %d", this, mFrameCount);
+            int bytesWritten = (int)mOutput->write(curBuf, mixBufferSize);
+            if (bytesWritten > 0) mBytesWritten += bytesWritten;
+            mNumWrites++;
+            mInWrite = false;
+            mStandby = false;
+            nsecs_t delta = systemTime() - mLastWriteTime;
+            if (delta > maxPeriod) {
+                LOGW("write blocked for %llu msecs, thread %p", ns2ms(delta), this);
+                mNumDelayedWrites++;
             }
+        } else {
+            usleep(sleepTime);
         }
 
         // finally let go of all our tracks, without the lock held
@@ -1718,50 +1720,55 @@ bool AudioFlinger::DirectOutputThread::threadLoop()
             }
        }
 
-        // output audio to hardware
-        if (mSuspended) {
-            usleep(kMaxBufferRecoveryInUsecs);
+        if (activeTrack != 0) {
+            AudioBufferProvider::Buffer buffer;
+            size_t frameCount = mFrameCount;
+            curBuf = (int8_t *)mMixBuffer;
+            // output audio to hardware
+            while(frameCount) {
+                buffer.frameCount = frameCount;
+                activeTrack->getNextBuffer(&buffer);
+                if (UNLIKELY(buffer.raw == 0)) {
+                    memset(curBuf, 0, frameCount * mFrameSize);
+                    break;
+                }
+                memcpy(curBuf, buffer.raw, buffer.frameCount * mFrameSize);
+                frameCount -= buffer.frameCount;
+                curBuf += buffer.frameCount * mFrameSize;
+                activeTrack->releaseBuffer(&buffer);
+            }
+            sleepTime = 0;
+            standbyTime = systemTime() + kStandbyTimeInNsecs;
         } else {
-            if (activeTrack != 0) {
-                AudioBufferProvider::Buffer buffer;
-                size_t frameCount = mFrameCount;
-                curBuf = (int8_t *)mMixBuffer;
-                // output audio to hardware
-                while(frameCount) {
-                    buffer.frameCount = frameCount;
-                    activeTrack->getNextBuffer(&buffer);
-                    if (UNLIKELY(buffer.raw == 0)) {
-                        memset(curBuf, 0, frameCount * mFrameSize);
-                        break;
-                    }
-                    memcpy(curBuf, buffer.raw, buffer.frameCount * mFrameSize);
-                    frameCount -= buffer.frameCount;
-                    curBuf += buffer.frameCount * mFrameSize;
-                    activeTrack->releaseBuffer(&buffer);
-                }
+            sleepTime += kBufferRecoveryInUsecs;
+            if (sleepTime > kMaxBufferRecoveryInUsecs) {
+                sleepTime = kMaxBufferRecoveryInUsecs;
+            }
+            // There was nothing to mix this round, which means all
+            // active tracks were late. Sleep a little bit to give
+            // them another chance. If we're too late, write 0s to audio
+            // hardware to avoid underrun.
+            if (mBytesWritten != 0 && sleepTime >= kMaxBufferRecoveryInUsecs &&
+                AudioSystem::isLinearPCM(mFormat)) {
+                memset (mMixBuffer, 0, mFrameCount * mFrameSize);
                 sleepTime = 0;
-                standbyTime = systemTime() + kStandbyTimeInNsecs;
-            } else {
-                sleepTime += kBufferRecoveryInUsecs;
-                if (mBytesWritten == 0 || !AudioSystem::isLinearPCM(mFormat) ||
-                    sleepTime < kMaxBufferRecoveryInUsecs) {
-                    usleep(kBufferRecoveryInUsecs);
-                } else {
-                    memset (mMixBuffer, 0, mFrameCount * mFrameSize);
-                    sleepTime = 0;
-                }
             }
+        }
 
-            // sleepTime == 0 means PCM data were written to mMixBuffer[]
-            if (sleepTime == 0) {
-                mLastWriteTime = systemTime();
-                mInWrite = true;
-                int bytesWritten = (int)mOutput->write(mMixBuffer, mixBufferSize);
-                if (bytesWritten) mBytesWritten += bytesWritten;
-                mNumWrites++;
-                mInWrite = false;
-                mStandby = false;
-            }
+        if (mSuspended) {
+            sleepTime = kMaxBufferRecoveryInUsecs;
+        }
+        // sleepTime == 0 means we must write to audio hardware
+        if (sleepTime == 0) {
+            mLastWriteTime = systemTime();
+            mInWrite = true;
+            int bytesWritten = (int)mOutput->write(mMixBuffer, mixBufferSize);
+            if (bytesWritten) mBytesWritten += bytesWritten;
+            mNumWrites++;
+            mInWrite = false;
+            mStandby = false;
+        } else {
+            usleep(sleepTime);
         }
 
         // finally let go of removed track, without the lock held
@@ -1913,38 +1920,40 @@ bool AudioFlinger::DuplicatingThread::threadLoop()
             }
 
             enabledTracks = prepareTracks_l(activeTracks, &tracksToRemove);
-       }
+        }
 
-        bool mustSleep = true;
         if (LIKELY(enabledTracks)) {
             // mix buffers...
             mAudioMixer->process(curBuf);
-            if (!mSuspended) {
-                for (size_t i = 0; i < outputTracks.size(); i++) {
-                    outputTracks[i]->write(curBuf, mFrameCount);
-                    mustSleep = false;
-                }
-                mStandby = false;
-                mBytesWritten += mixBufferSize;
-            }
+            sleepTime = 0;
+            standbyTime = systemTime() + kStandbyTimeInNsecs;
         } else {
-            // flush remaining overflow buffers in output tracks
-            for (size_t i = 0; i < outputTracks.size(); i++) {
-                if (outputTracks[i]->isActive()) {
-                    outputTracks[i]->write(curBuf, 0);
-                    standbyTime = systemTime() + kStandbyTimeInNsecs;
-                    mustSleep = false;
-                }
+            sleepTime += kBufferRecoveryInUsecs;
+            if (sleepTime > kMaxBufferRecoveryInUsecs) {
+                sleepTime = kMaxBufferRecoveryInUsecs;
+            }
+            // There was nothing to mix this round, which means all
+            // active tracks were late. Sleep a little bit to give
+            // them another chance. If we're too late, write 0s to audio
+            // hardware to avoid underrun.
+            if (mBytesWritten != 0 && sleepTime >= kMaxBufferRecoveryInUsecs) {
+                memset (curBuf, 0, mixBufferSize);
+                sleepTime = 0;
             }
         }
-        if (mustSleep) {
-//            LOGV("threadLoop() sleeping %d", sleepTime);
-            usleep(sleepTime);
-            if (sleepTime < kMaxBufferRecoveryInUsecs) {
-                sleepTime += kBufferRecoveryInUsecs;
+
+        if (mSuspended) {
+            sleepTime = kMaxBufferRecoveryInUsecs;
+        }
+        // sleepTime == 0 means we must write to audio hardware
+        if (sleepTime == 0) {
+            for (size_t i = 0; i < outputTracks.size(); i++) {
+                outputTracks[i]->write(curBuf, mFrameCount);
             }
+            mStandby = false;
+            mBytesWritten += mixBufferSize;
         } else {
-            sleepTime = kBufferRecoveryInUsecs;
+            usleep(sleepTime);
         }
 
         // finally let go of all our tracks, without the lock held
