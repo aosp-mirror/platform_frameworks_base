@@ -63,6 +63,7 @@ public class ContactHeaderWidget extends FrameLayout implements View.OnClickList
     private static final String TAG = "ContactHeaderWidget";
 
     private TextView mDisplayNameView;
+    private View mAggregateBadge;
     private TextView mPhoneticNameView;
     private CheckBox mStarredView;
     private FasttrackBadgeWidget mPhotoView;
@@ -159,6 +160,8 @@ public class ContactHeaderWidget extends FrameLayout implements View.OnClickList
 
         mDisplayNameView = (TextView) findViewById(R.id.name);
         mDisplayNameView.setOnLongClickListener(this);
+        mAggregateBadge = findViewById(R.id.aggregate_badge);
+        mAggregateBadge.setVisibility(View.GONE);
 
         mPhoneticNameView = (TextView) findViewById(R.id.phonetic_name);
 
@@ -281,6 +284,13 @@ public class ContactHeaderWidget extends FrameLayout implements View.OnClickList
                 }
             }
         }
+    }
+
+    /**
+     * Turn on/off showing of the aggregate bage element.
+     */
+    public void showAggregateBadge(boolean showBagde) {
+        mAggregateBadge.setVisibility(showBagde ? View.VISIBLE : View.GONE);
     }
 
     /**
