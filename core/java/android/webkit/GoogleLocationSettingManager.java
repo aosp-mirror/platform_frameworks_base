@@ -35,8 +35,6 @@ import java.util.HashSet;
  * @hide pending API council review
  */
 class GoogleLocationSettingManager {
-    // The application context.
-    private Context mContext;
     // The observer used to listen to the system setting.
     private GoogleLocationSettingObserver mSettingObserver;
 
@@ -48,6 +46,8 @@ class GoogleLocationSettingManager {
     // by the browser.
     private final static String LAST_READ_USE_LOCATION_FOR_SERVICES =
             "lastReadUseLocationForServices";
+    // The Browser package name.
+    private static final String BROWSER_PACKAGE_NAME = "com.android.browser";
     // The Google origins we consider.
     private static HashSet<String> sGoogleOrigins;
     static {
@@ -57,38 +57,72 @@ class GoogleLocationSettingManager {
         sGoogleOrigins.add("http://www.google.co.uk");
     }
 
-    GoogleLocationSettingManager(Context context) {
-        mContext = context;
+    private static GoogleLocationSettingManager sGoogleLocationSettingManager = null;
+    private static int sRefCount = 0;
+
+    static GoogleLocationSettingManager getInstance() {
+        if (sGoogleLocationSettingManager == null) {
+            sGoogleLocationSettingManager = new GoogleLocationSettingManager();
+        }
+        return sGoogleLocationSettingManager;
     }
+
+    private GoogleLocationSettingManager() {}
 
     /**
      * Starts the manager. Checks whether the setting has changed and
      * installs an observer to listen for future changes.
      */
-    public void start() {
-        maybeApplySetting();
-
+    public void start(Context context) {
+        // Are we running in the browser?
+        if (context == null || !BROWSER_PACKAGE_NAME.equals(context.getPackageName())) {
+            return;
+        }
+        // Increase the refCount
+        sRefCount++;
+        // Are we already registered?
+        if (mSettingObserver != null) {
+            return;
+        }
+        // Read and apply the settings if needed.
+        maybeApplySetting(context);
+        // Register to receive notifications when the system settings change.
         mSettingObserver = new GoogleLocationSettingObserver();
-        mSettingObserver.observe();
+        mSettingObserver.observe(context);
     }
 
     /**
+     * Stops the manager.
+     */
+    public void stop() {
+        // Are we already registered?
+        if (mSettingObserver == null) {
+            return;
+        }
+        if (--sRefCount == 0) {
+            mSettingObserver.doNotObserve();
+            mSettingObserver = null;
+        }
+    }
+    /**
      * Checks to see if the system setting has changed and if so,
      * updates the Geolocation permissions accordingly.
+     * @param the Application context
      */
-    private void maybeApplySetting() {
-        int setting = getSystemSetting();
-        if (settingChanged(setting)) {
+    private void maybeApplySetting(Context context) {
+        int setting = getSystemSetting(context);
+        if (settingChanged(setting, context)) {
             applySetting(setting);
         }
     }
 
     /**
      * Gets the current system setting for 'Use location for Google services'.
+     * @param the Application context
      * @return The system setting.
      */
-    private int getSystemSetting() {
-        return Settings.Secure.getInt(mContext.getContentResolver(),
+    private int getSystemSetting(Context context) {
+        return Settings.Secure.getInt(context.getContentResolver(),
                                       Settings.Secure.USE_LOCATION_FOR_SERVICES,
                                       sSystemSettingFalse);
     }
@@ -97,12 +131,13 @@ class GoogleLocationSettingManager {
      * Determines whether the supplied setting has changed from the last
      * value read by the browser.
      * @param setting The setting.
+     * @param the Application context
      * @return Whether the setting has changed from the last value read
      *     by the browser.
      */
-    private boolean settingChanged(int setting) {
+    private boolean settingChanged(int setting, Context context) {
         SharedPreferences preferences =
-                PreferenceManager.getDefaultSharedPreferences(mContext);
+                PreferenceManager.getDefaultSharedPreferences(context);
         // Default to false. If the system setting is false the first time it is ever read by the
         // browser, there's nothing to do.
         int lastReadSetting = sSystemSettingFalse;
@@ -137,20 +172,35 @@ class GoogleLocationSettingManager {
      * This class implements an observer to listen for changes to the
      * system setting.
      */
-    class GoogleLocationSettingObserver extends ContentObserver {
+    private class GoogleLocationSettingObserver extends ContentObserver {
+        private Context mContext;
+
         GoogleLocationSettingObserver() {
             super(new Handler());
         }
 
-        void observe() {
-            ContentResolver resolver = mContext.getContentResolver();
+        void observe(Context context) {
+            if (mContext != null) {
+                return;
+            }
+            ContentResolver resolver = context.getContentResolver();
             resolver.registerContentObserver(Settings.Secure.getUriFor(
                 Settings.Secure.USE_LOCATION_FOR_SERVICES), false, this);
+            mContext = context;
+        }
+
+        void doNotObserve() {
+            if (mContext == null) {
+                return;
+            }
+            ContentResolver resolver = mContext.getContentResolver();
+            resolver.unregisterContentObserver(this);
+            mContext = null;
         }
 
         @Override
         public void onChange(boolean selfChange) {
-            maybeApplySetting();
+            maybeApplySetting(mContext);
         }
     }
 }

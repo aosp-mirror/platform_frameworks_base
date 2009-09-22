@@ -190,10 +190,6 @@ public class WebSettings {
     private boolean         mAllowFileAccess = true;
     private boolean         mLoadWithOverviewMode = false;
 
-    // Manages interaction of the system setting 'Location & security - Share
-    // with Google' and the browser.
-    static GoogleLocationSettingManager sGoogleLocationSettingManager;
-
     // private WebSettings, not accessible by the host activity
     static private int      mDoubleTapToastCount = 3;
 
@@ -1353,8 +1349,9 @@ public class WebSettings {
         if (DebugFlags.WEB_SETTINGS) {
             junit.framework.Assert.assertTrue(frame.mNativeFrame != 0);
         }
-        sGoogleLocationSettingManager = new GoogleLocationSettingManager(mContext);
-        sGoogleLocationSettingManager.start();
+
+        GoogleLocationSettingManager.getInstance().start(mContext);
+
         SharedPreferences sp = mContext.getSharedPreferences(PREF_FILE,
                 Context.MODE_PRIVATE);
         if (mDoubleTapToastCount > 0) {
@@ -1364,6 +1361,14 @@ public class WebSettings {
         nativeSync(frame.mNativeFrame);
         mSyncPending = false;
         mEventHandler.createHandler();
+    }
+
+    /**
+     * Let the Settings object know that our owner is being destroyed.
+     */
+    /*package*/
+    synchronized void onDestroyed() {
+        GoogleLocationSettingManager.getInstance().stop();
     }
 
     private int pin(int size) {
