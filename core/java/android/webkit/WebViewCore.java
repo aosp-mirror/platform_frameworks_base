@@ -17,6 +17,7 @@
 package android.webkit;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Canvas;
 import android.graphics.DrawFilter;
 import android.graphics.Paint;
@@ -2091,22 +2092,49 @@ final class WebViewCore {
         }
     }
 
-    // PluginWidget functions for creating SurfaceViews for the Surface drawing
-    // model.
-    private ViewManager.ChildView createSurface(String packageName, String className,
+    // called by JNI. PluginWidget function to launch an activity and overlays
+    // the activity with the View provided by the plugin class.
+    private void startFullScreenPluginActivity(String libName, String clsName, int npp) {
+        if (mWebView == null) {
+            return;
+        }
+
+        String pkgName = PluginManager.getInstance(null).getPluginsAPKName(libName);
+        if (pkgName == null) {
+            Log.w(LOGTAG, "Unable to resolve " + libName + " to a plugin APK");
+            return;
+        }
+
+        Intent intent = new Intent("android.intent.webkit.PLUGIN");
+        intent.putExtra(PluginActivity.INTENT_EXTRA_PACKAGE_NAME, pkgName);
+        intent.putExtra(PluginActivity.INTENT_EXTRA_CLASS_NAME, clsName);
+        intent.putExtra(PluginActivity.INTENT_EXTRA_NPP_INSTANCE, npp);
+        mWebView.getContext().startActivity(intent);
+    }
+
+    // called by JNI.  PluginWidget functions for creating an embedded View for
+    // the surface drawing model.
+    private ViewManager.ChildView createSurface(String libName, String clsName,
             int npp, int x, int y, int width, int height) {
         if (mWebView == null) {
             return null;
         }
-        PluginStub stub = PluginUtil.getPluginStub(mWebView.getContext(), packageName, className);
-        if (stub == null) {
-            Log.e(LOGTAG, "Unable to find plugin class (" + className + 
-                    ") in the apk (" + packageName + ")");
+
+        String pkgName = PluginManager.getInstance(null).getPluginsAPKName(libName);
+        if (pkgName == null) {
+            Log.w(LOGTAG, "Unable to resolve " + libName + " to a plugin APK");
             return null;
         }
-        
+
+        PluginStub stub =PluginUtil.getPluginStub(mWebView.getContext(),pkgName, clsName);
+        if (stub == null) {
+            Log.e(LOGTAG, "Unable to find plugin class (" + clsName +
+                    ") in the apk (" + pkgName + ")");
+            return null;
+        }
+
         View pluginView = stub.getEmbeddedView(npp, mWebView.getContext());
-        
+
         ViewManager.ChildView view = mWebView.mViewManager.createView();
         view.mView = pluginView;
         view.attachView(x, y, width, height);
