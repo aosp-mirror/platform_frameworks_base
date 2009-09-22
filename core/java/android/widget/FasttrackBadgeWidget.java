@@ -22,6 +22,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.TypedArray;
 import android.database.Cursor;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.provider.ContactsContract.Contacts;
 import android.provider.ContactsContract.FastTrack;
@@ -46,6 +47,7 @@ public class FasttrackBadgeWidget extends ImageView implements OnClickListener {
     private String mContactPhone;
     private int mMode;
     private QueryHandler mQueryHandler;
+    private Drawable mBadgeBackground;
 
     protected String[] mExcludeMimes = null;
 
@@ -91,6 +93,8 @@ public class FasttrackBadgeWidget extends ImageView implements OnClickListener {
         a.recycle();
 
         init();
+
+        mBadgeBackground = getBackground();
     }
 
     private void init() {
@@ -108,6 +112,17 @@ public class FasttrackBadgeWidget extends ImageView implements OnClickListener {
      */
     public void assignContactUri(Uri contactUri) {
         mContactUri = contactUri;
+        mContactEmail = null;
+        mContactPhone = null;
+        onContactUriChanged();
+    }
+
+    private void onContactUriChanged() {
+        if (mContactUri == null && mContactEmail == null && mContactPhone == null) {
+            setBackgroundDrawable(null);
+        } else {
+            setBackgroundDrawable(mBadgeBackground);
+        }
     }
 
     /**
@@ -127,6 +142,7 @@ public class FasttrackBadgeWidget extends ImageView implements OnClickListener {
                     EMAIL_LOOKUP_PROJECTION, null, null, null);
         } else {
             mContactUri = null;
+            onContactUriChanged();
         }
     }
 
@@ -147,6 +163,7 @@ public class FasttrackBadgeWidget extends ImageView implements OnClickListener {
                     PHONE_LOOKUP_PROJECTION, null, null, null);
         } else {
             mContactUri = null;
+            onContactUriChanged();
         }
     }
 
@@ -237,6 +254,7 @@ public class FasttrackBadgeWidget extends ImageView implements OnClickListener {
             }
 
             mContactUri = lookupUri;
+            onContactUriChanged();
 
             if (trigger && lookupUri != null) {
                 // Found contact, so trigger track
