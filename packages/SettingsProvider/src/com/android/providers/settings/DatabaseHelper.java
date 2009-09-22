@@ -71,7 +71,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // database gets upgraded properly. At a minimum, please confirm that 'upgradeVersion'
     // is properly propagated through your change.  Not doing so will result in a loss of user
     // settings.
-    private static final int DATABASE_VERSION = 40;
+    private static final int DATABASE_VERSION = 41;
 
     private Context mContext;
 
@@ -479,6 +479,27 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             }
 
             upgradeVersion = 40;
+        }
+
+        if (upgradeVersion == 40) {
+            /*
+             * All animations are now turned on by default!
+             */
+            db.beginTransaction();
+            try {
+                db.execSQL("DELETE FROM system WHERE name='"
+                        + Settings.System.WINDOW_ANIMATION_SCALE + "'");
+                db.execSQL("DELETE FROM system WHERE name='"
+                        + Settings.System.TRANSITION_ANIMATION_SCALE + "'");
+                SQLiteStatement stmt = db.compileStatement("INSERT INTO system(name,value)"
+                        + " VALUES(?,?);");
+                loadDefaultAnimationSettings(stmt);
+                stmt.close();
+                db.setTransactionSuccessful();
+            } finally {
+                db.endTransaction();
+            }
+            upgradeVersion = 41;
         }
 
         if (upgradeVersion != currentVersion) {

@@ -58,6 +58,19 @@
         <item name="activityOpenExitAnimation">@anim/activity_open_exit</item>
         <item name="activityCloseEnterAnimation">@anim/activity_close_enter</item>
         <item name="activityCloseExitAnimation">@anim/activity_close_exit</item>
+        <item name="taskOpenEnterAnimation">@anim/activity_open_enter</item>
+        <item name="taskOpenExitAnimation">@anim/activity_open_exit</item>
+        <item name="taskCloseEnterAnimation">@anim/activity_close_enter</item>
+        <item name="taskCloseExitAnimation">@anim/activity_close_exit</item>
+        <item name="taskToFrontEnterAnimation">@anim/activity_open_enter</item>
+        <item name="taskToFrontExitAnimation">@anim/activity_open_exit</item>
+        <item name="taskToBackEnterAnimation">@anim/activity_close_enter</item>
+        <item name="taskToBackExitAnimation">@anim/activity_close_exit</item>
+        <!-- There is a good argument to be made that the user shouldn't
+             be aware of task transitions, so we are going to use the same
+             animation for them as we do for regular activity transitions. -->
+        <!-- These provide an alternative animation for task transitions. -->
+        <!--
         <item name="taskOpenEnterAnimation">@anim/task_open_enter</item>
         <item name="taskOpenExitAnimation">@anim/task_open_exit</item>
         <item name="taskCloseEnterAnimation">@anim/task_close_enter</item>
@@ -66,6 +79,7 @@
         <item name="taskToFrontExitAnimation">@anim/task_open_exit</item>
         <item name="taskToBackEnterAnimation">@anim/task_close_enter</item>
         <item name="taskToBackExitAnimation">@anim/task_close_exit</item>
+        -->
         <item name="wallpaperOpenEnterAnimation">@anim/wallpaper_open_enter</item>
         <item name="wallpaperOpenExitAnimation">@anim/wallpaper_open_exit</item>
         <item name="wallpaperCloseEnterAnimation">@anim/wallpaper_close_enter</item>

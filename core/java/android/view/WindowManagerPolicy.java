@@ -314,7 +314,9 @@ public interface WindowManagerPolicy {
         public boolean showLw(boolean doAnimation);
     }
 
-    /** No transition happening. */
+    /** Not set up for a transition. */
+    public final int TRANSIT_UNSET = 0;
+    /** No animation for transition. */
     public final int TRANSIT_NONE = 0;
     /** Window has been added to the screen. */
     public final int TRANSIT_ENTER = 1;
