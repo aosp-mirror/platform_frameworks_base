@@ -50,6 +50,7 @@ import android.util.Log;
  * List of settings that are backed up are stored in the Settings.java file
  */
 public class SettingsBackupAgent extends BackupHelperAgent {
+    // STOPSHIP: set DEBUG to false
     private static final boolean DEBUG = true;
 
     private static final String KEY_SYSTEM = "system";
@@ -227,6 +228,14 @@ public class SettingsBackupAgent extends BackupHelperAgent {
     }
 
     private void restoreSettings(BackupDataInput data, Uri contentUri) {
+        if (DEBUG) Log.i(TAG, "restoreSettings: " + contentUri);
+        String[] whitelist = null;
+        if (contentUri.equals(Settings.Secure.CONTENT_URI)) {
+            whitelist = Settings.Secure.SETTINGS_TO_BACKUP;
+        } else if (contentUri.equals(Settings.System.CONTENT_URI)) {
+            whitelist = Settings.System.SETTINGS_TO_BACKUP;
+        }
+
         ContentValues cv = new ContentValues(2);
         byte[] settings = new byte[data.getDataSize()];
         try {
@@ -248,9 +257,8 @@ public class SettingsBackupAgent extends BackupHelperAgent {
             if (!TextUtils.isEmpty(settingName) && !TextUtils.isEmpty(settingValue)) {
                 //Log.i(TAG, "Restore " + settingName + " = " + settingValue);
 
-                // TODO: versioning rather than just an ad hoc blacklist to handle
-                // older varieties of backed-up data
-                if (invalidSavedSetting(contentUri, settingName, settingValue)) {
+                // Only restore settings in our list of known-acceptable data
+                if (invalidSavedSetting(whitelist, settingName)) {
                     continue;
                 }
 
@@ -264,20 +272,23 @@ public class SettingsBackupAgent extends BackupHelperAgent {
         }
     }
 
-    private boolean invalidSavedSetting(Uri contentUri, String settingName, String settingValue) {
-        // Even if these settings were stored, don't use them on restore
-        if (contentUri.equals(Settings.Secure.CONTENT_URI)) {
-            if (settingName.equals(Settings.Secure.PREFERRED_NETWORK_MODE)
-                    || settingName.equals(Settings.Secure.PREFERRED_TTY_MODE)
-                    || settingName.equals(Settings.Secure.CDMA_CELL_BROADCAST_SMS)
-                    || settingName.equals(Settings.Secure.PREFERRED_CDMA_SUBSCRIPTION)
-                    || settingName.equals(Settings.Secure.ENHANCED_VOICE_PRIVACY_ENABLED)) {
-                if (DEBUG) Log.v(TAG, "Ignoring restore datum: " + settingName);
-                return true;
+    // Returns 'true' if the given setting is one that we refuse to restore
+    private boolean invalidSavedSetting(String[] knownNames, String candidate) {
+        // no filter? allow everything
+        if (knownNames == null) {
+            return false;
+        }
+
+        // whitelisted setting?  allow it
+        for (String name : knownNames) {
+            if (name.equals(candidate)) {
+                return false;
             }
         }
 
-        return false;
+        // refuse everything else
+        if (DEBUG) Log.v(TAG, "Ignoring restore datum: " + candidate);
+        return true;
     }
 
     private String[] copyAndSort(String[] keys) {
