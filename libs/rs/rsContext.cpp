@@ -112,8 +112,8 @@ bool Context::runRootScript()
 #endif
     rsAssert(mRootScript->mEnviroment.mIsRoot);
 
-    //glColor4f(1,1,1,1);
-    //glEnable(GL_LIGHT0);
+    eglQuerySurface(mEGL.mDisplay, mEGL.mSurface, EGL_WIDTH, &mEGL.mWidth);
+    eglQuerySurface(mEGL.mDisplay, mEGL.mSurface, EGL_HEIGHT, &mEGL.mHeight);
     glViewport(0, 0, mEGL.mWidth, mEGL.mHeight);
     glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
     glEnable(GL_POINT_SMOOTH);
