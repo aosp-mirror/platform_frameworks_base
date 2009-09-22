@@ -26,18 +26,40 @@ public class Element extends BaseObj {
     int mSize;
     Entry[] mEntries;
 
+    int getSizeBytes() {
+        return mSize;
+    }
+    int getComponentCount() {
+        return mEntries.length;
+    }
+    Element.DataType getComponentDataType(int num) {
+        return mEntries[num].mType;
+    }
+    Element.DataKind getComponentDataKind(int num) {
+        return mEntries[num].mKind;
+    }
+    boolean getComponentIsNormalized(int num) {
+        return mEntries[num].mIsNormalized;
+    }
+    int getComponentBits(int num) {
+        return mEntries[num].mBits;
+    }
+    String getComponentName(int num) {
+        return mEntries[num].mName;
+    }
+
     static class Entry {
-        Element mElement;
+        //Element mElement;
         Element.DataType mType;
         Element.DataKind mKind;
         boolean mIsNormalized;
         int mBits;
         String mName;
 
-        Entry(Element e, int bits) {
-            mElement = e;
-            int mBits = bits;
-        }
+        //Entry(Element e, int bits) {
+            //mElement = e;
+            //int mBits = bits;
+        //}
 
         Entry(DataType dt, DataKind dk, boolean isNorm, int bits, String name) {
             mType = dt;
@@ -266,14 +288,11 @@ public class Element extends BaseObj {
         int bits = 0;
         for (int ct=0; ct < e.mEntries.length; ct++) {
             Entry en = e.mEntries[ct];
-            if(en.mElement !=  null) {
+            //if(en.mElement !=  null) {
                 //rs.nElementAdd(en.mElement.mID);
-            } else {
-                int norm = 0;
-                if (en.mIsNormalized) {
-                    norm = 1;
-                }
-                rs.nElementAdd(en.mKind.mID, en.mType.mID, norm, en.mBits, en.mName);
+            //} else
+            {
+                rs.nElementAdd(en.mKind.mID, en.mType.mID, en.mIsNormalized, en.mBits, en.mName);
                 bits += en.mBits;
             }
         }
@@ -308,11 +327,11 @@ public class Element extends BaseObj {
             mEntryCount++;
         }
 
-        public Builder add(Element e) throws IllegalArgumentException {
-            Entry en = new Entry(e, e.mSize * 8);
-            addEntry(en);
-            return this;
-        }
+        //public Builder add(Element e) throws IllegalArgumentException {
+            //Entry en = new Entry(e, e.mSize * 8);
+            //addEntry(en);
+            //return this;
+        //}
 
         public Builder add(Element.DataType dt, Element.DataKind dk, boolean isNormalized, int bits, String name) {
             Entry en = new Entry(dt, dk, isNormalized, bits, name);
