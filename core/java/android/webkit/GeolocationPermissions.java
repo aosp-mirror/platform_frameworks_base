@@ -19,10 +19,9 @@ package android.webkit;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 
@@ -47,15 +46,13 @@ public final class GeolocationPermissions {
     private static GeolocationPermissions sInstance;
 
     private Handler mHandler;
+    private Handler mUIHandler;
 
     // Members used to transfer the origins and permissions between threads.
     private Set<String> mOrigins;
     private boolean mAllowed;
     private Set<String> mOriginsToClear;
     private Set<String> mOriginsToAllow;
-    private static Lock mLock = new ReentrantLock();
-    private static boolean mUpdated;
-    private static Condition mUpdatedCondition = mLock.newCondition();
 
     // Message ids
     static final int GET_ORIGINS = 0;
@@ -63,6 +60,15 @@ public final class GeolocationPermissions {
     static final int CLEAR = 2;
     static final int ALLOW = 3;
     static final int CLEAR_ALL = 4;
+
+    // Message ids on the UI thread
+    static final int RETURN_ORIGINS = 0;
+    static final int RETURN_ALLOWED = 1;
+
+    private static final String ORIGINS = "origins";
+    private static final String ORIGIN = "origin";
+    private static final String CALLBACK = "callback";
+    private static final String ALLOWED = "allowed";
 
     /**
      * Gets the singleton instance of the class.
@@ -75,22 +81,62 @@ public final class GeolocationPermissions {
     }
 
     /**
+     * Creates the UI message handler. Must be called on the UI thread.
+     */
+    public void createUIHandler() {
+        if (mUIHandler == null) {
+            mUIHandler = new Handler() {
+                @Override
+                public void handleMessage(Message msg) {
+                    // Runs on the UI thread.
+                    switch (msg.what) {
+                        case RETURN_ORIGINS: {
+                            Map values = (Map) msg.obj;
+                            Set origins = (Set) values.get(ORIGINS);
+                            ValueCallback<Set> callback = (ValueCallback<Set>) values.get(CALLBACK);
+                            callback.onReceiveValue(origins);
+                        } break;
+                        case RETURN_ALLOWED: {
+                            Map values = (Map) msg.obj;
+                            Boolean allowed = (Boolean) values.get(ALLOWED);
+                            ValueCallback<Boolean> callback = (ValueCallback<Boolean>) values.get(CALLBACK);
+                            callback.onReceiveValue(allowed);
+                        } break;
+                    }
+                }
+            };
+        }
+    }
+
+    /**
      * Creates the message handler. Must be called on the WebKit thread.
      */
     public void createHandler() {
-        mLock.lock();
         if (mHandler == null) {
             mHandler = new Handler() {
                 @Override
                 public void handleMessage(Message msg) {
                     // Runs on the WebKit thread.
                     switch (msg.what) {
-                        case GET_ORIGINS:
+                        case GET_ORIGINS: {
                             getOriginsImpl();
-                            break;
-                        case GET_ALLOWED:
-                            getAllowedImpl((String) msg.obj);
-                            break;
+                            ValueCallback callback = (ValueCallback) msg.obj;
+                            Set origins = new HashSet(mOrigins);
+                            Map values = new HashMap<String, Object>();
+                            values.put(CALLBACK, callback);
+                            values.put(ORIGINS, origins);
+                            postUIMessage(Message.obtain(null, RETURN_ORIGINS, values));
+                            } break;
+                        case GET_ALLOWED: {
+                            Map values = (Map) msg.obj;
+                            String origin = (String) values.get(ORIGIN);
+                            ValueCallback callback = (ValueCallback) values.get(CALLBACK);
+                            getAllowedImpl(origin);
+                            Map retValues = new HashMap<String, Object>();
+                            retValues.put(CALLBACK, callback);
+                            retValues.put(ALLOWED, new Boolean(mAllowed));
+                            postUIMessage(Message.obtain(null, RETURN_ALLOWED, retValues));
+                            } break;
                         case CLEAR:
                             nativeClear((String) msg.obj);
                             break;
@@ -115,7 +161,6 @@ public final class GeolocationPermissions {
                 }
             }
         }
-        mLock.unlock();
     }
 
     /**
@@ -127,29 +172,31 @@ public final class GeolocationPermissions {
     }
 
     /**
+     * Utility function to send a message to the handler on the UI thread
+     */
+    private void postUIMessage(Message msg) {
+        if (mUIHandler != null) {
+            mUIHandler.sendMessage(msg);
+        }
+    }
+
+    /**
      * Gets the set of origins for which Geolocation permissions are stored.
      * Note that we represent the origins as strings. These are created using
      * WebCore::SecurityOrigin::toString(). As long as all 'HTML 5 modules'
      * (Database, Geolocation etc) do so, it's safe to match up origins for the
      * purposes of displaying UI.
      */
-    public Set getOrigins() {
-        // Called on the UI thread.
-        Set origins = null;
-        mLock.lock();
-        try {
-            mUpdated = false;
-            postMessage(Message.obtain(null, GET_ORIGINS));
-            while (!mUpdated) {
-                mUpdatedCondition.await();
+    public void getOrigins(ValueCallback<Set> callback) {
+        if (callback != null) {
+            if (WebViewCore.THREAD_NAME.equals(Thread.currentThread().getName())) {
+                getOriginsImpl();
+                Set origins = new HashSet(mOrigins);
+                callback.onReceiveValue(origins);
+            } else {
+                postMessage(Message.obtain(null, GET_ORIGINS, callback));
             }
-            origins = mOrigins;
-        } catch (InterruptedException e) {
-            Log.e(TAG, "Exception while waiting for update", e);
-        } finally {
-            mLock.unlock();
         }
-        return origins;
     }
 
     /**
@@ -157,33 +204,29 @@ public final class GeolocationPermissions {
      */
     private void getOriginsImpl() {
         // Called on the WebKit thread.
-        mLock.lock();
         mOrigins = nativeGetOrigins();
-        mUpdated = true;
-        mUpdatedCondition.signal();
-        mLock.unlock();
     }
 
     /**
      * Gets the permission state for the specified origin.
      */
-    public boolean getAllowed(String origin) {
-        // Called on the UI thread.
-        boolean allowed = false;
-        mLock.lock();
-        try {
-            mUpdated = false;
-            postMessage(Message.obtain(null, GET_ALLOWED, origin));
-            while (!mUpdated) {
-                mUpdatedCondition.await();
-            }
-            allowed = mAllowed;
-        } catch (InterruptedException e) {
-            Log.e(TAG, "Exception while waiting for update", e);
-        } finally {
-            mLock.unlock();
+    public void getAllowed(String origin, ValueCallback<Boolean> callback) {
+        if (callback == null) {
+            return;
         }
-        return allowed;
+        if (origin == null) {
+            callback.onReceiveValue(null);
+            return;
+        }
+        if (WebViewCore.THREAD_NAME.equals(Thread.currentThread().getName())) {
+            getAllowedImpl(origin);
+            callback.onReceiveValue(new Boolean(mAllowed));
+        } else {
+            Map values = new HashMap<String, Object>();
+            values.put(ORIGIN, origin);
+            values.put(CALLBACK, callback);
+            postMessage(Message.obtain(null, GET_ALLOWED, values));
+        }
     }
 
     /**
@@ -191,11 +234,7 @@ public final class GeolocationPermissions {
      */
     private void getAllowedImpl(String origin) {
         // Called on the WebKit thread.
-        mLock.lock();
         mAllowed = nativeGetAllowed(origin);
-        mUpdated = true;
-        mUpdatedCondition.signal();
-        mLock.unlock();
     }
 
     /**
@@ -205,7 +244,6 @@ public final class GeolocationPermissions {
      */
     public void clear(String origin) {
         // Called on the UI thread.
-        mLock.lock();
         if (mHandler == null) {
             if (mOriginsToClear == null) {
                 mOriginsToClear = new HashSet<String>();
@@ -217,7 +255,6 @@ public final class GeolocationPermissions {
         } else {
             postMessage(Message.obtain(null, CLEAR, origin));
         }
-        mLock.unlock();
     }
 
     /**
@@ -227,7 +264,6 @@ public final class GeolocationPermissions {
      */
     public void allow(String origin) {
         // Called on the UI thread.
-        mLock.lock();
         if (mHandler == null) {
             if (mOriginsToAllow == null) {
                 mOriginsToAllow = new HashSet<String>();
@@ -239,7 +275,6 @@ public final class GeolocationPermissions {
         } else {
             postMessage(Message.obtain(null, ALLOW, origin));
         }
-        mLock.unlock();
     }
 
     /**

@@ -37,6 +37,7 @@ import android.view.SurfaceView;
 import android.view.View;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
@@ -162,8 +163,10 @@ final class WebViewCore {
         // The WebIconDatabase needs to be initialized within the UI thread so
         // just request the instance here.
         WebIconDatabase.getInstance();
-        // Create the WebStorage singleton
-        WebStorage.getInstance();
+        // Create the WebStorage singleton and the UI handler
+        WebStorage.getInstance().createUIHandler();
+        // Create the UI handler for GeolocationPermissions
+        GeolocationPermissions.getInstance().createUIHandler();
         // Send a message to initialize the WebViewCore.
         Message init = sWebCoreHandler.obtainMessage(
                 WebCoreThread.INITIALIZE, this);
@@ -1519,13 +1522,14 @@ final class WebViewCore {
     // callbacks. Computes the sum of database quota for all origins.
     private long getUsedQuota() {
         WebStorage webStorage = WebStorage.getInstance();
-        Set<String> origins = webStorage.getOrigins();
+        Collection<WebStorage.Origin> origins = webStorage.getOriginsSync();
+
         if (origins == null) {
             return 0;
         }
         long usedQuota = 0;
-        for (String origin : origins) {
-            usedQuota += webStorage.getQuotaForOrigin(origin);
+        for (WebStorage.Origin website : origins) {
+            usedQuota += website.getQuota();
         }
         return usedQuota;
     }
