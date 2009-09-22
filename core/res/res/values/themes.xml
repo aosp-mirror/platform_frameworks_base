@@ -175,6 +175,9 @@
         <item name="fasttrackBadgeWidgetStyleWindowSmall">@android:style/Widget.FasttrackBadgeWidget.WindowSmall</item>
         <item name="fasttrackBadgeWidgetStyleWindowMedium">@android:style/Widget.FasttrackBadgeWidget.WindowMedium</item>
         <item name="fasttrackBadgeWidgetStyleWindowLarge">@android:style/Widget.FasttrackBadgeWidget.WindowLarge</item>
+        <item name="fasttrackBadgeWidgetStyleSmallWindowSmall">@android:style/Widget.FasttrackBadgeWidgetSmall.WindowSmall</item>
+        <item name="fasttrackBadgeWidgetStyleSmallWindowMedium">@android:style/Widget.FasttrackBadgeWidgetSmall.WindowMedium</item>
+        <item name="fasttrackBadgeWidgetStyleSmallWindowLarge">@android:style/Widget.FasttrackBadgeWidgetSmall.WindowLarge</item>
         
         <!-- Preference styles -->
         <item name="preferenceScreenStyle">@android:style/Preference.PreferenceScreen</item>
