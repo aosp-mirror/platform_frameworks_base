@@ -736,6 +736,28 @@ public class MediaScanner
                     if (time != -1) {
                         values.put(Images.Media.DATE_TAKEN, time);
                     }
+
+                    int orientation = exif.getAttributeInt(
+                        ExifInterface.TAG_ORIENTATION, -1);
+                    if (orientation != -1) {
+                        // We only recognize a subset of orientation tag values.
+                        int degree;
+                        switch(orientation) {
+                            case ExifInterface.ORIENTATION_ROTATE_90:
+                                degree = 90;
+                                break;
+                            case ExifInterface.ORIENTATION_ROTATE_180:
+                                degree = 180;
+                                break;
+                            case ExifInterface.ORIENTATION_ROTATE_270:
+                                degree = 270;
+                                break;
+                            default:
+                                degree = 0;
+                                break;
+                        }
+                        values.put(Images.Media.ORIENTATION, degree);
+                    }
                 }
             }
 
