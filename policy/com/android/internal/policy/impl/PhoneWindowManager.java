@@ -20,6 +20,7 @@ import android.app.Activity;
 import android.app.ActivityManagerNative;
 import android.app.IActivityManager;
 import android.app.IStatusBar;
+import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -68,6 +69,7 @@ import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED;
+import static android.view.WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_MASK_ADJUST;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
 import static android.view.WindowManager.LayoutParams.LAST_APPLICATION_WINDOW;
@@ -218,9 +220,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     
     WindowState mTopFullscreenOpaqueWindowState;
     boolean mForceStatusBar;
-    boolean mHideKeyguard;
+    boolean mHideLockScreen;
+    boolean mDismissKeyguard;
     boolean mHomePressed;
     Intent mHomeIntent;
+    Intent mCarDockIntent;
+    Intent mDeskDockIntent;
     boolean mSearchKeyPressed;
     boolean mConsumeSearchKeyUp;
 
@@ -471,6 +476,14 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mHomeIntent =  new Intent(Intent.ACTION_MAIN, null);
         mHomeIntent.addCategory(Intent.CATEGORY_HOME);
         mHomeIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+                | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
+        mCarDockIntent =  new Intent(Intent.ACTION_MAIN, null);
+        mCarDockIntent.addCategory(Intent.CATEGORY_CAR_DOCK);
+        mCarDockIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+                | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
+        mDeskDockIntent =  new Intent(Intent.ACTION_MAIN, null);
+        mDeskDockIntent.addCategory(Intent.CATEGORY_DESK_DOCK);
+        mDeskDockIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK
                 | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
         PowerManager pm = (PowerManager)context.getSystemService(Context.POWER_SERVICE);
         mBroadcastWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
@@ -1050,9 +1063,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
      * given the situation with the keyguard.
      */
     void launchHomeFromHotKey() {
-        if (!mHideKeyguard && mKeyguardMediator.isShowing()) {
+        if (!mHideLockScreen && mKeyguardMediator.isShowing()) {
             // don't launch home if keyguard showing
-        } else if (!mHideKeyguard && mKeyguardMediator.isInputRestricted()) {
+        } else if (!mHideLockScreen && mKeyguardMediator.isInputRestricted()) {
             // when in keyguard restricted mode, must first verify unlock
             // before launching home
             mKeyguardMediator.verifyUnlock(new OnKeyguardExitResult() {
@@ -1063,7 +1076,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         } catch (RemoteException e) {
                         }
                         sendCloseSystemWindows();
-                        mContext.startActivity(mHomeIntent);
+                        startDockOrHome();
                     }
                 }
             });
@@ -1074,7 +1087,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             } catch (RemoteException e) {
             }
             sendCloseSystemWindows();
-            mContext.startActivity(mHomeIntent);
+            startDockOrHome();
         }
     }
 
@@ -1102,7 +1115,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         mTopFullscreenOpaqueWindowState = null;
         mForceStatusBar = false;
-        mHideKeyguard = false;
+        mHideLockScreen = false;
+        mDismissKeyguard = false;
         
         // decide where the status bar goes ahead of time
         if (mStatusBar != null) {
@@ -1309,11 +1323,14 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     && win.fillsScreenLw(mW, mH, false, false)) {
                 if (DEBUG_LAYOUT) Log.v(TAG, "Fullscreen window: " + win);
                 mTopFullscreenOpaqueWindowState = win;
+                if ((attrs.flags & FLAG_SHOW_WHEN_LOCKED) != 0) {
+                    if (localLOGV) Log.i(TAG, "Setting mHideLockScreen to true by win " + win);
+                    mHideLockScreen = true;
+                }
             }
-            if ((attrs.flags & FLAG_SHOW_WHEN_LOCKED) != 0) {
-                // TODO Add a check for the window to be full screen
-                if (localLOGV) Log.i(TAG, "Setting mHideKeyguard to true by win " + win);
-                mHideKeyguard = true;
+            if ((attrs.flags & FLAG_DISMISS_KEYGUARD) != 0) {
+                if (localLOGV) Log.i(TAG, "Setting mDismissKeyguard to true by win " + win);
+                mDismissKeyguard = true;
             }
         }
         
@@ -1337,15 +1354,15 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     /** {@inheritDoc} */
-    public boolean finishLayoutLw() {
-        boolean changed = false;
+    public int finishLayoutLw() {
+        int changes = 0;
         boolean hiding = false;
         if (mStatusBar != null) {
             //Log.i(TAG, "force=" + mForceStatusBar
             //        + " top=" + mTopFullscreenOpaqueWindowState);
             if (mForceStatusBar) {
                 if (DEBUG_LAYOUT) Log.v(TAG, "Showing status bar");
-                changed |= mStatusBar.showLw(true);
+                if (mStatusBar.showLw(true)) changes |= FINISH_LAYOUT_REDO_LAYOUT;
             } else if (mTopFullscreenOpaqueWindowState != null) {
                 //Log.i(TAG, "frame: " + mTopFullscreenOpaqueWindowState.getFrameLw()
                 //        + " shown frame: " + mTopFullscreenOpaqueWindowState.getShownFrameLw());
@@ -1356,33 +1373,48 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     (lp.flags & WindowManager.LayoutParams.FLAG_FULLSCREEN) != 0;
                 if (hideStatusBar) {
                     if (DEBUG_LAYOUT) Log.v(TAG, "Hiding status bar");
-                    changed |= mStatusBar.hideLw(true);
+                    if (mStatusBar.hideLw(true)) changes |= FINISH_LAYOUT_REDO_LAYOUT;
                     hiding = true;
                 } else {
                     if (DEBUG_LAYOUT) Log.v(TAG, "Showing status bar");
-                    changed |= mStatusBar.showLw(true);
+                    if (mStatusBar.showLw(true)) changes |= FINISH_LAYOUT_REDO_LAYOUT;
                 }
             }
         }
         // Hide the key guard if a visible window explicitly specifies that it wants to be displayed
         // when the screen is locked
         if (mKeyguard != null) {
-            if (localLOGV) Log.i(TAG, "finishLayoutLw::mHideKeyguard="+mHideKeyguard);
-            if (mHideKeyguard) {
-                changed |= mKeyguard.hideLw(true);
-                if (!mKeyguardMediator.isShowing()) {
+            if (localLOGV) Log.i(TAG, "finishLayoutLw::mHideKeyguard="+mHideLockScreen);
+            if (mDismissKeyguard && mKeyguardMediator.isShowing()
+                    && !mKeyguardMediator.isSecure()) {
+                if (mKeyguard.hideLw(true)) {
+                    changes |= FINISH_LAYOUT_REDO_LAYOUT
+                            | FINISH_LAYOUT_REDO_CONFIG
+                            | FINISH_LAYOUT_REDO_WALLPAPER;
+                }
+                if (!mKeyguardMediator.isSecure()) {
                     mHandler.post(new Runnable() {
                         public void run() {
                             mKeyguardMediator.keyguardDone(true);
                         }
                     });
                 }
+            } else if (mHideLockScreen && mKeyguardMediator.isShowing()) {
+                if (mKeyguard.hideLw(true)) {
+                    changes |= FINISH_LAYOUT_REDO_LAYOUT
+                            | FINISH_LAYOUT_REDO_CONFIG
+                            | FINISH_LAYOUT_REDO_WALLPAPER;
+                }
             } else {
-                changed |= mKeyguard.showLw(true);
+                if (mKeyguard.showLw(false)) {
+                    changes |= FINISH_LAYOUT_REDO_LAYOUT
+                            | FINISH_LAYOUT_REDO_CONFIG
+                            | FINISH_LAYOUT_REDO_WALLPAPER;
+                }
             }
         }
         
-        if (changed && hiding) {
+        if (changes != 0 && hiding) {
             IStatusBar sbs = IStatusBar.Stub.asInterface(ServiceManager.getService("statusbar"));
             if (sbs != null) {
                 try {
@@ -1393,7 +1425,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             }
         }
         
-        return changed;
+        return changes;
     }
 
     /** {@inheritDoc} */
@@ -1992,6 +2024,53 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     /**
+     * Return an Intent to launch the currently active dock as home.  Returns
+     * null if the standard home should be launched.
+     * @return
+     */
+    Intent createHomeDockIntent() {
+        if (mDockState == Intent.EXTRA_DOCK_STATE_UNDOCKED) {
+            return null;
+        }
+        
+        Intent intent;
+        if (mDockState == Intent.EXTRA_DOCK_STATE_CAR) {
+            intent = mCarDockIntent;
+        } else if (mDockState == Intent.EXTRA_DOCK_STATE_DESK) {
+            intent = mDeskDockIntent;
+        } else {
+            Log.w(TAG, "Unknown dock state: " + mDockState);
+            return null;
+        }
+        
+        ActivityInfo ai = intent.resolveActivityInfo(
+                mContext.getPackageManager(), PackageManager.GET_META_DATA);
+        if (ai == null) {
+            return null;
+        }
+        
+        if (ai.metaData != null && ai.metaData.getBoolean(Intent.METADATA_DOCK_HOME)) {
+            intent = new Intent(intent);
+            intent.setClassName(ai.packageName, ai.name);
+            return intent;
+        }
+        
+        return null;
+    }
+    
+    void startDockOrHome() {
+        Intent dock = createHomeDockIntent();
+        if (dock != null) {
+            try {
+                mContext.startActivity(dock);
+                return;
+            } catch (ActivityNotFoundException e) {
+            }
+        }
+        mContext.startActivity(mHomeIntent);
+    }
+    
+    /**
      * goes to the home screen
      * @return whether it did anything
      */
@@ -2003,13 +2082,23 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             } catch (RemoteException e) {
             }
             sendCloseSystemWindows();
-            mContext.startActivity(mHomeIntent);
+            startDockOrHome();
         } else {
             // This code brings home to the front or, if it is already
             // at the front, puts the device to sleep.
             try {
                 ActivityManagerNative.getDefault().stopAppSwitches();
                 sendCloseSystemWindows();
+                Intent dock = createHomeDockIntent();
+                if (dock != null) {
+                    int result = ActivityManagerNative.getDefault()
+                            .startActivity(null, dock,
+                                    dock.resolveTypeIfNeeded(mContext.getContentResolver()),
+                                    null, 0, null, null, 0, true /* onlyIfNeeded*/, false);
+                    if (result == IActivityManager.START_RETURN_INTENT_TO_CALLER) {
+                        return false;
+                    }
+                }
                 int result = ActivityManagerNative.getDefault()
                         .startActivity(null, mHomeIntent,
                                 mHomeIntent.resolveTypeIfNeeded(mContext.getContentResolver()),

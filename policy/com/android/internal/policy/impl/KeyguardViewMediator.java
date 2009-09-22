@@ -104,7 +104,7 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
     private static final int WAKE_WHEN_READY = 8;
     private static final int KEYGUARD_DONE = 9;
     private static final int KEYGUARD_DONE_DRAWING = 10;
-    private static final int HIDE_KEYGUARD = 11;
+    private static final int KEYGUARD_DONE_AUTHENTICATING = 11;
     
     /**
      * The default amount of time we stay awake (used for all key input)
@@ -444,7 +444,7 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
         if (mUpdateMonitor.isKeyguardBypassEnabled() && mKeyboardOpen
                 && !mKeyguardViewProperties.isSecure() && mKeyguardViewManager.isShowing()) {
             if (DEBUG) Log.d(TAG, "bypassing keyguard on sliding open of keyboard with non-secure keyguard");
-            mHandler.sendEmptyMessage(HIDE_KEYGUARD);
+            mHandler.sendEmptyMessage(KEYGUARD_DONE_AUTHENTICATING);
             return true;
         }
         return false;
@@ -793,7 +793,7 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
                 case KEYGUARD_DONE_DRAWING:
                     handleKeyguardDoneDrawing();
                     return;
-                case HIDE_KEYGUARD:
+                case KEYGUARD_DONE_AUTHENTICATING:
                     keyguardDone(true);
                     return;
             }
