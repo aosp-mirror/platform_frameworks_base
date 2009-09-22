@@ -853,6 +853,7 @@ final class WebViewCore {
                             synchronized (WebViewCore.this) {
                                 mBrowserFrame.destroy();
                                 mBrowserFrame = null;
+                                mSettings.onDestroyed();
                                 mNativeClass = 0;
                             }
                             break;
