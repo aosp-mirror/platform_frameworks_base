@@ -247,7 +247,6 @@ class BluetoothEventLoop {
                 addDevice(address, properties);
             }
         }
-        mBluetoothService.getBondState().setBondState(address, BluetoothDevice.BOND_BONDING);
         return;
     }
 
@@ -404,6 +403,9 @@ class BluetoothEventLoop {
             mBluetoothService.cancelPairingUserInput(address);
             return null;
         }
+        // Set state to BONDING, for incoming connections it will be set here.
+        // For outgoing connections, it gets set when call createBond.
+        mBluetoothService.getBondState().setBondState(address, BluetoothDevice.BOND_BONDING);
         return address;
     }
 
