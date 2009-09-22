@@ -912,6 +912,7 @@ class BackupManagerService extends IBackupManager.Stub {
 
         @Override
         public void run() {
+            int status = BackupConstants.TRANSPORT_OK;
             long startRealtime = SystemClock.elapsedRealtime();
             if (DEBUG) Log.v(TAG, "Beginning backup of " + mQueue.size() + " targets");
 
@@ -920,7 +921,6 @@ class BackupManagerService extends IBackupManager.Stub {
 
             try {
                 EventLog.writeEvent(BACKUP_START_EVENT, mTransport.transportDirName());
-                int status = BackupConstants.TRANSPORT_OK;
 
                 // If we haven't stored anything yet, we need to do an init operation.
                 if (status == BackupConstants.TRANSPORT_OK && mEverStoredApps.size() == 0) {
@@ -958,11 +958,6 @@ class BackupManagerService extends IBackupManager.Stub {
                     }
                 }
 
-                // When we succeed at everything, we can remove the journal
-                if (status == BackupConstants.TRANSPORT_OK && !mJournal.delete()) {
-                    Log.e(TAG, "Unable to remove backup journal file " + mJournal);
-                }
-
                 if (status == BackupConstants.TRANSPORT_NOT_INITIALIZED) {
                     // The backend reports that our dataset has been wiped.  We need to
                     // reset all of our bookkeeping and instead run a new backup pass for
@@ -973,7 +968,31 @@ class BackupManagerService extends IBackupManager.Stub {
                 }
             } catch (Exception e) {
                 Log.e(TAG, "Error in backup thread", e);
+                status = BackupConstants.TRANSPORT_ERROR;
             } finally {
+                // If things went wrong, we need to re-stage the apps we had expected
+                // to be backing up in this pass.  This journals the package names in
+                // the current active pending-backup file, not in the we are holding
+                // here in mJournal.
+                if (status != BackupConstants.TRANSPORT_OK) {
+                    Log.w(TAG, "Backup pass unsuccessful, restaging");
+                    for (BackupRequest req : mQueue) {
+                        try {
+                            dataChanged(req.appInfo.packageName);
+                        } catch (RemoteException e) {
+                            // can't happen; it's a local call
+                        }
+                    }
+                }
+
+                // Either backup was successful, in which case we of course do not need
+                // this pass's journal any more; or it failed, in which case we just
+                // re-enqueued all of these packages in the current active journal.
+                // Either way, we no longer need this pass's journal.
+                if (!mJournal.delete()) {
+                    Log.e(TAG, "Unable to remove backup journal file " + mJournal);
+                }
+
                 // Only once we're entirely finished do we release the wakelock
                 mWakelock.release();
             }
