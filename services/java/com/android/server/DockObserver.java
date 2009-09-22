@@ -74,7 +74,8 @@ class DockObserver extends UEventObserver {
             if (category != null) {
                 intent = new Intent(Intent.ACTION_MAIN);
                 intent.addCategory(category);
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+                        | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
                 try {
                     mContext.startActivity(intent);
                 } catch (ActivityNotFoundException e) {

@@ -602,11 +602,18 @@ public interface WindowManagerPolicy {
      * returned, all windows given to layoutWindow() <em>must</em> have had a
      * frame assigned.
      *  
-     * @return Return true if layout state may have changed (so that another 
-     *         layout will be performed).
+     * @return Return any bit set of {@link #FINISH_LAYOUT_REDO_LAYOUT}
+     * and {@link #FINISH_LAYOUT_REDO_CONFIG}.
      */
-    public boolean finishLayoutLw();
+    public int finishLayoutLw();
 
+    /** Layout state may have changed (so another layout will be performed) */
+    static final int FINISH_LAYOUT_REDO_LAYOUT = 0x0001;
+    /** Configuration state may have changed */
+    static final int FINISH_LAYOUT_REDO_CONFIG = 0x0002;
+    /** Wallpaper may need to move */
+    static final int FINISH_LAYOUT_REDO_WALLPAPER = 0x0004;
+    
     /**
      * Called when animation of the windows is about to start.
      * 
