@@ -117,7 +117,7 @@ public class PipedStreamTest extends TestCase {
         for (; ;) {
             try {
                 reader.join(60 * 1000);
-                writer.join(1 * 1000);
+                writer.join(1000);
                 break;
             } catch (InterruptedException ex) {
             }
@@ -166,11 +166,11 @@ public class PipedStreamTest extends TestCase {
                     int readInt = (((int) readBytes[0] & 0xff) << 24)
                             | (((int) readBytes[1] & 0xff) << 16)
                             | (((int) readBytes[2] & 0xff) << 8)
-                            | (((int) readBytes[3] & 0xff) << 0);
+                            | (((int) readBytes[3] & 0xff));
 
 
-                    assertEquals(readInt, fib.next());
-                    assertEquals(0, readBytes[4]);
+                    assertEquals("Error at " + countRead, fib.next(), readInt);
+                    assertEquals("Error at " + countRead, 0, readBytes[4]);
                     countRead++;
                 }
             }
@@ -189,7 +189,7 @@ public class PipedStreamTest extends TestCase {
                     writeBytes[0] = (byte) (toWrite >> 24);
                     writeBytes[1] = (byte) (toWrite >> 16);
                     writeBytes[2] = (byte) (toWrite >> 8);
-                    writeBytes[3] = (byte) (toWrite >> 0);
+                    writeBytes[3] = (byte) (toWrite);
                     writeBytes[4] = 0;
                     out.write(writeBytes, 0, writeBytes.length);
                 }
@@ -203,37 +203,35 @@ public class PipedStreamTest extends TestCase {
         for (; ;) {
             try {
                 reader.join(60 * 1000);
-                writer.join(1 * 1000);
+                writer.join(1000);
                 break;
             } catch (InterruptedException ex) {
             }
         }
 
-        assertEquals(2000, reader.countRead);
-
-        if (writer.exception != null) {
-            throw new Exception(writer.exception);
-        }
         if (reader.exception != null) {
             throw new Exception(reader.exception);
         }
+        if (writer.exception != null) {
+            throw new Exception(writer.exception);
+        }
+
+        assertEquals(2000, reader.countRead);
     }
 
     @SmallTest
     public void testC() throws Exception {
         final PipedInputStream in = new PipedInputStream();
         final PipedOutputStream out = new PipedOutputStream(in);
+        final byte readBytes[] = new byte[1024 * 2];
 
         assertEquals(0, in.available());
 
         TestThread reader, writer;
 
         reader = new TestThread() {
-            Fibonacci fib = new Fibonacci();
-
             @Override
             public void runTest() throws Exception {
-                byte readBytes[] = new byte[1024 * 2];
                 int ret;
 
                 for (; ;) {
@@ -245,17 +243,6 @@ public class PipedStreamTest extends TestCase {
                             return;
                         }
                         nread += ret;
-                    }
-
-                    assertEquals(nread, readBytes.length);
-
-                    for (int i = 0; i < (readBytes.length - 4); i += 4) {
-                        int readInt = (((int) readBytes[i + 0] & 0xff) << 24)
-                                | (((int) readBytes[i + 1] & 0xff) << 16)
-                                | (((int) readBytes[i + 2] & 0xff) << 8)
-                                | (((int) readBytes[i + 3] & 0xff) << 0);
-
-                        assertEquals(readInt, fib.next());
                     }
                 }
             }
@@ -271,10 +258,10 @@ public class PipedStreamTest extends TestCase {
                 byte writeBytes[] = new byte[1024 * 2];
                 for (int i = 0; i < (writeBytes.length - 4); i += 4) {
                     int toWrite = fib.next();
-                    writeBytes[i + 0] = (byte) (toWrite >> 24);
+                    writeBytes[i    ] = (byte) (toWrite >> 24);
                     writeBytes[i + 1] = (byte) (toWrite >> 16);
                     writeBytes[i + 2] = (byte) (toWrite >> 8);
-                    writeBytes[i + 3] = (byte) (toWrite >> 0);
+                    writeBytes[i + 3] = (byte) (toWrite);
                 }
                 out.write(writeBytes, 0, writeBytes.length);
                 out.close();
@@ -287,17 +274,27 @@ public class PipedStreamTest extends TestCase {
         for (; ;) {
             try {
                 reader.join(60 * 1000);
-                writer.join(1 * 100);
+                writer.join(1000);
                 break;
             } catch (InterruptedException ex) {
             }
         }
 
+        if (reader.exception != null) {
+            throw new Exception(reader.exception);
+        }
         if (writer.exception != null) {
             throw new Exception(writer.exception);
         }
-        if (reader.exception != null) {
-            throw new Exception(reader.exception);
+
+        Fibonacci fib = new Fibonacci();
+        for (int i = 0; i < (readBytes.length - 4); i += 4) {
+            int readInt = (((int) readBytes[i] & 0xff) << 24)
+                    | (((int) readBytes[i + 1] & 0xff) << 16)
+                    | (((int) readBytes[i + 2] & 0xff) << 8)
+                    | (((int) readBytes[i + 3] & 0xff));
+
+            assertEquals("Error at " + i, readInt, fib.next());
         }
     }
 }
