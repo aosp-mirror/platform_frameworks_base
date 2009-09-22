@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-/* //device/apps/common/res/anim/fade_out.xml
-**
+/*
 ** Copyright 2007, The Android Open Source Project
 **
 ** Licensed under the Apache License, Version 2.0 (the "License"); 
@@ -17,6 +16,7 @@
 ** limitations under the License.
 */
 -->
+
 <set xmlns:android="http://schemas.android.com/apk/res/android"
         android:interpolator="@anim/accelerate_interpolator">
     <scale android:fromXScale="1.0" android:toXScale="0.9"

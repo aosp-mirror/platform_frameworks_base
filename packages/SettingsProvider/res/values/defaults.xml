@@ -29,7 +29,7 @@
     <integer name="def_screen_brightness">102</integer>
     <bool name="def_screen_brightness_automatic_mode">false</bool>
     <fraction name="def_window_animation_scale">100%</fraction>
-    <fraction name="def_window_transition_scale">0%</fraction>
+    <fraction name="def_window_transition_scale">100%</fraction>
     
     <bool name="def_bluetooth_on">false</bool>
     <bool name="def_install_non_market_apps">false</bool>

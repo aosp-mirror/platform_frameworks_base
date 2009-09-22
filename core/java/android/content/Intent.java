@@ -2318,6 +2318,18 @@ public class Intent implements Parcelable {
      */
     public static final int FLAG_ACTIVITY_REORDER_TO_FRONT = 0X00020000;
     /**
+     * If set in an Intent passed to {@link Context#startActivity Context.startActivity()},
+     * this flag will prevent the system from applying an activity transition
+     * animation to go to the next activity state.  This doesn't mean an
+     * animation will never run -- if another activity change happens that doesn't
+     * specify this flag before the activity started here is displayed, then
+     * that transition will be used.  This this flag can be put to good use
+     * when you are going to do a series of activity operations but the
+     * animation seen by the user shouldn't be driven by the first activity
+     * change but rather a later one.
+     */
+    public static final int FLAG_ACTIVITY_NO_ANIMATION = 0X00010000;
+    /**
      * If set, when sending a broadcast only registered receivers will be
      * called -- no BroadcastReceiver components will be launched.
      */

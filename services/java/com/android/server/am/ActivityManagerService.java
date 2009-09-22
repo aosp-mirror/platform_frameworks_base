@@ -458,6 +458,13 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             = new ArrayList<HistoryRecord>();
 
     /**
+     * Animations that for the current transition have requested not to
+     * be considered for the transition animation.
+     */
+    final ArrayList<HistoryRecord> mNoAnimActivities
+            = new ArrayList<HistoryRecord>();
+    
+    /**
      * List of intents that were used to start the most recent tasks.
      */
     final ArrayList<TaskRecord> mRecentTasks
@@ -2249,6 +2256,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         next.resumeKeyDispatchingLocked();
         ensureActivitiesVisibleLocked(null, 0);
         mWindowManager.executeAppTransition();
+        mNoAnimActivities.clear();
 
         // Mark the point when the activity is resuming
         // TODO: To be more accurate, the mark should be before the onCreate,
@@ -2565,6 +2573,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             // Make sure we have executed any pending transitions, since there
             // should be nothing left to do at this point.
             mWindowManager.executeAppTransition();
+            mNoAnimActivities.clear();
             return false;
         }
 
@@ -2575,6 +2584,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             // Make sure we have executed any pending transitions, since there
             // should be nothing left to do at this point.
             mWindowManager.executeAppTransition();
+            mNoAnimActivities.clear();
             return false;
         }
         
@@ -2637,17 +2647,25 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             if (prev.finishing) {
                 if (DEBUG_TRANSITION) Log.v(TAG,
                         "Prepare close transition: prev=" + prev);
-                mWindowManager.prepareAppTransition(prev.task == next.task
-                        ? WindowManagerPolicy.TRANSIT_ACTIVITY_CLOSE
-                        : WindowManagerPolicy.TRANSIT_TASK_CLOSE);
+                if (mNoAnimActivities.contains(prev)) {
+                    mWindowManager.prepareAppTransition(WindowManagerPolicy.TRANSIT_NONE);
+                } else {
+                    mWindowManager.prepareAppTransition(prev.task == next.task
+                            ? WindowManagerPolicy.TRANSIT_ACTIVITY_CLOSE
+                            : WindowManagerPolicy.TRANSIT_TASK_CLOSE);
+                }
                 mWindowManager.setAppWillBeHidden(prev);
                 mWindowManager.setAppVisibility(prev, false);
             } else {
                 if (DEBUG_TRANSITION) Log.v(TAG,
                         "Prepare open transition: prev=" + prev);
-                mWindowManager.prepareAppTransition(prev.task == next.task
-                        ? WindowManagerPolicy.TRANSIT_ACTIVITY_OPEN
-                        : WindowManagerPolicy.TRANSIT_TASK_OPEN);
+                if (mNoAnimActivities.contains(next)) {
+                    mWindowManager.prepareAppTransition(WindowManagerPolicy.TRANSIT_NONE);
+                } else {
+                    mWindowManager.prepareAppTransition(prev.task == next.task
+                            ? WindowManagerPolicy.TRANSIT_ACTIVITY_OPEN
+                            : WindowManagerPolicy.TRANSIT_TASK_OPEN);
+                }
             }
             if (false) {
                 mWindowManager.setAppWillBeHidden(prev);
@@ -2656,7 +2674,11 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         } else if (mHistory.size() > 1) {
             if (DEBUG_TRANSITION) Log.v(TAG,
                     "Prepare open transition: no previous");
-            mWindowManager.prepareAppTransition(WindowManagerPolicy.TRANSIT_ACTIVITY_OPEN);
+            if (mNoAnimActivities.contains(next)) {
+                mWindowManager.prepareAppTransition(WindowManagerPolicy.TRANSIT_NONE);
+            } else {
+                mWindowManager.prepareAppTransition(WindowManagerPolicy.TRANSIT_ACTIVITY_OPEN);
+            }
         }
 
         if (next.app != null && next.app.thread != null) {
@@ -2699,6 +2721,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                     mHandler.sendEmptyMessage(RESUME_TOP_ACTIVITY_MSG);
                 }
                 mWindowManager.executeAppTransition();
+                mNoAnimActivities.clear();
                 return true;
             }
             
@@ -2859,9 +2882,18 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             }
             if (DEBUG_TRANSITION) Log.v(TAG,
                     "Prepare open transition: starting " + r);
-            mWindowManager.prepareAppTransition(newTask
-                    ? WindowManagerPolicy.TRANSIT_TASK_OPEN
-                    : WindowManagerPolicy.TRANSIT_ACTIVITY_OPEN);
+            if ((r.intent.getFlags()&Intent.FLAG_ACTIVITY_NO_ANIMATION) != 0) {
+                mWindowManager.prepareAppTransition(WindowManagerPolicy.TRANSIT_NONE);
+                mNoAnimActivities.add(r);
+            } else if ((r.intent.getFlags()&Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET) != 0) {
+                mWindowManager.prepareAppTransition(WindowManagerPolicy.TRANSIT_TASK_OPEN);
+                mNoAnimActivities.remove(r);
+            } else {
+                mWindowManager.prepareAppTransition(newTask
+                        ? WindowManagerPolicy.TRANSIT_TASK_OPEN
+                        : WindowManagerPolicy.TRANSIT_ACTIVITY_OPEN);
+                mNoAnimActivities.remove(r);
+            }
             mWindowManager.addAppToken(
                     addPos, r, r.task.taskId, r.info.screenOrientation, r.fullscreen);
             boolean doShow = true;
@@ -3336,7 +3368,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                         if (callerAtFront) {
                             // We really do want to push this one into the
                             // user's face, right now.
-                            moveTaskToFrontLocked(taskTop.task);
+                            moveTaskToFrontLocked(taskTop.task, r);
                         }
                     }
                     // If the caller has requested that the target task be
@@ -6922,14 +6954,14 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 for (int i=0; i<N; i++) {
                     TaskRecord tr = mRecentTasks.get(i);
                     if (tr.taskId == task) {
-                        moveTaskToFrontLocked(tr);
+                        moveTaskToFrontLocked(tr, null);
                         return;
                     }
                 }
                 for (int i=mHistory.size()-1; i>=0; i--) {
                     HistoryRecord hr = (HistoryRecord)mHistory.get(i);
                     if (hr.task.taskId == task) {
-                        moveTaskToFrontLocked(hr.task);
+                        moveTaskToFrontLocked(hr.task, null);
                         return;
                     }
                 }
@@ -6939,7 +6971,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         }
     }
 
-    private final void moveTaskToFrontLocked(TaskRecord tr) {
+    private final void moveTaskToFrontLocked(TaskRecord tr, HistoryRecord reason) {
         if (DEBUG_SWITCH) Log.v(TAG, "moveTaskToFront: " + tr);
 
         final int task = tr.taskId;
@@ -6950,10 +6982,6 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             return;
         }
 
-        if (DEBUG_TRANSITION) Log.v(TAG,
-                "Prepare to front transition: task=" + tr);
-        mWindowManager.prepareAppTransition(WindowManagerPolicy.TRANSIT_TASK_TO_FRONT);
-        
         ArrayList moved = new ArrayList();
 
         // Applying the affinities may have removed entries from the history,
@@ -6982,6 +7010,19 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             pos--;
         }
 
+        if (DEBUG_TRANSITION) Log.v(TAG,
+                "Prepare to front transition: task=" + tr);
+        if (reason != null &&
+                (reason.intent.getFlags()&Intent.FLAG_ACTIVITY_NO_ANIMATION) != 0) {
+            mWindowManager.prepareAppTransition(WindowManagerPolicy.TRANSIT_NONE);
+            HistoryRecord r = topRunningActivityLocked(null);
+            if (r != null) {
+                mNoAnimActivities.add(r);
+            }
+        } else {
+            mWindowManager.prepareAppTransition(WindowManagerPolicy.TRANSIT_TASK_TO_FRONT);
+        }
+        
         mWindowManager.moveAppTokensToTop(moved);
         if (VALIDATE_TOKENS) {
             mWindowManager.validateAppTokens(mHistory);
@@ -7007,7 +7048,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 }
             }
             final long origId = Binder.clearCallingIdentity();
-            moveTaskToBackLocked(task);
+            moveTaskToBackLocked(task, null);
             Binder.restoreCallingIdentity(origId);
         }
     }
@@ -7026,7 +7067,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             final long origId = Binder.clearCallingIdentity();
             int taskId = getTaskForActivityLocked(token, !nonRoot);
             if (taskId >= 0) {
-                return moveTaskToBackLocked(taskId);
+                return moveTaskToBackLocked(taskId, null);
             }
             Binder.restoreCallingIdentity(origId);
         }
@@ -7044,7 +7085,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
      * @param task The taskId to collect and move to the bottom.
      * @return Returns true if the move completed, false if not.
      */
-    private final boolean moveTaskToBackLocked(int task) {
+    private final boolean moveTaskToBackLocked(int task, HistoryRecord reason) {
         Log.i(TAG, "moveTaskToBack: " + task);
         
         // If we have a watcher, preflight the move before committing to it.  First check
@@ -7095,6 +7136,16 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             pos++;
         }
 
+        if (reason != null &&
+                (reason.intent.getFlags()&Intent.FLAG_ACTIVITY_NO_ANIMATION) != 0) {
+            mWindowManager.prepareAppTransition(WindowManagerPolicy.TRANSIT_NONE);
+            HistoryRecord r = topRunningActivityLocked(null);
+            if (r != null) {
+                mNoAnimActivities.add(r);
+            }
+        } else {
+            mWindowManager.prepareAppTransition(WindowManagerPolicy.TRANSIT_TASK_TO_FRONT);
+        }
         mWindowManager.moveAppTokensToBottom(moved);
         if (VALIDATE_TOKENS) {
             mWindowManager.validateAppTokens(mHistory);

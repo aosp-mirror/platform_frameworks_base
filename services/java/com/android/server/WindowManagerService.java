@@ -372,7 +372,7 @@ public class WindowManagerService extends IWindowManager.Stub
     // perform or TRANSIT_NONE if we are not waiting.  If we are waiting,
     // mOpeningApps and mClosingApps are the lists of tokens that will be
     // made visible or hidden at the next transition.
-    int mNextAppTransition = WindowManagerPolicy.TRANSIT_NONE;
+    int mNextAppTransition = WindowManagerPolicy.TRANSIT_UNSET;
     boolean mAppTransitionReady = false;
     boolean mAppTransitionRunning = false;
     boolean mAppTransitionTimeout = false;
@@ -932,7 +932,7 @@ public class WindowManagerService extends IWindowManager.Stub
                             + " layer=" + highestTarget.mAnimLayer
                             + " new layer=" + w.mAnimLayer);
 
-                    if (mNextAppTransition != WindowManagerPolicy.TRANSIT_NONE) {
+                    if (mNextAppTransition != WindowManagerPolicy.TRANSIT_UNSET) {
                         // If we are currently setting up for an animation,
                         // hold everything until we can find out what will happen.
                         mInputMethodTargetWaitingAnim = true;
@@ -1270,7 +1270,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
         }
 
-        if (mNextAppTransition != WindowManagerPolicy.TRANSIT_NONE) {
+        if (mNextAppTransition != WindowManagerPolicy.TRANSIT_UNSET) {
             // If we are currently waiting for an app transition, and either
             // the current target or the next target are involved with it,
             // then hold off on doing anything with the wallpaper.
@@ -2542,7 +2542,7 @@ public class WindowManagerService extends IWindowManager.Stub
                                 : com.android.internal.R.styleable.WindowAnimation_wallpaperIntraCloseExitAnimation;
                         break;
                 }
-                a = loadAnimation(lp, animAttr);
+                a = animAttr != 0 ? loadAnimation(lp, animAttr) : null;
                 if (DEBUG_ANIM) Log.v(TAG, "applyAnimation: wtoken=" + wtoken
                         + " anim=" + a
                         + " animAttr=0x" + Integer.toHexString(animAttr)
@@ -2990,7 +2990,8 @@ public class WindowManagerService extends IWindowManager.Stub
                     TAG, "Prepare app transition: transit=" + transit
                     + " mNextAppTransition=" + mNextAppTransition);
             if (!mDisplayFrozen) {
-                if (mNextAppTransition == WindowManagerPolicy.TRANSIT_NONE) {
+                if (mNextAppTransition == WindowManagerPolicy.TRANSIT_UNSET
+                        || mNextAppTransition == WindowManagerPolicy.TRANSIT_NONE) {
                     mNextAppTransition = transit;
                 } else if (transit == WindowManagerPolicy.TRANSIT_TASK_OPEN
                         && mNextAppTransition == WindowManagerPolicy.TRANSIT_TASK_CLOSE) {
@@ -3025,7 +3026,7 @@ public class WindowManagerService extends IWindowManager.Stub
         synchronized(mWindowMap) {
             if (DEBUG_APP_TRANSITIONS) Log.v(
                     TAG, "Execute app transition: mNextAppTransition=" + mNextAppTransition);
-            if (mNextAppTransition != WindowManagerPolicy.TRANSIT_NONE) {
+            if (mNextAppTransition != WindowManagerPolicy.TRANSIT_UNSET) {
                 mAppTransitionReady = true;
                 final long origId = Binder.clearCallingIdentity();
                 performLayoutAndPlaceSurfacesLocked();
@@ -3228,7 +3229,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
             boolean runningAppAnimation = false;
 
-            if (transit != WindowManagerPolicy.TRANSIT_NONE) {
+            if (transit != WindowManagerPolicy.TRANSIT_UNSET) {
                 if (wtoken.animation == sDummyAnimation) {
                     wtoken.animation = null;
                 }
@@ -3328,7 +3329,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
             // If we are preparing an app transition, then delay changing
             // the visibility of this token until we execute that transition.
-            if (!mDisplayFrozen && mNextAppTransition != WindowManagerPolicy.TRANSIT_NONE) {
+            if (!mDisplayFrozen && mNextAppTransition != WindowManagerPolicy.TRANSIT_UNSET) {
                 // Already in requested state, don't do anything more.
                 if (wtoken.hiddenRequested != visible) {
                     return;
@@ -3367,7 +3368,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
 
             final long origId = Binder.clearCallingIdentity();
-            setTokenVisibilityLocked(wtoken, null, visible, WindowManagerPolicy.TRANSIT_NONE, true);
+            setTokenVisibilityLocked(wtoken, null, visible, WindowManagerPolicy.TRANSIT_UNSET, true);
             wtoken.updateReportedVisibilityLocked();
             Binder.restoreCallingIdentity(origId);
         }
@@ -3493,13 +3494,13 @@ public class WindowManagerService extends IWindowManager.Stub
             mTokenList.remove(basewtoken);
             if (basewtoken != null && (wtoken=basewtoken.appWindowToken) != null) {
                 if (DEBUG_APP_TRANSITIONS) Log.v(TAG, "Removing app token: " + wtoken);
-                delayed = setTokenVisibilityLocked(wtoken, null, false, WindowManagerPolicy.TRANSIT_NONE, true);
+                delayed = setTokenVisibilityLocked(wtoken, null, false, WindowManagerPolicy.TRANSIT_UNSET, true);
                 wtoken.inPendingTransaction = false;
                 mOpeningApps.remove(wtoken);
                 wtoken.waitingToShow = false;
                 if (mClosingApps.contains(wtoken)) {
                     delayed = true;
-                } else if (mNextAppTransition != WindowManagerPolicy.TRANSIT_NONE) {
+                } else if (mNextAppTransition != WindowManagerPolicy.TRANSIT_UNSET) {
                     mClosingApps.add(wtoken);
                     wtoken.waitingToHide = true;
                     delayed = true;
@@ -3781,7 +3782,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 AppWindowToken wt = findAppWindowToken(tokens.get(i));
                 if (wt != null) {
                     mAppTokens.add(wt);
-                    if (mNextAppTransition != WindowManagerPolicy.TRANSIT_NONE) {
+                    if (mNextAppTransition != WindowManagerPolicy.TRANSIT_UNSET) {
                         mToTopApps.remove(wt);
                         mToBottomApps.remove(wt);
                         mToTopApps.add(wt);
@@ -3791,7 +3792,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
             }
             
-            if (mNextAppTransition == WindowManagerPolicy.TRANSIT_NONE) {
+            if (mNextAppTransition == WindowManagerPolicy.TRANSIT_UNSET) {
                 moveAppWindowsLocked(tokens, mAppTokens.size());
             }
         }
@@ -3813,7 +3814,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 AppWindowToken wt = findAppWindowToken(tokens.get(i));
                 if (wt != null) {
                     mAppTokens.add(pos, wt);
-                    if (mNextAppTransition != WindowManagerPolicy.TRANSIT_NONE) {
+                    if (mNextAppTransition != WindowManagerPolicy.TRANSIT_UNSET) {
                         mToTopApps.remove(wt);
                         mToBottomApps.remove(wt);
                         mToBottomApps.add(i, wt);
@@ -3824,7 +3825,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
             }
             
-            if (mNextAppTransition == WindowManagerPolicy.TRANSIT_NONE) {
+            if (mNextAppTransition == WindowManagerPolicy.TRANSIT_UNSET) {
                 moveAppWindowsLocked(tokens, 0);
             }
         }
@@ -7459,7 +7460,7 @@ public class WindowManagerService extends IWindowManager.Stub
          */
         boolean isReadyForDisplay() {
             if (mRootToken.waitingToShow &&
-                    mNextAppTransition != WindowManagerPolicy.TRANSIT_NONE) {
+                    mNextAppTransition != WindowManagerPolicy.TRANSIT_UNSET) {
                 return false;
             }
             final AppWindowToken atoken = mAppToken;
@@ -8530,7 +8531,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
                 case APP_TRANSITION_TIMEOUT: {
                     synchronized (mWindowMap) {
-                        if (mNextAppTransition != WindowManagerPolicy.TRANSIT_NONE) {
+                        if (mNextAppTransition != WindowManagerPolicy.TRANSIT_UNSET) {
                             if (DEBUG_APP_TRANSITIONS) Log.v(TAG,
                                     "*** APP TRANSITION TIMEOUT");
                             mAppTransitionReady = true;
@@ -9074,9 +9075,9 @@ public class WindowManagerService extends IWindowManager.Stub
                         if (DEBUG_APP_TRANSITIONS) Log.v(TAG, "**** GOOD TO GO");
                         int transit = mNextAppTransition;
                         if (mSkipAppTransitionAnimation) {
-                            transit = WindowManagerPolicy.TRANSIT_NONE;
+                            transit = WindowManagerPolicy.TRANSIT_UNSET;
                         }
-                        mNextAppTransition = WindowManagerPolicy.TRANSIT_NONE;
+                        mNextAppTransition = WindowManagerPolicy.TRANSIT_UNSET;
                         mAppTransitionReady = false;
                         mAppTransitionRunning = true;
                         mAppTransitionTimeout = false;
@@ -10092,8 +10093,8 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         mDisplayFrozen = true;
-        if (mNextAppTransition != WindowManagerPolicy.TRANSIT_NONE) {
-            mNextAppTransition = WindowManagerPolicy.TRANSIT_NONE;
+        if (mNextAppTransition != WindowManagerPolicy.TRANSIT_UNSET) {
+            mNextAppTransition = WindowManagerPolicy.TRANSIT_UNSET;
             mAppTransitionReady = true;
         }
 

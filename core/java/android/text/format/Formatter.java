@@ -32,6 +32,18 @@ public final class Formatter {
      * @return formated string with the number
      */
     public static String formatFileSize(Context context, long number) {
+        return formatFileSize(context, number, false);
+    }
+    
+    /**
+     * Like {@link #formatFileSize}, but trying to generate shorter numbers
+     * (showing fewer digits of precisin).
+     */
+    public static String formatShortFileSize(Context context, long number) {
+        return formatFileSize(context, number, true);
+    }
+    
+    private static String formatFileSize(Context context, long number, boolean shorter) {
         if (context == null) {
             return "";
         }
@@ -58,13 +70,24 @@ public final class Formatter {
             suffix = com.android.internal.R.string.petabyteShort;
             result = result / 1024;
         }
-        if (result < 100) {
-            String value = String.format("%.2f", result);
-            return context.getResources().
-                getString(com.android.internal.R.string.fileSizeSuffix,
-                          value, context.getString(suffix));
+        String value;
+        if (result < 1) {
+            value = String.format("%.2f", result);
+        } else if (result < 10) {
+            if (shorter) {
+                value = String.format("%.1f", result);
+            } else {
+                value = String.format("%.2f", result);
+            }
+        } else if (result < 100) {
+            if (shorter) {
+                value = String.format("%.0f", result);
+            } else {
+                value = String.format("%.2f", result);
+            }
+        } else {
+            value = String.format("%.0f", result);
         }
-        String value = String.format("%.0f", result);
         return context.getResources().
             getString(com.android.internal.R.string.fileSizeSuffix,
                       value, context.getString(suffix));
