@@ -22,24 +22,6 @@ import android.os.ParcelFileDescriptor;
 
 /** {@hide} */
 interface IBackupTransport {
-/* STOPSHIP - don't ship with this comment in place
-    Things the transport interface has to do:
-    1. set up the connection to the destination
-        - set up encryption
-        - for Google cloud, log in using the user's gaia credential or whatever
-        - for adb, just set up the all-in-one destination file
-    2. send each app's backup transaction
-        - parse the data file for key/value pointers etc
-        - send key/blobsize set to the Google cloud, get back quota ok/rejected response
-        - sd/adb doesn't preflight; no per-app quota
-        - app's entire change is essentially atomic
-        - cloud transaction encrypts then sends each key/value pair separately; we already
-          parsed the data when preflighting so we don't have to again here
-        - sd target streams raw data into encryption envelope then to sd?
-    3. shut down connection to destination
-        - cloud: tear down connection etc
-        - adb: close the file
-*/
     /**
      * Ask the transport where, on local device storage, to keep backup state blobs.
      * This is per-transport so that mock transports used for testing can coexist with
@@ -68,6 +50,17 @@ interface IBackupTransport {
     long requestBackupTime();
 
     /**
+     * Initialize the server side storage for this device, erasing all stored data.
+     * The transport may send the request immediately, or may buffer it.  After
+     * this is called, {@link #finishBackup} must be called to ensure the request
+     * is sent and received successfully.
+     *
+     * @return One of {@link BackupConstants#TRANSPORT_OK} (OK so far) or
+     *   {@link BackupConstants#TRANSPORT_ERROR} (on network error or other failure).
+     */
+    int initializeDevice();
+
+    /**
      * Send one application's data to the backup destination.  The transport may send
      * the data immediately, or may buffer it.  After this is called, {@link #finishBackup}
      * must be called to ensure the data is sent and recorded successfully.
@@ -81,15 +74,12 @@ interface IBackupTransport {
      *   will be erased prior to the storage of the data provided here.  The purpose of this
      *   is to provide a guarantee that no stale data exists in the restore set when the
      *   device begins providing backups.
-     * @return If everything is okay so far, returns zero (but {@link #finishBackup} must
-     *   still be called).  If the backend dataset has unexpectedly become unavailable,
-     *   such as when it is deleted after a period of device inactivity, returns {@link
-     *   BackupManager#DATASET_UNAVAILABLE}; in this case, the transport should be
-     *   reinitalized and the entire backup pass restarted.  Any other nonzero value is a
-     *   fatal error requiring that this package's backup be aborted and rescheduled.
+     * @return one of {@link BackupConstants#TRANSPORT_OK} (OK so far),
+     *  {@link BackupConstants#TRANSPORT_ERROR} (on network error or other failure), or
+     *  {@link BackupConstants#TRANSPORT_NOT_INITIALIZED} (if the backend dataset has
+     *  become lost due to inactive expiry or some other reason and needs re-initializing)
      */
-    int performBackup(in PackageInfo packageInfo, in ParcelFileDescriptor inFd,
-            boolean wipeAllFirst);
+    int performBackup(in PackageInfo packageInfo, in ParcelFileDescriptor inFd);
 
     /**
      * Erase the give application's data from the backup destination.  This clears
@@ -97,10 +87,9 @@ interface IBackupTransport {
      * the app had never yet been backed up.  After this is called, {@link finishBackup}
      * must be called to ensure that the operation is recorded successfully.
      *
-     * @return false if errors occurred (the backup should be aborted and rescheduled),
-     *   true if everything is OK so far (but {@link #finishBackup} must be called).
+     * @return the same error codes as {@link #performBackup}.
      */
-    boolean clearBackupData(in PackageInfo packageInfo);
+    int clearBackupData(in PackageInfo packageInfo);
 
     /**
      * Finish sending application data to the backup destination.  This must be
@@ -108,10 +97,9 @@ interface IBackupTransport {
      * all data is sent.  Only when this method returns true can a backup be assumed
      * to have succeeded.
      *
-     * @return false if errors occurred (the backup should be aborted and rescheduled),
-     *   true if everything is OK.
+     * @return the same error codes as {@link #performBackup}.
      */
-    boolean finishBackup();
+    int finishBackup();
 
     /**
      * Get the set of backups currently available over this transport.
@@ -129,10 +117,11 @@ interface IBackupTransport {
      * @param token A backup token as returned by {@link #getAvailableRestoreSets}.
      * @param packages List of applications to restore (if data is available).
      *   Application data will be restored in the order given.
-     * @return false if errors occurred (the restore should be aborted and rescheduled),
-     *   true if everything is OK so far (go ahead and call {@link #nextRestorePackage}).
+     * @return One of {@link BackupConstants#TRANSPORT_OK} (OK so far, call
+     *   {@link #nextRestorePackage}) or {@link BackupConstants#TRANSPORT_ERROR}
+     *   (an error occurred, the restore should be aborted and rescheduled).
      */
-    boolean startRestore(long token, in PackageInfo[] packages);
+    int startRestore(long token, in PackageInfo[] packages);
 
     /**
      * Get the package name of the next application with data in the backup store.
@@ -145,10 +134,9 @@ interface IBackupTransport {
     /**
      * Get the data for the application returned by {@link #nextRestorePackage}.
      * @param data An open, writable file into which the backup data should be stored.
-     * @return false if errors occurred (the restore should be aborted and rescheduled),
-     *   true if everything is OK so far (go ahead and call {@link #nextRestorePackage}).
+     * @return the same error codes as {@link #nextRestorePackage}.
      */
-    boolean getRestoreData(in ParcelFileDescriptor outFd);
+    int getRestoreData(in ParcelFileDescriptor outFd);
 
     /**
      * End a restore session (aborting any in-process data transfer as necessary),
