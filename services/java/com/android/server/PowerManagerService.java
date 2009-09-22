@@ -2131,7 +2131,9 @@ class PowerManagerService extends IPowerManager.Stub
         long milliseconds = event.timestamp / 1000000;
         synchronized (mLocks) {
             float distance = event.values[0];
-            if (distance >= 0.0 && distance < PROXIMITY_THRESHOLD) {
+            // compare against getMaximumRange to support sensors that only return 0 or 1
+            if (distance >= 0.0 && distance < PROXIMITY_THRESHOLD &&
+                    distance < mProximitySensor.getMaximumRange()) {
                 if (mSpew) {
                     Log.d(TAG, "onSensorChanged: proximity active, distance: " + distance);
                 }
