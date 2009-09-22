@@ -1238,6 +1238,7 @@ public class BluetoothService extends IBluetooth.Stub {
     /*package*/ synchronized void sendUuidIntent(String address) {
         ParcelUuid[] uuid = getUuidFromCache(address);
         Intent intent = new Intent(BluetoothDevice.ACTION_UUID);
+        intent.putExtra(BluetoothDevice.EXTRA_DEVICE, mAdapter.getRemoteDevice(address));
         intent.putExtra(BluetoothDevice.EXTRA_UUID, uuid);
         mContext.sendBroadcast(intent, BLUETOOTH_ADMIN_PERM);
 
