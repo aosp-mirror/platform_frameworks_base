@@ -31,7 +31,6 @@ import android.content.ServiceConnection;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageDataObserver;
 import android.content.pm.PackageInfo;
-import android.content.pm.PermissionInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.PackageManager;
 import android.content.pm.Signature;
@@ -67,6 +66,7 @@ import com.android.server.PackageManagerBackupAgent.Metadata;
 import java.io.EOFException;
 import java.io.File;
 import java.io.FileDescriptor;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.RandomAccessFile;
@@ -89,11 +89,14 @@ class BackupManagerService extends IBackupManager.Stub {
     // the first backup pass.
     private static final long FIRST_BACKUP_INTERVAL = 12 * AlarmManager.INTERVAL_HOUR;
 
-    private static final String RUN_BACKUP_ACTION = "_backup_run_";
+    private static final String RUN_BACKUP_ACTION = "android.backup.intent.RUN";
+    private static final String RUN_INITIALIZE_ACTION = "android.backup.intent.INIT";
+    private static final String RUN_CLEAR_ACTION = "android.backup.intent.CLEAR";
     private static final int MSG_RUN_BACKUP = 1;
     private static final int MSG_RUN_FULL_BACKUP = 2;
     private static final int MSG_RUN_RESTORE = 3;
     private static final int MSG_RUN_CLEAR = 4;
+    private static final int MSG_RUN_INITIALIZE = 5;
 
     // Event tags -- see system/core/logcat/event-log-tags
     private static final int BACKUP_DATA_CHANGED_EVENT = 2820;
@@ -123,9 +126,8 @@ class BackupManagerService extends IBackupManager.Stub {
     boolean mProvisioned;
     PowerManager.WakeLock mWakelock;
     final BackupHandler mBackupHandler = new BackupHandler();
-    PendingIntent mRunBackupIntent;
-    BroadcastReceiver mRunBackupReceiver;
-    IntentFilter mRunBackupFilter;
+    PendingIntent mRunBackupIntent, mRunInitIntent;
+    BroadcastReceiver mRunBackupReceiver, mRunInitReceiver;
     // map UIDs to the set of backup client services within that UID's app set
     final SparseArray<HashSet<ApplicationInfo>> mBackupParticipants
         = new SparseArray<HashSet<ApplicationInfo>>();
@@ -206,6 +208,10 @@ class BackupManagerService extends IBackupManager.Stub {
     private RandomAccessFile mEverStoredStream;
     HashSet<String> mEverStoredApps = new HashSet<String>();
 
+    // Persistently track the need to do a full init
+    static final String INIT_SENTINEL_FILE_NAME = "_need_init_";
+    HashSet<String> mPendingInits = new HashSet<String>();  // transport names
+    boolean mInitInProgress = false;
 
     public BackupManagerService(Context context) {
         mContext = context;
@@ -218,22 +224,31 @@ class BackupManagerService extends IBackupManager.Stub {
         // Set up our bookkeeping
         boolean areEnabled = Settings.Secure.getInt(context.getContentResolver(),
                 Settings.Secure.BACKUP_ENABLED, 0) != 0;
-        // !!! TODO: mProvisioned needs to default to 0, not 1.
         mProvisioned = Settings.Secure.getInt(context.getContentResolver(),
                 Settings.Secure.BACKUP_PROVISIONED, 0) != 0;
         mBaseStateDir = new File(Environment.getDataDirectory(), "backup");
         mDataDir = Environment.getDownloadCacheDirectory();
 
+        // Alarm receivers for scheduled backups & initialization operations
         mRunBackupReceiver = new RunBackupReceiver();
-        mRunBackupFilter = new IntentFilter();
-        mRunBackupFilter.addAction(RUN_BACKUP_ACTION);
-        context.registerReceiver(mRunBackupReceiver, mRunBackupFilter);
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(RUN_BACKUP_ACTION);
+        context.registerReceiver(mRunBackupReceiver, filter,
+                android.Manifest.permission.BACKUP, null);
+
+        mRunInitReceiver = new RunInitializeReceiver();
+        filter = new IntentFilter();
+        filter.addAction(RUN_INITIALIZE_ACTION);
+        context.registerReceiver(mRunInitReceiver, filter,
+                android.Manifest.permission.BACKUP, null);
 
         Intent backupIntent = new Intent(RUN_BACKUP_ACTION);
-        // !!! TODO: restrict delivery to our receiver; the naive setClass() doesn't seem to work
-        //backupIntent.setClass(context, mRunBackupReceiver.getClass());
         backupIntent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
         mRunBackupIntent = PendingIntent.getBroadcast(context, MSG_RUN_BACKUP, backupIntent, 0);
+
+        Intent initIntent = new Intent(RUN_INITIALIZE_ACTION);
+        backupIntent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
+        mRunInitIntent = PendingIntent.getBroadcast(context, MSG_RUN_INITIALIZE, initIntent, 0);
 
         // Set up the backup-request journaling
         mJournalDir = new File(mBaseStateDir, "pending");
@@ -287,14 +302,52 @@ class BackupManagerService extends IBackupManager.Stub {
     private class RunBackupReceiver extends BroadcastReceiver {
         public void onReceive(Context context, Intent intent) {
             if (RUN_BACKUP_ACTION.equals(intent.getAction())) {
-                if (DEBUG) Log.v(TAG, "Running a backup pass");
-
                 synchronized (mQueueLock) {
-                    // acquire a wakelock and pass it to the backup thread.  it will
-                    // be released once backup concludes.
+                    if (mPendingInits.size() > 0) {
+                        // If there are pending init operations, we process those
+                        // and then settle into the usual periodic backup schedule.
+                        if (DEBUG) Log.v(TAG, "Init pending at scheduled backup");
+                        try {
+                            mAlarmManager.cancel(mRunInitIntent);
+                            mRunInitIntent.send();
+                        } catch (PendingIntent.CanceledException ce) {
+                            Log.e(TAG, "Run init intent cancelled");
+                            // can't really do more than bail here
+                        }
+                    } else {
+                        // Don't run backups now if we're disabled, not yet
+                        // fully set up, or racing with an initialize pass.
+                        if (mEnabled && mProvisioned && !mInitInProgress) {
+                            if (DEBUG) Log.v(TAG, "Running a backup pass");
+
+                            // Acquire the wakelock and pass it to the backup thread.  it will
+                            // be released once backup concludes.
+                            mWakelock.acquire();
+
+                            Message msg = mBackupHandler.obtainMessage(MSG_RUN_BACKUP);
+                            mBackupHandler.sendMessage(msg);
+                        } else {
+                            Log.w(TAG, "Backup pass but e=" + mEnabled + " p=" + mProvisioned
+                                    + " i=" + mInitInProgress);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private class RunInitializeReceiver extends BroadcastReceiver {
+        public void onReceive(Context context, Intent intent) {
+            if (RUN_INITIALIZE_ACTION.equals(intent.getAction())) {
+                synchronized (mQueueLock) {
+                    if (DEBUG) Log.v(TAG, "Running a device init");
+                    mInitInProgress = true;
+
+                    // Acquire the wakelock and pass it to the init thread.  it will
+                    // be released once init concludes.
                     mWakelock.acquire();
 
-                    Message msg = mBackupHandler.obtainMessage(MSG_RUN_BACKUP);
+                    Message msg = mBackupHandler.obtainMessage(MSG_RUN_INITIALIZE);
                     mBackupHandler.sendMessage(msg);
                 }
             }
@@ -408,6 +461,37 @@ class BackupManagerService extends IBackupManager.Stub {
         }
     }
 
+    // Maintain persistent state around whether need to do an initialize operation.
+    // Must be called with the queue lock held.
+    void recordInitPendingLocked(boolean isPending, String transportName) {
+        if (DEBUG) Log.i(TAG, "recordInitPendingLocked: " + isPending
+                + " on transport " + transportName);
+        try {
+            IBackupTransport transport = getTransport(transportName);
+            String transportDirName = transport.transportDirName();
+            File stateDir = new File(mBaseStateDir, transportDirName);
+            File initPendingFile = new File(stateDir, INIT_SENTINEL_FILE_NAME);
+
+            if (isPending) {
+                // We need an init before we can proceed with sending backup data.
+                // Record that with an entry in our set of pending inits, as well as
+                // journaling it via creation of a sentinel file.
+                mPendingInits.add(transportName);
+                try {
+                    (new FileOutputStream(initPendingFile)).close();
+                } catch (IOException ioe) {
+                    // Something is badly wrong with our permissions; just try to move on
+                }
+            } else {
+                // No more initialization needed; wipe the journal and reset our state.
+                initPendingFile.delete();
+                mPendingInits.remove(transportName);
+            }
+        } catch (RemoteException e) {
+            // can't happen; the transport is local
+        }
+    }
+
     // Reset all of our bookkeeping, in response to having been told that
     // the backend data has been wiped [due to idle expiry, for example],
     // so we must re-upload all saved settings.
@@ -430,7 +514,10 @@ class BackupManagerService extends IBackupManager.Stub {
 
             // Remove all the state files
             for (File sf : stateFileDir.listFiles()) {
-                sf.delete();
+                // ... but don't touch the needs-init sentinel
+                if (!sf.getName().equals(INIT_SENTINEL_FILE_NAME)) {
+                    sf.delete();
+                }
             }
 
             // Enqueue a new backup of every participant
@@ -454,6 +541,29 @@ class BackupManagerService extends IBackupManager.Stub {
         synchronized (mTransports) {
             if (DEBUG) Log.v(TAG, "Registering transport " + name + " = " + transport);
             mTransports.put(name, transport);
+        }
+
+        // If the init sentinel file exists, we need to be sure to perform the init
+        // as soon as practical.  We also create the state directory at registration
+        // time to ensure it's present from the outset.
+        try {
+            String transportName = transport.transportDirName();
+            File stateDir = new File(mBaseStateDir, transportName);
+            stateDir.mkdirs();
+
+            File initSentinel = new File(stateDir, INIT_SENTINEL_FILE_NAME);
+            if (initSentinel.exists()) {
+                synchronized (mQueueLock) {
+                    mPendingInits.add(transportName);
+
+                    // TODO: pick a better starting time than now + 1 minute
+                    long delay = 1000 * 60; // one minute, in milliseconds
+                    mAlarmManager.set(AlarmManager.RTC_WAKEUP,
+                            System.currentTimeMillis() + delay, mRunInitIntent);
+                }
+            }
+        } catch (RemoteException e) {
+            // can't happen, the transport is local
         }
     }
 
@@ -579,6 +689,20 @@ class BackupManagerService extends IBackupManager.Stub {
             {
                 ClearParams params = (ClearParams)msg.obj;
                 (new PerformClearThread(params.transport, params.packageInfo)).start();
+                break;
+            }
+
+            case MSG_RUN_INITIALIZE:
+            {
+                HashSet<String> queue;
+
+                // Snapshot the pending-init queue and work on that
+                synchronized (mQueueLock) {
+                    queue = new HashSet<String>(mPendingInits);
+                    mPendingInits.clear();
+                }
+
+                (new PerformInitializeThread(queue)).start();
                 break;
             }
             }
@@ -907,7 +1031,6 @@ class BackupManagerService extends IBackupManager.Stub {
             } catch (RemoteException e) {
                 // can't happen; the transport is local
             }
-            mStateDir.mkdirs();
         }
 
         @Override
@@ -1206,7 +1329,6 @@ class BackupManagerService extends IBackupManager.Stub {
             } catch (RemoteException e) {
                 // can't happen; the transport is local
             }
-            mStateDir.mkdirs();
         }
 
         @Override
@@ -1552,6 +1674,80 @@ class BackupManagerService extends IBackupManager.Stub {
         }
     }
 
+    class PerformInitializeThread extends Thread {
+        HashSet<String> mQueue;
+
+        PerformInitializeThread(HashSet<String> transportNames) {
+            mQueue = transportNames;
+        }
+
+        @Override
+        public void run() {
+            int status;
+            try {
+                for (String transportName : mQueue) {
+                    IBackupTransport transport = getTransport(transportName);
+                    if (transport == null) {
+                        Log.e(TAG, "Requested init for " + transportName + " but not found");
+                        continue;
+                    }
+
+                    status = BackupConstants.TRANSPORT_OK;
+                    File stateDir = null;
+
+                    Log.i(TAG, "Device init on " + transport.transportDirName());
+
+                    stateDir = new File(mBaseStateDir, transport.transportDirName());
+
+                    status = transport.initializeDevice();
+                    if (status != BackupConstants.TRANSPORT_OK) {
+                        Log.e(TAG, "Error from initializeDevice: " + status);
+                    }
+                    if (status == BackupConstants.TRANSPORT_OK) {
+                        status = transport.finishBackup();
+                    }
+
+                    // Okay, the wipe really happened.  Clean up our local bookkeeping.
+                    if (status == BackupConstants.TRANSPORT_OK) {
+                        resetBackupState(stateDir);
+                        synchronized (mQueueLock) {
+                            recordInitPendingLocked(false, transportName);
+                        }
+                    }
+
+                    // If this didn't work, requeue this one and try again
+                    // after a suitable interval
+                    if (status != BackupConstants.TRANSPORT_OK) {
+                        Log.i(TAG, "Device init failed");
+                        synchronized (mQueueLock) {
+                            recordInitPendingLocked(true, transportName);
+                        }
+                        // do this via another alarm to make sure of the wakelock states
+                        long delay = transport.requestBackupTime();
+                        if (DEBUG) Log.w(TAG, "init failed on "
+                                + transportName + " resched in " + delay);
+                        mAlarmManager.set(AlarmManager.RTC_WAKEUP,
+                                System.currentTimeMillis() + delay, mRunInitIntent);
+                    } else {
+                        // success!
+                        Log.i(TAG, "Device init successful");
+                    }
+
+                }
+            } catch (RemoteException e) {
+                // can't happen; the transports are local
+            } catch (Exception e) {
+                Log.e(TAG, "Unexpected error performing init", e);
+            } finally {
+                // Done; indicate that we're finished and release the wakelock
+                synchronized (mQueueLock) {
+                    mInitInProgress = false;
+                }
+                mWakelock.release();
+            }
+        }
+    }
+
 
     // ----- IBackupManager binder interface -----
 
@@ -1694,6 +1890,8 @@ class BackupManagerService extends IBackupManager.Stub {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP,
                 "setBackupEnabled");
 
+        Log.i(TAG, "Backup enabled => " + enable);
+
         boolean wasEnabled = mEnabled;
         synchronized (this) {
             Settings.Secure.putInt(mContext.getContentResolver(),
@@ -1707,7 +1905,27 @@ class BackupManagerService extends IBackupManager.Stub {
                 startBackupAlarmsLocked(BACKUP_INTERVAL);
             } else if (!enable) {
                 // No longer enabled, so stop running backups
+                if (DEBUG) Log.i(TAG, "Opting out of backup");
+
                 mAlarmManager.cancel(mRunBackupIntent);
+
+                // This also constitutes an opt-out, so we wipe any data for
+                // this device from the backend.  We start that process with
+                // an alarm in order to guarantee wakelock states.
+                if (wasEnabled && mProvisioned) {
+                    // NOTE: we currently flush every registered transport, not just
+                    // the currently-active one.
+                    HashSet<String> allTransports;
+                    synchronized (mTransports) {
+                        allTransports = new HashSet<String>(mTransports.keySet());
+                    }
+                    // build the set of transports for which we are posting an init
+                    for (String transport : allTransports) {
+                        recordInitPendingLocked(true, transport);
+                    }
+                    mAlarmManager.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(),
+                            mRunInitIntent);
+                }
             }
         }
     }

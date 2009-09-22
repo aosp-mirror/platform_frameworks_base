@@ -52,6 +52,10 @@
     <protected-broadcast android:name="android.intent.action.NEW_OUTGOING_CALL" />
     <protected-broadcast android:name="android.intent.action.REBOOT" />
 
+    <protected-broadcast android:name="android.backup.intent.RUN" />
+    <protected-broadcast android:name="android.backup.intent.CLEAR" />
+    <protected-broadcast android:name="android.backup.intent.INIT" />
+
     <protected-broadcast android:name="android.bluetooth.adapter.action.STATE_CHANGED" />
     <protected-broadcast android:name="android.bluetooth.adapter.action.SCAN_MODE_CHANGED" />
     <protected-broadcast android:name="android.bluetooth.adapter.action.DISCOVERY_STARTED" />
