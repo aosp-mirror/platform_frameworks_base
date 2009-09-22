@@ -63,8 +63,11 @@ public class PluginManager {
 
     private final Context mContext;
 
+    private ArrayList<PackageInfo> mPackageInfoCache;
+
     private PluginManager(Context context) {
         mContext = context;
+        mPackageInfoCache = new ArrayList<PackageInfo>();
     }
 
     public static synchronized PluginManager getInstance(Context context) {
@@ -92,63 +95,92 @@ public class PluginManager {
     }
 
     String[] getPluginDirectories() {
+
         ArrayList<String> directories = new ArrayList<String>();
         PackageManager pm = mContext.getPackageManager();
         List<ResolveInfo> plugins = pm.queryIntentServices(new Intent(
                 PLUGIN_ACTION), PackageManager.GET_SERVICES);
-        for (ResolveInfo info : plugins) {
-            ServiceInfo serviceInfo = info.serviceInfo;
-            if (serviceInfo == null) {
-                Log.w(LOGTAG, "Ignore bad plugin");
-                continue;
-            }
-            PackageInfo pkgInfo;
-            try {
-                pkgInfo = pm.getPackageInfo(serviceInfo.packageName,
-                        PackageManager.GET_PERMISSIONS
-                                | PackageManager.GET_SIGNATURES);
-            } catch (NameNotFoundException e) {
-                Log.w(LOGTAG, "Cant find plugin: " + serviceInfo.packageName);
-                continue;
-            }
-            if (pkgInfo == null) {
-                continue;
-            }
-            String directory = pkgInfo.applicationInfo.dataDir + "/lib";
-            if (directories.contains(directory)) {
-                continue;
-            }
-            String permissions[] = pkgInfo.requestedPermissions;
-            if (permissions == null) {
-                continue;
-            }
-            boolean permissionOk = false;
-            for (String permit : permissions) {
-                if (PLUGIN_PERMISSION.equals(permit)) {
-                    permissionOk = true;
+
+        synchronized(mPackageInfoCache) {
+
+            // clear the list of existing packageInfo objects
+            mPackageInfoCache.clear();
+
+            for (ResolveInfo info : plugins) {
+                ServiceInfo serviceInfo = info.serviceInfo;
+                if (serviceInfo == null) {
+                    Log.w(LOGTAG, "Ignore bad plugin");
+                    continue;
+                }
+                PackageInfo pkgInfo;
+                try {
+                    pkgInfo = pm.getPackageInfo(serviceInfo.packageName,
+                                    PackageManager.GET_PERMISSIONS
+                                    | PackageManager.GET_SIGNATURES);
+                } catch (NameNotFoundException e) {
+                    Log.w(LOGTAG, "Cant find plugin: " + serviceInfo.packageName);
+                    continue;
+                }
+                if (pkgInfo == null) {
+                    continue;
+                }
+                String directory = pkgInfo.applicationInfo.dataDir + "/lib";
+                if (directories.contains(directory)) {
+                    continue;
+                }
+                String permissions[] = pkgInfo.requestedPermissions;
+                if (permissions == null) {
+                    continue;
+                }
+                boolean permissionOk = false;
+                for (String permit : permissions) {
+                    if (PLUGIN_PERMISSION.equals(permit)) {
+                        permissionOk = true;
+                        break;
+                    }
+                }
+                if (!permissionOk) {
+                    continue;
+                }
+                Signature signatures[] = pkgInfo.signatures;
+                if (signatures == null) {
+                    continue;
+                }
+                boolean signatureMatch = false;
+                for (Signature signature : signatures) {
+                    // TODO: check signature against Google provided one
+                    signatureMatch = true;
                     break;
                 }
+                if (!signatureMatch) {
+                    continue;
+                }
+                mPackageInfoCache.add(pkgInfo);
+                directories.add(directory);
             }
-            if (!permissionOk) {
-                continue;
-            }
-            Signature signatures[] = pkgInfo.signatures;
-            if (signatures == null) {
-                continue;
-            }
-            boolean signatureMatch = false;
-            for (Signature signature : signatures) {
-                // TODO: check signature against Google provided one
-                signatureMatch = true;
-                break;
-            }
-            if (!signatureMatch) {
-                continue;
-            }
-            directories.add(directory);
         }
 
         return directories.toArray(new String[directories.size()]);
+    }
+
+    String getPluginsAPKName(String pluginLib) {
+
+        // basic error checking on input params
+        if (pluginLib == null || pluginLib.length() == 0) {
+            return null;
+        }
+
+        // must be synchronized to ensure the consistency of the cache
+        synchronized(mPackageInfoCache) {
+            for (PackageInfo pkgInfo : mPackageInfoCache) {
+                if (pluginLib.startsWith(pkgInfo.applicationInfo.dataDir)) {
+                    return pkgInfo.packageName;
+                }
+            }
+        }
+
+        // if no apk was found then return null
+        return null;
     }
 
     String getPluginSharedDataDirectory() {
