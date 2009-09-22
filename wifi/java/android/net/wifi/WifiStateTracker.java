@@ -907,6 +907,7 @@ public class WifiStateTracker extends NetworkStateTracker {
                             }
                         }
                     } else if (newState == SupplicantState.DISCONNECTED) {
+                        mHaveIpAddress = false;
                         if (isDriverStopped() || mDisconnectExpected) {
                             handleDisconnectedState(DetailedState.DISCONNECTED);
                         } else {
@@ -1007,20 +1008,17 @@ public class WifiStateTracker extends NetworkStateTracker {
                     setNotificationVisible(false, 0, false, 0);
                     boolean wasDisconnectPending = mDisconnectPending;
                     cancelDisconnect();
-                    if (!TextUtils.equals(mWifiInfo.getSSID(), mLastSsid)) {
-                        /*
-                         * The connection is fully configured as far as link-level
-                         * connectivity is concerned, but we may still need to obtain
-                         * an IP address. But do this only if we are connecting to
-                         * a different network than we were connected to previously.
-                         */
-                        if (wasDisconnectPending) {
-                            DetailedState saveState = getNetworkInfo().getDetailedState();
-                            handleDisconnectedState(DetailedState.DISCONNECTED);
-                            setDetailedStateInternal(saveState);
-                        }
-                        configureInterface();
+                    /*
+                     * The connection is fully configured as far as link-level
+                     * connectivity is concerned, but we may still need to obtain
+                     * an IP address.
+                     */
+                    if (wasDisconnectPending) {
+                        DetailedState saveState = getNetworkInfo().getDetailedState();
+                        handleDisconnectedState(DetailedState.DISCONNECTED);
+                        setDetailedStateInternal(saveState);
                     }
+                    configureInterface();
                     mLastBssid = result.BSSID;
                     mLastSsid = mWifiInfo.getSSID();
                     mLastNetworkId = result.networkId;
