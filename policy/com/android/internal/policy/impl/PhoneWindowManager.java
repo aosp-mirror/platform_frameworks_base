@@ -1050,9 +1050,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
      * given the situation with the keyguard.
      */
     void launchHomeFromHotKey() {
-        if (mKeyguardMediator.isShowing()) {
+        if (!mHideKeyguard && mKeyguardMediator.isShowing()) {
             // don't launch home if keyguard showing
-        } else if (mKeyguardMediator.isInputRestricted()) {
+        } else if (!mHideKeyguard && mKeyguardMediator.isInputRestricted()) {
             // when in keyguard restricted mode, must first verify unlock
             // before launching home
             mKeyguardMediator.verifyUnlock(new OnKeyguardExitResult() {
@@ -1370,6 +1370,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             if (localLOGV) Log.i(TAG, "finishLayoutLw::mHideKeyguard="+mHideKeyguard);
             if (mHideKeyguard) {
                 changed |= mKeyguard.hideLw(true);
+                if (!mKeyguardMediator.isShowing()) {
+                    mHandler.post(new Runnable() {
+                        public void run() {
+                            mKeyguardMediator.keyguardDone(true);
+                        }
+                    });
+                }
             } else {
                 changed |= mKeyguard.showLw(true);
             }
@@ -1410,12 +1417,20 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 if (event.keycode == RawInputEvent.SW_LID) {
                     // lid changed state
                     mLidOpen = event.value == 0;
+                    boolean awakeNow = mKeyguardMediator.doLidChangeTq(mLidOpen);
                     updateRotation(Surface.FLAGS_ORIENTATION_ANIMATION_DISABLE);
-                    if (keyguardIsShowingTq()) {
+                    if (awakeNow) {
+                        // If the lid opening and we don't have to keep the
+                        // keyguard up, then we can turn on the screen
+                        // immediately.
+                        mKeyguardMediator.pokeWakelock();
+                    } else if (keyguardIsShowingTq()) {
                         if (mLidOpen) {
-                            // only do this if it's opening -- closing the device shouldn't turn it
-                            // off, but it also shouldn't turn it on.
-                            mKeyguardMediator.pokeWakelock();
+                            // If we are opening the lid and not hiding the
+                            // keyguard, then we need to have it turn on the
+                            // screen once it is shown.
+                            mKeyguardMediator.onWakeKeyWhenKeyguardShowingTq(
+                                    KeyEvent.KEYCODE_POWER);
                         }
                     } else {
                         // Light up the keyboard if we are sliding up.

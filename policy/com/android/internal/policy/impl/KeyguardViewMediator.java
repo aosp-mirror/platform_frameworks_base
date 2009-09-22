@@ -84,7 +84,7 @@ import android.view.WindowManagerPolicy;
  * thread of the keyguard.
  */
 public class KeyguardViewMediator implements KeyguardViewCallback,
-        KeyguardUpdateMonitor.ConfigurationChangeCallback, KeyguardUpdateMonitor.SimStateCallback {
+        KeyguardUpdateMonitor.SimStateCallback {
     private final static boolean DEBUG = false && Config.LOGD;
     private final static boolean DBG_WAKE = DEBUG || true;
 
@@ -104,6 +104,7 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
     private static final int WAKE_WHEN_READY = 8;
     private static final int KEYGUARD_DONE = 9;
     private static final int KEYGUARD_DONE_DRAWING = 10;
+    private static final int HIDE_KEYGUARD = 11;
     
     /**
      * The default amount of time we stay awake (used for all key input)
@@ -245,7 +246,6 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
 
         mUpdateMonitor = new KeyguardUpdateMonitor(context);
 
-        mUpdateMonitor.registerConfigurationChangeCallback(this);
         mUpdateMonitor.registerSimStateCallback(this);
 
         mKeyguardViewProperties =
@@ -434,6 +434,21 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
         return mShowing || mNeedToReshowWhenReenabled || !mUpdateMonitor.isDeviceProvisioned();
     }
 
+    /**
+     * Returns true if the change is resulting in the keyguard beign dismissed,
+     * meaning the screen can turn on immediately.  Otherwise returns false.
+     */
+    public boolean doLidChangeTq(boolean isLidOpen) {
+        mKeyboardOpen = isLidOpen;
+
+        if (mUpdateMonitor.isKeyguardBypassEnabled() && mKeyboardOpen
+                && !mKeyguardViewProperties.isSecure() && mKeyguardViewManager.isShowing()) {
+            if (DEBUG) Log.d(TAG, "bypassing keyguard on sliding open of keyboard with non-secure keyguard");
+            mHandler.sendEmptyMessage(HIDE_KEYGUARD);
+            return true;
+        }
+        return false;
+    }
 
     /**
      * Enable the keyguard if the settings are appropriate.
@@ -558,26 +573,6 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
         mHandler.sendMessage(msg);
     }
 
-    /**
-     * {@link KeyguardUpdateMonitor} callbacks.
-     */
-
-    /** {@inheritDoc} */
-    public void onOrientationChange(boolean inPortrait) {
-
-    }
-
-    /** {@inheritDoc} */
-    public void onKeyboardChange(boolean isKeyboardOpen) {
-        mKeyboardOpen = isKeyboardOpen;
-
-        if (mUpdateMonitor.isKeyguardBypassEnabled() && mKeyboardOpen
-                && !mKeyguardViewProperties.isSecure() && mKeyguardViewManager.isShowing()) {
-            if (DEBUG) Log.d(TAG, "bypassing keyguard on sliding open of keyboard with non-secure keyguard");
-            keyguardDone(true);
-        }
-    }
-
     /** {@inheritDoc} */
     public void onSimStateChanged(IccCard.State simState) {
         if (DEBUG) Log.d(TAG, "onSimStateChanged: " + simState);
@@ -615,6 +610,10 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
         }
     }
 
+    public boolean isSecure() {
+        return mKeyguardViewProperties.isSecure();
+    }
+    
     private BroadcastReceiver mBroadCastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -793,6 +792,10 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
                     return;
                 case KEYGUARD_DONE_DRAWING:
                     handleKeyguardDoneDrawing();
+                    return;
+                case HIDE_KEYGUARD:
+                    keyguardDone(true);
+                    return;
             }
         }
     };
