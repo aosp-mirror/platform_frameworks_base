@@ -488,7 +488,10 @@ public interface WindowManager extends ViewManager {
          * is locked. This will let application windows take precedence over
          * key guard or any other lock screens. Can be used with
          * {@link #FLAG_KEEP_SCREEN_ON} to turn screen on and display windows
-         * directly before showing the key guard window
+         * directly before showing the key guard window.  Can be used with
+         * {@link #FLAG_DISMISS_KEYGUARD} to automatically fully dismisss
+         * non-secure keyguards.  This flag only applies to the top-most
+         * full-screen window.
          */
         public static final int FLAG_SHOW_WHEN_LOCKED = 0x00080000;
 
@@ -505,6 +508,19 @@ public interface WindowManager extends ViewManager {
          * poke the power manager's user activity (as if the user had woken
          * up the device) to turn the screen on. */
         public static final int FLAG_TURN_SCREEN_ON = 0x00200000;
+        
+        /** Window flag: when set the window will cause the keyguard to
+         * be dismissed, only if it is not a secure lock keyguard.  Because such
+         * a keyguard is not needed for security, it will never re-appear if
+         * the user navigates to another window (in contrast to
+         * {@link #FLAG_SHOW_WHEN_LOCKED}, which will only temporarily
+         * hide both secure and non-secure keyguards but ensure they reappear
+         * when the user moves to another UI that doesn't hide them).
+         * If the keyguard is currently active and is secure (requires an
+         * unlock pattern) than the user will still need to confirm it before
+         * seeing this window, unless {@link #FLAG_SHOW_WHEN_LOCKED} has
+         * also been set. */
+        public static final int FLAG_DISMISS_KEYGUARD = 0x00400000;
         
         /** Window flag: special flag to limit the size of the window to be
          * original size ([320x480] x density). Used to create window for applications

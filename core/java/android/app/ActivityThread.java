@@ -1765,6 +1765,7 @@ public final class ActivityThread {
         public static final int CREATE_BACKUP_AGENT     = 128;
         public static final int DESTROY_BACKUP_AGENT    = 129;
         public static final int SUICIDE                 = 130;
+        public static final int REMOVE_PROVIDER         = 131;
         String codeToString(int code) {
             if (localLOGV) {
                 switch (code) {
@@ -1799,6 +1800,7 @@ public final class ActivityThread {
                     case CREATE_BACKUP_AGENT: return "CREATE_BACKUP_AGENT";
                     case DESTROY_BACKUP_AGENT: return "DESTROY_BACKUP_AGENT";
                     case SUICIDE: return "SUICIDE";
+                    case REMOVE_PROVIDER: return "REMOVE_PROVIDER";
                 }
             }
             return "(unknown)";
@@ -1911,9 +1913,10 @@ public final class ActivityThread {
                     handleDestroyBackupAgent((CreateBackupAgentData)msg.obj);
                     break;
                 case SUICIDE:
-                    {
-                        Process.killProcess(Process.myPid());
-                    }
+                    Process.killProcess(Process.myPid());
+                    break;
+                case REMOVE_PROVIDER:
+                    completeRemoveProvider((IContentProvider)msg.obj);
                     break;
             }
         }
@@ -4029,15 +4032,28 @@ public final class ActivityThread {
             } else {
                 prc.count--;
                 if(prc.count == 0) {
-                    mProviderRefCountMap.remove(jBinder);
-                    //invoke removeProvider to dereference provider
-                    removeProviderLocked(provider);
+                    // Schedule the actual remove asynchronously, since we
+                    // don't know the context this will be called in.
+                    Message msg = mH.obtainMessage(H.REMOVE_PROVIDER, provider);
+                    mH.sendMessage(msg);
                 } //end if
             } //end else
         } //end synchronized
         return true;
     }
 
+    final void completeRemoveProvider(IContentProvider provider) {
+        IBinder jBinder = provider.asBinder();
+        synchronized(mProviderMap) {
+            ProviderRefCount prc = mProviderRefCountMap.get(jBinder);
+            if(prc != null && prc.count == 0) {
+                mProviderRefCountMap.remove(jBinder);
+                //invoke removeProvider to dereference provider
+                removeProviderLocked(provider);
+            }
+        }
+    }
+    
     public final void removeProviderLocked(IContentProvider provider) {
         if (provider == null) {
             return;
