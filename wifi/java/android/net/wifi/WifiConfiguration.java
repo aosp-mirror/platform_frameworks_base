@@ -71,7 +71,7 @@ public class WifiConfiguration implements Parcelable {
     /** {@hide} */
     public EnterpriseField phase2 = new EnterpriseField("phase2");
     /** {@hide} */
-    public EnterpriseField identity = new EnterpriseField("anonymous_identity");
+    public EnterpriseField identity = new EnterpriseField("identity");
     /** {@hide} */
     public EnterpriseField anonymous_identity = new EnterpriseField("anonymous_identity");
     /** {@hide} */
