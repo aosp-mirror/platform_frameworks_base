@@ -1166,6 +1166,9 @@
   <public type="attr" name="accountPreferences" />
   <public type="attr" name="textAppearanceSearchResultSubtitle" />
   <public type="attr" name="textAppearanceSearchResultTitle" />
+  <public type="attr" name="summaryColumn" />
+  <public type="attr" name="detailColumn" />
+  <public type="attr" name="detailSocialSummary" />
 
   <public type="style" name="Theme.Wallpaper" />
   <public type="style" name="Theme.Wallpaper.NoTitleBar" />
