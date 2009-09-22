@@ -511,6 +511,9 @@ public class SyncStorageEngine extends Handler {
 
             SyncStatusInfo status = getOrCreateSyncStatusLocked(authority.ident);
             status.pending = true;
+            status.initialize = op.extras != null && 
+                 op.extras.containsKey(ContentResolver.SYNC_EXTRAS_INITIALIZE) &&
+                 op.extras.getBoolean(ContentResolver.SYNC_EXTRAS_INITIALIZE);
         }
 
         reportChange(ContentResolver.SYNC_OBSERVER_TYPE_PENDING);

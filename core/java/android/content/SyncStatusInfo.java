@@ -38,6 +38,7 @@ public class SyncStatusInfo implements Parcelable {
     public String lastFailureMesg;
     public long initialFailureTime;
     public boolean pending;
+    public boolean initialize;
     
     SyncStatusInfo(int authorityId) {
         this.authorityId = authorityId;
@@ -73,6 +74,7 @@ public class SyncStatusInfo implements Parcelable {
         parcel.writeString(lastFailureMesg);
         parcel.writeLong(initialFailureTime);
         parcel.writeInt(pending ? 1 : 0);
+        parcel.writeInt(initialize ? 1 : 0);
     }
 
     SyncStatusInfo(Parcel parcel) {
@@ -94,6 +96,7 @@ public class SyncStatusInfo implements Parcelable {
         lastFailureMesg = parcel.readString();
         initialFailureTime = parcel.readLong();
         pending = parcel.readInt() != 0;
+        initialize = parcel.readInt() != 0;
     }
     
     public static final Creator<SyncStatusInfo> CREATOR = new Creator<SyncStatusInfo>() {
