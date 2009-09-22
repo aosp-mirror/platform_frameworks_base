@@ -3772,10 +3772,10 @@ public class WebView extends AbsoluteLayout
                         mZoomButtonsController.setVisible(true);
                         int count = settings.getDoubleTapToastCount();
                         if (mInZoomOverview && count > 0) {
-                            settings.setDoubleTapToastCount(count--);
+                            settings.setDoubleTapToastCount(--count);
                             Toast.makeText(mContext,
                                     com.android.internal.R.string.double_tap_toast,
-                                    Toast.LENGTH_SHORT).show();
+                                    Toast.LENGTH_LONG).show();
                         }
                     }
                 }
