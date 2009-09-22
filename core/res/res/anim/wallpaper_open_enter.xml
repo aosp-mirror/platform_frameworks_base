@@ -17,6 +17,22 @@
 */
 -->
 
+<!-- This version zooms the new non-wallpaper up off the wallpaper the
+     wallpaper.  The wallpaper here just stays fixed behind. -->
+<set xmlns:android="http://schemas.android.com/apk/res/android"
+        android:interpolator="@anim/decelerate_interpolator"
+        android:zAdjustment="top">
+    <scale android:fromXScale=".5" android:toXScale="1.0"
+           android:fromYScale=".5" android:toYScale="1.0"
+           android:pivotX="50%p" android:pivotY="50%p"
+           android:duration="@android:integer/config_mediumAnimTime" />
+    <alpha android:fromAlpha="0.0" android:toAlpha="1.0"
+            android:duration="@android:integer/config_mediumAnimTime"/>
+</set>
+
+<!-- This version is a variation on the inter-activity slide that
+    also scales the wallpaper. -->
+<!--
 <set xmlns:android="http://schemas.android.com/apk/res/android"
         android:interpolator="@anim/decelerate_interpolator"
         android:zAdjustment="top">
@@ -27,3 +43,4 @@
 	<translate android:fromXDelta="-100%" android:toXDelta="0"
         android:duration="@android:integer/config_mediumAnimTime"/>
 </set>
+-->
