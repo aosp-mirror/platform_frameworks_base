@@ -3486,13 +3486,31 @@
     <!-- Contacts meta-data attributes -->
     <!-- =============================== -->
 
+    <!-- TODO: remove this deprecated styleable -->
     <declare-styleable name="Icon">
         <attr name="icon" />
         <attr name="mimeType" />
     </declare-styleable>
 
+    <!-- TODO: remove this deprecated styleable -->
     <declare-styleable name="IconDefault">
         <attr name="icon" />
+    </declare-styleable>
+
+    <!-- Maps a specific contact data MIME-type to styling information -->
+    <declare-styleable name="ContactsDataKind">
+        <!-- Mime-type handled by this mapping -->
+        <attr name="mimeType" />
+        <!-- Title used to represent data of this kind -->
+        <attr name="title" />
+        <!-- Icon used to represent data of this kind -->
+        <attr name="icon" />
+        <!-- Column in data table that summarizes this data -->
+        <attr name="summaryColumn" format="string" />
+        <!-- Column in data table that contains details for this data -->
+        <attr name="detailColumn" format="string" />
+        <!-- Flag indicating that detail should be built from SocialProvider -->
+        <attr name="detailSocialSummary" format="boolean" />
     </declare-styleable>
 
 </resources>
