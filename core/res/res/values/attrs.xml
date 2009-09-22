@@ -3501,8 +3501,6 @@
     <declare-styleable name="ContactsDataKind">
         <!-- Mime-type handled by this mapping -->
         <attr name="mimeType" />
-        <!-- Title used to represent data of this kind -->
-        <attr name="title" />
         <!-- Icon used to represent data of this kind -->
         <attr name="icon" />
         <!-- Column in data table that summarizes this data -->
