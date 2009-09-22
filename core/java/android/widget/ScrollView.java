@@ -743,7 +743,7 @@ public class ScrollView extends FrameLayout {
 
         final int maxJump = getMaxScrollAmount();
 
-        if (nextFocused != null && isWithinDeltaOfScreen(nextFocused, maxJump)) {
+        if (nextFocused != null && isWithinDeltaOfScreen(nextFocused, maxJump, getHeight())) {
             nextFocused.getDrawingRect(mTempRect);
             offsetDescendantRectToMyCoords(nextFocused, mTempRect);
             int scrollDelta = computeScrollDeltaToGetChildRectOnScreen(mTempRect);
@@ -792,19 +792,19 @@ public class ScrollView extends FrameLayout {
      *  screen.
      */
     private boolean isOffScreen(View descendant) {
-        return !isWithinDeltaOfScreen(descendant, 0);
+        return !isWithinDeltaOfScreen(descendant, 0, getHeight());
     }
 
     /**
      * @return whether the descendant of this scroll view is within delta
      *  pixels of being on the screen.
      */
-    private boolean isWithinDeltaOfScreen(View descendant, int delta) {
+    private boolean isWithinDeltaOfScreen(View descendant, int delta, int height) {
         descendant.getDrawingRect(mTempRect);
         offsetDescendantRectToMyCoords(descendant, mTempRect);
 
         return (mTempRect.bottom + delta) >= getScrollY()
-                && (mTempRect.top - delta) <= (getScrollY() + getHeight());
+                && (mTempRect.top - delta) <= (getScrollY() + height);
     }
 
     /**
@@ -1124,9 +1124,10 @@ public class ScrollView extends FrameLayout {
         if (null == currentFocused || this == currentFocused)
             return;
 
-        final int maxJump = mBottom - mTop;
-
-        if (isWithinDeltaOfScreen(currentFocused, maxJump)) {
+        // If the currently-focused view was visible on the screen when the
+        // screen was at the old height, then scroll the screen to make that
+        // view visible with the new screen height.
+        if (isWithinDeltaOfScreen(currentFocused, 0, oldh)) {
             currentFocused.getDrawingRect(mTempRect);
             offsetDescendantRectToMyCoords(currentFocused, mTempRect);
             int scrollDelta = computeScrollDeltaToGetChildRectOnScreen(mTempRect);
