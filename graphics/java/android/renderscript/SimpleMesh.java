@@ -162,7 +162,6 @@ public class SimpleMesh extends BaseObj {
         }
 
         public SimpleMesh create() {
-            Log.e("rs", "SimpleMesh create");
             SimpleMesh sm = internalCreate(mRS, this);
             sm.mVertexTypes = new Type[mVertexTypeCount];
             for(int ct=0; ct < mVertexTypeCount; ct++) {
@@ -177,7 +176,7 @@ public class SimpleMesh extends BaseObj {
     public static class TriangleMeshBuilder {
         float mVtxData[];
         int mVtxCount;
-        int mIndexData[];
+        short mIndexData[];
         int mIndexCount;
         RenderScript mRS;
         Element mElement;
@@ -191,7 +190,7 @@ public class SimpleMesh extends BaseObj {
             mVtxCount = 0;
             mIndexCount = 0;
             mVtxData = new float[128];
-            mIndexData = new int[128];
+            mIndexData = new short[128];
             mVtxSize = vtxSize;
             mNorm = norm;
             mTex = tex;
@@ -268,13 +267,13 @@ public class SimpleMesh extends BaseObj {
 
         public void addTriangle(int idx1, int idx2, int idx3) {
             if((mIndexCount + 3) >= mIndexData.length) {
-                int t[] = new int[mIndexData.length * 2];
+                short t[] = new short[mIndexData.length * 2];
                 System.arraycopy(mIndexData, 0, t, 0, mIndexData.length);
                 mIndexData = t;
             }
-            mIndexData[mIndexCount++] = idx1;
-            mIndexData[mIndexCount++] = idx2;
-            mIndexData[mIndexCount++] = idx3;
+            mIndexData[mIndexCount++] = (short)idx1;
+            mIndexData[mIndexCount++] = (short)idx2;
+            mIndexData[mIndexCount++] = (short)idx3;
         }
 
         public SimpleMesh create() {
@@ -309,10 +308,6 @@ public class SimpleMesh extends BaseObj {
             vertexAlloc.data(mVtxData);
             vertexAlloc.uploadToBufferObject();
 
-            // This is safe because length is a pow2
-            for(int ct=0; ct < (mIndexCount+1); ct += 2) {
-                mIndexData[ct >> 1] = mIndexData[ct] | (mIndexData[ct+1] << 16);
-            }
             indexAlloc.data(mIndexData);
             indexAlloc.uploadToBufferObject();
 

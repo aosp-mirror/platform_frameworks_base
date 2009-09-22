@@ -48,50 +48,49 @@ public class Allocation extends BaseObj {
     }
 
     public void data(int[] d) {
-        int size;
-        if(mType != null && mType.mElement != null) {
-            size = mType.mElement.mSize;
-            for(int ct=0; ct < mType.mValues.length; ct++) {
-                if(mType.mValues[ct] != 0) {
-                    size *= mType.mValues[ct];
-                }
-            }
-            if((d.length * 4) < size) {
-                throw new IllegalArgumentException("Array too small for allocation type.");
-            }
-            Log.e("rs", "Alloc data size=" + size);
-            mRS.nAllocationData(mID, d, size);
-            return;
-        }
-        mRS.nAllocationData(mID, d, d.length * 4);
+        subData1D(0, mType.getElementCount(), d);
+    }
+    public void data(short[] d) {
+        subData1D(0, mType.getElementCount(), d);
+    }
+    public void data(byte[] d) {
+        subData1D(0, mType.getElementCount(), d);
+    }
+    public void data(float[] d) {
+        subData1D(0, mType.getElementCount(), d);
     }
 
-    public void data(float[] d) {
-        int size;
-        if(mType != null && mType.mElement != null) {
-            size = mType.mElement.mSize;
-            for(int ct=0; ct < mType.mValues.length; ct++) {
-                if(mType.mValues[ct] != 0) {
-                    size *= mType.mValues[ct];
-                }
-            }
-            if((d.length * 4) < size) {
-                throw new IllegalArgumentException("Array too small for allocation type.");
-            }
-            Log.e("rs", "Alloc data size=" + size);
-            mRS.nAllocationData(mID, d, size);
-            return;
+    private void data1DChecks(int off, int count, int len, int dataSize) {
+        if((off < 0) || (count < 1) || ((off + count) > mType.getElementCount())) {
+            throw new IllegalArgumentException("Offset or Count out of bounds.");
         }
-        mRS.nAllocationData(mID, d, d.length * 4);
+        if((len) < dataSize) {
+            throw new IllegalArgumentException("Array too small for allocation type.");
+        }
     }
 
     public void subData1D(int off, int count, int[] d) {
-        mRS.nAllocationSubData1D(mID, off, count, d, count * 4);
+        int dataSize = mType.mElement.getSizeBytes() * count;
+        data1DChecks(off, count, d.length * 4, dataSize);
+        mRS.nAllocationSubData1D(mID, off, count, d, dataSize);
+    }
+    public void subData1D(int off, int count, short[] d) {
+        int dataSize = mType.mElement.getSizeBytes() * count;
+        data1DChecks(off, count, d.length * 2, dataSize);
+        mRS.nAllocationSubData1D(mID, off, count, d, dataSize);
+    }
+    public void subData1D(int off, int count, byte[] d) {
+        int dataSize = mType.mElement.getSizeBytes() * count;
+        data1DChecks(off, count, d.length, dataSize);
+        mRS.nAllocationSubData1D(mID, off, count, d, dataSize);
+    }
+    public void subData1D(int off, int count, float[] d) {
+        int dataSize = mType.mElement.getSizeBytes() * count;
+        data1DChecks(off, count, d.length * 4, dataSize);
+        mRS.nAllocationSubData1D(mID, off, count, d, dataSize);
     }
 
-    public void subData1D(int off, int count, float[] d) {
-        mRS.nAllocationSubData1D(mID, off, count, d, d.length * 4);
-    }
+
 
     public void subData2D(int xoff, int yoff, int w, int h, int[] d) {
         mRS.nAllocationSubData2D(mID, xoff, yoff, w, h, d, d.length * 4);
@@ -213,11 +212,15 @@ public class Allocation extends BaseObj {
     static public Allocation createSized(RenderScript rs, Element e, int count)
         throws IllegalArgumentException {
 
-        int id = rs.nAllocationCreateSized(e.mID, count);
+        Type.Builder b = new Type.Builder(rs, e);
+        b.add(Dimension.X, count);
+        Type t = b.create();
+
+        int id = rs.nAllocationCreateTyped(t.mID);
         if(id == 0) {
             throw new IllegalStateException("Bad element.");
         }
-        return new Allocation(id, rs, null);
+        return new Allocation(id, rs, t);
     }
 
     static public Allocation createFromBitmap(RenderScript rs, Bitmap b, Element dstFmt, boolean genMips)
