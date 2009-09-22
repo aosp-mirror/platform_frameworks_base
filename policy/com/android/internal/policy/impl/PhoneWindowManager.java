@@ -321,18 +321,27 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     MyOrientationListener mOrientationListener;
 
     boolean useSensorForOrientationLp(int appOrientation) {
+        // The app says use the sensor.
         if (appOrientation == ActivityInfo.SCREEN_ORIENTATION_SENSOR) {
             return true;
         }
-        if ((mAccelerometerDefault != 0 ||
-            (mCarDockEnablesAccelerometer && mDockState == Intent.EXTRA_DOCK_STATE_CAR) ||
-            (mDeskDockEnablesAccelerometer && mDockState == Intent.EXTRA_DOCK_STATE_DESK))
-            && (appOrientation == ActivityInfo.SCREEN_ORIENTATION_USER ||
-                // dock overrides SCREEN_ORIENTATION_NOSENSOR
-                appOrientation == ActivityInfo. SCREEN_ORIENTATION_NOSENSOR ||
-                appOrientation == ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED)) {
+        // The user preference says we can rotate, and the app is willing to rotate.
+        if (mAccelerometerDefault != 0 &&
+                (appOrientation == ActivityInfo.SCREEN_ORIENTATION_USER
+                 || appOrientation == ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED)) {
             return true;
         }
+        // We're in a dock that has a rotation affinity, an the app is willing to rotate.
+        if ((mCarDockEnablesAccelerometer && mDockState == Intent.EXTRA_DOCK_STATE_CAR)
+                || (mDeskDockEnablesAccelerometer && mDockState == Intent.EXTRA_DOCK_STATE_DESK)) {
+            // Note we override the nosensor flag here.
+            if (appOrientation == ActivityInfo.SCREEN_ORIENTATION_USER
+                    || appOrientation == ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+                    || appOrientation == ActivityInfo.SCREEN_ORIENTATION_NOSENSOR) {
+                return true;
+            }
+        }
+        // Else, don't use the sensor.
         return false;
     }
     
