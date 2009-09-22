@@ -274,6 +274,25 @@ public class CompatibilityInfo {
          * Apply translation to the canvas that is necessary to draw the content.
          */
         public void translateCanvas(Canvas canvas) {
+            if (applicationScale == 1.5f) {
+                /*  When we scale for compatibility, we can put our stretched
+                    bitmaps and ninepatches on exacty 1/2 pixel boundaries,
+                    which can give us inconsistent drawing due to imperfect
+                    float precision in the graphics engine's inverse matrix.
+                 
+                    As a work-around, we translate by a tiny amount to avoid
+                    landing on exact pixel centers and boundaries, giving us
+                    the slop we need to draw consistently.
+                 
+                    This constant is meant to resolve to 1/255 after it is
+                    scaled by 1.5 (applicationScale). Note, this is just a guess
+                    as to what is small enough not to create its own artifacts,
+                    and big enough to avoid the precision problems. Feel free
+                    to experiment with smaller values as you choose.
+                 */
+                final float tinyOffset = 2.0f / (3 * 255);
+                canvas.translate(tinyOffset, tinyOffset);
+            }
             canvas.scale(applicationScale, applicationScale);
         }
 
