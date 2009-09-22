@@ -1144,7 +1144,7 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
         String query = mSearchAutoComplete.getText().toString();
         String action = mGlobalSearchMode ? Intent.ACTION_WEB_SEARCH : Intent.ACTION_SEARCH;
         Intent intent = createIntent(action, null, null, query, null,
-                actionKey, actionMsg);
+                actionKey, actionMsg, null);
         // Allow GlobalSearch to log and create shortcut for searches launched by
         // the search button, enter key or an action key.
         if (mGlobalSearchMode) {
@@ -1579,9 +1579,10 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
 
             String query = getColumnString(c, SearchManager.SUGGEST_COLUMN_QUERY);
             String extraData = getColumnString(c, SearchManager.SUGGEST_COLUMN_INTENT_EXTRA_DATA);
+            String mode = mGlobalSearchMode ? SearchManager.MODE_GLOBAL_SEARCH_SUGGESTION : null;
 
             return createIntent(action, dataUri, extraData, query, componentName, actionKey,
-                    actionMsg);
+                    actionMsg, mode);
         } catch (RuntimeException e ) {
             int rowNum;
             try {                       // be really paranoid now
@@ -1607,10 +1608,12 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
      *        or {@link KeyEvent#KEYCODE_UNKNOWN} if none.
      * @param actionMsg The message for the action key that was pressed,
      *        or <code>null</code> if none.
+     * @param mode The search mode, one of the acceptable values for
+     *             {@link SearchManager#SEARCH_MODE}, or {@code null}.
      * @return The intent.
      */
     private Intent createIntent(String action, Uri data, String extraData, String query,
-            String componentName, int actionKey, String actionMsg) {
+            String componentName, int actionKey, String actionMsg, String mode) {
         // Now build the Intent
         Intent intent = new Intent(action);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -1633,6 +1636,9 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
         if (actionKey != KeyEvent.KEYCODE_UNKNOWN) {
             intent.putExtra(SearchManager.ACTION_KEY, actionKey);
             intent.putExtra(SearchManager.ACTION_MSG, actionMsg);
+        }
+        if (mode != null) {
+            intent.putExtra(SearchManager.SEARCH_MODE, mode);
         }
         // Only allow 3rd-party intents from GlobalSearch
         if (!mGlobalSearchMode) {
