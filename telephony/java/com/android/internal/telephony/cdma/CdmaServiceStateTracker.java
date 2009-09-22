@@ -538,12 +538,15 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
                 if (!mPendingRadioPowerOffAfterDataOff) {
                     DataConnectionTracker.State currentState = dcTracker.getState();
                     if (currentState != DataConnectionTracker.State.CONNECTED
-                            && currentState != DataConnectionTracker.State.DISCONNECTING) {
+                            && currentState != DataConnectionTracker.State.DISCONNECTING
+                            && currentState != DataConnectionTracker.State.INITING) {
                         if (DBG) log("Data disconnected, turn off radio right away.");
                         cm.setRadioPower(false, null);
                     }
-                    else if (sendEmptyMessageDelayed(EVENT_SET_RADIO_POWER_OFF, 5000)) {
-                        if (DBG) log("Wait 5 sec for data to be disconnected, then turn off radio.");
+                    else if (sendEmptyMessageDelayed(EVENT_SET_RADIO_POWER_OFF, 30000)) {
+                        if (DBG) {
+                            log("Wait up to 30 sec for data to disconnect, then turn off radio.");
+                        }
                         mPendingRadioPowerOffAfterDataOff = true;
                     } else {
                         Log.w(LOG_TAG, "Cannot send delayed Msg, turn off radio right away.");
