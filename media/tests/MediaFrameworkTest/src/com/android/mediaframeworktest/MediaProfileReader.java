@@ -32,6 +32,29 @@ public class MediaProfileReader {
         return s;
     }
 
+    public static boolean getWMAEnable() {
+        // push all the property into one big table
+        int wmaEnable = 1;
+        wmaEnable = SystemProperties.getInt("ro.media.dec.aud.wma.enabled",
+                wmaEnable);
+        if (wmaEnable == 1) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public static boolean getWMVEnable(){
+        int wmvEnable = 1;
+        wmvEnable = SystemProperties.getInt("ro.media.dec.vid.wmv.enabled",
+                wmvEnable);
+        if (wmvEnable == 1) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     public static void createVideoProfileTable() {
         // push all the property into one big table
         String encoderType = getVideoCodecProperty();
