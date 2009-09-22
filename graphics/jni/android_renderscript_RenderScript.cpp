@@ -181,7 +181,7 @@ nElementBegin(JNIEnv *_env, jobject _this)
 
 
 static void
-nElementAdd(JNIEnv *_env, jobject _this, jint kind, jint type, jint norm, jint bits, jstring name)
+nElementAdd(JNIEnv *_env, jobject _this, jint kind, jint type, jboolean norm, jint bits, jstring name)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
     const char* n = NULL;
@@ -359,14 +359,6 @@ nAllocationCreateTyped(JNIEnv *_env, jobject _this, jint e)
     return (jint) rsAllocationCreateTyped(con, (RsElement)e);
 }
 
-static jint
-nAllocationCreateSized(JNIEnv *_env, jobject _this, jint e, jint count)
-{
-    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
-    LOG_API("nAllocationCreateSized, con(%p), e(%p), count(%i)", con, (RsElement)e, count);
-    return (jint) rsAllocationCreateSized(con, (RsElement)e, count);
-}
-
 static void
 nAllocationUploadToTexture(JNIEnv *_env, jobject _this, jint a, jint mip)
 {
@@ -476,36 +468,36 @@ nAllocationCreateFromBitmapBoxed(JNIEnv *_env, jobject _this, jint dstFmt, jbool
 
 
 static void
-nAllocationData_i(JNIEnv *_env, jobject _this, jint alloc, jintArray data, int sizeBytes)
-{
-    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
-    jint len = _env->GetArrayLength(data);
-    LOG_API("nAllocationData_i, con(%p), alloc(%p), len(%i)", con, (RsAllocation)alloc, len);
-    jint *ptr = _env->GetIntArrayElements(data, NULL);
-    rsAllocationData(con, (RsAllocation)alloc, ptr, sizeBytes);
-    _env->ReleaseIntArrayElements(data, ptr, JNI_ABORT);
-}
-
-static void
-nAllocationData_f(JNIEnv *_env, jobject _this, jint alloc, jfloatArray data, int sizeBytes)
-{
-    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
-    jint len = _env->GetArrayLength(data);
-    LOG_API("nAllocationData_i, con(%p), alloc(%p), len(%i)", con, (RsAllocation)alloc, len);
-    jfloat *ptr = _env->GetFloatArrayElements(data, NULL);
-    rsAllocationData(con, (RsAllocation)alloc, ptr, sizeBytes);
-    _env->ReleaseFloatArrayElements(data, ptr, JNI_ABORT);
-}
-
-static void
 nAllocationSubData1D_i(JNIEnv *_env, jobject _this, jint alloc, jint offset, jint count, jintArray data, int sizeBytes)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
     jint len = _env->GetArrayLength(data);
-    LOG_API("nAllocation1DSubData_i, con(%p), adapter(%p), offset(%i), count(%i), len(%i)", con, (RsAllocation)alloc, offset, count, len);
+    LOG_API("nAllocation1DSubData_i, con(%p), adapter(%p), offset(%i), count(%i), len(%i), sizeBytes(%i)", con, (RsAllocation)alloc, offset, count, len, sizeBytes);
     jint *ptr = _env->GetIntArrayElements(data, NULL);
     rsAllocation1DSubData(con, (RsAllocation)alloc, offset, count, ptr, sizeBytes);
     _env->ReleaseIntArrayElements(data, ptr, JNI_ABORT);
+}
+
+static void
+nAllocationSubData1D_s(JNIEnv *_env, jobject _this, jint alloc, jint offset, jint count, jshortArray data, int sizeBytes)
+{
+    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
+    jint len = _env->GetArrayLength(data);
+    LOG_API("nAllocation1DSubData_s, con(%p), adapter(%p), offset(%i), count(%i), len(%i), sizeBytes(%i)", con, (RsAllocation)alloc, offset, count, len, sizeBytes);
+    jshort *ptr = _env->GetShortArrayElements(data, NULL);
+    rsAllocation1DSubData(con, (RsAllocation)alloc, offset, count, ptr, sizeBytes);
+    _env->ReleaseShortArrayElements(data, ptr, JNI_ABORT);
+}
+
+static void
+nAllocationSubData1D_b(JNIEnv *_env, jobject _this, jint alloc, jint offset, jint count, jbyteArray data, int sizeBytes)
+{
+    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
+    jint len = _env->GetArrayLength(data);
+    LOG_API("nAllocation1DSubData_b, con(%p), adapter(%p), offset(%i), count(%i), len(%i), sizeBytes(%i)", con, (RsAllocation)alloc, offset, count, len, sizeBytes);
+    jbyte *ptr = _env->GetByteArrayElements(data, NULL);
+    rsAllocation1DSubData(con, (RsAllocation)alloc, offset, count, ptr, sizeBytes);
+    _env->ReleaseByteArrayElements(data, ptr, JNI_ABORT);
 }
 
 static void
@@ -513,7 +505,7 @@ nAllocationSubData1D_f(JNIEnv *_env, jobject _this, jint alloc, jint offset, jin
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
     jint len = _env->GetArrayLength(data);
-    LOG_API("nAllocation1DSubData_f, con(%p), adapter(%p), offset(%i), count(%i), len(%i)", con, (RsAllocation)alloc, offset, count, len);
+    LOG_API("nAllocation1DSubData_f, con(%p), adapter(%p), offset(%i), count(%i), len(%i), sizeBytes(%i)", con, (RsAllocation)alloc, offset, count, len, sizeBytes);
     jfloat *ptr = _env->GetFloatArrayElements(data, NULL);
     rsAllocation1DSubData(con, (RsAllocation)alloc, offset, count, ptr, sizeBytes);
     _env->ReleaseFloatArrayElements(data, ptr, JNI_ABORT);
@@ -1323,7 +1315,7 @@ static JNINativeMethod methods[] = {
 {"nFileOpen",                      "([B)I",                                (void*)nFileOpen },
 
 {"nElementBegin",                  "()V",                                  (void*)nElementBegin },
-{"nElementAdd",                    "(IIIILjava/lang/String;)V",            (void*)nElementAdd },
+{"nElementAdd",                    "(IIZILjava/lang/String;)V",            (void*)nElementAdd },
 {"nElementCreate",                 "()I",                                  (void*)nElementCreate },
 
 {"nTypeBegin",                     "(I)V",                                 (void*)nTypeBegin },
@@ -1333,15 +1325,14 @@ static JNINativeMethod methods[] = {
 {"nTypeSetupFields",               "(Landroid/renderscript/Type;[I[I[Ljava/lang/reflect/Field;)V", (void*)nTypeSetupFields },
 
 {"nAllocationCreateTyped",         "(I)I",                                 (void*)nAllocationCreateTyped },
-{"nAllocationCreateSized",         "(II)I",                                (void*)nAllocationCreateSized },
 {"nAllocationCreateFromBitmap",    "(IZLandroid/graphics/Bitmap;)I",       (void*)nAllocationCreateFromBitmap },
 {"nAllocationCreateFromBitmapBoxed","(IZLandroid/graphics/Bitmap;)I",      (void*)nAllocationCreateFromBitmapBoxed },
 {"nAllocationCreateFromAssetStream","(IZI)I",                              (void*)nAllocationCreateFromAssetStream },
 {"nAllocationUploadToTexture",     "(II)V",                                (void*)nAllocationUploadToTexture },
 {"nAllocationUploadToBufferObject","(I)V",                                 (void*)nAllocationUploadToBufferObject },
-{"nAllocationData",                "(I[II)V",                              (void*)nAllocationData_i },
-{"nAllocationData",                "(I[FI)V",                              (void*)nAllocationData_f },
 {"nAllocationSubData1D",           "(III[II)V",                            (void*)nAllocationSubData1D_i },
+{"nAllocationSubData1D",           "(III[SI)V",                            (void*)nAllocationSubData1D_s },
+{"nAllocationSubData1D",           "(III[BI)V",                            (void*)nAllocationSubData1D_b },
 {"nAllocationSubData1D",           "(III[FI)V",                            (void*)nAllocationSubData1D_f },
 {"nAllocationSubData2D",           "(IIIII[II)V",                          (void*)nAllocationSubData2D_i },
 {"nAllocationSubData2D",           "(IIIII[FI)V",                          (void*)nAllocationSubData2D_f },

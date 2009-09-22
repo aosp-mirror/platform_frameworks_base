@@ -80,7 +80,7 @@ public class RenderScript {
     native int  nFileOpen(byte[] name);
 
     native void nElementBegin();
-    native void nElementAdd(int kind, int type, int norm, int bits, String s);
+    native void nElementAdd(int kind, int type, boolean norm, int bits, String s);
     native int  nElementCreate();
 
     native void nTypeBegin(int elementID);
@@ -90,17 +90,19 @@ public class RenderScript {
     native void nTypeSetupFields(Type t, int[] types, int[] bits, Field[] IDs);
 
     native int  nAllocationCreateTyped(int type);
-    native int  nAllocationCreateSized(int elem, int count);
+    //native int  nAllocationCreateSized(int elem, int count);
     native int  nAllocationCreateFromBitmap(int dstFmt, boolean genMips, Bitmap bmp);
     native int  nAllocationCreateFromBitmapBoxed(int dstFmt, boolean genMips, Bitmap bmp);
     native int  nAllocationCreateFromAssetStream(int dstFmt, boolean genMips, int assetStream);
 
     native void nAllocationUploadToTexture(int alloc, int baseMioLevel);
     native void nAllocationUploadToBufferObject(int alloc);
-    native void nAllocationData(int id, int[] d, int sizeBytes);
-    native void nAllocationData(int id, float[] d, int sizeBytes);
+
     native void nAllocationSubData1D(int id, int off, int count, int[] d, int sizeBytes);
+    native void nAllocationSubData1D(int id, int off, int count, short[] d, int sizeBytes);
+    native void nAllocationSubData1D(int id, int off, int count, byte[] d, int sizeBytes);
     native void nAllocationSubData1D(int id, int off, int count, float[] d, int sizeBytes);
+
     native void nAllocationSubData2D(int id, int xoff, int yoff, int w, int h, int[] d, int sizeBytes);
     native void nAllocationSubData2D(int id, int xoff, int yoff, int w, int h, float[] d, int sizeBytes);
     native void nAllocationRead(int id, int[] d);
