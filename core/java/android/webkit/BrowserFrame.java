@@ -707,6 +707,10 @@ class BrowserFrame extends Handler {
         return value.string.toString();
     }
 
+    private float density() {
+        return mContext.getResources().getDisplayMetrics().density;
+    }
+
     //==========================================================================
     // native functions
     //==========================================================================

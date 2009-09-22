@@ -100,6 +100,15 @@ final class WebViewCore {
 
     private boolean mViewportUserScalable = true;
 
+    /*
+     * range is from 70 to 400.
+     * 0 is a special value means device-dpi. The default scale factor will be
+     * always 100.
+     * -1 means undefined. The default scale factor will be
+     * WebView.DEFAULT_SCALE_PERCENT.
+     */
+    private int mViewportDensityDpi = -1;
+
     private int mRestoredScale = 0;
     private int mRestoredScreenWidthScale = 0;
     private int mRestoredX = 0;
@@ -1539,6 +1548,7 @@ final class WebViewCore {
         float mMaxScale;
         float mViewScale;
         float mTextWrapScale;
+        float mDefaultScale;
         int mScrollX;
         int mScrollY;
         boolean mMobileSite;
@@ -1842,30 +1852,38 @@ final class WebViewCore {
         // set the viewport settings from WebKit
         setViewportSettingsFromNative();
 
-        // adjust the default scale to match the density
-        if (WebView.DEFAULT_SCALE_PERCENT != 100) {
-            float adjust = (float) WebView.DEFAULT_SCALE_PERCENT / 100.0f;
-            if (mViewportInitialScale > 0) {
-                mViewportInitialScale *= adjust;
+        // adjust the default scale to match the densityDpi
+        float adjust = 1.0f;
+        if (mViewportDensityDpi == -1) {
+            if (WebView.DEFAULT_SCALE_PERCENT != 100) {
+                adjust = WebView.DEFAULT_SCALE_PERCENT / 100.0f;
             }
-            if (mViewportMinimumScale > 0) {
-                mViewportMinimumScale *= adjust;
-            }
-            if (mViewportMaximumScale > 0) {
-                mViewportMaximumScale *= adjust;
-            }
+        } else if (mViewportDensityDpi > 0) {
+            adjust = (float) mContext.getResources().getDisplayMetrics().densityDpi
+                    / mViewportDensityDpi;
+        }
+        int defaultScale = (int) (adjust * 100);
+
+        if (mViewportInitialScale > 0) {
+            mViewportInitialScale *= adjust;
+        }
+        if (mViewportMinimumScale > 0) {
+            mViewportMinimumScale *= adjust;
+        }
+        if (mViewportMaximumScale > 0) {
+            mViewportMaximumScale *= adjust;
         }
 
         // infer the values if they are not defined.
         if (mViewportWidth == 0) {
             if (mViewportInitialScale == 0) {
-                mViewportInitialScale = WebView.DEFAULT_SCALE_PERCENT;
+                mViewportInitialScale = defaultScale;
             }
         }
         if (mViewportUserScalable == false) {
-            mViewportInitialScale = WebView.DEFAULT_SCALE_PERCENT;
-            mViewportMinimumScale = WebView.DEFAULT_SCALE_PERCENT;
-            mViewportMaximumScale = WebView.DEFAULT_SCALE_PERCENT;
+            mViewportInitialScale = defaultScale;
+            mViewportMinimumScale = defaultScale;
+            mViewportMaximumScale = defaultScale;
         }
         if (mViewportMinimumScale > mViewportInitialScale
                 && mViewportInitialScale != 0) {
@@ -1875,8 +1893,7 @@ final class WebViewCore {
                 && mViewportMaximumScale < mViewportInitialScale) {
             mViewportMaximumScale = mViewportInitialScale;
         }
-        if (mViewportWidth < 0
-                && mViewportInitialScale == WebView.DEFAULT_SCALE_PERCENT) {
+        if (mViewportWidth < 0 && mViewportInitialScale == defaultScale) {
             mViewportWidth = 0;
         }
 
@@ -1893,7 +1910,7 @@ final class WebViewCore {
             // we call WebView method from WebCore thread. But not perfect
             // reference is better than no reference.
             webViewWidth = mWebView.getViewWidth();
-            viewportWidth = webViewWidth * 100 / WebView.DEFAULT_SCALE_PERCENT;
+            viewportWidth = (int) (webViewWidth / adjust);
             if (viewportWidth == 0) {
                 Log.w(LOGTAG, "Can't get the viewWidth after the first layout");
             }
@@ -1903,6 +1920,7 @@ final class WebViewCore {
         mRestoreState = new RestoreState();
         mRestoreState.mMinScale = mViewportMinimumScale / 100.0f;
         mRestoreState.mMaxScale = mViewportMaximumScale / 100.0f;
+        mRestoreState.mDefaultScale = adjust;
         mRestoreState.mScrollX = mRestoredX;
         mRestoreState.mScrollY = mRestoredY;
         mRestoreState.mMobileSite = (0 == mViewportWidth);
@@ -1924,8 +1942,7 @@ final class WebViewCore {
                 mRestoreState.mViewScale = mRestoreState.mTextWrapScale =
                         (float) webViewWidth / mViewportWidth;
             } else {
-                mRestoreState.mTextWrapScale =
-                        WebView.DEFAULT_SCALE_PERCENT / 100.0f;
+                mRestoreState.mTextWrapScale = adjust;
                 // 0 will trigger WebView to turn on zoom overview mode
                 mRestoreState.mViewScale = 0;
             }
