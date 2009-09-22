@@ -1867,19 +1867,13 @@ final class WebViewCore {
             mViewportMinimumScale = WebView.DEFAULT_SCALE_PERCENT;
             mViewportMaximumScale = WebView.DEFAULT_SCALE_PERCENT;
         }
-        if (mViewportMinimumScale > mViewportInitialScale) {
-            if (mViewportInitialScale == 0) {
-                mViewportInitialScale = mViewportMinimumScale;
-            } else {
-                mViewportMinimumScale = mViewportInitialScale;
-            }
+        if (mViewportMinimumScale > mViewportInitialScale
+                && mViewportInitialScale != 0) {
+            mViewportMinimumScale = mViewportInitialScale;
         }
-        if (mViewportMaximumScale > 0) {
-            if (mViewportMaximumScale < mViewportInitialScale) {
-                mViewportMaximumScale = mViewportInitialScale;
-            } else if (mViewportInitialScale == 0) {
-                mViewportInitialScale = mViewportMaximumScale;
-            }
+        if (mViewportMaximumScale > 0
+                && mViewportMaximumScale < mViewportInitialScale) {
+            mViewportMaximumScale = mViewportInitialScale;
         }
         if (mViewportWidth < 0
                 && mViewportInitialScale == WebView.DEFAULT_SCALE_PERCENT) {
