@@ -25,8 +25,9 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.SoundEffectConstants;
-import android.view.animation.AccelerateInterpolator;
+import android.view.VelocityTracker;
+import android.view.ViewConfiguration;
+import android.view.animation.DecelerateInterpolator;
 import static android.view.animation.AnimationUtils.currentAnimationTimeMillis;
 import com.android.internal.R;
 
@@ -60,16 +61,18 @@ public class RotarySelector extends View {
     private int mLeftHandleX;
     private int mRightHandleX;
 
-    // current offset of user's dragging
-    private int mTouchDragOffset = 0;
+    // current offset of rotary widget along the x axis
+    private int mRotaryOffsetX = 0;
 
     // state of the animation used to bring the handle back to its start position when
     // the user lets go before triggering an action
     private boolean mAnimating = false;
-    private long mAnimationStartTime; // set to the end point of the animatino
+    private long mAnimationStartTime;
     private long mAnimationDuration;
-    private int mAnimatingDeltaXStart;   // the animation will interpolate from this delta down to zero
-    private AccelerateInterpolator mInterpolator;
+    private int mAnimatingDeltaXStart;   // the animation will interpolate from this delta to zero
+    private int mAnimatingDeltaXEnd;
+
+    private DecelerateInterpolator mInterpolator;
 
     /**
      * If the user is currently dragging something.
@@ -87,8 +90,8 @@ public class RotarySelector extends View {
 
     // Vibration (haptic feedback)
     private Vibrator mVibrator;
-    private static final long VIBRATE_SHORT = 60;  // msec
-    private static final long VIBRATE_LONG = 100;  // msec
+    private static final long VIBRATE_SHORT = 30;  // msec
+    private static final long VIBRATE_LONG = 60;  // msec
 
     /**
      * The drawable for the arrows need to be scrunched this many dips towards the rotary bg below
@@ -114,11 +117,27 @@ public class RotarySelector extends View {
     static final int SNAP_BACK_ANIMATION_DURATION_MILLIS = 300;
     static final int SPIN_ANIMATION_DURATION_MILLIS = 800;
 
-    private static final boolean DRAW_CENTER_DIMPLE = false;
+    private static final boolean DRAW_CENTER_DIMPLE = true;
     private int mEdgeTriggerThresh;
     private int mDimpleWidth;
     private int mBackgroundWidth;
     private int mBackgroundHeight;
+    private final int mOuterRadius;
+    private final int mInnerRadius;
+    private int mDimpleSpacing;
+
+    private VelocityTracker mVelocityTracker;
+    private int mMinimumVelocity;
+    private int mMaximumVelocity;
+
+    /**
+     * The number of dimples we are flinging when we do the "spin" animation.  Used to know when to
+     * wrap the icons back around so they "rotate back" onto the screen.
+     * @see #updateAnimation()
+     */
+    private int mDimplesOfFling = 0;
+
+
 
     public RotarySelector(Context context) {
         this(context, null);
@@ -152,7 +171,7 @@ public class RotarySelector extends View {
         mArrowLongLeft.setBounds(0, 0, arrowW, arrowH);
         mArrowLongRight.setBounds(0, 0, arrowW, arrowH);
 
-        mInterpolator = new AccelerateInterpolator();
+        mInterpolator = new DecelerateInterpolator(1f);
 
         mEdgeTriggerThresh = (int) (mDensity * EDGE_TRIGGER_DIP);
 
@@ -160,6 +179,23 @@ public class RotarySelector extends View {
 
         mBackgroundWidth = mBackground.getIntrinsicWidth();
         mBackgroundHeight = mBackground.getIntrinsicHeight();
+        mOuterRadius = (int) (mDensity * OUTER_ROTARY_RADIUS_DIP);
+        mInnerRadius = (int) ((OUTER_ROTARY_RADIUS_DIP - ROTARY_STROKE_WIDTH_DIP) * mDensity);
+
+        final ViewConfiguration configuration = ViewConfiguration.get(mContext);
+        mMinimumVelocity = configuration.getScaledMinimumFlingVelocity() * 2;
+        mMaximumVelocity = configuration.getScaledMaximumFlingVelocity();
+    }
+
+    @Override
+    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+        super.onSizeChanged(w, h, oldw, oldh);
+
+        mLeftHandleX = (int) (EDGE_PADDING_DIP * mDensity) + mDimpleWidth / 2;
+        mRightHandleX =
+                getWidth() - (int) (EDGE_PADDING_DIP * mDensity) - mDimpleWidth / 2;
+
+        mDimpleSpacing = (getWidth() / 2) - mLeftHandleX;
     }
 
     /**
@@ -229,43 +265,21 @@ public class RotarySelector extends View {
         setMeasuredDimension(width, backgroundH + arrowH - arrowScrunch);
     }
 
-    @Override
-    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
-        super.onSizeChanged(w, h, oldw, oldh);
-
-        mLeftHandleX = (int) (EDGE_PADDING_DIP * mDensity) + mDimpleWidth / 2;
-        mRightHandleX =
-                getWidth() - (int) (EDGE_PADDING_DIP * mDensity) - mDimpleWidth / 2;
-    }
-
 //    private Paint mPaint = new Paint();
 
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
         if (DBG) {
-            log(String.format("onDraw: mAnimating=%s, mTouchDragOffset=%d, mGrabbedState=%d",
-                    mAnimating, mTouchDragOffset, mGrabbedState));
+            log(String.format("onDraw: mAnimating=%s, mRotaryOffsetX=%d, mGrabbedState=%d",
+                    mAnimating, mRotaryOffsetX, mGrabbedState));
         }
 
         final int height = getHeight();
 
         // update animating state before we draw anything
         if (mAnimating) {
-            final long millisSoFar = currentAnimationTimeMillis() - mAnimationStartTime;
-            final long millisLeft = mAnimationDuration - millisSoFar;
-            if (DBG) log("millisleft for animating: " + millisLeft);
-            if (millisLeft <= 0) {
-                reset();
-            } else {
-                // we always use the snap back duration as the denominator for interpolation
-                // to get a consistent velocity (bascially this makes us happy for the snap back
-                // and the spin around one).
-                final long denom = SNAP_BACK_ANIMATION_DURATION_MILLIS; // mAnimationDuration
-                float interpolation = mInterpolator.getInterpolation(
-                        (float) millisLeft / denom);
-                mTouchDragOffset = (int) (mAnimatingDeltaXStart * interpolation);
-            }
+            updateAnimation();
         }
 
         // Background:
@@ -302,16 +316,13 @@ public class RotarySelector extends View {
 //        float or = OUTER_ROTARY_RADIUS_DIP * mDensity;
 //        canvas.drawCircle(getWidth() / 2, or + mBackground.getBounds().top, or, mPaint);
 
-        final int outerRadius = (int) (mDensity * OUTER_ROTARY_RADIUS_DIP);
-        final int innerRadius =
-                (int) ((OUTER_ROTARY_RADIUS_DIP - ROTARY_STROKE_WIDTH_DIP) * mDensity);
         final int bgTop = mBackground.getBounds().top;
         {
-            final int xOffset = mLeftHandleX + mTouchDragOffset;
+            final int xOffset = mLeftHandleX + mRotaryOffsetX;
             final int drawableY = getYOnArc(
                     mBackground,
-                    innerRadius,
-                    outerRadius,
+                    mInnerRadius,
+                    mOuterRadius,
                     xOffset);
 
             drawCentered(mDimple, canvas, xOffset, drawableY + bgTop);
@@ -321,22 +332,22 @@ public class RotarySelector extends View {
         }
 
         if (DRAW_CENTER_DIMPLE) {
-            final int xOffset = getWidth() / 2 + mTouchDragOffset;
+            final int xOffset = getWidth() / 2 + mRotaryOffsetX;
             final int drawableY = getYOnArc(
                     mBackground,
-                    innerRadius,
-                    outerRadius,
+                    mInnerRadius,
+                    mOuterRadius,
                     xOffset);
 
             drawCentered(mDimple, canvas, xOffset, drawableY + bgTop);
         }
 
         {
-            final int xOffset = mRightHandleX + mTouchDragOffset;
+            final int xOffset = mRightHandleX + mRotaryOffsetX;
             final int drawableY = getYOnArc(
                     mBackground,
-                    innerRadius,
-                    outerRadius,
+                    mInnerRadius,
+                    mOuterRadius,
                     xOffset);
 
             drawCentered(mDimple, canvas, xOffset, drawableY + bgTop);
@@ -345,7 +356,33 @@ public class RotarySelector extends View {
             }
         }
 
-        if (mAnimating) invalidate();
+        // draw extra left hand dimples
+        int dimpleLeft = mRotaryOffsetX + mLeftHandleX - mDimpleSpacing;
+        final int halfdimple = mDimpleWidth / 2;
+        while (dimpleLeft > -halfdimple) {
+            final int drawableY = getYOnArc(
+                    mBackground,
+                    mInnerRadius,
+                    mOuterRadius,
+                    dimpleLeft);
+
+            drawCentered(mDimple, canvas, dimpleLeft, drawableY + bgTop);
+            dimpleLeft -= mDimpleSpacing;
+        }
+
+        // draw extra right hand dimples
+        int dimpleRight = mRotaryOffsetX + mRightHandleX + mDimpleSpacing;
+        final int rightThresh = mRight + halfdimple;
+        while (dimpleRight < rightThresh) {
+            final int drawableY = getYOnArc(
+                    mBackground,
+                    mInnerRadius,
+                    mOuterRadius,
+                    dimpleRight);
+
+            drawCentered(mDimple, canvas, dimpleRight, drawableY + bgTop);
+            dimpleRight += mDimpleSpacing;
+        }
     }
 
     /**
@@ -395,6 +432,11 @@ public class RotarySelector extends View {
         if (mAnimating) {
             return true;
         }
+        if (mVelocityTracker == null) {
+            mVelocityTracker = VelocityTracker.obtain();
+        }
+        mVelocityTracker.addMovement(event);
+
 
         final int eventX = (int) event.getX();
         final int hitWindow = mDimpleWidth;
@@ -409,12 +451,12 @@ public class RotarySelector extends View {
                     invalidate();
                 }
                 if (eventX < mLeftHandleX + hitWindow) {
-                    mTouchDragOffset = eventX - mLeftHandleX;
+                    mRotaryOffsetX = eventX - mLeftHandleX;
                     mGrabbedState = LEFT_HANDLE_GRABBED;
                     invalidate();
                     vibrate(VIBRATE_SHORT);
                 } else if (eventX > mRightHandleX - hitWindow) {
-                    mTouchDragOffset = eventX - mRightHandleX;
+                    mRotaryOffsetX = eventX - mRightHandleX;
                     mGrabbedState = RIGHT_HANDLE_GRABBED;
                     invalidate();
                     vibrate(VIBRATE_SHORT);
@@ -424,35 +466,38 @@ public class RotarySelector extends View {
             case MotionEvent.ACTION_MOVE:
                 if (DBG) log("touch-move");
                 if (mGrabbedState == LEFT_HANDLE_GRABBED) {
-                    mTouchDragOffset = eventX - mLeftHandleX;
+                    mRotaryOffsetX = eventX - mLeftHandleX;
                     invalidate();
                     if (eventX >= getRight() - mEdgeTriggerThresh && !mTriggered) {
                         mTriggered = true;
                         dispatchTriggerEvent(OnDialTriggerListener.LEFT_HANDLE);
-                        // set up "spin around animation"
-                        mAnimating = true;
-                        mAnimationStartTime = currentAnimationTimeMillis();
-                        mAnimationDuration = SPIN_ANIMATION_DURATION_MILLIS;
-                        mAnimatingDeltaXStart = -mBackgroundWidth*3;
-                        mTouchDragOffset = 0;
-                        mGrabbedState = NOTHING_GRABBED;
-                        invalidate();
-
+                        final VelocityTracker velocityTracker = mVelocityTracker;
+                        velocityTracker.computeCurrentVelocity(1000, mMaximumVelocity);
+                        final int velocity = Math.max(mMinimumVelocity, (int) velocityTracker.getXVelocity());
+                        mDimplesOfFling = Math.max(
+                                8,
+                                Math.abs(velocity / mDimpleSpacing));
+                        startAnimationWithVelocity(
+                                eventX - mLeftHandleX,
+                                mDimplesOfFling * mDimpleSpacing,
+                                velocity);
                     }
                 } else if (mGrabbedState == RIGHT_HANDLE_GRABBED) {
-                    mTouchDragOffset = eventX - mRightHandleX;
+                    mRotaryOffsetX = eventX - mRightHandleX;
                     invalidate();
                     if (eventX <= mEdgeTriggerThresh && !mTriggered) {
                         mTriggered = true;
                         dispatchTriggerEvent(OnDialTriggerListener.RIGHT_HANDLE);
-                        // set up "spin around animation"
-                        mAnimating = true;
-                        mAnimationStartTime = currentAnimationTimeMillis();
-                        mAnimationDuration = SPIN_ANIMATION_DURATION_MILLIS;
-                        mAnimatingDeltaXStart = mBackgroundWidth*3;
-                        mTouchDragOffset = 0;
-                        mGrabbedState = NOTHING_GRABBED;
-                        invalidate();
+                        final VelocityTracker velocityTracker = mVelocityTracker;
+                        velocityTracker.computeCurrentVelocity(1000, mMaximumVelocity);
+                        final int velocity = Math.min(-mMinimumVelocity, (int) velocityTracker.getXVelocity());
+                        mDimplesOfFling = Math.max(
+                                8,
+                                Math.abs(velocity / mDimpleSpacing));
+                        startAnimationWithVelocity(
+                                eventX - mRightHandleX,
+                                -(mDimplesOfFling * mDimpleSpacing),
+                                velocity);
                     }
                 }
                 break;
@@ -462,35 +507,84 @@ public class RotarySelector extends View {
                 if (mGrabbedState == LEFT_HANDLE_GRABBED
                         && Math.abs(eventX - mLeftHandleX) > 5) {
                     // set up "snap back" animation
-                    mAnimating = true;
-                    mAnimationStartTime = currentAnimationTimeMillis();
-                    mAnimationDuration = SNAP_BACK_ANIMATION_DURATION_MILLIS;
-                    mAnimatingDeltaXStart = eventX - mLeftHandleX;
+                    startAnimation(eventX - mLeftHandleX, 0, SNAP_BACK_ANIMATION_DURATION_MILLIS);
                 } else if (mGrabbedState == RIGHT_HANDLE_GRABBED
                         && Math.abs(eventX - mRightHandleX) > 5) {
                     // set up "snap back" animation
-                    mAnimating = true;
-                    mAnimationStartTime = currentAnimationTimeMillis();
-                    mAnimationDuration = SNAP_BACK_ANIMATION_DURATION_MILLIS;
-                    mAnimatingDeltaXStart = eventX - mRightHandleX;
+                    startAnimation(eventX - mRightHandleX, 0, SNAP_BACK_ANIMATION_DURATION_MILLIS);
                 }
-
-                mTouchDragOffset = 0;
+                mRotaryOffsetX = 0;
                 mGrabbedState = NOTHING_GRABBED;
                 invalidate();
+                if (mVelocityTracker != null) {
+                    mVelocityTracker.recycle(); // wishin' we had generational GC
+                    mVelocityTracker = null;
+                }
                 break;
             case MotionEvent.ACTION_CANCEL:
                 if (DBG) log("touch-cancel");
                 reset();
                 invalidate();
+                if (mVelocityTracker != null) {
+                    mVelocityTracker.recycle();
+                    mVelocityTracker = null;
+                }
                 break;
         }
         return true;
     }
 
+    private void startAnimation(int startX, int endX, int duration) {
+        mAnimating = true;
+        mAnimationStartTime = currentAnimationTimeMillis();
+        mAnimationDuration = duration;
+        mAnimatingDeltaXStart = startX;
+        mAnimatingDeltaXEnd = endX;
+        mGrabbedState = NOTHING_GRABBED;
+        mDimplesOfFling = 0;
+        invalidate();
+    }
+
+    private void startAnimationWithVelocity(int startX, int endX, int pixelsPerSecond) {
+        mAnimating = true;
+        mAnimationStartTime = currentAnimationTimeMillis();
+        mAnimationDuration = 1000 * (endX - startX) / pixelsPerSecond;
+        mAnimatingDeltaXStart = startX;
+        mAnimatingDeltaXEnd = endX;
+        mGrabbedState = NOTHING_GRABBED;
+        invalidate();
+    }
+
+    private void updateAnimation() {
+        final long millisSoFar = currentAnimationTimeMillis() - mAnimationStartTime;
+        final long millisLeft = mAnimationDuration - millisSoFar;
+        final int totalDeltaX = mAnimatingDeltaXStart - mAnimatingDeltaXEnd;
+        if (DBG) log("millisleft for animating: " + millisLeft);
+        if (millisLeft <= 0) {
+            reset();
+            return;
+        }
+        // from 0 to 1 as animation progresses
+        float interpolation =
+                mInterpolator.getInterpolation((float) millisSoFar / mAnimationDuration);
+        final int dx = (int) (totalDeltaX * (1 - interpolation));
+        mRotaryOffsetX = mAnimatingDeltaXEnd + dx;
+        if (mDimplesOfFling > 0) {
+            if (mRotaryOffsetX < 4 * mDimpleSpacing) {
+                // wrap around on fling left
+                mRotaryOffsetX += (4 + mDimplesOfFling - 4) * mDimpleSpacing;
+            } else if (mRotaryOffsetX > 4 * mDimpleSpacing) {
+                // wrap around on fling right
+                mRotaryOffsetX -= (4 + mDimplesOfFling - 4) * mDimpleSpacing;
+            }
+        }
+        invalidate();
+    }
+
     private void reset() {
         mAnimating = false;
-        mTouchDragOffset = 0;
+        mRotaryOffsetX = 0;
+        mDimplesOfFling = 0;
         mGrabbedState = NOTHING_GRABBED;
         mTriggered = false;
     }
@@ -500,7 +594,8 @@ public class RotarySelector extends View {
      */
     private synchronized void vibrate(long duration) {
         if (mVibrator == null) {
-            mVibrator = (android.os.Vibrator) getContext().getSystemService(Context.VIBRATOR_SERVICE);
+            mVibrator = (android.os.Vibrator)
+                    getContext().getSystemService(Context.VIBRATOR_SERVICE);
         }
         mVibrator.vibrate(duration);
     }
