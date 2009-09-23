@@ -50,7 +50,7 @@ public:
         then the bitmap must be an owner of its natively allocated pixels (via allocPixels).
         */
     static jobject createBitmap(JNIEnv* env, SkBitmap* bitmap, bool isMutable,
-                                jbyteArray ninePatch);
+                                jbyteArray ninePatch, int density = -1);
     
     static jobject createRegion(JNIEnv* env, SkRegion* region);
 
