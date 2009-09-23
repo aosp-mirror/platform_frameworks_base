@@ -143,6 +143,8 @@ public:
     bool checkVersion1_1() const {return (mGL.mMajorVersion > 1) || (mGL.mMinorVersion >= 1); }
     bool checkVersion2_0() const {return mGL.mMajorVersion >= 2; }
 
+    bool logTimes;
+
 protected:
     Device *mDev;
 
@@ -214,7 +216,6 @@ private:
     uint64_t mTimeFrame;
     uint64_t mTimeLastFrame;
 };
-
 
 }
 }

@@ -41,8 +41,6 @@ namespace renderscript {
 #define rsAssert(v) while(0)
 #endif
 
-#define RS_LOG_TIMES 0
-
 template<typename T>
 T rsMin(T in1, T in2)
 {
