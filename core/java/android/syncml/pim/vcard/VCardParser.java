@@ -23,9 +23,6 @@ import android.util.Log;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
-/**
- * @deprecated Please use the code in android.pim.vcard
- */
 @Deprecated
 public class VCardParser {
 
