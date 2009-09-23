@@ -473,8 +473,10 @@ class AppWidgetService extends IAppWidgetService.Stub
     public void stopListening(int hostId) {
         synchronized (mAppWidgetIds) {
             Host host = lookupHostLocked(getCallingUid(), hostId);
-            host.callbacks = null;
-            pruneHostLocked(host);
+            if (host != null) {
+                host.callbacks = null;
+                pruneHostLocked(host);
+            }
         }
     }
 
