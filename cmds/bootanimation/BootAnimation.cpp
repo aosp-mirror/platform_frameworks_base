@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#define LOG_TAG "BootAnimation"
+
 #include <stdint.h>
 #include <sys/types.h>
 #include <math.h>
@@ -58,11 +60,27 @@ BootAnimation::~BootAnimation() {
 }
 
 void BootAnimation::onFirstRef() {
-    run("BootAnimation", PRIORITY_DISPLAY);
+    status_t err = mSession->linkToComposerDeath(this);
+    LOGE_IF(err, "linkToComposerDeath failed (%s) ", strerror(-err));
+    if (err != NO_ERROR) {
+        run("BootAnimation", PRIORITY_DISPLAY);
+    }
 }
 
-const sp<SurfaceComposerClient>& BootAnimation::session() const {
+sp<SurfaceComposerClient> BootAnimation::session() const {
     return mSession;
+}
+
+
+void BootAnimation::binderDied(const wp<IBinder>& who)
+{
+    // woah, surfaceflinger died!
+    LOGD("SurfaceFlinger died, exiting...");
+
+    // calling requestExit() is not enough here because the Surface code
+    // might be blocked on a condition variable that will never be updated.
+    kill( getpid(), SIGKILL );
+    requestExit();
 }
 
 status_t BootAnimation::initTexture(Texture* texture, AssetManager& assets,
