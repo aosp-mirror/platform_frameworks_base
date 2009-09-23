@@ -3215,12 +3215,6 @@ public final class Settings {
             "vending_carrier_cred_buf_ms";
 
         /**
-         * Setting which states if German Direct Debit support should be enabled.
-         */
-        public static final String VENDING_GDD_ENABLE =
-            "vending_gdd_enable";
-
-        /**
          * URL that points to the legal terms of service to display in Settings.
          * <p>
          * This should be a https URL. For a pretty user-friendly URL, use
