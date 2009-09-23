@@ -61,6 +61,7 @@ public class RenderScript {
 
     native int  nDeviceCreate();
     native void nDeviceDestroy(int dev);
+    native void nDeviceSetConfig(int dev, int param, int value);
     native int  nContextCreate(int dev, Surface sur, int ver, boolean useDepth);
     native void nContextDestroy(int con);
 
@@ -71,6 +72,7 @@ public class RenderScript {
     native void nContextBindProgramFragmentStore(int pfs);
     native void nContextBindProgramFragment(int pf);
     native void nContextBindProgramVertex(int pf);
+    native void nContextBindProgramRaster(int pr);
     native void nContextAddDefineI32(String name, int value);
     native void nContextAddDefineF(String name, float value);
 
@@ -163,6 +165,10 @@ public class RenderScript {
     native void nProgramFragmentStoreDither(boolean enable);
     native int  nProgramFragmentStoreCreate();
 
+    native int  nProgramRasterCreate(int in, int out, boolean pointSmooth, boolean lineSmooth, boolean pointSprite);
+    native void nProgramRasterSetLineWidth(int pr, float v);
+    native void nProgramRasterSetPointSize(int pr, float v);
+
     native void nProgramFragmentBegin(int in, int out, boolean pointSpriteEnable);
     native void nProgramFragmentBindTexture(int vpf, int slot, int a);
     native void nProgramFragmentBindSampler(int vpf, int slot, int s);
@@ -200,9 +206,12 @@ public class RenderScript {
     ///////////////////////////////////////////////////////////////////////////////////
     //
 
-    public RenderScript(Surface sur, boolean useDepth) {
+    public RenderScript(Surface sur, boolean useDepth, boolean forceSW) {
         mSurface = sur;
         mDev = nDeviceCreate();
+        if(forceSW) {
+            nDeviceSetConfig(mDev, 0, 1);
+        }
         mContext = nContextCreate(mDev, mSurface, 0, useDepth);
 
         // TODO: This should be protected by a lock
@@ -310,6 +319,10 @@ public class RenderScript {
 
     public void contextBindProgramFragment(ProgramFragment pf) {
         nContextBindProgramFragment(pf.mID);
+    }
+
+    public void contextBindProgramRaster(ProgramRaster pf) {
+        nContextBindProgramRaster(pf.mID);
     }
 
     public void contextBindProgramVertex(ProgramVertex pf) {

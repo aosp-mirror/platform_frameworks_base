@@ -90,6 +90,7 @@ LOCAL_SRC_FILES:= \
 	rsProgram.cpp \
 	rsProgramFragment.cpp \
 	rsProgramFragmentStore.cpp \
+	rsProgramRaster.cpp \
 	rsProgramVertex.cpp \
 	rsSampler.cpp \
 	rsScript.cpp \

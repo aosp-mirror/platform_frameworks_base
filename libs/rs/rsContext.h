@@ -36,6 +36,7 @@
 #include "rsLight.h"
 #include "rsProgramFragment.h"
 #include "rsProgramFragmentStore.h"
+#include "rsProgramRaster.h"
 #include "rsProgramVertex.h"
 
 #include "rsgApiStructs.h"
@@ -65,6 +66,7 @@ public:
     SamplerState mStateSampler;
     ProgramFragmentState mStateFragment;
     ProgramFragmentStoreState mStateFragmentStore;
+    ProgramRasterState mStateRaster;
     ProgramVertexState mStateVertex;
     LightState mStateLight;
 
@@ -74,6 +76,7 @@ public:
 
     void swapBuffers();
     void setRootScript(Script *);
+    void setRaster(ProgramRaster *);
     void setVertex(ProgramVertex *);
     void setFragment(ProgramFragment *);
     void setFragmentStore(ProgramFragmentStore *);
@@ -82,6 +85,7 @@ public:
 
     const ProgramFragment * getFragment() {return mFragment.get();}
     const ProgramFragmentStore * getFragmentStore() {return mFragmentStore.get();}
+    const ProgramRaster * getRaster() {return mRaster.get();}
     const ProgramVertex * getVertex() {return mVertex.get();}
 
     void setupCheck();
@@ -101,6 +105,9 @@ public:
     }
     ProgramFragmentStore * getDefaultProgramFragmentStore() const {
         return mStateFragmentStore.mDefault.get();
+    }
+    ProgramRaster * getDefaultProgramRaster() const {
+        return mStateRaster.mDefault.get();
     }
 
     void addInt32Define(const char* name, int32_t value) {
@@ -172,6 +179,7 @@ protected:
     ObjectBaseRef<ProgramFragment> mFragment;
     ObjectBaseRef<ProgramVertex> mVertex;
     ObjectBaseRef<ProgramFragmentStore> mFragmentStore;
+    ObjectBaseRef<ProgramRaster> mRaster;
 
 
     struct ObjDestroyOOB {
