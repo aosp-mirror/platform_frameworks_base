@@ -148,6 +148,20 @@ public final class Settings {
             "android.settings.SECURITY_SETTINGS";
 
     /**
+     * Activity Action: Show settings to allow configuration of privacy options.
+     * <p>
+     * In some cases, a matching Activity may not exist, so ensure you
+     * safeguard against this.
+     * <p>
+     * Input: Nothing.
+     * <p>
+     * Output: Nothing.
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_PRIVACY_SETTINGS =
+            "android.settings.PRIVACY_SETTINGS";
+
+    /**
      * Activity Action: Show settings to allow configuration of Wi-Fi.
 
      * <p>
