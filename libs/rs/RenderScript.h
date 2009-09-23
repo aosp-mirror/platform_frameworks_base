@@ -45,9 +45,16 @@ typedef void * RsLight;
 typedef void * RsProgramVertex;
 typedef void * RsProgramFragment;
 typedef void * RsProgramFragmentStore;
+typedef void * RsProgramRaster;
+
+enum RsDeviceParam {
+    RS_DEVICE_PARAM_FORCE_SOFTWARE_GL,
+    RS_DEVICE_PARAM_COUNT
+};
 
 RsDevice rsDeviceCreate();
 void rsDeviceDestroy(RsDevice);
+void rsDeviceSetConfig(RsDevice, RsDeviceParam, int32_t value);
 
 RsContext rsContextCreate(RsDevice, void *, uint32_t version, bool useDepth);
 void rsContextDestroy(RsContext);
