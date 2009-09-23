@@ -1219,7 +1219,7 @@ class BackupManagerService extends IBackupManager.Stub {
             // build the set of apps to restore
             try {
                 // TODO: Log this before getAvailableRestoreSets, somehow
-                EventLog.writeEvent(RESTORE_START_EVENT, mTransport.transportDirName());
+                EventLog.writeEvent(RESTORE_START_EVENT, mTransport.transportDirName(), mToken);
 
                 // Get the list of all packages which have backup enabled.
                 // (Include the Package Manager metadata pseudo-package first.)
