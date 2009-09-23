@@ -856,6 +856,7 @@ final class WebViewCore {
                                 mBrowserFrame = null;
                                 mSettings.onDestroyed();
                                 mNativeClass = 0;
+                                mWebView = null;
                             }
                             break;
 
@@ -1406,7 +1407,6 @@ final class WebViewCore {
                         Message.obtain(null, EventHub.RESUME_TIMERS));
             }
             mEventHub.blockMessages();
-            mWebView = null;
         }
     }
 
