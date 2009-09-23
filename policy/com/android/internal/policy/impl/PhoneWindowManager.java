@@ -177,14 +177,16 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     RecentApplicationsDialog mRecentAppsDialog;
     Handler mHandler;
 
+    final IntentFilter mBatteryStatusFilter = new IntentFilter();
+    
     boolean mLidOpen;
-    boolean mPlugged;
+    int mPlugged;
     int mDockState = Intent.EXTRA_DOCK_STATE_UNDOCKED;
     int mLidOpenRotation;
     int mCarDockRotation;
     int mDeskDockRotation;
-    boolean mCarDockKeepsScreenOn;
-    boolean mDeskDockKeepsScreenOn;
+    int mCarDockKeepsScreenOn;
+    int mDeskDockKeepsScreenOn;
     boolean mCarDockEnablesAccelerometer;
     boolean mDeskDockEnablesAccelerometer;
     int mLidKeyboardAccessibility;
@@ -308,7 +310,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         @Override
         public void onOrientationChanged(int rotation) {
             // Send updates based on orientation value
-            if (true) Log.i(TAG, "onOrientationChanged, rotation changed to " +rotation);
+            if (localLOGV) Log.v(TAG, "onOrientationChanged, rotation changed to " +rotation);
             try {
                 mWindowManager.setRotation(rotation, false,
                         mFancyRotationAnimation);
@@ -393,7 +395,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
         //Could have been invoked due to screen turning on or off or
         //change of the currently visible window's orientation
-        if (localLOGV) Log.i(TAG, "Screen status="+mScreenOn+
+        if (localLOGV) Log.v(TAG, "Screen status="+mScreenOn+
                 ", current orientation="+mCurrentAppOrientation+
                 ", SensorEnabled="+mOrientationSensorEnabled);
         boolean disable = true;
@@ -403,7 +405,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 //enable listener if not already enabled
                 if (!mOrientationSensorEnabled) {
                     mOrientationListener.enable();
-                    if(localLOGV) Log.i(TAG, "Enabling listeners");
+                    if(localLOGV) Log.v(TAG, "Enabling listeners");
                     mOrientationSensorEnabled = true;
                 }
             } 
@@ -411,7 +413,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         //check if sensors need to be disabled
         if (disable && mOrientationSensorEnabled) {
             mOrientationListener.disable();
-            if(localLOGV) Log.i(TAG, "Disabling listeners");
+            if(localLOGV) Log.v(TAG, "Disabling listeners");
             mOrientationSensorEnabled = false;
         }
     }
@@ -507,10 +509,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 com.android.internal.R.integer.config_carDockRotation);
         mDeskDockRotation = readRotation(
                 com.android.internal.R.integer.config_deskDockRotation);
-        mCarDockKeepsScreenOn = mContext.getResources().getBoolean(
-                com.android.internal.R.bool.config_carDockKeepsScreenOn);
-        mDeskDockKeepsScreenOn = mContext.getResources().getBoolean(
-                com.android.internal.R.bool.config_deskDockKeepsScreenOn);
+        mCarDockKeepsScreenOn = mContext.getResources().getInteger(
+                com.android.internal.R.integer.config_carDockKeepsScreenOn);
+        mDeskDockKeepsScreenOn = mContext.getResources().getInteger(
+                com.android.internal.R.integer.config_deskDockKeepsScreenOn);
         mCarDockEnablesAccelerometer = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_carDockEnablesAccelerometer);
         mDeskDockEnablesAccelerometer = mContext.getResources().getBoolean(
@@ -524,16 +526,22 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         intentFilter.addAction(Intent.ACTION_POWER_CONNECTED);
         intentFilter.addAction(Intent.ACTION_POWER_DISCONNECTED);
         context.registerReceiver(mPowerReceiver, intentFilter);
-        Intent powerIntent = context.registerReceiver(null,
-                new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
-        mPlugged = false;
-        if (powerIntent != null) {
-            mPlugged = powerIntent.getIntExtra(BatteryManager.EXTRA_PLUGGED, 0) != 0;
-        }
+        mBatteryStatusFilter.addAction(Intent.ACTION_BATTERY_CHANGED);
+        mPlugged = 0;
+        updatePlugged();
         // register for dock events
         context.registerReceiver(mDockReceiver, new IntentFilter(Intent.ACTION_DOCK_EVENT));
     }
 
+    void updatePlugged() {
+        Intent powerIntent = mContext.registerReceiver(null, mBatteryStatusFilter);
+        if (localLOGV) Log.v(TAG, "New battery status: " + powerIntent.getExtras());
+        if (powerIntent != null) {
+            mPlugged = powerIntent.getIntExtra(BatteryManager.EXTRA_PLUGGED, 0);
+            if (localLOGV) Log.v(TAG, "PLUGGED: " + mPlugged);
+        }
+    }
+    
     private int readRotation(int resID) {
         try {
             int rotation = mContext.getResources().getInteger(resID);
@@ -1333,12 +1341,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 if (DEBUG_LAYOUT) Log.v(TAG, "Fullscreen window: " + win);
                 mTopFullscreenOpaqueWindowState = win;
                 if ((attrs.flags & FLAG_SHOW_WHEN_LOCKED) != 0) {
-                    if (localLOGV) Log.i(TAG, "Setting mHideLockScreen to true by win " + win);
+                    if (localLOGV) Log.v(TAG, "Setting mHideLockScreen to true by win " + win);
                     mHideLockScreen = true;
                 }
             }
             if ((attrs.flags & FLAG_DISMISS_KEYGUARD) != 0) {
-                if (localLOGV) Log.i(TAG, "Setting mDismissKeyguard to true by win " + win);
+                if (localLOGV) Log.v(TAG, "Setting mDismissKeyguard to true by win " + win);
                 mDismissKeyguard = true;
             }
         }
@@ -1393,22 +1401,21 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         // Hide the key guard if a visible window explicitly specifies that it wants to be displayed
         // when the screen is locked
         if (mKeyguard != null) {
-            if (localLOGV) Log.i(TAG, "finishLayoutLw::mHideKeyguard="+mHideLockScreen);
-            if (mDismissKeyguard && mKeyguardMediator.isShowing()
-                    && !mKeyguardMediator.isSecure()) {
+            if (localLOGV) Log.v(TAG, "finishLayoutLw::mHideKeyguard="+mHideLockScreen);
+            if (mDismissKeyguard && !mKeyguardMediator.isSecure()) {
                 if (mKeyguard.hideLw(true)) {
                     changes |= FINISH_LAYOUT_REDO_LAYOUT
                             | FINISH_LAYOUT_REDO_CONFIG
                             | FINISH_LAYOUT_REDO_WALLPAPER;
                 }
-                if (!mKeyguardMediator.isSecure()) {
+                if (mKeyguardMediator.isShowing()) {
                     mHandler.post(new Runnable() {
                         public void run() {
-                            mKeyguardMediator.keyguardDone(true);
+                            mKeyguardMediator.keyguardDone(false, false);
                         }
                     });
                 }
-            } else if (mHideLockScreen && mKeyguardMediator.isShowing()) {
+            } else if (mHideLockScreen) {
                 if (mKeyguard.hideLw(true)) {
                     changes |= FINISH_LAYOUT_REDO_LAYOUT
                             | FINISH_LAYOUT_REDO_CONFIG
@@ -1786,9 +1793,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     BroadcastReceiver mPowerReceiver = new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {
             if (Intent.ACTION_POWER_CONNECTED.equals(intent.getAction())) {
-                mPlugged = true;
+                updatePlugged();
             } else if (Intent.ACTION_POWER_DISCONNECTED.equals(intent.getAction())) {
-                mPlugged = false;
+                updatePlugged();
             }
             updateKeepScreenOn();
         }
@@ -1991,15 +1998,19 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
     
     void updateKeepScreenOn() {
-        if (mPlugged) {
+        if (mPlugged != 0) {
+            if (localLOGV) Log.v(TAG, "Update: mDockState=" + mDockState
+                    + " mPlugged=" + mPlugged
+                    + " mCarDockKeepsScreenOn" + mCarDockKeepsScreenOn
+                    + " mDeskDockKeepsScreenOn" + mDeskDockKeepsScreenOn);
             if (mDockState == Intent.EXTRA_DOCK_STATE_CAR
-                    && mCarDockKeepsScreenOn) {
+                    && (mPlugged&mCarDockKeepsScreenOn) != 0) {
                 if (!mDockWakeLock.isHeld()) {
                     mDockWakeLock.acquire();
                 }
                 return;
             } else if (mDockState == Intent.EXTRA_DOCK_STATE_DESK
-                    && mDeskDockKeepsScreenOn) {
+                    && (mPlugged&mDeskDockKeepsScreenOn) != 0) {
                 if (!mDockWakeLock.isHeld()) {
                     mDockWakeLock.acquire();
                 }
