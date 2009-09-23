@@ -22,6 +22,7 @@ using namespace android::renderscript;
 
 Device::Device()
 {
+    mForceSW = false;
 
 }
 
@@ -58,5 +59,15 @@ void rsDeviceDestroy(RsDevice dev)
     Device * d = static_cast<Device *>(dev);
     delete d;
 
+}
+
+void rsDeviceSetConfig(RsDevice dev, RsDeviceParam p, int32_t value)
+{
+    Device * d = static_cast<Device *>(dev);
+    if (p == RS_DEVICE_PARAM_FORCE_SOFTWARE_GL) {
+        d->mForceSW = value != 0;
+        return;
+    }
+    rsAssert(0);
 }
 
