@@ -226,27 +226,6 @@ public class SendReq extends MultimediaMessagePdu {
     }
 
     /**
-     * Get From value.
-     * From-value = Value-length
-     *      (Address-present-token Encoded-string-value | Insert-address-token)
-     *
-     * @return the value
-     */
-    public EncodedStringValue getFrom() {
-       return mPduHeaders.getEncodedStringValue(PduHeaders.FROM);
-    }
-
-    /**
-     * Set From value.
-     *
-     * @param value the value
-     * @throws NullPointerException if the value is null.
-     */
-    public void setFrom(EncodedStringValue value) {
-        mPduHeaders.setEncodedStringValue(value, PduHeaders.FROM);
-    }
-
-    /**
      * Get X-Mms-Message-Class value.
      * Message-class-value = Class-identifier | Token-text
      * Class-identifier = Personal | Advertisement | Informational | Auto
