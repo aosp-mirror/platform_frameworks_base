@@ -239,7 +239,7 @@ public class MediaRecorderTest extends ActivityInstrumentationTestCase<MediaFram
             validVideo = true;
         }
         Log.v(TAG, "width = " + mOutputVideoWidth + " height = " + mOutputVideoHeight + " Duration = " + mOutputDuration);
-        removeFile(filePath);
+        //removeFile(filePath);
         return validVideo;
     }
     
@@ -428,8 +428,9 @@ public class MediaRecorderTest extends ActivityInstrumentationTestCase<MediaFram
     }
 
     @LargeTest
-    //est cases for the new codec
+    //test cases for the new codec
     public void testDeviceSpecificCodec() throws Exception {
+        int noOfFailure = 0;
         boolean recordSuccess = false;
         String deviceType = MediaProfileReader.getDeviceType();
         Log.v(TAG, "deviceType = " + deviceType);
@@ -450,10 +451,18 @@ public class MediaRecorderTest extends ActivityInstrumentationTestCase<MediaFram
                         } else {
                             recordSuccess = recordVideoWithPara(encoder[i], audio[j], "low");
                         }
-                        assertTrue((encoder[i] + audio[j]), recordSuccess);
+                        if (!recordSuccess){
+                            Log.v(TAG, "testDeviceSpecificCodec failed");
+                            Log.v(TAG, "Encoder = " + encoder[i] + "Audio Encoder = " + audio[j]);
+                            noOfFailure++;
+                        }
+                       //assertTrue((encoder[i] + audio[j]), recordSuccess);
                     }
                 }
             }
+        }
+        if (noOfFailure != 0){
+            assertTrue("testDeviceSpecificCodec", false);
         }
     }
 }
