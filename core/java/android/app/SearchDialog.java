@@ -1617,6 +1617,9 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
         // Now build the Intent
         Intent intent = new Intent(action);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        // We need CLEAR_TOP to avoid reusing an old task that has other activities
+        // on top of the one we want.
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         if (data != null) {
             intent.setData(data);
         }
