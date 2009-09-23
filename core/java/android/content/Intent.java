@@ -1885,7 +1885,7 @@ public class Intent implements Parcelable {
             "android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST";
     /**
      * An activity to run when device is inserted into a car dock.
-    * Used with {@link #ACTION_MAIN} to launch an activity.
+     * Used with {@link #ACTION_MAIN} to launch an activity.
      * To monitor dock state, use {@link #ACTION_DOCK_EVENT} instead.
      */
     @SdkConstant(SdkConstantType.INTENT_CATEGORY)
@@ -2055,6 +2055,12 @@ public class Intent implements Parcelable {
      */
     public static final int EXTRA_DOCK_STATE_CAR = 2;
 
+    /**
+     * Boolean that can be supplied as meta-data with a dock activity, to
+     * indicate that the dock should take over the home key when it is active.
+     */
+    public static final String METADATA_DOCK_HOME = "android.dock_home";
+    
     /**
      * Used as a parcelable extra field in {@link #ACTION_APP_ERROR}, containing
      * the bug report.
@@ -3605,7 +3611,7 @@ public class Intent implements Parcelable {
             }
         } else {
             ResolveInfo info = pm.resolveActivity(
-                this, PackageManager.MATCH_DEFAULT_ONLY);
+                this, PackageManager.MATCH_DEFAULT_ONLY | flags);
             if (info != null) {
                 ai = info.activityInfo;
             }
