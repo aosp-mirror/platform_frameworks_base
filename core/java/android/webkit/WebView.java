@@ -2019,9 +2019,14 @@ public class WebView extends AbsoluteLayout
     private void calcOurContentVisibleRect(Rect r) {
         calcOurVisibleRect(r);
         r.left = viewToContentX(r.left);
-        r.top = viewToContentY(r.top);
+        // viewToContentY will remove the total height of the title bar.  Add
+        // the visible height back in to account for the fact that if the title
+        // bar is partially visible, the part of the visible rect which is
+        // displaying our content is displaced by that amount.
+        int titleHeight = getVisibleTitleHeight();
+        r.top = viewToContentY(r.top + titleHeight);
         r.right = viewToContentX(r.right);
-        r.bottom = viewToContentY(r.bottom);
+        r.bottom = viewToContentY(r.bottom + titleHeight);
     }
 
     static class ViewSizeData {
