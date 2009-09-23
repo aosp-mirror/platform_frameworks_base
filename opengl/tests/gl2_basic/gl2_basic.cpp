@@ -291,6 +291,7 @@ int main(int argc, char** argv) {
     for (;;) {
         renderFrame();
         eglSwapBuffers(dpy, surface);
+        checkEglError("eglSwapBuffers");
     }
 
     return 0;
