@@ -339,7 +339,7 @@
         <item name="android:minHeight">20dip</item>
         <item name="android:maxHeight">20dip</item>
         <item name="android:thumb">@android:drawable/seek_thumb</item>
-        <item name="android:thumbOffset">8px</item>
+        <item name="android:thumbOffset">8dip</item>
         <item name="android:focusable">true</item>
     </style>
 
@@ -431,8 +431,8 @@
         <item name="android:completionThreshold">2</item>
         <item name="android:dropDownSelector">@android:drawable/list_selector_background</item>
         <item name="android:popupBackground">@android:drawable/spinner_dropdown_background</item>
-        <item name="android:dropDownVerticalOffset">-6px</item>
-        <item name="android:dropDownHorizontalOffset">0px</item>
+        <item name="android:dropDownVerticalOffset">-6dip</item>
+        <item name="android:dropDownHorizontalOffset">0dip</item>
         <item name="android:dropDownWidth">wrap_content</item>
     </style>
 
@@ -514,7 +514,7 @@
     <style name="Widget.Gallery">
         <item name="android:fadingEdge">horizontal</item>
         <item name="android:gravity">center_vertical</item>
-        <item name="android:spacing">-20px</item>
+        <item name="android:spacing">-20dip</item>
         <item name="android:unselectedAlpha">0.85</item>
     </style>
     
@@ -528,8 +528,8 @@
         <item name="android:keyTextSize">22sp</item>
         <item name="android:keyTextColor">#FFFFFFFF</item>
         <item name="android:keyPreviewLayout">@android:layout/keyboard_key_preview</item>
-        <item name="android:keyPreviewOffset">-12dp</item>
-        <item name="android:keyPreviewHeight">80dp</item>
+        <item name="android:keyPreviewOffset">-12dip</item>
+        <item name="android:keyPreviewHeight">80dip</item>
         <item name="android:labelTextSize">14sp</item>
         <item name="android:popupLayout">@android:layout/keyboard_popup_keyboard</item>
         <item name="android:verticalCorrection">-10dip</item>
