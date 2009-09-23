@@ -17,12 +17,10 @@
 package android.syncml.pim.vcard;
 
 import android.content.AbstractSyncableContentProvider;
-import android.content.ContentProviderOperation;
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.net.Uri;
-import android.provider.CallLog;
 import android.provider.Contacts;
 import android.provider.CallLog.Calls;
 import android.provider.Contacts.ContactMethods;

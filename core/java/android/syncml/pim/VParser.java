@@ -23,7 +23,6 @@ import java.io.UnsupportedEncodingException;
 
 /**
  * This interface is used to parse the V format files, such as VCard & VCal
- *
  */
 @Deprecated
 abstract public class VParser {

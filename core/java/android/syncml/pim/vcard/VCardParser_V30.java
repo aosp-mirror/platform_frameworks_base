@@ -25,8 +25,6 @@ import java.util.HashSet;
 /**
  * This class is used to parse vcard3.0. <br>
  * Please refer to vCard Specification 3.0 (http://tools.ietf.org/html/rfc2426)
- * 
- * @deprecated Please use the code in android.pim.vcard
  */
 @Deprecated
 public class VCardParser_V30 extends VCardParser_V21 {

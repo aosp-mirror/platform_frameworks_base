@@ -29,8 +29,6 @@ import android.syncml.pim.vcard.ContactStruct.PhoneData;
 
 /**
  * Compose VCard string
- * 
- * @depricated Please use the code in android.pim.vcard
  */
 @Deprecated
 public class VCardComposer {
