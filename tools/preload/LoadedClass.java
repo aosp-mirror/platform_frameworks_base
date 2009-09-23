@@ -15,7 +15,11 @@
  */
 
 import java.io.Serializable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * A loaded class.
@@ -48,6 +52,30 @@ class LoadedClass implements Serializable, Comparable<LoadedClass> {
     LoadedClass(String name, boolean systemClass) {
         this.name = name;
         this.systemClass = systemClass;
+    }
+
+    /**
+     * Returns true if this class was loaded by more than one proc.
+     */
+    boolean isSharable() {
+        Set<String> procNames = new HashSet<String>();
+        for (Operation load : loads) {
+            if (load.process.fromZygote()) {
+                procNames.add(load.process.name);
+                if (procNames.size() > 1) {
+                    return true;
+                }
+            }
+        }
+        for (Operation init : initializations) {
+            if (init.process.fromZygote()) {
+                procNames.add(init.process.name);
+                if (procNames.size() > 1) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     void measureMemoryUsage() {

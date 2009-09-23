@@ -32,7 +32,7 @@ public class WritePreloadedClassFile {
     /**
      * Preload any class that take longer to load than MIN_LOAD_TIME_MICROS us.
      */
-    static final int MIN_LOAD_TIME_MICROS = 1250;
+    static final int MIN_LOAD_TIME_MICROS = 1000;
 
     public static void main(String[] args) throws IOException,
             ClassNotFoundException {
