@@ -195,7 +195,7 @@ public class WebSettings {
     static GoogleLocationSettingManager sGoogleLocationSettingManager;
 
     // private WebSettings, not accessible by the host activity
-    private int             mDoubleTapToastCount = 3;
+    static private int      mDoubleTapToastCount = 3;
 
     private static final String PREF_FILE = "WebViewSettings";
     private static final String DOUBLE_TAP_TOAST_COUNT = "double_tap_toast_count";
@@ -1357,8 +1357,10 @@ public class WebSettings {
         sGoogleLocationSettingManager.start();
         SharedPreferences sp = mContext.getSharedPreferences(PREF_FILE,
                 Context.MODE_PRIVATE);
-        mDoubleTapToastCount = sp.getInt(DOUBLE_TAP_TOAST_COUNT,
-                mDoubleTapToastCount);
+        if (mDoubleTapToastCount > 0) {
+            mDoubleTapToastCount = sp.getInt(DOUBLE_TAP_TOAST_COUNT,
+                    mDoubleTapToastCount);
+        }
         nativeSync(frame.mNativeFrame);
         mSyncPending = false;
         mEventHandler.createHandler();
