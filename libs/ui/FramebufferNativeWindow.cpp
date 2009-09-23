@@ -117,15 +117,17 @@ FramebufferNativeWindow::FramebufferNativeWindow()
 
         LOGE_IF(err, "fb buffer 1 allocation failed w=%d, h=%d, err=%s",
                 fbDev->width, fbDev->height, strerror(-err));
-    }
 
-    const_cast<uint32_t&>(android_native_window_t::flags) = fbDev->flags; 
-    const_cast<float&>(android_native_window_t::xdpi) = fbDev->xdpi;
-    const_cast<float&>(android_native_window_t::ydpi) = fbDev->ydpi;
-    const_cast<int&>(android_native_window_t::minSwapInterval) = 
-        fbDev->minSwapInterval;
-    const_cast<int&>(android_native_window_t::maxSwapInterval) = 
-        fbDev->maxSwapInterval;
+        const_cast<uint32_t&>(android_native_window_t::flags) = fbDev->flags; 
+        const_cast<float&>(android_native_window_t::xdpi) = fbDev->xdpi;
+        const_cast<float&>(android_native_window_t::ydpi) = fbDev->ydpi;
+        const_cast<int&>(android_native_window_t::minSwapInterval) = 
+            fbDev->minSwapInterval;
+        const_cast<int&>(android_native_window_t::maxSwapInterval) = 
+            fbDev->maxSwapInterval;
+    } else {
+        LOGE("Couldn't get gralloc module");
+    }
 
     android_native_window_t::setSwapInterval = setSwapInterval;
     android_native_window_t::dequeueBuffer = dequeueBuffer;
