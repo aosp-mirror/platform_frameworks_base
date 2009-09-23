@@ -25,7 +25,6 @@
 #include "rsType.h"
 #include "rsMatrix.h"
 #include "rsAllocation.h"
-#include "rsTriangleMesh.h"
 #include "rsSimpleMesh.h"
 #include "rsMesh.h"
 #include "rsDevice.h"
@@ -69,8 +68,6 @@ public:
     ProgramRasterState mStateRaster;
     ProgramVertexState mStateVertex;
     LightState mStateLight;
-
-    TriangleMeshContext mStateTriangleMesh;
 
     ScriptCState mScriptC;
 

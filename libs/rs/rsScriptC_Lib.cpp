@@ -92,24 +92,17 @@ static int32_t* SC_loadArrayI32(uint32_t bank, uint32_t offset)
     return i + offset;
 }
 
-static float* SC_loadTriangleMeshVerticesF(RsTriangleMesh mesh)
+static float* SC_loadSimpleMeshVerticesF(RsSimpleMesh mesh, uint32_t idx)
 {
-    TriangleMesh *tm = static_cast<TriangleMesh *>(mesh);
-    void *vp = tm->mVertexData;
-    float *f = static_cast<float *>(vp);
-    return f;
+    SimpleMesh *tm = static_cast<SimpleMesh *>(mesh);
+    void *vp = tm->mVertexBuffers[idx]->getPtr();;
+    return static_cast<float *>(vp);
 }
 
-static void SC_updateTriangleMesh(RsTriangleMesh mesh)
+static void SC_updateSimpleMesh(RsSimpleMesh mesh)
 {
-    TriangleMesh *tm = static_cast<TriangleMesh *>(mesh);
-    glBindBuffer(GL_ARRAY_BUFFER, tm->mBufferObjects[0]);
-    glBufferData(GL_ARRAY_BUFFER, tm->mVertexDataSize, tm->mVertexData, GL_STATIC_DRAW);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, tm->mBufferObjects[1]);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, tm->mIndexDataSize, tm->mIndexData, GL_STATIC_DRAW);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    SimpleMesh *sm = static_cast<SimpleMesh *>(mesh);
+    sm->uploadAll();
 }
 
 static uint32_t SC_loadU32(uint32_t bank, uint32_t offset)
@@ -661,18 +654,6 @@ static void SC_vpLoadTextureMatrix(const rsc_Matrix *m)
 // Drawing
 //////////////////////////////////////////////////////////////////////////////
 
-static void SC_drawTriangleMesh(RsTriangleMesh mesh)
-{
-    GET_TLS();
-    rsi_TriangleMeshRender(rsc, mesh);
-}
-
-static void SC_drawTriangleMeshRange(RsTriangleMesh mesh, uint32_t start, uint32_t count)
-{
-    GET_TLS();
-    rsi_TriangleMeshRenderRange(rsc, mesh, start, count);
-}
-
 static void SC_drawLine(float x1, float y1, float z1,
                         float x2, float y2, float z2)
 {
@@ -988,9 +969,9 @@ ScriptCState::SymbolTable_t ScriptCState::gSyms[] = {
         "void", "(int, int, float *)" },
     { "storeMatrix", (void *)&SC_storeMatrix,
         "void", "(int, int, float *)" },
-    { "loadTriangleMeshVerticesF", (void *)&SC_loadTriangleMeshVerticesF,
-        "float*", "(int)" },
-    { "updateTriangleMesh", (void *)&SC_updateTriangleMesh,
+    { "loadSimpleMeshVerticesF", (void *)&SC_loadSimpleMeshVerticesF,
+        "float*", "(int, int)" },
+    { "updateSimpleMesh", (void *)&SC_updateSimpleMesh,
         "void", "(int)" },
 
     // math
@@ -1172,10 +1153,6 @@ ScriptCState::SymbolTable_t ScriptCState::gSyms[] = {
         "void", "(float x1, float y1, float z1, float x2, float y2, float z2, float x3, float y3, float z3, float x4, float y4, float z4)" },
     { "drawQuadTexCoords", (void *)&SC_drawQuadTexCoords,
         "void", "(float x1, float y1, float z1, float u1, float v1, float x2, float y2, float z2, float u2, float v2, float x3, float y3, float z3, float u3, float v3, float x4, float y4, float z4, float u4, float v4)" },
-    { "drawTriangleMesh", (void *)&SC_drawTriangleMesh,
-        "void", "(int mesh)" },
-    { "drawTriangleMeshRange", (void *)&SC_drawTriangleMeshRange,
-        "void", "(int mesh, int start, int count)" },
     { "drawLine", (void *)&SC_drawLine,
         "void", "(float x1, float y1, float z1, float x2, float y2, float z2)" },
     { "drawSimpleMesh", (void *)&SC_drawSimpleMesh,

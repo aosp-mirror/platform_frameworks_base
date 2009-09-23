@@ -603,76 +603,6 @@ nAllocationSubReadFromObject(JNIEnv *_env, jobject _this, jint alloc, jobject _t
     free(bufAlloc);
 }
 
-// -----------------------------------
-
-static void
-nTriangleMeshBegin(JNIEnv *_env, jobject _this, jint v, jint i)
-{
-    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
-    LOG_API("nTriangleMeshBegin, con(%p), vertex(%p), index(%p)", con, (RsElement)v, (RsElement)i);
-    rsTriangleMeshBegin(con, (RsElement)v, (RsElement)i);
-}
-
-static void
-nTriangleMeshAddVertex_XY(JNIEnv *_env, jobject _this, jfloat x, jfloat y)
-{
-    float v[] = {x, y};
-    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
-    LOG_API("nTriangleMeshAddVertex_XY, con(%p), x(%f), y(%f)", con, x, y);
-    rsTriangleMeshAddVertex(con, v);
-}
-
-static void
-nTriangleMeshAddVertex_XYZ(JNIEnv *_env, jobject _this, jfloat x, jfloat y, jfloat z)
-{
-    float v[] = {x, y, z};
-    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
-    LOG_API("nTriangleMeshAddVertex_XYZ, con(%p), x(%f), y(%f), z(%f)", con, x, y, z);
-    rsTriangleMeshAddVertex(con, v);
-}
-
-static void
-nTriangleMeshAddVertex_XY_ST(JNIEnv *_env, jobject _this, jfloat x, jfloat y, jfloat s, jfloat t)
-{
-    float v[] = {s, t, x, y};
-    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
-    LOG_API("nTriangleMeshAddVertex_XY_ST, con(%p), x(%f), y(%f), s(%f), t(%f)", con, x, y, s, t);
-    rsTriangleMeshAddVertex(con, v);
-}
-
-static void
-nTriangleMeshAddVertex_XYZ_ST(JNIEnv *_env, jobject _this, jfloat x, jfloat y, jfloat z, jfloat s, jfloat t)
-{
-    float v[] = {s, t, x, y, z};
-    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
-    LOG_API("nTriangleMeshAddVertex_XYZ_ST, con(%p), x(%f), y(%f), z(%f), s(%f), t(%f)", con, x, y, z, s, t);
-    rsTriangleMeshAddVertex(con, v);
-}
-
-static void
-nTriangleMeshAddVertex_XYZ_ST_NORM(JNIEnv *_env, jobject _this, jfloat x, jfloat y, jfloat z, jfloat s, jfloat t, jfloat nx, jfloat ny, jfloat nz)
-{
-    float v[] = {nx, ny, nz, s, t, x, y, z};
-    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
-    LOG_API("nTriangleMeshAddVertex_XYZ_ST, con(%p), x(%f), y(%f), z(%f), s(%f), t(%f)", con, x, y, z, s, t);
-    rsTriangleMeshAddVertex(con, v);
-}
-
-static void
-nTriangleMeshAddTriangle(JNIEnv *_env, jobject _this, jint i1, jint i2, jint i3)
-{
-    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
-    LOG_API("nTriangleMeshAddTriangle, con(%p), i1(%i), i2(%i), i3(%i)", con, i1, i2, i3);
-    rsTriangleMeshAddTriangle(con, i1, i2, i3);
-}
-
-static jint
-nTriangleMeshCreate(JNIEnv *_env, jobject _this)
-{
-    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
-    LOG_API("nTriangleMeshCreate, con(%p)", con);
-    return (jint) rsTriangleMeshCreate(con);
-}
 
 // -----------------------------------
 
@@ -1384,15 +1314,6 @@ static JNINativeMethod methods[] = {
 {"nAllocationRead",                "(I[F)V",                               (void*)nAllocationRead_f },
 {"nAllocationSubDataFromObject",   "(ILandroid/renderscript/Type;ILjava/lang/Object;)V",   (void*)nAllocationSubDataFromObject },
 {"nAllocationSubReadFromObject",   "(ILandroid/renderscript/Type;ILjava/lang/Object;)V",   (void*)nAllocationSubReadFromObject },
-
-{"nTriangleMeshBegin",             "(II)V",                                (void*)nTriangleMeshBegin },
-{"nTriangleMeshAddVertex_XY",      "(FF)V",                                (void*)nTriangleMeshAddVertex_XY },
-{"nTriangleMeshAddVertex_XYZ",     "(FFF)V",                               (void*)nTriangleMeshAddVertex_XYZ },
-{"nTriangleMeshAddVertex_XY_ST",   "(FFFF)V",                              (void*)nTriangleMeshAddVertex_XY_ST },
-{"nTriangleMeshAddVertex_XYZ_ST",  "(FFFFF)V",                             (void*)nTriangleMeshAddVertex_XYZ_ST },
-{"nTriangleMeshAddVertex_XYZ_ST_NORM",  "(FFFFFFFF)V",                     (void*)nTriangleMeshAddVertex_XYZ_ST_NORM },
-{"nTriangleMeshAddTriangle",       "(III)V",                               (void*)nTriangleMeshAddTriangle },
-{"nTriangleMeshCreate",            "()I",                                  (void*)nTriangleMeshCreate },
 
 {"nAdapter1DBindAllocation",       "(II)V",                                (void*)nAdapter1DBindAllocation },
 {"nAdapter1DSetConstraint",        "(III)V",                               (void*)nAdapter1DSetConstraint },
