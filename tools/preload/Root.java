@@ -46,7 +46,8 @@ public class Root implements Serializable {
     final Map<String, LoadedClass> loadedClasses
             = new HashMap<String, LoadedClass>();
 
-    MemoryUsage baseline = MemoryUsage.baseline();
+//    MemoryUsage baseline = MemoryUsage.baseline();
+    MemoryUsage baseline = MemoryUsage.NOT_AVAILABLE;
 
     /**
      * Records class loads and initializations.
@@ -73,7 +74,7 @@ public class Root implements Serializable {
                     if (loadedClass.systemClass) {
                         // Only measure memory for classes in the boot
                         // classpath.
-                        loadedClass.measureMemoryUsage();
+//                        loadedClass.measureMemoryUsage();
                     }
                     loadedClasses.put(name, loadedClass);
                 }
