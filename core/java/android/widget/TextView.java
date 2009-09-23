@@ -2874,26 +2874,23 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * @attr ref android.R.styleable#TextView_inputType
      */
     public void setInputType(int type) {
+        final boolean wasPassword = isPasswordInputType(mInputType);
+        final boolean wasVisiblePassword = isVisiblePasswordInputType(mInputType);
         setInputType(type, false);
-        final int variation = type&(EditorInfo.TYPE_MASK_CLASS
-                |EditorInfo.TYPE_MASK_VARIATION);
-        final boolean isPassword = variation
-                == (EditorInfo.TYPE_CLASS_TEXT
-                        |EditorInfo.TYPE_TEXT_VARIATION_PASSWORD);
+        final boolean isPassword = isPasswordInputType(type);
+        final boolean isVisiblePassword = isVisiblePasswordInputType(type);
         boolean forceUpdate = false;
         if (isPassword) {
             setTransformationMethod(PasswordTransformationMethod.getInstance());
             setTypefaceByIndex(MONOSPACE, 0);
-        } else if (mTransformation == PasswordTransformationMethod.getInstance()) {
-            // We need to clean up if we were previously in password mode.
-            if (variation != (EditorInfo.TYPE_CLASS_TEXT
-                        |EditorInfo.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD)) {
-                setTypefaceByIndex(-1, -1);
-            }
-            forceUpdate = true;
-        } else if (variation == (EditorInfo.TYPE_CLASS_TEXT
-                        |EditorInfo.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD)) {
+        } else if (isVisiblePassword) {
             setTypefaceByIndex(MONOSPACE, 0);
+        } else if (wasPassword || wasVisiblePassword) {
+            // not in password mode, clean up typeface and transformation
+            setTypefaceByIndex(-1, -1);
+            if (mTransformation == PasswordTransformationMethod.getInstance()) {
+                forceUpdate = true;
+            }
         }
         
         boolean multiLine = (type&(EditorInfo.TYPE_MASK_CLASS
@@ -2911,6 +2908,22 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         
         InputMethodManager imm = InputMethodManager.peekInstance();
         if (imm != null) imm.restartInput(this);
+    }
+
+    private boolean isPasswordInputType(int inputType) {
+        final int variation = inputType & (EditorInfo.TYPE_MASK_CLASS
+                | EditorInfo.TYPE_MASK_VARIATION);
+        return variation
+                == (EditorInfo.TYPE_CLASS_TEXT
+                        | EditorInfo.TYPE_TEXT_VARIATION_PASSWORD);
+    }
+
+    private boolean isVisiblePasswordInputType(int inputType) {
+        final int variation = inputType & (EditorInfo.TYPE_MASK_CLASS
+                | EditorInfo.TYPE_MASK_VARIATION);
+        return variation
+                == (EditorInfo.TYPE_CLASS_TEXT
+                        | EditorInfo.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
     }
 
     /**
