@@ -244,7 +244,7 @@ class SyncManager implements OnAccountsUpdatedListener {
             // If this was the bootup case then don't sync everything, instead only
             // sync those that have an unknown syncable state, which will give them
             // a chance to set their syncable state.
-            boolean onlyThoseWithUnkownSyncableState = !justBootedUp;
+            boolean onlyThoseWithUnkownSyncableState = justBootedUp;
             scheduleSync(null, null, null, 0 /* no delay */, onlyThoseWithUnkownSyncableState);
         }
     }
