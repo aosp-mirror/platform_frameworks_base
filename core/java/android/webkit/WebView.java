@@ -2186,6 +2186,14 @@ public class WebView extends AbsoluteLayout
     }
 
     /**
+     * @return the width of the HTML content.
+     * @hide
+     */
+    public int getContentWidth() {
+        return mContentWidth;
+    }
+
+    /**
      * Pause all layout, parsing, and javascript timers for all webviews. This
      * is a global requests, not restricted to just this webview. This can be
      * useful if the application has been paused.
