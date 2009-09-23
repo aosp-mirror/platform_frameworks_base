@@ -486,6 +486,8 @@ public class MediaScanner
         }
 
         public void scanFile(String path, long lastModified, long fileSize) {
+            // This is the callback funtion from native codes.
+            // Log.v(TAG, "scanFile: "+path);
             doScanFile(path, null, lastModified, fileSize, false);
         }
 
