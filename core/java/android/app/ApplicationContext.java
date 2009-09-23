@@ -153,7 +153,6 @@ class ApplicationContext extends Context {
     private final static boolean DEBUG_ICONS = false;
 
     private static final Object sSync = new Object();
-    private static AccountManager sAccountManager;
     private static AlarmManager sAlarmManager;
     private static PowerManager sPowerManager;
     private static ConnectivityManager sConnectivityManager;
@@ -186,6 +185,7 @@ class ApplicationContext extends Context {
     private boolean mIsBluetoothAdapterCached = false;
     private BluetoothAdapter mBluetoothAdapter;
     private boolean mRestricted;
+    private AccountManager mAccountManager; // protected by mSync
 
     private final Object mSync = new Object();
 
@@ -908,14 +908,14 @@ class ApplicationContext extends Context {
     }
 
     private AccountManager getAccountManager() {
-        synchronized (sSync) {
-            if (sAccountManager == null) {
+        synchronized (mSync) {
+            if (mAccountManager == null) {
                 IBinder b = ServiceManager.getService(ACCOUNT_SERVICE);
                 IAccountManager service = IAccountManager.Stub.asInterface(b);
-                sAccountManager = new AccountManager(this, service);
+                mAccountManager = new AccountManager(this, service);
             }
+            return mAccountManager;
         }
-        return sAccountManager;
     }
 
     private ActivityManager getActivityManager() {
