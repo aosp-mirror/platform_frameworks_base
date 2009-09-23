@@ -37,18 +37,19 @@ class AssetManager;
 
 // ---------------------------------------------------------------------------
 
-class BootAnimation : public Thread
+class BootAnimation : public Thread, public IBinder::DeathRecipient
 {
 public:
                 BootAnimation();
     virtual     ~BootAnimation();
 
-    const sp<SurfaceComposerClient>& session() const;
+    sp<SurfaceComposerClient> session() const;
 
 private:
     virtual bool        threadLoop();
     virtual status_t    readyToRun();
     virtual void        onFirstRef();
+    virtual void        binderDied(const wp<IBinder>& who);
 
     struct Texture {
         GLint   w;

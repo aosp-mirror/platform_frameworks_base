@@ -62,34 +62,42 @@ static SortedVector<sp<SurfaceComposerClient> >             gOpenTransactions;
 static sp<IMemoryHeap>                                      gServerCblkMemory;
 static volatile surface_flinger_cblk_t*                     gServerCblk;
 
-const sp<ISurfaceComposer>& _get_surface_manager()
+static sp<ISurfaceComposer> getComposerService()
 {
-    if (gSurfaceManager != 0) {
-        return gSurfaceManager;
-    }
-
-    sp<IBinder> binder;
-    sp<IServiceManager> sm = defaultServiceManager();
-    do {
-        binder = sm->getService(String16("SurfaceFlinger"));
-        if (binder == 0) {
-            LOGW("SurfaceFlinger not published, waiting...");
-            usleep(500000); // 0.5 s
-        }
-    } while(binder == 0);
-    sp<ISurfaceComposer> sc(interface_cast<ISurfaceComposer>(binder));
-
+    sp<ISurfaceComposer> sc;
     Mutex::Autolock _l(gLock);
-    if (gSurfaceManager == 0) {
-        gSurfaceManager = sc;
+    if (gSurfaceManager != 0) {
+        sc = gSurfaceManager;
+    } else {
+        // release the lock while we're waiting...
+        gLock.unlock();
+
+        sp<IBinder> binder;
+        sp<IServiceManager> sm = defaultServiceManager();
+        do {
+            binder = sm->getService(String16("SurfaceFlinger"));
+            if (binder == 0) {
+                LOGW("SurfaceFlinger not published, waiting...");
+                usleep(500000); // 0.5 s
+            }
+        } while(binder == 0);
+
+        // grab the lock again for updating gSurfaceManager
+        gLock.lock();
+        if (gSurfaceManager == 0) {
+            sc = interface_cast<ISurfaceComposer>(binder);
+            gSurfaceManager = sc;
+        } else {
+            sc = gSurfaceManager;
+        }
     }
-    return gSurfaceManager;
+    return sc;
 }
 
 static volatile surface_flinger_cblk_t const * get_cblk()
 {
     if (gServerCblk == 0) {
-        const sp<ISurfaceComposer>& sm(_get_surface_manager());
+        sp<ISurfaceComposer> sm(getComposerService());
         Mutex::Autolock _l(gLock);
         if (gServerCblk == 0) {
             gServerCblkMemory = sm->getCblk();
@@ -112,7 +120,7 @@ static inline int compare_type( const layer_state_t& lhs,
 
 SurfaceComposerClient::SurfaceComposerClient()
 {
-    const sp<ISurfaceComposer>& sm(_get_surface_manager());
+    sp<ISurfaceComposer> sm(getComposerService());
     if (sm == 0) {
         _init(0, 0);
         return;
@@ -131,6 +139,15 @@ SurfaceComposerClient::SurfaceComposerClient(
         const sp<ISurfaceComposer>& sm, const sp<IBinder>& conn)
 {
     _init(sm, interface_cast<ISurfaceFlingerClient>(conn));
+}
+
+
+status_t SurfaceComposerClient::linkToComposerDeath(
+        const sp<IBinder::DeathRecipient>& recipient,
+        void* cookie, uint32_t flags)
+{
+    sp<ISurfaceComposer> sm(getComposerService());
+    return sm->asBinder()->linkToDeath(recipient, cookie, flags);    
 }
 
 void SurfaceComposerClient::_init(
@@ -183,7 +200,7 @@ SurfaceComposerClient::clientForConnection(const sp<IBinder>& conn)
 
     if (client == 0) {
         // Need to make a new client.
-        const sp<ISurfaceComposer>& sm(_get_surface_manager());
+        sp<ISurfaceComposer> sm(getComposerService());
         client = new SurfaceComposerClient(sm, conn);
         if (client != 0 && client->initCheck() == NO_ERROR) {
             Mutex::Autolock _l(gLock);
@@ -377,7 +394,7 @@ void SurfaceComposerClient::closeGlobalTransaction()
     const size_t N = clients.size();
     VERBOSE("closeGlobalTransaction (%ld clients)", N);
 
-    const sp<ISurfaceComposer>& sm(_get_surface_manager());
+    sp<ISurfaceComposer> sm(getComposerService());
     sm->openGlobalTransaction();
     for (size_t i=0; i<N; i++) {
         clients[i]->closeTransaction();
@@ -389,20 +406,20 @@ void SurfaceComposerClient::closeGlobalTransaction()
 
 status_t SurfaceComposerClient::freezeDisplay(DisplayID dpy, uint32_t flags)
 {
-    const sp<ISurfaceComposer>& sm(_get_surface_manager());
+    sp<ISurfaceComposer> sm(getComposerService());
     return sm->freezeDisplay(dpy, flags);
 }
 
 status_t SurfaceComposerClient::unfreezeDisplay(DisplayID dpy, uint32_t flags)
 {
-    const sp<ISurfaceComposer>& sm(_get_surface_manager());
+    sp<ISurfaceComposer> sm(getComposerService());
     return sm->unfreezeDisplay(dpy, flags);
 }
 
 int SurfaceComposerClient::setOrientation(DisplayID dpy, 
         int orientation, uint32_t flags)
 {
-    const sp<ISurfaceComposer>& sm(_get_surface_manager());
+    sp<ISurfaceComposer> sm(getComposerService());
     return sm->setOrientation(dpy, orientation, flags);
 }
 
