@@ -89,4 +89,25 @@ public class GenericPdu {
     public void setMmsVersion(int value) throws InvalidHeaderValueException {
         mPduHeaders.setOctet(value, PduHeaders.MMS_VERSION);
     }
+
+    /**
+     * Get From value.
+     * From-value = Value-length
+     *      (Address-present-token Encoded-string-value | Insert-address-token)
+     *
+     * @return the value
+     */
+    public EncodedStringValue getFrom() {
+       return mPduHeaders.getEncodedStringValue(PduHeaders.FROM);
+    }
+
+    /**
+     * Set From value.
+     *
+     * @param value the value
+     * @throws NullPointerException if the value is null.
+     */
+    public void setFrom(EncodedStringValue value) {
+        mPduHeaders.setEncodedStringValue(value, PduHeaders.FROM);
+    }
 }

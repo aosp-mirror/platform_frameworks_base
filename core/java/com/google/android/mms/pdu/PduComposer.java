@@ -450,6 +450,29 @@ public class PduComposer {
         appendQuotedString(str.getBytes());
     }
 
+    private EncodedStringValue appendAddressType(EncodedStringValue address) {
+        EncodedStringValue temp = null;
+
+        try {
+            int addressType = checkAddressType(address.getString());
+            temp = EncodedStringValue.copy(address);
+            if (PDU_PHONE_NUMBER_ADDRESS_TYPE == addressType) {
+                // Phone number.
+                temp.appendTextString(STRING_PHONE_NUMBER_ADDRESS_TYPE.getBytes());
+            } else if (PDU_IPV4_ADDRESS_TYPE == addressType) {
+                // Ipv4 address.
+                temp.appendTextString(STRING_IPV4_ADDRESS_TYPE.getBytes());
+            } else if (PDU_IPV6_ADDRESS_TYPE == addressType) {
+                // Ipv6 address.
+                temp.appendTextString(STRING_IPV6_ADDRESS_TYPE.getBytes());
+            }
+        } catch (NullPointerException e) {
+            return null;
+        }
+
+        return temp;
+    }
+
     /**
      * Append header to mMessage.
      */
@@ -489,21 +512,8 @@ public class PduComposer {
 
                 EncodedStringValue temp;
                 for (int i = 0; i < addr.length; i++) {
-                    try {
-                        int addressType = checkAddressType(addr[i].getString());
-                        temp = EncodedStringValue.copy(addr[i]);
-                        if (PDU_PHONE_NUMBER_ADDRESS_TYPE == addressType) {
-                            // Phone number.
-                            temp.appendTextString(
-                                    STRING_PHONE_NUMBER_ADDRESS_TYPE.getBytes());
-                        } else if (PDU_IPV4_ADDRESS_TYPE == addressType) {
-                            // Ipv4 address.
-                            temp.appendTextString(STRING_IPV4_ADDRESS_TYPE.getBytes());
-                        } else if (PDU_IPV6_ADDRESS_TYPE == addressType) {
-                            // Ipv6 address.
-                            temp.appendTextString(STRING_IPV6_ADDRESS_TYPE.getBytes());
-                        }
-                    } catch (NullPointerException e) {
+                    temp = appendAddressType(addr[i]);
+                    if (temp == null) {
                         return PDU_COMPOSE_CONTENT_ERROR;
                     }
 
@@ -530,7 +540,13 @@ public class PduComposer {
 
                     // Address-present-token = <Octet 128>
                     append(PduHeaders.FROM_ADDRESS_PRESENT_TOKEN);
-                    appendEncodedString(from);
+
+                    temp = appendAddressType(from);
+                    if (temp == null) {
+                        return PDU_COMPOSE_CONTENT_ERROR;
+                    }
+
+                    appendEncodedString(temp);
 
                     int flen = fstart.getLength();
                     mStack.pop();
