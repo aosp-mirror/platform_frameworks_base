@@ -16,6 +16,7 @@
 
 package android.core;
 
+import android.test.suitebuilder.annotation.Suppress;
 import junit.framework.TestCase;
 
 import java.io.BufferedReader;
@@ -29,10 +30,9 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.HashMap;
+import java.util.Map;
 
-import android.test.suitebuilder.annotation.Suppress;
-
-@Suppress
 public class URLTest extends TestCase {
 
     private static void get(String u) throws IOException {
@@ -63,10 +63,12 @@ public class URLTest extends TestCase {
         assertTrue(new String(data).indexOf("<html>") >= 0);
     }
 
+    @Suppress
     public void testGetHTTP() throws Exception {
         get("http://www.google.com");
     }
 
+    @Suppress
     public void testGetHTTPS() throws Exception {
         get("https://www.fortify.net/cgi/ssl_2.pl");
     }
@@ -79,6 +81,7 @@ public class URLTest extends TestCase {
     private static class DummyServer implements Runnable {
 
         private int keepAliveCount;
+        private Map<String, String> headers = new HashMap<String, String>();
 
         public DummyServer(int keepAliveCount) {
             this.keepAliveCount = keepAliveCount;
@@ -93,9 +96,17 @@ public class URLTest extends TestCase {
                 BufferedReader reader = new BufferedReader(new InputStreamReader(input));
                 try {
                     for (int i = 0; i < keepAliveCount; i++) {
-                        String header = reader.readLine();
-                        while (header != null && header.length() != 0) {
-                            header = reader.readLine();
+                        reader.readLine();
+                        headers.clear();
+                        while (true) {
+                            String header = reader.readLine();
+                            if (header.length() == 0) {
+                                break;
+                            }
+                            int colon = header.indexOf(":");
+                            String key = header.substring(0, colon);
+                            String value = header.substring(colon + 1).trim();
+                            headers.put(key, value);
                         }
 
                         OutputStream output = socket.getOutputStream();
@@ -142,6 +153,7 @@ public class URLTest extends TestCase {
     /**
      * Test case for HTTP keep-alive behavior.
      */
+    @Suppress
     public void testGetKeepAlive() throws Exception {
         new Thread(new DummyServer(3)).start();
         Thread.sleep(100);
@@ -160,9 +172,24 @@ public class URLTest extends TestCase {
         }
     }
 
+    @Suppress
+    public void testUserAgentHeader() throws Exception {
+        DummyServer server = new DummyServer(1);
+        new Thread(server).start();
+        Thread.sleep(100);
+
+        // We expect the request to work three times, then it fails.
+        request(new URL("http://localhost:8182"));
+
+        String userAgent = server.headers.get("User-Agent");
+        assertTrue("Unexpected User-Agent: " + userAgent, userAgent.matches(
+                "Dalvik/[\\d.]+ \\(Linux; U; Android \\w+(;.*)?( Build/\\w+)?\\)"));
+    }
+
     /**
      * Regression for issue 1001814.
      */
+    @Suppress
     public void testHttpConnectionTimeout() throws Exception {
         int timeout = 5000;
         HttpURLConnection cn = null;
@@ -190,7 +217,8 @@ public class URLTest extends TestCase {
     /** 
      * Regression test for issue 1158780 where using '{' and '}' in an URL threw
      * an NPE. The RI accepts this URL and returns the status 404.
-     */ 
+     */
+    @Suppress
     public void testMalformedUrl() throws Exception {
         URL url = new URL("http://www.google.com/cgi-bin/myscript?g={United+States}+Borders+Mexico+{Climate+change}+Marketing+{Automotive+industry}+News+Health+Internet");
         HttpURLConnection conn = (HttpURLConnection)url.openConnection();
