@@ -1169,6 +1169,7 @@
   <public type="attr" name="summaryColumn" />
   <public type="attr" name="detailColumn" />
   <public type="attr" name="detailSocialSummary" />
+  <public type="attr" name="thumbnail" />
 
   <public type="style" name="Theme.Wallpaper" />
   <public type="style" name="Theme.Wallpaper.NoTitleBar" />

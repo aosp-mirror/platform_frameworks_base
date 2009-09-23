@@ -40,6 +40,11 @@ public final class WallpaperInfo implements Parcelable {
     final String mSettingsActivityName;
 
     /**
+     * Resource identifier for this wallpaper's thumbnail image.
+     */
+    final int mThumbnailResource;
+
+    /**
      * Constructor.
      * 
      * @param context The Context in which we are parsing the wallpaper.
@@ -53,6 +58,7 @@ public final class WallpaperInfo implements Parcelable {
         
         PackageManager pm = context.getPackageManager();
         String settingsActivityComponent = null;
+        int thumbnailRes = -1;
         
         XmlResourceParser parser = null;
         try {
@@ -79,16 +85,23 @@ public final class WallpaperInfo implements Parcelable {
                     com.android.internal.R.styleable.Wallpaper);
             settingsActivityComponent = sa.getString(
                     com.android.internal.R.styleable.Wallpaper_settingsActivity);
+            
+            thumbnailRes = sa.getResourceId(
+                    com.android.internal.R.styleable.Wallpaper_thumbnail,
+                    -1);
+
             sa.recycle();
         } finally {
             if (parser != null) parser.close();
         }
         
         mSettingsActivityName = settingsActivityComponent;
+        mThumbnailResource = thumbnailRes;
     }
 
     WallpaperInfo(Parcel source) {
         mSettingsActivityName = source.readString();
+        mThumbnailResource = source.readInt();
         mService = ResolveInfo.CREATOR.createFromParcel(source);
     }
     
@@ -144,6 +157,20 @@ public final class WallpaperInfo implements Parcelable {
     }
     
     /**
+     * Load the thumbnail image for this wallpaper.
+     * 
+     * @param pm Supply a PackageManager used to load the wallpaper's
+     * resources.
+     */
+    public Drawable loadThumbnail(PackageManager pm) {
+        if (mThumbnailResource < 0) return null;
+
+        return pm.getDrawable(mService.serviceInfo.packageName,
+                              mThumbnailResource,
+                              null);
+    }
+    
+    /**
      * Return the class name of an activity that provides a settings UI for
      * the wallpaper.  You can launch this activity be starting it with
      * an {@link android.content.Intent} whose action is MAIN and with an
@@ -178,6 +205,7 @@ public final class WallpaperInfo implements Parcelable {
      */
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(mSettingsActivityName);
+        dest.writeInt(mThumbnailResource);
         mService.writeToParcel(dest, flags);
     }
 
