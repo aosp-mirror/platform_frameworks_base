@@ -32,7 +32,7 @@ public class VCardConfig {
     /* package */ static final int LOG_LEVEL_VERBOSE =
         LOG_LEVEL_PERFORMANCE_MEASUREMENT | LOG_LEVEL_SHOW_WARNING;
 
-    /* package */ static final int LOG_LEVEL = LOG_LEVEL_PERFORMANCE_MEASUREMENT;
+    /* package */ static final int LOG_LEVEL = LOG_LEVEL_NONE;
 
     // Assumes that "iso-8859-1" is able to map "all" 8bit characters to some unicode and
     // decode the unicode to the original charset. If not, this setting will cause some bug. 
