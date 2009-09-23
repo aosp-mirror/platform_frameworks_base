@@ -1203,13 +1203,16 @@ public class ContactStruct {
                 operationList.add(builder.build());
             }
         }
-        
+
         if (mWebsiteList != null) {
             for (String website : mWebsiteList) {
                 builder = ContentProviderOperation.newInsert(Data.CONTENT_URI);
                 builder.withValueBackReference(Website.RAW_CONTACT_ID, 0);
                 builder.withValue(Data.MIMETYPE, Website.CONTENT_ITEM_TYPE);
                 builder.withValue(Website.URL, website);
+                // There's no information about the type of URL in vCard.
+                // We use TYPE_HOME for safety. 
+                builder.withValue(Website.TYPE, Website.TYPE_HOME);
                 operationList.add(builder.build());
             }
         }
