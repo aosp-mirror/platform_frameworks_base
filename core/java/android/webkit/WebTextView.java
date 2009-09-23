@@ -328,6 +328,7 @@ import java.util.ArrayList;
             // Since the cursor will no longer be in the same place as the
             // focus, set the focus controller back to inactive
             mWebView.setFocusControllerInactive();
+            mWebView.invalidate();
             mOkayForFocusNotToMatch = true;
             break;
         case EditorInfo.IME_ACTION_DONE:
