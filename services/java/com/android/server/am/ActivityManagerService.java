@@ -10209,7 +10209,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 ServiceRecord.StartItem si = r.pendingStarts.get(i);
                 if (DEBUG_SERVICE) Log.v(TAG, "Sending arguments to service: "
                         + r.name + " " + r.intent + " args=" + si.intent);
-                if (si.intent == null && N > 0) {
+                if (si.intent == null && N > 1) {
                     // If somehow we got a dummy start at the front, then
                     // just drop it here.
                     i++;

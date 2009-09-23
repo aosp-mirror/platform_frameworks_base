@@ -64,18 +64,28 @@ import java.io.PrintWriter;
  * <p>There are two reasons that a service can be run by the system.  If someone
  * calls {@link android.content.Context#startService Context.startService()} then the system will
  * retrieve the service (creating it and calling its {@link #onCreate} method
- * if needed) and then call its {@link #onStart} method with the
+ * if needed) and then call its {@link #onStartCommand} method with the
  * arguments supplied by the client.  The service will at this point continue
  * running until {@link android.content.Context#stopService Context.stopService()} or
  * {@link #stopSelf()} is called.  Note that multiple calls to
  * Context.startService() do not nest (though they do result in multiple corresponding
- * calls to onStart()), so no matter how many times it is started a service
- * will be stopped once Context.stopService() or stopSelf() is called.
+ * calls to onStartCommand()), so no matter how many times it is started a service
+ * will be stopped once Context.stopService() or stopSelf() is called; however,
+ * services can use their {@link #stopSelf(int)} method to ensure the service is
+ * not stopped until started intents have been processed.
+ * 
+ * <p>For started services, there are two additional major modes of operation
+ * they can decide to run in, depending on the value they return from
+ * onStartCommand(): {@link #START_STICKY} is used for services that are
+ * explicitly started and stopped as needed, while {@link #START_NOT_STICKY}
+ * or {@link #START_REDELIVER_INTENT} are used for services that should only
+ * remain running while processing any commands sent to them.  See the linked
+ * documentation for more detail on the semantics.
  * 
  * <p>Clients can also use {@link android.content.Context#bindService Context.bindService()} to
  * obtain a persistent connection to a service.  This likewise creates the
  * service if it is not already running (calling {@link #onCreate} while
- * doing so), but does not call onStart().  The client will receive the
+ * doing so), but does not call onStartCommand().  The client will receive the
  * {@link android.os.IBinder} object that the service returns from its
  * {@link #onBind} method, allowing the client to then make calls back
  * to the service.  The service will remain running as long as the connection
@@ -122,7 +132,7 @@ import java.io.PrintWriter;
  * 
  * <ul>
  * <li><p>If the service is currently executing code in its
- * {@link #onCreate onCreate()}, {@link #onStart onStart()},
+ * {@link #onCreate onCreate()}, {@link #onStartCommand onStartCommand()},
  * or {@link #onDestroy onDestroy()} methods, then the hosting process will
  * be a foreground process to ensure this code can execute without
  * being killed.
@@ -135,15 +145,21 @@ import java.io.PrintWriter;
  * process is never less important than the most important client.  That is,
  * if one of its clients is visible to the user, then the service itself is
  * considered to be visible.
+ * <li><p>A started service can use the {@link #startForeground(int, Notification)}
+ * API to put the service in a foreground state, where the system considers
+ * it to be something the user is actively aware of and thus not a candidate
+ * for killing when low on memory.  (It is still theoretically possible for
+ * the service to be killed under extreme memory pressure from the current
+ * foreground application, but in practice this should not be a concern.)
  * </ul>
  * 
  * <p>Note this means that most of the time your service is running, it may
  * be killed by the system if it is under heavy memory pressure.  If this
  * happens, the system will later try to restart the service.  An important
- * consequence of this is that if you implement {@link #onStart onStart()}
+ * consequence of this is that if you implement {@link #onStartCommand onStartCommand()}
  * to schedule work to be done asynchronously or in another thread, then you
  * may want to write information about that work into persistent storage
- * during the onStart() call so that it does not get lost if the service later
+ * during the onStartCommand() call so that it does not get lost if the service later
  * gets killed.
  * 
  * <p>Other application components running in the same process as the service
@@ -196,10 +212,11 @@ public abstract class Service extends ContextWrapper implements ComponentCallbac
      * process is killed while it is started (after returning from
      * {@link #onStartCommand}), then leave it in the started state but
      * don't retain this delivered intent.  Later the system will try to
-     * re-create the service, but it will <em>not</em> call
-     * {@link #onStartCommand} unless there has been a new call to
-     * {@link Context#startService Context.startService(Intent)} with a new
-     * Intent to deliver.
+     * re-create the service.  Because it is in the started state, it will
+     * guarantee to call {@link #onStartCommand} after creating the new
+     * service instance; if there are not any pending start commands to be
+     * delivered to the service, it will be called with a null intent
+     * object, so you must take care to check for this.
      * 
      * <p>This mode makes sense for things that will be explicitly started
      * and stopped to run for arbitrary periods of time, such as a service
