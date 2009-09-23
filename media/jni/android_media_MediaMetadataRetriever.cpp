@@ -195,7 +195,7 @@ static jobject android_media_MediaMetadataRetriever_captureFrame(JNIEnv *env, jo
     // Since internally SkBitmap uses reference count to manage the reference to
     // its pixels, it is important that the pixels (along with SkBitmap) be
     // available after creating the Bitmap is returned to Java app.
-    return env->NewObject(fields.bitmapClazz, fields.bitmapConstructor, (int) bitmap, true, NULL);
+    return env->NewObject(fields.bitmapClazz, fields.bitmapConstructor, (int) bitmap, true, NULL, -1);
 }
 
 static jbyteArray android_media_MediaMetadataRetriever_extractAlbumArt(JNIEnv *env, jobject thiz)
@@ -316,7 +316,7 @@ int register_android_media_MediaMetadataRetriever(JNIEnv *env)
         return -1;
     }
 
-    fields.bitmapConstructor = env->GetMethodID(fields.bitmapClazz, "<init>", "(IZ[B)V");
+    fields.bitmapConstructor = env->GetMethodID(fields.bitmapClazz, "<init>", "(IZ[BI)V");
     if (fields.bitmapConstructor == NULL) {
         LOGE("Bitmap constructor is not found");
         return -1;
