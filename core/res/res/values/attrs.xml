@@ -396,14 +396,20 @@
         <attr name="spinnerItemStyle" format="reference" />
         <!-- Default MapView style. -->
         <attr name="mapViewStyle" format="reference" />
-        <!-- Dark Fasttrack badge style. -->
+        <!-- Default Fasttrack badge style. -->
         <attr name="fasttrackBadgeWidgetStyle" format="reference" />
-        <!-- Dark Fasttrack badge style with small fasttrack window. -->
+        <!-- Default Fasttrack badge style with small fasttrack window. -->
         <attr name="fasttrackBadgeWidgetStyleWindowSmall" format="reference" />
-        <!-- Dark Fasttrack badge style with medium fasttrack window. -->
+        <!-- Default Fasttrack badge style with medium fasttrack window. -->
         <attr name="fasttrackBadgeWidgetStyleWindowMedium" format="reference" />
-        <!-- Dark Fasttrack badge style with large fasttrack window. -->
+        <!-- Default Fasttrack badge style with large fasttrack window. -->
         <attr name="fasttrackBadgeWidgetStyleWindowLarge" format="reference" />
+        <!-- Default Fasttrack badge style with small fasttrack window. -->
+        <attr name="fasttrackBadgeWidgetStyleSmallWindowSmall" format="reference" />
+        <!-- Default Fasttrack badge style with medium fasttrack window. -->
+        <attr name="fasttrackBadgeWidgetStyleSmallWindowMedium" format="reference" />
+        <!-- Default Fasttrack badge style with large fasttrack window. -->
+        <attr name="fasttrackBadgeWidgetStyleSmallWindowLarge" format="reference" />
 
         <!-- =================== -->
         <!-- Preference styles   -->
