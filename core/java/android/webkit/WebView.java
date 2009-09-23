@@ -4868,7 +4868,8 @@ public class WebView extends AbsoluteLayout
                         mLastScale = restoreState.mTextWrapScale;
                         if (restoreState.mMinScale == 0) {
                             if (restoreState.mMobileSite) {
-                                if (draw.mMinPrefWidth > draw.mViewPoint.x) {
+                                if (draw.mMinPrefWidth >
+                                        Math.max(0, draw.mViewPoint.x)) {
                                     mMinZoomScale = (float) viewWidth
                                             / draw.mMinPrefWidth;
                                     mMinZoomScaleFixed = false;
