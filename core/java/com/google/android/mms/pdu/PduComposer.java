@@ -19,6 +19,8 @@ package com.google.android.mms.pdu;
 
 import android.content.ContentResolver;
 import android.content.Context;
+import android.util.Log;
+import android.text.TextUtils;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
@@ -528,6 +530,7 @@ public class PduComposer {
 
                 EncodedStringValue from = mPduHeader.getEncodedStringValue(field);
                 if ((from == null)
+                        || TextUtils.isEmpty(from.getString())
                         || new String(from.getTextString()).equals(
                                 PduHeaders.FROM_INSERT_ADDRESS_TOKEN_STR)) {
                     // Length of from = 1
