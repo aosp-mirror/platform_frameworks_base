@@ -229,36 +229,6 @@ SamplerCreate {
 	}
 
 
-TriangleMeshBegin {
-	param RsElement vertex
-	param RsElement index
-	}
-
-TriangleMeshAddVertex {
-	param const void *vtx
-	}
-
-TriangleMeshAddTriangle {
-	param uint32_t idx1
-	param uint32_t idx2
-	param uint32_t idx3
-	}
-
-TriangleMeshCreate {
-	ret RsTriangleMesh
-	}
-
-
-TriangleMeshRender {
-	param RsTriangleMesh vtm
-	}
-
-TriangleMeshRenderRange {
-	param RsTriangleMesh vtm
-	param uint32_t start
-	param uint32_t count
-	}
-
 
 ScriptBindAllocation {
 	param RsScript vtm

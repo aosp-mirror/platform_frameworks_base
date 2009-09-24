@@ -73,6 +73,20 @@ void SimpleMesh::renderRange(uint32_t start, uint32_t len) const
     }
 }
 
+void SimpleMesh::uploadAll()
+{
+    for (uint32_t ct=0; ct < mVertexTypeCount; ct++) {
+        if (mVertexBuffers[ct].get()) {
+            mVertexBuffers[ct]->uploadToBufferObject();
+        }
+    }
+    if (mIndexBuffer.get()) {
+        mIndexBuffer->uploadToBufferObject();
+    }
+    if (mPrimitiveBuffer.get()) {
+        mPrimitiveBuffer->uploadToBufferObject();
+    }
+}
 
 
 SimpleMeshContext::SimpleMeshContext()

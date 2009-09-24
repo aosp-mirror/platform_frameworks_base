@@ -37,7 +37,6 @@ typedef void * RsFile;
 typedef void * RsSampler;
 typedef void * RsScript;
 typedef void * RsScriptBasicTemp;
-typedef void * RsTriangleMesh;
 typedef void * RsSimpleMesh;
 typedef void * RsType;
 typedef void * RsLight;

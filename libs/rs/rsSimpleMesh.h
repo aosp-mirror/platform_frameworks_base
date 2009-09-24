@@ -47,6 +47,7 @@ public:
 
     void render() const;
     void renderRange(uint32_t start, uint32_t len) const;
+    void uploadAll();
 
 
 protected:
