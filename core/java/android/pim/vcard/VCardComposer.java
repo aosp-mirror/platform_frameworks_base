@@ -960,10 +960,12 @@ public class VCardComposer {
                 .get(Phone.CONTENT_ITEM_TYPE);
         if (contentValuesList != null) {
             for (ContentValues contentValues : contentValuesList) {
-                appendVCardTelephoneLine(builder, contentValues
-                        .getAsInteger(Phone.TYPE), contentValues
-                        .getAsString(Phone.LABEL), contentValues
-                        .getAsString(Phone.NUMBER));
+                Integer phoneType = contentValues.getAsInteger(Phone.TYPE);
+                int phoneTypeAsPrimitive =
+                    (phoneType == null ? Phone.TYPE_HOME : phoneType);
+                appendVCardTelephoneLine(builder, phoneTypeAsPrimitive,
+                        contentValues.getAsString(Phone.LABEL),
+                        contentValues.getAsString(Phone.NUMBER));
             }
         } else if (mIsDoCoMo) {
             appendVCardTelephoneLine(builder, Phone.TYPE_HOME, "", "");
@@ -1090,7 +1092,7 @@ public class VCardComposer {
     private void appendBirthday(final StringBuilder builder,
             final Map<String, List<ContentValues>> contentValuesListMap) {
         List<ContentValues> contentValuesList = contentValuesListMap
-                .get(Website.CONTENT_ITEM_TYPE);
+                .get(Miscellaneous.CONTENT_ITEM_TYPE);
         if (contentValuesList != null && contentValuesList.size() > 0) {
             // Theoretically, there must be only one birthday for each vCard data and
             // we are afraid of some parse error occuring in some devices, so

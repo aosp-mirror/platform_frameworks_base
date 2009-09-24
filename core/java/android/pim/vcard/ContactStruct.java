@@ -477,44 +477,148 @@ public class ContactStruct {
         mPhotoList = photoList;
         mWebsiteList = websiteList;
     }
+
+    // All getter methods should be used carefully, since they may change
+    // in the future as of 2009-09-24, on which I cannot be sure this structure
+    // is completely consolidated.
+    // When we are sure we will no longer change them, we'll be happy to
+    // make it complete public (withouth @hide tag)
+    //
+    // Also note that these getter methods should be used only after
+    // all properties being pushed into this object. If not, incorrect
+    // value will "be stored in the local cache and" be returned to you.
     
     /**
-     * @hide only for testing.
+     * @hide
+     */
+    public String getFamilyName() {
+        return mFamilyName;
+    }
+
+    /**
+     * @hide
+     */
+    public String getGivenName() {
+        return mGivenName;
+    }
+
+    /**
+     * @hide
+     */
+    public String getMiddleName() {
+        return mMiddleName;
+    }
+
+    /**
+     * @hide
+     */
+    public String getPrefix() {
+        return mPrefix;
+    }
+
+    /**
+     * @hide
+     */
+    public String getSuffix() {
+        return mSuffix;
+    }
+
+    /**
+     * @hide
+     */
+    public String getFullName() {
+        return mFullName;
+    }
+
+    /**
+     * @hide
+     */
+    public String getPhoneticFamilyName() {
+        return mPhoneticFamilyName;
+    }
+
+    /**
+     * @hide
+     */
+    public String getPhoneticGivenName() {
+        return mPhoneticGivenName;
+    }
+
+    /**
+     * @hide
+     */
+    public String getPhoneticMiddleName() {
+        return mPhoneticMiddleName;
+    }
+
+    /**
+     * @hide
+     */
+    public String getPhoneticFullName() {
+        return mPhoneticFullName;
+    }
+
+    /**
+     * @hide
+     */
+    public final List<String> getNickNameList() {
+        return mNickNameList;
+    }
+
+    /**
+     * @hide
+     */
+    public String getDisplayName() {
+        if (mDisplayName == null) {
+            constructDisplayName();
+        }
+        return mDisplayName;
+    }
+
+    /**
+     * @hide
+     */
+    public String getBirthday() {
+        return mBirthday;
+    }
+
+    /**
+     * @hide
      */
     public final List<PhotoData> getPhotoList() {
         return mPhotoList;
     }
-    
+
     /**
-     * @hide only for testing.
+     * @hide
      */
     public final List<String> getNotes() {
         return mNoteList;
     }
     
     /**
-     * @hide only for testing.
+     * @hide
      */
     public final List<PhoneData> getPhoneList() {
         return mPhoneList;
     }
     
     /**
-     * @hide only for testing.
+     * @hide
      */
     public final List<EmailData> getEmailList() {
         return mEmailList;
     }
     
     /**
-     * @hide only for testing.
+     * @hide
      */
     public final List<PostalData> getPostalList() {
         return mPostalList;
     }
     
     /**
-     * @hide only for testing.
+     * @hide
      */
     public final List<OrganizationData> getOrganizationList() {
         return mOrganizationList;
@@ -937,13 +1041,6 @@ public class ContactStruct {
         } else {
             // Unknown X- words and IANA token.
         }
-    }
-    
-    public String getDisplayName() {
-        if (mDisplayName == null) {
-            constructDisplayName();
-        }
-        return mDisplayName;
     }
 
     /**
