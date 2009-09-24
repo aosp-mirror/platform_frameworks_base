@@ -188,6 +188,11 @@ public:
     virtual bool needsBlending() const  { return false; }
 
     /**
+     * needsDithering - true if this surface needs dithering
+     */
+    virtual bool needsDithering() const { return false; }
+
+    /**
      * transformed -- true is this surface needs a to be transformed
      */
     virtual bool transformed() const    { return mTransformed; }
@@ -254,6 +259,7 @@ protected:
 
                 // cached during validateVisibility()
                 bool            mTransformed;
+                bool            mUseLinearFiltering;
                 int32_t         mOrientation;
                 GLfixed         mVertices[4][2];
                 Rect            mTransformedBounds;
