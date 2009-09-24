@@ -659,8 +659,9 @@ public final class BridgeTypedArray extends TypedArray {
             return null;
         }
 
-        String value = mData[index].getValue();
-        if (value == null || BridgeConstants.REFERENCE_NULL.equals(value)) {
+        IResourceValue value = mData[index];
+        String stringValue = value.getValue();
+        if (stringValue == null || BridgeConstants.REFERENCE_NULL.equals(stringValue)) {
             return null;
         }
 
