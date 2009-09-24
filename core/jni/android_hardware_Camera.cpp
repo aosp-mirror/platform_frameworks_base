@@ -112,7 +112,7 @@ void JNICameraContext::notify(int32_t msgType, int32_t ext1, int32_t ext2)
     }
     JNIEnv *env = AndroidRuntime::getJNIEnv();
     env->CallStaticVoidMethod(mCameraJClass, fields.post_event,
-            mCameraJObjectWeak, msgType, ext1, ext2);
+            mCameraJObjectWeak, msgType, ext1, ext2, NULL);
 }
 
 void JNICameraContext::copyAndPost(JNIEnv* env, const sp<IMemory>& dataPtr, int msgType)
