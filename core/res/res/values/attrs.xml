@@ -2639,6 +2639,9 @@
                  content for the duration of the animation. -->
             <enum name="bottom" value="-1" />
         </attr>
+        <!-- Special option for window animations: if this window is on top
+             of a wallpaper, don't animate the wallpaper with it. -->
+        <attr name="detachWallpaper" format="boolean" />
     </declare-styleable>
 
     <declare-styleable name="RotateAnimation">

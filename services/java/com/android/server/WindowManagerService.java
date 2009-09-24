@@ -7320,18 +7320,22 @@ public class WindowManagerService extends IWindowManager.Stub
             // are currently targeting.
             if (mAttrs.type == TYPE_WALLPAPER && mLowerWallpaperTarget == null
                     && mWallpaperTarget != null) {
-                if (mWallpaperTarget.mHasLocalTransformation) {
+                if (mWallpaperTarget.mHasLocalTransformation &&
+                        mWallpaperTarget.mAnimation != null &&
+                        !mWallpaperTarget.mAnimation.getDetachWallpaper()) {
                     attachedTransformation = mWallpaperTarget.mTransformation;
+                    if (DEBUG_WALLPAPER && attachedTransformation != null) {
+                        Log.v(TAG, "WP target attached xform: " + attachedTransformation);
+                    }
                 }
                 if (mWallpaperTarget.mAppToken != null &&
-                        mWallpaperTarget.mAppToken.hasTransformation) {
+                        mWallpaperTarget.mAppToken.hasTransformation &&
+                        mWallpaperTarget.mAppToken.animation != null &&
+                        !mWallpaperTarget.mAppToken.animation.getDetachWallpaper()) {
                     appTransformation = mWallpaperTarget.mAppToken.transformation;
-                }
-                if (DEBUG_WALLPAPER && attachedTransformation != null) {
-                    Log.v(TAG, "WP target attached xform: " + attachedTransformation);
-                }
-                if (DEBUG_WALLPAPER && appTransformation != null) {
-                    Log.v(TAG, "WP target app xform: " + appTransformation);
+                    if (DEBUG_WALLPAPER && appTransformation != null) {
+                        Log.v(TAG, "WP target app xform: " + appTransformation);
+                    }
                 }
             }
             
