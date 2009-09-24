@@ -668,7 +668,7 @@ public class RotarySelector extends View {
         // wrapping the offset back to the other side so that when the animation is finished,
         // the buttons will come back into their original places.
         if (mDimplesOfFling > 0) {
-            if (!goingRight && mRotaryOffsetX < 3 * mDimpleSpacing) {
+            if (!goingRight && mRotaryOffsetX < -3 * mDimpleSpacing) {
                 // wrap around on fling left
                 mRotaryOffsetX += mDimplesOfFling * mDimpleSpacing;
             } else if (goingRight && mRotaryOffsetX > 3 * mDimpleSpacing) {
