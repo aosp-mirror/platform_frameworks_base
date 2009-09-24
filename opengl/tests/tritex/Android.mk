@@ -2,7 +2,7 @@ LOCAL_PATH:= $(call my-dir)
 include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES:= \
-	tritex.c
+	tritex.cpp
 
 LOCAL_SHARED_LIBRARIES := \
 	libcutils \
