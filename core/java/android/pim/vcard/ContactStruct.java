@@ -18,7 +18,6 @@ package android.pim.vcard;
 import android.accounts.Account;
 import android.content.ContentProviderOperation;
 import android.content.ContentResolver;
-import android.content.ContentValues;
 import android.content.OperationApplicationException;
 import android.database.Cursor;
 import android.os.RemoteException;
@@ -26,10 +25,10 @@ import android.provider.ContactsContract;
 import android.provider.ContactsContract.Data;
 import android.provider.ContactsContract.Groups;
 import android.provider.ContactsContract.RawContacts;
+import android.provider.ContactsContract.CommonDataKinds.Birthday;
 import android.provider.ContactsContract.CommonDataKinds.Email;
 import android.provider.ContactsContract.CommonDataKinds.GroupMembership;
 import android.provider.ContactsContract.CommonDataKinds.Im;
-import android.provider.ContactsContract.CommonDataKinds.Miscellaneous;
 import android.provider.ContactsContract.CommonDataKinds.Nickname;
 import android.provider.ContactsContract.CommonDataKinds.Note;
 import android.provider.ContactsContract.CommonDataKinds.Organization;
@@ -1317,9 +1316,9 @@ public class ContactStruct {
         
         if (!TextUtils.isEmpty(mBirthday)) {
             builder = ContentProviderOperation.newInsert(Data.CONTENT_URI);
-            builder.withValueBackReference(Miscellaneous.RAW_CONTACT_ID, 0);
-            builder.withValue(Data.MIMETYPE, Miscellaneous.CONTENT_ITEM_TYPE);
-            builder.withValue(Miscellaneous.BIRTHDAY, mBirthday);
+            builder.withValueBackReference(Birthday.RAW_CONTACT_ID, 0);
+            builder.withValue(Data.MIMETYPE, Birthday.CONTENT_ITEM_TYPE);
+            builder.withValue(Birthday.BIRTHDAY, mBirthday);
             operationList.add(builder.build());
         }
 
