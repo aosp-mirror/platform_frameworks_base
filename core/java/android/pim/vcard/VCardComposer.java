@@ -24,6 +24,8 @@ import android.content.Entity.NamedContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteException;
 import android.os.RemoteException;
+import android.provider.CallLog;
+import android.provider.CallLog.Calls;
 import android.provider.ContactsContract.Contacts;
 import android.provider.ContactsContract.Data;
 import android.provider.ContactsContract.RawContacts;
@@ -38,11 +40,8 @@ import android.provider.ContactsContract.CommonDataKinds.Photo;
 import android.provider.ContactsContract.CommonDataKinds.StructuredName;
 import android.provider.ContactsContract.CommonDataKinds.StructuredPostal;
 import android.provider.ContactsContract.CommonDataKinds.Website;
-import android.provider.CallLog.Calls;
-import android.provider.CallLog;
-import android.text.format.DateUtils;
-import android.text.format.Time;
 import android.text.TextUtils;
+import android.text.format.Time;
 import android.util.CharsetUtils;
 import android.util.Log;
 
@@ -81,6 +80,8 @@ import java.util.Map;
  */
 public class VCardComposer {
     private static final String LOG_TAG = "vcard.VCardComposer";
+
+    private final static String DEFAULT_EMAIL_TYPE = Constants.ATTR_TYPE_INTERNET;
 
     public static interface OneEntryHandler {
         public boolean onInit(Context context);
@@ -403,7 +404,7 @@ public class VCardComposer {
 
     /**
      * @return Returns true when initialization is successful and all the other
-     *         methods are available. Returns false otherwise.
+     *          methods are available. Returns false otherwise.
      */
     public boolean init(final String selection, final String[] selectionArgs) {
         if (mCareHandlerErrors) {
@@ -554,7 +555,7 @@ public class VCardComposer {
         final long dateAsLong = mCursor.getLong(DATE_COLUMN_INDEX);
         builder.append(VCARD_PROPERTY_X_TIMESTAMP);
         builder.append(VCARD_ATTR_SEPARATOR);
-        appendType(builder, callLogTypeStr);
+        appendTypeAttribute(builder, callLogTypeStr);
         builder.append(VCARD_DATA_SEPARATOR);
         builder.append(toRfc2455Format(dateAsLong));
         builder.append(VCARD_COL_SEPARATOR);
@@ -705,9 +706,9 @@ public class VCardComposer {
         return mErrorReason;
     }
 
-    private void appendStructuredNames(StringBuilder builder,
+    private void appendStructuredNames(final StringBuilder builder,
             final Map<String, List<ContentValues>> contentValuesListMap) {
-        List<ContentValues> contentValuesList = contentValuesListMap
+        final List<ContentValues> contentValuesList = contentValuesListMap
                 .get(StructuredName.CONTENT_ITEM_TYPE);
         if (contentValuesList != null) {
             appendStructuredNamesInternal(builder, contentValuesList);
@@ -922,7 +923,7 @@ public class VCardComposer {
 
     private void appendNickNames(final StringBuilder builder,
             final Map<String, List<ContentValues>> contentValuesListMap) {
-        List<ContentValues> contentValuesList = contentValuesListMap
+        final List<ContentValues> contentValuesList = contentValuesListMap
                 .get(Nickname.CONTENT_ITEM_TYPE);
         if (contentValuesList != null) {
             final String propertyNickname;
@@ -958,7 +959,7 @@ public class VCardComposer {
 
     private void appendPhones(final StringBuilder builder,
             final Map<String, List<ContentValues>> contentValuesListMap) {
-        List<ContentValues> contentValuesList = contentValuesListMap
+        final List<ContentValues> contentValuesList = contentValuesListMap
                 .get(Phone.CONTENT_ITEM_TYPE);
         if (contentValuesList != null) {
             for (ContentValues contentValues : contentValuesList) {
@@ -976,7 +977,7 @@ public class VCardComposer {
 
     private void appendEmails(final StringBuilder builder,
             final Map<String, List<ContentValues>> contentValuesListMap) {
-        List<ContentValues> contentValuesList = contentValuesListMap
+        final List<ContentValues> contentValuesList = contentValuesListMap
                 .get(Email.CONTENT_ITEM_TYPE);
         if (contentValuesList != null) {
             for (ContentValues contentValues : contentValuesList) {
@@ -992,7 +993,7 @@ public class VCardComposer {
 
     private void appendPostals(final StringBuilder builder,
             final Map<String, List<ContentValues>> contentValuesListMap) {
-        List<ContentValues> contentValuesList = contentValuesListMap
+        final List<ContentValues> contentValuesList = contentValuesListMap
                 .get(StructuredPostal.CONTENT_ITEM_TYPE);
 
         if (contentValuesList != null) {
@@ -1062,7 +1063,7 @@ public class VCardComposer {
 
     private void appendIms(final StringBuilder builder,
             final Map<String, List<ContentValues>> contentValuesListMap) {
-        List<ContentValues> contentValuesList = contentValuesListMap
+        final List<ContentValues> contentValuesList = contentValuesListMap
                 .get(Im.CONTENT_ITEM_TYPE);
         if (contentValuesList != null) {
             for (ContentValues contentValues : contentValuesList) {
@@ -1081,7 +1082,7 @@ public class VCardComposer {
 
     private void appendWebsites(final StringBuilder builder,
             final Map<String, List<ContentValues>> contentValuesListMap) {
-        List<ContentValues> contentValuesList = contentValuesListMap
+        final List<ContentValues> contentValuesList = contentValuesListMap
                 .get(Website.CONTENT_ITEM_TYPE);
         if (contentValuesList != null) {
             for (ContentValues contentValues : contentValuesList) {
@@ -1093,7 +1094,7 @@ public class VCardComposer {
 
     private void appendBirthday(final StringBuilder builder,
             final Map<String, List<ContentValues>> contentValuesListMap) {
-        List<ContentValues> contentValuesList = contentValuesListMap
+        final List<ContentValues> contentValuesList = contentValuesListMap
                 .get(Miscellaneous.CONTENT_ITEM_TYPE);
         if (contentValuesList != null && contentValuesList.size() > 0) {
             // Theoretically, there must be only one birthday for each vCard data and
@@ -1106,7 +1107,7 @@ public class VCardComposer {
 
     private void appendOrganizations(final StringBuilder builder,
             final Map<String, List<ContentValues>> contentValuesListMap) {
-        List<ContentValues> contentValuesList = contentValuesListMap
+        final List<ContentValues> contentValuesList = contentValuesListMap
                 .get(Organization.CONTENT_ITEM_TYPE);
         if (contentValuesList != null) {
             for (ContentValues contentValues : contentValuesList) {
@@ -1124,7 +1125,7 @@ public class VCardComposer {
 
     private void appendPhotos(final StringBuilder builder,
             final Map<String, List<ContentValues>> contentValuesListMap) {
-        List<ContentValues> contentValuesList = contentValuesListMap
+        final List<ContentValues> contentValuesList = contentValuesListMap
                 .get(Photo.CONTENT_ITEM_TYPE);
         if (contentValuesList != null) {
             for (ContentValues contentValues : contentValuesList) {
@@ -1153,7 +1154,7 @@ public class VCardComposer {
                     Log.d(LOG_TAG, "Unknown photo type. Ignore.");
                     continue;
                 }
-                String photoString = VCardUtils.encodeBase64(data);
+                final String photoString = VCardUtils.encodeBase64(data);
                 if (photoString.length() > 0) {
                     appendVCardPhotoLine(builder, photoString, photoType);
                 }
@@ -1201,64 +1202,76 @@ public class VCardComposer {
      * Note that Quoted-Printable string must not be input here.
      */
     @SuppressWarnings("fallthrough")
-    private String escapeCharacters(String unescaped) {
+    private String escapeCharacters(final String unescaped) {
         if (TextUtils.isEmpty(unescaped)) {
             return "";
         }
 
-        StringBuilder builder = new StringBuilder();
+        final StringBuilder tmpBuilder = new StringBuilder();
         final int length = unescaped.length();
         for (int i = 0; i < length; i++) {
             char ch = unescaped.charAt(i);
             switch (ch) {
-            case ';':
-                builder.append('\\');
-                builder.append(';');
-                break;
-            case '\r':
-                if (i + 1 < length) {
-                    char nextChar = unescaped.charAt(i);
-                    if (nextChar == '\n') {
-                        continue;
+                case ';': {
+                    tmpBuilder.append('\\');
+                    tmpBuilder.append(';');
+                    break;
+                }
+                case '\r': {
+                    if (i + 1 < length) {
+                        char nextChar = unescaped.charAt(i);
+                        if (nextChar == '\n') {
+                            continue;
+                        } else {
+                            // fall through
+                        }
                     } else {
                         // fall through
                     }
-                } else {
-                    // fall through
                 }
-            case '\n':
-                // In vCard 2.1, there's no specification about this, while
-                // vCard 3.0 explicitly
-                // requires this should be encoded to "\n".
-                builder.append("\\n");
-                break;
-            case '\\':
-                if (mIsV30) {
-                    builder.append("\\\\");
+                case '\n': {
+                    // In vCard 2.1, there's no specification about this, while
+                    // vCard 3.0 explicitly requires this should be encoded to "\n".
+                    tmpBuilder.append("\\n");
                     break;
                 }
-            case '<':
-            case '>':
-                if (mIsDoCoMo) {
-                    builder.append('\\');
-                    builder.append(ch);
+                case '\\': {
+                    if (mIsV30) {
+                        tmpBuilder.append("\\\\");
+                        break;
+                    } else {
+                        // fall through
+                    }
                 }
-                break;
-            case ',':
-                if (mIsV30) {
-                    builder.append("\\,");
+                case '<':
+                case '>': {
+                    if (mIsDoCoMo) {
+                        tmpBuilder.append('\\');
+                        tmpBuilder.append(ch);
+                    } else {
+                        tmpBuilder.append(ch);
+                    }
                     break;
                 }
-            default:
-                builder.append(ch);
-                break;
+                case ',': {
+                    if (mIsV30) {
+                        tmpBuilder.append("\\,");
+                    } else {
+                        tmpBuilder.append(ch);
+                    }
+                    break;
+                }
+                default: {
+                    tmpBuilder.append(ch);
+                    break;
+                }
             }
         }
-        return builder.toString();
+        return tmpBuilder.toString();
     }
 
-    private void appendVCardPhotoLine(StringBuilder builder,
-            String encodedData, String type) {
+    private void appendVCardPhotoLine(final StringBuilder builder,
+            final String encodedData, final String photoType) {
         StringBuilder tmpBuilder = new StringBuilder();
         tmpBuilder.append(VCARD_PROPERTY_PHOTO);
         tmpBuilder.append(VCARD_ATTR_SEPARATOR);
@@ -1268,14 +1281,15 @@ public class VCardComposer {
             tmpBuilder.append(VCARD_ATTR_ENCODING_BASE64_V21);
         }
         tmpBuilder.append(VCARD_ATTR_SEPARATOR);
-        appendType(tmpBuilder, type);
+        appendTypeAttribute(tmpBuilder, photoType);
         tmpBuilder.append(VCARD_DATA_SEPARATOR);
         tmpBuilder.append(encodedData);
 
-        String tmpStr = tmpBuilder.toString();
+        final String tmpStr = tmpBuilder.toString();
         tmpBuilder = new StringBuilder();
         int lineCount = 0;
-        for (int i = 0; i < tmpStr.length(); i++) {
+        int length = tmpStr.length();
+        for (int i = 0; i < length; i++) {
             tmpBuilder.append(tmpStr.charAt(i));
             lineCount++;
             if (lineCount > 72) {
@@ -1289,7 +1303,8 @@ public class VCardComposer {
         builder.append(VCARD_COL_SEPARATOR);
     }
 
-    private void appendVCardPostalLine(StringBuilder builder, Integer type, String label,
+    private void appendVCardPostalLine(final StringBuilder builder,
+            final Integer typeAsObject, final String label,
             final ContentValues contentValues) {
         builder.append(VCARD_PROPERTY_ADR);
         builder.append(VCARD_ATTR_SEPARATOR);
@@ -1310,48 +1325,59 @@ public class VCardComposer {
             }
         }
 
-        if (type == null) {
-            type = StructuredPostal.TYPE_OTHER;
+        final int typeAsPrimitive;
+        if (typeAsObject == null) {
+            typeAsPrimitive = StructuredPostal.TYPE_OTHER;
+        } else {
+            typeAsPrimitive = typeAsObject;
         }
 
-        boolean typeIsAppended = false;
-        switch (type) {
-        case StructuredPostal.TYPE_HOME:
-            builder.append(Constants.ATTR_TYPE_HOME);
-            typeIsAppended = true;
-            break;
-        case StructuredPostal.TYPE_WORK:
-            builder.append(Constants.ATTR_TYPE_WORK);
-            typeIsAppended = true;
-            break;
-        case StructuredPostal.TYPE_CUSTOM:
-            if (mUsesAndroidProperty && !TextUtils.isEmpty(label)
-                        && VCardUtils.containsOnlyAlphaDigitHyphen(label)) {
-                // We're not sure whether the label is valid in the spec ("IANA-token" in the vCard 3.1
-                // is unclear...)
-                // Just for safety, we add "X-" at the beggining of each label.
-                // Also checks the label obeys with vCard 3.0 spec.
-                builder.append("X-");
-                builder.append(label);
-                builder.append(VCARD_DATA_SEPARATOR);
+        String typeAsString = null;
+        switch (typeAsPrimitive) {
+            case StructuredPostal.TYPE_HOME: {
+                typeAsString = Constants.ATTR_TYPE_HOME;
+                break;
             }
-            break;
-        case StructuredPostal.TYPE_OTHER:
-            break;
-        default:
-            Log.e(LOG_TAG, "Unknown StructuredPostal type: " + type);
-            break;
+            case StructuredPostal.TYPE_WORK: {
+                typeAsString = Constants.ATTR_TYPE_WORK;
+                break;
+            }
+            case StructuredPostal.TYPE_CUSTOM: {
+                if (mUsesAndroidProperty && !TextUtils.isEmpty(label)
+                        && VCardUtils.containsOnlyAlphaDigitHyphen(label)) {
+                    // We're not sure whether the label is valid in the spec
+                    // ("IANA-token" in the vCard 3.0 is unclear...)
+                    // Just  for safety, we add "X-" at the beggining of each label.
+                    // Also checks the label obeys with vCard 3.0 spec.
+                    builder.append("X-");
+                    builder.append(label);
+                    builder.append(VCARD_DATA_SEPARATOR);
+                }
+                break;
+            }
+            case StructuredPostal.TYPE_OTHER: {
+                break;
+            }
+            default: {
+                Log.e(LOG_TAG, "Unknown StructuredPostal type: " + typeAsPrimitive);
+                break;
+            }
+        }
+
+        if (typeAsString != null) {
+            appendTypeAttribute(builder, typeAsString);
         }
 
         if (dataExists) {
-            if (typeIsAppended) {
+            // Strictly, vCard 3.0 does not allow exporters to emit charset information,
+            // but we will add it since the information should be useful for importers,
+            //
+            // Assume no parser does not emit error with this attribute in vCard 3.0.
+            if (typeAsString != null) {
                 builder.append(VCARD_ATTR_SEPARATOR);
             }
-            // Strictly, vCard 3.0 does not allow this, but we add this since
-            // this information
-            // should be useful, Assume no parser does not emit error with this
-            // attribute.
             builder.append(mVCardAttributeCharset);
+
             if (useQuotedPrintable) {
                 builder.append(VCARD_ATTR_SEPARATOR);
                 builder.append(VCARD_ATTR_ENCODING_QP);
@@ -1381,61 +1407,78 @@ public class VCardComposer {
         builder.append(VCARD_COL_SEPARATOR);
     }
 
-    private void appendVCardEmailLine(StringBuilder builder, Integer type, String label, String data) {
+    private void appendVCardEmailLine(final StringBuilder builder,
+            final Integer typeAsObject, final String label, final String data) {
         builder.append(VCARD_PROPERTY_EMAIL);
-        builder.append(VCARD_ATTR_SEPARATOR);
 
-        if (type == null) {
-            type = Email.TYPE_OTHER;
+        final int typeAsPrimitive;
+        if (typeAsObject == null) {
+            typeAsPrimitive = Email.TYPE_OTHER;
+        } else {
+            typeAsPrimitive = typeAsObject;
         }
 
-        switch (type) {
-        case Email.TYPE_CUSTOM:
-            if (android.provider.Contacts.ContactMethodsColumns.MOBILE_EMAIL_TYPE_NAME
+        final String typeAsString;
+        switch (typeAsPrimitive) {
+            case Email.TYPE_CUSTOM: {
+                // For backward compatibility.
+                // Detail: Until Donut, there isn't TYPE_MOBILE for email while there is now.
+                //         To support mobile type at that time, this custom label had been used.
+                if (android.provider.Contacts.ContactMethodsColumns.MOBILE_EMAIL_TYPE_NAME
                         .equals(label)) {
-                builder.append(Constants.ATTR_TYPE_CELL);
-            } else if (mUsesAndroidProperty && !TextUtils.isEmpty(label)
+                    typeAsString = Constants.ATTR_TYPE_CELL;
+                } else if (mUsesAndroidProperty && !TextUtils.isEmpty(label)
                         && VCardUtils.containsOnlyAlphaDigitHyphen(label)) {
-                builder.append("X-");
-                builder.append(label);
-            } else {
-                // Default to INTERNET.
-                builder.append(Constants.ATTR_TYPE_INTERNET);
+                    typeAsString = "X-" + label;
+                } else {
+                    typeAsString = DEFAULT_EMAIL_TYPE;
+                }
+                break;
             }
-            break;
-        case Email.TYPE_HOME:
-            builder.append(Constants.ATTR_TYPE_HOME);
-            break;
-        case Email.TYPE_WORK:
-            builder.append(Constants.ATTR_TYPE_WORK);
-            break;
-        case Email.TYPE_OTHER:
-            builder.append(Constants.ATTR_TYPE_INTERNET);
-            break;
-        case Email.TYPE_MOBILE:
-            builder.append(Constants.ATTR_TYPE_CELL);
-            break;
-        default:
-            Log.e(LOG_TAG, "Unknown Email type: " + type);
-            builder.append(Constants.ATTR_TYPE_INTERNET);
-            break;
+            case Email.TYPE_HOME: {
+                typeAsString = Constants.ATTR_TYPE_HOME;
+                break;
+            }
+            case Email.TYPE_WORK: {
+                typeAsString = Constants.ATTR_TYPE_WORK;
+                break;
+            }
+            case Email.TYPE_OTHER: {
+                typeAsString = DEFAULT_EMAIL_TYPE;
+                break;
+            }
+            case Email.TYPE_MOBILE: {
+                typeAsString = Constants.ATTR_TYPE_CELL;
+                break;
+            }
+            default: {
+                Log.e(LOG_TAG, "Unknown Email type: " + typeAsPrimitive);
+                typeAsString = DEFAULT_EMAIL_TYPE;
+                break;
+            }
         }
 
+        builder.append(VCARD_ATTR_SEPARATOR);
+        appendTypeAttribute(builder, typeAsString);
         builder.append(VCARD_DATA_SEPARATOR);
         builder.append(data);
         builder.append(VCARD_COL_SEPARATOR);
     }
 
-    private void appendVCardTelephoneLine(StringBuilder builder, Integer type, String label,
+    private void appendVCardTelephoneLine(final StringBuilder builder,
+            final Integer typeAsObject, final String label,
             String encodedData) {
         builder.append(VCARD_PROPERTY_TEL);
         builder.append(VCARD_ATTR_SEPARATOR);
 
-        if (type == null) {
-            type = Phone.TYPE_OTHER;
+        final int typeAsPrimitive;
+        if (typeAsObject == null) {
+            typeAsPrimitive = Phone.TYPE_OTHER;
+        } else {
+            typeAsPrimitive = typeAsObject;
         }
 
-        switch (type) {
+        switch (typeAsPrimitive) {
         case Phone.TYPE_HOME:
             appendTypeAttributes(builder, Arrays.asList(
                     Constants.ATTR_TYPE_HOME, Constants.ATTR_TYPE_VOICE));
@@ -1459,25 +1502,26 @@ public class VCardComposer {
             if (mIsDoCoMo) {
                 // Not sure about the reason, but previous implementation had
                 // used "VOICE" instead of "PAGER"
+                // Also, refrain from using appendType() so that "TYPE=" is never be appended.
                 builder.append(Constants.ATTR_TYPE_VOICE);
             } else {
-                builder.append(Constants.ATTR_TYPE_PAGER);
+                appendTypeAttribute(builder, Constants.ATTR_TYPE_PAGER);
             }
             break;
         case Phone.TYPE_OTHER:
-            builder.append(Constants.ATTR_TYPE_VOICE);
+            appendTypeAttribute(builder, Constants.ATTR_TYPE_VOICE);
             break;
         case Phone.TYPE_CUSTOM:
             if (mUsesAndroidProperty && !TextUtils.isEmpty(label)
                         && VCardUtils.containsOnlyAlphaDigitHyphen(label)) {
-                builder.append("X-" + label);
+                appendTypeAttribute(builder, "X-" + label);
             } else {
                 // Just ignore the custom type.
-                builder.append(Constants.ATTR_TYPE_VOICE);
+                appendTypeAttribute(builder, Constants.ATTR_TYPE_VOICE);
             }
             break;
         default:
-            appendUncommonPhoneType(builder, type);
+            appendUncommonPhoneType(builder, typeAsPrimitive);
             break;
         }
 
@@ -1489,7 +1533,7 @@ public class VCardComposer {
     /**
      * Appends phone type string which may not be available in some devices.
      */
-    private void appendUncommonPhoneType(StringBuilder builder, Integer type) {
+    private void appendUncommonPhoneType(final StringBuilder builder, final Integer type) {
         if (mIsDoCoMo) {
             // The previous implementation for DoCoMo had been conservative
             // about miscellaneous types.
@@ -1497,7 +1541,7 @@ public class VCardComposer {
         } else {
             String phoneAttribute = VCardUtils.getPhoneAttributeString(type);
             if (phoneAttribute != null) {
-                builder.append(phoneAttribute);
+                appendTypeAttribute(builder, phoneAttribute);
             } else {
                 Log.e(LOG_TAG, "Unknown or unsupported (by vCard) Phone type: " + type);
             }
@@ -1510,7 +1554,7 @@ public class VCardComposer {
     }
 
     private void appendVCardLine(final StringBuilder builder,
-            final String field, final String rawData, boolean needCharset,
+            final String field, final String rawData, final boolean needCharset,
             boolean needQuotedPrintable) {
         builder.append(field);
         if (needCharset) {
@@ -1545,11 +1589,11 @@ public class VCardComposer {
             } else {
                 builder.append(VCARD_ATTR_SEPARATOR);
             }
-            appendType(builder, type);
+            appendTypeAttribute(builder, type);
         }
     }
 
-    private void appendType(final StringBuilder builder, final String type) {
+    private void appendTypeAttribute(final StringBuilder builder, final String type) {
         // Note: In vCard 3.0, Type strings also can be like this: "TYPE=HOME,PREF"
         if (mIsV30) {
             builder.append(Constants.ATTR_TYPE).append(VCARD_ATTR_EQUAL);
@@ -1581,7 +1625,7 @@ public class VCardComposer {
             str = tmpBuilder.toString();
         }
 
-        StringBuilder builder = new StringBuilder();
+        final StringBuilder tmpBuilder = new StringBuilder();
         int index = 0;
         int lineCount = 0;
         byte[] strArray = null;
@@ -1594,7 +1638,7 @@ public class VCardComposer {
             strArray = str.getBytes();
         }
         while (index < strArray.length) {
-            builder.append(String.format("=%02X", strArray[index]));
+            tmpBuilder.append(String.format("=%02X", strArray[index]));
             index += 1;
             lineCount += 3;
 
@@ -1606,11 +1650,11 @@ public class VCardComposer {
                 // it will become
                 // 6 bytes.
                 // 76 - 6 - 3 = 67
-                builder.append("=\r\n");
+                tmpBuilder.append("=\r\n");
                 lineCount = 0;
             }
         }
 
-        return builder.toString();
+        return tmpBuilder.toString();
     }
 }
