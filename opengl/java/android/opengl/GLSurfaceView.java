@@ -633,7 +633,7 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
      * An interface for customizing the eglCreateWindowSurface and eglDestroySurface calls.
      * <p>
      * This interface must be implemented by clients wishing to call
-     * {@link GLSurfaceView#setEGLContextCreator(EGLContextCreator)}
+     * {@link GLSurfaceView#setEGLWindowSurfaceFactory(EGLWindowSurfaceFactory)}
      */
     public interface EGLWindowSurfaceFactory {
         EGLSurface createWindowSurface(EGL10 egl, EGLDisplay display, EGLConfig config,
