@@ -246,26 +246,26 @@ public class VCardComposer {
     private static final String SHIFT_JIS = "SHIFT_JIS";
 
     private final Context mContext;
-    private int mVCardType;
-    private boolean mCareHandlerErrors;
-    private ContentResolver mContentResolver;
+    private final int mVCardType;
+    private final boolean mCareHandlerErrors;
+    private final ContentResolver mContentResolver;
 
     // Convenient member variables about the restriction of the vCard format.
     // Used for not calling the same methods returning same results.
-    private boolean mIsV30;
-    private boolean mIsJapaneseMobilePhone;
-    private boolean mOnlyOneNoteFieldIsAvailable;
-    private boolean mIsDoCoMo;
-    private boolean mUsesQuotedPrintable;
-    private boolean mUsesAndroidProperty;
-    private boolean mUsesDefactProperty;
-    private boolean mUsesShiftJis;
+    private final boolean mIsV30;
+    private final boolean mIsJapaneseMobilePhone;
+    private final boolean mOnlyOneNoteFieldIsAvailable;
+    private final boolean mIsDoCoMo;
+    private final boolean mUsesQuotedPrintable;
+    private final boolean mUsesAndroidProperty;
+    private final boolean mUsesDefactProperty;
+    private final boolean mUsesShiftJis;
 
     private Cursor mCursor;
     private int mIdColumn;
 
-    private String mCharsetString;
-    private static String mVCardAttributeCharset;
+    private final String mCharsetString;
+    private final String mVCardAttributeCharset;
     private boolean mTerminateIsCalled;
     private List<OneEntryHandler> mHandlerList;
 
