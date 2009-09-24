@@ -51,7 +51,8 @@ Layer::Layer(SurfaceFlinger* flinger, DisplayID display,
         const sp<Client>& c, int32_t i)
     :   LayerBaseClient(flinger, display, c, i),
         mSecure(false),
-        mNeedsBlending(true)
+        mNeedsBlending(true),
+        mNeedsDithering(false)
 {
     // no OpenGL operation is possible here, since we might not be
     // in the OpenGL thread.
@@ -106,9 +107,15 @@ status_t Layer::ditch()
 status_t Layer::setBuffers( uint32_t w, uint32_t h,
                             PixelFormat format, uint32_t flags)
 {
+    // this surfaces pixel format
     PixelFormatInfo info;
     status_t err = getPixelFormatInfo(format, &info);
     if (err) return err;
+
+    // the display's pixel format
+    const DisplayHardware& hw(graphicPlane(0).displayHardware());
+    PixelFormatInfo displayInfo;
+    getPixelFormatInfo(hw.getFormat(), &displayInfo);
 
     uint32_t bufferFlags = 0;
     if (flags & ISurfaceComposer::eSecure)
@@ -119,6 +126,12 @@ status_t Layer::setBuffers( uint32_t w, uint32_t h,
     mHeight = h;
     mSecure = (bufferFlags & Buffer::SECURE) ? true : false;
     mNeedsBlending = (info.h_alpha - info.l_alpha) > 0;
+
+    // we use the red index
+    int displayRedSize = displayInfo.getSize(PixelFormatInfo::INDEX_RED);
+    int layerRedsize = info.getSize(PixelFormatInfo::INDEX_RED);
+    mNeedsDithering = layerRedsize > displayRedSize;
+
     mBufferFlags = bufferFlags;
     for (size_t i=0 ; i<NUM_BUFFERS ; i++) {
         mBuffers[i] = new Buffer();

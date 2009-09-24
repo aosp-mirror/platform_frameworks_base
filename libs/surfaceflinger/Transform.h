@@ -50,6 +50,14 @@ public:
                 ROT_INVALID = 0x80000000
             };
 
+            enum type_mask {
+                IDENTITY            = 0,
+                TRANSLATE           = 0x1,
+                SCALE               = 0x2,
+                AFFINE              = 0x4,
+                PERSPECTIVE         = 0x8
+            };
+
             bool    transformed() const;
             int32_t getOrientation() const;
             bool    preserveRects() const;
