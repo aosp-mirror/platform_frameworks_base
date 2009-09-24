@@ -309,6 +309,7 @@ Context::Context(Device *dev, Surface *sur, bool useDepth)
 
     objDestroyOOBInit();
     timerInit();
+    timerSet(RS_TIMER_INTERNAL);
 
     LOGV("RS Launching thread");
     status = pthread_create(&mThreadId, &threadAttr, threadProc, this);
