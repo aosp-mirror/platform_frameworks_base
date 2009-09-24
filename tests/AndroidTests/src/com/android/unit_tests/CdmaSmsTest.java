@@ -16,6 +16,8 @@
 
 package com.android.unit_tests;
 
+import android.telephony.TelephonyManager;
+
 import com.android.internal.telephony.GsmAlphabet;
 import com.android.internal.telephony.SmsHeader;
 import com.android.internal.telephony.cdma.SmsMessage;
@@ -820,6 +822,8 @@ public class CdmaSmsTest extends AndroidTestCase {
 
     @SmallTest
     public void testFragmentText() throws Exception {
+        boolean isCdmaPhone = (TelephonyManager.getDefault().getPhoneType() ==
+                TelephonyManager.PHONE_TYPE_CDMA);
         // Valid 160 character ASCII text.
         String text1 = "123456789012345678901234567890123456789012345678901234567890" +
                 "1234567890123456789012345678901234567890123456789012345678901234567890" +
@@ -828,8 +832,10 @@ public class CdmaSmsTest extends AndroidTestCase {
         assertEquals(ted.msgCount, 1);
         assertEquals(ted.codeUnitCount, 160);
         assertEquals(ted.codeUnitSize, 1);
-        ArrayList<String> fragments = android.telephony.SmsMessage.fragmentText(text1);
-        assertEquals(fragments.size(), 1);
+        if (isCdmaPhone) {
+            ArrayList<String> fragments = android.telephony.SmsMessage.fragmentText(text1);
+            assertEquals(fragments.size(), 1);
+        }
         // Valid 160 character GSM text -- the last character is
         // non-ASCII, and so this will currently generate a singleton
         // EMS message, which is not necessarily supported by Verizon.
@@ -840,7 +846,9 @@ public class CdmaSmsTest extends AndroidTestCase {
         assertEquals(ted.msgCount, 1);
         assertEquals(ted.codeUnitCount, 160);
         assertEquals(ted.codeUnitSize, 1);
-        fragments = android.telephony.SmsMessage.fragmentText(text2);
-        assertEquals(fragments.size(), 1);
+        if (isCdmaPhone) {
+            ArrayList<String> fragments = android.telephony.SmsMessage.fragmentText(text2);
+            assertEquals(fragments.size(), 1);
+        }
     }
 }
