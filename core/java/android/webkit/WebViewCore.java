@@ -312,7 +312,9 @@ final class WebViewCore {
     }
 
     protected String[] populateVisitedLinks() {
-	return Browser.getVisitedHistory(mContext.getContentResolver());
+        // FIXME: getVisitedHistory needs permission and host may not have.
+//        return Browser.getVisitedHistory(mContext.getContentResolver());
+        return new String[0];
     }
 
     /**
