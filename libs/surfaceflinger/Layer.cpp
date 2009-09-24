@@ -223,14 +223,12 @@ void Layer::onDraw(const Region& clip) const
             mFrontBufferIndex : 0;
     GLuint textureName = mTextures[index].name;
     if (UNLIKELY(textureName == -1LU)) {
-        //LOGW("Layer %p doesn't have a texture", this);
         // the texture has not been created yet, this Layer has
         // in fact never been drawn into. this happens frequently with
         // SurfaceView.
         clearWithOpenGL(clip);
         return;
     }
-
     drawWithOpenGL(clip, mTextures[index]);
 }
 
