@@ -116,6 +116,10 @@ class CallbackProxy extends Handler {
         // Private result object
         private E mResult;
 
+        public ResultTransport(E defaultResult) {
+            mResult = defaultResult;
+        }
+
         public synchronized void setResult(E result) {
             mResult = result;
         }
@@ -819,7 +823,7 @@ class CallbackProxy extends Handler {
     public boolean shouldOverrideUrlLoading(String url) {
         // We have a default behavior if no client exists so always send the
         // message.
-        ResultTransport<Boolean> res = new ResultTransport<Boolean>();
+        ResultTransport<Boolean> res = new ResultTransport<Boolean>(false);
         Message msg = obtainMessage(OVERRIDE_URL);
         msg.getData().putString("url", url);
         msg.obj = res;
