@@ -1658,6 +1658,12 @@ public class PackageParser {
             a.info.flags |= ActivityInfo.FLAG_ALLOW_TASK_REPARENTING;
         }
 
+        if (sa.getBoolean(
+                com.android.internal.R.styleable.AndroidManifestActivity_finishOnCloseSystemDialogs,
+                false)) {
+            a.info.flags |= ActivityInfo.FLAG_FINISH_ON_CLOSE_SYSTEM_DIALOGS;
+        }
+
         if (!receiver) {
             a.info.launchMode = sa.getInt(
                     com.android.internal.R.styleable.AndroidManifestActivity_launchMode,

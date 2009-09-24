@@ -1134,6 +1134,7 @@
                  android:icon="@drawable/ic_launcher_android">
         <activity android:name="com.android.internal.app.ChooserActivity"
                 android:theme="@style/Theme.Dialog.Alert"
+                android:finishOnCloseSystemDialogs="true"
                 android:excludeFromRecents="true"
                 android:multiprocess="true">
             <intent-filter>

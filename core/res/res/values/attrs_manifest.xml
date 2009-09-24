@@ -288,6 +288,12 @@
          ignored and the activity simply finished. -->
     <attr name="finishOnTaskLaunch" format="boolean" />
     
+    <!-- Specify whether an activity should be finished when a "close system
+         windows" request has been made.  This happens, for example, when
+         the home key is pressed, when the device is locked, when a system
+         dialog like recent apps is displayed, etc. -->
+    <attr name="finishOnCloseSystemDialogs" format="boolean" />
+    
     <!-- Specify whether an activity's task should be cleared when it
          is re-launched from the home screen.  As a result, every time the
          user starts the task, they will be brought to its root activity,
@@ -1078,6 +1084,7 @@
         <attr name="taskAffinity" />
         <attr name="allowTaskReparenting" />
         <attr name="finishOnTaskLaunch" />
+        <attr name="finishOnCloseSystemDialogs" />
         <attr name="clearTaskOnLaunch" />
         <attr name="noHistory" />
         <attr name="alwaysRetainTaskState" />
