@@ -56,6 +56,7 @@ LayerBase::LayerBase(SurfaceFlinger* flinger, DisplayID display)
     : dpy(display), contentDirty(false),
       mFlinger(flinger),
       mTransformed(false),
+      mUseLinearFiltering(false),
       mOrientation(0),
       mTransactionFlags(0),
       mPremultipliedAlpha(true),
@@ -208,7 +209,19 @@ uint32_t LayerBase::doTransaction(uint32_t flags)
         flags |= eVisibleRegion;
         this->contentDirty = true;
     }
-    
+
+    if (temp.sequence != front.sequence) {
+        const bool linearFiltering = mUseLinearFiltering;
+        mUseLinearFiltering = false;
+        if (!(mFlags & DisplayHardware::SLOW_CONFIG)) {
+            // we may use linear filtering, if the matrix scales us
+            const uint8_t type = temp.transform.getType();
+            if (!temp.transform.preserveRects() || (type >= Transform::SCALE)) {
+                mUseLinearFiltering = true;
+            }
+        }
+    }
+
     // Commit the transaction
     commitTransaction(flags & eRestartTransaction);
     return flags;
@@ -332,13 +345,8 @@ GLuint LayerBase::createTexture() const
     glBindTexture(GL_TEXTURE_2D, textureName);
     glTexParameterx(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameterx(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    if (mFlags & DisplayHardware::SLOW_CONFIG) {
-        glTexParameterx(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glTexParameterx(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    } else {
-        glTexParameterx(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexParameterx(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    }
+    glTexParameterx(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameterx(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     return textureName;
 }
 
@@ -434,12 +442,6 @@ void LayerBase::drawWithOpenGL(const Region& clip, const Texture& texture) const
         Region::const_iterator it = clip.begin();
         Region::const_iterator const end = clip.end();
         if (it != end) {
-            // always use high-quality filtering with fast configurations
-            bool fast = !(mFlags & DisplayHardware::SLOW_CONFIG);
-            if (!fast && s.flags & ISurfaceComposer::eLayerFilter) {
-                glTexParameterx(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-                glTexParameterx(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-            }            
             const GLfixed texCoords[4][2] = {
                     { 0,        0 },
                     { 0,        0x10000 },
@@ -481,11 +483,6 @@ void LayerBase::drawWithOpenGL(const Region& clip, const Texture& texture) const
                 glScissor(r.left, sy, r.width(), r.height());
                 glDrawArrays(GL_TRIANGLE_FAN, 0, 4); 
             }
-
-            if (!fast && s.flags & ISurfaceComposer::eLayerFilter) {
-                glTexParameterx(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-                glTexParameterx(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-            }
             glDisableClientState(GL_TEXTURE_COORD_ARRAY);
         }
     } else {
@@ -512,6 +509,13 @@ void LayerBase::validateTexture(GLint textureName) const
     glBindTexture(GL_TEXTURE_2D, textureName);
     // TODO: reload the texture if needed
     // this is currently done in loadTexture() below
+    if (mUseLinearFiltering) {
+        glTexParameterx(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameterx(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    } else {
+        glTexParameterx(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexParameterx(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    }
 }
 
 void LayerBase::loadTexture(Texture* texture, GLint textureName, 

@@ -254,6 +254,7 @@ protected:
 
                 // cached during validateVisibility()
                 bool            mTransformed;
+                bool            mUseLinearFiltering;
                 int32_t         mOrientation;
                 GLfixed         mVertices[4][2];
                 Rect            mTransformedBounds;
