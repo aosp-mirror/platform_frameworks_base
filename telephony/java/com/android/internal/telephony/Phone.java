@@ -173,6 +173,11 @@ public interface Phone {
     static final int BM_AUS2_BAND   = 5; // GSM-900 / DCS-1800 / WCDMA-850
     static final int BM_BOUNDARY    = 6; // upper band boundary
 
+    // Radio Type
+    static final int PHONE_TYPE_NONE = RILConstants.NO_PHONE;
+    static final int PHONE_TYPE_GSM = RILConstants.GSM_PHONE;
+    static final int PHONE_TYPE_CDMA = RILConstants.CDMA_PHONE;
+
     // Used for preferred network type
     // Note NT_* substitute RILConstants.NETWORK_MODE_* above the Phone
     int NT_MODE_WCDMA_PREF   = RILConstants.NETWORK_MODE_WCDMA_PREF;
@@ -286,6 +291,12 @@ public interface Phone {
      *  @return The string name.
      */
     String getPhoneName();
+
+    /**
+     * Return a numerical identifier for the phone radio interface.
+     * @return PHONE_TYPE_XXX as defined above.
+     */
+    int getPhoneType();
 
     /**
      * Returns an array of string identifiers for the APN types serviced by the

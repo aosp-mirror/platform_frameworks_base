@@ -1256,6 +1256,7 @@ public interface CommandsInterface {
 
     /** Set the Phone type created */
     void setPhoneType(int phoneType);
+
     /**
      *  Query the CDMA roaming preference setting
      *

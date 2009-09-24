@@ -191,6 +191,10 @@ public class PhoneProxy extends Handler implements Phone {
         return mActivePhone.getPhoneName();
     }
 
+    public int getPhoneType() {
+        return mActivePhone.getPhoneType();
+    }
+
     public String[] getActiveApnTypes() {
         return mActivePhone.getActiveApnTypes();
     }

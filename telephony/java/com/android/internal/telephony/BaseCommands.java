@@ -676,7 +676,7 @@ public abstract class BaseCommands implements CommandsInterface {
                 mRadioTechnologyChangedRegistrants.notifyRegistrants();
             }
 
-            if (mState.isGsm() && !oldState.isOn() && (mPhoneType == RILConstants.CDMA_PHONE)) {
+            if (mState.isGsm() && !oldState.isOn() && (mPhoneType == Phone.PHONE_TYPE_CDMA)) {
                 Log.d(LOG_TAG,"Notifying: radio technology change CDMA OFF to GSM");
                 mRadioTechnologyChangedRegistrants.notifyRegistrants();
             }
@@ -686,7 +686,7 @@ public abstract class BaseCommands implements CommandsInterface {
                 mRadioTechnologyChangedRegistrants.notifyRegistrants();
             }
 
-            if (mState.isCdma() && !oldState.isOn() && (mPhoneType == RILConstants.GSM_PHONE)) {
+            if (mState.isCdma() && !oldState.isOn() && (mPhoneType == Phone.PHONE_TYPE_GSM)) {
                 Log.d(LOG_TAG,"Notifying: radio technology change GSM OFF to CDMA");
                 mRadioTechnologyChangedRegistrants.notifyRegistrants();
             }
