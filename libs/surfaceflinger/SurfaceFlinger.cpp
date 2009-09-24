@@ -859,10 +859,10 @@ void SurfaceFlinger::handleRepaint()
             // is costly and usually involves copying the whole update back.
         }
     } else {
-        if (flags & DisplayHardware::UPDATE_ON_DEMAND) {
+        if (flags & DisplayHardware::PARTIAL_UPDATES) {
             // We need to redraw the rectangle that will be updated
             // (pushed to the framebuffer).
-            // This is needed because UPDATE_ON_DEMAND only takes one
+            // This is needed because PARTIAL_UPDATES only takes one
             // rectangle instead of a region (see DisplayHardware::flip())
             mDirtyRegion.set(mInvalidRegion.bounds());
         } else {
@@ -920,7 +920,7 @@ void SurfaceFlinger::debugFlashRegions()
 
      if (!((flags & DisplayHardware::SWAP_RECTANGLE) ||
              (flags & DisplayHardware::BUFFER_PRESERVED))) {
-         const Region repaint((flags & DisplayHardware::UPDATE_ON_DEMAND) ?
+         const Region repaint((flags & DisplayHardware::PARTIAL_UPDATES) ?
                  mDirtyRegion.bounds() : hw.bounds());
          composeSurfaces(repaint);
      }
