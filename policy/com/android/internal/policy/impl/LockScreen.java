@@ -80,6 +80,7 @@ class LockScreen extends LinearLayout implements KeyguardScreen, KeyguardUpdateM
     private AudioManager mAudioManager;
     private java.text.DateFormat mDateFormat;
     private java.text.DateFormat mTimeFormat;
+    private boolean mCreatedInPortrait;
 
     /**
      * The status of this lock screen.
@@ -148,8 +149,14 @@ class LockScreen extends LinearLayout implements KeyguardScreen, KeyguardUpdateM
         mUpdateMonitor = updateMonitor;
         mCallback = callback;
 
+        mCreatedInPortrait = updateMonitor.isInPortrait();
+
         final LayoutInflater inflater = LayoutInflater.from(context);
-        inflater.inflate(R.layout.keyguard_screen_rotary_unlock, this, true);
+        if (mCreatedInPortrait) {
+            inflater.inflate(R.layout.keyguard_screen_rotary_unlock, this, true);
+        } else {
+            inflater.inflate(R.layout.keyguard_screen_rotary_unlock_land, this, true);
+        }
 
         mShowingBatteryInfo = updateMonitor.shouldShowBatteryInfo();
         mPluggedIn = updateMonitor.isDevicePluggedIn();
@@ -196,8 +203,8 @@ class LockScreen extends LinearLayout implements KeyguardScreen, KeyguardUpdateM
         mRotary.setOnDialTriggerListener(this);
         mRotary.setLeftHandleResource(R.drawable.ic_jog_dial_unlock);
         mRotary.setRightHandleResource(mSilentMode ?
-                R.drawable.ic_jog_dial_turn_ring_vol_off :
-                R.drawable.ic_jog_dial_turn_ring_vol_on);
+                R.drawable.ic_jog_dial_sound_off :
+                R.drawable.ic_jog_dial_sound_on);
     }
 
     @Override
@@ -218,8 +225,8 @@ class LockScreen extends LinearLayout implements KeyguardScreen, KeyguardUpdateM
             mAudioManager.setRingerMode(mSilentMode ? AudioManager.RINGER_MODE_SILENT
                         : AudioManager.RINGER_MODE_NORMAL);
             final int handleIcon = mSilentMode ?
-                    R.drawable.ic_jog_dial_turn_ring_vol_off :
-                    R.drawable.ic_jog_dial_turn_ring_vol_on;
+                    R.drawable.ic_jog_dial_sound_off :
+                    R.drawable.ic_jog_dial_sound_on;
             final int toastIcon = mSilentMode ?
                     R.drawable.ic_lock_ringer_off :
                     R.drawable.ic_lock_ringer_on;
@@ -461,7 +468,7 @@ class LockScreen extends LinearLayout implements KeyguardScreen, KeyguardUpdateM
 
                 // layout
                 mScreenLocked.setVisibility(View.VISIBLE);
-                mRotary.setVisibility(View.INVISIBLE);
+                mRotary.setVisibility(View.GONE);
                 mEmergencyCallButton.setVisibility(View.VISIBLE);
                 putEmergencyBelow(R.id.screenLocked);
                 break;
@@ -481,7 +488,7 @@ class LockScreen extends LinearLayout implements KeyguardScreen, KeyguardUpdateM
 
                 // layout
                 mScreenLocked.setVisibility(View.VISIBLE);
-                mRotary.setVisibility(View.INVISIBLE);
+                mRotary.setVisibility(View.GONE);
                 mEmergencyCallButton.setVisibility(View.VISIBLE);
                 putEmergencyBelow(R.id.screenLocked);
                 break;
@@ -509,6 +516,9 @@ class LockScreen extends LinearLayout implements KeyguardScreen, KeyguardUpdateM
 
 
     public void onOrientationChange(boolean inPortrait) {
+        if (inPortrait != mCreatedInPortrait) {
+            mCallback.recreateMe();
+        }
     }
 
     public void onKeyboardChange(boolean isKeyboardOpen) {
