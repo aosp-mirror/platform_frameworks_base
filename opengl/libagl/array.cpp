@@ -1266,9 +1266,7 @@ void glColorPointer(
     GLint size, GLenum type, GLsizei stride, const GLvoid *pointer)
 {
     ogles_context_t* c = ogles_context_t::get();
-    // in theory ogles doesn't allow color arrays of size 3
-    // but it is very useful to 'visualize' the normal array.
-    if (size<3 || size>4 || stride<0) {
+    if (size!=4 || stride<0) {
         ogles_error(c, GL_INVALID_VALUE);
         return;
     }
