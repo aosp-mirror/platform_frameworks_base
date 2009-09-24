@@ -167,7 +167,8 @@ private:
         TONE_STARTING,  // ToneGenerator is starting playing
         TONE_PLAYING,  // ToneGenerator is playing
         TONE_STOPPING,  // ToneGenerator is stoping
-        TONE_RESTARTING  //
+        TONE_STOPPED,  // ToneGenerator is stopped: the AudioTrack will be stopped
+        TONE_RESTARTING  // A start request was received in active state (playing or stopping)
     };
 
 
