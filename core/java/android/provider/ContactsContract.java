@@ -40,7 +40,10 @@ import java.io.InputStream;
 /**
  * The contract between the contacts provider and applications. Contains definitions
  * for the supported URIs and columns. These APIs supersede {@link Contacts}.
+ *
+ * @hide
  */
+@SuppressWarnings("unused")
 public final class ContactsContract {
     /** The authority for the contacts provider */
     public static final String AUTHORITY = "com.android.contacts";
@@ -225,7 +228,7 @@ public final class ContactsContract {
         public static final String IN_VISIBLE_GROUP = "in_visible_group";
 
         /**
-         * Contact presence status.  See {@link android.provider.Im.CommonPresenceColumns}
+         * Contact presence status.  See {@link PresenceColumns}
          * for individual status definitions.  This column is only returned if explicitly
          * requested in the query projection.
          * <p>Type: NUMBER</p>
@@ -2531,8 +2534,6 @@ public final class ContactsContract {
 
             /**
              * The extra field for the IM protocol
-             * <P>Type: the result of {@link CommonDataKinds.Im#encodePredefinedImProtocol(int)}
-             * or {@link CommonDataKinds.Im#encodeCustomImProtocol(String)}.</P>
              */
             public static final String IM_PROTOCOL = "im_protocol";
 
