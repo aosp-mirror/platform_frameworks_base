@@ -104,6 +104,38 @@ public final class BluetoothAdapter {
     public static final int STATE_TURNING_OFF = 13;
 
     /**
+     * Activity Action: Show a system activity that requests discoverable mode.
+     * <p>Discoverable mode is equivalent to {@link
+     * #SCAN_MODE_CONNECTABLE_DISCOVERABLE}. It allows remote devices to see
+     * this Bluetooth adapter when they perform a discovery.
+     * <p>For privacy, Android is not by default discoverable.
+     * <p>The sender can optionally use extra field {@link
+     * #EXTRA_DISCOVERABLE_DURATION} to request the duration of
+     * discoverability. Currently the default duration is 120 seconds, and
+     * maximum duration is capped at 300 seconds for each request.
+     * <p>Notification of the result of this activity is posted using the
+     * {@link android.app.Activity#onActivityResult} callback. The
+     * <code>resultCode</code>
+     * will be the duration (in seconds) of discoverability, or a negative
+     * value if the user rejected discoverability.
+     * <p>Applications can also listen for {@link #ACTION_SCAN_MODE_CHANGED}
+     * for global notification whenever the scan mode changes.
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN}
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_REQUEST_DISCOVERABLE =
+            "android.bluetooth.adapter.action.REQUEST_DISCOVERABLE";
+
+    /**
+     * Used as an optional int extra field in {@link
+     * #ACTION_REQUEST_DISCOVERABLE} intents to request a specific duration
+     * for discoverability in seconds. The current default is 120 seconds, and
+     * requests over 300 seconds will be capped. These values could change.
+     */
+    public static final String EXTRA_DISCOVERABLE_DURATION =
+            "android.bluetooth.adapter.extra.DISCOVERABLE_DURATION";
+
+    /**
      * Broadcast Action: Indicates the Bluetooth scan mode of the local Adapter
      * has changed.
      * <p>Always contains the extra fields {@link #EXTRA_SCAN_MODE} and {@link
@@ -388,10 +420,15 @@ public final class BluetoothAdapter {
      * {@link #SCAN_MODE_NONE},
      * {@link #SCAN_MODE_CONNECTABLE},
      * {@link #SCAN_MODE_CONNECTABLE_DISCOVERABLE}.
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN}
+     * <p>Requires {@link android.Manifest.permission#WRITE_SECURE_SETTINGS}
+     * <p>Applications cannot set the scan mode. They should use
+     * <code>startActivityForResult(
+     * BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE})
+     * </code>instead.
      *
      * @param mode valid scan mode
      * @return     true if the scan mode was set, false otherwise
+     * @hide
      */
     public boolean setScanMode(int mode) {
         try {

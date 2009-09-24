@@ -680,8 +680,8 @@ public class BluetoothService extends IBluetooth.Stub {
     }
 
     public synchronized boolean setScanMode(int mode) {
-        mContext.enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
-                                                "Need BLUETOOTH_ADMIN permission");
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS,
+                                                "Need WRITE_SECURE_SETTINGS permission");
         boolean pairable = false;
         boolean discoverable = false;
         switch (mode) {
