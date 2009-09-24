@@ -1998,6 +1998,13 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                 cb.onDetachedFromWindow();
             }
         }
+        
+        @Override
+        public void onCloseSystemDialogs(String reason) {
+            if (mFeatureId >= 0) {
+                closeAllPanels();
+            }
+        }
     }
 
     protected DecorView generateDecor() {

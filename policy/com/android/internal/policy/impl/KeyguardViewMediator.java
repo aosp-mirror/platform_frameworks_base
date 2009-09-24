@@ -19,6 +19,7 @@ package com.android.internal.policy.impl;
 import com.android.internal.telephony.IccCard;
 import com.android.internal.widget.LockPatternUtils;
 
+import android.app.ActivityManagerNative;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.app.StatusBarManager;
@@ -32,6 +33,7 @@ import android.os.Handler;
 import android.os.LocalPowerManager;
 import android.os.Message;
 import android.os.PowerManager;
+import android.os.RemoteException;
 import android.os.SystemClock;
 import android.telephony.TelephonyManager;
 import android.util.Config;
@@ -123,7 +125,7 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
      * turning on the keyguard (i.e, the user has this much time to turn
      * the screen back on without having to face the keyguard).
      */
-    private static final int KEYGUARD_DELAY_MS = 0;
+    private static final int KEYGUARD_DELAY_MS = 5000;
 
     /**
      * How long we'll wait for the {@link KeyguardViewCallback#keyguardDoneDrawing()}
@@ -869,6 +871,10 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
 
             mKeyguardViewManager.show();
             mShowing = true;
+            try {
+                ActivityManagerNative.getDefault().closeSystemDialogs("lock");
+            } catch (RemoteException e) {
+            }
         }
     }
 
