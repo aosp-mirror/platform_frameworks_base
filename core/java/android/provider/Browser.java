@@ -174,13 +174,29 @@ public class Browser {
     }
 
     public static final void sendString(Context c, String s) {
+        sendString(c, s,
+                c.getText(com.android.internal.R.string.sendText).toString());
+    }
+
+    /**
+     *  Find an application to handle the given string and, if found, invoke
+     *  it with the given string as a parameter.
+     *  @param c Context used to launch the new activity.
+     *  @param stringToSend The string to be handled.
+     *  @param chooserDialogTitle The title of the dialog that allows the user
+     *  to select between multiple applications that are all capable of handling
+     *  the string.
+     *  @hide pending API council approval
+     */
+    public static final void sendString(Context c,
+                                        String stringToSend,
+                                        String chooserDialogTitle) {
         Intent send = new Intent(Intent.ACTION_SEND);
         send.setType("text/plain");
-        send.putExtra(Intent.EXTRA_TEXT, s);
-        
+        send.putExtra(Intent.EXTRA_TEXT, stringToSend);
+
         try {
-            c.startActivity(Intent.createChooser(send,
-                    c.getText(com.android.internal.R.string.sendText)));
+            c.startActivity(Intent.createChooser(send, chooserDialogTitle));
         } catch(android.content.ActivityNotFoundException ex) {
             // if no app handles it, do nothing
         }
