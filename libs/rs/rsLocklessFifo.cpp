@@ -159,7 +159,7 @@ void LocklessCommandFifo::makeSpace(uint32_t bytes)
     if ((mPut+bytes) > mEnd) {
         // Need to loop regardless of where get is.
         while((mGet > mPut) && (mBuffer+4 >= mGet)) {
-            sleep(1);
+            usleep(100);
         }
 
         // Toss in a reset then the normal wait for space will do the rest.
@@ -170,7 +170,7 @@ void LocklessCommandFifo::makeSpace(uint32_t bytes)
 
     // it will fit here so we just need to wait for space.
     while(getFreeSpace() < bytes) {
-        sleep(1);
+        usleep(100);
     }
 
 }

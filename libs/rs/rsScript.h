@@ -69,6 +69,7 @@ public:
 
 
 
+    virtual void setupScript() = 0;
     virtual bool run(Context *, uint32_t launchID) = 0;
 };
 
