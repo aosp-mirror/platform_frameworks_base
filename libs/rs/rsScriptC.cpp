@@ -147,7 +147,7 @@ void ScriptCState::runCompiler(Context *rsc, ScriptC *s)
         ACCchar buf[4096];
         ACCsizei len;
         accGetScriptInfoLog(s->mAccScript, sizeof(buf), &len, buf);
-        LOGE(buf);
+        LOGV(buf);
     }
 
     if (s->mProgram.mInit) {
