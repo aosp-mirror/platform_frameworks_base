@@ -4766,6 +4766,9 @@ public class WebView extends AbsoluteLayout
     /* package */ void passToJavaScript(String currentText, KeyEvent event) {
         if (nativeCursorWantsKeyEvents() && !nativeCursorMatchesFocus()) {
             mWebViewCore.sendMessage(EventHub.CLICK);
+            int select = nativeFocusCandidateIsTextField() ?
+                    nativeFocusCandidateMaxLength() : 0;
+            setSelection(select, select);
         }
         WebViewCore.JSKeyData arg = new WebViewCore.JSKeyData();
         arg.mEvent = event;
