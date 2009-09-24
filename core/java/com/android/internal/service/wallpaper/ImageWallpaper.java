@@ -19,6 +19,7 @@ package com.android.internal.service.wallpaper;
 import android.app.WallpaperManager;
 import android.graphics.Canvas;
 import android.graphics.Rect;
+import android.graphics.Region.Op;
 import android.graphics.drawable.Drawable;
 import android.os.HandlerThread;
 import android.os.Process;
@@ -134,14 +135,18 @@ public class ImageWallpaper extends WallpaperService {
                     final int dh = frame.height();
                     final int bw = mBackground.getIntrinsicWidth();
                     final int bh = mBackground.getIntrinsicHeight();
-                    final int availw = bw-dw;
-                    final int availh = bh-dh;
-                    int xPixels = availw > 0
-                            ? -(int)(availw*mXOffset+.5f) : -(availw/2);
-                    int yPixels = availh > 0
-                            ? -(int)(availh*mYOffset+.5f) : -(availh/2);
+                    final int availw = dw-bw;
+                    final int availh = dh-bh;
+                    int xPixels = availw < 0 ? (int)(availw*mXOffset+.5f) : (availw/2);
+                    int yPixels = availh < 0 ? (int)(availh*mYOffset+.5f) : (availh/2);
+
                     c.translate(xPixels, yPixels);
-                    c.drawColor(0xff000000);
+                    if (availw<0 || availh<0) {
+                        c.save(Canvas.CLIP_SAVE_FLAG);
+                        c.clipRect(0, 0, bw, bh, Op.DIFFERENCE);
+                        c.drawColor(0xff000000);
+                        c.restore();
+                    }
                     background.draw(c);
                 }
                 sh.unlockCanvasAndPost(c);
