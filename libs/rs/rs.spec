@@ -55,11 +55,6 @@ ElementCreate {
 	ret RsElement
 	}
 
-ElementGetPredefined {
-	param RsElementPredefined predef
-	ret RsElement
-	}
-
 TypeBegin {
 	param RsElement type
 	}
@@ -78,21 +73,9 @@ AllocationCreateTyped {
 	ret RsAllocation
 	}
 
-AllocationCreatePredefSized {
-	param RsElementPredefined predef
-	param size_t count
-	ret RsAllocation
-	}
-
 AllocationCreateSized {
 	param RsElement e
 	param size_t count
-	ret RsAllocation
-	}
-
-AllocationCreateFromFile {
-	param const char *file
-	param bool genMips
 	ret RsAllocation
 	}
 
