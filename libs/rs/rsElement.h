@@ -69,24 +69,6 @@ public:
     ~ElementState();
 
     Vector<Component *> mComponentBuildList;
-
-
-
-    struct Predefined {
-        Predefined() {
-            mElement = NULL;
-        }
-        Predefined(RsElementPredefined en, Element *e) {
-            mEnum = en;
-            mElement = e;
-        }
-        RsElementPredefined mEnum;
-        Element * mElement;
-    };
-    Vector<Predefined> mPredefinedList;
-
-    void initPredefined();
-
 };
 
 
