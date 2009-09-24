@@ -60,8 +60,6 @@ void ProgramRaster::setupGL(const Context *rsc, ProgramRasterState *state)
     }
     state->mLast.set(this);
 
-    LOGE("setup %i %i %i %f %f", mPointSmooth, mLineSmooth, mPointSprite, mPointSize, mLineWidth);
-
     glPointSize(mPointSize);
     if (mPointSmooth) {
         glEnable(GL_POINT_SMOOTH);
