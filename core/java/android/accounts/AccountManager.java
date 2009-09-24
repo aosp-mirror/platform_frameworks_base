@@ -859,9 +859,10 @@ public class AccountManager {
             throw new IllegalArgumentException("the listener is null");
         }
         synchronized (mAccountsUpdatedListeners) {
-            if (mAccountsUpdatedListeners.remove(listener) == null) {
+            if (!mAccountsUpdatedListeners.containsKey(listener)) {
                 throw new IllegalStateException("this listener was not previously added");
             }
+            mAccountsUpdatedListeners.remove(listener);
             if (mAccountsUpdatedListeners.isEmpty()) {
                 mContext.unregisterReceiver(mAccountsChangedBroadcastReceiver);
             }
