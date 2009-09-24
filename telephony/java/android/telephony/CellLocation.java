@@ -26,11 +26,10 @@ import android.provider.Settings;
 import android.telephony.cdma.CdmaCellLocation;
 import android.telephony.gsm.GsmCellLocation;
 import com.android.internal.telephony.ITelephony;
-import com.android.internal.telephony.RILConstants;
+import com.android.internal.telephony.Phone;
 
 /**
- * Abstract class that represents the location of the device.  Currently the only
- * subclass is {@link android.telephony.gsm.GsmCellLocation}.  {@more}
+ * Abstract class that represents the location of the device.  {@more}
  */
 public abstract class CellLocation {
 
@@ -64,11 +63,13 @@ public abstract class CellLocation {
     public static CellLocation newFromBundle(Bundle bundle) {
         // TelephonyManager.getDefault().getPhoneType() handles the case when
         // ITelephony interface is not up yet.
-        int type = TelephonyManager.getDefault().getPhoneType();
-        if (type == RILConstants.CDMA_PHONE) {
+        switch(TelephonyManager.getDefault().getPhoneType()) {
+        case Phone.PHONE_TYPE_CDMA:
             return new CdmaCellLocation(bundle);
-        } else {
+        case Phone.PHONE_TYPE_GSM:
             return new GsmCellLocation(bundle);
+        default:
+            return null;
         }
     }
 
@@ -78,17 +79,20 @@ public abstract class CellLocation {
     public abstract void fillInNotifierBundle(Bundle bundle);
 
     /**
-     * Return a new CellLocation object representing an unknown location.
+     * Return a new CellLocation object representing an unknown
+     * location, or null for unknown/none phone radio types.
      *
      */
     public static CellLocation getEmpty() {
         // TelephonyManager.getDefault().getPhoneType() handles the case when
         // ITelephony interface is not up yet.
-        int type = TelephonyManager.getDefault().getPhoneType();
-        if (type == RILConstants.CDMA_PHONE) {
+        switch(TelephonyManager.getDefault().getPhoneType()) {
+        case Phone.PHONE_TYPE_CDMA:
             return new CdmaCellLocation();
-        } else {
+        case Phone.PHONE_TYPE_GSM:
             return new GsmCellLocation();
+        default:
+            return null;
         }
     }
 }
