@@ -244,6 +244,7 @@ public final class ContactsContract {
          * This column is only returned if explicitly requested in the query
          * projection.
          * <p>Type: TEXT</p>
+         * @hide TODO unhide
          */
         public static final String PRESENCE_CUSTOM_STATUS_TIMESTAMP =
                 Presence.PRESENCE_CUSTOM_STATUS_TIMESTAMP;
@@ -253,6 +254,7 @@ public final class ContactsContract {
          * This column is only returned if explicitly requested in the query
          * projection.
          * <p>Type: NUMBER</p>
+         * @hide TODO unhide
          */
         public static final String PRESENCE_PROTOCOL = "presence_protocol";
 
@@ -261,6 +263,7 @@ public final class ContactsContract {
          * {@link CommonDataKinds.Im#CUSTOM_PROTOCOL}. This column is only
          * returned if explicitly requested in the query projection.
          * <p>Type: TEXT</p>
+         * @hide TODO unhide
          */
         public static final String PRESENCE_CUSTOM_PROTOCOL = "presence_custom_protocol";
 
@@ -969,6 +972,7 @@ public final class ContactsContract {
         /**
          * The time when the presence custom status was inserted/updated.
          * <p>Type: TEXT</p>
+         * @hide TODO unhide
          */
         public static final String PRESENCE_CUSTOM_STATUS_TIMESTAMP = "status_timestamp";
     }
