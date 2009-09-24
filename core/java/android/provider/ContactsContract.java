@@ -1655,13 +1655,6 @@ public final class ContactsContract {
              * <P>Type: TEXT</P>
              */
             public static final String BIRTHDAY = DATA1;
-
-            /**
-             * The nickname as the user entered it.
-             * <P>Type: TEXT</P>
-             *@hide
-             */
-            public static final String NICKNAME = DATA2;
         }
 
         /**
