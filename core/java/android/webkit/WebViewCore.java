@@ -30,6 +30,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.Process;
+import android.provider.Browser;
 import android.util.Log;
 import android.util.SparseBooleanArray;
 import android.view.KeyEvent;
@@ -308,6 +309,10 @@ final class WebViewCore {
                         nativeSetNewStorageLimit(quota);
                     }
                 });
+    }
+
+    protected String[] populateVisitedLinks() {
+	return Browser.getVisitedHistory(mContext.getContentResolver());
     }
 
     /**
