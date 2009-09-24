@@ -21,6 +21,7 @@ import android.content.ContentProviderClient;
 import android.content.ContentProviderOperation;
 import android.content.ContentResolver;
 import android.content.ContentUris;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
@@ -38,9 +39,7 @@ import java.io.InputStream;
 
 /**
  * The contract between the contacts provider and applications. Contains definitions
- * for the supported URIs and columns.
- *
- * @hide pending API council approval
+ * for the supported URIs and columns. These APIs supersede {@link Contacts}.
  */
 public final class ContactsContract {
     /** The authority for the contacts provider */
@@ -57,10 +56,19 @@ public final class ContactsContract {
      */
     public static final String CALLER_IS_SYNCADAPTER = "caller_is_syncadapter";
 
+    /**
+     * @hide should be removed when users are updated to refer to SyncState
+     * @deprecated use SyncState instead
+     */
     public interface SyncStateColumns extends SyncStateContract.Columns {
     }
 
-    public static final class SyncState {
+    /**
+     * A table provided for sync adapters to use for storing private sync state data.
+     *
+     * @see SyncStateContract
+     */
+    public static final class SyncState implements SyncStateContract.Columns {
         /**
          * This utility class cannot be instantiated
          */
@@ -130,7 +138,8 @@ public final class ContactsContract {
      */
     private interface SyncColumns extends BaseSyncColumns {
         /**
-         * The name of the account instance to which this row belongs.
+         * The name of the account instance to which this row belongs, which when paired with
+         * {@link #ACCOUNT_TYPE} identifies a specific account.
          * <P>Type: TEXT</P>
          */
         public static final String ACCOUNT_NAME = "account_name";
@@ -163,15 +172,15 @@ public final class ContactsContract {
         public static final String DIRTY = "dirty";
     }
 
-    public interface ContactOptionsColumns {
+    private interface ContactOptionsColumns {
         /**
-         * The number of times a person has been contacted
+         * The number of times a contact has been contacted
          * <P>Type: INTEGER</P>
          */
         public static final String TIMES_CONTACTED = "times_contacted";
 
         /**
-         * The last time a person was contacted.
+         * The last time a contact was contacted.
          * <P>Type: INTEGER</P>
          */
         public static final String LAST_TIME_CONTACTED = "last_time_contacted";
@@ -183,13 +192,13 @@ public final class ContactsContract {
         public static final String STARRED = "starred";
 
         /**
-         * A custom ringtone associated with a person. Not always present.
+         * A custom ringtone associated with a contact. Not always present.
          * <P>Type: TEXT (URI to the ringtone)</P>
          */
         public static final String CUSTOM_RINGTONE = "custom_ringtone";
 
         /**
-         * Whether the person should always be sent to voicemail. Not always
+         * Whether the contact should always be sent to voicemail. Not always
          * present.
          * <P>Type: INTEGER (0 for false, 1 for true)</P>
          */
@@ -246,7 +255,7 @@ public final class ContactsContract {
 
     /**
      * Constants for the contacts table, which contains a record per group
-     * of raw contact representing the same person.
+     * of raw contacts representing the same person.
      */
     public static class Contacts implements BaseColumns, ContactsColumns,
             ContactOptionsColumns {
@@ -342,6 +351,20 @@ public final class ContactsContract {
         }
 
         /**
+         * Mark a contact as having been contacted.
+         *
+         * @param resolver the ContentResolver to use
+         * @param contactId the person who was contacted
+         */
+        public static void markAsContacted(ContentResolver resolver, long contactId) {
+            Uri uri = ContentUris.withAppendedId(CONTENT_URI, contactId);
+            ContentValues values = new ContentValues();
+            // TIMES_CONTACTED will be incremented when LAST_TIME_CONTACTED is modified.
+            values.put(LAST_TIME_CONTACTED, System.currentTimeMillis());
+            resolver.update(uri, values, null, null);
+        }
+
+        /**
          * The content:// style URI used for "type-to-filter" functionality on the
          * {@link #CONTENT_URI} URI. The filter string will be used to match
          * various parts of the contact name. The filter argument should be passed
@@ -432,10 +455,11 @@ public final class ContactsContract {
         }
 
         /**
-         * Opens an InputStream for the person's default photo and returns the
-         * photo as a Bitmap stream.
+         * Opens an InputStream for the contacts's default photo and returns the
+         * photo as a byte stream. If there is not photo null will be returned.
          *
          * @param contactUri the contact whose photo should be used
+         * @return an InputStream of the photo, or null if no photo is present
          */
         public static InputStream openContactPhotoInputStream(ContentResolver cr, Uri contactUri) {
             Uri photoUri = Uri.withAppendedPath(contactUri, Photo.CONTENT_DIRECTORY);
@@ -470,7 +494,7 @@ public final class ContactsContract {
         public static final String CONTACT_ID = "contact_id";
 
         /**
-         * Flag indicating that this {@link RawContacts} entry and its children has
+         * Flag indicating that this {@link RawContacts} entry and its children have
          * been restricted to specific platform apps.
          * <P>Type: INTEGER (boolean)</P>
          *
@@ -498,7 +522,7 @@ public final class ContactsContract {
     }
 
     /**
-     * Constants for the raw_contacts table, which contains the base contact
+     * Constants for the raw contacts table, which contains the base contact
      * information per sync source. Sync adapters and contact management apps
      * are the primary consumers of this API.
      */
@@ -600,6 +624,8 @@ public final class ContactsContract {
          * The package name to use when creating {@link Resources} objects for
          * this data row. This value is only designed for use when building user
          * interfaces, and should not be used to infer the owner.
+         *
+         * @hide
          */
         public static final String RES_PACKAGE = "res_package";
 
@@ -790,12 +816,6 @@ public final class ContactsContract {
     private interface PresenceColumns {
 
         /**
-         * The unique ID for a row.
-         * <P>Type: INTEGER (long)</P>
-         */
-        public static final String _ID = "presence_id";
-
-        /**
          * Reference to the {@link Data#_ID} entry that owns this presence.
          * <P>Type: INTEGER</P>
          */
@@ -834,13 +854,18 @@ public final class ContactsContract {
         /**
          * This utility class cannot be instantiated
          */
-        private Presence() {
-        }
+        private Presence() {}
 
         /**
          * The content:// style URI for this table
          */
         public static final Uri CONTENT_URI = Uri.withAppendedPath(AUTHORITY_URI, "presence");
+
+        /**
+         * The unique ID for a presence row.
+         * <P>Type: INTEGER (long)</P>
+         */
+        public static final String _ID = "presence_id";
 
         /**
          * Gets the resource ID for the proper presence icon.
@@ -895,8 +920,15 @@ public final class ContactsContract {
      */
     public static final class CommonDataKinds {
         /**
+         * This utility class cannot be instantiated
+         */
+        private CommonDataKinds() {}
+
+        /**
          * The {@link Data#RES_PACKAGE} value for common data that should be
          * shown using a default style.
+         *
+         * @hide RES_PACKAGE is hidden
          */
         public static final String PACKAGE_COMMON = "common";
 
@@ -937,6 +969,9 @@ public final class ContactsContract {
          * Parts of the name.
          */
         public static final class StructuredName implements DataColumnsWithJoins {
+            /**
+             * This utility class cannot be instantiated
+             */
             private StructuredName() {}
 
             /** MIME type used when storing this in data table. */
@@ -1003,6 +1038,9 @@ public final class ContactsContract {
          * A nickname.
          */
         public static final class Nickname implements DataColumnsWithJoins, CommonColumns {
+            /**
+             * This utility class cannot be instantiated
+             */
             private Nickname() {}
 
             /** MIME type used when storing this in data table. */
@@ -1024,6 +1062,9 @@ public final class ContactsContract {
          * Common data definition for telephone numbers.
          */
         public static final class Phone implements DataColumnsWithJoins, CommonColumns {
+            /**
+             * This utility class cannot be instantiated
+             */
             private Phone() {}
 
             /** MIME type used when storing this in data table. */
@@ -1081,6 +1122,7 @@ public final class ContactsContract {
 
             /**
              * @deprecated use {@link #getTypeLabel(Resources, int, CharSequence)} instead.
+             * @hide
              */
             @Deprecated
             public static final CharSequence getDisplayLabel(Context context, int type,
@@ -1090,6 +1132,7 @@ public final class ContactsContract {
 
             /**
              * @deprecated use {@link #getTypeLabel(Resources, int, CharSequence)} instead.
+             * @hide
              */
             @Deprecated
             public static final CharSequence getDisplayLabel(Context context, int type,
@@ -1147,6 +1190,9 @@ public final class ContactsContract {
          * Common data definition for email addresses.
          */
         public static final class Email implements DataColumnsWithJoins, CommonColumns {
+            /**
+             * This utility class cannot be instantiated
+             */
             private Email() {}
 
             /** MIME type used when storing this in data table. */
@@ -1227,6 +1273,9 @@ public final class ContactsContract {
          * Common data definition for postal addresses.
          */
         public static final class StructuredPostal implements DataColumnsWithJoins, CommonColumns {
+            /**
+             * This utility class cannot be instantiated
+             */
             private StructuredPostal() {
             }
 
@@ -1349,6 +1398,9 @@ public final class ContactsContract {
          * Common data definition for IM addresses.
          */
         public static final class Im implements DataColumnsWithJoins, CommonColumns {
+            /**
+             * This utility class cannot be instantiated
+             */
             private Im() {}
 
             /** MIME type used when storing this in data table. */
@@ -1449,6 +1501,9 @@ public final class ContactsContract {
          * Common data definition for organizations.
          */
         public static final class Organization implements DataColumnsWithJoins, CommonColumns {
+            /**
+             * This utility class cannot be instantiated
+             */
             private Organization() {}
 
             /** MIME type used when storing this in data table. */
@@ -1525,6 +1580,9 @@ public final class ContactsContract {
          * Common data definition for miscellaneous information.
          */
         public static final class Miscellaneous implements DataColumnsWithJoins {
+            /**
+             * This utility class cannot be instantiated
+             */
             private Miscellaneous() {}
 
             /** MIME type used when storing this in data table. */
@@ -1539,6 +1597,7 @@ public final class ContactsContract {
             /**
              * The nickname as the user entered it.
              * <P>Type: TEXT</P>
+             *@hide
              */
             public static final String NICKNAME = DATA2;
         }
@@ -1547,6 +1606,9 @@ public final class ContactsContract {
          * Common data definition for relations.
          */
         public static final class Relation implements DataColumnsWithJoins, CommonColumns {
+            /**
+             * This utility class cannot be instantiated
+             */
             private Relation() {}
 
             /** MIME type used when storing this in data table. */
@@ -1578,6 +1640,9 @@ public final class ContactsContract {
          * Common data definition for events.
          */
         public static final class Event implements DataColumnsWithJoins, CommonColumns {
+            /**
+             * This utility class cannot be instantiated
+             */
             private Event() {}
 
             /** MIME type used when storing this in data table. */
@@ -1597,6 +1662,9 @@ public final class ContactsContract {
          * Photo of the contact.
          */
         public static final class Photo implements DataColumnsWithJoins {
+            /**
+             * This utility class cannot be instantiated
+             */
             private Photo() {}
 
             /** MIME type used when storing this in data table. */
@@ -1615,6 +1683,9 @@ public final class ContactsContract {
          * Notes about the contact.
          */
         public static final class Note implements DataColumnsWithJoins {
+            /**
+             * This utility class cannot be instantiated
+             */
             private Note() {}
 
             /** MIME type used when storing this in data table. */
@@ -1631,6 +1702,9 @@ public final class ContactsContract {
          * Group Membership.
          */
         public static final class GroupMembership implements DataColumnsWithJoins {
+            /**
+             * This utility class cannot be instantiated
+             */
             private GroupMembership() {}
 
             /** MIME type used when storing this in data table. */
@@ -1656,6 +1730,9 @@ public final class ContactsContract {
          * Website related to the contact.
          */
         public static final class Website implements DataColumnsWithJoins, CommonColumns {
+            /**
+             * This utility class cannot be instantiated
+             */
             private Website() {}
 
             /** MIME type used when storing this in data table. */
@@ -1677,8 +1754,7 @@ public final class ContactsContract {
         }
     }
 
-    // TODO: make this private before unhiding
-    public interface GroupsColumns {
+    private interface GroupsColumns {
         /**
          * The display title of this group.
          * <p>
@@ -1690,6 +1766,8 @@ public final class ContactsContract {
          * The package name to use when creating {@link Resources} objects for
          * this group. This value is only designed for use when building user
          * interfaces, and should not be used to infer the owner.
+         *
+         * @hide
          */
         public static final String RES_PACKAGE = "res_package";
 
@@ -1697,6 +1775,8 @@ public final class ContactsContract {
          * The display title of this group to load as a resource from
          * {@link #RES_PACKAGE}, which may be localized.
          * <P>Type: TEXT</P>
+         *
+         * @hide
          */
         public static final String TITLE_RES = "title_res";
 
@@ -1946,6 +2026,8 @@ public final class ContactsContract {
     /**
      * Helper methods to display FastTrack dialogs that allow users to pivot on
      * a specific {@link Contacts} entry.
+     *
+     * @hide
      */
     public static final class FastTrack {
         /**
@@ -2149,6 +2231,8 @@ public final class ContactsContract {
          * Optional extra used with {@link #SHOW_OR_CREATE_CONTACT} to specify a
          * dialog location using screen coordinates. When not specified, the
          * dialog will be centered.
+         *
+         * @hide
          */
         @Deprecated
         public static final String EXTRA_TARGET_RECT = "target_rect";
@@ -2157,24 +2241,32 @@ public final class ContactsContract {
          * Optional extra used with {@link #SHOW_OR_CREATE_CONTACT} to specify a
          * desired dialog style, usually a variation on size. One of
          * {@link #MODE_SMALL}, {@link #MODE_MEDIUM}, or {@link #MODE_LARGE}.
+         *
+         * @hide
          */
         @Deprecated
         public static final String EXTRA_MODE = "mode";
 
         /**
          * Value for {@link #EXTRA_MODE} to show a small-sized dialog.
+         *
+         * @hide
          */
         @Deprecated
         public static final int MODE_SMALL = 1;
 
         /**
          * Value for {@link #EXTRA_MODE} to show a medium-sized dialog.
+         *
+         * @hide
          */
         @Deprecated
         public static final int MODE_MEDIUM = 2;
 
         /**
          * Value for {@link #EXTRA_MODE} to show a large-sized dialog.
+         *
+         * @hide
          */
         @Deprecated
         public static final int MODE_LARGE = 3;
@@ -2183,12 +2275,16 @@ public final class ContactsContract {
          * Optional extra used with {@link #SHOW_OR_CREATE_CONTACT} to indicate
          * a list of specific MIME-types to exclude and not display. Stored as a
          * {@link String} array.
+         *
+         * @hide
          */
         @Deprecated
         public static final String EXTRA_EXCLUDE_MIMES = "exclude_mimes";
 
         /**
          * Intents related to the Contacts app UI.
+         *
+         * @hide
          */
         public static final class UI {
             /**
@@ -2245,7 +2341,7 @@ public final class ContactsContract {
              * title to a custom String value.
              */
             public static final String TITLE_EXTRA_KEY =
-                "com.android.contacts.extra.TITLE_EXTRA";
+                    "com.android.contacts.extra.TITLE_EXTRA";
 
             /**
              * Activity Action: Display a filtered list of contacts
@@ -2256,14 +2352,14 @@ public final class ContactsContract {
              * Output: Nothing.
              */
             public static final String FILTER_CONTACTS_ACTION =
-                "com.android.contacts.action.FILTER_CONTACTS";
+                    "com.android.contacts.action.FILTER_CONTACTS";
 
             /**
              * Used as an int extra field in {@link #FILTER_CONTACTS_ACTION}
              * intents to supply the text on which to filter.
              */
             public static final String FILTER_TEXT_EXTRA_KEY =
-                "com.android.contacts.extra.FILTER_TEXT";
+                    "com.android.contacts.extra.FILTER_TEXT";
         }
 
         /**
