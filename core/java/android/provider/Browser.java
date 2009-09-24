@@ -280,23 +280,23 @@ public class Browser {
      *  @hide pending API council approval
      */
     public static final String[] getVisitedHistory(ContentResolver cr) {
-	try {
-	    String[] projection = new String[] { "url" };
-	    Cursor c = cr.query(BOOKMARKS_URI,
-				projection,
-				"visits > 0",
-				null, null);
-	    String[] str = new String[c.getCount()];
-	    int i = 0;
-	    while (c.moveToNext()) {
-		str[i] = c.getString(0);
-		i++;
-	    }
-	    c.deactivate();
-	    return str;
-	} catch (IllegalStateException e) {
-	    return new String[0];
-	}
+        try {
+            String[] projection = new String[] {
+                "url"
+            };
+            Cursor c = cr.query(BOOKMARKS_URI, projection, "visits > 0", null,
+                    null);
+            String[] str = new String[c.getCount()];
+            int i = 0;
+            while (c.moveToNext()) {
+                str[i] = c.getString(0);
+                i++;
+            }
+            c.deactivate();
+            return str;
+        } catch (IllegalStateException e) {
+            return new String[0];
+        }
     }
 
     /**
