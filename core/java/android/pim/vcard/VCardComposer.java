@@ -1,12 +1,12 @@
 /*
  * Copyright (C) 2009 The Android Open Source Project
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -38,6 +38,10 @@ import android.provider.ContactsContract.CommonDataKinds.Photo;
 import android.provider.ContactsContract.CommonDataKinds.StructuredName;
 import android.provider.ContactsContract.CommonDataKinds.StructuredPostal;
 import android.provider.ContactsContract.CommonDataKinds.Website;
+import android.provider.CallLog.Calls;
+import android.provider.CallLog;
+import android.text.format.DateUtils;
+import android.text.format.Time;
 import android.text.TextUtils;
 import android.util.CharsetUtils;
 import android.util.Log;
@@ -61,11 +65,11 @@ import java.util.Map;
  * completely differnt implementation from
  * android.syncml.pim.vcard.VCardComposer, which is not maintained anymore.
  * </p>
- * 
+ *
  * <p>
  * Usually, this class should be used like this.
  * </p>
- * 
+ *
  * <pre class="prettyprint"> VCardComposer composer = null; try { composer = new
  * VCardComposer(context); composer.addHandler(composer.new
  * HandlerForOutputStream(outputStream)); if (!composer.init()) { // Do
@@ -213,6 +217,9 @@ public class VCardComposer {
     private static final String VCARD_PROPERTY_X_NICKNAME = "X-NICKNAME";
     // TODO: add properties like X-LATITUDE
 
+    // Property for call log entry
+    private static final String VCARD_PROPERTY_X_TIMESTAMP = "X-IRMC-CALL-DATETIME";
+
     // Properties for DoCoMo vCard.
     private static final String VCARD_PROPERTY_X_CLASS = "X-CLASS";
     private static final String VCARD_PROPERTY_X_REDUCTION = "X-REDUCTION";
@@ -227,6 +234,7 @@ public class VCardComposer {
     private static final String VCARD_DATA_SEPARATOR = ":";
     private static final String VCARD_ITEM_SEPARATOR = ";";
     private static final String VCARD_WS = " ";
+    private static final String VCARD_ATTR_EQUAL = "=";
 
     // Type strings are now in VCardConstants.java.
 
@@ -238,20 +246,20 @@ public class VCardComposer {
     private static final String SHIFT_JIS = "SHIFT_JIS";
 
     private final Context mContext;
-    private final int mVCardType;
-    private final boolean mCareHandlerErrors;
-    private final ContentResolver mContentResolver;
+    private int mVCardType;
+    private boolean mCareHandlerErrors;
+    private ContentResolver mContentResolver;
 
     // Convenient member variables about the restriction of the vCard format.
     // Used for not calling the same methods returning same results.
-    private final boolean mIsV30;
-    private final boolean mIsJapaneseMobilePhone;
-    private final boolean mOnlyOneNoteFieldIsAvailable;
-    private final boolean mIsDoCoMo;
-    private final boolean mUsesQuotedPrintable;
-    private final boolean mUsesAndroidProperty;
-    private final boolean mUsesDefactProperty;
-    private final boolean mUsesShiftJis;
+    private boolean mIsV30;
+    private boolean mIsJapaneseMobilePhone;
+    private boolean mOnlyOneNoteFieldIsAvailable;
+    private boolean mIsDoCoMo;
+    private boolean mUsesQuotedPrintable;
+    private boolean mUsesAndroidProperty;
+    private boolean mUsesDefactProperty;
+    private boolean mUsesShiftJis;
 
     private Cursor mCursor;
     private int mIdColumn;
@@ -264,7 +272,7 @@ public class VCardComposer {
     private String mErrorReason = "No error";
 
     private static final Map<Integer, String> sImMap;
-    
+
     static {
         sImMap = new HashMap<Integer, String>();
         sImMap.put(Im.PROTOCOL_AIM, Constants.PROPERTY_X_AIM);
@@ -275,8 +283,27 @@ public class VCardComposer {
         sImMap.put(Im.PROTOCOL_SKYPE, Constants.PROPERTY_X_SKYPE_USERNAME);
         // Google talk is a special case.
     }
-    
-    
+
+    private boolean mIsCallLogComposer = false;
+
+    private static final String[] CONTACTS_PROJECTION = new String[] {
+        Contacts._ID,
+    };
+
+    /** The projection to use when querying the call log table */
+    private static final String[] CALL_LOG_PROJECTION = new String[] {
+            Calls.NUMBER, Calls.DATE, Calls.TYPE, Calls.CACHED_NAME, Calls.CACHED_NUMBER_TYPE,
+            Calls.CACHED_NUMBER_LABEL
+    };
+    private static final int NUMBER_COLUMN_INDEX = 0;
+    private static final int DATE_COLUMN_INDEX = 1;
+    private static final int CALL_TYPE_COLUMN_INDEX = 2;
+    private static final int CALLER_NAME_COLUMN_INDEX = 3;
+    private static final int CALLER_NUMBERTYPE_COLUMN_INDEX = 4;
+    private static final int CALLER_NUMBERLABEL_COLUMN_INDEX = 5;
+
+    private static final String FLAG_TIMEZONE_UTC = "Z";
+
     public VCardComposer(Context context) {
         this(context, VCardConfig.VCARD_TYPE_DEFAULT, true);
     }
@@ -287,10 +314,15 @@ public class VCardComposer {
                 careHandlerErrors);
     }
 
-    public VCardComposer(Context context, int vcardType, boolean careHandlerErrors) {
+    /**
+     * Construct for supporting call log entry vCard composing
+     */
+    public VCardComposer(Context context, int vcardType, boolean careHandlerErrors,
+            boolean isCallLogComposer) {
         mContext = context;
         mVCardType = vcardType;
         mCareHandlerErrors = careHandlerErrors;
+        mIsCallLogComposer = isCallLogComposer;
         mContentResolver = context.getContentResolver();
 
         mIsV30 = VCardConfig.isV30(vcardType);
@@ -318,6 +350,38 @@ public class VCardComposer {
             mCharsetString = "UTF-8";
             mVCardAttributeCharset = "CHARSET=UTF-8";
         }
+    }
+
+    public VCardComposer(Context context, int vcardType, boolean careHandlerErrors) {
+        this(context, vcardType, careHandlerErrors, false);
+    }
+
+    /**
+     * This static function is to compose vCard for phone own number
+     */
+    public String composeVCardForPhoneOwnNumber(int phonetype, String phoneName,
+            String phoneNumber, boolean vcardVer21) {
+        final StringBuilder builder = new StringBuilder();
+        appendVCardLine(builder, VCARD_PROPERTY_BEGIN, VCARD_DATA_VCARD);
+        if (!vcardVer21) {
+            appendVCardLine(builder, VCARD_PROPERTY_VERSION, Constants.VERSION_V30);
+        } else {
+            appendVCardLine(builder, VCARD_PROPERTY_VERSION, Constants.VERSION_V21);
+        }
+
+        boolean needCharset = false;
+        if (!(VCardUtils.containsOnlyAscii(phoneName))) {
+            needCharset = true;
+        }
+        appendVCardLine(builder, VCARD_PROPERTY_FULL_NAME, phoneName, needCharset, false);
+        appendVCardLine(builder, VCARD_PROPERTY_NAME, phoneName, needCharset, false);
+
+        String label = Integer.toString(phonetype);
+        appendVCardTelephoneLine(builder, phonetype, label, phoneNumber);
+
+        appendVCardLine(builder, VCARD_PROPERTY_END, VCARD_DATA_VCARD);
+
+        return builder.toString();
     }
 
     /**
@@ -357,11 +421,15 @@ public class VCardComposer {
             }
         }
 
-        final String[] projection = new String[] {Contacts._ID,};
+        if (mIsCallLogComposer) {
+            mCursor = mContentResolver.query(CallLog.Calls.CONTENT_URI, CALL_LOG_PROJECTION,
+                    selection, selectionArgs, null);
+        } else {
+            // TODO: thorow an appropriate exception!
+            mCursor = mContentResolver.query(RawContacts.CONTENT_URI, CONTACTS_PROJECTION,
+                    selection, selectionArgs, null);
+        }
 
-        // TODO: thorow an appropriate exception!
-        mCursor = mContentResolver.query(RawContacts.CONTENT_URI, projection,
-                selection, selectionArgs, null);
         if (mCursor == null || !mCursor.moveToFirst()) {
             if (mCursor != null) {
                 try {
@@ -376,7 +444,11 @@ public class VCardComposer {
             return false;
         }
 
-        mIdColumn = mCursor.getColumnIndex(Contacts._ID);
+        if (mIsCallLogComposer) {
+            mIdColumn = -1;
+        } else {
+            mIdColumn = mCursor.getColumnIndex(Contacts._ID);
+        }
 
         return true;
     }
@@ -390,7 +462,16 @@ public class VCardComposer {
         String name = null;
         String vcard;
         try {
-            vcard = createOneEntryInternal(mCursor.getString(mIdColumn));
+            if (mIsCallLogComposer) {
+                vcard = createOneCallLogEntryInternal();
+            } else {
+                if (mIdColumn >= 0) {
+                    vcard = createOneEntryInternal(mCursor.getString(mIdColumn));
+                } else {
+                    Log.e(LOG_TAG, "Incorrect mIdColumn: " + mIdColumn);
+                    return true;
+                }
+            }
         } catch (OutOfMemoryError error) {
             // Maybe some data (e.g. photo) is too big to have in memory. But it
             // should be rare.
@@ -420,6 +501,89 @@ public class VCardComposer {
         }
 
         return true;
+    }
+
+    /**
+     * Format according to RFC 2445 DATETIME type.
+     * The format is: ("%Y%m%dT%H%M%S").
+     */
+    private final String formatDate(final long millSecs) {
+        Time startDate = new Time();
+        startDate.set(millSecs);
+        String date = startDate.format2445();
+        return date + FLAG_TIMEZONE_UTC;
+    }
+
+    /**
+     * Create call history time stamp field.
+     *
+     * @param type call type
+     */
+    private String createCallHistoryTimeStampField(int type) {
+        // Extension for call history as defined in
+        // in the Specification for Ic Mobile Communcation - ver 1.1,
+        // Oct 2000. This is used to send the details of the call
+        // history - missed, incoming, outgoing along with date and time
+        // to the requesting device (For example, transferring phone book
+        // when connected over bluetooth)
+        // X-IRMC-CALL-DATETIME;MISSED:20050320T100000
+        final StringBuilder builder = new StringBuilder();
+        builder.append(VCARD_PROPERTY_X_TIMESTAMP);
+        builder.append(VCARD_ATTR_SEPARATOR);
+
+        if (mIsV30) {
+            builder.append(Constants.ATTR_TYPE).append(VCARD_ATTR_EQUAL);
+        }
+
+        if (type == Calls.INCOMING_TYPE) {
+            builder.append("INCOMING");
+        } else if (type == Calls.OUTGOING_TYPE) {
+            builder.append("OUTGOING");
+        } else if (type == Calls.MISSED_TYPE) {
+            builder.append("MISSED");
+        } else {
+            Log.w(LOG_TAG, "Call log type not correct.");
+            return null;
+        }
+
+        return builder.toString();
+    }
+
+    private String createOneCallLogEntryInternal() {
+        final StringBuilder builder = new StringBuilder();
+        appendVCardLine(builder, VCARD_PROPERTY_BEGIN, VCARD_DATA_VCARD);
+        if (mIsV30) {
+            appendVCardLine(builder, VCARD_PROPERTY_VERSION, Constants.VERSION_V30);
+        } else {
+            appendVCardLine(builder, VCARD_PROPERTY_VERSION, Constants.VERSION_V21);
+        }
+        String name = mCursor.getString(CALLER_NAME_COLUMN_INDEX);
+        if (TextUtils.isEmpty(name)) {
+            name = mCursor.getString(NUMBER_COLUMN_INDEX);
+        }
+        boolean needCharset = !(VCardUtils.containsOnlyAscii(name));
+        appendVCardLine(builder, VCARD_PROPERTY_FULL_NAME, name, needCharset, false);
+        appendVCardLine(builder, VCARD_PROPERTY_NAME, name, needCharset, false);
+
+        String number = mCursor.getString(NUMBER_COLUMN_INDEX);
+        int type = mCursor.getInt(CALLER_NUMBERTYPE_COLUMN_INDEX);
+        String label = mCursor.getString(CALLER_NUMBERLABEL_COLUMN_INDEX);
+        if (TextUtils.isEmpty(label)) {
+            label = Integer.toString(type);
+        }
+        appendVCardTelephoneLine(builder, type, label, number);
+
+        long date = mCursor.getLong(DATE_COLUMN_INDEX);
+        String dateClause = formatDate(date);
+        int callLogType = mCursor.getInt(CALL_TYPE_COLUMN_INDEX);
+        String timestampFeldString = createCallHistoryTimeStampField(callLogType);
+        if (timestampFeldString != null) {
+            appendVCardLine(builder, timestampFeldString, dateClause);
+        }
+
+        appendVCardLine(builder, VCARD_PROPERTY_END, VCARD_DATA_VCARD);
+
+        return builder.toString();
     }
 
     private String createOneEntryInternal(final String contactId) {
@@ -576,7 +740,7 @@ public class VCardComposer {
                 final String encodedPrefix = escapeCharacters(prefix);
                 final String encodedSuffix = escapeCharacters(suffix);
 
-                // N property. This order is specified by vCard spec and does not depend on countries. 
+                // N property. This order is specified by vCard spec and does not depend on countries.
                 builder.append(VCARD_PROPERTY_NAME);
                 if (!(VCardUtils.containsOnlyAscii(familyName) &&
                         VCardUtils.containsOnlyAscii(givenName) &&
@@ -584,7 +748,7 @@ public class VCardComposer {
                         VCardUtils.containsOnlyAscii(prefix) &&
                         VCardUtils.containsOnlyAscii(suffix))) {
                     builder.append(VCARD_ATTR_SEPARATOR);
-                    builder.append(mVCardAttributeCharset);   
+                    builder.append(mVCardAttributeCharset);
                 }
 
                 builder.append(VCARD_DATA_SEPARATOR);
@@ -658,7 +822,7 @@ public class VCardComposer {
                         // but we'll add this info since parser side may be able to
                         // use the charset via
                         // this attribute field.
-                        // 
+                        //
                         // e.g. Japanese mobile phones use Shift_Jis while RFC 2426
                         // recommends
                         // UTF-8. By adding this field, parsers may be able to know
@@ -684,12 +848,12 @@ public class VCardComposer {
                     builder.append(VCARD_ATTR_SEPARATOR);
                     builder.append(Constants.ATTR_TYPE_X_IRMC_N);
                     builder.append(VCARD_ATTR_SEPARATOR);
-                    
+
                     if (!(VCardUtils.containsOnlyAscii(phoneticFamilyName) &&
                             VCardUtils.containsOnlyAscii(phoneticMiddleName) &&
                             VCardUtils.containsOnlyAscii(phoneticGivenName))) {
                         builder.append(mVCardAttributeCharset);
-                        builder.append(VCARD_DATA_SEPARATOR);                        
+                        builder.append(VCARD_DATA_SEPARATOR);
                     }
 
                     builder.append(escapeCharacters(phoneticFamilyName));
@@ -841,7 +1005,7 @@ public class VCardComposer {
             builder.append(VCARD_COL_SEPARATOR);
         }
     }
-    
+
     /**
      * Try to append just one line. If there's no appropriate address
      * information, append an empty line.
@@ -907,10 +1071,10 @@ public class VCardComposer {
                     }
                     // TODO: add "X-GOOGLE TALK" case...
                 }
-            }            
+            }
         }
     }
-    
+
     private void appendWebsites(final StringBuilder builder,
             final Map<String, List<ContentValues>> contentValuesListMap) {
         List<ContentValues> contentValuesList = contentValuesListMap
@@ -922,7 +1086,7 @@ public class VCardComposer {
             }
         }
     }
-    
+
     private void appendBirthday(final StringBuilder builder,
             final Map<String, List<ContentValues>> contentValuesListMap) {
         List<ContentValues> contentValuesList = contentValuesListMap
@@ -1029,7 +1193,7 @@ public class VCardComposer {
     /**
      * Append '\' to the characters which should be escaped. The character set is different
      * not only between vCard 2.1 and vCard 3.0 but also among each device.
-     * 
+     *
      * Note that Quoted-Printable string must not be input here.
      */
     @SuppressWarnings("fallthrough")
@@ -1037,7 +1201,7 @@ public class VCardComposer {
         if (TextUtils.isEmpty(unescaped)) {
             return "";
         }
-        
+
         StringBuilder builder = new StringBuilder();
         final int length = unescaped.length();
         for (int i = 0; i < length; i++) {
@@ -1358,7 +1522,7 @@ public class VCardComposer {
             encodedData = encodeQuotedPrintable(rawData);
         } else {
             // TODO: one line may be too huge, which may be invalid in vCard spec, though
-            //       several (even well-known) applications do not care this. 
+            //       several (even well-known) applications do not care this.
             encodedData = escapeCharacters(rawData);
         }
 
