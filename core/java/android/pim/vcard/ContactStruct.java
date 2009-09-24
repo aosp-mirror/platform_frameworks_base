@@ -1026,8 +1026,7 @@ public class ContactStruct {
         }
     }
     
-    // From HardCodedSources.java in Contacts app.
-    // TODO: fix this.
+    // From GoogleSource.java in Contacts app.
     private static final String ACCOUNT_TYPE_GOOGLE = "com.google.GAIA";
     private static final String GOOGLE_MY_CONTACTS_GROUP = "System Group: My Contacts";
 
@@ -1041,7 +1040,8 @@ public class ContactStruct {
             builder.withValue(RawContacts.ACCOUNT_NAME, mAccount.name);
             builder.withValue(RawContacts.ACCOUNT_TYPE, mAccount.type);
 
-            // TODO: temporal fix for "My Groups" issue. Need to be refactored.
+            // Assume that caller side creates this group if it does not exist.
+            // TODO: refactor this code along with the change in GoogleSource.java
             if (ACCOUNT_TYPE_GOOGLE.equals(mAccount.type)) {
                 final Cursor cursor = resolver.query(Groups.CONTENT_URI, new String[] {
                         Groups.SOURCE_ID },
@@ -1058,7 +1058,8 @@ public class ContactStruct {
                 }
             }
         } else {
-            builder.withValues(new ContentValues());
+            builder.withValue(RawContacts.ACCOUNT_NAME, null);
+            builder.withValue(RawContacts.ACCOUNT_TYPE, null);
         }
         operationList.add(builder.build());
 
