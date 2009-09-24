@@ -219,6 +219,9 @@ public class VCardComposer {
 
     // Property for call log entry
     private static final String VCARD_PROPERTY_X_TIMESTAMP = "X-IRMC-CALL-DATETIME";
+    private static final String VCARD_PROPERTY_CALLTYPE_INCOMING = "INCOMING";
+    private static final String VCARD_PROPERTY_CALLTYPE_OUTGOING = "OUTGOING";
+    private static final String VCARD_PROPERTY_CALLTYPE_MISSED = "MISSED";
 
     // Properties for DoCoMo vCard.
     private static final String VCARD_PROPERTY_X_CLASS = "X-CLASS";
@@ -505,9 +508,9 @@ public class VCardComposer {
 
     /**
      * Format according to RFC 2445 DATETIME type.
-     * The format is: ("%Y%m%dT%H%M%S").
+     * The format is: ("%Y%m%dT%H%M%SZ").
      */
-    private final String formatDate(final long millSecs) {
+    private final String toRfc2455Format(final long millSecs) {
         Time startDate = new Time();
         startDate.set(millSecs);
         String date = startDate.format2445();
@@ -515,38 +518,46 @@ public class VCardComposer {
     }
 
     /**
-     * Create call history time stamp field.
-     *
-     * @param type call type
+     * Try to append the property line for a call history time stamp field if possible.
+     * Do nothing if the call log type gotton from the database is invalid.
      */
-    private String createCallHistoryTimeStampField(int type) {
+    private void tryAppendCallHistoryTimeStampField(final StringBuilder builder) {
         // Extension for call history as defined in
         // in the Specification for Ic Mobile Communcation - ver 1.1,
         // Oct 2000. This is used to send the details of the call
         // history - missed, incoming, outgoing along with date and time
         // to the requesting device (For example, transferring phone book
         // when connected over bluetooth)
-        // X-IRMC-CALL-DATETIME;MISSED:20050320T100000
-        final StringBuilder builder = new StringBuilder();
+        //
+        // e.g. "X-IRMC-CALL-DATETIME;MISSED:20050320T100000Z"
+        final int callLogType = mCursor.getInt(CALL_TYPE_COLUMN_INDEX);
+        final String callLogTypeStr;
+        switch (callLogType) {
+            case Calls.INCOMING_TYPE: {
+                callLogTypeStr = VCARD_PROPERTY_CALLTYPE_INCOMING;
+                break;
+            }
+            case Calls.OUTGOING_TYPE: {
+                callLogTypeStr = VCARD_PROPERTY_CALLTYPE_OUTGOING;
+                break;
+            }
+            case Calls.MISSED_TYPE: {
+                callLogTypeStr = VCARD_PROPERTY_CALLTYPE_MISSED;
+                break;
+            }
+            default: {
+                Log.w(LOG_TAG, "Call log type not correct.");
+                return;
+            }
+        }
+
+        final long dateAsLong = mCursor.getLong(DATE_COLUMN_INDEX);
         builder.append(VCARD_PROPERTY_X_TIMESTAMP);
         builder.append(VCARD_ATTR_SEPARATOR);
-
-        if (mIsV30) {
-            builder.append(Constants.ATTR_TYPE).append(VCARD_ATTR_EQUAL);
-        }
-
-        if (type == Calls.INCOMING_TYPE) {
-            builder.append("INCOMING");
-        } else if (type == Calls.OUTGOING_TYPE) {
-            builder.append("OUTGOING");
-        } else if (type == Calls.MISSED_TYPE) {
-            builder.append("MISSED");
-        } else {
-            Log.w(LOG_TAG, "Call log type not correct.");
-            return null;
-        }
-
-        return builder.toString();
+        appendType(builder, callLogTypeStr);
+        builder.append(VCARD_DATA_SEPARATOR);
+        builder.append(toRfc2455Format(dateAsLong));
+        builder.append(VCARD_COL_SEPARATOR);
     }
 
     private String createOneCallLogEntryInternal() {
@@ -561,7 +572,7 @@ public class VCardComposer {
         if (TextUtils.isEmpty(name)) {
             name = mCursor.getString(NUMBER_COLUMN_INDEX);
         }
-        boolean needCharset = !(VCardUtils.containsOnlyAscii(name));
+        final boolean needCharset = !(VCardUtils.containsOnlyAscii(name));
         appendVCardLine(builder, VCARD_PROPERTY_FULL_NAME, name, needCharset, false);
         appendVCardLine(builder, VCARD_PROPERTY_NAME, name, needCharset, false);
 
@@ -572,17 +583,8 @@ public class VCardComposer {
             label = Integer.toString(type);
         }
         appendVCardTelephoneLine(builder, type, label, number);
-
-        long date = mCursor.getLong(DATE_COLUMN_INDEX);
-        String dateClause = formatDate(date);
-        int callLogType = mCursor.getInt(CALL_TYPE_COLUMN_INDEX);
-        String timestampFeldString = createCallHistoryTimeStampField(callLogType);
-        if (timestampFeldString != null) {
-            appendVCardLine(builder, timestampFeldString, dateClause);
-        }
-
+        tryAppendCallHistoryTimeStampField(builder);
         appendVCardLine(builder, VCARD_PROPERTY_END, VCARD_DATA_VCARD);
-
         return builder.toString();
     }
 
@@ -1266,8 +1268,7 @@ public class VCardComposer {
             tmpBuilder.append(VCARD_ATTR_ENCODING_BASE64_V21);
         }
         tmpBuilder.append(VCARD_ATTR_SEPARATOR);
-        tmpBuilder.append("TYPE=");
-        tmpBuilder.append(type);
+        appendType(tmpBuilder, type);
         tmpBuilder.append(VCARD_DATA_SEPARATOR);
         tmpBuilder.append(encodedData);
 
@@ -1544,12 +1545,16 @@ public class VCardComposer {
             } else {
                 builder.append(VCARD_ATTR_SEPARATOR);
             }
-            if (mIsV30) {
-                builder.append(Constants.ATTR_TYPE);
-                builder.append('=');
-            }
-            builder.append(type);
+            appendType(builder, type);
         }
+    }
+
+    private void appendType(final StringBuilder builder, final String type) {
+        // Note: In vCard 3.0, Type strings also can be like this: "TYPE=HOME,PREF"
+        if (mIsV30) {
+            builder.append(Constants.ATTR_TYPE).append(VCARD_ATTR_EQUAL);
+        }
+        builder.append(type);
     }
 
     private String encodeQuotedPrintable(String str) {
