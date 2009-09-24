@@ -393,14 +393,6 @@ void LayerBase::drawWithOpenGL(const Region& clip, const Texture& texture) const
     
     glEnable(GL_TEXTURE_2D);
 
-    // Dithering...
-    bool fast = !(mFlags & DisplayHardware::SLOW_CONFIG);
-    if (fast || s.flags & ISurfaceComposer::eLayerDither) {
-        glEnable(GL_DITHER);
-    } else {
-        glDisable(GL_DITHER);
-    }
-
     if (UNLIKELY(s.alpha < 0xFF)) {
         // We have an alpha-modulation. We need to modulate all
         // texture components by alpha because we're always using 
@@ -515,6 +507,12 @@ void LayerBase::validateTexture(GLint textureName) const
     } else {
         glTexParameterx(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         glTexParameterx(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    }
+
+    if (needsDithering()) {
+        glEnable(GL_DITHER);
+    } else {
+        glDisable(GL_DITHER);
     }
 }
 

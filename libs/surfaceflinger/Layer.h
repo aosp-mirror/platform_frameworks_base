@@ -68,6 +68,7 @@ public:
     virtual void unlockPageFlip(const Transform& planeTransform, Region& outDirtyRegion);
     virtual void finishPageFlip();
     virtual bool needsBlending() const      { return mNeedsBlending; }
+    virtual bool needsDithering() const     { return mNeedsDithering; }
     virtual bool isSecure() const           { return mSecure; }
     virtual sp<Surface> createSurface() const;
     virtual status_t ditch();
@@ -109,6 +110,7 @@ private:
             bool            mSecure;
             int32_t         mFrontBufferIndex;
             bool            mNeedsBlending;
+            bool            mNeedsDithering;
             Region          mPostedDirtyRegion;
             sp<FreezeLock>  mFreezeLock;
             PixelFormat     mFormat;

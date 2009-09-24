@@ -188,6 +188,11 @@ public:
     virtual bool needsBlending() const  { return false; }
 
     /**
+     * needsDithering - true if this surface needs dithering
+     */
+    virtual bool needsDithering() const { return false; }
+
+    /**
      * transformed -- true is this surface needs a to be transformed
      */
     virtual bool transformed() const    { return mTransformed; }
