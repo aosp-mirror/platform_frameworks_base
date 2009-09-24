@@ -21,6 +21,7 @@
 #include <math.h>
 #include <fcntl.h>
 #include <utils/misc.h>
+#include <signal.h>
 
 #include <binder/IPCThreadState.h>
 #include <utils/threads.h>
