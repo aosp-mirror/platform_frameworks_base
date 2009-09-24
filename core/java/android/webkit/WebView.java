@@ -937,11 +937,15 @@ public class WebView extends AbsoluteLayout
      * Note: this can be called from WebCoreThread.
      */
     /* package */ int getViewHeight() {
+        return getViewHeightWithTitle() - getVisibleTitleHeight();
+    }
+
+    private int getViewHeightWithTitle() {
         int height = getHeight();
         if (isHorizontalScrollBarEnabled() && !mOverlayHorizontalScrollbar) {
             height -= getHorizontalScrollbarHeight();
         }
-        return height - getVisibleTitleHeight();
+        return height;
     }
 
     /**
@@ -2023,10 +2027,9 @@ public class WebView extends AbsoluteLayout
         // the visible height back in to account for the fact that if the title
         // bar is partially visible, the part of the visible rect which is
         // displaying our content is displaced by that amount.
-        int titleHeight = getVisibleTitleHeight();
-        r.top = viewToContentY(r.top + titleHeight);
+        r.top = viewToContentY(r.top + getVisibleTitleHeight());
         r.right = viewToContentX(r.right);
-        r.bottom = viewToContentY(r.bottom + titleHeight);
+        r.bottom = viewToContentY(r.bottom);
     }
 
     static class ViewSizeData {
@@ -3659,8 +3662,8 @@ public class WebView extends AbsoluteLayout
         if (x > getViewWidth() - 1) {
             x = getViewWidth() - 1;
         }
-        if (y > getViewHeight() - 1) {
-            y = getViewHeight() - 1;
+        if (y > getViewHeightWithTitle() - 1) {
+            y = getViewHeightWithTitle() - 1;
         }
 
         // pass the touch events from UI thread to WebCore thread
@@ -4705,7 +4708,7 @@ public class WebView extends AbsoluteLayout
         rect.offset(child.getLeft() - child.getScrollX(),
                 child.getTop() - child.getScrollY());
 
-        int height = getHeight() - getHorizontalScrollbarHeight();
+        int height = getViewHeightWithTitle();
         int screenTop = mScrollY;
         int screenBottom = screenTop + height;
 
