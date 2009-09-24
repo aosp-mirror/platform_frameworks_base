@@ -314,7 +314,6 @@ private:
     volatile    int32_t                 mTransactionCount;
                 Condition               mTransactionCV;
                 bool                    mResizeTransationPending;
-                SortedVector< sp<LayerBase> > mLayerPurgatory;
                 
                 // protected by mStateLock (but we could use another lock)
                 Tokenizer                               mTokens;
