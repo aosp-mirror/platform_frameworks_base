@@ -46,6 +46,15 @@ ScriptC::~ScriptC()
     }
 }
 
+void ScriptC::setupScript()
+{
+    for (int ct=0; ct < MAX_SCRIPT_BANKS; ct++) {
+        if (mProgram.mSlotPointers[ct]) {
+            *mProgram.mSlotPointers[ct] = mSlots[ct]->getPtr();
+        }
+    }
+}
+
 
 bool ScriptC::run(Context *rsc, uint32_t launchIndex)
 {
@@ -66,12 +75,7 @@ bool ScriptC::run(Context *rsc, uint32_t launchIndex)
         mEnviroment.mStartTimeMillis
                 = nanoseconds_to_milliseconds(systemTime(SYSTEM_TIME_MONOTONIC));
     }
-
-    for (int ct=0; ct < MAX_SCRIPT_BANKS; ct++) {
-        if (mProgram.mSlotPointers[ct]) {
-            *mProgram.mSlotPointers[ct] = mSlots[ct]->getPtr();
-        }
-    }
+    setupScript();
 
     bool ret = false;
     tls->mScript = this;

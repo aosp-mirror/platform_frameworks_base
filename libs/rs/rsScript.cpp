@@ -94,6 +94,7 @@ void rsi_ScriptSetInvoke(Context *rsc, const char *name, uint32_t slot)
 void rsi_ScriptInvoke(Context *rsc, RsScript vs, uint32_t slot)
 {
     Script *s = static_cast<Script *>(vs);
+    s->setupScript();
     s->mEnviroment.mInvokables[slot]();
 }
 
