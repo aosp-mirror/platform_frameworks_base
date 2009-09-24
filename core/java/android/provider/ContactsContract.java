@@ -40,8 +40,6 @@ import java.io.InputStream;
 /**
  * The contract between the contacts provider and applications. Contains definitions
  * for the supported URIs and columns. These APIs supersede {@link Contacts}.
- *
- * @hide
  */
 @SuppressWarnings("unused")
 public final class ContactsContract {
@@ -228,7 +226,7 @@ public final class ContactsContract {
         public static final String IN_VISIBLE_GROUP = "in_visible_group";
 
         /**
-         * Contact presence status.  See {@link PresenceColumns}
+         * Contact presence status.  See {@link Presence}
          * for individual status definitions.  This column is only returned if explicitly
          * requested in the query projection.
          * <p>Type: NUMBER</p>
@@ -320,7 +318,7 @@ public final class ContactsContract {
 
         /**
          * Build a {@link #CONTENT_LOOKUP_URI} lookup {@link Uri} using the
-         * given {@link Contacts#_ID} and {@link Contacts#LOOKUP_KEY}.
+         * given {@link android.provider.ContactsContract.Contacts#_ID} and {@link #LOOKUP_KEY}.
          */
         public static Uri getLookupUri(long contactId, String lookupKey) {
             return ContentUris.withAppendedId(Uri.withAppendedPath(Contacts.CONTENT_LOOKUP_URI,
@@ -460,7 +458,8 @@ public final class ContactsContract {
 
             /**
              * The directory twig for this sub-table. The URI can be followed by an optional
-             * type-to-filter, similar to {@link Contacts#CONTENT_FILTER_URI}.
+             * type-to-filter, similar to
+             * {@link android.provider.ContactsContract.Contacts#CONTENT_FILTER_URI}.
              */
             public static final String CONTENT_DIRECTORY = "suggestions";
         }
@@ -604,8 +603,9 @@ public final class ContactsContract {
         public static final int AGGREGATION_MODE_DISABLED = 3;
 
         /**
-         * Build a {@link Contacts#CONTENT_LOOKUP_URI} style {@link Uri} for the
-         * parent {@link Contacts} entry of the given {@link RawContacts} entry.
+         * Build a {@link android.provider.ContactsContract.Contacts#CONTENT_LOOKUP_URI}
+         * style {@link Uri} for the parent {@link android.provider.ContactsContract.Contacts}
+         * entry of the given {@link RawContacts} entry.
          */
         public static Uri getContactLookupUri(ContentResolver resolver, Uri rawContactUri) {
             // TODO: use a lighter query by joining rawcontacts with contacts in provider
@@ -769,8 +769,9 @@ public final class ContactsContract {
         public static final String CONTENT_TYPE = "vnd.android.cursor.dir/data";
 
         /**
-         * Build a {@link Contacts#CONTENT_LOOKUP_URI} style {@link Uri} for the
-         * parent {@link Contacts} entry of the given {@link Data} entry.
+         * Build a {@link android.provider.ContactsContract.Contacts#CONTENT_LOOKUP_URI}
+         * style {@link Uri} for the parent {@link android.provider.ContactsContract.Contacts}
+         * entry of the given {@link Data} entry.
          */
         public static Uri getContactLookupUri(ContentResolver resolver, Uri dataUri) {
             final Cursor cursor = resolver.query(dataUri, new String[] {
@@ -1104,7 +1105,7 @@ public final class ContactsContract {
 
             /**
              * The content:// style URI for all data records of the
-             * {@link Phone#CONTENT_ITEM_TYPE} MIME type, combined with the
+             * {@link #CONTENT_ITEM_TYPE} MIME type, combined with the
              * associated raw contact and aggregate contact data.
              */
             public static final Uri CONTENT_URI = Uri.withAppendedPath(Data.CONTENT_URI,
@@ -1112,7 +1113,7 @@ public final class ContactsContract {
 
             /**
              * The content:// style URL for phone lookup using a filter. The filter returns
-             * records of MIME type {@link Phone#CONTENT_ITEM_TYPE}. The filter is applied
+             * records of MIME type {@link #CONTENT_ITEM_TYPE}. The filter is applied
              * to display names as well as phone numbers. The filter argument should be passed
              * as an additional path segment after this URI.
              */
@@ -1168,7 +1169,7 @@ public final class ContactsContract {
 
             /**
              * Return the string resource that best describes the given
-             * {@link CommonColumns#TYPE}. Will always return a valid resource.
+             * {@link #TYPE}. Will always return a valid resource.
              */
             public static final int getTypeLabelResource(int type) {
                 switch (type) {
@@ -1198,8 +1199,8 @@ public final class ContactsContract {
 
             /**
              * Return a {@link CharSequence} that best describes the given type,
-             * possibly substituting the given {@link CommonColumns#LABEL} value
-             * for {@link BaseTypes#TYPE_CUSTOM}.
+             * possibly substituting the given {@link #LABEL} value
+             * for {@link #TYPE_CUSTOM}.
              */
             public static final CharSequence getTypeLabel(Resources res, int type,
                     CharSequence label) {
@@ -1231,7 +1232,7 @@ public final class ContactsContract {
 
             /**
              * The content:// style URI for all data records of the
-             * {@link Email#CONTENT_ITEM_TYPE} MIME type, combined with the
+             * {@link #CONTENT_ITEM_TYPE} MIME type, combined with the
              * associated raw contact and aggregate contact data.
              */
             public static final Uri CONTENT_URI = Uri.withAppendedPath(Data.CONTENT_URI,
@@ -1247,7 +1248,7 @@ public final class ContactsContract {
 
             /**
              * The content:// style URL for email lookup using a filter. The filter returns
-             * records of MIME type {@link Email#CONTENT_ITEM_TYPE}. The filter is applied
+             * records of MIME type {@link #CONTENT_ITEM_TYPE}. The filter is applied
              * to display names as well as email addresses. The filter argument should be passed
              * as an additional path segment after this URI.
              */
@@ -1267,7 +1268,7 @@ public final class ContactsContract {
 
             /**
              * Return the string resource that best describes the given
-             * {@link CommonColumns#TYPE}. Will always return a valid resource.
+             * {@link #TYPE}. Will always return a valid resource.
              */
             public static final int getTypeLabelResource(int type) {
                 switch (type) {
@@ -1281,8 +1282,8 @@ public final class ContactsContract {
 
             /**
              * Return a {@link CharSequence} that best describes the given type,
-             * possibly substituting the given {@link CommonColumns#LABEL} value
-             * for {@link BaseTypes#TYPE_CUSTOM}.
+             * possibly substituting the given {@link #LABEL} value
+             * for {@link #TYPE_CUSTOM}.
              */
             public static final CharSequence getTypeLabel(Resources res, int type,
                     CharSequence label) {
@@ -1393,7 +1394,7 @@ public final class ContactsContract {
 
             /**
              * Return the string resource that best describes the given
-             * {@link CommonColumns#TYPE}. Will always return a valid resource.
+             * {@link #TYPE}. Will always return a valid resource.
              */
             public static final int getTypeLabelResource(int type) {
                 switch (type) {
@@ -1406,8 +1407,8 @@ public final class ContactsContract {
 
             /**
              * Return a {@link CharSequence} that best describes the given type,
-             * possibly substituting the given {@link CommonColumns#LABEL} value
-             * for {@link BaseTypes#TYPE_CUSTOM}.
+             * possibly substituting the given {@link #LABEL} value
+             * for {@link #TYPE_CUSTOM}.
              */
             public static final CharSequence getTypeLabel(Resources res, int type,
                     CharSequence label) {
@@ -1462,7 +1463,7 @@ public final class ContactsContract {
 
             /**
              * Return the string resource that best describes the given
-             * {@link CommonColumns#TYPE}. Will always return a valid resource.
+             * {@link #TYPE}. Will always return a valid resource.
              */
             public static final int getTypeLabelResource(int type) {
                 switch (type) {
@@ -1475,8 +1476,8 @@ public final class ContactsContract {
 
             /**
              * Return a {@link CharSequence} that best describes the given type,
-             * possibly substituting the given {@link CommonColumns#LABEL} value
-             * for {@link BaseTypes#TYPE_CUSTOM}.
+             * possibly substituting the given {@link #LABEL} value
+             * for {@link #TYPE_CUSTOM}.
              */
             public static final CharSequence getTypeLabel(Resources res, int type,
                     CharSequence label) {
@@ -1490,7 +1491,7 @@ public final class ContactsContract {
 
             /**
              * Return the string resource that best describes the given
-             * {@link Im#PROTOCOL}. Will always return a valid resource.
+             * {@link #PROTOCOL}. Will always return a valid resource.
              */
             public static final int getProtocolLabelResource(int type) {
                 switch (type) {
@@ -1576,7 +1577,7 @@ public final class ContactsContract {
 
             /**
              * Return the string resource that best describes the given
-             * {@link CommonColumns#TYPE}. Will always return a valid resource.
+             * {@link #TYPE}. Will always return a valid resource.
              */
             public static final int getTypeLabelResource(int type) {
                 switch (type) {
@@ -1588,8 +1589,8 @@ public final class ContactsContract {
 
             /**
              * Return a {@link CharSequence} that best describes the given type,
-             * possibly substituting the given {@link CommonColumns#LABEL} value
-             * for {@link BaseTypes#TYPE_CUSTOM}.
+             * possibly substituting the given {@link #LABEL} value
+             * for {@link #TYPE_CUSTOM}.
              */
             public static final CharSequence getTypeLabel(Resources res, int type,
                     CharSequence label) {
