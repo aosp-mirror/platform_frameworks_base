@@ -274,6 +274,32 @@ public class Browser {
     }
 
     /**
+     *  Returns all the URLs in the history.
+     *  Requires {@link android.Manifest.permission#READ_HISTORY_BOOKMARKS}
+     *  @param cr   The ContentResolver used to access the database.
+     *  @hide pending API council approval
+     */
+    public static final String[] getVisitedHistory(ContentResolver cr) {
+	try {
+	    String[] projection = new String[] { "url" };
+	    Cursor c = cr.query(BOOKMARKS_URI,
+				projection,
+				"visits > 0",
+				null, null);
+	    String[] str = new String[c.getCount()];
+	    int i = 0;
+	    while (c.moveToNext()) {
+		str[i] = c.getString(0);
+		i++;
+	    }
+	    c.deactivate();
+	    return str;
+	} catch (IllegalStateException e) {
+	    return new String[0];
+	}
+    }
+
+    /**
      * If there are more than MAX_HISTORY_COUNT non-bookmark history
      * items in the bookmark/history table, delete TRUNCATE_N_OLDEST
      * of them.  This is used to keep our history table to a
