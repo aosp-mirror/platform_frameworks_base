@@ -16,6 +16,11 @@
 
 package com.android.internal.telephony;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
+
+import android.content.pm.PackageManager;
+import android.os.Binder;
 import android.os.ServiceManager;
 
 
@@ -81,5 +86,9 @@ public class PhoneSubInfoProxy extends IPhoneSubInfo.Stub {
      */
     public String getVoiceMailAlphaTag() {
         return mPhoneSubInfo.getVoiceMailAlphaTag();
+    }
+
+    protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        mPhoneSubInfo.dump(fd, pw, args);
     }
 }
