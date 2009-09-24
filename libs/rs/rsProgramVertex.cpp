@@ -133,9 +133,16 @@ ProgramVertexState::~ProgramVertexState()
 
 void ProgramVertexState::init(Context *rsc, int32_t w, int32_t h)
 {
+    rsi_ElementBegin(rsc);
+    rsi_ElementAdd(rsc, RS_KIND_USER, RS_TYPE_FLOAT, false, 32, NULL);
+    RsElement e = rsi_ElementCreate(rsc);
+
+    rsi_TypeBegin(rsc, e);
+    rsi_TypeAdd(rsc, RS_DIMENSION_X, 48);
+    mAllocType = rsi_TypeCreate(rsc);
+
     ProgramVertex *pv = new ProgramVertex(NULL, NULL);
-    Allocation *alloc = (Allocation *)
-        rsi_AllocationCreatePredefSized(rsc, RS_ELEMENT_USER_FLOAT, 48);
+    Allocation *alloc = (Allocation *)rsi_AllocationCreateTyped(rsc, mAllocType);
     mDefaultAlloc.set(alloc);
     mDefault.set(pv);
 
