@@ -286,7 +286,6 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
     }
 
     /**
-     * @hide
      * Install a custom EGLContextFactory.
      * <p>If this method is
      * called, it must be called before {@link #setRenderer(Renderer)}
@@ -302,7 +301,6 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
     }
 
     /**
-     * @hide
      * Install a custom EGLWindowSurfaceFactory.
      * <p>If this method is
      * called, it must be called before {@link #setRenderer(Renderer)}
@@ -609,7 +607,6 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
     }
 
     /**
-     * @hide
      * An interface for customizing the eglCreateContext and eglDestroyContext calls.
      * <p>
      * This interface must be implemented by clients wishing to call
@@ -633,7 +630,6 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
     }
 
     /**
-     * @hide
      * An interface for customizing the eglCreateWindowSurface and eglDestroySurface calls.
      * <p>
      * This interface must be implemented by clients wishing to call
