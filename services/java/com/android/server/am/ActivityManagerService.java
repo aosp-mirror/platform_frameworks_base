@@ -4957,6 +4957,16 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             }
             mWatchers.finishBroadcast();
             
+            mWindowManager.closeSystemDialogs(reason);
+            
+            for (i=mHistory.size()-1; i>=0; i--) {
+                HistoryRecord r = (HistoryRecord)mHistory.get(i);
+                if ((r.info.flags&ActivityInfo.FLAG_FINISH_ON_CLOSE_SYSTEM_DIALOGS) != 0) {
+                    finishActivityLocked(r, i,
+                            Activity.RESULT_CANCELED, null, "close-sys");
+                }
+            }
+            
             broadcastIntentLocked(null, null, intent, null,
                     null, 0, null, null, null, false, false, -1, uid);
         }
