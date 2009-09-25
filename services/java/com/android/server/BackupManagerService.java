@@ -162,6 +162,7 @@ class BackupManagerService extends IBackupManager.Stub {
     final Object mAgentConnectLock = new Object();
     IBackupAgent mConnectedAgent;
     volatile boolean mConnecting;
+    volatile boolean mBackupOrRestoreInProgress = false;
 
     // A similar synchronicity mechanism around clearing apps' data for restore
     final Object mClearDataLock = new Object();
@@ -211,7 +212,7 @@ class BackupManagerService extends IBackupManager.Stub {
     // Persistently track the need to do a full init
     static final String INIT_SENTINEL_FILE_NAME = "_need_init_";
     HashSet<String> mPendingInits = new HashSet<String>();  // transport names
-    boolean mInitInProgress = false;
+    volatile boolean mInitInProgress = false;
 
     public BackupManagerService(Context context) {
         mContext = context;
@@ -316,9 +317,12 @@ class BackupManagerService extends IBackupManager.Stub {
                         }
                     } else {
                         // Don't run backups now if we're disabled, not yet
-                        // fully set up, or racing with an initialize pass.
-                        if (mEnabled && mProvisioned && !mInitInProgress) {
+                        // fully set up, in the middle of a backup already,
+                        // or racing with an initialize pass.
+                        if (mEnabled && mProvisioned
+                                && !mBackupOrRestoreInProgress && !mInitInProgress) {
                             if (DEBUG) Log.v(TAG, "Running a backup pass");
+                            mBackupOrRestoreInProgress = true;
 
                             // Acquire the wakelock and pass it to the backup thread.  it will
                             // be released once backup concludes.
@@ -328,7 +332,7 @@ class BackupManagerService extends IBackupManager.Stub {
                             mBackupHandler.sendMessage(msg);
                         } else {
                             Log.w(TAG, "Backup pass but e=" + mEnabled + " p=" + mProvisioned
-                                    + " i=" + mInitInProgress);
+                                    + " b=" + mBackupOrRestoreInProgress + " i=" + mInitInProgress);
                         }
                     }
                 }
@@ -1106,6 +1110,12 @@ class BackupManagerService extends IBackupManager.Stub {
                             // can't happen; it's a local call
                         }
                     }
+
+                    // We also want to reset the backup schedule based on whatever
+                    // the transport suggests by way of retry/backoff time.
+                    try {
+                        startBackupAlarmsLocked(mTransport.requestBackupTime());
+                    } catch (RemoteException e) { /* cannot happen */ }
                 }
 
                 // Either backup was successful, in which case we of course do not need
@@ -1116,7 +1126,11 @@ class BackupManagerService extends IBackupManager.Stub {
                     Log.e(TAG, "Unable to remove backup journal file " + mJournal);
                 }
 
-                // Only once we're entirely finished do we release the wakelock
+                // Only once we're entirely finished do we indicate our completion
+                // and release the wakelock
+                synchronized (mQueueLock) {
+                    mBackupOrRestoreInProgress = false;
+                }
                 mWakelock.release();
             }
         }
@@ -1553,6 +1567,9 @@ class BackupManagerService extends IBackupManager.Stub {
                 }
 
                 // done; we can finally release the wakelock
+                synchronized (mQueueLock) {
+                    mBackupOrRestoreInProgress = false;
+                }
                 mWakelock.release();
             }
         }
@@ -1876,6 +1893,10 @@ class BackupManagerService extends IBackupManager.Stub {
 
         if (DEBUG) Log.v(TAG, "Scheduling immediate backup pass");
         synchronized (mQueueLock) {
+            // Because the alarms we are using can jitter, and we want an *immediate*
+            // backup pass to happen, we restart the timer beginning with "next time,"
+            // then manually fire the backup trigger intent ourselves.
+            startBackupAlarmsLocked(BACKUP_INTERVAL);
             try {
                 mRunBackupIntent.send();
             } catch (PendingIntent.CanceledException e) {
@@ -2108,15 +2129,24 @@ class BackupManagerService extends IBackupManager.Stub {
                 return -1;
             }
 
-            for (int i = 0; i < mRestoreSets.length; i++) {
-                if (token == mRestoreSets[i].token) {
-                    long oldId = Binder.clearCallingIdentity();
-                    mWakelock.acquire();
-                    Message msg = mBackupHandler.obtainMessage(MSG_RUN_RESTORE);
-                    msg.obj = new RestoreParams(mRestoreTransport, observer, token);
-                    mBackupHandler.sendMessage(msg);
-                    Binder.restoreCallingIdentity(oldId);
-                    return 0;
+            synchronized (mQueueLock) {
+                if (mBackupOrRestoreInProgress) {
+                    Log.e(TAG, "Backup pass in progress, restore aborted");
+                    return -1;
+                }
+
+                for (int i = 0; i < mRestoreSets.length; i++) {
+                    if (token == mRestoreSets[i].token) {
+                        long oldId = Binder.clearCallingIdentity();
+                        // Suppress backups until the restore operation is finished
+                        mBackupOrRestoreInProgress = true;
+                        mWakelock.acquire();
+                        Message msg = mBackupHandler.obtainMessage(MSG_RUN_RESTORE);
+                        msg.obj = new RestoreParams(mRestoreTransport, observer, token);
+                        mBackupHandler.sendMessage(msg);
+                        Binder.restoreCallingIdentity(oldId);
+                        return 0;
+                    }
                 }
             }
 
