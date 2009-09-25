@@ -73,6 +73,8 @@ public class RenderScript {
     native void nContextBindProgramRaster(int pr);
     native void nContextAddDefineI32(String name, int value);
     native void nContextAddDefineF(String name, float value);
+    native void nContextPause();
+    native void nContextResume();
 
     native void nAssignName(int obj, byte[] name);
     native void nObjDestroy(int id);
@@ -215,6 +217,14 @@ public class RenderScript {
 
         nDeviceDestroy(mDev);
         mDev = 0;
+    }
+
+    void pause() {
+        nContextPause();
+    }
+
+    void resume() {
+        nContextResume();
     }
 
     //////////////////////////////////////////////////////////////////////////////////
