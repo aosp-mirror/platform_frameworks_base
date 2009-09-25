@@ -126,7 +126,7 @@ public class StatusBarService extends IStatusBar.Stub
     public interface NotificationCallbacks {
         void onSetDisabled(int status);
         void onClearAll();
-        void onNotificationClick(String pkg, int id);
+        void onNotificationClick(String pkg, String tag, int id);
         void onPanelRevealed();
     }
 
@@ -833,7 +833,7 @@ public class StatusBarService extends IStatusBar.Stub
         content.setOnFocusChangeListener(mFocusChangeListener);
         PendingIntent contentIntent = n.contentIntent;
         if (contentIntent != null) {
-            content.setOnClickListener(new Launcher(contentIntent, n.pkg, n.id));
+            content.setOnClickListener(new Launcher(contentIntent, n.pkg, n.tag, n.id));
         }
 
         View child = null;
@@ -896,7 +896,7 @@ public class StatusBarService extends IStatusBar.Stub
                         com.android.internal.R.id.content);
                 PendingIntent contentIntent = n.contentIntent;
                 if (contentIntent != null) {
-                    content.setOnClickListener(new Launcher(contentIntent, n.pkg, n.id));
+                    content.setOnClickListener(new Launcher(contentIntent, n.pkg, n.tag, n.id));
                 }
             }
             catch (RuntimeException e) {
@@ -1248,11 +1248,13 @@ public class StatusBarService extends IStatusBar.Stub
     private class Launcher implements View.OnClickListener {
         private PendingIntent mIntent;
         private String mPkg;
+        private String mTag;
         private int mId;
 
-        Launcher(PendingIntent intent, String pkg, int id) {
+        Launcher(PendingIntent intent, String pkg, String tag, int id) {
             mIntent = intent;
             mPkg = pkg;
+            mTag = tag;
             mId = id;
         }
 
@@ -1267,7 +1269,7 @@ public class StatusBarService extends IStatusBar.Stub
             }
             try {
                 mIntent.send();
-                mNotificationCallbacks.onNotificationClick(mPkg, mId);
+                mNotificationCallbacks.onNotificationClick(mPkg, mTag, mId);
             } catch (PendingIntent.CanceledException e) {
                 // the stack trace isn't very helpful here.  Just log the exception message.
                 Log.w(TAG, "Sending contentIntent failed: " + e);
