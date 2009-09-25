@@ -30,7 +30,6 @@ import android.content.pm.ResolveInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources;
 import android.database.Cursor;
-import android.graphics.drawable.Animatable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
@@ -64,9 +63,9 @@ import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.ListAdapter;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemSelectedListener;
 
@@ -182,6 +181,9 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
         theWindow.setAttributes(lp);
 
         // get the view elements for local access
+        SearchBar searchBar = (SearchBar) findViewById(com.android.internal.R.id.search_bar);
+        searchBar.setSearchDialog(this);
+
         mBadgeLabel = (TextView) findViewById(com.android.internal.R.id.search_badge);
         mSearchAutoComplete = (SearchAutoComplete)
                 findViewById(com.android.internal.R.id.search_src_text);
@@ -205,8 +207,6 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
         mVoiceButton.setOnClickListener(mVoiceButtonClickListener);
         mVoiceButton.setOnKeyListener(mButtonsKeyListener);
 
-        mSearchAutoComplete.setSearchDialog(this);
-        
         // pre-hide all the extraneous elements
         mBadgeLabel.setVisibility(View.GONE);
 
@@ -1673,15 +1673,56 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
         }
         return result;
     }
-        
+
+    /**
+     * The root element in the search bar layout. This is a custom view just to override
+     * the handling of the back button.
+     */
+    public static class SearchBar extends LinearLayout {
+
+        private SearchDialog mSearchDialog;
+
+        public SearchBar(Context context, AttributeSet attrs) {
+            super(context, attrs);
+        }
+
+        public SearchBar(Context context) {
+            super(context);
+        }
+
+        public void setSearchDialog(SearchDialog searchDialog) {
+            mSearchDialog = searchDialog;
+        }
+
+        /**
+         * Overrides the handling of the back key to move back to the previous sources or dismiss
+         * the search dialog, instead of dismissing the input method.
+         */
+        @Override
+        public boolean dispatchKeyEventPreIme(KeyEvent event) {
+            if (DBG) Log.d(LOG_TAG, "onKeyPreIme(" + event + ")");
+            if (mSearchDialog != null && event.getKeyCode() == KeyEvent.KEYCODE_BACK) {
+                if (event.getAction() == KeyEvent.ACTION_DOWN
+                        && event.getRepeatCount() == 0) {
+                    getKeyDispatcherState().startTracking(event, this);
+                    return true;
+                } else if (event.getAction() == KeyEvent.ACTION_UP
+                        && !event.isCanceled() && getKeyDispatcherState().isTracking(event)) {
+                    mSearchDialog.onBackPressed();
+                    return true;
+                }
+            }
+            return super.dispatchKeyEventPreIme(event);
+        }
+    }
+
     /**
      * Local subclass for AutoCompleteTextView.
      */
     public static class SearchAutoComplete extends AutoCompleteTextView {
 
         private int mThreshold;
-        private SearchDialog mSearchDialog;
-        
+
         public SearchAutoComplete(Context context) {
             super(context);
             mThreshold = getThreshold();
@@ -1697,10 +1738,6 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
             mThreshold = getThreshold();
         }
 
-        private void setSearchDialog(SearchDialog searchDialog) {
-            mSearchDialog = searchDialog;
-        }
-        
         @Override
         public void setThreshold(int threshold) {
             super.setThreshold(threshold);
@@ -1754,46 +1791,6 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
             return mThreshold <= 0 || super.enoughToFilter();
         }
 
-        /**
-         * {@link AutoCompleteTextView#onKeyPreIme(int, KeyEvent)}) dismisses the drop-down on BACK,
-         * so we must override this method to modify the BACK behavior.
-         */
-        @Override
-        public boolean onKeyPreIme(int keyCode, KeyEvent event) {
-            if (DBG) Log.d(LOG_TAG, "onKeyPreIme(" + keyCode + "," + event + ")");
-            if (mSearchDialog.mSearchable == null) {
-                return false;
-            }
-            if (keyCode == KeyEvent.KEYCODE_BACK) {
-                if (event.getAction() == KeyEvent.ACTION_DOWN
-                        && event.getRepeatCount() == 0) {
-                    if (mSearchDialog.hasPreviousComponent() || isDismissingKeyboardPointless()) {
-                        getKeyDispatcherState().startTracking(event, this);
-                        return true;
-                    }
-                } else if (event.getAction() == KeyEvent.ACTION_UP
-                        && event.isTracking() && !event.isCanceled()) {
-                    if (mSearchDialog.backToPreviousComponent()) {
-                        return true;
-                    } else if (isDismissingKeyboardPointless()) {
-                        mSearchDialog.cancel();
-                        return true;
-                    }
-                }
-            }
-            return false;
-        }
-
-        // If the drop-down obscures the keyboard, or if the drop-down shows all suggestions,
-        // dismissing the keyboard is pointless, so we dismiss the entire dialog instead.
-        private boolean isDismissingKeyboardPointless() {
-            return (isInputMethodNotNeeded() || getDropDownChildCount() >= getAdapterCount());
-        }
-
-        private int getAdapterCount() {
-            final ListAdapter adapter = getAdapter();
-            return adapter == null ? 0 : adapter.getCount();
-        }
     }
 
     @Override
