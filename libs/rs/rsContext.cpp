@@ -46,6 +46,12 @@ void Context::initEGL()
         configAttribsPtr += 2;
     }
 
+    if (mDev->mForceSW) {
+        configAttribsPtr[0] = EGL_CONFIG_CAVEAT;
+        configAttribsPtr[1] = EGL_SLOW_CONFIG;
+        configAttribsPtr += 2;
+    }
+
     configAttribsPtr[0] = EGL_NONE;
     rsAssert(configAttribsPtr < (configAttribs + (sizeof(configAttribs) / sizeof(EGLint))));
 
@@ -116,7 +122,7 @@ bool Context::runRootScript()
     eglQuerySurface(mEGL.mDisplay, mEGL.mSurface, EGL_HEIGHT, &mEGL.mHeight);
     glViewport(0, 0, mEGL.mWidth, mEGL.mHeight);
     glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
-    glEnable(GL_POINT_SMOOTH);
+    //glEnable(GL_POINT_SMOOTH);
 
     glClearColor(mRootScript->mEnviroment.mClearColor[0],
                  mRootScript->mEnviroment.mClearColor[1],
@@ -192,16 +198,10 @@ void Context::timerPrint()
 
 void Context::setupCheck()
 {
-    if (mFragmentStore.get()) {
-        mFragmentStore->setupGL(this, &mStateFragmentStore);
-    }
-    if (mFragment.get()) {
-        mFragment->setupGL(this, &mStateFragment);
-    }
-    if (mVertex.get()) {
-        mVertex->setupGL(this, &mStateVertex);
-    }
-
+    mFragmentStore->setupGL(this, &mStateFragmentStore);
+    mFragment->setupGL(this, &mStateFragment);
+    mRaster->setupGL(this, &mStateRaster);
+    mVertex->setupGL(this, &mStateVertex);
 }
 
 
@@ -223,6 +223,8 @@ void * Context::threadProc(void *vrsc)
          LOGE("pthread_setspecific %i", status);
      }
 
+     rsc->mStateRaster.init(rsc, rsc->mEGL.mWidth, rsc->mEGL.mHeight);
+     rsc->setRaster(NULL);
      rsc->mStateVertex.init(rsc, rsc->mEGL.mWidth, rsc->mEGL.mHeight);
      rsc->setVertex(NULL);
      rsc->mStateFragment.init(rsc, rsc->mEGL.mWidth, rsc->mEGL.mHeight);
@@ -347,6 +349,15 @@ void Context::setFragment(ProgramFragment *pf)
         mFragment.set(mStateFragment.mDefault);
     } else {
         mFragment.set(pf);
+    }
+}
+
+void Context::setRaster(ProgramRaster *pr)
+{
+    if (pr == NULL) {
+        mRaster.set(mStateRaster.mDefault);
+    } else {
+        mRaster.set(pr);
     }
 }
 
@@ -517,6 +528,12 @@ void rsi_ContextBindProgramFragment(Context *rsc, RsProgramFragment vpf)
 {
     ProgramFragment *pf = static_cast<ProgramFragment *>(vpf);
     rsc->setFragment(pf);
+}
+
+void rsi_ContextBindProgramRaster(Context *rsc, RsProgramRaster vpr)
+{
+    ProgramRaster *pr = static_cast<ProgramRaster *>(vpr);
+    rsc->setRaster(pr);
 }
 
 void rsi_ContextBindProgramVertex(Context *rsc, RsProgramVertex vpv)

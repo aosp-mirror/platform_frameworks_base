@@ -143,6 +143,13 @@ nDeviceDestroy(JNIEnv *_env, jobject _this, jint dev)
     return rsDeviceDestroy((RsDevice)dev);
 }
 
+static void
+nDeviceSetConfig(JNIEnv *_env, jobject _this, jint dev, jint p, jint value)
+{
+    LOG_API("nDeviceSetConfig  dev(%p), param(%i), value(%i)", (void *)dev, p, value);
+    return rsDeviceSetConfig((RsDevice)dev, (RsDeviceParam)p, value);
+}
+
 static jint
 nContextCreate(JNIEnv *_env, jobject _this, jint dev, jobject wnd, jint ver, jboolean useDepth)
 {
@@ -1132,6 +1139,34 @@ nProgramVertexCreate(JNIEnv *_env, jobject _this)
 }
 
 
+// ---------------------------------------------------------------------------
+
+static jint
+nProgramRasterCreate(JNIEnv *_env, jobject _this, jint in, jint out,
+                     jboolean pointSmooth, jboolean lineSmooth, jboolean pointSprite)
+{
+    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
+    LOG_API("nProgramRasterCreate, con(%p), in(%p), out(%p), pointSmooth(%i), lineSmooth(%i), pointSprite(%i)",
+            con, (RsElement)in, (RsElement)out, pointSmooth, lineSmooth, pointSprite);
+    return (jint)rsProgramRasterCreate(con, (RsElement)in, (RsElement)out, pointSmooth, lineSmooth, pointSprite);
+}
+
+static void
+nProgramRasterSetPointSize(JNIEnv *_env, jobject _this, jint vpr, jfloat v)
+{
+    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
+    LOG_API("nProgramRasterSetPointSize, con(%p), vpf(%p), value(%f)", con, (RsProgramRaster)vpr, v);
+    rsProgramRasterSetPointSize(con, (RsProgramFragment)vpr, v);
+}
+
+static void
+nProgramRasterSetLineWidth(JNIEnv *_env, jobject _this, jint vpr, jfloat v)
+{
+    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
+    LOG_API("nProgramRasterSetLineWidth, con(%p), vpf(%p), value(%f)", con, (RsProgramRaster)vpr, v);
+    rsProgramRasterSetLineWidth(con, (RsProgramFragment)vpr, v);
+}
+
 
 // ---------------------------------------------------------------------------
 
@@ -1165,6 +1200,14 @@ nContextBindProgramVertex(JNIEnv *_env, jobject _this, jint pf)
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
     LOG_API("nContextBindProgramVertex, con(%p), pf(%p)", con, (RsProgramVertex)pf);
     rsContextBindProgramVertex(con, (RsProgramVertex)pf);
+}
+
+static void
+nContextBindProgramRaster(JNIEnv *_env, jobject _this, jint pf)
+{
+    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
+    LOG_API("nContextBindProgramRaster, con(%p), pf(%p)", con, (RsProgramRaster)pf);
+    rsContextBindProgramRaster(con, (RsProgramRaster)pf);
 }
 
 static void
@@ -1306,6 +1349,7 @@ static JNINativeMethod methods[] = {
 
 {"nDeviceCreate",                  "()I",                                  (void*)nDeviceCreate },
 {"nDeviceDestroy",                 "(I)V",                                 (void*)nDeviceDestroy },
+{"nDeviceSetConfig",               "(III)V",                               (void*)nDeviceSetConfig },
 {"nContextCreate",                 "(ILandroid/view/Surface;IZ)I",         (void*)nContextCreate },
 {"nContextDestroy",                "(I)V",                                 (void*)nContextDestroy },
 {"nAssignName",                    "(I[B)V",                               (void*)nAssignName },
@@ -1396,6 +1440,10 @@ static JNINativeMethod methods[] = {
 {"nProgramFragmentSetSlot",        "(IZII)V",                              (void*)nProgramFragmentSetSlot },
 {"nProgramFragmentCreate",         "()I",                                  (void*)nProgramFragmentCreate },
 
+{"nProgramRasterCreate",           "(IIZZZ)I",                             (void*)nProgramRasterCreate },
+{"nProgramRasterSetPointSize",     "(IF)V",                                (void*)nProgramRasterSetPointSize },
+{"nProgramRasterSetLineWidth",     "(IF)V",                                (void*)nProgramRasterSetLineWidth },
+
 {"nProgramVertexBindAllocation",   "(II)V",                                (void*)nProgramVertexBindAllocation },
 {"nProgramVertexBegin",            "(II)V",                                (void*)nProgramVertexBegin },
 {"nProgramVertexSetTextureMatrixEnable",   "(Z)V",                         (void*)nProgramVertexSetTextureMatrixEnable },
@@ -1413,6 +1461,7 @@ static JNINativeMethod methods[] = {
 {"nContextBindProgramFragmentStore","(I)V",                                (void*)nContextBindProgramFragmentStore },
 {"nContextBindProgramFragment",    "(I)V",                                 (void*)nContextBindProgramFragment },
 {"nContextBindProgramVertex",      "(I)V",                                 (void*)nContextBindProgramVertex },
+{"nContextBindProgramRaster",      "(I)V",                                 (void*)nContextBindProgramRaster },
 
 {"nSamplerBegin",                  "()V",                                  (void*)nSamplerBegin },
 {"nSamplerSet",                    "(II)V",                                (void*)nSamplerSet },

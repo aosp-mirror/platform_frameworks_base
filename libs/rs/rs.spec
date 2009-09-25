@@ -16,6 +16,10 @@ ContextBindProgramVertex {
 	param RsProgramVertex pgm
 	}
 
+ContextBindProgramRaster {
+	param RsProgramRaster pgm
+	}
+
 ContextSetDefineF {
     param const char* name
     param float value
@@ -369,6 +373,24 @@ ProgramFragmentStoreCreate {
 	ret RsProgramFragmentStore
 	}
 
+ProgramRasterCreate {
+	param RsElement in
+	param RsElement out
+	param bool pointSmooth
+	param bool lineSmooth
+	param bool pointSprite
+	ret RsProgramRaster
+}
+
+ProgramRasterSetLineWidth {
+	param RsProgramRaster pr
+	param float lw
+}
+
+ProgramRasterSetPointSize{
+	param RsProgramRaster pr
+	param float ps
+}
 
 
 ProgramFragmentBegin {

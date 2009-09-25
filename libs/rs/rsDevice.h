@@ -33,6 +33,8 @@ public:
     void addContext(Context *);
     void removeContext(Context *);
 
+    bool mForceSW;
+
 protected:
     Vector<Context *> mContexts;
 
