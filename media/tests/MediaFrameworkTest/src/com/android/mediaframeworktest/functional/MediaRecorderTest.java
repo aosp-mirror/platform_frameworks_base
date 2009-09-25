@@ -434,15 +434,15 @@ public class MediaRecorderTest extends ActivityInstrumentationTestCase<MediaFram
         boolean recordSuccess = false;
         String deviceType = MediaProfileReader.getDeviceType();
         Log.v(TAG, "deviceType = " + deviceType);
-        if (deviceType.compareTo("voles") == 0) {
-            // Test cases are device specified
-            MediaProfileReader.createVideoProfileTable();
-            MediaProfileReader.createAudioProfileTable();
-            MediaProfileReader.createEncoderTable();
-            String encoderType = MediaProfileReader.getVideoCodecProperty();
-            String encoder[] = encoderType.split(",");
-            String audioType = MediaProfileReader.getAudioCodecProperty();
+        // Test cases are device specified
+        MediaProfileReader.createVideoProfileTable();
+        MediaProfileReader.createAudioProfileTable();
+        MediaProfileReader.createEncoderTable();
+        String encoderType = MediaProfileReader.getVideoCodecProperty();
+        String audioType = MediaProfileReader.getAudioCodecProperty();
+        if ((encoderType.length() != 0) || (audioType.length() != 0)) {
             String audio[] = audioType.split(",");
+            String encoder[] = encoderType.split(",");
             for (int k = 0; k < 2; k++) {
                 for (int i = 0; i < encoder.length; i++) {
                     for (int j = 0; j < audio.length; j++) {
@@ -451,18 +451,18 @@ public class MediaRecorderTest extends ActivityInstrumentationTestCase<MediaFram
                         } else {
                             recordSuccess = recordVideoWithPara(encoder[i], audio[j], "low");
                         }
-                        if (!recordSuccess){
+                        if (!recordSuccess) {
                             Log.v(TAG, "testDeviceSpecificCodec failed");
                             Log.v(TAG, "Encoder = " + encoder[i] + "Audio Encoder = " + audio[j]);
                             noOfFailure++;
                         }
-                       //assertTrue((encoder[i] + audio[j]), recordSuccess);
+                        // assertTrue((encoder[i] + audio[j]), recordSuccess);
                     }
                 }
             }
-        }
-        if (noOfFailure != 0){
-            assertTrue("testDeviceSpecificCodec", false);
+            if (noOfFailure != 0) {
+                assertTrue("testDeviceSpecificCodec", false);
+            }
         }
     }
 }
