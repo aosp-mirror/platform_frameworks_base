@@ -65,10 +65,12 @@ void ObjectBase::incSysRef() const
 bool ObjectBase::checkDelete() const
 {
     if (!(mSysRefCount | mUserRefCount)) {
-        if (mName) {
-            LOGV("Deleting RS object %p, name %s", this, mName);
-        } else {
-            LOGV("Deleting RS object %p, no name", this);
+        if (mRSC && mRSC->props.mLogObjects) {
+            if (mName) {
+                LOGV("Deleting RS object %p, name %s", this, mName);
+            } else {
+                LOGV("Deleting RS object %p, no name", this);
+            }
         }
         delete this;
         return true;
@@ -155,7 +157,9 @@ void ObjectBase::remove() const
 
 void ObjectBase::zeroAllUserRef(Context *rsc)
 {
-    LOGV("Forcing release of all outstanding user refs.");
+    if (rsc->props.mLogObjects) {
+        LOGV("Forcing release of all outstanding user refs.");
+    }
 
     // This operation can be slow, only to be called during context cleanup.
     const ObjectBase * o = rsc->mObjHead;
