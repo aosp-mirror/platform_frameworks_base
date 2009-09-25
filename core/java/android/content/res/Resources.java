@@ -25,6 +25,7 @@ import org.xmlpull.v1.XmlPullParserException;
 import android.graphics.Movie;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.ColorDrawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.SystemProperties;
 import android.util.AttributeSet;
@@ -50,8 +51,10 @@ public class Resources {
     private static final boolean DEBUG_CONFIG = false;
     private static final boolean TRACE_FOR_PRELOAD = false;
 
-    private static final int sSdkVersion = SystemProperties.getInt(
-            "ro.build.version.sdk", 0);
+    // Use the current SDK version code.  If we are a development build,
+    // also allow the previous SDK version + 1.
+    private static final int sSdkVersion = Build.VERSION.SDK_INT
+            + ("REL".equals(Build.VERSION.CODENAME) ? 1 : 0);
     private static final Object mSync = new Object();
     private static Resources mSystem = null;
     
