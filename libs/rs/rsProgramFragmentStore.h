@@ -65,6 +65,7 @@ public:
     ProgramFragmentStoreState();
     ~ProgramFragmentStoreState();
     void init(Context *rsc, int32_t w, int32_t h);
+    void deinit(Context *rsc);
 
     ObjectBaseRef<ProgramFragmentStore> mDefault;
     ObjectBaseRef<ProgramFragmentStore> mLast;

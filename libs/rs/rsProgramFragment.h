@@ -75,6 +75,7 @@ public:
 
     ProgramFragment *mPF;
     void init(Context *rsc, int32_t w, int32_t h);
+    void deinit(Context *rsc);
 
     ObjectBaseRef<Type> mTextureTypes[ProgramFragment::MAX_TEXTURE];
     ObjectBaseRef<ProgramFragment> mDefault;

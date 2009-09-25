@@ -24,10 +24,14 @@ using namespace android::renderscript;
 
 SimpleMesh::SimpleMesh(Context *rsc) : ObjectBase(rsc)
 {
+    mAllocFile = __FILE__;
+    mAllocLine = __LINE__;
 }
 
 SimpleMesh::~SimpleMesh()
 {
+    delete[] mVertexTypes;
+    delete[] mVertexBuffers;
 }
 
 void SimpleMesh::render() const

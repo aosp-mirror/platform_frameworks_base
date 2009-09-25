@@ -24,6 +24,8 @@ using namespace android::renderscript;
 
 Light::Light(Context *rsc, bool isLocal, bool isMono) : ObjectBase(rsc)
 {
+    mAllocFile = __FILE__;
+    mAllocLine = __LINE__;
     mIsLocal = isLocal;
     mIsMono = isMono;
 
