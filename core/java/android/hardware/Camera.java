@@ -1093,17 +1093,18 @@ public class Camera {
         }
 
         /**
-         * Sets the orientation of the device in degrees, which instructs the
-         * camera driver to rotate the picture and thumbnail, in order to match
-         * what the user sees from the viewfinder. For example, suppose the
-         * natural position of the device is landscape. If the user takes a
+         * Sets the orientation of the device in degrees. For example, suppose
+         * the natural position of the device is landscape. If the user takes a
          * picture in landscape mode in 2048x1536 resolution, the rotation
          * should be set to 0. If the user rotates the phone 90 degrees
          * clockwise, the rotation should be set to 90. Applications can use
          * {@link android.view.OrientationEventListener} to set this parameter.
          *
-         * Since the picture is rotated, the orientation in the EXIF header is
-         * missing or always 1 (row #0 is top and column #0 is left side).
+         * The camera driver may set orientation in the EXIF header without
+         * rotating the picture. Or the driver may rotate the picture and
+         * the EXIF thumbnail. If the Jpeg picture is rotated, the orientation
+         * in the EXIF header will be missing or 1 (row #0 is top and column #0
+         * is left side).
          *
          * @param rotation The orientation of the device in degrees. Rotation
          *                 can only be 0, 90, 180 or 270.
