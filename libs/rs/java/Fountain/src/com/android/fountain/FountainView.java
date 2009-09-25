@@ -42,7 +42,6 @@ public class FountainView extends RSSurfaceView {
 
     public FountainView(Context context) {
         super(context);
-
         //setFocusable(true);
     }
 
@@ -59,11 +58,7 @@ public class FountainView extends RSSurfaceView {
 
     public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {
         super.surfaceChanged(holder, format, w, h);
-
-        Log.e("rs", "surfaceChanged");
         destroyRS();
-
-
         mRS = createRenderScript(false, true);
         mRender = new FountainRS();
         mRender.init(mRS, getResources(), w, h);
@@ -71,15 +66,7 @@ public class FountainView extends RSSurfaceView {
 
     public void surfaceDestroyed(SurfaceHolder holder) {
         // Surface will be destroyed when we return
-        Log.v("rs", "surfaceDestroyed");
         destroyRS();
-
-        try {
-            java.lang.Thread.sleep(5000);
-        } catch(InterruptedException e) {
-
-        }
-        Runtime.getRuntime().exit(0);
     }
 
 
