@@ -374,6 +374,7 @@ RsType rsi_TypeCreate(Context *rsc)
     st->setDimLOD(stc->mLOD);
     st->setDimFaces(stc->mFaces);
     st->compute();
+    stc->mElement.clear();
 
     return st;
 }
