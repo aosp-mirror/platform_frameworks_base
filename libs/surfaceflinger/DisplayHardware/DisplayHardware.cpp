@@ -160,7 +160,7 @@ void DisplayHardware::init(uint32_t dpy)
     
 
     if (mNativeWindow->isUpdateOnDemand()) {
-        mFlags |= UPDATE_ON_DEMAND;
+        mFlags |= PARTIAL_UPDATES;
     }
     
     if (eglGetConfigAttrib(display, config, EGL_CONFIG_CAVEAT, &dummy) == EGL_TRUE) {
@@ -174,9 +174,9 @@ void DisplayHardware::init(uint32_t dpy)
 
     surface = eglCreateWindowSurface(display, config, mNativeWindow.get(), NULL);
 
-    if (mFlags & UPDATE_ON_DEMAND) {
-        // if we have update on demand, we definitely don't need to
-        // preserve the backbuffer, which is usually costly.
+    if (mFlags & PARTIAL_UPDATES) {
+        // if we have partial updates, we definitely don't need to
+        // preserve the backbuffer, which may be costly.
         eglSurfaceAttrib(display, surface,
                 EGL_SWAP_BEHAVIOR, EGL_BUFFER_DESTROYED);
     }
@@ -199,9 +199,9 @@ void DisplayHardware::init(uint32_t dpy)
             mFlags |= SWAP_RECTANGLE;
         }
     }
-    // when we have the choice between UPDATE_ON_DEMAND and SWAP_RECTANGLE
-    // choose UPDATE_ON_DEMAND, which is more efficient
-    if (mFlags & UPDATE_ON_DEMAND)
+    // when we have the choice between PARTIAL_UPDATES and SWAP_RECTANGLE
+    // choose PARTIAL_UPDATES, which should be more efficient
+    if (mFlags & PARTIAL_UPDATES)
         mFlags &= ~SWAP_RECTANGLE;
 #endif
     
@@ -317,7 +317,7 @@ void DisplayHardware::flip(const Region& dirty) const
     } 
 #endif
     
-    if (mFlags & UPDATE_ON_DEMAND) {
+    if (mFlags & PARTIAL_UPDATES) {
         mNativeWindow->setUpdateRectangle(dirty.getBounds());
     }
     
