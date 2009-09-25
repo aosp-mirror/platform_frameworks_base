@@ -145,6 +145,8 @@ public:
 
     bool logTimes;
 
+    mutable const ObjectBase * mObjHead;
+
 protected:
     Device *mDev;
 

@@ -33,7 +33,7 @@ using namespace android::renderscript;
     ScriptC * sc = (ScriptC *) tls->mScript
 
 
-ScriptC::ScriptC()
+ScriptC::ScriptC(Context *rsc) : Script(rsc)
 {
     mAccScript = NULL;
     memset(&mProgram, 0, sizeof(mProgram));
@@ -106,7 +106,7 @@ void ScriptCState::clear()
     }
 
     delete mScript;
-    mScript = new ScriptC();
+    mScript = new ScriptC(NULL);
 
     mInt32Defines.clear();
     mFloatDefines.clear();
@@ -391,6 +391,7 @@ RsScript rsi_ScriptCCreate(Context * rsc)
 
     ss->runCompiler(rsc, s);
     s->incUserRef();
+    s->setContext(rsc);
     for (int ct=0; ct < MAX_SCRIPT_BANKS; ct++) {
         s->mTypes[ct].set(ss->mConstantBufferTypes[ct].get());
         s->mSlotNames[ct] = ss->mSlotNames[ct];

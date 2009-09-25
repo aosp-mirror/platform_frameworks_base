@@ -22,7 +22,7 @@ using namespace android::renderscript;
 #include <GLES/gl.h>
 #include <GLES/glext.h>
 
-SimpleMesh::SimpleMesh()
+SimpleMesh::SimpleMesh(Context *rsc) : ObjectBase(rsc)
 {
 }
 
@@ -104,7 +104,7 @@ namespace renderscript {
 
 RsSimpleMesh rsi_SimpleMeshCreate(Context *rsc, RsType prim, RsType idx, RsType *vtx, uint32_t vtxCount, uint32_t primType)
 {
-    SimpleMesh *sm = new SimpleMesh();
+    SimpleMesh *sm = new SimpleMesh(rsc);
     sm->incUserRef();
 
     sm->mIndexType.set((const Type *)idx);

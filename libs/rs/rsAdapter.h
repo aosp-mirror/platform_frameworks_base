@@ -23,15 +23,15 @@
 namespace android {
 namespace renderscript {
 
-    
+
 class Adapter1D : public ObjectBase
 {
 
 public:
     // By policy this allocation will hold a pointer to the type
     // but will not destroy it on destruction.
-    Adapter1D();
-    Adapter1D(Allocation *);
+    Adapter1D(Context *);
+    Adapter1D(Context *, Allocation *);
     void reset();
     void * getElement(uint32_t x);
 
@@ -64,8 +64,8 @@ class Adapter2D : public ObjectBase
 public:
     // By policy this allocation will hold a pointer to the type
     // but will not destroy it on destruction.
-    Adapter2D();
-    Adapter2D(Allocation *);
+    Adapter2D(Context *);
+    Adapter2D(Context *, Allocation *);
     void reset();
     void * getElement(uint32_t x, uint32_t y) const;
 
@@ -79,8 +79,8 @@ public:
     inline void setFace(uint32_t face) {mFace = face;}
     //void setArray(uint32_t num, uint32_t value);
 
-    void data(const void *data); 
-    void subData(uint32_t xoff, uint32_t yoff, uint32_t w, uint32_t h, const void *data); 
+    void data(const void *data);
+    void subData(uint32_t xoff, uint32_t yoff, uint32_t w, uint32_t h, const void *data);
 
 protected:
     ObjectBaseRef<Allocation> mAllocation;

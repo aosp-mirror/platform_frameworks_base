@@ -23,18 +23,21 @@
 namespace android {
 namespace renderscript {
 
+class Context;
+
 // An element is a group of Components that occupies one cell in a structure.
 class ObjectBase
 {
 public:
-    ObjectBase();
+    ObjectBase(Context *rsc);
     virtual ~ObjectBase();
 
     void incSysRef() const;
-    void decSysRef() const;
+    bool decSysRef() const;
 
     void incUserRef() const;
-    void decUserRef() const;
+    bool decUserRef() const;
+    bool zeroUserRef() const;
 
     const char * getName() const {
         return mName;
@@ -42,12 +45,24 @@ public:
     void setName(const char *);
     void setName(const char *, uint32_t len);
 
+    Context * getContext() const {return mRSC;}
+    void setContext(Context *);
+
+    static void zeroAllUserRef(Context *rsc);
+
 private:
+    void add() const;
+    void remove() const;
+
+    bool checkDelete() const;
+
     char * mName;
+    Context *mRSC;
     mutable int32_t mSysRefCount;
     mutable int32_t mUserRefCount;
 
-
+    mutable const ObjectBase * mPrev;
+    mutable const ObjectBase * mNext;
 };
 
 template<class T>

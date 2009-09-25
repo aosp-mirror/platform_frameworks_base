@@ -22,13 +22,13 @@ using namespace android;
 using namespace android::renderscript;
 
 
-Element::Element()
+Element::Element(Context *rsc) : ObjectBase(rsc)
 {
     mComponents = NULL;
     mComponentCount = 0;
 }
 
-Element::Element(uint32_t count)
+Element::Element(Context *rsc, uint32_t count) : ObjectBase(rsc)
 {
     mComponents = new ObjectBaseRef<Component> [count];
     mComponentCount = count;
@@ -197,7 +197,8 @@ void rsi_ElementBegin(Context *rsc)
 void rsi_ElementAdd(Context *rsc, RsDataKind dk, RsDataType dt, bool isNormalized, size_t bits, const char *name)
 {
     ElementState * sec = &rsc->mStateElement;
-    Component *c = new Component(static_cast<Component::DataKind>(dk),
+    Component *c = new Component(rsc,
+                                 static_cast<Component::DataKind>(dk),
                                  static_cast<Component::DataType>(dt),
                                  isNormalized,
                                  bits,
@@ -208,7 +209,7 @@ void rsi_ElementAdd(Context *rsc, RsDataKind dk, RsDataType dt, bool isNormalize
 RsElement rsi_ElementCreate(Context *rsc)
 {
     ElementState * sec = &rsc->mStateElement;
-    Element *se = new Element(sec->mComponentBuildList.size());
+    Element *se = new Element(rsc, sec->mComponentBuildList.size());
 
     for (size_t ct = 0; ct < se->getComponentCount(); ct++) {
         se->setComponent(ct, sec->mComponentBuildList[ct]);

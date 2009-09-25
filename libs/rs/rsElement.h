@@ -28,7 +28,7 @@ namespace renderscript {
 class Element : public ObjectBase
 {
 public:
-    Element(uint32_t count);
+    Element(Context *, uint32_t count);
     ~Element();
 
 
@@ -59,7 +59,7 @@ protected:
     ObjectBaseRef<Component> * mComponents;
     //uint32_t *mOffsetTable;
 
-    Element();
+    Element(Context *);
 };
 
 

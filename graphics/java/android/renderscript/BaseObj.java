@@ -60,9 +60,10 @@ class BaseObj {
     protected void finalize() throws Throwable
     {
         if (!mDestroyed) {
-            if(mID != 0) {
+            if(mID != 0 && mRS.isAlive()) {
                 mRS.nObjDestroyOOB(mID);
             }
+            mRS = null;
             mID = 0;
             mDestroyed = true;
             Log.v(RenderScript.LOG_TAG,
