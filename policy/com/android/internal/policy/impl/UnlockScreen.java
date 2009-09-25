@@ -181,9 +181,9 @@ class UnlockScreen extends LinearLayoutWithDefaultTouchRecepient
         mStatusSep = (TextView) findViewById(R.id.statusSep);
         mStatus2 = (TextView) findViewById(R.id.status2);
 
-        mShowingBatteryInfo = true;
-        mPluggedIn = true;
-        mBatteryLevel = 100;
+        mShowingBatteryInfo = mUpdateMonitor.shouldShowBatteryInfo();
+        mPluggedIn = mUpdateMonitor.isDevicePluggedIn();
+        mBatteryLevel = mUpdateMonitor.getBatteryLevel();
         mNextAlarm = mLockPatternUtils.getNextAlarm();
         updateStatusLines();
 
