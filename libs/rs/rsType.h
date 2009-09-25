@@ -139,12 +139,6 @@ public:
     uint32_t mLOD;
     bool mFaces;
     ObjectBaseRef<const Element> mElement;
-
-    ObjectBaseRef<const Type> mIndexType;
-    ObjectBaseRef<const Type> mPrimitiveType;
-    ObjectBaseRef<const Type> *mVertexTypes;
-
-
 };
 
 
