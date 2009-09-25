@@ -1876,6 +1876,26 @@ public final class ContactsContract {
          * The MIME type of a single group.
          */
         public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/group";
+
+        /**
+         * An optional query parameter added to {@link #CONTENT_URI} signaling
+         * that any update of {@link Contacts#STARRED} should not be triggered
+         * based on {@link #GROUP_VISIBLE} during the current update. Callers
+         * should follow-up with a separate update using {@link #FORCE_UPDATE}
+         * to ensure that {@link Contacts#STARRED} remains consistent.
+         *
+         * @hide
+         */
+        public static final String DELAY_UPDATE = "delay_update";
+
+        /**
+         * An optional query parameter added to {@link #CONTENT_URI} signaling
+         * that a full update of {@link Contacts#STARRED} should be triggered.
+         * This is usually only needed after using {@link #DELAY_UPDATE}.
+         *
+         * @hide
+         */
+        public static final String FORCE_UPDATE = "force_update";
     }
 
     /**
