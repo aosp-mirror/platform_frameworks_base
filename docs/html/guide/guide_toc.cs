@@ -238,6 +238,7 @@
       <li><a href="<?cs var:toroot ?>guide/developing/debug-tasks.html">
             <span class="en">Debugging Tasks</span>
           </a></li>
+      <li><a href="<?cs var:toroot ?>guide/developing/updating-sdk.html">Updating Your SDK</a></li>
       <li class="toggle-list">
         <div><a href="<?cs var:toroot ?>guide/developing/tools/index.html">
             <span class="en">Tools</span>

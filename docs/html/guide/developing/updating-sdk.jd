@@ -1,0 +1,108 @@
+page.title=Updating Your SDK
+@jd:body
+
+
+<div id="qv-wrapper">
+<div id="qv">
+<h2>Quickview</h2>
+<ul>
+  <li>Use the Android SDK and AVD Manager to 
+   install individual Android platforms, add-ons, tools
+   and documentation.</li>
+  <li>Keep your SDK up-to-date without having to install new
+   SDK directories and update your Eclipse preferences or {@code PATH} 
+   variable.</li>
+  <li>The Android SDK and AVD Manager is available only with the 
+   Android 1.6 SDK or later.</li>
+</ul>
+
+<h2>In this document</h2>
+<ol>
+  <li><a href="#Install">Installing SDK Packages</a></li>
+  <li><a href="#Add">Adding SDK Package Sites</a></li>
+</ol>
+</div>
+</div>
+
+<p>The <strong>Android SDK and AVD Manager</strong> lets you
+update your Android SDK without a visit to the
+Android Developers web site. Instead of downloading an entirely new SDK
+that includes Android platforms, tools, and documentation, you can instead
+install only the individual packages that you want.</p>
+
+<p>For example, when a new version of the Android platform is made available
+for developing applications, use the SDK and AVD Manager to install the
+platform into your existing SDK directory. You can then use the new platform
+in your <a href="{@docRoot}guide/developing/tools/avd.html">AVDs</a> and
+build your apps against it.</p>
+
+<p>The benefit to using this feature is that your SDK directory will
+remain the same. You don't need to reset the SDK location in
+your Eclipse preferences or modify your {@code PATH} environment variable,
+because all new packages are installed into your existing SDK directory.</p>
+
+
+<p>The SDK and AVD Manager can be opened in two ways:</p>
+<ul>
+  <li>Execute the 
+  <a href="{@docRoot}guide/developing/tools/othertools.html#android">{@code 
+  android}</a> tool with no options, or</li>
+  <li>From Eclipse, select <strong>Window</strong> > <strong>Android 
+  SDK and AVD Manager</strong>.</li>
+</ul>
+
+<p>The screenshot below shows the Android SDK and AVD Manager
+with the Available Packages open.</p>
+
+<img src="{@docRoot}images/sdk_manager_packages.png" alt="" />
+
+
+<h2 id="Install">Installing SDK Packages</h2>
+
+<p>When a new Android SDK platform, add-on, set of development tools or
+documentation becomes available, you can quickly download and
+install them into your existing Android SDK:</p>
+
+<ol>
+  <li>Select <strong>Available Packages</strong> in the left panel.
+  This will reveal all packages currently available for download.</li>
+  <li>Select the packages you'd like to install and click <strong>Install
+  Selected</strong>.</li>
+  <li>Verify and accept the packages you want and click <strong>Install
+  Accepted</strong>. The packages will now be installed into your existing
+  Android SDK directories.</li>
+</ol>
+
+<p>New platforms are automatically saved into the 
+<code><em>&lt;sdk_dir>/</em>platforms/</code> directory of your SDK;
+new add-ons are saved in the <code><em>&lt;sdk_dir>/</em>add-ons/</code>
+directory; and new documentation is saved in the existing
+<code><em>&lt;sdk_dir>/</em>docs/</code> directory (old docs are replaced).</p>
+
+<p class="note"><strong>Tip:</strong>
+Use the "Display updates only" checkbox to show only the packages
+you do not have.</p>
+
+
+<h2 id="Add">Adding SDK Package Sites</h2>
+
+<p>By default, <strong>Available Packages</strong> only shows 
+the Google repository for Android SDK packages and Google API
+add-ons. You can add additional sites that host
+Android SDK add-ons, then download add-on packages from them.</p>	
+
+<p>For example, a mobile carrier or hardware manufacturer may offer additional
+API libraries that are supported by their own Android-powered devices. 
+In order for you to develop using their libraries, you may need to install an 
+Android SDK add-on.
+If the carrier or manufacturer has hosted an add-on repository file on their
+web site, add their site to the SDK and AVD Manager:</p>
+<ol>
+  <li>Select <strong>Available Packages</strong> in the left panel.</li>
+  <li>Click <strong>Add Site</strong> and enter the URL of the 
+{@code repository.xml} file. Click <strong>OK</strong>.</li>
+</ol>
+<p>Any SDK packages available from the web site will now be listed and
+available for you to install in your existing Android SDK.</p>
+
+
