@@ -45,7 +45,7 @@ public class RSSurfaceView extends SurfaceView implements SurfaceHolder.Callback
     public RSSurfaceView(Context context) {
         super(context);
         init();
-        Log.v(RenderScript.LOG_TAG, "RSSurfaceView");
+        //Log.v(RenderScript.LOG_TAG, "RSSurfaceView");
     }
 
     /**
@@ -55,7 +55,7 @@ public class RSSurfaceView extends SurfaceView implements SurfaceHolder.Callback
     public RSSurfaceView(Context context, AttributeSet attrs) {
         super(context, attrs);
         init();
-        Log.v(RenderScript.LOG_TAG, "RSSurfaceView");
+        //Log.v(RenderScript.LOG_TAG, "RSSurfaceView");
     }
 
     private void init() {
@@ -80,7 +80,7 @@ public class RSSurfaceView extends SurfaceView implements SurfaceHolder.Callback
      */
     public void surfaceDestroyed(SurfaceHolder holder) {
         // Surface will be destroyed when we return
-        Log.v(RenderScript.LOG_TAG, "surfaceDestroyed");
+        //Log.v(RenderScript.LOG_TAG, "surfaceDestroyed");
     }
 
     /**
@@ -88,7 +88,7 @@ public class RSSurfaceView extends SurfaceView implements SurfaceHolder.Callback
      * not normally called or subclassed by clients of RSSurfaceView.
      */
     public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {
-        Log.v(RenderScript.LOG_TAG, "surfaceChanged");
+        //Log.v(RenderScript.LOG_TAG, "surfaceChanged");
     }
 
     /**
@@ -101,7 +101,7 @@ public class RSSurfaceView extends SurfaceView implements SurfaceHolder.Callback
         if(mRS != null) {
             mRS.pause();
         }
-        Log.v(RenderScript.LOG_TAG, "onPause");
+        //Log.v(RenderScript.LOG_TAG, "onPause");
     }
 
     /**
@@ -115,7 +115,7 @@ public class RSSurfaceView extends SurfaceView implements SurfaceHolder.Callback
         if(mRS != null) {
             mRS.resume();
         }
-        Log.v(RenderScript.LOG_TAG, "onResume");
+        //Log.v(RenderScript.LOG_TAG, "onResume");
     }
 
     /**
@@ -125,7 +125,7 @@ public class RSSurfaceView extends SurfaceView implements SurfaceHolder.Callback
      * @param r the runnable to be run on the GL rendering thread.
      */
     public void queueEvent(Runnable r) {
-        Log.v(RenderScript.LOG_TAG, "queueEvent");
+        //Log.v(RenderScript.LOG_TAG, "queueEvent");
     }
 
     /**

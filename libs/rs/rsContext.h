@@ -143,7 +143,11 @@ public:
     bool checkVersion1_1() const {return (mGL.mMajorVersion > 1) || (mGL.mMinorVersion >= 1); }
     bool checkVersion2_0() const {return mGL.mMajorVersion >= 2; }
 
-    bool logTimes;
+    struct {
+        bool mLogTimes;
+        bool mLogScripts;
+        bool mLogObjects;
+    } props;
 
     mutable const ObjectBase * mObjHead;
 
