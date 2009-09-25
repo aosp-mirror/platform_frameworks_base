@@ -427,6 +427,7 @@ public final class BluetoothDevice implements Parcelable {
      * <p>Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN}.
      *
      * @return false on immediate error, true if bonding will begin
+     * @hide
      */
     public boolean createBond() {
         try {
@@ -440,6 +441,7 @@ public final class BluetoothDevice implements Parcelable {
      * <p>Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN}.
      *
      * @return true on sucess, false on error
+     * @hide
      */
     public boolean cancelBondProcess() {
         try {
@@ -456,6 +458,7 @@ public final class BluetoothDevice implements Parcelable {
      * <p>Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN}.
      *
      * @return true on sucess, false on error
+     * @hide
      */
     public boolean removeBond() {
         try {
