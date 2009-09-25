@@ -196,8 +196,9 @@ BackupDataReader::Status()
                 m_done = true; \
             } else { \
                 m_status = errno; \
+                LOGD("CHECK_SIZE(a=%ld e=%ld) failed at line %d m_status='%s'", \
+                    long(actual), long(expected), __LINE__, strerror(m_status)); \
             } \
-            LOGD("CHECK_SIZE failed with at line %d m_status='%s'", __LINE__, strerror(m_status)); \
             return m_status; \
         } \
     } while(0)
