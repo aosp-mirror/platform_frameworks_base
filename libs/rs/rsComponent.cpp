@@ -23,6 +23,8 @@ using namespace android::renderscript;
 
 Component::Component(Context *rsc) : ObjectBase(rsc)
 {
+    mAllocFile = __FILE__;
+    mAllocLine = __LINE__;
     mType = FLOAT;
     mKind = USER;
     mIsNormalized = false;
@@ -33,6 +35,8 @@ Component::Component(Context *rsc,
     DataKind dk, DataType dt,
     bool isNormalized, uint32_t bits, const char * name) : ObjectBase(rsc)
 {
+    mAllocFile = __FILE__;
+    mAllocLine = __LINE__;
     mType = dt;
     mKind = dk;
     mIsNormalized = isNormalized;

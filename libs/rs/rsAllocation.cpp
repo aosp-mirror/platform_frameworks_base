@@ -24,6 +24,8 @@ using namespace android::renderscript;
 
 Allocation::Allocation(Context *rsc, const Type *type) : ObjectBase(rsc)
 {
+    mAllocFile = __FILE__;
+    mAllocLine = __LINE__;
     mPtr = NULL;
 
     mCpuWrite = false;

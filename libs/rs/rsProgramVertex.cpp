@@ -27,6 +27,8 @@ using namespace android::renderscript;
 ProgramVertex::ProgramVertex(Context *rsc, Element *in, Element *out) :
     Program(rsc, in, out)
 {
+    mAllocFile = __FILE__;
+    mAllocLine = __LINE__;
     mTextureMatrixEnable = false;
     mLightCount = 0;
 }
@@ -139,10 +141,10 @@ void ProgramVertexState::init(Context *rsc, int32_t w, int32_t h)
 
     rsi_TypeBegin(rsc, e);
     rsi_TypeAdd(rsc, RS_DIMENSION_X, 48);
-    mAllocType = rsi_TypeCreate(rsc);
+    mAllocType.set((Type *)rsi_TypeCreate(rsc));
 
     ProgramVertex *pv = new ProgramVertex(rsc, NULL, NULL);
-    Allocation *alloc = (Allocation *)rsi_AllocationCreateTyped(rsc, mAllocType);
+    Allocation *alloc = (Allocation *)rsi_AllocationCreateTyped(rsc, mAllocType.get());
     mDefaultAlloc.set(alloc);
     mDefault.set(pv);
 
@@ -154,6 +156,16 @@ void ProgramVertexState::init(Context *rsc, int32_t w, int32_t h)
 
     m.loadIdentity();
     alloc->subData(RS_PROGRAM_VERTEX_MODELVIEW_OFFSET, 16, &m.m[0], 16*4);
+}
+
+void ProgramVertexState::deinit(Context *rsc)
+{
+    mDefaultAlloc.clear();
+    mDefault.clear();
+    mAllocType.clear();
+    mLast.clear();
+    delete mPV;
+    mPV = NULL;
 }
 
 

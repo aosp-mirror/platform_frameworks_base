@@ -269,11 +269,16 @@ void * Context::threadProc(void *vrsc)
      }
 
      LOGV("RS Thread exiting");
+     rsc->mRaster.clear();
+     rsc->mFragment.clear();
+     rsc->mVertex.clear();
+     rsc->mFragmentStore.clear();
+     rsc->mRootScript.clear();
+     rsc->mStateRaster.deinit(rsc);
+     rsc->mStateVertex.deinit(rsc);
+     rsc->mStateFragment.deinit(rsc);
+     rsc->mStateFragmentStore.deinit(rsc);
      ObjectBase::zeroAllUserRef(rsc);
-     rsc->mRaster.set(NULL);
-     rsc->mFragment.set(NULL);
-     rsc->mVertex.set(NULL);
-     rsc->mFragmentStore.set(NULL);
 
      glClearColor(0,0,0,0);
      glClear(GL_COLOR_BUFFER_BIT);

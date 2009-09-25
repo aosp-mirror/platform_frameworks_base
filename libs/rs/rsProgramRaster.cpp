@@ -32,6 +32,8 @@ ProgramRaster::ProgramRaster(Context *rsc,
                              bool pointSprite) :
     Program(rsc, in, out)
 {
+    mAllocFile = __FILE__;
+    mAllocLine = __LINE__;
     mPointSmooth = pointSmooth;
     mLineSmooth = lineSmooth;
     mPointSprite = pointSprite;
@@ -98,6 +100,12 @@ void ProgramRasterState::init(Context *rsc, int32_t w, int32_t h)
 {
     ProgramRaster *pr = new ProgramRaster(rsc, NULL, NULL, false, false, false);
     mDefault.set(pr);
+}
+
+void ProgramRasterState::deinit(Context *rsc)
+{
+    mDefault.clear();
+    mLast.clear();
 }
 
 

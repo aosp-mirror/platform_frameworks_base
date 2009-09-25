@@ -35,6 +35,8 @@ using namespace android::renderscript;
 
 ScriptC::ScriptC(Context *rsc) : Script(rsc)
 {
+    mAllocFile = __FILE__;
+    mAllocLine = __LINE__;
     mAccScript = NULL;
     memset(&mProgram, 0, sizeof(mProgram));
 }
