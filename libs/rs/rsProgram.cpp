@@ -21,7 +21,7 @@ using namespace android;
 using namespace android::renderscript;
 
 
-Program::Program(Element *in, Element *out)
+Program::Program(Context *rsc, Element *in, Element *out) : ObjectBase(rsc)
 {
     mElementIn.set(in);
     mElementOut.set(out);

@@ -21,7 +21,7 @@ using namespace android;
 using namespace android::renderscript;
 
 
-Component::Component()
+Component::Component(Context *rsc) : ObjectBase(rsc)
 {
     mType = FLOAT;
     mKind = USER;
@@ -29,9 +29,9 @@ Component::Component()
     mBits = 0;
 }
 
-Component::Component(
+Component::Component(Context *rsc,
     DataKind dk, DataType dt,
-    bool isNormalized, uint32_t bits, const char * name)
+    bool isNormalized, uint32_t bits, const char * name) : ObjectBase(rsc)
 {
     mType = dt;
     mKind = dk;

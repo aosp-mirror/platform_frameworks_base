@@ -242,7 +242,7 @@ void FileA3D::IO::loadString(String8 *s)
 
 void FileA3D::processChunk_Mesh(Context *rsc, IO *io, A3DIndexEntry *ie)
 {
-    Mesh * m = new Mesh;
+    Mesh * m = new Mesh(rsc);
 
     m->mPrimitivesCount = io->loadU32();
     m->mPrimitives = new Mesh::Primitive_t *[m->mPrimitivesCount];

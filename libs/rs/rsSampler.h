@@ -31,7 +31,8 @@ class SamplerState;
 class Sampler : public ObjectBase
 {
 public:
-    Sampler(RsSamplerValue magFilter,
+    Sampler(Context *,
+            RsSamplerValue magFilter,
             RsSamplerValue minFilter,
             RsSamplerValue wrapS,
             RsSamplerValue wrapT,
@@ -55,12 +56,12 @@ protected:
     int32_t mBoundSlot;
 
 private:
-    Sampler();
+    Sampler(Context *);
 
 };
 
 
-class SamplerState 
+class SamplerState
 {
 public:
 

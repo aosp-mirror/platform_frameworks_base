@@ -28,7 +28,7 @@ class ProgramFragmentStoreState;
 class ProgramFragmentStore : public Program
 {
 public:
-    ProgramFragmentStore(Element *in, Element *out);
+    ProgramFragmentStore(Context *, Element *in, Element *out);
     virtual ~ProgramFragmentStore();
 
     virtual void setupGL(const Context *, ProgramFragmentStoreState *);

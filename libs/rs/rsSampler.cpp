@@ -25,17 +25,18 @@ using namespace android;
 using namespace android::renderscript;
 
 
-Sampler::Sampler()
+Sampler::Sampler(Context *rsc) : ObjectBase(rsc)
 {
     // Should not get called.
     rsAssert(0);
 }
 
-Sampler::Sampler(RsSamplerValue magFilter,
+Sampler::Sampler(Context *rsc,
+                 RsSamplerValue magFilter,
                  RsSamplerValue minFilter,
                  RsSamplerValue wrapS,
                  RsSamplerValue wrapT,
-                 RsSamplerValue wrapR)
+                 RsSamplerValue wrapR) : ObjectBase(rsc)
 {
     mMagFilter = magFilter;
     mMinFilter = minFilter;
@@ -138,7 +139,8 @@ RsSampler rsi_SamplerCreate(Context *rsc)
     SamplerState * ss = &rsc->mStateSampler;
 
 
-    Sampler * s = new Sampler(ss->mMagFilter,
+    Sampler * s = new Sampler(rsc,
+                              ss->mMagFilter,
                               ss->mMinFilter,
                               ss->mWrapS,
                               ss->mWrapT,
