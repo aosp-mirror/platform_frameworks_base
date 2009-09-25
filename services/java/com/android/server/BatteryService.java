@@ -267,6 +267,20 @@ class BatteryService extends Binder {
                 logOutlier = true;
             }
             
+            final boolean plugged = mPlugType != BATTERY_PLUGGED_NONE;
+            final boolean oldPlugged = mLastPlugType != BATTERY_PLUGGED_NONE;
+
+            /* The ACTION_BATTERY_LOW broadcast is sent in these situations:
+             * - is just un-plugged (previously was plugged) and battery level is under WARNING, or
+             * - is not plugged and battery level crosses the WARNING boundary (becomes < 15).
+             */
+            final boolean sendBatteryLow = !plugged
+                && mBatteryStatus != BatteryManager.BATTERY_STATUS_UNKNOWN
+                && mBatteryLevel < BATTERY_LEVEL_WARNING
+                && (oldPlugged || mLastBatteryLevel >= BATTERY_LEVEL_WARNING);
+            
+            sendIntent();
+            
             // Separate broadcast is sent for power connected / not connected
             // since the standard intent will not wake any applications and some
             // applications may want to have smart behavior based on this.
@@ -281,28 +295,6 @@ class BatteryService extends Binder {
                 mContext.sendBroadcast(statusIntent);
             }
 
-            final boolean plugged = mPlugType != BATTERY_PLUGGED_NONE;
-            final boolean oldPlugged = mLastPlugType != BATTERY_PLUGGED_NONE;
-
-            /* The ACTION_BATTERY_LOW broadcast is sent in these situations:
-             * - is just un-plugged (previously was plugged) and battery level is under WARNING, or
-             * - is not plugged and battery level crosses the WARNING boundary (becomes < 15).
-             */
-            final boolean sendBatteryLow = !plugged
-                && mBatteryStatus != BatteryManager.BATTERY_STATUS_UNKNOWN
-                && mBatteryLevel < BATTERY_LEVEL_WARNING
-                && (oldPlugged || mLastBatteryLevel >= BATTERY_LEVEL_WARNING);
-            
-            mLastBatteryStatus = mBatteryStatus;
-            mLastBatteryHealth = mBatteryHealth;
-            mLastBatteryPresent = mBatteryPresent;
-            mLastBatteryLevel = mBatteryLevel;
-            mLastPlugType = mPlugType;
-            mLastBatteryVoltage = mBatteryVoltage;
-            mLastBatteryTemperature = mBatteryTemperature;
-            mLastBatteryLevelCritical = mBatteryLevelCritical;
-
-            sendIntent();
             if (sendBatteryLow) {
                 mSentLowBatteryBroadcast = true;
                 statusIntent.setAction(Intent.ACTION_BATTERY_LOW);
@@ -317,6 +309,15 @@ class BatteryService extends Binder {
             if (logOutlier && dischargeDuration != 0) {
                 logOutlier(dischargeDuration);
             }
+            
+            mLastBatteryStatus = mBatteryStatus;
+            mLastBatteryHealth = mBatteryHealth;
+            mLastBatteryPresent = mBatteryPresent;
+            mLastBatteryLevel = mBatteryLevel;
+            mLastPlugType = mPlugType;
+            mLastBatteryVoltage = mBatteryVoltage;
+            mLastBatteryTemperature = mBatteryTemperature;
+            mLastBatteryLevelCritical = mBatteryLevelCritical;
         }
     }
 
