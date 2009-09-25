@@ -56,10 +56,10 @@ public class RotarySelector extends View {
 
     // UI elements
     private Bitmap mBackground;
-    private Drawable mDimple;
+    private Bitmap mDimple;
 
-    private Drawable mLeftHandleIcon;
-    private Drawable mRightHandleIcon;
+    private Bitmap mLeftHandleIcon;
+    private Bitmap mRightHandleIcon;
 
     private Bitmap mArrowShortLeftAndRight;
     private Bitmap mArrowLongLeft;  // Long arrow starting on the left, pointing clockwise
@@ -177,7 +177,7 @@ public class RotarySelector extends View {
 
         // Assets (all are BitmapDrawables).
         mBackground = getBitmapFor(R.drawable.jog_dial_bg);
-        mDimple = r.getDrawable(R.drawable.jog_dial_dimple);
+        mDimple = getBitmapFor(R.drawable.jog_dial_dimple);
 
         mArrowLongLeft = getBitmapFor(R.drawable.jog_dial_arrow_long_left_green);
         mArrowLongRight = getBitmapFor(R.drawable.jog_dial_arrow_long_right_red);
@@ -187,7 +187,7 @@ public class RotarySelector extends View {
 
         mEdgeTriggerThresh = (int) (mDensity * EDGE_TRIGGER_DIP);
 
-        mDimpleWidth = mDimple.getIntrinsicWidth();
+        mDimpleWidth = mDimple.getWidth();
 
         mBackgroundWidth = mBackground.getWidth();
         mBackgroundHeight = mBackground.getHeight();
@@ -239,20 +239,9 @@ public class RotarySelector extends View {
      * @param resId the resource ID.
      */
     public void setLeftHandleResource(int resId) {
-        Drawable d = null;
         if (resId != 0) {
-            d = getResources().getDrawable(resId);
+            mLeftHandleIcon = getBitmapFor(resId);
         }
-        setLeftHandleDrawable(d);
-    }
-
-    /**
-     * Sets the left handle icon to a given Drawable.
-     *
-     * @param d the Drawable to use as the icon, or null to remove the icon.
-     */
-    public void setLeftHandleDrawable(Drawable d) {
-        mLeftHandleIcon = d;
         invalidate();
     }
 
@@ -265,22 +254,12 @@ public class RotarySelector extends View {
      * @param resId the resource ID.
      */
     public void setRightHandleResource(int resId) {
-        Drawable d = null;
         if (resId != 0) {
-            d = getResources().getDrawable(resId);
+            mRightHandleIcon = getBitmapFor(resId);
         }
-        setRightHandleDrawable(d);
-    }
-
-    /**
-     * Sets the right handle icon to a given Drawable.
-     *
-     * @param d the Drawable to use as the icon, or null to remove the icon.
-     */
-    public void setRightHandleDrawable(Drawable d) {
-        mRightHandleIcon = d;
         invalidate();
     }
+
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
@@ -699,18 +678,15 @@ public class RotarySelector extends View {
     }
 
     /**
-     * Sets the bounds of the specified Drawable so that it's centered
-     * on the point (x,y), then draws it onto the specified canvas.
+     * Draw the bitmap so that it's centered
+     * on the point (x,y), then draws it using specified canvas.
      * TODO: is there already a utility method somewhere for this?
      */
-    private static void drawCentered(Drawable d, Canvas c, int x, int y) {
-        int w = d.getIntrinsicWidth();
-        int h = d.getIntrinsicHeight();
+    private void drawCentered(Bitmap d, Canvas c, int x, int y) {
+        int w = d.getWidth();
+        int h = d.getHeight();
 
-        // if (DBG) log("--> drawCentered: " + x + " , " + y + "; intrinsic " + w + " x " + h);
-        d.setBounds(x - (w / 2), y - (h / 2),
-                    x + (w / 2), y + (h / 2));
-        d.draw(c);
+        c.drawBitmap(d, x - (w / 2), y - (h / 2), mPaint);
     }
 
 
