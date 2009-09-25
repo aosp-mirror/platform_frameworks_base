@@ -124,11 +124,13 @@ static void initSocketNative(JNIEnv *env, jobject obj) {
     switch (type) {
     case TYPE_RFCOMM:
         lm |= auth ? RFCOMM_LM_AUTH : 0;
-        lm |= encrypt? RFCOMM_LM_ENCRYPT : 0;
+        lm |= encrypt ? RFCOMM_LM_ENCRYPT : 0;
+        lm |= (auth && encrypt) ? RFCOMM_LM_SECURE : 0;
         break;
     case TYPE_L2CAP:
         lm |= auth ? L2CAP_LM_AUTH : 0;
-        lm |= encrypt? L2CAP_LM_ENCRYPT : 0;
+        lm |= encrypt ? L2CAP_LM_ENCRYPT : 0;
+        lm |= (auth && encrypt) ? L2CAP_LM_SECURE : 0;
         break;
     }
 
