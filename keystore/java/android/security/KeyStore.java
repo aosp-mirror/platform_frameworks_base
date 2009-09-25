@@ -172,8 +172,10 @@ public class KeyStore {
             socket.shutdownOutput();
 
             InputStream in = socket.getInputStream();
-            code = in.read();
-            if (code == -1) {
+            if ((code = in.read()) != NO_ERROR) {
+                if (code != -1) {
+                    mError = code;
+                }
                 return null;
             }
 
@@ -194,7 +196,7 @@ public class KeyStore {
                 }
                 results.add(result);
             }
-            mError = code;
+            mError = NO_ERROR;
             return results.toArray(new byte[results.size()][]);
         } catch (IOException e) {
             // ignore
