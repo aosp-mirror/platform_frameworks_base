@@ -498,6 +498,7 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
             updateSearchAppIcon();
             updateSearchBadge();
             updateQueryHint();
+            mSearchAutoComplete.showDropDownAfterLayout();
         } 
     }
     
