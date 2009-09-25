@@ -1153,6 +1153,16 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             reply.writeNoException();
             return true;
         }
+        
+        case OVERRIDE_PENDING_TRANSITION_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            IBinder token = data.readStrongBinder();
+            String packageName = data.readString();
+            int enterAnim = data.readInt();
+            int exitAnim = data.readInt();
+            overridePendingTransition(token, packageName, enterAnim, exitAnim);
+            return true;
+        }
         }
         
         return super.onTransact(code, data, reply, flags);
@@ -2530,5 +2540,20 @@ class ActivityManagerProxy implements IActivityManager
         reply.recycle();
     }
         
+    public void overridePendingTransition(IBinder token, String packageName,
+            int enterAnim, int exitAnim) throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        data.writeStrongBinder(token);
+        data.writeString(packageName);
+        data.writeInt(enterAnim);
+        data.writeInt(exitAnim);
+        mRemote.transact(OVERRIDE_PENDING_TRANSITION_TRANSACTION, data, reply, 0);
+        reply.readException();
+        data.recycle();
+        reply.recycle();
+    }
+    
     private IBinder mRemote;
 }
