@@ -89,7 +89,7 @@ public class ViewConfiguration {
     /**
      * Distance a touch can wander before we think the user is scrolling in pixels
      */
-    private static final int TOUCH_SLOP = 25;
+    private static final int TOUCH_SLOP = 16;
     
     /**
      * Distance between the first touch and second touch to still be considered a double tap
