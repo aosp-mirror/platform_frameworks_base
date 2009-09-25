@@ -1416,6 +1416,7 @@ public final class Settings {
             DIM_SCREEN,
             SCREEN_OFF_TIMEOUT,
             SCREEN_BRIGHTNESS,
+            SCREEN_BRIGHTNESS_MODE,
             VIBRATE_ON,
             NOTIFICATIONS_USE_RING_VOLUME,
             MODE_RINGER,
