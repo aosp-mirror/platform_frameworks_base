@@ -73,6 +73,10 @@ import com.android.internal.R;
 public class AccountManagerService
         extends IAccountManager.Stub
         implements RegisteredServicesCacheListener {
+    private static final String GOOGLE_ACCOUNT_TYPE = "com.google.GAIA";
+
+    private static final String NO_BROADCAST_FLAG = "nobroadcast";
+
     private static final String TAG = "AccountManagerService";
 
     private static final int TIMEOUT_DELAY_MS = 1000 * 60;
@@ -357,6 +361,14 @@ public class AccountManagerService
         SQLiteDatabase db = mOpenHelper.getWritableDatabase();
         db.beginTransaction();
         try {
+            boolean noBroadcast = false;
+            if (account.type.equals(GOOGLE_ACCOUNT_TYPE)) {
+                // Look for the 'nobroadcast' flag and remove it since we don't want it to persist
+                // in the db.
+                noBroadcast = extras.getBoolean(NO_BROADCAST_FLAG, false);
+                extras.remove(NO_BROADCAST_FLAG);
+            }
+
             long numMatches = DatabaseUtils.longForQuery(db,
                     "select count(*) from " + TABLE_ACCOUNTS
                             + " WHERE " + ACCOUNTS_NAME + "=? AND " + ACCOUNTS_TYPE+ "=?",
@@ -381,7 +393,9 @@ public class AccountManagerService
                 }
             }
             db.setTransactionSuccessful();
-            sendAccountsChangedBroadcast();
+            if (!noBroadcast) {
+                sendAccountsChangedBroadcast();
+            }
             return true;
         } finally {
             db.endTransaction();
@@ -608,6 +622,10 @@ public class AccountManagerService
     public void setUserData(Account account, String key, String value) {
         checkAuthenticateAccountsPermission(account);
         long identityToken = clearCallingIdentity();
+        if (account.type.equals(GOOGLE_ACCOUNT_TYPE) && key.equals("broadcast")) {
+            sendAccountsChangedBroadcast();
+            return;
+        }
         try {
             writeUserdataIntoDatabase(account, key, value);
         } finally {
