@@ -3015,6 +3015,23 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
+     * Call immediately after one of the flavors of {@link #startActivity(Intent)}
+     * or {@link #finish} to specify an explicit transition animation to
+     * perform next.
+     * @param enterAnim A resource ID of the animation resource to use for
+     * the incoming activity.
+     * @param exitAnim A resource ID of the animation resource to use for
+     * the outgoing activity.
+     */
+    public void overridePendingTransition(int enterAnim, int exitAnim) {
+        try {
+            ActivityManagerNative.getDefault().overridePendingTransition(
+                    mToken, getPackageName(), enterAnim, exitAnim);
+        } catch (RemoteException e) {
+        }
+    }
+    
+    /**
      * Call this to set the result that your activity will return to its
      * caller.
      * 

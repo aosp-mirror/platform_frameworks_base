@@ -285,6 +285,9 @@ public interface IActivityManager extends IInterface {
     public Debug.MemoryInfo[] getProcessMemoryInfo(int[] pids)
             throws RemoteException;
     
+    public void overridePendingTransition(IBinder token, String packageName,
+            int enterAnim, int exitAnim) throws RemoteException;
+    
     /*
      * Private non-Binder interfaces
      */
@@ -444,4 +447,5 @@ public interface IActivityManager extends IInterface {
     int GET_PROCESS_MEMORY_INFO_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+97;
     int KILL_APPLICATION_PROCESS_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+98;
     int START_ACTIVITY_INTENT_SENDER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+99;
+    int OVERRIDE_PENDING_TRANSITION_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+100;
 }
