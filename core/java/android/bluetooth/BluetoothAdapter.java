@@ -297,7 +297,7 @@ public final class BluetoothAdapter {
      * Turn on the local Bluetooth adapter.
      * <p>This powers on the underlying Bluetooth hardware, and starts all
      * Bluetooth system services.
-     * <p>This is an asynchronous call: it will return immediatley, and
+     * <p>This is an asynchronous call: it will return immediately, and
      * clients should listen for {@link #ACTION_STATE_CHANGED}
      * to be notified of subsequent adapter state changes. If this call returns
      * true, then the adapter state will immediately transition from {@link
@@ -322,7 +322,7 @@ public final class BluetoothAdapter {
      * Turn off the local Bluetooth adapter.
      * <p>This gracefully shuts down all Bluetooth connections, stops Bluetooth
      * system services, and powers down the underlying Bluetooth hardware.
-     * <p>This is an asynchronous call: it will return immediatley, and
+     * <p>This is an asynchronous call: it will return immediately, and
      * clients should listen for {@link #ACTION_STATE_CHANGED}
      * to be notified of subsequent adapter state changes. If this call returns
      * true, then the adapter state will immediately transition from {@link
