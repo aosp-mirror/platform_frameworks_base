@@ -94,6 +94,9 @@ import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 import android.view.WindowManagerImpl;
 import android.view.WindowManagerPolicy;
+import android.view.WindowManagerPolicy.WindowState;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.media.IAudioService;
 import android.media.AudioManager;
 
@@ -722,6 +725,15 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         return STATUS_BAR_LAYER;
     }
 
+    public boolean doesForceHide(WindowState win, WindowManager.LayoutParams attrs) {
+        return attrs.type == WindowManager.LayoutParams.TYPE_KEYGUARD;
+    }
+    
+    public boolean canBeForceHidden(WindowState win, WindowManager.LayoutParams attrs) {
+        return attrs.type != WindowManager.LayoutParams.TYPE_STATUS_BAR
+                && attrs.type != WindowManager.LayoutParams.TYPE_WALLPAPER;
+    }
+    
     /** {@inheritDoc} */
     public View addStartingWindow(IBinder appToken, String packageName,
                                   int theme, CharSequence nonLocalizedLabel,
@@ -890,6 +902,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         return 0;
     }
 
+    public Animation createForceHideEnterAnimation() {
+        return AnimationUtils.loadAnimation(mContext,
+                com.android.internal.R.anim.lock_screen_behind_enter);
+    }
+    
     static ITelephony getPhoneInterface() {
         return ITelephony.Stub.asInterface(ServiceManager.checkService(Context.TELEPHONY_SERVICE));
     }
