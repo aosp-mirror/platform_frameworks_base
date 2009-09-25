@@ -36,6 +36,7 @@ import android.view.SurfaceView;
  **/
 public class RSSurfaceView extends SurfaceView implements SurfaceHolder.Callback {
     private SurfaceHolder mSurfaceHolder;
+    private RenderScript mRS;
 
     /**
      * Standard View constructor. In order to render something, you
@@ -97,6 +98,9 @@ public class RSSurfaceView extends SurfaceView implements SurfaceHolder.Callback
      * Must not be called before a renderer has been set.
      */
     public void onPause() {
+        if(mRS != null) {
+            mRS.pause();
+        }
         Log.v(RenderScript.LOG_TAG, "onPause");
     }
 
@@ -108,6 +112,9 @@ public class RSSurfaceView extends SurfaceView implements SurfaceHolder.Callback
      * Must not be called before a renderer has been set.
      */
     public void onResume() {
+        if(mRS != null) {
+            mRS.resume();
+        }
         Log.v(RenderScript.LOG_TAG, "onResume");
     }
 
@@ -138,8 +145,8 @@ public class RSSurfaceView extends SurfaceView implements SurfaceHolder.Callback
         while ((sur == null) || (mSurfaceHolder == null)) {
             sur = getHolder().getSurface();
         }
-        RenderScript rs = new RenderScript(sur, useDepth, forceSW);
-        return rs;
+        mRS = new RenderScript(sur, useDepth, forceSW);
+        return mRS;
     }
 
     public RenderScript createRenderScript(boolean useDepth) {
