@@ -65,8 +65,6 @@ public class RenderScript {
     native int  nContextCreate(int dev, Surface sur, int ver, boolean useDepth);
     native void nContextDestroy(int con);
 
-    //void rsContextBindSampler (uint32_t slot, RsSampler sampler);
-    //void rsContextBindRootScript (RsScript sampler);
     native void nContextBindRootScript(int script);
     native void nContextBindSampler(int sampler, int slot);
     native void nContextBindProgramFragmentStore(int pfs);
@@ -92,7 +90,6 @@ public class RenderScript {
     native void nTypeSetupFields(Type t, int[] types, int[] bits, Field[] IDs);
 
     native int  nAllocationCreateTyped(int type);
-    //native int  nAllocationCreateSized(int elem, int count);
     native int  nAllocationCreateFromBitmap(int dstFmt, boolean genMips, Bitmap bmp);
     native int  nAllocationCreateFromBitmapBoxed(int dstFmt, boolean genMips, Bitmap bmp);
     native int  nAllocationCreateFromAssetStream(int dstFmt, boolean genMips, int assetStream);
@@ -111,15 +108,6 @@ public class RenderScript {
     native void nAllocationRead(int id, float[] d);
     native void nAllocationSubDataFromObject(int id, Type t, int offset, Object o);
     native void nAllocationSubReadFromObject(int id, Type t, int offset, Object o);
-
-    native void nTriangleMeshBegin(int vertex, int index);
-    native void nTriangleMeshAddVertex_XY (float x, float y);
-    native void nTriangleMeshAddVertex_XYZ (float x, float y, float z);
-    native void nTriangleMeshAddVertex_XY_ST (float x, float y, float s, float t);
-    native void nTriangleMeshAddVertex_XYZ_ST (float x, float y, float z, float s, float t);
-    native void nTriangleMeshAddVertex_XYZ_ST_NORM (float x, float y, float z, float s, float t, float nx, float ny, float nz);
-    native void nTriangleMeshAddTriangle(int i1, int i2, int i3);
-    native int  nTriangleMeshCreate();
 
     native void nAdapter1DBindAllocation(int ad, int alloc);
     native void nAdapter1DSetConstraint(int ad, int dim, int value);
@@ -230,49 +218,6 @@ public class RenderScript {
     }
 
     //////////////////////////////////////////////////////////////////////////////////
-    // Triangle Mesh
-
-    public class TriangleMesh extends BaseObj {
-        TriangleMesh(int id) {
-            super(RenderScript.this);
-            mID = id;
-        }
-    }
-
-    public void triangleMeshBegin(Element vertex, Element index) {
-        nTriangleMeshBegin(vertex.mID, index.mID);
-    }
-
-    public void triangleMeshAddVertex_XY(float x, float y) {
-        nTriangleMeshAddVertex_XY(x, y);
-    }
-
-    public void triangleMeshAddVertex_XYZ(float x, float y, float z) {
-        nTriangleMeshAddVertex_XYZ(x, y, z);
-    }
-
-    public void triangleMeshAddVertex_XY_ST(float x, float y, float s, float t) {
-        nTriangleMeshAddVertex_XY_ST(x, y, s, t);
-    }
-
-    public void triangleMeshAddVertex_XYZ_ST(float x, float y, float z, float s, float t) {
-        nTriangleMeshAddVertex_XYZ_ST(x, y, z, s, t);
-    }
-
-    public void triangleMeshAddVertex_XYZ_ST_NORM(float x, float y, float z, float s, float t, float nx, float ny, float nz) {
-        nTriangleMeshAddVertex_XYZ_ST_NORM(x, y, z, s, t, nx, ny, nz);
-    }
-
-    public void triangleMeshAddTriangle(int i1, int i2, int i3) {
-        nTriangleMeshAddTriangle(i1, i2, i3);
-    }
-
-    public TriangleMesh triangleMeshCreate() {
-        int id = nTriangleMeshCreate();
-        return new TriangleMesh(id);
-    }
-
-    //////////////////////////////////////////////////////////////////////////////////
     // File
 
     public class File extends BaseObj {
@@ -301,32 +246,31 @@ public class RenderScript {
     ///////////////////////////////////////////////////////////////////////////////////
     // Root state
 
-    public void contextBindRootScript(Script s) {
-        int id = 0;
-        if(s != null) {
-            id = s.mID;
+    private int safeID(BaseObj o) {
+        if(o != null) {
+            return o.mID;
         }
-        nContextBindRootScript(id);
+        return 0;
     }
 
-    //public void contextBindSampler(Sampler s, int slot) {
-        //nContextBindSampler(s.mID);
-    //}
-
-    public void contextBindProgramFragmentStore(ProgramStore pfs) {
-        nContextBindProgramFragmentStore(pfs.mID);
+    public void contextBindRootScript(Script s) {
+        nContextBindRootScript(safeID(s));
     }
 
-    public void contextBindProgramFragment(ProgramFragment pf) {
-        nContextBindProgramFragment(pf.mID);
+    public void contextBindProgramFragmentStore(ProgramStore p) {
+        nContextBindProgramFragmentStore(safeID(p));
     }
 
-    public void contextBindProgramRaster(ProgramRaster pf) {
-        nContextBindProgramRaster(pf.mID);
+    public void contextBindProgramFragment(ProgramFragment p) {
+        nContextBindProgramFragment(safeID(p));
     }
 
-    public void contextBindProgramVertex(ProgramVertex pf) {
-        nContextBindProgramVertex(pf.mID);
+    public void contextBindProgramRaster(ProgramRaster p) {
+        nContextBindProgramRaster(safeID(p));
+    }
+
+    public void contextBindProgramVertex(ProgramVertex p) {
+        nContextBindProgramVertex(safeID(p));
     }
 
 }

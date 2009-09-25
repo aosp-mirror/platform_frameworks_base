@@ -98,8 +98,7 @@ LOCAL_SRC_FILES:= \
 	rsScriptC_Lib.cpp \
 	rsSimpleMesh.cpp \
 	rsThreadIO.cpp \
-	rsType.cpp \
-	rsTriangleMesh.cpp
+	rsType.cpp
 
 LOCAL_SHARED_LIBRARIES += libcutils libutils libEGL libGLESv1_CM libui libacc
 LOCAL_LDLIBS := -lpthread -ldl
