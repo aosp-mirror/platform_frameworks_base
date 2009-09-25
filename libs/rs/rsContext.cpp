@@ -251,7 +251,7 @@ void * Context::threadProc(void *vrsc)
          mDraw &= (rsc->mRootScript.get() != NULL);
 
          if (mDraw) {
-             mDraw = rsc->runRootScript();
+             mDraw = rsc->runRootScript() && !rsc->mPaused;
              if (rsc->logTimes) {
                  rsc->timerSet(RS_TIMER_CLEAR_SWAP);
              }
@@ -285,6 +285,7 @@ Context::Context(Device *dev, Surface *sur, bool useDepth)
     mRunning = false;
     mExit = false;
     mUseDepth = useDepth;
+    mPaused = false;
 
     int status;
     pthread_attr_t threadAttr;
@@ -309,6 +310,7 @@ Context::Context(Device *dev, Surface *sur, bool useDepth)
 
     objDestroyOOBInit();
     timerInit();
+    timerSet(RS_TIMER_INTERNAL);
 
     LOGV("RS Launching thread");
     status = pthread_create(&mThreadId, &threadAttr, threadProc, this);
@@ -317,7 +319,7 @@ Context::Context(Device *dev, Surface *sur, bool useDepth)
     }
 
     while(!mRunning) {
-        sleep(1);
+        usleep(100);
     }
 
     pthread_attr_destroy(&threadAttr);
@@ -327,6 +329,7 @@ Context::~Context()
 {
     LOGV("Context::~Context");
     mExit = true;
+    mPaused = false;
     void *res;
 
     mIO.shutdown();
@@ -339,6 +342,16 @@ Context::~Context()
     }
 
     objDestroyOOBDestroy();
+}
+
+void Context::pause()
+{
+    mPaused = true;
+}
+
+void Context::resume()
+{
+    mPaused = false;
 }
 
 void Context::setRootScript(Script *s)
@@ -575,6 +588,16 @@ void rsi_ContextSetDefineF(Context *rsc, const char* name, float value)
 void rsi_ContextSetDefineI32(Context *rsc, const char* name, int32_t value)
 {
     rsc->addFloatDefine(name, value);
+}
+
+void rsi_ContextPause(Context *rsc)
+{
+    rsc->pause();
+}
+
+void rsi_ContextResume(Context *rsc)
+{
+    rsc->resume();
 }
 
 }

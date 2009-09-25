@@ -37,7 +37,6 @@ typedef void * RsFile;
 typedef void * RsSampler;
 typedef void * RsScript;
 typedef void * RsScriptBasicTemp;
-typedef void * RsTriangleMesh;
 typedef void * RsSimpleMesh;
 typedef void * RsType;
 typedef void * RsLight;
@@ -89,32 +88,6 @@ enum RsDataKind {
     RS_KIND_NZ,
     RS_KIND_INDEX,
     RS_KIND_POINT_SIZE
-};
-
-enum RsElementPredefined {
-    RS_ELEMENT_USER_U8,
-    RS_ELEMENT_USER_I8,
-    RS_ELEMENT_USER_U16,
-    RS_ELEMENT_USER_I16,
-    RS_ELEMENT_USER_U32,
-    RS_ELEMENT_USER_I32,
-    RS_ELEMENT_USER_FLOAT,
-
-    RS_ELEMENT_A_8,          // 7
-    RS_ELEMENT_RGB_565,      // 8
-    RS_ELEMENT_RGBA_5551,    // 9
-    RS_ELEMENT_RGBA_4444,    // 10
-    RS_ELEMENT_RGB_888,      // 11
-    RS_ELEMENT_RGBA_8888,    // 12
-
-    RS_ELEMENT_INDEX_16, //13
-    RS_ELEMENT_INDEX_32,
-    RS_ELEMENT_XY_F32,
-    RS_ELEMENT_XYZ_F32,
-    RS_ELEMENT_ST_XY_F32,
-    RS_ELEMENT_ST_XYZ_F32,
-    RS_ELEMENT_NORM_XYZ_F32,
-    RS_ELEMENT_NORM_ST_XYZ_F32,
 };
 
 enum RsSamplerParam {

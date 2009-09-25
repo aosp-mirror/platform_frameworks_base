@@ -55,6 +55,7 @@ static bool validateFileName(const char* fileName)
 
 static bool isHidden(const char *root, const char *path)
 {
+    const char *ext  = NULL;
     const char *type = NULL;
 
     // Skip all hidden files.
@@ -83,6 +84,9 @@ static bool isHidden(const char *root, const char *path)
     } else if (path[strlen(path)-1] == '~') {
         // Skip suspected emacs backup files.
         type = "backup";
+    } else if ((ext = strrchr(path, '.')) != NULL && strcmp(ext, ".scc") == 0) {
+        // Skip VisualSourceSafe files and don't chatter about it
+        return true;
     } else {
         // Let everything else through.
         return false;

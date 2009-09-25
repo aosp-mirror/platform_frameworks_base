@@ -44,6 +44,7 @@ import android.widget.BaseAdapter;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Vector;
 
 /**
  * Implementation of the {@link android.view.Menu} interface for creating a
@@ -752,7 +753,13 @@ public class MenuBuilder implements Menu {
         return handled;
     }
 
-    MenuItemImpl findItemWithShortcutForKey(int keyCode, KeyEvent event) {
+    /*
+     * This function will return all the menu and sub-menu items that can
+     * be directly (the shortcut directly corresponds) and indirectly
+     * (the ALT-enabled char corresponds to the shortcut) associated
+     * with the keyCode.
+     */
+    List<MenuItemImpl> findItemsWithShortcutForKey(int keyCode, KeyEvent event) {
         final boolean qwerty = isQwertyMode();
         final int metaState = event.getMetaState();
         final KeyCharacterMap.KeyData possibleChars = new KeyCharacterMap.KeyData();
@@ -763,41 +770,76 @@ public class MenuBuilder implements Menu {
             return null;
         }
 
+        Vector<MenuItemImpl> items = new Vector();
         // Look for an item whose shortcut is this key.
         final int N = mItems.size();
         for (int i = 0; i < N; i++) {
             MenuItemImpl item = mItems.get(i);
             if (item.hasSubMenu()) {
-                MenuItemImpl subMenuItem = ((MenuBuilder)item.getSubMenu())
-                                .findItemWithShortcutForKey(keyCode, event);
-                if (subMenuItem != null) {
-                    return subMenuItem;
-                }
+                List<MenuItemImpl> subMenuItems = ((MenuBuilder)item.getSubMenu())
+                    .findItemsWithShortcutForKey(keyCode, event);
+                items.addAll(subMenuItems);
             }
-            if (qwerty) {
-                final char shortcutAlphaChar = item.getAlphabeticShortcut();
-                if (((metaState & (KeyEvent.META_SHIFT_ON | KeyEvent.META_SYM_ON)) == 0) &&
-                        (shortcutAlphaChar != 0) &&
-                        (shortcutAlphaChar == possibleChars.meta[0]
-                         || shortcutAlphaChar == possibleChars.meta[2]
-                         || (shortcutAlphaChar == '\b' && keyCode == KeyEvent.KEYCODE_DEL)) &&
-                        item.isEnabled()) {
-                    return item;
-                }
-            } else {
-                final char shortcutNumericChar = item.getNumericShortcut();
-                if (((metaState & (KeyEvent.META_SHIFT_ON | KeyEvent.META_SYM_ON)) == 0) &&
-                        (shortcutNumericChar != 0) &&
-                        (shortcutNumericChar == possibleChars.meta[0]
-                            || shortcutNumericChar == possibleChars.meta[2]) &&
-                        item.isEnabled()) {
-                    return item;
-                }
+            final char shortcutChar = qwerty ? item.getAlphabeticShortcut() : item.getNumericShortcut();
+            if (((metaState & (KeyEvent.META_SHIFT_ON | KeyEvent.META_SYM_ON)) == 0) &&
+                  (shortcutChar != 0) &&
+                  (shortcutChar == possibleChars.meta[0]
+                      || shortcutChar == possibleChars.meta[2]
+                      || (qwerty && shortcutChar == '\b' &&
+                          keyCode == KeyEvent.KEYCODE_DEL)) &&
+                  item.isEnabled()) {
+                items.add(item);
+            }
+        }
+        return items;
+    }
+
+    /*
+     * We want to return the menu item associated with the key, but if there is no
+     * ambiguity (i.e. there is only one menu item corresponding to the key) we want
+     * to return it even if it's not an exact match; this allow the user to
+     * _not_ use the ALT key for example, making the use of shortcuts slightly more
+     * user-friendly. An example is on the G1, '!' and '1' are on the same key, and
+     * in Gmail, Menu+1 will trigger Menu+! (the actual shortcut).
+     *
+     * On the other hand, if two (or more) shortcuts corresponds to the same key,
+     * we have to only return the exact match.
+     */
+    MenuItemImpl findItemWithShortcutForKey(int keyCode, KeyEvent event) {
+        // Get all items that can be associated directly or indirectly with the keyCode
+        List<MenuItemImpl> items = findItemsWithShortcutForKey(keyCode, event);
+
+        if (items == null) {
+            return null;
+        }
+
+        final int metaState = event.getMetaState();
+        final KeyCharacterMap.KeyData possibleChars = new KeyCharacterMap.KeyData();
+        // Get the chars associated with the keyCode (i.e using any chording combo)
+        event.getKeyData(possibleChars);
+
+        // If we have only one element, we can safely returns it
+        if (items.size() == 1) {
+            return items.get(0);
+        }
+
+        final boolean qwerty = isQwertyMode();
+        // If we found more than one item associated with the key,
+        // we have to return the exact match
+        for (MenuItemImpl item : items) {
+            final char shortcutChar = qwerty ? item.getAlphabeticShortcut() : item.getNumericShortcut();
+            if ((shortcutChar == possibleChars.meta[0] &&
+                    (metaState & KeyEvent.META_ALT_ON) == 0)
+                || (shortcutChar == possibleChars.meta[2] &&
+                    (metaState & KeyEvent.META_ALT_ON) != 0)
+                || (qwerty && shortcutChar == '\b' &&
+                    keyCode == KeyEvent.KEYCODE_DEL)) {
+                return item;
             }
         }
         return null;
     }
-    
+
     public boolean performIdentifierAction(int id, int flags) {
         // Look for an item whose identifier is the id.
         return performItemAction(findItem(id), flags);           

@@ -292,9 +292,9 @@ public final class ActivityThread {
         }
 
         public PackageInfo(ActivityThread activityThread, String name,
-                Context systemContext) {
+                Context systemContext, ApplicationInfo info) {
             mActivityThread = activityThread;
-            mApplicationInfo = new ApplicationInfo();
+            mApplicationInfo = info != null ? info : new ApplicationInfo();
             mApplicationInfo.packageName = name;
             mPackageName = name;
             mAppDir = null;
@@ -2202,7 +2202,7 @@ public final class ActivityThread {
             if (mSystemContext == null) {
                 ApplicationContext context =
                     ApplicationContext.createSystemContext(this);
-                PackageInfo info = new PackageInfo(this, "android", context);
+                PackageInfo info = new PackageInfo(this, "android", context, null);
                 context.init(info, null, this);
                 context.getResources().updateConfiguration(
                         getConfiguration(), getDisplayMetricsLocked(false));
@@ -2212,6 +2212,13 @@ public final class ActivityThread {
             }
         }
         return mSystemContext;
+    }
+
+    public void installSystemApplicationInfo(ApplicationInfo info) {
+        synchronized (this) {
+            ApplicationContext context = getSystemContext();
+            context.init(new PackageInfo(this, "android", context, info), null, this);
+        }
     }
 
     void scheduleGcIdler() {

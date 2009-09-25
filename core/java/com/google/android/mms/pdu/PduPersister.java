@@ -855,6 +855,8 @@ public class PduPersister {
         if (subject != null) {
             values.put(Mms.SUBJECT, toIsoString(subject.getTextString()));
             values.put(Mms.SUBJECT_CHARSET, subject.getCharacterSet());
+        } else {
+            values.put(Mms.SUBJECT, "");
         }
         
         long messageSize = sendReq.getMessageSize();

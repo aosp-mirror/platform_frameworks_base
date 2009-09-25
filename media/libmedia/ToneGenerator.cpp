@@ -1066,7 +1066,7 @@ void ToneGenerator::audioCallback(int event, void* user, void *info) {
 
     if (event != AudioTrack::EVENT_MORE_DATA) return;
 
-    const AudioTrack::Buffer *buffer = static_cast<const AudioTrack::Buffer *>(info);
+    AudioTrack::Buffer *buffer = static_cast<AudioTrack::Buffer *>(info);
     ToneGenerator *lpToneGen = static_cast<ToneGenerator *>(user);
     short *lpOut = buffer->i16;
     unsigned int lNumSmp = buffer->size/sizeof(short);
@@ -1106,13 +1106,13 @@ void ToneGenerator::audioCallback(int event, void* user, void *info) {
             lWaveCmd = WaveGenerator::WAVEGEN_STOP;
             lpToneGen->mNextSegSmp = TONEGEN_INF; // forced to skip state machine management below
             break;
+        case TONE_STOPPED:
+            LOGV("Stopped Cbk");
+            goto audioCallback_EndLoop;
         default:
             LOGV("Extra Cbk");
-            // Force loop exit
-            lNumSmp = 0;
             goto audioCallback_EndLoop;
         }
-
 
         // Exit if tone sequence is over
         if (lpToneDesc->segments[lpToneGen->mCurSegment].duration == 0 ||
@@ -1123,7 +1123,7 @@ void ToneGenerator::audioCallback(int event, void* user, void *info) {
             if (lpToneDesc->segments[lpToneGen->mCurSegment].duration == 0) {
                 goto audioCallback_EndLoop;
             }
-            // fade out before stopping if maximum duraiton reached
+            // fade out before stopping if maximum duration reached
             lWaveCmd = WaveGenerator::WAVEGEN_STOP;
             lpToneGen->mNextSegSmp = TONEGEN_INF; // forced to skip state machine management below
         }
@@ -1256,20 +1256,31 @@ audioCallback_EndLoop:
             lSignal = true;
             break;
         case TONE_STOPPING:
-            lpToneGen->mState = TONE_INIT;
-            LOGV("Cbk Stopping track\n");
-            lSignal = true;
-            lpToneGen->mpAudioTrack->stop();
-
+            LOGV("Cbk Stopping\n");
+            lpToneGen->mState = TONE_STOPPED;
             // Force loop exit
             lNumSmp = 0;
+            break;
+        case TONE_STOPPED:
+            lpToneGen->mState = TONE_INIT;
+            LOGV("Cbk Stopped track\n");
+            lpToneGen->mpAudioTrack->stop();
+            // Force loop exit
+            lNumSmp = 0;
+            buffer->size = 0;
+            lSignal = true;
             break;
         case TONE_STARTING:
             LOGV("Cbk starting track\n");
             lpToneGen->mState = TONE_PLAYING;
             lSignal = true;
            break;
+        case TONE_PLAYING:
+           break;
         default:
+            // Force loop exit
+            lNumSmp = 0;
+            buffer->size = 0;
             break;
         }
 

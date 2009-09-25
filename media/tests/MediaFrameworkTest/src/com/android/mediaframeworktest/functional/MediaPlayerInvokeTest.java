@@ -55,6 +55,7 @@ public class MediaPlayerInvokeTest extends ActivityInstrumentationTestCase2<Medi
     }
 
     // Generate a random number, sends it to the ping test player.
+    @Suppress
     @MediumTest
     public void testPing() throws Exception {
         mPlayer.setDataSource("test:invoke_mock_media_player.so?url=ping");

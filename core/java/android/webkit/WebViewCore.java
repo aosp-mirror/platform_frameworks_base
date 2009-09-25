@@ -1650,12 +1650,14 @@ final class WebViewCore {
     }
 
     /* package */ synchronized boolean pictureReady() {
-        return nativePictureReady();
+        return 0 != mNativeClass ? nativePictureReady() : false;
     }
 
     /*package*/ synchronized Picture copyContentPicture() {
         Picture result = new Picture();
-        nativeCopyContentToPicture(result);
+        if (0 != mNativeClass) {
+            nativeCopyContentToPicture(result);
+        }
         return result;
     }
 

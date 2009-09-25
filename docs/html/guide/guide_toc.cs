@@ -107,6 +107,9 @@
           <li><a href="<?cs var:toroot ?>guide/topics/resources/available-resources.html">
                 <span class="en">Available Resource Types</span>
               </a></li>
+          <li><a href="<?cs var:toroot ?>guide/topics/resources/localization.html">
+                <span class="en">Localization</span>
+              </a></li>
         </ul>
       </li>
       <li><a href="<?cs var:toroot ?>guide/topics/intents/intents-filters.html">
@@ -236,6 +239,7 @@
       <li><a href="<?cs var:toroot ?>guide/developing/debug-tasks.html">
             <span class="en">Debugging Tasks</span>
           </a></li>
+      <li><a href="<?cs var:toroot ?>guide/developing/updating-sdk.html">Updating Your SDK</a></li>
       <li class="toggle-list">
         <div><a href="<?cs var:toroot ?>guide/developing/tools/index.html">
             <span class="en">Tools</span>
@@ -369,6 +373,9 @@
           </a></li>
       <li><a href="<?cs var:toroot ?>guide/tutorials/views/index.html">
             <span class="en">Hello Views</span>
+          </a></li>
+      <li><a href="<?cs var:toroot ?>guide/tutorials/localization/index.html">
+            <span class="en">Hello Localization</span>
           </a></li>
       <li><a href="<?cs var:toroot ?>guide/tutorials/notepad/index.html">
             <span class="en">Notepad Tutorial</span>

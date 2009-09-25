@@ -15,7 +15,12 @@
  */
 package com.android.internal.telephony;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
+
 import android.content.Context;
+import android.content.pm.PackageManager;
+import android.os.Binder;
 import android.util.Log;
 
 public class PhoneSubInfo extends IPhoneSubInfo.Stub {
@@ -101,4 +106,19 @@ public class PhoneSubInfo extends IPhoneSubInfo.Stub {
         mContext.enforceCallingOrSelfPermission(READ_PHONE_STATE, "Requires READ_PHONE_STATE");
         return (String) mPhone.getVoiceMailAlphaTag();
     }
+
+    protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.DUMP)
+                != PackageManager.PERMISSION_GRANTED) {
+            pw.println("Permission Denial: can't dump PhoneSubInfo from from pid="
+                    + Binder.getCallingPid()
+                    + ", uid=" + Binder.getCallingUid());
+            return;
+        }
+
+        pw.println("Phone Subscriber Info:");
+        pw.println("  Phone Type = " + mPhone.getPhoneName());
+        pw.println("  Device ID = " + mPhone.getDeviceId());
+    }
+
 }

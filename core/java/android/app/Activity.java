@@ -2554,16 +2554,17 @@ public class Activity extends ContextThemeWrapper
     /**
      * This hook is called when the user signals the desire to start a search.
      * 
-     * <p>You can use this function as a simple way to launch the search UI, in response to a 
-     * menu item, search button, or other widgets within your activity.  Unless overidden, 
-     * calling this function is the same as calling:
-     * <p>The default implementation simply calls 
-     * {@link #startSearch startSearch(null, false, null, false)}, launching a local search.
+     * <p>You can use this function as a simple way to launch the search UI, in response to a
+     * menu item, search button, or other widgets within your activity. Unless overidden, 
+     * calling this function is the same as calling
+     * {@link #startSearch startSearch(null, false, null, false)}, which launches
+     * search for the current activity as specified in its manifest, see {@link SearchManager}.
      * 
      * <p>You can override this function to force global search, e.g. in response to a dedicated
      * search key, or to block search entirely (by simply returning false).
      * 
-     * @return Returns true if search launched, false if activity blocks it
+     * @return Returns {@code true} if search launched, and {@code false} if activity blocks it.
+     *         The default implementation always returns {@code true}.
      * 
      * @see android.app.SearchManager
      */
@@ -3014,6 +3015,23 @@ public class Activity extends ContextThemeWrapper
                 flagsMask, flagsValues, child);
     }
 
+    /**
+     * Call immediately after one of the flavors of {@link #startActivity(Intent)}
+     * or {@link #finish} to specify an explicit transition animation to
+     * perform next.
+     * @param enterAnim A resource ID of the animation resource to use for
+     * the incoming activity.
+     * @param exitAnim A resource ID of the animation resource to use for
+     * the outgoing activity.
+     */
+    public void overridePendingTransition(int enterAnim, int exitAnim) {
+        try {
+            ActivityManagerNative.getDefault().overridePendingTransition(
+                    mToken, getPackageName(), enterAnim, exitAnim);
+        } catch (RemoteException e) {
+        }
+    }
+    
     /**
      * Call this to set the result that your activity will return to its
      * caller.

@@ -30,6 +30,12 @@ ContextSetDefineI32 {
     param int32_t value
     }
 
+ContextPause {
+	}
+
+ContextResume {
+	}
+
 AssignName {
 	param void *obj
 	param const char *name
@@ -55,11 +61,6 @@ ElementCreate {
 	ret RsElement
 	}
 
-ElementGetPredefined {
-	param RsElementPredefined predef
-	ret RsElement
-	}
-
 TypeBegin {
 	param RsElement type
 	}
@@ -78,21 +79,9 @@ AllocationCreateTyped {
 	ret RsAllocation
 	}
 
-AllocationCreatePredefSized {
-	param RsElementPredefined predef
-	param size_t count
-	ret RsAllocation
-	}
-
 AllocationCreateSized {
 	param RsElement e
 	param size_t count
-	ret RsAllocation
-	}
-
-AllocationCreateFromFile {
-	param const char *file
-	param bool genMips
 	ret RsAllocation
 	}
 
@@ -228,36 +217,6 @@ SamplerCreate {
 	ret RsSampler
 	}
 
-
-TriangleMeshBegin {
-	param RsElement vertex
-	param RsElement index
-	}
-
-TriangleMeshAddVertex {
-	param const void *vtx
-	}
-
-TriangleMeshAddTriangle {
-	param uint32_t idx1
-	param uint32_t idx2
-	param uint32_t idx3
-	}
-
-TriangleMeshCreate {
-	ret RsTriangleMesh
-	}
-
-
-TriangleMeshRender {
-	param RsTriangleMesh vtm
-	}
-
-TriangleMeshRenderRange {
-	param RsTriangleMesh vtm
-	param uint32_t start
-	param uint32_t count
-	}
 
 
 ScriptBindAllocation {

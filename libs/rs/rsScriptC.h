@@ -58,6 +58,7 @@ public:
 
     ACCscript*    mAccScript;
 
+    virtual void setupScript();
     virtual bool run(Context *, uint32_t launchID);
 };
 

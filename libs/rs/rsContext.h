@@ -25,7 +25,6 @@
 #include "rsType.h"
 #include "rsMatrix.h"
 #include "rsAllocation.h"
-#include "rsTriangleMesh.h"
 #include "rsSimpleMesh.h"
 #include "rsMesh.h"
 #include "rsDevice.h"
@@ -70,8 +69,6 @@ public:
     ProgramVertexState mStateVertex;
     LightState mStateLight;
 
-    TriangleMeshContext mStateTriangleMesh;
-
     ScriptCState mScriptC;
 
     void swapBuffers();
@@ -90,6 +87,9 @@ public:
 
     void setupCheck();
     void allocationCheck(const Allocation *);
+
+    void pause();
+    void resume();
 
     void assignName(ObjectBase *obj, const char *name, uint32_t len);
     void removeName(ObjectBase *obj);
@@ -174,6 +174,7 @@ protected:
     bool mRunning;
     bool mExit;
     bool mUseDepth;
+    bool mPaused;
 
     pthread_t mThreadId;
 

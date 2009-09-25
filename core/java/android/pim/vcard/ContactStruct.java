@@ -18,7 +18,6 @@ package android.pim.vcard;
 import android.accounts.Account;
 import android.content.ContentProviderOperation;
 import android.content.ContentResolver;
-import android.content.ContentValues;
 import android.content.OperationApplicationException;
 import android.database.Cursor;
 import android.os.RemoteException;
@@ -26,10 +25,10 @@ import android.provider.ContactsContract;
 import android.provider.ContactsContract.Data;
 import android.provider.ContactsContract.Groups;
 import android.provider.ContactsContract.RawContacts;
+import android.provider.ContactsContract.CommonDataKinds.Birthday;
 import android.provider.ContactsContract.CommonDataKinds.Email;
 import android.provider.ContactsContract.CommonDataKinds.GroupMembership;
 import android.provider.ContactsContract.CommonDataKinds.Im;
-import android.provider.ContactsContract.CommonDataKinds.Miscellaneous;
 import android.provider.ContactsContract.CommonDataKinds.Nickname;
 import android.provider.ContactsContract.CommonDataKinds.Note;
 import android.provider.ContactsContract.CommonDataKinds.Organization;
@@ -477,44 +476,148 @@ public class ContactStruct {
         mPhotoList = photoList;
         mWebsiteList = websiteList;
     }
+
+    // All getter methods should be used carefully, since they may change
+    // in the future as of 2009-09-24, on which I cannot be sure this structure
+    // is completely consolidated.
+    // When we are sure we will no longer change them, we'll be happy to
+    // make it complete public (withouth @hide tag)
+    //
+    // Also note that these getter methods should be used only after
+    // all properties being pushed into this object. If not, incorrect
+    // value will "be stored in the local cache and" be returned to you.
     
     /**
-     * @hide only for testing.
+     * @hide
+     */
+    public String getFamilyName() {
+        return mFamilyName;
+    }
+
+    /**
+     * @hide
+     */
+    public String getGivenName() {
+        return mGivenName;
+    }
+
+    /**
+     * @hide
+     */
+    public String getMiddleName() {
+        return mMiddleName;
+    }
+
+    /**
+     * @hide
+     */
+    public String getPrefix() {
+        return mPrefix;
+    }
+
+    /**
+     * @hide
+     */
+    public String getSuffix() {
+        return mSuffix;
+    }
+
+    /**
+     * @hide
+     */
+    public String getFullName() {
+        return mFullName;
+    }
+
+    /**
+     * @hide
+     */
+    public String getPhoneticFamilyName() {
+        return mPhoneticFamilyName;
+    }
+
+    /**
+     * @hide
+     */
+    public String getPhoneticGivenName() {
+        return mPhoneticGivenName;
+    }
+
+    /**
+     * @hide
+     */
+    public String getPhoneticMiddleName() {
+        return mPhoneticMiddleName;
+    }
+
+    /**
+     * @hide
+     */
+    public String getPhoneticFullName() {
+        return mPhoneticFullName;
+    }
+
+    /**
+     * @hide
+     */
+    public final List<String> getNickNameList() {
+        return mNickNameList;
+    }
+
+    /**
+     * @hide
+     */
+    public String getDisplayName() {
+        if (mDisplayName == null) {
+            constructDisplayName();
+        }
+        return mDisplayName;
+    }
+
+    /**
+     * @hide
+     */
+    public String getBirthday() {
+        return mBirthday;
+    }
+
+    /**
+     * @hide
      */
     public final List<PhotoData> getPhotoList() {
         return mPhotoList;
     }
-    
+
     /**
-     * @hide only for testing.
+     * @hide
      */
     public final List<String> getNotes() {
         return mNoteList;
     }
     
     /**
-     * @hide only for testing.
+     * @hide
      */
     public final List<PhoneData> getPhoneList() {
         return mPhoneList;
     }
     
     /**
-     * @hide only for testing.
+     * @hide
      */
     public final List<EmailData> getEmailList() {
         return mEmailList;
     }
     
     /**
-     * @hide only for testing.
+     * @hide
      */
     public final List<PostalData> getPostalList() {
         return mPostalList;
     }
     
     /**
-     * @hide only for testing.
+     * @hide
      */
     public final List<OrganizationData> getOrganizationList() {
         return mOrganizationList;
@@ -938,13 +1041,6 @@ public class ContactStruct {
             // Unknown X- words and IANA token.
         }
     }
-    
-    public String getDisplayName() {
-        if (mDisplayName == null) {
-            constructDisplayName();
-        }
-        return mDisplayName;
-    }
 
     /**
      * Construct the display name. The constructed data must not be null.
@@ -1220,9 +1316,9 @@ public class ContactStruct {
         
         if (!TextUtils.isEmpty(mBirthday)) {
             builder = ContentProviderOperation.newInsert(Data.CONTENT_URI);
-            builder.withValueBackReference(Miscellaneous.RAW_CONTACT_ID, 0);
-            builder.withValue(Data.MIMETYPE, Miscellaneous.CONTENT_ITEM_TYPE);
-            builder.withValue(Miscellaneous.BIRTHDAY, mBirthday);
+            builder.withValueBackReference(Birthday.RAW_CONTACT_ID, 0);
+            builder.withValue(Data.MIMETYPE, Birthday.CONTENT_ITEM_TYPE);
+            builder.withValue(Birthday.BIRTHDAY, mBirthday);
             operationList.add(builder.build());
         }
 

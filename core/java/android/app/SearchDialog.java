@@ -498,6 +498,7 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
             updateSearchAppIcon();
             updateSearchBadge();
             updateQueryHint();
+            mSearchAutoComplete.showDropDownAfterLayout();
         } 
     }
     
@@ -1304,6 +1305,12 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
             // source. this is because GlobalSearch may not have permission to launch the
             // intent, and to avoid the extra step of going through GlobalSearch.
             if (mGlobalSearchMode) {
+                if (mStoredComponentName != null) {
+                    // If we're embedded in an application, dismiss the dialog.
+                    // This ensures that if the intent is handled by the current
+                    // activity, it's not obscured by the dialog.
+                    dismiss();
+                }
                 launchGlobalSearchIntent(intent);
             } else {
                 // If the intent was created from a suggestion, it will always have an explicit

@@ -245,7 +245,7 @@ public class ThumbnailUtil {
         }
         Matrix matrix = new Matrix();
         matrix.setScale(scale, scale);
-        Bitmap miniThumbnail = transform(matrix, source, width, height, false, recycle);
+        Bitmap miniThumbnail = transform(matrix, source, width, height, true, recycle);
         return miniThumbnail;
     }
 

@@ -26,7 +26,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.database.Cursor;
-import android.graphics.BitmapFactory;
 import android.graphics.Rect;
 import android.net.Uri;
 import android.os.RemoteException;
@@ -239,6 +238,34 @@ public final class ContactsContract {
          * <p>Type: TEXT</p>
          */
         public static final String PRESENCE_CUSTOM_STATUS = Presence.PRESENCE_CUSTOM_STATUS;
+
+        /**
+         * The time when the latest presence custom status was inserted/updated.
+         * This column is only returned if explicitly requested in the query
+         * projection.
+         * <p>Type: TEXT</p>
+         * @hide TODO unhide
+         */
+        public static final String PRESENCE_CUSTOM_STATUS_TIMESTAMP =
+                Presence.PRESENCE_CUSTOM_STATUS_TIMESTAMP;
+
+        /**
+         * Protocol that supplied the latest status update (see {@link CommonDataKinds.Im#PROTOCOL}.
+         * This column is only returned if explicitly requested in the query
+         * projection.
+         * <p>Type: NUMBER</p>
+         * @hide TODO unhide
+         */
+        public static final String PRESENCE_PROTOCOL = "presence_protocol";
+
+        /**
+         * Custom protocol that supplied the latest status update (see
+         * {@link CommonDataKinds.Im#CUSTOM_PROTOCOL}. This column is only
+         * returned if explicitly requested in the query projection.
+         * <p>Type: TEXT</p>
+         * @hide TODO unhide
+         */
+        public static final String PRESENCE_CUSTOM_PROTOCOL = "presence_custom_protocol";
 
         /**
          * An indicator of whether this contact has at least one phone number. "1" if there is
@@ -878,6 +905,7 @@ public final class ContactsContract {
     }
 
     public static final class Presence implements PresenceColumns, Im.CommonPresenceColumns {
+
         /**
          * This utility class cannot be instantiated
          */
@@ -940,6 +968,13 @@ public final class ContactsContract {
          * presence detail.
          */
         public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/im-presence";
+
+        /**
+         * The time when the presence custom status was inserted/updated.
+         * <p>Type: TEXT</p>
+         * @hide TODO unhide
+         */
+        public static final String PRESENCE_CUSTOM_STATUS_TIMESTAMP = "status_timestamp";
     }
 
     /**
@@ -1604,29 +1639,23 @@ public final class ContactsContract {
         }
 
         /**
-         * Common data definition for miscellaneous information.
+         * Common data definition for birthdays.
          */
-        public static final class Miscellaneous implements DataColumnsWithJoins {
+        public static final class Birthday implements DataColumnsWithJoins {
             /**
              * This utility class cannot be instantiated
              */
-            private Miscellaneous() {}
+            private Birthday() {}
 
             /** MIME type used when storing this in data table. */
-            public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/misc";
+            public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/birthday";
 
             /**
-             * The birthday as the user entered it.
+             * The birthday. This must be of the form YYYY-MM-DD or YYYY-MM-DDThh:mm:ss
+             * These are xs:date and xs:dateTime
              * <P>Type: TEXT</P>
              */
             public static final String BIRTHDAY = DATA1;
-
-            /**
-             * The nickname as the user entered it.
-             * <P>Type: TEXT</P>
-             *@hide
-             */
-            public static final String NICKNAME = DATA2;
         }
 
         /**
@@ -1699,7 +1728,7 @@ public final class ContactsContract {
 
             /**
              * Thumbnail photo of the raw contact. This is the raw bytes of an image
-             * that could be inflated using {@link BitmapFactory}.
+             * that could be inflated using {@link android.graphics.BitmapFactory}.
              * <p>
              * Type: BLOB
              */
