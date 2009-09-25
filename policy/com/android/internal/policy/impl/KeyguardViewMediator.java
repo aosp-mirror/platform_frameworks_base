@@ -718,10 +718,15 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
      * @see #handleKeyguardDone 
      */
     public void keyguardDone(boolean authenticated) {
+        keyguardDone(authenticated, true);
+    }
+
+    public void keyguardDone(boolean authenticated, boolean wakeup) {
         synchronized (this) {
             EventLog.writeEvent(70000, 2);       
             if (DEBUG) Log.d(TAG, "keyguardDone(" + authenticated + ")");
             Message msg = mHandler.obtainMessage(KEYGUARD_DONE);
+            msg.arg1 = wakeup ? 1 : 0;
             mHandler.sendMessage(msg);
 
             if (authenticated) {
@@ -788,7 +793,7 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
                     handleWakeWhenReady(msg.arg1);
                     return;
                 case KEYGUARD_DONE:
-                    handleKeyguardDone();
+                    handleKeyguardDone(msg.arg1 != 0);
                     return;
                 case KEYGUARD_DONE_DRAWING:
                     handleKeyguardDoneDrawing();
@@ -804,10 +809,12 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
      * @see #keyguardDone
      * @see #KEYGUARD_DONE
      */
-    private void handleKeyguardDone() {
+    private void handleKeyguardDone(boolean wakeup) {
         if (DEBUG) Log.d(TAG, "handleKeyguardDone");
         handleHide();
-        mPM.userActivity(SystemClock.uptimeMillis(), true);
+        if (wakeup) {
+            mPM.userActivity(SystemClock.uptimeMillis(), true);
+        }
         mWakeLock.release();
         mContext.sendBroadcast(mUserPresentIntent);
     }
