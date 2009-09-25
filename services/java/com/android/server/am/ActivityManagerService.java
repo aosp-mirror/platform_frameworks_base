@@ -1221,6 +1221,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             ApplicationInfo info =
                 mSelf.mContext.getPackageManager().getApplicationInfo(
                         "android", STOCK_PM_FLAGS);
+            mSystemThread.installSystemApplicationInfo(info);
+       
             synchronized (mSelf) {
                 ProcessRecord app = mSelf.newProcessRecordLocked(
                         mSystemThread.getApplicationThread(), info,
