@@ -372,15 +372,12 @@ public class TelephonyManager {
     /** Current network is UMTS */
     public static final int NETWORK_TYPE_UMTS = 3;
     /** Current network is CDMA: Either IS95A or IS95B*/
-    /** @hide */
     public static final int NETWORK_TYPE_CDMA = 4;
-    /** Current network is EVDO revision 0 or revision A*/
-    /** @hide */
+    /** Current network is EVDO revision 0*/
     public static final int NETWORK_TYPE_EVDO_0 = 5;
-    /** @hide */
+    /** Current network is EVDO revision A*/
     public static final int NETWORK_TYPE_EVDO_A = 6;
     /** Current network is 1xRTT*/
-    /** @hide */
     public static final int NETWORK_TYPE_1xRTT = 7;
 
     /**
