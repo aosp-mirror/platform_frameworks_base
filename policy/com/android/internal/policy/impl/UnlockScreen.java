@@ -486,12 +486,14 @@ class UnlockScreen extends LinearLayoutWithDefaultTouchRecepient
                 mInstructions = getContext().getString(
                         R.string.lockscreen_too_many_failed_attempts_countdown,
                         secondsRemaining);
+                updateStatusLines();
             }
 
             @Override
             public void onFinish() {
                 mLockPatternView.setEnabled(true);
                 mInstructions = getContext().getString(R.string.lockscreen_pattern_instructions);
+                updateStatusLines();
                 // TODO mUnlockIcon.setVisibility(View.VISIBLE);
                 mFailedPatternAttemptsSinceLastTimeout = 0;
                 if (mEnableFallback) {
