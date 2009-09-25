@@ -2,16 +2,16 @@
 **
 ** Copyright 2008, The Android Open Source Project
 **
-** Licensed under the Apache License, Version 2.0 (the "License"); 
-** you may not use this file except in compliance with the License. 
-** You may obtain a copy of the License at 
+** Licensed under the Apache License, Version 2.0 (the "License");
+** you may not use this file except in compliance with the License.
+** You may obtain a copy of the License at
 **
-**     http://www.apache.org/licenses/LICENSE-2.0 
+**     http://www.apache.org/licenses/LICENSE-2.0
 **
-** Unless required by applicable law or agreed to in writing, software 
-** distributed under the License is distributed on an "AS IS" BASIS, 
-** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
-** See the License for the specific language governing permissions and 
+** Unless required by applicable law or agreed to in writing, software
+** distributed under the License is distributed on an "AS IS" BASIS,
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+** See the License for the specific language governing permissions and
 ** limitations under the License.
 */
 
@@ -23,6 +23,103 @@
 #include <ui/CameraParameters.h>
 
 namespace android {
+// Parameter keys to communicate between camera application and driver.
+const char CameraParameters::KEY_PREVIEW_SIZE[] = "preview-size";
+const char CameraParameters::KEY_SUPPORTED_PREVIEW_SIZES[] = "preview-size-values";
+const char CameraParameters::KEY_PREVIEW_FORMAT[] = "preview-format";
+const char CameraParameters::KEY_SUPPORTED_PREVIEW_FORMATS[] = "preview-format-values";
+const char CameraParameters::KEY_PREVIEW_FRAME_RATE[] = "preview-frame-rate";
+const char CameraParameters::KEY_SUPPORTED_PREVIEW_FRAME_RATES[] = "preview-frame-rate-values";
+const char CameraParameters::KEY_PICTURE_SIZE[] = "picture-size";
+const char CameraParameters::KEY_SUPPORTED_PICTURE_SIZES[] = "picture-size-values";
+const char CameraParameters::KEY_PICTURE_FORMAT[] = "picture-format";
+const char CameraParameters::KEY_SUPPORTED_PICTURE_FORMATS[] = "picture-format-values";
+const char CameraParameters::KEY_JPEG_THUMBNAIL_WIDTH[] = "jpeg-thumbnail-width";
+const char CameraParameters::KEY_JPEG_THUMBNAIL_HEIGHT[] = "jpeg-thumbnail-height";
+const char CameraParameters::KEY_SUPPORTED_THUMBNAIL_SIZES[] = "jpeg-thumbnail-size-values";
+const char CameraParameters::KEY_JPEG_THUMBNAIL_QUALITY[] = "jpeg-thumbnail-quality";
+const char CameraParameters::KEY_JPEG_QUALITY[] = "jpeg-quality";
+const char CameraParameters::KEY_ROTATION[] = "rotation";
+const char CameraParameters::KEY_GPS_LATITUDE[] = "gps-latitude";
+const char CameraParameters::KEY_GPS_LONGITUDE[] = "gps-longitude";
+const char CameraParameters::KEY_GPS_ALTITUDE[] = "gps-altitude";
+const char CameraParameters::KEY_GPS_TIMESTAMP[] = "gps-timestamp";
+const char CameraParameters::KEY_WHITE_BALANCE[] = "whitebalance";
+const char CameraParameters::KEY_SUPPORTED_WHITE_BALANCE[] = "whitebalance-values";
+const char CameraParameters::KEY_EFFECT[] = "effect";
+const char CameraParameters::KEY_SUPPORTED_EFFECTS[] = "effect-values";
+const char CameraParameters::KEY_ANTIBANDING[] = "antibanding";
+const char CameraParameters::KEY_SUPPORTED_ANTIBANDING[] = "antibanding-values";
+const char CameraParameters::KEY_SCENE_MODE[] = "scene-mode";
+const char CameraParameters::KEY_SUPPORTED_SCENE_MODES[] = "scene-mode-values";
+const char CameraParameters::KEY_FLASH_MODE[] = "flash-mode";
+const char CameraParameters::KEY_SUPPORTED_FLASH_MODES[] = "flash-mode-values";
+const char CameraParameters::KEY_FOCUS_MODE[] = "focus-mode";
+const char CameraParameters::KEY_SUPPORTED_FOCUS_MODES[] = "focus-mode-values";
+
+// Values for white balance settings.
+const char CameraParameters::WHITE_BALANCE_AUTO[] = "auto";
+const char CameraParameters::WHITE_BALANCE_INCANDESCENT[] = "incandescent";
+const char CameraParameters::WHITE_BALANCE_FLUORESCENT[] = "fluorescent";
+const char CameraParameters::WHITE_BALANCE_WARM_FLUORESCENT[] = "warm-fluorescent";
+const char CameraParameters::WHITE_BALANCE_DAYLIGHT[] = "daylight";
+const char CameraParameters::WHITE_BALANCE_CLOUDY_DAYLIGHT[] = "cloudy-daylight";
+const char CameraParameters::WHITE_BALANCE_TWILIGHT[] = "twilight";
+const char CameraParameters::WHITE_BALANCE_SHADE[] = "shade";
+
+// Values for effect settings.
+const char CameraParameters::EFFECT_NONE[] = "none";
+const char CameraParameters::EFFECT_MONO[] = "mono";
+const char CameraParameters::EFFECT_NEGATIVE[] = "negative";
+const char CameraParameters::EFFECT_SOLARIZE[] = "solarize";
+const char CameraParameters::EFFECT_SEPIA[] = "sepia";
+const char CameraParameters::EFFECT_POSTERIZE[] = "posterize";
+const char CameraParameters::EFFECT_WHITEBOARD[] = "whiteboard";
+const char CameraParameters::EFFECT_BLACKBOARD[] = "blackboard";
+const char CameraParameters::EFFECT_AQUA[] = "aqua";
+
+// Values for antibanding settings.
+const char CameraParameters::ANTIBANDING_AUTO[] = "auto";
+const char CameraParameters::ANTIBANDING_50HZ[] = "50hz";
+const char CameraParameters::ANTIBANDING_60HZ[] = "60hz";
+const char CameraParameters::ANTIBANDING_OFF[] = "off";
+
+// Values for flash mode settings.
+const char CameraParameters::FLASH_MODE_OFF[] = "off";
+const char CameraParameters::FLASH_MODE_AUTO[] = "auto";
+const char CameraParameters::FLASH_MODE_ON[] = "on";
+const char CameraParameters::FLASH_MODE_RED_EYE[] = "red-eye";
+const char CameraParameters::FLASH_MODE_VIDEO_LIGHT[] = "video-light";
+
+// Values for scene mode settings.
+const char CameraParameters::SCENE_MODE_AUTO[] = "auto";
+const char CameraParameters::SCENE_MODE_ACTION[] = "action";
+const char CameraParameters::SCENE_MODE_PORTRAIT[] = "portrait";
+const char CameraParameters::SCENE_MODE_LANDSCAPE[] = "landscape";
+const char CameraParameters::SCENE_MODE_NIGHT[] = "night";
+const char CameraParameters::SCENE_MODE_NIGHT_PORTRAIT[] = "night-portrait";
+const char CameraParameters::SCENE_MODE_THEATRE[] = "theatre";
+const char CameraParameters::SCENE_MODE_BEACH[] = "beach";
+const char CameraParameters::SCENE_MODE_SNOW[] = "snow";
+const char CameraParameters::SCENE_MODE_SUNSET[] = "sunset";
+const char CameraParameters::SCENE_MODE_STEADYPHOTO[] = "steadyphoto";
+const char CameraParameters::SCENE_MODE_FIREWORKS[] = "fireworks";
+const char CameraParameters::SCENE_MODE_SPORTS[] = "sports";
+const char CameraParameters::SCENE_MODE_PARTY[] = "party";
+const char CameraParameters::SCENE_MODE_CANDLELIGHT[] = "candlelight";
+
+// Formats for setPreviewFormat and setPictureFormat.
+const char CameraParameters::PIXEL_FORMAT_YUV422SP[] = "yuv422sp";
+const char CameraParameters::PIXEL_FORMAT_YUV420SP[] = "yuv420sp";
+const char CameraParameters::PIXEL_FORMAT_YUV422I[] = "yuv422i-yuyv";
+const char CameraParameters::PIXEL_FORMAT_RGB565[] = "rgb565";
+const char CameraParameters::PIXEL_FORMAT_JPEG[] = "jpeg";
+
+// Values for focus mode settings.
+const char CameraParameters::FOCUS_MODE_AUTO[] = "auto";
+const char CameraParameters::FOCUS_MODE_INFINITY[] = "infinity";
+const char CameraParameters::FOCUS_MODE_MACRO[] = "macro";
+const char CameraParameters::FOCUS_MODE_FIXED[] = "fixed";
 
 static const char* portrait = "portrait";
 static const char* landscape = "landscape";
@@ -91,7 +188,7 @@ void CameraParameters::unflatten(const String8 &params)
 
 void CameraParameters::set(const char *key, const char *value)
 {
-    // XXX i think i can do this with strspn() 
+    // XXX i think i can do this with strspn()
     if (strchr(key, '=') || strchr(key, ';')) {
         //XXX LOGE("Key \"%s\"contains invalid character (= or ;)", key);
         return;
@@ -150,7 +247,7 @@ void CameraParameters::setPreviewSize(int width, int height)
 {
     char str[32];
     sprintf(str, "%dx%d", width, height);
-    set("preview-size", str);
+    set(KEY_PREVIEW_SIZE, str);
 }
 
 void CameraParameters::getPreviewSize(int *width, int *height) const
@@ -159,7 +256,7 @@ void CameraParameters::getPreviewSize(int *width, int *height) const
     *height = -1;
 
     // Get the current string, if it doesn't exist, leave the -1x-1
-    const char *p = get("preview-size");
+    const char *p = get(KEY_PREVIEW_SIZE);
     if (p == 0)
         return;
 
@@ -172,17 +269,17 @@ void CameraParameters::getPreviewSize(int *width, int *height) const
 
 void CameraParameters::setPreviewFrameRate(int fps)
 {
-    set("preview-frame-rate", fps);
+    set(KEY_PREVIEW_FRAME_RATE, fps);
 }
 
 int CameraParameters::getPreviewFrameRate() const
 {
-    return getInt("preview-frame-rate");
+    return getInt(KEY_PREVIEW_FRAME_RATE);
 }
 
 void CameraParameters::setPreviewFormat(const char *format)
 {
-    set("preview-format", format);
+    set(KEY_PREVIEW_FORMAT, format);
 }
 
 int CameraParameters::getOrientation() const
@@ -196,22 +293,22 @@ int CameraParameters::getOrientation() const
 void CameraParameters::setOrientation(int orientation)
 {
     if (orientation == CAMERA_ORIENTATION_PORTRAIT) {
-        set("preview-format", portrait);
+        set("orientation", portrait);
     } else {
-        set("preview-format", landscape);
+        set("orientation", landscape);
     }
 }
 
 const char *CameraParameters::getPreviewFormat() const
 {
-    return get("preview-format");
+    return get(KEY_PREVIEW_FORMAT);
 }
 
 void CameraParameters::setPictureSize(int width, int height)
 {
     char str[32];
     sprintf(str, "%dx%d", width, height);
-    set("picture-size", str);
+    set(KEY_PICTURE_SIZE, str);
 }
 
 void CameraParameters::getPictureSize(int *width, int *height) const
@@ -220,7 +317,7 @@ void CameraParameters::getPictureSize(int *width, int *height) const
     *height = -1;
 
     // Get the current string, if it doesn't exist, leave the -1x-1
-    const char *p = get("picture-size");
+    const char *p = get(KEY_PICTURE_SIZE);
     if (p == 0)
         return;
 
@@ -233,12 +330,12 @@ void CameraParameters::getPictureSize(int *width, int *height) const
 
 void CameraParameters::setPictureFormat(const char *format)
 {
-    set("picture-format", format);
+    set(KEY_PICTURE_FORMAT, format);
 }
 
 const char *CameraParameters::getPictureFormat() const
 {
-    return get("picture-format");
+    return get(KEY_PICTURE_FORMAT);
 }
 
 void CameraParameters::dump() const
