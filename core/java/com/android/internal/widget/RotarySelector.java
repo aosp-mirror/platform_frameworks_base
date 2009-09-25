@@ -18,7 +18,12 @@ package com.android.internal.widget;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.content.res.TypedArray;
 import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
 import android.graphics.drawable.Drawable;
 import android.os.Vibrator;
 import android.util.AttributeSet;
@@ -38,6 +43,9 @@ import com.android.internal.R;
  * security pattern is set.
  */
 public class RotarySelector extends View {
+    public static final int HORIZONTAL = 0;
+    public static final int VERTICAL = 1;
+
     private static final String LOG_TAG = "RotarySelector";
     private static final boolean DBG = false;
 
@@ -47,15 +55,15 @@ public class RotarySelector extends View {
     private float mDensity;
 
     // UI elements
-    private Drawable mBackground;
+    private Bitmap mBackground;
     private Drawable mDimple;
 
     private Drawable mLeftHandleIcon;
     private Drawable mRightHandleIcon;
 
-    private Drawable mArrowShortLeftAndRight;
-    private Drawable mArrowLongLeft;  // Long arrow starting on the left, pointing clockwise
-    private Drawable mArrowLongRight;  // Long arrow starting on the right, pointing CCW
+    private Bitmap mArrowShortLeftAndRight;
+    private Bitmap mArrowLongLeft;  // Long arrow starting on the left, pointing clockwise
+    private Bitmap mArrowLongRight;  // Long arrow starting on the right, pointing CCW
 
     // positions of the left and right handle
     private int mLeftHandleX;
@@ -73,6 +81,12 @@ public class RotarySelector extends View {
     private int mAnimatingDeltaXEnd;
 
     private DecelerateInterpolator mInterpolator;
+
+    private Paint mPaint = new Paint();
+
+    // used to rotate the background and arrow assets depending on orientation
+    final Matrix mBgMatrix = new Matrix();
+    final Matrix mArrowMatrix = new Matrix();
 
     /**
      * If the user is currently dragging something.
@@ -117,7 +131,6 @@ public class RotarySelector extends View {
     static final int SNAP_BACK_ANIMATION_DURATION_MILLIS = 300;
     static final int SPIN_ANIMATION_DURATION_MILLIS = 800;
 
-    private static final boolean DRAW_CENTER_DIMPLE = true;
     private int mEdgeTriggerThresh;
     private int mDimpleWidth;
     private int mBackgroundWidth;
@@ -137,6 +150,10 @@ public class RotarySelector extends View {
      */
     private int mDimplesOfFling = 0;
 
+    /**
+     * Either {@link #HORIZONTAL} or {@link #VERTICAL}.
+     */
+    private int mOrientation;
 
 
     public RotarySelector(Context context) {
@@ -148,28 +165,23 @@ public class RotarySelector extends View {
      */
     public RotarySelector(Context context, AttributeSet attrs) {
         super(context, attrs);
-        if (DBG) log("IncomingCallDialWidget constructor...");
+
+        TypedArray a =
+            context.obtainStyledAttributes(attrs, R.styleable.RotarySelector);
+        mOrientation = a.getInt(R.styleable.RotarySelector_orientation, HORIZONTAL);
+        a.recycle();
 
         Resources r = getResources();
         mDensity = r.getDisplayMetrics().density;
         if (DBG) log("- Density: " + mDensity);
 
         // Assets (all are BitmapDrawables).
-        mBackground = r.getDrawable(R.drawable.jog_dial_bg_cropped);
+        mBackground = getBitmapFor(R.drawable.jog_dial_bg);
         mDimple = r.getDrawable(R.drawable.jog_dial_dimple);
 
-        mArrowLongLeft = r.getDrawable(R.drawable.jog_dial_arrow_long_left_green);
-        mArrowLongRight = r.getDrawable(R.drawable.jog_dial_arrow_long_right_red);
-        mArrowShortLeftAndRight = r.getDrawable(R.drawable.jog_dial_arrow_short_left_and_right);
-
-        // Arrows:
-        // All arrow assets are the same size (they're the full width of
-        // the screen) regardless of which arrows are actually visible.
-        int arrowW = mArrowShortLeftAndRight.getIntrinsicWidth();
-        int arrowH = mArrowShortLeftAndRight.getIntrinsicHeight();
-        mArrowShortLeftAndRight.setBounds(0, 0, arrowW, arrowH);
-        mArrowLongLeft.setBounds(0, 0, arrowW, arrowH);
-        mArrowLongRight.setBounds(0, 0, arrowW, arrowH);
+        mArrowLongLeft = getBitmapFor(R.drawable.jog_dial_arrow_long_left_green);
+        mArrowLongRight = getBitmapFor(R.drawable.jog_dial_arrow_long_right_red);
+        mArrowShortLeftAndRight = getBitmapFor(R.drawable.jog_dial_arrow_short_left_and_right);
 
         mInterpolator = new DecelerateInterpolator(1f);
 
@@ -177,8 +189,8 @@ public class RotarySelector extends View {
 
         mDimpleWidth = mDimple.getIntrinsicWidth();
 
-        mBackgroundWidth = mBackground.getIntrinsicWidth();
-        mBackgroundHeight = mBackground.getIntrinsicHeight();
+        mBackgroundWidth = mBackground.getWidth();
+        mBackgroundHeight = mBackground.getHeight();
         mOuterRadius = (int) (mDensity * OUTER_ROTARY_RADIUS_DIP);
         mInnerRadius = (int) ((OUTER_ROTARY_RADIUS_DIP - ROTARY_STROKE_WIDTH_DIP) * mDensity);
 
@@ -187,15 +199,35 @@ public class RotarySelector extends View {
         mMaximumVelocity = configuration.getScaledMaximumFlingVelocity();
     }
 
+    private Bitmap getBitmapFor(int resId) {
+        return BitmapFactory.decodeResource(getContext().getResources(), resId);
+    }
+
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
 
-        mLeftHandleX = (int) (EDGE_PADDING_DIP * mDensity) + mDimpleWidth / 2;
-        mRightHandleX =
-                getWidth() - (int) (EDGE_PADDING_DIP * mDensity) - mDimpleWidth / 2;
+        final int edgePadding = (int) (EDGE_PADDING_DIP * mDensity);
+        mLeftHandleX = edgePadding + mDimpleWidth / 2;
+        final int length = isHoriz() ? w : h;
+        mRightHandleX = length - edgePadding - mDimpleWidth / 2;
+        mDimpleSpacing = (length / 2) - mLeftHandleX;
 
-        mDimpleSpacing = (getWidth() / 2) - mLeftHandleX;
+        // bg matrix only needs to be calculated once
+        mBgMatrix.setTranslate(0, 0);
+        if (!isHoriz()) {
+            // set up matrix for translating drawing of background and arrow assets
+            final int left = w - mBackgroundHeight;
+            mBgMatrix.preRotate(-90, 0, 0);
+            mBgMatrix.postTranslate(left, h);
+
+        } else {
+            mBgMatrix.postTranslate(0, h - mBackgroundHeight);
+        }
+    }
+
+    private boolean isHoriz() {
+        return mOrientation == HORIZONTAL;
     }
 
     /**
@@ -252,28 +284,35 @@ public class RotarySelector extends View {
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        final int width = MeasureSpec.getSize(widthMeasureSpec);  // screen width
-
-        final int arrowH = mArrowShortLeftAndRight.getIntrinsicHeight();
-        final int backgroundH = mBackgroundHeight;
+        final int length = isHoriz() ?
+                MeasureSpec.getSize(widthMeasureSpec) :
+                MeasureSpec.getSize(heightMeasureSpec);
+        final int arrowScrunch = (int) (ARROW_SCRUNCH_DIP * mDensity);
+        final int arrowH = mArrowShortLeftAndRight.getHeight();
 
         // by making the height less than arrow + bg, arrow and bg will be scrunched together,
         // overlaying somewhat (though on transparent portions of the drawable).
         // this works because the arrows are drawn from the top, and the rotary bg is drawn
         // from the bottom.
-        final int arrowScrunch = (int) (ARROW_SCRUNCH_DIP * mDensity);
-        setMeasuredDimension(width, backgroundH + arrowH - arrowScrunch);
-    }
+        final int height = mBackgroundHeight + arrowH - arrowScrunch;
 
-//    private Paint mPaint = new Paint();
+        if (isHoriz()) {
+            setMeasuredDimension(length, height);
+        } else {
+            setMeasuredDimension(height, length);
+        }
+    }
 
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        if (DBG) {
-            log(String.format("onDraw: mAnimating=%s, mRotaryOffsetX=%d, mGrabbedState=%d",
-                    mAnimating, mRotaryOffsetX, mGrabbedState));
-        }
+
+        final int width = getWidth();
+
+        // DEBUG: draw bounding box around widget
+//        mPaint.setColor(Color.RED);
+//        mPaint.setStyle(Paint.Style.STROKE);
+//        canvas.drawRect(0, 0, width, getHeight(), mPaint);
 
         final int height = getHeight();
 
@@ -283,76 +322,113 @@ public class RotarySelector extends View {
         }
 
         // Background:
-        final int backgroundW = mBackgroundWidth;
-        final int backgroundH = mBackgroundHeight;
-        final int backgroundY = height - backgroundH;
-        if (DBG) log("- Background INTRINSIC: " + backgroundW + " x " + backgroundH);
-        mBackground.setBounds(0, backgroundY,
-                              backgroundW, backgroundY + backgroundH);
-        if (DBG) log("  Background BOUNDS: " + mBackground.getBounds());
-        mBackground.draw(canvas);
-
+        canvas.drawBitmap(mBackground, mBgMatrix, mPaint);
 
         // Draw the correct arrow(s) depending on the current state:
-        Drawable currentArrow;
+        mArrowMatrix.reset();
         switch (mGrabbedState) {
             case NOTHING_GRABBED:
-                currentArrow  = null; //mArrowShortLeftAndRight;
+                //mArrowShortLeftAndRight;
                 break;
             case LEFT_HANDLE_GRABBED:
-                currentArrow = mArrowLongLeft;
+                mArrowMatrix.setTranslate(0, 0);
+                if (!isHoriz()) {
+                    mArrowMatrix.preRotate(-90, 0, 0);
+                    mArrowMatrix.postTranslate(0, height);
+                }
+                canvas.drawBitmap(mArrowLongLeft, mArrowMatrix, mPaint);
                 break;
             case RIGHT_HANDLE_GRABBED:
-                currentArrow = mArrowLongRight;
+                mArrowMatrix.setTranslate(0, 0);
+                if (!isHoriz()) {
+                    mArrowMatrix.preRotate(-90, 0, 0);
+                    // since bg width is > height of screen in landscape mode...
+                    mArrowMatrix.postTranslate(0, height + (mBackgroundWidth - height));
+                }
+                canvas.drawBitmap(mArrowLongRight, mArrowMatrix, mPaint);
                 break;
             default:
                 throw new IllegalStateException("invalid mGrabbedState: " + mGrabbedState);
         }
-        if (currentArrow != null) currentArrow.draw(canvas);
 
-        // debug: draw circle that should match the outer arc (good sanity check)
-//        mPaint.setColor(Color.RED);
-//        mPaint.setStyle(Paint.Style.STROKE);
+        final int bgHeight = mBackgroundHeight;
+        final int bgTop = isHoriz() ?
+                height - bgHeight:
+                width - bgHeight;
+        // DEBUG: draw circle bounding arc drawable: good sanity check we're doing the math
+        // correctly
 //        float or = OUTER_ROTARY_RADIUS_DIP * mDensity;
-//        canvas.drawCircle(getWidth() / 2, or + mBackground.getBounds().top, or, mPaint);
+//        final int vOffset = mBackgroundWidth - height;
+//        final int midX = isHoriz() ?
+//                width / 2 :
+//                mBackgroundWidth / 2 - vOffset;
+//        if (isHoriz()) {
+//            canvas.drawCircle(midX, or + bgTop, or, mPaint);
+//        } else {
+//            canvas.drawCircle(or + bgTop, midX, or, mPaint);
+//        }
 
-        final int bgTop = mBackground.getBounds().top;
+        // left dimple / icon
         {
             final int xOffset = mLeftHandleX + mRotaryOffsetX;
             final int drawableY = getYOnArc(
-                    mBackground,
+                    mBackgroundWidth,
                     mInnerRadius,
                     mOuterRadius,
                     xOffset);
-
-            drawCentered(mDimple, canvas, xOffset, drawableY + bgTop);
-            if (mGrabbedState != RIGHT_HANDLE_GRABBED) {
-                drawCentered(mLeftHandleIcon, canvas, xOffset, drawableY + bgTop);
+            if (isHoriz()) {
+                drawCentered(mDimple, canvas, xOffset, drawableY + bgTop);
+                if (mGrabbedState != RIGHT_HANDLE_GRABBED) {
+                    drawCentered(mLeftHandleIcon, canvas, xOffset, drawableY + bgTop);
+                }
+            } else {
+                // vertical
+                drawCentered(mDimple, canvas, drawableY + bgTop, height - xOffset);
+                if (mGrabbedState != RIGHT_HANDLE_GRABBED) {
+                    drawCentered(mLeftHandleIcon, canvas, drawableY + bgTop, height - xOffset);
+                }
             }
         }
 
-        if (DRAW_CENTER_DIMPLE) {
-            final int xOffset = getWidth() / 2 + mRotaryOffsetX;
+        // center dimple
+        {
+            final int xOffset = isHoriz() ?
+                    width / 2 + mRotaryOffsetX:
+                    height / 2 + mRotaryOffsetX;
             final int drawableY = getYOnArc(
-                    mBackground,
+                    mBackgroundWidth,
                     mInnerRadius,
                     mOuterRadius,
                     xOffset);
 
-            drawCentered(mDimple, canvas, xOffset, drawableY + bgTop);
+            if (isHoriz()) {
+                drawCentered(mDimple, canvas, xOffset, drawableY + bgTop);
+            } else {
+                // vertical
+                drawCentered(mDimple, canvas, drawableY + bgTop, height - xOffset);
+            }
         }
 
+        // right dimple / icon
         {
             final int xOffset = mRightHandleX + mRotaryOffsetX;
             final int drawableY = getYOnArc(
-                    mBackground,
+                    mBackgroundWidth,
                     mInnerRadius,
                     mOuterRadius,
                     xOffset);
 
-            drawCentered(mDimple, canvas, xOffset, drawableY + bgTop);
-            if (mGrabbedState != LEFT_HANDLE_GRABBED) {
-                drawCentered(mRightHandleIcon, canvas, xOffset, drawableY + bgTop);
+            if (isHoriz()) {
+                drawCentered(mDimple, canvas, xOffset, drawableY + bgTop);
+                if (mGrabbedState != LEFT_HANDLE_GRABBED) {
+                    drawCentered(mRightHandleIcon, canvas, xOffset, drawableY + bgTop);
+                }
+            } else {
+                // vertical
+                drawCentered(mDimple, canvas, drawableY + bgTop, height - xOffset);
+                if (mGrabbedState != LEFT_HANDLE_GRABBED) {
+                    drawCentered(mRightHandleIcon, canvas, drawableY + bgTop, height - xOffset);
+                }
             }
         }
 
@@ -361,12 +437,16 @@ public class RotarySelector extends View {
         final int halfdimple = mDimpleWidth / 2;
         while (dimpleLeft > -halfdimple) {
             final int drawableY = getYOnArc(
-                    mBackground,
+                    mBackgroundWidth,
                     mInnerRadius,
                     mOuterRadius,
                     dimpleLeft);
 
-            drawCentered(mDimple, canvas, dimpleLeft, drawableY + bgTop);
+            if (isHoriz()) {
+                drawCentered(mDimple, canvas, dimpleLeft, drawableY + bgTop);
+            } else {
+                drawCentered(mDimple, canvas, drawableY + bgTop, height - dimpleLeft);
+            }
             dimpleLeft -= mDimpleSpacing;
         }
 
@@ -375,40 +455,43 @@ public class RotarySelector extends View {
         final int rightThresh = mRight + halfdimple;
         while (dimpleRight < rightThresh) {
             final int drawableY = getYOnArc(
-                    mBackground,
+                    mBackgroundWidth,
                     mInnerRadius,
                     mOuterRadius,
                     dimpleRight);
 
-            drawCentered(mDimple, canvas, dimpleRight, drawableY + bgTop);
+            if (isHoriz()) {
+                drawCentered(mDimple, canvas, dimpleRight, drawableY + bgTop);
+            } else {
+                drawCentered(mDimple, canvas, drawableY + bgTop, height - dimpleRight);
+            }
             dimpleRight += mDimpleSpacing;
         }
     }
 
     /**
-     * Assuming drawable is a bounding box around a piece of an arc drawn by two concentric circles
+     * Assuming bitmap is a bounding box around a piece of an arc drawn by two concentric circles
      * (as the background drawable for the rotary widget is), and given an x coordinate along the
      * drawable, return the y coordinate of a point on the arc that is between the two concentric
      * circles.  The resulting y combined with the incoming x is a point along the circle in
      * between the two concentric circles.
      *
-     * @param drawable The drawable.
+     * @param backgroundWidth The width of the asset (the bottom of the box surrounding the arc).
      * @param innerRadius The radius of the circle that intersects the drawable at the bottom two
      *        corders of the drawable (top two corners in terms of drawing coordinates).
      * @param outerRadius The radius of the circle who's top most point is the top center of the
      *        drawable (bottom center in terms of drawing coordinates).
-     * @param x The distance along the x axis of the desired point.
-     * @return The y coordinate, in drawing coordinates, that will place (x, y) along the circle
+     * @param x The distance along the x axis of the desired point.    @return The y coordinate, in drawing coordinates, that will place (x, y) along the circle
      *        in between the two concentric circles.
      */
-    private int getYOnArc(Drawable drawable, int innerRadius, int outerRadius, int x) {
+    private int getYOnArc(int backgroundWidth, int innerRadius, int outerRadius, int x) {
 
         // the hypotenuse
         final int halfWidth = (outerRadius - innerRadius) / 2;
         final int middleRadius = innerRadius + halfWidth;
 
         // the bottom leg of the triangle
-        final int triangleBottom = (drawable.getIntrinsicWidth() / 2) - x;
+        final int triangleBottom = (backgroundWidth / 2) - x;
 
         // "Our offense is like the pythagorean theorem: There is no answer!" - Shaquille O'Neal
         final int triangleY =
@@ -437,8 +520,11 @@ public class RotarySelector extends View {
         }
         mVelocityTracker.addMovement(event);
 
+        final int height = getHeight();
 
-        final int eventX = (int) event.getX();
+        final int eventX = isHoriz() ?
+                (int) event.getX():
+                height - ((int) event.getY());
         final int hitWindow = mDimpleWidth;
 
         final int action = event.getAction();
@@ -468,12 +554,16 @@ public class RotarySelector extends View {
                 if (mGrabbedState == LEFT_HANDLE_GRABBED) {
                     mRotaryOffsetX = eventX - mLeftHandleX;
                     invalidate();
-                    if (eventX >= getRight() - mEdgeTriggerThresh && !mTriggered) {
+                    final int rightThresh = isHoriz() ? getRight() : height;
+                    if (eventX >= rightThresh - mEdgeTriggerThresh && !mTriggered) {
                         mTriggered = true;
                         dispatchTriggerEvent(OnDialTriggerListener.LEFT_HANDLE);
                         final VelocityTracker velocityTracker = mVelocityTracker;
                         velocityTracker.computeCurrentVelocity(1000, mMaximumVelocity);
-                        final int velocity = Math.max(mMinimumVelocity, (int) velocityTracker.getXVelocity());
+                        final int rawVelocity = isHoriz() ?
+                                (int) velocityTracker.getXVelocity():
+                                -(int) velocityTracker.getYVelocity();
+                        final int velocity = Math.max(mMinimumVelocity, rawVelocity);
                         mDimplesOfFling = Math.max(
                                 8,
                                 Math.abs(velocity / mDimpleSpacing));
@@ -490,7 +580,10 @@ public class RotarySelector extends View {
                         dispatchTriggerEvent(OnDialTriggerListener.RIGHT_HANDLE);
                         final VelocityTracker velocityTracker = mVelocityTracker;
                         velocityTracker.computeCurrentVelocity(1000, mMaximumVelocity);
-                        final int velocity = Math.min(-mMinimumVelocity, (int) velocityTracker.getXVelocity());
+                        final int rawVelocity = isHoriz() ?
+                                (int) velocityTracker.getXVelocity():
+                                - (int) velocityTracker.getYVelocity();
+                        final int velocity = Math.min(-mMinimumVelocity, rawVelocity);
                         mDimplesOfFling = Math.max(
                                 8,
                                 Math.abs(velocity / mDimpleSpacing));
@@ -559,6 +652,7 @@ public class RotarySelector extends View {
         final long millisSoFar = currentAnimationTimeMillis() - mAnimationStartTime;
         final long millisLeft = mAnimationDuration - millisSoFar;
         final int totalDeltaX = mAnimatingDeltaXStart - mAnimatingDeltaXEnd;
+        final boolean goingRight = totalDeltaX < 0;
         if (DBG) log("millisleft for animating: " + millisLeft);
         if (millisLeft <= 0) {
             reset();
@@ -569,13 +663,17 @@ public class RotarySelector extends View {
                 mInterpolator.getInterpolation((float) millisSoFar / mAnimationDuration);
         final int dx = (int) (totalDeltaX * (1 - interpolation));
         mRotaryOffsetX = mAnimatingDeltaXEnd + dx;
+
+        // once we have gone far enough to animate the current buttons off screen, we start
+        // wrapping the offset back to the other side so that when the animation is finished,
+        // the buttons will come back into their original places.
         if (mDimplesOfFling > 0) {
-            if (mRotaryOffsetX < 4 * mDimpleSpacing) {
+            if (!goingRight && mRotaryOffsetX < 3 * mDimpleSpacing) {
                 // wrap around on fling left
-                mRotaryOffsetX += (4 + mDimplesOfFling - 4) * mDimpleSpacing;
-            } else if (mRotaryOffsetX > 4 * mDimpleSpacing) {
+                mRotaryOffsetX += mDimplesOfFling * mDimpleSpacing;
+            } else if (goingRight && mRotaryOffsetX > 3 * mDimpleSpacing) {
                 // wrap around on fling right
-                mRotaryOffsetX -= (4 + mDimplesOfFling - 4) * mDimpleSpacing;
+                mRotaryOffsetX -= mDimplesOfFling * mDimpleSpacing;
             }
         }
         invalidate();
