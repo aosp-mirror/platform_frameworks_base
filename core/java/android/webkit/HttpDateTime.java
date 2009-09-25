@@ -184,11 +184,20 @@ public final class HttpDateTime {
             } else {
                 return year + 2000;
             }
-        } else
-            return (yearString.charAt(0) - '0') * 1000
+        } else if (yearString.length() == 3) {
+            // According to RFC 2822, three digit years should be added to 1900.
+            int year = (yearString.charAt(0) - '0') * 100
+                    + (yearString.charAt(1) - '0') * 10
+                    + (yearString.charAt(2) - '0');
+            return year + 1900;
+        } else if (yearString.length() == 4) {
+             return (yearString.charAt(0) - '0') * 1000
                     + (yearString.charAt(1) - '0') * 100
                     + (yearString.charAt(2) - '0') * 10
                     + (yearString.charAt(3) - '0');
+        } else {
+             return 1970;
+        }
     }
 
     private static TimeOfDay getTime(String timeString) {
