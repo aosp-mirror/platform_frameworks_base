@@ -42,13 +42,13 @@ bool ThreadIO::playCoreCommands(Context *con, bool waitForCommand)
         uint32_t cmdID = 0;
         uint32_t cmdSize = 0;
         ret = true;
-#if RS_LOG_TIMES
-        con->timerSet(Context::RS_TIMER_IDLE);
-#endif
+        if (con->logTimes) {
+            con->timerSet(Context::RS_TIMER_IDLE);
+        }
         const void * data = mToCore.get(&cmdID, &cmdSize);
-#if RS_LOG_TIMES
-        con->timerSet(Context::RS_TIMER_INTERNAL);
-#endif
+        if (con->logTimes) {
+            con->timerSet(Context::RS_TIMER_INTERNAL);
+        }
         waitForCommand = false;
         //LOGV("playCoreCommands 3 %i %i", cmdID, cmdSize);
 

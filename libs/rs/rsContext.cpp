@@ -20,11 +20,15 @@
 #include <ui/FramebufferNativeWindow.h>
 #include <ui/EGLUtils.h>
 
+#include <cutils/properties.h>
+
 #include <GLES/gl.h>
 #include <GLES/glext.h>
 
 using namespace android;
 using namespace android::renderscript;
+
+bool g_logTimes = -1;
 
 pthread_key_t Context::gThreadTLSKey = 0;
 
@@ -113,9 +117,9 @@ bool Context::runScript(Script *s, uint32_t launchID)
 
 bool Context::runRootScript()
 {
-#if RS_LOG_TIMES
-    timerSet(RS_TIMER_CLEAR_SWAP);
-#endif
+    if (this->logTimes) {
+        timerSet(RS_TIMER_CLEAR_SWAP);
+    }
     rsAssert(mRootScript->mEnviroment.mIsRoot);
 
     eglQuerySurface(mEGL.mDisplay, mEGL.mSurface, EGL_WIDTH, &mEGL.mWidth);
@@ -136,9 +140,9 @@ bool Context::runRootScript()
         glClear(GL_COLOR_BUFFER_BIT);
     }
 
-#if RS_LOG_TIMES
-    timerSet(RS_TIMER_SCRIPT);
-#endif
+    if (this->logTimes) {
+        timerSet(RS_TIMER_SCRIPT);
+    }
     bool ret = runScript(mRootScript.get(), 0);
     return ret;
 }
@@ -204,10 +208,18 @@ void Context::setupCheck()
     mVertex->setupGL(this, &mStateVertex);
 }
 
+static bool get_log_times()
+{
+    char buf[PROPERTY_VALUE_MAX];
+    property_get("debug.rs.profile", buf, "0");
+    return 0 != strcmp(buf, "0");
+}
 
 void * Context::threadProc(void *vrsc)
 {
      Context *rsc = static_cast<Context *>(vrsc);
+
+     rsc->logTimes = get_log_times();
 
      rsc->initEGL();
 
@@ -240,16 +252,16 @@ void * Context::threadProc(void *vrsc)
 
          if (mDraw) {
              mDraw = rsc->runRootScript();
-#if RS_LOG_TIMES
-             rsc->timerSet(RS_TIMER_CLEAR_SWAP);
-#endif
+             if (rsc->logTimes) {
+                 rsc->timerSet(RS_TIMER_CLEAR_SWAP);
+             }
              eglSwapBuffers(rsc->mEGL.mDisplay, rsc->mEGL.mSurface);
-#if RS_LOG_TIMES
-             rsc->timerFrame();
-             rsc->timerSet(RS_TIMER_INTERNAL);
-             rsc->timerPrint();
-             rsc->timerReset();
-#endif
+             if (rsc->logTimes) {
+                 rsc->timerFrame();
+                 rsc->timerSet(RS_TIMER_INTERNAL);
+                 rsc->timerPrint();
+                 rsc->timerReset();
+             }
          }
          if (rsc->mObjDestroy.mNeedToEmpty) {
              rsc->objDestroyOOBRun();
