@@ -124,7 +124,7 @@ public final class BridgeResources extends Resources {
         IResourceValue value = getResourceValue(id, mPlatformResourceFlag);
 
         if (value != null) {
-            return ResourceHelper.getDrawable(value.getValue(), mContext, value.isFramework());
+            return ResourceHelper.getDrawable(value, mContext, value.isFramework());
         }
 
         // id was not found or not resolved. Throw a NotFoundException.
