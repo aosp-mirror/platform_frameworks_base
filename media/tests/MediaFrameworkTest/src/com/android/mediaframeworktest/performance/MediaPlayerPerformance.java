@@ -40,6 +40,7 @@ import java.io.FileWriter;
 import java.io.BufferedWriter;
 
 import android.media.MediaMetadataRetriever;
+import com.android.mediaframeworktest.MediaProfileReader;
 
 /**
  * Junit / Instrumentation - performance measurement for media player and 
@@ -384,23 +385,24 @@ public class MediaPlayerPerformance extends ActivityInstrumentationTestCase<Medi
     @LargeTest
     public void testWMVVideoPlaybackMemoryUsage() throws Exception {
         boolean memoryResult = false;
-        mStartPid = getMediaserverPid();
-
-        File wmvMemoryOut = new File(MEDIA_MEMORY_OUTPUT);
-        Writer output = new BufferedWriter(new FileWriter(wmvMemoryOut, true));
-        output.write("WMV video playback only\n");
-        for (int i = 0; i < NUM_STRESS_LOOP; i++) {
-            mediaStressPlayback(MediaNames.VIDEO_WMV);
-            if (i == 0) {
-              mStartMemory = getMediaserverVsize();
-              output.write("Start memory : " + mStartMemory + "\n");
+        if (MediaProfileReader.getWMVEnable()){
+            mStartPid = getMediaserverPid();
+            File wmvMemoryOut = new File(MEDIA_MEMORY_OUTPUT);
+            Writer output = new BufferedWriter(new FileWriter(wmvMemoryOut, true));
+            output.write("WMV video playback only\n");
+            for (int i = 0; i < NUM_STRESS_LOOP; i++) {
+                mediaStressPlayback(MediaNames.VIDEO_WMV);
+                if (i == 0) {
+                    mStartMemory = getMediaserverVsize();
+                    output.write("Start memory : " + mStartMemory + "\n");
+                }
+                getMemoryWriteToLog(output);
             }
-            getMemoryWriteToLog(output);
+            output.write("\n");
+            memoryResult = validateMemoryResult(mStartPid, mStartMemory, output);
+            output.close();
+            assertTrue("wmv playback memory test", memoryResult);
         }
-        output.write("\n");
-        memoryResult = validateMemoryResult(mStartPid, mStartMemory, output);
-        output.close();
-        assertTrue("wmv playback memory test", memoryResult);
     }
 
     // Test case 4: Capture the memory usage after every 20 video only recorded
