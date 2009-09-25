@@ -296,7 +296,7 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
      * a context will be created with no shared context and
      * with a null attribute list.
      */
-    public void setContextFactory(EGLContextFactory factory) {
+    public void setEGLContextFactory(EGLContextFactory factory) {
         checkRenderThreadState();
         mEGLContextFactory = factory;
     }
@@ -311,7 +311,7 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
      * If this method is not called, then by default
      * a window surface will be created with a null attribute list.
      */
-    public void setWindowSurfaceFactory(EGLWindowSurfaceFactory factory) {
+    public void setEGLWindowSurfaceFactory(EGLWindowSurfaceFactory factory) {
         checkRenderThreadState();
         mEGLWindowSurfaceFactory = factory;
     }
