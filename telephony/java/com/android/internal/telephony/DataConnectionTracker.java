@@ -425,26 +425,28 @@ public abstract class DataConnectionTracker extends Handler {
      * will be sent by the ConnectivityManager when a connection to
      * the APN has been established.
      */
-    public int enableApnType(String type) {
+    public synchronized int enableApnType(String type) {
         int id = apnTypeToId(type);
         if (id == APN_INVALID_ID) {
             return Phone.APN_REQUEST_FAILED;
         }
 
-        // If already active, return
         if(DBG) Log.d(LOG_TAG, "enableApnType("+type+"), isApnTypeActive = "
                 + isApnTypeActive(type) + " and state = " + state);
-
-        if (isApnTypeActive(type)) {
-            if (state == State.INITING) return Phone.APN_REQUEST_STARTED;
-            else if (state == State.CONNECTED) return Phone.APN_ALREADY_ACTIVE;
-        }
 
         if (!isApnTypeAvailable(type)) {
             return Phone.APN_TYPE_NOT_AVAILABLE;
         }
 
+        // just because it's active doesn't mean we had it explicitly requested before
+        // (a broad default may handle many types).  make sure we mark it enabled
+        // so if the default is disabled we keep the connection for others
         setEnabled(id, true);
+
+        if (isApnTypeActive(type)) {
+            if (state == State.INITING) return Phone.APN_REQUEST_STARTED;
+            else if (state == State.CONNECTED) return Phone.APN_ALREADY_ACTIVE;
+        }
         return Phone.APN_REQUEST_STARTED;
     }
 
@@ -490,20 +492,21 @@ public abstract class DataConnectionTracker extends Handler {
 
     protected synchronized void onEnableApn(int apnId, int enabled) {
         if (DBG) {
-            Log.d(LOG_TAG, "got EVENT_APN_ENABLE_REQUEST with apnType = " + apnId +
-                    " and enable = " + enabled);
-            Log.d(LOG_TAG, "dataEnabled[apnId] = " + dataEnabled[apnId] +
-                    ", enabledCount = " + enabledCount);
+            Log.d(LOG_TAG, "EVENT_APN_ENABLE_REQUEST " + apnId + ", " + enabled);
+            Log.d(LOG_TAG, " dataEnabled = " + dataEnabled[apnId] +
+                    ", enabledCount = " + enabledCount +
+                    ", isApnTypeActive = " + isApnTypeActive(apnIdToType(apnId)));
         }
         if (enabled == APN_ENABLED) {
             if (!dataEnabled[apnId]) {
-                mRequestedApnType = apnIdToType(apnId);
-                onEnableNewApn();
-
                 dataEnabled[apnId] = true;
                 enabledCount++;
             }
-            onTrySetupData(null);
+            String type = apnIdToType(apnId);
+            if (!isApnTypeActive(type)) {
+                mRequestedApnType = type;
+                onEnableNewApn();
+            }
         } else {
             // disable
             if (dataEnabled[apnId]) {
@@ -511,7 +514,8 @@ public abstract class DataConnectionTracker extends Handler {
                 enabledCount--;
                 if (enabledCount == 0) {
                     onCleanUpConnection(true, Phone.REASON_DATA_DISABLED);
-                } else if (dataEnabled[APN_DEFAULT_ID] == true) {
+                } else if (dataEnabled[APN_DEFAULT_ID] == true &&
+                        !isApnTypeActive(Phone.APN_TYPE_DEFAULT)) {
                     mRequestedApnType = Phone.APN_TYPE_DEFAULT;
                     onEnableNewApn();
                 }
