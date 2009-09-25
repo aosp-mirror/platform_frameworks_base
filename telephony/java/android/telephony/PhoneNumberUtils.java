@@ -1230,6 +1230,9 @@ public class PhoneNumberUtils
      * listed in the ril / sim, then return true, otherwise false.
      */
     public static boolean isEmergencyNumber(String number) {
+        // If the number passed in is null, just return false:
+        if (number == null) return false;
+
         // Strip the separators from the number before comparing it
         // to the list.
         number = extractNetworkPortion(number);
