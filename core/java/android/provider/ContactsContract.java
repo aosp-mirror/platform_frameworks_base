@@ -1639,19 +1639,20 @@ public final class ContactsContract {
         }
 
         /**
-         * Common data definition for miscellaneous information.
+         * Common data definition for birthdays.
          */
-        public static final class Miscellaneous implements DataColumnsWithJoins {
+        public static final class Birthday implements DataColumnsWithJoins {
             /**
              * This utility class cannot be instantiated
              */
-            private Miscellaneous() {}
+            private Birthday() {}
 
             /** MIME type used when storing this in data table. */
-            public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/misc";
+            public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/birthday";
 
             /**
-             * The birthday as the user entered it.
+             * The birthday. This must be of the form YYYY-MM-DD or YYYY-MM-DDThh:mm:ss
+             * These are xs:date and xs:dateTime
              * <P>Type: TEXT</P>
              */
             public static final String BIRTHDAY = DATA1;
