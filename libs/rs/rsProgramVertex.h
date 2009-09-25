@@ -64,7 +64,7 @@ public:
     ObjectBaseRef<ProgramVertex> mLast;
     ObjectBaseRef<Allocation> mDefaultAlloc;
 
-
+    RsType mAllocType;
 
     ProgramVertex *mPV;
 
