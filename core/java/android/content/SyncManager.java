@@ -208,6 +208,15 @@ class SyncManager implements OnAccountsUpdatedListener {
         }
     };
 
+    private BroadcastReceiver mBackgroundDataSettingChanged = new BroadcastReceiver() {
+        public void onReceive(Context context, Intent intent) {
+            if (getConnectivityManager().getBackgroundDataSetting()) {
+                scheduleSync(null /* account */, null /* authority */, new Bundle(), 0 /* delay */,
+                        false /* onlyThoseWithUnknownSyncableState */);
+            }
+        }
+    };
+
     public void onAccountsUpdated(Account[] accounts) {
         // remember if this was the first time this was called after an update
         final boolean justBootedUp = mAccounts == null;
@@ -350,6 +359,9 @@ class SyncManager implements OnAccountsUpdatedListener {
 
         intentFilter = new IntentFilter(Intent.ACTION_BOOT_COMPLETED);
         context.registerReceiver(mBootCompletedReceiver, intentFilter);
+
+        intentFilter = new IntentFilter(ConnectivityManager.ACTION_BACKGROUND_DATA_SETTING_CHANGED);
+        context.registerReceiver(mBackgroundDataSettingChanged, intentFilter);
 
         intentFilter = new IntentFilter(Intent.ACTION_DEVICE_STORAGE_LOW);
         intentFilter.addAction(Intent.ACTION_DEVICE_STORAGE_OK);
@@ -687,8 +699,8 @@ class SyncManager implements OnAccountsUpdatedListener {
                             if (isLoggable) {
                                 Log.d(TAG, "scheduleSync: sync of " + account + ", " + authority
                                         + " is not allowed, dropping request");
-                                continue;
                             }
+                            continue;
                         }
                     }
                     if (isLoggable) {
