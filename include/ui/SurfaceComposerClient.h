@@ -20,6 +20,8 @@
 #include <stdint.h>
 #include <sys/types.h>
 
+#include <binder/IBinder.h>
+
 #include <utils/SortedVector.h>
 #include <utils/RefBase.h>
 #include <utils/threads.h>
@@ -106,6 +108,8 @@ public:
     static ssize_t getDisplayHeight(DisplayID dpy);
     static ssize_t getDisplayOrientation(DisplayID dpy);
 
+    status_t linkToComposerDeath(const sp<IBinder::DeathRecipient>& recipient,
+            void* cookie = NULL, uint32_t flags = 0);
 
 private:
     friend class Surface;
