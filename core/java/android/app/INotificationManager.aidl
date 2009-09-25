@@ -24,11 +24,15 @@ import android.content.Intent;
 /** {@hide} */
 interface INotificationManager
 {
+    /** @deprecated use {@link #enqueueNotificationWithTag} instead */
     void enqueueNotification(String pkg, int id, in Notification notification, inout int[] idReceived);
+    /** @deprecated use {@link #cancelNotificationWithTag} instead */
     void cancelNotification(String pkg, int id);
     void cancelAllNotifications(String pkg);
 
     void enqueueToast(String pkg, ITransientNotification callback, int duration);
     void cancelToast(String pkg, ITransientNotification callback);
+    void enqueueNotificationWithTag(String pkg, String tag, int id, in Notification notification, inout int[] idReceived);
+    void cancelNotificationWithTag(String pkg, String tag, int id);
 }
 

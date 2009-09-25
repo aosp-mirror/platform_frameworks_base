@@ -5,6 +5,7 @@ import android.widget.RemoteViews;
 
 public class NotificationData {
     public String pkg;
+    public String tag;
     public int id;
     public CharSequence tickerText;
 
@@ -16,9 +17,6 @@ public class NotificationData {
     public PendingIntent contentIntent;
 
     public PendingIntent deleteIntent;
-
-    public NotificationData() {
-    }
 
     public String toString() {
         return "NotificationData(package=" + pkg + " tickerText=" + tickerText

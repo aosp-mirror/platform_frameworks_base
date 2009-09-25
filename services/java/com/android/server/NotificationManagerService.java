@@ -30,7 +30,6 @@ import android.app.PendingIntent;
 import android.app.StatusBarManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
-import android.content.ContentQueryMap;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
@@ -103,7 +102,8 @@ class NotificationManagerService extends INotificationManager.Stub
     private boolean mAdbNotificationShown = false;
     private Notification mAdbNotification;
     
-    private ArrayList<NotificationRecord> mNotificationList;
+    private final ArrayList<NotificationRecord> mNotificationList =
+            new ArrayList<NotificationRecord>();
 
     private ArrayList<ToastRecord> mToastQueue;
 
@@ -152,20 +152,22 @@ class NotificationManagerService extends INotificationManager.Stub
 
     private static final class NotificationRecord
     {
-        String pkg;
-        int id;
+        final String pkg;
+        final String tag;
+        final int id;
         ITransientNotification callback;
         int duration;
-        Notification notification;
+        final Notification notification;
         IBinder statusBarKey;
 
-        NotificationRecord(String pkg, int id, Notification notification)
+        NotificationRecord(String pkg, String tag, int id, Notification notification)
         {
             this.pkg = pkg;
+            this.tag = tag;
             this.id = id;
             this.notification = notification;
         }
-        
+
         void dump(PrintWriter pw, String prefix, Context baseContext) {
             pw.println(prefix + this);
             pw.println(prefix + "  icon=0x" + Integer.toHexString(notification.icon)
@@ -189,7 +191,8 @@ class NotificationManagerService extends INotificationManager.Stub
             return "NotificationRecord{"
                 + Integer.toHexString(System.identityHashCode(this))
                 + " pkg=" + pkg
-                + " id=" + Integer.toHexString(id) + "}";
+                + " id=" + Integer.toHexString(id)
+                + " tag=" + tag + "}";
         }
     }
 
@@ -258,8 +261,8 @@ class NotificationManagerService extends INotificationManager.Stub
             cancelAll();
         }
 
-        public void onNotificationClick(String pkg, int id) {
-            cancelNotification(pkg, id, Notification.FLAG_AUTO_CANCEL,
+        public void onNotificationClick(String pkg, String tag, int id) {
+            cancelNotification(pkg, tag, id, Notification.FLAG_AUTO_CANCEL,
                     Notification.FLAG_FOREGROUND_SERVICE);
         }
 
@@ -369,7 +372,6 @@ class NotificationManagerService extends INotificationManager.Stub
         mSound = new AsyncPlayer(TAG);
         mSound.setUsesWakeLock(context);
         mToastQueue = new ArrayList<ToastRecord>();
-        mNotificationList = new ArrayList<NotificationRecord>();
         mHandler = new WorkerHandler();
         mStatusBarService = statusBar;
         statusBar.setNotificationCallbacks(mNotificationCallbacks);
@@ -583,6 +585,12 @@ class NotificationManagerService extends INotificationManager.Stub
     // ============================================================================
     public void enqueueNotification(String pkg, int id, Notification notification, int[] idOut)
     {
+        enqueueNotificationWithTag(pkg, null /* tag */, id, notification, idOut);
+    }
+
+    public void enqueueNotificationWithTag(String pkg, String tag, int id,
+            Notification notification, int[] idOut)
+    {
         checkIncomingCall(pkg);
         
         // This conditional is a dirty hack to limit the logging done on
@@ -608,10 +616,10 @@ class NotificationManagerService extends INotificationManager.Stub
         }
 
         synchronized (mNotificationList) {
-            NotificationRecord r = new NotificationRecord(pkg, id, notification);
+            NotificationRecord r = new NotificationRecord(pkg, tag, id, notification);
             NotificationRecord old = null;
 
-            int index = indexOfNotificationLocked(pkg, id);
+            int index = indexOfNotificationLocked(pkg, tag, id);
             if (index < 0) {
                 mNotificationList.add(r);
             } else {
@@ -645,17 +653,18 @@ class NotificationManagerService extends INotificationManager.Stub
                 }
 
                 NotificationData n = new NotificationData();
-                    n.id = id;
-                    n.pkg = pkg;
-                    n.when = notification.when;
-                    n.tickerText = truncatedTicker;
-                    n.ongoingEvent = (notification.flags & Notification.FLAG_ONGOING_EVENT) != 0;
-                    if (!n.ongoingEvent && (notification.flags & Notification.FLAG_NO_CLEAR) == 0) {
-                        n.clearable = true;
-                    }
-                    n.contentView = notification.contentView;
-                    n.contentIntent = notification.contentIntent;
-                    n.deleteIntent = notification.deleteIntent;
+                n.pkg = pkg;
+                n.tag = tag;
+                n.id = id;
+                n.when = notification.when;
+                n.tickerText = truncatedTicker;
+                n.ongoingEvent = (notification.flags & Notification.FLAG_ONGOING_EVENT) != 0;
+                if (!n.ongoingEvent && (notification.flags & Notification.FLAG_NO_CLEAR) == 0) {
+                    n.clearable = true;
+                }
+                n.contentView = notification.contentView;
+                n.contentIntent = notification.contentIntent;
+                n.deleteIntent = notification.deleteIntent;
                 if (old != null && old.statusBarKey != null) {
                     r.statusBarKey = old.statusBarKey;
                     long identity = Binder.clearCallingIdentity();
@@ -828,16 +837,14 @@ class NotificationManagerService extends INotificationManager.Stub
      * Cancels a notification ONLY if it has all of the {@code mustHaveFlags}
      * and none of the {@code mustNotHaveFlags}. 
      */
-    private void cancelNotification(String pkg, int id, int mustHaveFlags,
+    private void cancelNotification(String pkg, String tag, int id, int mustHaveFlags,
             int mustNotHaveFlags) {
         EventLog.writeEvent(EVENT_LOG_CANCEL, pkg, id, mustHaveFlags);
 
         synchronized (mNotificationList) {
-            NotificationRecord r = null;
-
-            int index = indexOfNotificationLocked(pkg, id);
+            int index = indexOfNotificationLocked(pkg, tag, id);
             if (index >= 0) {
-                r = mNotificationList.get(index);
+                NotificationRecord r = mNotificationList.get(index);
                 
                 if ((r.notification.flags & mustHaveFlags) != mustHaveFlags) {
                     return;
@@ -888,9 +895,13 @@ class NotificationManagerService extends INotificationManager.Stub
 
     
     public void cancelNotification(String pkg, int id) {
+        cancelNotificationWithTag(pkg, null /* tag */, id);
+    }
+
+    public void cancelNotificationWithTag(String pkg, String tag, int id) {
         checkIncomingCall(pkg);
         // Don't allow client applications to cancel foreground service notis.
-        cancelNotification(pkg, id, 0,
+        cancelNotification(pkg, tag, id, 0,
                 Binder.getCallingUid() == Process.SYSTEM_UID
                 ? 0 : Notification.FLAG_FOREGROUND_SERVICE);
     }
@@ -999,12 +1010,21 @@ class NotificationManagerService extends INotificationManager.Stub
     }
 
     // lock on mNotificationList
-    private int indexOfNotificationLocked(String pkg, int id)
+    private int indexOfNotificationLocked(String pkg, String tag, int id)
     {
         ArrayList<NotificationRecord> list = mNotificationList;
         final int len = list.size();
         for (int i=0; i<len; i++) {
             NotificationRecord r = list.get(i);
+            if (tag == null) {
+                if (r.tag != null) {
+                    continue;
+                }
+            } else {
+                if (!tag.equals(r.tag)) {
+                    continue;
+                }
+            }
             if (r.id == id && r.pkg.equals(pkg)) {
                 return i;
             }
