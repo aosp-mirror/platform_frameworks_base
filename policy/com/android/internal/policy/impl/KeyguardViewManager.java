@@ -102,6 +102,7 @@ public class KeyguardViewManager implements KeyguardWindowController {
             final int stretch = ViewGroup.LayoutParams.FILL_PARENT;
             int flags = WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN
                     | WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER
+                    | WindowManager.LayoutParams.FLAG_KEEP_SURFACE_WHILE_ANIMATING
                     /*| WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
                     | WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR*/ ;
             if (!mNeedsInput) {
@@ -111,7 +112,7 @@ public class KeyguardViewManager implements KeyguardWindowController {
                     stretch, stretch, WindowManager.LayoutParams.TYPE_KEYGUARD,
                     flags, PixelFormat.TRANSLUCENT);
             lp.softInputMode = WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN;
-            //lp.windowAnimations = com.android.internal.R.style.Animation_LockScreen;
+            lp.windowAnimations = com.android.internal.R.style.Animation_LockScreen;
             lp.screenOrientation = ActivityInfo.SCREEN_ORIENTATION_NOSENSOR;
             lp.setTitle("Keyguard");
             mWindowLayoutParams = lp;
@@ -210,10 +211,14 @@ public class KeyguardViewManager implements KeyguardWindowController {
         if (DEBUG) Log.d(TAG, "hide()");
         if (mKeyguardHost != null) {
             mKeyguardHost.setVisibility(View.GONE);
-            if (mKeyguardView != null) {
-                mKeyguardHost.removeView(mKeyguardView);
-                mKeyguardView.cleanUp();
-                mKeyguardView = null;
+            // Don't do this, so we can let the view continue to animate
+            // as it goes away.
+            if (false) {
+                if (mKeyguardView != null) {
+                    mKeyguardHost.removeView(mKeyguardView);
+                    mKeyguardView.cleanUp();
+                    mKeyguardView = null;
+                }
             }
         }
     }
