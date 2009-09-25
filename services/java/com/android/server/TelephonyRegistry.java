@@ -109,7 +109,13 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
     // handler before they get to app code.
 
     TelephonyRegistry(Context context) {
-        CellLocation.getEmpty().fillInNotifierBundle(mCellLocation);
+        CellLocation  location = CellLocation.getEmpty();
+
+        // Note that location can be null for non-phone builds like
+        // like the generic one.
+        if (location != null) {
+            location.fillInNotifierBundle(mCellLocation);
+        }
         mContext = context;
         mBatteryStats = BatteryStatsService.getService();
     }
