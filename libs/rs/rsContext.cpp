@@ -317,7 +317,7 @@ Context::Context(Device *dev, Surface *sur, bool useDepth)
     }
 
     while(!mRunning) {
-        sleep(1);
+        usleep(100);
     }
 
     pthread_attr_destroy(&threadAttr);
