@@ -319,8 +319,17 @@ public class ContactHeaderWidget extends FrameLayout implements View.OnClickList
      * Manually set the contact uri
      */
     public void setContactUri(Uri uri) {
+        setContactUri(uri, true);
+    }
+
+    /**
+     * Manually set the contact uri
+     */
+    public void setContactUri(Uri uri, boolean sendToFastrack) {
         mContactUri = uri;
-        mPhotoView.assignContactUri(uri);
+        if (sendToFastrack) {
+            mPhotoView.assignContactUri(uri);
+        }
     }
 
     /**
