@@ -23,10 +23,11 @@ using namespace android::renderscript;
 
 Program::Program(Context *rsc, Element *in, Element *out) : ObjectBase(rsc)
 {
+    mAllocFile = __FILE__;
+    mAllocLine = __LINE__;
+
     mElementIn.set(in);
     mElementOut.set(out);
-
-
 }
 
 Program::~Program()

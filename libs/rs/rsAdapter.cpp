@@ -23,11 +23,15 @@ using namespace android::renderscript;
 
 Adapter1D::Adapter1D(Context *rsc) : ObjectBase(rsc)
 {
+    mAllocFile = __FILE__;
+    mAllocLine = __LINE__;
     reset();
 }
 
 Adapter1D::Adapter1D(Context *rsc, Allocation *a) : ObjectBase(rsc)
 {
+    mAllocFile = __FILE__;
+    mAllocLine = __LINE__;
     reset();
     setAllocation(a);
 }
@@ -127,11 +131,15 @@ void rsi_Adapter1DData(Context *rsc, RsAdapter1D va, const void *data)
 
 Adapter2D::Adapter2D(Context *rsc) : ObjectBase(rsc)
 {
+    mAllocFile = __FILE__;
+    mAllocLine = __LINE__;
     reset();
 }
 
 Adapter2D::Adapter2D(Context *rsc, Allocation *a) : ObjectBase(rsc)
 {
+    mAllocFile = __FILE__;
+    mAllocLine = __LINE__;
     reset();
     setAllocation(a);
 }

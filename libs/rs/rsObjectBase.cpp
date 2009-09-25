@@ -28,6 +28,8 @@ ObjectBase::ObjectBase(Context *rsc)
     mRSC = NULL;
     mNext = NULL;
     mPrev = NULL;
+    mAllocFile = __FILE__;
+    mAllocLine = __LINE__;
     setContext(rsc);
 }
 
@@ -37,6 +39,17 @@ ObjectBase::~ObjectBase()
     rsAssert(!mUserRefCount);
     rsAssert(!mSysRefCount);
     remove();
+}
+
+void ObjectBase::dumpObj(const char *op) const
+{
+    if (mName) {
+        LOGV("%s RSobj %p, name %s, refs %i,%i  from %s,%i links %p,%p,%p",
+             op, this, mName, mUserRefCount, mSysRefCount, mAllocFile, mAllocLine, mNext, mPrev, mRSC);
+    } else {
+        LOGV("%s RSobj %p, no-name, refs %i,%i  from %s,%i links %p,%p,%p",
+             op, this, mUserRefCount, mSysRefCount, mAllocFile, mAllocLine, mNext, mPrev, mRSC);
+    }
 }
 
 void ObjectBase::setContext(Context *rsc)
@@ -66,11 +79,7 @@ bool ObjectBase::checkDelete() const
 {
     if (!(mSysRefCount | mUserRefCount)) {
         if (mRSC && mRSC->props.mLogObjects) {
-            if (mName) {
-                LOGV("Deleting RS object %p, name %s", this, mName);
-            } else {
-                LOGV("Deleting RS object %p, no name", this);
-            }
+            dumpObj("checkDelete");
         }
         delete this;
         return true;
@@ -82,14 +91,14 @@ bool ObjectBase::decUserRef() const
 {
     rsAssert(mUserRefCount > 0);
     mUserRefCount --;
-    //LOGV("ObjectBase %p dec ref %i", this, mRefCount);
+    //dumpObj("decUserRef");
     return checkDelete();
 }
 
 bool ObjectBase::zeroUserRef() const
 {
     mUserRefCount = 0;
-    //LOGV("ObjectBase %p dec ref %i", this, mRefCount);
+    //dumpObj("zeroUserRef");
     return checkDelete();
 }
 
@@ -97,7 +106,7 @@ bool ObjectBase::decSysRef() const
 {
     rsAssert(mSysRefCount > 0);
     mSysRefCount --;
-    //LOGV("ObjectBase %p dec ref %i", this, mRefCount);
+    //dumpObj("decSysRef");
     return checkDelete();
 }
 
@@ -172,6 +181,15 @@ void ObjectBase::zeroAllUserRef(Context *rsc)
         } else {
             o = o->mNext;
             //LOGE("o next %p", o);
+        }
+    }
+
+    if (rsc->props.mLogObjects) {
+        LOGV("Objects remaining.");
+        o = rsc->mObjHead;
+        while (o) {
+            o->dumpObj("  ");
+            o = o->mNext;
         }
     }
 }

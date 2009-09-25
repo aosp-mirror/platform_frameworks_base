@@ -50,6 +50,12 @@ public:
 
     static void zeroAllUserRef(Context *rsc);
 
+    void dumpObj(const char *op) const;
+
+protected:
+    const char *mAllocFile;
+    uint32_t mAllocLine;
+
 private:
     void add() const;
     void remove() const;

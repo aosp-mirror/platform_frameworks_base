@@ -24,6 +24,8 @@ using namespace android::renderscript;
 
 Mesh::Mesh(Context *rsc) : ObjectBase(rsc)
 {
+    mAllocFile = __FILE__;
+    mAllocLine = __LINE__;
     mVerticies = NULL;
     mVerticiesCount = 0;
     mPrimitives = NULL;
