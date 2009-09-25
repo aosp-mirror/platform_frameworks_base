@@ -30,7 +30,7 @@
     <integer name="config_shortAnimTime">150</integer>
     
     <!-- The duration (in milliseconds) of a medium-length animation. -->
-    <integer name="config_mediumAnimTime">250</integer>
+    <integer name="config_mediumAnimTime">200</integer>
     
     <!-- The duration (in milliseconds) of a long animation. -->
     <integer name="config_longAnimTime">400</integer>

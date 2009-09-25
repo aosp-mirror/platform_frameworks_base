@@ -1067,7 +1067,12 @@ public final class Bridge implements ILayoutBridge {
         public void wallpaperOffsetsComplete(IBinder window) {
             // pass for now.
         }
-
+        
+        @SuppressWarnings("unused")
+        public void closeSystemDialogs(String reason) {
+            // pass for now.
+        }
+        
         public IBinder asBinder() {
             // pass for now.
             return null;
@@ -1126,6 +1131,11 @@ public final class Bridge implements ILayoutBridge {
             // pass for now.
         }
 
+        @SuppressWarnings("unused")
+        public void closeSystemDialogs(String reason) {
+            // pass for now.
+        }
+        
         public IBinder asBinder() {
             // pass for now.
             return null;

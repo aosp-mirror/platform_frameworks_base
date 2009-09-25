@@ -3913,6 +3913,20 @@ public class WindowManagerService extends IWindowManager.Stub
         return mPolicy.inKeyguardRestrictedKeyInputMode();
     }
 
+    public void closeSystemDialogs(String reason) {
+        synchronized(mWindowMap) {
+            for (int i=mWindows.size()-1; i>=0; i--) {
+                WindowState w = (WindowState)mWindows.get(i);
+                if (w.mSurface != null) {
+                    try {
+                        w.mClient.closeSystemDialogs(reason);
+                    } catch (RemoteException e) {
+                    }
+                }
+            }
+        }
+    }
+    
     static float fixScale(float scale) {
         if (scale < 0) scale = 0;
         else if (scale > 20) scale = 20;

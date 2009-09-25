@@ -1610,6 +1610,7 @@ public final class ViewRoot extends Handler implements ViewParent,
     public final static int DISPATCH_KEY_FROM_IME = 1011;
     public final static int FINISH_INPUT_CONNECTION = 1012;
     public final static int CHECK_FOCUS = 1013;
+    public final static int CLOSE_SYSTEM_DIALOGS = 1014;
 
     @Override
     public void handleMessage(Message msg) {
@@ -1865,6 +1866,11 @@ public final class ViewRoot extends Handler implements ViewParent,
             InputMethodManager imm = InputMethodManager.peekInstance();
             if (imm != null) {
                 imm.checkFocus();
+            }
+        } break;
+        case CLOSE_SYSTEM_DIALOGS: {
+            if (mView != null) {
+                mView.onCloseSystemDialogs((String)msg.obj);
             }
         } break;
         }
@@ -2630,6 +2636,13 @@ public final class ViewRoot extends Handler implements ViewParent,
         sendMessage(msg);
     }
 
+    public void dispatchCloseSystemDialogs(String reason) {
+        Message msg = Message.obtain();
+        msg.what = CLOSE_SYSTEM_DIALOGS;
+        msg.obj = reason;
+        sendMessage(msg);
+    }
+    
     /**
      * The window is getting focus so if there is anything focused/selected
      * send an {@link AccessibilityEvent} to announce that.
@@ -2866,6 +2879,13 @@ public final class ViewRoot extends Handler implements ViewParent,
                         }
                     }
                 }
+            }
+        }
+        
+        public void closeSystemDialogs(String reason) {
+            final ViewRoot viewRoot = mViewRoot.get();
+            if (viewRoot != null) {
+                viewRoot.dispatchCloseSystemDialogs(reason);
             }
         }
         

@@ -18,9 +18,14 @@
 -->
 
 <set xmlns:android="http://schemas.android.com/apk/res/android"
-        android:interpolator="@anim/decelerate_interpolator">
+        android:interpolator="@anim/decelerate_interpolator"
+        android:zAdjustment="top">
+    <!-- For now stay like the normal activity transition.
     <scale android:fromXScale="2.0" android:toXScale="1.0"
            android:fromYScale="2.0" android:toYScale="1.0"
-           android:pivotX="50%p" android:pivotY="50%p"
-           android:duration="@android:integer/config_mediumAnimTime" />
+           android:pivotX="100%p" android:pivotY="50%p"
+           android:duration="@android:integer/config_shortAnimTime" />
+    -->
+    <translate android:fromXDelta="-100%" android:toXDelta="0"
+        android:duration="@android:integer/config_shortAnimTime"/>
 </set>
