@@ -1,9 +1,11 @@
 page.title=Other Tools
 @jd:body
 
-<p>The sections below describe other tools that you can use when building Android applications. </p>
+<p>The sections below describe other tools that you can use when building 
+Android applications. </p>
 
-<p>All of the tools are included in the Android SDK and are accessible from the <code>&lt;sdk&gt;/tools/</code> directory.</p>
+<p>All of the tools are included in the Android SDK and are accessible from the 
+<code>&lt;sdk&gt;/tools/</code> directory.</p>
 
 <h2>Contents</h2>
 
@@ -16,24 +18,32 @@ page.title=Other Tools
 <a name="activitycreator"></a>
 <h2 id="android">android</h2>
 
-<p>The android tool is a script that lets you create and manage Android Virtual Devices (AVDs) and, if you are developing using Ant, generate template Android projects to help you get started quickly. </p>
+<p>{@code android} is an important development tool that lets you:</p>
 
-<p>For information about how to use the android tool to manage AVDs, see <a href="{@docRoot}guide/developing/tools/avd.html">Android Virtual Devices</a>. </p>
+<ul>
+  <li>Create, delete, and view Android Virtual Devices (AVDs). See 
+  <a href="{@docRoot}guide/developing/tools/avd.html">Android Virtual Devices</a>.</li>
+  <li>Create and update Android projects. See
+  <a href="{@docRoot}guide/developing/other-ide.html">Developing in Other IDEs</a>.</li>
+  <li>Update your Android SDK with new platforms, add-ons, and documentation. See
+  <a href="{@docRoot}guide/developing/updating-sdk.html">Updating Your SDK</a>.</li>
+</ul>
 
-<p>For information about how to use the android tool to create or update a project, see <a href="{@docRoot}guide/developing/other-ide.html">Developing in Other IDEs</a>. </p>
-
-<p>Note that if you are developing in Eclipse with the ADT plugin, you will use the android tool to manage the AVDs you create, but you will not use the android tool for creating a project. The ADT plugin provides a New Project Wizard that helps you set up an Android project in Eclipse. </p>
-
-<p>If you are developing in Ant, you will use the android tool to manage your AVDs, and you can also use it to create or update a project. </p>
-
-<p class="note">Note: The android tool replaces the activitycreator tool provided in previous SDK releases.</p>
+<p>If you develop in Eclipse with the ADT plugin, you can perform
+these tasks directly from the IDE. To create
+Android projects and AVDs from Eclipse, see <a href="{@docRoot}guide/developing/eclipse-adt.html">Developing
+In Eclipse</a>. To update your SDK from Eclipse, see
+<a href="{@docRoot}guide/developing/updating-sdk.html">Updating Your SDK</a>. 
+</p>
 
 
 <a name="mksdcard"></a>
 
 <h2>mksdcard</h2>
 
-<p>The mksdcard tool lets you quickly create a FAT32 disk image that you can load in the emulator, to simulate the presence of an SD card in the device. Here is the usage for mksdcard:</p>
+<p>The mksdcard tool lets you quickly create a FAT32 disk image that you can 
+load in the emulator, to simulate the presence of an SD card in the device. 
+Here is the usage for mksdcard:</p>
 
 <pre>mksdcard [-l label] &lt;size&gt;[K|M] &lt;file&gt;</pre>
 
@@ -53,7 +63,8 @@ page.title=Other Tools
 <tr>
 	<td><code>size</code></td>
 	<td>An integer that specifies the size (in bytes) of disk image to create. 
-You can also specify size in kilobytes or megabytes, by appending a "K" or "M" to &lt;size&gt;. For example, <code>1048576K</code>, <code>1024M</code>.</td>
+You can also specify size in kilobytes or megabytes, by appending a "K" or "M" to 
+&lt;size&gt;. For example, <code>1048576K</code>, <code>1024M</code>.</td>
 </tr>
 
 <tr>
@@ -63,7 +74,9 @@ You can also specify size in kilobytes or megabytes, by appending a "K" or "M" t
 
 </table>
 
-<p>Once you have created the disk image file, you can load it in the emulator at startup using the emulator's -sdcard option. For more information, see <a href="{@docRoot}guide/developing/tools/emulator.html">Android Emulator</a>.</p>
+<p>Once you have created the disk image file, you can load it in the emulator at 
+startup using the emulator's -sdcard option. For more information, see 
+<a href="{@docRoot}guide/developing/tools/emulator.html">Android Emulator</a>.</p>
 
 <pre>emulator -sdcard &lt;file&gt;</pre>
 
@@ -71,7 +84,11 @@ You can also specify size in kilobytes or megabytes, by appending a "K" or "M" t
 
 <h2>dx</h2>
 
-<p>The dx tool lets you generate Android bytecode from .class files. The tool converts target files and/or directories to Dalvik executable format (.dex) files, so that they can run in the Android environment. It can also dump the class files in a human-readable format and run a target unit test. You can get the usage and options for this tool by using <code>dx --help</code>.</p>
+<p>The dx tool lets you generate Android bytecode from .class files. The tool 
+converts target files and/or directories to Dalvik executable format (.dex) files, 
+so that they can run in the Android environment. It can also dump the class files 
+in a human-readable format and run a target unit test. You can get the usage and 
+options for this tool by using <code>dx --help</code>.</p>
 
 
 
