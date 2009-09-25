@@ -302,6 +302,18 @@ public class WindowManagerService extends IWindowManager.Stub
     final ArrayList<AppWindowToken> mFinishedStarting = new ArrayList<AppWindowToken>();
 
     /**
+     * This was the app token that was used to retrieve the last enter
+     * animation.  It will be used for the next exit animation.
+     */
+    AppWindowToken mLastEnterAnimToken;
+    
+    /**
+     * These were the layout params used to retrieve the last enter animation.
+     * They will be used for the next exit animation.
+     */
+    LayoutParams mLastEnterAnimParams;
+    
+    /**
      * Z-ordered (bottom-most first) list of all Window objects.
      */
     final ArrayList mWindows = new ArrayList();
@@ -374,6 +386,9 @@ public class WindowManagerService extends IWindowManager.Stub
     // mOpeningApps and mClosingApps are the lists of tokens that will be
     // made visible or hidden at the next transition.
     int mNextAppTransition = WindowManagerPolicy.TRANSIT_UNSET;
+    String mNextAppTransitionPackage;
+    int mNextAppTransitionEnter;
+    int mNextAppTransitionExit;
     boolean mAppTransitionReady = false;
     boolean mAppTransitionRunning = false;
     boolean mAppTransitionTimeout = false;
@@ -1245,16 +1260,27 @@ public class WindowManagerService extends IWindowManager.Stub
         WindowState w = null;
         WindowState foundW = null;
         int foundI = 0;
+        WindowState topCurW = null;
+        int topCurI = 0;
         int i = N;
         while (i > 0) {
             i--;
             w = (WindowState)localmWindows.get(i);
+            if ((w.mAttrs.type == WindowManager.LayoutParams.TYPE_WALLPAPER)) {
+                if (topCurW == null) {
+                    topCurW = w;
+                    topCurI = i;
+                }
+                continue;
+            }
+            topCurW = null;
             if (w.mAppToken != null) {
                 // If this window's app token is hidden and not animating,
                 // it is of no interest to us.
                 if (w.mAppToken.hidden && w.mAppToken.animation == null) {
                     if (DEBUG_WALLPAPER) Log.v(TAG,
                             "Skipping hidden or animating token: " + w);
+                    topCurW = null;
                     continue;
                 }
             }
@@ -1268,8 +1294,9 @@ public class WindowManagerService extends IWindowManager.Stub
                         "Found wallpaper activity: #" + i + "=" + w);
                 foundW = w;
                 foundI = i;
-                if (w == mWallpaperTarget && w.mAppToken != null
-                        && w.mAppToken.animation != null) {
+                if (w == mWallpaperTarget && ((w.mAppToken != null
+                        && w.mAppToken.animation != null)
+                        || w.mAnimation != null)) {
                     // The current wallpaper target is animating, so we'll
                     // look behind it for another possible target and figure
                     // out what is going on below.
@@ -1316,14 +1343,16 @@ public class WindowManagerService extends IWindowManager.Stub
             
             // Now what is happening...  if the current and new targets are
             // animating, then we are in our super special mode!
-            if (foundW != null && foundW.mAppToken != null && oldW != null
-                    && oldW.mAppToken != null) {
+            if (foundW != null && oldW != null) {
+                boolean oldAnim = oldW.mAnimation != null
+                        || (oldW.mAppToken != null && oldW.mAppToken.animation != null);
+                boolean foundAnim = foundW.mAnimation != null
+                        || (foundW.mAppToken != null && foundW.mAppToken.animation != null);
                 if (DEBUG_WALLPAPER) {
-                    Log.v(TAG, "New animation: " + foundW.mAppToken.animation
-                            + " old animation: " + oldW.mAppToken.animation);
+                    Log.v(TAG, "New animation: " + foundAnim
+                            + " old animation: " + oldAnim);
                 }
-                if (foundW.mAppToken.animation != null
-                        && oldW.mAppToken.animation != null) {
+                if (foundAnim && oldAnim) {
                     int oldI = localmWindows.indexOf(oldW);
                     if (DEBUG_WALLPAPER) {
                         Log.v(TAG, "New i: " + foundI + " old i: " + oldI);
@@ -1336,7 +1365,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         }
                         
                         // Set the new target correctly.
-                        if (foundW.mAppToken.hiddenRequested) {
+                        if (foundW.mAppToken != null && foundW.mAppToken.hiddenRequested) {
                             if (DEBUG_WALLPAPER) {
                                 Log.v(TAG, "Old wallpaper still the target.");
                             }
@@ -1417,12 +1446,19 @@ public class WindowManagerService extends IWindowManager.Stub
                 foundI--;
             }
         } else {
-            if (DEBUG_WALLPAPER) Log.v(TAG, "Wallpaper not visible");
+            if (DEBUG_WALLPAPER) Log.v(TAG, "No wallpaper target");
         }
         
-        // Okay i is the position immediately above the wallpaper.  Look at
-        // what is below it for later.
-        foundW = foundI > 0 ? (WindowState)localmWindows.get(foundI-1) : null;
+        if (foundW == null && topCurW != null) {
+            // There is no wallpaper target, so it goes at the bottom.
+            // We will assume it is the same place as last time, if known.
+            foundW = topCurW;
+            foundI = topCurI+1;
+        } else {
+            // Okay i is the position immediately above the wallpaper.  Look at
+            // what is below it for later.
+            foundW = foundI > 0 ? (WindowState)localmWindows.get(foundI-1) : null;
+        }
         
         if (visible) {
             mLastWallpaperX = mWallpaperTarget.mWallpaperX;
@@ -2244,6 +2280,8 @@ public class WindowManagerService extends IWindowManager.Stub
                     Surface surface = win.createSurfaceLocked();
                     if (surface != null) {
                         outSurface.copyFrom(surface);
+                        win.mReportDestroySurface = false;
+                        win.mSurfacePendingDestroy = false;
                         if (SHOW_TRANSACTIONS) Log.i(TAG,
                                 "  OUT SURFACE " + outSurface + ": copied");
                     } else {
@@ -2269,17 +2307,21 @@ public class WindowManagerService extends IWindowManager.Stub
             } else {
                 win.mEnterAnimationPending = false;
                 if (win.mSurface != null) {
+                    if (DEBUG_VISIBILITY) Log.i(TAG, "Relayout invis " + win
+                            + ": mExiting=" + win.mExiting
+                            + " mSurfacePendingDestroy=" + win.mSurfacePendingDestroy);
                     // If we are not currently running the exit animation, we
                     // need to see about starting one.
-                    if (!win.mExiting) {
+                    if (!win.mExiting || win.mSurfacePendingDestroy) {
                         // Try starting an animation; if there isn't one, we
                         // can destroy the surface right away.
                         int transit = WindowManagerPolicy.TRANSIT_EXIT;
                         if (win.getAttrs().type == TYPE_APPLICATION_STARTING) {
                             transit = WindowManagerPolicy.TRANSIT_PREVIEW_DONE;
                         }
-                        if (win.isWinVisibleLw() &&
+                        if (!win.mSurfacePendingDestroy && win.isWinVisibleLw() &&
                               applyAnimationLocked(win, transit, false)) {
+                            focusMayChange = true;
                             win.mExiting = true;
                             mKeyWaiter.finishedKey(session, client, true,
                                     KeyWaiter.RETURN_NOTHING);
@@ -2301,11 +2343,23 @@ public class WindowManagerService extends IWindowManager.Stub
                         }
                     }
                 }
-                // We are being called from a local process, which
-                // means outSurface holds its current surface.  Ensure the
-                // surface object is cleared, but we don't want it actually
-                // destroyed at this point.
-                outSurface.release();
+                
+                if (win.mSurface == null || (win.getAttrs().flags
+                        & WindowManager.LayoutParams.FLAG_KEEP_SURFACE_WHILE_ANIMATING) == 0
+                        || win.mSurfacePendingDestroy) {
+                    // We are being called from a local process, which
+                    // means outSurface holds its current surface.  Ensure the
+                    // surface object is cleared, but we don't want it actually
+                    // destroyed at this point.
+                    win.mSurfacePendingDestroy = false;
+                    outSurface.release();
+                    if (DEBUG_VISIBILITY) Log.i(TAG, "Releasing surface in: " + win);
+                } else if (win.mSurface != null) {
+                    if (DEBUG_VISIBILITY) Log.i(TAG,
+                            "Keeping surface, will report destroy: " + win);
+                    win.mReportDestroySurface = true;
+                    outSurface.copyFrom(win.mSurface);
+                }
             }
 
             if (focusMayChange) {
@@ -2408,6 +2462,21 @@ public class WindowManagerService extends IWindowManager.Stub
         return null;
     }
 
+    private AttributeCache.Entry getCachedAnimations(String packageName, int resId) {
+        if (DEBUG_ANIM) Log.v(TAG, "Loading animations: params package="
+                + packageName + " resId=0x" + Integer.toHexString(resId));
+        if (packageName != null) {
+            if ((resId&0xFF000000) == 0x01000000) {
+                packageName = "android";
+            }
+            if (DEBUG_ANIM) Log.v(TAG, "Loading animations: picked package="
+                    + packageName);
+            return AttributeCache.instance().get(packageName, resId,
+                    com.android.internal.R.styleable.WindowAnimation);
+        }
+        return null;
+    }
+
     private void applyEnterAnimationLocked(WindowState win) {
         int transit = WindowManagerPolicy.TRANSIT_SHOW;
         if (win.mEnterAnimationPending) {
@@ -2491,6 +2560,22 @@ public class WindowManagerService extends IWindowManager.Stub
         return null;
     }
 
+    private Animation loadAnimation(String packageName, int resId) {
+        int anim = 0;
+        Context context = mContext;
+        if (resId >= 0) {
+            AttributeCache.Entry ent = getCachedAnimations(packageName, resId);
+            if (ent != null) {
+                context = ent.context;
+                anim = resId;
+            }
+        }
+        if (anim != 0) {
+            return AnimationUtils.loadAnimation(context, anim);
+        }
+        return null;
+    }
+
     private boolean applyAnimationLocked(AppWindowToken wtoken,
             WindowManager.LayoutParams lp, int transit, boolean enter) {
         // Only apply an animation if the display isn't frozen.  If it is
@@ -2503,6 +2588,9 @@ public class WindowManagerService extends IWindowManager.Stub
                 a = new FadeInOutAnimation(enter);
                 if (DEBUG_ANIM) Log.v(TAG,
                         "applying FadeInOutAnimation for a window in compatibility mode");
+            } else if (mNextAppTransitionPackage != null) {
+                a = loadAnimation(mNextAppTransitionPackage, enter ?
+                        mNextAppTransitionEnter : mNextAppTransitionExit);
             } else {
                 int animAttr = 0;
                 switch (transit) {
@@ -3032,6 +3120,15 @@ public class WindowManagerService extends IWindowManager.Stub
         return mNextAppTransition;
     }
 
+    public void overridePendingAppTransition(String packageName,
+            int enterAnim, int exitAnim) {
+        if (mNextAppTransition != WindowManagerPolicy.TRANSIT_UNSET){
+            mNextAppTransitionPackage = packageName;
+            mNextAppTransitionEnter = enterAnim;
+            mNextAppTransitionExit = exitAnim;
+        }
+    }
+    
     public void executeAppTransition() {
         if (!checkCallingPermission(android.Manifest.permission.MANAGE_APP_TOKENS,
                 "executeAppTransition()")) {
@@ -3039,8 +3136,12 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         synchronized(mWindowMap) {
-            if (DEBUG_APP_TRANSITIONS) Log.v(
-                    TAG, "Execute app transition: mNextAppTransition=" + mNextAppTransition);
+            if (DEBUG_APP_TRANSITIONS) {
+                RuntimeException e = new RuntimeException("here");
+                e.fillInStackTrace();
+                Log.w(TAG, "Execute app transition: mNextAppTransition="
+                        + mNextAppTransition, e);
+            }
             if (mNextAppTransition != WindowManagerPolicy.TRANSIT_UNSET) {
                 mAppTransitionReady = true;
                 final long origId = Binder.clearCallingIdentity();
@@ -3537,6 +3638,10 @@ public class WindowManagerService extends IWindowManager.Stub
                     wtoken.animating = false;
                 }
                 mAppTokens.remove(wtoken);
+                if (mLastEnterAnimToken == wtoken) {
+                    mLastEnterAnimToken = null;
+                    mLastEnterAnimParams = null;
+                }
                 wtoken.removed = true;
                 if (wtoken.startingData != null) {
                     startingToken = wtoken;
@@ -6527,6 +6632,8 @@ public class WindowManagerService extends IWindowManager.Stub
         boolean mPolicyVisibilityAfterAnim = true;
         boolean mAppFreezing;
         Surface mSurface;
+        boolean mReportDestroySurface;
+        boolean mSurfacePendingDestroy;
         boolean mAttachedHidden;    // is our parent window hidden?
         boolean mLastHidden;        // was this window last hidden?
         boolean mWallpaperVisible;  // for wallpaper, what was last vis report?
@@ -6929,6 +7036,8 @@ public class WindowManagerService extends IWindowManager.Stub
 
         Surface createSurfaceLocked() {
             if (mSurface == null) {
+                mReportDestroySurface = false;
+                mSurfacePendingDestroy = false;
                 mDrawPending = true;
                 mCommitDrawPending = false;
                 mReadyToShow = false;
@@ -7033,6 +7142,28 @@ public class WindowManagerService extends IWindowManager.Stub
             }
 
             if (mSurface != null) {
+                mDrawPending = false;
+                mCommitDrawPending = false;
+                mReadyToShow = false;
+
+                int i = mChildWindows.size();
+                while (i > 0) {
+                    i--;
+                    WindowState c = (WindowState)mChildWindows.get(i);
+                    c.mAttachedHidden = true;
+                }
+                
+                if (mReportDestroySurface) {
+                    mReportDestroySurface = false;
+                    mSurfacePendingDestroy = true;
+                    try {
+                        mClient.dispatchGetNewSurface();
+                        // We'll really destroy on the next time around.
+                        return;
+                    } catch (RemoteException e) {
+                    }
+                }
+                
                 try {
                     if (DEBUG_VISIBILITY) {
                         RuntimeException e = new RuntimeException();
@@ -7052,17 +7183,8 @@ public class WindowManagerService extends IWindowManager.Stub
                         + " surface " + mSurface + " session " + mSession
                         + ": " + e.toString());
                 }
+                
                 mSurface = null;
-                mDrawPending = false;
-                mCommitDrawPending = false;
-                mReadyToShow = false;
-
-                int i = mChildWindows.size();
-                while (i > 0) {
-                    i--;
-                    WindowState c = (WindowState)mChildWindows.get(i);
-                    c.mAttachedHidden = true;
-                }
             }
         }
 
@@ -7471,7 +7593,7 @@ public class WindowManagerService extends IWindowManager.Stub
          */
         boolean isVisibleOrAdding() {
             final AppWindowToken atoken = mAppToken;
-            return (mSurface != null
+            return ((mSurface != null && !mReportDestroySurface)
                             || (!mRelayoutCalled && mViewVisibility == View.VISIBLE))
                     && mPolicyVisibility && !mAttachedHidden
                     && (atoken == null || !atoken.hiddenRequested)
@@ -7642,38 +7764,50 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         public boolean showLw(boolean doAnimation) {
-            if (!mPolicyVisibility || !mPolicyVisibilityAfterAnim) {
-                mPolicyVisibility = true;
-                mPolicyVisibilityAfterAnim = true;
-                if (doAnimation) {
-                    applyAnimationLocked(this, WindowManagerPolicy.TRANSIT_ENTER, true);
-                }
-                requestAnimationLocked(0);
-                return true;
+            return showLw(doAnimation, true);
+        }
+
+        boolean showLw(boolean doAnimation, boolean requestAnim) {
+            if (mPolicyVisibility && mPolicyVisibilityAfterAnim) {
+                return false;
             }
-            return false;
+            mPolicyVisibility = true;
+            mPolicyVisibilityAfterAnim = true;
+            if (doAnimation) {
+                applyAnimationLocked(this, WindowManagerPolicy.TRANSIT_ENTER, true);
+            }
+            if (requestAnim) {
+                requestAnimationLocked(0);
+            }
+            return true;
         }
 
         public boolean hideLw(boolean doAnimation) {
+            return hideLw(doAnimation, true);
+        }
+
+        boolean hideLw(boolean doAnimation, boolean requestAnim) {
             boolean current = doAnimation ? mPolicyVisibilityAfterAnim
                     : mPolicyVisibility;
-            if (current) {
-                if (doAnimation) {
-                    applyAnimationLocked(this, WindowManagerPolicy.TRANSIT_EXIT, false);
-                    if (mAnimation == null) {
-                        doAnimation = false;
-                    }
-                }
-                if (doAnimation) {
-                    mPolicyVisibilityAfterAnim = false;
-                } else {
-                    mPolicyVisibilityAfterAnim = false;
-                    mPolicyVisibility = false;
-                }
-                requestAnimationLocked(0);
-                return true;
+            if (!current) {
+                return false;
             }
-            return false;
+            if (doAnimation) {
+                applyAnimationLocked(this, WindowManagerPolicy.TRANSIT_EXIT, false);
+                if (mAnimation == null) {
+                    doAnimation = false;
+                }
+            }
+            if (doAnimation) {
+                mPolicyVisibilityAfterAnim = false;
+            } else {
+                mPolicyVisibilityAfterAnim = false;
+                mPolicyVisibility = false;
+            }
+            if (requestAnim) {
+                requestAnimationLocked(0);
+            }
+            return true;
         }
 
         void dump(PrintWriter pw, String prefix) {
@@ -8703,28 +8837,37 @@ public class WindowManagerService extends IWindowManager.Stub
     final void rebuildAppWindowListLocked() {
         int NW = mWindows.size();
         int i;
+        int lastWallpaper = -1;
         int numRemoved = 0;
         
         // First remove all existing app windows.
         i=0;
         while (i < NW) {
-            if (((WindowState)mWindows.get(i)).mAppToken != null) {
+            WindowState w = (WindowState)mWindows.get(i);
+            if (w.mAppToken != null) {
                 WindowState win = (WindowState)mWindows.remove(i);
                 if (DEBUG_WINDOW_MOVEMENT) Log.v(TAG,
                         "Rebuild removing window: " + win);
                 NW--;
                 numRemoved++;
                 continue;
+            } else if (w.mAttrs.type == WindowManager.LayoutParams.TYPE_WALLPAPER
+                    && lastWallpaper == i-1) {
+                lastWallpaper = i;
             }
             i++;
         }
+        
+        // The wallpaper window(s) typically live at the bottom of the stack,
+        // so skip them before adding app tokens.
+        lastWallpaper++;
+        i = lastWallpaper;
         
         // First add all of the exiting app tokens...  these are no longer
         // in the main app list, but still have windows shown.  We put them
         // in the back because now that the animation is over we no longer
         // will care about them.
         int NT = mExitingAppTokens.size();
-        i = 0;
         for (int j=0; j<NT; j++) {
             i = reAddAppWindowsLocked(i, mExitingAppTokens.get(j));
         }
@@ -8735,6 +8878,7 @@ public class WindowManagerService extends IWindowManager.Stub
             i = reAddAppWindowsLocked(i, mAppTokens.get(j));
         }
         
+        i -= lastWallpaper;
         if (i != numRemoved) {
             Log.w(TAG, "Rebuild removed " + numRemoved
                     + " windows but added " + i);
@@ -8970,6 +9114,7 @@ public class WindowManagerService extends IWindowManager.Stub
         Surface.openTransaction();
         try {
             boolean restart;
+            boolean forceHiding = false;
 
             do {
                 final int transactionSequence = ++mTransactionSequence;
@@ -8995,6 +9140,8 @@ public class WindowManagerService extends IWindowManager.Stub
 
                 boolean tokenMayBeDrawn = false;
                 boolean wallpaperMayChange = false;
+                boolean focusMayChange = false;
+                boolean wallpaperForceHidingChanged = false;
 
                 mPolicy.beginAnimationLw(dw, dh);
 
@@ -9015,6 +9162,7 @@ public class WindowManagerService extends IWindowManager.Stub
                                 wallpaperMayChange = true;
                             }
                         }
+                        
                         boolean wasAnimating = w.mAnimating;
                         if (w.stepAnimationLocked(currentTime, dw, dh)) {
                             animating = true;
@@ -9023,6 +9171,38 @@ public class WindowManagerService extends IWindowManager.Stub
                         if (wasAnimating && !w.mAnimating && mWallpaperTarget == w) {
                             wallpaperMayChange = true;
                         }
+                        
+                        if (mPolicy.doesForceHide(w, attrs)) {
+                            if (!wasAnimating && animating) {
+                                wallpaperForceHidingChanged = true;
+                                focusMayChange = true;
+                            } else if (w.isReadyForDisplay() && w.mAnimation == null) {
+                                forceHiding = true;
+                            }
+                        } else if (mPolicy.canBeForceHidden(w, attrs)) {
+                            boolean changed;
+                            if (forceHiding) {
+                                changed = w.hideLw(false, false);
+                            } else {
+                                changed = w.showLw(false, false);
+                                if (changed && wallpaperForceHidingChanged
+                                        && w.isReadyForDisplay()) {
+                                    // Assume we will need to animate.  If
+                                    // we don't (because the wallpaper will
+                                    // stay with the lock screen), then we will
+                                    // clean up later.
+                                    Animation a = mPolicy.createForceHideEnterAnimation();
+                                    if (a != null) {
+                                        w.setAnimation(a);
+                                    }
+                                }
+                            }
+                            if (changed && (attrs.flags
+                                    & WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER) != 0) {
+                                wallpaperMayChange = true;
+                            }
+                        }
+                        
                         mPolicy.animatingWindowLw(w, attrs);
                     }
 
@@ -9147,6 +9327,7 @@ public class WindowManagerService extends IWindowManager.Stub
                             transit = WindowManagerPolicy.TRANSIT_UNSET;
                         }
                         mNextAppTransition = WindowManagerPolicy.TRANSIT_UNSET;
+                        mNextAppTransitionPackage = null;
                         mAppTransitionReady = false;
                         mAppTransitionRunning = true;
                         mAppTransitionTimeout = false;
@@ -9180,6 +9361,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         // The top-most window will supply the layout params,
                         // and we will determine it below.
                         LayoutParams animLp = null;
+                        AppWindowToken animToken = null;
                         int bestAnimLayer = -1;
                         
                         if (DEBUG_APP_TRANSITIONS) Log.v(TAG,
@@ -9222,9 +9404,11 @@ public class WindowManagerService extends IWindowManager.Stub
                                     // window, we will always use its anim.
                                     if ((ws.mAttrs.flags&FLAG_COMPATIBLE_WINDOW) != 0) {
                                         animLp = ws.mAttrs;
+                                        animToken = ws.mAppToken;
                                         bestAnimLayer = Integer.MAX_VALUE;
                                     } else if (ws.mLayer > bestAnimLayer) {
                                         animLp = ws.mAttrs;
+                                        animToken = ws.mAppToken;
                                         bestAnimLayer = ws.mLayer;
                                     }
                                 }
@@ -9260,6 +9444,15 @@ public class WindowManagerService extends IWindowManager.Stub
                             transit = WindowManagerPolicy.TRANSIT_WALLPAPER_OPEN;
                             if (DEBUG_APP_TRANSITIONS) Log.v(TAG,
                                     "New transit into wallpaper: " + transit);
+                        }
+                        
+                        if ((transit&WindowManagerPolicy.TRANSIT_ENTER_MASK) != 0) {
+                            mLastEnterAnimToken = animToken;
+                            mLastEnterAnimParams = animLp;
+                        } else if (mLastEnterAnimParams != null) {
+                            animLp = mLastEnterAnimParams;
+                            mLastEnterAnimToken = null;
+                            mLastEnterAnimParams = null;
                         }
                         
                         NN = mOpeningApps.size();
@@ -9302,6 +9495,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         }
                         performLayoutLockedInner();
                         updateFocusedWindowLocked(UPDATE_FOCUS_PLACING_SURFACES);
+                        focusMayChange = false;
 
                         restart = true;
                     }
@@ -9325,26 +9519,71 @@ public class WindowManagerService extends IWindowManager.Stub
                     mLayoutNeeded = true;
                 }
                 
+                int adjResult = 0;
+                
+                if (wallpaperForceHidingChanged) {
+                    // At this point, there was a window with a wallpaper that
+                    // was force hiding other windows behind it, but now it
+                    // is going away.  This may be simple -- just animate
+                    // away the wallpaper and its window -- or it may be
+                    // hard -- the wallpaper now needs to be shown behind
+                    // something that was hidden.
+                    WindowState oldWallpaper = mWallpaperTarget;
+                    adjResult = adjustWallpaperWindowsLocked();
+                    wallpaperMayChange = false;
+                    if (false) Log.v(TAG, "****** OLD: " + oldWallpaper
+                            + " NEW: " + mWallpaperTarget);
+                    if (mLowerWallpaperTarget == null) {
+                        // Whoops, we don't need a special wallpaper animation.
+                        // Clear them out.
+                        forceHiding = false;
+                        for (i=N-1; i>=0; i--) {
+                            WindowState w = (WindowState)mWindows.get(i);
+                            if (w.mSurface != null) {
+                                final WindowManager.LayoutParams attrs = w.mAttrs;
+                                if (mPolicy.doesForceHide(w, attrs)) {
+                                    forceHiding = true;
+                                } else if (mPolicy.canBeForceHidden(w, attrs)) {
+                                    if (!w.mAnimating) {
+                                        // We set the animation above so it
+                                        // is not yet running.
+                                        w.clearAnimation();
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                
                 if (wallpaperMayChange) {
                     if (DEBUG_WALLPAPER) Log.v(TAG,
                             "Wallpaper may change!  Adjusting");
-                    int adjResult = adjustWallpaperWindowsLocked();
-                    if ((adjResult&ADJUST_WALLPAPER_LAYERS_CHANGED) != 0) {
-                        if (DEBUG_WALLPAPER) Log.v(TAG,
-                                "Wallpaper layer changed: assigning layers + relayout");
+                    adjResult = adjustWallpaperWindowsLocked();
+                }
+                
+                if ((adjResult&ADJUST_WALLPAPER_LAYERS_CHANGED) != 0) {
+                    if (DEBUG_WALLPAPER) Log.v(TAG,
+                            "Wallpaper layer changed: assigning layers + relayout");
+                    restart = true;
+                    mLayoutNeeded = true;
+                    assignLayersLocked();
+                } else if ((adjResult&ADJUST_WALLPAPER_VISIBILITY_CHANGED) != 0) {
+                    if (DEBUG_WALLPAPER) Log.v(TAG,
+                            "Wallpaper visibility changed: relayout");
+                    restart = true;
+                    mLayoutNeeded = true;
+                }
+                
+                if (focusMayChange) {
+                    if (updateFocusedWindowLocked(UPDATE_FOCUS_PLACING_SURFACES)) {
                         restart = true;
-                        mLayoutNeeded = true;
-                        assignLayersLocked();
-                    } else if ((adjResult&ADJUST_WALLPAPER_VISIBILITY_CHANGED) != 0) {
-                        if (DEBUG_WALLPAPER) Log.v(TAG,
-                                "Wallpaper visibility changed: relayout");
-                        restart = true;
-                        mLayoutNeeded = true;
+                        adjResult = 0;
                     }
-                    if (mLayoutNeeded) {
-                        restart = true;
-                        performLayoutLockedInner();
-                    }
+                }
+
+                if (mLayoutNeeded) {
+                    restart = true;
+                    performLayoutLockedInner();
                 }
                 
             } while (restart);
@@ -9359,7 +9598,6 @@ public class WindowManagerService extends IWindowManager.Stub
             boolean covered = false;
             boolean syswin = false;
             boolean backgroundFillerShown = false;
-            boolean forceHiding = false;
 
             final int N = mWindows.size();
             
@@ -9492,46 +9730,17 @@ public class WindowManagerService extends IWindowManager.Stub
                         }
                     }
 
-                    if ((forceHiding
-                            && attrs.type != WindowManager.LayoutParams.TYPE_STATUS_BAR
-                            && attrs.type != WindowManager.LayoutParams.TYPE_WALLPAPER)
-                            || w.mAttachedHidden) {
+                    if (w.mAttachedHidden || !w.isReadyForDisplay()) {
                         if (!w.mLastHidden) {
                             //dump();
                             w.mLastHidden = true;
                             if (SHOW_TRANSACTIONS) Log.i(
-                                    TAG, "  SURFACE " + w.mSurface + ": HIDE (performLayout-attached)");
+                                    TAG, "  SURFACE " + w.mSurface + ": HIDE (performLayout)");
                             if (w.mSurface != null) {
                                 try {
                                     w.mSurface.hide();
                                 } catch (RuntimeException e) {
                                     Log.w(TAG, "Exception hiding surface in " + w);
-                                }
-                            }
-                            mKeyWaiter.releasePendingPointerLocked(w.mSession);
-                        }
-                        // If we are waiting for this window to handle an
-                        // orientation change, well, it is hidden, so
-                        // doesn't really matter.  Note that this does
-                        // introduce a potential glitch if the window
-                        // becomes unhidden before it has drawn for the
-                        // new orientation.
-                        if (w.mOrientationChanging) {
-                            w.mOrientationChanging = false;
-                            if (DEBUG_ORIENTATION) Log.v(TAG,
-                                    "Orientation change skips hidden " + w);
-                        }
-                    } else if (!w.isReadyForDisplay()) {
-                        if (!w.mLastHidden) {
-                            //dump();
-                            w.mLastHidden = true;
-                            if (SHOW_TRANSACTIONS) Log.i(
-                                    TAG, "  SURFACE " + w.mSurface + ": HIDE (performLayout-ready)");
-                            if (w.mSurface != null) {
-                                try {
-                                    w.mSurface.hide();
-                                } catch (RuntimeException e) {
-                                    Log.w(TAG, "Exception exception hiding surface in " + w);
                                 }
                             }
                             mKeyWaiter.releasePendingPointerLocked(w.mSession);
@@ -9609,9 +9818,6 @@ public class WindowManagerService extends IWindowManager.Stub
                     }
 
                     if (displayed) {
-                        if (attrs.type == WindowManager.LayoutParams.TYPE_KEYGUARD) {
-                            forceHiding = true;
-                        }
                         if (!covered) {
                             if (attrs.width == LayoutParams.FILL_PARENT
                                     && attrs.height == LayoutParams.FILL_PARENT) {
@@ -9694,7 +9900,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         }
                         backgroundFillerShown = true;
                         mBackgroundFillerShown = true;
-                    } else if (canBeSeen && !obscured && !forceHiding &&
+                    } else if (canBeSeen && !obscured &&
                             (attrFlags&FLAG_BLUR_BEHIND|FLAG_DIM_BEHIND) != 0) {
                         if (localLOGV) Log.v(TAG, "Win " + w
                                 + ": blurring=" + blurring
@@ -9860,6 +10066,10 @@ public class WindowManagerService extends IWindowManager.Stub
                 token.animating = false;
                 mAppTokens.remove(token);
                 mExitingAppTokens.remove(i);
+                if (mLastEnterAnimToken == token) {
+                    mLastEnterAnimToken = null;
+                    mLastEnterAnimParams = null;
+                }
             }
         }
 
@@ -10169,6 +10379,7 @@ public class WindowManagerService extends IWindowManager.Stub
         mDisplayFrozen = true;
         if (mNextAppTransition != WindowManagerPolicy.TRANSIT_UNSET) {
             mNextAppTransition = WindowManagerPolicy.TRANSIT_UNSET;
+            mNextAppTransitionPackage = null;
             mAppTransitionReady = true;
         }
 
@@ -10403,8 +10614,20 @@ public class WindowManagerService extends IWindowManager.Stub
                     pw.print(", mAppTransitionReady="); pw.print(mAppTransitionReady);
                     pw.print(", mAppTransitionRunning="); pw.print(mAppTransitionRunning);
                     pw.print(", mAppTransitionTimeout="); pw.println( mAppTransitionTimeout);
+            if (mNextAppTransitionPackage != null) {
+                pw.print("  mNextAppTransitionPackage=");
+                    pw.print(mNextAppTransitionPackage);
+                    pw.print(", mNextAppTransitionEnter=0x");
+                    pw.print(Integer.toHexString(mNextAppTransitionEnter));
+                    pw.print(", mNextAppTransitionExit=0x");
+                    pw.print(Integer.toHexString(mNextAppTransitionExit));
+            }
             pw.print("  mStartingIconInTransition="); pw.print(mStartingIconInTransition);
                     pw.print(", mSkipAppTransitionAnimation="); pw.println(mSkipAppTransitionAnimation);
+            if (mLastEnterAnimToken != null || mLastEnterAnimToken != null) {
+                pw.print("  mLastEnterAnimToken="); pw.print(mLastEnterAnimToken);
+                        pw.print(", mLastEnterAnimParams="); pw.println(mLastEnterAnimParams);
+            }
             if (mOpeningApps.size() > 0) {
                 pw.print("  mOpeningApps="); pw.println(mOpeningApps);
             }

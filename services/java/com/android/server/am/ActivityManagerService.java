@@ -2722,6 +2722,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                     // Do over!
                     mHandler.sendEmptyMessage(RESUME_TOP_ACTIVITY_MSG);
                 }
+                setFocusedActivityLocked(next);
+                ensureActivitiesVisibleLocked(null, 0);
                 mWindowManager.executeAppTransition();
                 mNoAnimActivities.clear();
                 return true;
@@ -4196,6 +4198,27 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         }
     }
 
+    public void overridePendingTransition(IBinder token, String packageName,
+            int enterAnim, int exitAnim) {
+        synchronized(this) {
+            int index = indexOfTokenLocked(token);
+            if (index < 0) {
+                return;
+            }
+            HistoryRecord self = (HistoryRecord)mHistory.get(index);
+
+            final long origId = Binder.clearCallingIdentity();
+            
+            if (self.state == ActivityState.RESUMED
+                    || self.state == ActivityState.PAUSING) {
+                mWindowManager.overridePendingAppTransition(packageName,
+                        enterAnim, exitAnim);
+            }
+            
+            Binder.restoreCallingIdentity(origId);
+        }
+    }
+    
     /**
      * Perform clean-up of service connections in an activity record.
      */

@@ -71,6 +71,7 @@ interface IWindowManager
     void setFocusedApp(IBinder token, boolean moveFocusNow);
     void prepareAppTransition(int transit);
     int getPendingAppTransition();
+    void overridePendingAppTransition(String packageName, int enterAnim, int exitAnim);
     void executeAppTransition();
     void setAppStartingWindow(IBinder token, String pkg, int theme,
             CharSequence nonLocalizedLabel, int labelRes,

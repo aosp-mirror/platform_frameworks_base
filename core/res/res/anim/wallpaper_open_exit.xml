@@ -16,9 +16,22 @@
 ** limitations under the License.
 */
 -->
+<!-- This version zooms the new non-wallpaper up out of the
+     wallpaper, without zooming the wallpaper itself. -->
+<set xmlns:android="http://schemas.android.com/apk/res/android"
+        android:interpolator="@anim/decelerate_interpolator"
+        android:zAdjustment="top">
+    <scale android:fromXScale="1.0" android:toXScale=".5"
+           android:fromYScale="1.0" android:toYScale=".5"
+           android:pivotX="50%p" android:pivotY="50%p"
+           android:duration="@android:integer/config_mediumAnimTime" />
+    <alpha android:fromAlpha="1.0" android:toAlpha="0"
+            android:duration="@android:integer/config_mediumAnimTime"/>
+</set>
 
 <!-- This version zooms the new non-wallpaper down on top of the
      wallpaper, without zooming the wallpaper itself. -->
+<!--
 <set xmlns:android="http://schemas.android.com/apk/res/android"
         android:interpolator="@anim/decelerate_interpolator"
         android:zAdjustment="top">
@@ -29,6 +42,7 @@
     <alpha android:fromAlpha="1.0" android:toAlpha="0"
             android:duration="@android:integer/config_mediumAnimTime"/>
 </set>
+-->
 
 <!-- This version zooms the new non-wallpaper down on top of the
      wallpaper. -->
