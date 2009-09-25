@@ -1497,11 +1497,12 @@ status_t SurfaceFlinger::dump(int fd, const Vector<String16>& args)
                     "+ %s %p\n"
                     "      "
                     "z=%9d, pos=(%4d,%4d), size=(%4d,%4d), "
-                    "needsBlending=%1d, invalidate=%1d, "
+                    "needsBlending=%1d, needsDithering=%1d, invalidate=%1d, "
                     "alpha=0x%02x, flags=0x%08x, tr=[%.2f, %.2f][%.2f, %.2f]\n",
                     layer->getTypeID(), layer.get(),
                     s.z, layer->tx(), layer->ty(), s.w, s.h,
-                    layer->needsBlending(), layer->contentDirty,
+                    layer->needsBlending(), layer->needsDithering(),
+                    layer->contentDirty,
                     s.alpha, s.flags,
                     s.transform[0], s.transform[1],
                     s.transform[2], s.transform[3]);
