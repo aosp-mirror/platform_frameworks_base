@@ -1532,9 +1532,11 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         PanelFeatureState st;
         for (int i = panels.length - 1; i >= 0; i--) {
             st = panels[i];
-            if ((st != null) && st.isOpen) {
-                // Clear st.isOpen (openPanel will not open if it's already open)
-                st.isOpen = false;
+            // We restore the panel if it was last open; we skip it if it
+            // now is open, to avoid a race condition if the user immediately
+            // opens it when we are resuming.
+            if ((st != null) && !st.isOpen && st.wasLastOpen) {
+                st.isInExpandedMode = st.wasLastExpanded;
                 openPanel(st, null);
             }
         }
@@ -2572,6 +2574,10 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
         boolean refreshDecorView;
 
+        boolean wasLastOpen;
+        
+        boolean wasLastExpanded;
+        
         /**
          * Contains the state of the menu when told to freeze.
          */
@@ -2620,8 +2626,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         void onRestoreInstanceState(Parcelable state) {
             SavedState savedState = (SavedState) state;
             featureId = savedState.featureId;
-            isOpen = savedState.isOpen;
-            isInExpandedMode = savedState.isInExpandedMode;
+            wasLastOpen = savedState.isOpen;
+            wasLastExpanded = savedState.isInExpandedMode;
             frozenMenuState = savedState.menuState;
 
             /*
