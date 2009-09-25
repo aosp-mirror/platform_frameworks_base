@@ -6,10 +6,16 @@
 
 #include <EGL/egl.h>
 #include <GLES/gl.h>
+#include <GLES/glext.h>
+
+#include <ui/FramebufferNativeWindow.h>
+#include <ui/EGLUtils.h>
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+
+using namespace android;
 
 EGLDisplay eglDisplay;
 EGLSurface eglSurface;
@@ -117,6 +123,7 @@ int init_gl_surface(void)
     EGLConfig myConfig = {0};
     EGLint attrib[] =
     {
+            EGL_SURFACE_TYPE, EGL_PBUFFER_BIT|EGL_WINDOW_BIT,
             EGL_DEPTH_SIZE,     16,
             EGL_NONE
     };
@@ -133,14 +140,11 @@ int init_gl_surface(void)
         return 0;
     }
 
-    if ( eglChooseConfig(eglDisplay, attrib, &myConfig, 1, &numConfigs) != EGL_TRUE )
-    {
-        printf("eglChooseConfig failed\n");
-        return 0;
-    }
+    EGLNativeWindowType window = android_createDisplaySurface();
+    EGLUtils::selectConfigForNativeWindow(eglDisplay, attrib, window, &myConfig);
 
     if ( (eglSurface = eglCreateWindowSurface(eglDisplay, myConfig,
-            android_createDisplaySurface(), 0)) == EGL_NO_SURFACE )
+            window, 0)) == EGL_NO_SURFACE )
     {
         printf("eglCreateWindowSurface failed\n");
         return 0;
@@ -239,12 +243,12 @@ void render(int quads)
             0,            FIXED_ONE
     };
 
-    const GLushort template[] = { 0, 1, 2,  0, 2, 3 };
+    const GLushort quadIndices[] = { 0, 1, 2,  0, 2, 3 };
 
 
-    GLushort* indices = (GLushort*)malloc(quads*sizeof(template));
+    GLushort* indices = (GLushort*)malloc(quads*sizeof(quadIndices));
     for (i=0 ; i<quads ; i++)
-        memcpy(indices+(sizeof(template)/sizeof(indices[0]))*i, template, sizeof(template));
+        memcpy(indices+(sizeof(quadIndices)/sizeof(indices[0]))*i, quadIndices, sizeof(quadIndices));
 
     glVertexPointer(3, GL_FLOAT, 0, vertices);
     glTexCoordPointer(2, GL_FIXED, 0, texCoords);
@@ -262,7 +266,7 @@ void render(int quads)
     for (j=0 ; j<10 ; j++) {
         printf("loop %d / 10 (%d quads / loop)\n", j, quads);
 
-        int nelem = sizeof(template)/sizeof(template[0]);
+        int nelem = sizeof(quadIndices)/sizeof(quadIndices[0]);
         glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
         glDrawElements(GL_TRIANGLES, nelem*quads, GL_UNSIGNED_SHORT, indices);
         eglSwapBuffers(eglDisplay, eglSurface);
