@@ -16,9 +16,6 @@
 
 package android.syncml.pim.vcard;
 
-/**
- * @depricated Please use the code in android.pim.vcard
- */
 @Deprecated
 public class VCardException extends java.lang.Exception{
     // constructors

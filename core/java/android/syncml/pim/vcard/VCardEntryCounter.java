@@ -20,9 +20,6 @@ import java.util.List;
 
 import android.syncml.pim.VBuilder;
 
-/**
- * @depricated Please use the code in android.pim.vcard
- */
 @Deprecated
 public class VCardEntryCounter implements VBuilder {
     private int mCount;
