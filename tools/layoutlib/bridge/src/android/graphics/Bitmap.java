@@ -28,13 +28,13 @@ public final class Bitmap extends _Original_Bitmap {
     private BufferedImage mImage;
 
     public Bitmap(File input) throws IOException {
-        super(1, true, null);
+        super(1, true, null, -1);
 
         mImage = ImageIO.read(input);
     }
 
     Bitmap(BufferedImage image) {
-        super(1, true, null);
+        super(1, true, null, -1);
         mImage = image;
     }
 

@@ -77,7 +77,8 @@ public final class Bitmap implements Parcelable {
 
         This can be called from JNI code.
     */
-    private Bitmap(int nativeBitmap, boolean isMutable, byte[] ninePatchChunk) {
+    private Bitmap(int nativeBitmap, boolean isMutable, byte[] ninePatchChunk,
+            int density) {
         if (nativeBitmap == 0) {
             throw new RuntimeException("internal error: native bitmap is 0");
         }
@@ -86,6 +87,9 @@ public final class Bitmap implements Parcelable {
         mNativeBitmap = nativeBitmap;
         mIsMutable = isMutable;
         mNinePatchChunk = ninePatchChunk;
+        if (density >= 0) {
+            mDensity = density;
+        }
     }
 
     /**
@@ -892,7 +896,7 @@ public final class Bitmap implements Parcelable {
      */
     public void writeToParcel(Parcel p, int flags) {
         checkRecycled("Can't parcel a recycled bitmap");
-        if (!nativeWriteToParcel(mNativeBitmap, mIsMutable, p)) {
+        if (!nativeWriteToParcel(mNativeBitmap, mIsMutable, mDensity, p)) {
             throw new RuntimeException("native writeToParcel failed");
         }
     }
@@ -1006,6 +1010,7 @@ public final class Bitmap implements Parcelable {
     // returns true on success
     private static native boolean nativeWriteToParcel(int nativeBitmap,
                                                       boolean isMutable,
+                                                      int density,
                                                       Parcel p);
     // returns a new bitmap built from the native bitmap's alpha, and the paint
     private static native Bitmap nativeExtractAlpha(int nativeBitmap,
