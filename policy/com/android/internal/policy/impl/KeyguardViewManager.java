@@ -211,14 +211,16 @@ public class KeyguardViewManager implements KeyguardWindowController {
         if (DEBUG) Log.d(TAG, "hide()");
         if (mKeyguardHost != null) {
             mKeyguardHost.setVisibility(View.GONE);
-            // Don't do this, so we can let the view continue to animate
+            // Don't do this right away, so we can let the view continue to animate
             // as it goes away.
-            if (false) {
-                if (mKeyguardView != null) {
-                    mKeyguardHost.removeView(mKeyguardView);
-                    mKeyguardView.cleanUp();
-                    mKeyguardView = null;
-                }
+            if (mKeyguardView != null) {
+                mKeyguardHost.postDelayed(new Runnable() {
+                    public void run() {
+                        mKeyguardHost.removeView(mKeyguardView);
+                        mKeyguardView.cleanUp();
+                        mKeyguardView = null;
+                    }
+                }, 500);
             }
         }
     }

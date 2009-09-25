@@ -17,16 +17,13 @@
 package com.android.internal.policy.impl;
 
 import android.content.Context;
-import android.content.ServiceConnection;
 import android.os.CountDownTimer;
 import android.os.SystemClock;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.MotionEvent;
 import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.TextView;
 import android.text.format.DateFormat;
 import android.text.TextUtils;
@@ -181,11 +178,7 @@ class UnlockScreen extends LinearLayoutWithDefaultTouchRecepient
         mStatusSep = (TextView) findViewById(R.id.statusSep);
         mStatus2 = (TextView) findViewById(R.id.status2);
 
-        mShowingBatteryInfo = mUpdateMonitor.shouldShowBatteryInfo();
-        mPluggedIn = mUpdateMonitor.isDevicePluggedIn();
-        mBatteryLevel = mUpdateMonitor.getBatteryLevel();
-        mNextAlarm = mLockPatternUtils.getNextAlarm();
-        updateStatusLines();
+        resetStatusInfo();
 
 
         mLockPatternView = (LockPatternView) findViewById(R.id.lockPattern);
@@ -243,6 +236,15 @@ class UnlockScreen extends LinearLayoutWithDefaultTouchRecepient
                 LockScreen.getCarrierString(
                         mUpdateMonitor.getTelephonyPlmn(),
                         mUpdateMonitor.getTelephonySpn()));
+    }
+
+    private void resetStatusInfo() {
+        mInstructions = null;
+        mShowingBatteryInfo = mUpdateMonitor.shouldShowBatteryInfo();
+        mPluggedIn = mUpdateMonitor.isDevicePluggedIn();
+        mBatteryLevel = mUpdateMonitor.getBatteryLevel();
+        mNextAlarm = mLockPatternUtils.getNextAlarm();
+        updateStatusLines();
     }
 
     private void updateStatusLines() {
@@ -391,8 +393,7 @@ class UnlockScreen extends LinearLayoutWithDefaultTouchRecepient
     /** {@inheritDoc} */
     public void onResume() {
         // reset header
-        updateStatusLines();
-        // TODO mUnlockIcon.setVisibility(View.VISIBLE);
+        resetStatusInfo();
 
         // reset lock pattern
         mLockPatternView.enableInput();
