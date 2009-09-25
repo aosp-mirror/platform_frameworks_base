@@ -84,19 +84,45 @@
         android:background="@android:drawable/divider_horizontal_dark"
             />
 
-    <!-- lock icon and header message -->
-    <TextView
-        android:id="@+id/headerText"
+    <!-- used for instructions such as "draw pattern to unlock", the next alarm, and charging
+         status.  -->
+    <LinearLayout
+        android:orientation="horizontal"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="3dip"
-        android:layout_centerHorizontal="true"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:textColor="?android:attr/textColorSecondary"
-        android:textSize="17sp"
-        android:drawableLeft="@drawable/ic_lock_idle_lock"
-        android:drawablePadding="4dip"
-        />
+        android:gravity="center"
+        >
+        <TextView
+            android:id="@+id/status1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textColor="?android:attr/textColorSecondary"
+            android:textSize="17sp"
+            android:drawablePadding="4dip"
+            />
+        <TextView
+            android:id="@+id/statusSep"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dip"
+            android:layout_marginRight="5dip"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textColor="?android:attr/textColorSecondary"
+            android:textSize="17sp"
+            />
+        <TextView
+            android:id="@+id/status2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textColor="?android:attr/textColorSecondary"
+            android:textSize="17sp"
+            android:drawablePadding="4dip"
+            />
+    </LinearLayout>
 
     <com.android.internal.widget.LockPatternView
         android:id="@+id/lockPattern"
@@ -122,7 +148,9 @@
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true"
                 android:text="@string/lockscreen_emergency_call"
+                android:background="@drawable/btn_lock_normal"
                 android:textAppearance="?android:attr/textAppearanceSmall"
+                android:textColor="?android:attr/textColorPrimary"
                 android:drawableLeft="@drawable/ic_emergency"
                 android:drawablePadding="8dip"
                 />
@@ -145,7 +173,9 @@
                 android:layout_marginLeft="4dip"
                 android:layout_marginRight="2dip"
                 android:text="@string/lockscreen_emergency_call"
+                android:background="@drawable/btn_lock_normal"
                 android:textAppearance="?android:attr/textAppearanceSmall"
+                android:textColor="?android:attr/textColorPrimary"
                 android:drawableLeft="@drawable/ic_emergency"
                 android:drawablePadding="8dip"
                 />
@@ -157,7 +187,9 @@
                 android:layout_marginBottom="4dip"
                 android:layout_marginLeft="2dip"
                 android:layout_marginRight="4dip"
+                android:background="@drawable/btn_lock_normal"
                 android:textAppearance="?android:attr/textAppearanceSmall"
+                android:textColor="?android:attr/textColorPrimary"
                 android:visibility="invisible"
                 />
         </LinearLayout>
