@@ -3122,7 +3122,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     public void overridePendingAppTransition(String packageName,
             int enterAnim, int exitAnim) {
-        if (mNextAppTransition != WindowManagerPolicy.TRANSIT_UNSET){
+        if (mNextAppTransition != WindowManagerPolicy.TRANSIT_UNSET) {
             mNextAppTransitionPackage = packageName;
             mNextAppTransitionEnter = enterAnim;
             mNextAppTransitionExit = exitAnim;
@@ -9327,7 +9327,6 @@ public class WindowManagerService extends IWindowManager.Stub
                             transit = WindowManagerPolicy.TRANSIT_UNSET;
                         }
                         mNextAppTransition = WindowManagerPolicy.TRANSIT_UNSET;
-                        mNextAppTransitionPackage = null;
                         mAppTransitionReady = false;
                         mAppTransitionRunning = true;
                         mAppTransitionTimeout = false;
@@ -9484,6 +9483,8 @@ public class WindowManagerService extends IWindowManager.Stub
                             wtoken.allDrawn = true;
                         }
 
+                        mNextAppTransitionPackage = null;
+                        
                         mOpeningApps.clear();
                         mClosingApps.clear();
 
