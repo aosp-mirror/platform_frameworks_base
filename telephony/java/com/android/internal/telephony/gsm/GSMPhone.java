@@ -66,7 +66,6 @@ import com.android.internal.telephony.PhoneBase;
 import com.android.internal.telephony.PhoneNotifier;
 import com.android.internal.telephony.PhoneProxy;
 import com.android.internal.telephony.PhoneSubInfo;
-import com.android.internal.telephony.RILConstants;
 import com.android.internal.telephony.TelephonyProperties;
 import com.android.internal.telephony.gsm.stk.StkService;
 import com.android.internal.telephony.test.SimulatedRadioControl;
@@ -141,7 +140,7 @@ public class GSMPhone extends PhoneBase {
             mSimulatedRadioControl = (SimulatedRadioControl) ci;
         }
 
-        mCM.setPhoneType(RILConstants.GSM_PHONE);
+        mCM.setPhoneType(Phone.PHONE_TYPE_GSM);
         mCT = new GsmCallTracker(this);
         mSST = new GsmServiceStateTracker (this);
         mSMS = new GsmSMSDispatcher(this);
@@ -201,7 +200,7 @@ public class GSMPhone extends PhoneBase {
 
         //Change the system property
         SystemProperties.set(TelephonyProperties.CURRENT_ACTIVE_PHONE,
-                new Integer(RILConstants.GSM_PHONE).toString());
+                new Integer(Phone.PHONE_TYPE_GSM).toString());
     }
 
     public void dispose() {
@@ -262,27 +261,27 @@ public class GSMPhone extends PhoneBase {
         return mSST.cellLoc;
     }
 
-    public Phone.State
-    getState() {
+    public Phone.State getState() {
         return mCT.state;
     }
 
-    public String
-    getPhoneName() {
+    public String getPhoneName() {
         return "GSM";
+    }
+
+    public int getPhoneType() {
+        return Phone.PHONE_TYPE_GSM;
     }
 
     public SignalStrength getSignalStrength() {
         return mSST.mSignalStrength;
     }
 
-    public boolean
-    getMessageWaitingIndicator() {
+    public boolean getMessageWaitingIndicator() {
         return mSIMRecords.getVoiceMessageWaiting();
     }
 
-    public boolean
-    getCallForwardingIndicator() {
+    public boolean getCallForwardingIndicator() {
         return mSIMRecords.getVoiceCallForwardingFlag();
     }
 

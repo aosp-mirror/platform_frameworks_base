@@ -740,6 +740,8 @@ public abstract class PhoneBase extends Handler implements Phone {
 
     public abstract String getPhoneName();
 
+    public abstract int getPhoneType();
+
     /** @hide */
     public int getVoiceMessageCount(){
         return 0;
