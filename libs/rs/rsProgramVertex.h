@@ -30,7 +30,7 @@ class ProgramVertex : public Program
 public:
     const static uint32_t MAX_LIGHTS = 8;
 
-    ProgramVertex(Element *in, Element *out);
+    ProgramVertex(Context *, Element *in, Element *out);
     virtual ~ProgramVertex();
 
     virtual void setupGL(const Context *rsc, ProgramVertexState *state);

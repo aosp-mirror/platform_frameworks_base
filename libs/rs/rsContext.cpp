@@ -269,6 +269,12 @@ void * Context::threadProc(void *vrsc)
      }
 
      LOGV("RS Thread exiting");
+     ObjectBase::zeroAllUserRef(rsc);
+     rsc->mRaster.set(NULL);
+     rsc->mFragment.set(NULL);
+     rsc->mVertex.set(NULL);
+     rsc->mFragmentStore.set(NULL);
+
      glClearColor(0,0,0,0);
      glClear(GL_COLOR_BUFFER_BIT);
      eglSwapBuffers(rsc->mEGL.mDisplay, rsc->mEGL.mSurface);
@@ -286,6 +292,7 @@ Context::Context(Device *dev, Surface *sur, bool useDepth)
     mExit = false;
     mUseDepth = useDepth;
     mPaused = false;
+    mObjHead = NULL;
 
     int status;
     pthread_attr_t threadAttr;

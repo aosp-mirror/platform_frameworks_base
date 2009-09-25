@@ -20,7 +20,7 @@
 using namespace android;
 using namespace android::renderscript;
 
-Type::Type()
+Type::Type(Context *rsc) : ObjectBase(rsc)
 {
     mLODs = 0;
     mLODCount = 0;
@@ -363,7 +363,7 @@ RsType rsi_TypeCreate(Context *rsc)
 {
     TypeState * stc = &rsc->mStateType;
 
-    Type * st = new Type();
+    Type * st = new Type(rsc);
     st->incUserRef();
     st->setDimX(stc->mX);
     st->setDimY(stc->mY);

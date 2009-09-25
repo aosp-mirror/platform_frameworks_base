@@ -21,12 +21,12 @@ using namespace android;
 using namespace android::renderscript;
 
 
-Adapter1D::Adapter1D()
+Adapter1D::Adapter1D(Context *rsc) : ObjectBase(rsc)
 {
     reset();
 }
 
-Adapter1D::Adapter1D(Allocation *a)
+Adapter1D::Adapter1D(Context *rsc, Allocation *a) : ObjectBase(rsc)
 {
     reset();
     setAllocation(a);
@@ -71,7 +71,7 @@ namespace renderscript {
 
 RsAdapter1D rsi_Adapter1DCreate(Context *rsc)
 {
-    Adapter1D *a = new Adapter1D();
+    Adapter1D *a = new Adapter1D(rsc);
     a->incUserRef();
     return a;
 }
@@ -125,12 +125,12 @@ void rsi_Adapter1DData(Context *rsc, RsAdapter1D va, const void *data)
 
 //////////////////////////
 
-Adapter2D::Adapter2D()
+Adapter2D::Adapter2D(Context *rsc) : ObjectBase(rsc)
 {
     reset();
 }
 
-Adapter2D::Adapter2D(Allocation *a)
+Adapter2D::Adapter2D(Context *rsc, Allocation *a) : ObjectBase(rsc)
 {
     reset();
     setAllocation(a);
@@ -184,7 +184,7 @@ namespace renderscript {
 
 RsAdapter2D rsi_Adapter2DCreate(Context *rsc)
 {
-    Adapter2D *a = new Adapter2D();
+    Adapter2D *a = new Adapter2D(rsc);
     a->incUserRef();
     return a;
 }

@@ -29,7 +29,7 @@ namespace renderscript {
 class Mesh : public ObjectBase
 {
 public:
-    Mesh();
+    Mesh(Context *);
     ~Mesh();
 
     struct Verticies_t
@@ -42,7 +42,7 @@ public:
         size_t mOffsetCoord;
         size_t mOffsetTex;
         size_t mOffsetNorm;
-    
+
         size_t mSizeCoord;
         size_t mSizeTex;
         size_t mSizeNorm;

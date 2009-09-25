@@ -29,7 +29,7 @@ namespace renderscript {
 class SimpleMesh : public ObjectBase
 {
 public:
-    SimpleMesh();
+    SimpleMesh(Context *);
     ~SimpleMesh();
 
     ObjectBaseRef<const Type> mIndexType;
