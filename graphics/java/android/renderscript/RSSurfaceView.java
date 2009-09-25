@@ -153,6 +153,9 @@ public class RSSurfaceView extends SurfaceView implements SurfaceHolder.Callback
         return createRenderScript(useDepth, false);
     }
 
-
+    public void destroyRenderScript() {
+        mRS.destroy();
+        mRS = null;
+    }
 }
 
