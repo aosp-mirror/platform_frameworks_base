@@ -1565,10 +1565,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
      * Tell the audio service to adjust the volume appropriate to the event.
      * @param keycode
      */
-    void sendVolToMusic(int keycode) {
+    void handleVolumeKey(int stream, int keycode) {
         final IAudioService audio = getAudioInterface();
         if (audio == null) {
-            Log.w(TAG, "sendVolToMusic: couldn't get IAudioService reference");
+            Log.w(TAG, "handleVolumeKey: couldn't get IAudioService reference");
             return;
         }
         try {
@@ -1576,8 +1576,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             // during the call, but we do it as a precaution for the rare possibility
             // that the music stops right before we call this
             mBroadcastWakeLock.acquire();
-            audio.adjustStreamVolume(
-                AudioManager.STREAM_MUSIC,
+            audio.adjustStreamVolume(stream,
                 keycode == KeyEvent.KEYCODE_VOLUME_UP
                             ? AudioManager.ADJUST_RAISE
                             : AudioManager.ADJUST_LOWER,
@@ -1639,12 +1638,22 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         } else if (isMusicActive()) {
                             // when keyguard is showing and screen off, we need
                             // to handle the volume key for music here
-                            sendVolToMusic(event.keycode);
+                            handleVolumeKey(AudioManager.STREAM_MUSIC, event.keycode);
                         }
                     }
                 }
             }
         } else if (!screenIsOn) {
+            // If we are in-call with screen off and keyguard is not showing,
+            // then handle the volume key ourselves.
+            // This is necessary because the phone app will disable the keyguard
+            // when the proximity sensor is in use.
+            if (isInCall() && event.type == RawInputEvent.EV_KEY &&
+                     (event.keycode == KeyEvent.KEYCODE_VOLUME_DOWN
+                                || event.keycode == KeyEvent.KEYCODE_VOLUME_UP)) {
+                result &= ~ACTION_PASS_TO_USER;
+                handleVolumeKey(AudioManager.STREAM_VOICE_CALL, event.keycode);
+            }
             if (isWakeKey) {
                 // a wake key has a sole purpose of waking the device; don't pass
                 // it to the user
