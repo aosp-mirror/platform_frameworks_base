@@ -30,6 +30,12 @@ ContextSetDefineI32 {
     param int32_t value
     }
 
+ContextPause {
+	}
+
+ContextResume {
+	}
+
 AssignName {
 	param void *obj
 	param const char *name

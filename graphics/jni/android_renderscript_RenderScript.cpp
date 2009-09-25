@@ -179,6 +179,22 @@ nContextDestroy(JNIEnv *_env, jobject _this, jint con)
 
 
 static void
+nContextPause(JNIEnv *_env, jobject _this)
+{
+    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
+    LOG_API("nContextPause, con(%p)", con);
+    rsContextPause(con);
+}
+
+static void
+nContextResume(JNIEnv *_env, jobject _this)
+{
+    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
+    LOG_API("nContextResume, con(%p)", con);
+    rsContextResume(con);
+}
+
+static void
 nElementBegin(JNIEnv *_env, jobject _this)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
@@ -1282,6 +1298,8 @@ static JNINativeMethod methods[] = {
 {"nDeviceSetConfig",               "(III)V",                               (void*)nDeviceSetConfig },
 {"nContextCreate",                 "(ILandroid/view/Surface;IZ)I",         (void*)nContextCreate },
 {"nContextDestroy",                "(I)V",                                 (void*)nContextDestroy },
+{"nContextPause",                  "()V",                                  (void*)nContextPause },
+{"nContextResume",                 "()V",                                  (void*)nContextResume },
 {"nAssignName",                    "(I[B)V",                               (void*)nAssignName },
 {"nObjDestroy",                    "(I)V",                                 (void*)nObjDestroy },
 {"nObjDestroyOOB",                 "(I)V",                                 (void*)nObjDestroyOOB },
