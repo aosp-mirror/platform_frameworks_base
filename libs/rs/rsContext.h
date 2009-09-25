@@ -88,6 +88,9 @@ public:
     void setupCheck();
     void allocationCheck(const Allocation *);
 
+    void pause();
+    void resume();
+
     void assignName(ObjectBase *obj, const char *name, uint32_t len);
     void removeName(ObjectBase *obj);
     ObjectBase * lookupName(const char *name) const;
@@ -171,6 +174,7 @@ protected:
     bool mRunning;
     bool mExit;
     bool mUseDepth;
+    bool mPaused;
 
     pthread_t mThreadId;
 
