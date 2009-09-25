@@ -158,10 +158,6 @@ class LockScreen extends LinearLayout implements KeyguardScreen, KeyguardUpdateM
             inflater.inflate(R.layout.keyguard_screen_rotary_unlock_land, this, true);
         }
 
-        mShowingBatteryInfo = updateMonitor.shouldShowBatteryInfo();
-        mPluggedIn = updateMonitor.isDevicePluggedIn();
-        mBatteryLevel = updateMonitor.getBatteryLevel();
-
         mCarrier = (TextView) findViewById(R.id.carrier);
         mTime = (TextView) findViewById(R.id.time);
         mDate = (TextView) findViewById(R.id.date);
@@ -182,17 +178,6 @@ class LockScreen extends LinearLayout implements KeyguardScreen, KeyguardUpdateM
         setFocusableInTouchMode(true);
         setDescendantFocusability(ViewGroup.FOCUS_BLOCK_DESCENDANTS);
 
-        mStatus = getCurrentStatus(updateMonitor.getSimState());
-        updateLayout(mStatus);
-
-        refreshBatteryStringAndIcon();
-        refreshAlarmDisplay();
-
-        mTimeFormat = DateFormat.getTimeFormat(getContext());
-        mDateFormat = getLockScreenDateFormat();
-        refreshTimeAndDateDisplay();
-        updateStatusLines();
-
         updateMonitor.registerInfoCallback(this);
         updateMonitor.registerSimStateCallback(this);
         updateMonitor.registerConfigurationChangeCallback(this);
@@ -205,6 +190,25 @@ class LockScreen extends LinearLayout implements KeyguardScreen, KeyguardUpdateM
         mRotary.setRightHandleResource(mSilentMode ?
                 R.drawable.ic_jog_dial_sound_off :
                 R.drawable.ic_jog_dial_sound_on);
+
+        resetStatusInfo(updateMonitor);
+    }
+
+    private void resetStatusInfo(KeyguardUpdateMonitor updateMonitor) {
+        mShowingBatteryInfo = updateMonitor.shouldShowBatteryInfo();
+        mPluggedIn = updateMonitor.isDevicePluggedIn();
+        mBatteryLevel = updateMonitor.getBatteryLevel();
+
+        mStatus = getCurrentStatus(updateMonitor.getSimState());
+        updateLayout(mStatus);
+
+        refreshBatteryStringAndIcon();
+        refreshAlarmDisplay();
+
+        mTimeFormat = DateFormat.getTimeFormat(getContext());
+        mDateFormat = getLockScreenDateFormat();
+        refreshTimeAndDateDisplay();
+        updateStatusLines();
     }
 
     @Override
@@ -540,7 +544,7 @@ class LockScreen extends LinearLayout implements KeyguardScreen, KeyguardUpdateM
 
     /** {@inheritDoc} */
     public void onResume() {
-
+        resetStatusInfo(mUpdateMonitor);
     }
 
     /** {@inheritDoc} */
