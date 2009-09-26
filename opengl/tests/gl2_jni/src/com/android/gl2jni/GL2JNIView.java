@@ -118,7 +118,7 @@ class GL2JNIView extends GLSurfaceView {
             }
             EGLConfig[] configs = new EGLConfig[numConfigs];
             egl.eglChooseConfig(display, s_configAttribs2, configs, numConfigs, num_config);
-            return configs[0s];
+            return configs[0];
         }
     }
 
