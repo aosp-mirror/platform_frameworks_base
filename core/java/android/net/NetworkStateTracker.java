@@ -124,11 +124,12 @@ public abstract class NetworkStateTracker extends Handler {
 
     public void addPrivateDnsRoutes() {
         if (DBG) Log.d(TAG, "addPrivateDnsRoutes for " + this +
-                "(" + mInterfaceName + ")");
+                "(" + mInterfaceName + ") - mPrivateDnsRouteSet = "+mPrivateDnsRouteSet);
         if (mInterfaceName != null && !mPrivateDnsRouteSet) {
             for (String addrString : getNameServers()) {
                 int addr = NetworkUtils.lookupHost(addrString);
-                if (addr != -1) {
+                if (addr != -1 && addr != 0) {
+                    if (DBG) Log.d(TAG, "  adding "+addrString+" ("+addr+")");
                     NetworkUtils.addHostRoute(mInterfaceName, addr);
                 }
             }
