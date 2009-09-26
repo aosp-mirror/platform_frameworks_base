@@ -456,8 +456,13 @@ public class ContactHeaderWidget extends FrameLayout implements View.OnClickList
         mPhotoView.assignContactUri(Contacts.getLookupUri(contactId, lookupKey));
 
         //Set the presence status
-        int presence = c.getInt(HEADER_PRESENCE_STATUS_COLUMN_INDEX);
-        mPresenceView.setImageResource(Presence.getPresenceIconResourceId(presence));
+        if (!c.isNull(HEADER_PRESENCE_STATUS_COLUMN_INDEX)) {
+            int presence = c.getInt(HEADER_PRESENCE_STATUS_COLUMN_INDEX);
+            mPresenceView.setImageResource(Presence.getPresenceIconResourceId(presence));
+            mPresenceView.setVisibility(View.VISIBLE);
+        } else {
+            mPresenceView.setVisibility(View.GONE);
+        }
     }
 
     /**
