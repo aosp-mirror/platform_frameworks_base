@@ -31,10 +31,11 @@ int main(int launchID) {
             np->b = b;
             np->a = 0xf0;
             newPart++;
+            np++;
             if (newPart >= count) {
                 newPart = 0;
+                np = &p[newPart];
             }
-            np++;
         }
     }
 
