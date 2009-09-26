@@ -24,4 +24,6 @@
     android:singleLine="true"
     android:ellipsize="end"
     android:layout_gravity="center_vertical"
+    android:shadowColor="#BB000000"
+    android:shadowRadius="2.75"
     />
