@@ -14,13 +14,8 @@
      limitations under the License.
 -->
 
-<!-- These are the hardware features that all devices must possess.
-     These are always added for you by the build system, you do not need
-     to add them yourself. -->
+<!-- This is the standard set of features for a touchscreen that supports
+     multitouch. -->
 <permissions>
-    <feature name="android.hardware.sensor.compass" />
-    <feature name="android.hardware.sensor.accelerometer" />
-    <feature name="android.hardware.bluetooth" />
-    <feature name="android.hardware.wifi" />
-    <feature name="android.hardware.touchscreen" />
+    <feature name="android.hardware.touchscreen.multitouch" />
 </permissions>

@@ -1103,6 +1103,12 @@ class PackageManagerService extends IPackageManager.Stub {
         return null;
     }
 
+    public boolean hasSystemFeature(String name) {
+        synchronized (mPackages) {
+            return mAvailableFeatures.containsKey(name);
+        }
+    }
+    
     public int checkPermission(String permName, String pkgName) {
         synchronized (mPackages) {
             PackageParser.Package p = mPackages.get(pkgName);
