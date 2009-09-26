@@ -57,8 +57,7 @@ import com.android.internal.R;
  * The parent must request the {@link Manifest.permission#READ_CONTACTS}
  * permission to access contact data.
  */
-public class ContactHeaderWidget extends FrameLayout implements View.OnClickListener,
-        View.OnLongClickListener {
+public class ContactHeaderWidget extends FrameLayout implements View.OnClickListener {
 
     private static final String TAG = "ContactHeaderWidget";
 
@@ -82,8 +81,8 @@ public class ContactHeaderWidget extends FrameLayout implements View.OnClickList
      * Interface for callbacks invoked when the user interacts with a header.
      */
     public interface ContactHeaderListener {
-        public void onPhotoLongClick(View view);
-        public void onDisplayNameLongClick(View view);
+        public void onPhotoClick(View view);
+        public void onDisplayNameClick(View view);
     }
 
     private ContactHeaderListener mListener;
@@ -159,7 +158,6 @@ public class ContactHeaderWidget extends FrameLayout implements View.OnClickList
         inflater.inflate(R.layout.contact_header, this);
 
         mDisplayNameView = (TextView) findViewById(R.id.name);
-        mDisplayNameView.setOnLongClickListener(this);
         mAggregateBadge = findViewById(R.id.aggregate_badge);
         mAggregateBadge.setVisibility(View.GONE);
 
@@ -169,7 +167,6 @@ public class ContactHeaderWidget extends FrameLayout implements View.OnClickList
         mStarredView.setOnClickListener(this);
 
         mPhotoView = (FasttrackBadgeWidget) findViewById(R.id.photo);
-        mPhotoView.setOnLongClickListener(this);
 
         mPresenceView = (ImageView) findViewById(R.id.presence);
 
@@ -193,6 +190,11 @@ public class ContactHeaderWidget extends FrameLayout implements View.OnClickList
         mQueryHandler = new QueryHandler(mContentResolver);
     }
 
+    public void enableClickListeners() {
+        mDisplayNameView.setOnClickListener(this);
+        mPhotoView.setOnClickListener(this);
+    }
+
     /**
      * Set the given {@link ContactHeaderListener} to handle header events.
      */
@@ -200,28 +202,15 @@ public class ContactHeaderWidget extends FrameLayout implements View.OnClickList
         mListener = listener;
     }
 
-    /** {@inheritDoc} */
-    public boolean onLongClick(View v) {
-        switch (v.getId()) {
-            case R.id.photo:
-                performPhotoLongClick();
-                return true;
-            case R.id.name:
-                performDisplayNameLongClick();
-                return true;
-        }
-        return false;
-    }
-
-    private void performPhotoLongClick() {
+    private void performPhotoClick() {
         if (mListener != null) {
-            mListener.onPhotoLongClick(mPhotoView);
+            mListener.onPhotoClick(mPhotoView);
         }
     }
 
-    private void performDisplayNameLongClick() {
+    private void performDisplayNameClick() {
         if (mListener != null) {
-            mListener.onDisplayNameLongClick(mDisplayNameView);
+            mListener.onDisplayNameClick(mDisplayNameView);
         }
     }
 
@@ -481,16 +470,25 @@ public class ContactHeaderWidget extends FrameLayout implements View.OnClickList
     }
 
     public void onClick(View view) {
-        // Make sure there is a contact
-        if (mContactUri == null) {
-            return;
-        }
-
-        if (view.getId() == R.id.star) {
-            // Toggle "starred" state
-            final ContentValues values = new ContentValues(1);
-            values.put(Contacts.STARRED, mStarredView.isChecked());
-            mContentResolver.update(mContactUri, values, null, null);
+        switch (view.getId()) {
+            case R.id.star: {
+                // Toggle "starred" state
+                // Make sure there is a contact
+                if (mContactUri != null) {
+                    final ContentValues values = new ContentValues(1);
+                    values.put(Contacts.STARRED, mStarredView.isChecked());
+                    mContentResolver.update(mContactUri, values, null, null);
+                }
+                break;
+            }
+            case R.id.photo: {
+                performPhotoClick();
+                break;
+            }
+            case R.id.name: {
+                performDisplayNameClick();
+                break;
+            }
         }
     }
 
