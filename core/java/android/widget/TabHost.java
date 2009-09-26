@@ -20,6 +20,7 @@ import android.app.LocalActivityManager;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.util.AttributeSet;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -28,10 +29,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.Window;
-import com.android.internal.R;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import com.android.internal.R;
 
 /**
  * Container for a tabbed window view. This object holds two children: a set of tab labels that the
@@ -497,17 +499,22 @@ mTabHost.addTab(TAB_TAG_1, "Hello, world!", "Tab 1");
         }
 
         public View createIndicatorView() {
+            final Context context = getContext();
             LayoutInflater inflater =
-                    (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                    (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             View tabIndicator = inflater.inflate(R.layout.tab_indicator,
                     mTabWidget, // tab widget is the parent
                     false); // no inflate params
-            // TODO: Move this to xml when bug 2068024 is resolved.
-            tabIndicator.getBackground().setDither(true);
 
             final TextView tv = (TextView) tabIndicator.findViewById(R.id.title);
             tv.setText(mLabel);
 
+            if (context.getApplicationInfo().targetSdkVersion <= Build.VERSION_CODES.DONUT) {
+                // Donut apps get old color scheme
+                tabIndicator.setBackgroundResource(R.drawable.tab_indicator_v4);
+                tv.setTextColor(context.getResources().getColorStateList(R.color.tab_indicator_text_v4));
+            }
+            
             return tabIndicator;
         }
     }
@@ -526,13 +533,12 @@ mTabHost.addTab(TAB_TAG_1, "Hello, world!", "Tab 1");
         }
 
         public View createIndicatorView() {
+            final Context context = getContext();
             LayoutInflater inflater =
-                    (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                    (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             View tabIndicator = inflater.inflate(R.layout.tab_indicator,
                     mTabWidget, // tab widget is the parent
                     false); // no inflate params
-            // TODO: Move this to xml when bug 2068024 is resolved.
-            tabIndicator.getBackground().setDither(true);
 
             final TextView tv = (TextView) tabIndicator.findViewById(R.id.title);
             tv.setText(mLabel);
@@ -540,6 +546,12 @@ mTabHost.addTab(TAB_TAG_1, "Hello, world!", "Tab 1");
             final ImageView iconView = (ImageView) tabIndicator.findViewById(R.id.icon);
             iconView.setImageDrawable(mIcon);
 
+            if (context.getApplicationInfo().targetSdkVersion <= Build.VERSION_CODES.DONUT) {
+                // Donut apps get old color scheme
+                tabIndicator.setBackgroundResource(R.drawable.tab_indicator_v4);
+                tv.setTextColor(context.getResources().getColorStateList(R.color.tab_indicator_text_v4));
+            }
+            
             return tabIndicator;
         }
     }
