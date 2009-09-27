@@ -4838,6 +4838,10 @@ public class WebView extends AbsoluteLayout
                         > INVAL_RECT_MSG_ID ? Integer.toString(msg.what)
                         : HandlerDebugString[msg.what - REMEMBER_PASSWORD]);
             }
+            if (mWebViewCore == null) {
+                // after WebView's destroy() is called, skip handling messages.
+                return;
+            }
             switch (msg.what) {
                 case REMEMBER_PASSWORD: {
                     mDatabase.setUsernamePassword(
