@@ -318,6 +318,17 @@ public final class ContactsContract {
                 "lookup");
 
         /**
+         * Base {@link Uri} for referencing a single {@link Contacts} entry,
+         * created by appending {@link Contacts#LOOKUP_KEY} using
+         * {@link Uri#withAppendedPath(Uri, String)}. Provides
+         * {@link OpenableColumns} columns when queried, or returns the
+         * referenced contact formatted as a vCard when opened through
+         * {@link ContentResolver#openAssetFileDescriptor(Uri, String)}.
+         */
+        public static final Uri CONTENT_VCARD_URI = Uri.withAppendedPath(CONTENT_URI,
+                "as_vcard");
+
+        /**
          * Builds a {@link #CONTENT_LOOKUP_URI} style {@link Uri} describing the
          * requested {@link Contacts} entry.
          *
@@ -433,6 +444,12 @@ public final class ContactsContract {
          * person.
          */
         public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/contact";
+
+        /**
+         * The MIME type of a {@link #CONTENT_URI} subdirectory of a single
+         * person.
+         */
+        public static final String CONTENT_VCARD_TYPE = "text/x-vcard";
 
         /**
          * A sub-directory of a single contact that contains all of the constituent raw contact
@@ -1631,6 +1648,12 @@ public final class ContactsContract {
              * <P>Type: TEXT</P>
              */
             public static final String PHONETIC_NAME = DATA8;
+
+            /**
+             * The office location of this organization.
+             * <P>Type: TEXT</P>
+             */
+            public static final String OFFICE_LOCATION = DATA9;
 
             /**
              * Return the string resource that best describes the given
