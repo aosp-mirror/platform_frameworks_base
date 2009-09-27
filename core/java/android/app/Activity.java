@@ -3020,9 +3020,9 @@ public class Activity extends ContextThemeWrapper
      * or {@link #finish} to specify an explicit transition animation to
      * perform next.
      * @param enterAnim A resource ID of the animation resource to use for
-     * the incoming activity.
+     * the incoming activity.  Use 0 for no animation.
      * @param exitAnim A resource ID of the animation resource to use for
-     * the outgoing activity.
+     * the outgoing activity.  Use 0 for no animation.
      */
     public void overridePendingTransition(int enterAnim, int exitAnim) {
         try {
