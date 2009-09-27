@@ -2884,6 +2884,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             setTransformationMethod(PasswordTransformationMethod.getInstance());
             setTypefaceByIndex(MONOSPACE, 0);
         } else if (isVisiblePassword) {
+            if (mTransformation == PasswordTransformationMethod.getInstance()) {
+                forceUpdate = true;
+            }
             setTypefaceByIndex(MONOSPACE, 0);
         } else if (wasPassword || wasVisiblePassword) {
             // not in password mode, clean up typeface and transformation
