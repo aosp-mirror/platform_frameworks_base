@@ -829,6 +829,9 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
             * OpenGL context is a somewhat heavy object.
             */
             mEglContext = mEGLContextFactory.createContext(mEgl, mEglDisplay, mEglConfig);
+            if (mEglContext == null || mEglContext == EGL10.EGL_NO_CONTEXT) {
+                throw new RuntimeException("createContext failed");
+            }
 
             mEglSurface = null;
         }
@@ -842,7 +845,7 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
              *  The window size has changed, so we need to create a new
              *  surface.
              */
-            if (mEglSurface != null) {
+            if (mEglSurface != null && mEglSurface != EGL10.EGL_NO_SURFACE) {
 
                 /*
                  * Unbind and destroy the old EGL surface, if
@@ -859,12 +862,17 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
             mEglSurface = mEGLWindowSurfaceFactory.createWindowSurface(mEgl,
                     mEglDisplay, mEglConfig, holder);
 
+            if (mEglSurface == null || mEglSurface == EGL10.EGL_NO_SURFACE) {
+                throw new RuntimeException("createWindowSurface failed");
+            }
+
             /*
              * Before we can issue GL commands, we need to make sure
              * the context is current and bound to a surface.
              */
-            mEgl.eglMakeCurrent(mEglDisplay, mEglSurface, mEglSurface,
-                    mEglContext);
+            if (!mEgl.eglMakeCurrent(mEglDisplay, mEglSurface, mEglSurface, mEglContext)) {
+                throw new RuntimeException("eglMakeCurrent failed.");
+            }
 
             GL gl = mEglContext.getGL();
             if (mGLWrapper != null) {
@@ -902,7 +910,7 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
         }
 
         public void destroySurface() {
-            if (mEglSurface != null) {
+            if (mEglSurface != null && mEglSurface != EGL10.EGL_NO_SURFACE) {
                 mEgl.eglMakeCurrent(mEglDisplay, EGL10.EGL_NO_SURFACE,
                         EGL10.EGL_NO_SURFACE,
                         EGL10.EGL_NO_CONTEXT);
