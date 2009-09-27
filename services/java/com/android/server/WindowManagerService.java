@@ -4174,7 +4174,7 @@ public class WindowManagerService extends IWindowManager.Stub
             final int N = mWindows.size();
             for (int i=0; i<N; i++) {
                 WindowState w = (WindowState)mWindows.get(i);
-                if (w.isVisibleLw() && !w.isDisplayedLw()) {
+                if (w.isVisibleLw() && !w.isDrawnLw()) {
                     return;
                 }
             }
@@ -7664,6 +7664,16 @@ public class WindowManagerService extends IWindowManager.Stub
                         || mAnimating);
         }
 
+        /**
+         * Returns true if the window has a surface that it has drawn a
+         * complete UI in to.
+         */
+        public boolean isDrawnLw() {
+            final AppWindowToken atoken = mAppToken;
+            return mSurface != null && !mDestroying
+                && !mDrawPending && !mCommitDrawPending;
+        }
+
         public boolean fillsScreenLw(int screenWidth, int screenHeight,
                                    boolean shownFrame, boolean onlyOpaque) {
             if (mSurface == null) {
@@ -8268,10 +8278,10 @@ public class WindowManagerService extends IWindowManager.Stub
                     continue;
                 }
                 if (DEBUG_VISIBILITY) {
-                    Log.v(TAG, "Win " + win + ": isDisplayed="
-                            + win.isDisplayedLw()
+                    Log.v(TAG, "Win " + win + ": isDrawn="
+                            + win.isDrawnLw()
                             + ", isAnimating=" + win.isAnimating());
-                    if (!win.isDisplayedLw()) {
+                    if (!win.isDrawnLw()) {
                         Log.v(TAG, "Not displayed: s=" + win.mSurface
                                 + " pv=" + win.mPolicyVisibility
                                 + " dp=" + win.mDrawPending
@@ -8284,7 +8294,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     }
                 }
                 numInteresting++;
-                if (win.isDisplayedLw()) {
+                if (win.isDrawnLw()) {
                     if (!win.isAnimating()) {
                         numVisible++;
                     }
@@ -9007,7 +9017,6 @@ public class WindowManagerService extends IWindowManager.Stub
                         || !win.mRelayoutCalled
                         || win.mRootToken.hidden
                         || (atoken != null && atoken.hiddenRequested)
-                        || !win.mPolicyVisibility
                         || win.mAttachedHidden
                         || win.mExiting || win.mDestroying;
 
@@ -9217,10 +9226,10 @@ public class WindowManagerService extends IWindowManager.Stub
                                 == WindowManager.LayoutParams.TYPE_BASE_APPLICATION)
                                 && !w.mExiting && !w.mDestroying) {
                             if (DEBUG_VISIBILITY || DEBUG_ORIENTATION) {
-                                Log.v(TAG, "Eval win " + w + ": isDisplayed="
-                                        + w.isDisplayedLw()
+                                Log.v(TAG, "Eval win " + w + ": isDrawn="
+                                        + w.isDrawnLw()
                                         + ", isAnimating=" + w.isAnimating());
-                                if (!w.isDisplayedLw()) {
+                                if (!w.isDrawnLw()) {
                                     Log.v(TAG, "Not displayed: s=" + w.mSurface
                                             + " pv=" + w.mPolicyVisibility
                                             + " dp=" + w.mDrawPending
@@ -9233,7 +9242,7 @@ public class WindowManagerService extends IWindowManager.Stub
                             if (w != atoken.startingWindow) {
                                 if (!atoken.freezingScreen || !w.mAppFreezing) {
                                     atoken.numInterestingWindows++;
-                                    if (w.isDisplayedLw()) {
+                                    if (w.isDrawnLw()) {
                                         atoken.numDrawnWindows++;
                                         if (DEBUG_VISIBILITY || DEBUG_ORIENTATION) Log.v(TAG,
                                                 "tokenMayBeDrawn: " + atoken
@@ -9242,7 +9251,7 @@ public class WindowManagerService extends IWindowManager.Stub
                                         tokenMayBeDrawn = true;
                                     }
                                 }
-                            } else if (w.isDisplayedLw()) {
+                            } else if (w.isDrawnLw()) {
                                 atoken.startingDisplayed = true;
                             }
                         }
