@@ -637,6 +637,9 @@ class BackupManagerService extends IBackupManager.Stub {
                 IBackupTransport transport = getTransport(mCurrentTransport);
                 if (transport == null) {
                     Log.v(TAG, "Backup requested but no transport available");
+                    synchronized (mQueueLock) {
+                        mBackupOrRestoreInProgress = false;
+                    }
                     mWakelock.release();
                     break;
                 }
@@ -671,6 +674,9 @@ class BackupManagerService extends IBackupManager.Stub {
                         (new PerformBackupThread(transport, queue, oldJournal)).start();
                     } else {
                         Log.v(TAG, "Backup requested but nothing pending");
+                        synchronized (mQueueLock) {
+                            mBackupOrRestoreInProgress = false;
+                        }
                         mWakelock.release();
                     }
                 }
@@ -1686,6 +1692,9 @@ class BackupManagerService extends IBackupManager.Stub {
                 }
 
                 // Last but not least, release the cpu
+                synchronized (mQueueLock) {
+                    mBackupOrRestoreInProgress = false;
+                }
                 mWakelock.release();
             }
         }
