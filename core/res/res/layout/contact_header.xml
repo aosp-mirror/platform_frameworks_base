@@ -34,7 +34,6 @@
         android:layout_width="0dip"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-
         android:orientation="vertical"
         android:layout_gravity="center_vertical" >
 
@@ -61,9 +60,19 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceSmall"
-            android:maxLines="2"
-            android:ellipsize="end"/>
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:layout_marginTop="-4dip"
+        />
 
+        <TextView android:id="@+id/status_date"
+            android:layout_width="fill_parent"
+            android:layout_height="0dip"
+            android:layout_weight="1"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:textSize="12sp"
+            android:layout_marginTop="-2dip"
+        />
     </LinearLayout>
 
     <ImageView
