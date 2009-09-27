@@ -28,7 +28,8 @@ class ProgramRasterState;
 class ProgramRaster : public Program
 {
 public:
-    ProgramRaster(Element *in,
+    ProgramRaster(Context *rsc,
+                  Element *in,
                   Element *out,
                   bool pointSmooth,
                   bool lineSmooth,

@@ -37,7 +37,7 @@ public:
     typedef int (*RunScript_t)(uint32_t launchIndex);
     typedef void (*VoidFunc_t)();
 
-    ScriptC();
+    ScriptC(Context *);
     virtual ~ScriptC();
 
     struct Program_t {

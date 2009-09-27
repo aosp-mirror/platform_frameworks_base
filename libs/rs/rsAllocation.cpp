@@ -22,7 +22,7 @@
 using namespace android;
 using namespace android::renderscript;
 
-Allocation::Allocation(const Type *type)
+Allocation::Allocation(Context *rsc, const Type *type) : ObjectBase(rsc)
 {
     mPtr = NULL;
 
@@ -90,7 +90,7 @@ void Allocation::uploadToTexture(uint32_t lodOffset)
     }
     glBindTexture(GL_TEXTURE_2D, mTextureID);
 
-    Adapter2D adapt(this);
+    Adapter2D adapt(getContext(), this);
     for(uint32_t lod = 0; (lod + lodOffset) < mType->getLODCount(); lod++) {
         adapt.setLOD(lod+lodOffset);
 
@@ -186,14 +186,14 @@ RsAllocation rsi_AllocationCreateTyped(Context *rsc, RsType vtype)
 {
     const Type * type = static_cast<const Type *>(vtype);
 
-    Allocation * alloc = new Allocation(type);
+    Allocation * alloc = new Allocation(rsc, type);
     alloc->incUserRef();
     return alloc;
 }
 
 RsAllocation rsi_AllocationCreateSized(Context *rsc, RsElement e, size_t count)
 {
-    Type * type = new Type();
+    Type * type = new Type(rsc);
     type->setDimX(count);
     type->setElement(static_cast<Element *>(e));
     type->compute();
@@ -371,8 +371,8 @@ RsAllocation rsi_AllocationCreateFromBitmap(Context *rsc, uint32_t w, uint32_t h
     cvt(texAlloc->getPtr(), data, w * h);
 
     if (genMips) {
-        Adapter2D adapt(texAlloc);
-        Adapter2D adapt2(texAlloc);
+        Adapter2D adapt(rsc, texAlloc);
+        Adapter2D adapt2(rsc, texAlloc);
         for(uint32_t lod=0; lod < (texAlloc->getType()->getLODCount() -1); lod++) {
             adapt.setLOD(lod);
             adapt2.setLOD(lod + 1);

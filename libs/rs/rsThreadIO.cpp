@@ -46,6 +46,10 @@ bool ThreadIO::playCoreCommands(Context *con, bool waitForCommand)
             con->timerSet(Context::RS_TIMER_IDLE);
         }
         const void * data = mToCore.get(&cmdID, &cmdSize);
+        if (!cmdSize) {
+            // exception occured, probably shutdown.
+            return false;
+        }
         if (con->logTimes) {
             con->timerSet(Context::RS_TIMER_INTERNAL);
         }

@@ -29,7 +29,7 @@ namespace renderscript {
 class Light : public ObjectBase
 {
 public:
-    Light(bool isLocal, bool isMono);
+    Light(Context *, bool isLocal, bool isMono);
     virtual ~Light();
 
     // Values, mutable after creation.

@@ -22,7 +22,7 @@ using namespace android::renderscript;
 #include <GLES/gl.h>
 #include <GLES/glext.h>
 
-Mesh::Mesh()
+Mesh::Mesh(Context *rsc) : ObjectBase(rsc)
 {
     mVerticies = NULL;
     mVerticiesCount = 0;
