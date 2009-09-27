@@ -174,6 +174,7 @@ public class ContactHeaderWidget extends FrameLayout implements View.OnClickList
         mPresenceView = (ImageView) findViewById(R.id.presence);
 
         mStatusView = (TextView)findViewById(R.id.status);
+        setSocialSnippet(null);
 
         // Set the photo with a random "no contact" image
         long now = SystemClock.elapsedRealtime();
@@ -355,7 +356,12 @@ public class ContactHeaderWidget extends FrameLayout implements View.OnClickList
      * Manually set the social snippet text to display in the header.
      */
     public void setSocialSnippet(CharSequence snippet) {
-        mStatusView.setText(snippet);
+        if (snippet == null) {
+            mStatusView.setVisibility(View.GONE);
+        } else {
+            mStatusView.setText(snippet);
+            mStatusView.setVisibility(View.VISIBLE);
+        }
     }
 
     /**
