@@ -850,8 +850,7 @@ public class PduComposer {
         PositionMarker ctStart = mStack.mark();
 
         // This contentTypeIdentifier should be used for type of attachment...
-        String contentType = new String(
-                mPduHeader.getTextString(PduHeaders.CONTENT_TYPE));
+        String contentType = new String(mPduHeader.getTextString(PduHeaders.CONTENT_TYPE));
         Integer contentTypeIdentifier = mContentTypeMap.get(contentType);
         if (contentTypeIdentifier == null) {
             // content type is mandatory
@@ -862,7 +861,7 @@ public class PduComposer {
 
         // content-type parameter: start
         PduBody body = ((SendReq) mPdu).getBody();
-        if (null == body) {
+        if (null == body || body.getPartsNum() == 0) {
             // empty message
             appendUintvarInteger(0);
             mStack.pop();
