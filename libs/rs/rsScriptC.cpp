@@ -33,8 +33,10 @@ using namespace android::renderscript;
     ScriptC * sc = (ScriptC *) tls->mScript
 
 
-ScriptC::ScriptC()
+ScriptC::ScriptC(Context *rsc) : Script(rsc)
 {
+    mAllocFile = __FILE__;
+    mAllocLine = __LINE__;
     mAccScript = NULL;
     memset(&mProgram, 0, sizeof(mProgram));
 }
@@ -106,7 +108,7 @@ void ScriptCState::clear()
     }
 
     delete mScript;
-    mScript = new ScriptC();
+    mScript = new ScriptC(NULL);
 
     mInt32Defines.clear();
     mFloatDefines.clear();
@@ -130,8 +132,8 @@ void ScriptCState::runCompiler(Context *rsc, ScriptC *s)
     rsc->appendNameDefines(&tmp);
     appendDecls(&tmp);
     rsc->appendVarDefines(&tmp);
-    appendVarDefines(&tmp);
-    appendTypes(&tmp);
+    appendVarDefines(rsc, &tmp);
+    appendTypes(rsc, &tmp);
     tmp.append("#line 1\n");
 
     const char* scriptSource[] = {tmp.string(), s->mEnviroment.mScriptText};
@@ -260,11 +262,13 @@ static void appendElementBody(String8 *s, const Element *e)
     s->append("}");
 }
 
-void ScriptCState::appendVarDefines(String8 *str)
+void ScriptCState::appendVarDefines(const Context *rsc, String8 *str)
 {
     char buf[256];
-    LOGD("appendVarDefines mInt32Defines.size()=%d mFloatDefines.size()=%d\n",
-            mInt32Defines.size(), mFloatDefines.size());
+    if (rsc->props.mLogScripts) {
+        LOGD("appendVarDefines mInt32Defines.size()=%d mFloatDefines.size()=%d\n",
+                mInt32Defines.size(), mFloatDefines.size());
+    }
     for (size_t ct=0; ct < mInt32Defines.size(); ct++) {
         str->append("#define ");
         str->append(mInt32Defines.keyAt(ct));
@@ -283,7 +287,7 @@ void ScriptCState::appendVarDefines(String8 *str)
 
 
 
-void ScriptCState::appendTypes(String8 *str)
+void ScriptCState::appendTypes(const Context *rsc, String8 *str)
 {
     char buf[256];
     String8 tmp;
@@ -308,7 +312,9 @@ void ScriptCState::appendTypes(String8 *str)
             s.append("_t struct struct_");
             s.append(e->getName());
             s.append("\n\n");
-            LOGD(s);
+            if (rsc->props.mLogScripts) {
+                LOGV(s);
+            }
             str->append(s);
         }
 
@@ -321,7 +327,9 @@ void ScriptCState::appendTypes(String8 *str)
                 tmp.append(c->getComponentName());
                 sprintf(buf, " %i\n", ct2);
                 tmp.append(buf);
-                LOGD(tmp);
+                if (rsc->props.mLogScripts) {
+                    LOGV(tmp);
+                }
                 str->append(tmp);
             }
         }
@@ -351,7 +359,9 @@ void ScriptCState::appendTypes(String8 *str)
             }
             s.append(mSlotNames[ct]);
             s.append(";\n");
-            LOGD(s);
+            if (rsc->props.mLogScripts) {
+                LOGV(s);
+            }
             str->append(s);
         }
     }
@@ -391,6 +401,7 @@ RsScript rsi_ScriptCCreate(Context * rsc)
 
     ss->runCompiler(rsc, s);
     s->incUserRef();
+    s->setContext(rsc);
     for (int ct=0; ct < MAX_SCRIPT_BANKS; ct++) {
         s->mTypes[ct].set(ss->mConstantBufferTypes[ct].get());
         s->mSlotNames[ct] = ss->mSlotNames[ct];

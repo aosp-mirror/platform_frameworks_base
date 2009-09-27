@@ -32,7 +32,7 @@ public:
 
 
 
-    ProgramFragment(Element *in, Element *out, bool pointSpriteEnable);
+    ProgramFragment(Context *, Element *in, Element *out, bool pointSpriteEnable);
     virtual ~ProgramFragment();
 
     virtual void setupGL(const Context *, ProgramFragmentState *);
@@ -75,6 +75,7 @@ public:
 
     ProgramFragment *mPF;
     void init(Context *rsc, int32_t w, int32_t h);
+    void deinit(Context *rsc);
 
     ObjectBaseRef<Type> mTextureTypes[ProgramFragment::MAX_TEXTURE];
     ObjectBaseRef<ProgramFragment> mDefault;

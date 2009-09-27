@@ -24,9 +24,11 @@ using namespace android;
 using namespace android::renderscript;
 
 
-ProgramFragment::ProgramFragment(Element *in, Element *out, bool pointSpriteEnable) :
-    Program(in, out)
+ProgramFragment::ProgramFragment(Context *rsc, Element *in, Element *out, bool pointSpriteEnable) :
+    Program(rsc, in, out)
 {
+    mAllocFile = __FILE__;
+    mAllocLine = __LINE__;
     for (uint32_t ct=0; ct < MAX_TEXTURE; ct++) {
         mEnvModes[ct] = RS_TEX_ENV_MODE_REPLACE;
         mTextureDimensions[ct] = 2;
@@ -186,8 +188,14 @@ ProgramFragmentState::~ProgramFragmentState()
 
 void ProgramFragmentState::init(Context *rsc, int32_t w, int32_t h)
 {
-    ProgramFragment *pf = new ProgramFragment(NULL, NULL, false);
+    ProgramFragment *pf = new ProgramFragment(rsc, NULL, NULL, false);
     mDefault.set(pf);
+}
+
+void ProgramFragmentState::deinit(Context *rsc)
+{
+    mDefault.clear();
+    mLast.clear();
 }
 
 
@@ -197,7 +205,7 @@ namespace renderscript {
 void rsi_ProgramFragmentBegin(Context * rsc, RsElement in, RsElement out, bool pointSpriteEnable)
 {
     delete rsc->mStateFragment.mPF;
-    rsc->mStateFragment.mPF = new ProgramFragment((Element *)in, (Element *)out, pointSpriteEnable);
+    rsc->mStateFragment.mPF = new ProgramFragment(rsc, (Element *)in, (Element *)out, pointSpriteEnable);
 }
 
 void rsi_ProgramFragmentBindTexture(Context *rsc, RsProgramFragment vpf, uint32_t slot, RsAllocation a)

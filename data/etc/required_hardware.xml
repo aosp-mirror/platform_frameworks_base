@@ -22,4 +22,5 @@
     <feature name="android.hardware.sensor.accelerometer" />
     <feature name="android.hardware.bluetooth" />
     <feature name="android.hardware.wifi" />
+    <feature name="android.hardware.touchscreen" />
 </permissions>

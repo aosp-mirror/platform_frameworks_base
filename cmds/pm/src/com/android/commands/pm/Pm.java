@@ -18,6 +18,7 @@ package com.android.commands.pm;
 
 import android.content.ComponentName;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.FeatureInfo;
 import android.content.pm.IPackageDeleteObserver;
 import android.content.pm.IPackageInstallObserver;
 import android.content.pm.IPackageManager;
@@ -34,6 +35,8 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 
 import java.io.File;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -42,21 +45,21 @@ import java.util.WeakHashMap;
 
 public final class Pm {
     IPackageManager mPm;
-    
+
     private WeakHashMap<String, Resources> mResourceCache
             = new WeakHashMap<String, Resources>();
-    
+
     private String[] mArgs;
     private int mNextArg;
     private String mCurArgData;
-    
-    private static final String PM_NOT_RUNNING_ERR = 
+
+    private static final String PM_NOT_RUNNING_ERR =
         "Error: Could not access the Package Manager.  Is the system running?";
-    
+
     public static void main(String[] args) {
         new Pm().run(args);
     }
-    
+
     public void run(String[] args) {
         boolean validCommand = false;
         if (args.length < 1) {
@@ -73,37 +76,37 @@ public final class Pm {
         mArgs = args;
         String op = args[0];
         mNextArg = 1;
-        
+
         if ("list".equals(op)) {
             runList();
             return;
         }
-        
+
         if ("path".equals(op)) {
             runPath();
             return;
         }
-        
+
         if ("install".equals(op)) {
             runInstall();
             return;
         }
-        
+
         if ("uninstall".equals(op)) {
             runUninstall();
             return;
         }
-        
+
         if ("enable".equals(op)) {
             runSetEnabledSetting(PackageManager.COMPONENT_ENABLED_STATE_ENABLED);
             return;
         }
-        
+
         if ("disable".equals(op)) {
             runSetEnabledSetting(PackageManager.COMPONENT_ENABLED_STATE_DISABLED);
             return;
         }
-        
+
         try {
             if (args.length == 1) {
                 if (args[0].equalsIgnoreCase("-l")) {
@@ -128,13 +131,14 @@ public final class Pm {
             }
         }
     }
-    
+
     /**
      * Execute the list sub-command.
-     * 
+     *
      * pm list [package | packages]
      * pm list permission-groups
      * pm list permissions
+     * pm list features
      * pm list instrumentation
      */
     private void runList() {
@@ -150,6 +154,8 @@ public final class Pm {
             runListPermissionGroups();
         } else if ("permissions".equals(type)) {
             runListPermissions();
+        } else if ("features".equals(type)) {
+            runListFeatures();
         } else if ("instrumentation".equals(type)) {
             runListInstrumentation();
         } else {
@@ -157,7 +163,7 @@ public final class Pm {
             showUsage();
         }
     }
-    
+
     /**
      * Lists all the installed packages.
      */
@@ -182,10 +188,10 @@ public final class Pm {
             showUsage();
             return;
         }
-        
+
         try {
             List<PackageInfo> packages = mPm.getInstalledPackages(0 /* all */);
-            
+
             int count = packages.size();
             for (int p = 0 ; p < count ; p++) {
                 PackageInfo info = packages.get(p);
@@ -201,10 +207,48 @@ public final class Pm {
             System.err.println(PM_NOT_RUNNING_ERR);
         }
     }
-    
+
+    /**
+     * Lists all of the features supported by the current device.
+     *
+     * pm list features
+     */
+    private void runListFeatures() {
+        try {
+            List<FeatureInfo> list = new ArrayList<FeatureInfo>();
+            FeatureInfo[] rawList = mPm.getSystemAvailableFeatures();
+            for (int i=0; i<rawList.length; i++) {
+                list.add(rawList[i]);
+            }
+                    
+
+            // Sort by name
+            Collections.sort(list, new Comparator<FeatureInfo>() {
+                public int compare(FeatureInfo o1, FeatureInfo o2) {
+                    if (o1.name == o2.name) return 0;
+                    if (o1.name == null) return -1;
+                    if (o2.name == null) return 1;
+                    return o1.name.compareTo(o2.name);
+                }
+            });
+
+            int count = (list != null) ? list.size() : 0;
+            for (int p = 0; p < count; p++) {
+                FeatureInfo fi = list.get(p);
+                System.out.print("feature:");
+                if (fi.name != null) System.out.println(fi.name);
+                else System.out.println("reqGlEsVersion=0x"
+                        + Integer.toHexString(fi.reqGlEsVersion));
+            }
+        } catch (RemoteException e) {
+            System.err.println(e.toString());
+            System.err.println(PM_NOT_RUNNING_ERR);
+        }
+    }
+
     /**
      * Lists all of the installed instrumentation, or all for a given package
-     * 
+     *
      * pm list instrumentation [package] [-f]
      */
     private void runListInstrumentation() {
@@ -260,14 +304,14 @@ public final class Pm {
             System.err.println(PM_NOT_RUNNING_ERR);
         }
     }
-    
+
     /**
      * Lists all the known permission groups.
      */
     private void runListPermissionGroups() {
         try {
             List<PermissionGroupInfo> pgs = mPm.getAllPermissionGroups(0);
-            
+
             int count = pgs.size();
             for (int p = 0 ; p < count ; p++) {
                 PermissionGroupInfo pgi = pgs.get(p);
@@ -279,7 +323,7 @@ public final class Pm {
             System.err.println(PM_NOT_RUNNING_ERR);
         }
     }
-    
+
     private String loadText(PackageItemInfo pii, int res, CharSequence nonLocalized) {
         if (nonLocalized != null) {
             return nonLocalized.toString();
@@ -290,7 +334,7 @@ public final class Pm {
         }
         return null;
     }
-    
+
     /**
      * Lists all the permissions in a group.
      */
@@ -321,7 +365,7 @@ public final class Pm {
                     return;
                 }
             }
-            
+
             String grp = nextOption();
             ArrayList<String> groupList = new ArrayList<String>();
             if (groups) {
@@ -334,7 +378,7 @@ public final class Pm {
             } else {
                 groupList.add(grp);
             }
-            
+
             if (dangerousOnly) {
                 System.out.println("Dangerous Permissions:");
                 System.out.println("");
@@ -365,7 +409,7 @@ public final class Pm {
             System.err.println(PM_NOT_RUNNING_ERR);
         }
     }
-    
+
     private void doListPermissions(ArrayList<String> groupList,
             boolean groups, boolean labels, boolean summary,
             int startProtectionLevel, int endProtectionLevel)
@@ -385,7 +429,7 @@ public final class Pm {
                                     pgi.nonLocalizedLabel) + ": ");
                         } else {
                             System.out.print(pgi.name + ": ");
-                            
+
                         }
                     } else {
                         System.out.println((labels ? "+ " : "")
@@ -468,13 +512,13 @@ public final class Pm {
                     }
                 }
             }
-            
+
             if (summary) {
                 System.out.println("");
             }
         }
     }
-    
+
     private void runPath() {
         String pkg = nextArg();
         if (pkg == null) {
@@ -484,7 +528,7 @@ public final class Pm {
         }
         displayPackageFilePath(pkg);
     }
-    
+
     class PackageInstallObserver extends IPackageInstallObserver.Stub {
         boolean finished;
         int result;
@@ -497,95 +541,40 @@ public final class Pm {
             }
         }
     }
-    
+
+    /**
+     * Converts a failure code into a string by using reflection to find a matching constant
+     * in PackageManager.
+     */
     private String installFailureToString(int result) {
-        String s;
-        switch (result) {
-        case PackageManager.INSTALL_FAILED_ALREADY_EXISTS:
-            s = "INSTALL_FAILED_ALREADY_EXISTS";
-            break;
-        case PackageManager.INSTALL_FAILED_INVALID_APK:
-            s = "INSTALL_FAILED_INVALID_APK";
-            break;
-        case PackageManager.INSTALL_FAILED_INVALID_URI:
-            s = "INSTALL_FAILED_INVALID_URI";
-            break;
-        case PackageManager.INSTALL_FAILED_INSUFFICIENT_STORAGE:
-            s = "INSTALL_FAILED_INSUFFICIENT_STORAGE";
-            break;
-        case PackageManager.INSTALL_FAILED_DUPLICATE_PACKAGE:
-            s = "INSTALL_FAILED_DUPLICATE_PACKAGE";
-            break;
-        case PackageManager.INSTALL_FAILED_NO_SHARED_USER:
-            s = "INSTALL_FAILED_NO_SHARED_USER";
-            break;
-        case PackageManager.INSTALL_FAILED_UPDATE_INCOMPATIBLE:
-            s = "INSTALL_FAILED_UPDATE_INCOMPATIBLE";
-            break;
-        case PackageManager.INSTALL_FAILED_SHARED_USER_INCOMPATIBLE:
-            s = "INSTALL_FAILED_SHARED_USER_INCOMPATIBLE";
-            break;
-        case PackageManager.INSTALL_FAILED_MISSING_SHARED_LIBRARY:
-            s = "INSTALL_FAILED_MISSING_SHARED_LIBRARY";
-            break;
-        case PackageManager.INSTALL_FAILED_DEXOPT:
-            s = "INSTALL_FAILED_DEXOPT";
-            break;
-        case PackageManager.INSTALL_FAILED_OLDER_SDK:
-            s = "INSTALL_FAILED_OLDER_SDK";
-            break;
-        case PackageManager.INSTALL_FAILED_CONFLICTING_PROVIDER:
-            s = "INSTALL_FAILED_CONFLICTING_PROVIDER";
-            break;
-        case PackageManager.INSTALL_FAILED_NEWER_SDK:
-            s = "INSTALL_FAILED_NEWER_SDK";
-            break;
-        case PackageManager.INSTALL_FAILED_TEST_ONLY:
-            s = "INSTALL_FAILED_TEST_ONLY";
-            break;
-        case PackageManager.INSTALL_FAILED_CPU_ABI_INCOMPATIBLE:
-            s = "INSTALL_FAILED_CPU_ABI_INCOMPATIBLE";
-            break;
-        case PackageManager.INSTALL_FAILED_MISSING_FEATURE:
-            s = "INSTALL_FAILED_MISSING_FEATURE";
-            break;
-        case PackageManager.INSTALL_PARSE_FAILED_NOT_APK:
-            s = "INSTALL_PARSE_FAILED_NOT_APK";
-            break;
-        case PackageManager.INSTALL_PARSE_FAILED_BAD_MANIFEST:
-            s = "INSTALL_PARSE_FAILED_BAD_MANIFEST";
-            break;
-        case PackageManager.INSTALL_PARSE_FAILED_UNEXPECTED_EXCEPTION:
-            s = "INSTALL_PARSE_FAILED_UNEXPECTED_EXCEPTION";
-            break;
-        case PackageManager.INSTALL_PARSE_FAILED_NO_CERTIFICATES:
-            s = "INSTALL_PARSE_FAILED_NO_CERTIFICATES";
-            break;
-        case PackageManager.INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES:
-            s = "INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES";
-            break;
-        case PackageManager.INSTALL_PARSE_FAILED_CERTIFICATE_ENCODING:
-            s = "INSTALL_PARSE_FAILED_CERTIFICATE_ENCODING";
-            break;
-        case PackageManager.INSTALL_PARSE_FAILED_BAD_PACKAGE_NAME:
-            s = "INSTALL_PARSE_FAILED_BAD_PACKAGE_NAME";
-            break;
-        case PackageManager.INSTALL_PARSE_FAILED_BAD_SHARED_USER_ID:
-            s = "INSTALL_PARSE_FAILED_BAD_SHARED_USER_ID";
-            break;
-        case PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED:
-            s = "INSTALL_PARSE_FAILED_MANIFEST_MALFORMED";
-            break;
-        case PackageManager.INSTALL_PARSE_FAILED_MANIFEST_EMPTY:
-            s = "INSTALL_PARSE_FAILED_MANIFEST_EMPTY";
-            break;
-        default:
-            s = Integer.toString(result);
-        break;
+        Field[] fields = PackageManager.class.getFields();
+        for (Field f: fields) {
+            if (f.getType() == int.class) {
+                int modifiers = f.getModifiers();
+                // only look at public final static fields.
+                if (((modifiers & Modifier.FINAL) != 0) &&
+                        ((modifiers & Modifier.PUBLIC) != 0) &&
+                        ((modifiers & Modifier.STATIC) != 0)) {
+                    String fieldName = f.getName();
+                    if (fieldName.startsWith("INSTALL_FAILED_") ||
+                            fieldName.startsWith("INSTALL_PARSE_FAILED_")) {
+                        // get the int value and compare it to result.
+                        try {
+                            if (result == f.getInt(null)) {
+                                return fieldName;
+                            }
+                        } catch (IllegalAccessException e) {
+                            // this shouldn't happen since we only look for public static fields.
+                        }
+                    }
+                }
+            }
         }
-        return s;
+
+        // couldn't find a matching constant? return the value
+        return Integer.toString(result);
     }
-    
+
     private void runInstall() {
         int installFlags = 0;
         String installerPackageName = null;
@@ -624,7 +613,7 @@ public final class Pm {
         try {
             mPm.installPackage(Uri.fromFile(new File(apkFilePath)), obs, installFlags,
                     installerPackageName);
-            
+
             synchronized (obs) {
                 while (!obs.finished) {
                     try {
@@ -645,11 +634,11 @@ public final class Pm {
             System.err.println(PM_NOT_RUNNING_ERR);
         }
     }
-    
+
     class PackageDeleteObserver extends IPackageDeleteObserver.Stub {
         boolean finished;
         boolean result;
-        
+
         public void packageDeleted(boolean succeeded) {
             synchronized (this) {
                 finished = true;
@@ -658,7 +647,7 @@ public final class Pm {
             }
         }
     }
-    
+
     private void runUninstall() {
         int unInstallFlags = 0;
 
@@ -712,7 +701,7 @@ public final class Pm {
         }
         return "unknown";
     }
-    
+
     private void runSetEnabledSetting(int state) {
         String pkg = nextArg();
         if (pkg == null) {
@@ -760,11 +749,11 @@ public final class Pm {
             System.err.println(PM_NOT_RUNNING_ERR);
         }
     }
-    
+
     private Resources getResources(PackageItemInfo pii) {
         Resources res = mResourceCache.get(pii.packageName);
         if (res != null) return res;
-        
+
         try {
             ApplicationInfo ai = mPm.getApplicationInfo(pii.packageName, 0);
             AssetManager am = new AssetManager();
@@ -778,7 +767,7 @@ public final class Pm {
             return null;
         }
     }
-    
+
     private String nextOption() {
         if (mNextArg >= mArgs.length) {
             return null;
@@ -830,7 +819,8 @@ public final class Pm {
         System.err.println("       pm list packages [-f]");
         System.err.println("       pm list permission-groups");
         System.err.println("       pm list permissions [-g] [-f] [-d] [-u] [GROUP]");
-        System.err.println("       pm list instrumentation [-f] [TARGET-PACKAGE]");        
+        System.err.println("       pm list instrumentation [-f] [TARGET-PACKAGE]");
+        System.err.println("       pm list features");
         System.err.println("       pm path PACKAGE");
         System.err.println("       pm install [-l] [-r] [-t] [-i INSTALLER_PACKAGE_NAME] PATH");
         System.err.println("       pm uninstall [-k] PACKAGE");
@@ -854,6 +844,8 @@ public final class Pm {
         System.err.println("The list instrumentation command prints all instrumentations,");
         System.err.println("or only those that target a specified package.  Options:");
         System.err.println("  -f: see their associated file.");
+        System.err.println("");
+        System.err.println("The list features command prints all features of the system.");
         System.err.println("");
         System.err.println("The path command prints the path to the .apk of a package.");
         System.err.println("");

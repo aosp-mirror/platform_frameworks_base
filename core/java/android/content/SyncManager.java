@@ -2092,6 +2092,7 @@ class SyncManager implements OnAccountsUpdatedListener {
             clickIntent.setClassName("com.android.providers.subscribedfeeds",
                     "com.android.settings.SyncActivityTooManyDeletes");
             clickIntent.putExtra("account", account);
+            clickIntent.putExtra("authority", authority);
             clickIntent.putExtra("provider", authorityName.toString());
             clickIntent.putExtra("numDeletes", numDeletes);
 

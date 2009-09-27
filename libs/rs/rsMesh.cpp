@@ -22,8 +22,10 @@ using namespace android::renderscript;
 #include <GLES/gl.h>
 #include <GLES/glext.h>
 
-Mesh::Mesh()
+Mesh::Mesh(Context *rsc) : ObjectBase(rsc)
 {
+    mAllocFile = __FILE__;
+    mAllocLine = __LINE__;
     mVerticies = NULL;
     mVerticiesCount = 0;
     mPrimitives = NULL;

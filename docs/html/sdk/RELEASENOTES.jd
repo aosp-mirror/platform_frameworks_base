@@ -54,7 +54,7 @@ current platform. </p>
 
 <p>If you're installing the Android SDK for the first time, please see
 the instructions in <a
-href="{@docRoot}sdk/1.5_r1/installing.html">Installing the SDK</a>.
+href="{@docRoot}sdk/1.6_r1/installing.html">Installing the SDK</a>.
 
 <h3>ADT Plugin for Eclipse</h3>
 
@@ -71,7 +71,7 @@ Plugin (0.9.3 or higher). </p>
 
 <p>The new version of ADT is downloadable from the usual remote update site or
 is separately downloadable as a .zip archive. For instructions on how to
-download the plugin, please see <a href="upgrading.html#UpdateAdt">Upgrading
+download the plugin, please see <a href="{@docRoot}sdk/1.6_r1/upgrading.html#UpdateAdt">Upgrading
 Your Eclipse Plugin</a>. </p>
 
 <h3>Android SDK and AVD Manager</h3>

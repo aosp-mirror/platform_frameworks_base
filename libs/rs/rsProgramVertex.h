@@ -30,7 +30,7 @@ class ProgramVertex : public Program
 public:
     const static uint32_t MAX_LIGHTS = 8;
 
-    ProgramVertex(Element *in, Element *out);
+    ProgramVertex(Context *, Element *in, Element *out);
     virtual ~ProgramVertex();
 
     virtual void setupGL(const Context *rsc, ProgramVertexState *state);
@@ -59,12 +59,13 @@ public:
     ~ProgramVertexState();
 
     void init(Context *rsc, int32_t w, int32_t h);
+    void deinit(Context *rsc);
 
     ObjectBaseRef<ProgramVertex> mDefault;
     ObjectBaseRef<ProgramVertex> mLast;
     ObjectBaseRef<Allocation> mDefaultAlloc;
 
-    RsType mAllocType;
+    ObjectBaseRef<Type> mAllocType;
 
     ProgramVertex *mPV;
 

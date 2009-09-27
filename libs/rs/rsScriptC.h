@@ -37,7 +37,7 @@ public:
     typedef int (*RunScript_t)(uint32_t launchIndex);
     typedef void (*VoidFunc_t)();
 
-    ScriptC();
+    ScriptC(Context *);
     virtual ~ScriptC();
 
     struct Program_t {
@@ -77,8 +77,8 @@ public:
 
     void clear();
     void runCompiler(Context *rsc, ScriptC *s);
-    void appendVarDefines(String8 *str);
-    void appendTypes(String8 *str);
+    void appendVarDefines(const Context *rsc, String8 *str);
+    void appendTypes(const Context *rsc, String8 *str);
 
     struct SymbolTable_t {
         const char * mName;

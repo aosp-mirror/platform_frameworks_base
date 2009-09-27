@@ -36,7 +36,7 @@ class Script : public ObjectBase
 public:
     typedef void (* InvokeFunc_t)(void);
 
-    Script();
+    Script(Context *);
     virtual ~Script();
 
 

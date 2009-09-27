@@ -28,8 +28,6 @@
 using namespace android;
 using namespace android::renderscript;
 
-bool g_logTimes = -1;
-
 pthread_key_t Context::gThreadTLSKey = 0;
 
 void Context::initEGL()
@@ -117,7 +115,7 @@ bool Context::runScript(Script *s, uint32_t launchID)
 
 bool Context::runRootScript()
 {
-    if (this->logTimes) {
+    if (props.mLogTimes) {
         timerSet(RS_TIMER_CLEAR_SWAP);
     }
     rsAssert(mRootScript->mEnviroment.mIsRoot);
@@ -140,7 +138,7 @@ bool Context::runRootScript()
         glClear(GL_COLOR_BUFFER_BIT);
     }
 
-    if (this->logTimes) {
+    if (this->props.mLogTimes) {
         timerSet(RS_TIMER_SCRIPT);
     }
     bool ret = runScript(mRootScript.get(), 0);
@@ -208,10 +206,10 @@ void Context::setupCheck()
     mVertex->setupGL(this, &mStateVertex);
 }
 
-static bool get_log_times()
+static bool getProp(const char *str)
 {
     char buf[PROPERTY_VALUE_MAX];
-    property_get("debug.rs.profile", buf, "0");
+    property_get(str, buf, "0");
     return 0 != strcmp(buf, "0");
 }
 
@@ -219,7 +217,9 @@ void * Context::threadProc(void *vrsc)
 {
      Context *rsc = static_cast<Context *>(vrsc);
 
-     rsc->logTimes = get_log_times();
+     rsc->props.mLogTimes = getProp("debug.rs.profile");
+     rsc->props.mLogScripts = getProp("debug.rs.script");
+     rsc->props.mLogObjects = getProp("debug.rs.objects");
 
      rsc->initEGL();
 
@@ -252,11 +252,11 @@ void * Context::threadProc(void *vrsc)
 
          if (mDraw) {
              mDraw = rsc->runRootScript() && !rsc->mPaused;
-             if (rsc->logTimes) {
+             if (rsc->props.mLogTimes) {
                  rsc->timerSet(RS_TIMER_CLEAR_SWAP);
              }
              eglSwapBuffers(rsc->mEGL.mDisplay, rsc->mEGL.mSurface);
-             if (rsc->logTimes) {
+             if (rsc->props.mLogTimes) {
                  rsc->timerFrame();
                  rsc->timerSet(RS_TIMER_INTERNAL);
                  rsc->timerPrint();
@@ -269,6 +269,17 @@ void * Context::threadProc(void *vrsc)
      }
 
      LOGV("RS Thread exiting");
+     rsc->mRaster.clear();
+     rsc->mFragment.clear();
+     rsc->mVertex.clear();
+     rsc->mFragmentStore.clear();
+     rsc->mRootScript.clear();
+     rsc->mStateRaster.deinit(rsc);
+     rsc->mStateVertex.deinit(rsc);
+     rsc->mStateFragment.deinit(rsc);
+     rsc->mStateFragmentStore.deinit(rsc);
+     ObjectBase::zeroAllUserRef(rsc);
+
      glClearColor(0,0,0,0);
      glClear(GL_COLOR_BUFFER_BIT);
      eglSwapBuffers(rsc->mEGL.mDisplay, rsc->mEGL.mSurface);
@@ -286,6 +297,7 @@ Context::Context(Device *dev, Surface *sur, bool useDepth)
     mExit = false;
     mUseDepth = useDepth;
     mPaused = false;
+    mObjHead = NULL;
 
     int status;
     pthread_attr_t threadAttr;

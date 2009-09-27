@@ -188,11 +188,6 @@
         </FrameLayout>
     </LinearLayout>
 
-    <View
-         android:background="@drawable/code_lock_left"
-         android:layout_width="2dip"
-         android:layout_height="fill_parent" />
-
     <!-- right side: lock pattern -->
     <com.android.internal.widget.LockPatternView android:id="@+id/lockPattern"
          android:layout_width="wrap_content"

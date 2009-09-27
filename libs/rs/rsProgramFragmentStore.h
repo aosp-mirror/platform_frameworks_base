@@ -28,7 +28,7 @@ class ProgramFragmentStoreState;
 class ProgramFragmentStore : public Program
 {
 public:
-    ProgramFragmentStore(Element *in, Element *out);
+    ProgramFragmentStore(Context *, Element *in, Element *out);
     virtual ~ProgramFragmentStore();
 
     virtual void setupGL(const Context *, ProgramFragmentStoreState *);
@@ -65,6 +65,7 @@ public:
     ProgramFragmentStoreState();
     ~ProgramFragmentStoreState();
     void init(Context *rsc, int32_t w, int32_t h);
+    void deinit(Context *rsc);
 
     ObjectBaseRef<ProgramFragmentStore> mDefault;
     ObjectBaseRef<ProgramFragmentStore> mLast;

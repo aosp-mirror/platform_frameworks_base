@@ -27,7 +27,7 @@ namespace renderscript {
 class Type : public ObjectBase
 {
 public:
-    Type();
+    Type(Context *);
     virtual ~Type();
 
     Type * createTex2D(const Element *, size_t w, size_t h, bool mip);
@@ -139,12 +139,6 @@ public:
     uint32_t mLOD;
     bool mFaces;
     ObjectBaseRef<const Element> mElement;
-
-    ObjectBaseRef<const Type> mIndexType;
-    ObjectBaseRef<const Type> mPrimitiveType;
-    ObjectBaseRef<const Type> *mVertexTypes;
-
-
 };
 
 

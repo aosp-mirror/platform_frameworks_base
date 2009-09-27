@@ -157,7 +157,8 @@ public class MobileDataStateTracker extends NetworkStateTracker {
                             // if we're not enabled but the APN Type is supported by this connection
                             // we should record the interface name if one's provided.  If the user
                             // turns on this network we will need the interfacename but won't get
-                            // a fresh connected message - TODO fix this..
+                            // a fresh connected message - TODO fix this when we get per-APN
+                            // notifications
                             if (state == Phone.DataState.CONNECTED) {
                                 if (DBG) Log.d(TAG, "replacing old mInterfaceName (" +
                                         mInterfaceName + ") with " +
@@ -186,10 +187,13 @@ public class MobileDataStateTracker extends NetworkStateTracker {
                                 if (mInterfaceName != null) {
                                     NetworkUtils.resetConnections(mInterfaceName);
                                 }
-                                if (DBG) Log.d(TAG, "clearing mInterfaceName for "+ mApnType +
-                                        " as it DISCONNECTED");
-                                mInterfaceName = null;
-                                mDefaultGatewayAddr = 0;
+                                // can't do this here - ConnectivityService needs it to clear stuff
+                                // it's ok though - just leave it to be refreshed next time
+                                // we connect.
+                                //if (DBG) Log.d(TAG, "clearing mInterfaceName for "+ mApnType +
+                                //        " as it DISCONNECTED");
+                                //mInterfaceName = null;
+                                //mDefaultGatewayAddr = 0;
                                 break;
                             case CONNECTING:
                                 setDetailedState(DetailedState.CONNECTING, reason, apnName);
@@ -310,6 +314,11 @@ public class MobileDataStateTracker extends NetworkStateTracker {
      */
     @Override
     public boolean teardown() {
+        // since we won't get a notification currently (TODO - per APN notifications)
+        // we won't get a disconnect message until all APN's on the current connection's
+        // APN list are disabled.  That means privateRoutes for DNS and such will remain on -
+        // not a problem since that's all shared with whatever other APN is still on, but
+        // ugly.
         setTeardownRequested(true);
         return (setEnableApn(mApnType, false) != Phone.APN_REQUEST_FAILED);
     }
@@ -321,6 +330,7 @@ public class MobileDataStateTracker extends NetworkStateTracker {
         setTeardownRequested(false);
         switch (setEnableApn(mApnType, true)) {
             case Phone.APN_ALREADY_ACTIVE:
+                // TODO - remove this when we get per-apn notifications
                 mEnabled = true;
                 // need to set self to CONNECTING so the below message is handled.
                 mMobileDataState = Phone.DataState.CONNECTING;

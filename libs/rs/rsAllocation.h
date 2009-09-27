@@ -33,7 +33,7 @@ class Allocation : public ObjectBase
 public:
     // By policy this allocation will hold a pointer to the type
     // but will not destroy it on destruction.
-    Allocation(const Type *);
+    Allocation(Context *rsc, const Type *);
     virtual ~Allocation();
 
     void setCpuWritable(bool);

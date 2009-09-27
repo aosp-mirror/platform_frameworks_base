@@ -19,8 +19,10 @@
 using namespace android;
 using namespace android::renderscript;
 
-Script::Script()
+Script::Script(Context *rsc) : ObjectBase(rsc)
 {
+    mAllocFile = __FILE__;
+    mAllocLine = __LINE__;
     memset(&mEnviroment, 0, sizeof(mEnviroment));
     mEnviroment.mClearColor[0] = 0;
     mEnviroment.mClearColor[1] = 0;

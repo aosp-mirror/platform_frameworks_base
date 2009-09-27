@@ -22,8 +22,10 @@ using namespace android;
 using namespace android::renderscript;
 
 
-Light::Light(bool isLocal, bool isMono)
+Light::Light(Context *rsc, bool isLocal, bool isMono) : ObjectBase(rsc)
 {
+    mAllocFile = __FILE__;
+    mAllocLine = __LINE__;
     mIsLocal = isLocal;
     mIsMono = isMono;
 
@@ -104,7 +106,7 @@ void rsi_LightSetMonochromatic(Context *rsc, bool isMono)
 
 RsLight rsi_LightCreate(Context *rsc)
 {
-    Light *l = new Light(rsc->mStateLight.mIsLocal,
+    Light *l = new Light(rsc, rsc->mStateLight.mIsLocal,
                          rsc->mStateLight.mIsMono);
     l->incUserRef();
     return l;

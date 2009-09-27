@@ -219,6 +219,10 @@ public class RenderScript {
         mDev = 0;
     }
 
+    boolean isAlive() {
+        return mContext != 0;
+    }
+
     void pause() {
         nContextPause();
     }

@@ -20,8 +20,10 @@
 using namespace android;
 using namespace android::renderscript;
 
-Type::Type()
+Type::Type(Context *rsc) : ObjectBase(rsc)
 {
+    mAllocFile = __FILE__;
+    mAllocLine = __LINE__;
     mLODs = 0;
     mLODCount = 0;
     memset(&mGL, 0, sizeof(mGL));
@@ -363,7 +365,7 @@ RsType rsi_TypeCreate(Context *rsc)
 {
     TypeState * stc = &rsc->mStateType;
 
-    Type * st = new Type();
+    Type * st = new Type(rsc);
     st->incUserRef();
     st->setDimX(stc->mX);
     st->setDimY(stc->mY);
@@ -372,6 +374,7 @@ RsType rsi_TypeCreate(Context *rsc)
     st->setDimLOD(stc->mLOD);
     st->setDimFaces(stc->mFaces);
     st->compute();
+    stc->mElement.clear();
 
     return st;
 }

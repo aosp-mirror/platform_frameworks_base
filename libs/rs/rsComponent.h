@@ -44,7 +44,7 @@ public:
     };
 
 
-    Component(DataKind dk, DataType dt, bool isNorm, uint32_t bits, const char *);
+    Component(Context *rsc, DataKind dk, DataType dt, bool isNorm, uint32_t bits, const char *);
     virtual ~Component();
 
     DataType getType() const {return mType;}
@@ -66,7 +66,7 @@ protected:
     String8 mName;
 
 private:
-    Component();
+    Component(Context *rsc);
 };
 
 

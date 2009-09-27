@@ -131,6 +131,12 @@ const void * LocklessCommandFifo::get(uint32_t *command, uint32_t *bytesData)
             mSignalToWorker.wait();
         }
 
+        if (mInShutdown) {
+            *command = 0;
+            *bytesData = 0;
+            return 0;
+        }
+
         *command = reinterpret_cast<const uint16_t *>(mGet)[0];
         *bytesData = reinterpret_cast<const uint16_t *>(mGet)[1];
         if (*command) {

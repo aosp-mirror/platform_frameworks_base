@@ -2951,8 +2951,8 @@ public final class ActivityThread {
 
             // The window is now visible if it has been added, we are not
             // simply finishing, and we are not starting another activity.
-            if (!r.activity.mFinished && r.activity.mDecor != null
-                    && !r.hideForNow) {
+            if (!r.activity.mFinished && !a.mStartedActivity
+                    && r.activity.mDecor != null && !r.hideForNow) {
                 if (r.newConfig != null) {
                     performConfigurationChanged(r.activity, r.newConfig);
                     r.newConfig = null;
@@ -2966,9 +2966,11 @@ public final class ActivityThread {
                     l.softInputMode = (l.softInputMode
                             & (~WindowManager.LayoutParams.SOFT_INPUT_IS_FORWARD_NAVIGATION))
                             | forwardBit;
-                    ViewManager wm = a.getWindowManager();
-                    View decor = r.window.getDecorView();
-                    wm.updateViewLayout(decor, l);
+                    if (r.activity.mVisibleFromClient) {
+                        ViewManager wm = a.getWindowManager();
+                        View decor = r.window.getDecorView();
+                        wm.updateViewLayout(decor, l);
+                    }
                 }
                 r.activity.mVisibleFromServer = true;
                 mNumVisibleActivities++;

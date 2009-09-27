@@ -29,7 +29,7 @@ namespace renderscript {
 class Program : public ObjectBase
 {
 public:
-    Program(Element *in, Element *out);
+    Program(Context *, Element *in, Element *out);
     virtual ~Program();
 
     void bindAllocation(Allocation *);

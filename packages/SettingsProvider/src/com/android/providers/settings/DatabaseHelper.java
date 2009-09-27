@@ -71,7 +71,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // database gets upgraded properly. At a minimum, please confirm that 'upgradeVersion'
     // is properly propagated through your change.  Not doing so will result in a loss of user
     // settings.
-    private static final int DATABASE_VERSION = 41;
+    private static final int DATABASE_VERSION = 42;
 
     private Context mContext;
 
@@ -502,6 +502,25 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             upgradeVersion = 41;
         }
 
+        if (upgradeVersion == 41) {
+            /*
+             * Initialize newly public haptic feedback setting
+             */
+            db.beginTransaction();
+            try {
+                db.execSQL("DELETE FROM system WHERE name='"
+                        + Settings.System.HAPTIC_FEEDBACK_ENABLED + "'");
+                SQLiteStatement stmt = db.compileStatement("INSERT INTO system(name,value)"
+                        + " VALUES(?,?);");
+                loadDefaultHapticSettings(stmt);
+                stmt.close();
+                db.setTransactionSuccessful();
+            } finally {
+                db.endTransaction();
+            }
+            upgradeVersion = 42;
+        }
+
         if (upgradeVersion != currentVersion) {
             Log.w(TAG, "Got stuck trying to upgrade from version " + upgradeVersion
                     + ", must wipe the settings provider");
@@ -746,6 +765,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         loadBooleanSetting(stmt, Settings.System.ACCELEROMETER_ROTATION,
                 R.bool.def_accelerometer_rotation);
 
+        loadDefaultHapticSettings(stmt);
+
         stmt.close();
     }
 
@@ -754,6 +775,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 R.fraction.def_window_animation_scale, 1);
         loadFractionSetting(stmt, Settings.System.TRANSITION_ANIMATION_SCALE,
                 R.fraction.def_window_transition_scale, 1);
+    }
+
+    private void loadDefaultHapticSettings(SQLiteStatement stmt) {
+        loadBooleanSetting(stmt, Settings.System.HAPTIC_FEEDBACK_ENABLED,
+                R.bool.def_haptic_feedback);
     }
 
     private void loadSecureSettings(SQLiteDatabase db) {

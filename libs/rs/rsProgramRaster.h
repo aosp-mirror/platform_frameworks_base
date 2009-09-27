@@ -28,7 +28,8 @@ class ProgramRasterState;
 class ProgramRaster : public Program
 {
 public:
-    ProgramRaster(Element *in,
+    ProgramRaster(Context *rsc,
+                  Element *in,
                   Element *out,
                   bool pointSmooth,
                   bool lineSmooth,
@@ -57,6 +58,7 @@ public:
     ProgramRasterState();
     ~ProgramRasterState();
     void init(Context *rsc, int32_t w, int32_t h);
+    void deinit(Context *rsc);
 
     ObjectBaseRef<ProgramRaster> mDefault;
     ObjectBaseRef<ProgramRaster> mLast;
