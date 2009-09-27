@@ -29,9 +29,9 @@ import android.provider.CallLog.Calls;
 import android.provider.ContactsContract.Contacts;
 import android.provider.ContactsContract.Data;
 import android.provider.ContactsContract.RawContacts;
+import android.provider.ContactsContract.CommonDataKinds.Birthday;
 import android.provider.ContactsContract.CommonDataKinds.Email;
 import android.provider.ContactsContract.CommonDataKinds.Im;
-import android.provider.ContactsContract.CommonDataKinds.Birthday;
 import android.provider.ContactsContract.CommonDataKinds.Nickname;
 import android.provider.ContactsContract.CommonDataKinds.Note;
 import android.provider.ContactsContract.CommonDataKinds.Organization;
@@ -40,9 +40,6 @@ import android.provider.ContactsContract.CommonDataKinds.Photo;
 import android.provider.ContactsContract.CommonDataKinds.StructuredName;
 import android.provider.ContactsContract.CommonDataKinds.StructuredPostal;
 import android.provider.ContactsContract.CommonDataKinds.Website;
-import android.provider.CallLog.Calls;
-import android.provider.CallLog;
-import android.text.format.Time;
 import android.text.TextUtils;
 import android.text.format.Time;
 import android.util.CharsetUtils;
@@ -85,6 +82,17 @@ public class VCardComposer {
     private static final String LOG_TAG = "vcard.VCardComposer";
 
     private final static String DEFAULT_EMAIL_TYPE = Constants.ATTR_TYPE_INTERNET;
+
+    public static final String FAILURE_REASON_FAILED_TO_GET_DATABASE_INFO =
+        "Failed to get database information";
+
+    public static final String FAILURE_REASON_NO_ENTRY =
+        "There's no exportable in the database";
+
+    public static final String FAILURE_REASON_NOT_INITIALIZED =
+        "The vCard composer object is not correctly initialized";
+
+    public static final String NO_ERROR = "No error";
 
     public static interface OneEntryHandler {
         public boolean onInit(Context context);
@@ -276,7 +284,7 @@ public class VCardComposer {
     private boolean mTerminateIsCalled;
     private List<OneEntryHandler> mHandlerList;
 
-    private String mErrorReason = "No error";
+    private String mErrorReason = NO_ERROR;
 
     private static final Map<Integer, String> sImMap;
 
@@ -293,12 +301,12 @@ public class VCardComposer {
 
     private boolean mIsCallLogComposer = false;
 
-    private static final String[] CONTACTS_PROJECTION = new String[] {
-        Contacts._ID,
+    private static final String[] sRawContactsProjection = new String[] {
+        RawContacts._ID,
     };
 
     /** The projection to use when querying the call log table */
-    private static final String[] CALL_LOG_PROJECTION = new String[] {
+    private static final String[] sCallLogProjection = new String[] {
             Calls.NUMBER, Calls.DATE, Calls.TYPE, Calls.CACHED_NAME, Calls.CACHED_NUMBER_TYPE,
             Calls.CACHED_NUMBER_LABEL
     };
@@ -312,17 +320,23 @@ public class VCardComposer {
     private static final String FLAG_TIMEZONE_UTC = "Z";
 
     public VCardComposer(Context context) {
-        this(context, VCardConfig.VCARD_TYPE_DEFAULT, true);
+        this(context, VCardConfig.VCARD_TYPE_DEFAULT, true, false);
     }
 
     public VCardComposer(Context context, String vcardTypeStr,
             boolean careHandlerErrors) {
         this(context, VCardConfig.getVCardTypeFromString(vcardTypeStr),
-                careHandlerErrors);
+                careHandlerErrors, false);
+    }
+
+    public VCardComposer(Context context, int vcardType, boolean careHandlerErrors) {
+        this(context, vcardType, careHandlerErrors, false);
     }
 
     /**
-     * Construct for supporting call log entry vCard composing
+     * Construct for supporting call log entry vCard composing.
+     *
+     * @param isCallLogComposer true if this composer is for creating Call Log vCard.
      */
     public VCardComposer(Context context, int vcardType, boolean careHandlerErrors,
             boolean isCallLogComposer) {
@@ -357,10 +371,6 @@ public class VCardComposer {
             mCharsetString = "UTF-8";
             mVCardAttributeCharset = "CHARSET=UTF-8";
         }
-    }
-
-    public VCardComposer(Context context, int vcardType, boolean careHandlerErrors) {
-        this(context, vcardType, careHandlerErrors, false);
     }
 
     /**
@@ -429,25 +439,27 @@ public class VCardComposer {
         }
 
         if (mIsCallLogComposer) {
-            mCursor = mContentResolver.query(CallLog.Calls.CONTENT_URI, CALL_LOG_PROJECTION,
+            mCursor = mContentResolver.query(CallLog.Calls.CONTENT_URI, sCallLogProjection,
                     selection, selectionArgs, null);
         } else {
-            // TODO: thorow an appropriate exception!
-            mCursor = mContentResolver.query(RawContacts.CONTENT_URI, CONTACTS_PROJECTION,
+            mCursor = mContentResolver.query(RawContacts.CONTENT_URI, sRawContactsProjection,
                     selection, selectionArgs, null);
         }
 
-        if (mCursor == null || !mCursor.moveToFirst()) {
-            if (mCursor != null) {
-                try {
-                    mCursor.close();
-                } catch (SQLiteException e) {
-                    Log.e(LOG_TAG, "SQLiteException on Cursor#close(): "
-                            + e.getMessage());
-                }
+        if (mCursor == null) {
+            mErrorReason = FAILURE_REASON_FAILED_TO_GET_DATABASE_INFO;
+            return false;
+        }
+
+        if (mCursor.getCount() == 0 || !mCursor.moveToFirst()) {
+            try {
+                mCursor.close();
+            } catch (SQLiteException e) {
+                Log.e(LOG_TAG, "SQLiteException on Cursor#close(): " + e.getMessage());
+            } finally {
                 mCursor = null;
+                mErrorReason = FAILURE_REASON_NO_ENTRY;
             }
-            mErrorReason = "Getting database information failed.";
             return false;
         }
 
@@ -462,8 +474,7 @@ public class VCardComposer {
 
     public boolean createOneEntry() {
         if (mCursor == null || mCursor.isAfterLast()) {
-            // TODO: ditto
-            mErrorReason = "Not initialized or database has some problem.";
+            mErrorReason = FAILURE_REASON_NOT_INITIALIZED;
             return false;
         }
         String name = null;
