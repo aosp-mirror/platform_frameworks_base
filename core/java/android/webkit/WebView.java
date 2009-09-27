@@ -356,7 +356,10 @@ public class WebView extends AbsoluteLayout
     // Whether to prevent drag during touch. The initial value depends on
     // mForwardTouchEvents. If WebCore wants touch events, we assume it will
     // take control of touch events unless it says no for touch down event.
-    private boolean mPreventDrag;
+    private static final int PREVENT_DRAG_NO = 0;
+    private static final int PREVENT_DRAG_MAYBE_YES = 1;
+    private static final int PREVENT_DRAG_YES = 2;
+    private int mPreventDrag = PREVENT_DRAG_NO;
 
     // To keep track of whether the current drag was initiated by a WebTextView,
     // so that we know not to hide the cursor
@@ -3710,7 +3713,8 @@ public class WebView extends AbsoluteLayout
                     }
                 } else {
                     mTouchMode = TOUCH_INIT_MODE;
-                    mPreventDrag = mForwardTouchEvents;
+                    mPreventDrag = mForwardTouchEvents ? PREVENT_DRAG_MAYBE_YES
+                            : PREVENT_DRAG_NO;
                     mWebViewCore.sendMessage(
                             EventHub.UPDATE_FRAME_CACHE_IF_LOADING);
                     if (mLogEvent && eventTime - mLastTouchUpTime < 1000) {
@@ -3751,11 +3755,15 @@ public class WebView extends AbsoluteLayout
                         invalidate();
                         break;
                     }
-                    if (mPreventDrag || (deltaX * deltaX + deltaY * deltaY)
-                            < mTouchSlopSquare) {
+                    if ((deltaX * deltaX + deltaY * deltaY) < mTouchSlopSquare) {
                         break;
                     }
-
+                    if (mPreventDrag == PREVENT_DRAG_MAYBE_YES) {
+                        // track mLastTouchTime as we may need to do fling at
+                        // ACTION_UP
+                        mLastTouchTime = eventTime;
+                        break;
+                    }
                     if (mTouchMode == TOUCH_SHORTPRESS_MODE
                             || mTouchMode == TOUCH_SHORTPRESS_START_MODE) {
                         mPrivateHandler.removeMessages(SWITCH_TO_LONGPRESS);
@@ -3884,15 +3892,6 @@ public class WebView extends AbsoluteLayout
                         mTouchMode = TOUCH_DONE_MODE;
                         doDoubleTap();
                         break;
-                    case TOUCH_INIT_MODE: // tap
-                        mPrivateHandler.removeMessages(SWITCH_TO_SHORTPRESS);
-                        if (!mPreventDrag) {
-                            mPrivateHandler.sendMessageDelayed(
-                                    mPrivateHandler.obtainMessage(
-                                    RELEASE_SINGLE_TAP),
-                                    ViewConfiguration.getDoubleTapTimeout());
-                        }
-                        break;
                     case TOUCH_SHORTPRESS_START_MODE:
                     case TOUCH_SHORTPRESS_MODE:
                         mPrivateHandler.removeMessages(SWITCH_TO_SHORTPRESS);
@@ -3904,6 +3903,34 @@ public class WebView extends AbsoluteLayout
                         commitCopy();
                         mTouchSelection = false;
                         break;
+                    case TOUCH_INIT_MODE: // tap
+                        mPrivateHandler.removeMessages(SWITCH_TO_SHORTPRESS);
+                        if ((deltaX * deltaX + deltaY * deltaY) > mTouchSlopSquare) {
+                            Log.w(LOGTAG, "Miss a drag as we are waiting for" +
+                                    " WebCore's response for touch down.");
+                            if (computeHorizontalScrollExtent() < computeHorizontalScrollRange()
+                                    || computeVerticalScrollExtent() < computeVerticalScrollRange()) {
+                                // we will not rewrite drag code here, but we
+                                // will try fling if it applies.
+                                WebViewCore.pauseUpdate(mWebViewCore);
+                                // fall through to TOUCH_DRAG_MODE
+                            } else {
+                                break;
+                            }
+                        } else {
+                            if (mPreventDrag == PREVENT_DRAG_MAYBE_YES) {
+                                // if mPreventDrag is not confirmed, treat it as
+                                // no so that it won't block tap or double tap.
+                                mPreventDrag = PREVENT_DRAG_NO;
+                            }
+                            if (mPreventDrag == PREVENT_DRAG_NO) {
+                                mPrivateHandler.sendMessageDelayed(
+                                        mPrivateHandler.obtainMessage(
+                                        RELEASE_SINGLE_TAP),
+                                        ViewConfiguration.getDoubleTapTimeout());
+                            }
+                            break;
+                        }
                     case TOUCH_DRAG_MODE:
                         // redraw in high-quality, as we're done dragging
                         invalidate();
@@ -4821,6 +4848,11 @@ public class WebView extends AbsoluteLayout
                     break;
                 }
                 case SWITCH_TO_SHORTPRESS: {
+                    // if mPreventDrag is not confirmed, treat it as no so that
+                    // it won't block panning the page.
+                    if (mPreventDrag == PREVENT_DRAG_MAYBE_YES) {
+                        mPreventDrag = PREVENT_DRAG_NO;
+                    }
                     if (mTouchMode == TOUCH_INIT_MODE) {
                         mTouchMode = TOUCH_SHORTPRESS_START_MODE;
                         updateSelection();
@@ -4830,7 +4862,7 @@ public class WebView extends AbsoluteLayout
                     break;
                 }
                 case SWITCH_TO_LONGPRESS: {
-                    if (!mPreventDrag) {
+                    if (mPreventDrag == PREVENT_DRAG_NO) {
                         mTouchMode = TOUCH_DONE_MODE;
                         performLongClick();
                         rebuildWebTextView();
@@ -4838,7 +4870,7 @@ public class WebView extends AbsoluteLayout
                     break;
                 }
                 case RELEASE_SINGLE_TAP: {
-                    if (!mPreventDrag) {
+                    if (mPreventDrag == PREVENT_DRAG_NO) {
                         mTouchMode = TOUCH_DONE_MODE;
                         doShortPress();
                     }
@@ -5064,9 +5096,14 @@ public class WebView extends AbsoluteLayout
 
                 case PREVENT_TOUCH_ID:
                     if (msg.arg1 == MotionEvent.ACTION_DOWN) {
-                        mPreventDrag = msg.arg2 == 1;
-                        if (mPreventDrag) {
-                            mTouchMode = TOUCH_DONE_MODE;
+                        // dont override if mPreventDrag has been set to no due
+                        // to time out
+                        if (mPreventDrag == PREVENT_DRAG_MAYBE_YES) {
+                            mPreventDrag = msg.arg2 == 1 ? PREVENT_DRAG_YES
+                                    : PREVENT_DRAG_NO;
+                            if (mPreventDrag == PREVENT_DRAG_YES) {
+                                mTouchMode = TOUCH_DONE_MODE;
+                            }
                         }
                     }
                     break;
