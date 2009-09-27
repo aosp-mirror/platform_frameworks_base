@@ -246,8 +246,7 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
     @Override
     protected boolean isApnTypeActive(String type) {
         return (isApnTypeAvailable(type) &&
-                mCdmaPhone.mSST.getCurrentCdmaDataConnectionState() ==
-                ServiceState.STATE_IN_SERVICE);
+                (state == State.CONNECTED || state == State.INITING));
     }
 
     @Override
@@ -261,8 +260,7 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
     }
 
     protected String[] getActiveApnTypes() {
-        if (mCdmaPhone.mSST.getCurrentCdmaDataConnectionState() ==
-                ServiceState.STATE_IN_SERVICE) {
+        if (state == State.CONNECTED || state == State.INITING) {
             return mSupportedApnTypes.clone();
         }
         return new String[0];
@@ -623,6 +621,15 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
             cleanUpConnection(false, null);
         }
         sendMessage(obtainMessage(EVENT_TRY_SETUP_DATA));
+    }
+
+    /**
+     * @override com.android.intenral.telephony.DataConnectionTracker
+     */
+    @Override
+    protected void onEnableNewApn() {
+        // for cdma we only use this when default data is enabled..
+        onTrySetupData(Phone.REASON_DATA_ENABLED);
     }
 
     /**
