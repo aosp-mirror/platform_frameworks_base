@@ -254,13 +254,13 @@ public class TelephonyManager {
      * (@link android.Manifest.permission#ACCESS_COARSE_UPDATES}
      */
     public List<NeighboringCellInfo> getNeighboringCellInfo() {
-       try {
-           return getITelephony().getNeighboringCellInfo();
-       } catch (RemoteException ex) {
-           return null;
-       } catch (NullPointerException ex) {
-           return null;
-       }
+        try {
+            return getITelephony().getNeighboringCellInfo();
+        } catch (RemoteException ex) {
+            return null;
+        } catch (NullPointerException ex) {
+            return null;
+        }
     }
 
     /** No phone radio. */

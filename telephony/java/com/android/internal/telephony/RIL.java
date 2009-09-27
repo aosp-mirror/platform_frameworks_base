@@ -17,6 +17,14 @@
 package com.android.internal.telephony;
 
 import static com.android.internal.telephony.RILConstants.*;
+import static android.telephony.TelephonyManager.NETWORK_TYPE_UNKNOWN;
+import static android.telephony.TelephonyManager.NETWORK_TYPE_EDGE;
+import static android.telephony.TelephonyManager.NETWORK_TYPE_GPRS;
+import static android.telephony.TelephonyManager.NETWORK_TYPE_UMTS;
+import static android.telephony.TelephonyManager.NETWORK_TYPE_HSDPA;
+import static android.telephony.TelephonyManager.NETWORK_TYPE_HSUPA;
+import static android.telephony.TelephonyManager.NETWORK_TYPE_HSPA;
+
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -30,6 +38,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.Parcel;
 import android.os.PowerManager;
+import android.os.SystemProperties;
 import android.os.PowerManager.WakeLock;
 import android.telephony.NeighboringCellInfo;
 import android.telephony.PhoneNumberUtils;
@@ -2876,21 +2885,44 @@ public final class RIL extends BaseCommands implements CommandsInterface {
 
    private Object
    responseCellList(Parcel p) {
-       int num;
+       int num, rssi;
+       String location;
        ArrayList<NeighboringCellInfo> response;
        NeighboringCellInfo cell;
 
        num = p.readInt();
-       response = new ArrayList<NeighboringCellInfo>(num);
+       response = new ArrayList<NeighboringCellInfo>();
 
-       for (int i = 0 ; i < num ; i++) {
-           int rssi = p.readInt();
-           int cid = Integer.valueOf(p.readString(), 16);
-           cell = new NeighboringCellInfo(rssi, cid);
-           response.add(cell);
+       // Determine the radio access type
+       String radioString = SystemProperties.get(
+               TelephonyProperties.PROPERTY_DATA_NETWORK_TYPE, "unknown");
+       int radioType;
+       if (radioString.equals("GPRS")) {
+           radioType = NETWORK_TYPE_GPRS;
+       } else if (radioString.equals("EDGE")) {
+           radioType = NETWORK_TYPE_EDGE;
+       } else if (radioString.equals("UMTS")) {
+           radioType = NETWORK_TYPE_UMTS;
+       } else if (radioString.equals("HSDPA")) {
+           radioType = NETWORK_TYPE_HSDPA;
+       } else if (radioString.equals("HSUPA")) {
+           radioType = NETWORK_TYPE_HSUPA;
+       } else if (radioString.equals("HSPA")) {
+           radioType = NETWORK_TYPE_HSPA;
+       } else {
+           radioType = NETWORK_TYPE_UNKNOWN;
        }
 
-    return response;
+       // Interpret the location based on radio access type
+       if (radioType != NETWORK_TYPE_UNKNOWN) {
+           for (int i = 0 ; i < num ; i++) {
+               rssi = p.readInt();
+               location = p.readString();
+               cell = new NeighboringCellInfo(rssi, location, radioType);
+               response.add(cell);
+           }
+       }
+       return response;
     }
 
     private Object responseGmsBroadcastConfig(Parcel p) {
