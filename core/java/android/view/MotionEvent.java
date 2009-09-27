@@ -1104,13 +1104,13 @@ public final class MotionEvent implements Parcelable {
         final int NS = mNumSamples;
         final int NI = NP*NS;
         final int ND = NI * NUM_SAMPLE_DATA;
-        if (data.length <= ND) {
+        if (data.length < (ND+(NP*NUM_SAMPLE_DATA))) {
             final int NEW_ND = ND + (NP * (BASE_AVAIL_SAMPLES * NUM_SAMPLE_DATA));
             float[] newData = new float[NEW_ND];
             System.arraycopy(data, 0, newData, 0, ND);
             mDataSamples = data = newData;
         }
-        if (times.length <= NS) {
+        if (times.length < (NS+1)) {
             final int NEW_NS = NS + BASE_AVAIL_SAMPLES;
             long[] newHistoryTimes = new long[NEW_NS];
             System.arraycopy(times, 0, newHistoryTimes, 0, NS);
