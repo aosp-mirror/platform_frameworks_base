@@ -22,6 +22,8 @@ using namespace android::renderscript;
 
 Type::Type(Context *rsc) : ObjectBase(rsc)
 {
+    mAllocFile = __FILE__;
+    mAllocLine = __LINE__;
     mLODs = 0;
     mLODCount = 0;
     memset(&mGL, 0, sizeof(mGL));

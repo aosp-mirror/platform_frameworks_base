@@ -27,6 +27,8 @@ using namespace android::renderscript;
 
 Sampler::Sampler(Context *rsc) : ObjectBase(rsc)
 {
+    mAllocFile = __FILE__;
+    mAllocLine = __LINE__;
     // Should not get called.
     rsAssert(0);
 }
@@ -38,6 +40,8 @@ Sampler::Sampler(Context *rsc,
                  RsSamplerValue wrapT,
                  RsSamplerValue wrapR) : ObjectBase(rsc)
 {
+    mAllocFile = __FILE__;
+    mAllocLine = __LINE__;
     mMagFilter = magFilter;
     mMinFilter = minFilter;
     mWrapS = wrapS;

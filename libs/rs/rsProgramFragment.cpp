@@ -27,6 +27,8 @@ using namespace android::renderscript;
 ProgramFragment::ProgramFragment(Context *rsc, Element *in, Element *out, bool pointSpriteEnable) :
     Program(rsc, in, out)
 {
+    mAllocFile = __FILE__;
+    mAllocLine = __LINE__;
     for (uint32_t ct=0; ct < MAX_TEXTURE; ct++) {
         mEnvModes[ct] = RS_TEX_ENV_MODE_REPLACE;
         mTextureDimensions[ct] = 2;
@@ -188,6 +190,12 @@ void ProgramFragmentState::init(Context *rsc, int32_t w, int32_t h)
 {
     ProgramFragment *pf = new ProgramFragment(rsc, NULL, NULL, false);
     mDefault.set(pf);
+}
+
+void ProgramFragmentState::deinit(Context *rsc)
+{
+    mDefault.clear();
+    mLast.clear();
 }
 
 

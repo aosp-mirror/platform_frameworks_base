@@ -24,12 +24,16 @@ using namespace android::renderscript;
 
 Element::Element(Context *rsc) : ObjectBase(rsc)
 {
+    mAllocFile = __FILE__;
+    mAllocLine = __LINE__;
     mComponents = NULL;
     mComponentCount = 0;
 }
 
 Element::Element(Context *rsc, uint32_t count) : ObjectBase(rsc)
 {
+    mAllocFile = __FILE__;
+    mAllocLine = __LINE__;
     mComponents = new ObjectBaseRef<Component> [count];
     mComponentCount = count;
 }

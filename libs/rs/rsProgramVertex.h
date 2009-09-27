@@ -59,12 +59,13 @@ public:
     ~ProgramVertexState();
 
     void init(Context *rsc, int32_t w, int32_t h);
+    void deinit(Context *rsc);
 
     ObjectBaseRef<ProgramVertex> mDefault;
     ObjectBaseRef<ProgramVertex> mLast;
     ObjectBaseRef<Allocation> mDefaultAlloc;
 
-    RsType mAllocType;
+    ObjectBaseRef<Type> mAllocType;
 
     ProgramVertex *mPV;
 
