@@ -896,10 +896,19 @@ public class Im {
         String BODY = "body";
 
         /**
-         * The date this message is sent or received
+         * The date this message is sent or received. This represents the display date for
+         * the message.
          * <P>Type: INTEGER</P>
          */
         String DATE = "date";
+
+        /**
+         * The real date for this message. While 'date' can be modified by the client
+         * to account for server time skew, the real_date is the original timestamp set
+         * by the server for incoming messages.
+         * <P>Type: INTEGER</P>
+         */
+        String REAL_DATE = "real_date";
 
         /**
          * Message Type, see {@link MessageType}
