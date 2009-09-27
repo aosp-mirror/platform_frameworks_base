@@ -995,9 +995,17 @@ public abstract class PackageManager {
      * 
      * @return An array of FeatureInfo classes describing the features
      * that are available on the system, or null if there are none(!!).
-     * 
      */
     public abstract FeatureInfo[] getSystemAvailableFeatures();
+
+    /**
+     * Check whether the given feature name is one of the available
+     * features as returned by {@link #getSystemAvailableFeatures()}.
+     * 
+     * @return Returns true if the devices supports the feature, else
+     * false.
+     */
+    public abstract boolean hasSystemFeature(String name);
 
     /**
      * Determine the best action to perform for a given Intent.  This is how

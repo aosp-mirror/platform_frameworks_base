@@ -1686,6 +1686,15 @@ class ApplicationContext extends Context {
         }
         
         @Override
+        public boolean hasSystemFeature(String name) {
+            try {
+                return mPM.hasSystemFeature(name);
+            } catch (RemoteException e) {
+                throw new RuntimeException("Package manager has died", e);
+            }
+        }
+        
+        @Override
         public int checkPermission(String permName, String pkgName) {
             try {
                 return mPM.checkPermission(permName, pkgName);
