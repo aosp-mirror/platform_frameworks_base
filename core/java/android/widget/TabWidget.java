@@ -16,11 +16,15 @@
 
 package android.widget;
 
+import com.android.internal.R;
+
 import android.content.Context;
+import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
@@ -94,10 +98,24 @@ public class TabWidget extends LinearLayout implements OnFocusChangeListener {
         setOrientation(LinearLayout.HORIZONTAL);
         mGroupFlags |= FLAG_USE_CHILD_DRAWING_ORDER;
 
-        mBottomLeftStrip = mContext.getResources().getDrawable(
-                com.android.internal.R.drawable.tab_bottom_left);
-        mBottomRightStrip = mContext.getResources().getDrawable(
-                com.android.internal.R.drawable.tab_bottom_right);
+        final Context context = mContext;
+        final Resources resources = context.getResources();
+        
+        if (context.getApplicationInfo().targetSdkVersion <= Build.VERSION_CODES.DONUT) {
+            // Donut apps get old color scheme
+            mBottomLeftStrip = resources.getDrawable(
+                    com.android.internal.R.drawable.tab_bottom_left_v4);
+            mBottomRightStrip = resources.getDrawable(
+                    com.android.internal.R.drawable.tab_bottom_right_v4); 
+        } else {
+            // Use modern color scheme for Eclair and beyond
+            mBottomLeftStrip = resources.getDrawable(
+                    com.android.internal.R.drawable.tab_bottom_left);
+            mBottomRightStrip = resources.getDrawable(
+                    com.android.internal.R.drawable.tab_bottom_right); 
+        }
+
+
         // Deal with focus, as we don't want the focus to go by default
         // to a tab other than the current tab
         setFocusable(true);

@@ -146,6 +146,9 @@ public class Build {
          * <li> The {@link android.app.Activity} class will now execute back
          * key presses on the key up instead of key down, to be able to detect
          * canceled presses from virtual keys.
+         * <li> The {@link android.widget.TabWidget} class will use a new color scheme
+         * for tabs. In the new scheme, the foreground tab has a medium gray background
+         * the background tabs have a dark gray background.
          * </ul>
          */
         public static final int ECLAIR = CUR_DEVELOPMENT;
