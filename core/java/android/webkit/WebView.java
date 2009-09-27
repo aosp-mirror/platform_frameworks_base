@@ -3587,9 +3587,13 @@ public class WebView extends AbsoluteLayout
 
         // update mMinZoomScale if the minimum zoom scale is not fixed
         if (!mMinZoomScaleFixed) {
-            mMinZoomScale = (float) getViewWidth()
+            // when change from narrow screen to wide screen, the new viewWidth
+            // can be wider than the old content width. We limit the minimum
+            // scale to 1.0f. The proper minimum scale will be calculated when
+            // the new picture shows up.
+            mMinZoomScale = Math.min(1.0f, (float) getViewWidth()
                     / (mDrawHistory ? mHistoryPicture.getWidth()
-                            : mZoomOverviewWidth);
+                            : mZoomOverviewWidth));
         }
 
         // we always force, in case our height changed, in which case we still
