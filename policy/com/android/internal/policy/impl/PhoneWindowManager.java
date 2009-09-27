@@ -2184,7 +2184,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     public void keyFeedbackFromInput(KeyEvent event) {
         if (event.getAction() == KeyEvent.ACTION_DOWN
                 && (event.getFlags()&KeyEvent.FLAG_VIRTUAL_HARD_KEY) != 0) {
-            mVibrator.vibrate(mVirtualKeyVibePattern, -1);
+            if (Settings.System.getInt(mContext.getContentResolver(),
+                    Settings.System.HAPTIC_FEEDBACK_ENABLED, 0) != 0) {
+                mVibrator.vibrate(mVirtualKeyVibePattern, -1);
+            }
         }
     }
     
