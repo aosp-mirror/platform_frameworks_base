@@ -58,19 +58,21 @@ public class MediaProfileReader {
     public static void createVideoProfileTable() {
         // push all the property into one big table
         String encoderType = getVideoCodecProperty();
-        String encoder[] = encoderType.split(",");
-        for (int i = 0; i < encoder.length; i++) {
-            for (int j = 0; j < VIDEO_ENCODER_PROPERTY.length; j++) {
-                String propertyName = MEDIA_ENC_VID + encoder[i] + VIDEO_ENCODER_PROPERTY[j];
-                String prop = SystemProperties.get(propertyName);
-                //push to the table
-                String propRange[] = prop.split(",");
-                OUTPUT_FORMAT_TABLE.put((encoder[i] + VIDEO_ENCODER_PROPERTY[j] + "_low"),
-                        Integer.parseInt(propRange[0]));
-                OUTPUT_FORMAT_TABLE.put((encoder[i] + VIDEO_ENCODER_PROPERTY[j] + "_high"),
-                        Integer.parseInt(propRange[1]));
-            }
+        if (encoderType.length() != 0) {
+            String encoder[] = encoderType.split(",");
+            for (int i = 0; i < encoder.length; i++) {
+                for (int j = 0; j < VIDEO_ENCODER_PROPERTY.length; j++) {
+                    String propertyName = MEDIA_ENC_VID + encoder[i] + VIDEO_ENCODER_PROPERTY[j];
+                    String prop = SystemProperties.get(propertyName);
+                    // push to the table
+                    String propRange[] = prop.split(",");
+                    OUTPUT_FORMAT_TABLE.put((encoder[i] + VIDEO_ENCODER_PROPERTY[j] + "_low"),
+                            Integer.parseInt(propRange[0]));
+                    OUTPUT_FORMAT_TABLE.put((encoder[i] + VIDEO_ENCODER_PROPERTY[j] + "_high"),
+                            Integer.parseInt(propRange[1]));
+                }
 
+            }
         }
     }
 
@@ -78,18 +80,19 @@ public class MediaProfileReader {
         // push all the property into one big table
         String audioType = getAudioCodecProperty();
         String encoder[] = audioType.split(",");
-        for (int i = 0; i < encoder.length; i++) {
-            for (int j = 0; j < AUDIO_ENCODER_PROPERTY.length; j++) {
-                String propertyName = MEDIA_AUD_VID + encoder[i] + AUDIO_ENCODER_PROPERTY[j];
-                String prop = SystemProperties.get(propertyName);
-                //push to the table
-                String propRange[] = prop.split(",");
-                OUTPUT_FORMAT_TABLE.put((encoder[i] + AUDIO_ENCODER_PROPERTY[j] + "_low"),
-                        Integer.parseInt(propRange[0]));
-                OUTPUT_FORMAT_TABLE.put((encoder[i] + AUDIO_ENCODER_PROPERTY[j] + "_high"),
-                        Integer.parseInt(propRange[1]));
+        if (audioType.length() != 0) {
+            for (int i = 0; i < encoder.length; i++) {
+                for (int j = 0; j < AUDIO_ENCODER_PROPERTY.length; j++) {
+                    String propertyName = MEDIA_AUD_VID + encoder[i] + AUDIO_ENCODER_PROPERTY[j];
+                    String prop = SystemProperties.get(propertyName);
+                    // push to the table
+                    String propRange[] = prop.split(",");
+                    OUTPUT_FORMAT_TABLE.put((encoder[i] + AUDIO_ENCODER_PROPERTY[j] + "_low"),
+                            Integer.parseInt(propRange[0]));
+                    OUTPUT_FORMAT_TABLE.put((encoder[i] + AUDIO_ENCODER_PROPERTY[j] + "_high"),
+                            Integer.parseInt(propRange[1]));
+                }
             }
-
         }
     }
 
