@@ -368,6 +368,9 @@ public class Camera {
      * uses auto-focus with the
      * <a href="{@docRoot}guide/topics/manifest/uses-feature-element.html">&lt;uses-feature></a>
      * manifest element.</p>
+     * <p>If the current flash mode is not
+     * {@link android.hardware.Camera.Parameters#FLASH_MODE_OFF}, flash may be
+     * fired during auto-focus depending on the driver.<p>
      *
      * @param cb the callback to run
      */
@@ -637,12 +640,13 @@ public class Camera {
          */
         public static final String FLASH_MODE_OFF = "off";
         /**
-         * Flash will be fired automatically when required. The timing is
-         * decided by camera driver.
+         * Flash will be fired automatically when required. The flash may be fired
+         * during preview, auto-focus, or snapshot depending on the driver.
          */
         public static final String FLASH_MODE_AUTO = "auto";
         /**
-         * Flash will always be fired. The timing is decided by camera driver.
+         * Flash will always be fired during snapshot. The flash may also be
+         * fired during preview or auto-focus depending on the driver.
          */
         public static final String FLASH_MODE_ON = "on";
         /**
@@ -650,9 +654,10 @@ public class Camera {
          */
         public static final String FLASH_MODE_RED_EYE = "red-eye";
         /**
-         * Constant emission of light. This can be used for video recording.
+         * Constant emission of light during preview, auto-focus and snapshot.
+         * This can also be used for video recording.
          */
-        public static final String FLASH_MODE_VIDEO_LIGHT = "video-light";
+        public static final String FLASH_MODE_TORCH = "torch";
 
         // Values for scene mode settings.
         public static final String SCENE_MODE_AUTO = "auto";
