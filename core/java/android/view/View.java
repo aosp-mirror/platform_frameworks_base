@@ -59,6 +59,7 @@ import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityEventSource;
 import android.view.accessibility.AccessibilityManager;
 import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
@@ -4806,7 +4807,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
 
             // Tell mScrollCache when we should start fading. This may
             // extend the fade start time if one was already scheduled
-            long fadeStartTime = SystemClock.uptimeMillis() + startDelay;
+            long fadeStartTime = AnimationUtils.currentAnimationTimeMillis() + startDelay;
             scrollCache.fadeStartTime = fadeStartTime;
             scrollCache.state = ScrollabilityCache.ON;
 
@@ -8993,7 +8994,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
         }
         
         public void run() {
-            long now = SystemClock.uptimeMillis();
+            long now = AnimationUtils.currentAnimationTimeMillis();
             if (now >= fadeStartTime) {
 
                 // the animation fades the scrollbars out by changing
