@@ -61,9 +61,8 @@ public class MediaMetadataRetrieverTest extends AndroidTestCase {
     }
 
     // Test frame capture
-    // Suppressing until 1259652 is fixed.
-    @Suppress
-    public static void disableTestThumbnailCapture() throws Exception {
+    @LargeTest
+    public static void testThumbnailCapture() throws Exception {
         MediaMetadataRetriever retriever = new MediaMetadataRetriever();
         Log.v(TAG, "Thumbnail processing starts");
         long startedAt = System.currentTimeMillis();
