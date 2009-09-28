@@ -412,10 +412,10 @@ public final class BluetoothAdapter {
      * Set the Bluetooth scan mode of the local Bluetooth adapter.
      * <p>The Bluetooth scan mode determines if the local adapter is
      * connectable and/or discoverable from remote Bluetooth devices.
-     * <p>For privacy reasons, it is recommended to limit the duration of time
-     * that the local adapter remains in a discoverable scan mode. For example,
-     * 2 minutes is a generous time to allow a remote Bluetooth device to
-     * initiate and complete its discovery process.
+     * <p>For privacy reasons, discoverable mode is automatically turned off
+     * after <code>duration</code> seconds. For example, 120 seconds should be
+     * enough for a remote device to initiate and complete its discovery
+     * process.
      * <p>Valid scan mode values are:
      * {@link #SCAN_MODE_NONE},
      * {@link #SCAN_MODE_CONNECTABLE},
@@ -427,14 +427,21 @@ public final class BluetoothAdapter {
      * </code>instead.
      *
      * @param mode valid scan mode
+     * @param duration time in seconds to apply scan mode, only used for
+     *                 {@link #SCAN_MODE_CONNECTABLE_DISCOVERABLE}
      * @return     true if the scan mode was set, false otherwise
      * @hide
      */
-    public boolean setScanMode(int mode) {
+    public boolean setScanMode(int mode, int duration) {
         try {
-            return mService.setScanMode(mode);
+            return mService.setScanMode(mode, duration);
         } catch (RemoteException e) {Log.e(TAG, "", e);}
         return false;
+    }
+
+    /** @hide */
+    public boolean setScanMode(int mode) {
+        return setScanMode(mode, 120);
     }
 
     /** @hide */
