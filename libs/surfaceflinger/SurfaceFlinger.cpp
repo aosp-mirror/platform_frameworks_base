@@ -491,7 +491,7 @@ bool SurfaceFlinger::threadLoop()
     handlePageFlip();
 
     const DisplayHardware& hw(graphicPlane(0).displayHardware());
-    if (LIKELY(hw.canDraw())) {
+    if (LIKELY(hw.canDraw() && !isFrozen())) {
         // repaint the framebuffer (if needed)
         handleRepaint();
 
@@ -512,14 +512,6 @@ bool SurfaceFlinger::threadLoop()
 
 void SurfaceFlinger::postFramebuffer()
 {
-    if (isFrozen()) {
-        // we are not allowed to draw, but pause a bit to make sure
-        // apps don't end up using the whole CPU, if they depend on
-        // surfaceflinger for synchronization.
-        usleep(8333); // 8.3ms ~ 120fps
-        return;
-    }
-
     if (!mInvalidRegion.isEmpty()) {
         const DisplayHardware& hw(graphicPlane(0).displayHardware());
         const nsecs_t now = systemTime();
