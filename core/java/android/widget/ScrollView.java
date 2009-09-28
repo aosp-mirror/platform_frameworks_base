@@ -832,6 +832,7 @@ public class ScrollView extends FrameLayout {
         long duration = AnimationUtils.currentAnimationTimeMillis() - mLastScroll;
         if (duration > ANIMATED_SCROLL_GAP) {
             mScroller.startScroll(mScrollX, mScrollY, dx, dy);
+            awakenScrollBars(mScroller.getDuration());
             invalidate();
         } else {
             if (!mScroller.isFinished()) {
@@ -1175,6 +1176,7 @@ public class ScrollView extends FrameLayout {
                 mScrollViewMovedFocus = false;
             }
     
+            awakenScrollBars(mScroller.getDuration());
             invalidate();
         }
     }

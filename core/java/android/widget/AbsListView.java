@@ -2444,7 +2444,9 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         if (spaceAbove >= absIncrementalDeltaY && spaceBelow >= absIncrementalDeltaY) {
             hideSelector();
             offsetChildrenTopAndBottom(incrementalDeltaY);
-            invalidate();
+            if (!awakenScrollBars()) {
+                invalidate();
+            }
             mMotionViewNewTop = mMotionViewOriginalTop + deltaY;
         } else {
             final int firstPosition = mFirstPosition;
@@ -2527,6 +2529,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             mBlockLayoutRequests = false;
 
             invokeOnItemScrollListener();
+            awakenScrollBars();
         }
     }
 

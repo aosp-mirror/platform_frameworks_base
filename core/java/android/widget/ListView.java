@@ -1818,13 +1818,29 @@ public class ListView extends AbsListView {
 
     /**
      * Makes the item at the supplied position selected.
-     *
+     * 
      * @param position the position of the item to select
      */
     @Override
     void setSelectionInt(int position) {
         setNextSelectedPositionInt(position);
+        boolean awakeScrollbars = false;
+
+        final int selectedPosition = mSelectedPosition;
+
+        if (selectedPosition >= 0) {
+            if (position == selectedPosition - 1) {
+                awakeScrollbars = true;
+            } else if (position == selectedPosition + 1) {
+                awakeScrollbars = true;
+            }
+        }
+
         layoutChildren();
+
+        if (awakeScrollbars) {
+            awakenScrollBars();
+        }
     }
 
     /**
@@ -2084,7 +2100,9 @@ public class ListView extends AbsListView {
 
                 setSelectionInt(position);
                 invokeOnItemScrollListener();
-                invalidate();
+                if (!awakenScrollBars()) {
+                    invalidate();
+                }
 
                 return true;
             }
@@ -2125,7 +2143,8 @@ public class ListView extends AbsListView {
             }
         }
 
-        if (moved) {
+        if (moved && !awakenScrollBars()) {
+            awakenScrollBars();
             invalidate();
         }
 
@@ -2270,7 +2289,9 @@ public class ListView extends AbsListView {
                 positionSelector(selectedView);
                 mSelectedTop = selectedView.getTop();
             }
-            invalidate();
+            if (!awakenScrollBars()) {
+                invalidate();
+            }
             invokeOnItemScrollListener();
             return true;
         }
