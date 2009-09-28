@@ -143,7 +143,7 @@ public class RemoteViews implements Parcelable, Filter {
                                     Intent.FLAG_ACTIVITY_NEW_TASK,
                                     Intent.FLAG_ACTIVITY_NEW_TASK, 0);
                         } catch (IntentSender.SendIntentException e) {
-                            throw new ActionException(e.toString());
+                            android.util.Log.e(LOG_TAG, "Cannot send pending intent: ", e);
                         }
                     }
                 };
