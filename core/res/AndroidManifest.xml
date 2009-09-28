@@ -1123,10 +1123,11 @@
         android:protectionLevel="signature" />
 
     <!-- Allows applications to set a live wallpaper.
-         @hide -->
+         @hide XXX Change to signature once the picker is moved to its
+         own apk as Ghod Intended. -->
     <permission android:name="android.permission.SET_WALLPAPER_COMPONENT"
         android:permissionGroup="android.permission-group.SYSTEM_TOOLS"
-        android:protectionLevel="signature" />
+        android:protectionLevel="signatureOrSystem" />
 
     <application android:process="system"
                  android:persistent="true"
