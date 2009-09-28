@@ -17,6 +17,7 @@
 package com.android.server;
 
 import android.app.Activity;
+import android.app.KeyguardManager;
 import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -26,6 +27,8 @@ import android.os.Message;
 import android.os.SystemClock;
 import android.os.UEventObserver;
 import android.util.Log;
+
+import com.android.internal.widget.LockPatternUtils;
 
 import java.io.FileReader;
 import java.io.FileNotFoundException;
@@ -46,7 +49,11 @@ class DockObserver extends UEventObserver {
     private final Context mContext;
 
     private PowerManagerService mPowerManager;
-    
+
+    private KeyguardManager.KeyguardLock mKeyguardLock;
+    private boolean mKeyguardDisabled;
+    private LockPatternUtils mLockPatternUtils;
+
     // The broadcast receiver which receives the result of the ordered broadcast sent when
     // the dock state changes. The original ordered broadcast is sent with an initial result
     // code of RESULT_OK. If any of the registered broadcast receivers changes this value, e.g.,
@@ -88,6 +95,7 @@ class DockObserver extends UEventObserver {
     public DockObserver(Context context, PowerManagerService pm) {
         mContext = context;
         mPowerManager = pm;
+        mLockPatternUtils = new LockPatternUtils(context.getContentResolver());
         init();  // set initial status
         startObserving(DOCK_UEVENT_MATCH);
     }
@@ -130,6 +138,10 @@ class DockObserver extends UEventObserver {
 
     void systemReady() {
         synchronized (this) {
+            KeyguardManager keyguardManager =
+                    (KeyguardManager)mContext.getSystemService(Context.KEYGUARD_SERVICE);
+            mKeyguardLock = keyguardManager.newKeyguardLock(TAG);
+
             // don't bother broadcasting undocked here
             if (mDockState != Intent.EXTRA_DOCK_STATE_UNDOCKED) {
                 update();
@@ -142,10 +154,25 @@ class DockObserver extends UEventObserver {
         mHandler.sendEmptyMessage(0);
     }
 
+    private final void updateKeyguardLocked() {
+        if (!mLockPatternUtils.isLockPatternEnabled()) {
+            if (!mKeyguardDisabled && mDockState != Intent.EXTRA_DOCK_STATE_UNDOCKED) {
+                Log.d(TAG, "calling mKeyguardLock.disableKeyguard");
+                mKeyguardLock.disableKeyguard();
+                mKeyguardDisabled = true;
+            } else if (mKeyguardDisabled && mDockState == Intent.EXTRA_DOCK_STATE_UNDOCKED) {
+                Log.d(TAG, "calling mKeyguardLock.reenableKeyguard");
+                mKeyguardLock.reenableKeyguard();
+                mKeyguardDisabled = false;
+            }
+        }
+    }
+
     private final Handler mHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
             synchronized (this) {
+                updateKeyguardLocked();
                 Log.d(TAG, "Broadcasting dock state " + mDockState);
                 // Pack up the values and broadcast them to everyone
                 mPowerManager.userActivityWithForce(SystemClock.uptimeMillis(), false, true);
