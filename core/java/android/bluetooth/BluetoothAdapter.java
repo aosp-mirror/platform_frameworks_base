@@ -18,6 +18,7 @@ package android.bluetooth;
 
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.os.ParcelUuid;
 import android.os.RemoteException;
 import android.util.Log;
 

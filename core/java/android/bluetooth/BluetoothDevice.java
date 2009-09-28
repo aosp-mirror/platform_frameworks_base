@@ -22,6 +22,7 @@ import android.content.Context;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.ParcelUuid;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.util.Log;
@@ -228,9 +229,9 @@ public final class BluetoothDevice implements Parcelable {
 
     /**
      * Broadcast Action: This intent is used to broadcast the {@link UUID}
-     * wrapped as a {@link ParcelUuid} of the remote device after it has been
-     * fetched. This intent is sent only when the UUIDs of the remote device
-     * are requested to be fetched using Service Discovery Protocol
+     * wrapped as a {@link android.os.ParcelUuid} of the remote device after it
+     * has been fetched. This intent is sent only when the UUIDs of the remote
+     * device are requested to be fetched using Service Discovery Protocol
      * <p> Always contains the extra field {@link #EXTRA_DEVICE}
      * <p> Always contains the extra filed {@link #EXTRA_UUID}
      * <p>Requires {@link android.Manifest.permission#BLUETOOTH} to receive.
@@ -309,8 +310,8 @@ public final class BluetoothDevice implements Parcelable {
 
     /**
      * Used as an extra field in {@link #ACTION_UUID} intents,
-     * Contains the {@link ParcelUuid}s of the remote device which is a parcelable
-     * version of {@link UUID}.
+     * Contains the {@link android.os.ParcelUuid}s of the remote device which
+     * is a parcelable version of {@link UUID}.
      * @hide
      */
     public static final String EXTRA_UUID = "android.bluetooth.device.extra.UUID";
