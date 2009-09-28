@@ -4108,7 +4108,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 "getScancodeState()")) {
             throw new SecurityException("Requires READ_INPUT_STATE permission");
         }
-        return KeyInputQueue.getScancodeState(sw);
+        return mQueue.getScancodeState(sw);
     }
 
     public int getScancodeStateForDevice(int devid, int sw) {
@@ -4116,7 +4116,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 "getScancodeStateForDevice()")) {
             throw new SecurityException("Requires READ_INPUT_STATE permission");
         }
-        return KeyInputQueue.getScancodeState(devid, sw);
+        return mQueue.getScancodeState(devid, sw);
     }
 
     public int getKeycodeState(int sw) {
@@ -4124,7 +4124,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 "getKeycodeState()")) {
             throw new SecurityException("Requires READ_INPUT_STATE permission");
         }
-        return KeyInputQueue.getKeycodeState(sw);
+        return mQueue.getKeycodeState(sw);
     }
 
     public int getKeycodeStateForDevice(int devid, int sw) {
@@ -4132,7 +4132,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 "getKeycodeStateForDevice()")) {
             throw new SecurityException("Requires READ_INPUT_STATE permission");
         }
-        return KeyInputQueue.getKeycodeState(devid, sw);
+        return mQueue.getKeycodeState(devid, sw);
     }
 
     public boolean hasKeys(int[] keycodes, boolean[] keyExists) {
