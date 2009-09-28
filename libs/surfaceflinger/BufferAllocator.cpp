@@ -102,6 +102,10 @@ status_t BufferAllocator::alloc(uint32_t w, uint32_t h, PixelFormat format,
         rec.vaddr = 0;
         rec.size = h * stride[0] * bytesPerPixel(format);
         list.add(*handle, rec);
+    } else {
+        String8 s;
+        dump(s);
+        LOGD("%s", s.string());
     }
 
     return err;
