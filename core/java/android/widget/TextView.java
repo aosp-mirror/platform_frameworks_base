@@ -5572,6 +5572,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
                 if (duration > ANIMATED_SCROLL_GAP) {
                     mScroller.startScroll(mScrollX, mScrollY, dx, dy);
+                    awakenScrollBars(mScroller.getDuration());
                     invalidate();
                 } else {
                     if (!mScroller.isFinished()) {

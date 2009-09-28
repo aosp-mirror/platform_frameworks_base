@@ -1162,6 +1162,12 @@
              set, else it will be false. -->
         <attr name="isScrollContainer" format="boolean" />
 
+          <!-- Defines whether to fade out scrollbars when they are not in use. -->
+         <attr name="fadeScrollbars" format="boolean" />
+         <!-- Defines the delay in milliseconds that a scrollbar takes to fade out. -->
+         <attr name="scrollbarFadeDuration" format="integer" />
+         <!-- Defines the delay in milliseconds that a scrollbar waits before fade out. -->
+        <attr name="scrollbarDefaultDelayBeforeFade" format="integer" />
         <!-- Sets the width of vertical scrollbars and height of horizontal scrollbars. -->
         <attr name="scrollbarSize" format="dimension" />
         <!-- Defines the horizontal scrollbar thumb drawable. -->

@@ -2480,6 +2480,7 @@ public class WebView extends AbsoluteLayout
             //        Log.d(LOGTAG, "startScroll: " + dx + " " + dy);
             mScroller.startScroll(mScrollX, mScrollY, dx, dy,
                     animationDuration > 0 ? animationDuration : computeDuration(dx, dy));
+            awakenScrollBars(mScroller.getDuration());
             invalidate();
         } else {
             abortAnimation(); // just in case
@@ -4326,6 +4327,7 @@ public class WebView extends AbsoluteLayout
         // resume the webcore update.
         final int time = mScroller.getDuration();
         mPrivateHandler.sendEmptyMessageDelayed(RESUME_WEBCORE_UPDATE, time);
+        awakenScrollBars(time);
         invalidate();
     }
 

@@ -1172,7 +1172,10 @@
   <public type="attr" name="thumbnail" />
   <public type="attr" name="detachWallpaper" />
   <public type="attr" name="finishOnCloseSystemDialogs" />
-
+  <public type="attr" name="scrollbarFadeDuration" />
+  <public type="attr" name="scrollbarDefaultDelayBeforeFade" />
+  <public type="attr" name="fadeScrollbars" />
+  
   <public type="style" name="Theme.Wallpaper" />
   <public type="style" name="Theme.Wallpaper.NoTitleBar" />
   <public type="style" name="Theme.Wallpaper.NoTitleBar.Fullscreen" />
