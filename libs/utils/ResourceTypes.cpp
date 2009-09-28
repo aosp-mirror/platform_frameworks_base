@@ -1743,7 +1743,7 @@ bool ResTable::getResourceName(uint32_t resID, resource_name* outName) const
         if (Res_GETPACKAGE(resID)+1 == 0) {
             LOGW("No package identifier when getting name for resource number 0x%08x", resID);
         } else {
-            LOGW("Resources don't contain pacakge for resource number 0x%08x", resID);
+            LOGW("Resources don't contain package for resource number 0x%08x", resID);
         }
         return false;
     }
@@ -1793,7 +1793,7 @@ ssize_t ResTable::getResource(uint32_t resID, Res_value* outValue, bool mayBeBag
         if (Res_GETPACKAGE(resID)+1 == 0) {
             LOGW("No package identifier when getting name for resource number 0x%08x", resID);
         } else {
-            LOGW("Resources don't contain pacakge for resource number 0x%08x", resID);
+            LOGW("Resources don't contain package for resource number 0x%08x", resID);
         }
         return BAD_INDEX;
     }
