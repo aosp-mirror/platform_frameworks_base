@@ -126,4 +126,9 @@
 
     <bool name="config_use_strict_phone_number_comparation">false</bool>
 
+    <!-- Display low battery warning when battery level dips to this value -->
+    <integer name="config_lowBatteryWarningLevel">15</integer>
+    <!-- Close low battery warning when battery level reaches this value -->
+    <integer name="config_lowBatteryCloseWarningLevel">20</integer>
+
 </resources>

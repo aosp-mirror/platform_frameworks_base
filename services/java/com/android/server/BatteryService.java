@@ -90,9 +90,6 @@ class BatteryService extends Binder {
     // This should probably be exposed in the API, though it's not critical
     private static final int BATTERY_PLUGGED_NONE = 0;
 
-    private static final int BATTERY_LEVEL_CLOSE_WARNING = 20;
-    private static final int BATTERY_LEVEL_WARNING = 15;
-
     private final Context mContext;
     private final IBatteryStats mBatteryStats;
     
@@ -114,7 +111,10 @@ class BatteryService extends Binder {
     private int mLastBatteryVoltage;
     private int mLastBatteryTemperature;
     private boolean mLastBatteryLevelCritical;
-    
+
+    private int mLowBatteryWarningLevel;
+    private int mLowBatteryCloseWarningLevel;
+
     private int mPlugType;
     private int mLastPlugType = -1; // Extra state so we can detect first run
     
@@ -126,6 +126,11 @@ class BatteryService extends Binder {
     public BatteryService(Context context) {
         mContext = context;
         mBatteryStats = BatteryStatsService.getService();
+
+        mLowBatteryWarningLevel = mContext.getResources().getInteger(
+                com.android.internal.R.integer.config_lowBatteryWarningLevel);
+        mLowBatteryCloseWarningLevel = mContext.getResources().getInteger(
+                com.android.internal.R.integer.config_lowBatteryCloseWarningLevel);
 
         mUEventObserver.startObserving("SUBSYSTEM=power_supply");
 
@@ -271,13 +276,15 @@ class BatteryService extends Binder {
             final boolean oldPlugged = mLastPlugType != BATTERY_PLUGGED_NONE;
 
             /* The ACTION_BATTERY_LOW broadcast is sent in these situations:
-             * - is just un-plugged (previously was plugged) and battery level is under WARNING, or
-             * - is not plugged and battery level crosses the WARNING boundary (becomes < 15).
+             * - is just un-plugged (previously was plugged) and battery level is
+             *   less than or equal to WARNING, or
+             * - is not plugged and battery level falls to WARNING boundary
+             *   (becomes <= mLowBatteryWarningLevel).
              */
             final boolean sendBatteryLow = !plugged
                 && mBatteryStatus != BatteryManager.BATTERY_STATUS_UNKNOWN
-                && mBatteryLevel < BATTERY_LEVEL_WARNING
-                && (oldPlugged || mLastBatteryLevel >= BATTERY_LEVEL_WARNING);
+                && mBatteryLevel <= mLowBatteryWarningLevel
+                && (oldPlugged || mLastBatteryLevel > mLowBatteryWarningLevel);
             
             sendIntent();
             
@@ -299,7 +306,7 @@ class BatteryService extends Binder {
                 mSentLowBatteryBroadcast = true;
                 statusIntent.setAction(Intent.ACTION_BATTERY_LOW);
                 mContext.sendBroadcast(statusIntent);
-            } else if (mSentLowBatteryBroadcast && mLastBatteryLevel >= BATTERY_LEVEL_CLOSE_WARNING) {
+            } else if (mSentLowBatteryBroadcast && mLastBatteryLevel >= mLowBatteryCloseWarningLevel) {
                 mSentLowBatteryBroadcast = false;
                 statusIntent.setAction(Intent.ACTION_BATTERY_OKAY);
                 mContext.sendBroadcast(statusIntent);
