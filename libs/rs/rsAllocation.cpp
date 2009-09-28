@@ -141,6 +141,7 @@ void Allocation::subData(uint32_t xoff, uint32_t count, const void *data, uint32
 
     if (size != sizeBytes) {
         LOGE("Allocation::subData called with mismatched size expected %i, got %i", size, sizeBytes);
+        mType->dumpLOGV("type info");
         return;
     }
     memcpy(ptr, data, size);

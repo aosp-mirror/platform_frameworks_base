@@ -51,6 +51,9 @@ public:
     uint32_t getComponentCount() const {return mComponentCount;}
     Component * getComponent(uint32_t idx) const {return mComponents[idx].get();}
 
+
+    void dumpLOGV(const char *prefix) const;
+
 protected:
     // deallocate any components that are part of this element.
     void clear();

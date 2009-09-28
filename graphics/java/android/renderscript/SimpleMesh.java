@@ -296,7 +296,7 @@ public class SimpleMesh extends BaseObj {
 
             Builder smb = new Builder(mRS);
             smb.addVertexType(mElement, mVtxCount / floatCount);
-            smb.setIndexType(Element.INDEX_16, mIndexCount);
+            smb.setIndexType(Element.INDEX_16(mRS), mIndexCount);
             smb.setPrimitive(Primitive.TRIANGLE);
             SimpleMesh sm = smb.create();
 

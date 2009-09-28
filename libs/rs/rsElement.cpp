@@ -55,6 +55,8 @@ void Element::setComponent(uint32_t idx, Component *c)
     rsAssert(!mComponents[idx].get());
     rsAssert(idx < mComponentCount);
     mComponents[idx].set(c);
+
+// Fixme: This should probably not be here
     c->incUserRef();
 }
 
@@ -179,6 +181,17 @@ uint32_t Element::getGLFormat() const
 }
 
 
+void Element::dumpLOGV(const char *prefix) const
+{
+    ObjectBase::dumpLOGV(prefix);
+    LOGV("%s   Element: components %i,  size %i", prefix, mComponentCount, getSizeBytes());
+    for (uint32_t ct = 0; ct < mComponentCount; ct++) {
+        char buf[1024];
+        sprintf(buf, "%s component %i: ", prefix, ct);
+        mComponents[ct]->dumpLOGV(buf);
+    }
+}
+
 ElementState::ElementState()
 {
 }
@@ -201,6 +214,9 @@ void rsi_ElementBegin(Context *rsc)
 void rsi_ElementAdd(Context *rsc, RsDataKind dk, RsDataType dt, bool isNormalized, size_t bits, const char *name)
 {
     ElementState * sec = &rsc->mStateElement;
+
+    rsAssert(bits > 0);
+
     Component *c = new Component(rsc,
                                  static_cast<Component::DataKind>(dk),
                                  static_cast<Component::DataType>(dt),
@@ -214,6 +230,8 @@ RsElement rsi_ElementCreate(Context *rsc)
 {
     ElementState * sec = &rsc->mStateElement;
     Element *se = new Element(rsc, sec->mComponentBuildList.size());
+
+    rsAssert(se->getComponentCount() > 0);
 
     for (size_t ct = 0; ct < se->getComponentCount(); ct++) {
         se->setComponent(ct, sec->mComponentBuildList[ct]);
