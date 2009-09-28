@@ -60,6 +60,7 @@ public final class ContactsContract {
      * @hide should be removed when users are updated to refer to SyncState
      * @deprecated use SyncState instead
      */
+    @Deprecated
     public interface SyncStateColumns extends SyncStateContract.Columns {
     }
 
@@ -225,49 +226,6 @@ public final class ContactsContract {
         public static final String IN_VISIBLE_GROUP = "in_visible_group";
 
         /**
-         * Contact presence status.  See {@link Presence}
-         * for individual status definitions.  This column is only returned if explicitly
-         * requested in the query projection.
-         * <p>Type: NUMBER</p>
-         */
-        public static final String PRESENCE_STATUS = Presence.PRESENCE_STATUS;
-
-        /**
-         * Contact presence custom status. This column is only returned if explicitly
-         * requested in the query projection.
-         * <p>Type: TEXT</p>
-         */
-        public static final String PRESENCE_CUSTOM_STATUS = Presence.PRESENCE_CUSTOM_STATUS;
-
-        /**
-         * The time when the latest presence custom status was inserted/updated.
-         * This column is only returned if explicitly requested in the query
-         * projection.
-         * <p>Type: TEXT</p>
-         * @hide TODO unhide
-         */
-        public static final String PRESENCE_CUSTOM_STATUS_TIMESTAMP =
-                Presence.PRESENCE_CUSTOM_STATUS_TIMESTAMP;
-
-        /**
-         * Protocol that supplied the latest status update (see {@link CommonDataKinds.Im#PROTOCOL}.
-         * This column is only returned if explicitly requested in the query
-         * projection.
-         * <p>Type: NUMBER</p>
-         * @hide TODO unhide
-         */
-        public static final String PRESENCE_PROTOCOL = "presence_protocol";
-
-        /**
-         * Custom protocol that supplied the latest status update (see
-         * {@link CommonDataKinds.Im#CUSTOM_PROTOCOL}. This column is only
-         * returned if explicitly requested in the query projection.
-         * <p>Type: TEXT</p>
-         * @hide TODO unhide
-         */
-        public static final String PRESENCE_CUSTOM_PROTOCOL = "presence_custom_protocol";
-
-        /**
          * An indicator of whether this contact has at least one phone number. "1" if there is
          * at least one phone number, "0" otherwise.
          * <P>Type: INTEGER</P>
@@ -281,12 +239,55 @@ public final class ContactsContract {
         public static final String LOOKUP_KEY = "lookup";
     }
 
+    private interface ContactStatusColumns {
+        /**
+         * Contact presence status. See {@link StatusUpdates} for individual status
+         * definitions.
+         * <p>Type: NUMBER</p>
+         */
+        public static final String CONTACT_PRESENCE = "contact_presence";
+
+        /**
+         * Contact's latest status update.
+         * <p>Type: TEXT</p>
+         */
+        public static final String CONTACT_STATUS = "contact_status";
+
+        /**
+         * The absolute time in milliseconds when the latest status was
+         * inserted/updated.
+         * <p>Type: NUMBER</p>
+         */
+        public static final String CONTACT_STATUS_TIMESTAMP = "contact_status_ts";
+
+        /**
+         * The package containing resources for this status: label and icon.
+         * <p>Type: NUMBER</p>
+         */
+        public static final String CONTACT_STATUS_RES_PACKAGE = "contact_status_res_package";
+
+        /**
+         * The resource ID of the label describing the source of contact
+         * status, e.g. "Google Talk". This resource is scoped by the
+         * {@link #CONTACT_STATUS_RES_PACKAGE}.
+         * <p>Type: NUMBER</p>
+         */
+        public static final String CONTACT_STATUS_LABEL = "contact_status_label";
+
+        /**
+         * The resource ID of the icon for the source of contact status. This
+         * resource is scoped by the {@link #CONTACT_STATUS_RES_PACKAGE}.
+         * <p>Type: NUMBER</p>
+         */
+        public static final String CONTACT_STATUS_ICON = "contact_status_icon";
+    }
+
     /**
      * Constants for the contacts table, which contains a record per group
      * of raw contacts representing the same person.
      */
     public static class Contacts implements BaseColumns, ContactsColumns,
-            ContactOptionsColumns {
+            ContactOptionsColumns, ContactStatusColumns {
         /**
          * This utility class cannot be instantiated
          */
@@ -649,6 +650,47 @@ public final class ContactsContract {
         }
     }
 
+    private interface StatusColumns extends Im.CommonPresenceColumns {
+        /**
+         * Contact's latest presence level, see {@link Im.CommonPresenceColumns} for
+         * specific definitions.
+         * <P>Type: INTEGER (one of the values below)</P>
+         */
+        public static final String PRESENCE = PRESENCE_STATUS;
+
+        /**
+         * Contact latest status update.
+         * <p>Type: TEXT</p>
+         */
+        public static final String STATUS = PRESENCE_CUSTOM_STATUS;
+
+        /**
+         * The absolute time in milliseconds when the latest status was inserted/updated.
+         * <p>Type: NUMBER</p>
+         */
+        public static final String STATUS_TIMESTAMP = "status_ts";
+
+        /**
+         * The package containing resources for this status: label and icon.
+         * <p>Type: NUMBER</p>
+         */
+        public static final String STATUS_RES_PACKAGE = "status_res_package";
+
+        /**
+         * The resource ID of the label describing the source of the status update, e.g. "Google
+         * Talk".  This resource should be scoped by the {@link #STATUS_RES_PACKAGE}.
+         * <p>Type: NUMBER</p>
+         */
+        public static final String STATUS_LABEL = "status_label";
+
+        /**
+         * The resource ID of the icon for the source of the status update.
+         * This resource should be scoped by the {@link #STATUS_RES_PACKAGE}.
+         * <p>Type: NUMBER</p>
+         */
+        public static final String STATUS_ICON = "status_icon";
+    }
+
     private interface DataColumns {
         /**
          * The package name to use when creating {@link Resources} objects for
@@ -736,8 +778,8 @@ public final class ContactsContract {
     /**
      * Combines all columns returned by {@link Data} table queries.
      */
-    private interface DataColumnsWithJoins extends BaseColumns, DataColumns, RawContactsColumns,
-            ContactsColumns, ContactOptionsColumns {
+    private interface DataColumnsWithJoins extends BaseColumns, DataColumns, StatusColumns,
+        RawContactsColumns, ContactsColumns, ContactOptionsColumns, ContactStatusColumns {
 
     }
 
@@ -757,15 +799,6 @@ public final class ContactsContract {
          * The content:// style URI for this table
          */
         public static final Uri CONTENT_URI = Uri.withAppendedPath(AUTHORITY_URI, "data");
-
-        /**
-         * The content:// style URI for this table joined with {@link Presence}
-         * data where applicable.
-         *
-         * @hide
-         */
-        public static final Uri CONTENT_WITH_PRESENCE_URI = Uri.withAppendedPath(AUTHORITY_URI,
-                "data_with_presence");
 
         /**
          * The MIME type of {@link #CONTENT_URI} providing a directory of data.
@@ -841,8 +874,8 @@ public final class ContactsContract {
     }
 
     /**
-     * Additional data mixed in with {@link Im.CommonPresenceColumns} to link
-     * back to specific {@link ContactsContract.Contacts#_ID} entries.
+     * Additional data mixed in with {@link StatusColumns} to link
+     * back to specific {@link ContactsContract.Data#_ID} entries.
      */
     private interface PresenceColumns {
 
@@ -881,23 +914,22 @@ public final class ContactsContract {
         public static final String IM_ACCOUNT = "im_account";
     }
 
-    public static final class Presence implements PresenceColumns, Im.CommonPresenceColumns {
+    /**
+     * A status update is linked to a {@link Data} row and captures the user's latest status
+     * update via the corresponding source, e.g. "Having lunch" via "Google Talk".
+     */
+    // TODO make final as soon as Presence is removed
+    public static /*final*/ class StatusUpdates implements StatusColumns, PresenceColumns {
 
         /**
          * This utility class cannot be instantiated
          */
-        private Presence() {}
+        private StatusUpdates() {}
 
         /**
          * The content:// style URI for this table
          */
-        public static final Uri CONTENT_URI = Uri.withAppendedPath(AUTHORITY_URI, "presence");
-
-        /**
-         * The unique ID for a presence row.
-         * <P>Type: INTEGER (long)</P>
-         */
-        public static final String _ID = "presence_id";
+        public static final Uri CONTENT_URI = Uri.withAppendedPath(AUTHORITY_URI, "status_updates");
 
         /**
          * Gets the resource ID for the proper presence icon.
@@ -936,22 +968,20 @@ public final class ContactsContract {
 
         /**
          * The MIME type of {@link #CONTENT_URI} providing a directory of
-         * presence details.
+         * status update details.
          */
-        public static final String CONTENT_TYPE = "vnd.android.cursor.dir/im-presence";
+        public static final String CONTENT_TYPE = "vnd.android.cursor.dir/status-update";
 
         /**
          * The MIME type of a {@link #CONTENT_URI} subdirectory of a single
-         * presence detail.
+         * status update detail.
          */
-        public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/im-presence";
+        public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/status-update";
+    }
 
-        /**
-         * The time when the presence custom status was inserted/updated.
-         * <p>Type: TEXT</p>
-         * @hide TODO unhide
-         */
-        public static final String PRESENCE_CUSTOM_STATUS_TIMESTAMP = "status_timestamp";
+    @Deprecated
+    public static final class Presence extends StatusUpdates {
+
     }
 
     /**
