@@ -3965,7 +3965,7 @@ public class WindowManagerService extends IWindowManager.Stub
     // -------------------------------------------------------------
 
     public void disableKeyguard(IBinder token, String tag) {
-        if (mContext.checkCallingPermission(android.Manifest.permission.DISABLE_KEYGUARD)
+        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.DISABLE_KEYGUARD)
             != PackageManager.PERMISSION_GRANTED) {
             throw new SecurityException("Requires DISABLE_KEYGUARD permission");
         }
@@ -3973,7 +3973,7 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     public void reenableKeyguard(IBinder token) {
-        if (mContext.checkCallingPermission(android.Manifest.permission.DISABLE_KEYGUARD)
+        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.DISABLE_KEYGUARD)
             != PackageManager.PERMISSION_GRANTED) {
             throw new SecurityException("Requires DISABLE_KEYGUARD permission");
         }
@@ -3999,7 +3999,7 @@ public class WindowManagerService extends IWindowManager.Stub
      * @see android.app.KeyguardManager#exitKeyguardSecurely
      */
     public void exitKeyguardSecurely(final IOnKeyguardExitResult callback) {
-        if (mContext.checkCallingPermission(android.Manifest.permission.DISABLE_KEYGUARD)
+        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.DISABLE_KEYGUARD)
             != PackageManager.PERMISSION_GRANTED) {
             throw new SecurityException("Requires DISABLE_KEYGUARD permission");
         }
