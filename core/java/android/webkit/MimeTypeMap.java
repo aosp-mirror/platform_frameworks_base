@@ -214,6 +214,34 @@ public class MimeTypeMap {
                     "application/vnd.oasis.opendocument.text-template", "ott");
             sMimeTypeMap.loadEntry(
                     "application/vnd.oasis.opendocument.text-web", "oth");
+            sMimeTypeMap.loadEntry("application/msword", "doc");
+            sMimeTypeMap.loadEntry("application/msword", "dot");
+            sMimeTypeMap.loadEntry(
+                    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                    "docx");
+            sMimeTypeMap.loadEntry(
+                    "application/vnd.openxmlformats-officedocument.wordprocessingml.template",
+                    "dotx");
+            sMimeTypeMap.loadEntry("application/vnd.ms-excel", "xls");
+            sMimeTypeMap.loadEntry("application/vnd.ms-excel", "xlt");
+            sMimeTypeMap.loadEntry(
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    "xlsx");
+            sMimeTypeMap.loadEntry(
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.template",
+                    "xltx");
+            sMimeTypeMap.loadEntry("application/vnd.ms-powerpoint", "ppt");
+            sMimeTypeMap.loadEntry("application/vnd.ms-powerpoint", "pot");
+            sMimeTypeMap.loadEntry("application/vnd.ms-powerpoint", "pps");
+            sMimeTypeMap.loadEntry(
+                    "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+                    "pptx");
+            sMimeTypeMap.loadEntry(
+                    "application/vnd.openxmlformats-officedocument.presentationml.template",
+                    "potx");
+            sMimeTypeMap.loadEntry(
+                    "application/vnd.openxmlformats-officedocument.presentationml.slideshow",
+                    "ppsx");
             sMimeTypeMap.loadEntry("application/vnd.rim.cod", "cod");
             sMimeTypeMap.loadEntry("application/vnd.smaf", "mmf");
             sMimeTypeMap.loadEntry("application/vnd.stardivision.calc", "sdc");
@@ -411,12 +439,13 @@ public class MimeTypeMap {
             sMimeTypeMap.loadEntry("text/plain", "asc");
             sMimeTypeMap.loadEntry("text/plain", "text");
             sMimeTypeMap.loadEntry("text/plain", "diff");
-            sMimeTypeMap.loadEntry("text/plain", "pot");
+            sMimeTypeMap.loadEntry("text/plain", "po");     // reserve "pot" for vnd.ms-powerpoint
             sMimeTypeMap.loadEntry("text/richtext", "rtx");
             sMimeTypeMap.loadEntry("text/rtf", "rtf");
             sMimeTypeMap.loadEntry("text/texmacs", "ts");
             sMimeTypeMap.loadEntry("text/text", "phps");
             sMimeTypeMap.loadEntry("text/tab-separated-values", "tsv");
+            sMimeTypeMap.loadEntry("text/xml", "xml");
             sMimeTypeMap.loadEntry("text/x-bibtex", "bib");
             sMimeTypeMap.loadEntry("text/x-boo", "boo");
             sMimeTypeMap.loadEntry("text/x-c++hdr", "h++");
