@@ -610,6 +610,13 @@ public class MediaScanner
         }
 
         public void setMimeType(String mimeType) {
+            if ("audio/mp4".equals(mMimeType) &&
+                    mimeType.startsWith("video")) {
+                // for feature parity with Donut, we force m4a files to keep the
+                // audio/mp4 mimetype, even if they are really "enhanced podcasts"
+                // with a video track
+                return;
+            }
             mMimeType = mimeType;
             mFileType = MediaFile.getFileTypeForMimeType(mimeType);
         }
