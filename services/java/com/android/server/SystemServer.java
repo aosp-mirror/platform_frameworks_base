@@ -365,8 +365,17 @@ class ServerThread extends Thread {
         mContentResolver.registerContentObserver(Settings.Secure.getUriFor(Settings.Secure.ADB_ENABLED),
                 false, new AdbSettingsObserver());
 
-        // It is now time to start up the app processes...
+        // Before things start rolling, be sure we have decided whether
+        // we are in safe mode.
         final boolean safeMode = wm.detectSafeMode();
+        if (safeMode) {
+            try {
+                ActivityManagerNative.getDefault().enterSafeMode();
+            } catch (RemoteException e) {
+            }
+        }
+        
+        // It is now time to start up the app processes...
 
         if (notification != null) {
             notification.systemReady();
