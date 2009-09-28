@@ -29,6 +29,8 @@
         android:ellipsize="end"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:textStyle="bold"
+        android:shadowColor="#BB000000"
+        android:shadowRadius="2.75"
         />
 
     <TextView android:id="@+id/phonetic_name"
