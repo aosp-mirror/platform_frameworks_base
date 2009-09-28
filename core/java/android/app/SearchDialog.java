@@ -1709,14 +1709,17 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
         public boolean dispatchKeyEventPreIme(KeyEvent event) {
             if (DBG) Log.d(LOG_TAG, "onKeyPreIme(" + event + ")");
             if (mSearchDialog != null && event.getKeyCode() == KeyEvent.KEYCODE_BACK) {
-                if (event.getAction() == KeyEvent.ACTION_DOWN
-                        && event.getRepeatCount() == 0) {
-                    getKeyDispatcherState().startTracking(event, this);
-                    return true;
-                } else if (event.getAction() == KeyEvent.ACTION_UP
-                        && !event.isCanceled() && getKeyDispatcherState().isTracking(event)) {
-                    mSearchDialog.onBackPressed();
-                    return true;
+                KeyEvent.DispatcherState state = getKeyDispatcherState();
+                if (state != null) {
+                    if (event.getAction() == KeyEvent.ACTION_DOWN
+                            && event.getRepeatCount() == 0) {
+                        state.startTracking(event, this);
+                        return true;
+                    } else if (event.getAction() == KeyEvent.ACTION_UP
+                            && !event.isCanceled() && state.isTracking(event)) {
+                        mSearchDialog.onBackPressed();
+                        return true;
+                    }
                 }
             }
             return super.dispatchKeyEventPreIme(event);
