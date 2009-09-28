@@ -126,6 +126,8 @@
         <item name="panelTextAppearance">?android:attr/textAppearanceInverse</item>
 
         <!-- Scrollbar attributes -->
+        <item name="scrollbarFadeDuration">250</item>
+        <item name="scrollbarDefaultDelayBeforeFade">300</item> 
         <item name="scrollbarSize">10dip</item>
         <item name="scrollbarThumbHorizontal">@android:drawable/scrollbar_handle_horizontal</item>
         <item name="scrollbarThumbVertical">@android:drawable/scrollbar_handle_vertical</item>
