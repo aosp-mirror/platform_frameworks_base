@@ -402,7 +402,6 @@ static jint availableNative(JNIEnv *env, jobject obj) {
     return -1;
 }
 
-/** jb must not be null. offset and offset+length must be within array */
 static jint readNative(JNIEnv *env, jobject obj, jbyteArray jb, jint offset,
         jint length) {
 #ifdef HAVE_BLUETOOTH
@@ -410,10 +409,20 @@ static jint readNative(JNIEnv *env, jobject obj, jbyteArray jb, jint offset,
 
     int ret;
     jbyte *b;
+    int sz;
     struct asocket *s = get_socketData(env, obj);
 
     if (!s)
         return -1;
+    if (jb == NULL) {
+        jniThrowIOException(env, EINVAL);
+        return -1;
+    }
+    sz = env->GetArrayLength(jb);
+    if (offset < 0 || length < 0 || offset + length > sz) {
+        jniThrowIOException(env, EINVAL);
+        return -1;
+    }
 
     b = env->GetByteArrayElements(jb, NULL);
     if (b == NULL) {
@@ -436,7 +445,6 @@ static jint readNative(JNIEnv *env, jobject obj, jbyteArray jb, jint offset,
     return -1;
 }
 
-/** jb must not be null. offset and offset+length must be within array */
 static jint writeNative(JNIEnv *env, jobject obj, jbyteArray jb, jint offset,
         jint length) {
 #ifdef HAVE_BLUETOOTH
@@ -444,10 +452,20 @@ static jint writeNative(JNIEnv *env, jobject obj, jbyteArray jb, jint offset,
 
     int ret;
     jbyte *b;
+    int sz;
     struct asocket *s = get_socketData(env, obj);
 
     if (!s)
         return -1;
+    if (jb == NULL) {
+        jniThrowIOException(env, EINVAL);
+        return -1;
+    }
+    sz = env->GetArrayLength(jb);
+    if (offset < 0 || length < 0 || offset + length > sz) {
+        jniThrowIOException(env, EINVAL);
+        return -1;
+    }
 
     b = env->GetByteArrayElements(jb, NULL);
     if (b == NULL) {
