@@ -813,7 +813,7 @@ public interface WindowManagerPolicy {
             boolean displayEnabled);
     
     /**
-     * Called when the system is mostly done booting to dentermine whether
+     * Called when the system is mostly done booting to determine whether
      * the system should go into safe mode.
      */
     public boolean detectSafeMode();

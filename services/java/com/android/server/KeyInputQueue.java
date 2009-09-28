@@ -337,6 +337,54 @@ public abstract class KeyInputQueue {
         }
     }
     
+    public int getScancodeState(int code) {
+        synchronized (mFirst) {
+            VirtualKey vk = mPressedVirtualKey;
+            if (vk != null) {
+                if (vk.scancode == code) {
+                    return 2;
+                }
+            }
+            return nativeGetScancodeState(code);
+        }
+    }
+    
+    public int getScancodeState(int deviceId, int code) {
+        synchronized (mFirst) {
+            VirtualKey vk = mPressedVirtualKey;
+            if (vk != null) {
+                if (vk.scancode == code) {
+                    return 2;
+                }
+            }
+            return nativeGetScancodeState(deviceId, code);
+        }
+    }
+    
+    public int getKeycodeState(int code) {
+        synchronized (mFirst) {
+            VirtualKey vk = mPressedVirtualKey;
+            if (vk != null) {
+                if (vk.lastKeycode == code) {
+                    return 2;
+                }
+            }
+            return nativeGetKeycodeState(code);
+        }
+    }
+    
+    public int getKeycodeState(int deviceId, int code) {
+        synchronized (mFirst) {
+            VirtualKey vk = mPressedVirtualKey;
+            if (vk != null) {
+                if (vk.lastKeycode == code) {
+                    return 2;
+                }
+            }
+            return nativeGetKeycodeState(deviceId, code);
+        }
+    }
+    
     public static native String getDeviceName(int deviceId);
     public static native int getDeviceClasses(int deviceId);
     public static native void addExcludedDevice(String deviceName);
@@ -344,10 +392,10 @@ public abstract class KeyInputQueue {
             InputDevice.AbsoluteInfo outInfo);
     public static native int getSwitchState(int sw);
     public static native int getSwitchState(int deviceId, int sw);
-    public static native int getScancodeState(int sw);
-    public static native int getScancodeState(int deviceId, int sw);
-    public static native int getKeycodeState(int sw);
-    public static native int getKeycodeState(int deviceId, int sw);
+    public static native int nativeGetScancodeState(int code);
+    public static native int nativeGetScancodeState(int deviceId, int code);
+    public static native int nativeGetKeycodeState(int code);
+    public static native int nativeGetKeycodeState(int deviceId, int code);
     public static native int scancodeToKeycode(int deviceId, int scancode);
     public static native boolean hasKeys(int[] keycodes, boolean[] keyExists);
     

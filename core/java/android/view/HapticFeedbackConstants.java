@@ -36,6 +36,18 @@ public class HapticFeedbackConstants {
     public static final int VIRTUAL_KEY = 1;
     
     /**
+     * This is a private constant.  Feel free to renumber as desired.
+     * @hide
+     */
+    public static final int SAFE_MODE_DISABLED = 10000;
+    
+    /**
+     * This is a private constant.  Feel free to renumber as desired.
+     * @hide
+     */
+    public static final int SAFE_MODE_ENABLED = 10001;
+    
+    /**
      * Flag for {@link View#performHapticFeedback(int, int)
      * View.performHapticFeedback(int, int)}: Ignore the setting in the
      * view for whether to perform haptic feedback, do it always.
