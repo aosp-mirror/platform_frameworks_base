@@ -215,7 +215,6 @@ public class MiniThumbFile {
                 r.write(data);
                 r.seek(pos);
                 r.writeByte(1);  // we have data in this slot
-                mChannel.force(true);
             }
         } catch (IOException ex) {
             Log.e(TAG, "couldn't save mini thumbnail data for "
