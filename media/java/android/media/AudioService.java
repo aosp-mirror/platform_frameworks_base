@@ -619,11 +619,12 @@ public class AudioService extends IAudioService.Stub {
     /** @see AudioManager#playSoundEffect(int) */
     public void playSoundEffect(int effectType) {
         sendMsg(mAudioHandler, MSG_PLAY_SOUND_EFFECT, SHARED_MSG, SENDMSG_NOOP,
-                effectType, SOUND_EFFECT_VOLUME, null, 0);
+                effectType, -1, null, 0);
     }
 
     /** @see AudioManager#playSoundEffect(int, float) */
     public void playSoundEffectVolume(int effectType, float volume) {
+        loadSoundEffects();
         sendMsg(mAudioHandler, MSG_PLAY_SOUND_EFFECT, SHARED_MSG, SENDMSG_NOOP,
                 effectType, (int) (volume * 1000), null, 0);
     }
@@ -634,6 +635,9 @@ public class AudioService extends IAudioService.Stub {
      */
     public boolean loadSoundEffects() {
         synchronized (mSoundEffectsLock) {
+            if (mSoundPool != null) {
+                return true;
+            }
             mSoundPool = new SoundPool(NUM_SOUNDPOOL_CHANNELS, AudioSystem.STREAM_SYSTEM, 0);
             if (mSoundPool == null) {
                 return false;
@@ -1197,10 +1201,20 @@ public class AudioService extends IAudioService.Stub {
                 if (mSoundPool == null) {
                     return;
                 }
+                float volFloat;
+                // use STREAM_MUSIC volume attenuated by 3 dB if volume is not specified by caller
+                if (volume < 0) {
+                    // Same linear to log conversion as in native AudioSystem::linearToLog() (AudioSystem.cpp)
+                    float dBPerStep = (float)((0.5 * 100) / MAX_STREAM_VOLUME[AudioSystem.STREAM_MUSIC]);
+                    int musicVolIndex = (mStreamStates[AudioSystem.STREAM_MUSIC].mIndex + 5) / 10;
+                    float musicVoldB = dBPerStep * (musicVolIndex - MAX_STREAM_VOLUME[AudioSystem.STREAM_MUSIC]);
+                    volFloat = (float)Math.pow(10, (musicVoldB - 3)/20);
+                } else {
+                    volFloat = (float) volume / 1000.0f;
+                }
 
                 if (SOUND_EFFECT_FILES_MAP[effectType][1] > 0) {
-                    float v = (float) volume / 1000.0f;
-                    mSoundPool.play(SOUND_EFFECT_FILES_MAP[effectType][1], v, v, 0, 0, 1.0f);
+                    mSoundPool.play(SOUND_EFFECT_FILES_MAP[effectType][1], volFloat, volFloat, 0, 0, 1.0f);
                 } else {
                     MediaPlayer mediaPlayer = new MediaPlayer();
                     if (mediaPlayer != null) {
@@ -1209,6 +1223,7 @@ public class AudioService extends IAudioService.Stub {
                             mediaPlayer.setDataSource(filePath);
                             mediaPlayer.setAudioStreamType(AudioSystem.STREAM_SYSTEM);
                             mediaPlayer.prepare();
+                            mediaPlayer.setVolume(volFloat, volFloat);
                             mediaPlayer.setOnCompletionListener(new OnCompletionListener() {
                                 public void onCompletion(MediaPlayer mp) {
                                     cleanupPlayer(mp);
