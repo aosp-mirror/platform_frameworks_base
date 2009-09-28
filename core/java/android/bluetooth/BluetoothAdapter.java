@@ -105,6 +105,8 @@ public final class BluetoothAdapter {
 
     /**
      * Activity Action: Show a system activity that requests discoverable mode.
+     * <p>This activity will also request the user to turn on Bluetooth if it
+     * is not currently enabled.
      * <p>Discoverable mode is equivalent to {@link
      * #SCAN_MODE_CONNECTABLE_DISCOVERABLE}. It allows remote devices to see
      * this Bluetooth adapter when they perform a discovery.
@@ -120,7 +122,7 @@ public final class BluetoothAdapter {
      * value if the user rejected discoverability.
      * <p>Applications can also listen for {@link #ACTION_SCAN_MODE_CHANGED}
      * for global notification whenever the scan mode changes.
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN}
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH}
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_REQUEST_DISCOVERABLE =
@@ -134,6 +136,24 @@ public final class BluetoothAdapter {
      */
     public static final String EXTRA_DISCOVERABLE_DURATION =
             "android.bluetooth.adapter.extra.DISCOVERABLE_DURATION";
+
+    /**
+     * Activity Action: Show a system activity that allows the user to turn on
+     * Bluetooth.
+     * <p>This system activity will return once Bluetooth has completed turning
+     * on, or the user has decided not to turn Bluetooth on.
+     * <p>Notification of the result of this activity is posted using the
+     * {@link android.app.Activity#onActivityResult} callback. The
+     * <code>resultCode</code>
+     * will be negative if the user did not turn on Bluetooth, and non-negative
+     * if Bluetooth has been turned on.
+     * <p>Applications can also listen for {@link #ACTION_STATE_CHANGED}
+     * for global notification whenever Bluetooth is turned on or off.
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH}
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_REQUEST_ENABLE =
+            "android.bluetooth.adapter.action.REQUEST_ENABLE";
 
     /**
      * Broadcast Action: Indicates the Bluetooth scan mode of the local Adapter
