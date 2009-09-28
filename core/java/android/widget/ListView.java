@@ -1567,7 +1567,7 @@ public class ListView extends AbsListView {
             } else {
                 if (mTouchMode > TOUCH_MODE_DOWN && mTouchMode < TOUCH_MODE_SCROLL) {
                     View child = getChildAt(mMotionPosition - mFirstPosition);
-                    positionSelector(child);
+                    if (child != null) positionSelector(child);
                 } else {
                     mSelectedTop = 0;
                     mSelectorRect.setEmpty();
