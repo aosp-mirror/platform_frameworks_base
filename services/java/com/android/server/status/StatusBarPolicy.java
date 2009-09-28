@@ -670,11 +670,9 @@ public class StatusBarPolicy {
     private void showLowBatteryWarning() {
         closeLastBatteryView();
 
-        /* Show exact battery level.
-         * Add 1 because the text says "less than X%".
-         */
+        // Show exact battery level.
         CharSequence levelText = mContext.getString(
-                    com.android.internal.R.string.battery_low_percent_format, mBatteryLevel + 1);
+                    com.android.internal.R.string.battery_low_percent_format, mBatteryLevel);
 
         if (mBatteryLevelTextView != null) {
             mBatteryLevelTextView.setText(levelText);

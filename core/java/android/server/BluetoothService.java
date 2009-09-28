@@ -78,6 +78,7 @@ public class BluetoothService extends IBluetooth.Stub {
     private static final int MESSAGE_REGISTER_SDP_RECORDS = 1;
     private static final int MESSAGE_FINISH_DISABLE = 2;
     private static final int MESSAGE_UUID_INTENT = 3;
+    private static final int MESSAGE_DISCOVERABLE_TIMEOUT = 4;
 
     // The timeout used to sent the UUIDs Intent
     // This timeout should be greater than the page timeout
@@ -307,6 +308,15 @@ public class BluetoothService extends IBluetooth.Stub {
                 String address = (String)msg.obj;
                 if (address != null)
                     sendUuidIntent(address);
+                break;
+            case MESSAGE_DISCOVERABLE_TIMEOUT:
+                int mode = msg.arg1;
+                if (isEnabled()) {
+                    // TODO: Switch back to the previous scan mode
+                    // This is ok for now, because we only use
+                    // CONNECTABLE and CONNECTABLE_DISCOVERABLE
+                    setScanMode(BluetoothAdapter.SCAN_MODE_CONNECTABLE, -1);
+                }
                 break;
             }
         }
@@ -679,23 +689,30 @@ public class BluetoothService extends IBluetooth.Stub {
         return setPropertyInteger("DiscoverableTimeout", timeout);
     }
 
-    public synchronized boolean setScanMode(int mode) {
+    public synchronized boolean setScanMode(int mode, int duration) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS,
                                                 "Need WRITE_SECURE_SETTINGS permission");
         boolean pairable = false;
         boolean discoverable = false;
+
         switch (mode) {
         case BluetoothAdapter.SCAN_MODE_NONE:
+            mHandler.removeMessages(MESSAGE_DISCOVERABLE_TIMEOUT);
             pairable = false;
             discoverable = false;
             break;
         case BluetoothAdapter.SCAN_MODE_CONNECTABLE:
+            mHandler.removeMessages(MESSAGE_DISCOVERABLE_TIMEOUT);
             pairable = true;
             discoverable = false;
             break;
         case BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE:
+            mHandler.removeMessages(MESSAGE_DISCOVERABLE_TIMEOUT);
             pairable = true;
             discoverable = true;
+            Message msg = mHandler.obtainMessage(MESSAGE_DISCOVERABLE_TIMEOUT);
+            mHandler.sendMessageDelayed(msg, duration * 1000);
+            if (DBG) Log.d(TAG, "BT Discoverable for " + duration + " seconds");
             break;
         default:
             Log.w(TAG, "Requested invalid scan mode " + mode);

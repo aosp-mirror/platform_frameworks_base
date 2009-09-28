@@ -96,9 +96,9 @@ public class ContactHeaderWidget extends FrameLayout implements View.OnClickList
             Contacts.PHOTO_ID,
             Contacts.DISPLAY_NAME,
             Contacts.STARRED,
-            Contacts.PRESENCE_STATUS,
-            Contacts.PRESENCE_CUSTOM_STATUS,
-            Contacts.PRESENCE_CUSTOM_STATUS_TIMESTAMP,
+            Contacts.CONTACT_PRESENCE,
+            Contacts.CONTACT_STATUS,
+            Contacts.CONTACT_STATUS_TIMESTAMP,
         };
         int _ID = 0;
         int LOOKUP_KEY = 1;
@@ -107,9 +107,9 @@ public class ContactHeaderWidget extends FrameLayout implements View.OnClickList
         //TODO: We need to figure out how we're going to get the phonetic name.
         //static final int HEADER_PHONETIC_NAME_COLUMN_INDEX
         int STARRED = 4;
-        int PRESENCE_STATUS = 5;
-        int PRESENCE_CUSTOM_STATUS = 6;
-        int PRESENCE_CUSTOM_STATUS_TIMESTAMP = 7;
+        int CONTACT_PRESENCE_STATUS = 5;
+        int CONTACT_STATUS = 6;
+        int CONTACT_STATUS_TIMESTAMP = 7;
     }
 
     //Projection used for looking up contact id from phone number
@@ -429,8 +429,8 @@ public class ContactHeaderWidget extends FrameLayout implements View.OnClickList
         mPhotoView.assignContactUri(Contacts.getLookupUri(contactId, lookupKey));
 
         //Set the presence status
-        if (!c.isNull(ContactQuery.PRESENCE_STATUS)) {
-            int presence = c.getInt(ContactQuery.PRESENCE_STATUS);
+        if (!c.isNull(ContactQuery.CONTACT_PRESENCE_STATUS)) {
+            int presence = c.getInt(ContactQuery.CONTACT_PRESENCE_STATUS);
             mPresenceView.setImageResource(Presence.getPresenceIconResourceId(presence));
             mPresenceView.setVisibility(View.VISIBLE);
         } else {
@@ -438,13 +438,13 @@ public class ContactHeaderWidget extends FrameLayout implements View.OnClickList
         }
 
         //Set the status update
-        String status = c.getString(ContactQuery.PRESENCE_CUSTOM_STATUS);
+        String status = c.getString(ContactQuery.CONTACT_STATUS);
         if (!TextUtils.isEmpty(status)) {
             mStatusView.setText(status);
             mStatusView.setVisibility(View.VISIBLE);
 
-            if (!c.isNull(ContactQuery.PRESENCE_CUSTOM_STATUS_TIMESTAMP)) {
-                long date = c.getLong(ContactQuery.PRESENCE_CUSTOM_STATUS_TIMESTAMP);
+            if (!c.isNull(ContactQuery.CONTACT_STATUS_TIMESTAMP)) {
+                long date = c.getLong(ContactQuery.CONTACT_STATUS_TIMESTAMP);
 
                 // Set the date/time field by mixing relative and absolute
                 // times.

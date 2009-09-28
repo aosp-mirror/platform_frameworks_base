@@ -952,7 +952,8 @@ static config_pair_t const config_base_attribute_list[] = {
         { EGL_BIND_TO_TEXTURE_RGBA,       EGL_FALSE                         },
         { EGL_BIND_TO_TEXTURE_RGB,        EGL_FALSE                         },
         { EGL_MIN_SWAP_INTERVAL,          1                                 },
-        { EGL_MAX_SWAP_INTERVAL,          4                                 },
+        { EGL_MAX_SWAP_INTERVAL,          1                                 },
+        { EGL_RENDERABLE_TYPE,            EGL_OPENGL_ES_BIT                 },
 };
 
 // These configs can override the base attribute list

@@ -3587,9 +3587,13 @@ public class WebView extends AbsoluteLayout
 
         // update mMinZoomScale if the minimum zoom scale is not fixed
         if (!mMinZoomScaleFixed) {
-            mMinZoomScale = (float) getViewWidth()
+            // when change from narrow screen to wide screen, the new viewWidth
+            // can be wider than the old content width. We limit the minimum
+            // scale to 1.0f. The proper minimum scale will be calculated when
+            // the new picture shows up.
+            mMinZoomScale = Math.min(1.0f, (float) getViewWidth()
                     / (mDrawHistory ? mHistoryPicture.getWidth()
-                            : mZoomOverviewWidth);
+                            : mZoomOverviewWidth));
         }
 
         // we always force, in case our height changed, in which case we still
@@ -3685,6 +3689,7 @@ public class WebView extends AbsoluteLayout
 
         switch (action) {
             case MotionEvent.ACTION_DOWN: {
+                mPreventDrag = PREVENT_DRAG_NO;
                 if (!mScroller.isFinished()) {
                     // stop the current scroll animation, but if this is
                     // the start of a fling, allow it to add to the current
@@ -3892,19 +3897,15 @@ public class WebView extends AbsoluteLayout
                         mTouchMode = TOUCH_DONE_MODE;
                         doDoubleTap();
                         break;
-                    case TOUCH_SHORTPRESS_START_MODE:
-                    case TOUCH_SHORTPRESS_MODE:
-                        mPrivateHandler.removeMessages(SWITCH_TO_SHORTPRESS);
-                        mPrivateHandler.removeMessages(SWITCH_TO_LONGPRESS);
-                        mTouchMode = TOUCH_DONE_MODE;
-                        doShortPress();
-                        break;
                     case TOUCH_SELECT_MODE:
                         commitCopy();
                         mTouchSelection = false;
                         break;
                     case TOUCH_INIT_MODE: // tap
+                    case TOUCH_SHORTPRESS_START_MODE:
+                    case TOUCH_SHORTPRESS_MODE:
                         mPrivateHandler.removeMessages(SWITCH_TO_SHORTPRESS);
+                        mPrivateHandler.removeMessages(SWITCH_TO_LONGPRESS);
                         if ((deltaX * deltaX + deltaY * deltaY) > mTouchSlopSquare) {
                             Log.w(LOGTAG, "Miss a drag as we are waiting for" +
                                     " WebCore's response for touch down.");
@@ -3924,10 +3925,15 @@ public class WebView extends AbsoluteLayout
                                 mPreventDrag = PREVENT_DRAG_NO;
                             }
                             if (mPreventDrag == PREVENT_DRAG_NO) {
-                                mPrivateHandler.sendMessageDelayed(
-                                        mPrivateHandler.obtainMessage(
-                                        RELEASE_SINGLE_TAP),
-                                        ViewConfiguration.getDoubleTapTimeout());
+                                if (mTouchMode == TOUCH_INIT_MODE) {
+                                    mPrivateHandler.sendMessageDelayed(
+                                            mPrivateHandler.obtainMessage(
+                                            RELEASE_SINGLE_TAP),
+                                            ViewConfiguration.getDoubleTapTimeout());
+                                } else {
+                                    mTouchMode = TOUCH_DONE_MODE;
+                                    doShortPress();
+                                }
                             }
                             break;
                         }

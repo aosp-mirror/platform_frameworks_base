@@ -35,7 +35,7 @@ interface IBluetooth
     boolean setName(in String name);
 
     int getScanMode();
-    boolean setScanMode(int mode);
+    boolean setScanMode(int mode, int duration);
 
     int getDiscoverableTimeout();
     boolean setDiscoverableTimeout(int timeout);

@@ -1416,6 +1416,7 @@ public final class Settings {
             DIM_SCREEN,
             SCREEN_OFF_TIMEOUT,
             SCREEN_BRIGHTNESS,
+            SCREEN_BRIGHTNESS_MODE,
             VIBRATE_ON,
             NOTIFICATIONS_USE_RING_VOLUME,
             MODE_RINGER,
@@ -2404,7 +2405,6 @@ public final class Settings {
         public static final String[] SETTINGS_TO_BACKUP = {
             ADB_ENABLED,
             ALLOW_MOCK_LOCATION,
-            INSTALL_NON_MARKET_APPS,
             PARENTAL_CONTROL_ENABLED,
             PARENTAL_CONTROL_REDIRECT_URL,
             USB_MASS_STORAGE_ENABLED,
