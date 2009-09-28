@@ -805,6 +805,22 @@ public final class ContactsContract {
         public static final String CONTENT_TYPE = "vnd.android.cursor.dir/data";
 
         /**
+         * If {@link #FOR_EXPORT_ONLY} is explicitly set to "1", returned Cursor toward
+         * Data.CONTENT_URI contains only exportable data.
+         *
+         * This flag is useful (currently) only for vCard exporter in Contacts app, which
+         * needs to exclude "un-exportable" data from available data to export, while
+         * Contacts app itself has priviledge to access all data including "un-expotable"
+         * ones and providers return all of them regardless of the callers' intention.
+         * <P>Type: INTEGER</p>
+         *
+         * @hide Maybe available only in Eclair and not really ready for public use.
+         * TODO: remove, or implement this feature completely. As of now (Eclair),
+         * we only use this flag in queryEntities(), not query().
+         */
+        public static final String FOR_EXPORT_ONLY = "for_export_only";
+
+        /**
          * Build a {@link android.provider.ContactsContract.Contacts#CONTENT_LOOKUP_URI}
          * style {@link Uri} for the parent {@link android.provider.ContactsContract.Contacts}
          * entry of the given {@link Data} entry.
