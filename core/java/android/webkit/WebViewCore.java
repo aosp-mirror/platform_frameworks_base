@@ -1980,6 +1980,13 @@ final class WebViewCore {
             data.mTextWrapWidth = data.mWidth;
             data.mScale = -1.0f;
             data.mIgnoreHeight = false;
+            // send VIEW_SIZE_CHANGED to the front of the queue so that we can
+            // avoid pushing the wrong picture to the WebView side. If there is
+            // a VIEW_SIZE_CHANGED in the queue, probably from WebView side,
+            // ignore it as we have a new size. If we leave VIEW_SIZE_CHANGED
+            // in the queue, as mLastHeightSent has been updated here, we may
+            // miss the requestLayout in WebView side after the new picture.
+            mEventHub.removeMessages(EventHub.VIEW_SIZE_CHANGED);
             mEventHub.sendMessageAtFrontOfQueue(Message.obtain(null,
                     EventHub.VIEW_SIZE_CHANGED, data));
         } else if (mSettings.getUseWideViewPort()) {
@@ -2001,6 +2008,9 @@ final class WebViewCore {
                 data.mTextWrapWidth = Math.round(webViewWidth
                         / mRestoreState.mTextWrapScale);
                 data.mIgnoreHeight = false;
+                // send VIEW_SIZE_CHANGED to the front of the queue so that we
+                // can avoid pushing the wrong picture to the WebView side.
+                mEventHub.removeMessages(EventHub.VIEW_SIZE_CHANGED);
                 mEventHub.sendMessageAtFrontOfQueue(Message.obtain(null,
                         EventHub.VIEW_SIZE_CHANGED, data));
             }
