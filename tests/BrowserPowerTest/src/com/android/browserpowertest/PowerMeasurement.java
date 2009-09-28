@@ -21,7 +21,7 @@ public class PowerMeasurement extends ActivityInstrumentationTestCase2<PowerTest
         super(PKG_NAME, PowerTestActivity.class);
     }
 
-    public void testPageLoad() throws Throwable {
+    public void testPageLoadStaticNYTimes() throws Throwable {
         Instrumentation mInst = getInstrumentation();
         PowerTestActivity act = getActivity();
 
