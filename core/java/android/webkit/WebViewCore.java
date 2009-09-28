@@ -872,7 +872,8 @@ final class WebViewCore {
                             break;
 
                         case SCROLL_TEXT_INPUT:
-                            nativeScrollFocusedTextInput(msg.arg1, msg.arg2);
+                            nativeScrollFocusedTextInput(
+                                    ((Float) msg.obj).floatValue(), msg.arg1);
                             break;
 
                         case LOAD_URL:
@@ -2076,9 +2077,9 @@ final class WebViewCore {
     private native void nativeUpdateFrameCacheIfLoading();
 
     /**
-     * Scroll the focused textfield to (x, y) in document space
+     * Scroll the focused textfield to (xPercent, y) in document space
      */
-    private native void nativeScrollFocusedTextInput(int x, int y);
+    private native void nativeScrollFocusedTextInput(float xPercent, int y);
 
     // these must be in document space (i.e. not scaled/zoomed).
     private native void nativeSetScrollOffset(int gen, int dx, int dy);
