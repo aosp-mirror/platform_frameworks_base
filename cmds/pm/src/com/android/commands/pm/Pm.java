@@ -18,6 +18,7 @@ package com.android.commands.pm;
 
 import android.content.ComponentName;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.FeatureInfo;
 import android.content.pm.IPackageDeleteObserver;
 import android.content.pm.IPackageInstallObserver;
 import android.content.pm.IPackageManager;
@@ -137,6 +138,7 @@ public final class Pm {
      * pm list [package | packages]
      * pm list permission-groups
      * pm list permissions
+     * pm list features
      * pm list instrumentation
      */
     private void runList() {
@@ -152,6 +154,8 @@ public final class Pm {
             runListPermissionGroups();
         } else if ("permissions".equals(type)) {
             runListPermissions();
+        } else if ("features".equals(type)) {
+            runListFeatures();
         } else if ("instrumentation".equals(type)) {
             runListInstrumentation();
         } else {
@@ -197,6 +201,44 @@ public final class Pm {
                     System.out.print("=");
                 }
                 System.out.println(info.packageName);
+            }
+        } catch (RemoteException e) {
+            System.err.println(e.toString());
+            System.err.println(PM_NOT_RUNNING_ERR);
+        }
+    }
+
+    /**
+     * Lists all of the features supported by the current device.
+     *
+     * pm list features
+     */
+    private void runListFeatures() {
+        try {
+            List<FeatureInfo> list = new ArrayList<FeatureInfo>();
+            FeatureInfo[] rawList = mPm.getSystemAvailableFeatures();
+            for (int i=0; i<rawList.length; i++) {
+                list.add(rawList[i]);
+            }
+                    
+
+            // Sort by name
+            Collections.sort(list, new Comparator<FeatureInfo>() {
+                public int compare(FeatureInfo o1, FeatureInfo o2) {
+                    if (o1.name == o2.name) return 0;
+                    if (o1.name == null) return -1;
+                    if (o2.name == null) return 1;
+                    return o1.name.compareTo(o2.name);
+                }
+            });
+
+            int count = (list != null) ? list.size() : 0;
+            for (int p = 0; p < count; p++) {
+                FeatureInfo fi = list.get(p);
+                System.out.print("feature:");
+                if (fi.name != null) System.out.println(fi.name);
+                else System.out.println("reqGlEsVersion=0x"
+                        + Integer.toHexString(fi.reqGlEsVersion));
             }
         } catch (RemoteException e) {
             System.err.println(e.toString());
@@ -778,6 +820,7 @@ public final class Pm {
         System.err.println("       pm list permission-groups");
         System.err.println("       pm list permissions [-g] [-f] [-d] [-u] [GROUP]");
         System.err.println("       pm list instrumentation [-f] [TARGET-PACKAGE]");
+        System.err.println("       pm list features");
         System.err.println("       pm path PACKAGE");
         System.err.println("       pm install [-l] [-r] [-t] [-i INSTALLER_PACKAGE_NAME] PATH");
         System.err.println("       pm uninstall [-k] PACKAGE");
@@ -801,6 +844,8 @@ public final class Pm {
         System.err.println("The list instrumentation command prints all instrumentations,");
         System.err.println("or only those that target a specified package.  Options:");
         System.err.println("  -f: see their associated file.");
+        System.err.println("");
+        System.err.println("The list features command prints all features of the system.");
         System.err.println("");
         System.err.println("The path command prints the path to the .apk of a package.");
         System.err.println("");
