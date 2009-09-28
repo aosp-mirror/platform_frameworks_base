@@ -69,6 +69,7 @@ public:
 
     void enableGLVertexBuffer() const;
 
+    void dumpLOGV(const char *prefix) const;
 
 protected:
     struct LOD {

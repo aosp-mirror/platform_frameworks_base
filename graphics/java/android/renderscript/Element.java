@@ -70,148 +70,169 @@ public class Element extends BaseObj {
         }
     }
 
-    public static final Element USER_U8 = new Element();
-    public static final Element USER_I8 = new Element();
-    public static final Element USER_U16 = new Element();
-    public static final Element USER_I16 = new Element();
-    public static final Element USER_U32 = new Element();
-    public static final Element USER_I32 = new Element();
-    public static final Element USER_FLOAT = new Element();
-
-    public static final Element A_8 = new Element();
-    public static final Element RGB_565 = new Element();
-    public static final Element RGB_888 = new Element();
-    public static final Element RGBA_5551 = new Element();
-    public static final Element RGBA_4444 = new Element();
-    public static final Element RGBA_8888 = new Element();
-
-    public static final Element INDEX_16 = new Element();
-    public static final Element XY_F32 = new Element();
-    public static final Element XYZ_F32 = new Element();
-    public static final Element ST_XY_F32 = new Element();
-    public static final Element ST_XYZ_F32 = new Element();
-    public static final Element NORM_XYZ_F32 = new Element();
-    public static final Element NORM_ST_XYZ_F32 = new Element();
-
-    static void initPredefined(RenderScript rs) {
-        USER_U8.mEntries = new Entry[1];
-        USER_U8.mEntries[0] = new Entry(DataType.UNSIGNED, DataKind.USER, false, 8, null);
-        USER_U8.init(rs);
-
-        USER_I8.mEntries = new Entry[1];
-        USER_I8.mEntries[0] = new Entry(DataType.SIGNED, DataKind.USER, false, 8, null);
-        USER_I8.init(rs);
-
-        USER_U16.mEntries = new Entry[1];
-        USER_U16.mEntries[0] = new Entry(DataType.UNSIGNED, DataKind.USER, false, 16, null);
-        USER_U16.init(rs);
-
-        USER_I16.mEntries = new Entry[1];
-        USER_I16.mEntries[0] = new Entry(DataType.SIGNED, DataKind.USER, false, 16, null);
-        USER_I16.init(rs);
-
-        USER_U32.mEntries = new Entry[1];
-        USER_U32.mEntries[0] = new Entry(DataType.UNSIGNED, DataKind.USER, false, 32, null);
-        USER_U32.init(rs);
-
-        USER_I32.mEntries = new Entry[1];
-        USER_I32.mEntries[0] = new Entry(DataType.SIGNED, DataKind.USER, false, 32, null);
-        USER_I32.init(rs);
-
-        USER_FLOAT.mEntries = new Entry[1];
-        USER_FLOAT.mEntries[0] = new Entry(DataType.FLOAT, DataKind.USER, false, 32, null);
-        USER_FLOAT.init(rs);
-
-        A_8.mEntries = new Entry[1];
-        A_8.mEntries[0] = new Entry(DataType.UNSIGNED, DataKind.ALPHA, true, 8, "a");
-        A_8.init(rs);
-
-        RGB_565.mEntries = new Entry[3];
-        RGB_565.mEntries[0] = new Entry(DataType.UNSIGNED, DataKind.RED, true, 5, "r");
-        RGB_565.mEntries[1] = new Entry(DataType.UNSIGNED, DataKind.GREEN, true, 6, "g");
-        RGB_565.mEntries[2] = new Entry(DataType.UNSIGNED, DataKind.BLUE, true, 5, "b");
-        RGB_565.init(rs);
-
-        RGB_888.mEntries = new Entry[3];
-        RGB_888.mEntries[0] = new Entry(DataType.UNSIGNED, DataKind.RED, true, 8, "r");
-        RGB_888.mEntries[1] = new Entry(DataType.UNSIGNED, DataKind.GREEN, true, 8, "g");
-        RGB_888.mEntries[2] = new Entry(DataType.UNSIGNED, DataKind.BLUE, true, 8, "b");
-        RGB_888.init(rs);
-
-        RGBA_5551.mEntries = new Entry[4];
-        RGBA_5551.mEntries[0] = new Entry(DataType.UNSIGNED, DataKind.RED, true, 5, "r");
-        RGBA_5551.mEntries[1] = new Entry(DataType.UNSIGNED, DataKind.GREEN, true, 5, "g");
-        RGBA_5551.mEntries[2] = new Entry(DataType.UNSIGNED, DataKind.BLUE, true, 5, "b");
-        RGBA_5551.mEntries[3] = new Entry(DataType.UNSIGNED, DataKind.ALPHA, true, 1, "a");
-        RGBA_5551.init(rs);
-
-        RGBA_4444.mEntries = new Entry[4];
-        RGBA_4444.mEntries[0] = new Entry(DataType.UNSIGNED, DataKind.RED, true, 4, "r");
-        RGBA_4444.mEntries[1] = new Entry(DataType.UNSIGNED, DataKind.GREEN, true, 4, "g");
-        RGBA_4444.mEntries[2] = new Entry(DataType.UNSIGNED, DataKind.BLUE, true, 4, "b");
-        RGBA_4444.mEntries[3] = new Entry(DataType.UNSIGNED, DataKind.ALPHA, true, 4, "a");
-        RGBA_4444.init(rs);
-
-        RGBA_8888.mEntries = new Entry[4];
-        RGBA_8888.mEntries[0] = new Entry(DataType.UNSIGNED, DataKind.RED, true, 8, "r");
-        RGBA_8888.mEntries[1] = new Entry(DataType.UNSIGNED, DataKind.GREEN, true, 8, "g");
-        RGBA_8888.mEntries[2] = new Entry(DataType.UNSIGNED, DataKind.BLUE, true, 8, "b");
-        RGBA_8888.mEntries[3] = new Entry(DataType.UNSIGNED, DataKind.ALPHA, true, 8, "a");
-        RGBA_8888.init(rs);
-
-        INDEX_16.mEntries = new Entry[1];
-        INDEX_16.mEntries[0] = new Entry(DataType.UNSIGNED, DataKind.INDEX, false, 16, "index");
-        INDEX_16.init(rs);
-
-        XY_F32.mEntries = new Entry[2];
-        XY_F32.mEntries[0] = new Entry(DataType.FLOAT, DataKind.X, false, 32, "x");
-        XY_F32.mEntries[1] = new Entry(DataType.FLOAT, DataKind.Y, false, 32, "y");
-        XY_F32.init(rs);
-
-        XYZ_F32.mEntries = new Entry[3];
-        XYZ_F32.mEntries[0] = new Entry(DataType.FLOAT, DataKind.X, false, 32, "x");
-        XYZ_F32.mEntries[1] = new Entry(DataType.FLOAT, DataKind.Y, false, 32, "y");
-        XYZ_F32.mEntries[2] = new Entry(DataType.FLOAT, DataKind.Z, false, 32, "z");
-        XYZ_F32.init(rs);
-
-        ST_XY_F32.mEntries = new Entry[4];
-        ST_XY_F32.mEntries[0] = new Entry(DataType.FLOAT, DataKind.S, false, 32, "s");
-        ST_XY_F32.mEntries[1] = new Entry(DataType.FLOAT, DataKind.T, false, 32, "t");
-        ST_XY_F32.mEntries[2] = new Entry(DataType.FLOAT, DataKind.X, false, 32, "x");
-        ST_XY_F32.mEntries[3] = new Entry(DataType.FLOAT, DataKind.Y, false, 32, "y");
-        ST_XY_F32.init(rs);
-
-        ST_XYZ_F32.mEntries = new Entry[5];
-        ST_XYZ_F32.mEntries[0] = new Entry(DataType.FLOAT, DataKind.S, false, 32, "s");
-        ST_XYZ_F32.mEntries[1] = new Entry(DataType.FLOAT, DataKind.T, false, 32, "t");
-        ST_XYZ_F32.mEntries[2] = new Entry(DataType.FLOAT, DataKind.X, false, 32, "x");
-        ST_XYZ_F32.mEntries[3] = new Entry(DataType.FLOAT, DataKind.Y, false, 32, "y");
-        ST_XYZ_F32.mEntries[4] = new Entry(DataType.FLOAT, DataKind.Z, false, 32, "z");
-        ST_XYZ_F32.init(rs);
-
-        NORM_XYZ_F32.mEntries = new Entry[6];
-        NORM_XYZ_F32.mEntries[0] = new Entry(DataType.FLOAT, DataKind.NX, false, 32, "nx");
-        NORM_XYZ_F32.mEntries[1] = new Entry(DataType.FLOAT, DataKind.NY, false, 32, "ny");
-        NORM_XYZ_F32.mEntries[2] = new Entry(DataType.FLOAT, DataKind.NZ, false, 32, "nz");
-        NORM_XYZ_F32.mEntries[3] = new Entry(DataType.FLOAT, DataKind.X, false, 32, "x");
-        NORM_XYZ_F32.mEntries[4] = new Entry(DataType.FLOAT, DataKind.Y, false, 32, "y");
-        NORM_XYZ_F32.mEntries[5] = new Entry(DataType.FLOAT, DataKind.Z, false, 32, "z");
-        NORM_XYZ_F32.init(rs);
-
-        NORM_ST_XYZ_F32.mEntries = new Entry[8];
-        NORM_ST_XYZ_F32.mEntries[0] = new Entry(DataType.FLOAT, DataKind.NX, false, 32, "nx");
-        NORM_ST_XYZ_F32.mEntries[1] = new Entry(DataType.FLOAT, DataKind.NY, false, 32, "ny");
-        NORM_ST_XYZ_F32.mEntries[2] = new Entry(DataType.FLOAT, DataKind.NZ, false, 32, "nz");
-        NORM_ST_XYZ_F32.mEntries[3] = new Entry(DataType.FLOAT, DataKind.S, false, 32, "s");
-        NORM_ST_XYZ_F32.mEntries[4] = new Entry(DataType.FLOAT, DataKind.T, false, 32, "t");
-        NORM_ST_XYZ_F32.mEntries[5] = new Entry(DataType.FLOAT, DataKind.X, false, 32, "x");
-        NORM_ST_XYZ_F32.mEntries[6] = new Entry(DataType.FLOAT, DataKind.Y, false, 32, "y");
-        NORM_ST_XYZ_F32.mEntries[7] = new Entry(DataType.FLOAT, DataKind.Z, false, 32, "z");
-        NORM_ST_XYZ_F32.init(rs);
-
-        rs.nInitElements(A_8.mID, RGBA_4444.mID, RGBA_8888.mID, RGB_565.mID);
+    public static Element USER_U8(RenderScript rs) {
+        if(rs.mElement_USER_U8 == null) {
+            rs.mElement_USER_U8 = new Element(rs, 1);
+            rs.mElement_USER_U8.mEntries[0] = new Entry(DataType.UNSIGNED, DataKind.USER, false, 8, null);
+            rs.mElement_USER_U8.init();
+        }
+        return rs.mElement_USER_U8;
     }
 
+    public static Element USER_I8(RenderScript rs) {
+        if(rs.mElement_USER_I8 == null) {
+            rs.mElement_USER_I8 = new Element(rs, 1);
+            rs.mElement_USER_I8.mEntries[0] = new Entry(DataType.SIGNED, DataKind.USER, false, 8, null);
+            rs.mElement_USER_I8.init();
+        }
+        return rs.mElement_USER_I8;
+    }
+
+    public static Element USER_U16(RenderScript rs) {
+        if(rs.mElement_USER_U16 == null) {
+            rs.mElement_USER_U16 = new Element(rs, 1);
+            rs.mElement_USER_U16.mEntries[0] = new Entry(DataType.UNSIGNED, DataKind.USER, false, 16, null);
+            rs.mElement_USER_U16.init();
+        }
+        return rs.mElement_USER_U16;
+    }
+
+    public static Element USER_I16(RenderScript rs) {
+        if(rs.mElement_USER_I16 == null) {
+            rs.mElement_USER_I16 = new Element(rs, 1);
+            rs.mElement_USER_I16.mEntries[0] = new Entry(DataType.SIGNED, DataKind.USER, false, 16, null);
+            rs.mElement_USER_I16.init();
+        }
+        return rs.mElement_USER_I16;
+    }
+
+    public static Element USER_U32(RenderScript rs) {
+        if(rs.mElement_USER_U32 == null) {
+            rs.mElement_USER_U32 = new Element(rs, 1);
+            rs.mElement_USER_U32.mEntries[0] = new Entry(DataType.UNSIGNED, DataKind.USER, false, 32, null);
+            rs.mElement_USER_U32.init();
+        }
+        return rs.mElement_USER_U32;
+    }
+
+    public static Element USER_I32(RenderScript rs) {
+        if(rs.mElement_USER_I32 == null) {
+            rs.mElement_USER_I32 = new Element(rs, 1);
+            rs.mElement_USER_I32.mEntries[0] = new Entry(DataType.SIGNED, DataKind.USER, false, 32, null);
+            rs.mElement_USER_I32.init();
+        }
+        return rs.mElement_USER_I32;
+    }
+
+    public static Element USER_F32(RenderScript rs) {
+        if(rs.mElement_USER_FLOAT == null) {
+            rs.mElement_USER_FLOAT = new Element(rs, 1);
+            rs.mElement_USER_FLOAT.mEntries[0] = new Entry(DataType.FLOAT, DataKind.USER, false, 32, null);
+            rs.mElement_USER_FLOAT.init();
+        }
+        return rs.mElement_USER_FLOAT;
+    }
+
+    public static Element A_8(RenderScript rs) {
+        if(rs.mElement_A_8 == null) {
+            rs.mElement_A_8 = new Element(rs, 1);
+            rs.mElement_A_8.mEntries[0] = new Entry(DataType.UNSIGNED, DataKind.ALPHA, true, 8, "a");
+            rs.mElement_A_8.init();
+        }
+        return rs.mElement_A_8;
+    }
+
+    public static Element RGB_565(RenderScript rs) {
+        if(rs.mElement_RGB_565 == null) {
+            rs.mElement_RGB_565 = new Element(rs, 3);
+            rs.mElement_RGB_565.mEntries[0] = new Entry(DataType.UNSIGNED, DataKind.RED, true, 5, "r");
+            rs.mElement_RGB_565.mEntries[1] = new Entry(DataType.UNSIGNED, DataKind.GREEN, true, 6, "g");
+            rs.mElement_RGB_565.mEntries[2] = new Entry(DataType.UNSIGNED, DataKind.BLUE, true, 5, "b");
+            rs.mElement_RGB_565.init();
+        }
+        return rs.mElement_RGB_565;
+    }
+
+    public static Element RGB_888(RenderScript rs) {
+        if(rs.mElement_RGB_888 == null) {
+            rs.mElement_RGB_888 = new Element(rs, 3);
+            rs.mElement_RGB_888.mEntries[0] = new Entry(DataType.UNSIGNED, DataKind.RED, true, 8, "r");
+            rs.mElement_RGB_888.mEntries[1] = new Entry(DataType.UNSIGNED, DataKind.GREEN, true, 8, "g");
+            rs.mElement_RGB_888.mEntries[2] = new Entry(DataType.UNSIGNED, DataKind.BLUE, true, 8, "b");
+            rs.mElement_RGB_888.init();
+        }
+        return rs.mElement_RGB_888;
+    }
+
+    public static Element RGBA_5551(RenderScript rs) {
+        if(rs.mElement_RGBA_5551 == null) {
+            rs.mElement_RGBA_5551 = new Element(rs, 4);
+            rs.mElement_RGBA_5551.mEntries[0] = new Entry(DataType.UNSIGNED, DataKind.RED, true, 5, "r");
+            rs.mElement_RGBA_5551.mEntries[1] = new Entry(DataType.UNSIGNED, DataKind.GREEN, true, 5, "g");
+            rs.mElement_RGBA_5551.mEntries[2] = new Entry(DataType.UNSIGNED, DataKind.BLUE, true, 5, "b");
+            rs.mElement_RGBA_5551.mEntries[3] = new Entry(DataType.UNSIGNED, DataKind.ALPHA, true, 1, "a");
+            rs.mElement_RGBA_5551.init();
+        }
+        return rs.mElement_RGBA_5551;
+    }
+
+    public static Element RGBA_4444(RenderScript rs) {
+        if(rs.mElement_RGBA_4444 == null) {
+            rs.mElement_RGBA_4444 = new Element(rs, 4);
+            rs.mElement_RGBA_4444.mEntries[0] = new Entry(DataType.UNSIGNED, DataKind.RED, true, 4, "r");
+            rs.mElement_RGBA_4444.mEntries[1] = new Entry(DataType.UNSIGNED, DataKind.GREEN, true, 4, "g");
+            rs.mElement_RGBA_4444.mEntries[2] = new Entry(DataType.UNSIGNED, DataKind.BLUE, true, 4, "b");
+            rs.mElement_RGBA_4444.mEntries[3] = new Entry(DataType.UNSIGNED, DataKind.ALPHA, true, 4, "a");
+            rs.mElement_RGBA_4444.init();
+        }
+        return rs.mElement_RGBA_4444;
+    }
+
+    public static Element RGBA_8888(RenderScript rs) {
+        if(rs.mElement_RGBA_8888 == null) {
+            rs.mElement_RGBA_8888 = new Element(rs, 4);
+            rs.mElement_RGBA_8888.mEntries[0] = new Entry(DataType.UNSIGNED, DataKind.RED, true, 8, "r");
+            rs.mElement_RGBA_8888.mEntries[1] = new Entry(DataType.UNSIGNED, DataKind.GREEN, true, 8, "g");
+            rs.mElement_RGBA_8888.mEntries[2] = new Entry(DataType.UNSIGNED, DataKind.BLUE, true, 8, "b");
+            rs.mElement_RGBA_8888.mEntries[3] = new Entry(DataType.UNSIGNED, DataKind.ALPHA, true, 8, "a");
+            rs.mElement_RGBA_8888.init();
+        }
+        return rs.mElement_RGBA_8888;
+    }
+
+    public static Element INDEX_16(RenderScript rs) {
+        if(rs.mElement_INDEX_16 == null) {
+            rs.mElement_INDEX_16 = new Element(rs, 1);
+            rs.mElement_INDEX_16.mEntries[0] = new Entry(DataType.UNSIGNED, DataKind.INDEX, false, 16, "index");
+            rs.mElement_INDEX_16.init();
+        }
+        return rs.mElement_INDEX_16;
+    }
+
+    public static Element XY_F32(RenderScript rs) {
+        if(rs.mElement_XY_F32 == null) {
+            rs.mElement_XY_F32 = new Element(rs, 2);
+            rs.mElement_XY_F32.mEntries[0] = new Entry(DataType.UNSIGNED, DataKind.X, false, 32, "x");
+            rs.mElement_XY_F32.mEntries[1] = new Entry(DataType.UNSIGNED, DataKind.Y, false, 32, "y");
+            rs.mElement_XY_F32.init();
+        }
+        return rs.mElement_XY_F32;
+    }
+
+    public static Element XYZ_F32(RenderScript rs) {
+        if(rs.mElement_XYZ_F32 == null) {
+            rs.mElement_XYZ_F32 = new Element(rs, 3);
+            rs.mElement_XYZ_F32.mEntries[0] = new Entry(DataType.UNSIGNED, DataKind.X, false, 32, "x");
+            rs.mElement_XYZ_F32.mEntries[1] = new Entry(DataType.UNSIGNED, DataKind.Y, false, 32, "y");
+            rs.mElement_XYZ_F32.mEntries[2] = new Entry(DataType.UNSIGNED, DataKind.Z, false, 32, "z");
+            rs.mElement_XYZ_F32.init();
+        }
+        return rs.mElement_XYZ_F32;
+    }
+
+    static void initPredefined(RenderScript rs) {
+        rs.nInitElements(A_8(rs).mID, RGBA_4444(rs).mID, RGBA_8888(rs).mID, RGB_565(rs).mID);
+    }
 
     public enum DataType {
         FLOAT (0),
@@ -252,10 +273,10 @@ public class Element extends BaseObj {
         }
     }
 
-    Element() {
-        super(null);
-        mID = 0;
+    Element(RenderScript rs, int count) {
+        super(rs);
         mSize = 0;
+        mEntries = new Entry[count];
     }
 
     public void destroy() throws IllegalStateException {
@@ -300,8 +321,7 @@ public class Element extends BaseObj {
         e.mSize = (bits + 7) >> 3;
     }
 
-    void init(RenderScript rs) {
-        mRS = rs;
+    void init() {
         internalCreate(mRS, this);
     }
 
@@ -463,10 +483,9 @@ public class Element extends BaseObj {
         }
 
         public Element create() {
-            Element e = new Element();
-            e.mEntries = new Entry[mEntryCount];
+            Element e = new Element(mRS, mEntryCount);
             java.lang.System.arraycopy(mEntries, 0, e.mEntries, 0, mEntryCount);
-            e.init(mRS);
+            e.init();
             return e;
         }
     }
