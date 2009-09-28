@@ -652,8 +652,7 @@ public final class ContactsContract {
 
     private interface StatusColumns extends Im.CommonPresenceColumns {
         /**
-         * Contact's latest presence level, see {@link Im.CommonPresenceColumns} for
-         * specific definitions.
+         * Contact's latest presence level.
          * <P>Type: INTEGER (one of the values below)</P>
          */
         public static final String PRESENCE = PRESENCE_STATUS;
