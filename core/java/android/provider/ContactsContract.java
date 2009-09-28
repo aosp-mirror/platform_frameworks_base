@@ -434,29 +434,6 @@ public final class ContactsContract {
         public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/contact";
 
         /**
-         * An optional query parameter added to {@link Groups#CONTENT_URI} or
-         * {@link Settings#CONTENT_URI} signaling that any update of
-         * {@link Contacts#STARRED} should not be triggered based on
-         * {@link Groups#GROUP_VISIBLE} or {@link Settings#UNGROUPED_VISIBLE}
-         * during the current update. Callers should follow-up with a separate
-         * update using {@link #FORCE_STARRED_UPDATE} to ensure that
-         * {@link Contacts#STARRED} remains consistent.
-         *
-         * @hide
-         */
-        public static final String DELAY_STARRED_UPDATE = "delay_update";
-
-        /**
-         * An optional query parameter added to {@link Groups#CONTENT_URI} or
-         * {@link Settings#CONTENT_URI} signaling that a full update of
-         * {@link Contacts#STARRED} should be triggered. This is usually only
-         * needed after using {@link #DELAY_STARRED_UPDATE}.
-         *
-         * @hide
-         */
-        public static final String FORCE_STARRED_UPDATE = "force_update";
-
-        /**
          * A sub-directory of a single contact that contains all of the constituent raw contact
          * {@link Data} rows.
          */
