@@ -182,7 +182,7 @@ public class RolloRS {
 
         mAllocScratchBuf = new int[32];
         mAllocScratch = Allocation.createSized(mRS,
-            Element.USER_I32, mAllocScratchBuf.length);
+            Element.USER_I32(mRS), mAllocScratchBuf.length);
         mAllocScratch.data(mAllocScratchBuf);
 
         Log.e("rs", "Done loading named");
@@ -193,14 +193,14 @@ public class RolloRS {
             mIcons = new Allocation[29];
             mAllocIconIDBuf = new int[mIcons.length];
             mAllocIconID = Allocation.createSized(mRS,
-                Element.USER_I32, mAllocIconIDBuf.length);
+                Element.USER_I32(mRS), mAllocIconIDBuf.length);
 
             mLabels = new Allocation[29];
             mAllocLabelIDBuf = new int[mLabels.length];
             mAllocLabelID = Allocation.createSized(mRS,
-                Element.USER_I32, mLabels.length);
+                Element.USER_I32(mRS), mLabels.length);
 
-            Element ie8888 = Element.RGBA_8888;
+            Element ie8888 = Element.RGBA_8888(mRS);
 
             mIcons[0] = Allocation.createFromBitmapResource(mRS, mRes, R.raw.browser, ie8888, true);
             mIcons[1] = Allocation.createFromBitmapResource(mRS, mRes, R.raw.market, ie8888, true);
@@ -284,7 +284,7 @@ public class RolloRS {
         p.setTextSize(20);
         p.setColor(0xffffffff);
         c.drawText(t, 2, 26, p);
-        return Allocation.createFromBitmap(mRS, b, Element.RGBA_8888, true);
+        return Allocation.createFromBitmap(mRS, b, Element.RGBA_8888(mRS), true);
     }
 
 
@@ -298,7 +298,7 @@ public class RolloRS {
 
         mAllocStateBuf = new int[] {0, 0, 0, 8, 0, 0, -1, 0, mAllocIconIDBuf.length, 0, 0};
         mAllocState = Allocation.createSized(mRS,
-            Element.USER_I32, mAllocStateBuf.length);
+            Element.USER_I32(mRS), mAllocStateBuf.length);
         mScript.bindAllocation(mAllocState, 0);
         mScript.bindAllocation(mAllocIconID, 1);
         mScript.bindAllocation(mAllocScratch, 2);

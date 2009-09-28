@@ -191,7 +191,25 @@ public class RenderScript {
     @SuppressWarnings({"FieldCanBeLocal"})
     private Surface mSurface;
 
-    private static boolean mElementsInitialized = false;
+
+    Element mElement_USER_U8;
+    Element mElement_USER_I8;
+    Element mElement_USER_U16;
+    Element mElement_USER_I16;
+    Element mElement_USER_U32;
+    Element mElement_USER_I32;
+    Element mElement_USER_FLOAT;
+
+    Element mElement_A_8;
+    Element mElement_RGB_565;
+    Element mElement_RGB_888;
+    Element mElement_RGBA_5551;
+    Element mElement_RGBA_4444;
+    Element mElement_RGBA_8888;
+
+    Element mElement_INDEX_16;
+    Element mElement_XY_F32;
+    Element mElement_XYZ_F32;
 
     ///////////////////////////////////////////////////////////////////////////////////
     //
@@ -203,12 +221,7 @@ public class RenderScript {
             nDeviceSetConfig(mDev, 0, 1);
         }
         mContext = nContextCreate(mDev, mSurface, 0, useDepth);
-
-        // TODO: This should be protected by a lock
-        if(!mElementsInitialized) {
-            Element.initPredefined(this);
-            mElementsInitialized = true;
-        }
+        Element.initPredefined(this);
     }
 
     public void destroy() {
