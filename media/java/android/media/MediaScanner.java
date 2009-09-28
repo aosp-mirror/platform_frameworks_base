@@ -1273,7 +1273,8 @@ public class MediaScanner
             }
         }
 
-        if (bestMatch == null) {
+        // if the match is not for an audio file, bail out
+        if (bestMatch == null || ! mAudioUri.equals(bestMatch.mTableUri)) {
             return false;
         }
 
