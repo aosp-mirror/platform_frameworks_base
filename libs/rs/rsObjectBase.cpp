@@ -41,7 +41,7 @@ ObjectBase::~ObjectBase()
     remove();
 }
 
-void ObjectBase::dumpObj(const char *op) const
+void ObjectBase::dumpLOGV(const char *op) const
 {
     if (mName) {
         LOGV("%s RSobj %p, name %s, refs %i,%i  from %s,%i links %p,%p,%p",
@@ -79,7 +79,7 @@ bool ObjectBase::checkDelete() const
 {
     if (!(mSysRefCount | mUserRefCount)) {
         if (mRSC && mRSC->props.mLogObjects) {
-            dumpObj("checkDelete");
+            dumpLOGV("checkDelete");
         }
         delete this;
         return true;
@@ -188,7 +188,7 @@ void ObjectBase::zeroAllUserRef(Context *rsc)
         LOGV("Objects remaining.");
         o = rsc->mObjHead;
         while (o) {
-            o->dumpObj("  ");
+            o->dumpLOGV("  ");
             o = o->mNext;
         }
     }

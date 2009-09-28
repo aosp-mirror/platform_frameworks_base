@@ -56,6 +56,7 @@ public:
     const char * getCType() const;
 
     const char * getComponentName() const {return mName.string();}
+    virtual void dumpLOGV(const char *prefix) const;
 
 protected:
 

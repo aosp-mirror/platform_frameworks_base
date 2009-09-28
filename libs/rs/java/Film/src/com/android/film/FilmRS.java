@@ -152,9 +152,9 @@ public class FilmRS {
         mBufferIDs = new int[13];
         mImages = new Allocation[13];
         mAllocIDs = Allocation.createSized(mRS,
-            Element.USER_FLOAT, mBufferIDs.length);
+            Element.USER_F32(mRS), mBufferIDs.length);
 
-        Element ie = Element.RGB_565;
+        Element ie = Element.RGB_565(mRS);
         mImages[0] = Allocation.createFromBitmapResourceBoxed(mRS, mRes, R.drawable.p01, ie, true);
         mImages[1] = Allocation.createFromBitmapResourceBoxed(mRS, mRes, R.drawable.p02, ie, true);
         mImages[2] = Allocation.createFromBitmapResourceBoxed(mRS, mRes, R.drawable.p03, ie, true);
@@ -195,7 +195,7 @@ public class FilmRS {
     {
         mBufferState = new int[10];
         mAllocState = Allocation.createSized(mRS,
-            Element.USER_FLOAT, mBufferState.length);
+            Element.USER_F32(mRS), mBufferState.length);
         mBufferState[STATE_LAST_FOCUS] = -1;
         mAllocState.data(mBufferState);
     }
@@ -238,12 +238,12 @@ public class FilmRS {
 
 
         mAllocOffsets = Allocation.createSized(mRS,
-            Element.USER_I32, mFSM.mTriangleOffsets.length);
+            Element.USER_I32(mRS), mFSM.mTriangleOffsets.length);
         mAllocOffsets.data(mFSM.mTriangleOffsets);
         mScriptStrip.bindAllocation(mAllocOffsets, 4);
 
         mAllocOffsetsTex = Allocation.createSized(mRS,
-            Element.USER_FLOAT, mFSM.mTriangleOffsetsTex.length);
+            Element.USER_F32(mRS), mFSM.mTriangleOffsetsTex.length);
         mAllocOffsetsTex.data(mFSM.mTriangleOffsetsTex);
         mScriptStrip.bindAllocation(mAllocOffsetsTex, 5);
 

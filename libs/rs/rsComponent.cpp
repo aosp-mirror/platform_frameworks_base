@@ -102,4 +102,9 @@ uint32_t Component::getGLType() const
     return 0;
 }
 
+void Component::dumpLOGV(const char *prefix) const
+{
+    ObjectBase::dumpLOGV(prefix);
+    LOGV("%s   component: %i %i %i %i", prefix, mType, mKind, mIsNormalized, mBits);
+}
 

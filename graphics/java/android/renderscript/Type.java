@@ -162,12 +162,19 @@ public class Type extends BaseObj {
         }
 
         public Builder(RenderScript rs, Element e) {
+            if(e.mID == 0) {
+                throw new IllegalArgumentException("Invalid element.");
+            }
+
             mRS = rs;
             mEntries = new Entry[4];
             mElement = e;
         }
 
         public void add(Dimension d, int value) {
+            if(value < 1) {
+                throw new IllegalArgumentException("Values of less than 1 for Dimensions are not valid.");
+            }
             if(mEntries.length >= mEntryCount) {
                 Entry[] en = new Entry[mEntryCount + 8];
                 System.arraycopy(mEntries, 0, en, 0, mEntries.length);

@@ -50,7 +50,7 @@ public:
 
     static void zeroAllUserRef(Context *rsc);
 
-    void dumpObj(const char *op) const;
+    virtual void dumpLOGV(const char *prefix) const;
 
 protected:
     const char *mAllocFile;
