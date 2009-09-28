@@ -934,10 +934,10 @@ public class StatusBarPolicy {
         else if (evdoDbm >= -105) levelEvdoDbm = 1;
         else levelEvdoDbm = 0;
 
-        if (evdoSnr > 7) levelEvdoSnr = 4;
-        else if (evdoSnr > 5) levelEvdoSnr = 3;
-        else if (evdoSnr > 3) levelEvdoSnr = 2;
-        else if (evdoSnr > 1) levelEvdoSnr = 1;
+        if (evdoSnr >= 7) levelEvdoSnr = 4;
+        else if (evdoSnr >= 5) levelEvdoSnr = 3;
+        else if (evdoSnr >= 3) levelEvdoSnr = 2;
+        else if (evdoSnr >= 1) levelEvdoSnr = 1;
         else levelEvdoSnr = 0;
 
         return (levelEvdoDbm < levelEvdoSnr) ? levelEvdoDbm : levelEvdoSnr;
