@@ -215,15 +215,17 @@ public:
     // Values for flash mode settings.
     // Flash will not be fired.
     static const char FLASH_MODE_OFF[];
-    // Flash will be fired automatically when required. The timing is decided by
-    // camera driver.
+    // Flash will be fired automatically when required. The flash may be fired
+    // during preview, auto-focus, or snapshot depending on the driver.
     static const char FLASH_MODE_AUTO[];
-    // Flash will always be fired. The timing is decided by camera driver.
+    // Flash will always be fired during snapshot. The flash may also be
+    // fired during preview or auto-focus depending on the driver.
     static const char FLASH_MODE_ON[];
     // Flash will be fired in red-eye reduction mode.
     static const char FLASH_MODE_RED_EYE[];
-    // Constant emission of light. This can be used for video recording.
-    static const char FLASH_MODE_VIDEO_LIGHT[];
+    // Constant emission of light during preview, auto-focus and snapshot.
+    // This can also be used for video recording.
+    static const char FLASH_MODE_TORCH[];
 
     // Values for scene mode settings.
     static const char SCENE_MODE_AUTO[];
