@@ -65,7 +65,13 @@ public class TestShellActivity extends Activity implements LayoutTestController 
                 mTimedOut = true;
                 if(mCallback != null)
                     mCallback.timedOut(mWebView.getUrl());
-                requestWebKitData();
+                if(!mRequestedWebKitData) {
+                    requestWebKitData();
+                } else {
+                    // if timed out and webkit data has been dumped before
+                    // finish directly
+                    finished();
+                }
                 return;
             } else if (msg.what == MSG_WEBKIT_DATA) {
                 TestShellActivity.this.dump(mTimedOut, (String)msg.obj);
@@ -83,6 +89,7 @@ public class TestShellActivity extends Activity implements LayoutTestController 
             throw new AssertionError("Requested webkit data twice: " + mWebView.getUrl());
 
         mRequestedWebKitData = true;
+        Log.v(LOGTAG, "message sent to WebView to dump text.");
         switch (mDumpDataType) {
             case DUMP_AS_TEXT:
                 mWebView.documentAsText(callback);
