@@ -51,15 +51,8 @@ MetadataRetrieverClient::MetadataRetrieverClient(pid_t pid)
     mAlbumArtDealer = NULL;
     mThumbnail = NULL;
     mAlbumArt = NULL;
-
-#ifndef NO_OPENCORE
-    mRetriever = new PVMetadataRetriever();
-#else
     mRetriever = NULL;
-#endif
-    if (mRetriever == NULL) {
-        LOGE("failed to initialize the retriever");
-    }
+    mMode = METADATA_MODE_FRAME_CAPTURE_AND_METADATA_RETRIEVAL;
 }
 
 MetadataRetrieverClient::~MetadataRetrieverClient()
@@ -74,7 +67,7 @@ status_t MetadataRetrieverClient::dump(int fd, const Vector<String16>& args) con
     char buffer[SIZE];
     String8 result;
     result.append(" MetadataRetrieverClient\n");
-    snprintf(buffer, 255, "  pid(%d)\n", mPid);
+    snprintf(buffer, 255, "  pid(%d) mode(%d)\n", mPid, mMode);
     result.append(buffer);
     write(fd, result.string(), result.size());
     write(fd, "\n", 1);
@@ -90,6 +83,7 @@ void MetadataRetrieverClient::disconnect()
     mAlbumArtDealer.clear();
     mThumbnail.clear();
     mAlbumArt.clear();
+    mMode = METADATA_MODE_FRAME_CAPTURE_AND_METADATA_RETRIEVAL;
     IPCThreadState::self()->flushCommands();
 }
 
@@ -134,7 +128,10 @@ status_t MetadataRetrieverClient::setDataSource(const char *url)
     LOGV("player type = %d", playerType);
     sp<MediaMetadataRetrieverBase> p = createRetriever(playerType);
     if (p == NULL) return NO_INIT;
-    status_t ret = p->setDataSource(url);
+    status_t ret = p->setMode(mMode);
+    if (ret == NO_ERROR) {
+        ret = p->setDataSource(url);
+    }
     if (ret == NO_ERROR) mRetriever = p;
     return ret;
 }
@@ -143,12 +140,6 @@ status_t MetadataRetrieverClient::setDataSource(int fd, int64_t offset, int64_t 
 {
     LOGV("setDataSource fd=%d, offset=%lld, length=%lld", fd, offset, length);
     Mutex::Autolock lock(mLock);
-    if (mRetriever == NULL) {
-        LOGE("retriever is not initialized");
-        ::close(fd);
-        return NO_INIT;
-    }
-
     struct stat sb;
     int ret = fstat(fd, &sb);
     if (ret != 0) {
@@ -178,7 +169,10 @@ status_t MetadataRetrieverClient::setDataSource(int fd, int64_t offset, int64_t 
         ::close(fd);
         return NO_INIT;
     }
-    status_t status = p->setDataSource(fd, offset, length);
+    status_t status = p->setMode(mMode);
+    if (status == NO_ERROR) {
+        p->setDataSource(fd, offset, length);
+    }
     if (status == NO_ERROR) mRetriever = p;
     ::close(fd);
     return status;
@@ -188,22 +182,30 @@ status_t MetadataRetrieverClient::setMode(int mode)
 {
     LOGV("setMode");
     Mutex::Autolock lock(mLock);
-    if (mRetriever == NULL) {
-        LOGE("retriever is not initialized");
-        return NO_INIT;
+    if (mode < METADATA_MODE_NOOP ||
+        mode > METADATA_MODE_FRAME_CAPTURE_AND_METADATA_RETRIEVAL) {
+        LOGE("invalid mode %d", mode);
+        return BAD_VALUE;
     }
-    return mRetriever->setMode(mode);
+    mMode = mode;
+    return NO_ERROR;
 }
 
 status_t MetadataRetrieverClient::getMode(int* mode) const
 {
     LOGV("getMode");
     Mutex::Autolock lock(mLock);
+
+    // TODO:
+    // This may not be necessary.
+    // If setDataSource() has not been called, return the cached value
+    // otherwise, return the value retrieved from the retriever
     if (mRetriever == NULL) {
-        LOGE("retriever is not initialized");
-        return NO_INIT;
+        *mode = mMode;
+    } else {
+        mRetriever->getMode(mode);
     }
-    return mRetriever->getMode(mode);
+    return NO_ERROR;
 }
 
 sp<IMemory> MetadataRetrieverClient::captureFrame()
