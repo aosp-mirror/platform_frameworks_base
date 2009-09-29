@@ -1592,8 +1592,7 @@ public class SearchManager
 
     /**
      * Query parameter added to suggestion queries to limit the number of suggestions returned.
-     *
-     * @hide Pending API council approval
+     * This limit is only advisory and suggestion providers may chose to ignore it.
      */
     public final static String SUGGEST_PARAMETER_LIMIT = "limit";
 
