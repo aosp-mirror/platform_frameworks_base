@@ -4723,7 +4723,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * caller should not call {@link #invalidate()}.</p>
      *
      * <p>This method should be invoked every time a subclass directly updates
-     * the scroll parameters. (See {@link #mScrollX} and {@link #mScrollY})</p>
+     * the scroll parameters.</p>
      *
      * <p>This method is automatically invoked by {@link #scrollBy(int, int)}
      * and {@link #scrollTo(int, int)}.</p>
@@ -4731,8 +4731,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * @return true if the animation is played, false otherwise
      *
      * @see #awakenScrollBars(int)
-     * @see #mScrollX
-     * @see #mScrollY
      * @see #scrollBy(int, int)
      * @see #scrollTo(int, int)
      * @see #isHorizontalScrollBarEnabled()
@@ -4764,7 +4762,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * 
      * <p>
      * This method should be invoked everytime a subclass directly updates the
-     * scroll parameters. (See {@link #mScrollX} and {@link #mScrollY})
+     * scroll parameters.
      * </p>
      * 
      * @param startDelay the delay, in milliseconds, after which the animation
@@ -4772,8 +4770,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      *        immediately
      * @return true if the animation is played, false otherwise
      * 
-     * @see #mScrollX
-     * @see #mScrollY
      * @see #scrollBy(int, int)
      * @see #scrollTo(int, int)
      * @see #isHorizontalScrollBarEnabled()
@@ -5314,7 +5310,22 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     private void recomputePadding() {
         setPadding(mPaddingLeft, mPaddingTop, mUserPaddingRight, mUserPaddingBottom);
     }
-
+    
+    /**
+     * Define whether scrollbars will fade when the view is not scrolling.
+     * 
+     * @param fadeScrollbars wheter to enable fading
+     * 
+     */
+    public void setScrollbarFadingEnabled(boolean fadeScrollbars) {
+        initScrollCache();
+        final ScrollabilityCache scrollabilityCache = mScrollCache;
+        scrollabilityCache.fadeScrollBars = fadeScrollbars;
+        if (!fadeScrollbars) {
+            scrollabilityCache.state = ScrollabilityCache.ON;
+        }
+    }
+    
     /**
      * <p>Specify the style of the scrollbars. The scrollbars can be overlaid or
      * inset. When inset, they add to the padding of the view. And the scrollbars
