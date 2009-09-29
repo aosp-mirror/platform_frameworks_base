@@ -1,7 +1,7 @@
 #pragma version(1)
 #pragma stateVertex(PV)
 #pragma stateFragment(PF)
-#pragma stateFragmentStore(PFS)
+#pragma stateStore(PFS)
 
 // Scratch buffer layout
 #define SCRATCH_FADE 0

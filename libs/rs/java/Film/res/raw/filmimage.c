@@ -4,7 +4,7 @@
 #pragma stateVertex(orthoWindow)
 #pragma stateRaster(flat)
 #pragma stateFragment(PgmFragBackground)
-#pragma stateFragmentStore(MyBlend)
+#pragma stateStore(MyBlend)
 
 
 int main(void* con, int ft, int launchID) {

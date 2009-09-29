@@ -51,7 +51,7 @@ public:
 
         ObjectBaseRef<ProgramVertex> mVertex;
         ObjectBaseRef<ProgramFragment> mFragment;
-        //ObjectBaseRef<ProgramRaster> mRaster;
+        ObjectBaseRef<ProgramRaster> mRaster;
         ObjectBaseRef<ProgramFragmentStore> mFragmentStore;
         InvokeFunc_t mInvokables[MAX_SCRIPT_BANKS];
         const char * mScriptText;
