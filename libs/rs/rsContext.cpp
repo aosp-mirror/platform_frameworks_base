@@ -103,12 +103,14 @@ bool Context::runScript(Script *s, uint32_t launchID)
     ObjectBaseRef<ProgramFragment> frag(mFragment);
     ObjectBaseRef<ProgramVertex> vtx(mVertex);
     ObjectBaseRef<ProgramFragmentStore> store(mFragmentStore);
+    ObjectBaseRef<ProgramRaster> raster(mRaster);
 
     bool ret = s->run(this, launchID);
 
     mFragment.set(frag);
     mVertex.set(vtx);
     mFragmentStore.set(store);
+    mRaster.set(raster);
     return ret;
 }
 
@@ -124,7 +126,6 @@ bool Context::runRootScript()
     eglQuerySurface(mEGL.mDisplay, mEGL.mSurface, EGL_HEIGHT, &mEGL.mHeight);
     glViewport(0, 0, mEGL.mWidth, mEGL.mHeight);
     glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
-    //glEnable(GL_POINT_SMOOTH);
 
     glClearColor(mRootScript->mEnviroment.mClearColor[0],
                  mRootScript->mEnviroment.mClearColor[1],

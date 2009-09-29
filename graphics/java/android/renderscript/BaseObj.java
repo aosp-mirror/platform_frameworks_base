@@ -66,8 +66,8 @@ class BaseObj {
             mRS = null;
             mID = 0;
             mDestroyed = true;
-            Log.v(RenderScript.LOG_TAG,
-                  getClass() + " auto finalizing object without having released the RS reference.");
+            //Log.v(RenderScript.LOG_TAG, getClass() +
+            // " auto finalizing object without having released the RS reference.");
         }
         super.finalize();
     }

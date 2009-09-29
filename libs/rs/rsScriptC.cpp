@@ -72,6 +72,9 @@ bool ScriptC::run(Context *rsc, uint32_t launchIndex)
     if (mEnviroment.mVertex.get()) {
         rsc->setVertex(mEnviroment.mVertex.get());
     }
+    if (mEnviroment.mRaster.get()) {
+        rsc->setRaster(mEnviroment.mRaster.get());
+    }
 
     if (launchIndex == 0) {
         mEnviroment.mStartTimeMillis
@@ -175,6 +178,7 @@ void ScriptCState::runCompiler(Context *rsc, ScriptC *s)
     s->mEnviroment.mFragment.set(rsc->getDefaultProgramFragment());
     s->mEnviroment.mVertex.set(rsc->getDefaultProgramVertex());
     s->mEnviroment.mFragmentStore.set(rsc->getDefaultProgramFragmentStore());
+    s->mEnviroment.mRaster.set(rsc->getDefaultProgramRaster());
 
     if (s->mProgram.mScript) {
         const static int pragmaMax = 16;
@@ -204,6 +208,18 @@ void ScriptCState::runCompiler(Context *rsc, ScriptC *s)
             }
 
             if (!strcmp(str[ct], "stateRaster")) {
+                if (!strcmp(str[ct+1], "default")) {
+                    continue;
+                }
+                if (!strcmp(str[ct+1], "parent")) {
+                    s->mEnviroment.mRaster.clear();
+                    continue;
+                }
+                ProgramRaster * pr = (ProgramRaster *)rsc->lookupName(str[ct+1]);
+                if (pr != NULL) {
+                    s->mEnviroment.mRaster.set(pr);
+                    continue;
+                }
                 LOGE("Unreconized value %s passed to stateRaster", str[ct+1]);
             }
 
@@ -223,7 +239,7 @@ void ScriptCState::runCompiler(Context *rsc, ScriptC *s)
                 LOGE("Unreconized value %s passed to stateFragment", str[ct+1]);
             }
 
-            if (!strcmp(str[ct], "stateFragmentStore")) {
+            if (!strcmp(str[ct], "stateStore")) {
                 if (!strcmp(str[ct+1], "default")) {
                     continue;
                 }
@@ -237,7 +253,7 @@ void ScriptCState::runCompiler(Context *rsc, ScriptC *s)
                     s->mEnviroment.mFragmentStore.set(pfs);
                     continue;
                 }
-                LOGE("Unreconized value %s passed to stateFragmentStore", str[ct+1]);
+                LOGE("Unreconized value %s passed to stateStore", str[ct+1]);
             }
 
         }

@@ -3,7 +3,7 @@
 #pragma version(1)
 #pragma stateVertex(PVBackground)
 #pragma stateFragment(PFBackground)
-#pragma stateFragmentStore(PSBackground)
+#pragma stateStore(PSBackground)
 
 #define STATE_TRIANGLE_OFFSET_COUNT 0
 #define STATE_LAST_FOCUS 1
@@ -33,7 +33,7 @@ int main(int index)
     drawSimpleMesh(NAMED_mesh);
 
     // Start of images.
-    bindProgramFragmentStore(NAMED_PSImages);
+    bindProgramStore(NAMED_PSImages);
     bindProgramFragment(NAMED_PFImages);
     bindProgramVertex(NAMED_PVImages);
 
