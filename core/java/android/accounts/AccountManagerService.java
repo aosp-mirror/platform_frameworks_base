@@ -102,6 +102,7 @@ public class AccountManagerService
     private static final String ACCOUNTS_ID = "_id";
     private static final String ACCOUNTS_NAME = "name";
     private static final String ACCOUNTS_TYPE = "type";
+    private static final String ACCOUNTS_TYPE_COUNT = "count(type)";
     private static final String ACCOUNTS_PASSWORD = "password";
 
     private static final String TABLE_AUTHTOKENS = "authtokens";
@@ -127,6 +128,8 @@ public class AccountManagerService
 
     private static final String[] ACCOUNT_NAME_TYPE_PROJECTION =
             new String[]{ACCOUNTS_ID, ACCOUNTS_NAME, ACCOUNTS_TYPE};
+    private static final String[] ACCOUNT_TYPE_COUNT_PROJECTION =
+            new String[] { ACCOUNTS_TYPE, ACCOUNTS_TYPE_COUNT};
     private static final Intent ACCOUNTS_CHANGED_INTENT;
 
     private static final String COUNT_OF_MATCHING_GRANTS = ""
@@ -1455,18 +1458,54 @@ public class AccountManagerService
         return asBinder();
     }
 
-    protected void dump(FileDescriptor fd, PrintWriter fout, String[] args) {
-        synchronized (mSessions) {
-            final long now = SystemClock.elapsedRealtime();
-            fout.println("AccountManagerService: " + mSessions.size() + " sessions");
-            for (Session session : mSessions.values()) {
-                fout.println("  " + session.toDebugString(now));
+    /**
+     * Searches array of arguments for the specified string
+     * @param args array of argument strings
+     * @param value value to search for
+     * @return true if the value is contained in the array
+     */
+    private static boolean scanArgs(String[] args, String value) {
+        if (args != null) {
+            for (String arg : args) {
+                if (value.equals(arg)) {
+                    return true;
+                }
             }
         }
+        return false;
+    }
 
-        fout.println();
+    protected void dump(FileDescriptor fd, PrintWriter fout, String[] args) {
+        final boolean isCheckinRequest = scanArgs(args, "--checkin") || scanArgs(args, "-c");
 
-        mAuthenticatorCache.dump(fd, fout, args);
+        if (isCheckinRequest) {
+            // This is a checkin request. *Only* upload the account types and the count of each.
+            SQLiteDatabase db = mOpenHelper.getReadableDatabase();
+
+            Cursor cursor = db.query(TABLE_ACCOUNTS, ACCOUNT_TYPE_COUNT_PROJECTION,
+                    null, null, ACCOUNTS_TYPE, null, null);
+            try {
+                while (cursor.moveToNext()) {
+                    // print type,count
+                    fout.println(cursor.getString(0) + "," + cursor.getString(1));
+                }
+            } finally {
+                if (cursor != null) {
+                    cursor.close();
+                }
+            }
+        } else {
+            synchronized (mSessions) {
+                final long now = SystemClock.elapsedRealtime();
+                fout.println("AccountManagerService: " + mSessions.size() + " sessions");
+                for (Session session : mSessions.values()) {
+                    fout.println("  " + session.toDebugString(now));
+                }
+            }
+
+            fout.println();
+            mAuthenticatorCache.dump(fd, fout, args);
+        }
     }
 
     private void doNotification(Account account, CharSequence message, Intent intent) {
