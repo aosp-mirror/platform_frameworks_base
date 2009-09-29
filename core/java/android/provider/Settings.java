@@ -3191,6 +3191,13 @@ public final class Settings {
                 "vending_pd_resend_frequency_ms";
 
         /**
+         * Time before an asset in the 'DOWNLOADING' state is considered ready
+         * for an install kick on the client.
+         */
+        public static final String VENDING_DOWNLOADING_KICK_TIMEOUT_MS =
+                "vending_downloading_kick_ms";
+
+        /**
          * Size of buffer in bytes for Vending to use when reading cache files.
          */
         public static final String VENDING_DISK_INPUT_BUFFER_BYTES =
