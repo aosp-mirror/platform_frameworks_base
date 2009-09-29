@@ -60,6 +60,7 @@ private:
     mutable Mutex                          mLock;
     sp<MediaMetadataRetrieverBase>         mRetriever;
     pid_t                                  mPid;
+    int                                    mMode;
 
     // Keep the shared memory copy of album art and capture frame (for thumbnail)
     sp<MemoryDealer>                       mAlbumArtDealer;
