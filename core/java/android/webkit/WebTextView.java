@@ -276,25 +276,6 @@ import java.util.ArrayList;
     }
 
     /**
-     *  Create a fake touch up event at (x,y) with respect to this WebTextView.
-     *  This is used by WebView to act as though a touch event which happened
-     *  before we placed the WebTextView actually hit it, so that it can place
-     *  the cursor accordingly.
-     */
-    /* package */ void fakeTouchEvent(float x, float y) {
-        // We need to ensure that there is a Layout, since the Layout is used
-        // in determining where to place the cursor.
-        if (getLayout() == null) {
-            measure(mWidthSpec, mHeightSpec);
-        }
-        // Create a fake touch up, which is used to place the cursor.
-        MotionEvent ev = MotionEvent.obtain(0, 0, MotionEvent.ACTION_UP,
-                x, y, 0);
-        onTouchEvent(ev);
-        ev.recycle();
-    }
-
-    /**
      *  Determine whether this WebTextView currently represents the node
      *  represented by ptr.
      *  @param  ptr Pointer to a node to compare to.
@@ -457,7 +438,14 @@ import java.util.ArrayList;
             int smallerSlop = slop/2;
             if (dx > smallerSlop || dy > smallerSlop) {
                 if (mWebView != null) {
-                    mWebView.scrollFocusedTextInput(mScrollX, mScrollY);
+                    float maxScrollX = (float) Touch.getMaxScrollX(this,
+                                getLayout(), mScrollY);
+                    if (DebugFlags.WEB_TEXT_VIEW) {
+                        Log.v(LOGTAG, "onTouchEvent x=" + mScrollX + " y="
+                                + mScrollY + " maxX=" + maxScrollX);
+                    }
+                    mWebView.scrollFocusedTextInput(maxScrollX > 0 ?
+                            mScrollX / maxScrollX : 0, mScrollY);
                 }
                 mScrolled = true;
                 return true;
