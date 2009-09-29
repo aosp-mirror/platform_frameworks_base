@@ -345,6 +345,7 @@ public class ContactHeaderWidget extends FrameLayout implements View.OnClickList
      */
     public void setExcludeMimes(String[] excludeMimes) {
         mExcludeMimes = excludeMimes;
+        mPhotoView.setExcludeMimes(excludeMimes);
     }
 
     /**
