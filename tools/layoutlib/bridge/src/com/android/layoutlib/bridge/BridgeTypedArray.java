@@ -673,7 +673,8 @@ public final class BridgeTypedArray extends TypedArray {
 
         // looks like we were unable to resolve the drawable
         mContext.getLogger().warning(String.format(
-                "Unable to resolve drawable \"%1$s\" in attribute \"%2$s\"", value, mNames[index]));
+                "Unable to resolve drawable \"%1$s\" in attribute \"%2$s\"", stringValue,
+                mNames[index]));
 
         return null;
     }
