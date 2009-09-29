@@ -24,6 +24,7 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Interpolator;
 import android.graphics.LinearGradient;
 import android.graphics.Matrix;
 import android.graphics.Paint;
@@ -58,6 +59,7 @@ import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityEventSource;
 import android.view.accessibility.AccessibilityManager;
 import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
@@ -514,7 +516,8 @@ import java.util.WeakHashMap;
  * The framework provides basic support for views that wish to internally
  * scroll their content. This includes keeping track of the X and Y scroll
  * offset as well as mechanisms for drawing scrollbars. See
- * {@link #scrollBy(int, int)}, {@link #scrollTo(int, int)} for more details.
+ * {@link #scrollBy(int, int)}, {@link #scrollTo(int, int)}, and 
+ * {@link #awakenScrollBars()} for more details.
  * </p>
  *
  * <a name="Tags"></a>
@@ -571,6 +574,8 @@ import java.util.WeakHashMap;
  * @attr ref android.R.styleable#View_scrollbarSize
  * @attr ref android.R.styleable#View_scrollbarStyle
  * @attr ref android.R.styleable#View_scrollbars
+ * @attr ref android.R.styleable#View_scrollbarDefaultDelayBeforeFade
+ * @attr ref android.R.styleable#View_scrollbarFadeDuration
  * @attr ref android.R.styleable#View_scrollbarTrackHorizontal
  * @attr ref android.R.styleable#View_scrollbarThumbHorizontal
  * @attr ref android.R.styleable#View_scrollbarThumbVertical
@@ -2214,12 +2219,28 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     protected void initializeScrollbars(TypedArray a) {
         initScrollCache();
 
-        if (mScrollCache.scrollBar == null) {
-            mScrollCache.scrollBar = new ScrollBarDrawable();
-        }
-
         final ScrollabilityCache scrollabilityCache = mScrollCache;
+        
+        if (scrollabilityCache.scrollBar == null) {
+            scrollabilityCache.scrollBar = new ScrollBarDrawable();
+        }
+        
+        final boolean fadeScrollbars = a.getBoolean(R.styleable.View_fadeScrollbars, false);
 
+        if (!fadeScrollbars) {
+            scrollabilityCache.state = ScrollabilityCache.ON;
+        }
+        scrollabilityCache.fadeScrollBars = fadeScrollbars;
+        
+        
+        scrollabilityCache.scrollBarFadeDuration = a.getInt(
+                R.styleable.View_scrollbarFadeDuration, ViewConfiguration
+                        .getScrollBarFadeDuration());
+        scrollabilityCache.scrollBarDefaultDelayBeforeFade = a.getInt(
+                R.styleable.View_scrollbarDefaultDelayBeforeFade,
+                ViewConfiguration.getScrollDefaultDelay());
+
+                
         scrollabilityCache.scrollBarSize = a.getDimensionPixelSize(
                 com.android.internal.R.styleable.View_scrollbarSize,
                 ViewConfiguration.get(mContext).getScaledScrollBarSize());
@@ -2263,7 +2284,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      */
     private void initScrollCache() {
         if (mScrollCache == null) {
-            mScrollCache = new ScrollabilityCache(ViewConfiguration.get(mContext));
+            mScrollCache = new ScrollabilityCache(ViewConfiguration.get(mContext), this);
         }
     }
 
@@ -4671,7 +4692,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
             mScrollX = x;
             mScrollY = y;
             onScrollChanged(mScrollX, mScrollY, oldX, oldY);
-            invalidate();
+            if (!awakenScrollBars()) {
+                invalidate();
+            }
         }
     }
 
@@ -4684,6 +4707,116 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      */
     public void scrollBy(int x, int y) {
         scrollTo(mScrollX + x, mScrollY + y);
+    }
+
+    /**
+     * <p>Trigger the scrollbars to draw. When invoked this method starts an
+     * animation to fade the scrollbars out after a default delay. If a subclass
+     * provides animated scrolling, the start delay should equal the duration
+     * of the scrolling animation.</p>
+     *
+     * <p>The animation starts only if at least one of the scrollbars is
+     * enabled, as specified by {@link #isHorizontalScrollBarEnabled()} and
+     * {@link #isVerticalScrollBarEnabled()}. When the animation is started,
+     * this method returns true, and false otherwise. If the animation is
+     * started, this method calls {@link #invalidate()}; in that case the
+     * caller should not call {@link #invalidate()}.</p>
+     *
+     * <p>This method should be invoked every time a subclass directly updates
+     * the scroll parameters.</p>
+     *
+     * <p>This method is automatically invoked by {@link #scrollBy(int, int)}
+     * and {@link #scrollTo(int, int)}.</p>
+     *
+     * @return true if the animation is played, false otherwise
+     *
+     * @see #awakenScrollBars(int)
+     * @see #scrollBy(int, int)
+     * @see #scrollTo(int, int)
+     * @see #isHorizontalScrollBarEnabled()
+     * @see #isVerticalScrollBarEnabled()
+     * @see #setHorizontalScrollBarEnabled(boolean)
+     * @see #setVerticalScrollBarEnabled(boolean)
+     */
+    protected boolean awakenScrollBars() {
+        return mScrollCache != null &&
+                awakenScrollBars(mScrollCache.scrollBarDefaultDelayBeforeFade);
+    }
+
+    /**
+     * <p>
+     * Trigger the scrollbars to draw. When invoked this method starts an
+     * animation to fade the scrollbars out after a fixed delay. If a subclass
+     * provides animated scrolling, the start delay should equal the duration of
+     * the scrolling animation.
+     * </p>
+     * 
+     * <p>
+     * The animation starts only if at least one of the scrollbars is enabled,
+     * as specified by {@link #isHorizontalScrollBarEnabled()} and
+     * {@link #isVerticalScrollBarEnabled()}. When the animation is started,
+     * this method returns true, and false otherwise. If the animation is
+     * started, this method calls {@link #invalidate()}; in that case the caller
+     * should not call {@link #invalidate()}.
+     * </p>
+     * 
+     * <p>
+     * This method should be invoked everytime a subclass directly updates the
+     * scroll parameters.
+     * </p>
+     * 
+     * @param startDelay the delay, in milliseconds, after which the animation
+     *        should start; when the delay is 0, the animation starts
+     *        immediately
+     * @return true if the animation is played, false otherwise
+     * 
+     * @see #scrollBy(int, int)
+     * @see #scrollTo(int, int)
+     * @see #isHorizontalScrollBarEnabled()
+     * @see #isVerticalScrollBarEnabled()
+     * @see #setHorizontalScrollBarEnabled(boolean)
+     * @see #setVerticalScrollBarEnabled(boolean)
+     */
+    protected boolean awakenScrollBars(int startDelay) {
+        final ScrollabilityCache scrollCache = mScrollCache;
+        
+        if (scrollCache == null || !scrollCache.fadeScrollBars) {
+            return false;
+        }
+
+        if (scrollCache.scrollBar == null) {
+            scrollCache.scrollBar = new ScrollBarDrawable();
+        }
+
+        if (isHorizontalScrollBarEnabled() || isVerticalScrollBarEnabled()) {
+
+            // Invalidate to show the scrollbars
+            invalidate();
+
+            if (scrollCache.state == ScrollabilityCache.OFF) {
+                // FIXME: this is copied from WindowManagerService.
+                // We should get this value from the system when it
+                // is possible to do so.
+                final int KEY_REPEAT_FIRST_DELAY = 750;
+                startDelay = Math.max(KEY_REPEAT_FIRST_DELAY, startDelay);
+            }
+
+            // Tell mScrollCache when we should start fading. This may
+            // extend the fade start time if one was already scheduled
+            long fadeStartTime = AnimationUtils.currentAnimationTimeMillis() + startDelay;
+            scrollCache.fadeStartTime = fadeStartTime;
+            scrollCache.state = ScrollabilityCache.ON;
+
+            // Schedule our fader to run, unscheduling any old ones first
+            if (mAttachInfo != null) {
+                mAttachInfo.mHandler.removeCallbacks(scrollCache);
+                mAttachInfo.mHandler.postAtTime(scrollCache, fadeStartTime);
+            }
+
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -5177,7 +5310,34 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     private void recomputePadding() {
         setPadding(mPaddingLeft, mPaddingTop, mUserPaddingRight, mUserPaddingBottom);
     }
-
+    
+    /**
+     * Define whether scrollbars will fade when the view is not scrolling.
+     * 
+     * @param fadeScrollbars wheter to enable fading
+     * 
+     */
+    public void setScrollbarFadingEnabled(boolean fadeScrollbars) {
+        initScrollCache();
+        final ScrollabilityCache scrollabilityCache = mScrollCache;
+        scrollabilityCache.fadeScrollBars = fadeScrollbars;
+        if (fadeScrollbars) {
+            scrollabilityCache.state = ScrollabilityCache.OFF;
+        } else {
+            scrollabilityCache.state = ScrollabilityCache.ON;
+        }
+    }
+    
+    /**
+     * 
+     * Returns true if scrollbars will fade when this view is not scrolling
+     * 
+     * @return true if scrollbar fading is enabled
+     */
+    public boolean isScrollbarFadingEnabled() {
+        return mScrollCache != null && mScrollCache.fadeScrollBars; 
+    }
+    
     /**
      * <p>Specify the style of the scrollbars. The scrollbars can be overlaid or
      * inset. When inset, they add to the padding of the view. And the scrollbars
@@ -5344,11 +5504,49 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * scrollbars are painted only if they have been awakened first.</p>
      *
      * @param canvas the canvas on which to draw the scrollbars
+     * 
+     * @see #awakenScrollBars(int)
      */
     private void onDrawScrollBars(Canvas canvas) {
         // scrollbars are drawn only when the animation is running
         final ScrollabilityCache cache = mScrollCache;
         if (cache != null) {
+            
+            int state = cache.state;
+            
+            if (state == ScrollabilityCache.OFF) {
+                return;
+            }
+            
+            boolean invalidate = false;
+            
+            if (state == ScrollabilityCache.FADING) {
+                // We're fading -- get our fade interpolation
+                if (cache.interpolatorValues == null) {
+                    cache.interpolatorValues = new float[1];
+                }
+                
+                float[] values = cache.interpolatorValues;
+                
+                // Stops the animation if we're done
+                if (cache.scrollBarInterpolator.timeToValues(values) ==
+                        Interpolator.Result.FREEZE_END) {
+                    cache.state = ScrollabilityCache.OFF;
+                } else {
+                    cache.scrollBar.setAlpha(Math.round(values[0]));
+                }
+                
+                // This will make the scroll bars inval themselves after 
+                // drawing. We only want this when we're fading so that
+                // we prevent excessive redraws
+                invalidate = true;
+            } else {
+                // We're just on -- but we may have been fading before so
+                // reset alpha
+                cache.scrollBar.setAlpha(255);
+            }
+
+            
             final int viewFlags = mViewFlags;
 
             final boolean drawHorizontalScrollBar =
@@ -5371,19 +5569,22 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                 final int scrollY = mScrollY;
                 final int inside = (viewFlags & SCROLLBARS_OUTSIDE_MASK) == 0 ? ~0 : 0;
 
+                int left, top, right, bottom;
+                
                 if (drawHorizontalScrollBar) {
-                    scrollBar.setParameters(
-                                            computeHorizontalScrollRange(),
+                    scrollBar.setParameters(computeHorizontalScrollRange(),
                                             computeHorizontalScrollOffset(),
                                             computeHorizontalScrollExtent(), false);
-                    final int top = scrollY + height - size - (mUserPaddingBottom & inside);
                     final int verticalScrollBarGap = drawVerticalScrollBar ?
-                                                getVerticalScrollbarWidth() : 0;
-                    onDrawHorizontalScrollBar(canvas, scrollBar,
-                        scrollX + (mPaddingLeft & inside),
-                        top,
-                        scrollX + width - (mUserPaddingRight & inside) - verticalScrollBarGap,
-                        top + size);
+                            getVerticalScrollbarWidth() : 0;
+                    top = scrollY + height - size - (mUserPaddingBottom & inside);                         
+                    left = scrollX + (mPaddingLeft & inside);
+                    right = scrollX + width - (mUserPaddingRight & inside) - verticalScrollBarGap;
+                    bottom = top + size;
+                    onDrawHorizontalScrollBar(canvas, scrollBar, left, top, right, bottom);
+                    if (invalidate) {
+                        invalidate(left, top, right, bottom);
+                    }
                 }
 
                 if (drawVerticalScrollBar) {
@@ -5391,12 +5592,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                                             computeVerticalScrollOffset(),
                                             computeVerticalScrollExtent(), true);
                     // TODO: Deal with RTL languages to position scrollbar on left
-                    final int left = scrollX + width - size - (mUserPaddingRight & inside);
-                    onDrawVerticalScrollBar(canvas, scrollBar,
-                             left,
-                             scrollY + (mPaddingTop & inside),
-                             left + size,
-                             scrollY + height - (mUserPaddingBottom & inside));
+                    left = scrollX + width - size - (mUserPaddingRight & inside);
+                    top = scrollY + (mPaddingTop & inside);
+                    right = left + size;
+                    bottom = scrollY + height - (mUserPaddingBottom & inside);
+                    onDrawVerticalScrollBar(canvas, scrollBar, left, top, right, bottom);
+                    if (invalidate) {
+                        invalidate(left, top, right, bottom);
+                    }
                 }
             }
         }
@@ -5424,7 +5627,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * @see #computeHorizontalScrollExtent()
      * @see #computeHorizontalScrollOffset()
      * @see android.widget.ScrollBarDrawable
-     *  @hide
+     * @hide
      */
     protected void onDrawHorizontalScrollBar(Canvas canvas,
                                              Drawable scrollBar,
@@ -8731,21 +8934,62 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * is supported. This avoids keeping too many unused fields in most
      * instances of View.</p>
      */
-    private static class ScrollabilityCache {
+    private static class ScrollabilityCache implements Runnable {
+                
+        /**
+         * Scrollbars are not visible
+         */
+        public static final int OFF = 0;
+
+        /**
+         * Scrollbars are visible
+         */
+        public static final int ON = 1;
+
+        /**
+         * Scrollbars are fading away
+         */
+        public static final int FADING = 2;
+
+        public boolean fadeScrollBars;
+        
         public int fadingEdgeLength;
+        public int scrollBarDefaultDelayBeforeFade;
+        public int scrollBarFadeDuration;
 
         public int scrollBarSize;
         public ScrollBarDrawable scrollBar;
+        public float[] interpolatorValues;
+        public View host;
 
         public final Paint paint;
         public final Matrix matrix;
         public Shader shader;
 
+        public final Interpolator scrollBarInterpolator = new Interpolator(1, 2);
+
+        private final float[] mOpaque = {255.0f};
+        private final float[] mTransparent = {0.0f};
+        
+        /**
+         * When fading should start. This time moves into the future every time
+         * a new scroll happens. Measured based on SystemClock.uptimeMillis()
+         */
+        public long fadeStartTime;
+
+
+        /**
+         * The current state of the scrollbars: ON, OFF, or FADING
+         */
+        public int state = OFF;
+
         private int mLastColor;
 
-        public ScrollabilityCache(ViewConfiguration configuration) {
+        public ScrollabilityCache(ViewConfiguration configuration, View host) {
             fadingEdgeLength = configuration.getScaledFadingEdgeLength();
             scrollBarSize = configuration.getScaledScrollBarSize();
+            scrollBarDefaultDelayBeforeFade = configuration.getScrollDefaultDelay();
+            scrollBarFadeDuration = configuration.getScrollBarFadeDuration();
 
             paint = new Paint();
             matrix = new Matrix();
@@ -8755,6 +8999,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
 
             paint.setShader(shader);
             paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.DST_OUT));
+            this.host = host;
         }
 
         public void setFadeColor(int color) {
@@ -8770,5 +9015,32 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                 paint.setXfermode(null);
             }
         }
+        
+        public void run() {
+            long now = AnimationUtils.currentAnimationTimeMillis();
+            if (now >= fadeStartTime) {
+
+                // the animation fades the scrollbars out by changing
+                // the opacity (alpha) from fully opaque to fully
+                // transparent
+                int nextFrame = (int) now;
+                int framesCount = 0;
+
+                Interpolator interpolator = scrollBarInterpolator;
+
+                // Start opaque
+                interpolator.setKeyFrame(framesCount++, nextFrame, mOpaque);
+
+                // End transparent
+                nextFrame += scrollBarFadeDuration;
+                interpolator.setKeyFrame(framesCount, nextFrame, mTransparent);
+
+                state = FADING;
+
+                // Kick off the fade animation
+                host.invalidate();
+            }
+        }
+
     }
 }

@@ -175,23 +175,89 @@ void renderFrame() {
     checkGlError("glDrawArrays");
 }
 
-#if 0
+void printEGLConfiguration(EGLDisplay dpy, EGLConfig config) {
 
-void PrintEGLConfig(EGLDisplay dpy, EGLConfig config) {
-	int attrib[] = {EGL_RED_SIZE, EGL_GREEN_SIZE, EGL_BLUE_SIZE, EGL_ALPHA_SIZE,
-			EGL_DEPTH_SIZE, EGL_SURFACE_TYPE, EGL_RENDERABLE_TYPE
-	};
-	for(size_t i = 0; i < sizeof(attrib)/sizeof(attrib[0]); i++) {
-        int value = 0;
-        int a = attrib[i];
-        if (eglGetConfigAttrib(dpy, config, a, &value)) {
-            printf(" 0x%04x: %d", a, value);
+#define X(VAL) {VAL, #VAL}
+    struct {EGLint attribute; const char* name;} names[] = {
+    X(EGL_BUFFER_SIZE),
+    X(EGL_ALPHA_SIZE),
+    X(EGL_BLUE_SIZE),
+    X(EGL_GREEN_SIZE),
+    X(EGL_RED_SIZE),
+    X(EGL_DEPTH_SIZE),
+    X(EGL_STENCIL_SIZE),
+    X(EGL_CONFIG_CAVEAT),
+    X(EGL_CONFIG_ID),
+    X(EGL_LEVEL),
+    X(EGL_MAX_PBUFFER_HEIGHT),
+    X(EGL_MAX_PBUFFER_PIXELS),
+    X(EGL_MAX_PBUFFER_WIDTH),
+    X(EGL_NATIVE_RENDERABLE),
+    X(EGL_NATIVE_VISUAL_ID),
+    X(EGL_NATIVE_VISUAL_TYPE),
+    X(EGL_PRESERVED_RESOURCES),
+    X(EGL_SAMPLES),
+    X(EGL_SAMPLE_BUFFERS),
+    X(EGL_SURFACE_TYPE),
+    X(EGL_TRANSPARENT_TYPE),
+    X(EGL_TRANSPARENT_RED_VALUE),
+    X(EGL_TRANSPARENT_GREEN_VALUE),
+    X(EGL_TRANSPARENT_BLUE_VALUE),
+    X(EGL_BIND_TO_TEXTURE_RGB),
+    X(EGL_BIND_TO_TEXTURE_RGBA),
+    X(EGL_MIN_SWAP_INTERVAL),
+    X(EGL_MAX_SWAP_INTERVAL),
+    X(EGL_LUMINANCE_SIZE),
+    X(EGL_ALPHA_MASK_SIZE),
+    X(EGL_COLOR_BUFFER_TYPE),
+    X(EGL_RENDERABLE_TYPE),
+    X(EGL_CONFORMANT),
+   };
+#undef X
+
+    for (size_t j = 0; j < sizeof(names) / sizeof(names[0]); j++) {
+        EGLint value = -1;
+        EGLint returnVal = eglGetConfigAttrib(dpy, config, names[j].attribute, &value);
+        EGLint error = eglGetError();
+        if (returnVal && error == EGL_SUCCESS) {
+            printf(" %s: ", names[j].name);
+            printf("%d (0x%x)", value, value);
         }
-	}
-	printf("\n");
+    }
+    printf("\n");
 }
 
-#endif
+int printEGLConfigurations(EGLDisplay dpy) {
+    EGLint numConfig = 0;
+    EGLint returnVal = eglGetConfigs(dpy, NULL, 0, &numConfig);
+    checkEglError("eglGetConfigs", returnVal);
+    if (!returnVal) {
+        return false;
+    }
+
+    printf("Number of EGL configuration: %d\n", numConfig);
+
+    EGLConfig* configs = (EGLConfig*) malloc(sizeof(EGLConfig) * numConfig);
+    if (! configs) {
+        printf("Could not allocate configs.\n");
+        return false;
+    }
+
+    returnVal = eglGetConfigs(dpy, configs, numConfig, &numConfig);
+    checkEglError("eglGetConfigs", returnVal);
+    if (!returnVal) {
+        free(configs);
+        return false;
+    }
+
+    for(int i = 0; i < numConfig; i++) {
+        printf("Configuration %d\n", i);
+        printEGLConfiguration(dpy, configs[i]);
+    }
+
+    free(configs);
+    return true;
+}
 
 int main(int argc, char** argv) {
     EGLBoolean returnValue;
@@ -199,7 +265,7 @@ int main(int argc, char** argv) {
 
     EGLint context_attribs[] = { EGL_CONTEXT_CLIENT_VERSION, 2, EGL_NONE };
     EGLint s_configAttribs[] = {
-            EGL_SURFACE_TYPE, EGL_PBUFFER_BIT|EGL_WINDOW_BIT,
+            EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
             EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
             EGL_NONE };
     EGLint majorVersion;
@@ -226,12 +292,24 @@ int main(int argc, char** argv) {
         return 0;
     }
 
+    if (!printEGLConfigurations(dpy)) {
+        printf("printEGLConfigurations failed\n");
+        return 0;
+    }
+
+    checkEglError("printEGLConfigurations");
+
     EGLNativeWindowType window = android_createDisplaySurface();
     returnValue = EGLUtils::selectConfigForNativeWindow(dpy, s_configAttribs, window, &myConfig);
     if (returnValue) {
-    	printf("EGLUtils::selectConfigForNativeWindow() returned %d", returnValue);
-    	return 0;
+        printf("EGLUtils::selectConfigForNativeWindow() returned %d", returnValue);
+        return 0;
     }
+
+    checkEglError("EGLUtils::selectConfigForNativeWindow");
+
+    printf("Chose this configuration:\n");
+    printEGLConfiguration(dpy, myConfig);
 
     surface = eglCreateWindowSurface(dpy, myConfig, window, NULL);
     checkEglError("eglCreateWindowSurface");

@@ -2884,6 +2884,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             setTransformationMethod(PasswordTransformationMethod.getInstance());
             setTypefaceByIndex(MONOSPACE, 0);
         } else if (isVisiblePassword) {
+            if (mTransformation == PasswordTransformationMethod.getInstance()) {
+                forceUpdate = true;
+            }
             setTypefaceByIndex(MONOSPACE, 0);
         } else if (wasPassword || wasVisiblePassword) {
             // not in password mode, clean up typeface and transformation
@@ -5572,6 +5575,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
                 if (duration > ANIMATED_SCROLL_GAP) {
                     mScroller.startScroll(mScrollX, mScrollY, dx, dy);
+                    awakenScrollBars(mScroller.getDuration());
                     invalidate();
                 } else {
                     if (!mScroller.isFinished()) {

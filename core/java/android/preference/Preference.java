@@ -102,6 +102,7 @@ public class Preference implements Comparable<Preference>, OnDependencyChangeLis
     private int mLayoutResId = com.android.internal.R.layout.preference;
     private int mWidgetLayoutResId;
     private boolean mHasSpecifiedLayout = false;
+    private View mLayoutView;
     
     private OnPreferenceChangeInternalListener mListener;
     
@@ -336,7 +337,7 @@ public class Preference implements Comparable<Preference>, OnDependencyChangeLis
         if (!mHasSpecifiedLayout) {
             mHasSpecifiedLayout = true;
         }
-        
+        mLayoutView = null;
         mLayoutResId = layoutResId;
     }
     
@@ -360,6 +361,7 @@ public class Preference implements Comparable<Preference>, OnDependencyChangeLis
      * @see #setLayoutResource(int)
      */
     public void setWidgetLayoutResource(int widgetLayoutResId) {
+        mLayoutView = null;
         mWidgetLayoutResId = widgetLayoutResId;
     }
 
@@ -387,7 +389,10 @@ public class Preference implements Comparable<Preference>, OnDependencyChangeLis
      */
     public View getView(View convertView, ViewGroup parent) {
         if (convertView == null) {
-            convertView = onCreateView(parent);
+            if (mLayoutView == null) {
+                mLayoutView = onCreateView(parent);
+            }
+            convertView = mLayoutView;
         }
         onBindView(convertView);
         return convertView;

@@ -195,7 +195,15 @@ public class PackageParser {
         if ((flags&PackageManager.GET_ACTIVITIES) != 0) {
             int N = p.activities.size();
             if (N > 0) {
-                pi.activities = new ActivityInfo[N];
+                if ((flags&PackageManager.GET_DISABLED_COMPONENTS) != 0) {
+                    pi.activities = new ActivityInfo[N];
+                } else {
+                    int num = 0;
+                    for (int i=0; i<N; i++) {
+                        if (p.activities.get(i).info.enabled) num++;
+                    }
+                    pi.activities = new ActivityInfo[num];
+                }
                 for (int i=0; i<N; i++) {
                     final Activity activity = p.activities.get(i);
                     if (activity.info.enabled
@@ -208,7 +216,15 @@ public class PackageParser {
         if ((flags&PackageManager.GET_RECEIVERS) != 0) {
             int N = p.receivers.size();
             if (N > 0) {
-                pi.receivers = new ActivityInfo[N];
+                if ((flags&PackageManager.GET_DISABLED_COMPONENTS) != 0) {
+                    pi.receivers = new ActivityInfo[N];
+                } else {
+                    int num = 0;
+                    for (int i=0; i<N; i++) {
+                        if (p.receivers.get(i).info.enabled) num++;
+                    }
+                    pi.receivers = new ActivityInfo[num];
+                }
                 for (int i=0; i<N; i++) {
                     final Activity activity = p.receivers.get(i);
                     if (activity.info.enabled
@@ -221,7 +237,15 @@ public class PackageParser {
         if ((flags&PackageManager.GET_SERVICES) != 0) {
             int N = p.services.size();
             if (N > 0) {
-                pi.services = new ServiceInfo[N];
+                if ((flags&PackageManager.GET_DISABLED_COMPONENTS) != 0) {
+                    pi.services = new ServiceInfo[N];
+                } else {
+                    int num = 0;
+                    for (int i=0; i<N; i++) {
+                        if (p.services.get(i).info.enabled) num++;
+                    }
+                    pi.services = new ServiceInfo[num];
+                }
                 for (int i=0; i<N; i++) {
                     final Service service = p.services.get(i);
                     if (service.info.enabled
@@ -234,7 +258,15 @@ public class PackageParser {
         if ((flags&PackageManager.GET_PROVIDERS) != 0) {
             int N = p.providers.size();
             if (N > 0) {
-                pi.providers = new ProviderInfo[N];
+                if ((flags&PackageManager.GET_DISABLED_COMPONENTS) != 0) {
+                    pi.providers = new ProviderInfo[N];
+                } else {
+                    int num = 0;
+                    for (int i=0; i<N; i++) {
+                        if (p.providers.get(i).info.enabled) num++;
+                    }
+                    pi.providers = new ProviderInfo[num];
+                }
                 for (int i=0; i<N; i++) {
                     final Provider provider = p.providers.get(i);
                     if (provider.info.enabled

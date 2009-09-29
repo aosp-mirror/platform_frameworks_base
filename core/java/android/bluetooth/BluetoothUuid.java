@@ -16,6 +16,8 @@
 
 package android.bluetooth;
 
+import android.os.ParcelUuid;
+
 import java.util.Arrays;
 import java.util.HashSet;
 

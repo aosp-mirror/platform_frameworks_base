@@ -2480,6 +2480,7 @@ public class WebView extends AbsoluteLayout
             //        Log.d(LOGTAG, "startScroll: " + dx + " " + dy);
             mScroller.startScroll(mScrollX, mScrollY, dx, dy,
                     animationDuration > 0 ? animationDuration : computeDuration(dx, dy));
+            awakenScrollBars(mScroller.getDuration());
             invalidate();
         } else {
             abortAnimation(); // just in case
@@ -2811,6 +2812,10 @@ public class WebView extends AbsoluteLayout
         } else {
             return super.performLongClick();
         }
+    }
+
+    boolean inAnimateZoom() {
+        return mZoomScale != 0;
     }
 
     /**
@@ -4326,6 +4331,7 @@ public class WebView extends AbsoluteLayout
         // resume the webcore update.
         final int time = mScroller.getDuration();
         mPrivateHandler.sendEmptyMessageDelayed(RESUME_WEBCORE_UPDATE, time);
+        awakenScrollBars(time);
         invalidate();
     }
 
@@ -4837,6 +4843,10 @@ public class WebView extends AbsoluteLayout
                 Log.v(LOGTAG, msg.what < REMEMBER_PASSWORD || msg.what
                         > INVAL_RECT_MSG_ID ? Integer.toString(msg.what)
                         : HandlerDebugString[msg.what - REMEMBER_PASSWORD]);
+            }
+            if (mWebViewCore == null) {
+                // after WebView's destroy() is called, skip handling messages.
+                return;
             }
             switch (msg.what) {
                 case REMEMBER_PASSWORD: {

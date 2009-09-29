@@ -1150,7 +1150,7 @@ public class GridView extends AbsListView {
                mSelectedTop = sel.getTop();
             } else if (mTouchMode > TOUCH_MODE_DOWN && mTouchMode < TOUCH_MODE_SCROLL) {
                 View child = getChildAt(mMotionPosition - mFirstPosition);
-                positionSelector(child);
+                if (child != null) positionSelector(child);                
             } else {
                 mSelectedTop = 0;
                 mSelectorRect.setEmpty();
@@ -1340,8 +1340,23 @@ public class GridView extends AbsListView {
      */
     @Override
     void setSelectionInt(int position) {
+        int previousSelectedPosition = mNextSelectedPosition;
+
         setNextSelectedPositionInt(position);
         layoutChildren();
+        
+        final int next = mStackFromBottom ? mItemCount - 1  - mNextSelectedPosition : 
+            mNextSelectedPosition;
+        final int previous = mStackFromBottom ? mItemCount - 1
+                - previousSelectedPosition : previousSelectedPosition;
+
+        final int nextRow = next / mNumColumns;
+        final int previousRow = previous / mNumColumns;
+
+        if (nextRow != previousRow) {
+            awakenScrollBars();
+        }
+
     }
 
     @Override
@@ -1471,6 +1486,7 @@ public class GridView extends AbsListView {
         if (nextPage >= 0) {
             setSelectionInt(nextPage);
             invokeOnItemScrollListener();
+            awakenScrollBars();
             return true;
         }
 
@@ -1496,6 +1512,10 @@ public class GridView extends AbsListView {
             setSelectionInt(mItemCount - 1);
             invokeOnItemScrollListener();
             moved = true;
+        }
+        
+        if (moved) {
+            awakenScrollBars();
         }
 
         return moved;
@@ -1563,6 +1583,10 @@ public class GridView extends AbsListView {
             invokeOnItemScrollListener();
         }
 
+        if (moved) {
+            awakenScrollBars();
+        }
+        
         return moved;
     }
 

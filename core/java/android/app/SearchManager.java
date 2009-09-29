@@ -27,9 +27,9 @@ import android.os.Handler;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.server.search.SearchableInfo;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
-import android.text.TextUtils;
 
 import java.util.List;
 
@@ -1591,6 +1591,12 @@ public class SearchManager
     public final static String SUGGEST_NEVER_MAKE_SHORTCUT = "_-1";
 
     /**
+     * Query parameter added to suggestion queries to limit the number of suggestions returned.
+     * This limit is only advisory and suggestion providers may chose to ignore it.
+     */
+    public final static String SUGGEST_PARAMETER_LIMIT = "limit";
+
+    /**
      * If a suggestion has this value in {@link #SUGGEST_COLUMN_INTENT_ACTION},
      * the search dialog will switch to a different suggestion source when the
      * suggestion is clicked. 
@@ -1980,6 +1986,21 @@ public class SearchManager
      * @hide because SearchableInfo is not part of the API.
      */
     public Cursor getSuggestions(SearchableInfo searchable, String query) {
+        return getSuggestions(searchable, query, -1);
+    }
+
+    /**
+     * Gets a cursor with search suggestions.
+     *
+     * @param searchable Information about how to get the suggestions.
+     * @param query The search text entered (so far).
+     * @param limit The query limit to pass to the suggestion provider. This is advisory,
+     *        the returned cursor may contain more rows. Pass {@code -1} for no limit.
+     * @return a cursor with suggestions, or <code>null</null> the suggestion query failed.
+     *
+     * @hide because SearchableInfo is not part of the API.
+     */
+    public Cursor getSuggestions(SearchableInfo searchable, String query, int limit) {
         if (searchable == null) {
             return null;
         }
@@ -1991,7 +2012,9 @@ public class SearchManager
 
         Uri.Builder uriBuilder = new Uri.Builder()
                 .scheme(ContentResolver.SCHEME_CONTENT)
-                .authority(authority);
+                .authority(authority)
+                .query("")  // TODO: Remove, workaround for a bug in Uri.writeToParcel()
+                .fragment("");  // TODO: Remove, workaround for a bug in Uri.writeToParcel()
 
         // if content path provided, insert it now
         final String contentPath = searchable.getSuggestPath();
@@ -1999,7 +2022,7 @@ public class SearchManager
             uriBuilder.appendEncodedPath(contentPath);
         }
 
-        // append standard suggestion query path 
+        // append standard suggestion query path
         uriBuilder.appendPath(SearchManager.SUGGEST_URI_PATH_QUERY);
 
         // get the query selection, may be null
@@ -2012,10 +2035,11 @@ public class SearchManager
             uriBuilder.appendPath(query);
         }
 
-        Uri uri = uriBuilder
-                .query("")     // TODO: Remove, workaround for a bug in Uri.writeToParcel()
-                .fragment("")  // TODO: Remove, workaround for a bug in Uri.writeToParcel()
-                .build();
+        if (limit > 0) {
+            uriBuilder.appendQueryParameter(SUGGEST_PARAMETER_LIMIT, String.valueOf(limit));
+        }
+
+        Uri uri = uriBuilder.build();
 
         // finally, make the query
         return mContext.getContentResolver().query(uri, null, selection, selArgs, null);

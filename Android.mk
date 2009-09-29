@@ -216,6 +216,7 @@ aidl_files := \
 	frameworks/base/core/java/android/net/Uri.aidl \
 	frameworks/base/core/java/android/os/Bundle.aidl \
 	frameworks/base/core/java/android/os/ParcelFileDescriptor.aidl \
+	frameworks/base/core/java/android/os/ParcelUuid.aidl \
 	frameworks/base/core/java/android/view/KeyEvent.aidl \
 	frameworks/base/core/java/android/view/MotionEvent.aidl \
 	frameworks/base/core/java/android/view/Surface.aidl \

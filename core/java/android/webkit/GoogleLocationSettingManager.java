@@ -200,7 +200,11 @@ class GoogleLocationSettingManager {
 
         @Override
         public void onChange(boolean selfChange) {
-            maybeApplySetting(mContext);
+            // This may come after the call to doNotObserve() above,
+            // so mContext may be null.
+            if (mContext != null) {
+                maybeApplySetting(mContext);
+            }
         }
     }
 }

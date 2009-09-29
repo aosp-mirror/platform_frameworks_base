@@ -1396,12 +1396,15 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
             }
             
-        } else {
+        } else if (mLowerWallpaperTarget != null) {
             // Is it time to stop animating?
-            if (mLowerWallpaperTarget == null
-                    || mLowerWallpaperTarget.mAppToken.animation == null
-                    || mUpperWallpaperTarget == null
-                    || mUpperWallpaperTarget.mAppToken.animation == null) {
+            boolean lowerAnimating = mLowerWallpaperTarget.mAnimation != null
+                    || (mLowerWallpaperTarget.mAppToken != null
+                            && mLowerWallpaperTarget.mAppToken.animation != null);
+            boolean upperAnimating = mUpperWallpaperTarget.mAnimation != null
+                    || (mUpperWallpaperTarget.mAppToken != null
+                            && mUpperWallpaperTarget.mAppToken.animation != null);
+            if (!lowerAnimating || !upperAnimating) {
                 if (DEBUG_WALLPAPER) {
                     Log.v(TAG, "No longer animating wallpaper targets!");
                 }
@@ -3965,7 +3968,7 @@ public class WindowManagerService extends IWindowManager.Stub
     // -------------------------------------------------------------
 
     public void disableKeyguard(IBinder token, String tag) {
-        if (mContext.checkCallingPermission(android.Manifest.permission.DISABLE_KEYGUARD)
+        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.DISABLE_KEYGUARD)
             != PackageManager.PERMISSION_GRANTED) {
             throw new SecurityException("Requires DISABLE_KEYGUARD permission");
         }
@@ -3973,7 +3976,7 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     public void reenableKeyguard(IBinder token) {
-        if (mContext.checkCallingPermission(android.Manifest.permission.DISABLE_KEYGUARD)
+        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.DISABLE_KEYGUARD)
             != PackageManager.PERMISSION_GRANTED) {
             throw new SecurityException("Requires DISABLE_KEYGUARD permission");
         }
@@ -3999,7 +4002,7 @@ public class WindowManagerService extends IWindowManager.Stub
      * @see android.app.KeyguardManager#exitKeyguardSecurely
      */
     public void exitKeyguardSecurely(final IOnKeyguardExitResult callback) {
-        if (mContext.checkCallingPermission(android.Manifest.permission.DISABLE_KEYGUARD)
+        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.DISABLE_KEYGUARD)
             != PackageManager.PERMISSION_GRANTED) {
             throw new SecurityException("Requires DISABLE_KEYGUARD permission");
         }
@@ -4108,7 +4111,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 "getScancodeState()")) {
             throw new SecurityException("Requires READ_INPUT_STATE permission");
         }
-        return KeyInputQueue.getScancodeState(sw);
+        return mQueue.getScancodeState(sw);
     }
 
     public int getScancodeStateForDevice(int devid, int sw) {
@@ -4116,7 +4119,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 "getScancodeStateForDevice()")) {
             throw new SecurityException("Requires READ_INPUT_STATE permission");
         }
-        return KeyInputQueue.getScancodeState(devid, sw);
+        return mQueue.getScancodeState(devid, sw);
     }
 
     public int getKeycodeState(int sw) {
@@ -4124,7 +4127,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 "getKeycodeState()")) {
             throw new SecurityException("Requires READ_INPUT_STATE permission");
         }
-        return KeyInputQueue.getKeycodeState(sw);
+        return mQueue.getKeycodeState(sw);
     }
 
     public int getKeycodeStateForDevice(int devid, int sw) {
@@ -4132,7 +4135,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 "getKeycodeStateForDevice()")) {
             throw new SecurityException("Requires READ_INPUT_STATE permission");
         }
-        return KeyInputQueue.getKeycodeState(devid, sw);
+        return mQueue.getKeycodeState(devid, sw);
     }
 
     public boolean hasKeys(int[] keycodes, boolean[] keyExists) {
