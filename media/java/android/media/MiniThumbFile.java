@@ -119,7 +119,9 @@ public class MiniThumbFile {
                     // ignore exception
                 }
             }
-            mChannel = mMiniThumbFile.getChannel();
+            if (mMiniThumbFile != null) {
+                mChannel = mMiniThumbFile.getChannel();
+            }
         }
         return mMiniThumbFile;
     }
