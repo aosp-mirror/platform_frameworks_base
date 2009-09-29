@@ -996,7 +996,7 @@ ScriptCState::SymbolTable_t ScriptCState::gSyms[] = {
         "float", "(float, float)" },
     { "abs", (void *)&abs,
         "int", "(int)" },
-    { "absf", (void *)&fabs,
+    { "absf", (void *)&fabsf,
         "float", "(float)" },
     { "sinf_fast", (void *)&SC_sinf_fast,
         "float", "(float)" },
