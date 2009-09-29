@@ -5321,9 +5321,21 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
         initScrollCache();
         final ScrollabilityCache scrollabilityCache = mScrollCache;
         scrollabilityCache.fadeScrollBars = fadeScrollbars;
-        if (!fadeScrollbars) {
+        if (fadeScrollbars) {
+            scrollabilityCache.state = ScrollabilityCache.OFF;
+        } else {
             scrollabilityCache.state = ScrollabilityCache.ON;
         }
+    }
+    
+    /**
+     * 
+     * Returns true if scrollbars will fade when this view is not scrolling
+     * 
+     * @return true if scrollbar fading is enabled
+     */
+    public boolean isScrollbarFadingEnabled() {
+        return mScrollCache != null && mScrollCache.fadeScrollBars; 
     }
     
     /**
