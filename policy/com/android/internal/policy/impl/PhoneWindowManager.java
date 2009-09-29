@@ -168,6 +168,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     // Vibrator pattern for haptic feedback of virtual key press.
     long[] mVirtualKeyVibePattern;
     
+    // Vibrator pattern for haptic feedback during boot when safe mode is disabled.
+    long[] mSafeModeDisabledVibePattern;
+    
+    // Vibrator pattern for haptic feedback during boot when safe mode is enabled.
+    long[] mSafeModeEnabledVibePattern;
+    
     /** If true, hitting shift & menu will broadcast Intent.ACTION_BUG_REPORT */
     boolean mEnableShiftMenuBugReports = false;
     
@@ -534,6 +540,15 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         updatePlugged();
         // register for dock events
         context.registerReceiver(mDockReceiver, new IntentFilter(Intent.ACTION_DOCK_EVENT));
+        mVibrator = new Vibrator();
+        mLongPressVibePattern = getLongIntArray(mContext.getResources(),
+                com.android.internal.R.array.config_longPressVibePattern);
+        mVirtualKeyVibePattern = getLongIntArray(mContext.getResources(),
+                com.android.internal.R.array.config_virtualKeyVibePattern);
+        mSafeModeDisabledVibePattern = getLongIntArray(mContext.getResources(),
+                com.android.internal.R.array.config_safeModeDisabledVibePattern);
+        mSafeModeEnabledVibePattern = getLongIntArray(mContext.getResources(),
+                com.android.internal.R.array.config_safeModeEnabledVibePattern);
     }
 
     void updatePlugged() {
@@ -1971,8 +1986,15 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     public boolean detectSafeMode() {
         try {
             int menuState = mWindowManager.getKeycodeState(KeyEvent.KEYCODE_MENU);
-            mSafeMode = menuState > 0;
-            Log.i(TAG, "Menu key state: " + menuState + " safeMode=" + mSafeMode);
+            int sState = mWindowManager.getKeycodeState(KeyEvent.KEYCODE_S);
+            int dpadState = mWindowManager.getKeycodeState(KeyEvent.KEYCODE_DPAD_CENTER);
+            int trackballState = mWindowManager.getScancodeState(RawInputEvent.BTN_MOUSE);
+            mSafeMode = menuState > 0 || sState > 0 || dpadState > 0 || trackballState > 0;
+            performHapticFeedbackLw(null, mSafeMode
+                    ? HapticFeedbackConstants.SAFE_MODE_ENABLED
+                    : HapticFeedbackConstants.SAFE_MODE_DISABLED, true);
+            Log.i(TAG, "SAFEMODE: " + mSafeMode + "menu=" + menuState + " s=" + sState
+                    + " dpad=" + dpadState + " trackball=" + trackballState + ")");
             return mSafeMode;
         } catch (RemoteException e) {
             // Doom! (it's also local)
@@ -1994,25 +2016,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     
     /** {@inheritDoc} */
     public void systemReady() {
-        try {
-            if (mSafeMode) {
-                // If the user is holding the menu key code, then we are
-                // going to boot into safe mode.
-                ActivityManagerNative.getDefault().enterSafeMode();
-            }
-            // tell the keyguard
-            mKeyguardMediator.onSystemReady();
-            android.os.SystemProperties.set("dev.bootcomplete", "1"); 
-            synchronized (mLock) {
-                updateOrientationListenerLp();
-                mVibrator = new Vibrator();
-                mLongPressVibePattern = getLongIntArray(mContext.getResources(),
-                        com.android.internal.R.array.config_longPressVibePattern);
-                mVirtualKeyVibePattern = getLongIntArray(mContext.getResources(),
-                        com.android.internal.R.array.config_virtualKeyVibePattern);
-            }
-        } catch (RemoteException e) {
-            // Ignore
+        // tell the keyguard
+        mKeyguardMediator.onSystemReady();
+        android.os.SystemProperties.set("dev.bootcomplete", "1"); 
+        synchronized (mLock) {
+            updateOrientationListenerLp();
         }
     }
    
@@ -2177,6 +2185,15 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             case HapticFeedbackConstants.LONG_PRESS:
                 mVibrator.vibrate(mLongPressVibePattern, -1);
                 return true;
+            case HapticFeedbackConstants.VIRTUAL_KEY:
+                mVibrator.vibrate(mVirtualKeyVibePattern, -1);
+                return true;
+            case HapticFeedbackConstants.SAFE_MODE_DISABLED:
+                mVibrator.vibrate(mSafeModeDisabledVibePattern, -1);
+                return true;
+            case HapticFeedbackConstants.SAFE_MODE_ENABLED:
+                mVibrator.vibrate(mSafeModeEnabledVibePattern, -1);
+                return true;
         }
         return false;
     }
@@ -2184,10 +2201,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     public void keyFeedbackFromInput(KeyEvent event) {
         if (event.getAction() == KeyEvent.ACTION_DOWN
                 && (event.getFlags()&KeyEvent.FLAG_VIRTUAL_HARD_KEY) != 0) {
-            if (Settings.System.getInt(mContext.getContentResolver(),
-                    Settings.System.HAPTIC_FEEDBACK_ENABLED, 0) != 0) {
-                mVibrator.vibrate(mVirtualKeyVibePattern, -1);
-            }
+            performHapticFeedbackLw(null, HapticFeedbackConstants.VIRTUAL_KEY, false);
         }
     }
     
