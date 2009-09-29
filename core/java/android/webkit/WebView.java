@@ -2814,6 +2814,10 @@ public class WebView extends AbsoluteLayout
         }
     }
 
+    boolean inAnimateZoom() {
+        return mZoomScale != 0;
+    }
+
     /**
      * Need to adjust the WebTextView after a change in zoom, since mActualScale
      * has changed.  This is especially important for password fields, which are
