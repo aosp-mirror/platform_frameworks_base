@@ -57,6 +57,14 @@ public final class ContactsContract {
     public static final String CALLER_IS_SYNCADAPTER = "caller_is_syncadapter";
 
     /**
+     * A query parameter key used to specify the package that is requesting a query.
+     * This is used for restricting data based on package name.
+     *
+     * @hide
+     */
+    public static final String REQUESTING_PACKAGE_PARAM_KEY = "requesting_package";
+
+    /**
      * @hide should be removed when users are updated to refer to SyncState
      * @deprecated use SyncState instead
      */
