@@ -540,7 +540,7 @@ public class Im {
          * The content:// style URL for contacts who have an open chat session
          */
         public static final Uri CONTENT_URI_CHAT_CONTACTS =
-            Uri.parse("content://com.google.android.providers.talk/contacts/chatting");
+            Uri.parse("content://com.google.android.providers.talk/contacts_chatting");
 
         /**
          * The content:// style URL for contacts who have been blocked
