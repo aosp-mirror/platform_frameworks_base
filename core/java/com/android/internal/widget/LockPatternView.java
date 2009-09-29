@@ -213,6 +213,12 @@ public class LockPatternView extends View {
         void onPatternCleared();
 
         /**
+         * The user extended the pattern currently being drawn by one cell.
+         * @param pattern The pattern with newly added cell.
+         */
+        void onPatternCellAdded(List<Cell> pattern);
+
+        /**
          * A pattern was detected from the user.
          * @param pattern The pattern.
          */
@@ -447,6 +453,9 @@ public class LockPatternView extends View {
     private void addCellToPattern(Cell newCell) {
         mPatternDrawLookup[newCell.getRow()][newCell.getColumn()] = true;
         mPattern.add(newCell);
+        if (mOnPatternListener != null) {
+            mOnPatternListener.onPatternCellAdded(mPattern);
+        }
     }
 
     // helper method to find which cell a point maps to
