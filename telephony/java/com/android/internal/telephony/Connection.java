@@ -59,6 +59,7 @@ public abstract class Connection {
         CDMA_ACCESS_FAILURE,
         CDMA_PREEMPTED,
         CDMA_NOT_EMERGENCY,              /* not an emergency call */
+        CDMA_ACCESS_BLOCKED,            /* Access Blocked by CDMA network */
         ERROR_UNSPECIFIED
     }
 
