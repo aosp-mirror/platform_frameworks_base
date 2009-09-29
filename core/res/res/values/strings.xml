@@ -1299,6 +1299,12 @@
     <string name="orgTypeOther">Other</string>
     <!-- Custom organization type -->
     <string name="orgTypeCustom">Custom</string>
+    
+    <!-- Attbution of a contact status update, when the time of update is unknown -->
+    <string name="contact_status_update_attribution">Via <xliff:g id="source" example="Google Talk">%1$s</xliff:g></string>
+
+    <!-- Attbution of a contact status update, when the time of update is known -->
+    <string name="contact_status_update_attribution_with_date"><xliff:g id="date" example="3 hours ago">%1$s</xliff:g> via <xliff:g id="source" example="Google Talk">%2$s</xliff:g></string>
 
     <!-- Instructions telling the user to enter their pin to unlock the keyguard.
          Displayed in one line in a large font.  -->
@@ -2082,5 +2088,4 @@
 
     <!-- Do Not Translate: Alternate eri.xml -->
     <string name="alternate_eri_file">/data/eri.xml</string>
-
 </resources>

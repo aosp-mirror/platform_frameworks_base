@@ -24,22 +24,26 @@ import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.res.Resources;
+import android.content.res.Resources.NotFoundException;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Rect;
 import android.net.Uri;
 import android.os.SystemClock;
 import android.provider.ContactsContract.Contacts;
 import android.provider.ContactsContract.Data;
 import android.provider.ContactsContract.PhoneLookup;
-import android.provider.ContactsContract.Presence;
 import android.provider.ContactsContract.RawContacts;
+import android.provider.ContactsContract.StatusUpdates;
 import android.provider.ContactsContract.CommonDataKinds.Email;
 import android.provider.ContactsContract.CommonDataKinds.Photo;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.CheckBox;
@@ -67,7 +71,7 @@ public class ContactHeaderWidget extends FrameLayout implements View.OnClickList
     private FasttrackBadgeWidget mPhotoView;
     private ImageView mPresenceView;
     private TextView mStatusView;
-    private TextView mStatusDateView;
+    private TextView mStatusAttributionView;
     private int mNoPhotoResource;
     private QueryHandler mQueryHandler;
 
@@ -99,6 +103,8 @@ public class ContactHeaderWidget extends FrameLayout implements View.OnClickList
             Contacts.CONTACT_PRESENCE,
             Contacts.CONTACT_STATUS,
             Contacts.CONTACT_STATUS_TIMESTAMP,
+            Contacts.CONTACT_STATUS_RES_PACKAGE,
+            Contacts.CONTACT_STATUS_LABEL,
         };
         int _ID = 0;
         int LOOKUP_KEY = 1;
@@ -110,6 +116,8 @@ public class ContactHeaderWidget extends FrameLayout implements View.OnClickList
         int CONTACT_PRESENCE_STATUS = 5;
         int CONTACT_STATUS = 6;
         int CONTACT_STATUS_TIMESTAMP = 7;
+        int CONTACT_STATUS_RES_PACKAGE = 8;
+        int CONTACT_STATUS_LABEL = 9;
     }
 
     //Projection used for looking up contact id from phone number
@@ -168,7 +176,7 @@ public class ContactHeaderWidget extends FrameLayout implements View.OnClickList
         mPresenceView = (ImageView) findViewById(R.id.presence);
 
         mStatusView = (TextView)findViewById(R.id.status);
-        mStatusDateView = (TextView)findViewById(R.id.status_date);
+        mStatusAttributionView = (TextView)findViewById(R.id.status_date);
 
         // Set the photo with a random "no contact" image
         long now = SystemClock.elapsedRealtime();
@@ -287,7 +295,7 @@ public class ContactHeaderWidget extends FrameLayout implements View.OnClickList
      * Manually set the presence.
      */
     public void setPresence(int presence) {
-        mPresenceView.setImageResource(Presence.getPresenceIconResourceId(presence));
+        mPresenceView.setImageResource(StatusUpdates.getPresenceIconResourceId(presence));
     }
 
     /**
@@ -432,7 +440,7 @@ public class ContactHeaderWidget extends FrameLayout implements View.OnClickList
         //Set the presence status
         if (!c.isNull(ContactQuery.CONTACT_PRESENCE_STATUS)) {
             int presence = c.getInt(ContactQuery.CONTACT_PRESENCE_STATUS);
-            mPresenceView.setImageResource(Presence.getPresenceIconResourceId(presence));
+            mPresenceView.setImageResource(StatusUpdates.getPresenceIconResourceId(presence));
             mPresenceView.setVisibility(View.VISIBLE);
         } else {
             mPresenceView.setVisibility(View.GONE);
@@ -444,6 +452,8 @@ public class ContactHeaderWidget extends FrameLayout implements View.OnClickList
             mStatusView.setText(status);
             mStatusView.setVisibility(View.VISIBLE);
 
+            CharSequence timestamp = null;
+
             if (!c.isNull(ContactQuery.CONTACT_STATUS_TIMESTAMP)) {
                 long date = c.getLong(ContactQuery.CONTACT_STATUS_TIMESTAMP);
 
@@ -451,18 +461,63 @@ public class ContactHeaderWidget extends FrameLayout implements View.OnClickList
                 // times.
                 int flags = DateUtils.FORMAT_ABBREV_RELATIVE;
 
-                mStatusDateView.setText(DateUtils.getRelativeTimeSpanString(date, System
-                        .currentTimeMillis(), DateUtils.MINUTE_IN_MILLIS, flags));
-                mStatusDateView.setVisibility(View.VISIBLE);
+                timestamp = DateUtils.getRelativeTimeSpanString(date,
+                        System.currentTimeMillis(), DateUtils.MINUTE_IN_MILLIS, flags);
+            }
+
+            String label = null;
+
+            if (!c.isNull(ContactQuery.CONTACT_STATUS_LABEL)) {
+                String resPackage = c.getString(ContactQuery.CONTACT_STATUS_RES_PACKAGE);
+                int labelResource = c.getInt(ContactQuery.CONTACT_STATUS_LABEL);
+                Resources resources;
+                if (TextUtils.isEmpty(resPackage)) {
+                    resources = getResources();
+                } else {
+                    PackageManager pm = getContext().getPackageManager();
+                    try {
+                        resources = pm.getResourcesForApplication(resPackage);
+                    } catch (NameNotFoundException e) {
+                        Log.w(TAG, "Contact status update resource package not found: "
+                                + resPackage);
+                        resources = null;
+                    }
+                }
+
+                if (resources != null) {
+                    try {
+                        label = resources.getString(labelResource);
+                    } catch (NotFoundException e) {
+                        Log.w(TAG, "Contact status update resource not found: " + resPackage + "@"
+                                + labelResource);
+                    }
+                }
+            }
+
+            CharSequence attribution;
+            if (timestamp != null && label != null) {
+                attribution = getContext().getString(
+                        R.string.contact_status_update_attribution_with_date,
+                        timestamp, label);
+            } else if (timestamp == null && label != null) {
+                attribution = getContext().getString(
+                        R.string.contact_status_update_attribution,
+                        label);
+            } else if (timestamp != null) {
+                attribution = timestamp;
             } else {
-                mStatusDateView.setVisibility(View.GONE);
+                attribution = null;
+            }
+            if (attribution != null) {
+                mStatusAttributionView.setText(attribution);
+                mStatusAttributionView.setVisibility(View.VISIBLE);
+            } else {
+                mStatusAttributionView.setVisibility(View.GONE);
             }
         } else {
             mStatusView.setVisibility(View.GONE);
-            mStatusDateView.setVisibility(View.GONE);
+            mStatusAttributionView.setVisibility(View.GONE);
         }
-
-        // TODO add support for status update source, e.g. "via Google Talk"
     }
 
     public void onClick(View view) {
