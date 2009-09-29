@@ -21,8 +21,7 @@
     <string name="gigabyteShort" msgid="3259882455212193214">"GB"</string>
     <string name="terabyteShort" msgid="231613018159186962">"TB"</string>
     <string name="petabyteShort" msgid="5637816680144990219">"PB"</string>
-    <!-- no translation found for fileSizeSuffix (7670819340156489359) -->
-    <skip />
+    <string name="fileSizeSuffix" msgid="7670819340156489359">"<xliff:g id="NUMBER">%1$s</xliff:g><xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="untitled" msgid="6071602020171759109">"&lt;utan titel&gt;"</string>
     <string name="ellipsis" msgid="7899829516048813237">"…"</string>
     <string name="emptyPhoneNumber" msgid="7694063042079676517">"(Inget telefonnummer)"</string>
@@ -50,18 +49,12 @@
     <string name="BaMmi" msgid="455193067926770581">"Samtalsspärr"</string>
     <string name="PwdMmi" msgid="7043715687905254199">"Byt lösenord"</string>
     <string name="PinMmi" msgid="3113117780361190304">"Byt PIN-kod"</string>
-    <!-- no translation found for CnipMmi (3110534680557857162) -->
-    <skip />
-    <!-- no translation found for CnirMmi (3062102121430548731) -->
-    <skip />
-    <!-- no translation found for ThreeWCMmi (9051047170321190368) -->
-    <skip />
-    <!-- no translation found for RuacMmi (7827887459138308886) -->
-    <skip />
-    <!-- no translation found for CndMmi (3116446237081575808) -->
-    <skip />
-    <!-- no translation found for DndMmi (1265478932418334331) -->
-    <skip />
+    <string name="CnipMmi" msgid="3110534680557857162">"Nummer för inkommande samtal tillgängligt"</string>
+    <string name="CnirMmi" msgid="3062102121430548731">"Begränsad åtkomst till nummer för inkommande samtal"</string>
+    <string name="ThreeWCMmi" msgid="9051047170321190368">"Trepartssamtal"</string>
+    <string name="RuacMmi" msgid="7827887459138308886">"Avvisande av oönskade irriterande samtal"</string>
+    <string name="CndMmi" msgid="3116446237081575808">"Leverans av nummer för inkommande samtal"</string>
+    <string name="DndMmi" msgid="1265478932418334331">"Stör ej"</string>
     <string name="CLIRDefaultOnNextCallOn" msgid="429415409145781923">"Nummerpresentatören är begränsad som standard. Nästa samtal: Begränsad"</string>
     <string name="CLIRDefaultOnNextCallOff" msgid="3092918006077864624">"Nummerpresentatörens standardinställning är begränsad. Nästa samtal: Inte begränsad"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="6179425182856418465">"Nummerpresentatörens standardinställning är inte begränsad. Nästa samtal: Begränsad"</string>
@@ -81,43 +74,27 @@
     <string name="serviceClassDataSync" msgid="7530000519646054776">"Synkronisera"</string>
     <string name="serviceClassPacket" msgid="6991006557993423453">"Paket"</string>
     <string name="serviceClassPAD" msgid="3235259085648271037">"PAD"</string>
-    <!-- no translation found for roamingText0 (7170335472198694945) -->
-    <skip />
-    <!-- no translation found for roamingText1 (5314861519752538922) -->
-    <skip />
-    <!-- no translation found for roamingText2 (8969929049081268115) -->
-    <skip />
-    <!-- no translation found for roamingText3 (5148255027043943317) -->
-    <skip />
-    <!-- no translation found for roamingText4 (8808456682550796530) -->
-    <skip />
-    <!-- no translation found for roamingText5 (7604063252850354350) -->
-    <skip />
-    <!-- no translation found for roamingText6 (2059440825782871513) -->
-    <skip />
-    <!-- no translation found for roamingText7 (7112078724097233605) -->
-    <skip />
-    <!-- no translation found for roamingText8 (5989569778604089291) -->
-    <skip />
-    <!-- no translation found for roamingText9 (7969296811355152491) -->
-    <skip />
-    <!-- no translation found for roamingText10 (3992906999815316417) -->
-    <skip />
-    <!-- no translation found for roamingText11 (4154476854426920970) -->
-    <skip />
-    <!-- no translation found for roamingText12 (1189071119992726320) -->
-    <skip />
-    <!-- no translation found for roamingTextSearching (8360141885972279963) -->
-    <skip />
+    <string name="roamingText0" msgid="7170335472198694945">"Indikator för roaming på"</string>
+    <string name="roamingText1" msgid="5314861519752538922">"Indikator för roaming av"</string>
+    <string name="roamingText2" msgid="8969929049081268115">"Blinkande roamingindikator"</string>
+    <string name="roamingText3" msgid="5148255027043943317">"Utanför kvarteret"</string>
+    <string name="roamingText4" msgid="8808456682550796530">"Utanför huset"</string>
+    <string name="roamingText5" msgid="7604063252850354350">"Roaming – föredraget system"</string>
+    <string name="roamingText6" msgid="2059440825782871513">"Roaming - tillgängligt system"</string>
+    <string name="roamingText7" msgid="7112078724097233605">"Roaming – alllianspartner"</string>
+    <string name="roamingText8" msgid="5989569778604089291">"Roaming – premiumpartner"</string>
+    <string name="roamingText9" msgid="7969296811355152491">"Roaming – full funktionalitet för tjänst"</string>
+    <string name="roamingText10" msgid="3992906999815316417">"Roaming – delvis funktionalitet för tjänst"</string>
+    <string name="roamingText11" msgid="4154476854426920970">"Roamingbanner på"</string>
+    <string name="roamingText12" msgid="1189071119992726320">"Roamingbanner av"</string>
+    <string name="roamingTextSearching" msgid="8360141885972279963">"Söker efter tjänst"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Vidarebefordras inte"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime" msgid="9206251736527085256">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g><xliff:g id="DIALING_NUMBER">{1}</xliff:g> efter <xliff:g id="TIME_DELAY">{2}</xliff:g> sekunder"</string>
     <string name="cfTemplateRegistered" msgid="5073237827620166285">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>. Vidarebefordras inte"</string>
     <string name="cfTemplateRegisteredTime" msgid="6781621964320635172">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Vidarebefordras inte"</string>
-    <!-- no translation found for fcComplete (3118848230966886575) -->
-    <skip />
-    <!-- no translation found for fcError (3327560126588500777) -->
-    <skip />
+    <string name="fcComplete" msgid="3118848230966886575">"Funktionskoden är fullständig."</string>
+    <string name="fcError" msgid="3327560126588500777">"Anslutningsproblem eller ogiltig funktionskod."</string>
     <string name="httpErrorOk" msgid="1191919378083472204">"OK"</string>
     <string name="httpError" msgid="2567300624552921790">"Webbsidan innehåller ett fel."</string>
     <string name="httpErrorLookup" msgid="4517085806977851374">"Webbadressen kunde inte hittas."</string>
@@ -179,10 +156,8 @@
     <string name="permgroupdesc_systemTools" msgid="8162102602190734305">"Åtkomst och kontroll av systemet på lägre nivå."</string>
     <string name="permgrouplab_developmentTools" msgid="3446164584710596513">"Utvecklingsverktyg"</string>
     <string name="permgroupdesc_developmentTools" msgid="9056431193893809814">"Funktioner som endast behövs för programutvecklare."</string>
-    <!-- no translation found for permgrouplab_storage (1971118770546336966) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_storage (9203302214915355774) -->
-    <skip />
+    <string name="permgrouplab_storage" msgid="1971118770546336966">"Lagring"</string>
+    <string name="permgroupdesc_storage" msgid="9203302214915355774">"Få åtkomst till SD-kortet."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"inaktivera eller ändra statusfält"</string>
     <string name="permdesc_statusBar" msgid="1365473595331989732">"Tillåter att programmet inaktiverar statusfältet eller lägger till och tar bort systemikoner."</string>
     <string name="permlab_expandStatusBar" msgid="1148198785937489264">"expandera/komprimera statusfält"</string>
@@ -215,14 +190,10 @@
     <string name="permdesc_forceBack" msgid="6534109744159919013">"Tillåter att ett program tvingar en aktivitet som finns i förgrunden att avsluta och gå tillbaka. Behövs inte för vanliga program."</string>
     <string name="permlab_dump" msgid="1681799862438954752">"hämta systemets interna status"</string>
     <string name="permdesc_dump" msgid="2198776174276275220">"Tillåter att ett program hämtar systemets interna status. Skadliga program kan hämta privat och skyddad information som de normalt aldrig ska behöva."</string>
-    <!-- no translation found for permlab_shutdown (7185747824038909016) -->
-    <skip />
-    <!-- no translation found for permdesc_shutdown (7046500838746291775) -->
-    <skip />
-    <!-- no translation found for permlab_stopAppSwitches (4138608610717425573) -->
-    <skip />
-    <!-- no translation found for permdesc_stopAppSwitches (3857886086919033794) -->
-    <skip />
+    <string name="permlab_shutdown" msgid="7185747824038909016">"avsluta delvis"</string>
+    <string name="permdesc_shutdown" msgid="7046500838746291775">"Sätter aktivitetshanteraren i avstängningsläge. Utför inte en fullständig avstängning."</string>
+    <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"förhindrar programbyten"</string>
+    <string name="permdesc_stopAppSwitches" msgid="3857886086919033794">"Hindrar att användaren byter till ett annat program."</string>
     <string name="permlab_runSetActivityWatcher" msgid="7811586187574696296">"övervaka och styra alla program som öppnas"</string>
     <string name="permdesc_runSetActivityWatcher" msgid="3228701938345388092">"Tillåter att ett program övervakar och styr hur systemet startar aktiviteter. Skadliga program kan bryta systemet helt. Den här behörigheten behövs bara för programmering, aldrig för vanlig telefonanvändning."</string>
     <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"skicka meddelande om borttaget paket"</string>
@@ -237,10 +208,8 @@
     <string name="permdesc_setAlwaysFinish" msgid="8773936403987091620">"Tillåter att ett program bestämmer om aktiviteter alltid är slutförda när de hamnar i bakgrunden. Ska inte behövas för vanliga program."</string>
     <string name="permlab_batteryStats" msgid="7863923071360031652">"ändra batteristatistik"</string>
     <string name="permdesc_batteryStats" msgid="5847319823772230560">"Tillåter att samlad batteristatistik ändras. Används inte av vanliga program."</string>
-    <!-- no translation found for permlab_backup (470013022865453920) -->
-    <skip />
-    <!-- no translation found for permdesc_backup (2305432853944929371) -->
-    <skip />
+    <string name="permlab_backup" msgid="470013022865453920">"kontrollera säkerhetskopiering och återställning av systemet"</string>
+    <string name="permdesc_backup" msgid="2305432853944929371">"Tillåter att programmet styr över systemets mekanism för säkerhetskopiering och återställning. Används inte av vanliga program."</string>
     <string name="permlab_internalSystemWindow" msgid="2148563628140193231">"visa otillåtna fönster"</string>
     <string name="permdesc_internalSystemWindow" msgid="5895082268284998469">"Tillåter att fönster skapas och används av det interna systemgränssnittet. Används inte av vanliga program."</string>
     <string name="permlab_systemAlertWindow" msgid="3372321942941168324">"visa varningar på systemnivå"</string>
@@ -307,10 +276,8 @@
     <string name="permdesc_accessMockLocation" msgid="7648286063459727252">"Skapa skenplatser för att testa. Skadliga program kan använda detta för att åsidosätta platsen och/eller statusen som returneras av riktiga platser, till exempel GPS- eller nätverksleverantörer."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"få åtkomst till extra kommandon för platsleverantör"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="1948144701382451721">"Få åtkomst till extra kommandon för platsleverantörer. Skadliga program kan använda detta för att störa hur GPS eller andra platskällor fungerar."</string>
-    <!-- no translation found for permlab_installLocationProvider (6578101199825193873) -->
-    <skip />
-    <!-- no translation found for permdesc_installLocationProvider (5449175116732002106) -->
-    <skip />
+    <string name="permlab_installLocationProvider" msgid="6578101199825193873">"behörighet att installera en platsleverantör"</string>
+    <string name="permdesc_installLocationProvider" msgid="5449175116732002106">"Skapa skenplatser för att testa. Skadliga program kan använda detta för att åsidosätta platsen och/eller statusen som returneras av riktiga platser, till exempel GPS- eller nätverksleverantörer, eller övervaka och rapportera din plats till en extern källa."</string>
     <string name="permlab_accessFineLocation" msgid="8116127007541369477">"hitta plats (GPS)"</string>
     <string name="permdesc_accessFineLocation" msgid="7411213317434337331">"Få åtkomst till detaljerade platskällor som Global Positioning System på telefonen, om det är tillgängligt. Skadliga program kan använda detta för att identifiera var du befinner dig, vilket drar mycket batteri."</string>
     <string name="permlab_accessCoarseLocation" msgid="4642255009181975828">"grov (nätverksbaserad) plats"</string>
@@ -351,10 +318,8 @@
     <string name="permdesc_bindGadget" msgid="2098697834497452046">"Tillåter att programmet instruerar systemet vilka widgetar som kan användas av vilket program. Med den här behörigheten kan åtkomst till personliga data beviljas andra program. Används inte av vanliga program."</string>
     <string name="permlab_modifyPhoneState" msgid="8423923777659292228">"ändra telefonstatus"</string>
     <string name="permdesc_modifyPhoneState" msgid="3302284561346956587">"Tillåter att programmet styr enhetens telefonfunktioner. Ett program med denna behörighet kan växla nätverk, aktivera och inaktivera telefonens radio och så vidare utan att ens meddela dig."</string>
-    <!-- no translation found for permlab_readPhoneState (2326172951448691631) -->
-    <skip />
-    <!-- no translation found for permdesc_readPhoneState (188877305147626781) -->
-    <skip />
+    <string name="permlab_readPhoneState" msgid="2326172951448691631">"läsa telefonstatus och identitet"</string>
+    <string name="permdesc_readPhoneState" msgid="188877305147626781">"Tillåter att programmet kommer åt enhetens telefonfunktioner. Ett program som har den här behörigheten kan identifiera telefonens telefonnummer och serienummer, om ett samtal pågår, numret som samtalet är kopplat till och så vidare."</string>
     <string name="permlab_wakeLock" msgid="573480187941496130">"förhindra att telefonen sätts i viloläge"</string>
     <string name="permdesc_wakeLock" msgid="7584036471227467099">"Tillåter att ett program förhindrar att telefonen går in i viloläge."</string>
     <string name="permlab_devicePower" msgid="4928622470980943206">"sätta på eller stänga av telefonen"</string>
@@ -385,10 +350,8 @@
     <string name="permdesc_accessWifiState" msgid="485796529139236346">"Tillåter att ett program visar information om statusen för Wi-Fi."</string>
     <string name="permlab_changeWifiState" msgid="7280632711057112137">"byta Wi-Fi-status"</string>
     <string name="permdesc_changeWifiState" msgid="2950383153656873267">"Tillåter att ett program ansluter till och kopplar från Wi-Fi-åtkomstpunkter och gör ändringar i konfigurerade Wi-Fi-nätverk."</string>
-    <!-- no translation found for permlab_changeWifiMulticastState (1368253871483254784) -->
-    <skip />
-    <!-- no translation found for permdesc_changeWifiMulticastState (8199464507656067553) -->
-    <skip />
+    <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"tillåt Wi-Fi multicast-mottagning"</string>
+    <string name="permdesc_changeWifiMulticastState" msgid="8199464507656067553">"Tillåter att ett program tar emot paket som inte är adresserade direkt till din enhet. Detta är användbart om du vill upptäcka tillgängliga tjänster i närheten. Det drar mer batteri än om telefonen inte är i multicast-läge."</string>
     <string name="permlab_bluetoothAdmin" msgid="1092209628459341292">"administrera bluetooth"</string>
     <string name="permdesc_bluetoothAdmin" msgid="7256289774667054555">"Tillåter att ett program konfigurerar den lokala Bluetooth-telefonen samt upptäcker och parkopplar den med fjärranslutna enheter."</string>
     <string name="permlab_bluetooth" msgid="8361038707857018732">"skapa Bluetooth-anslutningar"</string>
@@ -409,10 +372,8 @@
     <string name="permdesc_readDictionary" msgid="1082972603576360690">"Tillåt att ett program läser alla privata ord, namn och fraser som användaren lagrar i sin ordlista."</string>
     <string name="permlab_writeDictionary" msgid="6703109511836343341">"skriva till användardefinierad ordlista"</string>
     <string name="permdesc_writeDictionary" msgid="2241256206524082880">"Tillåter att ett program skriver in nya ord i användarordlistan."</string>
-    <!-- no translation found for permlab_sdcardWrite (8079403759001777291) -->
-    <skip />
-    <!-- no translation found for permdesc_sdcardWrite (6643963204976471878) -->
-    <skip />
+    <string name="permlab_sdcardWrite" msgid="8079403759001777291">"ändra/ta bort innehåll på SD-kortet"</string>
+    <string name="permdesc_sdcardWrite" msgid="6643963204976471878">"Tillåter att ett program skriver till SD-kortet."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Hem"</item>
     <item msgid="869923650527136615">"Mobil"</item>
@@ -470,8 +431,7 @@
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"Korrekt!"</string>
     <string name="lockscreen_pattern_wrong" msgid="4817583279053112312">"Försök igen"</string>
     <string name="lockscreen_plugged_in" msgid="613343852842944435">"Laddar (<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>)"</string>
-    <!-- no translation found for lockscreen_charged (4938930459620989972) -->
-    <skip />
+    <string name="lockscreen_charged" msgid="4938930459620989972">"Laddad."</string>
     <string name="lockscreen_low_battery" msgid="1482873981919249740">"Anslut din laddare."</string>
     <string name="lockscreen_missing_sim_message_short" msgid="7381499217732227295">"Inget SIM-kort."</string>
     <string name="lockscreen_missing_sim_message" msgid="2186920585695169078">"Inget SIM-kort i telefonen."</string>
@@ -493,8 +453,7 @@
     <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"Ogiltigt användarnamn eller lösenord."</string>
     <string name="hour_ampm" msgid="4329881288269772723">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%P</xliff:g>"</string>
     <string name="hour_cap_ampm" msgid="1829009197680861107">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%p</xliff:g>"</string>
-    <!-- no translation found for status_bar_clear_all_button (7774721344716731603) -->
-    <skip />
+    <string name="status_bar_clear_all_button" msgid="7774721344716731603">"Ta bort"</string>
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Inga aviseringar"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Pågående"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Meddelanden"</string>
@@ -503,8 +462,7 @@
     <string name="battery_low_title" msgid="7923774589611311406">"Anslut laddaren"</string>
     <string name="battery_low_subtitle" msgid="7388781709819722764">"Batteriet håller på att ta slut:"</string>
     <string name="battery_low_percent_format" msgid="6564958083485073855">"Mindre än <xliff:g id="NUMBER">%d%%</xliff:g> återstår."</string>
-    <!-- no translation found for battery_low_why (7655196144309694753) -->
-    <skip />
+    <string name="battery_low_why" msgid="7655196144309694753">"Varför?"</string>
     <string name="factorytest_failed" msgid="5410270329114212041">"Det gick fel vid fabrikstestet"</string>
     <string name="factorytest_not_system" msgid="4435201656767276723">"Åtgärden FACTORY_TEST stöds endast för paket som har installerats i /system/app."</string>
     <string name="factorytest_no_action" msgid="872991874799998561">"Vi hittade inget paket som erbjuder åtgärden FACTORY_TEST."</string>
@@ -513,14 +471,10 @@
     <string name="js_dialog_title_default" msgid="6961903213729667573">"JavaScript"</string>
     <string name="js_dialog_before_unload" msgid="1901675448179653089">"Vill du lämna den här den här sidan?"\n\n"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"Tryck på OK om du vill fortsätta eller på Avbryt om du vill vara kvar på den aktuella sidan."</string>
     <string name="save_password_label" msgid="6860261758665825069">"Bekräfta"</string>
-    <!-- no translation found for permlab_readHistoryBookmarks (1284843728203412135) -->
-    <skip />
-    <!-- no translation found for permdesc_readHistoryBookmarks (4981489815467617191) -->
-    <skip />
-    <!-- no translation found for permlab_writeHistoryBookmarks (9009434109836280374) -->
-    <skip />
-    <!-- no translation found for permdesc_writeHistoryBookmarks (945571990357114950) -->
-    <skip />
+    <string name="permlab_readHistoryBookmarks" msgid="1284843728203412135">"läsa webbläsarhistorik och bokmärken"</string>
+    <string name="permdesc_readHistoryBookmarks" msgid="4981489815467617191">"Tillåter att program läser alla webbadresser som webbläsaren har öppnat och alla webbläsarens bokmärken."</string>
+    <string name="permlab_writeHistoryBookmarks" msgid="9009434109836280374">"skriva webbläsarhistorik och bokmärken"</string>
+    <string name="permdesc_writeHistoryBookmarks" msgid="945571990357114950">"Tillåter att ett program ändrar webbläsarhistoriken och bokmärkena i din telefon. Skadliga program kan använda detta för att ta bort eller ändra data i webbläsaren."</string>
     <string name="save_password_message" msgid="767344687139195790">"Vill du att webbläsaren ska komma ihåg lösenordet?"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"Inte nu"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"Kom ihåg"</string>
@@ -665,8 +619,7 @@
     <string name="anr_application_process" msgid="4185842666452210193">"Programmet <xliff:g id="APPLICATION">%1$s</xliff:g> (i processen <xliff:g id="PROCESS">%2$s</xliff:g>) svarar inte."</string>
     <string name="anr_process" msgid="1246866008169975783">"Processen <xliff:g id="PROCESS">%1$s</xliff:g> svarar inte."</string>
     <string name="force_close" msgid="3653416315450806396">"Tvinga fram en stängning"</string>
-    <!-- no translation found for report (4060218260984795706) -->
-    <skip />
+    <string name="report" msgid="4060218260984795706">"Rapportera"</string>
     <string name="wait" msgid="7147118217226317732">"Vänta"</string>
     <string name="debug" msgid="9103374629678531849">"Felsökning"</string>
     <string name="sendText" msgid="5132506121645618310">"Välj en åtgärd för text"</string>
@@ -720,31 +673,24 @@
     <string name="extmedia_format_title" msgid="8663247929551095854">"Formatera SD-kort"</string>
     <string name="extmedia_format_message" msgid="3621369962433523619">"Vill du formatera SD-kortet? Alla data på ditt kort kommer att gå förlorade."</string>
     <string name="extmedia_format_button_format" msgid="4131064560127478695">"Format"</string>
-    <!-- no translation found for adb_active_notification_title (6729044778949189918) -->
-    <skip />
-    <!-- no translation found for adb_active_notification_message (4661997077344501389) -->
-    <skip />
+    <string name="adb_active_notification_title" msgid="6729044778949189918">"USB-felsökning ansluten"</string>
+    <string name="adb_active_notification_message" msgid="4661997077344501389">"En dator är ansluten till din telefon."</string>
     <string name="select_input_method" msgid="2086499663193509436">"Välj indatametod"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"kandidater"</u></string>
     <string name="ext_media_checking_notification_title" msgid="5457603418970994050">"Förbereder SD-kort"</string>
-    <!-- no translation found for ext_media_checking_notification_message (8287319882926737053) -->
-    <skip />
+    <string name="ext_media_checking_notification_message" msgid="8287319882926737053">"Söker efter fel."</string>
     <string name="ext_media_nofs_notification_title" msgid="780477838241212997">"Tomt SD-kort"</string>
-    <!-- no translation found for ext_media_nofs_notification_message (3817704088027829380) -->
-    <skip />
+    <string name="ext_media_nofs_notification_message" msgid="3817704088027829380">"SD-kortet är tomt eller så har det ett filsystem som inte stöds."</string>
     <string name="ext_media_unmountable_notification_title" msgid="6410723906019100189">"Skadat SD-kort"</string>
-    <!-- no translation found for ext_media_unmountable_notification_message (6902531775948238989) -->
-    <skip />
+    <string name="ext_media_unmountable_notification_message" msgid="6902531775948238989">"SD-kortet är skadat. Du måste eventuellt formatera om det."</string>
     <string name="ext_media_badremoval_notification_title" msgid="6872152882604407837">"SD-kort togs oväntat bort"</string>
     <string name="ext_media_badremoval_notification_message" msgid="7260183293747448241">"Demontera SD-kort innan borttagning för att undvika dataförlust."</string>
     <string name="ext_media_safe_unmount_notification_title" msgid="6729801130790616200">"Säkert att ta bort SD-kort"</string>
-    <!-- no translation found for ext_media_safe_unmount_notification_message (568841278138377604) -->
-    <skip />
+    <string name="ext_media_safe_unmount_notification_message" msgid="568841278138377604">"Det är nu säkert att ta bort SD-kortet."</string>
     <string name="ext_media_nomedia_notification_title" msgid="8902518030404381318">"Borttaget SD-kort"</string>
-    <!-- no translation found for ext_media_nomedia_notification_message (3870120652983659641) -->
-    <skip />
+    <string name="ext_media_nomedia_notification_message" msgid="3870120652983659641">"SD-kortet har tagits bort. Sätt i ett nytt."</string>
     <string name="activity_list_empty" msgid="4168820609403385789">"Inga matchande aktiviteter hittades"</string>
     <string name="permlab_pkgUsageStats" msgid="8787352074326748892">"uppdatera statistik över användning av komponenter"</string>
     <string name="permdesc_pkgUsageStats" msgid="891553695716752835">"Tillåter att samlad komponentstatistik ändras. Används inte av vanliga program."</string>
@@ -758,8 +704,6 @@
     <string name="ime_action_default" msgid="2840921885558045721">"Utför"</string>
     <string name="dial_number_using" msgid="5789176425167573586">"Slå nummer "\n"med <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <string name="create_contact_using" msgid="4947405226788104538">"Skapa kontakt"\n"med <xliff:g id="NUMBER">%s</xliff:g>"</string>
-    <!-- no translation found for accessibility_compound_button_selected (5612776946036285686) -->
-    <skip />
-    <!-- no translation found for accessibility_compound_button_unselected (8864512895673924091) -->
-    <skip />
+    <string name="accessibility_compound_button_selected" msgid="5612776946036285686">"markerad"</string>
+    <string name="accessibility_compound_button_unselected" msgid="8864512895673924091">"inte markerad"</string>
 </resources>
