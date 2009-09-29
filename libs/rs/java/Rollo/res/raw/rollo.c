@@ -1,7 +1,7 @@
 #pragma version(1)
 #pragma stateVertex(PV)
 #pragma stateFragment(PF)
-#pragma stateFragmentStore(PFS)
+#pragma stateStore(PFS)
 
 // Scratch buffer layout
 #define SCRATCH_FADE 0
@@ -105,7 +105,7 @@ int main(void* con, int ft, int launchID)
     if ((zoom < 1.1f) && (zoom > 0.9f)) {
         bindProgramVertex(NAMED_PVOrtho);
         bindProgramFragment(NAMED_PFText);
-        bindProgramFragmentStore(NAMED_PFSText);
+        bindProgramStore(NAMED_PFSText);
 
         rot = drawRot * scale;
         index = 0;
@@ -144,7 +144,7 @@ int main(void* con, int ft, int launchID)
 
         bindProgramVertex(NAMED_PV);
         bindProgramFragment(NAMED_PF);
-        bindProgramFragmentStore(NAMED_PFS);
+        bindProgramStore(NAMED_PFS);
     }
 
     // Draw the selected icon
