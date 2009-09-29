@@ -1917,11 +1917,14 @@ public class WebView extends AbsoluteLayout
                 int oldY = mScrollY;
                 mScrollX = pinLocX(mScrollX);
                 mScrollY = pinLocY(mScrollY);
-                // android.util.Log.d("skia", "recordNewContentSize -
-                // abortAnimation");
-                abortAnimation(); // just in case
                 if (oldX != mScrollX || oldY != mScrollY) {
                     sendOurVisibleRect();
+                }
+                if (!mScroller.isFinished()) {
+                    // We are in the middle of a scroll.  Repin the final scroll
+                    // position.
+                    mScroller.setFinalX(pinLocX(mScroller.getFinalX()));
+                    mScroller.setFinalY(pinLocY(mScroller.getFinalY()));
                 }
             }
         }
