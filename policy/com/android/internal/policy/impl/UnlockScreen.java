@@ -32,6 +32,7 @@ import com.android.internal.telephony.IccCard;
 import com.android.internal.widget.LinearLayoutWithDefaultTouchRecepient;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.LockPatternView;
+import com.android.internal.widget.LockPatternView.Cell;
 
 import java.util.List;
 import java.util.Date;
@@ -51,6 +52,9 @@ class UnlockScreen extends LinearLayoutWithDefaultTouchRecepient
 
     // how long we stay awake once the user is ready to enter a pattern
     private static final int UNLOCK_PATTERN_WAKE_INTERVAL_MS = 7000;
+
+    // how many cells the user has to cross before we poke the wakelock
+    private static final int MIN_PATTERN_BEFORE_POKE_WAKELOCK = 2;
 
     private int mFailedPatternAttemptsSinceLastTimeout = 0;
     private int mTotalFailedPatternAttempts = 0;
@@ -332,7 +336,6 @@ class UnlockScreen extends LinearLayoutWithDefaultTouchRecepient
                 ((SystemClock.elapsedRealtime() - mLastPokeTime)
                         >  (UNLOCK_PATTERN_WAKE_INTERVAL_MS - 100))) {
             mLastPokeTime = SystemClock.elapsedRealtime();
-            mCallback.pokeWakelock(UNLOCK_PATTERN_WAKE_INTERVAL_MS);
         }
         return result;
     }
@@ -445,6 +448,14 @@ class UnlockScreen extends LinearLayoutWithDefaultTouchRecepient
         public void onPatternCleared() {
         }
 
+        public void onPatternCellAdded(List<Cell> pattern) {
+            // To guard against accidental poking of the wakelock, look for
+            // the user actually trying to draw a pattern of some minimal length. 
+            if (pattern.size() > MIN_PATTERN_BEFORE_POKE_WAKELOCK) {
+                mCallback.pokeWakelock(UNLOCK_PATTERN_WAKE_INTERVAL_MS);
+            }
+        }
+
         public void onPatternDetected(List<LockPatternView.Cell> pattern) {
             if (mLockPatternUtils.checkPattern(pattern)) {
                 mLockPatternView
@@ -453,7 +464,9 @@ class UnlockScreen extends LinearLayoutWithDefaultTouchRecepient
                 updateStatusLines();
                 mCallback.keyguardDone(true);
             } else {
-                mCallback.pokeWakelock(UNLOCK_PATTERN_WAKE_INTERVAL_MS);
+                if (pattern.size() > MIN_PATTERN_BEFORE_POKE_WAKELOCK) {
+                    mCallback.pokeWakelock(UNLOCK_PATTERN_WAKE_INTERVAL_MS);
+                }
                 mLockPatternView.setDisplayMode(LockPatternView.DisplayMode.Wrong);
                 if (pattern.size() >= LockPatternUtils.MIN_PATTERN_REGISTER_FAIL) {
                     mTotalFailedPatternAttempts++;
