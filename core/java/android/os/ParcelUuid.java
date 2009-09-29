@@ -14,10 +14,7 @@
  * limitations under the License.
  */
 
-package android.bluetooth;
-
-import android.os.Parcel;
-import android.os.Parcelable;
+package android.os;
 
 import java.util.UUID;
 

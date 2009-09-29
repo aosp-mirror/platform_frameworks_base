@@ -16,7 +16,7 @@
 
 package android.bluetooth;
 
-import android.bluetooth.ParcelUuid;
+import android.os.ParcelUuid;
 
 /**
  * System private API for talking with the Bluetooth service.
