@@ -30,6 +30,7 @@
         <item name="colorForeground">@android:color/bright_foreground_dark</item>
         <item name="colorForegroundInverse">@android:color/bright_foreground_dark_inverse</item>
         <item name="colorBackground">@android:color/background_dark</item>
+        <item name="colorBackgroundCacheHint">?android:attr/colorBackground</item>
         <item name="disabledAlpha">0.5</item>
         <item name="backgroundDimAmount">0.6</item>
 
@@ -289,6 +290,7 @@
     	 wallpaper appear behind them.  -->
     <style name="Theme.Wallpaper">
         <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:colorBackgroundCacheHint">@null</item>
         <item name="android:windowShowWallpaper">true</item>
     </style>
 
@@ -308,6 +310,7 @@
          top of a dark background. -->
     <style name="Theme.WallpaperSettings">
         <item name="android:windowBackground">@android:drawable/screen_background_dark_transparent</item>
+        <item name="android:colorBackgroundCacheHint">@null</item>
         <item name="android:windowIsTranslucent">true</item>
         <item name="android:windowAnimationStyle">@android:style/Animation.Translucent</item>
     </style>
@@ -316,6 +319,7 @@
          top of a light background. -->
     <style name="Theme.Light.WallpaperSettings">
         <item name="android:windowBackground">@android:drawable/screen_background_light_transparent</item>
+        <item name="android:colorBackgroundCacheHint">@null</item>
         <item name="android:windowIsTranslucent">true</item>
         <item name="android:windowAnimationStyle">@android:style/Animation.Translucent</item>
     </style>
@@ -335,6 +339,7 @@
          flag and appropriate animations for your windows.  -->
     <style name="Theme.Translucent">
         <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:colorBackgroundCacheHint">@null</item>
         <item name="android:windowIsTranslucent">true</item>
         <!-- Note that we use the base animation style here (that is no
              animations) because we really have no idea how this kind of
@@ -379,6 +384,8 @@
         <item name="android:windowAnimationStyle">@android:style/Animation.Dialog</item>
         <item name="android:windowSoftInputMode">stateUnspecified|adjustPan</item>
 
+        <item name="android:colorBackgroundCacheHint">@null</item>
+        
         <item name="textAppearance">@android:style/TextAppearance</item>
         <item name="textAppearanceInverse">@android:style/TextAppearance.Inverse</item>
 
@@ -422,6 +429,7 @@
          background, and turns off dimming behind the window. -->
     <style name="Theme.Panel">
         <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:colorBackgroundCacheHint">@null</item>
         <item name="android:windowFrame">@null</item>
         <item name="android:windowContentOverlay">@null</item>
         <item name="android:windowIsFloating">true</item>
@@ -436,6 +444,7 @@
          background, and turns off dimming behind the window. -->
     <style name="Theme.Light.Panel">
         <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:colorBackgroundCacheHint">@null</item>
         <item name="android:windowFrame">@null</item>
         <item name="android:windowContentOverlay">@null</item>
         <item name="android:windowIsFloating">true</item>

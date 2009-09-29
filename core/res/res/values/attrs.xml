@@ -28,6 +28,11 @@
         <attr name="colorForegroundInverse" format="color" />
         <!-- Color that matches (as closely as possible) the window background. -->
         <attr name="colorBackground" format="color" />
+        <!-- This is a hint for a solid color that can be used for caching
+             rendered views.  This will be the color of the background when
+             there is a solid background color; it will be null when the
+             background is a texture or translucent. -->
+        <attr name="colorBackgroundCacheHint" format="color" />
         <!-- Default disabled alpha for widgets that set enabled/disabled alpha programmatically. -->
         <attr name="disabledAlpha" format="float" />
         <!-- Default background dim amount when a menu, dialog, or something similar pops up. -->
