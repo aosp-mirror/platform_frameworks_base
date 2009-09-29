@@ -34,12 +34,6 @@
 #include "DisplayHardware/DisplayHardware.h"
 
 
-// We don't honor the premultiplied alpha flags, which means that
-// premultiplied surface may be composed using a non-premultiplied
-// equation. We do this because it may be a lot faster on some hardware
-// The correct value is HONOR_PREMULTIPLIED_ALPHA = 1
-#define HONOR_PREMULTIPLIED_ALPHA   0
-
 namespace android {
 
 // ---------------------------------------------------------------------------
