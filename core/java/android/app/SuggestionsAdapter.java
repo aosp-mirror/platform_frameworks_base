@@ -58,6 +58,7 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
 
     private static final boolean DBG = false;
     private static final String LOG_TAG = "SuggestionsAdapter";
+    private static final int QUERY_LIMIT = 50;
 
     private SearchManager mSearchManager;
     private SearchDialog mSearchDialog;
@@ -186,7 +187,7 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
             mSearchDialog.getWindow().getDecorView().post(mStartSpinnerRunnable);
         }
         try {
-            final Cursor cursor = mSearchManager.getSuggestions(mSearchable, query);
+            final Cursor cursor = mSearchManager.getSuggestions(mSearchable, query, QUERY_LIMIT);
             // trigger fill window so the spinner stays up until the results are copied over and
             // closer to being ready
             if (!mGlobalSearchMode && cursor != null) cursor.getCount();
