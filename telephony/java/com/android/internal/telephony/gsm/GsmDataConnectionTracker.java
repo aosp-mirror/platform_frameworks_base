@@ -596,32 +596,36 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
     }
 
     protected String getInterfaceName(String apnType) {
-        if (mActivePdp != null
-                && (apnType == null || mActiveApn.canHandleType(apnType))) {
+        if (mActivePdp != null &&
+                (apnType == null ||
+                (mActiveApn != null && mActiveApn.canHandleType(apnType)))) {
             return mActivePdp.getInterface();
         }
         return null;
     }
 
     protected String getIpAddress(String apnType) {
-        if (mActivePdp != null
-                && (apnType == null || mActiveApn.canHandleType(apnType))) {
+        if (mActivePdp != null &&
+                (apnType == null ||
+                (mActiveApn != null && mActiveApn.canHandleType(apnType)))) {
             return mActivePdp.getIpAddress();
         }
         return null;
     }
 
     public String getGateway(String apnType) {
-        if (mActivePdp != null
-                && (apnType == null || mActiveApn.canHandleType(apnType))) {
+        if (mActivePdp != null &&
+                (apnType == null ||
+                (mActiveApn != null && mActiveApn.canHandleType(apnType)))) {
             return mActivePdp.getGatewayAddress();
         }
         return null;
     }
 
     protected String[] getDnsServers(String apnType) {
-        if (mActivePdp != null
-                && (apnType == null || mActiveApn.canHandleType(apnType))) {
+        if (mActivePdp != null &&
+                (apnType == null ||
+                (mActiveApn != null && mActiveApn.canHandleType(apnType)))) {
             return mActivePdp.getDnsServers();
         }
         return null;
