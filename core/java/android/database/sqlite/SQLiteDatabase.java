@@ -54,7 +54,8 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class SQLiteDatabase extends SQLiteClosable {
     private static final String TAG = "Database";
-    private static final int DB_OPERATION_EVENT = 52000;
+    private static final int EVENT_DB_OPERATION = 52000;
+    private static final int EVENT_DB_CORRUPT = 75004;
 
     /**
      * Algorithms used in ON CONFLICT clause
@@ -739,6 +740,7 @@ public class SQLiteDatabase extends SQLiteClosable {
             // Try to recover from this, if we can.
             // TODO: should we do this for other open failures?
             Log.e(TAG, "Deleting and re-creating corrupt database " + path, e);
+            EventLog.writeEvent(EVENT_DB_CORRUPT, path);
             new File(path).delete();
             return new SQLiteDatabase(path, factory, flags);
         }
@@ -1732,7 +1734,7 @@ public class SQLiteDatabase extends SQLiteClosable {
     }
 
     /* package */ void logTimeStat(boolean read, long begin, long end) {
-        EventLog.writeEvent(DB_OPERATION_EVENT, mPath, read ? 0 : 1, end - begin);
+        EventLog.writeEvent(EVENT_DB_OPERATION, mPath, read ? 0 : 1, end - begin);
     }
 
     /**
