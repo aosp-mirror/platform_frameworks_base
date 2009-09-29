@@ -1051,8 +1051,8 @@ public class ContactStruct {
             List<String> nameList;
             switch (VCardConfig.getNameOrderType(mVCardType)) {
             case VCardConfig.NAME_ORDER_JAPANESE:
-                if (VCardUtils.containsOnlyAscii(mFamilyName) &&
-                        VCardUtils.containsOnlyAscii(mGivenName)) {
+                if (VCardUtils.containsOnlyPrintableAscii(mFamilyName) &&
+                        VCardUtils.containsOnlyPrintableAscii(mGivenName)) {
                     nameList = Arrays.asList(mPrefix, mGivenName, mMiddleName, mFamilyName, mSuffix);
                 } else {
                     nameList = Arrays.asList(mPrefix, mFamilyName, mMiddleName, mGivenName, mSuffix);
