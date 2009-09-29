@@ -302,7 +302,19 @@ public class PhoneNumberUtils
      */
     public static boolean compare(String a, String b) {
         // We've used loose comparation at least Eclair, which may change in the future.
+
         return compare(a, b, false);
+    }
+
+    /**
+     * Compare phone numbers a and b, and return true if they're identical
+     * enough for caller ID purposes. Checks a resource to determine whether
+     * to use a strict or loose comparison algorithm.
+     */
+    public static boolean compare(Context context, String a, String b) {
+        boolean useStrict = context.getResources().getBoolean(
+               com.android.internal.R.bool.config_use_strict_phone_number_comparation);
+        return compare(a, b, useStrict);
     }
 
     /**
