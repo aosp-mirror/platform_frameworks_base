@@ -319,7 +319,7 @@ public final class ContactsContract {
 
         /**
          * Base {@link Uri} for referencing a single {@link Contacts} entry,
-         * created by appending {@link Contacts#LOOKUP_KEY} using
+         * created by appending {@link #LOOKUP_KEY} using
          * {@link Uri#withAppendedPath(Uri, String)}. Provides
          * {@link OpenableColumns} columns when queried, or returns the
          * referenced contact formatted as a vCard when opened through
