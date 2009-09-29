@@ -16,6 +16,9 @@
 
 package com.android.layoutlib.bridge;
 
+import com.android.layoutlib.api.IDensityBasedResourceValue;
+import com.android.layoutlib.api.IResourceValue;
+import com.android.layoutlib.api.IDensityBasedResourceValue.Density;
 import com.android.ninepatch.NinePatch;
 
 import org.kxml2.io.KXmlParser;
@@ -40,7 +43,7 @@ import java.util.regex.Pattern;
  * Helper class to provide various convertion method used in handling android resources.
  */
 public final class ResourceHelper {
-    
+
     private final static Pattern sFloatPattern = Pattern.compile("(-?[0-9]+(?:\\.[0-9]+)?)(.*)");
     private final static float[] sFloatOut = new float[1];
 
@@ -59,12 +62,12 @@ public final class ResourceHelper {
             }
 
             value = value.substring(1);
-            
+
             // make sure it's not longer than 32bit
             if (value.length() > 8) {
                 throw new NumberFormatException();
             }
-            
+
             if (value.length() == 3) { // RGB format
                 char[] color = new char[8];
                 color[0] = color[1] = 'F';
@@ -84,7 +87,7 @@ public final class ResourceHelper {
             }
 
             // this is a RRGGBB or AARRGGBB value
-            
+
             // Integer.parseInt will fail to parse strings like "ff191919", so we use
             // a Long, but cast the result back into an int, since we know that we're only
             // dealing with 32 bit values.
@@ -96,28 +99,30 @@ public final class ResourceHelper {
 
     /**
      * Returns a drawable from the given value.
-     * @param value The value. A path to a 9 patch, a bitmap or a xml based drawable,
+     * @param value The value that contains a path to a 9 patch, a bitmap or a xml based drawable,
      * or an hexadecimal color
-     * @param context 
+     * @param context
      * @param isFramework indicates whether the resource is a framework resources.
      * Framework resources are cached, and loaded only once.
      */
-    public static Drawable getDrawable(String value, BridgeContext context, boolean isFramework) {
+    public static Drawable getDrawable(IResourceValue value, BridgeContext context, boolean isFramework) {
         Drawable d = null;
-        
-        String lowerCaseValue = value.toLowerCase();
+
+        String stringValue = value.getValue();
+
+        String lowerCaseValue = stringValue.toLowerCase();
 
         if (lowerCaseValue.endsWith(NinePatch.EXTENSION_9PATCH)) {
-            File f = new File(value);
-            if (f.isFile()) {
-                NinePatch ninePatch = Bridge.getCached9Patch(value,
+            File file = new File(stringValue);
+            if (file.isFile()) {
+                NinePatch ninePatch = Bridge.getCached9Patch(stringValue,
                         isFramework ? null : context.getProjectKey());
-                
+
                 if (ninePatch == null) {
                     try {
-                        ninePatch = NinePatch.load(new File(value).toURL(), false /* convert */);
-                        
-                        Bridge.setCached9Patch(value, ninePatch,
+                        ninePatch = NinePatch.load(file.toURL(), false /* convert */);
+
+                        Bridge.setCached9Patch(stringValue, ninePatch,
                                 isFramework ? null : context.getProjectKey());
                     } catch (MalformedURLException e) {
                         // URL is wrong, we'll return null below
@@ -125,23 +130,23 @@ public final class ResourceHelper {
                         // failed to read the file, we'll return null below.
                     }
                 }
-                
+
                 if (ninePatch != null) {
                     return new NinePatchDrawable(ninePatch);
                 }
             }
-            
+
             return null;
         } else if (lowerCaseValue.endsWith(".xml")) {
             // create a blockparser for the file
-            File f = new File(value);
+            File f = new File(stringValue);
             if (f.isFile()) {
                 try {
                     // let the framework inflate the Drawable from the XML file.
                     KXmlParser parser = new KXmlParser();
                     parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, true);
                     parser.setInput(new FileReader(f));
-                    
+
                     d = Drawable.createFromXml(context.getResources(),
                             // FIXME: we need to know if this resource is platform or not
                             new BridgeXmlBlockParser(parser, context, false));
@@ -157,19 +162,43 @@ public final class ResourceHelper {
 
             return null;
         } else {
-            File bmpFile = new File(value);
+            File bmpFile = new File(stringValue);
             if (bmpFile.isFile()) {
                 try {
-                    Bitmap bitmap = Bridge.getCachedBitmap(value,
+                    Bitmap bitmap = Bridge.getCachedBitmap(stringValue,
                             isFramework ? null : context.getProjectKey());
-                    
+
                     if (bitmap == null) {
                         bitmap = new Bitmap(bmpFile);
-                        Bridge.setCachedBitmap(value, bitmap,
+                        try {
+                            bitmap.setDensity(Density.MEDIUM.getValue());
+                        } catch (NoClassDefFoundError error) {
+                            // look like we're running in an older version of ADT that doesn't
+                            // include the new layoutlib_api. Let's just ignore this, the drawing
+                            // will just be wrong.
+                        }
+                        Bridge.setCachedBitmap(stringValue, bitmap,
                                 isFramework ? null : context.getProjectKey());
                     }
-                    
-                    return new BitmapDrawable(bitmap);
+
+                    try {
+                        if (value instanceof IDensityBasedResourceValue) {
+                            Density density = ((IDensityBasedResourceValue)value).getDensity();
+                            if (density != Density.MEDIUM) {
+                                // create a copy of the bitmap
+                                bitmap = Bitmap.createBitmap(bitmap);
+
+                                // apply the density
+                                bitmap.setDensity(density.getValue());
+                            }
+                        }
+                    } catch (NoClassDefFoundError error) {
+                        // look like we're running in an older version of ADT that doesn't include
+                        // the new layoutlib_api. Let's just ignore this, the drawing will just be
+                        // wrong.
+                    }
+
+                    return new BitmapDrawable(context.getResources(), bitmap);
                 } catch (IOException e) {
                     // we'll return null below
                     // TODO: log the error.
@@ -177,7 +206,7 @@ public final class ResourceHelper {
             } else {
                 // attempt to get a color from the value
                 try {
-                    int color = getColor(value);
+                    int color = getColor(stringValue);
                     return new ColorDrawable(color);
                 } catch (NumberFormatException e) {
                     // we'll return null below.
@@ -185,20 +214,20 @@ public final class ResourceHelper {
                 }
             }
         }
-        
+
         return null;
     }
 
-    
+
     // ------- TypedValue stuff
     // This is taken from //device/libs/utils/ResourceTypes.cpp
-    
+
     private static final class UnitEntry {
         String name;
         int type;
         int unit;
         float scale;
-        
+
         UnitEntry(String name, int type, int unit, float scale) {
             this.name = name;
             this.type = type;
@@ -218,7 +247,7 @@ public final class ResourceHelper {
         new UnitEntry("%", TypedValue.TYPE_FRACTION, TypedValue.COMPLEX_UNIT_FRACTION, 1.0f/100),
         new UnitEntry("%p", TypedValue.TYPE_FRACTION, TypedValue.COMPLEX_UNIT_FRACTION_PARENT, 1.0f/100),
     };
-    
+
     /**
      * Returns the raw value from the given string.
      * This object is only valid until the next call on to {@link ResourceHelper}.
@@ -227,10 +256,10 @@ public final class ResourceHelper {
         if (stringToFloat(s, mValue)) {
             return mValue;
         }
-        
+
         return null;
     }
-    
+
     /**
      * Convert the string into a {@link TypedValue}.
      * @param s
@@ -258,7 +287,7 @@ public final class ResourceHelper {
         if (buf[0] < '0' && buf[0] > '9' && buf[0] != '.') {
             return false;
         }
-        
+
         // now look for the string that is after the float...
         Matcher m = sFloatPattern.matcher(s);
         if (m.matches()) {
@@ -272,11 +301,11 @@ public final class ResourceHelper {
                 // this shouldn't happen with the regexp above.
                 return false;
             }
-            
+
             if (end.length() > 0 && end.charAt(0) != ' ') {
                 // Might be a unit...
                 if (parseUnit(end, outValue, sFloatOut)) {
-                     
+
                     f *= sFloatOut[0];
                     boolean neg = f < 0;
                     if (neg) {
@@ -312,17 +341,17 @@ public final class ResourceHelper {
                     if (neg) {
                         mantissa = (-mantissa) & TypedValue.COMPLEX_MANTISSA_MASK;
                     }
-                    outValue.data |= 
+                    outValue.data |=
                         (radix<<TypedValue.COMPLEX_RADIX_SHIFT)
                         | (mantissa<<TypedValue.COMPLEX_MANTISSA_SHIFT);
                     return true;
                 }
                 return false;
             }
-            
+
             // make sure it's only spaces at the end.
             end = end.trim();
-    
+
             if (end.length() == 0) {
                 if (outValue != null) {
                     outValue.type = TypedValue.TYPE_FLOAT;
@@ -334,7 +363,7 @@ public final class ResourceHelper {
 
         return false;
     }
-    
+
     private static boolean parseUnit(String str, TypedValue outValue, float[] outScale) {
         str = str.trim();
 
@@ -343,7 +372,7 @@ public final class ResourceHelper {
                 outValue.type = unit.type;
                 outValue.data = unit.unit << TypedValue.COMPLEX_UNIT_SHIFT;
                 outScale[0] = unit.scale;
-                
+
                 return true;
             }
         }
