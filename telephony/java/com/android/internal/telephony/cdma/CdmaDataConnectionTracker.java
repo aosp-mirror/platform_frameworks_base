@@ -246,7 +246,7 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
     @Override
     protected boolean isApnTypeActive(String type) {
         return (isApnTypeAvailable(type) &&
-                (state == State.CONNECTED || state == State.INITING));
+                (state != State.IDLE));
     }
 
     @Override
@@ -260,7 +260,7 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
     }
 
     protected String[] getActiveApnTypes() {
-        if (state == State.CONNECTED || state == State.INITING) {
+        if (state != State.IDLE) {
             return mSupportedApnTypes.clone();
         }
         return new String[0];
