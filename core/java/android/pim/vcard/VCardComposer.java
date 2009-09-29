@@ -23,6 +23,7 @@ import android.content.EntityIterator;
 import android.content.Entity.NamedContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteException;
+import android.net.Uri;
 import android.os.RemoteException;
 import android.provider.CallLog;
 import android.provider.CallLog.Calls;
@@ -81,7 +82,7 @@ import java.util.Map;
 public class VCardComposer {
     private static final String LOG_TAG = "vcard.VCardComposer";
 
-    private final static String DEFAULT_EMAIL_TYPE = Constants.ATTR_TYPE_INTERNET;
+    private static final String DEFAULT_EMAIL_TYPE = Constants.ATTR_TYPE_INTERNET;
 
     public static final String FAILURE_REASON_FAILED_TO_GET_DATABASE_INFO =
         "Failed to get database information";
@@ -93,6 +94,14 @@ public class VCardComposer {
         "The vCard composer object is not correctly initialized";
 
     public static final String NO_ERROR = "No error";
+
+    private static final Uri sDataRequestUri;
+
+    static {
+        Uri.Builder builder = RawContacts.CONTENT_URI.buildUpon();
+        builder.appendQueryParameter(Data.FOR_EXPORT_ONLY, "1");
+        sDataRequestUri = builder.build();
+    }
 
     public static interface OneEntryHandler {
         public boolean onInit(Context context);
@@ -116,7 +125,7 @@ public class VCardComposer {
         @SuppressWarnings("hiding")
         private static final String LOG_TAG = "vcard.VCardComposer.HandlerForOutputStream";
 
-        private OutputStream mOutputStream; // mWriter will close this.
+        final private OutputStream mOutputStream; // mWriter will close this.
         private Writer mWriter;
 
         private boolean mOnTerminateIsCalled = false;
@@ -301,8 +310,8 @@ public class VCardComposer {
 
     private boolean mIsCallLogComposer = false;
 
-    private static final String[] sRawContactsProjection = new String[] {
-        RawContacts._ID,
+    private static final String[] sContactsProjection = new String[] {
+        Contacts._ID,
     };
 
     /** The projection to use when querying the call log table */
@@ -442,7 +451,7 @@ public class VCardComposer {
             mCursor = mContentResolver.query(CallLog.Calls.CONTENT_URI, sCallLogProjection,
                     selection, selectionArgs, null);
         } else {
-            mCursor = mContentResolver.query(RawContacts.CONTENT_URI, sRawContactsProjection,
+            mCursor = mContentResolver.query(Contacts.CONTENT_URI, sContactsProjection,
                     selection, selectionArgs, null);
         }
 
@@ -451,7 +460,7 @@ public class VCardComposer {
             return false;
         }
 
-        if (mCursor.getCount() == 0 || !mCursor.moveToFirst()) {
+        if (getCount() == 0 || !mCursor.moveToFirst()) {
             try {
                 mCursor.close();
             } catch (SQLiteException e) {
@@ -604,23 +613,19 @@ public class VCardComposer {
     }
 
     private String createOneEntryInternal(final String contactId) {
-        final StringBuilder builder = new StringBuilder();
-        appendVCardLine(builder, VCARD_PROPERTY_BEGIN, VCARD_DATA_VCARD);
-        if (mIsV30) {
-            appendVCardLine(builder, VCARD_PROPERTY_VERSION, Constants.VERSION_V30);
-        } else {
-            appendVCardLine(builder, VCARD_PROPERTY_VERSION, Constants.VERSION_V21);
-        }
-
         final Map<String, List<ContentValues>> contentValuesListMap =
-            new HashMap<String, List<ContentValues>>();
-
-        final String selection = Data.RAW_CONTACT_ID + "=?";
+                new HashMap<String, List<ContentValues>>();
+        final String selection = Data.CONTACT_ID + "=?";
         final String[] selectionArgs = new String[] {contactId};
+        // The resolver may return the entity iterator with no data. It is possiible.
+        // e.g. If all the data in the contact of the given contact id are not exportable ones,
+        //      they are hidden from the view of this method, though contact id itself exists.
+        boolean dataExists = false;
         EntityIterator entityIterator = null;
         try {
             entityIterator = mContentResolver.queryEntities(
-                    RawContacts.CONTENT_URI, selection, selectionArgs, null);
+                    sDataRequestUri, selection, selectionArgs, null);
+            dataExists = entityIterator.hasNext();
             while (entityIterator.hasNext()) {
                 Entity entity = entityIterator.next();
                 for (NamedContentValues namedContentValues : entity
@@ -648,7 +653,18 @@ public class VCardComposer {
             }
         }
 
-        // TODO: consolidate order? (low priority)
+        if (!dataExists) {
+            return "";
+        }
+
+        final StringBuilder builder = new StringBuilder();
+        appendVCardLine(builder, VCARD_PROPERTY_BEGIN, VCARD_DATA_VCARD);
+        if (mIsV30) {
+            appendVCardLine(builder, VCARD_PROPERTY_VERSION, Constants.VERSION_V30);
+        } else {
+            appendVCardLine(builder, VCARD_PROPERTY_VERSION, Constants.VERSION_V21);
+        }
+
         appendStructuredNames(builder, contentValuesListMap);
         appendNickNames(builder, contentValuesListMap);
         appendPhones(builder, contentValuesListMap);
@@ -660,7 +676,7 @@ public class VCardComposer {
         appendOrganizations(builder, contentValuesListMap);
         appendPhotos(builder, contentValuesListMap);
         appendNotes(builder, contentValuesListMap);
-        // TODO: GroupMembership... What?
+        // TODO: GroupMembership
 
         if (mIsDoCoMo) {
             appendVCardLine(builder, VCARD_PROPERTY_X_CLASS, VCARD_DATA_PUBLIC);
