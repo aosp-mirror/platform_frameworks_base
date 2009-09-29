@@ -67,7 +67,7 @@ class UnlockScreen extends LinearLayoutWithDefaultTouchRecepient
     /**
      * whether there is a fallback option available when the pattern is forgotten.
      */
-    private final boolean mEnableFallback;
+    private boolean mEnableFallback;
 
     private boolean mCreatedInPortrait;
 
@@ -154,14 +154,12 @@ class UnlockScreen extends LinearLayoutWithDefaultTouchRecepient
                  LockPatternUtils lockPatternUtils,
                  KeyguardUpdateMonitor updateMonitor,
                  KeyguardScreenCallback callback,
-                 int totalFailedAttempts,
-                 boolean enableFallback) {
+                 int totalFailedAttempts) {
         super(context);
         mLockPatternUtils = lockPatternUtils;
         mUpdateMonitor = updateMonitor;
         mCallback = callback;
         mTotalFailedPatternAttempts = totalFailedAttempts;
-        mEnableFallback = enableFallback;
         mFailedPatternAttemptsSinceLastTimeout = totalFailedAttempts % LockPatternUtils.FAILED_ATTEMPTS_BEFORE_TIMEOUT;
 
         if (mUpdateMonitor.isInPortrait()) {
@@ -242,6 +240,10 @@ class UnlockScreen extends LinearLayoutWithDefaultTouchRecepient
                         mUpdateMonitor.getTelephonySpn()));
     }
 
+    public void setEnableFallback(boolean state) {
+        mEnableFallback = state;
+    }
+    
     private void resetStatusInfo() {
         mInstructions = null;
         mShowingBatteryInfo = mUpdateMonitor.shouldShowBatteryInfo();
