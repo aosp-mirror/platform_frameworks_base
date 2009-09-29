@@ -1102,8 +1102,8 @@ public class Paint {
         return res;
     }
 
-    public native int native_breakText(char[] text, int index, int count,
-                                       float maxWidth, float[] measuredWidth);
+    private native int native_breakText(char[] text, int index, int count,
+                                        float maxWidth, float[] measuredWidth);
 
     /**
      * Measure the text, stopping early if the measured width exceeds maxWidth.
@@ -1174,8 +1174,8 @@ public class Paint {
         return res;
     }
 
-    public native int native_breakText(String text, boolean measureForwards,
-                                       float maxWidth, float[] measuredWidth);
+    private native int native_breakText(String text, boolean measureForwards,
+                                        float maxWidth, float[] measuredWidth);
 
     /**
      * Return the advance widths for the characters in the string.
