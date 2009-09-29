@@ -33,6 +33,7 @@ import android.provider.ContactsContract.CommonDataKinds.Email;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.View.OnClickListener;
+import com.android.internal.R;
 
 /**
  * Widget used to show an image with the standard fasttrack badge
@@ -48,6 +49,7 @@ public class FasttrackBadgeWidget extends ImageView implements OnClickListener {
     private int mMode;
     private QueryHandler mQueryHandler;
     private Drawable mBadgeBackground;
+    private Drawable mNoBadgeBackground;
 
     protected String[] mExcludeMimes = null;
 
@@ -119,7 +121,10 @@ public class FasttrackBadgeWidget extends ImageView implements OnClickListener {
 
     private void onContactUriChanged() {
         if (mContactUri == null && mContactEmail == null && mContactPhone == null) {
-            setBackgroundDrawable(null);
+            if (mNoBadgeBackground == null) {
+                mNoBadgeBackground = getResources().getDrawable(R.drawable.fasttrack_nobadge);
+            }
+            setBackgroundDrawable(mNoBadgeBackground);
         } else {
             setBackgroundDrawable(mBadgeBackground);
         }
