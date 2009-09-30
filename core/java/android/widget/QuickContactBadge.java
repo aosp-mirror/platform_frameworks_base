@@ -170,15 +170,6 @@ public class QuickContactBadge extends ImageView implements OnClickListener {
         }
     }
 
-    /**
-     * Set the QuickContact window mode. Options are {@link FastTrack#MODE_SMALL},
-     * {@link FastTrack#MODE_MEDIUM}, {@link FastTrack#MODE_LARGE}.
-     * @param size
-     */
-    public void setMode(int size) {
-        mMode = size;
-    }
-
     public void onClick(View v) {
         if (mContactUri != null) {
             final ContentResolver resolver = getContext().getContentResolver();
