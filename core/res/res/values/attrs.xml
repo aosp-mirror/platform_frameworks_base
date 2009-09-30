@@ -401,20 +401,20 @@
         <attr name="spinnerItemStyle" format="reference" />
         <!-- Default MapView style. -->
         <attr name="mapViewStyle" format="reference" />
-        <!-- Default Fasttrack badge style. -->
-        <attr name="fasttrackBadgeWidgetStyle" format="reference" />
-        <!-- Default Fasttrack badge style with small fasttrack window. -->
-        <attr name="fasttrackBadgeWidgetStyleWindowSmall" format="reference" />
-        <!-- Default Fasttrack badge style with medium fasttrack window. -->
-        <attr name="fasttrackBadgeWidgetStyleWindowMedium" format="reference" />
-        <!-- Default Fasttrack badge style with large fasttrack window. -->
-        <attr name="fasttrackBadgeWidgetStyleWindowLarge" format="reference" />
-        <!-- Default Fasttrack badge style with small fasttrack window. -->
-        <attr name="fasttrackBadgeWidgetStyleSmallWindowSmall" format="reference" />
-        <!-- Default Fasttrack badge style with medium fasttrack window. -->
-        <attr name="fasttrackBadgeWidgetStyleSmallWindowMedium" format="reference" />
-        <!-- Default Fasttrack badge style with large fasttrack window. -->
-        <attr name="fasttrackBadgeWidgetStyleSmallWindowLarge" format="reference" />
+        <!-- Default quickcontact badge style. -->
+        <attr name="quickContactBadgeStyle" format="reference" />
+        <!-- Default quickcontact badge style with small quickcontact window. -->
+        <attr name="quickContactBadgeStyleWindowSmall" format="reference" />
+        <!-- Default quickcontact badge style with medium quickcontact window. -->
+        <attr name="quickContactBadgeStyleWindowMedium" format="reference" />
+        <!-- Default quickcontact badge style with large quickcontact window. -->
+        <attr name="quickContactBadgeStyleWindowLarge" format="reference" />
+        <!-- Default quickcontact badge style with small quickcontact window. -->
+        <attr name="quickContactBadgeStyleSmallWindowSmall" format="reference" />
+        <!-- Default quickcontact badge style with medium quickcontact window. -->
+        <attr name="quickContactBadgeStyleSmallWindowMedium" format="reference" />
+        <!-- Default quickcontact badge style with large quickcontact window. -->
+        <attr name="quickContactBadgeStyleSmallWindowLarge" format="reference" />
 
         <!-- =================== -->
         <!-- Preference styles   -->
@@ -2227,8 +2227,8 @@
         <attr name="orientation" />
     </declare-styleable>
 
-    <declare-styleable name="FasttrackBadgeWidget">
-        <attr name="fasttrackWindowSize">
+    <declare-styleable name="QuickContactBadge">
+        <attr name="quickContactWindowSize">
             <enum name="modeSmall" value="1" />
             <enum name="modeMedium" value="2" />
             <enum name="modeLarge" value="3" />
