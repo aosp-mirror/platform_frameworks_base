@@ -810,7 +810,8 @@ public class ContactStruct {
         } else if (propName.equals("NICKNAME") || propName.equals("X-NICKNAME")) {
             addNickName(propValue);
         } else if (propName.equals("SOUND")) {
-            if (Constants.ATTR_TYPE_X_IRMC_N.equals(paramMap.get(Constants.ATTR_TYPE))) {
+            Collection<String> typeCollection = paramMap.get(Constants.ATTR_TYPE);
+            if (typeCollection != null && typeCollection.contains(Constants.ATTR_TYPE_X_IRMC_N)) {
                 handlePhoneticNameFromSound(propValueList);
             } else {
                 // Ignore this field since Android cannot understand what it is.
