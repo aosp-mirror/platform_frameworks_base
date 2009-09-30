@@ -49,10 +49,6 @@ public enum VpnType {
         return mDescriptionId;
     }
 
-    public String getDescription() {
-        return "";
-    }
-
     public Class<? extends VpnProfile> getProfileClass() {
         return mClass;
     }
