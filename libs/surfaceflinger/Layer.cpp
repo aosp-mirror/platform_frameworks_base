@@ -330,10 +330,6 @@ uint32_t Layer::doTransaction(uint32_t flags)
                     int(mBuffers[0]->getWidth()), int(mBuffers[0]->getHeight()),
                     int(mBuffers[1]->getWidth()), int(mBuffers[1]->getHeight()));
 
-        // record the new size, form this point on, when the client request a
-        // buffer, it'll get the new size.
-        setDrawingSize(temp.requested_w, temp.requested_h);
-
         // we're being resized and there is a freeze display request,
         // acquire a freeze lock, so that the screen stays put
         // until we've redrawn at the new size; this is to avoid
@@ -346,9 +342,10 @@ uint32_t Layer::doTransaction(uint32_t flags)
             }
         }
 
-        // recompute the visible region
-        flags |= Layer::eVisibleRegion;
-        this->contentDirty = true;
+        // record the new size, form this point on, when the client request a
+        // buffer, it'll get the new size.
+        setDrawingSize(temp.requested_w, temp.requested_h);
+
         // all buffers need reallocation
         lcblk->reallocate();
     }
