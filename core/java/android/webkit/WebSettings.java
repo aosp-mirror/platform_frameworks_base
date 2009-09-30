@@ -1005,7 +1005,6 @@ public class WebSettings {
      * @param databasePath String path to the directory where the Geolocation
      *     permissions database should be saved. May be the empty string but
      *     should never be null.
-     * @hide pending api council approval
      */
     public synchronized void setGeolocationDatabasePath(String databasePath) {
         if (databasePath != null && !databasePath.equals(mDatabasePath)) {
@@ -1122,7 +1121,6 @@ public class WebSettings {
     /**
      * Sets whether Geolocation is enabled.
      * @param flag Whether Geolocation should be enabled.
-     * @hide pending api council approval
      */
     public synchronized void setGeolocationEnabled(boolean flag) {
         if (mGeolocationEnabled != flag) {
