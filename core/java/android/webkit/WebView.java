@@ -3871,11 +3871,25 @@ public class WebView extends AbsoluteLayout
 
                     if (mSnapScrollMode == SNAP_X
                             || mSnapScrollMode == SNAP_X_LOCK) {
-                        scrollBy(deltaX, 0);
+                        if (deltaX == 0) {
+                            // keep the scrollbar on the screen even there is no
+                            // scroll
+                            awakenScrollBars(ViewConfiguration
+                                    .getScrollDefaultDelay(), false);
+                        } else {
+                            scrollBy(deltaX, 0);
+                        }
                         mLastTouchX = x;
                     } else if (mSnapScrollMode == SNAP_Y
                             || mSnapScrollMode == SNAP_Y_LOCK) {
-                        scrollBy(0, deltaY);
+                        if (deltaY == 0) {
+                            // keep the scrollbar on the screen even there is no
+                            // scroll
+                            awakenScrollBars(ViewConfiguration
+                                    .getScrollDefaultDelay(), false);
+                        } else {
+                            scrollBy(0, deltaY);
+                        }
                         mLastTouchY = y;
                     } else {
                         scrollBy(deltaX, deltaY);
@@ -3900,6 +3914,9 @@ public class WebView extends AbsoluteLayout
                 }
 
                 if (done) {
+                    // keep the scrollbar on the screen even there is no scroll
+                    awakenScrollBars(ViewConfiguration.getScrollDefaultDelay(),
+                            false);
                     // return false to indicate that we can't pan out of the
                     // view space
                     return false;
