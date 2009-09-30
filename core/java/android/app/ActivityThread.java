@@ -123,6 +123,7 @@ public final class ActivityThread {
     private static final boolean DEBUG_BROADCAST = false;
     private static final boolean DEBUG_RESULTS = false;
     private static final boolean DEBUG_BACKUP = true;
+    private static final boolean DEBUG_CONFIGURATION = false;
     private static final long MIN_TIME_BETWEEN_GCS = 5*1000;
     private static final Pattern PATTERN_SEMICOLON = Pattern.compile(";");
     private static final int SQLITE_MEM_RELEASED_EVENT_LOG_TAG = 75003;
@@ -2388,6 +2389,8 @@ public final class ActivityThread {
                 appContext.setOuterContext(activity);
                 CharSequence title = r.activityInfo.loadLabel(appContext.getPackageManager());
                 Configuration config = new Configuration(mConfiguration);
+                if (DEBUG_CONFIGURATION) Log.v(TAG, "Launching activity "
+                        + r.activityInfo.name + " with config " + config);
                 activity.attach(appContext, this, getInstrumentation(), r.token,
                         r.ident, app, r.intent, r.activityInfo, title, r.parent,
                         r.embeddedID, r.lastNonConfigurationInstance,
@@ -2954,6 +2957,8 @@ public final class ActivityThread {
             if (!r.activity.mFinished && !a.mStartedActivity
                     && r.activity.mDecor != null && !r.hideForNow) {
                 if (r.newConfig != null) {
+                    if (DEBUG_CONFIGURATION) Log.v(TAG, "Resuming activity "
+                            + r.activityInfo.name + " with newConfig " + r.newConfig);
                     performConfigurationChanged(r.activity, r.newConfig);
                     r.newConfig = null;
                 }
@@ -3195,6 +3200,8 @@ public final class ActivityThread {
                     }
                 }
                 if (r.newConfig != null) {
+                    if (DEBUG_CONFIGURATION) Log.v(TAG, "Updating activity vis "
+                            + r.activityInfo.name + " with new config " + r.newConfig);
                     performConfigurationChanged(r.activity, r.newConfig);
                     r.newConfig = null;
                 }
@@ -3476,6 +3483,10 @@ public final class ActivityThread {
 
         Configuration changedConfig = null;
 
+        if (DEBUG_CONFIGURATION) Log.v(TAG, "Relaunching activity "
+                + tmp.token + " with configChanges=0x"
+                + Integer.toHexString(configChanges));
+        
         // First: make sure we have the most recent configuration and most
         // recent version of the activity, or skip it if some previous call
         // had taken a more recent version.
@@ -3494,6 +3505,7 @@ public final class ActivityThread {
             }
 
             if (tmp == null) {
+                if (DEBUG_CONFIGURATION) Log.v(TAG, "Abort, activity not relaunching!");
                 return;
             }
 
@@ -3503,13 +3515,16 @@ public final class ActivityThread {
             }
         }
 
+        if (DEBUG_CONFIGURATION) Log.v(TAG, "Relaunching activity "
+                + tmp.token + ": changedConfig=" + changedConfig);
+        
         // If there was a pending configuration change, execute it first.
         if (changedConfig != null) {
             handleConfigurationChanged(changedConfig);
         }
 
         ActivityRecord r = mActivities.get(tmp.token);
-        if (localLOGV) Log.v(TAG, "Handling relaunch of " + r);
+        if (DEBUG_CONFIGURATION) Log.v(TAG, "Handling relaunch of " + r);
         if (r == null) {
             return;
         }
@@ -3595,6 +3610,8 @@ public final class ActivityThread {
                         // the activity manager may, before then, decide the
                         // activity needs to be destroyed to handle its new
                         // configuration.
+                        if (DEBUG_CONFIGURATION) Log.v(TAG, "Setting activity "
+                                + ar.activityInfo.name + " newConfig=" + newConfig);
                         ar.newConfig = newConfig;
                     }
                 }
@@ -3652,6 +3669,8 @@ public final class ActivityThread {
             }
         }
 
+        if (DEBUG_CONFIGURATION) Log.v(TAG, "Config callback " + cb
+                + ": shouldChangeConfig=" + shouldChangeConfig);
         if (shouldChangeConfig) {
             cb.onConfigurationChanged(config);
 
@@ -3679,6 +3698,9 @@ public final class ActivityThread {
         ArrayList<ComponentCallbacks> callbacks
                 = new ArrayList<ComponentCallbacks>();
 
+        if (DEBUG_CONFIGURATION) Log.v(TAG, "Handle configuration changed: "
+                + config);
+        
         synchronized(mPackages) {
             if (mConfiguration == null) {
                 mConfiguration = new Configuration();
@@ -3729,6 +3751,9 @@ public final class ActivityThread {
             return;
         }
 
+        if (DEBUG_CONFIGURATION) Log.v(TAG, "Handle activity config changed: "
+                + r.activityInfo.name);
+        
         performConfigurationChanged(r.activity, mConfiguration);
     }
 
