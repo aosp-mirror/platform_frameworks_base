@@ -313,7 +313,7 @@ class MountService extends IMountService.Stub {
             setMediaStorageNotification(
                     com.android.internal.R.string.ext_media_safe_unmount_notification_title,
                     com.android.internal.R.string.ext_media_safe_unmount_notification_message,
-                    com.android.internal.R.drawable.stat_notify_sim_toolkit,
+                    com.android.internal.R.drawable.stat_notify_sdcard,
                     true, true, null);
             mShowSafeUnmountNotificationWhenUnmounted = false;
         } else {
@@ -333,7 +333,7 @@ class MountService extends IMountService.Stub {
         setMediaStorageNotification(
                 com.android.internal.R.string.ext_media_checking_notification_title,
                 com.android.internal.R.string.ext_media_checking_notification_message,
-                com.android.internal.R.drawable.stat_notify_sim_toolkit,
+                com.android.internal.R.drawable.stat_notify_sdcard_prepare,
                 true, false, null);
 
         updateUsbMassStorageNotification(true, false);
