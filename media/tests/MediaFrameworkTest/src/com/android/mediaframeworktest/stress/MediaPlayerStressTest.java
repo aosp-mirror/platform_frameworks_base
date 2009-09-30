@@ -40,7 +40,7 @@ public class MediaPlayerStressTest extends ActivityInstrumentationTestCase2<Medi
 
     private static final int NUMBER_OF_RANDOM_REPOSITION_AND_PLAY = 10;
     private static final int NUMBER_OF_RANDOM_REPOSITION_AND_PLAY_SHORT = 5;
-    private static final int NUMBER_OF_STRESS_LOOPS = 1000;
+    private static final int NUMBER_OF_STRESS_LOOPS = 500;
     private static final int PLAYBACK_END_TOLERANCE = 5000;
     private static final int WAIT_UNTIL_PLAYBACK_FINISH = 515000 ;
 
