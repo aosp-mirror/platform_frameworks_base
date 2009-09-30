@@ -61,6 +61,9 @@ public class MiniThumbFile {
      * we should hashcode of content://media/external/images/media remains the same.
      */
     public static synchronized void reset() {
+        for (MiniThumbFile file : sThumbFiles.values()) {
+            file.deactivate();
+        }
         sThumbFiles.clear();
     }
 
@@ -144,7 +147,7 @@ public class MiniThumbFile {
 
     // Get the magic number for the specified id in the mini-thumb file.
     // Returns 0 if the magic is not available.
-    public long getMagic(long id) {
+    public synchronized long getMagic(long id) {
         // check the mini thumb file for the right data.  Right is
         // defined as having the right magic number at the offset
         // reserved for this "id".
@@ -183,13 +186,7 @@ public class MiniThumbFile {
         return 0;
     }
 
-    public void saveMiniThumbToFile(Bitmap bitmap, long id, long magic)
-            throws IOException {
-        byte[] data = ThumbnailUtil.miniThumbData(bitmap);
-        saveMiniThumbToFile(data, id, magic);
-    }
-
-    public void saveMiniThumbToFile(byte[] data, long id, long magic)
+    public synchronized void saveMiniThumbToFile(byte[] data, long id, long magic)
             throws IOException {
         RandomAccessFile r = miniThumbDataFile();
         if (r == null) return;
@@ -237,7 +234,7 @@ public class MiniThumbFile {
      * @param id the ID of the image (same of full size image).
      * @param data the buffer to store mini-thumbnail.
      */
-    public byte [] getMiniThumbFromFile(long id, byte [] data) {
+    public synchronized byte [] getMiniThumbFromFile(long id, byte [] data) {
         RandomAccessFile r = miniThumbDataFile();
         if (r == null) return null;
 
