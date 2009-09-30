@@ -867,15 +867,15 @@ public final class BatteryStatsImpl extends BatteryStats {
 
                 String[] nameStringArray = mProcWakelocksName;
                 long[] wlData = mProcWakelocksData;
-                Process.parseProcLine(wlBuffer, startIndex, endIndex, PROC_WAKELOCKS_FORMAT, 
-                        nameStringArray, wlData, null);
+                boolean parsed = Process.parseProcLine(wlBuffer, startIndex, endIndex,
+                        PROC_WAKELOCKS_FORMAT, nameStringArray, wlData, null);
                 
                 name = nameStringArray[0];
                 count = (int) wlData[1];
                 // convert nanoseconds to microseconds with rounding.
                 totalTime = (wlData[2] + 500) / 1000;
 
-                if (name.length() > 0) {
+                if (parsed && name.length() > 0) {
                     if (!m.containsKey(name)) {
                         m.put(name, new KernelWakelockStats(count, totalTime, 
                                 sKernelWakelockUpdateVersion));
@@ -892,7 +892,7 @@ public final class BatteryStatsImpl extends BatteryStats {
                             numUpdatedWlNames++;
                         }
                     }
-                }              
+                }
                 startIndex = endIndex;
             }
 
