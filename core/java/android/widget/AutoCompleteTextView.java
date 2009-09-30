@@ -82,6 +82,8 @@ import com.android.internal.R;
  * @attr ref android.R.styleable#AutoCompleteTextView_dropDownAnchor
  * @attr ref android.R.styleable#AutoCompleteTextView_dropDownWidth
  * @attr ref android.R.styleable#AutoCompleteTextView_dropDownHeight
+ * @attr ref android.R.styleable#AutoCompleteTextView_dropDownVerticalOffset
+ * @attr ref android.R.styleable#AutoCompleteTextView_dropDownHorizontalOffset
  */
 public class AutoCompleteTextView extends EditText implements Filter.FilterListener {
     static final boolean DEBUG = false;
@@ -1153,7 +1155,7 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
                 heightSpec = mDropDownHeight;
             }
 
-            mPopup.setOutsideTouchable(mForceIgnoreOutsideTouch ? false : !mDropDownAlwaysVisible);
+            mPopup.setOutsideTouchable(!mForceIgnoreOutsideTouch && !mDropDownAlwaysVisible);
 
             mPopup.update(getDropDownAnchorView(), mDropDownHorizontalOffset,
                     mDropDownVerticalOffset, widthSpec, heightSpec);
@@ -1183,8 +1185,8 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
             
             // use outside touchable to dismiss drop down when touching outside of it, so
             // only set this if the dropdown is not always visible
-            mPopup.setOutsideTouchable(mForceIgnoreOutsideTouch ? false : !mDropDownAlwaysVisible);
-            mPopup.setTouchInterceptor(new PopupTouchIntercepter());
+            mPopup.setOutsideTouchable(!mForceIgnoreOutsideTouch && !mDropDownAlwaysVisible);
+            mPopup.setTouchInterceptor(new PopupTouchInterceptor());
             mPopup.showAsDropDown(getDropDownAnchorView(),
                     mDropDownHorizontalOffset, mDropDownVerticalOffset);
             mDropDownList.setSelection(ListView.INVALID_POSITION);
@@ -1408,9 +1410,10 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
         }
     }
 
-    private class PopupTouchIntercepter implements OnTouchListener {
+    private class PopupTouchInterceptor implements OnTouchListener {
         public boolean onTouch(View v, MotionEvent event) {
-            if (event.getAction() == MotionEvent.ACTION_DOWN) {
+            if (event.getAction() == MotionEvent.ACTION_DOWN &&
+                    mPopup != null && mPopup.isShowing()) {
                 mPopup.setInputMethodMode(PopupWindow.INPUT_METHOD_NOT_NEEDED);
                 showDropDown();
             }
