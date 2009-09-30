@@ -294,8 +294,8 @@ sp<SurfaceBuffer> Layer::requestBuffer(int index, int usage)
                 this, index, w, h, strerror(-err));
     } else {
         LOGD_IF(DEBUG_RESIZE,
-                "Layer::requestBuffer(this=%p), index=%d, w=%d, h=%d",
-                this, index, w, h);
+                "Layer::requestBuffer(this=%p), index=%d, w=%d, h=%d, handle=%p",
+                this, index, w, h, buffer->handle);
     }
 
     if (err == NO_ERROR && buffer->handle != 0) {
@@ -318,21 +318,21 @@ uint32_t Layer::doTransaction(uint32_t flags)
     const Layer::State& front(drawingState());
     const Layer::State& temp(currentState());
 
-    // Index of the back buffer
-    const bool backbufferChanged = (front.w != temp.w) || (front.h != temp.h);
-    if (backbufferChanged) {
+    if ((front.requested_w != temp.requested_w) || 
+        (front.requested_h != temp.requested_h)) {
         // the size changed, we need to ask our client to request a new buffer
         LOGD_IF(DEBUG_RESIZE,
                     "resize (layer=%p), requested (%dx%d), "
                     "drawing (%d,%d), (%dx%d), (%dx%d)",
-                    this, int(temp.w), int(temp.h),
-                    int(drawingState().w), int(drawingState().h),
+                    this, 
+                    int(temp.requested_w), int(temp.requested_h),
+                    int(front.requested_w), int(front.requested_h),
                     int(mBuffers[0]->getWidth()), int(mBuffers[0]->getHeight()),
                     int(mBuffers[1]->getWidth()), int(mBuffers[1]->getHeight()));
 
         // record the new size, form this point on, when the client request a
         // buffer, it'll get the new size.
-        setDrawingSize(temp.w, temp.h);
+        setDrawingSize(temp.requested_w, temp.requested_h);
 
         // we're being resized and there is a freeze display request,
         // acquire a freeze lock, so that the screen stays put

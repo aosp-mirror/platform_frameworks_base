@@ -83,12 +83,14 @@ void LayerBase::initStates(uint32_t w, uint32_t h, uint32_t flags)
     if (flags & ISurfaceComposer::eNonPremultiplied)
         mPremultipliedAlpha = false;
 
-    mCurrentState.z         = 0;
-    mCurrentState.w         = w;
-    mCurrentState.h         = h;
-    mCurrentState.alpha     = 0xFF;
-    mCurrentState.flags     = layerFlags;
-    mCurrentState.sequence  = 0;
+    mCurrentState.z             = 0;
+    mCurrentState.w             = w;
+    mCurrentState.h             = h;
+    mCurrentState.requested_w   = w;
+    mCurrentState.requested_h   = h;
+    mCurrentState.alpha         = 0xFF;
+    mCurrentState.flags         = layerFlags;
+    mCurrentState.sequence      = 0;
     mCurrentState.transform.set(0, 0);
 
     // drawing state & current state are identical
@@ -132,10 +134,10 @@ bool LayerBase::setLayer(uint32_t z) {
     return true;
 }
 bool LayerBase::setSize(uint32_t w, uint32_t h) {
-    if (mCurrentState.w == w && mCurrentState.h == h)
+    if (mCurrentState.requested_w == w && mCurrentState.requested_h == h)
         return false;
-    mCurrentState.w = w;
-    mCurrentState.h = h;
+    mCurrentState.requested_w = w;
+    mCurrentState.requested_h = h;
     requestTransaction();
     return true;
 }
@@ -192,13 +194,19 @@ uint32_t LayerBase::doTransaction(uint32_t flags)
     const Layer::State& front(drawingState());
     const Layer::State& temp(currentState());
 
+    if ((front.requested_w != temp.requested_w) ||
+        (front.requested_h != temp.requested_h))  {
+        // resize the layer, set the physical size to the requested size
+        Layer::State& editTemp(currentState());
+        editTemp.w = temp.requested_w;
+        editTemp.h = temp.requested_h;
+    }
+
     if (temp.sequence != front.sequence) {
         // invalidate and recompute the visible regions if needed
         flags |= eVisibleRegion;
         this->contentDirty = true;
-    }
 
-    if (temp.sequence != front.sequence) {
         const bool linearFiltering = mUseLinearFiltering;
         mUseLinearFiltering = false;
         if (!(mFlags & DisplayHardware::SLOW_CONFIG)) {

@@ -88,6 +88,8 @@ public:
             struct State {
                 uint32_t        w;
                 uint32_t        h;
+                uint32_t        requested_w;
+                uint32_t        requested_h;
                 uint32_t        z;
                 uint8_t         alpha;
                 uint8_t         flags;
