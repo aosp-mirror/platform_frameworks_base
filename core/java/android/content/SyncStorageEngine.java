@@ -1104,7 +1104,7 @@ public class SyncStorageEngine extends Handler {
                                 String accountType = parser.getAttributeValue(
                                         null, "type");
                                 if (accountType == null) {
-                                    accountType = "com.google.GAIA";
+                                    accountType = "com.google";
                                 }
                                 String authorityName = parser.getAttributeValue(
                                         null, "authority");
@@ -1272,7 +1272,7 @@ public class SyncStorageEngine extends Handler {
                 String accountType = hasType
                         ? c.getString(c.getColumnIndex("account_type")) : null;
                 if (accountType == null) {
-                    accountType = "com.google.GAIA";
+                    accountType = "com.google";
                 }
                 String authorityName = c.getString(c.getColumnIndex("authority"));
                 AuthorityInfo authority = this.getOrCreateAuthorityLocked(

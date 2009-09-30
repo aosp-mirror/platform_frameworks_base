@@ -111,7 +111,7 @@ public class SubscribedFeedsIntentService extends IntentService {
                 + "and " + SubscribedFeeds.Feeds.FEED + "= ?";
         try {
             // TODO(fredq) fix the hardcoded type
-            final Account account = new Account(accountName, "com.google.GAIA");
+            final Account account = new Account(accountName, "com.google");
             c = context.getContentResolver().query(SubscribedFeeds.Feeds.CONTENT_URI,
                     null, where, new String[]{account.name, account.type, feed}, null);
             if (c.getCount() == 0) {

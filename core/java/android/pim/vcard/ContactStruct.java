@@ -1123,7 +1123,7 @@ public class ContactStruct {
     }
     
     // From GoogleSource.java in Contacts app.
-    private static final String ACCOUNT_TYPE_GOOGLE = "com.google.GAIA";
+    private static final String ACCOUNT_TYPE_GOOGLE = "com.google";
     private static final String GOOGLE_MY_CONTACTS_GROUP = "System Group: My Contacts";
 
     public void pushIntoContentResolver(ContentResolver resolver) {
