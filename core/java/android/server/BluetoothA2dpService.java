@@ -333,10 +333,11 @@ public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
             return false;
         }
         String path = mBluetoothService.getObjectPathFromAddress(device.getAddress());
-        if (path == null) {
+        Integer state = mAudioDevices.get(device);
+        if (path == null || state == null) {
             return false;
         }
-        switch (mAudioDevices.get(device)) {
+        switch (state.intValue()) {
         case BluetoothA2dp.STATE_CONNECTED:
             return true;
         case BluetoothA2dp.STATE_PLAYING:
@@ -354,10 +355,11 @@ public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
             return false;
         }
         String path = mBluetoothService.getObjectPathFromAddress(device.getAddress());
-        if (path == null) {
+        Integer state = mAudioDevices.get(device);
+        if (path == null || state == null) {
             return false;
         }
-        switch (mAudioDevices.get(device)) {
+        switch (state.intValue()) {
         case BluetoothA2dp.STATE_PLAYING:
             return true;
         case BluetoothA2dp.STATE_CONNECTED:
