@@ -73,7 +73,7 @@ import com.android.internal.R;
 public class AccountManagerService
         extends IAccountManager.Stub
         implements RegisteredServicesCacheListener {
-    private static final String GOOGLE_ACCOUNT_TYPE = "com.google.GAIA";
+    private static final String GOOGLE_ACCOUNT_TYPE = "com.google";
 
     private static final String NO_BROADCAST_FLAG = "nobroadcast";
 
@@ -81,7 +81,7 @@ public class AccountManagerService
 
     private static final int TIMEOUT_DELAY_MS = 1000 * 60;
     private static final String DATABASE_NAME = "accounts.db";
-    private static final int DATABASE_VERSION = 3;
+    private static final int DATABASE_VERSION = 4;
 
     private final Context mContext;
 
@@ -852,7 +852,7 @@ public class AccountManagerService
         try {
             new Session(response, accountType, expectActivityLaunch) {
                 public void run() throws RemoteException {
-                    mAuthenticator.addAccount(this, mAccountType, authTokenType, requiredFeatures, 
+                    mAuthenticator.addAccount(this, mAccountType, authTokenType, requiredFeatures,
                             options);
                 }
 
@@ -1287,7 +1287,7 @@ public class AccountManagerService
         MessageHandler(Looper looper) {
             super(looper);
         }
-        
+
         public void handleMessage(Message msg) {
             if (mBindHelper.handleMessage(msg)) {
                 return;
@@ -1379,6 +1379,12 @@ public class AccountManagerService
                 createAccountsDeletionTrigger(db);
                 oldVersion++;
             }
+
+            if (oldVersion == 3) {
+                db.execSQL("UPDATE " + TABLE_ACCOUNTS + " SET " + ACCOUNTS_TYPE +
+                        " = 'com.google' WHERE " + ACCOUNTS_TYPE + " == 'com.google.GAIA'");
+                oldVersion++;
+            }
         }
 
         @Override
@@ -1417,7 +1423,7 @@ public class AccountManagerService
             filter.addAction(Intent.ACTION_DEVICE_STORAGE_OK);
             context.registerReceiver(this, filter);
         }
-        
+
         /**
          * Compare the IMSI to the one stored in the login service's
          * database.  If they differ, erase all passwords and

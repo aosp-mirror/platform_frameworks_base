@@ -903,7 +903,7 @@ public abstract class ContentResolver {
         if (extras != null) {
             String accountName = extras.getString(SYNC_EXTRAS_ACCOUNT);
             if (!TextUtils.isEmpty(accountName)) {
-                account = new Account(accountName, "com.google.GAIA");
+                account = new Account(accountName, "com.google");
             }
             extras.remove(SYNC_EXTRAS_ACCOUNT);
         }
