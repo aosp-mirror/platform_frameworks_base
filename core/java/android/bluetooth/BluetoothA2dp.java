@@ -140,7 +140,7 @@ public final class BluetoothA2dp {
      *  @return false on immediate error, true otherwise
      *  @hide
      */
-    public int suspendSink(BluetoothDevice device) {
+    public boolean suspendSink(BluetoothDevice device) {
         try {
             return mService.suspendSink(device);
         } catch (RemoteException e) {
@@ -156,7 +156,7 @@ public final class BluetoothA2dp {
      *  @return false on immediate error, true otherwise
      *  @hide
      */
-    public int resumeSink(BluetoothDevice device) {
+    public boolean resumeSink(BluetoothDevice device) {
         try {
             return mService.resumeSink(device);
         } catch (RemoteException e) {
