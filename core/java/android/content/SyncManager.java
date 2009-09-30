@@ -73,6 +73,7 @@ import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Random;
 import java.util.Collection;
+import java.util.concurrent.CountDownLatch;
 
 /**
  * @hide
@@ -200,11 +201,7 @@ class SyncManager implements OnAccountsUpdatedListener {
 
     private BroadcastReceiver mBootCompletedReceiver = new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {
-            if (!mFactoryTest) {
-                mBootCompleted = true;
-                AccountManager.get(mContext).addOnAccountsUpdatedListener(SyncManager.this,
-                        mSyncHandler, true /* updateImmediately */);
-            }
+            mSyncHandler.onBootCompleted();
         }
     };
 
@@ -357,8 +354,10 @@ class SyncManager implements OnAccountsUpdatedListener {
         IntentFilter intentFilter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
         context.registerReceiver(mConnectivityIntentReceiver, intentFilter);
 
-        intentFilter = new IntentFilter(Intent.ACTION_BOOT_COMPLETED);
-        context.registerReceiver(mBootCompletedReceiver, intentFilter);
+        if (!factoryTest) {
+            intentFilter = new IntentFilter(Intent.ACTION_BOOT_COMPLETED);
+            context.registerReceiver(mBootCompletedReceiver, intentFilter);
+        }
 
         intentFilter = new IntentFilter(ConnectivityManager.ACTION_BACKGROUND_DATA_SETTING_CHANGED);
         context.registerReceiver(mBackgroundDataSettingChanged, intentFilter);
@@ -398,6 +397,13 @@ class SyncManager implements OnAccountsUpdatedListener {
                 sendCheckAlarmsMessage();
             }
         });
+
+        if (!factoryTest) {
+            AccountManager.get(mContext).addOnAccountsUpdatedListener(SyncManager.this,
+                mSyncHandler, false /* updateImmediately */);
+            // do this synchronously to ensure we have the accounts before this call returns
+            onAccountsUpdated(AccountManager.get(mContext).getAccounts());
+        }
     }
 
     private synchronized void initializeSyncPoll() {
@@ -580,10 +586,8 @@ class SyncManager implements OnAccountsUpdatedListener {
             Bundle extras, long delay, boolean onlyThoseWithUnkownSyncableState) {
         boolean isLoggable = Log.isLoggable(TAG, Log.VERBOSE);
 
-        if (!mBootCompleted) {
-            if (isLoggable) {
-                Log.v(TAG, "suppressing scheduleSync() since boot hasn't completed");
-            }
+        if (mAccounts == null) {
+            Log.e(TAG, "scheduleSync: the accounts aren't known yet, this should never happen");
             return;
         }
 
@@ -595,10 +599,9 @@ class SyncManager implements OnAccountsUpdatedListener {
             return;
         }
 
-        final boolean backgroundDataUsageAllowed =
+        final boolean backgroundDataUsageAllowed = !mBootCompleted ||
                 getConnectivityManager().getBackgroundDataSetting();
 
-        if (mAccounts == null) setStatusText("The accounts aren't known yet.");
         if (!mDataConnectionIsConnected) setStatusText("No data connection");
         if (mStorageIsLow) setStatusText("Memory low");
 
@@ -1453,7 +1456,29 @@ class SyncManager implements OnAccountsUpdatedListener {
         // used to track if we have installed the error notification so that we don't reinstall
         // it if sync is still failing
         private boolean mErrorNotificationInstalled = false;
+        private volatile CountDownLatch mReadyToRunLatch = new CountDownLatch(1);
 
+        public void onBootCompleted() {
+            mBootCompleted = true;
+            if (mReadyToRunLatch != null) {
+                mReadyToRunLatch.countDown();
+            }
+        }
+
+        private void waitUntilReadyToRun() {
+            CountDownLatch latch = mReadyToRunLatch;
+            if (latch != null) {
+                while (true) {
+                    try {
+                        latch.await();
+                        mReadyToRunLatch = null;
+                        return;
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                    }
+                }
+            }
+        }
         /**
          * Used to keep track of whether a sync notification is active and who it is for.
          */
@@ -1491,11 +1516,8 @@ class SyncManager implements OnAccountsUpdatedListener {
         }
 
         public void handleMessage(Message msg) {
-            handleSyncHandlerMessage(msg);
-        }
-
-        private void handleSyncHandlerMessage(Message msg) {
             try {
+                waitUntilReadyToRun();
                 switch (msg.what) {
                     case SyncHandler.MESSAGE_SYNC_FINISHED:
                         if (Log.isLoggable(TAG, Log.VERBOSE)) {
