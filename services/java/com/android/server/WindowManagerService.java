@@ -233,8 +233,8 @@ public class WindowManagerService extends IWindowManager.Stub
             mPolicy.enableKeyguard(false);
         }
         public void released() {
+            mPolicy.enableKeyguard(true);
             synchronized (mKeyguardDisabled) {
-                mPolicy.enableKeyguard(true);
                 mWaitingUntilKeyguardReenabled = false;
                 mKeyguardDisabled.notifyAll();
             }

@@ -10340,9 +10340,11 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         try {
             if (DEBUG_SERVICE) Log.v(TAG, "Scheduling start service: "
                     + r.name + " " + r.intent);
+            mStringBuilder.setLength(0);
+            r.intent.getIntent().toShortString(mStringBuilder, false, true);
             EventLog.writeEvent(LOG_AM_CREATE_SERVICE,
                     System.identityHashCode(r), r.shortName,
-                    r.intent.getIntent().toString(), r.app.pid);
+                    mStringBuilder.toString(), r.app.pid);
             synchronized (r.stats.getBatteryStats()) {
                 r.stats.startLaunchedLocked();
             }
