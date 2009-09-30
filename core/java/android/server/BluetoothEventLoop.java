@@ -403,9 +403,13 @@ class BluetoothEventLoop {
             mBluetoothService.cancelPairingUserInput(address);
             return null;
         }
-        // Set state to BONDING, for incoming connections it will be set here.
-        // For outgoing connections, it gets set when call createBond.
-        mBluetoothService.getBondState().setBondState(address, BluetoothDevice.BOND_BONDING);
+        // Set state to BONDING. For incoming connections it will be set here.
+        // For outgoing connections, it gets set when we call createBond.
+        // Also set it only when the state is not already Bonded, we can sometimes
+        // get an authorization request from the remote end if it doesn't have the link key
+        // while we still have it.
+        if (mBluetoothService.getBondState().getBondState(address) != BluetoothDevice.BOND_BONDED)
+            mBluetoothService.getBondState().setBondState(address, BluetoothDevice.BOND_BONDING);
         return address;
     }
 
