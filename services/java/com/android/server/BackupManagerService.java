@@ -163,8 +163,10 @@ class BackupManagerService extends IBackupManager.Stub {
     IBackupAgent mConnectedAgent;
     volatile boolean mConnecting;
     volatile boolean mBackupOrRestoreInProgress = false;
+    volatile long mLastBackupPass;
+    volatile long mNextBackupPass;
 
-    // A similar synchronicity mechanism around clearing apps' data for restore
+    // A similar synchronization mechanism around clearing apps' data for restore
     final Object mClearDataLock = new Object();
     volatile boolean mClearingData;
 
@@ -634,6 +636,9 @@ class BackupManagerService extends IBackupManager.Stub {
             switch (msg.what) {
             case MSG_RUN_BACKUP:
             {
+                mLastBackupPass = System.currentTimeMillis();
+                mNextBackupPass = mLastBackupPass + BACKUP_INTERVAL;
+
                 IBackupTransport transport = getTransport(mCurrentTransport);
                 if (transport == null) {
                     Log.v(TAG, "Backup requested but no transport available");
@@ -1988,6 +1993,7 @@ class BackupManagerService extends IBackupManager.Stub {
         long when = System.currentTimeMillis() + delayBeforeFirstBackup;
         mAlarmManager.setInexactRepeating(AlarmManager.RTC_WAKEUP, when,
                 BACKUP_INTERVAL, mRunBackupIntent);
+        mNextBackupPass = when;
     }
 
     // Report whether the backup mechanism is currently enabled
@@ -2194,28 +2200,43 @@ class BackupManagerService extends IBackupManager.Stub {
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         synchronized (mQueueLock) {
             pw.println("Backup Manager is " + (mEnabled ? "enabled" : "disabled")
-                    + " / " + (!mProvisioned ? "not " : "") + "provisioned");
+                    + " / " + (!mProvisioned ? "not " : "") + "provisioned / "
+                    + (!mBackupOrRestoreInProgress ? "not " : "") + "in progress / "
+                    + (this.mPendingInits.size() == 0 ? "not " : "") + "pending init / "
+                    + (!mInitInProgress ? "not " : "") + "initializing");
+            pw.println("Last backup pass: " + mLastBackupPass
+                    + " (now = " + System.currentTimeMillis() + ')');
+            pw.println("  next scheduled: " + mNextBackupPass);
+
             pw.println("Available transports:");
             for (String t : listAllTransports()) {
                 String pad = (t.equals(mCurrentTransport)) ? "  * " : "    ";
                 pw.println(pad + t);
             }
+
+            pw.println("Pending init: " + mPendingInits.size());
+            for (String s : mPendingInits) {
+                pw.println("    " + s);
+            }
+
             int N = mBackupParticipants.size();
-            pw.println("Participants: " + N);
+            pw.println("Participants:");
             for (int i=0; i<N; i++) {
                 int uid = mBackupParticipants.keyAt(i);
                 pw.print("  uid: ");
                 pw.println(uid);
                 HashSet<ApplicationInfo> participants = mBackupParticipants.valueAt(i);
                 for (ApplicationInfo app: participants) {
-                    pw.println("    " + app.toString());
+                    pw.println("    " + app.packageName);
                 }
             }
+
             pw.println("Ever backed up: " + mEverStoredApps.size());
             for (String pkg : mEverStoredApps) {
                 pw.println("    " + pkg);
             }
-            pw.println("Pending: " + mPendingBackups.size());
+
+            pw.println("Pending backup: " + mPendingBackups.size());
             for (BackupRequest req : mPendingBackups.values()) {
                 pw.println("    " + req);
             }
