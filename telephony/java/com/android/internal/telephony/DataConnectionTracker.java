@@ -100,6 +100,7 @@ public abstract class DataConnectionTracker extends Handler {
     public static final int EVENT_CLEAN_UP_CONNECTION = 34;
     protected static final int EVENT_CDMA_OTA_PROVISION = 35;
     protected static final int EVENT_RESTART_RADIO = 36;
+    protected static final int EVENT_SET_MASTER_DATA_ENABLE = 37;
 
     /***** Constants *****/
 
@@ -111,8 +112,11 @@ public abstract class DataConnectionTracker extends Handler {
     protected static final int APN_HIPRI_ID = 4;
     protected static final int APN_NUM_TYPES = 5;
 
-    protected static final int APN_DISABLED = 0;
-    protected static final int APN_ENABLED = 1;
+    protected static final int DISABLED = 0;
+    protected static final int ENABLED = 1;
+
+    // responds to the setDataEnabled call - used independently from the APN requests
+    protected boolean mMasterDataEnabled = true;
 
     protected boolean[] dataEnabled = new boolean[APN_NUM_TYPES];
     protected int enabledCount = 0;
@@ -322,6 +326,11 @@ public abstract class DataConnectionTracker extends Handler {
                 onCleanUpConnection(tearDown, (String)msg.obj);
                 break;
 
+            case EVENT_SET_MASTER_DATA_ENABLE:
+                boolean enabled = (msg.arg1 == ENABLED) ? true : false;
+                onSetDataEnabled(enabled);
+                break;
+
             default:
                 Log.e("DATA", "Unidentified event = " + msg.what);
                 break;
@@ -486,7 +495,7 @@ public abstract class DataConnectionTracker extends Handler {
 
         Message msg = obtainMessage(EVENT_ENABLE_NEW_APN);
         msg.arg1 = id;
-        msg.arg2 = (enable ? APN_ENABLED : APN_DISABLED);
+        msg.arg2 = (enable ? ENABLED : DISABLED);
         sendMessage(msg);
     }
 
@@ -497,7 +506,7 @@ public abstract class DataConnectionTracker extends Handler {
                     ", enabledCount = " + enabledCount +
                     ", isApnTypeActive = " + isApnTypeActive(apnIdToType(apnId)));
         }
-        if (enabled == APN_ENABLED) {
+        if (enabled == ENABLED) {
             if (!dataEnabled[apnId]) {
                 dataEnabled[apnId] = true;
                 enabledCount++;
@@ -545,8 +554,24 @@ public abstract class DataConnectionTracker extends Handler {
      */
     public boolean setDataEnabled(boolean enable) {
         if (DBG) Log.d(LOG_TAG, "setDataEnabled(" + enable + ")");
-        setEnabled(APN_DEFAULT_ID, enable);
+
+        Message msg = obtainMessage(EVENT_SET_MASTER_DATA_ENABLE);
+        msg.arg1 = (enable ? ENABLED : DISABLED);
+        sendMessage(msg);
         return true;
     }
+
+    protected void onSetDataEnabled(boolean enable) {
+        if (mMasterDataEnabled != enable) {
+            mMasterDataEnabled = enable;
+            if (enable) {
+                mRetryMgr.resetRetryCount();
+                onTrySetupData(Phone.REASON_DATA_ENABLED);
+            } else {
+                onCleanUpConnection(true, Phone.REASON_DATA_DISABLED);
+           }
+        }
+    }
+
 
 }
