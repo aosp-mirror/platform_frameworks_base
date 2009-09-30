@@ -2988,7 +2988,10 @@ public final class BatteryStatsImpl extends BatteryStats {
             if (mBackupFile.exists()) {
                 mBackupFile.delete();
             }
-            mFile.renameTo(mBackupFile);
+            if (!mFile.renameTo(mBackupFile)) {
+                Log.w("BatteryStats", "Failed to back up file before writing new stats");
+                return;
+            }
         }
 
         try {
@@ -3003,8 +3006,14 @@ public final class BatteryStatsImpl extends BatteryStats {
             mBackupFile.delete();
 
             mLastWriteTime = SystemClock.elapsedRealtime();
+            return;
         } catch (IOException e) {
-            Log.e("BatteryStats", "Error writing battery statistics", e);
+            Log.w("BatteryStats", "Error writing battery statistics", e);
+        }
+        if (mFile.exists()) {
+            if (!mFile.delete()) {
+                Log.w(TAG, "Failed to delete mangled file " + mFile);
+            }
         }
     }
 

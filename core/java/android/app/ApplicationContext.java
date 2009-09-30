@@ -2760,6 +2760,7 @@ class ApplicationContext extends Context {
             if (mFile.exists()) {
                 if (!mFile.renameTo(mBackupFile)) {
                     Log.e(TAG, "Couldn't rename file " + mFile + " to backup file " + mBackupFile);
+                    return false;
                 }
             }
             
