@@ -49,9 +49,9 @@ public class MediaRecorderStressTest extends ActivityInstrumentationTestCase2<Me
     private static final int NUMBER_OF_RECORDERANDPLAY_STRESS_LOOPS = 50;
     private static final int NUMBER_OF_SWTICHING_LOOPS_BW_CAMERA_AND_RECORDER = 200;
     private static final long WAIT_TIME_CAMERA_TEST = 3000;  // 3 second
-    private static final long WAIT_TIME_RECORDER_TEST = 60000;  // 6 second
-    private static final long WAIT_TIME_RECORD = 100000;  // 10 seconds
-    private static final long WAIT_TIME_PLAYBACK = 60000;  // 6 second
+    private static final long WAIT_TIME_RECORDER_TEST = 6000;  // 6 second
+    private static final long WAIT_TIME_RECORD = 10000;  // 10 seconds
+    private static final long WAIT_TIME_PLAYBACK = 6000;  // 6 second
     private static final String OUTPUT_FILE = "/sdcard/temp";
     private static final String OUTPUT_FILE_EXT = ".3gp";
     private static final String MEDIA_STRESS_OUTPUT =
