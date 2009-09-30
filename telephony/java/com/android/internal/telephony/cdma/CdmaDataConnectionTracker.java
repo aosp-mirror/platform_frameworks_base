@@ -76,6 +76,9 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
     /** Currently active CdmaDataConnection */
     private CdmaDataConnection mActiveDataConnection;
 
+    /** mimic of GSM's mActiveApn */
+    private boolean mIsApnActive = false;
+
     private boolean mPendingRestartRadio = false;
     private static final int TIME_DELAYED_TO_RESTART_RADIO =
             SystemProperties.getInt("ro.cdma.timetoradiorestart", 20000);
@@ -245,8 +248,7 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
 
     @Override
     protected boolean isApnTypeActive(String type) {
-        return (isApnTypeAvailable(type) &&
-                (state == State.CONNECTED || state == State.INITING));
+        return (mIsApnActive && isApnTypeAvailable(type));
     }
 
     @Override
@@ -260,10 +262,15 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
     }
 
     protected String[] getActiveApnTypes() {
-        if (state == State.CONNECTED || state == State.INITING) {
-            return mSupportedApnTypes.clone();
+        String[] result;
+        if (mIsApnActive) {
+            result = mSupportedApnTypes.clone();
+        } else {
+            // TODO - should this return an empty array?  See GSM too.
+            result = new String[1];
+            result[0] = Phone.APN_TYPE_DEFAULT;
         }
-        return new String[0];
+        return result;
     }
 
     protected String getActiveApnString() {
@@ -386,6 +393,7 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
         if (!tearDown) {
             setState(State.IDLE);
             phone.notifyDataConnection(reason);
+            mIsApnActive = false;
         }
     }
 
@@ -409,6 +417,7 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
         }
 
         mActiveDataConnection = conn;
+        mIsApnActive = true;
 
         Message msg = obtainMessage();
         msg.what = EVENT_DATA_SETUP_COMPLETE;
@@ -742,6 +751,7 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
         }
 
         phone.notifyDataConnection(reason);
+        mIsApnActive = false;
         if (retryAfterDisconnected(reason)) {
           trySetupData(reason);
       }

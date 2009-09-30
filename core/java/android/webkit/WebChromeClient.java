@@ -240,14 +240,12 @@ public class WebChromeClient {
     /**
      * Instructs the client to show a prompt to ask the user to set the
      * Geolocation permission state for the specified origin.
-     * @hide pending API council approval.
      */
     public void onGeolocationPermissionsShowPrompt(String origin,
             GeolocationPermissions.Callback callback) {}
 
     /**
      * Instructs the client to hide the Geolocation permissions prompt.
-     * @hide pending API council approval.
      */
     public void onGeolocationPermissionsHidePrompt() {}
 
@@ -297,4 +295,11 @@ public class WebChromeClient {
     public View getVideoLoadingProgressView() {
         return null;
     }
+
+    /** Obtains a list of all visited history items, used for link coloring
+     * @hide pending API Council approval
+     */
+    public void getVisitedHistory(ValueCallback<String[]> callback) {
+    }
+
 }

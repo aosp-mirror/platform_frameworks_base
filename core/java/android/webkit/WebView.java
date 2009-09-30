@@ -1111,6 +1111,12 @@ public class WebView extends AbsoluteLayout
         ArrayList<byte[]> history = new ArrayList<byte[]>(size);
         for (int i = 0; i < size; i++) {
             WebHistoryItem item = list.getItemAtIndex(i);
+            if (null == item) {
+                // FIXME: this shouldn't happen
+                // need to determine how item got set to null
+                Log.w(LOGTAG, "saveState: Unexpected null history item.");
+                return null;
+            }
             byte[] data = item.getFlattenedData();
             if (data == null) {
                 // It would be very odd to not have any data for a given history
@@ -1917,11 +1923,14 @@ public class WebView extends AbsoluteLayout
                 int oldY = mScrollY;
                 mScrollX = pinLocX(mScrollX);
                 mScrollY = pinLocY(mScrollY);
-                // android.util.Log.d("skia", "recordNewContentSize -
-                // abortAnimation");
-                abortAnimation(); // just in case
                 if (oldX != mScrollX || oldY != mScrollY) {
                     sendOurVisibleRect();
+                }
+                if (!mScroller.isFinished()) {
+                    // We are in the middle of a scroll.  Repin the final scroll
+                    // position.
+                    mScroller.setFinalX(pinLocX(mScroller.getFinalX()));
+                    mScroller.setFinalY(pinLocY(mScroller.getFinalY()));
                 }
             }
         }
@@ -3004,17 +3013,6 @@ public class WebView extends AbsoluteLayout
             if (mWebTextView == null) return;
 
             imm.showSoftInput(mWebTextView, 0);
-            // Now we need to fake a touch event to place the cursor where the
-            // user touched.
-            AbsoluteLayout.LayoutParams lp = (AbsoluteLayout.LayoutParams)
-                    mWebTextView.getLayoutParams();
-            if (lp != null) {
-                // Take the last touch and adjust for the location of the
-                // WebTextView.
-                float x = mLastTouchX + (float) (mScrollX - lp.x);
-                float y = mLastTouchY + (float) (mScrollY - lp.y);
-                mWebTextView.fakeTouchEvent(x, y);
-            }
             if (mInZoomOverview) {
                 // if in zoom overview mode, call doDoubleTap() to bring it back
                 // to normal mode so that user can enter text.
@@ -4502,18 +4500,19 @@ public class WebView extends AbsoluteLayout
 
     /**
      * Scroll the focused text field/area to match the WebTextView
-     * @param x New x position of the WebTextView in view coordinates
+     * @param xPercent New x position of the WebTextView from 0 to 1.
      * @param y New y position of the WebTextView in view coordinates
      */
-    /*package*/ void scrollFocusedTextInput(int x, int y) {
+    /*package*/ void scrollFocusedTextInput(float xPercent, int y) {
         if (!inEditingMode() || mWebViewCore == null) {
             return;
         }
-        mWebViewCore.sendMessage(EventHub.SCROLL_TEXT_INPUT, viewToContentX(x),
+        mWebViewCore.sendMessage(EventHub.SCROLL_TEXT_INPUT,
                 // Since this position is relative to the top of the text input
                 // field, we do not need to take the title bar's height into
                 // consideration.
-                viewToContentDimension(y));
+                viewToContentDimension(y),
+                new Float(xPercent));
     }
 
     /**
@@ -4805,9 +4804,11 @@ public class WebView extends AbsoluteLayout
     /* package */ void passToJavaScript(String currentText, KeyEvent event) {
         if (nativeCursorWantsKeyEvents() && !nativeCursorMatchesFocus()) {
             mWebViewCore.sendMessage(EventHub.CLICK);
-            int select = nativeFocusCandidateIsTextField() ?
-                    nativeFocusCandidateMaxLength() : 0;
-            setSelection(select, select);
+            if (mWebTextView.mOkayForFocusNotToMatch) {
+                int select = nativeFocusCandidateIsTextField() ?
+                        nativeFocusCandidateMaxLength() : 0;
+                setSelection(select, select);
+            }
         }
         WebViewCore.JSKeyData arg = new WebViewCore.JSKeyData();
         arg.mEvent = event;

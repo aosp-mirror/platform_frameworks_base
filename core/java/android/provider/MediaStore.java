@@ -240,6 +240,26 @@ public final class MediaStore {
         private static final String[] PROJECTION = new String[] {_ID, MediaColumns.DATA};
 
         /**
+         * This method cancels the thumbnail request so clients waiting for getThumbnail will be
+         * interrupted and return immediately. Only the original process which made the getThumbnail
+         * requests can cancel their own requests.
+         *
+         * @param cr ContentResolver
+         * @param origId original image or video id
+         * @param baseUri the base URI of requested thumbnails
+         */
+        static void cancelThumbnailRequest(ContentResolver cr, long origId, Uri baseUri) {
+            Uri cancelUri = baseUri.buildUpon().appendQueryParameter("cancel", "1")
+                    .appendQueryParameter("orig_id", String.valueOf(origId)).build();
+            Cursor c = null;
+            try {
+                c = cr.query(cancelUri, PROJECTION, null, null, null);
+            }
+            finally {
+                if (c != null) c.close();
+            }
+        }
+        /**
          * This method ensure thumbnails associated with origId are generated and decode the byte
          * stream from database (MICRO_KIND) or file (MINI_KIND).
          *
@@ -257,6 +277,7 @@ public final class MediaStore {
                 BitmapFactory.Options options, Uri baseUri, boolean isVideo) {
             Bitmap bitmap = null;
             String filePath = null;
+            // Log.v(TAG, "getThumbnail: origId="+origId+", kind="+kind+", isVideo="+isVideo);
             // some optimization for MICRO_KIND: if the magic is non-zero, we don't bother
             // querying MediaProvider and simply return thumbnail.
             if (kind == MICRO_KIND) {
@@ -632,6 +653,18 @@ public final class MediaStore {
                 return cr.query(EXTERNAL_CONTENT_URI, projection,
                         IMAGE_ID + " = " + origId + " AND " + KIND + " = " +
                         kind, null, null);
+            }
+
+            /**
+             * This method cancels the thumbnail request so clients waiting for getThumbnail will be
+             * interrupted and return immediately. Only the original process which made the getThumbnail
+             * requests can cancel their own requests.
+             *
+             * @param cr ContentResolver
+             * @param origId original image id
+             */
+            public static void cancelThumbnailRequest(ContentResolver cr, long origId) {
+                InternalThumbnails.cancelThumbnailRequest(cr, origId, EXTERNAL_CONTENT_URI);
             }
 
             /**
@@ -1551,6 +1584,18 @@ public final class MediaStore {
          *
          */
         public static class Thumbnails implements BaseColumns {
+            /**
+             * This method cancels the thumbnail request so clients waiting for getThumbnail will be
+             * interrupted and return immediately. Only the original process which made the getThumbnail
+             * requests can cancel their own requests.
+             *
+             * @param cr ContentResolver
+             * @param origId original video id
+             */
+            public static void cancelThumbnailRequest(ContentResolver cr, long origId) {
+                InternalThumbnails.cancelThumbnailRequest(cr, origId, EXTERNAL_CONTENT_URI);
+            }
+
             /**
              * This method checks if the thumbnails of the specified image (origId) has been created.
              * It will be blocked until the thumbnails are generated.

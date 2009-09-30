@@ -25,6 +25,7 @@ import android.util.Log;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
 import java.util.Hashtable;
@@ -44,12 +45,6 @@ import java.util.Hashtable;
  *       only.
  */
 public class MiniThumbFile {
-    public static final int THUMBNAIL_TARGET_SIZE = 320;
-    public static final int MINI_THUMB_TARGET_SIZE = 96;
-    public static final int THUMBNAIL_MAX_NUM_PIXELS = 512 * 384;
-    public static final int MINI_THUMB_MAX_NUM_PIXELS = 128 * 128;
-    public static final int UNCONSTRAINED = -1;
-
     private static final String TAG = "MiniThumbFile";
     private static final int MINI_THUMB_DATA_FILE_VERSION = 3;
     public static final int BYTES_PER_MINTHUMB = 10000;
@@ -57,6 +52,7 @@ public class MiniThumbFile {
     private Uri mUri;
     private RandomAccessFile mMiniThumbFile;
     private FileChannel mChannel;
+    private ByteBuffer mBuffer;
     private static Hashtable<String, MiniThumbFile> sThumbFiles =
         new Hashtable<String, MiniThumbFile>();
 
@@ -123,13 +119,16 @@ public class MiniThumbFile {
                     // ignore exception
                 }
             }
-            mChannel = mMiniThumbFile.getChannel();
+            if (mMiniThumbFile != null) {
+                mChannel = mMiniThumbFile.getChannel();
+            }
         }
         return mMiniThumbFile;
     }
 
     public MiniThumbFile(Uri uri) {
         mUri = uri;
+        mBuffer = ByteBuffer.allocateDirect(BYTES_PER_MINTHUMB);
     }
 
     public synchronized void deactivate() {
@@ -154,14 +153,16 @@ public class MiniThumbFile {
             long pos = id * BYTES_PER_MINTHUMB;
             FileLock lock = null;
             try {
-                lock = mChannel.lock();
+                mBuffer.clear();
+                mBuffer.limit(1 + 8);
+
+                lock = mChannel.lock(pos, 1 + 8, true);
                 // check that we can read the following 9 bytes
                 // (1 for the "status" and 8 for the long)
-                if (r.length() >= pos + 1 + 8) {
-                    r.seek(pos);
-                    if (r.readByte() == 1) {
-                        long fileMagic = r.readLong();
-                        return fileMagic;
+                if (mChannel.read(mBuffer, pos) == 9) {
+                    mBuffer.position(0);
+                    if (mBuffer.get() == 1) {
+                        return mBuffer.getLong();
                     }
                 }
             } catch (IOException ex) {
@@ -196,25 +197,20 @@ public class MiniThumbFile {
         long pos = id * BYTES_PER_MINTHUMB;
         FileLock lock = null;
         try {
-            lock = mChannel.lock();
             if (data != null) {
                 if (data.length > BYTES_PER_MINTHUMB - HEADER_SIZE) {
                     // not enough space to store it.
                     return;
                 }
-                r.seek(pos);
-                r.writeByte(0);     // we have no data in this slot
+                mBuffer.clear();
+                mBuffer.put((byte) 1);
+                mBuffer.putLong(magic);
+                mBuffer.putInt(data.length);
+                mBuffer.put(data);
+                mBuffer.flip();
 
-                // if magic is 0 then leave it alone
-                if (magic == 0) {
-                    r.skipBytes(8);
-                } else {
-                    r.writeLong(magic);
-                }
-                r.writeInt(data.length);
-                r.write(data);
-                r.seek(pos);
-                r.writeByte(1);  // we have data in this slot
+                lock = mChannel.lock(pos, BYTES_PER_MINTHUMB, false);
+                mChannel.write(mBuffer, pos);
             }
         } catch (IOException ex) {
             Log.e(TAG, "couldn't save mini thumbnail data for "
@@ -248,20 +244,22 @@ public class MiniThumbFile {
         long pos = id * BYTES_PER_MINTHUMB;
         FileLock lock = null;
         try {
-            lock = mChannel.lock();
-            r.seek(pos);
-            if (r.readByte() == 1) {
-                long magic = r.readLong();
-                int length = r.readInt();
-                int got = r.read(data, 0, length);
-                if (got != length) return null;
-                return data;
-            } else {
-                return null;
+            mBuffer.clear();
+            lock = mChannel.lock(pos, BYTES_PER_MINTHUMB, true);
+            int size = mChannel.read(mBuffer, pos);
+            if (size > 1 + 8 + 4) { // flag, magic, length
+                mBuffer.position(0);
+                byte flag = mBuffer.get();
+                long magic = mBuffer.getLong();
+                int length = mBuffer.getInt();
+
+                if (size >= 1 + 8 + 4 + length && data.length >= length) {
+                    mBuffer.get(data, 0, length);
+                    return data;
+                }
             }
         } catch (IOException ex) {
-            Log.w(TAG, "got exception when reading thumbnail: " + ex);
-            return null;
+            Log.w(TAG, "got exception when reading thumbnail id=" + id + ", exception: " + ex);
         } catch (RuntimeException ex) {
             // Other NIO related exception like disk full, read only channel..etc
             Log.e(TAG, "Got exception when reading thumbnail, id = " + id +

@@ -1175,6 +1175,7 @@
   <public type="attr" name="scrollbarFadeDuration" />
   <public type="attr" name="scrollbarDefaultDelayBeforeFade" />
   <public type="attr" name="fadeScrollbars" />
+  <public type="attr" name="colorBackgroundCacheHint" />
   
   <public type="style" name="Theme.Wallpaper" />
   <public type="style" name="Theme.Wallpaper.NoTitleBar" />

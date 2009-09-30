@@ -82,7 +82,7 @@
   <li>
     <h2>Native Development Tools</h2>
     <ul>
-      <li><a href="<?cs var:toroot ?>sdk/ndk/1.5_r1/index.html">Android 1.5 NDK, r1</a></li>
+      <li><a href="<?cs var:toroot ?>sdk/ndk/1.6_r1/index.html">Android 1.6 NDK, r1</a></li>
     </ul>
   </li>
   <li>

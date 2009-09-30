@@ -106,6 +106,7 @@ class BackupManagerService extends IBackupManager.Stub {
     private static final int BACKUP_PACKAGE_EVENT = 2824;
     private static final int BACKUP_SUCCESS_EVENT = 2825;
     private static final int BACKUP_RESET_EVENT = 2826;
+    private static final int BACKUP_INITIALIZE_EVENT = 2827;
 
     private static final int RESTORE_START_EVENT = 2830;
     private static final int RESTORE_TRANSPORT_FAILURE_EVENT = 2831;
@@ -163,8 +164,10 @@ class BackupManagerService extends IBackupManager.Stub {
     IBackupAgent mConnectedAgent;
     volatile boolean mConnecting;
     volatile boolean mBackupOrRestoreInProgress = false;
+    volatile long mLastBackupPass;
+    volatile long mNextBackupPass;
 
-    // A similar synchronicity mechanism around clearing apps' data for restore
+    // A similar synchronization mechanism around clearing apps' data for restore
     final Object mClearDataLock = new Object();
     volatile boolean mClearingData;
 
@@ -634,6 +637,9 @@ class BackupManagerService extends IBackupManager.Stub {
             switch (msg.what) {
             case MSG_RUN_BACKUP:
             {
+                mLastBackupPass = System.currentTimeMillis();
+                mNextBackupPass = mLastBackupPass + BACKUP_INTERVAL;
+
                 IBackupTransport transport = getTransport(mCurrentTransport);
                 if (transport == null) {
                     Log.v(TAG, "Backup requested but no transport available");
@@ -1057,7 +1063,14 @@ class BackupManagerService extends IBackupManager.Stub {
 
                 // If we haven't stored anything yet, we need to do an init operation.
                 if (status == BackupConstants.TRANSPORT_OK && mEverStoredApps.size() == 0) {
+                    Log.i(TAG, "Initializing (wiping) backup transport storage");
                     status = mTransport.initializeDevice();
+                    if (status == BackupConstants.TRANSPORT_OK) {
+                        EventLog.writeEvent(BACKUP_INITIALIZE_EVENT);
+                    } else {
+                        EventLog.writeEvent(BACKUP_TRANSPORT_FAILURE_EVENT, "(initialize)");
+                        Log.e(TAG, "Transport error in initializeDevice()");
+                    }
                 }
 
                 // The package manager doesn't have a proper <application> etc, but since
@@ -1086,7 +1099,7 @@ class BackupManagerService extends IBackupManager.Stub {
                         int millis = (int) (SystemClock.elapsedRealtime() - startRealtime);
                         EventLog.writeEvent(BACKUP_SUCCESS_EVENT, mQueue.size(), millis);
                     } else {
-                        EventLog.writeEvent(BACKUP_TRANSPORT_FAILURE_EVENT, "");
+                        EventLog.writeEvent(BACKUP_TRANSPORT_FAILURE_EVENT, "(finish)");
                         Log.e(TAG, "Transport error in finishBackup()");
                     }
                 }
@@ -1709,7 +1722,6 @@ class BackupManagerService extends IBackupManager.Stub {
 
         @Override
         public void run() {
-            int status;
             try {
                 for (String transportName : mQueue) {
                     IBackupTransport transport = getTransport(transportName);
@@ -1718,33 +1730,30 @@ class BackupManagerService extends IBackupManager.Stub {
                         continue;
                     }
 
-                    status = BackupConstants.TRANSPORT_OK;
-                    File stateDir = null;
+                    Log.i(TAG, "Initializing (wiping) backup transport storage: " + transportName);
+                    EventLog.writeEvent(BACKUP_START_EVENT, transport.transportDirName());
+                    long startRealtime = SystemClock.elapsedRealtime();
+                    int status = transport.initializeDevice();
 
-                    Log.i(TAG, "Device init on " + transport.transportDirName());
-
-                    stateDir = new File(mBaseStateDir, transport.transportDirName());
-
-                    status = transport.initializeDevice();
-                    if (status != BackupConstants.TRANSPORT_OK) {
-                        Log.e(TAG, "Error from initializeDevice: " + status);
-                    }
                     if (status == BackupConstants.TRANSPORT_OK) {
                         status = transport.finishBackup();
                     }
 
                     // Okay, the wipe really happened.  Clean up our local bookkeeping.
                     if (status == BackupConstants.TRANSPORT_OK) {
-                        resetBackupState(stateDir);
+                        Log.i(TAG, "Device init successful");
+                        int millis = (int) (SystemClock.elapsedRealtime() - startRealtime);
+                        EventLog.writeEvent(BACKUP_INITIALIZE_EVENT);
+                        resetBackupState(new File(mBaseStateDir, transport.transportDirName()));
+                        EventLog.writeEvent(BACKUP_SUCCESS_EVENT, 0, millis);
                         synchronized (mQueueLock) {
                             recordInitPendingLocked(false, transportName);
                         }
-                    }
-
-                    // If this didn't work, requeue this one and try again
-                    // after a suitable interval
-                    if (status != BackupConstants.TRANSPORT_OK) {
-                        Log.i(TAG, "Device init failed");
+                    } else {
+                        // If this didn't work, requeue this one and try again
+                        // after a suitable interval
+                        Log.e(TAG, "Transport error in initializeDevice()");
+                        EventLog.writeEvent(BACKUP_TRANSPORT_FAILURE_EVENT, "(initialize)");
                         synchronized (mQueueLock) {
                             recordInitPendingLocked(true, transportName);
                         }
@@ -1754,11 +1763,7 @@ class BackupManagerService extends IBackupManager.Stub {
                                 + transportName + " resched in " + delay);
                         mAlarmManager.set(AlarmManager.RTC_WAKEUP,
                                 System.currentTimeMillis() + delay, mRunInitIntent);
-                    } else {
-                        // success!
-                        Log.i(TAG, "Device init successful");
                     }
-
                 }
             } catch (RemoteException e) {
                 // can't happen; the transports are local
@@ -1988,6 +1993,7 @@ class BackupManagerService extends IBackupManager.Stub {
         long when = System.currentTimeMillis() + delayBeforeFirstBackup;
         mAlarmManager.setInexactRepeating(AlarmManager.RTC_WAKEUP, when,
                 BACKUP_INTERVAL, mRunBackupIntent);
+        mNextBackupPass = when;
     }
 
     // Report whether the backup mechanism is currently enabled
@@ -2194,28 +2200,43 @@ class BackupManagerService extends IBackupManager.Stub {
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         synchronized (mQueueLock) {
             pw.println("Backup Manager is " + (mEnabled ? "enabled" : "disabled")
-                    + " / " + (!mProvisioned ? "not " : "") + "provisioned");
+                    + " / " + (!mProvisioned ? "not " : "") + "provisioned / "
+                    + (!mBackupOrRestoreInProgress ? "not " : "") + "in progress / "
+                    + (this.mPendingInits.size() == 0 ? "not " : "") + "pending init / "
+                    + (!mInitInProgress ? "not " : "") + "initializing");
+            pw.println("Last backup pass: " + mLastBackupPass
+                    + " (now = " + System.currentTimeMillis() + ')');
+            pw.println("  next scheduled: " + mNextBackupPass);
+
             pw.println("Available transports:");
             for (String t : listAllTransports()) {
                 String pad = (t.equals(mCurrentTransport)) ? "  * " : "    ";
                 pw.println(pad + t);
             }
+
+            pw.println("Pending init: " + mPendingInits.size());
+            for (String s : mPendingInits) {
+                pw.println("    " + s);
+            }
+
             int N = mBackupParticipants.size();
-            pw.println("Participants: " + N);
+            pw.println("Participants:");
             for (int i=0; i<N; i++) {
                 int uid = mBackupParticipants.keyAt(i);
                 pw.print("  uid: ");
                 pw.println(uid);
                 HashSet<ApplicationInfo> participants = mBackupParticipants.valueAt(i);
                 for (ApplicationInfo app: participants) {
-                    pw.println("    " + app.toString());
+                    pw.println("    " + app.packageName);
                 }
             }
+
             pw.println("Ever backed up: " + mEverStoredApps.size());
             for (String pkg : mEverStoredApps) {
                 pw.println("    " + pkg);
             }
-            pw.println("Pending: " + mPendingBackups.size());
+
+            pw.println("Pending backup: " + mPendingBackups.size());
             for (BackupRequest req : mPendingBackups.values()) {
                 pw.println("    " + req);
             }

@@ -1051,8 +1051,8 @@ public class ContactStruct {
             List<String> nameList;
             switch (VCardConfig.getNameOrderType(mVCardType)) {
             case VCardConfig.NAME_ORDER_JAPANESE:
-                if (VCardUtils.containsOnlyAscii(mFamilyName) &&
-                        VCardUtils.containsOnlyAscii(mGivenName)) {
+                if (VCardUtils.containsOnlyPrintableAscii(mFamilyName) &&
+                        VCardUtils.containsOnlyPrintableAscii(mGivenName)) {
                     nameList = Arrays.asList(mPrefix, mGivenName, mMiddleName, mFamilyName, mSuffix);
                 } else {
                     nameList = Arrays.asList(mPrefix, mFamilyName, mMiddleName, mGivenName, mSuffix);
@@ -1123,7 +1123,7 @@ public class ContactStruct {
     }
     
     // From GoogleSource.java in Contacts app.
-    private static final String ACCOUNT_TYPE_GOOGLE = "com.google.GAIA";
+    private static final String ACCOUNT_TYPE_GOOGLE = "com.google";
     private static final String GOOGLE_MY_CONTACTS_GROUP = "System Group: My Contacts";
 
     public void pushIntoContentResolver(ContentResolver resolver) {

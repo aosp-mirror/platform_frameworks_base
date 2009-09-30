@@ -127,8 +127,8 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
     private ArrayList<ComponentName> mPreviousComponents;
 
     // For voice searching
-    private Intent mVoiceWebSearchIntent;
-    private Intent mVoiceAppSearchIntent;
+    private final Intent mVoiceWebSearchIntent;
+    private final Intent mVoiceAppSearchIntent;
 
     // support for AutoCompleteTextView suggestions display
     private SuggestionsAdapter mSuggestionsAdapter;
@@ -156,17 +156,24 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
      */
     public SearchDialog(Context context) {
         super(context, com.android.internal.R.style.Theme_GlobalSearchBar);
+
+        // Save voice intent for later queries/launching
+        mVoiceWebSearchIntent = new Intent(RecognizerIntent.ACTION_WEB_SEARCH);
+        mVoiceWebSearchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        mVoiceWebSearchIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+                RecognizerIntent.LANGUAGE_MODEL_WEB_SEARCH);
+
+        mVoiceAppSearchIntent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+        mVoiceAppSearchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
     }
 
     /**
-     * We create the search dialog just once, and it stays around (hidden)
-     * until activated by the user.
+     * Create the search dialog and any resources that are used for the
+     * entire lifetime of the dialog.
      */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        setContentView(com.android.internal.R.layout.search_bar);
 
         Window theWindow = getWindow();
         WindowManager.LayoutParams lp = theWindow.getAttributes();
@@ -179,6 +186,17 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
         lp.gravity = Gravity.TOP | Gravity.FILL_HORIZONTAL;
         lp.softInputMode = WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
         theWindow.setAttributes(lp);
+
+        // Touching outside of the search dialog will dismiss it
+        setCanceledOnTouchOutside(true);        
+    }
+
+    /**
+     * We recreate the dialog view each time it becomes visible so as to limit
+     * the scope of any problems with the contained resources.
+     */
+    private void createContentView() {
+        setContentView(com.android.internal.R.layout.search_bar);
 
         // get the view elements for local access
         SearchBar searchBar = (SearchBar) findViewById(com.android.internal.R.id.search_bar);
@@ -211,19 +229,6 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
         mBadgeLabel.setVisibility(View.GONE);
 
         // Additional adjustments to make Dialog work for Search
-
-        // Touching outside of the search dialog will dismiss it 
-        setCanceledOnTouchOutside(true);
-
-        // Save voice intent for later queries/launching
-        mVoiceWebSearchIntent = new Intent(RecognizerIntent.ACTION_WEB_SEARCH);
-        mVoiceWebSearchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        mVoiceWebSearchIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
-                RecognizerIntent.LANGUAGE_MODEL_WEB_SEARCH);
-        
-        mVoiceAppSearchIntent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
-        mVoiceAppSearchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-
         mSearchAutoCompleteImeOptions = mSearchAutoComplete.getImeOptions();
     }
 
@@ -358,7 +363,9 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
         // isDefaultSearchable() should always give the same result.
         mGlobalSearchMode = globalSearch || searchManager.isDefaultSearchable(mSearchable);
         mActivityContext = mSearchable.getActivityContext(getContext());
-        
+
+        createContentView();
+
         // show the dialog. this will call onStart().
         if (!isShowing()) {            
             // The Dialog uses a ContextThemeWrapper for the context; use this to change the

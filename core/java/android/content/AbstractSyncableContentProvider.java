@@ -170,7 +170,7 @@ public abstract class AbstractSyncableContentProvider extends SyncableContentPro
                         // AbstractGDataSyncAdapter, which will put acore into a crash loop
                         ArrayList<Account> gaiaAccounts = new ArrayList<Account>();
                         for (Account acct: accounts) {
-                            if (acct.type.equals("com.google.GAIA")) {
+                            if (acct.type.equals("com.google")) {
                                 gaiaAccounts.add(acct);
                             }
                         }

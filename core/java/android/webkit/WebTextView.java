@@ -87,11 +87,12 @@ import java.util.ArrayList;
     // Gets set to true when the the IME jumps to the next textfield.  When this
     // happens, the next time the user hits a key it is okay for the focus
     // pointer to not match the WebTextView's node pointer
-    private boolean         mOkayForFocusNotToMatch;
+    boolean                 mOkayForFocusNotToMatch;
     // Whether or not a selection change was generated from webkit.  If it was,
     // we do not need to pass the selection back to webkit.
     private boolean         mFromWebKit;
     private boolean         mGotTouchDown;
+    private boolean         mInSetTextAndKeepSelection;
     // Array to store the final character added in onTextChanged, so that its
     // KeyEvents may be determined.
     private char[]          mCharacter = new char[1];
@@ -276,25 +277,6 @@ import java.util.ArrayList;
     }
 
     /**
-     *  Create a fake touch up event at (x,y) with respect to this WebTextView.
-     *  This is used by WebView to act as though a touch event which happened
-     *  before we placed the WebTextView actually hit it, so that it can place
-     *  the cursor accordingly.
-     */
-    /* package */ void fakeTouchEvent(float x, float y) {
-        // We need to ensure that there is a Layout, since the Layout is used
-        // in determining where to place the cursor.
-        if (getLayout() == null) {
-            measure(mWidthSpec, mHeightSpec);
-        }
-        // Create a fake touch up, which is used to place the cursor.
-        MotionEvent ev = MotionEvent.obtain(0, 0, MotionEvent.ACTION_UP,
-                x, y, 0);
-        onTouchEvent(ev);
-        ev.recycle();
-    }
-
-    /**
      *  Determine whether this WebTextView currently represents the node
      *  represented by ptr.
      *  @param  ptr Pointer to a node to compare to.
@@ -414,7 +396,9 @@ import java.util.ArrayList;
                 Log.v(LOGTAG, "onTextChanged start=" + start
                         + " start + before=" + (start + before));
             }
-            mWebView.setSelection(start, start + before);
+            if (!mInSetTextAndKeepSelection) {
+                mWebView.setSelection(start, start + before);
+            }
         }
         if (!cannotUseKeyEvents) {
             int length = events.length;
@@ -457,7 +441,14 @@ import java.util.ArrayList;
             int smallerSlop = slop/2;
             if (dx > smallerSlop || dy > smallerSlop) {
                 if (mWebView != null) {
-                    mWebView.scrollFocusedTextInput(mScrollX, mScrollY);
+                    float maxScrollX = (float) Touch.getMaxScrollX(this,
+                                getLayout(), mScrollY);
+                    if (DebugFlags.WEB_TEXT_VIEW) {
+                        Log.v(LOGTAG, "onTouchEvent x=" + mScrollX + " y="
+                                + mScrollY + " maxX=" + maxScrollX);
+                    }
+                    mWebView.scrollFocusedTextInput(maxScrollX > 0 ?
+                            mScrollX / maxScrollX : 0, mScrollY);
                 }
                 mScrolled = true;
                 return true;
@@ -803,7 +794,9 @@ import java.util.ArrayList;
     /* package */ void setTextAndKeepSelection(String text) {
         mPreChange = text.toString();
         Editable edit = (Editable) getText();
+        mInSetTextAndKeepSelection = true;
         edit.replace(0, edit.length(), text);
+        mInSetTextAndKeepSelection = false;
         updateCachedTextfield();
     }
 

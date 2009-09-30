@@ -311,10 +311,13 @@ final class WebViewCore {
                 });
     }
 
-    protected String[] populateVisitedLinks() {
-        // FIXME: getVisitedHistory needs permission and host may not have.
-//        return Browser.getVisitedHistory(mContext.getContentResolver());
-        return new String[0];
+    protected void populateVisitedLinks() {
+        ValueCallback callback = new ValueCallback<String[]>() {
+            public void onReceiveValue(String[] value) {
+                sendMessage(EventHub.POPULATE_VISITED_LINKS, (Object)value);
+            }
+        };
+        mCallbackProxy.getVisitedHistory(callback);
     }
 
     /**
@@ -530,6 +533,11 @@ final class WebViewCore {
      *     life of the current page.
      */
     private native void nativeGeolocationPermissionsProvide(String origin, boolean allow, boolean remember);
+
+    /**
+     * Provide WebCore with the previously visted links from the history database
+     */
+    private native void  nativeProvideVisitedHistory(String[] history);
 
     // EventHub for processing messages
     private final EventHub mEventHub;
@@ -811,6 +819,8 @@ final class WebViewCore {
         // Geolocation
         static final int GEOLOCATION_PERMISSIONS_PROVIDE = 180;
 
+        static final int POPULATE_VISITED_LINKS = 181;
+
         // private message ids
         private static final int DESTROY =     200;
 
@@ -872,7 +882,8 @@ final class WebViewCore {
                             break;
 
                         case SCROLL_TEXT_INPUT:
-                            nativeScrollFocusedTextInput(msg.arg1, msg.arg2);
+                            nativeScrollFocusedTextInput(
+                                    ((Float) msg.obj).floatValue(), msg.arg1);
                             break;
 
                         case LOAD_URL:
@@ -1232,6 +1243,10 @@ final class WebViewCore {
                             if (msg.obj instanceof Message) {
                                 ((Message) msg.obj).sendToTarget();
                             }
+                            break;
+
+                        case POPULATE_VISITED_LINKS:
+                            nativeProvideVisitedHistory((String[])msg.obj);
                             break;
                     }
                 }
@@ -2076,9 +2091,9 @@ final class WebViewCore {
     private native void nativeUpdateFrameCacheIfLoading();
 
     /**
-     * Scroll the focused textfield to (x, y) in document space
+     * Scroll the focused textfield to (xPercent, y) in document space
      */
-    private native void nativeScrollFocusedTextInput(int x, int y);
+    private native void nativeScrollFocusedTextInput(float xPercent, int y);
 
     // these must be in document space (i.e. not scaled/zoomed).
     private native void nativeSetScrollOffset(int gen, int dx, int dy);
