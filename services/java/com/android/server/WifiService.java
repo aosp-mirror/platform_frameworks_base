@@ -1324,9 +1324,16 @@ public class WifiService extends IWifiManager.Stub {
                 if (!shouldWifiStayAwake(stayAwakeConditions, mPluggedType)) {
                     WifiInfo info = mWifiStateTracker.requestConnectionInfo();
                     if (info.getSupplicantState() != SupplicantState.COMPLETED) {
-                        // do not keep Wifi awake when screen is off if Wifi is not associated
-                        mDeviceIdle = true;
-                        updateWifiState();
+                        // we used to go to sleep immediately, but this caused some race conditions
+                        // we don't have time to track down for this release.  Delay instead, but not
+                        // as long as we would if connected (below)
+                        // TODO - fix the race conditions and switch back to the immediate turn-off
+                        long triggerTime = System.currentTimeMillis() + (2*60*1000); // 2 min
+                        Log.d(TAG, "setting ACTION_DEVICE_IDLE timer for 120,000 ms");
+                        mAlarmManager.set(AlarmManager.RTC_WAKEUP, triggerTime, mIdleIntent);
+                        //  // do not keep Wifi awake when screen is off if Wifi is not associated
+                        //  mDeviceIdle = true;
+                        //  updateWifiState();
                     } else {
                         long triggerTime = System.currentTimeMillis() + idleMillis;
                         Log.d(TAG, "setting ACTION_DEVICE_IDLE timer for " + idleMillis + "ms");
