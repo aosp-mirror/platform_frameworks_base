@@ -342,6 +342,12 @@ uint32_t Layer::doTransaction(uint32_t flags)
             }
         }
 
+        // this will make sure LayerBase::doTransaction doesn't update
+        // the drawing state's size
+        Layer::State& editDraw(mDrawingState);
+        editDraw.requested_w = temp.requested_w;
+        editDraw.requested_h = temp.requested_h;
+
         // record the new size, form this point on, when the client request a
         // buffer, it'll get the new size.
         setDrawingSize(temp.requested_w, temp.requested_h);
@@ -389,11 +395,35 @@ void Layer::lockPageFlip(bool& recomputeVisibleRegions)
     const Region dirty(lcblk->getDirtyRegion(buf));
     mPostedDirtyRegion = dirty.intersect( newFrontBuffer->getBounds() );
 
-
     const Layer::State& front(drawingState());
-    if (newFrontBuffer->getWidth() == front.w &&
-        newFrontBuffer->getHeight() ==front.h) {
-        mFreezeLock.clear();
+    if (newFrontBuffer->getWidth()  == front.requested_w &&
+        newFrontBuffer->getHeight() == front.requested_h)
+    {
+        if ((front.w != front.requested_w) ||
+            (front.h != front.requested_h))
+        {
+            // Here we pretend the transaction happened by updating the
+            // current and drawing states. Drawing state is only accessed
+            // in this thread, no need to have it locked
+            Layer::State& editDraw(mDrawingState);
+            editDraw.w = editDraw.requested_w;
+            editDraw.h = editDraw.requested_h;
+
+            // We also need to update the current state so that we don't
+            // end-up doing too much work during the next transaction.
+            // NOTE: We actually don't need hold the transaction lock here
+            // because State::w and State::h are only accessed from
+            // this thread
+            Layer::State& editTemp(currentState());
+            editTemp.w = editDraw.w;
+            editTemp.h = editDraw.h;
+
+            // recompute visible region
+            recomputeVisibleRegions = true;
+
+            // we now have the correct size, unfreeze the screen
+            mFreezeLock.clear();
+        }
     }
 
     // FIXME: signal an event if we have more buffers waiting
