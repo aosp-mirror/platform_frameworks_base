@@ -106,6 +106,7 @@ class CallbackProxy extends Handler {
     private static final int GEOLOCATION_PERMISSIONS_SHOW_PROMPT = 130;
     private static final int GEOLOCATION_PERMISSIONS_HIDE_PROMPT = 131;
     private static final int RECEIVED_TOUCH_ICON_URL             = 132;
+    private static final int GET_VISITED_HISTORY                 = 133;
 
     // Message triggered by the client to resume execution
     private static final int NOTIFY                              = 200;
@@ -654,6 +655,12 @@ class CallbackProxy extends Handler {
                 String sourceID = msg.getData().getString("sourceID");
                 int lineNumber = msg.getData().getInt("lineNumber");
                 mWebChromeClient.addMessageToConsole(message, lineNumber, sourceID);
+                break;
+
+            case GET_VISITED_HISTORY:
+                if (mWebChromeClient != null) {
+                    mWebChromeClient.getVisitedHistory((ValueCallback<String[]>)msg.obj);
+                }
                 break;
         }
     }
@@ -1328,5 +1335,17 @@ class CallbackProxy extends Handler {
             }
         }
         return result.getResult();
+    }
+
+    /**
+     * @hide pending API council approval
+     */
+    public void getVisitedHistory(ValueCallback<String[]> callback) {
+        if (mWebChromeClient == null) {
+            return;
+        }
+        Message msg = obtainMessage(GET_VISITED_HISTORY);
+        msg.obj = callback;
+        sendMessage(msg);
     }
 }
