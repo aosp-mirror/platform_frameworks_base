@@ -2049,7 +2049,7 @@ class PackageManagerService extends IPackageManager.Stub {
             scanMode |= SCAN_FORWARD_LOCKED;
         }
         File resFile = destResourceFile;
-        if ((scanMode & SCAN_FORWARD_LOCKED) != 0) {
+        if (ps != null && ((scanMode & SCAN_FORWARD_LOCKED) != 0)) {
             resFile = getFwdLockedResource(ps.name);
         }
         // Note that we invoke the following method only if we are about to unpack an application
@@ -6529,15 +6529,19 @@ class PackageManagerService extends IPackageManager.Stub {
                         |FileUtils.S_IRGRP|FileUtils.S_IWGRP
                         |FileUtils.S_IROTH,
                         -1, -1);
+                return;
 
             } catch(XmlPullParserException e) {
                 Log.w(TAG, "Unable to write package manager settings, current changes will be lost at reboot", e);
-
             } catch(java.io.IOException e) {
                 Log.w(TAG, "Unable to write package manager settings, current changes will be lost at reboot", e);
-
             }
-
+            // Clean up partially written file
+            if (mSettingsFilename.exists()) {
+                if (!mSettingsFilename.delete()) {
+                    Log.i(TAG, "Failed to clean up mangled file: " + mSettingsFilename);
+                }
+            }
             //Debug.stopMethodTracing();
         }
        
