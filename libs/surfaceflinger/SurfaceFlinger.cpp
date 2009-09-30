@@ -594,12 +594,6 @@ void SurfaceFlinger::handleTransactionLocked(
             const uint32_t flags = layer->doTransaction(0);
             if (flags & Layer::eVisibleRegion)
                 mVisibleRegionsDirty = true;
-
-            if (flags & Layer::eRestartTransaction) {
-                // restart the transaction, but back-off a little
-                layer->setTransactionFlags(eTransactionNeeded);
-                setTransactionFlags(eTraversalNeeded, ms2ns(8));
-            }
         }
     }
 
