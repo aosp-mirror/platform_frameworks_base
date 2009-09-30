@@ -44,6 +44,12 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
+/**
+ * Provides access to the system wallpaper. With WallpaperManager, you can
+ * get the current wallpaper, get the desired dimensions for the wallpaper, set
+ * the wallpaper, and more. Get an instance of WallpaperManager with
+ * {@link #getInstance(android.content.Context) getInstance()}. 
+ */
 public class WallpaperManager {
     private static String TAG = "WallpaperManager";
     private static boolean DEBUG = false;
@@ -310,8 +316,11 @@ public class WallpaperManager {
     }
     
     /**
-     * Like {@link #peekDrawable}, but always returns a valid Drawable.  If
+     * Retrieve the current system wallpaper; if
      * no wallpaper is set, the system default wallpaper is returned.
+     * This is returned as an
+     * abstract Drawable that you can install in a View to display whatever
+     * wallpaper the user has currently set. 
      *
      * @return Returns a Drawable object that will draw the wallpaper.
      */
@@ -326,10 +335,10 @@ public class WallpaperManager {
     }
 
     /**
-     * Retrieve the current system wallpaper.  This is returned as an
+     * Retrieve the current system wallpaper; if there is no wallpaper set,
+     * a null pointer is returned. This is returned as an
      * abstract Drawable that you can install in a View to display whatever
-     * wallpaper the user has currently set.  If there is no wallpaper set,
-     * a null pointer is returned.
+     * wallpaper the user has currently set.  
      *
      * @return Returns a Drawable object that will draw the wallpaper or a
      * null pointer if these is none.
@@ -345,8 +354,15 @@ public class WallpaperManager {
     }
 
     /**
-     * Like {@link #peekFastDrawable}, but always returns a valid Drawable.  If
-     * no wallpaper is set, the system default wallpaper is returned.
+     * Like {@link #getDrawable()}, but the returned Drawable has a number
+     * of limitations to reduce its overhead as much as possible. It will
+     * never scale the wallpaper (only centering it if the requested bounds
+     * do match the bitmap bounds, which should not be typical), doesn't
+     * allow setting an alpha, color filter, or other attributes, etc.  The
+     * bounds of the returned drawable will be initialized to the same bounds
+     * as the wallpaper, so normally you will not need to touch it.  The
+     * drawable also assumes that it will be used in a context running in
+     * the same density as the screen (not in density compatibility mode).
      *
      * @return Returns a Drawable object that will draw the wallpaper.
      */
@@ -360,15 +376,8 @@ public class WallpaperManager {
     }
 
     /**
-     * Like {@link #peekDrawable()}, but the returned Drawable has a number
-     * of limitations to reduce its overhead as much as possible: it will
-     * never scale the wallpaper (only centering it if the requested bounds
-     * do match the bitmap bounds, which should not be typical), doesn't
-     * allow setting an alpha, color filter, or other attributes, etc.  The
-     * bounds of the returned drawable will be initialized to the same bounds
-     * as the wallpaper, so normally you will not need to touch it.  The
-     * drawable also assumes that it will be used in a context running in
-     * the same density as the screen (not in density compatibility mode).
+     * Like {@link #getFastDrawable()}, but if there is no wallpaper set,
+     * a null pointer is returned.
      *
      * @return Returns an optimized Drawable object that will draw the
      * wallpaper or a null pointer if these is none.
@@ -566,7 +575,7 @@ public class WallpaperManager {
      * make sense when the wallpaper is larger than the screen.
      * 
      * @param windowToken The window who these offsets should be associated
-     * with, as returned by {@link android.view.View#getWindowVisibility()
+     * with, as returned by {@link android.view.View#getWindowToken()
      * View.getWindowToken()}.
      * @param xOffset The offset olong the X dimension, from 0 to 1.
      * @param yOffset The offset along the Y dimension, from 0 to 1.
@@ -589,7 +598,7 @@ public class WallpaperManager {
      * to scroll from whatever its last offsets were.
      * 
      * @param windowToken The window who these offsets should be associated
-     * with, as returned by {@link android.view.View#getWindowVisibility()
+     * with, as returned by {@link android.view.View#getWindowToken()
      * View.getWindowToken()}.
      */
     public void clearWallpaperOffsets(IBinder windowToken) {
