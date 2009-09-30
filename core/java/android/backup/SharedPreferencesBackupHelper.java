@@ -26,6 +26,7 @@ import java.io.FileDescriptor;
 /** @hide */
 public class SharedPreferencesBackupHelper extends FileBackupHelperBase implements BackupHelper {
     private static final String TAG = "SharedPreferencesBackupHelper";
+    private static final boolean DEBUG = false;
 
     private Context mContext;
     private String[] mPrefGroups;
@@ -56,9 +57,9 @@ public class SharedPreferencesBackupHelper extends FileBackupHelperBase implemen
     public void restoreEntity(BackupDataInputStream data) {
         Context context = mContext;
         
-        // TODO: turn this off before ship
-        Log.d(TAG, "got entity '" + data.getKey() + "' size=" + data.size());
         String key = data.getKey();
+        if (DEBUG) Log.d(TAG, "got entity '" + key + "' size=" + data.size());
+
         if (isKeyInList(key, mPrefGroups)) {
             File f = context.getSharedPrefsFile(key).getAbsoluteFile();
             writeFile(f, data);

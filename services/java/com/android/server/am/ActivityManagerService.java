@@ -140,7 +140,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
     static final boolean DEBUG_PROVIDER = localLOGV || false;
     static final boolean DEBUG_USER_LEAVING = localLOGV || false;
     static final boolean DEBUG_RESULTS = localLOGV || false;
-    static final boolean DEBUG_BACKUP = localLOGV || true;
+    static final boolean DEBUG_BACKUP = localLOGV || false;
     static final boolean DEBUG_CONFIGURATION = localLOGV || false;
     static final boolean VALIDATE_TOKENS = false;
     static final boolean SHOW_ACTIVITY_START_TIME = true;
@@ -11374,8 +11374,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 try {
                     proc.thread.scheduleCreateBackupAgent(app, backupMode);
                 } catch (RemoteException e) {
-                    // !!! TODO: notify the backup manager that we crashed, or rely on
-                    // death notices, or...?
+                    // Will time out on the backup manager side
                 }
             } else {
                 if (DEBUG_BACKUP) Log.v(TAG, "Agent proc not running, waiting for attach");
