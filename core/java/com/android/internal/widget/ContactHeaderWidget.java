@@ -47,7 +47,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.CheckBox;
-import android.widget.FasttrackBadgeWidget;
+import android.widget.QuickContactBadge;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -68,7 +68,7 @@ public class ContactHeaderWidget extends FrameLayout implements View.OnClickList
     private View mAggregateBadge;
     private TextView mPhoneticNameView;
     private CheckBox mStarredView;
-    private FasttrackBadgeWidget mPhotoView;
+    private QuickContactBadge mPhotoView;
     private ImageView mPresenceView;
     private TextView mStatusView;
     private TextView mStatusAttributionView;
@@ -171,7 +171,7 @@ public class ContactHeaderWidget extends FrameLayout implements View.OnClickList
         mStarredView = (CheckBox)findViewById(R.id.star);
         mStarredView.setOnClickListener(this);
 
-        mPhotoView = (FasttrackBadgeWidget) findViewById(R.id.photo);
+        mPhotoView = (QuickContactBadge) findViewById(R.id.photo);
 
         mPresenceView = (ImageView) findViewById(R.id.presence);
 
