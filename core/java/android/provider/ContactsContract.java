@@ -2254,6 +2254,7 @@ public final class ContactsContract {
             intent.putExtra(EXTRA_TARGET_RECT, target);
             intent.putExtra(EXTRA_MODE, mode);
             intent.putExtra(EXTRA_EXCLUDE_MIMES, excludeMimes);
+	    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
             context.startActivity(intent);
         }
     }
