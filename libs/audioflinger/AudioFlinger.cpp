@@ -74,6 +74,8 @@ static const int8_t kMaxTrackStartupRetries = 50;
 static const int kDumpLockRetries = 50;
 static const int kDumpLockSleep = 20000;
 
+static const nsecs_t kWarningThrottle = seconds(5);
+
 
 #define AUDIOFLINGER_SECURITY_ENABLED 1
 
@@ -1170,7 +1172,10 @@ bool AudioFlinger::MixerThread::threadLoop()
     size_t enabledTracks = 0;
     nsecs_t standbyTime = systemTime();
     size_t mixBufferSize = mFrameCount * mFrameSize;
-    nsecs_t maxPeriod = seconds(mFrameCount) / mSampleRate * 2;
+    // FIXME: Relaxed timing because of a certain device that can't meet latency
+    // Should be reduced to 2x after the vendor fixes the driver issue
+    nsecs_t maxPeriod = seconds(mFrameCount) / mSampleRate * 3;
+    nsecs_t lastWarning = 0;
 
     while (!exitPending())
     {
@@ -1183,7 +1188,9 @@ bool AudioFlinger::MixerThread::threadLoop()
 
             if (checkForNewParameters_l()) {
                 mixBufferSize = mFrameCount * mFrameSize;
-                maxPeriod = seconds(mFrameCount) / mSampleRate * 2;
+                // FIXME: Relaxed timing because of a certain device that can't meet latency
+                // Should be reduced to 2x after the vendor fixes the driver issue
+                maxPeriod = seconds(mFrameCount) / mSampleRate * 3;
             }
 
             const SortedVector< wp<Track> >& activeTracks = mActiveTracks;
@@ -1260,10 +1267,15 @@ bool AudioFlinger::MixerThread::threadLoop()
             mNumWrites++;
             mInWrite = false;
             mStandby = false;
-            nsecs_t delta = systemTime() - mLastWriteTime;
+            nsecs_t now = systemTime();
+            nsecs_t delta = now - mLastWriteTime;
             if (delta > maxPeriod) {
-                LOGW("write blocked for %llu msecs, thread %p", ns2ms(delta), this);
                 mNumDelayedWrites++;
+                if ((now - lastWarning) > kWarningThrottle) {
+                    LOGW("write blocked for %llu msecs, %d delayed writes, thread %p",
+                            ns2ms(delta), mNumDelayedWrites, this);
+                    lastWarning = now;
+                }
             }
         } else {
             usleep(sleepTime);
