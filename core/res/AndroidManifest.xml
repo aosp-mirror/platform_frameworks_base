@@ -342,11 +342,8 @@
     <!-- ================================== -->
     <eat-comment />
 
-    <!-- Permissions for direct access to Google accounts.
-         Note that while right now this is only used for Google accounts,
-         we expect in the future to have a more general account management
-         facility so this is specified as a general platform permission
-         group for accessing accounts. -->
+    <!-- Permissions for direct access to the accounts managed
+         by the Account Manager. -->
     <permission-group android:name="android.permission-group.ACCOUNTS"
         android:label="@string/permgrouplab_accounts"
         android:description="@string/permgroupdesc_accounts" />
