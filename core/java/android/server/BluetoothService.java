@@ -757,9 +757,7 @@ public class BluetoothService extends IBluetooth.Stub {
         if (!BluetoothAdapter.checkBluetoothAddress(address)) {
             return null;
         }
-        Map <String, String> properties = mDeviceProperties.get(address);
-        if (properties != null) return properties.get("Name");
-        return null;
+        return getRemoteDeviceProperty(address, "Name");
     }
 
     /**
