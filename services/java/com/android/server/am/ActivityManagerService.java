@@ -2252,7 +2252,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             mHandler.sendMessage(msg);
         }
 
-        reportResumedActivity(next);
+        reportResumedActivityLocked(next);
         
         next.thumbnail = null;
         setFocusedActivityLocked(next);
@@ -2525,7 +2525,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         }
     }
     
-    private void reportResumedActivity(HistoryRecord r) {
+    private void reportResumedActivityLocked(HistoryRecord r) {
         //Log.i(TAG, "**** REPORT RESUME: " + r);
         
         final int identHash = System.identityHashCode(r);
@@ -12814,6 +12814,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         if (andResume) {
             r.results = null;
             r.newIntents = null;
+            reportResumedActivityLocked(r);
         }
 
         return true;
