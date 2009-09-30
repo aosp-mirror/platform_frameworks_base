@@ -464,7 +464,7 @@ public final class Settings {
                 resolver.insert(uri, values);
                 return true;
             } catch (SQLException e) {
-                Log.e(TAG, "Can't set key " + name + " in " + uri, e);
+                Log.w(TAG, "Can't set key " + name + " in " + uri, e);
                 return false;
             }
         }
@@ -501,7 +501,7 @@ public final class Settings {
                     mValues.put(name, value);
                 } catch (SQLException e) {
                     // SQL error: return null, but don't cache it.
-                    Log.e(TAG, "Can't get key " + name + " from " + mUri, e);
+                    Log.w(TAG, "Can't get key " + name + " from " + mUri, e);
                 } finally {
                     if (c != null) c.close();
                 }
@@ -3746,7 +3746,7 @@ public final class Settings {
                         // The stored URL is bad...  ignore it.
                     } catch (IllegalArgumentException e) {
                         // Column not found
-                        Log.e(TAG, "Intent column not found", e);
+                        Log.w(TAG, "Intent column not found", e);
                     }
                 }
             } finally {
