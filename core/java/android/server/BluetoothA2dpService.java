@@ -325,6 +325,48 @@ public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
         }
     }
 
+    public synchronized boolean suspendSink(BluetoothDevice device) {
+        mContext.enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
+                            "Need BLUETOOTH_ADMIN permission");
+        if (DBG) log("suspendSink(" + device + ")");
+        if (device == null || mAudioDevices == null) {
+            return false;
+        }
+        String path = mBluetoothService.getObjectPathFromAddress(device.getAddress());
+        if (path == null) {
+            return false;
+        }
+        switch (mAudioDevices.get(device)) {
+        case BluetoothA2dp.STATE_CONNECTED:
+            return true;
+        case BluetoothA2dp.STATE_PLAYING:
+            return suspendSinkNative(path);
+        default:
+            return false;
+        }
+    }
+
+    public synchronized boolean resumeSink(BluetoothDevice device) {
+        mContext.enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
+                            "Need BLUETOOTH_ADMIN permission");
+        if (DBG) log("resumeSink(" + device + ")");
+        if (device == null || mAudioDevices == null) {
+            return false;
+        }
+        String path = mBluetoothService.getObjectPathFromAddress(device.getAddress());
+        if (path == null) {
+            return false;
+        }
+        switch (mAudioDevices.get(device)) {
+        case BluetoothA2dp.STATE_PLAYING:
+            return true;
+        case BluetoothA2dp.STATE_CONNECTED:
+            return resumeSinkNative(path);
+        default:
+            return false;
+        }
+    }
+
     public synchronized BluetoothDevice[] getConnectedSinks() {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
         Set<BluetoothDevice> sinks = lookupSinksMatchingStates(
@@ -445,5 +487,7 @@ public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
     private native void cleanupNative();
     private synchronized native boolean connectSinkNative(String path);
     private synchronized native boolean disconnectSinkNative(String path);
+    private synchronized native boolean suspendSinkNative(String path);
+    private synchronized native boolean resumeSinkNative(String path);
     private synchronized native Object []getSinkPropertiesNative(String path);
 }

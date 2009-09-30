@@ -163,6 +163,38 @@ static jboolean disconnectSinkNative(JNIEnv *env, jobject object,
     return JNI_FALSE;
 }
 
+static jboolean suspendSinkNative(JNIEnv *env, jobject object,
+                                     jstring path) {
+#ifdef HAVE_BLUETOOTH
+    LOGV(__FUNCTION__);
+    if (nat) {
+        const char *c_path = env->GetStringUTFChars(path, NULL);
+        bool ret = dbus_func_args_async(env, nat->conn, -1, NULL, NULL, nat,
+                           c_path, "org.bluez.audio.Sink", "Suspend",
+                           DBUS_TYPE_INVALID);
+        env->ReleaseStringUTFChars(path, c_path);
+        return ret ? JNI_TRUE : JNI_FALSE;
+    }
+#endif
+    return JNI_FALSE;
+}
+
+static jboolean resumeSinkNative(JNIEnv *env, jobject object,
+                                     jstring path) {
+#ifdef HAVE_BLUETOOTH
+    LOGV(__FUNCTION__);
+    if (nat) {
+        const char *c_path = env->GetStringUTFChars(path, NULL);
+        bool ret = dbus_func_args_async(env, nat->conn, -1, NULL, NULL, nat,
+                           c_path, "org.bluez.audio.Sink", "Resume",
+                           DBUS_TYPE_INVALID);
+        env->ReleaseStringUTFChars(path, c_path);
+        return ret ? JNI_TRUE : JNI_FALSE;
+    }
+#endif
+    return JNI_FALSE;
+}
+
 #ifdef HAVE_BLUETOOTH
 DBusHandlerResult a2dp_event_filter(DBusMessage *msg, JNIEnv *env) {
     DBusError err;
@@ -215,6 +247,8 @@ static JNINativeMethod sMethods[] = {
     /* Bluez audio 4.40 API */
     {"connectSinkNative", "(Ljava/lang/String;)Z", (void *)connectSinkNative},
     {"disconnectSinkNative", "(Ljava/lang/String;)Z", (void *)disconnectSinkNative},
+    {"suspendSinkNative", "(Ljava/lang/String;)Z", (void*)suspendSinkNative},
+    {"resumeSinkNative", "(Ljava/lang/String;)Z", (void*)resumeSinkNative},
     {"getSinkPropertiesNative", "(Ljava/lang/String;)[Ljava/lang/Object;",
                                     (void *)getSinkPropertiesNative},
 };
