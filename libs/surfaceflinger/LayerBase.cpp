@@ -95,14 +95,8 @@ void LayerBase::initStates(uint32_t w, uint32_t h, uint32_t flags)
     mDrawingState = mCurrentState;
 }
 
-void LayerBase::commitTransaction(bool skipSize) {
-    const uint32_t w = mDrawingState.w;
-    const uint32_t h = mDrawingState.h;
+void LayerBase::commitTransaction() {
     mDrawingState = mCurrentState;
-    if (skipSize) {
-        mDrawingState.w = w;
-        mDrawingState.h = h;
-    }
 }
 void LayerBase::forceVisibilityTransaction() {
     // this can be called without SurfaceFlinger.mStateLock, but if we
@@ -217,7 +211,7 @@ uint32_t LayerBase::doTransaction(uint32_t flags)
     }
 
     // Commit the transaction
-    commitTransaction(flags & eRestartTransaction);
+    commitTransaction();
     return flags;
 }
 

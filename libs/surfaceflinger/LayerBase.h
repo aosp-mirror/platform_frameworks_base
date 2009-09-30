@@ -107,7 +107,7 @@ public:
             bool setTransparentRegionHint(const Region& opaque);
             bool setFlags(uint8_t flags, uint8_t mask);
             
-            void commitTransaction(bool skipSize);
+            void commitTransaction();
             bool requestTransaction();
             void forceVisibilityTransaction();
             
@@ -211,7 +211,6 @@ public:
     
     enum { // flags for doTransaction()
         eVisibleRegion      = 0x00000002,
-        eRestartTransaction = 0x00000008
     };
 
 
