@@ -55,7 +55,7 @@ public class VCardConfig {
     
     private static final int FLAG_CHARSET_UTF8 = 0;
     private static final int FLAG_CHARSET_SHIFT_JIS = 0x20;
-    
+
     /**
      * The flag indicating the vCard composer will add some "X-" properties used only in Android
      * when the formal vCard specification does not have appropriate fields for that data.
@@ -85,7 +85,7 @@ public class VCardConfig {
      * in vCard 3.0). Some external parsers may get confused with non-valid, non-"X-" properties.
      */
     private static final int FLAG_USE_DEFACT_PROPERTY = 0x40000000;
-    
+
     /**
      * The flag indicating some specific dialect seen in vcard of DoCoMo (one of Japanese
      * mobile careers) should be used. This flag does not include any other information like
@@ -94,9 +94,19 @@ public class VCardConfig {
      */
     private static final int FLAG_DOCOMO = 0x20000000;
 
+    /**
+     * The flag indicating the vCard composer use Quoted-Printable toward even "primary" types.
+     * In this context, "primary" types means "N", "FN", etc. which are usually "not" encoded
+     * into Quoted-Printable format in external exporters.
+     * This flag is useful when some target importer does not accept "primary" property values
+     * without Quoted-Printable encoding.
+     *
+     * @hide Temporaly made public. We don't strictly define "primary", so we may change the
+     * behavior around this flag in the future. Do not use this flag without any reason.
+     */
+    public static final int FLAG_USE_QP_TO_PRIMARY_PROPERTIES = 0x10000000;
     
     // VCard types
-
 
     /**
      * General vCard format with the version 2.1. Uses UTF-8 for the charset.
@@ -114,10 +124,10 @@ public class VCardConfig {
     /**
      * General vCard format with the version 3.0. Uses UTF-8 for the charset.
      * 
-     * Note that this type is not fully implemented, so probably some bugs remain especially
-     * in parsing part.
-     * 
-     * TODO: implement this type.
+     * Note that this type is not fully implemented, so probably some bugs remain both in
+     * parsing and composing.
+     *
+     * TODO: implement this type correctly.
      */
     public static final int VCARD_TYPE_V30_GENERIC =
         (FLAG_V30 | NAME_ORDER_DEFAULT | FLAG_CHARSET_UTF8 |
@@ -243,6 +253,10 @@ public class VCardConfig {
                 (vcardType == VCARD_TYPE_DOCOMO));
     }
 
+    public static boolean usesUtf8(int vcardType) {
+        return ((vcardType & FLAG_CHARSET_UTF8) != 0);
+    }
+
     public static boolean usesShiftJis(int vcardType) {
         return ((vcardType & FLAG_CHARSET_SHIFT_JIS) != 0);
     }
@@ -257,7 +271,7 @@ public class VCardConfig {
     public static boolean needsToConvertPhoneticString(int vcardType) {
         return (vcardType == VCARD_TYPE_DOCOMO);
     }
-    
+
     public static int getNameOrderType(int vcardType) {
         return vcardType & NAME_ORDER_MASK;
     }
@@ -265,19 +279,27 @@ public class VCardConfig {
     public static boolean usesAndroidSpecificProperty(int vcardType) {
         return ((vcardType & FLAG_USE_ANDROID_PROPERTY) != 0);
     }
-    
+
     public static boolean usesDefactProperty(int vcardType) {
         return ((vcardType & FLAG_USE_DEFACT_PROPERTY) != 0);
     }
-    
+
     public static boolean onlyOneNoteFieldIsAvailable(int vcardType) {
         return vcardType == VCARD_TYPE_DOCOMO;
     }
-    
+
     public static boolean showPerformanceLog() {
         return (VCardConfig.LOG_LEVEL & VCardConfig.LOG_LEVEL_PERFORMANCE_MEASUREMENT) != 0;
     }
-    
+
+    /**
+     * @hide
+     */
+    public static boolean usesQPToPrimaryProperties(int vcardType) {
+       return (usesQuotedPrintable(vcardType) &&
+               ((vcardType & FLAG_USE_QP_TO_PRIMARY_PROPERTIES) != 0));
+    }
+
     private VCardConfig() {
     }
 }
