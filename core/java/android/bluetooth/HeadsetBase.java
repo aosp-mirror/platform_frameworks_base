@@ -211,9 +211,10 @@ public final class HeadsetBase {
      */
 
     public boolean connectAsync() {
-        return connectAsyncNative();
+        int ret = connectAsyncNative();
+        return (ret == 0) ? true : false;
     }
-    private native boolean connectAsyncNative();
+    private native int connectAsyncNative();
 
     public int getRemainingAsyncConnectWaitingTimeMs() {
         return mTimeoutRemainingMs;
