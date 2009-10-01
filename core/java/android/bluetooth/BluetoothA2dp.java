@@ -133,6 +133,38 @@ public final class BluetoothA2dp {
         }
     }
 
+    /** Initiate suspend from an A2DP sink.
+     *  Listen for SINK_STATE_CHANGED_ACTION to find out when
+     *  suspend is completed.
+     *  @param device Remote BT device.
+     *  @return false on immediate error, true otherwise
+     *  @hide
+     */
+    public int suspendSink(BluetoothDevice device) {
+        try {
+            return mService.suspendSink(device);
+        } catch (RemoteException e) {
+            Log.e(TAG, "", e);
+            return false;
+        }
+    }
+
+    /** Initiate resume from an suspended A2DP sink.
+     *  Listen for SINK_STATE_CHANGED_ACTION to find out when
+     *  resume is completed.
+     *  @param device Remote BT device.
+     *  @return false on immediate error, true otherwise
+     *  @hide
+     */
+    public int resumeSink(BluetoothDevice device) {
+        try {
+            return mService.resumeSink(device);
+        } catch (RemoteException e) {
+            Log.e(TAG, "", e);
+            return false;
+        }
+    }
+
     /** Check if a specified A2DP sink is connected.
      *  @param device Remote BT device.
      *  @return True if connected (or playing), false otherwise and on error.
