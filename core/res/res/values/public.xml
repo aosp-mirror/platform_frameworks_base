@@ -1193,4 +1193,5 @@
        can be seen. -->
   <public type="drawable" name="screen_background_dark_transparent" />
   <public type="drawable" name="screen_background_light_transparent" />
+  <public type="drawable" name="stat_notify_sdcard_prepare" />
 </resources>
