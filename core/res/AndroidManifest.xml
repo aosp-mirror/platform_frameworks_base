@@ -912,7 +912,8 @@
         android:protectionLevel="signature" />
 
     <!-- Must be required by wallpaper services, to ensure that only the
-         system can bind to them. -->
+         system can bind to them.
+         @hide Live Wallpaper -->
     <permission android:name="android.permission.BIND_WALLPAPER"
         android:label="@string/permlab_bindWallpaper"
         android:description="@string/permdesc_bindWallpaper"

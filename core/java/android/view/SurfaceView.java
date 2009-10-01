@@ -289,6 +289,23 @@ public class SurfaceView extends View {
     }
 
     /**
+     * Control whether the surface view's surface is placed on top of another
+     * regular surface view in the window (but still behind the window itself).
+     * This is typically used to place overlays on top of an underlying media
+     * surface view.
+     * 
+     * <p>Note that this must be set before the surface view's containing
+     * window is attached to the window manager.
+     * 
+     * <p>Calling this overrides any previous call to {@link #setZOrderOnTop}.
+     */
+    public void setZOrderMediaOverlay(boolean isMediaOverlay) {
+        mWindowType = isMediaOverlay
+                ? WindowManager.LayoutParams.TYPE_APPLICATION_MEDIA_OVERLAY
+                : WindowManager.LayoutParams.TYPE_APPLICATION_MEDIA;
+    }
+    
+    /**
      * Control whether the surface view's surface is placed on top of its
      * window.  Normally it is placed behind the window, to allow it to
      * (for the most part) appear to composite with the views in the
@@ -298,8 +315,10 @@ public class SurfaceView extends View {
      * 
      * <p>Note that this must be set before the surface view's containing
      * window is attached to the window manager.
+     * 
+     * <p>Calling this overrides any previous call to {@link #setZOrderMediaOverlay}.
      */
-    public void setOnTop(boolean onTop) {
+    public void setZOrderOnTop(boolean onTop) {
         mWindowType = onTop ? WindowManager.LayoutParams.TYPE_APPLICATION_PANEL
                 : WindowManager.LayoutParams.TYPE_APPLICATION_MEDIA;
     }

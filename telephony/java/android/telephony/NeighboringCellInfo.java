@@ -75,6 +75,7 @@ public class NeighboringCellInfo implements Parcelable
      * the radio network type at that moment. Its constructor needs radio network
      * type.
      */
+    @Deprecated
     public NeighboringCellInfo() {
         mRssi = UNKNOWN_RSSI;
         mLac = UNKNOWN_CID;
@@ -91,6 +92,7 @@ public class NeighboringCellInfo implements Parcelable
      * the radio network type at that moment. Its constructor needs radio network
      * type.
      */
+    @Deprecated
     public NeighboringCellInfo(int rssi, int cid) {
         mRssi = rssi;
         mCid = cid;
@@ -228,6 +230,7 @@ public class NeighboringCellInfo implements Parcelable
      * the radio network type at that moment. It shouldn't be changed after
      * creation.
      */
+    @Deprecated
     public void setCid(int cid) {
         mCid = cid;
     }
@@ -240,6 +243,7 @@ public class NeighboringCellInfo implements Parcelable
      * the radio network type at that moment. It shouldn't be changed after
      * creation.
      */
+    @Deprecated
     public void setRssi(int rssi) {
         mRssi = rssi;
     }

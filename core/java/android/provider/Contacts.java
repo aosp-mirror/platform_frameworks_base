@@ -668,12 +668,14 @@ public class Contacts {
 
             /**
              * The directory twig for this sub-table
+             * @deprecated see {@link android.provider.ContactsContract}
              */
             @Deprecated
             public static final String CONTENT_DIRECTORY = "phones";
 
             /**
              * The default sort order for this table
+             * @deprecated see {@link android.provider.ContactsContract}
              */
             @Deprecated
             public static final String DEFAULT_SORT_ORDER = "number ASC";
@@ -1925,6 +1927,9 @@ public class Contacts {
      */
     @Deprecated
     public static final class Intents {
+        /**
+         * @deprecated see {@link android.provider.ContactsContract}
+         */
         @Deprecated
         public Intents() {
         }
