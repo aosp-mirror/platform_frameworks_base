@@ -20,6 +20,7 @@ package com.android.internal.widget;
 import com.android.internal.R;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -34,6 +35,7 @@ import android.os.Parcelable;
 import android.os.SystemClock;
 import android.os.Vibrator;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -49,7 +51,7 @@ import java.util.List;
  */
 public class LockPatternView extends View {
     // Vibrator pattern for creating a tactile bump
-    private static final long[] VIBE_PATTERN = {0, 1, 40, 41};
+    private static final long[] DEFAULT_VIBE_PATTERN = {0, 1, 40, 41};
 
     private static final boolean PROFILE_DRAWING = false;
     private boolean mDrawingProfilingStarted = false;
@@ -117,6 +119,8 @@ public class LockPatternView extends View {
    
 
     private Vibrator vibe; // Vibrator for creating tactile feedback
+
+    private long[] mVibePattern;
 
     /**
      * Represents a cell in the 3 X 3 matrix of the unlock pattern view.
@@ -256,6 +260,27 @@ public class LockPatternView extends View {
         // we assume all bitmaps have the same size
         mBitmapWidth = mBitmapBtnDefault.getWidth();
         mBitmapHeight = mBitmapBtnDefault.getHeight();
+
+        // allow vibration pattern to be customized
+        mVibePattern = loadVibratePattern(com.android.internal.R.array.config_virtualKeyVibePattern);
+    }
+
+    private long[] loadVibratePattern(int id) {
+        int[] pattern = null;
+        try {
+            pattern = getResources().getIntArray(id);
+        } catch (Resources.NotFoundException e) {
+            Log.e("LockPatternView", "Vibrate pattern missing, using default", e);
+        }
+        if (pattern == null) {
+            return DEFAULT_VIBE_PATTERN;
+        }
+
+        long[] tmpPattern = new long[pattern.length];
+        for (int i = 0; i < pattern.length; i++) {
+            tmpPattern[i] = pattern[i];
+        }
+        return tmpPattern;
     }
 
     private Bitmap getBitmapFor(int resId) {
@@ -443,7 +468,7 @@ public class LockPatternView extends View {
             }
             addCellToPattern(cell);
             if (mTactileFeedbackEnabled){
-                vibe.vibrate(VIBE_PATTERN, -1); // Generate tactile feedback
+                vibe.vibrate(mVibePattern, -1); // Generate tactile feedback
             }
             return cell;
         }
