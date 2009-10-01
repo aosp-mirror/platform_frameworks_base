@@ -115,6 +115,7 @@ public class BitmapDrawable extends Drawable {
      * @deprecated Use {@link #BitmapDrawable(Resources, String)} to ensure
      * that the drawable has correctly set its target density.
      */
+    @Deprecated
     public BitmapDrawable(String filepath) {
         this(new BitmapState(BitmapFactory.decodeFile(filepath)), null);
         if (mBitmap == null) {
@@ -138,6 +139,7 @@ public class BitmapDrawable extends Drawable {
      * @deprecated Use {@link #BitmapDrawable(Resources, java.io.InputStream)} to ensure
      * that the drawable has correctly set its target density.
      */
+    @Deprecated
     public BitmapDrawable(java.io.InputStream is) {
         this(new BitmapState(BitmapFactory.decodeStream(is)), null);
         if (mBitmap == null) {

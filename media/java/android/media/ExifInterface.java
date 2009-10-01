@@ -92,7 +92,7 @@ public class ExifInterface {
     /**
      * Returns the integer value of the specified tag. If there is no such tag
      * in the JPEG file or the value cannot be parsed as integer, return
-     * @{code defaultValue}.
+     * <var>defaultValue</var>.
      *
      * @param tag the name of the tag.
      * @param defaultValue the value to return if the tag is not available.

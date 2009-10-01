@@ -8348,6 +8348,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     /**
      * This needs to be a better API (NOT ON VIEW) before it is exposed.  If
      * it is ever exposed at all.
+     * @hide
      */
     public void onCloseSystemDialogs(String reason) {
     }
