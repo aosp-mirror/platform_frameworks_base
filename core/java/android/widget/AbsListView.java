@@ -3560,6 +3560,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             // into the scrap heap
             int viewType = lp.viewType;
             if (!shouldRecycleViewType(viewType)) {
+                removeDetachedView(scrap, false);
                 return;
             }
 
