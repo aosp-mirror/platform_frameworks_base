@@ -79,7 +79,7 @@ import java.util.Map;
 
 class BackupManagerService extends IBackupManager.Stub {
     private static final String TAG = "BackupManagerService";
-    private static final boolean DEBUG = true;
+    private static final boolean DEBUG = false;
 
     // How often we perform a backup pass.  Privileged external callers can
     // trigger an immediate pass.
@@ -1648,13 +1648,13 @@ class BackupManagerService extends IBackupManager.Stub {
                 stateFile.delete();
 
                 // Tell the transport to remove all the persistent storage for the app
-                // STOPSHIP TODO - need to handle failures
+                // TODO - need to handle failures
                 mTransport.clearBackupData(mPackage);
             } catch (RemoteException e) {
                 // can't happen; the transport is local
             } finally {
                 try {
-                    // STOPSHIP TODO - need to handle failures
+                    // TODO - need to handle failures
                     mTransport.finishBackup();
                 } catch (RemoteException e) {
                     // can't happen; the transport is local
