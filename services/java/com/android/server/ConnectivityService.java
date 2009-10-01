@@ -765,8 +765,11 @@ public class ConnectivityService extends IConnectivityManager.Stub {
      */
     private void handleDisconnect(NetworkInfo info) {
 
-        if (DBG) Log.v(TAG, "Handle DISCONNECT for " + info.getTypeName());
         int prevNetType = info.getType();
+        if (DBG) {
+            Log.v(TAG, "Handle DISCONNECT for " + info.getTypeName() +
+                    (mNetAttributes[prevNetType].isDefault() ? ", a default network" : ""));
+        }
 
         mNetTrackers[prevNetType].setTeardownRequested(false);
         /*
@@ -806,7 +809,6 @@ public class ConnectivityService extends IConnectivityManager.Stub {
          */
         NetworkStateTracker newNet = null;
         if (mNetAttributes[prevNetType].isDefault()) {
-            if (DBG) Log.d(TAG, "disconnecting a default network");
             if (mActiveDefaultNetwork == prevNetType) {
                 mActiveDefaultNetwork = -1;
             }
@@ -1051,10 +1053,9 @@ public class ConnectivityService extends IConnectivityManager.Stub {
      * table entries exist.
      */
     private void handleConnectivityChange() {
-        if (DBG) Log.d(TAG, "handleConnectivityChange");
         /*
          * If a non-default network is enabled, add the host routes that
-         * will allow it's DNS servers to be accessed.  Only 
+         * will allow it's DNS servers to be accessed.  Only
          * If both mobile and wifi are enabled, add the host routes that
          * will allow MMS traffic to pass on the mobile network. But
          * remove the default route for the mobile network, so that there
@@ -1147,21 +1148,21 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     }
 
     private void handleDnsConfigurationChange() {
-        if (DBG) Log.d(TAG, "handleDnsConfig Change");
         // add default net's dns entries
         for (int x = mPriorityList.length-1; x>= 0; x--) {
             int netType = mPriorityList[x];
             NetworkStateTracker nt = mNetTrackers[netType];
-            if (DBG) Log.d(TAG, " checking " + nt);
             if (nt != null && nt.getNetworkInfo().isConnected() &&
                     !nt.isTeardownRequested()) {
-                if (DBG) Log.d(TAG, "  connected");
                 String[] dnsList = nt.getNameServers();
                 if (mNetAttributes[netType].isDefault()) {
                     int j = 1;
                     for (String dns : dnsList) {
                         if (dns != null && !TextUtils.equals(dns, "0.0.0.0")) {
-                            if (DBG) Log.d(TAG, "  adding "+dns);
+                            if (DBG) {
+                                Log.d(TAG, "adding dns " + dns + " for " +
+                                        nt.getNetworkInfo().getTypeName());
+                            }
                             SystemProperties.set("net.dns" + j++, dns);
                         }
                     }
