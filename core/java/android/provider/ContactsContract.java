@@ -2192,7 +2192,7 @@ public final class ContactsContract {
          *            should be centered around. In particular, if the dialog
          *            has a "callout" arrow, it will be pointed and centered
          *            around this {@link View}.
-         * @param lookupUri A {@link Contacts#CONTENT_LOOKUP_URI} style
+         * @param lookupUri A {@link ContactsContract.Contacts#CONTENT_LOOKUP_URI} style
          *            {@link Uri} that describes a specific contact to feature
          *            in this dialog.
          * @param mode Any of {@link #MODE_SMALL}, {@link #MODE_MEDIUM}, or
@@ -2231,7 +2231,7 @@ public final class ContactsContract {
          *            centered around, in screen coordinates. In particular, if
          *            the dialog has a "callout" arrow, it will be pointed and
          *            centered around this {@link Rect}.
-         * @param lookupUri A {@link Contacts#CONTENT_LOOKUP_URI} style
+         * @param lookupUri A {@link ContactsContract.Contacts#CONTENT_LOOKUP_URI} style
          *            {@link Uri} that describes a specific contact to feature
          *            in this dialog.
          * @param mode Any of {@link #MODE_SMALL}, {@link #MODE_MEDIUM}, or
