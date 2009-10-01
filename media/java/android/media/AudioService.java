@@ -178,12 +178,14 @@ public class AudioService extends IAudioService.Stub {
                 if (mMediaServerOk) {
                     sendMsg(mAudioHandler, MSG_MEDIA_SERVER_DIED, SHARED_MSG, SENDMSG_NOOP, 0, 0,
                             null, 1500);
+                    mMediaServerOk = false;
                 }
                 break;
             case AudioSystem.AUDIO_STATUS_OK:
                 if (!mMediaServerOk) {
                     sendMsg(mAudioHandler, MSG_MEDIA_SERVER_STARTED, SHARED_MSG, SENDMSG_NOOP, 0, 0,
                             null, 0);
+                    mMediaServerOk = true;
                 }
                 break;
             default:
@@ -1282,10 +1284,13 @@ public class AudioService extends IAudioService.Stub {
                     break;
 
                 case MSG_MEDIA_SERVER_DIED:
-                    Log.e(TAG, "Media server died.");
                     // Force creation of new IAudioflinger interface
-                    mMediaServerOk = false;
-                    AudioSystem.isMusicActive();
+                    if (!mMediaServerOk) {
+                        Log.e(TAG, "Media server died.");
+                        AudioSystem.isMusicActive();
+                        sendMsg(mAudioHandler, MSG_MEDIA_SERVER_DIED, SHARED_MSG, SENDMSG_NOOP, 0, 0,
+                                null, 500);
+                    }
                     break;
 
                 case MSG_MEDIA_SERVER_STARTED:
@@ -1323,8 +1328,6 @@ public class AudioService extends IAudioService.Stub {
 
                     // Restore ringer mode
                     setRingerModeInt(getRingerMode(), false);
-
-                    mMediaServerOk = true;
                     break;
 
                 case MSG_PLAY_SOUND_EFFECT:
