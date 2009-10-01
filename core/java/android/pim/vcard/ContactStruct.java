@@ -25,8 +25,8 @@ import android.provider.ContactsContract;
 import android.provider.ContactsContract.Data;
 import android.provider.ContactsContract.Groups;
 import android.provider.ContactsContract.RawContacts;
-import android.provider.ContactsContract.CommonDataKinds.Birthday;
 import android.provider.ContactsContract.CommonDataKinds.Email;
+import android.provider.ContactsContract.CommonDataKinds.Event;
 import android.provider.ContactsContract.CommonDataKinds.GroupMembership;
 import android.provider.ContactsContract.CommonDataKinds.Im;
 import android.provider.ContactsContract.CommonDataKinds.Nickname;
@@ -1317,9 +1317,10 @@ public class ContactStruct {
         
         if (!TextUtils.isEmpty(mBirthday)) {
             builder = ContentProviderOperation.newInsert(Data.CONTENT_URI);
-            builder.withValueBackReference(Birthday.RAW_CONTACT_ID, 0);
-            builder.withValue(Data.MIMETYPE, Birthday.CONTENT_ITEM_TYPE);
-            builder.withValue(Birthday.BIRTHDAY, mBirthday);
+            builder.withValueBackReference(Event.RAW_CONTACT_ID, 0);
+            builder.withValue(Data.MIMETYPE, Event.CONTENT_ITEM_TYPE);
+            builder.withValue(Event.START_DATE, mBirthday);
+            builder.withValue(Event.TYPE, Event.TYPE_BIRTHDAY);
             operationList.add(builder.build());
         }
 
