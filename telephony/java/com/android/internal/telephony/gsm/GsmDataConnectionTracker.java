@@ -391,7 +391,8 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
 
     private boolean isDataAllowed() {
         boolean roaming = phone.getServiceState().getRoaming();
-        return getAnyDataEnabled() && (!roaming || getDataOnRoamingEnabled());
+        return getAnyDataEnabled() && (!roaming || getDataOnRoamingEnabled()) &&
+                mMasterDataEnabled;
     }
 
     //****** Called from ServiceStateTracker
@@ -475,7 +476,8 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
                     " roaming=" + phone.getServiceState().getRoaming() +
                     " dataOnRoamingEnable=" + getDataOnRoamingEnabled() +
                     " ps restricted=" + mIsPsRestricted +
-                    " desiredPowerState=" + desiredPowerState);
+                    " desiredPowerState=" + desiredPowerState +
+                    " MasterDataEnabled=" + mMasterDataEnabled);
             return false;
         }
     }
@@ -1039,7 +1041,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
                 if (!mRequestedApnType.equals(Phone.APN_TYPE_DEFAULT)) {
                     // if no more retries on a secondary APN attempt, tell the world and revert.
                     phone.notifyDataConnection(Phone.REASON_APN_FAILED);
-                    onEnableApn(apnTypeToId(mRequestedApnType), APN_DISABLED);
+                    onEnableApn(apnTypeToId(mRequestedApnType), DISABLED);
                     return;
                 }
                 if (mReregisterOnReconnectFailure) {
@@ -1203,7 +1205,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
                 notifyNoData(cause);
                 if (!mRequestedApnType.equals(Phone.APN_TYPE_DEFAULT)) {
                     phone.notifyDataConnection(Phone.REASON_APN_FAILED);
-                    onEnableApn(apnTypeToId(mRequestedApnType), APN_DISABLED);
+                    onEnableApn(apnTypeToId(mRequestedApnType), DISABLED);
                 }
                 return;
             }

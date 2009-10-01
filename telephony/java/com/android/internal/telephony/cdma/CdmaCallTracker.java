@@ -1039,8 +1039,8 @@ public final class CdmaCallTracker extends CallTracker {
     private void disableDataCallInEmergencyCall(String dialString) {
         if (PhoneNumberUtils.isEmergencyNumber(dialString)) {
             if (Phone.DEBUG_PHONE) log("disableDataCallInEmergencyCall");
-            phone.disableDataConnectivity();
             mIsInEmergencyCall = true;
+            phone.disableDataConnectivity();
         }
     }
 
@@ -1050,15 +1050,16 @@ public final class CdmaCallTracker extends CallTracker {
      */
     private void checkAndEnableDataCallAfterEmergencyCallDropped() {
         if (mIsInEmergencyCall) {
+            mIsInEmergencyCall = false;
             String inEcm=SystemProperties.get(TelephonyProperties.PROPERTY_INECM_MODE, "false");
             if (Phone.DEBUG_PHONE) {
                 log("checkAndEnableDataCallAfterEmergencyCallDropped,inEcm=" + inEcm);
             }
             if (inEcm.compareTo("false") == 0) {
                 // Re-initiate data connection
+                // TODO - can this be changed to phone.enableDataConnectivity();
                 phone.mDataConnection.setDataEnabled(true);
             }
-            mIsInEmergencyCall = false;
         }
     }
 
