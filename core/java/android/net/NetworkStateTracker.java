@@ -123,8 +123,10 @@ public abstract class NetworkStateTracker extends Handler {
     }
 
     public void addPrivateDnsRoutes() {
-        if (DBG) Log.d(TAG, "addPrivateDnsRoutes for " + this +
-                "(" + mInterfaceName + ") - mPrivateDnsRouteSet = "+mPrivateDnsRouteSet);
+        if (DBG) {
+            Log.d(TAG, "addPrivateDnsRoutes for " + this +
+                    "(" + mInterfaceName + ") - mPrivateDnsRouteSet = "+mPrivateDnsRouteSet);
+        }
         if (mInterfaceName != null && !mPrivateDnsRouteSet) {
             for (String addrString : getNameServers()) {
                 int addr = NetworkUtils.lookupHost(addrString);
@@ -138,30 +140,36 @@ public abstract class NetworkStateTracker extends Handler {
     }
 
     public void removePrivateDnsRoutes() {
-        if (DBG) Log.d(TAG, "removePrivateDnsRoutes for " + this +
-                "(" + mInterfaceName + ")");
         // TODO - we should do this explicitly but the NetUtils api doesnt
         // support this yet - must remove all.  No worse than before
         if (mInterfaceName != null && mPrivateDnsRouteSet) {
+            if (DBG) {
+                Log.d(TAG, "removePrivateDnsRoutes for " + mNetworkInfo.getTypeName() +
+                        " (" + mInterfaceName + ")");
+            }
             NetworkUtils.removeHostRoutes(mInterfaceName);
             mPrivateDnsRouteSet = false;
         }
     }
 
     public void addDefaultRoute() {
-        if (DBG) Log.d(TAG, "addDefaultRoute for " + this + "(" +
-                mInterfaceName + "), GatewayAddr=" + mDefaultGatewayAddr);
         if ((mInterfaceName != null) && (mDefaultGatewayAddr != 0) &&
                 mDefaultRouteSet == false) {
+            if (DBG) {
+                Log.d(TAG, "addDefaultRoute for " + mNetworkInfo.getTypeName() +
+                        " (" + mInterfaceName + "), GatewayAddr=" + mDefaultGatewayAddr);
+            }
             NetworkUtils.setDefaultRoute(mInterfaceName, mDefaultGatewayAddr);
             mDefaultRouteSet = true;
         }
     }
 
     public void removeDefaultRoute() {
-        if (DBG) Log.d(TAG, "removeDefaultRoute for " + this + "(" +
-                mInterfaceName + ")");
         if (mInterfaceName != null && mDefaultRouteSet == true) {
+            if (DBG) {
+                Log.d(TAG, "removeDefaultRoute for " + mNetworkInfo.getTypeName() + " (" +
+                        mInterfaceName + ")");
+            }
             NetworkUtils.removeDefaultRoute(mInterfaceName);
             mDefaultRouteSet = false;
         }
