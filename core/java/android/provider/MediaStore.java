@@ -345,6 +345,7 @@ public final class MediaStore {
                             baseUri.buildUpon().appendPath(String.valueOf(origId))
                                     .toString().replaceFirst("thumbnails", "media"));
                     if (filePath == null) {
+                        if (c != null) c.close();
                         c = cr.query(uri, PROJECTION, null, null, null);
                         if (c == null || !c.moveToFirst()) {
                             return null;
