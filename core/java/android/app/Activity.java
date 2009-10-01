@@ -2619,14 +2619,10 @@ public class Activity extends ContextThemeWrapper
      * context here, in order to improve quality or specificity of its own
      * searches.  This data will be returned with SEARCH intent(s).  Null if
      * no extra data is required.
-     * @param globalSearch If false, this will only launch the search that has been specifically
-     * defined by the application (which is usually defined as a local search).  If no default
-     * search is defined in the current application or activity, no search will be launched.
-     * If true, this will always launch a platform-global (e.g. web-based) search instead.
      */
-    public void triggerSearch(String query, Bundle appSearchData, boolean globalSearch) {
+    public void triggerSearch(String query, Bundle appSearchData) {
         ensureSearchManager();
-        mSearchManager.triggerSearch(query, getComponentName(), appSearchData, globalSearch);
+        mSearchManager.triggerSearch(query, getComponentName(), appSearchData);
     }
 
     /**

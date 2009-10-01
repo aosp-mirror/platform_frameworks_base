@@ -247,14 +247,13 @@ public class SearchManagerService extends ISearchManager.Stub {
             ComponentName launchActivity,
             Bundle appSearchData,
             ISearchManagerCallback searchManagerCallback,
-            boolean globalSearch,
             int ident) {
         getSearchDialog().startSearch(
                 query,
                 false,
                 launchActivity,
                 appSearchData,
-                globalSearch,
+                false,
                 searchManagerCallback,
                 ident,
                 true); // triger search after launching
