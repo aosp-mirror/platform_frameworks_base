@@ -20,7 +20,12 @@ import com.android.internal.R;
 import com.android.internal.telephony.IccCard;
 import com.android.internal.widget.LockPatternUtils;
 
+import android.accounts.Account;
 import android.accounts.AccountManager;
+import android.accounts.AccountManagerCallback;
+import android.accounts.AccountManagerFuture;
+import android.accounts.AuthenticatorException;
+import android.accounts.OperationCanceledException;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -37,6 +42,8 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.view.WindowManager;
 
+import java.io.IOException;
+
 /**
  * The host view for all of the screens of the pattern unlock screen.  There are
  * two {@link Mode}s of operation, lock and unlock.  This will show the appropriate
@@ -48,7 +55,8 @@ import android.view.WindowManager;
  * {@link com.android.internal.policy.impl.KeyguardViewManager}
  * via its {@link com.android.internal.policy.impl.KeyguardViewCallback}, as appropriate.
  */
-public class LockPatternKeyguardView extends KeyguardViewBase {
+public class LockPatternKeyguardView extends KeyguardViewBase
+        implements AccountManagerCallback<Account[]> {
 
     // intent action for launching emergency dialer activity.
     static final String ACTION_EMERGENCY_DIAL = "com.android.phone.EmergencyDialer.DIAL";
@@ -141,6 +149,22 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
                 && (mUpdateMonitor.getSimState() == IccCard.State.ABSENT);
     }
 
+    public void run(AccountManagerFuture<Account[]> future) {
+        // We err on the side of caution.
+        // In case of error we assume we have a SAML account.
+        boolean hasSAMLAccount = true;
+        try {
+            hasSAMLAccount = future.getResult().length > 0;
+        } catch (OperationCanceledException e) {
+        } catch (IOException e) {
+        } catch (AuthenticatorException e) {
+        }
+        mEnableFallback = !hasSAMLAccount;
+        if (mUnlockScreen instanceof UnlockScreen) {
+            ((UnlockScreen)mUnlockScreen).setEnableFallback(true);
+        }
+    }
+
     /**
      * @param context Used to inflate, and create views.
      * @param updateMonitor Knows the state of the world, and passed along to each
@@ -156,25 +180,18 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
         super(context);
 
         final boolean hasAccount = AccountManager.get(context).getAccounts().length > 0;
-        boolean hasSAMLAccount = false;
         if (hasAccount) {
             /* If we have a SAML account which requires web login we can not use the
              fallback screen UI to ask the user for credentials.
              For now we will disable fallback screen in this case.
              Ultimately we could consider bringing up a web login from GLS
              but need to make sure that it will work in the "locked screen" mode. */
-            try {
-                String[] features = new String[] {"saml"};
-                hasSAMLAccount =
-                    AccountManager.get(context).getAccountsByTypeAndFeatures(
-                            "com.google.GAIA", features, null, null).getResult().length > 0;
-            } catch (Exception e) {
-                // We err on the side of caution.
-                // In case of error we assume we have a SAML account.
-                hasSAMLAccount = true;
-            }
+            String[] features = new String[] {"saml"};
+            AccountManager.get(context).getAccountsByTypeAndFeatures(
+                    "com.google.GAIA", features, this, null);
         }
-        mEnableFallback = hasAccount && !hasSAMLAccount;
+        
+        mEnableFallback = false;
 
         mRequiresSim =
                 TextUtils.isEmpty(SystemProperties.get("keyguard.no_require_sim"));
@@ -452,13 +469,14 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
 
     View createUnlockScreenFor(UnlockMode unlockMode) {
         if (unlockMode == UnlockMode.Pattern) {
-            return new UnlockScreen(
+            UnlockScreen view = new UnlockScreen(
                     mContext,
                     mLockPatternUtils,
                     mUpdateMonitor,
                     mKeyguardScreenCallback,
-                    mUpdateMonitor.getFailedAttempts(),
-                    mEnableFallback);
+                    mUpdateMonitor.getFailedAttempts());
+            view.setEnableFallback(mEnableFallback);
+            return view;
         } else if (unlockMode == UnlockMode.SimPin) {
             return new SimUnlockScreen(
                     mContext,
