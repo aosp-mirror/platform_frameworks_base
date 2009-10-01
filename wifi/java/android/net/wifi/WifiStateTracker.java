@@ -1237,9 +1237,9 @@ public class WifiStateTracker extends NetworkStateTracker {
         /*
          * Reset connection depends on both the interface and the IP assigned,
          * so it should be done before any chance of the IP being lost.
-         */  
+         */
         NetworkUtils.resetConnections(mInterfaceName);
-        
+
         // Stop DHCP
         if (mDhcpTarget != null) {
             mDhcpTarget.setCancelCallback(true);
@@ -1248,11 +1248,10 @@ public class WifiStateTracker extends NetworkStateTracker {
         if (!NetworkUtils.stopDhcp(mInterfaceName)) {
             Log.e(TAG, "Could not stop DHCP");
         }
-        
+
         NetworkUtils.disableInterface(mInterfaceName);
-        if (reenable) {
-            NetworkUtils.enableInterface(mInterfaceName);
-        }
+        // we no longer net to start the interface (driver does this for us)
+        // and it led to problems - removed.
     }
 
     /**
