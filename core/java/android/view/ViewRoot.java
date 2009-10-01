@@ -1841,7 +1841,7 @@ public final class ViewRoot extends Handler implements ViewParent,
             }
         } break;
         case DIE:
-            dispatchDetachedFromWindow();
+            doDie();
             break;
         case DISPATCH_KEY_FROM_IME: {
             if (LOCAL_LOGV) Log.v(
@@ -2520,6 +2520,14 @@ public final class ViewRoot extends Handler implements ViewParent,
     }
 
     public void die(boolean immediate) {
+        if (immediate) {
+            doDie();
+        } else {
+            sendEmptyMessage(DIE);
+        }
+    }
+
+    void doDie() {
         checkThread();
         if (Config.LOGV) Log.v("ViewRoot", "DIE in " + this + " of " + mSurface);
         synchronized (this) {
@@ -2543,11 +2551,7 @@ public final class ViewRoot extends Handler implements ViewParent,
             }
             if (mAdded) {
                 mAdded = false;
-                if (immediate) {
-                    dispatchDetachedFromWindow();
-                } else if (mView != null) {
-                    sendEmptyMessage(DIE);
-                }
+                dispatchDetachedFromWindow();
             }
         }
     }
