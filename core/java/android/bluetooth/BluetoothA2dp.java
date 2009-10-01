@@ -93,10 +93,15 @@ public final class BluetoothA2dp {
         mContext = c;
 
         IBinder b = ServiceManager.getService(BluetoothA2dpService.BLUETOOTH_A2DP_SERVICE);
-        if (b == null) {
-            throw new RuntimeException("Bluetooth A2DP service not available!");
+        if (b != null) {
+            mService = IBluetoothA2dp.Stub.asInterface(b);
+        } else {
+            Log.w(TAG, "Bluetooth A2DP service not available!");
+
+            // Instead of throwing an exception which prevents people from going
+            // into Wireless settings in the emulator. Let it crash later when it is actually used.
+            mService = null;
         }
-        mService = IBluetoothA2dp.Stub.asInterface(b);
     }
 
     /** Initiate a connection to an A2DP sink.
