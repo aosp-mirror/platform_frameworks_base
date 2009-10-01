@@ -121,7 +121,14 @@ void ProgramVertex::setTextureMatrix(const rsc_Matrix *m) const
     mDirty = true;
 }
 
-
+void ProgramVertex::transformToScreen(const Context *rsc, float *v4out, const float *v3in) const
+{
+    float *f = static_cast<float *>(mConstants->getPtr());
+    Matrix mvp;
+    mvp.loadMultiply((Matrix *)&f[RS_PROGRAM_VERTEX_MODELVIEW_OFFSET],
+                     (Matrix *)&f[RS_PROGRAM_VERTEX_PROJECTION_OFFSET]);
+    mvp.vectorMultiply(v4out, v3in);
+}
 
 ProgramVertexState::ProgramVertexState()
 {
