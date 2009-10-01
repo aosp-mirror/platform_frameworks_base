@@ -245,7 +245,7 @@ public final class MediaStore {
          * requests can cancel their own requests.
          *
          * @param cr ContentResolver
-         * @param origId original image or video id
+         * @param origId original image or video id. use -1 to cancel all requests.
          * @param baseUri the base URI of requested thumbnails
          */
         static void cancelThumbnailRequest(ContentResolver cr, long origId, Uri baseUri) {
@@ -340,24 +340,28 @@ public final class MediaStore {
                 // We probably run out of space, so create the thumbnail in memory.
                 if (bitmap == null) {
                     Log.v(TAG, "We probably run out of space, so create the thumbnail in memory.");
-                    int targetSize = kind == MINI_KIND ? ThumbnailUtil.THUMBNAIL_TARGET_SIZE :
-                            ThumbnailUtil.MINI_THUMB_TARGET_SIZE;
-                    int maxPixelNum = kind == MINI_KIND ? ThumbnailUtil.THUMBNAIL_MAX_NUM_PIXELS :
-                            ThumbnailUtil.MINI_THUMB_MAX_NUM_PIXELS;
+
                     Uri uri = Uri.parse(
                             baseUri.buildUpon().appendPath(String.valueOf(origId))
                                     .toString().replaceFirst("thumbnails", "media"));
-                    if (isVideo) {
+                    if (filePath == null) {
                         c = cr.query(uri, PROJECTION, null, null, null);
-                        if (c != null && c.moveToFirst()) {
-                            bitmap = ThumbnailUtil.createVideoThumbnail(c.getString(1));
-                            if (kind == MICRO_KIND) {
-                                bitmap = ThumbnailUtil.extractMiniThumb(bitmap,
-                                        targetSize, targetSize, ThumbnailUtil.RECYCLE_INPUT);
-                            }
+                        if (c == null || !c.moveToFirst()) {
+                            return null;
+                        }
+                        filePath = c.getString(1);
+                    }
+                    if (isVideo) {
+                        bitmap = ThumbnailUtil.createVideoThumbnail(filePath);
+                        if (kind == MICRO_KIND) {
+                            bitmap = ThumbnailUtil.extractMiniThumb(bitmap,
+                                    ThumbnailUtil.MINI_THUMB_TARGET_SIZE,
+                                    ThumbnailUtil.MINI_THUMB_TARGET_SIZE,
+                                    ThumbnailUtil.RECYCLE_INPUT);
                         }
                     } else {
-                        bitmap = ThumbnailUtil.makeBitmap(targetSize, maxPixelNum, uri, cr);
+                        bitmap = ThumbnailUtil.createImageThumbnail(cr, filePath, uri, origId,
+                                kind, false);
                     }
                 }
             } catch (SQLiteException ex) {
