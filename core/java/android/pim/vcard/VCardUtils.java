@@ -283,7 +283,7 @@ public class VCardUtils {
         return builder.toString();
     }
     
-    public static boolean containsOnlyAscii(String str) {
+    public static boolean containsOnlyPrintableAscii(String str) {
         if (TextUtils.isEmpty(str)) {
             return true;
         }
@@ -299,13 +299,35 @@ public class VCardUtils {
         }
         return true;
     }
-    
+
+    /**
+     * This is useful when checking the string should be encoded into quoted-printable
+     * or not, which is required by vCard 2.1.
+     * See the definition of "7bit" in vCard 2.1 spec for more information.
+     */
+    public static boolean containsOnlyNonCrLfPrintableAscii(String str) {
+        if (TextUtils.isEmpty(str)) {
+            return true;
+        }
+
+        final int length = str.length();
+        final int asciiFirst = 0x20;
+        final int asciiLast = 0x126;
+        for (int i = 0; i < length; i = str.offsetByCodePoints(i, 1)) {
+            int c = str.codePointAt(i);
+            if (c < asciiFirst || asciiLast < c || c == '\n' || c == '\r') {
+                return false;
+            }
+        }
+        return true;
+    }
+
     /**
      * This is useful since vCard 3.0 often requires the ("X-") properties and groups
      * should contain only alphabets, digits, and hyphen.
      * 
      * Note: It is already known some devices (wrongly) outputs properties with characters
-     *       which should not be in the field. One example is "X-GOOGLE TALK". We appreciate
+     *       which should not be in the field. One example is "X-GOOGLE TALK". We accept
      *       such kind of input but must never output it unless the target is very specific
      *       to the device which is able to parse the malformed input. 
      */
