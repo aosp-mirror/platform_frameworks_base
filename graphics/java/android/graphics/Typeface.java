@@ -180,6 +180,8 @@ public class Typeface {
      *
      * @param blackGamma gamma coefficient for black text
      * @param whiteGamma gamma coefficient for white text
+     *
+     * @hide - this is just for calibrating devices, not for normal apps
      */
     public static native void setGammaForText(float blackGamma, float whiteGamma);
 }
