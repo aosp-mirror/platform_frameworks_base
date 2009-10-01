@@ -188,7 +188,7 @@ public class LockPatternKeyguardView extends KeyguardViewBase
              but need to make sure that it will work in the "locked screen" mode. */
             String[] features = new String[] {"saml"};
             AccountManager.get(context).getAccountsByTypeAndFeatures(
-                    "com.google.GAIA", features, this, null);
+                    "com.google", features, this, null);
         }
         
         mEnableFallback = false;
