@@ -53,7 +53,7 @@ namespace android {
 // ---------------------------------------------------------------------------
 
 BootAnimation::BootAnimation() : Thread(false)
-{    
+{
     mSession = new SurfaceComposerClient();
 }
 
@@ -139,6 +139,62 @@ status_t BootAnimation::initTexture(Texture* texture, AssetManager& assets,
     return NO_ERROR;
 }
 
+status_t BootAnimation::initTexture(void* buffer, size_t len)
+{
+    //StopWatch watch("blah");
+
+    SkBitmap bitmap;
+    SkImageDecoder::DecodeMemory(buffer, len,
+            &bitmap, SkBitmap::kRGB_565_Config,
+            SkImageDecoder::kDecodePixels_Mode);
+
+    // ensure we can call getPixels(). No need to call unlock, since the
+    // bitmap will go out of scope when we return from this method.
+    bitmap.lockPixels();
+
+    const int w = bitmap.width();
+    const int h = bitmap.height();
+    const void* p = bitmap.getPixels();
+
+    GLint crop[4] = { 0, h, w, -h };
+    int tw = 1 << (31 - __builtin_clz(w));
+    int th = 1 << (31 - __builtin_clz(h));
+    if (tw < w) tw <<= 1;
+    if (th < h) th <<= 1;
+
+    switch (bitmap.getConfig()) {
+        case SkBitmap::kARGB_8888_Config:
+            if (tw != w || th != h) {
+                glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, tw, th, 0, GL_RGBA,
+                        GL_UNSIGNED_BYTE, 0);
+                glTexSubImage2D(GL_TEXTURE_2D, 0,
+                        0, 0, w, h, GL_RGBA, GL_UNSIGNED_BYTE, p);
+            } else {
+                glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, tw, th, 0, GL_RGBA,
+                        GL_UNSIGNED_BYTE, p);
+            }
+            break;
+
+        case SkBitmap::kRGB_565_Config:
+            if (tw != w || th != h) {
+                glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, tw, th, 0, GL_RGB,
+                        GL_UNSIGNED_SHORT_5_6_5, 0);
+                glTexSubImage2D(GL_TEXTURE_2D, 0,
+                        0, 0, w, h, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, p);
+            } else {
+                glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, tw, th, 0, GL_RGB,
+                        GL_UNSIGNED_SHORT_5_6_5, p);
+            }
+            break;
+        default:
+            break;
+    }
+
+    glTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_CROP_RECT_OES, crop);
+
+    return NO_ERROR;
+}
+
 status_t BootAnimation::readyToRun() {
     mAssets.addDefaultAssets();
 
@@ -158,8 +214,8 @@ status_t BootAnimation::readyToRun() {
 
     // initialize opengl and egl
     const EGLint attribs[] = {
-            EGL_DEPTH_SIZE, 0, 
-            EGL_NONE 
+            EGL_DEPTH_SIZE, 0,
+            EGL_NONE
     };
     EGLint w, h, dummy;
     EGLint numConfigs;
@@ -175,10 +231,10 @@ status_t BootAnimation::readyToRun() {
     context = eglCreateContext(display, config, NULL, NULL);
     eglQuerySurface(display, surface, EGL_WIDTH, &w);
     eglQuerySurface(display, surface, EGL_HEIGHT, &h);
-    
+
     if (eglMakeCurrent(display, surface, surface, context) == EGL_FALSE)
         return NO_INIT;
-    
+
     mDisplay = display;
     mContext = context;
     mSurface = surface;
@@ -187,16 +243,27 @@ status_t BootAnimation::readyToRun() {
     mFlingerSurfaceControl = control;
     mFlingerSurface = s;
 
-    // initialize GL
-    glShadeModel(GL_FLAT);
-    glEnable(GL_TEXTURE_2D);
-    glTexEnvx(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+    mAndroidAnimation = false;
+    status_t err = mZip.open("/data/local/bootanimation.zip");
+    if (err != NO_ERROR) {
+        err = mZip.open("/system/media/bootanimation.zip");
+        if (err != NO_ERROR) {
+            mAndroidAnimation = true;
+        }
+    }
 
     return NO_ERROR;
 }
 
-bool BootAnimation::threadLoop() {
-    bool r = android();
+bool BootAnimation::threadLoop()
+{
+    bool r;
+    if (mAndroidAnimation) {
+        r = android();
+    } else {
+        r = movie();
+    }
+
     eglMakeCurrent(mDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
     eglDestroyContext(mDisplay, mContext);
     eglDestroySurface(mDisplay, mSurface);
@@ -207,15 +274,20 @@ bool BootAnimation::threadLoop() {
     return r;
 }
 
-bool BootAnimation::android() {
+bool BootAnimation::android()
+{
     initTexture(&mAndroid[0], mAssets, "images/android-logo-mask.png");
     initTexture(&mAndroid[1], mAssets, "images/android-logo-shine.png");
 
     // clear screen
+    glShadeModel(GL_FLAT);
     glDisable(GL_DITHER);
     glDisable(GL_SCISSOR_TEST);
     glClear(GL_COLOR_BUFFER_BIT);
     eglSwapBuffers(mDisplay, mSurface);
+
+    glEnable(GL_TEXTURE_2D);
+    glTexEnvx(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 
     const GLint xc = (mWidth  - mAndroid[0].w) / 2;
     const GLint yc = (mHeight - mAndroid[0].h) / 2;
@@ -259,11 +331,157 @@ bool BootAnimation::android() {
         // 12fps: don't animate too fast to preserve CPU
         const nsecs_t sleepTime = 83333 - ns2us(systemTime() - now);
         if (sleepTime > 0)
-            usleep(sleepTime); 
+            usleep(sleepTime);
     } while (!exitPending());
 
     glDeleteTextures(1, &mAndroid[0].name);
     glDeleteTextures(1, &mAndroid[1].name);
+    return false;
+}
+
+
+bool BootAnimation::movie()
+{
+    ZipFileRO& zip(mZip);
+
+    size_t numEntries = zip.getNumEntries();
+    ZipEntryRO desc = zip.findEntryByName("desc.txt");
+    FileMap* descMap = zip.createEntryFileMap(desc);
+    LOGE_IF(!descMap, "descMap is null");
+    if (!descMap) {
+        return false;
+    }
+
+    String8 desString((char const*)descMap->getDataPtr(),
+            descMap->getDataLength());
+    char const* s = desString.string();
+
+    Animation animation;
+
+    // Parse the description file
+    for (;;) {
+        const char* endl = strstr(s, "\n");
+        if (!endl) break;
+        String8 line(s, endl - s);
+        const char* l = line.string();
+        int fps, width, height, count, pause;
+        char path[256];
+        if (sscanf(l, "%d %d %d", &width, &height, &fps) == 3) {
+            //LOGD("> w=%d, h=%d, fps=%d", fps, width, height);
+            animation.width = width;
+            animation.height = height;
+            animation.fps = fps;
+        }
+        if (sscanf(l, "p %d %d %s", &count, &pause, path) == 3) {
+            //LOGD("> count=%d, pause=%d, path=%s", count, pause, path);
+            Animation::Part part;
+            part.count = count;
+            part.pause = pause;
+            part.path = path;
+            animation.parts.add(part);
+        }
+        s = ++endl;
+    }
+
+    // read all the data structures
+    const size_t pcount = animation.parts.size();
+    for (size_t i=0 ; i<numEntries ; i++) {
+        char name[256];
+        ZipEntryRO entry = zip.findEntryByIndex(i);
+        if (zip.getEntryFileName(entry, name, 256) == 0) {
+            const String8 entryName(name);
+            const String8 path(entryName.getPathDir());
+            const String8 leaf(entryName.getPathLeaf());
+            if (leaf.size() > 0) {
+                for (int j=0 ; j<pcount ; j++) {
+                    if (path == animation.parts[j].path) {
+                        int method;
+                        // supports only stored png files
+                        if (zip.getEntryInfo(entry, &method, 0, 0, 0, 0, 0)) {
+                            if (method == ZipFileRO::kCompressStored) {
+                                FileMap* map = zip.createEntryFileMap(entry);
+                                if (map) {
+                                    Animation::Frame frame;
+                                    frame.name = leaf;
+                                    frame.map = map;
+                                    Animation::Part& part(animation.parts.editItemAt(j));
+                                    part.frames.add(frame);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // clear screen
+    glShadeModel(GL_FLAT);
+    glDisable(GL_DITHER);
+    glDisable(GL_SCISSOR_TEST);
+    glDisable(GL_BLEND);
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    eglSwapBuffers(mDisplay, mSurface);
+
+    glBindTexture(GL_TEXTURE_2D, 0);
+    glEnable(GL_TEXTURE_2D);
+    glTexEnvx(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+    glTexParameterx(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameterx(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameterx(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameterx(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    const int xc = (mWidth - animation.width) / 2;
+    const int yc = ((mHeight - animation.height) / 2);
+    nsecs_t lastFrame = systemTime();
+    nsecs_t frameDuration = s2ns(1) / animation.fps;
+
+    for (int i=0 ; i<pcount && !exitPending() ; i++) {
+        const Animation::Part& part(animation.parts[i]);
+        const size_t fcount = part.frames.size();
+        glBindTexture(GL_TEXTURE_2D, 0);
+
+        for (int r=0 ; !part.count || r<part.count ; r++) {
+            for (int j=0 ; j<fcount && !exitPending(); j++) {
+                const Animation::Frame& frame(part.frames[j]);
+
+                if (r > 0) {
+                    glBindTexture(GL_TEXTURE_2D, frame.tid);
+                } else {
+                    if (part.count != 1) {
+                        glGenTextures(1, &frame.tid);
+                        glBindTexture(GL_TEXTURE_2D, frame.tid);
+                        glTexParameterx(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+                        glTexParameterx(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+                    }
+                    initTexture(
+                            frame.map->getDataPtr(),
+                            frame.map->getDataLength());
+                }
+
+                glDrawTexiOES(xc, yc, 0, animation.width, animation.height);
+                eglSwapBuffers(mDisplay, mSurface);
+
+                nsecs_t now = systemTime();
+                nsecs_t delay = frameDuration - (now - lastFrame);
+                lastFrame = now;
+                long wait = ns2us(frameDuration);
+                if (wait > 0)
+                    usleep(wait);
+            }
+            usleep(part.pause * ns2us(frameDuration));
+        }
+
+        // free the textures for this part
+        if (part.count != 1) {
+            for (int j=0 ; j<fcount ; j++) {
+                const Animation::Frame& frame(part.frames[j]);
+                glDeleteTextures(1, &frame.tid);
+            }
+        }
+    }
+
     return false;
 }
 
