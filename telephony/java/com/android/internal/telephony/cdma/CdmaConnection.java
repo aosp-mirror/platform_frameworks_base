@@ -418,6 +418,8 @@ public class CdmaConnection extends Connection {
                 return DisconnectCause.CDMA_PREEMPTED;
             case CallFailCause.CDMA_NOT_EMERGENCY:
                 return DisconnectCause.CDMA_NOT_EMERGENCY;
+            case CallFailCause.CDMA_ACCESS_BLOCKED:
+                return DisconnectCause.CDMA_ACCESS_BLOCKED;
             case CallFailCause.ERROR_UNSPECIFIED:
             case CallFailCause.NORMAL_CLEARING:
             default:
