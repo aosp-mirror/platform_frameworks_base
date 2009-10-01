@@ -1330,7 +1330,7 @@ public class Intent implements Parcelable {
     public static final String ACTION_UID_REMOVED = "android.intent.action.UID_REMOVED";
     /**
      * Broadcast Action:  The current system wallpaper has changed.  See
-     * {@link Context#getWallpaper} for retrieving the new wallpaper.
+     * {@link android.app.WallpaperManager} for retrieving the new wallpaper.
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_WALLPAPER_CHANGED = "android.intent.action.WALLPAPER_CHANGED";
