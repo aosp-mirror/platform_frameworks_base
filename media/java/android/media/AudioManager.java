@@ -725,7 +725,7 @@ public class AudioManager {
      *         false if otherwise
      */
     public boolean isBluetoothA2dpOn() {
-        if (AudioSystem.getDeviceConnectionState(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP,"") 
+        if (AudioSystem.getDeviceConnectionState(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP,"")
             == AudioSystem.DEVICE_STATE_UNAVAILABLE) {
             return false;
         } else {
@@ -750,7 +750,7 @@ public class AudioManager {
      *         false if otherwise
      */
     public boolean isWiredHeadsetOn() {
-        if (AudioSystem.getDeviceConnectionState(AudioSystem.DEVICE_OUT_WIRED_HEADSET,"") 
+        if (AudioSystem.getDeviceConnectionState(AudioSystem.DEVICE_OUT_WIRED_HEADSET,"")
                 == AudioSystem.DEVICE_STATE_UNAVAILABLE) {
             return false;
         } else {
@@ -1063,7 +1063,9 @@ public class AudioManager {
      *            {@link #FX_KEYPRESS_SPACEBAR},
      *            {@link #FX_KEYPRESS_DELETE},
      *            {@link #FX_KEYPRESS_RETURN},
-     * @param volume Sound effect volume
+     * @param volume Sound effect volume.
+     * The volume value is a raw scalar so UI controls should be scaled logarithmically.
+     * If a volume of -1 is specified, the AudioManager.STREAM_MUSIC stream volume minus 3dB will be used.
      * NOTE: This version is for applications that have their own
      * settings panel for enabling and controlling volume.
      */
