@@ -603,18 +603,19 @@ status_t AudioFlinger::setParameters(int ioHandle, const String8& keyValuePairs)
         return result;
     }
 
-    // Check if parameters are for an output
-    PlaybackThread *playbackThread = checkPlaybackThread_l(ioHandle);
-    if (playbackThread != NULL) {
-        return playbackThread->setParameters(keyValuePairs);
+    // hold a strong ref on thread in case closeOutput() or closeInput() is called
+    // and the thread is exited once the lock is released
+    sp<ThreadBase> thread;
+    {
+        Mutex::Autolock _l(mLock);
+        thread = checkPlaybackThread_l(ioHandle);
+        if (thread == NULL) {
+            thread = checkRecordThread_l(ioHandle);
+        }
     }
-
-    // Check if parameters are for an input
-    RecordThread *recordThread = checkRecordThread_l(ioHandle);
-    if (recordThread != NULL) {
-        return recordThread->setParameters(keyValuePairs);
+    if (thread != NULL) {
+        return thread->setParameters(keyValuePairs);
     }
-
     return BAD_VALUE;
 }
 
@@ -626,6 +627,9 @@ String8 AudioFlinger::getParameters(int ioHandle, const String8& keys)
     if (ioHandle == 0) {
         return mAudioHardware->getParameters(keys);
     }
+
+    Mutex::Autolock _l(mLock);
+
     PlaybackThread *playbackThread = checkPlaybackThread_l(ioHandle);
     if (playbackThread != NULL) {
         return playbackThread->getParameters(keys);
@@ -736,7 +740,7 @@ AudioFlinger::ThreadBase::~ThreadBase()
 
 void AudioFlinger::ThreadBase::exit()
 {
-    // keep a strong ref on ourself so that we want get
+    // keep a strong ref on ourself so that we wont get
     // destroyed in the middle of requestExitAndWait()
     sp <ThreadBase> strongMe = this;
 
@@ -778,9 +782,14 @@ status_t AudioFlinger::ThreadBase::setParameters(const String8& keyValuePairs)
 
     mNewParameters.add(keyValuePairs);
     mWaitWorkCV.signal();
-    mParamCond.wait(mLock);
-    status = mParamStatus;
-    mWaitWorkCV.signal();
+    // wait condition with timeout in case the thread loop has exited
+    // before the request could be processed
+    if (mParamCond.waitRelative(mLock, seconds(2)) == NO_ERROR) {
+        status = mParamStatus;
+        mWaitWorkCV.signal();
+    } else {
+        status = TIMED_OUT;
+    }
     return status;
 }
 
