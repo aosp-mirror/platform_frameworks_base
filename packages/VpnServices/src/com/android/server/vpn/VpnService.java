@@ -30,18 +30,15 @@ import android.util.Log;
 import java.io.IOException;
 import java.io.Serializable;
 import java.net.DatagramSocket;
-import java.net.Socket;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.UnknownHostException;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * The service base class for managing a type of VPN connection.
  */
 abstract class VpnService<E extends VpnProfile> implements Serializable {
-    protected static final long serialVersionUID = 1L;
+    static final long serialVersionUID = 1L;
     private static final boolean DBG = true;
     private static final int NOTIFICATION_ID = 1;
 
@@ -75,8 +72,8 @@ abstract class VpnService<E extends VpnProfile> implements Serializable {
 
     private long mStartTime; // VPN connection start time
 
-    // for helping managing multiple daemons
-    private DaemonHelper mDaemonHelper = new DaemonHelper();
+    // for helping managing daemons
+    private VpnDaemons mDaemons = new VpnDaemons();
 
     // for helping showing, updating notification
     private transient NotificationHelper mNotification;
@@ -87,21 +84,11 @@ abstract class VpnService<E extends VpnProfile> implements Serializable {
     protected abstract void connect(String serverIp, String username,
             String password) throws IOException;
 
-    protected abstract void stopPreviouslyRunDaemons();
-
     /**
-     * Starts a VPN daemon.
+     * Returns the daemons management class for this service object.
      */
-    protected DaemonProxy startDaemon(String daemonName)
-            throws IOException {
-        return mDaemonHelper.startDaemon(daemonName);
-    }
-
-    /**
-     * Stops a VPN daemon.
-     */
-    protected void stopDaemon(String daemonName) {
-        new DaemonProxy(daemonName).stop();
+    protected VpnDaemons getDaemons() {
+        return mDaemons;
     }
 
     /**
@@ -141,7 +128,7 @@ abstract class VpnService<E extends VpnProfile> implements Serializable {
         try {
             setState(VpnState.CONNECTING);
 
-            stopPreviouslyRunDaemons();
+            mDaemons.stopAll();
             String serverIp = getIp(getProfile().getServerName());
             saveLocalIpAndInterface(serverIp);
             onBeforeConnect();
@@ -160,7 +147,7 @@ abstract class VpnService<E extends VpnProfile> implements Serializable {
             setState(VpnState.DISCONNECTING);
             mNotification.showDisconnect();
 
-            mDaemonHelper.stopAll();
+            mDaemons.stopAll();
         } catch (Throwable e) {
             Log.e(TAG, "onDisconnect()", e);
         } finally {
@@ -206,7 +193,7 @@ abstract class VpnService<E extends VpnProfile> implements Serializable {
                 onConnected();
                 return;
             } else {
-                int err = mDaemonHelper.getSocketError();
+                int err = mDaemons.getSocketError();
                 if (err != 0) {
                     onError(err);
                     return;
@@ -223,7 +210,7 @@ abstract class VpnService<E extends VpnProfile> implements Serializable {
     private synchronized void onConnected() throws IOException {
         if (DBG) Log.d(TAG, "onConnected()");
 
-        mDaemonHelper.closeSockets();
+        mDaemons.closeSockets();
         saveOriginalDns();
         saveAndSetDomainSuffices();
 
@@ -341,15 +328,20 @@ abstract class VpnService<E extends VpnProfile> implements Serializable {
             public void run() {
                 Log.i(TAG, "VPN connectivity monitor running");
                 try {
-                    for (;;) {
+                    for (int i = 10; ; i--) {
+                        long now = System.currentTimeMillis();
+
+                        boolean heavyCheck = i == 0;
                         synchronized (VpnService.this) {
-                            if ((mState != VpnState.CONNECTED)
-                                || !checkConnectivity()) {
-                                break;
+                            if (mState != VpnState.CONNECTED) break;
+                            mNotification.update(now);
+
+                            if (heavyCheck) {
+                                i = 10;
+                                if (checkConnectivity()) checkDns();
                             }
-                            mNotification.update();
-                            checkDns();
-                            VpnService.this.wait(1000); // 1 second
+                            long t = 1000L - System.currentTimeMillis() + now;
+                            if (t > 100L) VpnService.this.wait(t);
                         }
                     }
                 } catch (InterruptedException e) {
@@ -378,7 +370,7 @@ abstract class VpnService<E extends VpnProfile> implements Serializable {
 
     // returns false if vpn connectivity is broken
     private boolean checkConnectivity() {
-        if (mDaemonHelper.anyDaemonStopped() || isLocalIpChanged()) {
+        if (mDaemons.anyDaemonStopped() || isLocalIpChanged()) {
             onError(new IOException("Connectivity lost"));
             return false;
         } else {
@@ -421,60 +413,17 @@ abstract class VpnService<E extends VpnProfile> implements Serializable {
     }
 
     private class DaemonHelper implements Serializable {
-        private List<DaemonProxy> mDaemonList =
-                new ArrayList<DaemonProxy>();
-
-        synchronized DaemonProxy startDaemon(String daemonName)
-                throws IOException {
-            DaemonProxy daemon = new DaemonProxy(daemonName);
-            mDaemonList.add(daemon);
-            daemon.start();
-            return daemon;
-        }
-
-        synchronized void stopAll() {
-            for (DaemonProxy s : mDaemonList) s.stop();
-        }
-
-        synchronized void closeSockets() {
-            for (DaemonProxy s : mDaemonList) s.closeControlSocket();
-        }
-
-        synchronized boolean anyDaemonStopped() {
-            for (DaemonProxy s : mDaemonList) {
-                if (s.isStopped()) {
-                    Log.w(TAG, "    VPN daemon gone: " + s.getName());
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        private int getResultFromSocket(DaemonProxy s) {
-            try {
-                return s.getResultFromSocket();
-            } catch (IOException e) {
-                return -1;
-            }
-        }
-
-        synchronized int getSocketError() {
-            for (DaemonProxy s : mDaemonList) {
-                int errCode = getResultFromSocket(s);
-                if (errCode != 0) return errCode;
-            }
-            return 0;
-        }
     }
 
     // Helper class for showing, updating notification.
     private class NotificationHelper {
-        void update() {
+        void update(long now) {
             String title = getNotificationTitle(true);
             Notification n = new Notification(R.drawable.vpn_connected, title,
                     mStartTime);
             n.setLatestEventInfo(mContext, title,
-                    getNotificationMessage(true), prepareNotificationIntent());
+                    getConnectedNotificationMessage(now),
+                    prepareNotificationIntent());
             n.flags |= Notification.FLAG_NO_CLEAR;
             n.flags |= Notification.FLAG_ONGOING_EVENT;
             enableNotification(n);
@@ -485,7 +434,8 @@ abstract class VpnService<E extends VpnProfile> implements Serializable {
             Notification n = new Notification(R.drawable.vpn_disconnected,
                     title, System.currentTimeMillis());
             n.setLatestEventInfo(mContext, title,
-                    getNotificationMessage(false), prepareNotificationIntent());
+                    getDisconnectedNotificationMessage(),
+                    prepareNotificationIntent());
             n.flags |= Notification.FLAG_AUTO_CANCEL;
             disableNotification();
             enableNotification(n);
@@ -515,8 +465,8 @@ abstract class VpnService<E extends VpnProfile> implements Serializable {
             return String.format(formatString, mProfile.getName());
         }
 
-        private String getFormattedTime(long duration) {
-            long hours = duration / 3600;
+        private String getFormattedTime(int duration) {
+            int hours = duration / 3600;
             StringBuilder sb = new StringBuilder();
             if (hours > 0) sb.append(hours).append(':');
             sb.append(String.format("%02d:%02d", (duration % 3600 / 60),
@@ -524,14 +474,13 @@ abstract class VpnService<E extends VpnProfile> implements Serializable {
             return sb.toString();
         }
 
-        private String getNotificationMessage(boolean connected) {
-            if (connected) {
-                long time = (System.currentTimeMillis() - mStartTime) / 1000;
-                return getFormattedTime(time);
-            } else {
-                return mContext.getString(
-                        R.string.vpn_notification_hint_disconnected);
-            }
+        private String getConnectedNotificationMessage(long now) {
+            return getFormattedTime((int) (now - mStartTime) / 1000);
+        }
+
+        private String getDisconnectedNotificationMessage() {
+            return mContext.getString(
+                    R.string.vpn_notification_hint_disconnected);
         }
     }
 }

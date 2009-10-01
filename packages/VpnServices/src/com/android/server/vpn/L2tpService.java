@@ -24,20 +24,12 @@ import java.io.IOException;
  * The service that manages the L2TP VPN connection.
  */
 class L2tpService extends VpnService<L2tpProfile> {
-    static final String L2TP_DAEMON = "l2tp";
-    static final String L2TP_PORT = "1701";
-
     @Override
     protected void connect(String serverIp, String username, String password)
             throws IOException {
         L2tpProfile p = getProfile();
-        MtpdHelper.sendCommand(this, L2TP_DAEMON, serverIp, L2TP_PORT,
+        getDaemons().startL2tp(serverIp,
                 (p.isSecretEnabled() ? p.getSecretString() : null),
                 username, password);
-    }
-
-    @Override
-    protected void stopPreviouslyRunDaemons() {
-        stopDaemon(MtpdHelper.MTPD);
     }
 }
