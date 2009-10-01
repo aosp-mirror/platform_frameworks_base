@@ -672,6 +672,23 @@ static void SC_drawLine(float x1, float y1, float z1,
     glDrawArrays(GL_LINES, 0, 2);
 }
 
+static void SC_drawPoint(float x, float y, float z)
+{
+    GET_TLS();
+    rsc->setupCheck();
+
+    float vtx[] = { x, y, z };
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glEnableClientState(GL_VERTEX_ARRAY);
+    glVertexPointer(3, GL_FLOAT, 0, vtx);
+
+    glDisableClientState(GL_NORMAL_ARRAY);
+    glDisableClientState(GL_COLOR_ARRAY);
+
+    glDrawArrays(GL_POINTS, 0, 1);
+}
+
 static void SC_drawQuadTexCoords(float x1, float y1, float z1,
                                  float u1, float v1,
                                  float x2, float y2, float z2,
@@ -1131,6 +1148,8 @@ ScriptCState::SymbolTable_t ScriptCState::gSyms[] = {
         "void", "(int)" },
     { "bindProgramFragmentStore", (void *)&SC_bindProgramFragmentStore,
         "void", "(int)" },
+    { "bindProgramStore", (void *)&SC_bindProgramFragmentStore,
+        "void", "(int)" },
     { "bindProgramVertex", (void *)&SC_bindProgramVertex,
         "void", "(int)" },
     { "bindSampler", (void *)&SC_bindSampler,
@@ -1155,6 +1174,8 @@ ScriptCState::SymbolTable_t ScriptCState::gSyms[] = {
         "void", "(float x1, float y1, float z1, float u1, float v1, float x2, float y2, float z2, float u2, float v2, float x3, float y3, float z3, float u3, float v3, float x4, float y4, float z4, float u4, float v4)" },
     { "drawLine", (void *)&SC_drawLine,
         "void", "(float x1, float y1, float z1, float x2, float y2, float z2)" },
+    { "drawPoint", (void *)&SC_drawPoint,
+        "void", "(float x1, float y1, float z1)" },
     { "drawSimpleMesh", (void *)&SC_drawSimpleMesh,
         "void", "(int ism)" },
     { "drawSimpleMeshRange", (void *)&SC_drawSimpleMeshRange,

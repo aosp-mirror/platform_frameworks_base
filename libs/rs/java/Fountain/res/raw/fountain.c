@@ -1,8 +1,5 @@
 // Fountain test script
 #pragma version(1)
-#pragma stateVertex(default)
-#pragma stateFragment(default)
-#pragma stateFragmentStore(default)
 
 int newPart = 0;
 
