@@ -39,10 +39,8 @@ import android.view.MotionEvent;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
-import android.webkit.ViewManager.ChildView;
 import android.widget.AbsoluteLayout;
 import android.widget.FrameLayout;
-import android.widget.ImageView;
 import android.widget.MediaController;
 import android.widget.VideoView;
 
@@ -56,20 +54,22 @@ import java.util.Map;
  */
 class HTML5VideoViewProxy extends Handler
                           implements MediaPlayer.OnPreparedListener,
-                          MediaPlayer.OnCompletionListener {
+                          MediaPlayer.OnCompletionListener,
+                          MediaPlayer.OnErrorListener {
     // Logging tag.
     private static final String LOGTAG = "HTML5VideoViewProxy";
 
     // Message Ids for WebCore thread -> UI thread communication.
-    private static final int INIT              = 100;
-    private static final int PLAY              = 101;
-    private static final int SET_POSTER        = 102;
-    private static final int SEEK              = 103;
-    private static final int PAUSE             = 104;
+    private static final int PLAY                = 100;
+    private static final int SEEK                = 101;
+    private static final int PAUSE               = 102;
+    private static final int ERROR               = 103;
+    private static final int LOAD_DEFAULT_POSTER = 104;
 
     // Message Ids to be handled on the WebCore thread
     private static final int PREPARED          = 200;
     private static final int ENDED             = 201;
+    private static final int POSTER_FETCHED    = 202;
 
     // The C++ MediaPlayerPrivateAndroid object.
     int mNativePointer;
@@ -77,10 +77,9 @@ class HTML5VideoViewProxy extends Handler
     private Handler mWebCoreHandler;
     // The WebView instance that created this view.
     private WebView mWebView;
-    // The ChildView instance used by the ViewManager.
-    private ChildView mChildView;
     // The poster image to be shown when the video is not playing.
-    private ImageView mPosterView;
+    // This ref prevents the bitmap from being GC'ed.
+    private Bitmap mPoster;
     // The poster downloader.
     private PosterDownloader mPosterDownloader;
     // The seek position.
@@ -138,6 +137,7 @@ class HTML5VideoViewProxy extends Handler
             mVideoView.setVideoURI(Uri.parse(url));
             mVideoView.setOnCompletionListener(proxy);
             mVideoView.setOnPreparedListener(proxy);
+            mVideoView.setOnErrorListener(proxy);
             mVideoView.seekTo(time);
             mLayout.addView(mVideoView, layoutParams);
             mProgressView = client.getVideoLoadingProgressView();
@@ -163,11 +163,12 @@ class HTML5VideoViewProxy extends Handler
         }
 
         public static void onPrepared() {
-            if (mProgressView != null) {
-                mProgressView.setVisibility(View.GONE);
-                mLayout.removeView(mProgressView);
-                mProgressView = null;
+            if (mProgressView == null || mLayout == null) {
+                return;
             }
+            mProgressView.setVisibility(View.GONE);
+            mLayout.removeView(mProgressView);
+            mProgressView = null;
         }
     }
 
@@ -189,6 +190,12 @@ class HTML5VideoViewProxy extends Handler
         playbackEnded();
     }
 
+    // MediaPlayer.OnErrorListener
+    public boolean onError(MediaPlayer mp, int what, int extra) {
+        sendMessage(obtainMessage(ERROR));
+        return false;
+    }
+
     public void playbackEnded() {
         Message msg = Message.obtain(mWebCoreHandler, ENDED);
         mWebCoreHandler.sendMessage(msg);
@@ -199,29 +206,12 @@ class HTML5VideoViewProxy extends Handler
     public void handleMessage(Message msg) {
         // This executes on the UI thread.
         switch (msg.what) {
-            case INIT: {
-                mPosterView = new ImageView(mWebView.getContext());
-                WebChromeClient client = mWebView.getWebChromeClient();
-                if (client != null) {
-                    Bitmap poster = client.getDefaultVideoPoster();
-                    if (poster != null) {
-                        mPosterView.setImageBitmap(poster);
-                    }
-                }
-                mChildView.mView = mPosterView;
-                break;
-            }
             case PLAY: {
                 String url = (String) msg.obj;
                 WebChromeClient client = mWebView.getWebChromeClient();
                 if (client != null) {
                     VideoPlayer.play(url, mSeekPosition, this, client);
                 }
-                break;
-            }
-            case SET_POSTER: {
-                Bitmap poster = (Bitmap) msg.obj;
-                mPosterView.setImageBitmap(poster);
                 break;
             }
             case SEEK: {
@@ -232,6 +222,20 @@ class HTML5VideoViewProxy extends Handler
             }
             case PAUSE: {
                 VideoPlayer.pause(this);
+                break;
+            }
+            case ERROR: {
+                WebChromeClient client = mWebView.getWebChromeClient();
+                if (client != null) {
+                    client.onHideCustomView();
+                }
+                break;
+            }
+            case LOAD_DEFAULT_POSTER: {
+                WebChromeClient client = mWebView.getWebChromeClient();
+                if (client != null) {
+                    doSetPoster(client.getDefaultVideoPoster());
+                }
                 break;
             }
         }
@@ -302,9 +306,7 @@ class HTML5VideoViewProxy extends Handler
                 if (mPosterBytes.size() > 0) {
                     Bitmap poster = BitmapFactory.decodeByteArray(
                             mPosterBytes.toByteArray(), 0, mPosterBytes.size());
-                    if (poster != null) {
-                        mProxy.doSetPoster(poster);
-                    }
+                    mProxy.doSetPoster(poster);
                 }
                 cleanup();
             } else if (mStatusCode >= 300 && mStatusCode < 400) {
@@ -401,6 +403,10 @@ class HTML5VideoViewProxy extends Handler
                     case ENDED:
                         nativeOnEnded(mNativePointer);
                         break;
+                    case POSTER_FETCHED:
+                        Bitmap poster = (Bitmap) msg.obj;
+                        nativeOnPosterFetched(poster, mNativePointer);
+                        break;
                 }
             }
         };
@@ -410,10 +416,11 @@ class HTML5VideoViewProxy extends Handler
         if (poster == null) {
             return;
         }
-        // Send the bitmap over to the UI thread.
-        Message message = obtainMessage(SET_POSTER);
-        message.obj = poster;
-        sendMessage(message);
+        // Save a ref to the bitmap and send it over to the WebCore thread.
+        mPoster = poster;
+        Message msg = Message.obtain(mWebCoreHandler, POSTER_FETCHED);
+        msg.obj = poster;
+        mWebCoreHandler.sendMessage(msg);
     }
 
     public Context getContext() {
@@ -453,38 +460,15 @@ class HTML5VideoViewProxy extends Handler
     }
 
     /**
-     * Create the child view that will cary the poster.
+     * Tear down this proxy object.
      */
-    public void createView() {
-        mChildView = mWebView.mViewManager.createView();
-        sendMessage(obtainMessage(INIT));
-    }
-
-    /**
-     * Attach the poster view.
-     * @param x, y are the screen coordinates where the poster should be hung.
-     * @param width, height denote the size of the poster.
-     */
-    public void attachView(int x, int y, int width, int height) {
-        if (mChildView == null) {
-            return;
-        }
-        mChildView.attachView(x, y, width, height);
-    }
-
-    /**
-     * Remove the child view and, thus, the poster.
-     */
-    public void removeView() {
-        if (mChildView == null) {
-            return;
-        }
-        mChildView.removeView();
+    public void teardown() {
         // This is called by the C++ MediaPlayerPrivate dtor.
         // Cancel any active poster download.
         if (mPosterDownloader != null) {
             mPosterDownloader.cancelAndReleaseQueue();
         }
+        mNativePointer = 0;
     }
 
     /**
@@ -493,6 +477,8 @@ class HTML5VideoViewProxy extends Handler
      */
     public void loadPoster(String url) {
         if (url == null) {
+            Message message = obtainMessage(LOAD_DEFAULT_POSTER);
+            sendMessage(message);
             return;
         }
         // Cancel any active poster download.
@@ -516,4 +502,5 @@ class HTML5VideoViewProxy extends Handler
 
     private native void nativeOnPrepared(int duration, int width, int height, int nativePointer);
     private native void nativeOnEnded(int nativePointer);
+    private native void nativeOnPosterFetched(Bitmap poster, int nativePointer);
 }
