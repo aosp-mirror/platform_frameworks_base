@@ -123,7 +123,7 @@ int init_gl_surface(void)
     EGLConfig myConfig = {0};
     EGLint attrib[] =
     {
-            EGL_SURFACE_TYPE, EGL_PBUFFER_BIT|EGL_WINDOW_BIT,
+            EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
             EGL_DEPTH_SIZE,     16,
             EGL_NONE
     };
