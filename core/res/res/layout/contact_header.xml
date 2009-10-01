@@ -22,12 +22,12 @@
     android:background="@drawable/title_bar_medium"
     android:paddingRight="5dip">
 
-    <android.widget.FasttrackBadgeWidget android:id="@+id/photo"
+    <android.widget.QuickContactBadge android:id="@+id/photo"
         android:layout_alignParentLeft="true"
         android:layout_gravity="center_vertical"
         android:layout_marginRight="10dip"
         android:layout_marginLeft="10dip"
-        style="@*android:style/Widget.FasttrackBadgeWidget.WindowSmall" />
+        style="@*android:style/Widget.QuickContactBadge.WindowSmall" />
     />
 
     <LinearLayout
