@@ -2133,12 +2133,12 @@ public final class ContactsContract {
     }
 
     /**
-     * Helper methods to display FastTrack dialogs that allow users to pivot on
+     * Helper methods to display QuickContact dialogs that allow users to pivot on
      * a specific {@link Contacts} entry.
      *
      * @hide
      */
-    public static final class FastTrack {
+    public static final class QuickContact {
         /**
          * Action used to trigger person pivot dialog.
          * @hide
@@ -2166,19 +2166,19 @@ public final class ContactsContract {
         public static final String EXTRA_EXCLUDE_MIMES = "exclude_mimes";
 
         /**
-         * Small FastTrack mode, usually presented with minimal actions.
+         * Small QuickContact mode, usually presented with minimal actions.
          */
         public static final int MODE_SMALL = 1;
 
         /**
-         * Medium FastTrack mode, includes actions and light summary describing
+         * Medium QuickContact mode, includes actions and light summary describing
          * the {@link Contacts} entry being shown. This may include social
          * status and presence details.
          */
         public static final int MODE_MEDIUM = 2;
 
         /**
-         * Large FastTrack mode, includes actions and larger, card-like summary
+         * Large QuickContact mode, includes actions and larger, card-like summary
          * of the {@link Contacts} entry being shown. This may include detailed
          * information, such as a photo.
          */
@@ -2207,7 +2207,7 @@ public final class ContactsContract {
          *            already viewing the contact details card, this can be used
          *            to omit the details entry from the dialog.
          */
-        public static void showFastTrack(Context context, View target, Uri lookupUri, int mode,
+        public static void showQuickContact(Context context, View target, Uri lookupUri, int mode,
                 String[] excludeMimes) {
             // Find location and bounds of target view
             final int[] location = new int[2];
@@ -2220,7 +2220,7 @@ public final class ContactsContract {
             rect.bottom = rect.top + target.getHeight();
 
             // Trigger with obtained rectangle
-            showFastTrack(context, rect, lookupUri, mode, excludeMimes);
+            showQuickContact(context, rect, lookupUri, mode, excludeMimes);
         }
 
         /**
@@ -2246,7 +2246,7 @@ public final class ContactsContract {
          *            already viewing the contact details card, this can be used
          *            to omit the details entry from the dialog.
          */
-        public static void showFastTrack(Context context, Rect target, Uri lookupUri, int mode,
+        public static void showQuickContact(Context context, Rect target, Uri lookupUri, int mode,
                 String[] excludeMimes) {
             // Launch pivot dialog through intent for now
             final Intent intent = new Intent(ACTION_FAST_TRACK);
