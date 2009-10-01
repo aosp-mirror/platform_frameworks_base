@@ -79,7 +79,7 @@ import java.util.Map;
 
 class BackupManagerService extends IBackupManager.Stub {
     private static final String TAG = "BackupManagerService";
-    private static final boolean DEBUG = true;
+    private static final boolean DEBUG = false;
 
     // How often we perform a backup pass.  Privileged external callers can
     // trigger an immediate pass.
@@ -205,11 +205,9 @@ class BackupManagerService extends IBackupManager.Stub {
     File mDataDir;
     File mJournalDir;
     File mJournal;
-    RandomAccessFile mJournalStream;
 
     // Keep a log of all the apps we've ever backed up
     private File mEverStored;
-    private RandomAccessFile mEverStoredStream;
     HashSet<String> mEverStoredApps = new HashSet<String>();
 
     // Persistently track the need to do a full init
@@ -257,7 +255,7 @@ class BackupManagerService extends IBackupManager.Stub {
         // Set up the backup-request journaling
         mJournalDir = new File(mBaseStateDir, "pending");
         mJournalDir.mkdirs();   // creates mBaseStateDir along the way
-        makeJournalLocked();    // okay because no other threads are running yet
+        mJournal = null;        // will be created on first use
 
         // Set up the various sorts of package tracking we do
         initPackageTracking();
@@ -369,54 +367,49 @@ class BackupManagerService extends IBackupManager.Stub {
         // this log, we sanity-check its contents here and reconstruct it.
         mEverStored = new File(mBaseStateDir, "processed");
         File tempProcessedFile = new File(mBaseStateDir, "processed.new");
-        try {
-            // If there are previous contents, parse them out then start a new
-            // file to continue the recordkeeping.
-            if (mEverStored.exists()) {
-                RandomAccessFile temp = new RandomAccessFile(tempProcessedFile, "rw");
-                mEverStoredStream = new RandomAccessFile(mEverStored, "r");
-
-                // parse its existing contents
-                mEverStoredStream.seek(0);
-                temp.seek(0);
-                try {
-                    while (true) {
-                        PackageInfo info;
-                        String pkg = mEverStoredStream.readUTF();
-                        try {
-                            info = mPackageManager.getPackageInfo(pkg, 0);
-                            mEverStoredApps.add(pkg);
-                            temp.writeUTF(pkg);
-                            if (DEBUG) Log.v(TAG, "   + " + pkg);
-                        } catch (NameNotFoundException e) {
-                            // nope, this package was uninstalled; don't include it
-                            if (DEBUG) Log.v(TAG, "   - " + pkg);
-                        }
-                    }
-                } catch (EOFException e) {
-                    // now we're at EOF
-                }
-
-                // Once we've rewritten the backup history log, atomically replace the
-                // old one with the new one then reopen the file for continuing use.
-                temp.close();
-                mEverStoredStream.close();
-                tempProcessedFile.renameTo(mEverStored);
-            }
-            // This will create the file if it doesn't exist
-            mEverStoredStream = new RandomAccessFile(mEverStored, "rwd");
-            mEverStoredStream.seek(mEverStoredStream.length());
-        } catch (IOException e) {
-            Log.e(TAG, "Unable to open known-stored file!");
-            mEverStoredStream = null;
-        }
 
         // If we were in the middle of removing something from the ever-backed-up
         // file, there might be a transient "processed.new" file still present.
-        // We've reconstructed a coherent state at this point though, so we can
-        // safely discard that file now.
+        // Ignore it -- we'll validate "processed" against the current package set.
         if (tempProcessedFile.exists()) {
             tempProcessedFile.delete();
+        }
+
+        // If there are previous contents, parse them out then start a new
+        // file to continue the recordkeeping.
+        if (mEverStored.exists()) {
+            RandomAccessFile temp = null;
+            RandomAccessFile in = null;
+
+            try {
+                temp = new RandomAccessFile(tempProcessedFile, "rws");
+                in = new RandomAccessFile(mEverStored, "r");
+
+                while (true) {
+                    PackageInfo info;
+                    String pkg = in.readUTF();
+                    try {
+                        info = mPackageManager.getPackageInfo(pkg, 0);
+                        mEverStoredApps.add(pkg);
+                        temp.writeUTF(pkg);
+                        if (DEBUG) Log.v(TAG, "   + " + pkg);
+                    } catch (NameNotFoundException e) {
+                        // nope, this package was uninstalled; don't include it
+                        if (DEBUG) Log.v(TAG, "   - " + pkg);
+                    }
+                }
+            } catch (EOFException e) {
+                // Once we've rewritten the backup history log, atomically replace the
+                // old one with the new one then reopen the file for continuing use.
+                if (!tempProcessedFile.renameTo(mEverStored)) {
+                    Log.e(TAG, "Error renaming " + tempProcessedFile + " to " + mEverStored);
+                }
+            } catch (IOException e) {
+                Log.e(TAG, "Error in processed file", e);
+            } finally {
+                try { if (temp != null) temp.close(); } catch (IOException e) {}
+                try { if (in != null) in.close(); } catch (IOException e) {}
+            }
         }
 
         // Register for broadcasts about package install, etc., so we can
@@ -428,41 +421,29 @@ class BackupManagerService extends IBackupManager.Stub {
         mContext.registerReceiver(mBroadcastReceiver, filter);
     }
 
-    private void makeJournalLocked() {
-        try {
-            mJournal = File.createTempFile("journal", null, mJournalDir);
-            mJournalStream = new RandomAccessFile(mJournal, "rwd");
-        } catch (IOException e) {
-            Log.e(TAG, "Unable to write backup journals");
-            mJournal = null;
-            mJournalStream = null;
-        }
-    }
-
     private void parseLeftoverJournals() {
-        if (mJournal != null) {
-            File[] allJournals = mJournalDir.listFiles();
-            for (File f : allJournals) {
-                if (f.compareTo(mJournal) != 0) {
-                    // This isn't the current journal, so it must be a leftover.  Read
-                    // out the package names mentioned there and schedule them for
-                    // backup.
-                    try {
-                        Log.i(TAG, "Found stale backup journal, scheduling:");
-                        RandomAccessFile in = new RandomAccessFile(f, "r");
-                        while (true) {
-                            String packageName = in.readUTF();
-                            Log.i(TAG, "    + " + packageName);
-                            dataChanged(packageName);
-                        }
-                    } catch (EOFException e) {
-                        // no more data; we're done
-                    } catch (Exception e) {
-                        // can't read it or other error; just skip it
-                    } finally {
-                        // close/delete the file
-                        f.delete();
+        for (File f : mJournalDir.listFiles()) {
+            if (mJournal == null || f.compareTo(mJournal) != 0) {
+                // This isn't the current journal, so it must be a leftover.  Read
+                // out the package names mentioned there and schedule them for
+                // backup.
+                RandomAccessFile in = null;
+                try {
+                    Log.i(TAG, "Found stale backup journal, scheduling:");
+                    in = new RandomAccessFile(f, "r");
+                    while (true) {
+                        String packageName = in.readUTF();
+                        Log.i(TAG, "    + " + packageName);
+                        dataChanged(packageName);
                     }
+                } catch (EOFException e) {
+                    // no more data; we're done
+                } catch (Exception e) {
+                    Log.e(TAG, "Can't read " + f, e);
+                } finally {
+                    // close/delete the file
+                    try { if (in != null) in.close(); } catch (IOException e) {}
+                    f.delete();
                 }
             }
         }
@@ -505,19 +486,8 @@ class BackupManagerService extends IBackupManager.Stub {
     void resetBackupState(File stateFileDir) {
         synchronized (mQueueLock) {
             // Wipe the "what we've ever backed up" tracking
-            try {
-                // close the ever-stored journal...
-                if (mEverStoredStream != null) {
-                    mEverStoredStream.close();
-                }
-                // ... so we can delete it and start over
-                mEverStored.delete();
-                mEverStoredStream = new RandomAccessFile(mEverStored, "rwd");
-            } catch (IOException e) {
-                Log.e(TAG, "Unable to open known-stored file!");
-                mEverStoredStream = null;
-            }
             mEverStoredApps.clear();
+            mEverStored.delete();
 
             // Remove all the state files
             for (File sf : stateFileDir.listFiles()) {
@@ -533,11 +503,7 @@ class BackupManagerService extends IBackupManager.Stub {
                 int uid = mBackupParticipants.keyAt(i);
                 HashSet<ApplicationInfo> participants = mBackupParticipants.valueAt(i);
                 for (ApplicationInfo app: participants) {
-                    try {
-                        dataChanged(app.packageName);
-                    } catch (RemoteException e) {
-                        // can't happen; we're in the same process
-                    }
+                    dataChanged(app.packageName);
                 }
             }
         }
@@ -652,7 +618,6 @@ class BackupManagerService extends IBackupManager.Stub {
 
                 // snapshot the pending-backup set and work on that
                 ArrayList<BackupRequest> queue = new ArrayList<BackupRequest>();
-                File oldJournal = mJournal;
                 synchronized (mQueueLock) {
                     // Do we have any work to do?
                     if (mPendingBackups.size() > 0) {
@@ -663,14 +628,8 @@ class BackupManagerService extends IBackupManager.Stub {
                         mPendingBackups.clear();
 
                         // Start a new backup-queue journal file too
-                        if (mJournalStream != null) {
-                            try {
-                                mJournalStream.close();
-                            } catch (IOException e) {
-                                // don't need to do anything
-                            }
-                            makeJournalLocked();
-                        }
+                        File oldJournal = mJournal;
+                        mJournal = null;
 
                         // At this point, we have started a new journal file, and the old
                         // file identity is being passed to the backup processing thread.
@@ -763,11 +722,7 @@ class BackupManagerService extends IBackupManager.Stub {
                 if (!mEverStoredApps.contains(pkg.packageName)) {
                     if (DEBUG) Log.i(TAG, "New app " + pkg.packageName
                             + " never backed up; scheduling");
-                    try {
-                        dataChanged(pkg.packageName);
-                    } catch (RemoteException e) {
-                        // can't happen; it's a local method call
-                    }
+                    dataChanged(pkg.packageName);
                 }
             }
         }
@@ -871,58 +826,57 @@ class BackupManagerService extends IBackupManager.Stub {
     // Called from the backup thread: record that the given app has been successfully
     // backed up at least once
     void logBackupComplete(String packageName) {
-        if (mEverStoredStream != null && !packageName.equals(PACKAGE_MANAGER_SENTINEL)) {
-            synchronized (mEverStoredApps) {
-                if (mEverStoredApps.add(packageName)) {
-                    try {
-                        mEverStoredStream.writeUTF(packageName);
-                    } catch (IOException e) {
-                        Log.e(TAG, "Unable to log backup of " + packageName + ", ceasing log");
-                        try {
-                            mEverStoredStream.close();
-                        } catch (IOException ioe) {
-                            // we're dropping it; no need to handle an exception on close here
-                        }
-                        mEverStoredStream = null;
-                    }
-                }
+        if (packageName.equals(PACKAGE_MANAGER_SENTINEL)) return;
+
+        synchronized (mEverStoredApps) {
+            if (!mEverStoredApps.add(packageName)) return;
+
+            RandomAccessFile out = null;
+            try {
+                out = new RandomAccessFile(mEverStored, "rws");
+                out.seek(out.length());
+                out.writeUTF(packageName);
+            } catch (IOException e) {
+                Log.e(TAG, "Can't log backup of " + packageName + " to " + mEverStored);
+            } finally {
+                try { if (out != null) out.close(); } catch (IOException e) {}
             }
         }
     }
 
     // Remove our awareness of having ever backed up the given package
     void removeEverBackedUp(String packageName) {
-        if (DEBUG) Log.v(TAG, "Removing backed-up knowledge of " + packageName
-                + ", new set:");
+        if (DEBUG) Log.v(TAG, "Removing backed-up knowledge of " + packageName + ", new set:");
 
-        if (mEverStoredStream != null) {
-            synchronized (mEverStoredApps) {
-                // Rewrite the file and rename to overwrite.  If we reboot in the middle,
-                // we'll recognize on initialization time that the package no longer
-                // exists and fix it up then.
-                File tempKnownFile = new File(mBaseStateDir, "processed.new");
-                try {
-                    mEverStoredStream.close();
-                    RandomAccessFile known = new RandomAccessFile(tempKnownFile, "rw");
-                    mEverStoredApps.remove(packageName);
-                    for (String s : mEverStoredApps) {
-                        known.writeUTF(s);
-                        if (DEBUG) Log.v(TAG, "    " + s);
-                    }
-                    known.close();
-                    tempKnownFile.renameTo(mEverStored);
-                    mEverStoredStream = new RandomAccessFile(mEverStored, "rwd");
-                } catch (IOException e) {
-                    // Bad: we couldn't create the new copy.  For safety's sake we
-                    // abandon the whole process and remove all what's-backed-up
-                    // state entirely, meaning we'll force a backup pass for every
-                    // participant on the next boot or [re]install.
-                    Log.w(TAG, "Error rewriting backed-up set; halting log");
-                    mEverStoredStream = null;
-                    mEverStoredApps.clear();
-                    tempKnownFile.delete();
-                    mEverStored.delete();
+        synchronized (mEverStoredApps) {
+            // Rewrite the file and rename to overwrite.  If we reboot in the middle,
+            // we'll recognize on initialization time that the package no longer
+            // exists and fix it up then.
+            File tempKnownFile = new File(mBaseStateDir, "processed.new");
+            RandomAccessFile known = null;
+            try {
+                known = new RandomAccessFile(tempKnownFile, "rws");
+                mEverStoredApps.remove(packageName);
+                for (String s : mEverStoredApps) {
+                    known.writeUTF(s);
+                    if (DEBUG) Log.v(TAG, "    " + s);
                 }
+                known.close();
+                known = null;
+                if (!tempKnownFile.renameTo(mEverStored)) {
+                    throw new IOException("Can't rename " + tempKnownFile + " to " + mEverStored);
+                }
+            } catch (IOException e) {
+                // Bad: we couldn't create the new copy.  For safety's sake we
+                // abandon the whole process and remove all what's-backed-up
+                // state entirely, meaning we'll force a backup pass for every
+                // participant on the next boot or [re]install.
+                Log.w(TAG, "Error rewriting " + mEverStored, e);
+                mEverStoredApps.clear();
+                tempKnownFile.delete();
+                mEverStored.delete();
+            } finally {
+                try { if (known != null) known.close(); } catch (IOException e) {}
             }
         }
     }
@@ -1018,8 +972,7 @@ class BackupManagerService extends IBackupManager.Stub {
     }
 
     class ClearDataObserver extends IPackageDataObserver.Stub {
-        public void onRemoveCompleted(String packageName, boolean succeeded)
-                throws RemoteException {
+        public void onRemoveCompleted(String packageName, boolean succeeded) {
             synchronized(mClearDataLock) {
                 mClearingData = false;
                 mClearDataLock.notifyAll();
@@ -1061,9 +1014,11 @@ class BackupManagerService extends IBackupManager.Stub {
             try {
                 EventLog.writeEvent(BACKUP_START_EVENT, mTransport.transportDirName());
 
-                // If we haven't stored anything yet, we need to do an init operation.
-                if (status == BackupConstants.TRANSPORT_OK && mEverStoredApps.size() == 0) {
-                    Log.i(TAG, "Initializing (wiping) backup transport storage");
+                // If we haven't stored package manager metadata yet, we must init the transport.
+                File pmState = new File(mStateDir, PACKAGE_MANAGER_SENTINEL);
+                if (status == BackupConstants.TRANSPORT_OK && pmState.length() <= 0) {
+                    Log.i(TAG, "Initializing (wiping) backup state and transport storage");
+                    resetBackupState(mStateDir);  // Just to make sure.
                     status = mTransport.initializeDevice();
                     if (status == BackupConstants.TRANSPORT_OK) {
                         EventLog.writeEvent(BACKUP_INITIALIZE_EVENT);
@@ -1107,10 +1062,9 @@ class BackupManagerService extends IBackupManager.Stub {
                 if (status == BackupConstants.TRANSPORT_NOT_INITIALIZED) {
                     // The backend reports that our dataset has been wiped.  We need to
                     // reset all of our bookkeeping and instead run a new backup pass for
-                    // everything.
+                    // everything.  This must come after mBackupOrRestoreInProgress is cleared.
                     EventLog.writeEvent(BACKUP_RESET_EVENT, mTransport.transportDirName());
                     resetBackupState(mStateDir);
-                    backupNow();
                 }
             } catch (Exception e) {
                 Log.e(TAG, "Error in backup thread", e);
@@ -1123,11 +1077,7 @@ class BackupManagerService extends IBackupManager.Stub {
                 if (status != BackupConstants.TRANSPORT_OK) {
                     Log.w(TAG, "Backup pass unsuccessful, restaging");
                     for (BackupRequest req : mQueue) {
-                        try {
-                            dataChanged(req.appInfo.packageName);
-                        } catch (RemoteException e) {
-                            // can't happen; it's a local call
-                        }
+                        dataChanged(req.appInfo.packageName);
                     }
 
                     // We also want to reset the backup schedule based on whatever
@@ -1141,7 +1091,7 @@ class BackupManagerService extends IBackupManager.Stub {
                 // this pass's journal any more; or it failed, in which case we just
                 // re-enqueued all of these packages in the current active journal.
                 // Either way, we no longer need this pass's journal.
-                if (!mJournal.delete()) {
+                if (mJournal != null && !mJournal.delete()) {
                     Log.e(TAG, "Unable to remove backup journal file " + mJournal);
                 }
 
@@ -1150,6 +1100,12 @@ class BackupManagerService extends IBackupManager.Stub {
                 synchronized (mQueueLock) {
                     mBackupOrRestoreInProgress = false;
                 }
+
+                if (status == BackupConstants.TRANSPORT_NOT_INITIALIZED) {
+                    // This must come after mBackupOrRestoreInProgress is cleared.
+                    backupNow();
+                }
+
                 mWakelock.release();
             }
         }
@@ -1692,13 +1648,13 @@ class BackupManagerService extends IBackupManager.Stub {
                 stateFile.delete();
 
                 // Tell the transport to remove all the persistent storage for the app
-                // STOPSHIP TODO - need to handle failures
+                // TODO - need to handle failures
                 mTransport.clearBackupData(mPackage);
             } catch (RemoteException e) {
                 // can't happen; the transport is local
             } finally {
                 try {
-                    // STOPSHIP TODO - need to handle failures
+                    // TODO - need to handle failures
                     mTransport.finishBackup();
                 } catch (RemoteException e) {
                     // can't happen; the transport is local
@@ -1782,7 +1738,7 @@ class BackupManagerService extends IBackupManager.Stub {
 
     // ----- IBackupManager binder interface -----
 
-    public void dataChanged(String packageName) throws RemoteException {
+    public void dataChanged(String packageName) {
         // Record that we need a backup pass for the caller.  Since multiple callers
         // may share a uid, we need to note all candidates within that uid and schedule
         // a backup pass for each of them.
@@ -1840,14 +1796,17 @@ class BackupManagerService extends IBackupManager.Stub {
     }
 
     private void writeToJournalLocked(String str) {
-        if (mJournalStream != null) {
-            try {
-                mJournalStream.writeUTF(str);
-            } catch (IOException e) {
-                Log.e(TAG, "Error writing to backup journal");
-                mJournalStream = null;
-                mJournal = null;
-            }
+        RandomAccessFile out = null;
+        try {
+            if (mJournal == null) mJournal = File.createTempFile("journal", null, mJournalDir);
+            out = new RandomAccessFile(mJournal, "rws");
+            out.seek(out.length());
+            out.writeUTF(str);
+        } catch (IOException e) {
+            Log.e(TAG, "Can't write " + str + " to backup journal", e);
+            mJournal = null;
+        } finally {
+            try { if (out != null) out.close(); } catch (IOException e) {}
         }
     }
 
@@ -1902,7 +1861,7 @@ class BackupManagerService extends IBackupManager.Stub {
 
     // Run a backup pass immediately for any applications that have declared
     // that they have pending updates.
-    public void backupNow() throws RemoteException {
+    public void backupNow() {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP, "backupNow");
 
         if (DEBUG) Log.v(TAG, "Scheduling immediate backup pass");
@@ -2210,8 +2169,16 @@ class BackupManagerService extends IBackupManager.Stub {
 
             pw.println("Available transports:");
             for (String t : listAllTransports()) {
-                String pad = (t.equals(mCurrentTransport)) ? "  * " : "    ";
-                pw.println(pad + t);
+                pw.println((t.equals(mCurrentTransport) ? "  * " : "    ") + t);
+                try {
+                    File dir = new File(mBaseStateDir, getTransport(t).transportDirName());
+                    for (File f : dir.listFiles()) {
+                        pw.println("       " + f.getName() + " - " + f.length() + " state bytes");
+                    }
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Error in transportDirName()", e);
+                    pw.println("        Error: " + e);
+                }
             }
 
             pw.println("Pending init: " + mPendingInits.size());

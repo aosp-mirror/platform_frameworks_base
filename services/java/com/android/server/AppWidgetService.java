@@ -816,7 +816,10 @@ class AppWidgetService extends IAppWidgetService.Stub
             temp.delete();
         }
 
-        writeStateToFileLocked(temp);
+        if (!writeStateToFileLocked(temp)) {
+            Log.w(TAG, "Failed to persist new settings");
+            return;
+        }
 
         //noinspection ResultOfMethodCallIgnored
         real.delete();
@@ -824,7 +827,7 @@ class AppWidgetService extends IAppWidgetService.Stub
         temp.renameTo(real);
     }
 
-    void writeStateToFileLocked(File file) {
+    boolean writeStateToFileLocked(File file) {
         FileOutputStream stream = null;
         int N;
 
@@ -877,6 +880,7 @@ class AppWidgetService extends IAppWidgetService.Stub
 
             out.endDocument();
             stream.close();
+            return true;
         } catch (IOException e) {
             try {
                 if (stream != null) {
@@ -889,6 +893,7 @@ class AppWidgetService extends IAppWidgetService.Stub
                 //noinspection ResultOfMethodCallIgnored
                 file.delete();
             }
+            return false;
         }
     }
 

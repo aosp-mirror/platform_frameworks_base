@@ -2863,17 +2863,31 @@ public class WebView extends AbsoluteLayout
                 invalidate();
                 if (mNeedToAdjustWebTextView) {
                     mNeedToAdjustWebTextView = false;
-                    mWebTextView.setTextSize(TypedValue.COMPLEX_UNIT_PX,
-                            contentToViewDimension(
-                            nativeFocusCandidateTextSize()));
-                    Rect bounds = nativeFocusCandidateNodeBounds();
-                    Rect vBox = contentToViewRect(bounds);
-                    mWebTextView.setRect(vBox.left, vBox.top, vBox.width(),
-                            vBox.height());
-                    // If it is a password field, start drawing the
-                    // WebTextView once again.
-                    if (nativeFocusCandidateIsPassword()) {
-                        mWebTextView.setInPassword(true);
+                    Rect contentBounds = nativeFocusCandidateNodeBounds();
+                    Rect vBox = contentToViewRect(contentBounds);
+                    Rect visibleRect = new Rect();
+                    calcOurVisibleRect(visibleRect);
+                    if (visibleRect.contains(vBox)) {
+                        // As a result of the zoom, the textfield is now on
+                        // screen.  Place the WebTextView in its new place,
+                        // accounting for our new scroll/zoom values.
+                        mWebTextView.setTextSize(TypedValue.COMPLEX_UNIT_PX,
+                                contentToViewDimension(
+                                nativeFocusCandidateTextSize()));
+                        mWebTextView.setRect(vBox.left, vBox.top, vBox.width(),
+                                vBox.height());
+                        // If it is a password field, start drawing the
+                        // WebTextView once again.
+                        if (nativeFocusCandidateIsPassword()) {
+                            mWebTextView.setInPassword(true);
+                        }
+                    } else {
+                        // The textfield is now off screen.  The user probably
+                        // was not zooming to see the textfield better.  Remove
+                        // the WebTextView.  If the user types a key, and the
+                        // textfield is still in focus, we will reconstruct
+                        // the WebTextView and scroll it back on screen.
+                        mWebTextView.remove();
                     }
                 }
             }
@@ -3857,11 +3871,25 @@ public class WebView extends AbsoluteLayout
 
                     if (mSnapScrollMode == SNAP_X
                             || mSnapScrollMode == SNAP_X_LOCK) {
-                        scrollBy(deltaX, 0);
+                        if (deltaX == 0) {
+                            // keep the scrollbar on the screen even there is no
+                            // scroll
+                            awakenScrollBars(ViewConfiguration
+                                    .getScrollDefaultDelay(), false);
+                        } else {
+                            scrollBy(deltaX, 0);
+                        }
                         mLastTouchX = x;
                     } else if (mSnapScrollMode == SNAP_Y
                             || mSnapScrollMode == SNAP_Y_LOCK) {
-                        scrollBy(0, deltaY);
+                        if (deltaY == 0) {
+                            // keep the scrollbar on the screen even there is no
+                            // scroll
+                            awakenScrollBars(ViewConfiguration
+                                    .getScrollDefaultDelay(), false);
+                        } else {
+                            scrollBy(0, deltaY);
+                        }
                         mLastTouchY = y;
                     } else {
                         scrollBy(deltaX, deltaY);
@@ -3886,6 +3914,9 @@ public class WebView extends AbsoluteLayout
                 }
 
                 if (done) {
+                    // keep the scrollbar on the screen even there is no scroll
+                    awakenScrollBars(ViewConfiguration.getScrollDefaultDelay(),
+                            false);
                     // return false to indicate that we can't pan out of the
                     // view space
                     return false;

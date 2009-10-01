@@ -1812,7 +1812,18 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
 
     @Override
     public void onBackPressed() {
+        // If the input method is covering the search dialog completely,
+        // e.g. in landscape mode with no hard keyboard, dismiss just the input method
+        InputMethodManager imm = (InputMethodManager)getContext()
+                .getSystemService(Context.INPUT_METHOD_SERVICE);
+        if (imm != null && imm.isFullscreenMode() &&
+                imm.hideSoftInputFromWindow(getWindow().getDecorView().getWindowToken(), 0)) {
+            return;
+        }
+        // Otherwise, go back to any previous source (e.g. back to QSB when
+        // pivoted into a source.
         if (!backToPreviousComponent()) {
+            // If no previous source, close search dialog
             cancel();
         }
     }

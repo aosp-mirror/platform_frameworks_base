@@ -109,7 +109,7 @@ public interface IActivityManager extends IInterface {
     public void setPersistent(IBinder token, boolean isPersistent) throws RemoteException;
     public void attachApplication(IApplicationThread app) throws RemoteException;
     /* oneway */
-    public void activityIdle(IBinder token) throws RemoteException;
+    public void activityIdle(IBinder token, Configuration config) throws RemoteException;
     public void activityPaused(IBinder token, Bundle state) throws RemoteException;
     /* oneway */
     public void activityStopped(IBinder token,

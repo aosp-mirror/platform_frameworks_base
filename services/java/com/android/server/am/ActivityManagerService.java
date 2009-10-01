@@ -140,7 +140,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
     static final boolean DEBUG_PROVIDER = localLOGV || false;
     static final boolean DEBUG_USER_LEAVING = localLOGV || false;
     static final boolean DEBUG_RESULTS = localLOGV || false;
-    static final boolean DEBUG_BACKUP = localLOGV || true;
+    static final boolean DEBUG_BACKUP = localLOGV || false;
+    static final boolean DEBUG_CONFIGURATION = localLOGV || false;
     static final boolean VALIDATE_TOKENS = false;
     static final boolean SHOW_ACTIVITY_START_TIME = true;
     
@@ -1092,7 +1093,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 // so we need to be conservative and assume it isn't.
                 IBinder token = (IBinder)msg.obj;
                 Log.w(TAG, "Activity idle timeout for " + token);
-                activityIdleInternal(token, true);
+                activityIdleInternal(token, true, null);
             } break;
             case DESTROY_TIMEOUT_MSG: {
                 IBinder token = (IBinder)msg.obj;
@@ -1103,7 +1104,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             } break;
             case IDLE_NOW_MSG: {
                 IBinder token = (IBinder)msg.obj;
-                activityIdle(token);
+                activityIdle(token, null);
             } break;
             case SERVICE_TIMEOUT_MSG: {
                 if (mDidDexOpt) {
@@ -2251,7 +2252,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             mHandler.sendMessage(msg);
         }
 
-        reportResumedActivity(next);
+        reportResumedActivityLocked(next);
         
         next.thumbnail = null;
         setFocusedActivityLocked(next);
@@ -2524,7 +2525,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         }
     }
     
-    private void reportResumedActivity(HistoryRecord r) {
+    private void reportResumedActivityLocked(HistoryRecord r) {
         //Log.i(TAG, "**** REPORT RESUME: " + r);
         
         final int identHash = System.identityHashCode(r);
@@ -5295,6 +5296,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             if (app.instrumentationClass != null) {
                 ensurePackageDexOpt(app.instrumentationClass.getPackageName());
             }
+            if (DEBUG_CONFIGURATION) Log.v(TAG, "Binding proc "
+                    + processName + " with config " + mConfiguration);
             thread.bindApplication(processName, app.instrumentationInfo != null
                     ? app.instrumentationInfo : app.info, providers,
                     app.instrumentationClass, app.instrumentationProfileFile,
@@ -5416,9 +5419,9 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         }
     }
 
-    public final void activityIdle(IBinder token) {
+    public final void activityIdle(IBinder token, Configuration config) {
         final long origId = Binder.clearCallingIdentity();
-        activityIdleInternal(token, false);
+        activityIdleInternal(token, false, config);
         Binder.restoreCallingIdentity(origId);
     }
 
@@ -5471,7 +5474,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         mWindowManager.enableScreenAfterBoot();
     }
 
-    final void activityIdleInternal(IBinder token, boolean fromTimeout) {
+    final void activityIdleInternal(IBinder token, boolean fromTimeout,
+            Configuration config) {
         if (localLOGV) Log.v(TAG, "Activity idle: " + token);
 
         ArrayList<HistoryRecord> stops = null;
@@ -5494,6 +5498,15 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             if (index >= 0) {
                 HistoryRecord r = (HistoryRecord)mHistory.get(index);
 
+                // This is a hack to semi-deal with a race condition
+                // in the client where it can be constructed with a
+                // newer configuration from when we asked it to launch.
+                // We'll update with whatever configuration it now says
+                // it used to launch.
+                if (config != null) {
+                    r.configuration = config;
+                }
+                
                 // No longer need to keep the device awake.
                 if (mResumedActivity == r && mLaunchingActivity.isHeld()) {
                     mHandler.removeMessages(LAUNCH_TIMEOUT_MSG);
@@ -8326,6 +8339,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             // This happens before any activities are started, so we can
             // change mConfiguration in-place.
             mConfiguration.updateFrom(configuration);
+            if (DEBUG_CONFIGURATION) Log.v(TAG, "Initial config: " + mConfiguration);
         }
     }
 
@@ -10336,9 +10350,11 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         try {
             if (DEBUG_SERVICE) Log.v(TAG, "Scheduling start service: "
                     + r.name + " " + r.intent);
+            mStringBuilder.setLength(0);
+            r.intent.getIntent().toShortString(mStringBuilder, false, true);
             EventLog.writeEvent(LOG_AM_CREATE_SERVICE,
                     System.identityHashCode(r), r.shortName,
-                    r.intent.getIntent().toString(), r.app.pid);
+                    mStringBuilder.toString(), r.app.pid);
             synchronized (r.stats.getBatteryStats()) {
                 r.stats.startLaunchedLocked();
             }
@@ -11368,8 +11384,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 try {
                     proc.thread.scheduleCreateBackupAgent(app, backupMode);
                 } catch (RemoteException e) {
-                    // !!! TODO: notify the backup manager that we crashed, or rely on
-                    // death notices, or...?
+                    // Will time out on the backup manager side
                 }
             } else {
                 if (DEBUG_BACKUP) Log.v(TAG, "Agent proc not running, waiting for attach");
@@ -12713,7 +12728,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             Configuration newConfig = new Configuration(mConfiguration);
             changes = newConfig.updateFrom(values);
             if (changes != 0) {
-                if (DEBUG_SWITCH) {
+                if (DEBUG_SWITCH || DEBUG_CONFIGURATION) {
                     Log.i(TAG, "Updating configuration to: " + values);
                 }
                 
@@ -12737,6 +12752,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                     ProcessRecord app = mLRUProcesses.get(i);
                     try {
                         if (app.thread != null) {
+                            if (DEBUG_CONFIGURATION) Log.v(TAG, "Sending to proc "
+                                    + app.processName + " new config " + mConfiguration);
                             app.thread.scheduleConfigurationChanged(mConfiguration);
                         }
                     } catch (Exception e) {
@@ -12806,6 +12823,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         if (andResume) {
             r.results = null;
             r.newIntents = null;
+            reportResumedActivityLocked(r);
         }
 
         return true;
@@ -12820,19 +12838,21 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
      */
     private final boolean ensureActivityConfigurationLocked(HistoryRecord r,
             int globalChanges) {
-        if (DEBUG_SWITCH) Log.i(TAG, "Ensuring correct configuration: " + r);
+        if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Log.v(TAG,
+                "Ensuring correct configuration: " + r);
         
         // Short circuit: if the two configurations are the exact same
         // object (the common case), then there is nothing to do.
         Configuration newConfig = mConfiguration;
         if (r.configuration == newConfig) {
-            if (DEBUG_SWITCH) Log.i(TAG, "Configuration unchanged in " + r);
+            if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Log.v(TAG,
+                    "Configuration unchanged in " + r);
             return true;
         }
         
         // We don't worry about activities that are finishing.
         if (r.finishing) {
-            if (DEBUG_SWITCH) Log.i(TAG,
+            if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Log.v(TAG,
                     "Configuration doesn't matter in finishing " + r);
             r.stopFreezingScreenLocked(false);
             return true;
@@ -12846,7 +12866,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         // If the activity isn't currently running, just leave the new
         // configuration and it will pick that up next time it starts.
         if (r.app == null || r.app.thread == null) {
-            if (DEBUG_SWITCH) Log.i(TAG,
+            if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Log.v(TAG,
                     "Configuration doesn't matter not running " + r);
             r.stopFreezingScreenLocked(false);
             return true;
@@ -12858,22 +12878,26 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
 
             // Figure out what has changed between the two configurations.
             int changes = oldConfig.diff(newConfig);
-            if (DEBUG_SWITCH) {
-                Log.i(TAG, "Checking to restart " + r.info.name + ": changed=0x"
+            if (DEBUG_SWITCH || DEBUG_CONFIGURATION) {
+                Log.v(TAG, "Checking to restart " + r.info.name + ": changed=0x"
                         + Integer.toHexString(changes) + ", handles=0x"
-                        + Integer.toHexString(r.info.configChanges));
+                        + Integer.toHexString(r.info.configChanges)
+                        + ", newConfig=" + newConfig);
             }
             if ((changes&(~r.info.configChanges)) != 0) {
                 // Aha, the activity isn't handling the change, so DIE DIE DIE.
                 r.configChangeFlags |= changes;
                 r.startFreezingScreenLocked(r.app, globalChanges);
                 if (r.app == null || r.app.thread == null) {
-                    if (DEBUG_SWITCH) Log.i(TAG, "Switch is destroying non-running " + r);
+                    if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Log.v(TAG,
+                            "Switch is destroying non-running " + r);
                     destroyActivityLocked(r, true);
                 } else if (r.state == ActivityState.PAUSING) {
                     // A little annoying: we are waiting for this activity to
                     // finish pausing.  Let's not do anything now, but just
                     // flag that it needs to be restarted when done pausing.
+                    if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Log.v(TAG,
+                            "Switch is skipping already pausing " + r);
                     r.configDestroy = true;
                     return true;
                 } else if (r.state == ActivityState.RESUMED) {
@@ -12881,11 +12905,13 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                     // and we need to restart the top, resumed activity.
                     // Instead of doing the normal handshaking, just say
                     // "restart!".
-                    if (DEBUG_SWITCH) Log.i(TAG, "Switch is restarting resumed " + r);
+                    if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Log.v(TAG,
+                            "Switch is restarting resumed " + r);
                     relaunchActivityLocked(r, r.configChangeFlags, true);
                     r.configChangeFlags = 0;
                 } else {
-                    if (DEBUG_SWITCH) Log.i(TAG, "Switch is restarting non-resumed " + r);
+                    if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Log.v(TAG,
+                            "Switch is restarting non-resumed " + r);
                     relaunchActivityLocked(r, r.configChangeFlags, false);
                     r.configChangeFlags = 0;
                 }
@@ -12903,6 +12929,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         // it last got.
         if (r.app != null && r.app.thread != null) {
             try {
+                if (DEBUG_CONFIGURATION) Log.v(TAG, "Sending new config to " + r);
                 r.app.thread.scheduleActivityConfigurationChanged(r);
             } catch (RemoteException e) {
                 // If process died, whatever.

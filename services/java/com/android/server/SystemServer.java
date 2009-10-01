@@ -119,6 +119,7 @@ class ServerThread extends Thread {
 
             mContentResolver = context.getContentResolver();
 
+            // The AccountManager must come before the ContentService
             try {
                 Log.i(TAG, "Account Manager");
                 ServiceManager.addService(Context.ACCOUNT_SERVICE,

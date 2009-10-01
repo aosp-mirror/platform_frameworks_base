@@ -34,12 +34,6 @@
 #include "DisplayHardware/DisplayHardware.h"
 
 
-// We don't honor the premultiplied alpha flags, which means that
-// premultiplied surface may be composed using a non-premultiplied
-// equation. We do this because it may be a lot faster on some hardware
-// The correct value is HONOR_PREMULTIPLIED_ALPHA = 1
-#define HONOR_PREMULTIPLIED_ALPHA   0
-
 namespace android {
 
 // ---------------------------------------------------------------------------
@@ -89,26 +83,22 @@ void LayerBase::initStates(uint32_t w, uint32_t h, uint32_t flags)
     if (flags & ISurfaceComposer::eNonPremultiplied)
         mPremultipliedAlpha = false;
 
-    mCurrentState.z         = 0;
-    mCurrentState.w         = w;
-    mCurrentState.h         = h;
-    mCurrentState.alpha     = 0xFF;
-    mCurrentState.flags     = layerFlags;
-    mCurrentState.sequence  = 0;
+    mCurrentState.z             = 0;
+    mCurrentState.w             = w;
+    mCurrentState.h             = h;
+    mCurrentState.requested_w   = w;
+    mCurrentState.requested_h   = h;
+    mCurrentState.alpha         = 0xFF;
+    mCurrentState.flags         = layerFlags;
+    mCurrentState.sequence      = 0;
     mCurrentState.transform.set(0, 0);
 
     // drawing state & current state are identical
     mDrawingState = mCurrentState;
 }
 
-void LayerBase::commitTransaction(bool skipSize) {
-    const uint32_t w = mDrawingState.w;
-    const uint32_t h = mDrawingState.h;
+void LayerBase::commitTransaction() {
     mDrawingState = mCurrentState;
-    if (skipSize) {
-        mDrawingState.w = w;
-        mDrawingState.h = h;
-    }
 }
 void LayerBase::forceVisibilityTransaction() {
     // this can be called without SurfaceFlinger.mStateLock, but if we
@@ -144,10 +134,10 @@ bool LayerBase::setLayer(uint32_t z) {
     return true;
 }
 bool LayerBase::setSize(uint32_t w, uint32_t h) {
-    if (mCurrentState.w == w && mCurrentState.h == h)
+    if (mCurrentState.requested_w == w && mCurrentState.requested_h == h)
         return false;
-    mCurrentState.w = w;
-    mCurrentState.h = h;
+    mCurrentState.requested_w = w;
+    mCurrentState.requested_h = h;
     requestTransaction();
     return true;
 }
@@ -204,13 +194,25 @@ uint32_t LayerBase::doTransaction(uint32_t flags)
     const Layer::State& front(drawingState());
     const Layer::State& temp(currentState());
 
-    if (temp.sequence != front.sequence) {
+    if ((front.requested_w != temp.requested_w) ||
+        (front.requested_h != temp.requested_h))  {
+        // resize the layer, set the physical size to the requested size
+        Layer::State& editTemp(currentState());
+        editTemp.w = temp.requested_w;
+        editTemp.h = temp.requested_h;
+    }
+
+    if ((front.w != temp.w) || (front.h != temp.h)) {
         // invalidate and recompute the visible regions if needed
-        flags |= eVisibleRegion;
+        flags |= Layer::eVisibleRegion;
         this->contentDirty = true;
     }
 
     if (temp.sequence != front.sequence) {
+        // invalidate and recompute the visible regions if needed
+        flags |= eVisibleRegion;
+        this->contentDirty = true;
+
         const bool linearFiltering = mUseLinearFiltering;
         mUseLinearFiltering = false;
         if (!(mFlags & DisplayHardware::SLOW_CONFIG)) {
@@ -223,7 +225,7 @@ uint32_t LayerBase::doTransaction(uint32_t flags)
     }
 
     // Commit the transaction
-    commitTransaction(flags & eRestartTransaction);
+    commitTransaction();
     return flags;
 }
 

@@ -233,8 +233,8 @@ public class WindowManagerService extends IWindowManager.Stub
             mPolicy.enableKeyguard(false);
         }
         public void released() {
+            mPolicy.enableKeyguard(true);
             synchronized (mKeyguardDisabled) {
-                mPolicy.enableKeyguard(true);
                 mWaitingUntilKeyguardReenabled = false;
                 mKeyguardDisabled.notifyAll();
             }
@@ -7071,6 +7071,11 @@ public class WindowManagerService extends IWindowManager.Stub
                     w = mRequestedWidth;
                     h = mRequestedHeight;
                 }
+
+                // Something is wrong and SurfaceFlinger will not like this,
+                // try to revert to sane values
+                if (w <= 0) w = 1;
+                if (h <= 0) h = 1;
 
                 try {
                     mSurface = new Surface(

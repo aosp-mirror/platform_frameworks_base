@@ -25,7 +25,7 @@ import android.database.Cursor;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.provider.ContactsContract.Contacts;
-import android.provider.ContactsContract.FastTrack;
+import android.provider.ContactsContract.QuickContact;
 import android.provider.ContactsContract.Intents;
 import android.provider.ContactsContract.PhoneLookup;
 import android.provider.ContactsContract.RawContacts;
@@ -36,12 +36,10 @@ import android.view.View.OnClickListener;
 import com.android.internal.R;
 
 /**
- * Widget used to show an image with the standard fasttrack badge
+ * Widget used to show an image with the standard QuickContact badge
  * and on-click behavior.
- *
- * @hide
  */
-public class FasttrackBadgeWidget extends ImageView implements OnClickListener {
+public class QuickContactBadge extends ImageView implements OnClickListener {
 
     private Uri mContactUri;
     private String mContactEmail;
@@ -74,23 +72,23 @@ public class FasttrackBadgeWidget extends ImageView implements OnClickListener {
 
 
 
-    public FasttrackBadgeWidget(Context context) {
+    public QuickContactBadge(Context context) {
         this(context, null);
     }
 
-    public FasttrackBadgeWidget(Context context, AttributeSet attrs) {
+    public QuickContactBadge(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
     }
 
-    public FasttrackBadgeWidget(Context context, AttributeSet attrs, int defStyle) {
+    public QuickContactBadge(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
 
         TypedArray a =
             context.obtainStyledAttributes(attrs,
-                    com.android.internal.R.styleable.FasttrackBadgeWidget, defStyle, 0);
+                    com.android.internal.R.styleable.QuickContactBadge, defStyle, 0);
 
-        mMode = a.getInt(com.android.internal.R.styleable.FasttrackBadgeWidget_fasttrackWindowSize,
-                FastTrack.MODE_MEDIUM);
+        mMode = a.getInt(com.android.internal.R.styleable.QuickContactBadge_quickContactWindowSize,
+                QuickContact.MODE_MEDIUM);
 
         a.recycle();
 
@@ -105,8 +103,17 @@ public class FasttrackBadgeWidget extends ImageView implements OnClickListener {
     }
 
     /**
-     * Assign the contact uri that this fasttrack badge should be associated
-     * with. Note that this is only used for displaying the fasttrack window and
+     * Set the QuickContact window mode. Options are {@link QuickContact#MODE_SMALL},
+     * {@link QuickContact#MODE_MEDIUM}, {@link QuickContact#MODE_LARGE}.
+     * @param size
+     */
+    public void setMode(int size) {
+        mMode = size;
+    }
+
+    /**
+     * Assign the contact uri that this QuickContactBadge should be associated
+     * with. Note that this is only used for displaying the QuickContact window and
      * won't bind the contact's photo for you.
      *
      * @param contactUri Either a {@link Contacts#CONTENT_URI} or
@@ -122,7 +129,7 @@ public class FasttrackBadgeWidget extends ImageView implements OnClickListener {
     private void onContactUriChanged() {
         if (mContactUri == null && mContactEmail == null && mContactPhone == null) {
             if (mNoBadgeBackground == null) {
-                mNoBadgeBackground = getResources().getDrawable(R.drawable.fasttrack_nobadge);
+                mNoBadgeBackground = getResources().getDrawable(R.drawable.quickcontact_nobadge);
             }
             setBackgroundDrawable(mNoBadgeBackground);
         } else {
@@ -172,15 +179,6 @@ public class FasttrackBadgeWidget extends ImageView implements OnClickListener {
         }
     }
 
-    /**
-     * Set the fasttrack window mode. Options are {@link FastTrack#MODE_SMALL},
-     * {@link FastTrack#MODE_MEDIUM}, {@link FastTrack#MODE_LARGE}.
-     * @param size
-     */
-    public void setMode(int size) {
-        mMode = size;
-    }
-
     public void onClick(View v) {
         if (mContactUri != null) {
             final ContentResolver resolver = getContext().getContentResolver();
@@ -210,7 +208,7 @@ public class FasttrackBadgeWidget extends ImageView implements OnClickListener {
     }
 
     private void trigger(Uri lookupUri) {
-        FastTrack.showFastTrack(getContext(), this, lookupUri, mMode, mExcludeMimes);
+        QuickContact.showQuickContact(getContext(), this, lookupUri, mMode, mExcludeMimes);
     }
 
     private class QueryHandler extends AsyncQueryHandler {

@@ -1692,26 +1692,6 @@ public final class ContactsContract {
         }
 
         /**
-         * Common data definition for birthdays.
-         */
-        public static final class Birthday implements DataColumnsWithJoins {
-            /**
-             * This utility class cannot be instantiated
-             */
-            private Birthday() {}
-
-            /** MIME type used when storing this in data table. */
-            public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/birthday";
-
-            /**
-             * The birthday. This must be of the form YYYY-MM-DD or YYYY-MM-DDThh:mm:ss
-             * These are xs:date and xs:dateTime
-             * <P>Type: TEXT</P>
-             */
-            public static final String BIRTHDAY = DATA1;
-        }
-
-        /**
          * Common data definition for relations.
          */
         public static final class Relation implements DataColumnsWithJoins, CommonColumns {
@@ -1755,16 +1735,34 @@ public final class ContactsContract {
             private Event() {}
 
             /** MIME type used when storing this in data table. */
-            public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/event";
+            public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/contact_event";
 
             public static final int TYPE_ANNIVERSARY = 1;
             public static final int TYPE_OTHER = 2;
+            public static final int TYPE_BIRTHDAY = 3;
 
             /**
              * The event start date as the user entered it.
              * <P>Type: TEXT</P>
              */
             public static final String START_DATE = DATA;
+
+            /**
+             * Return the string resource that best describes the given
+             * {@link #TYPE}. Will always return a valid resource.
+             */
+            public static int getTypeResource(Integer type) {
+                if (type == null) {
+                    return com.android.internal.R.string.eventTypeOther;
+                }
+                switch (type) {
+                    case TYPE_ANNIVERSARY:
+                        return com.android.internal.R.string.eventTypeAnniversary;
+                    case TYPE_BIRTHDAY: return com.android.internal.R.string.eventTypeBirthday;
+                    case TYPE_OTHER: return com.android.internal.R.string.eventTypeOther;
+                    default: return com.android.internal.R.string.eventTypeOther;
+                }
+            }
         }
 
         /**
@@ -2133,18 +2131,16 @@ public final class ContactsContract {
     }
 
     /**
-     * Helper methods to display FastTrack dialogs that allow users to pivot on
+     * Helper methods to display QuickContact dialogs that allow users to pivot on
      * a specific {@link Contacts} entry.
-     *
-     * @hide
      */
-    public static final class FastTrack {
+    public static final class QuickContact {
         /**
          * Action used to trigger person pivot dialog.
          * @hide
          */
-        public static final String ACTION_FAST_TRACK =
-                "com.android.contacts.action.FAST_TRACK";
+        public static final String ACTION_QUICK_CONTACT =
+                "com.android.contacts.action.QUICK_CONTACT";
 
         /**
          * Extra used to specify pivot dialog location in screen coordinates.
@@ -2166,19 +2162,19 @@ public final class ContactsContract {
         public static final String EXTRA_EXCLUDE_MIMES = "exclude_mimes";
 
         /**
-         * Small FastTrack mode, usually presented with minimal actions.
+         * Small QuickContact mode, usually presented with minimal actions.
          */
         public static final int MODE_SMALL = 1;
 
         /**
-         * Medium FastTrack mode, includes actions and light summary describing
+         * Medium QuickContact mode, includes actions and light summary describing
          * the {@link Contacts} entry being shown. This may include social
          * status and presence details.
          */
         public static final int MODE_MEDIUM = 2;
 
         /**
-         * Large FastTrack mode, includes actions and larger, card-like summary
+         * Large QuickContact mode, includes actions and larger, card-like summary
          * of the {@link Contacts} entry being shown. This may include detailed
          * information, such as a photo.
          */
@@ -2196,7 +2192,7 @@ public final class ContactsContract {
          *            should be centered around. In particular, if the dialog
          *            has a "callout" arrow, it will be pointed and centered
          *            around this {@link View}.
-         * @param lookupUri A {@link Contacts#CONTENT_LOOKUP_URI} style
+         * @param lookupUri A {@link ContactsContract.Contacts#CONTENT_LOOKUP_URI} style
          *            {@link Uri} that describes a specific contact to feature
          *            in this dialog.
          * @param mode Any of {@link #MODE_SMALL}, {@link #MODE_MEDIUM}, or
@@ -2207,7 +2203,7 @@ public final class ContactsContract {
          *            already viewing the contact details card, this can be used
          *            to omit the details entry from the dialog.
          */
-        public static void showFastTrack(Context context, View target, Uri lookupUri, int mode,
+        public static void showQuickContact(Context context, View target, Uri lookupUri, int mode,
                 String[] excludeMimes) {
             // Find location and bounds of target view
             final int[] location = new int[2];
@@ -2220,7 +2216,7 @@ public final class ContactsContract {
             rect.bottom = rect.top + target.getHeight();
 
             // Trigger with obtained rectangle
-            showFastTrack(context, rect, lookupUri, mode, excludeMimes);
+            showQuickContact(context, rect, lookupUri, mode, excludeMimes);
         }
 
         /**
@@ -2235,7 +2231,7 @@ public final class ContactsContract {
          *            centered around, in screen coordinates. In particular, if
          *            the dialog has a "callout" arrow, it will be pointed and
          *            centered around this {@link Rect}.
-         * @param lookupUri A {@link Contacts#CONTENT_LOOKUP_URI} style
+         * @param lookupUri A {@link ContactsContract.Contacts#CONTENT_LOOKUP_URI} style
          *            {@link Uri} that describes a specific contact to feature
          *            in this dialog.
          * @param mode Any of {@link #MODE_SMALL}, {@link #MODE_MEDIUM}, or
@@ -2246,10 +2242,13 @@ public final class ContactsContract {
          *            already viewing the contact details card, this can be used
          *            to omit the details entry from the dialog.
          */
-        public static void showFastTrack(Context context, Rect target, Uri lookupUri, int mode,
+        public static void showQuickContact(Context context, Rect target, Uri lookupUri, int mode,
                 String[] excludeMimes) {
             // Launch pivot dialog through intent for now
-            final Intent intent = new Intent(ACTION_FAST_TRACK);
+            final Intent intent = new Intent(ACTION_QUICK_CONTACT);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP
+                    | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
+
             intent.setData(lookupUri);
             intent.putExtra(EXTRA_TARGET_RECT, target);
             intent.putExtra(EXTRA_MODE, mode);

@@ -594,12 +594,6 @@ void SurfaceFlinger::handleTransactionLocked(
             const uint32_t flags = layer->doTransaction(0);
             if (flags & Layer::eVisibleRegion)
                 mVisibleRegionsDirty = true;
-
-            if (flags & Layer::eRestartTransaction) {
-                // restart the transaction, but back-off a little
-                layer->setTransactionFlags(eTransactionNeeded);
-                setTransactionFlags(eTraversalNeeded, ms2ns(8));
-            }
         }
     }
 
@@ -1131,7 +1125,14 @@ void SurfaceFlinger::closeGlobalTransaction()
         // take effect before returning.
         Mutex::Autolock _l(mStateLock);
         while (mResizeTransationPending) {
-            mTransactionCV.wait(mStateLock);
+            status_t err = mTransactionCV.waitRelative(mStateLock, s2ns(5));
+            if (CC_UNLIKELY(err != NO_ERROR)) {
+                // just in case something goes wrong in SF, return to the
+                // called after a few seconds.
+                LOGW_IF(err == TIMED_OUT, "closeGlobalTransaction timed out!");
+                mResizeTransationPending = false;
+                break;
+            }
         }
     }
 }

@@ -986,6 +986,7 @@ public class PackageParser {
         }
 
         final int NP = PackageParser.NEW_PERMISSIONS.length;
+        StringBuilder implicitPerms = null;
         for (int ip=0; ip<NP; ip++) {
             final PackageParser.NewPermissionInfo npi
                     = PackageParser.NEW_PERMISSIONS[ip];
@@ -993,10 +994,19 @@ public class PackageParser {
                 break;
             }
             if (!pkg.requestedPermissions.contains(npi.name)) {
-                Log.i(TAG, "Impliciting adding " + npi.name + " to old pkg "
-                        + pkg.packageName);
+                if (implicitPerms == null) {
+                    implicitPerms = new StringBuilder(128);
+                    implicitPerms.append(pkg.packageName);
+                    implicitPerms.append(": compat added ");
+                } else {
+                    implicitPerms.append(' ');
+                }
+                implicitPerms.append(npi.name);
                 pkg.requestedPermissions.add(npi.name);
             }
+        }
+        if (implicitPerms != null) {
+            Log.i(TAG, implicitPerms.toString());
         }
         
         if (supportsSmallScreens < 0 || (supportsSmallScreens > 0
@@ -1335,8 +1345,10 @@ public class PackageParser {
                     com.android.internal.R.styleable.AndroidManifestApplication_backupAgent);
             if (backupAgent != null) {
                 ai.backupAgentName = buildClassName(pkgName, backupAgent, outError);
-                Log.v(TAG, "android:backupAgent = " + ai.backupAgentName
-                        + " from " + pkgName + "+" + backupAgent);
+                if (false) {
+                    Log.v(TAG, "android:backupAgent = " + ai.backupAgentName
+                            + " from " + pkgName + "+" + backupAgent);
+                }
 
                 if (sa.getBoolean(
                         com.android.internal.R.styleable.AndroidManifestApplication_killAfterRestore,
@@ -1526,8 +1538,9 @@ public class PackageParser {
 
             } else {
                 if (!RIGID_PARSER) {
-                    Log.w(TAG, "Problem in package " + mArchiveSourcePath + ":");
-                    Log.w(TAG, "Unknown element under <application>: " + tagName);
+                    Log.w(TAG, "Unknown element under <application>: " + tagName
+                            + " at " + mArchiveSourcePath + " "
+                            + parser.getPositionDescription());
                     XmlUtils.skipCurrentTag(parser);
                     continue;
                 } else {
@@ -1572,25 +1585,6 @@ public class PackageParser {
         return true;
     }
 
-    private boolean parseComponentInfo(Package owner, int flags,
-            ComponentInfo outInfo, String[] outError, String tag, TypedArray sa,
-            int nameRes, int labelRes, int iconRes, int processRes,
-            int enabledRes) {
-        if (!parsePackageItemInfo(owner, outInfo, outError, tag, sa,
-                nameRes, labelRes, iconRes)) {
-            return false;
-        }
-
-        if (processRes != 0) {
-            outInfo.processName = buildProcessName(owner.applicationInfo.packageName,
-                    owner.applicationInfo.processName, sa.getNonResourceString(processRes),
-                    flags, mSeparateProcesses, outError);
-        }
-        outInfo.enabled = sa.getBoolean(enabledRes, true);
-
-        return outError[0] == null;
-    }
-    
     private Activity parseActivity(Package owner, Resources res,
             XmlPullParser parser, AttributeSet attrs, int flags, String[] outError,
             boolean receiver) throws XmlPullParserException, IOException {
@@ -1749,9 +1743,13 @@ public class PackageParser {
                 if (!RIGID_PARSER) {
                     Log.w(TAG, "Problem in package " + mArchiveSourcePath + ":");
                     if (receiver) {
-                        Log.w(TAG, "Unknown element under <receiver>: " + parser.getName());
+                        Log.w(TAG, "Unknown element under <receiver>: " + parser.getName()
+                                + " at " + mArchiveSourcePath + " "
+                                + parser.getPositionDescription());
                     } else {
-                        Log.w(TAG, "Unknown element under <activity>: " + parser.getName());
+                        Log.w(TAG, "Unknown element under <activity>: " + parser.getName()
+                                + " at " + mArchiveSourcePath + " "
+                                + parser.getPositionDescription());
                     }
                     XmlUtils.skipCurrentTag(parser);
                     continue;
@@ -1891,8 +1889,9 @@ public class PackageParser {
                 }
             } else {
                 if (!RIGID_PARSER) {
-                    Log.w(TAG, "Problem in package " + mArchiveSourcePath + ":");
-                    Log.w(TAG, "Unknown element under <activity-alias>: " + parser.getName());
+                    Log.w(TAG, "Unknown element under <activity-alias>: " + parser.getName()
+                            + " at " + mArchiveSourcePath + " "
+                            + parser.getPositionDescription());
                     XmlUtils.skipCurrentTag(parser);
                     continue;
                 }
@@ -2055,8 +2054,9 @@ public class PackageParser {
                     outInfo.info.grantUriPermissions = true;
                 } else {
                     if (!RIGID_PARSER) {
-                        Log.w(TAG, "Problem in package " + mArchiveSourcePath + ":");
-                        Log.w(TAG, "No path, pathPrefix, or pathPattern for <path-permission>");
+                        Log.w(TAG, "Unknown element under <path-permission>: "
+                                + parser.getName() + " at " + mArchiveSourcePath + " "
+                                + parser.getPositionDescription());
                         XmlUtils.skipCurrentTag(parser);
                         continue;
                     }
@@ -2096,8 +2096,9 @@ public class PackageParser {
 
                 if (!havePerm) {
                     if (!RIGID_PARSER) {
-                        Log.w(TAG, "Problem in package " + mArchiveSourcePath + ":");
-                        Log.w(TAG, "No readPermission or writePermssion for <path-permission>");
+                        Log.w(TAG, "No readPermission or writePermssion for <path-permission>: "
+                                + parser.getName() + " at " + mArchiveSourcePath + " "
+                                + parser.getPositionDescription());
                         XmlUtils.skipCurrentTag(parser);
                         continue;
                     }
@@ -2141,8 +2142,9 @@ public class PackageParser {
                     }
                 } else {
                     if (!RIGID_PARSER) {
-                        Log.w(TAG, "Problem in package " + mArchiveSourcePath + ":");
-                        Log.w(TAG, "No path, pathPrefix, or pathPattern for <path-permission>");
+                        Log.w(TAG, "No path, pathPrefix, or pathPattern for <path-permission>: "
+                                + parser.getName() + " at " + mArchiveSourcePath + " "
+                                + parser.getPositionDescription());
                         XmlUtils.skipCurrentTag(parser);
                         continue;
                     }
@@ -2153,9 +2155,9 @@ public class PackageParser {
 
             } else {
                 if (!RIGID_PARSER) {
-                    Log.w(TAG, "Problem in package " + mArchiveSourcePath + ":");
                     Log.w(TAG, "Unknown element under <provider>: "
-                            + parser.getName());
+                            + parser.getName() + " at " + mArchiveSourcePath + " "
+                            + parser.getPositionDescription());
                     XmlUtils.skipCurrentTag(parser);
                     continue;
                 }
@@ -2233,9 +2235,9 @@ public class PackageParser {
                 }
             } else {
                 if (!RIGID_PARSER) {
-                    Log.w(TAG, "Problem in package " + mArchiveSourcePath + ":");
                     Log.w(TAG, "Unknown element under <service>: "
-                            + parser.getName());
+                            + parser.getName() + " at " + mArchiveSourcePath + " "
+                            + parser.getPositionDescription());
                     XmlUtils.skipCurrentTag(parser);
                     continue;
                 }
@@ -2272,9 +2274,9 @@ public class PackageParser {
                 }
             } else {
                 if (!RIGID_PARSER) {
-                    Log.w(TAG, "Problem in package " + mArchiveSourcePath + ":");
                     Log.w(TAG, "Unknown element under " + tag + ": "
-                            + parser.getName());
+                            + parser.getName() + " at " + mArchiveSourcePath + " "
+                            + parser.getPositionDescription());
                     XmlUtils.skipCurrentTag(parser);
                     continue;
                 }
@@ -2330,8 +2332,9 @@ public class PackageParser {
                     data.putFloat(name, v.getFloat());
                 } else {
                     if (!RIGID_PARSER) {
-                        Log.w(TAG, "Problem in package " + mArchiveSourcePath + ":");
-                        Log.w(TAG, "<meta-data> only supports string, integer, float, color, boolean, and resource reference types");
+                        Log.w(TAG, "<meta-data> only supports string, integer, float, color, boolean, and resource reference types: "
+                                + parser.getName() + " at " + mArchiveSourcePath + " "
+                                + parser.getPositionDescription());
                     } else {
                         outError[0] = "<meta-data> only supports string, integer, float, color, boolean, and resource reference types";
                         data = null;
@@ -2365,6 +2368,7 @@ public class PackageParser {
                 com.android.internal.R.styleable.AndroidManifestIntentFilter_priority, 0);
         if (priority > 0 && isActivity && (flags&PARSE_IS_SYSTEM) == 0) {
             Log.w(TAG, "Activity with priority > 0, forcing to 0 at "
+                    + mArchiveSourcePath + " "
                     + parser.getPositionDescription());
             priority = 0;
         }
@@ -2462,8 +2466,9 @@ public class PackageParser {
                 sa.recycle();
                 XmlUtils.skipCurrentTag(parser);
             } else if (!RIGID_PARSER) {
-                Log.w(TAG, "Problem in package " + mArchiveSourcePath + ":");
-                Log.w(TAG, "Unknown element under <intent-filter>: " + parser.getName());
+                Log.w(TAG, "Unknown element under <intent-filter>: "
+                        + parser.getName() + " at " + mArchiveSourcePath + " "
+                        + parser.getPositionDescription());
                 XmlUtils.skipCurrentTag(parser);
             } else {
                 outError[0] = "Bad element under <intent-filter>: " + parser.getName();

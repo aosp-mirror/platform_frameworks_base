@@ -30,7 +30,7 @@
 <RelativeLayout
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:background="#A0000000"
+    android:background="#70000000"
         >
 
     <TextView

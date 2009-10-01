@@ -178,6 +178,7 @@ class PackageManagerService extends IPackageManager.Stub {
     final File mFrameworkDir;
     final File mSystemAppDir;
     final File mAppInstallDir;
+    final File mDalvikCacheDir;
 
     // Directory containing the private parts (e.g. code and non-resource assets) of forward-locked
     // apps.
@@ -438,8 +439,11 @@ class PackageManagerService extends IPackageManager.Stub {
             final HashSet<String> libFiles = new HashSet<String>();
             
             mFrameworkDir = new File(Environment.getRootDirectory(), "framework");
+            mDalvikCacheDir = new File(dataDir, "dalvik-cache");
             
             if (mInstaller != null) {
+                boolean didDexOpt = false;
+                
                 /**
                  * Out of paranoia, ensure that everything in the boot class
                  * path has been dexed.
@@ -452,6 +456,7 @@ class PackageManagerService extends IPackageManager.Stub {
                             if (dalvik.system.DexFile.isDexOptNeeded(paths[i])) {
                                 libFiles.add(paths[i]);
                                 mInstaller.dexopt(paths[i], Process.SYSTEM_UID, true);
+                                didDexOpt = true;
                             }
                         } catch (FileNotFoundException e) {
                             Log.w(TAG, "Boot class path not found: " + paths[i]);
@@ -474,6 +479,7 @@ class PackageManagerService extends IPackageManager.Stub {
                             if (dalvik.system.DexFile.isDexOptNeeded(lib)) {
                                 libFiles.add(lib);
                                 mInstaller.dexopt(lib, Process.SYSTEM_UID, true);
+                                didDexOpt = true;
                             }
                         } catch (FileNotFoundException e) {
                             Log.w(TAG, "Library not found: " + lib);
@@ -493,7 +499,7 @@ class PackageManagerService extends IPackageManager.Stub {
                  * run from a non-root shell.
                  */
                 String[] frameworkFiles = mFrameworkDir.list();
-                if (frameworkFiles != null && mInstaller != null) {
+                if (frameworkFiles != null) {
                     for (int i=0; i<frameworkFiles.length; i++) {
                         File libPath = new File(mFrameworkDir, frameworkFiles[i]);
                         String path = libPath.getPath();
@@ -508,11 +514,31 @@ class PackageManagerService extends IPackageManager.Stub {
                         try {
                             if (dalvik.system.DexFile.isDexOptNeeded(path)) {
                                 mInstaller.dexopt(path, Process.SYSTEM_UID, true);
+                                didDexOpt = true;
                             }
                         } catch (FileNotFoundException e) {
                             Log.w(TAG, "Jar not found: " + path);
                         } catch (IOException e) {
                             Log.w(TAG, "Exception reading jar: " + path, e);
+                        }
+                    }
+                }
+                
+                if (didDexOpt) {
+                    // If we had to do a dexopt of one of the previous
+                    // things, then something on the system has changed.
+                    // Consider this significant, and wipe away all other
+                    // existing dexopt files to ensure we don't leave any
+                    // dangling around.
+                    String[] files = mDalvikCacheDir.list();
+                    if (files != null) {
+                        for (int i=0; i<files.length; i++) {
+                            String fn = files[i];
+                            if (fn.startsWith("data@app@")
+                                    || fn.startsWith("data@app-private@")) {
+                                Log.i(TAG, "Pruning dalvik file: " + fn);
+                                (new File(mDalvikCacheDir, fn)).delete();
+                            }
                         }
                     }
                 }
@@ -641,6 +667,27 @@ class PackageManagerService extends IPackageManager.Stub {
         final File permFile = new File(Environment.getRootDirectory(),
                 "etc/permissions/platform.xml");
         readPermissionsFromXml(permFile);
+        
+        StringBuilder sb = new StringBuilder(128);
+        sb.append("Libs:");
+        Iterator<String> it = mSharedLibraries.keySet().iterator();
+        while (it.hasNext()) {
+            sb.append(' ');
+            String name = it.next();
+            sb.append(name);
+            sb.append(':');
+            sb.append(mSharedLibraries.get(name));
+        }
+        Log.i(TAG, sb.toString());
+        
+        sb.setLength(0);
+        sb.append("Features:");
+        it = mAvailableFeatures.keySet().iterator();
+        while (it.hasNext()) {
+            sb.append(' ');
+            sb.append(it.next());
+        }
+        Log.i(TAG, sb.toString());
     }
     
     private void readPermissionsFromXml(File permFile) {        
@@ -730,7 +777,7 @@ class PackageManagerService extends IPackageManager.Stub {
                         Log.w(TAG, "<library> without file at "
                                 + parser.getPositionDescription());
                     } else {
-                        Log.i(TAG, "Got library " + lname + " in " + lfile);
+                        //Log.i(TAG, "Got library " + lname + " in " + lfile);
                         mSharedLibraries.put(lname, lfile);
                     }
                     XmlUtils.skipCurrentTag(parser);
@@ -742,7 +789,7 @@ class PackageManagerService extends IPackageManager.Stub {
                         Log.w(TAG, "<feature> without name at "
                                 + parser.getPositionDescription());
                     } else {
-                        Log.i(TAG, "Got feature " + fname);
+                        //Log.i(TAG, "Got feature " + fname);
                         FeatureInfo fi = new FeatureInfo();
                         fi.name = fname;
                         mAvailableFeatures.put(fname, fi);
@@ -1974,27 +2021,25 @@ class PackageManagerService extends IPackageManager.Stub {
         }
         if ((parseFlags&PackageParser.PARSE_IS_SYSTEM) != 0) {
             // Check for updated system applications here
-            if (updatedPkg != null) {
-                if ((ps != null) && (!ps.codePath.getPath().equals(scanFile.getPath()))) {
-                    if (pkg.mVersionCode <= ps.versionCode) {
-                     // The system package has been updated and the code path does not match
-                        // Ignore entry. Just return
-                        Log.w(TAG, "Package:" + pkg.packageName +
-                                " has been updated. Ignoring the one from path:"+scanFile);
-                        mLastScanError = PackageManager.INSTALL_FAILED_DUPLICATE_PACKAGE;
-                        return null;
-                    } else {
-                        // Delete the older apk pointed to by ps
-                        // At this point, its safely assumed that package installation for
-                        // apps in system partition will go through. If not there won't be a working
-                        // version of the app
-                        synchronized (mPackages) {
-                            // Just remove the loaded entries from package lists.
-                            mPackages.remove(ps.name);
-                        }
-                        deletePackageResourcesLI(ps.name, ps.codePathString, ps.resourcePathString);
-                        mSettings.enableSystemPackageLP(ps.name);
+            if ((ps != null) && (!ps.codePath.equals(scanFile))) {
+                if (pkg.mVersionCode < ps.versionCode) {
+                    // The system package has been updated and the code path does not match
+                    // Ignore entry. Just return
+                    Log.w(TAG, "Package:" + pkg.packageName +
+                            " has been updated. Ignoring the one from path:"+scanFile);
+                    mLastScanError = PackageManager.INSTALL_FAILED_DUPLICATE_PACKAGE;
+                    return null;
+                } else {
+                    // Delete the older apk pointed to by ps
+                    // At this point, its safely assumed that package installation for
+                    // apps in system partition will go through. If not there won't be a working
+                    // version of the app
+                    synchronized (mPackages) {
+                        // Just remove the loaded entries from package lists.
+                        mPackages.remove(ps.name);
                     }
+                    deletePackageResourcesLI(ps.name, ps.codePathString, ps.resourcePathString);
+                    mSettings.enableSystemPackageLP(ps.name);
                 }
             }
         }
@@ -2004,7 +2049,7 @@ class PackageManagerService extends IPackageManager.Stub {
             scanMode |= SCAN_FORWARD_LOCKED;
         }
         File resFile = destResourceFile;
-        if ((scanMode & SCAN_FORWARD_LOCKED) != 0) {
+        if (ps != null && ((scanMode & SCAN_FORWARD_LOCKED) != 0)) {
             resFile = getFwdLockedResource(ps.name);
         }
         // Note that we invoke the following method only if we are about to unpack an application
@@ -3814,14 +3859,13 @@ class PackageManagerService extends IPackageManager.Stub {
             final ApplicationInfo deletedPackageAppInfo = deletedPackage.applicationInfo;
             final ApplicationInfo installedPackageAppInfo =
                 newPackage.applicationInfo;
-            if (!deletedPackageAppInfo.sourceDir
-                    .equals(installedPackageAppInfo.sourceDir)) {
-                new File(deletedPackageAppInfo.sourceDir).delete();
-            }
-            if (!deletedPackageAppInfo.publicSourceDir
-                    .equals(installedPackageAppInfo.publicSourceDir)) {
-                new File(deletedPackageAppInfo.publicSourceDir).delete();
-            }
+            deletePackageResourcesLI(pkgName,
+                    !deletedPackageAppInfo.sourceDir
+                            .equals(installedPackageAppInfo.sourceDir)
+                            ? deletedPackageAppInfo.sourceDir : null,
+                    !deletedPackageAppInfo.publicSourceDir
+                            .equals(installedPackageAppInfo.publicSourceDir)
+                            ? deletedPackageAppInfo.publicSourceDir : null);
             //update signature on the new package setting
             //this should always succeed, since we checked the
             //signature earlier.
@@ -4504,22 +4548,30 @@ class PackageManagerService extends IPackageManager.Stub {
 
     private void deletePackageResourcesLI(String packageName,
             String sourceDir, String publicSourceDir) {
-        File sourceFile = new File(sourceDir);
-        if (!sourceFile.exists()) {
-            Log.w(TAG, "Package source " + sourceDir + " does not exist.");
+        if (sourceDir != null) {
+            File sourceFile = new File(sourceDir);
+            if (!sourceFile.exists()) {
+                Log.w(TAG, "Package source " + sourceDir + " does not exist.");
+            }
+            // Delete application's code and resources
+            sourceFile.delete();
+            if (mInstaller != null) {
+                int retCode = mInstaller.rmdex(sourceFile.toString());
+                if (retCode < 0) {
+                    Log.w(TAG, "Couldn't remove dex file for package: "
+                            + packageName + " at location "
+                            + sourceFile.toString() + ", retcode=" + retCode);
+                    // we don't consider this to be a failure of the core package deletion
+                }
+            }
         }
-        // Delete application's code and resources
-        sourceFile.delete();
-        final File publicSourceFile = new File(publicSourceDir);
-        if (publicSourceFile.exists()) {
-            publicSourceFile.delete();
-        }
-        if (mInstaller != null) {
-            int retCode = mInstaller.rmdex(sourceFile.toString());
-            if (retCode < 0) {
-                Log.w(TAG, "Couldn't remove dex file for package: "
-                        + packageName + " at location " + sourceFile.toString() + ", retcode=" + retCode);
-                // we don't consider this to be a failure of the core package deletion
+        if (publicSourceDir != null && !publicSourceDir.equals(sourceDir)) {
+            final File publicSourceFile = new File(publicSourceDir);
+            if (!publicSourceFile.exists()) {
+                Log.w(TAG, "Package public source " + publicSourceFile + " does not exist.");
+            }
+            if (publicSourceFile.exists()) {
+                publicSourceFile.delete();
             }
         }
     }
@@ -5725,7 +5777,7 @@ class PackageManagerService extends IPackageManager.Stub {
     }
 
     static class GrantedPermissions {
-        final int pkgFlags;
+        int pkgFlags;
         
         HashSet<String> grantedPermissions = new HashSet<String>();
         int[] gids;
@@ -6143,10 +6195,10 @@ class PackageManagerService extends IPackageManager.Stub {
                         // Let the app continue with previous uid if code path changes.
                         reportSettingsProblem(Log.WARN,
                                 "Package " + name + " codePath changed from " + p.codePath
-                                + " to " + codePath + "; Retaining data and using new code from " +
-                                codePath);
+                                + " to " + codePath + "; Retaining data and using new");
                     }
-                } else if (p.sharedUser != sharedUser) {
+                }
+                if (p.sharedUser != sharedUser) {
                     reportSettingsProblem(Log.WARN,
                             "Package " + name + " shared user changed from "
                             + (p.sharedUser != null ? p.sharedUser.name : "<nothing>")
@@ -6154,6 +6206,13 @@ class PackageManagerService extends IPackageManager.Stub {
                             + (sharedUser != null ? sharedUser.name : "<nothing>")
                             + "; replacing with new");
                     p = null;
+                } else {
+                    if ((pkgFlags&ApplicationInfo.FLAG_SYSTEM) != 0) {
+                        // If what we are scanning is a system package, then
+                        // make it so, regardless of whether it was previously
+                        // installed only in the data partition.
+                        p.pkgFlags |= ApplicationInfo.FLAG_SYSTEM;
+                    }
                 }
             }
             if (p == null) {
@@ -6214,14 +6273,14 @@ class PackageManagerService extends IPackageManager.Stub {
             // Update code path if needed
             if (!codePath.toString().equalsIgnoreCase(p.codePathString)) {
                 Log.w(TAG, "Code path for pkg : " + p.pkg.packageName +
-                        " changing form " + p.codePathString + " to " + codePath);
+                        " changing from " + p.codePathString + " to " + codePath);
                 p.codePath = codePath;
                 p.codePathString = codePath.toString();
             }
             //Update resource path if needed
             if (!resourcePath.toString().equalsIgnoreCase(p.resourcePathString)) {
                 Log.w(TAG, "Resource path for pkg : " + p.pkg.packageName +
-                        " changing form " + p.resourcePathString + " to " + resourcePath);
+                        " changing from " + p.resourcePathString + " to " + resourcePath);
                 p.resourcePath = resourcePath;
                 p.resourcePathString = resourcePath.toString();
             }
@@ -6470,15 +6529,19 @@ class PackageManagerService extends IPackageManager.Stub {
                         |FileUtils.S_IRGRP|FileUtils.S_IWGRP
                         |FileUtils.S_IROTH,
                         -1, -1);
+                return;
 
             } catch(XmlPullParserException e) {
                 Log.w(TAG, "Unable to write package manager settings, current changes will be lost at reboot", e);
-
             } catch(java.io.IOException e) {
                 Log.w(TAG, "Unable to write package manager settings, current changes will be lost at reboot", e);
-
             }
-
+            // Clean up partially written file
+            if (mSettingsFilename.exists()) {
+                if (!mSettingsFilename.delete()) {
+                    Log.i(TAG, "Failed to clean up mangled file: " + mSettingsFilename);
+                }
+            }
             //Debug.stopMethodTracing();
         }
        

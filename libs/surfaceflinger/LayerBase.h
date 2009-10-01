@@ -88,6 +88,8 @@ public:
             struct State {
                 uint32_t        w;
                 uint32_t        h;
+                uint32_t        requested_w;
+                uint32_t        requested_h;
                 uint32_t        z;
                 uint8_t         alpha;
                 uint8_t         flags;
@@ -107,7 +109,7 @@ public:
             bool setTransparentRegionHint(const Region& opaque);
             bool setFlags(uint8_t flags, uint8_t mask);
             
-            void commitTransaction(bool skipSize);
+            void commitTransaction();
             bool requestTransaction();
             void forceVisibilityTransaction();
             
@@ -211,7 +213,6 @@ public:
     
     enum { // flags for doTransaction()
         eVisibleRegion      = 0x00000002,
-        eRestartTransaction = 0x00000008
     };
 
 

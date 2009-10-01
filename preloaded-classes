@@ -910,7 +910,6 @@ android.widget.ExpandableListView
 android.widget.ExpandableListView$SavedState
 android.widget.FastScroller
 android.widget.FastScroller$ScrollFade
-android.widget.FasttrackBadgeWidget
 android.widget.Filter
 android.widget.FrameLayout
 android.widget.FrameLayout$LayoutParams
@@ -934,6 +933,7 @@ android.widget.PopupWindow$1
 android.widget.PopupWindow$PopupViewContainer
 android.widget.ProgressBar
 android.widget.ProgressBar$SavedState
+android.widget.QuickContactBadge
 android.widget.RadioButton
 android.widget.RadioGroup
 android.widget.RadioGroup$CheckedStateTracker

@@ -50,8 +50,7 @@ import android.util.Log;
  * List of settings that are backed up are stored in the Settings.java file
  */
 public class SettingsBackupAgent extends BackupHelperAgent {
-    // STOPSHIP: set DEBUG to false
-    private static final boolean DEBUG = true;
+    private static final boolean DEBUG = false;
 
     private static final String KEY_SYSTEM = "system";
     private static final String KEY_SECURE = "secure";

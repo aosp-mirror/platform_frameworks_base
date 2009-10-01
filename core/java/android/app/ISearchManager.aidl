@@ -41,7 +41,6 @@ interface ISearchManager {
             in ComponentName launchActivity,
             in Bundle appSearchData,
             ISearchManagerCallback searchManagerCallback,
-            boolean globalSearch,
             int ident);
 
     void stopSearch();

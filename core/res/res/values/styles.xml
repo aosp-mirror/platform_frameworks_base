@@ -524,44 +524,44 @@
         <item name="android:shadowRadius">2.75</item>
     </style>
 
-    <style name="Widget.FasttrackBadgeWidget">
+    <style name="Widget.QuickContactBadge">
         <item name="android:layout_width">50dip</item>
         <item name="android:layout_height">56dip</item>
-        <item name="android:background">@android:drawable/fasttrack_badge</item>
+        <item name="android:background">@android:drawable/quickcontact_badge</item>
         <item name="android:clickable">true</item>
         <item name="android:scaleType">fitCenter</item>
     </style>
     
-    <style name="Widget.FasttrackBadgeWidgetSmall">
+    <style name="Widget.QuickContactBadgeSmall">
         <item name="android:layout_width">39dip</item>
         <item name="android:layout_height">42dip</item>
-        <item name="android:background">@android:drawable/fasttrack_badge_small</item>
+        <item name="android:background">@android:drawable/quickcontact_badge_small</item>
         <item name="android:clickable">true</item>
         <item name="android:scaleType">fitCenter</item>
     </style>
 
-    <style name="Widget.FasttrackBadgeWidget.WindowSmall">
-        <item name="android:fasttrackWindowSize">modeSmall</item>
+    <style name="Widget.QuickContactBadge.WindowSmall">
+        <item name="android:quickContactWindowSize">modeSmall</item>
     </style>
 
-    <style name="Widget.FasttrackBadgeWidget.WindowMedium">
-        <item name="android:fasttrackWindowSize">modeMedium</item>
+    <style name="Widget.QuickContactBadge.WindowMedium">
+        <item name="android:quickContactWindowSize">modeMedium</item>
     </style>
 
-    <style name="Widget.FasttrackBadgeWidget.WindowLarge">
-        <item name="android:fasttrackWindowSize">modeLarge</item>
+    <style name="Widget.QuickContactBadge.WindowLarge">
+        <item name="android:quickContactWindowSize">modeLarge</item>
     </style>
     
-    <style name="Widget.FasttrackBadgeWidgetSmall.WindowSmall">
-        <item name="android:fasttrackWindowSize">modeSmall</item>
+    <style name="Widget.QuickContactBadgeSmall.WindowSmall">
+        <item name="android:quickContactWindowSize">modeSmall</item>
     </style>
 
-    <style name="Widget.FasttrackBadgeWidgetSmall.WindowMedium">
-        <item name="android:fasttrackWindowSize">modeMedium</item>
+    <style name="Widget.QuickContactBadgeSmall.WindowMedium">
+        <item name="android:quickContactWindowSize">modeMedium</item>
     </style>
 
-    <style name="Widget.FasttrackBadgeWidgetSmall.WindowLarge">
-        <item name="android:fasttrackWindowSize">modeLarge</item>
+    <style name="Widget.QuickContactBadgeSmall.WindowLarge">
+        <item name="android:quickContactWindowSize">modeLarge</item>
     </style>
 
     <!-- Text Appearances -->

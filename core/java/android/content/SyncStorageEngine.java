@@ -103,7 +103,7 @@ public class SyncStorageEngine extends Handler {
     public static final String MESG_SUCCESS = "success";
     public static final String MESG_CANCELED = "canceled";
 
-    public static final int MAX_HISTORY = 15;
+    public static final int MAX_HISTORY = 100;
 
     private static final int MSG_WRITE_STATUS = 1;
     private static final long WRITE_STATUS_DELAY = 1000*60*10; // 10 minutes

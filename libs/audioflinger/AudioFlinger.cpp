@@ -74,6 +74,8 @@ static const int8_t kMaxTrackStartupRetries = 50;
 static const int kDumpLockRetries = 50;
 static const int kDumpLockSleep = 20000;
 
+static const nsecs_t kWarningThrottle = seconds(5);
+
 
 #define AUDIOFLINGER_SECURITY_ENABLED 1
 
@@ -601,18 +603,19 @@ status_t AudioFlinger::setParameters(int ioHandle, const String8& keyValuePairs)
         return result;
     }
 
-    // Check if parameters are for an output
-    PlaybackThread *playbackThread = checkPlaybackThread_l(ioHandle);
-    if (playbackThread != NULL) {
-        return playbackThread->setParameters(keyValuePairs);
+    // hold a strong ref on thread in case closeOutput() or closeInput() is called
+    // and the thread is exited once the lock is released
+    sp<ThreadBase> thread;
+    {
+        Mutex::Autolock _l(mLock);
+        thread = checkPlaybackThread_l(ioHandle);
+        if (thread == NULL) {
+            thread = checkRecordThread_l(ioHandle);
+        }
     }
-
-    // Check if parameters are for an input
-    RecordThread *recordThread = checkRecordThread_l(ioHandle);
-    if (recordThread != NULL) {
-        return recordThread->setParameters(keyValuePairs);
+    if (thread != NULL) {
+        return thread->setParameters(keyValuePairs);
     }
-
     return BAD_VALUE;
 }
 
@@ -624,6 +627,9 @@ String8 AudioFlinger::getParameters(int ioHandle, const String8& keys)
     if (ioHandle == 0) {
         return mAudioHardware->getParameters(keys);
     }
+
+    Mutex::Autolock _l(mLock);
+
     PlaybackThread *playbackThread = checkPlaybackThread_l(ioHandle);
     if (playbackThread != NULL) {
         return playbackThread->getParameters(keys);
@@ -734,7 +740,7 @@ AudioFlinger::ThreadBase::~ThreadBase()
 
 void AudioFlinger::ThreadBase::exit()
 {
-    // keep a strong ref on ourself so that we want get
+    // keep a strong ref on ourself so that we wont get
     // destroyed in the middle of requestExitAndWait()
     sp <ThreadBase> strongMe = this;
 
@@ -776,9 +782,14 @@ status_t AudioFlinger::ThreadBase::setParameters(const String8& keyValuePairs)
 
     mNewParameters.add(keyValuePairs);
     mWaitWorkCV.signal();
-    mParamCond.wait(mLock);
-    status = mParamStatus;
-    mWaitWorkCV.signal();
+    // wait condition with timeout in case the thread loop has exited
+    // before the request could be processed
+    if (mParamCond.waitRelative(mLock, seconds(2)) == NO_ERROR) {
+        status = mParamStatus;
+        mWaitWorkCV.signal();
+    } else {
+        status = TIMED_OUT;
+    }
     return status;
 }
 
@@ -1170,7 +1181,10 @@ bool AudioFlinger::MixerThread::threadLoop()
     size_t enabledTracks = 0;
     nsecs_t standbyTime = systemTime();
     size_t mixBufferSize = mFrameCount * mFrameSize;
-    nsecs_t maxPeriod = seconds(mFrameCount) / mSampleRate * 2;
+    // FIXME: Relaxed timing because of a certain device that can't meet latency
+    // Should be reduced to 2x after the vendor fixes the driver issue
+    nsecs_t maxPeriod = seconds(mFrameCount) / mSampleRate * 3;
+    nsecs_t lastWarning = 0;
 
     while (!exitPending())
     {
@@ -1183,7 +1197,9 @@ bool AudioFlinger::MixerThread::threadLoop()
 
             if (checkForNewParameters_l()) {
                 mixBufferSize = mFrameCount * mFrameSize;
-                maxPeriod = seconds(mFrameCount) / mSampleRate * 2;
+                // FIXME: Relaxed timing because of a certain device that can't meet latency
+                // Should be reduced to 2x after the vendor fixes the driver issue
+                maxPeriod = seconds(mFrameCount) / mSampleRate * 3;
             }
 
             const SortedVector< wp<Track> >& activeTracks = mActiveTracks;
@@ -1260,10 +1276,15 @@ bool AudioFlinger::MixerThread::threadLoop()
             mNumWrites++;
             mInWrite = false;
             mStandby = false;
-            nsecs_t delta = systemTime() - mLastWriteTime;
+            nsecs_t now = systemTime();
+            nsecs_t delta = now - mLastWriteTime;
             if (delta > maxPeriod) {
-                LOGW("write blocked for %llu msecs, thread %p", ns2ms(delta), this);
                 mNumDelayedWrites++;
+                if ((now - lastWarning) > kWarningThrottle) {
+                    LOGW("write blocked for %llu msecs, %d delayed writes, thread %p",
+                            ns2ms(delta), mNumDelayedWrites, this);
+                    lastWarning = now;
+                }
             }
         } else {
             usleep(sleepTime);

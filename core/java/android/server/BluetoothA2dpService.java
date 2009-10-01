@@ -112,6 +112,13 @@ public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
                     Message msg = Message.obtain(mHandler, MESSAGE_CONNECT_TO, device);
                     mHandler.sendMessageDelayed(msg, 6000);
                 }
+            } else if (action.equals(BluetoothDevice.ACTION_ACL_DISCONNECTED)) {
+                synchronized (this) {
+                    if (mAudioDevices.containsKey(device)) {
+                        int state = mAudioDevices.get(device);
+                        handleSinkStateChange(device, state, BluetoothA2dp.STATE_DISCONNECTED);
+                    }
+                }
             }
         }
     };
@@ -135,6 +142,7 @@ public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
         mIntentFilter = new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
         mIntentFilter.addAction(BluetoothDevice.ACTION_BOND_STATE_CHANGED);
         mIntentFilter.addAction(BluetoothDevice.ACTION_ACL_CONNECTED);
+        mIntentFilter.addAction(BluetoothDevice.ACTION_ACL_DISCONNECTED);
         mContext.registerReceiver(mReceiver, mIntentFilter);
 
         mAudioDevices = new HashMap<BluetoothDevice, Integer>();

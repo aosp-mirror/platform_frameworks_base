@@ -381,7 +381,10 @@ public final class UsageStatsService extends IUsageStats.Stub {
             mFileLeaf = getCurrentDateStr(FILE_PREFIX);
             // Copy current file to back up
             File backupFile =  new File(mFile.getPath() + ".bak");
-            mFile.renameTo(backupFile);
+            if (!mFile.renameTo(backupFile)) {
+                Log.w(TAG, "Failed to persist new stats");
+                return;
+            }
             try {
                 // Write mStats to file
                 writeStatsFLOCK();

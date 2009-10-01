@@ -294,8 +294,8 @@ sp<SurfaceBuffer> Layer::requestBuffer(int index, int usage)
                 this, index, w, h, strerror(-err));
     } else {
         LOGD_IF(DEBUG_RESIZE,
-                "Layer::requestBuffer(this=%p), index=%d, w=%d, h=%d",
-                this, index, w, h);
+                "Layer::requestBuffer(this=%p), index=%d, w=%d, h=%d, handle=%p",
+                this, index, w, h, buffer->handle);
     }
 
     if (err == NO_ERROR && buffer->handle != 0) {
@@ -318,21 +318,17 @@ uint32_t Layer::doTransaction(uint32_t flags)
     const Layer::State& front(drawingState());
     const Layer::State& temp(currentState());
 
-    // Index of the back buffer
-    const bool backbufferChanged = (front.w != temp.w) || (front.h != temp.h);
-    if (backbufferChanged) {
+    if ((front.requested_w != temp.requested_w) || 
+        (front.requested_h != temp.requested_h)) {
         // the size changed, we need to ask our client to request a new buffer
         LOGD_IF(DEBUG_RESIZE,
                     "resize (layer=%p), requested (%dx%d), "
                     "drawing (%d,%d), (%dx%d), (%dx%d)",
-                    this, int(temp.w), int(temp.h),
-                    int(drawingState().w), int(drawingState().h),
+                    this, 
+                    int(temp.requested_w), int(temp.requested_h),
+                    int(front.requested_w), int(front.requested_h),
                     int(mBuffers[0]->getWidth()), int(mBuffers[0]->getHeight()),
                     int(mBuffers[1]->getWidth()), int(mBuffers[1]->getHeight()));
-
-        // record the new size, form this point on, when the client request a
-        // buffer, it'll get the new size.
-        setDrawingSize(temp.w, temp.h);
 
         // we're being resized and there is a freeze display request,
         // acquire a freeze lock, so that the screen stays put
@@ -346,9 +342,16 @@ uint32_t Layer::doTransaction(uint32_t flags)
             }
         }
 
-        // recompute the visible region
-        flags |= Layer::eVisibleRegion;
-        this->contentDirty = true;
+        // this will make sure LayerBase::doTransaction doesn't update
+        // the drawing state's size
+        Layer::State& editDraw(mDrawingState);
+        editDraw.requested_w = temp.requested_w;
+        editDraw.requested_h = temp.requested_h;
+
+        // record the new size, form this point on, when the client request a
+        // buffer, it'll get the new size.
+        setDrawingSize(temp.requested_w, temp.requested_h);
+
         // all buffers need reallocation
         lcblk->reallocate();
     }
@@ -392,11 +395,35 @@ void Layer::lockPageFlip(bool& recomputeVisibleRegions)
     const Region dirty(lcblk->getDirtyRegion(buf));
     mPostedDirtyRegion = dirty.intersect( newFrontBuffer->getBounds() );
 
-
     const Layer::State& front(drawingState());
-    if (newFrontBuffer->getWidth() == front.w &&
-        newFrontBuffer->getHeight() ==front.h) {
-        mFreezeLock.clear();
+    if (newFrontBuffer->getWidth()  == front.requested_w &&
+        newFrontBuffer->getHeight() == front.requested_h)
+    {
+        if ((front.w != front.requested_w) ||
+            (front.h != front.requested_h))
+        {
+            // Here we pretend the transaction happened by updating the
+            // current and drawing states. Drawing state is only accessed
+            // in this thread, no need to have it locked
+            Layer::State& editDraw(mDrawingState);
+            editDraw.w = editDraw.requested_w;
+            editDraw.h = editDraw.requested_h;
+
+            // We also need to update the current state so that we don't
+            // end-up doing too much work during the next transaction.
+            // NOTE: We actually don't need hold the transaction lock here
+            // because State::w and State::h are only accessed from
+            // this thread
+            Layer::State& editTemp(currentState());
+            editTemp.w = editDraw.w;
+            editTemp.h = editDraw.h;
+
+            // recompute visible region
+            recomputeVisibleRegions = true;
+
+            // we now have the correct size, unfreeze the screen
+            mFreezeLock.clear();
+        }
     }
 
     // FIXME: signal an event if we have more buffers waiting
