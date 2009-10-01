@@ -22,6 +22,8 @@
 #include "acc/acc.h"
 #include "utils/Timers.h"
 
+#define GL_GLEXT_PROTOTYPES
+
 #include <GLES/gl.h>
 #include <GLES/glext.h>
 
@@ -744,6 +746,48 @@ static void SC_drawQuad(float x1, float y1, float z1,
                          x4, y4, z4, 0, 0);
 }
 
+static void SC_drawSpriteScreenspace(float x, float y, float z, float w, float h)
+{
+    GET_TLS();
+    rsc->setupCheck();
+
+    GLint crop[4] = {0, h, w, -h};
+    glTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_CROP_RECT_OES, crop);
+    glDrawTexfOES(x, y, z, w, h);
+}
+
+static void SC_drawSprite(float x, float y, float z, float w, float h)
+{
+    GET_TLS();
+    rsc->setupCheck();
+
+    float vin[3] = {x, y, z};
+    float vout[4];
+
+    //LOGE("ds  in %f %f %f", x, y, z);
+    rsc->getVertex()->transformToScreen(rsc, vout, vin);
+    //LOGE("ds  out %f %f %f %f", vout[0], vout[1], vout[2], vout[3]);
+    vout[0] /= vout[3];
+    vout[1] /= vout[3];
+    vout[2] /= vout[3];
+
+    vout[0] *= rsc->getWidth() / 2;
+    vout[1] *= rsc->getHeight() / 2;
+    vout[0] += rsc->getWidth() / 2;
+    vout[1] += rsc->getHeight() / 2;
+
+    vout[0] -= w/2;
+    vout[1] -= h/2;
+
+    //LOGE("ds  out2 %f %f %f", vout[0], vout[1], vout[2]);
+
+    // U, V, W, H
+    GLint crop[4] = {0, h, w, -h};
+    glTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_CROP_RECT_OES, crop);
+    glDrawTexiOES(vout[0], vout[1], 0/*vout[2]*/, w, h);
+}
+
+
 static void SC_drawRect(float x1, float y1,
                         float x2, float y2, float z)
 {
@@ -1172,6 +1216,10 @@ ScriptCState::SymbolTable_t ScriptCState::gSyms[] = {
         "void", "(float x1, float y1, float z1, float x2, float y2, float z2, float x3, float y3, float z3, float x4, float y4, float z4)" },
     { "drawQuadTexCoords", (void *)&SC_drawQuadTexCoords,
         "void", "(float x1, float y1, float z1, float u1, float v1, float x2, float y2, float z2, float u2, float v2, float x3, float y3, float z3, float u3, float v3, float x4, float y4, float z4, float u4, float v4)" },
+    { "drawSprite", (void *)&SC_drawSprite,
+        "void", "(float x, float y, float z, float w, float h)" },
+    { "drawSpriteScreenspace", (void *)&SC_drawSpriteScreenspace,
+        "void", "(float x, float y, float z, float w, float h)" },
     { "drawLine", (void *)&SC_drawLine,
         "void", "(float x1, float y1, float z1, float x2, float y2, float z2)" },
     { "drawPoint", (void *)&SC_drawPoint,
