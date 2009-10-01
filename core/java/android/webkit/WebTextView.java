@@ -87,11 +87,12 @@ import java.util.ArrayList;
     // Gets set to true when the the IME jumps to the next textfield.  When this
     // happens, the next time the user hits a key it is okay for the focus
     // pointer to not match the WebTextView's node pointer
-    private boolean         mOkayForFocusNotToMatch;
+    boolean                 mOkayForFocusNotToMatch;
     // Whether or not a selection change was generated from webkit.  If it was,
     // we do not need to pass the selection back to webkit.
     private boolean         mFromWebKit;
     private boolean         mGotTouchDown;
+    private boolean         mInSetTextAndKeepSelection;
     // Array to store the final character added in onTextChanged, so that its
     // KeyEvents may be determined.
     private char[]          mCharacter = new char[1];
@@ -395,7 +396,9 @@ import java.util.ArrayList;
                 Log.v(LOGTAG, "onTextChanged start=" + start
                         + " start + before=" + (start + before));
             }
-            mWebView.setSelection(start, start + before);
+            if (!mInSetTextAndKeepSelection) {
+                mWebView.setSelection(start, start + before);
+            }
         }
         if (!cannotUseKeyEvents) {
             int length = events.length;
@@ -791,7 +794,9 @@ import java.util.ArrayList;
     /* package */ void setTextAndKeepSelection(String text) {
         mPreChange = text.toString();
         Editable edit = (Editable) getText();
+        mInSetTextAndKeepSelection = true;
         edit.replace(0, edit.length(), text);
+        mInSetTextAndKeepSelection = false;
         updateCachedTextfield();
     }
 
