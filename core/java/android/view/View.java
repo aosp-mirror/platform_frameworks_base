@@ -4740,7 +4740,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      */
     protected boolean awakenScrollBars() {
         return mScrollCache != null &&
-                awakenScrollBars(mScrollCache.scrollBarDefaultDelayBeforeFade);
+                awakenScrollBars(mScrollCache.scrollBarDefaultDelayBeforeFade, true);
     }
 
     /**
@@ -4778,6 +4778,48 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * @see #setVerticalScrollBarEnabled(boolean)
      */
     protected boolean awakenScrollBars(int startDelay) {
+        return awakenScrollBars(startDelay, true);
+    }
+        
+    /**
+     * <p>
+     * Trigger the scrollbars to draw. When invoked this method starts an
+     * animation to fade the scrollbars out after a fixed delay. If a subclass
+     * provides animated scrolling, the start delay should equal the duration of
+     * the scrolling animation.
+     * </p>
+     * 
+     * <p>
+     * The animation starts only if at least one of the scrollbars is enabled,
+     * as specified by {@link #isHorizontalScrollBarEnabled()} and
+     * {@link #isVerticalScrollBarEnabled()}. When the animation is started,
+     * this method returns true, and false otherwise. If the animation is
+     * started, this method calls {@link #invalidate()} if the invalidate parameter 
+     * is set to true; in that case the caller
+     * should not call {@link #invalidate()}.
+     * </p>
+     * 
+     * <p>
+     * This method should be invoked everytime a subclass directly updates the
+     * scroll parameters.
+     * </p>
+     * 
+     * @param startDelay the delay, in milliseconds, after which the animation
+     *        should start; when the delay is 0, the animation starts
+     *        immediately
+     * 
+     * @param invalidate Wheter this method should call invalidate
+     * 
+     * @return true if the animation is played, false otherwise
+     * 
+     * @see #scrollBy(int, int)
+     * @see #scrollTo(int, int)
+     * @see #isHorizontalScrollBarEnabled()
+     * @see #isVerticalScrollBarEnabled()
+     * @see #setHorizontalScrollBarEnabled(boolean)
+     * @see #setVerticalScrollBarEnabled(boolean)
+     */
+    protected boolean awakenScrollBars(int startDelay, boolean invalidate) {
         final ScrollabilityCache scrollCache = mScrollCache;
         
         if (scrollCache == null || !scrollCache.fadeScrollBars) {
@@ -4790,8 +4832,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
 
         if (isHorizontalScrollBarEnabled() || isVerticalScrollBarEnabled()) {
 
-            // Invalidate to show the scrollbars
-            invalidate();
+            if (invalidate) {
+                // Invalidate to show the scrollbars
+                invalidate();
+            }
 
             if (scrollCache.state == ScrollabilityCache.OFF) {
                 // FIXME: this is copied from WindowManagerService.
