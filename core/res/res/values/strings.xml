@@ -1243,6 +1243,13 @@
     <!-- MMS phone number type -->
     <string name="phoneTypeMms">MMS</string>
 
+    <!-- Label for a birthday event -->
+    <string name="eventTypeBirthday">Birthday</string>
+    <!-- Label for an anniversary event -->
+    <string name="eventTypeAnniversary">Anniversary</string>
+    <!-- Label for other events -->
+    <string name="eventTypeOther">Event</string>
+
     <!-- Custom email type -->
     <string name="emailTypeCustom">Custom</string>
     <!-- Home email type -->
@@ -1299,7 +1306,7 @@
     <string name="orgTypeOther">Other</string>
     <!-- Custom organization type -->
     <string name="orgTypeCustom">Custom</string>
-    
+
     <!-- Attbution of a contact status update, when the time of update is unknown -->
     <string name="contact_status_update_attribution">Via <xliff:g id="source" example="Google Talk">%1$s</xliff:g></string>
 

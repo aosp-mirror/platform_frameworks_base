@@ -1692,26 +1692,6 @@ public final class ContactsContract {
         }
 
         /**
-         * Common data definition for birthdays.
-         */
-        public static final class Birthday implements DataColumnsWithJoins {
-            /**
-             * This utility class cannot be instantiated
-             */
-            private Birthday() {}
-
-            /** MIME type used when storing this in data table. */
-            public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/birthday";
-
-            /**
-             * The birthday. This must be of the form YYYY-MM-DD or YYYY-MM-DDThh:mm:ss
-             * These are xs:date and xs:dateTime
-             * <P>Type: TEXT</P>
-             */
-            public static final String BIRTHDAY = DATA1;
-        }
-
-        /**
          * Common data definition for relations.
          */
         public static final class Relation implements DataColumnsWithJoins, CommonColumns {
@@ -1755,16 +1735,34 @@ public final class ContactsContract {
             private Event() {}
 
             /** MIME type used when storing this in data table. */
-            public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/event";
+            public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/contact_event";
 
             public static final int TYPE_ANNIVERSARY = 1;
             public static final int TYPE_OTHER = 2;
+            public static final int TYPE_BIRTHDAY = 3;
 
             /**
              * The event start date as the user entered it.
              * <P>Type: TEXT</P>
              */
             public static final String START_DATE = DATA;
+
+            /**
+             * Return the string resource that best describes the given
+             * {@link #TYPE}. Will always return a valid resource.
+             */
+            public static int getTypeResource(Integer type) {
+                if (type == null) {
+                    return com.android.internal.R.string.eventTypeOther;
+                }
+                switch (type) {
+                    case TYPE_ANNIVERSARY:
+                        return com.android.internal.R.string.eventTypeAnniversary;
+                    case TYPE_BIRTHDAY: return com.android.internal.R.string.eventTypeBirthday;
+                    case TYPE_OTHER: return com.android.internal.R.string.eventTypeOther;
+                    default: return com.android.internal.R.string.eventTypeOther;
+                }
+            }
         }
 
         /**

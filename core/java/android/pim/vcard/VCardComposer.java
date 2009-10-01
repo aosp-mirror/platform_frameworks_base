@@ -30,8 +30,8 @@ import android.provider.CallLog.Calls;
 import android.provider.ContactsContract.Contacts;
 import android.provider.ContactsContract.Data;
 import android.provider.ContactsContract.RawContacts;
-import android.provider.ContactsContract.CommonDataKinds.Birthday;
 import android.provider.ContactsContract.CommonDataKinds.Email;
+import android.provider.ContactsContract.CommonDataKinds.Event;
 import android.provider.ContactsContract.CommonDataKinds.Im;
 import android.provider.ContactsContract.CommonDataKinds.Nickname;
 import android.provider.ContactsContract.CommonDataKinds.Note;
@@ -1301,12 +1301,16 @@ public class VCardComposer {
     private void appendBirthday(final StringBuilder builder,
             final Map<String, List<ContentValues>> contentValuesListMap) {
         final List<ContentValues> contentValuesList = contentValuesListMap
-                .get(Birthday.CONTENT_ITEM_TYPE);
+                .get(Event.CONTENT_ITEM_TYPE);
         if (contentValuesList != null && contentValuesList.size() > 0) {
+            Integer eventType = contentValuesList.get(0).getAsInteger(Event.TYPE);
+            if (eventType == null || !eventType.equals(Event.TYPE_BIRTHDAY)) {
+                return;
+            }
             // Theoretically, there must be only one birthday for each vCard data and
             // we are afraid of some parse error occuring in some devices, so
             // we emit only one birthday entry for now.
-            String birthday = contentValuesList.get(0).getAsString(Birthday.BIRTHDAY);
+            String birthday = contentValuesList.get(0).getAsString(Event.START_DATE);
             if (birthday != null) {
                 birthday = birthday.trim();
             }
