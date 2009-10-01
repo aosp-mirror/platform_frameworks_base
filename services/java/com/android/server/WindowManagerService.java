@@ -7072,6 +7072,11 @@ public class WindowManagerService extends IWindowManager.Stub
                     h = mRequestedHeight;
                 }
 
+                // Something is wrong and SurfaceFlinger will not like this,
+                // try to revert to sane values
+                if (w <= 0) w = 1;
+                if (h <= 0) h = 1;
+
                 try {
                     mSurface = new Surface(
                             mSession.mSurfaceSession, mSession.mPid,
