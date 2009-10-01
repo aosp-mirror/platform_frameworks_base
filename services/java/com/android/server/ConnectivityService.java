@@ -439,6 +439,13 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         return tracker != null && tracker.setRadio(turnOn);
     }
 
+    /**
+     * Used to notice when the calling process dies so we can self-expire
+     *
+     * Also used to know if the process has cleaned up after itself when
+     * our auto-expire timer goes off.  The timer has a link to an object.
+     *
+     */
     private class FeatureUser implements IBinder.DeathRecipient {
         int mNetworkType;
         String mFeature;
@@ -453,6 +460,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             mBinder = binder;
             mPid = getCallingPid();
             mUid = getCallingUid();
+
             try {
                 mBinder.linkToDeath(this, 0);
             } catch (RemoteException e) {
@@ -467,11 +475,17 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         public void binderDied() {
             Log.d(TAG, "ConnectivityService FeatureUser binderDied(" +
                     mNetworkType + ", " + mFeature + ", " + mBinder);
-            stopUsingNetworkFeature(mNetworkType, mFeature, mPid, mUid);
+            stopUsingNetworkFeature(this, false);
         }
 
+        public void expire() {
+            Log.d(TAG, "ConnectivityService FeatureUser expire(" +
+                    mNetworkType + ", " + mFeature + ", " + mBinder);
+            stopUsingNetworkFeature(this, false);
+        }
     }
 
+    // javadoc from interface
     public int startUsingNetworkFeature(int networkType, String feature,
             IBinder binder) {
         if (DBG) {
@@ -483,9 +497,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             return Phone.APN_REQUEST_FAILED;
         }
 
-        synchronized (mFeatureUsers) {
-            mFeatureUsers.add(new FeatureUser(networkType, feature, binder));
-        }
+        FeatureUser f = new FeatureUser(networkType, feature, binder);
 
         // TODO - move this into the MobileDataStateTracker
         int usedNetworkType = networkType;
@@ -513,10 +525,17 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                     return Phone.APN_TYPE_NOT_AVAILABLE;
                 }
 
-                if (!mNetRequestersPids[usedNetworkType].contains(currentPid)) {
-                    // this gets used for per-pid dns when connected
-                    mNetRequestersPids[usedNetworkType].add(currentPid);
+                synchronized(this) {
+                    mFeatureUsers.add(f);
+                    if (!mNetRequestersPids[usedNetworkType].contains(currentPid)) {
+                        // this gets used for per-pid dns when connected
+                        mNetRequestersPids[usedNetworkType].add(currentPid);
+                    }
                 }
+                mHandler.sendMessageDelayed(mHandler.obtainMessage(
+                        NetworkStateTracker.EVENT_RESTORE_DEFAULT_NETWORK,
+                        f), getRestoreDefaultNetworkDelay());
+
 
                 if ((ni.isConnectedOrConnecting() == true) &&
                         !network.isTeardownRequested()) {
@@ -533,22 +552,17 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 // check if the radio in play can make another contact
                 // assume if cannot for now
 
-                // since we have to drop the default on this radio, setup
-                // an automatic event to switch back
-                if(mHandler.hasMessages(NetworkStateTracker.
-                        EVENT_RESTORE_DEFAULT_NETWORK, radio) ||
-                        radio.getNetworkInfo().isConnectedOrConnecting()) {
-                    mHandler.removeMessages(NetworkStateTracker.
-                            EVENT_RESTORE_DEFAULT_NETWORK,
-                            radio);
-                    mHandler.sendMessageDelayed(mHandler.obtainMessage(
-                            NetworkStateTracker.EVENT_RESTORE_DEFAULT_NETWORK,
-                            radio), getRestoreDefaultNetworkDelay());
-                }
                 if (DBG) Log.d(TAG, "reconnecting to special network");
                 network.reconnect();
                 return Phone.APN_REQUEST_STARTED;
             } else {
+                synchronized(this) {
+                    mFeatureUsers.add(f);
+                }
+                mHandler.sendMessageDelayed(mHandler.obtainMessage(
+                        NetworkStateTracker.EVENT_RESTORE_DEFAULT_NETWORK,
+                        f), getRestoreDefaultNetworkDelay());
+
                 return network.startUsingNetworkFeature(feature,
                         getCallingPid(), getCallingUid());
             }
@@ -556,13 +570,43 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         return Phone.APN_TYPE_NOT_AVAILABLE;
     }
 
+    // javadoc from interface
     public int stopUsingNetworkFeature(int networkType, String feature) {
-        return stopUsingNetworkFeature(networkType, feature, getCallingPid(),
-                getCallingUid());
+        int pid = getCallingPid();
+        int uid = getCallingUid();
+
+        FeatureUser u = null;
+        boolean found = false;
+
+        synchronized(this) {
+            for (int i = 0; i < mFeatureUsers.size() ; i++) {
+                u = (FeatureUser)mFeatureUsers.get(i);
+                if (uid == u.mUid && pid == u.mPid &&
+                        networkType == u.mNetworkType &&
+                        TextUtils.equals(feature, u.mFeature)) {
+                    found = true;
+                    break;
+                }
+            }
+        }
+        if (found && u != null) {
+            // stop regardless of how many other time this proc had called start
+            return stopUsingNetworkFeature(u, true);
+        } else {
+            // none found!
+            return 1;
+        }
     }
 
-    private int stopUsingNetworkFeature(int networkType, String feature,
-            int pid, int uid) {
+    private int stopUsingNetworkFeature(FeatureUser u, boolean ignoreDups) {
+        int networkType = u.mNetworkType;
+        String feature = u.mFeature;
+        int pid = u.mPid;
+        int uid = u.mUid;
+
+        NetworkStateTracker tracker = null;
+        boolean callTeardown = false;  // used to carry our decision outside of sync block
+
         if (DBG) {
             Log.d(TAG, "stopUsingNetworkFeature for net " + networkType +
                     ": " + feature);
@@ -572,55 +616,65 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             return -1;
         }
 
-        synchronized (mFeatureUsers) {
-            for (int i=0; i < mFeatureUsers.size(); i++) {
-                FeatureUser u = (FeatureUser)mFeatureUsers.get(i);
-                if (uid == u.mUid && pid == u.mPid &&
-                        networkType == u.mNetworkType &&
-                        TextUtils.equals(feature, u.mFeature)) {
-                    u.unlinkDeathRecipient();
-                    mFeatureUsers.remove(i);
-                    break;
-                }
-            }
-        }
-
-        // TODO - move to MobileDataStateTracker
-        int usedNetworkType = networkType;
-        if (networkType == ConnectivityManager.TYPE_MOBILE) {
-            if (TextUtils.equals(feature, Phone.FEATURE_ENABLE_MMS)) {
-                usedNetworkType = ConnectivityManager.TYPE_MOBILE_MMS;
-            } else if (TextUtils.equals(feature, Phone.FEATURE_ENABLE_SUPL)) {
-                usedNetworkType = ConnectivityManager.TYPE_MOBILE_SUPL;
-            } else if (TextUtils.equals(feature, Phone.FEATURE_ENABLE_DUN)) {
-                usedNetworkType = ConnectivityManager.TYPE_MOBILE_DUN;
-            } else if (TextUtils.equals(feature, Phone.FEATURE_ENABLE_HIPRI)) {
-                usedNetworkType = ConnectivityManager.TYPE_MOBILE_HIPRI;
-            }
-        }
-        NetworkStateTracker tracker =  mNetTrackers[usedNetworkType];
-        if(usedNetworkType != networkType) {
-            Integer currentPid = new Integer(pid);
-            if (mNetRequestersPids[usedNetworkType].remove(currentPid)) {
-                reassessPidDns(pid, true);
-            }
-            if (mNetRequestersPids[usedNetworkType].size() != 0) {
-                if (DBG) Log.d(TAG, "not tearing down special network - " +
-                        "others still using it");
+        // need to link the mFeatureUsers list with the mNetRequestersPids state in this
+        // sync block
+        synchronized(this) {
+            // check if this process still has an outstanding start request
+            if (!mFeatureUsers.contains(u)) {
                 return 1;
             }
-
-            tracker.teardown();
-            NetworkStateTracker radio = mNetTrackers[networkType];
-            // Check if we want to revert to the default
-            if (mHandler.hasMessages(NetworkStateTracker.
-                    EVENT_RESTORE_DEFAULT_NETWORK, radio)) {
-                mHandler.removeMessages(NetworkStateTracker.
-                        EVENT_RESTORE_DEFAULT_NETWORK, radio);
-                radio.reconnect();
+            u.unlinkDeathRecipient();
+            mFeatureUsers.remove(mFeatureUsers.indexOf(u));
+            // If we care about duplicate requests, check for that here.
+            //
+            // This is done to support the extension of a request - the app
+            // can request we start the network feature again and renew the
+            // auto-shutoff delay.  Normal "stop" calls from the app though
+            // do not pay attention to duplicate requests - in effect the
+            // API does not refcount and a single stop will counter multiple starts.
+            if (ignoreDups == false) {
+                for (int i = 0; i < mFeatureUsers.size() ; i++) {
+                    FeatureUser x = (FeatureUser)mFeatureUsers.get(i);
+                    if (x.mUid == u.mUid && x.mPid == u.mPid &&
+                            x.mNetworkType == u.mNetworkType &&
+                            TextUtils.equals(x.mFeature, u.mFeature)) {
+                        return 1;
+                    }
+                }
             }
+
+            // TODO - move to MobileDataStateTracker
+            int usedNetworkType = networkType;
+            if (networkType == ConnectivityManager.TYPE_MOBILE) {
+                if (TextUtils.equals(feature, Phone.FEATURE_ENABLE_MMS)) {
+                    usedNetworkType = ConnectivityManager.TYPE_MOBILE_MMS;
+                } else if (TextUtils.equals(feature, Phone.FEATURE_ENABLE_SUPL)) {
+                    usedNetworkType = ConnectivityManager.TYPE_MOBILE_SUPL;
+                } else if (TextUtils.equals(feature, Phone.FEATURE_ENABLE_DUN)) {
+                    usedNetworkType = ConnectivityManager.TYPE_MOBILE_DUN;
+                } else if (TextUtils.equals(feature, Phone.FEATURE_ENABLE_HIPRI)) {
+                    usedNetworkType = ConnectivityManager.TYPE_MOBILE_HIPRI;
+                }
+            }
+            tracker =  mNetTrackers[usedNetworkType];
+            if(usedNetworkType != networkType) {
+                Integer currentPid = new Integer(pid);
+                reassessPidDns(pid, true);
+                mNetRequestersPids[usedNetworkType].remove(currentPid);
+                if (mNetRequestersPids[usedNetworkType].size() != 0) {
+                    if (DBG) Log.d(TAG, "not tearing down special network - " +
+                           "others still using it");
+                    return 1;
+                }
+                callTeardown = true;
+            }
+        }
+
+        if (callTeardown) {
+            tracker.teardown();
             return 1;
         } else {
+            // do it the old fashioned way
             return tracker.stopUsingNetworkFeature(feature, pid, uid);
         }
     }
@@ -1231,17 +1285,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                     // fill me in
                     break;
                 case NetworkStateTracker.EVENT_RESTORE_DEFAULT_NETWORK:
-                    for (NetworkStateTracker net : mNetTrackers) {
-                        NetworkInfo i = net.getNetworkInfo();
-                        if (i.isConnected() &&
-                                !mNetAttributes[i.getType()].isDefault()) {
-                            if (DBG) {
-                                Log.d(TAG, "tearing down " + i +
-                                        " to restore the default network");
-                            }
-                            teardown(net);
-                        }
-                    }
+                    FeatureUser u = (FeatureUser)msg.obj;
+                    u.expire();
                     break;
             }
         }
