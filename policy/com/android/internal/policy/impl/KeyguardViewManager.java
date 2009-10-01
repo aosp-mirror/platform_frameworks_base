@@ -197,10 +197,14 @@ public class KeyguardViewManager implements KeyguardWindowController {
      *
      * @param keyCode The wake key.
      */
-    public void wakeWhenReadyTq(int keyCode) {
+    public boolean wakeWhenReadyTq(int keyCode) {
         if (DEBUG) Log.d(TAG, "wakeWhenReady(" + keyCode + ")");
         if (mKeyguardView != null) {
             mKeyguardView.wakeWhenReadyTq(keyCode);
+            return true;
+        } else {
+            Log.w(TAG, "mKeyguardView is null in wakeWhenReadyTq");
+            return false;
         }
     }
 
