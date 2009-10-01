@@ -18,9 +18,15 @@ package android.media;
 
 import android.net.Uri;
 import android.os.ParcelFileDescriptor;
+import android.provider.BaseColumns;
+import android.provider.MediaStore.Images;
+import android.provider.MediaStore.Images.Thumbnails;
 import android.util.Log;
 
 import android.content.ContentResolver;
+import android.content.ContentUris;
+import android.content.ContentValues;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -250,32 +256,6 @@ public class ThumbnailUtil {
     }
 
     /**
-     * Creates a byte[] for a given bitmap of the desired size. Recycles the
-     * input bitmap.
-     */
-    public static byte[] miniThumbData(Bitmap source) {
-        if (source == null) return null;
-
-        Bitmap miniThumbnail = extractMiniThumb(
-                source, MINI_THUMB_TARGET_SIZE,
-                MINI_THUMB_TARGET_SIZE,
-                RECYCLE_INPUT);
-
-        ByteArrayOutputStream miniOutStream = new ByteArrayOutputStream();
-        miniThumbnail.compress(Bitmap.CompressFormat.JPEG, 75, miniOutStream);
-        miniThumbnail.recycle();
-
-        try {
-            miniOutStream.close();
-            byte [] data = miniOutStream.toByteArray();
-            return data;
-        } catch (java.io.IOException ex) {
-            Log.e(TAG, "got exception ex " + ex);
-        }
-        return null;
-    }
-
-    /**
      * Create a video thumbnail for a video. May return null if the video is
      * corrupt.
      *
@@ -298,6 +278,67 @@ public class ThumbnailUtil {
             } catch (RuntimeException ex) {
                 // Ignore failures while cleaning up.
             }
+        }
+        return bitmap;
+    }
+
+    /**
+     * This method first examines if the thumbnail embedded in EXIF is bigger than our target
+     * size. If not, then it'll create a thumbnail from original image. Due to efficiency
+     * consideration, we want to let MediaThumbRequest avoid calling this method twice for
+     * both kinds, so it only requests for MICRO_KIND and set saveImage to true.
+     *
+     * This method always returns a "square thumbnail" for MICRO_KIND thumbnail.
+     *
+     * @param cr ContentResolver
+     * @param filePath file path needed by EXIF interface
+     * @param uri URI of original image
+     * @param origId image id
+     * @param kind either MINI_KIND or MICRO_KIND
+     * @param saveImage Whether to save MINI_KIND thumbnail obtained in this method.
+     * @return Bitmap
+     */
+    public static Bitmap createImageThumbnail(ContentResolver cr, String filePath, Uri uri,
+            long origId, int kind, boolean saveMini) {
+        boolean wantMini = (kind == Images.Thumbnails.MINI_KIND || saveMini);
+        int targetSize = wantMini ?
+                ThumbnailUtil.THUMBNAIL_TARGET_SIZE : ThumbnailUtil.MINI_THUMB_TARGET_SIZE;
+        int maxPixels = wantMini ?
+                ThumbnailUtil.THUMBNAIL_MAX_NUM_PIXELS : ThumbnailUtil.MINI_THUMB_MAX_NUM_PIXELS;
+        byte[] thumbData = createThumbnailFromEXIF(filePath, targetSize);
+        Bitmap bitmap = null;
+
+        if (thumbData != null) {
+            BitmapFactory.Options options = new BitmapFactory.Options();
+            options.inSampleSize = computeSampleSize(options, targetSize, maxPixels);
+            options.inDither = false;
+            options.inPreferredConfig = Bitmap.Config.ARGB_8888;
+            options.inJustDecodeBounds = false;
+            bitmap = BitmapFactory.decodeByteArray(thumbData, 0, thumbData.length, options);
+        }
+
+        if (bitmap == null) {
+            bitmap = ThumbnailUtil.makeBitmap(targetSize, maxPixels, uri, cr);
+        }
+
+        if (bitmap == null) {
+            return null;
+        }
+
+        if (saveMini) {
+            if (thumbData != null) {
+                ThumbnailUtil.storeThumbnail(cr, origId, thumbData, bitmap.getWidth(),
+                        bitmap.getHeight());
+            } else {
+                ThumbnailUtil.storeThumbnail(cr, origId, bitmap);
+            }
+        }
+
+        if (kind == Images.Thumbnails.MICRO_KIND) {
+            // now we make it a "square thumbnail" for MICRO_KIND thumbnail
+            bitmap = ThumbnailUtil.extractMiniThumb(bitmap,
+                    ThumbnailUtil.MINI_THUMB_TARGET_SIZE,
+                    ThumbnailUtil.MINI_THUMB_TARGET_SIZE, ThumbnailUtil.RECYCLE_INPUT);
         }
         return bitmap;
     }
@@ -396,6 +437,108 @@ public class ThumbnailUtil {
         return b2;
     }
 
+    private static final String[] THUMB_PROJECTION = new String[] {
+        BaseColumns._ID // 0
+    };
 
+    /**
+     * Look up thumbnail uri by given imageId, it will be automatically created if it's not created
+     * yet. Most of the time imageId is identical to thumbId, but it's not always true.
+     * @param req
+     * @param width
+     * @param height
+     * @return Uri Thumbnail uri
+     */
+    private static Uri getImageThumbnailUri(ContentResolver cr, long origId, int width, int height) {
+        Uri thumbUri = Images.Thumbnails.EXTERNAL_CONTENT_URI;
+        Cursor c = cr.query(thumbUri, THUMB_PROJECTION,
+              Thumbnails.IMAGE_ID + "=?",
+              new String[]{String.valueOf(origId)}, null);
+        try {
+            if (c.moveToNext()) {
+                return ContentUris.withAppendedId(thumbUri, c.getLong(0));
+            }
+        } finally {
+            if (c != null) c.close();
+        }
 
+        ContentValues values = new ContentValues(4);
+        values.put(Thumbnails.KIND, Thumbnails.MINI_KIND);
+        values.put(Thumbnails.IMAGE_ID, origId);
+        values.put(Thumbnails.HEIGHT, height);
+        values.put(Thumbnails.WIDTH, width);
+        try {
+            return cr.insert(thumbUri, values);
+        } catch (Exception ex) {
+            Log.w(TAG, ex);
+            return null;
+        }
+    }
+
+    /**
+     * Store a given thumbnail in the database. (Bitmap)
+     */
+    private static boolean storeThumbnail(ContentResolver cr, long origId, Bitmap thumb) {
+        if (thumb == null) return false;
+        try {
+            Uri uri = getImageThumbnailUri(cr, origId, thumb.getWidth(), thumb.getHeight());
+            OutputStream thumbOut = cr.openOutputStream(uri);
+            thumb.compress(Bitmap.CompressFormat.JPEG, 85, thumbOut);
+            thumbOut.close();
+            return true;
+        } catch (Throwable t) {
+            Log.e(TAG, "Unable to store thumbnail", t);
+            return false;
+        }
+    }
+
+    /**
+     * Store a given thumbnail in the database. (byte array)
+     */
+    private static boolean storeThumbnail(ContentResolver cr, long origId, byte[] jpegThumbnail,
+            int width, int height) {
+        if (jpegThumbnail == null) return false;
+
+        Uri uri = getImageThumbnailUri(cr, origId, width, height);
+        if (uri == null) {
+            return false;
+        }
+        try {
+            OutputStream thumbOut = cr.openOutputStream(uri);
+            thumbOut.write(jpegThumbnail);
+            thumbOut.close();
+            return true;
+        } catch (Throwable t) {
+            Log.e(TAG, "Unable to store thumbnail", t);
+            return false;
+        }
+    }
+
+    // Extract thumbnail in image that meets the targetSize criteria.
+    static byte[] createThumbnailFromEXIF(String filePath, int targetSize) {
+        if (filePath == null) return null;
+
+        try {
+            ExifInterface exif = new ExifInterface(filePath);
+            if (exif == null) return null;
+            byte [] thumbData = exif.getThumbnail();
+            if (thumbData == null) return null;
+            // Sniff the size of the EXIF thumbnail before decoding it. Photos
+            // from the device will pass, but images that are side loaded from
+            // other cameras may not.
+            BitmapFactory.Options options = new BitmapFactory.Options();
+            options.inJustDecodeBounds = true;
+            BitmapFactory.decodeByteArray(thumbData, 0, thumbData.length, options);
+
+            int width = options.outWidth;
+            int height = options.outHeight;
+
+            if (width >= targetSize && height >= targetSize) {
+                return thumbData;
+            }
+        } catch (IOException ex) {
+            Log.w(TAG, ex);
+        }
+        return null;
+    }
 }
