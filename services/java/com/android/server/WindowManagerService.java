@@ -1396,12 +1396,15 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
             }
             
-        } else {
+        } else if (mLowerWallpaperTarget != null) {
             // Is it time to stop animating?
-            if (mLowerWallpaperTarget == null
-                    || mLowerWallpaperTarget.mAppToken.animation == null
-                    || mUpperWallpaperTarget == null
-                    || mUpperWallpaperTarget.mAppToken.animation == null) {
+            boolean lowerAnimating = mLowerWallpaperTarget.mAnimation != null
+                    || (mLowerWallpaperTarget.mAppToken != null
+                            && mLowerWallpaperTarget.mAppToken.animation != null);
+            boolean upperAnimating = mUpperWallpaperTarget.mAnimation != null
+                    || (mUpperWallpaperTarget.mAppToken != null
+                            && mUpperWallpaperTarget.mAppToken.animation != null);
+            if (!lowerAnimating || !upperAnimating) {
                 if (DEBUG_WALLPAPER) {
                     Log.v(TAG, "No longer animating wallpaper targets!");
                 }
