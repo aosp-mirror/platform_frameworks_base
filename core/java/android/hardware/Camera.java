@@ -469,6 +469,8 @@ public class Camera {
 
     /**
      * Handles the zoom callback.
+     *
+     * @hide
      */
     public interface ZoomCallback
     {
@@ -487,6 +489,7 @@ public class Camera {
      * Registers a callback to be invoked when the zoom
      * level is updated by the camera driver.
      * @param cb the callback to run
+     * @hide
      */
     public final void setZoomCallback(ZoomCallback cb)
     {
