@@ -24,19 +24,11 @@ import java.io.IOException;
  * The service that manages the PPTP VPN connection.
  */
 class PptpService extends VpnService<PptpProfile> {
-    static final String PPTP_DAEMON = "pptp";
-    static final String PPTP_PORT = "1723";
-
     @Override
     protected void connect(String serverIp, String username, String password)
             throws IOException {
         PptpProfile p = getProfile();
-        MtpdHelper.sendCommand(this, PPTP_DAEMON, serverIp, PPTP_PORT, null,
-                username, password, p.isEncryptionEnabled());
-    }
-
-    @Override
-    protected void stopPreviouslyRunDaemons() {
-        stopDaemon(MtpdHelper.MTPD);
+        getDaemons().startPptp(serverIp, username, password,
+                p.isEncryptionEnabled());
     }
 }
