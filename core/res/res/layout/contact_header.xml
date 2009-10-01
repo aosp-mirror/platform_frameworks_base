@@ -23,10 +23,9 @@
     android:paddingRight="5dip">
 
     <android.widget.QuickContactBadge android:id="@+id/photo"
-        android:layout_alignParentLeft="true"
         android:layout_gravity="center_vertical"
-        android:layout_marginRight="10dip"
-        android:layout_marginLeft="10dip"
+        android:layout_marginRight="8dip"
+        android:layout_marginLeft="-1dip"
         style="@*android:style/Widget.QuickContactBadge.WindowSmall" />
     />
 
@@ -60,7 +59,7 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceSmall"
-            android:maxLines="1"
+            android:singleLine="true"
             android:ellipsize="end"
             android:layout_marginTop="-4dip"
         />
