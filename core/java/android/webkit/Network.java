@@ -180,20 +180,24 @@ class Network {
         }
 
         RequestQueue q = mRequestQueue;
+        RequestHandle handle = null;
         if (loader.isSynchronous()) {
-            q = new RequestQueue(loader.getContext(), 1);
-        }
-
-        RequestHandle handle = q.queueRequest(
-                url, loader.getWebAddress(), method, headers, loader,
-                bodyProvider, bodyLength);
-        loader.attachRequestHandle(handle);
-
-        if (loader.isSynchronous()) {
-            handle.waitUntilComplete();
+            handle = q.queueSynchronousRequest(url, loader.getWebAddress(),
+                    method, headers, loader, bodyProvider, bodyLength);
+            loader.attachRequestHandle(handle);
+            handle.processRequest();
             loader.loadSynchronousMessages();
-            q.shutdown();
+        } else {
+            handle = q.queueRequest(url, loader.getWebAddress(), method,
+                    headers, loader, bodyProvider, bodyLength);
+            // FIXME: Although this is probably a rare condition, normal network
+            // requests are processed in a separate thread. This means that it
+            // is possible to process part of the request before setting the
+            // request handle on the loader. We should probably refactor this to
+            // ensure the handle is attached before processing begins.
+            loader.attachRequestHandle(handle);
         }
+
         return true;
     }
 

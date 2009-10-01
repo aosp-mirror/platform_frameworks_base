@@ -42,15 +42,13 @@ public class RequestHandle {
     private WebAddress    mUri;
     private String        mMethod;
     private Map<String, String> mHeaders;
-
     private RequestQueue  mRequestQueue;
-
     private Request       mRequest;
-
     private InputStream   mBodyProvider;
     private int           mBodyLength;
-
     private int           mRedirectCount = 0;
+    // Used only with synchronous requests.
+    private Connection    mConnection;
 
     private final static String AUTHORIZATION_HEADER = "Authorization";
     private final static String PROXY_AUTHORIZATION_HEADER = "Proxy-Authorization";
@@ -78,6 +76,19 @@ public class RequestHandle {
         mRequestQueue = requestQueue;
 
         mRequest = request;
+    }
+
+    /**
+     * Creates a new request session with a given Connection. This connection
+     * is used during a synchronous load to handle this request.
+     */
+    public RequestHandle(RequestQueue requestQueue, String url, WebAddress uri,
+            String method, Map<String, String> headers,
+            InputStream bodyProvider, int bodyLength, Request request,
+            Connection conn) {
+        this(requestQueue, url, uri, method, headers, bodyProvider, bodyLength,
+                request);
+        mConnection = conn;
     }
 
     /**
@@ -260,6 +271,12 @@ public class RequestHandle {
 
     public void waitUntilComplete() {
         mRequest.waitUntilComplete();
+    }
+
+    public void processRequest() {
+        if (mConnection != null) {
+            mConnection.processRequests(mRequest);
+        }
     }
 
     /**

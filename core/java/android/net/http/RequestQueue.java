@@ -171,16 +171,17 @@ public class RequestQueue implements RequestFeeder {
         }
 
         public Connection getConnection(Context context, HttpHost host) {
+            host = RequestQueue.this.determineHost(host);
             Connection con = mIdleCache.getConnection(host);
             if (con == null) {
                 mTotalConnection++;
-                con = Connection.getConnection(
-                        mContext, host, this, RequestQueue.this);
+                con = Connection.getConnection(mContext, host, mProxyHost,
+                        RequestQueue.this);
             }
             return con;
         }
-        public boolean recycleConnection(HttpHost host, Connection connection) {
-            return mIdleCache.cacheConnection(host, connection);
+        public boolean recycleConnection(Connection connection) {
+            return mIdleCache.cacheConnection(connection.getHost(), connection);
         }
 
     }
@@ -342,6 +343,66 @@ public class RequestQueue implements RequestFeeder {
                 req);
     }
 
+    private static class SyncFeeder implements RequestFeeder {
+        // This is used in the case where the request fails and needs to be
+        // requeued into the RequestFeeder.
+        private Request mRequest;
+        SyncFeeder() {
+        }
+        public Request getRequest() {
+            Request r = mRequest;
+            mRequest = null;
+            return r;
+        }
+        public Request getRequest(HttpHost host) {
+            return getRequest();
+        }
+        public boolean haveRequest(HttpHost host) {
+            return mRequest != null;
+        }
+        public void requeueRequest(Request r) {
+            mRequest = r;
+        }
+    }
+
+    public RequestHandle queueSynchronousRequest(String url, WebAddress uri,
+            String method, Map<String, String> headers,
+            EventHandler eventHandler, InputStream bodyProvider,
+            int bodyLength) {
+        if (HttpLog.LOGV) {
+            HttpLog.v("RequestQueue.dispatchSynchronousRequest " + uri);
+        }
+
+        HttpHost host = new HttpHost(uri.mHost, uri.mPort, uri.mScheme);
+
+        Request req = new Request(method, host, mProxyHost, uri.mPath,
+                bodyProvider, bodyLength, eventHandler, headers);
+
+        // Open a new connection that uses our special RequestFeeder
+        // implementation.
+        host = determineHost(host);
+        Connection conn = Connection.getConnection(mContext, host, mProxyHost,
+                new SyncFeeder());
+
+        // TODO: I would like to process the request here but LoadListener
+        // needs a RequestHandle to process some messages.
+        return new RequestHandle(this, url, uri, method, headers, bodyProvider,
+                bodyLength, req, conn);
+
+    }
+
+    // Chooses between the proxy and the request's host.
+    private HttpHost determineHost(HttpHost host) {
+        // There used to be a comment in ConnectionThread about t-mob's proxy
+        // being really bad about https. But, HttpsConnection actually looks
+        // for a proxy and connects through it anyway. I think that this check
+        // is still valid because if a site is https, we will use
+        // HttpsConnection rather than HttpConnection if the proxy address is
+        // not secure.
+        return (mProxyHost == null || "https".equals(host.getSchemeName()))
+                ? host : mProxyHost;
+    }
+
     /**
      * @return true iff there are any non-active requests pending
      */
@@ -478,6 +539,6 @@ public class RequestQueue implements RequestFeeder {
     interface ConnectionManager {
         HttpHost getProxyHost();
         Connection getConnection(Context context, HttpHost host);
-        boolean recycleConnection(HttpHost host, Connection connection);
+        boolean recycleConnection(Connection connection);
     }
 }

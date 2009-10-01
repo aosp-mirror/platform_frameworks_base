@@ -35,9 +35,8 @@ import org.apache.http.params.HttpConnectionParams;
 class HttpConnection extends Connection {
 
     HttpConnection(Context context, HttpHost host,
-                   RequestQueue.ConnectionManager connectionManager,
                    RequestFeeder requestFeeder) {
-        super(context, host, connectionManager, requestFeeder);
+        super(context, host, requestFeeder);
     }
 
     /**

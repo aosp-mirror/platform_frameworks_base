@@ -108,24 +108,11 @@ class ConnectionThread extends Thread {
                 if (HttpLog.LOGV) HttpLog.v("ConnectionThread: new request " +
                                             request.mHost + " " + request );
 
-                HttpHost proxy = mConnectionManager.getProxyHost();
-
-                HttpHost host;
-                if (false) {
-                    // Allow https proxy
-                    host = proxy == null ? request.mHost : proxy;
-                } else {
-                    // Disallow https proxy -- tmob proxy server
-                    // serves a request loop for https reqs
-                    host = (proxy == null ||
-                            request.mHost.getSchemeName().equals("https")) ?
-                            request.mHost : proxy;
-                }
-                mConnection = mConnectionManager.getConnection(mContext, host);
+                mConnection = mConnectionManager.getConnection(mContext,
+                        request.mHost);
                 mConnection.processRequests(request);
                 if (mConnection.getCanPersist()) {
-                    if (!mConnectionManager.recycleConnection(host,
-                                mConnection)) {
+                    if (!mConnectionManager.recycleConnection(mConnection)) {
                         mConnection.closeConnection();
                     }
                 } else {
