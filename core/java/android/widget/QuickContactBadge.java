@@ -25,7 +25,7 @@ import android.database.Cursor;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.provider.ContactsContract.Contacts;
-import android.provider.ContactsContract.FastTrack;
+import android.provider.ContactsContract.QuickContact;
 import android.provider.ContactsContract.Intents;
 import android.provider.ContactsContract.PhoneLookup;
 import android.provider.ContactsContract.RawContacts;
@@ -88,7 +88,7 @@ public class QuickContactBadge extends ImageView implements OnClickListener {
                     com.android.internal.R.styleable.QuickContactBadge, defStyle, 0);
 
         mMode = a.getInt(com.android.internal.R.styleable.QuickContactBadge_quickContactWindowSize,
-                FastTrack.MODE_MEDIUM);
+                QuickContact.MODE_MEDIUM);
 
         a.recycle();
 
@@ -100,6 +100,15 @@ public class QuickContactBadge extends ImageView implements OnClickListener {
     private void init() {
         mQueryHandler = new QueryHandler(mContext.getContentResolver());
         setOnClickListener(this);
+    }
+
+    /**
+     * Set the QuickContact window mode. Options are {@link QuickContact#MODE_SMALL},
+     * {@link QuickContact#MODE_MEDIUM}, {@link QuickContact#MODE_LARGE}.
+     * @param size
+     */
+    public void setMode(int size) {
+        mMode = size;
     }
 
     /**
@@ -199,7 +208,7 @@ public class QuickContactBadge extends ImageView implements OnClickListener {
     }
 
     private void trigger(Uri lookupUri) {
-        FastTrack.showFastTrack(getContext(), this, lookupUri, mMode, mExcludeMimes);
+        QuickContact.showQuickContact(getContext(), this, lookupUri, mMode, mExcludeMimes);
     }
 
     private class QueryHandler extends AsyncQueryHandler {
