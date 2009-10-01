@@ -1093,7 +1093,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 // so we need to be conservative and assume it isn't.
                 IBinder token = (IBinder)msg.obj;
                 Log.w(TAG, "Activity idle timeout for " + token);
-                activityIdleInternal(token, true);
+                activityIdleInternal(token, true, null);
             } break;
             case DESTROY_TIMEOUT_MSG: {
                 IBinder token = (IBinder)msg.obj;
@@ -1104,7 +1104,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             } break;
             case IDLE_NOW_MSG: {
                 IBinder token = (IBinder)msg.obj;
-                activityIdle(token);
+                activityIdle(token, null);
             } break;
             case SERVICE_TIMEOUT_MSG: {
                 if (mDidDexOpt) {
@@ -5419,9 +5419,9 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         }
     }
 
-    public final void activityIdle(IBinder token) {
+    public final void activityIdle(IBinder token, Configuration config) {
         final long origId = Binder.clearCallingIdentity();
-        activityIdleInternal(token, false);
+        activityIdleInternal(token, false, config);
         Binder.restoreCallingIdentity(origId);
     }
 
@@ -5474,7 +5474,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         mWindowManager.enableScreenAfterBoot();
     }
 
-    final void activityIdleInternal(IBinder token, boolean fromTimeout) {
+    final void activityIdleInternal(IBinder token, boolean fromTimeout,
+            Configuration config) {
         if (localLOGV) Log.v(TAG, "Activity idle: " + token);
 
         ArrayList<HistoryRecord> stops = null;
@@ -5497,6 +5498,15 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             if (index >= 0) {
                 HistoryRecord r = (HistoryRecord)mHistory.get(index);
 
+                // This is a hack to semi-deal with a race condition
+                // in the client where it can be constructed with a
+                // newer configuration from when we asked it to launch.
+                // We'll update with whatever configuration it now says
+                // it used to launch.
+                if (config != null) {
+                    r.configuration = config;
+                }
+                
                 // No longer need to keep the device awake.
                 if (mResumedActivity == r && mLaunchingActivity.isHeld()) {
                     mHandler.removeMessages(LAUNCH_TIMEOUT_MSG);
