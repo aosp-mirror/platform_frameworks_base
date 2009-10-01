@@ -1281,7 +1281,11 @@ public class Camera {
         }
 
         /**
-         * Sets the scene mode.
+         * Sets the scene mode. Other parameters may be changed after changing
+         * scene mode. For example, flash and supported flash mode may be
+         * changed to "off" in night scene mode. After setting scene mode,
+         * applications should call getParameters to know if some parameters are
+         * changed.
          *
          * @param value SCENE_MODE_XXX string constants.
          */
