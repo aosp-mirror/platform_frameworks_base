@@ -260,7 +260,7 @@ static jboolean connectNative(JNIEnv *env, jobject obj)
 #endif
 }
 
-static jboolean connectAsyncNative(JNIEnv *env, jobject obj) {
+static jint connectAsyncNative(JNIEnv *env, jobject obj) {
     LOGV(__FUNCTION__);
 #ifdef HAVE_BLUETOOTH
     struct sockaddr_rc addr;
@@ -268,7 +268,7 @@ static jboolean connectAsyncNative(JNIEnv *env, jobject obj) {
 
     if (nat->rfcomm_connected) {
         LOGV("RFCOMM socket is already connected or connection is in progress.");
-        return JNI_TRUE;
+        return 0;
     }
 
     if (nat->rfcomm_sock < 0) {
@@ -278,7 +278,7 @@ static jboolean connectAsyncNative(JNIEnv *env, jobject obj) {
         if (nat->rfcomm_sock < 0) {
             LOGE("%s: Could not create RFCOMM socket: %s\n", __FUNCTION__,
                  strerror(errno));
-            return JNI_FALSE;
+            return -1;
         }
 
         if (debug_no_encrypt()) {
@@ -291,7 +291,7 @@ static jboolean connectAsyncNative(JNIEnv *env, jobject obj) {
                     sizeof(lm)) < 0) {
             LOGE("%s: Can't set RFCOMM link mode", __FUNCTION__);
             close(nat->rfcomm_sock);
-            return JNI_FALSE;
+            return -1;
         }
         LOGI("Created RFCOMM socket fd %d.", nat->rfcomm_sock);
     }
@@ -314,7 +314,7 @@ static jboolean connectAsyncNative(JNIEnv *env, jobject obj) {
             if (rc >= 0) {
                 nat->rfcomm_connected = 1;
                 LOGI("async connect successful");
-                return JNI_TRUE;
+                return 0;
             }
             else if (rc < 0) {
                 if (errno == EINPROGRESS || errno == EAGAIN)
@@ -322,20 +322,20 @@ static jboolean connectAsyncNative(JNIEnv *env, jobject obj) {
                     LOGI("async connect is in progress (%s)",
                          strerror(errno));
                     nat->rfcomm_connected = -1;
-                    return JNI_TRUE;
+                    return 0;
                 }
                 else
                 {
                     LOGE("async connect error: %s (%d)", strerror(errno), errno);
                     close(nat->rfcomm_sock);
                     nat->rfcomm_sock = -1;
-                    return JNI_FALSE;
+                    return -errno;
                 }
             }
         } // fcntl(nat->rfcomm_sock ...)
     } // if (nat->rfcomm_sock_flags >= 0)
 #endif
-    return JNI_FALSE;
+    return -1;
 }
 
 static jint waitForAsyncConnectNative(JNIEnv *env, jobject obj,
@@ -357,9 +357,11 @@ static jint waitForAsyncConnectNative(JNIEnv *env, jobject obj,
         close(nat->rfcomm_sock);
         nat->rfcomm_sock = -1;
     }
-    if (JNI_FALSE == connectAsyncNative(env, obj)) {
+    int ret = connectAsyncNative(env, obj);
+
+    if (ret < 0) {
         LOGI("Failed to re-open RFCOMM socket!");
-        return -1;
+        return ret;
     }
 
     if (nat->rfcomm_sock >= 0) {
@@ -532,7 +534,7 @@ static JNINativeMethod sMethods[] = {
     {"initializeNativeDataNative", "(I)V", (void *)initializeNativeDataNative},
     {"cleanupNativeDataNative", "()V", (void *)cleanupNativeDataNative},
     {"connectNative", "()Z", (void *)connectNative},
-    {"connectAsyncNative", "()Z", (void *)connectAsyncNative},
+    {"connectAsyncNative", "()I", (void *)connectAsyncNative},
     {"waitForAsyncConnectNative", "(I)I", (void *)waitForAsyncConnectNative},
     {"disconnectNative", "()V", (void *)disconnectNative},
     {"sendURCNative", "(Ljava/lang/String;)Z", (void *)sendURCNative},
