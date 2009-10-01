@@ -23,7 +23,7 @@
 namespace android {
 namespace renderscript {
 
-struct Matrix 
+struct Matrix
 {
     float m[16];
 
@@ -46,6 +46,8 @@ struct Matrix
 
     void loadOrtho(float l, float r, float b, float t, float n, float f);
     void loadFrustum(float l, float r, float b, float t, float n, float f);
+
+    void vectorMultiply(float *v4out, const float *v3in) const;
 
     void multiply(const Matrix *rhs) {
         Matrix tmp;
@@ -71,7 +73,7 @@ struct Matrix
 
 
 };
-    
+
 
 
 }

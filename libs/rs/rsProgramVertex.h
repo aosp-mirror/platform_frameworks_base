@@ -43,6 +43,9 @@ public:
     void setModelviewMatrix(const rsc_Matrix *) const;
     void setTextureMatrix(const rsc_Matrix *) const;
 
+    void transformToScreen(const Context *, float *v4out, const float *v3in) const;
+
+
 protected:
     uint32_t mLightCount;
     ObjectBaseRef<const Light> mLights[MAX_LIGHTS];

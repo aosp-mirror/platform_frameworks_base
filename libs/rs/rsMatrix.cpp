@@ -85,7 +85,7 @@ void Matrix::loadRotate(float rot, float x, float y, float z)
     const float zx = z * x;
     const float xs = x * s;
     const float ys = y * s;
-    const float zs = z * s;		
+    const float zs = z * s;
     m[ 0] = x*x*nc +  c;
     m[ 4] =  xy*nc - zs;
     m[ 8] =  zx*nc + ys;
@@ -156,4 +156,9 @@ void Matrix::loadFrustum(float l, float r, float b, float t, float n, float f) {
     m[15]= 0;
 }
 
-
+void Matrix::vectorMultiply(float *out, const float *in) const {
+    out[0] = (m[0] * in[0]) + (m[4] * in[1]) + (m[8] * in[2]) + m[12];
+    out[1] = (m[1] * in[0]) + (m[5] * in[1]) + (m[9] * in[2]) + m[13];
+    out[2] = (m[2] * in[0]) + (m[6] * in[1]) + (m[10] * in[2]) + m[14];
+    out[3] = (m[3] * in[0]) + (m[7] * in[1]) + (m[11] * in[2]) + m[15];
+}
