@@ -22,9 +22,6 @@ import com.android.internal.widget.LockPatternUtils;
 import android.app.ActivityManagerNative;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
-import android.app.StatusBarManager;
-import static android.app.StatusBarManager.DISABLE_EXPAND;
-import static android.app.StatusBarManager.DISABLE_NONE;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -159,11 +156,6 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
      * @see #wakeWhenReadyLocked(int)
      */
     private PowerManager.WakeLock mWakeAndHandOff;
-
-    /**
-     * Used to disable / reenable status bar expansion.
-     */
-    private StatusBarManager mStatusBarManager;
 
     private KeyguardViewManager mKeyguardViewManager;
 
@@ -349,14 +341,12 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
                 if (DEBUG) Log.d(TAG, "remembering to reshow, hiding keyguard, "
                         + "disabling status bar expansion");
                 mNeedToReshowWhenReenabled = true;
-                setStatusBarExpandable(false);
                 hideLocked();
             } else if (enabled && mNeedToReshowWhenReenabled) {
                 // reenabled after previously hidden, reshow
                 if (DEBUG) Log.d(TAG, "previously hidden, reshowing, reenabling "
                         + "status bar expansion");
                 mNeedToReshowWhenReenabled = false;
-                setStatusBarExpandable(true);
 
                 if (mExitSecureCallback != null) {
                     if (DEBUG) Log.d(TAG, "onKeyguardExitResult(false), resetting");
@@ -409,15 +399,6 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
                 verifyUnlockLocked();
             }
         }
-    }
-
-
-    private void setStatusBarExpandable(boolean isExpandable) {
-        if (mStatusBarManager == null) {
-            mStatusBarManager =
-                    (StatusBarManager) mContext.getSystemService(Context.STATUS_BAR_SERVICE);
-        }
-        mStatusBarManager.disable(isExpandable ? DISABLE_NONE : DISABLE_EXPAND);
     }
 
     /**
@@ -744,7 +725,6 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
                     // the keyguard when they've released the lock
                     mExternallyEnabled = true;
                     mNeedToReshowWhenReenabled = false;
-                    setStatusBarExpandable(true);
                 }
             }
         }
