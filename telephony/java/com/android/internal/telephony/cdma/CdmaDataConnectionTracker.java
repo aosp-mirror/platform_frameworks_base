@@ -302,7 +302,7 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
 
     private boolean isDataAllowed() {
         boolean roaming = phone.getServiceState().getRoaming();
-        return getAnyDataEnabled() && (!roaming || getDataOnRoamingEnabled());
+        return getAnyDataEnabled() && (!roaming || getDataOnRoamingEnabled()) && mMasterDataEnabled;
     }
 
     private boolean trySetupData(String reason) {
@@ -347,7 +347,8 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
                     " roaming=" + roaming +
                     " dataOnRoamingEnable=" + getDataOnRoamingEnabled() +
                     " desiredPowerState=" + desiredPowerState +
-                    " PendingRestartRadio=" + mPendingRestartRadio);
+                    " PendingRestartRadio=" + mPendingRestartRadio +
+                    " MasterDataEnabled=" + mMasterDataEnabled);
             }
             return false;
         }
