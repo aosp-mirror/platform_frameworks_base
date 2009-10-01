@@ -57,6 +57,7 @@ public class RotarySelector extends View {
     // UI elements
     private Bitmap mBackground;
     private Bitmap mDimple;
+    private Bitmap mDimpleDim;
 
     private Bitmap mLeftHandleIcon;
     private Bitmap mRightHandleIcon;
@@ -178,6 +179,7 @@ public class RotarySelector extends View {
         // Assets (all are BitmapDrawables).
         mBackground = getBitmapFor(R.drawable.jog_dial_bg);
         mDimple = getBitmapFor(R.drawable.jog_dial_dimple);
+        mDimpleDim = getBitmapFor(R.drawable.jog_dial_dimple_dim);
 
         mArrowLongLeft = getBitmapFor(R.drawable.jog_dial_arrow_long_left_green);
         mArrowLongRight = getBitmapFor(R.drawable.jog_dial_arrow_long_right_red);
@@ -347,6 +349,9 @@ public class RotarySelector extends View {
 //            canvas.drawCircle(or + bgTop, midX, or, mPaint);
 //        }
 
+        // dimple selection
+        Bitmap dimpleBitmap = mGrabbedState == NOTHING_GRABBED ? mDimple : mDimpleDim;
+
         // left dimple / icon
         {
             final int xOffset = mLeftHandleX + mRotaryOffsetX;
@@ -356,13 +361,13 @@ public class RotarySelector extends View {
                     mOuterRadius,
                     xOffset);
             if (isHoriz()) {
-                drawCentered(mDimple, canvas, xOffset, drawableY + bgTop);
+                drawCentered(dimpleBitmap, canvas, xOffset, drawableY + bgTop);
                 if (mGrabbedState != RIGHT_HANDLE_GRABBED) {
                     drawCentered(mLeftHandleIcon, canvas, xOffset, drawableY + bgTop);
                 }
             } else {
                 // vertical
-                drawCentered(mDimple, canvas, drawableY + bgTop, height - xOffset);
+                drawCentered(dimpleBitmap, canvas, drawableY + bgTop, height - xOffset);
                 if (mGrabbedState != RIGHT_HANDLE_GRABBED) {
                     drawCentered(mLeftHandleIcon, canvas, drawableY + bgTop, height - xOffset);
                 }
@@ -381,10 +386,10 @@ public class RotarySelector extends View {
                     xOffset);
 
             if (isHoriz()) {
-                drawCentered(mDimple, canvas, xOffset, drawableY + bgTop);
+                drawCentered(dimpleBitmap, canvas, xOffset, drawableY + bgTop);
             } else {
                 // vertical
-                drawCentered(mDimple, canvas, drawableY + bgTop, height - xOffset);
+                drawCentered(dimpleBitmap, canvas, drawableY + bgTop, height - xOffset);
             }
         }
 
@@ -398,13 +403,13 @@ public class RotarySelector extends View {
                     xOffset);
 
             if (isHoriz()) {
-                drawCentered(mDimple, canvas, xOffset, drawableY + bgTop);
+                drawCentered(dimpleBitmap, canvas, xOffset, drawableY + bgTop);
                 if (mGrabbedState != LEFT_HANDLE_GRABBED) {
                     drawCentered(mRightHandleIcon, canvas, xOffset, drawableY + bgTop);
                 }
             } else {
                 // vertical
-                drawCentered(mDimple, canvas, drawableY + bgTop, height - xOffset);
+                drawCentered(dimpleBitmap, canvas, drawableY + bgTop, height - xOffset);
                 if (mGrabbedState != LEFT_HANDLE_GRABBED) {
                     drawCentered(mRightHandleIcon, canvas, drawableY + bgTop, height - xOffset);
                 }
@@ -422,9 +427,9 @@ public class RotarySelector extends View {
                     dimpleLeft);
 
             if (isHoriz()) {
-                drawCentered(mDimple, canvas, dimpleLeft, drawableY + bgTop);
+                drawCentered(dimpleBitmap, canvas, dimpleLeft, drawableY + bgTop);
             } else {
-                drawCentered(mDimple, canvas, drawableY + bgTop, height - dimpleLeft);
+                drawCentered(dimpleBitmap, canvas, drawableY + bgTop, height - dimpleLeft);
             }
             dimpleLeft -= mDimpleSpacing;
         }
@@ -440,9 +445,9 @@ public class RotarySelector extends View {
                     dimpleRight);
 
             if (isHoriz()) {
-                drawCentered(mDimple, canvas, dimpleRight, drawableY + bgTop);
+                drawCentered(dimpleBitmap, canvas, dimpleRight, drawableY + bgTop);
             } else {
-                drawCentered(mDimple, canvas, drawableY + bgTop, height - dimpleRight);
+                drawCentered(dimpleBitmap, canvas, drawableY + bgTop, height - dimpleRight);
             }
             dimpleRight += mDimpleSpacing;
         }
