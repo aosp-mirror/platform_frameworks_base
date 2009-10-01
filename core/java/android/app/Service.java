@@ -158,9 +158,9 @@ import java.io.PrintWriter;
  * happens, the system will later try to restart the service.  An important
  * consequence of this is that if you implement {@link #onStartCommand onStartCommand()}
  * to schedule work to be done asynchronously or in another thread, then you
- * may want to write information about that work into persistent storage
- * during the onStartCommand() call so that it does not get lost if the service later
- * gets killed.
+ * may want to use {@link #START_FLAG_REDELIVERY} to have the system
+ * re-deliver an Intent for you so that it does not get lost if your service
+ * is killed while processing it.
  * 
  * <p>Other application components running in the same process as the service
  * (such as an {@link android.app.Activity}) can, of course, increase the
@@ -230,7 +230,10 @@ public abstract class Service extends ContextWrapper implements ComponentCallbac
      * {@link #onStartCommand}), and there are no new start intents to
      * deliver to it, then take the service out of the started state and
      * don't recreate until a future explicit call to
-     * {@link Context#startService Context.startService(Intent)}.
+     * {@link Context#startService Context.startService(Intent)}.  The
+     * service will not receive a {@link #onStartCommand(Intent, int, int)}
+     * call with a null Intent because it will not be re-started if there
+     * are no pending Intents to deliver.
      * 
      * <p>This mode makes sense for things that want to do some work as a
      * result of being started, but can be stopped when under memory pressure
@@ -252,7 +255,11 @@ public abstract class Service extends ContextWrapper implements ComponentCallbac
      * and the last delivered Intent re-delivered to it again via
      * {@link #onStartCommand}.  This Intent will remain scheduled for
      * redelivery until the service calls {@link #stopSelf(int)} with the
-     * start ID provided to {@link #onStartCommand}.
+     * start ID provided to {@link #onStartCommand}.  The
+     * service will not receive a {@link #onStartCommand(Intent, int, int)}
+     * call with a null Intent because it will will only be re-started if
+     * it is not finished processing all Intents sent to it (and any such
+     * pending events will be delivered at the point of restart).
      */
     public static final int START_REDELIVER_INTENT = 3;
     
@@ -402,6 +409,13 @@ public abstract class Service extends ContextWrapper implements ComponentCallbac
      * safely avoid stopping if there is a start request from a client that you 
      * haven't yet seen in {@link #onStart}. 
      * 
+     * <p><em>Be careful about ordering of your calls to this function.</em>.
+     * If you call this function with the most-recently received ID before
+     * you have called it for previously received IDs, the service will be
+     * immediately stopped anyway.  If you may end up processing IDs out
+     * of order (such as by dispatching them on separate threads), then you
+     * are responsible for stopping them in the same order you received them.</p>
+     * 
      * @param startId The most recent start identifier received in {@link 
      *                #onStart}.
      * @return Returns true if the startId matches the last start request
@@ -423,7 +437,15 @@ public abstract class Service extends ContextWrapper implements ComponentCallbac
     
     /**
      * @deprecated This is a now a no-op, use
-     * {@link #startForeground(int, Notification)} instead.
+     * {@link #startForeground(int, Notification)} instead.  This method
+     * has been turned into a no-op rather than simply being deprecated
+     * because analysis of numerous poorly behaving devices has shown that
+     * increasingly often the trouble is being caused in part by applications
+     * that are abusing it.  Thus, given a choice between introducing
+     * problems in existing applications using this API (by allowing them to
+     * be killed when they would like to avoid it), vs allowing the performance
+     * of the entire system to be decreased, this method was deemed less
+     * important.
      */
     @Deprecated
     public final void setForeground(boolean isForeground) {
