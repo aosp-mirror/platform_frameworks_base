@@ -1116,6 +1116,7 @@ public final class ActivityThread {
         boolean stopped;
         boolean hideForNow;
         Configuration newConfig;
+        Configuration createdConfig;
         ActivityRecord nextIdle;
 
         ActivityInfo activityInfo;
@@ -1944,7 +1945,8 @@ public final class ActivityThread {
                         (a.activity != null ? a.activity.mFinished : false));
                     if (a.activity != null && !a.activity.mFinished) {
                         try {
-                            am.activityIdle(a.token);
+                            am.activityIdle(a.token, a.createdConfig);
+                            a.createdConfig = null;
                         } catch (RemoteException ex) {
                         }
                     }
@@ -2464,6 +2466,7 @@ public final class ActivityThread {
         Activity a = performLaunchActivity(r, customIntent);
 
         if (a != null) {
+            r.createdConfig = new Configuration(a.getResources().getConfiguration());
             handleResumeActivity(r.token, false, r.isForward);
 
             if (!r.activity.mFinished && r.startsNotResumed) {

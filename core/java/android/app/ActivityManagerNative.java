@@ -315,8 +315,12 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
         case ACTIVITY_IDLE_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             IBinder token = data.readStrongBinder();
+            Configuration config = null;
+            if (data.readInt() != 0) {
+                config = Configuration.CREATOR.createFromParcel(data);
+            }
             if (token != null) {
-                activityIdle(token);
+                activityIdle(token, config);
             }
             reply.writeNoException();
             return true;
@@ -1397,12 +1401,18 @@ class ActivityManagerProxy implements IActivityManager
         data.recycle();
         reply.recycle();
     }
-    public void activityIdle(IBinder token) throws RemoteException
+    public void activityIdle(IBinder token, Configuration config) throws RemoteException
     {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IActivityManager.descriptor);
         data.writeStrongBinder(token);
+        if (config != null) {
+            data.writeInt(1);
+            config.writeToParcel(data, 0);
+        } else {
+            data.writeInt(0);
+        }
         mRemote.transact(ACTIVITY_IDLE_TRANSACTION, data, reply, IBinder.FLAG_ONEWAY);
         reply.readException();
         data.recycle();
