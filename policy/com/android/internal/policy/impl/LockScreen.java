@@ -81,6 +81,7 @@ class LockScreen extends LinearLayout implements KeyguardScreen, KeyguardUpdateM
     private java.text.DateFormat mDateFormat;
     private java.text.DateFormat mTimeFormat;
     private boolean mCreatedInPortrait;
+    private boolean mDisableMenuKeyInLockScreen;
 
     /**
      * The status of this lock screen.
@@ -149,6 +150,9 @@ class LockScreen extends LinearLayout implements KeyguardScreen, KeyguardUpdateM
         mUpdateMonitor = updateMonitor;
         mCallback = callback;
 
+        mDisableMenuKeyInLockScreen = getResources()
+            .getBoolean(R.bool.config_disableMenuKeyInLockScreen);
+
         mCreatedInPortrait = updateMonitor.isInPortrait();
 
         final LayoutInflater inflater = LayoutInflater.from(context);
@@ -213,7 +217,7 @@ class LockScreen extends LinearLayout implements KeyguardScreen, KeyguardUpdateM
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if (keyCode == KeyEvent.KEYCODE_MENU) {
+        if (keyCode == KeyEvent.KEYCODE_MENU && !mDisableMenuKeyInLockScreen) {
             mCallback.goToUnlockScreen();
         }
         return false;
