@@ -1111,6 +1111,12 @@ public class WebView extends AbsoluteLayout
         ArrayList<byte[]> history = new ArrayList<byte[]>(size);
         for (int i = 0; i < size; i++) {
             WebHistoryItem item = list.getItemAtIndex(i);
+            if (null == item) {
+                // FIXME: this shouldn't happen
+                // need to determine how item got set to null
+                Log.w(LOGTAG, "saveState: Unexpected null history item.");
+                return null;
+            }
             byte[] data = item.getFlattenedData();
             if (data == null) {
                 // It would be very odd to not have any data for a given history
