@@ -1785,17 +1785,12 @@ public class SearchManager
      * context here, in order to improve quality or specificity of its own
      * searches.  This data will be returned with SEARCH intent(s).  Null if
      * no extra data is required.
-     * @param globalSearch If false, this will only launch the search that has been specifically
-     * defined by the application (which is usually defined as a local search).  If no default
-     * search is defined in the current application or activity, no search will be launched.
-     * If true, this will always launch a platform-global (e.g. web-based) search instead.
      *
      * @see #startSearch
      */
     public void triggerSearch(String query,
                               ComponentName launchActivity,
-                              Bundle appSearchData,
-                              boolean globalSearch) {
+                              Bundle appSearchData) {
         if (mIdent == 0) throw new IllegalArgumentException(
                 "Called from outside of an Activity context");
         if (!mAssociatedPackage.equals(launchActivity.getPackageName())) {
@@ -1808,7 +1803,7 @@ public class SearchManager
         }
         try {
             mService.triggerSearch(query, launchActivity, appSearchData, mSearchManagerCallback,
-                    globalSearch, mIdent);
+                    mIdent);
         } catch (RemoteException ex) {
             Log.e(TAG, "triggerSearch() failed.", ex);
         }
