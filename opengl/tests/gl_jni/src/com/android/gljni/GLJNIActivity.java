@@ -18,28 +18,27 @@ package com.android.gljni;
 
 import android.app.Activity;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.WindowManager;
-
-import java.io.File;
-
 
 public class GLJNIActivity extends Activity {
 
     GLJNIView mView;
 
-    @Override protected void onCreate(Bundle icicle) {
+    @Override
+    protected void onCreate(Bundle icicle) {
         super.onCreate(icicle);
         mView = new GLJNIView(getApplication());
-	setContentView(mView);
+	    mView.setFocusableInTouchMode(true);
+	    setContentView(mView);
     }
 
-    @Override protected void onPause() {
+    @Override
+    protected void onPause() {
         super.onPause();
         mView.onPause();
     }
 
-    @Override protected void onResume() {
+    @Override
+    protected void onResume() {
         super.onResume();
         mView.onResume();
     }

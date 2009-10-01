@@ -80,5 +80,11 @@ class GLJNIView extends GLSurfaceView {
             // Do nothing.
         }
     }
+    
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        GLJNILib.changeBackground();
+        return true;
+    }
 }
 

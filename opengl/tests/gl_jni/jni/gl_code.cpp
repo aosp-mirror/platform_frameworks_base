@@ -3,13 +3,16 @@
 #include <nativehelper/jni.h>
 #define LOG_TAG "GLJNI gl_code.cpp"
 #include <utils/Log.h>
+
 #include <GLES/gl.h>
 
 #include <stdio.h>
+
 #include <stdlib.h>
 #include <math.h>
 
 GLuint texture;
+GLfloat background;
 
 #define FIXED_ONE 0x10000
 
@@ -83,9 +86,9 @@ void init_scene(int width, int height)
     printGLString("Vendor", GL_VENDOR);
     printGLString("Renderer", GL_RENDERER);
     printGLString("Extensions", GL_EXTENSIONS);
+
     glDisable(GL_DITHER);
     glEnable(GL_CULL_FACE);
-
 
     float ratio = width / height;
     glViewport(0, 0, width, height);
@@ -94,8 +97,8 @@ void init_scene(int width, int height)
     glLoadIdentity();
     glFrustumf(-ratio, ratio, -1, 1, 1, 10);
 
-
     glMatrixMode(GL_MODELVIEW);
+
     glLoadIdentity();
     gluLookAt(
             0, 0, 3,  // eye
@@ -122,6 +125,7 @@ void create_texture()
             on, off, on, off, on, off, on, off,
             off, on, off, on, off, on, off, on,
     };
+
     glGenTextures(1, &texture);
     glBindTexture(GL_TEXTURE_2D, texture);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 8, 8, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
@@ -133,8 +137,8 @@ void create_texture()
 extern "C" {
     JNIEXPORT void JNICALL Java_com_android_gljni_GLJNILib_init(JNIEnv * env, jobject obj,  jint width, jint height);
     JNIEXPORT void JNICALL Java_com_android_gljni_GLJNILib_step(JNIEnv * env, jobject obj);
+    JNIEXPORT void JNICALL Java_com_android_gljni_GLJNILib_changeBackground(JNIEnv * env, jobject obj);
 };
-
 
 JNIEXPORT void JNICALL Java_com_android_gljni_GLJNILib_init(JNIEnv * env, jobject obj,  jint width, jint height)
 {
@@ -159,10 +163,8 @@ JNIEXPORT void JNICALL Java_com_android_gljni_GLJNILib_step(JNIEnv * env, jobjec
     };
 
     const GLushort quadIndices[] = { 0, 1, 2,  0, 2, 3 };
-
     glVertexPointer(3, GL_FLOAT, 0, vertices);
     glTexCoordPointer(2, GL_FIXED, 0, texCoords);
-
 
     int nelem = sizeof(quadIndices)/sizeof(quadIndices[0]);
     static float grey;
@@ -170,8 +172,12 @@ JNIEXPORT void JNICALL Java_com_android_gljni_GLJNILib_step(JNIEnv * env, jobjec
     if (grey > 1.0f) {
         grey = 0.0f;
     }
-    glClearColor(grey, grey, grey, 1.0f);
+    glClearColor(background, grey, grey, 1.0f);
     glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
     glDrawElements(GL_TRIANGLES, nelem, GL_UNSIGNED_SHORT, quadIndices);
 }
 
+JNIEXPORT void JNICALL Java_com_android_gljni_GLJNILib_changeBackground(JNIEnv * env, jobject obj)
+{
+    background = 1.0f - background;
+}
