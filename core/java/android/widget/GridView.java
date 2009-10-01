@@ -220,6 +220,8 @@ public class GridView extends AbsListView {
                 selectedView = temp;
             }
 
+            // mReferenceView will change with each call to makeRow()
+            // do not cache in a local variable outside of this loop
             nextTop = mReferenceView.getBottom() + mVerticalSpacing;
 
             pos += mNumColumns;
@@ -233,7 +235,8 @@ public class GridView extends AbsListView {
         final int horizontalSpacing = mHorizontalSpacing;
 
         int last;
-        int nextLeft = mListPadding.left + ((mStretchMode == STRETCH_SPACING_UNIFORM) ? horizontalSpacing : 0);
+        int nextLeft = mListPadding.left +
+                ((mStretchMode == STRETCH_SPACING_UNIFORM) ? horizontalSpacing : 0);
 
         if (!mStackFromBottom) {
             last = Math.min(startPos + mNumColumns, mItemCount);
@@ -252,16 +255,14 @@ public class GridView extends AbsListView {
         final boolean inClick = touchModeDrawsInPressedState();
         final int selectedPosition = mSelectedPosition;
 
-        mReferenceView = null;
-
+        View child = null;
         for (int pos = startPos; pos < last; pos++) {
             // is this the selected item?
             boolean selected = pos == selectedPosition;
             // does the list view have focus or contain focus
 
             final int where = flow ? -1 : pos - startPos;
-            final View child = makeAndAddView(pos, y, flow, nextLeft, selected, where);
-            mReferenceView = child;
+            child = makeAndAddView(pos, y, flow, nextLeft, selected, where);
 
             nextLeft += columnWidth;
             if (pos < last - 1) {
@@ -273,6 +274,8 @@ public class GridView extends AbsListView {
             }
         }
 
+        mReferenceView = child;
+        
         if (selectedView != null) {
             mReferenceViewInSelectedRow = mReferenceView;
         }
@@ -465,6 +468,11 @@ public class GridView extends AbsListView {
         mFirstPosition = motionRowStart;
 
         final View referenceView = mReferenceView;
+        // We didn't have anything to layout, bail out
+        if (referenceView == null) {
+            return null;
+        }
+
         final int verticalSpacing = mVerticalSpacing;
 
         View above;
