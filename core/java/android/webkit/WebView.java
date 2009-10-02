@@ -3316,7 +3316,9 @@ public class WebView extends AbsoluteLayout
             // our view system's notion of focus
             rebuildWebTextView();
             // Now we need to pass the event to it
-            return mWebTextView.onKeyDown(keyCode, event);
+            if (inEditingMode()) {
+                return mWebTextView.onKeyDown(keyCode, event);
+            }
         } else if (nativeHasFocusNode()) {
             // In this case, the cursor is not on a text input, but the focus
             // might be.  Check it, and if so, hand over to the WebTextView.
