@@ -93,9 +93,9 @@ public class RotarySelector extends View {
      * If the user is currently dragging something.
      */
     private int mGrabbedState = NOTHING_GRABBED;
-    private static final int NOTHING_GRABBED = 0;
-    private static final int LEFT_HANDLE_GRABBED = 1;
-    private static final int RIGHT_HANDLE_GRABBED = 2;
+    public static final int NOTHING_GRABBED = 0;
+    public static final int LEFT_HANDLE_GRABBED = 1;
+    public static final int RIGHT_HANDLE_GRABBED = 2;
 
     /**
      * Whether the user has triggered something (e.g dragging the left handle all the way over to
@@ -522,12 +522,12 @@ public class RotarySelector extends View {
                 }
                 if (eventX < mLeftHandleX + hitWindow) {
                     mRotaryOffsetX = eventX - mLeftHandleX;
-                    mGrabbedState = LEFT_HANDLE_GRABBED;
+                    setGrabbedState(LEFT_HANDLE_GRABBED);
                     invalidate();
                     vibrate(VIBRATE_SHORT);
                 } else if (eventX > mRightHandleX - hitWindow) {
                     mRotaryOffsetX = eventX - mRightHandleX;
-                    mGrabbedState = RIGHT_HANDLE_GRABBED;
+                    setGrabbedState(RIGHT_HANDLE_GRABBED);
                     invalidate();
                     vibrate(VIBRATE_SHORT);
                 }
@@ -591,7 +591,7 @@ public class RotarySelector extends View {
                     startAnimation(eventX - mRightHandleX, 0, SNAP_BACK_ANIMATION_DURATION_MILLIS);
                 }
                 mRotaryOffsetX = 0;
-                mGrabbedState = NOTHING_GRABBED;
+                setGrabbedState(NOTHING_GRABBED);
                 invalidate();
                 if (mVelocityTracker != null) {
                     mVelocityTracker.recycle(); // wishin' we had generational GC
@@ -617,7 +617,7 @@ public class RotarySelector extends View {
         mAnimationDuration = duration;
         mAnimatingDeltaXStart = startX;
         mAnimatingDeltaXEnd = endX;
-        mGrabbedState = NOTHING_GRABBED;
+        setGrabbedState(NOTHING_GRABBED);
         mDimplesOfFling = 0;
         invalidate();
     }
@@ -628,7 +628,7 @@ public class RotarySelector extends View {
         mAnimationDuration = 1000 * (endX - startX) / pixelsPerSecond;
         mAnimatingDeltaXStart = startX;
         mAnimatingDeltaXEnd = endX;
-        mGrabbedState = NOTHING_GRABBED;
+        setGrabbedState(NOTHING_GRABBED);
         invalidate();
     }
 
@@ -667,7 +667,7 @@ public class RotarySelector extends View {
         mAnimating = false;
         mRotaryOffsetX = 0;
         mDimplesOfFling = 0;
-        mGrabbedState = NOTHING_GRABBED;
+        setGrabbedState(NOTHING_GRABBED);
         mTriggered = false;
     }
 
@@ -716,6 +716,19 @@ public class RotarySelector extends View {
     }
 
     /**
+     * Sets the current grabbed state, and dispatches a grabbed state change
+     * event to our listener.
+     */
+    private void setGrabbedState(int newState) {
+        if (newState != mGrabbedState) {
+            mGrabbedState = newState;
+            if (mOnDialTriggerListener != null) {
+                mOnDialTriggerListener.onGrabbedStateChange(this, mGrabbedState);
+            }
+        }
+    }
+
+    /**
      * Interface definition for a callback to be invoked when the dial
      * is "triggered" by rotating it one way or the other.
      */
@@ -740,6 +753,16 @@ public class RotarySelector extends View {
          *        either {@link #LEFT_HANDLE}, {@link #RIGHT_HANDLE}.
          */
         void onDialTrigger(View v, int whichHandle);
+
+        /**
+         * Called when the "grabbed state" changes (i.e. when
+         * the user either grabs or releases one of the handles.)
+         *
+         * @param v the view that was triggered
+         * @param grabbedState the new state: either {@link #NOTHING_GRABBED},
+         * {@link #LEFT_HANDLE_GRABBED}, or {@link #RIGHT_HANDLE_GRABBED}.
+         */
+        void onGrabbedStateChange(View v, int grabbedState);
     }
 
 
