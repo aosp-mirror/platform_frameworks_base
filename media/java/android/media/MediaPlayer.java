@@ -522,6 +522,7 @@ public class MediaPlayer
      *
      * @return A parcel suitable to hold a request for the native
      * player.
+     * {@hide}
      */
     public Parcel newRequest() {
         Parcel parcel = Parcel.obtain();
@@ -543,6 +544,7 @@ public class MediaPlayer
      * native player.
      *
      * @return The status code see utils/Errors.h
+     * {@hide}
      */
     public int invoke(Parcel request, Parcel reply) {
         int retcode = native_invoke(request, reply);
