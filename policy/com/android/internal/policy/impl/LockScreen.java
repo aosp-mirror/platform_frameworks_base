@@ -30,6 +30,8 @@ import android.widget.*;
 import android.graphics.drawable.Drawable;
 import android.util.Log;
 import android.media.AudioManager;
+import android.os.SystemProperties;
+
 import com.android.internal.telephony.IccCard;
 
 import java.util.Date;
@@ -151,7 +153,8 @@ class LockScreen extends LinearLayout implements KeyguardScreen, KeyguardUpdateM
         mCallback = callback;
 
         mDisableMenuKeyInLockScreen = getResources()
-            .getBoolean(R.bool.config_disableMenuKeyInLockScreen);
+            .getBoolean(R.bool.config_disableMenuKeyInLockScreen)
+            && !SystemProperties.getBoolean("ro.monkey", false);
 
         mCreatedInPortrait = updateMonitor.isInPortrait();
 
