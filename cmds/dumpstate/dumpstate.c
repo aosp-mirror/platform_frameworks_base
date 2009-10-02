@@ -340,7 +340,7 @@ static void dump_kernel_log(const char *path, const char *title)
         if (stat(path, &sbuf) < 0)
             printf("%s: stat failed (%s)\n", path, strerror(errno));
         else
-            printf("Harvested %s", ctime(&sbuf.st_ctime));
+            printf("Harvested %s", ctime(&sbuf.st_mtime));
     
         DUMP(path);
     }
