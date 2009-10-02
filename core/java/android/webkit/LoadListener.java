@@ -1211,8 +1211,17 @@ class LoadListener extends Handler implements EventHandler {
                 // mRequestHandle can be null when the request was satisfied
                 // by the cache, and the cache returned a redirect
                 if (mRequestHandle != null) {
-                    mRequestHandle.setupRedirect(mUrl, mStatusCode,
-                            mRequestHeaders);
+                    try {
+                        mRequestHandle.setupRedirect(mUrl, mStatusCode,
+                                mRequestHeaders);
+                    } catch(RuntimeException e) {
+                        Log.e(LOGTAG, e.getMessage());
+                        // Signal a bad url error if we could not load the
+                        // redirection.
+                        handleError(EventHandler.ERROR_BAD_URL,
+                                mContext.getString(R.string.httpErrorBadUrl));
+                        return;
+                    }
                 } else {
                     // If the original request came from the cache, there is no
                     // RequestHandle, we have to create a new one through
