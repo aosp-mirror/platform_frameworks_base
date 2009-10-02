@@ -35,8 +35,6 @@
 
 #include <cutils/sockets.h>
 #include <netinet/tcp.h>
-#include <cutils/properties.h>
-#include <cutils/adb_networking.h>
 
 namespace android {
 
