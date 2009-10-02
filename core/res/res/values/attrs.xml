@@ -914,6 +914,8 @@
         <enum name="KEYCODE_MUTE" value="91" />
         <enum name="KEYCODE_PAGE_UP" value="92" />
         <enum name="KEYCODE_PAGE_DOWN" value="93" />
+        <enum name="KEYCODE_PICTSYMBOLS" value="94" />
+        <enum name="KEYCODE_SWITCH_CHARSET" value="95" />
     </attr>
 
     <!-- ***************************************************************** -->
