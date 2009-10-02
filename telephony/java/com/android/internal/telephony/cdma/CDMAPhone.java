@@ -561,15 +561,7 @@ public class CDMAPhone extends PhoneBase {
     public DataState getDataConnectionState() {
         DataState ret = DataState.DISCONNECTED;
 
-        if ((SystemProperties.get("adb.connected", "").length() > 0)
-                && (SystemProperties.get("android.net.use-adb-networking", "")
-                        .length() > 0)) {
-            // We're connected to an ADB host and we have USB networking
-            // turned on. No matter what the radio state is,
-            // we report data connected
-
-            ret = DataState.CONNECTED;
-        } else if (mSST == null) {
+        if (mSST == null) {
              // Radio Technology Change is ongoning, dispose() and removeReferences() have
              // already been called
 
