@@ -884,7 +884,10 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
 
             // this should result in a call to 'poke wakelock' which will set a timeout
             // on releasing the wakelock
-            mKeyguardViewManager.wakeWhenReadyTq(keyCode);
+            if (!mKeyguardViewManager.wakeWhenReadyTq(keyCode)) {
+                // poke wakelock ourselves if keyguard is no longer active
+                pokeWakelock();
+            }
 
             /**
              * Now that the keyguard is ready and has poked the wake lock, we can
