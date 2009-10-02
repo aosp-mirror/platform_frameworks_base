@@ -18,6 +18,7 @@ package android.webkit;
 
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.graphics.Canvas;
 import android.graphics.DrawFilter;
 import android.graphics.Paint;
@@ -26,11 +27,13 @@ import android.graphics.Picture;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.Region;
+import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.Process;
 import android.provider.Browser;
+import android.provider.OpenableColumns;
 import android.util.Log;
 import android.util.SparseBooleanArray;
 import android.view.KeyEvent;
@@ -271,6 +274,39 @@ final class WebViewCore {
      */
     protected void jsAlert(String url, String message) {
         mCallbackProxy.onJsAlert(url, message);
+    }
+
+
+    /**
+     * Called by JNI.  Open a file chooser to upload a file.
+     * @return String version of the URI plus the name of the file.
+     * FIXME: Just return the URI here, and in FileSystem::pathGetFileName, call
+     * into Java to get the filename.
+     */
+    private String openFileChooser() {
+        Uri uri = mCallbackProxy.openFileChooser();
+        if (uri == null) return "";
+        // Find out the name, and append it to the URI.
+        // Webkit will treat the name as the filename, and
+        // the URI as the path.  The URI will be used
+        // in BrowserFrame to get the actual data.
+        Cursor cursor = mContext.getContentResolver().query(
+                uri,
+                new String[] { OpenableColumns.DISPLAY_NAME },
+                null,
+                null,
+                null);
+        String name = "";
+        if (cursor != null) {
+            try {
+                if (cursor.moveToNext()) {
+                    name = cursor.getString(0);
+                }
+            } finally {
+                cursor.close();
+            }
+        }
+        return uri.toString() + "/" + name;
     }
 
     /**

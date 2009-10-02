@@ -19,17 +19,21 @@ package android.webkit;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.res.AssetManager;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.net.ParseException;
+import android.net.Uri;
 import android.net.WebAddress;
 import android.net.http.SslCertificate;
 import android.os.Handler;
 import android.os.Message;
+import android.provider.OpenableColumns;
 import android.util.Log;
 import android.util.TypedValue;
 
 import junit.framework.Assert;
 
+import java.io.InputStream;
 import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
@@ -460,6 +464,60 @@ class BrowserFrame extends Handler {
             mJSInterfaceMap.remove(interfaceName);
         }
         mJSInterfaceMap.put(interfaceName, obj);
+    }
+
+    /**
+     * Called by JNI.  Given a URI, find the associated file and return its size
+     * @param uri A String representing the URI of the desired file.
+     * @return int The size of the given file.
+     */
+    private int getFileSize(String uri) {
+        int size = 0;
+        Cursor cursor = mContext.getContentResolver().query(Uri.parse(uri),
+                new String[] { OpenableColumns.SIZE },
+                null,
+                null,
+                null);
+        if (cursor != null) {
+            try {
+                if (cursor.moveToNext()) {
+                    size = cursor.getInt(0);
+                }
+            } finally {
+                cursor.close();
+            }
+        }
+        return size;
+    }
+
+    /**
+     * Called by JNI.  Given a URI, a buffer, and an offset into the buffer,
+     * copy the resource into buffer.
+     * @param uri A String representing the URI of the desired file.
+     * @param buffer The byte array to copy the data into.
+     * @param offset The offet into buffer to place the data.
+     * @return int The size of the given file, or zero if it fails.
+     */
+    private int getFile(String uri, byte[] buffer, int offset) {
+        int size = 0;
+        try {
+            InputStream stream = mContext.getContentResolver()
+                            .openInputStream(Uri.parse(uri));
+            size = stream.available();
+            if (buffer != null && buffer.length - offset >= size) {
+                stream.read(buffer, offset, size);
+            } else {
+                size = 0;
+            }
+            stream.close();
+        } catch (java.io.FileNotFoundException e) {
+            Log.e(LOGTAG, "FileNotFoundException:" + e);
+            size = 0;
+        } catch (java.io.IOException e2) {
+            Log.e(LOGTAG, "IOException: " + e2);
+            size = 0;
+        }
+        return size;
     }
 
     /**
