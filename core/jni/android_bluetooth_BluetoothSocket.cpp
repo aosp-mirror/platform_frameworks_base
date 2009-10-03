@@ -237,7 +237,8 @@ static void connectNative(JNIEnv *env, jobject obj) {
     jniThrowIOException(env, ENOSYS);
 }
 
-static void bindListenNative(JNIEnv *env, jobject obj) {
+/* Returns errno instead of throwing, so java can check errno */
+static int bindListenNative(JNIEnv *env, jobject obj) {
 #ifdef HAVE_BLUETOOTH
     LOGV(__FUNCTION__);
 
@@ -248,7 +249,7 @@ static void bindListenNative(JNIEnv *env, jobject obj) {
     struct asocket *s = get_socketData(env, obj);
 
     if (!s)
-        return;
+        return EINVAL;
 
     type = env->GetIntField(obj, field_mType);
 
@@ -283,28 +284,25 @@ static void bindListenNative(JNIEnv *env, jobject obj) {
         memcpy(&addr_l2.l2_bdaddr, &bdaddr, sizeof(bdaddr_t));
         break;
     default:
-        jniThrowIOException(env, ENOSYS);
-        return;
+        return ENOSYS;
     }
 
     if (bind(s->fd, addr, addr_sz)) {
         LOGV("...bind(%d) gave errno %d", s->fd, errno);
-        jniThrowIOException(env, errno);
-        return;
+        return errno;
     }
 
     if (listen(s->fd, 1)) {
         LOGV("...listen(%d) gave errno %d", s->fd, errno);
-        jniThrowIOException(env, errno);
-        return;
+        return errno;
     }
 
     LOGV("...bindListenNative(%d) success", s->fd);
 
-    return;
+    return 0;
 
 #endif
-    jniThrowIOException(env, ENOSYS);
+    return ENOSYS;
 }
 
 static jobject acceptNative(JNIEnv *env, jobject obj, int timeout) {
@@ -521,17 +519,22 @@ static void destroyNative(JNIEnv *env, jobject obj) {
     jniThrowIOException(env, ENOSYS);
 }
 
+static void throwErrnoNative(JNIEnv *env, jobject obj, jint err) {
+    jniThrowIOException(env, err);
+}
+
 static JNINativeMethod sMethods[] = {
     {"initSocketNative", "()V",  (void*) initSocketNative},
     {"initSocketFromFdNative", "(I)V",  (void*) initSocketFromFdNative},
     {"connectNative", "()V", (void *) connectNative},
-    {"bindListenNative", "()V", (void *) bindListenNative},
+    {"bindListenNative", "()I", (void *) bindListenNative},
     {"acceptNative", "(I)Landroid/bluetooth/BluetoothSocket;", (void *) acceptNative},
     {"availableNative", "()I",    (void *) availableNative},
     {"readNative", "([BII)I",    (void *) readNative},
     {"writeNative", "([BII)I",    (void *) writeNative},
     {"abortNative", "()V",    (void *) abortNative},
     {"destroyNative", "()V",    (void *) destroyNative},
+    {"throwErrnoNative", "(I)V",    (void *) throwErrnoNative},
 };
 
 int register_android_bluetooth_BluetoothSocket(JNIEnv *env) {
