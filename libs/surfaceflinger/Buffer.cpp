@@ -20,17 +20,12 @@
 
 #include <utils/Errors.h>
 #include <utils/Log.h>
-#include <binder/MemoryBase.h>
-#include <binder/IMemory.h>
 
 #include <ui/PixelFormat.h>
-#include <ui/Surface.h>
 #include <pixelflinger/pixelflinger.h>
 
 #include "Buffer.h"
 #include "BufferAllocator.h"
-#include "SurfaceFlinger.h"
-
 
 namespace android {
 

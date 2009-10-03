@@ -20,20 +20,11 @@
 #include <stdint.h>
 #include <sys/types.h>
 
-#include <hardware/gralloc.h>
-
-#include <utils/Atomic.h>
-
 #include <ui/PixelFormat.h>
 #include <ui/Rect.h>
-#include <ui/Surface.h>
-
 #include <pixelflinger/pixelflinger.h>
-
-#include <private/ui/SharedBufferStack.h>
 #include <private/ui/SurfaceBuffer.h>
 
-class copybit_image_t;
 struct android_native_buffer_t;
 
 namespace android {
@@ -41,8 +32,6 @@ namespace android {
 // ===========================================================================
 // Buffer
 // ===========================================================================
-
-class NativeBuffer;
 
 class Buffer : public SurfaceBuffer
 {
