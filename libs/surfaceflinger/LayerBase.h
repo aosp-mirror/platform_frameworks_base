@@ -205,10 +205,13 @@ public:
      */
     virtual bool isSecure() const       { return false; }
 
-    /** signal this layer that it's not needed any longer. called from the 
-     * main thread */
+    /** Called from the main thread, when the surface is removed from the
+     * draw list */
     virtual status_t ditch() { return NO_ERROR; }
 
+    /** called with the state lock when the surface is removed from the
+     *  current list */
+    virtual void onRemoved() { };
     
     
     enum { // flags for doTransaction()
@@ -318,7 +321,7 @@ public:
             sp<Surface> getSurface();
     virtual sp<Surface> createSurface() const;
     
-    virtual void onRemoved() { }
+    virtual void onRemoved();
 
     class Surface : public BnSurface 
     {

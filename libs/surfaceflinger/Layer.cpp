@@ -65,14 +65,6 @@ Layer::~Layer()
     // the actual buffers will be destroyed here
 }
 
-// called with SurfaceFlinger::mStateLock as soon as the layer is entered
-// in the purgatory list
-void Layer::onRemoved()
-{
-    // wake up the condition
-    lcblk->setStatus(NO_INIT);
-}
-
 void Layer::destroy()
 {
     for (size_t i=0 ; i<NUM_BUFFERS ; i++) {
