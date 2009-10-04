@@ -32,13 +32,14 @@ import java.io.RandomAccessFile;
 class RandomBlock {
 
     private static final String TAG = "RandomBlock";
+    private static final boolean DEBUG = false;
     private static final int BLOCK_SIZE = 4096;
     private byte[] block = new byte[BLOCK_SIZE];
 
     private RandomBlock() { }
 
     static RandomBlock fromFile(String filename) throws IOException {
-        Log.v(TAG, "reading from file " + filename);
+        if (DEBUG) Log.v(TAG, "reading from file " + filename);
         InputStream stream = null;
         try {
             stream = new FileInputStream(filename);
@@ -62,7 +63,7 @@ class RandomBlock {
     }
 
     void toFile(String filename) throws IOException {
-        Log.v(TAG, "writing to file " + filename);
+        if (DEBUG) Log.v(TAG, "writing to file " + filename);
         RandomAccessFile out = null;
         try {
             out = new RandomAccessFile(filename, "rws");

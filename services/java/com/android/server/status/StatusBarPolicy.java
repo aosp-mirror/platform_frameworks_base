@@ -1180,16 +1180,16 @@ public class StatusBarPolicy {
         final String action = intent.getAction();
         final boolean enabled = intent.getBooleanExtra(TtyIntent.TTY_ENABLED, false);
 
-        Log.i(TAG, "updateTTY: enabled: " + enabled);
+        if (false) Log.v(TAG, "updateTTY: enabled: " + enabled);
 
         if (enabled) {
             // TTY is on
-            Log.i(TAG, "updateTTY: set TTY on");
+            if (false) Log.v(TAG, "updateTTY: set TTY on");
             mService.updateIcon(mTTYModeIcon, mTTYModeEnableIconData, null);
             mService.setIconVisibility(mTTYModeIcon, true);
         } else {
             // TTY is off
-            Log.i(TAG, "updateTTY: set TTY off");
+            if (false) Log.v(TAG, "updateTTY: set TTY off");
             mService.setIconVisibility(mTTYModeIcon, false);
         }
     }
@@ -1220,7 +1220,7 @@ public class StatusBarPolicy {
         }
 
         if (iconIndex == EriInfo.ROAMING_INDICATOR_OFF) {
-            Log.d(TAG, "Cdma ROAMING_INDICATOR_OFF, removing ERI icon");
+            if (false) Log.v(TAG, "Cdma ROAMING_INDICATOR_OFF, removing ERI icon");
             mService.setIconVisibility(mCdmaRoamingIndicatorIcon, false);
             return;
         }

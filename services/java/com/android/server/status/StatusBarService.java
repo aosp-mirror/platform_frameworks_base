@@ -1733,7 +1733,7 @@ public class StatusBarService extends IStatusBar.Stub
         mOngoingTitle.setText(mContext.getText(R.string.status_bar_ongoing_events_title));
         mLatestTitle.setText(mContext.getText(R.string.status_bar_latest_events_title));
         mNoNotificationsTitle.setText(mContext.getText(R.string.status_bar_no_notifications_title));
-        Log.d(TAG, "updateResources");
+        if (false) Log.v(TAG, "updateResources");
     }
 
     //
