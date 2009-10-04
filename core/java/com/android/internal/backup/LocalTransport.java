@@ -41,7 +41,6 @@ public class LocalTransport extends IBackupTransport.Stub {
 
 
     public LocalTransport(Context context) {
-        if (DEBUG) Log.v(TAG, "Transport constructed");
         mContext = context;
         mPackageManager = context.getPackageManager();
     }

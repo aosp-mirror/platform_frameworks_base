@@ -53,7 +53,7 @@ import java.util.List;
  */
 public class ConnectivityService extends IConnectivityManager.Stub {
 
-    private static final boolean DBG = true;
+    private static final boolean DBG = false;
     private static final String TAG = "ConnectivityService";
 
     // Event log tags (must be in sync with event-log-tags)
