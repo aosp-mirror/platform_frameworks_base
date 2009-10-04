@@ -1993,8 +1993,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             performHapticFeedbackLw(null, mSafeMode
                     ? HapticFeedbackConstants.SAFE_MODE_ENABLED
                     : HapticFeedbackConstants.SAFE_MODE_DISABLED, true);
-            Log.i(TAG, "SAFEMODE: " + mSafeMode + "menu=" + menuState + " s=" + sState
-                    + " dpad=" + dpadState + " trackball=" + trackballState + ")");
+            if (mSafeMode) {
+                Log.i(TAG, "SAFE MODE ENABLED (menu=" + menuState + " s=" + sState
+                        + " dpad=" + dpadState + " trackball=" + trackballState + ")");
+            } else {
+                Log.i(TAG, "SAFE MODE not enabled");
+            }
             return mSafeMode;
         } catch (RemoteException e) {
             // Doom! (it's also local)
