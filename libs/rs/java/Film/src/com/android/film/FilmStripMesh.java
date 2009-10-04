@@ -212,7 +212,9 @@ class FilmStripMesh {
         t.nxyz(1, 0, 0);
         int count = vtx.length / 2;
 
-        SimpleMesh.TriangleMeshBuilder tm = new SimpleMesh.TriangleMeshBuilder(rs, 3, true, true);
+        SimpleMesh.TriangleMeshBuilder tm = new SimpleMesh.TriangleMeshBuilder(
+            rs, 3,
+            SimpleMesh.TriangleMeshBuilder.NORMAL | SimpleMesh.TriangleMeshBuilder.TEXTURE_0);
 
         float runningS = 0;
         for (int ct=0; ct < (count-1); ct++) {
@@ -227,11 +229,14 @@ class FilmStripMesh {
             t.ny /= len;
             t.y = -0.5f;
             t.t = 0;
-            tm.add_XYZ_ST_NORM(t.x, t.y, t.z, t.s, t.t, t.nx, t.ny, t.nz);
+            tm.setNormal(t.nx, t.ny, t.nz);
+            tm.setTexture(t.s, t.t);
+            tm.addVertex(t.x, t.y, t.z);
             //android.util.Log.e("rs", "vtx x="+t.x+" y="+t.y+" z="+t.z+" s="+t.s+" t="+t.t);
             t.y = .5f;
             t.t = 1;
-            tm.add_XYZ_ST_NORM(t.x, t.y, t.z, t.s, t.t, t.nx, t.ny, t.nz);
+            tm.setTexture(t.s, t.t);
+            tm.addVertex(t.x, t.y, t.z);
             //android.util.Log.e("rs", "vtx x="+t.x+" y="+t.y+" z="+t.z+" s="+t.s+" t="+t.t);
 
             if((runningS*2) > mTriangleOffsetsCount) {
