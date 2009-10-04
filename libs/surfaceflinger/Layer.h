@@ -85,8 +85,6 @@ private:
         return mBuffers[mFrontBufferIndex];
     }
  
-    virtual void onRemoved();
-
     void reloadTexture(const Region& dirty);
 
     sp<SurfaceBuffer> requestBuffer(int index, int usage);

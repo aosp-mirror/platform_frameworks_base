@@ -114,6 +114,12 @@ uint32_t SharedBufferBase::getIdentity()
     return stack.identity;
 }
 
+status_t SharedBufferBase::getStatus() const
+{
+    SharedBufferStack& stack( *mSharedStack );
+    return stack.status;
+}
+
 size_t SharedBufferBase::getFrontBuffer() const
 {
     SharedBufferStack& stack( *mSharedStack );
@@ -134,7 +140,6 @@ String8 SharedBufferBase::dump(char const* prefix) const
     result.append(buffer);
     return result;
 }
-
 
 // ============================================================================
 // conditions and updates
@@ -375,8 +380,10 @@ status_t SharedBufferServer::unlock(int buffer)
 
 void SharedBufferServer::setStatus(status_t status)
 {
-    StatusUpdate update(this, status);
-    updateCondition( update );
+    if (status < NO_ERROR) {
+        StatusUpdate update(this, status);
+        updateCondition( update );
+    }
 }
 
 status_t SharedBufferServer::reallocate()
