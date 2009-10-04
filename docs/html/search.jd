@@ -94,9 +94,9 @@ page.title=Search Results
 
       // when an event on the browser history occurs (back, forward, load) perform a search
       $(window).history(function(e, hash) {
-        var query = getQuery(hash);
+        var query = decodeURI(getQuery(hash));
         searchControl.execute(query);
-        $("#searchTitle").html("search results for <em>" + decodeURI(query) + "</em>");
+        $("#searchTitle").html("search results for <em>" + query + "</em>");
       });
 
       // forcefully regain key-up event control (previously jacked by search api)
