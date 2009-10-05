@@ -15,7 +15,7 @@
  */
 package android.accounts;
 
-public class OperationCanceledException extends Exception {
+public class OperationCanceledException extends AccountsException {
     public OperationCanceledException() {
         super();
     }

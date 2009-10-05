@@ -63,10 +63,10 @@ public class AccountAuthenticatorActivity extends Activity {
         if (icicle == null) {
             Intent intent = getIntent();
             mAccountAuthenticatorResponse =
-                    intent.getParcelableExtra(Constants.ACCOUNT_AUTHENTICATOR_RESPONSE_KEY);
+                    intent.getParcelableExtra(AccountManager.KEY_ACCOUNT_AUTHENTICATOR_RESPONSE);
         } else {
             mAccountAuthenticatorResponse =
-                    icicle.getParcelable(Constants.ACCOUNT_AUTHENTICATOR_RESPONSE_KEY);
+                    icicle.getParcelable(AccountManager.KEY_ACCOUNT_AUTHENTICATOR_RESPONSE);
         }
 
         if (mAccountAuthenticatorResponse != null) {
@@ -79,7 +79,7 @@ public class AccountAuthenticatorActivity extends Activity {
      * @param outState where to store any instance data
      */
     protected void onSaveInstanceState(Bundle outState) {
-        outState.putParcelable(Constants.ACCOUNT_AUTHENTICATOR_RESPONSE_KEY,
+        outState.putParcelable(AccountManager.KEY_ACCOUNT_AUTHENTICATOR_RESPONSE,
                 mAccountAuthenticatorResponse);
         super.onSaveInstanceState(outState);
     }
@@ -93,7 +93,7 @@ public class AccountAuthenticatorActivity extends Activity {
             if (mResultBundle != null) {
                 mAccountAuthenticatorResponse.onResult(mResultBundle);
             } else {
-                mAccountAuthenticatorResponse.onError(Constants.ERROR_CODE_CANCELED, "canceled");
+                mAccountAuthenticatorResponse.onError(AccountManager.ERROR_CODE_CANCELED, "canceled");
             }
             mAccountAuthenticatorResponse = null;
         }

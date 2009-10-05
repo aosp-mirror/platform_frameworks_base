@@ -13,19 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package android.accounts;
 
-public class NetworkErrorException extends AccountsException {
-    public NetworkErrorException() {
+public class AccountsException extends Exception {
+    public AccountsException() {
         super();
     }
-    public NetworkErrorException(String message) {
+    public AccountsException(String message) {
         super(message);
     }
-    public NetworkErrorException(String message, Throwable cause) {
+    public AccountsException(String message, Throwable cause) {
         super(message, cause);
     }
-    public NetworkErrorException(Throwable cause) {
+    public AccountsException(Throwable cause) {
         super(cause);
     }
 }

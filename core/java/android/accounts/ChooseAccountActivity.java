@@ -23,6 +23,9 @@ import android.widget.ListView;
 import android.view.View;
 import android.util.Log;
 
+/**
+ * @hide
+ */
 public class ChooseAccountActivity extends ListActivity {
     private static final String TAG = "AccountManager";
     private Parcelable[] mAccounts = null;
@@ -34,13 +37,13 @@ public class ChooseAccountActivity extends ListActivity {
         super.onCreate(savedInstanceState);
 
         if (savedInstanceState == null) {
-            mAccounts = getIntent().getParcelableArrayExtra(Constants.ACCOUNTS_KEY);
+            mAccounts = getIntent().getParcelableArrayExtra(AccountManager.KEY_ACCOUNTS);
             mAccountManagerResponse =
-                    getIntent().getParcelableExtra(Constants.ACCOUNT_MANAGER_RESPONSE_KEY);
+                    getIntent().getParcelableExtra(AccountManager.KEY_ACCOUNT_MANAGER_RESPONSE);
         } else {
-            mAccounts = savedInstanceState.getParcelableArray(Constants.ACCOUNTS_KEY);
+            mAccounts = savedInstanceState.getParcelableArray(AccountManager.KEY_ACCOUNTS);
             mAccountManagerResponse =
-                    savedInstanceState.getParcelable(Constants.ACCOUNT_MANAGER_RESPONSE_KEY);
+                    savedInstanceState.getParcelable(AccountManager.KEY_ACCOUNT_MANAGER_RESPONSE);
         }
 
         String[] mAccountNames = new String[mAccounts.length];
@@ -59,8 +62,8 @@ public class ChooseAccountActivity extends ListActivity {
         Account account = (Account) mAccounts[position];
         Log.d(TAG, "selected account " + account);
         Bundle bundle = new Bundle();
-        bundle.putString(Constants.ACCOUNT_NAME_KEY, account.name);
-        bundle.putString(Constants.ACCOUNT_TYPE_KEY, account.type);
+        bundle.putString(AccountManager.KEY_ACCOUNT_NAME, account.name);
+        bundle.putString(AccountManager.KEY_ACCOUNT_TYPE, account.type);
         mResult = bundle;
         finish();
     }
@@ -70,7 +73,7 @@ public class ChooseAccountActivity extends ListActivity {
             if (mResult != null) {
                 mAccountManagerResponse.onResult(mResult);
             } else {
-                mAccountManagerResponse.onError(Constants.ERROR_CODE_CANCELED, "canceled");
+                mAccountManagerResponse.onError(AccountManager.ERROR_CODE_CANCELED, "canceled");
             }
         }
         super.finish();

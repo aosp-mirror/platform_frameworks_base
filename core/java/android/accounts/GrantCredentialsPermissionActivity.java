@@ -121,7 +121,7 @@ public class GrantCredentialsPermissionActivity extends Activity implements View
             if (mResultBundle != null) {
                 accountAuthenticatorResponse.onResult(mResultBundle);
             } else {
-                accountAuthenticatorResponse.onError(Constants.ERROR_CODE_CANCELED, "canceled");
+                accountAuthenticatorResponse.onError(AccountManager.ERROR_CODE_CANCELED, "canceled");
             }
         }
         super.finish();

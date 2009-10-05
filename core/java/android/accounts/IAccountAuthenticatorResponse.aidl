@@ -19,6 +19,7 @@ import android.os.Bundle;
 
 /**
  * The interface used to return responses from an {@link IAccountAuthenticator}
+ * @hide
  */
 oneway interface IAccountAuthenticatorResponse {
     void onResult(in Bundle value);
