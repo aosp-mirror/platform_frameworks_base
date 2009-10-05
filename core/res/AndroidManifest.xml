@@ -331,7 +331,7 @@
 
     <!-- Allows applications to call into AccountAuthenticators. Only
     the system can get this permission. -->
-    <permission android:name="android.permission.ACCOUNT_MANAGER_SERVICE"
+    <permission android:name="android.permission.ACCOUNT_MANAGER"
         android:permissionGroup="android.permission-group.ACCOUNTS"
         android:protectionLevel="signature"
         android:description="@string/permdesc_accountManagerService"

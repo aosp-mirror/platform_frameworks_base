@@ -19,7 +19,7 @@ package android.accounts;
 /**
  * An interface that contains the callback used by the AccountMonitor
  */
-public interface OnAccountsUpdatedListener {
+public interface OnAccountsUpdateListener {
     /**
      * This invoked when the AccountMonitor starts up and whenever the account
      * set changes.

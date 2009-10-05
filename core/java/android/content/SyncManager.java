@@ -23,7 +23,7 @@ import com.android.internal.util.ArrayUtils;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
-import android.accounts.OnAccountsUpdatedListener;
+import android.accounts.OnAccountsUpdateListener;
 import android.app.AlarmManager;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -78,7 +78,7 @@ import java.util.concurrent.CountDownLatch;
 /**
  * @hide
  */
-class SyncManager implements OnAccountsUpdatedListener {
+class SyncManager implements OnAccountsUpdateListener {
     private static final String TAG = "SyncManager";
 
     // used during dumping of the Sync history
