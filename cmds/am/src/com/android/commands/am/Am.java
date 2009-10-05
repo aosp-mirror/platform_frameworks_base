@@ -340,7 +340,8 @@ public class Am {
         private boolean mFinished = false;
 
         public synchronized void performReceive(
-                Intent intent, int rc, String data, Bundle ext, boolean ord) {
+                Intent intent, int rc, String data, Bundle ext, boolean ord,
+                boolean sticky) {
             String line = "Broadcast completed: result=" + rc;
             if (data != null) line = line + ", data=\"" + data + "\"";
             if (ext != null) line = line + ", extras: " + ext;
