@@ -720,7 +720,8 @@ public class MediaPlayer
     }
 
     /**
-     * Sets the data source (FileDescriptor) to use.  It is the caller's responsibility
+     * Sets the data source (FileDescriptor) to use.  The FileDescriptor must be
+     * seekable (N.B. a LocalSocket is not seekable). It is the caller's responsibility
      * to close the file descriptor. It is safe to do so as soon as this call returns.
      *
      * @param fd the FileDescriptor for the file you want to play
@@ -869,8 +870,10 @@ public class MediaPlayer
      * Returns the width of the video.
      *
      * @return the width of the video, or 0 if there is no video,
-     * no display surface was set, or prepare()/prepareAsync()
-     * have not completed yet
+     * no display surface was set, or the width has not been determined
+     * yet. The OnVideoSizeChangedListener can be registered via
+     * {@link #setOnVideoSizeChangedListener(OnVideoSizeChangedListener)}
+     * to provide a notification when the width is available.
      */
     public native int getVideoWidth();
 
@@ -878,8 +881,10 @@ public class MediaPlayer
      * Returns the height of the video.
      *
      * @return the height of the video, or 0 if there is no video,
-     * no display surface was set, or prepare()/prepareAsync()
-     * have not completed yet
+     * no display surface was set, or the height has not been determined
+     * yet. The OnVideoSizeChangedListener can be registered via
+     * {@link #setOnVideoSizeChangedListener(OnVideoSizeChangedListener)}
+     * to provide a notification when the height is available.
      */
     public native int getVideoHeight();
 

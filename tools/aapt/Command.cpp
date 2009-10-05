@@ -401,7 +401,7 @@ int doDump(Bundle* bundle)
             ResXMLTree tree;
             asset = assets.openNonAsset(resname, Asset::ACCESS_BUFFER);
             if (asset == NULL) {
-                fprintf(stderr, "ERROR: dump failed because resource %p found\n", resname);
+                fprintf(stderr, "ERROR: dump failed because resource %s found\n", resname);
                 goto bail;
             }
 
@@ -427,7 +427,7 @@ int doDump(Bundle* bundle)
             ResXMLTree tree;
             asset = assets.openNonAsset(resname, Asset::ACCESS_BUFFER);
             if (asset == NULL) {
-                fprintf(stderr, "ERROR: dump failed because resource %p found\n", resname);
+                fprintf(stderr, "ERROR: dump failed because resource %s found\n", resname);
                 goto bail;
             }
 

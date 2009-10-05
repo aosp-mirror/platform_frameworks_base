@@ -1028,7 +1028,7 @@ public abstract class Uri implements Parcelable, Comparable<Uri> {
         }
 
         private String parseHost() {
-            String authority = getAuthority();
+            String authority = getEncodedAuthority();
             if (authority == null) {
                 return null;
             }
@@ -1037,9 +1037,11 @@ public abstract class Uri implements Parcelable, Comparable<Uri> {
             int userInfoSeparator = authority.indexOf('@');
             int portSeparator = authority.indexOf(':', userInfoSeparator);
 
-            return portSeparator == NOT_FOUND
+            String encodedHost = portSeparator == NOT_FOUND
                     ? authority.substring(userInfoSeparator + 1)
                     : authority.substring(userInfoSeparator + 1, portSeparator);
+
+            return decode(encodedHost);
         }
 
         private volatile int port = NOT_CALCULATED;
@@ -1051,7 +1053,7 @@ public abstract class Uri implements Parcelable, Comparable<Uri> {
         }
 
         private int parsePort() {
-            String authority = getAuthority();
+            String authority = getEncodedAuthority();
             if (authority == null) {
                 return -1;
             }
@@ -1065,7 +1067,7 @@ public abstract class Uri implements Parcelable, Comparable<Uri> {
                 return -1;
             }
 
-            String portString = authority.substring(portSeparator + 1);
+            String portString = decode(authority.substring(portSeparator + 1));
             try {
                 return Integer.parseInt(portString);
             } catch (NumberFormatException e) {
