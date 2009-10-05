@@ -43,44 +43,10 @@ public class Main {
 
         try {
             AsmGenerator agen = new AsmGenerator(log, osDestJar[0],
-                    new Class<?>[] {  // classes to inject in the final JAR
-                        OverrideMethod.class,
-                        MethodListener.class,
-                        MethodAdapter.class
-                    },
-                    new String[] {  // methods to force override
-                        "android.view.View#isInEditMode",
-                        "android.content.res.Resources$Theme#obtainStyledAttributes",
-                    },
-                    new String[] {  // classes to rename (so that we can replace them in layoutlib)
-                        // original-platform-class-name ======> renamed-class-name
-                        "android.graphics.Bitmap",              "android.graphics._Original_Bitmap",
-                        "android.graphics.BitmapShader",        "android.graphics._Original_BitmapShader",
-                        "android.graphics.Canvas",              "android.graphics._Original_Canvas",
-                        "android.graphics.ComposeShader",       "android.graphics._Original_ComposeShader",
-                        "android.graphics.LinearGradient",      "android.graphics._Original_LinearGradient",
-                        "android.graphics.Matrix",              "android.graphics._Original_Matrix",
-                        "android.graphics.Paint",               "android.graphics._Original_Paint",
-                        "android.graphics.Path",                "android.graphics._Original_Path",
-                        "android.graphics.PorterDuffXfermode",  "android.graphics._Original_PorterDuffXfermode",
-                        "android.graphics.RadialGradient",      "android.graphics._Original_RadialGradient",
-                        "android.graphics.Shader",              "android.graphics._Original_Shader",
-                        "android.graphics.SweepGradient",       "android.graphics._Original_SweepGradient",
-                        "android.graphics.Typeface",            "android.graphics._Original_Typeface",
-                        "android.os.ServiceManager",            "android.os._Original_ServiceManager",
-                        "android.util.FloatMath",               "android.util._Original_FloatMath",
-                        "android.view.SurfaceView",             "android.view._Original_SurfaceView",
-                        "android.view.accessibility.AccessibilityManager", "android.view.accessibility._Original_AccessibilityManager",
-                    },
-                    new String[] { // methods deleted from their return type.
-                        "android.graphics.Paint", // class to delete method from
-                        "android.graphics.Paint$Align", // list of type identifying methods to delete
-                        "android.graphics.Paint$Style",
-                        "android.graphics.Paint$Join",
-                        "android.graphics.Paint$Cap",
-                        "android.graphics.Paint$FontMetrics",
-                        "android.graphics.Paint$FontMetricsInt",
-                        null }
+                    CreateInfo.INJECTED_CLASSES,
+                    CreateInfo.OVERRIDDEN_METHODS,
+                    CreateInfo.RENAMED_CLASSES,
+                    CreateInfo.REMOVED_METHODS
             );
 
             AsmAnalyzer aa = new AsmAnalyzer(log, osJarPath, agen,
