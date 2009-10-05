@@ -86,7 +86,7 @@ public class VCardDataBuilder implements VCardBuilder {
             boolean strictLineBreakParsing, int vcardType, Account account) {
         this(null, charset, strictLineBreakParsing, vcardType, account);
     }
-    
+
     /**
      * @hide
      */
@@ -124,6 +124,18 @@ public class VCardDataBuilder implements VCardBuilder {
         for (EntryHandler entryHandler : mEntryHandlers) {
             entryHandler.onParsingEnd();
         }
+    }
+
+    /**
+     * Called when the parse failed between startRecord() and endRecord().
+     * Currently it happens only when the vCard format is 3.0.
+     * (VCardVersionException is thrown by VCardParser_V21 and this object is reused by
+     * VCardParser_V30. At that time, startRecord() is called twice before endRecord() is called.)
+     * TODO: Should this be in VCardBuilder interface?
+     */
+    public void clear() {
+        mCurrentContactStruct = null;
+        mCurrentProperty = new ContactStruct.Property();
     }
 
     /**
