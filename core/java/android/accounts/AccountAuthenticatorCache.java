@@ -35,8 +35,8 @@ import android.text.TextUtils;
     private static final String TAG = "Account";
 
     public AccountAuthenticatorCache(Context context) {
-        super(context, Constants.AUTHENTICATOR_INTENT_ACTION,
-                Constants.AUTHENTICATOR_META_DATA_NAME, Constants.AUTHENTICATOR_ATTRIBUTES_NAME);
+        super(context, AccountManager.ACTION_AUTHENTICATOR_INTENT,
+                AccountManager.AUTHENTICATOR_META_DATA_NAME, AccountManager.AUTHENTICATOR_ATTRIBUTES_NAME);
     }
 
     public AuthenticatorDescription parseServiceAttributes(String packageName, AttributeSet attrs) {

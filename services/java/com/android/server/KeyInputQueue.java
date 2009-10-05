@@ -48,6 +48,7 @@ import java.util.ArrayList;
 public abstract class KeyInputQueue {
     static final String TAG = "KeyInputQueue";
 
+    static final boolean DEBUG = false;
     static final boolean DEBUG_VIRTUAL_KEYS = false;
     static final boolean DEBUG_POINTERS = false;
     
@@ -200,7 +201,7 @@ public abstract class KeyInputQueue {
             FileInputStream fis = new FileInputStream(
                     "/sys/board_properties/virtualkeys." + deviceName);
             InputStreamReader isr = new InputStreamReader(fis);
-            BufferedReader br = new BufferedReader(isr);
+            BufferedReader br = new BufferedReader(isr, 2048);
             String str = br.readLine();
             if (str != null) {
                 String[] it = str.split(":");
@@ -257,7 +258,7 @@ public abstract class KeyInputQueue {
                 }
                 String name = parser.getAttributeValue(null, "name");
                 if (name != null) {
-                    Log.d(TAG, "addExcludedDevice " + name);
+                    if (DEBUG) Log.v(TAG, "addExcludedDevice " + name);
                     addExcludedDevice(name);
                 }
             }
@@ -413,7 +414,7 @@ public abstract class KeyInputQueue {
     
     Thread mThread = new Thread("InputDeviceReader") {
         public void run() {
-            Log.d(TAG, "InputDeviceReader.run()");
+            if (DEBUG) Log.v(TAG, "InputDeviceReader.run()");
             android.os.Process.setThreadPriority(
                     android.os.Process.THREAD_PRIORITY_URGENT_DISPLAY);
             

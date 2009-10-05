@@ -22,6 +22,7 @@ import android.os.Bundle;
 
 /**
  * Service that allows the interaction with an authentication server.
+ * @hide
  */
 oneway interface IAccountAuthenticator {
     /**
@@ -31,16 +32,10 @@ oneway interface IAccountAuthenticator {
         String authTokenType, in String[] requiredFeatures, in Bundle options);
 
     /**
-     * Checks that the account/password combination is valid.
-     * note -- deprecated
-     */
-    void confirmPassword(in IAccountAuthenticatorResponse response,
-        in Account account, String password);
-
-    /**
      * prompts the user for the credentials of the account
      */
-    void confirmCredentials(in IAccountAuthenticatorResponse response, in Account account);
+    void confirmCredentials(in IAccountAuthenticatorResponse response, in Account account,
+        in Bundle options);
 
     /**
      * gets the password by either prompting the user or querying the IAccountManager

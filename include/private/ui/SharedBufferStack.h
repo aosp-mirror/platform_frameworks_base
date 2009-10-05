@@ -142,6 +142,7 @@ public:
     SharedBufferBase(SharedClient* sharedClient, int surface, int num);
     ~SharedBufferBase();
     uint32_t getIdentity();
+    status_t getStatus() const;
     size_t getFrontBuffer() const;
     String8 dump(char const* prefix) const;
 
@@ -177,7 +178,7 @@ status_t SharedBufferBase::waitForCondition(T condition)
 {
     const SharedBufferStack& stack( *mSharedStack );
     SharedClient& client( *mSharedClient );
-    const nsecs_t TIMEOUT = s2ns(1); 
+    const nsecs_t TIMEOUT = s2ns(1);
     Mutex::Autolock _l(client.lock);
     while ((condition()==false) && (stack.status == NO_ERROR)) {
         status_t err = client.cv.waitRelative(client.lock, TIMEOUT);
@@ -187,14 +188,15 @@ status_t SharedBufferBase::waitForCondition(T condition)
             if (err == TIMED_OUT) {
                 if (condition()) {
                     LOGE("waitForCondition(%s) timed out (identity=%d), "
-                            "but condition is true! We recovered but it "
-                            "shouldn't happen." , 
-                            T::name(), mSharedStack->identity);
+                        "but condition is true! We recovered but it "
+                        "shouldn't happen." , T::name(),
+                        mSharedStack->identity);
                     break;
                 } else {
-                    LOGW("waitForCondition(%s) timed out (identity=%d). "
-                            "CPU may be pegged. trying again.",
-                            T::name(), mSharedStack->identity);
+                    LOGW("waitForCondition(%s) timed out "
+                        "(identity=%d, status=%d). "
+                        "CPU may be pegged. trying again.", T::name(),
+                        mSharedStack->identity, mSharedStack->status);
                 }
             } else {
                 LOGE("waitForCondition(%s) error (%s) ",

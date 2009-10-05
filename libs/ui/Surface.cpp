@@ -733,9 +733,11 @@ status_t Surface::getBufferLocked(int index, int usage)
             index, usage);
     if (buffer != 0) { // this should never happen by construction
         LOGE_IF(buffer->handle == NULL, 
-                "requestBuffer(%d, %08x) returned a buffer with a null handle",
-                index, usage);
-        if (buffer->handle != NULL) { 
+                "Surface (identity=%d) requestBuffer(%d, %08x) returned"
+                "a buffer with a null handle", mIdentity, index, usage);
+        err = mSharedBufferClient->getStatus();
+        LOGE_IF(err,  "Surface (identity=%d) state = %d", mIdentity, err);
+        if (!err && buffer->handle != NULL) {
             err = getBufferMapper().registerBuffer(buffer->handle);
             LOGW_IF(err, "registerBuffer(...) failed %d (%s)",
                     err, strerror(-err));

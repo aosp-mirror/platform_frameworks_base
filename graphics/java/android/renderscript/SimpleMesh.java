@@ -82,7 +82,7 @@ public class SimpleMesh extends BaseObj {
         }
 
         public int addVertexType(Type t) throws IllegalStateException {
-            if(mVertexTypeCount >= mVertexTypes.length) {
+            if (mVertexTypeCount >= mVertexTypes.length) {
                 throw new IllegalStateException("Max vertex types exceeded.");
             }
 
@@ -94,7 +94,7 @@ public class SimpleMesh extends BaseObj {
         }
 
         public int addVertexType(Element e, int size) throws IllegalStateException {
-            if(mVertexTypeCount >= mVertexTypes.length) {
+            if (mVertexTypeCount >= mVertexTypes.length) {
                 throw new IllegalStateException("Max vertex types exceeded.");
             }
 
@@ -134,9 +134,9 @@ public class SimpleMesh extends BaseObj {
             int toDestroyCount = 0;
 
             int indexID = 0;
-            if(b.mIndexType.t != null) {
+            if (b.mIndexType.t != null) {
                 indexID = b.mIndexType.t.mID;
-            } else if(b.mIndexType.size != 0) {
+            } else if (b.mIndexType.size != 0) {
                 b.mIndexType.t = b.newType(b.mIndexType.e, b.mIndexType.size);
                 indexID = b.mIndexType.t.mID;
                 toDestroy[toDestroyCount++] = b.mIndexType.t;
@@ -144,7 +144,7 @@ public class SimpleMesh extends BaseObj {
 
             int[] IDs = new int[b.mVertexTypeCount];
             for(int ct=0; ct < b.mVertexTypeCount; ct++) {
-                if(b.mVertexTypes[ct].t != null) {
+                if (b.mVertexTypes[ct].t != null) {
                     IDs[ct] = b.mVertexTypes[ct].t.mID;
                 } else {
                     b.mVertexTypes[ct].t = b.newType(b.mVertexTypes[ct].e, b.mVertexTypes[ct].size);
@@ -181,92 +181,116 @@ public class SimpleMesh extends BaseObj {
         RenderScript mRS;
         Element mElement;
 
-        int mVtxSize;
-        boolean mNorm;
-        boolean mTex;
+        float mNX = 0;
+        float mNY = 0;
+        float mNZ = -1;
+        float mS0 = 0;
+        float mT0 = 0;
+        float mR = 1;
+        float mG = 1;
+        float mB = 1;
+        float mA = 1;
 
-        public TriangleMeshBuilder(RenderScript rs, int vtxSize, boolean norm, boolean tex) {
+        int mVtxSize;
+        int mFlags;
+
+        public static final int COLOR = 0x0001;
+        public static final int NORMAL = 0x0002;
+        public static final int TEXTURE_0 = 0x0100;
+
+        public TriangleMeshBuilder(RenderScript rs, int vtxSize, int flags) {
             mRS = rs;
             mVtxCount = 0;
             mIndexCount = 0;
             mVtxData = new float[128];
             mIndexData = new short[128];
             mVtxSize = vtxSize;
-            mNorm = norm;
-            mTex = tex;
+            mFlags = flags;
 
-            if(vtxSize < 2 || vtxSize > 3) {
+            if (vtxSize < 2 || vtxSize > 3) {
                 throw new IllegalArgumentException("Vertex size out of range.");
             }
         }
 
         private void makeSpace(int count) {
-            if((mVtxCount + count) >= mVtxData.length) {
+            if ((mVtxCount + count) >= mVtxData.length) {
                 float t[] = new float[mVtxData.length * 2];
                 System.arraycopy(mVtxData, 0, t, 0, mVtxData.length);
                 mVtxData = t;
             }
         }
 
-        public void add_XY(float x, float y) {
-            if((mVtxSize != 2) || mNorm || mTex) {
-                throw new IllegalStateException("add mistmatch with declaired components.");
+        private void latch() {
+            if ((mFlags & COLOR) != 0) {
+                makeSpace(4);
+                mVtxData[mVtxCount++] = mR;
+                mVtxData[mVtxCount++] = mG;
+                mVtxData[mVtxCount++] = mB;
+                mVtxData[mVtxCount++] = mA;
+            }
+            if ((mFlags & NORMAL) != 0) {
+                makeSpace(3);
+                mVtxData[mVtxCount++] = mNX;
+                mVtxData[mVtxCount++] = mNY;
+                mVtxData[mVtxCount++] = mNZ;
+            }
+            if ((mFlags & TEXTURE_0) != 0) {
+                makeSpace(2);
+                mVtxData[mVtxCount++] = mS0;
+                mVtxData[mVtxCount++] = mT0;
+            }
+        }
+
+        public void addVertex(float x, float y) {
+            if (mVtxSize != 2) {
+                throw new IllegalStateException("add mistmatch with declared components.");
             }
             makeSpace(2);
             mVtxData[mVtxCount++] = x;
             mVtxData[mVtxCount++] = y;
+            latch();
         }
 
-        public void add_XYZ(float x, float y, float z) {
-            if((mVtxSize != 3) || mNorm || mTex) {
-                throw new IllegalStateException("add mistmatch with declaired components.");
+        public void addVertex(float x, float y, float z) {
+            if (mVtxSize != 3) {
+                throw new IllegalStateException("add mistmatch with declared components.");
             }
             makeSpace(3);
             mVtxData[mVtxCount++] = x;
             mVtxData[mVtxCount++] = y;
             mVtxData[mVtxCount++] = z;
+            latch();
         }
 
-        public void add_XY_ST(float x, float y, float s, float t) {
-            if((mVtxSize != 2) || mNorm || !mTex) {
-                throw new IllegalStateException("add mistmatch with declaired components.");
+        public void setTexture(float s, float t) {
+            if ((mFlags & TEXTURE_0) == 0) {
+                throw new IllegalStateException("add mistmatch with declared components.");
             }
-            makeSpace(4);
-            mVtxData[mVtxCount++] = x;
-            mVtxData[mVtxCount++] = y;
-            mVtxData[mVtxCount++] = s;
-            mVtxData[mVtxCount++] = t;
+            mS0 = s;
+            mT0 = t;
         }
 
-        public void add_XYZ_ST(float x, float y, float z, float s, float t) {
-            if((mVtxSize != 3) || mNorm || !mTex) {
-                throw new IllegalStateException("add mistmatch with declaired components.");
+        public void setNormal(float x, float y, float z) {
+            if ((mFlags & NORMAL) == 0) {
+                throw new IllegalStateException("add mistmatch with declared components.");
             }
-            makeSpace(5);
-            mVtxData[mVtxCount++] = x;
-            mVtxData[mVtxCount++] = y;
-            mVtxData[mVtxCount++] = z;
-            mVtxData[mVtxCount++] = s;
-            mVtxData[mVtxCount++] = t;
+            mNX = x;
+            mNY = y;
+            mNZ = z;
         }
 
-        public void add_XYZ_ST_NORM(float x, float y, float z, float s, float t, float nx, float ny, float nz) {
-            if((mVtxSize != 3) || !mNorm || !mTex) {
-                throw new IllegalStateException("add mistmatch with declaired components.");
+        public void setColor(float r, float g, float b, float a) {
+            if ((mFlags & COLOR) == 0) {
+                throw new IllegalStateException("add mistmatch with declared components.");
             }
-            makeSpace(8);
-            mVtxData[mVtxCount++] = x;
-            mVtxData[mVtxCount++] = y;
-            mVtxData[mVtxCount++] = z;
-            mVtxData[mVtxCount++] = s;
-            mVtxData[mVtxCount++] = t;
-            mVtxData[mVtxCount++] = nx;
-            mVtxData[mVtxCount++] = ny;
-            mVtxData[mVtxCount++] = nz;
+            mR = r;
+            mG = g;
+            mB = b;
+            mA = a;
         }
 
         public void addTriangle(int idx1, int idx2, int idx3) {
-            if((mIndexCount + 3) >= mIndexData.length) {
+            if ((mIndexCount + 3) >= mIndexData.length) {
                 short t[] = new short[mIndexData.length * 2];
                 System.arraycopy(mIndexData, 0, t, 0, mIndexData.length);
                 mIndexData = t;
@@ -279,16 +303,20 @@ public class SimpleMesh extends BaseObj {
         public SimpleMesh create() {
             Element.Builder b = new Element.Builder(mRS);
             int floatCount = mVtxSize;
-            if(mVtxSize == 2) {
+            if (mVtxSize == 2) {
                 b.addFloatXY();
             } else {
                 b.addFloatXYZ();
             }
-            if(mTex) {
+            if ((mFlags & COLOR) != 0) {
+                floatCount += 4;
+                b.addFloatRGBA();
+            }
+            if ((mFlags & TEXTURE_0) != 0) {
                 floatCount += 2;
                 b.addFloatST();
             }
-            if(mNorm) {
+            if ((mFlags & NORMAL) != 0) {
                 floatCount += 3;
                 b.addFloatNorm();
             }

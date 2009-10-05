@@ -973,8 +973,9 @@ public class PackageParser {
                 return null;
 
             } else {
-                Log.w(TAG, "Bad element under <manifest>: "
-                      + parser.getName());
+                Log.w(TAG, "Unknown element under <manifest>: " + parser.getName()
+                        + " at " + mArchiveSourcePath + " "
+                        + parser.getPositionDescription());
                 XmlUtils.skipCurrentTag(parser);
                 continue;
             }
@@ -1729,8 +1730,9 @@ public class PackageParser {
                     return null;
                 }
                 if (intent.countActions() == 0) {
-                    Log.w(TAG, "Intent filter for activity " + intent
-                            + " defines no actions");
+                    Log.w(TAG, "No actions in intent filter at "
+                            + mArchiveSourcePath + " "
+                            + parser.getPositionDescription());
                 } else {
                     a.intents.add(intent);
                 }
@@ -1877,8 +1879,9 @@ public class PackageParser {
                     return null;
                 }
                 if (intent.countActions() == 0) {
-                    Log.w(TAG, "Intent filter for activity alias " + intent
-                            + " defines no actions");
+                    Log.w(TAG, "No actions in intent filter at "
+                            + mArchiveSourcePath + " "
+                            + parser.getPositionDescription());
                 } else {
                     a.intents.add(intent);
                 }

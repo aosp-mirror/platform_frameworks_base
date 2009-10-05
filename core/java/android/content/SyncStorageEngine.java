@@ -1028,7 +1028,7 @@ public class SyncStorageEngine extends Handler {
                     ident++;
                 }
             }
-            Log.d(TAG, "created a new AuthorityInfo for " + accountName
+            if (DEBUG) Log.v(TAG, "created a new AuthorityInfo for " + accountName
                     + ", provider " + authorityName);
             authority = new AuthorityInfo(accountName, authorityName, ident);
             account.authorities.put(authorityName, authority);

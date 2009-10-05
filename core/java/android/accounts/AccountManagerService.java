@@ -156,7 +156,7 @@ public class AccountManagerService
                     && SystemProperties.getBoolean("ro.debuggable", false);
 
     static {
-        ACCOUNTS_CHANGED_INTENT = new Intent(Constants.LOGIN_ACCOUNTS_CHANGED_ACTION);
+        ACCOUNTS_CHANGED_INTENT = new Intent(AccountManager.LOGIN_ACCOUNTS_CHANGED_ACTION);
         ACCOUNTS_CHANGED_INTENT.setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
     }
 
@@ -440,16 +440,16 @@ public class AccountManagerService
         }
 
         public void onResult(Bundle result) {
-            if (result != null && result.containsKey(Constants.BOOLEAN_RESULT_KEY)
-                    && !result.containsKey(Constants.INTENT_KEY)) {
-                final boolean removalAllowed = result.getBoolean(Constants.BOOLEAN_RESULT_KEY);
+            if (result != null && result.containsKey(AccountManager.KEY_BOOLEAN_RESULT)
+                    && !result.containsKey(AccountManager.KEY_INTENT)) {
+                final boolean removalAllowed = result.getBoolean(AccountManager.KEY_BOOLEAN_RESULT);
                 if (removalAllowed) {
                     removeAccount(mAccount);
                 }
                 IAccountManagerResponse response = getResponseAndClose();
                 if (response != null) {
                     Bundle result2 = new Bundle();
-                    result2.putBoolean(Constants.BOOLEAN_RESULT_KEY, removalAllowed);
+                    result2.putBoolean(AccountManager.KEY_BOOLEAN_RESULT, removalAllowed);
                     try {
                         response.onResult(result2);
                     } catch (RemoteException e) {
@@ -691,9 +691,9 @@ public class AccountManagerService
                 String authToken = readAuthTokenFromDatabase(account, authTokenType);
                 if (authToken != null) {
                     Bundle result = new Bundle();
-                    result.putString(Constants.AUTHTOKEN_KEY, authToken);
-                    result.putString(Constants.ACCOUNT_NAME_KEY, account.name);
-                    result.putString(Constants.ACCOUNT_TYPE_KEY, account.type);
+                    result.putString(AccountManager.KEY_AUTHTOKEN, authToken);
+                    result.putString(AccountManager.KEY_ACCOUNT_NAME, account.name);
+                    result.putString(AccountManager.KEY_ACCOUNT_TYPE, account.type);
                     onResult(response, result);
                     return;
                 }
@@ -721,22 +721,22 @@ public class AccountManagerService
 
                 public void onResult(Bundle result) {
                     if (result != null) {
-                        if (result.containsKey(Constants.AUTH_TOKEN_LABEL_KEY)) {
+                        if (result.containsKey(AccountManager.KEY_AUTH_TOKEN_LABEL)) {
                             Intent intent = newGrantCredentialsPermissionIntent(account, callerUid,
                                     new AccountAuthenticatorResponse(this),
                                     authTokenType,
-                                    result.getString(Constants.AUTH_TOKEN_LABEL_KEY));
+                                    result.getString(AccountManager.KEY_AUTH_TOKEN_LABEL));
                             Bundle bundle = new Bundle();
-                            bundle.putParcelable(Constants.INTENT_KEY, intent);
+                            bundle.putParcelable(AccountManager.KEY_INTENT, intent);
                             onResult(bundle);
                             return;
                         }
-                        String authToken = result.getString(Constants.AUTHTOKEN_KEY);
+                        String authToken = result.getString(AccountManager.KEY_AUTHTOKEN);
                         if (authToken != null) {
-                            String name = result.getString(Constants.ACCOUNT_NAME_KEY);
-                            String type = result.getString(Constants.ACCOUNT_TYPE_KEY);
+                            String name = result.getString(AccountManager.KEY_ACCOUNT_NAME);
+                            String type = result.getString(AccountManager.KEY_ACCOUNT_TYPE);
                             if (TextUtils.isEmpty(type) || TextUtils.isEmpty(name)) {
-                                onError(Constants.ERROR_CODE_INVALID_RESPONSE,
+                                onError(AccountManager.ERROR_CODE_INVALID_RESPONSE,
                                         "the type and name should not be empty");
                                 return;
                             }
@@ -744,10 +744,10 @@ public class AccountManagerService
                                     authTokenType, authToken);
                         }
 
-                        Intent intent = result.getParcelable(Constants.INTENT_KEY);
+                        Intent intent = result.getParcelable(AccountManager.KEY_INTENT);
                         if (intent != null && notifyOnAuthFailure) {
                             doNotification(
-                                    account, result.getString(Constants.AUTH_FAILED_MESSAGE_KEY),
+                                    account, result.getString(AccountManager.KEY_AUTH_FAILED_MESSAGE),
                                     intent);
                         }
                     }
@@ -871,35 +871,16 @@ public class AccountManagerService
     }
 
     public void confirmCredentials(IAccountManagerResponse response,
-            final Account account, final boolean expectActivityLaunch) {
+            final Account account, final Bundle options, final boolean expectActivityLaunch) {
         checkManageAccountsPermission();
         long identityToken = clearCallingIdentity();
         try {
             new Session(response, account.type, expectActivityLaunch) {
                 public void run() throws RemoteException {
-                    mAuthenticator.confirmCredentials(this, account);
+                    mAuthenticator.confirmCredentials(this, account, options);
                 }
                 protected String toDebugString(long now) {
                     return super.toDebugString(now) + ", confirmCredentials"
-                            + ", " + account;
-                }
-            }.bind();
-        } finally {
-            restoreCallingIdentity(identityToken);
-        }
-    }
-
-    public void confirmPassword(IAccountManagerResponse response, final Account account,
-            final String password) {
-        checkManageAccountsPermission();
-        long identityToken = clearCallingIdentity();
-        try {
-            new Session(response, account.type, false /* expectActivityLaunch */) {
-                public void run() throws RemoteException {
-                    mAuthenticator.confirmPassword(this, account, password);
-                }
-                protected String toDebugString(long now) {
-                    return super.toDebugString(now) + ", confirmPassword"
                             + ", " + account;
                 }
             }.bind();
@@ -980,17 +961,17 @@ public class AccountManagerService
             try {
                 mAuthenticator.hasFeatures(this, mAccountsOfType[mCurrentAccount], mFeatures);
             } catch (RemoteException e) {
-                onError(Constants.ERROR_CODE_REMOTE_EXCEPTION, "remote exception");
+                onError(AccountManager.ERROR_CODE_REMOTE_EXCEPTION, "remote exception");
             }
         }
 
         public void onResult(Bundle result) {
             mNumResults++;
             if (result == null) {
-                onError(Constants.ERROR_CODE_INVALID_RESPONSE, "null bundle");
+                onError(AccountManager.ERROR_CODE_INVALID_RESPONSE, "null bundle");
                 return;
             }
-            if (result.getBoolean(Constants.BOOLEAN_RESULT_KEY, false)) {
+            if (result.getBoolean(AccountManager.KEY_BOOLEAN_RESULT, false)) {
                 mAccountsWithFeatures.add(mAccountsOfType[mCurrentAccount]);
             }
             mCurrentAccount++;
@@ -1006,7 +987,7 @@ public class AccountManagerService
                         accounts[i] = mAccountsWithFeatures.get(i);
                     }
                     Bundle result = new Bundle();
-                    result.putParcelableArray(Constants.ACCOUNTS_KEY, accounts);
+                    result.putParcelableArray(AccountManager.KEY_ACCOUNTS, accounts);
                     response.onResult(result);
                 } catch (RemoteException e) {
                     // if the caller is dead then there is no one to care about remote exceptions
@@ -1040,7 +1021,7 @@ public class AccountManagerService
         if (features != null && type == null) {
             if (response != null) {
                 try {
-                    response.onError(Constants.ERROR_CODE_BAD_ARGUMENTS, "type is null");
+                    response.onError(AccountManager.ERROR_CODE_BAD_ARGUMENTS, "type is null");
                 } catch (RemoteException e) {
                     // ignore this
                 }
@@ -1171,7 +1152,7 @@ public class AccountManagerService
             }
             if (!mBindHelper.bind(mAccountType, this)) {
                 Log.d(TAG, "bind attempt failed for " + toDebugString());
-                onError(Constants.ERROR_CODE_REMOTE_EXCEPTION, "bind failure");
+                onError(AccountManager.ERROR_CODE_REMOTE_EXCEPTION, "bind failure");
             }
         }
 
@@ -1196,7 +1177,7 @@ public class AccountManagerService
             try {
                 run();
             } catch (RemoteException e) {
-                onError(Constants.ERROR_CODE_REMOTE_EXCEPTION,
+                onError(AccountManager.ERROR_CODE_REMOTE_EXCEPTION,
                         "remote exception");
             }
         }
@@ -1207,7 +1188,7 @@ public class AccountManagerService
             mAuthenticator = null;
             IAccountManagerResponse response = getResponseAndClose();
             if (response != null) {
-                onError(Constants.ERROR_CODE_REMOTE_EXCEPTION,
+                onError(AccountManager.ERROR_CODE_REMOTE_EXCEPTION,
                         "disconnected");
             }
         }
@@ -1215,16 +1196,16 @@ public class AccountManagerService
         public void onTimedOut() {
             IAccountManagerResponse response = getResponseAndClose();
             if (response != null) {
-                onError(Constants.ERROR_CODE_REMOTE_EXCEPTION,
+                onError(AccountManager.ERROR_CODE_REMOTE_EXCEPTION,
                         "timeout");
             }
         }
 
         public void onResult(Bundle result) {
             mNumResults++;
-            if (result != null && !TextUtils.isEmpty(result.getString(Constants.AUTHTOKEN_KEY))) {
-                String accountName = result.getString(Constants.ACCOUNT_NAME_KEY);
-                String accountType = result.getString(Constants.ACCOUNT_TYPE_KEY);
+            if (result != null && !TextUtils.isEmpty(result.getString(AccountManager.KEY_AUTHTOKEN))) {
+                String accountName = result.getString(AccountManager.KEY_ACCOUNT_NAME);
+                String accountType = result.getString(AccountManager.KEY_ACCOUNT_TYPE);
                 if (!TextUtils.isEmpty(accountName) && !TextUtils.isEmpty(accountType)) {
                     Account account = new Account(accountName, accountType);
                     cancelNotification(getSigninRequiredNotificationId(account));
@@ -1232,7 +1213,7 @@ public class AccountManagerService
             }
             IAccountManagerResponse response;
             if (mExpectActivityLaunch && result != null
-                    && result.containsKey(Constants.INTENT_KEY)) {
+                    && result.containsKey(AccountManager.KEY_INTENT)) {
                 response = mResponse;
             } else {
                 response = getResponseAndClose();
@@ -1240,7 +1221,7 @@ public class AccountManagerService
             if (response != null) {
                 try {
                     if (result == null) {
-                        response.onError(Constants.ERROR_CODE_INVALID_RESPONSE,
+                        response.onError(AccountManager.ERROR_CODE_INVALID_RESPONSE,
                                 "null bundle returned");
                     } else {
                         response.onResult(result);

@@ -54,9 +54,44 @@ import com.google.android.collect.Maps;
 public class AccountManager {
     private static final String TAG = "AccountManager";
 
+    public static final int ERROR_CODE_REMOTE_EXCEPTION = 1;
+    public static final int ERROR_CODE_NETWORK_ERROR = 3;
+    public static final int ERROR_CODE_CANCELED = 4;
+    public static final int ERROR_CODE_INVALID_RESPONSE = 5;
+    public static final int ERROR_CODE_UNSUPPORTED_OPERATION = 6;
+    public static final int ERROR_CODE_BAD_ARGUMENTS = 7;
+    public static final int ERROR_CODE_BAD_REQUEST = 8;
+    public static final String KEY_ACCOUNTS = "accounts";
+    public static final String KEY_AUTHENTICATOR_TYPES = "authenticator_types";
+    public static final String KEY_USERDATA = "userdata";
+    public static final String KEY_AUTHTOKEN = "authtoken";
+    public static final String KEY_PASSWORD = "password";
+    public static final String KEY_ACCOUNT_NAME = "authAccount";
+    public static final String KEY_ACCOUNT_TYPE = "accountType";
+    public static final String KEY_ERROR_CODE = "errorCode";
+    public static final String KEY_ERROR_MESSAGE = "errorMessage";
+    public static final String KEY_INTENT = "intent";
+    public static final String KEY_BOOLEAN_RESULT = "booleanResult";
+    public static final String KEY_ACCOUNT_AUTHENTICATOR_RESPONSE = "accountAuthenticatorResponse";
+    public static final String KEY_ACCOUNT_MANAGER_RESPONSE = "accountManagerResponse";
+    public static final String KEY_AUTH_FAILED_MESSAGE = "authFailedMessage";
+    public static final String KEY_AUTH_TOKEN_LABEL = "authTokenLabelKey";
+    public static final String ACTION_AUTHENTICATOR_INTENT =
+            "android.accounts.AccountAuthenticator";
+    public static final String AUTHENTICATOR_META_DATA_NAME =
+                    "android.accounts.AccountAuthenticator";
+    public static final String AUTHENTICATOR_ATTRIBUTES_NAME = "account-authenticator";
+
     private final Context mContext;
     private final IAccountManager mService;
     private final Handler mMainHandler;
+    /**
+     * Action sent as a broadcast Intent by the AccountsService
+     * when accounts are added to and/or removed from the device's
+     * database.
+     */
+    public static final String LOGIN_ACCOUNTS_CHANGED_ACTION =
+        "android.accounts.LOGIN_ACCOUNTS_CHANGED";
 
     /**
      * @hide
@@ -141,10 +176,10 @@ public class AccountManager {
                 mService.removeAccount(mResponse, account);
             }
             public Boolean bundleToResult(Bundle bundle) throws AuthenticatorException {
-                if (!bundle.containsKey(Constants.BOOLEAN_RESULT_KEY)) {
+                if (!bundle.containsKey(KEY_BOOLEAN_RESULT)) {
                     throw new AuthenticatorException("no result in response");
                 }
-                return bundle.getBoolean(Constants.BOOLEAN_RESULT_KEY);
+                return bundle.getBoolean(KEY_BOOLEAN_RESULT);
             }
         }.start();
     }
@@ -208,7 +243,7 @@ public class AccountManager {
             throws OperationCanceledException, IOException, AuthenticatorException {
         Bundle bundle = getAuthToken(account, authTokenType, notifyAuthFailure, null /* callback */,
                 null /* handler */).getResult();
-        return bundle.getString(Constants.AUTHTOKEN_KEY);
+        return bundle.getString(KEY_AUTHTOKEN);
     }
 
     /**
@@ -262,23 +297,6 @@ public class AccountManager {
         }.start();
     }
 
-    /** @deprecated use {@link #confirmCredentials} instead */
-    @Deprecated
-    public AccountManagerFuture<Boolean> confirmPassword(final Account account, final String password,
-            AccountManagerCallback<Boolean> callback, Handler handler) {
-        return new Future2Task<Boolean>(handler, callback) {
-            public void doWork() throws RemoteException {
-                mService.confirmPassword(mResponse, account, password);
-            }
-            public Boolean bundleToResult(Bundle bundle) throws AuthenticatorException {
-                if (!bundle.containsKey(Constants.BOOLEAN_RESULT_KEY)) {
-                    throw new AuthenticatorException("no result in response");
-                }
-                return bundle.getBoolean(Constants.BOOLEAN_RESULT_KEY);
-            }
-        }.start();
-    }
-
     public AccountManagerFuture<Account[]> getAccountsByTypeAndFeatures(
             final String type, final String[] features,
             AccountManagerCallback<Account[]> callback, Handler handler) {
@@ -288,10 +306,10 @@ public class AccountManager {
                 mService.getAccountsByFeatures(mResponse, type, features);
             }
             public Account[] bundleToResult(Bundle bundle) throws AuthenticatorException {
-                if (!bundle.containsKey(Constants.ACCOUNTS_KEY)) {
+                if (!bundle.containsKey(KEY_ACCOUNTS)) {
                     throw new AuthenticatorException("no result in response");
                 }
-                final Parcelable[] parcelables = bundle.getParcelableArray(Constants.ACCOUNTS_KEY);
+                final Parcelable[] parcelables = bundle.getParcelableArray(KEY_ACCOUNTS);
                 Account[] descs = new Account[parcelables.length];
                 for (int i = 0; i < parcelables.length; i++) {
                     descs[i] = (Account) parcelables[i];
@@ -301,12 +319,14 @@ public class AccountManager {
         }.start();
     }
 
-    public AccountManagerFuture<Bundle> confirmCredentials(final Account account, final Activity activity,
+    public AccountManagerFuture<Bundle> confirmCredentials(final Account account,
+            final Bundle options,
+            final Activity activity,
             final AccountManagerCallback<Bundle> callback,
             final Handler handler) {
         return new AmsTask(activity, handler, callback) {
             public void doWork() throws RemoteException {
-                mService.confirmCredentials(mResponse, account, activity != null);
+                mService.confirmCredentials(mResponse, account, options, activity != null);
             }
         }.start();
     }
@@ -357,7 +377,7 @@ public class AccountManager {
         });
     }
 
-    private void postToHandler(Handler handler, final OnAccountsUpdatedListener listener,
+    private void postToHandler(Handler handler, final OnAccountsUpdateListener listener,
             final Account[] accounts) {
         final Account[] accountsCopy = new Account[accounts.length];
         // send a copy to make sure that one doesn't
@@ -480,7 +500,7 @@ public class AccountManager {
             }
 
             public void onError(int code, String message) {
-                if (code == Constants.ERROR_CODE_CANCELED) {
+                if (code == ERROR_CODE_CANCELED) {
                     // the authenticator indicated that this request was canceled, do so now
                     cancel(true /* mayInterruptIfRunning */);
                     return;
@@ -536,11 +556,11 @@ public class AccountManager {
                 } catch (AuthenticatorException e) {
                     // we will set the exception below
                 }
-                onError(Constants.ERROR_CODE_INVALID_RESPONSE, "no result in response");
+                onError(ERROR_CODE_INVALID_RESPONSE, "no result in response");
             }
 
             public void onError(int code, String message) {
-                if (code == Constants.ERROR_CODE_CANCELED) {
+                if (code == ERROR_CODE_CANCELED) {
                     cancel(true /* mayInterruptIfRunning */);
                     return;
                 }
@@ -621,19 +641,19 @@ public class AccountManager {
     }
 
     private Exception convertErrorToException(int code, String message) {
-        if (code == Constants.ERROR_CODE_NETWORK_ERROR) {
+        if (code == ERROR_CODE_NETWORK_ERROR) {
             return new IOException(message);
         }
 
-        if (code == Constants.ERROR_CODE_UNSUPPORTED_OPERATION) {
+        if (code == ERROR_CODE_UNSUPPORTED_OPERATION) {
             return new UnsupportedOperationException(message);
         }
 
-        if (code == Constants.ERROR_CODE_INVALID_RESPONSE) {
+        if (code == ERROR_CODE_INVALID_RESPONSE) {
             return new AuthenticatorException(message);
         }
 
-        if (code == Constants.ERROR_CODE_BAD_ARGUMENTS) {
+        if (code == ERROR_CODE_BAD_ARGUMENTS) {
             return new IllegalArgumentException(message);
         }
 
@@ -690,9 +710,9 @@ public class AccountManager {
                                 } else {
                                     // send result since we can't prompt to add an account
                                     Bundle result = new Bundle();
-                                    result.putString(Constants.ACCOUNT_NAME_KEY, null);
-                                    result.putString(Constants.ACCOUNT_TYPE_KEY, null);
-                                    result.putString(Constants.AUTHTOKEN_KEY, null);
+                                    result.putString(KEY_ACCOUNT_NAME, null);
+                                    result.putString(KEY_ACCOUNT_TYPE, null);
+                                    result.putString(KEY_AUTHTOKEN, null);
                                     try {
                                         mResponse.onResult(result);
                                     } catch (RemoteException e) {
@@ -716,8 +736,8 @@ public class AccountManager {
                                             new IAccountManagerResponse.Stub() {
                                         public void onResult(Bundle value) throws RemoteException {
                                             Account account = new Account(
-                                                    value.getString(Constants.ACCOUNT_NAME_KEY),
-                                                    value.getString(Constants.ACCOUNT_TYPE_KEY));
+                                                    value.getString(KEY_ACCOUNT_NAME),
+                                                    value.getString(KEY_ACCOUNT_TYPE));
                                             mFuture = getAuthToken(account, mAuthTokenType, mLoginOptions,
                                                     mActivity, mMyCallback, mHandler);
                                         }
@@ -731,15 +751,15 @@ public class AccountManager {
                                     Intent intent = new Intent();
                                     intent.setClassName("android",
                                             "android.accounts.ChooseAccountActivity");
-                                    intent.putExtra(Constants.ACCOUNTS_KEY, accounts);
-                                    intent.putExtra(Constants.ACCOUNT_MANAGER_RESPONSE_KEY,
+                                    intent.putExtra(KEY_ACCOUNTS, accounts);
+                                    intent.putExtra(KEY_ACCOUNT_MANAGER_RESPONSE,
                                             new AccountManagerResponse(chooseResponse));
                                     mActivity.startActivity(intent);
                                     // the result will arrive via the IAccountManagerResponse
                                 } else {
                                     // send result since we can't prompt to select an account
                                     Bundle result = new Bundle();
-                                    result.putString(Constants.ACCOUNTS_KEY, null);
+                                    result.putString(KEY_ACCOUNTS, null);
                                     try {
                                         mResponse.onResult(result);
                                     } catch (RemoteException e) {
@@ -751,38 +771,34 @@ public class AccountManager {
                         }}, mHandler);
         }
 
-
-
-        // TODO(fredq) pass through the calls to our implemention of Future2 to the underlying
-        // future that we create. We need to do things like have cancel cancel the mFuture, if set
-        // or to cause this to be canceled if mFuture isn't set.
-        // Once this is done then getAuthTokenByFeatures can be changed to return a Future2.
-
         public void run(AccountManagerFuture<Bundle> future) {
             try {
-                set(future.get());
-            } catch (InterruptedException e) {
-                cancel(true);
-            } catch (CancellationException e) {
-                cancel(true);
-            } catch (ExecutionException e) {
-                setException(e.getCause());
+                set(future.getResult());
+            } catch (OperationCanceledException e) {
+                cancel(true /* mayInterruptIfRUnning */);
+            } catch (IOException e) {
+                setException(e);
+            } catch (AuthenticatorException e) {
+                setException(e);
             }
         }
     }
 
-    public void getAuthTokenByFeatures(
+    public AccountManagerFuture<Bundle> getAuthTokenByFeatures(
             final String accountType, final String authTokenType, final String[] features,
             final Activity activityForPrompting, final Bundle addAccountOptions,
             final Bundle loginOptions,
             final AccountManagerCallback<Bundle> callback, final Handler handler) {
         if (accountType == null) throw new IllegalArgumentException("account type is null");
         if (authTokenType == null) throw new IllegalArgumentException("authTokenType is null");
-        new GetAuthTokenByTypeAndFeaturesTask(accountType, authTokenType,  features,
-                activityForPrompting, addAccountOptions, loginOptions, callback, handler).start();
+        final GetAuthTokenByTypeAndFeaturesTask task =
+                new GetAuthTokenByTypeAndFeaturesTask(accountType, authTokenType, features,
+                activityForPrompting, addAccountOptions, loginOptions, callback, handler);
+        task.start();
+        return task;
     }
 
-    private final HashMap<OnAccountsUpdatedListener, Handler> mAccountsUpdatedListeners =
+    private final HashMap<OnAccountsUpdateListener, Handler> mAccountsUpdatedListeners =
             Maps.newHashMap();
 
     /**
@@ -795,7 +811,7 @@ public class AccountManager {
             final Account[] accounts = getAccounts();
             // send the result to the listeners
             synchronized (mAccountsUpdatedListeners) {
-                for (Map.Entry<OnAccountsUpdatedListener, Handler> entry :
+                for (Map.Entry<OnAccountsUpdateListener, Handler> entry :
                         mAccountsUpdatedListeners.entrySet()) {
                     postToHandler(entry.getValue(), entry.getKey(), accounts);
                 }
@@ -804,7 +820,7 @@ public class AccountManager {
     };
 
     /**
-     * Add a {@link OnAccountsUpdatedListener} to this instance of the {@link AccountManager}.
+     * Add a {@link OnAccountsUpdateListener} to this instance of the {@link AccountManager}.
      * The listener is guaranteed to be invoked on the thread of the Handler that is passed
      * in or the main thread's Handler if handler is null.
      * <p>
@@ -819,7 +835,7 @@ public class AccountManager {
      * @throws IllegalArgumentException if listener is null
      * @throws IllegalStateException if listener was already added
      */
-    public void addOnAccountsUpdatedListener(final OnAccountsUpdatedListener listener,
+    public void addOnAccountsUpdatedListener(final OnAccountsUpdateListener listener,
             Handler handler, boolean updateImmediately) {
         if (listener == null) {
             throw new IllegalArgumentException("the listener is null");
@@ -835,7 +851,7 @@ public class AccountManager {
             if (wasEmpty) {
                 // Register a broadcast receiver to monitor account changes
                 IntentFilter intentFilter = new IntentFilter();
-                intentFilter.addAction(Constants.LOGIN_ACCOUNTS_CHANGED_ACTION);
+                intentFilter.addAction(LOGIN_ACCOUNTS_CHANGED_ACTION);
                 // To recover from disk-full.
                 intentFilter.addAction(Intent.ACTION_DEVICE_STORAGE_OK); 
                 mContext.registerReceiver(mAccountsChangedBroadcastReceiver, intentFilter);
@@ -848,13 +864,13 @@ public class AccountManager {
     }
 
     /**
-     * Remove an {@link OnAccountsUpdatedListener} that was previously registered with
+     * Remove an {@link OnAccountsUpdateListener} that was previously registered with
      * {@link #addOnAccountsUpdatedListener}.
      * @param listener the listener to remove
      * @throws IllegalArgumentException if listener is null
      * @throws IllegalStateException if listener was not already added
      */
-    public void removeOnAccountsUpdatedListener(OnAccountsUpdatedListener listener) {
+    public void removeOnAccountsUpdatedListener(OnAccountsUpdateListener listener) {
         if (listener == null) {
             throw new IllegalArgumentException("the listener is null");
         }
