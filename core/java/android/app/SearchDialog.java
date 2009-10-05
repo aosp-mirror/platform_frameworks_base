@@ -364,10 +364,12 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
         mGlobalSearchMode = globalSearch || searchManager.isDefaultSearchable(mSearchable);
         mActivityContext = mSearchable.getActivityContext(getContext());
 
-        createContentView();
-
         // show the dialog. this will call onStart().
-        if (!isShowing()) {            
+        if (!isShowing()) {
+            // Recreate the search bar view every time the dialog is shown, to get rid
+            // of any bad state in the AutoCompleteTextView etc
+            createContentView();
+
             // The Dialog uses a ContextThemeWrapper for the context; use this to change the
             // theme out from underneath us, between the global search theme and the in-app
             // search theme. They are identical except that the global search theme does not
