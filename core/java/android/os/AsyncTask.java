@@ -413,6 +413,7 @@ public abstract class AsyncTask<Params, Progress, Result> {
     }
 
     private void finish(Result result) {
+        if (isCancelled()) result = null;
         onPostExecute(result);
         mStatus = Status.FINISHED;
     }
