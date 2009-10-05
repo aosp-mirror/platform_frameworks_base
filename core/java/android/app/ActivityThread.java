@@ -653,7 +653,7 @@ public final class ActivityThread {
                     mStrongRef = strong ? rd : null;
                 }
                 public void performReceive(Intent intent, int resultCode,
-                        String data, Bundle extras, boolean ordered) {
+                        String data, Bundle extras, boolean ordered, boolean sticky) {
                     ReceiverDispatcher rd = mDispatcher.get();
                     if (DEBUG_BROADCAST) {
                         int seq = intent.getIntExtra("seq", -1);
@@ -661,7 +661,8 @@ public final class ActivityThread {
                                 + " to " + rd);
                     }
                     if (rd != null) {
-                        rd.performReceive(intent, resultCode, data, extras, ordered);
+                        rd.performReceive(intent, resultCode, data, extras,
+                                ordered, sticky);
                     }
                 }
             }
@@ -681,6 +682,7 @@ public final class ActivityThread {
                 private String mCurData;
                 private Bundle mCurMap;
                 private boolean mCurOrdered;
+                private boolean mCurSticky;
 
                 public void run() {
                     BroadcastReceiver receiver = mReceiver;
@@ -706,6 +708,7 @@ public final class ActivityThread {
                         receiver.setResult(mCurCode, mCurData, mCurMap);
                         receiver.clearAbortBroadcast();
                         receiver.setOrderedHint(mCurOrdered);
+                        receiver.setInitialStickyHint(mCurSticky);
                         receiver.onReceive(mContext, intent);
                     } catch (Exception e) {
                         if (mRegistered && mCurOrdered) {
@@ -788,7 +791,7 @@ public final class ActivityThread {
             }
 
             public void performReceive(Intent intent, int resultCode,
-                    String data, Bundle extras, boolean ordered) {
+                    String data, Bundle extras, boolean ordered, boolean sticky) {
                 if (DEBUG_BROADCAST) {
                     int seq = intent.getIntExtra("seq", -1);
                     Log.i(TAG, "Enqueueing broadcast " + intent.getAction() + " seq=" + seq
@@ -800,6 +803,7 @@ public final class ActivityThread {
                 args.mCurData = data;
                 args.mCurMap = extras;
                 args.mCurOrdered = ordered;
+                args.mCurSticky = sticky;
                 if (!mActivityThread.post(args)) {
                     if (mRegistered) {
                         IActivityManager mgr = ActivityManagerNative.getDefault();
@@ -1515,9 +1519,9 @@ public final class ActivityThread {
         // correctly ordered, since these are one-way calls and the binder driver
         // applies transaction ordering per object for such calls.
         public void scheduleRegisteredReceiver(IIntentReceiver receiver, Intent intent,
-                int resultCode, String dataStr, Bundle extras, boolean ordered)
-                throws RemoteException {
-            receiver.performReceive(intent, resultCode, dataStr, extras, ordered);
+                int resultCode, String dataStr, Bundle extras, boolean ordered,
+                boolean sticky) throws RemoteException {
+            receiver.performReceive(intent, resultCode, dataStr, extras, ordered, sticky);
         }
 
         public void scheduleLowMemory() {

@@ -317,8 +317,9 @@ public abstract class ApplicationThreadNative extends Binder
             String dataStr = data.readString();
             Bundle extras = data.readBundle();
             boolean ordered = data.readInt() != 0;
+            boolean sticky = data.readInt() != 0;
             scheduleRegisteredReceiver(receiver, intent,
-                    resultCode, dataStr, extras, ordered);
+                    resultCode, dataStr, extras, ordered, sticky);
             return true;
         }
 
@@ -716,7 +717,7 @@ class ApplicationThreadProxy implements IApplicationThread {
     }
     
     public void scheduleRegisteredReceiver(IIntentReceiver receiver, Intent intent,
-            int resultCode, String dataStr, Bundle extras, boolean ordered)
+            int resultCode, String dataStr, Bundle extras, boolean ordered, boolean sticky)
             throws RemoteException {
         Parcel data = Parcel.obtain();
         data.writeInterfaceToken(IApplicationThread.descriptor);
@@ -726,6 +727,7 @@ class ApplicationThreadProxy implements IApplicationThread {
         data.writeString(dataStr);
         data.writeBundle(extras);
         data.writeInt(ordered ? 1 : 0);
+        data.writeInt(sticky ? 1 : 0);
         mRemote.transact(SCHEDULE_REGISTERED_RECEIVER_TRANSACTION, data, null,
                 IBinder.FLAG_ONEWAY);
         data.recycle();
