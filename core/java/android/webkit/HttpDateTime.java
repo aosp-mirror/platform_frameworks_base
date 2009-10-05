@@ -50,13 +50,15 @@ public final class HttpDateTime {
      * Wdy Mon DD HH:MM:SS YYYY GMT
      * 
      * HH can be H if the first digit is zero.
+     * 
+     * Mon can be the full name of the month.
      */
     private static final String HTTP_DATE_RFC_REGEXP =
-            "([0-9]{1,2})[- ]([A-Za-z]{3,3})[- ]([0-9]{2,4})[ ]"
+            "([0-9]{1,2})[- ]([A-Za-z]{3,9})[- ]([0-9]{2,4})[ ]"
             + "([0-9]{1,2}:[0-9][0-9]:[0-9][0-9])";
 
     private static final String HTTP_DATE_ANSIC_REGEXP =
-            "[ ]([A-Za-z]{3,3})[ ]+([0-9]{1,2})[ ]"
+            "[ ]([A-Za-z]{3,9})[ ]+([0-9]{1,2})[ ]"
             + "([0-9]{1,2}:[0-9][0-9]:[0-9][0-9])[ ]([0-9]{2,4})";
 
     /**
