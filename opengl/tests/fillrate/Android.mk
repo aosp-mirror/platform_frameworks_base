@@ -6,6 +6,7 @@ LOCAL_SRC_FILES:= \
 
 LOCAL_SHARED_LIBRARIES := \
 	libcutils \
+	libutils \
     libEGL \
     libGLESv1_CM \
     libui

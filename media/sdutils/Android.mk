@@ -6,7 +6,7 @@ include $(CLEAR_VARS)
 LOCAL_SRC_FILES:= \
 	sdutil.cpp \
 
-LOCAL_SHARED_LIBRARIES := libhardware_legacy libcutils libutils libc
+LOCAL_SHARED_LIBRARIES := libhardware_legacy libbinder libcutils libutils libc
 
 LOCAL_MODULE:= sdutil
 LOCAL_MODULE_TAGS := debug
