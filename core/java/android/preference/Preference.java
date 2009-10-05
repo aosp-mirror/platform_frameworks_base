@@ -188,17 +188,7 @@ public class Preference implements Comparable<Preference>, OnDependencyChangeLis
         mContext = context;
 
         TypedArray a = context.obtainStyledAttributes(attrs,
-                com.android.internal.R.styleable.Preference);
-        if (a.hasValue(com.android.internal.R.styleable.Preference_layout) ||
-                a.hasValue(com.android.internal.R.styleable.Preference_widgetLayout)) {
-            // This preference has a custom layout defined (not one taken from
-            // the default style)
-            mHasSpecifiedLayout = true;
-        }
-        a.recycle();
-        
-        a = context.obtainStyledAttributes(attrs, com.android.internal.R.styleable.Preference,
-                defStyle, 0);
+                com.android.internal.R.styleable.Preference, defStyle, 0);
         for (int i = a.getIndexCount(); i >= 0; i--) {
             int attr = a.getIndex(i); 
             switch (attr) {
@@ -252,6 +242,11 @@ public class Preference implements Comparable<Preference>, OnDependencyChangeLis
             }
         }
         a.recycle();
+
+        if (!getClass().getName().startsWith("android.preference")) {
+            // For subclasses not in this package, assume the worst and don't cache views
+            mHasSpecifiedLayout = true;
+        }
     }
     
     /**
@@ -332,11 +327,11 @@ public class Preference implements Comparable<Preference>, OnDependencyChangeLis
      * @see #setWidgetLayoutResource(int)
      */
     public void setLayoutResource(int layoutResId) {
-        
-        if (!mHasSpecifiedLayout) {
+        if (layoutResId != mLayoutResId) {
+            // Layout changed
             mHasSpecifiedLayout = true;
         }
-        
+
         mLayoutResId = layoutResId;
     }
     
@@ -360,6 +355,10 @@ public class Preference implements Comparable<Preference>, OnDependencyChangeLis
      * @see #setLayoutResource(int)
      */
     public void setWidgetLayoutResource(int widgetLayoutResId) {
+        if (widgetLayoutResId != mWidgetLayoutResId) {
+            // Layout changed
+            mHasSpecifiedLayout = true;
+        }
         mWidgetLayoutResId = widgetLayoutResId;
     }
 
