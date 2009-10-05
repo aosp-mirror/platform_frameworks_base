@@ -8389,7 +8389,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                         if (i == 0) {
                             finisher = new IIntentReceiver.Stub() {
                                 public void performReceive(Intent intent, int resultCode,
-                                        String data, Bundle extras, boolean ordered)
+                                        String data, Bundle extras, boolean ordered,
+                                        boolean sticky)
                                         throws RemoteException {
                                     synchronized (ActivityManagerService.this) {
                                         mDidUpdate = true;
@@ -11571,7 +11572,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                     Intent intent = (Intent)allSticky.get(i);
                     BroadcastRecord r = new BroadcastRecord(intent, null,
                             null, -1, -1, null, receivers, null, 0, null, null,
-                            false);
+                            false, true);
                     if (mParallelBroadcasts.size() == 0) {
                         scheduleBroadcastsLocked();
                     }
@@ -11796,7 +11797,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             BroadcastRecord r = new BroadcastRecord(intent, callerApp,
                     callerPackage, callingPid, callingUid, requiredPermission,
                     registeredReceivers, resultTo, resultCode, resultData, map,
-                    ordered);
+                    ordered, false);
             if (DEBUG_BROADCAST) Log.v(
                     TAG, "Enqueueing parallel broadcast " + r
                     + ": prev had " + mParallelBroadcasts.size());
@@ -11875,7 +11876,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 || resultTo != null) {
             BroadcastRecord r = new BroadcastRecord(intent, callerApp,
                     callerPackage, callingPid, callingUid, requiredPermission,
-                    receivers, resultTo, resultCode, resultData, map, ordered);
+                    receivers, resultTo, resultCode, resultData, map, ordered, false);
             if (DEBUG_BROADCAST) Log.v(
                     TAG, "Enqueueing ordered broadcast " + r
                     + ": prev had " + mOrderedBroadcasts.size());
@@ -12179,15 +12180,15 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
     }
 
     static void performReceive(ProcessRecord app, IIntentReceiver receiver,
-            Intent intent, int resultCode, String data,
-            Bundle extras, boolean ordered) throws RemoteException {
+            Intent intent, int resultCode, String data, Bundle extras,
+            boolean ordered, boolean sticky) throws RemoteException {
         if (app != null && app.thread != null) {
             // If we have an app thread, do the call through that so it is
             // correctly ordered with other one-way calls.
             app.thread.scheduleRegisteredReceiver(receiver, intent, resultCode,
-                    data, extras, ordered);
+                    data, extras, ordered, sticky);
         } else {
-            receiver.performReceive(intent, resultCode, data, extras, ordered);
+            receiver.performReceive(intent, resultCode, data, extras, ordered, sticky);
         }
     }
     
@@ -12251,7 +12252,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 }
                 performReceive(filter.receiverList.app, filter.receiverList.receiver,
                     new Intent(r.intent), r.resultCode,
-                    r.resultData, r.resultExtras, r.ordered);
+                    r.resultData, r.resultExtras, r.ordered, r.sticky);
                 if (ordered) {
                     r.state = BroadcastRecord.CALL_DONE_RECEIVE;
                 }
@@ -12384,7 +12385,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                             }
                             performReceive(r.callerApp, r.resultTo,
                                 new Intent(r.intent), r.resultCode,
-                                r.resultData, r.resultExtras, false);
+                                r.resultData, r.resultExtras, false, false);
                         } catch (RemoteException e) {
                             Log.w(TAG, "Failure sending broadcast result of " + r.intent, e);
                         }

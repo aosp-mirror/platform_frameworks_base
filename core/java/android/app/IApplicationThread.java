@@ -91,7 +91,7 @@ public interface IApplicationThread extends IInterface {
     void dumpService(FileDescriptor fd, IBinder servicetoken, String[] args)
             throws RemoteException;
     void scheduleRegisteredReceiver(IIntentReceiver receiver, Intent intent,
-            int resultCode, String data, Bundle extras, boolean ordered)
+            int resultCode, String data, Bundle extras, boolean ordered, boolean sticky)
             throws RemoteException;
     void scheduleLowMemory() throws RemoteException;
     void scheduleActivityConfigurationChanged(IBinder token) throws RemoteException;
