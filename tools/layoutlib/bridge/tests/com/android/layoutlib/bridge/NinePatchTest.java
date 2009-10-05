@@ -12,7 +12,7 @@ public class NinePatchTest extends TestCase {
 
     @Override
     protected void setUp() throws Exception {
-        URL url = this.getClass().getClassLoader().getResource("data/button.9.png");
+        URL url = this.getClass().getClassLoader().getResource("button.9.png");
 
         mPatch = NinePatch.load(url, false /* convert */);
     }
