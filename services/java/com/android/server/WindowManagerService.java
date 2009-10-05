@@ -3218,7 +3218,6 @@ public class WindowManagerService extends IWindowManager.Stub
                         ttoken.windows.remove(startingWindow);
                         ttoken.allAppWindows.remove(startingWindow);
                         addWindowToListInOrderLocked(startingWindow, true);
-                        wtoken.allAppWindows.add(startingWindow);
 
                         // Propagate other interesting state between the
                         // tokens.  If the old token is displayed, we should
