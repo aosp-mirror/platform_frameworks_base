@@ -62,8 +62,6 @@ static const char* kDeadlockedString = "AudioFlinger may be deadlocked\n";
 static const char* kHardwareLockedString = "Hardware lock is taken\n";
 
 //static const nsecs_t kStandbyTimeInNsecs = seconds(3);
-static const unsigned long kBufferRecoveryInUsecs = 2000;
-static const unsigned long kMaxBufferRecoveryInUsecs = 20000;
 static const float MAX_GAIN = 4096.0f;
 
 // retry counts for buffer fill timeout
@@ -1070,10 +1068,10 @@ status_t AudioFlinger::PlaybackThread::addTrack_l(const sp<Track>& track)
     // in both cases "unstop" the track
     if (track->isPaused()) {
         track->mState = TrackBase::RESUMING;
-        LOGV("PAUSED => RESUMING (%d)", track->name());
+        LOGV("PAUSED => RESUMING (%d) on thread %p", track->name(), this);
     } else {
         track->mState = TrackBase::ACTIVE;
-        LOGV("? => ACTIVE (%d)", track->name());
+        LOGV("? => ACTIVE (%d) on thread %p", track->name(), this);
     }
     // set retry count for buffer fill
     track->mRetryCount = kMaxTrackStartupRetries;
@@ -1175,7 +1173,8 @@ AudioFlinger::MixerThread::~MixerThread()
 
 bool AudioFlinger::MixerThread::threadLoop()
 {
-    unsigned long sleepTime = 0;
+    uint32_t sleepTime = 0;
+    uint32_t maxBufferRecoveryInUsecs = getMaxBufferRecoveryInUsecs();
     int16_t* curBuf = mMixBuffer;
     Vector< sp<Track> > tracksToRemove;
     size_t enabledTracks = 0;
@@ -1200,6 +1199,7 @@ bool AudioFlinger::MixerThread::threadLoop()
                 // FIXME: Relaxed timing because of a certain device that can't meet latency
                 // Should be reduced to 2x after the vendor fixes the driver issue
                 maxPeriod = seconds(mFrameCount) / mSampleRate * 3;
+                maxBufferRecoveryInUsecs = getMaxBufferRecoveryInUsecs();
             }
 
             const SortedVector< wp<Track> >& activeTracks = mActiveTracks;
@@ -1235,7 +1235,6 @@ bool AudioFlinger::MixerThread::threadLoop()
                     }
 
                     standbyTime = systemTime() + kStandbyTimeInNsecs;
-                    sleepTime = 0;
                     continue;
                 }
             }
@@ -1249,28 +1248,23 @@ bool AudioFlinger::MixerThread::threadLoop()
             sleepTime = 0;
             standbyTime = systemTime() + kStandbyTimeInNsecs;
         } else {
-            sleepTime += kBufferRecoveryInUsecs;
-            if (sleepTime > kMaxBufferRecoveryInUsecs) {
-                sleepTime = kMaxBufferRecoveryInUsecs;
-            }
-            // There was nothing to mix this round, which means all
-            // active tracks were late. Sleep a little bit to give
-            // them another chance. If we're too late, write 0s to audio
-            // hardware to avoid underrun.
-            if (mBytesWritten != 0 && sleepTime >= kMaxBufferRecoveryInUsecs) {
+            // If no tracks are ready, sleep once for the duration of an output
+            // buffer size, then write 0s to the output
+            if (sleepTime == 0) {
+                sleepTime = maxBufferRecoveryInUsecs;
+            } else if (mBytesWritten != 0) {
                 memset (curBuf, 0, mixBufferSize);
                 sleepTime = 0;
             }
         }
 
         if (mSuspended) {
-            sleepTime = kMaxBufferRecoveryInUsecs;
+            sleepTime = maxBufferRecoveryInUsecs;
         }
         // sleepTime == 0 means we must write to audio hardware
         if (sleepTime == 0) {
             mLastWriteTime = systemTime();
             mInWrite = true;
-            LOGV("mOutput->write() thread %p frames %d", this, mFrameCount);
             int bytesWritten = (int)mOutput->write(curBuf, mixBufferSize);
             if (bytesWritten > 0) mBytesWritten += bytesWritten;
             mNumWrites++;
@@ -1393,7 +1387,7 @@ size_t AudioFlinger::MixerThread::prepareTracks_l(const SortedVector< wp<Track> 
                 // No buffers for this track. Give it a few chances to
                 // fill a buffer, then remove it from active list.
                 if (--(track->mRetryCount) <= 0) {
-                    LOGV("BUFFER TIMEOUT: remove(%d) from active list", track->name());
+                    LOGV("BUFFER TIMEOUT: remove(%d) from active list on thread %p", track->name(), this);
                     tracksToRemove->add(track);
                 }
                 // For tracks using static shared memory buffer, make sure that we have
@@ -1583,6 +1577,16 @@ status_t AudioFlinger::MixerThread::dumpInternals(int fd, const Vector<String16>
     return NO_ERROR;
 }
 
+uint32_t AudioFlinger::MixerThread::getMaxBufferRecoveryInUsecs()
+{
+    uint32_t time = ((mFrameCount * 1000) / mSampleRate) * 1000;
+    // Add some margin with regard to scheduling precision
+    if (time > 10000) {
+        time -= 10000;
+    }
+    return time;
+}
+
 // ----------------------------------------------------------------------------
 AudioFlinger::DirectOutputThread::DirectOutputThread(const sp<AudioFlinger>& audioFlinger, AudioStreamOut* output)
     :   PlaybackThread(audioFlinger, output),
@@ -1598,7 +1602,8 @@ AudioFlinger::DirectOutputThread::~DirectOutputThread()
 
 bool AudioFlinger::DirectOutputThread::threadLoop()
 {
-    unsigned long sleepTime = 0;
+    uint32_t sleepTime = 0;
+    uint32_t maxBufferRecoveryInUsecs = getMaxBufferRecoveryInUsecs();
     sp<Track> trackToRemove;
     sp<Track> activeTrack;
     nsecs_t standbyTime = systemTime();
@@ -1615,6 +1620,7 @@ bool AudioFlinger::DirectOutputThread::threadLoop()
 
             if (checkForNewParameters_l()) {
                 mixBufferSize = mFrameCount*mFrameSize;
+                maxBufferRecoveryInUsecs = getMaxBufferRecoveryInUsecs();
             }
 
             // put audio hardware into standby after short delay
@@ -1648,7 +1654,6 @@ bool AudioFlinger::DirectOutputThread::threadLoop()
                     }
 
                     standbyTime = systemTime() + kStandbyTimeInNsecs;
-                    sleepTime = 0;
                     continue;
                 }
             }
@@ -1761,23 +1766,16 @@ bool AudioFlinger::DirectOutputThread::threadLoop()
             sleepTime = 0;
             standbyTime = systemTime() + kStandbyTimeInNsecs;
         } else {
-            sleepTime += kBufferRecoveryInUsecs;
-            if (sleepTime > kMaxBufferRecoveryInUsecs) {
-                sleepTime = kMaxBufferRecoveryInUsecs;
-            }
-            // There was nothing to mix this round, which means all
-            // active tracks were late. Sleep a little bit to give
-            // them another chance. If we're too late, write 0s to audio
-            // hardware to avoid underrun.
-            if (mBytesWritten != 0 && sleepTime >= kMaxBufferRecoveryInUsecs &&
-                AudioSystem::isLinearPCM(mFormat)) {
+            if (sleepTime == 0) {
+                sleepTime = maxBufferRecoveryInUsecs;
+            } else if (mBytesWritten != 0 && AudioSystem::isLinearPCM(mFormat)) {
                 memset (mMixBuffer, 0, mFrameCount * mFrameSize);
                 sleepTime = 0;
             }
         }
 
         if (mSuspended) {
-            sleepTime = kMaxBufferRecoveryInUsecs;
+            sleepTime = maxBufferRecoveryInUsecs;
         }
         // sleepTime == 0 means we must write to audio hardware
         if (sleepTime == 0) {
@@ -1861,6 +1859,21 @@ bool AudioFlinger::DirectOutputThread::checkForNewParameters_l()
     return reconfig;
 }
 
+uint32_t AudioFlinger::DirectOutputThread::getMaxBufferRecoveryInUsecs()
+{
+    uint32_t time;
+    if (AudioSystem::isLinearPCM(mFormat)) {
+        time = ((mFrameCount * 1000) / mSampleRate) * 1000;
+        // Add some margin with regard to scheduling precision
+        if (time > 10000) {
+            time -= 10000;
+        }
+    } else {
+        time = 10000;
+    }
+    return time;
+}
+
 // ----------------------------------------------------------------------------
 
 AudioFlinger::DuplicatingThread::DuplicatingThread(const sp<AudioFlinger>& audioFlinger, AudioFlinger::MixerThread* mainThread)
@@ -1877,13 +1890,15 @@ AudioFlinger::DuplicatingThread::~DuplicatingThread()
 
 bool AudioFlinger::DuplicatingThread::threadLoop()
 {
-    unsigned long sleepTime = kBufferRecoveryInUsecs;
+    uint32_t sleepTime = 0;
+    uint32_t maxBufferRecoveryInUsecs = getMaxBufferRecoveryInUsecs();
     int16_t* curBuf = mMixBuffer;
     Vector< sp<Track> > tracksToRemove;
     size_t enabledTracks = 0;
     nsecs_t standbyTime = systemTime();
     size_t mixBufferSize = mFrameCount*mFrameSize;
     SortedVector< sp<OutputTrack> > outputTracks;
+    uint32_t writeFrames = 0;
 
     while (!exitPending())
     {
@@ -1896,6 +1911,7 @@ bool AudioFlinger::DuplicatingThread::threadLoop()
 
             if (checkForNewParameters_l()) {
                 mixBufferSize = mFrameCount*mFrameSize;
+                maxBufferRecoveryInUsecs = getMaxBufferRecoveryInUsecs();
             }
 
             const SortedVector< wp<Track> >& activeTracks = mActiveTracks;
@@ -1935,7 +1951,6 @@ bool AudioFlinger::DuplicatingThread::threadLoop()
                     }
 
                     standbyTime = systemTime() + kStandbyTimeInNsecs;
-                    sleepTime = kBufferRecoveryInUsecs;
                     continue;
                 }
             }
@@ -1947,29 +1962,30 @@ bool AudioFlinger::DuplicatingThread::threadLoop()
             // mix buffers...
             mAudioMixer->process(curBuf);
             sleepTime = 0;
-            standbyTime = systemTime() + kStandbyTimeInNsecs;
+            writeFrames = mFrameCount;
         } else {
-            sleepTime += kBufferRecoveryInUsecs;
-            if (sleepTime > kMaxBufferRecoveryInUsecs) {
-                sleepTime = kMaxBufferRecoveryInUsecs;
-            }
-            // There was nothing to mix this round, which means all
-            // active tracks were late. Sleep a little bit to give
-            // them another chance. If we're too late, write 0s to audio
-            // hardware to avoid underrun.
-            if (mBytesWritten != 0 && sleepTime >= kMaxBufferRecoveryInUsecs) {
-                memset (curBuf, 0, mixBufferSize);
-                sleepTime = 0;
+            if (sleepTime == 0) {
+                sleepTime = maxBufferRecoveryInUsecs;
+            } else if (mBytesWritten != 0) {
+                // flush remaining overflow buffers in output tracks
+                for (size_t i = 0; i < outputTracks.size(); i++) {
+                    if (outputTracks[i]->isActive()) {
+                        sleepTime = 0;
+                        writeFrames = 0;
+                        break;
+                    }
+                }
             }
         }
 
         if (mSuspended) {
-            sleepTime = kMaxBufferRecoveryInUsecs;
+            sleepTime = maxBufferRecoveryInUsecs;
         }
         // sleepTime == 0 means we must write to audio hardware
         if (sleepTime == 0) {
+            standbyTime = systemTime() + kStandbyTimeInNsecs;
             for (size_t i = 0; i < outputTracks.size(); i++) {
-                outputTracks[i]->write(curBuf, mFrameCount);
+                outputTracks[i]->write(curBuf, writeFrames);
             }
             mStandby = false;
             mBytesWritten += mixBufferSize;
@@ -2025,7 +2041,6 @@ void AudioFlinger::DuplicatingThread::removeOutputTrack(MixerThread *thread)
     }
     LOGV("removeOutputTrack(): unkonwn thread: %p", thread);
 }
-
 
 // ----------------------------------------------------------------------------
 
@@ -2300,7 +2315,7 @@ status_t AudioFlinger::PlaybackThread::Track::getNextBuffer(AudioBufferProvider:
 getNextBuffer_exit:
      buffer->raw = 0;
      buffer->frameCount = 0;
-     LOGV("getNextBuffer() no more data");
+     LOGV("getNextBuffer() no more data for track %d on thread %p", mName, mThread.unsafe_get());
      return NOT_ENOUGH_DATA;
 }
 
@@ -2341,7 +2356,7 @@ void AudioFlinger::PlaybackThread::Track::stop()
             if (playbackThread->mActiveTracks.indexOf(this) < 0) {
                 reset();
             }
-            LOGV("(> STOPPED) => STOPPED (%d)", mName);
+            LOGV("(> STOPPED) => STOPPED (%d) on thread %p", mName, playbackThread);
         }
     }
 }
@@ -2354,7 +2369,7 @@ void AudioFlinger::PlaybackThread::Track::pause()
         Mutex::Autolock _l(thread->mLock);
         if (mState == ACTIVE || mState == RESUMING) {
             mState = PAUSING;
-            LOGV("ACTIVE/RESUMING => PAUSING (%d)", mName);
+            LOGV("ACTIVE/RESUMING => PAUSING (%d) on thread %p", mName, thread.get());
         }
     }
 }
@@ -2566,7 +2581,7 @@ bool AudioFlinger::PlaybackThread::OutputTrack::write(int16_t* data, uint32_t fr
 
     uint32_t waitTimeLeftMs = mWaitTimeMs;
 
-    if (!mActive) {
+    if (!mActive && frames != 0) {
         start();
         sp<ThreadBase> thread = mThread.promote();
         if (thread != 0) {
@@ -2608,7 +2623,7 @@ bool AudioFlinger::PlaybackThread::OutputTrack::write(int16_t* data, uint32_t fr
                 break;
             }
             uint32_t waitTimeMs = (uint32_t)ns2ms(systemTime() - startTime);
-//            LOGV("OutputTrack::write() waitTimeMs %d waitTimeLeftMs %d", waitTimeMs, waitTimeLeftMs)
+            LOGV("OutputTrack::write() to thread %p waitTimeMs %d waitTimeLeftMs %d", mThread.unsafe_get(), waitTimeMs, waitTimeLeftMs);
             if (waitTimeLeftMs >= waitTimeMs) {
                 waitTimeLeftMs -= waitTimeMs;
             } else {
@@ -2663,7 +2678,7 @@ bool AudioFlinger::PlaybackThread::OutputTrack::write(int16_t* data, uint32_t fr
             pInBuffer->i16 = pInBuffer->mBuffer;
             memset(pInBuffer->raw, 0, frames * channels * sizeof(int16_t));
             mBufferQueue.add(pInBuffer);
-        } else {
+        } else if (mActive) {
             stop();
         }
     }

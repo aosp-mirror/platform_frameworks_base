@@ -248,6 +248,7 @@ private:
     // only if tone duration is less than about 27 Hours(@44100Hz sampling rate). If this time is exceeded,
     // no crash will occur but tone sequence will show a glitch.
     unsigned int mMaxSmp;  // Maximum number of audio samples played (maximun tone duration)
+    int mDurationMs;  // Maximum tone duration in ms
 
     unsigned short mCurSegment;  // Current segment index in ToneDescriptor segments[]
     unsigned short mCurCount;  // Current sequence repeat count
