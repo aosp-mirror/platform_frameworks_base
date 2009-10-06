@@ -42,7 +42,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  * BluetoothSocket} ready for an outgoing connection to a remote
  * {@link BluetoothDevice}.
  *
- * <p>Use {@link BluetoothAdapter#listenUsingRfcommOn} to create a listening
+ * <p>Use {@link BluetoothAdapter#listenUsingRfcomm} to create a listening
  * {@link BluetoothServerSocket} ready for incoming connections to the local
  * {@link BluetoothAdapter}.
  *
@@ -54,10 +54,16 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  * {@link android.Manifest.permission#BLUETOOTH}
  */
 public final class BluetoothSocket implements Closeable {
+    /** @hide */
+    public static final int MAX_RFCOMM_CHANNEL = 30;
+
     /** Keep TYPE_ fields in sync with BluetoothSocket.cpp */
     /*package*/ static final int TYPE_RFCOMM = 1;
     /*package*/ static final int TYPE_SCO = 2;
     /*package*/ static final int TYPE_L2CAP = 3;
+
+    /*package*/ static final int EBADFD = 77;
+    /*package*/ static final int EADDRINUSE = 98;
 
     private final int mType;  /* one of TYPE_RFCOMM etc */
     private final int mPort;  /* RFCOMM channel or L2CAP psm */
@@ -90,6 +96,11 @@ public final class BluetoothSocket implements Closeable {
      */
     /*package*/ BluetoothSocket(int type, int fd, boolean auth, boolean encrypt,
             BluetoothDevice device, int port) throws IOException {
+        if (type == BluetoothSocket.TYPE_RFCOMM) {
+            if (port < 1 || port > MAX_RFCOMM_CHANNEL) {
+                throw new IOException("Invalid RFCOMM channel: " + port);
+            }
+        }
         mType = type;
         mAuth = auth;
         mEncrypt = encrypt;
@@ -211,11 +222,15 @@ public final class BluetoothSocket implements Closeable {
         return mOutputStream;
     }
 
-    /*package*/ void bindListen() throws IOException {
+    /**
+     * Currently returns unix errno instead of throwing IOException,
+     * so that BluetoothAdapter can check the error code for EADDRINUSE
+     */
+    /*package*/ int bindListen() {
         mLock.readLock().lock();
         try {
-            if (mClosed) throw new IOException("socket closed");
-            bindListenNative();
+            if (mClosed) return EBADFD;
+            return bindListenNative();
         } finally {
             mLock.readLock().unlock();
         }
@@ -264,11 +279,16 @@ public final class BluetoothSocket implements Closeable {
     private native void initSocketNative() throws IOException;
     private native void initSocketFromFdNative(int fd) throws IOException;
     private native void connectNative() throws IOException;
-    private native void bindListenNative() throws IOException;
+    private native int bindListenNative();
     private native BluetoothSocket acceptNative(int timeout) throws IOException;
     private native int availableNative() throws IOException;
     private native int readNative(byte[] b, int offset, int length) throws IOException;
     private native int writeNative(byte[] b, int offset, int length) throws IOException;
     private native void abortNative() throws IOException;
     private native void destroyNative() throws IOException;
+    /**
+     * Throws an IOException for given posix errno. Done natively so we can
+     * use strerr to convert to string error.
+     */
+    /*package*/ native void throwErrnoNative(int errno) throws IOException;
 }

@@ -16,6 +16,8 @@
 
 package android.bluetooth;
 
+import android.os.Handler;
+
 import java.io.Closeable;
 import java.io.IOException;
 
@@ -38,7 +40,7 @@ import java.io.IOException;
  * BluetoothSocket} ready for an outgoing connection to a remote
  * {@link BluetoothDevice}.
  *
- * <p>Use {@link BluetoothAdapter#listenUsingRfcommOn} to create a listening
+ * <p>Use {@link BluetoothAdapter#listenUsingRfcomm} to create a listening
  * {@link BluetoothServerSocket} ready for incoming connections to the local
  * {@link BluetoothAdapter}.
  *
@@ -52,6 +54,8 @@ import java.io.IOException;
 public final class BluetoothServerSocket implements Closeable {
 
     /*package*/ final BluetoothSocket mSocket;
+    private Handler mHandler;
+    private int mMessage;
 
     /**
      * Construct a socket for incoming connections.
@@ -101,6 +105,16 @@ public final class BluetoothServerSocket implements Closeable {
      * throw an IOException.
      */
     public void close() throws IOException {
+        synchronized (this) {
+            if (mHandler != null) {
+                mHandler.obtainMessage(mMessage).sendToTarget();
+            }
+        }
         mSocket.close();
+    }
+
+    /*package*/ synchronized void setCloseHandler(Handler handler, int message) {
+        mHandler = handler;
+        mMessage = message;
     }
 }

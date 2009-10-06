@@ -41,7 +41,7 @@ public class BridgeXmlBlockParserTest extends TestCase {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        URL url = this.getClass().getClassLoader().getResource("data/layout1.xml");
+        URL url = this.getClass().getClassLoader().getResource("layout1.xml");
         mXmlPath = url.getFile();
         mDoc = getXmlDocument(mXmlPath);
     }

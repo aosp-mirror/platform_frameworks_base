@@ -73,6 +73,48 @@ public class BridgeTest extends TestCase {
         }
     }
 
+    /**
+     * Mock implementation of {@link IStyleResourceValue}.
+     */
+    private static class StyleResourceValueMock extends ResourceValue
+            implements IStyleResourceValue {
+
+        private String mParentStyle = null;
+        private HashMap<String, IResourceValue> mItems = new HashMap<String, IResourceValue>();
+
+        StyleResourceValueMock(String name) {
+            super(name);
+        }
+
+        StyleResourceValueMock(String name, String parentStyle) {
+            super(name);
+            mParentStyle = parentStyle;
+        }
+
+        public String getParentStyle() {
+            return mParentStyle;
+        }
+
+        public IResourceValue findItem(String name) {
+            return mItems.get(name);
+        }
+
+        public void addItem(IResourceValue value) {
+            mItems.put(value.getName(), value);
+        }
+
+        @Override
+        public void replaceWith(ResourceValue value) {
+            super.replaceWith(value);
+
+            if (value instanceof StyleResourceValueMock) {
+                mItems.clear();
+                mItems.putAll(((StyleResourceValueMock)value).mItems);
+            }
+        }
+    }
+
+
     public void testComputeLayout() throws Exception {
         
         TestParser parser = new TestParser();
@@ -88,8 +130,10 @@ public class BridgeTest extends TestCase {
         
         // FIXME need a dummy font for the tests!
         ILayoutResult result = mBridge.computeLayout(parser, new Integer(1) /* projectKey */, 
-                screenWidth, screenHeight,
-                "Theme", projectResources, frameworkResources, null, null);
+                screenWidth, screenHeight, false /* full render */,
+                160, 160f, 160f,
+                "Theme", false /* is project theme */,
+                projectResources, frameworkResources, null, null);
                 
         display(result.getRootView(), "");
     }
@@ -191,7 +235,7 @@ public class BridgeTest extends TestCase {
      * a style item value. If the number of string in the array is not even, an exception is thrown.
      */
     private IStyleResourceValue createStyle(String styleName, String... items) {
-        StyleResourceValue value = new StyleResourceValue(styleName);
+        StyleResourceValueMock value = new StyleResourceValueMock(styleName);
         
         if (items.length % 3 == 0) {
             for (int i = 0 ; i < items.length;) {
@@ -220,8 +264,10 @@ public class BridgeTest extends TestCase {
 
         // FIXME need a dummy font for the tests!
         ILayoutResult result = mBridge.computeLayout(parser, new Integer(1) /* projectKey */,
-                screenWidth, screenHeight,
-                "Theme", projectResources, frameworkResources, null, null);
+                screenWidth, screenHeight, false /* full render */,
+                160, 160f, 160f,
+                "Theme", false /* is project theme */,
+                projectResources, frameworkResources, null, null);
                 
         display(result.getRootView(), "");
     }
