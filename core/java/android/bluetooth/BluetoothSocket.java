@@ -42,7 +42,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  * BluetoothSocket} ready for an outgoing connection to a remote
  * {@link BluetoothDevice}.
  *
- * <p>Use {@link BluetoothAdapter#listenUsingRfcommOn} to create a listening
+ * <p>Use {@link BluetoothAdapter#listenUsingRfcomm} to create a listening
  * {@link BluetoothServerSocket} ready for incoming connections to the local
  * {@link BluetoothAdapter}.
  *
