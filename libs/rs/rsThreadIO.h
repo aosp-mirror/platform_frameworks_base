@@ -39,7 +39,7 @@ public:
 
 
     LocklessCommandFifo mToCore;
-    //LocklessCommandFifo mToClient;
+    LocklessCommandFifo mToClient;
 
     intptr_t mToCoreRet;
 

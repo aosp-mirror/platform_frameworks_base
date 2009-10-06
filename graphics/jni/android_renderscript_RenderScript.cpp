@@ -194,6 +194,37 @@ nContextResume(JNIEnv *_env, jobject _this)
     rsContextResume(con);
 }
 
+static jint
+nContextGetMessage(JNIEnv *_env, jobject _this, jintArray data, jboolean wait)
+{
+    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
+    jint len = _env->GetArrayLength(data);
+    LOG_API("nContextGetMessage, con(%p), len(%i)", con, len);
+    jint *ptr = _env->GetIntArrayElements(data, NULL);
+    size_t receiveLen;
+    int id = rsContextGetMessage(con, ptr, &receiveLen, len * 4, wait);
+    if (!id && receiveLen) {
+        LOGE("message receive buffer too small.  %i", receiveLen);
+    }
+    _env->ReleaseIntArrayElements(data, ptr, 0);
+    return id;
+}
+
+static void nContextInitToClient(JNIEnv *_env, jobject _this)
+{
+    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
+    LOG_API("nContextInitToClient, con(%p)", con);
+    rsContextInitToClient(con);
+}
+
+static void nContextDeinitToClient(JNIEnv *_env, jobject _this)
+{
+    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
+    LOG_API("nContextDeinitToClient, con(%p)", con);
+    rsContextDeinitToClient(con);
+}
+
+
 static void
 nElementBegin(JNIEnv *_env, jobject _this)
 {
@@ -1303,6 +1334,9 @@ static JNINativeMethod methods[] = {
 {"nAssignName",                    "(I[B)V",                               (void*)nAssignName },
 {"nObjDestroy",                    "(I)V",                                 (void*)nObjDestroy },
 {"nObjDestroyOOB",                 "(I)V",                                 (void*)nObjDestroyOOB },
+{"nContextGetMessage",             "([IZ)I",                               (void*)nContextGetMessage },
+{"nContextInitToClient",           "()V",                                  (void*)nContextInitToClient },
+{"nContextDeinitToClient",         "()V",                                  (void*)nContextDeinitToClient },
 
 {"nFileOpen",                      "([B)I",                                (void*)nFileOpen },
 

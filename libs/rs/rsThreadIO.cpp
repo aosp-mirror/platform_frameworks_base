@@ -24,6 +24,7 @@ using namespace android::renderscript;
 ThreadIO::ThreadIO()
 {
     mToCore.init(16 * 1024);
+    mToClient.init(1024);
 }
 
 ThreadIO::~ThreadIO()

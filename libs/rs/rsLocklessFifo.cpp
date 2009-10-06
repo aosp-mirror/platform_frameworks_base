@@ -99,6 +99,9 @@ void * LocklessCommandFifo::reserve(uint32_t sizeInBytes)
 
 void LocklessCommandFifo::commit(uint32_t command, uint32_t sizeInBytes)
 {
+    if (mInShutdown) {
+        return;
+    }
     //dumpState("commit 1");
     reinterpret_cast<uint16_t *>(mPut)[0] = command;
     reinterpret_cast<uint16_t *>(mPut)[1] = sizeInBytes;
@@ -109,6 +112,9 @@ void LocklessCommandFifo::commit(uint32_t command, uint32_t sizeInBytes)
 
 void LocklessCommandFifo::commitSync(uint32_t command, uint32_t sizeInBytes)
 {
+    if (mInShutdown) {
+        return;
+    }
     commit(command, sizeInBytes);
     flush();
 }
