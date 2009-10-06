@@ -50,6 +50,10 @@ public final class BluetoothUuid {
     public static final ParcelUuid ObexObjectPush =
             ParcelUuid.fromString("00001105-0000-1000-8000-00805f9b34fb");
 
+    public static final ParcelUuid[] RESERVED_UUIDS = {
+        AudioSink, AudioSource, AdvAudioDist, HSP, Handsfree, AvrcpController, AvrcpTarget,
+        ObexObjectPush};
+
     public static boolean isAudioSource(ParcelUuid uuid) {
         return uuid.equals(AudioSource);
     }

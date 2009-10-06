@@ -63,4 +63,7 @@ interface IBluetooth
 
     boolean setTrust(in String address, in boolean value);
     boolean getTrustState(in String address);
+
+    int addRfcommServiceRecord(in String serviceName, in ParcelUuid uuid, int channel, IBinder b);
+    void removeServiceRecord(int handle);
 }

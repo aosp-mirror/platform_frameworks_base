@@ -818,6 +818,48 @@ static jboolean discoverServicesNative(JNIEnv *env, jobject object,
     return JNI_FALSE;
 }
 
+static jint addRfcommServiceRecordNative(JNIEnv *env, jobject object,
+        jstring name, jlong uuidMsb, jlong uuidLsb, jshort channel) {
+    LOGV(__FUNCTION__);
+#ifdef HAVE_BLUETOOTH
+    native_data_t *nat = get_native_data(env, object);
+    if (nat) {
+        const char *c_name = env->GetStringUTFChars(name, NULL);
+        LOGV("... name = %s", c_name);
+        LOGV("... uuid1 = %llX", uuidMsb);
+        LOGV("... uuid2 = %llX", uuidLsb);
+        LOGV("... channel = %d", channel);
+        DBusMessage *reply = dbus_func_args(env, nat->conn,
+                           get_adapter_path(env, object),
+                           DBUS_ADAPTER_IFACE, "AddRfcommServiceRecord",
+                           DBUS_TYPE_STRING, &c_name,
+                           DBUS_TYPE_UINT64, &uuidMsb,
+                           DBUS_TYPE_UINT64, &uuidLsb,
+                           DBUS_TYPE_UINT16, &channel,
+                           DBUS_TYPE_INVALID);
+        env->ReleaseStringUTFChars(name, c_name);
+        return reply ? dbus_returns_uint32(env, reply) : -1;
+    }
+#endif
+    return -1;
+}
+
+static jboolean removeServiceRecordNative(JNIEnv *env, jobject object, jint handle) {
+    LOGV(__FUNCTION__);
+#ifdef HAVE_BLUETOOTH
+    native_data_t *nat = get_native_data(env, object);
+    if (nat) {
+        LOGV("... handle = %X", handle);
+        DBusMessage *reply = dbus_func_args(env, nat->conn,
+                           get_adapter_path(env, object),
+                           DBUS_ADAPTER_IFACE, "RemoveServiceRecord",
+                           DBUS_TYPE_UINT32, &handle,
+                           DBUS_TYPE_INVALID);
+        return reply ? JNI_TRUE : JNI_FALSE;
+    }
+#endif
+    return JNI_FALSE;
+}
 
 static JNINativeMethod sMethods[] = {
      /* name, signature, funcPtr */
@@ -861,6 +903,8 @@ static JNINativeMethod sMethods[] = {
             (void *)setDevicePropertyBooleanNative},
     {"createDeviceNative", "(Ljava/lang/String;)Z", (void *)createDeviceNative},
     {"discoverServicesNative", "(Ljava/lang/String;Ljava/lang/String;)Z", (void *)discoverServicesNative},
+    {"addRfcommServiceRecordNative", "(Ljava/lang/String;JJS)I", (void *)addRfcommServiceRecordNative},
+    {"removeServiceRecordNative", "(I)Z", (void *)removeServiceRecordNative},
 };
 
 int register_android_server_BluetoothService(JNIEnv *env) {
