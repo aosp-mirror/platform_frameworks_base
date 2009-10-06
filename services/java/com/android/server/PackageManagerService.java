@@ -1997,7 +1997,6 @@ class PackageManagerService extends IPackageManager.Stub {
         parseFlags |= mDefParseFlags;
         PackageParser pp = new PackageParser(scanFile.getPath());
         pp.setSeparateProcesses(mSeparateProcesses);
-        pp.setSdkVersion(mSdkVersion, mSdkCodename);
         final PackageParser.Package pkg = pp.parsePackage(scanFile,
                 destCodeFile.getAbsolutePath(), mMetrics, parseFlags);
         if (pkg == null) {
@@ -4168,7 +4167,6 @@ class PackageManagerService extends IPackageManager.Stub {
             parseFlags |= mDefParseFlags;
             PackageParser pp = new PackageParser(tmpPackageFile.getPath());
             pp.setSeparateProcesses(mSeparateProcesses);
-            pp.setSdkVersion(mSdkVersion, mSdkCodename);
             final PackageParser.Package pkg = pp.parsePackage(tmpPackageFile,
                     destPackageFile.getAbsolutePath(), mMetrics, parseFlags);
             if (pkg == null) {
