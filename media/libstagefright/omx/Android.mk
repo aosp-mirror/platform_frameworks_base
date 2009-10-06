@@ -10,6 +10,7 @@ LOCAL_C_INCLUDES += $(TOP)/hardware/ti/omap3/liboverlay
 LOCAL_C_INCLUDES += $(JNI_H_INCLUDE)
 
 LOCAL_SRC_FILES:=                 \
+        ColorConverter.cpp        \
 	OMX.cpp                   \
         QComHardwareRenderer.cpp  \
         SoftwareRenderer.cpp      \
