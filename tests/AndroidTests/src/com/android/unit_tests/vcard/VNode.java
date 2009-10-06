@@ -18,7 +18,7 @@ package com.android.unit_tests.vcard;
 import java.util.ArrayList;
 
 /**
- * @hide old class. Just for testing
+ * Previously used in main vCard handling code but now exists only for testing.
  */
 public class VNode {
     public String VName;

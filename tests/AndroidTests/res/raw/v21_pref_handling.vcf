@@ -1,0 +1,15 @@
+BEGIN:VCARD
+VERSION:2.1
+FN:Smith
+TEL;HOME:1
+TEL;WORK;PREF:2
+TEL;ISDN:3
+EMAIL;PREF;HOME:test@example.com
+EMAIL;CELL;PREF:test2@examination.com
+ORG:Company
+TITLE:Engineer
+ORG:Mystery
+TITLE:Blogger
+ORG:Poetry
+TITLE:Poet
+END:VCARD

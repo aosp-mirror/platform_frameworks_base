@@ -36,7 +36,8 @@ import java.util.List;
  * Maybe several vcard instance, so use vNodeList to store.
  * VNode: standy by a vcard instance.
  * PropertyNode: standy by a property line of a card.
- * @hide old class, just for testing use 
+ *
+ * Previously used in main vCard handling code but now exists only for testing.
  */
 public class VNodeBuilder implements VCardBuilder {
     static private String LOG_TAG = "VDATABuilder"; 
