@@ -2836,6 +2836,21 @@ public class WebView extends AbsoluteLayout
      */
     private boolean mNeedToAdjustWebTextView;
 
+    private boolean didUpdateTextViewBounds(boolean allowIntersect) {
+        Rect contentBounds = nativeFocusCandidateNodeBounds();
+        Rect vBox = contentToViewRect(contentBounds);
+        Rect visibleRect = new Rect();
+        calcOurVisibleRect(visibleRect);
+        if (allowIntersect ? Rect.intersects(visibleRect, vBox) :
+                visibleRect.contains(vBox)) {
+            mWebTextView.setRect(vBox.left, vBox.top, vBox.width(),
+                    vBox.height());
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     private void drawCoreAndCursorRing(Canvas canvas, int color,
         boolean drawCursorRing) {
         if (mDrawHistory) {
@@ -2863,19 +2878,13 @@ public class WebView extends AbsoluteLayout
                 invalidate();
                 if (mNeedToAdjustWebTextView) {
                     mNeedToAdjustWebTextView = false;
-                    Rect contentBounds = nativeFocusCandidateNodeBounds();
-                    Rect vBox = contentToViewRect(contentBounds);
-                    Rect visibleRect = new Rect();
-                    calcOurVisibleRect(visibleRect);
-                    if (visibleRect.contains(vBox)) {
-                        // As a result of the zoom, the textfield is now on
-                        // screen.  Place the WebTextView in its new place,
-                        // accounting for our new scroll/zoom values.
+                    // As a result of the zoom, the textfield is now on
+                    // screen.  Place the WebTextView in its new place,
+                    // accounting for our new scroll/zoom values.
+                    if (didUpdateTextViewBounds(false)) {
                         mWebTextView.setTextSize(TypedValue.COMPLEX_UNIT_PX,
                                 contentToViewDimension(
                                 nativeFocusCandidateTextSize()));
-                        mWebTextView.setRect(vBox.left, vBox.top, vBox.width(),
-                                vBox.height());
                         // If it is a password field, start drawing the
                         // WebTextView once again.
                         if (nativeFocusCandidateIsPassword()) {
@@ -2950,6 +2959,10 @@ public class WebView extends AbsoluteLayout
         // the process of scrolling them into view.
         if (mFindIsUp && !animateScroll) {
             nativeDrawMatches(canvas);
+        }
+        if (mFocusSizeChanged) {
+            mFocusSizeChanged = false;
+            didUpdateTextViewBounds(true);
         }
     }
 
@@ -4039,6 +4052,7 @@ public class WebView extends AbsoluteLayout
     private static final int SELECT_CURSOR_OFFSET = 16;
     private int mSelectX = 0;
     private int mSelectY = 0;
+    private boolean mFocusSizeChanged = false;
     private boolean mShiftIsPressed = false;
     private boolean mTrackballDown = false;
     private long mTrackballUpTime = 0;
@@ -5036,6 +5050,9 @@ public class WebView extends AbsoluteLayout
                             setNewZoomScale((float) viewWidth
                                     / mZoomOverviewWidth, false);
                         }
+                    }
+                    if (draw.mFocusSizeChanged && inEditingMode()) {
+                        mFocusSizeChanged = true;
                     }
                     break;
                 }
