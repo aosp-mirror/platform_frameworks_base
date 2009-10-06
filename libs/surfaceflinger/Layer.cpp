@@ -51,6 +51,7 @@ Layer::Layer(SurfaceFlinger* flinger, DisplayID display,
         const sp<Client>& c, int32_t i)
     :   LayerBaseClient(flinger, display, c, i),
         mSecure(false),
+        mNoEGLImageForSwBuffers(false),
         mNeedsBlending(true),
         mNeedsDithering(false)
 {
@@ -108,13 +109,15 @@ status_t Layer::setBuffers( uint32_t w, uint32_t h,
     const DisplayHardware& hw(graphicPlane(0).displayHardware());
     PixelFormatInfo displayInfo;
     getPixelFormatInfo(hw.getFormat(), &displayInfo);
-
+    const uint32_t hwFlags = hw.getFlags();
+    
     mFormat = format;
     mWidth = w;
     mHeight = h;
     mSecure = (flags & ISurfaceComposer::eSecure) ? true : false;
     mNeedsBlending = (info.h_alpha - info.l_alpha) > 0;
-
+    mNoEGLImageForSwBuffers = !(hwFlags & DisplayHardware::CACHED_BUFFERS);
+    
     // we use the red index
     int displayRedSize = displayInfo.getSize(PixelFormatInfo::INDEX_RED);
     int layerRedsize = info.getSize(PixelFormatInfo::INDEX_RED);
@@ -331,7 +334,15 @@ uint32_t Layer::getEffectiveUsage(uint32_t usage) const
     } else {
         // it's allowed to modify the usage flags here, but generally
         // the requested flags should be honored.
-        usage |= GraphicBuffer::USAGE_HW_TEXTURE;
+        if (mNoEGLImageForSwBuffers) {
+            if (usage & GraphicBuffer::USAGE_HW_MASK) {
+                // request EGLImage for h/w buffers only
+                usage |= GraphicBuffer::USAGE_HW_TEXTURE;
+            }
+        } else {
+            // request EGLImage for all buffers
+            usage |= GraphicBuffer::USAGE_HW_TEXTURE;
+        }
     }
     return usage;
 }

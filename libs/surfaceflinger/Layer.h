@@ -107,6 +107,7 @@ private:
     sp<Surface>             mSurface;
 
             bool            mSecure;
+            bool            mNoEGLImageForSwBuffers;
             int32_t         mFrontBufferIndex;
             bool            mNeedsBlending;
             bool            mNeedsDithering;
