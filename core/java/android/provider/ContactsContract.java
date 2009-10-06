@@ -673,6 +673,30 @@ public final class ContactsContract {
              */
             public static final String CONTENT_DIRECTORY = "data";
         }
+
+        /**
+         * A sub-directory of a single raw contact that contains all of their {@link Data} rows.
+         * To access this directory append {@link Entity#CONTENT_DIRECTORY} to the contact URI.
+         */
+        public static final class Entity implements BaseColumns, DataColumns {
+            /**
+             * no public constructor since this is a utility class
+             */
+            private Entity() {
+            }
+
+            /**
+             * The directory twig for this sub-table
+             */
+            public static final String CONTENT_DIRECTORY = "entity";
+
+            /**
+             * The ID of the data column. The value will be null if this raw contact has no
+             * data rows.
+             * <P>Type: INTEGER</P>
+             */
+            public static final String DATA_ID = "data_id";
+        }
     }
 
     private interface StatusColumns extends Im.CommonPresenceColumns {
@@ -867,6 +891,51 @@ public final class ContactsContract {
             }
             return lookupUri;
         }
+    }
+
+    /**
+     * Constants for the raw contacts entities table, which can be though of as an outer join
+     * of the raw_contacts table with the data table.
+     */
+    public final static class RawContactsEntity
+            implements BaseColumns, DataColumns, RawContactsColumns {
+        /**
+         * This utility class cannot be instantiated
+         */
+        private RawContactsEntity() {}
+
+        /**
+         * The content:// style URI for this table
+         */
+        public static final Uri CONTENT_URI =
+                Uri.withAppendedPath(AUTHORITY_URI, "raw_contact_entities");
+
+        /**
+         * The MIME type of {@link #CONTENT_URI} providing a directory of raw contact entities.
+         */
+        public static final String CONTENT_TYPE = "vnd.android.cursor.dir/raw_contact_entity";
+
+        /**
+         * If {@link #FOR_EXPORT_ONLY} is explicitly set to "1", returned Cursor toward
+         * Data.CONTENT_URI contains only exportable data.
+         *
+         * This flag is useful (currently) only for vCard exporter in Contacts app, which
+         * needs to exclude "un-exportable" data from available data to export, while
+         * Contacts app itself has priviledge to access all data including "un-expotable"
+         * ones and providers return all of them regardless of the callers' intention.
+         * <P>Type: INTEGER</p>
+         *
+         * @hide Maybe available only in Eclair and not really ready for public use.
+         * TODO: remove, or implement this feature completely. As of now (Eclair),
+         * we only use this flag in queryEntities(), not query().
+         */
+        public static final String FOR_EXPORT_ONLY = "for_export_only";
+
+        /**
+         * The ID of the data column. The value will be null if this raw contact has no data rows.
+         * <P>Type: INTEGER</P>
+         */
+        public static final String DATA_ID = "data_id";
     }
 
     private interface PhoneLookupColumns {

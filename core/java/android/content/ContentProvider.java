@@ -131,6 +131,9 @@ public abstract class ContentProvider implements ComponentCallbacks {
                     selectionArgs, sortOrder);
         }
 
+        /**
+         * @hide
+         */
         public EntityIterator queryEntities(Uri uri, String selection, String[] selectionArgs,
                 String sortOrder) {
             enforceReadPermission(uri);
@@ -150,11 +153,6 @@ public abstract class ContentProvider implements ComponentCallbacks {
         public int bulkInsert(Uri uri, ContentValues[] initialValues) {
             enforceWritePermission(uri);
             return ContentProvider.this.bulkInsert(uri, initialValues);
-        }
-
-        public Uri insertEntity(Uri uri, Entity entities) {
-            enforceWritePermission(uri);
-            return ContentProvider.this.insertEntity(uri, entities);
         }
 
         public ContentProviderResult[] applyBatch(ArrayList<ContentProviderOperation> operations)
@@ -180,11 +178,6 @@ public abstract class ContentProvider implements ComponentCallbacks {
                 String[] selectionArgs) {
             enforceWritePermission(uri);
             return ContentProvider.this.update(uri, values, selection, selectionArgs);
-        }
-
-        public int updateEntity(Uri uri, Entity entity) {
-            enforceWritePermission(uri);
-            return ContentProvider.this.updateEntity(uri, entity);
         }
 
         public ParcelFileDescriptor openFile(Uri uri, String mode)
@@ -451,6 +444,9 @@ public abstract class ContentProvider implements ComponentCallbacks {
     public abstract Cursor query(Uri uri, String[] projection,
             String selection, String[] selectionArgs, String sortOrder);
 
+    /**
+     * @hide
+     */
     public EntityIterator queryEntities(Uri uri, String selection, String[] selectionArgs,
             String sortOrder) {
         throw new UnsupportedOperationException();
@@ -506,10 +502,6 @@ public abstract class ContentProvider implements ComponentCallbacks {
         return numValues;
     }
 
-    public Uri insertEntity(Uri uri, Entity entity) {
-        throw new UnsupportedOperationException();
-    }
-
     /**
      * A request to delete one or more rows. The selection clause is applied when performing
      * the deletion, allowing the operation to affect multiple rows in a
@@ -554,14 +546,10 @@ public abstract class ContentProvider implements ComponentCallbacks {
     public abstract int update(Uri uri, ContentValues values, String selection,
             String[] selectionArgs);
 
-    public int updateEntity(Uri uri, Entity entity) {
-        throw new UnsupportedOperationException();
-    }
-
     /**
      * Open a file blob associated with a content URI.
      * This method can be called from multiple
-     * threads, as described in
+     * threads, as described inentity
      * <a href="{@docRoot}guide/topics/fundamentals.html#procthread">Application Fundamentals:
      * Processes and Threads</a>.
      * 
