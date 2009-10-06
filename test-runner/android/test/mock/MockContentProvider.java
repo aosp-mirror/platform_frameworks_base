@@ -53,10 +53,6 @@ public class MockContentProvider implements IContentProvider {
         return 0;
     }
 
-    public Uri insertEntity(Uri uri, Entity entities) throws RemoteException {
-        throw new UnsupportedOperationException("unimplemented mock method");
-    }
-
     @SuppressWarnings("unused")
     public IBulkCursor bulkQuery(Uri url, String[] projection, String selection,
             String[] selectionArgs, String sortOrder, IContentObserver observer, 
@@ -103,6 +99,9 @@ public class MockContentProvider implements IContentProvider {
         throw new UnsupportedOperationException("unimplemented mock method");
     }
 
+    /**
+     * @hide
+     */
     public EntityIterator queryEntities(Uri url, String selection, String[] selectionArgs,
             String sortOrder) throws RemoteException {
         throw new UnsupportedOperationException("unimplemented mock method");
@@ -111,10 +110,6 @@ public class MockContentProvider implements IContentProvider {
     @SuppressWarnings("unused")
     public int update(Uri url, ContentValues values, String selection, String[] selectionArgs)
             throws RemoteException {
-        throw new UnsupportedOperationException("unimplemented mock method");
-    }
-
-    public int updateEntity(Uri uri, Entity entity) throws RemoteException {
         throw new UnsupportedOperationException("unimplemented mock method");
     }
 
