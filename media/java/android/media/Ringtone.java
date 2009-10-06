@@ -137,11 +137,17 @@ public class Ringtone {
                     cursor = res.query(uri, MEDIA_COLUMNS, null, null, null);
                 }
                 
-                if (cursor != null && cursor.getCount() == 1) {
-                    cursor.moveToFirst();
-                    return cursor.getString(2);
-                } else {
-                    title = uri.getLastPathSegment();
+                try {
+                    if (cursor != null && cursor.getCount() == 1) {
+                        cursor.moveToFirst();
+                        return cursor.getString(2);
+                    } else {
+                        title = uri.getLastPathSegment();
+                    }
+                } finally {
+                    if (cursor != null) {
+                        cursor.close();
+                    }
                 }
             }
         }
