@@ -293,7 +293,7 @@ private:
             inline void decFreezeCount() { if (mFreezeCount > 0) mFreezeCount--; }
             inline bool hasFreezeRequest() const { return mFreezeDisplay; }
             inline bool isFrozen() const { 
-                return mFreezeDisplay || mFreezeCount>0;
+                return (mFreezeDisplay || mFreezeCount>0) && mBootFinished;
             }
 
             
@@ -351,6 +351,7 @@ private:
                 nsecs_t                     mLastSwapBufferTime;
                 volatile nsecs_t            mDebugInTransaction;
                 nsecs_t                     mLastTransactionTime;
+                bool                        mBootFinished;
 
                 // these are thread safe
     mutable     Barrier                     mReadyToRunBarrier;

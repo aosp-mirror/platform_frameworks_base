@@ -25,10 +25,10 @@
 #include <utils/Log.h>
 #include <utils/StopWatch.h>
 
+#include <ui/GraphicBuffer.h>
 #include <ui/PixelFormat.h>
 #include <ui/Surface.h>
 
-#include "Buffer.h"
 #include "clz.h"
 #include "Layer.h"
 #include "SurfaceFlinger.h"
@@ -109,14 +109,10 @@ status_t Layer::setBuffers( uint32_t w, uint32_t h,
     PixelFormatInfo displayInfo;
     getPixelFormatInfo(hw.getFormat(), &displayInfo);
 
-    uint32_t bufferFlags = 0;
-    if (flags & ISurfaceComposer::eSecure)
-        bufferFlags |= Buffer::SECURE;
-
     mFormat = format;
     mWidth = w;
     mHeight = h;
-    mSecure = (bufferFlags & Buffer::SECURE) ? true : false;
+    mSecure = (flags & ISurfaceComposer::eSecure) ? true : false;
     mNeedsBlending = (info.h_alpha - info.l_alpha) > 0;
 
     // we use the red index
@@ -124,9 +120,8 @@ status_t Layer::setBuffers( uint32_t w, uint32_t h,
     int layerRedsize = info.getSize(PixelFormatInfo::INDEX_RED);
     mNeedsDithering = layerRedsize > displayRedSize;
 
-    mBufferFlags = bufferFlags;
     for (size_t i=0 ; i<NUM_BUFFERS ; i++) {
-        mBuffers[i] = new Buffer();
+        mBuffers[i] = new GraphicBuffer();
     }
     mSurface = new SurfaceLayer(mFlinger, clientIndex(), this);
     return NO_ERROR;
@@ -135,8 +130,9 @@ status_t Layer::setBuffers( uint32_t w, uint32_t h,
 void Layer::reloadTexture(const Region& dirty)
 {
     Mutex::Autolock _l(mLock);
-    sp<Buffer> buffer(getFrontBuffer());
-    if (LIKELY(mFlags & DisplayHardware::DIRECT_TEXTURE)) {
+    sp<GraphicBuffer> buffer(getFrontBuffer());
+    if (LIKELY((mFlags & DisplayHardware::DIRECT_TEXTURE) &&
+            (buffer->usage & GRALLOC_USAGE_HW_TEXTURE))) {
         int index = mFrontBufferIndex;
         if (LIKELY(!mTextures[index].dirty)) {
             glBindTexture(GL_TEXTURE_2D, mTextures[index].name);
@@ -187,6 +183,7 @@ void Layer::reloadTexture(const Region& dirty)
                     mFlags &= ~DisplayHardware::DIRECT_TEXTURE;
                 } else {
                     // Everything went okay!
+                    mTextures[index].NPOTAdjust = false;
                     mTextures[index].dirty  = false;
                     mTextures[index].width  = clientBuf->width;
                     mTextures[index].height = clientBuf->height;
@@ -194,15 +191,21 @@ void Layer::reloadTexture(const Region& dirty)
             }                
         }
     } else {
+        for (int i=0 ; i<NUM_BUFFERS ; i++)
+            mTextures[i].image = EGL_NO_IMAGE_KHR;
+
         GGLSurface t;
-        status_t res = buffer->lock(&t, GRALLOC_USAGE_SW_READ_RARELY);
+        status_t res = buffer->lock(&t, GRALLOC_USAGE_SW_READ_OFTEN);
         LOGE_IF(res, "error %d (%s) locking buffer %p",
                 res, strerror(res), buffer.get());
+        
         if (res == NO_ERROR) {
             if (UNLIKELY(mTextures[0].name == -1U)) {
                 mTextures[0].name = createTexture();
+                mTextures[0].width = 0;
+                mTextures[0].height = 0;
             }
-            loadTexture(&mTextures[0], mTextures[0].name, dirty, t);
+            loadTexture(&mTextures[0], dirty, t);
             buffer->unlock();
         }
     }
@@ -211,8 +214,9 @@ void Layer::reloadTexture(const Region& dirty)
 
 void Layer::onDraw(const Region& clip) const
 {
-    const int index = (mFlags & DisplayHardware::DIRECT_TEXTURE) ? 
-            mFrontBufferIndex : 0;
+    int index = mFrontBufferIndex;
+    if (mTextures[index].image == EGL_NO_IMAGE_KHR)
+        index = 0;
     GLuint textureName = mTextures[index].name;
     if (UNLIKELY(textureName == -1LU)) {
         // the texture has not been created yet, this Layer has
@@ -224,9 +228,9 @@ void Layer::onDraw(const Region& clip) const
     drawWithOpenGL(clip, mTextures[index]);
 }
 
-sp<SurfaceBuffer> Layer::requestBuffer(int index, int usage)
+sp<GraphicBuffer> Layer::requestBuffer(int index, int usage)
 {
-    sp<Buffer> buffer;
+    sp<GraphicBuffer> buffer;
 
     // this ensures our client doesn't go away while we're accessing
     // the shared area.
@@ -269,14 +273,15 @@ sp<SurfaceBuffer> Layer::requestBuffer(int index, int usage)
         mBuffers[index].clear();
     }
 
+    const uint32_t effectiveUsage = getEffectiveUsage(usage);
     if (buffer!=0 && buffer->getStrongCount() == 1) {
-        err = buffer->reallocate(w, h, mFormat, usage, mBufferFlags);
+        err = buffer->reallocate(w, h, mFormat, effectiveUsage);
     } else {
         // here we have to reallocate a new buffer because we could have a
         // client in our process with a reference to it (eg: status bar),
         // and we can't release the handle under its feet.
         buffer.clear();
-        buffer = new Buffer(w, h, mFormat, usage, mBufferFlags);
+        buffer = new GraphicBuffer(w, h, mFormat, effectiveUsage);
         err = buffer->initCheck();
     }
 
@@ -303,6 +308,32 @@ sp<SurfaceBuffer> Layer::requestBuffer(int index, int usage)
         }
     }
     return buffer;
+}
+
+uint32_t Layer::getEffectiveUsage(uint32_t usage) const
+{
+    /*
+     *  buffers used for software rendering, but h/w composition
+     *  are allocated with SW_READ_OFTEN | SW_WRITE_OFTEN | HW_TEXTURE
+     *
+     *  buffers used for h/w rendering and h/w composition
+     *  are allocated with  HW_RENDER | HW_TEXTURE
+     *
+     *  buffers used with h/w rendering and either NPOT or no egl_image_ext
+     *  are allocated with SW_READ_RARELY | HW_RENDER
+     *
+     */
+
+    if (mSecure) {
+        // secure buffer, don't store it into the GPU
+        usage = GraphicBuffer::USAGE_SW_READ_OFTEN |
+                GraphicBuffer::USAGE_SW_WRITE_OFTEN;
+    } else {
+        // it's allowed to modify the usage flags here, but generally
+        // the requested flags should be honored.
+        usage |= GraphicBuffer::USAGE_HW_TEXTURE;
+    }
+    return usage;
 }
 
 uint32_t Layer::doTransaction(uint32_t flags)
@@ -383,7 +414,7 @@ void Layer::lockPageFlip(bool& recomputeVisibleRegions)
     mFrontBufferIndex = buf;
 
     // get the dirty region
-    sp<Buffer> newFrontBuffer(getBuffer(buf));
+    sp<GraphicBuffer> newFrontBuffer(getBuffer(buf));
     const Region dirty(lcblk->getDirtyRegion(buf));
     mPostedDirtyRegion = dirty.intersect( newFrontBuffer->getBounds() );
 
@@ -421,7 +452,9 @@ void Layer::lockPageFlip(bool& recomputeVisibleRegions)
     // FIXME: signal an event if we have more buffers waiting
     // mFlinger->signalEvent();
 
-    reloadTexture( mPostedDirtyRegion );
+    if (!mPostedDirtyRegion.isEmpty()) {
+        reloadTexture( mPostedDirtyRegion );
+    }
 }
 
 void Layer::unlockPageFlip(
@@ -465,9 +498,9 @@ Layer::SurfaceLayer::~SurfaceLayer()
 {
 }
 
-sp<SurfaceBuffer> Layer::SurfaceLayer::requestBuffer(int index, int usage)
+sp<GraphicBuffer> Layer::SurfaceLayer::requestBuffer(int index, int usage)
 {
-    sp<SurfaceBuffer> buffer;
+    sp<GraphicBuffer> buffer;
     sp<Layer> owner(getOwner());
     if (owner != 0) {
         LOGE_IF(uint32_t(index)>=NUM_BUFFERS,

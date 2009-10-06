@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "BufferMapper"
+#define LOG_TAG "GraphicBufferMapper"
 
 #include <stdint.h>
 #include <errno.h>
@@ -22,7 +22,7 @@
 #include <utils/Errors.h>
 #include <utils/Log.h>
 
-#include <ui/BufferMapper.h>
+#include <ui/GraphicBufferMapper.h>
 #include <ui/Rect.h>
 
 #include <hardware/gralloc.h>
@@ -31,9 +31,9 @@
 namespace android {
 // ---------------------------------------------------------------------------
 
-ANDROID_SINGLETON_STATIC_INSTANCE( BufferMapper )
+ANDROID_SINGLETON_STATIC_INSTANCE( GraphicBufferMapper )
 
-BufferMapper::BufferMapper()
+GraphicBufferMapper::GraphicBufferMapper()
     : mAllocMod(0)
 {
     hw_module_t const* module;
@@ -44,7 +44,7 @@ BufferMapper::BufferMapper()
     }
 }
 
-status_t BufferMapper::registerBuffer(buffer_handle_t handle)
+status_t GraphicBufferMapper::registerBuffer(buffer_handle_t handle)
 {
     status_t err = mAllocMod->registerBuffer(mAllocMod, handle);
     LOGW_IF(err, "registerBuffer(%p) failed %d (%s)",
@@ -52,7 +52,7 @@ status_t BufferMapper::registerBuffer(buffer_handle_t handle)
     return err;
 }
 
-status_t BufferMapper::unregisterBuffer(buffer_handle_t handle)
+status_t GraphicBufferMapper::unregisterBuffer(buffer_handle_t handle)
 {
     status_t err = mAllocMod->unregisterBuffer(mAllocMod, handle);
     LOGW_IF(err, "unregisterBuffer(%p) failed %d (%s)",
@@ -60,7 +60,7 @@ status_t BufferMapper::unregisterBuffer(buffer_handle_t handle)
     return err;
 }
 
-status_t BufferMapper::lock(buffer_handle_t handle, 
+status_t GraphicBufferMapper::lock(buffer_handle_t handle, 
         int usage, const Rect& bounds, void** vaddr)
 {
     status_t err = mAllocMod->lock(mAllocMod, handle, usage,
@@ -69,7 +69,7 @@ status_t BufferMapper::lock(buffer_handle_t handle,
     return err;
 }
 
-status_t BufferMapper::unlock(buffer_handle_t handle)
+status_t GraphicBufferMapper::unlock(buffer_handle_t handle)
 {
     status_t err = mAllocMod->unlock(mAllocMod, handle);
     LOGW_IF(err, "unlock(...) failed %d (%s)", err, strerror(-err));

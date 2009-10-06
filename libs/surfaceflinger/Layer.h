@@ -20,6 +20,7 @@
 #include <stdint.h>
 #include <sys/types.h>
 
+#include <ui/GraphicBuffer.h>
 #include <ui/PixelFormat.h>
 #include <pixelflinger/pixelflinger.h>
 
@@ -28,7 +29,6 @@
 #include <GLES/gl.h>
 #include <GLES/glext.h>
 
-#include "Buffer.h"
 #include "LayerBase.h"
 #include "Transform.h"
 
@@ -38,7 +38,6 @@ namespace android {
 
 class Client;
 class FreezeLock;
-class Buffer;
 
 // ---------------------------------------------------------------------------
 
@@ -74,20 +73,22 @@ public:
     virtual status_t ditch();
     
     // only for debugging
-    inline sp<Buffer> getBuffer(int i) { return mBuffers[i]; }
+    inline sp<GraphicBuffer> getBuffer(int i) { return mBuffers[i]; }
     // only for debugging
     inline const sp<FreezeLock>&  getFreezeLock() const { return mFreezeLock; }
     // only for debugging
     inline PixelFormat pixelFormat() const { return mFormat; }
 
 private:
-    inline sp<Buffer> getFrontBuffer() {
+    inline sp<GraphicBuffer> getFrontBuffer() {
         return mBuffers[mFrontBufferIndex];
     }
  
     void reloadTexture(const Region& dirty);
 
-    sp<SurfaceBuffer> requestBuffer(int index, int usage);
+    uint32_t getEffectiveUsage(uint32_t usage) const;
+
+    sp<GraphicBuffer> requestBuffer(int index, int usage);
     void destroy();
 
     class SurfaceLayer : public LayerBaseClient::Surface {
@@ -96,7 +97,7 @@ private:
                 SurfaceID id, const sp<Layer>& owner);
         ~SurfaceLayer();
     private:
-        virtual sp<SurfaceBuffer> requestBuffer(int index, int usage);
+        virtual sp<GraphicBuffer> requestBuffer(int index, int usage);
         sp<Layer> getOwner() const {
             return static_cast<Layer*>(Surface::getOwner().get());
         }
@@ -112,10 +113,9 @@ private:
             Region          mPostedDirtyRegion;
             sp<FreezeLock>  mFreezeLock;
             PixelFormat     mFormat;
-            uint32_t        mBufferFlags;
             
             // protected by mLock
-            sp<Buffer>      mBuffers[NUM_BUFFERS];
+            sp<GraphicBuffer> mBuffers[NUM_BUFFERS];
             Texture         mTextures[NUM_BUFFERS];
             uint32_t        mWidth;
             uint32_t        mHeight;
