@@ -195,7 +195,7 @@ void CameraService::decUsers() {
     android_atomic_dec(&mUsers);
 }
 
-static sp<MediaPlayer> newMediaPlayer(const char *file) 
+static sp<MediaPlayer> newMediaPlayer(const char *file)
 {
     sp<MediaPlayer> mp = new MediaPlayer();
     if (mp->setDataSource(file) == NO_ERROR) {
@@ -267,7 +267,7 @@ status_t CameraService::Client::lock()
 status_t CameraService::Client::unlock()
 {
     int callingPid = getCallingPid();
-    LOGD("unlock from pid %d (mClientPid %d)", callingPid, mClientPid);    
+    LOGD("unlock from pid %d (mClientPid %d)", callingPid, mClientPid);
     Mutex::Autolock _l(mLock);
     // allow anyone to use camera
     status_t result = checkPid();
@@ -648,7 +648,7 @@ status_t CameraService::Client::startPreviewMode()
 status_t CameraService::Client::startPreview()
 {
     LOGD("startPreview (pid %d)", getCallingPid());
-    
+
     return startCameraMode(CAMERA_PREVIEW_MODE);
 }
 
@@ -1132,6 +1132,21 @@ String8 CameraService::Client::getParameters() const
     String8 params(mHardware->getParameters().flatten());
     LOGD("getParameters(%s)", params.string());
     return params;
+}
+
+status_t CameraService::Client::sendCommand(int32_t cmd, int32_t arg1, int32_t arg2)
+{
+    LOGD("sendCommand (pid %d)", getCallingPid());
+    Mutex::Autolock lock(mLock);
+    status_t result = checkPid();
+    if (result != NO_ERROR) return result;
+
+    if (mHardware == 0) {
+        LOGE("mHardware is NULL, returning.");
+        return INVALID_OPERATION;
+    }
+
+    return mHardware->sendCommand(cmd, arg1, arg2);
 }
 
 void CameraService::Client::copyFrameAndPostCopiedFrame(sp<IMemoryHeap> heap, size_t offset, size_t size)

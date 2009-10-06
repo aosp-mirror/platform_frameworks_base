@@ -78,6 +78,12 @@ enum {
     CAMERA_MSG_ALL_MSGS         = 0x1FF
 };
 
+// cmdType in sendCommand functions
+enum {
+    CAMERA_CMD_START_SMOOTH_ZOOM     = 1,
+    CAMERA_CMD_STOP_SMOOTH_ZOOM      = 2,
+};
+
 // camera fatal errors
 enum {
     CAMERA_ERROR_UKNOWN  = 1,
@@ -154,6 +160,9 @@ public:
 
             // get preview/capture parameters - key/value pairs
             String8     getParameters() const;
+
+            // send command to camera driver
+            status_t    sendCommand(int32_t cmd, int32_t arg1, int32_t arg2);
 
             void        setListener(const sp<CameraListener>& listener);
             void        setPreviewCallbackFlags(int preview_callback_flag);

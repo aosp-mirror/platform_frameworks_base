@@ -301,7 +301,7 @@ public class Camera {
 
             case CAMERA_MSG_ZOOM:
                 if (mZoomCallback != null) {
-                    mZoomCallback.onZoomUpdate(msg.arg1, mCamera);
+                    mZoomCallback.onZoomUpdate(msg.arg1, msg.arg2 != 0, mCamera);
                 }
                 return;
 
@@ -468,6 +468,26 @@ public class Camera {
     }
 
     /**
+     * Zooms to the requested value smoothly. Driver will generate {@link
+     * #ZoomCallback} for the current zoom value and whether zoom is stopped.
+     * The applications can call {@link #stopSmoothZoom} to stop the zoom
+     * earlier. The applications should not call startSmoothZoom again or {@link
+     * android.hardware.Camera.Parameters#setZoom(int)} before the zoom stops.
+     *
+     * @param value zoom value. The valid range is 0 to {@link
+     *              android.hardware.Camera.Parameters#getMaxZoom}.
+     * @hide
+     */
+    public native final void startSmoothZoom(int value);
+
+    /**
+     * Stops the smooth zoom. The applications should wait for the {@link
+     * #ZoomCallback} to know when the zoom is actually stopped.
+     * @hide
+     */
+    public native final void stopSmoothZoom();
+
+    /**
      * Handles the zoom callback.
      *
      * @hide
@@ -476,18 +496,21 @@ public class Camera {
     {
         /**
          * Callback for zoom updates
-         * @param zoomLevel   new zoom level in 1/1000 increments,
-         * e.g. a zoom of 3.2x is stored as 3200. Accuracy of the
-         * value is dependent on the hardware implementation. Not
-         * all devices will generate this callback.
+         *
+         * @param zoomValue the current zoom value. In smooth zoom mode, camera
+         *                  generates this callback for every new zoom value.
+         * @param stopped whether smooth zoom is stopped. If the value is true,
+         *                this is the last zoom update for the application.
+         *
          * @param camera  the Camera service object
+         * @see android.hardware.Camera.Parameters#startSmoothZoom
          */
-        void onZoomUpdate(int zoomLevel, Camera camera);
+        void onZoomUpdate(int zoomValue, boolean stopped, Camera camera);
     };
 
     /**
-     * Registers a callback to be invoked when the zoom
-     * level is updated by the camera driver.
+     * Registers a callback to be invoked when the zoom value is updated by the
+     * camera driver during smooth zoom.
      * @param cb the callback to run
      * @hide
      */
@@ -642,20 +665,24 @@ public class Camera {
          * Flash will not be fired.
          */
         public static final String FLASH_MODE_OFF = "off";
+
         /**
          * Flash will be fired automatically when required. The flash may be fired
          * during preview, auto-focus, or snapshot depending on the driver.
          */
         public static final String FLASH_MODE_AUTO = "auto";
+
         /**
          * Flash will always be fired during snapshot. The flash may also be
          * fired during preview or auto-focus depending on the driver.
          */
         public static final String FLASH_MODE_ON = "on";
+
         /**
          * Flash will be fired in red-eye reduction mode.
          */
         public static final String FLASH_MODE_RED_EYE = "red-eye";
+
         /**
          * Constant emission of light during preview, auto-focus and snapshot.
          * This can also be used for video recording.
@@ -684,12 +711,14 @@ public class Camera {
          * Auto-focus mode.
          */
         public static final String FOCUS_MODE_AUTO = "auto";
+
         /**
          * Focus is set at infinity. Applications should not call
          * {@link #autoFocus(AutoFocusCallback)} in this mode.
          */
         public static final String FOCUS_MODE_INFINITY = "infinity";
         public static final String FOCUS_MODE_MACRO = "macro";
+
         /**
          * Focus is fixed. The camera is always in this mode if the focus is not
          * adjustable. If the camera has auto-focus, this mode can fix the
@@ -1365,6 +1394,80 @@ public class Camera {
         public List<String> getSupportedFocusModes() {
             String str = get(KEY_FOCUS_MODE + SUPPORTED_VALUES_SUFFIX);
             return split(str);
+        }
+
+        /**
+         * Gets current zoom value. This also works when smooth zoom is in
+         * progress.
+         *
+         * @return the current zoom value. The range is 0 to {@link
+         *          #getMaxZoom}.
+         * @hide
+         */
+        public int getZoom() {
+            return getInt("zoom");
+        }
+
+        /**
+         * Sets current zoom value. If {@link #startSmoothZoom(int)} has been
+         * called and zoom is not stopped yet, applications should not call this
+         * method.
+         *
+         * @param value zoom value. The valid range is 0 to {@link #getMaxZoom}.
+         * @hide
+         */
+        public void setZoom(int value) {
+            set("zoom", value);
+        }
+
+        /**
+         * Returns true if zoom is supported. Applications should call this
+         * before using other zoom methods.
+         *
+         * @return true if zoom is supported.
+         * @hide
+         */
+        public boolean isZoomSupported() {
+            String str = get("zoom-supported");
+            return "true".equals(str);
+        }
+
+        /**
+         * Gets the maximum zoom value allowed for snapshot. This is the maximum
+         * value that applications can set to {@link #setZoom(int)}.
+         *
+         * @return the maximum zoom value supported by the camera.
+         * @hide
+         */
+        public int getMaxZoom() {
+            return getInt("max-zoom");
+        }
+
+        /**
+         * Gets the zoom factors of all zoom values.
+         *
+         * @return the zoom factors in 1/100 increments. Ex: a zoom of 3.2x is
+         *         returned as 320. Accuracy of the value is dependent on the
+         *         hardware implementation. The first element of the list is the
+         *         zoom factor of first zoom value. If the first zoom value is
+         *         0, the zoom factor should be 100. The last element is the
+         *         zoom factor of zoom value {@link #getMaxZoom}.
+         * @hide
+         */
+        public List<Integer> getZoomFactors() {
+            return splitInt(get("zoom-factors"));
+        }
+
+        /**
+         * Returns true if smooth zoom is supported. Applications should call
+         * this before using other smooth zoom methods.
+         *
+         * @return true if smooth zoom is supported.
+         * @hide
+         */
+        public boolean isSmoothZoomSupported() {
+            String str = get("smooth-zoom-supported");
+            return "true".equals(str);
         }
 
         // Splits a comma delimited string to an ArrayList of String.
