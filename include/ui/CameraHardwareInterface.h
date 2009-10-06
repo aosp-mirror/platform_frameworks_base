@@ -147,7 +147,7 @@ public:
      * Returns true if recording is enabled.
      */
     virtual bool        recordingEnabled() = 0;
-    
+
     /**
      * Release a record frame previously returned by CAMERA_MSG_VIDEO_FRAME.
      */
@@ -186,11 +186,16 @@ public:
     virtual CameraParameters  getParameters() const = 0;
 
     /**
+     * Send command to camera driver.
+     */
+    virtual status_t sendCommand(int32_t cmd, int32_t arg1, int32_t arg2) = 0;
+
+    /**
      * Release the hardware resources owned by this object.  Note that this is
      * *not* done in the destructor.
      */
     virtual void release() = 0;
-    
+
     /**
      * Dump state of the camera hardware
      */
