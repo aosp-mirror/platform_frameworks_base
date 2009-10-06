@@ -746,6 +746,8 @@ status_t Surface::getBufferLocked(int index, int usage)
                 currentBuffer->setIndex(index);
                 mNeedFullUpdate = true;
             }
+        } else {
+            err = err<0 ? err : NO_MEMORY;
         }
     }
     return err; 
