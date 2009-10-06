@@ -18,14 +18,19 @@ package android.bluetooth;
 
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.os.Binder;
+import android.os.Handler;
+import android.os.Message;
 import android.os.ParcelUuid;
 import android.os.RemoteException;
 import android.util.Log;
 
 import java.io.IOException;
 import java.util.Collections;
-import java.util.Set;
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.Random;
+import java.util.Set;
 
 /**
  * Represents the local Bluetooth adapter.
@@ -40,6 +45,7 @@ import java.util.HashSet;
  */
 public final class BluetoothAdapter {
     private static final String TAG = "BluetoothAdapter";
+    private static final boolean DBG = true;  //STOPSHIP: Remove excess logging
 
     /**
      * Sentinel error value for this class. Guaranteed to not equal any other
@@ -558,29 +564,138 @@ public final class BluetoothAdapter {
     }
 
     /**
+     * Randomly picks RFCOMM channels until none are left.
+     * Avoids reserved channels.
+     */
+    private static class RfcommChannelPicker {
+        private static final int[] RESERVED_RFCOMM_CHANNELS =  new int[] {
+            10,  // HFAG
+            11,  // HSAG
+            12,  // OPUSH
+            19,  // PBAP
+        };
+        private static LinkedList<Integer> sChannels;  // master list of non-reserved channels
+        private static Random sRandom;
+
+        private final LinkedList<Integer> mChannels;  // local list of channels left to try
+
+        public RfcommChannelPicker() {
+            synchronized (RfcommChannelPicker.class) {
+                if (sChannels == null) {
+                    // lazy initialization of non-reserved rfcomm channels
+                    sChannels = new LinkedList<Integer>();
+                    for (int i = 1; i <= BluetoothSocket.MAX_RFCOMM_CHANNEL; i++) {
+                        sChannels.addLast(new Integer(i));
+                    }
+                    for (int reserved : RESERVED_RFCOMM_CHANNELS) {
+                        sChannels.remove(new Integer(reserved));
+                    }
+                    sRandom = new Random();
+                }
+                mChannels = (LinkedList<Integer>)sChannels.clone();
+            }
+        }
+        /* Returns next random channel, or -1 if we're out */
+        public int nextChannel() {
+            if (mChannels.size() == 0) {
+                return -1;
+            }
+            return mChannels.remove(sRandom.nextInt(mChannels.size()));
+        }
+    }
+
+    /**
      * Create a listening, secure RFCOMM Bluetooth socket.
      * <p>A remote device connecting to this socket will be authenticated and
      * communication on this socket will be encrypted.
      * <p>Use {@link BluetoothServerSocket#accept} to retrieve incoming
-     * connections to listening {@link BluetoothServerSocket}.
+     * connections from a listening {@link BluetoothServerSocket}.
      * <p>Valid RFCOMM channels are in range 1 to 30.
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH}
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN}
      * @param channel RFCOMM channel to listen on
      * @return a listening RFCOMM BluetoothServerSocket
      * @throws IOException on error, for example Bluetooth not available, or
      *                     insufficient permissions, or channel in use.
+     * @hide
      */
     public BluetoothServerSocket listenUsingRfcommOn(int channel) throws IOException {
         BluetoothServerSocket socket = new BluetoothServerSocket(
                 BluetoothSocket.TYPE_RFCOMM, true, true, channel);
-        try {
-            socket.mSocket.bindListen();
-        } catch (IOException e) {
+        int errno = socket.mSocket.bindListen();
+        if (errno != 0) {
             try {
                 socket.close();
-            } catch (IOException e2) { }
-            throw e;
+            } catch (IOException e) {}
+            socket.mSocket.throwErrnoNative(errno);
         }
+        return socket;
+    }
+
+    /**
+     * Create a listening, secure RFCOMM Bluetooth socket with Service Record.
+     * <p>A remote device connecting to this socket will be authenticated and
+     * communication on this socket will be encrypted.
+     * <p>Use {@link BluetoothServerSocket#accept} to retrieve incoming
+     * connections from a listening {@link BluetoothServerSocket}.
+     * <p>The system will assign an unused RFCOMM channel to listen on.
+     * <p>The system will also register a Service Discovery
+     * Protocol (SDP) record with the local SDP server containing the specified
+     * UUID, service name, and auto-assigned channel. Remote Bluetooth devices
+     * can use the same UUID to query our SDP server and discover which channel
+     * to connect to. This SDP record will be removed when this socket is
+     * closed, or if this application closes unexpectedly.
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH}
+     * @param name service name for SDP record
+     * @param uuid uuid for SDP record
+     * @return a listening RFCOMM BluetoothServerSocket
+     * @throws IOException on error, for example Bluetooth not available, or
+     *                     insufficient permissions, or channel in use.
+     */
+    public BluetoothServerSocket listenUsingRfcomm(String name, ParcelUuid uuid)
+            throws IOException {
+        RfcommChannelPicker picker = new RfcommChannelPicker();
+
+        BluetoothServerSocket socket;
+        int channel;
+        int errno;
+        while (true) {
+            channel = picker.nextChannel();
+
+            if (channel == -1) {
+                throw new IOException("No available channels");
+            }
+
+            socket = new BluetoothServerSocket(
+                    BluetoothSocket.TYPE_RFCOMM, true, true, channel);
+            errno = socket.mSocket.bindListen();
+            if (errno == 0) {
+                if (DBG) Log.d(TAG, "listening on RFCOMM channel " + channel);
+                break;  // success
+            } else if (errno == BluetoothSocket.EADDRINUSE) {
+                if (DBG) Log.d(TAG, "RFCOMM channel " + channel + " in use");
+                try {
+                    socket.close();
+                } catch (IOException e) {}
+                continue;  // try another channel
+            } else {
+                try {
+                    socket.close();
+                } catch (IOException e) {}
+                socket.mSocket.throwErrnoNative(errno);  // Exception as a result of bindListen()
+            }
+        }
+
+        int handle = -1;
+        try {
+            handle = mService.addRfcommServiceRecord(name, uuid, channel, new Binder());
+        } catch (RemoteException e) {Log.e(TAG, "", e);}
+        if (handle == -1) {
+            try {
+                socket.close();
+            } catch (IOException e) {}
+            throw new IOException("Not able to register SDP record for " + name);
+        }
+        socket.setCloseHandler(mHandler, handle);
         return socket;
     }
 
@@ -595,13 +710,12 @@ public final class BluetoothAdapter {
     public BluetoothServerSocket listenUsingInsecureRfcommOn(int port) throws IOException {
         BluetoothServerSocket socket = new BluetoothServerSocket(
                 BluetoothSocket.TYPE_RFCOMM, false, false, port);
-        try {
-            socket.mSocket.bindListen();
-        } catch (IOException e) {
+        int errno = socket.mSocket.bindListen();
+        if (errno != 0) {
             try {
                 socket.close();
-            } catch (IOException e2) { }
-            throw e;
+            } catch (IOException e) {}
+            socket.mSocket.throwErrnoNative(errno);
         }
         return socket;
     }
@@ -617,13 +731,12 @@ public final class BluetoothAdapter {
     public static BluetoothServerSocket listenUsingScoOn() throws IOException {
         BluetoothServerSocket socket = new BluetoothServerSocket(
                 BluetoothSocket.TYPE_SCO, false, false, -1);
-        try {
-            socket.mSocket.bindListen();
-        } catch (IOException e) {
+        int errno = socket.mSocket.bindListen();
+        if (errno != 0) {
             try {
                 socket.close();
-            } catch (IOException e2) { }
-            throw e;
+            } catch (IOException e) {}
+            socket.mSocket.throwErrnoNative(errno);
         }
         return socket;
     }
@@ -635,6 +748,17 @@ public final class BluetoothAdapter {
         }
         return Collections.unmodifiableSet(devices);
     }
+
+    private Handler mHandler = new Handler() {
+        public void handleMessage(Message msg) {
+            /* handle socket closing */
+            int handle = msg.what;
+            try {
+                if (DBG) Log.d(TAG, "Removing service record " + Integer.toHexString(handle));
+                mService.removeServiceRecord(handle);
+            } catch (RemoteException e) {Log.e(TAG, "", e);}
+        }
+    };
 
     /**
      * Validate a Bluetooth address, such as "00:43:A8:23:10:F0"
