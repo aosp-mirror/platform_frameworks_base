@@ -1002,6 +1002,12 @@ static uint32_t SC_colorFloatRGBAto565(float r, float g, float b)
     return rs888to565(ir, ig, ib);
 }
 
+static uint32_t SC_toClient(void *data, int cmdID, int len, int waitForSpace)
+{
+    GET_TLS();
+    return rsc->sendMessageToClient(data, cmdID, len, waitForSpace != 0);
+}
+
 //////////////////////////////////////////////////////////////////////////////
 // Class implementation
 //////////////////////////////////////////////////////////////////////////////
@@ -1270,6 +1276,8 @@ ScriptCState::SymbolTable_t ScriptCState::gSyms[] = {
     { "getHeight", (void *)&SC_getHeight,
         "int", "()" },
 
+    { "sendToClient", (void *)&SC_toClient,
+        "int", "(void *data, int cmdID, int len, int waitForSpace)" },
 
 
     { "debugF", (void *)&SC_debugF,

@@ -59,6 +59,10 @@ RsContext rsContextCreate(RsDevice, void *, uint32_t version, bool useDepth);
 void rsContextDestroy(RsContext);
 void rsObjDestroyOOB(RsContext, void *);
 
+uint32_t rsContextGetMessage(RsContext, void *data, size_t *receiveLen, size_t bufferLen, bool wait);
+void rsContextInitToClient(RsContext);
+void rsContextDeinitToClient(RsContext);
+
 #define RS_MAX_TEXTURE 2
 
 enum RsDataType {
