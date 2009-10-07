@@ -5,8 +5,6 @@ import android.os.Parcelable;
 
 /**
  * This class is used to store information about the result of a sync
- * 
- * @hide
  */
 public final class SyncResult implements Parcelable {
     public final boolean syncAlreadyInProgress;
