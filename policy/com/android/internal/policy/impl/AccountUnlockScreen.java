@@ -303,9 +303,12 @@ public class AccountUnlockScreen extends RelativeLayout implements KeyguardScree
             mCheckingDialog.setCancelable(false);
             mCheckingDialog.getWindow().setType(
                     WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG);
-            mCheckingDialog.getWindow().setFlags(
-                    WindowManager.LayoutParams.FLAG_BLUR_BEHIND,
-                    WindowManager.LayoutParams.FLAG_BLUR_BEHIND);
+            if (!mContext.getResources().getBoolean(
+                    com.android.internal.R.bool.config_sf_slowBlur)) {
+                mCheckingDialog.getWindow().setFlags(
+                        WindowManager.LayoutParams.FLAG_BLUR_BEHIND,
+                        WindowManager.LayoutParams.FLAG_BLUR_BEHIND);
+            }
         }
         return mCheckingDialog;
     }
