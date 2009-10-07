@@ -44,8 +44,7 @@ import com.google.android.collect.Maps;
 /**
  * A class that helps with interactions with the AccountManagerService. It provides
  * methods to allow for account, password, and authtoken management for all accounts on the
- * device. Some of these calls are implemented with the help of the corresponding
- * {@link IAccountAuthenticator} services. One accesses the {@link AccountManager} by calling:
+ * device. One accesses the {@link AccountManager} by calling:
  *    AccountManager accountManager = AccountManager.get(context);
  *
  * <p>
