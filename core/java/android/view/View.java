@@ -6188,11 +6188,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
             }
 
             final int drawingCacheBackgroundColor = mDrawingCacheBackgroundColor;
-            final boolean opaque = drawingCacheBackgroundColor != 0 ||
-                (mBGDrawable != null && mBGDrawable.getOpacity() == PixelFormat.OPAQUE);
+            final boolean opaque = drawingCacheBackgroundColor != 0 || isOpaque();
+            final boolean translucentWindow = attachInfo.mTranslucentWindow;
 
             if (width <= 0 || height <= 0 ||
-                    (width * height * (opaque ? 2 : 4) > // Projected bitmap size in bytes
+                     // Projected bitmap size in bytes
+                    (width * height * (opaque && !translucentWindow ? 2 : 4) >
                             ViewConfiguration.get(mContext).getScaledMaximumDrawingCacheSize())) {
                 destroyDrawingCache();
                 return;
@@ -6203,7 +6204,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                     (mUnscaledDrawingCache == null ? null : mUnscaledDrawingCache.get());
 
             if (bitmap == null || bitmap.getWidth() != width || bitmap.getHeight() != height) {
-
                 Bitmap.Config quality;
                 if (!opaque) {
                     switch (mViewFlags & DRAWING_CACHE_QUALITY_MASK) {
@@ -6221,7 +6221,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                             break;
                     }
                 } else {
-                    quality = Bitmap.Config.RGB_565;
+                    // Optimization for translucent windows
+                    // If the window is translucent, use a 32 bits bitmap to benefit from memcpy()
+                    quality = translucentWindow ? Bitmap.Config.ARGB_8888 : Bitmap.Config.RGB_565;
                 }
 
                 // Try to cleanup memory
@@ -6235,6 +6237,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                     } else {
                         mUnscaledDrawingCache = new SoftReference<Bitmap>(bitmap);
                     }
+                    if (opaque && translucentWindow) bitmap.setHasAlpha(false);
                 } catch (OutOfMemoryError e) {
                     // If there is not enough memory to create the bitmap cache, just
                     // ignore the issue as bitmap caches are not required to draw the
@@ -8821,6 +8824,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
         int mWindowTop;
 
         /**
+         * Indicates whether the window is translucent/transparent
+         */
+        boolean mTranslucentWindow;        
+
+        /**
          * For windows that are full-screen but using insets to layout inside
          * of the screen decorations, these are the current insets for the
          * content of the window.
@@ -9033,8 +9041,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
         public ScrollabilityCache(ViewConfiguration configuration, View host) {
             fadingEdgeLength = configuration.getScaledFadingEdgeLength();
             scrollBarSize = configuration.getScaledScrollBarSize();
-            scrollBarDefaultDelayBeforeFade = configuration.getScrollDefaultDelay();
-            scrollBarFadeDuration = configuration.getScrollBarFadeDuration();
+            scrollBarDefaultDelayBeforeFade = ViewConfiguration.getScrollDefaultDelay();
+            scrollBarFadeDuration = ViewConfiguration.getScrollBarFadeDuration();
 
             paint = new Paint();
             matrix = new Matrix();
