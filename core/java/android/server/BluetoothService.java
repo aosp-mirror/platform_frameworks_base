@@ -28,6 +28,7 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothHeadset;
+import android.bluetooth.BluetoothSocket;
 import android.bluetooth.BluetoothUuid;
 import android.bluetooth.IBluetooth;
 import android.os.ParcelUuid;
@@ -37,6 +38,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Binder;
+import android.os.IBinder;
 import android.os.Handler;
 import android.os.Message;
 import android.os.RemoteException;
@@ -90,6 +92,8 @@ public class BluetoothService extends IBluetooth.Stub {
     private final HashMap <String, Map<ParcelUuid, Integer>> mDeviceServiceChannelCache;
     private final ArrayList <String> mUuidIntentTracker;
 
+    private final HashMap<Integer, Integer> mServiceRecordToPid;
+
     static {
         classInitNative();
     }
@@ -117,6 +121,7 @@ public class BluetoothService extends IBluetooth.Stub {
 
         mDeviceServiceChannelCache = new HashMap<String, Map<ParcelUuid, Integer>>();
         mUuidIntentTracker = new ArrayList<String>();
+        mServiceRecordToPid = new HashMap<Integer, Integer>();
         registerForAirplaneMode();
     }
 
@@ -206,6 +211,7 @@ public class BluetoothService extends IBluetooth.Stub {
 
         mIsDiscovering = false;
         mAdapterProperties.clear();
+        mServiceRecordToPid.clear();
 
         if (saveSetting) {
             persistBluetoothOnSetting(false);
@@ -1211,6 +1217,71 @@ public class BluetoothService extends IBluetooth.Stub {
         mDeviceServiceChannelCache.put(address, value);
     }
 
+    /**
+     * b is a handle to a Binder instance, so that this service can be notified
+     * for Applications that terminate unexpectedly, to clean there service
+     * records
+     */
+    public synchronized int addRfcommServiceRecord(String serviceName, ParcelUuid uuid,
+            int channel, IBinder b) {
+        mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM,
+                                                "Need BLUETOOTH permission");
+        if (serviceName == null || uuid == null || channel < 1 ||
+                channel > BluetoothSocket.MAX_RFCOMM_CHANNEL) {
+            return -1;
+        }
+        if (BluetoothUuid.isUuidPresent(BluetoothUuid.RESERVED_UUIDS, uuid)) {
+            Log.w(TAG, "Attempted to register a reserved UUID: " + uuid);
+            return -1;
+        }
+        int handle = addRfcommServiceRecordNative(serviceName,
+                uuid.getUuid().getMostSignificantBits(), uuid.getUuid().getLeastSignificantBits(),
+                (short)channel);
+        if (DBG) log("new handle " + Integer.toHexString(handle));
+        if (handle == -1) {
+            return -1;
+        }
+
+        int pid = Binder.getCallingPid();
+        mServiceRecordToPid.put(new Integer(handle), new Integer(pid));
+        try {
+            b.linkToDeath(new Reaper(handle, pid), 0);
+        } catch (RemoteException e) {}
+        return handle;
+    }
+
+    public void removeServiceRecord(int handle) {
+        mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM,
+                                                "Need BLUETOOTH permission");
+        checkAndRemoveRecord(handle, Binder.getCallingPid());
+    }
+
+    private synchronized void checkAndRemoveRecord(int handle, int pid) {
+        Integer handleInt = new Integer(handle);
+        Integer owner = mServiceRecordToPid.get(handleInt);
+        if (owner != null && pid == owner.intValue()) {
+            if (DBG) log("Removing service record " + Integer.toHexString(handle) + " for pid " +
+                    pid);
+            mServiceRecordToPid.remove(handleInt);
+            removeServiceRecordNative(handle);
+        }
+    }
+
+    private class Reaper implements IBinder.DeathRecipient {
+        int pid;
+        int handle;
+        Reaper(int handle, int pid) {
+            this.pid = pid;
+            this.handle = handle;
+        }
+        public void binderDied() {
+            synchronized (BluetoothService.this) {
+                if (DBG) log("Tracked app " + pid + " died");
+                checkAndRemoveRecord(handle, pid);
+            }
+        }
+    }
+
     private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -1263,25 +1334,25 @@ public class BluetoothService extends IBluetooth.Stub {
 
     @Override
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        pw.println("\nmIsAirplaneSensitive = " + mIsAirplaneSensitive + "\n");
-
         switch(mBluetoothState) {
         case BluetoothAdapter.STATE_OFF:
-            pw.println("\nBluetooth OFF\n");
+            pw.println("Bluetooth OFF\n");
             return;
         case BluetoothAdapter.STATE_TURNING_ON:
-            pw.println("\nBluetooth TURNING ON\n");
+            pw.println("Bluetooth TURNING ON\n");
             return;
         case BluetoothAdapter.STATE_TURNING_OFF:
-            pw.println("\nBluetooth TURNING OFF\n");
+            pw.println("Bluetooth TURNING OFF\n");
             return;
         case BluetoothAdapter.STATE_ON:
-            pw.println("\nBluetooth ON\n");
+            pw.println("Bluetooth ON\n");
         }
 
-        pw.println("\nLocal address = " + getAddress());
-        pw.println("\nLocal name = " + getName());
-        pw.println("\nisDiscovering() = " + isDiscovering());
+        pw.println("mIsAirplaneSensitive = " + mIsAirplaneSensitive);
+
+        pw.println("Local address = " + getAddress());
+        pw.println("Local name = " + getName());
+        pw.println("isDiscovering() = " + isDiscovering());
 
         BluetoothHeadset headset = new BluetoothHeadset(mContext, null);
 
@@ -1292,13 +1363,17 @@ public class BluetoothService extends IBluetooth.Stub {
                        toBondStateString(bondState),
                        mBondState.getAttempt(address),
                        getRemoteName(address));
-            if (bondState == BluetoothDevice.BOND_BONDED) {
-                ParcelUuid[] uuids = getRemoteUuids(address);
-                if (uuids == null) {
-                    pw.printf("\tuuids = null\n");
-                } else {
-                    for (ParcelUuid uuid : uuids) {
-                        pw.printf("\t" + uuid + "\n");
+
+            Map<ParcelUuid, Integer> uuidChannels = mDeviceServiceChannelCache.get(address);
+            if (uuidChannels == null) {
+                pw.println("\tuuids = null");
+            } else {
+                for (ParcelUuid uuid : uuidChannels.keySet()) {
+                    Integer channel = uuidChannels.get(uuid);
+                    if (channel == null) {
+                        pw.println("\t" + uuid);
+                    } else {
+                        pw.println("\t" + uuid + " RFCOMM channel = " + channel);
                     }
                 }
             }
@@ -1310,8 +1385,10 @@ public class BluetoothService extends IBluetooth.Stub {
             devicesObjectPath = value.split(",");
         }
         pw.println("\n--ACL connected devices--");
-        for (String device : devicesObjectPath) {
-            pw.println(getAddressFromObjectPath(device));
+        if (devicesObjectPath != null) {
+            for (String device : devicesObjectPath) {
+                pw.println(getAddressFromObjectPath(device));
+            }
         }
 
         // Rather not do this from here, but no-where else and I need this
@@ -1331,10 +1408,15 @@ public class BluetoothService extends IBluetooth.Stub {
             pw.println("getState() = STATE_ERROR");
             break;
         }
-        pw.println("getCurrentHeadset() = " + headset.getCurrentHeadset());
-        pw.println("getBatteryUsageHint() = " + headset.getBatteryUsageHint());
 
+        pw.println("\ngetCurrentHeadset() = " + headset.getCurrentHeadset());
+        pw.println("getBatteryUsageHint() = " + headset.getBatteryUsageHint());
         headset.close();
+        pw.println("\n--Application Service Records--");
+        for (Integer handle : mServiceRecordToPid.keySet()) {
+            Integer pid = mServiceRecordToPid.get(handle);
+            pw.println("\tpid " + pid + " handle " + Integer.toHexString(handle));
+        }
     }
 
     /* package */ static int bluezStringToScanMode(boolean pairable, boolean discoverable) {
@@ -1423,8 +1505,12 @@ public class BluetoothService extends IBluetooth.Stub {
     private native boolean setPasskeyNative(String address, int passkey, int nativeData);
     private native boolean setPairingConfirmationNative(String address, boolean confirm,
             int nativeData);
-    private native boolean setDevicePropertyBooleanNative(String objectPath, String key, int value);
+    private native boolean setDevicePropertyBooleanNative(String objectPath, String key,
+            int value);
     private native boolean createDeviceNative(String address);
     private native boolean discoverServicesNative(String objectPath, String pattern);
 
+    private native int addRfcommServiceRecordNative(String name, long uuidMsb, long uuidLsb,
+            short channel);
+    private native boolean removeServiceRecordNative(int handle);
 }
