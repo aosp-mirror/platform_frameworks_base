@@ -594,6 +594,18 @@ android_media_MediaPlayer_native_finalize(JNIEnv *env, jobject thiz)
     android_media_MediaPlayer_release(env, thiz);
 }
 
+static jint
+android_media_MediaPlayer_snoop(JNIEnv* env, jobject thiz, jobject data, jint kind) {
+    jshort* ar = (jshort*)env->GetPrimitiveArrayCritical((jarray)data, 0);
+    jsize len = env->GetArrayLength((jarray)data);
+    int ret = 0;
+    if (ar) {
+        ret = MediaPlayer::snoop(ar, len, kind);
+        env->ReleasePrimitiveArrayCritical((jarray)data, ar, 0);
+    }
+    return ret;
+}
+
 // ----------------------------------------------------------------------------
 
 static JNINativeMethod gMethods[] = {
@@ -624,6 +636,7 @@ static JNINativeMethod gMethods[] = {
     {"native_init",         "()V",                              (void *)android_media_MediaPlayer_native_init},
     {"native_setup",        "(Ljava/lang/Object;)V",            (void *)android_media_MediaPlayer_native_setup},
     {"native_finalize",     "()V",                              (void *)android_media_MediaPlayer_native_finalize},
+    {"snoop",               "([SI)I",                           (void *)android_media_MediaPlayer_snoop},
 };
 
 static const char* const kClassPathName = "android/media/MediaPlayer";
