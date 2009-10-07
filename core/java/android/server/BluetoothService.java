@@ -154,7 +154,7 @@ public class BluetoothService extends IBluetooth.Stub {
     }
 
     public synchronized void initAfterRegistration() {
-        mAdapter = (BluetoothAdapter) mContext.getSystemService(Context.BLUETOOTH_SERVICE);
+        mAdapter = BluetoothAdapter.getDefaultAdapter();
         mEventLoop = new BluetoothEventLoop(mContext, mAdapter, this);
     }
 

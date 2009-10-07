@@ -20,9 +20,11 @@ import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.os.Binder;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Message;
 import android.os.ParcelUuid;
 import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.util.Log;
 
 import java.io.IOException;
@@ -36,10 +38,8 @@ import java.util.UUID;
 /**
  * Represents the local Bluetooth adapter.
  *
- * <p>Use {@link android.content.Context#getSystemService} with {@link
- * android.content.Context#BLUETOOTH_SERVICE} to get the default local
- * Bluetooth adapter. On most Android devices there is only one local
- * Bluetotoh adapter.
+ * <p>Use {@link #getDefaultAdapter} to get the default local Bluetooth
+ * adapter.
  *
  * <p>Use the {@link BluetoothDevice} class for operations on remote Bluetooth
  * devices.
@@ -257,12 +257,40 @@ public final class BluetoothAdapter {
      */
     public static final String EXTRA_LOCAL_NAME = "android.bluetooth.adapter.extra.LOCAL_NAME";
 
+    /** @hide */
+    public static final String BLUETOOTH_SERVICE = "bluetooth";
+
     private static final int ADDRESS_LENGTH = 17;
+
+    /**
+     * Lazyily initialized singleton. Guaranteed final after first object
+     * constructed.
+     */
+    private static BluetoothAdapter sAdapter;
 
     private final IBluetooth mService;
 
     /**
-     * Do not use this constructor. Use Context.getSystemService() instead.
+     * Get a handle to the default local Bluetooth adapter.
+     * <p>Currently Android only supports one Bluetooth adapter, but the API
+     * could be extended to support more. This will always return the default
+     * adapter.
+     * @return the default local adapter, or null if Bluetooth is not supported
+     *         on this hardware platform
+     */
+    public static synchronized BluetoothAdapter getDefaultAdapter() {
+        if (sAdapter == null) {
+            IBinder b = ServiceManager.getService(BluetoothAdapter.BLUETOOTH_SERVICE);
+            if (b != null) {
+                IBluetooth service = IBluetooth.Stub.asInterface(b);
+                sAdapter = new BluetoothAdapter(service);
+            }
+        }
+        return sAdapter;
+    }
+
+    /**
+     * Use {@link #getDefaultAdapter} to get the BluetoothAdapter instance.
      * @hide
      */
     public BluetoothAdapter(IBluetooth service) {
