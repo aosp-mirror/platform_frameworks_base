@@ -39,6 +39,8 @@
 
 namespace android {
 
+static const int OMX_QCOM_COLOR_FormatYVU420SemiPlanar = 0x7FA30C00;
+
 struct CodecInfo {
     const char *mime;
     const char *codec;
@@ -241,6 +243,15 @@ sp<OMXCodec> OMXCodec::Create(
 
         quirks |= kRequiresAllocateBufferOnInputPorts;
         quirks |= kRequiresAllocateBufferOnOutputPorts;
+    }
+
+    if (!strcmp(componentName, "OMX.qcom.video.decoder.avc")) {
+        // This decoder misreports the required output buffer size if
+        // the content in question is not a multiple-16 width/height.
+
+        // XXX Not enabled by default to make the bug reproducible by
+        // the vendor.
+        // quirks |= kAlwaysAllocateOutputWithPadding;
     }
 
     sp<OMXCodec> codec = new OMXCodec(
@@ -835,6 +846,25 @@ status_t OMXCodec::allocateBuffersOnPort(OMX_U32 portIndex) {
 
     if (err != OK) {
         return err;
+    }
+
+    if ((portIndex == kPortIndexOutput)
+            && (mQuirks & kAlwaysAllocateOutputWithPadding)) {
+        CHECK_EQ(def.eDomain, OMX_PortDomainVideo);
+        const OMX_VIDEO_PORTDEFINITIONTYPE *videoDef = &def.format.video;
+        CHECK_EQ(videoDef->eColorFormat, OMX_QCOM_COLOR_FormatYVU420SemiPlanar);
+
+        OMX_U32 width = (videoDef->nFrameWidth + 15) & ~0x0f;
+        OMX_U32 height = (videoDef->nFrameHeight + 15) & ~0x0f;
+
+        size_t newBufferSize = (width * height * 3) / 2;
+        CHECK(newBufferSize >= def.nBufferSize);
+        if (newBufferSize > def.nBufferSize) {
+            CODEC_LOGV("Rounding up output buffersize from %ld to %ld "
+                       "to accomodate multiple-of-16 alignment.",
+                       def.nBufferSize, newBufferSize);
+        }
+        def.nBufferSize = newBufferSize;
     }
 
     size_t totalSize = def.nBufferCountActual * def.nBufferSize;
@@ -2016,8 +2046,6 @@ static const char *colorFormatString(OMX_COLOR_FORMATTYPE type) {
     };
 
     size_t numNames = sizeof(kNames) / sizeof(kNames[0]);
-
-    static const int OMX_QCOM_COLOR_FormatYVU420SemiPlanar = 0x7FA30C00;
 
     if (type == OMX_QCOM_COLOR_FormatYVU420SemiPlanar) {
         return "OMX_QCOM_COLOR_FormatYVU420SemiPlanar";
