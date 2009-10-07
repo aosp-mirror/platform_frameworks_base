@@ -147,10 +147,8 @@
     <string name="permgroupdesc_location" msgid="2430258821648348660">"Controla tu ubicación física"</string>
     <string name="permgrouplab_network" msgid="5808983377727109831">"Comunicación de red"</string>
     <string name="permgroupdesc_network" msgid="5035763698958415998">"Admite aplicaciones que acceden a varias funciones de red."</string>
-    <!-- no translation found for permgrouplab_accounts (3359646291125325519) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_accounts (4948732641827091312) -->
-    <skip />
+    <string name="permgrouplab_accounts" msgid="3359646291125325519">"Tus cuentas"</string>
+    <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Acceder a las cuentas disponibles."</string>
     <string name="permgrouplab_hardwareControls" msgid="7998214968791599326">"Controles de hardware"</string>
     <string name="permgroupdesc_hardwareControls" msgid="4357057861225462702">"Acceso directo al hardware en el teléfono."</string>
     <string name="permgrouplab_phoneCalls" msgid="9067173988325865923">"Llamadas telefónicas"</string>
@@ -455,12 +453,9 @@
     <string name="phoneTypeWorkPager" msgid="649938731231157056">"Localizador del trabajo"</string>
     <string name="phoneTypeAssistant" msgid="5596772636128562884">"Asistente"</string>
     <string name="phoneTypeMms" msgid="7254492275502768992">"MMS"</string>
-    <!-- no translation found for eventTypeBirthday (2813379844211390740) -->
-    <skip />
-    <!-- no translation found for eventTypeAnniversary (3876779744518284000) -->
-    <skip />
-    <!-- no translation found for eventTypeOther (5834288791948564594) -->
-    <skip />
+    <string name="eventTypeBirthday" msgid="2813379844211390740">"Cumpleaños"</string>
+    <string name="eventTypeAnniversary" msgid="3876779744518284000">"Aniversario"</string>
+    <string name="eventTypeOther" msgid="5834288791948564594">"Evento"</string>
     <string name="emailTypeCustom" msgid="8525960257804213846">"Personalizado"</string>
     <string name="emailTypeHome" msgid="449227236140433919">"Página principal"</string>
     <string name="emailTypeWork" msgid="3548058059601149973">"Trabajo"</string>
@@ -487,7 +482,8 @@
     <string name="orgTypeWork" msgid="29268870505363872">"Trabajo"</string>
     <string name="orgTypeOther" msgid="3951781131570124082">"Otro"</string>
     <string name="orgTypeCustom" msgid="225523415372088322">"Personalizado"</string>
-    <string name="contact_status_update_attribution" msgid="3903174274739111950">"A través de <xliff:g id="SOURCE">%1$s</xliff:g>"</string>
+    <!-- no translation found for contact_status_update_attribution (5112589886094402795) -->
+    <skip />
     <string name="contact_status_update_attribution_with_date" msgid="5945386376369979909">"<xliff:g id="DATE">%1$s</xliff:g> a través de <xliff:g id="SOURCE">%2$s</xliff:g>"</string>
     <string name="keyguard_password_enter_pin_code" msgid="3731488827218876115">"Ingresar el código de PIN"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="1295984114338107718">"¡Código de PIN incorrecto!"</string>
@@ -793,12 +789,8 @@
     <string name="accessibility_binding_label" msgid="4148120742096474641">"Accesibilidad"</string>
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"Papel tapiz"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"Cambiar fondo de pantalla"</string>
-    <!-- no translation found for pptp_vpn_description (2688045385181439401) -->
-    <skip />
-    <!-- no translation found for l2tp_vpn_description (3750692169378923304) -->
-    <skip />
-    <!-- no translation found for l2tp_ipsec_psk_vpn_description (3945043564008303239) -->
-    <skip />
-    <!-- no translation found for l2tp_ipsec_crt_vpn_description (5382714073103653577) -->
-    <skip />
+    <string name="pptp_vpn_description" msgid="2688045385181439401">"Protocolo de túnel punto a punto"</string>
+    <string name="l2tp_vpn_description" msgid="3750692169378923304">"Protocolo de túnel de nivel 2"</string>
+    <string name="l2tp_ipsec_psk_vpn_description" msgid="3945043564008303239">"Clave previamente compartida según L2TP/IPSec VPN"</string>
+    <string name="l2tp_ipsec_crt_vpn_description" msgid="5382714073103653577">"Certificado según L2TP/IPSec VPN"</string>
 </resources>
