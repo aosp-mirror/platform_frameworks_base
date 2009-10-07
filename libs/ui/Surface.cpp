@@ -31,7 +31,8 @@
 #include <utils/Log.h>
 
 #include <ui/DisplayInfo.h>
-#include <ui/BufferMapper.h>
+#include <ui/GraphicBuffer.h>
+#include <ui/GraphicBufferMapper.h>
 #include <ui/ISurface.h>
 #include <ui/Surface.h>
 #include <ui/SurfaceComposerClient.h>
@@ -41,15 +42,14 @@
 
 #include <private/ui/SharedBufferStack.h>
 #include <private/ui/LayerState.h>
-#include <private/ui/SurfaceBuffer.h>
 
 namespace android {
 
 // ----------------------------------------------------------------------
 
 static status_t copyBlt(
-        const sp<SurfaceBuffer>& dst, 
-        const sp<SurfaceBuffer>& src, 
+        const sp<GraphicBuffer>& dst, 
+        const sp<GraphicBuffer>& src, 
         const Region& reg)
 {
     status_t err;
@@ -310,7 +310,7 @@ Surface::Surface(const sp<SurfaceControl>& surface)
     : mClient(surface->mClient), mSurface(surface->mSurface),
       mToken(surface->mToken), mIdentity(surface->mIdentity),
       mFormat(surface->mFormat), mFlags(surface->mFlags),
-      mBufferMapper(BufferMapper::get()), mSharedBufferClient(NULL),
+      mBufferMapper(GraphicBufferMapper::get()), mSharedBufferClient(NULL),
       mWidth(surface->mWidth), mHeight(surface->mHeight)
 {
     mSharedBufferClient = new SharedBufferClient(
@@ -320,7 +320,7 @@ Surface::Surface(const sp<SurfaceControl>& surface)
 }
 
 Surface::Surface(const Parcel& parcel)
-    :  mBufferMapper(BufferMapper::get()), mSharedBufferClient(NULL)
+    :  mBufferMapper(GraphicBufferMapper::get()), mSharedBufferClient(NULL)
 {
     sp<IBinder> clientBinder = parcel.readStrongBinder();
     mSurface    = interface_cast<ISurface>(parcel.readStrongBinder());
@@ -473,11 +473,11 @@ int Surface::perform(android_native_window_t* window,
 
 // ----------------------------------------------------------------------------
 
-status_t Surface::dequeueBuffer(sp<SurfaceBuffer>* buffer) {
+status_t Surface::dequeueBuffer(sp<GraphicBuffer>* buffer) {
     android_native_buffer_t* out;
     status_t err = dequeueBuffer(&out);
     if (err == NO_ERROR) {
-        *buffer = SurfaceBuffer::getSelf(out);
+        *buffer = GraphicBuffer::getSelf(out);
     }
     return err;
 }
@@ -500,7 +500,7 @@ int Surface::dequeueBuffer(android_native_buffer_t** buffer)
 
     // below we make sure we AT LEAST have the usage flags we want
     const uint32_t usage(getUsage());
-    const sp<SurfaceBuffer>& backBuffer(mBuffers[bufIdx]);
+    const sp<GraphicBuffer>& backBuffer(mBuffers[bufIdx]);
     if (backBuffer == 0 || 
         ((uint32_t(backBuffer->usage) & usage) != usage) ||
         mSharedBufferClient->needNewBuffer(bufIdx)) 
@@ -537,7 +537,7 @@ int Surface::lockBuffer(android_native_buffer_t* buffer)
     if (err != NO_ERROR)
         return err;
 
-    int32_t bufIdx = SurfaceBuffer::getSelf(buffer)->getIndex();
+    int32_t bufIdx = GraphicBuffer::getSelf(buffer)->getIndex();
     err = mSharedBufferClient->lock(bufIdx);
     LOGE_IF(err, "error locking buffer %d (%s)", bufIdx, strerror(-err));
     return err;
@@ -554,7 +554,7 @@ int Surface::queueBuffer(android_native_buffer_t* buffer)
         mDirtyRegion.set(mSwapRectangle);
     }
     
-    int32_t bufIdx = SurfaceBuffer::getSelf(buffer)->getIndex();
+    int32_t bufIdx = GraphicBuffer::getSelf(buffer)->getIndex();
     mSharedBufferClient->setDirtyRegion(bufIdx, mDirtyRegion);
     err = mSharedBufferClient->queue(bufIdx);
     LOGE_IF(err, "error queuing buffer %d (%s)", bufIdx, strerror(-err));
@@ -627,7 +627,7 @@ status_t Surface::lock(SurfaceInfo* other, Region* dirtyIn, bool blocking)
     // we're intending to do software rendering from this point
     setUsage(GRALLOC_USAGE_SW_READ_OFTEN | GRALLOC_USAGE_SW_WRITE_OFTEN);
 
-    sp<SurfaceBuffer> backBuffer;
+    sp<GraphicBuffer> backBuffer;
     status_t err = dequeueBuffer(&backBuffer);
     LOGE_IF(err, "dequeueBuffer failed (%s)", strerror(-err));
     if (err == NO_ERROR) {
@@ -652,7 +652,7 @@ status_t Surface::lock(SurfaceInfo* other, Region* dirtyIn, bool blocking)
                 newDirtyRegion.andSelf(bounds);
             }
 
-            const sp<SurfaceBuffer>& frontBuffer(mPostedBuffer);
+            const sp<GraphicBuffer>& frontBuffer(mPostedBuffer);
             if (frontBuffer !=0 &&
                 backBuffer->width  == frontBuffer->width && 
                 backBuffer->height == frontBuffer->height &&
@@ -721,13 +721,13 @@ status_t Surface::getBufferLocked(int index, int usage)
     status_t err = NO_MEMORY;
 
     // free the current buffer
-    sp<SurfaceBuffer>& currentBuffer(mBuffers[index]);
+    sp<GraphicBuffer>& currentBuffer(mBuffers[index]);
     if (currentBuffer != 0) {
         getBufferMapper().unregisterBuffer(currentBuffer->handle);
         currentBuffer.clear();
     }
 
-    sp<SurfaceBuffer> buffer = s->requestBuffer(index, usage);
+    sp<GraphicBuffer> buffer = s->requestBuffer(index, usage);
     LOGE_IF(buffer==0,
             "ISurface::getBuffer(%d, %08x) returned NULL",
             index, usage);

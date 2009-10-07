@@ -22,8 +22,8 @@
 #include <utils/StopWatch.h>
 #include <utils/Log.h>
 
-#include "Buffer.h"
-#include <ui/BufferMapper.h>
+#include <ui/GraphicBuffer.h>
+#include <ui/GraphicBufferMapper.h>
 
 using namespace android;
 
@@ -46,7 +46,7 @@ int main(int argc, char** argv)
     memset(temp2, 0, size);
 
 
-    sp<Buffer> buffer = new Buffer(128, 256, HAL_PIXEL_FORMAT_RGBA_8888,
+    sp<GraphicBuffer> buffer = new GraphicBuffer(128, 256, HAL_PIXEL_FORMAT_RGBA_8888,
             GRALLOC_USAGE_SW_READ_OFTEN |
             GRALLOC_USAGE_SW_WRITE_OFTEN);
 
@@ -57,7 +57,7 @@ int main(int argc, char** argv)
     }
 
     void* vaddr;
-    buffer->SurfaceBuffer::lock(
+    buffer->lock(
             GRALLOC_USAGE_SW_READ_OFTEN | GRALLOC_USAGE_SW_WRITE_OFTEN,
             &vaddr);
 

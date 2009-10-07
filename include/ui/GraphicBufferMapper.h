@@ -33,10 +33,10 @@ namespace android {
 
 class Rect;
 
-class BufferMapper : public Singleton<BufferMapper>
+class GraphicBufferMapper : public Singleton<GraphicBufferMapper>
 {
 public:
-    static inline BufferMapper& get() { return getInstance(); }
+    static inline GraphicBufferMapper& get() { return getInstance(); }
 
     status_t registerBuffer(buffer_handle_t handle);
 
@@ -51,8 +51,8 @@ public:
     void dump(buffer_handle_t handle);
 
 private:
-    friend class Singleton<BufferMapper>;
-    BufferMapper();
+    friend class Singleton<GraphicBufferMapper>;
+    GraphicBufferMapper();
     gralloc_module_t const *mAllocMod;
 };
 
