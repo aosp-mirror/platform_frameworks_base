@@ -18,7 +18,6 @@ package android.bluetooth;
 
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
-import android.content.Context;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -328,7 +327,7 @@ public final class BluetoothDevice implements Parcelable {
     /*package*/ static IBluetooth getService() {
         synchronized (BluetoothDevice.class) {
             if (sService == null) {
-                IBinder b = ServiceManager.getService(Context.BLUETOOTH_SERVICE);
+                IBinder b = ServiceManager.getService(BluetoothAdapter.BLUETOOTH_SERVICE);
                 if (b == null) {
                     throw new RuntimeException("Bluetooth service not available");
                 }
