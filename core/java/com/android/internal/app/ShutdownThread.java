@@ -181,7 +181,7 @@ public final class ShutdownThread extends Thread {
                 ITelephony.Stub.asInterface(ServiceManager.checkService("phone"));
         final IBluetooth bluetooth =
                 IBluetooth.Stub.asInterface(ServiceManager.checkService(
-                        Context.BLUETOOTH_SERVICE));
+                        BluetoothAdapter.BLUETOOTH_SERVICE));
         
         try {
             bluetoothOff = bluetooth == null ||
