@@ -304,10 +304,15 @@ Context::Context(Device *dev, Surface *sur, bool useDepth)
     int status;
     pthread_attr_t threadAttr;
 
-    status = pthread_key_create(&gThreadTLSKey, NULL);
-    if (status) {
-        LOGE("Failed to init thread tls key.");
-        return;
+    if (!gThreadTLSKey) {
+        status = pthread_key_create(&gThreadTLSKey, NULL);
+        if (status) {
+            LOGE("Failed to init thread tls key.");
+            return;
+        }
+    } else {
+        // HACK: workaround gl hang on start
+        exit(-1);
     }
 
     status = pthread_attr_init(&threadAttr);
