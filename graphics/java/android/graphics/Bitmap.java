@@ -684,9 +684,32 @@ public final class Bitmap implements Parcelable {
         return Config.nativeToConfig(nativeConfig(mNativeBitmap));
     }
 
-    /** Returns true if the bitmap's pixels support levels of alpha */
+    /** Returns true if the bitmap's config supports per-pixel alpha, and
+     * if the pixels may contain non-opaque alpha values. For some configs,
+     * this is always false (e.g. RGB_565), since they do not support per-pixel
+     * alpha. However, for configs that do, the bitmap may be flagged to be
+     * known that all of its pixels are opaque. In this case hasAlpha() will
+     * also return false. If a config such as ARGB_8888 is not so flagged,
+     * it will return true by default.
+     */
     public final boolean hasAlpha() {
         return nativeHasAlpha(mNativeBitmap);
+    }
+
+    /**
+     * Tell the bitmap if all of the pixels are known to be opaque (false)
+     * or if some of the pixels may contain non-opaque alpha values (true).
+     * Note, for some configs (e.g. RGB_565) this call is ignore, since it does
+     * not support per-pixel alpha values.
+     *
+     * This is meant as a drawing hint, as in some cases a bitmap that is known
+     * to be opaque can take a faster drawing case than one that may have
+     * non-opaque per-pixel alpha values.
+     *
+     * @hide
+     */
+    public void setHasAlpha(boolean hasAlpha) {
+        nativeSetHasAlpha(mNativeBitmap, hasAlpha);
     }
 
     /**
@@ -1018,6 +1041,7 @@ public final class Bitmap implements Parcelable {
                                                     int[] offsetXY);
 
     private static native void nativePrepareToDraw(int nativeBitmap);
+    private static native void nativeSetHasAlpha(int nBitmap, boolean hasAlpha);
 
     /* package */ final int ni() {
         return mNativeBitmap;
