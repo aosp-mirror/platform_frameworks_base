@@ -94,7 +94,8 @@ class ProcessRecord implements Watchdog.PssRequestor {
     // class (String) -> ContentProviderRecord
     final HashMap pubProviders = new HashMap(); 
     // All ContentProviderRecord process is using
-    final HashSet conProviders = new HashSet(); 
+    final HashMap<ContentProviderRecord, Integer> conProviders
+            = new HashMap<ContentProviderRecord, Integer>(); 
     
     boolean persistent;         // always keep this application running?
     boolean crashing;           // are we in the process of crashing?
