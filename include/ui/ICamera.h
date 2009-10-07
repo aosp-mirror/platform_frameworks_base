@@ -87,6 +87,9 @@ public:
 
     // get preview/capture parameters - key/value pairs
     virtual String8         getParameters() const = 0;
+
+    // send command to camera driver
+    virtual status_t        sendCommand(int32_t cmd, int32_t arg1, int32_t arg2) = 0;
 };
 
 // ----------------------------------------------------------------------------

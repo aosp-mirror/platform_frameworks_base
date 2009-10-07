@@ -852,10 +852,10 @@ public class ToneGenerator
 
     /**
      * This method starts the playback of a tone of the specified type for the specified duration.
-     * @param toneType   The type of tone generated @see #startTone(int).
+     * @param toneType   The type of tone generated @see {@link #startTone(int)}.
      * @param durationMs  The tone duration in milliseconds. If the tone is limited in time by definition,
      * the actual duration will be the minimum of durationMs and the defined tone duration. Setting durationMs to -1,
-     * is equivalent to calling #startTone(int).
+     * is equivalent to calling {@link #startTone(int)}.
     */
     public native boolean startTone(int toneType, int durationMs);
 

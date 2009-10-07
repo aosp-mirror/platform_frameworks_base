@@ -39,12 +39,11 @@ namespace android {
 
 // ---------------------------------------------------------------------------
 
-class SurfaceFlinger;
 class DisplayHardware;
-class GraphicPlane;
 class Client;
-class SurfaceBuffer;
-class Buffer;
+class GraphicBuffer;
+class GraphicPlane;
+class SurfaceFlinger;
 
 // ---------------------------------------------------------------------------
 
@@ -241,12 +240,18 @@ protected:
     
           struct Texture {
               Texture() : name(-1U), width(0), height(0),
-                  image(EGL_NO_IMAGE_KHR), transform(0), dirty(true) { }
+                  image(EGL_NO_IMAGE_KHR), transform(0), 
+                  NPOTAdjust(false), dirty(true) { }
               GLuint        name;
               GLuint        width;
               GLuint        height;
+              GLuint        potWidth;
+              GLuint        potHeight;
+              GLfloat       wScale;
+              GLfloat       hScale;
               EGLImageKHR   image;
               uint32_t      transform;
+              bool          NPOTAdjust;
               bool          dirty;
           };
 
@@ -254,7 +259,7 @@ protected:
                                GLclampx b, GLclampx alpha) const;
           void clearWithOpenGL(const Region& clip) const;
           void drawWithOpenGL(const Region& clip, const Texture& texture) const;
-          void loadTexture(Texture* texture, GLint textureName, 
+          void loadTexture(Texture* texture, 
                   const Region& dirty, const GGLSurface& t) const;
 
           
@@ -339,7 +344,7 @@ public:
         sp<LayerBaseClient> getOwner() const;
 
     private:
-        virtual sp<SurfaceBuffer> requestBuffer(int index, int usage);
+        virtual sp<GraphicBuffer> requestBuffer(int index, int usage);
         virtual status_t registerBuffers(const ISurface::BufferHeap& buffers); 
         virtual void postBuffer(ssize_t offset);
         virtual void unregisterBuffers();

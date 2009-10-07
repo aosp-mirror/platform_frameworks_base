@@ -53,7 +53,7 @@ import java.util.List;
  */
 public class ConnectivityService extends IConnectivityManager.Stub {
 
-    private static final boolean DBG = false;
+    private static final boolean DBG = true;
     private static final String TAG = "ConnectivityService";
 
     // Event log tags (must be in sync with event-log-tags)
@@ -740,7 +740,6 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 ++numConnectedNets;
             }
         }
-        if (DBG) Log.d(TAG, "numConnectedNets returning "+numConnectedNets);
         return numConnectedNets;
     }
 
@@ -766,10 +765,6 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     private void handleDisconnect(NetworkInfo info) {
 
         int prevNetType = info.getType();
-        if (DBG) {
-            Log.v(TAG, "Handle DISCONNECT for " + info.getTypeName() +
-                    (mNetAttributes[prevNetType].isDefault() ? ", a default network" : ""));
-        }
 
         mNetTrackers[prevNetType].setTeardownRequested(false);
         /*
@@ -878,11 +873,6 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         // do this before we broadcast the change
         handleConnectivityChange();
 
-        if (DBG) Log.v(TAG, "Sending DISCONNECT bcast for " +
-                info.getTypeName() +
-                (newNet == null || !newNet.isAvailable() ? "" : " other=" +
-                newNet.getNetworkInfo().getTypeName()));
-
         sendStickyBroadcast(intent);
         /*
          * If the failover network is already connected, then immediately send
@@ -975,8 +965,6 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     }
 
     private void handleConnect(NetworkInfo info) {
-        if (DBG) Log.d(TAG, "Handle CONNECT for " + info.getTypeName());
-
         int type = info.getType();
 
         // snapshot isFailover, because sendConnectedBroadcast() resets it
@@ -986,7 +974,6 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         // if this is a default net and other default is running
         // kill the one not preferred
         if (mNetAttributes[type].isDefault()) {
-            if (DBG) Log.d(TAG, "connecting to a default network");
             if (mActiveDefaultNetwork != -1 && mActiveDefaultNetwork != type) {
                 if ((type != mNetworkPreference &&
                         mNetAttributes[mActiveDefaultNetwork].mPriority >
@@ -1016,7 +1003,6 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             mActiveDefaultNetwork = type;
         }
         thisNet.setTeardownRequested(false);
-        if (DBG) Log.d(TAG, "Sending CONNECT bcast for " + info.getTypeName());
         thisNet.updateNetworkSettings();
         handleConnectivityChange();
         sendConnectedBroadcast(info);

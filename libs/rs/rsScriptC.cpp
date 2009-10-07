@@ -62,6 +62,7 @@ bool ScriptC::run(Context *rsc, uint32_t launchIndex)
 {
     Context::ScriptTLSStruct * tls =
     (Context::ScriptTLSStruct *)pthread_getspecific(Context::gThreadTLSKey);
+    rsAssert(tls);
 
     if (mEnviroment.mFragmentStore.get()) {
         rsc->setFragmentStore(mEnviroment.mFragmentStore.get());

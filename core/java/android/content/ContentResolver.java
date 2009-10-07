@@ -218,6 +218,7 @@ public abstract class ContentResolver {
     /**
      * EntityIterator wrapper that releases the associated ContentProviderClient when the
      * iterator is closed.
+     * @hide
      */
     private class EntityIteratorWrapper implements EntityIterator {
         private final EntityIterator mInner;
@@ -283,6 +284,7 @@ public abstract class ContentResolver {
      * @throws RemoteException thrown if a RemoteException is encountered while attempting
      *   to communicate with a remote provider.
      * @throws IllegalArgumentException thrown if there is no provider that matches the uri
+     * @hide
      */
     public final EntityIterator queryEntities(Uri uri,
             String selection, String[] selectionArgs, String sortOrder) throws RemoteException {

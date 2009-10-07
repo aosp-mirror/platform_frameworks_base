@@ -142,6 +142,7 @@ bool Context::runRootScript()
     if (this->props.mLogTimes) {
         timerSet(RS_TIMER_SCRIPT);
     }
+    mStateFragmentStore.mLast.clear();
     bool ret = runScript(mRootScript.get(), 0);
     return ret;
 }
@@ -303,10 +304,15 @@ Context::Context(Device *dev, Surface *sur, bool useDepth)
     int status;
     pthread_attr_t threadAttr;
 
-    status = pthread_key_create(&gThreadTLSKey, NULL);
-    if (status) {
-        LOGE("Failed to init thread tls key.");
-        return;
+    if (!gThreadTLSKey) {
+        status = pthread_key_create(&gThreadTLSKey, NULL);
+        if (status) {
+            LOGE("Failed to init thread tls key.");
+            return;
+        }
+    } else {
+        // HACK: workaround gl hang on start
+        exit(-1);
     }
 
     status = pthread_attr_init(&threadAttr);
@@ -529,6 +535,64 @@ void Context::objDestroyAdd(ObjectBase *obj)
     }
 }
 
+uint32_t Context::getMessageToClient(void *data, size_t *receiveLen, size_t bufferLen, bool wait)
+{
+    //LOGE("getMessageToClient %i %i", bufferLen, wait);
+    if (!wait) {
+        if (mIO.mToClient.isEmpty()) {
+            // No message to get and not going to wait for one.
+            receiveLen = 0;
+            return 0;
+        }
+    }
+
+    //LOGE("getMessageToClient 2 con=%p", this);
+    uint32_t bytesData = 0;
+    uint32_t commandID = 0;
+    const void *d = mIO.mToClient.get(&commandID, &bytesData);
+    //LOGE("getMessageToClient 3    %i  %i", commandID, bytesData);
+
+    *receiveLen = bytesData;
+    if (bufferLen >= bytesData) {
+        memcpy(data, d, bytesData);
+        mIO.mToClient.next();
+        return commandID;
+    }
+    return 0;
+}
+
+bool Context::sendMessageToClient(void *data, uint32_t cmdID, size_t len, bool waitForSpace)
+{
+    //LOGE("sendMessageToClient %i %i %i", cmdID, len, waitForSpace);
+    if (cmdID == 0) {
+        LOGE("Attempting to send invalid command 0 to client.");
+        return false;
+    }
+    if (!waitForSpace) {
+        if (mIO.mToClient.getFreeSpace() < len) {
+            // Not enough room, and not waiting.
+            return false;
+        }
+    }
+    //LOGE("sendMessageToClient 2");
+    void *p = mIO.mToClient.reserve(len);
+    memcpy(p, data, len);
+    mIO.mToClient.commit(cmdID, len);
+    //LOGE("sendMessageToClient 3");
+    return true;
+}
+
+void Context::initToClient()
+{
+    while(!mRunning) {
+        usleep(100);
+    }
+}
+
+void Context::deinitToClient()
+{
+    mIO.mToClient.shutdown();
+}
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////
@@ -634,5 +698,23 @@ void rsObjDestroyOOB(RsContext vrsc, void *obj)
 {
     Context * rsc = static_cast<Context *>(vrsc);
     rsc->objDestroyAdd(static_cast<ObjectBase *>(obj));
+}
+
+uint32_t rsContextGetMessage(RsContext vrsc, void *data, size_t *receiveLen, size_t bufferLen, bool wait)
+{
+    Context * rsc = static_cast<Context *>(vrsc);
+    return rsc->getMessageToClient(data, receiveLen, bufferLen, wait);
+}
+
+void rsContextInitToClient(RsContext vrsc)
+{
+    Context * rsc = static_cast<Context *>(vrsc);
+    rsc->initToClient();
+}
+
+void rsContextDeinitToClient(RsContext vrsc)
+{
+    Context * rsc = static_cast<Context *>(vrsc);
+    rsc->deinitToClient();
 }
 

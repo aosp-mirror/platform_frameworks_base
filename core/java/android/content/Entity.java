@@ -26,6 +26,7 @@ import java.util.ArrayList;
 /**
  * Objects that pass through the ContentProvider and ContentResolver's methods that deal with
  * Entities must implement this abstract base class and thus themselves be Parcelable.
+ * @hide
  */
 public final class Entity implements Parcelable {
     final private ContentValues mValues;

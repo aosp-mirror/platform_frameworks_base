@@ -8,6 +8,7 @@ import android.os.RemoteException;
  * An abstract class that makes it easy to implement an EntityIterator over a cursor.
  * The user must implement {@link #newEntityFromCursorLocked}, which runs inside of a
  * database transaction.
+ * @hide
  */
 public abstract class AbstractCursorEntityIterator implements EntityIterator {
     private final Cursor mEntityCursor;

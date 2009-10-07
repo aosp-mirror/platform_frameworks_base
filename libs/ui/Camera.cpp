@@ -278,6 +278,15 @@ String8 Camera::getParameters() const
     return params;
 }
 
+// send command to camera driver
+status_t Camera::sendCommand(int32_t cmd, int32_t arg1, int32_t arg2)
+{
+    LOGD("sendCommand");
+    sp <ICamera> c = mCamera;
+    if (c == 0) return NO_INIT;
+    return c->sendCommand(cmd, arg1, arg2);
+}
+
 void Camera::setListener(const sp<CameraListener>& listener)
 {
     Mutex::Autolock _l(mLock);
