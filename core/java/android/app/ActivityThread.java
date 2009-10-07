@@ -4075,6 +4075,9 @@ public final class ActivityThread {
                 if(prc.count == 0) {
                     // Schedule the actual remove asynchronously, since we
                     // don't know the context this will be called in.
+                    // TODO: it would be nice to post a delayed message, so
+                    // if we come back and need the same provider quickly
+                    // we will still have it available.
                     Message msg = mH.obtainMessage(H.REMOVE_PROVIDER, provider);
                     mH.sendMessage(msg);
                 } //end if
@@ -4085,23 +4088,36 @@ public final class ActivityThread {
 
     final void completeRemoveProvider(IContentProvider provider) {
         IBinder jBinder = provider.asBinder();
+        String name = null;
         synchronized(mProviderMap) {
             ProviderRefCount prc = mProviderRefCountMap.get(jBinder);
             if(prc != null && prc.count == 0) {
                 mProviderRefCountMap.remove(jBinder);
                 //invoke removeProvider to dereference provider
-                removeProviderLocked(provider);
+                name = removeProviderLocked(provider);
             }
+        }
+        
+        if (name != null) {
+            try {
+                if(localLOGV) Log.v(TAG, "removeProvider::Invoking " +
+                        "ActivityManagerNative.removeContentProvider(" + name);
+                ActivityManagerNative.getDefault().removeContentProvider(
+                        getApplicationThread(), name);
+            } catch (RemoteException e) {
+                //do nothing content provider object is dead any way
+            } //end catch
         }
     }
     
-    public final void removeProviderLocked(IContentProvider provider) {
+    public final String removeProviderLocked(IContentProvider provider) {
         if (provider == null) {
-            return;
+            return null;
         }
         IBinder providerBinder = provider.asBinder();
-        boolean amRemoveFlag = false;
 
+        String name = null;
+        
         // remove the provider from mProviderMap
         Iterator<ProviderRecord> iter = mProviderMap.values().iterator();
         while (iter.hasNext()) {
@@ -4111,7 +4127,7 @@ public final class ActivityThread {
                 //find if its published by this process itself
                 if(pr.mLocalProvider != null) {
                     if(localLOGV) Log.i(TAG, "removeProvider::found local provider returning");
-                    return;
+                    return name;
                 }
                 if(localLOGV) Log.v(TAG, "removeProvider::Not local provider Unlinking " +
                         "death recipient");
@@ -4119,18 +4135,13 @@ public final class ActivityThread {
                 myBinder.unlinkToDeath(pr, 0);
                 iter.remove();
                 //invoke remove only once for the very first name seen
-                if(!amRemoveFlag) {
-                    try {
-                        if(localLOGV) Log.v(TAG, "removeProvider::Invoking " +
-                                "ActivityManagerNative.removeContentProvider("+pr.mName);
-                        ActivityManagerNative.getDefault().removeContentProvider(getApplicationThread(), pr.mName);
-                        amRemoveFlag = true;
-                    } catch (RemoteException e) {
-                        //do nothing content provider object is dead any way
-                    } //end catch
+                if(name == null) {
+                    name = pr.mName;
                 }
             } //end if myBinder
         }  //end while iter
+        
+        return name;
     }
 
     final void removeDeadProvider(String name, IContentProvider provider) {

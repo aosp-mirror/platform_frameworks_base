@@ -7543,8 +7543,13 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                     if (DEBUG_PROVIDER) Log.v(TAG,
                             "Adding provider requested by "
                             + r.processName + " from process "
-                            + cpr.info.processName);                    
-                    r.conProviders.add(cpr);
+                            + cpr.info.processName);
+                    Integer cnt = r.conProviders.get(cpr);
+                    if (cnt == null) {
+                        r.conProviders.put(cpr, new Integer(1));
+                    } else {
+                        r.conProviders.put(cpr, new Integer(cnt.intValue()+1));
+                    }
                     cpr.clients.add(r);
                 } else {
                     cpr.externals++;
@@ -7649,8 +7654,13 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                     if (DEBUG_PROVIDER) Log.v(TAG,
                             "Adding provider requested by "
                             + r.processName + " from process "
-                            + cpr.info.processName);                    
-                    r.conProviders.add(cpr);
+                            + cpr.info.processName);
+                    Integer cnt = r.conProviders.get(cpr);
+                    if (cnt == null) {
+                        r.conProviders.put(cpr, new Integer(1));
+                    } else {
+                        r.conProviders.put(cpr, new Integer(cnt.intValue()+1));
+                    }
                     cpr.clients.add(r);
                 } else {
                     cpr.externals++;
@@ -7727,8 +7737,13 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                         + cpr.info.name + " in process " + r.processName);
                 return;
             } else {
-                localCpr.clients.remove(r);
-                r.conProviders.remove(localCpr);
+                Integer cnt = r.conProviders.get(localCpr);
+                if (cnt == null || cnt.intValue() <= 1) {
+                    localCpr.clients.remove(r);
+                    r.conProviders.remove(localCpr);
+                } else {
+                    r.conProviders.put(localCpr, new Integer(cnt.intValue()-1));
+                }
             }
             updateOomAdjLocked();
         }
@@ -9915,7 +9930,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
 
         // Unregister from connected content providers.
         if (!app.conProviders.isEmpty()) {
-            Iterator it = app.conProviders.iterator();
+            Iterator it = app.conProviders.keySet().iterator();
             while (it.hasNext()) {
                 ContentProviderRecord cpr = (ContentProviderRecord)it.next();
                 cpr.clients.remove(app);
