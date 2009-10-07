@@ -344,6 +344,7 @@ public abstract class AsyncQueryHandler extends Handler {
      * @param token The token to identify the query.
      * @param cookie The cookie object.
      * @param iterator The iterator holding the query results.
+     * @hide
      */
     protected void onQueryEntitiesComplete(int token, Object cookie, EntityIterator iterator) {
         // Empty

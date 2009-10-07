@@ -155,28 +155,6 @@ abstract public class ContentProviderNative extends Binder implements IContentPr
                     return true;
                 }
 
-                case INSERT_ENTITIES_TRANSACTION:
-                {
-                    data.enforceInterface(IContentProvider.descriptor);
-                    Uri uri = Uri.CREATOR.createFromParcel(data);
-                    Entity entity = (Entity) data.readParcelable(null);
-                    Uri newUri = insertEntity(uri, entity);
-                    reply.writeNoException();
-                    Uri.writeToParcel(reply, newUri);
-                    return true;
-                }
-
-                case UPDATE_ENTITIES_TRANSACTION:
-                {
-                    data.enforceInterface(IContentProvider.descriptor);
-                    Uri uri = Uri.CREATOR.createFromParcel(data);
-                    Entity entity = (Entity) data.readParcelable(null);
-                    int count = updateEntity(uri, entity);
-                    reply.writeNoException();
-                    reply.writeInt(count);
-                    return true;
-                }
-
                 case APPLY_BATCH_TRANSACTION:
                 {
                     data.enforceInterface(IContentProvider.descriptor);
@@ -267,6 +245,9 @@ abstract public class ContentProviderNative extends Binder implements IContentPr
         return super.onTransact(code, data, reply, flags);
     }
 
+    /**
+     * @hide
+     */
     private class IEntityIteratorImpl extends IEntityIterator.Stub {
         private final EntityIterator mEntityIterator;
 
@@ -371,6 +352,9 @@ final class ContentProviderProxy implements IContentProvider
         return adaptor;
     }
 
+    /**
+     * @hide
+     */
     public EntityIterator queryEntities(Uri url, String selection, String[] selectionArgs,
             String sortOrder)
             throws RemoteException {
@@ -396,6 +380,9 @@ final class ContentProviderProxy implements IContentProvider
         return new RemoteEntityIterator(IEntityIterator.Stub.asInterface(entityIteratorBinder));
     }
 
+    /**
+     * @hide
+     */
     static class RemoteEntityIterator implements EntityIterator {
         private final IEntityIterator mEntityIterator;
         RemoteEntityIterator(IEntityIterator entityIterator) {
@@ -504,44 +491,6 @@ final class ContentProviderProxy implements IContentProvider
         reply.recycle();
 
         return results;
-    }
-
-    public Uri insertEntity(Uri uri, Entity entity) throws RemoteException {
-        Parcel data = Parcel.obtain();
-        Parcel reply = Parcel.obtain();
-
-        try {
-            data.writeInterfaceToken(IContentProvider.descriptor);
-            uri.writeToParcel(data, 0);
-            data.writeParcelable(entity, 0);
-
-            mRemote.transact(IContentProvider.INSERT_ENTITIES_TRANSACTION, data, reply, 0);
-
-            DatabaseUtils.readExceptionFromParcel(reply);
-            return Uri.CREATOR.createFromParcel(reply);
-        } finally {
-            data.recycle();
-            reply.recycle();
-        }
-    }
-
-    public int updateEntity(Uri uri, Entity entity) throws RemoteException {
-        Parcel data = Parcel.obtain();
-        Parcel reply = Parcel.obtain();
-
-        try {
-            data.writeInterfaceToken(IContentProvider.descriptor);
-            uri.writeToParcel(data, 0);
-            data.writeParcelable(entity, 0);
-
-            mRemote.transact(IContentProvider.UPDATE_ENTITIES_TRANSACTION, data, reply, 0);
-
-            DatabaseUtils.readExceptionFromParcel(reply);
-            return reply.readInt();
-        } finally {
-            data.recycle();
-            reply.recycle();
-        }
     }
 
     public int delete(Uri url, String selection, String[] selectionArgs)
