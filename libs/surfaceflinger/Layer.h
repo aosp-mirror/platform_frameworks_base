@@ -80,7 +80,7 @@ public:
     inline PixelFormat pixelFormat() const { return mFormat; }
 
 private:
-    inline sp<GraphicBuffer> getFrontBuffer() {
+    inline sp<GraphicBuffer> getFrontBufferLocked() {
         return mBuffers[mFrontBufferIndex];
     }
  
