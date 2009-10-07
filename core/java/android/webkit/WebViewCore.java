@@ -422,6 +422,8 @@ final class WebViewCore {
      */
     private native boolean nativeRecordContent(Region invalRegion, Point wh);
 
+    private native boolean nativeFocusBoundsChanged();
+
     /**
      * Splits slow parts of the picture set. Called from the webkit
      * thread after nativeDrawContent returns true.
@@ -1593,6 +1595,7 @@ final class WebViewCore {
         int mMinPrefWidth;
         RestoreState mRestoreState; // only non-null if it is for the first
                                     // picture set after the first layout
+        boolean mFocusSizeChanged;
     }
 
     private void webkitDraw() {
@@ -1607,6 +1610,7 @@ final class WebViewCore {
         if (mWebView != null) {
             // Send the native view size that was used during the most recent
             // layout.
+            draw.mFocusSizeChanged = nativeFocusBoundsChanged();
             draw.mViewPoint = new Point(mCurrentViewWidth, mCurrentViewHeight);
             if (mSettings.getUseWideViewPort()) {
                 draw.mMinPrefWidth = Math.max(
