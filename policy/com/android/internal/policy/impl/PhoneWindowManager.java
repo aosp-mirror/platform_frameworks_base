@@ -1366,7 +1366,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (win.isVisibleLw()) {
             if ((attrs.flags & FLAG_FORCE_NOT_FULLSCREEN) != 0) {
                 mForceStatusBar = true;
-            } else if (mTopFullscreenOpaqueWindowState == null
+            } 
+            if (mTopFullscreenOpaqueWindowState == null
                     && attrs.type >= FIRST_APPLICATION_WINDOW
                     && attrs.type <= LAST_APPLICATION_WINDOW
                     && win.fillsScreenLw(mW, mH, false, false)) {
@@ -1407,8 +1408,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         int changes = 0;
         boolean hiding = false;
         if (mStatusBar != null) {
-            //Log.i(TAG, "force=" + mForceStatusBar
-            //        + " top=" + mTopFullscreenOpaqueWindowState);
+            if (localLOGV) Log.i(TAG, "force=" + mForceStatusBar
+                    + " top=" + mTopFullscreenOpaqueWindowState);
             if (mForceStatusBar) {
                 if (DEBUG_LAYOUT) Log.v(TAG, "Showing status bar");
                 if (mStatusBar.showLw(true)) changes |= FINISH_LAYOUT_REDO_LAYOUT;
@@ -1435,7 +1436,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (mKeyguard != null) {
             if (localLOGV) Log.v(TAG, "finishLayoutLw::mHideKeyguard="+mHideLockScreen);
             if (mDismissKeyguard && !mKeyguardMediator.isSecure()) {
-                if (mKeyguard.hideLw(true)) {
+                if (mKeyguard.hideLw(false)) {
                     changes |= FINISH_LAYOUT_REDO_LAYOUT
                             | FINISH_LAYOUT_REDO_CONFIG
                             | FINISH_LAYOUT_REDO_WALLPAPER;
@@ -1448,7 +1449,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     });
                 }
             } else if (mHideLockScreen) {
-                if (mKeyguard.hideLw(true)) {
+                if (mKeyguard.hideLw(false)) {
                     changes |= FINISH_LAYOUT_REDO_LAYOUT
                             | FINISH_LAYOUT_REDO_CONFIG
                             | FINISH_LAYOUT_REDO_WALLPAPER;
