@@ -9184,7 +9184,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                     pw.print("      lowMem="); pw.print(proc.reportLowMemory);
                             pw.print(", last gced=");
                             pw.print(now-proc.lastRequestedGc);
-                            pw.print(" ms ago, last lowMwm=");
+                            pw.print(" ms ago, last lowMem=");
                             pw.print(now-proc.lastLowMemory);
                             pw.println(" ms ago");
                     
@@ -12307,8 +12307,10 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             // broadcast, then do nothing at this point.  Just in case, we
             // check that the process we're waiting for still exists.
             if (mPendingBroadcast != null) {
-                Log.i(TAG, "processNextBroadcast: waiting for "
-                        + mPendingBroadcast.curApp);
+                if (DEBUG_BROADCAST_LIGHT) {
+                    Log.v(TAG, "processNextBroadcast: waiting for "
+                            + mPendingBroadcast.curApp);
+                }
 
                 boolean isDead;
                 synchronized (mPidsSelfLocked) {

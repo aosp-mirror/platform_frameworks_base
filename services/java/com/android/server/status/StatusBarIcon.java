@@ -149,6 +149,11 @@ class StatusBarIcon {
             r = context.getResources();
         }
 
+        if (data.iconId == 0) {
+            Log.w(StatusBarService.TAG, "No icon ID for slot " + data.slot);
+            return null;
+        }
+        
         try {
             return r.getDrawable(data.iconId);
         } catch (RuntimeException e) {
