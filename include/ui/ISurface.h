@@ -34,7 +34,7 @@ typedef int32_t    SurfaceID;
 
 class IMemoryHeap;
 class OverlayRef;
-class SurfaceBuffer;
+class GraphicBuffer;
 
 class ISurface : public IInterface
 {
@@ -50,7 +50,7 @@ protected:
 public: 
     DECLARE_META_INTERFACE(Surface);
 
-    virtual sp<SurfaceBuffer> requestBuffer(int bufferIdx, int usage) = 0; 
+    virtual sp<GraphicBuffer> requestBuffer(int bufferIdx, int usage) = 0; 
     
     class BufferHeap {
     public:

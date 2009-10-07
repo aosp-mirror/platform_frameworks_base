@@ -37,6 +37,7 @@
 #include <utils/String16.h>
 #include <utils/StopWatch.h>
 
+#include <ui/GraphicBufferAllocator.h>
 #include <ui/PixelFormat.h>
 #include <ui/DisplayInfo.h>
 
@@ -44,8 +45,6 @@
 #include <GLES/gl.h>
 
 #include "clz.h"
-#include "Buffer.h"
-#include "BufferAllocator.h"
 #include "Layer.h"
 #include "LayerBlur.h"
 #include "LayerBuffer.h"
@@ -190,6 +189,7 @@ SurfaceFlinger::SurfaceFlinger()
         mLastSwapBufferTime(0),
         mDebugInTransaction(0),
         mLastTransactionTime(0),
+        mBootFinished(false),
         mConsoleSignals(0),
         mSecureFrameBuffer(0)
 {
@@ -294,6 +294,7 @@ void SurfaceFlinger::bootFinished()
     const nsecs_t now = systemTime();
     const nsecs_t duration = now - mBootTime;
     LOGI("Boot is finished (%ld ms)", long(ns2ms(duration)) );  
+    mBootFinished = true;
     property_set("ctl.stop", "bootanim");
 }
 
@@ -1521,8 +1522,8 @@ status_t SurfaceFlinger::dump(int fd, const Vector<String16>& args)
             if (l != 0) {
                 SharedBufferStack::Statistics stats = l->lcblk->getStats();
                 result.append( l->lcblk->dump("      ") );
-                sp<const Buffer> buf0(l->getBuffer(0));
-                sp<const Buffer> buf1(l->getBuffer(1));
+                sp<const GraphicBuffer> buf0(l->getBuffer(0));
+                sp<const GraphicBuffer> buf1(l->getBuffer(1));
                 uint32_t w0=0, h0=0, s0=0;
                 uint32_t w1=0, h1=0, s1=0;
                 if (buf0 != 0) {
@@ -1573,7 +1574,7 @@ status_t SurfaceFlinger::dump(int fd, const Vector<String16>& args)
         }
         snprintf(buffer, SIZE, "  client count: %d\n", mClientsMap.size());
         result.append(buffer);
-        const BufferAllocator& alloc(BufferAllocator::get());
+        const GraphicBufferAllocator& alloc(GraphicBufferAllocator::get());
         alloc.dump(result);
 
         if (locked) {

@@ -20,18 +20,20 @@
 #include <utils/Singleton.h>
 #include <utils/String8.h>
 
-#include "BufferAllocator.h"
+#include <ui/GraphicBufferAllocator.h>
 
+#include <private/ui/sw_gralloc_handle.h>
 
 namespace android {
 // ---------------------------------------------------------------------------
 
-ANDROID_SINGLETON_STATIC_INSTANCE( BufferAllocator )
+ANDROID_SINGLETON_STATIC_INSTANCE( GraphicBufferAllocator )
 
-Mutex BufferAllocator::sLock;
-KeyedVector<buffer_handle_t, BufferAllocator::alloc_rec_t> BufferAllocator::sAllocList;
+Mutex GraphicBufferAllocator::sLock;
+KeyedVector<buffer_handle_t,
+    GraphicBufferAllocator::alloc_rec_t> GraphicBufferAllocator::sAllocList;
 
-BufferAllocator::BufferAllocator()
+GraphicBufferAllocator::GraphicBufferAllocator()
     : mAllocDev(0)
 {
     hw_module_t const* module;
@@ -42,12 +44,12 @@ BufferAllocator::BufferAllocator()
     }
 }
 
-BufferAllocator::~BufferAllocator()
+GraphicBufferAllocator::~GraphicBufferAllocator()
 {
     gralloc_close(mAllocDev);
 }
 
-void BufferAllocator::dump(String8& result) const
+void GraphicBufferAllocator::dump(String8& result) const
 {
     Mutex::Autolock _l(sLock);
     KeyedVector<buffer_handle_t, alloc_rec_t>& list(sAllocList);
@@ -73,7 +75,7 @@ static inline uint32_t clamp(uint32_t c) {
     return c>0 ? c : 1;
 }
 
-status_t BufferAllocator::alloc(uint32_t w, uint32_t h, PixelFormat format,
+status_t GraphicBufferAllocator::alloc(uint32_t w, uint32_t h, PixelFormat format,
         int usage, buffer_handle_t* handle, int32_t* stride)
 {
     Mutex::Autolock _l(mLock);
@@ -83,8 +85,13 @@ status_t BufferAllocator::alloc(uint32_t w, uint32_t h, PixelFormat format,
     h = clamp(h);
 
     // we have a h/w allocator and h/w buffer is requested
-    status_t err = mAllocDev->alloc(mAllocDev,
-            w, h, format, usage, handle, stride);
+    status_t err; 
+    
+    if (usage & GRALLOC_USAGE_HW_MASK) {
+        err = mAllocDev->alloc(mAllocDev, w, h, format, usage, handle, stride);
+    } else {
+        err = sw_gralloc_handle_t::alloc(w, h, format, usage, handle, stride);
+    }
 
     LOGW_IF(err, "alloc(%u, %u, %d, %08x, ...) failed %d (%s)",
             w, h, format, usage, err, strerror(-err));
@@ -109,13 +116,18 @@ status_t BufferAllocator::alloc(uint32_t w, uint32_t h, PixelFormat format,
     return err;
 }
 
-status_t BufferAllocator::free(buffer_handle_t handle)
+status_t GraphicBufferAllocator::free(buffer_handle_t handle)
 {
     Mutex::Autolock _l(mLock);
 
-    status_t err = mAllocDev->free(mAllocDev, handle);
+    status_t err;
+    if (sw_gralloc_handle_t::validate(handle) < 0) {
+        err = mAllocDev->free(mAllocDev, handle);
+    } else {
+        err = sw_gralloc_handle_t::free((sw_gralloc_handle_t*)handle);
+    }
+
     LOGW_IF(err, "free(...) failed %d (%s)", err, strerror(-err));
-    
     if (err == NO_ERROR) {
         Mutex::Autolock _l(sLock);
         KeyedVector<buffer_handle_t, alloc_rec_t>& list(sAllocList);

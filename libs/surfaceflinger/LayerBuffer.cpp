@@ -23,13 +23,12 @@
 #include <utils/Log.h>
 #include <utils/StopWatch.h>
 
+#include <ui/GraphicBuffer.h>
 #include <ui/PixelFormat.h>
 #include <ui/FramebufferNativeWindow.h>
 
 #include <hardware/copybit.h>
 
-#include "Buffer.h"
-#include "BufferAllocator.h"
 #include "LayerBuffer.h"
 #include "SurfaceFlinger.h"
 #include "DisplayHardware/DisplayHardware.h"
@@ -474,9 +473,9 @@ void LayerBuffer::BufferSource::onDraw(const Region& clip) const
                         mTempBitmap->getWidth() < size_t(tmp_w) || 
                         mTempBitmap->getHeight() < size_t(tmp_h)) {
                     mTempBitmap.clear();
-                    mTempBitmap = new android::Buffer(
-                            tmp_w, tmp_h, src.img.format,
-                            BufferAllocator::USAGE_HW_2D);
+                    mTempBitmap = new GraphicBuffer(
+                            tmp_w, tmp_h, src.img.format, 
+                            GraphicBuffer::USAGE_HW_2D);
                     err = mTempBitmap->initCheck();
                 }
 
@@ -549,7 +548,7 @@ void LayerBuffer::BufferSource::onDraw(const Region& clip) const
         t.format = src.img.format;
         t.data = (GGLubyte*)src.img.base;
         const Region dirty(Rect(t.width, t.height));
-        mLayer.loadTexture(&mTexture, mTexture.name, dirty, t);
+        mLayer.loadTexture(&mTexture, dirty, t);
         mTexture.transform = mBufferHeap.transform;
         mLayer.drawWithOpenGL(clip, mTexture);
     }
