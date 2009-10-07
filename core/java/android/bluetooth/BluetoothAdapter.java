@@ -31,6 +31,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Random;
 import java.util.Set;
+import java.util.UUID;
 
 /**
  * Represents the local Bluetooth adapter.
@@ -564,8 +565,16 @@ public final class BluetoothAdapter {
     }
 
     /**
-     * Randomly picks RFCOMM channels until none are left.
+     * Picks RFCOMM channels until none are left.
      * Avoids reserved channels.
+     * Ideally we would pick random channels, but in the current implementation
+     * we start with the channel that is the hash of the UUID, and try every
+     * available channel from there. This means that in most cases a given
+     * uuid will use the same channel. This is a workaround for a Bluez SDP
+     * bug where we are not updating the cache when the channel changes for a
+     * uuid.
+     * TODO: Fix the Bluez SDP caching bug, and go back to random channel
+     * selection
      */
     private static class RfcommChannelPicker {
         private static final int[] RESERVED_RFCOMM_CHANNELS =  new int[] {
@@ -579,7 +588,9 @@ public final class BluetoothAdapter {
 
         private final LinkedList<Integer> mChannels;  // local list of channels left to try
 
-        public RfcommChannelPicker() {
+        private final UUID mUuid;
+
+        public RfcommChannelPicker(UUID uuid) {
             synchronized (RfcommChannelPicker.class) {
                 if (sChannels == null) {
                     // lazy initialization of non-reserved rfcomm channels
@@ -594,13 +605,21 @@ public final class BluetoothAdapter {
                 }
                 mChannels = (LinkedList<Integer>)sChannels.clone();
             }
+            mUuid = uuid;
         }
-        /* Returns next random channel, or -1 if we're out */
+        /* Returns next channel, or -1 if we're out */
         public int nextChannel() {
-            if (mChannels.size() == 0) {
-                return -1;
+            int channel = mUuid.hashCode();  // always pick the same channel to try first
+            Integer channelInt;
+            while (mChannels.size() > 0) {
+                channelInt = new Integer(channel);
+                if (mChannels.remove(channelInt)) {
+                    return channel;
+                }
+                channel = (channel % BluetoothSocket.MAX_RFCOMM_CHANNEL) + 1;
             }
-            return mChannels.remove(sRandom.nextInt(mChannels.size()));
+
+            return -1;
         }
     }
 
@@ -644,6 +663,8 @@ public final class BluetoothAdapter {
      * can use the same UUID to query our SDP server and discover which channel
      * to connect to. This SDP record will be removed when this socket is
      * closed, or if this application closes unexpectedly.
+     * <p>Use {@link BluetoothDevice#createRfcommSocketToServiceRecord} to
+     * connect to this socket from another device using the same {@link UUID}.
      * <p>Requires {@link android.Manifest.permission#BLUETOOTH}
      * @param name service name for SDP record
      * @param uuid uuid for SDP record
@@ -651,9 +672,9 @@ public final class BluetoothAdapter {
      * @throws IOException on error, for example Bluetooth not available, or
      *                     insufficient permissions, or channel in use.
      */
-    public BluetoothServerSocket listenUsingRfcomm(String name, ParcelUuid uuid)
+    public BluetoothServerSocket listenUsingRfcommWithServiceRecord(String name, UUID uuid)
             throws IOException {
-        RfcommChannelPicker picker = new RfcommChannelPicker();
+        RfcommChannelPicker picker = new RfcommChannelPicker(uuid);
 
         BluetoothServerSocket socket;
         int channel;
@@ -687,7 +708,8 @@ public final class BluetoothAdapter {
 
         int handle = -1;
         try {
-            handle = mService.addRfcommServiceRecord(name, uuid, channel, new Binder());
+            handle = mService.addRfcommServiceRecord(name, new ParcelUuid(uuid), channel,
+                    new Binder());
         } catch (RemoteException e) {Log.e(TAG, "", e);}
         if (handle == -1) {
             try {
