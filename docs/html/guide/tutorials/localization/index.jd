@@ -76,7 +76,7 @@ subdirectories for the three most common types of resources: graphics
 (<code>res/values/</code>). Most of the localization work you do later in this
 tutorial will involve adding more subdirectories to the <code>res/</code>
 directory.</p>
-    <img src="../../../images/hello_l10n/plain_project.png" alt="plain project" width="194"
+    <img src="{@docRoot}images/hello_l10n/plain_project.png" alt="plain project" width="194"
 height="229">
   </li>
   <li>Open the <code>res/layout/main.xml</code> file and replace it with the
@@ -192,7 +192,7 @@ within <code>res/values/strings.xml</code>. </li>
 
 <p>The project structure now looks like this:</p>
 
-  <img src="../../../images/hello_l10n/nonlocalized_project.png" alt="nonlocalized" width="394"
+  <img src="{@docRoot}images/hello_l10n/nonlocalized_project.png" alt="nonlocalized" width="394"
 height="320">
 
 <p class="note"><strong>Tip:</strong> If you will want to run the application on
@@ -215,9 +215,9 @@ should look something like this:</p>
     <th scope="col">After clicking the flag, in any locale:</th>
   </tr>
   <tr>
-    <td valign="top"><img src="../../../images/hello_l10n/nonlocalized_screenshot1.png"
+    <td valign="top"><img src="{@docRoot}images/hello_l10n/nonlocalized_screenshot1.png"
 alt="nonlocalized" width="321" height="366"></td>
-    <td><img src="../../../images/hello_l10n/nonlocalized_screenshot2.png" alt="nonlocalized2"
+    <td><img src="{@docRoot}images/hello_l10n/nonlocalized_screenshot2.png" alt="nonlocalized2"
 width="321" height="366"></td>
   </tr>
 </table>
@@ -400,29 +400,34 @@ is not Germany. </li>
 
 <h3 id="localize_strings">Localize the Strings</h3>
 
-<p>The application requires  three more <code>strings.xml</code> files, one each
-for German, French, and Japanese. In this example, we will start by copying
-<code>res/values/strings.xml</code> into new
-<code>res/values-<em>&lt;qualifier&gt;</em>/strings.xml</code> files.</p>
-
-<p>Under the <code>res/</code> directory, create the three new directories and
-copy <code>res/values/strings.xml</code> into each of them. For example, using
-Eclipse you could do it like this:</p>
+<p>The application requires three more <code>strings.xml</code> files, one 
+each for German, French, and Japanese. To create these resource files within 
+Eclipse:</p>
 
 <ol>
-  <li>Right-click the <code>res/values/</code> folder and select Copy.</li>
-  <li>Right-click on the <code>res/</code> folder and select Paste. Rename the
-folder <code>values-de </code>and click OK.<br>
-    <img src="../../../images/hello_l10n/copy_res_files.png" alt="res_file_copy" width="557"
-height="181" style="margin:15px"></li>
-  <li>Repeat steps 1 and 2 two more times, for <code>values-fr</code>, and
-<code>values-ja</code>. Now the project includes these new files, all still
-containing British English text strings: <br />
+<li>Select <strong>File</strong> &gt; <strong>New</strong> &gt; <strong>Android 
+XML File</strong> to open the New Android XML File wizard. You can also open 
+the wizard by clicking its icon in the toolbar:<br />
+<img src="{@docRoot}images/hello_l10n/xml_file_wizard_shortcut.png" 
+alt="file_wizard_shortcut" width="297"
+height="90" style="margin:15px"></li>
+  <li>Select L10N for the Project field, and type <code>strings.xml</code> into 
+the File field. In the left-hand list, select Language, then click the right arrow.<br>
+<img src="{@docRoot}images/hello_l10n/xml_wizard1.png" alt="res_file_copy" width="335"
+height="406" style="margin:15px"></li>
+  <li>Type <code>de</code> in the Language box and click Finish.<br>
+    <img src="{@docRoot}images/hello_l10n/xml_wizard2.png" alt="res_file_copy" width="306"
+height="179">
+<p>A new file, <code>res/values-de/strings.xml</code>, now appears among the project 
+files.</p></li>
+<li>Repeat the steps twice more, for the language codes <code>fr</code> and	
+	<code>ja</code>.
+Now the project includes these new skeleton files: <br />
     <code>res/<strong>values-de</strong>/strings.xml</code><br />
     <code>res/<strong>values-fr</strong>/strings.xml</code><br />
     <code>res/<strong>values-ja</strong>/strings.xml</code><br />
   </li>
-  <li>Replace the strings in the three new files with localized text. To do
+  <li>Add localized text to the new files. To do
 this, open the <code>res/values-<em>&lt;qualifier&gt;</em>/strings.xml</code> files and
 replace the code as follows:</li>
 </ol>
@@ -526,12 +531,12 @@ available in the Android system image. </p>
 use the  Custom Locale application, which is available in the Application
 tab:</p>
 
-<p><img src="../../../images/hello_l10n/custom_locale_app.png" alt="custom locale app" width="163"
+<p><img src="{@docRoot}images/hello_l10n/custom_locale_app.png" alt="custom locale app" width="163"
 height="158" style="margin-left:15px"></p>
 
 <p>To switch to a new locale, long-press a  locale name:</p>
 
-<p><img src="../../../images/hello_l10n/using_custom_locale.png" alt="using custom locale"
+<p><img src="{@docRoot}images/hello_l10n/using_custom_locale.png" alt="using custom locale"
 width="512" height="299" style="margin-left:15px"></p>
 
 <p>For a list of supported locales, see the 
@@ -549,14 +554,14 @@ locale. Here are some of the results you should see:</p>
   <tr>
     <td>German / Germany
     	<br />Specifically supported by the Hello, L10N application.</td>
-    <td><img src="../../../images/hello_l10n/german_screenshot.png" alt="custom locale app"
+    <td><img src="{@docRoot}images/hello_l10n/german_screenshot.png" alt="custom locale app"
 width="321" height="175" align="right"
 style="margin-left:10px;margin-right:20px"></td>
   </tr>
   <tr>
     <td>French / Canada
     	<br />Specifically supported by the Hello, L10N application.</td>
-    <td><img src="../../../images/hello_l10n/frenchCA_screenshot.png" alt="custom locale app"
+    <td><img src="{@docRoot}images/hello_l10n/frenchCA_screenshot.png" alt="custom locale app"
 width="321" height="175" align="right"
 style="margin-left:10px;margin-right:20px"></td>
   </tr>
@@ -564,7 +569,7 @@ style="margin-left:10px;margin-right:20px"></td>
     <td>German / Switzerland
     	<br />Only the language is specifically supported by 
 the Hello, L10N  application.</td>
-    <td><img src="../../../images/hello_l10n/germanCH_screenshot.png" alt="custom locale app"
+    <td><img src="{@docRoot}images/hello_l10n/germanCH_screenshot.png" alt="custom locale app"
 width="321" height="175" align="right"
 style="margin-left:10px;margin-right:20px">`</td>
   </tr>
@@ -572,7 +577,7 @@ style="margin-left:10px;margin-right:20px">`</td>
     <td>Japanese
     	<br />Specifically supported by  the Hello, L10N  application. 
 	</td>
-    <td><img src="../../../images/hello_l10n/japanese_screenshot.png" alt="custom locale app"
+    <td><img src="{@docRoot}images/hello_l10n/japanese_screenshot.png" alt="custom locale app"
 width="321" height="220" align="right"
 style="margin-left:10px;margin-right:20px">`</td>
   </tr>
@@ -580,7 +585,7 @@ style="margin-left:10px;margin-right:20px">`</td>
     <td>Romansh / Switzerland (custom locale <code>rm_CH</code>)
     	<br />Not specifically supported  by  the Hello, L10N 
 application, so the application uses the default resources.</td>
-    <td><img src="../../../images/hello_l10n/romanshCH_screenshot.png" alt="custom locale app"
+    <td><img src="{@docRoot}images/hello_l10n/romanshCH_screenshot.png" alt="custom locale app"
 width="321" height="175" align="right"
 style="margin-left:10px;margin-right:20px"></td>
   </tr>
