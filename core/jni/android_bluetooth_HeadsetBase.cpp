@@ -396,7 +396,7 @@ static jint waitForAsyncConnectNative(JNIEnv *env, jobject obj,
                 LOGE("select() on RFCOMM socket: %s (%d)",
                      strerror(errno),
                      errno);
-                return -1;
+                return -errno;
             }
             return 0;
         }
@@ -429,7 +429,7 @@ static jint waitForAsyncConnectNative(JNIEnv *env, jobject obj,
                     fcntl(nat->rfcomm_sock, F_SETFL, nat->rfcomm_sock_flags);
                     close(nat->rfcomm_sock);
                     nat->rfcomm_sock = -1;
-                    return -1;
+                    return -errno;
                 }
             }
             /* Restore the blocking properties of the socket. */
