@@ -20,6 +20,7 @@ import android.accounts.Account;
 import android.os.Bundle;
 import android.os.Process;
 import android.os.NetStat;
+import android.os.IBinder;
 import android.util.EventLog;
 
 import java.util.concurrent.atomic.AtomicInteger;
@@ -29,12 +30,10 @@ import java.util.concurrent.atomic.AtomicInteger;
  * If a sync operation is already in progress when a startSync() request is received then an error
  * will be returned to the new request and the existing request will be allowed to continue.
  * When a startSync() is received and there is no sync operation in progress then a thread
- * will be started to run the operation and {@link #performSync} will be invoked on that thread.
+ * will be started to run the operation and {@link #onPerformSync} will be invoked on that thread.
  * If a cancelSync() is received that matches an existing sync operation then the thread
  * that is running that sync operation will be interrupted, which will indicate to the thread
  * that the sync has been canceled.
- *
- * @hide
  */
 public abstract class AbstractThreadedSyncAdapter {
     private final Context mContext;
@@ -71,7 +70,7 @@ public abstract class AbstractThreadedSyncAdapter {
         return mContext;
     }
 
-    class ISyncAdapterImpl extends ISyncAdapter.Stub {
+    private class ISyncAdapterImpl extends ISyncAdapter.Stub {
         public void startSync(ISyncContext syncContext, String authority, Account account,
                 Bundle extras) {
             final SyncContext syncContextClient = new SyncContext(syncContext);
@@ -112,7 +111,7 @@ public abstract class AbstractThreadedSyncAdapter {
             // check it and when we use it
             synchronized (mSyncThreadLock) {
                 if (mSyncThread != null
-                        && mSyncThread.mSyncContext.getISyncContext().asBinder()
+                        && mSyncThread.mSyncContext.getSyncContextBinder()
                         == syncContext.asBinder()) {
                     mSyncThread.interrupt();
                 }
@@ -121,9 +120,9 @@ public abstract class AbstractThreadedSyncAdapter {
     }
 
     /**
-     * The thread that invokes performSync(). It also acquires the provider for this sync
-     * before calling performSync and releases it afterwards. Cancel this thread in order to
-     * cancel the sync.
+     * The thread that invokes {@link AbstractThreadedSyncAdapter#onPerformSync}. It also acquires
+     * the provider for this sync before calling onPerformSync and releases it afterwards. Cancel
+     * this thread in order to cancel the sync.
      */
     private class SyncThread extends Thread {
         private final SyncContext mSyncContext;
@@ -157,11 +156,10 @@ public abstract class AbstractThreadedSyncAdapter {
             try {
                 provider = mContext.getContentResolver().acquireContentProviderClient(mAuthority);
                 if (provider != null) {
-                    AbstractThreadedSyncAdapter.this.performSync(mAccount, mExtras,
+                    AbstractThreadedSyncAdapter.this.onPerformSync(mAccount, mExtras,
                             mAuthority, provider, syncResult);
                 } else {
-                    // TODO(fredq) update the syncResults to indicate that we were unable to
-                    // find the provider. maybe with a ProviderError?
+                    syncResult.databaseError = true;
                 }
             } finally {
                 if (provider != null) {
@@ -170,7 +168,7 @@ public abstract class AbstractThreadedSyncAdapter {
                 if (!isCanceled()) {
                     mSyncContext.onFinished(syncResult);
                 }
-                logSyncDetails(NetStat.getUidTxBytes(uid) - mInitialTxBytes,
+                onLogSyncDetails(NetStat.getUidTxBytes(uid) - mInitialTxBytes,
                         NetStat.getUidRxBytes(uid) - mInitialRxBytes, syncResult);
                 // synchronize so that the assignment will be seen by other threads
                 // that also synchronize accesses to mSyncThread
@@ -186,10 +184,10 @@ public abstract class AbstractThreadedSyncAdapter {
     }
 
     /**
-     * @return a reference to the ISyncAdapter interface into this SyncAdapter implementation.
+     * @return a reference to the IBinder of the SyncAdapter service.
      */
-    public final ISyncAdapter getISyncAdapter() {
-        return mISyncAdapterImpl;
+    public final IBinder getSyncAdapterBinder() {
+        return mISyncAdapterImpl.asBinder();
     }
 
     /**
@@ -204,7 +202,7 @@ public abstract class AbstractThreadedSyncAdapter {
      *   authority
      * @param syncResult SyncAdapter-specific parameters
      */
-    public abstract void performSync(Account account, Bundle extras,
+    public abstract void onPerformSync(Account account, Bundle extras,
             String authority, ContentProviderClient provider, SyncResult syncResult);
 
     /**
@@ -215,9 +213,9 @@ public abstract class AbstractThreadedSyncAdapter {
      * @param bytesSent number of bytes the sync sent over the network
      * @param bytesReceived number of bytes the sync received over the network
      * @param result The SyncResult object holding info on the sync
+     * @hide
      */
-    protected void logSyncDetails(long bytesSent, long bytesReceived, SyncResult result) {
+    protected void onLogSyncDetails(long bytesSent, long bytesReceived, SyncResult result) {
         EventLog.writeEvent(SyncAdapter.LOG_SYNC_DETAILS, TAG, bytesSent, bytesReceived, "");
     }
-
 }
