@@ -384,11 +384,37 @@ public abstract class BroadcastReceiver {
     }
     
     /**
+     * Returns true if the receiver is currently processing an ordered
+     * broadcast.
+     */
+    public final boolean isOrderedBroadcast() {
+        return mOrderedHint;
+    }
+    
+    /**
+     * Returns true if the receiver is currently processing the initial
+     * value of a sticky broadcast -- that is, the value that was last
+     * broadcast and is currently held in the sticky cache, so this is
+     * not directly the result of a broadcast right now.
+     */
+    public final boolean isInitialStickyBroadcast() {
+        return mInitialStickyHint;
+    }
+    
+    /**
      * For internal use, sets the hint about whether this BroadcastReceiver is
      * running in ordered mode.
      */
     public final void setOrderedHint(boolean isOrdered) {
         mOrderedHint = isOrdered;
+    }
+    
+    /**
+     * For internal use, sets the hint about whether this BroadcastReceiver is
+     * receiving the initial sticky broadcast value. @hide
+     */
+    public final void setInitialStickyHint(boolean isInitialSticky) {
+        mInitialStickyHint = isInitialSticky;
     }
     
     /**
@@ -414,7 +440,10 @@ public abstract class BroadcastReceiver {
     }
     
     void checkSynchronousHint() {
-        if (mOrderedHint) {
+        // Note that we don't assert when receiving the initial sticky value,
+        // since that may have come from an ordered broadcast.  We'll catch
+        // them later when the real broadcast happens again.
+        if (mOrderedHint || mInitialStickyHint) {
             return;
         }
         RuntimeException e = new RuntimeException(
@@ -429,5 +458,6 @@ public abstract class BroadcastReceiver {
     private boolean mAbortBroadcast;
     private boolean mDebugUnregister;
     private boolean mOrderedHint;
+    private boolean mInitialStickyHint;
 }
 

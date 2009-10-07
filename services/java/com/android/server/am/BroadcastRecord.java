@@ -39,7 +39,9 @@ class BroadcastRecord extends Binder {
     final String callerPackage; // who sent this
     final int callingPid;   // the pid of who sent this
     final int callingUid;   // the uid of who sent this
-    String requiredPermission; // a permission the caller has required
+    final boolean ordered;  // serialize the send to receivers?
+    final boolean sticky;   // originated from existing sticky data?
+    final String requiredPermission; // a permission the caller has required
     final List receivers;   // contains BroadcastFilter and ResolveInfo
     final IIntentReceiver resultTo; // who receives final result if non-null
     long dispatchTime;      // when dispatch started on this set of receivers
@@ -48,7 +50,6 @@ class BroadcastRecord extends Binder {
     String resultData;      // current result data value.
     Bundle resultExtras;    // current result extra data values.
     boolean resultAbort;    // current result abortBroadcast value.
-    boolean ordered;        // serialize the send to receivers?
     int nextReceiver;       // next receiver to be executed.
     IBinder receiver;       // who is currently running, null if none.
     int state;
@@ -86,7 +87,7 @@ class BroadcastRecord extends Binder {
               + " resultCode=" + resultCode + " resultData=" + resultData);
         pw.println(prefix + "resultExtras=" + resultExtras);
         pw.println(prefix + "resultAbort=" + resultAbort
-                + " ordered=" + ordered);
+                + " ordered=" + ordered + " sticky=" + sticky);
         pw.println(prefix + "nextReceiver=" + nextReceiver
               + " receiver=" + receiver);
         pw.println(prefix + "curFilter=" + curFilter);
@@ -122,7 +123,8 @@ class BroadcastRecord extends Binder {
     BroadcastRecord(Intent _intent, ProcessRecord _callerApp, String _callerPackage,
             int _callingPid, int _callingUid, String _requiredPermission,
             List _receivers, IIntentReceiver _resultTo, int _resultCode,
-            String _resultData, Bundle _resultExtras, boolean _serialized) {
+            String _resultData, Bundle _resultExtras, boolean _serialized,
+            boolean _sticky) {
         intent = _intent;
         callerApp = _callerApp;
         callerPackage = _callerPackage;
@@ -135,6 +137,7 @@ class BroadcastRecord extends Binder {
         resultData = _resultData;
         resultExtras = _resultExtras;
         ordered = _serialized;
+        sticky = _sticky;
         nextReceiver = 0;
         state = IDLE;
     }
