@@ -368,6 +368,12 @@ CameraParameters CameraHardwareStub::getParameters() const
     return mParameters;
 }
 
+status_t CameraHardwareStub::sendCommand(int32_t command, int32_t arg1,
+                                         int32_t arg2)
+{
+    return BAD_VALUE;
+}
+
 void CameraHardwareStub::release()
 {
 }
