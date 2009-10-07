@@ -879,6 +879,7 @@ ToneGenerator::~ToneGenerator() {
 ////////////////////////////////////////////////////////////////////////////////
 bool ToneGenerator::startTone(int toneType, int durationMs) {
     bool lResult = false;
+    status_t lStatus;
 
     if ((toneType < 0) || (toneType >= NUM_TONES))
         return lResult;
@@ -898,15 +899,16 @@ bool ToneGenerator::startTone(int toneType, int durationMs) {
     toneType = getToneForRegion(toneType);
     mpNewToneDesc = &sToneDescriptors[toneType];
 
-    if (durationMs == -1) {
-        mMaxSmp = TONEGEN_INF;
-    } else {
-        if (durationMs > (int)(TONEGEN_INF / mSamplingRate)) {
-            mMaxSmp = (durationMs / 1000) * mSamplingRate;
-        } else {
-            mMaxSmp = (durationMs * mSamplingRate) / 1000;
+    mDurationMs = durationMs;
+
+    if (mState == TONE_STOPPED) {
+        LOGV("Start waiting for previous tone to stop");
+        lStatus = mWaitCbkCond.waitRelative(mLock, seconds(1));
+        if (lStatus != NO_ERROR) {
+            LOGE("--- start wait for stop timed out, status %d", lStatus);
+            mState = TONE_IDLE;
+            return lResult;
         }
-        LOGV("startTone, duration limited to %d ms", durationMs);
     }
 
     if (mState == TONE_INIT) {
@@ -919,7 +921,7 @@ bool ToneGenerator::startTone(int toneType, int durationMs) {
             mLock.lock();
             if (mState == TONE_STARTING) {
                 LOGV("Wait for start callback");
-                status_t lStatus = mWaitCbkCond.waitRelative(mLock, seconds(1));
+                lStatus = mWaitCbkCond.waitRelative(mLock, seconds(1));
                 if (lStatus != NO_ERROR) {
                     LOGE("--- Immediate start timed out, status %d", lStatus);
                     mState = TONE_IDLE;
@@ -931,9 +933,8 @@ bool ToneGenerator::startTone(int toneType, int durationMs) {
         }
     } else {
         LOGV("Delayed start\n");
-
         mState = TONE_RESTARTING;
-        status_t lStatus = mWaitCbkCond.waitRelative(mLock, seconds(1));
+        lStatus = mWaitCbkCond.waitRelative(mLock, seconds(1));
         if (lStatus == NO_ERROR) {
             if (mState != TONE_IDLE) {
                 lResult = true;
@@ -1315,6 +1316,17 @@ bool ToneGenerator::prepareWave() {
     clearWaveGens();
 
     mpToneDesc = mpNewToneDesc;
+
+    if (mDurationMs == -1) {
+        mMaxSmp = TONEGEN_INF;
+    } else {
+        if (mDurationMs > (int)(TONEGEN_INF / mSamplingRate)) {
+            mMaxSmp = (mDurationMs / 1000) * mSamplingRate;
+        } else {
+            mMaxSmp = (mDurationMs * mSamplingRate) / 1000;
+        }
+        LOGV("prepareWave, duration limited to %d ms", mDurationMs);
+    }
 
     while (mpToneDesc->segments[segmentIdx].duration) {
         // Get total number of sine waves: needed to adapt sine wave gain.

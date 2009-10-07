@@ -524,6 +524,10 @@ private:
         bool                            mMasterMute;
         SortedVector< wp<Track> >       mActiveTracks;
 
+        virtual int             getTrackName_l() = 0;
+        virtual void            deleteTrackName_l(int name) = 0;
+        virtual uint32_t        getMaxBufferRecoveryInUsecs() = 0;
+
     private:
 
         friend class AudioFlinger;
@@ -539,8 +543,7 @@ private:
 
         status_t    addTrack_l(const sp<Track>& track);
         void        destroyTrack_l(const sp<Track>& track);
-        virtual int         getTrackName_l() = 0;
-        virtual void        deleteTrackName_l(int name) = 0;
+
         void        readOutputParameters();
 
         virtual status_t    dumpInternals(int fd, const Vector<String16>& args);
@@ -571,13 +574,14 @@ private:
                                       int streamType);
                     void        putTracks(SortedVector < sp<Track> >& tracks,
                                       SortedVector < wp<Track> >& activeTracks);
-        virtual     int         getTrackName_l();
-        virtual     void        deleteTrackName_l(int name);
         virtual     bool        checkForNewParameters_l();
         virtual     status_t    dumpInternals(int fd, const Vector<String16>& args);
 
     protected:
         size_t prepareTracks_l(const SortedVector< wp<Track> >& activeTracks, Vector< sp<Track> > *tracksToRemove);
+        virtual     int         getTrackName_l();
+        virtual     void        deleteTrackName_l(int name);
+        virtual     uint32_t    getMaxBufferRecoveryInUsecs();
 
         AudioMixer*                     mAudioMixer;
     };
@@ -591,9 +595,12 @@ private:
         // Thread virtuals
         virtual     bool        threadLoop();
 
+        virtual     bool        checkForNewParameters_l();
+
+    protected:
         virtual     int         getTrackName_l();
         virtual     void        deleteTrackName_l(int name);
-        virtual     bool        checkForNewParameters_l();
+        virtual     uint32_t    getMaxBufferRecoveryInUsecs();
 
     private:
         float mLeftVolume;
