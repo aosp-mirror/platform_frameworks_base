@@ -28,6 +28,10 @@
 #include <cutils/sockets.h>
 #include "private/android_filesystem_config.h"
 
+#define LOG_NDEBUG 0
+#define LOG_TAG "dumpstate"
+#include <utils/Log.h>
+
 #include "dumpstate.h"
 
 static char* const gzip_args[] = { "gzip", "-6", 0 };
@@ -182,6 +186,8 @@ int main(int argc, char *argv[]) {
     pid_t   pid;
     gid_t groups[] = { AID_LOG, AID_SDCARD_RW };
 
+    LOGI("begin\n");
+
     /* set as high priority, and protect from OOM killer */
     setpriority(PRIO_PROCESS, 0, -20);
     protect_from_oom_killer();
@@ -331,6 +337,8 @@ int main(int argc, char *argv[]) {
 
     /* so gzip will terminate */
     close(STDOUT_FILENO);
+
+    LOGI("done\n");
 
     return 0;
 }
