@@ -55,14 +55,14 @@ public class BigCacheTest extends ActivityInstrumentationTestCase<BigCache> {
 
     @MediumTest
     public void testDrawingCacheBelowMaximumSize() throws Exception {
-        final int max = ViewConfiguration.getMaximumDrawingCacheSize();
+        final int max = ViewConfiguration.get(getActivity()).getScaledMaximumDrawingCacheSize();
         assertTrue(mTiny.getWidth() * mTiny.getHeight() * 2 < max);
         assertNotNull(createCacheForView(mTiny));
     }
 
     @MediumTest
     public void testDrawingCacheAboveMaximumSize() throws Exception {
-        final int max = ViewConfiguration.getMaximumDrawingCacheSize();
+        final int max = ViewConfiguration.get(getActivity()).getScaledMaximumDrawingCacheSize();
         assertTrue(mLarge.getWidth() * mLarge.getHeight() * 2 > max);
         assertNull(createCacheForView(mLarge));
     }
