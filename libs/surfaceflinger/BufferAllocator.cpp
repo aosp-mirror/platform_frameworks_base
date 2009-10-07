@@ -15,8 +15,6 @@
 ** limitations under the License.
 */
 
-#include <sys/mman.h>
-#include <cutils/ashmem.h>
 #include <cutils/log.h>
 
 #include <utils/Singleton.h>

@@ -690,6 +690,14 @@ sp<LayerBaseClient::Surface> LayerBaseClient::createSurface() const
             const_cast<LayerBaseClient *>(this));
 }
 
+// called with SurfaceFlinger::mStateLock as soon as the layer is entered
+// in the purgatory list
+void LayerBaseClient::onRemoved()
+{
+    // wake up the condition
+    lcblk->setStatus(NO_INIT);
+}
+
 // ---------------------------------------------------------------------------
 
 LayerBaseClient::Surface::Surface(
@@ -699,7 +707,6 @@ LayerBaseClient::Surface::Surface(
     : mFlinger(flinger), mToken(id), mIdentity(identity), mOwner(owner)
 {
 }
-
 
 LayerBaseClient::Surface::~Surface() 
 {
