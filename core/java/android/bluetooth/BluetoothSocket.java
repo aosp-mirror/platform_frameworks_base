@@ -16,11 +16,15 @@
 
 package android.bluetooth;
 
+import android.bluetooth.IBluetoothCallback;
+import android.os.ParcelUuid;
+import android.os.RemoteException;
+import android.util.Log;
+
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
@@ -38,13 +42,13 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  * connection orientated, streaming transport over Bluetooth. It is also known
  * as the Serial Port Profile (SPP).
  *
- * <p>Use {@link BluetoothDevice#createRfcommSocket} to create a new {@link
- * BluetoothSocket} ready for an outgoing connection to a remote
+ * <p>Use {@link BluetoothDevice#createRfcommSocketToServiceRecord} to create
+ * a new {@link BluetoothSocket} ready for an outgoing connection to a remote
  * {@link BluetoothDevice}.
  *
- * <p>Use {@link BluetoothAdapter#listenUsingRfcomm} to create a listening
- * {@link BluetoothServerSocket} ready for incoming connections to the local
- * {@link BluetoothAdapter}.
+ * <p>Use {@link BluetoothAdapter#listenUsingRfcommWithServiceRecord} to
+ * create a listening {@link BluetoothServerSocket} ready for incoming
+ * connections to the local {@link BluetoothAdapter}.
  *
  * <p>{@link BluetoothSocket} and {@link BluetoothServerSocket} are thread
  * safe. In particular, {@link #close} will always immediately abort ongoing
@@ -54,6 +58,8 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  * {@link android.Manifest.permission#BLUETOOTH}
  */
 public final class BluetoothSocket implements Closeable {
+    private static final String TAG = "BluetoothSocket";
+
     /** @hide */
     public static final int MAX_RFCOMM_CHANNEL = 30;
 
@@ -66,13 +72,15 @@ public final class BluetoothSocket implements Closeable {
     /*package*/ static final int EADDRINUSE = 98;
 
     private final int mType;  /* one of TYPE_RFCOMM etc */
-    private final int mPort;  /* RFCOMM channel or L2CAP psm */
     private final BluetoothDevice mDevice;    /* remote device */
     private final String mAddress;    /* remote address */
     private final boolean mAuth;
     private final boolean mEncrypt;
     private final BluetoothInputStream mInputStream;
     private final BluetoothOutputStream mOutputStream;
+    private final SdpHelper mSdp;
+
+    private int mPort;  /* RFCOMM channel or L2CAP psm */
 
     /** prevents all native calls after destroyNative() */
     private boolean mClosed;
@@ -91,15 +99,23 @@ public final class BluetoothSocket implements Closeable {
      * @param encrypt require the connection to be encrypted
      * @param device  remote device that this socket can connect to
      * @param port    remote port
+     * @param uuid    SDP uuid
      * @throws IOException On error, for example Bluetooth not available, or
      *                     insufficient priveleges
      */
     /*package*/ BluetoothSocket(int type, int fd, boolean auth, boolean encrypt,
-            BluetoothDevice device, int port) throws IOException {
-        if (type == BluetoothSocket.TYPE_RFCOMM) {
+            BluetoothDevice device, int port, ParcelUuid uuid) throws IOException {
+        if (type == BluetoothSocket.TYPE_RFCOMM && uuid == null && fd == -1) {
             if (port < 1 || port > MAX_RFCOMM_CHANNEL) {
                 throw new IOException("Invalid RFCOMM channel: " + port);
             }
+        }
+        if (uuid == null) {
+            mPort = port;
+            mSdp = null;
+        } else {
+            mSdp = new SdpHelper(device, uuid);
+            mPort = -1;
         }
         mType = type;
         mAuth = auth;
@@ -110,7 +126,6 @@ public final class BluetoothSocket implements Closeable {
         } else {
             mAddress = device.getAddress();
         }
-        mPort = port;
         if (fd == -1) {
             initSocketNative();
         } else {
@@ -123,7 +138,7 @@ public final class BluetoothSocket implements Closeable {
     }
 
     /**
-     * Construct a BluetoothSocket from address.
+     * Construct a BluetoothSocket from address. Used by native code.
      * @param type    type of socket
      * @param fd      fd to use for connected socket, or -1 for a new socket
      * @param auth    require the remote device to be authenticated
@@ -135,7 +150,7 @@ public final class BluetoothSocket implements Closeable {
      */
     private BluetoothSocket(int type, int fd, boolean auth, boolean encrypt, String address,
             int port) throws IOException {
-        this(type, fd, auth, encrypt, new BluetoothDevice(address), port);
+        this(type, fd, auth, encrypt, new BluetoothDevice(address), port, null);
     }
 
     /** @hide */
@@ -160,7 +175,12 @@ public final class BluetoothSocket implements Closeable {
         mLock.readLock().lock();
         try {
             if (mClosed) throw new IOException("socket closed");
-            connectNative();
+
+            if (mSdp != null) {
+                mPort = mSdp.doSdp();  // blocks
+            }
+
+            connectNative();  // blocks
         } finally {
             mLock.readLock().unlock();
         }
@@ -176,12 +196,15 @@ public final class BluetoothSocket implements Closeable {
         mLock.readLock().lock();
         try {
             if (mClosed) return;
+            if (mSdp != null) {
+                mSdp.cancel();
+            }
             abortNative();
         } finally {
             mLock.readLock().unlock();
         }
 
-        // all native calls are guarenteed to immediately return after
+        // all native calls are guaranteed to immediately return after
         // abortNative(), so this lock should immediatley acquire
         mLock.writeLock().lock();
         try {
@@ -291,4 +314,62 @@ public final class BluetoothSocket implements Closeable {
      * use strerr to convert to string error.
      */
     /*package*/ native void throwErrnoNative(int errno) throws IOException;
+
+    /**
+     * Helper to perform blocking SDP lookup.
+     */
+    private static class SdpHelper extends IBluetoothCallback.Stub {
+        private final IBluetooth service;
+        private final ParcelUuid uuid;
+        private final BluetoothDevice device;
+        private int channel;
+        private boolean canceled;
+        public SdpHelper(BluetoothDevice device, ParcelUuid uuid) {
+            service = BluetoothDevice.getService();
+            this.device = device;
+            this.uuid = uuid;
+            canceled = false;
+        }
+        /**
+         * Returns the RFCOMM channel for the UUID, or throws IOException
+         * on failure.
+         */
+        public synchronized int doSdp() throws IOException {
+            if (canceled) throw new IOException("Service discovery canceled");
+            channel = -1;
+
+            boolean inProgress = false;
+            try {
+                inProgress = service.fetchRemoteUuids(device.getAddress(), uuid, this);
+            } catch (RemoteException e) {Log.e(TAG, "", e);}
+
+            if (!inProgress) throw new IOException("Unable to start Service Discovery");
+
+            try {
+                /* 12 second timeout as a precaution - onRfcommChannelFound
+                 * should always occur before the timeout */
+                wait(12000);   // block
+
+            } catch (InterruptedException e) {}
+
+            if (canceled) throw new IOException("Service discovery canceled");
+            if (channel < 1) throw new IOException("Service discovery failed");
+
+            return channel;
+        }
+        /** Object cannot be re-used after calling cancel() */
+        public synchronized void cancel() {
+            if (!canceled) {
+                canceled = true;
+                channel = -1;
+                notifyAll();  // unblock
+            }
+        }
+        public synchronized void onRfcommChannelFound(int channel) {
+            if (!canceled) {
+                this.channel = channel;
+                notifyAll();  // unblock
+            }
+        }
+    }
 }
