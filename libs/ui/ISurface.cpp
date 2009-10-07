@@ -27,7 +27,7 @@
 #include <ui/Overlay.h>
 #include <ui/Surface.h>
 
-#include <private/ui/SurfaceBuffer.h>
+#include <ui/GraphicBuffer.h>
 
 namespace android {
 
@@ -71,14 +71,14 @@ public:
     {
     }
 
-    virtual sp<SurfaceBuffer> requestBuffer(int bufferIdx, int usage)
+    virtual sp<GraphicBuffer> requestBuffer(int bufferIdx, int usage)
     {
         Parcel data, reply;
         data.writeInterfaceToken(ISurface::getInterfaceDescriptor());
         data.writeInt32(bufferIdx);
         data.writeInt32(usage);
         remote()->transact(REQUEST_BUFFER, data, &reply);
-        sp<SurfaceBuffer> buffer = new SurfaceBuffer(reply);
+        sp<GraphicBuffer> buffer = new GraphicBuffer(reply);
         return buffer;
     }
 
@@ -139,8 +139,8 @@ status_t BnSurface::onTransact(
             CHECK_INTERFACE(ISurface, data, reply);
             int bufferIdx = data.readInt32();
             int usage = data.readInt32();
-            sp<SurfaceBuffer> buffer(requestBuffer(bufferIdx, usage));
-            return SurfaceBuffer::writeToParcel(reply, buffer.get());
+            sp<GraphicBuffer> buffer(requestBuffer(bufferIdx, usage));
+            return GraphicBuffer::writeToParcel(reply, buffer.get());
         }
         case REGISTER_BUFFERS: {
             CHECK_INTERFACE(ISurface, data, reply);

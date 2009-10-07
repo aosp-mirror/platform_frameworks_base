@@ -6,8 +6,6 @@ LOCAL_SRC_FILES:= \
     DisplayHardware/DisplayHardware.cpp \
     DisplayHardware/DisplayHardwareBase.cpp \
     BlurFilter.cpp.arm \
-    Buffer.cpp \
-    BufferAllocator.cpp \
     Layer.cpp \
     LayerBase.cpp \
     LayerBuffer.cpp \
