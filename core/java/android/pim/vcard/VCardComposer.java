@@ -294,7 +294,7 @@ public class VCardComposer {
     private final String mCharsetString;
     private final String mVCardAttributeCharset;
     private boolean mTerminateIsCalled;
-    private List<OneEntryHandler> mHandlerList;
+    final private List<OneEntryHandler> mHandlerList;
 
     private String mErrorReason = NO_ERROR;
 
@@ -371,6 +371,7 @@ public class VCardComposer {
         mUsesUtf8 = VCardConfig.usesUtf8(vcardType);
         mUsesShiftJis = VCardConfig.usesShiftJis(vcardType);
         mUsesQPToPrimaryProperties = VCardConfig.usesQPToPrimaryProperties(vcardType);
+        mHandlerList = new ArrayList<OneEntryHandler>();
 
         if (mIsDoCoMo) {
             mCharsetString = CharsetUtils.charsetForVendor(SHIFT_JIS, "docomo").name();
@@ -420,9 +421,6 @@ public class VCardComposer {
      * Must call before {{@link #init()}.
      */
     public void addHandler(OneEntryHandler handler) {
-        if (mHandlerList == null) {
-            mHandlerList = new ArrayList<OneEntryHandler>();
-        }
         mHandlerList.add(handler);
     }
 
