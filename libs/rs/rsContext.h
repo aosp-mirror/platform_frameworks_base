@@ -97,6 +97,12 @@ public:
     void appendNameDefines(String8 *str) const;
     void appendVarDefines(String8 *str) const;
 
+    uint32_t getMessageToClient(void *data, size_t *receiveLen, size_t bufferLen, bool wait);
+    bool sendMessageToClient(void *data, uint32_t cmdID, size_t len, bool waitForSpace);
+
+    void initToClient();
+    void deinitToClient();
+
     ProgramFragment * getDefaultProgramFragment() const {
         return mStateFragment.mDefault.get();
     }

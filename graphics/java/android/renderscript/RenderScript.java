@@ -75,6 +75,9 @@ public class RenderScript {
     native void nContextAddDefineF(String name, float value);
     native void nContextPause();
     native void nContextResume();
+    native int nContextGetMessage(int[] data, boolean wait);
+    native void nContextInitToClient();
+    native void nContextDeinitToClient();
 
     native void nAssignName(int obj, byte[] name);
     native void nObjDestroy(int id);
@@ -190,6 +193,7 @@ public class RenderScript {
     private int     mContext;
     @SuppressWarnings({"FieldCanBeLocal"})
     private Surface mSurface;
+    private MessageThread mMessageThread;
 
 
     Element mElement_USER_U8;
@@ -214,6 +218,52 @@ public class RenderScript {
     ///////////////////////////////////////////////////////////////////////////////////
     //
 
+    public static class RSMessage implements Runnable {
+        protected int[] mData;
+        protected int mID;
+        public void run() {
+        }
+    }
+    public RSMessage mMessageCallback = null;
+
+    private static class MessageThread extends Thread {
+        RenderScript mRS;
+        boolean mRun = true;
+
+        MessageThread(RenderScript rs) {
+            super("RSMessageThread");
+            mRS = rs;
+
+        }
+
+        public void run() {
+            // This function is a temporary solution.  The final solution will
+            // used typed allocations where the message id is the type indicator.
+            int[] rbuf = new int[16];
+            mRS.nContextInitToClient();
+            while(mRun) {
+                int msg = mRS.nContextGetMessage(rbuf, true);
+                if (msg == 0) {
+                    // Should only happen during teardown.
+                    // But we want to avoid starving other threads during
+                    // teardown by yielding until the next line in the destructor
+                    // can execute to set mRun = false
+                    try {
+                        sleep(1, 0);
+                    } catch(InterruptedException e) {
+                    }
+                }
+                if(mRS.mMessageCallback != null) {
+                    mRS.mMessageCallback.mData = rbuf;
+                    mRS.mMessageCallback.mID = msg;
+                    mRS.mMessageCallback.run();
+                }
+                //Log.d("rs", "MessageThread msg " + msg + " v1 " + rbuf[0] + " v2 " + rbuf[1] + " v3 " +rbuf[2]);
+            }
+            Log.d("rs", "MessageThread exiting.");
+        }
+    }
+
     public RenderScript(Surface sur, boolean useDepth, boolean forceSW) {
         mSurface = sur;
         mDev = nDeviceCreate();
@@ -222,9 +272,14 @@ public class RenderScript {
         }
         mContext = nContextCreate(mDev, mSurface, 0, useDepth);
         Element.initPredefined(this);
+        mMessageThread = new MessageThread(this);
+        mMessageThread.start();
     }
 
     public void destroy() {
+        nContextDeinitToClient();
+        mMessageThread.mRun = false;
+
         nContextDestroy(mContext);
         mContext = 0;
 
