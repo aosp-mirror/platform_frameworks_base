@@ -23,6 +23,7 @@ import com.android.internal.os.SamplingProfilerIntegration;
 import dalvik.system.VMRuntime;
 
 import android.app.ActivityManagerNative;
+import android.bluetooth.BluetoothAdapter;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.ContentService;
@@ -172,14 +173,14 @@ class ServerThread extends Thread {
             // support Bluetooth - see bug 988521
             if (SystemProperties.get("ro.kernel.qemu").equals("1")) {
                 Log.i(TAG, "Registering null Bluetooth Service (emulator)");
-                ServiceManager.addService(Context.BLUETOOTH_SERVICE, null);
+                ServiceManager.addService(BluetoothAdapter.BLUETOOTH_SERVICE, null);
             } else if (factoryTest == SystemServer.FACTORY_TEST_LOW_LEVEL) {
                 Log.i(TAG, "Registering null Bluetooth Service (factory test)");
-                ServiceManager.addService(Context.BLUETOOTH_SERVICE, null);
+                ServiceManager.addService(BluetoothAdapter.BLUETOOTH_SERVICE, null);
             } else {
                 Log.i(TAG, "Bluetooth Service");
                 bluetooth = new BluetoothService(context);
-                ServiceManager.addService(Context.BLUETOOTH_SERVICE, bluetooth);
+                ServiceManager.addService(BluetoothAdapter.BLUETOOTH_SERVICE, bluetooth);
                 bluetooth.initAfterRegistration();
                 bluetoothA2dp = new BluetoothA2dpService(context, bluetooth);
                 ServiceManager.addService(BluetoothA2dpService.BLUETOOTH_A2DP_SERVICE,
