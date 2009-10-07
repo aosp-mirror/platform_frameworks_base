@@ -613,10 +613,12 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
                     && event.getRepeatCount() == 0) {
                 getKeyDispatcherState().startTracking(event, this);
                 return true;
-            } else if (event.getAction() == KeyEvent.ACTION_UP
-                    && event.isTracking() && !event.isCanceled()) {
-                dismissDropDown();
-                return true;
+            } else if (event.getAction() == KeyEvent.ACTION_UP) {
+                getKeyDispatcherState().handleUpEvent(event);
+                if (event.isTracking() && !event.isCanceled()) {
+                    dismissDropDown();
+                    return true;
+                }
             }
         }
         return super.onKeyPreIme(keyCode, event);
