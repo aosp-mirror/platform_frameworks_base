@@ -34,7 +34,7 @@ namespace android {
 
 // ---------------------------------------------------------------------------
 
-class BufferMapper;
+class GraphicBufferMapper;
 class IOMX;
 class Rect;
 class Surface;
@@ -192,8 +192,8 @@ private:
    
            status_t validate(SharedClient const* cblk) const;
 
-    inline const BufferMapper& getBufferMapper() const { return mBufferMapper; }
-    inline BufferMapper& getBufferMapper() { return mBufferMapper; }
+    inline const GraphicBufferMapper& getBufferMapper() const { return mBufferMapper; }
+    inline GraphicBufferMapper& getBufferMapper() { return mBufferMapper; }
     
     static int setSwapInterval(android_native_window_t* window, int interval);
     static int dequeueBuffer(android_native_window_t* window, android_native_buffer_t** buffer);
@@ -208,7 +208,7 @@ private:
     int query(int what, int* value);
     int perform(int operation, va_list args);
 
-    status_t dequeueBuffer(sp<SurfaceBuffer>* buffer);
+    status_t dequeueBuffer(sp<GraphicBuffer>* buffer);
 
     
     void setUsage(uint32_t reqUsage);
@@ -221,7 +221,7 @@ private:
     uint32_t                    mIdentity;
     PixelFormat                 mFormat;
     uint32_t                    mFlags;
-    BufferMapper&               mBufferMapper;
+    GraphicBufferMapper&        mBufferMapper;
     SharedBufferClient*         mSharedBufferClient;
 
     // protected by mSurfaceLock
@@ -230,12 +230,12 @@ private:
     
     // protected by mSurfaceLock. These are also used from lock/unlock
     // but in that case, they must be called form the same thread.
-    sp<SurfaceBuffer>           mBuffers[2];
+    sp<GraphicBuffer>           mBuffers[2];
     mutable Region              mDirtyRegion;
 
     // must be used from the lock/unlock thread
-    sp<SurfaceBuffer>           mLockedBuffer;
-    sp<SurfaceBuffer>           mPostedBuffer;
+    sp<GraphicBuffer>           mLockedBuffer;
+    sp<GraphicBuffer>           mPostedBuffer;
     mutable Region              mOldDirtyRegion;
     bool                        mNeedFullUpdate;
 

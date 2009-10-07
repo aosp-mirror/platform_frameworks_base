@@ -123,7 +123,7 @@ void DisplayHardware::init(uint32_t dpy)
     EGLint numConfigs=0;
     EGLSurface surface;
     EGLContext context;
-    mFlags = 0;
+    mFlags = CACHED_BUFFERS;
 
     // TODO: all the extensions below should be queried through
     // eglGetProcAddress().
@@ -239,12 +239,17 @@ void DisplayHardware::init(uint32_t dpy)
 
     eglMakeCurrent(display, surface, surface, context);
     const char* const  gl_extensions = (const char*)glGetString(GL_EXTENSIONS);
+    const char* const  gl_renderer = (const char*)glGetString(GL_RENDERER);
     LOGI("OpenGL informations:");
     LOGI("vendor    : %s", glGetString(GL_VENDOR));
-    LOGI("renderer  : %s", glGetString(GL_RENDERER));
+    LOGI("renderer  : %s", gl_renderer);
     LOGI("version   : %s", glGetString(GL_VERSION));
     LOGI("extensions: %s", gl_extensions);
 
+    if (strstr(gl_renderer, "PowerVR SGX 530")) {
+        LOGD("Assuming uncached graphics buffers.");
+        mFlags &= ~CACHED_BUFFERS;
+    }
     if (strstr(gl_extensions, "GL_ARB_texture_non_power_of_two")) {
         mFlags |= NPOT_EXTENSION;
     }

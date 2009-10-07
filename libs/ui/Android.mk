@@ -2,13 +2,15 @@ LOCAL_PATH:= $(call my-dir)
 include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES:= \
-	BufferMapper.cpp \
 	Camera.cpp \
 	CameraParameters.cpp \
 	EGLUtils.cpp \
 	EventHub.cpp \
 	EventRecurrence.cpp \
 	FramebufferNativeWindow.cpp \
+	GraphicBuffer.cpp \
+	GraphicBufferAllocator.cpp \
+	GraphicBufferMapper.cpp \
 	KeyLayoutMap.cpp \
 	KeyCharacterMap.cpp \
 	ICamera.cpp \
@@ -25,7 +27,6 @@ LOCAL_SRC_FILES:= \
 	Region.cpp \
 	SharedBufferStack.cpp \
 	Surface.cpp \
-	SurfaceBuffer.cpp \
 	SurfaceComposerClient.cpp \
 	SurfaceFlingerSynchro.cpp 
 
