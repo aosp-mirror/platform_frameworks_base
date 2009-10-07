@@ -55,6 +55,10 @@ class BluetoothEventLoop {
     private static final int EVENT_RESTART_BLUETOOTH = 2;
     private static final int EVENT_PAIRING_CONSENT_DELAYED_ACCEPT = 3;
 
+    private static final int CREATE_DEVICE_ALREADY_EXISTS = 1;
+    private static final int CREATE_DEVICE_SUCCESS = 0;
+    private static final int CREATE_DEVICE_FAILED = -1;
+
     // The time (in millisecs) to delay the pairing attempt after the first
     // auto pairing attempt fails. We use an exponential delay with
     // INIT_AUTO_PAIRING_FAILURE_ATTEMPT_DELAY as the initial value and
@@ -550,14 +554,27 @@ class BluetoothEventLoop {
             mBluetoothService.updateRemoteDevicePropertiesCache(address);
         }
         mBluetoothService.sendUuidIntent(address);
+        mBluetoothService.makeServiceChannelCallbacks(address);
     }
 
-    private void onCreateDeviceResult(String address, boolean result) {
-        if (DBG) {
-            log("Result of onCreateDeviceResult:" + result);
-        }
-        if (!result) {
+    private void onCreateDeviceResult(String address, int result) {
+        if (DBG) log("Result of onCreateDeviceResult:" + result);
+
+        switch (result) {
+        case CREATE_DEVICE_ALREADY_EXISTS:
+            String path = mBluetoothService.getObjectPathFromAddress(address);
+            if (path != null) {
+                mBluetoothService.discoverServicesNative(path, "");
+                break;
+            }
+            Log.w(TAG, "Device exists, but we dont have the bluez path, failing");
+            // fall-through
+        case CREATE_DEVICE_FAILED:
             mBluetoothService.sendUuidIntent(address);
+            mBluetoothService.makeServiceChannelCallbacks(address);
+            break;
+        case CREATE_DEVICE_SUCCESS:
+            // nothing to do, UUID intent's will be sent via property changed
         }
     }
 

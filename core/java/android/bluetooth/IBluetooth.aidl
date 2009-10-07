@@ -16,6 +16,7 @@
 
 package android.bluetooth;
 
+import android.bluetooth.IBluetoothCallback;
 import android.os.ParcelUuid;
 
 /**
@@ -53,8 +54,8 @@ interface IBluetooth
     String getRemoteName(in String address);
     int getRemoteClass(in String address);
     ParcelUuid[] getRemoteUuids(in String address);
-    boolean fetchRemoteUuidsWithSdp(in String address);
-    int getRemoteServiceChannel(in String address,in ParcelUuid uuid);
+    boolean fetchRemoteUuids(in String address, in ParcelUuid uuid, in IBluetoothCallback callback);
+    int getRemoteServiceChannel(in String address, in ParcelUuid uuid);
 
     boolean setPin(in String address, in byte[] pin);
     boolean setPasskey(in String address, int passkey);

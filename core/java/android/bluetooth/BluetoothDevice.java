@@ -316,10 +316,27 @@ public final class BluetoothDevice implements Parcelable {
      */
     public static final String EXTRA_UUID = "android.bluetooth.device.extra.UUID";
 
-
-    private static IBluetooth sService;  /* Guarenteed constant after first object constructed */
+    /**
+     * Lazy initialization. Guaranteed final after first object constructed, or
+     * getService() called.
+     * TODO: Unify implementation of sService amongst BluetoothFoo API's
+     */
+    private static IBluetooth sService;
 
     private final String mAddress;
+
+    /*package*/ static IBluetooth getService() {
+        synchronized (BluetoothDevice.class) {
+            if (sService == null) {
+                IBinder b = ServiceManager.getService(Context.BLUETOOTH_SERVICE);
+                if (b == null) {
+                    throw new RuntimeException("Bluetooth service not available");
+                }
+                sService = IBluetooth.Stub.asInterface(b);
+            }
+        }
+        return sService;
+    }
 
     /**
      * Create a new BluetoothDevice
@@ -331,16 +348,7 @@ public final class BluetoothDevice implements Parcelable {
      * @hide
      */
     /*package*/ BluetoothDevice(String address) {
-        synchronized (BluetoothDevice.class) {
-            if (sService == null) {
-                IBinder b = ServiceManager.getService(Context.BLUETOOTH_SERVICE);
-                if (b == null) {
-                    throw new RuntimeException("Bluetooth service not available");
-                }
-                sService = IBluetooth.Stub.asInterface(b);
-            }
-        }
-
+        getService();  // ensures sService is initialized
         if (!BluetoothAdapter.checkBluetoothAddress(address)) {
             throw new IllegalArgumentException(address + " is not a valid Bluetooth address");
         }
@@ -551,7 +559,7 @@ public final class BluetoothDevice implements Parcelable {
       */
      public boolean fetchUuidsWithSdp() {
         try {
-            return sService.fetchRemoteUuidsWithSdp(mAddress);
+            return sService.fetchRemoteUuids(mAddress, null, null);
         } catch (RemoteException e) {Log.e(TAG, "", e);}
         return false;
     }
@@ -598,7 +606,7 @@ public final class BluetoothDevice implements Parcelable {
 
     /**
      * Create an RFCOMM {@link BluetoothSocket} ready to start a secure
-     * outgoing connection to this remote device.
+     * outgoing connection to this remote device on given channel.
      * <p>The remote device will be authenticated and communication on this
      * socket will be encrypted.
      * <p>Use {@link BluetoothSocket#connect} to intiate the outgoing
@@ -610,9 +618,34 @@ public final class BluetoothDevice implements Parcelable {
      * @return a RFCOMM BluetoothServerSocket ready for an outgoing connection
      * @throws IOException on error, for example Bluetooth not available, or
      *                     insufficient permissions
+     * @hide
      */
     public BluetoothSocket createRfcommSocket(int channel) throws IOException {
-        return new BluetoothSocket(BluetoothSocket.TYPE_RFCOMM, -1, true, true, this, channel);
+        return new BluetoothSocket(BluetoothSocket.TYPE_RFCOMM, -1, true, true, this, channel,
+                null);
+    }
+
+    /**
+     * Create an RFCOMM {@link BluetoothSocket} ready to start a secure
+     * outgoing connection to this remote device using SDP lookup of uuid.
+     * <p>This is designed to be used with {@link
+     * BluetoothAdapter#listenUsingRfcommWithServiceRecord} for peer-peer
+     * Bluetooth applications.
+     * <p>Use {@link BluetoothSocket#connect} to intiate the outgoing
+     * connection. This will also perform an SDP lookup of the given uuid to
+     * determine which channel to connect to.
+     * <p>The remote device will be authenticated and communication on this
+     * socket will be encrypted.
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH}
+     *
+     * @param uuid service record uuid to lookup RFCOMM channel
+     * @return a RFCOMM BluetoothServerSocket ready for an outgoing connection
+     * @throws IOException on error, for example Bluetooth not available, or
+     *                     insufficient permissions
+     */
+    public BluetoothSocket createRfcommSocketToServiceRecord(UUID uuid) throws IOException {
+        return new BluetoothSocket(BluetoothSocket.TYPE_RFCOMM, -1, true, true, this, -1,
+                new ParcelUuid(uuid));
     }
 
     /**
@@ -628,7 +661,8 @@ public final class BluetoothDevice implements Parcelable {
      * @hide
      */
     public BluetoothSocket createInsecureRfcommSocket(int port) throws IOException {
-        return new BluetoothSocket(BluetoothSocket.TYPE_RFCOMM, -1, false, false, this, port);
+        return new BluetoothSocket(BluetoothSocket.TYPE_RFCOMM, -1, false, false, this, port,
+                null);
     }
 
     /**
@@ -640,7 +674,7 @@ public final class BluetoothDevice implements Parcelable {
      * @hide
      */
     public BluetoothSocket createScoSocket() throws IOException {
-        return new BluetoothSocket(BluetoothSocket.TYPE_SCO, -1, true, true, this, -1);
+        return new BluetoothSocket(BluetoothSocket.TYPE_SCO, -1, true, true, this, -1, null);
     }
 
     /**
