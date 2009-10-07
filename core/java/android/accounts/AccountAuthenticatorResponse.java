@@ -28,7 +28,10 @@ import android.os.RemoteException;
 public class AccountAuthenticatorResponse implements Parcelable {
     private IAccountAuthenticatorResponse mAccountAuthenticatorResponse;
 
-    public AccountAuthenticatorResponse(IAccountAuthenticatorResponse response) {
+    /**
+     * @hide
+     */
+    /* package private */ AccountAuthenticatorResponse(IAccountAuthenticatorResponse response) {
         mAccountAuthenticatorResponse = response;
     }
 

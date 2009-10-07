@@ -52,11 +52,5 @@ interface IAccountManager {
     void editProperties(in IAccountManagerResponse response, String accountType,
         boolean expectActivityLaunch);
     void confirmCredentials(in IAccountManagerResponse response, in Account account,
-        boolean expectActivityLaunch);
-
-    /*
-     * @deprecated
-     */
-    void confirmPassword(in IAccountManagerResponse response, in Account account,
-        String password);
+        in Bundle options, boolean expectActivityLaunch);
 }

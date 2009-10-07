@@ -3,7 +3,7 @@ package android.test;
 import com.google.android.collect.Lists;
 
 import android.accounts.AccountManager;
-import android.accounts.OnAccountsUpdatedListener;
+import android.accounts.OnAccountsUpdateListener;
 import android.accounts.Account;
 import android.content.ContextWrapper;
 import android.content.ContentResolver;
@@ -15,7 +15,6 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Handler;
-import android.os.Looper;
 
 import java.util.List;
 import java.io.File;
@@ -98,7 +97,7 @@ public class IsolatedContext extends ContextWrapper {
             super(IsolatedContext.this, null /* IAccountManager */, null /* handler */);
         }
 
-        public void addOnAccountsUpdatedListener(OnAccountsUpdatedListener listener,
+        public void addOnAccountsUpdatedListener(OnAccountsUpdateListener listener,
                 Handler handler, boolean updateImmediately) {
             // do nothing
         }
