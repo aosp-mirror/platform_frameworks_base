@@ -1489,11 +1489,11 @@ public final class Telephony {
 
             /**
              * This is the scrap file we use to store the media attachment when the user
-             * chooses to capture a photo to be attached (and could be used for other media types
-             * if necessary). We pass {#link@Uri} to the Camera app, which streams the captured
-             * image to the uri. Internally we write the media content to this file.
+             * chooses to capture a photo to be attached . We pass {#link@Uri} to the Camera app,
+             * which streams the captured image to the uri. Internally we write the media content
+             * to this file. It's named '.temp.jpg' so Gallery won't pick it up.
              */
-            public static final String SCRAP_FILE_PATH = "/sdcard/mms/scrapSpace/file";
+            public static final String SCRAP_FILE_PATH = "/sdcard/mms/scrapSpace/.temp.jpg";
         }
 
         public static final class Intents {
