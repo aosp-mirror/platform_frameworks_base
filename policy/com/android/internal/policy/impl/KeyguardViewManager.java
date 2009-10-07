@@ -48,7 +48,7 @@ public class KeyguardViewManager implements KeyguardWindowController {
 
     private WindowManager.LayoutParams mWindowLayoutParams;
     private boolean mNeedsInput = false;
-    
+
     private FrameLayout mKeyguardHost;
     private KeyguardViewBase mKeyguardView;
 
@@ -154,7 +154,7 @@ public class KeyguardViewManager implements KeyguardWindowController {
             mViewManager.updateViewLayout(mKeyguardHost, mWindowLayoutParams);
         }
     }
-    
+
     /**
      * Reset the state of the view.
      */
@@ -218,15 +218,13 @@ public class KeyguardViewManager implements KeyguardWindowController {
             // Don't do this right away, so we can let the view continue to animate
             // as it goes away.
             if (mKeyguardView != null) {
-                final View lastView = mKeyguardView;
+                final KeyguardViewBase lastView = mKeyguardView;
+                mKeyguardView = null;
                 mKeyguardHost.postDelayed(new Runnable() {
                     public void run() {
                         synchronized (KeyguardViewManager.this) {
-                            if (mKeyguardView == lastView) {
-                                mKeyguardHost.removeView(mKeyguardView);
-                                mKeyguardView.cleanUp();
-                                mKeyguardView = null;
-                            }
+                            mKeyguardHost.removeView(lastView);
+                            lastView.cleanUp();
                         }
                     }
                 }, 500);
