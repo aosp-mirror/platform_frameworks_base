@@ -42,7 +42,7 @@ import android.text.TextUtils;
 public class MobileDataStateTracker extends NetworkStateTracker {
 
     private static final String TAG = "MobileDataStateTracker";
-    private static final boolean DBG = false;
+    private static final boolean DBG = true;
 
     private Phone.DataState mMobileDataState;
     private ITelephony mPhoneService;
@@ -142,11 +142,6 @@ public class MobileDataStateTracker extends NetworkStateTracker {
 
                     boolean unavailable = intent.getBooleanExtra(Phone.NETWORK_UNAVAILABLE_KEY,
                             false);
-                    if (DBG) Log.d(TAG, mApnType + " Received " + intent.getAction() +
-                            " broadcast - state = " + state + ", oldstate = " + mMobileDataState +
-                            ", unavailable = " + unavailable + ", reason = " +
-                            (reason == null ? "(unspecified)" : reason) +
-                            ", apnTypeList = " + apnTypeList);
 
                     // set this regardless of the apnTypeList.  It's all the same radio/network
                     // underneath
@@ -166,13 +161,16 @@ public class MobileDataStateTracker extends NetworkStateTracker {
                                         " for " + mApnType);
                                 mInterfaceName = intent.getStringExtra(Phone.DATA_IFACE_NAME_KEY);
                             }
-                            if (DBG) Log.d(TAG, "  dropped - mEnabled = false");
                             return;
                         }
                     } else {
-                        if (DBG) Log.d(TAG, "  dropped - wrong Apn");
                         return;
                     }
+
+                    if (DBG) Log.d(TAG, mApnType + " Received state= " + state + ", old= " +
+                            mMobileDataState + ", reason= " +
+                            (reason == null ? "(unspecified)" : reason) +
+                            ", apnTypeList= " + apnTypeList);
 
                     if (mMobileDataState != state) {
                         mMobileDataState = state;
