@@ -575,9 +575,12 @@ public class LockPatternKeyguardView extends KeyguardViewBase
                 .setNeutralButton(R.string.ok, null)
                 .create();
         dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG);
-        dialog.getWindow().setFlags(
-                WindowManager.LayoutParams.FLAG_BLUR_BEHIND,
-                WindowManager.LayoutParams.FLAG_BLUR_BEHIND);
+        if (!mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_sf_slowBlur)) {
+            dialog.getWindow().setFlags(
+                    WindowManager.LayoutParams.FLAG_BLUR_BEHIND,
+                    WindowManager.LayoutParams.FLAG_BLUR_BEHIND);
+        }
         dialog.show();
     }
 
@@ -595,9 +598,12 @@ public class LockPatternKeyguardView extends KeyguardViewBase
                 .setNeutralButton(R.string.ok, null)
                 .create();
         dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG);
-        dialog.getWindow().setFlags(
-                WindowManager.LayoutParams.FLAG_BLUR_BEHIND,
-                WindowManager.LayoutParams.FLAG_BLUR_BEHIND);
+        if (!mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_sf_slowBlur)) {
+            dialog.getWindow().setFlags(
+                    WindowManager.LayoutParams.FLAG_BLUR_BEHIND,
+                    WindowManager.LayoutParams.FLAG_BLUR_BEHIND);
+        }
         dialog.show();
     }
 

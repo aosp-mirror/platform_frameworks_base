@@ -182,9 +182,12 @@ public class SimUnlockScreen extends LinearLayout implements KeyguardScreen, Vie
             mSimUnlockProgressDialog.setCancelable(false);
             mSimUnlockProgressDialog.getWindow().setType(
                     WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG);
-            mSimUnlockProgressDialog.getWindow().setFlags(
-                    WindowManager.LayoutParams.FLAG_BLUR_BEHIND,
-                    WindowManager.LayoutParams.FLAG_BLUR_BEHIND);
+            if (!mContext.getResources().getBoolean(
+                    com.android.internal.R.bool.config_sf_slowBlur)) {
+                mSimUnlockProgressDialog.getWindow().setFlags(
+                        WindowManager.LayoutParams.FLAG_BLUR_BEHIND,
+                        WindowManager.LayoutParams.FLAG_BLUR_BEHIND);
+            }
         }
         return mSimUnlockProgressDialog;
     }
