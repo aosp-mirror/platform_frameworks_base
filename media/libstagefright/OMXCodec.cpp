@@ -1412,10 +1412,11 @@ void OMXCodec::drainInputBuffer(BufferInfo *info) {
             memcpy(info->mMem->pointer(), specific->mData, specific->mSize);
         }
 
-        mOMX->empty_buffer(
+        status_t err = mOMX->empty_buffer(
                 mNode, info->mBuffer, 0, size,
                 OMX_BUFFERFLAG_ENDOFFRAME | OMX_BUFFERFLAG_CODECCONFIG,
                 0);
+        CHECK_EQ(err, OK);
 
         info->mOwnedByComponent = true;
 
@@ -1468,16 +1469,21 @@ void OMXCodec::drainInputBuffer(BufferInfo *info) {
         }
     }
 
-    mOMX->empty_buffer(
-            mNode, info->mBuffer, 0, srcLength,
-            flags, timestamp);
-
-    info->mOwnedByComponent = true;
-
     if (srcBuffer != NULL) {
         srcBuffer->release();
         srcBuffer = NULL;
     }
+
+    err = mOMX->empty_buffer(
+            mNode, info->mBuffer, 0, srcLength,
+            flags, timestamp);
+
+    if (err != OK) {
+        setState(ERROR);
+        return;
+    }
+
+    info->mOwnedByComponent = true;
 }
 
 void OMXCodec::fillOutputBuffer(BufferInfo *info) {
@@ -1490,7 +1496,8 @@ void OMXCodec::fillOutputBuffer(BufferInfo *info) {
     }
 
     CODEC_LOGV("Calling fill_buffer on buffer %p", info->mBuffer);
-    mOMX->fill_buffer(mNode, info->mBuffer);
+    status_t err = mOMX->fill_buffer(mNode, info->mBuffer);
+    CHECK_EQ(err, OK);
 
     info->mOwnedByComponent = true;
 }
