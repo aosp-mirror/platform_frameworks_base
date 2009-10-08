@@ -70,9 +70,9 @@ public:
     virtual status_t observe_node(
             node_id node, const sp<IOMXObserver> &observer);
 
-    virtual void fill_buffer(node_id node, buffer_id buffer);
+    virtual status_t fill_buffer(node_id node, buffer_id buffer);
 
-    virtual void empty_buffer(
+    virtual status_t empty_buffer(
             node_id node,
             buffer_id buffer,
             OMX_U32 range_offset, OMX_U32 range_length,

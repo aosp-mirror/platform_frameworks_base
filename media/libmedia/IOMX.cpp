@@ -289,15 +289,17 @@ public:
         return reply.readInt32();
     }
 
-    virtual void fill_buffer(node_id node, buffer_id buffer) {
+    virtual status_t fill_buffer(node_id node, buffer_id buffer) {
         Parcel data, reply;
         data.writeInterfaceToken(IOMX::getInterfaceDescriptor());
         data.writeIntPtr((intptr_t)node);
         data.writeIntPtr((intptr_t)buffer);
-        remote()->transact(FILL_BUFFER, data, &reply, IBinder::FLAG_ONEWAY);
+        remote()->transact(FILL_BUFFER, data, &reply);
+
+        return reply.readInt32();
     }
 
-    virtual void empty_buffer(
+    virtual status_t empty_buffer(
             node_id node,
             buffer_id buffer,
             OMX_U32 range_offset, OMX_U32 range_length,
@@ -310,7 +312,9 @@ public:
         data.writeInt32(range_length);
         data.writeInt32(flags);
         data.writeInt64(timestamp);
-        remote()->transact(EMPTY_BUFFER, data, &reply, IBinder::FLAG_ONEWAY);
+        remote()->transact(EMPTY_BUFFER, data, &reply);
+
+        return reply.readInt32();
     }
 
     virtual status_t get_extension_index(
@@ -601,7 +605,7 @@ status_t BnOMX::onTransact(
 
             node_id node = (void*)data.readIntPtr();
             buffer_id buffer = (void*)data.readIntPtr();
-            fill_buffer(node, buffer);
+            reply->writeInt32(fill_buffer(node, buffer));
 
             return NO_ERROR;
         }
@@ -617,9 +621,10 @@ status_t BnOMX::onTransact(
             OMX_U32 flags = data.readInt32();
             OMX_TICKS timestamp = data.readInt64();
 
-            empty_buffer(
-                    node, buffer, range_offset, range_length,
-                    flags, timestamp);
+            reply->writeInt32(
+                    empty_buffer(
+                        node, buffer, range_offset, range_length,
+                        flags, timestamp));
 
             return NO_ERROR;
         }
