@@ -3327,7 +3327,7 @@ public class WebView extends AbsoluteLayout
             }
         }
 
-        if (nativeCursorIsPlugin()) {
+        if (nativeFocusCandidateIsPlugin()) {
             nativeUpdatePluginReceivesEvents();
             invalidate();
         } else if (nativeCursorIsTextInput()) {
@@ -4705,8 +4705,12 @@ public class WebView extends AbsoluteLayout
     // called by JNI
     private void sendPluginState(int state) {
         WebViewCore.PluginStateData psd = new WebViewCore.PluginStateData();
-        psd.mFrame = nativeCursorFramePointer();
-        psd.mNode = nativeCursorNodePointer();
+        psd.mFrame = nativeFocusCandidateFramePointer();
+        psd.mNode = nativeFocusCandidatePointer();
+        if (DebugFlags.WEB_VIEW) {
+            Log.v(LOGTAG, "sendPluginState frame=" + psd.mFrame
+                    + " node=" + psd.mNode);
+        }
         psd.mState = state;
         mWebViewCore.sendMessage(EventHub.PLUGIN_STATE, psd);
     }
@@ -4897,9 +4901,10 @@ public class WebView extends AbsoluteLayout
     class PrivateHandler extends Handler {
         @Override
         public void handleMessage(Message msg) {
-            if (DebugFlags.WEB_VIEW) {
+            // exclude INVAL_RECT_MSG_ID since it is frequently output
+            if (DebugFlags.WEB_VIEW && msg.what != INVAL_RECT_MSG_ID) {
                 Log.v(LOGTAG, msg.what < REMEMBER_PASSWORD || msg.what
-                        > INVAL_RECT_MSG_ID ? Integer.toString(msg.what)
+                        > REQUEST_KEYBOARD ? Integer.toString(msg.what)
                         : HandlerDebugString[msg.what - REMEMBER_PASSWORD]);
             }
             if (mWebViewCore == null) {
@@ -5190,6 +5195,11 @@ public class WebView extends AbsoluteLayout
                         hideSoftKeyboard();
                     } else {
                         displaySoftKeyboard(false);
+                        if (DebugFlags.WEB_VIEW) {
+                            Log.v(LOGTAG, "REQUEST_KEYBOARD"
+                                    + " focusCandidateIsPlugin="
+                                    + nativeFocusCandidateIsPlugin());
+                        }
                     }
                     break;
 
@@ -5616,7 +5626,6 @@ public class WebView extends AbsoluteLayout
     /* package */ native boolean nativeCursorMatchesFocus();
     private native boolean  nativeCursorIntersects(Rect visibleRect);
     private native boolean  nativeCursorIsAnchor();
-    private native boolean  nativeCursorIsPlugin();
     private native boolean  nativeCursorIsTextInput();
     private native Point    nativeCursorPosition();
     private native String   nativeCursorText();
@@ -5635,7 +5644,9 @@ public class WebView extends AbsoluteLayout
     private native void     nativeDumpDisplayTree(String urlOrNull);
     private native int      nativeFindAll(String findLower, String findUpper);
     private native void     nativeFindNext(boolean forward);
+    private native int      nativeFocusCandidateFramePointer();
     private native boolean  nativeFocusCandidateIsPassword();
+    private native boolean  nativeFocusCandidateIsPlugin();
     private native boolean  nativeFocusCandidateIsRtlText();
     private native boolean  nativeFocusCandidateIsTextField();
     private native boolean  nativeFocusCandidateIsTextInput();
