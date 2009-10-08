@@ -2630,6 +2630,16 @@ public class WebView extends AbsoluteLayout
     }
 
     /**
+     * Gets the WebViewClient
+     * @return the current WebViewClient instance.
+     *
+     *@hide pending API council approval.
+     */
+    public WebViewClient getWebViewClient() {
+        return mCallbackProxy.getWebViewClient();
+    }
+
+    /**
      * Register the interface to be used when content can not be handled by
      * the rendering engine, and should be downloaded instead. This will replace
      * the current handler.
