@@ -99,6 +99,7 @@ public:
 
     uint32_t getMessageToClient(void *data, size_t *receiveLen, size_t bufferLen, bool wait);
     bool sendMessageToClient(void *data, uint32_t cmdID, size_t len, bool waitForSpace);
+    bool runScript(Script *s, uint32_t launchID);
 
     void initToClient();
     void deinitToClient();
@@ -212,7 +213,6 @@ private:
 
     void initEGL();
 
-    bool runScript(Script *s, uint32_t launchID);
     bool runRootScript();
 
     static void * threadProc(void *);
