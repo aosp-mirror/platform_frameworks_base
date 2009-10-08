@@ -394,6 +394,12 @@ status_t SharedBufferServer::reallocate()
     return NO_ERROR;
 }
 
+int32_t SharedBufferServer::getQueuedCount() const
+{
+    SharedBufferStack& stack( *mSharedStack );
+    return stack.queued;
+}
+
 status_t SharedBufferServer::assertReallocate(int buffer)
 {
     ReallocateCondition condition(this, buffer);

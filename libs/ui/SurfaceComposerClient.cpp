@@ -42,7 +42,6 @@
 
 #include <private/ui/LayerState.h>
 #include <private/ui/SharedBufferStack.h>
-#include <private/ui/SurfaceFlingerSynchro.h>
 
 #define VERBOSE(...)	((void)0)
 //#define VERBOSE			LOGD
@@ -155,7 +154,6 @@ void SurfaceComposerClient::_init(
 {
     VERBOSE("Creating client %p, conn %p", this, conn.get());
 
-    mSignalServer = 0;
     mPrebuiltLayerState = 0;
     mTransactionOpen = 0;
     mStatus = NO_ERROR;
@@ -168,7 +166,7 @@ void SurfaceComposerClient::_init(
     }
 
     mControlMemory = mClient->getControlBlock();
-    mSignalServer = new SurfaceFlingerSynchro(sm);
+    mSignalServer = sm;
     mControl = static_cast<SharedClient *>(mControlMemory->getBase());
 }
 
@@ -225,7 +223,6 @@ void SurfaceComposerClient::dispose()
         Mutex::Autolock _lg(gLock);
         Mutex::Autolock _lm(mLock);
 
-        delete mSignalServer;
         mSignalServer = 0;
 
         if (mClient != 0) {
