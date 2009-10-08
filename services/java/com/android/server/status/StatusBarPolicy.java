@@ -624,15 +624,20 @@ public class StatusBarPolicy {
             pixelFormat = bg.getOpacity();
         }
 
+        int flags =  WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+                | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
+                | WindowManager.LayoutParams.FLAG_DIM_BEHIND;
+        
+        if (!mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_sf_slowBlur)) {
+            flags |= WindowManager.LayoutParams.FLAG_BLUR_BEHIND;
+        }
+        
         WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
                 ViewGroup.LayoutParams.WRAP_CONTENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT,
                 WindowManager.LayoutParams.TYPE_TOAST,
-                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
-                    | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
-                    | WindowManager.LayoutParams.FLAG_BLUR_BEHIND
-                    | WindowManager.LayoutParams.FLAG_DIM_BEHIND,
-                pixelFormat);
+                flags, pixelFormat);
 
         // Get the dim amount from the theme
         TypedArray a = mContext.obtainStyledAttributes(
