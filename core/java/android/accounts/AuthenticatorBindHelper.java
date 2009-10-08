@@ -146,7 +146,7 @@ public class AuthenticatorBindHelper {
                                 Log.v(TAG, "there are no more callbacks for service "
                                         + authenticatorType + ", unbinding service");
                             }
-                            unbindFromService(authenticatorType);
+                            unbindFromServiceLocked(authenticatorType);
                         } else {
                             if (Log.isLoggable(TAG, Log.VERBOSE)) {
                                 Log.v(TAG, "leaving service " + authenticatorType
@@ -161,7 +161,10 @@ public class AuthenticatorBindHelper {
         }
     }
 
-    private void unbindFromService(String authenticatorType) {
+    /**
+     * You must synchronized on mServiceConnections before calling this
+     */
+    private void unbindFromServiceLocked(String authenticatorType) {
         if (Log.isLoggable(TAG, Log.VERBOSE)) {
             Log.v(TAG, "unbindService from " + authenticatorType);
         }
@@ -217,15 +220,18 @@ public class AuthenticatorBindHelper {
             // post a message for each service user to tell them that the service is disconnected,
             // and unbind from the service.
             synchronized (mServiceConnections) {
-                for (Callback callback : mServiceUsers.get(mAuthenticatorType)) {
-                    if (Log.isLoggable(TAG, Log.VERBOSE)) {
-                        Log.v(TAG, "the service became disconnected, scheduling a "
-                                + "disconnected message for "
-                                + mAuthenticatorType);
+                final ArrayList<Callback> callbackList = mServiceUsers.get(mAuthenticatorType);
+                if (callbackList != null) {
+                    for (Callback callback : callbackList) {
+                        if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                            Log.v(TAG, "the service became disconnected, scheduling a "
+                                    + "disconnected message for "
+                                    + mAuthenticatorType);
+                        }
+                        mHandler.obtainMessage(mMessageWhatDisconnected, callback).sendToTarget();
                     }
-                    mHandler.obtainMessage(mMessageWhatDisconnected, callback).sendToTarget();
+                    unbindFromServiceLocked(mAuthenticatorType);
                 }
-                unbindFromService(mAuthenticatorType);
             }
         }
     }
