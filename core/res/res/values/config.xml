@@ -26,6 +26,11 @@
          strictly needed. -->
     <bool name="config_sf_limitedAlpha">false</bool>
     
+    <!-- Flag indicating whether the surface flinger is inefficient
+         at performing a blur.  Used by parts of the UI to turn off
+         the blur effect where it isn't worth the performance hit. -->
+    <bool name="config_sf_slowBlur">false</bool>
+    
     <!-- The duration (in milliseconds) of a short animation. -->
     <integer name="config_shortAnimTime">150</integer>
     
