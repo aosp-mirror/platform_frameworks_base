@@ -1008,6 +1008,13 @@ static uint32_t SC_toClient(void *data, int cmdID, int len, int waitForSpace)
     return rsc->sendMessageToClient(data, cmdID, len, waitForSpace != 0);
 }
 
+static void SC_scriptCall(int scriptID)
+{
+    GET_TLS();
+    rsc->runScript((Script *)scriptID, 0);
+}
+
+
 //////////////////////////////////////////////////////////////////////////////
 // Class implementation
 //////////////////////////////////////////////////////////////////////////////
@@ -1288,6 +1295,9 @@ ScriptCState::SymbolTable_t ScriptCState::gSyms[] = {
         "void", "(void *, float)" },
     { "debugHexI32", (void *)&SC_debugHexI32,
         "void", "(void *, int)" },
+
+    { "scriptCall", (void *)&SC_scriptCall,
+        "void", "(int)" },
 
 
     { NULL, NULL, NULL, NULL }
