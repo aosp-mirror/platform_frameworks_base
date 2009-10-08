@@ -19,6 +19,7 @@ package android.text.style;
 import android.graphics.Paint;
 import android.graphics.Canvas;
 import android.text.Layout;
+import android.text.TextPaint;
 
 public interface LineHeightSpan
 extends ParagraphStyle, WrapTogetherSpan
@@ -26,4 +27,13 @@ extends ParagraphStyle, WrapTogetherSpan
     public void chooseHeight(CharSequence text, int start, int end,
                              int spanstartv, int v,
                              Paint.FontMetricsInt fm);
+
+    /**
+     * @hide Not in the donut API
+     */
+    public interface WithDensity extends LineHeightSpan {
+        public void chooseHeight(CharSequence text, int start, int end,
+                                 int spanstartv, int v,
+                                 Paint.FontMetricsInt fm, TextPaint paint);
+    }
 }
