@@ -54,6 +54,7 @@ class BluetoothEventLoop {
     private static final int EVENT_AUTO_PAIRING_FAILURE_ATTEMPT_DELAY = 1;
     private static final int EVENT_RESTART_BLUETOOTH = 2;
     private static final int EVENT_PAIRING_CONSENT_DELAYED_ACCEPT = 3;
+    private static final int EVENT_AGENT_CANCEL = 4;
 
     private static final int CREATE_DEVICE_ALREADY_EXISTS = 1;
     private static final int CREATE_DEVICE_SUCCESS = 0;
@@ -89,6 +90,22 @@ class BluetoothEventLoop {
                 if (address != null) {
                     mBluetoothService.setPairingConfirmation(address, true);
                 }
+                break;
+            case EVENT_AGENT_CANCEL:
+                // Set the Bond State to BOND_NONE.
+                // We always have only 1 device in BONDING state.
+                String[] devices =
+                    mBluetoothService.getBondState().listInState(BluetoothDevice.BOND_BONDING);
+                if (devices.length == 0) {
+                    break;
+                } else if (devices.length > 1) {
+                    Log.e(TAG, " There is more than one device in the Bonding State");
+                    break;
+                }
+                address = devices[0];
+                mBluetoothService.getBondState().setBondState(address,
+                        BluetoothDevice.BOND_NONE,
+                        BluetoothDevice.UNBOND_REASON_REMOTE_AUTH_CANCELED);
                 break;
             }
         }
@@ -544,6 +561,10 @@ class BluetoothEventLoop {
     private void onAgentCancel() {
         Intent intent = new Intent(BluetoothDevice.ACTION_PAIRING_CANCEL);
         mContext.sendBroadcast(intent, BLUETOOTH_ADMIN_PERM);
+
+        mHandler.sendMessageDelayed(mHandler.obtainMessage(EVENT_AGENT_CANCEL),
+                   1500);
+
         return;
     }
 
