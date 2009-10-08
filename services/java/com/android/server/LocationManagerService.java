@@ -382,7 +382,12 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
     }
 
     public void locationCallbackFinished(ILocationListener listener) {
-        Receiver receiver = getReceiver(listener);
+        //Do not use getReceiver here as that will add the ILocationListener to
+        //the receiver list if it is not found.  If it is not found then the
+        //LocationListener was removed when it had a pending broadcast and should
+        //not be added back.
+        IBinder binder = listener.asBinder();
+        Receiver receiver = mReceivers.get(binder);
         if (receiver != null) {
             synchronized (receiver) {
                 // so wakelock calls will succeed
@@ -921,6 +926,12 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
         try {
             if (mReceivers.remove(receiver.mKey) != null && receiver.isListener()) {
                 receiver.getListener().asBinder().unlinkToDeath(receiver, 0);
+                synchronized(receiver) {
+                    if(receiver.mPendingBroadcasts > 0) {
+                        decrementPendingBroadcasts();
+                        receiver.mPendingBroadcasts = 0;
+                    }
+                }
             }
 
             // Record which providers were associated with this listener
