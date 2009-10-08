@@ -191,10 +191,10 @@ public class BluetoothService extends IBluetooth.Stub {
     /**
      * Bring down bluetooth. Returns true on success.
      *
-     * @param saveSetting If true, disable BT in settings
+     * @param saveSetting If true, persist the new setting
      */
     public synchronized boolean disable(boolean saveSetting) {
-        mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
+        mContext.enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM, "Need BLUETOOTH_ADMIN permission");
 
         switch (mBluetoothState) {
         case BluetoothAdapter.STATE_OFF:
@@ -1013,7 +1013,8 @@ public class BluetoothService extends IBluetooth.Stub {
      */
     public synchronized boolean setTrust(String address, boolean value) {
         if (!BluetoothAdapter.checkBluetoothAddress(address)) {
-            mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
+            mContext.enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
+                    "Need BLUETOOTH_ADMIN permission");
             return false;
         }
 
