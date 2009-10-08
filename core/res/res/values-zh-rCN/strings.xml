@@ -433,13 +433,13 @@
     <string name="lockscreen_plugged_in" msgid="613343852842944435">"正在充电 (<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>)"</string>
     <string name="lockscreen_charged" msgid="4938930459620989972">"电已充满。"</string>
     <string name="lockscreen_low_battery" msgid="1482873981919249740">"连接您的充电器。"</string>
-    <string name="lockscreen_missing_sim_message_short" msgid="7381499217732227295">"没有 SIM 卡。"</string>
-    <string name="lockscreen_missing_sim_message" msgid="2186920585695169078">"手机中无 SIM 卡。"</string>
-    <string name="lockscreen_missing_sim_instructions" msgid="8874620818937719067">"请插入 SIM 卡。"</string>
+    <string name="lockscreen_missing_sim_message_short" msgid="7381499217732227295">"没有 SIM 卡"</string>
+    <string name="lockscreen_missing_sim_message" msgid="2186920585695169078">"手机中无 SIM 卡"</string>
+    <string name="lockscreen_missing_sim_instructions" msgid="8874620818937719067">"请插入 SIM 卡"</string>
     <string name="lockscreen_network_locked_message" msgid="143389224986028501">"网络已锁定"</string>
-    <string name="lockscreen_sim_puk_locked_message" msgid="7441797339976230">"SIM 卡被 PUK 锁定。"</string>
+    <string name="lockscreen_sim_puk_locked_message" msgid="7441797339976230">"SIM 卡被 PUK 锁定"</string>
     <string name="lockscreen_sim_puk_locked_instructions" msgid="635967534992394321">"请参阅《用户指南》或联系客服人员。"</string>
-    <string name="lockscreen_sim_locked_message" msgid="8066660129206001039">"SIM 卡被锁定。"</string>
+    <string name="lockscreen_sim_locked_message" msgid="8066660129206001039">"SIM 卡被锁定"</string>
     <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="595323214052881264">"正在解锁 SIM 卡..."</string>
     <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="3514742106066877476">"您已经 <xliff:g id="NUMBER_0">%d</xliff:g> 次错误地绘制了解锁图案。"\n\n"请在 <xliff:g id="NUMBER_1">%d</xliff:g> 秒后重试。"</string>
     <string name="lockscreen_failed_attempts_almost_glogin" msgid="3351013842320127827">"您已经 <xliff:g id="NUMBER_0">%d</xliff:g> 次错误地绘制了解锁图案。如果再尝试 <xliff:g id="NUMBER_1">%d</xliff:g> 次后仍不成功，系统会要求您使用自己的 Google 登录信息解锁手机。"\n\n"请在 <xliff:g id="NUMBER_2">%d</xliff:g> 秒后重试。"</string>
