@@ -272,6 +272,7 @@ public class StatusBarPolicy {
     private IBinder mDataIcon;
     private IconData mDataData;
     private boolean mDataIconVisible;
+    private boolean mHspaDataDistinguishable;
 
     // ringer volume
     private IBinder mVolumeIcon;
@@ -517,6 +518,14 @@ public class StatusBarPolicy {
         filter.addAction(TelephonyIntents.ACTION_SIM_STATE_CHANGED);
         filter.addAction(TtyIntent.TTY_ENABLED_CHANGE_ACTION);
         mContext.registerReceiver(mIntentReceiver, filter, null, mHandler);
+
+        // load config to determine if to distinguish Hspa data icon
+        try {
+            mHspaDataDistinguishable = mContext.getResources().getBoolean(
+                    com.android.internal.R.bool.config_hspa_data_distinguishable);
+        } catch (Exception e) {
+            mHspaDataDistinguishable = false;
+        }
     }
 
     public static void installIcons(Context context, StatusBarService service) {
@@ -960,7 +969,11 @@ public class StatusBarPolicy {
         case TelephonyManager.NETWORK_TYPE_HSDPA:
         case TelephonyManager.NETWORK_TYPE_HSUPA:
         case TelephonyManager.NETWORK_TYPE_HSPA:
-            mDataIconList = sDataNetType_h;
+            if (mHspaDataDistinguishable) {
+                mDataIconList = sDataNetType_h;
+            } else {
+                mDataIconList = sDataNetType_3g;
+            }
             break;
         case TelephonyManager.NETWORK_TYPE_CDMA:
             // display 1xRTT for IS95A/B
