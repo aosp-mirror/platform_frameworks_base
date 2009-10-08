@@ -16,7 +16,7 @@
 
 #include <math.h>
 
-#define LOG_NDEBUG 0
+//#define LOG_NDEBUG 0
 #define LOG_TAG "A2dpAudioInterface"
 #include <utils/Log.h>
 #include <utils/String8.h>
@@ -40,7 +40,7 @@ namespace android {
 //}
 
 A2dpAudioInterface::A2dpAudioInterface(AudioHardwareInterface* hw) :
-    mOutput(0), mHardwareInterface(hw), mBluetoothEnabled(true)
+    mOutput(0), mHardwareInterface(hw), mBluetoothEnabled(true), mSuspended(false)
 {
 }
 
@@ -78,6 +78,7 @@ AudioStreamOut* A2dpAudioInterface::openOutputStream(
     if ((err = out->set(devices, format, channels, sampleRate)) == NO_ERROR) {
         mOutput = out;
         mOutput->setBluetoothEnabled(mBluetoothEnabled);
+        mOutput->setSuspended(mSuspended);
     } else {
         delete out;
     }
@@ -142,6 +143,14 @@ status_t A2dpAudioInterface::setParameters(const String8& keyValuePairs)
         }
         param.remove(key);
     }
+    key = String8("A2dpSuspended");
+    if (param.get(key, value) == NO_ERROR) {
+        mSuspended = (value == "true");
+        if (mOutput) {
+            mOutput->setSuspended(mSuspended);
+        }
+        param.remove(key);
+    }
 
     if (param.size()) {
         status_t hwStatus = mHardwareInterface->setParameters(param.toString());
@@ -163,6 +172,12 @@ String8 A2dpAudioInterface::getParameters(const String8& keys)
     key = "bluetooth_enabled";
     if (param.get(key, value) == NO_ERROR) {
         value = mBluetoothEnabled ? "true" : "false";
+        a2dpParam.add(key, value);
+        param.remove(key);
+    }
+    key = "A2dpSuspended";
+    if (param.get(key, value) == NO_ERROR) {
+        value = mSuspended ? "true" : "false";
         a2dpParam.add(key, value);
         param.remove(key);
     }
@@ -204,7 +219,7 @@ A2dpAudioInterface::A2dpAudioStreamOut::A2dpAudioStreamOut() :
     mFd(-1), mStandby(true), mStartCount(0), mRetryCount(0), mData(NULL),
     // assume BT enabled to start, this is safe because its only the
     // enabled->disabled transition we are worried about
-    mBluetoothEnabled(true), mDevice(0), mClosing(false)
+    mBluetoothEnabled(true), mDevice(0), mClosing(false), mSuspended(false)
 {
     // use any address by default
     strcpy(mA2dpAddress, "00:00:00:00:00:00");
@@ -258,8 +273,10 @@ ssize_t A2dpAudioInterface::A2dpAudioStreamOut::write(const void* buffer, size_t
     size_t remaining = bytes;
     status_t status = -1;
 
-    if (!mBluetoothEnabled || mClosing) {
-        LOGW("A2dpAudioStreamOut::write(), but bluetooth disabled");
+    if (!mBluetoothEnabled || mClosing || mSuspended) {
+        LOGV("A2dpAudioStreamOut::write(), but bluetooth disabled \
+               mBluetoothEnabled %d, mClosing %d, mSuspended %d",
+                mBluetoothEnabled, mClosing, mSuspended);
         goto Error;
     }
 
@@ -405,6 +422,14 @@ status_t A2dpAudioInterface::A2dpAudioStreamOut::setBluetoothEnabled(bool enable
     if (!enabled) {
         return close_l();
     }
+    return NO_ERROR;
+}
+
+status_t A2dpAudioInterface::A2dpAudioStreamOut::setSuspended(bool onOff)
+{
+    LOGV("setSuspended %d", onOff);
+    mSuspended = onOff;
+    standby();
     return NO_ERROR;
 }
 
