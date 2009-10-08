@@ -31,6 +31,7 @@ import android.bluetooth.BluetoothHeadset;
 import android.bluetooth.BluetoothSocket;
 import android.bluetooth.BluetoothUuid;
 import android.bluetooth.IBluetooth;
+import android.bluetooth.IBluetoothCallback;
 import android.os.ParcelUuid;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
@@ -55,6 +56,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 public class BluetoothService extends IBluetooth.Stub {
@@ -86,13 +88,38 @@ public class BluetoothService extends IBluetooth.Stub {
     // This timeout should be greater than the page timeout
     private static final int UUID_INTENT_DELAY = 6000;
 
-    private final Map<String, String> mAdapterProperties;
-    private final HashMap <String, Map<String, String>> mDeviceProperties;
+    /** Always retrieve RFCOMM channel for these SDP UUIDs */
+    private static final ParcelUuid[] RFCOMM_UUIDS = {
+            BluetoothUuid.Handsfree,
+            BluetoothUuid.HSP,
+            BluetoothUuid.ObexObjectPush };
 
-    private final HashMap <String, Map<ParcelUuid, Integer>> mDeviceServiceChannelCache;
-    private final ArrayList <String> mUuidIntentTracker;
+
+    private final Map<String, String> mAdapterProperties;
+    private final HashMap<String, Map<String, String>> mDeviceProperties;
+
+    private final HashMap<String, Map<ParcelUuid, Integer>> mDeviceServiceChannelCache;
+    private final ArrayList<String> mUuidIntentTracker;
+    private final HashMap<RemoteService, IBluetoothCallback> mUuidCallbackTracker;
 
     private final HashMap<Integer, Integer> mServiceRecordToPid;
+
+    private static class RemoteService {
+        public String address;
+        public ParcelUuid uuid;
+        public RemoteService(String address, ParcelUuid uuid) {
+            this.address = address;
+            this.uuid = uuid;
+        }
+        @Override
+        public boolean equals(Object o) {
+            if (o instanceof RemoteService) {
+                RemoteService service = (RemoteService)o;
+                return address.equals(service.address) && uuid.equals(service.uuid);
+            }
+            return false;
+        }
+    }
 
     static {
         classInitNative();
@@ -121,6 +148,7 @@ public class BluetoothService extends IBluetooth.Stub {
 
         mDeviceServiceChannelCache = new HashMap<String, Map<ParcelUuid, Integer>>();
         mUuidIntentTracker = new ArrayList<String>();
+        mUuidCallbackTracker = new HashMap<RemoteService, IBluetoothCallback>();
         mServiceRecordToPid = new HashMap<Integer, Integer>();
         registerForAirplaneMode();
     }
@@ -312,8 +340,10 @@ public class BluetoothService extends IBluetooth.Stub {
                 break;
             case MESSAGE_UUID_INTENT:
                 String address = (String)msg.obj;
-                if (address != null)
+                if (address != null) {
                     sendUuidIntent(address);
+                    makeServiceChannelCallbacks(address);
+                }
                 break;
             case MESSAGE_DISCOVERABLE_TIMEOUT:
                 int mode = msg.arg1;
@@ -1064,14 +1094,35 @@ public class BluetoothService extends IBluetooth.Stub {
         return uuids;
     }
 
-    public synchronized boolean fetchRemoteUuidsWithSdp(String address) {
+    /**
+     * Connect and fetch new UUID's using SDP.
+     * The UUID's found are broadcast as intents.
+     * Optionally takes a uuid and callback to fetch the RFCOMM channel for the
+     * a given uuid.
+     * TODO: Don't wait UUID_INTENT_DELAY to broadcast UUID intents on success
+     * TODO: Don't wait UUID_INTENT_DELAY to handle the failure case for
+     * callback and broadcast intents.
+     */
+    public synchronized boolean fetchRemoteUuids(String address, ParcelUuid uuid,
+            IBluetoothCallback callback) {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
         if (!BluetoothAdapter.checkBluetoothAddress(address)) {
             return false;
         }
 
+        RemoteService service = new RemoteService(address, uuid);
+        if (uuid != null && mUuidCallbackTracker.get(service) != null) {
+            // An SDP query for this address & uuid is already in progress
+            // Do not add this callback for the uuid
+            return false;
+        }
+
         if (mUuidIntentTracker.contains(address)) {
             // An SDP query for this address is already in progress
+            // Add this uuid onto the in-progress SDP query
+            if (uuid != null) {
+                mUuidCallbackTracker.put(new RemoteService(address, uuid), callback);
+            }
             return true;
         }
 
@@ -1087,6 +1138,9 @@ public class BluetoothService extends IBluetooth.Stub {
         }
 
         mUuidIntentTracker.add(address);
+        if (uuid != null) {
+            mUuidCallbackTracker.put(new RemoteService(address, uuid), callback);
+        }
 
         Message message = mHandler.obtainMessage(MESSAGE_UUID_INTENT);
         message.obj = address;
@@ -1096,6 +1150,7 @@ public class BluetoothService extends IBluetooth.Stub {
 
     /**
      * Gets the rfcomm channel associated with the UUID.
+     * Pulls records from the cache only.
      *
      * @param address Address of the remote device
      * @param uuid ParcelUuid of the service attribute
@@ -1201,20 +1256,67 @@ public class BluetoothService extends IBluetooth.Stub {
         // We are storing the rfcomm channel numbers only for the uuids
         // we are interested in.
         int channel;
-        ParcelUuid[] interestedUuids = {BluetoothUuid.Handsfree,
-                                        BluetoothUuid.HSP,
-                                        BluetoothUuid.ObexObjectPush};
+        if (DBG) log("updateDeviceServiceChannelCache(" + address + ")");
+
+        ArrayList<ParcelUuid> applicationUuids = new ArrayList();
+
+        synchronized (this) {
+            for (RemoteService service : mUuidCallbackTracker.keySet()) {
+                if (service.address.equals(address)) {
+                    applicationUuids.add(service.uuid);
+                }
+            }
+        }
 
         Map <ParcelUuid, Integer> value = new HashMap<ParcelUuid, Integer>();
-        for (ParcelUuid uuid: interestedUuids) {
+
+        // Retrieve RFCOMM channel for default uuids
+        for (ParcelUuid uuid : RFCOMM_UUIDS) {
             if (BluetoothUuid.isUuidPresent(deviceUuids, uuid)) {
-                channel =
-                   getDeviceServiceChannelNative(getObjectPathFromAddress(address), uuid.toString(),
-                                                 0x0004);
+                channel = getDeviceServiceChannelNative(getObjectPathFromAddress(address),
+                        uuid.toString(), 0x0004);
+                if (DBG) log("\tuuid(system): " + uuid + " " + channel);
                 value.put(uuid, channel);
             }
         }
-        mDeviceServiceChannelCache.put(address, value);
+        // Retrieve RFCOMM channel for application requested uuids
+        for (ParcelUuid uuid : applicationUuids) {
+            if (BluetoothUuid.isUuidPresent(deviceUuids, uuid)) {
+                channel = getDeviceServiceChannelNative(getObjectPathFromAddress(address),
+                        uuid.toString(), 0x0004);
+                if (DBG) log("\tuuid(application): " + uuid + " " + channel);
+                value.put(uuid, channel);
+            }
+        }
+
+        synchronized (this) {
+            // Make application callbacks
+            for (Iterator<RemoteService> iter = mUuidCallbackTracker.keySet().iterator();
+                    iter.hasNext();) {
+                RemoteService service = iter.next();
+                if (service.address.equals(address)) {
+                    channel = -1;
+                    if (value.get(service.uuid) != null) {
+                        channel = value.get(service.uuid);
+                    }
+                    if (channel != -1) {
+                        if (DBG) log("Making callback for " + service.uuid + " with result " +
+                                channel);
+                        IBluetoothCallback callback = mUuidCallbackTracker.get(service);
+                        if (callback != null) {
+                            try {
+                                callback.onRfcommChannelFound(channel);
+                            } catch (RemoteException e) {Log.e(TAG, "", e);}
+                        }
+
+                        iter.remove();
+                    }
+                }
+            }
+
+            // Update cache
+            mDeviceServiceChannelCache.put(address, value);
+        }
     }
 
     /**
@@ -1330,6 +1432,26 @@ public class BluetoothService extends IBluetooth.Stub {
 
         if (mUuidIntentTracker.contains(address))
             mUuidIntentTracker.remove(address);
+
+    }
+
+    /*package*/ synchronized void makeServiceChannelCallbacks(String address) {
+        for (Iterator<RemoteService> iter = mUuidCallbackTracker.keySet().iterator();
+                iter.hasNext();) {
+            RemoteService service = iter.next();
+            if (service.address.equals(address)) {
+                if (DBG) log("Cleaning up failed UUID channel lookup: " + service.address +
+                        " " + service.uuid);
+                IBluetoothCallback callback = mUuidCallbackTracker.get(service);
+                if (callback != null) {
+                    try {
+                        callback.onRfcommChannelFound(-1);
+                    } catch (RemoteException e) {Log.e(TAG, "", e);}
+                }
+
+                iter.remove();
+            }
+        }
     }
 
     @Override
@@ -1375,6 +1497,11 @@ public class BluetoothService extends IBluetooth.Stub {
                     } else {
                         pw.println("\t" + uuid + " RFCOMM channel = " + channel);
                     }
+                }
+            }
+            for (RemoteService service : mUuidCallbackTracker.keySet()) {
+                if (service.address.equals(address)) {
+                    pw.println("\tPENDING CALLBACK: " + service.uuid);
                 }
             }
         }
@@ -1508,7 +1635,7 @@ public class BluetoothService extends IBluetooth.Stub {
     private native boolean setDevicePropertyBooleanNative(String objectPath, String key,
             int value);
     private native boolean createDeviceNative(String address);
-    private native boolean discoverServicesNative(String objectPath, String pattern);
+    /*package*/ native boolean discoverServicesNative(String objectPath, String pattern);
 
     private native int addRfcommServiceRecordNative(String name, long uuidMsb, long uuidLsb,
             short channel);

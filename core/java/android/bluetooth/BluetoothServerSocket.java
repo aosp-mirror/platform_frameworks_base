@@ -36,13 +36,13 @@ import java.io.IOException;
  * connection orientated, streaming transport over Bluetooth. It is also known
  * as the Serial Port Profile (SPP).
  *
- * <p>Use {@link BluetoothDevice#createRfcommSocket} to create a new {@link
- * BluetoothSocket} ready for an outgoing connection to a remote
+ * <p>Use {@link BluetoothDevice#createRfcommSocketToServiceRecord} to create
+ * a new {@link BluetoothSocket} ready for an outgoing connection to a remote
  * {@link BluetoothDevice}.
  *
- * <p>Use {@link BluetoothAdapter#listenUsingRfcomm} to create a listening
- * {@link BluetoothServerSocket} ready for incoming connections to the local
- * {@link BluetoothAdapter}.
+ * <p>Use {@link BluetoothAdapter#listenUsingRfcommWithServiceRecord} to
+ * create a listening {@link BluetoothServerSocket} ready for incoming
+ * connections to the local {@link BluetoothAdapter}.
  *
  * <p>{@link BluetoothSocket} and {@link BluetoothServerSocket} are thread
  * safe. In particular, {@link #close} will always immediately abort ongoing
@@ -68,7 +68,7 @@ public final class BluetoothServerSocket implements Closeable {
      */
     /*package*/ BluetoothServerSocket(int type, boolean auth, boolean encrypt, int port)
             throws IOException {
-        mSocket = new BluetoothSocket(type, -1, auth, encrypt, null, port);
+        mSocket = new BluetoothSocket(type, -1, auth, encrypt, null, port, null);
     }
 
     /**

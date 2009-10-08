@@ -36,6 +36,10 @@
 
 namespace android {
 
+#define CREATE_DEVICE_ALREADY_EXISTS 1
+#define CREATE_DEVICE_SUCCESS 0
+#define CREATE_DEVICE_FAILED -1
+
 #ifdef HAVE_BLUETOOTH
 static jfieldID field_mNativeData;
 
@@ -95,7 +99,7 @@ static void classInitNative(JNIEnv* env, jclass clazz) {
     method_onCreatePairedDeviceResult = env->GetMethodID(clazz, "onCreatePairedDeviceResult",
                                                          "(Ljava/lang/String;I)V");
     method_onCreateDeviceResult = env->GetMethodID(clazz, "onCreateDeviceResult",
-                                                         "(Ljava/lang/String;Z)V");
+                                                         "(Ljava/lang/String;I)V");
     method_onDiscoverServicesResult = env->GetMethodID(clazz, "onDiscoverServicesResult",
                                                          "(Ljava/lang/String;Z)V");
 
@@ -1115,10 +1119,13 @@ void onCreateDeviceResult(DBusMessage *msg, void *user, void *n) {
 
     LOGV("... Address = %s", address);
 
-    bool result = JNI_TRUE;
+    jint result = CREATE_DEVICE_SUCCESS;
     if (dbus_set_error_from_message(&err, msg)) {
+        if (dbus_error_has_name(&err, "org.bluez.Error.AlreadyExists")) {
+            result = CREATE_DEVICE_ALREADY_EXISTS;
+        }
         LOG_AND_FREE_DBUS_ERROR(&err);
-        result = JNI_FALSE;
+        result = CREATE_DEVICE_FAILED;
     }
     env->CallVoidMethod(nat->me,
                         method_onCreateDeviceResult,
