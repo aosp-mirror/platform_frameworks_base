@@ -110,7 +110,7 @@ static void dumpstate(int full) {
         PRINT("------ PACKAGE UID ERRORS ------");
         DUMP("/data/system/uiderrors.txt");
 
-        dump_kernel_log("/data/dontpanic/last_kmsg", "RAMCONSOLE");
+        dump_kernel_log("/data/dontpanic/last_kmsg", "LAST KMSG");
         dump_kernel_log("/data/dontpanic/apanic_console",
                         "PANIC CONSOLE");
         dump_kernel_log("/data/dontpanic/apanic_threads",
