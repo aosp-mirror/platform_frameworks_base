@@ -17,6 +17,7 @@
 package android.location;
 
 import android.location.Location;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 
 /**
@@ -41,7 +42,7 @@ interface ILocationProvider {
     long getStatusUpdateTime();
     void enableLocationTracking(boolean enable);
     void setMinTime(long minTime);
-    void updateNetworkState(int state);
+    void updateNetworkState(int state, in NetworkInfo info);
     void updateLocation(in Location location);
     boolean sendExtraCommand(String command, inout Bundle extras);
     void addListener(int uid);
