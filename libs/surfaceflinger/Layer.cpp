@@ -460,8 +460,10 @@ void Layer::lockPageFlip(bool& recomputeVisibleRegions)
         }
     }
 
-    // FIXME: signal an event if we have more buffers waiting
-    // mFlinger->signalEvent();
+    if (lcblk->getQueuedCount()) {
+        // signal an event if we have more buffers waiting
+        mFlinger->signalEvent();
+    }
 
     if (!mPostedDirtyRegion.isEmpty()) {
         reloadTexture( mPostedDirtyRegion );
