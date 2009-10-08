@@ -563,7 +563,19 @@ status_t CameraService::Client::setOverlay()
     status_t ret = NO_ERROR;
     if (mSurface != 0) {
         if (mOverlayRef.get() == NULL) {
-            mOverlayRef = mSurface->createOverlay(w, h, OVERLAY_FORMAT_DEFAULT);
+
+            // FIXME:
+            // Surfaceflinger may hold onto the previous overlay reference for some
+            // time after we try to destroy it. retry a few times. In the future, we
+            // should make the destroy call block, or possibly specify that we can
+            // wait in the createOverlay call if the previous overlay is in the 
+            // process of being destroyed.
+            for (int retry = 0; retry < 50; ++retry) {
+                mOverlayRef = mSurface->createOverlay(w, h, OVERLAY_FORMAT_DEFAULT);
+                if (mOverlayRef != NULL) break;
+                LOGD("Overlay create failed - retrying");
+                usleep(20000);
+            }
             if ( mOverlayRef.get() == NULL )
             {
                 LOGE("Overlay Creation Failed!");
