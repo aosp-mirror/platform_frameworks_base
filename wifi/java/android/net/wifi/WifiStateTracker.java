@@ -90,6 +90,7 @@ public class WifiStateTracker extends NetworkStateTracker {
      */ 
     private static final int EVENT_DRIVER_STATE_CHANGED              = 12;
     private static final int EVENT_PASSWORD_KEY_MAY_BE_INCORRECT     = 13;
+    private static final int EVENT_MAYBE_START_SCAN_POST_DISCONNECT  = 14;
 
     /**
      * Interval in milliseconds between polling for connection
@@ -126,6 +127,14 @@ public class WifiStateTracker extends NetworkStateTracker {
     private static final int RECONNECT_DELAY_MSECS = 2000;
 
     /**
+     * When the supplicant disconnects from an AP it sometimes forgets
+     * to restart scanning.  Wait this delay before asking it to start
+     * scanning (in case it forgot).  15 sec is the standard delay between
+     * scans.
+     */
+    private static final int KICKSTART_SCANNING_DELAY_MSECS = 15000;
+
+    /**
      * The maximum number of times we will retry a connection to an access point
      * for which we have failed in acquiring an IP address from DHCP. A value of
      * N means that we will make N+1 connection attempts in all.
@@ -147,6 +156,14 @@ public class WifiStateTracker extends NetworkStateTracker {
      * The current number of WPA supplicant loop iterations:
      */
     private int mNumSupplicantLoopIterations = 0;
+
+    /**
+     * The current number of supplicant state changes.  This is used to determine
+     * if we've received any new info since we found out it was DISCONNECTED or
+     * INACTIVE.  If we haven't for X ms, we then request a scan - it should have
+     * done that automatically, but sometimes some firmware does not.
+     */
+    private int mNumSupplicantStateChanges = 0;
 
     /**
      * True if we received an event that that a password-key may be incorrect.
@@ -831,7 +848,16 @@ public class WifiStateTracker extends NetworkStateTracker {
                 }
                 break;
 
+            case EVENT_MAYBE_START_SCAN_POST_DISCONNECT:
+                // Only do this if we haven't gotten a new supplicant status since the timer
+                // started
+                if (mNumSupplicantStateChanges == msg.arg1) {
+                    WifiNative.scanCommand(false); // do a passive scan
+                }
+                break;
+
             case EVENT_SUPPLICANT_STATE_CHANGED:
+                mNumSupplicantStateChanges++;
                 SupplicantStateChangeResult supplicantStateResult =
                     (SupplicantStateChangeResult) msg.obj;
                 SupplicantState newState = supplicantStateResult.state;
@@ -848,6 +874,17 @@ public class WifiStateTracker extends NetworkStateTracker {
                                       " ==> " + newState);
 
                 int networkId = supplicantStateResult.networkId;
+
+                /*
+                 * If we get disconnect or inactive we need to start our
+                 * watchdog timer to start a scan
+                 */
+                if (newState == SupplicantState.DISCONNECTED ||
+                        newState == SupplicantState.INACTIVE) {
+                    sendMessageDelayed(obtainMessage(EVENT_MAYBE_START_SCAN_POST_DISCONNECT,
+                            mNumSupplicantStateChanges, 0), KICKSTART_SCANNING_DELAY_MSECS);
+                }
+
 
                 /*
                  * Did we get to DISCONNECTED state due to an
