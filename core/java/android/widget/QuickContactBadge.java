@@ -25,9 +25,9 @@ import android.database.Cursor;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.provider.ContactsContract.Contacts;
-import android.provider.ContactsContract.QuickContact;
 import android.provider.ContactsContract.Intents;
 import android.provider.ContactsContract.PhoneLookup;
+import android.provider.ContactsContract.QuickContact;
 import android.provider.ContactsContract.RawContacts;
 import android.provider.ContactsContract.CommonDataKinds.Email;
 import android.util.AttributeSet;
@@ -55,21 +55,28 @@ public class QuickContactBadge extends ImageView implements OnClickListener {
     static final private int TOKEN_PHONE_LOOKUP = 1;
     static final private int TOKEN_EMAIL_LOOKUP_AND_TRIGGER = 2;
     static final private int TOKEN_PHONE_LOOKUP_AND_TRIGGER = 3;
+    static final private int TOKEN_CONTACT_LOOKUP_AND_TRIGGER = 4;
 
     static final String[] EMAIL_LOOKUP_PROJECTION = new String[] {
         RawContacts.CONTACT_ID,
         Contacts.LOOKUP_KEY,
     };
-    static int EMAIL_ID_COLUMN_INDEX = 0;
-    static int EMAIL_LOOKUP_STRING_COLUMN_INDEX = 1;
+    static final int EMAIL_ID_COLUMN_INDEX = 0;
+    static final int EMAIL_LOOKUP_STRING_COLUMN_INDEX = 1;
 
     static final String[] PHONE_LOOKUP_PROJECTION = new String[] {
         PhoneLookup._ID,
         PhoneLookup.LOOKUP_KEY,
     };
-    static int PHONE_ID_COLUMN_INDEX = 0;
-    static int PHONE_LOOKUP_STRING_COLUMN_INDEX = 1;
+    static final int PHONE_ID_COLUMN_INDEX = 0;
+    static final int PHONE_LOOKUP_STRING_COLUMN_INDEX = 1;
 
+    static final String[] CONTACT_LOOKUP_PROJECTION = new String[] {
+        Contacts._ID,
+        Contacts.LOOKUP_KEY,
+    };
+    static final int CONTACT_ID_COLUMN_INDEX = 0;
+    static final int CONTACT_LOOKUPKEY_COLUMN_INDEX = 1;
 
 
     public QuickContactBadge(Context context) {
@@ -181,9 +188,9 @@ public class QuickContactBadge extends ImageView implements OnClickListener {
 
     public void onClick(View v) {
         if (mContactUri != null) {
-            final ContentResolver resolver = getContext().getContentResolver();
-            final Uri lookupUri = Contacts.getLookupUri(resolver, mContactUri);
-            trigger(lookupUri);
+            mQueryHandler.startQuery(TOKEN_CONTACT_LOOKUP_AND_TRIGGER, null,
+                    mContactUri,
+                    CONTACT_LOOKUP_PROJECTION, null, null, null);
         } else if (mContactEmail != null) {
             mQueryHandler.startQuery(TOKEN_EMAIL_LOOKUP_AND_TRIGGER, mContactEmail,
                     Uri.withAppendedPath(Email.CONTENT_LOOKUP_URI, Uri.encode(mContactEmail)),
@@ -248,6 +255,17 @@ public class QuickContactBadge extends ImageView implements OnClickListener {
                             String lookupKey = cursor.getString(EMAIL_LOOKUP_STRING_COLUMN_INDEX);
                             lookupUri = Contacts.getLookupUri(contactId, lookupKey);
                         }
+                    }
+
+                    case TOKEN_CONTACT_LOOKUP_AND_TRIGGER: {
+                        if (cursor != null && cursor.moveToFirst()) {
+                            long contactId = cursor.getLong(CONTACT_ID_COLUMN_INDEX);
+                            String lookupKey = cursor.getString(CONTACT_LOOKUPKEY_COLUMN_INDEX);
+                            lookupUri = Contacts.getLookupUri(contactId, lookupKey);
+                            trigger = true;
+                        }
+
+                        break;
                     }
                 }
             } finally {
