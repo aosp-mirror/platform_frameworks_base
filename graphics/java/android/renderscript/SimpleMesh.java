@@ -290,6 +290,11 @@ public class SimpleMesh extends BaseObj {
         }
 
         public void addTriangle(int idx1, int idx2, int idx3) {
+            if((idx1 >= mVtxCount) || (idx1 < 0) ||
+               (idx2 >= mVtxCount) || (idx2 < 0) ||
+               (idx3 >= mVtxCount) || (idx3 < 0)) {
+               throw new IllegalStateException("Index provided greater than vertex count.");
+            }
             if ((mIndexCount + 3) >= mIndexData.length) {
                 short t[] = new short[mIndexData.length * 2];
                 System.arraycopy(mIndexData, 0, t, 0, mIndexData.length);
