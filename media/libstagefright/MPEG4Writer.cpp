@@ -399,15 +399,11 @@ void MPEG4Writer::Track::threadEntry() {
         info.size = buffer->range_length();
         info.offset = offset;
 
-        int32_t units, scale;
-        bool success =
-            buffer->meta_data()->findInt32(kKeyTimeUnits, &units);
-        CHECK(success);
-        success =
-            buffer->meta_data()->findInt32(kKeyTimeScale, &scale);
-        CHECK(success);
+        int64_t timestampUs;
+        CHECK(buffer->meta_data()->findInt64(kKeyTime, &timestampUs));
 
-        info.timestamp = (int64_t)units * 1000 / scale;
+        // Our timestamp is in ms.
+        info.timestamp = (timestampUs + 500) / 1000;
 
         mSampleInfos.push_back(info);
 
