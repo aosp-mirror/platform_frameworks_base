@@ -90,7 +90,6 @@ private:
         kRequiresFlushCompleteEmulation      = 16,
         kRequiresAllocateBufferOnOutputPorts = 32,
         kRequiresFlushBeforeShutdown         = 64,
-        kAlwaysAllocateOutputWithPadding     = 128,
     };
 
     struct BufferInfo {
