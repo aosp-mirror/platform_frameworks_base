@@ -571,7 +571,7 @@ public class BluetoothService extends IBluetooth.Stub {
             return state.intValue();
         }
 
-        private synchronized String[] listInState(int state) {
+        /*package*/ synchronized String[] listInState(int state) {
             ArrayList<String> result = new ArrayList<String>(mState.size());
             for (Map.Entry<String, Integer> e : mState.entrySet()) {
                 if (e.getValue().intValue() == state) {
