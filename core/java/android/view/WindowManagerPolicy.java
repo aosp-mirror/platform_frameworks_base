@@ -263,6 +263,13 @@ public interface WindowManagerPolicy {
         boolean isVisibleLw();
         
         /**
+         * Like {@link #isVisibleLw}, but also counts a window that is currently
+         * "hidden" behind the keyguard as visible.  This allows us to apply
+         * things like window flags that impact the keyguard.
+         */
+        boolean isVisibleOrBehindKeyguardLw();
+        
+        /**
          * Is this window currently visible to the user on-screen?  It is 
          * displayed either if it is visible or it is currently running an 
          * animation before no longer being visible.  Must be called with the
