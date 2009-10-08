@@ -876,6 +876,10 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
     private void handleHide() {
         synchronized (KeyguardViewMediator.this) {
             if (DEBUG) Log.d(TAG, "handleHide");
+            if (mWakeAndHandOff.isHeld()) {
+                Log.w(TAG, "attempt to hide the keyguard while waking, ignored");
+                return;
+            }
             // When we go away, tell the poewr manager to honor requests from userActivity.
             mRealPowerManager.enableUserActivity(true);
 
