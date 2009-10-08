@@ -513,6 +513,7 @@ public final class BluetoothDevice implements Parcelable {
 
     /**
      * Get trust state of a remote device.
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH}.
      * @hide
      */
     public boolean getTrustState() {
@@ -526,6 +527,7 @@ public final class BluetoothDevice implements Parcelable {
 
     /**
      * Set trust state for a remote device.
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN}.
      * @param value the trust state value (true or false)
      * @hide
      */
@@ -657,6 +659,8 @@ public final class BluetoothDevice implements Parcelable {
      * Call #connect on the returned #BluetoothSocket to begin the connection.
      * The remote device will not be authenticated and communication on this
      * socket will not be encrypted.
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN}
+     *
      * @param port    remote port
      * @return An RFCOMM BluetoothSocket
      * @throws IOException On error, for example Bluetooth not available, or
@@ -671,6 +675,8 @@ public final class BluetoothDevice implements Parcelable {
     /**
      * Construct a SCO socket ready to start an outgoing connection.
      * Call #connect on the returned #BluetoothSocket to begin the connection.
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN}
+     *
      * @return a SCO BluetoothSocket
      * @throws IOException on error, for example Bluetooth not available, or
      *                     insufficient permissions.
