@@ -289,6 +289,7 @@ public:
     void setStatus(status_t status);
     status_t reallocate();
     status_t assertReallocate(int buffer);
+    int32_t getQueuedCount() const;
     
     Region getDirtyRegion(int buffer) const;
 
