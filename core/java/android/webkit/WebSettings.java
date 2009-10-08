@@ -1007,7 +1007,8 @@ public class WebSettings {
      *     should never be null.
      */
     public synchronized void setGeolocationDatabasePath(String databasePath) {
-        if (databasePath != null && !databasePath.equals(mDatabasePath)) {
+        if (databasePath != null
+                && !databasePath.equals(mGeolocationDatabasePath)) {
             mGeolocationDatabasePath = databasePath;
             postSync();
         }
