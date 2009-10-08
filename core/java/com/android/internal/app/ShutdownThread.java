@@ -32,6 +32,7 @@ import android.os.RemoteException;
 import android.os.Power;
 import android.os.ServiceManager;
 import android.os.SystemClock;
+
 import com.android.internal.telephony.ITelephony;
 import android.util.Log;
 import android.view.WindowManager;
@@ -91,7 +92,10 @@ public final class ShutdownThread extends Thread {
                     .setNegativeButton(com.android.internal.R.string.no, null)
                     .create();
             dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG);
-            dialog.getWindow().addFlags(WindowManager.LayoutParams.FLAG_BLUR_BEHIND);
+            if (!context.getResources().getBoolean(
+                    com.android.internal.R.bool.config_sf_slowBlur)) {
+                dialog.getWindow().addFlags(WindowManager.LayoutParams.FLAG_BLUR_BEHIND);
+            }
             dialog.show();
         } else {
             beginShutdownSequence(context);
@@ -111,7 +115,10 @@ public final class ShutdownThread extends Thread {
         pd.setIndeterminate(true);
         pd.setCancelable(false);
         pd.getWindow().setType(WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG);
-        pd.getWindow().addFlags(WindowManager.LayoutParams.FLAG_BLUR_BEHIND);
+        if (!context.getResources().getBoolean(
+                com.android.internal.R.bool.config_sf_slowBlur)) {
+            pd.getWindow().addFlags(WindowManager.LayoutParams.FLAG_BLUR_BEHIND);
+        }
 
         pd.show();
 
@@ -181,7 +188,7 @@ public final class ShutdownThread extends Thread {
                 ITelephony.Stub.asInterface(ServiceManager.checkService("phone"));
         final IBluetooth bluetooth =
                 IBluetooth.Stub.asInterface(ServiceManager.checkService(
-                        Context.BLUETOOTH_SERVICE));
+                        BluetoothAdapter.BLUETOOTH_SERVICE));
         
         try {
             bluetoothOff = bluetooth == null ||

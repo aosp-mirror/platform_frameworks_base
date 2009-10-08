@@ -454,14 +454,16 @@ void Layer::lockPageFlip(bool& recomputeVisibleRegions)
 
             // recompute visible region
             recomputeVisibleRegions = true;
-
-            // we now have the correct size, unfreeze the screen
-            mFreezeLock.clear();
         }
+
+        // we now have the correct size, unfreeze the screen
+        mFreezeLock.clear();
     }
 
-    // FIXME: signal an event if we have more buffers waiting
-    // mFlinger->signalEvent();
+    if (lcblk->getQueuedCount()) {
+        // signal an event if we have more buffers waiting
+        mFlinger->signalEvent();
+    }
 
     if (!mPostedDirtyRegion.isEmpty()) {
         reloadTexture( mPostedDirtyRegion );

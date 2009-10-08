@@ -22,8 +22,6 @@ import com.google.android.collect.Maps;
 
 import org.xmlpull.v1.XmlPullParserException;
 
-import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.IBluetooth;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -182,8 +180,6 @@ class ApplicationContext extends Context {
     private StatusBarManager mStatusBarManager = null;
     private TelephonyManager mTelephonyManager = null;
     private ClipboardManager mClipboardManager = null;
-    private boolean mIsBluetoothAdapterCached = false;
-    private BluetoothAdapter mBluetoothAdapter;
     private boolean mRestricted;
     private AccountManager mAccountManager; // protected by mSync
 
@@ -883,8 +879,6 @@ class ApplicationContext extends Context {
             return getSearchManager();
         } else if (SENSOR_SERVICE.equals(name)) {
             return getSensorManager();
-        } else if (BLUETOOTH_SERVICE.equals(name)) {
-            return getBluetoothAdapter();
         } else if (VIBRATOR_SERVICE.equals(name)) {
             return getVibrator();
         } else if (STATUS_BAR_SERVICE.equals(name)) {
@@ -1032,18 +1026,6 @@ class ApplicationContext extends Context {
             }
         }
         return mSearchManager;
-    }
-
-    private synchronized BluetoothAdapter getBluetoothAdapter() {
-        if (!mIsBluetoothAdapterCached) {
-            mIsBluetoothAdapterCached = true;
-            IBinder b = ServiceManager.getService(BLUETOOTH_SERVICE);
-            if (b != null) {
-                IBluetooth service = IBluetooth.Stub.asInterface(b);
-                mBluetoothAdapter = new BluetoothAdapter(service);
-            }
-        }
-        return mBluetoothAdapter;
     }
 
     private SensorManager getSensorManager() {

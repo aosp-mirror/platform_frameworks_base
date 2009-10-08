@@ -153,7 +153,7 @@ private:
                 SharedClient*               mControl;
                 sp<IMemoryHeap>             mControlMemory;
                 sp<ISurfaceFlingerClient>   mClient;
-                SurfaceFlingerSynchro*      mSignalServer;
+                sp<ISurfaceComposer>        mSignalServer;
 };
 
 }; // namespace android
