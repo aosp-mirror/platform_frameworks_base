@@ -1359,12 +1359,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         
         win.computeFrameLw(pf, df, cf, vf);
         
-        if (win.isVisibleLw()) {
+        if (mTopFullscreenOpaqueWindowState == null &&
+                win.isVisibleOrBehindKeyguardLw()) {
             if ((attrs.flags & FLAG_FORCE_NOT_FULLSCREEN) != 0) {
                 mForceStatusBar = true;
             } 
-            if (mTopFullscreenOpaqueWindowState == null
-                    && attrs.type >= FIRST_APPLICATION_WINDOW
+            if (attrs.type >= FIRST_APPLICATION_WINDOW
                     && attrs.type <= LAST_APPLICATION_WINDOW
                     && win.fillsScreenLw(mW, mH, false, false)) {
                 if (DEBUG_LAYOUT) Log.v(TAG, "Fullscreen window: " + win);
