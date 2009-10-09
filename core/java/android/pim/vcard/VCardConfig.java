@@ -106,14 +106,6 @@ public class VCardConfig {
      */
     public static final int FLAG_USE_QP_TO_PRIMARY_PROPERTIES = 0x10000000;
 
-    // Note: if you really want to add additional flag(s) incompatible with the main source tree,
-    // please use flags from 0x0001000 to 0x00080000.
-    //
-    // If we notice we cannot manage flags in just one integer, we'll change this interface and
-    // create/use a complete class, not just an integer, with similar API (but imcompatible).
-    //
-    // Again, please be aware that this API is intentionally hidden ~= unstable!
-
     //// The followings are VCard types available from importer/exporter. ////
 
     /**
