@@ -287,9 +287,13 @@ public final class BluetoothDevice implements Parcelable {
     /** A bond attempt failed because of repeated attempts
      * @hide */
     public static final int UNBOND_REASON_REPEATED_ATTEMPTS = 7;
+    /** A bond attempt failed because we received an Authentication Cancel
+     *  by remote end
+     * @hide */
+    public static final int UNBOND_REASON_REMOTE_AUTH_CANCELED = 8;
     /** An existing bond was explicitly revoked
      * @hide */
-    public static final int UNBOND_REASON_REMOVED = 8;
+    public static final int UNBOND_REASON_REMOVED = 9;
 
     /** The user will be prompted to enter a pin
      * @hide */
