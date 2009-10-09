@@ -29,7 +29,7 @@ oneway interface IPhoneStateListener {
     // we use bundle here instead of CellLocation so it can get the right subclass
     void onCellLocationChanged(in Bundle location);
     void onCallStateChanged(int state, String incomingNumber);
-    void onDataConnectionStateChanged(int state);
+    void onDataConnectionStateChanged(int state, int networkType);
     void onDataActivity(int direction);
     void onSignalStrengthsChanged(in SignalStrength signalStrength);
 }
