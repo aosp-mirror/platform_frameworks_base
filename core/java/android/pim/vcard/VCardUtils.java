@@ -43,9 +43,9 @@ public class VCardUtils {
     // vCard and current (as of 2009-08-07) Contacts structure. 
     private static final Map<Integer, String> sKnownPhoneTypesMap_ItoS;
     private static final Set<String> sPhoneTypesSetUnknownToContacts;
-    
+
     private static final Map<String, Integer> sKnownPhoneTypesMap_StoI;
-    
+
     static {
         sKnownPhoneTypesMap_ItoS = new HashMap<Integer, String>();
         sKnownPhoneTypesMap_StoI = new HashMap<String, Integer>();
@@ -61,14 +61,15 @@ public class VCardUtils {
         sKnownPhoneTypesMap_StoI.put(Constants.ATTR_TYPE_WORK, Phone.TYPE_WORK);
         sKnownPhoneTypesMap_StoI.put(Constants.ATTR_TYPE_CELL, Phone.TYPE_MOBILE);
                 
-        sKnownPhoneTypesMap_StoI.put(Constants.ATTR_TYPE_PHONE_EXTRA_OTHER, Phone.TYPE_OTHER);
-        sKnownPhoneTypesMap_StoI.put(Constants.ATTR_TYPE_PHONE_EXTRA_CALLBACK, Phone.TYPE_CALLBACK);
+        sKnownPhoneTypesMap_StoI.put(Constants.ATTR_PHONE_EXTRA_TYPE_OTHER, Phone.TYPE_OTHER);
+        sKnownPhoneTypesMap_StoI.put(Constants.ATTR_PHONE_EXTRA_TYPE_CALLBACK, Phone.TYPE_CALLBACK);
         sKnownPhoneTypesMap_StoI.put(
-                Constants.ATTR_TYPE_PHONE_EXTRA_COMPANY_MAIN, Phone.TYPE_COMPANY_MAIN);
-        sKnownPhoneTypesMap_StoI.put(Constants.ATTR_TYPE_PHONE_EXTRA_RADIO, Phone.TYPE_RADIO);
-        sKnownPhoneTypesMap_StoI.put(Constants.ATTR_TYPE_PHONE_EXTRA_TELEX, Phone.TYPE_TELEX);
-        sKnownPhoneTypesMap_StoI.put(Constants.ATTR_TYPE_PHONE_EXTRA_TTY_TDD, Phone.TYPE_TTY_TDD);
-        sKnownPhoneTypesMap_StoI.put(Constants.ATTR_TYPE_PHONE_EXTRA_ASSISTANT, Phone.TYPE_ASSISTANT);
+                Constants.ATTR_PHONE_EXTRA_TYPE_COMPANY_MAIN, Phone.TYPE_COMPANY_MAIN);
+        sKnownPhoneTypesMap_StoI.put(Constants.ATTR_PHONE_EXTRA_TYPE_RADIO, Phone.TYPE_RADIO);
+        sKnownPhoneTypesMap_StoI.put(Constants.ATTR_PHONE_EXTRA_TYPE_TELEX, Phone.TYPE_TELEX);
+        sKnownPhoneTypesMap_StoI.put(Constants.ATTR_PHONE_EXTRA_TYPE_TTY_TDD, Phone.TYPE_TTY_TDD);
+        sKnownPhoneTypesMap_StoI.put(Constants.ATTR_PHONE_EXTRA_TYPE_ASSISTANT,
+                Phone.TYPE_ASSISTANT);
 
         sPhoneTypesSetUnknownToContacts = new HashSet<String>();
         sPhoneTypesSetUnknownToContacts.add(Constants.ATTR_TYPE_MODEM);
@@ -76,11 +77,11 @@ public class VCardUtils {
         sPhoneTypesSetUnknownToContacts.add(Constants.ATTR_TYPE_BBS);
         sPhoneTypesSetUnknownToContacts.add(Constants.ATTR_TYPE_VIDEO);
     }
-    
+
     public static String getPhoneAttributeString(Integer type) {
         return sKnownPhoneTypesMap_ItoS.get(type);
     }
-    
+
     /**
      * Returns Interger when the given types can be parsed as known type. Returns String object
      * when not, which should be set to label. 
