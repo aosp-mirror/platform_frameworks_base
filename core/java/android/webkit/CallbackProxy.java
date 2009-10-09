@@ -107,6 +107,7 @@ class CallbackProxy extends Handler {
     private static final int GEOLOCATION_PERMISSIONS_HIDE_PROMPT = 131;
     private static final int RECEIVED_TOUCH_ICON_URL             = 132;
     private static final int GET_VISITED_HISTORY                 = 133;
+    private static final int OPEN_FILE_CHOOSER                   = 134;
 
     // Message triggered by the client to resume execution
     private static final int NOTIFY                              = 200;
@@ -660,6 +661,12 @@ class CallbackProxy extends Handler {
             case GET_VISITED_HISTORY:
                 if (mWebChromeClient != null) {
                     mWebChromeClient.getVisitedHistory((ValueCallback<String[]>)msg.obj);
+                }
+                break;
+
+            case OPEN_FILE_CHOOSER:
+                if (mWebChromeClient != null) {
+                    mWebChromeClient.openFileChooser((UploadFile) msg.obj);
                 }
                 break;
         }
@@ -1347,5 +1354,41 @@ class CallbackProxy extends Handler {
         Message msg = obtainMessage(GET_VISITED_HISTORY);
         msg.obj = callback;
         sendMessage(msg);
+    }
+
+    private class UploadFile implements ValueCallback<Uri> {
+        private Uri mValue;
+        public void onReceiveValue(Uri value) {
+            mValue = value;
+            synchronized (CallbackProxy.this) {
+                CallbackProxy.this.notify();
+            }
+        }
+        public Uri getResult() {
+            return mValue;
+        }
+    }
+
+    /**
+     * Called by WebViewCore to open a file chooser.
+     */
+    /* package */ Uri openFileChooser() {
+        if (mWebChromeClient == null) {
+            return null;
+        }
+        Message myMessage = obtainMessage(OPEN_FILE_CHOOSER);
+        UploadFile uploadFile = new UploadFile();
+        myMessage.obj = uploadFile;
+        synchronized (this) {
+            sendMessage(myMessage);
+            try {
+                wait();
+            } catch (InterruptedException e) {
+                Log.e(LOGTAG,
+                        "Caught exception while waiting for openFileChooser");
+                Log.e(LOGTAG, Log.getStackTraceString(e));
+            }
+        }
+        return uploadFile.getResult();
     }
 }

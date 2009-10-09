@@ -17,6 +17,7 @@
 package android.webkit;
 
 import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Message;
 import android.view.View;
 
@@ -302,4 +303,13 @@ public class WebChromeClient {
     public void getVisitedHistory(ValueCallback<String[]> callback) {
     }
 
+    /**
+     * Tell the client to open a file chooser.
+     * @param uploadFile A ValueCallback to set the URI of the file to upload.
+     *      onReceiveValue must be called to wake up the thread.
+     * @hide
+     */
+    public void openFileChooser(ValueCallback<Uri> uploadFile) {
+        uploadFile.onReceiveValue(null);
+    }
 }
