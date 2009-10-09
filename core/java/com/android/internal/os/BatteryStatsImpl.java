@@ -24,6 +24,7 @@ import android.os.ParcelFormatException;
 import android.os.Parcelable;
 import android.os.Process;
 import android.os.SystemClock;
+import android.telephony.ServiceState;
 import android.telephony.SignalStrength;
 import android.telephony.TelephonyManager;
 import android.util.Log;
@@ -56,7 +57,7 @@ public final class BatteryStatsImpl extends BatteryStats {
     private static final int MAGIC = 0xBA757475; // 'BATSTATS' 
 
     // Current on-disk Parcel version
-    private static final int VERSION = 40;
+    private static final int VERSION = 41;
 
     private static int sNumSpeedSteps;
 
@@ -117,7 +118,9 @@ public final class BatteryStatsImpl extends BatteryStats {
     int mPhoneSignalStrengthBin = -1;
     final StopwatchTimer[] mPhoneSignalStrengthsTimer = 
             new StopwatchTimer[NUM_SIGNAL_STRENGTH_BINS];
-    
+
+    StopwatchTimer mPhoneSignalScanningTimer;
+
     int mPhoneDataConnectionType = -1;
     final StopwatchTimer[] mPhoneDataConnectionsTimer = 
             new StopwatchTimer[NUM_DATA_CONNECTION_TYPES];
@@ -168,6 +171,8 @@ public final class BatteryStatsImpl extends BatteryStats {
 
     private int mBluetoothPingCount;
     private int mBluetoothPingStart = -1;
+
+    private int mPhoneServiceState = -1;
 
     /*
      * Holds a SamplingTimer associated with each kernel wakelock name being tracked.
@@ -681,6 +686,8 @@ public final class BatteryStatsImpl extends BatteryStats {
          */
         long mAcquireTime;
 
+        long mTimeout;
+
         StopwatchTimer(int type, ArrayList<StopwatchTimer> timerPool,
                 ArrayList<Unpluggable> unpluggables, Parcel in) {
             super(type, unpluggables, in);
@@ -694,6 +701,10 @@ public final class BatteryStatsImpl extends BatteryStats {
             mTimerPool = timerPool;
         }
         
+        void setTimeout(long timeout) {
+            mTimeout = timeout;
+        }
+
         public void writeToParcel(Parcel out, long batteryRealtime) {
             super.writeToParcel(out, batteryRealtime);
             out.writeLong(mUpdateTime);
@@ -797,6 +808,9 @@ public final class BatteryStatsImpl extends BatteryStats {
 
         @Override
         protected long computeRunTimeLocked(long curBatteryRealtime) {
+            if (mTimeout > 0 && curBatteryRealtime > mUpdateTime + mTimeout) {
+                curBatteryRealtime = mUpdateTime + mTimeout;
+            }
             return mTotalTime + (mNesting > 0
                     ? (curBatteryRealtime - mUpdateTime)
                             / (mTimerPool != null ? mTimerPool.size() : 1)
@@ -1123,34 +1137,59 @@ public final class BatteryStatsImpl extends BatteryStats {
         }
     }
 
-    public void noteAirplaneModeLocked(boolean isAirplaneMode) {
-        final int bin = mPhoneSignalStrengthBin;
-        if (bin >= 0) {
-            if (!isAirplaneMode) {
-                if (!mPhoneSignalStrengthsTimer[bin].isRunningLocked()) {
-                    mPhoneSignalStrengthsTimer[bin].startRunningLocked(this);
-                }
-            } else {
-                for (int i = 0; i < NUM_SIGNAL_STRENGTH_BINS; i++) {
-                    while (mPhoneSignalStrengthsTimer[i].isRunningLocked()) {
-                        mPhoneSignalStrengthsTimer[i].stopRunningLocked(this);
-                    }
+    /**
+     * Telephony stack updates the phone state.
+     * @param state phone state from ServiceState.getState()
+     */
+    public void notePhoneStateLocked(int state) {
+        int bin = mPhoneSignalStrengthBin;
+        boolean isAirplaneMode = state == ServiceState.STATE_POWER_OFF;
+        // Stop all timers
+        if (isAirplaneMode || state == ServiceState.STATE_OUT_OF_SERVICE) {
+            for (int i = 0; i < NUM_SIGNAL_STRENGTH_BINS; i++) {
+                while (mPhoneSignalStrengthsTimer[i].isRunningLocked()) {
+                    mPhoneSignalStrengthsTimer[i].stopRunningLocked(this);
                 }
             }
         }
+        // Stop Signal Scanning timer, in case we're going into service
+        while (mPhoneSignalScanningTimer.isRunningLocked()) {
+            mPhoneSignalScanningTimer.stopRunningLocked(this);
+        }
+
+        // If we're back in service or continuing in service, restart the old timer.
+        if (state == ServiceState.STATE_IN_SERVICE) {
+            if (bin == -1) bin = SIGNAL_STRENGTH_NONE_OR_UNKNOWN;
+            if (!mPhoneSignalStrengthsTimer[bin].isRunningLocked()) {
+                mPhoneSignalStrengthsTimer[bin].startRunningLocked(this);
+            }
+        } else if (state == ServiceState.STATE_OUT_OF_SERVICE) {
+            mPhoneSignalStrengthBin = SIGNAL_STRENGTH_NONE_OR_UNKNOWN;
+            if (!mPhoneSignalStrengthsTimer[mPhoneSignalStrengthBin].isRunningLocked()) {
+                mPhoneSignalStrengthsTimer[mPhoneSignalStrengthBin].startRunningLocked(this);
+            }
+            if (!mPhoneSignalScanningTimer.isRunningLocked()) {
+                mPhoneSignalScanningTimer.startRunningLocked(this);
+            }
+        }
+        mPhoneServiceState = state;
     }
 
     public void notePhoneSignalStrengthLocked(SignalStrength signalStrength) {
         // Bin the strength.
         int bin;
-
+        if (mPhoneServiceState == ServiceState.STATE_POWER_OFF
+                || mPhoneServiceState == ServiceState.STATE_OUT_OF_SERVICE) {
+            // Ignore any signal strength changes when radio was turned off or out of service.
+            return;
+        }
         if (!signalStrength.isGsm()) {
             int dBm = signalStrength.getCdmaDbm();
-            if (dBm >= -75) bin = SIGNAL_STRENGTH_NONE_OR_UNKNOWN;
-            else if (dBm >= -85) bin = SIGNAL_STRENGTH_GREAT;
-            else if (dBm >= -95)  bin = SIGNAL_STRENGTH_GOOD;
-            else if (dBm >= -100)  bin = SIGNAL_STRENGTH_MODERATE;
-            else bin = SIGNAL_STRENGTH_POOR;
+            if (dBm >= -75) bin = SIGNAL_STRENGTH_GREAT;
+            else if (dBm >= -85) bin = SIGNAL_STRENGTH_GOOD;
+            else if (dBm >= -95)  bin = SIGNAL_STRENGTH_MODERATE;
+            else if (dBm >= -100)  bin = SIGNAL_STRENGTH_POOR;
+            else bin = SIGNAL_STRENGTH_NONE_OR_UNKNOWN;
         } else {
             int asu = signalStrength.getGsmSignalStrength();
             if (asu < 0 || asu >= 99) bin = SIGNAL_STRENGTH_NONE_OR_UNKNOWN;
@@ -1328,7 +1367,13 @@ public final class BatteryStatsImpl extends BatteryStats {
         return mPhoneSignalStrengthsTimer[strengthBin].getTotalTimeLocked(
                 batteryRealtime, which);
     }
-    
+
+    @Override public long getPhoneSignalScanningTime(
+            long batteryRealtime, int which) {
+        return mPhoneSignalScanningTimer.getTotalTimeLocked(
+                batteryRealtime, which);
+    }
+
     @Override public int getPhoneSignalStrengthCount(int dataType, int which) {
         return mPhoneDataConnectionsTimer[dataType].getCountLocked(which);
     }
@@ -2653,6 +2698,7 @@ public final class BatteryStatsImpl extends BatteryStats {
         for (int i=0; i<NUM_SIGNAL_STRENGTH_BINS; i++) {
             mPhoneSignalStrengthsTimer[i] = new StopwatchTimer(-200-i, null, mUnpluggables);
         }
+        mPhoneSignalScanningTimer = new StopwatchTimer(-200+1, null, mUnpluggables);
         for (int i=0; i<NUM_DATA_CONNECTION_TYPES; i++) {
             mPhoneDataConnectionsTimer[i] = new StopwatchTimer(-300-i, null, mUnpluggables);
         }
@@ -2677,6 +2723,12 @@ public final class BatteryStatsImpl extends BatteryStats {
 
     public void setNumSpeedSteps(int steps) {
         if (sNumSpeedSteps == 0) sNumSpeedSteps = steps;
+    }
+
+    public void setRadioScanningTimeout(long timeout) {
+        if (mPhoneSignalScanningTimer != null) {
+            mPhoneSignalScanningTimer.setTimeout(timeout);
+        }
     }
 
     @Override
@@ -3114,6 +3166,7 @@ public final class BatteryStatsImpl extends BatteryStats {
         for (int i=0; i<NUM_SIGNAL_STRENGTH_BINS; i++) {
             mPhoneSignalStrengthsTimer[i].readSummaryFromParcelLocked(in);
         }
+        mPhoneSignalScanningTimer.readSummaryFromParcelLocked(in);
         for (int i=0; i<NUM_DATA_CONNECTION_TYPES; i++) {
             mPhoneDataConnectionsTimer[i].readSummaryFromParcelLocked(in);
         }
@@ -3257,6 +3310,7 @@ public final class BatteryStatsImpl extends BatteryStats {
         for (int i=0; i<NUM_SIGNAL_STRENGTH_BINS; i++) {
             mPhoneSignalStrengthsTimer[i].writeSummaryFromParcelLocked(out, NOWREAL);
         }
+        mPhoneSignalScanningTimer.writeSummaryFromParcelLocked(out, NOWREAL);
         for (int i=0; i<NUM_DATA_CONNECTION_TYPES; i++) {
             mPhoneDataConnectionsTimer[i].writeSummaryFromParcelLocked(out, NOWREAL);
         }
@@ -3418,6 +3472,7 @@ public final class BatteryStatsImpl extends BatteryStats {
         for (int i=0; i<NUM_SIGNAL_STRENGTH_BINS; i++) {
             mPhoneSignalStrengthsTimer[i] = new StopwatchTimer(-200-i, null, mUnpluggables, in);
         }
+        mPhoneSignalScanningTimer = new StopwatchTimer(-200+1, null, mUnpluggables, in);
         for (int i=0; i<NUM_DATA_CONNECTION_TYPES; i++) {
             mPhoneDataConnectionsTimer[i] = new StopwatchTimer(-300-i, null, mUnpluggables, in);
         }
@@ -3513,6 +3568,7 @@ public final class BatteryStatsImpl extends BatteryStats {
         for (int i=0; i<NUM_SIGNAL_STRENGTH_BINS; i++) {
             mPhoneSignalStrengthsTimer[i].writeToParcel(out, batteryRealtime);
         }
+        mPhoneSignalScanningTimer.writeToParcel(out, batteryRealtime);
         for (int i=0; i<NUM_DATA_CONNECTION_TYPES; i++) {
             mPhoneDataConnectionsTimer[i].writeToParcel(out, batteryRealtime);
         }
@@ -3598,6 +3654,8 @@ public final class BatteryStatsImpl extends BatteryStats {
                 pr.println("*** Signal strength #" + i + ":");
                 mPhoneSignalStrengthsTimer[i].logState(pr, "  ");
             }
+            pr.println("*** Signal scanning :");
+            mPhoneSignalScanningTimer.logState(pr, "  ");
             for (int i=0; i<NUM_DATA_CONNECTION_TYPES; i++) {
                 pr.println("*** Data connection type #" + i + ":");
                 mPhoneDataConnectionsTimer[i].logState(pr, "  ");
