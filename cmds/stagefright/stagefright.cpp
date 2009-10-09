@@ -71,7 +71,12 @@ static void playSource(OMXClient *client, const sp<MediaSource> &source) {
             options.clearSeekTo();
 
             bool shouldSeek = false;
-            if (err != OK) {
+            if (err == INFO_FORMAT_CHANGED) {
+                CHECK_EQ(buffer, NULL);
+
+                printf("format changed.\n");
+                continue;
+            } else if (err != OK) {
                 printf("reached EOF.\n");
 
                 shouldSeek = true;
@@ -136,6 +141,12 @@ static void playSource(OMXClient *client, const sp<MediaSource> &source) {
 
             if (err != OK) {
                 CHECK_EQ(buffer, NULL);
+
+                if (err == INFO_FORMAT_CHANGED) {
+                    printf("format changed.\n");
+                    continue;
+                }
+
                 break;
             }
 
