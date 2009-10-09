@@ -782,7 +782,7 @@ public class StatusBarPolicy {
         public void onServiceStateChanged(ServiceState state) {
             mServiceState = state;
             updateSignalStrength();
-            updateCdmaRoamingIcon();
+            updateCdmaRoamingIcon(state);
             updateDataIcon();
         }
 
@@ -796,9 +796,9 @@ public class StatusBarPolicy {
         }
 
         @Override
-        public void onDataConnectionStateChanged(int state) {
+        public void onDataConnectionStateChanged(int state, int networkType) {
             mDataState = state;
-            updateDataNetType();
+            updateDataNetType(networkType);
             updateDataIcon();
         }
 
@@ -835,7 +835,7 @@ public class StatusBarPolicy {
     }
 
     private boolean isCdma() {
-        return ((mPhone != null) && (mPhone.getPhoneType() == TelephonyManager.PHONE_TYPE_CDMA));
+        return (mSignalStrength != null) && !mSignalStrength.isGsm();
     }
 
     private boolean isEvdo() {
@@ -889,6 +889,7 @@ public class StatusBarPolicy {
             else if (asu >= 4)  iconLevel = 2;
             else iconLevel = 1;
 
+            // Though mPhone is a Manager, this call is not an IPC
             if (mPhone.isNetworkRoaming()) {
                 iconList = sSignalImages_r;
             } else {
@@ -956,8 +957,7 @@ public class StatusBarPolicy {
         return (levelEvdoDbm < levelEvdoSnr) ? levelEvdoDbm : levelEvdoSnr;
     }
 
-    private final void updateDataNetType() {
-        int net = mPhone.getNetworkType();
+    private final void updateDataNetType(int net) {
 
         switch (net) {
         case TelephonyManager.NETWORK_TYPE_EDGE:
@@ -1211,7 +1211,7 @@ public class StatusBarPolicy {
         }
     }
 
-    private final void updateCdmaRoamingIcon() {
+    private final void updateCdmaRoamingIcon(ServiceState state) {
         if (!hasService()) {
             mService.setIconVisibility(mCdmaRoamingIndicatorIcon, false);
             return;
@@ -1223,8 +1223,8 @@ public class StatusBarPolicy {
         }
 
         int[] iconList = sRoamingIndicatorImages_cdma;
-        int iconIndex = mPhone.getCdmaEriIconIndex();
-        int iconMode = mPhone.getCdmaEriIconMode();
+        int iconIndex = state.getCdmaEriIconIndex();
+        int iconMode = state.getCdmaEriIconMode();
 
         if (iconIndex == -1) {
             Log.e(TAG, "getCdmaEriIconIndex returned null, skipping ERI icon update");
