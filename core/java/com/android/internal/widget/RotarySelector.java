@@ -106,8 +106,8 @@ public class RotarySelector extends View {
 
     // Vibration (haptic feedback)
     private Vibrator mVibrator;
-    private static final long VIBRATE_SHORT = 30;  // msec
-    private static final long VIBRATE_LONG = 60;  // msec
+    private static final long VIBRATE_SHORT = 20;  // msec
+    private static final long VIBRATE_LONG = 20;  // msec
 
     /**
      * The drawable for the arrows need to be scrunched this many dips towards the rotary bg below
