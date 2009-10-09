@@ -4556,7 +4556,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                     long now = SystemClock.uptimeMillis();
                     for (i=0; i<count; i++) {
                         ProcessRecord rec = mLRUProcesses.get(i);
-                        if (rec.thread != null &&
+                        if (rec != app && rec.thread != null &&
                                 (rec.lastLowMemory+GC_MIN_INTERVAL) <= now) {
                             // The low memory report is overriding any current
                             // state for a GC request.  Make sure to do
@@ -9852,6 +9852,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             mLRUProcesses.remove(index);
         }
 
+        mProcessesToGc.remove(app);
+        
         // Dismiss any open dialogs.
         if (app.crashDialog != null) {
             app.crashDialog.dismiss();
@@ -10519,7 +10521,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         //Log.i(TAG, "Bring up service:");
         //r.dump("  ");
 
-        if (r.app != null) {
+        if (r.app != null && r.app.thread != null) {
             sendServiceArgsLocked(r, false);
             return true;
         }
@@ -10550,20 +10552,22 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             // restart the application.
         }
 
+        // Not running -- get it started, and enqueue this service record
+        // to be executed when the app comes up.
+        if (startProcessLocked(appName, r.appInfo, true, intentFlags,
+                "service", r.name, false) == null) {
+            Log.w(TAG, "Unable to launch app "
+                    + r.appInfo.packageName + "/"
+                    + r.appInfo.uid + " for service "
+                    + r.intent.getIntent() + ": process is bad");
+            bringDownServiceLocked(r, true);
+            return false;
+        }
+        
         if (!mPendingServices.contains(r)) {
-            // Not running -- get it started, and enqueue this service record
-            // to be executed when the app comes up.
-            if (startProcessLocked(appName, r.appInfo, true, intentFlags,
-                    "service", r.name, false) == null) {
-                Log.w(TAG, "Unable to launch app "
-                        + r.appInfo.packageName + "/"
-                        + r.appInfo.uid + " for service "
-                        + r.intent.getIntent() + ": process is bad");
-                bringDownServiceLocked(r, true);
-                return false;
-            }
             mPendingServices.add(r);
         }
+        
         return true;
     }
 
