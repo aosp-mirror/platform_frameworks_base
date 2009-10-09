@@ -204,7 +204,7 @@ sp<OMXCodec> OMXCodec::Create(
 
         status_t err = omx->allocate_node(componentName, &node);
         if (err == OK) {
-            LOGI("Successfully allocated OMX node '%s'", componentName);
+            LOGV("Successfully allocated OMX node '%s'", componentName);
             break;
         }
     }
@@ -321,9 +321,10 @@ sp<OMXCodec> OMXCodec::Create(
             size -= length;
         }
 
-        LOGI("AVC profile = %d (%s), level = %d",
+        LOGV("AVC profile = %d (%s), level = %d",
              (int)profile, AVCProfileToString(profile), (int)level / 10);
 
+#if 0
         if (!strcmp(componentName, "OMX.TI.Video.Decoder")
             && (profile != kAVCProfileBaseline || level > 39)) {
             // This stream exceeds the decoder's capabilities.
@@ -331,6 +332,7 @@ sp<OMXCodec> OMXCodec::Create(
             LOGE("Profile and/or level exceed the decoder's capabilities.");
             return NULL;
         }
+#endif
     }
 
     if (!strcasecmp(MEDIA_MIMETYPE_AUDIO_AMR_NB, mime)) {
@@ -440,7 +442,7 @@ status_t OMXCodec::setVideoPortFormatType(
         // CHECK_EQ(format.nIndex, index);
 
 #if 1
-        CODEC_LOGI("portIndex: %ld, index: %ld, eCompressionFormat=%d eColorFormat=%d",
+        CODEC_LOGV("portIndex: %ld, index: %ld, eCompressionFormat=%d eColorFormat=%d",
              portIndex,
              index, format.eCompressionFormat, format.eColorFormat);
 #endif
@@ -473,7 +475,7 @@ status_t OMXCodec::setVideoPortFormatType(
         return UNKNOWN_ERROR;
     }
 
-    CODEC_LOGI("found a match.");
+    CODEC_LOGV("found a match.");
     status_t err = mOMX->set_parameter(
             mNode, OMX_IndexParamVideoPortFormat,
             &format, sizeof(format));
@@ -483,7 +485,7 @@ status_t OMXCodec::setVideoPortFormatType(
 
 void OMXCodec::setVideoInputFormat(
         const char *mime, OMX_U32 width, OMX_U32 height) {
-    CODEC_LOGI("setVideoInputFormat width=%ld, height=%ld", width, height);
+    CODEC_LOGV("setVideoInputFormat width=%ld, height=%ld", width, height);
 
     OMX_VIDEO_CODINGTYPE compressionFormat = OMX_VIDEO_CodingUnused;
     if (!strcasecmp(MEDIA_MIMETYPE_VIDEO_AVC, mime)) {
@@ -543,7 +545,7 @@ void OMXCodec::setVideoInputFormat(
     CHECK_EQ(err, OK);
 
     def.nBufferSize = (width * height * 2); // (width * height * 3) / 2;
-    CODEC_LOGI("Setting nBufferSize = %ld", def.nBufferSize);
+    CODEC_LOGV("Setting nBufferSize = %ld", def.nBufferSize);
 
     CHECK_EQ(def.eDomain, OMX_PortDomainVideo);
 
@@ -559,7 +561,7 @@ void OMXCodec::setVideoInputFormat(
 
 void OMXCodec::setVideoOutputFormat(
         const char *mime, OMX_U32 width, OMX_U32 height) {
-    CODEC_LOGI("setVideoOutputFormat width=%ld, height=%ld", width, height);
+    CODEC_LOGV("setVideoOutputFormat width=%ld, height=%ld", width, height);
 
     OMX_VIDEO_CODINGTYPE compressionFormat = OMX_VIDEO_CodingUnused;
     if (!strcasecmp(MEDIA_MIMETYPE_VIDEO_AVC, mime)) {
