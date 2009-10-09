@@ -20,6 +20,7 @@ import android.location.Address;
 import android.location.ILocationProvider;
 import android.location.Location;
 import android.location.LocationManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -217,9 +218,9 @@ public class LocationProviderProxy implements IBinder.DeathRecipient {
         }
     }
 
-    public void updateNetworkState(int state) {
+    public void updateNetworkState(int state, NetworkInfo info) {
         try {
-            mProvider.updateNetworkState(state);
+            mProvider.updateNetworkState(state, info);
         } catch (RemoteException e) {
             Log.e(TAG, "updateNetworkState failed", e);
         }

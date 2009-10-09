@@ -94,6 +94,8 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
 
     private Bundle mCellLocation = new Bundle();
 
+    private int mDataConnectionNetworkType;
+
     static final int PHONE_STATE_PERMISSION_MASK =
                 PhoneStateListener.LISTEN_CALL_FORWARDING_INDICATOR |
                 PhoneStateListener.LISTEN_CALL_STATE |
@@ -187,7 +189,8 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
                     }
                     if ((events & PhoneStateListener.LISTEN_DATA_CONNECTION_STATE) != 0) {
                         try {
-                            r.callback.onDataConnectionStateChanged(mDataConnectionState);
+                            r.callback.onDataConnectionStateChanged(mDataConnectionState,
+                                mDataConnectionNetworkType);
                         } catch (RemoteException ex) {
                             remove(r.binder);
                         }
@@ -345,7 +348,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
     }
 
     public void notifyDataConnection(int state, boolean isDataConnectivityPossible,
-            String reason, String apn, String[] apnTypes, String interfaceName) {
+            String reason, String apn, String[] apnTypes, String interfaceName, int networkType) {
         if (!checkNotifyPermission("notifyDataConnection()" )) {
             return;
         }
@@ -356,11 +359,12 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
             mDataConnectionApn = apn;
             mDataConnectionApnTypes = apnTypes;
             mDataConnectionInterfaceName = interfaceName;
+            mDataConnectionNetworkType = networkType;
             for (int i = mRecords.size() - 1; i >= 0; i--) {
                 Record r = mRecords.get(i);
                 if ((r.events & PhoneStateListener.LISTEN_DATA_CONNECTION_STATE) != 0) {
                     try {
-                        r.callback.onDataConnectionStateChanged(state);
+                        r.callback.onDataConnectionStateChanged(state, networkType);
                     } catch (RemoteException ex) {
                         remove(r.binder);
                     }

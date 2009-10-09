@@ -56,6 +56,8 @@ static void dumpstate(int full) {
         EXEC_XBIN("procrank");
         PRINT("------ VIRTUAL MEMORY STATS ------");
         DUMP("/proc/vmstat");
+        PRINT("------ VMALLOC INFO ------");
+        DUMP("/proc/vmallocinfo");
         PRINT("------ SLAB INFO ------");
         DUMP("/proc/slabinfo");
         PRINT("------ ZONEINFO ------");
