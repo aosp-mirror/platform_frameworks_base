@@ -1436,6 +1436,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             mSimpleProcessManagement = true;
         }
 
+        Log.i(TAG, "Memory class: " + ActivityManager.staticGetMemoryClass());
+        
         MY_PID = Process.myPid();
         
         File dataDir = Environment.getDataDirectory();
