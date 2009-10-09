@@ -16,6 +16,7 @@
 
 package android.webkit;
 
+import android.app.ActivityManager;
 import android.content.Context;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
@@ -105,7 +106,13 @@ class BrowserFrame extends Handler {
         if (sJavaBridge == null) {
             sJavaBridge = new JWebCoreJavaBridge(context);
             // set WebCore native cache size
-            sJavaBridge.setCacheSize(4 * 1024 * 1024);
+            ActivityManager am = (ActivityManager) context
+                    .getSystemService(Context.ACTIVITY_SERVICE);
+            if (am.getMemoryClass() > 16) {
+                sJavaBridge.setCacheSize(8 * 1024 * 1024);
+            } else {
+                sJavaBridge.setCacheSize(4 * 1024 * 1024);
+            }
             // initialize CacheManager
             CacheManager.init(context);
             // create CookieSyncManager with current Context
