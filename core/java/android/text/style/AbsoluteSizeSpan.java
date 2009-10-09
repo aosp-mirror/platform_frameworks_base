@@ -24,13 +24,30 @@ import android.text.TextUtils;
 public class AbsoluteSizeSpan extends MetricAffectingSpan implements ParcelableSpan {
 
     private final int mSize;
+    private boolean mDip;
 
+    /**
+     * Set the text size to <code>size</code> physical pixels.
+     */
     public AbsoluteSizeSpan(int size) {
         mSize = size;
     }
 
+    /**
+     * Set the text size to <code>size</code> physical pixels,
+     * or to <code>size</code> device-independent pixels if
+     * <code>dip</code> is true.
+     *
+     * @hide Not in the donut API
+     */
+    public AbsoluteSizeSpan(int size, boolean dip) {
+        mSize = size;
+        mDip = dip;
+    }
+
     public AbsoluteSizeSpan(Parcel src) {
         mSize = src.readInt();
+        mDip = src.readInt() != 0;
     }
     
     public int getSpanTypeId() {
@@ -43,19 +60,35 @@ public class AbsoluteSizeSpan extends MetricAffectingSpan implements ParcelableS
 
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(mSize);
+        dest.writeInt(mDip ? 1 : 0);
     }
 
     public int getSize() {
         return mSize;
     }
 
+    /**
+     * @hide Not in the donut API
+     */
+    public boolean getDip() {
+        return mDip;
+    }
+
     @Override
     public void updateDrawState(TextPaint ds) {
-        ds.setTextSize(mSize);
+        if (mDip) {
+            ds.setTextSize(mSize * ds.density);
+        } else {
+            ds.setTextSize(mSize);
+        }
     }
 
     @Override
     public void updateMeasureState(TextPaint ds) {
-        ds.setTextSize(mSize);
+        if (mDip) {
+            ds.setTextSize(mSize * ds.density);
+        } else {
+            ds.setTextSize(mSize);
+        }
     }
 }
