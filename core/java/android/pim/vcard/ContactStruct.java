@@ -698,6 +698,7 @@ public class ContactStruct {
             mPhotoList = new ArrayList<PhotoData>(1);
         }
         final PhotoData photoData = new PhotoData(0, null, photoBytes);
+        mPhotoList.add(photoData);
     }
 
     /**
