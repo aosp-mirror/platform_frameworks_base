@@ -493,38 +493,44 @@ void LayerBuffer::BufferSource::onDraw(const Region& clip) const
                 copybit->set_parameter(copybit, COPYBIT_DITHER, COPYBIT_DISABLE);
                 err = copybit->stretch(copybit,
                         &tmp.img, &src.img, &tmp.crop, &src.crop, &tmp_it);
-                src = tmp;
+                if (err != NO_ERROR) {
+                    LOGE("copybit failed (%s)", strerror(err));
+                } else {
+                    src = tmp;
+                }
             }
         }
 
-        const DisplayHardware& hw(mLayer.graphicPlane(0).displayHardware());
-        copybit_image_t dst;
-        hw.getDisplaySurface(&dst);
-        const copybit_rect_t& drect
-            = reinterpret_cast<const copybit_rect_t&>(transformedBounds);
-        const State& s(mLayer.drawingState());
-        region_iterator it(clip);
-        
-        // pick the right orientation for this buffer
-        int orientation = mLayer.getOrientation();
-        if (UNLIKELY(mBufferHeap.transform)) {
-            Transform rot90;
-            GraphicPlane::orientationToTransfrom(
-                    ISurfaceComposer::eOrientation90, 0, 0, &rot90);
-            const Transform& planeTransform(mLayer.graphicPlane(0).transform());
-            const Layer::State& s(mLayer.drawingState());
-            Transform tr(planeTransform * s.transform * rot90);
-            orientation = tr.getOrientation();
-        }
-        
-        copybit->set_parameter(copybit, COPYBIT_TRANSFORM, orientation);
-        copybit->set_parameter(copybit, COPYBIT_PLANE_ALPHA, s.alpha);
-        copybit->set_parameter(copybit, COPYBIT_DITHER, COPYBIT_ENABLE);
+        if (err == NO_ERROR) {
+            const DisplayHardware& hw(mLayer.graphicPlane(0).displayHardware());
+            copybit_image_t dst;
+            hw.getDisplaySurface(&dst);
+            const copybit_rect_t& drect
+                = reinterpret_cast<const copybit_rect_t&>(transformedBounds);
+            const State& s(mLayer.drawingState());
+            region_iterator it(clip);
 
-        err = copybit->stretch(copybit,
-                &dst, &src.img, &drect, &src.crop, &it);
-        if (err != NO_ERROR) {
-            LOGE("copybit failed (%s)", strerror(err));
+            // pick the right orientation for this buffer
+            int orientation = mLayer.getOrientation();
+            if (UNLIKELY(mBufferHeap.transform)) {
+                Transform rot90;
+                GraphicPlane::orientationToTransfrom(
+                        ISurfaceComposer::eOrientation90, 0, 0, &rot90);
+                const Transform& planeTransform(mLayer.graphicPlane(0).transform());
+                const Layer::State& s(mLayer.drawingState());
+                Transform tr(planeTransform * s.transform * rot90);
+                orientation = tr.getOrientation();
+            }
+
+            copybit->set_parameter(copybit, COPYBIT_TRANSFORM, orientation);
+            copybit->set_parameter(copybit, COPYBIT_PLANE_ALPHA, s.alpha);
+            copybit->set_parameter(copybit, COPYBIT_DITHER, COPYBIT_ENABLE);
+
+            err = copybit->stretch(copybit,
+                    &dst, &src.img, &drect, &src.crop, &it);
+            if (err != NO_ERROR) {
+                LOGE("copybit failed (%s)", strerror(err));
+            }
         }
     }
 
