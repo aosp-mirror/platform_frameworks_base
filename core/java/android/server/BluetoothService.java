@@ -61,7 +61,7 @@ import java.util.Map;
 
 public class BluetoothService extends IBluetooth.Stub {
     private static final String TAG = "BluetoothService";
-    private static final boolean DBG = false;
+    private static final boolean DBG = true;
 
     private int mNativeData;
     private BluetoothEventLoop mEventLoop;
