@@ -48,6 +48,7 @@ import android.location.Location;
 import android.location.LocationManager;
 import android.location.LocationProvider;
 import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
@@ -529,7 +530,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
             }
 
             // notify provider of current network state
-            proxy.updateNetworkState(mNetworkState);
+            proxy.updateNetworkState(mNetworkState, null);
         }
     }
 
@@ -1600,13 +1601,15 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
                 } else {
                     mNetworkState = LocationProvider.TEMPORARILY_UNAVAILABLE;
                 }
+                NetworkInfo info =
+                        (NetworkInfo)intent.getExtra(ConnectivityManager.EXTRA_NETWORK_INFO);
 
                 // Notify location providers of current network state
                 synchronized (mLock) {
                     for (int i = mProviders.size() - 1; i >= 0; i--) {
                         LocationProviderProxy provider = mProviders.get(i);
                         if (provider.requiresNetwork()) {
-                            provider.updateNetworkState(mNetworkState);
+                            provider.updateNetworkState(mNetworkState, info);
                         }
                     }
                 }

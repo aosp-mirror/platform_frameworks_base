@@ -32,6 +32,7 @@ import android.location.Location;
 import android.location.LocationManager;
 import android.location.LocationProvider;
 import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.SntpClient;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -46,7 +47,6 @@ import android.util.SparseIntArray;
 
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.telephony.Phone;
-import com.android.internal.telephony.TelephonyIntents;
 import com.android.internal.location.GpsNetInitiatedHandler;
 import com.android.internal.location.GpsNetInitiatedHandler.GpsNiNotification;
 
@@ -303,22 +303,6 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
             } else if (action.equals(ALARM_TIMEOUT)) {
                 if (DEBUG) Log.d(TAG, "ALARM_TIMEOUT");
                 hibernate();
-            } else if (action.equals(TelephonyIntents.ACTION_ANY_DATA_CONNECTION_STATE_CHANGED)) {
-                String state = intent.getStringExtra(Phone.STATE_KEY);
-                String apnName = intent.getStringExtra(Phone.DATA_APN_KEY);
-                String reason = intent.getStringExtra(Phone.STATE_CHANGE_REASON_KEY);
-
-                if (Config.LOGD) {
-                    Log.d(TAG, "state: " + state +  " apnName: " + apnName + " reason: " + reason);
-                }
-                // FIXME - might not have an APN on CDMA
-                if ("CONNECTED".equals(state) && apnName != null && apnName.length() > 0) {
-                    mAGpsApn = apnName;
-                    if (mAGpsDataConnectionState == AGPS_DATA_CONNECTION_OPENING) {
-                        native_agps_data_conn_open(mAGpsApn);
-                        mAGpsDataConnectionState = AGPS_DATA_CONNECTION_OPEN;
-                    }
-                }
             }
         }
     };
@@ -343,7 +327,6 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(ALARM_WAKEUP);
         intentFilter.addAction(ALARM_TIMEOUT);
-        intentFilter.addAction(TelephonyIntents.ACTION_ANY_DATA_CONNECTION_STATE_CHANGED);
         context.registerReceiver(mBroadcastReciever, intentFilter);
 
         mConnMgr = (ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -391,13 +374,30 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
         return true;
     }
 
-    public void updateNetworkState(int state) {
+    public void updateNetworkState(int state, NetworkInfo info) {
         mNetworkAvailable = (state == LocationProvider.AVAILABLE);
 
         if (Config.LOGD) {
-            Log.d(TAG, "updateNetworkState " + (mNetworkAvailable ? "available" : "unavailable"));
+            Log.d(TAG, "updateNetworkState " + (mNetworkAvailable ? "available" : "unavailable")
+                + " info: " + info);
         }
-        
+
+        if (info != null && info.getType() == ConnectivityManager.TYPE_MOBILE_SUPL
+                && mAGpsDataConnectionState == AGPS_DATA_CONNECTION_OPENING) {
+            String apnName = info.getExtraInfo();
+            if (mNetworkAvailable && apnName != null && apnName.length() > 0) {
+                mAGpsApn = apnName;
+                if (DEBUG) Log.d(TAG, "call native_agps_data_conn_open");
+                native_agps_data_conn_open(apnName);
+                mAGpsDataConnectionState = AGPS_DATA_CONNECTION_OPEN;
+            } else {
+                if (DEBUG) Log.d(TAG, "call native_agps_data_conn_failed");
+                mAGpsApn = null;
+                mAGpsDataConnectionState = AGPS_DATA_CONNECTION_CLOSED;
+                native_agps_data_conn_failed();
+            }
+        }
+
         if (mNetworkAvailable && mNetworkThread != null && mEnabled) {
             // signal the network thread when the network becomes available
             mNetworkThread.signal();
