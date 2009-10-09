@@ -569,6 +569,7 @@ public final class BluetoothAdapter {
      * <p>Applications can also register for {@link #ACTION_DISCOVERY_STARTED}
      * or {@link #ACTION_DISCOVERY_FINISHED} to be notified when discovery
      * starts or completes.
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH}.
      *
      * @return true if discovering
      */
@@ -582,6 +583,7 @@ public final class BluetoothAdapter {
     /**
      * Return the set of {@link BluetoothDevice} objects that are bonded
      * (paired) to the local adapter.
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH}.
      *
      * @return unmodifiable set of {@link BluetoothDevice}, or null on error
      */
