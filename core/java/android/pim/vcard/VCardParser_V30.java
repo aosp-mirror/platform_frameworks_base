@@ -48,12 +48,17 @@ public class VCardParser_V30 extends VCardParser_V21 {
     private String mPreviousLine;
     
     private boolean mEmittedAgentWarning = false;
-    
+
     @Override
-    protected String getVersion() {
+    protected int getVersion() {
+        return VCardConfig.FLAG_V30;
+    }
+
+    @Override
+    protected String getVersionString() {
         return Constants.VERSION_V30;
     }
-    
+
     @Override
     protected boolean isValidPropertyName(String propertyName) {
         if (!(sAcceptablePropsWithParam.contains(propertyName) ||
@@ -284,6 +289,10 @@ public class VCardParser_V30 extends VCardParser_V21 {
      */ 
     @Override
     protected String maybeUnescapeText(String text) {
+        return unescapeText(text);
+    }
+
+    public static String unescapeText(String text) {
         StringBuilder builder = new StringBuilder();
         int length = text.length();
         for (int i = 0; i < length; i++) {
@@ -299,15 +308,19 @@ public class VCardParser_V30 extends VCardParser_V21 {
                 builder.append(ch);
             }
         }
-        return builder.toString();
+        return builder.toString();        
     }
     
     @Override
     protected String maybeUnescapeCharacter(char ch) {
+        return unescapeCharacter(ch);
+    }
+
+    public static String unescapeCharacter(char ch) {
         if (ch == 'n' || ch == 'N') {
             return "\n";
         } else {
             return String.valueOf(ch);
-        }
+        }        
     }
 }
