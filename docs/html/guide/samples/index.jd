@@ -33,6 +33,10 @@ can modify them and watch them execute. </p>
   <dd>An application for saving notes. Similar (but not identical) to the 
     <a href="{@docRoot}guide/tutorials/notepad/index.html">Notepad tutorial</a>.</dd>
   
+ <dt><a href="SearchableDictionary/index.html">Searchable Dictionary</a></dt>
+  <dd>A sample application that demonstrates Android's search framework, 
+  including how to provide search suggestions for Quick Search Box.</dd>
+  
  <dt><a href="Snake/index.html">Snake</a></dt>
   <dd>An implementation of the classic game "Snake."</dd>
   

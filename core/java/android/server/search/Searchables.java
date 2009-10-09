@@ -26,7 +26,6 @@ import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
-import android.content.pm.ApplicationInfo;
 import android.os.Bundle;
 import android.util.Log;
 
@@ -231,16 +230,14 @@ public class Searchables {
                         : webSearchInfoList.get(ii - search_count);
                 ActivityInfo ai = info.activityInfo;
                 // Check first to avoid duplicate entries.
-                if (newSearchablesMap.containsKey(new ComponentName(ai.packageName, ai.name))) {
-                    continue;
-                }
-                SearchableInfo searchable = SearchableInfo.getActivityMetaData(mContext, ai);
-                if (searchable != null) {
-                    newSearchablesList.add(searchable);
-                    newSearchablesMap.put(searchable.getSearchActivity(), searchable);
-                    if (searchable.shouldIncludeInGlobalSearch()
-                            && isWhitelistedForGlobalSearch(pm, searchable.getSearchActivity())) {
-                        newSearchablesInGlobalSearchList.add(searchable);
+                if (newSearchablesMap.get(new ComponentName(ai.packageName, ai.name)) == null) {
+                    SearchableInfo searchable = SearchableInfo.getActivityMetaData(mContext, ai);
+                    if (searchable != null) {
+                        newSearchablesList.add(searchable);
+                        newSearchablesMap.put(searchable.getSearchActivity(), searchable);
+                        if (searchable.shouldIncludeInGlobalSearch()) {
+                            newSearchablesInGlobalSearchList.add(searchable);
+                        }
                     }
                 }
             }
@@ -288,25 +285,6 @@ public class Searchables {
             mSearchablesForWebSearchList = newSearchablesForWebSearchList;
             mDefaultSearchable = newDefaultSearchable;
             mDefaultSearchableForWebSearch = newDefaultSearchableForWebSearch;
-        }
-    }
-
-    /**
-     * Determines whether an activity may be included in quick search box.  For now this is
-     * restricted to system installed apps.
-     *
-     * TODO: remove when we are ready to enable global search for third party applications.
-     *
-     * @param pm The package manager.
-     * @param searchActivity The component of the search activity.
-     * @return True if the search activity may include its search suggestions in quick search box.
-     */
-    private boolean isWhitelistedForGlobalSearch(PackageManager pm, ComponentName searchActivity) {
-        try {
-            ActivityInfo ai = pm.getActivityInfo(searchActivity, 0);
-            return ((ai.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0);
-        } catch (PackageManager.NameNotFoundException e) {
-            return false;
         }
     }
 

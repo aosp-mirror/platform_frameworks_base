@@ -3,8 +3,8 @@ page.title=Community
 @jd:body
 
 	<div id="mainBodyFluid">
-			<h1>Community</h1>
-			<p>Welcome to the Android developers community! We're glad you're here and invite you to participate in these discussions. Before posting, please read the <a href="http://source.android.com/discuss/android-discussion-groups-charter">Groups Charter</a> that covers the community guidelines.</p>
+<h1>Community</h1>
+<p>Welcome to the Android developers community! We're glad you're here and invite you to participate in these discussions. Before posting, please read the <a href="http://source.android.com/discuss/android-discussion-groups-charter">Groups Charter</a> that covers the community guidelines.</p>
 
 <p class="note"><strong>Note:</strong> If you are seeking discussion about Android source code (not application development),
 then please refer to the <a href="http://source.android.com/discuss">Open Source Project Mailing lists</a>.</p>
@@ -53,48 +53,42 @@ phrasing your questions, read <a href="http://www.catb.org/%7Eesr/faqs/smart-que
 <li><b>Android beginners</b> - You're new to Android application development. You want to figure out how to get started with the Android SDK and the basic Android APIs? Start here. This list is open to any discussion around beginner-type questions for developers using the SDK; this is a great way to get up and running with your new application on the Android platform. Ask about getting your development environment set up, get help with the first steps of Android development (your first User Interface, your first permission, your first file on the Android filesystem, your first app on the Android Market...). Be sure to check the archives first before asking new questions. Please avoid advanced subjects, which belong on android-developers, and user questions, which will get a better reception on android-discuss.
 <ul>
 <li>Subscribe using Google Groups:&nbsp;<a href="http://groups.google.com/group/android-beginners">android-beginners</a></li>
-<li>Subscribe via email:&nbsp;<a href="mailto:android-beginners-subscribe@googlegroups.com">android-beginners-subscribe@googlegroups.com</a><a href="mailto:android-platform-subscribe@googlegroups.com">
-</a></li>
+<li>Subscribe via email:&nbsp;<a href="mailto:android-beginners-subscribe@googlegroups.com">android-beginners-subscribe@googlegroups.com</a></li>
 </ul>
 </li>
 
 <li><b>Android developers</b> - You're now an experienced Android application developer. You've grasped the basics of Android app development, you're comfortable using the SDK, now you want to move to advanced topics. Get help here with troubleshooting applications, advice on implementation, and strategies for improving your application's performance and user experience. This is the not the right place to discuss user issues (use android-discuss for that) or beginner questions with the Android SDK (use android-beginners for that).
 <ul>
 <li>Subscribe using Google Groups:&nbsp;<a href="http://groups.google.com/group/android-developers">android-developers</a></li>
-<li>Subscribe via email:&nbsp;<a href="mailto:android-developers-subscribe@googlegroups.com">android-developers-subscribe@googlegroups.com</a><a href="mailto:android-platform-subscribe@googlegroups.com">
-</a></li>
+<li>Subscribe via email:&nbsp;<a href="mailto:android-developers-subscribe@googlegroups.com">android-developers-subscribe@googlegroups.com</a></li>
 </ul>
 </li>
 
 <li><b>Android discuss</b> - The "water cooler" of Android discussion. You can discuss just about anything Android-related here, ideas for the Android platform, announcements about your applications, discussions about Android devices, community resources... As long as your discussion is related to Android, it's on-topic here. However, if you have a discussion here that could belong on another list, you are probably not reaching all of your target audience here and may want to consider shifting to a more targeted list.
 <ul>
 <li>Subscribe using Google Groups:&nbsp;<a href="http://groups.google.com/group/android-discuss">android-discuss</a></li>
-<li>Subscribe via email:&nbsp;<a href="mailto:android-discuss-subscribe@googlegroups.com">android-discuss-subscribe@googlegroups.com</a><a href="mailto:android-platform-subscribe@googlegroups.com">
-    </a></li>
+<li>Subscribe via email:&nbsp;<a href="mailto:android-discuss-subscribe@googlegroups.com">android-discuss-subscribe@googlegroups.com</a></li>
 </ul>
 </li>
 
 <li><b>Android ndk</b> - A place for discussing the Android NDK and topics related to using native code in Android applications. 
 <ul>
 <li>Subscribe using Google Groups:&nbsp;<a href="http://groups.google.com/group/android-ndk">android-ndk</a></li>
-<li>Subscribe via email:&nbsp;<a href="mailto:android-ndk-subscribe@googlegroups.com">android-ndk-subscribe@googlegroups.com</a><a href="mailto:android-platform-subscribe@googlegroups.com">
-    </a></li>
+<li>Subscribe via email:&nbsp;<a href="mailto:android-ndk-subscribe@googlegroups.com">android-ndk-subscribe@googlegroups.com</a></li>
 </ul>
 </li>
 
 <li><b>Android security discuss</b> - A place for open discussion on secure development, emerging security concerns, and best practices for and by android developers. Please don't disclose vulnerabilities directly on this list, you'd be putting all Android users at risk.
 <ul>
 <li>Subscribe using Google Groups:&nbsp;<a href="http://groups.google.com/group/android-security-discuss">android-security-discuss</a></li>
-<li>Subscribe via email:&nbsp;<a href="mailto:android-security-discuss@googlegroups.com">android-security-discuss@googlegroups.com</a><a href="mailto:android-platform-subscribe@googlegroups.com">
-    </a></li>
+<li>Subscribe via email:&nbsp;<a href="mailto:android-security-discuss@googlegroups.com">android-security-discuss@googlegroups.com</a></li>
 </ul>
 </li>
 
 <li><b>Android security announce</b> - A low-volume group for security-related announcements by the Android Security Team.
 <ul>
 <li>Subscribe using Google Groups:&nbsp;<a href="http://groups.google.com/group/android-security-announce">android-security-announce</a></li>
-<li>Subscribe via email:&nbsp;<a href="mailto:android-security-announce-subscribe@googlegroups.com">android-security-announce-subscribe@googlegroups.com</a>
-<a href="mailto:android-platform-subscribe@googlegroups.com">    </a></li>
+<li>Subscribe via email:&nbsp;<a href="mailto:android-security-announce-subscribe@googlegroups.com">android-security-announce-subscribe@googlegroups.com</a></li>
 </ul>
 </li>
 

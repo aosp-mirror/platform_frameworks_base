@@ -26,24 +26,24 @@ page</a>.
   </tr>
 
   <tr>
-     <td>0.9.2</td>
-     <td><a href="http://dl-ssl.google.com/android/ADT-0.9.2.zip">ADT-0.9.2.zip</a></td>
+     <td>0.9.3</td>
+     <td><a href="http://dl-ssl.google.com/android/ADT-0.9.3.zip">ADT-0.9.3.zip</a></td>
      <td><nobr>bytes</nobr></td>
      <td><nobr></nobr></td>
-     <td><nobr>Required for users of Android 1.6 SDK (and later releases). Updated from 0.9.1. <em><nobr>August 2009</nobr></em></td>
+     <td><nobr>Required for users of Android 1.6 SDK (and later releases). Updated from 0.9.1. <em><nobr>September 2009</nobr></em></td>
   </tr>
   <tr class="alt-color">
      <td>0.9.1</td>
      <td><a href="http://dl-ssl.google.com/android/ADT-0.9.1.zip">ADT-0.9.1.zip</a></td>
      <td><nobr>2916093 bytes</nobr></td>
      <td><nobr>e7b2ab40414ac98</nobr></td>
-     <td><nobr>Required for users of Android 1.5 SDK (and later releases). Updated from 0.9.0. <em><nobr>6 May 2009</nobr></em></td>
+     <td><nobr>Required for users of Android 1.5 SDK. Updated from 0.9.0. <em><nobr>6 May 2009</nobr></em></td>
   </tr>
   <tr>
      <td>0.8.0</td>
      <td><a href="http://dl-ssl.google.com/android/ADT-0.8.0.zip">ADT-0.8.0.zip</a></td>
      <td colspan="2"><nobr>&nbsp;</nobr></td>
-     <td><nobr>Required for users of Android 1.1 SDK and Android 1.0 SDK. <em><nobr>23 Sep 2008</nobr></em></td>
+     <td><nobr>Required for users of Android 1.0/1.1 SDKs. <em><nobr>23 Sep 2008</nobr></em></td>
   </tr>
 </table>
 
@@ -63,20 +63,19 @@ Feature ID column and look at its version number.</p>
 
   <tr>
      <td>0.7.1</td>
-     <td>Required for users of Android 0.9 SDK beta. As of this version, <b>Eclipse 3.2 is no longer supported.</b>
-     Please upgrade to Eclipse Ganymede (3.4) or Europa (3.3) if you are still using 3.2. <em><nobr>18 Aug 2008</nobr></em></td>
+     <td>Required for users of the Android 0.9 SDK beta. <em><nobr>18 Aug 2008</nobr></em></td>
   </tr>
   <tr>
      <td>0.4.0</td>
-     <td>Required if you are using the M5 SDK. See the SDK Release Notes for details on changes and enhancements in this version. <em><nobr>12 Feb 2008</nobr></em></td>
+     <td>Required for users of the Android M5 Early Look SDK. <em><nobr>12 Feb 2008</nobr></em></td>
   </tr>
   <tr>
      <td>0.3.3</td>
-     <td>Some significant enhancements (see m3-rc37 SDK Release Notes). <em><nobr>14 Dec 2007</nobr></em></td>
+     <td>Required for users of the Android M3-RC37 Early Look SDK. <em><nobr>14 Dec 2007</nobr></em></td>
   </tr>
   <tr>
      <td>0.3.1</td>
-     <td>Initial Release. Required for Android m3-rc20 SDK and Android m3-rc22 SDK.<em><nobr>21 Nov 2007</nobr></em></td>
+     <td>Initial Release. Required for users of the Android M3-RC20/22 SDKs.<em><nobr>21 Nov 2007</nobr></em></td>
   </tr>
 </table>
 </p>

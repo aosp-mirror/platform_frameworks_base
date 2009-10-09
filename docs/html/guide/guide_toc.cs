@@ -256,6 +256,7 @@
       		<li><a href="<?cs var:toroot ?>guide/developing/tools/monkey.html">Monkey</a></li>
       		<li><a href="<?cs var:toroot ?>guide/developing/tools/adb.html#sqlite">sqlite3</a></li>
       		<li><a href="<?cs var:toroot ?>guide/developing/tools/traceview.html" >Traceview</a></li>
+      		<li><a href="<?cs var:toroot ?>guide/developing/tools/zipalign.html" >zipalign</a></li>
     	  </ul>
   	  </li>
   <!--<li><a href="<?cs var:toroot ?>guide/developing/instrumentation/index.html">Instrumentation</a></li>
@@ -375,7 +376,7 @@
     </ul>
     <ul>
     <?cs if:android.whichdoc != "online" ?>
-      <li><a href="<?cs var:toroot ?>../samples">
+      <li><a href="<?cs var:toroot ?>../platforms/android-<?cs var:sdk.version ?>/samples">
             <span class="en">Sample Code</span>
           &raquo;</a></li>
     <?cs else ?>
@@ -398,6 +399,9 @@
               </a></li>
           <li><a href="<?cs var:toroot ?>guide/samples/NotePad/index.html">
                 <span class="en">Note Pad</span>
+              </a></li>
+          <li><a href="<?cs var:toroot ?>guide/samples/SearchableDictionary/index.html">
+                <span class="en">Searchable Dictionary</span>
               </a></li>
           <li><a href="<?cs var:toroot ?>guide/samples/Snake/index.html">
                 <span class="en">Snake</span>
