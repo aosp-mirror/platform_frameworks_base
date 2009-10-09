@@ -542,7 +542,7 @@ public class WifiService extends IWifiManager.Stub {
 
         value = WifiNative.getNetworkVariableCommand(netId, WifiConfiguration.ssidVarName);
         if (!TextUtils.isEmpty(value)) {
-            config.SSID = value;
+            config.SSID = removeDoubleQuotes(value);
         } else {
             config.SSID = null;
         }
@@ -675,9 +675,19 @@ public class WifiService extends IWifiManager.Stub {
             value = WifiNative.getNetworkVariableCommand(netId,
                     field.varName());
             if (!TextUtils.isEmpty(value)) {
+                if (field != config.eap) value = removeDoubleQuotes(value);
                 field.setValue(value);
             }
         }
+    }
+
+    private static String removeDoubleQuotes(String string) {
+        if (string.length() <= 2) return "";
+        return string.substring(1, string.length() - 1);
+    }
+
+    private static String convertToQuotedString(String string) {
+        return "\"" + string + "\"";
     }
 
     /**
@@ -731,7 +741,7 @@ public class WifiService extends IWifiManager.Stub {
                 !WifiNative.setNetworkVariableCommand(
                     netId,
                     WifiConfiguration.ssidVarName,
-                    config.SSID)) {
+                    convertToQuotedString(config.SSID))) {
                 if (DBG) {
                     Log.d(TAG, "failed to set SSID: "+config.SSID);
                 }
@@ -894,18 +904,22 @@ public class WifiService extends IWifiManager.Stub {
                     : config.enterpriseFields) {
                 String varName = field.varName();
                 String value = field.value();
-                if ((value != null) && !WifiNative.setNetworkVariableCommand(
-                    netId,
-                    varName,
-                    value)) {
-                    if (DBG) {
-                        Log.d(TAG, config.SSID + ": failed to set " + varName +
-                              ": " + value);
+                if (value != null) {
+                    if (field != config.eap) {
+                        value = convertToQuotedString(value);
                     }
-                    break setVariables;
+                    if (!WifiNative.setNetworkVariableCommand(
+                            netId,
+                            varName,
+                            value)) {
+                        if (DBG) {
+                            Log.d(TAG, config.SSID + ": failed to set " + varName +
+                                  ": " + value);
+                        }
+                        break setVariables;
+                    }
                 }
             }
-
             return netId;
         }
 
