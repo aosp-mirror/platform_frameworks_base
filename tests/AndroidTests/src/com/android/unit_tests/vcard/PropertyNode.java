@@ -16,6 +16,7 @@
 package com.android.unit_tests.vcard;
 
 import android.content.ContentValues;
+import android.pim.vcard.ContactStruct;
 
 import org.apache.commons.codec.binary.Base64;
 
@@ -28,7 +29,12 @@ import java.util.Map.Entry;
 import java.util.regex.Pattern;
 
 /**
- * @hide old class just for test
+ * Previously used in main vCard handling code but now exists only for testing.
+ *
+ * Especially useful for testing parser code (VCardParser), since all properties can be
+ * checked via this class unlike {@link ContactStruct}, which only emits the result of
+ * interpretation of the content of each vCard. We cannot know whether vCard parser or
+ * ContactStruct is wrong withouth this class.
  */
 public class PropertyNode {
     public String propName;

@@ -144,10 +144,14 @@ public class VCardParser_V21 extends VCardParser {
         }
     }
 
-    protected String getVersion() {
+    protected int getVersion() {
+        return VCardConfig.FLAG_V21;
+    }
+
+    protected String getVersionString() {
         return "2.1";
     }
-    
+
     /**
      * @return true when the propertyName is a valid property name.
      */
@@ -356,7 +360,7 @@ public class VCardParser_V21 extends VCardParser {
      *      / [groups "."] "ADR"   [params] ":" addressparts CRLF
      *      / [groups "."] "ORG"   [params] ":" orgparts CRLF
      *      / [groups "."] "N"     [params] ":" nameparts CRLF
-     *      / [groups "."] "AGENT" [params] ":" vcard CRLF 
+     *      / [groups "."] "AGENT" [params] ":" vcard CRLF
      */
     protected boolean parseItem() throws IOException, VCardException {
         mEncoding = sDefaultEncoding;
@@ -392,9 +396,10 @@ public class VCardParser_V21 extends VCardParser {
                 } else {
                     throw new VCardException("Unknown BEGIN type: " + propertyValue);
                 }
-            } else if (propertyName.equals("VERSION") && !propertyValue.equals(getVersion())) {
+            } else if (propertyName.equals("VERSION") &&
+                    !propertyValue.equals(getVersionString())) {
                 throw new VCardVersionException("Incompatible version: " + 
-                        propertyValue + " != " + getVersion());
+                        propertyValue + " != " + getVersionString());
             }
             start = System.currentTimeMillis();
             handlePropertyValue(propertyName, propertyValue);
@@ -761,32 +766,11 @@ public class VCardParser_V21 extends VCardParser {
         }
 
         if (mBuilder != null) {
-            StringBuilder builder = new StringBuilder();
-            ArrayList<String> list = new ArrayList<String>();
-            int length = propertyValue.length();
-            for (int i = 0; i < length; i++) {
-                char ch = propertyValue.charAt(i);
-                if (ch == '\\' && i < length - 1) {
-                    char nextCh = propertyValue.charAt(i + 1);
-                    String unescapedString = maybeUnescapeCharacter(nextCh); 
-                    if (unescapedString != null) {
-                        builder.append(unescapedString);
-                        i++;
-                    } else {
-                        builder.append(ch);
-                    }
-                } else if (ch == ';') {
-                    list.add(builder.toString());
-                    builder = new StringBuilder();
-                } else {
-                    builder.append(ch);
-                }
-            }
-            list.add(builder.toString());
-            mBuilder.propertyValues(list);
+            mBuilder.propertyValues(VCardUtils.constructListFromValue(
+                    propertyValue, (getVersion() == VCardConfig.FLAG_V30)));
         }
     }
-    
+
     /**
      * vCard 2.1 specifies AGENT allows one vcard entry. It is not encoded at all.
      * 
@@ -819,12 +803,16 @@ public class VCardParser_V21 extends VCardParser {
     protected String maybeUnescapeText(String text) {
         return text;
     }
-    
+
     /**
      * Returns unescaped String if the character should be unescaped. Return null otherwise.
      * e.g. In vCard 2.1, "\;" should be unescaped into ";" while "\x" should not be.
      */
     protected String maybeUnescapeCharacter(char ch) {
+        return unescapeCharacter(ch);
+    }
+
+    public static String unescapeCharacter(char ch) {
         // Original vCard 2.1 specification does not allow transformation
         // "\:" -> ":", "\," -> ",", and "\\" -> "\", but previous implementation of
         // this class allowed them, so keep it as is.

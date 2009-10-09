@@ -22,9 +22,11 @@ import android.provider.ContactsContract.CommonDataKinds.Phone;
 import android.provider.ContactsContract.CommonDataKinds.StructuredPostal;
 import android.text.TextUtils;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -187,7 +189,10 @@ public class VCardUtils {
         }
 
         builder.withValue(StructuredPostal.POBOX, postalData.pobox);
-        // Extended address is dropped since there's no relevant entry in ContactsContract.
+        // TODO: Japanese phone seems to use this field for expressing all the address including
+        // region, city, etc. Not sure we're ok to store them into NEIGHBORHOOD, while it would be
+        // better than dropping them all.
+        builder.withValue(StructuredPostal.NEIGHBORHOOD, postalData.extendedAddress);
         builder.withValue(StructuredPostal.STREET, postalData.street);
         builder.withValue(StructuredPostal.CITY, postalData.localty);
         builder.withValue(StructuredPostal.REGION, postalData.region);
@@ -282,7 +287,36 @@ public class VCardUtils {
         }
         return builder.toString();
     }
-    
+
+    public static List<String> constructListFromValue(final String value,
+            final boolean isV30) {
+        final List<String> list = new ArrayList<String>();
+        StringBuilder builder = new StringBuilder();
+        int length = value.length();
+        for (int i = 0; i < length; i++) {
+            char ch = value.charAt(i);
+            if (ch == '\\' && i < length - 1) {
+                char nextCh = value.charAt(i + 1);
+                final String unescapedString =
+                    (isV30 ? VCardParser_V30.unescapeCharacter(nextCh) :
+                        VCardParser_V21.unescapeCharacter(nextCh));
+                if (unescapedString != null) {
+                    builder.append(unescapedString);
+                    i++;
+                } else {
+                    builder.append(ch);
+                }
+            } else if (ch == ';') {
+                list.add(builder.toString());
+                builder = new StringBuilder();
+            } else {
+                builder.append(ch);
+            }
+        }
+        list.add(builder.toString());
+        return list;
+    }
+
     public static boolean containsOnlyPrintableAscii(String str) {
         if (TextUtils.isEmpty(str)) {
             return true;
