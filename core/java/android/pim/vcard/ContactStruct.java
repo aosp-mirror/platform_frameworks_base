@@ -71,9 +71,6 @@ public class ContactStruct {
         sImMap.put(Constants.PROPERTY_X_GOOGLE_TALK_WITH_SPACE, Im.PROTOCOL_GOOGLE_TALK);
     }
     
-    /**
-     * @hide only for testing
-     */
     static public class PhoneData {
         public final int type;
         public final String data;
@@ -251,9 +248,6 @@ public class ContactStruct {
         }
     }
     
-    /**
-     * @hide only for testing.
-     */
     static public class OrganizationData {
         public final int type;
         // non-final is Intended: we may change the values since this info is separated into
@@ -328,9 +322,6 @@ public class ContactStruct {
         }
     }
     
-    /**
-     * @hide only for testing.
-     */
     static public class PhotoData {
         public static final String FORMAT_FLASH = "SWF";
         public final int type;
@@ -372,10 +363,6 @@ public class ContactStruct {
         private List<String> mPropertyValueList = new ArrayList<String>();
         private byte[] mPropertyBytes;
         
-        public Property() {
-            clear();
-        }
-        
         public void setPropertyName(final String propertyName) {
             mPropertyName = propertyName;
         }
@@ -415,6 +402,7 @@ public class ContactStruct {
             mPropertyName = null;
             mParameterMap.clear();
             mPropertyValueList.clear();
+            mPropertyBytes = null;
         }
     }
     
@@ -462,45 +450,6 @@ public class ContactStruct {
     public ContactStruct(int vcardType, Account account) {
         mVCardType = vcardType;
         mAccount = account;
-    }
-
-    /**
-     * @hide only for testing.
-     */
-    public ContactStruct(String givenName,
-            String familyName,
-            String middleName,
-            String prefix,
-            String suffix,
-            String phoneticGivenName,
-            String pheneticFamilyName,
-            String phoneticMiddleName,
-            List<String> nicknameList,
-            List<byte[]> photoBytesList,
-            List<String> noteList,
-            List<PhoneData> phoneList, 
-            List<EmailData> emailList,
-            List<PostalData> postalList,
-            List<OrganizationData> organizationList,
-            List<ImData> imList,
-            List<PhotoData> photoList,
-            List<String> websiteList) {
-        this(VCardConfig.VCARD_TYPE_DEFAULT);
-        mGivenName = givenName;
-        mFamilyName = familyName;
-        mPrefix = prefix;
-        mSuffix = suffix;
-        mPhoneticGivenName = givenName;
-        mPhoneticFamilyName = familyName;
-        mPhoneticMiddleName = middleName;
-        mNickNameList = nicknameList;
-        mNoteList = noteList;
-        mEmailList = emailList;
-        mPostalList = postalList;
-        mOrganizationList = organizationList;
-        mImList = imList;
-        mPhotoList = photoList;
-        mWebsiteList = websiteList;
     }
 
     /**
@@ -717,7 +666,7 @@ public class ContactStruct {
             mFamilyName = elems.get(0);
         }
     }
-    
+
     /**
      * Some Japanese mobile phones use this field for phonetic name,
      *  since vCard 2.1 does not have "SORT-STRING" type.
@@ -758,21 +707,22 @@ public class ContactStruct {
         }
         final String propValue = listToString(propValueList).trim();
         
-        if (propName.equals("VERSION")) {
+        if (propName.equals(Constants.PROPERTY_VERSION)) {
             // vCard version. Ignore this.
-        } else if (propName.equals("FN")) {
+        } else if (propName.equals(Constants.PROPERTY_FN)) {
             mFullName = propValue;
-        } else if (propName.equals("NAME") && mFullName == null) {
+        } else if (propName.equals(Constants.PROPERTY_NAME) && mFullName == null) {
             // Only in vCard 3.0. Use this if FN, which must exist in vCard 3.0 but may not
             // actually exist in the real vCard data, does not exist.
             mFullName = propValue;
-        } else if (propName.equals("N")) {
+        } else if (propName.equals(Constants.PROPERTY_N)) {
             handleNProperty(propValueList);
-        } else if (propName.equals("SORT-STRING")) {
+        } else if (propName.equals(Constants.PROPERTY_NICKNAME)) {
             mPhoneticFullName = propValue;
-        } else if (propName.equals("NICKNAME") || propName.equals("X-NICKNAME")) {
+        } else if (propName.equals(Constants.PROPERTY_NICKNAME) ||
+                propName.equals(Constants.PROPERTY_X_NICKNAME)) {
             addNickName(propValue);
-        } else if (propName.equals("SOUND")) {
+        } else if (propName.equals(Constants.PROPERTY_SOUND)) {
             Collection<String> typeCollection = paramMap.get(Constants.ATTR_TYPE);
             if (typeCollection != null && typeCollection.contains(Constants.ATTR_TYPE_X_IRMC_N)) {
                 // As of 2009-10-08, Parser side does not split a property value into separated
@@ -786,7 +736,7 @@ public class ContactStruct {
             } else {
                 // Ignore this field since Android cannot understand what it is.
             }
-        } else if (propName.equals("ADR")) {
+        } else if (propName.equals(Constants.PROPERTY_ADR)) {
             boolean valuesAreAllEmpty = true;
             for (String value : propValueList) {
                 if (value.length() > 0) {
@@ -811,15 +761,15 @@ public class ContactStruct {
                         type = StructuredPostal.TYPE_HOME;
                         label = "";
                     } else if (typeString.equals(Constants.ATTR_TYPE_WORK) || 
-                            typeString.equalsIgnoreCase("COMPANY")) {
+                            typeString.equalsIgnoreCase(Constants.ATTR_EXTRA_TYPE_COMPANY)) {
                         // "COMPANY" seems emitted by Windows Mobile, which is not
                         // specifically supported by vCard 2.1. We assume this is same
                         // as "WORK".
                         type = StructuredPostal.TYPE_WORK;
                         label = "";
-                    } else if (typeString.equals("PARCEL") || 
-                            typeString.equals("DOM") ||
-                            typeString.equals("INTL")) {
+                    } else if (typeString.equals(Constants.ATTR_ADR_TYPE_PARCEL) ||
+                            typeString.equals(Constants.ATTR_ADR_TYPE_DOM) ||
+                            typeString.equals(Constants.ATTR_ADR_TYPE_INTL)) {
                         // We do not have any appropriate way to store this information.
                     } else {
                         if (typeString.startsWith("X-") && type < 0) {
@@ -838,7 +788,7 @@ public class ContactStruct {
             }
 
             addPostal(type, propValueList, label, isPrimary);
-        } else if (propName.equals("EMAIL")) {
+        } else if (propName.equals(Constants.PROPERTY_EMAIL)) {
             int type = -1;
             String label = null;
             boolean isPrimary = false;
@@ -870,7 +820,7 @@ public class ContactStruct {
                 type = Email.TYPE_OTHER;
             }
             addEmail(type, propValue, label, isPrimary);
-        } else if (propName.equals("ORG")) {
+        } else if (propName.equals(Constants.PROPERTY_ORG)) {
             // vCard specification does not specify other types.
             final int type = Organization.TYPE_WORK;
             boolean isPrimary = false;
@@ -883,12 +833,13 @@ public class ContactStruct {
                 }
             }
             handleOrgValue(type, propValueList, isPrimary);
-        } else if (propName.equals("TITLE")) {
+        } else if (propName.equals(Constants.PROPERTY_TITLE)) {
             handleTitleValue(propValue);
-        } else if (propName.equals("ROLE")) {
+        } else if (propName.equals(Constants.PROPERTY_ROLE)) {
             // This conflicts with TITLE. Ignore for now...
             // handleTitleValue(propValue);
-        } else if (propName.equals("PHOTO") || propName.equals("LOGO")) {
+        } else if (propName.equals(Constants.PROPERTY_PHOTO) ||
+                propName.equals(Constants.PROPERTY_LOGO)) {
             Collection<String> paramMapValue = paramMap.get("VALUE");
             if (paramMapValue != null && paramMapValue.contains("URL")) {
                 // Currently we do not have appropriate example for testing this case.
@@ -907,7 +858,7 @@ public class ContactStruct {
                 }
                 addPhotoBytes(formatName, propBytes, isPrimary);
             }
-        } else if (propName.equals("TEL")) {
+        } else if (propName.equals(Constants.PROPERTY_TEL)) {
             final Collection<String> typeCollection = paramMap.get(Constants.ATTR_TYPE);
             final Object typeObject = VCardUtils.getPhoneTypeFromStrings(typeCollection);
             final int type;
@@ -959,20 +910,20 @@ public class ContactStruct {
                 type = Phone.TYPE_HOME;
             }
             addIm(type, propValue, null, isPrimary);
-        } else if (propName.equals("NOTE")) {
+        } else if (propName.equals(Constants.PROPERTY_NOTE)) {
             addNote(propValue);
-        } else if (propName.equals("URL")) {
+        } else if (propName.equals(Constants.PROPERTY_URL)) {
             if (mWebsiteList == null) {
                 mWebsiteList = new ArrayList<String>(1);
             }
             mWebsiteList.add(propValue);
-        } else if (propName.equals("X-PHONETIC-FIRST-NAME")) {
+        } else if (propName.equals(Constants.PROPERTY_X_PHONETIC_FIRST_NAME)) {
             mPhoneticGivenName = propValue;
-        } else if (propName.equals("X-PHONETIC-MIDDLE-NAME")) {
+        } else if (propName.equals(Constants.PROPERTY_X_PHONETIC_MIDDLE_NAME)) {
             mPhoneticMiddleName = propValue;
-        } else if (propName.equals("X-PHONETIC-LAST-NAME")) {
+        } else if (propName.equals(Constants.PROPERTY_X_PHONETIC_LAST_NAME)) {
             mPhoneticFamilyName = propValue;
-        } else if (propName.equals("BDAY")) {
+        } else if (propName.equals(Constants.PROPERTY_BDAY)) {
             mBirthday = propValue;
         /*} else if (propName.equals("REV")) {                
             // Revision of this VCard entry. I think we can ignore this.
