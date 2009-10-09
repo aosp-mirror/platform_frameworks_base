@@ -101,6 +101,7 @@ private:
                 status_t    close_l();
                 status_t    setAddress(const char* address);
                 status_t    setBluetoothEnabled(bool enabled);
+                status_t    setSuspended(bool onOff);
 
     private:
                 int         mFd;
@@ -113,6 +114,7 @@ private:
                 bool        mBluetoothEnabled;
                 uint32_t    mDevice;
                 bool        mClosing;
+                bool        mSuspended;
     };
 
     friend class A2dpAudioStreamOut;
@@ -121,6 +123,7 @@ private:
     AudioHardwareInterface  *mHardwareInterface;
     char        mA2dpAddress[20];
     bool        mBluetoothEnabled;
+    bool        mSuspended;
 };
 
 
