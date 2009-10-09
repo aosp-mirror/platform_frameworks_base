@@ -227,6 +227,53 @@ static void SC_vec3Scale(vec3_t *lhs, float scale)
     lhs->z *= scale;
 }
 
+//////////////////////////////////////////////////////////////////////////////
+// Vec4 routines
+//////////////////////////////////////////////////////////////////////////////
+
+static void SC_vec4Norm(vec4_t *v)
+{
+    float len = sqrtf(v->x * v->x + v->y * v->y + v->z * v->z + v->w * v->w);
+    len = 1 / len;
+    v->x *= len;
+    v->y *= len;
+    v->z *= len;
+    v->w *= len;
+}
+
+static float SC_vec4Length(const vec4_t *v)
+{
+    return sqrtf(v->x * v->x + v->y * v->y + v->z * v->z + v->w * v->w);
+}
+
+static void SC_vec4Add(vec4_t *dest, const vec4_t *lhs, const vec4_t *rhs)
+{
+    dest->x = lhs->x + rhs->x;
+    dest->y = lhs->y + rhs->y;
+    dest->z = lhs->z + rhs->z;
+    dest->w = lhs->w + rhs->w;
+}
+
+static void SC_vec4Sub(vec4_t *dest, const vec4_t *lhs, const vec4_t *rhs)
+{
+    dest->x = lhs->x - rhs->x;
+    dest->y = lhs->y - rhs->y;
+    dest->z = lhs->z - rhs->z;
+    dest->w = lhs->w - rhs->w;
+}
+
+static float SC_vec4Dot(const vec4_t *lhs, const vec4_t *rhs)
+{
+    return lhs->x * rhs->x + lhs->y * rhs->y + lhs->z * rhs->z + lhs->w * rhs->w;
+}
+
+static void SC_vec4Scale(vec4_t *lhs, float scale)
+{
+    lhs->x *= scale;
+    lhs->y *= scale;
+    lhs->z *= scale;
+    lhs->w *= scale;
+}
 
 //////////////////////////////////////////////////////////////////////////////
 // Math routines
@@ -284,6 +331,16 @@ static float SC_randf2(float min, float max)
 {
     float r = (float)rand();
     return r / RAND_MAX * (max - min) + min;
+}
+
+static int SC_sign(int value)
+{
+    return (value > 0) - (value < 0);
+}
+
+static float SC_signf(float value)
+{
+    return (value > 0) - (value < 0);
 }
 
 static float SC_clampf(float amount, float low, float high)
@@ -1103,6 +1160,10 @@ ScriptCState::SymbolTable_t ScriptCState::gSyms[] = {
         "int", "(int)" },
     { "sqrf", (void *)&SC_sqrf,
         "float", "(float)" },
+    { "sign", (void *)&SC_sign,
+        "int", "(int)" },
+    { "signf", (void *)&SC_signf,
+        "float", "(float)" },
     { "clamp", (void *)&SC_clamp,
         "int", "(int, int, int)" },
     { "clampf", (void *)&SC_clampf,
@@ -1199,6 +1260,20 @@ ScriptCState::SymbolTable_t ScriptCState::gSyms[] = {
         "float", "(struct vec3_s *lhs, struct vec3_s *rhs)" },
     { "vec3Scale", (void *)&SC_vec3Scale,
         "void", "(struct vec3_s *lhs, float scale)" },
+
+    // vec4
+    { "vec4Norm", (void *)&SC_vec4Norm,
+        "void", "(struct vec4_s *)" },
+    { "vec4Length", (void *)&SC_vec4Length,
+        "float", "(struct vec4_s *)" },
+    { "vec4Add", (void *)&SC_vec4Add,
+        "void", "(struct vec4_s *dest, struct vec4_s *lhs, struct vec4_s *rhs)" },
+    { "vec4Sub", (void *)&SC_vec4Sub,
+        "void", "(struct vec4_s *dest, struct vec4_s *lhs, struct vec4_s *rhs)" },
+    { "vec4Dot", (void *)&SC_vec4Dot,
+        "float", "(struct vec4_s *lhs, struct vec4_s *rhs)" },
+    { "vec4Scale", (void *)&SC_vec4Scale,
+        "void", "(struct vec4_s *lhs, float scale)" },
 
     // context
     { "bindProgramFragment", (void *)&SC_bindProgramFragment,
