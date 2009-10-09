@@ -37,6 +37,7 @@
 #include "VorbisMetadataRetriever.h"
 #include "MidiMetadataRetriever.h"
 #include "MetadataRetrieverClient.h"
+#include "StagefrightMetadataRetriever.h"
 
 namespace android {
 
@@ -105,9 +106,15 @@ static sp<MediaMetadataRetrieverBase> createRetriever(player_type playerType)
             LOGV("create midi metadata retriever");
             p = new MidiMetadataRetriever();
             break;
+#if BUILD_WITH_FULL_STAGEFRIGHT
+        case STAGEFRIGHT_PLAYER:
+            LOGV("create StagefrightMetadataRetriever");
+            p = new StagefrightMetadataRetriever;
+            break;
+#endif
         default:
             // TODO:
-            // support for STAGEFRIGHT_PLAYER and TEST_PLAYER
+            // support for TEST_PLAYER
             LOGE("player type %d is not supported",  playerType);
             break;
     }
