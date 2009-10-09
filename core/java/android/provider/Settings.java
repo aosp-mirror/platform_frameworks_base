@@ -3621,6 +3621,11 @@ public final class Settings {
         public static final String SEND_ACTION_APP_ERROR = "send_action_app_error";
 
         /**
+         * Maximum size of /proc/last_kmsg content to upload after reboot.
+         */
+        public static final String LAST_KMSG_KB = "last_kmsg_kb";
+
+        /**
          * @deprecated
          * @hide
          */
