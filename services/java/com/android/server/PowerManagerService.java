@@ -1531,9 +1531,10 @@ class PowerManagerService extends IPowerManager.Stub
                 } finally {
                     Binder.restoreCallingIdentity(identity);
                 }
-                mScreenBrightness.setTargetLocked(brightness,
-                        steps, INITIAL_SCREEN_BRIGHTNESS, nominalCurrentValue);
-                startAnimation = true;
+                if (mScreenBrightness.setTargetLocked(brightness,
+                        steps, INITIAL_SCREEN_BRIGHTNESS, nominalCurrentValue)) {
+                    startAnimation = true;
+                }
             } else {
                 if ((newState & SCREEN_BRIGHT_BIT) == 0) {
                     // dim or turn off backlight, depending on if the screen is on
@@ -1612,11 +1613,13 @@ class PowerManagerService extends IPowerManager.Stub
                     + " delta=" + delta);
         }
         
-        void setTargetLocked(int target, int stepsToTarget, int initialValue,
+        boolean setTargetLocked(int target, int stepsToTarget, int initialValue,
                 int nominalCurrentValue) {
             if (!initialized) {
                 initialized = true;
                 curValue = (float)initialValue;
+            } else if (targetValue == target) {
+                return false;
             }
             targetValue = target;
             delta = (targetValue -
@@ -1630,6 +1633,7 @@ class PowerManagerService extends IPowerManager.Stub
                         + noticeMe);
             }
             animating = true;
+            return true;
         }
         
         boolean stepLocked() {
