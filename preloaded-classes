@@ -939,9 +939,9 @@ org.apache.harmony.luni.internal.net.www.protocol.file.Handler
 org.apache.harmony.luni.internal.net.www.protocol.http.Handler
 org.apache.harmony.luni.internal.net.www.protocol.https.Handler
 org.apache.harmony.luni.internal.net.www.protocol.jar.Handler
-org.apache.harmony.luni.internal.net.www.protocol.jar.JarURLConnection
-org.apache.harmony.luni.internal.net.www.protocol.jar.JarURLConnection$1
-org.apache.harmony.luni.internal.net.www.protocol.jar.JarURLConnection$JarURLConnectionInputStream
+org.apache.harmony.luni.internal.net.www.protocol.jar.JarURLConnectionImpl
+org.apache.harmony.luni.internal.net.www.protocol.jar.JarURLConnectionImpl$1
+org.apache.harmony.luni.internal.net.www.protocol.jar.JarURLConnectionImpl$JarURLConnectionInputStream
 org.apache.harmony.luni.internal.util.TimezoneGetter
 org.apache.harmony.luni.internal.util.ZoneInfo
 org.apache.harmony.luni.internal.util.ZoneInfoDB
