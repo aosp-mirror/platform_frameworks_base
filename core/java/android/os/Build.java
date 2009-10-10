@@ -151,7 +151,7 @@ public class Build {
          * the background tabs have a dark gray background.
          * </ul>
          */
-        public static final int ECLAIR = CUR_DEVELOPMENT;
+        public static final int ECLAIR = 5;
     }
     
     /** The type of build, like "user" or "eng". */
