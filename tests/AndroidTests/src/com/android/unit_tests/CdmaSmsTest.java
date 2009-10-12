@@ -61,6 +61,16 @@ public class CdmaSmsTest extends AndroidTestCase {
         for (int i = 0; i < data2.length; i++) {
             assertEquals(addr.origBytes[i], data2[i]);
         }
+        addr = CdmaSmsAddress.parse("650.253.1000");
+        assertEquals(addr.ton, CdmaSmsAddress.TON_UNKNOWN);
+        assertEquals(addr.digitMode, CdmaSmsAddress.DIGIT_MODE_4BIT_DTMF);
+        assertEquals(addr.numberMode, CdmaSmsAddress.NUMBER_MODE_NOT_DATA_NETWORK);
+        assertEquals(addr.numberOfDigits, 10);
+        assertEquals(addr.origBytes.length, 10);
+        byte[] data5 = {6, 5, 10, 2, 5, 3, 1, 10, 10, 10};
+        for (int i = 0; i < data2.length; i++) {
+            assertEquals(addr.origBytes[i], data5[i]);
+        }
         addr = CdmaSmsAddress.parse("(+886) 917 222 555");
         assertEquals(addr.ton, CdmaSmsAddress.TON_INTERNATIONAL_OR_IP);
         assertEquals(addr.digitMode, CdmaSmsAddress.DIGIT_MODE_4BIT_DTMF);
