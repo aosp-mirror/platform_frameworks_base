@@ -190,6 +190,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     
     boolean mLidOpen;
     int mPlugged;
+    boolean mRegisteredBatteryReceiver;
     int mDockState = Intent.EXTRA_DOCK_STATE_UNDOCKED;
     int mLidOpenRotation;
     int mCarDockRotation;
@@ -531,13 +532,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mLidNavigationAccessibility = mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_lidNavigationAccessibility);
         // register for battery events
-        IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(Intent.ACTION_POWER_CONNECTED);
-        intentFilter.addAction(Intent.ACTION_POWER_DISCONNECTED);
-        context.registerReceiver(mPowerReceiver, intentFilter);
         mBatteryStatusFilter.addAction(Intent.ACTION_BATTERY_CHANGED);
         mPlugged = 0;
-        updatePlugged();
+        updatePlugged(context.registerReceiver(null, mBatteryStatusFilter));
         // register for dock events
         context.registerReceiver(mDockReceiver, new IntentFilter(Intent.ACTION_DOCK_EVENT));
         mVibrator = new Vibrator();
@@ -551,8 +548,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 com.android.internal.R.array.config_safeModeEnabledVibePattern);
     }
 
-    void updatePlugged() {
-        Intent powerIntent = mContext.registerReceiver(null, mBatteryStatusFilter);
+    void updatePlugged(Intent powerIntent) {
         if (localLOGV) Log.v(TAG, "New battery status: " + powerIntent.getExtras());
         if (powerIntent != null) {
             mPlugged = powerIntent.getIntExtra(BatteryManager.EXTRA_PLUGGED, 0);
@@ -1832,14 +1828,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     };
 
-    BroadcastReceiver mPowerReceiver = new BroadcastReceiver() {
+    BroadcastReceiver mBatteryReceiver = new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {
-            if (Intent.ACTION_POWER_CONNECTED.equals(intent.getAction())) {
-                updatePlugged();
-            } else if (Intent.ACTION_POWER_DISCONNECTED.equals(intent.getAction())) {
-                updatePlugged();
-            }
-            updateKeepScreenOn();
+            updatePlugged(intent);
+            updateDockKeepingScreenOn();
         }
     };
 
@@ -1847,8 +1839,18 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         public void onReceive(Context context, Intent intent) {
             mDockState = intent.getIntExtra(Intent.EXTRA_DOCK_STATE,
                     Intent.EXTRA_DOCK_STATE_UNDOCKED);
+            boolean watchBattery = mDockState != Intent.EXTRA_DOCK_STATE_UNDOCKED;
+            if (watchBattery != mRegisteredBatteryReceiver) {
+                mRegisteredBatteryReceiver = watchBattery;
+                if (watchBattery) {
+                    updatePlugged(mContext.registerReceiver(mBatteryReceiver,
+                            mBatteryStatusFilter));
+                } else {
+                    mContext.unregisterReceiver(mBatteryReceiver);
+                }
+            }
             updateRotation(Surface.FLAGS_ORIENTATION_ANIMATION_DISABLE);
-            updateKeepScreenOn();
+            updateDockKeepingScreenOn();
             updateOrientationListenerLp();
         }
     };
@@ -2036,7 +2038,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         updateRotation(Surface.FLAGS_ORIENTATION_ANIMATION_DISABLE);
     }
     
-    void updateKeepScreenOn() {
+    void updateDockKeepingScreenOn() {
         if (mPlugged != 0) {
             if (localLOGV) Log.v(TAG, "Update: mDockState=" + mDockState
                     + " mPlugged=" + mPlugged
