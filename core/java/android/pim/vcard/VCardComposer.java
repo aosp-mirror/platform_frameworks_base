@@ -111,6 +111,10 @@ public class VCardComposer {
     public static final String FAILURE_REASON_NOT_INITIALIZED =
         "The vCard composer object is not correctly initialized";
 
+    /** Should be visible only from developers... (no need to translate, hopefully) */
+    public static final String FAILURE_REASON_UNSUPPORTED_URI =
+        "The Uri vCard composer received is not supported by the composer.";
+
     public static final String NO_ERROR = "No error";
 
     public static final String VCARD_TYPE_STRING_DOCOMO = "docomo";
@@ -137,6 +141,15 @@ public class VCardComposer {
     private static final String VCARD_ATTR_ENCODING_BASE64_V30 = "ENCODING=b";
 
     private static final String SHIFT_JIS = "SHIFT_JIS";
+
+    /**
+     * Special URI for testing.
+     */
+    public static final String VCARD_TEST_AUTHORITY = "com.android.unit_tests.vcard";
+    public static final Uri VCARD_TEST_AUTHORITY_URI =
+        Uri.parse("content://" + VCARD_TEST_AUTHORITY);
+    public static final Uri CONTACTS_TEST_CONTENT_URI =
+        Uri.withAppendedPath(VCARD_TEST_AUTHORITY_URI, "contacts");
 
     private static final Uri sDataRequestUri;
     private static final Map<Integer, String> sImMap;
@@ -286,7 +299,7 @@ public class VCardComposer {
 
     private String mErrorReason = NO_ERROR;
 
-    private boolean mIsCallLogComposer = false;
+    private boolean mIsCallLogComposer;
 
     private static final String[] sContactsProjection = new String[] {
         Contacts._ID,
@@ -307,30 +320,24 @@ public class VCardComposer {
     private static final String FLAG_TIMEZONE_UTC = "Z";
 
     public VCardComposer(Context context) {
-        this(context, VCardConfig.VCARD_TYPE_DEFAULT, true, false);
+        this(context, VCardConfig.VCARD_TYPE_DEFAULT, true);
     }
 
-    public VCardComposer(Context context, String vcardTypeStr,
-            boolean careHandlerErrors) {
-        this(context, VCardConfig.getVCardTypeFromString(vcardTypeStr),
-                careHandlerErrors, false);
+    public VCardComposer(Context context, int vcardType) {
+        this(context, vcardType, true);
     }
 
-    public VCardComposer(Context context, int vcardType, boolean careHandlerErrors) {
-        this(context, vcardType, careHandlerErrors, false);
+    public VCardComposer(Context context, String vcardTypeStr, boolean careHandlerErrors) {
+        this(context, VCardConfig.getVCardTypeFromString(vcardTypeStr), careHandlerErrors);
     }
 
     /**
      * Construct for supporting call log entry vCard composing.
-     *
-     * @param isCallLogComposer true if this composer is for creating Call Log vCard.
      */
-    public VCardComposer(Context context, int vcardType, boolean careHandlerErrors,
-            boolean isCallLogComposer) {
+    public VCardComposer(Context context, int vcardType, boolean careHandlerErrors) {
         mContext = context;
         mVCardType = vcardType;
         mCareHandlerErrors = careHandlerErrors;
-        mIsCallLogComposer = isCallLogComposer;
         mContentResolver = context.getContentResolver();
 
         mIsV30 = VCardConfig.isV30(vcardType);
@@ -370,15 +377,26 @@ public class VCardComposer {
         mHandlerList.add(handler);
     }
 
-    public boolean init() {
-        return init(null, null);
-    }
-
     /**
      * @return Returns true when initialization is successful and all the other
      *          methods are available. Returns false otherwise.
      */
+    public boolean init() {
+        return init(null, null);
+    }
+
     public boolean init(final String selection, final String[] selectionArgs) {
+        return init(Contacts.CONTENT_URI, selection, selectionArgs, null);
+    }
+
+    /**
+     * Note that this is unstable interface, may be deleted in the future.
+     */
+    public boolean init(final Uri contentUri, final String selection,
+            final String[] selectionArgs, final String sortOrder) {
+        if (contentUri == null) {
+            return false;
+        }
         if (mCareHandlerErrors) {
             List<OneEntryHandler> finishedList = new ArrayList<OneEntryHandler>(
                     mHandlerList.size());
@@ -397,13 +415,19 @@ public class VCardComposer {
             }
         }
 
-        if (mIsCallLogComposer) {
-            mCursor = mContentResolver.query(CallLog.Calls.CONTENT_URI, sCallLogProjection,
-                    selection, selectionArgs, null);
+        final String[] projection;
+        if (CallLog.Calls.CONTENT_URI.equals(contentUri)) {
+            projection = sCallLogProjection;
+            mIsCallLogComposer = true;
+        } else if (Contacts.CONTENT_URI.equals(contentUri) ||
+                CONTACTS_TEST_CONTENT_URI.equals(contentUri)) {
+            projection = sContactsProjection;
         } else {
-            mCursor = mContentResolver.query(Contacts.CONTENT_URI, sContactsProjection,
-                    selection, selectionArgs, null);
+            mErrorReason = FAILURE_REASON_UNSUPPORTED_URI;
+            return false;
         }
+        mCursor = mContentResolver.query(
+                contentUri, projection, selection, selectionArgs, sortOrder);
 
         if (mCursor == null) {
             mErrorReason = FAILURE_REASON_FAILED_TO_GET_DATABASE_INFO;
@@ -496,8 +520,7 @@ public class VCardComposer {
             dataExists = entityIterator.hasNext();
             while (entityIterator.hasNext()) {
                 Entity entity = entityIterator.next();
-                for (NamedContentValues namedContentValues : entity
-                        .getSubValues()) {
+                for (NamedContentValues namedContentValues : entity.getSubValues()) {
                     ContentValues contentValues = namedContentValues.values;
                     String key = contentValues.getAsString(Data.MIMETYPE);
                     if (key != null) {

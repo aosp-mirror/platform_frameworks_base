@@ -190,6 +190,7 @@ public class VNodeBuilder implements VCardBuilder {
     
     private String handleOneValue(String value, String targetCharset, String encoding) {
         if (encoding != null) {
+            encoding = encoding.toUpperCase();
             if (encoding.equals("BASE64") || encoding.equals("B")) {
                 // Assume BASE64 is used only when the number of values is 1.
                 mCurrentPropNode.propValue_bytes =

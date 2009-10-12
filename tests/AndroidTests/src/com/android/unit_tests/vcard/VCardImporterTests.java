@@ -17,6 +17,7 @@
 package com.android.unit_tests.vcard;
 
 import com.android.unit_tests.R;
+import com.android.unit_tests.vcard.PropertyNodesVerifier.TypeSet;
 
 import android.content.ContentProviderOperation;
 import android.content.ContentProviderResult;
@@ -56,14 +57,13 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.Map.Entry;
 
-public class VCardImportTests extends AndroidTestCase {
+public class VCardImporterTests extends AndroidTestCase {
     // Push data into int array at first since values like 0x80 are
     // interpreted as int by the compiler and casting all of them is
     // cumbersome...
@@ -423,7 +423,7 @@ public class VCardImportTests extends AndroidTestCase {
         0x55, 0x25, 0x15, 0x2c, 0x68, 0xa3, 0x30, 0xeb, 0x54, 0xa5, 0x15,
         0x0c, 0xd1, 0x00, 0xff, 0xd9};
 
-    private static final byte[] sPhotoByteArrayForComplicatedCase;
+    /* package */ static final byte[] sPhotoByteArrayForComplicatedCase;
 
     static {
         final int length = sPhotoIntArrayForComplicatedCase.length;
@@ -433,69 +433,7 @@ public class VCardImportTests extends AndroidTestCase {
         }
     }
 
-    private class PropertyNodesVerifier {
-        private HashMap<String, List<PropertyNode>> mPropertyNodeMap;
-        public PropertyNodesVerifier() {
-            mPropertyNodeMap = new HashMap<String, List<PropertyNode>>();
-        }
 
-        public PropertyNodesVerifier addPropertyNode(String propName, String propValue,
-                List<String> propValue_vector, byte[] propValue_bytes,
-                ContentValues paramMap, Set<String> paramMap_TYPE, Set<String> propGroupSet) {
-            PropertyNode propertyNode = new PropertyNode(propName,
-                    propValue, propValue_vector, propValue_bytes,
-                    paramMap, paramMap_TYPE, propGroupSet);
-            List<PropertyNode> expectedNodeList = mPropertyNodeMap.get(propName);
-            if (expectedNodeList == null) {
-                expectedNodeList = new ArrayList<PropertyNode>();
-                mPropertyNodeMap.put(propName, expectedNodeList);
-            }
-            expectedNodeList.add(propertyNode);
-            return this;
-        }
-
-        public void verify(VNode vnode) {
-            for (PropertyNode propertyNode : vnode.propList) {
-                String propName = propertyNode.propName;
-                List<PropertyNode> nodes = mPropertyNodeMap.get(propName);
-                if (nodes == null) {
-                    fail("Unexpected propName \"" + propName + "\" exists.");
-                }
-                boolean successful = false;
-                int size = nodes.size();
-                for (int i = 0; i < size; i++) {
-                    PropertyNode expectedNode = nodes.get(i);
-                    if (expectedNode.propName.equals(propName)) {
-                        if (expectedNode.equals(propertyNode)) {
-                            successful = true;
-                            nodes.remove(i);
-                            if (nodes.size() == 0) {
-                                mPropertyNodeMap.remove(propName);
-                            }
-                            break;
-                        } else {
-                            fail("Property \"" + propName + "\" has wrong value.\n" 
-                                    + "expected: " + expectedNode.toString() 
-                                    + "\n  actual: " + propertyNode.toString());
-                        }
-                    }
-                }
-                if (!successful) {
-                    fail("Unexpected property \"" + propName + "\" exists.");
-                }
-            }
-            if (mPropertyNodeMap.size() != 0) {
-                List<String> expectedProps = new ArrayList<String>();
-                for (List<PropertyNode> nodes : mPropertyNodeMap.values()) {
-                    for (PropertyNode node : nodes) {
-                        expectedProps.add(node.propName);
-                    }
-                }
-                fail("expected props " + Arrays.toString(expectedProps.toArray()) +
-                        " was not found");
-            }
-        }
-    }
 
     public class VerificationResolver extends MockContentResolver {
         VerificationProvider mVerificationProvider = new VerificationProvider();
@@ -749,7 +687,7 @@ public class VCardImportTests extends AndroidTestCase {
             InputStream is = getContext().getResources().openRawResource(mResourceId);
             final VCardParser vCardParser;
             if (VCardConfig.isV30(mVCardType)) {
-                vCardParser = new VCardParser_V30();
+                vCardParser = new VCardParser_V30(true);  // use StrictParsing
             } else {
                 vCardParser = new VCardParser_V21();
             }
@@ -777,9 +715,8 @@ public class VCardImportTests extends AndroidTestCase {
         assertEquals(true, parser.parse(is,"ISO-8859-1", builder));
         is.close();
         assertEquals(1, builder.vNodeList.size());
-        PropertyNodesVerifier verifier = new PropertyNodesVerifier()
-            .addPropertyNode("N", "Ando;Roid;", Arrays.asList("Ando", "Roid", ""),
-                    null, null, null, null);
+        PropertyNodesVerifier verifier = new PropertyNodesVerifier(this)
+            .addNodeWithOrder("N", "Ando;Roid;", Arrays.asList("Ando", "Roid", ""));
         verifier.verify(builder.vNodeList.get(0));
     }
 
@@ -839,12 +776,11 @@ public class VCardImportTests extends AndroidTestCase {
         assertEquals(true, parser.parse(is,"ISO-8859-1", builder));
         is.close();
         assertEquals(1, builder.vNodeList.size());
-        PropertyNodesVerifier verifier = new PropertyNodesVerifier()
-            .addPropertyNode("VERSION", "2.1", null, null, null, null, null)
-            .addPropertyNode("N", ";A;B\\;C\\;;D;:E;\\\\;",
-                    Arrays.asList("", "A;B\\", "C\\;", "D", ":E", "\\\\", ""),
-                    null, null, null, null)
-            .addPropertyNode("FN", "A;B\\C\\;D:E\\\\", null, null, null, null, null);
+        PropertyNodesVerifier verifier = new PropertyNodesVerifier(this)
+            .addNodeWithOrder("VERSION", "2.1")
+            .addNodeWithOrder("N", ";A;B\\;C\\;;D;:E;\\\\;",
+                    Arrays.asList("", "A;B\\", "C\\;", "D", ":E", "\\\\", ""))
+            .addNodeWithOrder("FN", "A;B\\C\\;D:E\\\\");
         verifier.verify(builder.vNodeList.get(0));
     }
 
@@ -962,63 +898,51 @@ public class VCardImportTests extends AndroidTestCase {
         contentValuesForQP.put("ENCODING", "QUOTED-PRINTABLE");
         ContentValues contentValuesForPhoto = new ContentValues();
         contentValuesForPhoto.put("ENCODING", "BASE64");
-        PropertyNodesVerifier verifier = new PropertyNodesVerifier()
-            .addPropertyNode("VERSION", "2.1", null, null, null, null, null)
-            .addPropertyNode("N", "Gump;Forrest;Hoge;Pos;Tao",
-                    Arrays.asList("Gump", "Forrest", "Hoge", "Pos", "Tao"),
-                    null, null, null, null)
-            .addPropertyNode("FN", "Joe Due", null, null, null, null, null)
-            .addPropertyNode("ORG", "Gump Shrimp Co.;Sales Dept.;Manager;Fish keeper",
-                    Arrays.asList("Gump Shrimp Co.", "Sales Dept.;Manager", "Fish keeper"),
-                    null, null, null, null)
-            .addPropertyNode("ROLE", "Fish Cake Keeper!", null, null, null, null, null)
-            .addPropertyNode("TITLE", "Shrimp Man", null, null, null, null, null)
-            .addPropertyNode("X-CLASS", "PUBLIC", null, null, null, null, null)
-            .addPropertyNode("TEL", "(111) 555-1212", null, null, null,
-                    new HashSet<String>(Arrays.asList("WORK", "VOICE")), null)
-            .addPropertyNode("TEL", "(404) 555-1212", null, null, null,
-                    new HashSet<String>(Arrays.asList("HOME", "VOICE")), null)
-            .addPropertyNode("TEL", "0311111111", null, null, null,
-                    new HashSet<String>(Arrays.asList("CELL")), null)
-            .addPropertyNode("TEL", "0322222222", null, null, null,
-                    new HashSet<String>(Arrays.asList("VIDEO")), null)
-            .addPropertyNode("TEL", "0333333333", null, null, null,
-                    new HashSet<String>(Arrays.asList("VOICE")), null)     
-            .addPropertyNode("ADR", ";;100 Waters Edge;Baytown;LA;30314;United States of America",
+        PropertyNodesVerifier verifier = new PropertyNodesVerifier(this)
+            .addNodeWithOrder("VERSION", "2.1")
+            .addNodeWithOrder("N", "Gump;Forrest;Hoge;Pos;Tao",
+                    Arrays.asList("Gump", "Forrest", "Hoge", "Pos", "Tao"))
+            .addNodeWithOrder("FN", "Joe Due")
+            .addNodeWithOrder("ORG", "Gump Shrimp Co.;Sales Dept.;Manager;Fish keeper",
+                    Arrays.asList("Gump Shrimp Co.", "Sales Dept.;Manager", "Fish keeper"))
+            .addNodeWithOrder("ROLE", "Fish Cake Keeper!")
+            .addNodeWithOrder("TITLE", "Shrimp Man")
+            .addNodeWithOrder("X-CLASS", "PUBLIC")
+            .addNodeWithOrder("TEL", "(111) 555-1212", new TypeSet("WORK", "VOICE"))
+            .addNodeWithOrder("TEL", "(404) 555-1212", new TypeSet("HOME", "VOICE"))
+            .addNodeWithOrder("TEL", "0311111111", new TypeSet("CELL"))
+            .addNodeWithOrder("TEL", "0322222222", new TypeSet("VIDEO"))
+            .addNodeWithOrder("TEL", "0333333333", new TypeSet("VOICE"))
+            .addNodeWithOrder("ADR", ";;100 Waters Edge;Baytown;LA;30314;United States of America",
                     Arrays.asList("", "", "100 Waters Edge", "Baytown",
                             "LA", "30314", "United States of America"),
-                            null, null, new HashSet<String>(Arrays.asList("WORK")), null)
-            .addPropertyNode("LABEL",
+                            null, null, new TypeSet("WORK"), null)
+            .addNodeWithOrder("LABEL",
                     "100 Waters Edge\r\nBaytown, LA 30314\r\nUnited  States of America",
-                    null, null, contentValuesForQP,
-                    new HashSet<String>(Arrays.asList("WORK")), null)
-            .addPropertyNode("ADR",
+                    null, null, contentValuesForQP, new TypeSet("WORK"), null)
+            .addNodeWithOrder("ADR",
                     ";;42 Plantation St.;Baytown;LA;30314;United States of America",
                     Arrays.asList("", "", "42 Plantation St.", "Baytown",
                             "LA", "30314", "United States of America"), null, null,
-                    new HashSet<String>(Arrays.asList("HOME")), null)
-            .addPropertyNode("LABEL",
+                    new TypeSet("HOME"), null)
+            .addNodeWithOrder("LABEL",
                     "42 Plantation St.\r\nBaytown, LA 30314\r\nUnited  States of America",
                     null, null, contentValuesForQP,
-                    new HashSet<String>(Arrays.asList("HOME")), null)
-            .addPropertyNode("EMAIL", "forrestgump@walladalla.com",
-                    null, null, null,
-                    new HashSet<String>(Arrays.asList("PREF", "INTERNET")), null)
-            .addPropertyNode("EMAIL", "cell@example.com", null, null, null,
-                    new HashSet<String>(Arrays.asList("CELL")), null)
-            .addPropertyNode("NOTE", "The following note is the example from RFC 2045.",
-                    null, null, null, null, null)
-            .addPropertyNode("NOTE",
+                    new TypeSet("HOME"), null)
+            .addNodeWithOrder("EMAIL", "forrestgump@walladalla.com", new TypeSet("PREF", "INTERNET"))
+            .addNodeWithOrder("EMAIL", "cell@example.com", new TypeSet("CELL"))
+            .addNodeWithOrder("NOTE", "The following note is the example from RFC 2045.")
+            .addNodeWithOrder("NOTE",
                     "Now's the time for all folk to come to the aid of their country.",
                     null, null, contentValuesForQP, null, null)
-            .addPropertyNode("PHOTO", null,
+            .addNodeWithOrder("PHOTO", null,
                     null, sPhotoByteArrayForComplicatedCase, contentValuesForPhoto,
-                    new HashSet<String>(Arrays.asList("JPEG")), null)
-            .addPropertyNode("X-ATTRIBUTE", "Some String", null, null, null, null, null)
-            .addPropertyNode("BDAY", "19800101", null, null, null, null, null)
-            .addPropertyNode("GEO", "35.6563854,139.6994233", null, null, null, null, null)
-            .addPropertyNode("URL", "http://www.example.com/", null, null, null, null, null)
-            .addPropertyNode("REV", "20080424T195243Z", null, null, null, null, null);
+                    new TypeSet("JPEG"), null)
+            .addNodeWithOrder("X-ATTRIBUTE", "Some String")
+            .addNodeWithOrder("BDAY", "19800101")
+            .addNodeWithOrder("GEO", "35.6563854,139.6994233")
+            .addNodeWithOrder("URL", "http://www.example.com/")
+            .addNodeWithOrder("REV", "20080424T195243Z");
         verifier.verify(builder.vNodeList.get(0));
     }
 
@@ -1126,22 +1050,19 @@ public class VCardImportTests extends AndroidTestCase {
         assertEquals(true, parser.parse(is,"ISO-8859-1", builder));
         is.close();
         assertEquals(1, builder.vNodeList.size());
-        PropertyNodesVerifier verifier = new PropertyNodesVerifier()
-            .addPropertyNode("VERSION", "3.0", null, null, null, null, null)
-            .addPropertyNode("FN", "And Roid", null, null, null, null, null)
-            .addPropertyNode("N", "And;Roid;;;", Arrays.asList("And", "Roid", "", "", ""),
-                    null, null, null, null)
-            .addPropertyNode("ORG", "Open;Handset; Alliance",
-                    Arrays.asList("Open", "Handset", " Alliance"),
-                    null, null, null, null)
-            .addPropertyNode("SORT-STRING", "android", null, null, null, null, null)
-            .addPropertyNode("TEL", "0300000000", null, null, null,
-                        new HashSet<String>(Arrays.asList("PREF", "VOICE")), null)
-            .addPropertyNode("CLASS", "PUBLIC", null, null, null, null, null)
-            .addPropertyNode("X-GNO", "0", null, null, null, null, null)
-            .addPropertyNode("X-GN", "group0", null, null, null, null, null)
-            .addPropertyNode("X-REDUCTION", "0", null, null, null, null, null)
-            .addPropertyNode("REV", "20081031T065854Z", null, null, null, null, null);
+        PropertyNodesVerifier verifier = new PropertyNodesVerifier(this)
+            .addNodeWithOrder("VERSION", "3.0")
+            .addNodeWithOrder("FN", "And Roid")
+            .addNodeWithOrder("N", "And;Roid;;;", Arrays.asList("And", "Roid", "", "", ""))
+            .addNodeWithOrder("ORG", "Open;Handset; Alliance",
+                    Arrays.asList("Open", "Handset", " Alliance"))
+            .addNodeWithOrder("SORT-STRING", "android")
+            .addNodeWithOrder("TEL", "0300000000", new TypeSet("PREF", "VOICE"))
+            .addNodeWithOrder("CLASS", "PUBLIC")
+            .addNodeWithOrder("X-GNO", "0")
+            .addNodeWithOrder("X-GN", "group0")
+            .addNodeWithOrder("X-REDUCTION", "0")
+            .addNodeWithOrder("REV", "20081031T065854Z");
         verifier.verify(builder.vNodeList.get(0));
     }
 
@@ -1182,16 +1103,16 @@ public class VCardImportTests extends AndroidTestCase {
         // Though Japanese careers append ";;;;" at the end of the value of "SOUND",
         // vCard 2.1/3.0 specification does not allow multiple values.
         // Do not need to handle it as multiple values.
-        PropertyNodesVerifier verifier = new PropertyNodesVerifier()
-            .addPropertyNode("VERSION", "2.1", null, null, null, null, null)
-            .addPropertyNode("N", "\u5B89\u85E4\u30ED\u30A4\u30C9;;;;",
+        PropertyNodesVerifier verifier = new PropertyNodesVerifier(this)
+            .addNodeWithOrder("VERSION", "2.1", null, null, null, null, null)
+            .addNodeWithOrder("N", "\u5B89\u85E4\u30ED\u30A4\u30C9;;;;",
                     Arrays.asList("\u5B89\u85E4\u30ED\u30A4\u30C9", "", "", "", ""),
                     null, contentValuesForShiftJis, null, null)
-            .addPropertyNode("SOUND", "\uFF71\uFF9D\uFF84\uFF9E\uFF73\uFF9B\uFF72\uFF84\uFF9E;;;;",
+            .addNodeWithOrder("SOUND", "\uFF71\uFF9D\uFF84\uFF9E\uFF73\uFF9B\uFF72\uFF84\uFF9E;;;;",
                     null, null, contentValuesForShiftJis,
-                    new HashSet<String>(Arrays.asList("X-IRMC-N")), null)
-            .addPropertyNode("TEL", "0300000000", null, null, null,
-                    new HashSet<String>(Arrays.asList("VOICE", "PREF")), null);
+                    new TypeSet("X-IRMC-N"), null)
+            .addNodeWithOrder("TEL", "0300000000", null, null, null,
+                    new TypeSet("VOICE", "PREF"), null);
         verifier.verify(builder.vNodeList.get(0));
     }
 
@@ -1257,19 +1178,19 @@ public class VCardImportTests extends AndroidTestCase {
         ContentValues contentValuesForQP = new ContentValues();
         contentValuesForQP.put("ENCODING", "QUOTED-PRINTABLE");
         contentValuesForQP.put("CHARSET", "SHIFT_JIS");
-        PropertyNodesVerifier verifier = new PropertyNodesVerifier()
-            .addPropertyNode("VERSION", "2.1", null, null, null, null, null)
-            .addPropertyNode("N", "\u5B89\u85E4;\u30ED\u30A4\u30C9\u0031;;;",
+        PropertyNodesVerifier verifier = new PropertyNodesVerifier(this)
+            .addNodeWithOrder("VERSION", "2.1")
+            .addNodeWithOrder("N", "\u5B89\u85E4;\u30ED\u30A4\u30C9\u0031;;;",
                     Arrays.asList("\u5B89\u85E4", "\u30ED\u30A4\u30C9\u0031",
                             "", "", ""),
                     null, contentValuesForShiftJis, null, null)
-            .addPropertyNode("FN", "\u5B89\u85E4\u0020\u30ED\u30A4\u30C9\u0020\u0031",
+            .addNodeWithOrder("FN", "\u5B89\u85E4\u0020\u30ED\u30A4\u30C9\u0020\u0031",
                     null, null, contentValuesForShiftJis, null, null)
-            .addPropertyNode("SOUND",
+            .addNodeWithOrder("SOUND",
                     "\uFF71\uFF9D\uFF84\uFF9E\uFF73;\uFF9B\uFF72\uFF84\uFF9E\u0031;;;",
                     null, null, contentValuesForShiftJis,
-                    new HashSet<String>(Arrays.asList("X-IRMC-N")), null)
-            .addPropertyNode("ADR",
+                    new TypeSet("X-IRMC-N"), null)
+            .addNodeWithOrder("ADR",
                     ";\u6771\u4EAC\u90FD\u6E0B\u8C37\u533A\u685C" +
                     "\u4E18\u753A\u0032\u0036\u002D\u0031\u30BB" +
                     "\u30EB\u30EA\u30A2\u30F3\u30BF\u30EF\u30FC\u0036" +
@@ -1279,8 +1200,8 @@ public class VCardImportTests extends AndroidTestCase {
                             "\u4E18\u753A\u0032\u0036\u002D\u0031\u30BB" +
                             "\u30EB\u30EA\u30A2\u30F3\u30BF\u30EF\u30FC" +
                             "\u0036\u968E", "", "", "", "150-8512", ""),
-                    null, contentValuesForQP, new HashSet<String>(Arrays.asList("HOME")), null)
-            .addPropertyNode("NOTE", "\u30E1\u30E2", null, null, contentValuesForQP, null, null);
+                    null, contentValuesForQP, new TypeSet("HOME"), null)
+            .addNodeWithOrder("NOTE", "\u30E1\u30E2", null, null, contentValuesForQP, null, null);
         verifier.verify(builder.vNodeList.get(0));
     }
 
@@ -1329,60 +1250,48 @@ public class VCardImportTests extends AndroidTestCase {
         assertEquals(3, builder.vNodeList.size());
         ContentValues contentValuesForShiftJis = new ContentValues();
         contentValuesForShiftJis.put("CHARSET", "SHIFT_JIS");
-        PropertyNodesVerifier verifier = new PropertyNodesVerifier()
-            .addPropertyNode("VERSION", "2.1", null, null, null, null, null)
-            .addPropertyNode("N", "\u5B89\u85E4\u30ED\u30A4\u30C9\u0033;;;;",
+        PropertyNodesVerifier verifier = new PropertyNodesVerifier(this)
+            .addNodeWithOrder("VERSION", "2.1")
+            .addNodeWithOrder("N", "\u5B89\u85E4\u30ED\u30A4\u30C9\u0033;;;;",
                     Arrays.asList("\u5B89\u85E4\u30ED\u30A4\u30C9\u0033", "", "", "", ""),
                     null, contentValuesForShiftJis, null, null)
-            .addPropertyNode("SOUND",
+            .addNodeWithOrder("SOUND",
                     "\uFF71\uFF9D\uFF84\uFF9E\uFF73\uFF9B\uFF72\uFF84\uFF9E\u0033;;;;",
                     null, null, contentValuesForShiftJis,
-                    new HashSet<String>(Arrays.asList("X-IRMC-N")), null)
-            .addPropertyNode("TEL", "9", null, null, null,
-                    new HashSet<String>(Arrays.asList("X-NEC-SECRET")), null)
-            .addPropertyNode("TEL", "10", null, null, null,
-                    new HashSet<String>(Arrays.asList("X-NEC-HOTEL")), null)
-            .addPropertyNode("TEL", "11", null, null, null,
-                    new HashSet<String>(Arrays.asList("X-NEC-SCHOOL")), null)
-            .addPropertyNode("TEL", "12", null, null, null,
-                    new HashSet<String>(Arrays.asList("FAX", "HOME")), null);
+                    new TypeSet("X-IRMC-N"), null)
+            .addNodeWithOrder("TEL", "9", new TypeSet("X-NEC-SECRET"))
+            .addNodeWithOrder("TEL", "10", new TypeSet("X-NEC-HOTEL"))
+            .addNodeWithOrder("TEL", "11", new TypeSet("X-NEC-SCHOOL"))
+            .addNodeWithOrder("TEL", "12", new TypeSet("FAX", "HOME"));
         verifier.verify(builder.vNodeList.get(0));
         
-        verifier = new PropertyNodesVerifier()
-            .addPropertyNode("VERSION", "2.1", null, null, null, null, null)
-            .addPropertyNode("N", "\u5B89\u85E4\u30ED\u30A4\u30C9\u0034;;;;",
+        verifier = new PropertyNodesVerifier(this)
+            .addNodeWithOrder("VERSION", "2.1")
+            .addNodeWithOrder("N", "\u5B89\u85E4\u30ED\u30A4\u30C9\u0034;;;;",
                     Arrays.asList("\u5B89\u85E4\u30ED\u30A4\u30C9\u0034", "", "", "", ""),
                     null, contentValuesForShiftJis, null, null)
-            .addPropertyNode("SOUND",
+            .addNodeWithOrder("SOUND",
                     "\uFF71\uFF9D\uFF84\uFF9E\uFF73\uFF9B\uFF72\uFF84\uFF9E\u0034;;;;",
                     null, null, contentValuesForShiftJis,
-                    new HashSet<String>(Arrays.asList("X-IRMC-N")), null)
-            .addPropertyNode("TEL", "13", null, null, null,
-                    new HashSet<String>(Arrays.asList("MODEM")), null)
-            .addPropertyNode("TEL", "14", null, null, null,
-                    new HashSet<String>(Arrays.asList("PAGER")), null)
-            .addPropertyNode("TEL", "15", null, null, null,
-                    new HashSet<String>(Arrays.asList("X-NEC-FAMILY")), null)
-            .addPropertyNode("TEL", "16", null, null, null,
-                    new HashSet<String>(Arrays.asList("X-NEC-GIRL")), null);
+                    new TypeSet("X-IRMC-N"), null)
+            .addNodeWithOrder("TEL", "13", new TypeSet("MODEM"))
+            .addNodeWithOrder("TEL", "14", new TypeSet("PAGER"))
+            .addNodeWithOrder("TEL", "15", new TypeSet("X-NEC-FAMILY"))
+            .addNodeWithOrder("TEL", "16", new TypeSet("X-NEC-GIRL"));
         verifier.verify(builder.vNodeList.get(1));
-        verifier = new PropertyNodesVerifier()
-            .addPropertyNode("VERSION", "2.1", null, null, null, null, null)
-            .addPropertyNode("N", "\u5B89\u85E4\u30ED\u30A4\u30C9\u0035;;;;",
+        verifier = new PropertyNodesVerifier(this)
+            .addNodeWithOrder("VERSION", "2.1")
+            .addNodeWithOrder("N", "\u5B89\u85E4\u30ED\u30A4\u30C9\u0035;;;;",
                     Arrays.asList("\u5B89\u85E4\u30ED\u30A4\u30C9\u0035", "", "", "", ""),
                     null, contentValuesForShiftJis, null, null)
-            .addPropertyNode("SOUND",
+            .addNodeWithOrder("SOUND",
                     "\uFF71\uFF9D\uFF84\uFF9E\uFF73\uFF9B\uFF72\uFF84\uFF9E\u0035;;;;",
                     null, null, contentValuesForShiftJis,
-                    new HashSet<String>(Arrays.asList("X-IRMC-N")), null)
-            .addPropertyNode("TEL", "17", null, null, null,
-                    new HashSet<String>(Arrays.asList("X-NEC-BOY")), null)
-            .addPropertyNode("TEL", "18", null, null, null,
-                    new HashSet<String>(Arrays.asList("X-NEC-FRIEND")), null)
-            .addPropertyNode("TEL", "19", null, null, null,
-                    new HashSet<String>(Arrays.asList("X-NEC-PHS")), null)
-            .addPropertyNode("TEL", "20", null, null, null,
-                    new HashSet<String>(Arrays.asList("X-NEC-RESTAURANT")), null);
+                    new TypeSet("X-IRMC-N"), null)
+            .addNodeWithOrder("TEL", "17", new TypeSet("X-NEC-BOY"))
+            .addNodeWithOrder("TEL", "18", new TypeSet("X-NEC-FRIEND"))
+            .addNodeWithOrder("TEL", "19", new TypeSet("X-NEC-PHS"))
+            .addNodeWithOrder("TEL", "20", new TypeSet("X-NEC-RESTAURANT"));
         verifier.verify(builder.vNodeList.get(2));
     }
 }

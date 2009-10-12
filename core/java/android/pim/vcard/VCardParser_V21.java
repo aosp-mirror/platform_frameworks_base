@@ -525,10 +525,18 @@ public class VCardParser_V21 extends VCardParser {
                 throw new VCardException("Unknown type \"" + paramName + "\"");
             }
         } else {
-            handleType(strArray[0]);
+            handleParamWithoutName(strArray[0]);
         }
     }
     
+    /**
+     * vCard 3.0 parser may throw VCardException.
+     */
+    @SuppressWarnings("unused")
+    protected void handleParamWithoutName(final String paramValue) throws VCardException {
+        handleType(paramValue);
+    }
+
     /**
      * ptypeval = knowntype / "X-" word
      */
@@ -832,6 +840,9 @@ public class VCardParser_V21 extends VCardParser {
     @Override
     public boolean parse(InputStream is, String charset, VCardBuilder builder)
             throws IOException, VCardException {
+        if (charset == null) {
+            charset = VCardConfig.DEFAULT_CHARSET;
+        }
         final InputStreamReader tmpReader = new InputStreamReader(is, charset);
         if (VCardConfig.showPerformanceLog()) {
             mReader = new CustomBufferedReader(tmpReader);
