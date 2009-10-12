@@ -147,7 +147,12 @@ static bool get_mp3_frame_size(
             *out_bitrate = bitrate;
         }
 
-        *frame_size = 144000 * bitrate / sampling_rate + padding;
+        if (version == 3 /* V1 */) {
+            *frame_size = 144000 * bitrate / sampling_rate + padding;
+        } else {
+            // V2 or V2.5
+            *frame_size = 72000 * bitrate / sampling_rate + padding;
+        }
     }
 
     if (out_sampling_rate) {
@@ -166,6 +171,33 @@ static bool get_mp3_frame_size(
 static bool Resync(
         const sp<DataSource> &source, uint32_t match_header,
         off_t *inout_pos, uint32_t *out_header) {
+    if (*inout_pos == 0) {
+        // Skip an optional ID3 header if syncing at the very beginning
+        // of the datasource.
+
+        uint8_t id3header[10];
+        if (source->read_at(0, id3header, sizeof(id3header))
+                < (ssize_t)sizeof(id3header)) {
+            // If we can't even read these 10 bytes, we might as well bail out,
+            // even if there _were_ 10 bytes of valid mp3 audio data...
+            return false;
+        }
+
+        if (id3header[0] == 'I' && id3header[1] == 'D' && id3header[2] == '3') {
+            // Skip the ID3v2 header.
+
+            size_t len =
+                ((id3header[6] & 0x7f) << 21)
+                | ((id3header[7] & 0x7f) << 14)
+                | ((id3header[8] & 0x7f) << 7)
+                | (id3header[9] & 0x7f);
+
+            len += 10;
+
+            *inout_pos += len;
+        }
+    }
+
     // Everything must match except for
     // protection, bitrate, padding, private bits and mode extension.
     const uint32_t kMask = 0xfffe0ccf;
