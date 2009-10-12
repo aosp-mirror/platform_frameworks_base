@@ -238,6 +238,7 @@ public final class MediaStore {
         private static final int FULL_SCREEN_KIND = 2;
         private static final int MICRO_KIND = 3;
         private static final String[] PROJECTION = new String[] {_ID, MediaColumns.DATA};
+        static final int DEFAULT_GROUP_ID = 0;
 
         /**
          * This method cancels the thumbnail request so clients waiting for getThumbnail will be
@@ -246,11 +247,14 @@ public final class MediaStore {
          *
          * @param cr ContentResolver
          * @param origId original image or video id. use -1 to cancel all requests.
+         * @param groupId the same groupId used in getThumbnail
          * @param baseUri the base URI of requested thumbnails
          */
-        static void cancelThumbnailRequest(ContentResolver cr, long origId, Uri baseUri) {
+        static void cancelThumbnailRequest(ContentResolver cr, long origId, Uri baseUri,
+                long groupId) {
             Uri cancelUri = baseUri.buildUpon().appendQueryParameter("cancel", "1")
-                    .appendQueryParameter("orig_id", String.valueOf(origId)).build();
+                    .appendQueryParameter("orig_id", String.valueOf(origId))
+                    .appendQueryParameter("group_id", String.valueOf(groupId)).build();
             Cursor c = null;
             try {
                 c = cr.query(cancelUri, PROJECTION, null, null, null);
@@ -271,9 +275,10 @@ public final class MediaStore {
          * @param kind could be MINI_KIND or MICRO_KIND
          * @param options this is only used for MINI_KIND when decoding the Bitmap
          * @param baseUri the base URI of requested thumbnails
+         * @param groupId the id of group to which this request belongs
          * @return Bitmap bitmap of specified thumbnail kind
          */
-        static Bitmap getThumbnail(ContentResolver cr, long origId, int kind,
+        static Bitmap getThumbnail(ContentResolver cr, long origId, long groupId, int kind,
                 BitmapFactory.Options options, Uri baseUri, boolean isVideo) {
             Bitmap bitmap = null;
             String filePath = null;
@@ -297,7 +302,8 @@ public final class MediaStore {
             Cursor c = null;
             try {
                 Uri blockingUri = baseUri.buildUpon().appendQueryParameter("blocking", "1")
-                        .appendQueryParameter("orig_id", String.valueOf(origId)).build();
+                        .appendQueryParameter("orig_id", String.valueOf(origId))
+                        .appendQueryParameter("group_id", String.valueOf(groupId)).build();
                 c = cr.query(blockingUri, PROJECTION, null, null, null);
                 // This happens when original image/video doesn't exist.
                 if (c == null) return null;
@@ -354,7 +360,7 @@ public final class MediaStore {
                     }
                     if (isVideo) {
                         bitmap = ThumbnailUtil.createVideoThumbnail(filePath);
-                        if (kind == MICRO_KIND) {
+                        if (kind == MICRO_KIND && bitmap != null) {
                             bitmap = ThumbnailUtil.extractMiniThumb(bitmap,
                                     ThumbnailUtil.MINI_THUMB_TARGET_SIZE,
                                     ThumbnailUtil.MINI_THUMB_TARGET_SIZE,
@@ -669,7 +675,8 @@ public final class MediaStore {
              * @param origId original image id
              */
             public static void cancelThumbnailRequest(ContentResolver cr, long origId) {
-                InternalThumbnails.cancelThumbnailRequest(cr, origId, EXTERNAL_CONTENT_URI);
+                InternalThumbnails.cancelThumbnailRequest(cr, origId, EXTERNAL_CONTENT_URI,
+                        InternalThumbnails.DEFAULT_GROUP_ID);
             }
 
             /**
@@ -685,7 +692,39 @@ public final class MediaStore {
              */
             public static Bitmap getThumbnail(ContentResolver cr, long origId, int kind,
                     BitmapFactory.Options options) {
-                return InternalThumbnails.getThumbnail(cr, origId, kind, options,
+                return InternalThumbnails.getThumbnail(cr, origId,
+                        InternalThumbnails.DEFAULT_GROUP_ID, kind, options,
+                        EXTERNAL_CONTENT_URI, false);
+            }
+
+            /**
+             * This method cancels the thumbnail request so clients waiting for getThumbnail will be
+             * interrupted and return immediately. Only the original process which made the getThumbnail
+             * requests can cancel their own requests.
+             *
+             * @param cr ContentResolver
+             * @param origId original image id
+             * @param groupId the same groupId used in getThumbnail.
+             */
+            public static void cancelThumbnailRequest(ContentResolver cr, long origId, long groupId) {
+                InternalThumbnails.cancelThumbnailRequest(cr, origId, EXTERNAL_CONTENT_URI, groupId);
+            }
+
+            /**
+             * This method checks if the thumbnails of the specified image (origId) has been created.
+             * It will be blocked until the thumbnails are generated.
+             *
+             * @param cr ContentResolver used to dispatch queries to MediaProvider.
+             * @param origId Original image id associated with thumbnail of interest.
+             * @param groupId the id of group to which this request belongs
+             * @param kind The type of thumbnail to fetch. Should be either MINI_KIND or MICRO_KIND.
+             * @param options this is only used for MINI_KIND when decoding the Bitmap
+             * @return A Bitmap instance. It could be null if the original image
+             *         associated with origId doesn't exist or memory is not enough.
+             */
+            public static Bitmap getThumbnail(ContentResolver cr, long origId, long groupId,
+                    int kind, BitmapFactory.Options options) {
+                return InternalThumbnails.getThumbnail(cr, origId, groupId, kind, options,
                         EXTERNAL_CONTENT_URI, false);
             }
 
@@ -1598,7 +1637,8 @@ public final class MediaStore {
              * @param origId original video id
              */
             public static void cancelThumbnailRequest(ContentResolver cr, long origId) {
-                InternalThumbnails.cancelThumbnailRequest(cr, origId, EXTERNAL_CONTENT_URI);
+                InternalThumbnails.cancelThumbnailRequest(cr, origId, EXTERNAL_CONTENT_URI,
+                        InternalThumbnails.DEFAULT_GROUP_ID);
             }
 
             /**
@@ -1607,15 +1647,47 @@ public final class MediaStore {
              *
              * @param cr ContentResolver used to dispatch queries to MediaProvider.
              * @param origId Original image id associated with thumbnail of interest.
+             * @param kind The type of thumbnail to fetch. Should be either MINI_KIND or MICRO_KIND.
+             * @param options this is only used for MINI_KIND when decoding the Bitmap
+             * @return A Bitmap instance. It could be null if the original image
+             *         associated with origId doesn't exist or memory is not enough.
+             */
+            public static Bitmap getThumbnail(ContentResolver cr, long origId, int kind,
+                    BitmapFactory.Options options) {
+                return InternalThumbnails.getThumbnail(cr, origId,
+                        InternalThumbnails.DEFAULT_GROUP_ID, kind, options,
+                        EXTERNAL_CONTENT_URI, true);
+            }
+
+            /**
+             * This method checks if the thumbnails of the specified image (origId) has been created.
+             * It will be blocked until the thumbnails are generated.
+             *
+             * @param cr ContentResolver used to dispatch queries to MediaProvider.
+             * @param origId Original image id associated with thumbnail of interest.
+             * @param groupId the id of group to which this request belongs
              * @param kind The type of thumbnail to fetch. Should be either MINI_KIND or MICRO_KIND
              * @param options this is only used for MINI_KIND when decoding the Bitmap
              * @return A Bitmap instance. It could be null if the original image associated with
              *         origId doesn't exist or memory is not enough.
              */
-            public static Bitmap getThumbnail(ContentResolver cr, long origId, int kind,
-                    BitmapFactory.Options options) {
-                return InternalThumbnails.getThumbnail(cr, origId, kind, options,
+            public static Bitmap getThumbnail(ContentResolver cr, long origId, long groupId,
+                    int kind, BitmapFactory.Options options) {
+                return InternalThumbnails.getThumbnail(cr, origId, groupId, kind, options,
                         EXTERNAL_CONTENT_URI, true);
+            }
+
+            /**
+             * This method cancels the thumbnail request so clients waiting for getThumbnail will be
+             * interrupted and return immediately. Only the original process which made the getThumbnail
+             * requests can cancel their own requests.
+             *
+             * @param cr ContentResolver
+             * @param origId original video id
+             * @param groupId the same groupId used in getThumbnail.
+             */
+            public static void cancelThumbnailRequest(ContentResolver cr, long origId, long groupId) {
+                InternalThumbnails.cancelThumbnailRequest(cr, origId, EXTERNAL_CONTENT_URI, groupId);
             }
 
             /**
