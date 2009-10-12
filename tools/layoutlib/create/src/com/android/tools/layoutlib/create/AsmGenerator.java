@@ -68,6 +68,7 @@ public class AsmGenerator {
      * 
      * @param log Output logger.
      * @param osDestJar The path of the destination JAR to create.
+     * @param injectClasses The list of class from layoutlib_create to inject in layoutlib.
      * @param stubMethods The list of methods to stub out. Each entry must be in the form
      *          "package.package.OuterClass$InnerClass#MethodName".
      * @param renameClasses The list of classes to rename, must be an even list: the binary FQCN
