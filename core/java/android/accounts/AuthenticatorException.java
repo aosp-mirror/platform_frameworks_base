@@ -16,7 +16,7 @@
 
 package android.accounts;
 
-public class AuthenticatorException extends Exception {
+public class AuthenticatorException extends AccountsException {
     public AuthenticatorException() {
         super();
     }

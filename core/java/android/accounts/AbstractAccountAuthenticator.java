@@ -19,9 +19,10 @@ package android.accounts;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.Binder;
-import android.util.Log;
+import android.os.IBinder;
 import android.content.pm.PackageManager;
 import android.content.Context;
+import android.content.Intent;
 import android.Manifest;
 
 /**
@@ -36,7 +37,7 @@ public abstract class AbstractAccountAuthenticator {
         mContext = context;
     }
 
-    class Transport extends IAccountAuthenticator.Stub {
+    private class Transport extends IAccountAuthenticator.Stub {
         public void addAccount(IAccountAuthenticatorResponse response, String accountType,
                 String authTokenType, String[] requiredFeatures, Bundle options)
                 throws RemoteException {
@@ -47,53 +48,38 @@ public abstract class AbstractAccountAuthenticator {
                     new AccountAuthenticatorResponse(response),
                         accountType, authTokenType, requiredFeatures, options);
             } catch (NetworkErrorException e) {
-                response.onError(Constants.ERROR_CODE_NETWORK_ERROR, e.getMessage());
+                response.onError(AccountManager.ERROR_CODE_NETWORK_ERROR, e.getMessage());
                 return;
             } catch (UnsupportedOperationException e) {
-                response.onError(Constants.ERROR_CODE_UNSUPPORTED_OPERATION,
+                response.onError(AccountManager.ERROR_CODE_UNSUPPORTED_OPERATION,
                         "addAccount not supported");
                 return;
             }
             if (result != null) {
                 response.onResult(result);
+            } else {
+                response.onError(AccountManager.ERROR_CODE_INVALID_RESPONSE,
+                        "no response from the authenticator");
             }
-        }
-
-        public void confirmPassword(IAccountAuthenticatorResponse response,
-                Account account, String password) throws RemoteException {
-            checkBinderPermission();
-            boolean result;
-            try {
-                result = AbstractAccountAuthenticator.this.confirmPassword(
-                    new AccountAuthenticatorResponse(response),
-                        account, password);
-            } catch (UnsupportedOperationException e) {
-                response.onError(Constants.ERROR_CODE_UNSUPPORTED_OPERATION,
-                        "confirmPassword not supported");
-                return;
-            } catch (NetworkErrorException e) {
-                response.onError(Constants.ERROR_CODE_NETWORK_ERROR, e.getMessage());
-                return;
-            }
-            Bundle bundle = new Bundle();
-            bundle.putBoolean(Constants.BOOLEAN_RESULT_KEY, result);
-            response.onResult(bundle);
         }
 
         public void confirmCredentials(IAccountAuthenticatorResponse response,
-                Account account) throws RemoteException {
+                Account account, Bundle options) throws RemoteException {
             checkBinderPermission();
             final Bundle result;
             try {
                 result = AbstractAccountAuthenticator.this.confirmCredentials(
-                    new AccountAuthenticatorResponse(response), account);
+                    new AccountAuthenticatorResponse(response), account, options);
             } catch (UnsupportedOperationException e) {
-                response.onError(Constants.ERROR_CODE_UNSUPPORTED_OPERATION,
+                response.onError(AccountManager.ERROR_CODE_UNSUPPORTED_OPERATION,
                         "confirmCredentials not supported");
                 return;
             }
             if (result != null) {
                 response.onResult(result);
+            } else {
+                response.onError(AccountManager.ERROR_CODE_INVALID_RESPONSE,
+                        "no response from the authenticator");
             }
         }
 
@@ -103,14 +89,14 @@ public abstract class AbstractAccountAuthenticator {
             checkBinderPermission();
             try {
                 Bundle result = new Bundle();
-                result.putString(Constants.AUTH_TOKEN_LABEL_KEY,
+                result.putString(AccountManager.KEY_AUTH_TOKEN_LABEL,
                         AbstractAccountAuthenticator.this.getAuthTokenLabel(authTokenType));
                 response.onResult(result);
             } catch (IllegalArgumentException e) {
-                response.onError(Constants.ERROR_CODE_BAD_ARGUMENTS,
+                response.onError(AccountManager.ERROR_CODE_BAD_ARGUMENTS,
                         "unknown authTokenType");
             } catch (UnsupportedOperationException e) {
-                response.onError(Constants.ERROR_CODE_UNSUPPORTED_OPERATION,
+                response.onError(AccountManager.ERROR_CODE_UNSUPPORTED_OPERATION,
                         "getAuthTokenTypeLabel not supported");
             }
         }
@@ -125,12 +111,15 @@ public abstract class AbstractAccountAuthenticator {
                         authTokenType, loginOptions);
                 if (result != null) {
                     response.onResult(result);
+                } else {
+                    response.onError(AccountManager.ERROR_CODE_INVALID_RESPONSE,
+                            "no response from the authenticator");
                 }
             } catch (UnsupportedOperationException e) {
-                response.onError(Constants.ERROR_CODE_UNSUPPORTED_OPERATION,
+                response.onError(AccountManager.ERROR_CODE_UNSUPPORTED_OPERATION,
                         "getAuthToken not supported");
             } catch (NetworkErrorException e) {
-                response.onError(Constants.ERROR_CODE_NETWORK_ERROR, e.getMessage());
+                response.onError(AccountManager.ERROR_CODE_NETWORK_ERROR, e.getMessage());
             }
         }
 
@@ -143,12 +132,15 @@ public abstract class AbstractAccountAuthenticator {
                     new AccountAuthenticatorResponse(response), account,
                         authTokenType, loginOptions);
             } catch (UnsupportedOperationException e) {
-                response.onError(Constants.ERROR_CODE_UNSUPPORTED_OPERATION,
+                response.onError(AccountManager.ERROR_CODE_UNSUPPORTED_OPERATION,
                         "updateCredentials not supported");
                 return;
             }
             if (result != null) {
                 response.onResult(result);
+            } else {
+                response.onError(AccountManager.ERROR_CODE_INVALID_RESPONSE,
+                        "no response from the authenticator");
             }
         }
 
@@ -160,12 +152,15 @@ public abstract class AbstractAccountAuthenticator {
                 result = AbstractAccountAuthenticator.this.editProperties(
                     new AccountAuthenticatorResponse(response), accountType);
             } catch (UnsupportedOperationException e) {
-                response.onError(Constants.ERROR_CODE_UNSUPPORTED_OPERATION,
+                response.onError(AccountManager.ERROR_CODE_UNSUPPORTED_OPERATION,
                         "editProperties not supported");
                 return;
             }
             if (result != null) {
                 response.onResult(result);
+            } else {
+                response.onError(AccountManager.ERROR_CODE_INVALID_RESPONSE,
+                        "no response from the authenticator");
             }
         }
 
@@ -177,15 +172,18 @@ public abstract class AbstractAccountAuthenticator {
                 result = AbstractAccountAuthenticator.this.hasFeatures(
                     new AccountAuthenticatorResponse(response), account, features);
             } catch (UnsupportedOperationException e) {
-                response.onError(Constants.ERROR_CODE_UNSUPPORTED_OPERATION,
+                response.onError(AccountManager.ERROR_CODE_UNSUPPORTED_OPERATION,
                         "hasFeatures not supported");
                 return;
             } catch (NetworkErrorException e) {
-                response.onError(Constants.ERROR_CODE_NETWORK_ERROR, e.getMessage());
+                response.onError(AccountManager.ERROR_CODE_NETWORK_ERROR, e.getMessage());
                 return;
             }
             if (result != null) {
                 response.onResult(result);
+            } else {
+                response.onError(AccountManager.ERROR_CODE_INVALID_RESPONSE,
+                        "no response from the authenticator");
             }
         }
 
@@ -197,34 +195,34 @@ public abstract class AbstractAccountAuthenticator {
                     new AccountAuthenticatorResponse(response), account);
                 if (result != null) {
                     response.onResult(result);
+                } else {
+                    response.onError(AccountManager.ERROR_CODE_INVALID_RESPONSE,
+                            "no response from the authenticator");
                 }
             } catch (UnsupportedOperationException e) {
-                response.onError(Constants.ERROR_CODE_UNSUPPORTED_OPERATION,
+                response.onError(AccountManager.ERROR_CODE_UNSUPPORTED_OPERATION,
                         "getAccountRemovalAllowed not supported");
-                return;
             } catch (NetworkErrorException e) {
-                response.onError(Constants.ERROR_CODE_NETWORK_ERROR, e.getMessage());
-                return;
+                response.onError(AccountManager.ERROR_CODE_NETWORK_ERROR, e.getMessage());
             }
         }
     }
 
     private void checkBinderPermission() {
         final int uid = Binder.getCallingUid();
-        final String perm = Manifest.permission.ACCOUNT_MANAGER_SERVICE;
+        final String perm = Manifest.permission.ACCOUNT_MANAGER;
         if (mContext.checkCallingOrSelfPermission(perm) != PackageManager.PERMISSION_GRANTED) {
             throw new SecurityException("caller uid " + uid + " lacks " + perm);
         }
     }
 
-    Transport mTransport = new Transport();
+    private Transport mTransport = new Transport();
 
     /**
-     * @return the IAccountAuthenticator binder transport object
+     * @return the IBinder for the AccountAuthenticator
      */
-    public final IAccountAuthenticator getIAccountAuthenticator()
-    {
-        return mTransport;
+    public final IBinder getIBinder() {
+        return mTransport.asBinder();
     }
 
     /**
@@ -244,11 +242,8 @@ public abstract class AbstractAccountAuthenticator {
     public abstract Bundle addAccount(AccountAuthenticatorResponse response, String accountType,
             String authTokenType, String[] requiredFeatures, Bundle options)
             throws NetworkErrorException;
-    /* @deprecated */
-    public abstract boolean confirmPassword(AccountAuthenticatorResponse response,
-            Account account, String password) throws NetworkErrorException;
     public abstract Bundle confirmCredentials(AccountAuthenticatorResponse response,
-            Account account);
+            Account account, Bundle options);
     public abstract Bundle getAuthToken(AccountAuthenticatorResponse response,
             Account account, String authTokenType, Bundle loginOptions)
             throws NetworkErrorException;
@@ -260,7 +255,7 @@ public abstract class AbstractAccountAuthenticator {
     public Bundle getAccountRemovalAllowed(AccountAuthenticatorResponse response,
             Account account) throws NetworkErrorException {
         final Bundle result = new Bundle();
-        result.putBoolean(Constants.BOOLEAN_RESULT_KEY, true);
+        result.putBoolean(AccountManager.KEY_BOOLEAN_RESULT, true);
         return result;
     }
 }

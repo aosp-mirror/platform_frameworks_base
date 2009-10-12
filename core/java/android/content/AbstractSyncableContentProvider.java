@@ -4,7 +4,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.Cursor;
 import android.net.Uri;
-import android.accounts.OnAccountsUpdatedListener;
+import android.accounts.OnAccountsUpdateListener;
 import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.provider.SyncConstValue;
@@ -160,7 +160,7 @@ public abstract class AbstractSyncableContentProvider extends SyncableContentPro
                 mDatabaseName);
         mSyncState = new SyncStateContentProviderHelper(mOpenHelper);
         AccountManager.get(getContext()).addOnAccountsUpdatedListener(
-                new OnAccountsUpdatedListener() {
+                new OnAccountsUpdateListener() {
                     public void onAccountsUpdated(Account[] accounts) {
                         // Some providers override onAccountsChanged(); give them a database to
                         // work with.
