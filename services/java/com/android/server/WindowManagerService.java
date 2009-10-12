@@ -3971,7 +3971,9 @@ public class WindowManagerService extends IWindowManager.Stub
             != PackageManager.PERMISSION_GRANTED) {
             throw new SecurityException("Requires DISABLE_KEYGUARD permission");
         }
-        mKeyguardDisabled.acquire(token, tag);
+        synchronized (mKeyguardDisabled) {
+            mKeyguardDisabled.acquire(token, tag);
+        }
     }
 
     public void reenableKeyguard(IBinder token) {
