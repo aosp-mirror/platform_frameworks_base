@@ -27,6 +27,7 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.PatternMatcher;
 import android.util.AttributeSet;
@@ -84,8 +85,9 @@ public class PackageParser {
 
     private String mArchiveSourcePath;
     private String[] mSeparateProcesses;
-    private int mSdkVersion;
-    private String mSdkCodename;
+    private static final int SDK_VERSION = Build.VERSION.SDK_INT;
+    private static final String SDK_CODENAME = "REL".equals(Build.VERSION.CODENAME)
+            ? null : Build.VERSION.CODENAME;
 
     private int mParseError = PackageManager.INSTALL_SUCCEEDED;
 
@@ -150,11 +152,6 @@ public class PackageParser {
 
     public void setSeparateProcesses(String[] procs) {
         mSeparateProcesses = procs;
-    }
-
-    public void setSdkVersion(int sdkVersion, String codename) {
-        mSdkVersion = sdkVersion;
-        mSdkCodename = codename;
     }
 
     private static final boolean isPackageFilename(String name) {
@@ -825,7 +822,7 @@ public class PackageParser {
                 XmlUtils.skipCurrentTag(parser);
 
             } else if (tagName.equals("uses-sdk")) {
-                if (mSdkVersion > 0) {
+                if (SDK_VERSION > 0) {
                     sa = res.obtainAttributes(attrs,
                             com.android.internal.R.styleable.AndroidManifestUsesSdk);
 
@@ -858,15 +855,15 @@ public class PackageParser {
                     
                     int maxVers = sa.getInt(
                             com.android.internal.R.styleable.AndroidManifestUsesSdk_maxSdkVersion,
-                            mSdkVersion);
+                            SDK_VERSION);
 
                     sa.recycle();
 
                     if (minCode != null) {
-                        if (!minCode.equals(mSdkCodename)) {
-                            if (mSdkCodename != null) {
+                        if (!minCode.equals(SDK_CODENAME)) {
+                            if (SDK_CODENAME != null) {
                                 outError[0] = "Requires development platform " + minCode
-                                        + " (current platform is " + mSdkCodename + ")";
+                                        + " (current platform is " + SDK_CODENAME + ")";
                             } else {
                                 outError[0] = "Requires development platform " + minCode
                                         + " but this is a release platform.";
@@ -874,18 +871,18 @@ public class PackageParser {
                             mParseError = PackageManager.INSTALL_FAILED_OLDER_SDK;
                             return null;
                         }
-                    } else if (minVers > mSdkVersion) {
+                    } else if (minVers > SDK_VERSION) {
                         outError[0] = "Requires newer sdk version #" + minVers
-                                + " (current version is #" + mSdkVersion + ")";
+                                + " (current version is #" + SDK_VERSION + ")";
                         mParseError = PackageManager.INSTALL_FAILED_OLDER_SDK;
                         return null;
                     }
                     
                     if (targetCode != null) {
-                        if (!targetCode.equals(mSdkCodename)) {
-                            if (mSdkCodename != null) {
+                        if (!targetCode.equals(SDK_CODENAME)) {
+                            if (SDK_CODENAME != null) {
                                 outError[0] = "Requires development platform " + targetCode
-                                        + " (current platform is " + mSdkCodename + ")";
+                                        + " (current platform is " + SDK_CODENAME + ")";
                             } else {
                                 outError[0] = "Requires development platform " + targetCode
                                         + " but this is a release platform.";
@@ -900,9 +897,9 @@ public class PackageParser {
                         pkg.applicationInfo.targetSdkVersion = targetVers;
                     }
                     
-                    if (maxVers < mSdkVersion) {
+                    if (maxVers < SDK_VERSION) {
                         outError[0] = "Requires older sdk version #" + maxVers
-                                + " (current version is #" + mSdkVersion + ")";
+                                + " (current version is #" + SDK_VERSION + ")";
                         mParseError = PackageManager.INSTALL_FAILED_OLDER_SDK;
                         return null;
                     }
