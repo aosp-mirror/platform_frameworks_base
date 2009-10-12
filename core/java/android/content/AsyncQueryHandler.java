@@ -213,6 +213,7 @@ public abstract class AsyncQueryHandler extends Handler {
      * @param orderBy How to order the rows, formatted as an SQL ORDER BY clause
      *            (excluding the ORDER BY itself). Passing null will use the
      *            default sort order, which may be unordered.
+     * @hide
      */
     public void startQueryEntities(int token, Object cookie, Uri uri, String selection,
             String[] selectionArgs, String orderBy) {
