@@ -150,6 +150,12 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
     private PowerManager.WakeLock mWakeLock;
 
     /**
+     * Used to keep the device awake while to ensure the keyguard finishes opening before
+     * we sleep.
+     */
+    private PowerManager.WakeLock mShowKeyguardWakeLock;
+
+    /**
      * Does not turn on screen, held while a call to {@link KeyguardViewManager#wakeWhenReadyTq(int)}
      * is called to make sure the device doesn't sleep before it has a chance to poke
      * the wake lock.
@@ -224,6 +230,8 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
                 PowerManager.FULL_WAKE_LOCK | PowerManager.ACQUIRE_CAUSES_WAKEUP, 
                 "keyguard");
         mWakeLock.setReferenceCounted(false);
+        mShowKeyguardWakeLock = mPM.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "show keyguard");
+        mShowKeyguardWakeLock.setReferenceCounted(false);
 
         mWakeAndHandOff = mPM.newWakeLock(
                 PowerManager.PARTIAL_WAKE_LOCK,
@@ -542,6 +550,8 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
      */
     private void showLocked() {
         if (DEBUG) Log.d(TAG, "showLocked");
+        // ensure we stay awake until we are finished displaying the keyguard
+        mShowKeyguardWakeLock.acquire();
         Message msg = mHandler.obtainMessage(SHOW);
         mHandler.sendMessage(msg);
     }
@@ -855,6 +865,7 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
                 ActivityManagerNative.getDefault().closeSystemDialogs("lock");
             } catch (RemoteException e) {
             }
+            mShowKeyguardWakeLock.release();
         }
     }
 
