@@ -43,6 +43,7 @@ public:
     // Caller retains ownership of both "dataSource" and "sampleTable".
     MPEG4Source(const sp<MetaData> &format,
                 const sp<DataSource> &dataSource,
+                int32_t timeScale,
                 const sp<SampleTable> &sampleTable);
 
     virtual status_t start(MetaData *params = NULL);
@@ -390,7 +391,6 @@ status_t MPEG4Extractor::parseChunk(off_t *offset, int depth) {
             }
 
             mLastTrack->timescale = ntohl(timescale);
-            mLastTrack->meta->setInt32(kKeyTimeScale, mLastTrack->timescale);
 
             int64_t duration;
             if (version == 1) {
@@ -409,7 +409,8 @@ status_t MPEG4Extractor::parseChunk(off_t *offset, int depth) {
                 }
                 duration = ntohl(duration32);
             }
-            mLastTrack->meta->setInt32(kKeyDuration, duration);
+            mLastTrack->meta->setInt64(
+                    kKeyDuration, (duration * 1000000) / mLastTrack->timescale);
 
             *offset += chunk_size;
             break;
@@ -722,7 +723,7 @@ sp<MediaSource> MPEG4Extractor::getTrack(size_t index) {
     }
 
     return new MPEG4Source(
-            track->meta, mDataSource, track->sampleTable);
+            track->meta, mDataSource, track->timescale, track->sampleTable);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -730,10 +731,11 @@ sp<MediaSource> MPEG4Extractor::getTrack(size_t index) {
 MPEG4Source::MPEG4Source(
         const sp<MetaData> &format,
         const sp<DataSource> &dataSource,
+        int32_t timeScale,
         const sp<SampleTable> &sampleTable)
     : mFormat(format),
       mDataSource(dataSource),
-      mTimescale(0),
+      mTimescale(timeScale),
       mSampleTable(sampleTable),
       mCurrentSampleIndex(0),
       mIsAVC(false),
@@ -744,9 +746,6 @@ MPEG4Source::MPEG4Source(
       mSrcBuffer(NULL) {
     const char *mime;
     bool success = mFormat->findCString(kKeyMIMEType, &mime);
-    CHECK(success);
-
-    success = mFormat->findInt32(kKeyTimeScale, &mTimescale);
     CHECK(success);
 
     mIsAVC = !strcasecmp(mime, MEDIA_MIMETYPE_VIDEO_AVC);
@@ -879,8 +878,8 @@ status_t MPEG4Source::read(
 
             mBuffer->set_range(0, size);
             mBuffer->meta_data()->clear();
-            mBuffer->meta_data()->setInt32(kKeyTimeUnits, dts);
-            mBuffer->meta_data()->setInt32(kKeyTimeScale, mTimescale);
+            mBuffer->meta_data()->setInt64(
+                    kKeyTime, ((int64_t)dts * 1000000) / mTimescale);
             ++mCurrentSampleIndex;
         }
 
@@ -959,8 +958,8 @@ status_t MPEG4Source::read(
 
         mBuffer->set_range(0, dstOffset);
         mBuffer->meta_data()->clear();
-        mBuffer->meta_data()->setInt32(kKeyTimeUnits, dts);
-        mBuffer->meta_data()->setInt32(kKeyTimeScale, mTimescale);
+        mBuffer->meta_data()->setInt64(
+                kKeyTime, ((int64_t)dts * 1000000) / mTimescale);
         ++mCurrentSampleIndex;
 
         *out = mBuffer;

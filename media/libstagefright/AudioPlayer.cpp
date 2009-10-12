@@ -209,15 +209,9 @@ void AudioPlayer::fillBuffer(void *data, size_t size) {
                 break;
             }
 
-            int32_t units, scale;
-            bool success =
-                mInputBuffer->meta_data()->findInt32(kKeyTimeUnits, &units);
-            success = success &&
-                mInputBuffer->meta_data()->findInt32(kKeyTimeScale, &scale);
-            CHECK(success);
-
             Mutex::Autolock autoLock(mLock);
-            mPositionTimeMediaUs = (int64_t)units * 1000000 / scale;
+            CHECK(mInputBuffer->meta_data()->findInt64(
+                        kKeyTime, &mPositionTimeMediaUs));
 
             mPositionTimeRealUs =
                 ((mNumFramesPlayed + size_done / mFrameSize) * 1000000)

@@ -986,12 +986,8 @@ void OMXCodec::on_message(const omx_message &msg) {
 
                 buffer->meta_data()->clear();
 
-                buffer->meta_data()->setInt32(
-                        kKeyTimeUnits,
-                        (msg.u.extended_buffer_data.timestamp + 500) / 1000);
-
-                buffer->meta_data()->setInt32(
-                        kKeyTimeScale, 1000);
+                buffer->meta_data()->setInt64(
+                        kKeyTime, msg.u.extended_buffer_data.timestamp);
 
                 if (msg.u.extended_buffer_data.flags & OMX_BUFFERFLAG_SYNCFRAME) {
                     buffer->meta_data()->setInt32(kKeyIsSyncFrame, true);
@@ -1439,7 +1435,7 @@ void OMXCodec::drainInputBuffer(BufferInfo *info) {
     }
 
     OMX_U32 flags = OMX_BUFFERFLAG_ENDOFFRAME;
-    OMX_TICKS timestamp = 0;
+    OMX_TICKS timestampUs = 0;
     size_t srcLength = 0;
 
     if (err != OK) {
@@ -1459,15 +1455,11 @@ void OMXCodec::drainInputBuffer(BufferInfo *info) {
                (const uint8_t *)srcBuffer->data() + srcBuffer->range_offset(),
                srcLength);
 
-        int32_t units, scale;
-        if (srcBuffer->meta_data()->findInt32(kKeyTimeUnits, &units)
-            && srcBuffer->meta_data()->findInt32(kKeyTimeScale, &scale)) {
-            timestamp = ((OMX_TICKS)units * 1000000) / scale;
-
+        if (srcBuffer->meta_data()->findInt64(kKeyTime, &timestampUs)) {
             CODEC_LOGV("Calling empty_buffer on buffer %p (length %d)",
                  info->mBuffer, srcLength);
             CODEC_LOGV("Calling empty_buffer with timestamp %lld us (%.2f secs)",
-                 timestamp, timestamp / 1E6);
+                 timestampUs, timestampUs / 1E6);
         }
     }
 
@@ -1478,7 +1470,7 @@ void OMXCodec::drainInputBuffer(BufferInfo *info) {
 
     err = mOMX->empty_buffer(
             mNode, info->mBuffer, 0, srcLength,
-            flags, timestamp);
+            flags, timestampUs);
 
     if (err != OK) {
         setState(ERROR);

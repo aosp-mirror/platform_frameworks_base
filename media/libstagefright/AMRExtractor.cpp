@@ -201,10 +201,7 @@ status_t AMRSource::read(
     }
 
     buffer->set_range(0, frameSize);
-    buffer->meta_data()->setInt32(
-            kKeyTimeUnits, (mCurrentTimeUs + 500) / 1000);
-    buffer->meta_data()->setInt32(
-            kKeyTimeScale, 1000);
+    buffer->meta_data()->setInt64(kKeyTime, mCurrentTimeUs);
 
     mOffset += frameSize;
     mCurrentTimeUs += 20000;  // Each frame is 20ms

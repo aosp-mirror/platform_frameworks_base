@@ -191,8 +191,7 @@ status_t CameraSource::read(
     *buffer = new CameraBuffer(frame);
 
     (*buffer)->meta_data()->clear();
-    (*buffer)->meta_data()->setInt32(kKeyTimeScale, 15);
-    (*buffer)->meta_data()->setInt32(kKeyTimeUnits, count);
+    (*buffer)->meta_data()->setInt64(kKeyTime, (count * 1000000) / 15);
 
     (*buffer)->add_ref();
     (*buffer)->setObserver(this);

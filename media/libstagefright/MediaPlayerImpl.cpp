@@ -261,15 +261,9 @@ void MediaPlayerImpl::videoEntry() {
             continue;
         }
 
-        int32_t units, scale;
-        bool success =
-            buffer->meta_data()->findInt32(kKeyTimeUnits, &units);
-        CHECK(success);
-        success =
-            buffer->meta_data()->findInt32(kKeyTimeScale, &scale);
-        CHECK(success);
+        int64_t pts_us;
+        CHECK(buffer->meta_data()->findInt64(kKeyTime, &pts_us));
 
-        int64_t pts_us = (int64_t)units * 1000000 / scale;
         {
             Mutex::Autolock autoLock(mLock);
             mVideoPosition = pts_us;
@@ -379,12 +373,10 @@ void MediaPlayerImpl::init() {
 
             sp<MediaSource> source = mExtractor->getTrack(i);
 
-            int32_t units, scale;
-            if (meta->findInt32(kKeyDuration, &units)
-                && meta->findInt32(kKeyTimeScale, &scale)) {
-                int64_t duration_us = (int64_t)units * 1000000 / scale;
-                if (duration_us > mDuration) {
-                    mDuration = duration_us;
+            int64_t durationUs;
+            if (meta->findInt64(kKeyDuration, &durationUs)) {
+                if (durationUs > mDuration) {
+                    mDuration = durationUs;
                 }
             }
 
