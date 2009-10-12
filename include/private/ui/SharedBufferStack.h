@@ -139,7 +139,8 @@ private:
 class SharedBufferBase
 {
 public:
-    SharedBufferBase(SharedClient* sharedClient, int surface, int num);
+    SharedBufferBase(SharedClient* sharedClient, int surface, int num,
+            int32_t identity);
     ~SharedBufferBase();
     uint32_t getIdentity();
     status_t getStatus() const;
@@ -150,6 +151,7 @@ protected:
     SharedClient* const mSharedClient;
     SharedBufferStack* const mSharedStack;
     const int mNumBuffers;
+    const int mIdentity;
 
     friend struct Update;
     friend struct QueueUpdate;
@@ -180,7 +182,10 @@ status_t SharedBufferBase::waitForCondition(T condition)
     SharedClient& client( *mSharedClient );
     const nsecs_t TIMEOUT = s2ns(1);
     Mutex::Autolock _l(client.lock);
-    while ((condition()==false) && (stack.status == NO_ERROR)) {
+    while ((condition()==false) &&
+            (stack.identity == mIdentity) &&
+            (stack.status == NO_ERROR))
+    {
         status_t err = client.cv.waitRelative(client.lock, TIMEOUT);
         
         // handle errors and timeouts
@@ -190,13 +195,13 @@ status_t SharedBufferBase::waitForCondition(T condition)
                     LOGE("waitForCondition(%s) timed out (identity=%d), "
                         "but condition is true! We recovered but it "
                         "shouldn't happen." , T::name(),
-                        mSharedStack->identity);
+                        stack.identity);
                     break;
                 } else {
                     LOGW("waitForCondition(%s) timed out "
                         "(identity=%d, status=%d). "
                         "CPU may be pegged. trying again.", T::name(),
-                        mSharedStack->identity, mSharedStack->status);
+                        stack.identity, stack.status);
                 }
             } else {
                 LOGE("waitForCondition(%s) error (%s) ",
@@ -205,7 +210,7 @@ status_t SharedBufferBase::waitForCondition(T condition)
             }
         }
     }
-    return stack.status;
+    return (stack.identity != mIdentity) ? status_t(BAD_INDEX) : stack.status;
 }
 
 
@@ -223,8 +228,9 @@ status_t SharedBufferBase::updateCondition(T update) {
 class SharedBufferClient : public SharedBufferBase
 {
 public:
-    SharedBufferClient(SharedClient* sharedClient, int surface, int num);
-    
+    SharedBufferClient(SharedClient* sharedClient, int surface, int num,
+            int32_t identity);
+
     ssize_t dequeue();
     status_t undoDequeue(int buf);
     

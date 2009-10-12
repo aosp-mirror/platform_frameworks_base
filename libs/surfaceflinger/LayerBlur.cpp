@@ -189,8 +189,8 @@ void LayerBlur::onDraw(const Region& clip) const
             } else {
                 GLuint tw = 1 << (31 - clz(w));
                 GLuint th = 1 << (31 - clz(h));
-                if (tw < w) tw <<= 1;
-                if (th < h) th <<= 1;
+                if (tw < GLuint(w)) tw <<= 1;
+                if (th < GLuint(h)) th <<= 1;
                 glTexImage2D(GL_TEXTURE_2D, 0, mReadFormat, tw, th, 0,
                         mReadFormat, mReadType, NULL);
                 glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, w, h, 

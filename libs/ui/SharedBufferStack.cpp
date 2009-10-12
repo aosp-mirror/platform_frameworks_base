@@ -97,10 +97,10 @@ Region SharedBufferStack::getDirtyRegion(int buffer) const
 // ----------------------------------------------------------------------------
 
 SharedBufferBase::SharedBufferBase(SharedClient* sharedClient,
-        int surface, int num)
+        int surface, int num, int32_t identity)
     : mSharedClient(sharedClient), 
       mSharedStack(sharedClient->surfaces + surface),
-      mNumBuffers(num)
+      mNumBuffers(num), mIdentity(identity)
 {
 }
 
@@ -248,8 +248,8 @@ ssize_t SharedBufferServer::StatusUpdate::operator()() {
 // ============================================================================
 
 SharedBufferClient::SharedBufferClient(SharedClient* sharedClient,
-        int surface, int num)
-    : SharedBufferBase(sharedClient, surface, num), tail(0)
+        int surface, int num, int32_t identity)
+    : SharedBufferBase(sharedClient, surface, num, identity), tail(0)
 {
     tail = computeTail();
 }
@@ -353,7 +353,7 @@ status_t SharedBufferClient::setDirtyRegion(int buffer, const Region& reg)
 
 SharedBufferServer::SharedBufferServer(SharedClient* sharedClient,
         int surface, int num, int32_t identity)
-    : SharedBufferBase(sharedClient, surface, num)
+    : SharedBufferBase(sharedClient, surface, num, identity)
 {
     mSharedStack->init(identity);
     mSharedStack->head = num-1;

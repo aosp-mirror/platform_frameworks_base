@@ -133,7 +133,7 @@ status_t Layer::setBuffers( uint32_t w, uint32_t h,
 void Layer::reloadTexture(const Region& dirty)
 {
     Mutex::Autolock _l(mLock);
-    sp<GraphicBuffer> buffer(getFrontBuffer());
+    sp<GraphicBuffer> buffer(getFrontBufferLocked());
     if (LIKELY((mFlags & DisplayHardware::DIRECT_TEXTURE) &&
             (buffer->usage & GRALLOC_USAGE_HW_TEXTURE))) {
         int index = mFrontBufferIndex;
@@ -194,7 +194,7 @@ void Layer::reloadTexture(const Region& dirty)
             }                
         }
     } else {
-        for (int i=0 ; i<NUM_BUFFERS ; i++)
+        for (size_t i=0 ; i<NUM_BUFFERS ; i++)
             mTextures[i].image = EGL_NO_IMAGE_KHR;
 
         GGLSurface t;

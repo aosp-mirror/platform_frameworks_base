@@ -314,7 +314,7 @@ Surface::Surface(const sp<SurfaceControl>& surface)
       mWidth(surface->mWidth), mHeight(surface->mHeight)
 {
     mSharedBufferClient = new SharedBufferClient(
-            mClient->mControl, mToken, 2);
+            mClient->mControl, mToken, 2, mIdentity);
 
     init();
 }
@@ -336,7 +336,7 @@ Surface::Surface(const Parcel& parcel)
         mClient = SurfaceComposerClient::clientForConnection(clientBinder);
 
         mSharedBufferClient = new SharedBufferClient(
-                mClient->mControl, mToken, 2);
+                mClient->mControl, mToken, 2, mIdentity);
     }
 
     init();
