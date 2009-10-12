@@ -282,10 +282,20 @@ public final class EriManager {
     }
 
     private EriDisplayInformation getEriDisplayInformation(int roamInd, int defRoamInd){
-        //int iconIndex = -1;
-        //int iconMode = -1;
-        //String iconText = "ERI text";
         EriDisplayInformation ret;
+
+        // Carrier can use eri.xml to customize any built-in roaming display indications
+        if (isEriFileLoaded) {
+            EriInfo eriInfo = getEriInfo(roamInd);
+            if (eriInfo != null) {
+                if (DBG) Log.d(LOG_TAG, "ERI roamInd " + roamInd + " found in ERI file");
+                ret = new EriDisplayInformation(
+                        eriInfo.mIconIndex,
+                        eriInfo.mIconMode,
+                        eriInfo.mEriText);
+                return ret;
+            }
+        }
 
         switch (roamInd) {
         // Handling the standard roaming indicator (non-ERI)
