@@ -247,6 +247,11 @@ class LockScreen extends LinearLayout implements KeyguardScreen, KeyguardUpdateM
         }
     }
 
+    /** {@inheritDoc} */
+    public void onGrabbedStateChange(View v, int grabbedState) {
+        // TODO: Update onscreen hint text based on the new state.
+    }
+
     /**
      * Displays a message in a text view and then removes it.
      * @param textView The text view.
@@ -556,4 +561,3 @@ class LockScreen extends LinearLayout implements KeyguardScreen, KeyguardUpdateM
         mUpdateMonitor.removeCallback(this);
     }
 }
-
