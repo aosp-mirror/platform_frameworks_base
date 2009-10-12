@@ -413,6 +413,28 @@ static void android_hardware_Camera_unlock(JNIEnv *env, jobject thiz)
     }
 }
 
+static void android_hardware_Camera_startSmoothZoom(JNIEnv *env, jobject thiz, jint value)
+{
+    LOGD("startSmoothZoom");
+    sp<Camera> camera = get_native_camera(env, thiz, NULL);
+    if (camera == 0) return;
+
+    if (camera->sendCommand(CAMERA_CMD_START_SMOOTH_ZOOM, value, 0) != NO_ERROR) {
+        jniThrowException(env, "java/lang/RuntimeException", "start smooth zoom failed");
+    }
+}
+
+static void android_hardware_Camera_stopSmoothZoom(JNIEnv *env, jobject thiz)
+{
+    LOGD("stopSmoothZoom");
+    sp<Camera> camera = get_native_camera(env, thiz, NULL);
+    if (camera == 0) return;
+
+    if (camera->sendCommand(CAMERA_CMD_STOP_SMOOTH_ZOOM, 0, 0) != NO_ERROR) {
+        jniThrowException(env, "java/lang/RuntimeException", "stop smooth zoom failed");
+    }
+}
+
 //-------------------------------------------------
 
 static JNINativeMethod camMethods[] = {
@@ -461,6 +483,12 @@ static JNINativeMethod camMethods[] = {
   { "unlock",
     "()V",
     (void*)android_hardware_Camera_unlock },
+  { "startSmoothZoom",
+    "(I)V",
+    (void *)android_hardware_Camera_startSmoothZoom },
+  { "stopSmoothZoom",
+    "()V",
+    (void *)android_hardware_Camera_stopSmoothZoom },
 };
 
 struct field {
