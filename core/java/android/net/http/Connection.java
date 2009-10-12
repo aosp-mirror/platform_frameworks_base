@@ -94,7 +94,6 @@ abstract class Connection {
      */
     private static final String HTTP_CONNECTION = "http.connection";
 
-    RequestQueue.ConnectionManager mConnectionManager;
     RequestFeeder mRequestFeeder;
 
     /**
@@ -104,11 +103,9 @@ abstract class Connection {
     private byte[] mBuf;
 
     protected Connection(Context context, HttpHost host,
-                         RequestQueue.ConnectionManager connectionManager,
                          RequestFeeder requestFeeder) {
         mContext = context;
         mHost = host;
-        mConnectionManager = connectionManager;
         mRequestFeeder = requestFeeder;
 
         mCanPersist = false;
@@ -124,18 +121,15 @@ abstract class Connection {
      * necessary
      */
     static Connection getConnection(
-            Context context, HttpHost host,
-            RequestQueue.ConnectionManager connectionManager,
+            Context context, HttpHost host, HttpHost proxy,
             RequestFeeder requestFeeder) {
 
         if (host.getSchemeName().equals("http")) {
-            return new HttpConnection(context, host, connectionManager,
-                                      requestFeeder);
+            return new HttpConnection(context, host, requestFeeder);
         }
 
         // Otherwise, default to https
-        return new HttpsConnection(context, host, connectionManager,
-                                   requestFeeder);
+        return new HttpsConnection(context, host, proxy, requestFeeder);
     }
 
     /**
@@ -338,7 +332,7 @@ abstract class Connection {
                 mRequestFeeder.requeueRequest(tReq);
                 empty = false;
             }
-            if (empty) empty = mRequestFeeder.haveRequest(mHost);
+            if (empty) empty = !mRequestFeeder.haveRequest(mHost);
         }
         return empty;
     }
