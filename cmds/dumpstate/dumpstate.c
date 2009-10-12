@@ -111,6 +111,13 @@ static void dumpstate(int full) {
                         "PANIC CONSOLE");
         dump_kernel_log("/data/dontpanic/apanic_threads",
                         "PANIC THREADS");
+
+        PRINT("------ BACKLIGHTS ------");
+        DUMP_PROMPT("LCD brightness=", "/sys/class/leds/lcd-backlight/brightness");
+        DUMP_PROMPT("Button brightness=", "/sys/class/leds/button-backlight/brightness");
+        DUMP_PROMPT("Keyboard brightness=", "/sys/class/leds/keyboard-backlight/brightness");
+        DUMP_PROMPT("ALS mode=", "/sys/class/leds/lcd-backlight/als");
+        DUMP_PROMPT("LCD driver registers:\n", "/sys/class/leds/lcd-backlight/registers");
     }
     PRINT("========================================================");
     PRINT("== build.prop");
