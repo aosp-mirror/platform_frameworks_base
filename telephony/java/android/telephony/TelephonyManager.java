@@ -732,7 +732,6 @@ public class TelephonyManager {
     public static final int DATA_ACTIVITY_INOUT = DATA_ACTIVITY_IN | DATA_ACTIVITY_OUT;
     /**
      * Data connection is active, but physical link is down
-     * @hide
      */
     public static final int DATA_ACTIVITY_DORMANT = 0x00000004;
 
