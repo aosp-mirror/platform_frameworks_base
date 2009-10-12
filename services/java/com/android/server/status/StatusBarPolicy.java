@@ -448,8 +448,7 @@ public class StatusBarPolicy {
         mBluetoothData = IconData.makeIcon("bluetooth",
                 null, com.android.internal.R.drawable.stat_sys_data_bluetooth, 0, 0);
         mBluetoothIcon = service.addIcon(mBluetoothData, null);
-        BluetoothAdapter adapter =
-                (BluetoothAdapter) mContext.getSystemService(Context.BLUETOOTH_SERVICE);
+        BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
         if (adapter != null) {
             mBluetoothEnabled = adapter.isEnabled();
         } else {
