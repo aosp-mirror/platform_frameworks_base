@@ -26,6 +26,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.SystemClock;
 import android.os.UEventObserver;
+import android.provider.Settings;
 import android.util.Log;
 
 import com.android.internal.widget.LockPatternUtils;
@@ -154,26 +155,16 @@ class DockObserver extends UEventObserver {
         mHandler.sendEmptyMessage(0);
     }
 
-    private final void updateKeyguardLocked() {
-        if (!mLockPatternUtils.isLockPatternEnabled()) {
-            if (!mKeyguardDisabled && mDockState != Intent.EXTRA_DOCK_STATE_UNDOCKED) {
-                Log.d(TAG, "calling mKeyguardLock.disableKeyguard");
-                mKeyguardLock.disableKeyguard();
-                mKeyguardDisabled = true;
-            } else if (mKeyguardDisabled && mDockState == Intent.EXTRA_DOCK_STATE_UNDOCKED) {
-                Log.d(TAG, "calling mKeyguardLock.reenableKeyguard");
-                mKeyguardLock.reenableKeyguard();
-                mKeyguardDisabled = false;
-            }
-        }
-    }
-
     private final Handler mHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
             synchronized (this) {
-                updateKeyguardLocked();
-                Log.d(TAG, "Broadcasting dock state " + mDockState);
+                Log.i(TAG, "Dock state changed: " + mDockState);
+                if (Settings.Secure.getInt(mContext.getContentResolver(),
+                        Settings.Secure.DEVICE_PROVISIONED, 0) == 0) {
+                    Log.i(TAG, "Device not provisioned, skipping dock broadcast");
+                    return;
+                }
                 // Pack up the values and broadcast them to everyone
                 mPowerManager.userActivityWithForce(SystemClock.uptimeMillis(), false, true);
                 Intent intent = new Intent(Intent.ACTION_DOCK_EVENT);
