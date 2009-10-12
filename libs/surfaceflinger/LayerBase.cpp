@@ -449,17 +449,9 @@ void LayerBase::drawWithOpenGL(const Region& clip, const Texture& texture) const
             glTranslatef(0, 1, 0);
             glRotatef(-90, 0, 0, 1);
         }
-
-        if (!(mFlags & (DisplayHardware::NPOT_EXTENSION |
-                DisplayHardware::DIRECT_TEXTURE))) {
-            // find the smallest power-of-two that will accommodate our surface
-            GLuint tw = 1 << (31 - clz(width));
-            GLuint th = 1 << (31 - clz(height));
-            if (tw < width)  tw <<= 1;
-            if (th < height) th <<= 1;
-            GLfloat ws = GLfloat(width) /tw;
-            GLfloat hs = GLfloat(height)/th;
-            glScalef(ws, hs, 1.0f);
+        
+        if (texture.NPOTAdjust) {
+            glScalef(texture.wScale, texture.hScale, 1.0f);
         }
 
         glEnableClientState(GL_TEXTURE_COORD_ARRAY);
@@ -508,21 +500,15 @@ void LayerBase::validateTexture(GLint textureName) const
     }
 }
 
-void LayerBase::loadTexture(Texture* texture, GLint textureName, 
+void LayerBase::loadTexture(Texture* texture, 
         const Region& dirty, const GGLSurface& t) const
 {
-    // TODO: defer the actual texture reload until LayerBase::validateTexture
-    // is called.
-
-    texture->name = textureName;
-    GLuint& textureWidth(texture->width);
-    GLuint& textureHeight(texture->height);
+    if (texture->name == -1U) {
+        // uh?
+        return;
+    }
     
-    uint32_t flags = mFlags;
-    glBindTexture(GL_TEXTURE_2D, textureName);
-
-    GLuint tw = t.width;
-    GLuint th = t.height;
+    glBindTexture(GL_TEXTURE_2D, texture->name);
 
     /*
      * In OpenGL ES we can't specify a stride with glTexImage2D (however,
@@ -547,64 +533,63 @@ void LayerBase::loadTexture(Texture* texture, GLint textureName,
     /*
      * round to POT if needed 
      */
-    
-    GLuint texture_w = tw;
-    GLuint texture_h = th;
-    if (!(flags & DisplayHardware::NPOT_EXTENSION)) {
-        // find the smallest power-of-two that will accommodate our surface
-        texture_w = 1 << (31 - clz(t.width));
-        texture_h = 1 << (31 - clz(t.height));
-        if (texture_w < t.width)  texture_w <<= 1;
-        if (texture_h < t.height) texture_h <<= 1;
+    if (!(mFlags & DisplayHardware::NPOT_EXTENSION)) {
+        texture->NPOTAdjust = true;
     }
     
-regular:
+    if (texture->NPOTAdjust) {
+        // find the smallest power-of-two that will accommodate our surface
+        texture->potWidth  = 1 << (31 - clz(t.width));
+        texture->potHeight = 1 << (31 - clz(t.height));
+        if (texture->potWidth  < t.width)  texture->potWidth  <<= 1;
+        if (texture->potHeight < t.height) texture->potHeight <<= 1;
+        texture->wScale = float(t.width)  / texture->potWidth;
+        texture->hScale = float(t.height) / texture->potHeight;
+    } else {
+        texture->potWidth  = t.width;
+        texture->potHeight = t.height;
+    }
+
     Rect bounds(dirty.bounds());
     GLvoid* data = 0;
-    if (texture_w!=textureWidth || texture_h!=textureHeight) {
-        // texture size changed, we need to create a new one
+    if (texture->width != t.width || texture->height != t.height) {
+        texture->width  = t.width;
+        texture->height = t.height;
 
-        if (!textureWidth || !textureHeight) {
-            // this is the first time, load the whole texture
-            if (texture_w==tw && texture_h==th) {
-                // we can do it one pass
-                data = t.data;
-            } else {
-                // we have to create the texture first because it
-                // doesn't match the size of the buffer
-                bounds.set(Rect(tw, th));
-            }
+        // texture size changed, we need to create a new one
+        bounds.set(Rect(t.width, t.height));
+        if (t.width  == texture->potWidth &&
+            t.height == texture->potHeight) {
+            // we can do it one pass
+            data = t.data;
         }
-        
+
         if (t.format == GGL_PIXEL_FORMAT_RGB_565) {
             glTexImage2D(GL_TEXTURE_2D, 0,
-                    GL_RGB, texture_w, texture_h, 0,
+                    GL_RGB, texture->potWidth, texture->potHeight, 0,
                     GL_RGB, GL_UNSIGNED_SHORT_5_6_5, data);
         } else if (t.format == GGL_PIXEL_FORMAT_RGBA_4444) {
             glTexImage2D(GL_TEXTURE_2D, 0,
-                    GL_RGBA, texture_w, texture_h, 0,
+                    GL_RGBA, texture->potWidth, texture->potHeight, 0,
                     GL_RGBA, GL_UNSIGNED_SHORT_4_4_4_4, data);
         } else if (t.format == GGL_PIXEL_FORMAT_RGBA_8888 || 
                    t.format == GGL_PIXEL_FORMAT_RGBX_8888) {
             glTexImage2D(GL_TEXTURE_2D, 0,
-                    GL_RGBA, texture_w, texture_h, 0,
+                    GL_RGBA, texture->potWidth, texture->potHeight, 0,
                     GL_RGBA, GL_UNSIGNED_BYTE, data);
         } else if ( t.format == GGL_PIXEL_FORMAT_YCbCr_422_SP ||
                     t.format == GGL_PIXEL_FORMAT_YCbCr_420_SP) {
             // just show the Y plane of YUV buffers
             glTexImage2D(GL_TEXTURE_2D, 0,
-                    GL_LUMINANCE, texture_w, texture_h, 0,
+                    GL_LUMINANCE, texture->potWidth, texture->potHeight, 0,
                     GL_LUMINANCE, GL_UNSIGNED_BYTE, data);
         } else {
             // oops, we don't handle this format!
             LOGE("layer %p, texture=%d, using format %d, which is not "
-                 "supported by the GL", this, textureName, t.format);
-            textureName = -1;
+                 "supported by the GL", this, texture->name, t.format);
         }
-        textureWidth = texture_w;
-        textureHeight = texture_h;
     }
-    if (!data && textureName>=0) {
+    if (!data) {
         if (t.format == GGL_PIXEL_FORMAT_RGB_565) {
             glTexSubImage2D(GL_TEXTURE_2D, 0,
                     0, bounds.top, t.width, bounds.height(),
@@ -747,7 +732,7 @@ status_t LayerBaseClient::Surface::onTransact(
     return BnSurface::onTransact(code, data, reply, flags);
 }
 
-sp<SurfaceBuffer> LayerBaseClient::Surface::requestBuffer(int index, int usage) 
+sp<GraphicBuffer> LayerBaseClient::Surface::requestBuffer(int index, int usage) 
 {
     return NULL; 
 }

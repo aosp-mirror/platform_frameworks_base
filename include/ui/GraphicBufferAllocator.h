@@ -37,7 +37,7 @@ namespace android {
 
 class String8;
 
-class BufferAllocator : public Singleton<BufferAllocator>
+class GraphicBufferAllocator : public Singleton<GraphicBufferAllocator>
 {
 public:
     enum {
@@ -59,7 +59,7 @@ public:
         USAGE_HW_MASK           = GRALLOC_USAGE_HW_MASK
     };
 
-    static inline BufferAllocator& get() { return getInstance(); }
+    static inline GraphicBufferAllocator& get() { return getInstance(); }
     
 
     status_t alloc(uint32_t w, uint32_t h, PixelFormat format, int usage,
@@ -82,9 +82,9 @@ private:
     static Mutex sLock;
     static KeyedVector<buffer_handle_t, alloc_rec_t> sAllocList;
     
-    friend class Singleton<BufferAllocator>;
-    BufferAllocator();
-    ~BufferAllocator();
+    friend class Singleton<GraphicBufferAllocator>;
+    GraphicBufferAllocator();
+    ~GraphicBufferAllocator();
     
     mutable Mutex mLock;
     alloc_device_t  *mAllocDev;

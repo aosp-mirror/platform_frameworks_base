@@ -20,9 +20,6 @@
 #include <stdint.h>
 #include <sys/types.h>
 
-#include <binder/IMemory.h>
-#include <private/ui/LayerState.h>
-
 #include "LayerBase.h"
 
 struct copybit_device_t;
@@ -133,7 +130,7 @@ private:
         status_t                        mStatus;
         ISurface::BufferHeap            mBufferHeap;
         size_t                          mBufferSize;
-        mutable sp<android::Buffer>     mTempBitmap;
+        mutable sp<GraphicBuffer>       mTempBitmap;
         mutable LayerBase::Texture      mTexture;
         copybit_device_t*               mBlitEngine;
     };
