@@ -572,6 +572,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
     // javadoc from interface
     public int stopUsingNetworkFeature(int networkType, String feature) {
+        enforceChangePermission();
+
         int pid = getCallingPid();
         int uid = getCallingUid();
 
@@ -611,7 +613,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             Log.d(TAG, "stopUsingNetworkFeature for net " + networkType +
                     ": " + feature);
         }
-        enforceChangePermission();
+
         if (!ConnectivityManager.isNetworkTypeValid(networkType)) {
             return -1;
         }
