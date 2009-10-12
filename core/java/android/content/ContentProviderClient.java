@@ -89,20 +89,13 @@ public class ContentProviderClient {
         return mContentProvider.openAssetFile(url, mode);
     }
 
-    /** see {@link ContentProvider#queryEntities} */
+    /**
+     * see {@link ContentProvider#queryEntities}
+     * @hide
+     */
     public EntityIterator queryEntities(Uri uri, String selection, String[] selectionArgs,
             String sortOrder) throws RemoteException {
         return mContentProvider.queryEntities(uri, selection, selectionArgs, sortOrder);
-    }
-
-    /** see {@link ContentProvider#insertEntity} */
-    public Uri insertEntity(Uri uri, Entity entity) throws RemoteException {
-        return mContentProvider.insertEntity(uri, entity);
-    }
-
-    /** see {@link ContentProvider#updateEntity} */
-    public int updateEntity(Uri uri, Entity entity) throws RemoteException {
-        return mContentProvider.updateEntity(uri, entity);
     }
 
     /** see {@link ContentProvider#applyBatch} */
