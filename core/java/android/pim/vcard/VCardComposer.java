@@ -288,6 +288,7 @@ public class VCardComposer {
     private final boolean mUsesUtf8;
     private final boolean mUsesShiftJis;
     private final boolean mUsesQPToPrimaryProperties;
+    private final boolean mAppendTypeParamName;
 
     private Cursor mCursor;
     private int mIdColumn;
@@ -353,6 +354,7 @@ public class VCardComposer {
         mUsesUtf8 = VCardConfig.usesUtf8(vcardType);
         mUsesShiftJis = VCardConfig.usesShiftJis(vcardType);
         mUsesQPToPrimaryProperties = VCardConfig.usesQPToPrimaryProperties(vcardType);
+        mAppendTypeParamName = VCardConfig.appendTypeParamName(vcardType);
         mHandlerList = new ArrayList<OneEntryHandler>();
 
         if (mIsDoCoMo) {
@@ -1756,7 +1758,7 @@ public class VCardComposer {
 
     private void appendTypeAttribute(final StringBuilder builder, final String type) {
         // Note: In vCard 3.0, Type strings also can be like this: "TYPE=HOME,PREF"
-        if (mIsV30) {
+        if (mIsV30 || mAppendTypeParamName) {
             builder.append(Constants.ATTR_TYPE).append(VCARD_ATTR_EQUAL);
         }
         builder.append(type);
