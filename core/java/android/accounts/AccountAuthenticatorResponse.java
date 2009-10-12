@@ -22,8 +22,7 @@ import android.os.Parcel;
 import android.os.RemoteException;
 
 /**
- * Object that wraps calls to an {@link IAccountAuthenticatorResponse} object.
- * TODO: this interface is still in flux
+ * Object used to communicate responses back to the AccountManager
  */
 public class AccountAuthenticatorResponse implements Parcelable {
     private IAccountAuthenticatorResponse mAccountAuthenticatorResponse;
