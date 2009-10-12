@@ -886,6 +886,7 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
             // on releasing the wakelock
             if (!mKeyguardViewManager.wakeWhenReadyTq(keyCode)) {
                 // poke wakelock ourselves if keyguard is no longer active
+                Log.w(TAG, "mKeyguardViewManager.wakeWhenReadyTq did not poke wake lock, so poke it ourselves");
                 pokeWakelock();
             }
 
@@ -896,7 +897,7 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
             mWakeAndHandOff.release();
 
             if (!mWakeLock.isHeld()) {
-                Log.w(TAG, "mKeyguardViewManager.wakeWhenReadyTq did not poke wake lock");
+                Log.w(TAG, "mWakeLock not held in mKeyguardViewManager.wakeWhenReadyTq");
             }
         }
     }
