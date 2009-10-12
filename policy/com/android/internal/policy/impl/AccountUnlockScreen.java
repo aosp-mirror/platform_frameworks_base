@@ -42,6 +42,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.app.Dialog;
 import android.app.ProgressDialog;
+import android.os.Bundle;
 
 import java.io.IOException;
 
@@ -261,16 +262,19 @@ public class AccountUnlockScreen extends RelativeLayout implements KeyguardScree
             return;
         }
         getProgressDialog().show();
-        AccountManager.get(mContext).confirmPassword(
-                account, password, new AccountManagerCallback<Boolean>() {
-            public void run(AccountManagerFuture<Boolean> future) {
+        Bundle options = new Bundle();
+        options.putString(AccountManager.KEY_PASSWORD, password);
+        AccountManager.get(mContext).confirmCredentials(account, options, null /* activity */,
+                new AccountManagerCallback<Bundle>() {
+            public void run(AccountManagerFuture<Bundle> future) {
                 try {
                     mCallback.pokeWakelock(AWAKE_POKE_MILLIS);
-                    final boolean result = future.getResult();
+                    final Bundle result = future.getResult();
+                    final boolean verified = result.getBoolean(AccountManager.KEY_BOOLEAN_RESULT);
                     // ensure on UI thread
                     mLogin.post(new Runnable() {
                         public void run() {
-                            onCheckPasswordResult(result);
+                            onCheckPasswordResult(verified);
                         }
                     });
                 } catch (OperationCanceledException e) {
