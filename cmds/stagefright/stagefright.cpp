@@ -76,14 +76,12 @@ static void playSource(OMXClient *client, const sp<MediaSource> &source) {
 
                 shouldSeek = true;
             } else {
-                int32_t units, scale;
-                CHECK(buffer->meta_data()->findInt32(kKeyTimeUnits, &units));
-                CHECK(buffer->meta_data()->findInt32(kKeyTimeScale, &scale));
-                int64_t timestamp = ((OMX_TICKS)units * 1000000) / scale;
+                int64_t timestampUs;
+                CHECK(buffer->meta_data()->findInt64(kKeyTime, &timestampUs));
 
                 bool failed = false;
                 if (seekTimeUs >= 0) {
-                    int64_t diff = timestamp - seekTimeUs;
+                    int64_t diff = timestampUs - seekTimeUs;
 
                     if (diff > 500000) {
                         printf("ERROR: ");
@@ -92,7 +90,7 @@ static void playSource(OMXClient *client, const sp<MediaSource> &source) {
                 }
 
                 printf("buffer has timestamp %lld us (%.2f secs)\n",
-                       timestamp, timestamp / 1E6);
+                       timestampUs, timestampUs / 1E6);
 
                 buffer->release();
                 buffer = NULL;

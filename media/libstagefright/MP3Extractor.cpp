@@ -338,10 +338,9 @@ MP3Extractor::MP3Extractor(const sp<DataSource> &source)
 
         off_t fileSize;
         if (mDataSource->getSize(&fileSize) == OK) {
-            mMeta->setInt32(
+            mMeta->setInt64(
                     kKeyDuration,
-                    8 * (fileSize - mFirstFramePos) / bitrate);
-            mMeta->setInt32(kKeyTimeScale, 1000);
+                    8000 * (fileSize - mFirstFramePos) / bitrate);
         }
     }
 }
@@ -492,8 +491,7 @@ status_t MP3Source::read(
 
     buffer->set_range(0, frame_size);
 
-    buffer->meta_data()->setInt32(kKeyTimeUnits, mCurrentTimeUs / 1000);
-    buffer->meta_data()->setInt32(kKeyTimeScale, 1000);
+    buffer->meta_data()->setInt64(kKeyTime, mCurrentTimeUs);
 
     mCurrentPos += frame_size;
     mCurrentTimeUs += 1152 * 1000000 / 44100;
