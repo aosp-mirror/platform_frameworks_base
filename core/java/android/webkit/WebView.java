@@ -2619,12 +2619,12 @@ public class WebView extends AbsoluteLayout
 
         if (mHeightCanMeasure) {
             if (getMeasuredHeight() != contentToViewDimension(mContentHeight)
-                    && updateLayout) {
+                    || updateLayout) {
                 requestLayout();
             }
         } else if (mWidthCanMeasure) {
             if (getMeasuredWidth() != contentToViewDimension(mContentWidth)
-                    && updateLayout) {
+                    || updateLayout) {
                 requestLayout();
             }
         } else {
@@ -3662,6 +3662,24 @@ public class WebView extends AbsoluteLayout
         }
 
         super.onFocusChanged(focused, direction, previouslyFocusedRect);
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    protected boolean setFrame(int left, int top, int right, int bottom) {
+        boolean changed = super.setFrame(left, top, right, bottom);
+        if (!changed && mHeightCanMeasure) {
+            // When mHeightCanMeasure is true, we will set mLastHeightSent to 0
+            // in WebViewCore after we get the first layout. We do call
+            // requestLayout() when we get contentSizeChanged(). But the View
+            // system won't call onSizeChanged if the dimension is not changed.
+            // In this case, we need to call sendViewSizeZoom() explicitly to
+            // notify the WebKit about the new dimensions.
+            sendViewSizeZoom();
+        }
+        return changed;
     }
 
     @Override
