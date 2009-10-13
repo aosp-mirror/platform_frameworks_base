@@ -52,6 +52,12 @@ public abstract class KeyInputQueue {
     static final boolean DEBUG_VIRTUAL_KEYS = false;
     static final boolean DEBUG_POINTERS = false;
     
+    /**
+     * Turn on some hacks we have to improve the touch interaction with a
+     * certain device whose screen currently is not all that good.
+     */
+    static final boolean BAD_TOUCH_HACK = true;
+    
     private static final String EXCLUDED_DEVICES_PATH = "etc/excluded-input-devices.xml";
 
     final SparseArray<InputDevice> mDevices = new SparseArray<InputDevice>();
@@ -540,19 +546,17 @@ public abstract class KeyInputQueue {
                                             keycode, 0, scancode,
                                             ((ev.flags & WindowManagerPolicy.FLAG_WOKE_HERE) != 0)
                                              ? KeyEvent.FLAG_WOKE_HERE : 0));
+                            
                         } else if (ev.type == RawInputEvent.EV_KEY) {
+                            // Single touch protocol: touch going down or up.
                             if (ev.scancode == RawInputEvent.BTN_TOUCH &&
                                     (classes&(RawInputEvent.CLASS_TOUCHSCREEN
                                             |RawInputEvent.CLASS_TOUCHSCREEN_MT))
                                             == RawInputEvent.CLASS_TOUCHSCREEN) {
                                 di.mAbs.changed = true;
                                 di.mAbs.mDown[0] = ev.value != 0;
-                            } else if (ev.scancode == RawInputEvent.BTN_2 &&
-                                    (classes&(RawInputEvent.CLASS_TOUCHSCREEN
-                                            |RawInputEvent.CLASS_TOUCHSCREEN_MT))
-                                            == RawInputEvent.CLASS_TOUCHSCREEN) {
-                                di.mAbs.changed = true;
-                                di.mAbs.mDown[1] = ev.value != 0;
+                            
+                            // Trackball (mouse) protocol: press down or up.
                             } else if (ev.scancode == RawInputEvent.BTN_MOUSE &&
                                     (classes&RawInputEvent.CLASS_TRACKBALL) != 0) {
                                 di.mRel.changed = true;
@@ -560,6 +564,7 @@ public abstract class KeyInputQueue {
                                 send = true;
                             }
     
+                        // Process position events from multitouch protocol.
                         } else if (ev.type == RawInputEvent.EV_ABS &&
                                 (classes&RawInputEvent.CLASS_TOUCHSCREEN_MT) != 0) {
                             if (ev.scancode == RawInputEvent.ABS_MT_TOUCH_MAJOR) {
@@ -585,10 +590,10 @@ public abstract class KeyInputQueue {
                                 di.mAbs.mNextData[di.mAbs.mAddingPointerOffset
                                     + MotionEvent.SAMPLE_SIZE] = ev.value;
                             }
-                            
+                        
+                        // Process position events from single touch protocol.
                         } else if (ev.type == RawInputEvent.EV_ABS &&
                                 (classes&RawInputEvent.CLASS_TOUCHSCREEN) != 0) {
-                            // Finger 1
                             if (ev.scancode == RawInputEvent.ABS_X) {
                                 di.mAbs.changed = true;
                                 di.curTouchVals[MotionEvent.SAMPLE_X] = ev.value;
@@ -605,18 +610,9 @@ public abstract class KeyInputQueue {
                                 di.curTouchVals[MotionEvent.SAMPLE_SIZE] = ev.value;
                                 di.curTouchVals[MotionEvent.NUM_SAMPLE_DATA
                                                  + MotionEvent.SAMPLE_SIZE] = ev.value;
-
-                            // Finger 2
-                            } else if (ev.scancode == RawInputEvent.ABS_HAT0X) {
-                                di.mAbs.changed = true;
-                                di.curTouchVals[MotionEvent.NUM_SAMPLE_DATA 
-                                         + MotionEvent.SAMPLE_X] = ev.value;
-                            } else if (ev.scancode == RawInputEvent.ABS_HAT0Y) {
-                                di.mAbs.changed = true;
-                                di.curTouchVals[MotionEvent.NUM_SAMPLE_DATA
-                                        + MotionEvent.SAMPLE_Y] = ev.value;
                             }
     
+                        // Process movement events from trackball (mouse) protocol.
                         } else if (ev.type == RawInputEvent.EV_REL &&
                                 (classes&RawInputEvent.CLASS_TRACKBALL) != 0) {
                             // Add this relative movement into our totals.
@@ -629,6 +625,9 @@ public abstract class KeyInputQueue {
                             }
                         }
                         
+                        // Handle multitouch protocol sync: tells us that the
+                        // driver has returned all data for -one- of the pointers
+                        // that is currently down.
                         if (ev.type == RawInputEvent.EV_SYN
                                 && ev.scancode == RawInputEvent.SYN_MT_REPORT
                                 && di.mAbs != null) {
@@ -654,6 +653,9 @@ public abstract class KeyInputQueue {
                                     if (DEBUG_POINTERS) Log.v(TAG, "MT_REPORT: no pointer");
                                 }
                             }
+                        
+                        // Handle general event sync: all data for the current
+                        // event update has been delivered.
                         } else if (send || (ev.type == RawInputEvent.EV_SYN
                                 && ev.scancode == RawInputEvent.SYN_REPORT)) {
                             if (mDisplay != null) {
@@ -677,15 +679,10 @@ public abstract class KeyInputQueue {
                                                     MotionEvent.NUM_SAMPLE_DATA);
                                             ms.mNextNumPointers++;
                                         }
-                                        if (ms.mDown[1]) {
-                                            System.arraycopy(di.curTouchVals,
-                                                    MotionEvent.NUM_SAMPLE_DATA,
-                                                    ms.mNextData,
-                                                    ms.mNextNumPointers
-                                                    * MotionEvent.NUM_SAMPLE_DATA,
-                                                    MotionEvent.NUM_SAMPLE_DATA);
-                                            ms.mNextNumPointers++;
-                                        }
+                                    }
+                                    
+                                    if (BAD_TOUCH_HACK) {
+                                        ms.dropBadPoint(di);
                                     }
                                     
                                     boolean doMotion = !monitorVirtualKey(di,
@@ -719,6 +716,16 @@ public abstract class KeyInputQueue {
                                                         RawInputEvent.CLASS_TOUCHSCREEN, me);
                                             }
                                         } while (ms.hasMore());
+                                    } else {
+                                        // We are consuming movement in the
+                                        // virtual key area...  but still
+                                        // propagate this to the previous
+                                        // data for comparisons.
+                                        System.arraycopy(ms.mNextData, 0,
+                                                ms.mLastData, 0,
+                                                ms.mNextNumPointers
+                                                        * MotionEvent.NUM_SAMPLE_DATA);
+                                        ms.mLastNumPointers = ms.mNextNumPointers;
                                     }
                                     
                                     ms.finish();
