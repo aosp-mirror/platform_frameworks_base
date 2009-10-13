@@ -19,9 +19,10 @@
 #define HTTP_DATASOURCE_H_
 
 #include <media/stagefright/DataSource.h>
-#include <media/stagefright/HTTPStream.h>
 
 namespace android {
+
+class HTTPStream;
 
 class HTTPDataSource : public DataSource {
 public:
@@ -40,7 +41,7 @@ private:
         kBufferSize = 64 * 1024
     };
 
-    HTTPStream mHttp;
+    HTTPStream *mHttp;
     char *mHost;
     int mPort;
     char *mPath;

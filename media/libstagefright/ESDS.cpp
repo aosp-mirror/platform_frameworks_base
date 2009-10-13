@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include <media/stagefright/ESDS.h>
+#include "include/ESDS.h"
 
 #include <string.h>
 

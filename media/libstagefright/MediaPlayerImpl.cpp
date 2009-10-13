@@ -18,6 +18,9 @@
 #define LOG_TAG "MediaPlayerImpl"
 #include "utils/Log.h"
 
+#include "include/string.h"
+#include "include/HTTPStream.h"
+
 #include <OMX_Component.h>
 
 #include <unistd.h>
@@ -26,7 +29,6 @@
 #include <media/stagefright/CachingDataSource.h>
 // #include <media/stagefright/CameraSource.h>
 #include <media/stagefright/HTTPDataSource.h>
-#include <media/stagefright/HTTPStream.h>
 #include <media/stagefright/MediaDebug.h>
 #include <media/stagefright/MediaExtractor.h>
 #include <media/stagefright/MediaPlayerImpl.h>

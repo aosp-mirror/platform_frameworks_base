@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
+#include "../include/QComHardwareRenderer.h"
+
 #include <binder/MemoryHeapBase.h>
 #include <binder/MemoryHeapPmem.h>
 #include <media/stagefright/MediaDebug.h>
-#include <media/stagefright/QComHardwareRenderer.h>
 #include <ui/ISurface.h>
 
 namespace android {

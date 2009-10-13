@@ -14,17 +14,19 @@
  * limitations under the License.
  */
 
+#include "include/string.h"
+#include "include/HTTPStream.h"
+
 #include <stdlib.h>
 
 #include <media/stagefright/HTTPDataSource.h>
-#include <media/stagefright/HTTPStream.h>
 #include <media/stagefright/MediaDebug.h>
-#include <media/stagefright/string.h>
 
 namespace android {
 
 HTTPDataSource::HTTPDataSource(const char *uri)
-    : mHost(NULL),
+    : mHttp(new HTTPStream),
+      mHost(NULL),
       mPort(0),
       mPath(NULL),
       mBuffer(malloc(kBufferSize)),
@@ -65,29 +67,33 @@ HTTPDataSource::HTTPDataSource(const char *uri)
     mPort = port;
     mPath = strdup(path.c_str());
 
-    status_t err = mHttp.connect(mHost, mPort);
+    status_t err = mHttp->connect(mHost, mPort);
     CHECK_EQ(err, OK);
 }
 
 HTTPDataSource::HTTPDataSource(const char *host, int port, const char *path)
-    : mHost(strdup(host)),
+    : mHttp(new HTTPStream),
+      mHost(strdup(host)),
       mPort(port),
       mPath(strdup(path)),
       mBuffer(malloc(kBufferSize)),
       mBufferLength(0),
       mBufferOffset(0) {
-    status_t err = mHttp.connect(mHost, mPort);
+    status_t err = mHttp->connect(mHost, mPort);
     CHECK_EQ(err, OK);
 }
 
 HTTPDataSource::~HTTPDataSource() {
-    mHttp.disconnect();
+    mHttp->disconnect();
 
     free(mBuffer);
     mBuffer = NULL;
 
     free(mPath);
     mPath = NULL;
+
+    delete mHttp;
+    mHttp = NULL;
 }
 
 ssize_t HTTPDataSource::read_at(off_t offset, void *data, size_t size) {
@@ -120,19 +126,19 @@ ssize_t HTTPDataSource::read_at(off_t offset, void *data, size_t size) {
     status_t err;
     int attempt = 1;
     for (;;) {
-        if ((err = mHttp.send("GET ")) != OK
-            || (err = mHttp.send(mPath)) != OK
-            || (err = mHttp.send(" HTTP/1.1\r\n")) != OK
-            || (err = mHttp.send(host)) != OK
-            || (err = mHttp.send(range)) != OK
-            || (err = mHttp.send("\r\n")) != OK
-            || (err = mHttp.receive_header(&http_status)) != OK) {
+        if ((err = mHttp->send("GET ")) != OK
+            || (err = mHttp->send(mPath)) != OK
+            || (err = mHttp->send(" HTTP/1.1\r\n")) != OK
+            || (err = mHttp->send(host)) != OK
+            || (err = mHttp->send(range)) != OK
+            || (err = mHttp->send("\r\n")) != OK
+            || (err = mHttp->receive_header(&http_status)) != OK) {
 
             if (attempt == 3) {
                 return err;
             }
 
-            mHttp.connect(mHost, mPort);
+            mHttp->connect(mHost, mPort);
             ++attempt;
         } else {
             break;
@@ -144,14 +150,14 @@ ssize_t HTTPDataSource::read_at(off_t offset, void *data, size_t size) {
     }
 
     string value;
-    if (!mHttp.find_header_value("Content-Length", &value)) {
+    if (!mHttp->find_header_value("Content-Length", &value)) {
         return UNKNOWN_ERROR;
     }
 
     char *end;
     unsigned long contentLength = strtoul(value.c_str(), &end, 10);
 
-    ssize_t num_bytes_received = mHttp.receive(mBuffer, contentLength);
+    ssize_t num_bytes_received = mHttp->receive(mBuffer, contentLength);
 
     if (num_bytes_received <= 0) {
         return num_bytes_received;

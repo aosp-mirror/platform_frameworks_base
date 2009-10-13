@@ -22,10 +22,11 @@
 #define LOG_TAG "TimedEventQueue"
 #include <utils/Log.h>
 
+#include "include/TimedEventQueue.h"
+
 #include <sys/time.h>
 
 #include <media/stagefright/MediaDebug.h>
-#include <media/stagefright/TimedEventQueue.h>
 
 namespace android {
 
