@@ -208,6 +208,7 @@ public class BluetoothService extends IBluetooth.Stub {
             return false;
         }
         setBluetoothState(BluetoothAdapter.STATE_TURNING_OFF);
+        mHandler.removeMessages(MESSAGE_REGISTER_SDP_RECORDS);
 
         // Allow 3 seconds for profiles to gracefully disconnect
         // TODO: Introduce a callback mechanism so that each profile can notify
@@ -327,12 +328,39 @@ public class BluetoothService extends IBluetooth.Stub {
         public void handleMessage(Message msg) {
             switch (msg.what) {
             case MESSAGE_REGISTER_SDP_RECORDS:
-                //TODO: Don't assume HSP/HFP is running, don't use sdptool,
-                if (isEnabled()) {
+                if (!isEnabled()) {
+                    return;
+                }
+                // SystemService.start() forks sdptool to register service
+                // records. It can fail to register some records if it is
+                // forked multiple times in a row, probably because there is
+                // some race in sdptool or bluez when operated in parallel.
+                // As a workaround, delay 500ms between each fork of sdptool.
+                // TODO: Don't fork sdptool in order to regsiter service
+                // records, use a DBUS call instead.
+                switch (msg.arg1) {
+                case 1:
+                    Log.d(TAG, "Registering hsag record");
                     SystemService.start("hsag");
+                    mHandler.sendMessageDelayed(
+                            mHandler.obtainMessage(MESSAGE_REGISTER_SDP_RECORDS, 2, -1), 500);
+                    break;
+                case 2:
+                    Log.d(TAG, "Registering hfag record");
                     SystemService.start("hfag");
+                    mHandler.sendMessageDelayed(
+                            mHandler.obtainMessage(MESSAGE_REGISTER_SDP_RECORDS, 3, -1), 500);
+                    break;
+                case 3:
+                    Log.d(TAG, "Registering opush record");
                     SystemService.start("opush");
+                    mHandler.sendMessageDelayed(
+                            mHandler.obtainMessage(MESSAGE_REGISTER_SDP_RECORDS, 4, -1), 500);
+                    break;
+                case 4:
+                    Log.d(TAG, "Registering pbap record");
                     SystemService.start("pbap");
+                    break;
                 }
                 break;
             case MESSAGE_FINISH_DISABLE:
@@ -402,8 +430,8 @@ public class BluetoothService extends IBluetooth.Stub {
                 }
                 mIsDiscovering = false;
                 mBondState.loadBondState();
-                mHandler.sendMessageDelayed(mHandler.obtainMessage(MESSAGE_REGISTER_SDP_RECORDS),
-                                            3000);
+                mHandler.sendMessageDelayed(
+                        mHandler.obtainMessage(MESSAGE_REGISTER_SDP_RECORDS, 1, -1), 3000);
 
                 // Log bluetooth on to battery stats.
                 long ident = Binder.clearCallingIdentity();
