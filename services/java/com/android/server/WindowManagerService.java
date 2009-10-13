@@ -7574,6 +7574,21 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         /**
+         * Like {@link #isVisibleLw}, but also counts a window that is currently
+         * "hidden" behind the keyguard as visible.  This allows us to apply
+         * things like window flags that impact the keyguard.
+         * XXX I am starting to think we need to have ANOTHER visibility flag
+         * for this "hidden behind keyguard" state rather than overloading
+         * mPolicyVisibility.  Ungh.
+         */
+        public boolean isVisibleOrBehindKeyguardLw() {
+            final AppWindowToken atoken = mAppToken;
+            return mSurface != null && !mAttachedHidden
+                    && (atoken == null ? mPolicyVisibility : !atoken.hiddenRequested)
+                    && !mExiting && !mDestroying;
+        }
+
+        /**
          * Is this window visible, ignoring its app token?  It is not visible
          * if there is no surface, or we are in the process of running an exit animation
          * that will remove the surface.
