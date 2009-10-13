@@ -608,7 +608,7 @@ void MediaPlayerImpl::populateISurface() {
     success = success && meta->findInt32(kKeyHeight, &decodedHeight);
     CHECK(success);
 
-    LOGI("mVideoWidth=%ld, mVideoHeight=%ld, decodedWidth=%ld, decodedHeight=%ld",
+    LOGI("mVideoWidth=%d, mVideoHeight=%d, decodedWidth=%d, decodedHeight=%d",
          mVideoWidth, mVideoHeight, decodedWidth, decodedHeight);
 
     if (mSurface.get() != NULL) {
