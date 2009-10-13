@@ -27,6 +27,7 @@ import android.os.RemoteException;
 import android.os.Handler;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.SystemProperties;
 import android.text.TextUtils;
 import java.util.List;
 
@@ -46,6 +47,26 @@ public class ActivityManager {
         mHandler = handler;
     }
 
+    /**
+     * Return the approximate per-application memory class of the current
+     * device.  This gives you an idea of how hard a memory limit you should
+     * impose on your application to let the overall system work best.  The
+     * returned value is in megabytes; the baseline Android memory class is
+     * 16 (which happens to be the Java heap limit of those devices); some
+     * device with more memory may return 24 or even higher numbers.
+     */
+    public int getMemoryClass() {
+        return staticGetMemoryClass();
+    }
+    
+    /** @hide */
+    static public int staticGetMemoryClass() {
+        // Really brain dead right now -- just take this from the configured
+        // vm heap size, and assume it is in megabytes and thus ends with "m".
+        String vmHeapSize = SystemProperties.get("dalvik.vm.heapsize", "16m");
+        return Integer.parseInt(vmHeapSize.substring(0, vmHeapSize.length()-1));
+    }
+    
     /**
      * Information you can retrieve about tasks that the user has most recently
      * started or visited.
