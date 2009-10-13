@@ -529,7 +529,7 @@ status_t OMX::observe_node(
     return OK;
 }
 
-void OMX::fill_buffer(node_id node, buffer_id buffer) {
+status_t OMX::fill_buffer(node_id node, buffer_id buffer) {
     OMX_BUFFERHEADERTYPE *header = (OMX_BUFFERHEADERTYPE *)buffer;
     header->nFilledLen = 0;
     header->nOffset = 0;
@@ -539,10 +539,11 @@ void OMX::fill_buffer(node_id node, buffer_id buffer) {
 
     OMX_ERRORTYPE err =
         OMX_FillThisBuffer(node_meta->handle(), header);
-    CHECK_EQ(err, OMX_ErrorNone);
+
+    return (err == OMX_ErrorNone) ? OK : UNKNOWN_ERROR;
 }
 
-void OMX::empty_buffer(
+status_t OMX::empty_buffer(
         node_id node,
         buffer_id buffer,
         OMX_U32 range_offset, OMX_U32 range_length,
@@ -561,7 +562,8 @@ void OMX::empty_buffer(
 
     OMX_ERRORTYPE err =
         OMX_EmptyThisBuffer(node_meta->handle(), header);
-    CHECK_EQ(err, OMX_ErrorNone);
+
+    return (err == OMX_ErrorNone) ? OK : UNKNOWN_ERROR;
 }
 
 status_t OMX::get_extension_index(
