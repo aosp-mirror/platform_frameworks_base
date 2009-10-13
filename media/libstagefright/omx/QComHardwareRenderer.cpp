@@ -83,6 +83,11 @@ void QComHardwareRenderer::render(
     }
 
     mISurface->postBuffer(offset);
+
+    // Since we cannot tell how long it'll take until surface flinger
+    // has displayed the data onscreen, we'll just have to guess...
+    // We must not return the buffer to the decoder before it's been displayed.
+    usleep(25000);
 }
 
 bool QComHardwareRenderer::getOffset(void *platformPrivate, size_t *offset) {
