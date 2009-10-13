@@ -91,7 +91,8 @@ HTTPDataSource::~HTTPDataSource() {
 }
 
 ssize_t HTTPDataSource::read_at(off_t offset, void *data, size_t size) {
-    if (offset >= mBufferOffset && offset < mBufferOffset + mBufferLength) {
+    if (offset >= mBufferOffset
+            && offset < (off_t)(mBufferOffset + mBufferLength)) {
         size_t num_bytes_available = mBufferLength - (offset - mBufferOffset);
 
         size_t copy = num_bytes_available;
