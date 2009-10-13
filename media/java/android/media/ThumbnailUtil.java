@@ -33,6 +33,7 @@ import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.media.MediaMetadataRetriever;
+import android.media.MediaFile.MediaFileType;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileDescriptor;
@@ -305,8 +306,12 @@ public class ThumbnailUtil {
                 ThumbnailUtil.THUMBNAIL_TARGET_SIZE : ThumbnailUtil.MINI_THUMB_TARGET_SIZE;
         int maxPixels = wantMini ?
                 ThumbnailUtil.THUMBNAIL_MAX_NUM_PIXELS : ThumbnailUtil.MINI_THUMB_MAX_NUM_PIXELS;
-        byte[] thumbData = createThumbnailFromEXIF(filePath, targetSize);
+        byte[] thumbData = null;
         Bitmap bitmap = null;
+        MediaFileType fileType = MediaFile.getFileType(filePath);
+        if (fileType != null && fileType.fileType == MediaFile.FILE_TYPE_JPEG) {
+            thumbData = createThumbnailFromEXIF(filePath, targetSize);
+        }
 
         if (thumbData != null) {
             BitmapFactory.Options options = new BitmapFactory.Options();
