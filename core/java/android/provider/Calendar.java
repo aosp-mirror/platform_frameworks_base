@@ -514,6 +514,12 @@ public final class Calendar {
          * <P>Type: String</P>
          */
         public static final String OWNER_ACCOUNT = "ownerAccount";
+
+        /**
+         * Whether the row has been deleted.  A deleted row should be ignored.
+         * <P>Type: INTEGER (boolean)</P>
+         */
+        public static final String DELETED = "deleted";
     }
 
     /**
