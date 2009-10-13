@@ -677,6 +677,7 @@ OMXCodec::OMXCodec(
       mInitialBufferSubmit(true),
       mSignalledEOS(false),
       mNoMoreOutputData(false),
+      mOutputPortSettingsHaveChanged(false),
       mSeekTimeUs(-1) {
     mPortStatus[kPortIndexInput] = ENABLED;
     mPortStatus[kPortIndexOutput] = ENABLED;
@@ -1077,6 +1078,9 @@ void OMXCodec::onCmdComplete(OMX_COMMANDTYPE cmd, OMX_U32 data) {
 
             if (mState == RECONFIGURING) {
                 CHECK_EQ(portIndex, kPortIndexOutput);
+
+                initOutputFormat(mSource->getFormat());
+                mOutputPortSettingsHaveChanged = true;
 
                 enablePortAsync(portIndex);
 
@@ -1782,6 +1786,7 @@ status_t OMXCodec::start(MetaData *) {
     mInitialBufferSubmit = true;
     mSignalledEOS = false;
     mNoMoreOutputData = false;
+    mOutputPortSettingsHaveChanged = false;
     mSeekTimeUs = -1;
     mFilledBuffers.clear();
 
@@ -1852,6 +1857,8 @@ status_t OMXCodec::stop() {
 }
 
 sp<MetaData> OMXCodec::getFormat() {
+    Mutex::Autolock autoLock(mLock);
+
     return mOutputFormat;
 }
 
@@ -1913,6 +1920,12 @@ status_t OMXCodec::read(
 
     if (mFilledBuffers.empty()) {
         return ERROR_END_OF_STREAM;
+    }
+
+    if (mOutputPortSettingsHaveChanged) {
+        mOutputPortSettingsHaveChanged = false;
+
+        return INFO_FORMAT_CHANGED;
     }
 
     size_t index = *mFilledBuffers.begin();

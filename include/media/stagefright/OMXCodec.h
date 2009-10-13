@@ -124,6 +124,7 @@ private:
     bool mInitialBufferSubmit;
     bool mSignalledEOS;
     bool mNoMoreOutputData;
+    bool mOutputPortSettingsHaveChanged;
     int64_t mSeekTimeUs;
 
     Mutex mLock;

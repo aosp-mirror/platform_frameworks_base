@@ -250,6 +250,13 @@ void MediaPlayerImpl::videoEntry() {
         status_t err = mVideoDecoder->read(&buffer, &options);
         CHECK((err == OK && buffer != NULL) || (err != OK && buffer == NULL));
 
+        if (err == INFO_FORMAT_CHANGED) {
+            LOGI("format changed.");
+            depopulateISurface();
+            populateISurface();
+            continue;
+        }
+
         if (err == ERROR_END_OF_STREAM || err != OK) {
             eof = true;
             continue;
@@ -600,6 +607,9 @@ void MediaPlayerImpl::populateISurface() {
     success = success && meta->findInt32(kKeyWidth, &decodedWidth);
     success = success && meta->findInt32(kKeyHeight, &decodedHeight);
     CHECK(success);
+
+    LOGI("mVideoWidth=%ld, mVideoHeight=%ld, decodedWidth=%ld, decodedHeight=%ld",
+         mVideoWidth, mVideoHeight, decodedWidth, decodedHeight);
 
     if (mSurface.get() != NULL) {
         mVideoRenderer =

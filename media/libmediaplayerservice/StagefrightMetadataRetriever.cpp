@@ -130,7 +130,10 @@ VideoFrame *StagefrightMetadataRetriever::captureFrame() {
     decoder->start();
 
     MediaBuffer *buffer;
-    status_t err = decoder->read(&buffer);
+    status_t err;
+    do {
+        err = decoder->read(&buffer);
+    } while (err == INFO_FORMAT_CHANGED);
 
     if (err != OK) {
         CHECK_EQ(buffer, NULL);
