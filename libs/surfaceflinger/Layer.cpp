@@ -454,10 +454,10 @@ void Layer::lockPageFlip(bool& recomputeVisibleRegions)
 
             // recompute visible region
             recomputeVisibleRegions = true;
-
-            // we now have the correct size, unfreeze the screen
-            mFreezeLock.clear();
         }
+
+        // we now have the correct size, unfreeze the screen
+        mFreezeLock.clear();
     }
 
     if (lcblk->getQueuedCount()) {
