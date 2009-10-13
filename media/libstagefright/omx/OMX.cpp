@@ -25,11 +25,12 @@
 
 #include "pv_omxcore.h"
 
+#include "../include/QComHardwareRenderer.h"
+#include "../include/SoftwareRenderer.h"
+#include "../include/TIHardwareRenderer.h"
+
 #include <binder/IMemory.h>
 #include <media/stagefright/MediaDebug.h>
-#include <media/stagefright/QComHardwareRenderer.h>
-#include <media/stagefright/SoftwareRenderer.h>
-#include <media/stagefright/TIHardwareRenderer.h>
 #include <media/stagefright/VideoRenderer.h>
 
 #include <OMX_Component.h>

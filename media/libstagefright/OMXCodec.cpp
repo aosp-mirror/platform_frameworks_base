@@ -18,11 +18,12 @@
 #define LOG_TAG "OMXCodec"
 #include <utils/Log.h>
 
+#include "include/ESDS.h"
+
 #include <binder/IServiceManager.h>
 #include <binder/MemoryDealer.h>
 #include <binder/ProcessState.h>
 #include <media/IMediaPlayerService.h>
-#include <media/stagefright/ESDS.h>
 #include <media/stagefright/MediaBuffer.h>
 #include <media/stagefright/MediaBufferGroup.h>
 #include <media/stagefright/MediaDebug.h>
