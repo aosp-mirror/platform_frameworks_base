@@ -229,7 +229,9 @@ public class Camera {
     public final void setPreviewCallback(PreviewCallback cb) {
         mPreviewCallback = cb;
         mOneShot = false;
-        setHasPreviewCallback(cb != null, false);
+        // Always use one-shot mode. We fake camera preview mode by
+        // doing one-shot preview continuously.
+        setHasPreviewCallback(cb != null, true);
     }
 
     /**
@@ -280,10 +282,19 @@ public class Camera {
 
             case CAMERA_MSG_PREVIEW_FRAME:
                 if (mPreviewCallback != null) {
-                    mPreviewCallback.onPreviewFrame((byte[])msg.obj, mCamera);
+                    PreviewCallback cb = mPreviewCallback;
                     if (mOneShot) {
+                        // Clear the callback variable before the callback
+                        // in case the app calls setPreviewCallback from
+                        // the callback function
                         mPreviewCallback = null;
+                    } else {
+                        // We're faking the camera preview mode to prevent
+                        // the app from being flooded with preview frames.
+                        // Set to oneshot mode again.
+                        setHasPreviewCallback(true, true);
                     }
+                    cb.onPreviewFrame((byte[])msg.obj, mCamera);
                 }
                 return;
 
