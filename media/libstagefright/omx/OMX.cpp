@@ -283,7 +283,7 @@ status_t OMX::allocate_node(const char *name, node_id *node) {
             &handle, const_cast<char *>(name), meta, &kCallbacks);
 
     if (err != OMX_ErrorNone) {
-        LOGE("FAILED to allocate omx component '%s'", name);
+        LOGV("FAILED to allocate omx component '%s'", name);
 
         delete meta;
         meta = NULL;

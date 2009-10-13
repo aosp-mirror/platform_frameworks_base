@@ -18,7 +18,7 @@
 
 #define SOFTWARE_RENDERER_H_
 
-#include <OMX_Video.h>
+#include <media/stagefright/ColorConverter.h>
 #include <media/stagefright/VideoRenderer.h>
 #include <utils/RefBase.h>
 
@@ -41,21 +41,14 @@ public:
             const void *data, size_t size, void *platformPrivate);
 
 private:
-    uint8_t *initClip();
-
-    void renderCbYCrY(const void *data, size_t size);
-    void renderYUV420Planar(const void *data, size_t size);
-    void renderQCOMYUV420SemiPlanar(const void *data, size_t size);
-
     OMX_COLOR_FORMATTYPE mColorFormat;
+    ColorConverter mConverter;
     sp<ISurface> mISurface;
     size_t mDisplayWidth, mDisplayHeight;
     size_t mDecodedWidth, mDecodedHeight;
     size_t mFrameSize;
     sp<MemoryHeapBase> mMemoryHeap;
     int mIndex;
-
-    uint8_t *mClip;
 
     SoftwareRenderer(const SoftwareRenderer &);
     SoftwareRenderer &operator=(const SoftwareRenderer &);

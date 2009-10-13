@@ -34,7 +34,10 @@ MmapSource::MmapSource(const char *filename)
       mBase(NULL),
       mSize(0) {
     LOGV("MmapSource '%s'", filename);
-    CHECK(mFd >= 0);
+
+    if (mFd < 0) {
+        return;
+    }
 
     off_t size = lseek(mFd, 0, SEEK_END);
     mSize = (size_t)size;
