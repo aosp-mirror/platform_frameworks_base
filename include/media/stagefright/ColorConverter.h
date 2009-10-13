@@ -20,6 +20,8 @@
 
 #include <sys/types.h>
 
+#include <stdint.h>
+
 #include <OMX_Video.h>
 
 namespace android {
