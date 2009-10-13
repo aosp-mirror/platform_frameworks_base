@@ -24,6 +24,7 @@ import android.view.WindowManagerPolicy;
 
 public class InputDevice {
     static final boolean DEBUG_POINTERS = false;
+    static final boolean DEBUG_HACKS = false;
     
     /** Amount that trackball needs to move in order to generate a key event. */
     static final int TRACKBALL_MOVEMENT_THRESHOLD = 6;
@@ -76,6 +77,19 @@ public class InputDevice {
         final int[] mNextData = new int[(MotionEvent.NUM_SAMPLE_DATA * MAX_POINTERS)
                                         + MotionEvent.NUM_SAMPLE_DATA];
         
+        // Used to determine whether we dropped bad data, to avoid doing
+        // it repeatedly.
+        final boolean[] mDroppedBadPoint = new boolean[MAX_POINTERS];
+        
+        // Used to perform averaging of reported coordinates, to smooth
+        // the data and filter out transients during a release.
+        static final int HISTORY_SIZE = 5;
+        int[] mHistoryDataStart = new int[MAX_POINTERS];
+        int[] mHistoryDataEnd = new int[MAX_POINTERS];
+        final int[] mHistoryData = new int[(MotionEvent.NUM_SAMPLE_DATA * MAX_POINTERS)
+                                        * HISTORY_SIZE];
+        final int[] mAveragedData = new int[MotionEvent.NUM_SAMPLE_DATA * MAX_POINTERS];
+        
         // Temporary data structures for doing the pointer ID mapping.
         final int[] mLast2Next = new int[MAX_POINTERS];
         final int[] mNext2Last = new int[MAX_POINTERS];
@@ -96,6 +110,183 @@ public class InputDevice {
             for (int i=0; i<MAX_POINTERS; i++) {
                 mPointerIds[i] = i;
             }
+        }
+        
+        /**
+         * Special hack for devices that have bad screen data: if one of the
+         * points has moved more than a screen height from the last position,
+         * then drop it.
+         */
+        void dropBadPoint(InputDevice dev) {
+            // We should always have absY, but let's be paranoid.
+            if (dev.absY == null) {
+                return;
+            }
+            // Don't do anything if a finger is going down or up.  We run
+            // here before assigning pointer IDs, so there isn't a good
+            // way to do per-finger matching.
+            if (mNextNumPointers != mLastNumPointers) {
+                return;
+            }
+            
+            // We consider a single movement across more than a 7/16 of
+            // the long size of the screen to be bad.  This was a magic value
+            // determined by looking at the maximum distance it is feasible
+            // to actually move in one sample.
+            final int maxDy = ((dev.absY.maxValue-dev.absY.minValue)*7)/16;
+            
+            // Look through all new points and see if any are farther than
+            // acceptable from all previous points.
+            for (int i=mNextNumPointers-1; i>=0; i--) {
+                final int ioff = i * MotionEvent.NUM_SAMPLE_DATA;
+                //final int x = mNextData[ioff + MotionEvent.SAMPLE_X];
+                final int y = mNextData[ioff + MotionEvent.SAMPLE_Y];
+                if (DEBUG_HACKS) Log.v("InputDevice", "Looking at next point #" + i + ": y=" + y);
+                boolean dropped = false;
+                if (!mDroppedBadPoint[i] && mLastNumPointers > 0) {
+                    dropped = true;
+                    int closestDy = -1;
+                    int closestY = -1;
+                    // We will drop this new point if it is sufficiently
+                    // far away from -all- last points.
+                    for (int j=mLastNumPointers-1; j>=0; j--) {
+                        final int joff = j * MotionEvent.NUM_SAMPLE_DATA;
+                        //int dx = x - mLastData[joff + MotionEvent.SAMPLE_X];
+                        int dy = y - mLastData[joff + MotionEvent.SAMPLE_Y];
+                        //if (dx < 0) dx = -dx;
+                        if (dy < 0) dy = -dy;
+                        if (DEBUG_HACKS) Log.v("InputDevice", "Comparing with last point #" + j
+                                + ": y=" + mLastData[joff] + " dy=" + dy);
+                        if (dy < maxDy) {
+                            dropped = false;
+                            break;
+                        } else if (closestDy < 0 || dy < closestDy) {
+                            closestDy = dy;
+                            closestY = mLastData[joff + MotionEvent.SAMPLE_Y];
+                        }
+                    }
+                    if (dropped) {
+                        dropped = true;
+                        Log.i("InputDevice", "Dropping bad point #" + i
+                                + ": newY=" + y + " closestDy=" + closestDy
+                                + " maxDy=" + maxDy);
+                        mNextData[ioff + MotionEvent.SAMPLE_Y] = closestY;
+                        break;
+                    }
+                }
+                mDroppedBadPoint[i] = dropped;
+            }
+        }
+        
+        /**
+         * Special hack for devices that have bad screen data: aggregate and
+         * compute averages of the coordinate data, to reduce the amount of
+         * jitter seen by applications.
+         */
+        int[] generateAveragedData(int upOrDownPointer, int lastNumPointers,
+                int nextNumPointers) {
+            final int numPointers = mLastNumPointers;
+            final int[] rawData = mLastData;
+            if (DEBUG_HACKS) Log.v("InputDevice", "lastNumPointers=" + lastNumPointers
+                    + " nextNumPointers=" + nextNumPointers
+                    + " numPointers=" + numPointers);
+            for (int i=0; i<numPointers; i++) {
+                final int ioff = i * MotionEvent.NUM_SAMPLE_DATA;
+                // We keep the average data in offsets based on the pointer
+                // ID, so we don't need to move it around as fingers are
+                // pressed and released.
+                final int p = mPointerIds[i];
+                final int poff = p * MotionEvent.NUM_SAMPLE_DATA * HISTORY_SIZE;
+                if (i == upOrDownPointer && lastNumPointers != nextNumPointers) {
+                    if (lastNumPointers < nextNumPointers) {
+                        // This pointer is going down.  Clear its history
+                        // and start fresh.
+                        if (DEBUG_HACKS) Log.v("InputDevice", "Pointer down @ index "
+                                + upOrDownPointer + " id " + mPointerIds[i]);
+                        mHistoryDataStart[i] = 0;
+                        mHistoryDataEnd[i] = 0;
+                        System.arraycopy(rawData, ioff, mHistoryData, poff,
+                                MotionEvent.NUM_SAMPLE_DATA);
+                        System.arraycopy(rawData, ioff, mAveragedData, ioff,
+                                MotionEvent.NUM_SAMPLE_DATA);
+                        continue;
+                    } else {
+                        // The pointer is going up.  Just fall through to
+                        // recompute the last averaged point (and don't add
+                        // it as a new point to include in the average).
+                        if (DEBUG_HACKS) Log.v("InputDevice", "Pointer up @ index "
+                                + upOrDownPointer + " id " + mPointerIds[i]);
+                    }
+                } else {
+                    int end = mHistoryDataEnd[i];
+                    int eoff = poff + (end*MotionEvent.NUM_SAMPLE_DATA);
+                    int oldX = mHistoryData[eoff + MotionEvent.SAMPLE_X];
+                    int oldY = mHistoryData[eoff + MotionEvent.SAMPLE_Y];
+                    int newX = rawData[ioff + MotionEvent.SAMPLE_X];
+                    int newY = rawData[ioff + MotionEvent.SAMPLE_Y];
+                    int dx = newX-oldX;
+                    int dy = newY-oldY;
+                    int delta = dx*dx + dy*dy;
+                    if (DEBUG_HACKS) Log.v("InputDevice", "Delta from last: " + delta);
+                    if (delta >= (75*75)) {
+                        // Magic number, if moving farther than this, turn
+                        // off filtering to avoid lag in response.
+                        mHistoryDataStart[i] = 0;
+                        mHistoryDataEnd[i] = 0;
+                        System.arraycopy(rawData, ioff, mHistoryData, poff,
+                                MotionEvent.NUM_SAMPLE_DATA);
+                        System.arraycopy(rawData, ioff, mAveragedData, ioff,
+                                MotionEvent.NUM_SAMPLE_DATA);
+                        continue;
+                    } else {
+                        end++;
+                        if (end >= HISTORY_SIZE) {
+                            end -= HISTORY_SIZE;
+                        }
+                        mHistoryDataEnd[i] = end;
+                        int noff = poff + (end*MotionEvent.NUM_SAMPLE_DATA);
+                        mHistoryData[noff + MotionEvent.SAMPLE_X] = newX;
+                        mHistoryData[noff + MotionEvent.SAMPLE_Y] = newY;
+                        mHistoryData[noff + MotionEvent.SAMPLE_PRESSURE]
+                                = rawData[ioff + MotionEvent.SAMPLE_PRESSURE];
+                        int start = mHistoryDataStart[i];
+                        if (end == start) {
+                            start++;
+                            if (start >= HISTORY_SIZE) {
+                                start -= HISTORY_SIZE;
+                            }
+                            mHistoryDataStart[i] = start;
+                        }
+                    }
+                }
+                
+                // Now compute the average.
+                int start = mHistoryDataStart[i];
+                int end = mHistoryDataEnd[i];
+                int x=0, y=0;
+                int totalPressure = 0;
+                while (start != end) {
+                    int soff = poff + (start*MotionEvent.NUM_SAMPLE_DATA);
+                    int pressure = mHistoryData[soff + MotionEvent.SAMPLE_PRESSURE];
+                    x += mHistoryData[soff + MotionEvent.SAMPLE_X] * pressure;
+                    y += mHistoryData[soff + MotionEvent.SAMPLE_Y] * pressure;
+                    totalPressure += pressure;
+                    start++;
+                    if (start >= HISTORY_SIZE) start = 0;
+                }
+                int eoff = poff + (end*MotionEvent.NUM_SAMPLE_DATA);
+                int pressure = mHistoryData[eoff + MotionEvent.SAMPLE_PRESSURE];
+                x += mHistoryData[eoff + MotionEvent.SAMPLE_X] * pressure;
+                y += mHistoryData[eoff + MotionEvent.SAMPLE_Y] * pressure;
+                totalPressure += pressure;
+                x /= totalPressure;
+                y /= totalPressure;
+                if (DEBUG_HACKS) Log.v("InputDevice", "Averaging " + totalPressure
+                        + " weight: (" + x + "," + y + ")");
+                mAveragedData[ioff + MotionEvent.SAMPLE_X] = x;
+                mAveragedData[ioff + MotionEvent.SAMPLE_Y] = y;
+            }
+            return mAveragedData;
         }
         
         private boolean assignPointer(int nextIndex, boolean allowOverlap) {
@@ -333,7 +524,13 @@ public class InputDevice {
             int upOrDownPointer = updatePointerIdentifiers();
             
             final float[] reportData = mReportData;
-            final int[] rawData = mLastData;
+            final int[] rawData;
+            if (KeyInputQueue.BAD_TOUCH_HACK) {
+                rawData = generateAveragedData(upOrDownPointer, lastNumPointers,
+                        nextNumPointers);
+            } else {
+                rawData = mLastData;
+            }
             
             final int numPointers = mLastNumPointers;
             
