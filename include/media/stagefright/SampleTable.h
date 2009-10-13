@@ -35,17 +35,17 @@ public:
 
     // type can be 'stco' or 'co64'.
     status_t setChunkOffsetParams(
-            uint32_t type, off_t data_offset, off_t data_size);
+            uint32_t type, off_t data_offset, size_t data_size);
 
-    status_t setSampleToChunkParams(off_t data_offset, off_t data_size);
+    status_t setSampleToChunkParams(off_t data_offset, size_t data_size);
 
     // type can be 'stsz' or 'stz2'.
     status_t setSampleSizeParams(
-            uint32_t type, off_t data_offset, off_t data_size);
+            uint32_t type, off_t data_offset, size_t data_size);
 
-    status_t setTimeToSampleParams(off_t data_offset, off_t data_size);
+    status_t setTimeToSampleParams(off_t data_offset, size_t data_size);
 
-    status_t setSyncSampleParams(off_t data_offset, off_t data_size);
+    status_t setSyncSampleParams(off_t data_offset, size_t data_size);
 
     ////////////////////////////////////////////////////////////////////////////
 
