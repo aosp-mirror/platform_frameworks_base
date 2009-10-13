@@ -848,7 +848,7 @@ int doDump(Bundle* bundle)
                 printf("uses-feature:'android.hardware.camera'\n");
                 printf("uses-feature:'android.hardware.camera.autofocus'\n");
             }
-            
+
             if (hasMainActivity) {
                 printf("main\n");
             }
@@ -997,8 +997,15 @@ int doAdd(Bundle* bundle)
             printf(" '%s'... (from gzip)\n", fileName);
             result = zip->addGzip(fileName, String8(fileName).getBasePath().string(), NULL);
         } else {
-            printf(" '%s'...\n", fileName);
-            result = zip->add(fileName, bundle->getCompressionMethod(), NULL);
+            if (bundle->getJunkPath()) {
+                String8 storageName = String8(fileName).getPathLeaf();
+                printf(" '%s' as '%s'...\n", fileName, storageName.string());
+                result = zip->add(fileName, storageName.string(),
+                                  bundle->getCompressionMethod(), NULL);
+            } else {
+                printf(" '%s'...\n", fileName);
+                result = zip->add(fileName, bundle->getCompressionMethod(), NULL);
+            }
         }
         if (result != NO_ERROR) {
             fprintf(stderr, "Unable to add '%s' to '%s'", bundle->getFileSpecEntry(i), zipFileName);
