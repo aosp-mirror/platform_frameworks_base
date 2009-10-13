@@ -148,8 +148,10 @@
     <string name="permgroupdesc_location" msgid="2430258821648348660">"Sleduje vaši fyzickou polohu"</string>
     <string name="permgrouplab_network" msgid="5808983377727109831">"Síťová komunikace"</string>
     <string name="permgroupdesc_network" msgid="5035763698958415998">"Umožňuje aplikacím získat přístup k různým funkcím sítě."</string>
-    <string name="permgrouplab_accounts" msgid="7140261692496314430">"Vaše účty Google"</string>
-    <string name="permgroupdesc_accounts" msgid="6735915929704895193">"Přístup k dostupným účtům Google."</string>
+    <!-- no translation found for permgrouplab_accounts (3359646291125325519) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_accounts (4948732641827091312) -->
+    <skip />
     <string name="permgrouplab_hardwareControls" msgid="7998214968791599326">"Řízení hardwaru"</string>
     <string name="permgroupdesc_hardwareControls" msgid="4357057861225462702">"Přímý přístup k hardwaru telefonu."</string>
     <string name="permgrouplab_phoneCalls" msgid="9067173988325865923">"Telefonní hovory"</string>
@@ -433,6 +435,110 @@
     <item msgid="2506857312718630823">"ICQ"</item>
     <item msgid="1648797903785279353">"Jabber"</item>
   </string-array>
+    <!-- no translation found for phoneTypeCustom (1644738059053355820) -->
+    <skip />
+    <!-- no translation found for phoneTypeHome (2570923463033985887) -->
+    <skip />
+    <!-- no translation found for phoneTypeMobile (6501463557754751037) -->
+    <skip />
+    <!-- no translation found for phoneTypeWork (8863939667059911633) -->
+    <skip />
+    <!-- no translation found for phoneTypeFaxWork (3517792160008890912) -->
+    <skip />
+    <!-- no translation found for phoneTypeFaxHome (2067265972322971467) -->
+    <skip />
+    <!-- no translation found for phoneTypePager (7582359955394921732) -->
+    <skip />
+    <!-- no translation found for phoneTypeOther (1544425847868765990) -->
+    <skip />
+    <!-- no translation found for phoneTypeCallback (2712175203065678206) -->
+    <skip />
+    <!-- no translation found for phoneTypeCar (8738360689616716982) -->
+    <skip />
+    <!-- no translation found for phoneTypeCompanyMain (540434356461478916) -->
+    <skip />
+    <!-- no translation found for phoneTypeIsdn (8022453193171370337) -->
+    <skip />
+    <!-- no translation found for phoneTypeMain (6766137010628326916) -->
+    <skip />
+    <!-- no translation found for phoneTypeOtherFax (8587657145072446565) -->
+    <skip />
+    <!-- no translation found for phoneTypeRadio (4093738079908667513) -->
+    <skip />
+    <!-- no translation found for phoneTypeTelex (3367879952476250512) -->
+    <skip />
+    <!-- no translation found for phoneTypeTtyTdd (8606514378585000044) -->
+    <skip />
+    <!-- no translation found for phoneTypeWorkMobile (1311426989184065709) -->
+    <skip />
+    <!-- no translation found for phoneTypeWorkPager (649938731231157056) -->
+    <skip />
+    <!-- no translation found for phoneTypeAssistant (5596772636128562884) -->
+    <skip />
+    <!-- no translation found for phoneTypeMms (7254492275502768992) -->
+    <skip />
+    <!-- no translation found for eventTypeBirthday (2813379844211390740) -->
+    <skip />
+    <!-- no translation found for eventTypeAnniversary (3876779744518284000) -->
+    <skip />
+    <!-- no translation found for eventTypeOther (5834288791948564594) -->
+    <skip />
+    <!-- no translation found for emailTypeCustom (8525960257804213846) -->
+    <skip />
+    <!-- no translation found for emailTypeHome (449227236140433919) -->
+    <skip />
+    <!-- no translation found for emailTypeWork (3548058059601149973) -->
+    <skip />
+    <!-- no translation found for emailTypeOther (2923008695272639549) -->
+    <skip />
+    <!-- no translation found for emailTypeMobile (119919005321166205) -->
+    <skip />
+    <!-- no translation found for postalTypeCustom (8903206903060479902) -->
+    <skip />
+    <!-- no translation found for postalTypeHome (8165756977184483097) -->
+    <skip />
+    <!-- no translation found for postalTypeWork (5268172772387694495) -->
+    <skip />
+    <!-- no translation found for postalTypeOther (2726111966623584341) -->
+    <skip />
+    <!-- no translation found for imTypeCustom (2074028755527826046) -->
+    <skip />
+    <!-- no translation found for imTypeHome (6241181032954263892) -->
+    <skip />
+    <!-- no translation found for imTypeWork (1371489290242433090) -->
+    <skip />
+    <!-- no translation found for imTypeOther (5377007495735915478) -->
+    <skip />
+    <!-- no translation found for imProtocolCustom (6919453836618749992) -->
+    <skip />
+    <!-- no translation found for imProtocolAim (7050360612368383417) -->
+    <skip />
+    <!-- no translation found for imProtocolMsn (144556545420769442) -->
+    <skip />
+    <!-- no translation found for imProtocolYahoo (8271439408469021273) -->
+    <skip />
+    <!-- no translation found for imProtocolSkype (9019296744622832951) -->
+    <skip />
+    <!-- no translation found for imProtocolQq (8887484379494111884) -->
+    <skip />
+    <!-- no translation found for imProtocolGoogleTalk (3808393979157698766) -->
+    <skip />
+    <!-- no translation found for imProtocolIcq (1574870433606517315) -->
+    <skip />
+    <!-- no translation found for imProtocolJabber (2279917630875771722) -->
+    <skip />
+    <!-- no translation found for imProtocolNetMeeting (8287625655986827971) -->
+    <skip />
+    <!-- no translation found for orgTypeWork (29268870505363872) -->
+    <skip />
+    <!-- no translation found for orgTypeOther (3951781131570124082) -->
+    <skip />
+    <!-- no translation found for orgTypeCustom (225523415372088322) -->
+    <skip />
+    <!-- no translation found for contact_status_update_attribution (5112589886094402795) -->
+    <skip />
+    <!-- no translation found for contact_status_update_attribution_with_date (5945386376369979909) -->
+    <skip />
     <string name="keyguard_password_enter_pin_code" msgid="3731488827218876115">"Zadejte kód PIN"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="1295984114338107718">"Nesprávný kód PIN"</string>
     <string name="keyguard_label_text" msgid="861796461028298424">"Chcete-li telefon odemknout, stiskněte Menu a poté 0."</string>
@@ -447,6 +553,8 @@
     <string name="lockscreen_pattern_wrong" msgid="4817583279053112312">"Zkuste to prosím znovu"</string>
     <string name="lockscreen_plugged_in" msgid="613343852842944435">"Nabíjení (<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>)"</string>
     <string name="lockscreen_charged" msgid="4938930459620989972">"Nabito."</string>
+    <!-- no translation found for lockscreen_battery_short (3617549178603354656) -->
+    <skip />
     <string name="lockscreen_low_battery" msgid="1482873981919249740">"Připojte dobíjecí zařízení."</string>
     <string name="lockscreen_missing_sim_message_short" msgid="7381499217732227295">"Není vložena SIM karta."</string>
     <string name="lockscreen_missing_sim_message" msgid="2186920585695169078">"V telefonu není žádná karta SIM."</string>
@@ -478,7 +586,8 @@
     <string name="battery_status_charging" msgid="756617993998772213">"Nabíjení..."</string>
     <string name="battery_low_title" msgid="7923774589611311406">"Prosím připojte dobíjecí zařízení"</string>
     <string name="battery_low_subtitle" msgid="7388781709819722764">"Baterie je vybitá:"</string>
-    <string name="battery_low_percent_format" msgid="6564958083485073855">"zbývá méně než <xliff:g id="NUMBER">%d%%</xliff:g>."</string>
+    <!-- no translation found for battery_low_percent_format (696154104579022959) -->
+    <skip />
     <string name="battery_low_why" msgid="7279169609518386372">"Využití baterie"</string>
     <string name="factorytest_failed" msgid="5410270329114212041">"Test továrního nastavení se nezdařil"</string>
     <string name="factorytest_not_system" msgid="4435201656767276723">"Test FACTORY_TEST lze provést pouze u balíčků nainstalovaných ve složce /system/app."</string>
@@ -488,6 +597,8 @@
     <string name="js_dialog_title_default" msgid="6961903213729667573">"JavaScript"</string>
     <string name="js_dialog_before_unload" msgid="1901675448179653089">"Chcete opustit tuto stránku?"\n\n"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"Vyberte OK, chcete-li pokračovat, nebo Zrušit, chcete-li na stránce zůstat."</string>
     <string name="save_password_label" msgid="6860261758665825069">"Potvrdit"</string>
+    <!-- no translation found for double_tap_toast (1068216937244567247) -->
+    <skip />
     <string name="permlab_readHistoryBookmarks" msgid="1284843728203412135">"čtení historie a záložek Prohlížeče"</string>
     <string name="permdesc_readHistoryBookmarks" msgid="4981489815467617191">"Umožňuje aplikaci číst všechny navštívené adresy URL a záložky Prohlížeče."</string>
     <string name="permlab_writeHistoryBookmarks" msgid="9009434109836280374">"zápis do historie a záložek Prohlížeče"</string>
@@ -738,4 +849,12 @@
     <string name="accessibility_binding_label" msgid="4148120742096474641">"Usnadnění"</string>
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"Tapeta"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"Změnit tapetu"</string>
+    <!-- no translation found for pptp_vpn_description (2688045385181439401) -->
+    <skip />
+    <!-- no translation found for l2tp_vpn_description (3750692169378923304) -->
+    <skip />
+    <!-- no translation found for l2tp_ipsec_psk_vpn_description (3945043564008303239) -->
+    <skip />
+    <!-- no translation found for l2tp_ipsec_crt_vpn_description (5382714073103653577) -->
+    <skip />
 </resources>
