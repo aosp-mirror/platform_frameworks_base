@@ -837,8 +837,6 @@
     <string name="create_contact_using" msgid="4947405226788104538">"Vytvořit kontakt"\n"pro <xliff:g id="NUMBER">%s</xliff:g>."</string>
     <string name="accessibility_compound_button_selected" msgid="5612776946036285686">"Zaškrtnuto"</string>
     <string name="accessibility_compound_button_unselected" msgid="8864512895673924091">"Nezaškrtnuto"</string>
-    <string name="grant_credentials_permission_message_desc" msgid="6883276587034335667">"Uvedené aplikace od <xliff:g id="APPLICATION">%2$s</xliff:g> požadují oprávnění přistupovat k přihlašovacím údajům účtu <xliff:g id="ACCOUNT">%1$s</xliff:g>. Chcete toto oprávnění udělit? Pokud je udělíte, vaše odpověď se uloží a tato výzva se již nebude zobrazovat."</string>
-    <string name="grant_credentials_permission_message_with_authtokenlabel_desc" msgid="3159007601893584687">"Uvedené aplikace požadují od <xliff:g id="APPLICATION">%3$s</xliff:g> oprávnění přistupovat k přihlašovacím údajům (typ: <xliff:g id="TYPE">%1$s</xliff:g>) účtu <xliff:g id="ACCOUNT">%2$s</xliff:g>. Chcete toto oprávnění udělit? Pokud je udělíte, vaše odpověď se uloží a tato výzva se již nebude zobrazovat."</string>
     <string name="allow" msgid="7225948811296386551">"Povolit"</string>
     <string name="deny" msgid="2081879885755434506">"Odepřít"</string>
     <string name="permission_request_notification_title" msgid="5390555465778213840">"Požadováno oprávnění"</string>

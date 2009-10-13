@@ -837,8 +837,6 @@
     <string name="create_contact_using" msgid="4947405226788104538">"<xliff:g id="NUMBER">%s</xliff:g>を使って"\n"連絡先を新規登録"</string>
     <string name="accessibility_compound_button_selected" msgid="5612776946036285686">"オン"</string>
     <string name="accessibility_compound_button_unselected" msgid="8864512895673924091">"オフ"</string>
-    <string name="grant_credentials_permission_message_desc" msgid="6883276587034335667">"リストされているアプリケーションが、アカウント<xliff:g id="ACCOUNT">%1$s</xliff:g>のログイン認証情報に<xliff:g id="APPLICATION">%2$s</xliff:g>からアクセスする権限をリクエストしています。この権限を許可しますか？許可すると、入力が記録され、次回以降はこのメッセージが表示されなくなります。"</string>
-    <string name="grant_credentials_permission_message_with_authtokenlabel_desc" msgid="3159007601893584687">"リストされているアプリケーションが、アカウント<xliff:g id="ACCOUNT">%2$s</xliff:g>の<xliff:g id="TYPE">%1$s</xliff:g>ログイン認証情報に<xliff:g id="APPLICATION">%3$s</xliff:g>からアクセスする権限をリクエストしています。この権限を許可しますか？許可すると、入力は記録され、次回以降はこのメッセージが表示されなくなります。"</string>
     <string name="allow" msgid="7225948811296386551">"許可"</string>
     <string name="deny" msgid="2081879885755434506">"拒否"</string>
     <string name="permission_request_notification_title" msgid="5390555465778213840">"リクエスト済み権限"</string>

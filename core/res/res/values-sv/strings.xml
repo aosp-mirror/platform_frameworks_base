@@ -837,8 +837,6 @@
     <string name="create_contact_using" msgid="4947405226788104538">"Skapa kontakt"\n"med <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <string name="accessibility_compound_button_selected" msgid="5612776946036285686">"markerad"</string>
     <string name="accessibility_compound_button_unselected" msgid="8864512895673924091">"inte markerad"</string>
-    <string name="grant_credentials_permission_message_desc" msgid="6883276587034335667">"Programmen begär åtkomst till inloggningsuppgifterna för kontot <xliff:g id="ACCOUNT">%1$s</xliff:g> från <xliff:g id="APPLICATION">%2$s</xliff:g>. Vill du bevilja behörighet? Om du gör det kommer vi ihåg det och du blir inte tillfrågad igen."</string>
-    <string name="grant_credentials_permission_message_with_authtokenlabel_desc" msgid="3159007601893584687">"Programmen begär åtkomst till inloggningsuppgifterna <xliff:g id="TYPE">%1$s</xliff:g> för kontot <xliff:g id="ACCOUNT">%2$s</xliff:g> från <xliff:g id="APPLICATION">%3$s</xliff:g>. Vill du bevilja behörighet? Om du gör det kommer vi ihåg det och du blir inte tillfrågad igen."</string>
     <string name="allow" msgid="7225948811296386551">"Tillåt"</string>
     <string name="deny" msgid="2081879885755434506">"Neka"</string>
     <string name="permission_request_notification_title" msgid="5390555465778213840">"Begärd behörighet"</string>
