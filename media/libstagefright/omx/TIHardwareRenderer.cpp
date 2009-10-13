@@ -17,7 +17,8 @@
 #define LOG_TAG "TIHardwareRenderer"
 #include <utils/Log.h>
 
-#include <media/stagefright/TIHardwareRenderer.h>
+#include "../include/TIHardwareRenderer.h"
+
 #include <media/stagefright/MediaDebug.h>
 #include <ui/ISurface.h>
 #include <ui/Overlay.h>

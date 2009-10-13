@@ -18,10 +18,11 @@
 
 #define HTTP_STREAM_H_
 
+#include "string.h"
+
 #include <sys/types.h>
 
 #include <media/stagefright/MediaErrors.h>
-#include <media/stagefright/string.h>
 #include <utils/KeyedVector.h>
 
 namespace android {

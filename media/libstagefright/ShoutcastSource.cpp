@@ -14,16 +14,17 @@
  * limitations under the License.
  */
 
+#include "include/string.h"
+#include "include/HTTPStream.h"
+
 #include <stdlib.h>
 
-#include <media/stagefright/HTTPStream.h>
 #include <media/stagefright/MediaBuffer.h>
 #include <media/stagefright/MediaBufferGroup.h>
 #include <media/stagefright/MediaDebug.h>
 #include <media/stagefright/MediaDefs.h>
 #include <media/stagefright/MetaData.h>
 #include <media/stagefright/ShoutcastSource.h>
-#include <media/stagefright/string.h>
 
 namespace android {
 

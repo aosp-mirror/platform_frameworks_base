@@ -17,11 +17,12 @@
 #define LOG_TAG "SampleTable"
 #include <utils/Log.h>
 
+#include "include/SampleTable.h"
+
 #include <arpa/inet.h>
 
 #include <media/stagefright/DataSource.h>
 #include <media/stagefright/MediaDebug.h>
-#include <media/stagefright/SampleTable.h>
 #include <media/stagefright/Utils.h>
 
 namespace android {

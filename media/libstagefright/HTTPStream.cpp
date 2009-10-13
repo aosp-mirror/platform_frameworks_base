@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#include "include/HTTPStream.h"
+
 #include <sys/socket.h>
 
 #include <arpa/inet.h>
@@ -25,7 +27,6 @@
 #include <string.h>
 #include <unistd.h>
 
-#include <media/stagefright/HTTPStream.h>
 #include <media/stagefright/MediaDebug.h>
 
 namespace android {
