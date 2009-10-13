@@ -6189,7 +6189,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
 
             final int drawingCacheBackgroundColor = mDrawingCacheBackgroundColor;
             final boolean opaque = drawingCacheBackgroundColor != 0 || isOpaque();
-            final boolean translucentWindow = attachInfo.mTranslucentWindow;
+            final boolean translucentWindow = attachInfo != null && attachInfo.mTranslucentWindow;
 
             if (width <= 0 || height <= 0 ||
                      // Projected bitmap size in bytes
