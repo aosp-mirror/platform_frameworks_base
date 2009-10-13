@@ -483,6 +483,7 @@ public class MimeTypeMap {
             sMimeTypeMap.loadEntry("video/dv", "dif");
             sMimeTypeMap.loadEntry("video/dv", "dv");
             sMimeTypeMap.loadEntry("video/fli", "fli");
+            sMimeTypeMap.loadEntry("video/m4v", "m4v");
             sMimeTypeMap.loadEntry("video/mpeg", "mpeg");
             sMimeTypeMap.loadEntry("video/mpeg", "mpg");
             sMimeTypeMap.loadEntry("video/mpeg", "mpe");
