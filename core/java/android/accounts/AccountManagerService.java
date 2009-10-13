@@ -223,7 +223,11 @@ public class AccountManagerService
         mBindHelper = new AuthenticatorBindHelper(mContext, mAuthenticatorCache, mMessageHandler,
                 MESSAGE_CONNECTED, MESSAGE_DISCONNECTED);
 
-        mSimWatcher = new SimWatcher(mContext);
+        if (SystemProperties.getBoolean("ro.config.sim_password_clear", false)) {
+          mSimWatcher = new SimWatcher(mContext);
+        } else {
+          mSimWatcher = null;
+        }
         sThis.set(this);
 
         onRegisteredServicesCacheChanged();
