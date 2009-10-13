@@ -288,7 +288,7 @@ public final class EriManager {
         if (isEriFileLoaded) {
             EriInfo eriInfo = getEriInfo(roamInd);
             if (eriInfo != null) {
-                if (DBG) Log.d(LOG_TAG, "ERI roamInd " + roamInd + " found in ERI file");
+                if (VDBG) Log.v(LOG_TAG, "ERI roamInd " + roamInd + " found in ERI file");
                 ret = new EriDisplayInformation(
                         eriInfo.mIconIndex,
                         eriInfo.mIconMode,
