@@ -958,4 +958,424 @@ class GLErrorWrapper extends GLWrapperBase {
         checkError();
         return valid;
     }
+
+    public void glBindBuffer(int target, int buffer) {
+        checkThread();
+        mgl11.glBindBuffer(target, buffer);
+        checkError();
+    }
+
+    public void glBufferData(int target, int size, Buffer data, int usage) {
+        checkThread();
+        mgl11.glBufferData(target, size, data, usage);
+        checkError();
+    }
+
+    public void glBufferSubData(int target, int offset, int size, Buffer data) {
+        checkThread();
+        mgl11.glBufferSubData(target, offset, size, data);
+        checkError();
+    }
+
+    public void glColor4ub(byte red, byte green, byte blue, byte alpha) {
+        checkThread();
+        mgl11.glColor4ub(red, green, blue, alpha);
+        checkError();    }
+
+    public void glColorPointer(int size, int type, int stride, int offset) {
+        checkThread();
+        mgl11.glColorPointer(size, type, stride, offset);
+        checkError();
+    }
+
+    public void glDeleteBuffers(int n, int[] buffers, int offset) {
+        checkThread();
+        mgl11.glDeleteBuffers(n, buffers, offset);
+        checkError();
+    }
+
+    public void glDeleteBuffers(int n, IntBuffer buffers) {
+        checkThread();
+        mgl11.glDeleteBuffers(n, buffers);
+        checkError();
+    }
+
+    public void glDrawElements(int mode, int count, int type, int offset) {
+        checkThread();
+        mgl11.glDrawElements(mode, count, type, offset);
+        checkError();
+    }
+
+    public void glGenBuffers(int n, int[] buffers, int offset) {
+        checkThread();
+        mgl11.glGenBuffers(n, buffers, offset);
+        checkError();
+    }
+
+    public void glGenBuffers(int n, IntBuffer buffers) {
+        checkThread();
+        mgl11.glGenBuffers(n, buffers);
+        checkError();
+    }
+
+    public void glGetBooleanv(int pname, boolean[] params, int offset) {
+        checkThread();
+        mgl11.glGetBooleanv(pname, params, offset);
+        checkError();
+    }
+
+    public void glGetBooleanv(int pname, IntBuffer params) {
+        checkThread();
+        mgl11.glGetBooleanv(pname, params);
+        checkError();
+    }
+
+    public void glGetBufferParameteriv(int target, int pname, int[] params,
+            int offset) {
+        checkThread();
+        mgl11.glGetBufferParameteriv(target, pname, params, offset);
+        checkError();
+    }
+
+    public void glGetBufferParameteriv(int target, int pname, IntBuffer params) {
+        checkThread();
+        mgl11.glGetBufferParameteriv(target, pname, params);
+        checkError();
+    }
+
+    public void glGetClipPlanef(int pname, float[] eqn, int offset) {
+        checkThread();
+        mgl11.glGetClipPlanef(pname, eqn, offset);
+        checkError();
+    }
+
+    public void glGetClipPlanef(int pname, FloatBuffer eqn) {
+        checkThread();
+        mgl11.glGetClipPlanef(pname, eqn);
+        checkError();
+    }
+
+    public void glGetClipPlanex(int pname, int[] eqn, int offset) {
+        checkThread();
+        mgl11.glGetClipPlanex(pname, eqn, offset);
+        checkError();
+    }
+
+    public void glGetClipPlanex(int pname, IntBuffer eqn) {
+        checkThread();
+        mgl11.glGetClipPlanex(pname, eqn);
+        checkError();
+    }
+
+    public void glGetFixedv(int pname, int[] params, int offset) {
+        checkThread();
+        mgl11.glGetFixedv(pname, params, offset);
+        checkError();
+    }
+
+    public void glGetFixedv(int pname, IntBuffer params) {
+        checkThread();
+        mgl11.glGetFixedv(pname, params);
+        checkError();
+    }
+
+    public void glGetFloatv(int pname, float[] params, int offset) {
+        checkThread();
+        mgl11.glGetFloatv(pname, params, offset);
+        checkError();
+    }
+
+    public void glGetFloatv(int pname, FloatBuffer params) {
+        checkThread();
+        mgl11.glGetFloatv(pname, params);
+        checkError();
+    }
+
+    public void glGetLightfv(int light, int pname, float[] params, int offset) {
+        checkThread();
+        mgl11.glGetLightfv(light, pname, params, offset);
+        checkError();
+    }
+
+    public void glGetLightfv(int light, int pname, FloatBuffer params) {
+        checkThread();
+        mgl11.glGetLightfv(light, pname, params);
+        checkError();
+    }
+
+    public void glGetLightxv(int light, int pname, int[] params, int offset) {
+        checkThread();
+        mgl11.glGetLightxv(light, pname, params, offset);
+        checkError();
+    }
+
+    public void glGetLightxv(int light, int pname, IntBuffer params) {
+        checkThread();
+        mgl11.glGetLightxv(light, pname, params);
+        checkError();
+    }
+
+    public void glGetMaterialfv(int face, int pname, float[] params, int offset) {
+        checkThread();
+        mgl11.glGetMaterialfv(face, pname, params, offset);
+        checkError();
+    }
+
+    public void glGetMaterialfv(int face, int pname, FloatBuffer params) {
+        checkThread();
+        mgl11.glGetMaterialfv(face, pname, params);
+        checkError();
+    }
+
+    public void glGetMaterialxv(int face, int pname, int[] params, int offset) {
+        checkThread();
+        mgl11.glGetMaterialxv(face, pname, params, offset);
+        checkError();
+    }
+
+    public void glGetMaterialxv(int face, int pname, IntBuffer params) {
+        checkThread();
+        mgl11.glGetMaterialxv(face, pname, params);
+        checkError();
+    }
+
+    public void glGetPointerv(int pname, Buffer[] params) {
+        checkThread();
+        mgl11.glGetPointerv(pname, params);
+        checkError();
+    }
+
+    public void glGetTexEnviv(int env, int pname, int[] params, int offset) {
+        checkThread();
+        mgl11.glGetTexEnviv(env, pname, params, offset);
+        checkError();
+    }
+
+    public void glGetTexEnviv(int env, int pname, IntBuffer params) {
+        checkThread();
+        mgl11.glGetTexEnviv(env, pname, params);
+        checkError();
+    }
+
+    public void glGetTexEnvxv(int env, int pname, int[] params, int offset) {
+        checkThread();
+        mgl11.glGetTexEnvxv(env, pname, params, offset);
+        checkError();
+    }
+
+    public void glGetTexEnvxv(int env, int pname, IntBuffer params) {
+        checkThread();
+        mgl11.glGetTexEnvxv(env, pname, params);
+        checkError();
+    }
+
+    public void glGetTexParameterfv(int target, int pname, float[] params,
+            int offset) {
+        checkThread();
+        mgl11.glGetTexParameterfv(target, pname, params, offset);
+        checkError();
+    }
+
+    public void glGetTexParameterfv(int target, int pname, FloatBuffer params) {
+        checkThread();
+        mgl11.glGetTexParameterfv(target, pname, params);
+        checkError();
+    }
+
+    public void glGetTexParameteriv(int target, int pname, int[] params,
+            int offset) {
+        checkThread();
+        mgl11.glGetTexParameteriv(target, pname, params, offset);
+        checkError();
+    }
+
+    public void glGetTexParameteriv(int target, int pname, IntBuffer params) {
+        checkThread();
+        mgl11.glGetTexParameteriv(target, pname, params);
+        checkError();
+    }
+
+    public void glGetTexParameterxv(int target, int pname, int[] params,
+            int offset) {
+        checkThread();
+        mgl11.glGetTexParameterxv(target, pname, params, offset);
+        checkError();
+    }
+
+    public void glGetTexParameterxv(int target, int pname, IntBuffer params) {
+        checkThread();
+        mgl11.glGetTexParameterxv(target, pname, params);
+        checkError();
+    }
+
+    public boolean glIsBuffer(int buffer) {
+        checkThread();
+        boolean valid = mgl11.glIsBuffer(buffer);
+        checkError();
+        return valid;
+    }
+
+    public boolean glIsEnabled(int cap) {
+        checkThread();
+        boolean valid = mgl11.glIsEnabled(cap);
+        checkError();
+        return valid;
+    }
+
+    public boolean glIsTexture(int texture) {
+        checkThread();
+        boolean valid = mgl11.glIsTexture(texture);
+        checkError();
+        return valid;
+    }
+
+    public void glNormalPointer(int type, int stride, int offset) {
+        checkThread();
+        mgl11.glNormalPointer(type, stride, offset);
+        checkError();
+    }
+
+    public void glPointParameterf(int pname, float param) {
+        checkThread();
+        mgl11.glPointParameterf(pname, param);
+        checkError();
+    }
+
+    public void glPointParameterfv(int pname, float[] params, int offset) {
+        checkThread();
+        mgl11.glPointParameterfv(pname, params, offset);
+        checkError();
+    }
+
+    public void glPointParameterfv(int pname, FloatBuffer params) {
+        checkThread();
+        mgl11.glPointParameterfv(pname, params);
+        checkError();
+    }
+
+    public void glPointParameterx(int pname, int param) {
+        checkThread();
+        mgl11.glPointParameterx(pname, param);
+        checkError();
+    }
+
+    public void glPointParameterxv(int pname, int[] params, int offset) {
+        checkThread();
+        mgl11.glPointParameterxv(pname, params, offset);
+        checkError();
+    }
+
+    public void glPointParameterxv(int pname, IntBuffer params) {
+        checkThread();
+        mgl11.glPointParameterxv(pname, params);
+        checkError();
+    }
+
+    public void glPointSizePointerOES(int type, int stride, Buffer pointer) {
+        checkThread();
+        mgl11.glPointSizePointerOES(type, stride, pointer);
+        checkError();
+    }
+
+    public void glTexCoordPointer(int size, int type, int stride, int offset) {
+        checkThread();
+        mgl11.glTexCoordPointer(size, type, stride, offset);
+        checkError();
+    }
+
+    public void glTexEnvi(int target, int pname, int param) {
+        checkThread();
+        mgl11.glTexEnvi(target, pname, param);
+        checkError();
+    }
+
+    public void glTexEnviv(int target, int pname, int[] params, int offset) {
+        checkThread();
+        mgl11.glTexEnviv(target, pname, params, offset);
+        checkError();
+    }
+
+    public void glTexEnviv(int target, int pname, IntBuffer params) {
+        checkThread();
+        mgl11.glTexEnviv(target, pname, params);
+        checkError();
+    }
+
+    public void glTexParameterfv(int target, int pname, float[] params,
+            int offset) {
+        checkThread();
+        mgl11.glTexParameterfv(target, pname, params, offset);
+        checkError();
+    }
+
+    public void glTexParameterfv(int target, int pname, FloatBuffer params) {
+        checkThread();
+        mgl11.glTexParameterfv(target, pname, params);
+        checkError();
+    }
+
+    public void glTexParameteri(int target, int pname, int param) {
+        checkThread();
+        mgl11.glTexParameteri(target, pname, param);
+        checkError();
+    }
+
+    public void glTexParameterxv(int target, int pname, int[] params, int offset) {
+        checkThread();
+        mgl11.glTexParameterxv(target, pname, params, offset);
+        checkError();
+    }
+
+    public void glTexParameterxv(int target, int pname, IntBuffer params) {
+        checkThread();
+        mgl11.glTexParameterxv(target, pname, params);
+        checkError();
+    }
+
+    public void glVertexPointer(int size, int type, int stride, int offset) {
+        checkThread();
+        mgl11.glVertexPointer(size, type, stride, offset);
+        checkError();
+    }
+
+    public void glCurrentPaletteMatrixOES(int matrixpaletteindex) {
+        checkThread();
+        mgl11Ext.glCurrentPaletteMatrixOES(matrixpaletteindex);
+        checkError();
+    }
+
+    public void glLoadPaletteFromModelViewMatrixOES() {
+        checkThread();
+        mgl11Ext.glLoadPaletteFromModelViewMatrixOES();
+        checkError();
+    }
+
+    public void glMatrixIndexPointerOES(int size, int type, int stride,
+            Buffer pointer) {
+        checkThread();
+        mgl11Ext.glMatrixIndexPointerOES(size, type, stride, pointer);
+        checkError();
+    }
+
+    public void glMatrixIndexPointerOES(int size, int type, int stride,
+            int offset) {
+        checkThread();
+        mgl11Ext.glMatrixIndexPointerOES(size, type, stride, offset);
+        checkError();
+    }
+
+    public void glWeightPointerOES(int size, int type, int stride,
+            Buffer pointer) {
+        checkThread();
+        mgl11Ext.glWeightPointerOES(size, type, stride, pointer);
+        checkError();
+    }
+
+    public void glWeightPointerOES(int size, int type, int stride, int offset) {
+        checkThread();
+        mgl11Ext.glWeightPointerOES(size, type, stride, offset);
+        checkError();
+    }
+
+
 }
