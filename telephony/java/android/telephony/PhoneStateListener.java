@@ -206,6 +206,13 @@ public class PhoneStateListener {
     }
 
     /**
+     * @hide
+     * same as above, but with the network type.  Both called.
+     */
+    public void onDataConnectionStateChanged(int state, int networkType) {
+    }
+
+    /**
      * Callback invoked when data activity state changes.
      *
      * @see TelephonyManager#DATA_ACTIVITY_NONE
@@ -264,8 +271,9 @@ public class PhoneStateListener {
             Message.obtain(mHandler, LISTEN_CALL_STATE, state, 0, incomingNumber).sendToTarget();
         }
 
-        public void onDataConnectionStateChanged(int state) {
-            Message.obtain(mHandler, LISTEN_DATA_CONNECTION_STATE, state, 0, null).sendToTarget();
+        public void onDataConnectionStateChanged(int state, int networkType) {
+            Message.obtain(mHandler, LISTEN_DATA_CONNECTION_STATE, state, networkType, null).
+                    sendToTarget();
         }
 
         public void onDataActivity(int direction) {
@@ -299,6 +307,7 @@ public class PhoneStateListener {
                     PhoneStateListener.this.onCallStateChanged(msg.arg1, (String)msg.obj);
                     break;
                 case LISTEN_DATA_CONNECTION_STATE:
+                    PhoneStateListener.this.onDataConnectionStateChanged(msg.arg1, msg.arg2);
                     PhoneStateListener.this.onDataConnectionStateChanged(msg.arg1);
                     break;
                 case LISTEN_DATA_ACTIVITY:
