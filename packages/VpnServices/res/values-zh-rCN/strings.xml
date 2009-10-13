@@ -15,8 +15,8 @@
 -->
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_label" msgid="4589592829302498102">"VPN 服务"</string>
-    <string name="vpn_notification_title_connected" msgid="2567196609405266775">"%s VPN 已连接"</string>
-    <string name="vpn_notification_title_disconnected" msgid="3564361788336568244">"VPN“%s”连接已断开"</string>
-    <string name="vpn_notification_hint_disconnected" msgid="1952209867082269429">"触摸可重新连接 VPN。"</string>
+    <string name="app_label" msgid="4589592829302498102">"虚拟专用网服务"</string>
+    <string name="vpn_notification_title_connected" msgid="2567196609405266775">"已连接虚拟专用网%s"</string>
+    <string name="vpn_notification_title_disconnected" msgid="3564361788336568244">"已与虚拟专用网%s断开连接"</string>
+    <string name="vpn_notification_hint_disconnected" msgid="1952209867082269429">"轻触可重新连接到虚拟专用网。"</string>
 </resources>

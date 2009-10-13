@@ -372,7 +372,7 @@
     <string name="permdesc_readDictionary" msgid="1082972603576360690">"Позволяет приложению считывать любые слова, имена и фразы личного пользования, которые могут храниться в пользовательском словаре."</string>
     <string name="permlab_writeDictionary" msgid="6703109511836343341">"записывать в пользовательский словарь"</string>
     <string name="permdesc_writeDictionary" msgid="2241256206524082880">"Позволяет приложению записывать новые слова в пользовательский словарь."</string>
-    <string name="permlab_sdcardWrite" msgid="8079403759001777291">"изменить/удалить содержание SD-карты"</string>
+    <string name="permlab_sdcardWrite" msgid="8079403759001777291">"изменять/удалять содержание SD-карты"</string>
     <string name="permdesc_sdcardWrite" msgid="6643963204976471878">"Разрешает приложению запись на SD-карту"</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Домашний"</item>

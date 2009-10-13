@@ -568,7 +568,7 @@
     <string name="weeks" msgid="6509623834583944518">"semanas"</string>
     <string name="year" msgid="4001118221013892076">"ano"</string>
     <string name="years" msgid="6881577717993213522">"anos"</string>
-    <string name="every_weekday" msgid="8777593878457748503">"Todos os dias da semana (de segunda a sexta)"</string>
+    <string name="every_weekday" msgid="8777593878457748503">"De segunda a sexta-feira"</string>
     <string name="daily" msgid="5738949095624133403">"Diariamente"</string>
     <string name="weekly" msgid="983428358394268344">"Semanalmente na <xliff:g id="DAY">%s</xliff:g>"</string>
     <string name="monthly" msgid="2667202947170988834">"Mensalmente"</string>
@@ -699,7 +699,7 @@
     <string name="ime_action_go" msgid="8320845651737369027">"Ir"</string>
     <string name="ime_action_search" msgid="658110271822807811">"Pesquisar"</string>
     <string name="ime_action_send" msgid="2316166556349314424">"Enviar"</string>
-    <string name="ime_action_next" msgid="3138843904009813834">"Próximo"</string>
+    <string name="ime_action_next" msgid="3138843904009813834">"Avançar"</string>
     <string name="ime_action_done" msgid="8971516117910934605">"Concluído"</string>
     <string name="ime_action_default" msgid="2840921885558045721">"Executar"</string>
     <string name="dial_number_using" msgid="5789176425167573586">"Discar número"\n"usando <xliff:g id="NUMBER">%s</xliff:g>"</string>
