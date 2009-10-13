@@ -150,6 +150,16 @@ class CallbackProxy extends Handler {
     }
 
     /**
+     * Get the WebViewClient.
+     * @return the current WebViewClient instance.
+     *
+     *@hide pending API council approval.
+     */
+    public WebViewClient getWebViewClient() {
+       return mWebViewClient;
+    }
+
+    /**
      * Set the WebChromeClient.
      * @param client An implementation of WebChromeClient.
      */
