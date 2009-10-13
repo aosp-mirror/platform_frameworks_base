@@ -38,6 +38,7 @@ import android.provider.ContactsContract.CommonDataKinds.StructuredName;
 import android.provider.ContactsContract.CommonDataKinds.StructuredPostal;
 import android.provider.ContactsContract.CommonDataKinds.Website;
 import android.telephony.PhoneNumberUtils;
+import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -46,7 +47,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -55,11 +55,11 @@ import java.util.Map;
  */
 public class ContactStruct {
     private static final String LOG_TAG = "vcard.ContactStruct";
-    
+
     // Key: the name shown in VCard. e.g. "X-AIM", "X-ICQ"
     // Value: the result of {@link Contacts.ContactMethods#encodePredefinedImProtocol}
     private static final Map<String, Integer> sImMap = new HashMap<String, Integer>();
-    
+
     static {
         sImMap.put(Constants.PROPERTY_X_AIM, Im.PROTOCOL_AIM);
         sImMap.put(Constants.PROPERTY_X_MSN, Im.PROTOCOL_MSN);
@@ -90,7 +90,7 @@ public class ContactStruct {
         
         @Override
         public boolean equals(Object obj) {
-            if (obj instanceof PhoneData) {
+            if (!(obj instanceof PhoneData)) {
                 return false;
             }
             PhoneData phoneData = (PhoneData)obj;
@@ -125,7 +125,7 @@ public class ContactStruct {
         
         @Override
         public boolean equals(Object obj) {
-            if (obj instanceof EmailData) {
+            if (!(obj instanceof EmailData)) {
                 return false;
             }
             EmailData emailData = (EmailData)obj;
@@ -202,7 +202,7 @@ public class ContactStruct {
         
         @Override
         public boolean equals(Object obj) {
-            if (obj instanceof PostalData) {
+            if (!(obj instanceof PostalData)) {
                 return false;
             }
             PostalData postalData = (PostalData)obj;
@@ -256,35 +256,44 @@ public class ContactStruct {
      */
     static public class OrganizationData {
         public final int type;
-        public final String companyName;
-        // can be changed in some VCard format. 
-        public String positionName;
+        // non-final is Intended: we may change the values since this info is separated into
+        // two parts in vCard: "ORG" + "TITLE".
+        public String companyName;
+        public String departmentName;
+        public String titleName;
         // isPrimary is changable only when there's no appropriate one existing in
         // the original VCard.
         public boolean isPrimary;
-        public OrganizationData(int type, String companyName, String positionName,
+        public OrganizationData(int type,
+                String companyName,
+                String departmentName,
+                String titleName,
                 boolean isPrimary) {
             this.type = type;
             this.companyName = companyName;
-            this.positionName = positionName;
+            this.departmentName = departmentName;
+            this.titleName = titleName;
             this.isPrimary = isPrimary;
         }
         
         @Override
         public boolean equals(Object obj) {
-            if (obj instanceof OrganizationData) {
+            if (!(obj instanceof OrganizationData)) {
                 return false;
             }
             OrganizationData organization = (OrganizationData)obj;
-            return (type == organization.type && companyName.equals(organization.companyName) &&
-                    positionName.equals(organization.positionName) &&
+            return (type == organization.type &&
+                    TextUtils.equals(companyName, organization.companyName) &&
+                    TextUtils.equals(departmentName, organization.departmentName) &&
+                    TextUtils.equals(titleName, organization.titleName) &&
                     isPrimary == organization.isPrimary);
         }
-        
+
         @Override
         public String toString() {
-            return String.format("type: %d, company: %s, position: %s, isPrimary: %s",
-                    type, companyName, positionName, isPrimary);
+            return String.format(
+                    "type: %d, company: %s, department: %s, title: %s, isPrimary: %s",
+                    type, companyName, departmentName, titleName, isPrimary);
         }
     }
     
@@ -304,7 +313,7 @@ public class ContactStruct {
         
         @Override
         public boolean equals(Object obj) {
-            if (obj instanceof ImData) {
+            if (!(obj instanceof ImData)) {
                 return false;
             }
             ImData imData = (ImData)obj;
@@ -327,11 +336,32 @@ public class ContactStruct {
         public final int type;
         public final String formatName;  // used when type is not defined in ContactsContract.
         public final byte[] photoBytes;
+        public final boolean isPrimary;
 
-        public PhotoData(int type, String formatName, byte[] photoBytes) {
+        public PhotoData(int type, String formatName, byte[] photoBytes, boolean isPrimary) {
             this.type = type;
             this.formatName = formatName;
             this.photoBytes = photoBytes;
+            this.isPrimary = isPrimary;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (!(obj instanceof PhotoData)) {
+                return false;
+            }
+            PhotoData photoData = (PhotoData)obj;
+            return (type == photoData.type &&
+                    (formatName == null ? (photoData.formatName == null) :
+                            formatName.equals(photoData.formatName)) &&
+                    (Arrays.equals(photoBytes, photoData.photoBytes)) &&
+                    (isPrimary == photoData.isPrimary));
+        }
+
+        @Override
+        public String toString() {
+            return String.format("type: %d, format: %s: size: %d, isPrimary: %s",
+                    type, formatName, photoBytes.length, isPrimary);
         }
     }
     
@@ -421,15 +451,6 @@ public class ContactStruct {
     private final int mVCardType;
     private final Account mAccount;
 
-    // Each Column of four properties has ISPRIMARY field
-    // (See android.provider.Contacts)
-    // If false even after the parsing loop, we choose the first entry as a "primary"
-    // entry.
-    private boolean mPrefIsSet_Address;
-    private boolean mPrefIsSet_Phone;
-    private boolean mPrefIsSet_Email;
-    private boolean mPrefIsSet_Organization;
-
     public ContactStruct() {
         this(VCardConfig.VCARD_TYPE_V21_GENERIC);
     }
@@ -454,12 +475,14 @@ public class ContactStruct {
             String phoneticGivenName,
             String pheneticFamilyName,
             String phoneticMiddleName,
+            List<String> nicknameList,
             List<byte[]> photoBytesList,
-            List<String> notes,
+            List<String> noteList,
             List<PhoneData> phoneList, 
             List<EmailData> emailList,
             List<PostalData> postalList,
             List<OrganizationData> organizationList,
+            List<ImData> imList,
             List<PhotoData> photoList,
             List<String> websiteList) {
         this(VCardConfig.VCARD_TYPE_DEFAULT);
@@ -470,159 +493,16 @@ public class ContactStruct {
         mPhoneticGivenName = givenName;
         mPhoneticFamilyName = familyName;
         mPhoneticMiddleName = middleName;
+        mNickNameList = nicknameList;
+        mNoteList = noteList;
         mEmailList = emailList;
         mPostalList = postalList;
         mOrganizationList = organizationList;
+        mImList = imList;
         mPhotoList = photoList;
         mWebsiteList = websiteList;
     }
 
-    // All getter methods should be used carefully, since they may change
-    // in the future as of 2009-09-24, on which I cannot be sure this structure
-    // is completely consolidated.
-    // When we are sure we will no longer change them, we'll be happy to
-    // make it complete public (withouth @hide tag)
-    //
-    // Also note that these getter methods should be used only after
-    // all properties being pushed into this object. If not, incorrect
-    // value will "be stored in the local cache and" be returned to you.
-    
-    /**
-     * @hide
-     */
-    public String getFamilyName() {
-        return mFamilyName;
-    }
-
-    /**
-     * @hide
-     */
-    public String getGivenName() {
-        return mGivenName;
-    }
-
-    /**
-     * @hide
-     */
-    public String getMiddleName() {
-        return mMiddleName;
-    }
-
-    /**
-     * @hide
-     */
-    public String getPrefix() {
-        return mPrefix;
-    }
-
-    /**
-     * @hide
-     */
-    public String getSuffix() {
-        return mSuffix;
-    }
-
-    /**
-     * @hide
-     */
-    public String getFullName() {
-        return mFullName;
-    }
-
-    /**
-     * @hide
-     */
-    public String getPhoneticFamilyName() {
-        return mPhoneticFamilyName;
-    }
-
-    /**
-     * @hide
-     */
-    public String getPhoneticGivenName() {
-        return mPhoneticGivenName;
-    }
-
-    /**
-     * @hide
-     */
-    public String getPhoneticMiddleName() {
-        return mPhoneticMiddleName;
-    }
-
-    /**
-     * @hide
-     */
-    public String getPhoneticFullName() {
-        return mPhoneticFullName;
-    }
-
-    /**
-     * @hide
-     */
-    public final List<String> getNickNameList() {
-        return mNickNameList;
-    }
-
-    /**
-     * @hide
-     */
-    public String getDisplayName() {
-        if (mDisplayName == null) {
-            constructDisplayName();
-        }
-        return mDisplayName;
-    }
-
-    /**
-     * @hide
-     */
-    public String getBirthday() {
-        return mBirthday;
-    }
-
-    /**
-     * @hide
-     */
-    public final List<PhotoData> getPhotoList() {
-        return mPhotoList;
-    }
-
-    /**
-     * @hide
-     */
-    public final List<String> getNotes() {
-        return mNoteList;
-    }
-    
-    /**
-     * @hide
-     */
-    public final List<PhoneData> getPhoneList() {
-        return mPhoneList;
-    }
-    
-    /**
-     * @hide
-     */
-    public final List<EmailData> getEmailList() {
-        return mEmailList;
-    }
-    
-    /**
-     * @hide
-     */
-    public final List<PostalData> getPostalList() {
-        return mPostalList;
-    }
-    
-    /**
-     * @hide
-     */
-    public final List<OrganizationData> getOrganizationList() {
-        return mOrganizationList;
-    }
-    
     /**
      * Add a phone info to phoneList.
      * @param data phone number
@@ -643,10 +523,24 @@ public class ContactStruct {
             }
         }
 
-        PhoneData phoneData = new PhoneData(type,
-                PhoneNumberUtils.formatNumber(builder.toString()),
-                label, isPrimary);
-
+        final String formattedPhoneNumber;
+        {
+            final String rawPhoneNumber = builder.toString();
+            if (VCardConfig.isJapaneseDevice(mVCardType)) {
+                // As of 2009-10-07, there's no formatNumber() which accepts
+                // the second argument and returns String directly. 
+                final SpannableStringBuilder tmpBuilder =
+                    new SpannableStringBuilder(rawPhoneNumber);
+                PhoneNumberUtils.formatNumber(tmpBuilder, PhoneNumberUtils.FORMAT_JAPAN);
+                formattedPhoneNumber = tmpBuilder.toString();
+            } else {
+                // There's no information available on vCard side. Depend on the default
+                // behavior, which may cause problem in the future when the additional format
+                // rule is supported (e.g. PhoneNumberUtils.FORMAT_KLINGON)
+                formattedPhoneNumber = PhoneNumberUtils.formatNumber(rawPhoneNumber);
+            }
+        }
+        PhoneData phoneData = new PhoneData(type, formattedPhoneNumber, label, isPrimary);
         mPhoneList.add(phoneData);
     }
 
@@ -666,19 +560,116 @@ public class ContactStruct {
     
     private void addPostal(int type, List<String> propValueList, String label, boolean isPrimary){
         if (mPostalList == null) {
-            mPostalList = new ArrayList<PostalData>();
+            mPostalList = new ArrayList<PostalData>(0);
         }
         mPostalList.add(new PostalData(type, propValueList, label, isPrimary));
     }
     
-    private void addOrganization(int type, final String companyName,
-            final String positionName, boolean isPrimary) {
+    /**
+     * Should be called via {@link #handleOrgValue(int, List, boolean)} or
+     * {@link #handleTitleValue(String)}.
+     */
+    private void addNewOrganization(int type, final String companyName,
+            final String departmentName,
+            final String titleName, boolean isPrimary) {
         if (mOrganizationList == null) {
             mOrganizationList = new ArrayList<OrganizationData>();
         }
-        mOrganizationList.add(new OrganizationData(type, companyName, positionName, isPrimary));
+        mOrganizationList.add(new OrganizationData(type, companyName,
+                departmentName, titleName, isPrimary));
     }
+
+    private static final List<String> sEmptyList = new ArrayList<String>(0);
     
+    /**
+     * Set "ORG" related values to the appropriate data. If there's more than one
+     * OrganizationData objects, this input data are attached to the last one which does not
+     * have valid values (not including empty but only null). If there's no
+     * OrganizationData object, a new OrganizationData is created, whose title is set to null.
+     */
+    private void handleOrgValue(final int type, List<String> orgList, boolean isPrimary) {
+        if (orgList == null) {
+            orgList = sEmptyList;
+        }
+        final String companyName;
+        final String departmentName;
+        final int size = orgList.size();
+        switch (size) {
+            case 0: {
+                companyName = "";
+                departmentName = null;
+                break;
+            }
+            case 1: {
+                companyName = orgList.get(0);
+                departmentName = null;
+                break;
+            }
+            default: {  // More than 1.
+                companyName = orgList.get(0);
+                // We're not sure which is the correct string for department.
+                // In order to keep all the data, concatinate the rest of elements.
+                StringBuilder builder = new StringBuilder();
+                for (int i = 1; i < size; i++) {
+                    if (i > 1) {
+                        builder.append(' ');
+                    }
+                    builder.append(orgList.get(i));
+                }
+                departmentName = builder.toString();
+            }
+        }
+        if (mOrganizationList == null) {
+            // Create new first organization entry, with "null" title which may be
+            // added via handleTitleValue().
+            addNewOrganization(type, companyName, departmentName, null, isPrimary);
+            return;
+        }
+        for (OrganizationData organizationData : mOrganizationList) {
+            // Not use TextUtils.isEmpty() since ORG was set but the elements might be empty.
+            // e.g. "ORG;PREF:;" -> Both companyName and departmentName become empty but not null.
+            if (organizationData.companyName == null &&
+                    organizationData.departmentName == null) {
+                // Probably the "TITLE" property comes before the "ORG" property via
+                // handleTitleLine().
+                organizationData.companyName = companyName;
+                organizationData.departmentName = departmentName;
+                organizationData.isPrimary = isPrimary;
+                return;
+            }
+        }
+        // No OrganizatioData is available. Create another one, with "null" title, which may be
+        // added via handleTitleValue().
+        addNewOrganization(type, companyName, departmentName, null, isPrimary);
+    }
+
+    private final static int DEFAULT_ORGANIZATION_TYPE = Organization.TYPE_WORK;
+
+    /**
+     * Set "title" value to the appropriate data. If there's more than one
+     * OrganizationData objects, this input is attached to the last one which does not
+     * have valid title value (not including empty but only null). If there's no
+     * OrganizationData object, a new OrganizationData is created, whose company name is
+     * set to null.
+     */
+    private void handleTitleValue(final String title) {
+        if (mOrganizationList == null) {
+            // Create new first organization entry, with "null" other info, which may be
+            // added via handleOrgValue().
+            addNewOrganization(DEFAULT_ORGANIZATION_TYPE, null, null, title, false);
+            return;
+        }
+        for (OrganizationData organizationData : mOrganizationList) {
+            if (organizationData.titleName == null) {
+                organizationData.titleName = title;
+                return;
+            }
+        }
+        // No Organization is available. Create another one, with "null" other info, which may be
+        // added via handleOrgValue().
+        addNewOrganization(DEFAULT_ORGANIZATION_TYPE, null, null, title, false);
+    }
+
     private void addIm(int type, String data, String label, boolean isPrimary) {
         if (mImList == null) {
             mImList = new ArrayList<ImData>();
@@ -693,43 +684,14 @@ public class ContactStruct {
         mNoteList.add(note);
     }
     
-    private void addPhotoBytes(String formatName, byte[] photoBytes) {
+    private void addPhotoBytes(String formatName, byte[] photoBytes, boolean isPrimary) {
         if (mPhotoList == null) {
             mPhotoList = new ArrayList<PhotoData>(1);
         }
-        final PhotoData photoData = new PhotoData(0, null, photoBytes);
+        final PhotoData photoData = new PhotoData(0, null, photoBytes, isPrimary);
         mPhotoList.add(photoData);
     }
 
-    /**
-     * Set "position" value to the appropriate data. If there's more than one
-     * OrganizationData objects, the value is set to the last one. If there's no
-     * OrganizationData object, a new OrganizationData is created, whose company name is
-     * empty.  
-     * 
-     * TODO: incomplete logic. fix this:
-     * 
-     * e.g. This assumes ORG comes earlier, but TITLE may come earlier like this, though we do not
-     * know how to handle it in general cases...
-     * ----
-     * TITLE:Software Engineer
-     * ORG:Google
-     * ----
-     */
-    private void setPosition(String positionValue) {
-        if (mOrganizationList == null) {
-            mOrganizationList = new ArrayList<OrganizationData>();
-        }
-        int size = mOrganizationList.size();
-        if (size == 0) {
-            addOrganization(ContactsContract.CommonDataKinds.Organization.TYPE_OTHER,
-                    "", null, false);
-            size = 1;
-        }
-        OrganizationData lastData = mOrganizationList.get(size - 1);
-        lastData.positionName = positionValue;
-    }
- 
     @SuppressWarnings("fallthrough")
     private void handleNProperty(List<String> elems) {
         // Family, Given, Middle, Prefix, Suffix. (1 - 5)
@@ -813,7 +775,14 @@ public class ContactStruct {
         } else if (propName.equals("SOUND")) {
             Collection<String> typeCollection = paramMap.get(Constants.ATTR_TYPE);
             if (typeCollection != null && typeCollection.contains(Constants.ATTR_TYPE_X_IRMC_N)) {
-                handlePhoneticNameFromSound(propValueList);
+                // As of 2009-10-08, Parser side does not split a property value into separated
+                // values using ';' (in other words, propValueList.size() == 1),
+                // which is correct behavior from the view of vCard 2.1.
+                // But we want it to be separated, so do the separation here.
+                final List<String> phoneticNameList =
+                    VCardUtils.constructListFromValue(propValue,    
+                            VCardConfig.isV30(mVCardType));
+                handlePhoneticNameFromSound(phoneticNameList);
             } else {
                 // Ignore this field since Android cannot understand what it is.
             }
@@ -836,9 +805,7 @@ public class ContactStruct {
             if (typeCollection != null) {
                 for (String typeString : typeCollection) {
                     typeString = typeString.toUpperCase();
-                    if (typeString.equals(Constants.ATTR_TYPE_PREF) && !mPrefIsSet_Address) {
-                        // Only first "PREF" is considered.
-                        mPrefIsSet_Address = true;
+                    if (typeString.equals(Constants.ATTR_TYPE_PREF)) {
                         isPrimary = true;
                     } else if (typeString.equals(Constants.ATTR_TYPE_HOME)) {
                         type = StructuredPostal.TYPE_HOME;
@@ -879,9 +846,7 @@ public class ContactStruct {
             if (typeCollection != null) {
                 for (String typeString : typeCollection) {
                     typeString = typeString.toUpperCase();
-                    if (typeString.equals(Constants.ATTR_TYPE_PREF) && !mPrefIsSet_Email) {
-                        // Only first "PREF" is considered.
-                        mPrefIsSet_Email = true;
+                    if (typeString.equals(Constants.ATTR_TYPE_PREF)) {
                         isPrimary = true;
                     } else if (typeString.equals(Constants.ATTR_TYPE_HOME)) {
                         type = Email.TYPE_HOME;
@@ -907,48 +872,44 @@ public class ContactStruct {
             addEmail(type, propValue, label, isPrimary);
         } else if (propName.equals("ORG")) {
             // vCard specification does not specify other types.
-            int type = Organization.TYPE_WORK;
+            final int type = Organization.TYPE_WORK;
             boolean isPrimary = false;
-            
             Collection<String> typeCollection = paramMap.get(Constants.ATTR_TYPE);
             if (typeCollection != null) {
                 for (String typeString : typeCollection) {
-                    if (typeString.equals(Constants.ATTR_TYPE_PREF) && !mPrefIsSet_Organization) {
-                        // vCard specification officially does not have PREF in ORG.
-                        // This is just for safety.
-                        mPrefIsSet_Organization = true;
+                    if (typeString.equals(Constants.ATTR_TYPE_PREF)) {
                         isPrimary = true;
                     }
                 }
             }
-
-            StringBuilder builder = new StringBuilder();
-            for (Iterator<String> iter = propValueList.iterator(); iter.hasNext();) {
-                builder.append(iter.next());
-                if (iter.hasNext()) {
-                    builder.append(' ');
-                }
-            }
-            addOrganization(type, builder.toString(), "", isPrimary);
+            handleOrgValue(type, propValueList, isPrimary);
         } else if (propName.equals("TITLE")) {
-            setPosition(propValue);
+            handleTitleValue(propValue);
         } else if (propName.equals("ROLE")) {
-            setPosition(propValue);
+            // This conflicts with TITLE. Ignore for now...
+            // handleTitleValue(propValue);
         } else if (propName.equals("PHOTO") || propName.equals("LOGO")) {
-            String formatName = null;
-            Collection<String> typeCollection = paramMap.get("TYPE");
-            if (typeCollection != null) {
-                formatName = typeCollection.iterator().next();
-            }
             Collection<String> paramMapValue = paramMap.get("VALUE");
             if (paramMapValue != null && paramMapValue.contains("URL")) {
                 // Currently we do not have appropriate example for testing this case.
             } else {
-                addPhotoBytes(formatName, propBytes);
+                final Collection<String> typeCollection = paramMap.get("TYPE");
+                String formatName = null;
+                boolean isPrimary = false;
+                if (typeCollection != null) {
+                    for (String typeValue : typeCollection) {
+                        if (Constants.ATTR_TYPE_PREF.equals(typeValue)) {
+                            isPrimary = true;
+                        } else if (formatName == null){
+                            formatName = typeValue;
+                        }
+                    }
+                }
+                addPhotoBytes(formatName, propBytes, isPrimary);
             }
         } else if (propName.equals("TEL")) {
-            Collection<String> typeCollection = paramMap.get(Constants.ATTR_TYPE);
-            Object typeObject = VCardUtils.getPhoneTypeFromStrings(typeCollection);
+            final Collection<String> typeCollection = paramMap.get(Constants.ATTR_TYPE);
+            final Object typeObject = VCardUtils.getPhoneTypeFromStrings(typeCollection);
             final int type;
             final String label;
             if (typeObject instanceof Integer) {
@@ -960,9 +921,7 @@ public class ContactStruct {
             }
             
             final boolean isPrimary;
-            if (!mPrefIsSet_Phone && typeCollection != null &&
-                    typeCollection.contains(Constants.ATTR_TYPE_PREF)) {
-                mPrefIsSet_Phone = true;
+            if (typeCollection != null && typeCollection.contains(Constants.ATTR_TYPE_PREF)) {
                 isPrimary = true;
             } else {
                 isPrimary = false;
@@ -975,9 +934,7 @@ public class ContactStruct {
             int type = Phone.TYPE_OTHER;
             final String label = null;
             final boolean isPrimary;
-            if (!mPrefIsSet_Phone && typeCollection != null &&
-                    typeCollection.contains(Constants.ATTR_TYPE_PREF)) {
-                mPrefIsSet_Phone = true;
+            if (typeCollection != null && typeCollection.contains(Constants.ATTR_TYPE_PREF)) {
                 isPrimary = true;
             } else {
                 isPrimary = false;
@@ -1048,7 +1005,10 @@ public class ContactStruct {
      * Construct the display name. The constructed data must not be null.
      */
     private void constructDisplayName() {
-        if (!(TextUtils.isEmpty(mFamilyName) && TextUtils.isEmpty(mGivenName))) {
+        // FullName (created via "FN" or "NAME" field) is prefered.
+        if (!TextUtils.isEmpty(mFullName)) {
+            mDisplayName = mFullName;
+        } else if (!(TextUtils.isEmpty(mFamilyName) && TextUtils.isEmpty(mGivenName))) {
             StringBuilder builder = new StringBuilder();
             List<String> nameList;
             switch (VCardConfig.getNameOrderType(mVCardType)) {
@@ -1079,8 +1039,6 @@ public class ContactStruct {
                 }
             }
             mDisplayName = builder.toString();
-        } else if (!TextUtils.isEmpty(mFullName)) {
-            mDisplayName = mFullName;
         } else if (!(TextUtils.isEmpty(mPhoneticFamilyName) &&
                 TextUtils.isEmpty(mPhoneticGivenName))) {
             mDisplayName = VCardUtils.constructNameFromElements(mVCardType,
@@ -1103,24 +1061,9 @@ public class ContactStruct {
      */
     public void consolidateFields() {
         constructDisplayName();
-        
+
         if (mPhoneticFullName != null) {
             mPhoneticFullName = mPhoneticFullName.trim();
-        }
-
-        // If there is no "PREF", we choose the first entries as primary.
-        if (!mPrefIsSet_Phone && mPhoneList != null && mPhoneList.size() > 0) {
-            mPhoneList.get(0).isPrimary = true;
-        }
-
-        if (!mPrefIsSet_Address && mPostalList != null && mPostalList.size() > 0) {
-            mPostalList.get(0).isPrimary = true;
-        }
-        if (!mPrefIsSet_Email && mEmailList != null && mEmailList.size() > 0) {
-            mEmailList.get(0).isPrimary = true;
-        }
-        if (!mPrefIsSet_Organization && mOrganizationList != null && mOrganizationList.size() > 0) {
-            mOrganizationList.get(0).isPrimary = true;
         }
     }
     
@@ -1181,22 +1124,16 @@ public class ContactStruct {
         }
 
         if (mNickNameList != null && mNickNameList.size() > 0) {
-            boolean first = true;
             for (String nickName : mNickNameList) {
                 builder = ContentProviderOperation.newInsert(Data.CONTENT_URI);
                 builder.withValueBackReference(Nickname.RAW_CONTACT_ID, 0);
                 builder.withValue(Data.MIMETYPE, Nickname.CONTENT_ITEM_TYPE);
-
                 builder.withValue(Nickname.TYPE, Nickname.TYPE_DEFAULT);
                 builder.withValue(Nickname.NAME, nickName);
-                if (first) {
-                    builder.withValue(Data.IS_PRIMARY, 1);
-                    first = false;
-                }
                 operationList.add(builder.build());
             }
         }
-        
+
         if (mPhoneList != null) {
             for (PhoneData phoneData : mPhoneList) {
                 builder = ContentProviderOperation.newInsert(Data.CONTENT_URI);
@@ -1209,30 +1146,34 @@ public class ContactStruct {
                 }
                 builder.withValue(Phone.NUMBER, phoneData.data);
                 if (phoneData.isPrimary) {
-                    builder.withValue(Data.IS_PRIMARY, 1);
+                    builder.withValue(Phone.IS_PRIMARY, 1);
                 }
                 operationList.add(builder.build());
             }
         }
-        
+
         if (mOrganizationList != null) {
-            boolean first = true;
             for (OrganizationData organizationData : mOrganizationList) {
                 builder = ContentProviderOperation.newInsert(Data.CONTENT_URI);
                 builder.withValueBackReference(Organization.RAW_CONTACT_ID, 0);
                 builder.withValue(Data.MIMETYPE, Organization.CONTENT_ITEM_TYPE);
-
-                // Currently, we do not use TYPE_CUSTOM.
                 builder.withValue(Organization.TYPE, organizationData.type);
-                builder.withValue(Organization.COMPANY, organizationData.companyName);
-                builder.withValue(Organization.TITLE, organizationData.positionName);
-                if (first) {
-                    builder.withValue(Data.IS_PRIMARY, 1);
+                if (organizationData.companyName != null) {
+                    builder.withValue(Organization.COMPANY, organizationData.companyName);
+                }
+                if (organizationData.departmentName != null) {
+                    builder.withValue(Organization.DEPARTMENT, organizationData.departmentName);
+                }
+                if (organizationData.titleName != null) {
+                    builder.withValue(Organization.TITLE, organizationData.titleName);
+                }
+                if (organizationData.isPrimary) {
+                    builder.withValue(Organization.IS_PRIMARY, 1);
                 }
                 operationList.add(builder.build());
             }
         }
-        
+
         if (mEmailList != null) {
             for (EmailData emailData : mEmailList) {
                 builder = ContentProviderOperation.newInsert(Data.CONTENT_URI);
@@ -1265,7 +1206,6 @@ public class ContactStruct {
                 builder = ContentProviderOperation.newInsert(Data.CONTENT_URI);
                 builder.withValueBackReference(Im.RAW_CONTACT_ID, 0);
                 builder.withValue(Data.MIMETYPE, Im.CONTENT_ITEM_TYPE);
-                
                 builder.withValue(Im.TYPE, imData.type);
                 if (imData.type == Im.TYPE_CUSTOM) {
                     builder.withValue(Im.LABEL, imData.label);
@@ -1282,22 +1222,19 @@ public class ContactStruct {
                 builder = ContentProviderOperation.newInsert(Data.CONTENT_URI);
                 builder.withValueBackReference(Note.RAW_CONTACT_ID, 0);
                 builder.withValue(Data.MIMETYPE, Note.CONTENT_ITEM_TYPE);
-
                 builder.withValue(Note.NOTE, note);
                 operationList.add(builder.build());
             }
         }
-        
+
         if (mPhotoList != null) {
-            boolean first = true;
             for (PhotoData photoData : mPhotoList) {
                 builder = ContentProviderOperation.newInsert(Data.CONTENT_URI);
                 builder.withValueBackReference(Photo.RAW_CONTACT_ID, 0);
                 builder.withValue(Data.MIMETYPE, Photo.CONTENT_ITEM_TYPE);
                 builder.withValue(Photo.PHOTO, photoData.photoBytes);
-                if (first) {
-                    builder.withValue(Data.IS_PRIMARY, 1);
-                    first = false;
+                if (photoData.isPrimary) {
+                    builder.withValue(Photo.IS_PRIMARY, 1);
                 }
                 operationList.add(builder.build());
             }
@@ -1310,12 +1247,12 @@ public class ContactStruct {
                 builder.withValue(Data.MIMETYPE, Website.CONTENT_ITEM_TYPE);
                 builder.withValue(Website.URL, website);
                 // There's no information about the type of URL in vCard.
-                // We use TYPE_HOME for safety. 
-                builder.withValue(Website.TYPE, Website.TYPE_HOME);
+                // We use TYPE_HOMEPAGE for safety. 
+                builder.withValue(Website.TYPE, Website.TYPE_HOMEPAGE);
                 operationList.add(builder.build());
             }
         }
-        
+
         if (!TextUtils.isEmpty(mBirthday)) {
             builder = ContentProviderOperation.newInsert(Data.CONTENT_URI);
             builder.withValueBackReference(Event.RAW_CONTACT_ID, 0);
@@ -1363,5 +1300,100 @@ public class ContactStruct {
         } else {
             return "";
         }
+    }
+
+    // All getter methods should be used carefully, since they may change
+    // in the future as of 2009-10-05, on which I cannot be sure this structure
+    // is completely consolidated.
+    //
+    // Also note that these getter methods should be used only after
+    // all properties being pushed into this object. If not, incorrect
+    // value will "be stored in the local cache and" be returned to you.
+
+    public String getFamilyName() {
+        return mFamilyName;
+    }
+
+    public String getGivenName() {
+        return mGivenName;
+    }
+
+    public String getMiddleName() {
+        return mMiddleName;
+    }
+
+    public String getPrefix() {
+        return mPrefix;
+    }
+
+    public String getSuffix() {
+        return mSuffix;
+    }
+
+    public String getFullName() {
+        return mFullName;
+    }
+
+    public String getPhoneticFamilyName() {
+        return mPhoneticFamilyName;
+    }
+
+    public String getPhoneticGivenName() {
+        return mPhoneticGivenName;
+    }
+
+    public String getPhoneticMiddleName() {
+        return mPhoneticMiddleName;
+    }
+
+    public String getPhoneticFullName() {
+        return mPhoneticFullName;
+    }
+
+    public final List<String> getNickNameList() {
+        return mNickNameList;
+    }
+
+    public String getBirthday() {
+        return mBirthday;
+    }
+
+    public final List<String> getNotes() {
+        return mNoteList;
+    }
+
+    public final List<PhoneData> getPhoneList() {
+        return mPhoneList;
+    }
+
+    public final List<EmailData> getEmailList() {
+        return mEmailList;
+    }
+
+    public final List<PostalData> getPostalList() {
+        return mPostalList;
+    }
+
+    public final List<OrganizationData> getOrganizationList() {
+        return mOrganizationList;
+    }
+
+    public final List<ImData> getImList() {
+        return mImList;
+    }
+
+    public final List<PhotoData> getPhotoList() {
+        return mPhotoList;
+    }
+
+    public final List<String> getWebsiteList() {
+        return mWebsiteList;
+    }
+
+    public String getDisplayName() {
+        if (mDisplayName == null) {
+            constructDisplayName();
+        }
+        return mDisplayName;
     }
 }

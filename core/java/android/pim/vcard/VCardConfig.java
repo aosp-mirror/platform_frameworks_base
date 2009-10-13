@@ -41,8 +41,8 @@ public class VCardConfig {
     // TODO: make the other codes use this flag
     public static final boolean IGNORE_CASE_EXCEPT_VALUE = true;
     
-    private static final int FLAG_V21 = 0;
-    private static final int FLAG_V30 = 1;
+    public static final int FLAG_V21 = 0;
+    public static final int FLAG_V30 = 1;
 
     // 0x2 is reserved for the future use ...
 
@@ -105,8 +105,16 @@ public class VCardConfig {
      * behavior around this flag in the future. Do not use this flag without any reason.
      */
     public static final int FLAG_USE_QP_TO_PRIMARY_PROPERTIES = 0x10000000;
-    
-    // VCard types
+
+    // Note: if you really want to add additional flag(s) incompatible with the main source tree,
+    // please use flags from 0x0001000 to 0x00080000.
+    //
+    // If we notice we cannot manage flags in just one integer, we'll change this interface and
+    // create/use a complete class, not just an integer, with similar API (but imcompatible).
+    //
+    // Again, please be aware that this API is intentionally hidden ~= unstable!
+
+    //// The followings are VCard types available from importer/exporter. ////
 
     /**
      * General vCard format with the version 2.1. Uses UTF-8 for the charset.
