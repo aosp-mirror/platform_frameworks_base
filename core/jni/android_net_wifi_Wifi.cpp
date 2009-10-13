@@ -20,6 +20,7 @@
 #include <utils/misc.h>
 #include <android_runtime/AndroidRuntime.h>
 #include <utils/Log.h>
+#include <utils/String16.h>
 
 #include "wifi.h"
 
@@ -92,7 +93,8 @@ static jstring doStringCommand(JNIEnv *env, const char *cmd)
     if (doCommand(cmd, reply, sizeof(reply)) != 0) {
         return env->NewStringUTF(NULL);
     } else {
-        return env->NewStringUTF(reply);
+        String16 str((char *)reply);
+        return env->NewString((const jchar *)str.string(), str.size());
     }
 }
 
