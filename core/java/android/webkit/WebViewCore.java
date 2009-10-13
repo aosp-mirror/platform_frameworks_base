@@ -2215,6 +2215,11 @@ final class WebViewCore {
         return view;
     }
     
+    private void updateSurface(ViewManager.ChildView childView, int x, int y,
+            int width, int height) {
+        childView.attachView(x, y, width, height);
+    }
+
     private void destroySurface(ViewManager.ChildView childView) {
         childView.removeView();
     }
