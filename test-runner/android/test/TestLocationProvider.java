@@ -22,6 +22,7 @@ import android.location.ILocationManager;
 import android.location.ILocationProvider;
 import android.location.Location;
 import android.location.LocationProvider;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.SystemClock;
@@ -156,7 +157,7 @@ public class TestLocationProvider extends ILocationProvider.Stub {
     public void setMinTime(long minTime) {
     }
 
-    public void updateNetworkState(int state) {
+    public void updateNetworkState(int state, NetworkInfo info) {
     }
 
     public void updateLocation(Location location) {

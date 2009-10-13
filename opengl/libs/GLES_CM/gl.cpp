@@ -31,6 +31,9 @@
 
 using namespace android;
 
+// set this to 1 for crude GL debugging
+#define CHECK_FOR_GL_ERRORS     0
+
 // ----------------------------------------------------------------------------
 // extensions for the framework
 // ----------------------------------------------------------------------------
@@ -71,7 +74,7 @@ void glVertexPointerBounds(GLint size, GLenum type,
 #undef CALL_GL_API
 #undef CALL_GL_API_RETURN
 
-#if USE_FAST_TLS_KEY
+#if USE_FAST_TLS_KEY && !CHECK_FOR_GL_ERRORS
 
     #define API_ENTRY(_api) __attribute__((naked)) _api
 
@@ -95,12 +98,27 @@ void glVertexPointerBounds(GLint size, GLenum type,
 
 #else
 
+    #if CHECK_FOR_GL_ERRORS
+    
+        #define CHECK_GL_ERRORS(_api) \
+            do { GLint err = glGetError(); \
+                LOGE_IF(err != GL_NO_ERROR, "%s failed (0x%04X)", #_api, err); \
+            } while(false);
+
+    #else
+
+        #define CHECK_GL_ERRORS(_api) do { } while(false);
+
+    #endif
+
+
     #define API_ENTRY(_api) _api
 
     #define CALL_GL_API(_api, ...)                                      \
         gl_hooks_t::gl_t const * const _c = &getGlThreadSpecific()->gl; \
-        _c->_api(__VA_ARGS__)
-    
+        _c->_api(__VA_ARGS__);                                          \
+        CHECK_GL_ERRORS(_api)
+
     #define CALL_GL_API_RETURN(_api, ...)                               \
         gl_hooks_t::gl_t const * const _c = &getGlThreadSpecific()->gl; \
         return _c->_api(__VA_ARGS__)
