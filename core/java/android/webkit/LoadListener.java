@@ -408,8 +408,7 @@ class LoadListener extends Handler implements EventHandler {
                 mStatusCode == HTTP_MOVED_PERMANENTLY ||
                 mStatusCode == HTTP_TEMPORARY_REDIRECT) && 
                 mNativeLoader != 0) {
-            if (!mFromCache && mRequestHandle != null
-                    && !mRequestHandle.getMethod().equals("POST")) {
+            if (!mFromCache && mRequestHandle != null) {
                 mCacheResult = CacheManager.createCacheFile(mUrl, mStatusCode,
                         headers, mMimeType, false);
             }
