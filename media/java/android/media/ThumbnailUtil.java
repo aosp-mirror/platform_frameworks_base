@@ -459,6 +459,7 @@ public class ThumbnailUtil {
         Cursor c = cr.query(thumbUri, THUMB_PROJECTION,
               Thumbnails.IMAGE_ID + "=?",
               new String[]{String.valueOf(origId)}, null);
+        if (c == null) return null;
         try {
             if (c.moveToNext()) {
                 return ContentUris.withAppendedId(thumbUri, c.getLong(0));
@@ -487,6 +488,7 @@ public class ThumbnailUtil {
         if (thumb == null) return false;
         try {
             Uri uri = getImageThumbnailUri(cr, origId, thumb.getWidth(), thumb.getHeight());
+            if (uri == null) return false;
             OutputStream thumbOut = cr.openOutputStream(uri);
             thumb.compress(Bitmap.CompressFormat.JPEG, 85, thumbOut);
             thumbOut.close();
