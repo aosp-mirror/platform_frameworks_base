@@ -63,7 +63,7 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.Map.Entry;
 
-public class VCardTests extends AndroidTestCase {
+public class VCardImportTests extends AndroidTestCase {
     // Push data into int array at first since values like 0x80 are
     // interpreted as int by the compiler and casting all of them is
     // cumbersome...
