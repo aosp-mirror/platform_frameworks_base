@@ -129,7 +129,7 @@ public final class ContactsContract {
      * these columns are private to the sync adapter. Other clients of the API
      * should not attempt to either read or write this column.
      */
-    private interface BaseSyncColumns {
+    protected interface BaseSyncColumns {
 
         /** Generic column for use by sync adapters. */
         public static final String SYNC1 = "sync1";
@@ -145,7 +145,7 @@ public final class ContactsContract {
      * Columns that appear when each row of a table belongs to a specific
      * account, including sync information that an account may need.
      */
-    private interface SyncColumns extends BaseSyncColumns {
+    protected interface SyncColumns extends BaseSyncColumns {
         /**
          * The name of the account instance to which this row belongs, which when paired with
          * {@link #ACCOUNT_TYPE} identifies a specific account.
@@ -181,7 +181,7 @@ public final class ContactsContract {
         public static final String DIRTY = "dirty";
     }
 
-    private interface ContactOptionsColumns {
+    protected interface ContactOptionsColumns {
         /**
          * The number of times a contact has been contacted
          * <P>Type: INTEGER</P>
@@ -214,7 +214,7 @@ public final class ContactsContract {
         public static final String SEND_TO_VOICEMAIL = "send_to_voicemail";
     }
 
-    private interface ContactsColumns {
+    protected interface ContactsColumns {
         /**
          * The display name for the contact.
          * <P>Type: TEXT</P>
@@ -247,7 +247,7 @@ public final class ContactsContract {
         public static final String LOOKUP_KEY = "lookup";
     }
 
-    private interface ContactStatusColumns {
+    protected interface ContactStatusColumns {
         /**
          * Contact presence status. See {@link StatusUpdates} for individual status
          * definitions.
@@ -540,7 +540,7 @@ public final class ContactsContract {
         }
     }
 
-    private interface RawContactsColumns {
+    protected interface RawContactsColumns {
         /**
          * A reference to the {@link android.provider.ContactsContract.Contacts#_ID} that this
          * data belongs to.
@@ -699,7 +699,7 @@ public final class ContactsContract {
         }
     }
 
-    private interface StatusColumns extends Im.CommonPresenceColumns {
+    protected interface StatusColumns extends Im.CommonPresenceColumns {
         /**
          * Contact's latest presence level.
          * <P>Type: INTEGER (one of the values below)</P>
@@ -739,7 +739,7 @@ public final class ContactsContract {
         public static final String STATUS_ICON = "status_icon";
     }
 
-    private interface DataColumns {
+    protected interface DataColumns {
         /**
          * The package name to use when creating {@link Resources} objects for
          * this data row. This value is only designed for use when building user
@@ -826,7 +826,7 @@ public final class ContactsContract {
     /**
      * Combines all columns returned by {@link Data} table queries.
      */
-    private interface DataColumnsWithJoins extends BaseColumns, DataColumns, StatusColumns,
+    protected interface DataColumnsWithJoins extends BaseColumns, DataColumns, StatusColumns,
         RawContactsColumns, ContactsColumns, ContactOptionsColumns, ContactStatusColumns {
 
     }
@@ -938,7 +938,7 @@ public final class ContactsContract {
         public static final String DATA_ID = "data_id";
     }
 
-    private interface PhoneLookupColumns {
+    protected interface PhoneLookupColumns {
         /**
          * The phone number as the user entered it.
          * <P>Type: TEXT</P>
@@ -986,7 +986,7 @@ public final class ContactsContract {
      * Additional data mixed in with {@link StatusColumns} to link
      * back to specific {@link ContactsContract.Data#_ID} entries.
      */
-    private interface PresenceColumns {
+    protected interface PresenceColumns {
 
         /**
          * Reference to the {@link Data#_ID} entry that owns this presence.
@@ -1123,7 +1123,7 @@ public final class ContactsContract {
         /**
          * Columns common across the specific types.
          */
-        private interface CommonColumns extends BaseTypes {
+        protected interface CommonColumns extends BaseTypes {
             /**
              * The data for the contact method.
              * <P>Type: TEXT</P>
@@ -1930,7 +1930,7 @@ public final class ContactsContract {
         }
     }
 
-    private interface GroupsColumns {
+    protected interface GroupsColumns {
         /**
          * The display title of this group.
          * <p>
