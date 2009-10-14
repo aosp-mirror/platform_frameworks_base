@@ -58,6 +58,10 @@ bool MetaData::setInt32(uint32_t key, int32_t value) {
     return setData(key, TYPE_INT32, &value, sizeof(value));
 }
 
+bool MetaData::setInt64(uint32_t key, int64_t value) {
+    return setData(key, TYPE_INT64, &value, sizeof(value));
+}
+
 bool MetaData::setFloat(uint32_t key, float value) {
     return setData(key, TYPE_FLOAT, &value, sizeof(value));
 }
@@ -90,6 +94,21 @@ bool MetaData::findInt32(uint32_t key, int32_t *value) {
     CHECK_EQ(size, sizeof(*value));
 
     *value = *(int32_t *)data;
+
+    return true;
+}
+
+bool MetaData::findInt64(uint32_t key, int64_t *value) {
+    uint32_t type;
+    const void *data;
+    size_t size;
+    if (!findData(key, &type, &data, &size) || type != TYPE_INT64) {
+        return false;
+    }
+
+    CHECK_EQ(size, sizeof(*value));
+
+    *value = *(int64_t *)data;
 
     return true;
 }

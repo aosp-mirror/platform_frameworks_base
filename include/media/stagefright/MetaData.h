@@ -27,23 +27,23 @@
 
 namespace android {
 
+// The following keys map to int32_t data unless indicated otherwise.
 enum {
-    kKeyMIMEType          = 'mime',
+    kKeyMIMEType          = 'mime',  // cstring
     kKeyWidth             = 'widt',
     kKeyHeight            = 'heig',
     kKeyChannelCount      = '#chn',
     kKeySampleRate        = 'srte',
     kKeyBitRate           = 'brte',
-    kKeyESDS              = 'esds',
-    kKeyAVCC              = 'avcc',
-    kKeyTimeUnits         = '#tim',
-    kKeyTimeScale         = 'scal',
+    kKeyESDS              = 'esds',  // raw data
+    kKeyAVCC              = 'avcc',  // raw data
     kKeyWantsNALFragments = 'NALf',
     kKeyIsSyncFrame       = 'sync',
-    kKeyDuration          = 'dura',
+    kKeyTime              = 'time',  // int64_t (usecs)
+    kKeyDuration          = 'dura',  // int64_t (usecs)
     kKeyColorFormat       = 'colf',
-    kKeyPlatformPrivate   = 'priv',
-    kKeyDecoderComponent  = 'decC',
+    kKeyPlatformPrivate   = 'priv',  // pointer
+    kKeyDecoderComponent  = 'decC',  // cstring
     kKeyBufferID          = 'bfID',
     kKeyMaxInputSize      = 'inpS',
 };
@@ -62,6 +62,7 @@ public:
         TYPE_NONE     = 'none',
         TYPE_C_STRING = 'cstr',
         TYPE_INT32    = 'in32',
+        TYPE_INT64    = 'in64',
         TYPE_FLOAT    = 'floa',
         TYPE_POINTER  = 'ptr ',
     };
@@ -71,11 +72,13 @@ public:
 
     bool setCString(uint32_t key, const char *value);
     bool setInt32(uint32_t key, int32_t value);
+    bool setInt64(uint32_t key, int64_t value);
     bool setFloat(uint32_t key, float value);
     bool setPointer(uint32_t key, void *value);
 
     bool findCString(uint32_t key, const char **value);
     bool findInt32(uint32_t key, int32_t *value);
+    bool findInt64(uint32_t key, int64_t *value);
     bool findFloat(uint32_t key, float *value);
     bool findPointer(uint32_t key, void **value);
 
