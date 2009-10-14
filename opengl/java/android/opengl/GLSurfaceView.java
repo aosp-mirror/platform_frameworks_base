@@ -682,7 +682,10 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
         }
         public EGLConfig chooseConfig(EGL10 egl, EGLDisplay display) {
             int[] num_config = new int[1];
-            egl.eglChooseConfig(display, mConfigSpec, null, 0, num_config);
+            if (!egl.eglChooseConfig(display, mConfigSpec, null, 0,
+                    num_config)) {
+                throw new IllegalArgumentException("eglChooseConfig failed");
+            }
 
             int numConfigs = num_config[0];
 
@@ -692,8 +695,10 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
             }
 
             EGLConfig[] configs = new EGLConfig[numConfigs];
-            egl.eglChooseConfig(display, mConfigSpec, configs, numConfigs,
-                    num_config);
+            if (!egl.eglChooseConfig(display, mConfigSpec, configs, numConfigs,
+                    num_config)) {
+                throw new IllegalArgumentException("eglChooseConfig#2 failed");
+            }
             EGLConfig config = chooseConfig(egl, display, configs);
             if (config == null) {
                 throw new IllegalArgumentException("No config chosen");
@@ -818,11 +823,17 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
              */
             mEglDisplay = mEgl.eglGetDisplay(EGL10.EGL_DEFAULT_DISPLAY);
 
+            if (mEglDisplay == EGL10.EGL_NO_DISPLAY) {
+                throw new RuntimeException("eglGetDisplay failed");
+            }
+
             /*
              * We can now initialize EGL for that display
              */
             int[] version = new int[2];
-            mEgl.eglInitialize(mEglDisplay, version);
+            if(!mEgl.eglInitialize(mEglDisplay, version)) {
+                throw new RuntimeException("eglInitialize failed");
+            }
             mEglConfig = mEGLConfigChooser.chooseConfig(mEgl, mEglDisplay);
 
             /*
