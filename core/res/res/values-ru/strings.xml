@@ -837,8 +837,6 @@
     <string name="create_contact_using" msgid="4947405226788104538">"Создать контакт"\n"с номером <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <string name="accessibility_compound_button_selected" msgid="5612776946036285686">"отмечено"</string>
     <string name="accessibility_compound_button_unselected" msgid="8864512895673924091">"не проверено"</string>
-    <string name="grant_credentials_permission_message_desc" msgid="6883276587034335667">"Перечисленные приложения запрашивают разрешение на доступ к регистрационном данным аккаунта <xliff:g id="ACCOUNT">%1$s</xliff:g> из <xliff:g id="APPLICATION">%2$s</xliff:g>. Разрешить доступ? Если да, ваш ответ будет сохранен и это сообщение больше не будет выводиться."</string>
-    <string name="grant_credentials_permission_message_with_authtokenlabel_desc" msgid="3159007601893584687">"Перечисленные приложения запрашивают разрешение на доступ к регистрационном данным <xliff:g id="TYPE">%1$s</xliff:g> аккаунта <xliff:g id="ACCOUNT">%2$s</xliff:g> из <xliff:g id="APPLICATION">%3$s</xliff:g>. Разрешить доступ? Если да, ваш ответ будет сохранен и это сообщение больше не будет выводиться."</string>
     <string name="allow" msgid="7225948811296386551">"Разрешить"</string>
     <string name="deny" msgid="2081879885755434506">"Отклонить"</string>
     <string name="permission_request_notification_title" msgid="5390555465778213840">"Разрешение запрошено"</string>

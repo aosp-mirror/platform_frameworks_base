@@ -837,8 +837,6 @@
     <string name="create_contact_using" msgid="4947405226788104538">"전화번호부에"\n"<xliff:g id="NUMBER">%s</xliff:g> 추가"</string>
     <string name="accessibility_compound_button_selected" msgid="5612776946036285686">"선택함"</string>
     <string name="accessibility_compound_button_unselected" msgid="8864512895673924091">"선택 안함"</string>
-    <string name="grant_credentials_permission_message_desc" msgid="6883276587034335667">"나열된 응용프로그램이 <xliff:g id="APPLICATION">%2$s</xliff:g>에서 <xliff:g id="ACCOUNT">%1$s</xliff:g> 계정의 로그인 자격증명에 액세스할 수 있는 권한을 요청 중입니다. 권한을 부여하시겠습니까? 권한을 부여하면 응답 내용이 저장되며 메시지가 다시 표시되지 않습니다."</string>
-    <string name="grant_credentials_permission_message_with_authtokenlabel_desc" msgid="3159007601893584687">"나열된 응용프로그램이 <xliff:g id="APPLICATION">%3$s</xliff:g>에서 <xliff:g id="ACCOUNT">%2$s</xliff:g> 계정의 <xliff:g id="TYPE">%1$s</xliff:g> 로그인 자격증명에 액세스할 수 있는 권한을 요청 중입니다. 권한을 부여하시겠습니까? 권한을 부여하면 응답 내용이 저장되며 메시지가 다시 표시되지 않습니다."</string>
     <string name="allow" msgid="7225948811296386551">"허용"</string>
     <string name="deny" msgid="2081879885755434506">"거부"</string>
     <string name="permission_request_notification_title" msgid="5390555465778213840">"권한 요청"</string>

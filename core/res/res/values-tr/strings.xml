@@ -837,8 +837,6 @@
     <string name="create_contact_using" msgid="4947405226788104538">"<xliff:g id="NUMBER">%s</xliff:g>"\n" ile kişi oluştur"</string>
     <string name="accessibility_compound_button_selected" msgid="5612776946036285686">"seçildi"</string>
     <string name="accessibility_compound_button_unselected" msgid="8864512895673924091">"seçilmedi"</string>
-    <string name="grant_credentials_permission_message_desc" msgid="6883276587034335667">"Listelenen uygulamalar, <xliff:g id="APPLICATION">%2$s</xliff:g> uygulamasının <xliff:g id="ACCOUNT">%1$s</xliff:g> hesabı için giriş bilgilerine erişim izni istiyor. Bu izni vermek istiyor musunuz? İstiyorsanız yanıtınız kaydedilecek ve tekrar sorulmayacaktır."</string>
-    <string name="grant_credentials_permission_message_with_authtokenlabel_desc" msgid="3159007601893584687">"Listelenen uygulamalar, <xliff:g id="APPLICATION">%3$s</xliff:g> uygulamasının <xliff:g id="ACCOUNT">%2$s</xliff:g> hesabı için <xliff:g id="TYPE">%1$s</xliff:g> girişi bilgilerine erişim izni istiyor. Bu izni vermek istiyor musunuz? İstiyorsanız yanıtınız kaydedilecek ve tekrar sorulmayacaktır."</string>
     <string name="allow" msgid="7225948811296386551">"İzin Ver"</string>
     <string name="deny" msgid="2081879885755434506">"Reddet"</string>
     <string name="permission_request_notification_title" msgid="5390555465778213840">"İzin İstendi"</string>

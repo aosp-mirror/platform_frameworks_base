@@ -777,8 +777,6 @@
     <string name="create_contact_using" msgid="4947405226788104538">"Crear contacto "\n"con <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <string name="accessibility_compound_button_selected" msgid="5612776946036285686">"verificado"</string>
     <string name="accessibility_compound_button_unselected" msgid="8864512895673924091">"no verificado"</string>
-    <string name="grant_credentials_permission_message_desc" msgid="6883276587034335667">"Las aplicaciones enumeradas requieren permiso para acceder a las credenciales de inicio de sesión para la cuenta <xliff:g id="ACCOUNT">%1$s</xliff:g> desde <xliff:g id="APPLICATION">%2$s</xliff:g> ¿Deseas otorgar este permiso? Si es así, el sistema recordará tu respuesta y no volverá a solicitarla."</string>
-    <string name="grant_credentials_permission_message_with_authtokenlabel_desc" msgid="3159007601893584687">"Las aplicaciones enumeradas requieren permiso para acceder a las <xliff:g id="TYPE">%1$s</xliff:g> credenciales de inicio de sesión para la cuenta <xliff:g id="ACCOUNT">%2$s</xliff:g> desde <xliff:g id="APPLICATION">%3$s</xliff:g>.¿Deseas otorgar este permiso? Si es así, el sistema recordará tu respuesta y no volverá a solicitarla."</string>
     <string name="allow" msgid="7225948811296386551">"Permitir"</string>
     <string name="deny" msgid="2081879885755434506">"Denegar"</string>
     <string name="permission_request_notification_title" msgid="5390555465778213840">"Permiso solicitado"</string>

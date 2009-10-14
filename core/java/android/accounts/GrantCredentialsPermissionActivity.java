@@ -18,14 +18,16 @@ package android.accounts;
 import android.app.Activity;
 import android.os.Bundle;
 import android.widget.TextView;
-import android.widget.ArrayAdapter;
-import android.widget.ListView;
+import android.widget.LinearLayout;
+import android.widget.ImageView;
 import android.view.View;
 import android.view.LayoutInflater;
-import android.view.ViewGroup;
+import android.view.Window;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.text.TextUtils;
+import android.graphics.drawable.Drawable;
 import com.android.internal.R;
 
 /**
@@ -43,62 +45,68 @@ public class GrantCredentialsPermissionActivity extends Activity implements View
     private String mAuthTokenType;
     private int mUid;
     private Bundle mResultBundle = null;
+    protected LayoutInflater mInflater;
 
     protected void onCreate(Bundle savedInstanceState) {
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
         super.onCreate(savedInstanceState);
-        getWindow().setContentView(R.layout.grant_credentials_permission);
-        mAccount = getIntent().getExtras().getParcelable(EXTRAS_ACCOUNT);
-        mAuthTokenType = getIntent().getExtras().getString(EXTRAS_AUTH_TOKEN_TYPE);
-        mUid = getIntent().getExtras().getInt(EXTRAS_REQUESTING_UID);
-        final String accountTypeLabel =
-                getIntent().getExtras().getString(EXTRAS_ACCOUNT_TYPE_LABEL);
-        final String[] packages = getIntent().getExtras().getStringArray(EXTRAS_PACKAGES);
+        setContentView(R.layout.grant_credentials_permission);
 
-        findViewById(R.id.allow).setOnClickListener(this);
-        findViewById(R.id.deny).setOnClickListener(this);
+        mInflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
-        TextView messageView = (TextView) getWindow().findViewById(R.id.message);
-        String authTokenLabel = getIntent().getExtras().getString(EXTRAS_AUTH_TOKEN_LABEL);
-        if (authTokenLabel.length() == 0) {
-            CharSequence grantCredentialsPermissionFormat = getResources().getText(
-                    R.string.grant_credentials_permission_message_desc);
-            messageView.setText(String.format(grantCredentialsPermissionFormat.toString(),
-                    mAccount.name, accountTypeLabel));
-        } else {
-            CharSequence grantCredentialsPermissionFormat = getResources().getText(
-                    R.string.grant_credentials_permission_message_with_authtokenlabel_desc);
-            messageView.setText(String.format(grantCredentialsPermissionFormat.toString(),
-                    authTokenLabel, mAccount.name, accountTypeLabel));
-        }
+        final Bundle extras = getIntent().getExtras();
+        mAccount = extras.getParcelable(EXTRAS_ACCOUNT);
+        mAuthTokenType = extras.getString(EXTRAS_AUTH_TOKEN_TYPE);
+        mUid = extras.getInt(EXTRAS_REQUESTING_UID);
+        final String accountTypeLabel = extras.getString(EXTRAS_ACCOUNT_TYPE_LABEL);
+        final String[] packages = extras.getStringArray(EXTRAS_PACKAGES);
+        final String authTokenLabel = extras.getString(EXTRAS_AUTH_TOKEN_LABEL);
 
-        String[] packageLabels = new String[packages.length];
+        findViewById(R.id.allow_button).setOnClickListener(this);
+        findViewById(R.id.deny_button).setOnClickListener(this);
+
+        LinearLayout packagesListView = (LinearLayout) findViewById(R.id.packages_list);
+
         final PackageManager pm = getPackageManager();
-        for (int i = 0; i < packages.length; i++) {
+        for (String pkg : packages) {
+            String packageLabel;
             try {
-                packageLabels[i] =
-                        pm.getApplicationLabel(pm.getApplicationInfo(packages[i], 0)).toString();
+                packageLabel = pm.getApplicationLabel(pm.getApplicationInfo(pkg, 0)).toString();
             } catch (PackageManager.NameNotFoundException e) {
-                packageLabels[i] = packages[i];
+                packageLabel = pkg;
             }
+            packagesListView.addView(newPackageView(packageLabel));
         }
-        ((ListView) findViewById(R.id.packages_list)).setAdapter(
-                new PackagesArrayAdapter(this, packageLabels));
+
+        ((TextView) findViewById(R.id.account_name)).setText(mAccount.name);
+        ((TextView) findViewById(R.id.account_type)).setText(accountTypeLabel);
+        TextView authTokenTypeView = (TextView) findViewById(R.id.authtoken_type);
+        if (TextUtils.isEmpty(authTokenLabel)) {
+            authTokenTypeView.setVisibility(View.GONE);
+        } else {
+            authTokenTypeView.setText(authTokenLabel);
+        }
+    }
+
+    private View newPackageView(String packageLabel) {
+        View view = mInflater.inflate(R.layout.permissions_package_list_item, null);
+        ((TextView) view.findViewById(R.id.package_label)).setText(packageLabel);
+        return view;
     }
 
     public void onClick(View v) {
+        final AccountManagerService accountManagerService = AccountManagerService.getSingleton();
         switch (v.getId()) {
-            case R.id.allow:
-                AccountManagerService.getSingleton().grantAppPermission(mAccount, mAuthTokenType,
-                        mUid);
+            case R.id.allow_button:
+                accountManagerService.grantAppPermission(mAccount, mAuthTokenType, mUid);
                 Intent result = new Intent();
                 result.putExtra("retry", true);
                 setResult(RESULT_OK, result);
                 setAccountAuthenticatorResult(result.getExtras());
                 break;
 
-            case R.id.deny:
-                AccountManagerService.getSingleton().revokeAppPermission(mAccount, mAuthTokenType,
-                        mUid);
+            case R.id.deny_button:
+                accountManagerService.revokeAppPermission(mAccount, mAuthTokenType, mUid);
                 setResult(RESULT_CANCELED);
                 break;
         }
@@ -110,63 +118,20 @@ public class GrantCredentialsPermissionActivity extends Activity implements View
     }
 
     /**
-     * Sends the result or a Constants.ERROR_CODE_CANCELED error if a result isn't present.
+     * Sends the result or a {@link AccountManager#ERROR_CODE_CANCELED} error if a
+     * result isn't present.
      */
     public void finish() {
         Intent intent = getIntent();
-        AccountAuthenticatorResponse accountAuthenticatorResponse =
-                intent.getParcelableExtra(EXTRAS_RESPONSE);
-        if (accountAuthenticatorResponse != null) {
+        AccountAuthenticatorResponse response = intent.getParcelableExtra(EXTRAS_RESPONSE);
+        if (response != null) {
             // send the result bundle back if set, otherwise send an error.
             if (mResultBundle != null) {
-                accountAuthenticatorResponse.onResult(mResultBundle);
+                response.onResult(mResultBundle);
             } else {
-                accountAuthenticatorResponse.onError(AccountManager.ERROR_CODE_CANCELED, "canceled");
+                response.onError(AccountManager.ERROR_CODE_CANCELED, "canceled");
             }
         }
         super.finish();
-    }
-
-    private static class PackagesArrayAdapter extends ArrayAdapter<String> {
-        protected LayoutInflater mInflater;
-        private static final int mResource = R.layout.simple_list_item_1;
-
-        public PackagesArrayAdapter(Context context, String[] items) {
-            super(context, mResource, items);
-            mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        }
-
-        static class ViewHolder {
-            TextView label;
-        }
-
-        @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-            // A ViewHolder keeps references to children views to avoid unneccessary calls
-            // to findViewById() on each row.
-            ViewHolder holder;
-
-            // When convertView is not null, we can reuse it directly, there is no need
-            // to reinflate it. We only inflate a new View when the convertView supplied
-            // by ListView is null.
-            if (convertView == null) {
-                convertView = mInflater.inflate(mResource, null);
-
-                // Creates a ViewHolder and store references to the two children views
-                // we want to bind data to.
-                holder = new ViewHolder();
-                holder.label = (TextView) convertView.findViewById(R.id.text1);
-
-                convertView.setTag(holder);
-            } else {
-                // Get the ViewHolder back to get fast access to the TextView
-                // and the ImageView.
-                holder = (ViewHolder) convertView.getTag();
-            }
-
-            holder.label.setText(getItem(position));
-
-            return convertView;
-        }
     }
 }

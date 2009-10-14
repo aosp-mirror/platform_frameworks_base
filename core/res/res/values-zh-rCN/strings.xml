@@ -837,8 +837,6 @@
     <string name="create_contact_using" msgid="4947405226788104538">"创建电话号码为"\n"<xliff:g id="NUMBER">%s</xliff:g> 的联系人"</string>
     <string name="accessibility_compound_button_selected" msgid="5612776946036285686">"已选中"</string>
     <string name="accessibility_compound_button_unselected" msgid="8864512895673924091">"未选中"</string>
-    <string name="grant_credentials_permission_message_desc" msgid="6883276587034335667">"所列应用程序正在请求相应的权限，以便从<xliff:g id="APPLICATION">%2$s</xliff:g>访问 <xliff:g id="ACCOUNT">%1$s</xliff:g> 帐户的登录凭据。是否要授予这种权限？如果授予，系统会记住您所做的选择，且不再提示。"</string>
-    <string name="grant_credentials_permission_message_with_authtokenlabel_desc" msgid="3159007601893584687">"所列应用程序正在请求相应的权限，以便从<xliff:g id="APPLICATION">%3$s</xliff:g>访问 <xliff:g id="ACCOUNT">%2$s</xliff:g> 帐户的<xliff:g id="TYPE">%1$s</xliff:g>登录凭据。是否要授予这种权限？如果授予，系统会记住您所做的选择，且不再提示。"</string>
     <string name="allow" msgid="7225948811296386551">"允许"</string>
     <string name="deny" msgid="2081879885755434506">"拒绝"</string>
     <string name="permission_request_notification_title" msgid="5390555465778213840">"已请求权限"</string>

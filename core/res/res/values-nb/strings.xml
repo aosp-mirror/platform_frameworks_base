@@ -837,8 +837,6 @@
     <string name="create_contact_using" msgid="4947405226788104538">"Lag kontakt"\n"med nummeret <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <string name="accessibility_compound_button_selected" msgid="5612776946036285686">"valgt"</string>
     <string name="accessibility_compound_button_unselected" msgid="8864512895673924091">"ikke valgt"</string>
-    <string name="grant_credentials_permission_message_desc" msgid="6883276587034335667">"Det nevnte programmet ber om tilgangstillatelse til påloggingsopplysningene for konto <xliff:g id="ACCOUNT">%1$s</xliff:g> fra <xliff:g id="APPLICATION">%2$s</xliff:g>. Vil du gi denne tillatelsen? I så fall vil svaret ditt bli lagret, og du vil ikke bli spurt flere ganger."</string>
-    <string name="grant_credentials_permission_message_with_authtokenlabel_desc" msgid="3159007601893584687">"Det nevnte programmet ber om tilgangstillatelse til <xliff:g id="TYPE">%1$s</xliff:g>-påloggingsopplysningene for konto <xliff:g id="ACCOUNT">%2$s</xliff:g> fra <xliff:g id="APPLICATION">%3$s</xliff:g>. Vil du gi denne tillatelsen? I så fall vil svaret ditt bli lagret, og du vil ikke bli spurt flere ganger."</string>
     <string name="allow" msgid="7225948811296386551">"Tillat"</string>
     <string name="deny" msgid="2081879885755434506">"Avslå"</string>
     <string name="permission_request_notification_title" msgid="5390555465778213840">"Tillatelse forespurt"</string>
