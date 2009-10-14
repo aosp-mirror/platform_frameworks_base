@@ -106,6 +106,21 @@ public class VCardConfig {
      */
     public static final int FLAG_USE_QP_TO_PRIMARY_PROPERTIES = 0x10000000;
 
+    /**
+     * The flag indicating the vCard composer "for 2.1" emits "TYPE=" string every time
+     * possible. The default behavior does not emit it and is valid, while adding "TYPE="
+     * is also valid. In vCrad 3.0, this flag is unnecessary, since "TYPE=" is MUST in
+     * vCard 3.0 specification.
+     *
+     * If you are targeting to some importer which cannot accept type attributes (params)
+     * without "TYPE=" string (which should be rare though), please use this flag.
+     *
+     * XXX: Really rare?
+     *
+     * e.g. int vcardType = (VCARD_TYPE_V21_GENERIC | FLAG_APPEND_TYPE_PARAM);
+     */
+    public static final int FLAG_APPEND_TYPE_PARAM = 0x08000000;
+
     //// The followings are VCard types available from importer/exporter. ////
 
     /**
@@ -298,6 +313,10 @@ public class VCardConfig {
     public static boolean usesQPToPrimaryProperties(int vcardType) {
        return (usesQuotedPrintable(vcardType) &&
                ((vcardType & FLAG_USE_QP_TO_PRIMARY_PROPERTIES) != 0));
+    }
+
+    public static boolean appendTypeParamName(int vcardType) {
+        return (vcardType & FLAG_APPEND_TYPE_PARAM) != 0;
     }
 
     private VCardConfig() {
