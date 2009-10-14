@@ -5609,6 +5609,17 @@ public class WebView extends AbsoluteLayout
     }
 
     /**
+     * Draw the HTML page into the specified canvas. This call ignores any
+     * view-specific zoom, scroll offset, or other changes. It does not draw
+     * any view-specific chrome, such as progress or URL bars.
+     *
+     * @hide only needs to be accessible to Browser and testing
+     */
+    public void drawPage(Canvas canvas) {
+        mWebViewCore.drawContentPicture(canvas, 0, false, false);
+    }
+
+    /**
      *  Update our cache with updatedText.
      *  @param updatedText  The new text to put in our cache.
      */
