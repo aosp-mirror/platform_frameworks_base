@@ -18,6 +18,7 @@ package android.pim.vcard;
 import android.content.ContentProviderOperation;
 import android.content.ContentValues;
 import android.provider.ContactsContract.Data;
+import android.provider.ContactsContract.CommonDataKinds.Im;
 import android.provider.ContactsContract.CommonDataKinds.Phone;
 import android.provider.ContactsContract.CommonDataKinds.StructuredPostal;
 import android.text.TextUtils;
@@ -44,38 +45,49 @@ public class VCardUtils {
     private static final Map<Integer, String> sKnownPhoneTypesMap_ItoS;
     private static final Set<String> sPhoneTypesSetUnknownToContacts;
 
-    private static final Map<String, Integer> sKnownPhoneTypesMap_StoI;
+    private static final Map<String, Integer> sKnownPhoneTypeMap_StoI;
+
+    private static final Map<Integer, String> sKnownImPropNameMap_ItoS;
 
     static {
         sKnownPhoneTypesMap_ItoS = new HashMap<Integer, String>();
-        sKnownPhoneTypesMap_StoI = new HashMap<String, Integer>();
+        sKnownPhoneTypeMap_StoI = new HashMap<String, Integer>();
 
         sKnownPhoneTypesMap_ItoS.put(Phone.TYPE_CAR, Constants.ATTR_TYPE_CAR);
-        sKnownPhoneTypesMap_StoI.put(Constants.ATTR_TYPE_CAR, Phone.TYPE_CAR);
+        sKnownPhoneTypeMap_StoI.put(Constants.ATTR_TYPE_CAR, Phone.TYPE_CAR);
         sKnownPhoneTypesMap_ItoS.put(Phone.TYPE_PAGER, Constants.ATTR_TYPE_PAGER);
-        sKnownPhoneTypesMap_StoI.put(Constants.ATTR_TYPE_PAGER, Phone.TYPE_PAGER);
+        sKnownPhoneTypeMap_StoI.put(Constants.ATTR_TYPE_PAGER, Phone.TYPE_PAGER);
         sKnownPhoneTypesMap_ItoS.put(Phone.TYPE_ISDN, Constants.ATTR_TYPE_ISDN);
-        sKnownPhoneTypesMap_StoI.put(Constants.ATTR_TYPE_ISDN, Phone.TYPE_ISDN);
+        sKnownPhoneTypeMap_StoI.put(Constants.ATTR_TYPE_ISDN, Phone.TYPE_ISDN);
         
-        sKnownPhoneTypesMap_StoI.put(Constants.ATTR_TYPE_HOME, Phone.TYPE_HOME);
-        sKnownPhoneTypesMap_StoI.put(Constants.ATTR_TYPE_WORK, Phone.TYPE_WORK);
-        sKnownPhoneTypesMap_StoI.put(Constants.ATTR_TYPE_CELL, Phone.TYPE_MOBILE);
+        sKnownPhoneTypeMap_StoI.put(Constants.ATTR_TYPE_HOME, Phone.TYPE_HOME);
+        sKnownPhoneTypeMap_StoI.put(Constants.ATTR_TYPE_WORK, Phone.TYPE_WORK);
+        sKnownPhoneTypeMap_StoI.put(Constants.ATTR_TYPE_CELL, Phone.TYPE_MOBILE);
                 
-        sKnownPhoneTypesMap_StoI.put(Constants.ATTR_PHONE_EXTRA_TYPE_OTHER, Phone.TYPE_OTHER);
-        sKnownPhoneTypesMap_StoI.put(Constants.ATTR_PHONE_EXTRA_TYPE_CALLBACK, Phone.TYPE_CALLBACK);
-        sKnownPhoneTypesMap_StoI.put(
+        sKnownPhoneTypeMap_StoI.put(Constants.ATTR_PHONE_EXTRA_TYPE_OTHER, Phone.TYPE_OTHER);
+        sKnownPhoneTypeMap_StoI.put(Constants.ATTR_PHONE_EXTRA_TYPE_CALLBACK, Phone.TYPE_CALLBACK);
+        sKnownPhoneTypeMap_StoI.put(
                 Constants.ATTR_PHONE_EXTRA_TYPE_COMPANY_MAIN, Phone.TYPE_COMPANY_MAIN);
-        sKnownPhoneTypesMap_StoI.put(Constants.ATTR_PHONE_EXTRA_TYPE_RADIO, Phone.TYPE_RADIO);
-        sKnownPhoneTypesMap_StoI.put(Constants.ATTR_PHONE_EXTRA_TYPE_TELEX, Phone.TYPE_TELEX);
-        sKnownPhoneTypesMap_StoI.put(Constants.ATTR_PHONE_EXTRA_TYPE_TTY_TDD, Phone.TYPE_TTY_TDD);
-        sKnownPhoneTypesMap_StoI.put(Constants.ATTR_PHONE_EXTRA_TYPE_ASSISTANT,
+        sKnownPhoneTypeMap_StoI.put(Constants.ATTR_PHONE_EXTRA_TYPE_RADIO, Phone.TYPE_RADIO);
+        sKnownPhoneTypeMap_StoI.put(Constants.ATTR_PHONE_EXTRA_TYPE_TTY_TDD, Phone.TYPE_TTY_TDD);
+        sKnownPhoneTypeMap_StoI.put(Constants.ATTR_PHONE_EXTRA_TYPE_ASSISTANT,
                 Phone.TYPE_ASSISTANT);
 
         sPhoneTypesSetUnknownToContacts = new HashSet<String>();
         sPhoneTypesSetUnknownToContacts.add(Constants.ATTR_TYPE_MODEM);
-        sPhoneTypesSetUnknownToContacts.add(Constants.ATTR_TYPE_MSG);
         sPhoneTypesSetUnknownToContacts.add(Constants.ATTR_TYPE_BBS);
         sPhoneTypesSetUnknownToContacts.add(Constants.ATTR_TYPE_VIDEO);
+
+        sKnownImPropNameMap_ItoS = new HashMap<Integer, String>();
+        sKnownImPropNameMap_ItoS.put(Im.PROTOCOL_AIM, Constants.PROPERTY_X_AIM);
+        sKnownImPropNameMap_ItoS.put(Im.PROTOCOL_MSN, Constants.PROPERTY_X_MSN);
+        sKnownImPropNameMap_ItoS.put(Im.PROTOCOL_YAHOO, Constants.PROPERTY_X_YAHOO);
+        sKnownImPropNameMap_ItoS.put(Im.PROTOCOL_SKYPE, Constants.PROPERTY_X_SKYPE_USERNAME);
+        sKnownImPropNameMap_ItoS.put(Im.PROTOCOL_GOOGLE_TALK, Constants.PROPERTY_X_GOOGLE_TALK);
+        sKnownImPropNameMap_ItoS.put(Im.PROTOCOL_ICQ, Constants.PROPERTY_X_ICQ);
+        sKnownImPropNameMap_ItoS.put(Im.PROTOCOL_JABBER, Constants.PROPERTY_X_JABBER);
+        sKnownImPropNameMap_ItoS.put(Im.PROTOCOL_QQ, Constants.PROPERTY_X_QQ);
+        sKnownImPropNameMap_ItoS.put(Im.PROTOCOL_NETMEETING, Constants.PROPERTY_X_NETMEETING);
     }
 
     public static String getPhoneAttributeString(Integer type) {
@@ -103,7 +115,7 @@ public class VCardUtils {
                     if (typeString.startsWith("X-") && type < 0) {
                         typeString = typeString.substring(2);
                     }
-                    Integer tmp = sKnownPhoneTypesMap_StoI.get(typeString);
+                    Integer tmp = sKnownPhoneTypeMap_StoI.get(typeString);
                     if (tmp != null) {
                         type = tmp;
                     } else if (type < 0) {
@@ -136,7 +148,11 @@ public class VCardUtils {
             return type;
         }
     }
-    
+
+    public static String getPropertyNameForIm(int protocol) {
+        return sKnownImPropNameMap_ItoS.get(protocol);
+    }
+
     public static boolean isValidPhoneAttribute(String phoneAttribute, int vcardType) {
         // TODO: check the following.
         // - it may violate vCard spec
@@ -206,12 +222,12 @@ public class VCardUtils {
             builder.withValue(Data.IS_PRIMARY, 1);
         }
     }
-    
+
     /**
      * Returns String[] containing address information based on vCard spec
      * (PO Box, Extended Address, Street, Locality, Region, Postal Code, Country Name).
      * All String objects are non-null ("" is used when the relevant data is empty).
-     * 
+     *
      * Note that the data structure of ContactsContract is different from that defined in vCard.
      * So some conversion may be performed in this method. See also
      * {{@link #insertStructuredPostalDataUsingContactsStruct(int,
@@ -219,13 +235,20 @@ public class VCardUtils {
      * android.pim.vcard.ContactStruct.PostalData)}
      */
     public static String[] getVCardPostalElements(ContentValues contentValues) {
+        // adr-value    = 0*6(text-value ";") text-value
+        //              ; PO Box, Extended Address, Street, Locality, Region, Postal
+        //              ; Code, Country Name
         String[] dataArray = new String[7];
         dataArray[0] = contentValues.getAsString(StructuredPostal.POBOX);
         if (dataArray[0] == null) {
             dataArray[0] = "";
         }
-        // Extended addr. There's no relevant data in ContactsContract.
-        dataArray[1] = "";
+        // We keep all the data in StructuredPostal, presuming NEIGHBORHOOD is
+        // similar to "Extended Address".
+        dataArray[1] = contentValues.getAsString(StructuredPostal.NEIGHBORHOOD);
+        if (dataArray[1] == null) {
+            dataArray[1] = "";
+        }
         dataArray[2] = contentValues.getAsString(StructuredPostal.STREET);
         if (dataArray[2] == null) {
             dataArray[2] = "";
