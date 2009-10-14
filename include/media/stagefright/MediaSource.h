@@ -51,6 +51,9 @@ struct MediaSource : public RefBase {
     // buffer is available, an error is encountered of the end of the stream
     // is reached.
     // End of stream is signalled by a result of ERROR_END_OF_STREAM.
+    // A result of INFO_FORMAT_CHANGED indicates that the format of this
+    // MediaSource has changed mid-stream, the client can continue reading
+    // but should be prepared for buffers of the new configuration.
     virtual status_t read(
             MediaBuffer **buffer, const ReadOptions *options = NULL) = 0;
 
