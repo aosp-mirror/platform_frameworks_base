@@ -17,9 +17,10 @@
 #define LOG_TAG "SoftwareRenderer"
 #include <utils/Log.h>
 
+#include "../include/SoftwareRenderer.h"
+
 #include <binder/MemoryHeapBase.h>
 #include <media/stagefright/MediaDebug.h>
-#include <media/stagefright/SoftwareRenderer.h>
 #include <ui/ISurface.h>
 
 namespace android {
