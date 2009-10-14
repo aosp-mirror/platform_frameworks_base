@@ -46,8 +46,31 @@ public class VCardParser_V30 extends VCardParser_V21 {
     private static final HashSet<String> acceptablePropsWithoutParam = new HashSet<String>();
 
     private String mPreviousLine;
-    
+
     private boolean mEmittedAgentWarning = false;
+
+    /**
+     * True when the caller wants the parser to be strict about the input.
+     * Currently this is only for testing.
+     */
+    private final boolean mStrictParsing;
+
+    public VCardParser_V30() {
+        super();
+        mStrictParsing = false;
+    }
+
+    /**
+     * @param strictParsing when true, this object throws VCardException when the vcard is not
+     * valid from the view of vCard 3.0 specification (defined in RFC 2426). Note that this class
+     * is not fully yet for being used with this flag and may not notice invalid line(s).
+     *
+     * @hide currently only for testing! 
+     */
+    public VCardParser_V30(boolean strictParsing) {
+        super();
+        mStrictParsing = strictParsing;
+    }
 
     @Override
     protected int getVersion() {
@@ -204,7 +227,16 @@ public class VCardParser_V30 extends VCardParser_V21 {
         // TODO: fix this.
         super.handleAnyParam(paramName, paramValue);
     }
-    
+
+    @Override
+    protected void handleParamWithoutName(final String paramValue) throws VCardException {
+        if (mStrictParsing) {
+            throw new VCardException("Parameter without name is not acceptable in vCard 3.0");
+        } else {
+            super.handleParamWithoutName(paramValue);
+        }
+    }
+
     /**
      *  vCard 3.0 defines
      *  
