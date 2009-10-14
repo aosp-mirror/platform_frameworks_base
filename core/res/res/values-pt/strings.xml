@@ -837,8 +837,6 @@
     <string name="create_contact_using" msgid="4947405226788104538">"Criar contato "\n"usando <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <string name="accessibility_compound_button_selected" msgid="5612776946036285686">"selecionado"</string>
     <string name="accessibility_compound_button_unselected" msgid="8864512895673924091">"não selecionado"</string>
-    <string name="grant_credentials_permission_message_desc" msgid="6883276587034335667">"Os aplicativos listados estão solicitando autorização para acessar as credenciais de login para a conta <xliff:g id="ACCOUNT">%1$s</xliff:g> de <xliff:g id="APPLICATION">%2$s</xliff:g>. Deseja conceder essa autorização? Em caso afirmativo, sua resposta será lembrada e essa pergunta não será feita novamente."</string>
-    <string name="grant_credentials_permission_message_with_authtokenlabel_desc" msgid="3159007601893584687">"Os aplicativos listados estão solicitando autorização para acessar as credenciais de login <xliff:g id="TYPE">%1$s</xliff:g> para a conta <xliff:g id="ACCOUNT">%2$s</xliff:g> de <xliff:g id="APPLICATION">%3$s</xliff:g>. Deseja conceder essa autorização? Em caso afirmativo, sua resposta será lembrada e essa pergunta não será feita novamente."</string>
     <string name="allow" msgid="7225948811296386551">"Permitir"</string>
     <string name="deny" msgid="2081879885755434506">"Negar"</string>
     <string name="permission_request_notification_title" msgid="5390555465778213840">"Autorização solicitada"</string>

@@ -837,8 +837,6 @@
     <string name="create_contact_using" msgid="4947405226788104538">"建立手機號碼為 <xliff:g id="NUMBER">%s</xliff:g>"\n"的聯絡人"</string>
     <string name="accessibility_compound_button_selected" msgid="5612776946036285686">"已勾選"</string>
     <string name="accessibility_compound_button_unselected" msgid="8864512895673924091">"未勾選"</string>
-    <string name="grant_credentials_permission_message_desc" msgid="6883276587034335667">"這些應用程式要求存取「<xliff:g id="APPLICATION">%2$s</xliff:g>」的 <xliff:g id="ACCOUNT">%1$s</xliff:g> 帳戶登入認證的權限，您要授予此權限嗎？如果確定授予，系統會記住您的選擇，不會再次詢問您。"</string>
-    <string name="grant_credentials_permission_message_with_authtokenlabel_desc" msgid="3159007601893584687">"這些應用程式要求存取「<xliff:g id="APPLICATION">%3$s</xliff:g>」的 <xliff:g id="ACCOUNT">%2$s</xliff:g> 帳戶「<xliff:g id="TYPE">%1$s</xliff:g>」登入認證的權限，您要授予此權限嗎？如果確定授予，系統會記住您的選擇，不會再次詢問您。"</string>
     <string name="allow" msgid="7225948811296386551">"允許"</string>
     <string name="deny" msgid="2081879885755434506">"拒絕"</string>
     <string name="permission_request_notification_title" msgid="5390555465778213840">"已要求權限"</string>

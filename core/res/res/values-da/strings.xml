@@ -837,8 +837,6 @@
     <string name="create_contact_using" msgid="4947405226788104538">"Opret kontakt"\n"ved hjælp af <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <string name="accessibility_compound_button_selected" msgid="5612776946036285686">"kontrolleret"</string>
     <string name="accessibility_compound_button_unselected" msgid="8864512895673924091">"ikke kontrolleret"</string>
-    <string name="grant_credentials_permission_message_desc" msgid="6883276587034335667">"De nævnte programmer beder om tilladelse til at få adgang til loginoplysningerne til kontoen <xliff:g id="ACCOUNT">%1$s</xliff:g> fra <xliff:g id="APPLICATION">%2$s</xliff:g>. Ønsker du at give denne tilladelse? Hvis ja, så huskes dit svar, og du vil ikke blive spurgt om det igen."</string>
-    <string name="grant_credentials_permission_message_with_authtokenlabel_desc" msgid="3159007601893584687">"De nævnte programmer beder om tilladelse til at få adgang til <xliff:g id="TYPE">%1$s</xliff:g>-loginoplysningerne til kontoen <xliff:g id="ACCOUNT">%2$s</xliff:g> fra <xliff:g id="APPLICATION">%3$s</xliff:g>. Vil du give denne tilladelse? Hvis ja, så huskes dit svar, og du vil ikke blive spurgt om det igen."</string>
     <string name="allow" msgid="7225948811296386551">"Tillad"</string>
     <string name="deny" msgid="2081879885755434506">"Afvis"</string>
     <string name="permission_request_notification_title" msgid="5390555465778213840">"Der er anmodet om tilladelse"</string>

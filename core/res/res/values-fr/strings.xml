@@ -837,8 +837,6 @@
     <string name="create_contact_using" msgid="4947405226788104538">"Ajouter un contact"\n"en utilisant <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <string name="accessibility_compound_button_selected" msgid="5612776946036285686">"sélectionné"</string>
     <string name="accessibility_compound_button_unselected" msgid="8864512895673924091">"non sélectionné"</string>
-    <string name="grant_credentials_permission_message_desc" msgid="6883276587034335667">"Les applications répertoriées demandent l\'autorisation d\'accéder aux informations d\'identification du compte <xliff:g id="ACCOUNT">%1$s</xliff:g> depuis <xliff:g id="APPLICATION">%2$s</xliff:g>. Souhaitez-vous accorder cette autorisation ? Si vous acceptez, votre choix sera enregistré et cette question ne vous sera plus posée."</string>
-    <string name="grant_credentials_permission_message_with_authtokenlabel_desc" msgid="3159007601893584687">"Les applications répertoriées demandent l\'autorisation d\'accéder aux informations d\'identification des <xliff:g id="TYPE">%1$s</xliff:g> associés au compte <xliff:g id="ACCOUNT">%2$s</xliff:g> depuis <xliff:g id="APPLICATION">%3$s</xliff:g>. Souhaitez-vous accorder cette autorisation ? Si vous acceptez, votre choix sera enregistré et cette question ne vous sera plus posée."</string>
     <string name="allow" msgid="7225948811296386551">"Autoriser"</string>
     <string name="deny" msgid="2081879885755434506">"Refuser"</string>
     <string name="permission_request_notification_title" msgid="5390555465778213840">"Autorisation demandée"</string>

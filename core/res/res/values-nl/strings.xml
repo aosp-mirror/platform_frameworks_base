@@ -837,8 +837,6 @@
     <string name="create_contact_using" msgid="4947405226788104538">"Contact maken"\n"met <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <string name="accessibility_compound_button_selected" msgid="5612776946036285686">"aangevinkt"</string>
     <string name="accessibility_compound_button_unselected" msgid="8864512895673924091">"niet aangevinkt"</string>
-    <string name="grant_credentials_permission_message_desc" msgid="6883276587034335667">"De weergegeven toepassingen vragen toestemming voor toegang tot de aanmeldingsgegevens voor account \'<xliff:g id="ACCOUNT">%1$s</xliff:g>\' van <xliff:g id="APPLICATION">%2$s</xliff:g>. Wilt u deze toestemming verlenen? Als u dit wilt doen, wordt uw antwoord onthouden en wordt dit niet opnieuw gevraagd."</string>
-    <string name="grant_credentials_permission_message_with_authtokenlabel_desc" msgid="3159007601893584687">"De weergegeven toepassingen vragen toestemming voor toegang tot de aanmeldingsgegevens voor <xliff:g id="TYPE">%1$s</xliff:g> van het account \'<xliff:g id="ACCOUNT">%2$s</xliff:g>\' van <xliff:g id="APPLICATION">%3$s</xliff:g>. Wilt u deze toestemming verlenen? Als u dit wilt doen, wordt uw antwoord onthouden en wordt dit niet opnieuw gevraagd."</string>
     <string name="allow" msgid="7225948811296386551">"Toestaan"</string>
     <string name="deny" msgid="2081879885755434506">"Weigeren"</string>
     <string name="permission_request_notification_title" msgid="5390555465778213840">"Toestemming gevraagd"</string>

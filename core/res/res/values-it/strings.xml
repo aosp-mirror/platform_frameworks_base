@@ -837,8 +837,6 @@
     <string name="create_contact_using" msgid="4947405226788104538">"Crea contatto"\n"utilizzando <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <string name="accessibility_compound_button_selected" msgid="5612776946036285686">"selezionato"</string>
     <string name="accessibility_compound_button_unselected" msgid="8864512895673924091">"non selezionato"</string>
-    <string name="grant_credentials_permission_message_desc" msgid="6883276587034335667">"Le applicazioni elencate richiedono l\'autorizzazione per accedere alle credenziali di accesso per l\'account <xliff:g id="ACCOUNT">%1$s</xliff:g> da <xliff:g id="APPLICATION">%2$s</xliff:g>. Concedere questa autorizzazione? In tal caso la tua risposta verrà memorizzata e questa domanda non ti verrà più posta."</string>
-    <string name="grant_credentials_permission_message_with_authtokenlabel_desc" msgid="3159007601893584687">"Le applicazioni elencate richiedono l\'autorizzazione per accedere alle credenziali di accesso <xliff:g id="TYPE">%1$s</xliff:g> per l\'account <xliff:g id="ACCOUNT">%2$s</xliff:g> da <xliff:g id="APPLICATION">%3$s</xliff:g>. Concedere questa autorizzazione? In tal caso la tua risposta verrà memorizzata e questa domanda non ti verrà più posta."</string>
     <string name="allow" msgid="7225948811296386551">"Consenti"</string>
     <string name="deny" msgid="2081879885755434506">"Nega"</string>
     <string name="permission_request_notification_title" msgid="5390555465778213840">"Autorizzazione richiesta"</string>

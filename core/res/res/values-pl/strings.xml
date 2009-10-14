@@ -837,8 +837,6 @@
     <string name="create_contact_using" msgid="4947405226788104538">"Utwórz kontakt"\n"dla numeru <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <string name="accessibility_compound_button_selected" msgid="5612776946036285686">"zaznaczone"</string>
     <string name="accessibility_compound_button_unselected" msgid="8864512895673924091">"niezaznaczone"</string>
-    <string name="grant_credentials_permission_message_desc" msgid="6883276587034335667">"Wymienione aplikacje żądają pozwolenia na dostęp do danych logowania dla konta <xliff:g id="ACCOUNT">%1$s</xliff:g> powiązanego z aplikacją <xliff:g id="APPLICATION">%2$s</xliff:g>. Czy chcesz udzielić takiego pozwolenia? Jeśli tak, odpowiedź zostanie zapamiętana i to pytanie nie będzie już wyświetlane."</string>
-    <string name="grant_credentials_permission_message_with_authtokenlabel_desc" msgid="3159007601893584687">"Wymienione aplikacje żądają pozwolenia na dostęp do danych logowania dotyczących funkcji <xliff:g id="TYPE">%1$s</xliff:g> dla konta <xliff:g id="ACCOUNT">%2$s</xliff:g> powiązanego z aplikacją <xliff:g id="APPLICATION">%3$s</xliff:g>. Czy chcesz udzielić takiego pozwolenia? Jeśli tak, odpowiedź zostanie zapamiętana i to pytanie nie będzie już wyświetlane."</string>
     <string name="allow" msgid="7225948811296386551">"Zezwól"</string>
     <string name="deny" msgid="2081879885755434506">"Odmów"</string>
     <string name="permission_request_notification_title" msgid="5390555465778213840">"Żądane pozwolenie"</string>

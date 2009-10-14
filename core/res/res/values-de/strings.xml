@@ -837,8 +837,6 @@
     <string name="create_contact_using" msgid="4947405226788104538">"Neuer Kontakt"\n"mit <xliff:g id="NUMBER">%s</xliff:g> erstellen"</string>
     <string name="accessibility_compound_button_selected" msgid="5612776946036285686">"aktiviert"</string>
     <string name="accessibility_compound_button_unselected" msgid="8864512895673924091">"nicht aktiviert"</string>
-    <string name="grant_credentials_permission_message_desc" msgid="6883276587034335667">"Die aufgelisteten Anwendungen fordern eine Berechtigung zum Zugriff auf die Anmeldeinformationen für das Konto <xliff:g id="ACCOUNT">%1$s</xliff:g> von <xliff:g id="APPLICATION">%2$s</xliff:g> an. Möchten Sie diese Berechtigung erteilen? Wenn ja, wird Ihre Antwort gespeichert und Sie erhalten keine erneute Aufforderung."</string>
-    <string name="grant_credentials_permission_message_with_authtokenlabel_desc" msgid="3159007601893584687">"Die aufgelisteten Anwendungen fordern eine Berechtigung zum Zugriff auf die <xliff:g id="TYPE">%1$s</xliff:g>-Anmeldeinformationen für das Konto <xliff:g id="APPLICATION">%3$s</xliff:g> von <xliff:g id="ACCOUNT">%2$s</xliff:g> an. Möchten Sie diese Berechtigung erteilen? Wenn ja, wird Ihre Antwort gespeichert und Sie erhalten keine erneute Aufforderung."</string>
     <string name="allow" msgid="7225948811296386551">"Zulassen"</string>
     <string name="deny" msgid="2081879885755434506">"Ablehnen"</string>
     <string name="permission_request_notification_title" msgid="5390555465778213840">"Berechtigung angefordert"</string>

@@ -837,8 +837,6 @@
     <string name="create_contact_using" msgid="4947405226788104538">"Δημιουργία επαφής"\n"με τη χρήση του <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <string name="accessibility_compound_button_selected" msgid="5612776946036285686">"επιλεγμένο"</string>
     <string name="accessibility_compound_button_unselected" msgid="8864512895673924091">"δεν ελέγχθηκε"</string>
-    <string name="grant_credentials_permission_message_desc" msgid="6883276587034335667">"Οι εφαρμογές που παραθέτονται στη λίστα ζητούν άδεια για να αποκτήσουν πρόσβαση στα διαπιστευτήρια σύνδεσης για τον λογαριασμό <xliff:g id="ACCOUNT">%1$s</xliff:g> από <xliff:g id="APPLICATION">%2$s</xliff:g>. Θα αποδεχτείτε το αίτημα; Εάν το αποδεχτείτε, η απάντησή σας θα αποθηκευτεί και δεν θα ερωτηθείτε ξανά."</string>
-    <string name="grant_credentials_permission_message_with_authtokenlabel_desc" msgid="3159007601893584687">"Οι εφαρμογές που παραθέτονται στη λίστα ζητούν άδεια για να αποκτήσουν πρόσβαση στα διαπιστευτήρια σύνδεσης <xliff:g id="TYPE">%1$s</xliff:g> για τον λογαριασμό <xliff:g id="ACCOUNT">%2$s</xliff:g> από <xliff:g id="APPLICATION">%3$s</xliff:g>. Θα αποδεχτείτε το αίτημα; Εάν το αποδεχτείτε, η απάντησή σας θα αποθηκευτεί και δεν θα ερωτηθείτε ξανά."</string>
     <string name="allow" msgid="7225948811296386551">"Να επιτρέπεται"</string>
     <string name="deny" msgid="2081879885755434506">"Άρνηση"</string>
     <string name="permission_request_notification_title" msgid="5390555465778213840">"Απαιτείται άδεια"</string>

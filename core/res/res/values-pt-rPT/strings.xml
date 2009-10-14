@@ -837,8 +837,6 @@
     <string name="create_contact_using" msgid="4947405226788104538">"Criar contacto"\n"utilizando <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <string name="accessibility_compound_button_selected" msgid="5612776946036285686">"verificado"</string>
     <string name="accessibility_compound_button_unselected" msgid="8864512895673924091">"não verificado"</string>
-    <string name="grant_credentials_permission_message_desc" msgid="6883276587034335667">"As aplicações listadas estão a pedir autorização para aceder às credenciais de início de sessão da conta <xliff:g id="ACCOUNT">%1$s</xliff:g> a partir de <xliff:g id="APPLICATION">%2$s</xliff:g>. Pretende conceder esta autorização? Em caso afirmativo, a sua resposta será memorizada e não lhe será solicitado que responda novamente."</string>
-    <string name="grant_credentials_permission_message_with_authtokenlabel_desc" msgid="3159007601893584687">"As aplicações listadas estão a pedir autorização para aceder às credenciais de início de sessão <xliff:g id="TYPE">%1$s</xliff:g> para a conta <xliff:g id="ACCOUNT">%2$s</xliff:g> a partir de <xliff:g id="APPLICATION">%3$s</xliff:g>. Pretende conceder esta autorização? Em caso afirmativo, a sua resposta será memorizada e não lhe será solicitado que responda novamente."</string>
     <string name="allow" msgid="7225948811296386551">"Permitir"</string>
     <string name="deny" msgid="2081879885755434506">"Recusar"</string>
     <string name="permission_request_notification_title" msgid="5390555465778213840">"Autorização Solicitada"</string>
