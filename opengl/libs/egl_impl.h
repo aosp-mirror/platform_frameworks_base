@@ -23,18 +23,19 @@
 #include <EGL/eglext.h>
 #include <EGL/eglplatform.h>
 
+#include "hooks.h"
+
 // ----------------------------------------------------------------------------
 namespace android {
 // ----------------------------------------------------------------------------
 
-struct gl_hooks_t;
-
 struct egl_connection_t
 {
     void *              dso;
-    gl_hooks_t *        hooks;
+    gl_hooks_t *        hooks[2];
     EGLint              major;
     EGLint              minor;
+    egl_t               egl;
 };
 
 EGLAPI EGLImageKHR egl_get_image_for_current_context(EGLImageKHR image);
