@@ -390,6 +390,8 @@ public class WebView extends AbsoluteLayout
     private static final int LONG_PRESS_TIMEOUT = 1000;
     // needed to avoid flinging after a pause of no movement
     private static final int MIN_FLING_TIME = 250;
+    // draw unfiltered after drag is held without movement
+    private static final int MOTIONLESS_TIME = 100;
     // The time that the Zoom Controls are visible before fading away
     private static final long ZOOM_CONTROLS_TIMEOUT =
             ViewConfiguration.getZoomControlsTimeout();
@@ -427,6 +429,10 @@ public class WebView extends AbsoluteLayout
     private Scroller mScroller;
 
     private boolean mWrapContent;
+    private static final int MOTIONLESS_FALSE           = 0;
+    private static final int MOTIONLESS_PENDING         = 1;
+    private static final int MOTIONLESS_TRUE            = 2;
+    private int mHeldMotionless;
 
     /**
      * Private message ids
@@ -438,6 +444,8 @@ public class WebView extends AbsoluteLayout
     private static final int RELEASE_SINGLE_TAP         = 5;
     private static final int REQUEST_FORM_DATA          = 6;
     private static final int RESUME_WEBCORE_UPDATE      = 7;
+    private static final int DRAG_HELD_MOTIONLESS       = 8;
+    private static final int AWAKEN_SCROLL_BARS         = 9;
 
     //! arg1=x, arg2=y
     static final int SCROLL_TO_MSG_ID                   = 10;
@@ -468,9 +476,9 @@ public class WebView extends AbsoluteLayout
         "SWITCH_TO_LONGPRESS", //            = 4;
         "RELEASE_SINGLE_TAP", //             = 5;
         "REQUEST_FORM_DATA", //              = 6;
-        "SWITCH_TO_CLICK", //                = 7;
-        "RESUME_WEBCORE_UPDATE", //          = 8;
-        "9",
+        "RESUME_WEBCORE_UPDATE", //          = 7;
+        "DRAG_HELD_MOTIONLESS", //           = 8;
+        "AWAKEN_SCROLL_BARS", //             = 9;
         "SCROLL_TO_MSG_ID", //               = 10;
         "SCROLL_BY_MSG_ID", //               = 11;
         "SPAWN_SCROLL_TO_MSG_ID", //         = 12;
@@ -2870,8 +2878,22 @@ public class WebView extends AbsoluteLayout
         }
 
         boolean animateZoom = mZoomScale != 0;
-        boolean animateScroll = !mScroller.isFinished()
-                || mVelocityTracker != null;
+        boolean animateScroll = (!mScroller.isFinished()
+                || mVelocityTracker != null)
+                && (mTouchMode != TOUCH_DRAG_MODE ||
+                mHeldMotionless != MOTIONLESS_TRUE);
+        if (mTouchMode == TOUCH_DRAG_MODE) {
+            if (mHeldMotionless == MOTIONLESS_PENDING) {
+                mPrivateHandler.removeMessages(DRAG_HELD_MOTIONLESS);
+                mPrivateHandler.removeMessages(AWAKEN_SCROLL_BARS);
+                mHeldMotionless = MOTIONLESS_FALSE;
+            }
+            if (mHeldMotionless == MOTIONLESS_FALSE) {
+                mPrivateHandler.sendMessageDelayed(mPrivateHandler
+                        .obtainMessage(DRAG_HELD_MOTIONLESS), MOTIONLESS_TIME);
+                mHeldMotionless = MOTIONLESS_PENDING;
+            }
+        }
         if (animateZoom) {
             float zoomScale;
             int interval = (int) (SystemClock.uptimeMillis() - mZoomStart);
@@ -3726,8 +3748,10 @@ public class WebView extends AbsoluteLayout
             mLastSentTouchTime = eventTime;
         }
 
-        int deltaX = (int) (mLastTouchX - x);
-        int deltaY = (int) (mLastTouchY - y);
+        float fDeltaX = mLastTouchX - x;
+        float fDeltaY = mLastTouchY - y;
+        int deltaX = (int) fDeltaX;
+        int deltaY = (int) fDeltaY;
 
         switch (action) {
             case MotionEvent.ACTION_DOWN: {
@@ -3853,13 +3877,27 @@ public class WebView extends AbsoluteLayout
 
                 // do pan
                 int newScrollX = pinLocX(mScrollX + deltaX);
-                deltaX = newScrollX - mScrollX;
+                int newDeltaX = newScrollX - mScrollX;
+                if (deltaX != newDeltaX) {
+                    deltaX = newDeltaX;
+                    fDeltaX = (float) newDeltaX;
+                }
                 int newScrollY = pinLocY(mScrollY + deltaY);
-                deltaY = newScrollY - mScrollY;
+                int newDeltaY = newScrollY - mScrollY;
+                if (deltaY != newDeltaY) {
+                    deltaY = newDeltaY;
+                    fDeltaY = (float) newDeltaY;
+                }
                 boolean done = false;
-                if (deltaX == 0 && deltaY == 0) {
-                    done = true;
+                boolean keepScrollBarsVisible = false;
+                if (Math.abs(fDeltaX) < 1.0f && Math.abs(fDeltaY) < 1.0f) {
+                    keepScrollBarsVisible = done = true;
                 } else {
+                    if (mHeldMotionless != MOTIONLESS_FALSE) {
+                        mPrivateHandler.removeMessages(DRAG_HELD_MOTIONLESS);
+                        mPrivateHandler.removeMessages(AWAKEN_SCROLL_BARS);
+                        mHeldMotionless = MOTIONLESS_FALSE;
+                    }
                     if (mSnapScrollMode == SNAP_X || mSnapScrollMode == SNAP_Y) {
                         int ax = Math.abs(deltaX);
                         int ay = Math.abs(deltaY);
@@ -3899,8 +3937,7 @@ public class WebView extends AbsoluteLayout
                         if (deltaX == 0) {
                             // keep the scrollbar on the screen even there is no
                             // scroll
-                            awakenScrollBars(ViewConfiguration
-                                    .getScrollDefaultDelay(), false);
+                            keepScrollBarsVisible = true;
                         } else {
                             scrollBy(deltaX, 0);
                         }
@@ -3910,8 +3947,7 @@ public class WebView extends AbsoluteLayout
                         if (deltaY == 0) {
                             // keep the scrollbar on the screen even there is no
                             // scroll
-                            awakenScrollBars(ViewConfiguration
-                                    .getScrollDefaultDelay(), false);
+                            keepScrollBarsVisible = true;
                         } else {
                             scrollBy(0, deltaY);
                         }
@@ -3938,13 +3974,17 @@ public class WebView extends AbsoluteLayout
                     }
                 }
 
-                if (done) {
+                if (keepScrollBarsVisible) {
+                    if (mHeldMotionless != MOTIONLESS_TRUE) {
+                        mHeldMotionless = MOTIONLESS_TRUE;
+                        invalidate();
+                    }
                     // keep the scrollbar on the screen even there is no scroll
                     awakenScrollBars(ViewConfiguration.getScrollDefaultDelay(),
                             false);
                     // return false to indicate that we can't pan out of the
                     // view space
-                    return false;
+                    return !done;
                 }
                 break;
             }
@@ -3997,6 +4037,9 @@ public class WebView extends AbsoluteLayout
                             break;
                         }
                     case TOUCH_DRAG_MODE:
+                        mPrivateHandler.removeMessages(DRAG_HELD_MOTIONLESS);
+                        mPrivateHandler.removeMessages(AWAKEN_SCROLL_BARS);
+                        mHeldMotionless = MOTIONLESS_TRUE;
                         // redraw in high-quality, as we're done dragging
                         invalidate();
                         // if the user waits a while w/o moving before the
@@ -4036,6 +4079,9 @@ public class WebView extends AbsoluteLayout
                 }
                 mPrivateHandler.removeMessages(SWITCH_TO_SHORTPRESS);
                 mPrivateHandler.removeMessages(SWITCH_TO_LONGPRESS);
+                mPrivateHandler.removeMessages(DRAG_HELD_MOTIONLESS);
+                mPrivateHandler.removeMessages(AWAKEN_SCROLL_BARS);
+                mHeldMotionless = MOTIONLESS_TRUE;
                 mTouchMode = TOUCH_DONE_MODE;
                 nativeHideCursor();
                 break;
@@ -5203,6 +5249,21 @@ public class WebView extends AbsoluteLayout
                     }
                     break;
 
+                case DRAG_HELD_MOTIONLESS:
+                    mHeldMotionless = MOTIONLESS_TRUE;
+                    invalidate();
+                    // fall through to keep scrollbars awake
+
+                case AWAKEN_SCROLL_BARS:
+                    if (mTouchMode == TOUCH_DRAG_MODE
+                            && mHeldMotionless == MOTIONLESS_TRUE) {
+                        awakenScrollBars(ViewConfiguration
+                                .getScrollDefaultDelay(), false);
+                        mPrivateHandler.sendMessageDelayed(mPrivateHandler
+                                .obtainMessage(AWAKEN_SCROLL_BARS),
+                                ViewConfiguration.getScrollDefaultDelay());
+                    }
+                    break;
                 default:
                     super.handleMessage(msg);
                     break;
