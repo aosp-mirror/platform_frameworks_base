@@ -230,6 +230,6 @@ public class PropertyNodesVerifier {
         }
         mTestCase.fail("Property \"" + propName + "\" has wrong value.\n"
                 + builder.toString()
-                + " actual: " + actualNode.toString());
+                + "  actual: " + actualNode.toString());
     }
 }
