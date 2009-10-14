@@ -2117,7 +2117,7 @@ public final class ContactsContract {
         public static final String RAW_CONTACT_ID2 = "raw_contact_id2";
     }
 
-    private interface SettingsColumns {
+    protected interface SettingsColumns {
         /**
          * The name of the account instance to which this row belongs.
          * <P>Type: TEXT</P>
