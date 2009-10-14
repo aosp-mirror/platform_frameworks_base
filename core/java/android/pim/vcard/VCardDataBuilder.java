@@ -69,7 +69,7 @@ public class VCardDataBuilder implements VCardBuilder {
     private List<EntryHandler> mEntryHandlers = new ArrayList<EntryHandler>();
     
     public VCardDataBuilder() {
-        this(null, null, false, VCardConfig.VCARD_TYPE_V21_GENERIC, null);
+        this(null, null, false, VCardConfig.VCARD_TYPE_V21_GENERIC_UTF8, null);
     }
 
     /**

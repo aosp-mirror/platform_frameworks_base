@@ -56,7 +56,7 @@ package android.pim.vcard;
     public static final String PROPERTY_X_PHONETIC_MIDDLE_NAME = "X-PHONETIC-MIDDLE-NAME";
     public static final String PROPERTY_X_PHONETIC_LAST_NAME = "X-PHONETIC-LAST-NAME";
 
-    // Properties both the current (as of 2009-08-17) ContactsStruct and de-fact vCard extensions
+    // Properties both ContactsStruct in Eclair and de-fact vCard extensions
     // shown in http://en.wikipedia.org/wiki/VCard support are defined here.
     public static final String PROPERTY_X_AIM = "X-AIM";
     public static final String PROPERTY_X_MSN = "X-MSN";
@@ -65,15 +65,12 @@ package android.pim.vcard;
     public static final String PROPERTY_X_JABBER = "X-JABBER";
     public static final String PROPERTY_X_GOOGLE_TALK = "X-GOOGLE-TALK";
     public static final String PROPERTY_X_SKYPE_USERNAME = "X-SKYPE-USERNAME";
+    // Properties only ContactsStruct has. We alse use this.
+    public static final String PROPERTY_X_QQ = "X-QQ";
+    public static final String PROPERTY_X_NETMEETING = "X-NETMEETING";
+
     // Phone number for Skype, available as usual phone.
     public static final String PROPERTY_X_SKYPE_PSTNNUMBER = "X-SKYPE-PSTNNUMBER";
-    // Some device emits this "X-" attribute, which is specifically invalid but should be
-    // always properly accepted, and emitted in some special case (for that device/application).
-    public static final String PROPERTY_X_GOOGLE_TALK_WITH_SPACE = "X-GOOGLE TALK";
-
-    // Android specific properties
-    // Use only in vCard paser code.
-    public static final String PROPERTY_X_NICKNAME = "X-NICKNAME";
 
     // Properties for DoCoMo vCard.
     public static final String PROPERTY_X_CLASS = "X-CLASS";
@@ -81,6 +78,11 @@ package android.pim.vcard;
     public static final String PROPERTY_X_NO = "X-NO";
     public static final String PROPERTY_X_DCM_HMN_MODE = "X-DCM-HMN-MODE";
 
+    // For some historical reason, we often use the term "ATTR"/"attribute" especially toward
+    // what is called "param" in both vCard specs, while vCard, while vCard importer side uses
+    // "param".
+    //
+    // TODO: Confusing. Fix it.
     public static final String ATTR_TYPE = "TYPE";
 
     // How more than one TYPE fields are expressed is different between vCard 2.1 and vCard 3.0
@@ -102,13 +104,19 @@ package android.pim.vcard;
     public static final String ATTR_TYPE_VOICE = "VOICE";
     public static final String ATTR_TYPE_INTERNET = "INTERNET";
 
-    // Abbreviation of "preferable"? We interpret this value as "primary" property.
+    // Abbreviation of "prefered" according to vCard 2.1 specification.
+    // We interpret this value as "primary" property during import/export.
+    //
+    // Note: Both vCard specs does anything about the requirement about this attribute,
+    //       but there may be some vCard importer which will get confused with more than
+    //       one "PREF"s in one property name, while Android accepts them.
     public static final String ATTR_TYPE_PREF = "PREF";
 
     // Phone types valid in vCard and known to ContactsContract, but not so common.
     public static final String ATTR_TYPE_CAR = "CAR";
     public static final String ATTR_TYPE_ISDN = "ISDN";
     public static final String ATTR_TYPE_PAGER = "PAGER";
+    public static final String ATTR_TYPE_TLX = "TLX";  // Telex
 
     // Phone types existing in vCard 2.1 but not known to ContactsContract.
     // TODO: should make parser make these TYPE_CUSTOM.
@@ -118,16 +126,16 @@ package android.pim.vcard;
     public static final String ATTR_TYPE_VIDEO = "VIDEO";
 
     // Attribute for Phones, which are not formally valid in vCard (at least 2.1).
-    // These types are encoded to "X-" attributes when composing vCard for now.
-    // Parser passes these even if "X-" is added to the attribute.
-    public static final String ATTR_PHONE_EXTRA_TYPE_OTHER = "OTHER";
+    // These types are basically encoded to "X-" attributes when composing vCard.
+    // Parser passes these when "X-" is added to the attribute or not.
     public static final String ATTR_PHONE_EXTRA_TYPE_CALLBACK = "CALLBACK";
-    // TODO: may be "TYPE=COMPANY,PREF", not "COMPANY-MAIN".
-    public static final String ATTR_PHONE_EXTRA_TYPE_COMPANY_MAIN = "COMPANY-MAIN";
     public static final String ATTR_PHONE_EXTRA_TYPE_RADIO = "RADIO";
-    public static final String ATTR_PHONE_EXTRA_TYPE_TELEX = "TELEX";
     public static final String ATTR_PHONE_EXTRA_TYPE_TTY_TDD = "TTY-TDD";
     public static final String ATTR_PHONE_EXTRA_TYPE_ASSISTANT = "ASSISTANT";
+    // vCard composer translates this type to "WORK" + "PREF". Just for parsing.
+    public static final String ATTR_PHONE_EXTRA_TYPE_COMPANY_MAIN = "COMPANY-MAIN";
+    // vCard composer translates this type to "VOICE" Just for parsing.
+    public static final String ATTR_PHONE_EXTRA_TYPE_OTHER = "OTHER";
 
     // Attribute for addresses.
     public static final String ATTR_ADR_TYPE_PARCEL = "PARCEL";
@@ -141,6 +149,14 @@ package android.pim.vcard;
     // DoCoMo specific attribute. Used with "SOUND" property, which is alternate of SORT-STRING in
     // vCard 3.0.
     public static final String ATTR_TYPE_X_IRMC_N = "X-IRMC-N";
+
+    public interface ImportOnly {
+        public static final String PROPERTY_X_NICKNAME = "X-NICKNAME";
+        // Some device emits this "X-" attribute for expressing Google Talk,
+        // which is specifically invalid but should be always properly accepted, and emitted
+        // in some special case (for that device/application).
+        public static final String PROPERTY_X_GOOGLE_TALK_WITH_SPACE = "X-GOOGLE TALK";
+    }
 
     private Constants() {
     }
