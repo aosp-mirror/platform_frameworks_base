@@ -148,8 +148,10 @@
     <string name="permgroupdesc_location" msgid="2430258821648348660">"Monitora o seu local físico."</string>
     <string name="permgrouplab_network" msgid="5808983377727109831">"Comunicação da rede"</string>
     <string name="permgroupdesc_network" msgid="5035763698958415998">"Permite que os aplicativos acessem diversos recursos de rede."</string>
-    <string name="permgrouplab_accounts" msgid="7140261692496314430">"Suas Contas do Google"</string>
-    <string name="permgroupdesc_accounts" msgid="6735915929704895193">"Acessar as Contas do Google disponíveis."</string>
+    <!-- no translation found for permgrouplab_accounts (3359646291125325519) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_accounts (4948732641827091312) -->
+    <skip />
     <string name="permgrouplab_hardwareControls" msgid="7998214968791599326">"Controles de hardware"</string>
     <string name="permgroupdesc_hardwareControls" msgid="4357057861225462702">"Acessa o hardware diretamente no aparelho."</string>
     <string name="permgrouplab_phoneCalls" msgid="9067173988325865923">"Chamadas telefônicas"</string>
@@ -433,6 +435,110 @@
     <item msgid="2506857312718630823">"ICQ"</item>
     <item msgid="1648797903785279353">"Jabber"</item>
   </string-array>
+    <!-- no translation found for phoneTypeCustom (1644738059053355820) -->
+    <skip />
+    <!-- no translation found for phoneTypeHome (2570923463033985887) -->
+    <skip />
+    <!-- no translation found for phoneTypeMobile (6501463557754751037) -->
+    <skip />
+    <!-- no translation found for phoneTypeWork (8863939667059911633) -->
+    <skip />
+    <!-- no translation found for phoneTypeFaxWork (3517792160008890912) -->
+    <skip />
+    <!-- no translation found for phoneTypeFaxHome (2067265972322971467) -->
+    <skip />
+    <!-- no translation found for phoneTypePager (7582359955394921732) -->
+    <skip />
+    <!-- no translation found for phoneTypeOther (1544425847868765990) -->
+    <skip />
+    <!-- no translation found for phoneTypeCallback (2712175203065678206) -->
+    <skip />
+    <!-- no translation found for phoneTypeCar (8738360689616716982) -->
+    <skip />
+    <!-- no translation found for phoneTypeCompanyMain (540434356461478916) -->
+    <skip />
+    <!-- no translation found for phoneTypeIsdn (8022453193171370337) -->
+    <skip />
+    <!-- no translation found for phoneTypeMain (6766137010628326916) -->
+    <skip />
+    <!-- no translation found for phoneTypeOtherFax (8587657145072446565) -->
+    <skip />
+    <!-- no translation found for phoneTypeRadio (4093738079908667513) -->
+    <skip />
+    <!-- no translation found for phoneTypeTelex (3367879952476250512) -->
+    <skip />
+    <!-- no translation found for phoneTypeTtyTdd (8606514378585000044) -->
+    <skip />
+    <!-- no translation found for phoneTypeWorkMobile (1311426989184065709) -->
+    <skip />
+    <!-- no translation found for phoneTypeWorkPager (649938731231157056) -->
+    <skip />
+    <!-- no translation found for phoneTypeAssistant (5596772636128562884) -->
+    <skip />
+    <!-- no translation found for phoneTypeMms (7254492275502768992) -->
+    <skip />
+    <!-- no translation found for eventTypeBirthday (2813379844211390740) -->
+    <skip />
+    <!-- no translation found for eventTypeAnniversary (3876779744518284000) -->
+    <skip />
+    <!-- no translation found for eventTypeOther (5834288791948564594) -->
+    <skip />
+    <!-- no translation found for emailTypeCustom (8525960257804213846) -->
+    <skip />
+    <!-- no translation found for emailTypeHome (449227236140433919) -->
+    <skip />
+    <!-- no translation found for emailTypeWork (3548058059601149973) -->
+    <skip />
+    <!-- no translation found for emailTypeOther (2923008695272639549) -->
+    <skip />
+    <!-- no translation found for emailTypeMobile (119919005321166205) -->
+    <skip />
+    <!-- no translation found for postalTypeCustom (8903206903060479902) -->
+    <skip />
+    <!-- no translation found for postalTypeHome (8165756977184483097) -->
+    <skip />
+    <!-- no translation found for postalTypeWork (5268172772387694495) -->
+    <skip />
+    <!-- no translation found for postalTypeOther (2726111966623584341) -->
+    <skip />
+    <!-- no translation found for imTypeCustom (2074028755527826046) -->
+    <skip />
+    <!-- no translation found for imTypeHome (6241181032954263892) -->
+    <skip />
+    <!-- no translation found for imTypeWork (1371489290242433090) -->
+    <skip />
+    <!-- no translation found for imTypeOther (5377007495735915478) -->
+    <skip />
+    <!-- no translation found for imProtocolCustom (6919453836618749992) -->
+    <skip />
+    <!-- no translation found for imProtocolAim (7050360612368383417) -->
+    <skip />
+    <!-- no translation found for imProtocolMsn (144556545420769442) -->
+    <skip />
+    <!-- no translation found for imProtocolYahoo (8271439408469021273) -->
+    <skip />
+    <!-- no translation found for imProtocolSkype (9019296744622832951) -->
+    <skip />
+    <!-- no translation found for imProtocolQq (8887484379494111884) -->
+    <skip />
+    <!-- no translation found for imProtocolGoogleTalk (3808393979157698766) -->
+    <skip />
+    <!-- no translation found for imProtocolIcq (1574870433606517315) -->
+    <skip />
+    <!-- no translation found for imProtocolJabber (2279917630875771722) -->
+    <skip />
+    <!-- no translation found for imProtocolNetMeeting (8287625655986827971) -->
+    <skip />
+    <!-- no translation found for orgTypeWork (29268870505363872) -->
+    <skip />
+    <!-- no translation found for orgTypeOther (3951781131570124082) -->
+    <skip />
+    <!-- no translation found for orgTypeCustom (225523415372088322) -->
+    <skip />
+    <!-- no translation found for contact_status_update_attribution (5112589886094402795) -->
+    <skip />
+    <!-- no translation found for contact_status_update_attribution_with_date (5945386376369979909) -->
+    <skip />
     <string name="keyguard_password_enter_pin_code" msgid="3731488827218876115">"Digite o código PIN"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="1295984114338107718">"Código PIN incorreto!"</string>
     <string name="keyguard_label_text" msgid="861796461028298424">"Para desbloquear, pressione Menu e, em seguida, 0."</string>
@@ -447,6 +553,8 @@
     <string name="lockscreen_pattern_wrong" msgid="4817583279053112312">"Tente novamente"</string>
     <string name="lockscreen_plugged_in" msgid="613343852842944435">"Carregando (<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>)"</string>
     <string name="lockscreen_charged" msgid="4938930459620989972">"Carregado."</string>
+    <!-- no translation found for lockscreen_battery_short (3617549178603354656) -->
+    <skip />
     <string name="lockscreen_low_battery" msgid="1482873981919249740">"Conecte o seu carregador."</string>
     <string name="lockscreen_missing_sim_message_short" msgid="7381499217732227295">"Sem cartão SIM."</string>
     <string name="lockscreen_missing_sim_message" msgid="2186920585695169078">"Não há um cartão SIM no telefone."</string>
@@ -478,7 +586,8 @@
     <string name="battery_status_charging" msgid="756617993998772213">"Carregando..."</string>
     <string name="battery_low_title" msgid="7923774589611311406">"Conecte o carregador"</string>
     <string name="battery_low_subtitle" msgid="7388781709819722764">"A bateria está ficando baixa:"</string>
-    <string name="battery_low_percent_format" msgid="6564958083485073855">"menos de <xliff:g id="NUMBER">%d%%</xliff:g> restantes."</string>
+    <!-- no translation found for battery_low_percent_format (696154104579022959) -->
+    <skip />
     <string name="battery_low_why" msgid="7279169609518386372">"Uso da bateria"</string>
     <string name="factorytest_failed" msgid="5410270329114212041">"Falha no teste de fábrica"</string>
     <string name="factorytest_not_system" msgid="4435201656767276723">"A ação FACTORY_TEST é suportada apenas para pacotes instalados em /system/app."</string>
@@ -488,6 +597,8 @@
     <string name="js_dialog_title_default" msgid="6961903213729667573">"JavaScript"</string>
     <string name="js_dialog_before_unload" msgid="1901675448179653089">"Deseja sair desta página?"\n\n"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"Selecione OK para continuar ou Cancelar para permanecer na página atual."</string>
     <string name="save_password_label" msgid="6860261758665825069">"Confirmar"</string>
+    <!-- no translation found for double_tap_toast (1068216937244567247) -->
+    <skip />
     <string name="permlab_readHistoryBookmarks" msgid="1284843728203412135">"ler histórico e favoritos do Navegador"</string>
     <string name="permdesc_readHistoryBookmarks" msgid="4981489815467617191">"Permite que o aplicativo leia todos os URLs visitados pelo Navegador e todos os favoritos do Navegador."</string>
     <string name="permlab_writeHistoryBookmarks" msgid="9009434109836280374">"gravar histórico e favoritos do Navegador"</string>
@@ -585,7 +696,7 @@
     <string name="weeks" msgid="6509623834583944518">"semanas"</string>
     <string name="year" msgid="4001118221013892076">"ano"</string>
     <string name="years" msgid="6881577717993213522">"anos"</string>
-    <string name="every_weekday" msgid="8777593878457748503">"Todos os dias da semana (de segunda a sexta)"</string>
+    <string name="every_weekday" msgid="8777593878457748503">"De segunda a sexta-feira"</string>
     <string name="daily" msgid="5738949095624133403">"Diariamente"</string>
     <string name="weekly" msgid="983428358394268344">"Semanalmente na <xliff:g id="DAY">%s</xliff:g>"</string>
     <string name="monthly" msgid="2667202947170988834">"Mensalmente"</string>
@@ -719,7 +830,7 @@
     <string name="ime_action_go" msgid="8320845651737369027">"Ir"</string>
     <string name="ime_action_search" msgid="658110271822807811">"Pesquisar"</string>
     <string name="ime_action_send" msgid="2316166556349314424">"Enviar"</string>
-    <string name="ime_action_next" msgid="3138843904009813834">"Próximo"</string>
+    <string name="ime_action_next" msgid="3138843904009813834">"Avançar"</string>
     <string name="ime_action_done" msgid="8971516117910934605">"Concluído"</string>
     <string name="ime_action_default" msgid="2840921885558045721">"Executar"</string>
     <string name="dial_number_using" msgid="5789176425167573586">"Discar número"\n"usando <xliff:g id="NUMBER">%s</xliff:g>"</string>
@@ -738,4 +849,12 @@
     <string name="accessibility_binding_label" msgid="4148120742096474641">"Acessibilidade"</string>
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"Papel de parede"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"Alterar papel de parede"</string>
+    <!-- no translation found for pptp_vpn_description (2688045385181439401) -->
+    <skip />
+    <!-- no translation found for l2tp_vpn_description (3750692169378923304) -->
+    <skip />
+    <!-- no translation found for l2tp_ipsec_psk_vpn_description (3945043564008303239) -->
+    <skip />
+    <!-- no translation found for l2tp_ipsec_crt_vpn_description (5382714073103653577) -->
+    <skip />
 </resources>
