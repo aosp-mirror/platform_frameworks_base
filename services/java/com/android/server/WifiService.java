@@ -1716,8 +1716,10 @@ public class WifiService extends IWifiManager.Stub {
     }
 
     private boolean acquireWifiLockLocked(WifiLock wifiLock) {
+        Log.d(TAG, "acquireWifiLockLocked: " + wifiLock);
+
         mLocks.addLock(wifiLock);
-        
+
         int uid = Binder.getCallingUid();
         long ident = Binder.clearCallingIdentity();
         try {
@@ -1735,7 +1737,7 @@ public class WifiService extends IWifiManager.Stub {
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
-        
+
         updateWifiState();
         return true;
     }
@@ -1749,8 +1751,11 @@ public class WifiService extends IWifiManager.Stub {
 
     private boolean releaseWifiLockLocked(IBinder lock) {
         boolean hadLock;
-        
+
         WifiLock wifiLock = mLocks.removeLock(lock);
+
+        Log.d(TAG, "releaseWifiLockLocked: " + wifiLock);
+
         hadLock = (wifiLock != null);
 
         if (hadLock) {
@@ -1772,7 +1777,7 @@ public class WifiService extends IWifiManager.Stub {
                 Binder.restoreCallingIdentity(ident);
             }
         }
-        
+        // TODO - should this only happen if you hadLock?
         updateWifiState();
         return hadLock;
     }
