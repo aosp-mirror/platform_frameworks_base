@@ -721,11 +721,14 @@ public abstract class KeyInputQueue {
                                         // virtual key area...  but still
                                         // propagate this to the previous
                                         // data for comparisons.
+                                        int num = ms.mNextNumPointers;
+                                        if (num > InputDevice.MAX_POINTERS) {
+                                            num = InputDevice.MAX_POINTERS;
+                                        }
                                         System.arraycopy(ms.mNextData, 0,
                                                 ms.mLastData, 0,
-                                                ms.mNextNumPointers
-                                                        * MotionEvent.NUM_SAMPLE_DATA);
-                                        ms.mLastNumPointers = ms.mNextNumPointers;
+                                                num * MotionEvent.NUM_SAMPLE_DATA);
+                                        ms.mLastNumPointers = num;
                                     }
                                     
                                     ms.finish();
