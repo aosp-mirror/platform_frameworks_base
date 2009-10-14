@@ -496,15 +496,18 @@ class BrowserFrame extends Handler {
      * @param uri A String representing the URI of the desired file.
      * @param buffer The byte array to copy the data into.
      * @param offset The offet into buffer to place the data.
+     * @param expectSize The size that the buffer has allocated for this file.
      * @return int The size of the given file, or zero if it fails.
      */
-    private int getFile(String uri, byte[] buffer, int offset) {
+    private int getFile(String uri, byte[] buffer, int offset,
+            int expectedSize) {
         int size = 0;
         try {
             InputStream stream = mContext.getContentResolver()
                             .openInputStream(Uri.parse(uri));
             size = stream.available();
-            if (buffer != null && buffer.length - offset >= size) {
+            if (size <= expectedSize && buffer != null
+                    && buffer.length - offset >= size) {
                 stream.read(buffer, offset, size);
             } else {
                 size = 0;
