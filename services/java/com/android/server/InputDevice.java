@@ -268,6 +268,7 @@ public class InputDevice {
                 while (start != end) {
                     int soff = poff + (start*MotionEvent.NUM_SAMPLE_DATA);
                     int pressure = mHistoryData[soff + MotionEvent.SAMPLE_PRESSURE];
+                    if (pressure <= 0) pressure = 1;
                     x += mHistoryData[soff + MotionEvent.SAMPLE_X] * pressure;
                     y += mHistoryData[soff + MotionEvent.SAMPLE_Y] * pressure;
                     totalPressure += pressure;
@@ -276,6 +277,7 @@ public class InputDevice {
                 }
                 int eoff = poff + (end*MotionEvent.NUM_SAMPLE_DATA);
                 int pressure = mHistoryData[eoff + MotionEvent.SAMPLE_PRESSURE];
+                if (pressure <= 0) pressure = 1;
                 x += mHistoryData[eoff + MotionEvent.SAMPLE_X] * pressure;
                 y += mHistoryData[eoff + MotionEvent.SAMPLE_Y] * pressure;
                 totalPressure += pressure;
