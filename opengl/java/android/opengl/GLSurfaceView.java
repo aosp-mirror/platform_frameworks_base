@@ -18,7 +18,6 @@ package android.opengl;
 
 import java.io.Writer;
 import java.util.ArrayList;
-import java.util.concurrent.Semaphore;
 
 import javax.microedition.khronos.egl.EGL10;
 import javax.microedition.khronos.egl.EGL11;
@@ -30,6 +29,8 @@ import javax.microedition.khronos.opengles.GL;
 import javax.microedition.khronos.opengles.GL10;
 
 import android.content.Context;
+import android.content.pm.ConfigurationInfo;
+import android.os.SystemProperties;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.SurfaceHolder;
@@ -966,16 +967,12 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
              * accesses EGL.
              */
             try {
-                try {
-                sEglSemaphore.acquire();
-                } catch (InterruptedException e) {
-                    return;
-                }
+                sGLAccessLock.acquire();
                 guardedRun();
             } catch (InterruptedException e) {
                 // fall thru and exit normally
             } finally {
-                sEglSemaphore.release();
+                sGLAccessLock.release();
             }
         }
 
@@ -1040,6 +1037,7 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
                     }
                     if (changed) {
                         gl = (GL10) mEglHelper.createSurface(getHolder());
+                        sGLAccessLock.checkGLDriver(gl);
                         tellRendererSurfaceChanged = true;
                     }
                     if (tellRendererSurfaceCreated) {
@@ -1241,7 +1239,56 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
         }
     }
 
-    private static final Semaphore sEglSemaphore = new Semaphore(1);
+    private static class GLAccessLock {
+        public synchronized void acquire() throws InterruptedException {
+            if (! mGLESVersionCheckComplete) {
+                mGLESVersion = SystemProperties.getInt(
+                        "ro.opengles.version",
+                        ConfigurationInfo.GL_ES_VERSION_UNDEFINED);
+                if (mGLESVersion >= kGLES_20) {
+                    mMultipleGLESContextsAllowed = true;
+                }
+                mGLESVersionCheckComplete = true;
+            }
+
+            while ((! mMultipleGLESContextsAllowed)
+                    && mGLContextCount > 0) {
+                wait();
+            }
+
+            mGLContextCount++;
+
+        }
+
+        public synchronized void release() {
+            mGLContextCount--;
+            notifyAll();
+        }
+
+        public synchronized void checkGLDriver(GL10 gl) {
+            if (! mGLESDriverCheckComplete) {
+                if (mGLESVersion < kGLES_20) {
+                    String renderer = gl.glGetString(GL10.GL_RENDERER);
+                    mMultipleGLESContextsAllowed =
+                        ! renderer.startsWith(kMSM7K_RENDERER_PREFIX);
+                    notifyAll();
+                }
+                mGLESDriverCheckComplete = true;
+            }
+        }
+
+        private boolean mGLESVersionCheckComplete;
+        private int mGLESVersion;
+        private boolean mGLESDriverCheckComplete;
+        private boolean mMultipleGLESContextsAllowed;
+        private int mGLContextCount;
+        private static final int kGLES_20 = 0x20000;
+        private static final String kMSM7K_RENDERER_PREFIX =
+            "Q3Dimension MSM7500 ";
+    };
+
+    private static GLAccessLock sGLAccessLock = new GLAccessLock();
+
     private boolean mSizeChanged = true;
 
     private GLThread mGLThread;
