@@ -21,120 +21,142 @@
 #include <binder/IServiceManager.h>
 #include <media/stagefright/CameraSource.h>
 #include <media/stagefright/MediaDebug.h>
+#include <media/stagefright/MediaDefs.h>
 #include <media/stagefright/MediaErrors.h>
 #include <media/stagefright/MetaData.h>
-#include <ui/ICameraClient.h>
-#include <ui/ICameraService.h>
+#include <ui/Camera.h>
+#include <ui/CameraParameters.h>
+#include <ui/GraphicBuffer.h>
+#include <ui/ISurface.h>
 #include <ui/Overlay.h>
-#include <utils/String16.h>
+#include <utils/String8.h>
 
 namespace android {
 
-class CameraBuffer : public MediaBuffer {
-public:
-    CameraBuffer(const sp<IMemory> &frame)
-        : MediaBuffer(frame->pointer(), frame->size()),
-          mFrame(frame) {
-    }
+static int64_t getNowUs() {
+    struct timeval tv;
+    gettimeofday(&tv, NULL);
 
-    sp<IMemory> releaseFrame() {
-        sp<IMemory> frame = mFrame;
-        mFrame.clear();
-        return frame;
-    }
+    return (int64_t)tv.tv_usec + tv.tv_sec * 1000000;
+}
 
-private:
-    sp<IMemory> mFrame;
-};
-
-class CameraSourceClient : public BnCameraClient {
-public:
-    CameraSourceClient()
-        : mSource(NULL) {
-    }
-
-    virtual void notifyCallback(int32_t msgType, int32_t ext1, int32_t ext2) {
-        CHECK(mSource != NULL);
-        mSource->notifyCallback(msgType, ext1, ext2);
-    }
-
-    virtual void dataCallback(int32_t msgType, const sp<IMemory> &data) {
-        CHECK(mSource != NULL);
-        mSource->dataCallback(msgType, data);
-    }
-
-    void setCameraSource(CameraSource *source) {
-        mSource = source;
-    }
-
-private:
-    CameraSource *mSource;
-};
-
-class DummySurface : public BnSurface {
-public:
+struct DummySurface : public BnSurface {
     DummySurface() {}
+
+    virtual sp<GraphicBuffer> requestBuffer(int bufferIdx, int usage) {
+        return NULL;
+    }
 
     virtual status_t registerBuffers(const BufferHeap &buffers) {
         return OK;
     }
 
-    virtual void postBuffer(ssize_t offset) {
-    }
+    virtual void postBuffer(ssize_t offset) {}
+    virtual void unregisterBuffers() {}
 
-    virtual void unregisterBuffers() {
-    }
-    
     virtual sp<OverlayRef> createOverlay(
             uint32_t w, uint32_t h, int32_t format) {
         return NULL;
     }
+
+protected:
+    virtual ~DummySurface() {}
+
+    DummySurface(const DummySurface &);
+    DummySurface &operator=(const DummySurface &);
 };
+
+struct CameraSourceListener : public CameraListener {
+    CameraSourceListener(const sp<CameraSource> &source);
+
+    virtual void notify(int32_t msgType, int32_t ext1, int32_t ext2);
+    virtual void postData(int32_t msgType, const sp<IMemory> &dataPtr);
+
+    virtual void postDataTimestamp(
+            nsecs_t timestamp, int32_t msgType, const sp<IMemory>& dataPtr);
+
+protected:
+    virtual ~CameraSourceListener();
+
+private:
+    wp<CameraSource> mSource;
+
+    CameraSourceListener(const CameraSourceListener &);
+    CameraSourceListener &operator=(const CameraSourceListener &);
+};
+
+CameraSourceListener::CameraSourceListener(const sp<CameraSource> &source)
+    : mSource(source) {
+}
+
+CameraSourceListener::~CameraSourceListener() {
+}
+
+void CameraSourceListener::notify(int32_t msgType, int32_t ext1, int32_t ext2) {
+    LOGV("notify(%d, %d, %d)", msgType, ext1, ext2);
+}
+
+void CameraSourceListener::postData(int32_t msgType, const sp<IMemory> &dataPtr) {
+    LOGV("postData(%d, ptr:%p, size:%d)",
+         msgType, dataPtr->pointer(), dataPtr->size());
+
+    sp<CameraSource> source = mSource.promote();
+    if (source.get() != NULL) {
+        source->dataCallback(msgType, dataPtr);
+    }
+}
+
+void CameraSourceListener::postDataTimestamp(
+        nsecs_t timestamp, int32_t msgType, const sp<IMemory>& dataPtr) {
+    LOGV("postDataTimestamp(%lld, %d, ptr:%p, size:%d)",
+         timestamp, msgType, dataPtr->pointer(), dataPtr->size());
+}
 
 // static
 CameraSource *CameraSource::Create() {
-    sp<IServiceManager> sm = defaultServiceManager();
+    sp<Camera> camera = Camera::connect();
 
-    sp<ICameraService> service =
-        interface_cast<ICameraService>(
-                sm->getService(String16("media.camera")));
+    if (camera.get() == NULL) {
+        return NULL;
+    }
 
-    sp<CameraSourceClient> client = new CameraSourceClient;
-    sp<ICamera> camera = service->connect(client);
-
-    CameraSource *source = new CameraSource(camera, client);
-    client->setCameraSource(source);
-
-    return source;
+    return new CameraSource(camera);
 }
 
-CameraSource::CameraSource(
-        const sp<ICamera> &camera, const sp<ICameraClient> &client)
+CameraSource::CameraSource(const sp<Camera> &camera)
     : mCamera(camera),
-      mCameraClient(client),
+      mWidth(0),
+      mHeight(0),
+      mFirstFrameTimeUs(0),
       mNumFrames(0),
       mStarted(false) {
-    printf("params: \"%s\"\n", mCamera->getParameters().string());
+    String8 s = mCamera->getParameters();
+    printf("params: \"%s\"\n", s.string());
+
+    CameraParameters params(s);
+    params.getPreviewSize(&mWidth, &mHeight);
 }
 
 CameraSource::~CameraSource() {
     if (mStarted) {
         stop();
     }
-
-    mCamera->disconnect();
 }
 
 status_t CameraSource::start(MetaData *) {
     CHECK(!mStarted);
 
-    status_t err = mCamera->lock();
+    mCamera->setListener(new CameraSourceListener(this));
+
+    sp<ISurface> dummy = new DummySurface;
+    status_t err = mCamera->setPreviewDisplay(dummy);
     CHECK_EQ(err, OK);
 
-    err = mCamera->setPreviewDisplay(new DummySurface);
-    CHECK_EQ(err, OK);
-    mCamera->setPreviewCallbackFlag(1);
-    mCamera->startPreview();
+    mCamera->setPreviewCallbackFlags(
+            FRAME_CALLBACK_FLAG_ENABLE_MASK
+            | FRAME_CALLBACK_FLAG_COPY_OUT_MASK);
+
+    err = mCamera->startPreview();
     CHECK_EQ(err, OK);
 
     mStarted = true;
@@ -146,7 +168,6 @@ status_t CameraSource::stop() {
     CHECK(mStarted);
 
     mCamera->stopPreview();
-    mCamera->unlock();
 
     mStarted = false;
 
@@ -157,8 +178,8 @@ sp<MetaData> CameraSource::getFormat() {
     sp<MetaData> meta = new MetaData;
     meta->setCString(kKeyMIMEType, MEDIA_MIMETYPE_VIDEO_RAW);
     meta->setInt32(kKeyColorFormat, OMX_COLOR_FormatYUV420SemiPlanar);
-    meta->setInt32(kKeyWidth, 480);
-    meta->setInt32(kKeyHeight, 320);
+    meta->setInt32(kKeyWidth, mWidth);
+    meta->setInt32(kKeyHeight, mHeight);
 
     return meta;
 }
@@ -175,6 +196,7 @@ status_t CameraSource::read(
     }
 
     sp<IMemory> frame;
+    int64_t frameTime;
 
     {
         Mutex::Autolock autoLock(mLock);
@@ -184,40 +206,33 @@ status_t CameraSource::read(
 
         frame = *mFrames.begin();
         mFrames.erase(mFrames.begin());
+
+        frameTime = *mFrameTimes.begin();
+        mFrameTimes.erase(mFrameTimes.begin());
     }
 
-    int count = mNumFrames++;
-
-    *buffer = new CameraBuffer(frame);
+    *buffer = new MediaBuffer(frame->size());
+    memcpy((*buffer)->data(), frame->pointer(), frame->size());
+    (*buffer)->set_range(0, frame->size());
 
     (*buffer)->meta_data()->clear();
-    (*buffer)->meta_data()->setInt64(kKeyTime, (count * 1000000) / 15);
-
-    (*buffer)->add_ref();
-    (*buffer)->setObserver(this);
+    (*buffer)->meta_data()->setInt64(kKeyTime, frameTime);
 
     return OK;
-}
-
-void CameraSource::notifyCallback(int32_t msgType, int32_t ext1, int32_t ext2) {
-    printf("notifyCallback %d, %d, %d\n", msgType, ext1, ext2);
 }
 
 void CameraSource::dataCallback(int32_t msgType, const sp<IMemory> &data) {
     Mutex::Autolock autoLock(mLock);
 
+    int64_t nowUs = getNowUs();
+    if (mNumFrames == 0) {
+        mFirstFrameTimeUs = nowUs;
+    }
+    ++mNumFrames;
+
     mFrames.push_back(data);
+    mFrameTimes.push_back(nowUs - mFirstFrameTimeUs);
     mFrameAvailableCondition.signal();
-}
-
-void CameraSource::signalBufferReturned(MediaBuffer *_buffer) {
-    CameraBuffer *buffer = static_cast<CameraBuffer *>(_buffer);
-
-    mCamera->releaseRecordingFrame(buffer->releaseFrame());
-
-    buffer->setObserver(NULL);
-    buffer->release();
-    buffer = NULL;
 }
 
 }  // namespace android
