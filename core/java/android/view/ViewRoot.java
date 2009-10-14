@@ -68,6 +68,7 @@ public final class ViewRoot extends Handler implements ViewParent,
         View.AttachInfo.Callbacks {
     private static final String TAG = "ViewRoot";
     private static final boolean DBG = false;
+    private static final boolean SHOW_FPS = false;
     @SuppressWarnings({"ConstantConditionalExpression"})
     private static final boolean LOCAL_LOGV = false ? Config.LOGD : Config.LOGV;
     /** @noinspection PointlessBooleanExpression*/
@@ -1244,7 +1245,7 @@ public final class ViewRoot extends Handler implements ViewParent,
                     mEgl.eglSwapBuffers(mEglDisplay, mEglSurface);
                     checkEglErrors();
 
-                    if (Config.DEBUG && ViewDebug.showFps) {
+                    if (SHOW_FPS || Config.DEBUG && ViewDebug.showFps) {
                         int now = (int)SystemClock.elapsedRealtime();
                         if (sDrawTime != 0) {
                             nativeShowFPS(canvas, now - sDrawTime);
@@ -1356,7 +1357,7 @@ public final class ViewRoot extends Handler implements ViewParent,
                     mView.dispatchConsistencyCheck(ViewDebug.CONSISTENCY_DRAWING);
                 }
 
-                if (Config.DEBUG && ViewDebug.showFps) {
+                if (SHOW_FPS || Config.DEBUG && ViewDebug.showFps) {
                     int now = (int)SystemClock.elapsedRealtime();
                     if (sDrawTime != 0) {
                         nativeShowFPS(canvas, now - sDrawTime);
