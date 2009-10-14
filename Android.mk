@@ -108,6 +108,7 @@ LOCAL_SRC_FILES += \
 	core/java/android/hardware/ISensorService.aidl \
 	core/java/android/net/IConnectivityManager.aidl \
 	core/java/android/os/ICheckinService.aidl \
+	core/java/android/os/IDropBox.aidl \
 	core/java/android/os/IHardwareService.aidl \
 	core/java/android/os/IMessenger.aidl \
 	core/java/android/os/IMountService.aidl \
@@ -216,6 +217,7 @@ aidl_files := \
 	frameworks/base/core/java/android/appwidget/AppWidgetProviderInfo.aidl \
 	frameworks/base/core/java/android/net/Uri.aidl \
 	frameworks/base/core/java/android/os/Bundle.aidl \
+	frameworks/base/core/java/android/os/DropBoxEntry.aidl \
 	frameworks/base/core/java/android/os/ParcelFileDescriptor.aidl \
 	frameworks/base/core/java/android/os/ParcelUuid.aidl \
 	frameworks/base/core/java/android/view/KeyEvent.aidl \
