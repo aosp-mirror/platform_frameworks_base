@@ -68,7 +68,8 @@ public class ContactStruct {
         sImMap.put(Constants.PROPERTY_X_JABBER, Im.PROTOCOL_JABBER);
         sImMap.put(Constants.PROPERTY_X_SKYPE_USERNAME, Im.PROTOCOL_SKYPE);
         sImMap.put(Constants.PROPERTY_X_GOOGLE_TALK, Im.PROTOCOL_GOOGLE_TALK);
-        sImMap.put(Constants.PROPERTY_X_GOOGLE_TALK_WITH_SPACE, Im.PROTOCOL_GOOGLE_TALK);
+        sImMap.put(Constants.ImportOnly.PROPERTY_X_GOOGLE_TALK_WITH_SPACE,
+                Im.PROTOCOL_GOOGLE_TALK);
     }
     
     static public class PhoneData {
@@ -292,16 +293,18 @@ public class ContactStruct {
     }
     
     static public class ImData {
+        public final int protocol;
+        public final String customProtocol;
         public final int type;
         public final String data;
-        public final String label;
         public final boolean isPrimary;
         
-        // TODO: ContactsConstant#PROTOCOL, ContactsConstant#CUSTOM_PROTOCOL should be used?
-        public ImData(int type, String data, String label, boolean isPrimary) {
+        public ImData(int protocol, String customProtocol, int type,
+                String data, boolean isPrimary) {
+            this.protocol = protocol;
+            this.customProtocol = customProtocol;
             this.type = type;
             this.data = data;
-            this.label = label;
             this.isPrimary = isPrimary;
         }
         
@@ -311,14 +314,18 @@ public class ContactStruct {
                 return false;
             }
             ImData imData = (ImData)obj;
-            return (type == imData.type && data.equals(imData.data) &&
-                    label.equals(imData.label) && isPrimary == imData.isPrimary);
+            return (type == imData.type && protocol == imData.protocol
+                    && (customProtocol != null ? customProtocol.equals(imData.customProtocol) :
+                        (imData.customProtocol == null))
+                    && (data != null ? data.equals(imData.data) : (imData.data == null))
+                    && isPrimary == imData.isPrimary);
         }
         
         @Override
         public String toString() {
-            return String.format("type: %d, data: %s, label: %s, isPrimary: %s",
-                    type, data, label, isPrimary);
+            return String.format(
+                    "type: %d, protocol: %d, custom_protcol: %s, data: %s, isPrimary: %s",
+                    type, protocol, customProtocol, data, isPrimary);
         }
     }
     
@@ -440,7 +447,7 @@ public class ContactStruct {
     private final Account mAccount;
 
     public ContactStruct() {
-        this(VCardConfig.VCARD_TYPE_V21_GENERIC);
+        this(VCardConfig.VCARD_TYPE_V21_GENERIC_UTF8);
     }
 
     public ContactStruct(int vcardType) {
@@ -619,11 +626,12 @@ public class ContactStruct {
         addNewOrganization(DEFAULT_ORGANIZATION_TYPE, null, null, title, false);
     }
 
-    private void addIm(int type, String data, String label, boolean isPrimary) {
+    private void addIm(int protocol, String customProtocol, int type,
+            String propValue, boolean isPrimary) {
         if (mImList == null) {
             mImList = new ArrayList<ImData>();
         }
-        mImList.add(new ImData(type, data, label, isPrimary));
+        mImList.add(new ImData(protocol, customProtocol, type, propValue, isPrimary));
     }
     
     private void addNote(final String note) {
@@ -720,7 +728,7 @@ public class ContactStruct {
         } else if (propName.equals(Constants.PROPERTY_NICKNAME)) {
             mPhoneticFullName = propValue;
         } else if (propName.equals(Constants.PROPERTY_NICKNAME) ||
-                propName.equals(Constants.PROPERTY_X_NICKNAME)) {
+                propName.equals(Constants.ImportOnly.PROPERTY_X_NICKNAME)) {
             addNickName(propValue);
         } else if (propName.equals(Constants.PROPERTY_SOUND)) {
             Collection<String> typeCollection = paramMap.get(Constants.ATTR_TYPE);
@@ -891,25 +899,28 @@ public class ContactStruct {
                 isPrimary = false;
             }
             addPhone(type, propValue, label, isPrimary);
-        } else if (sImMap.containsKey(propName)){
-            int type = sImMap.get(propName);
+        } else if (sImMap.containsKey(propName)) {
+            final int protocol = sImMap.get(propName);
             boolean isPrimary = false;
+            int type = -1;
             final Collection<String> typeCollection = paramMap.get(Constants.ATTR_TYPE);
             if (typeCollection != null) {
                 for (String typeString : typeCollection) {
                     if (typeString.equals(Constants.ATTR_TYPE_PREF)) {
                         isPrimary = true;
-                    } else if (typeString.equalsIgnoreCase(Constants.ATTR_TYPE_HOME)) {
-                        type = Phone.TYPE_HOME;
-                    } else if (typeString.equalsIgnoreCase(Constants.ATTR_TYPE_WORK)) {
-                        type = Phone.TYPE_WORK;
+                    } else if (type < 0) {
+                        if (typeString.equalsIgnoreCase(Constants.ATTR_TYPE_HOME)) {
+                            type = Im.TYPE_HOME;
+                        } else if (typeString.equalsIgnoreCase(Constants.ATTR_TYPE_WORK)) {
+                            type = Im.TYPE_WORK;
+                        }
                     }
                 }
             }
             if (type < 0) {
                 type = Phone.TYPE_HOME;
             }
-            addIm(type, propValue, null, isPrimary);
+            addIm(protocol, null, type, propValue, isPrimary);
         } else if (propName.equals(Constants.PROPERTY_NOTE)) {
             addNote(propValue);
         } else if (propName.equals(Constants.PROPERTY_URL)) {
@@ -1158,10 +1169,10 @@ public class ContactStruct {
                 builder.withValueBackReference(Im.RAW_CONTACT_ID, 0);
                 builder.withValue(Data.MIMETYPE, Im.CONTENT_ITEM_TYPE);
                 builder.withValue(Im.TYPE, imData.type);
-                if (imData.type == Im.TYPE_CUSTOM) {
-                    builder.withValue(Im.LABEL, imData.label);
+                builder.withValue(Im.PROTOCOL, imData.protocol);
+                if (imData.protocol == Im.PROTOCOL_CUSTOM) {
+                    builder.withValue(Im.CUSTOM_PROTOCOL, imData.customProtocol);
                 }
-                builder.withValue(Im.DATA, imData.data);
                 if (imData.isPrimary) {
                     builder.withValue(Data.IS_PRIMARY, 1);
                 }

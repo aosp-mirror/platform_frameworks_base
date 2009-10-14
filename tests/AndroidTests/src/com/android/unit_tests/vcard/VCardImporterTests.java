@@ -722,7 +722,7 @@ public class VCardImporterTests extends AndroidTestCase {
 
     public void testV21SimpleCase1_Type_Generic() throws IOException, VCardException {
         ContactStructVerifier verifier = new ContactStructVerifier(
-                R.raw.v21_simple_1, VCardConfig.VCARD_TYPE_V21_GENERIC);
+                R.raw.v21_simple_1, VCardConfig.VCARD_TYPE_V21_GENERIC_UTF8);
         ContentValues contentValues =
             verifier.createExpected(StructuredName.CONTENT_ITEM_TYPE);
         contentValues.put(StructuredName.FAMILY_NAME, "Ando");
@@ -733,7 +733,7 @@ public class VCardImporterTests extends AndroidTestCase {
 
     public void testV21SimpleCase1_Type_Japanese() throws IOException, VCardException {
         ContactStructVerifier verifier = new ContactStructVerifier(
-                R.raw.v21_simple_1, VCardConfig.VCARD_TYPE_V21_JAPANESE);
+                R.raw.v21_simple_1, VCardConfig.VCARD_TYPE_V21_JAPANESE_SJIS);
         ContentValues contentValues =
             verifier.createExpected(StructuredName.CONTENT_ITEM_TYPE);
         contentValues.put(StructuredName.FAMILY_NAME, "Ando");
@@ -746,7 +746,7 @@ public class VCardImporterTests extends AndroidTestCase {
 
     public void testV21SimpleCase2() throws IOException, VCardException {
         ContactStructVerifier verifier = new ContactStructVerifier(
-                R.raw.v21_simple_2, VCardConfig.VCARD_TYPE_V21_GENERIC);
+                R.raw.v21_simple_2, VCardConfig.VCARD_TYPE_V21_GENERIC_UTF8);
         ContentValues contentValues =
             verifier.createExpected(StructuredName.CONTENT_ITEM_TYPE);
         contentValues.put(StructuredName.DISPLAY_NAME, "Ando Roid");
@@ -755,7 +755,7 @@ public class VCardImporterTests extends AndroidTestCase {
 
     public void testV21SimpleCase3() throws IOException, VCardException {
         ContactStructVerifier verifier = new ContactStructVerifier(
-                R.raw.v21_simple_3, VCardConfig.VCARD_TYPE_V21_GENERIC);
+                R.raw.v21_simple_3, VCardConfig.VCARD_TYPE_V21_GENERIC_UTF8);
         ContentValues contentValues =
             verifier.createExpected(StructuredName.CONTENT_ITEM_TYPE);
         contentValues.put(StructuredName.FAMILY_NAME, "Ando");
@@ -790,7 +790,7 @@ public class VCardImporterTests extends AndroidTestCase {
      */
     public void testV21BackslashCase() throws IOException, VCardException {
         ContactStructVerifier verifier = new ContactStructVerifier(
-                R.raw.v21_backslash, VCardConfig.VCARD_TYPE_V21_GENERIC);
+                R.raw.v21_backslash, VCardConfig.VCARD_TYPE_V21_GENERIC_UTF8);
         ContentValues contentValues =
             verifier.createExpected(StructuredName.CONTENT_ITEM_TYPE);
         // FAMILY_NAME is empty and removed in this test...
@@ -804,7 +804,7 @@ public class VCardImporterTests extends AndroidTestCase {
 
     public void testOrgBeforTitle() throws IOException, VCardException {
         ContactStructVerifier verifier = new ContactStructVerifier(
-                R.raw.v21_org_before_title, VCardConfig.VCARD_TYPE_V21_GENERIC);
+                R.raw.v21_org_before_title, VCardConfig.VCARD_TYPE_V21_GENERIC_UTF8);
         ContentValues contentValues =
             verifier.createExpected(StructuredName.CONTENT_ITEM_TYPE);
         contentValues.put(StructuredName.DISPLAY_NAME, "Normal Guy");
@@ -819,7 +819,7 @@ public class VCardImporterTests extends AndroidTestCase {
 
     public void testTitleBeforOrg() throws IOException, VCardException {
         ContactStructVerifier verifier = new ContactStructVerifier(
-                R.raw.v21_title_before_org, VCardConfig.VCARD_TYPE_V21_GENERIC);
+                R.raw.v21_title_before_org, VCardConfig.VCARD_TYPE_V21_GENERIC_UTF8);
         ContentValues contentValues =
             verifier.createExpected(StructuredName.CONTENT_ITEM_TYPE);
         contentValues.put(StructuredName.DISPLAY_NAME, "Nice Guy");
@@ -838,7 +838,7 @@ public class VCardImporterTests extends AndroidTestCase {
      */
     public void testV21PrefToIsPrimary() throws IOException, VCardException {
         ContactStructVerifier verifier = new ContactStructVerifier(
-                R.raw.v21_pref_handling, VCardConfig.VCARD_TYPE_V21_GENERIC);
+                R.raw.v21_pref_handling, VCardConfig.VCARD_TYPE_V21_GENERIC_UTF8);
         ContentValues contentValues =
             verifier.createExpected(StructuredName.CONTENT_ITEM_TYPE);
         contentValues.put(Data.MIMETYPE, StructuredName.CONTENT_ITEM_TYPE);
@@ -952,7 +952,7 @@ public class VCardImporterTests extends AndroidTestCase {
      */
     public void testV21ComplicatedCase() throws IOException, VCardException {
         ContactStructVerifier verifier = new ContactStructVerifier(
-                R.raw.v21_complicated, VCardConfig.VCARD_TYPE_V21_GENERIC);
+                R.raw.v21_complicated, VCardConfig.VCARD_TYPE_V21_GENERIC_UTF8);
         ContentValues contentValues =
             verifier.createExpected(StructuredName.CONTENT_ITEM_TYPE);
         contentValues.put(StructuredName.FAMILY_NAME, "Gump");
@@ -1068,7 +1068,7 @@ public class VCardImporterTests extends AndroidTestCase {
 
     public void testV30Simple() throws IOException, VCardException {
         ContactStructVerifier verifier = new ContactStructVerifier(
-                R.raw.v30_simple, VCardConfig.VCARD_TYPE_V30_GENERIC);
+                R.raw.v30_simple, VCardConfig.VCARD_TYPE_V30_GENERIC_UTF8);
         ContentValues contentValues =
             verifier.createExpected(StructuredName.CONTENT_ITEM_TYPE);
         contentValues.put(StructuredName.FAMILY_NAME, "And");
@@ -1139,25 +1139,28 @@ public class VCardImporterTests extends AndroidTestCase {
         verifier.verify();
     }
     /**
-     * Verifies vCard with Japanese can be parsed correctly with VCARD_TYPE_V21_GENERIC. 
+     * Verifies vCard with Japanese can be parsed correctly with
+     * {@link android.pim.vcard.VCardConfig#VCARD_TYPE_V21_GENERIC_UTF8}.
      */
-    public void testV21Japanese1_Type_Generic() throws IOException, VCardException {
+    public void testV21Japanese1_Type_Generic_Utf8() throws IOException, VCardException {
         ContactStructVerifier verifier = new ContactStructVerifier(
-                R.raw.v21_japanese_1, VCardConfig.VCARD_TYPE_V21_GENERIC);
+                R.raw.v21_japanese_1, VCardConfig.VCARD_TYPE_V21_GENERIC_UTF8);
         testV21Japanese1Common(verifier, false);
     }
 
     /**
-     * Verifies vCard with Japanese can be parsed correctly with VCARD_TYPE_V21_JAPANESE.
+     * Verifies vCard with Japanese can be parsed correctly with
+     * {@link android.pim.vcard.VCardConfig#VCARD_TYPE_V21_JAPANESE_SJIS}.
      */
-    public void testV21Japanese1_Type_Japanese() throws IOException, VCardException {
+    public void testV21Japanese1_Type_Japanese_Sjis() throws IOException, VCardException {
         ContactStructVerifier verifier = new ContactStructVerifier(
-                R.raw.v21_japanese_1, VCardConfig.VCARD_TYPE_V21_JAPANESE);
+                R.raw.v21_japanese_1, VCardConfig.VCARD_TYPE_V21_JAPANESE_SJIS);
         testV21Japanese1Common(verifier, true);
     }
 
     /**
-     * Verifies vCard with Japanese can be parsed correctly with VCARD_TYPE_V21_JAPANESE_UTF8,
+     * Verifies vCard with Japanese can be parsed correctly with
+     * {@link android.pim.vcard.VCardConfig#VCARD_TYPE_V21_JAPANESE_UTF8}.
      * since vCard 2.1 specifies the charset of each line if it contains non-Ascii.
      */
     public void testV21Japanese1_Type_Japanese_Utf8() throws IOException, VCardException {
@@ -1205,9 +1208,9 @@ public class VCardImporterTests extends AndroidTestCase {
         verifier.verify(builder.vNodeList.get(0));
     }
 
-    public void testV21Japanese2_Type_Generic() throws IOException, VCardException {
+    public void testV21Japanese2_Type_Generic_Utf8() throws IOException, VCardException {
         ContactStructVerifier verifier = new ContactStructVerifier(
-                R.raw.v21_japanese_2, VCardConfig.VCARD_TYPE_V21_GENERIC);
+                R.raw.v21_japanese_2, VCardConfig.VCARD_TYPE_V21_GENERIC_UTF8);
         ContentValues contentValues =
             verifier.createExpected(StructuredName.CONTENT_ITEM_TYPE);
         contentValues.put(StructuredName.FAMILY_NAME, "\u5B89\u85E4");
