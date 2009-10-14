@@ -21,6 +21,7 @@ import android.os.Bundle;
 import android.os.Process;
 import android.os.NetStat;
 import android.os.IBinder;
+import android.os.RemoteException;
 import android.util.EventLog;
 
 import java.util.concurrent.atomic.AtomicInteger;
@@ -116,6 +117,12 @@ public abstract class AbstractThreadedSyncAdapter {
                     mSyncThread.interrupt();
                 }
             }
+        }
+
+        public void initialize(Account account, String authority) throws RemoteException {
+            Bundle extras = new Bundle();
+            extras.putBoolean(ContentResolver.SYNC_EXTRAS_INITIALIZE, true);
+            startSync(null, authority, account, extras);
         }
     }
 
