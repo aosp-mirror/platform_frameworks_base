@@ -1721,6 +1721,7 @@ public class WebView extends AbsoluteLayout
      *            as the data member with "url" as key. The result can be null.
      */
     public void requestImageRef(Message msg) {
+        if (0 == mNativeClass) return; // client isn't initialized
         int contentX = viewToContentX((int) mLastTouchX + mScrollX);
         int contentY = viewToContentY((int) mLastTouchY + mScrollY);
         String ref = nativeImageURI(contentX, contentY);
@@ -2339,6 +2340,7 @@ public class WebView extends AbsoluteLayout
      * @param forward Direction to search.
      */
     public void findNext(boolean forward) {
+        if (0 == mNativeClass) return; // client isn't initialized
         nativeFindNext(forward);
     }
 
@@ -2349,6 +2351,7 @@ public class WebView extends AbsoluteLayout
      *              that were found.
      */
     public int findAll(String find) {
+        if (0 == mNativeClass) return 0; // client isn't initialized
         if (mFindIsUp == false) {
             recordNewContentSize(mContentWidth, mContentHeight + mFindHeight,
                     false);
@@ -3477,6 +3480,7 @@ public class WebView extends AbsoluteLayout
      * @hide
      */
     public void emulateShiftHeld() {
+        if (0 == mNativeClass) return; // client isn't initialized
         mExtendSelection = false;
         mShiftIsPressed = true;
         nativeHideCursor();
