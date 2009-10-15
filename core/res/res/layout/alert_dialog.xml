@@ -50,11 +50,11 @@
                 android:paddingTop="6dip"
                 android:paddingRight="10dip"
                 android:src="@drawable/ic_dialog_info" />
-            <com.android.internal.widget.DialogTitle android:id="@+id/alertTitle" 
+            <com.android.internal.widget.DialogTitle android:id="@+id/alertTitle"
                 style="?android:attr/textAppearanceLarge"
                 android:singleLine="true"
                 android:ellipsize="end"
-                android:layout_width="fill_parent" 
+                android:layout_width="fill_parent"
                 android:layout_height="wrap_content" />
         </LinearLayout>
         <ImageView android:id="@+id/titleDivider"
@@ -63,9 +63,7 @@
             android:visibility="gone"
             android:scaleType="fitXY"
             android:gravity="fill_horizontal"
-            android:src="@android:drawable/dialog_divider_horizontal_light"
-            android:layout_marginLeft="10dip"
-            android:layout_marginRight="10dip"/>
+            android:src="@android:drawable/divider_horizontal_dark" />
         <!-- If the client uses a customTitle, it will be added here. -->
     </LinearLayout>
 
@@ -88,7 +86,7 @@
                 android:padding="5dip" />
         </ScrollView>
     </LinearLayout>
-        
+
     <FrameLayout android:id="@+id/customPanel"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
@@ -99,13 +97,13 @@
             android:paddingTop="5dip"
             android:paddingBottom="5dip" />
     </FrameLayout>
-        
+
     <LinearLayout android:id="@+id/buttonPanel"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:minHeight="54dip"
-        android:orientation="vertical" >     
-        <LinearLayout 
+        android:orientation="vertical" >
+        <LinearLayout
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
