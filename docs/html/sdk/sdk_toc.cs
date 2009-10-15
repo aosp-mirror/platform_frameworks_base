@@ -13,10 +13,7 @@
       <span style="display:none" class="zh-TW">目前 SDK 發行版本</span>
     </h2>
     <ul>
-      <li><a href="<?cs var:toroot ?>sdk/<?cs
-        if:sdk.preview ?>preview<?cs
-			  else ?><?cs var:sdk.current ?><?cs
-			  /if ?>/index.html">
+      <li><a href="<?cs var:toroot ?>sdk/index.html">
           <span class="en">Download</span>
           <span style="display:none" class="de">Herunterladen</span>
           <span style="display:none" class="es">Descargar</span>
@@ -26,10 +23,7 @@
           <span style="display:none" class="zh-CN">下载</span>
           <span style="display:none" class="zh-TW">下載</span>
         </a></li>
-      <li><a href="<?cs var:toroot ?>sdk/<?cs
-        if:sdk.preview ?>preview<?cs
-			  else ?><?cs var:sdk.current ?><?cs
-			  /if ?>/installing.html">
+      <li><a href="<?cs var:toroot ?>sdk/<?cs var:sdk.current ?>/installing.html">
           <span class="en">Installing</span>
           <span style="display:none" class="de">Installieren</span>
           <span style="display:none" class="es">Instalación</span>
@@ -39,14 +33,8 @@
           <span style="display:none" class="zh-CN">安装</span>
           <span style="display:none" class="zh-TW">安裝</span>
         </a></li>
-      <li><a href="<?cs var:toroot ?>sdk/<?cs
-        if:sdk.preview ?>preview<?cs
-			  else ?><?cs var:sdk.current ?><?cs
-			  /if ?>/upgrading.html">Upgrading</a></li>
-      <li><a href="<?cs var:toroot ?>sdk/<?cs
-        if:sdk.preview ?>preview<?cs
-			  else ?><?cs var:sdk.current ?><?cs
-			  /if ?>/requirements.html">System Requirements</a></li>
+      <li><a href="<?cs var:toroot ?>sdk/updating-sdk.html">Updating Your SDK</a></li>
+      <li><a href="<?cs var:toroot ?>sdk/requirements.html">System Requirements</a></li>
     </ul><?cs 
    else ?> <?cs # else "if NOT online" ... ?>
     <h2>
@@ -55,10 +43,7 @@
    /if ?> <?cs # end of "if/else online" ... ?>
     <ul>
       <li><a href="<?cs var:toroot ?>sdk/terms.html">SDK Terms and Conditions</a></li>
-      <li><a href="<?cs var:toroot ?><?cs 
-        if:sdk.current == "preview" ?>sdk/preview/index.html<?cs 
-        else ?>sdk/RELEASENOTES.html<?cs 
-        /if ?>">SDK Release Notes</a></li>
+      <li><a href="<?cs var:toroot ?>sdk/RELEASENOTES.html">SDK Release Notes</a></li>
     </ul>
   </li><?cs 
  if:android.whichdoc == "online" ?>
@@ -74,11 +59,34 @@
       <span style="display:none" class="zh-TW">系統影像版本資訊</span>
     </h2>
     <ul>
+      <li><a href="<?cs var:toroot ?>sdk/android-2.0.html">Android 2.0 Version Notes</a></li>
       <li><a href="<?cs var:toroot ?>sdk/android-1.6.html">Android 1.6 Version Notes</a></li>
-      <li><a href="<?cs var:toroot ?>sdk/android-1.5.html">Android 1.5 Version Notes</a></li>
-      <li><a href="<?cs var:toroot ?>sdk/android-1.1.html">Android 1.1 Version Notes</a></li>
+  <!--    <li class="toggle-list"><div><a href="#" onclick="toggle(this.parentNode.parentNode,true); return false;">More</a></div>
+        <ul> -->
+          <li><a href="<?cs var:toroot ?>sdk/android-1.5.html">Android 1.5 Version Notes</a></li>
+          <li><a href="<?cs var:toroot ?>sdk/android-1.1.html">Android 1.1 Version Notes</a></li>
+  <!--    </ul> -->
+      </li>
     </ul>
   </li>
+<!--
+  <li>
+    <h2>
+      <span class="en">Developer Tools</span>
+      <span style="display:none" class="de"></span>
+      <span style="display:none" class="es"></span>
+      <span style="display:none" class="fr"></span>
+      <span style="display:none" class="it"></span>
+      <span style="display:none" class="ja"></span>
+      <span style="display:none" class="zh-CN"></span>
+      <span style="display:none" class="zh-TW"></span>
+    </h2>
+    <ul>
+      <li><a href="<?cs var:toroot ?>sdk/tools.html">Tools Revision 3</a></li>
+      <li><a href="<?cs var:toroot ?>sdk/adt.html">"ADT Plugin for Eclipse, 0.9.4</a></li>
+    </ul>
+  </li>
+-->
   <li>
     <h2>Native Development Tools</h2>
     <ul>
@@ -97,6 +105,7 @@
         <span style="display:none" class="zh-TW">較舊的 SDK 發行版本</span>
     </h2>
     <ul>
+      <li><a href="<?cs var:toroot ?>sdk/1.6_r1/index.html">Android 1.6 SDK, r1</a></li>
       <li><a href="<?cs var:toroot ?>sdk/1.5_r3/index.html">Android 1.5 SDK, r3</a></li>
       <li><a href="<?cs var:toroot ?>sdk/1.1_r1/index.html">Android 1.1 SDK, r1</a></li>
       <li><a href="<?cs var:toroot ?>sdk/1.0_r2/index.html">Android 1.0 SDK, r2</a></li>
