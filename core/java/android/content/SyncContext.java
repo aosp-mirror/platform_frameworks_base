@@ -56,7 +56,9 @@ public class SyncContext {
         if (now < mLastHeartbeatSendTime + HEARTBEAT_SEND_INTERVAL_IN_MS) return;
         try {
             mLastHeartbeatSendTime = now;
-            mSyncContext.sendHeartbeat();
+            if (mSyncContext != null) {
+                mSyncContext.sendHeartbeat();
+            }
         } catch (RemoteException e) {
             // this should never happen
         }
@@ -64,13 +66,15 @@ public class SyncContext {
 
     public void onFinished(SyncResult result) {
         try {
-            mSyncContext.onFinished(result);
+            if (mSyncContext != null) {
+                mSyncContext.onFinished(result);
+            }
         } catch (RemoteException e) {
             // this should never happen
         }
     }
 
     public IBinder getSyncContextBinder() {
-        return mSyncContext.asBinder();
+        return (mSyncContext == null) ? null : mSyncContext.asBinder();
     }
 }
