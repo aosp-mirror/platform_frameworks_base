@@ -21,6 +21,8 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.ServiceConnection;
+import android.content.ComponentName;
 import android.content.pm.PackageManager;
 import android.content.pm.RegisteredServicesCache;
 import android.content.pm.PackageInfo;
@@ -90,11 +92,8 @@ public class AccountManagerService
 
     // Messages that can be sent on mHandler
     private static final int MESSAGE_TIMED_OUT = 3;
-    private static final int MESSAGE_CONNECTED = 7;
-    private static final int MESSAGE_DISCONNECTED = 8;
 
     private final AccountAuthenticatorCache mAuthenticatorCache;
-    private final AuthenticatorBindHelper mBindHelper;
     private final DatabaseHelper mOpenHelper;
     private final SimWatcher mSimWatcher;
 
@@ -220,8 +219,6 @@ public class AccountManagerService
 
         mAuthenticatorCache = new AccountAuthenticatorCache(mContext);
         mAuthenticatorCache.setListener(this);
-        mBindHelper = new AuthenticatorBindHelper(mContext, mAuthenticatorCache, mMessageHandler,
-                MESSAGE_CONNECTED, MESSAGE_DISCONNECTED);
 
         if (SystemProperties.getBoolean("ro.config.sim_password_clear", false)) {
           mSimWatcher = new SimWatcher(mContext);
@@ -1072,7 +1069,7 @@ public class AccountManagerService
     }
 
     private abstract class Session extends IAccountAuthenticatorResponse.Stub
-            implements AuthenticatorBindHelper.Callback, IBinder.DeathRecipient {
+            implements IBinder.DeathRecipient, ServiceConnection {
         IAccountManagerResponse mResponse;
         final String mAccountType;
         final boolean mExpectActivityLaunch;
@@ -1154,7 +1151,7 @@ public class AccountManagerService
             if (Log.isLoggable(TAG, Log.VERBOSE)) {
                 Log.v(TAG, "initiating bind to authenticator type " + mAccountType);
             }
-            if (!mBindHelper.bind(mAccountType, this)) {
+            if (!bindToAuthenticator(mAccountType)) {
                 Log.d(TAG, "bind attempt failed for " + toDebugString());
                 onError(AccountManager.ERROR_CODE_REMOTE_EXCEPTION, "bind failure");
             }
@@ -1163,7 +1160,7 @@ public class AccountManagerService
         private void unbind() {
             if (mAuthenticator != null) {
                 mAuthenticator = null;
-                mBindHelper.unbind(this);
+                mContext.unbindService(this);
             }
         }
 
@@ -1176,7 +1173,7 @@ public class AccountManagerService
             mMessageHandler.removeMessages(MESSAGE_TIMED_OUT, this);
         }
 
-        public void onConnected(IBinder service) {
+        public void onServiceConnected(ComponentName name, IBinder service) {
             mAuthenticator = IAccountAuthenticator.Stub.asInterface(service);
             try {
                 run();
@@ -1186,9 +1183,7 @@ public class AccountManagerService
             }
         }
 
-        public abstract void run() throws RemoteException;
-
-        public void onDisconnected() {
+        public void onServiceDisconnected(ComponentName name) {
             mAuthenticator = null;
             IAccountManagerResponse response = getResponseAndClose();
             if (response != null) {
@@ -1196,6 +1191,8 @@ public class AccountManagerService
                         "disconnected");
             }
         }
+
+        public abstract void run() throws RemoteException;
 
         public void onTimedOut() {
             IAccountManagerResponse response = getResponseAndClose();
@@ -1266,6 +1263,39 @@ public class AccountManagerService
                 }
             }
         }
+
+        /**
+         * find the component name for the authenticator and initiate a bind
+         * if no authenticator or the bind fails then return false, otherwise return true
+         */
+        private boolean bindToAuthenticator(String authenticatorType) {
+            AccountAuthenticatorCache.ServiceInfo<AuthenticatorDescription> authenticatorInfo =
+                    mAuthenticatorCache.getServiceInfo(
+                            AuthenticatorDescription.newKey(authenticatorType));
+            if (authenticatorInfo == null) {
+                if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                    Log.v(TAG, "there is no authenticator for " + authenticatorType
+                            + ", bailing out");
+                }
+                return false;
+            }
+
+            Intent intent = new Intent();
+            intent.setAction(AccountManager.ACTION_AUTHENTICATOR_INTENT);
+            intent.setComponent(authenticatorInfo.componentName);
+            if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                Log.v(TAG, "performing bindService to " + authenticatorInfo.componentName);
+            }
+            if (!mContext.bindService(intent, this, Context.BIND_AUTO_CREATE)) {
+                if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                    Log.v(TAG, "bindService to " + authenticatorInfo.componentName + " failed");
+                }
+                return false;
+            }
+
+
+            return true;
+        }
     }
 
     private class MessageHandler extends Handler {
@@ -1274,9 +1304,6 @@ public class AccountManagerService
         }
 
         public void handleMessage(Message msg) {
-            if (mBindHelper.handleMessage(msg)) {
-                return;
-            }
             switch (msg.what) {
                 case MESSAGE_TIMED_OUT:
                     Session session = (Session)msg.obj;
@@ -1571,16 +1598,17 @@ public class AccountManagerService
     private boolean permissionIsGranted(Account account, String authTokenType, int callerUid) {
         final boolean fromAuthenticator = hasAuthenticatorUid(account.type, callerUid);
         final boolean hasExplicitGrants = hasExplicitlyGrantedPermission(account, authTokenType);
+        final boolean inSystemImage = inSystemImage(callerUid);
         if (Log.isLoggable(TAG, Log.VERBOSE)) {
             Log.v(TAG, "checkGrantsOrCallingUidAgainstAuthenticator: caller uid "
                     + callerUid + ", account " + account
                     + ": is authenticator? " + fromAuthenticator
                     + ", has explicit permission? " + hasExplicitGrants);
         }
-        return fromAuthenticator || hasExplicitGrants || inSystemImage(callerUid);
+        return fromAuthenticator || hasExplicitGrants || inSystemImage;
     }
 
-    private boolean hasAuthenticatorUid(String accountType, int callingUid) {
+    private boolean hasAuthenticatorcontextUid(String accountType, int callingUid) {
         for (RegisteredServicesCache.ServiceInfo<AuthenticatorDescription> serviceInfo :
                 mAuthenticatorCache.getAllServices()) {
             if (serviceInfo.type.type.equals(accountType)) {
