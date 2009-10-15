@@ -3098,6 +3098,13 @@ public final class Settings {
                 = "google_login_generic_auth_service";
 
         /**
+         * Duration in milliseconds after setup at which market does not reconcile applications
+         * which are installed during restore.
+         */
+        public static final String VENDING_RESTORE_WINDOW_MS = "vending_restore_window_ms";
+
+
+        /**
          * Frequency in milliseconds at which we should sync the locally installed Vending Machine
          * content with the server.
          */
