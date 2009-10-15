@@ -44,4 +44,12 @@ oneway interface ISyncAdapter {
      * @param syncContext the ISyncContext that was passed to {@link #startSync}
      */
     void cancelSync(ISyncContext syncContext);
+
+    /**
+     * Initialize the SyncAdapter for this account and authority.
+     *
+     * @param account the account that should be synced
+     * @param authority the authority that should be synced
+     */
+    void initialize(in Account account, String authority);
 }
