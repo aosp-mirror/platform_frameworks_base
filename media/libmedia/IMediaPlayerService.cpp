@@ -35,7 +35,7 @@ enum {
     DECODE_FD,
     CREATE_MEDIA_RECORDER,
     CREATE_METADATA_RETRIEVER,
-    CREATE_OMX,
+    GET_OMX,
     SNOOP
 };
 
@@ -123,10 +123,10 @@ public:
         return interface_cast<IMemory>(reply.readStrongBinder());
     }
 
-    virtual sp<IOMX> createOMX() {
+    virtual sp<IOMX> getOMX() {
         Parcel data, reply;
         data.writeInterfaceToken(IMediaPlayerService::getInterfaceDescriptor());
-        remote()->transact(CREATE_OMX, data, &reply);
+        remote()->transact(GET_OMX, data, &reply);
         return interface_cast<IOMX>(reply.readStrongBinder());
     }
 };
@@ -207,9 +207,9 @@ status_t BnMediaPlayerService::onTransact(
             reply->writeStrongBinder(retriever->asBinder());
             return NO_ERROR;
         } break;
-        case CREATE_OMX: {
+        case GET_OMX: {
             CHECK_INTERFACE(IMediaPlayerService, data, reply);
-            sp<IOMX> omx = createOMX();
+            sp<IOMX> omx = getOMX();
             reply->writeStrongBinder(omx->asBinder());
             return NO_ERROR;
         } break;
