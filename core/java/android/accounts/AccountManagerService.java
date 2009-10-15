@@ -1608,7 +1608,7 @@ public class AccountManagerService
         return fromAuthenticator || hasExplicitGrants || inSystemImage;
     }
 
-    private boolean hasAuthenticatorcontextUid(String accountType, int callingUid) {
+    private boolean hasAuthenticatorUid(String accountType, int callingUid) {
         for (RegisteredServicesCache.ServiceInfo<AuthenticatorDescription> serviceInfo :
                 mAuthenticatorCache.getAllServices()) {
             if (serviceInfo.type.type.equals(accountType)) {
