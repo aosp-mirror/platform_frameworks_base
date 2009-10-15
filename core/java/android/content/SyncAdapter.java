@@ -38,6 +38,12 @@ public abstract class SyncAdapter {
         public void cancelSync(ISyncContext syncContext) throws RemoteException {
             SyncAdapter.this.cancelSync();
         }
+
+        public void initialize(Account account, String authority) throws RemoteException {
+            Bundle extras = new Bundle();
+            extras.putBoolean(ContentResolver.SYNC_EXTRAS_INITIALIZE, true);
+            startSync(null, authority, account, extras);
+        }
     }
 
     Transport mTransport = new Transport();

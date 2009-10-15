@@ -544,6 +544,46 @@ class SyncManager implements OnAccountsUpdateListener {
         return (activeSyncContext != null) ? activeSyncContext.mSyncOperation.account : null;
     }
 
+    private void initializeSyncAdapter(Account account, String authority) {
+        SyncAdapterType syncAdapterType = SyncAdapterType.newKey(authority, account.type);
+        RegisteredServicesCache.ServiceInfo<SyncAdapterType> syncAdapterInfo =
+                mSyncAdapters.getServiceInfo(syncAdapterType);
+        if (syncAdapterInfo == null) {
+            Log.w(TAG, "can't find a sync adapter for " + syncAdapterType);
+            return;
+        }
+
+        Intent intent = new Intent();
+        intent.setAction("android.content.SyncAdapter");
+        intent.setComponent(syncAdapterInfo.componentName);
+        mContext.bindService(intent, new InitializerServiceConnection(account, authority),
+                Context.BIND_AUTO_CREATE);
+    }
+
+    private class InitializerServiceConnection implements ServiceConnection {
+        private final Account mAccount;
+        private final String mAuthority;
+
+        public InitializerServiceConnection(Account account, String authority) {
+            mAccount = account;
+            mAuthority = authority;
+        }
+
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            try {
+                ISyncAdapter.Stub.asInterface(service).initialize(mAccount, mAuthority);
+            } catch (RemoteException e) {
+                // doesn't matter, we will retry again later
+            } finally {
+                mContext.unbindService(this);
+            }
+        }
+
+        public void onServiceDisconnected(ComponentName name) {
+            mContext.unbindService(this);
+        }
+    }
+
     /**
      * Returns whether or not sync is enabled.  Sync can be enabled by
      * setting the system property "ro.config.sync" to the value "yes".
@@ -686,36 +726,34 @@ class SyncManager implements OnAccountsUpdateListener {
                         continue;
                     }
 
-                    // make this an initialization sync if the isSyncable state is unknown
-                    Bundle extrasCopy = extras;
-                    long delayCopy = delay;
+                    // initialize the SyncAdapter if the isSyncable state is unknown
                     if (isSyncable < 0) {
-                        extrasCopy = new Bundle(extras);
-                        extrasCopy.putBoolean(ContentResolver.SYNC_EXTRAS_INITIALIZE, true);
-                        delayCopy = -1; // expedite this
-                    } else {
-                        final boolean syncAutomatically = masterSyncAutomatically
-                                && mSyncStorageEngine.getSyncAutomatically(account, authority);
-                        boolean syncAllowed =
-                                manualSync || (backgroundDataUsageAllowed && syncAutomatically);
-                        if (!syncAllowed) {
-                            if (isLoggable) {
-                                Log.d(TAG, "scheduleSync: sync of " + account + ", " + authority
-                                        + " is not allowed, dropping request");
-                            }
-                            continue;
-                        }
+                        initializeSyncAdapter(account, authority);
+                        continue;
                     }
+
+                    final boolean syncAutomatically = masterSyncAutomatically
+                            && mSyncStorageEngine.getSyncAutomatically(account, authority);
+                    boolean syncAllowed =
+                            manualSync || (backgroundDataUsageAllowed && syncAutomatically);
+                    if (!syncAllowed) {
+                        if (isLoggable) {
+                            Log.d(TAG, "scheduleSync: sync of " + account + ", " + authority
+                                    + " is not allowed, dropping request");
+                        }
+                        continue;
+                    }
+
                     if (isLoggable) {
                         Log.v(TAG, "scheduleSync:"
-                                + " delay " + delayCopy
+                                + " delay " + delay
                                 + ", source " + source
                                 + ", account " + account
                                 + ", authority " + authority
-                                + ", extras " + extrasCopy);
+                                + ", extras " + extras);
                     }
                     scheduleSyncOperation(
-                            new SyncOperation(account, source, authority, extrasCopy, delayCopy));
+                            new SyncOperation(account, source, authority, extras, delay));
                 }
             }
         }
