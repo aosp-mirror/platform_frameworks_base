@@ -140,7 +140,7 @@ public class StatusBarService extends IStatusBar.Stub
             boolean down = event.getAction() == KeyEvent.ACTION_DOWN;
             switch (event.getKeyCode()) {
             case KeyEvent.KEYCODE_BACK:
-                if (down) {
+                if (!down) {
                     StatusBarService.this.deactivate();
                 }
                 return true;
@@ -973,15 +973,24 @@ public class StatusBarService extends IStatusBar.Stub
     }
     
     void animateCollapse() {
-        if (SPEW) Log.d(TAG, "Animate collapse: expanded=" + mExpanded
-                + " expanded visible=" + mExpandedVisible);
+        if (SPEW) {
+            Log.d(TAG, "animateCollapse(): mExpanded=" + mExpanded
+                    + " mExpandedVisible=" + mExpandedVisible
+                    + " mAnimating=" + mAnimating
+                    + " mAnimVel=" + mAnimVel);
+        }
         
         if (!mExpandedVisible) {
             return;
         }
 
-        prepareTracking(mDisplay.getHeight()-1);
-        performFling(mDisplay.getHeight()-1, -2000.0f, true);
+        if (mAnimating) {
+            return;
+        }
+
+        int y = mDisplay.getHeight()-1;
+        prepareTracking(y);
+        performFling(y, -2000.0f, true);
     }
     
     void performExpand() {
@@ -1096,7 +1105,7 @@ public class StatusBarService extends IStatusBar.Stub
         mTracking = true;
         mVelocityTracker = VelocityTracker.obtain();
         boolean opening = !mExpanded;
-        if (!mExpanded) {
+        if (opening) {
             mAnimAccel = 2000.0f;
             mAnimVel = 200;
             mAnimY = mStatusBarView.getHeight();
@@ -1111,16 +1120,13 @@ public class StatusBarService extends IStatusBar.Stub
             mAnimating = true;
             mHandler.sendMessageAtTime(mHandler.obtainMessage(MSG_ANIMATE_REVEAL),
                     mCurAnimationTime);
+            makeExpandedVisible();
         } else {
             // it's open, close it?
             if (mAnimating) {
                 mAnimating = false;
                 mHandler.removeMessages(MSG_ANIMATE);
             }
-        }
-        if (opening) {
-            makeExpandedVisible();
-        } else {
             updateExpandedViewPos(y + mViewDelta);
         }
     }
@@ -1547,7 +1553,7 @@ public class StatusBarService extends IStatusBar.Stub
 
     void updateExpandedViewPos(int expandedPosition) {
         if (SPEW) {
-            Log.d(TAG, "updateExpandedViewPos before pos=" + expandedPosition
+            Log.d(TAG, "updateExpandedViewPos before expandedPosition=" + expandedPosition
                     + " mTrackingParams.y=" + mTrackingParams.y
                     + " mTrackingPosition=" + mTrackingPosition);
         }
