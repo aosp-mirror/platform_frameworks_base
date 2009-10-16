@@ -86,7 +86,7 @@ public:
                         rasterizer(current);
                     }
                 }
-            } while(!spannerInner.isDone());            
+            } while(!spannerInner.isDone());
         } while(!spanner.isDone());
     }
 
@@ -220,18 +220,21 @@ private:
         }
 
         inline void prepare(int inside) {
-            SpannerBase::lhs_head = lhs.rects->left  + lhs.dx;
-            SpannerBase::lhs_tail = lhs.rects->right + lhs.dx;
-            SpannerBase::rhs_head = rhs.rects->left  + rhs.dx;
-            SpannerBase::rhs_tail = rhs.rects->right + rhs.dx;
             if (inside == SpannerBase::lhs_before_rhs) {
+                SpannerBase::lhs_head = lhs.rects->left  + lhs.dx;
+                SpannerBase::lhs_tail = lhs.rects->right + lhs.dx;
                 SpannerBase::rhs_head = max_value;
                 SpannerBase::rhs_tail = max_value;
             } else if (inside == SpannerBase::lhs_after_rhs) {
                 SpannerBase::lhs_head = max_value;
                 SpannerBase::lhs_tail = max_value;
+                SpannerBase::rhs_head = rhs.rects->left  + rhs.dx;
+                SpannerBase::rhs_tail = rhs.rects->right + rhs.dx;
             } else {
-                // use both spans
+                SpannerBase::lhs_head = lhs.rects->left  + lhs.dx;
+                SpannerBase::lhs_tail = lhs.rects->right + lhs.dx;
+                SpannerBase::rhs_head = rhs.rects->left  + rhs.dx;
+                SpannerBase::rhs_tail = rhs.rects->right + rhs.dx;
             }
         }
 
