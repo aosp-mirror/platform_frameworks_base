@@ -3,7 +3,50 @@ page.title=SDK Release Notes
 
 <p>This document provides version-specific information about Android SDK
 releases. For the latest known issues, please ensure that you're viewing this
-page at <a href="http://developer.android.com/sdk/RELEASENOTES.html">http://developer.android.com/sdk/RELEASENOTES.html</a>.</p>
+page at <a
+href="http://developer.android.com/sdk/RELEASENOTES.html">http://developer.
+android.com/sdk/RELEASENOTES.html</a>.</p>
+
+<h2 id="multiversion_r1">Android SDK</h2>
+
+<p>The Android SDK has changed! If you've worked with the Android SDK before,
+you will notice several important differences:</p>
+
+<ul>
+<li style="margin-top:.5em">The SDK downloadable package includes <em>only</em>
+the latest version of the Android SDK Tools.</li>
+<li>Once you've installed the SDK, you now use the Android SDK and AVD Manager
+to download all of the SDK components that you need, such as Android platforms,
+SDK add-ons, tools, and documentation. </li>
+<li>The new approach is modular &mdash; you can install only the components you
+need and update any or all components without affecting your development
+environment.</li>
+<li>In short, once you've installed the new SDK, you will not need to download
+an SDK package again. Instead, you will use the Android SDK and AVD Manager to
+keep your development environment up-to-date. </li>
+</ul>
+
+<p>Note that if you are currently using the Android 1.6 SDK, you do not
+necessarily need to install the new SDK, since your existing SDK incudes the
+Android SDK and AVD Manager tool. To develop against Android 2.0, for example,
+you could just download the Android 2.0 platform into your existing SDK. </p>
+
+<p>Release notes for Android platforms that are downloadable into the SDK are
+now available from the "SDK" tab, under "Downloadable SDK Components."</p>
+
+<ul>
+<li>Release notes for the Android 2.0 platform are in the <a
+href="{@docRoot}sdk/android-2.0.html">Android 2.0, Release 1</a> document. </li>
+<li>You can find information about tools changes in the <a
+href="{@docRoot}sdk/tools-notes.html">SDK Tools Notes</a> and <a
+href="{@docRoot}sdk/adt-notes.html">ADT Plugin Notes</a>.</li>
+</ul>
+
+<p>To get started with the SDK, review the Quick Start summary on the <a
+href="{@docRoot}sdk/index.html">Android SDK download page</a> or read <a
+href="{@docRoot}sdk/installing.html">Installing the SDK</a> for more
+information. </p>
+
 
 <h2 id="1.6_r1">Android 1.6 SDK, Release 1</h2>
 
