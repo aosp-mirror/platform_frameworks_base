@@ -57,6 +57,7 @@ void Context::initEGL()
     configAttribsPtr[0] = EGL_NONE;
     rsAssert(configAttribsPtr < (configAttribs + (sizeof(configAttribs) / sizeof(EGLint))));
 
+    LOGV("initEGL start");
     mEGL.mDisplay = eglGetDisplay(EGL_DEFAULT_DISPLAY);
     eglInitialize(mEGL.mDisplay, &mEGL.mMajorVersion, &mEGL.mMinorVersion);
 
