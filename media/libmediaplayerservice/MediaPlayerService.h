@@ -183,7 +183,7 @@ public:
     virtual sp<IMemory>         decode(const char* url, uint32_t *pSampleRate, int* pNumChannels, int* pFormat);
     virtual sp<IMemory>         decode(int fd, int64_t offset, int64_t length, uint32_t *pSampleRate, int* pNumChannels, int* pFormat);
     virtual sp<IMemory>         snoop();
-    virtual sp<IOMX>            createOMX();
+    virtual sp<IOMX>            getOMX();
 
     virtual status_t            dump(int fd, const Vector<String16>& args);
 
@@ -281,6 +281,7 @@ private:
     mutable     Mutex                       mLock;
                 SortedVector< wp<Client> >  mClients;
                 int32_t                     mNextConnId;
+                sp<IOMX>                    mOMX;
 };
 
 // ----------------------------------------------------------------------------
