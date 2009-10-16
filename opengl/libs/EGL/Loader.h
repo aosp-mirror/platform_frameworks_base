@@ -32,7 +32,7 @@
 namespace android {
 // ----------------------------------------------------------------------------
 
-struct gl_hooks_t;
+struct egl_connection_t;
 
 class Loader : public Singleton<Loader>
 {
@@ -69,12 +69,12 @@ class Loader : public Singleton<Loader>
 public:
     ~Loader();
     
-    void* open(EGLNativeDisplayType display, int impl, gl_hooks_t* hooks);
+    void* open(EGLNativeDisplayType display, int impl, egl_connection_t* cnx);
     status_t close(void* driver);
     
 private:
     Loader();
-    void *load_driver(const char* driver, gl_hooks_t* hooks, uint32_t mask);
+    void *load_driver(const char* driver, egl_connection_t* cnx, uint32_t mask);
 
     static __attribute__((noinline))
     void init_api(void* dso, 
