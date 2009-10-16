@@ -44,6 +44,10 @@ protected:
     ObjectBaseRef<Allocation> mConstants;
 
     mutable bool mDirty;
+
+
+public:
+    void forceDirty() {mDirty = true;}
 };
 
 
