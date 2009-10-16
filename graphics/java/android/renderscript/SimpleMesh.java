@@ -228,16 +228,16 @@ public class SimpleMesh extends BaseObj {
                 mVtxData[mVtxCount++] = mB;
                 mVtxData[mVtxCount++] = mA;
             }
+            if ((mFlags & TEXTURE_0) != 0) {
+                makeSpace(2);
+                mVtxData[mVtxCount++] = mS0;
+                mVtxData[mVtxCount++] = mT0;
+            }
             if ((mFlags & NORMAL) != 0) {
                 makeSpace(3);
                 mVtxData[mVtxCount++] = mNX;
                 mVtxData[mVtxCount++] = mNY;
                 mVtxData[mVtxCount++] = mNZ;
-            }
-            if ((mFlags & TEXTURE_0) != 0) {
-                makeSpace(2);
-                mVtxData[mVtxCount++] = mS0;
-                mVtxData[mVtxCount++] = mT0;
             }
         }
 
