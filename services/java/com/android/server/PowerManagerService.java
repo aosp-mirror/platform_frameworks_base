@@ -53,6 +53,7 @@ import android.view.WindowManagerPolicy;
 import static android.provider.Settings.System.DIM_SCREEN;
 import static android.provider.Settings.System.SCREEN_BRIGHTNESS;
 import static android.provider.Settings.System.SCREEN_BRIGHTNESS_MODE;
+import static android.provider.Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC;
 import static android.provider.Settings.System.SCREEN_OFF_TIMEOUT;
 import static android.provider.Settings.System.STAY_ON_WHILE_PLUGGED_IN;
 
@@ -199,6 +200,8 @@ class PowerManagerService extends IPowerManager.Stub
     private long mScreenOnStartTime;
     private boolean mPreventScreenOn;
     private int mScreenBrightnessOverride = -1;
+    private boolean mHasHardwareAutoBrightness;
+    private boolean mAutoBrightessEnabled;
 
     // Used when logging number and duration of touch-down cycles
     private long mTotalTouchDownTime;
@@ -344,6 +347,9 @@ class PowerManagerService extends IPowerManager.Stub
                  // DIM_SCREEN
                 //mDimScreen = getInt(DIM_SCREEN) != 0;
 
+                // SCREEN_BRIGHTNESS_MODE
+                setScreenBrightnessMode(getInt(SCREEN_BRIGHTNESS_MODE));
+
                 // recalculate everything
                 setScreenOffTimeoutsLocked();
             }
@@ -415,12 +421,17 @@ class PowerManagerService extends IPowerManager.Stub
         mScreenOffIntent = new Intent(Intent.ACTION_SCREEN_OFF);
         mScreenOffIntent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
 
-        ContentResolver resolver = mContext.getContentResolver();
+        mHasHardwareAutoBrightness = mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_hardware_automatic_brightness_available);
+
+       ContentResolver resolver = mContext.getContentResolver();
         Cursor settingsCursor = resolver.query(Settings.System.CONTENT_URI, null,
                 "(" + Settings.System.NAME + "=?) or ("
                         + Settings.System.NAME + "=?) or ("
+                        + Settings.System.NAME + "=?) or ("
                         + Settings.System.NAME + "=?)",
-                new String[]{STAY_ON_WHILE_PLUGGED_IN, SCREEN_OFF_TIMEOUT, DIM_SCREEN},
+                new String[]{STAY_ON_WHILE_PLUGGED_IN, SCREEN_OFF_TIMEOUT, DIM_SCREEN,
+                        SCREEN_BRIGHTNESS_MODE},
                 null);
         mSettings = new ContentQueryMap(settingsCursor, Settings.System.NAME, true, mHandler);
         SettingsObserver settingsObserver = new SettingsObserver();
@@ -443,10 +454,6 @@ class PowerManagerService extends IPowerManager.Stub
 
         // turn everything on
         setPowerState(ALL_BRIGHT);
-
-        // set auto brightness mode to user setting
-        boolean brightnessMode = Settings.System.getInt(resolver, SCREEN_BRIGHTNESS_MODE, 1) != 0;
-        mHardware.setAutoBrightness_UNCHECKED(brightnessMode);
 
         synchronized (mHandlerThread) {
             mInitComplete = true;
@@ -1885,6 +1892,18 @@ class PowerManagerService extends IPowerManager.Stub
         }
     }
 
+    private void setScreenBrightnessMode(int mode) {
+        mAutoBrightessEnabled = (mode == SCREEN_BRIGHTNESS_MODE_AUTOMATIC);
+
+        if (mHasHardwareAutoBrightness) {
+            // When setting auto-brightness, must reset the brightness afterwards
+            mHardware.setAutoBrightness_UNCHECKED(mAutoBrightessEnabled);
+            setBacklightBrightness((int)mScreenBrightness.curValue);
+        } else {
+            // not yet implemented
+        }
+    }
+
     /** Sets the screen off timeouts:
      *      mKeylightDelay
      *      mDimDelay
@@ -2096,11 +2115,6 @@ class PowerManagerService extends IPowerManager.Stub
             mButtonBrightness.curValue = brightness;
             mButtonBrightness.animating = false;
         }
-    }
-
-    public void setAutoBrightness(boolean on) {
-        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.DEVICE_POWER, null);
-        mHardware.setAutoBrightness_UNCHECKED(on);
     }
 
     private SensorManager getSensorManager() {

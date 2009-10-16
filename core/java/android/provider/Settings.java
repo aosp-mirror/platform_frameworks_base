@@ -1081,6 +1081,18 @@ public final class Settings {
         public static final String SCREEN_BRIGHTNESS_MODE = "screen_brightness_mode";
 
         /**
+         * SCREEN_BRIGHTNESS_MODE value for manual mode.
+         * @hide
+         */
+        public static final int SCREEN_BRIGHTNESS_MODE_MANUAL = 0;
+
+        /**
+         * SCREEN_BRIGHTNESS_MODE value for manual mode.
+         * @hide
+         */
+        public static final int SCREEN_BRIGHTNESS_MODE_AUTOMATIC = 1;
+
+        /**
          * Control whether the process CPU usage meter should be shown.
          */
         public static final String SHOW_PROCESSES = "show_processes";
