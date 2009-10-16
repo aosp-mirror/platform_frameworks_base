@@ -41,14 +41,7 @@ void gl_unimplemented() {
 #define EGL_ENTRY(_r, _api, ...) #_api,
 
 char const * const gl_names[] = {
-    #include "GLES_CM/gl_entries.in"
-    #include "GLES_CM/glext_entries.in"
-    NULL
-};
-
-char const * const gl2_names[] = {
-    #include "GLES2/gl2_entries.in"
-    #include "GLES2/gl2ext_entries.in"
+    #include "entries.in"
     NULL
 };
 

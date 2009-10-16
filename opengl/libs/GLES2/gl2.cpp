@@ -53,7 +53,7 @@ using namespace android;
             "bx    lr                 \n"                       \
             :                                                   \
             : [tls] "J"(TLS_SLOT_OPENGL_API*4),                 \
-              [api] "J"(__builtin_offsetof(gl_hooks_t, gl2._api))    \
+              [api] "J"(__builtin_offsetof(gl_hooks_t, gl._api))    \
             :                                                   \
             );
     
@@ -66,11 +66,11 @@ using namespace android;
     #define API_ENTRY(_api) _api
 
     #define CALL_GL_API(_api, ...)                                       \
-        gl_hooks_t::gl2_t const * const _c = &getGlThreadSpecific()->gl2; \
+        gl_hooks_t::gl_t const * const _c = &getGlThreadSpecific()->gl;  \
         _c->_api(__VA_ARGS__)
     
     #define CALL_GL_API_RETURN(_api, ...)                                \
-        gl_hooks_t::gl2_t const * const _c = &getGlThreadSpecific()->gl2; \
+        gl_hooks_t::gl_t const * const _c = &getGlThreadSpecific()->gl;  \
         return _c->_api(__VA_ARGS__)
 
 #endif

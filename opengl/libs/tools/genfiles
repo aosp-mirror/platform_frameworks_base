@@ -14,14 +14,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-./glapigen ../../include/GLES/gl.h > ../GLES_CM/gl_api.in 
-./glentrygen ../../include/GLES/gl.h > ../GLES_CM/gl_entries.in 
+./glapigen ../../include/GLES/gl.h      > ../GLES_CM/gl_api.in
+./glapigen ../../include/GLES/glext.h   > ../GLES_CM/glext_api.in
+./glapigen ../../include/GLES2/gl2.h    > ../GLES2/gl2_api.in
+./glapigen ../../include/GLES2/gl2ext.h > ../GLES2/gl2ext_api.in
 
-./glapigen ../../include/GLES/glext.h > ../GLES_CM/glext_api.in 
-./glentrygen ../../include/GLES/glext.h > ../GLES_CM/glext_entries.in 
+./glentrygen ../../include/GLES/gl.h      > /tmp/gl_entries.in
+./glentrygen ../../include/GLES/glext.h   > /tmp/glext_entries.in
+./glentrygen ../../include/GLES2/gl2.h    > /tmp/gl2_entries.in
+./glentrygen ../../include/GLES2/gl2ext.h > /tmp/gl2ext_entries.in
 
-./glapigen ../../include/GLES2/gl2.h > ../GLES2/gl2_api.in 
-./glentrygen ../../include/GLES2/gl2.h > ../GLES2/gl2_entries.in 
-
-./glapigen ../../include/GLES2/gl2ext.h > ../GLES2/gl2ext_api.in 
-./glentrygen ../../include/GLES2/gl2ext.h > ../GLES2/gl2ext_entries.in 
+cat /tmp/gl_entries.in \
+    /tmp/glext_entries.in \
+    /tmp/gl2_entries.in \
+    /tmp/gl2ext_entries.in \
+        | sort -t, -k2 \
+        | awk -F, '!_[$2]++' \
+            > ../entries.in
