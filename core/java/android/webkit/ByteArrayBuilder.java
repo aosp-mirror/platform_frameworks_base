@@ -16,6 +16,8 @@
 
 package android.webkit;
 
+import java.lang.ref.ReferenceQueue;
+import java.lang.ref.SoftReference;
 import java.util.LinkedList;
 import java.util.ListIterator;
 
@@ -23,47 +25,37 @@ import java.util.ListIterator;
     them back out.  It does not optimize for returning the result in a
     single array, though this is supported in the API. It is fastest
     if the retrieval can be done via iterating through chunks.
-
-    Things to add:
-      - consider dynamically increasing our min_capacity,
-        as we see mTotalSize increase
 */
 class ByteArrayBuilder {
 
     private static final int DEFAULT_CAPACITY = 8192;
 
+    // Global pool of chunks to be used by other ByteArrayBuilders.
+    private static final LinkedList<SoftReference<Chunk>> sPool =
+            new LinkedList<SoftReference<Chunk>>();
+    // Reference queue for processing gc'd entries.
+    private static final ReferenceQueue<Chunk> sQueue =
+            new ReferenceQueue<Chunk>();
+
     private LinkedList<Chunk> mChunks;
 
-    /** free pool */
-    private LinkedList<Chunk> mPool;
-
-    private int mMinCapacity;
-
     public ByteArrayBuilder() {
-        init(0);
-    }
-
-    public ByteArrayBuilder(int minCapacity) {
-        init(minCapacity);
-    }
-
-    private void init(int minCapacity) {
         mChunks = new LinkedList<Chunk>();
-        mPool = new LinkedList<Chunk>();
-
-        if (minCapacity <= 0) {
-            minCapacity = DEFAULT_CAPACITY;
-        }
-        mMinCapacity = minCapacity;
-    }
-
-    public void append(byte[] array) {
-        append(array, 0, array.length);
     }
 
     public synchronized void append(byte[] array, int offset, int length) {
         while (length > 0) {
-            Chunk c = appendChunk(length);
+            Chunk c = null;
+            if (mChunks.isEmpty()) {
+                c = obtainChunk(length);
+                mChunks.addLast(c);
+            } else {
+                c = mChunks.getLast();
+                if (c.mLength == c.mArray.length) {
+                    c = obtainChunk(length);
+                    mChunks.addLast(c);
+                }
+            }
             int amount = Math.min(length, c.mArray.length - c.mLength);
             System.arraycopy(array, offset, c.mArray, c.mLength, amount);
             c.mLength += amount;
@@ -75,7 +67,7 @@ class ByteArrayBuilder {
     /**
      * The fastest way to retrieve the data is to iterate through the
      * chunks.  This returns the first chunk.  Note: this pulls the
-     * chunk out of the queue.  The caller must call releaseChunk() to
+     * chunk out of the queue.  The caller must call Chunk.release() to
      * dispose of it.
      */
     public synchronized Chunk getFirstChunk() {
@@ -83,23 +75,11 @@ class ByteArrayBuilder {
         return mChunks.removeFirst();
     }
 
-    /**
-     * recycles chunk
-     */
-    public synchronized void releaseChunk(Chunk c) {
-        c.mLength = 0;
-        mPool.addLast(c);
-    }
-
-    public boolean isEmpty() {
+    public synchronized boolean isEmpty() {
         return mChunks.isEmpty();
     }
 
-    public int size() {
-        return mChunks.size();
-    }
-
-    public int getByteSize() {
+    public synchronized int getByteSize() {
         int total = 0;
         ListIterator<Chunk> it = mChunks.listIterator(0);
         while (it.hasNext()) {
@@ -112,37 +92,37 @@ class ByteArrayBuilder {
     public synchronized void clear() {
         Chunk c = getFirstChunk();
         while (c != null) {
-            releaseChunk(c);
+            c.release();
             c = getFirstChunk();
         }
     }
 
-    private Chunk appendChunk(int length) {
-        if (length < mMinCapacity) {
-            length = mMinCapacity;
-        }
-
-        Chunk c;
-        if (mChunks.isEmpty()) {
-            c = obtainChunk(length);
-        } else {
-            c = mChunks.getLast();
-            if (c.mLength == c.mArray.length) {
-                c = obtainChunk(length);
+    // Must be called with lock held on sPool.
+    private void processPoolLocked() {
+        while (true) {
+            SoftReference<Chunk> entry = (SoftReference<Chunk>) sQueue.poll();
+            if (entry == null) {
+                break;
             }
+            sPool.remove(entry);
         }
-        return c;
     }
 
     private Chunk obtainChunk(int length) {
-        Chunk c;
-        if (mPool.isEmpty()) {
-            c = new Chunk(length);
-        } else {
-            c = mPool.removeFirst();
+        // Correct a small length.
+        if (length < DEFAULT_CAPACITY) {
+            length = DEFAULT_CAPACITY;
         }
-        mChunks.addLast(c);
-        return c;
+        synchronized (sPool) {
+            // Process any queued references so that sPool does not contain
+            // dead entries.
+            processPoolLocked();
+            if (!sPool.isEmpty()) {
+                return sPool.removeFirst().get();
+            } else {
+                return new Chunk(length);
+            }
+        }
     }
 
     public static class Chunk {
@@ -153,5 +133,19 @@ class ByteArrayBuilder {
             mArray = new byte[length];
             mLength = 0;
         }
+
+        /**
+         * Release the chunk and make it available for reuse.
+         */
+        public void release() {
+            mLength = 0;
+            synchronized (sPool) {
+                // Add the chunk back to the pool as a SoftReference so it can
+                // be gc'd if needed.
+                sPool.offer(new SoftReference<Chunk>(this, sQueue));
+                sPool.notifyAll();
+            }
+        }
+
     }
 }

@@ -78,7 +78,7 @@ class LoadListener extends Handler implements EventHandler {
 
     private static int sNativeLoaderCount;
 
-    private final ByteArrayBuilder mDataBuilder = new ByteArrayBuilder(8192);
+    private final ByteArrayBuilder mDataBuilder = new ByteArrayBuilder();
 
     private String   mUrl;
     private WebAddress mUri;
@@ -522,17 +522,18 @@ class LoadListener extends Handler implements EventHandler {
      * IMPORTANT: as this is called from network thread, can't call native
      * directly
      * XXX: Unlike the other network thread methods, this method can do the
-     * work of decoding the data and appending it to the data builder because
-     * mDataBuilder is a thread-safe structure.
+     * work of decoding the data and appending it to the data builder.
      */
     public void data(byte[] data, int length) {
         if (DebugFlags.LOAD_LISTENER) {
             Log.v(LOGTAG, "LoadListener.data(): url: " + url());
         }
 
-        // Synchronize on mData because commitLoad may write mData to WebCore
-        // and we don't want to replace mData or mDataLength at the same time
-        // as a write.
+        // The reason isEmpty() and append() need to synchronized together is
+        // because it is possible for getFirstChunk() to be called multiple
+        // times between isEmpty() and append(). This could cause commitLoad()
+        // to finish before processing the newly appended data and no message
+        // will be sent.
         boolean sendMessage = false;
         synchronized (mDataBuilder) {
             sendMessage = mDataBuilder.isEmpty();
@@ -1009,28 +1010,34 @@ class LoadListener extends Handler implements EventHandler {
         if (mIsMainPageLoader) {
             String type = sCertificateTypeMap.get(mMimeType);
             if (type != null) {
-                // In the case of downloading certificate, we will save it to
-                // the KeyStore and stop the current loading so that it will not
-                // generate a new history page
-                byte[] cert = new byte[mDataBuilder.getByteSize()];
-                int offset = 0;
-                while (true) {
-                    ByteArrayBuilder.Chunk c = mDataBuilder.getFirstChunk();
-                    if (c == null) break;
+                // This must be synchronized so that no more data can be added
+                // after getByteSize returns.
+                synchronized (mDataBuilder) {
+                    // In the case of downloading certificate, we will save it
+                    // to the KeyStore and stop the current loading so that it
+                    // will not generate a new history page
+                    byte[] cert = new byte[mDataBuilder.getByteSize()];
+                    int offset = 0;
+                    while (true) {
+                        ByteArrayBuilder.Chunk c = mDataBuilder.getFirstChunk();
+                        if (c == null) break;
 
-                    if (c.mLength != 0) {
-                        System.arraycopy(c.mArray, 0, cert, offset, c.mLength);
-                        offset += c.mLength;
+                        if (c.mLength != 0) {
+                            System.arraycopy(c.mArray, 0, cert, offset, c.mLength);
+                            offset += c.mLength;
+                        }
+                        c.release();
                     }
-                    mDataBuilder.releaseChunk(c);
+                    CertTool.addCertificate(mContext, type, cert);
+                    mBrowserFrame.stopLoading();
+                    return;
                 }
-                CertTool.addCertificate(mContext, type, cert);
-                mBrowserFrame.stopLoading();
-                return;
             }
         }
 
-        // Give the data to WebKit now
+        // Give the data to WebKit now. We don't have to synchronize on
+        // mDataBuilder here because pulling each chunk removes it from the
+        // internal list so it cannot be modified.
         PerfChecker checker = new PerfChecker();
         ByteArrayBuilder.Chunk c;
         while (true) {
@@ -1047,7 +1054,7 @@ class LoadListener extends Handler implements EventHandler {
                 }
                 nativeAddData(c.mArray, c.mLength);
             }
-            mDataBuilder.releaseChunk(c);
+            c.release();
             checker.responseAlert("res nativeAddData");
         }
     }
