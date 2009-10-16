@@ -438,6 +438,7 @@ void Context::setVertex(ProgramVertex *pv)
     } else {
         mVertex.set(pv);
     }
+    mVertex->forceDirty();
 }
 
 void Context::assignName(ObjectBase *obj, const char *name, uint32_t len)
