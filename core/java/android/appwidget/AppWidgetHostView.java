@@ -123,7 +123,8 @@ public class AppWidgetHostView extends FrameLayout {
 
     @Override
     protected void dispatchRestoreInstanceState(SparseArray<Parcelable> container) {
-        final ParcelableSparseArray jail = (ParcelableSparseArray) container.get(generateId());
+        ParcelableSparseArray jail = (ParcelableSparseArray) container.get(generateId());
+        if (jail == null) jail = new ParcelableSparseArray();
         super.dispatchRestoreInstanceState(jail);
     }
 
