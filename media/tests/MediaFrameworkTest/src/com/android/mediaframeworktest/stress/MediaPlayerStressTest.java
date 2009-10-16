@@ -41,7 +41,7 @@ public class MediaPlayerStressTest extends ActivityInstrumentationTestCase2<Medi
     private static final int NUMBER_OF_RANDOM_REPOSITION_AND_PLAY = 10;
     private static final int NUMBER_OF_RANDOM_REPOSITION_AND_PLAY_SHORT = 5;
     private static final int NUMBER_OF_STRESS_LOOPS = 500;
-    private static final int PLAYBACK_END_TOLERANCE = 5000;
+    private static final int PLAYBACK_END_TOLERANCE = 30000;
     private static final int WAIT_UNTIL_PLAYBACK_FINISH = 515000 ;
 
     public MediaPlayerStressTest() {
@@ -112,10 +112,11 @@ public class MediaPlayerStressTest extends ActivityInstrumentationTestCase2<Medi
                 if (random_no_of_seek == 0) {
                     random_no_of_seek = 1;
                 }
-                // Random seek and play
+                Log.v(TAG, "random_seek = " + random_no_of_seek);
+                // Play for 10 seconds then random seekTo
                 for (int j = 0; j < random_no_of_seek; j++) {
                     random_play_time =
-                        generator.nextInt(video_duration / 2);
+                        generator.nextInt(video_duration / 100);
                     Log.v(TAG, "Play time = " + random_play_time);
                     Thread.sleep(random_play_time);
                     random_seek_time =
@@ -123,12 +124,13 @@ public class MediaPlayerStressTest extends ActivityInstrumentationTestCase2<Medi
                     Log.v(TAG, "Seek time = " + random_seek_time);
                     mp.seekTo(random_seek_time);
                 }
-                //wait until the movie finish and check the current position
-                //Make sure the wait time is long enough
-                long wait_until_playback_finish = video_duration - random_seek_time + PLAYBACK_END_TOLERANCE * 2;
-                Thread.sleep(wait_until_playback_finish);
+                //Seek to 10s from the end of the video
+                mp.seekTo(video_duration - 10000);
+                //After reposition, play 30 seconds the video should be finished.
+                Thread.sleep(PLAYBACK_END_TOLERANCE);
                 Log.v(TAG, "CurrentPosition = " + mp.getCurrentPosition());
-                if ( mp.isPlaying() || mp.getCurrentPosition() > (video_duration + PLAYBACK_END_TOLERANCE)){
+                if ( mp.isPlaying() || mp.getCurrentPosition()
+                        > (video_duration)){
                     assertTrue("Current PlayTime greater than duration", false);
                 }
                 mp.release();
