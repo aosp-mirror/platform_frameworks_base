@@ -42,57 +42,57 @@ public:
     typedef void *buffer_id;
     typedef void *node_id;
 
-    virtual status_t list_nodes(List<String8> *list) = 0;
+    virtual status_t listNodes(List<String8> *list) = 0;
 
-    virtual status_t allocate_node(const char *name, node_id *node) = 0;
-    virtual status_t free_node(node_id node) = 0;
+    virtual status_t allocateNode(
+            const char *name, const sp<IOMXObserver> &observer,
+            node_id *node) = 0;
 
-    virtual status_t send_command(
+    virtual status_t freeNode(node_id node) = 0;
+
+    virtual status_t sendCommand(
             node_id node, OMX_COMMANDTYPE cmd, OMX_S32 param) = 0;
 
-    virtual status_t get_parameter(
+    virtual status_t getParameter(
             node_id node, OMX_INDEXTYPE index,
             void *params, size_t size) = 0;
 
-    virtual status_t set_parameter(
+    virtual status_t setParameter(
             node_id node, OMX_INDEXTYPE index,
             const void *params, size_t size) = 0;
 
-    virtual status_t get_config(
+    virtual status_t getConfig(
             node_id node, OMX_INDEXTYPE index,
             void *params, size_t size) = 0;
 
-    virtual status_t set_config(
+    virtual status_t setConfig(
             node_id node, OMX_INDEXTYPE index,
             const void *params, size_t size) = 0;
 
-    virtual status_t use_buffer(
+    virtual status_t useBuffer(
             node_id node, OMX_U32 port_index, const sp<IMemory> &params,
             buffer_id *buffer) = 0;
 
-    virtual status_t allocate_buffer(
+    virtual status_t allocateBuffer(
             node_id node, OMX_U32 port_index, size_t size,
             buffer_id *buffer) = 0;
 
-    virtual status_t allocate_buffer_with_backup(
+    virtual status_t allocateBufferWithBackup(
             node_id node, OMX_U32 port_index, const sp<IMemory> &params,
             buffer_id *buffer) = 0;
 
-    virtual status_t free_buffer(
+    virtual status_t freeBuffer(
             node_id node, OMX_U32 port_index, buffer_id buffer) = 0;
 
-    virtual status_t observe_node(
-            node_id node, const sp<IOMXObserver> &observer) = 0;
+    virtual status_t fillBuffer(node_id node, buffer_id buffer) = 0;
 
-    virtual status_t fill_buffer(node_id node, buffer_id buffer) = 0;
-
-    virtual status_t empty_buffer(
+    virtual status_t emptyBuffer(
             node_id node,
             buffer_id buffer,
             OMX_U32 range_offset, OMX_U32 range_length,
             OMX_U32 flags, OMX_TICKS timestamp) = 0;
 
-    virtual status_t get_extension_index(
+    virtual status_t getExtensionIndex(
             node_id node,
             const char *parameter_name,
             OMX_INDEXTYPE *index) = 0;
@@ -162,7 +162,7 @@ class IOMXObserver : public IInterface {
 public:
     DECLARE_META_INTERFACE(OMXObserver);
 
-    virtual void on_message(const omx_message &msg) = 0;
+    virtual void onMessage(const omx_message &msg) = 0;
 };
 
 class IOMXRenderer : public IInterface {

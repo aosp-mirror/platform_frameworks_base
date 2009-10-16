@@ -19,66 +19,67 @@
 
 #include <media/IOMX.h>
 #include <utils/threads.h>
+#include <utils/KeyedVector.h>
 
 namespace android {
 
-class NodeMeta;
+class OMXNodeInstance;
 
-class OMX : public BnOMX {
+class OMX : public BnOMX,
+            public IBinder::DeathRecipient {
 public:
     OMX();
 
-    virtual status_t list_nodes(List<String8> *list);
+    virtual status_t listNodes(List<String8> *list);
 
-    virtual status_t allocate_node(const char *name, node_id *node);
-    virtual status_t free_node(node_id node);
+    virtual status_t allocateNode(
+            const char *name, const sp<IOMXObserver> &observer, node_id *node);
 
-    virtual status_t send_command(
+    virtual status_t freeNode(node_id node);
+
+    virtual status_t sendCommand(
             node_id node, OMX_COMMANDTYPE cmd, OMX_S32 param);
 
-    virtual status_t get_parameter(
+    virtual status_t getParameter(
             node_id node, OMX_INDEXTYPE index,
             void *params, size_t size);
 
-    virtual status_t set_parameter(
+    virtual status_t setParameter(
             node_id node, OMX_INDEXTYPE index,
             const void *params, size_t size);
 
-    virtual status_t get_config(
+    virtual status_t getConfig(
             node_id node, OMX_INDEXTYPE index,
             void *params, size_t size);
 
-    virtual status_t set_config(
+    virtual status_t setConfig(
             node_id node, OMX_INDEXTYPE index,
             const void *params, size_t size);
 
-    virtual status_t use_buffer(
+    virtual status_t useBuffer(
             node_id node, OMX_U32 port_index, const sp<IMemory> &params,
             buffer_id *buffer);
 
-    virtual status_t allocate_buffer(
+    virtual status_t allocateBuffer(
             node_id node, OMX_U32 port_index, size_t size,
             buffer_id *buffer);
 
-    virtual status_t allocate_buffer_with_backup(
+    virtual status_t allocateBufferWithBackup(
             node_id node, OMX_U32 port_index, const sp<IMemory> &params,
             buffer_id *buffer);
 
-    virtual status_t free_buffer(
+    virtual status_t freeBuffer(
             node_id node, OMX_U32 port_index, buffer_id buffer);
 
-    virtual status_t observe_node(
-            node_id node, const sp<IOMXObserver> &observer);
+    virtual status_t fillBuffer(node_id node, buffer_id buffer);
 
-    virtual status_t fill_buffer(node_id node, buffer_id buffer);
-
-    virtual status_t empty_buffer(
+    virtual status_t emptyBuffer(
             node_id node,
             buffer_id buffer,
             OMX_U32 range_offset, OMX_U32 range_length,
             OMX_U32 flags, OMX_TICKS timestamp);
 
-    virtual status_t get_extension_index(
+    virtual status_t getExtensionIndex(
             node_id node,
             const char *parameter_name,
             OMX_INDEXTYPE *index);
@@ -90,44 +91,38 @@ public:
             size_t encodedWidth, size_t encodedHeight,
             size_t displayWidth, size_t displayHeight);
 
-private:
-    static OMX_CALLBACKTYPE kCallbacks;
-
-    Mutex mLock;
-
-    struct CallbackDispatcher;
-    sp<CallbackDispatcher> mDispatcher;
-
-    static OMX_ERRORTYPE OnEvent(
-            OMX_IN OMX_HANDLETYPE hComponent,
-            OMX_IN OMX_PTR pAppData,
-            OMX_IN OMX_EVENTTYPE eEvent,
-            OMX_IN OMX_U32 nData1,
-            OMX_IN OMX_U32 nData2,
-            OMX_IN OMX_PTR pEventData);
-
-    static OMX_ERRORTYPE OnEmptyBufferDone(
-            OMX_IN OMX_HANDLETYPE hComponent,
-            OMX_IN OMX_PTR pAppData,
-            OMX_IN OMX_BUFFERHEADERTYPE* pBuffer);
-
-    static OMX_ERRORTYPE OnFillBufferDone(
-            OMX_IN OMX_HANDLETYPE hComponent,
-            OMX_IN OMX_PTR pAppData,
-            OMX_IN OMX_BUFFERHEADERTYPE* pBuffer);
+    virtual void binderDied(const wp<IBinder> &the_late_who);
 
     OMX_ERRORTYPE OnEvent(
-            NodeMeta *meta,
+            node_id node,
             OMX_IN OMX_EVENTTYPE eEvent,
             OMX_IN OMX_U32 nData1,
             OMX_IN OMX_U32 nData2,
             OMX_IN OMX_PTR pEventData);
         
     OMX_ERRORTYPE OnEmptyBufferDone(
-            NodeMeta *meta, OMX_IN OMX_BUFFERHEADERTYPE *pBuffer);
+            node_id node, OMX_IN OMX_BUFFERHEADERTYPE *pBuffer);
 
     OMX_ERRORTYPE OnFillBufferDone(
-            NodeMeta *meta, OMX_IN OMX_BUFFERHEADERTYPE *pBuffer);
+            node_id node, OMX_IN OMX_BUFFERHEADERTYPE *pBuffer);
+
+    void invalidateNodeID(node_id node);
+
+private:
+    Mutex mLock;
+
+    struct CallbackDispatcher;
+    sp<CallbackDispatcher> mDispatcher;
+
+    int32_t mNodeCounter;
+
+    KeyedVector<wp<IBinder>, OMXNodeInstance *> mLiveNodes;
+    KeyedVector<node_id, OMXNodeInstance *> mNodeIDToInstance;
+
+    node_id makeNodeID(OMXNodeInstance *instance);
+    OMXNodeInstance *findInstance(node_id node);
+
+    void invalidateNodeID_l(node_id node);
 
     OMX(const OMX &);
     OMX &operator=(const OMX &);
