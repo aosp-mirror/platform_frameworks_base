@@ -53,6 +53,9 @@ public:
     ~Context();
 
     static pthread_key_t gThreadTLSKey;
+    static uint32_t gThreadTLSKeyCount;
+    static pthread_mutex_t gInitMutex;
+
     struct ScriptTLSStruct {
         Context * mContext;
         Script * mScript;
