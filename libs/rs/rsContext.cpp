@@ -29,6 +29,8 @@ using namespace android;
 using namespace android::renderscript;
 
 pthread_key_t Context::gThreadTLSKey = 0;
+uint32_t Context::gThreadTLSKeyCount = 0;
+pthread_mutex_t Context::gInitMutex = PTHREAD_MUTEX_INITIALIZER;
 
 void Context::initEGL()
 {
@@ -300,6 +302,8 @@ void * Context::threadProc(void *vrsc)
 
 Context::Context(Device *dev, Surface *sur, bool useDepth)
 {
+    pthread_mutex_lock(&gInitMutex);
+
     dev->addContext(this);
     mDev = dev;
     mRunning = false;
@@ -311,16 +315,18 @@ Context::Context(Device *dev, Surface *sur, bool useDepth)
     int status;
     pthread_attr_t threadAttr;
 
-    if (!gThreadTLSKey) {
+    if (!gThreadTLSKeyCount) {
         status = pthread_key_create(&gThreadTLSKey, NULL);
         if (status) {
             LOGE("Failed to init thread tls key.");
+            pthread_mutex_unlock(&gInitMutex);
             return;
         }
-    } else {
-        // HACK: workaround gl hang on start
-        exit(-1);
     }
+    gThreadTLSKeyCount++;
+    pthread_mutex_unlock(&gInitMutex);
+
+    // Global init done at this point.
 
     status = pthread_attr_init(&threadAttr);
     if (status) {
@@ -362,10 +368,16 @@ Context::~Context()
     int status = pthread_join(mThreadId, &res);
     objDestroyOOBRun();
 
+    // Global structure cleanup.
+    pthread_mutex_lock(&gInitMutex);
     if (mDev) {
         mDev->removeContext(this);
-        pthread_key_delete(gThreadTLSKey);
+        --gThreadTLSKeyCount;
+        if (!gThreadTLSKeyCount) {
+            pthread_key_delete(gThreadTLSKey);
+        }
     }
+    pthread_mutex_unlock(&gInitMutex);
 
     objDestroyOOBDestroy();
 }
