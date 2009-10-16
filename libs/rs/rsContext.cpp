@@ -145,6 +145,12 @@ bool Context::runRootScript()
     }
     mStateFragmentStore.mLast.clear();
     bool ret = runScript(mRootScript.get(), 0);
+
+    GLenum err = glGetError();
+    if (err != GL_NO_ERROR) {
+        LOGE("Pending GL Error, 0x%x", err);
+    }
+
     return ret;
 }
 
