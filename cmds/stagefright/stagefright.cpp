@@ -52,6 +52,9 @@ static int64_t getNowUs() {
 static void playSource(OMXClient *client, const sp<MediaSource> &source) {
     sp<MetaData> meta = source->getFormat();
 
+    int64_t durationUs;
+    CHECK(meta->findInt64(kKeyDuration, &durationUs));
+
     sp<OMXCodec> decoder = OMXCodec::Create(
             client->interface(), meta, false /* createEncoder */, source);
 
@@ -61,7 +64,7 @@ static void playSource(OMXClient *client, const sp<MediaSource> &source) {
 
     decoder->start();
 
-    if (gReproduceBug == 3) {
+    if (gReproduceBug >= 3 && gReproduceBug <= 5) {
         status_t err;
         MediaBuffer *buffer;
         MediaSource::ReadOptions options;
@@ -85,10 +88,19 @@ static void playSource(OMXClient *client, const sp<MediaSource> &source) {
                 CHECK(buffer->meta_data()->findInt64(kKeyTime, &timestampUs));
 
                 bool failed = false;
+
                 if (seekTimeUs >= 0) {
                     int64_t diff = timestampUs - seekTimeUs;
 
-                    if (diff > 500000) {
+                    if (diff < 0) {
+                        diff = -diff;
+                    }
+
+                    if ((gReproduceBug == 4 && diff > 500000)
+                        || (gReproduceBug == 5 && timestampUs < 0)) {
+                        printf("wanted: %.2f secs, got: %.2f secs\n",
+                               seekTimeUs / 1E6, timestampUs / 1E6);
+
                         printf("ERROR: ");
                         failed = true;
                     }
@@ -105,13 +117,16 @@ static void playSource(OMXClient *client, const sp<MediaSource> &source) {
                 }
 
                 shouldSeek = ((double)rand() / RAND_MAX) < 0.1;
-                shouldSeek = false;
+
+                if (gReproduceBug == 3) {
+                    shouldSeek = false;
+                }
             }
 
             seekTimeUs = -1;
 
             if (shouldSeek) {
-                seekTimeUs = (rand() * 30E6) / RAND_MAX;
+                seekTimeUs = (rand() * (float)durationUs) / RAND_MAX;
                 options.setSeekTo(seekTimeUs);
 
                 printf("seeking to %lld us (%.2f secs)\n",
