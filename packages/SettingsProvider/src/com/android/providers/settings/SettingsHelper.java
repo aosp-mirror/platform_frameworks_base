@@ -45,7 +45,6 @@ public class SettingsHelper {
 
     private boolean mSilent;
     private boolean mVibrate;
-    private boolean mHasAutoBrightness;
 
     public SettingsHelper(Context context) {
         mContext = context;
@@ -54,9 +53,6 @@ public class SettingsHelper {
         mContentService = ContentResolver.getContentService();
         mPowerManager = IPowerManager.Stub.asInterface(
                 ServiceManager.getService("power"));
-
-        mHasAutoBrightness = context.getResources().getBoolean(
-                com.android.internal.R.bool.config_automatic_brightness_available);
     }
 
     /**
@@ -71,18 +67,6 @@ public class SettingsHelper {
     public boolean restoreValue(String name, String value) {
         if (Settings.System.SCREEN_BRIGHTNESS.equals(name)) {
             setBrightness(Integer.parseInt(value));
-        } else if (Settings.System.SCREEN_BRIGHTNESS_MODE.equals(name)) {
-            if (mHasAutoBrightness) {
-                // When setting auto-brightness, must reset the brightness afterwards
-                try {
-                    int curBrightness = Settings.System.getInt(mContext.getContentResolver(),
-                            Settings.System.SCREEN_BRIGHTNESS);
-                    setAutoBrightness(Integer.parseInt(value) != 0);
-                    setBrightness(curBrightness);
-                } catch (Settings.SettingNotFoundException e) {
-                    // no brightness setting at all?  weird.  skip this then.
-                }
-            }
         } else if (Settings.System.SOUND_EFFECTS_ENABLED.equals(name)) {
             setSoundEffects(Integer.parseInt(value) == 1);
         } else if (Settings.Secure.LOCATION_PROVIDERS_ALLOWED.equals(name)) {
@@ -90,16 +74,6 @@ public class SettingsHelper {
             return false;
         }
         return true;
-    }
-
-    private void setAutoBrightness(boolean value) {
-        if (mPowerManager != null) {
-            try {
-                mPowerManager.setAutoBrightness(value);
-            } catch (RemoteException e) {
-                // unable to reach the power manager; skip
-            }
-        }
     }
 
     private void setGpsLocation(String value) {
