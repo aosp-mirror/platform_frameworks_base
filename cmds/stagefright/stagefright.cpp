@@ -52,6 +52,13 @@ static int64_t getNowUs() {
 static void playSource(OMXClient *client, const sp<MediaSource> &source) {
     sp<MetaData> meta = source->getFormat();
 
+    int32_t durationUnits;
+    int32_t timeScale;
+    CHECK(meta->findInt32(kKeyDuration, &durationUnits));
+    CHECK(meta->findInt32(kKeyTimeScale, &timeScale));
+
+    int64_t durationUs = ((int64_t)durationUnits * 1000000) / timeScale;
+
     sp<OMXCodec> decoder = OMXCodec::Create(
             client->interface(), meta, false /* createEncoder */, source);
 
@@ -61,7 +68,7 @@ static void playSource(OMXClient *client, const sp<MediaSource> &source) {
 
     decoder->start();
 
-    if (gReproduceBug == 3) {
+    if (gReproduceBug >= 3 && gReproduceBug <= 5) {
         status_t err;
         MediaBuffer *buffer;
         MediaSource::ReadOptions options;
@@ -76,23 +83,31 @@ static void playSource(OMXClient *client, const sp<MediaSource> &source) {
 
                 shouldSeek = true;
             } else {
-                int32_t units, scale;
-                CHECK(buffer->meta_data()->findInt32(kKeyTimeUnits, &units));
-                CHECK(buffer->meta_data()->findInt32(kKeyTimeScale, &scale));
-                int64_t timestamp = ((OMX_TICKS)units * 1000000) / scale;
+                int32_t timestampUnits;
+                CHECK(buffer->meta_data()->findInt32(kKeyTimeUnits, &timestampUnits));
+
+                int64_t timestampUs = ((int64_t)timestampUnits * 1000000) / timeScale;
 
                 bool failed = false;
-                if (seekTimeUs >= 0) {
-                    int64_t diff = timestamp - seekTimeUs;
 
-                    if (diff > 500000) {
+                if (seekTimeUs >= 0) {
+                    int64_t diff = timestampUs - seekTimeUs;
+                    if (diff < 0) {
+                        diff = -diff;
+                    }
+
+                    if ((gReproduceBug == 4 && diff > 500000)
+                        || (gReproduceBug == 5 && timestampUs < 0)) {
+                        printf("wanted: %.2f secs, got: %.2f secs\n",
+                               seekTimeUs / 1E6, timestampUs / 1E6);
+
                         printf("ERROR: ");
                         failed = true;
                     }
                 }
 
                 printf("buffer has timestamp %lld us (%.2f secs)\n",
-                       timestamp, timestamp / 1E6);
+                       timestampUs, timestampUs / 1E6);
 
                 buffer->release();
                 buffer = NULL;
@@ -102,13 +117,16 @@ static void playSource(OMXClient *client, const sp<MediaSource> &source) {
                 }
 
                 shouldSeek = ((double)rand() / RAND_MAX) < 0.1;
-                shouldSeek = false;
+
+                if (gReproduceBug == 3) {
+                    shouldSeek = false;
+                }
             }
 
             seekTimeUs = -1;
 
             if (shouldSeek) {
-                seekTimeUs = (rand() * 30E6) / RAND_MAX;
+                seekTimeUs = (rand() * (float)durationUs) / RAND_MAX;
                 options.setSeekTo(seekTimeUs);
 
                 printf("seeking to %lld us (%.2f secs)\n",
@@ -138,6 +156,7 @@ static void playSource(OMXClient *client, const sp<MediaSource> &source) {
 
             if (err != OK) {
                 CHECK_EQ(buffer, NULL);
+
                 break;
             }
 
