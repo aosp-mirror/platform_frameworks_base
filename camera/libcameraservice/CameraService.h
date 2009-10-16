@@ -23,10 +23,9 @@
 #include <ui/CameraHardwareInterface.h>
 #include <ui/Camera.h>
 
-class android::MemoryHeapBase;
-
 namespace android {
 
+class MemoryHeapBase;
 class MediaPlayer;
 
 // ----------------------------------------------------------------------------
@@ -151,7 +150,8 @@ private:
                     void        handleRawPicture(const sp<IMemory>&);
                     void        handleCompressedPicture(const sp<IMemory>&);
 
-                    void        copyFrameAndPostCopiedFrame(sp<IMemoryHeap> heap, size_t offset, size_t size);
+                    void        copyFrameAndPostCopiedFrame(const sp<ICameraClient>& client,
+                                    const sp<IMemoryHeap>& heap, size_t offset, size_t size);
 
         // camera operation mode
         enum camera_mode {
