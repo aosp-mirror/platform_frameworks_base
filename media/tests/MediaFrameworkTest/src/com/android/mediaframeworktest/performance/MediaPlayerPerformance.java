@@ -309,6 +309,8 @@ public class MediaPlayerPerformance extends ActivityInstrumentationTestCase<Medi
     }
 
     public boolean validateMemoryResult (int startPid, int startMemory, Writer output) throws Exception {
+        //Wait for 10 seconds to make sure the memory settle.
+        Thread.sleep(10000);
         mEndPid = getMediaserverPid();
         mEndMemory = getMediaserverVsize();
         Log.v(TAG, "End Memory " + mEndMemory);
