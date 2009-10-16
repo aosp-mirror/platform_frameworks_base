@@ -624,7 +624,7 @@ AlertDialog.Builder builder;
 AlertDialog alertDialog;
 
 Context mContext = getApplicationContext();
-LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(LAYOUT_INFLATER);
+LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(LAYOUT_INFLATER_SERVICE);
 View layout = inflater.inflate(R.layout.custom_dialog,
                                (ViewGroup) findViewById(R.id.layout_root));
 
