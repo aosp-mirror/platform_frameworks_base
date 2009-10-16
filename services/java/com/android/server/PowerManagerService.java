@@ -53,6 +53,7 @@ import android.view.WindowManagerPolicy;
 import static android.provider.Settings.System.DIM_SCREEN;
 import static android.provider.Settings.System.SCREEN_BRIGHTNESS;
 import static android.provider.Settings.System.SCREEN_BRIGHTNESS_MODE;
+import static android.provider.Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC;
 import static android.provider.Settings.System.SCREEN_OFF_TIMEOUT;
 import static android.provider.Settings.System.STAY_ON_WHILE_PLUGGED_IN;
 
@@ -64,7 +65,7 @@ import java.util.Observable;
 import java.util.Observer;
 
 class PowerManagerService extends IPowerManager.Stub
-        implements LocalPowerManager, Watchdog.Monitor, SensorEventListener {
+        implements LocalPowerManager, Watchdog.Monitor {
 
     private static final String TAG = "PowerManagerService";
     static final String PARTIAL_NAME = "PowerManagerService";
@@ -189,6 +190,9 @@ class PowerManagerService extends IPowerManager.Stub
     private BatteryService mBatteryService;
     private SensorManager mSensorManager;
     private Sensor mProximitySensor;
+    private Sensor mLightSensor;
+    private boolean mLightSensorEnabled;
+    private float mLightSensorValue = -1;
     private boolean mDimScreen = true;
     private long mNextTimeout;
     private volatile int mPokey = 0;
@@ -199,6 +203,8 @@ class PowerManagerService extends IPowerManager.Stub
     private long mScreenOnStartTime;
     private boolean mPreventScreenOn;
     private int mScreenBrightnessOverride = -1;
+    private boolean mHasHardwareAutoBrightness;
+    private boolean mAutoBrightessEnabled;
 
     // Used when logging number and duration of touch-down cycles
     private long mTotalTouchDownTime;
@@ -207,6 +213,7 @@ class PowerManagerService extends IPowerManager.Stub
 
     // could be either static or controllable at runtime
     private static final boolean mSpew = false;
+    private static final boolean mDebugLightSensor = false;
 
     /*
     static PrintStream mLog;
@@ -344,6 +351,9 @@ class PowerManagerService extends IPowerManager.Stub
                  // DIM_SCREEN
                 //mDimScreen = getInt(DIM_SCREEN) != 0;
 
+                // SCREEN_BRIGHTNESS_MODE
+                setScreenBrightnessMode(getInt(SCREEN_BRIGHTNESS_MODE));
+
                 // recalculate everything
                 setScreenOffTimeoutsLocked();
             }
@@ -415,12 +425,17 @@ class PowerManagerService extends IPowerManager.Stub
         mScreenOffIntent = new Intent(Intent.ACTION_SCREEN_OFF);
         mScreenOffIntent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
 
-        ContentResolver resolver = mContext.getContentResolver();
+        mHasHardwareAutoBrightness = mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_hardware_automatic_brightness_available);
+
+       ContentResolver resolver = mContext.getContentResolver();
         Cursor settingsCursor = resolver.query(Settings.System.CONTENT_URI, null,
                 "(" + Settings.System.NAME + "=?) or ("
                         + Settings.System.NAME + "=?) or ("
+                        + Settings.System.NAME + "=?) or ("
                         + Settings.System.NAME + "=?)",
-                new String[]{STAY_ON_WHILE_PLUGGED_IN, SCREEN_OFF_TIMEOUT, DIM_SCREEN},
+                new String[]{STAY_ON_WHILE_PLUGGED_IN, SCREEN_OFF_TIMEOUT, DIM_SCREEN,
+                        SCREEN_BRIGHTNESS_MODE},
                 null);
         mSettings = new ContentQueryMap(settingsCursor, Settings.System.NAME, true, mHandler);
         SettingsObserver settingsObserver = new SettingsObserver();
@@ -443,10 +458,6 @@ class PowerManagerService extends IPowerManager.Stub
 
         // turn everything on
         setPowerState(ALL_BRIGHT);
-
-        // set auto brightness mode to user setting
-        boolean brightnessMode = Settings.System.getInt(resolver, SCREEN_BRIGHTNESS_MODE, 1) != 0;
-        mHardware.setAutoBrightness_UNCHECKED(brightnessMode);
 
         synchronized (mHandlerThread) {
             mInitComplete = true;
@@ -1164,7 +1175,7 @@ class PowerManagerService extends IPowerManager.Stub
 
                 // Finally, set the flag that prevents the screen from turning on.
                 // (Below, in setPowerState(), we'll check mPreventScreenOn and
-                // we *won't* call Power.setScreenState(true) if it's set.)
+                // we *won't* call setScreenStateLocked(true) if it's set.)
                 mPreventScreenOn = true;
             } else {
                 // (Re)enable the screen.
@@ -1182,9 +1193,9 @@ class PowerManagerService extends IPowerManager.Stub
                         Log.d(TAG,
                               "preventScreenOn: turning on after a prior preventScreenOn(true)!");
                     }
-                    int err = Power.setScreenState(true);
+                    int err = setScreenStateLocked(true);
                     if (err != 0) {
-                        Log.w(TAG, "preventScreenOn: error from Power.setScreenState(): " + err);
+                        Log.w(TAG, "preventScreenOn: error from setScreenStateLocked(): " + err);
                     }
                 }
 
@@ -1238,6 +1249,14 @@ class PowerManagerService extends IPowerManager.Stub
                 forceReenableScreen();
             }
         };
+
+    private int setScreenStateLocked(boolean on) {
+        int err = Power.setScreenState(on);
+        if (err == 0) {
+            enableLightSensor(on && mAutoBrightessEnabled);
+        }
+        return err;
+    }
 
     private void setPowerState(int state)
     {
@@ -1327,7 +1346,7 @@ class PowerManagerService extends IPowerManager.Stub
                         reallyTurnScreenOn = false;
                     }
                     if (reallyTurnScreenOn) {
-                        err = Power.setScreenState(true);
+                        err = setScreenStateLocked(true);
                         long identity = Binder.clearCallingIdentity();
                         try {
                             mBatteryStats.noteScreenBrightness(
@@ -1339,7 +1358,7 @@ class PowerManagerService extends IPowerManager.Stub
                             Binder.restoreCallingIdentity(identity);
                         }
                     } else {
-                        Power.setScreenState(false);
+                        setScreenStateLocked(false);
                         // But continue as if we really did turn the screen on...
                         err = 0;
                     }
@@ -1384,7 +1403,7 @@ class PowerManagerService extends IPowerManager.Stub
         EventLog.writeEvent(LOG_POWER_SCREEN_STATE, 0, becauseOfUser ? 1 : 0,
                 mTotalTouchDownTime, mTouchCycles);
         mLastTouchDown = 0;
-        int err = Power.setScreenState(false);
+        int err = setScreenStateLocked(false);
         if (mScreenOnStartTime != 0) {
             mScreenOnTime += SystemClock.elapsedRealtime() - mScreenOnStartTime;
             mScreenOnStartTime = 0;
@@ -1802,6 +1821,14 @@ class PowerManagerService extends IPowerManager.Stub
         }
     }
 
+    private void lightSensorChangedLocked(float value) {
+        if (mDebugLightSensor) {
+            Log.d(TAG, "lightSensorChangedLocked " + value);
+        }
+        mLightSensorValue = value;
+        // more to do here
+    }
+
     /**
      * The user requested that we go to sleep (probably with the power button).
      * This overrides all wake locks that are held.
@@ -1882,6 +1909,18 @@ class PowerManagerService extends IPowerManager.Stub
         synchronized (mLocks) {
             mUserActivityAllowed = enabled;
             mLastEventTime = SystemClock.uptimeMillis(); // we might need to pass this in
+        }
+    }
+
+    private void setScreenBrightnessMode(int mode) {
+        mAutoBrightessEnabled = (mode == SCREEN_BRIGHTNESS_MODE_AUTOMATIC);
+
+        if (mHasHardwareAutoBrightness) {
+            // When setting auto-brightness, must reset the brightness afterwards
+            mHardware.setAutoBrightness_UNCHECKED(mAutoBrightessEnabled);
+            setBacklightBrightness((int)mScreenBrightness.curValue);
+        } else {
+            enableLightSensor(screenIsOn() && mAutoBrightessEnabled);
         }
     }
 
@@ -2031,6 +2070,14 @@ class PowerManagerService extends IPowerManager.Stub
     }
     
     void systemReady() {
+        mSensorManager = new SensorManager(mHandlerThread.getLooper());
+        mProximitySensor = mSensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY);
+        // don't bother with the light sensor if auto brightness is handled in hardware
+        if (!mHasHardwareAutoBrightness) {
+            mLightSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
+            enableLightSensor(mAutoBrightessEnabled);
+        }
+
         synchronized (mLocks) {
             Log.d(TAG, "system ready!");
             mDoneBooting = true;
@@ -2058,8 +2105,6 @@ class PowerManagerService extends IPowerManager.Stub
                    | PowerManager.FULL_WAKE_LOCK
                    | PowerManager.SCREEN_DIM_WAKE_LOCK;
 
-        // call getSensorManager() to make sure mProximitySensor is initialized
-        getSensorManager();
         if (mProximitySensor != null) {
             result |= PowerManager.PROXIMITY_SCREEN_OFF_WAKE_LOCK;
         }
@@ -2098,31 +2143,19 @@ class PowerManagerService extends IPowerManager.Stub
         }
     }
 
-    public void setAutoBrightness(boolean on) {
-        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.DEVICE_POWER, null);
-        mHardware.setAutoBrightness_UNCHECKED(on);
-    }
-
-    private SensorManager getSensorManager() {
-        if (mSensorManager == null) {
-            mSensorManager = new SensorManager(mHandlerThread.getLooper());
-            mProximitySensor = mSensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY);
-        }
-        return mSensorManager;
-    }
-
     private void enableProximityLockLocked() {
         if (mSpew) {
             Log.d(TAG, "enableProximityLockLocked");
         }
-        mSensorManager.registerListener(this, mProximitySensor, SensorManager.SENSOR_DELAY_NORMAL);
+        mSensorManager.registerListener(mProximityListener, mProximitySensor,
+                SensorManager.SENSOR_DELAY_NORMAL);
     }
 
     private void disableProximityLockLocked() {
         if (mSpew) {
             Log.d(TAG, "disableProximityLockLocked");
         }
-        mSensorManager.unregisterListener(this);
+        mSensorManager.unregisterListener(mProximityListener);
         synchronized (mLocks) {
             if (mProximitySensorActive) {
                 mProximitySensorActive = false;
@@ -2131,32 +2164,65 @@ class PowerManagerService extends IPowerManager.Stub
         }
     }
 
-    public void onSensorChanged(SensorEvent event) {
-        long milliseconds = event.timestamp / 1000000;
-        synchronized (mLocks) {
-            float distance = event.values[0];
-            // compare against getMaximumRange to support sensors that only return 0 or 1
-            if (distance >= 0.0 && distance < PROXIMITY_THRESHOLD &&
-                    distance < mProximitySensor.getMaximumRange()) {
-                if (mSpew) {
-                    Log.d(TAG, "onSensorChanged: proximity active, distance: " + distance);
-                }
-                goToSleepLocked(milliseconds);
-                mProximitySensorActive = true;
+    private void enableLightSensor(boolean enable) {
+        if (mDebugLightSensor) {
+            Log.d(TAG, "enableLightSensor " + enable);
+        }
+        if (mSensorManager != null && mLightSensorEnabled != enable) {
+            mLightSensorEnabled = enable;
+            if (enable) {
+                mSensorManager.registerListener(mLightListener, mLightSensor,
+                        SensorManager.SENSOR_DELAY_NORMAL);
             } else {
-                // proximity sensor negative events trigger as user activity.
-                // temporarily set mUserActivityAllowed to true so this will work
-                // even when the keyguard is on.
-                if (mSpew) {
-                    Log.d(TAG, "onSensorChanged: proximity inactive, distance: " + distance);
-                }
-                mProximitySensorActive = false;
-                forceUserActivityLocked();
+                mSensorManager.unregisterListener(mLightListener);
             }
         }
     }
 
-    public void onAccuracyChanged(Sensor sensor, int accuracy) {
-        // ignore
-    }
+    SensorEventListener mProximityListener = new SensorEventListener() {
+        public void onSensorChanged(SensorEvent event) {
+            long milliseconds = event.timestamp / 1000000;
+            synchronized (mLocks) {
+                float distance = event.values[0];
+                // compare against getMaximumRange to support sensors that only return 0 or 1
+                if (distance >= 0.0 && distance < PROXIMITY_THRESHOLD &&
+                        distance < mProximitySensor.getMaximumRange()) {
+                    if (mSpew) {
+                        Log.d(TAG, "onSensorChanged: proximity active, distance: " + distance);
+                    }
+                    goToSleepLocked(milliseconds);
+                    mProximitySensorActive = true;
+                } else {
+                    // proximity sensor negative events trigger as user activity.
+                    // temporarily set mUserActivityAllowed to true so this will work
+                    // even when the keyguard is on.
+                    if (mSpew) {
+                        Log.d(TAG, "onSensorChanged: proximity inactive, distance: " + distance);
+                    }
+                    mProximitySensorActive = false;
+                    forceUserActivityLocked();
+                }
+            }
+        }
+
+        public void onAccuracyChanged(Sensor sensor, int accuracy) {
+            // ignore
+        }
+    };
+
+    SensorEventListener mLightListener = new SensorEventListener() {
+        public void onSensorChanged(SensorEvent event) {
+            synchronized (mLocks) {
+                int value = (int)event.values[0];
+                if (mDebugLightSensor) {
+                    Log.d(TAG, "onSensorChanged: light value: " + value);
+                }
+                lightSensorChangedLocked(value);
+            }
+        }
+
+        public void onAccuracyChanged(Sensor sensor, int accuracy) {
+            // ignore
+        }
+    };
 }

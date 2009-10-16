@@ -133,7 +133,7 @@ public class HardwareService extends IHardwareService.Stub {
         context.registerReceiver(mIntentReceiver, filter);
 
         mAutoBrightnessAvailable = context.getResources().getBoolean(
-                com.android.internal.R.bool.config_automatic_brightness_available);
+                com.android.internal.R.bool.config_hardware_automatic_brightness_available);
     }
 
     protected void finalize() throws Throwable {

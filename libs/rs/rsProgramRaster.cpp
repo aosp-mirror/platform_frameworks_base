@@ -74,7 +74,7 @@ void ProgramRaster::setupGL(const Context *rsc, ProgramRasterState *state)
     if (mLineSmooth) {
         glEnable(GL_LINE_SMOOTH);
     } else {
-        glEnable(GL_LINE_SMOOTH);
+        glDisable(GL_LINE_SMOOTH);
     }
 
     if (rsc->checkVersion1_1()) {

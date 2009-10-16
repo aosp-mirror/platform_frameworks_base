@@ -2926,12 +2926,12 @@ public class WebView extends AbsoluteLayout
                 animateScroll);
 
         if (mNativeClass == 0) return;
-        if (mShiftIsPressed) {
+        if (mShiftIsPressed && !animateZoom) {
             if (mTouchSelection) {
                 nativeDrawSelectionRegion(canvas);
             } else {
-                nativeDrawSelection(canvas, mSelectX, mSelectY,
-                        mExtendSelection);
+                nativeDrawSelection(canvas, mInvActualScale, getTitleHeight(),
+                        mSelectX, mSelectY, mExtendSelection);
             }
         } else if (drawCursorRing) {
             if (mTouchMode == TOUCH_SHORTPRESS_START_MODE) {
@@ -4065,6 +4065,9 @@ public class WebView extends AbsoluteLayout
             return true;
         }
         if (ev.getAction() == MotionEvent.ACTION_DOWN) {
+            if (mShiftIsPressed) {
+                return true; // discard press if copy in progress
+            }
             mTrackballDown = true;
             if (mNativeClass == 0) {
                 return false;
@@ -4093,6 +4096,7 @@ public class WebView extends AbsoluteLayout
                 } else {
                     mExtendSelection = true;
                 }
+                return true; // discard press if copy in progress
             }
             if (DebugFlags.WEB_VIEW) {
                 Log.v(LOGTAG, "onTrackballEvent up ev=" + ev
@@ -5600,8 +5604,8 @@ public class WebView extends AbsoluteLayout
     private native void     nativeDestroy();
     private native void     nativeDrawCursorRing(Canvas content);
     private native void     nativeDrawMatches(Canvas canvas);
-    private native void     nativeDrawSelection(Canvas content
-            , int x, int y, boolean extendSelection);
+    private native void     nativeDrawSelection(Canvas content, float scale,
+            int offset, int x, int y, boolean extendSelection);
     private native void     nativeDrawSelectionRegion(Canvas content);
     private native void     nativeDumpDisplayTree(String urlOrNull);
     private native int      nativeFindAll(String findLower, String findUpper);

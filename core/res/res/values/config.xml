@@ -67,7 +67,11 @@
          the slider can be opened (for example, in a pocket or purse). -->
     <bool name="config_bypass_keyguard_if_slider_open">true</bool>
     
-    <!-- Flag indicating whether the device supports automatic brightness mode. -->
+    <!-- Flag indicating whether the device supports automatic brightness mode in hardware. -->
+    <bool name="config_hardware_automatic_brightness_available">false</bool>
+
+    <!-- Flag indicating whether the we should enable the automatic brightness in Settings.
+         Software implementation will be used if config_hardware_auto_brightness_available is not set -->
     <bool name="config_automatic_brightness_available">false</bool>
     
     <!-- XXXXXX END OF RESOURCES USING WRONG NAMING CONVENTION -->
