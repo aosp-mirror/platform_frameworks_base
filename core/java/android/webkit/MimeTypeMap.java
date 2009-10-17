@@ -431,6 +431,8 @@ public class MimeTypeMap {
             sMimeTypeMap.loadEntry("text/calendar", "icz");
             sMimeTypeMap.loadEntry("text/comma-separated-values", "csv");
             sMimeTypeMap.loadEntry("text/css", "css");
+            sMimeTypeMap.loadEntry("text/html", "htm");
+            sMimeTypeMap.loadEntry("text/html", "html");
             sMimeTypeMap.loadEntry("text/h323", "323");
             sMimeTypeMap.loadEntry("text/iuls", "uls");
             sMimeTypeMap.loadEntry("text/mathml", "mml");
