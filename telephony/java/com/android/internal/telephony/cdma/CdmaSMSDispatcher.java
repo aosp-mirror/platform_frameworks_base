@@ -100,6 +100,7 @@ final class CdmaSMSDispatcher extends SMSDispatcher {
 
         // If sms is null, means there was a parsing error.
         if (smsb == null) {
+            Log.e(TAG, "dispatchMessage: message is null");
             return Intents.RESULT_SMS_GENERIC_ERROR;
         }
 
