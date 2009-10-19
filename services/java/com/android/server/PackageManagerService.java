@@ -872,6 +872,10 @@ class PackageManagerService extends IPackageManager.Stub {
     }
 
     PackageInfo generatePackageInfo(PackageParser.Package p, int flags) {
+        if ((flags & PackageManager.GET_UNINSTALLED_PACKAGES) != 0) {
+            // The package has been uninstalled but has retained data and resources.
+            return PackageParser.generatePackageInfo(p, null, flags);
+        }
         final PackageSetting ps = (PackageSetting)p.mExtras;
         if (ps == null) {
             return null;

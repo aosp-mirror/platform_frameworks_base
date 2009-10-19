@@ -128,7 +128,7 @@ const char* Loader::getTag(int dpy, int impl)
     return 0;
 }
 
-void* Loader::open(EGLNativeDisplayType display, int impl, gl_hooks_t* hooks)
+void* Loader::open(EGLNativeDisplayType display, int impl, egl_connection_t* cnx)
 {
     /*
      * TODO: if we don't find display/0, then use 0/0
@@ -144,22 +144,22 @@ void* Loader::open(EGLNativeDisplayType display, int impl, gl_hooks_t* hooks)
     char const* tag = getTag(index, impl);
     if (tag) {
         snprintf(path, PATH_MAX, format, "GLES", tag);
-        dso = load_driver(path, hooks, EGL | GLESv1_CM | GLESv2);
+        dso = load_driver(path, cnx, EGL | GLESv1_CM | GLESv2);
         if (dso) {
             hnd = new driver_t(dso);
         } else {
             // Always load EGL first
             snprintf(path, PATH_MAX, format, "EGL", tag);
-            dso = load_driver(path, hooks, EGL);
+            dso = load_driver(path, cnx, EGL);
             if (dso) {
                 hnd = new driver_t(dso);
 
                 // TODO: make this more automated
                 snprintf(path, PATH_MAX, format, "GLESv1_CM", tag);
-                hnd->set( load_driver(path, hooks, GLESv1_CM), GLESv1_CM );
+                hnd->set( load_driver(path, cnx, GLESv1_CM), GLESv1_CM );
 
                 snprintf(path, PATH_MAX, format, "GLESv2", tag);
-                hnd->set( load_driver(path, hooks, GLESv2), GLESv2 );
+                hnd->set( load_driver(path, cnx, GLESv2), GLESv2 );
             }
         }
     }
@@ -223,7 +223,7 @@ void Loader::init_api(void* dso,
 }
 
 void *Loader::load_driver(const char* driver_absolute_path,
-        gl_hooks_t* hooks, uint32_t mask)
+        egl_connection_t* cnx, uint32_t mask)
 {
     if (access(driver_absolute_path, R_OK)) {
         // this happens often, we don't want to log an error
@@ -245,7 +245,7 @@ void *Loader::load_driver(const char* driver_absolute_path,
         LOGE_IF(!getProcAddress, 
                 "can't find eglGetProcAddress() in %s", driver_absolute_path);
 
-        gl_hooks_t::egl_t* egl = &hooks->egl;
+        egl_t* egl = &cnx->egl;
         __eglMustCastToProperFunctionPointerType* curr =
             (__eglMustCastToProperFunctionPointerType*)egl;
         char const * const * api = egl_names;
@@ -266,14 +266,16 @@ void *Loader::load_driver(const char* driver_absolute_path,
     }
     
     if (mask & GLESv1_CM) {
-        init_api(dso, gl_names,  
-                (__eglMustCastToProperFunctionPointerType*)&hooks->gl, 
-                getProcAddress);
+        init_api(dso, gl_names,
+            (__eglMustCastToProperFunctionPointerType*)
+                &cnx->hooks[GLESv1_INDEX]->gl,
+            getProcAddress);
     }
 
     if (mask & GLESv2) {
-      init_api(dso, gl2_names, 
-            (__eglMustCastToProperFunctionPointerType*)&hooks->gl2, 
+      init_api(dso, gl_names,
+            (__eglMustCastToProperFunctionPointerType*)
+                &cnx->hooks[GLESv2_INDEX]->gl,
             getProcAddress);
     }
     
