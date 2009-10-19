@@ -1058,6 +1058,71 @@ void OMXCodec::onEvent(OMX_EVENTTYPE event, OMX_U32 data1, OMX_U32 data2) {
     }
 }
 
+// Has the format changed in any way that the client would have to be aware of?
+static bool formatHasNotablyChanged(
+        const sp<MetaData> &from, const sp<MetaData> &to) {
+    if (from.get() == NULL && to.get() == NULL) {
+        return false;
+    }
+
+    if (from.get() == NULL && to.get() != NULL
+        || from.get() != NULL && to.get() == NULL) {
+        return true;
+    }
+
+    const char *mime_from, *mime_to;
+    CHECK(from->findCString(kKeyMIMEType, &mime_from));
+    CHECK(to->findCString(kKeyMIMEType, &mime_to));
+
+    if (strcasecmp(mime_from, mime_to)) {
+        return true;
+    }
+
+    if (!strcasecmp(mime_from, MEDIA_MIMETYPE_VIDEO_RAW)) {
+        int32_t colorFormat_from, colorFormat_to;
+        CHECK(from->findInt32(kKeyColorFormat, &colorFormat_from));
+        CHECK(to->findInt32(kKeyColorFormat, &colorFormat_to));
+
+        if (colorFormat_from != colorFormat_to) {
+            return true;
+        }
+
+        int32_t width_from, width_to;
+        CHECK(from->findInt32(kKeyWidth, &width_from));
+        CHECK(to->findInt32(kKeyWidth, &width_to));
+
+        if (width_from != width_to) {
+            return true;
+        }
+
+        int32_t height_from, height_to;
+        CHECK(from->findInt32(kKeyHeight, &height_from));
+        CHECK(to->findInt32(kKeyHeight, &height_to));
+
+        if (height_from != height_to) {
+            return true;
+        }
+    } else if (!strcasecmp(mime_from, MEDIA_MIMETYPE_AUDIO_RAW)) {
+        int32_t numChannels_from, numChannels_to;
+        CHECK(from->findInt32(kKeyChannelCount, &numChannels_from));
+        CHECK(to->findInt32(kKeyChannelCount, &numChannels_to));
+
+        if (numChannels_from != numChannels_to) {
+            return true;
+        }
+
+        int32_t sampleRate_from, sampleRate_to;
+        CHECK(from->findInt32(kKeySampleRate, &sampleRate_from));
+        CHECK(to->findInt32(kKeySampleRate, &sampleRate_to));
+
+        if (sampleRate_from != sampleRate_to) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 void OMXCodec::onCmdComplete(OMX_COMMANDTYPE cmd, OMX_U32 data) {
     switch (cmd) {
         case OMX_CommandStateSet:
@@ -1080,8 +1145,14 @@ void OMXCodec::onCmdComplete(OMX_COMMANDTYPE cmd, OMX_U32 data) {
             if (mState == RECONFIGURING) {
                 CHECK_EQ(portIndex, kPortIndexOutput);
 
+                sp<MetaData> oldOutputFormat = mOutputFormat;
                 initOutputFormat(mSource->getFormat());
-                mOutputPortSettingsHaveChanged = true;
+
+                // Don't notify clients if the output port settings change
+                // wasn't of importance to them, i.e. it may be that just the
+                // number of buffers has changed and nothing else.
+                mOutputPortSettingsHaveChanged =
+                    formatHasNotablyChanged(oldOutputFormat, mOutputFormat);
 
                 enablePortAsync(portIndex);
 
