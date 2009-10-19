@@ -97,6 +97,11 @@ public class PowerProfile {
     public static final String POWER_RADIO_ON = "radio.on";
 
     /**
+     * Power consumption when cell radio is hunting for a signal.
+     */
+    public static final String POWER_RADIO_SCANNING = "radio.scanning";
+
+    /**
      * Power consumption when talking on the phone.
      */
     public static final String POWER_RADIO_ACTIVE = "radio.active";
