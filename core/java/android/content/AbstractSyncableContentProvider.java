@@ -747,4 +747,8 @@ public abstract class AbstractSyncableContentProvider extends SyncableContentPro
     public void writeSyncDataBytes(Account account, byte[] data) {
         mSyncState.writeSyncDataBytes(mOpenHelper.getWritableDatabase(), account, data);
     }
+
+    protected ContentProvider getSyncStateProvider() {
+        return mSyncState.asContentProvider();
+    }
 }
