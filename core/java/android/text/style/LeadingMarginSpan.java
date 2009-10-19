@@ -33,6 +33,11 @@ extends ParagraphStyle
                                   CharSequence text, int start, int end,
                                   boolean first, Layout layout);
 
+
+    public interface LeadingMarginSpan2 extends LeadingMarginSpan, WrapTogetherSpan {
+        public int getLeadingMarginLineCount();
+    };
+
     public static class Standard implements LeadingMarginSpan, ParcelableSpan {
         private final int mFirst, mRest;
         
