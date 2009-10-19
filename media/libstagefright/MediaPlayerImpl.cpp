@@ -18,7 +18,7 @@
 #define LOG_TAG "MediaPlayerImpl"
 #include "utils/Log.h"
 
-#include "include/string.h"
+#include "include/stagefright_string.h"
 #include "include/HTTPStream.h"
 
 #include <OMX_Component.h>
