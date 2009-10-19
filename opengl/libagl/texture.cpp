@@ -1252,6 +1252,11 @@ void glTexSubImage2D(
         ogles_error(c, GL_INVALID_OPERATION);
         return;
     }
+
+    if (format != tex->internalformat) {
+        ogles_error(c, GL_INVALID_OPERATION);
+        return;
+    }
     if ((xoffset + width  > GLsizei(surface.width)) ||
         (yoffset + height > GLsizei(surface.height))) {
         ogles_error(c, GL_INVALID_VALUE);
