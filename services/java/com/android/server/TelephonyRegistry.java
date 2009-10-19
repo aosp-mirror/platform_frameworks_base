@@ -477,7 +477,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
     private void broadcastServiceStateChanged(ServiceState state) {
         long ident = Binder.clearCallingIdentity();
         try {
-            mBatteryStats.noteAirplaneMode(state.getState() == ServiceState.STATE_POWER_OFF);
+            mBatteryStats.notePhoneState(state.getState());
         } catch (RemoteException re) {
             // Can't do much
         } finally {

@@ -51,6 +51,9 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
         mContext = context;
         ServiceManager.addService("batteryinfo", asBinder());
         mStats.setNumSpeedSteps(new PowerProfile(mContext).getNumSpeedSteps());
+        mStats.setRadioScanningTimeout(mContext.getResources().getInteger(
+                com.android.internal.R.integer.config_radioScanningTimeout)
+                * 1000L);
     }
     
     public void shutdown() {
@@ -195,10 +198,10 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
         }
     }
 
-    public void noteAirplaneMode(boolean airplaneMode) {
+    public void notePhoneState(int state) {
         enforceCallingPermission();
         synchronized (mStats) {
-            mStats.noteAirplaneModeLocked(airplaneMode);
+            mStats.notePhoneStateLocked(state);
         }
     }
 
