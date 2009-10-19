@@ -18,7 +18,7 @@
 
 #define HTTP_STREAM_H_
 
-#include "string.h"
+#include "stagefright_string.h"
 
 #include <sys/types.h>
 

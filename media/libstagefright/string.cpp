@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "include/string.h"
+#include "include/stagefright_string.h"
 
 namespace android {
 
