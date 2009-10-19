@@ -76,12 +76,20 @@ void glVertexPointerBounds(GLint size, GLenum type,
 
 #if USE_FAST_TLS_KEY && !CHECK_FOR_GL_ERRORS
 
+    #ifdef HAVE_ARM_TLS_REGISTER
+        #define GET_TLS(reg) \
+            "mrc p15, 0, " #reg ", c13, c0, 3 \n"
+    #else
+        #define GET_TLS(reg) \
+            "mov   " #reg ", #0xFFFF0FFF      \n"  \
+            "ldr   " #reg ", [" #reg ", #-15] \n"
+    #endif
+
     #define API_ENTRY(_api) __attribute__((naked)) _api
 
     #define CALL_GL_API(_api, ...)                              \
          asm volatile(                                          \
-            "mov   r12, #0xFFFF0FFF   \n"                       \
-            "ldr   r12, [r12, #-15]   \n"                       \
+            GET_TLS(r12)                                        \
             "ldr   r12, [r12, %[tls]] \n"                       \
             "cmp   r12, #0            \n"                       \
             "ldrne pc,  [r12, %[api]] \n"                       \
@@ -91,7 +99,7 @@ void glVertexPointerBounds(GLint size, GLenum type,
               [api] "J"(__builtin_offsetof(gl_hooks_t, gl._api))    \
             :                                                   \
             );
-    
+
     #define CALL_GL_API_RETURN(_api, ...) \
         CALL_GL_API(_api, __VA_ARGS__) \
         return 0; // placate gcc's warnings. never reached.
