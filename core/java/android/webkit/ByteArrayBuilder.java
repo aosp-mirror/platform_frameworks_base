@@ -114,14 +114,17 @@ class ByteArrayBuilder {
             length = DEFAULT_CAPACITY;
         }
         synchronized (sPool) {
-            // Process any queued references so that sPool does not contain
-            // dead entries.
+            // Process any queued references and remove them from the pool.
             processPoolLocked();
             if (!sPool.isEmpty()) {
-                return sPool.removeFirst().get();
-            } else {
-                return new Chunk(length);
+                Chunk c = sPool.removeFirst().get();
+                // The first item may have been queued after processPoolLocked
+                // so check for null.
+                if (c != null) {
+                    return c;
+                }
             }
+            return new Chunk(length);
         }
     }
 
