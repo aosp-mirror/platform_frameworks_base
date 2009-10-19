@@ -560,8 +560,6 @@ final class WebViewCore {
      */
     private native void nativeSetNewStorageLimit(long limit);
 
-    private native void nativeUpdatePluginState(int framePtr, int nodePtr, int state);
-
     /**
      * Provide WebCore with a Geolocation permission state for the specified
      * origin.
@@ -716,12 +714,6 @@ final class WebViewCore {
         int mY;
     }
 
-    static class PluginStateData {
-        int mFrame;
-        int mNode;
-        int mState;
-    }
-
     static class GeolocationPermissionsData {
         String mOrigin;
         boolean mAllow;
@@ -758,7 +750,7 @@ final class WebViewCore {
             "SINGLE_LISTBOX_CHOICE", // = 124;
             "MESSAGE_RELAY", // = 125;
             "SET_BACKGROUND_COLOR", // = 126;
-            "PLUGIN_STATE", // = 127;
+            "127", // = 127
             "SAVE_DOCUMENT_STATE", // = 128;
             "GET_SELECTION", // = 129;
             "WEBKIT_DRAW", // = 130;
@@ -809,7 +801,6 @@ final class WebViewCore {
         static final int SINGLE_LISTBOX_CHOICE = 124;
         static final int MESSAGE_RELAY = 125;
         static final int SET_BACKGROUND_COLOR = 126;
-        static final int PLUGIN_STATE = 127; // plugin notifications
         static final int SAVE_DOCUMENT_STATE = 128;
         static final int GET_SELECTION = 129;
         static final int WEBKIT_DRAW = 130;
@@ -1067,11 +1058,6 @@ final class WebViewCore {
                         case FREE_MEMORY:
                             clearCache(false);
                             nativeFreeMemory();
-                            break;
-
-                        case PLUGIN_STATE:
-                            PluginStateData psd = (PluginStateData) msg.obj;
-                            nativeUpdatePluginState(psd.mFrame, psd.mNode, psd.mState);
                             break;
 
                         case SET_NETWORK_STATE:
