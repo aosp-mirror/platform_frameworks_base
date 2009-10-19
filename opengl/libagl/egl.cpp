@@ -953,11 +953,16 @@ static config_pair_t const config_base_attribute_list[] = {
         { EGL_BIND_TO_TEXTURE_RGB,        EGL_FALSE                         },
         { EGL_MIN_SWAP_INTERVAL,          1                                 },
         { EGL_MAX_SWAP_INTERVAL,          1                                 },
+        { EGL_LUMINANCE_SIZE,             0                                 },
+        { EGL_ALPHA_MASK_SIZE,            0                                 },
+        { EGL_COLOR_BUFFER_TYPE,          EGL_RGB_BUFFER                    },
         { EGL_RENDERABLE_TYPE,            EGL_OPENGL_ES_BIT                 },
+        { EGL_CONFORMANT,                 0                                 }
 };
 
 // These configs can override the base attribute list
 // NOTE: when adding a config here, don't forget to update eglCreate*Surface()
+
 
 static config_pair_t const config_0_attribute_list[] = {
         { EGL_BUFFER_SIZE,     16 },
@@ -1062,10 +1067,18 @@ static config_management_t const gConfigManagement[] = {
         { EGL_BIND_TO_TEXTURE_RGB,        config_management_t::exact   },
         { EGL_MIN_SWAP_INTERVAL,          config_management_t::exact   },
         { EGL_MAX_SWAP_INTERVAL,          config_management_t::exact   },
+        { EGL_LUMINANCE_SIZE,             config_management_t::atLeast },
+        { EGL_ALPHA_MASK_SIZE,            config_management_t::atLeast },
+        { EGL_COLOR_BUFFER_TYPE,          config_management_t::exact   },
+        { EGL_RENDERABLE_TYPE,            config_management_t::mask    },
+        { EGL_CONFORMANT,                 config_management_t::mask    }
 };
 
+
 static config_pair_t const config_defaults[] = {
-        { EGL_SURFACE_TYPE,        EGL_WINDOW_BIT },
+    // attributes that are not specified are simply ignored, if a particular
+    // one needs not be ignored, it must be specified here, eg:
+    // { EGL_SURFACE_TYPE, EGL_WINDOW_BIT },
 };
 
 // ----------------------------------------------------------------------------
@@ -1513,7 +1526,7 @@ EGLBoolean eglChooseConfig( EGLDisplay dpy, const EGLint *attrib_list,
         numAttributes++;
         EGLint attr = *attrib_list++;
         EGLint val  = *attrib_list++;
-        for (int i=0 ; i<numConfigs ; i++) {
+        for (int i=0 ; possibleMatch && i<numConfigs ; i++) {
             if (!(possibleMatch & (1<<i)))
                 continue;
             if (isAttributeMatching(i, attr, val) == 0) {
@@ -1523,15 +1536,15 @@ EGLBoolean eglChooseConfig( EGLDisplay dpy, const EGLint *attrib_list,
     }
 
     // now, handle the attributes which have a useful default value
-    for (size_t j=0 ; j<NELEM(config_defaults) ; j++) {
-        // see if this attribute was specified, if not apply its
+    for (size_t j=0 ; possibleMatch && j<NELEM(config_defaults) ; j++) {
+        // see if this attribute was specified, if not, apply its
         // default value
         if (binarySearch<config_pair_t>(
                 (config_pair_t const*)attrib_list,
                 0, numAttributes-1,
                 config_defaults[j].key) < 0)
         {
-            for (int i=0 ; i<numConfigs ; i++) {
+            for (int i=0 ; possibleMatch && i<numConfigs ; i++) {
                 if (!(possibleMatch & (1<<i)))
                     continue;
                 if (isAttributeMatching(i,
