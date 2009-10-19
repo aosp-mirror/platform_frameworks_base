@@ -294,7 +294,12 @@ public abstract class Layout {
                                                      lbaseline, lbottom, buf,
                                                      start, end, par, this);
 
-                            left += margin.getLeadingMargin(par);
+                            boolean useMargin = par;
+                            if (margin instanceof LeadingMarginSpan.LeadingMarginSpan2) {
+                                int count = ((LeadingMarginSpan.LeadingMarginSpan2)margin).getLeadingMarginLineCount();
+                                useMargin = count > i;
+                            }
+                            left += margin.getLeadingMargin(useMargin);
                         }
                     }
                 }
@@ -1293,7 +1298,13 @@ public abstract class Layout {
                                                         LeadingMarginSpan.class);
 
                 for (int i = 0; i < spans.length; i++) {
-                    left += spans[i].getLeadingMargin(par);
+                    boolean margin = par;
+                    LeadingMarginSpan span = spans[i];
+                    if (span instanceof LeadingMarginSpan.LeadingMarginSpan2) {
+                        int count = ((LeadingMarginSpan.LeadingMarginSpan2)span).getLeadingMarginLineCount();
+                        margin = count >= line;
+                    }
+                    left += span.getLeadingMargin(margin);
                 }
             }
         }

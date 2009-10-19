@@ -161,6 +161,7 @@ extends Layout
             else
                 end++;
 
+            int firstWidthLineCount = 1;
             int firstwidth = outerwidth;
             int restwidth = outerwidth;
 
@@ -171,8 +172,12 @@ extends Layout
 
                 sp = spanned.getSpans(start, end, LeadingMarginSpan.class);
                 for (int i = 0; i < sp.length; i++) {
+                    LeadingMarginSpan lms = sp[i];
                     firstwidth -= sp[i].getLeadingMargin(true);
                     restwidth -= sp[i].getLeadingMargin(false);
+                    if (lms instanceof LeadingMarginSpan.LeadingMarginSpan2) {
+                        firstWidthLineCount = ((LeadingMarginSpan.LeadingMarginSpan2)lms).getLeadingMarginLineCount();
+                    }
                 }
 
                 chooseht = spanned.getSpans(start, end, LineHeightSpan.class);
@@ -750,7 +755,9 @@ extends Layout
                         fitascent = fitdescent = fittop = fitbottom = 0;
                         okascent = okdescent = oktop = okbottom = 0;
 
-                        width = restwidth;
+                        if (--firstWidthLineCount <= 0) {
+                            width = restwidth;
+                        }
                     }
                 }
             }
