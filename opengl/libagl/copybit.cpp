@@ -41,11 +41,12 @@
 namespace android {
 
 static void textureToCopyBitImage(
-        const GGLSurface* surface, buffer_handle_t buffer, copybit_image_t* img) 
+        const GGLSurface* surface, int32_t opFormat, 
+        buffer_handle_t buffer, copybit_image_t* img) 
 {
     img->w      = surface->stride;
     img->h      = surface->height;
-    img->format = surface->format;
+    img->format = opFormat;
     img->base   = surface->data;
     img->handle = (native_handle_t *)buffer;
 }
@@ -207,39 +208,13 @@ static bool copybit(GLint x, GLint y,
     int planeAlpha = 255;
     static const int tmu = 0;
     texture_t& tev(c->rasterizer.state.texture[tmu]);
-    bool srcTextureHasAlpha = hasAlpha(textureObject->surface.format);
+    int32_t opFormat = textureObject->surface.format;
+    const bool srcTextureHasAlpha = hasAlpha(opFormat);
     if (!srcTextureHasAlpha) {
         planeAlpha = fixedToByte(c->currentColorClamped.a);
     }
 
-    switch (tev.env) {
-    case GGL_REPLACE:
-        break;
-    case GGL_MODULATE:
-        if (! (c->currentColorClamped.r == FIXED_ONE &&
-               c->currentColorClamped.g == FIXED_ONE &&
-               c->currentColorClamped.b == FIXED_ONE)) {
-            LOGD_IF(DEBUG_COPYBIT, 
-                    "MODULATE and non white color (%08x, %08x, %08x)",
-                    c->currentColorClamped.r,
-                    c->currentColorClamped.g,
-                    c->currentColorClamped.b);
-            return false;
-        }
-        if (srcTextureHasAlpha && c->currentColorClamped.a < FIXED_ONE) {
-            LOGD_IF(DEBUG_COPYBIT, 
-                    "MODULATE and texture w/alpha and alpha=%08x)",
-                    c->currentColorClamped.a);
-            return false;
-        }
-        break;
-
-    default:
-        // Incompatible texture environment.
-        LOGD_IF(DEBUG_COPYBIT, "incompatible texture environment");
-        return false;
-    }
-
+    const bool cbHasAlpha = hasAlpha(cbSurface.format);
     bool blending = false;
     if ((enables & GGL_ENABLE_BLENDING)
             && !(c->rasterizer.state.blend.src == GL_ONE
@@ -262,19 +237,47 @@ static bool copybit(GLint x, GLint y,
         }
         blending = true;
     } else {
-        // No blending is OK if we are not using alpha.
-        if (srcTextureHasAlpha || planeAlpha != 255) {
-            // Incompatible alpha
-            LOGD_IF(DEBUG_COPYBIT, "incompatible alpha");
-            return false;
+        if (cbHasAlpha) {
+            // NOTE: the result will be slightly wrong in this case because
+            // the destination alpha channel will be set to 1.0 instead of
+            // the iterated alpha value. *shrug*.
+        }
+        // disable plane blending and src blending for supported formats
+        planeAlpha = 255;
+        if (opFormat == COPYBIT_FORMAT_RGBA_8888) {
+            opFormat = COPYBIT_FORMAT_RGBX_8888;
+        } else {
+            if (srcTextureHasAlpha) {
+                LOGD_IF(DEBUG_COPYBIT, "texture format requires blending");
+                return false;
+            }
         }
     }
 
-    if (srcTextureHasAlpha && planeAlpha != 255) {
-        // Can't do two types of alpha at once.
-        LOGD_IF(DEBUG_COPYBIT, "src alpha and plane alpha");
+    switch (tev.env) {
+    case GGL_REPLACE:
+        break;
+    case GGL_MODULATE:
+        // only cases allowed is:
+        // RGB  source, color={1,1,1,a} -> can be done with GL_REPLACE
+        // RGBA source, color={1,1,1,1} -> can be done with GL_REPLACE
+        if (blending) {
+            if (c->currentColorClamped.r == c->currentColorClamped.a &&
+                c->currentColorClamped.g == c->currentColorClamped.a &&
+                c->currentColorClamped.b == c->currentColorClamped.a) {
+                // TODO: Need to emulate: RGBA source, color={a,a,a,a} / premult
+                // and RGBA source, color={1,1,1,a} / regular-blending
+                // (both are equivalent)
+            }
+        }
+        LOGD_IF(DEBUG_COPYBIT, "GGL_MODULATE");
+        return false;
+    default:
+        // Incompatible texture environment.
+        LOGD_IF(DEBUG_COPYBIT, "incompatible texture environment");
         return false;
     }
+
 
     // LOGW("calling copybits");
 
@@ -282,12 +285,12 @@ static bool copybit(GLint x, GLint y,
 
     copybit_image_t dst;
     buffer_handle_t target_hnd = c->copybits.drawSurfaceBuffer;
-    textureToCopyBitImage(&cbSurface, target_hnd, &dst);
+    textureToCopyBitImage(&cbSurface, cbSurface.format, target_hnd, &dst);
     copybit_rect_t drect = {x, y, x+w, y+h};
 
     copybit_image_t src;
     buffer_handle_t source_hnd = textureObject->buffer->handle;
-    textureToCopyBitImage(&textureObject->surface, source_hnd, &src);
+    textureToCopyBitImage(&textureObject->surface, opFormat, source_hnd, &src);
     copybit_rect_t srect = { Ucr, Vcr + Hcr, Ucr + Wcr, Vcr };
 
     copybit->set_parameter(copybit, COPYBIT_TRANSFORM, transform);
