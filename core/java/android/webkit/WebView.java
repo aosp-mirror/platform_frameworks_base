@@ -64,6 +64,7 @@ import android.widget.AbsoluteLayout;
 import android.widget.Adapter;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.CheckedTextView;
 import android.widget.FrameLayout;
 import android.widget.ListView;
 import android.widget.Scroller;
@@ -5299,8 +5300,16 @@ public class WebView extends AbsoluteLayout
         // Need these to provide stable ids to my ArrayAdapter,
         // which normally does not have stable ids. (Bug 1250098)
         private class Container extends Object {
+            /**
+             * Possible values for mEnabled.  Keep in sync with OptionStatus in
+             * WebViewCore.cpp
+             */
+            final static int OPTGROUP = -1;
+            final static int OPTION_DISABLED = 0;
+            final static int OPTION_ENABLED = 1;
+
             String  mString;
-            boolean mEnabled;
+            int     mEnabled;
             int     mId;
 
             public String toString() {
@@ -5318,6 +5327,23 @@ public class WebView extends AbsoluteLayout
                             multiple ? com.android.internal.R.layout.select_dialog_multichoice :
                             com.android.internal.R.layout.select_dialog_singlechoice,
                             objects);
+            }
+
+            @Override
+            public View getView(int position, View convertView,
+                    ViewGroup parent) {
+                // Always pass in null so that we will get a new CheckedTextView
+                // Otherwise, an item which was previously used as an <optgroup>
+                // element (i.e. has no check), could get used as an <option>
+                // element, which needs a checkbox/radio, but it would not have
+                // one.
+                convertView = super.getView(position, null, parent);
+                Container c = item(position);
+                if (c != null && Container.OPTGROUP == c.mEnabled
+                        && convertView instanceof CheckedTextView) {
+                    ((CheckedTextView) convertView).setCheckMarkDrawable(null);
+                }
+                return convertView;
             }
 
             @Override
@@ -5355,12 +5381,11 @@ public class WebView extends AbsoluteLayout
                 if (item == null) {
                     return false;
                 }
-                return item.mEnabled;
+                return Container.OPTION_ENABLED == item.mEnabled;
             }
         }
 
-        private InvokeListBox(String[] array,
-                boolean[] enabled, int[] selected) {
+        private InvokeListBox(String[] array, int[] enabled, int[] selected) {
             mMultiple = true;
             mSelectedArray = selected;
 
@@ -5374,8 +5399,7 @@ public class WebView extends AbsoluteLayout
             }
         }
 
-        private InvokeListBox(String[] array, boolean[] enabled, int
-                selection) {
+        private InvokeListBox(String[] array, int[] enabled, int selection) {
             mSelection = selection;
             mMultiple = false;
 
@@ -5506,10 +5530,11 @@ public class WebView extends AbsoluteLayout
      * Request a dropdown menu for a listbox with multiple selection.
      *
      * @param array Labels for the listbox.
-     * @param enabledArray  Which positions are enabled.
+     * @param enabledArray  State for each element in the list.  See static
+     *      integers in Container class.
      * @param selectedArray Which positions are initally selected.
      */
-    void requestListBox(String[] array, boolean[]enabledArray, int[]
+    void requestListBox(String[] array, int[] enabledArray, int[]
             selectedArray) {
         mPrivateHandler.post(
                 new InvokeListBox(array, enabledArray, selectedArray));
@@ -5520,10 +5545,11 @@ public class WebView extends AbsoluteLayout
      * <select> element.
      *
      * @param array Labels for the listbox.
-     * @param enabledArray  Which positions are enabled.
+     * @param enabledArray  State for each element in the list.  See static
+     *      integers in Container class.
      * @param selection Which position is initally selected.
      */
-    void requestListBox(String[] array, boolean[]enabledArray, int selection) {
+    void requestListBox(String[] array, int[] enabledArray, int selection) {
         mPrivateHandler.post(
                 new InvokeListBox(array, enabledArray, selection));
     }
