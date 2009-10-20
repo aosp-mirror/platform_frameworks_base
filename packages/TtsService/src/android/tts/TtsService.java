@@ -20,8 +20,10 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.pm.ResolveInfo;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnCompletionListener;
@@ -39,6 +41,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.TimeUnit;
@@ -146,12 +149,17 @@ public class TtsService extends Service implements OnCompletionListener {
     private final ReentrantLock synthesizerLock = new ReentrantLock();
 
     private static SynthProxy sNativeSynth = null;
+    private String currentSpeechEngineSOFile = "";
+
     @Override
     public void onCreate() {
         super.onCreate();
         Log.v("TtsService", "TtsService.onCreate()");
 
         mResolver = getContentResolver();
+
+        currentSpeechEngineSOFile = "";
+        setEngine(getDefaultEngine());
 
         String soLibPath = "/system/lib/libttspico.so";
         if (sNativeSynth == null) {
@@ -194,6 +202,54 @@ public class TtsService extends Service implements OnCompletionListener {
     }
 
 
+    private int setEngine(String enginePackageName) {
+        String soFilename = "";
+        // The SVOX TTS is an exception to how the TTS packaging scheme works
+        // because it is part of the system and not a 3rd party add-on; thus
+        // its binary is actually located under /system/lib/
+        if (enginePackageName.equals("com.svox.pico")) {
+            soFilename = "/system/lib/libttspico.so";
+        } else {
+            // Find the package
+            Intent intent = new Intent("android.intent.action.START_TTS_ENGINE");
+            intent.setPackage(enginePackageName);
+            ResolveInfo[] enginesArray = new ResolveInfo[0];
+            PackageManager pm = getPackageManager();
+            List <ResolveInfo> resolveInfos = pm.queryIntentActivities(intent, 0);
+            if ((resolveInfos == null) || resolveInfos.isEmpty()) {
+                Log.e(SERVICE_TAG, "Invalid TTS Engine Package: " + enginePackageName);
+                return TextToSpeech.ERROR;
+            }
+            enginesArray = resolveInfos.toArray(enginesArray);
+            // Generate the TTS .so filename from the package
+            ActivityInfo aInfo = enginesArray[0].activityInfo;
+            soFilename = aInfo.name.replace(aInfo.packageName + ".", "") + ".so";
+            soFilename = soFilename.toLowerCase();
+            soFilename = "/data/data/" + aInfo.packageName + "/lib/libtts" + soFilename;
+        }
+
+        if (currentSpeechEngineSOFile.equals(soFilename)) {
+            return TextToSpeech.SUCCESS;
+        }
+
+        File f = new File(soFilename);
+        if (!f.exists()) {
+            Log.e(SERVICE_TAG, "Invalid TTS Binary: " + soFilename);
+            return TextToSpeech.ERROR;
+        }
+
+        if (sNativeSynth != null) {
+            sNativeSynth.stopSync();
+            sNativeSynth.shutdown();
+            sNativeSynth = null;
+        }
+        sNativeSynth = new SynthProxy(soFilename);
+        currentSpeechEngineSOFile = soFilename;
+        return TextToSpeech.SUCCESS;
+    }
+
+
+
     private void setDefaultSettings() {
         setLanguage("", this.getDefaultLanguage(), getDefaultCountry(), getDefaultLocVariant());
 
@@ -209,6 +265,15 @@ public class TtsService extends Service implements OnCompletionListener {
                 == 1 );
     }
 
+    private String getDefaultEngine() {
+        String defaultEngine = android.provider.Settings.Secure.getString(mResolver,
+                android.provider.Settings.Secure.TTS_DEFAULT_SYNTH);
+        if (defaultEngine == null) {
+            return TextToSpeech.Engine.DEFAULT_SYNTH;
+        } else {
+            return defaultEngine;
+        }
+    }
 
     private int getDefaultRate() {
         return android.provider.Settings.Secure.getInt(mResolver,
