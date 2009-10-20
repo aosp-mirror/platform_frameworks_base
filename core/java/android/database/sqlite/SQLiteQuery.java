@@ -30,9 +30,6 @@ public class SQLiteQuery extends SQLiteProgram {
     /** The index of the unbound OFFSET parameter */
     private int mOffsetIndex;
     
-    /** The SQL used to create this query */
-    private String mQuery;
-
     /** Args to bind on requery */
     private String[] mBindArgs;
 
@@ -49,7 +46,6 @@ public class SQLiteQuery extends SQLiteProgram {
         super(db, query);
 
         mOffsetIndex = offsetIndex;
-        mQuery = query;
         mBindArgs = bindArgs;
     }
 
@@ -77,7 +73,7 @@ public class SQLiteQuery extends SQLiteProgram {
 
                 // Logging
                 if (SQLiteDebug.DEBUG_SQL_STATEMENTS) {
-                    Log.d(TAG, "fillWindow(): " + mQuery);
+                    Log.d(TAG, "fillWindow(): " + mSql);
                 }
                 if (logStats) {
                     mDatabase.logTimeStat(true /* read */, startTime,
@@ -133,7 +129,7 @@ public class SQLiteQuery extends SQLiteProgram {
     
     @Override
     public String toString() {
-        return "SQLiteQuery: " + mQuery;
+        return "SQLiteQuery: " + mSql;
     }
     
     @Override
@@ -153,7 +149,7 @@ public class SQLiteQuery extends SQLiteProgram {
                     super.bindString(i + 1, mBindArgs[i]);
                 }
             } catch (SQLiteMisuseException e) {
-                StringBuilder errMsg = new StringBuilder("mQuery " + mQuery);
+                StringBuilder errMsg = new StringBuilder("mSql " + mSql);
                 for (int i = 0; i < len; i++) {
                     errMsg.append(" ");
                     errMsg.append(mBindArgs[i]);

@@ -32,6 +32,12 @@ public final class SQLiteDebug {
             Log.isLoggable("SQLiteStatements", Log.VERBOSE);
 
     /**
+     * Controls the printing of compiled-sql-statement cache stats.
+     */
+    public static final boolean DEBUG_SQL_CACHE =
+            Log.isLoggable("SQLiteCompiledSql", Log.VERBOSE);
+
+    /**
      * Controls the stack trace reporting of active cursors being
      * finalized.
      */
