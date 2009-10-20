@@ -65,6 +65,7 @@ public class InputDevice {
         
         // This is the last generated pointer data, ordered to match
         // mPointerIds.
+        boolean mSkipLastPointers;
         int mLastNumPointers = 0;
         final int[] mLastData = new int[MotionEvent.NUM_SAMPLE_DATA * MAX_POINTERS];
         
@@ -510,6 +511,11 @@ public class InputDevice {
         MotionEvent generateAbsMotion(InputDevice device, long curTime,
                 long curTimeNano, Display display, int orientation,
                 int metaState) {
+            
+            if (mSkipLastPointers) {
+                mSkipLastPointers = false;
+                mLastNumPointers = 0;
+            }
             
             if (mNextNumPointers <= 0 && mLastNumPointers <= 0) {
                 return null;

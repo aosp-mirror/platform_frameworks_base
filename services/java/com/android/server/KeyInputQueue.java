@@ -689,7 +689,8 @@ public abstract class KeyInputQueue {
                                             ev, curTime, curTimeNano);
                                     
                                     if (doMotion && ms.mNextNumPointers > 0
-                                            && ms.mLastNumPointers == 0) {
+                                            && (ms.mLastNumPointers == 0
+                                                    || ms.mSkipLastPointers)) {
                                         doMotion = !generateVirtualKeyDown(di,
                                                 ev, curTime, curTimeNano);
                                     }
@@ -703,7 +704,7 @@ public abstract class KeyInputQueue {
                                             me = ms.generateAbsMotion(di, curTime,
                                                     curTimeNano, mDisplay,
                                                     mOrientation, mGlobalMetaState);
-                                            if (false) Log.v(TAG, "Absolute: x="
+                                            if (DEBUG_POINTERS) Log.v(TAG, "Absolute: x="
                                                     + di.mAbs.mNextData[MotionEvent.SAMPLE_X]
                                                     + " y="
                                                     + di.mAbs.mNextData[MotionEvent.SAMPLE_Y]
@@ -729,6 +730,7 @@ public abstract class KeyInputQueue {
                                                 ms.mLastData, 0,
                                                 num * MotionEvent.NUM_SAMPLE_DATA);
                                         ms.mLastNumPointers = num;
+                                        ms.mSkipLastPointers = true;
                                     }
                                     
                                     ms.finish();
