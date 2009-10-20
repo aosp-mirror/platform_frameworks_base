@@ -1882,10 +1882,12 @@ class PowerManagerService extends IPowerManager.Stub
 
     private Runnable mAutoBrightnessTask = new Runnable() {
         public void run() {
-            int value = (int)mLightSensorPendingValue;
-            if (value >= 0) {
-                mLightSensorPendingValue = -1;
-                lightSensorChangedLocked(value);
+            synchronized (mLocks) {
+                int value = (int)mLightSensorPendingValue;
+                if (value >= 0) {
+                    mLightSensorPendingValue = -1;
+                    lightSensorChangedLocked(value);
+                }
             }
         }
     };
