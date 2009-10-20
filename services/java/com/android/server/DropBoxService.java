@@ -244,7 +244,7 @@ public final class DropBoxService extends IDropBox.Stub {
                 mContentResolver, Settings.Gservices.DROPBOX_TAG_PREFIX + tag));
     }
 
-    public synchronized DropBoxEntry getNextEntry(long millis) {
+    public synchronized DropBoxEntry getNextEntry(String tag, long millis) {
         if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.READ_LOGS)
                 != PackageManager.PERMISSION_GRANTED) {
             throw new SecurityException("READ_LOGS permission required");
@@ -257,7 +257,10 @@ public final class DropBoxService extends IDropBox.Stub {
             return null;
         }
 
-        for (EntryFile entry : mAllFiles.contents.tailSet(new EntryFile(millis + 1))) {
+        FileList list = tag == null ? mAllFiles : mFilesByTag.get(tag);
+        if (list == null) return null;
+
+        for (EntryFile entry : list.contents.tailSet(new EntryFile(millis + 1))) {
             if (entry.tag == null) continue;
             try {
                 File file = (entry.flags & DropBoxEntry.IS_EMPTY) != 0 ? null : entry.file;
