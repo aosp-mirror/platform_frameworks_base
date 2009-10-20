@@ -99,6 +99,7 @@ void usage(void)
         "   -f  force overwrite of existing files\n"
         "   -g  specify a pixel tolerance to force images to grayscale, default 0\n"
         "   -j  specify a jar or zip file containing classes to include\n"
+        "   -k  junk path of file(s) added\n"
         "   -m  make package directories under location specified by -J\n"
 #if 0
         "   -p  pseudolocalize the default configuration\n"
@@ -235,6 +236,9 @@ int main(int argc, char* const argv[])
                 tolerance = atoi(argv[0]);
                 bundle.setGrayscaleTolerance(tolerance);
                 printf("%s: Images with deviation <= %d will be forced to grayscale.\n", prog, tolerance);
+                break;
+            case 'k':
+                bundle.setJunkPath(true);
                 break;
             case 'm':
                 bundle.setMakePackageDirs(true);
