@@ -77,12 +77,14 @@ interface IDropBox {
 
     /**
      * Gets the next entry from the drop box *after* the specified time.
-     * Requires android.permission.READ_LOGS.
+     * Requires android.permission.READ_LOGS.  You must always call
+     * {@link DropBoxEntry#close()} on the return value!
      *
+     * @param tag of entry to look for, null for all tags
      * @param millis time of the last entry seen
      * @return the next entry, or null if there are no more entries
      */
-    DropBoxEntry getNextEntry(long millis);
+    DropBoxEntry getNextEntry(String tag, long millis);
 
     // TODO: It may be useful to have some sort of notification mechanism
     // when data is added to the dropbox, for demand-driven readers --
