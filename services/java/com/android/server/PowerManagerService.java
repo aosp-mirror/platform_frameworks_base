@@ -477,8 +477,13 @@ class PowerManagerService extends IPowerManager.Stub
         // And explicitly do the initial update of our cached settings
         updateGservicesValues();
 
-        // turn everything on
-        setPowerState(ALL_BRIGHT);
+        if (mAutoBrightessEnabled) {
+            // turn the screen on
+            setPowerState(SCREEN_BRIGHT);
+        } else {
+            // turn everything on
+            setPowerState(ALL_BRIGHT);
+        }
 
         synchronized (mHandlerThread) {
             mInitComplete = true;
@@ -1285,6 +1290,9 @@ class PowerManagerService extends IPowerManager.Stub
                 // make sure button and key backlights are off too
                 mHardware.setLightBrightness_UNCHECKED(HardwareService.LIGHT_ID_BUTTONS, 0);
                 mHardware.setLightBrightness_UNCHECKED(HardwareService.LIGHT_ID_KEYBOARD, 0);
+                // clear current value so we will update based on the new conditions
+                // when the sensor is reenabled.
+                mLightSensorValue = -1;
             }
         }
         return err;
@@ -1323,7 +1331,7 @@ class PowerManagerService extends IPowerManager.Stub
                 return;
             }
             
-            if (!mDoneBooting) {
+            if (!mDoneBooting && !mAutoBrightessEnabled) {
                 newState |= ALL_BRIGHT;
             }
 
@@ -2275,6 +2283,7 @@ class PowerManagerService extends IPowerManager.Stub
                         SensorManager.SENSOR_DELAY_NORMAL);
             } else {
                 mSensorManager.unregisterListener(mLightListener);
+                mHandler.removeCallbacks(mAutoBrightnessTask);
             }
         }
     }
@@ -2319,8 +2328,14 @@ class PowerManagerService extends IPowerManager.Stub
                 }
                 mHandler.removeCallbacks(mAutoBrightnessTask);
                 if (mLightSensorValue != value) {
-                    mLightSensorPendingValue = value;
-                    mHandler.postDelayed(mAutoBrightnessTask, LIGHT_SENSOR_DELAY);
+                    if (mLightSensorValue == -1) {
+                        // process the value immediately
+                        lightSensorChangedLocked(value);
+                    } else {
+                        // delay processing to debounce the sensor
+                        mLightSensorPendingValue = value;
+                        mHandler.postDelayed(mAutoBrightnessTask, LIGHT_SENSOR_DELAY);
+                    }
                 } else {
                     mLightSensorPendingValue = -1;
                 }
