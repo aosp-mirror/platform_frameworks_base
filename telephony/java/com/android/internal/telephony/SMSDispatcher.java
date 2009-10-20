@@ -303,6 +303,7 @@ public abstract class SMSDispatcher extends Handler {
                     notifyAndAcknowledgeLastIncomingSms(handled, result, null);
                 }
             } catch (RuntimeException ex) {
+                Log.e(TAG, "Exception dispatching message", ex);
                 notifyAndAcknowledgeLastIncomingSms(false, Intents.RESULT_SMS_GENERIC_ERROR, null);
             }
 
