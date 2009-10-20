@@ -6440,12 +6440,17 @@ class PackageManagerService extends IPackageManager.Stub {
             // Keep the old settings around until we know the new ones have
             // been successfully written.
             if (mSettingsFilename.exists()) {
-                if (mBackupSettingsFilename.exists()) {
-                    mBackupSettingsFilename.delete();
-                }
-                if (!mSettingsFilename.renameTo(mBackupSettingsFilename)) {
-                    Log.w(TAG, "Unable to backup package manager settings, current changes will be lost at reboot");
-                    return;
+                // Presence of backup settings file indicates that we failed
+                // to persist settings earlier. So preserve the older
+                // backup for future reference since the current settings
+                // might have been corrupted.
+                if (!mBackupSettingsFilename.exists()) {
+                    if (!mSettingsFilename.renameTo(mBackupSettingsFilename)) {
+                        Log.w(TAG, "Unable to backup package manager settings, current changes will be lost at reboot");
+                        return;
+                    }
+                } else {
+                    Log.w(TAG, "Preserving older settings backup");
                 }
             }
 
@@ -6712,6 +6717,13 @@ class PackageManagerService extends IPackageManager.Stub {
                     str = new FileInputStream(mBackupSettingsFilename);
                     mReadMessages.append("Reading from backup settings file\n");
                     Log.i(TAG, "Reading from backup settings file!");
+                    if (mSettingsFilename.exists()) {
+                        // If both the backup and settings file exist, we
+                        // ignore the settings since it might have been
+                        // corrupted.
+                        Log.w(TAG, "Cleaning up settings file " + mSettingsFilename);
+                        mSettingsFilename.delete();
+                    }
                 } catch (java.io.IOException e) {
                     // We'll try for the normal settings file.
                 }
