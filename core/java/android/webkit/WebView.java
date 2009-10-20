@@ -3292,6 +3292,15 @@ public class WebView extends AbsoluteLayout
                 && keyCode <= KeyEvent.KEYCODE_DPAD_RIGHT) {
             // always handle the navigation keys in the UI thread
             switchOutDrawHistory();
+            if (mShiftIsPressed) {
+                int xRate = keyCode == KeyEvent.KEYCODE_DPAD_LEFT
+                    ? -1 : keyCode == KeyEvent.KEYCODE_DPAD_RIGHT ? 1 : 0;
+                int yRate = keyCode == KeyEvent.KEYCODE_DPAD_UP ?
+                    -1 : keyCode == KeyEvent.KEYCODE_DPAD_DOWN ? 1 : 0;
+                int multiplier = event.getRepeatCount() + 1;
+                moveSelection(xRate * multiplier, yRate * multiplier);
+                return true;
+            }
             if (navHandledKey(keyCode, 1, false, event.getEventTime(), false)) {
                 playSoundEffect(keyCodeToSoundsEffect(keyCode));
                 return true;
@@ -3303,6 +3312,9 @@ public class WebView extends AbsoluteLayout
         if (keyCode == KeyEvent.KEYCODE_DPAD_CENTER) {
             switchOutDrawHistory();
             if (event.getRepeatCount() == 0) {
+                if (mShiftIsPressed) {
+                    return true; // discard press if copy in progress
+                }
                 mGotCenterDown = true;
                 mPrivateHandler.sendMessageDelayed(mPrivateHandler
                         .obtainMessage(LONG_PRESS_CENTER), LONG_PRESS_TIMEOUT);
@@ -3437,7 +3449,12 @@ public class WebView extends AbsoluteLayout
             mGotCenterDown = false;
 
             if (mShiftIsPressed) {
-                return false;
+                if (mExtendSelection) {
+                    commitCopy();
+                } else {
+                    mExtendSelection = true;
+                }
+                return true; // discard press if copy in progress
             }
 
             // perform the single click
@@ -4218,8 +4235,8 @@ public class WebView extends AbsoluteLayout
             return;
         int width = getViewWidth();
         int height = getViewHeight();
-        mSelectX += scaleTrackballX(xRate, width);
-        mSelectY += scaleTrackballY(yRate, height);
+        mSelectX += xRate;
+        mSelectY += yRate;
         int maxX = width + mScrollX;
         int maxY = height + mScrollY;
         mSelectX = Math.min(maxX, Math.max(mScrollX - SELECT_CURSOR_OFFSET
@@ -4301,8 +4318,11 @@ public class WebView extends AbsoluteLayout
         }
         float xRate = mTrackballRemainsX * 1000 / elapsed;
         float yRate = mTrackballRemainsY * 1000 / elapsed;
+        int viewWidth = getViewWidth();
+        int viewHeight = getViewHeight();
         if (mShiftIsPressed) {
-            moveSelection(xRate, yRate);
+            moveSelection(scaleTrackballX(xRate, viewWidth),
+                    scaleTrackballY(yRate, viewHeight));
             mTrackballRemainsX = mTrackballRemainsY = 0;
             return;
         }
@@ -4316,8 +4336,8 @@ public class WebView extends AbsoluteLayout
                     + " mTrackballRemainsX=" + mTrackballRemainsX
                     + " mTrackballRemainsY=" + mTrackballRemainsY);
         }
-        int width = mContentWidth - getViewWidth();
-        int height = mContentHeight - getViewHeight();
+        int width = mContentWidth - viewWidth;
+        int height = mContentHeight - viewHeight;
         if (width < 0) width = 0;
         if (height < 0) height = 0;
         ax = Math.abs(mTrackballRemainsX * TRACKBALL_MULTIPLIER);
