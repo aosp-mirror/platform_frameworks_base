@@ -543,11 +543,10 @@ public class WebView extends AbsoluteLayout
     private boolean mUserScroll = false;
 
     private int mSnapScrollMode = SNAP_NONE;
-    private static final int SNAP_NONE = 1;
-    private static final int SNAP_X = 2;
-    private static final int SNAP_Y = 3;
-    private static final int SNAP_X_LOCK = 4;
-    private static final int SNAP_Y_LOCK = 5;
+    private static final int SNAP_NONE = 0;
+    private static final int SNAP_LOCK = 1; // not a separate state
+    private static final int SNAP_X = 2; // may be combined with SNAP_LOCK
+    private static final int SNAP_Y = 4; // may be combined with SNAP_LOCK
     private boolean mSnapPositive;
 
     // Used to match key downs and key ups
@@ -3914,11 +3913,6 @@ public class WebView extends AbsoluteLayout
                 if (Math.abs(fDeltaX) < 1.0f && Math.abs(fDeltaY) < 1.0f) {
                     keepScrollBarsVisible = done = true;
                 } else {
-                    if (mHeldMotionless != MOTIONLESS_FALSE) {
-                        mPrivateHandler.removeMessages(DRAG_HELD_MOTIONLESS);
-                        mPrivateHandler.removeMessages(AWAKEN_SCROLL_BARS);
-                        mHeldMotionless = MOTIONLESS_FALSE;
-                    }
                     if (mSnapScrollMode == SNAP_X || mSnapScrollMode == SNAP_Y) {
                         int ax = Math.abs(deltaX);
                         int ay = Math.abs(deltaY);
@@ -3929,54 +3923,47 @@ public class WebView extends AbsoluteLayout
                                 mSnapScrollMode = SNAP_NONE;
                             }
                             // reverse direction means lock in the snap mode
-                            if ((ax > MAX_SLOPE_FOR_DIAG * ay) &&
-                                    ((mSnapPositive &&
-                                    deltaX < -mMinLockSnapReverseDistance)
-                                    || (!mSnapPositive &&
-                                    deltaX > mMinLockSnapReverseDistance))) {
-                                mSnapScrollMode = SNAP_X_LOCK;
+                            if (ax > MAX_SLOPE_FOR_DIAG * ay &&
+                                    (mSnapPositive
+                                    ? deltaX < -mMinLockSnapReverseDistance
+                                    : deltaX > mMinLockSnapReverseDistance)) {
+                                mSnapScrollMode |= SNAP_LOCK;
                             }
                         } else {
                             // radical change means getting out of snap mode
-                            if ((ax > MAX_SLOPE_FOR_DIAG * ay)
+                            if (ax > MAX_SLOPE_FOR_DIAG * ay
                                     && ax > MIN_BREAK_SNAP_CROSS_DISTANCE) {
                                 mSnapScrollMode = SNAP_NONE;
                             }
                             // reverse direction means lock in the snap mode
-                            if ((ay > MAX_SLOPE_FOR_DIAG * ax) &&
-                                    ((mSnapPositive &&
-                                    deltaY < -mMinLockSnapReverseDistance)
-                                    || (!mSnapPositive &&
-                                    deltaY > mMinLockSnapReverseDistance))) {
-                                mSnapScrollMode = SNAP_Y_LOCK;
+                            if (ay > MAX_SLOPE_FOR_DIAG * ax &&
+                                    (mSnapPositive
+                                    ? deltaY < -mMinLockSnapReverseDistance
+                                    : deltaY > mMinLockSnapReverseDistance)) {
+                                mSnapScrollMode |= SNAP_LOCK;
                             }
                         }
                     }
-
-                    if (mSnapScrollMode == SNAP_X
-                            || mSnapScrollMode == SNAP_X_LOCK) {
-                        if (deltaX == 0) {
-                            // keep the scrollbar on the screen even there is no
-                            // scroll
-                            keepScrollBarsVisible = true;
+                    if (mSnapScrollMode != SNAP_NONE) {
+                        if ((mSnapScrollMode & SNAP_X) == SNAP_X) {
+                            deltaY = 0;
                         } else {
-                            scrollBy(deltaX, 0);
+                            deltaX = 0;
                         }
-                        mLastTouchX = x;
-                    } else if (mSnapScrollMode == SNAP_Y
-                            || mSnapScrollMode == SNAP_Y_LOCK) {
-                        if (deltaY == 0) {
-                            // keep the scrollbar on the screen even there is no
-                            // scroll
-                            keepScrollBarsVisible = true;
-                        } else {
-                            scrollBy(0, deltaY);
-                        }
-                        mLastTouchY = y;
-                    } else {
+                    }
+                    if ((deltaX | deltaY) != 0) {
                         scrollBy(deltaX, deltaY);
-                        mLastTouchX = x;
-                        mLastTouchY = y;
+                        if (deltaX != 0) {
+                            mLastTouchX = x;
+                        }
+                        if (deltaY != 0) {
+                            mLastTouchY = y;
+                        }
+                        mHeldMotionless = MOTIONLESS_FALSE;
+                    } else {
+                        // keep the scrollbar on the screen even there is no
+                        // scroll
+                        keepScrollBarsVisible = true;
                     }
                     mLastTouchTime = eventTime;
                     mUserScroll = true;
@@ -4412,7 +4399,7 @@ public class WebView extends AbsoluteLayout
         int vy = (int) mVelocityTracker.getYVelocity();
 
         if (mSnapScrollMode != SNAP_NONE) {
-            if (mSnapScrollMode == SNAP_X || mSnapScrollMode == SNAP_X_LOCK) {
+            if ((mSnapScrollMode & SNAP_X) == SNAP_X) {
                 vy = 0;
             } else {
                 vx = 0;
