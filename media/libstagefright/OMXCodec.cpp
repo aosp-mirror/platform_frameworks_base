@@ -210,6 +210,7 @@ sp<OMXCodec> OMXCodec::Create(
     uint32_t quirks = 0;
     if (!strcmp(componentName, "OMX.PV.avcdec")) {
         quirks |= kWantsNALFragments;
+        quirks |= kOutputDimensionsAre16Aligned;
     }
     if (!strcmp(componentName, "OMX.TI.MP3.decode")) {
         quirks |= kNeedsFlushBeforeDisable;
@@ -231,6 +232,7 @@ sp<OMXCodec> OMXCodec::Create(
         // XXX Required on P....on only.
         quirks |= kRequiresAllocateBufferOnInputPorts;
         quirks |= kRequiresAllocateBufferOnOutputPorts;
+        quirks |= kOutputDimensionsAre16Aligned;
     }
 
     if (!strncmp(componentName, "OMX.TI.", 7)) {
@@ -2386,7 +2388,7 @@ void OMXCodec::initOutputFormat(const sp<MetaData> &inputFormat) {
                 CHECK(!"Unknown compression format.");
             }
 
-            if (!strcmp(mComponentName, "OMX.PV.avcdec")) {
+            if (mQuirks & kOutputDimensionsAre16Aligned) {
                 // This component appears to be lying to me.
                 mOutputFormat->setInt32(
                         kKeyWidth, (video_def->nFrameWidth + 15) & -16);
