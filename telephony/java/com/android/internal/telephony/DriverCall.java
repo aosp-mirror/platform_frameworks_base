@@ -73,8 +73,7 @@ public class DriverCall implements Comparable {
             if (p.hasMore()) {
                 // Some lame implementations return strings
                 // like "NOT AVAILABLE" in the CLCC line
-                ret.number = PhoneNumberUtils.extractNetworkPortion(
-                                    p.nextString());
+                ret.number = PhoneNumberUtils.extractNetworkPortionAlt(p.nextString());
 
                 if (ret.number.length() == 0) {
                     ret.number = null;

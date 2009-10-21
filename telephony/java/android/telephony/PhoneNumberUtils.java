@@ -207,6 +207,42 @@ public class PhoneNumberUtils
     }
 
     /**
+     * Extracts the network address portion and canonicalize.
+     *
+     * This function is equivalent to extractNetworkPortion(), except
+     * for allowing the PLUS character to occur at arbitrary positions
+     * in the address portion, not just the first position.
+     *
+     * @hide
+     */
+    public static String extractNetworkPortionAlt(String phoneNumber) {
+        if (phoneNumber == null) {
+            return null;
+        }
+
+        int len = phoneNumber.length();
+        StringBuilder ret = new StringBuilder(len);
+        boolean haveSeenPlus = false;
+
+        for (int i = 0; i < len; i++) {
+            char c = phoneNumber.charAt(i);
+            if (c == '+') {
+                if (haveSeenPlus) {
+                    continue;
+                }
+                haveSeenPlus = true;
+            }
+            if (isDialable(c)) {
+                ret.append(c);
+            } else if (isStartsPostDial (c)) {
+                break;
+            }
+        }
+
+        return ret.toString();
+    }
+
+    /**
      * Strips separators from a phone number string.
      * @param phoneNumber phone number to strip.
      * @return phone string stripped of separators.
@@ -590,7 +626,7 @@ public class PhoneNumberUtils
      */
     public static String
     toCallerIDMinMatch(String phoneNumber) {
-        String np = extractNetworkPortion(phoneNumber);
+        String np = extractNetworkPortionAlt(phoneNumber);
         return internalGetStrippedReversed(np, MIN_MATCH);
     }
 
@@ -603,7 +639,7 @@ public class PhoneNumberUtils
      */
     public static String
     getStrippedReversed(String phoneNumber) {
-        String np = extractNetworkPortion(phoneNumber);
+        String np = extractNetworkPortionAlt(phoneNumber);
 
         if (np == null) return null;
 
@@ -1247,7 +1283,7 @@ public class PhoneNumberUtils
 
         // Strip the separators from the number before comparing it
         // to the list.
-        number = extractNetworkPortion(number);
+        number = extractNetworkPortionAlt(number);
 
         // retrieve the list of emergency numbers
         String numbers = SystemProperties.get("ro.ril.ecclist");
@@ -1290,7 +1326,7 @@ public class PhoneNumberUtils
 
         // Strip the separators from the number before comparing it
         // to the list.
-        number = extractNetworkPortion(number);
+        number = extractNetworkPortionAlt(number);
 
         // compare tolerates null so we need to make sure that we
         // don't return true when both are null.

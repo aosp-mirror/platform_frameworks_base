@@ -25,7 +25,7 @@ import junit.framework.TestCase;
 public class PhoneNumberUtilsTest extends TestCase {
 
     @SmallTest
-    public void testA() throws Exception {
+    public void testExtractNetworkPortion() throws Exception {
         assertEquals(
                 "+17005554141",
                 PhoneNumberUtils.extractNetworkPortion("+17005554141")
@@ -178,6 +178,68 @@ public class PhoneNumberUtilsTest extends TestCase {
         assertNull(PhoneNumberUtils.toCallerIDMinMatch(null));
         assertNull(PhoneNumberUtils.getStrippedReversed(null));
         assertNull(PhoneNumberUtils.stringFromStringAndTOA(null, 1));
+    }
+
+    @SmallTest
+    public void testExtractNetworkPortionAlt() throws Exception {
+        assertEquals(
+                "+17005554141",
+                PhoneNumberUtils.extractNetworkPortionAlt("+17005554141")
+        );
+
+        assertEquals(
+                "+17005554141",
+                PhoneNumberUtils.extractNetworkPortionAlt("+1 (700).555-4141")
+        );
+
+        assertEquals(
+                "17005554141",
+                PhoneNumberUtils.extractNetworkPortionAlt("1 (700).555-4141")
+        );
+
+        // This may seem wrong, but it's probably ok
+        assertEquals(
+                "17005554141*#",
+                PhoneNumberUtils.extractNetworkPortionAlt("1 (700).555-4141*#")
+        );
+
+        assertEquals(
+                "170055541NN",
+                PhoneNumberUtils.extractNetworkPortionAlt("1 (700).555-41NN")
+        );
+
+        assertEquals(
+                "170055541NN",
+                PhoneNumberUtils.extractNetworkPortionAlt("1 (700).555-41NN,1234")
+        );
+
+        assertEquals(
+                "170055541NN",
+                PhoneNumberUtils.extractNetworkPortionAlt("1 (700).555-41NN;1234")
+        );
+
+        // An MMI string is unperterbed, even though it contains a
+        // (valid in this case) embedded +
+        assertEquals(
+                "**21**+17005554141#",
+                PhoneNumberUtils.extractNetworkPortionAlt("**21**+17005554141#")
+        );
+
+        assertEquals(
+                "*31#+447966164208",
+                PhoneNumberUtils.extractNetworkPortionAlt("*31#+447966164208")
+        );
+
+        assertEquals(
+                "*31#+447966164208",
+                PhoneNumberUtils.extractNetworkPortionAlt("*31# (+44) 79 6616 4208")
+        );
+
+        assertEquals("", PhoneNumberUtils.extractNetworkPortionAlt(""));
+
+        assertEquals("", PhoneNumberUtils.extractNetworkPortionAlt(",1234"));
+
+        assertNull(PhoneNumberUtils.extractNetworkPortionAlt(null));
     }
 
     @SmallTest

@@ -154,7 +154,7 @@ public class CdmaConnection extends Connection {
         dialString = formatDialString(dialString);
         Log.d(LOG_TAG, "[CDMAConn] CdmaConnection:formated dialString=" + dialString);
 
-        this.address = PhoneNumberUtils.extractNetworkPortion(dialString);
+        this.address = PhoneNumberUtils.extractNetworkPortionAlt(dialString);
         this.postDialString = PhoneNumberUtils.extractPostDialPortion(dialString);
 
         index = -1;
