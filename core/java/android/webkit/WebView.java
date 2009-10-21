@@ -66,6 +66,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.CheckedTextView;
 import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Scroller;
 import android.widget.Toast;
@@ -82,6 +83,8 @@ import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
+import junit.framework.Assert;
 
 /**
  * <p>A View that displays web pages. This class is the basis upon which you
@@ -5339,9 +5342,40 @@ public class WebView extends AbsoluteLayout
                 // one.
                 convertView = super.getView(position, null, parent);
                 Container c = item(position);
-                if (c != null && Container.OPTGROUP == c.mEnabled
-                        && convertView instanceof CheckedTextView) {
-                    ((CheckedTextView) convertView).setCheckMarkDrawable(null);
+                if (c != null && Container.OPTION_ENABLED != c.mEnabled) {
+                    // ListView does not draw dividers between disabled and
+                    // enabled elements.  Use a LinearLayout to provide dividers
+                    LinearLayout layout = new LinearLayout(mContext);
+                    layout.setOrientation(LinearLayout.VERTICAL);
+                    if (position > 0) {
+                        View dividerTop = new View(mContext);
+                        dividerTop.setBackgroundResource(
+                                android.R.drawable.divider_horizontal_bright);
+                        layout.addView(dividerTop);
+                    }
+
+                    if (Container.OPTGROUP == c.mEnabled) {
+                        // Currently select_dialog_multichoice and
+                        // select_dialog_singlechoice are CheckedTextViews.  If
+                        // that changes, the class cast will no longer be valid.
+                        Assert.assertTrue(
+                                convertView instanceof CheckedTextView);
+                        ((CheckedTextView) convertView).setCheckMarkDrawable(
+                                null);
+                    } else {
+                        // c.mEnabled == Container.OPTION_DISABLED
+                        // Draw the disabled element in a disabled state.
+                        convertView.setEnabled(false);
+                    }
+
+                    layout.addView(convertView);
+                    if (position < getCount() - 1) {
+                        View dividerBottom = new View(mContext);
+                        dividerBottom.setBackgroundResource(
+                                android.R.drawable.divider_horizontal_bright);
+                        layout.addView(dividerBottom);
+                    }
+                    return layout;
                 }
                 return convertView;
             }
