@@ -130,90 +130,169 @@ status_t Layer::setBuffers( uint32_t w, uint32_t h,
     return NO_ERROR;
 }
 
+status_t Layer::initializeEglImageLocked(
+        const sp<GraphicBuffer>& buffer, Texture* texture)
+{
+    status_t err = NO_ERROR;
+
+    // we need to recreate the texture
+    EGLDisplay dpy(mFlinger->graphicPlane(0).getEGLDisplay());
+
+    // free the previous image
+    if (texture->image != EGL_NO_IMAGE_KHR) {
+        eglDestroyImageKHR(dpy, texture->image);
+        texture->image = EGL_NO_IMAGE_KHR;
+    }
+
+    // construct an EGL_NATIVE_BUFFER_ANDROID
+    android_native_buffer_t* clientBuf = buffer->getNativeBuffer();
+
+    // create the new EGLImageKHR
+    const EGLint attrs[] = {
+            EGL_IMAGE_PRESERVED_KHR,    EGL_TRUE,
+            EGL_NONE,                   EGL_NONE
+    };
+    texture->image = eglCreateImageKHR(
+            dpy, EGL_NO_CONTEXT, EGL_NATIVE_BUFFER_ANDROID,
+            (EGLClientBuffer)clientBuf, attrs);
+
+    LOGE_IF(texture->image == EGL_NO_IMAGE_KHR,
+            "eglCreateImageKHR() failed. err=0x%4x",
+            eglGetError());
+
+    if (texture->image != EGL_NO_IMAGE_KHR) {
+        glBindTexture(GL_TEXTURE_2D, texture->name);
+        glEGLImageTargetTexture2DOES(GL_TEXTURE_2D,
+                (GLeglImageOES)texture->image);
+        GLint error = glGetError();
+        if (UNLIKELY(error != GL_NO_ERROR)) {
+            // this failed, for instance, because we don't support NPOT.
+            // FIXME: do something!
+            LOGE("layer=%p, glEGLImageTargetTexture2DOES(%p) "
+                 "failed err=0x%04x",
+                 this, texture->image, error);
+            mFlags &= ~DisplayHardware::DIRECT_TEXTURE;
+            err = INVALID_OPERATION;
+        } else {
+            // Everything went okay!
+            texture->NPOTAdjust = false;
+            texture->dirty  = false;
+            texture->width  = clientBuf->width;
+            texture->height = clientBuf->height;
+        }
+    } else {
+        err = INVALID_OPERATION;
+    }
+    return err;
+}
+
 void Layer::reloadTexture(const Region& dirty)
 {
     Mutex::Autolock _l(mLock);
     sp<GraphicBuffer> buffer(getFrontBufferLocked());
-    if (LIKELY((mFlags & DisplayHardware::DIRECT_TEXTURE) &&
-            (buffer->usage & GRALLOC_USAGE_HW_TEXTURE))) {
-        int index = mFrontBufferIndex;
-        if (LIKELY(!mTextures[index].dirty)) {
-            glBindTexture(GL_TEXTURE_2D, mTextures[index].name);
+    int index = mFrontBufferIndex;
+
+    // create the new texture name if needed
+    if (UNLIKELY(mTextures[index].name == -1U)) {
+        mTextures[index].name = createTexture();
+        mTextures[index].width = 0;
+        mTextures[index].height = 0;
+    }
+
+    if (mFlags & DisplayHardware::DIRECT_TEXTURE) {
+        if (buffer->usage & GraphicBuffer::USAGE_HW_TEXTURE) {
+            if (mTextures[index].dirty) {
+                initializeEglImageLocked(buffer, &mTextures[index]);
+            }
         } else {
-            // we need to recreate the texture
-            EGLDisplay dpy(mFlinger->graphicPlane(0).getEGLDisplay());
-            
-            // create the new texture name if needed
-            if (UNLIKELY(mTextures[index].name == -1U)) {
-                mTextures[index].name = createTexture();
-            } else {
-                glBindTexture(GL_TEXTURE_2D, mTextures[index].name);
+            if (mHybridBuffer==0 || (mHybridBuffer->width != buffer->width ||
+                    mHybridBuffer->height != buffer->height)) {
+                mHybridBuffer.clear();
+                mHybridBuffer = new GraphicBuffer(
+                        buffer->width, buffer->height, buffer->format,
+                        GraphicBuffer::USAGE_SW_WRITE_OFTEN |
+                        GraphicBuffer::USAGE_HW_TEXTURE);
+                initializeEglImageLocked(
+                        mHybridBuffer, &mTextures[0]);
             }
 
-            // free the previous image
-            if (mTextures[index].image != EGL_NO_IMAGE_KHR) {
-                eglDestroyImageKHR(dpy, mTextures[index].image);
-                mTextures[index].image = EGL_NO_IMAGE_KHR;
-            }
-            
-            // construct an EGL_NATIVE_BUFFER_ANDROID
-            android_native_buffer_t* clientBuf = buffer->getNativeBuffer();
-            
-            // create the new EGLImageKHR
-            const EGLint attrs[] = { 
-                    EGL_IMAGE_PRESERVED_KHR,    EGL_TRUE, 
-                    EGL_NONE,                   EGL_NONE 
-            };
-            mTextures[index].image = eglCreateImageKHR(
-                    dpy, EGL_NO_CONTEXT, EGL_NATIVE_BUFFER_ANDROID,
-                    (EGLClientBuffer)clientBuf, attrs);
+            GGLSurface t;
+            status_t res = buffer->lock(&t, GRALLOC_USAGE_SW_READ_OFTEN);
+            LOGE_IF(res, "error %d (%s) locking buffer %p",
+                    res, strerror(res), buffer.get());
+            if (res == NO_ERROR) {
+                Texture* const texture(&mTextures[0]);
 
-            LOGE_IF(mTextures[index].image == EGL_NO_IMAGE_KHR,
-                    "eglCreateImageKHR() failed. err=0x%4x",
-                    eglGetError());
-            
-            if (mTextures[index].image != EGL_NO_IMAGE_KHR) {
-                glEGLImageTargetTexture2DOES(GL_TEXTURE_2D, 
-                        (GLeglImageOES)mTextures[index].image);
-                GLint error = glGetError();
-                if (UNLIKELY(error != GL_NO_ERROR)) {
-                    // this failed, for instance, because we don't support
-                    // NPOT.
-                    // FIXME: do something!
-                    LOGD("layer=%p, glEGLImageTargetTexture2DOES(%p) "
-                         "failed err=0x%04x",
-                         this, mTextures[index].image, error);
-                    mFlags &= ~DisplayHardware::DIRECT_TEXTURE;
-                } else {
-                    // Everything went okay!
-                    mTextures[index].NPOTAdjust = false;
-                    mTextures[index].dirty  = false;
-                    mTextures[index].width  = clientBuf->width;
-                    mTextures[index].height = clientBuf->height;
+                glBindTexture(GL_TEXTURE_2D, texture->name);
+
+                sp<GraphicBuffer> buf(mHybridBuffer);
+                void* vaddr;
+                res = buf->lock(GraphicBuffer::USAGE_SW_WRITE_OFTEN, &vaddr);
+                if (res == NO_ERROR) {
+                    int bpp = 0;
+                    switch (t.format) {
+                    case GGL_PIXEL_FORMAT_RGB_565:
+                    case GGL_PIXEL_FORMAT_RGBA_4444:
+                        bpp = 2;
+                        break;
+                    case GGL_PIXEL_FORMAT_RGBA_8888:
+                    case GGL_PIXEL_FORMAT_RGBX_8888:
+                        bpp = 4;
+                        break;
+                    case GGL_PIXEL_FORMAT_YCbCr_422_SP:
+                    case GGL_PIXEL_FORMAT_YCbCr_420_SP:
+                        // just show the Y plane of YUV buffers
+                        bpp = 1;
+                        break;
+                    default:
+                        // oops, we don't handle this format!
+                        LOGE("layer %p, texture=%d, using format %d, which is not "
+                                "supported by the GL", this, texture->name, t.format);
+                    }
+                    if (bpp) {
+                        const Rect bounds(dirty.getBounds());
+                        size_t src_stride = t.stride;
+                        size_t dst_stride = buf->stride;
+                        if (src_stride == dst_stride &&
+                            bounds.width() == t.width &&
+                            bounds.height() == t.height)
+                        {
+                            memcpy(vaddr, t.data, t.height * t.stride * bpp);
+                        } else {
+                            GLubyte const * src = t.data +
+                                (bounds.left + bounds.top * src_stride) * bpp;
+                            GLubyte * dst = (GLubyte *)vaddr +
+                                (bounds.left + bounds.top * dst_stride) * bpp;
+                            const size_t length = bounds.width() * bpp;
+                            size_t h = bounds.height();
+                            src_stride *= bpp;
+                            dst_stride *= bpp;
+                            while (h--) {
+                                memcpy(dst, src, length);
+                                dst += dst_stride;
+                                src += src_stride;
+                            }
+                        }
+                    }
+                    buf->unlock();
                 }
-            }                
+                buffer->unlock();
+            }
         }
     } else {
-        for (size_t i=0 ; i<NUM_BUFFERS ; i++)
+        for (size_t i=0 ; i<NUM_BUFFERS ; i++) {
             mTextures[i].image = EGL_NO_IMAGE_KHR;
-
+        }
         GGLSurface t;
         status_t res = buffer->lock(&t, GRALLOC_USAGE_SW_READ_OFTEN);
         LOGE_IF(res, "error %d (%s) locking buffer %p",
                 res, strerror(res), buffer.get());
-        
         if (res == NO_ERROR) {
-            if (UNLIKELY(mTextures[0].name == -1U)) {
-                mTextures[0].name = createTexture();
-                mTextures[0].width = 0;
-                mTextures[0].height = 0;
-            }
             loadTexture(&mTextures[0], dirty, t);
             buffer->unlock();
         }
     }
 }
-
 
 void Layer::onDraw(const Region& clip) const
 {
