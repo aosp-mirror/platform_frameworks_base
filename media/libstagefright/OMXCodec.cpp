@@ -1065,8 +1065,8 @@ static bool formatHasNotablyChanged(
         return false;
     }
 
-    if (from.get() == NULL && to.get() != NULL
-        || from.get() != NULL && to.get() == NULL) {
+    if ((from.get() == NULL && to.get() != NULL)
+        || (from.get() != NULL && to.get() == NULL)) {
         return true;
     }
 

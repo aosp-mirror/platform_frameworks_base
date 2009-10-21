@@ -106,7 +106,6 @@ private:
 
     sp<IOMX> mOMX;
     IOMX::node_id mNode;
-    sp<OMXCodecObserver> mObserver;
     uint32_t mQuirks;
     bool mIsEncoder;
     char *mMIME;
