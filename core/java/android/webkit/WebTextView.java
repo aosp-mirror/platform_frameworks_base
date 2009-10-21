@@ -138,7 +138,10 @@ import java.util.ArrayList;
         }
         if (!isArrowKey && !mOkayForFocusNotToMatch
                 && mWebView.nativeFocusNodePointer() != mNodePointer) {
-            mWebView.nativeClearCursor();
+            if (mWebView.nativeCursorNodePointer() == mNodePointer) {
+                // remove cursor so character doesn't go back to this view
+                mWebView.nativeClearCursor();
+            }
             // Do not call remove() here, which hides the soft keyboard.  If
             // the soft keyboard is being displayed, the user will still want
             // it there.
