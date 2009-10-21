@@ -152,10 +152,24 @@ public class NinePatchDrawable extends Drawable {
     private void computeBitmapSize() {
         final int sdensity = mNinePatch.getDensity();
         final int tdensity = mTargetDensity;
-        mBitmapWidth = Bitmap.scaleFromDensity(mNinePatch.getWidth(),
-                sdensity, tdensity);
-        mBitmapHeight = Bitmap.scaleFromDensity(mNinePatch.getHeight(),
-                sdensity, tdensity);
+        if (sdensity == tdensity) {
+            mBitmapWidth = mNinePatch.getWidth();
+            mBitmapHeight = mNinePatch.getHeight();
+        } else {
+            mBitmapWidth = Bitmap.scaleFromDensity(mNinePatch.getWidth(),
+                    sdensity, tdensity);
+            mBitmapHeight = Bitmap.scaleFromDensity(mNinePatch.getHeight(),
+                    sdensity, tdensity);
+            Rect dest = mPadding;
+            Rect src = mNinePatchState.mPadding;
+            if (dest == src) {
+                mPadding = dest = new Rect(src);
+            }
+            dest.left = Bitmap.scaleFromDensity(src.left, sdensity, tdensity);
+            dest.top = Bitmap.scaleFromDensity(src.top, sdensity, tdensity);
+            dest.right = Bitmap.scaleFromDensity(src.right, sdensity, tdensity);
+            dest.bottom = Bitmap.scaleFromDensity(src.bottom, sdensity, tdensity);
+        }
     }
     
     // overrides
@@ -301,7 +315,6 @@ public class NinePatchDrawable extends Drawable {
         if (!mMutated && super.mutate() == this) {
             mNinePatchState = new NinePatchState(mNinePatchState);
             mNinePatch = mNinePatchState.mNinePatch;
-            mPadding = mNinePatchState.mPadding;
             mMutated = true;
         }
         return this;
@@ -326,7 +339,8 @@ public class NinePatchDrawable extends Drawable {
 
         NinePatchState(NinePatchState state) {
             mNinePatch = new NinePatch(state.mNinePatch);
-            mPadding = new Rect(state.mPadding);
+            // Note we don't copy the padding because it is immutable.
+            mPadding = state.mPadding;
             mDither = state.mDither;
             mChangingConfigurations = state.mChangingConfigurations;
             mTargetDensity = state.mTargetDensity;

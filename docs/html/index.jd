@@ -15,12 +15,12 @@ home=true
                                 <div id="announcement" style="width:275px">
                                   <p>The second Android Developer Challenge has begun! In this contest,
                                   real-world users will help review and score applications and the overall winner will 
-                                  take away $250,000. The deadline for submitting an application to the contest is August 31, 2009.</p>
+                                  take away $250,000. The deadline for submissions was August 31, 2009.</p>
                                   <p><a href="http://code.google.com/android/adc/">Learn more about ADC 2 &raquo;</a></p>
                                 </div> <!-- end annoucement -->
                             </div> <!-- end annoucement-block -->  
                         </div><!-- end topAnnouncement -->
-                        <div id="carouselMain" style="height:192px"> <!-- this height can be adjusted based on the content height -->
+                        <div id="carouselMain" style="height:190px"> <!-- this height can be adjusted based on the content height -->
                         </div>
                             <div class="clearer"></div>
                         <div id="carouselWheel">
@@ -120,12 +120,17 @@ home=true
     'sdk': {
       'layout':"imgLeft",
       'icon':"sdk-small.png",
-      'name':"SDK 1.5 r3",
-      'img':"sdk-large.png",
-      'title':"Android 1.5 SDK",
-      'desc': "<p>Android 1.5 SDK is now available. It includes new APIs for Android 1.5, updated developer tools, multiple platform versions, and a Google APIs add-on.</p><p><a href='{@docRoot}sdk/1.5_r3/index.html'>Download Android 1.5 SDK &raquo;</a></p>"
+      'name':"Android 1.6 SDK",
+      'img':"donut-android.png",
+      'title':"Android 1.6 SDK",
+      'desc': "<p>The Android 1.6 SDK is now available, with new APIs and updated tools!</p>"
+               + " <p>For more about the Android 1.6 platform, read the <a href='http://developer.android.com/sdk/android-1.6-highlights.html'>highlights</a>"
+               + "<!--and watch some <a href='http://developer.android.com/videos/index.html'>videos</a>-->."
+               + " Also keep an eye on the <a href='http://android-developers.blogspot.com'>Blog</a>"
+               + " for posts about some of the new developer technologies in Android 1.6.</p>"
+               + "<p><a href='{@docRoot}sdk/1.6_r1/index.html'>Download the Android 1.6 SDK &raquo;</a></p>"
     },
-    
+
     'io': {
       'layout':"imgLeft",
       'icon':"io-small.png",

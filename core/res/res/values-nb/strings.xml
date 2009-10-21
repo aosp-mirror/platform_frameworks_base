@@ -21,7 +21,7 @@
     <string name="gigabyteShort" msgid="3259882455212193214">"GB"</string>
     <string name="terabyteShort" msgid="231613018159186962">"TB"</string>
     <string name="petabyteShort" msgid="5637816680144990219">"PB"</string>
-    <string name="fileSizeSuffix" msgid="7670819340156489359">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
+    <string name="fileSizeSuffix" msgid="7670819340156489359">"<xliff:g id="NUMBER">%1$s</xliff:g><xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="untitled" msgid="6071602020171759109">"&lt;uten navn&gt;"</string>
     <string name="ellipsis" msgid="7899829516048813237">"…"</string>
     <string name="emptyPhoneNumber" msgid="7694063042079676517">"(Mangler telefonnummer)"</string>
@@ -80,11 +80,11 @@
     <string name="roamingText3" msgid="5148255027043943317">"Ute av nabolaget"</string>
     <string name="roamingText4" msgid="8808456682550796530">"Ute av bygningen"</string>
     <string name="roamingText5" msgid="7604063252850354350">"Roaming - foretrukket system"</string>
-    <string name="roamingText6" msgid="2059440825782871513">"Roaming - tilgjengelig system"</string>
-    <string name="roamingText7" msgid="7112078724097233605">"Roaming - alliansepartner"</string>
-    <string name="roamingText8" msgid="5989569778604089291">"Roaming - gullpartner"</string>
-    <string name="roamingText9" msgid="7969296811355152491">"Roaming - full tjenestefunksjoanlitet"</string>
-    <string name="roamingText10" msgid="3992906999815316417">"Roaming - delvis tjenestefunksjonalitet"</string>
+    <string name="roamingText6" msgid="2059440825782871513">"Roaming – tilgjengelig system"</string>
+    <string name="roamingText7" msgid="7112078724097233605">"Roaming – alliansepartner"</string>
+    <string name="roamingText8" msgid="5989569778604089291">"Roaming – gullpartner"</string>
+    <string name="roamingText9" msgid="7969296811355152491">"Roaming – full tjenestefunksjonalitet"</string>
+    <string name="roamingText10" msgid="3992906999815316417">"Roaming – delvis tjenestefunksjonalitet"</string>
     <string name="roamingText11" msgid="4154476854426920970">"Roaming-banner på"</string>
     <string name="roamingText12" msgid="1189071119992726320">"Roaming-banner av"</string>
     <string name="roamingTextSearching" msgid="8360141885972279963">"Leter etter tjeneste"</string>
@@ -194,14 +194,14 @@
     <string name="permdesc_shutdown" msgid="7046500838746291775">"Lar applikasjonen sette aktivitetshåndtereren i avslutningstilstand. Slår ikke systemet helt av."</string>
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"forhindre applikasjonsbytte"</string>
     <string name="permdesc_stopAppSwitches" msgid="3857886086919033794">"Lar applikasjonen forhindre brukeren fra å bytte til en annen applikasjon."</string>
-    <string name="permlab_runSetActivityWatcher" msgid="7811586187574696296">"overvåke og kontrollere all applikasjonsoppstart"</string>
+    <string name="permlab_runSetActivityWatcher" msgid="7811586187574696296">"Blokker popup-vinduer"</string>
     <string name="permdesc_runSetActivityWatcher" msgid="3228701938345388092">"Lar applikasjonen overvåke og kontrollere hvordan systemet starter applikasjoner. Ondsinnede applikasjoner kan ta over systemet helt. Denne rettigheten behøves bare for utvikling, aldri for vanlig bruk av telefonen."</string>
     <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"kringkaste melding om fjernet pakke"</string>
     <string name="permdesc_broadcastPackageRemoved" msgid="3453286591439891260">"Lar applikasjonen kringkaste en melding om at en applikasjonspakke er blitt fjernet. Ondsinnede applikasjoner kan bruke dette til å drepe vilkårlige andre kjørende applikasjoner."</string>
     <string name="permlab_broadcastSmsReceived" msgid="5689095009030336593">"kringkaste melding om mottatt SMS"</string>
     <string name="permdesc_broadcastSmsReceived" msgid="9122419277306740155">"Lar applikasjonen kringkaste en melding om at en SMS-melding er mottatt. Ondsinnede applikasjoner kan bruke dette til å forfalske innkommende SMS-meldinger."</string>
     <string name="permlab_broadcastWapPush" msgid="3145347413028582371">"kringkaste melding om mottatt WAP-PUSH"</string>
-    <string name="permdesc_broadcastWapPush" msgid="3955303669461378091">"Lar applikasjonen kringkaste en melding om at en WAP-PUSH-melding er blitt mottatt. Ondsinnede applikasjoner kan bruke dette til å forfalske MMS-kvitteringer eller i det stille erstatte innholdet av vilkårlige nettsider med ondsinnede varianter."</string>
+    <string name="permdesc_broadcastWapPush" msgid="3955303669461378091">"Lar applikasjonen kringkaste en melding om at en WAP-PUSH-melding er blitt mottatt. Ondsinnede applikasjoner kan bruke dette til å forfalske MMS-kvitteringer eller i det stille erstatte innholdet av vilkårlige nettsteder med ondsinnede varianter."</string>
     <string name="permlab_setProcessLimit" msgid="2451873664363662666">"begrense antallet kjørende prosesser"</string>
     <string name="permdesc_setProcessLimit" msgid="7824786028557379539">"Lar applikasjonen kontrollere maksimalt antall kjørende prosesser. Behøves aldri for vanlige applikasjoner."</string>
     <string name="permlab_setAlwaysFinish" msgid="5342837862439543783">"få alle bakgrunnsapplikasjoner til å lukkes"</string>
@@ -243,9 +243,9 @@
     <string name="permlab_clearAppCache" msgid="4747698311163766540">"slette hurtigbufferdata for alle applikasjoner"</string>
     <string name="permdesc_clearAppCache" msgid="7740465694193671402">"Lar applikasjonen frigjøre lagringsplass ved å slette filer i applikasjoners hurtigbufferkatalog. Tilgangen er vanligvis sterkt begrenset, til systemprosesser."</string>
     <string name="permlab_readLogs" msgid="4811921703882532070">"lese systemets loggfiler"</string>
-    <string name="permdesc_readLogs" msgid="2257937955580475902">"Lar applikasjonen to lese fra diverse loggfiler på systemet. Disse inneholder generell informasjon om hva som gjøres med telefonen, men skal ikke inneholde personlig eller privat informasjon."</string>
+    <string name="permdesc_readLogs" msgid="2257937955580475902">"Lar applikasjonen lese fra diverse loggfiler på systemet. Disse inneholder generell informasjon om hva som gjøres med telefonen, men skal ikke inneholde personlig eller privat informasjon."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"lese/skrive ressurser eid av diag"</string>
-    <string name="permdesc_diagnostic" msgid="3121238373951637049">"Lar applikasjonen to lese og skrive enhver ressurs eid av gruppen diag; for eksempel, filer i /dev. Dette kan potensielt påvirke systemets sikkerhet og stabilitet. Dette bør KUN brukes for maskinvarespesifikke diagnoseverktøy laget av operatøren eller produsenten."</string>
+    <string name="permdesc_diagnostic" msgid="3121238373951637049">"Lar applikasjonen lese og skrive enhver ressurs eid av gruppen diag; for eksempel, filer i /dev. Dette kan potensielt påvirke systemets sikkerhet og stabilitet. Dette bør KUN brukes for maskinvarespesifikke diagnoseverktøy laget av operatøren eller produsenten."</string>
     <string name="permlab_changeComponentState" msgid="79425198834329406">"aktivere eller deaktigere applikasjonskomponenter"</string>
     <string name="permdesc_changeComponentState" msgid="4569107043246700630">"Lar applikasjonen endre om en komponent i en annen applikasjon er aktivert eller ikke. Ondsinnede applikasjoner kan bruke dette til å deaktivere viktige telefonfunksjoner. Denne rettigheten må brukes med forsiktighet, ettersom det er mulig å få applikasjonskomponenter inn i en ubrukelig, inkonsistent eller ustabil tilstand."</string>
     <string name="permlab_setPreferredApplications" msgid="3393305202145172005">"velge foretrukne applikasjoner"</string>
@@ -272,8 +272,8 @@
     <string name="permdesc_readCalendar" msgid="5533029139652095734">"Lar applikasjonen lese alle kalenderhendelser lagret på telefonen. Ondsinnede applikasjoner kan bruke dette til å sende kalenderhendelser til andre."</string>
     <string name="permlab_writeCalendar" msgid="377926474603567214">"skrive kalenderinformasjon"</string>
     <string name="permdesc_writeCalendar" msgid="8674240662630003173">"Lar applikasjonen endre kalenderhendelser lagret på telefonen. Ondsinnede applikasjoner kan bruke dette til å slette eller endre kalenderinformasjon."</string>
-    <string name="permlab_accessMockLocation" msgid="8688334974036823330">"lage manuelle plasseringskilder for testing"</string>
-    <string name="permdesc_accessMockLocation" msgid="7648286063459727252">"Lage manuelle plassingskilder for testing. Ondsinnede applikasjoner kan bruke dette til å overstyre plasseringen og/eller statusen rapportert av ekte plasseringskilder slik som GPS eller nettverksoperatører."</string>
+    <string name="permlab_accessMockLocation" msgid="8688334974036823330">"lage simulerte plasseringskilder for testing"</string>
+    <string name="permdesc_accessMockLocation" msgid="7648286063459727252">"Lage simulerte plassingskilder for testing. Ondsinnede applikasjoner kan bruke dette til å overstyre plasseringen og/eller statusen rapportert av ekte plasseringskilder slik som GPS eller nettverksoperatører."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"få tilgang til ekstra plasseringskommandoer"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="1948144701382451721">"Få tilgang til ekstra kommandoer for plasseringskilder. Ondsinnede applikasjoner kan bruke dette til å forstyrre GPS eller andre plasseringskilder."</string>
     <string name="permlab_installLocationProvider" msgid="6578101199825193873">"installere plasseringskilder"</string>
@@ -318,10 +318,8 @@
     <string name="permdesc_bindGadget" msgid="2098697834497452046">"Lar applikasjonen fortelle systemet hvilke gadgeter som kan brukes av hvilke applikasjoner. Med denne rettigheten kan applikasjoner andre applikasjoner tilgang til personlig data. Ikke ment for vanlige applikasjoner."</string>
     <string name="permlab_modifyPhoneState" msgid="8423923777659292228">"endre telefontilstand"</string>
     <string name="permdesc_modifyPhoneState" msgid="3302284561346956587">"Lar applikasjonen kontrollere telefonfunksjonaliteten i enheten. En applikasjon med denne rettigheten kan endre nettverk, slå telefonens radio av eller på og lignende uten noensinne å varsle brukeren."</string>
-    <!-- no translation found for permlab_readPhoneState (2326172951448691631) -->
-    <skip />
-    <!-- no translation found for permdesc_readPhoneState (188877305147626781) -->
-    <skip />
+    <string name="permlab_readPhoneState" msgid="2326172951448691631">"lese telefontilstand og -identitet"</string>
+    <string name="permdesc_readPhoneState" msgid="188877305147626781">"Gir applikasjonen tilgang til telefonfunksjonaliteten i enheten. En applikasjon med denne rettigheten kan finne telefonens telefonnummer og seriellnummer, om en samtale er aktiv, nummeret det ringes til og lignende."</string>
     <string name="permlab_wakeLock" msgid="573480187941496130">"forhindre telefonen fra å sove"</string>
     <string name="permdesc_wakeLock" msgid="7584036471227467099">"Lar applikasjonen forhindre telefonen fra å gå i hvilemodus."</string>
     <string name="permlab_devicePower" msgid="4928622470980943206">"slå telefonen av eller på"</string>
@@ -332,8 +330,8 @@
     <string name="permdesc_setWallpaper" msgid="6417041752170585837">"Lar applikasjonen sette systemets bakgrunnsbilde."</string>
     <string name="permlab_setWallpaperHints" msgid="3600721069353106851">"sette størrelseshint for bakgrunn"</string>
     <string name="permdesc_setWallpaperHints" msgid="6019479164008079626">"Lar applikasjonen sette størrelseshint for systemets bakgrunnsbilde."</string>
-    <string name="permlab_masterClear" msgid="2315750423139697397">"nullstille systemet til fabrikkinnstillinger"</string>
-    <string name="permdesc_masterClear" msgid="5033465107545174514">"Lar applikasjonen nullstille systemet til fabrikkinnstillinger, noe som vil fjerne alle data, alt oppsett, og alle installerte applikasjoner."</string>
+    <string name="permlab_masterClear" msgid="2315750423139697397">"tilbakestille systemet til fabrikkinnstillinger"</string>
+    <string name="permdesc_masterClear" msgid="5033465107545174514">"Lar applikasjonen tilbakestille systemet til fabrikkinnstillinger, noe som vil fjerne alle data, alt oppsett, og alle installerte applikasjoner."</string>
     <string name="permlab_setTimeZone" msgid="2945079801013077340">"endre tidssone"</string>
     <string name="permdesc_setTimeZone" msgid="1902540227418179364">"Lar applikasjonen endre telefonens tidssone."</string>
     <string name="permlab_getAccounts" msgid="4549918644233460103">"oppdage kjente kontoer"</string>
@@ -365,7 +363,7 @@
     <string name="permlab_writeSyncSettings" msgid="6297138566442486462">"skrive synkroniseringsinnstillinger"</string>
     <string name="permdesc_writeSyncSettings" msgid="2498201614431360044">"Lar applikasjonen to endre på synkroniseringsinnstillingene, som for eksempel om kontakter blir synkronisert."</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"lese synkroniseringsstatistikk"</string>
-    <string name="permdesc_readSyncStats" msgid="7511448343374465000">"Lar applikasjonen lese synkroniseringsstatistikk, som for eksempel historien over alle synkroniseringer utført."</string>
+    <string name="permdesc_readSyncStats" msgid="7511448343374465000">"Lar applikasjonen lese synkroniseringsstatistikk, som for eksempel loggen over alle synkroniseringer utført."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"lese abonnement på nyhetskilder"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="3622200625634207660">"Lar applikasjonen hente detaljer om hvilke nyhetskilder som synkroniseres."</string>
     <string name="permlab_subscribedFeedsWrite" msgid="9015246325408209296">"endre abonnement på nyhetskilder"</string>
@@ -422,7 +420,7 @@
   </string-array>
     <string name="keyguard_password_enter_pin_code" msgid="3731488827218876115">"Skriv inn PIN-kode:"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="1295984114338107718">"Gal PIN-kode!"</string>
-    <string name="keyguard_label_text" msgid="861796461028298424">"For å låse opp, trykk på Meny og deretter 0."</string>
+    <string name="keyguard_label_text" msgid="861796461028298424">"For å låse opp, trykk på menyknappen og deretter 0."</string>
     <string name="emergency_call_dialog_number_for_display" msgid="696192103195090970">"Nødnummer"</string>
     <string name="lockscreen_carrier_default" msgid="8812714795156374435">"(Ingen operatør)"</string>
     <string name="lockscreen_screen_locked" msgid="7288443074806832904">"Skjermen er låst"</string>
@@ -451,7 +449,7 @@
     <string name="lockscreen_glogin_instructions" msgid="1816635201812207709">"For å låse opp, logg på med Google-kontoen din"</string>
     <string name="lockscreen_glogin_username_hint" msgid="8846881424106484447">"Brukernavn (e-post)"</string>
     <string name="lockscreen_glogin_password_hint" msgid="5958028383954738528">"Passord"</string>
-    <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"Logg inn"</string>
+    <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"Logg på"</string>
     <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"Ugyldig brukernavn eller passord."</string>
     <string name="hour_ampm" msgid="4329881288269772723">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%P</xliff:g>"</string>
     <string name="hour_cap_ampm" msgid="1829009197680861107">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%p</xliff:g>"</string>
@@ -473,10 +471,10 @@
     <string name="js_dialog_title_default" msgid="6961903213729667573">"JavaScript"</string>
     <string name="js_dialog_before_unload" msgid="1901675448179653089">"Naviger bort fra denne siden?"\n\n"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"Velg OK for å fortsette, eller Avbryt for å forbli på denne siden."</string>
     <string name="save_password_label" msgid="6860261758665825069">"Bekreft"</string>
-    <string name="permlab_readHistoryBookmarks" msgid="1284843728203412135">"lese nettleserens historie og bokmerker"</string>
+    <string name="permlab_readHistoryBookmarks" msgid="1284843728203412135">"lese nettleserens logg og bokmerker"</string>
     <string name="permdesc_readHistoryBookmarks" msgid="4981489815467617191">"Lar applikasjonen lese alle adresser nettleseren har besøkt, og alle nettleserens bokmerker."</string>
-    <string name="permlab_writeHistoryBookmarks" msgid="9009434109836280374">"skrive til nettleserens historie og bokmerker"</string>
-    <string name="permdesc_writeHistoryBookmarks" msgid="945571990357114950">"Lar applikasjonen endre nettleserens historie og bokmerker lagret på telefonen. Ondsinnede applikasjoner kan bruke dette til å fjerne eller redigere nettleserens data."</string>
+    <string name="permlab_writeHistoryBookmarks" msgid="9009434109836280374">"skrive til nettleserens logg og bokmerker"</string>
+    <string name="permdesc_writeHistoryBookmarks" msgid="945571990357114950">"Lar applikasjonen endre nettleserens logg og bokmerker lagret på telefonen. Ondsinnede applikasjoner kan bruke dette til å fjerne eller redigere nettleserens data."</string>
     <string name="save_password_message" msgid="767344687139195790">"Ønsker du at nettleseren skal huske dette passordet?"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"Ikke nå"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"Husk"</string>

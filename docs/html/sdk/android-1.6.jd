@@ -1,0 +1,324 @@
+page.title=Android 1.6 Version Notes
+
+@jd:body
+
+<p>
+<em>Date:</em> September 2009<br />
+<em>API Level:</em>&nbsp;<strong>4</strong></p>
+
+
+<p>This document provides version notes for the Android 1.6 system image included in the SDK. </p>
+
+<ul>
+<li><a href="#overview">Overview</a>
+<li><a href="#features">Release Highlights</a>
+<li><a href="#apps">Built-in Applications</a>
+<li><a href="#locs">Locales</a>
+<li><a href="#api-changes">API Changes</a>
+</ul>
+
+<h2 id="overview">Overview</h2>
+
+<p>The Android 1.6 system delivered in the SDK (as library and system image) is
+the development counterpart to the Android 1.6 production system image, which is
+deployable to Android-powered handsets starting October 2009. The system is
+fully compliant and includes no external libraries. </p>
+
+<p>The Android 1.6 system delivers an updated version of the framework
+API. As with previous versions, the Android 1.6 API 
+is assigned an integer identifier &mdash; <strong>4</strong> &mdash; that is
+stored in the system itself. This identifier, called the "API Level", allows the
+system to correctly determine whether an application is compatible with
+the system, prior to installing the application. </p>
+
+<p>For more information about how to use API Level, see the <a
+href="{@docRoot}guide/appendix/api-levels.html">API Levels</a> document. </p>
+
+<h2 id="features">Highlights</h2>
+
+<p>For a list of new user features and platform highlights, see the <a
+href="http://developer.android.com/sdk/android-1.6-highlights.html">Android 1.6 Platform
+Highlights</a> document.</p>
+
+<h2 id="apps">Built-in Applications</h2>
+
+<p>The system image includes these built-in applications:</p>
+	<ul>
+	<li>Alarm Clock</li>
+	<li>Browser</li>
+	<li>Calculator</li>
+	<li>Camcorder</li>
+	<li>Camera</li>
+	<li>Contacts</li>
+	<li>Custom Locale (developer app)</li>
+	<li>Dev Tools (developer app)</li>
+	<li>Dialer</li>
+	<li>Email</li>
+	<li>Gallery</li>
+	<li>Gestures Builder</li>
+	<li>IME for Japanese text input</li>
+	<li>Messaging</li>
+	<li>Music</li>
+	<li>Settings</li>
+	<li>Spare Parts (developer app)</li>
+	</ul>
+
+<h2 id="locs">Locales</h2>
+
+<p>The system image provides a variety of built-in locales. In some cases, 
+region-specific strings are available for the locales. In other cases, 
+a default version of the language is used. The languages that will be 
+available in the Android 1.6 system image are listed below (with 
+<em>language</em>_<em>country/region</em> locale descriptor).</p>
+
+<table style="border:0;">
+<tr>
+<td style="border:0">
+<ul style="margin-bottom:0;">
+<li>Arabic, Egypt (ar_EG)</li>
+<li>Arabic, Israel (ar_IL)</li>
+<li>Bulgarian, Bulgaria (bg_BG)</li>
+<li>Chinese, PRC (zh_CN)</li>
+<li>Chinese, Taiwan (zh_TW)</li>
+<li>Croatian, Croatia (hr_HR)</li>
+<li>Czech, Czech Republic (cs_CZ)</li>
+<li>Danish, Denmark (da_DK)</li>
+<li>Dutch, Netherlands (nl_NL)</li>
+<li>Dutch, Belgium (nl_BE)</li>
+<li>English, US (en_US)</li>
+<li>English, Britain (en_GB)</li>
+<li>English, Canada (en_CA)</li>
+<li>English, Australia (en_AU)</li>
+<li>English, India (en_IN)</li>
+<li>English, Ireland (en_IE)</li>
+<li>English, New Zealand (en_NZ)</li>
+<li>English, Singapore (en_SG)</li>
+<li>English, South Africa (en_ZA)</li>
+<li>Finnish, Finland (fi_FI)</li>
+<li>French, France (fr_FR)</li>
+<li>French, Belgium (fr_BE)</li>
+<li>French, Canada (fr_CA)</li>
+<li>French, Switzerland (fr_CH)</li>
+<li>German, Germany (de_DE)</li>
+<li>German, Austria (de_AT)</li>
+<li>German, Switzerland (de_CH)</li>
+<li>German, Liechtenstein (de_LI)</li>
+</ul>
+</td>
+<td style="border:0;padding-left:5em;">
+<ul style="margin-bottom:0;">
+<li>Greek, Greece (el_GR)</li>
+<li>Hindi, India (hi_IN)</li>
+<li>Hungarian, Hungary (hu_HU)</li>
+<li>Indonesian, Indonesia (id_ID)</li>
+<li>Italian, Italy (it_IT)</li>
+<li>Italian, Switzerland (it_CH)</li>
+<li>Japanese, Japan (ja_JP)</li>
+<li>Korean, Korea (ko_KR)</li>
+<li>Latvian, Latvia (lv_LV)</li>
+<li>Lithuanian, Lithuania (lt_LT)</li>
+<li>Norwegian Bokmål, Norway (nb_NO)</li>
+<li>Polish, Poland (pl_PL)</li>
+<li>Portuguese, Brazil (pt_BR)</li>
+<li>Portuguese, Portugal (pt_PT)</li>
+<li>Romanian, Romania (ro_RO)</li>
+<li>Russian, Russia (ru_RU)</li>
+<li>Serbian, Serbia (sr_RS)</li>
+<li>Slovak, Slovakia (sk_SK)</li>
+<li>Slovenian, Slovenia (sl_SI)</li>
+<li>Spanish, Spain (es_ES)</li>
+<li>Spanish, US (es_US)</li>
+<li>Swedish, Sweden (sv_SE)</li>
+<li>Thai, Thailand (th_TH)</li>
+<li>Tagalog, Philippines (tl_PH)</li>
+<li>Turkish, Turkey (tr_TR)</li>
+<li>Ukranian, Ukrania (uk_UA)</li>
+<li>Vietnamese, Vietnam (vi_VN)</li>
+</ul>
+</td>
+</tr>
+</table>
+
+<p>Localized UI strings match the locales that are accessible 
+through Settings.</p>
+
+<h2 id="api-changes">API Changes</h2>
+
+<h4 id="UIFramework">UI framework</h4>
+    <ul>
+      <li>New classes in {@link android.view.animation}
+      to control the behavior of animations:
+        <ul>
+          <li><code>AnticipateInterpolator</code></li>
+          <li><code>AnticipateOvershootInterpolator</code></li>
+          <li><code>BounceInterpolator</code></li>
+          <li><code>OvershootInterpolator</code></li>
+        </ul>
+      </li>
+      <li>New XML attribute <code>android:onClick</code> to specify a View's 
+<a href="/reference/android/view/View.OnClickListener.html">View.OnClickListener</a> 
+from a layout file.
+      </li>
+      <li>New support for dealing with varying screen densities. Density
+information is associated with Bitmap and Canvas for performing the
+correct scaling. The framework will automatically scale bitmaps and
+nine-patches based on the density the resource was found under and the
+density of the screen, etc.
+      </li>
+    </ul>
+
+<h4>Search framework</h4>
+  <ul>
+    <li>Applications can now expose relevant content to users as search
+suggestions in the Quick Search Box, a new device-wide search capability that is
+accessible from the home screen. To support this, the search framework adds new
+attributes to the searchable metadata file. For complete information, see the
+{@link android.app.SearchManager SearchManager} documentation.
+    </li>
+  </ul>
+
+<h4>Accessibility framework</h4>
+  <ul>
+    <li>New {@link android.view.accessibility android.accessibility} package
+that includes classes for capturing accessibility events and forwarding them to
+an {@link android.accessibilityservice AccessibilityService} handler. </li>
+    <li>New {@link android.accessibilityservice AccessibilityService} package
+that lets your application track user events and provide visual, audible, or
+haptic feedback to the user. </li>
+  </ul>
+
+<h4>Gesture Input</h4>
+  <ul>
+    <li>New {@link android.gesture gesture} API for creating, recognizing,
+loading, and saving gestures.</li>
+  </ul>
+
+<h4>Text-to-speech</h4>
+  <ul>
+    <li>New {@link android.speech.tts android.speech.tts} package provides
+classes for synthesizing speech from text, for immediate playback or to create a
+sound file.</li>
+  </ul>
+
+<h4>Graphics</h4>
+  <ul>
+    <li>Classes in {@link android.graphics android.graphics} now support scaling
+for different screen densities.</li>
+  </ul>
+
+<h4>Telephony</h4>
+  <ul>
+    <li>New {@link android.telephony.SmsManager SmsManager} and other classes
+for sending and receiving SMS messages.</li>
+  </ul>
+
+<h4>Utilities</h4>
+  <ul>
+    <li>New {@link android.util.DisplayMetrics DisplayMetrics} fields for
+determining the density of the current device screen.</li>
+  </ul>
+
+<h4 id="AndroidManifest">Android Manifest elements</h4>
+
+    <ul>
+      <li>New <a href="{@docRoot}guide/topics/manifest/supports-screens-element.html">{@code 
+      &lt;supports-screens>}</a> element lets you specify the device screen sizes that your 
+      application is designed and tested to support, where "size" is a combination
+      of resolution and density. If your application is run on a device whose screen 
+      size is not specified in the <code>&lt;supports-screen&gt;</code> element, the system 
+      displays the application in <em>compatibility mode</em>, which performs best-effort scaling
+      of the application UI to match the resolution and density of the screen. 
+
+    <p>The attributes available for defining an application's screen support are:
+
+        <ul>
+
+          <li><code>smallScreen</code>: Boolean value that indicates whether the
+            application is designed to run on devices with small screens. 
+            Examples: QVGA low density; VGA high density.
+          </li>
+          <li><code>normalScreens</code>: Boolean value that indicates whether 
+            the application is designed to run on devices with normal screens. 
+            Examples: WQVGA low density; HVGA medium density; WVGA high density.
+          </li>
+          <li><code>largeScreens</code>: Boolean value that indicates whether 
+            the application is designed to run on devices with significantly 
+            larger screens, such that special care may be required on
+            the application's part to make proper use of the screen area. 
+            Examples: VGA medium density; WVGA medium density.
+          </li>
+          <li><code>anyDensity</code>: Boolean value that indicates whether 
+            the application can accommodate any screen density.
+          </li>
+          <li><code>resizable</code>: Boolean value that indicates whether
+            the application can expand its layout to fit slightly larger screens.
+          </li>
+        </ul>
+    </p>
+    </li>
+
+      <li>New <a href="{@docRoot}guide/topics/manifest/uses-feature-element.html">{@code &lt;uses-feature>}</a>
+        element lets an application specify hardware (or other)
+        features that it requires to function normally. When an application
+        specifies such features, the system allows the application to be installed only
+        on devices that offer the required features. The element supports these
+        attributes:
+        <ul>
+          <li><code>name</code>: The name of the feature required by the application. Currently accepts 
+          "android.hardware.camera" and "android.hardware.camera.autofocus" values, which specify that a 
+          camera and camera autofocus are required, respectively.</li>
+          <li><code>glEsVersion</code>: Indicates the minimum version of OpenGL ES required.</li>
+        </ul>
+      </li>
+      <li>New attributes for the 
+      <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html">{@code &lt;uses-sdk>}</a> element:
+        <ul>
+          <li><code>maxSdkVersion</code>: This indicates the maximum API Level on which an application is 
+          designed to run. If an application declares this attribute, the Android system prevents the user 
+          from installing the application if the system's API Level is higher than the value specified in 
+          this attribute. </li>
+          <li><code>targetSdkVersion</code>: This indicates the API Level that the application is targeting. 
+          It is able to run on older versions (down to minSdkVersion), but was explicitly tested to 
+          work with the version specified here. Specifying this version allows the platform to 
+          disable compatibility code that is not required or enable newer features that are not 
+          available to older applications. </li>
+        </ul>
+      </li>
+
+      </li>
+    </ul>
+
+<h4>New Permissions</h4>
+
+    <ul>
+      <li>{@link android.Manifest.permission#CHANGE_WIFI_MULTICAST_STATE
+          CHANGE_WIFI_MULTICAST_STATE}: Allows applications to enter Wi-Fi 
+          Multicast mode.
+      </li>
+      <li>{@link android.Manifest.permission#GLOBAL_SEARCH}: Allows the 
+          global search system to access the data of a specified content provider.
+      </li> 
+      <li>{@link android.Manifest.permission#INSTALL_LOCATION_PROVIDER INSTALL_LOCATION_PROVIDER}: 
+          Allows an application to install a location provider into the Location Manager.
+      </li>
+      <li>{@link android.Manifest.permission#READ_HISTORY_BOOKMARKS READ_HISTORY_BOOKMARKS}: 
+          Allows an application to read (but not write) the user's browsing history 
+          and bookmarks.
+      </li>
+      <li>{@link android.Manifest.permission#WRITE_HISTORY_BOOKMARKS WRITE_HISTORY_BOOKMARKS}: 
+          Allows an application to write (but not read) the user's browsing history 
+          and bookmarks.
+      </li>
+      <li>{@link android.Manifest.permission#WRITE_EXTERNAL_STORAGE WRITE_EXTERNAL_STORAGE}: 
+          Allows an application to write to external storage. Applications using API Level 3
+          and lower will be implicitly granted this permission (and this will be visible to 
+          the user); Applications using API Level 4 or higher must explicitly request this 
+          permission.
+      </li>
+    </ul>
+
+
+<h3 id="api-diff">API Change Details</h3>
+
+<p>For a detailed view of API changes in Android 1.6 (API Level 4), see the <a
+href="{@docRoot}sdk/api_diff/4/changes.html">API Differences Report</a>.</p>

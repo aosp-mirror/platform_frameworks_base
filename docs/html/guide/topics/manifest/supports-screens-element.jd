@@ -30,40 +30,8 @@ framework will scale down assets by a factor of 0.75 (low dpi screens)
 or scale them up by a factor of 1.5 (high dpi screens).
 The screen density is expressed as dots-per-inch (dpi).</p>
 
-<p>Currently supported densities:</p>
-<ul>
-  <li>Low density: 120 dpi</li>
-  <li>Medium density: 160 dpi</li>
-  <li>High density: 240 dpi</li>
-</ul>
-
-<p>Table of display types:</p>
-
-<table>
-<tr>
-  <th></th><th>Low Density</th><th>Medium Density</th><th>High Density</th>
-</tr>
-<tr>
-  <th>Small Screen</th>
-  <td>QVGA</td>
-  <td>n/a</td>
-  <td>VGA</td>
-</tr>
-<tr>
-  <th>Normal Screen</th>
-  <td>WQVGA</td>
-  <td>HVGA</td>
-  <td>WVGA, FWVGA</td>
-</tr>
-<tr>
-  <th>Large Screen</th>
-  <td>n/a</td>
-  <td>VGA, WVGA, FWVGA</td>
-  <td>n/a</td>
-</tr>
-</table>
-
-</dd> 
+<p>For more information, see 
+<a href="{@docRoot}guide/practices/screens_suppport.html">Multiple Screens Support</a>.</p>
 
 
 <dt>attributes:</dt>
@@ -116,6 +84,7 @@ The screen density is expressed as dots-per-inch (dpi).</p>
 <dt>see also:</dt>
 <dd>
   <ul>
+    <li><a href="{@docRoot}guide/practices/screens_suppport.html">Multiple Screens Support</a></li>
     <li>{@link android.util.DisplayMetrics}</li>
   </ul>
 </dd>

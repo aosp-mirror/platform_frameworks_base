@@ -56,7 +56,7 @@ home=true
                                       <td>
                                               <h2 class="green">公開</h2>
                                               <p>Android マーケットは、アプリケーションを携帯端末に配信するためのオープン サービスです。</p>
-                                              <p><a href="http://www.android.com/market.html">詳細 &raquo;</a></p>
+                                              <p><a href="http://market.android.com/publish/Home">詳細 &raquo;</a></p>
                                       </td>
                               </tr>
                               <tr>
@@ -118,10 +118,10 @@ home=true
     'sdk': {
       'layout':"imgLeft",
       'icon':"sdk-small.png",
-      'name':"SDK 1.5 r3",
-      'img':"sdk-large.png",
-      'title':"Android 1.5 SDK",
-      'desc': "<p>Android 1.5 SDK の最新バージョンが公開されました。このリリースには Android 1.5 用の API、最新版デベロッパーツール、複数プラットフォーム(バージョン)サポート、そして Google API のアドオンが含まれています。</p><p><a href='{@docRoot}sdk/1.5_r3/index.html'>Android 1.5 SDK をダウンロード &raquo;</a></p>"
+      'name':"SDK 1.6 r1",
+      'img':"donut-android.png",
+      'title':"Android 1.6 SDK",
+      'desc': "<p>Android 1.6 SDK の最新バージョンが公開されました。このリリースには Android 1.6 用の API、最新版デベロッパーツール、複数プラットフォーム(バージョン)サポート、そして Google API のアドオンが含まれています。</p><p><a href='{@docRoot}sdk/1.6_r1/index.html'>Android 1.6 SDK をダウンロード &raquo;</a></p>"
     },
     
     'io': {

@@ -14,7 +14,13 @@ developing Android applications using the Android SDK tools included in Android 
 <ul>
   <li>Windows XP or Vista</li>
   <li>Mac OS X 10.4.8 or later (x86 only)</li>
-  <li>Linux (tested on Linux Ubuntu Dapper Drake)</li>
+  <li>Linux (tested on Linux Ubuntu Dapper Drake)
+    <ul>
+      <li>64-bit distributions must be capable of running 32-bit applications. 
+      For information about how to add support for 32-bit applications, see
+      the <a href="installing.html#installnotes">Installation Notes</a>.</li>
+    </ul>
+  </li>
 </ul>
 
 <h4>Supported Development Environments:</h4>

@@ -327,11 +327,17 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         mText = "";
 
         mTextPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
+        mTextPaint.density = getResources().getDisplayMetrics().density;
+        mTextPaint.setCompatibilityScaling(
+                getResources().getCompatibilityInfo().applicationScale);
+
         // If we get the paint from the skin, we should set it to left, since
         // the layout always wants it to be left.
         // mTextPaint.setTextAlign(Paint.Align.LEFT);
 
         mHighlightPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        mHighlightPaint.setCompatibilityScaling(
+                getResources().getCompatibilityInfo().applicationScale);
 
         mMovement = getDefaultMovementMethod();
         mTransformation = null;

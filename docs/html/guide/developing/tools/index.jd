@@ -89,5 +89,10 @@ applications on the emulator. </p>
             <dd>A script that lets you manage AVDs and generate <a
                         href="http://ant.apache.org/" title="Ant">Ant</a> build files that 
                         you can use to compile your Android applications. </dd>
+                        
+  <dt><a  href="zipalign.html">zipalign</a></dt>
+            <dd>An important .apk optimization tool. This tool ensures that all uncompressed data starts
+            with a particular alignment relative to the start of the file. This should always be used
+            to align .apk files after they have been signed.</dd>
 </dl>
 

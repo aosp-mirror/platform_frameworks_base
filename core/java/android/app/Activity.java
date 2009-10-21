@@ -2479,16 +2479,17 @@ public class Activity extends ContextThemeWrapper
     /**
      * This hook is called when the user signals the desire to start a search.
      * 
-     * <p>You can use this function as a simple way to launch the search UI, in response to a 
-     * menu item, search button, or other widgets within your activity.  Unless overidden, 
-     * calling this function is the same as calling:
-     * <p>The default implementation simply calls 
-     * {@link #startSearch startSearch(null, false, null, false)}, launching a local search.
+     * <p>You can use this function as a simple way to launch the search UI, in response to a
+     * menu item, search button, or other widgets within your activity. Unless overidden, 
+     * calling this function is the same as calling
+     * {@link #startSearch startSearch(null, false, null, false)}, which launches
+     * search for the current activity as specified in its manifest, see {@link SearchManager}.
      * 
      * <p>You can override this function to force global search, e.g. in response to a dedicated
      * search key, or to block search entirely (by simply returning false).
      * 
-     * @return Returns true if search launched, false if activity blocks it
+     * @return Returns {@code true} if search launched, and {@code false} if activity blocks it.
+     *         The default implementation always returns {@code true}.
      * 
      * @see android.app.SearchManager
      */

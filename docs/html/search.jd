@@ -2,8 +2,10 @@ page.title=Search Results
 @jd:body
 
 <script src="http://www.google.com/jsapi" type="text/javascript"></script>
-<script src="{@docRoot}assets/jquery-history.js" type="text/javascript"></script>
-<script type="text/javascript">
+<script src="/assets/jquery-history.js" type="text/javascript"></script>
+<script type="text/javascript">      
+      var tabIndex = 0;
+            
       google.load('search', '1');
 
       function OnLoad() {
@@ -66,34 +68,69 @@ page.title=Search Results
 
         // upon ajax search, refresh the url and search title
         searchControl.setSearchStartingCallback(this, function(control, searcher, query) {
+            // save the tab index from the hash
+            tabIndex = location.hash.split("&t=")[1];
+        
             $("#searchTitle").html("search results for <em>" + query + "</em>");
-            $.history.add('q=' + query); // add the current query to the browser history
+            $.history.add('q=' + query + '&t=' + tabIndex);
+            openTab();
         });
 
         // draw the search results box
         searchControl.draw(document.getElementById("leftSearchControl"), drawOptions);
 
-        // execute a search upon page load, from url hash query
-        if (location.href.indexOf("#q=") != -1) {
-          url = location.href.split("#q=");
-          searchControl.execute(decodeURI(url[1]));
+        // get query and execute the search
+        if (location.hash.indexOf("&t=") != -1) {
+          searchControl.execute(decodeURI(getQuery(location.hash)));
         }
+        
         document.getElementById("search_autocomplete").focus();
+        addTabListeners();
       }
+      // End of OnLoad
+
 
       google.setOnLoadCallback(OnLoad, true);
 
       // when an event on the browser history occurs (back, forward, load) perform a search
       $(window).history(function(e, hash) {
-        hashParts = hash.split('=');
-        searchControl.execute(decodeURI(hashParts[1]));
-        $("#searchTitle").html("search results for <em>" + decodeURI(hashParts[1]) + "</em>");
+        var query = decodeURI(getQuery(hash));
+        searchControl.execute(query);
+        $("#searchTitle").html("search results for <em>" + query + "</em>");
       });
 
       // forcefully regain key-up event control (previously jacked by search api)
       $("#search_autocomplete").keyup(function(event) {
         return search_changed(event, false, '/');
       });
+
+      // open a tab, specified by its array position
+      function openTab() {
+        tabIndex = location.hash.split("&t=")[1];
+        
+        // show the appropriate tab
+        var tabHeaders = $(".gsc-tabHeader");
+        $(tabHeaders[tabIndex]).click();
+      }
+      
+      // add event listeners to each tab so we can track the browser history
+      function addTabListeners() {
+        var tabHeaders = $(".gsc-tabHeader");
+        for (var i = 0; i < tabHeaders.length; i++) {
+          $(tabHeaders[i]).attr("id",i).click(function() {
+            var tabHeaders = $(".gsc-tabHeader");
+            var tabIndex = $(this).attr("id");
+            $.history.add('q=' + getQuery(location.hash) + '&t=' + tabIndex); // update the hash with the new tab
+          });
+        }
+      }
+      
+      function getQuery(hash) {
+        var hashParts = hash.split('&t=');
+        var queryParts = hashParts[0].split('=');
+        return queryParts[1];
+      }
+
 </script>
 
   <div id="mainBodyFixed" style="width:auto; margin:20px">

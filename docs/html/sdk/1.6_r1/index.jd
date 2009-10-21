@@ -1,0 +1,140 @@
+page.title=Android 1.6 SDK, Release 1
+sdk.redirect=0
+sdk.version=1.6
+
+sdk.date=September 2009
+
+sdk.win_download=android-sdk-windows-1.6_r1.zip
+sdk.win_bytes=260529085
+sdk.win_checksum=2bcbacbc7af0363058ca1cac6abad848
+
+sdk.mac_download=android-sdk-mac_x86-1.6_r1.zip
+sdk.mac_bytes=247412515
+sdk.mac_checksum=eb13cc79602d492e89103efcf48ac1f6
+
+sdk.linux_download=android-sdk-linux_x86-1.6_r1.tgz
+sdk.linux_bytes=238224860
+sdk.linux_checksum=b4bf0e610ff6db2fb6fb09c49cba1e79
+
+adt.zip_download=ADT-0.9.3.zip
+adt.zip_version=0.9.3
+adt.zip_bytes=3252487
+adt.zip_checksum=c296488ac35772667c0f49e822156979
+
+@jd:body
+
+<p>For more information on this SDK release, read the
+<a href="{@docRoot}sdk/RELEASENOTES.html#1.6_r1">Release Notes</a>.</p>
+
+<h2>SDK Contents</h2>
+
+<h4>Development tools</h4>
+
+<p>The SDK includes a full set of tools for developing and debugging application
+code and designing an application UI. You can read about the tools in the <a
+href="{@docRoot}guide/developing/tools/index.html">Dev Guide</a> and access them
+in the <code>&lt;sdk&gt;/tools/</code> directory. 
+
+<p>The tools package in this SDK includes updates from those provided in the
+previous SDK. The tools use the same project structure as in the previous SDK
+(Android 1.5). If you have application projects developed in the Android 1.5
+SDK, you can migrate them to the latest SDK without modification. For more
+information about how to migrate, see <a href="upgrading.html">Upgrading the
+SDK</a>.
+
+<h4 id="system_images">Android Platforms</h4>
+
+<p>This SDK includes multiple Android platform versions that you can use to
+develop applications. For each version, both a fully compliant Android library
+and system image are provided. The table below lists the platform versions
+included in this SDK. For more information about a platform version &mdash;
+features, applications included, localizations, API changes, and so on &mdash;
+see its Version Notes. </p>
+
+<table style="margin-right:1em;" width="80%">
+<tr>
+<th><nobr>Platform</nobr></th><th><nobr>API
+Level</nobr></th><th>Notes</th><th>Description</th>
+</tr>
+<tr>
+<td width="5%"><nobr>Android 1.6</nobr></td>
+<td  width="5%">4</td>
+<td  width="5%"><nobr><a href="{@docRoot}sdk/android-1.6.html">Version
+Notes</a></nobr></td>
+<td>Includes a standard Android 1.6 library and system image with a set of
+development applications. Does not include any external libraries (such as the
+Maps external library).</td>
+</tr>
+<tr>
+<td width="5%"><nobr>Android 1.5</nobr></td>
+<td  width="5%">3</td>
+<td  width="5%"><nobr><a href="{@docRoot}sdk/android-1.5.html">Version
+Notes</a></nobr></td>
+<td>Includes a standard Android 1.5 library and system image with a set of
+development applications. Does not include any external libraries (such as the
+Maps external library).</td>
+</tr>
+</table>
+
+<p>Note that you can use the Android SDK and AVD Manager to download other
+platform versions into your development environment.</span>. 
+
+<h4 id="system_images">SDK Add-Ons</h4>
+
+<p>An SDK add-on provides a development environment for an Android external
+library or a customized (but fully compliant) Android system image. This SDK
+includes the SDK add-ons listed below. The Android system API Level required by
+the add-ons are noted.</p>
+
+<table style="margin-right:1em;" width="80%">
+<tr>
+<th><nobr>Add-On</nobr></th><th><nobr>API Level</nobr></th>
+<th>Notes</th><th>Description</th>
+</tr>
+<tr>
+<td width="5%"><nobr>Google APIs</nobr></td>
+<td  width="5%">4</td>
+<td  width="5%">&nbsp;</td>
+<td>Includes the com.google.android.maps external library, a compliant
+Android 1.6 system image, a {@link android.location.Geocoder Geocoder}
+backend service implementation, documentation, and sample code. </td>
+</tr>
+<tr>
+<td width="5%"><nobr>Google APIs</nobr></td>
+<td  width="5%">3</td>
+<td  width="5%">&nbsp;</td>
+<td>Includes the com.google.android.maps external library, a compliant 
+Android 1.5 system image, a {@link android.location.Geocoder Geocoder}
+backend service implementation, documentation, and sample code. </td>
+</tr>
+</table>
+
+<h4>Sample Code and Applications</h4>
+
+<p>You can look at a variety of tutorials and samples in the <a
+href="{@docRoot}guide/samples/index.html">Dev Guide</a> and access the sample
+code itself in the <code>&lt;sdk&gt;/platforms/&lt;platform&gt;/samples/</code>
+directory of the SDK package. Note the new location &mdash; the SDK now includes
+multiple platform versions that you can develop against and each has its own
+sample code directory. </p>
+
+<p>For example, to view or build the samples available for the Android 
+1.6 platform (AVD target "Android 1.6"), you will find the samples in the
+<code>&lt;sdk&gt;/platforms/android-1.6/samples/</code> directory of the SDK
+package. </p>
+
+<h4>Documentation</h4>
+
+<p>The SDK package includes a full set of local documentation. To view it, open
+the <code>&lt;sdk&gt;/documentation.html</code> file in a web browser. If you
+are developing in an IDE such as Eclipse, you can also view the reference
+documentation directly in the IDE. </p>
+
+<p>The most current documentation is always available on the Android Developers
+site:</p>
+
+<p style="margin-left:2em;"><a
+href="http://developer.android.com/index.html">http://developer.android.com/</a>
+</p>
+
+

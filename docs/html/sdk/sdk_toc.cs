@@ -74,6 +74,7 @@
         <span class="zh-TW">系統影像版本資訊</span>
     </h2>
     <ul>
+      <li><a href="<?cs var:toroot ?>sdk/android-1.6.html">Android 1.6 Version Notes</a></li>
       <li><a href="<?cs var:toroot ?>sdk/android-1.5.html">Android 1.5 Version Notes</a></li>
       <li><a href="<?cs var:toroot ?>sdk/android-1.1.html">Android 1.1 Version Notes</a></li>
     </ul>
@@ -81,7 +82,7 @@
   <li>
     <h2>Native Development Tools</h2>
     <ul>
-      <li><a href="<?cs var:toroot ?>sdk/ndk/1.5_r1/index.html">Android 1.5 NDK, r1</a></li>
+      <li><a href="<?cs var:toroot ?>sdk/ndk/1.6_r1/index.html">Android 1.6 NDK, r1</a></li>
     </ul>
   </li>
   <li>
@@ -96,6 +97,7 @@
         <span class="zh-TW">較舊的 SDK 發行版本</span>
     </h2>
     <ul>
+      <li><a href="<?cs var:toroot ?>sdk/1.5_r3/index.html">Android 1.5 SDK, r3</a></li>
       <li><a href="<?cs var:toroot ?>sdk/1.1_r1/index.html">Android 1.1 SDK, r1</a></li>
       <li><a href="<?cs var:toroot ?>sdk/1.0_r2/index.html">Android 1.0 SDK, r2</a></li>
       <li><a href="<?cs var:toroot ?>sdk/older_releases.html">Other Releases</a></li>

@@ -1,0 +1,57 @@
+page.title=System Requirements
+sdk.version=1.6
+sdk.preview=0
+@jd:body
+
+<p>The sections below describe the system and software requirements for developing 
+Android applications using the Android SDK tools included in Android 
+<?cs var:sdk.version ?> SDK<?cs if:sdk.rel.id ?>, Release <?cs var:sdk.rel.id ?><?cs /if ?>. </p>
+
+<h3>Supported Operating Systems</h3>
+<ul>
+  <li>Windows XP (32-bit) or Vista (32- or 64-bit)</li>
+  <li>Mac OS X 10.4.8 or later (x86 only)</li>
+  <li>Linux (tested on Linux Ubuntu Hardy Heron)
+    <ul>
+      <li>64-bit distributions must be capable of running 32-bit applications. 
+      For information about how to add support for 32-bit applications, see
+      the <a href="installing.html#InstallationNotes">Installation Notes</a>.</li>
+    </ul>
+  </li>
+</ul>
+
+<h3>Supported Development Environments</h3>
+<ul>
+  <li>Eclipse IDE
+    <ul>
+      <li><a href="http://www.eclipse.org/downloads/">Eclipse</a> 3.4 (Ganymede) or 3.5 (Galileo)
+        <ul>
+        <li>Note: Eclipse 3.3 has not been fully tested with ADT 0.9.3 and support can no longer be guaranteed. We suggest you upgrade to 
+          Eclipse 3.4 or 3.5.</li>
+        <li>Recommended Eclipse IDE packages: Eclipse IDE for Java EE Developers, Eclipse IDE for Java Developers, Eclipse for RCP/Plug-in Developers</li>
+        <li>Eclipse <a href="http://www.eclipse.org/jdt">JDT</a> plugin (included in most Eclipse IDE packages) </li>
+        <li>Eclipse Classic IDE package is not supported.</li>
+        </ul>
+      </li>     
+      <li><a href="http://java.sun.com/javase/downloads/index.jsp">JDK 5 or JDK 6</a> (JRE alone is not sufficient)</li>
+      <li><a href="installing.html#installingplugin">Android Development Tools plugin</a> (optional)</li>
+      <li><strong>Not</strong> compatible with Gnu Compiler for Java (gcj)</li>
+    </ul>
+  </li>
+  <li>Other development environments or IDEs
+    <ul>
+      <li><a href="http://java.sun.com/javase/downloads/index.jsp">JDK 5 or JDK 6</a> (JRE alone is not sufficient)</li>
+      <li><a href="http://ant.apache.org/">Apache Ant</a> 1.6.5 or later for Linux and Mac, 1.7 or later for Windows</li>
+      <li><strong>Not</strong> compatible with Gnu Compiler for Java (gcj)</li>
+    </ul>
+  </li>
+</ul>
+
+<p class="note"><strong>Note:</strong> If JDK is already installed on your development computer, please take a moment to make sure that it meets the version requirements listed above. In
+particular, note that some Linux distributions may include JDK 1.4 or Gnu Compiler for Java, both of which are not supported for Android development. </p>
+
+<h3>Hardware requirements</h3>
+<ul>
+  <li>For the base SDK package, at least 600MB of available disk space. For each platform downloaded into the SDK, an additional 100MB is needed. </li>
+</ul>
+

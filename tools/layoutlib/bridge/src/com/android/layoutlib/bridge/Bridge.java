@@ -341,6 +341,7 @@ public final class Bridge implements ILayoutBridge {
         try {
             // setup the display Metrics.
             DisplayMetrics metrics = new DisplayMetrics();
+            metrics.densityDpi = density;
             metrics.density = density / (float) DisplayMetrics.DENSITY_DEFAULT;
             metrics.scaledDensity = metrics.density;
             metrics.widthPixels = screenWidth;
@@ -388,7 +389,7 @@ public final class Bridge implements ILayoutBridge {
 
             // get the background drawable
             if (windowBackground != null) {
-                Drawable d = ResourceHelper.getDrawable(windowBackground.getValue(),
+                Drawable d = ResourceHelper.getDrawable(windowBackground,
                         context, true /* isFramework */);
                 root.setBackgroundDrawable(d);
             }

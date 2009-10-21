@@ -21,8 +21,7 @@
     <string name="gigabyteShort" msgid="3259882455212193214">"GB"</string>
     <string name="terabyteShort" msgid="231613018159186962">"TB"</string>
     <string name="petabyteShort" msgid="5637816680144990219">"PB"</string>
-    <!-- no translation found for fileSizeSuffix (7670819340156489359) -->
-    <skip />
+    <string name="fileSizeSuffix" msgid="7670819340156489359">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="untitled" msgid="6071602020171759109">"&lt;제목없음&gt;"</string>
     <string name="ellipsis" msgid="7899829516048813237">"…"</string>
     <string name="emptyPhoneNumber" msgid="7694063042079676517">"(전화번호 없음)"</string>
@@ -50,18 +49,12 @@
     <string name="BaMmi" msgid="455193067926770581">"착발신 제한"</string>
     <string name="PwdMmi" msgid="7043715687905254199">"비밀번호 변경"</string>
     <string name="PinMmi" msgid="3113117780361190304">"PIN 변경"</string>
-    <!-- no translation found for CnipMmi (3110534680557857162) -->
-    <skip />
-    <!-- no translation found for CnirMmi (3062102121430548731) -->
-    <skip />
-    <!-- no translation found for ThreeWCMmi (9051047170321190368) -->
-    <skip />
-    <!-- no translation found for RuacMmi (7827887459138308886) -->
-    <skip />
-    <!-- no translation found for CndMmi (3116446237081575808) -->
-    <skip />
-    <!-- no translation found for DndMmi (1265478932418334331) -->
-    <skip />
+    <string name="CnipMmi" msgid="3110534680557857162">"통화 번호 존재"</string>
+    <string name="CnirMmi" msgid="3062102121430548731">"제한된 통화 번호"</string>
+    <string name="ThreeWCMmi" msgid="9051047170321190368">"3자 통화"</string>
+    <string name="RuacMmi" msgid="7827887459138308886">"원하지 않는 통화 수신 거부"</string>
+    <string name="CndMmi" msgid="3116446237081575808">"통화 번호 전달"</string>
+    <string name="DndMmi" msgid="1265478932418334331">"응답 거부"</string>
     <string name="CLIRDefaultOnNextCallOn" msgid="429415409145781923">"발신자 번호가 기본적으로 제한됨으로 설정됩니다. 다음 통화: 제한됨"</string>
     <string name="CLIRDefaultOnNextCallOff" msgid="3092918006077864624">"발신자 번호가 기본적으로 제한됨으로 설정됩니다. 다음 통화: 제한되지 않음"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="6179425182856418465">"발신자 번호가 기본적으로 제한되지 않음으로 설정됩니다. 다음 통화: 제한됨"</string>
@@ -81,43 +74,27 @@
     <string name="serviceClassDataSync" msgid="7530000519646054776">"동기화"</string>
     <string name="serviceClassPacket" msgid="6991006557993423453">"패킷"</string>
     <string name="serviceClassPAD" msgid="3235259085648271037">"PAD"</string>
-    <!-- no translation found for roamingText0 (7170335472198694945) -->
-    <skip />
-    <!-- no translation found for roamingText1 (5314861519752538922) -->
-    <skip />
-    <!-- no translation found for roamingText2 (8969929049081268115) -->
-    <skip />
-    <!-- no translation found for roamingText3 (5148255027043943317) -->
-    <skip />
-    <!-- no translation found for roamingText4 (8808456682550796530) -->
-    <skip />
-    <!-- no translation found for roamingText5 (7604063252850354350) -->
-    <skip />
-    <!-- no translation found for roamingText6 (2059440825782871513) -->
-    <skip />
-    <!-- no translation found for roamingText7 (7112078724097233605) -->
-    <skip />
-    <!-- no translation found for roamingText8 (5989569778604089291) -->
-    <skip />
-    <!-- no translation found for roamingText9 (7969296811355152491) -->
-    <skip />
-    <!-- no translation found for roamingText10 (3992906999815316417) -->
-    <skip />
-    <!-- no translation found for roamingText11 (4154476854426920970) -->
-    <skip />
-    <!-- no translation found for roamingText12 (1189071119992726320) -->
-    <skip />
-    <!-- no translation found for roamingTextSearching (8360141885972279963) -->
-    <skip />
+    <string name="roamingText0" msgid="7170335472198694945">"로밍 표시기 사용"</string>
+    <string name="roamingText1" msgid="5314861519752538922">"로밍 표시기 사용 안함"</string>
+    <string name="roamingText2" msgid="8969929049081268115">"로밍 표시기 깜박임"</string>
+    <string name="roamingText3" msgid="5148255027043943317">"인근 지역 외부"</string>
+    <string name="roamingText4" msgid="8808456682550796530">"건물 밖"</string>
+    <string name="roamingText5" msgid="7604063252850354350">"로밍 - 기본 시스템"</string>
+    <string name="roamingText6" msgid="2059440825782871513">"로밍 - 사용 가능한 시스템"</string>
+    <string name="roamingText7" msgid="7112078724097233605">"로밍 - 제휴 파트너"</string>
+    <string name="roamingText8" msgid="5989569778604089291">"로밍 - 프리미엄 파트너"</string>
+    <string name="roamingText9" msgid="7969296811355152491">"로밍 - 전체 서비스 기능"</string>
+    <string name="roamingText10" msgid="3992906999815316417">"로밍 - 부분 서비스 기능"</string>
+    <string name="roamingText11" msgid="4154476854426920970">"로밍 배너 사용"</string>
+    <string name="roamingText12" msgid="1189071119992726320">"로밍 배너 사용 안함"</string>
+    <string name="roamingTextSearching" msgid="8360141885972279963">"서비스 검색 중"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: 착신전환 안됨"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime" msgid="9206251736527085256">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g><xliff:g id="TIME_DELAY">{2}</xliff:g>초 후"</string>
     <string name="cfTemplateRegistered" msgid="5073237827620166285">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: 착신전환 안됨"</string>
     <string name="cfTemplateRegisteredTime" msgid="6781621964320635172">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: 착신전환 안됨"</string>
-    <!-- no translation found for fcComplete (3118848230966886575) -->
-    <skip />
-    <!-- no translation found for fcError (3327560126588500777) -->
-    <skip />
+    <string name="fcComplete" msgid="3118848230966886575">"기능 코드가 완료되었습니다."</string>
+    <string name="fcError" msgid="3327560126588500777">"연결에 문제가 있거나 기능 코드가 잘못되었습니다."</string>
     <string name="httpErrorOk" msgid="1191919378083472204">"확인"</string>
     <string name="httpError" msgid="2567300624552921790">"웹페이지에 오류가 있습니다."</string>
     <string name="httpErrorLookup" msgid="4517085806977851374">"URL을 찾을 수 없습니다."</string>
@@ -179,10 +156,8 @@
     <string name="permgroupdesc_systemTools" msgid="8162102602190734305">"시스템을 하위 수준에서 액세스하고 제어합니다."</string>
     <string name="permgrouplab_developmentTools" msgid="3446164584710596513">"개발 도구"</string>
     <string name="permgroupdesc_developmentTools" msgid="9056431193893809814">"응용프로그램 개발자에게만 필요한 기능입니다."</string>
-    <!-- no translation found for permgrouplab_storage (1971118770546336966) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_storage (9203302214915355774) -->
-    <skip />
+    <string name="permgrouplab_storage" msgid="1971118770546336966">"저장"</string>
+    <string name="permgroupdesc_storage" msgid="9203302214915355774">"SD 카드에 액세스합니다."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"상태 표시줄 사용 중지 또는 수정"</string>
     <string name="permdesc_statusBar" msgid="1365473595331989732">"응용프로그램이 상태 표시줄을 사용 중지하거나 시스템 아이콘을 추가 및 제거할 수 있도록 합니다."</string>
     <string name="permlab_expandStatusBar" msgid="1148198785937489264">"상태 표시줄 확장/축소"</string>
@@ -215,14 +190,10 @@
     <string name="permdesc_forceBack" msgid="6534109744159919013">"응용프로그램이 포그라운드에 있는 활동을 강제로 닫고 되돌아갈 수 있도록 합니다. 일반 응용프로그램에는 필요하지 않습니다."</string>
     <string name="permlab_dump" msgid="1681799862438954752">"시스템 내부 상태 검색"</string>
     <string name="permdesc_dump" msgid="2198776174276275220">"응용프로그램이 시스템의 내부 상태를 검색할 수 있도록 합니다. 단, 악성 응용프로그램이 이 기능을 이용하여 일반적으로 필요하지 않은 다양한 개인정보와 보안정보를 검색할 수 있습니다."</string>
-    <!-- no translation found for permlab_shutdown (7185747824038909016) -->
-    <skip />
-    <!-- no translation found for permdesc_shutdown (7046500838746291775) -->
-    <skip />
-    <!-- no translation found for permlab_stopAppSwitches (4138608610717425573) -->
-    <skip />
-    <!-- no translation found for permdesc_stopAppSwitches (3857886086919033794) -->
-    <skip />
+    <string name="permlab_shutdown" msgid="7185747824038909016">"부분 종료"</string>
+    <string name="permdesc_shutdown" msgid="7046500838746291775">"작업 관리자를 종료 상태로 설정하며 전체 종료를 수행하지 않습니다."</string>
+    <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"응용프로그램 전환 방지"</string>
+    <string name="permdesc_stopAppSwitches" msgid="3857886086919033794">"사용자가 다른 응용프로그램으로 전환하지 못하게 합니다."</string>
     <string name="permlab_runSetActivityWatcher" msgid="7811586187574696296">"실행 중인 모든 응용프로그램 모니터링 및 제어"</string>
     <string name="permdesc_runSetActivityWatcher" msgid="3228701938345388092">"응용프로그램이 시스템에서 활동이 시작되는 방식을 모니터링하고 제어할 수 있도록 합니다. 단, 악성 응용프로그램이 이 기능을 이용하여 시스템을 완전히 손상시킬 수 있습니다. 이 권한은 개발 과정에만 필요하며 일반 휴대전화 사용 시에는 필요하지 않습니다."</string>
     <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"패키지 제거 브로드캐스트 보내기"</string>
@@ -237,10 +208,8 @@
     <string name="permdesc_setAlwaysFinish" msgid="8773936403987091620">"응용프로그램이 백그라운드로 이동한 활동을 항상 바로 종료할지 여부를 제어할 수 있도록 합니다. 일반 응용프로그램에는 필요하지 않습니다."</string>
     <string name="permlab_batteryStats" msgid="7863923071360031652">"배터리 통계 수정"</string>
     <string name="permdesc_batteryStats" msgid="5847319823772230560">"수집된 배터리 통계를 수정할 수 있도록 합니다. 일반 응용프로그램에서는 사용할 수 없습니다."</string>
-    <!-- no translation found for permlab_backup (470013022865453920) -->
-    <skip />
-    <!-- no translation found for permdesc_backup (2305432853944929371) -->
-    <skip />
+    <string name="permlab_backup" msgid="470013022865453920">"시스템 백업 및 복원 관리"</string>
+    <string name="permdesc_backup" msgid="2305432853944929371">"응용프로그램이 시스템 백업을 관리하고 매커니즘을 복원할 수 있도록 합니다. 일반 응용프로그램에서는 사용할 수 없습니다."</string>
     <string name="permlab_internalSystemWindow" msgid="2148563628140193231">"인증되지 않은 창 표시"</string>
     <string name="permdesc_internalSystemWindow" msgid="5895082268284998469">"내부 시스템 사용자 인터페이스에서 사용하는 창을 만들 수 있도록 합니다. 일반 응용프로그램에서는 사용하지 않습니다."</string>
     <string name="permlab_systemAlertWindow" msgid="3372321942941168324">"시스템 수준 경고 표시"</string>
@@ -307,10 +276,8 @@
     <string name="permdesc_accessMockLocation" msgid="7648286063459727252">"테스트용 가짜 위치 소스를 만듭니다. 단, 악성 응용프로그램이 이 기능을 이용하여 GPS, 네트워크 제공업체 같은 실제 위치 소스에서 반환한 위치 및/또는 상태를 덮어쓸 수 있습니다."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"추가 위치 제공업체 명령 액세스"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="1948144701382451721">"추가 위치 제공업체 명령에 액세스합니다. 단, 악성 응용프로그램이 이 기능을 이용하여 GPS 또는 기타 위치 소스의 작동을 방해할 수 있습니다."</string>
-    <!-- no translation found for permlab_installLocationProvider (6578101199825193873) -->
-    <skip />
-    <!-- no translation found for permdesc_installLocationProvider (5449175116732002106) -->
-    <skip />
+    <string name="permlab_installLocationProvider" msgid="6578101199825193873">"위치 정보 공급자 설치 권한"</string>
+    <string name="permdesc_installLocationProvider" msgid="5449175116732002106">"테스트용 가짜 위치 소스를 만듭니다. 단, 악성 응용프로그램이 이 기능을 이용하여 GPS, 네트워크 제공업체 같은 실제 위치 소스에서 반환한 위치 및/또는 상태를 덮어쓰거나 사용자의 위치를 모니터링하여 외부 소스로 보고할 수 있습니다."</string>
     <string name="permlab_accessFineLocation" msgid="8116127007541369477">"자세한 (GPS) 위치"</string>
     <string name="permdesc_accessFineLocation" msgid="7411213317434337331">"가능한 경우 휴대전화에서 GPS(범지구 위치 측정 시스템) 등의 자세한 위치 소스에 액세스합니다. 이 경우 악성 응용프로그램이 사용자의 위치를 확인하고 추가 배터리 전원을 소비할 수 있습니다."</string>
     <string name="permlab_accessCoarseLocation" msgid="4642255009181975828">"광범위한 네트워크 기반 위치"</string>
@@ -351,10 +318,8 @@
     <string name="permdesc_bindGadget" msgid="2098697834497452046">"응용프로그램이 응용프로그램에서 사용할 수 있는 위젯을 시스템에 알릴 수 있도록 합니다. 이 권한을 갖는 응용프로그램은 개인 정보에 대한 액세스 권한을 다른 응용프로그램에 부여할 수 있습니다. 일반 응용프로그램에서는 사용하지 않습니다."</string>
     <string name="permlab_modifyPhoneState" msgid="8423923777659292228">"휴대전화 상태 수정"</string>
     <string name="permdesc_modifyPhoneState" msgid="3302284561346956587">"응용프로그램이 장치의 휴대전화 기능을 제어할 수 있도록 합니다. 이 권한을 갖는 응용프로그램은 사용자에게 알리지 않고 네트워크를 전환하거나 휴대전화 무선 기능을 켜고 끄는 등의 작업을 수행할 수 있습니다."</string>
-    <!-- no translation found for permlab_readPhoneState (2326172951448691631) -->
-    <skip />
-    <!-- no translation found for permdesc_readPhoneState (188877305147626781) -->
-    <skip />
+    <string name="permlab_readPhoneState" msgid="2326172951448691631">"휴대전화 상태 및 ID 읽기"</string>
+    <string name="permdesc_readPhoneState" msgid="188877305147626781">"응용프로그램이 장치의 휴대전화 기능에 액세스할 수 있도록 합니다. 이 권한을 갖는 응용프로그램은 휴대전화의 전화번호 및 일련번호, 통화가 활성인지 여부, 해당 통화가 연결된 번호 등을 확인할 수 있습니다."</string>
     <string name="permlab_wakeLock" msgid="573480187941496130">"휴대전화가 절전 모드로 전환되지 않도록 설정"</string>
     <string name="permdesc_wakeLock" msgid="7584036471227467099">"응용프로그램이 휴대전화가 절전 모드로 전환되지 않도록 합니다."</string>
     <string name="permlab_devicePower" msgid="4928622470980943206">"휴대전화 전원 켜고 끄기"</string>
@@ -385,10 +350,8 @@
     <string name="permdesc_accessWifiState" msgid="485796529139236346">"응용프로그램이 Wi-Fi의 상태에 대한 정보를 볼 수 있도록 합니다."</string>
     <string name="permlab_changeWifiState" msgid="7280632711057112137">"Wi-Fi 상태 변경"</string>
     <string name="permdesc_changeWifiState" msgid="2950383153656873267">"응용프로그램이 Wi-Fi 액세스포인트에 연결하거나 연결을 끊고, 구성된 Wi-Fi 네트워크를 변경할 수 있도록 합니다."</string>
-    <!-- no translation found for permlab_changeWifiMulticastState (1368253871483254784) -->
-    <skip />
-    <!-- no translation found for permdesc_changeWifiMulticastState (8199464507656067553) -->
-    <skip />
+    <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"Wi-Fi 멀티캐스트 수신 허용"</string>
+    <string name="permdesc_changeWifiMulticastState" msgid="8199464507656067553">"응용프로그램이 휴대기기로 직접 주소가 지정되지 않은 패킷을 받을 수 있도록 합니다. 이 기능은 가까운 곳에서 제공되는 서비스를 검색할 때 유용하며 비멀티캐스트 모드보다 전원을 더 많이 소비합니다."</string>
     <string name="permlab_bluetoothAdmin" msgid="1092209628459341292">"Bluetooth 관리"</string>
     <string name="permdesc_bluetoothAdmin" msgid="7256289774667054555">"응용프로그램이 로컬 Bluetooth 휴대전화를 구성한 다음 원격 장치를 검색하여 페어링할 수 있도록 합니다."</string>
     <string name="permlab_bluetooth" msgid="8361038707857018732">"Bluetooth 연결 만들기"</string>
@@ -409,10 +372,8 @@
     <string name="permdesc_readDictionary" msgid="1082972603576360690">"응용프로그램이 사용자 사전에 보관되어 있는 비공개 단어, 이름 및 구문을 읽도록 합니다."</string>
     <string name="permlab_writeDictionary" msgid="6703109511836343341">"상용자 정의 사전에 작성"</string>
     <string name="permdesc_writeDictionary" msgid="2241256206524082880">"응용프로그램이 사용자 사전에 새 단어를 입력할 수 있도록 합니다."</string>
-    <!-- no translation found for permlab_sdcardWrite (8079403759001777291) -->
-    <skip />
-    <!-- no translation found for permdesc_sdcardWrite (6643963204976471878) -->
-    <skip />
+    <string name="permlab_sdcardWrite" msgid="8079403759001777291">"SD 카드 콘텐츠 수정/삭제"</string>
+    <string name="permdesc_sdcardWrite" msgid="6643963204976471878">"응용프로그램이 SD 카드에 쓸 수 있도록 합니다."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"집"</item>
     <item msgid="869923650527136615">"모바일"</item>
@@ -470,8 +431,7 @@
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"맞습니다."</string>
     <string name="lockscreen_pattern_wrong" msgid="4817583279053112312">"죄송합니다. 다시 시도하세요."</string>
     <string name="lockscreen_plugged_in" msgid="613343852842944435">"충전 중(<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>)"</string>
-    <!-- no translation found for lockscreen_charged (4938930459620989972) -->
-    <skip />
+    <string name="lockscreen_charged" msgid="4938930459620989972">"충전되었습니다."</string>
     <string name="lockscreen_low_battery" msgid="1482873981919249740">"충전기를 연결하세요."</string>
     <string name="lockscreen_missing_sim_message_short" msgid="7381499217732227295">"SIM 카드가 없습니다."</string>
     <string name="lockscreen_missing_sim_message" msgid="2186920585695169078">"휴대전화에 SIM 카드가 없습니다."</string>
@@ -493,8 +453,7 @@
     <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"사용자 이름 또는 비밀번호가 잘못되었습니다."</string>
     <string name="hour_ampm" msgid="4329881288269772723">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%P</xliff:g>"</string>
     <string name="hour_cap_ampm" msgid="1829009197680861107">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%p</xliff:g>"</string>
-    <!-- no translation found for status_bar_clear_all_button (7774721344716731603) -->
-    <skip />
+    <string name="status_bar_clear_all_button" msgid="7774721344716731603">"지우기"</string>
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"알림 없음"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"진행 중"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"알림"</string>
@@ -503,8 +462,7 @@
     <string name="battery_low_title" msgid="7923774589611311406">"충전기를 연결하세요."</string>
     <string name="battery_low_subtitle" msgid="7388781709819722764">"배터리 전원이 부족합니다."</string>
     <string name="battery_low_percent_format" msgid="6564958083485073855">"<xliff:g id="NUMBER">%d%%</xliff:g> 미만 남음"</string>
-    <!-- no translation found for battery_low_why (7655196144309694753) -->
-    <skip />
+    <string name="battery_low_why" msgid="7655196144309694753">"원인"</string>
     <string name="factorytest_failed" msgid="5410270329114212041">"출고 테스트 불합격"</string>
     <string name="factorytest_not_system" msgid="4435201656767276723">"FACTORY_TEST 작업은 /system/app 디렉토리에 설치된 패키지에 대해서만 지원됩니다."</string>
     <string name="factorytest_no_action" msgid="872991874799998561">"FACTORY_TEST 작업을 제공하는 패키지가 없습니다."</string>
@@ -513,14 +471,10 @@
     <string name="js_dialog_title_default" msgid="6961903213729667573">"자바스크립트"</string>
     <string name="js_dialog_before_unload" msgid="1901675448179653089">"다른 페이지를 탐색하시겠습니까?"\n\n"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"계속하려면 \'확인\'을 선택하고 현재 페이지에 그대로 있으려면 \'취소\'를 선택하세요."</string>
     <string name="save_password_label" msgid="6860261758665825069">"확인"</string>
-    <!-- no translation found for permlab_readHistoryBookmarks (1284843728203412135) -->
-    <skip />
-    <!-- no translation found for permdesc_readHistoryBookmarks (4981489815467617191) -->
-    <skip />
-    <!-- no translation found for permlab_writeHistoryBookmarks (9009434109836280374) -->
-    <skip />
-    <!-- no translation found for permdesc_writeHistoryBookmarks (945571990357114950) -->
-    <skip />
+    <string name="permlab_readHistoryBookmarks" msgid="1284843728203412135">"브라우저의 기록 및 북마크 읽기"</string>
+    <string name="permdesc_readHistoryBookmarks" msgid="4981489815467617191">"응용프로그램이 브라우저로 방문한 모든 URL과 브라우저의 모든 북마크를 읽도록 허용합니다."</string>
+    <string name="permlab_writeHistoryBookmarks" msgid="9009434109836280374">"브라우저의 기록 및 북마크 쓰기"</string>
+    <string name="permdesc_writeHistoryBookmarks" msgid="945571990357114950">"응용프로그램이 휴대전화에 저장된 브라우저 기록 또는 북마크를 수정할 수 있도록 허용합니다. 이 경우 악성 응용프로그램이 브라우저의 데이터를 지우거나 수정할 수 있습니다."</string>
     <string name="save_password_message" msgid="767344687139195790">"브라우저에 이 비밀번호를 저장하시겠습니까?"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"나중에"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"저장"</string>
@@ -665,8 +619,7 @@
     <string name="anr_application_process" msgid="4185842666452210193">"<xliff:g id="APPLICATION">%1$s</xliff:g> 응용프로그램(<xliff:g id="PROCESS">%2$s</xliff:g> 프로세스)이 응답하지 않습니다."</string>
     <string name="anr_process" msgid="1246866008169975783">"<xliff:g id="PROCESS">%1$s</xliff:g> 프로세스가 응답하지 않습니다."</string>
     <string name="force_close" msgid="3653416315450806396">"닫기"</string>
-    <!-- no translation found for report (4060218260984795706) -->
-    <skip />
+    <string name="report" msgid="4060218260984795706">"신고"</string>
     <string name="wait" msgid="7147118217226317732">"대기"</string>
     <string name="debug" msgid="9103374629678531849">"디버그"</string>
     <string name="sendText" msgid="5132506121645618310">"텍스트에 대한 작업 선택"</string>
@@ -720,31 +673,24 @@
     <string name="extmedia_format_title" msgid="8663247929551095854">"SD 카드 포맷"</string>
     <string name="extmedia_format_message" msgid="3621369962433523619">"SD 카드를 포맷하시겠습니까? 포맷하면 카드의 모든 데이터를 잃게 됩니다."</string>
     <string name="extmedia_format_button_format" msgid="4131064560127478695">"포맷"</string>
-    <!-- no translation found for adb_active_notification_title (6729044778949189918) -->
-    <skip />
-    <!-- no translation found for adb_active_notification_message (4661997077344501389) -->
-    <skip />
+    <string name="adb_active_notification_title" msgid="6729044778949189918">"USB 디버깅 연결됨"</string>
+    <string name="adb_active_notification_message" msgid="4661997077344501389">"컴퓨터가 휴대전화에 연결되어 있습니다."</string>
     <string name="select_input_method" msgid="2086499663193509436">"입력 방법 선택"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"가능한 원인"</u></string>
     <string name="ext_media_checking_notification_title" msgid="5457603418970994050">"SD 카드 준비 중"</string>
-    <!-- no translation found for ext_media_checking_notification_message (8287319882926737053) -->
-    <skip />
+    <string name="ext_media_checking_notification_message" msgid="8287319882926737053">"오류 확인 중입니다."</string>
     <string name="ext_media_nofs_notification_title" msgid="780477838241212997">"빈 SD 카드"</string>
-    <!-- no translation found for ext_media_nofs_notification_message (3817704088027829380) -->
-    <skip />
+    <string name="ext_media_nofs_notification_message" msgid="3817704088027829380">"SD 카드가 비어 있거나 지원되지 않는 파일 시스템을 사용합니다."</string>
     <string name="ext_media_unmountable_notification_title" msgid="6410723906019100189">"손상된 SD 카드"</string>
-    <!-- no translation found for ext_media_unmountable_notification_message (6902531775948238989) -->
-    <skip />
+    <string name="ext_media_unmountable_notification_message" msgid="6902531775948238989">"SD 카드가 손상되었습니다. 카드를 다시 포맷해야 할 수 있습니다."</string>
     <string name="ext_media_badremoval_notification_title" msgid="6872152882604407837">"SD 카드가 예상치 않게 제거되었습니다."</string>
     <string name="ext_media_badremoval_notification_message" msgid="7260183293747448241">"데이터 손실을 피하려면 SD 카드를 제거하기 전에 마운트 해제합니다."</string>
     <string name="ext_media_safe_unmount_notification_title" msgid="6729801130790616200">"SD 카드를 안전하게 제거할 수 있습니다."</string>
-    <!-- no translation found for ext_media_safe_unmount_notification_message (568841278138377604) -->
-    <skip />
+    <string name="ext_media_safe_unmount_notification_message" msgid="568841278138377604">"안전하게 SD 카드를 제거할 수 있습니다."</string>
     <string name="ext_media_nomedia_notification_title" msgid="8902518030404381318">"SD 카드를 제거했습니다."</string>
-    <!-- no translation found for ext_media_nomedia_notification_message (3870120652983659641) -->
-    <skip />
+    <string name="ext_media_nomedia_notification_message" msgid="3870120652983659641">"SD 카드가 제거되었습니다. 새 카드를 넣으세요."</string>
     <string name="activity_list_empty" msgid="4168820609403385789">"일치하는 활동이 없습니다."</string>
     <string name="permlab_pkgUsageStats" msgid="8787352074326748892">"구성 요소 사용 통계 업데이트"</string>
     <string name="permdesc_pkgUsageStats" msgid="891553695716752835">"수집된 구성요소 사용 통계를 수정할 수 있는 권한을 부여합니다. 일반 응용프로그램은 이 권한을 사용할 수 없습니다."</string>
@@ -758,8 +704,6 @@
     <string name="ime_action_default" msgid="2840921885558045721">"실행"</string>
     <string name="dial_number_using" msgid="5789176425167573586">"전화하기 "\n"<xliff:g id="NUMBER">%s</xliff:g>에 연결"</string>
     <string name="create_contact_using" msgid="4947405226788104538">"전화번호부에"\n"<xliff:g id="NUMBER">%s</xliff:g> 추가"</string>
-    <!-- no translation found for accessibility_compound_button_selected (5612776946036285686) -->
-    <skip />
-    <!-- no translation found for accessibility_compound_button_unselected (8864512895673924091) -->
-    <skip />
+    <string name="accessibility_compound_button_selected" msgid="5612776946036285686">"선택함"</string>
+    <string name="accessibility_compound_button_unselected" msgid="8864512895673924091">"선택 안함"</string>
 </resources>

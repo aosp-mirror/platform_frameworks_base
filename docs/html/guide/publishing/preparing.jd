@@ -220,22 +220,20 @@ elements, any MapView elements referencing the old Key will not have permission
 to download Maps data. </li>
 </ol>
 
-<p>For more information about signing and your private key, see <a
-href="{@docRoot}guide/publishing/app-signing.html">Signing Your Applications</a>.</p>
-
-
 <h2 id="compile">Compile your application</h2>
 
 <p>When you've prepared your application as described in the previous sections,
-you can compile your application for release. </p>
+you can compile your application for release.</p>
+
 
 <h2 id="post-compile">After compiling your application</h2>
 
 <h3 id="signapp">8. Sign your application</h3>
 
-<p>Sign your application using your private key. Signing your application
-correctly is critically important. Please see 
-<a href="{@docRoot}guide/publishing/app-signing.html">Signing Your
+<p>Sign your application using your private key and then
+align it with the {@code zipalign} tool. Signing your application
+correctly is critically important. Please see
+<a href="{@docRoot}guide/publishing/app-signing.html">Signing Your 
 Applications</a> for complete information. </p>
 
 <h3 id="testapp">9. Test your compiled and signed application</h3>
