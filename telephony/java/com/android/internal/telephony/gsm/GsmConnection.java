@@ -144,7 +144,7 @@ public class GsmConnection extends Connection {
 
         this.dialString = dialString;
 
-        this.address = PhoneNumberUtils.extractNetworkPortion(dialString);
+        this.address = PhoneNumberUtils.extractNetworkPortionAlt(dialString);
         this.postDialString = PhoneNumberUtils.extractPostDialPortion(dialString);
 
         index = -1;

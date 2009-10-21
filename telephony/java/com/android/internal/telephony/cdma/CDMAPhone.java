@@ -1317,7 +1317,7 @@ public class CDMAPhone extends PhoneBase {
     @Override
     public  boolean isOtaSpNumber(String dialStr){
         boolean isOtaSpNum = false;
-        String dialableStr = PhoneNumberUtils.extractNetworkPortion(dialStr);
+        String dialableStr = PhoneNumberUtils.extractNetworkPortionAlt(dialStr);
         if (dialableStr != null) {
             isOtaSpNum = isIs683OtaSpDialStr(dialableStr);
             if (isOtaSpNum == false) {
