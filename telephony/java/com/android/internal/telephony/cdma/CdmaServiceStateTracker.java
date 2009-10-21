@@ -350,29 +350,35 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
             if (ar.exception == null) {
                 String states[] = (String[])ar.result;
                 int baseStationId = -1;
-                int baseStationLongitude = -1;
-                int baseStationLatitude = -1;
+                int baseStationLatitude = Integer.MAX_VALUE;
+                int baseStationLongitude = Integer.MAX_VALUE;
+                int systemId = -1;
+                int networkId = -1;
 
-                int baseStationData[] = {
-                        -1, // baseStationId
-                        -1, // baseStationLatitude
-                        -1  // baseStationLongitude
-                };
-
-                if (states.length == 3) {
-                    for(int i = 0; i < states.length; i++) {
-                        try {
-                            if (states[i] != null && states[i].length() > 0) {
-                                baseStationData[i] = Integer.parseInt(states[i], 16);
-                            }
-                        } catch (NumberFormatException ex) {
-                            Log.w(LOG_TAG, "error parsing cell location data: " + ex);
+                if (states.length > 9) {
+                    try {
+                        if (states[4] != null) {
+                            baseStationId = Integer.parseInt(states[4]);
                         }
+                        if (states[5] != null) {
+                            baseStationLatitude = Integer.parseInt(states[5]);
+                        }
+                        if (states[6] != null) {
+                            baseStationLongitude = Integer.parseInt(states[6]);
+                        }
+                        if (states[8] != null) {
+                            systemId = Integer.parseInt(states[8]);
+                        }
+                        if (states[9] != null) {
+                            networkId = Integer.parseInt(states[9]);
+                        }
+                    } catch (NumberFormatException ex) {
+                        Log.w(LOG_TAG, "error parsing cell location data: " + ex);
                     }
                 }
 
-                cellLoc.setCellLocationData(baseStationData[0],
-                        baseStationData[1], baseStationData[2]);
+                cellLoc.setCellLocationData(baseStationId, baseStationLatitude,
+                        baseStationLongitude, systemId, networkId);
                 phone.notifyLocationChanged();
             }
 
@@ -640,8 +646,8 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
                 int registrationState = 4;     //[0] registrationState
                 int radioTechnology = -1;      //[3] radioTechnology
                 int baseStationId = -1;        //[4] baseStationId
-                int baseStationLatitude = -1;  //[5] baseStationLatitude
-                int baseStationLongitude = -1; //[6] baseStationLongitude
+                int baseStationLatitude = Integer.MAX_VALUE;  //[5] baseStationLatitude
+                int baseStationLongitude = Integer.MAX_VALUE; //[6] baseStationLongitude
                 int cssIndicator = 0;          //[7] init with 0, because it is treated as a boolean
                 int systemId = 0;              //[8] systemId
                 int networkId = 0;             //[9] networkId
@@ -652,20 +658,43 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
 
                 if (states.length == 14) {
                     try {
-                        registrationState = Integer.parseInt(states[0]);
-                        radioTechnology = Integer.parseInt(states[3]);
-                        baseStationId = Integer.parseInt(states[4]);
-                        baseStationLatitude = Integer.parseInt(states[5], 16);
-                        baseStationLongitude = Integer.parseInt(states[6], 16);
-                        cssIndicator = Integer.parseInt(states[7]);
-                        systemId = Integer.parseInt(states[8]);
-                        networkId = Integer.parseInt(states[9]);
-                        roamingIndicator = Integer.parseInt(states[10]);
-                        systemIsInPrl = Integer.parseInt(states[11]);
-                        defaultRoamingIndicator = Integer.parseInt(states[12]);
-                        reasonForDenial = Integer.parseInt(states[13]);
-                    }
-                    catch(NumberFormatException ex) {
+                        if (states[0] != null) {
+                            registrationState = Integer.parseInt(states[0]);
+                        }
+                        if (states[3] != null) {
+                            radioTechnology = Integer.parseInt(states[3]);
+                        }
+                        if (states[4] != null) {
+                            baseStationId = Integer.parseInt(states[4]);
+                        }
+                        if (states[5] != null) {
+                            baseStationLatitude = Integer.parseInt(states[5]);
+                        }
+                        if (states[6] != null) {
+                            baseStationLongitude = Integer.parseInt(states[6]);
+                        }
+                        if (states[7] != null) {
+                            cssIndicator = Integer.parseInt(states[7]);
+                        }
+                        if (states[8] != null) {
+                            systemId = Integer.parseInt(states[8]);
+                        }
+                        if (states[9] != null) {
+                            networkId = Integer.parseInt(states[9]);
+                        }
+                        if (states[10] != null) {
+                            roamingIndicator = Integer.parseInt(states[10]);
+                        }
+                        if (states[11] != null) {
+                            systemIsInPrl = Integer.parseInt(states[11]);
+                        }
+                        if (states[12] != null) {
+                            defaultRoamingIndicator = Integer.parseInt(states[12]);
+                        }
+                        if (states[13] != null) {
+                            reasonForDenial = Integer.parseInt(states[13]);
+                        }
+                    } catch (NumberFormatException ex) {
                         Log.w(LOG_TAG, "error parsing RegistrationState: " + ex);
                     }
                 } else {
