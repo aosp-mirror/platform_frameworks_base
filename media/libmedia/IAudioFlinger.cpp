@@ -59,7 +59,8 @@ enum {
     RESTORE_OUTPUT,
     OPEN_INPUT,
     CLOSE_INPUT,
-    SET_STREAM_OUTPUT
+    SET_STREAM_OUTPUT,
+    SET_VOICE_VOLUME
 };
 
 class BpAudioFlinger : public BpInterface<IAudioFlinger>
@@ -455,6 +456,15 @@ public:
         remote()->transact(SET_STREAM_OUTPUT, data, &reply);
         return reply.readInt32();
     }
+
+    virtual status_t setVoiceVolume(float volume)
+    {
+        Parcel data, reply;
+        data.writeInterfaceToken(IAudioFlinger::getInterfaceDescriptor());
+        data.writeFloat(volume);
+        remote()->transact(SET_VOICE_VOLUME, data, &reply);
+        return reply.readInt32();
+    }
 };
 
 IMPLEMENT_META_INTERFACE(AudioFlinger, "android.media.IAudioFlinger");
@@ -698,6 +708,12 @@ status_t BnAudioFlinger::onTransact(
             uint32_t stream = data.readInt32();
             int output = data.readInt32();
             reply->writeInt32(setStreamOutput(stream, output));
+            return NO_ERROR;
+        } break;
+        case SET_VOICE_VOLUME: {
+            CHECK_INTERFACE(IAudioFlinger, data, reply);
+            float volume = data.readFloat();
+            reply->writeInt32( setVoiceVolume(volume) );
             return NO_ERROR;
         } break;
         default:
