@@ -117,11 +117,11 @@ public class CheckedTextView extends TextView implements Checkable {
      * @param d The Drawable to use for the checkmark.
      */
     public void setCheckMarkDrawable(Drawable d) {
+        if (mCheckMarkDrawable != null) {
+            mCheckMarkDrawable.setCallback(null);
+            unscheduleDrawable(mCheckMarkDrawable);
+        }
         if (d != null) {
-            if (mCheckMarkDrawable != null) {
-                mCheckMarkDrawable.setCallback(null);
-                unscheduleDrawable(mCheckMarkDrawable);
-            }
             d.setCallback(this);
             d.setVisible(getVisibility() == VISIBLE, false);
             d.setState(CHECKED_STATE_SET);
@@ -130,10 +130,10 @@ public class CheckedTextView extends TextView implements Checkable {
             mCheckMarkWidth = d.getIntrinsicWidth();
             mPaddingRight = mCheckMarkWidth + mBasePaddingRight;
             d.setState(getDrawableState());
-            mCheckMarkDrawable = d;
         } else {
             mPaddingRight = mBasePaddingRight;
         }
+        mCheckMarkDrawable = d;
         requestLayout();
     }
     
