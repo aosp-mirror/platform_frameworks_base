@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.unit_tests.vcard;
+package android.test.mock;
 
 import android.content.ContentResolver;
 import android.database.CharArrayBuffer;
@@ -26,6 +26,16 @@ import android.os.Bundle;
 
 import java.util.Map;
 
+/**
+ * <P>
+ * A mock {@link android.database.Cursor} class that isolates the test code from real
+ * Cursor implementation.
+ * </P>
+ * <P>
+ * All methods including ones related to querying the state of the cursor are
+ * are non-functional and throw {@link java.lang.UnsupportedOperationException}.
+ * </P>
+ */
 public class MockCursor implements Cursor {
     public int getColumnCount() {
         throw new UnsupportedOperationException("unimplemented mock method");

@@ -58,7 +58,7 @@ import android.provider.ContactsContract.CommonDataKinds.Website;
 import android.test.AndroidTestCase;
 import android.test.mock.MockContentResolver;
 import android.test.mock.MockContext;
-import android.util.Log;
+import android.test.mock.MockCursor;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
