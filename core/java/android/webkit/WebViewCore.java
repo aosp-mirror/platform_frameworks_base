@@ -2141,7 +2141,7 @@ final class WebViewCore {
     private native void nativeSetGlobalBounds(int x, int y, int w, int h);
 
     // called by JNI
-    private void requestListBox(String[] array, boolean[] enabledArray,
+    private void requestListBox(String[] array, int[] enabledArray,
             int[] selectedArray) {
         if (mWebView != null) {
             mWebView.requestListBox(array, enabledArray, selectedArray);
@@ -2149,7 +2149,7 @@ final class WebViewCore {
     }
 
     // called by JNI
-    private void requestListBox(String[] array, boolean[] enabledArray,
+    private void requestListBox(String[] array, int[] enabledArray,
             int selection) {
         if (mWebView != null) {
             mWebView.requestListBox(array, enabledArray, selection);
