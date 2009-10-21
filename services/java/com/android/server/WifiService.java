@@ -1829,6 +1829,19 @@ public class WifiService extends IWifiManager.Stub {
         }
     }
 
+    public void initializeMulticastFiltering() {
+        enforceMulticastChangePermission();
+
+        synchronized (mMulticasters) {
+            // if anybody had requested filters be off, leave off
+            if (mMulticasters.size() != 0) {
+                return;
+            } else {
+                WifiNative.startPacketFiltering();
+            }
+        }
+    }
+
     public void acquireMulticastLock(IBinder binder, String tag) {
         enforceMulticastChangePermission();
 
