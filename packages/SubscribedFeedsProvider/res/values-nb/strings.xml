@@ -15,6 +15,6 @@
 -->
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_label" msgid="5400580392303600842">"Strømsynkronisering"</string>
+    <string name="app_label" msgid="5400580392303600842">"Synkroniser·innmatinger"</string>
     <string name="provider_label" msgid="3669714991966737047">"Push-abonnementer"</string>
 </resources>
