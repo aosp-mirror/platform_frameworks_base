@@ -3410,6 +3410,7 @@ public class WebView extends AbsoluteLayout
             }
             if (isTextInput) {
                 rebuildWebTextView();
+                displaySoftKeyboard(true);
             }
             return true;
         }
