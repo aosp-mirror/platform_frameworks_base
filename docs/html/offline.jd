@@ -10,17 +10,17 @@ page.title=Welcome
 
 <h3>If you've downloaded the Android SDK for the first time...</h3>
 
-<p>Complete the online guide to 
-<a href="http://developer.android.com/sdk/{@sdkCurrent}/installing.html">Installing 
+<p>Follow the online guide to 
+<a href="{@docRoot}sdk/installing.html">Installing 
 the Android SDK</a>, which will help you setup your development environment
 (including the Android Development Tools plugin for Eclipse) 
 so you can start developing Android apps.</p>
 
 <p>Once your environment is setup, look at the
-<a href="http://developer.android.com/sdk/{@sdkCurrent}/installing.html#NextSteps">Next
-Steps</a> for some pointers that will teach you about Android and get you started.</p>
+<a href="{@docRoot}sdk/installing.html#NextSteps">Next
+Steps</a> for some suggestions on how to begin learning about Android.</p>
 
-<h3>If you've updated an existing SDK using the <em>SDK and AVD Manager</em>...</h3>
+<h3>If you've just installed new SDK components using the <em>SDK and AVD Manager</em>...</h3>
 
 <p>There's no additional setup.</p>
 
@@ -37,10 +37,11 @@ directory; and new documentation is saved in the existing
 Android developer documentation. The offline documentation offers almost all the same
 content and features as the online documentation. Because some features
 such as search and videos are network-based, not everything will work if you
-are not connected to the Internet.<br/><br/>
-For the most current documentation and fully-functional experience, please visit<br/>
-<strong><a href="http://developer.android.com">
-http://developer.android.com</a></strong>.
+are not connected to the Internet.</p>
+
+<p>For the most current documentation and a fully-functional experience, please visit:</p>
+<p style="margin-left:2em;">
+<a href="http://developer.android.com">http://developer.android.com</a></strong>.
 </p>
 
 
