@@ -17,12 +17,16 @@
 package com.android.internal.logging;
 
 import android.util.Log;
+import dalvik.system.DalvikLogging;
+import dalvik.system.DalvikLogHandler;
 
-import java.util.logging.*;
-import java.util.Date;
-import java.text.MessageFormat;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.logging.Formatter;
+import java.util.logging.Handler;
+import java.util.logging.Level;
+import java.util.logging.LogRecord;
+import java.util.logging.Logger;
 
 /**
  * Implements a {@link java.util.logging.Logger} handler that writes to the Android log. The
@@ -77,7 +81,7 @@ import java.io.StringWriter;
  *   </tr>
  * </table>
  */
-public class AndroidHandler extends Handler {
+public class AndroidHandler extends Handler implements DalvikLogHandler {
     /**
      * Holds the formatter for all Android log handlers.
      */
@@ -118,33 +122,13 @@ public class AndroidHandler extends Handler {
 
     @Override
     public void publish(LogRecord record) {
+        int level = getAndroidLevel(record.getLevel());
+        String tag = DalvikLogging.loggerNameToTag(record.getLoggerName());
+        if (!Log.isLoggable(tag, level)) {
+            return;
+        }
+
         try {
-            int level = getAndroidLevel(record.getLevel());
-            String tag = record.getLoggerName();
-
-            if (tag == null) {
-                // Anonymous logger.
-                tag = "null";    
-            } else {
-                // Tags must be <= 23 characters.
-                int length = tag.length();
-                if (length > 23) {
-                    // Most loggers use the full class name. Try dropping the
-                    // package.
-                    int lastPeriod = tag.lastIndexOf(".");
-                    if (length - lastPeriod - 1 <= 23) {
-                        tag = tag.substring(lastPeriod + 1);
-                    } else {
-                        // Use last 23 chars.
-                        tag = tag.substring(tag.length() - 23);
-                    }
-                }
-            }
-
-            if (!Log.isLoggable(tag, level)) {
-                return;
-            }
-
             String message = getFormatter().format(record);
             Log.println(level, tag, message);
         } catch (RuntimeException e) {
@@ -152,12 +136,26 @@ public class AndroidHandler extends Handler {
         }
     }
 
+    public void publish(Logger source, String tag, Level level, String message) {
+        // TODO: avoid ducking into native 2x; we aren't saving any formatter calls
+        int priority = getAndroidLevel(level);
+        if (!Log.isLoggable(tag, priority)) {
+            return;
+        }
+
+        try {
+            Log.println(priority, tag, message);
+        } catch (RuntimeException e) {
+            Log.e("AndroidHandler", "Error logging message.", e);
+        }
+    }
+
     /**
      * Converts a {@link java.util.logging.Logger} logging level into an Android one.
-     * 
+     *
      * @param level The {@link java.util.logging.Logger} logging level.
-     * 
-     * @return The resulting Android logging level. 
+     *
+     * @return The resulting Android logging level.
      */
     static int getAndroidLevel(Level level) {
         int value = level.intValue();
@@ -171,5 +169,4 @@ public class AndroidHandler extends Handler {
             return Log.DEBUG;
         }
     }
-    
 }
