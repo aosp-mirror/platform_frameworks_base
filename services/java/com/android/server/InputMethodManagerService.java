@@ -41,6 +41,7 @@ import android.content.IntentFilter;
 import android.content.DialogInterface.OnCancelListener;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
@@ -366,16 +367,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                         // Uh oh, current input method is no longer around!
                         // Pick another one...
                         Log.i(TAG, "Current input method removed: " + curInputMethodId);
-                        List<InputMethodInfo> enabled = getEnabledInputMethodListLocked();
-                        if (enabled != null && enabled.size() > 0) {
-                            changed = true;
-                            curIm = enabled.get(0);
-                            curInputMethodId = curIm.getId();
-                            Log.i(TAG, "Switching to: " + curInputMethodId);
-                            Settings.Secure.putString(mContext.getContentResolver(),
-                                    Settings.Secure.DEFAULT_INPUT_METHOD,
-                                    curInputMethodId);
-                        } else if (curIm != null) {
+                        if (!chooseNewDefaultIME()) {
                             changed = true;
                             curIm = null;
                             curInputMethodId = "";
@@ -389,16 +381,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 } else if (curIm == null) {
                     // We currently don't have a default input method... is
                     // one now available?
-                    List<InputMethodInfo> enabled = getEnabledInputMethodListLocked();
-                    if (enabled != null && enabled.size() > 0) {
-                        changed = true;
-                        curIm = enabled.get(0);
-                        curInputMethodId = curIm.getId();
-                        Log.i(TAG, "New default input method: " + curInputMethodId);
-                        Settings.Secure.putString(mContext.getContentResolver(),
-                                Settings.Secure.DEFAULT_INPUT_METHOD,
-                                curInputMethodId);
-                    }
+                    changed = chooseNewDefaultIME();
                 }
                 
                 if (changed) {
@@ -1369,6 +1352,23 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         return false;
     }
 
+    private boolean isSystemIme(InputMethodInfo inputMethod) {
+        return (inputMethod.getServiceInfo().applicationInfo.flags
+                & ApplicationInfo.FLAG_SYSTEM) != 0;
+    }
+
+    private boolean chooseNewDefaultIME() {
+        List<InputMethodInfo> enabled = getEnabledInputMethodListLocked();
+        if (enabled != null && enabled.size() > 0) {
+            Settings.Secure.putString(mContext.getContentResolver(),
+                    Settings.Secure.DEFAULT_INPUT_METHOD,
+                    enabled.get(0).getId());
+            return true;
+        }
+
+        return false;
+    }
+
     void buildInputMethodListLocked(ArrayList<InputMethodInfo> list,
             HashMap<String, InputMethodInfo> map) {
         list.clear();
@@ -1399,6 +1399,11 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 list.add(p);
                 map.put(p.getId(), p);
 
+                // System IMEs are enabled by default
+                if (isSystemIme(p)) {
+                    setInputMethodEnabled(p.getId(), true);
+                }
+
                 if (DEBUG) {
                     Log.d(TAG, "Found a third-party input method " + p);
                 }
@@ -1407,6 +1412,14 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 Log.w(TAG, "Unable to load input method " + compName, e);
             } catch (IOException e) {
                 Log.w(TAG, "Unable to load input method " + compName, e);
+            }
+        }
+
+        String defaultIme = Settings.Secure.getString(mContext
+                .getContentResolver(), Settings.Secure.DEFAULT_INPUT_METHOD);
+        if (!map.containsKey(defaultIme)) {
+            if (chooseNewDefaultIME()) {
+                updateFromSettingsLocked();
             }
         }
     }
