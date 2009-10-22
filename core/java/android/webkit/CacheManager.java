@@ -109,9 +109,6 @@ public final class CacheManager {
             return expires;
         }
 
-        /**
-         * @hide Pending API council approval
-         */
         public String getExpiresString() {
             return expiresString;
         }
@@ -136,9 +133,6 @@ public final class CacheManager {
             return encoding;
         }
 
-        /**
-         * @hide Pending API council approval
-         */
         public String getContentDisposition() {
             return contentdisposition;
         }
