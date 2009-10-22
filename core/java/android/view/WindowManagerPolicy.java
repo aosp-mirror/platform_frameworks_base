@@ -868,4 +868,9 @@ public interface WindowManagerPolicy {
      * requesting this is no longer visible.
      */
     public void screenOnStoppedLw();
+
+    /**
+     * Return false to disable key repeat events from being generated.
+     */
+    public boolean allowKeyRepeat();
 }

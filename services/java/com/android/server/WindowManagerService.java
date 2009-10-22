@@ -6227,6 +6227,13 @@ public class WindowManagerService extends IWindowManager.Stub
                     lt.sample("2 got event              ", System.nanoTime() - ev.whenNano);
                 }
 
+                if (lastKey != null && !mPolicy.allowKeyRepeat()) {
+                    // cancel key repeat at the request of the policy.
+                    lastKey = null;
+                    downTime = 0;
+                    lastKeyTime = curTime;
+                    nextKeyTime = curTime + LONG_WAIT;
+                }
                 try {
                     if (ev != null) {
                         curTime = SystemClock.uptimeMillis();
