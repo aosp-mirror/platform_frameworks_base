@@ -786,16 +786,8 @@ public class WifiStateTracker extends NetworkStateTracker {
                  * Filter out multicast packets. This saves battery power, since
                  * the CPU doesn't have to spend time processing packets that
                  * are going to end up being thrown away.
-                 *
-                 * Note that rather than turn this off directly, we use the
-                 * public api - this keeps us all in sync - turn multicast on
-                 * first and then off.. if nobody else wants it on it'll be
-                 * off then and it's all synchronized within the API.
                  */
-                WifiManager.MulticastLock l = 
-                        mWM.createMulticastLock("WifiStateTracker");
-                l.acquire();
-                l.release();
+                mWM.initializeMulticastFiltering();
 
                 if (mBluetoothA2dp == null) {
                     mBluetoothA2dp = new BluetoothA2dp(mContext);

@@ -1056,4 +1056,17 @@ public class WifiManager {
             return false;
         }
     }
+
+    /**
+     * Initialize the multicast filtering to 'on'
+     * @hide no intent to publish
+     */
+    public boolean initializeMulticastFiltering() {
+        try {
+            mService.initializeMulticastFiltering();
+            return true;
+        } catch (RemoteException e) {
+             return false;
+        }
+    }
 }

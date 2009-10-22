@@ -70,6 +70,8 @@ interface IWifiManager
 
     boolean releaseWifiLock(IBinder lock);
 
+    void initializeMulticastFiltering();
+
     boolean isMulticastEnabled();
 
     void acquireMulticastLock(IBinder binder, String tag);
