@@ -30,11 +30,15 @@ struct OMXCodecObserver;
 
 struct OMXCodec : public MediaSource,
                   public MediaBufferObserver {
+    enum CreationFlags {
+        kPreferSoftwareCodecs = 1,
+    };
     static sp<OMXCodec> Create(
             const sp<IOMX> &omx,
             const sp<MetaData> &meta, bool createEncoder,
             const sp<MediaSource> &source,
-            const char *matchComponentName = NULL);
+            const char *matchComponentName = NULL,
+            uint32_t flags = 0);
 
     static void setComponentRole(
             const sp<IOMX> &omx, IOMX::node_id node, bool isEncoder,
@@ -206,6 +210,14 @@ private:
     void initOutputFormat(const sp<MetaData> &inputFormat);
 
     void dumpPortStatus(OMX_U32 portIndex);
+
+    static uint32_t getComponentQuirks(const char *componentName);
+
+    static void findMatchingCodecs(
+            const char *mime,
+            bool createEncoder, const char *matchComponentName,
+            uint32_t flags,
+            Vector<String8> *matchingCodecs);
 
     OMXCodec(const OMXCodec &);
     OMXCodec &operator=(const OMXCodec &);
