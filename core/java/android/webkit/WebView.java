@@ -3380,6 +3380,7 @@ public class WebView extends AbsoluteLayout
             rebuildWebTextView();
             // Now we need to pass the event to it
             if (inEditingMode()) {
+                mWebTextView.mResendKeyDown = true;
                 return mWebTextView.onKeyDown(keyCode, event);
             }
         } else if (nativeHasFocusNode()) {
@@ -4950,6 +4951,7 @@ public class WebView extends AbsoluteLayout
                 int select = nativeFocusCandidateIsTextField() ?
                         nativeFocusCandidateMaxLength() : 0;
                 setSelection(select, select);
+                mWebTextView.mOkayForFocusNotToMatch = false; // only once
             }
         }
         WebViewCore.JSKeyData arg = new WebViewCore.JSKeyData();

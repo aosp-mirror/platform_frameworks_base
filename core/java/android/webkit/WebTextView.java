@@ -88,6 +88,7 @@ import java.util.ArrayList;
     // happens, the next time the user hits a key it is okay for the focus
     // pointer to not match the WebTextView's node pointer
     boolean                 mOkayForFocusNotToMatch;
+    boolean                 mResendKeyDown;
     // Whether or not a selection change was generated from webkit.  If it was,
     // we do not need to pass the selection back to webkit.
     private boolean         mFromWebKit;
@@ -136,10 +137,9 @@ import java.util.ArrayList;
                 isArrowKey = true;
                 break;
         }
-        if (!isArrowKey && !mOkayForFocusNotToMatch
+        if (!isArrowKey && !mOkayForFocusNotToMatch && !mResendKeyDown
                 && mWebView.nativeFocusNodePointer() != mNodePointer) {
-            if (mWebView.nativeCursorNodePointer() == mNodePointer) {
-                // remove cursor so character doesn't go back to this view
+            if (mWebView.nativeFocusNodePointer() != 0) {
                 mWebView.nativeClearCursor();
             }
             // Do not call remove() here, which hides the soft keyboard.  If
@@ -152,7 +152,7 @@ import java.util.ArrayList;
         // After a jump to next textfield and the first key press, the cursor
         // and focus will once again match, so reset this value.
         mOkayForFocusNotToMatch = false;
-
+        mResendKeyDown = false;
         Spannable text = (Spannable) getText();
         int oldLength = text.length();
         // Normally the delete key's dom events are sent via onTextChanged.
