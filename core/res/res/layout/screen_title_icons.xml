@@ -66,22 +66,25 @@ This is the basic layout for a screen, with all of its features enabled.
             android:layout_toLeftOf="@id/progress_circular"
             android:layout_toRightOf="@android:id/left_icon"
             >
+            <TextView android:id="@android:id/title"
+                style="?android:attr/windowTitleStyle"
+                android:layout_width="0dip"
+                android:layout_height="fill_parent"
+                android:layout_weight="1"
+                android:background="@null"
+                android:fadingEdge="horizontal"
+                android:scrollHorizontally="true"
+                android:gravity="center_vertical"
+                android:layout_marginRight="2dip"
+                />
             <!-- 2dip between the icon and the title text, if icon is present. -->
             <ImageView android:id="@android:id/right_icon"
                 android:visibility="gone"
                 android:layout_width="16dip"
                 android:layout_height="16dip"
+                android:layout_weight="0"
                 android:layout_gravity="center_vertical"
                 android:scaleType="fitCenter"
-                android:layout_marginRight="2dip" />
-            <TextView android:id="@android:id/title"
-                style="?android:attr/windowTitleStyle"
-                android:layout_width="fill_parent"
-                android:layout_height="fill_parent"
-                android:background="@null"
-                android:fadingEdge="horizontal"
-                android:scrollHorizontally="true"
-                android:gravity="center_vertical"
                 />
             </LinearLayout>
     </RelativeLayout>
