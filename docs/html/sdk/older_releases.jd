@@ -7,7 +7,7 @@ released before Android 1.0. The list is provided for informational purposes
 only.</p>
 
 <p>If you are just getting started developing on Android, make sure that you
-are using the <a href="{@docRoot}sdk/{@sdkCurrent}/index.html">most current SDK available</a>,
+are using the <a href="{@docRoot}sdk/index.html">most current SDK available</a>,
 to ensure that your applications will be compatible with the latest
 Android-powered devices.</p>
 

@@ -26,14 +26,14 @@ Android applications. </p>
   <li>Create and update Android projects. See
   <a href="{@docRoot}guide/developing/other-ide.html">Developing in Other IDEs</a>.</li>
   <li>Update your Android SDK with new platforms, add-ons, and documentation. See
-  <a href="{@docRoot}guide/developing/updating-sdk.html">Updating Your SDK</a>.</li>
+  <a href="{@docRoot}sdk/adding-components.html">Adding SDK Components</a>.</li>
 </ul>
 
 <p>If you develop in Eclipse with the ADT plugin, you can perform
 these tasks directly from the IDE. To create
 Android projects and AVDs from Eclipse, see <a href="{@docRoot}guide/developing/eclipse-adt.html">Developing
 In Eclipse</a>. To update your SDK from Eclipse, see
-<a href="{@docRoot}guide/developing/updating-sdk.html">Updating Your SDK</a>. 
+<a href="{@docRoot}sdk/adding-components.html">Adding SDK Components</a>. 
 </p>
 
 
