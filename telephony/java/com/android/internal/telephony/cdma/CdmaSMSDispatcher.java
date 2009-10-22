@@ -481,7 +481,7 @@ final class CdmaSMSDispatcher extends SMSDispatcher {
             return CommandsInterface.CDMA_SMS_FAIL_CAUSE_INVALID_TELESERVICE_ID;
         case Intents.RESULT_SMS_GENERIC_ERROR:
         default:
-            return CommandsInterface.CDMA_SMS_FAIL_CAUSE_OTHER_TERMINAL_PROBLEM;
+            return CommandsInterface.CDMA_SMS_FAIL_CAUSE_ENCODING_PROBLEM;
         }
     }
 }
