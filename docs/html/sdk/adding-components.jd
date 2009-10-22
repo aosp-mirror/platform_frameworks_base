@@ -55,7 +55,7 @@ compatibility.</p>
 <h2 id="InstallingComponents">Installing SDK Components</h2>
 
 <p>Use the Android SDK and AVD Manager to install new SDK components. 
-To launch the SDK and AVD Manager in one of these ways:</p>
+You can launch the SDK and AVD Manager in one of these ways:</p>
 <ul>
   <li>Execute the {@code android}</a> tool command with no options. If you
 haven't used the tool before, change to the <code>&lt;sdk&gt;/tools</code>
@@ -95,12 +95,13 @@ you do not have.</p>
 
 <h3 id="AddingSites">Adding New Sites</h3>
 
-<p>By default, <strong>Available Components</strong> only shows 
-the default repository for platforms, the Google APIs
-Add-On, and other SDK components. You can add additional sites that host
-Android SDK add-ons, then download the SDK add-ons from them.</p>	
+<p>By default, <strong>Available Components</strong> only shows the default
+repository site, which offers platforms, SDK tools, documentation, the 
+Google APIs Add-on, and other components. You can add other sites that host 
+their own Android SDK add-ons, then download the SDK add-ons
+from those sites.</p>	
 
-<p>For example, a mobile carrier or device manufacturer may offer additional
+<p>For example, a mobile carrier or device manufacturer might offer additional
 API libraries that are supported by their own Android-powered devices. In order
 to develop using their libraries, you must install their Android SDK add-on. </p>
 

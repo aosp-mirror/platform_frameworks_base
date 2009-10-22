@@ -383,8 +383,8 @@ framework_docs_SDK_PREVIEW:=0
 ## Latest ADT version identifiers, for reference from published docs
 framework_docs_ADT_VERSION:=0.9.4
 framework_docs_ADT_DOWNLOAD:=ADT-0.9.4.zip
-framework_docs_ADT_BYTES:=0
-framework_docs_ADT_CHECKSUM:=0
+framework_docs_ADT_BYTES:=3367536
+framework_docs_ADT_CHECKSUM:=4cdecd72b3e28022d8a55891f13e7d43
 
 framework_docs_LOCAL_DROIDDOC_OPTIONS += \
 		-hdf sdk.version $(framework_docs_SDK_VERSION) \
