@@ -257,12 +257,6 @@ public class CDMAPhone extends PhoneBase {
     }
 
     public ServiceState getServiceState() {
-        int roamInd = mSST.ss.getCdmaRoamingIndicator();
-        int defRoamInd = mSST.ss.getCdmaDefaultRoamingIndicator();
-
-        mSST.ss.setCdmaEriIconIndex(mEriManager.getCdmaEriIconIndex(roamInd, defRoamInd));
-        mSST.ss.setCdmaEriIconMode(mEriManager.getCdmaEriIconMode(roamInd, defRoamInd));
-
         return mSST.ss;
     }
 
@@ -796,10 +790,6 @@ public class CDMAPhone extends PhoneBase {
     }
 
      void notifyServiceStateChanged(ServiceState ss) {
-         // TODO this seems really inefficient.  Can't we calc this when the fundamentals change and store in the
-         // service state?
-         ss.setCdmaEriIconIndex(this.getCdmaEriIconIndex());
-         ss.setCdmaEriIconMode(this.getCdmaEriIconMode());
          super.notifyServiceStateChangedP(ss);
      }
 
@@ -1322,9 +1312,7 @@ public class CDMAPhone extends PhoneBase {
 
     @Override
     public int getCdmaEriIconIndex() {
-        int roamInd = getServiceState().getCdmaRoamingIndicator();
-        int defRoamInd = getServiceState().getCdmaDefaultRoamingIndicator();
-        return mEriManager.getCdmaEriIconIndex(roamInd, defRoamInd);
+        return getServiceState().getCdmaEriIconIndex();
     }
 
     /**
@@ -1334,9 +1322,7 @@ public class CDMAPhone extends PhoneBase {
      */
     @Override
     public int getCdmaEriIconMode() {
-        int roamInd = getServiceState().getCdmaRoamingIndicator();
-        int defRoamInd = getServiceState().getCdmaDefaultRoamingIndicator();
-        return mEriManager.getCdmaEriIconMode(roamInd, defRoamInd);
+        return getServiceState().getCdmaEriIconMode();
     }
 
     /**
