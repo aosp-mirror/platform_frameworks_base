@@ -108,6 +108,9 @@ VideoFrame *StagefrightMetadataRetriever::captureFrame() {
         return NULL;
     }
 
+    sp<MetaData> trackMeta = mExtractor->getTrackMetaData(
+            i, MediaExtractor::kIncludeExtensiveMetaData);
+
     sp<MediaSource> source = mExtractor->getTrack(i);
 
     if (source.get() == NULL) {
@@ -132,6 +135,12 @@ VideoFrame *StagefrightMetadataRetriever::captureFrame() {
     // Read one output buffer, ignore format change notifications
     // and spurious empty buffers.
 
+    MediaSource::ReadOptions options;
+    int64_t thumbNailTime;
+    if (trackMeta->findInt64(kKeyThumbnailTime, &thumbNailTime)) {
+        options.setSeekTo(thumbNailTime);
+    }
+
     MediaBuffer *buffer = NULL;
     status_t err;
     do {
@@ -139,7 +148,8 @@ VideoFrame *StagefrightMetadataRetriever::captureFrame() {
             buffer->release();
             buffer = NULL;
         }
-        err = decoder->read(&buffer);
+        err = decoder->read(&buffer, &options);
+        options.clearSeekTo();
     } while (err == INFO_FORMAT_CHANGED
              || (buffer != NULL && buffer->range_length() == 0));
 

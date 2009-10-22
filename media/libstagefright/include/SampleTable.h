@@ -75,6 +75,8 @@ public:
     status_t findClosestSyncSample(
             uint32_t start_sample_index, uint32_t *sample_index);
 
+    status_t findThumbnailSample(uint32_t *sample_index);
+
 protected:
     ~SampleTable();
 

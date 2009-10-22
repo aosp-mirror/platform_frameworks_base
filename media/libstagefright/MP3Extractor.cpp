@@ -393,7 +393,7 @@ sp<MediaSource> MP3Extractor::getTrack(size_t index) {
             mMeta, mDataSource, mFirstFramePos, mFixedHeader);
 }
 
-sp<MetaData> MP3Extractor::getTrackMetaData(size_t index) {
+sp<MetaData> MP3Extractor::getTrackMetaData(size_t index, uint32_t flags) {
     if (mFirstFramePos < 0 || index != 0) {
         return NULL;
     }
