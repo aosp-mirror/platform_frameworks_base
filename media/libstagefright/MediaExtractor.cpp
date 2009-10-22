@@ -41,7 +41,7 @@ sp<MediaExtractor> MediaExtractor::Create(
         }
 
         mime = tmp.string();
-        LOGI("Autodetected media content as '%s' with confidence %.2f",
+        LOGV("Autodetected media content as '%s' with confidence %.2f",
              mime, confidence);
     }
 

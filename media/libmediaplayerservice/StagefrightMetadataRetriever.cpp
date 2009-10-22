@@ -86,7 +86,7 @@ VideoFrame *StagefrightMetadataRetriever::captureFrame() {
     LOGV("captureFrame");
 
     if (mExtractor.get() == NULL) {
-        LOGE("no extractor.");
+        LOGV("no extractor.");
         return NULL;
     }
 
@@ -104,7 +104,7 @@ VideoFrame *StagefrightMetadataRetriever::captureFrame() {
     }
 
     if (i == n) {
-        LOGE("no video track found.");
+        LOGV("no video track found.");
         return NULL;
     }
 
@@ -114,7 +114,7 @@ VideoFrame *StagefrightMetadataRetriever::captureFrame() {
     sp<MediaSource> source = mExtractor->getTrack(i);
 
     if (source.get() == NULL) {
-        LOGE("unable to instantiate video track.");
+        LOGV("unable to instantiate video track.");
         return NULL;
     }
 
@@ -126,7 +126,7 @@ VideoFrame *StagefrightMetadataRetriever::captureFrame() {
                 NULL, OMXCodec::kPreferSoftwareCodecs);
 
     if (decoder.get() == NULL) {
-        LOGE("unable to instantiate video decoder.");
+        LOGV("unable to instantiate video decoder.");
 
         return NULL;
     }
@@ -157,13 +157,13 @@ VideoFrame *StagefrightMetadataRetriever::captureFrame() {
     if (err != OK) {
         CHECK_EQ(buffer, NULL);
 
-        LOGE("decoding frame failed.");
+        LOGV("decoding frame failed.");
         decoder->stop();
 
         return NULL;
     }
 
-    LOGI("successfully decoded video frame.");
+    LOGV("successfully decoded video frame.");
 
     meta = decoder->getFormat();
 
