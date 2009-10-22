@@ -2218,5 +2218,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             mPowerManager.userActivity(curTime, false, LocalPowerManager.OTHER_EVENT);
         }
     }
+
+    public boolean allowKeyRepeat() {
+        // disable key repeat when screen is off
+        return mScreenOn;
+    }
 }
 
