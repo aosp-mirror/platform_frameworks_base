@@ -231,7 +231,6 @@ sp<OMXCodec> OMXCodec::Create(
     }
     if (!strncmp(componentName, "OMX.qcom.video.decoder.", 23)) {
         // XXX Required on P....on only.
-        quirks |= kRequiresAllocateBufferOnInputPorts;
         quirks |= kRequiresAllocateBufferOnOutputPorts;
     }
 
