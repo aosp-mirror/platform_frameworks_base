@@ -218,7 +218,7 @@ public class SmsMessage {
                     index, data);
         }
 
-        return new SmsMessage(wrappedMessage);
+        return wrappedMessage != null ? new SmsMessage(wrappedMessage) : null;
     }
 
     /**
