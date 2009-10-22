@@ -98,7 +98,7 @@
       </li>
       <li class="toggle-list">
         <div><a href="<?cs var:toroot ?>guide/topics/resources/index.html">
-               <span class="en">Resources and Assests</span> 
+               <span class="en">Resources and Assets</span> 
              </a></div>
         <ul>
           <li><a href="<?cs var:toroot ?>guide/topics/resources/resources-i18n.html">
