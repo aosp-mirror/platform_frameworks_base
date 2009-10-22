@@ -111,7 +111,7 @@ temporarily overcoming the restriction imposed by the
 <code><a href="{@docRoot}guide/topics/manifest/provider-element.html#wprmsn">writePermission</a></code>, and 
 <code><a href="{@docRoot}guide/topics/manifest/provider-element.html#prmsn">permission</a></code> attributes 
 &mdash; 
-"{@code true}" if permission can be granted, and "{@ code false}" if not.  
+"{@code true}" if permission can be granted, and "{@code false}" if not.  
 If "{@code true}", permission can be granted to any of the content 
 provider's data.  If "{@code false}", permission can be granted only 
 to the data subsets listed in 
