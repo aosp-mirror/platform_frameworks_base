@@ -179,7 +179,8 @@ size_t MPEG4Extractor::countTracks() {
     return n;
 }
 
-sp<MetaData> MPEG4Extractor::getTrackMetaData(size_t index) {
+sp<MetaData> MPEG4Extractor::getTrackMetaData(
+        size_t index, uint32_t flags) {
     status_t err;
     if ((err = readMetaData()) != OK) {
         return NULL;
@@ -197,6 +198,25 @@ sp<MetaData> MPEG4Extractor::getTrackMetaData(size_t index) {
 
     if (track == NULL) {
         return NULL;
+    }
+
+    if ((flags & kIncludeExtensiveMetaData)
+            && !track->includes_expensive_metadata) {
+        track->includes_expensive_metadata = true;
+
+        const char *mime;
+        CHECK(track->meta->findCString(kKeyMIMEType, &mime));
+        if (!strncasecmp("video/", mime, 6)) {
+            uint32_t sampleIndex;
+            uint32_t sampleTime;
+            if (track->sampleTable->findThumbnailSample(&sampleIndex) == OK
+                    && track->sampleTable->getDecodingTime(
+                        sampleIndex, &sampleTime) == OK) {
+                track->meta->setInt64(
+                        kKeyThumbnailTime,
+                        ((int64_t)sampleTime * 1000000) / track->timescale);
+            }
+        }
     }
 
     return track->meta;
@@ -353,6 +373,7 @@ status_t MPEG4Extractor::parseChunk(off_t *offset, int depth) {
             mLastTrack = track;
 
             track->meta = new MetaData;
+            track->includes_expensive_metadata = false;
             track->timescale = 0;
             track->sampleTable = new SampleTable(mDataSource);
             track->meta->setCString(kKeyMIMEType, "application/octet-stream");

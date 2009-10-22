@@ -30,7 +30,7 @@ public:
 
     virtual size_t countTracks();
     virtual sp<MediaSource> getTrack(size_t index);
-    virtual sp<MetaData> getTrackMetaData(size_t index);
+    virtual sp<MetaData> getTrackMetaData(size_t index, uint32_t flags);
 
     static sp<MetaData> makeAMRFormat(bool isWide);
 

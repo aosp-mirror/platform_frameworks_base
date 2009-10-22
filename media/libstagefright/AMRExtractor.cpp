@@ -86,7 +86,7 @@ sp<MediaSource> AMRExtractor::getTrack(size_t index) {
     return new AMRSource(mDataSource, mIsWide);
 }
 
-sp<MetaData> AMRExtractor::getTrackMetaData(size_t index) {
+sp<MetaData> AMRExtractor::getTrackMetaData(size_t index, uint32_t flags) {
     if (mInitCheck != OK || index != 0) {
         return NULL;
     }
