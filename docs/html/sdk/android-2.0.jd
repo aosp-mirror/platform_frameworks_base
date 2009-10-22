@@ -1,9 +1,9 @@
-page.title=Android 1.5, Release 3
-sdk.platform.version=1.5
-sdk.platform.apiLevel=3
+page.title=Android 2.0, Release 1
+sdk.platform.version=2.0
+sdk.platform.apiLevel=5
 sdk.platform.majorMinor=major
-sdk.platform.releaseDate=April 2009
-sdk.platform.deployableDate=May 2009
+sdk.platform.releaseDate=October 2009
+sdk.platform.deployableDate=November 2009
 
 @jd:body
 
@@ -16,7 +16,7 @@ sdk.platform.deployableDate=May 2009
 	<li><a href="#apps">Built-in Applications</a></li>
 	<li><a href="#locs">Locales</a></li>
 	<li><a href="#skins">Emulator Skins</a></li>
-	<li><a href="#notes">Other Notes</a></li>
+	<li><a href="#dev-features">Developer Features</a></li>
 	<li><a href="#api">Framework API</a>
         <ol>
 	<li><a href="#api-level">API level</a></li>
@@ -61,7 +61,6 @@ Components</a>.</p>
 href="http://developer.android.com/sdk/android-{@sdkPlatformVersion}-highlights.html">Android 
 {@sdkPlatformVersion} Platform Highlights</a> document.</p>
 
-
 <h2 id="apps">Built-in Applications</h2>
 
 <p>The system image included in the downloadable platform provides these
@@ -79,13 +78,14 @@ built-in applications:</p>
 	<li>Contacts</li>
 	<li>Custom Locale (developer app)</li>
 	<li>Dev Tools (developer app)</li>
+	<li>Dialer</li>
 	</ul>
 </td>
 <td style="border:0;padding-bottom:0;margin-bottom:0;padding-left:5em;">
 	<ul>
-	<li>Dialer</li>
 	<li>Email</li>
 	<li>Gallery</li>
+	<li>Gestures Builder</li>
 	<li>IME for Japanese text input</li>
 	<li>Messaging</li>
 	<li>Music</li>
@@ -101,7 +101,7 @@ built-in applications:</p>
 <p>The system image included in the downloadable platform provides a variety of
 built-in locales. In some cases, region-specific strings are available for the
 locales. In other cases, a default version of the language is used. The
-languages that will be available in the Android {@sdkPlatformVersion} system image are listed
+languages that will be available in the Android 1.6 system image are listed
 below (with <em>language</em>_<em>country/region</em> locale descriptor).</p>
 
 <table style="border:0;padding-bottom:0;margin-bottom:0;">
@@ -150,24 +150,38 @@ through Settings.</p>
 
 <ul>
   <li>
-    QVGA-P (240x320, low density, small screen)
+    QVGA (240x320, low density, small screen)
   </li>
   <li>
-    QVGA-L (320x480, low density, small screen)
+    WQVGA (240x400, low density, normal screen)
+  </li>
+  <li>
+    FWQVGA (240x432, low density, normal screen)
   </li>
   <li>
     HVGA (320x480, medium density, normal screen)
   </li>
   <li>
-    HVGA-P (320x480, medium density, normal screen)
+    WVGA800 (480x800, high density, normal screen)
   </li>
   <li>
-    HVGA-L (320x480, medium density, normal screen)
+    WVGA854 (480x854 high density, normal screen)
   </li>
 </ul>
 
 <p>For more information about how to develop an application that displays and functions properly on all Android-powered devices, see <a href="{@docRoot}guide/practices/screens_support.html">Supporting Multiple Screens</a>.</p>
 
+<h2 id="dev-features">Developer Features</h2>
+
+<p>The sections below provide information about new developer features offered by the downloadable Android 2.0 platform component.</p>
+
+<h3 id="ant">Ant Support</h3>
+
+<ul>
+<li>Debug- and release-mode application signing. Release-mode signing includes integrated support for <code>zipalign</code> optimization. For more information, see <a href="{@docRoot}guide/publishing/app-signing.html#releasecompile">Signing Your Applications</a>.</li>
+
+<li>Adds new Ant build system with support for Emma instrumentation projects (code coverage).</li>
+</ul>
 
 <h2 id="api">Framework API</h2>
 
@@ -192,76 +206,80 @@ href="{@docRoot}guide/appendix/api-levels.html">API Levels</a> document. </p>
 
 <h3 id="api-changes">API changes summary</h3>
 
-<h4>UI framework</h4>
+<h4>Bluetooth</h4>
+<ul>
+<li>Turn on/off Bluetooth</li>
+<li>Device and service discovery</li>
+<li>Connect to a remote device using RFCOMM and send/receive data</li>
+<li>Advertise RFCOMM services and listen for incoming RFCOMM connection</li>
+</ul>
+
+<h4>Sync adapters </h4>
+<ul>
+<li>New APIs for sync adapters to connect to any backend</li>
+</ul>
+
+<h4>Account Manager</h4>
+<ul>
+<li>Centralized account manager API to securely store and access auth tokens/passwords </li>
+</ul>
+
+<h4>Contacts</h4>
+<ul>
+<li>New contacts APIs that allow for data from multiple accounts</li>
+<li>New Quick Contact framework APIs enable developers to create contact badges in their app. Clicking on the badge opens a window with a list of ways to contact the person with one click.</li>
+</ul>
+
+<h4>WebView</h4>
+<ul>
+<li>HTML5 support:
   <ul>
-    <li>Framework for easier background/UI thread interaction</li>
-    <li>New {@link android.widget.SlidingDrawer SlidingDrawer} widget</li>
-    <li>New {@link android.widget.HorizontalScrollView HorizontalScrollview} widget</li>
+  <li>Database API support, for client-side databases using SQL.</li>
+  <li>Application cache support, for offline applications.</li>
+  <li>Geolocation API support, to provide location information about the device.</li>
+  <li>&lt;video&gt; tag support in Fullscreen mode.</li>
   </ul>
-
-<h4>AppWidget framework</h4>
+</li>
+<li>Deprecated Gears; HTML5 database APIs now supported instead.</li>
+<li>Deprecated classes: UrlInterceptHandler, Plugin, PluginData, PluginList, UrlInterceptRegistry.</li>
+<li>DPI support for WebView
   <ul>
-    <li>APIs for creating secure home screen {@link android.appwidget
-AppWidgets}. For information about how to use AppWidgets, see the Developer's
-Guide <a href="{@docRoot}guide/topics/appwidgets/index.html">AppWidgets</a>
-documentation. Also see <a
-href="http://android-developers.blogspot.com/2009/04/introducing-home-screen-widgets-and.html">
-Introducing home screen widgets and the AppWidget
-framework</a> on the Android Developer's Blog.</li>
-    <li>APIs for populating {@link android.provider.LiveFolders Live Folders}
-        with custom content.</li>
+  <li>In viewport meta tag, target-densityDpi can be specified to control the default zoom.</li>
+  <li>&lt;meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,target-densityDpi=device-dpi"/&gt; will ensure the page to be loaded with 100% on any dpi devices.</li>
   </ul>
+</li>
+</ul>
 
-<h4>Media framework</h4>
+<h4>Camera</h4>
+<ul>
+<li>New parameters for color effect, scene mode, flash mode, focus mode, white balance, rotation, and other settings.</li>
+<li>New ZoomCallback interface to perform actions when the zoom level has changed.</li>
+</ul>
+
+<h4>Media</h4>
+<ul>
+<li>MediaScanner now generates thumbnails for all images when they are inserted into MediaStore.</li>
+<li>New Thumbnail API for retrieving image and video thumbnails on demand.</li>
+</ul>
+
+<h4>Other Framework</h4>
+<ul>
+<li>New system themes in android.R.style to easily display activities on top of the current system wallpaper or keep the previous activity visible in the background. </li>
+<li>New WallpaperManager API replaces and extends the wallpaper APIs that were previously in Context, to allow applications to request and set the system wallpaper.</li>
+<li>New Service APIs to help applications correctly handle Service life-cycle, in particular low memory situations where a Service may be killed while it is running.
   <ul>
-    <li>Raw audio recording and playback APIs</li>
-    <li>Interactive MIDI playback engine</li>
-    <li>Video recording APIs for developers (3GP format)</li>
-    <li>Video and photo sharing Intents</li>
-    <li>Media search Intent</li>
+  <li>Service.setForeground() has been deprecated and now effectively performs no operation. This is replaced with a new API, startForeground(), that helps (and requires) associating an ongoing notification with the foreground state.</li>
   </ul>
-
-<h4>Input Method framework </h4>
-   <ul>
-    <li>{@link android.inputmethodservice.InputMethodService Input Method
-        Service} framework</li>
-    <li>Text-prediction engine</li>
-    <li>Ability to provide downloadable IMEs to users</li>
-  </ul>
-
-<h4>Application-defined hardware requirements</h4>
-   <p>Applications can now use a new element in their manifest files, <a
-href="{@docRoot}guide/topics/manifest/uses-configuration-element.html"><code>&lt;uses-configuration&gt;</code></a>
- to indicate to the Android system what hardware features
-they require in order to function properly. For example, an application might
-use the element to specify that it requires a physical keyboard or a particular
-navigation device, such as a trackball. Prior to installing the application, the
-Android system checks the attributes defined for the
-<code>&lt;uses-configuration&gt;</code> element and allows the installation to
-continue only if the required hardware is present.</p>
-
-<h4>Speech recognition framework</h4>
-    <ul>
-    <li>Support for using speech recognition libraries via Intent. See {@link
-android.speech.RecognizerIntent RecognizerIntent}.</li>
-  </ul>
-
-<h4>Miscellaneous API additions</h4>
-  <ul>
-    <li>LocationManager - Applications can get location change updates via
-        Intent</li>
-    <li>WebView - Touch start/end/move/cancel DOM event support</li>
-    <li>Redesigned {@link android.hardware.SensorManager Sensor Manager
-        APIs}</li>
-    <li>GLSurfaceView - convenience framework for creating OpenGL
-        applications</li>
-    <li>Broadcast Intent for app update install succeeded - for smoother app
-        upgrade experience</li>
-  </ul>
-
+</li>
+<li>MotionEvent can now report simultaneous-touch information for devices that support it. Up to three pointers can be tracked simultaneously. </li>
+<li>KeyEvent has new key dispatching APIs, to help implement action-on-up and long press behavior, as well a new mechanism to cancel key presses (for virtual keys).</li>
+<li>WindowManager.LayoutParams has new constants that allow a window to wake up the screen when it is displayed and show the window even if the screen is locked. This allows applications to more cleanly implement things like alarm clocks that should wake the device.</li>
+<li>New Intent APIs that broadcast the docking state of the device and allow applications to launch special activities when the device is placed in a desktop or car dock.</li>
+</ul>
 
 <h3 id="api-diff">API differences report</h3>
 
 <p>For a detailed view of API changes in Android {@sdkPlatformVersion} (API Level {@sdkPlatformApiLevel}), as compared to 
-the previous version, see the <a href="{@docRoot}sdk/api_diff/{@sdkPlatformApiLevel}/changes.html">API 
-Differences Report</a>.</p>
+the previous version, see the <a
+href="{@docRoot}sdk/api_diff/{@sdkPlatformApiLevel}/changes.html">API Differences Report</a>.</p>
+
