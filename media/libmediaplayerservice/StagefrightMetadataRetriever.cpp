@@ -122,7 +122,8 @@ VideoFrame *StagefrightMetadataRetriever::captureFrame() {
 
     sp<MediaSource> decoder =
         OMXCodec::Create(
-                mClient.interface(), meta, false, source);
+                mClient.interface(), meta, false, source,
+                NULL, OMXCodec::kPreferSoftwareCodecs);
 
     if (decoder.get() == NULL) {
         LOGE("unable to instantiate video decoder.");

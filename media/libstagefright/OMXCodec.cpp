@@ -172,49 +172,35 @@ static void InitOMXParams(T *params) {
     params->nVersion.s.nStep = 0;
 }
 
-// static
-sp<OMXCodec> OMXCodec::Create(
-        const sp<IOMX> &omx,
-        const sp<MetaData> &meta, bool createEncoder,
-        const sp<MediaSource> &source,
-        const char *matchComponentName) {
-    const char *mime;
-    bool success = meta->findCString(kKeyMIMEType, &mime);
-    CHECK(success);
-
-    const char *componentName = NULL;
-    sp<OMXCodecObserver> observer = new OMXCodecObserver;
-    IOMX::node_id node = 0;
-    for (int index = 0;; ++index) {
-        if (createEncoder) {
-            componentName = GetCodec(
-                    kEncoderInfo, sizeof(kEncoderInfo) / sizeof(kEncoderInfo[0]),
-                    mime, index);
-        } else {
-            componentName = GetCodec(
-                    kDecoderInfo, sizeof(kDecoderInfo) / sizeof(kDecoderInfo[0]),
-                    mime, index);
-        }
-
-        if (!componentName) {
-            return NULL;
-        }
-
-        // If a specific codec is requested, skip the non-matching ones.
-        if (matchComponentName && strcmp(componentName, matchComponentName)) {
-            continue;
-        }
-
-        LOGV("Attempting to allocate OMX node '%s'", componentName);
-
-        status_t err = omx->allocateNode(componentName, observer, &node);
-        if (err == OK) {
-            LOGV("Successfully allocated OMX node '%s'", componentName);
-            break;
-        }
+static bool IsSoftwareCodec(const char *componentName) {
+    if (!strncmp("OMX.PV.", componentName, 7)) {
+        return true;
     }
 
+    return false;
+}
+
+static int CompareSoftwareCodecsFirst(
+        const String8 *elem1, const String8 *elem2) {
+    bool isSoftwareCodec1 = IsSoftwareCodec(elem1->string());
+    bool isSoftwareCodec2 = IsSoftwareCodec(elem2->string());
+
+    if (isSoftwareCodec1) {
+        if (isSoftwareCodec2) { return 0; }
+        return -1;
+    }
+
+    if (isSoftwareCodec2) {
+        return 1;
+    }
+
+    return 0;
+}
+
+// static
+uint32_t OMXCodec::getComponentQuirks(const char *componentName) {
     uint32_t quirks = 0;
+
     if (!strcmp(componentName, "OMX.PV.avcdec")) {
         quirks |= kWantsNALFragments;
     }
@@ -244,8 +230,94 @@ sp<OMXCodec> OMXCodec::Create(
         quirks |= kRequiresAllocateBufferOnOutputPorts;
     }
 
+    return quirks;
+}
+
+// static
+void OMXCodec::findMatchingCodecs(
+        const char *mime,
+        bool createEncoder, const char *matchComponentName,
+        uint32_t flags,
+        Vector<String8> *matchingCodecs) {
+    matchingCodecs->clear();
+
+    for (int index = 0;; ++index) {
+        const char *componentName;
+
+        if (createEncoder) {
+            componentName = GetCodec(
+                    kEncoderInfo,
+                    sizeof(kEncoderInfo) / sizeof(kEncoderInfo[0]),
+                    mime, index);
+        } else {
+            componentName = GetCodec(
+                    kDecoderInfo,
+                    sizeof(kDecoderInfo) / sizeof(kDecoderInfo[0]),
+                    mime, index);
+        }
+
+        if (!componentName) {
+            break;
+        }
+
+        // If a specific codec is requested, skip the non-matching ones.
+        if (matchComponentName && strcmp(componentName, matchComponentName)) {
+            continue;
+        }
+
+        matchingCodecs->push(String8(componentName));
+    }
+
+    if (flags & kPreferSoftwareCodecs) {
+        matchingCodecs->sort(CompareSoftwareCodecsFirst);
+    }
+}
+
+// static
+sp<OMXCodec> OMXCodec::Create(
+        const sp<IOMX> &omx,
+        const sp<MetaData> &meta, bool createEncoder,
+        const sp<MediaSource> &source,
+        const char *matchComponentName,
+        uint32_t flags) {
+    const char *mime;
+    bool success = meta->findCString(kKeyMIMEType, &mime);
+    CHECK(success);
+
+    Vector<String8> matchingCodecs;
+    findMatchingCodecs(
+            mime, createEncoder, matchComponentName, flags, &matchingCodecs);
+
+    if (matchingCodecs.isEmpty()) {
+        return NULL;
+    }
+
+    sp<OMXCodecObserver> observer = new OMXCodecObserver;
+    IOMX::node_id node = 0;
+    success = false;
+
+    const char *componentName;
+    for (size_t i = 0; i < matchingCodecs.size(); ++i) {
+        componentName = matchingCodecs[i].string();
+
+        LOGV("Attempting to allocate OMX node '%s'", componentName);
+
+        status_t err = omx->allocateNode(componentName, observer, &node);
+        if (err == OK) {
+            LOGV("Successfully allocated OMX node '%s'", componentName);
+
+            success = true;
+            break;
+        }
+    }
+
+    if (!success) {
+        return NULL;
+    }
+
     sp<OMXCodec> codec = new OMXCodec(
-            omx, node, quirks, createEncoder, mime, componentName,
+            omx, node, getComponentQuirks(componentName),
+            createEncoder, mime, componentName,
             source);
 
     observer->setCodec(codec);
