@@ -107,8 +107,6 @@ static status_t StatusFromOMXError(OMX_ERRORTYPE err) {
 }
 
 status_t OMXNodeInstance::freeNode() {
-    Mutex::Autolock autoLock(mLock);
-
     OMX_ERRORTYPE err = OMX_MasterFreeHandle(mHandle);
     mHandle = NULL;
 
@@ -119,9 +117,8 @@ status_t OMXNodeInstance::freeNode() {
     mOwner->invalidateNodeID(mNodeID);
     mNodeID = NULL;
 
-    LOGI("OMXNodeInstance going away.");
-    mObserver.clear();
-    // delete this;  // leads to heap-corruption???
+    LOGV("OMXNodeInstance going away.");
+    delete this;
 
     return StatusFromOMXError(err);
 }
