@@ -47,33 +47,25 @@ sdk.linux_checksum=
 
 <p><strong>2. Install the ADT Plugin for Eclipse</strong></p>
 
-<p>If you are developing in Eclipse, set up a remote update site and install the Android Development Tools (ADT) plugin. The ADT plugin adds powerful extensions to the Eclipse IDE that help you to create and debug Android applications more easily and faster. If you use Eclipse, ADT gives you an incredible boost in developing Android 
-applications. </p>
+<p>If you are developing in Eclipse, set up a remote update site and install the Android Development Tools (ADT) plugin.</p>
 
 <p>For detailed instructions, see <a href="{@docRoot}sdk/eclipse-adt.html">Installing and Updating ADT</a>.</p>
 
-<p><strong>3. Download one or more Android platforms</strong></p>
+<p><strong>3. Add Android platforms to your SDK</strong></p>
 
-<p>To develop an application, you need to download at least one Android platform component and install it into your SDK. 
+<p>Use the Android SDK and AVD Manager, included in the SDK starter package, to add one or more Android platforms (for example, Android 1.6 or Android 2.0) to your SDK. In most cases, you will want to download multiple platforms, so that you can build your application on the lowest version you want to support, but test against higher versions that you intend the application to run on. Information about each platform is available at left, under "Downloadable SDK Components."</p>
 
-<p>Each downloadable platform includes an Android library and system image, as well as emulator skins, sample code and applications, and more. In most cases, you will want to download multiple platforms into your SDK, so that you can build your application on the minimum version you want to support, but test it against higher versions that you intend the application to run on.</p>
+<p>For more information about how to add platforms and other SDK components, see <a href="{@docRoot}sdk/adding-components.html">Adding SDK Components</a>.</p>
 
-<p>While you are downloading platforms, make sure to download the latest documentation package. The documentation covers all versions of the API and lets you filter out those versions that your application won't support. </p>
+<p><strong>4. Get the latest documentation</strong></p>
 
-<p>To download platforms or any other SDK component, use the Android SDK and AVD Manager tool, included in the SDK starter package. For more information, see <a href="{@docRoot}sdk/adding-components.html">Adding SDK Components</a>. Detailed information about individual platforms and other components are provided in the navigation bar at left, under "Downloadable SDK Components."</p>
+<p>If you develop while offline, use the Android SDK and AVD Manager to download the latest documentation package. The documentation covers all versions of the API and lets you filter out those versions that your application won't support. Once installed, the documentation is also available to you directly from the Eclipse IDE. </p>
 
+<p><strong>5. Download other SDK components</strong></p>
 
+<p>You can use the Android SDK and AVD Manager to download other SDK components, such as the SDK add-ons. An SDK add-on provides a development environment for an Android external library or a customized Android system image. For example, the Google APIs Add-On lets you develop an application that takes advantage of the Google Maps external library. </p>
 
-<p><strong>4. Download other SDK components</strong></p>
-
-<p>In addition to Android platforms, you can also download SDK add-ons and a local version of the Android developer documentation to your SDK environment. </p>
-
-<p>An SDK add-on provides a development environment for an Android external
-library or a customized (but fully compliant) Android system image. You can install an add-on if you want to make use of its external library in your application. For example, the Google APIs Add-On lets you develop an application that takes advantage of the Google Maps external library. </p>
-
-<p>Use the Android SDK and AVD Manager tool to download add-ons and other components into your SDK. </p>
-
-<p><strong>5. Get started with an application project</strong></p>
+<p><strong>6. Get started with an application project</strong></p>
 
 <p>Once you've set up your SDK, the next step is to start a new application project or move existing applications into the new SDK.</p>
 
