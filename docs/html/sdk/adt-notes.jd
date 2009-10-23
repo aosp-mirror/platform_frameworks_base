@@ -48,8 +48,8 @@ bigger than the screen.</li>
 <ul>
 <li>Includes the improvements from the standlone DDMS, revision 3.</li>
 <li>Adds an option to open HPROF files into eclipse instead of writing them on
-disk. If a profiler such as MAT (Memory Analyzer Tool http://eclipse.org/mat) is
-installed, it'll open the file.</li>
+disk. If a profiler such as MAT (<a href="http://eclipse.org/mat">Memory Analyzer 
+Tool</a>) is installed, it'll open the file.</li>
 </ul>
 
 <h3>Android SDK and AVD Manager integration</h3>
