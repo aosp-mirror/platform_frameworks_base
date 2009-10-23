@@ -199,6 +199,8 @@ class HTML5VideoViewProxy extends Handler
     public void playbackEnded() {
         Message msg = Message.obtain(mWebCoreHandler, ENDED);
         mWebCoreHandler.sendMessage(msg);
+        // also send a message to ourselves to return to the WebView
+        sendMessage(obtainMessage(ENDED));
     }
 
     // Handler for the messages from WebCore thread to the UI thread.
@@ -224,6 +226,7 @@ class HTML5VideoViewProxy extends Handler
                 VideoPlayer.pause(this);
                 break;
             }
+            case ENDED:
             case ERROR: {
                 WebChromeClient client = mWebView.getWebChromeClient();
                 if (client != null) {
