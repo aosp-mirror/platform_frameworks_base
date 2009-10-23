@@ -80,29 +80,37 @@ public interface AccountManagerFuture<V> {
     boolean isDone();
 
     /**
-     * Wrapper for {@link java.util.concurrent.Future#get()}. If the get() throws
-     * {@link InterruptedException} then the
-     * {@link AccountManagerFuture} is canceled and
-     * {@link android.accounts.OperationCanceledException} is thrown.
-     * @return the {@link android.os.Bundle} that is returned by get()
-     * @throws android.accounts.OperationCanceledException if get() throws the unchecked
-     * CancellationException
-     * or if the Future was interrupted.
+     * Accessor for the future result the {@link AccountManagerFuture} represents. This
+     * call will block until the result is available. In order to check if the result is
+     * available without blocking, one may call {@link #isDone()} and  {@link #isCancelled()}.
+     * If the request that generated this result fails or is canceled then an exception
+     * will be thrown rather than the call returning normally.
+     * @return the actual result
+     * @throws android.accounts.OperationCanceledException if the request was canceled for any
+     * reason
+     * @throws android.accounts.AuthenticatorException if there was an error communicating with
+     * the authenticator or if the authenticator returned an invalid response
+     * @throws java.io.IOException if the authenticator returned an error response that indicates
+     * that it encountered an IOException while communicating with the authentication server
      */
     V getResult() throws OperationCanceledException, IOException, AuthenticatorException;
 
     /**
-     * Wrapper for {@link java.util.concurrent.Future#get()}. If the get() throws
-     * {@link InterruptedException} then the
-     * {@link AccountManagerFuture} is canceled and
-     * {@link android.accounts.OperationCanceledException} is thrown.
+     * Accessor for the future result the {@link AccountManagerFuture} represents. This
+     * call will block until the result is available. In order to check if the result is
+     * available without blocking, one may call {@link #isDone()} and  {@link #isCancelled()}.
+     * If the request that generated this result fails or is canceled then an exception
+     * will be thrown rather than the call returning normally. If a timeout is specified then
+     * the request will automatically be canceled if it does not complete in that amount of time.
      * @param timeout the maximum time to wait
-     * @param unit the time unit of the timeout argument
-     * @return the {@link android.os.Bundle} that is returned by
-     * {@link java.util.concurrent.Future#get()}
-     * @throws android.accounts.OperationCanceledException if get() throws the unchecked
-     * {@link java.util.concurrent.CancellationException} or if the {@link AccountManagerFuture}
-     * was interrupted.
+     * @param unit the time unit of the timeout argument. This must not be null.
+     * @return the actual result
+     * @throws android.accounts.OperationCanceledException if the request was canceled for any
+     * reason
+     * @throws android.accounts.AuthenticatorException if there was an error communicating with
+     * the authenticator or if the authenticator returned an invalid response
+     * @throws java.io.IOException if the authenticator returned an error response that indicates
+     * that it encountered an IOException while communicating with the authentication server
      */
     V getResult(long timeout, TimeUnit unit)
             throws OperationCanceledException, IOException, AuthenticatorException;
