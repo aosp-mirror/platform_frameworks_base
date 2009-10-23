@@ -61,9 +61,7 @@ earlier, you should read this document and consider how you may need to adapt
 your application for proper display on new devices that offer different screens
 and that are running Android 1.6 or later. In most cases, only minor adjustments
 are needed, however you should make sure to <a href="#testing">test your
-application</a> on all of the new screens supported in Android 1.6. 
-
-<!--See <a href="#migrating">Migrating</a> for strategies e you can continue using the previous API level and use target API level, or you can just compile. --></p>
+application</a> on all supported screens. </p>
 
 <p>In particular, if you have an existing application that you would like to
 make available for users of devices with small screens (such as QVGA), please
@@ -73,7 +71,11 @@ information about how to do that. </p>
 
 <h2 id="overview">Overview of Screens Support</h2>
 
-<p>The sections below provide an overview of the Android platform's support for multiple screens, including an introduction to terms and concepts used in this document and in the API, a summary of the screen configurations that the platform supports, and an overview of the API and underlying screen-compatibility features.</p>
+<p>The sections below provide an overview of the Android platform's support for
+multiple screens, including an introduction to terms and concepts used in this
+document and in the API, a summary of the screen configurations that the
+platform supports, and an overview of the API and underlying
+screen-compatibility features.</p>
 
 
 <h3>Terms and Concepts</h3>
@@ -462,7 +464,7 @@ pixels</a> for more information. </p>
 
 <h3 id="attrs">Manifest attributes for screens support</h3>
 
-<p> Android 1.6 introduces a new manifest element, 
+<p> Android 1.6 introduced a new manifest element, 
 <a href="{@docRoot}guide/topics/manifest/supports-screens-element.html"><code>&lt;supports-screens&gt;</code></a>,
 whose attributes you can use to control the
 display of your application on different classes of device screens, as listed
@@ -631,8 +633,8 @@ appropriate attributes to <code>false</code>.
 
 <h3 id="qualifiers">Resource directory qualifiers for screen size and density</h3>
 
-<p>Android 1.6 supports new resource directory qualifiers for selecting
-resources based on the characteristics of the screen on which your application
+<p>Android supports resource directory qualifiers for controlling the selection
+of resources based on the characteristics of the screen on which your application
 is running. You can use these qualifiers to provide size- and density-specific
 resources in your application. For more information about the generalized sizes
 and densities that correspond to the qualifiers, see <a href="#range">Table
@@ -693,14 +695,14 @@ to the baseline screen configuration.</td>
 </tr>
 <tr>
 <td>Platform version</td>
-<td><code>v4</code></td>
-<td>Resources that are for use only on Android 1.6 (API Level 4) or higher
-platform versions. If your application is designed to run on both Android 1.5
-(or lower) and Android 1.6 (and higher), you can use this qualifier to tag
-resources that should be excluded when your application is running on Android
-1.5 or earlier. Using this qualifier is necessary in some cases, if the older
-platform is inadvertently loading resources from an Android 1.6 resources
-directory. </td>
+<td><nobr><code>v&lt;api-level&gt;</code></nobr></td>
+<td>Resources that are for use only on a specific API Level or higher. For
+example, if your application is designed to run on both Android 1.5 (API Level
+3) and Android 1.6 (API Level 4 and higher), you can use the <code>-v4</code>
+qualifier to tag any resources that should be excluded when your application is
+running on Android 1.5 (API Level 3). Using the version qualifier is necessary
+in some cases, if the older platform is inadvertently loading resources from a
+directory containing resources for a newer platform. </td>
 </tr>
 </table>
 
@@ -975,8 +977,8 @@ Here's how to do that:</p>
 <code>android:minSdkVersion</code> attribute as it is. You <em>do not</em> need
 to increment the value of the attribute to support new devices and multiple
 screens. </li>
-  <li>Extend compatibility for Android 1.6 devices by adding a new attribute
-&mdash; <code>android:targetSdkVersion</code> &mdash; to the
+  <li>Extend compatibility for Android 1.6 (and higher) devices by adding 
+a new attribute &mdash; <code>android:targetSdkVersion</code> &mdash; to the
 <code>uses-sdk</code> element. Set the value of the attribute to
 "<code>4</code>". This allows your application to "inherit" the platform's
 multiple screens support, even though it is technically using an earlier version
@@ -988,11 +990,12 @@ later, this is where you will add them.</li>
 the Android 1.6 (API Level 4) library, rather than against the Android 1.5 (or
 earlier) library. You will not be able to compile your application against the
 older platform because of the new manifest attribute. </li>
-  <li>Set up AVDs for testing your application on Android 1.6. Create AVDs that
-use the screen sizes and densities that you want to support. When you create the
-AVDs, make sure to select the Android 1.6 platform as the system image to run.
-For more information, see <a href="#testing">How to Test Your Application on
-Multiple Screens</a>, below.</li>
+  <li>Set up AVDs for testing your application on Android 1.6 and higher
+releases. Create AVDs that use the screen sizes and densities that you want to
+support. When you create the AVDs, make sure to select the Android 1.6 or higher
+platform as the system image to run. For more information, see <a
+href="#testing">How to Test Your Application on Multiple Screens</a>,
+below.</li>
   <li>Set up AVDs for testing your application on Android 1.5 (or earlier
 platform). You need AVDs running the older platforms you are targeting, so that
 you can test for compatibility and ensure that there are no functional
@@ -1018,10 +1021,11 @@ qualifiers</a>. Qualifiers must be arranged in a proscribed order. See
 <a href="{@docRoot}guide/topics/resources/resources-i18n.html#AlternateResources">
 Alternate Resources</a> for more information. </li>
     <li>Note that if you add size- or density-specific resource directories
-tagged with any of the Android 1.6 qualifiers listed in this document, you
-should make sure to also tag those directories with the <code>v4</code>
-qualifier. This ensures that those resources will be ignored when the
-application is run on Android 1.5 or lower platform versions.</p></li>
+tagged with any of the resource qualifiers listed in this document, you should
+make sure to also tag those directories with the <code>v&lt;api-level&gt;</code>
+qualifier (for example, <code>-v4</code>). This ensures that those resources
+will be ignored when the application is run on Android 1.5 or lower platform
+versions.</p></li>
     </ul>
   </li>
   <li>If your application does not offer support (such as custom layouts) for
@@ -1074,12 +1078,18 @@ the defaults. For general information about working with AVDs, see
 <a href="{@docRoot}guide/developing/tools/avd.html">Android Virtual
 Devices</a>.</p>
 
-<p>The Android 1.6 SDK includes these emulator skins, which represent the
-primary screen configurations that your should test:</p>
+<p>The Android 1.6 and higher platforms in the SDK include these emulator skins,
+which represent the primary screen configurations that your should test:</p>
 
 <ul>
   <li>
     QVGA (240x320, low density, small screen)
+  </li>
+  <li>
+    WQVGA400 (240x400, low density, normal screen)
+  </li>
+  <li>
+    WQVGA432 (240x432, low density, normal screen)
   </li>
   <li>
     HVGA (320x480, medium density, normal screen)

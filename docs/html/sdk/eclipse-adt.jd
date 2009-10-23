@@ -265,20 +265,6 @@ installation. Fully remove your existing ADT Plugin as described in <a
 href="#uninstalling">Uninstalling the ADT Plugin</a>, below, and then follow the guide to <a
 href="#installing">Installing the ADT Plugin</a>.</p>
 
-<h3 id="updateEclipsePrefs">Update your Eclipse SDK Preferences</h3>
-
-<p>The last step is to update your Eclipse preferences to point to the new 
-SDK directory:</p>
-<ol>
-  <li>Select <strong>Window</strong> > <strong>Preferences</strong> to open 
-      the Preferences panel (Mac: <strong>Eclipse</strong> > <strong>Preferences
-      </strong>).</li>
-  <li>Select <strong>Android</strong> from the left panel.</li>
-  <li>For the SDK Location, click <strong>Browse</strong> 
-  and locate your SDK directory.</li>
-  <li>Click <strong>Apply</strong>, then <strong>OK</strong>.</li>
-</ol>
-
 
 <h2 id="uninstalling">Uninstalling the ADT plugin</h2>
 
