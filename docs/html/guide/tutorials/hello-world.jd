@@ -29,7 +29,7 @@ You can then return to this tutorial and ignore anything about Eclipse.</p>
 
 <p>Before you start, you should already have the very latest SDK installed, and if you're using
 Eclipse, you should have installed the ADT plugin as well. If you have not installed these, see 
-<a href="{@docRoot}sdk/{@sdkCurrent}/installing.html">Installing the Android SDK</a> and return
+<a href="{@docRoot}sdk/installing.html">Installing the Android SDK</a> and return
 here when you've completed the installation.</p>
 
 <h2 id="avd">Create an AVD</h2>
