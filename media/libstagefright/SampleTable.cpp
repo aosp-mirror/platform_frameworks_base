@@ -70,7 +70,7 @@ status_t SampleTable::setChunkOffsetParams(
     }
 
     uint8_t header[8];
-    if (mDataSource->read_at(
+    if (mDataSource->readAt(
                 data_offset, header, sizeof(header)) < (ssize_t)sizeof(header)) {
         return ERROR_IO;
     }
@@ -108,7 +108,7 @@ status_t SampleTable::setSampleToChunkParams(
     }
 
     uint8_t header[8];
-    if (mDataSource->read_at(
+    if (mDataSource->readAt(
                 data_offset, header, sizeof(header)) < (ssize_t)sizeof(header)) {
         return ERROR_IO;
     }
@@ -142,7 +142,7 @@ status_t SampleTable::setSampleSizeParams(
     }
 
     uint8_t header[12];
-    if (mDataSource->read_at(
+    if (mDataSource->readAt(
                 data_offset, header, sizeof(header)) < (ssize_t)sizeof(header)) {
         return ERROR_IO;
     }
@@ -194,7 +194,7 @@ status_t SampleTable::setTimeToSampleParams(
     }
 
     uint8_t header[8];
-    if (mDataSource->read_at(
+    if (mDataSource->readAt(
                 data_offset, header, sizeof(header)) < (ssize_t)sizeof(header)) {
         return ERROR_IO;
     }
@@ -208,7 +208,7 @@ status_t SampleTable::setTimeToSampleParams(
     mTimeToSample = new uint32_t[mTimeToSampleCount * 2];
 
     size_t size = sizeof(uint32_t) * mTimeToSampleCount * 2;
-    if (mDataSource->read_at(
+    if (mDataSource->readAt(
                 data_offset + 8, mTimeToSample, size) < (ssize_t)size) {
         return ERROR_IO;
     }
@@ -228,7 +228,7 @@ status_t SampleTable::setSyncSampleParams(off_t data_offset, size_t data_size) {
     mSyncSampleOffset = data_offset;
 
     uint8_t header[8];
-    if (mDataSource->read_at(
+    if (mDataSource->readAt(
                 data_offset, header, sizeof(header)) < (ssize_t)sizeof(header)) {
         return ERROR_IO;
     }
@@ -264,7 +264,7 @@ status_t SampleTable::getChunkOffset(uint32_t chunk_index, off_t *offset) {
     if (mChunkOffsetType == kChunkOffsetType32) {
         uint32_t offset32;
 
-        if (mDataSource->read_at(
+        if (mDataSource->readAt(
                     mChunkOffsetOffset + 8 + 4 * chunk_index,
                     &offset32,
                     sizeof(offset32)) < (ssize_t)sizeof(offset32)) {
@@ -276,7 +276,7 @@ status_t SampleTable::getChunkOffset(uint32_t chunk_index, off_t *offset) {
         CHECK_EQ(mChunkOffsetType, kChunkOffsetType64);
 
         uint64_t offset64;
-        if (mDataSource->read_at(
+        if (mDataSource->readAt(
                     mChunkOffsetOffset + 8 + 8 * chunk_index,
                     &offset64,
                     sizeof(offset64)) < (ssize_t)sizeof(offset64)) {
@@ -313,7 +313,7 @@ status_t SampleTable::getChunkForSample(
     uint32_t index = 0;
     while (index < mNumSampleToChunkOffsets) {
         uint8_t buffer[12];
-        if (mDataSource->read_at(mSampleToChunkOffset + 8 + index * 12,
+        if (mDataSource->readAt(mSampleToChunkOffset + 8 + index * 12,
                                  buffer, sizeof(buffer)) < (ssize_t)sizeof(buffer)) {
             return ERROR_IO;
         }
@@ -362,7 +362,7 @@ status_t SampleTable::getSampleSize(
     switch (mSampleSizeFieldSize) {
         case 32:
         {
-            if (mDataSource->read_at(
+            if (mDataSource->readAt(
                         mSampleSizeOffset + 12 + 4 * sample_index,
                         sample_size, sizeof(*sample_size)) < (ssize_t)sizeof(*sample_size)) {
                 return ERROR_IO;
@@ -375,7 +375,7 @@ status_t SampleTable::getSampleSize(
         case 16:
         {
             uint16_t x;
-            if (mDataSource->read_at(
+            if (mDataSource->readAt(
                         mSampleSizeOffset + 12 + 2 * sample_index,
                         &x, sizeof(x)) < (ssize_t)sizeof(x)) {
                 return ERROR_IO;
@@ -388,7 +388,7 @@ status_t SampleTable::getSampleSize(
         case 8:
         {
             uint8_t x;
-            if (mDataSource->read_at(
+            if (mDataSource->readAt(
                         mSampleSizeOffset + 12 + sample_index,
                         &x, sizeof(x)) < (ssize_t)sizeof(x)) {
                 return ERROR_IO;
@@ -403,7 +403,7 @@ status_t SampleTable::getSampleSize(
             CHECK_EQ(mSampleSizeFieldSize, 4);
 
             uint8_t x;
-            if (mDataSource->read_at(
+            if (mDataSource->readAt(
                         mSampleSizeOffset + 12 + sample_index / 2,
                         &x, sizeof(x)) < (ssize_t)sizeof(x)) {
                 return ERROR_IO;
@@ -554,7 +554,7 @@ status_t SampleTable::findClosestSyncSample(
     uint32_t right = mNumSyncSamples;
     while (left < right) {
         uint32_t mid = (left + right) / 2;
-        if (mDataSource->read_at(
+        if (mDataSource->readAt(
                     mSyncSampleOffset + 8 + (mid - 1) * 4, &x, 4) != 4) {
             return ERROR_IO;
         }
@@ -597,7 +597,7 @@ status_t SampleTable::findThumbnailSample(uint32_t *sample_index) {
 
     for (size_t i = 0; i < numSamplesToScan; ++i) {
         uint32_t x;
-        if (mDataSource->read_at(
+        if (mDataSource->readAt(
                     mSyncSampleOffset + 8 + i * 4, &x, 4) != 4) {
             return ERROR_IO;
         }
