@@ -507,7 +507,7 @@ void LayerBase::loadTexture(Texture* texture,
         // uh?
         return;
     }
-    
+
     glBindTexture(GL_TEXTURE_2D, texture->name);
 
     /*
