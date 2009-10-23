@@ -101,8 +101,9 @@ built-in applications:</p>
 <p>The system image included in the downloadable platform provides a variety of
 built-in locales. In some cases, region-specific strings are available for the
 locales. In other cases, a default version of the language is used. The
-languages that will be available in the Android 1.6 system image are listed
-below (with <em>language</em>_<em>country/region</em> locale descriptor).</p>
+languages that are available in the Android {@sdkPlatformVersion} system 
+image are listed below (with <em>language</em>_<em>country/region</em> locale 
+descriptor).</p>
 
 <table style="border:0;padding-bottom:0;margin-bottom:0;">
 <tr>
@@ -144,7 +145,7 @@ below (with <em>language</em>_<em>country/region</em> locale descriptor).</p>
 <p>Localized UI strings match the locales that are accessible 
 through Settings.</p>
 
-<h2 id="api-changes">Emulator Skins</h2>
+<h2 id="skins">Emulator Skins</h2>
 
 <p>The downloadable platform includes a set of emulator skins that you can use for modeling your application in different screen sizes and resolutions. The emulator skins are: </p>
 
@@ -198,8 +199,8 @@ system to correctly determine whether an application is compatible with
 the system, prior to installing the application. </p>
 
 <p>To use APIs introduced in Android {@sdkPlatformVersion} in your application, you need to 
-set the proper value, "{@sdkPlatformApiLevel}", in the <code>&lt;uses-sdk&gt;</code> attributes in your 
-application's manifest. </p>
+set the proper value, "{@sdkPlatformApiLevel}", in the attributes of the <code>&lt;uses-sdk&gt;</code> 
+element in your application's manifest. </p>
 
 <p>For more information about how to use API Level, see the <a
 href="{@docRoot}guide/appendix/api-levels.html">API Levels</a> document. </p>
@@ -232,22 +233,7 @@ href="{@docRoot}guide/appendix/api-levels.html">API Levels</a> document. </p>
 
 <h4>WebView</h4>
 <ul>
-<li>HTML5 support:
-  <ul>
-  <li>Database API support, for client-side databases using SQL.</li>
-  <li>Application cache support, for offline applications.</li>
-  <li>Geolocation API support, to provide location information about the device.</li>
-  <li>&lt;video&gt; tag support in Fullscreen mode.</li>
-  </ul>
-</li>
-<li>Deprecated Gears; HTML5 database APIs now supported instead.</li>
 <li>Deprecated classes: UrlInterceptHandler, Plugin, PluginData, PluginList, UrlInterceptRegistry.</li>
-<li>DPI support for WebView
-  <ul>
-  <li>In viewport meta tag, target-densityDpi can be specified to control the default zoom.</li>
-  <li>&lt;meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,target-densityDpi=device-dpi"/&gt; will ensure the page to be loaded with 100% on any dpi devices.</li>
-  </ul>
-</li>
 </ul>
 
 <h4>Camera</h4>
