@@ -539,9 +539,8 @@ height="158" style="margin-left:15px"></p>
 <p><img src="{@docRoot}images/hello_l10n/using_custom_locale.png" alt="using custom locale"
 width="512" height="299" style="margin-left:15px"></p>
 
-<p>For a list of supported locales, see the 
-<a href="{@docRoot}sdk/android-{@sdkCurrentVersion}.html">Android
-Version Notes</a>.</p>
+<p>For a list of supported locales in a specific Android platform, see the 
+associated notes in the "SDK" tab, under "Downloadable SDK Components."</p>
 
 <p>Run the application for each of the expected locales, plus one unexpected
 locale. Here are some of the results you should see:</p>
