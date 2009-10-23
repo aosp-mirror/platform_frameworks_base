@@ -378,6 +378,8 @@ public class PhoneNumberUtils
     compareLoosely(String a, String b) {
         int ia, ib;
         int matched;
+        int numNonDialableCharsInA = 0;
+        int numNonDialableCharsInB = 0;
 
         if (a == null || b == null) return a == b;
 
@@ -398,6 +400,7 @@ public class PhoneNumberUtils
             if (!isDialable(ca)) {
                 ia--;
                 skipCmp = true;
+                numNonDialableCharsInA++;
             }
 
             cb = b.charAt(ib);
@@ -405,6 +408,7 @@ public class PhoneNumberUtils
             if (!isDialable(cb)) {
                 ib--;
                 skipCmp = true;
+                numNonDialableCharsInB++;
             }
 
             if (!skipCmp) {
@@ -416,13 +420,16 @@ public class PhoneNumberUtils
         }
 
         if (matched < MIN_MATCH) {
-            int aLen = a.length();
+            int effectiveALen = a.length() - numNonDialableCharsInA;
+            int effectiveBLen = b.length() - numNonDialableCharsInB;
 
-            // if the input strings match, but their lengths < MIN_MATCH,
-            // treat them as equal.
-            if (aLen == b.length() && aLen == matched) {
+
+            // if the number of dialable chars in a and b match, but the matched chars < MIN_MATCH,
+            // treat them as equal (i.e. 404-04 and 40404)
+            if (effectiveALen == effectiveBLen && effectiveALen == matched) {
                 return true;
             }
+
             return false;
         }
 
