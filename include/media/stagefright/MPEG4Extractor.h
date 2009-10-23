@@ -33,7 +33,7 @@ public:
 
     size_t countTracks();
     sp<MediaSource> getTrack(size_t index);
-    sp<MetaData> getTrackMetaData(size_t index);
+    sp<MetaData> getTrackMetaData(size_t index, uint32_t flags);
 
 protected:
     virtual ~MPEG4Extractor();
@@ -44,6 +44,7 @@ private:
         sp<MetaData> meta;
         uint32_t timescale;
         sp<SampleTable> sampleTable;
+        bool includes_expensive_metadata;
     };
 
     sp<DataSource> mDataSource;

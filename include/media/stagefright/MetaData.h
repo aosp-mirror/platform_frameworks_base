@@ -46,6 +46,7 @@ enum {
     kKeyDecoderComponent  = 'decC',  // cstring
     kKeyBufferID          = 'bfID',
     kKeyMaxInputSize      = 'inpS',
+    kKeyThumbnailTime     = 'thbT',  // int64_t (usecs)
 };
 
 enum {

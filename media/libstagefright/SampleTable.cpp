@@ -575,5 +575,52 @@ status_t SampleTable::findClosestSyncSample(
     return OK;
 }
 
+status_t SampleTable::findThumbnailSample(uint32_t *sample_index) {
+    if (mSyncSampleOffset < 0) {
+        // All samples are sync-samples.
+        *sample_index = 0;
+        return OK;
+    }
+
+    uint32_t bestSampleIndex = 0;
+    size_t maxSampleSize = 0;
+
+    static const size_t kMaxNumSyncSamplesToScan = 20;
+
+    // Consider the first kMaxNumSyncSamplesToScan sync samples and
+    // pick the one with the largest (compressed) size as the thumbnail.
+
+    size_t numSamplesToScan = mNumSyncSamples;
+    if (numSamplesToScan > kMaxNumSyncSamplesToScan) {
+        numSamplesToScan = kMaxNumSyncSamplesToScan;
+    }
+
+    for (size_t i = 0; i < numSamplesToScan; ++i) {
+        uint32_t x;
+        if (mDataSource->read_at(
+                    mSyncSampleOffset + 8 + i * 4, &x, 4) != 4) {
+            return ERROR_IO;
+        }
+        x = ntohl(x);
+        --x;
+
+        // Now x is a sample index.
+        size_t sampleSize;
+        status_t err = getSampleSize(x, &sampleSize);
+        if (err != OK) {
+            return err;
+        }
+
+        if (i == 0 || sampleSize > maxSampleSize) {
+            bestSampleIndex = x;
+            maxSampleSize = sampleSize;
+        }
+    }
+
+    *sample_index = bestSampleIndex;
+
+    return OK;
+}
+
 }  // namespace android
 

@@ -1943,8 +1943,23 @@ status_t OMXCodec::read(
         return UNKNOWN_ERROR;
     }
 
+    bool seeking = false;
+    int64_t seekTimeUs;
+    if (options && options->getSeekTo(&seekTimeUs)) {
+        seeking = true;
+    }
+
     if (mInitialBufferSubmit) {
         mInitialBufferSubmit = false;
+
+        if (seeking) {
+            CHECK(seekTimeUs >= 0);
+            mSeekTimeUs = seekTimeUs;
+
+            // There's no reason to trigger the code below, there's
+            // nothing to flush yet.
+            seeking = false;
+        }
 
         drainInputBuffers();
 
@@ -1955,8 +1970,7 @@ status_t OMXCodec::read(
         }
     }
 
-    int64_t seekTimeUs;
-    if (options && options->getSeekTo(&seekTimeUs)) {
+    if (seeking) {
         CODEC_LOGV("seeking to %lld us (%.2f secs)", seekTimeUs, seekTimeUs / 1E6);
 
         mSignalledEOS = false;
