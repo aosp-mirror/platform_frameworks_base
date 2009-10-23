@@ -23,7 +23,7 @@
 #include <media/stagefright/MediaDebug.h>
 #include <media/stagefright/MediaDefs.h>
 #include <media/stagefright/MetaData.h>
-#include <media/stagefright/MPEG4Extractor.h>
+#include <media/stagefright/MediaExtractor.h>
 #include <media/stagefright/MPEG4Writer.h>
 #include <media/stagefright/MmapSource.h>
 #include <media/stagefright/OMXClient.h>
@@ -88,8 +88,8 @@ private:
 sp<MediaSource> createSource(const char *filename) {
     sp<MediaSource> source;
 
-    sp<MPEG4Extractor> extractor =
-        new MPEG4Extractor(new MmapSource(filename));
+    sp<MediaExtractor> extractor =
+        MediaExtractor::Create(new MmapSource(filename));
 
     size_t num_tracks = extractor->countTracks();
 

@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-#include <media/stagefright/AMRExtractor.h>
+#include "include/AMRExtractor.h"
+#include "include/MP3Extractor.h"
+#include "include/MPEG4Extractor.h"
+
 #include <media/stagefright/DataSource.h>
 #include <media/stagefright/MediaErrors.h>
-#include <media/stagefright/MP3Extractor.h>
-#include <media/stagefright/MPEG4Extractor.h>
 #include <utils/String8.h>
 
 namespace android {

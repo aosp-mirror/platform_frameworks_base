@@ -18,11 +18,12 @@
 #define LOG_TAG "MediaExtractor"
 #include <utils/Log.h>
 
-#include <media/stagefright/AMRExtractor.h>
+#include "include/AMRExtractor.h"
+#include "include/MP3Extractor.h"
+#include "include/MPEG4Extractor.h"
+
 #include <media/stagefright/DataSource.h>
 #include <media/stagefright/MediaDefs.h>
-#include <media/stagefright/MP3Extractor.h>
-#include <media/stagefright/MPEG4Extractor.h>
 #include <media/stagefright/MediaExtractor.h>
 #include <utils/String8.h>
 
