@@ -2904,6 +2904,16 @@ public final class ViewRoot extends Handler implements ViewParent,
                 }
             }
         }
+        
+        public void dispatchWallpaperCommand(String action, int x, int y,
+                int z, Bundle extras, boolean sync) {
+            if (sync) {
+                try {
+                    sWindowSession.wallpaperCommandComplete(asBinder(), null);
+                } catch (RemoteException e) {
+                }
+            }
+        }
     }
 
     /**

@@ -592,6 +592,31 @@ public class WallpaperManager {
     }
     
     /**
+     * Send an arbitrary command to the current active wallpaper.
+     * 
+     * @param windowToken The window who these offsets should be associated
+     * with, as returned by {@link android.view.View#getWindowToken()
+     * View.getWindowToken()}.
+     * @param action Name of the command to perform.  This must be a scoped
+     * name to avoid collisions, such as "com.mycompany.wallpaper.DOIT".
+     * @param x Arbitrary integer argument based on command.
+     * @param y Arbitrary integer argument based on command.
+     * @param z Arbitrary integer argument based on command.
+     * @param extras Optional additional information for the command, or null.
+     */
+    public void sendWallpaperCommand(IBinder windowToken, String action,
+            int x, int y, int z, Bundle extras) {
+        try {
+            //Log.v(TAG, "Sending new wallpaper offsets from app...");
+            ViewRoot.getWindowSession(mContext.getMainLooper()).sendWallpaperCommand(
+                    windowToken, action, x, y, z, extras, false);
+            //Log.v(TAG, "...app returning after sending offsets!");
+        } catch (RemoteException e) {
+            // Ignore.
+        }
+    }
+    
+    /**
      * Clear the offsets previously associated with this window through
      * {@link #setWallpaperOffsets(IBinder, float, float)}.  This reverts
      * the window to its default state, where it does not cause the wallpaper

@@ -18,10 +18,10 @@
 package android.view;
 
 import android.graphics.Rect;
+import android.os.Bundle;
+import android.os.ParcelFileDescriptor;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
-
-import android.os.ParcelFileDescriptor;
 
 /**
  * API back to a client window that the Window Manager uses to inform it of
@@ -63,4 +63,7 @@ oneway interface IWindow {
      * Called for wallpaper windows when their offsets change.
      */
     void dispatchWallpaperOffsets(float x, float y, boolean sync);
+    
+    void dispatchWallpaperCommand(String action, int x, int y,
+            int z, in Bundle extras, boolean sync);
 }

@@ -19,6 +19,7 @@ package android.view;
 
 import android.graphics.Rect;
 import android.graphics.Region;
+import android.os.Bundle;
 import android.view.IWindow;
 import android.view.MotionEvent;
 import android.view.WindowManager;
@@ -116,4 +117,9 @@ interface IWindowSession {
     void setWallpaperPosition(IBinder windowToken, float x, float y);
     
     void wallpaperOffsetsComplete(IBinder window);
+    
+    Bundle sendWallpaperCommand(IBinder window, String action, int x, int y,
+            int z, in Bundle extras, boolean sync);
+    
+    void wallpaperCommandComplete(IBinder window, in Bundle result);
 }
