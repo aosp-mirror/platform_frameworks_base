@@ -28,7 +28,7 @@ bool DataSource::getUInt16(off_t offset, uint16_t *x) {
     *x = 0;
 
     uint8_t byte[2];
-    if (read_at(offset, byte, 2) != 2) {
+    if (readAt(offset, byte, 2) != 2) {
         return false;
     }
 

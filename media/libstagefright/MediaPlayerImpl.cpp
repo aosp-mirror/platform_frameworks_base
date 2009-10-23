@@ -26,9 +26,7 @@
 #include <unistd.h>
 
 #include <media/stagefright/AudioPlayer.h>
-#include <media/stagefright/CachingDataSource.h>
 // #include <media/stagefright/CameraSource.h>
-#include <media/stagefright/HTTPDataSource.h>
 #include <media/stagefright/MediaDebug.h>
 #include <media/stagefright/MediaExtractor.h>
 #include <media/stagefright/MediaPlayerImpl.h>
@@ -71,18 +69,7 @@ MediaPlayerImpl::MediaPlayerImpl(const char *uri)
         mVideoDecoder = CameraSource::Create();
 #endif
     } else {
-        sp<DataSource> source;
-        if (!strncasecmp("file://", uri, 7)) {
-            source = new MmapSource(uri + 7);
-        } else if (!strncasecmp("http://", uri, 7)) {
-            source = new HTTPDataSource(uri);
-            source = new CachingDataSource(source, 64 * 1024, 10);
-        } else {
-            // Assume it's a filename.
-            source = new MmapSource(uri);
-        }
-
-        mExtractor = MediaExtractor::Create(source);
+        mExtractor = MediaExtractor::CreateFromURI(uri);
 
         if (mExtractor == NULL) {
             return;

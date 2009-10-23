@@ -67,8 +67,7 @@ HTTPDataSource::HTTPDataSource(const char *uri)
     mPort = port;
     mPath = strdup(path.c_str());
 
-    status_t err = mHttp->connect(mHost, mPort);
-    CHECK_EQ(err, OK);
+    mInitCheck = mHttp->connect(mHost, mPort);
 }
 
 HTTPDataSource::HTTPDataSource(const char *host, int port, const char *path)
@@ -79,8 +78,11 @@ HTTPDataSource::HTTPDataSource(const char *host, int port, const char *path)
       mBuffer(malloc(kBufferSize)),
       mBufferLength(0),
       mBufferOffset(0) {
-    status_t err = mHttp->connect(mHost, mPort);
-    CHECK_EQ(err, OK);
+    mInitCheck = mHttp->connect(mHost, mPort);
+}
+
+status_t HTTPDataSource::initCheck() const {
+    return mInitCheck;
 }
 
 HTTPDataSource::~HTTPDataSource() {
@@ -96,7 +98,7 @@ HTTPDataSource::~HTTPDataSource() {
     mHttp = NULL;
 }
 
-ssize_t HTTPDataSource::read_at(off_t offset, void *data, size_t size) {
+ssize_t HTTPDataSource::readAt(off_t offset, void *data, size_t size) {
     if (offset >= mBufferOffset
             && offset < (off_t)(mBufferOffset + mBufferLength)) {
         size_t num_bytes_available = mBufferLength - (offset - mBufferOffset);

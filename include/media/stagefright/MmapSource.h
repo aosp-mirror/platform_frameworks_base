@@ -30,12 +30,13 @@ public:
     // Assumes ownership of "fd".
     MmapSource(int fd, int64_t offset, int64_t length);
 
-    virtual ~MmapSource();
+    virtual status_t initCheck() const;
 
-    status_t InitCheck() const;
-
-    virtual ssize_t read_at(off_t offset, void *data, size_t size);
+    virtual ssize_t readAt(off_t offset, void *data, size_t size);
     virtual status_t getSize(off_t *size);
+
+protected:
+    virtual ~MmapSource();
 
 private:
     int mFd;

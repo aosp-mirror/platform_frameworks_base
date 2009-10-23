@@ -31,7 +31,6 @@ class ShoutcastSource : public MediaSource {
 public:
     // Assumes ownership of "http".
     ShoutcastSource(HTTPStream *http);
-    virtual ~ShoutcastSource();
 
     virtual status_t start(MetaData *params = NULL);
     virtual status_t stop();
@@ -40,6 +39,9 @@ public:
 
     virtual status_t read(
             MediaBuffer **buffer, const ReadOptions *options = NULL);
+
+protected:
+    virtual ~ShoutcastSource();
 
 private:
     HTTPStream *mHttp;
