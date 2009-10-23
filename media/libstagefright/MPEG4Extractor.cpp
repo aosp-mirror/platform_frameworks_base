@@ -17,6 +17,7 @@
 #define LOG_TAG "MPEG4Extractor"
 #include <utils/Log.h>
 
+#include "include/MPEG4Extractor.h"
 #include "include/SampleTable.h"
 
 #include <arpa/inet.h>
@@ -27,7 +28,6 @@
 #include <string.h>
 
 #include <media/stagefright/DataSource.h>
-#include <media/stagefright/MPEG4Extractor.h>
 #include <media/stagefright/MediaBuffer.h>
 #include <media/stagefright/MediaBufferGroup.h>
 #include <media/stagefright/MediaDebug.h>
