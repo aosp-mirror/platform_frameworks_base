@@ -48,26 +48,7 @@ StagefrightMetadataRetriever::~StagefrightMetadataRetriever() {
 status_t StagefrightMetadataRetriever::setDataSource(const char *uri) {
     LOGV("setDataSource(%s)", uri);
 
-    sp<DataSource> source;
-    if (!strncasecmp("file://", uri, 7)) {
-        sp<MmapSource> mmapSource = new MmapSource(uri + 7);
-        if (mmapSource->InitCheck() != OK) {
-            return ERROR_IO;
-        }
-        source = mmapSource;
-    } else if (!strncasecmp("http://", uri, 7)) {
-        source = new HTTPDataSource(uri);
-        source = new CachingDataSource(source, 64 * 1024, 10);
-    } else {
-        // Assume it's a filename.
-        sp<MmapSource> mmapSource = new MmapSource(uri);
-        if (mmapSource->InitCheck() != OK) {
-            return ERROR_IO;
-        }
-        source = mmapSource;
-    }
-
-    mExtractor = MediaExtractor::Create(source);
+    mExtractor = MediaExtractor::CreateFromURI(uri);
 
     return mExtractor.get() != NULL ? OK : UNKNOWN_ERROR;
 }

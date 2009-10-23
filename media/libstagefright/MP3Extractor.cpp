@@ -177,7 +177,7 @@ static bool Resync(
         // of the datasource.
 
         uint8_t id3header[10];
-        if (source->read_at(0, id3header, sizeof(id3header))
+        if (source->readAt(0, id3header, sizeof(id3header))
                 < (ssize_t)sizeof(id3header)) {
             // If we can't even read these 10 bytes, we might as well bail out,
             // even if there _were_ 10 bytes of valid mp3 audio data...
@@ -228,7 +228,7 @@ static bool Resync(
             buffer_length = buffer_length - buffer_offset;
             buffer_offset = 0;
 
-            ssize_t n = source->read_at(
+            ssize_t n = source->readAt(
                     pos, &buffer[buffer_length], kMaxFrameSize - buffer_length);
 
             if (n <= 0) {
@@ -265,7 +265,7 @@ static bool Resync(
         valid = true;
         for (int j = 0; j < 3; ++j) {
             uint8_t tmp[4];
-            if (source->read_at(test_pos, tmp, 4) < 4) {
+            if (source->readAt(test_pos, tmp, 4) < 4) {
                 valid = false;
                 break;
             }
@@ -480,7 +480,7 @@ status_t MP3Source::read(
 
     size_t frame_size;
     for (;;) {
-        ssize_t n = mDataSource->read_at(mCurrentPos, buffer->data(), 4);
+        ssize_t n = mDataSource->readAt(mCurrentPos, buffer->data(), 4);
         if (n < 4) {
             buffer->release();
             buffer = NULL;
@@ -514,7 +514,7 @@ status_t MP3Source::read(
 
     CHECK(frame_size <= buffer->size());
 
-    ssize_t n = mDataSource->read_at(mCurrentPos, buffer->data(), frame_size);
+    ssize_t n = mDataSource->readAt(mCurrentPos, buffer->data(), frame_size);
     if (n < (ssize_t)frame_size) {
         buffer->release();
         buffer = NULL;

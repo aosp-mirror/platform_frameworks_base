@@ -156,7 +156,7 @@ status_t AMRSource::read(
     *out = NULL;
 
     uint8_t header;
-    ssize_t n = mDataSource->read_at(mOffset, &header, 1);
+    ssize_t n = mDataSource->readAt(mOffset, &header, 1);
 
     if (n < 1) {
         return ERROR_IO;
@@ -192,7 +192,7 @@ status_t AMRSource::read(
     // Round up bits to bytes and add 1 for the header byte.
     frameSize = (frameSize + 7) / 8 + 1;
 
-    n = mDataSource->read_at(mOffset, buffer->data(), frameSize);
+    n = mDataSource->readAt(mOffset, buffer->data(), frameSize);
 
     if (n != (ssize_t)frameSize) {
         buffer->release();
@@ -218,7 +218,7 @@ bool SniffAMR(
         const sp<DataSource> &source, String8 *mimeType, float *confidence) {
     char header[9];
 
-    if (source->read_at(0, header, sizeof(header)) != sizeof(header)) {
+    if (source->readAt(0, header, sizeof(header)) != sizeof(header)) {
         return false;
     }
 

@@ -81,12 +81,12 @@ MmapSource::~MmapSource() {
     }
 }
 
-status_t MmapSource::InitCheck() const {
+status_t MmapSource::initCheck() const {
     return mFd == -1 ? NO_INIT : OK;
 }
 
-ssize_t MmapSource::read_at(off_t offset, void *data, size_t size) {
-    LOGV("read_at offset:%ld data:%p size:%d", offset, data, size);
+ssize_t MmapSource::readAt(off_t offset, void *data, size_t size) {
+    LOGV("readAt offset:%ld data:%p size:%d", offset, data, size);
     CHECK(offset >= 0);
 
     size_t avail = 0;

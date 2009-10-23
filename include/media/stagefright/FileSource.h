@@ -29,11 +29,13 @@ namespace android {
 class FileSource : public DataSource {
 public:
     FileSource(const char *filename);
+
+    virtual status_t initCheck() const;
+
+    virtual ssize_t readAt(off_t offset, void *data, size_t size);
+
+protected:
     virtual ~FileSource();
-
-    status_t InitCheck() const;
-
-    virtual ssize_t read_at(off_t offset, void *data, size_t size);
 
 private:
     FILE *mFile;
