@@ -22,9 +22,12 @@
 #include "include/MP3Extractor.h"
 #include "include/MPEG4Extractor.h"
 
+#include <media/stagefright/CachingDataSource.h>
 #include <media/stagefright/DataSource.h>
+#include <media/stagefright/HTTPDataSource.h>
 #include <media/stagefright/MediaDefs.h>
 #include <media/stagefright/MediaExtractor.h>
+#include <media/stagefright/MmapSource.h>
 #include <utils/String8.h>
 
 namespace android {
@@ -57,6 +60,27 @@ sp<MediaExtractor> MediaExtractor::Create(
     }
 
     return NULL;
+}
+
+// static
+sp<MediaExtractor> MediaExtractor::CreateFromURI(
+        const char *uri, const char *mime) {
+    sp<DataSource> source;
+    if (!strncasecmp("file://", uri, 7)) {
+        source = new MmapSource(uri + 7);
+    } else if (!strncasecmp("http://", uri, 7)) {
+        source = new HTTPDataSource(uri);
+        source = new CachingDataSource(source, 64 * 1024, 10);
+    } else {
+        // Assume it's a filename.
+        source = new MmapSource(uri);
+    }
+
+    if (source == NULL || source->initCheck() != OK) {
+        return NULL;
+    }
+
+    return Create(source, mime);
 }
 
 }  // namespace android

@@ -29,12 +29,12 @@ public:
     HTTPDataSource(const char *host, int port, const char *path);
     HTTPDataSource(const char *uri);
 
+    virtual status_t initCheck() const;
+
+    virtual ssize_t readAt(off_t offset, void *data, size_t size);
+
+protected:
     virtual ~HTTPDataSource();
-
-    // XXXandih
-    status_t InitCheck() const { return OK; }
-
-    virtual ssize_t read_at(off_t offset, void *data, size_t size);
 
 private:
     enum {
@@ -49,6 +49,8 @@ private:
     void *mBuffer;
     size_t mBufferLength;
     off_t mBufferOffset;
+
+    status_t mInitCheck;
 
     HTTPDataSource(const HTTPDataSource &);
     HTTPDataSource &operator=(const HTTPDataSource &);

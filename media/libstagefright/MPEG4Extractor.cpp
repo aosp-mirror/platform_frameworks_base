@@ -249,7 +249,7 @@ static void MakeFourCCString(uint32_t x, char *s) {
 
 status_t MPEG4Extractor::parseChunk(off_t *offset, int depth) {
     uint32_t hdr[2];
-    if (mDataSource->read_at(*offset, hdr, 8) < 8) {
+    if (mDataSource->readAt(*offset, hdr, 8) < 8) {
         return ERROR_IO;
     }
     uint64_t chunk_size = ntohl(hdr[0]);
@@ -257,7 +257,7 @@ status_t MPEG4Extractor::parseChunk(off_t *offset, int depth) {
     off_t data_offset = *offset + 8;
 
     if (chunk_size == 1) {
-        if (mDataSource->read_at(*offset + 8, &chunk_size, 8) < 8) {
+        if (mDataSource->readAt(*offset + 8, &chunk_size, 8) < 8) {
             return ERROR_IO;
         }
         chunk_size = ntoh64(chunk_size);
@@ -274,7 +274,7 @@ status_t MPEG4Extractor::parseChunk(off_t *offset, int depth) {
 
     char buffer[256];
     if (chunk_size <= sizeof(buffer)) {
-        if (mDataSource->read_at(*offset, buffer, chunk_size) < chunk_size) {
+        if (mDataSource->readAt(*offset, buffer, chunk_size) < chunk_size) {
             return ERROR_IO;
         }
 
@@ -320,7 +320,7 @@ status_t MPEG4Extractor::parseChunk(off_t *offset, int depth) {
             CHECK(chunk_data_size >= 4);
 
             uint8_t version;
-            if (mDataSource->read_at(data_offset, &version, 1) < 1) {
+            if (mDataSource->readAt(data_offset, &version, 1) < 1) {
                 return ERROR_IO;
             }
 
@@ -334,7 +334,7 @@ status_t MPEG4Extractor::parseChunk(off_t *offset, int depth) {
                 }
 
                 uint8_t buffer[36 + 60];
-                if (mDataSource->read_at(
+                if (mDataSource->readAt(
                             data_offset, buffer, sizeof(buffer)) < (ssize_t)sizeof(buffer)) {
                     return ERROR_IO;
                 }
@@ -351,7 +351,7 @@ status_t MPEG4Extractor::parseChunk(off_t *offset, int depth) {
                 }
 
                 uint8_t buffer[24 + 60];
-                if (mDataSource->read_at(
+                if (mDataSource->readAt(
                             data_offset, buffer, sizeof(buffer)) < (ssize_t)sizeof(buffer)) {
                     return ERROR_IO;
                 }
@@ -389,7 +389,7 @@ status_t MPEG4Extractor::parseChunk(off_t *offset, int depth) {
             }
 
             uint8_t version;
-            if (mDataSource->read_at(
+            if (mDataSource->readAt(
                         data_offset, &version, sizeof(version))
                     < (ssize_t)sizeof(version)) {
                 return ERROR_IO;
@@ -406,7 +406,7 @@ status_t MPEG4Extractor::parseChunk(off_t *offset, int depth) {
             }
 
             uint32_t timescale;
-            if (mDataSource->read_at(
+            if (mDataSource->readAt(
                         timescale_offset, &timescale, sizeof(timescale))
                     < (ssize_t)sizeof(timescale)) {
                 return ERROR_IO;
@@ -416,7 +416,7 @@ status_t MPEG4Extractor::parseChunk(off_t *offset, int depth) {
 
             int64_t duration;
             if (version == 1) {
-                if (mDataSource->read_at(
+                if (mDataSource->readAt(
                             timescale_offset + 4, &duration, sizeof(duration))
                         < (ssize_t)sizeof(duration)) {
                     return ERROR_IO;
@@ -424,7 +424,7 @@ status_t MPEG4Extractor::parseChunk(off_t *offset, int depth) {
                 duration = ntoh64(duration);
             } else {
                 int32_t duration32;
-                if (mDataSource->read_at(
+                if (mDataSource->readAt(
                             timescale_offset + 4, &duration32, sizeof(duration32))
                         < (ssize_t)sizeof(duration32)) {
                     return ERROR_IO;
@@ -445,7 +445,7 @@ status_t MPEG4Extractor::parseChunk(off_t *offset, int depth) {
             }
 
             uint8_t buffer[24];
-            if (mDataSource->read_at(data_offset, buffer, 24) < 24) {
+            if (mDataSource->readAt(data_offset, buffer, 24) < 24) {
                 return ERROR_IO;
             }
 
@@ -472,7 +472,7 @@ status_t MPEG4Extractor::parseChunk(off_t *offset, int depth) {
 
             uint8_t buffer[8];
             CHECK(chunk_data_size >= (off_t)sizeof(buffer));
-            if (mDataSource->read_at(
+            if (mDataSource->readAt(
                         data_offset, buffer, 8) < 8) {
                 return ERROR_IO;
             }
@@ -515,7 +515,7 @@ status_t MPEG4Extractor::parseChunk(off_t *offset, int depth) {
                 return ERROR_MALFORMED;
             }
 
-            if (mDataSource->read_at(
+            if (mDataSource->readAt(
                         data_offset, buffer, sizeof(buffer)) < (ssize_t)sizeof(buffer)) {
                 return ERROR_IO;
             }
@@ -567,7 +567,7 @@ status_t MPEG4Extractor::parseChunk(off_t *offset, int depth) {
                 return ERROR_MALFORMED;
             }
 
-            if (mDataSource->read_at(
+            if (mDataSource->readAt(
                         data_offset, buffer, sizeof(buffer)) < (ssize_t)sizeof(buffer)) {
                 return ERROR_IO;
             }
@@ -678,7 +678,7 @@ status_t MPEG4Extractor::parseChunk(off_t *offset, int depth) {
                 return ERROR_BUFFER_TOO_SMALL;
             }
 
-            if (mDataSource->read_at(
+            if (mDataSource->readAt(
                         data_offset, buffer, chunk_data_size) < chunk_data_size) {
                 return ERROR_IO;
             }
@@ -702,7 +702,7 @@ status_t MPEG4Extractor::parseChunk(off_t *offset, int depth) {
                 return ERROR_BUFFER_TOO_SMALL;
             }
 
-            if (mDataSource->read_at(
+            if (mDataSource->readAt(
                         data_offset, buffer, chunk_data_size) < chunk_data_size) {
                 return ERROR_IO;
             }
@@ -889,7 +889,7 @@ status_t MPEG4Source::read(
     if (!mIsAVC || mWantsNALFragments) {
         if (newBuffer) {
             ssize_t num_bytes_read =
-                mDataSource->read_at(offset, (uint8_t *)mBuffer->data(), size);
+                mDataSource->readAt(offset, (uint8_t *)mBuffer->data(), size);
 
             if (num_bytes_read < (ssize_t)size) {
                 mBuffer->release();
@@ -944,7 +944,7 @@ status_t MPEG4Source::read(
         // the start code (0x00 00 00 01).
 
         ssize_t num_bytes_read =
-            mDataSource->read_at(offset, mSrcBuffer, size);
+            mDataSource->readAt(offset, mSrcBuffer, size);
 
         if (num_bytes_read < (ssize_t)size) {
             mBuffer->release();
@@ -995,7 +995,7 @@ bool SniffMPEG4(
         const sp<DataSource> &source, String8 *mimeType, float *confidence) {
     uint8_t header[8];
 
-    ssize_t n = source->read_at(4, header, sizeof(header));
+    ssize_t n = source->readAt(4, header, sizeof(header));
     if (n < (ssize_t)sizeof(header)) {
         return false;
     }

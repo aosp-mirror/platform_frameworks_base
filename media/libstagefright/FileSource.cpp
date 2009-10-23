@@ -30,11 +30,11 @@ FileSource::~FileSource() {
     }
 }
 
-status_t FileSource::InitCheck() const {
+status_t FileSource::initCheck() const {
     return mFile != NULL ? OK : NO_INIT;
 }
 
-ssize_t FileSource::read_at(off_t offset, void *data, size_t size) {
+ssize_t FileSource::readAt(off_t offset, void *data, size_t size) {
     Mutex::Autolock autoLock(mLock);
 
     int err = fseeko(mFile, offset, SEEK_SET);

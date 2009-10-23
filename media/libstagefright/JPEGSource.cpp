@@ -119,7 +119,7 @@ status_t JPEGSource::read(
     MediaBuffer *buffer;
     mGroup->acquire_buffer(&buffer);
 
-    ssize_t n = mSource->read_at(mOffset, buffer->data(), mSize - mOffset);
+    ssize_t n = mSource->readAt(mOffset, buffer->data(), mSize - mOffset);
 
     if (n <= 0) {
         buffer->release();
@@ -156,13 +156,13 @@ status_t JPEGSource::parseJPEG() {
 
     for (;;) {
         uint8_t marker;
-        if (mSource->read_at(i++, &marker, 1) != 1) {
+        if (mSource->readAt(i++, &marker, 1) != 1) {
             return ERROR_IO;
         }
 
         CHECK_EQ(marker, 0xff);
 
-        if (mSource->read_at(i++, &marker, 1) != 1) {
+        if (mSource->readAt(i++, &marker, 1) != 1) {
             return ERROR_IO;
         }
 

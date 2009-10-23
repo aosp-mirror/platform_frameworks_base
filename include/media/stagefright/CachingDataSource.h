@@ -29,9 +29,9 @@ public:
     CachingDataSource(
             const sp<DataSource> &source, size_t pageSize, int numPages);
 
-    status_t InitCheck() const;
+    virtual status_t initCheck() const;
 
-    virtual ssize_t read_at(off_t offset, void *data, size_t size);
+    virtual ssize_t readAt(off_t offset, void *data, size_t size);
 
 protected:
     virtual ~CachingDataSource();

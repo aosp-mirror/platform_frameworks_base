@@ -33,7 +33,9 @@ class DataSource : public RefBase {
 public:
     DataSource() {}
 
-    virtual ssize_t read_at(off_t offset, void *data, size_t size) = 0;
+    virtual status_t initCheck() const = 0;
+
+    virtual ssize_t readAt(off_t offset, void *data, size_t size) = 0;
 
     // Convenience methods:
     bool getUInt16(off_t offset, uint16_t *x);
