@@ -119,7 +119,8 @@ on which the application is able to run. The default value is "1".</li>
 <li><code>android:targetSdkVersion</code> &mdash; Specifies the API Level
 on which the application is designed to run. In some cases, this allows the
 application to use manifest elements or behaviors defined in the target
-API Level, rather than those in the minimum API Level.</li>
+API Level, rather than being restricted to using only those defined 
+for the minimum API Level.</li>
 <li><code>android:maxSdkVersion</code> &mdash; Specifies the maximum API Level
 on which the application is able to run.</li>
 </ul>

@@ -12,7 +12,7 @@ sdk.preview=0
     <li><a href="#Installing">Install the SDK</a></li>
     <li><a href="#InstallingADT">Install the ADT Plugin for Eclipse</a></li>
     <li><a href="#components">Add Platforms and Other SDK Components</a></li>
-    <li><a href="#sdkContents">SDK Contents</a></li>
+    <li><a href="#sdkContents">Explore the SDK</a></li>
     <li><a href="#NextSteps">Next Steps</a></li>
     <li><a href="#troubleshooting">Troubleshooting</a></li>
   </ol>
@@ -65,9 +65,9 @@ to install Eclipse, you can download it from this location: </p>
 <h2 id="Installing">Download and Install the SDK</h2>
 
 <p>Download the SDK package that is appropriate for your development computer.
-Unpack the Android SDK .zip archive to a suitable location on your machine. By
+Unpack the Android SDK archive to a suitable location on your machine. By
 default, the SDK files are unpacked into a directory named
-<code>android_sdk</code>. </p>
+<code>android-sdk-&lt;machine-platform&gt;</code>. </p>
 
 <p>Make a note of the name and location of the unpacked SDK directory on your
 system &mdash; you will need to refer to the SDK directory later, when setting
@@ -99,9 +99,6 @@ supply the full path to the tools directory. </p>
   <code>tools/</code> directory to the path. </li>
   </ul>
 
-<p>Note that, if you update your SDK in the future, you 
-should remember to update your <code>PATH</code> settings to point to the new location, if different.</p>
-
 <p>If you will be using the Eclipse IDE as your development environment,
 the next section describes how to install the Android Development Tools (ADT) plugin and set up Eclipse. 
 If you choose not to use Eclipse, you can 
@@ -126,14 +123,16 @@ information about how to install ADT, see
 
 <p>If you prefer to work in an IDE other than Eclipse, you do not need to
 install Eclipse or ADT, instead, you can directly use the SDK tools to build and
-debug your application &mdash; skip to <a href="#NextSteps">Next Steps</a>.)</p>
+debug your application.</p>
 
 <h2 id="components">Add Android Platforms and Other Components</h2>
 
 <p>Once you've downloaded and installed the SDK, you need to install SDK
 components in it. The SDK starter package includes a tool called Android SDK and
-AVD Manager to help you see what components are available and then install them
-into your SDK environment.</p>
+AVD Manager that helps you see what SDK components are available and then install 
+them into your SDK environment. The <a 
+href="{@docRoot}sdk/adding-components.html">Adding SDK Components</a> document 
+provides step-by-step instructions.</p>
 
 <p>There are several types of SDK components available:</p>
 
@@ -164,32 +163,26 @@ multiversion documentation for the Android framework API.
 </li>
 </ul>
 
-<p>For information about how to use the Android SDK and AVD Manager to download
-any of these components into your SDK, see the instructions in </p>
-<p style="margin-left:2em;"><a
-href="{@docRoot}sdk/adding-components.html">Adding SDK Components</a>. </p>
-
-<p>To develop an application, you <strong>must download at least one Android
-platform</strong> into your SDK. Typically, you will want to download multiple
-platforms, including the version that you want to develop against and all other
-higher platforms. By downloading multiple platforms, you can test the
-forward-compatibility of your application by running it on different platforms
-in the Android emulator. </p>
-
-<p class="note"><strong>Note:</strong> To get started with any application, even
-if you are following the <a
+<p>To develop any application, even if you are following the <a
 href="{@docRoot}guide/tutorials/hello-world.html">Hello World</a> tutorial, you
-must download at least one Android platform into your SDK. For instructions, see
-<a href="{@docRoot}sdk/adding-components.html">Adding SDK Components</a></p>
+<strong>must download at least one Android platform</strong> into your SDK.
+Typically, you will want to download multiple platforms, including the version
+that you want to develop against and all other higher platforms. By downloading
+multiple platforms, you can test the forward-compatibility of your application
+by running it on different platforms in the Android emulator. </p>
+
+<p>For more information about adding components and additional repository sites,
+see the <a href="{@docRoot}sdk/adding-components.html">Adding SDK Components</a>.
+</p>
 
 
-<h2 id="sdkContents">Contents of the SDK</h2>
+<h2 id="sdkContents">Explore the SDK</h2>
 
 <p>Once you've installed the SDK and downloaded the platforms, documentation,
 and add-ons that you need, open the SDK directory and take a look at what's
 inside.</p>
 
-<p>The table below describes the full SDK directory contents, with all components 
+<p>The table below describes the full SDK directory contents, with components 
 installed. </p>
 
 <table>
@@ -205,7 +198,8 @@ devices. </td>
 <tr>
 <td colspan="3"><code>docs/</code></td>
 <td>A full set of documentation in HTML format, including the Developer's Guide,
-API Reference, and other information.</td>
+API Reference, and other information. To read the documentation, load the 
+file <code>offline.html</code> in a web browser.</td>
 </tr>
 <tr>
 <td colspan="3"><code>platforms/</code></td>
@@ -272,15 +266,21 @@ version.</td>
 as the emulator, the <code>android</code> tool, adb, ddms, and more.</td>
 </tr>
 <tr>
-<td colspan="3"><code>RELEASE_NOTES.html</code></td>
-<td>A file that loads the local version of the SDK release notes, if
-available.</td>
+<td colspan="3"><code>SDK Readme.txt</code></td>
+<td>A file that explains how to perform the initial setup of your SDK, 
+including how to launch the Android SDK and AVD Manager tool on all 
+platforms</td>
 </tr>
 <tr>
+<td colspan="3"><code>SDK Setup.exe</code></td>
+<td>For Windows SDK only. A shortcut that launches the Android SDK and AVD 
+Manager tool, which you use to add components to your SDK. </td>
+</tr>
+<!--<tr>
 <td colspan="3"><code>documentation.html</code></td>
 <td>A file that loads the entry page for the local Android SDK
 documentation.</td>
-</tr>
+</tr>-->
 
 </table>
 
