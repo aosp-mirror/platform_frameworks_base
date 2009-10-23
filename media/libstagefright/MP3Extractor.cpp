@@ -18,8 +18,9 @@
 #define LOG_TAG "MP3Extractor"
 #include <utils/Log.h>
 
+#include "include/MP3Extractor.h"
+
 #include <media/stagefright/DataSource.h>
-#include <media/stagefright/MP3Extractor.h>
 #include <media/stagefright/MediaBuffer.h>
 #include <media/stagefright/MediaBufferGroup.h>
 #include <media/stagefright/MediaDebug.h>

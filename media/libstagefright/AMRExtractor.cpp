@@ -18,7 +18,8 @@
 #define LOG_TAG "AMRExtractor"
 #include <utils/Log.h>
 
-#include <media/stagefright/AMRExtractor.h>
+#include "include/AMRExtractor.h"
+
 #include <media/stagefright/DataSource.h>
 #include <media/stagefright/MediaBufferGroup.h>
 #include <media/stagefright/MediaDebug.h>
