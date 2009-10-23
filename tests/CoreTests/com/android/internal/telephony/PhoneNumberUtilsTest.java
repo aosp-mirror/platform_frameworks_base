@@ -314,6 +314,9 @@ public class PhoneNumberUtilsTest extends TestCase {
         // 444 is not a valid country code, but
         // matchIntlPrefixAndCC doesnt know this
         assertTrue(PhoneNumberUtils.compare("+444 207 792 3490", "0 207 792 3490"));
+
+        // compare SMS short code
+        assertTrue(PhoneNumberUtils.compare("404-04", "40404"));
     }
 
 
