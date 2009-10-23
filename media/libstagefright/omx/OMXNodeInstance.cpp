@@ -120,7 +120,8 @@ status_t OMXNodeInstance::freeNode() {
     mNodeID = NULL;
 
     LOGI("OMXNodeInstance going away.");
-    delete this;
+    mObserver.clear();
+    // delete this;  // leads to heap-corruption???
 
     return StatusFromOMXError(err);
 }
