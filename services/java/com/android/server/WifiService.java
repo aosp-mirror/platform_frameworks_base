@@ -142,6 +142,7 @@ public class WifiService extends IWifiManager.Stub {
     private static final int MESSAGE_STOP_WIFI        = 2;
     private static final int MESSAGE_START_WIFI       = 3;
     private static final int MESSAGE_RELEASE_WAKELOCK = 4;
+    private static final int MESSAGE_UPDATE_STATE     = 5;
 
     private final  WifiHandler mWifiHandler;
 
@@ -1446,6 +1447,11 @@ public class WifiService extends IWifiManager.Stub {
     }
 
     private void updateWifiState() {
+        // send a message so it's all serialized
+        Message.obtain(mWifiHandler, MESSAGE_UPDATE_STATE, 0, 0).sendToTarget();
+    }
+
+    private void doUpdateWifiState() {
         boolean wifiEnabled = getPersistedWifiEnabled();
         boolean airplaneMode = isAirplaneModeOn() && !mAirplaneModeOverwridden;
         boolean lockHeld = mLocks.hasLocks();
@@ -1549,6 +1555,10 @@ public class WifiService extends IWifiManager.Stub {
                     mWifiStateTracker.setScanOnlyMode(msg.arg1 != 0);
                     mWifiStateTracker.restart();
                     sWakeLock.release();
+                    break;
+
+                case MESSAGE_UPDATE_STATE:
+                    doUpdateWifiState();
                     break;
 
                 case MESSAGE_DISABLE_WIFI:
