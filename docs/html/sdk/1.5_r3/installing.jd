@@ -323,7 +323,7 @@ begin developing applications. Here are a few ways you can get started: </p>
 <ul>
   <li>If JDK is already installed on your development computer, please
   take a moment to make sure that it meets the version requirements listed
-  in the <a href="{@docRoot}sdk/{@sdkCurrent}/requirements.html">System Requirements</a>.
+  in the <a href="{@docRoot}sdk/requirements.html">System Requirements</a>.
   In particular, note that some Linux distributions may include JDK 1.4 or Gnu
   Compiler for Java, both of which are not supported for Android development.</li>
 </ul>

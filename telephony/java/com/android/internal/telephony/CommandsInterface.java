@@ -148,6 +148,7 @@ public interface CommandsInterface {
     static final int CDMA_SMS_FAIL_CAUSE_INVALID_TELESERVICE_ID     = 4;
     static final int CDMA_SMS_FAIL_CAUSE_RESOURCE_SHORTAGE          = 35;
     static final int CDMA_SMS_FAIL_CAUSE_OTHER_TERMINAL_PROBLEM     = 39;
+    static final int CDMA_SMS_FAIL_CAUSE_ENCODING_PROBLEM           = 96;
 
     //***** Methods
 

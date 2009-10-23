@@ -22,21 +22,17 @@ import android.os.Bundle;
 
 /**
  * Base class for implementing an Activity that is used to help implement an
- * AbstractAccountAuthenticator. If the AbstractAccountAuthenticator needs to return an Intent
- * that is to be used to launch an Activity that needs to return results to satisfy an
- * AbstractAccountAuthenticator request, it should store the AccountAuthenticatorResponse
- * inside of the Intent as follows:
- * <p>
+ * AbstractAccountAuthenticator. If the AbstractAccountAuthenticator needs to use an activity
+ * to handle the request then it can have the activity extend AccountAuthenticatorActivity.
+ * The AbstractAccountAuthenticator passes in the response to the intent using the following:
+ * <pre>
  *      intent.putExtra(Constants.ACCOUNT_AUTHENTICATOR_RESPONSE_KEY, response);
- * <p>
- * The activity that it launches should extend the AccountAuthenticatorActivity. If this
- * activity has a result that satisfies the original request it sets it via:
- * <p>
- *       setAccountAuthenticatorResult(result)
- * <p>
+ * </pre>
+ * The activity then sets the result that is to be handed to the response via
+ * {@link #setAccountAuthenticatorResult(android.os.Bundle)}.
  * This result will be sent as the result of the request when the activity finishes. If this
- * is never set or if it is set to null then the request will be canceled when the activity
- * finishes.
+ * is never set or if it is set to null then error {@link AccountManager#ERROR_CODE_CANCELED}
+ * will be called on the response.
  */
 public class AccountAuthenticatorActivity extends Activity {
     private AccountAuthenticatorResponse mAccountAuthenticatorResponse = null;

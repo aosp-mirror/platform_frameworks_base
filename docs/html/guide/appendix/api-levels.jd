@@ -83,6 +83,7 @@ Android platform.</p>
 
 <table>
   <tr><th>Platform Version</th><th>API Level</th></tr>
+  <tr><td>Android 2.0</td><td>5</td></tr>
   <tr><td>Android 1.6</td><td>4</td></tr>
   <tr><td>Android 1.5</td><td>3</td></tr>
   <tr><td>Android 1.1</td><td>2</td></tr>
@@ -115,6 +116,11 @@ they are designed to support. The element offers two key attributes:</p>
 <ul>
 <li><code>android:minSdkVersion</code> &mdash; Specifies the minimum API Level
 on which the application is able to run. The default value is "1".</li>
+<li><code>android:targetSdkVersion</code> &mdash; Specifies the API Level
+on which the application is designed to run. In some cases, this allows the
+application to use manifest elements or behaviors defined in the target
+API Level, rather than being restricted to using only those defined 
+for the minimum API Level.</li>
 <li><code>android:maxSdkVersion</code> &mdash; Specifies the maximum API Level
 on which the application is able to run.</li>
 </ul>
@@ -146,7 +152,7 @@ element might look like this: </p>
 
 <pre>&lt;manifest&gt;
   ...
-  &lt;uses-sdk android:minSdkVersion="4" /&gt;
+  &lt;uses-sdk android:minSdkVersion="5" /&gt;
   ...
 &lt;/manifest&gt;</pre>
 
@@ -288,23 +294,26 @@ a list of platform versions and their API Levels. </p>
 
 <h2 id="provisional">Using a Provisional API Level</h2>
 
-<p>During an "Early Look" SDK release, the APIs may not be final, so the API Level integer
-will not be specified. You must instead use a provisional API Level in your application
-manifest in order to build applications against the Early Look platform. In this case,
-the provisional API Level is not an integer, but a string matching the codename of the
-unreleased platform version (for example, "Eclair"). The provisional API Level will be specified
-in the Early Look SDK release notes and is case-sensitive.</p>
+<p>In some cases, an "Early Look" Android SDK platform may be available. To let
+you begin developing on the platform although the APIs may not be final, the
+platform's API Level integer will not be specified. You must instead use the
+platform's <em>provisional API Level</em> in your application manifest, in order
+to build applications against the platform. A provisional API Level is not an
+integer, but a string matching the codename of the unreleased platform version.
+The provisional API Level will be specified in the release notes for the Early
+Look SDK release notes and is case-sensitive.</p>
 
-<p>The use of a provisional API Level is designed to protect developers 
-and device users from inadvertently publishing or installing applications based on the 
-Early Look framework API, which may not run properly on actual devices running the final
-system image.</p>
+<p>The use of a provisional API Level is designed to protect developers and
+device users from inadvertently publishing or installing applications based on
+the Early Look framework API, which may not run properly on actual devices
+running the final system image.</p>
 
-<p>The provisional API Level will only be valid while using the Early Look SDK to run
-applications in the emulator. An application using the provisional API Level can never be 
-installed on an Android device. When the final SDK is released, you must replace any
-instances of the provisional API Level in your application manifest with the final 
-API Level integer.</p>
+<p>The provisional API Level will only be valid while using the Early Look SDK
+and can only be used to run applications in the emulator. An application using
+the provisional API Level can never be installed on an Android device. At the
+final release of the platform, you must replace any instances of the provisional
+API Level in your application manifest with the final platform's actual API
+Level integer.</p>
 
 
 <h2 id="filtering">Filtering the Reference Documentation by API Level</h2>

@@ -28,8 +28,8 @@ the specific View object that the user interacts with. The View class provides t
 methods that look useful for UI events. These methods are called by the Android framework when the 
 respective action occurs on that object. For instance, when a View (such as a Button) is touched,
 the <code>onTouchEvent()</code> method is called on that object. However, in order to intercept this, you must extend
-the class and override the method. Obviously, extending every View object
-you want to use (just to handle an event) would be obsurd. This is why the View class also contains
+the class and override the method. However, extending every View object
+in order to handle such an event would not be practical. This is why the View class also contains
 a collection of nested interfaces with callbacks that you can much more easily define. These interfaces,
 called <a href="#EventListeners">event listeners</a>, are your ticket to capturing the user interaction with your UI.</p>
 
@@ -102,7 +102,7 @@ protected void onCreate(Bundle savedValues) {
 }
 </pre>
 
-<p>You may also find it more conventient to implement OnClickListener as a part of your Activity.
+<p>You may also find it more convenient to implement OnClickListener as a part of your Activity.
 This will avoid the extra class load and object allocation. For example:</p>
 <pre>
 public class ExampleActivity extends Activity implements OnClickListener {
@@ -168,7 +168,7 @@ you'll learn see some of the common callbacks used for event handling, including
   <li><code>{@link  android.view.View#onTouchEvent}</code> - Called when a touch screen motion event occurs.</li>
   <li><code>{@link  android.view.View#onFocusChanged}</code> - Called when the view gains or loses focus.</li>
 </ul>
-<p>There are some other methods that you should be awere of, which are not part of the View class, 
+<p>There are some other methods that you should be aware of, which are not part of the View class, 
 but can directly impact the way you're able to handle events. So, when managing more complex events inside 
 a layout, consider these other methods:</p>
 <ul>

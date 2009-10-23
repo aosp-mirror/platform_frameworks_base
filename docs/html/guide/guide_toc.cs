@@ -98,7 +98,7 @@
       </li>
       <li class="toggle-list">
         <div><a href="<?cs var:toroot ?>guide/topics/resources/index.html">
-               <span class="en">Resources and Assests</span> 
+               <span class="en">Resources and Assets</span> 
              </a></div>
         <ul>
           <li><a href="<?cs var:toroot ?>guide/topics/resources/resources-i18n.html">
@@ -325,6 +325,9 @@
                <span class="zh-TW">最佳實務</span>
     </h2>
     <ul>
+      <li><a href="<?cs var:toroot ?>guide/practices/screens_support.html">
+            <span class="en">Supporting Multiple Screens</span>
+          </a></li>
       <li class="toggle-list">
         <div><a href="<?cs var:toroot ?>guide/practices/ui_guidelines/index.html">
                <span class="en">UI Guidelines</span>
@@ -344,6 +347,8 @@
               </a></li>
         </ul>
       </li>
+      </ul>
+      <ul>
       <li><a href="<?cs var:toroot ?>guide/practices/design/performance.html">
             <span class="en">Designing for Performance</span>
           </a></li>

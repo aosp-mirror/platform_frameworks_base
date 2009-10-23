@@ -360,7 +360,9 @@ public final class SmsManager {
                 // List contains all records, including "free" records (null)
                 if (data != null) {
                     SmsMessage sms = SmsMessage.createFromEfRecord(i+1, data.getBytes());
-                    messages.add(sms);
+                    if (sms != null) {
+                        messages.add(sms);
+                    }
                 }
             }
         }
