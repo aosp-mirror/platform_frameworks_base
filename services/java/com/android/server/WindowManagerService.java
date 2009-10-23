@@ -63,6 +63,7 @@ import android.graphics.Rect;
 import android.graphics.Region;
 import android.os.BatteryStats;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.Debug;
 import android.os.Handler;
 import android.os.IBinder;
@@ -432,8 +433,6 @@ public class WindowManagerService extends IWindowManager.Stub
     int mWallpaperAnimLayerAdjustment;
     float mLastWallpaperX = -1;
     float mLastWallpaperY = -1;
-    // Lock for waiting for the wallpaper.
-    final Object mWaitingOnWallpaperLock = new Object();
     // This is set when we are waiting for a wallpaper to tell us it is done
     // changing its scroll position.
     WindowState mWaitingOnWallpaper;
@@ -1604,34 +1603,30 @@ public class WindowManagerService extends IWindowManager.Stub
                         + wallpaperWin + " x=" + wallpaperWin.mWallpaperX
                         + " y=" + wallpaperWin.mWallpaperY);
                 if (sync) {
-                    synchronized (mWaitingOnWallpaperLock) {
-                        mWaitingOnWallpaper = wallpaperWin;
-                    }
+                    mWaitingOnWallpaper = wallpaperWin;
                 }
                 wallpaperWin.mClient.dispatchWallpaperOffsets(
                         wallpaperWin.mWallpaperX, wallpaperWin.mWallpaperY, sync);
                 if (sync) {
-                    synchronized (mWaitingOnWallpaperLock) {
-                        if (mWaitingOnWallpaper != null) {
-                            long start = SystemClock.uptimeMillis();
-                            if ((mLastWallpaperTimeoutTime+WALLPAPER_TIMEOUT_RECOVERY)
-                                    < start) {
-                                try {
-                                    if (DEBUG_WALLPAPER) Log.v(TAG,
-                                            "Waiting for offset complete...");
-                                    mWaitingOnWallpaperLock.wait(WALLPAPER_TIMEOUT);
-                                } catch (InterruptedException e) {
-                                }
-                                if (DEBUG_WALLPAPER) Log.v(TAG, "Offset complete!");
-                                if ((start+WALLPAPER_TIMEOUT)
-                                        < SystemClock.uptimeMillis()) {
-                                    Log.i(TAG, "Timeout waiting for wallpaper to offset: "
-                                            + wallpaperWin);
-                                    mLastWallpaperTimeoutTime = start;
-                                }
+                    if (mWaitingOnWallpaper != null) {
+                        long start = SystemClock.uptimeMillis();
+                        if ((mLastWallpaperTimeoutTime+WALLPAPER_TIMEOUT_RECOVERY)
+                                < start) {
+                            try {
+                                if (DEBUG_WALLPAPER) Log.v(TAG,
+                                        "Waiting for offset complete...");
+                                mWindowMap.wait(WALLPAPER_TIMEOUT);
+                            } catch (InterruptedException e) {
                             }
-                            mWaitingOnWallpaper = null;
+                            if (DEBUG_WALLPAPER) Log.v(TAG, "Offset complete!");
+                            if ((start+WALLPAPER_TIMEOUT)
+                                    < SystemClock.uptimeMillis()) {
+                                Log.i(TAG, "Timeout waiting for wallpaper to offset: "
+                                        + wallpaperWin);
+                                mLastWallpaperTimeoutTime = start;
+                            }
                         }
+                        mWaitingOnWallpaper = null;
                     }
                 }
             } catch (RemoteException e) {
@@ -1642,11 +1637,11 @@ public class WindowManagerService extends IWindowManager.Stub
     }
     
     void wallpaperOffsetsComplete(IBinder window) {
-        synchronized (mWaitingOnWallpaperLock) {
+        synchronized (mWindowMap) {
             if (mWaitingOnWallpaper != null &&
                     mWaitingOnWallpaper.mClient.asBinder() == window) {
                 mWaitingOnWallpaper = null;
-                mWaitingOnWallpaperLock.notifyAll();
+                mWindowMap.notifyAll();
             }
         }
     }
@@ -2194,6 +2189,47 @@ public class WindowManagerService extends IWindowManager.Stub
                 performLayoutAndPlaceSurfacesLocked();
             }
         }
+    }
+    
+    void wallpaperCommandComplete(IBinder window, Bundle result) {
+        synchronized (mWindowMap) {
+            if (mWaitingOnWallpaper != null &&
+                    mWaitingOnWallpaper.mClient.asBinder() == window) {
+                mWaitingOnWallpaper = null;
+                mWindowMap.notifyAll();
+            }
+        }
+    }
+    
+    public Bundle sendWindowWallpaperCommandLocked(WindowState window,
+            String action, int x, int y, int z, Bundle extras, boolean sync) {
+        if (window == mWallpaperTarget || window == mLowerWallpaperTarget
+                || window == mUpperWallpaperTarget) {
+            boolean doWait = sync;
+            int curTokenIndex = mWallpaperTokens.size();
+            while (curTokenIndex > 0) {
+                curTokenIndex--;
+                WindowToken token = mWallpaperTokens.get(curTokenIndex);
+                int curWallpaperIndex = token.windows.size();
+                while (curWallpaperIndex > 0) {
+                    curWallpaperIndex--;
+                    WindowState wallpaper = token.windows.get(curWallpaperIndex);
+                    try {
+                        wallpaper.mClient.dispatchWallpaperCommand(action,
+                                x, y, z, extras, sync);
+                        // We only want to be synchronous with one wallpaper.
+                        sync = false;
+                    } catch (RemoteException e) {
+                    }
+                }
+            }
+            
+            if (doWait) {
+                // XXX Need to wait for result.
+            }
+        }
+        
+        return null;
     }
     
     public int relayoutWindow(Session session, IWindow client,
@@ -6563,6 +6599,24 @@ public class WindowManagerService extends IWindowManager.Stub
         
         public void wallpaperOffsetsComplete(IBinder window) {
             WindowManagerService.this.wallpaperOffsetsComplete(window);
+        }
+        
+        public Bundle sendWallpaperCommand(IBinder window, String action, int x, int y,
+                int z, Bundle extras, boolean sync) {
+            synchronized(mWindowMap) {
+                long ident = Binder.clearCallingIdentity();
+                try {
+                    return sendWindowWallpaperCommandLocked(
+                            windowForClientLocked(this, window),
+                            action, x, y, z, extras, sync);
+                } finally {
+                    Binder.restoreCallingIdentity(ident);
+                }
+            }
+        }
+        
+        public void wallpaperCommandComplete(IBinder window, Bundle result) {
+            WindowManagerService.this.wallpaperCommandComplete(window, result);
         }
         
         void windowAddedLocked() {
