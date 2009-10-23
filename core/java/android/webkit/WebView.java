@@ -3468,20 +3468,18 @@ public class WebView extends AbsoluteLayout
             if (!nativeCursorIntersects(visibleRect)) {
                 return false;
             }
-            nativeSetFollowedLink(true);
             nativeUpdatePluginReceivesEvents();
             WebViewCore.CursorData data = cursorData();
             mWebViewCore.sendMessage(EventHub.SET_MOVE_MOUSE, data);
             playSoundEffect(SoundEffectConstants.CLICK);
-            boolean isTextInput = nativeCursorIsTextInput();
-            if (isTextInput || !mCallbackProxy.uiOverrideUrlLoading(
-                        nativeCursorText())) {
+            if (nativeCursorIsTextInput()) {
+                rebuildWebTextView();
+                return true;
+            }
+            nativeSetFollowedLink(true);
+            if (!mCallbackProxy.uiOverrideUrlLoading(nativeCursorText())) {
                 mWebViewCore.sendMessage(EventHub.CLICK, data.mFrame,
                         nativeCursorNodePointer());
-            }
-            if (isTextInput) {
-                rebuildWebTextView();
-                displaySoftKeyboard(true);
             }
             return true;
         }
