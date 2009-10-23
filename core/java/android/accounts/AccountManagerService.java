@@ -16,22 +16,27 @@
 
 package android.accounts;
 
+import android.Manifest;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
-import android.content.ComponentName;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.RegisteredServicesCache;
-import android.content.pm.PackageInfo;
-import android.content.pm.ApplicationInfo;
 import android.content.pm.RegisteredServicesCacheListener;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -39,17 +44,13 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.os.SystemClock;
-import android.os.Binder;
 import android.os.SystemProperties;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Pair;
-import android.app.PendingIntent;
-import android.app.NotificationManager;
-import android.app.Notification;
-import android.Manifest;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -60,8 +61,9 @@ import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
-import com.android.internal.telephony.TelephonyIntents;
 import com.android.internal.R;
+import com.android.internal.telephony.ITelephony;
+import com.android.internal.telephony.TelephonyIntents;
 
 /**
  * A system service that provides  account, password, and authtoken management for all
@@ -220,11 +222,7 @@ public class AccountManagerService
         mAuthenticatorCache = new AccountAuthenticatorCache(mContext);
         mAuthenticatorCache.setListener(this);
 
-        if (SystemProperties.getBoolean("ro.config.sim_password_clear", false)) {
-          mSimWatcher = new SimWatcher(mContext);
-        } else {
-          mSimWatcher = null;
-        }
+        mSimWatcher = new SimWatcher(mContext);
         sThis.set(this);
 
         onRegisteredServicesCacheChanged();
@@ -1443,15 +1441,57 @@ public class AccountManagerService
          */
         @Override
         public void onReceive(Context context, Intent intent) {
-            // Check IMSI on every update; nothing happens if the IMSI is missing or unchanged.
-            String imsi = ((TelephonyManager) context.getSystemService(
-                    Context.TELEPHONY_SERVICE)).getSubscriberId();
+            // Check IMSI on every update; nothing happens if the IMSI
+            // is missing or unchanged.
+            TelephonyManager telephonyManager =
+                (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
+            if (telephonyManager == null) {
+                Log.w(TAG, "failed to get TelephonyManager");
+                return;
+            }
+            String imsi = telephonyManager.getSubscriberId();
+
+            // If the subscriber ID is an empty string, don't do anything.
             if (TextUtils.isEmpty(imsi)) return;
 
+            // If the current IMSI matches what's stored, don't do anything.
             String storedImsi = getMetaValue("imsi");
-
             if (Log.isLoggable(TAG, Log.VERBOSE)) {
                 Log.v(TAG, "current IMSI=" + imsi + "; stored IMSI=" + storedImsi);
+            }
+            if (imsi.equals(storedImsi)) return;
+
+            // If a CDMA phone is unprovisioned, getSubscriberId()
+            // will return a different value, but we *don't* erase the
+            // passwords.  We only erase them if it has a different
+            // subscriber ID once it's provisioned.
+            if (telephonyManager.getPhoneType() == TelephonyManager.PHONE_TYPE_CDMA) {
+                IBinder service = ServiceManager.checkService(Context.TELEPHONY_SERVICE);
+                if (service == null) {
+                    Log.w(TAG, "call to checkService(TELEPHONY_SERVICE) failed");
+                    return;
+                }
+                ITelephony telephony = ITelephony.Stub.asInterface(service);
+                if (telephony == null) {
+                    Log.w(TAG, "failed to get ITelephony interface");
+                    return;
+                }
+                boolean needsProvisioning;
+                try {
+                    needsProvisioning = telephony.getCdmaNeedsProvisioning();
+                } catch (RemoteException e) {
+                    Log.w(TAG, "exception while checking provisioning", e);
+                    // default to NOT wiping out the passwords
+                    needsProvisioning = true;
+                }
+                if (needsProvisioning) {
+                    // if the phone needs re-provisioning, don't do anything.
+                    if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                        Log.v(TAG, "current IMSI=" + imsi + " (needs provisioning); stored IMSI=" +
+                              storedImsi);
+                    }
+                    return;
+                }
             }
 
             if (!imsi.equals(storedImsi) && !TextUtils.isEmpty(storedImsi)) {
