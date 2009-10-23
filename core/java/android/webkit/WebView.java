@@ -2834,10 +2834,7 @@ public class WebView extends AbsoluteLayout
     public boolean performLongClick() {
         if (mNativeClass != 0 && nativeCursorIsTextInput()) {
             // Send the click so that the textfield is in focus
-            // FIXME: When we start respecting changes to the native textfield's
-            // selection, need to make sure that this does not change it.
-            mWebViewCore.sendMessage(EventHub.CLICK, nativeCursorFramePointer(),
-                    nativeCursorNodePointer());
+            centerKeyPressOnTextField();
             rebuildWebTextView();
         }
         if (inEditingMode()) {
@@ -3474,6 +3471,7 @@ public class WebView extends AbsoluteLayout
             playSoundEffect(SoundEffectConstants.CLICK);
             if (nativeCursorIsTextInput()) {
                 rebuildWebTextView();
+                centerKeyPressOnTextField();
                 return true;
             }
             nativeSetFollowedLink(true);
@@ -4707,12 +4705,15 @@ public class WebView extends AbsoluteLayout
         nativeTextInputMotionUp(x, y);
     }
 
-    /*package*/ void shortPressOnTextField() {
-        if (inEditingMode()) {
-            View v = mWebTextView;
-            int x = viewToContentX((v.getLeft() + v.getRight()) >> 1);
-            int y = viewToContentY((v.getTop() + v.getBottom()) >> 1);
-            nativeTextInputMotionUp(x, y);
+    /**
+     * Called when pressing the center key or trackball on a textfield.
+     */
+    /*package*/ void centerKeyPressOnTextField() {
+        mWebViewCore.sendMessage(EventHub.CLICK, nativeCursorFramePointer(),
+                    nativeCursorNodePointer());
+        // Need to show the soft keyboard if it's not readonly.
+        if (!nativeCursorIsReadOnly()) {
+            displaySoftKeyboard(true);
         }
     }
 
@@ -5789,6 +5790,7 @@ public class WebView extends AbsoluteLayout
     /* package */ native boolean nativeCursorMatchesFocus();
     private native boolean  nativeCursorIntersects(Rect visibleRect);
     private native boolean  nativeCursorIsAnchor();
+    private native boolean  nativeCursorIsReadOnly();
     private native boolean  nativeCursorIsTextInput();
     private native Point    nativeCursorPosition();
     private native String   nativeCursorText();

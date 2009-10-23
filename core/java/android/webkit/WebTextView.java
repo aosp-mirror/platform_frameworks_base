@@ -188,7 +188,7 @@ import java.util.ArrayList;
             }
             // Center key should be passed to a potential onClick
             if (!down) {
-                mWebView.shortPressOnTextField();
+                mWebView.centerKeyPressOnTextField();
             }
             // Pass to super to handle longpress.
             return super.dispatchKeyEvent(event);
