@@ -753,6 +753,16 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
     }
 
     /**
+     * Dumps the contents of VM reference tables (e.g. JNI locals and
+     * globals) to the log file.
+     *
+     * @hide
+     */
+    public static final void dumpReferenceTables() {
+        VMDebug.dumpReferenceTables();
+    }
+
+    /**
      * API for gathering and querying instruction counts.
      *
      * Example usage:
