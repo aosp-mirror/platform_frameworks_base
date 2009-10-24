@@ -482,38 +482,17 @@ status_t AudioFlinger::setStreamVolume(int stream, float value, int output)
         }
     }
 
-    status_t ret = NO_ERROR;
-
-    if (stream == AudioSystem::VOICE_CALL ||
-        stream == AudioSystem::BLUETOOTH_SCO) {
-        float hwValue;
-        if (stream == AudioSystem::VOICE_CALL) {
-            hwValue = (float)AudioSystem::logToLinear(value)/100.0f;
-            // offset value to reflect actual hardware volume that never reaches 0
-            // 1% corresponds roughly to first step in VOICE_CALL stream volume setting (see AudioService.java)
-            value = 0.01 + 0.99 * value;
-        } else { // (type == AudioSystem::BLUETOOTH_SCO)
-            hwValue = 1.0f;
-        }
-
-        AutoMutex lock(mHardwareLock);
-        mHardwareStatus = AUDIO_SET_VOICE_VOLUME;
-        ret = mAudioHardware->setVoiceVolume(hwValue);
-        mHardwareStatus = AUDIO_HW_IDLE;
-
-    }
-
     mStreamTypes[stream].volume = value;
 
     if (thread == NULL) {
-        for (uint32_t i = 0; i < mPlaybackThreads.size(); i++)
+        for (uint32_t i = 0; i < mPlaybackThreads.size(); i++) {
            mPlaybackThreads.valueAt(i)->setStreamVolume(stream, value);
-
+        }
     } else {
         thread->setStreamVolume(stream, value);
     }
 
-    return ret;
+    return NO_ERROR;
 }
 
 status_t AudioFlinger::setStreamMute(int stream, bool muted)
@@ -551,11 +530,6 @@ float AudioFlinger::streamVolume(int stream, int output) const
         volume = thread->streamVolume(stream);
     } else {
         volume = mStreamTypes[stream].volume;
-    }
-
-    // remove correction applied by setStreamVolume()
-    if (stream == AudioSystem::VOICE_CALL) {
-        volume = (volume - 0.01) / 0.99 ;
     }
 
     return volume;
@@ -642,6 +616,21 @@ String8 AudioFlinger::getParameters(int ioHandle, const String8& keys)
 size_t AudioFlinger::getInputBufferSize(uint32_t sampleRate, int format, int channelCount)
 {
     return mAudioHardware->getInputBufferSize(sampleRate, format, channelCount);
+}
+
+status_t AudioFlinger::setVoiceVolume(float value)
+{
+    // check calling permissions
+    if (!settingsAllowed()) {
+        return PERMISSION_DENIED;
+    }
+
+    AutoMutex lock(mHardwareLock);
+    mHardwareStatus = AUDIO_SET_VOICE_VOLUME;
+    status_t ret = mAudioHardware->setVoiceVolume(value);
+    mHardwareStatus = AUDIO_HW_IDLE;
+
+    return ret;
 }
 
 void AudioFlinger::registerClient(const sp<IAudioFlingerClient>& client)
