@@ -81,6 +81,7 @@ public class Camera {
     private ZoomCallback mZoomCallback;
     private ErrorCallback mErrorCallback;
     private boolean mOneShot;
+    private boolean mWithBuffer;
 
     /**
      * Returns a new Camera object.
@@ -229,9 +230,10 @@ public class Camera {
     public final void setPreviewCallback(PreviewCallback cb) {
         mPreviewCallback = cb;
         mOneShot = false;
+        mWithBuffer = false;
         // Always use one-shot mode. We fake camera preview mode by
         // doing one-shot preview continuously.
-        setHasPreviewCallback(cb != null, true);
+        setHasPreviewCallback(cb != null, false);
     }
 
     /**
@@ -241,14 +243,48 @@ public class Camera {
      * @param cb A callback object that receives a copy of the preview frame.
      */
     public final void setOneShotPreviewCallback(PreviewCallback cb) {
-        if (cb != null) {
-            mPreviewCallback = cb;
-            mOneShot = true;
-            setHasPreviewCallback(true, true);
-        }
+        mPreviewCallback = cb;
+        mOneShot = true;
+        mWithBuffer = false;
+        setHasPreviewCallback(cb != null, false);
     }
 
-    private native final void setHasPreviewCallback(boolean installed, boolean oneshot);
+    private native final void setHasPreviewCallback(boolean installed, boolean manualBuffer);
+
+    /**
+     * Installs a callback which will get called as long as there are buffers in the
+     * preview buffer queue, which minimizes dynamic allocation of preview buffers.
+     *
+     * Apps must call addCallbackBuffer to explicitly register the buffers to use, or no callbacks
+     * will be received. addCallbackBuffer may be safely called before or after
+     * a call to setPreviewCallbackWithBuffer with a non-null callback parameter.
+     *
+     * The buffer queue will be cleared upon any calls to setOneShotPreviewCallback,
+     * setPreviewCallback, or to this method with a null callback parameter.
+     *
+     * @param cb A callback object that receives a copy of the preview frame.  A null value will clear the queue.
+     * @hide
+     */
+    public final void setPreviewCallbackWithBuffer(PreviewCallback cb) {
+        mPreviewCallback = cb;
+        mOneShot = false;
+        mWithBuffer = true;
+        setHasPreviewCallback(cb != null, true);
+    }
+
+    /**
+     * Adds a pre-allocated buffer to the callback buffer queue.
+     * Preview width and height can be determined from getPreviewSize, and bitsPerPixel can be
+     * found from from  {@link android.hardware.Camera.Parameters#getPreviewFormat()} and
+     * {@link android.graphics.PixelFormat#getPixelFormatInfo(int, PixelFormat)}
+     *
+     * Alternatively, a buffer from a previous callback may be passed in or used
+     * to determine the size of new preview frame buffers.
+     *
+     * @param callbackBuffer The buffer to register. Size should be width * height * bitsPerPixel / 8.
+     * @hide
+     */
+    public native final void addCallbackBuffer(byte[] callbackBuffer);
 
     private class EventHandler extends Handler
     {
@@ -288,11 +324,11 @@ public class Camera {
                         // in case the app calls setPreviewCallback from
                         // the callback function
                         mPreviewCallback = null;
-                    } else {
+                    } else if (!mWithBuffer) {
                         // We're faking the camera preview mode to prevent
                         // the app from being flooded with preview frames.
                         // Set to oneshot mode again.
-                        setHasPreviewCallback(true, true);
+                        setHasPreviewCallback(true, false);
                     }
                     cb.onPreviewFrame((byte[])msg.obj, mCamera);
                 }
