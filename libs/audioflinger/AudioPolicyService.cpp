@@ -495,6 +495,10 @@ status_t AudioPolicyService::stopTone()
     return NO_ERROR;
 }
 
+status_t AudioPolicyService::setVoiceVolume(float volume, int delayMs)
+{
+    return mAudioCommandThread->voiceVolumeCommand(volume, delayMs);
+}
 
 // -----------  AudioPolicyService::AudioCommandThread implementation ----------
 
@@ -577,6 +581,16 @@ bool AudioPolicyService::AudioCommandThread::threadLoop()
                      }
                      delete data;
                      }break;
+                case SET_VOICE_VOLUME: {
+                    VoiceVolumeData *data = (VoiceVolumeData *)command->mParam;
+                    LOGV("AudioCommandThread() processing set voice volume volume %f", data->mVolume);
+                    command->mStatus = AudioSystem::setVoiceVolume(data->mVolume);
+                    if (command->mWaitStatus) {
+                        command->mCond.signal();
+                        mWaitWorkCV.wait(mLock);
+                    }
+                    delete data;
+                    }break;
                 default:
                     LOGW("AudioCommandThread() unknown command %d", command->mCommand);
                 }
@@ -597,7 +611,6 @@ bool AudioPolicyService::AudioCommandThread::threadLoop()
 
 void AudioPolicyService::AudioCommandThread::startToneCommand(int type, int stream)
 {
-    Mutex::Autolock _l(mLock);
     AudioCommand *command = new AudioCommand();
     command->mCommand = START_TONE;
     ToneData *data = new ToneData();
@@ -605,6 +618,7 @@ void AudioPolicyService::AudioCommandThread::startToneCommand(int type, int stre
     data->mStream = stream;
     command->mParam = (void *)data;
     command->mWaitStatus = false;
+    Mutex::Autolock _l(mLock);
     insertCommand_l(command);
     LOGV("AudioCommandThread() adding tone start type %d, stream %d", type, stream);
     mWaitWorkCV.signal();
@@ -612,11 +626,11 @@ void AudioPolicyService::AudioCommandThread::startToneCommand(int type, int stre
 
 void AudioPolicyService::AudioCommandThread::stopToneCommand()
 {
-    Mutex::Autolock _l(mLock);
     AudioCommand *command = new AudioCommand();
     command->mCommand = STOP_TONE;
     command->mParam = NULL;
     command->mWaitStatus = false;
+    Mutex::Autolock _l(mLock);
     insertCommand_l(command);
     LOGV("AudioCommandThread() adding tone stop");
     mWaitWorkCV.signal();
@@ -626,7 +640,6 @@ status_t AudioPolicyService::AudioCommandThread::volumeCommand(int stream, float
 {
     status_t status = NO_ERROR;
 
-    Mutex::Autolock _l(mLock);
     AudioCommand *command = new AudioCommand();
     command->mCommand = SET_VOLUME;
     VolumeData *data = new VolumeData();
@@ -639,6 +652,7 @@ status_t AudioPolicyService::AudioCommandThread::volumeCommand(int stream, float
     } else {
         command->mWaitStatus = false;
     }
+    Mutex::Autolock _l(mLock);
     insertCommand_l(command, delayMs);
     LOGV("AudioCommandThread() adding set volume stream %d, volume %f, output %d", stream, volume, output);
     mWaitWorkCV.signal();
@@ -654,7 +668,6 @@ status_t AudioPolicyService::AudioCommandThread::parametersCommand(int ioHandle,
 {
     status_t status = NO_ERROR;
 
-    Mutex::Autolock _l(mLock);
     AudioCommand *command = new AudioCommand();
     command->mCommand = SET_PARAMETERS;
     ParametersData *data = new ParametersData();
@@ -666,8 +679,35 @@ status_t AudioPolicyService::AudioCommandThread::parametersCommand(int ioHandle,
     } else {
         command->mWaitStatus = false;
     }
+    Mutex::Autolock _l(mLock);
     insertCommand_l(command, delayMs);
     LOGV("AudioCommandThread() adding set parameter string %s, io %d ,delay %d", keyValuePairs.string(), ioHandle, delayMs);
+    mWaitWorkCV.signal();
+    if (command->mWaitStatus) {
+        command->mCond.wait(mLock);
+        status =  command->mStatus;
+        mWaitWorkCV.signal();
+    }
+    return status;
+}
+
+status_t AudioPolicyService::AudioCommandThread::voiceVolumeCommand(float volume, int delayMs)
+{
+    status_t status = NO_ERROR;
+
+    AudioCommand *command = new AudioCommand();
+    command->mCommand = SET_VOICE_VOLUME;
+    VoiceVolumeData *data = new VoiceVolumeData();
+    data->mVolume = volume;
+    command->mParam = data;
+    if (delayMs == 0) {
+        command->mWaitStatus = true;
+    } else {
+        command->mWaitStatus = false;
+    }
+    Mutex::Autolock _l(mLock);
+    insertCommand_l(command, delayMs);
+    LOGV("AudioCommandThread() adding set voice volume volume %f", volume);
     mWaitWorkCV.signal();
     if (command->mWaitStatus) {
         command->mCond.wait(mLock);

@@ -105,6 +105,7 @@ public:
     virtual String8 getParameters(audio_io_handle_t ioHandle, const String8& keys);
     virtual status_t startTone(ToneGenerator::tone_type tone, AudioSystem::stream_type stream);
     virtual status_t stopTone();
+    virtual status_t setVoiceVolume(float volume, int delayMs = 0);
 
 private:
                         AudioPolicyService();
@@ -125,7 +126,8 @@ private:
             START_TONE,
             STOP_TONE,
             SET_VOLUME,
-            SET_PARAMETERS
+            SET_PARAMETERS,
+            SET_VOICE_VOLUME
         };
 
         AudioCommandThread ();
@@ -140,6 +142,7 @@ private:
                     void        stopToneCommand();
                     status_t    volumeCommand(int stream, float volume, int output, int delayMs = 0);
                     status_t    parametersCommand(int ioHandle, const String8& keyValuePairs, int delayMs = 0);
+                    status_t    voiceVolumeCommand(float volume, int delayMs = 0);
                     void        insertCommand_l(AudioCommand *command, int delayMs = 0);
 
     private:
@@ -166,12 +169,17 @@ private:
             float mVolume;
             int mIO;
         };
+
         class ParametersData {
         public:
             int mIO;
             String8 mKeyValuePairs;
         };
 
+        class VoiceVolumeData {
+        public:
+            float mVolume;
+        };
 
         Mutex   mLock;
         Condition mWaitWorkCV;
