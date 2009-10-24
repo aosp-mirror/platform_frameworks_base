@@ -2,7 +2,7 @@ glClipPlanef check eqn 4
 glClipPlanex check eqn 4
 glGetClipPlanefOES check eqn 4
 glGetClipPlanexOES check eqn 4
-glDeleteBuffers check buffers n 
+glDeleteBuffers check buffers n
 glDeleteTextures check textures n
 glDrawElements check_AIOOBE indices count
 glFog ifcheck params 1 pname GL_FOG_MODE,GL_FOG_DENSITY,GL_FOG_START,GL_FOG_END ifcheck params 4 pname GL_FOG_COLOR
@@ -23,7 +23,8 @@ glPointParameter check params 1
 glTexEnv ifcheck params 1 pname GL_TEXTURE_ENV_MODE,GL_COMBINE_RGB,GL_COMBINE_ALPHA ifcheck params 4 pname GL_TEXTURE_ENV_COLOR
 glTexImage2D nullAllowed
 glTexSubImage2D nullAllowed
-glBufferData nullAllowed
+glBufferData nullAllowed check data size
+glBufferSubData check data size
 glTexParameter check params 1
 glQueryMatrixxOES check mantissa 16 check exponent 16 return -1
 glDrawTexfvOES check coords 5
