@@ -23,6 +23,8 @@
 #include "JNIHelp.h"
 #include "android_runtime/AndroidRuntime.h"
 
+#include <utils/Vector.h>
+
 #include <ui/Surface.h>
 #include <ui/Camera.h>
 #include <binder/IMemory.h>
@@ -47,16 +49,23 @@ public:
     virtual void notify(int32_t msgType, int32_t ext1, int32_t ext2);
     virtual void postData(int32_t msgType, const sp<IMemory>& dataPtr);
     virtual void postDataTimestamp(nsecs_t timestamp, int32_t msgType, const sp<IMemory>& dataPtr);
+    void addCallbackBuffer(JNIEnv *env, jbyteArray cbb);
+    void setCallbackMode(JNIEnv *env, bool installed, bool manualMode);
     sp<Camera> getCamera() { Mutex::Autolock _l(mLock); return mCamera; }
     void release();
 
 private:
     void copyAndPost(JNIEnv* env, const sp<IMemory>& dataPtr, int msgType);
+    void clearCallbackBuffers_l(JNIEnv *env);
 
     jobject     mCameraJObjectWeak;     // weak reference to java object
     jclass      mCameraJClass;          // strong reference to java class
     sp<Camera>  mCamera;                // strong reference to native object
     Mutex       mLock;
+
+    Vector<jbyteArray> mCallbackBuffers; // Global reference application managed byte[]
+    bool mManualBufferMode;              // Whether to use application managed buffers.
+    bool mManualCameraCallbackSet;       // Whether the callback has been set, used to reduce unnecessary calls to set the callback.
 };
 
 sp<Camera> get_native_camera(JNIEnv *env, jobject thiz, JNICameraContext** pContext)
@@ -81,6 +90,9 @@ JNICameraContext::JNICameraContext(JNIEnv* env, jobject weak_this, jclass clazz,
     mCameraJObjectWeak = env->NewGlobalRef(weak_this);
     mCameraJClass = (jclass)env->NewGlobalRef(clazz);
     mCamera = camera;
+
+    mManualBufferMode = false;
+    mManualCameraCallbackSet = false;
 }
 
 void JNICameraContext::release()
@@ -97,6 +109,7 @@ void JNICameraContext::release()
         env->DeleteGlobalRef(mCameraJClass);
         mCameraJClass = NULL;
     }
+    clearCallbackBuffers_l(env);
     mCamera.clear();
 }
 
@@ -129,7 +142,42 @@ void JNICameraContext::copyAndPost(JNIEnv* env, const sp<IMemory>& dataPtr, int 
 
         if (heapBase != NULL) {
             const jbyte* data = reinterpret_cast<const jbyte*>(heapBase + offset);
-            obj = env->NewByteArray(size);
+
+            if (!mManualBufferMode) {
+                LOGV("Allocating callback buffer");
+                obj = env->NewByteArray(size);
+            } else {
+                // Vector access should be protected by lock in postData()
+                if(!mCallbackBuffers.isEmpty()) {
+                    LOGV("Using callback buffer from queue of length %d", mCallbackBuffers.size());
+                    jbyteArray globalBuffer = mCallbackBuffers.itemAt(0);
+                    mCallbackBuffers.removeAt(0);
+
+                    obj = (jbyteArray)env->NewLocalRef(globalBuffer);
+                    env->DeleteGlobalRef(globalBuffer);
+
+                    if (obj != NULL) {
+                        jsize bufferLength = env->GetArrayLength(obj);
+                        if ((int)bufferLength < (int)size) {
+                            LOGE("Manually set buffer was too small! Expected %d bytes, but got %d!",
+                                 size, bufferLength);
+                            env->DeleteLocalRef(obj);
+                            return;
+                        }
+                    }
+                }
+
+                if(mCallbackBuffers.isEmpty()) {
+                    LOGW("Out of buffers, clearing callback!");
+                    mCamera->setPreviewCallbackFlags(FRAME_CALLBACK_FLAG_NOOP);
+                    mManualCameraCallbackSet = false;
+
+                    if (obj == NULL) {
+                        return;
+                    }
+                }
+            }
+
             if (obj == NULL) {
                 LOGE("Couldn't allocate byte array for JPEG data");
                 env->ExceptionClear();
@@ -182,6 +230,62 @@ void JNICameraContext::postDataTimestamp(nsecs_t timestamp, int32_t msgType, con
 {
     // TODO: plumb up to Java. For now, just drop the timestamp
     postData(msgType, dataPtr);
+}
+
+void JNICameraContext::setCallbackMode(JNIEnv *env, bool installed, bool manualMode)
+{
+    Mutex::Autolock _l(mLock);
+    mManualBufferMode = manualMode;
+    mManualCameraCallbackSet = false;
+
+    // In order to limit the over usage of binder threads, all non-manual buffer
+    // callbacks use FRAME_CALLBACK_FLAG_BARCODE_SCANNER mode now.
+    //
+    // Continuous callbacks will have the callback re-registered from handleMessage.
+    // Manual buffer mode will operate as fast as possible, relying on the finite supply
+    // of buffers for throttling.
+
+    if (!installed) {
+        mCamera->setPreviewCallbackFlags(FRAME_CALLBACK_FLAG_NOOP);
+        clearCallbackBuffers_l(env);
+    } else if (mManualBufferMode) {
+        if (!mCallbackBuffers.isEmpty()) {
+            mCamera->setPreviewCallbackFlags(FRAME_CALLBACK_FLAG_CAMERA);
+            mManualCameraCallbackSet = true;
+        }
+    } else {
+        mCamera->setPreviewCallbackFlags(FRAME_CALLBACK_FLAG_BARCODE_SCANNER);
+        clearCallbackBuffers_l(env);
+    }
+}
+
+void JNICameraContext::addCallbackBuffer(JNIEnv *env, jbyteArray cbb)
+{
+    if (cbb != NULL) {
+        Mutex::Autolock _l(mLock);
+        jbyteArray callbackBuffer = (jbyteArray)env->NewGlobalRef(cbb);
+        mCallbackBuffers.push(cbb);
+
+        LOGV("Adding callback buffer to queue, %d total", mCallbackBuffers.size());
+
+        // We want to make sure the camera knows we're ready for the next frame.
+        // This may have come unset had we not had a callbackbuffer ready for it last time.
+        if (mManualBufferMode && !mManualCameraCallbackSet) {
+            mCamera->setPreviewCallbackFlags(FRAME_CALLBACK_FLAG_CAMERA);
+            mManualCameraCallbackSet = true;
+        }
+    } else {
+       LOGE("Null byte array!");
+    }
+}
+
+void JNICameraContext::clearCallbackBuffers_l(JNIEnv *env)
+{
+    LOGV("Clearing callback buffers, %d remained", mCallbackBuffers.size());
+    while(!mCallbackBuffers.isEmpty()) {
+        env->DeleteGlobalRef(mCallbackBuffers.top());
+        mCallbackBuffers.pop();
+    }
 }
 
 // connect to camera service
@@ -297,8 +401,9 @@ static bool android_hardware_Camera_previewEnabled(JNIEnv *env, jobject thiz)
     return c->previewEnabled();
 }
 
-static void android_hardware_Camera_setHasPreviewCallback(JNIEnv *env, jobject thiz, jboolean installed, jboolean oneshot)
+static void android_hardware_Camera_setHasPreviewCallback(JNIEnv *env, jobject thiz, jboolean installed, jboolean manualBuffer)
 {
+    LOGV("setHasPreviewCallback: installed:%d, manualBuffer:%d", (int)installed, (int)manualBuffer);
     // Important: Only install preview_callback if the Java code has called
     // setPreviewCallback() with a non-null value, otherwise we'd pay to memcpy
     // each preview frame for nothing.
@@ -306,13 +411,19 @@ static void android_hardware_Camera_setHasPreviewCallback(JNIEnv *env, jobject t
     sp<Camera> camera = get_native_camera(env, thiz, &context);
     if (camera == 0) return;
 
-    int callback_flag;
-    if (installed) {
-        callback_flag = oneshot ? FRAME_CALLBACK_FLAG_BARCODE_SCANNER : FRAME_CALLBACK_FLAG_CAMERA;
-    } else {
-        callback_flag = FRAME_CALLBACK_FLAG_NOOP;
+    // setCallbackMode will take care of setting the context flags and calling
+    // camera->setPreviewCallbackFlags within a mutex for us.
+    context->setCallbackMode(env, installed, manualBuffer);
+}
+
+static void android_hardware_Camera_addCallbackBuffer(JNIEnv *env, jobject thiz, jbyteArray bytes) {
+    LOGV("addCallbackBuffer");
+
+    JNICameraContext* context = reinterpret_cast<JNICameraContext*>(env->GetIntField(thiz, fields.context));
+
+    if (context != NULL) {
+        context->addCallbackBuffer(env, bytes);
     }
-    camera->setPreviewCallbackFlags(callback_flag);
 }
 
 static void android_hardware_Camera_autoFocus(JNIEnv *env, jobject thiz)
@@ -459,6 +570,9 @@ static JNINativeMethod camMethods[] = {
   { "setHasPreviewCallback",
     "(ZZ)V",
     (void *)android_hardware_Camera_setHasPreviewCallback },
+  { "addCallbackBuffer",
+    "([B)V",
+    (void *)android_hardware_Camera_addCallbackBuffer },
   { "native_autoFocus",
     "()V",
     (void *)android_hardware_Camera_autoFocus },
