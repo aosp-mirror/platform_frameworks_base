@@ -102,10 +102,10 @@ public:
 
     virtual     status_t    setParameters(int ioHandle, const String8& keyValuePairs) = 0;
     virtual     String8     getParameters(int ioHandle, const String8& keys) = 0;
-    
+
     // register a current process for audio output change notifications
     virtual void registerClient(const sp<IAudioFlingerClient>& client) = 0;
-    
+
     // retrieve the audio recording buffer size
     virtual size_t getInputBufferSize(uint32_t sampleRate, int format, int channelCount) = 0;
 
@@ -128,6 +128,8 @@ public:
     virtual status_t closeInput(int input) = 0;
 
     virtual status_t setStreamOutput(uint32_t stream, int output) = 0;
+
+    virtual status_t setVoiceVolume(float volume) = 0;
 };
 
 
