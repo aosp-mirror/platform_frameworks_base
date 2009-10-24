@@ -133,6 +133,8 @@ public:
 
     virtual status_t setStreamOutput(uint32_t stream, int output);
 
+    virtual status_t setVoiceVolume(float volume);
+
     // IBinder::DeathRecipient
     virtual     void        binderDied(const wp<IBinder>& who);
 

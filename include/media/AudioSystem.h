@@ -220,6 +220,7 @@ public:
     static status_t getInputBufferSize(uint32_t sampleRate, int format, int channelCount,
         size_t* buffSize);
 
+    static status_t setVoiceVolume(float volume);
 
     //
     // AudioPolicyService interface
