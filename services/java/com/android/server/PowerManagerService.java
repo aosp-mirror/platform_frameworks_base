@@ -1286,7 +1286,7 @@ class PowerManagerService extends IPowerManager.Stub
 
     private int setScreenStateLocked(boolean on) {
         int err = Power.setScreenState(on);
-        if (err == 0) {
+        if (err == 0 && !mHasHardwareAutoBrightness) {
             enableLightSensor(on && mAutoBrightessEnabled);
             if (!on) {
                 // make sure button and key backlights are off too
