@@ -89,7 +89,6 @@ public:
     const ProgramVertex * getVertex() {return mVertex.get();}
 
     void setupCheck();
-    void allocationCheck(const Allocation *);
 
     void pause();
     void resume();
