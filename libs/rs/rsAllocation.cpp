@@ -125,6 +125,7 @@ void Allocation::data(const void *data, uint32_t sizeBytes)
         return;
     }
     memcpy(mPtr, data, size);
+    sendDirty();
 }
 
 void Allocation::read(void *data)
@@ -145,6 +146,7 @@ void Allocation::subData(uint32_t xoff, uint32_t count, const void *data, uint32
         return;
     }
     memcpy(ptr, data, size);
+    sendDirty();
 }
 
 void Allocation::subData(uint32_t xoff, uint32_t yoff,
@@ -169,6 +171,7 @@ void Allocation::subData(uint32_t xoff, uint32_t yoff,
         src += lineSize;
         dst += destW * eSize;
     }
+    sendDirty();
 }
 
 void Allocation::subData(uint32_t xoff, uint32_t yoff, uint32_t zoff,
@@ -176,7 +179,28 @@ void Allocation::subData(uint32_t xoff, uint32_t yoff, uint32_t zoff,
 {
 }
 
+void Allocation::addProgramToDirty(const Program *p)
+{
+    mToDirtyList.add(p);
+}
 
+void Allocation::removeProgramToDirty(const Program *p)
+{
+    for (size_t ct=0; ct < mToDirtyList.size(); ct++) {
+        if (mToDirtyList[ct] == p) {
+            mToDirtyList.removeAt(ct);
+            return;
+        }
+    }
+    rsAssert(0);
+}
+
+void Allocation::sendDirty() const
+{
+    for (size_t ct=0; ct < mToDirtyList.size(); ct++) {
+        mToDirtyList[ct]->forceDirty();
+    }
+}
 
 /////////////////
 //
@@ -412,31 +436,24 @@ RsAllocation rsi_AllocationCreateFromBitmapBoxed(Context *rsc, uint32_t w, uint3
     RsAllocation ret = rsi_AllocationCreateFromBitmap(rsc, w2, h2, _dst, _src, genMips, tmp);
     free(tmp);
     return ret;
-
-
-
-
 }
 
 void rsi_AllocationData(Context *rsc, RsAllocation va, const void *data, uint32_t sizeBytes)
 {
     Allocation *a = static_cast<Allocation *>(va);
     a->data(data, sizeBytes);
-    rsc->allocationCheck(a);
 }
 
 void rsi_Allocation1DSubData(Context *rsc, RsAllocation va, uint32_t xoff, uint32_t count, const void *data, uint32_t sizeBytes)
 {
     Allocation *a = static_cast<Allocation *>(va);
     a->subData(xoff, count, data, sizeBytes);
-    rsc->allocationCheck(a);
 }
 
 void rsi_Allocation2DSubData(Context *rsc, RsAllocation va, uint32_t xoff, uint32_t yoff, uint32_t w, uint32_t h, const void *data, uint32_t sizeBytes)
 {
     Allocation *a = static_cast<Allocation *>(va);
     a->subData(xoff, yoff, w, h, data, sizeBytes);
-    rsc->allocationCheck(a);
 }
 
 void rsi_AllocationRead(Context *rsc, RsAllocation va, void *data)

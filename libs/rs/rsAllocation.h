@@ -23,7 +23,7 @@
 namespace android {
 namespace renderscript {
 
-
+class Program;
 
 class Allocation : public ObjectBase
 {
@@ -65,10 +65,16 @@ public:
     void enableGLVertexBuffers() const;
     void setupGLIndexBuffers() const;
 
+    void addProgramToDirty(const Program *);
+    void removeProgramToDirty(const Program *);
 
 protected:
+    void sendDirty() const;
+
     ObjectBaseRef<const Type> mType;
     void * mPtr;
+
+    Vector<const Program *> mToDirtyList;
 
     // Usage restrictions
     bool mCpuWrite;

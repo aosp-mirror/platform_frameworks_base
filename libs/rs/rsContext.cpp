@@ -424,13 +424,6 @@ void Context::setRaster(ProgramRaster *pr)
     }
 }
 
-void Context::allocationCheck(const Allocation *a)
-{
-    mVertex->checkUpdatedAllocation(a);
-    mFragment->checkUpdatedAllocation(a);
-    mFragmentStore->checkUpdatedAllocation(a);
-}
-
 void Context::setVertex(ProgramVertex *pv)
 {
     if (pv == NULL) {
@@ -438,7 +431,6 @@ void Context::setVertex(ProgramVertex *pv)
     } else {
         mVertex.set(pv);
     }
-    mVertex->forceDirty();
 }
 
 void Context::assignName(ObjectBase *obj, const char *name, uint32_t len)

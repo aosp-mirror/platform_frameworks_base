@@ -32,19 +32,23 @@ Program::Program(Context *rsc, Element *in, Element *out) : ObjectBase(rsc)
 
 Program::~Program()
 {
+    bindAllocation(NULL);
 }
 
 
 void Program::bindAllocation(Allocation *alloc)
 {
+    if (mConstants.get() == alloc) {
+        return;
+    }
+    if (mConstants.get()) {
+        mConstants.get()->removeProgramToDirty(this);
+    }
     mConstants.set(alloc);
+    if (alloc) {
+        alloc->addProgramToDirty(this);
+    }
     mDirty = true;
 }
 
-void Program::checkUpdatedAllocation(const Allocation *alloc)
-{
-    if (mConstants.get() == alloc) {
-        mDirty = true;
-    }
-}
 

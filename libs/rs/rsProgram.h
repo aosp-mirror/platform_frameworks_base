@@ -33,7 +33,6 @@ public:
     virtual ~Program();
 
     void bindAllocation(Allocation *);
-    void checkUpdatedAllocation(const Allocation *);
 
 protected:
     // Components not listed in "in" will be passed though
@@ -47,7 +46,7 @@ protected:
 
 
 public:
-    void forceDirty() {mDirty = true;}
+    void forceDirty() const {mDirty = true;}
 };
 
 
