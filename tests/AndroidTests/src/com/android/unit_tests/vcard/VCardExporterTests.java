@@ -16,8 +16,6 @@
 
 package com.android.unit_tests.vcard;
 
-import com.android.unit_tests.vcard.PropertyNodesVerifier.TypeSet;
-
 import android.content.ContentProvider;
 import android.content.ContentProviderOperation;
 import android.content.ContentProviderResult;
@@ -60,16 +58,20 @@ import android.test.mock.MockContentResolver;
 import android.test.mock.MockContext;
 import android.test.mock.MockCursor;
 
+import com.android.unit_tests.vcard.PropertyNodesVerifier.TypeSet;
+
+import junit.framework.TestCase;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-
-import junit.framework.TestCase;
+import java.util.Set;
 
 /**
  * Almost a dead copy of android.test.mock.MockContentProvider, but different in that this
@@ -292,12 +294,16 @@ public class VCardExporterTests extends AndroidTestCase {
         final private TestCase mTestCase;
         final private List<PropertyNodesVerifier> mPropertyNodesVerifierList;
         final private boolean mIsV30;
+        // To allow duplication, use list instead of set.
+        // TODO: support multiple vCard entries.
+        final private List<String> mExpectedLineList;
         int mCount;
 
-        public VCardVerificationHandler(TestCase testCase, int version) {
+        public VCardVerificationHandler(final TestCase testCase, final int version) {
             mTestCase = testCase;
             mPropertyNodesVerifierList = new ArrayList<PropertyNodesVerifier>();
             mIsV30 = (version == V30);
+            mExpectedLineList = new ArrayList<String>();
             mCount = 1;
         }
 
@@ -316,11 +322,51 @@ public class VCardExporterTests extends AndroidTestCase {
             return verifier;
         }
 
-        public boolean onInit(Context context) {
+        public VCardVerificationHandler addExpectedLine(String line) {
+            mExpectedLineList.add(line);
+            return this;
+        }
+
+        public boolean onInit(final Context context) {
             return true;
         }
 
-        public boolean onEntryCreated(String vcard) {
+        public boolean onEntryCreated(final String vcard) {
+            if (!mExpectedLineList.isEmpty()) {
+                verifyLines(vcard);
+            }
+            verifyNodes(vcard);
+            return true;
+        }
+
+        private void verifyLines(final String vcard) {
+            final String[] lineArray = vcard.split("\\r?\\n");
+            final int length = lineArray.length;
+            for (int i = 0; i < length; i++) {
+                final String line = lineArray[i];
+                // TODO: support multiple vcard entries.
+                if ("BEGIN:VCARD".equals(line) || "END:VCARD".equals(line) ||
+                        (mIsV30 ? "VERSION:3.0" : "VERSION:2.1").equals(line)) {
+                    continue;
+                }
+                final int index = mExpectedLineList.indexOf(line);
+                if (index >= 0) {
+                    mExpectedLineList.remove(index);
+                } else {
+                    mTestCase.fail("Unexpected line: " + line);
+                }
+            }
+            if (!mExpectedLineList.isEmpty()) {
+                StringBuffer buffer = new StringBuffer();
+                for (String expectedLine : mExpectedLineList) {
+                    buffer.append(expectedLine);
+                    buffer.append("\n");
+                }
+                mTestCase.fail("Expected line(s) not found:" + buffer.toString());
+            }
+        }
+
+        private void verifyNodes(final String vcard) {
             if (mPropertyNodesVerifierList.size() == 0) {
                 mTestCase.fail("Too many vCard entries seems to be inserted(No."
                         + mCount + " of the entries (No.1 is the first entry))");
@@ -344,7 +390,6 @@ public class VCardExporterTests extends AndroidTestCase {
             } finally {
                 mCount++;
             }
-            return true;
         }
 
         public void onTerminate() {
@@ -1178,8 +1223,6 @@ public class VCardExporterTests extends AndroidTestCase {
         testNoteCommon(V30);
     }
 
-    // TODO: test for non-ascii...
-
     private void testPhotoCommon(int version) {
         final boolean isV30 = version == V30;
         ExportTestResolver resolver = new ExportTestResolver();
@@ -1207,5 +1250,25 @@ public class VCardExporterTests extends AndroidTestCase {
 
     public void testPhotoV30() {
         testPhotoCommon(V30);
+    }
+
+    public void testV30HandleEscape() {
+        final int version = V30;
+        ExportTestResolver resolver = new ExportTestResolver();
+        ContentValues contentValues = resolver.buildData(StructuredName.CONTENT_ITEM_TYPE);
+        contentValues.put(StructuredName.FAMILY_NAME, "\\");
+        contentValues.put(StructuredName.GIVEN_NAME, ";");
+        contentValues.put(StructuredName.MIDDLE_NAME, ",");
+        contentValues.put(StructuredName.PREFIX, "\n");
+        contentValues.put(StructuredName.DISPLAY_NAME, "[<{Unescaped:Asciis}>]");
+        VCardVerificationHandler handler = new VCardVerificationHandler(this, version);
+        // Verifies the vCard String correctly escapes each character which must be escaped.
+        handler.addExpectedLine("N:\\\\;\\;;\\,;\\n;")
+            .addExpectedLine("FN:[<{Unescaped:Asciis}>]");
+        handler.addNewVerifier()
+            .addNodeWithoutOrder("FN", "[<{Unescaped:Asciis}>]")
+            .addNodeWithoutOrder("N", Arrays.asList("\\", ";", ",", "\n", ""));
+
+        verifyOneComposition(resolver, handler, version);
     }
 }

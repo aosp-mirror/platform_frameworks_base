@@ -742,10 +742,9 @@ public class VCardComposer {
                 encodedSuffix = escapeCharacters(suffix);
             }
 
-            // N property. This order is specified by vCard spec and does not depend on countries.
             builder.append(Constants.PROPERTY_N);
             if (shouldAppendCharsetAttribute(Arrays.asList(
-                    familyName, givenName, middleName, prefix, suffix))) {
+                    encodedFamily, encodedGiven, encodedMiddle, encodedPrefix, encodedSuffix))) {
                 builder.append(VCARD_ATTR_SEPARATOR);
                 builder.append(mVCardAttributeCharset);
             }
@@ -766,9 +765,15 @@ public class VCardComposer {
             builder.append(encodedSuffix);
             builder.append(VCARD_COL_SEPARATOR);
 
-            final String formattedName = VCardUtils.constructNameFromElements(
+            final String formattedName;
+            if (!TextUtils.isEmpty(displayName)) {
+                formattedName = displayName;
+            } else {
+                formattedName = VCardUtils.constructNameFromElements(
                     VCardConfig.getNameOrderType(mVCardType),
                     encodedFamily, encodedMiddle, encodedGiven, encodedPrefix, encodedSuffix);
+            }
+
             final boolean reallyUseQuotedPrintableToFullname =
                 !mRefrainsQPToPrimaryProperties &&
                 !VCardUtils.containsOnlyNonCrLfPrintableAscii(formattedName);
@@ -1501,7 +1506,7 @@ public class VCardComposer {
         final StringBuilder tmpBuilder = new StringBuilder();
         final int length = unescaped.length();
         for (int i = 0; i < length; i++) {
-            char ch = unescaped.charAt(i);
+            final char ch = unescaped.charAt(i);
             switch (ch) {
                 case ';': {
                     tmpBuilder.append('\\');
@@ -1512,7 +1517,7 @@ public class VCardComposer {
                     if (i + 1 < length) {
                         char nextChar = unescaped.charAt(i);
                         if (nextChar == '\n') {
-                            continue;
+                            break;
                         } else {
                             // fall through
                         }
