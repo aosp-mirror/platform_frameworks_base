@@ -70,6 +70,21 @@ public class PropertyNodesVerifier {
         return addNodeWithOrder(propName, propValue, propValueList, null, null, null, null);
     }
 
+    public PropertyNodesVerifier addNodeWithOrder(String propName, List<String> propValueList) {
+        StringBuffer buffer = new StringBuffer();
+        boolean first = true;
+        for (String propValueElem : propValueList) {
+            if (first) {
+                first = false;
+            } else {
+                buffer.append(';');
+            }
+            buffer.append(propValueElem);
+        }
+        return addNodeWithOrder(propName, buffer.toString(), propValueList,
+                null, null, null, null);
+    }
+
     public PropertyNodesVerifier addNodeWithOrder(String propName, String propValue,
             TypeSet paramMap_TYPE) {
         return addNodeWithOrder(propName, propValue, null, null, null, paramMap_TYPE, null);
@@ -105,6 +120,21 @@ public class PropertyNodesVerifier {
     public PropertyNodesVerifier addNodeWithoutOrder(String propName, String propValue,
             List<String> propValueList) {
         return addNodeWithoutOrder(propName, propValue, propValueList, null, null, null, null);
+    }
+
+    public PropertyNodesVerifier addNodeWithoutOrder(String propName, List<String> propValueList) {
+        StringBuffer buffer = new StringBuffer();
+        boolean first = true;
+        for (String propValueElem : propValueList) {
+            if (first) {
+                first = false;
+            } else {
+                buffer.append(';');
+            }
+            buffer.append(propValueElem);
+        }
+        return addNodeWithoutOrder(propName, buffer.toString(), propValueList,
+                null, null, null, null);
     }
 
     public PropertyNodesVerifier addNodeWithoutOrder(String propName, String propValue,
