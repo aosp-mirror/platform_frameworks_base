@@ -107,6 +107,55 @@ static status_t StatusFromOMXError(OMX_ERRORTYPE err) {
 }
 
 status_t OMXNodeInstance::freeNode() {
+    // Transition the node from its current state all the way down
+    // to "Loaded".
+    // This ensures that all active buffers are properly freed even
+    // for components that don't do this themselves on a call to
+    // "FreeHandle".
+
+    OMX_STATETYPE state;
+    CHECK_EQ(OMX_GetState(mHandle, &state), OMX_ErrorNone);
+    switch (state) {
+        case OMX_StateExecuting:
+        {
+            LOGV("forcing Executing->Idle");
+            sendCommand(OMX_CommandStateSet, OMX_StateIdle);
+            OMX_ERRORTYPE err;
+            while ((err = OMX_GetState(mHandle, &state)) == OMX_ErrorNone
+                   && state != OMX_StateIdle) {
+                usleep(100000);
+            }
+            CHECK_EQ(err, OMX_ErrorNone);
+
+            // fall through
+        }
+
+        case OMX_StateIdle:
+        {
+            LOGV("forcing Idle->Loaded");
+            sendCommand(OMX_CommandStateSet, OMX_StateLoaded);
+
+            freeActiveBuffers();
+
+            OMX_ERRORTYPE err;
+            while ((err = OMX_GetState(mHandle, &state)) == OMX_ErrorNone
+                   && state != OMX_StateLoaded) {
+                LOGV("waiting for Loaded state...");
+                usleep(100000);
+            }
+            CHECK_EQ(err, OMX_ErrorNone);
+
+            // fall through
+        }
+
+        case OMX_StateLoaded:
+            break;
+
+        default:
+            CHECK(!"should not be here, unknown state.");
+            break;
+    }
+
     OMX_ERRORTYPE err = OMX_MasterFreeHandle(mHandle);
     mHandle = NULL;
 
@@ -193,6 +242,8 @@ status_t OMXNodeInstance::useBuffer(
 
     *buffer = header;
 
+    addActiveBuffer(portIndex, *buffer);
+
     return OK;
 }
 
@@ -219,6 +270,8 @@ status_t OMXNodeInstance::allocateBuffer(
     }
 
     *buffer = header;
+
+    addActiveBuffer(portIndex, *buffer);
 
     return OK;
 }
@@ -248,12 +301,16 @@ status_t OMXNodeInstance::allocateBufferWithBackup(
 
     *buffer = header;
 
+    addActiveBuffer(portIndex, *buffer);
+
     return OK;
 }
 
 status_t OMXNodeInstance::freeBuffer(
         OMX_U32 portIndex, OMX::buffer_id buffer) {
     Mutex::Autolock autoLock(mLock);
+
+    removeActiveBuffer(portIndex, buffer);
 
     OMX_BUFFERHEADERTYPE *header = (OMX_BUFFERHEADERTYPE *)buffer;
     BufferMeta *buffer_meta = static_cast<BufferMeta *>(header->pAppPrivate);
@@ -365,6 +422,38 @@ OMX_ERRORTYPE OMXNodeInstance::OnFillBufferDone(
         OMX_IN OMX_BUFFERHEADERTYPE* pBuffer) {
     OMXNodeInstance *instance = static_cast<OMXNodeInstance *>(pAppData);
     return instance->owner()->OnFillBufferDone(instance->nodeID(), pBuffer);
+}
+
+void OMXNodeInstance::addActiveBuffer(OMX_U32 portIndex, OMX::buffer_id id) {
+    ActiveBuffer active;
+    active.mPortIndex = portIndex;
+    active.mID = id;
+    mActiveBuffers.push(active);
+}
+
+void OMXNodeInstance::removeActiveBuffer(
+        OMX_U32 portIndex, OMX::buffer_id id) {
+    bool found = false;
+    for (size_t i = 0; i < mActiveBuffers.size(); ++i) {
+        if (mActiveBuffers[i].mPortIndex == portIndex
+            && mActiveBuffers[i].mID == id) {
+            found = true;
+            mActiveBuffers.removeItemsAt(i);
+            break;
+        }
+    }
+
+    if (!found) {
+        LOGW("Attempt to remove an active buffer we know nothing about...");
+    }
+}
+
+void OMXNodeInstance::freeActiveBuffers() {
+    // Make sure to count down here, as freeBuffer will in turn remove
+    // the active buffer from the vector...
+    for (size_t i = mActiveBuffers.size(); i--;) {
+        freeBuffer(mActiveBuffers[i].mPortIndex, mActiveBuffers[i].mID);
+    }
 }
 
 }  // namespace android
