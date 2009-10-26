@@ -72,8 +72,7 @@ public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
     private final AudioManager mAudioManager;
     private final BluetoothService mBluetoothService;
     private final BluetoothAdapter mAdapter;
-    private boolean mSuspending;
-    private boolean mResuming;
+    private int   mTargetA2dpState;
 
     private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override
@@ -151,8 +150,7 @@ public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
 
         if (mBluetoothService.isEnabled())
             onBluetoothEnable();
-        mSuspending = false;
-        mResuming = false;
+        mTargetA2dpState = -1;
     }
 
     @Override
@@ -341,10 +339,7 @@ public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
     public synchronized boolean suspendSink(BluetoothDevice device) {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
                             "Need BLUETOOTH_ADMIN permission");
-        if (DBG) log("suspendSink(" + device + "), mSuspending: "+mSuspending+", mResuming: "+mResuming);
-        if (mSuspending) {
-            return true;
-        }
+        if (DBG) log("suspendSink(" + device + "), mTargetA2dpState: "+mTargetA2dpState);
         if (device == null || mAudioDevices == null) {
             return false;
         }
@@ -353,28 +348,15 @@ public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
         if (path == null || state == null) {
             return false;
         }
-        switch (state.intValue()) {
-        case BluetoothA2dp.STATE_CONNECTED:
-            if (mResuming) {
-                mSuspending = true;
-            }
-            return true;
-        case BluetoothA2dp.STATE_PLAYING:
-            mAudioManager.setParameters("A2dpSuspended=true");
-            mSuspending = suspendSinkNative(path);
-            return mSuspending;
-        default:
-            return false;
-        }
+
+        mTargetA2dpState = BluetoothA2dp.STATE_CONNECTED;
+        return checkSinkSuspendState(state.intValue());
     }
 
     public synchronized boolean resumeSink(BluetoothDevice device) {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
                             "Need BLUETOOTH_ADMIN permission");
-        if (DBG) log("resumeSink(" + device + "), mResuming: "+mResuming+", mSuspending: "+mSuspending);
-        if (mResuming) {
-            return true;
-        }
+        if (DBG) log("resumeSink(" + device + "), mTargetA2dpState: "+mTargetA2dpState);
         if (device == null || mAudioDevices == null) {
             return false;
         }
@@ -383,19 +365,8 @@ public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
         if (path == null || state == null) {
             return false;
         }
-        switch (state.intValue()) {
-        case BluetoothA2dp.STATE_PLAYING:
-            if (mSuspending) {
-                mResuming = true;
-            }
-            return true;
-        case BluetoothA2dp.STATE_CONNECTED:
-            mResuming = resumeSinkNative(path);
-            mAudioManager.setParameters("A2dpSuspended=false");
-            return mResuming;
-        default:
-            return false;
-        }
+        mTargetA2dpState = BluetoothA2dp.STATE_PLAYING;
+        return checkSinkSuspendState(state.intValue());
     }
 
     public synchronized BluetoothDevice[] getConnectedSinks() {
@@ -458,10 +429,6 @@ public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
     }
 
     private void handleSinkStateChange(BluetoothDevice device, int prevState, int state) {
-        if (state == BluetoothA2dp.STATE_DISCONNECTED) {
-            mSuspending = false;
-            mResuming = false;
-        }
         if (state != prevState) {
             if (state == BluetoothA2dp.STATE_DISCONNECTED ||
                     state == BluetoothA2dp.STATE_DISCONNECTING) {
@@ -477,28 +444,11 @@ public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
             }
             mAudioDevices.put(device, state);
 
-            if (state == BluetoothA2dp.STATE_CONNECTED && prevState == BluetoothA2dp.STATE_PLAYING) {
-                if (DBG) log("handleSinkStateChange() STATE_PLAYING -> STATE_CONNECTED: mSuspending: "
-                        +mSuspending+", mResuming: "+mResuming);
-                if (mSuspending) {
-                    mSuspending = false;
-                    if (mResuming) {
-                        mResuming = false;
-                        resumeSink(device);
-                    }
-                }
-            }
-            if (state == BluetoothA2dp.STATE_PLAYING && prevState == BluetoothA2dp.STATE_CONNECTED) {
-                if (DBG) log("handleSinkStateChange() STATE_CONNECTED -> STATE_PLAYING: mSuspending: "
-                        +mSuspending+", mResuming: "+mResuming);
+            checkSinkSuspendState(state);
+            mTargetA2dpState = -1;
 
-                if (mResuming) {
-                    mResuming = false;
-                    if (mSuspending) {
-                        mSuspending = false;
-                        suspendSink(device);
-                    }
-                }
+            if (state == BluetoothA2dp.STATE_CONNECTING) {
+                mAudioManager.setParameters("A2dpSuspended=false");
             }
             Intent intent = new Intent(BluetoothA2dp.ACTION_SINK_STATE_CHANGED);
             intent.putExtra(BluetoothDevice.EXTRA_DEVICE, device);
@@ -525,6 +475,23 @@ public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
             }
         }
         return sinks;
+    }
+
+    private boolean checkSinkSuspendState(int state) {
+        boolean result = true;
+
+        if (state != mTargetA2dpState) {
+            if (state == BluetoothA2dp.STATE_PLAYING &&
+                mTargetA2dpState == BluetoothA2dp.STATE_CONNECTED) {
+                mAudioManager.setParameters("A2dpSuspended=true");
+            } else if (state == BluetoothA2dp.STATE_CONNECTED &&
+                mTargetA2dpState == BluetoothA2dp.STATE_PLAYING) {
+                mAudioManager.setParameters("A2dpSuspended=false");
+            } else {
+                result = false;
+            }
+        }
+        return result;
     }
 
     @Override
