@@ -541,4 +541,33 @@ public class UriTest extends TestCase {
         assertEquals(nestedUrl,
                 Uri.decode(uri.getQueryParameters("nested").get(0)));
     }
+
+    public void testGetQueryParameterEdgeCases() {
+        Uri uri;
+
+        // key at beginning of URL
+        uri = Uri.parse("http://test/").buildUpon()
+            .appendQueryParameter("key", "a b")
+            .appendQueryParameter("keya", "c d")
+            .appendQueryParameter("bkey", "e f")
+            .build();
+        assertEquals("a b", uri.getQueryParameter("key"));
+
+        // key in middle of URL
+        uri = Uri.parse("http://test/").buildUpon()
+            .appendQueryParameter("akeyb", "a b")
+            .appendQueryParameter("keya", "c d")
+            .appendQueryParameter("key", "e f")
+            .appendQueryParameter("bkey", "g h")
+            .build();
+        assertEquals("e f", uri.getQueryParameter("key"));
+
+        // key at end of URL
+        uri = Uri.parse("http://test/").buildUpon()
+            .appendQueryParameter("akeyb", "a b")
+            .appendQueryParameter("keya", "c d")
+            .appendQueryParameter("key", "y z")
+            .build();
+        assertEquals("y z", uri.getQueryParameter("key"));
+    }
 }

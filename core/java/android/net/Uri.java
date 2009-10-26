@@ -1567,51 +1567,40 @@ public abstract class Uri implements Parcelable, Comparable<Uri> {
         if (isOpaque()) {
             throw new UnsupportedOperationException(NOT_HIERARCHICAL);
         }
+        if (key == null) {
+          throw new NullPointerException("key");
+        }
 
-        String query = getEncodedQuery();
-
+        final String query = getEncodedQuery();
         if (query == null) {
             return null;
         }
 
-        String encodedKey;
-        try {
-            encodedKey = URLEncoder.encode(key, DEFAULT_ENCODING);
-        } catch (UnsupportedEncodingException e) {
-            throw new AssertionError(e);
-        }
+        final String encodedKey = encode(key, null);
+        final int encodedKeyLength = encodedKey.length();
 
-        String prefix = encodedKey + "=";
+        int encodedKeySearchIndex = 0;
+        final int encodedKeySearchEnd = query.length() - (encodedKeyLength + 1);
 
-        if (query.length() < prefix.length()) {
-            return null;
-        }
-
-        int start;
-        if (query.startsWith(prefix)) {
-            // It's the first parameter.
-            start = prefix.length();
-        } else {
-            // It must be later in the query string.
-            prefix = "&" + prefix;
-            start = query.indexOf(prefix);
-
-            if (start == -1) {
-                // Not found.
-                return null;
+        while (encodedKeySearchIndex <= encodedKeySearchEnd) {
+            int keyIndex = query.indexOf(encodedKey, encodedKeySearchIndex);
+            if (keyIndex == -1) {
+                break;
             }
-
-            start += prefix.length();
+            final int equalsIndex = keyIndex + encodedKeyLength;
+            if (query.charAt(equalsIndex) != '=') {
+                encodedKeySearchIndex = equalsIndex + 1;
+                continue;
+            }
+            if (keyIndex == 0 || query.charAt(keyIndex - 1) == '&') {
+                int end = query.indexOf('&', equalsIndex);
+                if (end == -1) {
+                    end = query.length();
+                }
+                return decode(query.substring(equalsIndex + 1, end));
+            }
         }
-
-        // Find end of value.
-        int end = query.indexOf('&', start);
-        if (end == -1) {
-            end = query.length();
-        }
-
-        String value = query.substring(start, end);
-        return decode(value);
+        return null;
     }
 
     /** Identifies a null parcelled Uri. */
