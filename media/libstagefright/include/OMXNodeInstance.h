@@ -85,7 +85,17 @@ private:
     OMX_HANDLETYPE mHandle;
     sp<IOMXObserver> mObserver;
 
+    struct ActiveBuffer {
+        OMX_U32 mPortIndex;
+        OMX::buffer_id mID;
+    };
+    Vector<ActiveBuffer> mActiveBuffers;
+
     ~OMXNodeInstance();
+
+    void addActiveBuffer(OMX_U32 portIndex, OMX::buffer_id id);
+    void removeActiveBuffer(OMX_U32 portIndex, OMX::buffer_id id);
+    void freeActiveBuffers();
 
     static OMX_ERRORTYPE OnEvent(
             OMX_IN OMX_HANDLETYPE hComponent,
