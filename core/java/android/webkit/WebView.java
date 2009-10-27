@@ -3095,6 +3095,16 @@ public class WebView extends AbsoluteLayout
         imm.hideSoftInputFromWindow(this.getWindowToken(), 0);
     }
 
+    /**
+     * Only for calling from JNI.  Allows a click on an unfocused textfield to
+     * put the textfield in focus.
+     */
+    private void setOkayNotToMatch() {
+        if (inEditingMode()) {
+            mWebTextView.mOkayForFocusNotToMatch = true;
+        }
+    }
+
     /*
      * This method checks the current focus and cursor and potentially rebuilds
      * mWebTextView to have the appropriate properties, such as password,
@@ -3150,6 +3160,7 @@ public class WebView extends AbsoluteLayout
                     && nativeTextGeneration() == mTextGeneration) {
                 mWebTextView.setTextAndKeepSelection(text);
             } else {
+                // FIXME: Determine whether this is necessary.
                 Selection.setSelection(spannable, start, end);
             }
         } else {
@@ -3182,34 +3193,12 @@ public class WebView extends AbsoluteLayout
             mWebTextView.setSingleLine(isTextField);
             mWebTextView.setInPassword(nativeFocusCandidateIsPassword());
             if (null == text) {
-                mWebTextView.setText("", 0, 0);
                 if (DebugFlags.WEB_VIEW) {
                     Log.v(LOGTAG, "rebuildWebTextView null == text");
                 }
-            } else {
-                // Change to true to enable the old style behavior, where
-                // entering a textfield/textarea always set the selection to the
-                // whole field.  This was desirable for the case where the user
-                // intends to scroll past the field using the trackball.
-                // However, it causes a problem when replying to emails - the
-                // user expects the cursor to be at the beginning of the
-                // textarea.  Testing out a new behavior, where textfields set
-                // selection at the end, and textareas at the beginning.
-                if (false) {
-                    mWebTextView.setText(text, 0, text.length());
-                } else if (isTextField) {
-                    int length = text.length();
-                    mWebTextView.setText(text, length, length);
-                    if (DebugFlags.WEB_VIEW) {
-                        Log.v(LOGTAG, "rebuildWebTextView length=" + length);
-                    }
-                } else {
-                    mWebTextView.setText(text, 0, 0);
-                    if (DebugFlags.WEB_VIEW) {
-                        Log.v(LOGTAG, "rebuildWebTextView !isTextField");
-                    }
-                }
+                text = "";
             }
+            mWebTextView.setTextAndKeepSelection(text);
             mWebTextView.requestFocus();
         }
     }
@@ -3365,15 +3354,16 @@ public class WebView extends AbsoluteLayout
             rebuildWebTextView();
             // Now we need to pass the event to it
             if (inEditingMode()) {
-                mWebTextView.mResendKeyDown = true;
-                return mWebTextView.onKeyDown(keyCode, event);
+                mWebTextView.setDefaultSelection();
+                mWebTextView.mOkayForFocusNotToMatch = true;
+                return mWebTextView.dispatchKeyEvent(event);
             }
         } else if (nativeHasFocusNode()) {
             // In this case, the cursor is not on a text input, but the focus
             // might be.  Check it, and if so, hand over to the WebTextView.
             rebuildWebTextView();
             if (inEditingMode()) {
-                return mWebTextView.onKeyDown(keyCode, event);
+                return mWebTextView.dispatchKeyEvent(event);
             }
         }
 
@@ -3460,6 +3450,10 @@ public class WebView extends AbsoluteLayout
             if (nativeCursorIsTextInput()) {
                 rebuildWebTextView();
                 centerKeyPressOnTextField();
+                if (inEditingMode()) {
+                    mWebTextView.setDefaultSelection();
+                    mWebTextView.mOkayForFocusNotToMatch = true;
+                }
                 return true;
             }
             nativeSetFollowedLink(true);
@@ -4937,15 +4931,6 @@ public class WebView extends AbsoluteLayout
     }
 
     /* package */ void passToJavaScript(String currentText, KeyEvent event) {
-        if (nativeCursorWantsKeyEvents() && !nativeCursorMatchesFocus()) {
-            mWebViewCore.sendMessage(EventHub.CLICK);
-            if (mWebTextView.mOkayForFocusNotToMatch) {
-                int select = nativeFocusCandidateIsTextField() ?
-                        nativeFocusCandidateMaxLength() : 0;
-                setSelection(select, select);
-                mWebTextView.mOkayForFocusNotToMatch = false; // only once
-            }
-        }
         WebViewCore.JSKeyData arg = new WebViewCore.JSKeyData();
         arg.mEvent = event;
         arg.mCurrentText = currentText;
