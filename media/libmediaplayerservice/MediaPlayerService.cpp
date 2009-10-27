@@ -356,11 +356,44 @@ extern "C" void get_malloc_leak_info(uint8_t** info, size_t* overallSize,
         size_t* infoSize, size_t* totalMemory, size_t* backtraceSize);
 extern "C" void free_malloc_leak_info(uint8_t* info);
 
+// Use the String-class below instead of String8 to allocate all memory
+// beforehand and not reenter the heap while we are examining it...
+struct MyString8 {
+    static const size_t MAX_SIZE = 256 * 1024;
+
+    MyString8()
+        : mPtr((char *)malloc(MAX_SIZE)) {
+        *mPtr = '\0';
+    }
+
+    ~MyString8() {
+        free(mPtr);
+    }
+
+    void append(const char *s) {
+        strcat(mPtr, s);
+    }
+
+    const char *string() const {
+        return mPtr;
+    }
+
+    size_t size() const {
+        return strlen(mPtr);
+    }
+
+private:
+    char *mPtr;
+
+    MyString8(const MyString8 &);
+    MyString8 &operator=(const MyString8 &);
+};
+
 void memStatus(int fd, const Vector<String16>& args)
 {
     const size_t SIZE = 256;
     char buffer[SIZE];
-    String8 result;
+    MyString8 result;
 
     typedef struct {
         size_t size;
