@@ -84,14 +84,24 @@ import java.util.ArrayList;
     // True if the most recent drag event has caused either the TextView to
     // scroll or the web page to scroll.  Gets reset after a touch down.
     private boolean         mScrolled;
-    // Gets set to true when the the IME jumps to the next textfield.  When this
-    // happens, the next time the user hits a key it is okay for the focus
-    // pointer to not match the WebTextView's node pointer
+    // Gets set to true any time the WebTextView has focus, but the navigation
+    // cache does not yet know that the focus has been changed.  This happens
+    // if the user presses "Next", if the user moves the cursor to a textfield
+    // and starts typing or clicks the trackball/center key, and when the user
+    // touches a textfield.
     boolean                 mOkayForFocusNotToMatch;
-    boolean                 mResendKeyDown;
     // Whether or not a selection change was generated from webkit.  If it was,
     // we do not need to pass the selection back to webkit.
     private boolean         mFromWebKit;
+    // Whether or not a selection change was generated from the WebTextView
+    // gaining focus.  If it is, we do not want to pass it to webkit.  This
+    // selection comes from the MovementMethod, but we behave differently.  If
+    // WebTextView gained focus from a touch, webkit will determine the
+    // selection.
+    private boolean         mFromFocusChange;
+    // Whether or not a selection change was generated from setInputType.  We
+    // do not want to pass this change to webkit.
+    private boolean         mFromSetInputType;
     private boolean         mGotTouchDown;
     private boolean         mInSetTextAndKeepSelection;
     // Array to store the final character added in onTextChanged, so that its
@@ -137,22 +147,23 @@ import java.util.ArrayList;
                 isArrowKey = true;
                 break;
         }
-        if (!isArrowKey && !mOkayForFocusNotToMatch && !mResendKeyDown
-                && mWebView.nativeFocusNodePointer() != mNodePointer) {
-            if (mWebView.nativeFocusNodePointer() != 0) {
+
+        if (down) {
+            if (mOkayForFocusNotToMatch) {
+                if (mWebView.nativeFocusNodePointer() == mNodePointer) {
+                    mOkayForFocusNotToMatch = false;
+                }
+            } else if (mWebView.nativeFocusNodePointer() != mNodePointer
+                    && !isArrowKey) {
                 mWebView.nativeClearCursor();
+                // Do not call remove() here, which hides the soft keyboard.  If
+                // the soft keyboard is being displayed, the user will still want
+                // it there.
+                mWebView.removeView(this);
+                mWebView.requestFocus();
+                return mWebView.dispatchKeyEvent(event);
             }
-            // Do not call remove() here, which hides the soft keyboard.  If
-            // the soft keyboard is being displayed, the user will still want
-            // it there.
-            mWebView.removeView(this);
-            mWebView.requestFocus();
-            return mWebView.dispatchKeyEvent(event);
         }
-        // After a jump to next textfield and the first key press, the cursor
-        // and focus will once again match, so reset this value.
-        mOkayForFocusNotToMatch = false;
-        mResendKeyDown = false;
         Spannable text = (Spannable) getText();
         int oldLength = text.length();
         // Normally the delete key's dom events are sent via onTextChanged.
@@ -306,15 +317,19 @@ import java.util.ArrayList;
     public void onEditorAction(int actionCode) {
         switch (actionCode) {
         case EditorInfo.IME_ACTION_NEXT:
-            mWebView.nativeMoveCursorToNextTextInput();
-            // Preemptively rebuild the WebTextView, so that the action will
-            // be set properly.
-            mWebView.rebuildWebTextView();
             // Since the cursor will no longer be in the same place as the
             // focus, set the focus controller back to inactive
             mWebView.setFocusControllerInactive();
-            mWebView.invalidate();
+            mWebView.nativeMoveCursorToNextTextInput();
             mOkayForFocusNotToMatch = true;
+            // Pass the click to set the focus to the textfield which will now
+            // have the cursor.
+            mWebView.centerKeyPressOnTextField();
+            // Preemptively rebuild the WebTextView, so that the action will
+            // be set properly.
+            mWebView.rebuildWebTextView();
+            setDefaultSelection();
+            mWebView.invalidate();
             break;
         case EditorInfo.IME_ACTION_DONE:
             super.onEditorAction(actionCode);
@@ -334,6 +349,14 @@ import java.util.ArrayList;
     }
 
     @Override
+    protected void onFocusChanged(boolean focused, int direction,
+            Rect previouslyFocusedRect) {
+        mFromFocusChange = true;
+        super.onFocusChanged(focused, direction, previouslyFocusedRect);
+        mFromFocusChange = false;
+    }
+
+    @Override
     protected void onSelectionChanged(int selStart, int selEnd) {
         // This code is copied from TextView.onDraw().  That code does not get
         // executed, however, because the WebTextView does not draw, allowing
@@ -345,7 +368,8 @@ import java.util.ArrayList;
             int candEnd = EditableInputConnection.getComposingSpanEnd(sp);
             imm.updateSelection(this, selStart, selEnd, candStart, candEnd);
         }
-        if (!mFromWebKit && mWebView != null) {
+        if (!mFromWebKit && !mFromFocusChange && !mFromSetInputType
+                && mWebView != null) {
             if (DebugFlags.WEB_TEXT_VIEW) {
                 Log.v(LOGTAG, "onSelectionChanged selStart=" + selStart
                         + " selEnd=" + selEnd);
@@ -594,6 +618,17 @@ import java.util.ArrayList;
     }
 
     /**
+     * Sets the selection when the user clicks on a textfield or textarea with
+     * the trackball or center key, or starts typing into it without clicking on
+     * it.
+     */
+    /* package */ void setDefaultSelection() {
+        Spannable text = (Spannable) getText();
+        int selection = mSingle ? text.length() : 0;
+        Selection. setSelection(text, selection, selection);
+    }
+
+    /**
      * Determine whether to use the system-wide password disguising method,
      * or to use none.
      * @param   inPassword  True if the textfield is a password field.
@@ -661,6 +696,13 @@ import java.util.ArrayList;
         // that other applications that use embedded WebViews will properly
         // display the text in password textfields.
         setTextColor(Color.BLACK);
+    }
+
+    @Override
+    public void setInputType(int type) {
+        mFromSetInputType = true;
+        super.setInputType(type);
+        mFromSetInputType = false;
     }
 
     /* package */ void setMaxLength(int maxLength) {
@@ -761,32 +803,6 @@ import java.util.ArrayList;
         mSingle = single;
         setHorizontallyScrolling(single);
         setInputType(inputType);
-    }
-
-    /**
-     * Set the text for this WebTextView, and set the selection to (start, end)
-     * @param   text    Text to go into this WebTextView.
-     * @param   start   Beginning of the selection.
-     * @param   end     End of the selection.
-     */
-    /* package */ void setText(CharSequence text, int start, int end) {
-        mPreChange = text.toString();
-        setText(text);
-        Spannable span = (Spannable) getText();
-        int length = span.length();
-        if (end > length) {
-            end = length;
-        }
-        if (start < 0) {
-            start = 0;
-        } else if (start > length) {
-            start = length;
-        }
-        if (DebugFlags.WEB_TEXT_VIEW) {
-            Log.v(LOGTAG, "setText start=" + start
-                    + " end=" + end);
-        }
-        Selection.setSelection(span, start, end);
     }
 
     /**
