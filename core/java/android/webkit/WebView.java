@@ -2971,11 +2971,12 @@ public class WebView extends AbsoluteLayout
 
         if (mNativeClass == 0) return;
         if (mShiftIsPressed && !animateZoom) {
-            if (mTouchSelection) {
+            if (mTouchSelection || mExtendSelection) {
                 nativeDrawSelectionRegion(canvas);
-            } else {
-                nativeDrawSelection(canvas, mInvActualScale, getTitleHeight(),
-                        mSelectX, mSelectY, mExtendSelection);
+            }
+            if (!mTouchSelection) {
+                nativeDrawSelectionPointer(canvas, mInvActualScale, mSelectX,
+                        mSelectY - getTitleHeight(), mExtendSelection);
             }
         } else if (drawCursorRing) {
             if (mTouchMode == TOUCH_SHORTPRESS_START_MODE) {
@@ -3275,18 +3276,8 @@ public class WebView extends AbsoluteLayout
         if (mShiftIsPressed == false && nativeCursorWantsKeyEvents() == false
                 && (keyCode == KeyEvent.KEYCODE_SHIFT_LEFT
                 || keyCode == KeyEvent.KEYCODE_SHIFT_RIGHT)) {
-            mExtendSelection = false;
-            mShiftIsPressed = true;
-            if (nativeHasCursorNode()) {
-                Rect rect = nativeCursorNodeBounds();
-                mSelectX = contentToViewX(rect.left);
-                mSelectY = contentToViewY(rect.top);
-            } else {
-                mSelectX = mScrollX + (int) mLastTouchX;
-                mSelectY = mScrollY + (int) mLastTouchY;
-            }
-            nativeHideCursor();
-       }
+            setUpSelectXY();
+        }
 
         if (keyCode >= KeyEvent.KEYCODE_DPAD_UP
                 && keyCode <= KeyEvent.KEYCODE_DPAD_RIGHT) {
@@ -3454,6 +3445,7 @@ public class WebView extends AbsoluteLayout
                     commitCopy();
                 } else {
                     mExtendSelection = true;
+                    invalidate(); // draw the i-beam instead of the arrow
                 }
                 return true; // discard press if copy in progress
             }
@@ -3494,14 +3486,29 @@ public class WebView extends AbsoluteLayout
         return false;
     }
 
+    private void setUpSelectXY() {
+        mExtendSelection = false;
+        mShiftIsPressed = true;
+        if (nativeHasCursorNode()) {
+            Rect rect = nativeCursorNodeBounds();
+            mSelectX = contentToViewX(rect.left);
+            mSelectY = contentToViewY(rect.top);
+        } else if (mLastTouchY > getVisibleTitleHeight()) {
+            mSelectX = mScrollX + (int) mLastTouchX;
+            mSelectY = mScrollY + (int) mLastTouchY;
+        } else {
+            mSelectX = mScrollX + getViewWidth() / 2;
+            mSelectY = mScrollY + getViewHeightWithTitle() / 2;
+        }
+        nativeHideCursor();
+    }
+
     /**
      * @hide
      */
     public void emulateShiftHeld() {
         if (0 == mNativeClass) return; // client isn't initialized
-        mExtendSelection = false;
-        mShiftIsPressed = true;
-        nativeHideCursor();
+        setUpSelectXY();
     }
 
     private boolean commitCopy() {
@@ -3519,6 +3526,7 @@ public class WebView extends AbsoluteLayout
             mExtendSelection = false;
         }
         mShiftIsPressed = false;
+        invalidate(); // remove selection region and pointer
         if (mTouchMode == TOUCH_SELECT_MODE) {
             mTouchMode = TOUCH_INIT_MODE;
         }
@@ -3813,6 +3821,7 @@ public class WebView extends AbsoluteLayout
                     nativeMoveSelection(viewToContentX(mSelectX),
                             viewToContentY(mSelectY), false);
                     mTouchSelection = mExtendSelection = true;
+                    invalidate(); // draw the i-beam instead of the arrow
                 } else if (mPrivateHandler.hasMessages(RELEASE_SINGLE_TAP)) {
                     mPrivateHandler.removeMessages(RELEASE_SINGLE_TAP);
                     if (deltaX * deltaX + deltaY * deltaY < mDoubleTapSlopSquare) {
@@ -4195,6 +4204,7 @@ public class WebView extends AbsoluteLayout
                     commitCopy();
                 } else {
                     mExtendSelection = true;
+                    invalidate(); // draw the i-beam instead of the arrow
                 }
                 return true; // discard press if copy in progress
             }
@@ -5803,8 +5813,8 @@ public class WebView extends AbsoluteLayout
     private native void     nativeDestroy();
     private native void     nativeDrawCursorRing(Canvas content);
     private native void     nativeDrawMatches(Canvas canvas);
-    private native void     nativeDrawSelection(Canvas content, float scale,
-            int offset, int x, int y, boolean extendSelection);
+    private native void     nativeDrawSelectionPointer(Canvas content,
+            float scale, int x, int y, boolean extendSelection);
     private native void     nativeDrawSelectionRegion(Canvas content);
     private native void     nativeDumpDisplayTree(String urlOrNull);
     private native int      nativeFindAll(String findLower, String findUpper);
