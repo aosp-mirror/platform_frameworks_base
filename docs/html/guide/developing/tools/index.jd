@@ -32,6 +32,11 @@ applications on the emulator. </p>
         of the current display with a pixel grid, so you can get your layout just right.
     </dd>
 
+ <dt><a href="layoutopt.html">layoutopt</a></dt>
+    <dd>This tool lets you quickly analyze your application's layouts for
+efficiency.
+    </dd>
+
 	  <dt><a href="draw9patch.html">Draw 9-patch</a></dt>
 	    <dd>The Draw 9-patch tool allows you to easily create a 
 	    {@link android.graphics.NinePatch} graphic using a WYSIWYG editor. It also previews stretched 
