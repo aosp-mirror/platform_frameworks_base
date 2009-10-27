@@ -3355,10 +3355,7 @@ public class WebView extends AbsoluteLayout
             }
         }
 
-        if (nativeFocusCandidateIsPlugin()) {
-            nativeUpdatePluginReceivesEvents();
-            invalidate();
-        } else if (nativeCursorIsTextInput()) {
+        if (nativeCursorIsTextInput()) {
             // This message will put the node in focus, for the DOM's notion
             // of focus, and make the focuscontroller active
             mWebViewCore.sendMessage(EventHub.CLICK, nativeCursorFramePointer(),
@@ -3457,7 +3454,6 @@ public class WebView extends AbsoluteLayout
             if (!nativeCursorIntersects(visibleRect)) {
                 return false;
             }
-            nativeUpdatePluginReceivesEvents();
             WebViewCore.CursorData data = cursorData();
             mWebViewCore.sendMessage(EventHub.SET_MOVE_MOUSE, data);
             playSoundEffect(SoundEffectConstants.CLICK);
@@ -4793,19 +4789,6 @@ public class WebView extends AbsoluteLayout
         mCallbackProxy.uiOverrideUrlLoading(url);
     }
 
-    // called by JNI
-    private void sendPluginState(int state) {
-        WebViewCore.PluginStateData psd = new WebViewCore.PluginStateData();
-        psd.mFrame = nativeFocusCandidateFramePointer();
-        psd.mNode = nativeFocusCandidatePointer();
-        if (DebugFlags.WEB_VIEW) {
-            Log.v(LOGTAG, "sendPluginState frame=" + psd.mFrame
-                    + " node=" + psd.mNode);
-        }
-        psd.mState = state;
-        mWebViewCore.sendMessage(EventHub.PLUGIN_STATE, psd);
-    }
-
     @Override
     public boolean requestFocus(int direction, Rect previouslyFocusedRect) {
         boolean result = false;
@@ -5201,9 +5184,7 @@ public class WebView extends AbsoluteLayout
                     }
                     break;
                 case MOVE_OUT_OF_PLUGIN:
-                    if (nativePluginEatsNavKey()) {
-                        navHandledKey(msg.arg1, 1, false, 0, true);
-                    }
+                    navHandledKey(msg.arg1, 1, false, 0, true);
                     break;
                 case UPDATE_TEXT_ENTRY_MSG_ID:
                     // this is sent after finishing resize in WebViewCore. Make
@@ -5697,7 +5678,7 @@ public class WebView extends AbsoluteLayout
         if (mNativeClass == 0) {
             return false;
         }
-        if (ignorePlugin == false && nativePluginEatsNavKey()) {
+        if (ignorePlugin == false && nativeFocusIsPlugin()) {
             KeyEvent event = new KeyEvent(time, time, KeyEvent.ACTION_DOWN
                 , keyCode, count, (mShiftIsPressed ? KeyEvent.META_SHIFT_ON : 0)
                 | (false ? KeyEvent.META_ALT_ON : 0) // FIXME
@@ -5831,6 +5812,7 @@ public class WebView extends AbsoluteLayout
     /* package */ native int nativeFocusCandidatePointer();
     private native String   nativeFocusCandidateText();
     private native int      nativeFocusCandidateTextSize();
+    private native boolean  nativeFocusIsPlugin();
     /* package */ native int nativeFocusNodePointer();
     private native Rect     nativeGetCursorRingBounds();
     private native Region   nativeGetSelection();
@@ -5848,7 +5830,6 @@ public class WebView extends AbsoluteLayout
     private native int      nativeMoveGeneration();
     private native void     nativeMoveSelection(int x, int y,
             boolean extendSelection);
-    private native boolean  nativePluginEatsNavKey();
     // Like many other of our native methods, you must make sure that
     // mNativeClass is not null before calling this method.
     private native void     nativeRecordButtons(boolean focused,
@@ -5870,7 +5851,6 @@ public class WebView extends AbsoluteLayout
     // we always want to pass in our generation number.
     private native void     nativeUpdateCachedTextfield(String updatedText,
             int generation);
-    private native void     nativeUpdatePluginReceivesEvents();
     // return NO_LEFTEDGE means failure.
     private static final int NO_LEFTEDGE = -1;
     private native int      nativeGetBlockLeftEdge(int x, int y, float scale);
