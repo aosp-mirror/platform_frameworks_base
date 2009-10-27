@@ -2037,16 +2037,21 @@ class PowerManagerService extends IPowerManager.Stub
     }
 
     private void setScreenBrightnessMode(int mode) {
-        mAutoBrightessEnabled = (mode == SCREEN_BRIGHTNESS_MODE_AUTOMATIC);
-        // reset computed brightness
-        mLightSensorBrightness = -1;
+        boolean enabled = (mode == SCREEN_BRIGHTNESS_MODE_AUTOMATIC);
+        if (mAutoBrightessEnabled != enabled) {
+            mAutoBrightessEnabled = enabled;
+            // reset computed brightness
+            mLightSensorBrightness = -1;
 
-        if (mHasHardwareAutoBrightness) {
-            // When setting auto-brightness, must reset the brightness afterwards
-            mHardware.setAutoBrightness_UNCHECKED(mAutoBrightessEnabled);
-            setBacklightBrightness((int)mScreenBrightness.curValue);
-        } else {
-            enableLightSensor(screenIsOn() && mAutoBrightessEnabled);
+            if (mHasHardwareAutoBrightness) {
+                // When setting auto-brightness, must reset the brightness afterwards
+                mHardware.setAutoBrightness_UNCHECKED(enabled);
+                if (screenIsOn()) {
+                    setBacklightBrightness((int)mScreenBrightness.curValue);
+                }
+            } else {
+                enableLightSensor(screenIsOn() && enabled);
+            }
         }
     }
 
