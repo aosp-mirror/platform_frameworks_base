@@ -2189,8 +2189,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
     
     public boolean performHapticFeedbackLw(WindowState win, int effectId, boolean always) {
-        if (!always && Settings.System.getInt(mContext.getContentResolver(),
-                Settings.System.HAPTIC_FEEDBACK_ENABLED, 0) == 0) {
+        final boolean hapticsDisabled = Settings.System.getInt(mContext.getContentResolver(),
+                Settings.System.HAPTIC_FEEDBACK_ENABLED, 0) == 0;
+        if (!always && (hapticsDisabled || mKeyguardMediator.isShowing())) {
             return false;
         }
         switch (effectId) {
