@@ -5,9 +5,7 @@ sdk.platform.majorMinor=major
 sdk.platform.releaseDate=April 2009
 sdk.platform.deployableDate=May 2009
 
-<p>
-<em>Date:</em> April 2009<br />
-<em>API Level:</em>&nbsp;<strong>3</strong></p>
+@jd:body
 
 <div id="qv-wrapper">
 <div id="qv">
