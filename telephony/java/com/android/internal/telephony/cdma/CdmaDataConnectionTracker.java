@@ -81,7 +81,7 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
 
     private boolean mPendingRestartRadio = false;
     private static final int TIME_DELAYED_TO_RESTART_RADIO =
-            SystemProperties.getInt("ro.cdma.timetoradiorestart", 20000);
+            SystemProperties.getInt("ro.cdma.timetoradiorestart", 60000);
 
     /**
      * Pool size of CdmaDataConnection objects.
