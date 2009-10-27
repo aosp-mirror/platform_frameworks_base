@@ -480,23 +480,11 @@ public class ContactStruct {
             }
         }
 
-        final String formattedPhoneNumber;
-        {
-            final String rawPhoneNumber = builder.toString();
-            if (VCardConfig.isJapaneseDevice(mVCardType)) {
-                // As of 2009-10-07, there's no formatNumber() which accepts
-                // the second argument and returns String directly. 
-                final SpannableStringBuilder tmpBuilder =
-                    new SpannableStringBuilder(rawPhoneNumber);
-                PhoneNumberUtils.formatNumber(tmpBuilder, PhoneNumberUtils.FORMAT_JAPAN);
-                formattedPhoneNumber = tmpBuilder.toString();
-            } else {
-                // There's no information available on vCard side. Depend on the default
-                // behavior, which may cause problem in the future when the additional format
-                // rule is supported (e.g. PhoneNumberUtils.FORMAT_KLINGON)
-                formattedPhoneNumber = PhoneNumberUtils.formatNumber(rawPhoneNumber);
-            }
-        }
+        // Use NANP in default when there's no information about locale.
+        final int formattingType = (VCardConfig.isJapaneseDevice(mVCardType) ?
+                PhoneNumberUtils.FORMAT_JAPAN : PhoneNumberUtils.FORMAT_NANP);
+        final String formattedPhoneNumber =
+                PhoneNumberUtils.formatNumber(builder.toString(), formattingType);
         PhoneData phoneData = new PhoneData(type, formattedPhoneNumber, label, isPrimary);
         mPhoneList.add(phoneData);
     }
