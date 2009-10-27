@@ -101,7 +101,10 @@
       <span style="display:none" class="zh-CN"></span>
       <span style="display:none" class="zh-TW"></span></a>
       </li>
-      <li><a href="<?cs var:toroot ?>sdk/adt-notes.html">ADT <?cs var:adt.zip.version ?> Notes</span></a>
+      </ul>
+      <ul>
+      <li><a href="<?cs var:toroot ?>sdk/adt-notes.html">ADT <?cs var:adt.zip.version ?> 
+          <span class="new">new!</span></span></a>
       </li>
     </ul>
   </li>
