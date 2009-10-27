@@ -1,4 +1,4 @@
-page.title=Installing and Updating the ADT Plugin
+page.title=Installing and Updating ADT
 sdk.preview=0
 
 @jd:body
@@ -23,21 +23,23 @@ sdk.preview=0
 
 <p>Android offers a custom plugin for the Eclipse IDE, called Android
 Development Tools (ADT), that is designed to give you a powerful,
-integrated environment in which to build Android applications. It
-extends the capabilites of Eclipse to let you quickly set up new Android
+integrated environment in which to build Android applications. </p>
+
+<p>ADT extends the capabilites of Eclipse to let you quickly set up new Android
 projects, create an application UI, add components based on the Android
-Framework API, debug your applications using the Android SDK tools, and even export
-signed (or unsigned) APKs in order to distribute your application.</p>
+Framework API, debug your applications using the Android SDK tools, and even
+export signed (or unsigned) APKs in order to distribute your application.</p>
 
 <p>In general, using Eclipse with ADT is a highly recommended approach to
-Android development and is the fastest way to get started.
+Android development and is the fastest way to get started. If you use Eclipse,
+the ADT plugin gives you an incredible boost in developing Android
+applications.</p>
 
-<p>To install and update the ADT Plugin, you can take advantage of the Eclipse 
-remote update feature. By setting up a remote update site, you can 
-easily download, install, and check for ADT updates. Alternatively, you 
-can download the latest ADT to your development
-computer as a local site archive. The sections below provide nstructions 
-for both methods.</p>
+<p>To install and update the ADT Plugin, you can take advantage of the Eclipse
+remote update feature. By setting up a remote update site, you can easily
+download, install, and check for ADT updates. Alternatively, you can download
+the latest ADT to your development computer as a local site archive. The
+sections below provide instructions for both methods.</p>
 
 
 <h2 id="preparing">Prepare for Installation</h2>
