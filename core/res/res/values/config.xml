@@ -204,4 +204,7 @@
          This must be overridden in platform specific overlays -->
     <integer-array name="config_autoBrightnessKeyboardBacklightValues">
     </integer-array>
+
+    <!-- Enables swipe versus poly-finger touch disambiguation in the KeyboardView -->
+    <bool name="config_swipeDisambiguation">true</bool>
 </resources>
