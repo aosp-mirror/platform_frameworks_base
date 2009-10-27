@@ -55,8 +55,8 @@ void LayerDim::initDimmer(SurfaceFlinger* flinger, uint32_t w, uint32_t h)
     sHeight = h;
     sUseTexture = false;
     
-#ifdef DIM_WITH_TEXTURE
-    
+#if defined(DIM_WITH_TEXTURE) && defined(EGL_ANDROID_image_native_buffer)
+
 #warning "using a texture to implement LayerDim"
     
     /* On some h/w like msm7K, it is faster to use a texture because the
@@ -69,7 +69,6 @@ void LayerDim::initDimmer(SurfaceFlinger* flinger, uint32_t w, uint32_t h)
     uint32_t flags = hw.getFlags();
 
     if (LIKELY(flags & DisplayHardware::DIRECT_TEXTURE)) {
-        // TODO: api to pass the usage flags
         sp<GraphicBuffer> buffer = new GraphicBuffer(w, h, PIXEL_FORMAT_RGB_565,
                  GraphicBuffer::USAGE_SW_WRITE_OFTEN |
                  GraphicBuffer::USAGE_HW_TEXTURE);
@@ -123,7 +122,7 @@ void LayerDim::onDraw(const Region& clip) const
         glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
         glColor4x(0, 0, 0, alpha);
         
-#ifdef DIM_WITH_TEXTURE
+#if defined(DIM_WITH_TEXTURE) && defined(EGL_ANDROID_image_native_buffer)
         if (sUseTexture) {
             glBindTexture(GL_TEXTURE_2D, sTexId);
             glEnable(GL_TEXTURE_2D);
