@@ -98,7 +98,7 @@ void OMX::CallbackDispatcher::post(const omx_message &msg) {
 void OMX::CallbackDispatcher::dispatch(const omx_message &msg) {
     OMXNodeInstance *instance = mOwner->findInstance(msg.node);
     if (instance == NULL) {
-        LOGW("Would have dispatched a message to a node that's already gone.");
+        LOGV("Would have dispatched a message to a node that's already gone.");
         return;
     }
     instance->onMessage(msg);
