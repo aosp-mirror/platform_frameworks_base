@@ -2273,15 +2273,27 @@ class PowerManagerService extends IPowerManager.Stub
         if (mSpew) {
             Log.d(TAG, "enableProximityLockLocked");
         }
-        mSensorManager.registerListener(mProximityListener, mProximitySensor,
-                SensorManager.SENSOR_DELAY_NORMAL);
+        // clear calling identity so sensor manager battery stats are accurate
+        long identity = Binder.clearCallingIdentity();
+        try {
+            mSensorManager.registerListener(mProximityListener, mProximitySensor,
+                    SensorManager.SENSOR_DELAY_NORMAL);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
     }
 
     private void disableProximityLockLocked() {
         if (mSpew) {
             Log.d(TAG, "disableProximityLockLocked");
         }
-        mSensorManager.unregisterListener(mProximityListener);
+        // clear calling identity so sensor manager battery stats are accurate
+        long identity = Binder.clearCallingIdentity();
+        try {
+            mSensorManager.unregisterListener(mProximityListener);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
         synchronized (mLocks) {
             if (mProximitySensorActive) {
                 mProximitySensorActive = false;
@@ -2296,12 +2308,18 @@ class PowerManagerService extends IPowerManager.Stub
         }
         if (mSensorManager != null && mLightSensorEnabled != enable) {
             mLightSensorEnabled = enable;
-            if (enable) {
-                mSensorManager.registerListener(mLightListener, mLightSensor,
-                        SensorManager.SENSOR_DELAY_NORMAL);
-            } else {
-                mSensorManager.unregisterListener(mLightListener);
-                mHandler.removeCallbacks(mAutoBrightnessTask);
+            // clear calling identity so sensor manager battery stats are accurate
+            long identity = Binder.clearCallingIdentity();
+            try {
+                if (enable) {
+                    mSensorManager.registerListener(mLightListener, mLightSensor,
+                            SensorManager.SENSOR_DELAY_NORMAL);
+                } else {
+                    mSensorManager.unregisterListener(mLightListener);
+                    mHandler.removeCallbacks(mAutoBrightnessTask);
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
             }
         }
     }
