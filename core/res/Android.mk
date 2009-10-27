@@ -34,3 +34,7 @@ LOCAL_MODULE_PATH := $(TARGET_OUT_JAVA_LIBRARIES)
 LOCAL_EXPORT_PACKAGE_RESOURCES := true
 
 include $(BUILD_PACKAGE)
+
+# define a global intermediate target that other module may depend on.
+.PHONY: framework-res-package-target
+framework-res-package-target: $(LOCAL_BUILT_MODULE)
