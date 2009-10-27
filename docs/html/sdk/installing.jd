@@ -30,16 +30,16 @@ sdk.preview=0
 development environment for the first time.</p>
 
 <p>If you encounter any problems during installation, see the 
-<a href="#InstallationNotes">Installation Notes</a> at the bottom of
+<a href="#troubleshooting">Troubleshooting</a> section at the bottom of
 this page.</p>
 
 <h4>Updating?</h4>
 
 <p>If you are currently using the Android 1.6 SDK, you do not necessarily need
-to install the new SDK, since your existing SDK incudes the Android SDK and AVD
-Manager tool. To develop against the new Android 2.0 platform, for example, you
-could just download the updated SDK Tools (Revision 3) and the Android 2.0 
-platform into your existing SDK.</p>
+to install the new SDK, since your existing SDK already includes the Android SDK
+and AVD Manager tool. To develop against the new Android 2.0 platform, for
+example, you could just download the updated SDK Tools (Revision 3) and the
+Android 2.0 platform into your existing SDK.</p>
 
 <p>If you are using Android 1.5 SDK or older, you should install the new SDK as
 described in this document and move your application projects to the new
@@ -125,14 +125,34 @@ information about how to install ADT, see
 install Eclipse or ADT, instead, you can directly use the SDK tools to build and
 debug your application.</p>
 
+
 <h2 id="components">Add Android Platforms and Other Components</h2>
 
-<p>Once you've downloaded and installed the SDK, you need to install SDK
-components in it. The SDK starter package includes a tool called Android SDK and
-AVD Manager that helps you see what SDK components are available and then install 
-them into your SDK environment. The <a 
-href="{@docRoot}sdk/adding-components.html">Adding SDK Components</a> document 
-provides step-by-step instructions.</p>
+<div class="sidebox-wrapper">
+<div class="sidebox">
+<p>The <strong>Android SDK and AVD Manager</strong> tool is pre-installed in
+your SDK. Using the tool is a key part of performing the initial setup of your
+SDK, as well as keeping it up-to-date with the latest platforms, tools, and
+other components. </p>
+
+<p style="margin-top:.75em;">For full instructions on how to use the tool, see 
+<a href="/sdk/adding-components.html#installingComponents">Adding SDK
+Components</a>.</p> 
+</div>
+</div>
+
+<p>The Android SDK uses a modular structure that separates the major parts of
+the SDK &mdash; platforms, add-ons, tools, and the API documentation &mdash;
+into a set of separately installable components. The SDK components are
+available to you for individual download, as needed, from the Android SDK
+repository site. </p>
+
+<p>The Android SDK starter package includes only a single component: the latest
+version of the SDK Tools. Included in that component is a tool called <em>Android
+SDK and AVD Manager</em> that you can use to download other components from the SDK
+repository site. The tool provides a graphical UI that lets you browse the
+repository, select new or updated components for download, and then install them
+in your SDK. </p>
 
 <p>There are several types of SDK components available:</p>
 
@@ -163,17 +183,22 @@ multiversion documentation for the Android framework API.
 </li>
 </ul>
 
-<p>To develop any application, even if you are following the <a
+<p>To develop <em>any</em> Android application, even if you are following the <a
 href="{@docRoot}guide/tutorials/hello-world.html">Hello World</a> tutorial, you
 <strong>must download at least one Android platform</strong> into your SDK.
-Typically, you will want to download multiple platforms, including the version
-that you want to develop against and all other higher platforms. By downloading
-multiple platforms, you can test the forward-compatibility of your application
-by running it on different platforms in the Android emulator. </p>
+Typically, you will want to download multiple platforms, so that you can build
+your application on the lowest version you want to support, but test against
+higher versions that you intend the application to run on. You can test your
+applications on different platforms by running in an 
+Android Virtual Device (AVD) on the Android emulator. </p>
 
-<p>For more information about adding components and additional repository sites,
-see the <a href="{@docRoot}sdk/adding-components.html">Adding SDK Components</a>.
-</p>
+<p>For step-by-step instructions on how to use the Android SDK and AVD Manager
+to add components, see the <a href="{@docRoot}sdk/adding-components.html">Adding
+SDK Components</a> document. </p>
+
+<p>For release notes and other detailed information about individual SDK 
+components, see the documents listed under "Downloadable SDK Components" in 
+the navigation at left.</p>
 
 
 <h2 id="sdkContents">Explore the SDK</h2>

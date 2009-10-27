@@ -2037,16 +2037,21 @@ class PowerManagerService extends IPowerManager.Stub
     }
 
     private void setScreenBrightnessMode(int mode) {
-        mAutoBrightessEnabled = (mode == SCREEN_BRIGHTNESS_MODE_AUTOMATIC);
-        // reset computed brightness
-        mLightSensorBrightness = -1;
+        boolean enabled = (mode == SCREEN_BRIGHTNESS_MODE_AUTOMATIC);
+        if (mAutoBrightessEnabled != enabled) {
+            mAutoBrightessEnabled = enabled;
+            // reset computed brightness
+            mLightSensorBrightness = -1;
 
-        if (mHasHardwareAutoBrightness) {
-            // When setting auto-brightness, must reset the brightness afterwards
-            mHardware.setAutoBrightness_UNCHECKED(mAutoBrightessEnabled);
-            setBacklightBrightness((int)mScreenBrightness.curValue);
-        } else {
-            enableLightSensor(screenIsOn() && mAutoBrightessEnabled);
+            if (mHasHardwareAutoBrightness) {
+                // When setting auto-brightness, must reset the brightness afterwards
+                mHardware.setAutoBrightness_UNCHECKED(enabled);
+                if (screenIsOn()) {
+                    setBacklightBrightness((int)mScreenBrightness.curValue);
+                }
+            } else {
+                enableLightSensor(screenIsOn() && enabled);
+            }
         }
     }
 
@@ -2273,15 +2278,27 @@ class PowerManagerService extends IPowerManager.Stub
         if (mSpew) {
             Log.d(TAG, "enableProximityLockLocked");
         }
-        mSensorManager.registerListener(mProximityListener, mProximitySensor,
-                SensorManager.SENSOR_DELAY_NORMAL);
+        // clear calling identity so sensor manager battery stats are accurate
+        long identity = Binder.clearCallingIdentity();
+        try {
+            mSensorManager.registerListener(mProximityListener, mProximitySensor,
+                    SensorManager.SENSOR_DELAY_NORMAL);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
     }
 
     private void disableProximityLockLocked() {
         if (mSpew) {
             Log.d(TAG, "disableProximityLockLocked");
         }
-        mSensorManager.unregisterListener(mProximityListener);
+        // clear calling identity so sensor manager battery stats are accurate
+        long identity = Binder.clearCallingIdentity();
+        try {
+            mSensorManager.unregisterListener(mProximityListener);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
         synchronized (mLocks) {
             if (mProximitySensorActive) {
                 mProximitySensorActive = false;
@@ -2296,12 +2313,18 @@ class PowerManagerService extends IPowerManager.Stub
         }
         if (mSensorManager != null && mLightSensorEnabled != enable) {
             mLightSensorEnabled = enable;
-            if (enable) {
-                mSensorManager.registerListener(mLightListener, mLightSensor,
-                        SensorManager.SENSOR_DELAY_NORMAL);
-            } else {
-                mSensorManager.unregisterListener(mLightListener);
-                mHandler.removeCallbacks(mAutoBrightnessTask);
+            // clear calling identity so sensor manager battery stats are accurate
+            long identity = Binder.clearCallingIdentity();
+            try {
+                if (enable) {
+                    mSensorManager.registerListener(mLightListener, mLightSensor,
+                            SensorManager.SENSOR_DELAY_NORMAL);
+                } else {
+                    mSensorManager.unregisterListener(mLightListener);
+                    mHandler.removeCallbacks(mAutoBrightnessTask);
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
             }
         }
     }
