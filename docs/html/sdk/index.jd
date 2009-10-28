@@ -3,70 +3,87 @@ sdk.redirect=0
 sdk.version=2.0
 sdk.date=October 2009
 
-sdk.win_download=android-sdk-windows_r1.zip
-sdk.win_bytes=
-sdk.win_checksum=
+sdk.win_download=android-sdk_r3-windows.zip
+sdk.win_bytes=23070805
+sdk.win_checksum=bd7b57d5df37bd55ea101e76b24260a8
 
-sdk.mac_download=android-sdk-mac_x86_r1.zip
-sdk.mac_bytes=
-sdk.mac_checksum=
+sdk.mac_download=android-sdk_r3-mac.zip
+sdk.mac_bytes=19653431
+sdk.mac_checksum=f6674bf45e5e36811eea7e584f0c1d67
 
-sdk.linux_download=android-sdk-linux_x86_r1.tgz
-sdk.linux_bytes=
-sdk.linux_checksum=
+sdk.linux_download=android-sdk_r3-linux.tgz
+sdk.linux_bytes=15986291
+sdk.linux_checksum=3e1534e7fc15d154ff81616f0dc1545c
 
 @jd:body
 
-<p>For important information about this SDK release, please review the
-<a href="{@docRoot}sdk/RELEASENOTES.html">Release Notes</a>.</p>
 
-<div class="special">
-<p>The Android SDK has changed! If you've worked with the Android SDK before, you will notice several important differences:</p>
+<h2 id="quickstart">Quick Start</h2>
 
-<ul>
-<li style="margin-top:.5em">The SDK downloadable package includes <em>only</em> the latest version of the Android SDK Tools.</li>
-<li>Once you've installed the SDK, you now use the Android SDK and AVD Manager to download all of the SDK components that you need, such as Android platforms, SDK add-ons, tools, and documentation. </li>
-<li>The new approach is modular &mdash; you can install only the components you need and update any or all components without affecting your development environment.</li>
-<li>In short, once you've installed the new SDK, you will not need to download an SDK package again. Instead, you will use the Android SDK and AVD Manager to keep your development environment up-to-date. </li>
-</ul>
-
-<p>If you are currently using the Android 1.6 SDK, you do not need to install the new SDK, since your existing SDK incudes the Android SDK and AVD Manager tool. To develop against Android 2.0, for example, you could just download the updated SDK Tools (Revision 3) and the Android 2.0 platform into your existing SDK. </p>
-</div>
-
-<h2>Quick Start</h2>
-
-<p class="xnote">The steps below provide an overview of how to get started with the Android SDK. For detailed instructions, start with the <a href="{@docRoot}sdk/installing.html">Installing</a> guide. </p>
+<p>The steps below provide an overview of how to get started with the Android
+SDK. For detailed instructions, start with the <a
+href="{@docRoot}sdk/installing.html">Installing</a> guide. </p>
 
 <p><strong>0. Prepare your development computer</strong></p>
 
-<p>Read the <a href="{@docRoot}sdk/requirements.html">System Requirements</a> document and make sure that your development computer meets the hardware and software requirements for the Android SDK. Install any additional software needed before downloading the Android SDK. In particular, if you plan to develop Android applications in the Eclipse IDE using the ADT Plugin (see below), make sure that you have the correct version of Eclipse installed. 
+<p>Read the <a href="{@docRoot}sdk/requirements.html">System Requirements</a>
+document and make sure that your development computer meets the hardware and
+software requirements for the Android SDK. Install any additional software
+needed before downloading the Android SDK. In particular, if you plan to develop
+Android applications in the Eclipse IDE using the ADT Plugin (see below), make
+sure that you have the correct version of Eclipse installed. 
 
 <p><strong>1. Download and install the SDK starter package</strong></p>
 
-<p>Select a starter package from the table at the top of this page and download it to your development computer. To install the SDK, simply unpack the starter package to a safe location and then add the location to your PATH. </p>
+<p>Select a starter package from the table at the top of this page and download
+it to your development computer. To install the SDK, simply unpack the starter
+package to a safe location and then add the location to your PATH. </p>
 
 <p><strong>2. Install the ADT Plugin for Eclipse</strong></p>
 
-<p>If you are developing in Eclipse, set up a remote update site and install the Android Development Tools (ADT) plugin.</p>
-
-<p>For detailed instructions, see <a href="{@docRoot}sdk/eclipse-adt.html">Installing and Updating ADT</a>.</p>
+<p>If you are developing in Eclipse, set up a remote update site and install the
+Android Development Tools (ADT) plugin. For detailed instructions, see <a
+href="{@docRoot}sdk/eclipse-adt.html">Installing and Updating ADT</a>.</p>
 
 <p><strong>3. Add Android platforms to your SDK</strong></p>
 
-<p>Use the Android SDK and AVD Manager, included in the SDK starter package, to add one or more Android platforms (for example, Android 1.6 or Android 2.0) to your SDK. In most cases, you will want to download multiple platforms, so that you can build your application on the lowest version you want to support, but test against higher versions that you intend the application to run on. Information about each platform is available at left, under "Downloadable SDK Components."</p>
+<p>Use the Android SDK and AVD Manager, included in the SDK starter package, to
+add one or more Android platforms (for example, Android 1.6 or Android 2.0) to
+your SDK. In most cases, you will want to download multiple platforms, so that
+you can build your application on the lowest version you want to support, but
+test against higher versions that you intend the application to run on.
+Information about each platform is available at left, under "Downloadable SDK
+Components."</p>
 
-<p>For more information about how to add platforms and other SDK components, see <a href="{@docRoot}sdk/adding-components.html">Adding SDK Components</a>.</p>
+<p>To launch the Android SDK and AVD Manager on Windows, execute <code>SDK
+Setup.exe</code>, at the root of the SDK directory. On Mac OS X or Linux,
+execute the <code>android</code> tool in the <code>&lt;sdk&gt;/tools/</code>
+folder. For more information about how to add platforms and other components,
+see <a href="{@docRoot}sdk/adding-components.html">Adding SDK Components</a>.
+</p>
 
 <p><strong>4. Get the latest documentation</strong></p>
 
-<p>If you develop while offline, use the Android SDK and AVD Manager to download the latest documentation package. The documentation covers all versions of the API and lets you filter out those versions that your application won't support. Once installed, the documentation is also available to you directly from the Eclipse IDE. </p>
+<p>If you develop while offline, use the Android SDK and AVD Manager to download
+the latest documentation package. The documentation covers all versions of the
+API and lets you filter out those versions that your application won't support.
+Once installed, the documentation is also available to you directly from the
+Eclipse IDE. </p>
 
 <p><strong>5. Download other SDK components</strong></p>
 
-<p>You can use the Android SDK and AVD Manager to download other SDK components, such as the SDK add-ons. An SDK add-on provides a development environment for an Android external library or a customized Android system image. For example, the Google APIs Add-On lets you develop an application that takes advantage of the Google Maps external library. </p>
+<p>You can use the Android SDK and AVD Manager to download other SDK components,
+such as the SDK add-ons. An SDK add-on provides a development environment for an
+Android external library or a customized Android system image. For example, the
+Google APIs Add-On lets you develop an application that takes advantage of the
+Google Maps external library. </p>
 
 <p><strong>6. Get started with an application project</strong></p>
 
-<p>Once you've set up your SDK, the next step is to start a new application project or move existing applications into the new SDK.</p>
+<p>Once you've set up your SDK, the next step is to start a new application
+project or move existing applications into the new SDK.</p>
 
-<p>If you are new to Android, you can use the <a href="{@docRoot}guide/tutorials/hello-world.html">Hello World</a> tutorial to get started quickly. Welcome!</p>
+<p>If you are new to Android, you can use the <a
+href="{@docRoot}guide/tutorials/hello-world.html">Hello World</a> tutorial to
+get started quickly. <a href="{@docRoot}sdk/installing.html#NextSteps">Next
+Steps</a> offers other suggestions of how to begin. Welcome!</p>
