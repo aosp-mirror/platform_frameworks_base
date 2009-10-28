@@ -158,7 +158,6 @@ class PowerManagerService extends IPowerManager.Stub
     private int mProximityCount = 0;
     private int mPowerState;
     private boolean mOffBecauseOfUser;
-    private boolean mAnimatingScreenOff;
     private int mUserState;
     private boolean mKeyboardVisible = false;
     private boolean mUserActivityAllowed = true;
@@ -1232,7 +1231,6 @@ class PowerManagerService extends IPowerManager.Stub
                         Log.d(TAG,
                               "preventScreenOn: turning on after a prior preventScreenOn(true)!");
                     }
-                    mAnimatingScreenOff = false;
                     int err = setScreenStateLocked(true);
                     if (err != 0) {
                         Log.w(TAG, "preventScreenOn: error from setScreenStateLocked(): " + err);
@@ -1394,7 +1392,6 @@ class PowerManagerService extends IPowerManager.Stub
                         reallyTurnScreenOn = false;
                     }
                     if (reallyTurnScreenOn) {
-                        mAnimatingScreenOff = false;
                         err = setScreenStateLocked(true);
                         long identity = Binder.clearCallingIdentity();
                         try {
@@ -1436,7 +1433,6 @@ class PowerManagerService extends IPowerManager.Stub
                     if (!mScreenBrightness.animating) {
                         err = screenOffFinishedAnimatingLocked(becauseOfUser);
                     } else {
-                        mAnimatingScreenOff = true;
                         mOffBecauseOfUser = becauseOfUser;
                         err = 0;
                         mLastTouchDown = 0;
@@ -1454,7 +1450,6 @@ class PowerManagerService extends IPowerManager.Stub
                 mTotalTouchDownTime, mTouchCycles);
         mLastTouchDown = 0;
         int err = setScreenStateLocked(false);
-        mAnimatingScreenOff = false;
         if (mScreenOnStartTime != 0) {
             mScreenOnTime += SystemClock.elapsedRealtime() - mScreenOnStartTime;
             mScreenOnStartTime = 0;
@@ -1827,9 +1822,6 @@ class PowerManagerService extends IPowerManager.Stub
             return;
         }
 
-        if (mAnimatingScreenOff) {
-            return;
-        }
         if (false) {
             if (((mPokey & POKE_LOCK_IGNORE_CHEEK_EVENTS) != 0)) {
                 Log.d(TAG, "userActivity !!!");//, new RuntimeException());
@@ -1846,6 +1838,11 @@ class PowerManagerService extends IPowerManager.Stub
                         + " mWakeLockState=0x" + Integer.toHexString(mWakeLockState)
                         + " mProximitySensorActive=" + mProximitySensorActive
                         + " force=" + force);
+            }
+            // ignore user activity if we are in the process of turning off the screen
+            if (mScreenBrightness.animating && mScreenBrightness.targetValue == 0) {
+                Log.d(TAG, "ignoring user activity while turning off screen");
+                return;
             }
             if (mLastEventTime <= time || force) {
                 mLastEventTime = time;
