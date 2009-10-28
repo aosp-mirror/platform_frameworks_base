@@ -56,7 +56,7 @@ bool GraphicsJNI::hasException(JNIEnv *env) {
 ///////////////////////////////////////////////////////////////////////////////
 
 AutoJavaFloatArray::AutoJavaFloatArray(JNIEnv* env, jfloatArray array,
-                                       int minLength)
+                                       int minLength, JNIAccess access)
 : fEnv(env), fArray(array), fPtr(NULL), fLen(0) {
     SkASSERT(env);
     if (array) {
@@ -66,11 +66,12 @@ AutoJavaFloatArray::AutoJavaFloatArray(JNIEnv* env, jfloatArray array,
         }
         fPtr = env->GetFloatArrayElements(array, NULL);
     }
+    fReleaseMode = (access == kRO_JNIAccess) ? JNI_ABORT : 0;
 }
 
 AutoJavaFloatArray::~AutoJavaFloatArray() {
     if (fPtr) {
-        fEnv->ReleaseFloatArrayElements(fArray, fPtr, 0);
+        fEnv->ReleaseFloatArrayElements(fArray, fPtr, fReleaseMode);
     }
 }
 
@@ -94,7 +95,7 @@ AutoJavaIntArray::~AutoJavaIntArray() {
 }
 
 AutoJavaShortArray::AutoJavaShortArray(JNIEnv* env, jshortArray array,
-                                       int minLength)
+                                       int minLength, JNIAccess access)
 : fEnv(env), fArray(array), fPtr(NULL), fLen(0) {
     SkASSERT(env);
     if (array) {
@@ -104,11 +105,12 @@ AutoJavaShortArray::AutoJavaShortArray(JNIEnv* env, jshortArray array,
         }
         fPtr = env->GetShortArrayElements(array, NULL);
     }
+    fReleaseMode = (access == kRO_JNIAccess) ? JNI_ABORT : 0;
 }
 
 AutoJavaShortArray::~AutoJavaShortArray() {
     if (fPtr) {
-        fEnv->ReleaseShortArrayElements(fArray, fPtr, 0);
+        fEnv->ReleaseShortArrayElements(fArray, fPtr, fReleaseMode);
     }
 }
 
