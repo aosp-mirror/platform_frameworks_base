@@ -503,4 +503,5 @@ public class MediaNames {
       "http://75.17.48.204:10088/yslau/stress_media/mpeg4_qvga_24fps.3gp";
   public static final int STREAM_H264_480_360_1411k_DURATION = 46000;
   public static final int VIDEO_H263_AAC_DURATION = 501000;
+  public static final int VIDEO_H263_AMR_DURATION = 502000;
 }
