@@ -160,7 +160,8 @@ public class PerformanceCollectorTest extends TestCase {
         verifyTimingBundle(timing, labels);
     }
 
-    @LargeTest
+    // TODO: flaky test
+    // @LargeTest
     public void testSimpleSequence() throws Exception {
         MockPerformanceResultsWriter writer = new MockPerformanceResultsWriter();
         mPerfCollector.setPerformanceResultsWriter(writer);
@@ -192,7 +193,8 @@ public class PerformanceCollectorTest extends TestCase {
         verifyTimingBundle(timing, labels);
     }
 
-    @LargeTest
+    // TODO: flaky test
+    // @LargeTest
     public void testLongSequence() throws Exception {
         MockPerformanceResultsWriter writer = new MockPerformanceResultsWriter();
         mPerfCollector.setPerformanceResultsWriter(writer);
