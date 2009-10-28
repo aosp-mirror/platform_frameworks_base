@@ -1709,6 +1709,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
         boolean supportsSpeed, boolean supportsBearing, int powerRequirement, int accuracy) {
         checkMockPermissionsSafe();
 
+        long identity = Binder.clearCallingIdentity();
         synchronized (mLock) {
             MockProvider provider = new MockProvider(name, this,
                 requiresNetwork, requiresSatellite,
@@ -1731,6 +1732,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
             mLastKnownLocation.put(name, null);
             updateProvidersLocked();
         }
+        Binder.restoreCallingIdentity(identity);
     }
 
     public void removeTestProvider(String provider) {
@@ -1740,6 +1742,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
             if (mockProvider == null) {
                 throw new IllegalArgumentException("Provider \"" + provider + "\" unknown");
             }
+            long identity = Binder.clearCallingIdentity();
             removeProvider(mProvidersByName.get(provider));
             mMockProviders.remove(mockProvider);
             // reinstall real provider if we were mocking GPS or network provider
@@ -1752,6 +1755,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
             }
             mLastKnownLocation.put(provider, null);
             updateProvidersLocked();
+            Binder.restoreCallingIdentity(identity);
         }
     }
 
@@ -1787,6 +1791,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
             if (mockProvider == null) {
                 throw new IllegalArgumentException("Provider \"" + provider + "\" unknown");
             }
+            long identity = Binder.clearCallingIdentity();
             if (enabled) {
                 mockProvider.enable();
                 mEnabledProviders.add(provider);
@@ -1797,6 +1802,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
                 mDisabledProviders.add(provider);
             }
             updateProvidersLocked();
+            Binder.restoreCallingIdentity(identity);
         }
     }
 
@@ -1807,9 +1813,11 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
             if (mockProvider == null) {
                 throw new IllegalArgumentException("Provider \"" + provider + "\" unknown");
             }
+            long identity = Binder.clearCallingIdentity();
             mEnabledProviders.remove(provider);
             mDisabledProviders.remove(provider);
             updateProvidersLocked();
+            Binder.restoreCallingIdentity(identity);
         }
     }
 
