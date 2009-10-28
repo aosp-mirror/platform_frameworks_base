@@ -16,7 +16,6 @@ sdk.platform.deployableDate=October 2009
 	<li><a href="#apps">Built-in Applications</a></li>
 	<li><a href="#locs">Locales</a></li>
 	<li><a href="#skins">Emulator Skins</a></li>
-	<li><a href="#notes">Other Notes</a></li>
 	<li><a href="#api">Framework API</a>
         <ol>
 	<li><a href="#api-level">API level</a></li>
