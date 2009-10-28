@@ -33,6 +33,10 @@
 #include <hardware/copybit.h>
 #include <private/ui/android_natives_priv.h>
 
+#include <ui/GraphicBuffer.h>
+#include <ui/Region.h>
+#include <ui/Rect.h>
+
 
 #define DEBUG_COPYBIT true
 
@@ -175,16 +179,6 @@ static bool copybit(GLint x, GLint y,
         dtdy /= screen_h;
     }
     dtdy = -dtdy; // see equation of dtdy above
-    if (dsdx < c->copybits.minScale || dsdx > c->copybits.maxScale
-            || dtdy < c->copybits.minScale || dtdy > c->copybits.maxScale) {
-        // The requested scale is out of the range the hardware
-        // can support.
-        LOGD_IF(DEBUG_COPYBIT,
-                "scale out of range dsdx=%08x (Wcr=%d / w=%d), "
-                "dtdy=%08x (Hcr=%d / h=%d), Ucr=%d, Vcr=%d", 
-                dsdx, Wcr, w, dtdy, Hcr, h, Ucr, Vcr);
-        return false;
-    }
 
     // copybit doesn't say anything about filtering, so we can't
     // discriminate. On msm7k, copybit will always filter.
@@ -278,20 +272,92 @@ static bool copybit(GLint x, GLint y,
         return false;
     }
 
-
-    // LOGW("calling copybits");
-
     copybit_device_t* copybit = c->copybits.blitEngine;
+    copybit_image_t src;
+    buffer_handle_t source_hnd = textureObject->buffer->handle;
+    textureToCopyBitImage(&textureObject->surface, opFormat, source_hnd, &src);
+    copybit_rect_t srect = { Ucr, Vcr + Hcr, Ucr + Wcr, Vcr };
+
+    /*
+     *  Below we perform extra passes needed to emulate things the h/w
+     * cannot do.
+     */
+
+    const GLfixed minScaleInv = gglDivQ(0x10000, c->copybits.minScale, 16);
+    const GLfixed maxScaleInv = gglDivQ(0x10000, c->copybits.maxScale, 16);
+
+    sp<GraphicBuffer> tempBitmap;
+
+    if (dsdx < maxScaleInv || dsdx > minScaleInv ||
+        dtdy < maxScaleInv || dtdy > minScaleInv)
+    {
+        // The requested scale is out of the range the hardware
+        // can support.
+        LOGD_IF(DEBUG_COPYBIT,
+                "scale out of range dsdx=%08x (Wcr=%d / w=%d), "
+                "dtdy=%08x (Hcr=%d / h=%d), Ucr=%d, Vcr=%d",
+                dsdx, Wcr, w, dtdy, Hcr, h, Ucr, Vcr);
+
+        int32_t xscale=0x10000, yscale=0x10000;
+        if (dsdx > minScaleInv)         xscale = c->copybits.minScale;
+        else if (dsdx < maxScaleInv)    xscale = c->copybits.maxScale;
+        if (dtdy > minScaleInv)         yscale = c->copybits.minScale;
+        else if (dtdy < maxScaleInv)    yscale = c->copybits.maxScale;
+        dsdx = gglMulx(dsdx, xscale);
+        dtdy = gglMulx(dtdy, yscale);
+
+        /* we handle only one step of resizing below. Handling an arbitrary
+         * number is relatively easy (replace "if" above by "while"), but requires
+         * two intermediate buffers and so far we never had the need.
+         */
+
+        if (dsdx < maxScaleInv || dsdx > minScaleInv ||
+            dtdy < maxScaleInv || dtdy > minScaleInv) {
+            LOGD_IF(DEBUG_COPYBIT,
+                    "scale out of range dsdx=%08x (Wcr=%d / w=%d), "
+                    "dtdy=%08x (Hcr=%d / h=%d), Ucr=%d, Vcr=%d",
+                    dsdx, Wcr, w, dtdy, Hcr, h, Ucr, Vcr);
+            return false;
+        }
+
+        const int tmp_w = gglMulx(srect.r - srect.l, xscale, 16);
+        const int tmp_h = gglMulx(srect.b - srect.t, yscale, 16);
+
+        LOGD_IF(DEBUG_COPYBIT,
+                "xscale=%08x, yscale=%08x, dsdx=%08x, dtdy=%08x, tmp_w=%d, tmp_h=%d",
+                xscale, yscale, dsdx, dtdy, tmp_w, tmp_h);
+
+        tempBitmap = new GraphicBuffer(
+                    tmp_w, tmp_h, src.format,
+                    GraphicBuffer::USAGE_HW_2D);
+
+        status_t err = tempBitmap->initCheck();
+        if (err == NO_ERROR) {
+            copybit_image_t tmp_dst;
+            copybit_rect_t tmp_rect;
+            tmp_dst.w = tmp_w;
+            tmp_dst.h = tmp_h;
+            tmp_dst.format = src.format;
+            tmp_dst.handle = (native_handle_t*)tempBitmap->getNativeBuffer()->handle;
+            tmp_rect.l = 0;
+            tmp_rect.t = 0;
+            tmp_rect.r = tmp_dst.w;
+            tmp_rect.b = tmp_dst.h;
+            region_iterator tmp_it(Region(Rect(tmp_rect.r, tmp_rect.b)));
+            copybit->set_parameter(copybit, COPYBIT_TRANSFORM, 0);
+            copybit->set_parameter(copybit, COPYBIT_PLANE_ALPHA, 0xFF);
+            copybit->set_parameter(copybit, COPYBIT_DITHER, COPYBIT_DISABLE);
+            err = copybit->stretch(copybit,
+                    &tmp_dst, &src, &tmp_rect, &srect, &tmp_it);
+            src = tmp_dst;
+            srect = tmp_rect;
+        }
+    }
 
     copybit_image_t dst;
     buffer_handle_t target_hnd = c->copybits.drawSurfaceBuffer;
     textureToCopyBitImage(&cbSurface, cbSurface.format, target_hnd, &dst);
     copybit_rect_t drect = {x, y, x+w, y+h};
-
-    copybit_image_t src;
-    buffer_handle_t source_hnd = textureObject->buffer->handle;
-    textureToCopyBitImage(&textureObject->surface, opFormat, source_hnd, &src);
-    copybit_rect_t srect = { Ucr, Vcr + Hcr, Ucr + Wcr, Vcr };
 
     copybit->set_parameter(copybit, COPYBIT_TRANSFORM, transform);
     copybit->set_parameter(copybit, COPYBIT_PLANE_ALPHA, planeAlpha);
