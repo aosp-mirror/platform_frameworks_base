@@ -1669,6 +1669,8 @@ public final class Telephony {
 
         public static final String NUMERIC = "numeric";
 
+        public static final String AUTH_TYPE = "authtype";
+
         public static final String TYPE = "type";
 
         public static final String CURRENT = "current";

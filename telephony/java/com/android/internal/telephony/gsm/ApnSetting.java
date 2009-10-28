@@ -31,6 +31,7 @@ public class ApnSetting {
     String mmsPort;
     String user;
     String password;
+    int authType;
     String[] types;
     int id;
     String numeric;
@@ -38,7 +39,7 @@ public class ApnSetting {
 
     ApnSetting(int id, String numeric, String carrier, String apn, String proxy, String port,
             String mmsc, String mmsProxy, String mmsPort,
-            String user, String password, String[] types) {
+            String user, String password, int authType, String[] types) {
         this.id = id;
         this.numeric = numeric;
         this.carrier = carrier;
@@ -50,6 +51,7 @@ public class ApnSetting {
         this.mmsPort = mmsPort;
         this.user = user;
         this.password = password;
+        this.authType = authType;
         this.types = types;
     }
 
@@ -63,7 +65,8 @@ public class ApnSetting {
         .append(", ").append(mmsc)
         .append(", ").append(mmsProxy)
         .append(", ").append(mmsPort)
-        .append(", ").append(port);
+        .append(", ").append(port)
+        .append(", ").append(authType);
         for (String t : types) {
             sb.append(", ").append(t);
         }
