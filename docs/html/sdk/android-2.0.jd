@@ -205,6 +205,7 @@ element in your application's manifest. </p>
 <p>For more information about how to use API Level, see the <a
 href="{@docRoot}guide/appendix/api-levels.html">API Levels</a> document. </p>
 
+
 <h3 id="api-changes">API changes summary</h3>
 
 <h4>Bluetooth</h4>
@@ -262,6 +263,62 @@ href="{@docRoot}guide/appendix/api-levels.html">API Levels</a> document. </p>
 <li>WindowManager.LayoutParams has new constants that allow a window to wake up the screen when it is displayed and show the window even if the screen is locked. This allows applications to more cleanly implement things like alarm clocks that should wake the device.</li>
 <li>New Intent APIs that broadcast the docking state of the device and allow applications to launch special activities when the device is placed in a desktop or car dock.</li>
 </ul>
+
+<h4>Key events executed on key-up</h4>
+
+<p>Android 2.0 is designed to run on devices that use virtual keys for HOME,
+MENU, BACK, and SEARCH, rather than physical keys. To support the best user
+experience on those devices, the Android platform now executes these buttons at
+key-up, for a key-down/key-up pair, rather than key-down. This helps prevent 
+accidental button events and lets the user press the button area and then drag 
+out of it without generating an event. </p>
+
+<p>This change in behavior should only affect your application if it is
+intercepting button events and taking an action on key-down, rather than on
+key-up. Especially if your application is intercepting the BACK key, you should
+make sure that your application is handling the key events properly. </p>
+
+<p>In general, intercepting the BACK key in an application is not recommended,
+however, if your application is doing so and it invokes some action on
+key-down, rather than key-up, you should modify your code. </p>
+
+<p>If your application will use APIs introduced in Android 2.0 (API Level 5), 
+you can take advantage of new APIs for managing key-event pairs:</p>
+
+<ul>
+<li>If you are intercepting the BACK key in an activity or dialog, just
+implement the new {@link android.app.Activity#onBackPressed()} method. </li>
+<li>If you are intercepting the BACK key in a view, you should track the key
+event on key-down (through the new {@link android.view.KeyEvent#startTracking}
+method), then invoke the action at key up. Here's a pattern you can use:</li>
+
+<pre>    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK
+                && event.getRepeatCount() == 0) {
+            event.startTracking();
+            return true;
+        }
+        return super.onKeyDown(keyCode, event);
+    }
+
+    public boolean onKeyUp(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK && event.isTracking()
+                && !event.isCanceled()) {
+            // *** DO ACTION HERE ***
+            return true;
+        }
+        return super.onKeyUp(keyCode, event);
+    }</pre>
+
+</ul>
+
+<p>If you want to update a legacy application so that its handling of the BACK
+key works properly for both Android 2.0 and older platform versions, you 
+can use an approach similar to that shown above. Your code can catch the
+target button event on key-down, set a flag to track the key event, and 
+then also catch the event on key-up, executing the desired action if the tracking 
+flag is set. You'll also want to watch for focus changes and clear the tracking 
+flag when gaining/losing focus.</p>
 
 <h3 id="api-diff">API differences report</h3>
 
