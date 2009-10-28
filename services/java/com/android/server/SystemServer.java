@@ -296,7 +296,7 @@ class ServerThread extends Thread {
 
             try {
                 Log.i(TAG, "DropBox Service");
-                ServiceManager.addService("dropbox",
+                ServiceManager.addService(Context.DROPBOX_SERVICE,
                         new DropBoxService(context, new File("/data/system/dropbox")));
             } catch (Throwable e) {
                 Log.e(TAG, "Failure starting DropBox Service", e);

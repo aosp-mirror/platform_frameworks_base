@@ -23,8 +23,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.net.Uri;
-import android.os.DropBoxEntry;
-import android.os.IDropBox;
+import android.os.DropBox;
 import android.os.ParcelFileDescriptor;
 import android.os.StatFs;
 import android.os.SystemClock;
@@ -32,11 +31,13 @@ import android.provider.Settings;
 import android.text.format.DateFormat;
 import android.util.Log;
 
+import com.android.internal.os.IDropBoxService;
+
 import java.io.File;
 import java.io.FileDescriptor;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
@@ -53,11 +54,12 @@ import java.util.TreeSet;
 import java.util.zip.GZIPOutputStream;
 
 /**
- * Implementation of {@link IDropBox} using the filesystem.
+ * Implementation of {@link IDropBoxService} using the filesystem.
+ * Clients use {@link DropBox} to access this service.
  *
  * {@hide}
  */
-public final class DropBoxService extends IDropBox.Stub {
+public final class DropBoxService extends IDropBoxService.Stub {
     private static final String TAG = "DropBoxService";
     private static final int DEFAULT_RESERVE_PERCENT = 10;
     private static final int DEFAULT_QUOTA_PERCENT = 10;
@@ -129,50 +131,13 @@ public final class DropBoxService extends IDropBox.Stub {
         mContext.unregisterReceiver(mReceiver);
     }
 
-    public void addText(String tag, String data) {
-        addData(tag, data.getBytes(), DropBoxEntry.IS_TEXT);
-    }
-
-    public void addData(String tag, byte[] data, int flags) {
-        File temp = null;
-        OutputStream out = null;
-        try {
-            if ((flags & DropBoxEntry.IS_EMPTY) != 0) throw new IllegalArgumentException();
-
-            init();
-            if (!isTagEnabled(tag)) return;
-
-            long max = trimToFit();
-            if (data.length > max) {
-                Log.w(TAG, "Dropping: " + tag + " (" + data.length + " > " + max + " bytes)");
-                // Pass temp = null to createEntry() to leave a tombstone
-            } else {
-                temp = new File(mDropBoxDir, "drop" + Thread.currentThread().getId() + ".tmp");
-                out = new FileOutputStream(temp);
-                if (data.length > mBlockSize && ((flags & DropBoxEntry.IS_GZIPPED) == 0)) {
-                    flags = flags | DropBoxEntry.IS_GZIPPED;
-                    out = new GZIPOutputStream(out);
-                }
-                out.write(data);
-                out.close();
-                out = null;
-            }
-
-            createEntry(temp, tag, flags);
-            temp = null;
-        } catch (IOException e) {
-            Log.e(TAG, "Can't write: " + tag, e);
-        } finally {
-            try { if (out != null) out.close(); } catch (IOException e) {}
-            if (temp != null) temp.delete();
-        }
-    }
-
-    public void addFile(String tag, ParcelFileDescriptor data, int flags) {
+    public void add(DropBox.Entry entry) {
         File temp = null;
         OutputStream output = null;
+        final String tag = entry.getTag();
         try {
-            if ((flags & DropBoxEntry.IS_EMPTY) != 0) throw new IllegalArgumentException();
+            int flags = entry.getFlags();
+            if ((flags & DropBox.IS_EMPTY) != 0) throw new IllegalArgumentException();
 
             init();
             if (!isTagEnabled(tag)) return;
@@ -180,7 +145,7 @@ public final class DropBoxService extends IDropBox.Stub {
             long lastTrim = System.currentTimeMillis();
 
             byte[] buffer = new byte[mBlockSize];
-            FileInputStream input = new FileInputStream(data.getFileDescriptor());
+            InputStream input = entry.getInputStream();
 
             // First, accumulate up to one block worth of data in memory before
             // deciding whether to compress the data or not.
@@ -197,9 +162,9 @@ public final class DropBoxService extends IDropBox.Stub {
 
             temp = new File(mDropBoxDir, "drop" + Thread.currentThread().getId() + ".tmp");
             output = new FileOutputStream(temp);
-            if (read == buffer.length && ((flags & DropBoxEntry.IS_GZIPPED) == 0)) {
+            if (read == buffer.length && ((flags & DropBox.IS_GZIPPED) == 0)) {
                 output = new GZIPOutputStream(output);
-                flags = flags | DropBoxEntry.IS_GZIPPED;
+                flags = flags | DropBox.IS_GZIPPED;
             }
 
             do {
@@ -234,7 +199,7 @@ public final class DropBoxService extends IDropBox.Stub {
             Log.e(TAG, "Can't write: " + tag, e);
         } finally {
             try { if (output != null) output.close(); } catch (IOException e) {}
-            try { data.close(); } catch (IOException e) {}
+            entry.close();
             if (temp != null) temp.delete();
         }
     }
@@ -244,7 +209,7 @@ public final class DropBoxService extends IDropBox.Stub {
                 mContentResolver, Settings.Gservices.DROPBOX_TAG_PREFIX + tag));
     }
 
-    public synchronized DropBoxEntry getNextEntry(String tag, long millis) {
+    public synchronized DropBox.Entry getNextEntry(String tag, long millis) {
         if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.READ_LOGS)
                 != PackageManager.PERMISSION_GRANTED) {
             throw new SecurityException("READ_LOGS permission required");
@@ -262,9 +227,11 @@ public final class DropBoxService extends IDropBox.Stub {
 
         for (EntryFile entry : list.contents.tailSet(new EntryFile(millis + 1))) {
             if (entry.tag == null) continue;
+            if ((entry.flags & DropBox.IS_EMPTY) != 0) {
+                return new DropBox.Entry(entry.tag, entry.timestampMillis);
+            }
             try {
-                File file = (entry.flags & DropBoxEntry.IS_EMPTY) != 0 ? null : entry.file;
-                return new DropBoxEntry(entry.tag, entry.timestampMillis, file, entry.flags);
+                return new DropBox.Entry(entry.tag, entry.timestampMillis, entry.file, entry.flags);
             } catch (IOException e) {
                 Log.e(TAG, "Can't read: " + entry.file, e);
                 // Continue to next file
@@ -331,25 +298,25 @@ public final class DropBoxService extends IDropBox.Stub {
             if (entry.file == null) {
                 pw.println(" (no file)");
                 continue;
-            } else if ((entry.flags & DropBoxEntry.IS_EMPTY) != 0) {
+            } else if ((entry.flags & DropBox.IS_EMPTY) != 0) {
                 pw.println(" (contents lost)");
                 continue;
             } else {
-                pw.print((entry.flags & DropBoxEntry.IS_GZIPPED) != 0 ? " (comopressed " : " (");
-                pw.print((entry.flags & DropBoxEntry.IS_TEXT) != 0 ? "text" : "data");
+                pw.print((entry.flags & DropBox.IS_GZIPPED) != 0 ? " (comopressed " : " (");
+                pw.print((entry.flags & DropBox.IS_TEXT) != 0 ? "text" : "data");
                 pw.format(", %d bytes)", entry.file.length());
                 pw.println();
             }
 
-            if (doFile || (doPrint && (entry.flags & DropBoxEntry.IS_TEXT) == 0)) {
+            if (doFile || (doPrint && (entry.flags & DropBox.IS_TEXT) == 0)) {
                 if (!doPrint) pw.print("    ");
                 pw.println(entry.file.getPath());
             }
 
-            if ((entry.flags & DropBoxEntry.IS_TEXT) != 0 && (doPrint || !doFile)) {
-                DropBoxEntry dbe = null;
+            if ((entry.flags & DropBox.IS_TEXT) != 0 && (doPrint || !doFile)) {
+                DropBox.Entry dbe = null;
                 try {
-                    dbe = new DropBoxEntry(
+                    dbe = new DropBox.Entry(
                              entry.tag, entry.timestampMillis, entry.file, entry.flags);
 
                     if (doPrint) {
@@ -435,20 +402,20 @@ public final class DropBoxService extends IDropBox.Stub {
          * @param dir to store file in
          * @param tag to use for new log file name
          * @param timestampMillis of log entry
-         * @param flags for the entry data (from {@link DropBoxEntry})
+         * @param flags for the entry data
          * @param blockSize to use for space accounting
          * @throws IOException if the file can't be moved
          */
         public EntryFile(File temp, File dir, String tag,long timestampMillis,
                          int flags, int blockSize) throws IOException {
-            if ((flags & DropBoxEntry.IS_EMPTY) != 0) throw new IllegalArgumentException();
+            if ((flags & DropBox.IS_EMPTY) != 0) throw new IllegalArgumentException();
 
             this.tag = tag;
             this.timestampMillis = timestampMillis;
             this.flags = flags;
             this.file = new File(dir, Uri.encode(tag) + "@" + timestampMillis +
-                    ((flags & DropBoxEntry.IS_TEXT) != 0 ? ".txt" : ".dat") +
-                    ((flags & DropBoxEntry.IS_GZIPPED) != 0 ? ".gz" : ""));
+                    ((flags & DropBox.IS_TEXT) != 0 ? ".txt" : ".dat") +
+                    ((flags & DropBox.IS_GZIPPED) != 0 ? ".gz" : ""));
 
             if (!temp.renameTo(this.file)) {
                 throw new IOException("Can't rename " + temp + " to " + this.file);
@@ -466,7 +433,7 @@ public final class DropBoxService extends IDropBox.Stub {
         public EntryFile(File dir, String tag, long timestampMillis) throws IOException {
             this.tag = tag;
             this.timestampMillis = timestampMillis;
-            this.flags = DropBoxEntry.IS_EMPTY;
+            this.flags = DropBox.IS_EMPTY;
             this.file = new File(dir, Uri.encode(tag) + "@" + timestampMillis + ".lost");
             this.blocks = 0;
             new FileOutputStream(this.file).close();
@@ -486,26 +453,26 @@ public final class DropBoxService extends IDropBox.Stub {
             if (at < 0) {
                 this.tag = null;
                 this.timestampMillis = 0;
-                this.flags = DropBoxEntry.IS_EMPTY;
+                this.flags = DropBox.IS_EMPTY;
                 return;
             }
 
             int flags = 0;
             this.tag = Uri.decode(name.substring(0, at));
             if (name.endsWith(".gz")) {
-                flags |= DropBoxEntry.IS_GZIPPED;
+                flags |= DropBox.IS_GZIPPED;
                 name = name.substring(0, name.length() - 3);
             }
             if (name.endsWith(".lost")) {
-                flags |= DropBoxEntry.IS_EMPTY;
+                flags |= DropBox.IS_EMPTY;
                 name = name.substring(at + 1, name.length() - 5);
             } else if (name.endsWith(".txt")) {
-                flags |= DropBoxEntry.IS_TEXT;
+                flags |= DropBox.IS_TEXT;
                 name = name.substring(at + 1, name.length() - 4);
             } else if (name.endsWith(".dat")) {
                 name = name.substring(at + 1, name.length() - 4);
             } else {
-                this.flags = DropBoxEntry.IS_EMPTY;
+                this.flags = DropBox.IS_EMPTY;
                 this.timestampMillis = 0;
                 return;
             }
@@ -523,7 +490,7 @@ public final class DropBoxService extends IDropBox.Stub {
         public EntryFile(long millis) {
             this.tag = null;
             this.timestampMillis = millis;
-            this.flags = DropBoxEntry.IS_EMPTY;
+            this.flags = DropBox.IS_EMPTY;
             this.file = null;
             this.blocks = 0;
         }
@@ -618,7 +585,7 @@ public final class DropBoxService extends IDropBox.Stub {
                 mAllFiles.blocks -= late.blocks;
                 FileList tagFiles = mFilesByTag.get(late.tag);
                 if (tagFiles.contents.remove(late)) tagFiles.blocks -= late.blocks;
-                if ((late.flags & DropBoxEntry.IS_EMPTY) == 0) {
+                if ((late.flags & DropBox.IS_EMPTY) == 0) {
                     enrollEntry(new EntryFile(
                             late.file, mDropBoxDir, late.tag, t++, late.flags, mBlockSize));
                 } else {

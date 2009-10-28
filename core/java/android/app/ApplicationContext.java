@@ -70,6 +70,7 @@ import android.net.wifi.IWifiManager;
 import android.net.wifi.WifiManager;
 import android.os.Binder;
 import android.os.Bundle;
+import android.os.DropBox;
 import android.os.FileUtils;
 import android.os.Handler;
 import android.os.IBinder;
@@ -92,6 +93,8 @@ import android.view.accessibility.AccessibilityManager;
 import android.view.inputmethod.InputMethodManager;
 import android.accounts.AccountManager;
 import android.accounts.IAccountManager;
+
+import com.android.internal.os.IDropBoxService;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -182,6 +185,7 @@ class ApplicationContext extends Context {
     private ClipboardManager mClipboardManager = null;
     private boolean mRestricted;
     private AccountManager mAccountManager; // protected by mSync
+    private DropBox mDropBox = null;
 
     private final Object mSync = new Object();
 
@@ -896,6 +900,8 @@ class ApplicationContext extends Context {
             return getClipboardManager();
         } else if (WALLPAPER_SERVICE.equals(name)) {
             return getWallpaperManager();
+        } else if (DROPBOX_SERVICE.equals(name)) {
+            return getDropBox();
         }
 
         return null;
@@ -1045,13 +1051,24 @@ class ApplicationContext extends Context {
         }
         return mVibrator;
     }
-  
+
     private AudioManager getAudioManager()
     {
         if (mAudioManager == null) {
             mAudioManager = new AudioManager(this);
         }
         return mAudioManager;
+    }
+
+    private DropBox getDropBox() {
+        synchronized (mSync) {
+            if (mDropBox == null) {
+                IBinder b = ServiceManager.getService(DROPBOX_SERVICE);
+                IDropBoxService service = IDropBoxService.Stub.asInterface(b);
+                mDropBox = new DropBox(service);
+            }
+        }
+        return mDropBox;
     }
 
     @Override
