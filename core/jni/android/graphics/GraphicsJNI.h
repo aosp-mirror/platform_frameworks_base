@@ -80,9 +80,15 @@ private:
     bool fReportSizeToVM;
 };
 
+enum JNIAccess {
+    kRO_JNIAccess,
+    kRW_JNIAccess
+};
+
 class AutoJavaFloatArray {
 public:
-    AutoJavaFloatArray(JNIEnv* env, jfloatArray array, int minLength = 0);
+    AutoJavaFloatArray(JNIEnv* env, jfloatArray array,
+                       int minLength = 0, JNIAccess = kRW_JNIAccess);
     ~AutoJavaFloatArray();
     
     float* ptr() const { return fPtr; }
@@ -93,6 +99,7 @@ private:
     jfloatArray fArray;
     float*      fPtr;
     int         fLen;
+    int         fReleaseMode;
 };
 
 class AutoJavaIntArray {
@@ -112,7 +119,8 @@ private:
 
 class AutoJavaShortArray {
 public:
-    AutoJavaShortArray(JNIEnv* env, jshortArray array, int minLength = 0);
+    AutoJavaShortArray(JNIEnv* env, jshortArray array,
+                       int minLength = 0, JNIAccess = kRW_JNIAccess);
     ~AutoJavaShortArray();
     
     jshort* ptr() const { return fPtr; }
@@ -123,6 +131,7 @@ private:
     jshortArray fArray;
     jshort*      fPtr;
     int         fLen;
+    int         fReleaseMode;
 };
 
 class AutoJavaByteArray {
