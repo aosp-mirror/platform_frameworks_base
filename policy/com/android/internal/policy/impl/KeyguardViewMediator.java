@@ -32,6 +32,7 @@ import android.os.Message;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.SystemClock;
+import android.os.SystemProperties;
 import android.telephony.TelephonyManager;
 import android.util.Config;
 import android.util.EventLog;
@@ -469,9 +470,13 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
             }
             
             // if the setup wizard hasn't run yet, don't show
+            final boolean requireSim = !SystemProperties.getBoolean("keyguard.no_require_sim",
+                    false);
             final boolean provisioned = mUpdateMonitor.isDeviceProvisioned();
             final IccCard.State state = mUpdateMonitor.getSimState();
-            final boolean lockedOrMissing = state.isPinLocked() || (state == IccCard.State.ABSENT);
+            final boolean lockedOrMissing = state.isPinLocked()
+                    || ((state == IccCard.State.ABSENT) && requireSim);
+
             if (!lockedOrMissing && !provisioned) {
                 if (DEBUG) Log.d(TAG, "doKeyguard: not showing because device isn't provisioned"
                         + " and the sim is not locked or missing");
