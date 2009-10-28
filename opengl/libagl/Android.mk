@@ -25,6 +25,13 @@ LOCAL_SRC_FILES:= \
 	primitives.cpp.arm	        \
 	vertex.cpp.arm
 
+LOCAL_CFLAGS += -DLOG_TAG=\"libagl\"
+LOCAL_CFLAGS += -DGL_GLEXT_PROTOTYPES -DEGL_EGLEXT_PROTOTYPES
+LOCAL_CFLAGS += -fvisibility=hidden
+
+LOCAL_SHARED_LIBRARIES := libcutils libhardware libutils libpixelflinger
+LOCAL_LDLIBS := -lpthread -ldl
+
 ifeq ($(TARGET_ARCH),arm)
 	LOCAL_SRC_FILES += fixed_asm.S iterators.S
 	LOCAL_CFLAGS += -fstrict-aliasing
@@ -38,15 +45,9 @@ endif
 ifeq ($(LIBAGL_USE_GRALLOC_COPYBITS),1)
     LOCAL_CFLAGS += -DLIBAGL_USE_GRALLOC_COPYBITS
     LOCAL_SRC_FILES += copybit.cpp
+    LOCAL_SHARED_LIBRARIES += libui
 endif
 
-LOCAL_CFLAGS += -DLOG_TAG=\"libagl\"
-LOCAL_CFLAGS += -DGL_GLEXT_PROTOTYPES -DEGL_EGLEXT_PROTOTYPES
-
-LOCAL_SHARED_LIBRARIES := libcutils libhardware libutils libpixelflinger
-LOCAL_CFLAGS += -fvisibility=hidden
-
-LOCAL_LDLIBS := -lpthread -ldl
 
 LOCAL_MODULE_PATH := $(TARGET_OUT_SHARED_LIBRARIES)/egl
 LOCAL_MODULE:= libGLES_android

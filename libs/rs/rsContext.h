@@ -54,6 +54,7 @@ public:
 
     static pthread_key_t gThreadTLSKey;
     static uint32_t gThreadTLSKeyCount;
+    static uint32_t gGLContextCount;
     static pthread_mutex_t gInitMutex;
 
     struct ScriptTLSStruct {
@@ -215,6 +216,7 @@ private:
     Context();
 
     void initEGL();
+    void deinitEGL();
 
     bool runRootScript();
 

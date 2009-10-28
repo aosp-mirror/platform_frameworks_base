@@ -191,6 +191,7 @@ public class KeyboardView extends View implements View.OnClickListener {
     private int mLastCodeX;
     private int mLastCodeY;
     private int mCurrentKey = NOT_A_KEY;
+    private int mDownKey = NOT_A_KEY;
     private long mLastKeyTime;
     private long mCurrentKeyTime;
     private int[] mKeyIndices = new int[12];
@@ -202,6 +203,10 @@ public class KeyboardView extends View implements View.OnClickListener {
     private boolean mAbortKey;
     private Key mInvalidatedKey;
     private Rect mClipRegion = new Rect(0, 0, 0, 0);
+    private boolean mPossiblePoly;
+    private SwipeTracker mSwipeTracker = new SwipeTracker();
+    private int mSwipeThreshold;
+    private boolean mDisambiguateSwipe;
 
     // Variables for dealing with multiple pointers
     private int mOldPointerCount = 1;
@@ -351,7 +356,10 @@ public class KeyboardView extends View implements View.OnClickListener {
         mPadding = new Rect(0, 0, 0, 0);
         mMiniKeyboardCache = new HashMap<Key,View>();
         mKeyBackground.getPadding(mPadding);
-        
+
+        mSwipeThreshold = (int) (500 * getResources().getDisplayMetrics().density);
+        mDisambiguateSwipe = getResources().getBoolean(
+                com.android.internal.R.bool.config_swipeDisambiguation);
         resetMultiTap();
         initGestureDetector();
     }
@@ -361,22 +369,49 @@ public class KeyboardView extends View implements View.OnClickListener {
             @Override
             public boolean onFling(MotionEvent me1, MotionEvent me2, 
                     float velocityX, float velocityY) {
+                if (mPossiblePoly) return false;
                 final float absX = Math.abs(velocityX);
                 final float absY = Math.abs(velocityY);
-                if (velocityX > 500 && absY < absX) {
-                    swipeRight();
-                    return true;
-                } else if (velocityX < -500 && absY < absX) {
-                    swipeLeft();
-                    return true;
-                } else if (velocityY < -500 && absX < absY) {
-                    swipeUp();
-                    return true;
-                } else if (velocityY > 500 && absX < 200) {
-                    swipeDown();
-                    return true;
-                } else if (absX > 800 || absY > 800) {
-                    return true;
+                float deltaX = me2.getX() - me1.getX();
+                float deltaY = me2.getY() - me1.getY();
+                int travelX = getWidth() / 2; // Half the keyboard width
+                int travelY = getHeight() / 2; // Half the keyboard height
+                mSwipeTracker.computeCurrentVelocity(1000);
+                final float endingVelocityX = mSwipeTracker.getXVelocity();
+                final float endingVelocityY = mSwipeTracker.getYVelocity();
+                boolean sendDownKey = false;
+                if (velocityX > mSwipeThreshold && absY < absX && deltaX > travelX) {
+                    if (mDisambiguateSwipe && endingVelocityX < velocityX / 4) {
+                        sendDownKey = true;
+                    } else {
+                        swipeRight();
+                        return true;
+                    }
+                } else if (velocityX < -mSwipeThreshold && absY < absX && deltaX < -travelX) {
+                    if (mDisambiguateSwipe && endingVelocityX > velocityX / 4) {
+                        sendDownKey = true;
+                    } else {
+                        swipeLeft();
+                        return true;
+                    }
+                } else if (velocityY < -mSwipeThreshold && absX < absY && deltaY < -travelY) {
+                    if (mDisambiguateSwipe && endingVelocityY > velocityY / 4) {
+                        sendDownKey = true;
+                    } else {
+                        swipeUp();
+                        return true;
+                    }
+                } else if (velocityY > mSwipeThreshold && absX < absY / 2 && deltaY > travelY) {
+                    if (mDisambiguateSwipe && endingVelocityY < velocityY / 4) {
+                        sendDownKey = true;
+                    } else {
+                        swipeDown();
+                        return true;
+                    }
+                }
+
+                if (sendDownKey) {
+                    detectAndSendKey(mDownKey, mStartX, mStartY, me1.getEventTime());
                 }
                 return false;
             }
@@ -743,8 +778,7 @@ public class KeyboardView extends View implements View.OnClickListener {
         return primaryIndex;
     }
 
-    private void detectAndSendKey(int x, int y, long eventTime) {
-        int index = mCurrentKey;
+    private void detectAndSendKey(int index, int x, int y, long eventTime) {
         if (index != NOT_A_KEY && index < mKeys.length) {
             final Key key = mKeys[index];
             if (key.text != null) {
@@ -1026,51 +1060,64 @@ public class KeyboardView extends View implements View.OnClickListener {
         return false;
     }
 
+    private long mOldEventTime;
+    private boolean mUsedVelocity;
+
     @Override
     public boolean onTouchEvent(MotionEvent me) {
         // Convert multi-pointer up/down events to single up/down events to 
         // deal with the typical multi-pointer behavior of two-thumb typing
-        int pointerCount = me.getPointerCount();
+        final int pointerCount = me.getPointerCount();
+        final int action = me.getAction();
         boolean result = false;
+        final long now = me.getEventTime();
+
         if (pointerCount != mOldPointerCount) {
-            long now = me.getEventTime();
             if (pointerCount == 1) {
                 // Send a down event for the latest pointer
                 MotionEvent down = MotionEvent.obtain(now, now, MotionEvent.ACTION_DOWN,
                         me.getX(), me.getY(), me.getMetaState());
-                result = onModifiedTouchEvent(down);
+                result = onModifiedTouchEvent(down, false);
                 down.recycle();
                 // If it's an up action, then deliver the up as well.
-                if (me.getAction() == MotionEvent.ACTION_UP) {
-                    result = onModifiedTouchEvent(me);
+                if (action == MotionEvent.ACTION_UP) {
+                    result = onModifiedTouchEvent(me, true);
                 }
             } else {
                 // Send an up event for the last pointer
                 MotionEvent up = MotionEvent.obtain(now, now, MotionEvent.ACTION_UP,
                         mOldPointerX, mOldPointerY, me.getMetaState());
-                result = onModifiedTouchEvent(up);
+                result = onModifiedTouchEvent(up, true);
                 up.recycle();
             }
         } else {
             if (pointerCount == 1) {
+                result = onModifiedTouchEvent(me, false);
                 mOldPointerX = me.getX();
                 mOldPointerY = me.getY();
-                result = onModifiedTouchEvent(me);
             } else {
                 // Don't do anything when 2 pointers are down and moving.
                 result = true;
             }
         }
         mOldPointerCount = pointerCount;
+
         return result;
     }
 
-    private boolean onModifiedTouchEvent(MotionEvent me) {
+    private boolean onModifiedTouchEvent(MotionEvent me, boolean possiblePoly) {
         int touchX = (int) me.getX() - mPaddingLeft;
         int touchY = (int) me.getY() + mVerticalCorrection - mPaddingTop;
-        int action = me.getAction();
-        long eventTime = me.getEventTime();
+        final int action = me.getAction();
+        final long eventTime = me.getEventTime();
+        mOldEventTime = eventTime;
         int keyIndex = getKeyIndices(touchX, touchY, null);
+        mPossiblePoly = possiblePoly;
+
+        // Track the last few movements to look for spurious swipes.
+        if (action == MotionEvent.ACTION_DOWN) mSwipeTracker.clear();
+        mSwipeTracker.addMovement(me);
+
         if (mGestureDetector.onTouchEvent(me)) {
             showPreview(NOT_A_KEY);
             mHandler.removeMessages(MSG_REPEAT);
@@ -1095,6 +1142,7 @@ public class KeyboardView extends View implements View.OnClickListener {
                 mCurrentKeyTime = 0;
                 mLastKey = NOT_A_KEY;
                 mCurrentKey = keyIndex;
+                mDownKey = keyIndex;
                 mDownTime = me.getEventTime();
                 mLastMoveTime = mDownTime;
                 checkMultiTap(eventTime, keyIndex);
@@ -1167,10 +1215,16 @@ public class KeyboardView extends View implements View.OnClickListener {
                 Arrays.fill(mKeyIndices, NOT_A_KEY);
                 // If we're not on a repeating key (which sends on a DOWN event)
                 if (mRepeatKeyIndex == NOT_A_KEY && !mMiniKeyboardOnScreen && !mAbortKey) {
-                    detectAndSendKey(touchX, touchY, eventTime);
+                    detectAndSendKey(mCurrentKey, touchX, touchY, eventTime);
                 }
                 invalidateKey(keyIndex);
                 mRepeatKeyIndex = NOT_A_KEY;
+                break;
+            case MotionEvent.ACTION_CANCEL:
+                removeMessages();
+                mAbortKey = true;
+                showPreview(NOT_A_KEY);
+                invalidateKey(mCurrentKey);
                 break;
         }
         mLastX = touchX;
@@ -1180,7 +1234,7 @@ public class KeyboardView extends View implements View.OnClickListener {
 
     private boolean repeatKey() {
         Key key = mKeys[mRepeatKeyIndex];
-        detectAndSendKey(key.x, key.y, mLastTapTime);
+        detectAndSendKey(mCurrentKey, key.x, key.y, mLastTapTime);
         return true;
     }
     
@@ -1263,6 +1317,116 @@ public class KeyboardView extends View implements View.OnClickListener {
         }
         if (eventTime > mLastTapTime + MULTITAP_INTERVAL || keyIndex != mLastSentIndex) {
             resetMultiTap();
+        }
+    }
+
+    private static class SwipeTracker {
+
+        static final int NUM_PAST = 4;
+        static final int LONGEST_PAST_TIME = 200;
+
+        final float mPastX[] = new float[NUM_PAST];
+        final float mPastY[] = new float[NUM_PAST];
+        final long mPastTime[] = new long[NUM_PAST];
+
+        float mYVelocity;
+        float mXVelocity;
+
+        public void clear() {
+            mPastTime[0] = 0;
+        }
+
+        public void addMovement(MotionEvent ev) {
+            long time = ev.getEventTime();
+            final int N = ev.getHistorySize();
+            for (int i=0; i<N; i++) {
+                addPoint(ev.getHistoricalX(i), ev.getHistoricalY(i),
+                        ev.getHistoricalEventTime(i));
+            }
+            addPoint(ev.getX(), ev.getY(), time);
+        }
+
+        private void addPoint(float x, float y, long time) {
+            int drop = -1;
+            int i;
+            final long[] pastTime = mPastTime;
+            for (i=0; i<NUM_PAST; i++) {
+                if (pastTime[i] == 0) {
+                    break;
+                } else if (pastTime[i] < time-LONGEST_PAST_TIME) {
+                    drop = i;
+                }
+            }
+            if (i == NUM_PAST && drop < 0) {
+                drop = 0;
+            }
+            if (drop == i) drop--;
+            final float[] pastX = mPastX;
+            final float[] pastY = mPastY;
+            if (drop >= 0) {
+                final int start = drop+1;
+                final int count = NUM_PAST-drop-1;
+                System.arraycopy(pastX, start, pastX, 0, count);
+                System.arraycopy(pastY, start, pastY, 0, count);
+                System.arraycopy(pastTime, start, pastTime, 0, count);
+                i -= (drop+1);
+            }
+            pastX[i] = x;
+            pastY[i] = y;
+            pastTime[i] = time;
+            i++;
+            if (i < NUM_PAST) {
+                pastTime[i] = 0;
+            }
+        }
+
+        public void computeCurrentVelocity(int units) {
+            computeCurrentVelocity(units, Float.MAX_VALUE);
+        }
+
+        public void computeCurrentVelocity(int units, float maxVelocity) {
+            final float[] pastX = mPastX;
+            final float[] pastY = mPastY;
+            final long[] pastTime = mPastTime;
+
+            final float oldestX = pastX[0];
+            final float oldestY = pastY[0];
+            final long oldestTime = pastTime[0];
+            float accumX = 0;
+            float accumY = 0;
+            int N=0;
+            while (N < NUM_PAST) {
+                if (pastTime[N] == 0) {
+                    break;
+                }
+                N++;
+            }
+
+            for (int i=1; i < N; i++) {
+                final int dur = (int)(pastTime[i] - oldestTime);
+                if (dur == 0) continue;
+                float dist = pastX[i] - oldestX;
+                float vel = (dist/dur) * units;   // pixels/frame.
+                if (accumX == 0) accumX = vel;
+                else accumX = (accumX + vel) * .5f;
+
+                dist = pastY[i] - oldestY;
+                vel = (dist/dur) * units;   // pixels/frame.
+                if (accumY == 0) accumY = vel;
+                else accumY = (accumY + vel) * .5f;
+            }
+            mXVelocity = accumX < 0.0f ? Math.max(accumX, -maxVelocity)
+                    : Math.min(accumX, maxVelocity);
+            mYVelocity = accumY < 0.0f ? Math.max(accumY, -maxVelocity)
+                    : Math.min(accumY, maxVelocity);
+        }
+
+        public float getXVelocity() {
+            return mXVelocity;
+        }
+
+        public float getYVelocity() {
+            return mYVelocity;
         }
     }
 }

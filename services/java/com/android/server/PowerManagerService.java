@@ -131,6 +131,8 @@ class PowerManagerService extends IPowerManager.Stub
     static final boolean ANIMATE_KEYBOARD_LIGHTS = false;
     
     static final int ANIM_STEPS = 60/4;
+    // Slower animation for autobrightness changes
+    static final int AUTOBRIGHTNESS_ANIM_STEPS = 60;
 
     // These magic numbers are the initial state of the LEDs at boot.  Ideally
     // we should read them from the driver, but our current hardware returns 0
@@ -156,7 +158,6 @@ class PowerManagerService extends IPowerManager.Stub
     private int mProximityCount = 0;
     private int mPowerState;
     private boolean mOffBecauseOfUser;
-    private boolean mAnimatingScreenOff;
     private int mUserState;
     private boolean mKeyboardVisible = false;
     private boolean mUserActivityAllowed = true;
@@ -224,7 +225,7 @@ class PowerManagerService extends IPowerManager.Stub
 
     // could be either static or controllable at runtime
     private static final boolean mSpew = false;
-    private static final boolean mDebugLightSensor = false;
+    private static final boolean mDebugLightSensor = (false || mSpew);
 
     /*
     static PrintStream mLog;
@@ -1230,7 +1231,6 @@ class PowerManagerService extends IPowerManager.Stub
                         Log.d(TAG,
                               "preventScreenOn: turning on after a prior preventScreenOn(true)!");
                     }
-                    mAnimatingScreenOff = false;
                     int err = setScreenStateLocked(true);
                     if (err != 0) {
                         Log.w(TAG, "preventScreenOn: error from setScreenStateLocked(): " + err);
@@ -1392,7 +1392,6 @@ class PowerManagerService extends IPowerManager.Stub
                         reallyTurnScreenOn = false;
                     }
                     if (reallyTurnScreenOn) {
-                        mAnimatingScreenOff = false;
                         err = setScreenStateLocked(true);
                         long identity = Binder.clearCallingIdentity();
                         try {
@@ -1434,7 +1433,6 @@ class PowerManagerService extends IPowerManager.Stub
                     if (!mScreenBrightness.animating) {
                         err = screenOffFinishedAnimatingLocked(becauseOfUser);
                     } else {
-                        mAnimatingScreenOff = true;
                         mOffBecauseOfUser = becauseOfUser;
                         err = 0;
                         mLastTouchDown = 0;
@@ -1452,7 +1450,6 @@ class PowerManagerService extends IPowerManager.Stub
                 mTotalTouchDownTime, mTouchCycles);
         mLastTouchDown = 0;
         int err = setScreenStateLocked(false);
-        mAnimatingScreenOff = false;
         if (mScreenOnStartTime != 0) {
             mScreenOnTime += SystemClock.elapsedRealtime() - mScreenOnStartTime;
             mScreenOnStartTime = 0;
@@ -1825,9 +1822,6 @@ class PowerManagerService extends IPowerManager.Stub
             return;
         }
 
-        if (mAnimatingScreenOff) {
-            return;
-        }
         if (false) {
             if (((mPokey & POKE_LOCK_IGNORE_CHEEK_EVENTS) != 0)) {
                 Log.d(TAG, "userActivity !!!");//, new RuntimeException());
@@ -1844,6 +1838,11 @@ class PowerManagerService extends IPowerManager.Stub
                         + " mWakeLockState=0x" + Integer.toHexString(mWakeLockState)
                         + " mProximitySensorActive=" + mProximitySensorActive
                         + " force=" + force);
+            }
+            // ignore user activity if we are in the process of turning off the screen
+            if (mScreenBrightness.animating && mScreenBrightness.targetValue == 0) {
+                Log.d(TAG, "ignoring user activity while turning off screen");
+                return;
             }
             if (mLastEventTime <= time || force) {
                 mLastEventTime = time;
@@ -1925,27 +1924,45 @@ class PowerManagerService extends IPowerManager.Stub
                     Log.d(TAG, "keyboardValue " + keyboardValue);
                 }
 
+                boolean startAnimation = false;
                 if (mScreenBrightnessOverride < 0) {
-                    mHardware.setLightBrightness_UNCHECKED(HardwareService.LIGHT_ID_BACKLIGHT,
-                            lcdValue);
-                }
-                mHardware.setLightBrightness_UNCHECKED(HardwareService.LIGHT_ID_BUTTONS,
-                        buttonValue);
-                mHardware.setLightBrightness_UNCHECKED(HardwareService.LIGHT_ID_KEYBOARD,
-                        keyboardValue);
-
-                // update our animation state
-                if (ANIMATE_SCREEN_LIGHTS) {
-                    mScreenBrightness.curValue = lcdValue;
-                    mScreenBrightness.animating = false;
+                    if (ANIMATE_SCREEN_LIGHTS) {
+                        if (mScreenBrightness.setTargetLocked(lcdValue,
+                                AUTOBRIGHTNESS_ANIM_STEPS, INITIAL_SCREEN_BRIGHTNESS,
+                                (int)mScreenBrightness.curValue)) {
+                            startAnimation = true;
+                        }
+                    } else {
+                        mHardware.setLightBrightness_UNCHECKED(HardwareService.LIGHT_ID_BACKLIGHT,
+                                lcdValue);
+                    }
                 }
                 if (ANIMATE_BUTTON_LIGHTS) {
-                    mButtonBrightness.curValue = buttonValue;
-                    mButtonBrightness.animating = false;
+                    if (mButtonBrightness.setTargetLocked(buttonValue,
+                            AUTOBRIGHTNESS_ANIM_STEPS, INITIAL_BUTTON_BRIGHTNESS,
+                            (int)mButtonBrightness.curValue)) {
+                        startAnimation = true;
+                    }
+                } else {
+                    mHardware.setLightBrightness_UNCHECKED(HardwareService.LIGHT_ID_BUTTONS,
+                            buttonValue);
                 }
                 if (ANIMATE_KEYBOARD_LIGHTS) {
-                    mKeyboardBrightness.curValue = keyboardValue;
-                    mKeyboardBrightness.animating = false;
+                    if (mKeyboardBrightness.setTargetLocked(keyboardValue,
+                            AUTOBRIGHTNESS_ANIM_STEPS, INITIAL_BUTTON_BRIGHTNESS,
+                            (int)mKeyboardBrightness.curValue)) {
+                        startAnimation = true;
+                    }
+                } else {
+                    mHardware.setLightBrightness_UNCHECKED(HardwareService.LIGHT_ID_KEYBOARD,
+                            keyboardValue);
+                }
+                if (startAnimation) {
+                    if (mDebugLightSensor) {
+                        Log.i(TAG, "lightSensorChangedLocked scheduling light animator");
+                    }
+                    mHandler.removeCallbacks(mLightAnimator);
+                    mHandler.post(mLightAnimator);
                 }
             }
         }
@@ -2041,6 +2058,7 @@ class PowerManagerService extends IPowerManager.Stub
         if (mAutoBrightessEnabled != enabled) {
             mAutoBrightessEnabled = enabled;
             // reset computed brightness
+            mLightSensorValue = -1;
             mLightSensorBrightness = -1;
 
             if (mHasHardwareAutoBrightness) {
@@ -2263,14 +2281,17 @@ class PowerManagerService extends IPowerManager.Stub
         if (ANIMATE_SCREEN_LIGHTS) {
             mScreenBrightness.curValue = brightness;
             mScreenBrightness.animating = false;
+            mScreenBrightness.targetValue = -1;
         }
         if (ANIMATE_KEYBOARD_LIGHTS) {
             mKeyboardBrightness.curValue = brightness;
             mKeyboardBrightness.animating = false;
+            mKeyboardBrightness.targetValue = -1;
         }
         if (ANIMATE_BUTTON_LIGHTS) {
             mButtonBrightness.curValue = brightness;
             mButtonBrightness.animating = false;
+            mButtonBrightness.targetValue = -1;
         }
     }
 

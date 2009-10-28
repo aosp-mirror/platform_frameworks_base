@@ -66,7 +66,11 @@ public:
     GraphicBuffer();
 
     // creates w * h buffer
-    GraphicBuffer(uint32_t w, uint32_t h, PixelFormat format, uint32_t ssage);
+    GraphicBuffer(uint32_t w, uint32_t h, PixelFormat format, uint32_t usage);
+
+    // create a buffer from an existing handle
+    GraphicBuffer(uint32_t w, uint32_t h, PixelFormat format, uint32_t usage,
+            uint32_t stride, native_handle_t* handle, bool keepOwnership);
 
     // return status
     status_t initCheck() const;
@@ -94,9 +98,15 @@ protected:
     GraphicBuffer(const Parcel& reply);
     virtual ~GraphicBuffer();
 
+    enum {
+        ownNone   = 0,
+        ownHandle = 1,
+        ownData   = 2,
+    };
+
     inline const GraphicBufferMapper& getBufferMapper() const { return mBufferMapper; }
     inline GraphicBufferMapper& getBufferMapper() { return mBufferMapper; }
-    bool mOwner;
+    uint8_t mOwner;
 
 private:
     friend class Surface;
