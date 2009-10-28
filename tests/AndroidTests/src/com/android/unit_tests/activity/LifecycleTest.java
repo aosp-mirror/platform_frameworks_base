@@ -51,8 +51,8 @@ public class LifecycleTest extends ActivityTestsBase {
     }
 
     //Marking flaky until bug 1164344 is fixed.
-    @FlakyTest(tolerance=2)
-    @LargeTest
+    // @FlakyTest(tolerance=2)
+    // @LargeTest
     public void testScreen() throws Exception {
         mIntent = mTopIntent;
         runLaunchpad(LaunchpadActivity.LIFECYCLE_SCREEN);
