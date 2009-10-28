@@ -9303,6 +9303,15 @@ public class WindowManagerService extends IWindowManager.Stub
                                     & WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER) != 0) {
                                 wallpaperMayChange = true;
                             }
+                            if (changed && !forceHiding
+                                    && (mCurrentFocus == null)
+                                    && (mFocusedApp != null)) {
+                                // It's possible that the last focus recalculation left no
+                                // current focused window even though the app has come to the
+                                // foreground already.  In this case, we make sure to recalculate
+                                // focus when we show a window.
+                                focusMayChange = true;
+                            }
                         }
                         
                         mPolicy.animatingWindowLw(w, attrs);
