@@ -1279,7 +1279,7 @@ public class VCardExporterTests extends AndroidTestCase {
 
         VCardVerificationHandler handler = new VCardVerificationHandler(this, V21);
         handler.addNewVerifierWithEmptyName()
-            .addNodeWithOrder("X-ANDROID-CUSTOM", Nickname.CONTENT_ITEM_TYPE + ";Nicky");
+            .addNodeWithOrder("X-ANDROID-CUSTOM", Nickname.CONTENT_ITEM_TYPE + ";Nicky;;;;;;;;;;;;;;");
 
         // TODO: also test import part.
 
