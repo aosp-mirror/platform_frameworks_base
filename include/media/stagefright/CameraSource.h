@@ -26,12 +26,11 @@
 
 namespace android {
 
-class ICamera;
-class ICameraClient;
 class IMemory;
+class ISurface;
+class Camera;
 
-class CameraSource : public MediaSource,
-                     public MediaBufferObserver {
+class CameraSource : public MediaSource {
 public:
     static CameraSource *Create();
 
@@ -45,23 +44,24 @@ public:
     virtual status_t read(
             MediaBuffer **buffer, const ReadOptions *options = NULL);
 
-    virtual void notifyCallback(int32_t msgType, int32_t ext1, int32_t ext2);
-    virtual void dataCallback(int32_t msgType, const sp<IMemory>& data);
-
-    virtual void signalBufferReturned(MediaBuffer *buffer);
-
 private:
-    CameraSource(const sp<ICamera> &camera, const sp<ICameraClient> &client);
+    friend class CameraSourceListener;
 
-    sp<ICamera> mCamera;
-    sp<ICameraClient> mCameraClient;
+    sp<Camera> mCamera;
 
     Mutex mLock;
     Condition mFrameAvailableCondition;
     List<sp<IMemory> > mFrames;
+    List<int64_t> mFrameTimes;
 
-    int mNumFrames;
+    int mWidth, mHeight;
+    int64_t mFirstFrameTimeUs;
+    int32_t mNumFrames;
     bool mStarted;
+
+    CameraSource(const sp<Camera> &camera);
+
+    void dataCallback(int32_t msgType, const sp<IMemory> &data);
 
     CameraSource(const CameraSource &);
     CameraSource &operator=(const CameraSource &);

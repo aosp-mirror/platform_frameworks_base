@@ -17,6 +17,7 @@ ifeq ($(BUILD_WITH_FULL_STAGEFRIGHT),true)
 LOCAL_SRC_FILES +=                \
         AMRExtractor.cpp          \
         CachingDataSource.cpp     \
+        CameraSource.cpp          \
         DataSource.cpp            \
         FileSource.cpp            \
         HTTPDataSource.cpp        \
