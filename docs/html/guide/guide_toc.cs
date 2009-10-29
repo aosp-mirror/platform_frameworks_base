@@ -254,6 +254,7 @@
       		<li><a href="<?cs var:toroot ?>guide/developing/tools/draw9patch.html">Draw 9-Patch</a></li>
       		<li><a href="<?cs var:toroot ?>guide/developing/tools/emulator.html">Emulator</a></li>
       		<li><a href="<?cs var:toroot ?>guide/developing/tools/hierarchy-viewer.html">Hierarchy Viewer</a></li>
+      		<li><a href="<?cs var:toroot ?>guide/developing/tools/layoutopt.html">layoutopt</a></li>
       		<li><a href="<?cs var:toroot ?>guide/developing/tools/othertools.html#mksdcard">mksdcard</a></li>
       		<li><a href="<?cs var:toroot ?>guide/developing/tools/monkey.html">Monkey</a></li>
       		<li><a href="<?cs var:toroot ?>guide/developing/tools/adb.html#sqlite">sqlite3</a></li>
