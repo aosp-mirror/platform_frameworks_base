@@ -959,10 +959,10 @@ public class AudioService extends IAudioService.Stub {
     ///////////////////////////////////////////////////////////////////////////
 
     public class VolumeStreamState {
-        private final String mVolumeIndexSettingName;
-        private final String mLastAudibleVolumeIndexSettingName;
         private final int mStreamType;
 
+        private String mVolumeIndexSettingName;
+        private String mLastAudibleVolumeIndexSettingName;
         private int mIndexMax;
         private int mIndex;
         private int mLastAudibleIndex;
@@ -970,8 +970,7 @@ public class AudioService extends IAudioService.Stub {
 
         private VolumeStreamState(String settingName, int streamType) {
 
-            mVolumeIndexSettingName = settingName;
-            mLastAudibleVolumeIndexSettingName = settingName + System.APPEND_FOR_LAST_AUDIBLE;
+            setVolumeIndexSettingName(settingName);
 
             mStreamType = streamType;
 
@@ -989,6 +988,11 @@ public class AudioService extends IAudioService.Stub {
             mLastAudibleIndex = getValidIndex(10 * mLastAudibleIndex);
             setStreamVolumeIndex(streamType, mIndex);
             mDeathHandlers = new ArrayList<VolumeDeathHandler>();
+        }
+
+        public void setVolumeIndexSettingName(String settingName) {
+            mVolumeIndexSettingName = settingName;
+            mLastAudibleVolumeIndexSettingName = settingName + System.APPEND_FOR_LAST_AUDIBLE;
         }
 
         public boolean adjustIndex(int deltaIndex) {
@@ -1370,11 +1374,17 @@ public class AudioService extends IAudioService.Stub {
                     mNotificationsUseRingVolume = notificationsUseRingVolume;
                     if (mNotificationsUseRingVolume == 1) {
                         STREAM_VOLUME_ALIAS[AudioSystem.STREAM_NOTIFICATION] = AudioSystem.STREAM_RING;
+                        mStreamStates[AudioSystem.STREAM_NOTIFICATION].setVolumeIndexSettingName(
+                                System.VOLUME_SETTINGS[AudioSystem.STREAM_RING]);
                     } else {
                         STREAM_VOLUME_ALIAS[AudioSystem.STREAM_NOTIFICATION] = AudioSystem.STREAM_NOTIFICATION;
+                        mStreamStates[AudioSystem.STREAM_NOTIFICATION].setVolumeIndexSettingName(
+                                System.VOLUME_SETTINGS[AudioSystem.STREAM_NOTIFICATION]);
                         // Persist notification volume volume as it was not persisted while aliased to ring volume
+                        //  and persist with no delay as there might be registered observers of the persisted
+                        //  notification volume.
                         sendMsg(mAudioHandler, MSG_PERSIST_VOLUME, AudioSystem.STREAM_NOTIFICATION,
-                                SENDMSG_REPLACE, 0, 0, mStreamStates[AudioSystem.STREAM_NOTIFICATION], PERSIST_DELAY);
+                                SENDMSG_REPLACE, 0, 0, mStreamStates[AudioSystem.STREAM_NOTIFICATION], 0);
                     }
                 }
             }
