@@ -49,7 +49,7 @@ public class ProgramStore extends BaseObj {
         SRC_ALPHA (4),
         ONE_MINUS_SRC_ALPHA (5),
         DST_ALPHA (6),
-        ONE_MINUS_DST_ALPA (7),
+        ONE_MINUS_DST_ALPHA (7),
         SRC_ALPHA_SATURATE (8);
 
         int mID;
@@ -66,7 +66,7 @@ public class ProgramStore extends BaseObj {
         SRC_ALPHA (4),
         ONE_MINUS_SRC_ALPHA (5),
         DST_ALPHA (6),
-        ONE_MINUS_DST_ALPA (7);
+        ONE_MINUS_DST_ALPHA (7);
 
         int mID;
         BlendDstFunc(int id) {
