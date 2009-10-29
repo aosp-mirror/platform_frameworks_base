@@ -321,7 +321,8 @@ public class AccountManager {
      */
     public String peekAuthToken(final Account account, final String authTokenType) {
         if (account == null) {
-            throw new IllegalArgumentException("the account must not be null");
+            Log.e(TAG, "peekAuthToken: the account must not be null");
+            return null;
         }
         if (authTokenType == null) {
             return null;
@@ -346,7 +347,8 @@ public class AccountManager {
      */
     public void setPassword(final Account account, final String password) {
         if (account == null) {
-            throw new IllegalArgumentException("the account must not be null");
+            Log.e(TAG, "the account must not be null");
+            return;
         }
         try {
             mService.setPassword(account, password);
@@ -365,7 +367,8 @@ public class AccountManager {
      */
     public void clearPassword(final Account account) {
         if (account == null) {
-            throw new IllegalArgumentException("the account must not be null");
+            Log.e(TAG, "the account must not be null");
+            return;
         }
         try {
             mService.clearPassword(account);
@@ -388,10 +391,12 @@ public class AccountManager {
      */
     public void setUserData(final Account account, final String key, final String value) {
         if (account == null) {
-            throw new IllegalArgumentException("the account must not be null");
+            Log.e(TAG, "the account must not be null");
+            return;
         }
         if (key == null) {
-            throw new IllegalArgumentException("the key must not be null");
+            Log.e(TAG, "the key must not be null");
+            return;
         }
         try {
             mService.setUserData(account, key, value);
@@ -602,11 +607,14 @@ public class AccountManager {
             final String authTokenType, final String[] requiredFeatures,
             final Bundle addAccountOptions,
             final Activity activity, AccountManagerCallback<Bundle> callback, Handler handler) {
-        if (accountType == null) {
-            throw new IllegalArgumentException();
-        }
         return new AmsTask(activity, handler, callback) {
             public void doWork() throws RemoteException {
+                if (accountType == null) {
+                    Log.e(TAG, "the account must not be null");
+                    // to unblock caller waiting on Future.get()
+                    set(new Bundle()); 
+                    return;
+                }
                 mService.addAcount(mResponse, accountType, authTokenType,
                         requiredFeatures, activity != null, addAccountOptions);
             }
@@ -616,9 +624,13 @@ public class AccountManager {
     public AccountManagerFuture<Account[]> getAccountsByTypeAndFeatures(
             final String type, final String[] features,
             AccountManagerCallback<Account[]> callback, Handler handler) {
-        if (type == null) throw new IllegalArgumentException("type is null");
         return new Future2Task<Account[]>(handler, callback) {
             public void doWork() throws RemoteException {
+                if (type == null) {
+                    Log.e(TAG, "Type is null");
+                    set(new Account[0]);
+                    return;
+                }
                 mService.getAccountsByFeatures(mResponse, type, features);
             }
             public Account[] bundleToResult(Bundle bundle) throws AuthenticatorException {
@@ -785,7 +797,7 @@ public class AccountManager {
             //noinspection ThrowableInstanceNeverThrow
 //            Log.e(TAG, "calling this from your main thread can lead to deadlock and/or ANRs",
 //                    new Exception());
-            // TODO(fredq) remove the log and throw this exception when the callers are fixed
+            // TODO remove the log and throw this exception when the callers are fixed
 //            throw new IllegalStateException(
 //                    "calling this from your main thread can lead to deadlock");
         }
@@ -1338,11 +1350,13 @@ public class AccountManager {
      */
     public void removeOnAccountsUpdatedListener(OnAccountsUpdateListener listener) {
         if (listener == null) {
-            throw new IllegalArgumentException("the listener is null");
+            Log.e(TAG, "Missing listener");
+            return;
         }
         synchronized (mAccountsUpdatedListeners) {
             if (!mAccountsUpdatedListeners.containsKey(listener)) {
-                throw new IllegalStateException("this listener was not previously added");
+                Log.e(TAG, "Listener was not previously added");
+                return;
             }
             mAccountsUpdatedListeners.remove(listener);
             if (mAccountsUpdatedListeners.isEmpty()) {
