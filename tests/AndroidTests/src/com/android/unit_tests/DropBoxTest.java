@@ -19,8 +19,7 @@ package com.android.unit_tests;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.os.DropBoxEntry;
-import android.os.IDropBox;
+import android.os.DropBox;
 import android.os.ParcelFileDescriptor;
 import android.os.ServiceManager;
 import android.os.StatFs;
@@ -36,7 +35,7 @@ import java.io.InputStream;
 import java.util.Random;
 import java.util.zip.GZIPOutputStream;
 
-/** Test {@link IDropBox} functionality. */
+/** Test {@link DropBox} functionality. */
 public class DropBoxTest extends AndroidTestCase {
     public void tearDown() throws Exception {
         Intent override = new Intent(Settings.Gservices.OVERRIDE_ACTION);
@@ -47,7 +46,7 @@ public class DropBoxTest extends AndroidTestCase {
     }
 
     public void testAddText() throws Exception {
-        IDropBox dropbox = IDropBox.Stub.asInterface(ServiceManager.getService("dropbox"));
+        DropBox dropbox = (DropBox) getContext().getSystemService(Context.DROPBOX_SERVICE);
         long before = System.currentTimeMillis();
         Thread.sleep(5);
         dropbox.addText("DropBoxTest", "TEST0");
@@ -59,9 +58,9 @@ public class DropBoxTest extends AndroidTestCase {
         Thread.sleep(5);
         long after = System.currentTimeMillis();
 
-        DropBoxEntry e0 = dropbox.getNextEntry("DropBoxTest", before);
-        DropBoxEntry e1 = dropbox.getNextEntry("DropBoxTest", e0.getTimeMillis());
-        DropBoxEntry e2 = dropbox.getNextEntry("DropBoxTest", e1.getTimeMillis());
+        DropBox.Entry e0 = dropbox.getNextEntry("DropBoxTest", before);
+        DropBox.Entry e1 = dropbox.getNextEntry("DropBoxTest", e0.getTimeMillis());
+        DropBox.Entry e2 = dropbox.getNextEntry("DropBoxTest", e1.getTimeMillis());
         assertTrue(null == dropbox.getNextEntry("DropBoxTest", e2.getTimeMillis()));
 
         assertTrue(e0.getTimeMillis() > before);
@@ -80,12 +79,12 @@ public class DropBoxTest extends AndroidTestCase {
     }
 
     public void testAddData() throws Exception {
-        IDropBox dropbox = IDropBox.Stub.asInterface(ServiceManager.getService("dropbox"));
+        DropBox dropbox = (DropBox) getContext().getSystemService(Context.DROPBOX_SERVICE);
         long before = System.currentTimeMillis();
         dropbox.addData("DropBoxTest", "TEST".getBytes(), 0);
         long after = System.currentTimeMillis();
 
-        DropBoxEntry e = dropbox.getNextEntry("DropBoxTest", before);
+        DropBox.Entry e = dropbox.getNextEntry("DropBoxTest", before);
         assertTrue(null == dropbox.getNextEntry("DropBoxTest", e.getTimeMillis()));
 
         assertEquals("DropBoxTest", e.getTag());
@@ -123,7 +122,7 @@ public class DropBoxTest extends AndroidTestCase {
         os2.close();
         gz3.close();
 
-        IDropBox dropbox = IDropBox.Stub.asInterface(ServiceManager.getService("dropbox"));
+        DropBox dropbox = (DropBox) getContext().getSystemService(Context.DROPBOX_SERVICE);
         int mode = ParcelFileDescriptor.MODE_READ_ONLY;
 
         ParcelFileDescriptor pfd0 = ParcelFileDescriptor.open(f0, mode);
@@ -131,20 +130,20 @@ public class DropBoxTest extends AndroidTestCase {
         ParcelFileDescriptor pfd2 = ParcelFileDescriptor.open(f2, mode);
         ParcelFileDescriptor pfd3 = ParcelFileDescriptor.open(f3, mode);
 
-        dropbox.addFile("DropBoxTest", pfd0, DropBoxEntry.IS_TEXT);
-        dropbox.addFile("DropBoxTest", pfd1, DropBoxEntry.IS_TEXT | DropBoxEntry.IS_GZIPPED);
+        dropbox.addFile("DropBoxTest", pfd0, DropBox.IS_TEXT);
+        dropbox.addFile("DropBoxTest", pfd1, DropBox.IS_TEXT | DropBox.IS_GZIPPED);
         dropbox.addFile("DropBoxTest", pfd2, 0);
-        dropbox.addFile("DropBoxTest", pfd3, DropBoxEntry.IS_GZIPPED);
+        dropbox.addFile("DropBoxTest", pfd3, DropBox.IS_GZIPPED);
 
         pfd0.close();
         pfd1.close();
         pfd2.close();
         pfd3.close();
 
-        DropBoxEntry e0 = dropbox.getNextEntry("DropBoxTest", before);
-        DropBoxEntry e1 = dropbox.getNextEntry("DropBoxTest", e0.getTimeMillis());
-        DropBoxEntry e2 = dropbox.getNextEntry("DropBoxTest", e1.getTimeMillis());
-        DropBoxEntry e3 = dropbox.getNextEntry("DropBoxTest", e2.getTimeMillis());
+        DropBox.Entry e0 = dropbox.getNextEntry("DropBoxTest", before);
+        DropBox.Entry e1 = dropbox.getNextEntry("DropBoxTest", e0.getTimeMillis());
+        DropBox.Entry e2 = dropbox.getNextEntry("DropBoxTest", e1.getTimeMillis());
+        DropBox.Entry e3 = dropbox.getNextEntry("DropBoxTest", e2.getTimeMillis());
         assertTrue(null == dropbox.getNextEntry("DropBoxTest", e3.getTimeMillis()));
 
         assertTrue(e0.getTimeMillis() > before);
@@ -152,8 +151,8 @@ public class DropBoxTest extends AndroidTestCase {
         assertTrue(e2.getTimeMillis() > e1.getTimeMillis());
         assertTrue(e3.getTimeMillis() > e2.getTimeMillis());
 
-        assertEquals(DropBoxEntry.IS_TEXT, e0.getFlags());
-        assertEquals(DropBoxEntry.IS_TEXT, e1.getFlags());
+        assertEquals(DropBox.IS_TEXT, e0.getFlags());
+        assertEquals(DropBox.IS_TEXT, e1.getFlags());
         assertEquals(0, e2.getFlags());
         assertEquals(0, e3.getFlags());
 
@@ -199,13 +198,14 @@ public class DropBoxTest extends AndroidTestCase {
         // Tombstone in the far future
         new FileOutputStream(new File(dir, "DropBoxTest@" + (before + 100002) + ".lost")).close();
 
-        DropBoxService dropbox = new DropBoxService(getContext(), dir);
+        DropBoxService service = new DropBoxService(getContext(), dir);
+        DropBox dropbox = new DropBox(service);
 
         // Until a write, the timestamps are taken at face value
-        DropBoxEntry e0 = dropbox.getNextEntry(null, before);
-        DropBoxEntry e1 = dropbox.getNextEntry(null, e0.getTimeMillis());
-        DropBoxEntry e2 = dropbox.getNextEntry(null, e1.getTimeMillis());
-        DropBoxEntry e3 = dropbox.getNextEntry(null, e2.getTimeMillis());
+        DropBox.Entry e0 = dropbox.getNextEntry(null, before);
+        DropBox.Entry e1 = dropbox.getNextEntry(null, e0.getTimeMillis());
+        DropBox.Entry e2 = dropbox.getNextEntry(null, e1.getTimeMillis());
+        DropBox.Entry e3 = dropbox.getNextEntry(null, e2.getTimeMillis());
         assertTrue(null == dropbox.getNextEntry(null, e3.getTimeMillis()));
 
         assertEquals("FUTURE0", e0.getText(80));
@@ -245,11 +245,11 @@ public class DropBoxTest extends AndroidTestCase {
         e1.close();
         e2.close();
         e3.close();
-        dropbox.stop();
+        service.stop();
     }
 
     public void testIsTagEnabled() throws Exception {
-        IDropBox dropbox = IDropBox.Stub.asInterface(ServiceManager.getService("dropbox"));
+        DropBox dropbox = (DropBox) getContext().getSystemService(Context.DROPBOX_SERVICE);
         long before = System.currentTimeMillis();
         dropbox.addText("DropBoxTest", "TEST-ENABLED");
         assertTrue(dropbox.isTagEnabled("DropBoxTest"));
@@ -268,8 +268,8 @@ public class DropBoxTest extends AndroidTestCase {
         dropbox.addText("DropBoxTest", "TEST-ENABLED-AGAIN");
         assertTrue(dropbox.isTagEnabled("DropBoxTest"));
 
-        DropBoxEntry e0 = dropbox.getNextEntry("DropBoxTest", before);
-        DropBoxEntry e1 = dropbox.getNextEntry("DropBoxTest", e0.getTimeMillis());
+        DropBox.Entry e0 = dropbox.getNextEntry("DropBoxTest", before);
+        DropBox.Entry e1 = dropbox.getNextEntry("DropBoxTest", e0.getTimeMillis());
         assertTrue(null == dropbox.getNextEntry("DropBoxTest", e1.getTimeMillis()));
 
         assertEquals("TEST-ENABLED", e0.getText(80));
@@ -281,23 +281,24 @@ public class DropBoxTest extends AndroidTestCase {
 
     public void testGetNextEntry() throws Exception {
         File dir = getEmptyDir("testGetNextEntry");
-        DropBoxService dropbox = new DropBoxService(getContext(), dir);
+        DropBoxService service = new DropBoxService(getContext(), dir);
+        DropBox dropbox = new DropBox(service);
 
         long before = System.currentTimeMillis();
         dropbox.addText("DropBoxTest.A", "A0");
         dropbox.addText("DropBoxTest.B", "B0");
         dropbox.addText("DropBoxTest.A", "A1");
 
-        DropBoxEntry a0 = dropbox.getNextEntry("DropBoxTest.A", before);
-        DropBoxEntry a1 = dropbox.getNextEntry("DropBoxTest.A", a0.getTimeMillis());
+        DropBox.Entry a0 = dropbox.getNextEntry("DropBoxTest.A", before);
+        DropBox.Entry a1 = dropbox.getNextEntry("DropBoxTest.A", a0.getTimeMillis());
         assertTrue(null == dropbox.getNextEntry("DropBoxTest.A", a1.getTimeMillis()));
 
-        DropBoxEntry b0 = dropbox.getNextEntry("DropBoxTest.B", before);
+        DropBox.Entry b0 = dropbox.getNextEntry("DropBoxTest.B", before);
         assertTrue(null == dropbox.getNextEntry("DropBoxTest.B", b0.getTimeMillis()));
 
-        DropBoxEntry x0 = dropbox.getNextEntry(null, before);
-        DropBoxEntry x1 = dropbox.getNextEntry(null, x0.getTimeMillis());
-        DropBoxEntry x2 = dropbox.getNextEntry(null, x1.getTimeMillis());
+        DropBox.Entry x0 = dropbox.getNextEntry(null, before);
+        DropBox.Entry x1 = dropbox.getNextEntry(null, x0.getTimeMillis());
+        DropBox.Entry x2 = dropbox.getNextEntry(null, x1.getTimeMillis());
         assertTrue(null == dropbox.getNextEntry(null, x2.getTimeMillis()));
 
         assertEquals("DropBoxTest.A", a0.getTag());
@@ -321,7 +322,7 @@ public class DropBoxTest extends AndroidTestCase {
         x0.close();
         x1.close();
         x2.close();
-        dropbox.stop();
+        service.stop();
     }
 
     public void testSizeLimits() throws Exception {
@@ -344,7 +345,9 @@ public class DropBoxTest extends AndroidTestCase {
 
         final int overhead = 64;
         long before = System.currentTimeMillis();
-        DropBoxService dropbox = new DropBoxService(getContext(), dir);
+        DropBoxService service = new DropBoxService(getContext(), dir);
+        DropBox dropbox = new DropBox(service);
+
         addRandomEntry(dropbox, "DropBoxTest0", blockSize - overhead);
         addRandomEntry(dropbox, "DropBoxTest0", blockSize - overhead);
 
@@ -358,16 +361,16 @@ public class DropBoxTest extends AndroidTestCase {
         addRandomEntry(dropbox, "DropBoxTest2", blockSize - overhead);
         addRandomEntry(dropbox, "DropBoxTest2", blockSize - overhead);
 
-        DropBoxEntry e0 = dropbox.getNextEntry(null, before);
-        DropBoxEntry e1 = dropbox.getNextEntry(null, e0.getTimeMillis());
-        DropBoxEntry e2 = dropbox.getNextEntry(null, e1.getTimeMillis());
-        DropBoxEntry e3 = dropbox.getNextEntry(null, e2.getTimeMillis());
-        DropBoxEntry e4 = dropbox.getNextEntry(null, e3.getTimeMillis());
-        DropBoxEntry e5 = dropbox.getNextEntry(null, e4.getTimeMillis());
-        DropBoxEntry e6 = dropbox.getNextEntry(null, e5.getTimeMillis());
-        DropBoxEntry e7 = dropbox.getNextEntry(null, e6.getTimeMillis());
-        DropBoxEntry e8 = dropbox.getNextEntry(null, e7.getTimeMillis());
-        DropBoxEntry e9 = dropbox.getNextEntry(null, e8.getTimeMillis());
+        DropBox.Entry e0 = dropbox.getNextEntry(null, before);
+        DropBox.Entry e1 = dropbox.getNextEntry(null, e0.getTimeMillis());
+        DropBox.Entry e2 = dropbox.getNextEntry(null, e1.getTimeMillis());
+        DropBox.Entry e3 = dropbox.getNextEntry(null, e2.getTimeMillis());
+        DropBox.Entry e4 = dropbox.getNextEntry(null, e3.getTimeMillis());
+        DropBox.Entry e5 = dropbox.getNextEntry(null, e4.getTimeMillis());
+        DropBox.Entry e6 = dropbox.getNextEntry(null, e5.getTimeMillis());
+        DropBox.Entry e7 = dropbox.getNextEntry(null, e6.getTimeMillis());
+        DropBox.Entry e8 = dropbox.getNextEntry(null, e7.getTimeMillis());
+        DropBox.Entry e9 = dropbox.getNextEntry(null, e8.getTimeMillis());
         assertTrue(null == dropbox.getNextEntry(null, e9.getTimeMillis()));
 
         assertEquals("DropBoxTest0", e0.getTag());
@@ -406,9 +409,9 @@ public class DropBoxTest extends AndroidTestCase {
 
         // Specifying a tag name skips tombstone records.
 
-        DropBoxEntry t0 = dropbox.getNextEntry("DropBoxTest1", before);
-        DropBoxEntry t1 = dropbox.getNextEntry("DropBoxTest1", t0.getTimeMillis());
-        DropBoxEntry t2 = dropbox.getNextEntry("DropBoxTest1", t1.getTimeMillis());
+        DropBox.Entry t0 = dropbox.getNextEntry("DropBoxTest1", before);
+        DropBox.Entry t1 = dropbox.getNextEntry("DropBoxTest1", t0.getTimeMillis());
+        DropBox.Entry t2 = dropbox.getNextEntry("DropBoxTest1", t1.getTimeMillis());
         assertTrue(null == dropbox.getNextEntry("DropBoxTest1", t2.getTimeMillis()));
 
         assertEquals("DropBoxTest1", t0.getTag());
@@ -422,7 +425,7 @@ public class DropBoxTest extends AndroidTestCase {
         t0.close();
         t1.close();
         t2.close();
-        dropbox.stop();
+        service.stop();
     }
 
     public void testAgeLimits() throws Exception {
@@ -438,13 +441,15 @@ public class DropBoxTest extends AndroidTestCase {
 
         // Write one normal entry and another so big that it is instantly tombstoned
         long before = System.currentTimeMillis();
-        DropBoxService dropbox = new DropBoxService(getContext(), dir);
+        DropBoxService service = new DropBoxService(getContext(), dir);
+        DropBox dropbox = new DropBox(service);
+
         dropbox.addText("DropBoxTest", "TEST");
         addRandomEntry(dropbox, "DropBoxTest", blockSize * 20);
 
         // Verify that things are as expected
-        DropBoxEntry e0 = dropbox.getNextEntry(null, before);
-        DropBoxEntry e1 = dropbox.getNextEntry(null, e0.getTimeMillis());
+        DropBox.Entry e0 = dropbox.getNextEntry(null, before);
+        DropBox.Entry e1 = dropbox.getNextEntry(null, e0.getTimeMillis());
         assertTrue(null == dropbox.getNextEntry(null, e1.getTimeMillis()));
 
         assertEquals("TEST", e0.getText(80));
@@ -471,7 +476,8 @@ public class DropBoxTest extends AndroidTestCase {
 
         File dir = new File(getEmptyDir("testCreateDropBoxWith"), "InvalidDirectory");
         new FileOutputStream(dir).close();  // Create an empty file
-        DropBoxService dropbox = new DropBoxService(getContext(), dir);
+        DropBoxService service = new DropBoxService(getContext(), dir);
+        DropBox dropbox = new DropBox(service);
 
         dropbox.addText("DropBoxTest", "should be ignored");
         dropbox.addData("DropBoxTest", "should be ignored".getBytes(), 0);
@@ -479,15 +485,15 @@ public class DropBoxTest extends AndroidTestCase {
 
         dir.delete();  // Remove the file so a directory can be created
         dropbox.addText("DropBoxTest", "TEST");
-        DropBoxEntry e = dropbox.getNextEntry("DropBoxTest", 0);
+        DropBox.Entry e = dropbox.getNextEntry("DropBoxTest", 0);
         assertTrue(null == dropbox.getNextEntry("DropBoxTest", e.getTimeMillis()));
         assertEquals("DropBoxTest", e.getTag());
         assertEquals("TEST", e.getText(80));
         e.close();
-        dropbox.stop();
+        service.stop();
     }
 
-    private void addRandomEntry(IDropBox dropbox, String tag, int size) throws Exception {
+    private void addRandomEntry(DropBox dropbox, String tag, int size) throws Exception {
         byte[] bytes = new byte[size];
         new Random(System.currentTimeMillis()).nextBytes(bytes);
 
@@ -501,7 +507,7 @@ public class DropBoxTest extends AndroidTestCase {
         fd.close();
     }
 
-    private int getEntrySize(DropBoxEntry e) throws Exception {
+    private int getEntrySize(DropBox.Entry e) throws Exception {
         InputStream is = e.getInputStream();
         if (is == null) return -1;
         int length = 0;

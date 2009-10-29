@@ -1309,7 +1309,7 @@ public abstract class Context {
      * @see #getSystemService
      */
     public static final String APPWIDGET_SERVICE = "appwidget";
-    
+
     /**
      * Use with {@link #getSystemService} to retrieve an
      * {@blink android.backup.IBackupManager IBackupManager} for communicating
@@ -1319,7 +1319,16 @@ public abstract class Context {
      * @see #getSystemService
      */
     public static final String BACKUP_SERVICE = "backup";
-    
+
+    /**
+     * Use with {@link #getSystemService} to retrieve a
+     * {@blink android.os.DropBox DropBox} instance for recording
+     * diagnostic logs.
+     * @hide
+     * @see #getSystemService
+     */
+    public static final String DROPBOX_SERVICE = "dropbox";
+
     /**
      * Determine whether the given permission is allowed for a particular
      * process and user ID running in the system.
