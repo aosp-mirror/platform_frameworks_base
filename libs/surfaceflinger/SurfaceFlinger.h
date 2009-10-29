@@ -246,8 +246,10 @@ private:
     virtual status_t    readyToRun();
     virtual void        onFirstRef();
 
+public:     // hack to work around gcc 4.0.3 bug
     const GraphicPlane&     graphicPlane(int dpy) const;
           GraphicPlane&     graphicPlane(int dpy);
+private:
 
             void        waitForEvent();
 public:     // hack to work around gcc 4.0.3 bug
