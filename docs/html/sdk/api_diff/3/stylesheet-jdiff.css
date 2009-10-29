@@ -3,6 +3,7 @@
 
 div.and-diff-id {border: 1px solid #eee;position:relative;float:right;clear:both;padding:0px;}
 table.diffspectable {border:1px;padding:0px;margin:0px;}
+table.jdiffIndex {margin-bottom:.5em;}
 .diffspechead {background-color:#eee;}
 .diffspectable tr {border:0px;padding:0px;}
 .diffspectable td  {background-color:eee;border:0px;font-size:90%;font-weight:normal;padding:0px;padding-left:1px;padding-right:1px;text-align:center;color:777;}
@@ -29,7 +30,7 @@ tt {font-size:11pt;font-family:monospace;}
   }
 .hiddenlink {
   font-size:96%;
-  line-height:.8em;
+/*  line-height:.8em; */
   text-decoration:none;}
 a {
   text-decoration:none;}

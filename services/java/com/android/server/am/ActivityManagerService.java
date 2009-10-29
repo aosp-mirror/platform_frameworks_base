@@ -2705,13 +2705,31 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
 
             // Have the window manager re-evaluate the orientation of
             // the screen based on the new activity order.
-            Configuration config = mWindowManager.updateOrientationFromAppTokens(
-                    mConfiguration,
-                    next.mayFreezeScreenLocked(next.app) ? next : null);
-            if (config != null) {
-                next.frozenBeforeDestroy = true;
+            boolean updated;
+            synchronized (this) {
+                Configuration config = mWindowManager.updateOrientationFromAppTokens(
+                        mConfiguration,
+                        next.mayFreezeScreenLocked(next.app) ? next : null);
+                if (config != null) {
+                    /*
+                     * Explicitly restore the locale to the one from the
+                     * old configuration, since the one that comes back from
+                     * the window manager has the default (boot) locale.
+                     *
+                     * It looks like previously the locale picker only worked
+                     * by coincidence: usually it would do its setting of
+                     * the locale after the activity transition, so it didn't
+                     * matter that this lost it.  With the synchronized
+                     * block now keeping them from happening at the same time,
+                     * this one always would happen second and undo what the
+                     * locale picker had just done.
+                     */
+                    config.locale = mConfiguration.locale;
+                    next.frozenBeforeDestroy = true;
+                }
+                updated = updateConfigurationLocked(config, next);
             }
-            if (!updateConfigurationLocked(config, next)) {
+            if (!updated) {
                 // The configuration update wasn't able to keep the existing
                 // instance of the activity, and instead started a new one.
                 // We should be all done, but let's just make sure our activity

@@ -9303,6 +9303,15 @@ public class WindowManagerService extends IWindowManager.Stub
                                     & WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER) != 0) {
                                 wallpaperMayChange = true;
                             }
+                            if (changed && !forceHiding
+                                    && (mCurrentFocus == null)
+                                    && (mFocusedApp != null)) {
+                                // It's possible that the last focus recalculation left no
+                                // current focused window even though the app has come to the
+                                // foreground already.  In this case, we make sure to recalculate
+                                // focus when we show a window.
+                                focusMayChange = true;
+                            }
                         }
                         
                         mPolicy.animatingWindowLw(w, attrs);
@@ -9644,7 +9653,8 @@ public class WindowManagerService extends IWindowManager.Stub
                             WindowState w = (WindowState)mWindows.get(i);
                             if (w.mSurface != null) {
                                 final WindowManager.LayoutParams attrs = w.mAttrs;
-                                if (mPolicy.doesForceHide(w, attrs)) {
+                                if (mPolicy.doesForceHide(w, attrs) && w.isVisibleLw()) {
+                                    if (DEBUG_FOCUS) Log.i(TAG, "win=" + w + " force hides other windows");
                                     forceHiding = true;
                                 } else if (mPolicy.canBeForceHidden(w, attrs)) {
                                     if (!w.mAnimating) {

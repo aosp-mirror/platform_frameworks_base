@@ -1069,27 +1069,28 @@ not. Once you've tested your application and found that it displays properly on
 various screen sizes, you should make sure to add the corresponding size
 attribute(s) to your application's manifest. -->
 
+<div id="f9.5" style="float:right;margin:0;padding:0;">
+  <img src="{@docRoot}images/screens_support/avds-config.png" style="padding:0;margin:0;">
+  <p class="caption" style="margin:0 0 1.5em 1em;padding:0 0 0 1em;"><strong>Figure 3.</strong>
+  A typical set of AVDs for testing screens support.</p>
+</div>
+
 <p>As a test environment for your applications, set up a series of AVDs that
 emulate the screen sizes and densities you want to support. The Android SDK
-includes four emulator skins to get you started. You can use the Android AVD
+includes six emulator skins to get you started. You can use the Android AVD
 Manager or the <code>android</code> tool to create AVDs that use the various
 emulator skins and you can also set up custom AVDs to test densities other than
 the defaults. For general information about working with AVDs, see 
 <a href="{@docRoot}guide/developing/tools/avd.html">Android Virtual
 Devices</a>.</p>
 
-<p>The Android 1.6 and higher platforms in the SDK include these emulator skins,
-which represent the primary screen configurations that your should test:</p>
+<p>The Android SDK provides a set of default emulator skins that you can use for 
+testing. The skins are included as part of each Android platform that you can
+install in your SDK. The Android 1.6 platform offers these default skins:</p>
 
 <ul>
   <li>
     QVGA (240x320, low density, small screen)
-  </li>
-  <li>
-    WQVGA400 (240x400, low density, normal screen)
-  </li>
-  <li>
-    WQVGA432 (240x432, low density, normal screen)
   </li>
   <li>
     HVGA (320x480, medium density, normal screen)
@@ -1099,6 +1100,18 @@ which represent the primary screen configurations that your should test:</p>
   </li>
   <li>
     WVGA854 (480x854 high density, normal screen)
+  </li>
+</ul>
+
+<p>The Android 2.0 platform offers all of the Android 1.6 default skins, 
+above, plus:</p>
+
+<ul>
+  <li>
+    WQVGA400 (240x400, low density, normal screen)
+  </li>
+  <li>
+    WQVGA432 (240x432, low density, normal screen)
   </li>
 </ul>
 
@@ -1131,6 +1144,12 @@ monitor. Using the default densities, the emulator skins included in the Android
     QVGA, low density: 3.3"
   </li>
   <li>
+    WQVGA, low density: 3.9"
+  </li>
+  <li>
+    WQVGA432, low density: 4.1"
+  </li>
+  <li>
     HVGA, medium density: 3.6"
   </li>
   <li>
@@ -1141,6 +1160,12 @@ monitor. Using the default densities, the emulator skins included in the Android
   </li>
 </ul>
 
+<div style="float: right;background-color:#fff;margin: 0;padding: 20px 0 20px 20px;width:520px;">
+  <img src="{@docRoot}images/screens_support/avd-density.png" style="padding:0;margin:0;">
+  <p class="caption" style="margin:0 0 1.5em 1em;padding:0 0 0 1em; width:280px;"><strong>Figure 4.</strong>
+  Resolution and density options that you can use, when creating an AVD using the AVD Manager.</p>
+</div>
+
 <p>You should also make sure to test your application on different physical
 screen sizes within a single size-density configuration. For example, according
 to <a href="#range">Table 1</a>, the minimum supported diagonal of QVGA is 2.8".
@@ -1150,46 +1175,41 @@ To display this is on a 30" monitor you will need to adjust the value passed to
 
 <pre>emulator -avd &lt;name&gt; -scale 0.6</pre>
 
-<p>If you would like to test your application on a screen not supported by the
-built-in skins, you can either adjust an existing skin, or create a custom
-resolution.</p>
+<p>If you would like to test your application on a screen that uses a resolution
+or density not supported by the built-in skins, you can either adjust an
+existing skin, or create an AVD
+that uses a custom resolution or density.</p>
 
-<p>For example, to test on a large WVGA800 screen with medium density:</p>
+<p>In the AVD Manager, you can specify a custom skin resolution or density in
+the Create New AVD dialog, as shown in Figure 4, at right.</p>
+
+<p>In the <code>android</code> tool, follow these steps to create an AVD with a
+custom resolution or density:</p>
 
 <ol>
-  <li>Create an AVD based on the WVGA800 skin (using the <code>android</code>
-tool's command line.)<br></li>
-  <li>Answer "yes" when asked about using custom hardware</li>
-  <li>enter "160" when asked about the value for <em>hw.lcd.density</em>
-(120-low, 160-medium, 240-high).</li>
+  <li>Use the <code>create avd</code> command to create a new AVD, specifying
+the <code>--skin</code> option with a value that references either a default
+skin name (such as "WVGA800") or a custom skin resolution (such as 240x432).
+Here's an example:
+     <pre>android create avd -n &lt;name&gt; -t &lt;targetID&gt; --skin WVGA800</pre>
+  </li>
+  <li>To specify a custom density for the skin, answer "yes" when asked whether
+you want to create a custom hardware profile for the new AVD.</li>
+  <li>Continue through the various profile settings until the tool asks you to
+specify "Abstracted LCD density" (<em>hw.lcd.density</em>). Consult <a
+href="#range">Table 1</a>, earlier in this document, and enter the appropriate
+value. For example, enter "160" to use medium density for the WVGA800 screen.</li>
+  <li>Set any other hardware options and complete the AVD creation.</li>
 </ol>
 
-<p>When running this AVD, the emulator will emulate a 5.8" WVGA screen.</p>
+<p>In the example above (WVGA medium density), the new AVD will emulate a 5.8" 
+WVGA screen.</p>
 
 <p>As an alternative to adjusting the emulator skin configuration, you can use
 the emulator skin's default density and add the <code>-dpi-device</code> option
 to the emulator command line when starting the AVD. For example, </p>
 
 <pre>emulator -avd WVGA800 -scale 96dpi -dpi-device 160</pre>
-
-<p>If you would like to test your application with a resolution not supported by
-the provided skins, you can use the desired resolution in place of the skin
-name. For instance, for FWQVGA you would use:</p>
-
-<pre>android create avd ... --skin 240x432</pre>
-
-<p>Next, you would need to set the proper density for the screen. When asked by
-the tool whether you want to create a custom hardware profile for the new AVD,
-enter "yes". Continue through the various profile settings until the tools asks
-you to specify "Abstracted LCD density". Consult <a href="#range">Table 1</a>,
-earlier in this document, and enter the appropriate value. For the FWQVGA
-screen, the density should be "160", or medium.</p>
-
-<div id="f9.5" style="text-align:left;margin:0;padding:0;">
-  <img src="{@docRoot}images/screens_support/avds-config.png" style="padding:0;margin:0;">
-  <p class="caption" style="margin:0 0 1.5em 1em;padding:0 0 0 1em;"><strong>Figure 3.</strong>
-  A typical set of AVDs for testing screens support.</p>
-</div>
 
 
 <h2 id="compatibility-examples">Screen-Compatibility Examples</h2>
