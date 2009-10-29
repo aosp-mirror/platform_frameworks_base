@@ -152,6 +152,12 @@ public final class Telephony {
          * <P>Type: INTEGER (boolean)</P>
          */
         public static final String LOCKED = "locked";
+
+        /**
+         * Error code associated with sending or receiving this message
+         * <P>Type: INTEGER</P>
+         */
+        public static final String ERROR_CODE = "error_code";
 }
 
     /**
@@ -243,7 +249,7 @@ public final class Telephony {
          * @return true if the operation succeeded
          */
         public static boolean moveMessageToFolder(Context context,
-                Uri uri, int folder) {
+                Uri uri, int folder, int error) {
             if (uri == null) {
                 return false;
             }
@@ -266,7 +272,7 @@ public final class Telephony {
                 return false;
             }
 
-            ContentValues values = new ContentValues(2);
+            ContentValues values = new ContentValues(3);
 
             values.put(TYPE, folder);
             if (markAsUnread) {
@@ -274,6 +280,7 @@ public final class Telephony {
             } else if (markAsRead) {
                 values.put(READ, Integer.valueOf(1));
             }
+            values.put(ERROR_CODE, error);
 
             return 1 == SqliteWrapper.update(context, context.getContentResolver(),
                             uri, values, null, null);
