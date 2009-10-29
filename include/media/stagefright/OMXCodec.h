@@ -158,6 +158,8 @@ private:
     void setVideoInputFormat(
             const char *mime, OMX_U32 width, OMX_U32 height);
 
+    status_t setupMPEG4EncoderParameters();
+
     void setVideoOutputFormat(
             const char *mime, OMX_U32 width, OMX_U32 height);
 

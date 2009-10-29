@@ -214,6 +214,7 @@ uint32_t OMXCodec::getComponentQuirks(const char *componentName) {
     if (!strncmp(componentName, "OMX.qcom.video.encoder.", 23)) {
         quirks |= kRequiresLoadedToIdleAfterAllocation;
         quirks |= kRequiresAllocateBufferOnInputPorts;
+        quirks |= kRequiresAllocateBufferOnOutputPorts;
     }
     if (!strncmp(componentName, "OMX.qcom.video.decoder.", 23)) {
         // XXX Required on P....on only.
@@ -562,6 +563,22 @@ status_t OMXCodec::setVideoPortFormatType(
     return err;
 }
 
+static size_t getFrameSize(
+        OMX_COLOR_FORMATTYPE colorFormat, int32_t width, int32_t height) {
+    switch (colorFormat) {
+        case OMX_COLOR_FormatYCbYCr:
+        case OMX_COLOR_FormatCbYCrY:
+            return width * height * 2;
+
+        case OMX_COLOR_FormatYUV420SemiPlanar:
+            return (width * height * 3) / 2;
+
+        default:
+            CHECK(!"Should not be here. Unsupported color format.");
+            break;
+    }
+}
+
 void OMXCodec::setVideoInputFormat(
         const char *mime, OMX_U32 width, OMX_U32 height) {
     CODEC_LOGV("setVideoInputFormat width=%ld, height=%ld", width, height);
@@ -585,12 +602,13 @@ void OMXCodec::setVideoInputFormat(
         colorFormat = OMX_COLOR_FormatYUV420SemiPlanar;
     }
 
-    setVideoPortFormatType(
+    CHECK_EQ(setVideoPortFormatType(
             kPortIndexInput, OMX_VIDEO_CodingUnused,
-            colorFormat);
+            colorFormat), OK);
 
-    setVideoPortFormatType(
-            kPortIndexOutput, compressionFormat, OMX_COLOR_FormatUnused);
+    CHECK_EQ(setVideoPortFormatType(
+            kPortIndexOutput, compressionFormat, OMX_COLOR_FormatUnused),
+            OK);
 
     OMX_PARAM_PORTDEFINITIONTYPE def;
     InitOMXParams(&def);
@@ -623,7 +641,7 @@ void OMXCodec::setVideoInputFormat(
             mNode, OMX_IndexParamPortDefinition, &def, sizeof(def));
     CHECK_EQ(err, OK);
 
-    def.nBufferSize = (width * height * 2); // (width * height * 3) / 2;
+    def.nBufferSize = getFrameSize(colorFormat, width, height);
     CODEC_LOGV("Setting nBufferSize = %ld", def.nBufferSize);
 
     CHECK_EQ(def.eDomain, OMX_PortDomainVideo);
@@ -633,9 +651,103 @@ void OMXCodec::setVideoInputFormat(
     video_def->eCompressionFormat = OMX_VIDEO_CodingUnused;
     video_def->eColorFormat = colorFormat;
 
+    video_def->xFramerate = 24 << 16;  // XXX crucial!
+
     err = mOMX->setParameter(
             mNode, OMX_IndexParamPortDefinition, &def, sizeof(def));
     CHECK_EQ(err, OK);
+
+    switch (compressionFormat) {
+        case OMX_VIDEO_CodingMPEG4:
+        {
+            CHECK_EQ(setupMPEG4EncoderParameters(), OK);
+            break;
+        }
+
+        case OMX_VIDEO_CodingH263:
+            break;
+
+        default:
+            CHECK(!"Support for this compressionFormat to be implemented.");
+            break;
+    }
+}
+
+status_t OMXCodec::setupMPEG4EncoderParameters() {
+    OMX_VIDEO_PARAM_MPEG4TYPE mpeg4type;
+    InitOMXParams(&mpeg4type);
+    mpeg4type.nPortIndex = kPortIndexOutput;
+
+    status_t err = mOMX->getParameter(
+            mNode, OMX_IndexParamVideoMpeg4, &mpeg4type, sizeof(mpeg4type));
+    CHECK_EQ(err, OK);
+
+    mpeg4type.nSliceHeaderSpacing = 0;
+    mpeg4type.bSVH = OMX_FALSE;
+    mpeg4type.bGov = OMX_FALSE;
+
+    mpeg4type.nAllowedPictureTypes =
+        OMX_VIDEO_PictureTypeI | OMX_VIDEO_PictureTypeP;
+
+    mpeg4type.nPFrames = 23;
+    mpeg4type.nBFrames = 0;
+
+    mpeg4type.nIDCVLCThreshold = 0;
+    mpeg4type.bACPred = OMX_TRUE;
+    mpeg4type.nMaxPacketSize = 256;
+    mpeg4type.nTimeIncRes = 1000;
+    mpeg4type.nHeaderExtension = 0;
+    mpeg4type.bReversibleVLC = OMX_FALSE;
+
+    mpeg4type.eProfile = OMX_VIDEO_MPEG4ProfileCore;
+    mpeg4type.eLevel = OMX_VIDEO_MPEG4Level2;
+
+    err = mOMX->setParameter(
+            mNode, OMX_IndexParamVideoMpeg4, &mpeg4type, sizeof(mpeg4type));
+    CHECK_EQ(err, OK);
+
+    // ----------------
+
+    OMX_VIDEO_PARAM_BITRATETYPE bitrateType;
+    InitOMXParams(&bitrateType);
+    bitrateType.nPortIndex = kPortIndexOutput;
+
+    err = mOMX->getParameter(
+            mNode, OMX_IndexParamVideoBitrate,
+            &bitrateType, sizeof(bitrateType));
+    CHECK_EQ(err, OK);
+
+    bitrateType.eControlRate = OMX_Video_ControlRateVariable;
+    bitrateType.nTargetBitrate = 1000000;
+
+    err = mOMX->setParameter(
+            mNode, OMX_IndexParamVideoBitrate,
+            &bitrateType, sizeof(bitrateType));
+    CHECK_EQ(err, OK);
+
+    // ----------------
+
+    OMX_VIDEO_PARAM_ERRORCORRECTIONTYPE errorCorrectionType;
+    InitOMXParams(&errorCorrectionType);
+    errorCorrectionType.nPortIndex = kPortIndexOutput;
+
+    err = mOMX->getParameter(
+            mNode, OMX_IndexParamVideoErrorCorrection,
+            &errorCorrectionType, sizeof(errorCorrectionType));
+    CHECK_EQ(err, OK);
+
+    errorCorrectionType.bEnableHEC = OMX_FALSE;
+    errorCorrectionType.bEnableResync = OMX_TRUE;
+    errorCorrectionType.nResynchMarkerSpacing = 256;
+    errorCorrectionType.bEnableDataPartitioning = OMX_FALSE;
+    errorCorrectionType.bEnableRVLC = OMX_FALSE;
+
+    err = mOMX->setParameter(
+            mNode, OMX_IndexParamVideoErrorCorrection,
+            &errorCorrectionType, sizeof(errorCorrectionType));
+    CHECK_EQ(err, OK);
+
+    return OK;
 }
 
 void OMXCodec::setVideoOutputFormat(
@@ -708,6 +820,7 @@ void OMXCodec::setVideoOutputFormat(
     video_def->nFrameWidth = width;
     video_def->nFrameHeight = height;
 
+    video_def->eCompressionFormat = compressionFormat;
     video_def->eColorFormat = OMX_COLOR_FormatUnused;
 
     err = mOMX->setParameter(
