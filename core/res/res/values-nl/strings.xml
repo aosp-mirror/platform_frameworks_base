@@ -444,7 +444,7 @@
     <string name="phoneTypeOther" msgid="1544425847868765990">"Overig"</string>
     <string name="phoneTypeCallback" msgid="2712175203065678206">"Terugbelnummer"</string>
     <string name="phoneTypeCar" msgid="8738360689616716982">"Auto"</string>
-    <string name="phoneTypeCompanyMain" msgid="540434356461478916">"Hoofdkantoor"</string>
+    <string name="phoneTypeCompanyMain" msgid="540434356461478916">"Bedrijf, algemeen"</string>
     <string name="phoneTypeIsdn" msgid="8022453193171370337">"ISDN"</string>
     <string name="phoneTypeMain" msgid="6766137010628326916">"Algemeen"</string>
     <string name="phoneTypeOtherFax" msgid="8587657145072446565">"Andere fax"</string>
