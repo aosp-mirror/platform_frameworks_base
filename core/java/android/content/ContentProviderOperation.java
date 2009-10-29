@@ -545,7 +545,8 @@ public class ContentProviderOperation implements Parcelable {
                         "only updates, deletes, and asserts can have selections");
             }
             mSelection = selection;
-            mSelectionArgs = selectionArgs;
+            mSelectionArgs = new String[selectionArgs.length];
+            System.arraycopy(selectionArgs, 0, mSelectionArgs, 0, selectionArgs.length);
             return this;
         }
 
