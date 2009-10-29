@@ -68,31 +68,28 @@ int main(int argc, char** argv)
      
      glBindTexture(GL_TEXTURE_2D, 0);
      glTexParameterx(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-     glTexParameterx(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-     glTexParameterx(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-     glTexParameterx(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+     glTexParameterx(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+     glTexParameterx(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+     glTexParameterx(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
      glTexEnvx(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
      glDisable(GL_DITHER);
      glDisable(GL_BLEND);
      glEnable(GL_TEXTURE_2D);
      glColor4f(1,1,1,1);
 
-     const uint32_t t32[] = {
-             0xFFFFFFFF, 0xFF0000FF, 0xFF00FF00, 0xFFFF0000,
-             0xFFFFFF00, 0xFFFF00FF, 0xFF00FFFF, 0xFF000000
-     };
+     const uint16_t t16[64] = { 0xFFFF, 0xF800, 0x07E0, 0x001F };
 
      const GLfloat vertices[4][2] = {
-             { 0,  0 },
-             { w,  h }
+             { w/2,  0 },
+             { w/2,  h }
      };
 
      const GLfloat texCoords[4][2] = {
              { 0,  0 },
-             { 1,  0 }
+             { 1,  1 }
      };
 
-     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 8, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, t32);
+     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 1, 4, 0, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, t16);
 
      glViewport(0, 0, w, h);
      glMatrixMode(GL_PROJECTION);
