@@ -72,6 +72,9 @@ package android.pim.vcard;
     // Phone number for Skype, available as usual phone.
     public static final String PROPERTY_X_SKYPE_PSTNNUMBER = "X-SKYPE-PSTNNUMBER";
 
+    // Property for Android-specific fields.
+    public static final String PROPERTY_X_ANDROID_CUSTOM = "X-ANDROID-CUSTOM";
+
     // Properties for DoCoMo vCard.
     public static final String PROPERTY_X_CLASS = "X-CLASS";
     public static final String PROPERTY_X_REDUCTION = "X-REDUCTION";
@@ -157,6 +160,9 @@ package android.pim.vcard;
         // in some special case (for that device/application).
         public static final String PROPERTY_X_GOOGLE_TALK_WITH_SPACE = "X-GOOGLE TALK";
     }
+
+    // TODO: Should be in ContactsContract?
+    /* package */ static final int MAX_DATA_COLUMN = 15;
 
     private Constants() {
     }

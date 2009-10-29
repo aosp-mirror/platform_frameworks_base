@@ -1019,11 +1019,11 @@ public class VCardComposer {
             return;
         }
 
-        final String propertyNickname;
+        final boolean useAndroidProperty;
         if (mIsV30) {
-            propertyNickname = Constants.PROPERTY_NICKNAME;
-        /*} else if (mUsesAndroidProperty) {
-            propertyNickname = VCARD_PROPERTY_X_NICKNAME;*/
+            useAndroidProperty = false;
+        } else if (mUsesAndroidProperty) {
+            useAndroidProperty = true;
         } else {
             // There's no way to add this field.
             return;
@@ -1034,29 +1034,13 @@ public class VCardComposer {
             if (TextUtils.isEmpty(nickname)) {
                 continue;
             }
-
-            final String encodedNickname;
-            final boolean reallyUseQuotedPrintable =
-                (mUsesQuotedPrintable &&
-                        !VCardUtils.containsOnlyNonCrLfPrintableAscii(nickname));
-            if (reallyUseQuotedPrintable) {
-                encodedNickname = encodeQuotedPrintable(nickname);
+            if (useAndroidProperty) {
+                appendAndroidSpecificProperty(builder, Nickname.CONTENT_ITEM_TYPE,
+                        contentValues);
             } else {
-                encodedNickname = escapeCharacters(nickname);
+                appendVCardLineWithCharsetAndQPDetection(builder,
+                        Constants.PROPERTY_NICKNAME, nickname);
             }
-
-            builder.append(propertyNickname);
-            if (shouldAppendCharsetAttribute(propertyNickname)) {
-                builder.append(VCARD_ATTR_SEPARATOR);
-                builder.append(mVCardAttributeCharset);
-            }
-            if (reallyUseQuotedPrintable) {
-                builder.append(VCARD_ATTR_SEPARATOR);
-                builder.append(VCARD_ATTR_ENCODING_QP);
-            }
-            builder.append(VCARD_DATA_SEPARATOR);
-            builder.append(encodedNickname);
-            builder.append(VCARD_COL_SEPARATOR);
         }
     }
 
@@ -1489,6 +1473,33 @@ public class VCardComposer {
                 }
             }
         }
+    }
+
+    private void appendAndroidSpecificProperty(final StringBuilder builder,
+            final String mimeType, ContentValues contentValues) {
+        List<String> rawDataList = new ArrayList<String>();
+        rawDataList.add(mimeType);
+        final List<String> columnNameList;
+        if (Nickname.CONTENT_ITEM_TYPE.equals(mimeType)) {
+            
+        } else {
+            // If you add the other field, please check all the columns are able to be
+            // converted to String.
+            //
+            // e.g. BLOB is not what we can handle here now.
+            return;
+        }
+
+        for (int i = 0; i < Constants.MAX_DATA_COLUMN; i++) {
+            String value = contentValues.getAsString("data" + i);
+            if (value == null) {
+                value = "";
+            }
+            rawDataList.add(value);
+        }
+
+        appendVCardLineWithCharsetAndQPDetection(builder,
+                Constants.PROPERTY_X_ANDROID_CUSTOM, rawDataList);
     }
 
     /**
@@ -1968,6 +1979,8 @@ public class VCardComposer {
         }
     }
 
+    // appendVCardLine() variants accepting one String.
+
     private void appendVCardLineWithCharsetAndQPDetection(final StringBuilder builder,
             final String propertyName, final String rawData) {
         appendVCardLineWithCharsetAndQPDetection(builder, propertyName, null, rawData);
@@ -2023,6 +2036,87 @@ public class VCardComposer {
 
         builder.append(VCARD_DATA_SEPARATOR);
         builder.append(encodedData);
+        builder.append(VCARD_COL_SEPARATOR);
+    }
+
+    // appendVCardLine() variants accepting List<String>.
+
+    private void appendVCardLineWithCharsetAndQPDetection(final StringBuilder builder,
+            final String propertyName, final List<String> rawDataList) {
+        appendVCardLineWithCharsetAndQPDetection(builder, propertyName, null, rawDataList);
+    }
+
+    private void appendVCardLineWithCharsetAndQPDetection(final StringBuilder builder,
+            final String propertyName,
+            final List<String> attributeList, final List<String> rawDataList) {
+        boolean needCharset = false;
+        boolean reallyUseQuotedPrintable = false;
+        for (String rawData : rawDataList) {
+            if (!needCharset && mUsesQuotedPrintable &&
+                    !VCardUtils.containsOnlyPrintableAscii(rawData)) {
+                needCharset = true;
+            }
+            if (!reallyUseQuotedPrintable &&
+                    !VCardUtils.containsOnlyNonCrLfPrintableAscii(rawData)) {
+                reallyUseQuotedPrintable = true;
+            }
+            if (needCharset && reallyUseQuotedPrintable) {
+                break;
+            }
+        }
+
+        appendVCardLine(builder, propertyName, attributeList,
+                rawDataList, needCharset, reallyUseQuotedPrintable);
+    }
+
+    /*
+    private void appendVCardLine(final StringBuilder builder,
+            final String propertyName, final List<String> rawDataList) {
+        appendVCardLine(builder, propertyName, rawDataList, false, false);
+    }
+
+    private void appendVCardLine(final StringBuilder builder,
+            final String propertyName, final List<String> rawDataList,
+            final boolean needCharset, boolean needQuotedPrintable) {
+        appendVCardLine(builder, propertyName, null, rawDataList, needCharset, needQuotedPrintable);
+    }*/
+
+    private void appendVCardLine(final StringBuilder builder,
+            final String propertyName,
+            final List<String> attributeList,
+            final List<String> rawDataList, final boolean needCharset,
+            boolean needQuotedPrintable) {
+        builder.append(propertyName);
+        if (attributeList != null && attributeList.size() > 0) {
+            builder.append(VCARD_ATTR_SEPARATOR);
+            appendTypeAttributes(builder, attributeList);
+        }
+        if (needCharset) {
+            builder.append(VCARD_ATTR_SEPARATOR);
+            builder.append(mVCardAttributeCharset);
+        }
+
+        builder.append(VCARD_DATA_SEPARATOR);
+        boolean first = true;
+        for (String rawData : rawDataList) {
+            final String encodedData;
+            if (needQuotedPrintable) {
+                builder.append(VCARD_ATTR_SEPARATOR);
+                builder.append(VCARD_ATTR_ENCODING_QP);
+                encodedData = encodeQuotedPrintable(rawData);
+            } else {
+                // TODO: one line may be too huge, which may be invalid in vCard spec, though
+                //       several (even well-known) applications do not care this.
+                encodedData = escapeCharacters(rawData);
+            }
+
+            if (first) {
+                first = false;
+            } else {
+                builder.append(VCARD_ITEM_SEPARATOR);
+            }
+            builder.append(encodedData);
+        }
         builder.append(VCARD_COL_SEPARATOR);
     }
 
