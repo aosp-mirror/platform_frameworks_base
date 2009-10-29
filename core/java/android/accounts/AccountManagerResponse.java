@@ -22,16 +22,17 @@ import android.os.Parcelable;
 import android.os.RemoteException;
 
 /**
- * Object that wraps calls to an {@link android.accounts.IAccountManagerResponse} object.
- * @hide
+ * Used by Account Authenticators to return a response.
  */
 public class AccountManagerResponse implements Parcelable {
     private IAccountManagerResponse mResponse;
 
+    /** @hide */
     public AccountManagerResponse(IAccountManagerResponse response) {
         mResponse = response;
     }
 
+    /** @hide */
     public AccountManagerResponse(Parcel parcel) {
         mResponse =
                 IAccountManagerResponse.Stub.asInterface(parcel.readStrongBinder());
@@ -53,14 +54,17 @@ public class AccountManagerResponse implements Parcelable {
         }
     }
 
+    /** @hide */
     public int describeContents() {
         return 0;
     }
 
+    /** @hide */
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeStrongBinder(mResponse.asBinder());
     }
 
+    /** @hide */
     public static final Creator<AccountManagerResponse> CREATOR =
             new Creator<AccountManagerResponse>() {
         public AccountManagerResponse createFromParcel(Parcel source) {
