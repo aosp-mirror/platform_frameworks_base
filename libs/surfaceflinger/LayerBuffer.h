@@ -132,7 +132,6 @@ private:
         size_t                          mBufferSize;
         mutable sp<GraphicBuffer>       mTempBitmap;
         mutable LayerBase::Texture      mTexture;
-        copybit_device_t*               mBlitEngine;
     };
     
     class OverlaySource : public Source {
