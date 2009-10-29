@@ -442,7 +442,8 @@ public class ContactStruct {
     private List<ImData> mImList;
     private List<PhotoData> mPhotoList;
     private List<String> mWebsiteList;
-    
+    private List<List<String>> mAndroidCustomPropertyList;
+
     private final int mVCardType;
     private final Account mAccount;
 
@@ -928,14 +929,19 @@ public class ContactStruct {
                 mWebsiteList = new ArrayList<String>(1);
             }
             mWebsiteList.add(propValue);
+        } else if (propName.equals(Constants.PROPERTY_BDAY)) {
+            mBirthday = propValue;
         } else if (propName.equals(Constants.PROPERTY_X_PHONETIC_FIRST_NAME)) {
             mPhoneticGivenName = propValue;
         } else if (propName.equals(Constants.PROPERTY_X_PHONETIC_MIDDLE_NAME)) {
             mPhoneticMiddleName = propValue;
         } else if (propName.equals(Constants.PROPERTY_X_PHONETIC_LAST_NAME)) {
             mPhoneticFamilyName = propValue;
-        } else if (propName.equals(Constants.PROPERTY_BDAY)) {
-            mBirthday = propValue;
+        } else if (propName.equals(Constants.PROPERTY_X_ANDROID_CUSTOM)) {
+            final List<String> customPropertyList =
+                VCardUtils.constructListFromValue(propValue,
+                        VCardConfig.isV30(mVCardType));
+            handleAndroidCustomProperty(customPropertyList);
         /*} else if (propName.equals("REV")) {                
             // Revision of this VCard entry. I think we can ignore this.
         } else if (propName.equals("UID")) {
@@ -961,6 +967,13 @@ public class ContactStruct {
         } else {
             // Unknown X- words and IANA token.
         }
+    }
+
+    private void handleAndroidCustomProperty(final List<String> customPropertyList) {
+        if (mAndroidCustomPropertyList == null) {
+            mAndroidCustomPropertyList = new ArrayList<List<String>>();
+        }
+        mAndroidCustomPropertyList.add(customPropertyList);
     }
 
     /**
@@ -1017,7 +1030,7 @@ public class ContactStruct {
             mDisplayName = "";
         }
     }
-    
+
     /**
      * Consolidate several fielsds (like mName) using name candidates, 
      */
@@ -1028,7 +1041,7 @@ public class ContactStruct {
             mPhoneticFullName = mPhoneticFullName.trim();
         }
     }
-    
+
     // From GoogleSource.java in Contacts app.
     private static final String ACCOUNT_TYPE_GOOGLE = "com.google";
     private static final String GOOGLE_MY_CONTACTS_GROUP = "System Group: My Contacts";
@@ -1222,6 +1235,36 @@ public class ContactStruct {
             builder.withValue(Event.START_DATE, mBirthday);
             builder.withValue(Event.TYPE, Event.TYPE_BIRTHDAY);
             operationList.add(builder.build());
+        }
+
+        if (mAndroidCustomPropertyList != null) {
+            for (List<String> customPropertyList : mAndroidCustomPropertyList) {
+                int size = customPropertyList.size();
+                if (size < 2 || TextUtils.isEmpty(customPropertyList.get(0))) {
+                    continue;
+                } else if (size > Constants.MAX_DATA_COLUMN + 1) {
+                    size = Constants.MAX_DATA_COLUMN + 1;
+                    customPropertyList =
+                        customPropertyList.subList(0, Constants.MAX_DATA_COLUMN + 2);
+                }
+
+                int i = 0;
+                for (final String customPropertyValue : customPropertyList) {
+                    if (i == 0) {
+                        final String mimeType = customPropertyValue;
+                        builder = ContentProviderOperation.newInsert(Data.CONTENT_URI);
+                        builder.withValueBackReference(GroupMembership.RAW_CONTACT_ID, 0);
+                        builder.withValue(Data.MIMETYPE, mimeType);
+                    } else {  // 1 <= i && i <= MAX_DATA_COLUMNS  
+                        if (!TextUtils.isEmpty(customPropertyValue)) {
+                            builder.withValue("data" + i, customPropertyValue);
+                        }
+                    }
+
+                    operationList.add(builder.build());
+                    i++;
+                }
+            }
         }
 
         if (myGroupsId != null) {
