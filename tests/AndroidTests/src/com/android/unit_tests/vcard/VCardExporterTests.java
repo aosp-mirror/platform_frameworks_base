@@ -643,9 +643,6 @@ public class VCardExporterTests extends AndroidTestCase {
         testStructuredNameUseSuperPrimaryCommon(V30);
     }
 
-    /**
-     * There's no property for nickname in vCard 2.1, so we don't have any requirement on it.
-     */
     public void testNickNameV30() {
         ExportTestResolver resolver = new ExportTestResolver();
         ContentValues contentValues = resolver.buildData(Nickname.CONTENT_ITEM_TYPE);
@@ -1268,5 +1265,24 @@ public class VCardExporterTests extends AndroidTestCase {
             .addNodeWithoutOrder("N", Arrays.asList("\\", ";", ",", "\n", ""));
 
         verifyOneComposition(resolver, handler, version);
+    }
+
+    /**
+     * There's no "NICKNAME" property in vCard 2.1, while there is in vCard 3.0.
+     * We use Android-specific "X-ANDROID-CUSTOM" property.
+     * This test verifies the functionality.
+     */
+    public void testNickNameV21() {
+        ExportTestResolver resolver = new ExportTestResolver();
+        ContentValues contentValues = resolver.buildData(Nickname.CONTENT_ITEM_TYPE);
+        contentValues.put(Nickname.NAME, "Nicky");
+
+        VCardVerificationHandler handler = new VCardVerificationHandler(this, V21);
+        handler.addNewVerifierWithEmptyName()
+            .addNodeWithOrder("X-ANDROID-CUSTOM", Nickname.CONTENT_ITEM_TYPE + ";Nicky");
+
+        // TODO: also test import part.
+
+        verifyOneComposition(resolver, handler, V21);
     }
 }
