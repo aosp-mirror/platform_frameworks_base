@@ -85,8 +85,6 @@ private:
     }
  
     void reloadTexture(const Region& dirty);
-    status_t initializeEglImageLocked(
-            const sp<GraphicBuffer>& buffer, Texture* texture);
 
     uint32_t getEffectiveUsage(uint32_t usage) const;
 

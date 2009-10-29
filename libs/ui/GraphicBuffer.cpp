@@ -37,7 +37,7 @@ namespace android {
 // ===========================================================================
 
 GraphicBuffer::GraphicBuffer()
-    : BASE(), mOwner(false), mBufferMapper(GraphicBufferMapper::get()),
+    : BASE(), mOwner(ownData), mBufferMapper(GraphicBufferMapper::get()),
       mInitCheck(NO_ERROR),  mVStride(0), mIndex(-1)
 {
     width  = 
@@ -50,7 +50,7 @@ GraphicBuffer::GraphicBuffer()
 
 GraphicBuffer::GraphicBuffer(uint32_t w, uint32_t h, 
         PixelFormat reqFormat, uint32_t reqUsage)
-    : BASE(), mOwner(false), mBufferMapper(GraphicBufferMapper::get()),
+    : BASE(), mOwner(ownData), mBufferMapper(GraphicBufferMapper::get()),
       mInitCheck(NO_ERROR),  mVStride(0), mIndex(-1)
 {
     width  = 
@@ -62,8 +62,23 @@ GraphicBuffer::GraphicBuffer(uint32_t w, uint32_t h,
     mInitCheck = initSize(w, h, reqFormat, reqUsage);
 }
 
+GraphicBuffer::GraphicBuffer(uint32_t w, uint32_t h,
+        PixelFormat inFormat, uint32_t inUsage,
+        uint32_t inStride, native_handle_t* inHandle, bool keepOwnership)
+    : BASE(), mOwner(keepOwnership ? ownHandle : ownNone),
+      mBufferMapper(GraphicBufferMapper::get()),
+      mInitCheck(NO_ERROR),  mVStride(0), mIndex(-1)
+{
+    width  = w;
+    height = h;
+    stride = inStride;
+    format = inFormat;
+    usage  = inUsage;
+    handle = inHandle;
+}
+
 GraphicBuffer::GraphicBuffer(const Parcel& data) 
-    : BASE(), mOwner(true), mBufferMapper(GraphicBufferMapper::get()),
+    : BASE(), mOwner(ownHandle), mBufferMapper(GraphicBufferMapper::get()),
       mInitCheck(NO_ERROR),  mVStride(0), mIndex(-1)
 {
     // we own the handle in this case
@@ -83,10 +98,10 @@ GraphicBuffer::GraphicBuffer(const Parcel& data)
 GraphicBuffer::~GraphicBuffer()
 {
     if (handle) {
-        if (mOwner) {
+        if (mOwner == ownHandle) {
             native_handle_close(handle);
             native_handle_delete(const_cast<native_handle*>(handle));
-        } else {
+        } else if (mOwner == ownData) {
             GraphicBufferAllocator& allocator(GraphicBufferAllocator::get());
             allocator.free(handle);
         }
@@ -106,6 +121,9 @@ android_native_buffer_t* GraphicBuffer::getNativeBuffer() const
 status_t GraphicBuffer::reallocate(uint32_t w, uint32_t h, PixelFormat f,
         uint32_t reqUsage)
 {
+    if (mOwner != ownData)
+        return INVALID_OPERATION;
+
     if (handle) {
         GraphicBufferAllocator& allocator(GraphicBufferAllocator::get());
         allocator.free(handle);
