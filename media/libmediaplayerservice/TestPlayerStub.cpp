@@ -176,7 +176,7 @@ status_t TestPlayerStub::resetInternal()
     mContentUrl = NULL;
 
     if (mPlayer) {
-        LOG_ASSERT(mDeletePlayer != NULL);
+        LOG_ASSERT(mDeletePlayer != NULL, "mDeletePlayer is null");
         (*mDeletePlayer)(mPlayer);
         mPlayer = NULL;
     }
