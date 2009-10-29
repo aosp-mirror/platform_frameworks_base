@@ -94,7 +94,7 @@ public class MediaPlayerStressTest extends ActivityInstrumentationTestCase2<Medi
         long randomseed = System.currentTimeMillis(); 
         Random generator = new Random(randomseed);
         Log.v(TAG, "Random seed: " + randomseed);
-        int video_duration = MediaNames.VIDEO_H263_AAC_DURATION;
+        int video_duration = MediaNames.VIDEO_H263_AMR_DURATION;
         int random_play_time = 0;
         int random_seek_time = 0;
         int random_no_of_seek = 0;
