@@ -130,62 +130,6 @@ status_t Layer::setBuffers( uint32_t w, uint32_t h,
     return NO_ERROR;
 }
 
-status_t Layer::initializeEglImageLocked(
-        const sp<GraphicBuffer>& buffer, Texture* texture)
-{
-    status_t err = NO_ERROR;
-
-    // we need to recreate the texture
-    EGLDisplay dpy(mFlinger->graphicPlane(0).getEGLDisplay());
-
-    // free the previous image
-    if (texture->image != EGL_NO_IMAGE_KHR) {
-        eglDestroyImageKHR(dpy, texture->image);
-        texture->image = EGL_NO_IMAGE_KHR;
-    }
-
-    // construct an EGL_NATIVE_BUFFER_ANDROID
-    android_native_buffer_t* clientBuf = buffer->getNativeBuffer();
-
-    // create the new EGLImageKHR
-    const EGLint attrs[] = {
-            EGL_IMAGE_PRESERVED_KHR,    EGL_TRUE,
-            EGL_NONE,                   EGL_NONE
-    };
-    texture->image = eglCreateImageKHR(
-            dpy, EGL_NO_CONTEXT, EGL_NATIVE_BUFFER_ANDROID,
-            (EGLClientBuffer)clientBuf, attrs);
-
-    LOGE_IF(texture->image == EGL_NO_IMAGE_KHR,
-            "eglCreateImageKHR() failed. err=0x%4x",
-            eglGetError());
-
-    if (texture->image != EGL_NO_IMAGE_KHR) {
-        glBindTexture(GL_TEXTURE_2D, texture->name);
-        glEGLImageTargetTexture2DOES(GL_TEXTURE_2D,
-                (GLeglImageOES)texture->image);
-        GLint error = glGetError();
-        if (UNLIKELY(error != GL_NO_ERROR)) {
-            // this failed, for instance, because we don't support NPOT.
-            // FIXME: do something!
-            LOGE("layer=%p, glEGLImageTargetTexture2DOES(%p) "
-                 "failed err=0x%04x",
-                 this, texture->image, error);
-            mFlags &= ~DisplayHardware::DIRECT_TEXTURE;
-            err = INVALID_OPERATION;
-        } else {
-            // Everything went okay!
-            texture->NPOTAdjust = false;
-            texture->dirty  = false;
-            texture->width  = clientBuf->width;
-            texture->height = clientBuf->height;
-        }
-    } else {
-        err = INVALID_OPERATION;
-    }
-    return err;
-}
-
 void Layer::reloadTexture(const Region& dirty)
 {
     Mutex::Autolock _l(mLock);
@@ -199,10 +143,11 @@ void Layer::reloadTexture(const Region& dirty)
         mTextures[index].height = 0;
     }
 
+#ifdef EGL_ANDROID_image_native_buffer
     if (mFlags & DisplayHardware::DIRECT_TEXTURE) {
         if (buffer->usage & GraphicBuffer::USAGE_HW_TEXTURE) {
             if (mTextures[index].dirty) {
-                initializeEglImageLocked(buffer, &mTextures[index]);
+                initializeEglImage(buffer, &mTextures[index]);
             }
         } else {
             if (mHybridBuffer==0 || (mHybridBuffer->width != buffer->width ||
@@ -212,7 +157,7 @@ void Layer::reloadTexture(const Region& dirty)
                         buffer->width, buffer->height, buffer->format,
                         GraphicBuffer::USAGE_SW_WRITE_OFTEN |
                         GraphicBuffer::USAGE_HW_TEXTURE);
-                initializeEglImageLocked(
+                initializeEglImage(
                         mHybridBuffer, &mTextures[0]);
             }
 
@@ -279,7 +224,9 @@ void Layer::reloadTexture(const Region& dirty)
                 buffer->unlock();
             }
         }
-    } else {
+    } else
+#endif
+    {
         for (size_t i=0 ; i<NUM_BUFFERS ; i++) {
             mTextures[i].image = EGL_NO_IMAGE_KHR;
         }

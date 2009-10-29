@@ -261,6 +261,8 @@ protected:
           void drawWithOpenGL(const Region& clip, const Texture& texture) const;
           void loadTexture(Texture* texture, 
                   const Region& dirty, const GGLSurface& t) const;
+          status_t initializeEglImage(
+                  const sp<GraphicBuffer>& buffer, Texture* texture);
 
           
                 sp<SurfaceFlinger> mFlinger;
