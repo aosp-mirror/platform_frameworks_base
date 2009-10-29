@@ -429,7 +429,7 @@ RsAllocation rsi_AllocationCreateFromBitmapBoxed(Context *rsc, uint32_t w, uint3
     const uint8_t * src = static_cast<const uint8_t *>(data);
     for (uint32_t y = 0; y < h; y++) {
         uint8_t * ydst = &tmp[(y + ((h2 - h) >> 1)) * w2 * bpp];
-        memcpy(&ydst[(w2 - w) >> 1], src, w * bpp);
+        memcpy(&ydst[((w2 - w) >> 1) * bpp], src, w * bpp);
         src += w * bpp;
     }
 
