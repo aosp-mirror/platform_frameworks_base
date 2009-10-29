@@ -491,6 +491,8 @@ LOCAL_DROIDDOC_CUSTOM_ASSET_DIR:=assets-sdk
 
 include $(BUILD_DROIDDOC)
 
+# explicitly specify that online-sdk depends on framework-res.
+$(full_target): framework-res-package-target
 
 # ==== docs that have all of the stuff that's @hidden =======================
 include $(CLEAR_VARS)
