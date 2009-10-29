@@ -16,6 +16,7 @@
 
 package android.provider;
 
+import android.accounts.Account;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.ContentResolver;
@@ -30,6 +31,7 @@ import android.content.ContentProviderClient;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.net.Uri;
+import android.os.RemoteException;
 import android.pim.ICalendar;
 import android.pim.RecurrenceSet;
 import android.text.TextUtils;
@@ -37,8 +39,6 @@ import android.text.format.DateUtils;
 import android.text.format.Time;
 import android.util.Config;
 import android.util.Log;
-import android.accounts.Account;
-import android.os.RemoteException;
 
 /**
  * The Calendar provider contains all calendar events.
@@ -1223,7 +1223,7 @@ public final class Calendar {
         /**
          * The default sort order for this table
          */
-        public static final String DEFAULT_SORT_ORDER = "alarmTime ASC,begin ASC,title ASC";
+        public static final String DEFAULT_SORT_ORDER = "begin ASC,title ASC";
     }
 
     public static final class CalendarAlerts implements BaseColumns,
@@ -1239,6 +1239,8 @@ public final class Calendar {
          */
         public static final Uri CONTENT_URI_BY_INSTANCE =
             Uri.parse("content://calendar/calendar_alerts/by_instance");
+
+        private static final boolean DEBUG = true;
 
         public static final Uri insert(ContentResolver cr, long eventId,
                 long begin, long end, long alarmTime, int minutes) {
@@ -1257,9 +1259,9 @@ public final class Calendar {
         }
 
         public static final Cursor query(ContentResolver cr, String[] projection,
-                String selection, String[] selectionArgs) {
+                String selection, String[] selectionArgs, String sortOrder) {
             return cr.query(CONTENT_URI, projection, selection, selectionArgs,
-                    DEFAULT_SORT_ORDER);
+                    sortOrder);
         }
 
         /**
@@ -1276,7 +1278,7 @@ public final class Calendar {
             // TODO: construct an explicit SQL query so that we can add
             // "LIMIT 1" to the end and get just one result.
             String[] projection = new String[] { ALARM_TIME };
-            Cursor cursor = query(cr, projection, selection, null);
+            Cursor cursor = query(cr, projection, selection, null, ALARM_TIME + " ASC");
             long alarmTime = -1;
             try {
                 if (cursor != null && cursor.moveToFirst()) {
@@ -1305,46 +1307,61 @@ public final class Calendar {
             // Get all the alerts that have been scheduled but have not fired
             // and should have fired by now and are not too old.
             long now = System.currentTimeMillis();
-            long ancient = now - 24 * DateUtils.HOUR_IN_MILLIS;
+            long ancient = now - DateUtils.DAY_IN_MILLIS;
             String selection = CalendarAlerts.STATE + "=" + CalendarAlerts.SCHEDULED
                     + " AND " + CalendarAlerts.ALARM_TIME + "<" + now
                     + " AND " + CalendarAlerts.ALARM_TIME + ">" + ancient
                     + " AND " + CalendarAlerts.END + ">=" + now;
             String[] projection = new String[] {
-                    _ID,
-                    BEGIN,
-                    END,
                     ALARM_TIME,
             };
-            Cursor cursor = CalendarAlerts.query(cr, projection, selection, null);
+
+            // TODO: construct an explicit SQL query so that we can add
+            // "GROUPBY" instead of doing a sort and de-dup
+            Cursor cursor = CalendarAlerts.query(cr, projection, selection, null, "alarmTime ASC");
             if (cursor == null) {
                 return;
             }
-            if (Log.isLoggable(TAG, Log.DEBUG)) {
+
+            if (DEBUG) {
                 Log.d(TAG, "missed alarms found: " + cursor.getCount());
             }
 
             try {
+                long alarmTime = -1;
+
                 while (cursor.moveToNext()) {
-                    long id = cursor.getLong(0);
-                    long begin = cursor.getLong(1);
-                    long end = cursor.getLong(2);
-                    long alarmTime = cursor.getLong(3);
-                    Uri uri = ContentUris.withAppendedId(CONTENT_URI, id);
-                    Intent intent = new Intent(android.provider.Calendar.EVENT_REMINDER_ACTION);
-                    intent.setData(uri);
-                    intent.putExtra(android.provider.Calendar.EVENT_BEGIN_TIME, begin);
-                    intent.putExtra(android.provider.Calendar.EVENT_END_TIME, end);
-                    PendingIntent sender = PendingIntent.getBroadcast(context,
-                            0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
-                    Log.w(TAG, "rescheduling missed alarm, id: " + id + " begin: " + begin
-                            + " end: " + end + " alarmTime: " + alarmTime);
-                    manager.set(AlarmManager.RTC_WAKEUP, alarmTime, sender);
+                    long newAlarmTime = cursor.getLong(0);
+                    if (alarmTime != newAlarmTime) {
+                        if (DEBUG) {
+                            Log.w(TAG, "rescheduling missed alarm. alarmTime: " + newAlarmTime);
+                        }
+                        scheduleAlarm(context, manager, newAlarmTime);
+                        alarmTime = newAlarmTime;
+                    }
                 }
             } finally {
                 cursor.close();
             }
+        }
 
+        public static void scheduleAlarm(Context context, AlarmManager manager, long alarmTime) {
+            if (DEBUG) {
+                Time time = new Time();
+                time.set(alarmTime);
+                String schedTime = time.format(" %a, %b %d, %Y %I:%M%P");
+                Log.d(TAG, "Schedule alarm at " + alarmTime + " " + schedTime);
+            }
+
+            if (manager == null) {
+                manager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+            }
+
+            Intent intent = new Intent(android.provider.Calendar.EVENT_REMINDER_ACTION);
+            intent.putExtra(android.provider.Calendar.CalendarAlerts.ALARM_TIME, alarmTime);
+            PendingIntent pi = PendingIntent.getBroadcast(context, 0, intent,
+                    PendingIntent.FLAG_CANCEL_CURRENT);
+            manager.set(AlarmManager.RTC_WAKEUP, alarmTime, pi);
         }
 
         /**
@@ -1367,7 +1384,7 @@ public final class Calendar {
             // TODO: construct an explicit SQL query so that we can add
             // "LIMIT 1" to the end and get just one result.
             String[] projection = new String[] { CalendarAlerts.ALARM_TIME };
-            Cursor cursor = query(cr, projection, selection, null);
+            Cursor cursor = query(cr, projection, selection, null, null);
             boolean found = false;
             try {
                 if (cursor != null && cursor.getCount() > 0) {
