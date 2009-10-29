@@ -84,9 +84,11 @@ public class PdpConnection extends DataConnection {
         lastFailCause = FailCause.NONE;
         receivedDisconnectReq = false;
 
-        int authType = (apn.user != null) ? RILConstants.SETUP_DATA_AUTH_PAP_CHAP :
-            RILConstants.SETUP_DATA_AUTH_NONE;
-
+        int authType = apn.authType;
+        if (authType == -1) {
+            authType = (apn.user != null) ? RILConstants.SETUP_DATA_AUTH_PAP_CHAP :
+                RILConstants.SETUP_DATA_AUTH_NONE;
+        }
         phone.mCM.setupDataCall(Integer.toString(RILConstants.SETUP_DATA_TECH_GSM),
                 Integer.toString(RILConstants.DATA_PROFILE_DEFAULT), apn.apn, apn.user,
                 apn.password, Integer.toString(authType),
