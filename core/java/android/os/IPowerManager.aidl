@@ -31,6 +31,7 @@ interface IPowerManager
     long getScreenOnTime();
     void preventScreenOn(boolean prevent);
     void setScreenBrightnessOverride(int brightness);
+    boolean isScreenOn();
 
     // sets the brightness of the backlights (screen, keyboard, button) 0-255
     void setBacklightBrightness(int brightness);
