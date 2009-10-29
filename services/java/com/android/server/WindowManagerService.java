@@ -9644,7 +9644,8 @@ public class WindowManagerService extends IWindowManager.Stub
                             WindowState w = (WindowState)mWindows.get(i);
                             if (w.mSurface != null) {
                                 final WindowManager.LayoutParams attrs = w.mAttrs;
-                                if (mPolicy.doesForceHide(w, attrs)) {
+                                if (mPolicy.doesForceHide(w, attrs) && w.isVisibleLw()) {
+                                    if (DEBUG_FOCUS) Log.i(TAG, "win=" + w + " force hides other windows");
                                     forceHiding = true;
                                 } else if (mPolicy.canBeForceHidden(w, attrs)) {
                                     if (!w.mAnimating) {
