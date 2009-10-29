@@ -32,8 +32,10 @@
 
 using namespace android;
 
-#if 0
+#if 1
 class DummySource : public MediaSource {
+    static const int32_t kFramerate = 24;  // fps
+
 public:
     DummySource(int width, int height)
         : mWidth(width),
@@ -52,6 +54,7 @@ public:
     }
 
     virtual status_t start(MetaData *params) {
+        mNumFramesOutput = 0;
         return OK;
     }
 
@@ -61,6 +64,12 @@ public:
 
     virtual status_t read(
             MediaBuffer **buffer, const MediaSource::ReadOptions *options) {
+        if (mNumFramesOutput == kFramerate * 10) {
+            // Stop returning data after 10 secs.
+            return ERROR_END_OF_STREAM;
+        }
+
+        // printf("DummySource::read\n");
         status_t err = mGroup.acquire_buffer(buffer);
         if (err != OK) {
             return err;
@@ -69,7 +78,13 @@ public:
         char x = (char)((double)rand() / RAND_MAX * 255);
         memset((*buffer)->data(), x, mSize);
         (*buffer)->set_range(0, mSize);
+        (*buffer)->meta_data()->clear();
+        (*buffer)->meta_data()->setInt64(
+                kKeyTime, (mNumFramesOutput * 1000000) / kFramerate);
+        ++mNumFramesOutput;
 
+        // printf("DummySource::read - returning buffer\n");
+        // LOGI("DummySource::read - returning buffer");
         return OK;
     }
 
@@ -80,6 +95,7 @@ private:
     MediaBufferGroup mGroup;
     int mWidth, mHeight;
     size_t mSize;
+    int64_t mNumFramesOutput;;
 
     DummySource(const DummySource &);
     DummySource &operator=(const DummySource &);
@@ -144,8 +160,8 @@ int main(int argc, char **argv) {
     success = success && meta->findInt32(kKeyHeight, &height);
     CHECK(success);
 #else
-    int width = 320;
-    int height = 240;
+    int width = 800;
+    int height = 480;
     sp<MediaSource> decoder = new DummySource(width, height);
 #endif
 
@@ -159,19 +175,26 @@ int main(int argc, char **argv) {
         OMXCodec::Create(
                 client.interface(), enc_meta, true /* createEncoder */, decoder);
 
-#if 0
+#if 1
     sp<MPEG4Writer> writer = new MPEG4Writer("/sdcard/output.mp4");
-    writer->addSource(enc_meta, encoder);
+    writer->addSource(encoder);
     writer->start();
-    sleep(20);
-    printf("stopping now.\n");
+    while (!writer->reachedEOS()) {
+        usleep(100000);
+    }
     writer->stop();
 #else
     encoder->start();
 
     MediaBuffer *buffer;
     while (encoder->read(&buffer) == OK) {
-        printf("got an output frame of size %d\n", buffer->range_length());
+        int32_t isSync;
+        if (!buffer->meta_data()->findInt32(kKeyIsSyncFrame, &isSync)) {
+            isSync = false;
+        }
+
+        printf("got an output frame of size %d%s\n", buffer->range_length(),
+               isSync ? " (SYNC)" : "");
 
         buffer->release();
         buffer = NULL;
