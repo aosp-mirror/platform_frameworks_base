@@ -70,8 +70,8 @@ page.title=Search Results
         searchControl.setSearchStartingCallback(this, function(control, searcher, query) {
             // save the tab index from the hash
             tabIndex = location.hash.split("&t=")[1];
-        
-            $("#searchTitle").html("search results for <em>" + query + "</em>");
+
+            $("#searchTitle").html("search results for <em>" + escapeHTML(query) + "</em>");
             $.history.add('q=' + query + '&t=' + tabIndex);
             openTab();
         });
@@ -96,7 +96,8 @@ page.title=Search Results
       $(window).history(function(e, hash) {
         var query = decodeURI(getQuery(hash));
         searchControl.execute(query);
-        $("#searchTitle").html("search results for <em>" + query + "</em>");
+
+        $("#searchTitle").html("search results for <em>" + escapeHTML(query) + "</em>");
       });
 
       // forcefully regain key-up event control (previously jacked by search api)
@@ -129,6 +130,13 @@ page.title=Search Results
         var hashParts = hash.split('&t=');
         var queryParts = hashParts[0].split('=');
         return queryParts[1];
+      }
+
+      /* returns the given string with all HTML brackets converted to entities
+         TODO: move this to the site's JS library */
+      function escapeHTML(string) {
+        return string.replace(/</g,"&lt;")
+                     .replace(/>/g,"&gt;");
       }
 
 </script>
