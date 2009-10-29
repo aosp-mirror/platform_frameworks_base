@@ -51,7 +51,7 @@ pid_t gettid() { return syscall(__NR_gettid);}
 #undef __KERNEL__
 #endif
 
-#define POLICY_DEBUG 1
+#define POLICY_DEBUG 0
 
 using namespace android;
 
