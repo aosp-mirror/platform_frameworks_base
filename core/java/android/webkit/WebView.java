@@ -462,6 +462,7 @@ public class WebView extends AbsoluteLayout
     static final int UPDATE_TEXT_ENTRY_MSG_ID           = 15;
     static final int WEBCORE_INITIALIZED_MSG_ID         = 16;
     static final int UPDATE_TEXTFIELD_TEXT_MSG_ID       = 17;
+    static final int FIND_AGAIN                         = 18;
     static final int MOVE_OUT_OF_PLUGIN                 = 19;
     static final int CLEAR_TEXT_ENTRY                   = 20;
     static final int UPDATE_TEXT_SELECTION_MSG_ID       = 21;
@@ -491,7 +492,7 @@ public class WebView extends AbsoluteLayout
         "UPDATE_TEXT_ENTRY_MSG_ID", //       = 15;
         "WEBCORE_INITIALIZED_MSG_ID", //     = 16;
         "UPDATE_TEXTFIELD_TEXT_MSG_ID", //   = 17;
-        "18", //        = 18;
+        "FIND_AGAIN", //                     = 18;
         "MOVE_OUT_OF_PLUGIN", //             = 19;
         "CLEAR_TEXT_ENTRY", //               = 20;
         "UPDATE_TEXT_SELECTION_MSG_ID", //   = 21;
@@ -2362,6 +2363,7 @@ public class WebView extends AbsoluteLayout
         }
         int result = nativeFindAll(find.toLowerCase(), find.toUpperCase());
         invalidate();
+        mLastFind = find;
         return result;
     }
 
@@ -2369,6 +2371,9 @@ public class WebView extends AbsoluteLayout
     // or not we draw the highlights for matches.
     private boolean mFindIsUp;
     private int mFindHeight;
+    // Keep track of the last string sent, so we can search again after an
+    // orientation change or the dismissal of the soft keyboard.
+    private String mLastFind;
 
     /**
      * Return the first substring consisting of the address of a physical
@@ -5258,6 +5263,13 @@ public class WebView extends AbsoluteLayout
                                     + " focusCandidateIsPlugin="
                                     + nativeFocusCandidateIsPlugin());
                         }
+                    }
+                    break;
+
+                case FIND_AGAIN:
+                    // Ignore if find has been dismissed.
+                    if (mFindIsUp) {
+                        findAll(mLastFind);
                     }
                     break;
 
