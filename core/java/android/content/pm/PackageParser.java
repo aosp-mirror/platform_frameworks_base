@@ -201,11 +201,11 @@ public class PackageParser {
                     }
                     pi.activities = new ActivityInfo[num];
                 }
-                for (int i=0; i<N; i++) {
+                for (int i=0, j=0; i<N; i++) {
                     final Activity activity = p.activities.get(i);
                     if (activity.info.enabled
                         || (flags&PackageManager.GET_DISABLED_COMPONENTS) != 0) {
-                        pi.activities[i] = generateActivityInfo(p.activities.get(i), flags);
+                        pi.activities[j++] = generateActivityInfo(p.activities.get(i), flags);
                     }
                 }
             }
@@ -222,11 +222,11 @@ public class PackageParser {
                     }
                     pi.receivers = new ActivityInfo[num];
                 }
-                for (int i=0; i<N; i++) {
+                for (int i=0, j=0; i<N; i++) {
                     final Activity activity = p.receivers.get(i);
                     if (activity.info.enabled
                         || (flags&PackageManager.GET_DISABLED_COMPONENTS) != 0) {
-                        pi.receivers[i] = generateActivityInfo(p.receivers.get(i), flags);
+                        pi.receivers[j++] = generateActivityInfo(p.receivers.get(i), flags);
                     }
                 }
             }
@@ -243,11 +243,11 @@ public class PackageParser {
                     }
                     pi.services = new ServiceInfo[num];
                 }
-                for (int i=0; i<N; i++) {
+                for (int i=0, j=0; i<N; i++) {
                     final Service service = p.services.get(i);
                     if (service.info.enabled
                         || (flags&PackageManager.GET_DISABLED_COMPONENTS) != 0) {
-                        pi.services[i] = generateServiceInfo(p.services.get(i), flags);
+                        pi.services[j++] = generateServiceInfo(p.services.get(i), flags);
                     }
                 }
             }
@@ -264,11 +264,11 @@ public class PackageParser {
                     }
                     pi.providers = new ProviderInfo[num];
                 }
-                for (int i=0; i<N; i++) {
+                for (int i=0, j=0; i<N; i++) {
                     final Provider provider = p.providers.get(i);
                     if (provider.info.enabled
                         || (flags&PackageManager.GET_DISABLED_COMPONENTS) != 0) {
-                        pi.providers[i] = generateProviderInfo(p.providers.get(i), flags);
+                        pi.providers[j++] = generateProviderInfo(p.providers.get(i), flags);
                     }
                 }
             }
@@ -300,12 +300,10 @@ public class PackageParser {
             }
         }
         if ((flags&PackageManager.GET_SIGNATURES) != 0) {
-            if (p.mSignatures != null) {
-                int N = p.mSignatures.length;
-                if (N > 0) {
-                    pi.signatures = new Signature[N];
-                    System.arraycopy(p.mSignatures, 0, pi.signatures, 0, N);
-                }
+           int N = (p.mSignatures != null) ? p.mSignatures.length : 0;
+           if (N > 0) {
+                pi.signatures = new Signature[N];
+                System.arraycopy(p.mSignatures, 0, pi.signatures, 0, N);
             }
         }
         return pi;
