@@ -86,9 +86,9 @@ static void dumpstate(int full) {
         DUMP("/proc/wakelocks");
         PRINT("");
         PRINT("------ PROCESSES ------");
-        EXEC("ps");
+        EXEC1("ps", "-P");
         PRINT("------ PROCESSES AND THREADS ------");
-        EXEC2("ps", "-t", "-p");
+        EXEC3("ps", "-t", "-p", "-P");
         PRINT("------ LIBRANK ------");
         EXEC_XBIN("librank");
         PRINT("------ BINDER FAILED TRANSACTION LOG ------");
@@ -362,4 +362,3 @@ static void dump_kernel_log(const char *path, const char *title)
         DUMP(path);
     }
 }
-
