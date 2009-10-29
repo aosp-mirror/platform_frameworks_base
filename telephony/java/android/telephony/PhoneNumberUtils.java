@@ -1060,8 +1060,8 @@ public class PhoneNumberUtils
      * Breaks the given number down and formats it according to the rules
      * for the country the number is from.
      *
-     * @param source the phone number to format
-     * @return a locally acceptable formatting of the input, or the raw input if
+     * @param source The phone number to format
+     * @return A locally acceptable formatting of the input, or the raw input if
      *  formatting rules aren't known for the number
      */
     public static String formatNumber(String source) {
@@ -1071,10 +1071,27 @@ public class PhoneNumberUtils
     }
 
     /**
+     * Formats the given number with the given formatting type. Currently
+     * {@link #FORMAT_NANP} and {@link #FORMAT_JAPAN} are supported as a formating type.
+     *
+     * @param source the phone number to format
+     * @param defaultFormattingType The default formatting rules to apply if the number does
+     * not begin with +<country_code>
+     * @return The phone number formatted with the given formatting type.
+     *
+     * @hide TODO:Shuold be unhidden.
+     */
+    public static String formatNumber(String source, int defaultFormattingType) {
+        SpannableStringBuilder text = new SpannableStringBuilder(source);
+        formatNumber(text, defaultFormattingType);
+        return text.toString();
+    }
+
+    /**
      * Returns the phone number formatting type for the given locale.
      *
      * @param locale The locale of interest, usually {@link Locale#getDefault()}
-     * @return the formatting type for the given locale, or FORMAT_UNKNOWN if the formatting
+     * @return The formatting type for the given locale, or FORMAT_UNKNOWN if the formatting
      * rules are not known for the given locale
      */
     public static int getFormatTypeForLocale(Locale locale) {
@@ -1084,7 +1101,8 @@ public class PhoneNumberUtils
     }
 
     /**
-     * Formats a phone number in-place. Currently only supports NANP formatting.
+     * Formats a phone number in-place. Currently {@link #FORMAT_JAPAN} and {@link #FORMAT_NANP}
+     * is supported as a second argument.
      *
      * @param text The number to be formatted, will be modified with the formatting
      * @param defaultFormattingType The default formatting rules to apply if the number does
