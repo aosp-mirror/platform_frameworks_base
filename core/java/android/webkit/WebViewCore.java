@@ -2115,6 +2115,13 @@ final class WebViewCore {
                 WebView.CLEAR_TEXT_ENTRY).sendToTarget();
     }
 
+    // called by JNI
+    private void sendFindAgain() {
+        if (mWebView == null) return;
+        Message.obtain(mWebView.mPrivateHandler,
+                WebView.FIND_AGAIN).sendToTarget();
+    }
+
     private native void nativeUpdateFrameCacheIfLoading();
 
     /**
