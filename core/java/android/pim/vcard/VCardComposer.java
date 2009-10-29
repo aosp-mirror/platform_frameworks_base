@@ -1490,7 +1490,7 @@ public class VCardComposer {
             return;
         }
 
-        for (int i = 0; i < Constants.MAX_DATA_COLUMN; i++) {
+        for (int i = 1; i <= Constants.MAX_DATA_COLUMN; i++) {
             String value = contentValues.getAsString("data" + i);
             if (value == null) {
                 value = "";
