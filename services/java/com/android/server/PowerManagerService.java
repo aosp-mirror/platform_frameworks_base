@@ -478,7 +478,7 @@ class PowerManagerService extends IPowerManager.Stub
         // And explicitly do the initial update of our cached settings
         updateGservicesValues();
 
-        if (mAutoBrightessEnabled) {
+        if (mAutoBrightessEnabled && !mHasHardwareAutoBrightness) {
             // turn the screen on
             setPowerState(SCREEN_BRIGHT);
         } else {
@@ -580,7 +580,11 @@ class PowerManagerService extends IPowerManager.Stub
             switch (wl.flags & LOCK_MASK)
             {
                 case PowerManager.FULL_WAKE_LOCK:
-                    wl.minState = SCREEN_BRIGHT;
+                    if (mAutoBrightessEnabled && !mHasHardwareAutoBrightness) {
+                        wl.minState = SCREEN_BRIGHT;
+                    } else {
+                        wl.minState = (mKeyboardVisible ? ALL_BRIGHT : SCREEN_BUTTON_BRIGHT);
+                    }
                     break;
                 case PowerManager.SCREEN_BRIGHT_WAKE_LOCK:
                     wl.minState = SCREEN_BRIGHT;
@@ -1332,8 +1336,8 @@ class PowerManagerService extends IPowerManager.Stub
             if (newState == mPowerState) {
                 return;
             }
-            
-            if (!mDoneBooting && !mAutoBrightessEnabled) {
+
+            if (!mDoneBooting && !(mAutoBrightessEnabled && !mHasHardwareAutoBrightness)) {
                 newState |= ALL_BRIGHT;
             }
 
@@ -1757,7 +1761,7 @@ class PowerManagerService extends IPowerManager.Stub
         try {
             if (mScreenBrightnessOverride >= 0) {
                 return mScreenBrightnessOverride;
-            } else if (mLightSensorBrightness >= 0) {
+            } else if (mLightSensorBrightness >= 0 && !mHasHardwareAutoBrightness) {
                 return mLightSensorBrightness;
             }
             final int brightness = Settings.System.getInt(mContext.getContentResolver(),
@@ -1846,7 +1850,8 @@ class PowerManagerService extends IPowerManager.Stub
                 if ((mUserActivityAllowed && !mProximitySensorActive) || force) {
                     // Only turn on button backlights if a button was pressed
                     // and auto brightness is disabled
-                    if (eventType == BUTTON_EVENT && !mAutoBrightessEnabled) {
+                    if (eventType == BUTTON_EVENT &&
+                            !(mAutoBrightessEnabled && !mHasHardwareAutoBrightness)) {
                         mUserState = (mKeyboardVisible ? ALL_BRIGHT : SCREEN_BUTTON_BRIGHT);
                     } else {
                         // don't clear button/keyboard backlights when the screen is touched.
@@ -1903,6 +1908,8 @@ class PowerManagerService extends IPowerManager.Stub
         if (mDebugLightSensor) {
             Log.d(TAG, "lightSensorChangedLocked " + value);
         }
+
+        if (mHasHardwareAutoBrightness) return;
 
         if (mLightSensorValue != value) {
             mLightSensorValue = value;
