@@ -2042,9 +2042,16 @@ final class WebViewCore {
                 // know the exact scale. If mRestoredScale is non-zero, use it;
                 // otherwise just use mTextWrapScale as the initial scale.
                 data.mScale = mRestoreState.mViewScale == 0
-                        ? (mRestoredScale > 0 ? mRestoredScale
+                        ? (mRestoredScale > 0 ? mRestoredScale / 100.0f
                                 : mRestoreState.mTextWrapScale)
                         : mRestoreState.mViewScale;
+                if (DebugFlags.WEB_VIEW_CORE) {
+                    Log.v(LOGTAG, "setupViewport"
+                             + " mRestoredScale=" + mRestoredScale
+                             + " mViewScale=" + mRestoreState.mViewScale
+                             + " mTextWrapScale=" + mRestoreState.mTextWrapScale
+                             );
+                }
                 data.mWidth = Math.round(webViewWidth / data.mScale);
                 data.mHeight = mCurrentViewHeight * data.mWidth / viewportWidth;
                 data.mTextWrapWidth = Math.round(webViewWidth
