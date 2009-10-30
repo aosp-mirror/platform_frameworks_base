@@ -60,12 +60,11 @@ public class MobileDataStateTracker extends NetworkStateTracker {
      * @param apnType the Phone apnType
      * @param tag the name of this network
      */
-    public MobileDataStateTracker(Context context, Handler target,
-            int netType, String apnType, String tag) {
+    public MobileDataStateTracker(Context context, Handler target, int netType, String tag) {
         super(context, target, netType,
                 TelephonyManager.getDefault().getNetworkType(), tag,
                 TelephonyManager.getDefault().getNetworkTypeName());
-        mApnType = apnType;
+        mApnType = networkTypeToApnType(netType);
         mPhoneService = null;
         if(netType == ConnectivityManager.TYPE_MOBILE) {
             mEnabled = true;
@@ -500,5 +499,23 @@ public class MobileDataStateTracker extends NetworkStateTracker {
         Log.w(TAG, "Could not " + (enable ? "enable" : "disable")
                 + " APN type \"" + apnType + "\"");
         return Phone.APN_REQUEST_FAILED;
+    }
+
+    public static String networkTypeToApnType(int netType) {
+        switch(netType) {
+            case ConnectivityManager.TYPE_MOBILE:
+                return Phone.APN_TYPE_DEFAULT;  // TODO - use just one of these
+            case ConnectivityManager.TYPE_MOBILE_MMS:
+                return Phone.APN_TYPE_MMS;
+            case ConnectivityManager.TYPE_MOBILE_SUPL:
+                return Phone.APN_TYPE_SUPL;
+            case ConnectivityManager.TYPE_MOBILE_DUN:
+                return Phone.APN_TYPE_DUN;
+            case ConnectivityManager.TYPE_MOBILE_HIPRI:
+                return Phone.APN_TYPE_HIPRI;
+            default:
+                Log.e(TAG, "Error mapping networkType " + netType + " to apnType.");
+                return null;
+        }
     }
 }

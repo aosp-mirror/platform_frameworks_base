@@ -114,45 +114,24 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         public NetworkAttributes(String init) {
             String fragments[] = init.split(",");
             mName = fragments[0].toLowerCase();
-            if (fragments[1].toLowerCase().equals("wifi")) {
-                mRadio = ConnectivityManager.TYPE_WIFI;
-            } else {
-                mRadio = ConnectivityManager.TYPE_MOBILE;
-            }
-            if (mName.equals("default")) {
-                mType = mRadio;
-            } else if (mName.equals("mms")) {
-                mType = ConnectivityManager.TYPE_MOBILE_MMS;
-            } else if (mName.equals("supl")) {
-                mType = ConnectivityManager.TYPE_MOBILE_SUPL;
-            } else if (mName.equals("dun")) {
-                mType = ConnectivityManager.TYPE_MOBILE_DUN;
-            } else if (mName.equals("hipri")) {
-                mType = ConnectivityManager.TYPE_MOBILE_HIPRI;
-            }
-            mPriority = Integer.parseInt(fragments[2]);
+            mType = Integer.parseInt(fragments[1]);
+            mRadio = Integer.parseInt(fragments[2]);
+            mPriority = Integer.parseInt(fragments[3]);
         }
         public boolean isDefault() {
             return (mType == mRadio);
         }
     }
     NetworkAttributes[] mNetAttributes;
+    int mNetworksDefined;
 
     private class RadioAttributes {
-        public String mName;
-        public int mPriority;
         public int mSimultaneity;
         public int mType;
         public RadioAttributes(String init) {
             String fragments[] = init.split(",");
-            mName = fragments[0].toLowerCase();
-            mPriority = Integer.parseInt(fragments[1]);
-            mSimultaneity = Integer.parseInt(fragments[2]);
-            if (mName.equals("wifi")) {
-                mType = ConnectivityManager.TYPE_WIFI;
-            } else {
-                mType = ConnectivityManager.TYPE_MOBILE;
-            }
+            mType = Integer.parseInt(fragments[0]);
+            mSimultaneity = Integer.parseInt(fragments[1]);
         }
     }
     RadioAttributes[] mRadioAttributes;
@@ -209,48 +188,87 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
         mNetworkPreference = getPersistedNetworkPreference();
 
+        mRadioAttributes = new RadioAttributes[ConnectivityManager.MAX_RADIO_TYPE+1];
+        mNetAttributes = new NetworkAttributes[ConnectivityManager.MAX_NETWORK_TYPE+1];
+
         // Load device network attributes from resources
-        mNetAttributes = new NetworkAttributes[
-                ConnectivityManager.MAX_NETWORK_TYPE+1];
-        mRadioAttributes = new RadioAttributes[
-                ConnectivityManager.MAX_RADIO_TYPE+1];
-        String[] naStrings = context.getResources().getStringArray(
-                com.android.internal.R.array.networkAttributes);
-        // TODO - what if the setting has gaps/unknown types?
-        for (String a : naStrings) {
-            NetworkAttributes n = new NetworkAttributes(a);
-            mNetAttributes[n.mType] = n;
-        }
         String[] raStrings = context.getResources().getStringArray(
                 com.android.internal.R.array.radioAttributes);
-        for (String a : raStrings) {
-            RadioAttributes r = new RadioAttributes(a);
+        for (String raString : raStrings) {
+            RadioAttributes r = new RadioAttributes(raString);
+            if (r.mType > ConnectivityManager.MAX_RADIO_TYPE) {
+                Log.e(TAG, "Error in radioAttributes - ignoring attempt to define type " + r.mType);
+                continue;
+            }
+            if (mRadioAttributes[r.mType] != null) {
+                Log.e(TAG, "Error in radioAttributes - ignoring attempt to redefine type " +
+                        r.mType);
+                continue;
+            }
             mRadioAttributes[r.mType] = r;
         }
 
-        // high priority first
-        mPriorityList = new int[naStrings.length];
-        {
-            int priority = 0; //lowest
-            int nextPos = naStrings.length-1;
-            while (nextPos>-1) {
-                for (int i = 0; i < mNetAttributes.length; i++) {
-                    if(mNetAttributes[i].mPriority == priority) {
-                        mPriorityList[nextPos--] = i;
-                    }
+        String[] naStrings = context.getResources().getStringArray(
+                com.android.internal.R.array.networkAttributes);
+        for (String naString : naStrings) {
+            try {
+                NetworkAttributes n = new NetworkAttributes(naString);
+                if (n.mType > ConnectivityManager.MAX_NETWORK_TYPE) {
+                    Log.e(TAG, "Error in networkAttributes - ignoring attempt to define type " +
+                            n.mType);
+                    continue;
                 }
-                priority++;
+                if (mNetAttributes[n.mType] != null) {
+                    Log.e(TAG, "Error in networkAttributes - ignoring attempt to redefine type " +
+                            n.mType);
+                    continue;
+                }
+                if (mRadioAttributes[n.mRadio] == null) {
+                    Log.e(TAG, "Error in networkAttributes - ignoring attempt to use undefined " +
+                            "radio " + n.mRadio + " in network type " + n.mType);
+                    continue;
+                }
+                mNetAttributes[n.mType] = n;
+                mNetworksDefined++;
+            } catch(Exception e) {
+                // ignore it - leave the entry null
             }
         }
 
-        mNetRequestersPids =
-                new ArrayList[ConnectivityManager.MAX_NETWORK_TYPE+1];
-        for (int i=0; i<=ConnectivityManager.MAX_NETWORK_TYPE; i++) {
+        // high priority first
+        mPriorityList = new int[mNetworksDefined];
+        {
+            int insertionPoint = mNetworksDefined-1;
+            int currentLowest = 0;
+            int nextLowest = 0;
+            while (insertionPoint > -1) {
+                for (NetworkAttributes na : mNetAttributes) {
+                    if (na == null) continue;
+                    if (na.mPriority < currentLowest) continue;
+                    if (na.mPriority > currentLowest) {
+                        if (na.mPriority < nextLowest || nextLowest == 0) {
+                            nextLowest = na.mPriority;
+                        }
+                        continue;
+                    }
+                    mPriorityList[insertionPoint--] = na.mType;
+                }
+                currentLowest = nextLowest;
+                nextLowest = 0;
+            }
+        }
+
+        mNetRequestersPids = new ArrayList[ConnectivityManager.MAX_NETWORK_TYPE+1];
+        for (int i : mPriorityList) {
             mNetRequestersPids[i] = new ArrayList();
         }
 
         mFeatureUsers = new ArrayList();
 
+        mNumDnsEntries = 0;
+
+        mTestMode = SystemProperties.get("cm.test.mode").equals("true")
+                && SystemProperties.get("ro.build.type").equals("eng");
         /*
          * Create the network state trackers for Wi-Fi and mobile
          * data. Maybe this could be done with a factory class,
@@ -258,48 +276,32 @@ public class ConnectivityService extends IConnectivityManager.Stub {
          * the number of different network types is not going
          * to change very often.
          */
-        if (DBG) Log.v(TAG, "Starting Wifi Service.");
-        WifiStateTracker wst = new WifiStateTracker(context, mHandler);
-        WifiService wifiService = new WifiService(context, wst);
-        ServiceManager.addService(Context.WIFI_SERVICE, wifiService);
-        mNetTrackers[ConnectivityManager.TYPE_WIFI] = wst;
+        for (int netType : mPriorityList) {
+            switch (mNetAttributes[netType].mRadio) {
+            case ConnectivityManager.TYPE_WIFI:
+                if (DBG) Log.v(TAG, "Starting Wifi Service.");
+                WifiStateTracker wst = new WifiStateTracker(context, mHandler);
+                WifiService wifiService = new WifiService(context, wst);
+                ServiceManager.addService(Context.WIFI_SERVICE, wifiService);
+                mNetTrackers[ConnectivityManager.TYPE_WIFI] = wst;
+                wst.startMonitoring();
 
-        mNetTrackers[ConnectivityManager.TYPE_MOBILE] =
-                new MobileDataStateTracker(context, mHandler,
-                ConnectivityManager.TYPE_MOBILE, Phone.APN_TYPE_DEFAULT,
-                "MOBILE");
-
-        mNetTrackers[ConnectivityManager.TYPE_MOBILE_MMS] =
-                new MobileDataStateTracker(context, mHandler,
-                ConnectivityManager.TYPE_MOBILE_MMS, Phone.APN_TYPE_MMS,
-                "MOBILE_MMS");
-
-        mNetTrackers[ConnectivityManager.TYPE_MOBILE_SUPL] =
-                new MobileDataStateTracker(context, mHandler,
-                ConnectivityManager.TYPE_MOBILE_SUPL, Phone.APN_TYPE_SUPL,
-                "MOBILE_SUPL");
-
-        mNetTrackers[ConnectivityManager.TYPE_MOBILE_DUN] =
-                new MobileDataStateTracker(context, mHandler,
-                ConnectivityManager.TYPE_MOBILE_DUN, Phone.APN_TYPE_DUN,
-                "MOBILE_DUN");
-
-        mNetTrackers[ConnectivityManager.TYPE_MOBILE_HIPRI] =
-                new MobileDataStateTracker(context, mHandler,
-                ConnectivityManager.TYPE_MOBILE_HIPRI, Phone.APN_TYPE_HIPRI,
-                "MOBILE_HIPRI");
-
-        mNumDnsEntries = 0;
-
-        mTestMode = SystemProperties.get("cm.test.mode").equals("true")
-                && SystemProperties.get("ro.build.type").equals("eng");
-
-        for (NetworkStateTracker t : mNetTrackers)
-            t.startMonitoring();
-
-        // Constructing this starts it too
-        mWifiWatchdogService = new WifiWatchdogService(context, wst);
+                // Constructing this starts it too
+                mWifiWatchdogService = new WifiWatchdogService(context, wst);
+                break;
+            case ConnectivityManager.TYPE_MOBILE:
+                mNetTrackers[netType] = new MobileDataStateTracker(context, mHandler,
+                    netType, mNetAttributes[netType].mName);
+                mNetTrackers[netType].startMonitoring();
+                break;
+            default:
+                Log.e(TAG, "Trying to create a DataStateTracker for an unknown radio type " +
+                        mNetAttributes[netType].mRadio);
+                continue;
+            }
+        }
     }
+
 
     /**
      * Sets the preferred network.
@@ -308,6 +310,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     public synchronized void setNetworkPreference(int preference) {
         enforceChangePermission();
         if (ConnectivityManager.isNetworkTypeValid(preference) &&
+                mNetAttributes[preference] != null &&
                 mNetAttributes[preference].isDefault()) {
             if (mNetworkPreference != preference) {
                 persistNetworkPreference(preference);
@@ -355,7 +358,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             return;
 
         for (int t=0; t <= ConnectivityManager.MAX_RADIO_TYPE; t++) {
-            if (t != mNetworkPreference &&
+            if (t != mNetworkPreference && mNetTrackers[t] != null &&
                     mNetTrackers[t].getNetworkInfo().isConnected()) {
                 if (DBG) {
                     Log.d(TAG, "tearing down " +
@@ -386,7 +389,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     public NetworkInfo getActiveNetworkInfo() {
         enforceAccessPermission();
         for (int type=0; type <= ConnectivityManager.MAX_NETWORK_TYPE; type++) {
-            if (!mNetAttributes[type].isDefault()) {
+            if (mNetAttributes[type] == null || !mNetAttributes[type].isDefault()) {
                 continue;
             }
             NetworkStateTracker t = mNetTrackers[type];
@@ -413,10 +416,10 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
     public NetworkInfo[] getAllNetworkInfo() {
         enforceAccessPermission();
-        NetworkInfo[] result = new NetworkInfo[mNetTrackers.length];
+        NetworkInfo[] result = new NetworkInfo[mNetworksDefined];
         int i = 0;
         for (NetworkStateTracker t : mNetTrackers) {
-            result[i++] = t.getNetworkInfo();
+            if(t != null) result[i++] = t.getNetworkInfo();
         }
         return result;
     }
@@ -425,7 +428,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         boolean result = true;
         enforceChangePermission();
         for (NetworkStateTracker t : mNetTrackers) {
-            result = t.setRadio(turnOn) && result;
+            if (t != null) result = t.setRadio(turnOn) && result;
         }
         return result;
     }
@@ -493,7 +496,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                     ": " + feature);
         }
         enforceChangePermission();
-        if (!ConnectivityManager.isNetworkTypeValid(networkType)) {
+        if (!ConnectivityManager.isNetworkTypeValid(networkType) ||
+                mNetAttributes[networkType] == null) {
             return Phone.APN_REQUEST_FAILED;
         }
 
@@ -659,7 +663,10 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 }
             }
             tracker =  mNetTrackers[usedNetworkType];
-            if(usedNetworkType != networkType) {
+            if (tracker == null) {
+                return -1;
+            }
+            if (usedNetworkType != networkType) {
                 Integer currentPid = new Integer(pid);
                 reassessPidDns(pid, true);
                 mNetRequestersPids[usedNetworkType].remove(currentPid);
@@ -697,9 +704,10 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         }
         NetworkStateTracker tracker = mNetTrackers[networkType];
 
-        if (!tracker.getNetworkInfo().isConnected() || tracker.isTeardownRequested()) {
+        if (tracker == null || !tracker.getNetworkInfo().isConnected() ||
+                tracker.isTeardownRequested()) {
             if (DBG) {
-                Log.d(TAG, "requestRouteToHost on down network (" + networkType + " - dropped");
+                Log.d(TAG, "requestRouteToHost on down network (" + networkType + ") - dropped");
             }
             return false;
         }
@@ -737,7 +745,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         int numConnectedNets = 0;
 
         for (NetworkStateTracker nt : mNetTrackers) {
-            if (nt.getNetworkInfo().isConnected() &&
+            if (nt != null && nt.getNetworkInfo().isConnected() &&
                     !nt.isTeardownRequested()) {
                 ++numConnectedNets;
             }
@@ -814,9 +822,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             int newPriority = -1;
             for (int checkType=0; checkType <=
                     ConnectivityManager.MAX_NETWORK_TYPE; checkType++) {
-                if (checkType == prevNetType) {
-                    continue;
-                }
+                if (checkType == prevNetType) continue;
+                if (mNetAttributes[checkType] == null) continue;
                 if (mNetAttributes[checkType].isDefault()) {
                     /* TODO - if we have multiple nets we could use
                      * we may want to put more thought into which we choose
@@ -825,11 +832,9 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                         newType = checkType;
                         break;
                     }
-                    if (mRadioAttributes[mNetAttributes[checkType].mRadio].
-                            mPriority > newPriority) {
+                    if (mNetAttributes[checkType].mPriority > newPriority) {
                         newType = checkType;
-                        newPriority = mRadioAttributes[mNetAttributes[newType].
-                                mRadio].mPriority;
+                        newPriority = mNetAttributes[newType].mPriority;
                     }
                 }
             }
@@ -1198,7 +1203,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         }
         pw.println();
         for (NetworkStateTracker nst : mNetTrackers) {
-            if (nst.getNetworkInfo().isConnected()) {
+            if (nst != null && nst.getNetworkInfo().isConnected()) {
                 pw.println("Active network: " + nst.getNetworkInfo().
                         getTypeName());
             }
