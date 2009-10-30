@@ -428,14 +428,6 @@ public class AccountManagerService
         checkManageAccountsPermission();
         long identityToken = clearCallingIdentity();
         try {
-            if (account == null) {
-                try {
-                    response.onError(AccountManager.ERROR_CODE_BAD_ARGUMENTS, "null account");
-                } catch (RemoteException e) {
-                    // it doesn't matter if we are unable to deliver this error
-                }
-                return;
-            }
             new RemoveAccountSession(response, account).bind();
         } finally {
             restoreCallingIdentity(identityToken);
@@ -705,22 +697,6 @@ public class AccountManagerService
 
         long identityToken = clearCallingIdentity();
         try {
-            try {
-                if (account == null) {
-                    response.onError(AccountManager.ERROR_CODE_BAD_ARGUMENTS,
-                            "account is null");
-                    return;
-                }
-                if (authTokenType == null) {
-                    response.onError(AccountManager.ERROR_CODE_BAD_ARGUMENTS,
-                            "authTokenType is null");
-                    return;
-                }
-            } catch (RemoteException e) {
-                // it doesn't matter if we can't deliver this error
-                return;
-            }
-
             // if the caller has permission, do the peek. otherwise go the more expensive
             // route of starting a Session
             if (permissionGranted) {
@@ -886,16 +862,6 @@ public class AccountManagerService
         checkManageAccountsPermission();
         long identityToken = clearCallingIdentity();
         try {
-            try {
-                if (authTokenType == null) {
-                    response.onError(AccountManager.ERROR_CODE_BAD_ARGUMENTS,
-                            "authTokenType is null");
-                    return;
-                }
-            } catch (RemoteException e) {
-                // it doesn't matter if we can't deliver this error
-                return;
-            }
             new Session(response, accountType, expectActivityLaunch) {
                 public void run() throws RemoteException {
                     mAuthenticator.addAccount(this, mAccountType, authTokenType, requiredFeatures,
@@ -921,16 +887,6 @@ public class AccountManagerService
         checkManageAccountsPermission();
         long identityToken = clearCallingIdentity();
         try {
-            try {
-                if (account == null) {
-                    response.onError(AccountManager.ERROR_CODE_BAD_ARGUMENTS,
-                            "account is null");
-                    return;
-                }
-            } catch (RemoteException e) {
-                // it doesn't matter if we can't deliver this error
-                return;
-            }
             new Session(response, account.type, expectActivityLaunch) {
                 public void run() throws RemoteException {
                     mAuthenticator.confirmCredentials(this, account, options);
@@ -951,16 +907,6 @@ public class AccountManagerService
         checkManageAccountsPermission();
         long identityToken = clearCallingIdentity();
         try {
-            try {
-                if (account == null) {
-                    response.onError(AccountManager.ERROR_CODE_BAD_ARGUMENTS,
-                            "account is null");
-                    return;
-                }
-            } catch (RemoteException e) {
-                // it doesn't matter if we can't deliver this error
-                return;
-            }
             new Session(response, account.type, expectActivityLaunch) {
                 public void run() throws RemoteException {
                     mAuthenticator.updateCredentials(this, account, authTokenType, loginOptions);
@@ -983,16 +929,6 @@ public class AccountManagerService
         checkManageAccountsPermission();
         long identityToken = clearCallingIdentity();
         try {
-            try {
-                if (accountType == null) {
-                    response.onError(AccountManager.ERROR_CODE_BAD_ARGUMENTS,
-                            "accountType is null");
-                    return;
-                }
-            } catch (RemoteException e) {
-                // it doesn't matter if we can't deliver this error
-                return;
-            }
             new Session(response, accountType, expectActivityLaunch) {
                 public void run() throws RemoteException {
                     mAuthenticator.editProperties(this, mAccountType);
