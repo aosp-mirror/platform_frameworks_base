@@ -6344,7 +6344,9 @@ class PackageManagerService extends IPackageManager.Stub {
                     continue;
                 }
                 for (PackageSetting pkg:sus.packages) {
-                    if (pkg.pkg.requestedPermissions.contains(eachPerm)) {
+                    if (pkg.pkg != null &&
+                            !pkg.pkg.packageName.equalsIgnoreCase(deletedPs.pkg.packageName) &&
+                            pkg.pkg.requestedPermissions.contains(eachPerm)) {
                         used = true;
                         break;
                     }
@@ -6359,7 +6361,9 @@ class PackageManagerService extends IPackageManager.Stub {
             int newGids[] = globalGids;
             for (String eachPerm : sus.grantedPermissions) {
                 BasePermission bp = mPermissions.get(eachPerm);
-                newGids = appendInts(newGids, bp.gids);
+                if (bp != null) {
+                    newGids = appendInts(newGids, bp.gids);
+                }
             }
             sus.gids = newGids;
         }
