@@ -68,7 +68,7 @@ int main(int argc, char** argv)
      
      glBindTexture(GL_TEXTURE_2D, 0);
      glTexParameterx(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-     glTexParameterx(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+     glTexParameterx(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
      glTexParameterx(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
      glTexParameterx(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
      glTexEnvx(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
@@ -77,7 +77,9 @@ int main(int argc, char** argv)
      glEnable(GL_TEXTURE_2D);
      glColor4f(1,1,1,1);
 
-     const uint16_t t16[64] = { 0xFFFF, 0xF800, 0x07E0, 0x001F };
+
+     // default pack-alignment is 4
+     const uint16_t t16[64] = { 0xFFFF, 0, 0xF800, 0, 0x07E0, 0, 0x001F, 0 };
 
      const GLfloat vertices[4][2] = {
              { w/2,  0 },
