@@ -1677,7 +1677,7 @@ EGLImageKHR eglCreateImageKHR(EGLDisplay dpy, EGLContext ctx, EGLenum target,
         } else {
             // In case of success, we need to clear all error flags
             // (especially those caused by the implementation that didn't
-            // succeed). TODO: we could about this if we knew this was
+            // succeed). TODO: we could avoid this if we knew this was
             // a "full" success (all implementation succeeded).
             eglGetError();
         }
