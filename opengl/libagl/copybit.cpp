@@ -74,6 +74,7 @@ private:
     static int iterate_done(copybit_region_t const *, copybit_rect_t*) {
         return 0;
     }
+public:
     copybit_rect_t r;
 };
 
@@ -421,6 +422,19 @@ static bool copybit(GLint x, GLint y,
                 (enables & GGL_ENABLE_DITHER) ?
                         COPYBIT_ENABLE : COPYBIT_DISABLE);
         clipRectRegion it(c);
+
+        LOGD("dst={%d, %d, %d, %p, %p}, "
+             "src={%d, %d, %d, %p, %p}, "
+             "drect={%d,%d,%d,%d}, "
+             "srect={%d,%d,%d,%d}, "
+             "it={%d,%d,%d,%d}, " ,
+             dst.w, dst.h, dst.format, dst.base, dst.handle,
+             src.w, src.h, src.format, src.base, src.handle,
+             drect.l, drect.t, drect.r, drect.b,
+             srect.l, srect.t, srect.r, srect.b,
+             it.r.l, it.r.t, it.r.r, it.r.b
+        );
+
         err = copybit->stretch(copybit, &dst, &src, &drect, &srect, &it);
     }
     if (err != NO_ERROR) {
