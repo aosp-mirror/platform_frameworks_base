@@ -865,7 +865,11 @@ status_t CameraService::Client::takePicture()
 }
 
 // snapshot taken
-void CameraService::Client::handleShutter()
+void CameraService::Client::handleShutter(
+    image_rect_type *size // The width and height of yuv picture for
+                          // registerBuffer. If this is NULL, use the picture
+                          // size from parameters.
+)
 {
     // Play shutter sound.
     if (mMediaPlayerClick.get() != NULL) {
@@ -889,11 +893,20 @@ void CameraService::Client::handleShutter()
     if (mSurface != 0 && !mUseOverlay) {
         int w, h;
         CameraParameters params(mHardware->getParameters());
-        params.getPictureSize(&w, &h);
         uint32_t transform = 0;
         if (params.getOrientation() == CameraParameters::CAMERA_ORIENTATION_PORTRAIT) {
             LOGV("portrait mode");
             transform = ISurface::BufferHeap::ROT_90;
+        }
+
+        if (size == NULL) {
+            params.getPictureSize(&w, &h);
+        } else {
+            w = size->width;
+            h = size->height;
+            w &= ~1;
+            h &= ~1;
+            LOGD("Snapshot image width=%d, height=%d", w, h);
         }
         ISurface::BufferHeap buffers(w, h, w, h,
             PIXEL_FORMAT_YCbCr_420_SP, transform, 0, mHardware->getRawHeap());
@@ -1048,7 +1061,8 @@ void CameraService::Client::notifyCallback(int32_t msgType, int32_t ext1, int32_
 
     switch (msgType) {
         case CAMERA_MSG_SHUTTER:
-            client->handleShutter();
+            // ext1 is the dimension of the yuv picture.
+            client->handleShutter((image_rect_type *)ext1);
             break;
         default:
             sp<ICameraClient> c = client->mCameraClient;
