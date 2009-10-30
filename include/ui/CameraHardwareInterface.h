@@ -25,6 +25,15 @@
 #include <ui/Overlay.h>
 
 namespace android {
+/**
+ *  The size of image for display.
+ */
+typedef struct image_rect_struct
+{
+  uint32_t width;      /* Image width */
+  uint32_t height;     /* Image height */
+} image_rect_type;
+
 
 typedef void (*notify_callback)(int32_t msgType,
                                 int32_t ext1,
