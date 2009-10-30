@@ -24,6 +24,7 @@ namespace android {
 
 class PVMediaRecorder;
 class ISurface;
+class MediaPlayerService;
 
 class MediaRecorderClient : public BnMediaRecorder
 {
@@ -53,12 +54,13 @@ public:
 private:
     friend class                 MediaPlayerService;  // for accessing private constructor
 
-                                 MediaRecorderClient(pid_t pid);
+                                 MediaRecorderClient(const sp<MediaPlayerService>& service, pid_t pid);
     virtual 		         ~MediaRecorderClient();
 
     pid_t			 mPid;
     Mutex			 mLock;
     PVMediaRecorder              *mRecorder;
+    sp<MediaPlayerService>       mMediaPlayerService;
 };
 
 }; // namespace android
