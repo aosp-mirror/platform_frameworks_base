@@ -313,6 +313,8 @@ public class VCardComposer {
 
     private boolean mIsCallLogComposer = false;
 
+    private boolean mNeedPhotoForVCard = true;
+
     private static final String[] sContactsProjection = new String[] {
         Contacts._ID,
     };
@@ -332,17 +334,17 @@ public class VCardComposer {
     private static final String FLAG_TIMEZONE_UTC = "Z";
 
     public VCardComposer(Context context) {
-        this(context, VCardConfig.VCARD_TYPE_DEFAULT, true, false);
+        this(context, VCardConfig.VCARD_TYPE_DEFAULT, true, false, true);
     }
 
     public VCardComposer(Context context, String vcardTypeStr,
             boolean careHandlerErrors) {
         this(context, VCardConfig.getVCardTypeFromString(vcardTypeStr),
-                careHandlerErrors, false);
+                careHandlerErrors, false, true);
     }
 
     public VCardComposer(Context context, int vcardType, boolean careHandlerErrors) {
-        this(context, vcardType, careHandlerErrors, false);
+        this(context, vcardType, careHandlerErrors, false, true);
     }
 
     /**
@@ -351,11 +353,12 @@ public class VCardComposer {
      * @param isCallLogComposer true if this composer is for creating Call Log vCard.
      */
     public VCardComposer(Context context, int vcardType, boolean careHandlerErrors,
-            boolean isCallLogComposer) {
+            boolean isCallLogComposer, boolean needPhotoInVCard) {
         mContext = context;
         mVCardType = vcardType;
         mCareHandlerErrors = careHandlerErrors;
         mIsCallLogComposer = isCallLogComposer;
+        mNeedPhotoForVCard = needPhotoInVCard;
         mContentResolver = context.getContentResolver();
 
         mIsV30 = VCardConfig.isV30(vcardType);
@@ -679,7 +682,9 @@ public class VCardComposer {
         appendWebsites(builder, contentValuesListMap);
         appendBirthday(builder, contentValuesListMap);
         appendOrganizations(builder, contentValuesListMap);
-        appendPhotos(builder, contentValuesListMap);
+        if (mNeedPhotoForVCard) {
+            appendPhotos(builder, contentValuesListMap);
+        }
         appendNotes(builder, contentValuesListMap);
         // TODO: GroupMembership
 
