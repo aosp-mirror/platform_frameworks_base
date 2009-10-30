@@ -70,7 +70,8 @@ public class LoadTestsAutoTest extends ActivityInstrumentationTestCase2<TestShel
         freeMem();
 
         // Run tests
-        runTestAndWaitUntilDone(activity, runner.mTestPath, runner.mTimeoutInMillis);
+        runTestAndWaitUntilDone(activity, runner.mTestPath, runner.mTimeoutInMillis,
+                runner.mGetDrawTime, runner.mSaveImagePath);
 
         activity.clearCache();
         try {
@@ -161,7 +162,8 @@ public class LoadTestsAutoTest extends ActivityInstrumentationTestCase2<TestShel
     }
 
     // A convenient method to be called by another activity.
-    private void runTestAndWaitUntilDone(TestShellActivity activity, String url, int timeout) {
+    private void runTestAndWaitUntilDone(TestShellActivity activity, String url, int timeout,
+            boolean getDrawTime, String saveImagePath) {
         activity.setCallback(new TestShellCallback() {
             public void finished() {
                 synchronized (LoadTestsAutoTest.this) {
@@ -181,6 +183,9 @@ public class LoadTestsAutoTest extends ActivityInstrumentationTestCase2<TestShel
         intent.putExtra(TestShellActivity.TEST_URL, url);
         intent.putExtra(TestShellActivity.TIMEOUT_IN_MILLIS, timeout);
         intent.putExtra(TestShellActivity.RESULT_FILE, LOAD_TEST_RESULT);
+        intent.putExtra(TestShellActivity.GET_DRAW_TIME, getDrawTime);
+        if (saveImagePath != null)
+            intent.putExtra(TestShellActivity.SAVE_IMAGE, saveImagePath);
         activity.startActivity(intent);
 
         // Wait until done.
