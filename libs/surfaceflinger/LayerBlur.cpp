@@ -40,9 +40,10 @@ const char* const LayerBlur::typeID = "LayerBlur";
 
 LayerBlur::LayerBlur(SurfaceFlinger* flinger, DisplayID display,
         const sp<Client>& client, int32_t i)
-: LayerBaseClient(flinger, display, client, i), mCacheDirty(true),
-mRefreshCache(true), mCacheAge(0), mTextureName(-1U), 
-mWidthScale(1.0f), mHeightScale(1.0f)
+    : LayerBaseClient(flinger, display, client, i), mCacheDirty(true),
+          mRefreshCache(true), mCacheAge(0), mTextureName(-1U),
+          mWidthScale(1.0f), mHeightScale(1.0f),
+          mBlurFormat(GGL_PIXEL_FORMAT_RGB_565)
 {
 }
 
