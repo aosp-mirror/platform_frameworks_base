@@ -91,6 +91,11 @@ private:
         copybit_rect_t    crop;
     };
 
+    static gralloc_module_t const* sGrallocModule;
+    static gralloc_module_t const* getGrallocModule() {
+        return sGrallocModule;
+    }
+
     class Buffer : public LightRefBase<Buffer> {
     public:
         Buffer(const ISurface::BufferHeap& buffers, ssize_t offset);

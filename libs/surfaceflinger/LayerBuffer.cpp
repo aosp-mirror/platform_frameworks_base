@@ -33,14 +33,13 @@
 #include "SurfaceFlinger.h"
 #include "DisplayHardware/DisplayHardware.h"
 
-#include "gralloc_priv.h"   // needed for msm / copybit
-
 namespace android {
 
 // ---------------------------------------------------------------------------
 
 const uint32_t LayerBuffer::typeInfo = LayerBaseClient::typeInfo | 0x20;
 const char* const LayerBuffer::typeID = "LayerBuffer";
+gralloc_module_t const* LayerBuffer::sGrallocModule = 0;
 
 // ---------------------------------------------------------------------------
 
@@ -60,6 +59,16 @@ void LayerBuffer::onFirstRef()
     LayerBaseClient::onFirstRef();
     mSurface = new SurfaceLayerBuffer(mFlinger, clientIndex(),
             const_cast<LayerBuffer *>(this));
+
+    hw_module_t const* module = (hw_module_t const*)sGrallocModule;
+    if (!module) {
+        // NOTE: technically there is a race here, but it shouldn't
+        // cause any problem since hw_get_module() always returns
+        // the same value.
+        if (hw_get_module(GRALLOC_HARDWARE_MODULE_ID, &module) == 0) {
+            sGrallocModule = (gralloc_module_t const *)module;
+        }
+    }
 }
 
 sp<LayerBaseClient::Surface> LayerBuffer::createSurface() const
@@ -243,30 +252,36 @@ LayerBuffer::Buffer::Buffer(const ISurface::BufferHeap& buffers, ssize_t offset)
     : mBufferHeap(buffers)
 {
     NativeBuffer& src(mNativeBuffer);
-    
-    src.crop.l = 0;
-    src.crop.t = 0;
-    src.crop.r = buffers.w;
-    src.crop.b = buffers.h;
-    
-    src.img.w       = buffers.hor_stride ?: buffers.w;
-    src.img.h       = buffers.ver_stride ?: buffers.h;
-    src.img.format  = buffers.format;
-    src.img.base    = (void*)(intptr_t(buffers.heap->base()) + offset);
+    src.img.handle = 0;
 
-    // FIXME: gross hack, we should never access private_handle_t from here,
-    // but this is needed by msm drivers
-    private_handle_t* hnd = new private_handle_t(
-            buffers.heap->heapID(), buffers.heap->getSize(), 0);
-    hnd->offset = offset;
-    src.img.handle = hnd;
+    gralloc_module_t const * module = LayerBuffer::getGrallocModule();
+    if (module && module->perform) {
+        int err = module->perform(module,
+                GRALLOC_MODULE_PERFORM_CREATE_HANDLE_FROM_BUFFER,
+                buffers.heap->heapID(), buffers.heap->getSize(),
+                offset, buffers.heap->base(),
+                &src.img.handle);
+
+        if (err == NO_ERROR) {
+            src.crop.l = 0;
+            src.crop.t = 0;
+            src.crop.r = buffers.w;
+            src.crop.b = buffers.h;
+
+            src.img.w       = buffers.hor_stride ?: buffers.w;
+            src.img.h       = buffers.ver_stride ?: buffers.h;
+            src.img.format  = buffers.format;
+            src.img.base    = (void*)(intptr_t(buffers.heap->base()) + offset);
+        }
+    }
 }
 
 LayerBuffer::Buffer::~Buffer()
 {
     NativeBuffer& src(mNativeBuffer);
-    if (src.img.handle)
-        delete (private_handle_t*)src.img.handle;
+    if (src.img.handle) {
+        native_handle_delete(src.img.handle);
+    }
 }
 
 // ============================================================================
