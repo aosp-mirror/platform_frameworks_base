@@ -1,6 +1,7 @@
 #include "GraphicsJNI.h"
 #include "SkMaskFilter.h"
 #include "SkBlurMaskFilter.h"
+#include "SkTableMaskFilter.h"
 
 #include <jni.h>
 
@@ -39,6 +40,19 @@ public:
         ThrowIAE_IfNull(env, filter);
         return filter;
     }
+
+    static SkMaskFilter* createTable(JNIEnv* env, jobject, jbyteArray jtable) {
+        AutoJavaByteArray autoTable(env, jtable, 256);
+        return new SkTableMaskFilter((const uint8_t*)autoTable.ptr());
+    }
+
+    static SkMaskFilter* createClipTable(JNIEnv* env, jobject, int min, int max) {
+        return SkTableMaskFilter::CreateClip(min, max);
+    }
+
+    static SkMaskFilter* createGammaTable(JNIEnv* env, jobject, float gamma) {
+        return SkTableMaskFilter::CreateGamma(gamma);
+    }
 };
 
 static JNINativeMethod gMaskFilterMethods[] = {
@@ -51,6 +65,12 @@ static JNINativeMethod gBlurMaskFilterMethods[] = {
 
 static JNINativeMethod gEmbossMaskFilterMethods[] = {
     { "nativeConstructor",  "([FFFF)I", (void*)SkMaskFilterGlue::createEmboss    }
+};
+
+static JNINativeMethod gTableMaskFilterMethods[] = {
+    { "nativeNewTable", "([B)I", (void*)SkMaskFilterGlue::createTable    },
+    { "nativeNewClip",  "(II)I", (void*)SkMaskFilterGlue::createClipTable    },
+    { "nativeNewGamma", "(F)I", (void*)SkMaskFilterGlue::createGammaTable    }
 };
 
 #include <android_runtime/AndroidRuntime.h>
@@ -67,6 +87,7 @@ int register_android_graphics_MaskFilter(JNIEnv* env)
     REG(env, "android/graphics/MaskFilter", gMaskFilterMethods);
     REG(env, "android/graphics/BlurMaskFilter", gBlurMaskFilterMethods);
     REG(env, "android/graphics/EmbossMaskFilter", gEmbossMaskFilterMethods);
+    REG(env, "android/graphics/TableMaskFilter", gTableMaskFilterMethods);
     
     return 0;
 }

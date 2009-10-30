@@ -1641,8 +1641,13 @@ EGLImageKHR eglCreateImageKHR(EGLDisplay dpy, EGLContext ctx, EGLenum target,
         if (dp == 0) {
             return setError(EGL_BAD_DISPLAY, EGL_NO_IMAGE_KHR);
         }
-        // since we don't have a way to know which implementation to call,
-        // we're calling all of them
+
+        /* Since we don't have a way to know which implementation to call,
+         * we're calling all of them. If at least one of the implementation
+         * succeeded, this is a success.
+         */
+
+        EGLint currentError = eglGetError();
 
         EGLImageKHR implImages[IMPL_NUM_IMPLEMENTATIONS];
         bool success = false;
@@ -1659,9 +1664,24 @@ EGLImageKHR eglCreateImageKHR(EGLDisplay dpy, EGLContext ctx, EGLenum target,
                 }
             }
         }
-        if (!success)
+
+        if (!success) {
+            // failure, if there was an error when we entered this function,
+            // the error flag must not be updated.
+            // Otherwise, the error is whatever happened in the implementation
+            // that faulted.
+            if (currentError != EGL_SUCCESS) {
+                setError(currentError, EGL_NO_IMAGE_KHR);
+            }
             return EGL_NO_IMAGE_KHR;
-        
+        } else {
+            // In case of success, we need to clear all error flags
+            // (especially those caused by the implementation that didn't
+            // succeed). TODO: we could avoid this if we knew this was
+            // a "full" success (all implementation succeeded).
+            eglGetError();
+        }
+
         egl_image_t* result = new egl_image_t(dpy, ctx);
         memcpy(result->images, implImages, sizeof(implImages));
         return (EGLImageKHR)result;
