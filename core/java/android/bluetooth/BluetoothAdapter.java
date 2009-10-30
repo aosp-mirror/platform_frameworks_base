@@ -597,14 +597,6 @@ public final class BluetoothAdapter {
     /**
      * Picks RFCOMM channels until none are left.
      * Avoids reserved channels.
-     * Ideally we would pick random channels, but in the current implementation
-     * we start with the channel that is the hash of the UUID, and try every
-     * available channel from there. This means that in most cases a given
-     * uuid will use the same channel. This is a workaround for a Bluez SDP
-     * bug where we are not updating the cache when the channel changes for a
-     * uuid.
-     * TODO: Fix the Bluez SDP caching bug, and go back to random channel
-     * selection
      */
     private static class RfcommChannelPicker {
         private static final int[] RESERVED_RFCOMM_CHANNELS =  new int[] {
@@ -637,19 +629,12 @@ public final class BluetoothAdapter {
             }
             mUuid = uuid;
         }
-        /* Returns next channel, or -1 if we're out */
+        /* Returns next random channel, or -1 if we're out */
         public int nextChannel() {
-            int channel = mUuid.hashCode();  // always pick the same channel to try first
-            Integer channelInt;
-            while (mChannels.size() > 0) {
-                channelInt = new Integer(channel);
-                if (mChannels.remove(channelInt)) {
-                    return channel;
-                }
-                channel = (channel % BluetoothSocket.MAX_RFCOMM_CHANNEL) + 1;
+            if (mChannels.size() == 0) {
+                return -1;
             }
-
-            return -1;
+            return mChannels.remove(sRandom.nextInt(mChannels.size()));
         }
     }
 
