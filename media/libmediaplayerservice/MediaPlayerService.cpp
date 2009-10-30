@@ -225,12 +225,22 @@ MediaPlayerService::~MediaPlayerService()
 sp<IMediaRecorder> MediaPlayerService::createMediaRecorder(pid_t pid)
 {
 #ifndef NO_OPENCORE
-    sp<MediaRecorderClient> recorder = new MediaRecorderClient(pid);
+    sp<MediaRecorderClient> recorder = new MediaRecorderClient(this, pid);
+    wp<MediaRecorderClient> w = recorder;
+    Mutex::Autolock lock(mLock);
+    mMediaRecorderClients.add(w);
 #else
     sp<MediaRecorderClient> recorder = NULL;
 #endif
     LOGV("Create new media recorder client from pid %d", pid);
     return recorder;
+}
+
+void MediaPlayerService::removeMediaRecorderClient(wp<MediaRecorderClient> client)
+{
+    Mutex::Autolock lock(mLock);
+    mMediaRecorderClients.remove(client);
+    LOGV("Delete media recorder client");
 }
 
 sp<IMediaMetadataRetriever> MediaPlayerService::createMetadataRetriever(pid_t pid)
@@ -499,6 +509,13 @@ status_t MediaPlayerService::dump(int fd, const Vector<String16>& args)
             sp<Client> c = mClients[i].promote();
             if (c != 0) c->dump(fd, args);
         }
+        for (int i = 0, n = mMediaRecorderClients.size(); i < n; ++i) {
+            result.append(" MediaRecorderClient\n");
+            sp<MediaRecorderClient> c = mMediaRecorderClients[i].promote();
+            snprintf(buffer, 255, "  pid(%d)\n\n", c->mPid);
+            result.append(buffer);
+        }
+
         result.append(" Files opened and/or mapped:\n");
         snprintf(buffer, SIZE, "/proc/%d/maps", myTid());
         FILE *f = fopen(buffer, "r");
