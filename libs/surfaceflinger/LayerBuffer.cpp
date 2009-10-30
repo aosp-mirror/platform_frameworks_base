@@ -437,9 +437,7 @@ void LayerBuffer::BufferSource::onDraw(const Region& clip) const
     }
 
     if (err != NO_ERROR) {
-        // OpenGL fall-back
-        GLuint w = 0;
-        GLuint h = 0;
+        // slower fallback
         GGLSurface t;
         t.version = sizeof(GGLSurface);
         t.width  = src.crop.r;
