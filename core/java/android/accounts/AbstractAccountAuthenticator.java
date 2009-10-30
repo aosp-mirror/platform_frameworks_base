@@ -88,7 +88,7 @@ import android.Manifest;
  * The activity must then call {@link AccountAuthenticatorResponse#onResult} or
  * {@link AccountAuthenticatorResponse#onError} when it is complete.
  * <li> If the authenticator cannot synchronously process the request and return a result then it
- * may choose to return null and then use the {@link AccountManagerResponse} to send the result
+ * may choose to return null and then use the AccountManagerResponse to send the result
  * when it has completed the request.
  * </ul>
  * <p>
