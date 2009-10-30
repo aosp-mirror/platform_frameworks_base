@@ -240,6 +240,28 @@ public final class MediaStore {
         private static final String[] PROJECTION = new String[] {_ID, MediaColumns.DATA};
         static final int DEFAULT_GROUP_ID = 0;
 
+        private static Bitmap getMiniThumbFromFile(Cursor c, Uri baseUri, ContentResolver cr, BitmapFactory.Options options) {
+            Bitmap bitmap = null;
+            Uri thumbUri = null;
+            try {
+                long thumbId = c.getLong(0);
+                String filePath = c.getString(1);
+                thumbUri = ContentUris.withAppendedId(baseUri, thumbId);
+                ParcelFileDescriptor pfdInput = cr.openFileDescriptor(thumbUri, "r");
+                bitmap = BitmapFactory.decodeFileDescriptor(
+                        pfdInput.getFileDescriptor(), null, options);
+                pfdInput.close();
+            } catch (FileNotFoundException ex) {
+                Log.e(TAG, "couldn't open thumbnail " + thumbUri + "; " + ex);
+            } catch (IOException ex) {
+                Log.e(TAG, "couldn't open thumbnail " + thumbUri + "; " + ex);
+            } catch (OutOfMemoryError ex) {
+                Log.e(TAG, "failed to allocate memory for thumbnail "
+                        + thumbUri + "; " + ex);
+            }
+            return bitmap;
+        }
+
         /**
          * This method cancels the thumbnail request so clients waiting for getThumbnail will be
          * interrupted and return immediately. Only the original process which made the getThumbnail
@@ -283,11 +305,12 @@ public final class MediaStore {
             Bitmap bitmap = null;
             String filePath = null;
             // Log.v(TAG, "getThumbnail: origId="+origId+", kind="+kind+", isVideo="+isVideo);
-            // some optimization for MICRO_KIND: if the magic is non-zero, we don't bother
+            // If the magic is non-zero, we simply return thumbnail if it does exist.
             // querying MediaProvider and simply return thumbnail.
-            if (kind == MICRO_KIND) {
-                MiniThumbFile thumbFile = MiniThumbFile.instance(baseUri);
-                if (thumbFile.getMagic(origId) != 0) {
+            MiniThumbFile thumbFile = MiniThumbFile.instance(baseUri);
+            long magic = thumbFile.getMagic(origId);
+            if (magic != 0) {
+                if (kind == MICRO_KIND) {
                     byte[] data = new byte[MiniThumbFile.BYTES_PER_MINTHUMB];
                     if (thumbFile.getMiniThumbFromFile(origId, data) != null) {
                         bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
@@ -296,6 +319,20 @@ public final class MediaStore {
                         }
                     }
                     return bitmap;
+                } else if (kind == MINI_KIND) {
+                    String column = isVideo ? "video_id=" : "image_id=";
+                    Cursor c = null;
+                    try {
+                        c = cr.query(baseUri, PROJECTION, column + origId, null, null);
+                        if (c != null && c.moveToFirst()) {
+                            bitmap = getMiniThumbFromFile(c, baseUri, cr, options);
+                            if (bitmap != null) {
+                                return bitmap;
+                            }
+                        }
+                    } finally {
+                        if (c != null) c.close();
+                    }
                 }
             }
 
@@ -310,7 +347,6 @@ public final class MediaStore {
 
                 // Assuming thumbnail has been generated, at least original image exists.
                 if (kind == MICRO_KIND) {
-                    MiniThumbFile thumbFile = MiniThumbFile.instance(baseUri);
                     byte[] data = new byte[MiniThumbFile.BYTES_PER_MINTHUMB];
                     if (thumbFile.getMiniThumbFromFile(origId, data) != null) {
                         bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
@@ -320,24 +356,7 @@ public final class MediaStore {
                     }
                 } else if (kind == MINI_KIND) {
                     if (c.moveToFirst()) {
-                        ParcelFileDescriptor pfdInput;
-                        Uri thumbUri = null;
-                        try {
-                            long thumbId = c.getLong(0);
-                            filePath = c.getString(1);
-                            thumbUri = ContentUris.withAppendedId(baseUri, thumbId);
-                            pfdInput = cr.openFileDescriptor(thumbUri, "r");
-                            bitmap = BitmapFactory.decodeFileDescriptor(
-                                    pfdInput.getFileDescriptor(), null, options);
-                            pfdInput.close();
-                        } catch (FileNotFoundException ex) {
-                            Log.e(TAG, "couldn't open thumbnail " + thumbUri + "; " + ex);
-                        } catch (IOException ex) {
-                            Log.e(TAG, "couldn't open thumbnail " + thumbUri + "; " + ex);
-                        } catch (OutOfMemoryError ex) {
-                            Log.e(TAG, "failed to allocate memory for thumbnail "
-                                    + thumbUri + "; " + ex);
-                        }
+                        bitmap = getMiniThumbFromFile(c, baseUri, cr, options);
                     }
                 } else {
                     throw new IllegalArgumentException("Unsupported kind: " + kind);
