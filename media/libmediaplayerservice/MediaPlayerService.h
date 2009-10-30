@@ -35,6 +35,7 @@ namespace android {
 class IMediaRecorder;
 class IMediaMetadataRetriever;
 class IOMX;
+class MediaRecorderClient;
 
 #define CALLBACK_ANTAGONIZER 0
 #if CALLBACK_ANTAGONIZER
@@ -175,6 +176,7 @@ public:
 
     // IMediaPlayerService interface
     virtual sp<IMediaRecorder>  createMediaRecorder(pid_t pid);
+    void    removeMediaRecorderClient(wp<MediaRecorderClient> client);
     virtual sp<IMediaMetadataRetriever> createMetadataRetriever(pid_t pid);
 
     // House keeping for media player clients
@@ -280,6 +282,7 @@ private:
 
     mutable     Mutex                       mLock;
                 SortedVector< wp<Client> >  mClients;
+                SortedVector< wp<MediaRecorderClient> > mMediaRecorderClients;
                 int32_t                     mNextConnId;
 };
 
