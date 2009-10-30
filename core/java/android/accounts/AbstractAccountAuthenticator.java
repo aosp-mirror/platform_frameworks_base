@@ -87,6 +87,9 @@ import android.Manifest;
  * the {@link AccountAuthenticatorResponse} as {@link AccountManager#KEY_ACCOUNT_MANAGER_RESPONSE}.
  * The activity must then call {@link AccountAuthenticatorResponse#onResult} or
  * {@link AccountAuthenticatorResponse#onError} when it is complete.
+ * <li> If the authenticator cannot synchronously process the request and return a result then it
+ * may choose to return null and then use the {@link AccountManagerResponse} to send the result
+ * when it has completed the request.
  * </ul>
  * <p>
  * The following descriptions of each of the abstract authenticator methods will not describe the
@@ -111,44 +114,35 @@ public abstract class AbstractAccountAuthenticator {
                 String authTokenType, String[] requiredFeatures, Bundle options)
                 throws RemoteException {
             checkBinderPermission();
-            final Bundle result;
             try {
-                result = AbstractAccountAuthenticator.this.addAccount(
+                final Bundle result = AbstractAccountAuthenticator.this.addAccount(
                     new AccountAuthenticatorResponse(response),
                         accountType, authTokenType, requiredFeatures, options);
+                if (result != null) {
+                    response.onResult(result);
+                }
             } catch (NetworkErrorException e) {
                 response.onError(AccountManager.ERROR_CODE_NETWORK_ERROR, e.getMessage());
-                return;
             } catch (UnsupportedOperationException e) {
                 response.onError(AccountManager.ERROR_CODE_UNSUPPORTED_OPERATION,
                         "addAccount not supported");
-                return;
-            }
-            if (result != null) {
-                response.onResult(result);
-            } else {
-                response.onError(AccountManager.ERROR_CODE_INVALID_RESPONSE,
-                        "no response from the authenticator");
             }
         }
 
         public void confirmCredentials(IAccountAuthenticatorResponse response,
                 Account account, Bundle options) throws RemoteException {
             checkBinderPermission();
-            final Bundle result;
             try {
-                result = AbstractAccountAuthenticator.this.confirmCredentials(
+                final Bundle result = AbstractAccountAuthenticator.this.confirmCredentials(
                     new AccountAuthenticatorResponse(response), account, options);
+                if (result != null) {
+                    response.onResult(result);
+                }
+            } catch (NetworkErrorException e) {
+                response.onError(AccountManager.ERROR_CODE_NETWORK_ERROR, e.getMessage());
             } catch (UnsupportedOperationException e) {
                 response.onError(AccountManager.ERROR_CODE_UNSUPPORTED_OPERATION,
                         "confirmCredentials not supported");
-                return;
-            }
-            if (result != null) {
-                response.onResult(result);
-            } else {
-                response.onError(AccountManager.ERROR_CODE_INVALID_RESPONSE,
-                        "no response from the authenticator");
             }
         }
 
@@ -180,9 +174,6 @@ public abstract class AbstractAccountAuthenticator {
                         authTokenType, loginOptions);
                 if (result != null) {
                     response.onResult(result);
-                } else {
-                    response.onError(AccountManager.ERROR_CODE_INVALID_RESPONSE,
-                            "no response from the authenticator");
                 }
             } catch (UnsupportedOperationException e) {
                 response.onError(AccountManager.ERROR_CODE_UNSUPPORTED_OPERATION,
@@ -195,64 +186,50 @@ public abstract class AbstractAccountAuthenticator {
         public void updateCredentials(IAccountAuthenticatorResponse response, Account account,
                 String authTokenType, Bundle loginOptions) throws RemoteException {
             checkBinderPermission();
-            final Bundle result;
             try {
-                result = AbstractAccountAuthenticator.this.updateCredentials(
+                final Bundle result = AbstractAccountAuthenticator.this.updateCredentials(
                     new AccountAuthenticatorResponse(response), account,
                         authTokenType, loginOptions);
+                if (result != null) {
+                    response.onResult(result);
+                }
+            } catch (NetworkErrorException e) {
+                response.onError(AccountManager.ERROR_CODE_NETWORK_ERROR, e.getMessage());
             } catch (UnsupportedOperationException e) {
                 response.onError(AccountManager.ERROR_CODE_UNSUPPORTED_OPERATION,
                         "updateCredentials not supported");
-                return;
-            }
-            if (result != null) {
-                response.onResult(result);
-            } else {
-                response.onError(AccountManager.ERROR_CODE_INVALID_RESPONSE,
-                        "no response from the authenticator");
             }
         }
 
         public void editProperties(IAccountAuthenticatorResponse response,
                 String accountType) throws RemoteException {
             checkBinderPermission();
-            final Bundle result;
             try {
-                result = AbstractAccountAuthenticator.this.editProperties(
+                final Bundle result = AbstractAccountAuthenticator.this.editProperties(
                     new AccountAuthenticatorResponse(response), accountType);
+                if (result != null) {
+                    response.onResult(result);
+                }
             } catch (UnsupportedOperationException e) {
                 response.onError(AccountManager.ERROR_CODE_UNSUPPORTED_OPERATION,
                         "editProperties not supported");
-                return;
-            }
-            if (result != null) {
-                response.onResult(result);
-            } else {
-                response.onError(AccountManager.ERROR_CODE_INVALID_RESPONSE,
-                        "no response from the authenticator");
             }
         }
 
         public void hasFeatures(IAccountAuthenticatorResponse response,
                 Account account, String[] features) throws RemoteException {
             checkBinderPermission();
-            final Bundle result;
             try {
-                result = AbstractAccountAuthenticator.this.hasFeatures(
+                final Bundle result = AbstractAccountAuthenticator.this.hasFeatures(
                     new AccountAuthenticatorResponse(response), account, features);
+                if (result != null) {
+                    response.onResult(result);
+                }
             } catch (UnsupportedOperationException e) {
                 response.onError(AccountManager.ERROR_CODE_UNSUPPORTED_OPERATION,
                         "hasFeatures not supported");
-                return;
             } catch (NetworkErrorException e) {
                 response.onError(AccountManager.ERROR_CODE_NETWORK_ERROR, e.getMessage());
-                return;
-            }
-            if (result != null) {
-                response.onResult(result);
-            } else {
-                response.onError(AccountManager.ERROR_CODE_INVALID_RESPONSE,
-                        "no response from the authenticator");
             }
         }
 
@@ -264,9 +241,6 @@ public abstract class AbstractAccountAuthenticator {
                     new AccountAuthenticatorResponse(response), account);
                 if (result != null) {
                     response.onResult(result);
-                } else {
-                    response.onError(AccountManager.ERROR_CODE_INVALID_RESPONSE,
-                            "no response from the authenticator");
                 }
             } catch (UnsupportedOperationException e) {
                 response.onError(AccountManager.ERROR_CODE_UNSUPPORTED_OPERATION,
@@ -347,16 +321,18 @@ public abstract class AbstractAccountAuthenticator {
      * <li> {@link AccountManager#KEY_ERROR_CODE} and {@link AccountManager#KEY_ERROR_MESSAGE} to
      * indicate an error
      * </ul>
+     * @throws NetworkErrorException if the authenticator could not honor the request due to a
+     * network error
      */
     public abstract Bundle confirmCredentials(AccountAuthenticatorResponse response,
-            Account account, Bundle options);
-
+            Account account, Bundle options)
+            throws NetworkErrorException;
     /**
      * Gets the authtoken for an account.
      * @param response to send the result back to the AccountManager, will never be null
      * @param account the account whose credentials are to be retrieved, will never be null
      * @param authTokenType the type of auth token to retrieve, will never be null
-     * @param loginOptions a Bundle of authenticator-specific options, may be null
+     * @param options a Bundle of authenticator-specific options, may be null
      * @return a Bundle result or null if the result is to be returned via the response. The result
      * will contain either:
      * <ul>
@@ -370,7 +346,7 @@ public abstract class AbstractAccountAuthenticator {
      * network error
      */
     public abstract Bundle getAuthToken(AccountAuthenticatorResponse response,
-            Account account, String authTokenType, Bundle loginOptions)
+            Account account, String authTokenType, Bundle options)
             throws NetworkErrorException;
 
     /**
@@ -386,7 +362,7 @@ public abstract class AbstractAccountAuthenticator {
      * @param account the account whose credentials are to be updated, will never be null
      * @param authTokenType the type of auth token to retrieve after updating the credentials,
      * may be null
-     * @param loginOptions a Bundle of authenticator-specific options, may be null
+     * @param options a Bundle of authenticator-specific options, may be null
      * @return a Bundle result or null if the result is to be returned via the response. The result
      * will contain either:
      * <ul>
@@ -397,9 +373,11 @@ public abstract class AbstractAccountAuthenticator {
      * <li> {@link AccountManager#KEY_ERROR_CODE} and {@link AccountManager#KEY_ERROR_MESSAGE} to
      * indicate an error
      * </ul>
+     * @throws NetworkErrorException if the authenticator could not honor the request due to a
+     * network error
      */
     public abstract Bundle updateCredentials(AccountAuthenticatorResponse response,
-            Account account, String authTokenType, Bundle loginOptions);
+            Account account, String authTokenType, Bundle options) throws NetworkErrorException;
     
     /**
      * Checks if the account supports all the specified authenticator specific features.

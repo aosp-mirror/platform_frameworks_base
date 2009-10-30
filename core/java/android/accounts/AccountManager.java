@@ -237,13 +237,13 @@ public class AccountManager {
      * with the same UID as the Authenticator for the account.
      * @param account The account to add
      * @param password The password to associate with the account. May be null.
-     * @param extras A bundle of key/value pairs to set as the account's userdata. May be null.
+     * @param userdata A bundle of key/value pairs to set as the account's userdata. May be null.
      * @return true if the account was sucessfully added, false otherwise, for example,
      * if the account already exists or if the account is null
      */
-    public boolean addAccountExplicitly(Account account, String password, Bundle extras) {
+    public boolean addAccountExplicitly(Account account, String password, Bundle userdata) {
         try {
-            return mService.addAccount(account, password, extras);
+            return mService.addAccount(account, password, userdata);
         } catch (RemoteException e) {
             // won't ever happen
             throw new RuntimeException(e);
@@ -320,6 +320,12 @@ public class AccountManager {
      * AccountManager, null otherwise.
      */
     public String peekAuthToken(final Account account, final String authTokenType) {
+        if (account == null) {
+            throw new IllegalArgumentException("the account must not be null");
+        }
+        if (authTokenType == null) {
+            return null;
+        }
         try {
             return mService.peekAuthToken(account, authTokenType);
         } catch (RemoteException e) {
@@ -339,6 +345,9 @@ public class AccountManager {
      * @param password the password to set for the account. May be null.
      */
     public void setPassword(final Account account, final String password) {
+        if (account == null) {
+            throw new IllegalArgumentException("the account must not be null");
+        }
         try {
             mService.setPassword(account, password);
         } catch (RemoteException e) {
@@ -355,6 +364,9 @@ public class AccountManager {
      * @param account the account whose password is to be cleared. Must not be null.
      */
     public void clearPassword(final Account account) {
+        if (account == null) {
+            throw new IllegalArgumentException("the account must not be null");
+        }
         try {
             mService.clearPassword(account);
         } catch (RemoteException e) {
@@ -375,6 +387,12 @@ public class AccountManager {
      * @param value the value to set. May be null.
      */
     public void setUserData(final Account account, final String key, final String value) {
+        if (account == null) {
+            throw new IllegalArgumentException("the account must not be null");
+        }
+        if (key == null) {
+            throw new IllegalArgumentException("the key must not be null");
+        }
         try {
             mService.setUserData(account, key, value);
         } catch (RemoteException e) {
@@ -458,7 +476,7 @@ public class AccountManager {
      * @param account The account whose credentials are to be updated.
      * @param authTokenType the auth token to retrieve as part of updating the credentials.
      * May be null.
-     * @param loginOptions authenticator specific options for the request
+     * @param options authenticator specific options for the request
      * @param activity If the authenticator returns a {@link #KEY_INTENT} in the result then
      * the intent will be started with this activity. If activity is null then the result will
      * be returned as-is.
@@ -474,7 +492,7 @@ public class AccountManager {
      * If the user presses "back" then the request will be canceled.
      */
     public AccountManagerFuture<Bundle> getAuthToken(
-            final Account account, final String authTokenType, final Bundle loginOptions,
+            final Account account, final String authTokenType, final Bundle options,
             final Activity activity, AccountManagerCallback<Bundle> callback, Handler handler) {
         if (activity == null) throw new IllegalArgumentException("activity is null");
         if (authTokenType == null) throw new IllegalArgumentException("authTokenType is null");
@@ -482,7 +500,7 @@ public class AccountManager {
             public void doWork() throws RemoteException {
                 mService.getAuthToken(mResponse, account, authTokenType,
                         false /* notifyOnAuthFailure */, true /* expectActivityLaunch */,
-                        loginOptions);
+                        options);
             }
         }.start();
     }
@@ -584,6 +602,9 @@ public class AccountManager {
             final String authTokenType, final String[] requiredFeatures,
             final Bundle addAccountOptions,
             final Activity activity, AccountManagerCallback<Bundle> callback, Handler handler) {
+        if (accountType == null) {
+            throw new IllegalArgumentException();
+        }
         return new AmsTask(activity, handler, callback) {
             public void doWork() throws RemoteException {
                 mService.addAcount(mResponse, accountType, authTokenType,
@@ -683,7 +704,7 @@ public class AccountManager {
      * @param account The account whose credentials are to be updated.
      * @param authTokenType the auth token to retrieve as part of updating the credentials.
      * May be null.
-     * @param loginOptions authenticator specific options for the request
+     * @param options authenticator specific options for the request
      * @param activity If the authenticator returns a {@link #KEY_INTENT} in the result then
      * the intent will be started with this activity. If activity is null then the result will
      * be returned as-is.
@@ -702,13 +723,13 @@ public class AccountManager {
      */
     public AccountManagerFuture<Bundle> updateCredentials(final Account account,
             final String authTokenType,
-            final Bundle loginOptions, final Activity activity,
+            final Bundle options, final Activity activity,
             final AccountManagerCallback<Bundle> callback,
             final Handler handler) {
         return new AmsTask(activity, handler, callback) {
             public void doWork() throws RemoteException {
                 mService.updateCredentials(mResponse, account, authTokenType, activity != null,
-                        loginOptions);
+                        options);
             }
         }.start();
     }
@@ -1214,7 +1235,7 @@ public class AccountManager {
      * @param activityForPrompting The activity used to start any account management
      * activities that are required to fulfill this request. This may be null.
      * @param addAccountOptions authenticator-specific options used if an account needs to be added
-     * @param loginOptions authenticator-specific options passed to getAuthToken
+     * @param getAuthTokenOptions authenticator-specific options passed to getAuthToken
      * @param callback A callback to invoke when the request completes. If null then
      * no callback is invoked.
      * @param handler The {@link Handler} to use to invoke the callback. If null then the
@@ -1232,13 +1253,13 @@ public class AccountManager {
     public AccountManagerFuture<Bundle> getAuthTokenByFeatures(
             final String accountType, final String authTokenType, final String[] features,
             final Activity activityForPrompting, final Bundle addAccountOptions,
-            final Bundle loginOptions,
+            final Bundle getAuthTokenOptions,
             final AccountManagerCallback<Bundle> callback, final Handler handler) {
         if (accountType == null) throw new IllegalArgumentException("account type is null");
         if (authTokenType == null) throw new IllegalArgumentException("authTokenType is null");
         final GetAuthTokenByTypeAndFeaturesTask task =
                 new GetAuthTokenByTypeAndFeaturesTask(accountType, authTokenType, features,
-                activityForPrompting, addAccountOptions, loginOptions, callback, handler);
+                activityForPrompting, addAccountOptions, getAuthTokenOptions, callback, handler);
         task.start();
         return task;
     }
