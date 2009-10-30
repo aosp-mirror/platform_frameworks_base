@@ -145,7 +145,7 @@ private:
         static      sp<Client>  getClientFromCookie(void* user);
 
                     void        handlePreviewData(const sp<IMemory>&);
-                    void        handleShutter();
+                    void        handleShutter(image_rect_type *image);
                     void        handlePostview(const sp<IMemory>&);
                     void        handleRawPicture(const sp<IMemory>&);
                     void        handleCompressedPicture(const sp<IMemory>&);
