@@ -69,7 +69,7 @@ public class DisplayMetrics {
      * Density Independent Pixel unit, where one DIP is one pixel on an
      * approximately 160 dpi screen (for example a 240x320, 1.5"x2" screen), 
      * providing the baseline of the system's display. Thus on a 160dpi screen 
-     * this density value will be 1; on a 106 dpi screen it would be .75; etc.
+     * this density value will be 1; on a 120 dpi screen it would be .75; etc.
      *  
      * <p>This value does not exactly follow the real screen size (as given by 
      * {@link #xdpi} and {@link #ydpi}, but rather is used to scale the size of
