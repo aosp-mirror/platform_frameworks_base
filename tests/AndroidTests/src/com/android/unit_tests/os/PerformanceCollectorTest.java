@@ -19,8 +19,9 @@ package com.android.unit_tests.os;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.os.PerformanceCollector;
+import android.os.Process;
 import android.os.PerformanceCollector.PerformanceResultsWriter;
-import android.test.suitebuilder.annotation.LargeTest;
+import android.test.suitebuilder.annotation.SmallTest;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -44,6 +45,7 @@ public class PerformanceCollectorTest extends TestCase {
         mPerfCollector = null;
     }
 
+    @SmallTest
     public void testBeginSnapshotNoWriter() throws Exception {
         mPerfCollector.beginSnapshot("testBeginSnapshotNoWriter");
 
@@ -54,15 +56,16 @@ public class PerformanceCollectorTest extends TestCase {
         assertEquals(2, snapshot.size());
     }
 
-    @LargeTest
+    @SmallTest
     public void testEndSnapshotNoWriter() throws Exception {
         mPerfCollector.beginSnapshot("testEndSnapshotNoWriter");
-        sleepForRandomLongPeriod();
+        workForRandomLongPeriod();
         Bundle snapshot = mPerfCollector.endSnapshot();
 
         verifySnapshotBundle(snapshot);
     }
 
+    @SmallTest
     public void testStartTimingNoWriter() throws Exception {
         mPerfCollector.startTiming("testStartTimingNoWriter");
 
@@ -73,21 +76,23 @@ public class PerformanceCollectorTest extends TestCase {
         verifyTimingBundle(measurement, new ArrayList<String>());
     }
 
+    @SmallTest
     public void testAddIterationNoWriter() throws Exception {
         mPerfCollector.startTiming("testAddIterationNoWriter");
-        sleepForRandomTinyPeriod();
+        workForRandomTinyPeriod();
         Bundle iteration = mPerfCollector.addIteration("timing1");
 
         verifyIterationBundle(iteration, "timing1");
     }
 
+    @SmallTest
     public void testStopTimingNoWriter() throws Exception {
         mPerfCollector.startTiming("testStopTimingNoWriter");
-        sleepForRandomTinyPeriod();
+        workForRandomTinyPeriod();
         mPerfCollector.addIteration("timing2");
-        sleepForRandomTinyPeriod();
+        workForRandomTinyPeriod();
         mPerfCollector.addIteration("timing3");
-        sleepForRandomShortPeriod();
+        workForRandomShortPeriod();
         Bundle timing = mPerfCollector.stopTiming("timing4");
 
         ArrayList<String> labels = new ArrayList<String>();
@@ -97,6 +102,7 @@ public class PerformanceCollectorTest extends TestCase {
         verifyTimingBundle(timing, labels);
     }
 
+    @SmallTest
     public void testBeginSnapshot() throws Exception {
         MockPerformanceResultsWriter writer = new MockPerformanceResultsWriter();
         mPerfCollector.setPerformanceResultsWriter(writer);
@@ -110,19 +116,20 @@ public class PerformanceCollectorTest extends TestCase {
         assertEquals(2, snapshot.size());
     }
 
-    @LargeTest
+    @SmallTest
     public void testEndSnapshot() throws Exception {
         MockPerformanceResultsWriter writer = new MockPerformanceResultsWriter();
         mPerfCollector.setPerformanceResultsWriter(writer);
         mPerfCollector.beginSnapshot("testEndSnapshot");
-        sleepForRandomLongPeriod();
+        workForRandomLongPeriod();
         Bundle snapshot1 = mPerfCollector.endSnapshot();
         Bundle snapshot2 = writer.snapshotResults;
 
-        assertTrue(snapshot1.equals(snapshot2));
+        assertEqualsBundle(snapshot1, snapshot2);
         verifySnapshotBundle(snapshot1);
     }
 
+    @SmallTest
     public void testStartTiming() throws Exception {
         MockPerformanceResultsWriter writer = new MockPerformanceResultsWriter();
         mPerfCollector.setPerformanceResultsWriter(writer);
@@ -136,21 +143,23 @@ public class PerformanceCollectorTest extends TestCase {
         verifyTimingBundle(measurement, new ArrayList<String>());
     }
 
+    @SmallTest
     public void testAddIteration() throws Exception {
         mPerfCollector.startTiming("testAddIteration");
-        sleepForRandomTinyPeriod();
+        workForRandomTinyPeriod();
         Bundle iteration = mPerfCollector.addIteration("timing5");
 
         verifyIterationBundle(iteration, "timing5");
     }
 
+    @SmallTest
     public void testStopTiming() throws Exception {
         mPerfCollector.startTiming("testStopTiming");
-        sleepForRandomTinyPeriod();
+        workForRandomTinyPeriod();
         mPerfCollector.addIteration("timing6");
-        sleepForRandomTinyPeriod();
+        workForRandomTinyPeriod();
         mPerfCollector.addIteration("timing7");
-        sleepForRandomShortPeriod();
+        workForRandomShortPeriod();
         Bundle timing = mPerfCollector.stopTiming("timing8");
 
         ArrayList<String> labels = new ArrayList<String>();
@@ -160,28 +169,90 @@ public class PerformanceCollectorTest extends TestCase {
         verifyTimingBundle(timing, labels);
     }
 
-    // TODO: flaky test
-    // @LargeTest
+    @SmallTest
+    public void testAddMeasurementLong() throws Exception {
+        MockPerformanceResultsWriter writer = new MockPerformanceResultsWriter();
+        mPerfCollector.setPerformanceResultsWriter(writer);
+        mPerfCollector.startTiming("testAddMeasurementLong");
+        mPerfCollector.addMeasurement("testAddMeasurementLongZero", 0);
+        mPerfCollector.addMeasurement("testAddMeasurementLongPos", 348573);
+        mPerfCollector.addMeasurement("testAddMeasurementLongNeg", -19354);
+        mPerfCollector.stopTiming("");
+
+        assertEquals("testAddMeasurementLong", writer.timingLabel);
+        Bundle results = writer.timingResults;
+        assertEquals(4, results.size());
+        assertTrue(results.containsKey("testAddMeasurementLongZero"));
+        assertEquals(0, results.getLong("testAddMeasurementLongZero"));
+        assertTrue(results.containsKey("testAddMeasurementLongPos"));
+        assertEquals(348573, results.getLong("testAddMeasurementLongPos"));
+        assertTrue(results.containsKey("testAddMeasurementLongNeg"));
+        assertEquals(-19354, results.getLong("testAddMeasurementLongNeg"));
+    }
+
+    @SmallTest
+    public void testAddMeasurementFloat() throws Exception {
+        MockPerformanceResultsWriter writer = new MockPerformanceResultsWriter();
+        mPerfCollector.setPerformanceResultsWriter(writer);
+        mPerfCollector.startTiming("testAddMeasurementFloat");
+        mPerfCollector.addMeasurement("testAddMeasurementFloatZero", 0.0f);
+        mPerfCollector.addMeasurement("testAddMeasurementFloatPos", 348573.345f);
+        mPerfCollector.addMeasurement("testAddMeasurementFloatNeg", -19354.093f);
+        mPerfCollector.stopTiming("");
+
+        assertEquals("testAddMeasurementFloat", writer.timingLabel);
+        Bundle results = writer.timingResults;
+        assertEquals(4, results.size());
+        assertTrue(results.containsKey("testAddMeasurementFloatZero"));
+        assertEquals(0.0f, results.getFloat("testAddMeasurementFloatZero"));
+        assertTrue(results.containsKey("testAddMeasurementFloatPos"));
+        assertEquals(348573.345f, results.getFloat("testAddMeasurementFloatPos"));
+        assertTrue(results.containsKey("testAddMeasurementFloatNeg"));
+        assertEquals(-19354.093f, results.getFloat("testAddMeasurementFloatNeg"));
+    }
+
+    @SmallTest
+    public void testAddMeasurementString() throws Exception {
+        MockPerformanceResultsWriter writer = new MockPerformanceResultsWriter();
+        mPerfCollector.setPerformanceResultsWriter(writer);
+        mPerfCollector.startTiming("testAddMeasurementString");
+        mPerfCollector.addMeasurement("testAddMeasurementStringNull", null);
+        mPerfCollector.addMeasurement("testAddMeasurementStringEmpty", "");
+        mPerfCollector.addMeasurement("testAddMeasurementStringNonEmpty", "Hello World");
+        mPerfCollector.stopTiming("");
+
+        assertEquals("testAddMeasurementString", writer.timingLabel);
+        Bundle results = writer.timingResults;
+        assertEquals(4, results.size());
+        assertTrue(results.containsKey("testAddMeasurementStringNull"));
+        assertNull(results.getString("testAddMeasurementStringNull"));
+        assertTrue(results.containsKey("testAddMeasurementStringEmpty"));
+        assertEquals("", results.getString("testAddMeasurementStringEmpty"));
+        assertTrue(results.containsKey("testAddMeasurementStringNonEmpty"));
+        assertEquals("Hello World", results.getString("testAddMeasurementStringNonEmpty"));
+    }
+
+    @SmallTest
     public void testSimpleSequence() throws Exception {
         MockPerformanceResultsWriter writer = new MockPerformanceResultsWriter();
         mPerfCollector.setPerformanceResultsWriter(writer);
         mPerfCollector.beginSnapshot("testSimpleSequence");
         mPerfCollector.startTiming("testSimpleSequenceTiming");
-        sleepForRandomTinyPeriod();
+        workForRandomTinyPeriod();
         mPerfCollector.addIteration("iteration1");
-        sleepForRandomTinyPeriod();
+        workForRandomTinyPeriod();
         mPerfCollector.addIteration("iteration2");
-        sleepForRandomTinyPeriod();
+        workForRandomTinyPeriod();
         mPerfCollector.addIteration("iteration3");
-        sleepForRandomTinyPeriod();
+        workForRandomTinyPeriod();
         mPerfCollector.addIteration("iteration4");
-        sleepForRandomShortPeriod();
+        workForRandomShortPeriod();
         Bundle timing = mPerfCollector.stopTiming("iteration5");
-        sleepForRandomLongPeriod();
+        workForRandomLongPeriod();
         Bundle snapshot1 = mPerfCollector.endSnapshot();
         Bundle snapshot2 = writer.snapshotResults;
 
-        assertTrue(snapshot1.equals(snapshot2));
+        assertEqualsBundle(snapshot1, snapshot2);
         verifySnapshotBundle(snapshot1);
 
         ArrayList<String> labels = new ArrayList<String>();
@@ -193,60 +264,59 @@ public class PerformanceCollectorTest extends TestCase {
         verifyTimingBundle(timing, labels);
     }
 
-    // TODO: flaky test
-    // @LargeTest
+    @SmallTest
     public void testLongSequence() throws Exception {
         MockPerformanceResultsWriter writer = new MockPerformanceResultsWriter();
         mPerfCollector.setPerformanceResultsWriter(writer);
         mPerfCollector.beginSnapshot("testLongSequence");
         mPerfCollector.startTiming("testLongSequenceTiming1");
-        sleepForRandomTinyPeriod();
+        workForRandomTinyPeriod();
         mPerfCollector.addIteration("iteration1");
-        sleepForRandomTinyPeriod();
+        workForRandomTinyPeriod();
         mPerfCollector.addIteration("iteration2");
-        sleepForRandomShortPeriod();
+        workForRandomShortPeriod();
         Bundle timing1 = mPerfCollector.stopTiming("iteration3");
-        sleepForRandomLongPeriod();
+        workForRandomLongPeriod();
 
         mPerfCollector.startTiming("testLongSequenceTiming2");
-        sleepForRandomTinyPeriod();
+        workForRandomTinyPeriod();
         mPerfCollector.addIteration("iteration4");
-        sleepForRandomTinyPeriod();
+        workForRandomTinyPeriod();
         mPerfCollector.addIteration("iteration5");
-        sleepForRandomShortPeriod();
+        workForRandomShortPeriod();
         Bundle timing2 = mPerfCollector.stopTiming("iteration6");
-        sleepForRandomLongPeriod();
+        workForRandomLongPeriod();
 
         mPerfCollector.startTiming("testLongSequenceTiming3");
-        sleepForRandomTinyPeriod();
+        workForRandomTinyPeriod();
         mPerfCollector.addIteration("iteration7");
-        sleepForRandomTinyPeriod();
+        workForRandomTinyPeriod();
         mPerfCollector.addIteration("iteration8");
-        sleepForRandomShortPeriod();
+        workForRandomShortPeriod();
         Bundle timing3 = mPerfCollector.stopTiming("iteration9");
-        sleepForRandomLongPeriod();
+        workForRandomLongPeriod();
 
         mPerfCollector.startTiming("testLongSequenceTiming4");
-        sleepForRandomTinyPeriod();
+        workForRandomTinyPeriod();
         mPerfCollector.addIteration("iteration10");
-        sleepForRandomTinyPeriod();
+        workForRandomTinyPeriod();
         mPerfCollector.addIteration("iteration11");
-        sleepForRandomShortPeriod();
+        workForRandomShortPeriod();
         Bundle timing4 = mPerfCollector.stopTiming("iteration12");
-        sleepForRandomLongPeriod();
+        workForRandomLongPeriod();
 
         mPerfCollector.startTiming("testLongSequenceTiming5");
-        sleepForRandomTinyPeriod();
+        workForRandomTinyPeriod();
         mPerfCollector.addIteration("iteration13");
-        sleepForRandomTinyPeriod();
+        workForRandomTinyPeriod();
         mPerfCollector.addIteration("iteration14");
-        sleepForRandomShortPeriod();
+        workForRandomShortPeriod();
         Bundle timing5 = mPerfCollector.stopTiming("iteration15");
-        sleepForRandomLongPeriod();
+        workForRandomLongPeriod();
         Bundle snapshot1 = mPerfCollector.endSnapshot();
         Bundle snapshot2 = writer.snapshotResults;
 
-        assertTrue(snapshot1.equals(snapshot2));
+        assertEqualsBundle(snapshot1, snapshot2);
         verifySnapshotBundle(snapshot1);
 
         ArrayList<String> labels1 = new ArrayList<String>();
@@ -280,57 +350,53 @@ public class PerformanceCollectorTest extends TestCase {
      * Verify that snapshotting and timing do not interfere w/ each other,
      * by staggering calls to snapshot and timing functions.
      */
-    @LargeTest
+    @SmallTest
     public void testOutOfOrderSequence() {
         MockPerformanceResultsWriter writer = new MockPerformanceResultsWriter();
         mPerfCollector.setPerformanceResultsWriter(writer);
         mPerfCollector.startTiming("testOutOfOrderSequenceTiming");
-        sleepForRandomShortPeriod();
+        workForRandomShortPeriod();
         mPerfCollector.beginSnapshot("testOutOfOrderSequenceSnapshot");
-        sleepForRandomShortPeriod();
+        workForRandomShortPeriod();
         Bundle timing1 = mPerfCollector.stopTiming("timing1");
-        sleepForRandomShortPeriod();
+        workForRandomShortPeriod();
         Bundle snapshot1 = mPerfCollector.endSnapshot();
 
         Bundle timing2 = writer.timingResults;
         Bundle snapshot2 = writer.snapshotResults;
 
-        assertTrue(snapshot1.equals(snapshot2));
+        assertEqualsBundle(snapshot1, snapshot2);
         verifySnapshotBundle(snapshot1);
 
-        assertTrue(timing1.equals(timing2));
+        assertEqualsBundle(timing1, timing2);
         ArrayList<String> labels = new ArrayList<String>();
         labels.add("timing1");
         verifyTimingBundle(timing1, labels);
     }
 
-    private void sleepForRandomPeriod(int minDuration, int maxDuration) {
+    private void workForRandomPeriod(int minDuration, int maxDuration) {
         Random random = new Random();
         int period = minDuration + random.nextInt(maxDuration - minDuration);
-        int slept = 0;
-        // Generate random positive amount of work, so cpu time is measurable in
+        long start = Process.getElapsedCpuTime();
+        // Generate positive amount of work, so cpu time is measurable in
         // milliseconds
-        while (slept < period) {
-            int step = random.nextInt(minDuration/5);
-            try {
-                Thread.sleep(step);
-            } catch (InterruptedException e ) {
-                // eat the exception
+        while (Process.getElapsedCpuTime() - start < period) {
+            for (int i = 0, temp = 0; i < 50; i++ ) {
+                temp += i;
             }
-            slept += step;
         }
     }
 
-    private void sleepForRandomTinyPeriod() {
-        sleepForRandomPeriod(25, 50);
+    private void workForRandomTinyPeriod() {
+        workForRandomPeriod(2, 5);
     }
 
-    private void sleepForRandomShortPeriod() {
-        sleepForRandomPeriod(100, 250);
+    private void workForRandomShortPeriod() {
+        workForRandomPeriod(10, 25);
     }
 
-    private void sleepForRandomLongPeriod() {
-        sleepForRandomPeriod(500, 1000);
+    private void workForRandomLongPeriod() {
+        workForRandomPeriod(50, 100);
     }
 
     private void verifySnapshotBundle(Bundle snapshot) {
@@ -411,6 +477,13 @@ public class PerformanceCollectorTest extends TestCase {
         }
     }
 
+    private void assertEqualsBundle(Bundle b1, Bundle b2) {
+        assertEquals(b1.keySet(), b2.keySet());
+        for (String key : b1.keySet()) {
+            assertEquals(b1.get(key), b2.get(key));
+        }
+    }
+
     private Object readPrivateField(String fieldName, Object object) throws Exception {
         Field f = object.getClass().getDeclaredField(fieldName);
         f.setAccessible(true);
@@ -429,7 +502,7 @@ public class PerformanceCollectorTest extends TestCase {
         }
 
         public void writeEndSnapshot(Bundle results) {
-            snapshotResults = results;
+            snapshotResults.putAll(results);
         }
 
         public void writeStartTiming(String label) {
@@ -437,7 +510,19 @@ public class PerformanceCollectorTest extends TestCase {
         }
 
         public void writeStopTiming(Bundle results) {
-            timingResults = results;
+            timingResults.putAll(results);
+        }
+
+        public void writeMeasurement(String label, long value) {
+            timingResults.putLong(label, value);
+        }
+
+        public void writeMeasurement(String label, float value) {
+            timingResults.putFloat(label, value);
+        }
+
+        public void writeMeasurement(String label, String value) {
+            timingResults.putString(label, value);
         }
     }
 }

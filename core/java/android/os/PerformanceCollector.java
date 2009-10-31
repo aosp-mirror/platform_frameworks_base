@@ -107,6 +107,36 @@ public class PerformanceCollector {
          * @see PerformanceCollector#stopTiming(String)
          */
         public void writeStopTiming(Bundle results);
+
+        /**
+         * Callback invoked as last action in
+         * {@link PerformanceCollector#addMeasurement(String, long)} for
+         * reporting an integer type measurement.
+         *
+         * @param label short description of the metric that was measured
+         * @param value long value of the measurement
+         */
+        public void writeMeasurement(String label, long value);
+
+        /**
+         * Callback invoked as last action in
+         * {@link PerformanceCollector#addMeasurement(String, float)} for
+         * reporting a float type measurement.
+         *
+         * @param label short description of the metric that was measured
+         * @param value float value of the measurement
+         */
+        public void writeMeasurement(String label, float value);
+
+        /**
+         * Callback invoked as last action in
+         * {@link PerformanceCollector#addMeasurement(String, String)} for
+         * reporting a string field.
+         *
+         * @param label short description of the metric that was measured
+         * @param value string summary of the measurement
+         */
+        public void writeMeasurement(String label, String value);
     }
 
     /**
@@ -383,6 +413,39 @@ public class PerformanceCollector {
         if (mPerfWriter != null)
             mPerfWriter.writeStopTiming(mPerfMeasurement);
         return mPerfMeasurement;
+    }
+
+    /**
+     * Add an integer type measurement to the collector.
+     *
+     * @param label short description of the metric that was measured
+     * @param value long value of the measurement
+     */
+    public void addMeasurement(String label, long value) {
+        if (mPerfWriter != null)
+            mPerfWriter.writeMeasurement(label, value);
+    }
+
+    /**
+     * Add a float type measurement to the collector.
+     *
+     * @param label short description of the metric that was measured
+     * @param value float value of the measurement
+     */
+    public void addMeasurement(String label, float value) {
+        if (mPerfWriter != null)
+            mPerfWriter.writeMeasurement(label, value);
+    }
+
+    /**
+     * Add a string field to the collector.
+     *
+     * @param label short description of the metric that was measured
+     * @param value string summary of the measurement
+     */
+    public void addMeasurement(String label, String value) {
+        if (mPerfWriter != null)
+            mPerfWriter.writeMeasurement(label, value);
     }
 
     /*
