@@ -96,6 +96,10 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
     
     // The extra key used in an intent to the speech recognizer for in-app voice search.
     private static final String EXTRA_CALLING_PACKAGE = "calling_package";
+    
+    // The string used for privateImeOptions to identify to the IME that it should not show
+    // a microphone button since one already exists in the search dialog.
+    private static final String IME_OPTION_NO_MICROPHONE = "nm";
 
     private static final int SEARCH_PLATE_LEFT_PADDING_GLOBAL = 12;
     private static final int SEARCH_PLATE_LEFT_PADDING_NON_GLOBAL = 7;
@@ -543,6 +547,14 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
             mSearchAutoComplete.setInputType(inputType);
             mSearchAutoCompleteImeOptions = mSearchable.getImeOptions();
             mSearchAutoComplete.setImeOptions(mSearchAutoCompleteImeOptions);
+            
+            // If the search dialog is going to show a voice search button, then don't let
+            // the soft keyboard display a microphone button if it would have otherwise.
+            if (mSearchable.getVoiceSearchEnabled()) {
+                mSearchAutoComplete.setPrivateImeOptions(IME_OPTION_NO_MICROPHONE);
+            } else {
+                mSearchAutoComplete.setPrivateImeOptions(null);
+            }
         }
     }
     
