@@ -76,6 +76,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 class BackupManagerService extends IBackupManager.Stub {
     private static final String TAG = "BackupManagerService";
@@ -84,6 +85,9 @@ class BackupManagerService extends IBackupManager.Stub {
     // How often we perform a backup pass.  Privileged external callers can
     // trigger an immediate pass.
     private static final long BACKUP_INTERVAL = AlarmManager.INTERVAL_HOUR;
+
+    // Random variation in backup scheduling time to avoid server load spikes
+    private static final int FUZZ_MILLIS = 5 * 60 * 1000;
 
     // The amount of time between the initial provisioning of the device and
     // the first backup pass.
@@ -1949,9 +1953,15 @@ class BackupManagerService extends IBackupManager.Stub {
     }
 
     private void startBackupAlarmsLocked(long delayBeforeFirstBackup) {
-        long when = System.currentTimeMillis() + delayBeforeFirstBackup;
-        mAlarmManager.setInexactRepeating(AlarmManager.RTC_WAKEUP, when,
-                BACKUP_INTERVAL, mRunBackupIntent);
+        // We used to use setInexactRepeating(), but that may be linked to
+        // backups running at :00 more often than not, creating load spikes.
+        // Schedule at an exact time for now, and also add a bit of "fuzz".
+
+        Random random = new Random();
+        long when = System.currentTimeMillis() + delayBeforeFirstBackup +
+                random.nextInt(FUZZ_MILLIS);
+        mAlarmManager.setRepeating(AlarmManager.RTC_WAKEUP, when,
+                BACKUP_INTERVAL + random.nextInt(FUZZ_MILLIS), mRunBackupIntent);
         mNextBackupPass = when;
     }
 
