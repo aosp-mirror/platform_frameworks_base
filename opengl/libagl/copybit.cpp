@@ -423,7 +423,8 @@ static bool copybit(GLint x, GLint y,
                         COPYBIT_ENABLE : COPYBIT_DISABLE);
         clipRectRegion it(c);
 
-        LOGD("dst={%d, %d, %d, %p, %p}, "
+        LOGD_IF(0,
+             "dst={%d, %d, %d, %p, %p}, "
              "src={%d, %d, %d, %p, %p}, "
              "drect={%d,%d,%d,%d}, "
              "srect={%d,%d,%d,%d}, "
