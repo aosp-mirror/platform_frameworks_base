@@ -1922,7 +1922,12 @@ class PowerManagerService extends IPowerManager.Stub
             if ((mPowerState & BATTERY_LOW_BIT) == 0) {
                 int lcdValue = getAutoBrightnessValue(value, mLcdBacklightValues);
                 int buttonValue = getAutoBrightnessValue(value, mButtonBacklightValues);
-                int keyboardValue = getAutoBrightnessValue(value, mKeyboardBacklightValues);
+                int keyboardValue;
+                if (mKeyboardVisible) {
+                    keyboardValue = getAutoBrightnessValue(value, mKeyboardBacklightValues);
+                } else {
+                    keyboardValue = 0;
+                }
                 mLightSensorBrightness = lcdValue;
 
                 if (mDebugLightSensor) {
@@ -2044,6 +2049,14 @@ class PowerManagerService extends IPowerManager.Stub
                 // will take care of turning on due to a true change to the lid
                 // switch and synchronized with the lock screen.
                 if ((mPowerState & SCREEN_ON_BIT) != 0) {
+                    if (mAutoBrightessEnabled && mUseSoftwareAutoBrightness) {
+                        // force recompute of backlight values
+                        if (mLightSensorValue >= 0) {
+                            int value = (int)mLightSensorValue;
+                            mLightSensorValue = -1;
+                            lightSensorChangedLocked(value);
+                        }
+                    }
                     userActivity(SystemClock.uptimeMillis(), false, BUTTON_EVENT, true);
                 }
             }
@@ -2273,7 +2286,8 @@ class PowerManagerService extends IPowerManager.Stub
         // Don't let applications turn the screen all the way off
         brightness = Math.max(brightness, Power.BRIGHTNESS_DIM);
         mHardware.setLightBrightness_UNCHECKED(HardwareService.LIGHT_ID_BACKLIGHT, brightness);
-        mHardware.setLightBrightness_UNCHECKED(HardwareService.LIGHT_ID_KEYBOARD, brightness);
+        mHardware.setLightBrightness_UNCHECKED(HardwareService.LIGHT_ID_KEYBOARD,
+            (mKeyboardVisible ? brightness : 0));
         mHardware.setLightBrightness_UNCHECKED(HardwareService.LIGHT_ID_BUTTONS, brightness);
         long identity = Binder.clearCallingIdentity();
         try {
