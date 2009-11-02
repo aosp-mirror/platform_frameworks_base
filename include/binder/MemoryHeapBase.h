@@ -35,7 +35,8 @@ public:
         MAP_ONCE = IMemoryHeap::MAP_ONCE,
         // memory won't be mapped locally, but will be mapped in the remote
         // process.
-        DONT_MAP_LOCALLY = 0x00000100
+        DONT_MAP_LOCALLY = 0x00000100,
+        NO_CACHING = 0x00000200
     };
 
     /* 
