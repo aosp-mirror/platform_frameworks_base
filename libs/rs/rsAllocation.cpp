@@ -52,6 +52,8 @@ Allocation::Allocation(Context *rsc, const Type *type) : ObjectBase(rsc)
 
 Allocation::~Allocation()
 {
+    free(mPtr);
+    mPtr = NULL;
 }
 
 void Allocation::setCpuWritable(bool)

@@ -39,6 +39,7 @@ ObjectBase::~ObjectBase()
     rsAssert(!mUserRefCount);
     rsAssert(!mSysRefCount);
     remove();
+    delete[] mName;
 }
 
 void ObjectBase::dumpLOGV(const char *op) const

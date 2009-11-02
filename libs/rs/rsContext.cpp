@@ -350,6 +350,7 @@ void * Context::threadProc(void *vrsc)
      rsc->deinitEGL();
      pthread_mutex_unlock(&gInitMutex);
 
+     rsc->mObjDestroy.mNeedToEmpty = true;
      rsc->objDestroyOOBRun();
      LOGV("RS Thread exited");
      return NULL;
@@ -421,6 +422,7 @@ Context::~Context()
 
     mIO.shutdown();
     int status = pthread_join(mThreadId, &res);
+    mObjDestroy.mNeedToEmpty = true;
     objDestroyOOBRun();
 
     // Global structure cleanup.
@@ -431,6 +433,7 @@ Context::~Context()
         if (!gThreadTLSKeyCount) {
             pthread_key_delete(gThreadTLSKey);
         }
+        mDev = NULL;
     }
     pthread_mutex_unlock(&gInitMutex);
 
