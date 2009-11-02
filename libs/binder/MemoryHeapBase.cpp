@@ -67,7 +67,11 @@ MemoryHeapBase::MemoryHeapBase(const char* device, size_t size, uint32_t flags)
     : mFD(-1), mSize(0), mBase(MAP_FAILED), mFlags(flags),
       mDevice(0), mNeedUnmap(false)
 {
-    int fd = open(device, O_RDWR);
+    int open_flags = O_RDWR;
+    if (flags & NO_CACHING)
+        open_flags |= O_SYNC;
+
+    int fd = open(device, open_flags);
     LOGE_IF(fd<0, "error opening %s: %s", device, strerror(errno));
     if (fd >= 0) {
         const size_t pagesize = getpagesize();
