@@ -212,12 +212,17 @@ class PowerManagerService extends IPowerManager.Stub
     private boolean mPreventScreenOn;
     private int mScreenBrightnessOverride = -1;
     private boolean mUseSoftwareAutoBrightness;
-    private boolean mUseHardwareAutoBrightness;
     private boolean mAutoBrightessEnabled;
     private int[] mAutoBrightnessLevels;
     private int[] mLcdBacklightValues;
     private int[] mButtonBacklightValues;
     private int[] mKeyboardBacklightValues;
+
+    /*
+     * WARNING - DO NOT USE THE HARDWARE AUTO-BRIGHTNESS FEATURE
+     * Hardware auto brightness support is deprecated and will be removed in the next release.
+     */
+    private boolean mUseHardwareAutoBrightness;
 
     // Used when logging number and duration of touch-down cycles
     private long mTotalTouchDownTime;
@@ -443,11 +448,17 @@ class PowerManagerService extends IPowerManager.Stub
         // read settings for auto-brightness
         mUseSoftwareAutoBrightness = resources.getBoolean(
                 com.android.internal.R.bool.config_automatic_brightness_available);
+
+        /*
+         * WARNING - DO NOT USE THE HARDWARE AUTO-BRIGHTNESS FEATURE
+         * Hardware auto brightness support is deprecated and will be removed in the next release.
+         */
         mUseHardwareAutoBrightness = resources.getBoolean(
                 com.android.internal.R.bool.config_hardware_automatic_brightness_available);
         if (mUseHardwareAutoBrightness) {
             mUseSoftwareAutoBrightness = false;
         }
+
         if (mUseSoftwareAutoBrightness) {
             mAutoBrightnessLevels = resources.getIntArray(
                     com.android.internal.R.array.config_autoBrightnessLevels);
