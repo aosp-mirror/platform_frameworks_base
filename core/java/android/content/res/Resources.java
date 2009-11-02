@@ -54,7 +54,7 @@ public class Resources {
     // Use the current SDK version code.  If we are a development build,
     // also allow the previous SDK version + 1.
     private static final int sSdkVersion = Build.VERSION.SDK_INT
-            + ("REL".equals(Build.VERSION.CODENAME) ? 1 : 0);
+            + ("REL".equals(Build.VERSION.CODENAME) ? 0 : 1);
     private static final Object mSync = new Object();
     private static Resources mSystem = null;
     
