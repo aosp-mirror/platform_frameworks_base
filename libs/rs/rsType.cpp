@@ -57,6 +57,7 @@ TypeState::TypeState()
 
 TypeState::~TypeState()
 {
+    delete[] mLODs;
 }
 
 size_t Type::getOffsetForFace(uint32_t face) const
