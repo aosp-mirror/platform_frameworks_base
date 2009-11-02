@@ -1272,7 +1272,7 @@ struct ResTable_config
 
             if (version || o.version) {
                 if ((sdkVersion != o.sdkVersion) && requested->sdkVersion) {
-                    return (sdkVersion);
+                    return (sdkVersion > o.sdkVersion);
                 }
 
                 if ((minorVersion != o.minorVersion) &&
@@ -1384,7 +1384,7 @@ struct ResTable_config
         }
         if (version != 0) {
             if (settings.sdkVersion != 0 && sdkVersion != 0
-                && sdkVersion != settings.sdkVersion) {
+                && sdkVersion > settings.sdkVersion) {
                 return false;
             }
             if (settings.minorVersion != 0 && minorVersion != 0
