@@ -2079,7 +2079,6 @@ class PowerManagerService extends IPowerManager.Stub
     public void enableUserActivity(boolean enabled) {
         synchronized (mLocks) {
             mUserActivityAllowed = enabled;
-            mLastEventTime = SystemClock.uptimeMillis(); // we might need to pass this in
         }
     }
 
