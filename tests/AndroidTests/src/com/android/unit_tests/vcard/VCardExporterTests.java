@@ -53,10 +53,10 @@ import android.provider.ContactsContract.CommonDataKinds.Photo;
 import android.provider.ContactsContract.CommonDataKinds.StructuredName;
 import android.provider.ContactsContract.CommonDataKinds.StructuredPostal;
 import android.provider.ContactsContract.CommonDataKinds.Website;
-import android.test.AndroidTestCase;
 import android.test.mock.MockContentResolver;
 import android.test.mock.MockContext;
 import android.test.mock.MockCursor;
+import android.util.Log;
 
 import com.android.unit_tests.vcard.PropertyNodesVerifier.TypeSet;
 
@@ -155,7 +155,7 @@ class MockContentProvider extends ContentProvider {
  * This test class depends on vCard importer code, so if tests for vCard importer fail,
  * the result of this class will not be reliable.
  */
-public class VCardExporterTests extends AndroidTestCase {
+public class VCardExporterTests extends VCardTestsBase {
     private static final int V21 = 0;
     private static final int V30 = 1;
 
@@ -295,13 +295,23 @@ public class VCardExporterTests extends AndroidTestCase {
         // To allow duplication, use list instead of set.
         // TODO: support multiple vCard entries.
         final private List<String> mExpectedLineList;
+        final private ContactStructVerifier mContactStructVerifier;
+        final private int mVCardType;
         int mCount;
 
         public VCardVerificationHandler(final TestCase testCase, final int version) {
+            this(testCase, null, version);
+        }
+
+        public VCardVerificationHandler(final TestCase testCase,
+                ContactStructVerifier contactStructVerifier, final int version) {
             mTestCase = testCase;
             mPropertyNodesVerifierList = new ArrayList<PropertyNodesVerifier>();
             mIsV30 = (version == V30);
             mExpectedLineList = new ArrayList<String>();
+            mContactStructVerifier = contactStructVerifier;
+            mVCardType = (version == V30 ? VCardConfig.VCARD_TYPE_V30_GENERIC_UTF8
+                    : VCardConfig.VCARD_TYPE_V21_GENERIC_UTF8);
             mCount = 1;
         }
 
@@ -381,6 +391,12 @@ public class VCardExporterTests extends AndroidTestCase {
                 is.close();
                 mTestCase.assertEquals(1, builder.vNodeList.size());
                 propertyNodesVerifier.verify(builder.vNodeList.get(0));
+                if (mContactStructVerifier != null) {
+                    Log.d("@@@", vcard);
+                    is = new ByteArrayInputStream(vcard.getBytes("UTF-8"));
+                    mContactStructVerifier.verify(is, mVCardType);
+                    is.close();
+                }
             } catch (IOException e) {
                 mTestCase.fail("Unexpected IOException: " + e.getMessage());
             } catch (VCardException e) {
@@ -412,7 +428,7 @@ public class VCardExporterTests extends AndroidTestCase {
             VCardVerificationHandler handler, int version) {
         final boolean isV30 = (version == V30);
 
-        int vcardType = (isV30 ? VCardConfig.VCARD_TYPE_V30_GENERIC_UTF8
+        final int vcardType = (isV30 ? VCardConfig.VCARD_TYPE_V30_GENERIC_UTF8
                 : VCardConfig.VCARD_TYPE_V21_GENERIC_UTF8);
         VCardComposer composer = new VCardComposer(new CustomMockContext(resolver), vcardType);
         composer.addHandler(handler);
@@ -1277,11 +1293,14 @@ public class VCardExporterTests extends AndroidTestCase {
         ContentValues contentValues = resolver.buildData(Nickname.CONTENT_ITEM_TYPE);
         contentValues.put(Nickname.NAME, "Nicky");
 
-        VCardVerificationHandler handler = new VCardVerificationHandler(this, V21);
-        handler.addNewVerifierWithEmptyName()
-            .addNodeWithOrder("X-ANDROID-CUSTOM", Nickname.CONTENT_ITEM_TYPE + ";Nicky;;;;;;;;;;;;;;");
+        ContactStructVerifier verifier = new ContactStructVerifier();
+        contentValues = verifier.createExpected(Nickname.CONTENT_ITEM_TYPE);
+        contentValues.put(Nickname.NAME, "Nicky");
 
-        // TODO: also test import part.
+        VCardVerificationHandler handler = new VCardVerificationHandler(this, verifier, V21);
+        handler.addNewVerifierWithEmptyName()
+            .addNodeWithOrder("X-ANDROID-CUSTOM",
+                    Nickname.CONTENT_ITEM_TYPE + ";Nicky;;;;;;;;;;;;;;");
 
         verifyOneComposition(resolver, handler, V21);
     }
