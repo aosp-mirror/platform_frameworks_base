@@ -99,8 +99,6 @@ SimpleMeshContext::SimpleMeshContext()
 
 SimpleMeshContext::~SimpleMeshContext()
 {
-    delete[] mVertexTypes;
-    delete[] mVertexBuffers;
 }
 
 
