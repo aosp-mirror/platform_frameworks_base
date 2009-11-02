@@ -1548,6 +1548,7 @@ void MediaPlayerService::AudioOutput::pause()
 {
     LOGV("pause");
     if (mTrack) mTrack->pause();
+    lastWriteTime = 0;
 }
 
 void MediaPlayerService::AudioOutput::close()
