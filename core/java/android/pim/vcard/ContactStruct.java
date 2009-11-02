@@ -714,7 +714,7 @@ public class ContactStruct {
             mFullName = propValue;
         } else if (propName.equals(Constants.PROPERTY_N)) {
             handleNProperty(propValueList);
-        } else if (propName.equals(Constants.PROPERTY_NICKNAME)) {
+        } else if (propName.equals(Constants.PROPERTY_SORT_STRING)) {
             mPhoneticFullName = propValue;
         } else if (propName.equals(Constants.PROPERTY_NICKNAME) ||
                 propName.equals(Constants.ImportOnly.PROPERTY_X_NICKNAME)) {
@@ -1067,7 +1067,7 @@ public class ContactStruct {
         }
         operationList.add(builder.build());
 
-        {
+        if (!nameFieldsAreEmpty()) {
             builder = ContentProviderOperation.newInsert(Data.CONTENT_URI);
             builder.withValueBackReference(StructuredName.RAW_CONTACT_ID, 0);
             builder.withValue(Data.MIMETYPE, StructuredName.CONTENT_ITEM_TYPE);
@@ -1078,9 +1078,15 @@ public class ContactStruct {
             builder.withValue(StructuredName.PREFIX, mPrefix);
             builder.withValue(StructuredName.SUFFIX, mSuffix);
 
-            builder.withValue(StructuredName.PHONETIC_GIVEN_NAME, mPhoneticGivenName);
-            builder.withValue(StructuredName.PHONETIC_FAMILY_NAME, mPhoneticFamilyName);
-            builder.withValue(StructuredName.PHONETIC_MIDDLE_NAME, mPhoneticMiddleName);
+            if (!(TextUtils.isEmpty(mPhoneticGivenName)
+                    && TextUtils.isEmpty(mPhoneticFamilyName)
+                    && TextUtils.isEmpty(mPhoneticMiddleName))) {
+                builder.withValue(StructuredName.PHONETIC_GIVEN_NAME, mPhoneticGivenName);
+                builder.withValue(StructuredName.PHONETIC_FAMILY_NAME, mPhoneticFamilyName);
+                builder.withValue(StructuredName.PHONETIC_MIDDLE_NAME, mPhoneticMiddleName);
+            } else if (!TextUtils.isEmpty(mPhoneticFullName)) {
+                builder.withValue(StructuredName.PHONETIC_GIVEN_NAME, mPhoneticFullName);
+            }
 
             builder.withValue(StructuredName.DISPLAY_NAME, getDisplayName());
             operationList.add(builder.build());
@@ -1249,9 +1255,9 @@ public class ContactStruct {
                         }
                     }
 
-                    operationList.add(builder.build());
                     i++;
                 }
+                operationList.add(builder.build());
             }
         }
 
@@ -1270,6 +1276,19 @@ public class ContactStruct {
         } catch (OperationApplicationException e) {
             Log.e(LOG_TAG, String.format("%s: %s", e.toString(), e.getMessage()));
         }
+    }
+
+    private boolean nameFieldsAreEmpty() {
+        return (TextUtils.isEmpty(mFamilyName)
+                && TextUtils.isEmpty(mMiddleName)
+                && TextUtils.isEmpty(mGivenName)
+                && TextUtils.isEmpty(mPrefix)
+                && TextUtils.isEmpty(mSuffix)
+                && TextUtils.isEmpty(mFullName)
+                && TextUtils.isEmpty(mPhoneticFamilyName)
+                && TextUtils.isEmpty(mPhoneticMiddleName)
+                && TextUtils.isEmpty(mPhoneticGivenName)
+                && TextUtils.isEmpty(mPhoneticFullName));
     }
 
     public boolean isIgnorable() {

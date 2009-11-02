@@ -46,6 +46,7 @@ import android.test.AndroidTestCase;
 import android.test.mock.MockContentProvider;
 import android.test.mock.MockContentResolver;
 import android.text.TextUtils;
+import android.util.Log;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -136,6 +137,13 @@ import java.util.Map.Entry;
                 fakeResultArray[i] = new ContentProviderResult(uri);
             }
 
+            Log.d("@@@", "size: " + size);
+            for (int i = 0; i < size; i++) {
+                ContentProviderOperation operation = operations.get(i);
+                ContentValues contentValues = operation.resolveValueBackReferences(
+                        fakeResultArray, i);
+                Log.d("@@@", convertToEasilyReadableString(contentValues));
+            }
             for (int i = 0; i < size; i++) {
                 ContentProviderOperation operation = operations.get(i);
                 ContentValues actualContentValues = operation.resolveValueBackReferences(
@@ -167,11 +175,9 @@ import java.util.Map.Entry;
                     for (String key: keyToBeRemoved) {
                         actualContentValues.remove(key);
                     }
-                    /* For testing
                     Log.d("@@@",
                             String.format("MimeType: %s, data: %s",
                                     mimeType, actualContentValues.toString()));
-                     */
                     // Remove RAW_CONTACT_ID entry just for safety, since we do not care
                     // how resolver-related code handles the entry in this unit test,
                     if (actualContentValues.containsKey(Data.RAW_CONTACT_ID)) {
@@ -179,18 +185,16 @@ import java.util.Map.Entry;
                     }
                     final Collection<ContentValues> contentValuesCollection =
                         mMimeTypeToExpectedContentValues.get(mimeType);
-                    if (contentValuesCollection == null) {
+                    if (contentValuesCollection.isEmpty()) {
                         fail("ContentValues for MimeType " + mimeType
                                 + " is not expected at all (" + actualContentValues + ")");
                     }
                     boolean checked = false;
                     for (ContentValues expectedContentValues : contentValuesCollection) {
-                        /* For testing
                         Log.d("@@@", "expected: "
                                 + convertToEasilyReadableString(expectedContentValues));
                         Log.d("@@@", "actual  : "
                                 + convertToEasilyReadableString(actualContentValues));
-                         */
                         if (equalsForContentValues(expectedContentValues,
                                 actualContentValues)) {
                             assertTrue(contentValuesCollection.remove(expectedContentValues));
@@ -230,13 +234,10 @@ import java.util.Map.Entry;
     }
 
     public class ContactStructVerifier {
-        private final int mResourceId;
-        private final int mVCardType;
         private final ImportVerificationResolver mResolver;
         // private final String mCharset;
-        public ContactStructVerifier(int resId, int vCardType) {
-            mResourceId = resId;
-            mVCardType = vCardType;
+
+        public ContactStructVerifier() {
             mResolver = new ImportVerificationResolver();
         }
 
@@ -247,16 +248,21 @@ import java.util.Map.Entry;
             return contentValues;
         }
 
-        public void verify() throws IOException, VCardException {
-            InputStream is = getContext().getResources().openRawResource(mResourceId);
+        public void verify(int resId, int vCardType)
+                throws IOException, VCardException {
+            verify(getContext().getResources().openRawResource(resId), vCardType);
+        }
+
+        public void verify(InputStream is, int vCardType)
+                throws IOException, VCardException {
             final VCardParser vCardParser;
-            if (VCardConfig.isV30(mVCardType)) {
+            if (VCardConfig.isV30(vCardType)) {
                 vCardParser = new VCardParser_V30(true);  // use StrictParsing
             } else {
                 vCardParser = new VCardParser_V21();
             }
             VCardDataBuilder builder =
-                new VCardDataBuilder(null, null, false, mVCardType, null);
+                new VCardDataBuilder(null, null, false, vCardType, null);
             builder.addEntryHandler(new EntryCommitter(mResolver));
             try {
                 vCardParser.parse(is, builder);
@@ -283,12 +289,13 @@ import java.util.Map.Entry;
         SortedMap<String, String> sortedMap = new TreeMap<String, String>();
         for (Entry<String, Object> entry : contentValues.valueSet()) {
             final String key = entry.getKey();
-            final String value = entry.getValue().toString();
+            final Object value = entry.getValue();
+            final String valueString = (value != null ? value.toString() : null);
             if (Data.MIMETYPE.equals(key)) {
-                mimeTypeValue = value;
+                mimeTypeValue = valueString;
             } else {
                 assertNotNull(key);
-                sortedMap.put(key, (value != null ? value.toString() : ""));
+                sortedMap.put(key, valueString);
             }
         }
         StringBuilder builder = new StringBuilder();
