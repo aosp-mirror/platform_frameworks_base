@@ -1803,6 +1803,8 @@ class PowerManagerService extends IPowerManager.Stub
     }
 
     private void forceUserActivityLocked() {
+        // cancel animation so userActivity will succeed
+        mScreenBrightness.animating = false;
         boolean savedActivityAllowed = mUserActivityAllowed;
         mUserActivityAllowed = true;
         userActivity(SystemClock.uptimeMillis(), false);
