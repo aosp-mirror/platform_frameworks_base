@@ -1162,7 +1162,7 @@ AudioFlinger::MixerThread::~MixerThread()
 
 bool AudioFlinger::MixerThread::threadLoop()
 {
-    uint32_t sleepTime = 0;
+    uint32_t sleepTime = 1000;
     uint32_t maxBufferRecoveryInUsecs = getMaxBufferRecoveryInUsecs();
     int16_t* curBuf = mMixBuffer;
     Vector< sp<Track> > tracksToRemove;
@@ -1224,6 +1224,7 @@ bool AudioFlinger::MixerThread::threadLoop()
                     }
 
                     standbyTime = systemTime() + kStandbyTimeInNsecs;
+                    sleepTime = 1000;
                     continue;
                 }
             }
@@ -1591,7 +1592,7 @@ AudioFlinger::DirectOutputThread::~DirectOutputThread()
 
 bool AudioFlinger::DirectOutputThread::threadLoop()
 {
-    uint32_t sleepTime = 0;
+    uint32_t sleepTime = 1000;
     uint32_t maxBufferRecoveryInUsecs = getMaxBufferRecoveryInUsecs();
     sp<Track> trackToRemove;
     sp<Track> activeTrack;
@@ -1643,6 +1644,7 @@ bool AudioFlinger::DirectOutputThread::threadLoop()
                     }
 
                     standbyTime = systemTime() + kStandbyTimeInNsecs;
+                    sleepTime = 1000;
                     continue;
                 }
             }
@@ -1879,7 +1881,7 @@ AudioFlinger::DuplicatingThread::~DuplicatingThread()
 
 bool AudioFlinger::DuplicatingThread::threadLoop()
 {
-    uint32_t sleepTime = 0;
+    uint32_t sleepTime = 1000;
     uint32_t maxBufferRecoveryInUsecs = getMaxBufferRecoveryInUsecs();
     int16_t* curBuf = mMixBuffer;
     Vector< sp<Track> > tracksToRemove;
@@ -1940,6 +1942,7 @@ bool AudioFlinger::DuplicatingThread::threadLoop()
                     }
 
                     standbyTime = systemTime() + kStandbyTimeInNsecs;
+                    sleepTime = 1000;
                     continue;
                 }
             }
