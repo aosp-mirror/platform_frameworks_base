@@ -2548,6 +2548,41 @@ public class WebView extends AbsoluteLayout
         }
     }
 
+    /**
+     * Called by CallbackProxy when the page finishes loading.
+     * @param url The URL of the page which has finished loading.
+     */
+    /* package */ void onPageFinished(String url) {
+        if (mPageThatNeedsToSlideTitleBarOffScreen != null) {
+            // If the user is now on a different page, or has scrolled the page
+            // past the point where the title bar is offscreen, ignore the
+            // scroll request.
+            if (mPageThatNeedsToSlideTitleBarOffScreen.equals(url)
+                    && mScrollX == 0 && mScrollY == 0) {
+                pinScrollTo(0, mYDistanceToSlideTitleOffScreen, true,
+                        SLIDE_TITLE_DURATION);
+            }
+            mPageThatNeedsToSlideTitleBarOffScreen = null;
+        }
+    }
+
+    /**
+     * The URL of a page that sent a message to scroll the title bar off screen.
+     *
+     * Many mobile sites tell the page to scroll to (0,1) in order to scroll the
+     * title bar off the screen.  Sometimes, the scroll position is set before
+     * the page finishes loading.  Rather than scrolling while the page is still
+     * loading, keep track of the URL and new scroll position so we can perform
+     * the scroll once the page finishes loading.
+     */
+    private String mPageThatNeedsToSlideTitleBarOffScreen;
+
+    /**
+     * The destination Y scroll position to be used when the page finishes
+     * loading.  See mPageThatNeedsToSlideTitleBarOffScreen.
+     */
+    private int mYDistanceToSlideTitleOffScreen;
+
     // scale from content to view coordinates, and pin
     // return true if pin caused the final x/y different than the request cx/cy,
     // and a future scroll may reach the request cx/cy after our size has
@@ -2582,8 +2617,18 @@ public class WebView extends AbsoluteLayout
         // page, assume this is an attempt to scroll off the title bar, and
         // animate the title bar off screen slowly enough that the user can see
         // it.
-        if (cx == 0 && cy == 1 && mScrollX == 0 && mScrollY == 0) {
-            pinScrollTo(vx, vy, true, SLIDE_TITLE_DURATION);
+        if (cx == 0 && cy == 1 && mScrollX == 0 && mScrollY == 0
+                && mTitleBar != null) {
+            // FIXME: 100 should be defined somewhere as our max progress.
+            if (getProgress() < 100) {
+                // Wait to scroll the title bar off screen until the page has
+                // finished loading.  Keep track of the URL and the destination
+                // Y position
+                mPageThatNeedsToSlideTitleBarOffScreen = getUrl();
+                mYDistanceToSlideTitleOffScreen = vy;
+            } else {
+                pinScrollTo(vx, vy, true, SLIDE_TITLE_DURATION);
+            }
             // Since we are animating, we have not yet reached the desired
             // scroll position.  Do not return true to request another attempt
             return false;
