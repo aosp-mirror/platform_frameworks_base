@@ -651,7 +651,7 @@ EGLBoolean egl_window_surface_v2_t::bindDrawSurface(ogles_context_t* gl)
         if (supportedCopybitsDestinationFormat(buffer.format)) {
             buffer_handle_t handle = this->buffer->handle;
             if (handle != NULL) {
-                gl->copybits.drawSurfaceBuffer = handle;
+                gl->copybits.drawSurfaceBuffer = this->buffer;
             }
         }
     }
