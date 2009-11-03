@@ -62,7 +62,6 @@ import android.test.mock.MockContentResolver;
 import android.test.mock.MockContext;
 import android.test.mock.MockCursor;
 import android.text.TextUtils;
-import android.util.Log;
 
 import junit.framework.TestCase;
 
@@ -173,6 +172,64 @@ class CustomMockContext extends MockContext {
     }
 }
 
+class ContentValuesBuilder {
+    private final ContentValues mContentValues;
+
+    public ContentValuesBuilder(final ContentValues contentValues) {
+        mContentValues = contentValues;
+    }
+
+    public ContentValuesBuilder put(String key, String value) {
+        mContentValues.put(key, value);
+        return this;
+    }
+
+    public ContentValuesBuilder put(String key, Byte value) {
+        mContentValues.put(key, value);
+        return this;
+    }
+
+    public ContentValuesBuilder put(String key, Short value) {
+        mContentValues.put(key, value);
+        return this;
+    }
+
+    public ContentValuesBuilder put(String key, Integer value) {
+        mContentValues.put(key, value);
+        return this;
+    }
+
+    public ContentValuesBuilder put(String key, Long value) {
+        mContentValues.put(key, value);
+        return this;
+    }
+
+    public ContentValuesBuilder put(String key, Float value) {
+        mContentValues.put(key, value);
+        return this;
+    }
+
+    public ContentValuesBuilder put(String key, Double value) {
+        mContentValues.put(key, value);
+        return this;
+    }
+
+    public ContentValuesBuilder put(String key, Boolean value) {
+        mContentValues.put(key, value);
+        return this;
+    }
+
+    public ContentValuesBuilder put(String key, byte[] value) {
+        mContentValues.put(key, value);
+        return this;
+    }
+
+    public ContentValuesBuilder putNull(String key) {
+        mContentValues.putNull(key);
+        return this;
+    }
+}
+
 /**
  * BaseClass for vCard unit tests with utility classes.
  * Please do not add each unit test here.
@@ -233,7 +290,7 @@ class CustomMockContext extends MockContext {
             }
 
             final Collection<ContentValues> contentValuesCollection =
-                mMimeTypeToExpectedContentValues.get(mimeType);
+                    mMimeTypeToExpectedContentValues.get(mimeType);
             contentValuesCollection.add(expectedContentValues);
         }
 
@@ -347,19 +404,19 @@ class CustomMockContext extends MockContext {
         }
     }
 
-    public class ContactStructVerifier {
+    public class ContentValuesVerifier {
         private final ImportVerificationResolver mResolver;
         // private final String mCharset;
 
-        public ContactStructVerifier() {
+        public ContentValuesVerifier() {
             mResolver = new ImportVerificationResolver();
         }
 
-        public ContentValues createExpected(String mimeType) {
+        public ContentValuesBuilder buildExpected(String mimeType) {
             ContentValues contentValues = new ContentValues();
             contentValues.put(Data.MIMETYPE, mimeType);
             mResolver.addExpectedContentValues(contentValues);
-            return contentValues;
+            return new ContentValuesBuilder(contentValues);
         }
 
         public void verify(int resId, int vCardType)
@@ -399,7 +456,7 @@ class CustomMockContext extends MockContext {
             addProvider(RawContacts.CONTENT_URI.getAuthority(), mProvider);
         }
 
-        public ContentValues buildData(String mimeType) {
+        public ContentValuesBuilder buildInput(String mimeType) {
             return mProvider.buildData(mimeType);
         }
     }
@@ -437,11 +494,11 @@ class CustomMockContext extends MockContext {
 
     public class ExportTestProvider extends MockContentProvider {
         List<ContentValues> mContentValuesList = new ArrayList<ContentValues>();
-        public ContentValues buildData(String mimeType) {
+        public ContentValuesBuilder buildData(String mimeType) {
             ContentValues contentValues = new ContentValues();
             contentValues.put(Data.MIMETYPE, mimeType);
             mContentValuesList.add(contentValues);
-            return contentValues;
+            return new ContentValuesBuilder(contentValues);
         }
 
         @Override
@@ -518,45 +575,46 @@ class CustomMockContext extends MockContext {
         }
     }
 
-    public static class VCardVerificationHandler implements VCardComposer.OneEntryHandler {
+    public class VCardVerificationHandler implements VCardComposer.OneEntryHandler {
         final private TestCase mTestCase;
         final private List<PropertyNodesVerifier> mPropertyNodesVerifierList;
         final private boolean mIsV30;
         // To allow duplication, use list instead of set.
         // TODO: support multiple vCard entries.
         final private List<String> mExpectedLineList;
-        final private ContactStructVerifier mContactStructVerifier;
+        final private List<ContentValuesVerifier> mContentValuesVerifierList;
         final private int mVCardType;
         int mCount;
 
         public VCardVerificationHandler(final TestCase testCase, final int version) {
-            this(testCase, null, version);
-        }
-
-        public VCardVerificationHandler(final TestCase testCase,
-                ContactStructVerifier contactStructVerifier, final int version) {
             mTestCase = testCase;
             mPropertyNodesVerifierList = new ArrayList<PropertyNodesVerifier>();
             mIsV30 = (version == V30);
             mExpectedLineList = new ArrayList<String>();
-            mContactStructVerifier = contactStructVerifier;
+            mContentValuesVerifierList = new ArrayList<ContentValuesVerifier>();
             mVCardType = (version == V30 ? VCardConfig.VCARD_TYPE_V30_GENERIC_UTF8
                     : VCardConfig.VCARD_TYPE_V21_GENERIC_UTF8);
             mCount = 1;
         }
 
-        public PropertyNodesVerifier addNewVerifier() {
+        public PropertyNodesVerifier addPropertyNodesVerifier() {
             PropertyNodesVerifier verifier = new PropertyNodesVerifier(mTestCase);
             mPropertyNodesVerifierList.add(verifier);
             verifier.addNodeWithOrder("VERSION", mIsV30 ? "3.0" : "2.1");
             return verifier;
         }
 
-        public PropertyNodesVerifier addNewVerifierWithEmptyName() {
-            PropertyNodesVerifier verifier = addNewVerifier();
+        public PropertyNodesVerifier addPropertyVerifierWithEmptyName() {
+            PropertyNodesVerifier verifier = addPropertyNodesVerifier();
             if (mIsV30) {
                 verifier.addNodeWithOrder("N", "").addNodeWithOrder("FN", "");
             }
+            return verifier;
+        }
+
+        public ContentValuesVerifier addContentValuesVerifier() {
+            ContentValuesVerifier verifier = new ContentValuesVerifier();
+            mContentValuesVerifierList.add(verifier);
             return verifier;
         }
 
@@ -610,7 +668,7 @@ class CustomMockContext extends MockContext {
                         + mCount + " of the entries (No.1 is the first entry))");
             }
             PropertyNodesVerifier propertyNodesVerifier =
-                mPropertyNodesVerifierList.get(0);
+                    mPropertyNodesVerifierList.get(0);
             mPropertyNodesVerifierList.remove(0);
             VCardParser parser = (mIsV30 ? new VCardParser_V30(true) : new VCardParser_V21());
             VNodeBuilder builder = new VNodeBuilder();
@@ -621,10 +679,11 @@ class CustomMockContext extends MockContext {
                 is.close();
                 mTestCase.assertEquals(1, builder.vNodeList.size());
                 propertyNodesVerifier.verify(builder.vNodeList.get(0));
-                if (mContactStructVerifier != null) {
-                    Log.d("@@@", vcard);
+                if (!mContentValuesVerifierList.isEmpty()) {
+                    ContentValuesVerifier contentValuesVerifier =
+                            mContentValuesVerifierList.get(0);
                     is = new ByteArrayInputStream(vcard.getBytes("UTF-8"));
-                    mContactStructVerifier.verify(is, mVCardType);
+                    contentValuesVerifier.verify(is, mVCardType);
                     is.close();
                 }
             } catch (IOException e) {
