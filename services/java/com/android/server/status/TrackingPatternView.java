@@ -55,6 +55,8 @@ public class TrackingPatternView extends View {
         final int textureWidth = mTextureWidth;
         final int textureHeight = mTextureHeight;
 
+        Log.d("TrackingPatternView", "width=" + width + " textureWidth=" + textureWidth);
+
         int x = 0;
         int y;
 
