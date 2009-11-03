@@ -54,6 +54,17 @@ Allocation::~Allocation()
 {
     free(mPtr);
     mPtr = NULL;
+
+    if (mBufferID) {
+        // Causes a SW crash....
+        //LOGV(" mBufferID %i", mBufferID);
+        //glDeleteBuffers(1, &mBufferID);
+        //mBufferID = 0;
+    }
+    if (mTextureID) {
+        glDeleteTextures(1, &mTextureID);
+        mTextureID = 0;
+    }
 }
 
 void Allocation::setCpuWritable(bool)
