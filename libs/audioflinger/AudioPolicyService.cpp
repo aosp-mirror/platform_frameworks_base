@@ -43,6 +43,12 @@
 
 namespace android {
 
+static const char* kDeadlockedString = "AudioPolicyService may be deadlocked\n";
+static const char* kCmdDeadlockedString = "AudioPolicyService command thread may be deadlocked\n";
+
+static const int kDumpLockRetries = 50;
+static const int kDumpLockSleep = 20000;
+
 static bool checkPermission() {
 #ifndef HAVE_ANDROID_OS
     return true;
@@ -335,17 +341,65 @@ void AudioPolicyService::binderDied(const wp<IBinder>& who) {
     LOGW("binderDied() %p, tid %d, calling tid %d", who.unsafe_get(), gettid(), IPCThreadState::self()->getCallingPid());
 }
 
+static bool tryLock(Mutex& mutex)
+{
+    bool locked = false;
+    for (int i = 0; i < kDumpLockRetries; ++i) {
+        if (mutex.tryLock() == NO_ERROR) {
+            locked = true;
+            break;
+        }
+        usleep(kDumpLockSleep);
+    }
+    return locked;
+}
+
+status_t AudioPolicyService::dumpInternals(int fd)
+{
+    const size_t SIZE = 256;
+    char buffer[SIZE];
+    String8 result;
+
+    snprintf(buffer, SIZE, "PolicyManager Interface: %p\n", mpPolicyManager);
+    result.append(buffer);
+    snprintf(buffer, SIZE, "Command Thread: %p\n", mAudioCommandThread.get());
+    result.append(buffer);
+    snprintf(buffer, SIZE, "Tones Thread: %p\n", mTonePlaybackThread.get());
+    result.append(buffer);
+
+    write(fd, result.string(), result.size());
+    return NO_ERROR;
+}
+
 status_t AudioPolicyService::dump(int fd, const Vector<String16>& args)
 {
     if (checkCallingPermission(String16("android.permission.DUMP")) == false) {
-        dumpPermissionDenial(fd, args);
+        dumpPermissionDenial(fd);
     } else {
+        bool locked = tryLock(mLock);
+        if (!locked) {
+            String8 result(kDeadlockedString);
+            write(fd, result.string(), result.size());
+        }
 
+        dumpInternals(fd);
+        if (mAudioCommandThread != NULL) {
+            mAudioCommandThread->dump(fd);
+        }
+        if (mTonePlaybackThread != NULL) {
+            mTonePlaybackThread->dump(fd);
+        }
+
+        if (mpPolicyManager) {
+            mpPolicyManager->dump(fd);
+        }
+
+        if (locked) mLock.unlock();
     }
     return NO_ERROR;
 }
 
-status_t AudioPolicyService::dumpPermissionDenial(int fd, const Vector<String16>& args)
+status_t AudioPolicyService::dumpPermissionDenial(int fd)
 {
     const size_t SIZE = 256;
     char buffer[SIZE];
@@ -609,6 +663,36 @@ bool AudioPolicyService::AudioCommandThread::threadLoop()
     return false;
 }
 
+status_t AudioPolicyService::AudioCommandThread::dump(int fd)
+{
+    const size_t SIZE = 256;
+    char buffer[SIZE];
+    String8 result;
+
+    snprintf(buffer, SIZE, "AudioCommandThread %p Dump\n", this);
+    result.append(buffer);
+    write(fd, result.string(), result.size());
+
+    bool locked = tryLock(mLock);
+    if (!locked) {
+        String8 result2(kCmdDeadlockedString);
+        write(fd, result2.string(), result2.size());
+    }
+
+    snprintf(buffer, SIZE, "- Commands:\n");
+    result = String8(buffer);
+    result.append("   Command Time        Status  Wait pParam\n");
+    for (int i = 0; i < (int)mAudioCommands.size(); i++) {
+        mAudioCommands[i]->dump(buffer, SIZE);
+        result.append(buffer);
+    }
+    write(fd, result.string(), result.size());
+
+    if (locked) mLock.unlock();
+
+    return NO_ERROR;
+}
+
 void AudioPolicyService::AudioCommandThread::startToneCommand(int type, int stream)
 {
     AudioCommand *command = new AudioCommand();
@@ -806,6 +890,17 @@ void AudioPolicyService::AudioCommandThread::exit()
         mWaitWorkCV.signal();
     }
     requestExitAndWait();
+}
+
+void AudioPolicyService::AudioCommandThread::AudioCommand::dump(char* buffer, size_t size)
+{
+    snprintf(buffer, size, "   %02d      %06d.%03d  %03d     %01u    %p\n",
+            mCommand,
+            (int)ns2s(mTime),
+            (int)ns2ms(mTime)%1000,
+            mStatus,
+            mWaitStatus,
+            mParam);
 }
 
 }; // namespace android
