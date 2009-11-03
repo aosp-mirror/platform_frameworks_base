@@ -692,6 +692,7 @@ public class StatusBarService extends IStatusBar.Stub
                     mTicker.addEntry(n, StatusBarIcon.getIcon(mContext, data), n.tickerText);
                 }
             }
+            updateExpandedViewPos(EXPANDED_LEAVE_ALONE);
         }
 
         // icon
@@ -1558,15 +1559,24 @@ public class StatusBarService extends IStatusBar.Stub
                     + " mTrackingPosition=" + mTrackingPosition);
         }
 
-        // If the expanded view is not visible, there is no reason to do
-        // any work.
-        if (!mExpandedVisible) {
-            return;
-        }
-        
-        // tracking view...
         int h = mStatusBarView.getHeight();
         int disph = mDisplay.getHeight();
+
+        // If the expanded view is not visible, make sure they're still off screen.
+        // Maybe the view was resized.
+        if (!mExpandedVisible) {
+            if (mTrackingView != null) {
+                mTrackingPosition = mTrackingParams.y = -disph;
+                WindowManagerImpl.getDefault().updateViewLayout(mTrackingView, mTrackingParams);
+            }
+            if (mExpandedParams != null) {
+                mExpandedParams.y = -disph;
+                mExpandedDialog.getWindow().setAttributes(mExpandedParams);
+            }
+            return;
+        }
+
+        // tracking view...
         int pos;
         if (expandedPosition == EXPANDED_FULL_OPEN) {
             pos = h;
@@ -1677,7 +1687,7 @@ public class StatusBarService extends IStatusBar.Stub
     private View.OnClickListener mClearButtonListener = new View.OnClickListener() {
         public void onClick(View v) {
             mNotificationCallbacks.onClearAll();
-            performCollapse();
+            addPendingOp(OP_EXPAND, null, false);
         }
     };
 
