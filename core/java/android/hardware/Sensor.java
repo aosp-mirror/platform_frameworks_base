@@ -46,13 +46,21 @@ public class Sensor {
 
     /** A constant describing a gyroscope sensor type */
     public static final int TYPE_GYROSCOPE      = 4;
-    /** A constant describing a light sensor type */
+    /**
+     * A constant describing an light sensor type.
+     * See {@link android.hardware.SensorEvent SensorEvent}
+     * for more details.
+     */
     public static final int TYPE_LIGHT          = 5;
     /** A constant describing a pressure sensor type */
     public static final int TYPE_PRESSURE       = 6;
     /** A constant describing a temperature sensor type */
     public static final int TYPE_TEMPERATURE    = 7;
-    /** A constant describing a proximity sensor type */
+    /**
+     * A constant describing an proximity sensor type.
+     * See {@link android.hardware.SensorEvent SensorEvent}
+     * for more details.
+     */
     public static final int TYPE_PROXIMITY      = 8;
 
     
