@@ -55,14 +55,23 @@ static void playSource(OMXClient *client, const sp<MediaSource> &source) {
     int64_t durationUs;
     CHECK(meta->findInt64(kKeyDuration, &durationUs));
 
-    sp<OMXCodec> decoder = OMXCodec::Create(
+    const char *mime;
+    CHECK(meta->findCString(kKeyMIMEType, &mime));
+
+    sp<MediaSource> rawSource;
+    if (!strcasecmp(MEDIA_MIMETYPE_AUDIO_RAW, mime)) {
+        rawSource = source;
+    } else {
+        rawSource = OMXCodec::Create(
             client->interface(), meta, false /* createEncoder */, source);
 
-    if (decoder == NULL) {
-        return;
+        if (rawSource == NULL) {
+            fprintf(stderr, "Failed to instantiate decoder for '%s'.\n", mime);
+            return;
+        }
     }
 
-    decoder->start();
+    rawSource->start();
 
     if (gReproduceBug >= 3 && gReproduceBug <= 5) {
         status_t err;
@@ -70,7 +79,7 @@ static void playSource(OMXClient *client, const sp<MediaSource> &source) {
         MediaSource::ReadOptions options;
         int64_t seekTimeUs = -1;
         for (;;) {
-            err = decoder->read(&buffer, &options);
+            err = rawSource->read(&buffer, &options);
             options.clearSeekTo();
 
             bool shouldSeek = false;
@@ -134,7 +143,7 @@ static void playSource(OMXClient *client, const sp<MediaSource> &source) {
             }
         }
 
-        decoder->stop();
+        rawSource->stop();
 
         return;
     }
@@ -151,7 +160,7 @@ static void playSource(OMXClient *client, const sp<MediaSource> &source) {
         MediaBuffer *buffer;
 
         for (;;) {
-            status_t err = decoder->read(&buffer, &options);
+            status_t err = rawSource->read(&buffer, &options);
             options.clearSeekTo();
 
             if (err != OK) {
@@ -193,7 +202,7 @@ static void playSource(OMXClient *client, const sp<MediaSource> &source) {
         options.setSeekTo(0);
     }
 
-    decoder->stop();
+    rawSource->stop();
     printf("\n");
 
     int64_t delay = getNowUs() - startTime;
