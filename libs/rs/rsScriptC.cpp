@@ -46,6 +46,8 @@ ScriptC::~ScriptC()
     if (mAccScript) {
         accDeleteScript(mAccScript);
     }
+    free(mEnviroment.mScriptText);
+    mEnviroment.mScriptText = NULL;
 }
 
 void ScriptC::setupScript()
@@ -404,7 +406,11 @@ void rsi_ScriptCSetScript(Context * rsc, void *vp)
 void rsi_ScriptCSetText(Context *rsc, const char *text, uint32_t len)
 {
     ScriptCState *ss = &rsc->mScriptC;
-    ss->mScript->mEnviroment.mScriptText = text;
+
+    char *t = (char *)malloc(len + 1);
+    memcpy(t, text, len);
+    t[len] = 0;
+    ss->mScript->mEnviroment.mScriptText = t;
     ss->mScript->mEnviroment.mScriptTextLength = len;
 }
 
