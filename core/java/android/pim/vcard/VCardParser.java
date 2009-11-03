@@ -35,7 +35,7 @@ public abstract class VCardParser {
      * 
      * In order to avoid "misunderstanding" charset as much as possible, this method
      * use "ISO-8859-1" for reading the stream. When charset is specified in some property
-     * (with "CHARSET=..." attribute), the string is decoded to raw bytes and encoded to
+     * (with "CHARSET=..." parameter), the string is decoded to raw bytes and encoded to
      * the charset. This method assumes that "ISO-8859-1" has 1 to 1 mapping in all 8bit
      * characters, which is not completely sure. In some cases, this "decoding-encoding"
      * scheme may fail. To avoid the case,
