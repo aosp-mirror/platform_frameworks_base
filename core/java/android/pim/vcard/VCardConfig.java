@@ -163,7 +163,7 @@ public class VCardConfig {
      * is also valid. In vCrad 3.0, this flag is unnecessary, since "TYPE=" is MUST in
      * vCard 3.0 specification.
      *
-     * If you are targeting to some importer which cannot accept type attributes (params)
+     * If you are targeting to some importer which cannot accept type parameters
      * without "TYPE=" string (which should be rare though), please use this flag.
      *
      * XXX: Really rare?
