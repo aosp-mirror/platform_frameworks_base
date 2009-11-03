@@ -847,118 +847,118 @@ icons in your applications.</code>.
 <tr>
 
 <td class="image-caption-i image-list">
-  <img src="/images/icon_design/ic_launcher_alarmclock.png" alt="Android asset" />
+  <img src="{@docRoot}images/icon_design/ic_launcher_alarmclock.png" alt="Android asset" />
   <div class="caption">Alarm Clock</div></td>
 
 
 <td class="image-caption-i image-list">
-  <img src="/images/icon_design/ic_launcher_browser.png" alt="Android asset" />
+  <img src="{@docRoot}images/icon_design/ic_launcher_browser.png" alt="Android asset" />
   <div class="caption">Browser</div></td>
 
 
 <td class="image-caption-i image-list">
-  <img src="/images/icon_design/ic_launcher_calculator.png" alt="Android asset" />
+  <img src="{@docRoot}images/icon_design/ic_launcher_calculator.png" alt="Android asset" />
   <div class="caption">Calculator</div></td>
 	
 
 <td class="image-caption-i image-list">
-  <img src="/images/icon_design/ic_launcher_calendar.png" alt="Android asset" />
+  <img src="{@docRoot}images/icon_design/ic_launcher_calendar.png" alt="Android asset" />
   <div class="caption">Calendar</div></td>
 
 
 <td class="image-caption-i image-list">
-  <img src="/images/icon_design/ic_launcher_video_camera.png" alt="Android asset" />
+  <img src="{@docRoot}images/icon_design/ic_launcher_video_camera.png" alt="Android asset" />
   <div class="caption">Camcorder</div></td>
 
 
 <td class="image-caption-i image-list">
-  <img src="/images/icon_design/ic_launcher_camera.png" alt="Android asset" />
+  <img src="{@docRoot}images/icon_design/ic_launcher_camera.png" alt="Android asset" />
   <div class="caption">Camera</div></td>
 
 
 <td class="image-caption-i image-list">
-  <img src="/images/icon_design/ic_launcher_contacts.png" alt="Android asset" />
+  <img src="{@docRoot}images/icon_design/ic_launcher_contacts.png" alt="Android asset" />
   <div class="caption">Contacts</div></td>
 
 </tr>
 <tr>
 
 <td class="image-caption-i image-list">
-  <img src="/images/icon_design/ic_launcher_phone_dialer.png" alt="Android asset" />
+  <img src="{@docRoot}images/icon_design/ic_launcher_phone_dialer.png" alt="Android asset" />
   <div class="caption">Dialer</div></td>
 
 
 <td class="image-caption-i image-list">
-  <img src="/images/icon_design/ic_launcher_email_generic.png" alt="Android asset" />
+  <img src="{@docRoot}images/icon_design/ic_launcher_email_generic.png" alt="Android asset" />
   <div class="caption">Email</div></td>
 
 
 <td class="image-caption-i image-list">
-  <img src="/images/icon_design/ic_launcher_gallery.png" alt="Android asset" />
+  <img src="{@docRoot}images/icon_design/ic_launcher_gallery.png" alt="Android asset" />
   <div class="caption">Gallery</div></td>
 
 
 <td class="image-caption-i image-list">
-  <img src="/images/icon_design/ic_launcher_generic_application.png" alt="Android asset" />
+  <img src="{@docRoot}images/icon_design/ic_launcher_generic_application.png" alt="Android asset" />
   <div class="caption">Generic application</div></td>
 
 
 <td class="image-caption-i image-list">
-  <img src="/images/icon_design/ic_launcher_email.png" alt="Android asset" />
+  <img src="{@docRoot}images/icon_design/ic_launcher_email.png" alt="Android asset" />
   <div class="caption">Gmail</div></td>
 
 
 <td class="image-caption-i image-list">
-  <img src="/images/icon_design/ic_launcher_google_talk.png" alt="Android asset" />
+  <img src="{@docRoot}images/icon_design/ic_launcher_google_talk.png" alt="Android asset" />
   <div class="caption">Google Talk</div></td>
 
 
 <td class="image-caption-i image-list">
-  <img src="/images/icon_design/ic_launcher_IM.png" alt="Android asset" />
+  <img src="{@docRoot}images/icon_design/ic_launcher_IM.png" alt="Android asset" />
   <div class="caption">IM</div></td>
 
 </tr>
 <tr>
 
 <td class="image-caption-i image-list">
-  <img src="/images/icon_design/ic_launcher_maps.png" alt="Android asset" />
+  <img src="{@docRoot}images/icon_design/ic_launcher_maps.png" alt="Android asset" />
   <div class="caption">Maps</div></td>
 
 
 <td class="image-caption-i image-list">
-  <img src="/images/icon_design/ic_launcher_marketplace.png" alt="Android asset" />
+  <img src="{@docRoot}images/icon_design/ic_launcher_marketplace.png" alt="Android asset" />
   <div class="caption">Market </div></td>
 
 
 <td class="image-caption-i image-list">
-  <img src="/images/icon_design/ic_launcher_sms_mms.png" alt="Android asset" />
+  <img src="{@docRoot}images/icon_design/ic_launcher_sms_mms.png" alt="Android asset" />
   <div class="caption">Messaging </div></td>
 
 
 <td class="image-caption-i image-list">
-  <img src="/images/icon_design/ic_launcher_musicplayer_2.png" alt="Android asset" />
+  <img src="{@docRoot}images/icon_design/ic_launcher_musicplayer_2.png" alt="Android asset" />
   <div class="caption">Music</div></td>
 
 
 <td class="image-caption-i image-list">
-  <img src="/images/icon_design/ic_launcher_settings.png" alt="Android asset" />
+  <img src="{@docRoot}images/icon_design/ic_launcher_settings.png" alt="Android asset" />
   <div class="caption">Settings</div></td>
 
 
 <td class="image-caption-i image-list">
-  <img src="/images/icon_design/ic_launcher_voicedial.png" alt="Android asset" />
+  <img src="{@docRoot}images/icon_design/ic_launcher_voicedial.png" alt="Android asset" />
   <div class="caption">Voice Dialer</div></td>
 
 
 <td class="image-caption-i image-list">
-  <img src="/images/icon_design/ic_launcher_voicesearch.png" alt="Android asset" />
+  <img src="{@docRoot}images/icon_design/ic_launcher_voicesearch.png" alt="Android asset" />
   <div class="caption">Voice Search</div></td>
 
 </tr>
 <tr>
 
 <td class="image-caption-i image-list">
-  <img src="/images/icon_design/ic_launcher_youtube.png" alt="Android asset" />
+  <img src="{@docRoot}images/icon_design/ic_launcher_youtube.png" alt="Android asset" />
   <div class="caption">YouTube</div></td>
 </tr>
 </table>
