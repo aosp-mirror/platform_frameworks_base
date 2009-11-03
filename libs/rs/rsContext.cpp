@@ -342,6 +342,9 @@ void * Context::threadProc(void *vrsc)
      rsc->mStateFragmentStore.deinit(rsc);
      ObjectBase::zeroAllUserRef(rsc);
 
+     rsc->mObjDestroy.mNeedToEmpty = true;
+     rsc->objDestroyOOBRun();
+
      glClearColor(0,0,0,0);
      glClear(GL_COLOR_BUFFER_BIT);
      eglSwapBuffers(rsc->mEGL.mDisplay, rsc->mEGL.mSurface);
@@ -350,8 +353,6 @@ void * Context::threadProc(void *vrsc)
      rsc->deinitEGL();
      pthread_mutex_unlock(&gInitMutex);
 
-     rsc->mObjDestroy.mNeedToEmpty = true;
-     rsc->objDestroyOOBRun();
      LOGV("RS Thread exited");
      return NULL;
 }

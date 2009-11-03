@@ -41,10 +41,6 @@ public:
     virtual ~ScriptC();
 
     struct Program_t {
-        const char * mScriptText;
-        uint32_t mScriptTextLength;
-
-
         int mVersionMajor;
         int mVersionMinor;
 
