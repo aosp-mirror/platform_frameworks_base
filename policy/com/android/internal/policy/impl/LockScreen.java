@@ -21,6 +21,7 @@ import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.RotarySelector;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.text.format.DateFormat;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -35,6 +36,7 @@ import android.os.SystemProperties;
 import com.android.internal.telephony.IccCard;
 
 import java.util.Date;
+import java.io.File;
 import java.text.SimpleDateFormat;
 
 /**
@@ -46,8 +48,9 @@ class LockScreen extends LinearLayout implements KeyguardScreen, KeyguardUpdateM
         KeyguardUpdateMonitor.SimStateCallback, KeyguardUpdateMonitor.ConfigurationChangeCallback,
         RotarySelector.OnDialTriggerListener {
 
-    static private final boolean DBG = false;
-    static private final String TAG = "LockScreen";
+    private static final boolean DBG = false;
+    private static final String TAG = "LockScreen";
+    private static final String ENABLE_MENU_KEY_FILE = "/data/local/enable_menu_key";
 
     private Status mStatus = Status.Normal;
 
@@ -83,7 +86,7 @@ class LockScreen extends LinearLayout implements KeyguardScreen, KeyguardUpdateM
     private java.text.DateFormat mDateFormat;
     private java.text.DateFormat mTimeFormat;
     private boolean mCreatedInPortrait;
-    private boolean mDisableMenuKeyInLockScreen;
+    private boolean mEnableMenuKeyInLockScreen;
 
     /**
      * The status of this lock screen.
@@ -136,6 +139,20 @@ class LockScreen extends LinearLayout implements KeyguardScreen, KeyguardUpdateM
         }
     }
 
+    /**
+     * In general, we enable unlocking the insecure key guard with the menu key. However, there are
+     * some cases where we wish to disable it, notably when the menu button placement or technology
+     * is prone to false positives.
+     *
+     * @return true if the menu key should be enabled
+     */
+    private boolean shouldEnableMenuKey() {
+        final Resources res = getResources();
+        final boolean configDisabled = res.getBoolean(R.bool.config_disableMenuKeyInLockScreen);
+        final boolean isMonkey = SystemProperties.getBoolean("ro.monkey", false);
+        final boolean fileOverride = (new File(ENABLE_MENU_KEY_FILE)).exists();
+        return !configDisabled || isMonkey || fileOverride;
+    }
 
     /**
      * @param context Used to setup the view.
@@ -152,9 +169,7 @@ class LockScreen extends LinearLayout implements KeyguardScreen, KeyguardUpdateM
         mUpdateMonitor = updateMonitor;
         mCallback = callback;
 
-        mDisableMenuKeyInLockScreen = getResources()
-            .getBoolean(R.bool.config_disableMenuKeyInLockScreen)
-            && !SystemProperties.getBoolean("ro.monkey", false);
+        mEnableMenuKeyInLockScreen = shouldEnableMenuKey();
 
         mCreatedInPortrait = updateMonitor.isInPortrait();
 
@@ -220,7 +235,7 @@ class LockScreen extends LinearLayout implements KeyguardScreen, KeyguardUpdateM
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if (keyCode == KeyEvent.KEYCODE_MENU && !mDisableMenuKeyInLockScreen) {
+        if (keyCode == KeyEvent.KEYCODE_MENU && mEnableMenuKeyInLockScreen) {
             mCallback.goToUnlockScreen();
         }
         return false;
