@@ -4956,8 +4956,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * invalidate/draw passes.
      *
      * @return True if this View is guaranteed to be fully opaque, false otherwise.
-     *
-     * @hide Pending API council approval
      */
     @ViewDebug.ExportedProperty
     public boolean isOpaque() {
