@@ -444,6 +444,8 @@ void LayerBuffer::BufferSource::onDraw(const Region& clip) const
                 GraphicBuffer::USAGE_HW_TEXTURE,
                 src.img.w, src.img.handle, false);
 
+        graphicBuffer->setVerticalStride(src.img.h);
+
         err = mLayer.initializeEglImage(graphicBuffer, &mTexture);
     }
 #endif
