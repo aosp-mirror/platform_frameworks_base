@@ -950,8 +950,7 @@ public class StatusBarService extends IStatusBar.Stub
         panelSlightlyVisible(true);
         
         updateExpandedViewPos(EXPANDED_LEAVE_ALONE);
-        mExpandedParams.flags &= ~WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
-        mExpandedDialog.getWindow().setAttributes(mExpandedParams);
+        mExpandedDialog.show();
         mExpandedView.requestFocus(View.FOCUS_FORWARD);
         mTrackingView.setVisibility(View.VISIBLE);
         
@@ -1028,8 +1027,7 @@ public class StatusBarService extends IStatusBar.Stub
         }
         mExpandedVisible = false;
         panelSlightlyVisible(false);
-        mExpandedParams.flags |= WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
-        mExpandedDialog.getWindow().setAttributes(mExpandedParams);
+        mExpandedDialog.hide();
         mTrackingView.setVisibility(View.GONE);
 
         if ((mDisabled & StatusBarManager.DISABLE_NOTIFICATION_ICONS) == 0) {
@@ -1058,7 +1056,6 @@ public class StatusBarService extends IStatusBar.Stub
             else if (mAnimY < mStatusBarView.getHeight()) {
                 if (SPEW) Log.d(TAG, "Animation completed to collapsed state.");
                 mAnimating = false;
-                updateExpandedViewPos(0);
                 performCollapse();
             }
             else {
@@ -1511,19 +1508,17 @@ public class StatusBarService extends IStatusBar.Stub
             }
         }
 
-        final int disph = mDisplay.getHeight();
         lp = mExpandedDialog.getWindow().getAttributes();
         lp.width = ViewGroup.LayoutParams.FILL_PARENT;
         lp.height = ViewGroup.LayoutParams.WRAP_CONTENT;
         lp.x = 0;
-        mTrackingPosition = lp.y = -disph; // sufficiently large negative
+        lp.y = 0;
         lp.type = WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL;
         lp.flags = WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
                 | WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
                 | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
                 | WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM
-                | WindowManager.LayoutParams.FLAG_DITHER
-                | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
+                | WindowManager.LayoutParams.FLAG_DITHER;
         lp.format = pixelFormat;
         lp.gravity = Gravity.TOP | Gravity.FILL_HORIZONTAL;
         lp.setTitle("StatusBarExpanded");
@@ -1536,6 +1531,7 @@ public class StatusBarService extends IStatusBar.Stub
                 new ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT,
                                            ViewGroup.LayoutParams.WRAP_CONTENT));
         mExpandedDialog.show();
+        mExpandedDialog.hide();
         FrameLayout hack = (FrameLayout)mExpandedView.getParent();
         hack.setForeground(null);
     }

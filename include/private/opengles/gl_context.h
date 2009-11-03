@@ -32,6 +32,8 @@
 #include <GLES/gl.h>
 #include <GLES/glext.h>
 
+struct android_native_buffer_t;
+
 namespace android {
 
 const unsigned int OGLES_NUM_COMPRESSED_TEXTURE_FORMATS = 10;
@@ -602,7 +604,7 @@ struct copybits_context_t {
     copybit_device_t*       blitEngine;
     int32_t                 minScale;
     int32_t                 maxScale;
-    buffer_handle_t         drawSurfaceBuffer;
+    android_native_buffer_t* drawSurfaceBuffer;
 };
 
 struct ogles_context_t {

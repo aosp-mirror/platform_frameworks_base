@@ -226,6 +226,14 @@ int GraphicBuffer::getIndex() const {
     return mIndex;
 }
 
+void GraphicBuffer::setVerticalStride(uint32_t vstride) {
+    mVStride = vstride;
+}
+
+uint32_t GraphicBuffer::getVerticalStride() const {
+    return mVStride;
+}
+
 // ---------------------------------------------------------------------------
 
 }; // namespace android

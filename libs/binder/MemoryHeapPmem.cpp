@@ -132,7 +132,7 @@ MemoryHeapPmem::MemoryHeapPmem(const sp<MemoryHeapBase>& pmemHeap,
     char const * const device = pmemHeap->getDevice();
 #if HAVE_ANDROID_OS
     if (device) {
-        int fd = open(device, O_RDWR);
+        int fd = open(device, O_RDWR | (flags & NO_CACHING ? O_SYNC : 0));
         LOGE_IF(fd<0, "couldn't open %s (%s)", device, strerror(errno));
         if (fd >= 0) {
             int err = ioctl(fd, PMEM_CONNECT, pmemHeap->heapID());
