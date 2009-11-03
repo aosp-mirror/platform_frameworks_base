@@ -93,6 +93,8 @@ public:
     
     void setIndex(int index);
     int getIndex() const;
+    void setVerticalStride(uint32_t vstride);
+    uint32_t getVerticalStride() const;
 
 protected:
     GraphicBuffer(const Parcel& reply);
