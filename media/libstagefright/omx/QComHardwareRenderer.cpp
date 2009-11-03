@@ -127,7 +127,8 @@ void QComHardwareRenderer::publishBuffers(uint32_t pmem_fd) {
 
     master->setDevice("/dev/pmem");
 
-    mMemoryHeap = new MemoryHeapPmem(master, 0);
+    uint32_t heap_flags = master->getFlags() & MemoryHeapBase::NO_CACHING;
+    mMemoryHeap = new MemoryHeapPmem(master, heap_flags);
     mMemoryHeap->slap();
 
     ISurface::BufferHeap bufferHeap(
