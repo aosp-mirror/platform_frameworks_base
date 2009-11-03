@@ -171,6 +171,24 @@ nContextCreate(JNIEnv *_env, jobject _this, jint dev, jobject wnd, jint ver, jbo
 }
 
 static void
+nContextSetSurface(JNIEnv *_env, jobject _this, jobject wnd)
+{
+    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
+    LOG_API("nContextSetSurface, con(%p), surface(%p)", con, (Surface *)wnd);
+
+    Surface * window = NULL;
+    if (wnd == NULL) {
+
+    } else {
+        jclass surface_class = _env->FindClass("android/view/Surface");
+        jfieldID surfaceFieldID = _env->GetFieldID(surface_class, "mSurface", "I");
+        window = (Surface*)_env->GetIntField(wnd, surfaceFieldID);
+    }
+
+    rsContextSetSurface(con, window);
+}
+
+static void
 nContextDestroy(JNIEnv *_env, jobject _this, jint con)
 {
     LOG_API("nContextDestroy, con(%p)", (RsContext)con);
@@ -1328,6 +1346,7 @@ static JNINativeMethod methods[] = {
 {"nDeviceDestroy",                 "(I)V",                                 (void*)nDeviceDestroy },
 {"nDeviceSetConfig",               "(III)V",                               (void*)nDeviceSetConfig },
 {"nContextCreate",                 "(ILandroid/view/Surface;IZ)I",         (void*)nContextCreate },
+{"nContextSetSurface",             "(Landroid/view/Surface;)V",            (void*)nContextSetSurface },
 {"nContextDestroy",                "(I)V",                                 (void*)nContextDestroy },
 {"nContextPause",                  "()V",                                  (void*)nContextPause },
 {"nContextResume",                 "()V",                                  (void*)nContextResume },
