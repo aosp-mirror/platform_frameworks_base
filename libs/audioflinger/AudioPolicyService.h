@@ -111,6 +111,8 @@ private:
                         AudioPolicyService();
     virtual             ~AudioPolicyService();
 
+            status_t dumpInternals(int fd);
+
     // Thread used for tone playback and to send audio config commands to audio flinger
     // For tone playback, using a separate thread is necessary to avoid deadlock with mLock because startTone()
     // and stopTone() are normally called with mLock locked and requesting a tone start or stop will cause
@@ -133,6 +135,8 @@ private:
         AudioCommandThread ();
         virtual             ~AudioCommandThread();
 
+                    status_t    dump(int fd);
+
         // Thread virtuals
         virtual     void        onFirstRef();
         virtual     bool        threadLoop();
@@ -149,6 +153,8 @@ private:
         // descriptor for requested tone playback event
         class AudioCommand {
         public:
+            void dump(char* buffer, size_t size);
+
             int mCommand;   // START_TONE, STOP_TONE ...
             nsecs_t mTime;  // time stamp
             Condition mCond; // condition for status return
@@ -188,7 +194,7 @@ private:
     };
 
     // Internal dump utilities.
-    status_t dumpPermissionDenial(int fd, const Vector<String16>& args);
+    status_t dumpPermissionDenial(int fd);
 
 
     Mutex   mLock;      // prevents concurrent access to AudioPolicy manager functions changing device
