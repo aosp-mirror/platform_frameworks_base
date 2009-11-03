@@ -54,7 +54,7 @@ public:
         ObjectBaseRef<ProgramRaster> mRaster;
         ObjectBaseRef<ProgramFragmentStore> mFragmentStore;
         InvokeFunc_t mInvokables[MAX_SCRIPT_BANKS];
-        const char * mScriptText;
+        char * mScriptText;
         uint32_t mScriptTextLength;
     };
     Enviroment_t mEnviroment;
