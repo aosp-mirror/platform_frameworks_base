@@ -218,12 +218,6 @@ class PowerManagerService extends IPowerManager.Stub
     private int[] mButtonBacklightValues;
     private int[] mKeyboardBacklightValues;
 
-    /*
-     * WARNING - DO NOT USE THE HARDWARE AUTO-BRIGHTNESS FEATURE
-     * Hardware auto brightness support is deprecated and will be removed in the next release.
-     */
-    private boolean mUseHardwareAutoBrightness;
-
     // Used when logging number and duration of touch-down cycles
     private long mTotalTouchDownTime;
     private long mLastTouchDown;
@@ -448,17 +442,6 @@ class PowerManagerService extends IPowerManager.Stub
         // read settings for auto-brightness
         mUseSoftwareAutoBrightness = resources.getBoolean(
                 com.android.internal.R.bool.config_automatic_brightness_available);
-
-        /*
-         * WARNING - DO NOT USE THE HARDWARE AUTO-BRIGHTNESS FEATURE
-         * Hardware auto brightness support is deprecated and will be removed in the next release.
-         */
-        mUseHardwareAutoBrightness = resources.getBoolean(
-                com.android.internal.R.bool.config_hardware_automatic_brightness_available);
-        if (mUseHardwareAutoBrightness) {
-            mUseSoftwareAutoBrightness = false;
-        }
-
         if (mUseSoftwareAutoBrightness) {
             mAutoBrightnessLevels = resources.getIntArray(
                     com.android.internal.R.array.config_autoBrightnessLevels);
@@ -906,7 +889,6 @@ class PowerManagerService extends IPowerManager.Stub
         pw.println("  mLightSensorEnabled=" + mLightSensorEnabled);
         pw.println("  mLightSensorValue=" + mLightSensorValue);
         pw.println("  mLightSensorPendingValue=" + mLightSensorPendingValue);
-        pw.println("  mUseHardwareAutoBrightness=" + mUseHardwareAutoBrightness);
         pw.println("  mUseSoftwareAutoBrightness=" + mUseSoftwareAutoBrightness);
         pw.println("  mAutoBrightessEnabled=" + mAutoBrightessEnabled);
         mScreenBrightness.dump(pw, "  mScreenBrightness: ");
@@ -2086,16 +2068,9 @@ class PowerManagerService extends IPowerManager.Stub
 
     private void setScreenBrightnessMode(int mode) {
         boolean enabled = (mode == SCREEN_BRIGHTNESS_MODE_AUTOMATIC);
-        if (mAutoBrightessEnabled != enabled) {
+        if (mUseSoftwareAutoBrightness && mAutoBrightessEnabled != enabled) {
             mAutoBrightessEnabled = enabled;
-
-            if (mUseHardwareAutoBrightness) {
-                // When setting auto-brightness, must reset the brightness afterwards
-                mHardware.setAutoBrightness_UNCHECKED(enabled);
-                if (screenIsOn()) {
-                    setBacklightBrightness((int)mScreenBrightness.curValue);
-                }
-            } else if (mUseSoftwareAutoBrightness && screenIsOn()) {
+            if (screenIsOn()) {
                 // force recompute of backlight values
                 if (mLightSensorValue >= 0) {
                     int value = (int)mLightSensorValue;

@@ -59,8 +59,6 @@ public class HardwareService extends IHardwareService.Stub {
     private boolean mAttentionLightOn;
     private boolean mPulsing;
 
-    private boolean mAutoBrightnessAvailable;
-
     private class Vibration implements IBinder.DeathRecipient {
         private final IBinder mToken;
         private final long    mTimeout;
@@ -131,9 +129,6 @@ public class HardwareService extends IHardwareService.Stub {
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_SCREEN_OFF);
         context.registerReceiver(mIntentReceiver, filter);
-
-        mAutoBrightnessAvailable = context.getResources().getBoolean(
-                com.android.internal.R.bool.config_hardware_automatic_brightness_available);
     }
 
     protected void finalize() throws Throwable {
@@ -285,12 +280,6 @@ public class HardwareService extends IHardwareService.Stub {
 
     void setLightFlashing_UNCHECKED(int light, int color, int mode, int onMS, int offMS) {
         setLight_native(mNativePointer, light, color, mode, onMS, offMS);
-    }
-
-    void setAutoBrightness_UNCHECKED(boolean on) {
-        if (mAutoBrightnessAvailable) {
-            setAutoBrightness_native(mNativePointer, on);
-        }
     }
 
     public void setAttentionLight(boolean on) {
@@ -493,7 +482,6 @@ public class HardwareService extends IHardwareService.Stub {
     private static native int init_native();
     private static native void finalize_native(int ptr);
 
-    private static native void setAutoBrightness_native(int ptr, boolean automatic);
     private static native void setLight_native(int ptr, int light, int color, int mode,
             int onMS, int offMS);
 
