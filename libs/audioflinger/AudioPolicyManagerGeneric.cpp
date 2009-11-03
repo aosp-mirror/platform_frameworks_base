@@ -459,6 +459,61 @@ status_t AudioPolicyManagerGeneric::getStreamVolumeIndex(AudioSystem::stream_typ
     return NO_ERROR;
 }
 
+status_t AudioPolicyManagerGeneric::dump(int fd)
+{
+    const size_t SIZE = 256;
+    char buffer[SIZE];
+    String8 result;
+
+    snprintf(buffer, SIZE, "\nAudioPolicyManager Dump: %p\n", this);
+    result.append(buffer);
+    snprintf(buffer, SIZE, " Hardware Output: %d\n", mHardwareOutput);
+    result.append(buffer);
+    snprintf(buffer, SIZE, " Output devices: %08x\n", mAvailableOutputDevices);
+    result.append(buffer);
+    snprintf(buffer, SIZE, " Input devices: %08x\n", mAvailableInputDevices);
+    result.append(buffer);
+    snprintf(buffer, SIZE, " Phone state: %d\n", mPhoneState);
+    result.append(buffer);
+    snprintf(buffer, SIZE, " Ringer mode: %d\n", mRingerMode);
+    result.append(buffer);
+    snprintf(buffer, SIZE, " Force use for communications %d\n", mForceUse[AudioSystem::FOR_COMMUNICATION]);
+    result.append(buffer);
+    snprintf(buffer, SIZE, " Force use for media %d\n", mForceUse[AudioSystem::FOR_MEDIA]);
+    result.append(buffer);
+    snprintf(buffer, SIZE, " Force use for record %d\n", mForceUse[AudioSystem::FOR_RECORD]);
+    result.append(buffer);
+    write(fd, result.string(), result.size());
+
+    snprintf(buffer, SIZE, "\nOutputs dump:\n");
+    write(fd, buffer, strlen(buffer));
+    for (size_t i = 0; i < mOutputs.size(); i++) {
+        snprintf(buffer, SIZE, "- Output %d dump:\n", mOutputs.keyAt(i));
+        write(fd, buffer, strlen(buffer));
+        mOutputs.valueAt(i)->dump(fd);
+    }
+
+    snprintf(buffer, SIZE, "\nInputs dump:\n");
+    write(fd, buffer, strlen(buffer));
+    for (size_t i = 0; i < mInputs.size(); i++) {
+        snprintf(buffer, SIZE, "- Input %d dump:\n", mInputs.keyAt(i));
+        write(fd, buffer, strlen(buffer));
+        mInputs.valueAt(i)->dump(fd);
+    }
+
+    snprintf(buffer, SIZE, "\nStreams dump:\n");
+    write(fd, buffer, strlen(buffer));
+    snprintf(buffer, SIZE, " Stream  Index Min  Index Max  Index Cur  Mute Count  Can be muted\n");
+    write(fd, buffer, strlen(buffer));
+    for (size_t i = 0; i < AudioSystem::NUM_STREAM_TYPES; i++) {
+        snprintf(buffer, SIZE, " %02d", i);
+        mStreams[i].dump(buffer + 3, SIZE);
+        write(fd, buffer, strlen(buffer));
+    }
+
+    return NO_ERROR;
+}
+
 // ----------------------------------------------------------------------------
 // AudioPolicyManagerGeneric
 // ----------------------------------------------------------------------------
@@ -815,12 +870,76 @@ uint32_t AudioPolicyManagerGeneric::AudioOutputDescriptor::refCount()
     return refcount;
 }
 
+status_t AudioPolicyManagerGeneric::AudioOutputDescriptor::dump(int fd)
+{
+    const size_t SIZE = 256;
+    char buffer[SIZE];
+    String8 result;
+
+    snprintf(buffer, SIZE, " Sampling rate: %d\n", mSamplingRate);
+    result.append(buffer);
+    snprintf(buffer, SIZE, " Format: %d\n", mFormat);
+    result.append(buffer);
+    snprintf(buffer, SIZE, " Channels: %08x\n", mChannels);
+    result.append(buffer);
+    snprintf(buffer, SIZE, " Latency: %d\n", mLatency);
+    result.append(buffer);
+    snprintf(buffer, SIZE, " Flags %08x\n", mFlags);
+    result.append(buffer);
+    snprintf(buffer, SIZE, " Devices %08x\n", mDevice);
+    result.append(buffer);
+    snprintf(buffer, SIZE, " Stream refCount\n");
+    result.append(buffer);
+    for (int i = 0; i < AudioSystem::NUM_STREAM_TYPES; i++) {
+        snprintf(buffer, SIZE, " %02d     %d\n", i, mRefCount[i]);
+        result.append(buffer);
+    }
+    write(fd, result.string(), result.size());
+
+    return NO_ERROR;
+}
+
 // --- AudioInputDescriptor class implementation
 
 AudioPolicyManagerGeneric::AudioInputDescriptor::AudioInputDescriptor()
     : mSamplingRate(0), mFormat(0), mChannels(0),
      mAcoustics((AudioSystem::audio_in_acoustics)0), mDevice(0), mRefCount(0)
 {
+}
+
+status_t AudioPolicyManagerGeneric::AudioInputDescriptor::dump(int fd)
+{
+    const size_t SIZE = 256;
+    char buffer[SIZE];
+    String8 result;
+
+    snprintf(buffer, SIZE, " Sampling rate: %d\n", mSamplingRate);
+    result.append(buffer);
+    snprintf(buffer, SIZE, " Format: %d\n", mFormat);
+    result.append(buffer);
+    snprintf(buffer, SIZE, " Channels: %08x\n", mChannels);
+    result.append(buffer);
+    snprintf(buffer, SIZE, " Acoustics %08x\n", mAcoustics);
+    result.append(buffer);
+    snprintf(buffer, SIZE, " Devices %08x\n", mDevice);
+    result.append(buffer);
+    snprintf(buffer, SIZE, " Ref Count %d\n", mRefCount);
+    result.append(buffer);
+    write(fd, result.string(), result.size());
+
+    return NO_ERROR;
+}
+
+// --- StreamDescriptor class implementation
+
+void AudioPolicyManagerGeneric::StreamDescriptor::dump(char* buffer, size_t size)
+{
+    snprintf(buffer, size, "      %02d         %02d         %02d         %02d          %d\n",
+            mIndexMin,
+            mIndexMax,
+            mIndexCur,
+            mMuteCount,
+            mCanBeMuted);
 }
 
 }; // namespace android
