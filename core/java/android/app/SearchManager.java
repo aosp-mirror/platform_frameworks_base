@@ -330,8 +330,8 @@ import java.util.List;
  * you'll need to update your searchable activity (or other activities) to receive the intents
  * as you've defined them.</li>
  * <li>Implement a Content Provider that provides suggestions.  If you already have one, and it 
- * has access to your suggestions data.  If not, you'll have to create one.
- * You'll also provide information about your Content Provider in your 
+ * has access to your suggestions data, you can use that provider. If not, you'll have to create 
+ * one. You'll also provide information about your Content Provider in your 
  * package's <a href="{@docRoot}guide/topics/manifest/manifest-intro.html">manifest</a>.</li>
  * <li>Update your searchable activity's XML configuration file.  There are two categories of
  * information used for suggestions:
@@ -1181,7 +1181,7 @@ import java.util.List;
  *     Bundle appData = new Bundle();
  *     appData.put...();
  *     appData.put...();
- *     startSearch(null, false, appData);
+ *     startSearch(null, false, appData, false);
  *     return true;
  * }</pre> 
  *

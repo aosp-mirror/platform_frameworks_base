@@ -187,7 +187,7 @@ uninstall procedure and continue to <a href="#installAdt">Install the 0.9 ADT pl
 
 <p>If you encounter problems, ensure your ADT is fully uninstalled and then
 follow the guide to 
-<a href="installingplugin">Installing the ADT Plugin
+<a href="installing.html#installingplugin">Installing the ADT Plugin
 for Eclipse</a>.</p>
 
 <h3 id="updateEclipsePrefs">Update your Eclipse SDK Preferences</h3>
