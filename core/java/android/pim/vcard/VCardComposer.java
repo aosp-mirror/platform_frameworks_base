@@ -131,17 +131,17 @@ public class VCardComposer {
     private static final String VCARD_DATA_VCARD = "VCARD";
     private static final String VCARD_DATA_PUBLIC = "PUBLIC";
 
-    private static final String VCARD_ATTR_SEPARATOR = ";";
-    private static final String VCARD_COL_SEPARATOR = "\r\n";
+    private static final String VCARD_PARAM_SEPARATOR = ";";
+    private static final String VCARD_END_OF_LINE = "\r\n";
     private static final String VCARD_DATA_SEPARATOR = ":";
     private static final String VCARD_ITEM_SEPARATOR = ";";
     private static final String VCARD_WS = " ";
-    private static final String VCARD_ATTR_EQUAL = "=";
+    private static final String VCARD_PARAM_EQUAL = "=";
 
-    private static final String VCARD_ATTR_ENCODING_QP = "ENCODING=QUOTED-PRINTABLE";
+    private static final String VCARD_PARAM_ENCODING_QP = "ENCODING=QUOTED-PRINTABLE";
 
-    private static final String VCARD_ATTR_ENCODING_BASE64_V21 = "ENCODING=BASE64";
-    private static final String VCARD_ATTR_ENCODING_BASE64_V30 = "ENCODING=b";
+    private static final String VCARD_PARAM_ENCODING_BASE64_V21 = "ENCODING=BASE64";
+    private static final String VCARD_PARAM_ENCODING_BASE64_V30 = "ENCODING=b";
 
     private static final String SHIFT_JIS = "SHIFT_JIS";
 
@@ -309,7 +309,7 @@ public class VCardComposer {
     private int mIdColumn;
 
     private final String mCharsetString;
-    private final String mVCardAttributeCharset;
+    private final String mVCardCharsetParameter;
     private boolean mTerminateIsCalled;
     final private List<OneEntryHandler> mHandlerList;
 
@@ -378,13 +378,13 @@ public class VCardComposer {
             // Do not use mCharsetString bellow since it is different from "SHIFT_JIS" but
             // may be "DOCOMO_SHIFT_JIS" or something like that (internal expression used in
             // Android, not shown to the public).
-            mVCardAttributeCharset = "CHARSET=" + SHIFT_JIS;
+            mVCardCharsetParameter = "CHARSET=" + SHIFT_JIS;
         } else if (mUsesShiftJis) {
             mCharsetString = CharsetUtils.charsetForVendor(SHIFT_JIS).name();
-            mVCardAttributeCharset = "CHARSET=" + SHIFT_JIS;
+            mVCardCharsetParameter = "CHARSET=" + SHIFT_JIS;
         } else {
             mCharsetString = "UTF-8";
-            mVCardAttributeCharset = "CHARSET=UTF-8";
+            mVCardCharsetParameter = "CHARSET=UTF-8";
         }
     }
 
@@ -743,14 +743,14 @@ public class VCardComposer {
             }
 
             builder.append(Constants.PROPERTY_N);
-            if (shouldAppendCharsetAttribute(Arrays.asList(
+            if (shouldAppendCharsetParameters(Arrays.asList(
                     encodedFamily, encodedGiven, encodedMiddle, encodedPrefix, encodedSuffix))) {
-                builder.append(VCARD_ATTR_SEPARATOR);
-                builder.append(mVCardAttributeCharset);
+                builder.append(VCARD_PARAM_SEPARATOR);
+                builder.append(mVCardCharsetParameter);
             }
             if (reallyUseQuotedPrintableToName) {
-                builder.append(VCARD_ATTR_SEPARATOR);
-                builder.append(VCARD_ATTR_ENCODING_QP);
+                builder.append(VCARD_PARAM_SEPARATOR);
+                builder.append(VCARD_PARAM_ENCODING_QP);
             }
 
             builder.append(VCARD_DATA_SEPARATOR);
@@ -763,7 +763,7 @@ public class VCardComposer {
             builder.append(encodedPrefix);
             builder.append(VCARD_ITEM_SEPARATOR);
             builder.append(encodedSuffix);
-            builder.append(VCARD_COL_SEPARATOR);
+            builder.append(VCARD_END_OF_LINE);
 
             final String formattedName;
             if (!TextUtils.isEmpty(displayName)) {
@@ -785,17 +785,17 @@ public class VCardComposer {
 
             // FN property
             builder.append(Constants.PROPERTY_FN);
-            if (shouldAppendCharsetAttribute(encodedFullname)) {
-                builder.append(VCARD_ATTR_SEPARATOR);
-                builder.append(mVCardAttributeCharset);
+            if (shouldAppendCharsetParameter(encodedFullname)) {
+                builder.append(VCARD_PARAM_SEPARATOR);
+                builder.append(mVCardCharsetParameter);
             }
             if (reallyUseQuotedPrintableToFullname) {
-                builder.append(VCARD_ATTR_SEPARATOR);
-                builder.append(VCARD_ATTR_ENCODING_QP);
+                builder.append(VCARD_PARAM_SEPARATOR);
+                builder.append(VCARD_PARAM_ENCODING_QP);
             }
             builder.append(VCARD_DATA_SEPARATOR);
             builder.append(encodedFullname);
-            builder.append(VCARD_COL_SEPARATOR);
+            builder.append(VCARD_END_OF_LINE);
         } else if (!TextUtils.isEmpty(displayName)) {
             final boolean reallyUseQuotedPrintableToDisplayName =
                 (!mRefrainsQPToPrimaryProperties &&
@@ -806,13 +806,13 @@ public class VCardComposer {
                                 escapeCharacters(displayName);
 
             builder.append(Constants.PROPERTY_N);
-            if (shouldAppendCharsetAttribute(encodedDisplayName)) {
-                builder.append(VCARD_ATTR_SEPARATOR);
-                builder.append(mVCardAttributeCharset);
+            if (shouldAppendCharsetParameter(encodedDisplayName)) {
+                builder.append(VCARD_PARAM_SEPARATOR);
+                builder.append(mVCardCharsetParameter);
             }
             if (reallyUseQuotedPrintableToDisplayName) {
-                builder.append(VCARD_ATTR_SEPARATOR);
-                builder.append(VCARD_ATTR_ENCODING_QP);
+                builder.append(VCARD_PARAM_SEPARATOR);
+                builder.append(VCARD_PARAM_ENCODING_QP);
             }
             builder.append(VCARD_DATA_SEPARATOR);
             builder.append(encodedDisplayName);
@@ -820,17 +820,17 @@ public class VCardComposer {
             builder.append(VCARD_ITEM_SEPARATOR);
             builder.append(VCARD_ITEM_SEPARATOR);
             builder.append(VCARD_ITEM_SEPARATOR);
-            builder.append(VCARD_COL_SEPARATOR);
+            builder.append(VCARD_END_OF_LINE);
             if (mIsV30) {
                 builder.append(Constants.PROPERTY_FN);
                 // TODO: Not allowed formally...
-                if (shouldAppendCharsetAttribute(encodedDisplayName)) {
-                    builder.append(VCARD_ATTR_SEPARATOR);
-                    builder.append(mVCardAttributeCharset);
+                if (shouldAppendCharsetParameter(encodedDisplayName)) {
+                    builder.append(VCARD_PARAM_SEPARATOR);
+                    builder.append(mVCardCharsetParameter);
                 }
                 builder.append(VCARD_DATA_SEPARATOR);
                 builder.append(encodedDisplayName);
-                builder.append(VCARD_COL_SEPARATOR);
+                builder.append(VCARD_END_OF_LINE);
             }
         } else if (mIsV30) {
             // vCard 3.0 specification requires these fields.
@@ -872,13 +872,13 @@ public class VCardComposer {
 
                 // Do not need to care about QP, since vCard 3.0 does not allow it.
                 final String encodedSortString = escapeCharacters(sortString);
-                if (shouldAppendCharsetAttribute(encodedSortString)) {
-                    builder.append(VCARD_ATTR_SEPARATOR);
-                    builder.append(mVCardAttributeCharset);
+                if (shouldAppendCharsetParameter(encodedSortString)) {
+                    builder.append(VCARD_PARAM_SEPARATOR);
+                    builder.append(mVCardCharsetParameter);
                 }
                 builder.append(VCARD_DATA_SEPARATOR);
                 builder.append(encodedSortString);
-                builder.append(VCARD_COL_SEPARATOR);
+                builder.append(VCARD_END_OF_LINE);
             } else if (mIsJapaneseMobilePhone) {
                 // Note: There is no appropriate property for expressing
                 //       phonetic name in vCard 2.1, while there is in
@@ -888,8 +888,8 @@ public class VCardComposer {
                 //       a lot of Japanese mobile phones. This is "X-" property, so
                 //       any parser hopefully would not get confused with this.
                 builder.append(Constants.PROPERTY_SOUND);
-                builder.append(VCARD_ATTR_SEPARATOR);
-                builder.append(Constants.ATTR_TYPE_X_IRMC_N);
+                builder.append(VCARD_PARAM_SEPARATOR);
+                builder.append(Constants.PARAM_TYPE_X_IRMC_N);
 
                 boolean reallyUseQuotedPrintable =
                     (!mRefrainsQPToPrimaryProperties
@@ -913,11 +913,11 @@ public class VCardComposer {
                     encodedPhoneticGivenName = escapeCharacters(phoneticGivenName);
                 }
 
-                if (shouldAppendCharsetAttribute(Arrays.asList(
+                if (shouldAppendCharsetParameters(Arrays.asList(
                         encodedPhoneticFamilyName, encodedPhoneticMiddleName,
                         encodedPhoneticGivenName))) {
-                    builder.append(VCARD_ATTR_SEPARATOR);
-                    builder.append(mVCardAttributeCharset);
+                    builder.append(VCARD_PARAM_SEPARATOR);
+                    builder.append(mVCardCharsetParameter);
                 }
                 builder.append(VCARD_DATA_SEPARATOR);
                 builder.append(encodedPhoneticFamilyName);
@@ -927,18 +927,18 @@ public class VCardComposer {
                 builder.append(encodedPhoneticMiddleName);
                 builder.append(VCARD_ITEM_SEPARATOR);
                 builder.append(VCARD_ITEM_SEPARATOR);
-                builder.append(VCARD_COL_SEPARATOR);
+                builder.append(VCARD_END_OF_LINE);
             }
         } else if (mIsDoCoMo) {
             builder.append(Constants.PROPERTY_SOUND);
-            builder.append(VCARD_ATTR_SEPARATOR);
-            builder.append(Constants.ATTR_TYPE_X_IRMC_N);
+            builder.append(VCARD_PARAM_SEPARATOR);
+            builder.append(Constants.PARAM_TYPE_X_IRMC_N);
             builder.append(VCARD_DATA_SEPARATOR);
             builder.append(VCARD_ITEM_SEPARATOR);
             builder.append(VCARD_ITEM_SEPARATOR);
             builder.append(VCARD_ITEM_SEPARATOR);
             builder.append(VCARD_ITEM_SEPARATOR);
-            builder.append(VCARD_COL_SEPARATOR);
+            builder.append(VCARD_END_OF_LINE);
         }
 
         if (mUsesDefactProperty) {
@@ -952,17 +952,17 @@ public class VCardComposer {
                     encodedPhoneticGivenName = escapeCharacters(phoneticGivenName);
                 }
                 builder.append(Constants.PROPERTY_X_PHONETIC_FIRST_NAME);
-                if (shouldAppendCharsetAttribute(encodedPhoneticGivenName)) {
-                    builder.append(VCARD_ATTR_SEPARATOR);
-                    builder.append(mVCardAttributeCharset);
+                if (shouldAppendCharsetParameter(encodedPhoneticGivenName)) {
+                    builder.append(VCARD_PARAM_SEPARATOR);
+                    builder.append(mVCardCharsetParameter);
                 }
                 if (reallyUseQuotedPrintable) {
-                    builder.append(VCARD_ATTR_SEPARATOR);
-                    builder.append(VCARD_ATTR_ENCODING_QP);
+                    builder.append(VCARD_PARAM_SEPARATOR);
+                    builder.append(VCARD_PARAM_ENCODING_QP);
                 }
                 builder.append(VCARD_DATA_SEPARATOR);
                 builder.append(encodedPhoneticGivenName);
-                builder.append(VCARD_COL_SEPARATOR);
+                builder.append(VCARD_END_OF_LINE);
             }
             if (!TextUtils.isEmpty(phoneticMiddleName)) {
                 final boolean reallyUseQuotedPrintable =
@@ -974,17 +974,17 @@ public class VCardComposer {
                     encodedPhoneticMiddleName = escapeCharacters(phoneticMiddleName);
                 }
                 builder.append(Constants.PROPERTY_X_PHONETIC_MIDDLE_NAME);
-                if (shouldAppendCharsetAttribute(encodedPhoneticMiddleName)) {
-                    builder.append(VCARD_ATTR_SEPARATOR);
-                    builder.append(mVCardAttributeCharset);
+                if (shouldAppendCharsetParameter(encodedPhoneticMiddleName)) {
+                    builder.append(VCARD_PARAM_SEPARATOR);
+                    builder.append(mVCardCharsetParameter);
                 }
                 if (reallyUseQuotedPrintable) {
-                    builder.append(VCARD_ATTR_SEPARATOR);
-                    builder.append(VCARD_ATTR_ENCODING_QP);
+                    builder.append(VCARD_PARAM_SEPARATOR);
+                    builder.append(VCARD_PARAM_ENCODING_QP);
                 }
                 builder.append(VCARD_DATA_SEPARATOR);
                 builder.append(encodedPhoneticMiddleName);
-                builder.append(VCARD_COL_SEPARATOR);
+                builder.append(VCARD_END_OF_LINE);
             }
             if (!TextUtils.isEmpty(phoneticFamilyName)) {
                 final boolean reallyUseQuotedPrintable =
@@ -996,17 +996,17 @@ public class VCardComposer {
                     encodedPhoneticFamilyName = escapeCharacters(phoneticFamilyName);
                 }
                 builder.append(Constants.PROPERTY_X_PHONETIC_LAST_NAME);
-                if (shouldAppendCharsetAttribute(encodedPhoneticFamilyName)) {
-                    builder.append(VCARD_ATTR_SEPARATOR);
-                    builder.append(mVCardAttributeCharset);
+                if (shouldAppendCharsetParameter(encodedPhoneticFamilyName)) {
+                    builder.append(VCARD_PARAM_SEPARATOR);
+                    builder.append(mVCardCharsetParameter);
                 }
                 if (reallyUseQuotedPrintable) {
-                    builder.append(VCARD_ATTR_SEPARATOR);
-                    builder.append(VCARD_ATTR_ENCODING_QP);
+                    builder.append(VCARD_PARAM_SEPARATOR);
+                    builder.append(VCARD_PARAM_ENCODING_QP);
                 }
                 builder.append(VCARD_DATA_SEPARATOR);
                 builder.append(encodedPhoneticFamilyName);
-                builder.append(VCARD_COL_SEPARATOR);
+                builder.append(VCARD_END_OF_LINE);
             }
         }
     }
@@ -1128,10 +1128,10 @@ public class VCardComposer {
             }
         } else if (mIsDoCoMo) {
             builder.append(Constants.PROPERTY_ADR);
-            builder.append(VCARD_ATTR_SEPARATOR);
-            builder.append(Constants.ATTR_TYPE_HOME);
+            builder.append(VCARD_PARAM_SEPARATOR);
+            builder.append(Constants.PARAM_TYPE_HOME);
             builder.append(VCARD_DATA_SEPARATOR);
-            builder.append(VCARD_COL_SEPARATOR);
+            builder.append(VCARD_END_OF_LINE);
         }
     }
 
@@ -1225,11 +1225,11 @@ public class VCardComposer {
                 final Integer typeAsInteger = contentValues.getAsInteger(Im.TYPE);
                 switch (typeAsInteger != null ? typeAsInteger : Im.TYPE_OTHER) {
                     case Im.TYPE_HOME: {
-                        typeAsString = Constants.ATTR_TYPE_HOME;
+                        typeAsString = Constants.PARAM_TYPE_HOME;
                         break;
                     }
                     case Im.TYPE_WORK: {
-                        typeAsString = Constants.ATTR_TYPE_WORK;
+                        typeAsString = Constants.PARAM_TYPE_WORK;
                         break;
                     }
                     case Im.TYPE_CUSTOM: {
@@ -1245,19 +1245,19 @@ public class VCardComposer {
                 }
             }
 
-            List<String> attributeList = new ArrayList<String>();
+            List<String> parameterList = new ArrayList<String>();
             if (!TextUtils.isEmpty(typeAsString)) {
-                attributeList.add(typeAsString);
+                parameterList.add(typeAsString);
             }
             final Integer isPrimaryAsInteger = contentValues.getAsInteger(Im.IS_PRIMARY);
             final boolean isPrimary = (isPrimaryAsInteger != null ?
                     (isPrimaryAsInteger > 0) : false);
             if (isPrimary) {
-                attributeList.add(Constants.ATTR_TYPE_PREF);
+                parameterList.add(Constants.PARAM_TYPE_PREF);
             }
 
             appendVCardLineWithCharsetAndQPDetection(
-                    builder, propertyName, attributeList, data);
+                    builder, propertyName, parameterList, data);
         }
     }
 
@@ -1273,7 +1273,8 @@ public class VCardComposer {
             if (website != null) {
                 website = website.trim();
             }
-            // Note: vCard 3.0 does not allow any attribute addition toward "URL"
+
+            // Note: vCard 3.0 does not allow any parameter addition toward "URL"
             //       property, while there's no document in vCard 2.1.
             //
             // TODO: Should we allow adding it when appropriate?
@@ -1581,14 +1582,14 @@ public class VCardComposer {
             final String encodedData, final String photoType) {
         StringBuilder tmpBuilder = new StringBuilder();
         tmpBuilder.append(Constants.PROPERTY_PHOTO);
-        tmpBuilder.append(VCARD_ATTR_SEPARATOR);
+        tmpBuilder.append(VCARD_PARAM_SEPARATOR);
         if (mIsV30) {
-            tmpBuilder.append(VCARD_ATTR_ENCODING_BASE64_V30);
+            tmpBuilder.append(VCARD_PARAM_ENCODING_BASE64_V30);
         } else {
-            tmpBuilder.append(VCARD_ATTR_ENCODING_BASE64_V21);
+            tmpBuilder.append(VCARD_PARAM_ENCODING_BASE64_V21);
         }
-        tmpBuilder.append(VCARD_ATTR_SEPARATOR);
-        appendTypeAttribute(tmpBuilder, photoType);
+        tmpBuilder.append(VCARD_PARAM_SEPARATOR);
+        appendTypeParameter(tmpBuilder, photoType);
         tmpBuilder.append(VCARD_DATA_SEPARATOR);
         tmpBuilder.append(encodedData);
 
@@ -1600,14 +1601,14 @@ public class VCardComposer {
             tmpBuilder.append(tmpStr.charAt(i));
             lineCount++;
             if (lineCount > 72) {
-                tmpBuilder.append(VCARD_COL_SEPARATOR);
+                tmpBuilder.append(VCARD_END_OF_LINE);
                 tmpBuilder.append(VCARD_WS);
                 lineCount = 0;
             }
         }
         builder.append(tmpBuilder.toString());
-        builder.append(VCARD_COL_SEPARATOR);
-        builder.append(VCARD_COL_SEPARATOR);
+        builder.append(VCARD_END_OF_LINE);
+        builder.append(VCARD_END_OF_LINE);
     }
 
     private class PostalStruct {
@@ -1719,17 +1720,17 @@ public class VCardComposer {
             }
         }
 
-        List<String> attributeList = new ArrayList<String>();
+        List<String> parameterList = new ArrayList<String>();
         if (isPrimary) {
-            attributeList.add(Constants.ATTR_TYPE_PREF);
+            parameterList.add(Constants.PARAM_TYPE_PREF);
         }
         switch (type) {
             case StructuredPostal.TYPE_HOME: {
-                attributeList.add(Constants.ATTR_TYPE_HOME);
+                parameterList.add(Constants.PARAM_TYPE_HOME);
                 break;
             }
             case StructuredPostal.TYPE_WORK: {
-                attributeList.add(Constants.ATTR_TYPE_WORK);
+                parameterList.add(Constants.PARAM_TYPE_WORK);
                 break;
             }
             case StructuredPostal.TYPE_CUSTOM: {
@@ -1739,7 +1740,7 @@ public class VCardComposer {
                     // ("IANA-token" in the vCard 3.0 is unclear...)
                     // Just  for safety, we add "X-" at the beggining of each label.
                     // Also checks the label obeys with vCard 3.0 spec.
-                    attributeList.add("X-" + label);
+                    parameterList.add("X-" + label);
                 }
                 break;
             }
@@ -1754,42 +1755,42 @@ public class VCardComposer {
 
         // Actual data construction starts from here.
         // TODO: add a new version of appendVCardLine() for this purpose.
-
+        
         builder.append(Constants.PROPERTY_ADR);
-        builder.append(VCARD_ATTR_SEPARATOR);
+        builder.append(VCARD_PARAM_SEPARATOR);
 
-        // Attributes
+        // Parameters
         {
-            boolean shouldAppendAttrSeparator = false;
-            if (!attributeList.isEmpty()) {
-                appendTypeAttributes(builder, attributeList);
-                shouldAppendAttrSeparator = true;
+            boolean shouldAppendParamSeparator = false;
+            if (!parameterList.isEmpty()) {
+                appendTypeParameters(builder, parameterList);
+                shouldAppendParamSeparator = true;
             }
 
             if (appendCharset) {
                 // Strictly, vCard 3.0 does not allow exporters to emit charset information,
                 // but we will add it since the information should be useful for importers,
                 //
-                // Assume no parser does not emit error with this attribute in vCard 3.0.
-                if (shouldAppendAttrSeparator) {
-                    builder.append(VCARD_ATTR_SEPARATOR);
+                // Assume no parser does not emit error with this parameter in vCard 3.0.
+                if (shouldAppendParamSeparator) {
+                    builder.append(VCARD_PARAM_SEPARATOR);
                 }
-                builder.append(mVCardAttributeCharset);
-                shouldAppendAttrSeparator = true;
+                builder.append(mVCardCharsetParameter);
+                shouldAppendParamSeparator = true;
             }
 
             if (reallyUseQuotedPrintable) {
-                if (shouldAppendAttrSeparator) {
-                    builder.append(VCARD_ATTR_SEPARATOR);
+                if (shouldAppendParamSeparator) {
+                    builder.append(VCARD_PARAM_SEPARATOR);
                 }
-                builder.append(VCARD_ATTR_ENCODING_QP);
-                shouldAppendAttrSeparator = true;
+                builder.append(VCARD_PARAM_ENCODING_QP);
+                shouldAppendParamSeparator = true;
             }
         }
 
         builder.append(VCARD_DATA_SEPARATOR);
         builder.append(addressData);
-        builder.append(VCARD_COL_SEPARATOR);
+        builder.append(VCARD_END_OF_LINE);
     }
 
     private void appendVCardEmailLine(final StringBuilder builder,
@@ -1803,7 +1804,7 @@ public class VCardComposer {
                 //         To support mobile type at that time, this custom label had been used.
                 if (android.provider.Contacts.ContactMethodsColumns.MOBILE_EMAIL_TYPE_NAME
                         .equals(label)) {
-                    typeAsString = Constants.ATTR_TYPE_CELL;
+                    typeAsString = Constants.PARAM_TYPE_CELL;
                 } else if (mUsesAndroidProperty && !TextUtils.isEmpty(label)
                         && VCardUtils.containsOnlyAlphaDigitHyphen(label)) {
                     typeAsString = "X-" + label;
@@ -1813,11 +1814,11 @@ public class VCardComposer {
                 break;
             }
             case Email.TYPE_HOME: {
-                typeAsString = Constants.ATTR_TYPE_HOME;
+                typeAsString = Constants.PARAM_TYPE_HOME;
                 break;
             }
             case Email.TYPE_WORK: {
-                typeAsString = Constants.ATTR_TYPE_WORK;
+                typeAsString = Constants.PARAM_TYPE_WORK;
                 break;
             }
             case Email.TYPE_OTHER: {
@@ -1825,7 +1826,7 @@ public class VCardComposer {
                 break;
             }
             case Email.TYPE_MOBILE: {
-                typeAsString = Constants.ATTR_TYPE_CELL;
+                typeAsString = Constants.PARAM_TYPE_CELL;
                 break;
             }
             default: {
@@ -1835,23 +1836,23 @@ public class VCardComposer {
             }
         }
 
-        final List<String> attributeList = new ArrayList<String>();
+        final List<String> parameterList = new ArrayList<String>();
         if (isPrimary) {
-            attributeList.add(Constants.ATTR_TYPE_PREF);
+            parameterList.add(Constants.PARAM_TYPE_PREF);
         }
         if (!TextUtils.isEmpty(typeAsString)) {
-            attributeList.add(typeAsString);
+            parameterList.add(typeAsString);
         }
 
         appendVCardLineWithCharsetAndQPDetection(builder, Constants.PROPERTY_EMAIL,
-                attributeList, rawData);
+                parameterList, rawData);
     }
 
     private void appendVCardTelephoneLine(final StringBuilder builder,
             final Integer typeAsObject, final String label,
             final String encodedData, boolean isPrimary) {
         builder.append(Constants.PROPERTY_TEL);
-        builder.append(VCARD_ATTR_SEPARATOR);
+        builder.append(VCARD_PARAM_SEPARATOR);
 
         final int typeAsPrimitive;
         if (typeAsObject == null) {
@@ -1860,84 +1861,84 @@ public class VCardComposer {
             typeAsPrimitive = typeAsObject;
         }
 
-        ArrayList<String> attributeList = new ArrayList<String>();
+        ArrayList<String> parameterList = new ArrayList<String>();
         switch (typeAsPrimitive) {
         case Phone.TYPE_HOME:
-            attributeList.addAll(
-                    Arrays.asList(Constants.ATTR_TYPE_HOME, Constants.ATTR_TYPE_VOICE));
+            parameterList.addAll(
+                    Arrays.asList(Constants.PARAM_TYPE_HOME, Constants.PARAM_TYPE_VOICE));
             break;
         case Phone.TYPE_WORK:
-            attributeList.addAll(
-                    Arrays.asList(Constants.ATTR_TYPE_WORK, Constants.ATTR_TYPE_VOICE));
+            parameterList.addAll(
+                    Arrays.asList(Constants.PARAM_TYPE_WORK, Constants.PARAM_TYPE_VOICE));
             break;
         case Phone.TYPE_FAX_HOME:
-            attributeList.addAll(
-                    Arrays.asList(Constants.ATTR_TYPE_HOME, Constants.ATTR_TYPE_FAX));
+            parameterList.addAll(
+                    Arrays.asList(Constants.PARAM_TYPE_HOME, Constants.PARAM_TYPE_FAX));
             break;
         case Phone.TYPE_FAX_WORK:
-            attributeList.addAll(
-                    Arrays.asList(Constants.ATTR_TYPE_WORK, Constants.ATTR_TYPE_FAX));
+            parameterList.addAll(
+                    Arrays.asList(Constants.PARAM_TYPE_WORK, Constants.PARAM_TYPE_FAX));
             break;
         case Phone.TYPE_MOBILE:
-            attributeList.add(Constants.ATTR_TYPE_CELL);
+            parameterList.add(Constants.PARAM_TYPE_CELL);
             break;
         case Phone.TYPE_PAGER:
             if (mIsDoCoMo) {
                 // Not sure about the reason, but previous implementation had
                 // used "VOICE" instead of "PAGER"
-                attributeList.add(Constants.ATTR_TYPE_VOICE);
+                parameterList.add(Constants.PARAM_TYPE_VOICE);
             } else {
-                attributeList.add(Constants.ATTR_TYPE_PAGER);
+                parameterList.add(Constants.PARAM_TYPE_PAGER);
             }
             break;
         case Phone.TYPE_OTHER:
-            attributeList.add(Constants.ATTR_TYPE_VOICE);
+            parameterList.add(Constants.PARAM_TYPE_VOICE);
             break;
         case Phone.TYPE_CAR:
-            attributeList.add(Constants.ATTR_TYPE_CAR);
+            parameterList.add(Constants.PARAM_TYPE_CAR);
             break;
         case Phone.TYPE_COMPANY_MAIN:
             // There's no relevant field in vCard (at least 2.1).
-            attributeList.add(Constants.ATTR_TYPE_WORK);
+            parameterList.add(Constants.PARAM_TYPE_WORK);
             isPrimary = true;
             break;
         case Phone.TYPE_ISDN:
-            attributeList.add(Constants.ATTR_TYPE_ISDN);
+            parameterList.add(Constants.PARAM_TYPE_ISDN);
             break;
         case Phone.TYPE_MAIN:
             isPrimary = true;
             break;
         case Phone.TYPE_OTHER_FAX:
-            attributeList.add(Constants.ATTR_TYPE_FAX);
+            parameterList.add(Constants.PARAM_TYPE_FAX);
             break;
         case Phone.TYPE_TELEX:
-            attributeList.add(Constants.ATTR_TYPE_TLX);
+            parameterList.add(Constants.PARAM_TYPE_TLX);
             break;
         case Phone.TYPE_WORK_MOBILE:
-            attributeList.addAll(
-                    Arrays.asList(Constants.ATTR_TYPE_WORK, Constants.ATTR_TYPE_CELL));
+            parameterList.addAll(
+                    Arrays.asList(Constants.PARAM_TYPE_WORK, Constants.PARAM_TYPE_CELL));
             break;
         case Phone.TYPE_WORK_PAGER:
-            attributeList.add(Constants.ATTR_TYPE_WORK);
+            parameterList.add(Constants.PARAM_TYPE_WORK);
             // See above.
             if (mIsDoCoMo) {
-                attributeList.add(Constants.ATTR_TYPE_VOICE);
+                parameterList.add(Constants.PARAM_TYPE_VOICE);
             } else {
-                attributeList.add(Constants.ATTR_TYPE_PAGER);
+                parameterList.add(Constants.PARAM_TYPE_PAGER);
             }
             break;
         case Phone.TYPE_MMS:
-            attributeList.add(Constants.ATTR_TYPE_MSG);
+            parameterList.add(Constants.PARAM_TYPE_MSG);
             break;
         case Phone.TYPE_CUSTOM:
             if (mUsesAndroidProperty && !TextUtils.isEmpty(label)
                         && VCardUtils.containsOnlyAlphaDigitHyphen(label)) {
-                // Note: Strictly, vCard 2.1 does not allow "X-" attribute without
+                // Note: Strictly, vCard 2.1 does not allow "X-" parameter without
                 //       "TYPE=" string.
-                attributeList.add("X-" + label);
+                parameterList.add("X-" + label);
             } else {
                 // Just ignore the custom type.
-                attributeList.add(Constants.ATTR_TYPE_VOICE);
+                parameterList.add(Constants.PARAM_TYPE_VOICE);
             }
             break;
         case Phone.TYPE_RADIO:
@@ -1947,18 +1948,18 @@ public class VCardComposer {
         }
 
         if (isPrimary) {
-            attributeList.add(Constants.ATTR_TYPE_PREF);
+            parameterList.add(Constants.PARAM_TYPE_PREF);
         }
 
-        if (attributeList.isEmpty()) {
+        if (parameterList.isEmpty()) {
             appendUncommonPhoneType(builder, typeAsPrimitive);
         } else {
-            appendTypeAttributes(builder, attributeList);
+            appendTypeParameters(builder, parameterList);
         }
 
         builder.append(VCARD_DATA_SEPARATOR);
         builder.append(encodedData);
-        builder.append(VCARD_COL_SEPARATOR);
+        builder.append(VCARD_END_OF_LINE);
     }
 
     /**
@@ -1968,11 +1969,11 @@ public class VCardComposer {
         if (mIsDoCoMo) {
             // The previous implementation for DoCoMo had been conservative
             // about miscellaneous types.
-            builder.append(Constants.ATTR_TYPE_VOICE);
+            builder.append(Constants.PARAM_TYPE_VOICE);
         } else {
-            String phoneAttribute = VCardUtils.getPhoneAttributeString(type);
-            if (phoneAttribute != null) {
-                appendTypeAttribute(builder, phoneAttribute);
+            String phoneType = VCardUtils.getPhoneTypeString(type);
+            if (phoneType != null) {
+                appendTypeParameter(builder, phoneType);
             } else {
                 Log.e(LOG_TAG, "Unknown or unsupported (by vCard) Phone type: " + type);
             }
@@ -1988,12 +1989,12 @@ public class VCardComposer {
 
     private void appendVCardLineWithCharsetAndQPDetection(final StringBuilder builder,
             final String propertyName,
-            final List<String> attributeList, final String rawData) {
+            final List<String> parameterList, final String rawData) {
         final boolean needCharset =
             (mUsesQuotedPrintable && !VCardUtils.containsOnlyPrintableAscii(rawData));
         final boolean reallyUseQuotedPrintable =
             !VCardUtils.containsOnlyNonCrLfPrintableAscii(rawData);
-        appendVCardLine(builder, propertyName, attributeList,
+        appendVCardLine(builder, propertyName, parameterList,
                 rawData, needCharset, reallyUseQuotedPrintable);
     }
 
@@ -2010,23 +2011,23 @@ public class VCardComposer {
 
     private void appendVCardLine(final StringBuilder builder,
             final String propertyName,
-            final List<String> attributeList,
+            final List<String> parameterList,
             final String rawData, final boolean needCharset,
             boolean needQuotedPrintable) {
         builder.append(propertyName);
-        if (attributeList != null && attributeList.size() > 0) {
-            builder.append(VCARD_ATTR_SEPARATOR);
-            appendTypeAttributes(builder, attributeList);
+        if (parameterList != null && parameterList.size() > 0) {
+            builder.append(VCARD_PARAM_SEPARATOR);
+            appendTypeParameters(builder, parameterList);
         }
         if (needCharset) {
-            builder.append(VCARD_ATTR_SEPARATOR);
-            builder.append(mVCardAttributeCharset);
+            builder.append(VCARD_PARAM_SEPARATOR);
+            builder.append(mVCardCharsetParameter);
         }
 
         final String encodedData;
         if (needQuotedPrintable) {
-            builder.append(VCARD_ATTR_SEPARATOR);
-            builder.append(VCARD_ATTR_ENCODING_QP);
+            builder.append(VCARD_PARAM_SEPARATOR);
+            builder.append(VCARD_PARAM_ENCODING_QP);
             encodedData = encodeQuotedPrintable(rawData);
         } else {
             // TODO: one line may be too huge, which may be invalid in vCard spec, though
@@ -2036,7 +2037,7 @@ public class VCardComposer {
 
         builder.append(VCARD_DATA_SEPARATOR);
         builder.append(encodedData);
-        builder.append(VCARD_COL_SEPARATOR);
+        builder.append(VCARD_END_OF_LINE);
     }
 
     // appendVCardLine() variants accepting List<String>.
@@ -2048,7 +2049,7 @@ public class VCardComposer {
 
     private void appendVCardLineWithCharsetAndQPDetection(final StringBuilder builder,
             final String propertyName,
-            final List<String> attributeList, final List<String> rawDataList) {
+            final List<String> parameterList, final List<String> rawDataList) {
         boolean needCharset = false;
         boolean reallyUseQuotedPrintable = false;
         for (String rawData : rawDataList) {
@@ -2065,7 +2066,7 @@ public class VCardComposer {
             }
         }
 
-        appendVCardLine(builder, propertyName, attributeList,
+        appendVCardLine(builder, propertyName, parameterList,
                 rawDataList, needCharset, reallyUseQuotedPrintable);
     }
 
@@ -2083,17 +2084,17 @@ public class VCardComposer {
 
     private void appendVCardLine(final StringBuilder builder,
             final String propertyName,
-            final List<String> attributeList,
+            final List<String> parameterList,
             final List<String> rawDataList, final boolean needCharset,
             boolean needQuotedPrintable) {
         builder.append(propertyName);
-        if (attributeList != null && attributeList.size() > 0) {
-            builder.append(VCARD_ATTR_SEPARATOR);
-            appendTypeAttributes(builder, attributeList);
+        if (parameterList != null && parameterList.size() > 0) {
+            builder.append(VCARD_PARAM_SEPARATOR);
+            appendTypeParameters(builder, parameterList);
         }
         if (needCharset) {
-            builder.append(VCARD_ATTR_SEPARATOR);
-            builder.append(mVCardAttributeCharset);
+            builder.append(VCARD_PARAM_SEPARATOR);
+            builder.append(mVCardCharsetParameter);
         }
 
         builder.append(VCARD_DATA_SEPARATOR);
@@ -2101,8 +2102,8 @@ public class VCardComposer {
         for (String rawData : rawDataList) {
             final String encodedData;
             if (needQuotedPrintable) {
-                builder.append(VCARD_ATTR_SEPARATOR);
-                builder.append(VCARD_ATTR_ENCODING_QP);
+                builder.append(VCARD_PARAM_SEPARATOR);
+                builder.append(VCARD_PARAM_ENCODING_QP);
                 encodedData = encodeQuotedPrintable(rawData);
             } else {
                 // TODO: one line may be too huge, which may be invalid in vCard spec, though
@@ -2117,13 +2118,13 @@ public class VCardComposer {
             }
             builder.append(encodedData);
         }
-        builder.append(VCARD_COL_SEPARATOR);
+        builder.append(VCARD_END_OF_LINE);
     }
 
     /**
-     * VCARD_ATTR_SEPARATOR must be appended before this method being called.
+     * VCARD_PARAM_SEPARATOR must be appended before this method being called.
      */
-    private void appendTypeAttributes(final StringBuilder builder,
+    private void appendTypeParameters(final StringBuilder builder,
             final List<String> types) {
         // We may have to make this comma separated form like "TYPE=DOM,WORK" in the future,
         // which would be recommended way in vcard 3.0 though not valid in vCard 2.1.
@@ -2132,53 +2133,54 @@ public class VCardComposer {
             if (first) {
                 first = false;
             } else {
-                builder.append(VCARD_ATTR_SEPARATOR);
+                builder.append(VCARD_PARAM_SEPARATOR);
             }
-            appendTypeAttribute(builder, type);
+            appendTypeParameter(builder, type);
         }
     }
 
     /**
-     * VCARD_ATTR_SEPARATOR must be appended before this method being called.
+     * VCARD_PARAM_SEPARATOR must be appended before this method being called.
      */
-    private void appendTypeAttribute(final StringBuilder builder, final String type) {
+    private void appendTypeParameter(final StringBuilder builder, final String type) {
         // Refrain from using appendType() so that "TYPE=" is not be appended when the
         // device is DoCoMo's (just for safety).
         //
         // Note: In vCard 3.0, Type strings also can be like this: "TYPE=HOME,PREF"
         if ((mIsV30 || mAppendTypeParamName) && !mIsDoCoMo) {
-            builder.append(Constants.ATTR_TYPE).append(VCARD_ATTR_EQUAL);
+            builder.append(Constants.PARAM_TYPE).append(VCARD_PARAM_EQUAL);
         }
         builder.append(type);
     }
 
     /**
-     * Returns true when the property line should contain charset attribute
+     * Returns true when the property line should contain charset parameter
      * information. This method may return true even when vCard version is 3.0.
      *
      * Strictly, adding charset information is invalid in VCard 3.0.
-     * However we'll add the info only when used charset is not UTF-8
+     * However we'll add the info only when charset we use is not UTF-8
      * in vCard 3.0 format, since parser side may be able to use the charset
-     * via this field, though we may encounter another problem by adding it...
+     * via this field, though we may encounter another problem by adding it.
      *
      * e.g. Japanese mobile phones use Shift_Jis while RFC 2426
      * recommends UTF-8. By adding this field, parsers may be able
      * to know this text is NOT UTF-8 but Shift_Jis.
      */
-    private boolean shouldAppendCharsetAttribute(final String propertyValue) {
+    private boolean shouldAppendCharsetParameter(final String propertyValue) {
         return (!VCardUtils.containsOnlyPrintableAscii(propertyValue) &&
                         (!mIsV30 || !mUsesUtf8));
     }
 
-    private boolean shouldAppendCharsetAttribute(final List<String> propertyValueList) {
-        boolean shouldAppendBasically = false;
+    private boolean shouldAppendCharsetParameters(final List<String> propertyValueList) {
+        if (mIsV30 && mUsesUtf8) {
+            return false;
+        }
         for (String propertyValue : propertyValueList) {
             if (!VCardUtils.containsOnlyPrintableAscii(propertyValue)) {
-                shouldAppendBasically = true;
-                break;
+                return true;
             }
         }
-        return shouldAppendBasically && (!mIsV30 || !mUsesUtf8);
+        return false;
     }
 
     private String encodeQuotedPrintable(String str) {
@@ -2315,11 +2317,11 @@ public class VCardComposer {
 
         final long dateAsLong = mCursor.getLong(DATE_COLUMN_INDEX);
         builder.append(VCARD_PROPERTY_X_TIMESTAMP);
-        builder.append(VCARD_ATTR_SEPARATOR);
-        appendTypeAttribute(builder, callLogTypeStr);
+        builder.append(VCARD_PARAM_SEPARATOR);
+        appendTypeParameter(builder, callLogTypeStr);
         builder.append(VCARD_DATA_SEPARATOR);
         builder.append(toRfc2455Format(dateAsLong));
-        builder.append(VCARD_COL_SEPARATOR);
+        builder.append(VCARD_END_OF_LINE);
     }
 
     private String createOneCallLogEntryInternal() {

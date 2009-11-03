@@ -38,7 +38,6 @@ import android.provider.ContactsContract.CommonDataKinds.StructuredName;
 import android.provider.ContactsContract.CommonDataKinds.StructuredPostal;
 import android.provider.ContactsContract.CommonDataKinds.Website;
 import android.telephony.PhoneNumberUtils;
-import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -720,8 +719,8 @@ public class ContactStruct {
                 propName.equals(Constants.ImportOnly.PROPERTY_X_NICKNAME)) {
             addNickName(propValue);
         } else if (propName.equals(Constants.PROPERTY_SOUND)) {
-            Collection<String> typeCollection = paramMap.get(Constants.ATTR_TYPE);
-            if (typeCollection != null && typeCollection.contains(Constants.ATTR_TYPE_X_IRMC_N)) {
+            Collection<String> typeCollection = paramMap.get(Constants.PARAM_TYPE);
+            if (typeCollection != null && typeCollection.contains(Constants.PARAM_TYPE_X_IRMC_N)) {
                 // As of 2009-10-08, Parser side does not split a property value into separated
                 // values using ';' (in other words, propValueList.size() == 1),
                 // which is correct behavior from the view of vCard 2.1.
@@ -748,25 +747,25 @@ public class ContactStruct {
             int type = -1;
             String label = "";
             boolean isPrimary = false;
-            Collection<String> typeCollection = paramMap.get(Constants.ATTR_TYPE);
+            Collection<String> typeCollection = paramMap.get(Constants.PARAM_TYPE);
             if (typeCollection != null) {
                 for (String typeString : typeCollection) {
                     typeString = typeString.toUpperCase();
-                    if (typeString.equals(Constants.ATTR_TYPE_PREF)) {
+                    if (typeString.equals(Constants.PARAM_TYPE_PREF)) {
                         isPrimary = true;
-                    } else if (typeString.equals(Constants.ATTR_TYPE_HOME)) {
+                    } else if (typeString.equals(Constants.PARAM_TYPE_HOME)) {
                         type = StructuredPostal.TYPE_HOME;
                         label = "";
-                    } else if (typeString.equals(Constants.ATTR_TYPE_WORK) || 
-                            typeString.equalsIgnoreCase(Constants.ATTR_EXTRA_TYPE_COMPANY)) {
+                    } else if (typeString.equals(Constants.PARAM_TYPE_WORK) || 
+                            typeString.equalsIgnoreCase(Constants.PARAM_EXTRA_TYPE_COMPANY)) {
                         // "COMPANY" seems emitted by Windows Mobile, which is not
                         // specifically supported by vCard 2.1. We assume this is same
                         // as "WORK".
                         type = StructuredPostal.TYPE_WORK;
                         label = "";
-                    } else if (typeString.equals(Constants.ATTR_ADR_TYPE_PARCEL) ||
-                            typeString.equals(Constants.ATTR_ADR_TYPE_DOM) ||
-                            typeString.equals(Constants.ATTR_ADR_TYPE_INTL)) {
+                    } else if (typeString.equals(Constants.PARAM_ADR_TYPE_PARCEL) ||
+                            typeString.equals(Constants.PARAM_ADR_TYPE_DOM) ||
+                            typeString.equals(Constants.PARAM_ADR_TYPE_INTL)) {
                         // We do not have any appropriate way to store this information.
                     } else {
                         if (typeString.startsWith("X-") && type < 0) {
@@ -789,17 +788,17 @@ public class ContactStruct {
             int type = -1;
             String label = null;
             boolean isPrimary = false;
-            Collection<String> typeCollection = paramMap.get(Constants.ATTR_TYPE);
+            Collection<String> typeCollection = paramMap.get(Constants.PARAM_TYPE);
             if (typeCollection != null) {
                 for (String typeString : typeCollection) {
                     typeString = typeString.toUpperCase();
-                    if (typeString.equals(Constants.ATTR_TYPE_PREF)) {
+                    if (typeString.equals(Constants.PARAM_TYPE_PREF)) {
                         isPrimary = true;
-                    } else if (typeString.equals(Constants.ATTR_TYPE_HOME)) {
+                    } else if (typeString.equals(Constants.PARAM_TYPE_HOME)) {
                         type = Email.TYPE_HOME;
-                    } else if (typeString.equals(Constants.ATTR_TYPE_WORK)) {
+                    } else if (typeString.equals(Constants.PARAM_TYPE_WORK)) {
                         type = Email.TYPE_WORK;
-                    } else if (typeString.equals(Constants.ATTR_TYPE_CELL)) {
+                    } else if (typeString.equals(Constants.PARAM_TYPE_CELL)) {
                         type = Email.TYPE_MOBILE;
                     } else {
                         if (typeString.startsWith("X-") && type < 0) {
@@ -821,10 +820,10 @@ public class ContactStruct {
             // vCard specification does not specify other types.
             final int type = Organization.TYPE_WORK;
             boolean isPrimary = false;
-            Collection<String> typeCollection = paramMap.get(Constants.ATTR_TYPE);
+            Collection<String> typeCollection = paramMap.get(Constants.PARAM_TYPE);
             if (typeCollection != null) {
                 for (String typeString : typeCollection) {
-                    if (typeString.equals(Constants.ATTR_TYPE_PREF)) {
+                    if (typeString.equals(Constants.PARAM_TYPE_PREF)) {
                         isPrimary = true;
                     }
                 }
@@ -846,7 +845,7 @@ public class ContactStruct {
                 boolean isPrimary = false;
                 if (typeCollection != null) {
                     for (String typeValue : typeCollection) {
-                        if (Constants.ATTR_TYPE_PREF.equals(typeValue)) {
+                        if (Constants.PARAM_TYPE_PREF.equals(typeValue)) {
                             isPrimary = true;
                         } else if (formatName == null){
                             formatName = typeValue;
@@ -856,7 +855,7 @@ public class ContactStruct {
                 addPhotoBytes(formatName, propBytes, isPrimary);
             }
         } else if (propName.equals(Constants.PROPERTY_TEL)) {
-            final Collection<String> typeCollection = paramMap.get(Constants.ATTR_TYPE);
+            final Collection<String> typeCollection = paramMap.get(Constants.PARAM_TYPE);
             final Object typeObject = VCardUtils.getPhoneTypeFromStrings(typeCollection);
             final int type;
             final String label;
@@ -869,7 +868,7 @@ public class ContactStruct {
             }
             
             final boolean isPrimary;
-            if (typeCollection != null && typeCollection.contains(Constants.ATTR_TYPE_PREF)) {
+            if (typeCollection != null && typeCollection.contains(Constants.PARAM_TYPE_PREF)) {
                 isPrimary = true;
             } else {
                 isPrimary = false;
@@ -877,12 +876,12 @@ public class ContactStruct {
             addPhone(type, propValue, label, isPrimary);
         } else if (propName.equals(Constants.PROPERTY_X_SKYPE_PSTNNUMBER)) {
             // The phone number available via Skype.
-            Collection<String> typeCollection = paramMap.get(Constants.ATTR_TYPE);
+            Collection<String> typeCollection = paramMap.get(Constants.PARAM_TYPE);
             // XXX: should use TYPE_CUSTOM + the label "Skype"? (which may need localization)
             int type = Phone.TYPE_OTHER;
             final String label = null;
             final boolean isPrimary;
-            if (typeCollection != null && typeCollection.contains(Constants.ATTR_TYPE_PREF)) {
+            if (typeCollection != null && typeCollection.contains(Constants.PARAM_TYPE_PREF)) {
                 isPrimary = true;
             } else {
                 isPrimary = false;
@@ -892,15 +891,15 @@ public class ContactStruct {
             final int protocol = sImMap.get(propName);
             boolean isPrimary = false;
             int type = -1;
-            final Collection<String> typeCollection = paramMap.get(Constants.ATTR_TYPE);
+            final Collection<String> typeCollection = paramMap.get(Constants.PARAM_TYPE);
             if (typeCollection != null) {
                 for (String typeString : typeCollection) {
-                    if (typeString.equals(Constants.ATTR_TYPE_PREF)) {
+                    if (typeString.equals(Constants.PARAM_TYPE_PREF)) {
                         isPrimary = true;
                     } else if (type < 0) {
-                        if (typeString.equalsIgnoreCase(Constants.ATTR_TYPE_HOME)) {
+                        if (typeString.equalsIgnoreCase(Constants.PARAM_TYPE_HOME)) {
                             type = Im.TYPE_HOME;
-                        } else if (typeString.equalsIgnoreCase(Constants.ATTR_TYPE_WORK)) {
+                        } else if (typeString.equalsIgnoreCase(Constants.PARAM_TYPE_WORK)) {
                             type = Im.TYPE_WORK;
                         }
                     }

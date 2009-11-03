@@ -40,7 +40,7 @@ public class VCardUtils {
      */
 
     // Note that not all types are included in this map/set, since, for example, TYPE_HOME_FAX is
-    // converted to two attribute Strings. These only contain some minor fields valid in both
+    // converted to two parameter Strings. These only contain some minor fields valid in both
     // vCard and current (as of 2009-08-07) Contacts structure. 
     private static final Map<Integer, String> sKnownPhoneTypesMap_ItoS;
     private static final Set<String> sPhoneTypesSetUnknownToContacts;
@@ -53,30 +53,30 @@ public class VCardUtils {
         sKnownPhoneTypesMap_ItoS = new HashMap<Integer, String>();
         sKnownPhoneTypeMap_StoI = new HashMap<String, Integer>();
 
-        sKnownPhoneTypesMap_ItoS.put(Phone.TYPE_CAR, Constants.ATTR_TYPE_CAR);
-        sKnownPhoneTypeMap_StoI.put(Constants.ATTR_TYPE_CAR, Phone.TYPE_CAR);
-        sKnownPhoneTypesMap_ItoS.put(Phone.TYPE_PAGER, Constants.ATTR_TYPE_PAGER);
-        sKnownPhoneTypeMap_StoI.put(Constants.ATTR_TYPE_PAGER, Phone.TYPE_PAGER);
-        sKnownPhoneTypesMap_ItoS.put(Phone.TYPE_ISDN, Constants.ATTR_TYPE_ISDN);
-        sKnownPhoneTypeMap_StoI.put(Constants.ATTR_TYPE_ISDN, Phone.TYPE_ISDN);
+        sKnownPhoneTypesMap_ItoS.put(Phone.TYPE_CAR, Constants.PARAM_TYPE_CAR);
+        sKnownPhoneTypeMap_StoI.put(Constants.PARAM_TYPE_CAR, Phone.TYPE_CAR);
+        sKnownPhoneTypesMap_ItoS.put(Phone.TYPE_PAGER, Constants.PARAM_TYPE_PAGER);
+        sKnownPhoneTypeMap_StoI.put(Constants.PARAM_TYPE_PAGER, Phone.TYPE_PAGER);
+        sKnownPhoneTypesMap_ItoS.put(Phone.TYPE_ISDN, Constants.PARAM_TYPE_ISDN);
+        sKnownPhoneTypeMap_StoI.put(Constants.PARAM_TYPE_ISDN, Phone.TYPE_ISDN);
         
-        sKnownPhoneTypeMap_StoI.put(Constants.ATTR_TYPE_HOME, Phone.TYPE_HOME);
-        sKnownPhoneTypeMap_StoI.put(Constants.ATTR_TYPE_WORK, Phone.TYPE_WORK);
-        sKnownPhoneTypeMap_StoI.put(Constants.ATTR_TYPE_CELL, Phone.TYPE_MOBILE);
+        sKnownPhoneTypeMap_StoI.put(Constants.PARAM_TYPE_HOME, Phone.TYPE_HOME);
+        sKnownPhoneTypeMap_StoI.put(Constants.PARAM_TYPE_WORK, Phone.TYPE_WORK);
+        sKnownPhoneTypeMap_StoI.put(Constants.PARAM_TYPE_CELL, Phone.TYPE_MOBILE);
                 
-        sKnownPhoneTypeMap_StoI.put(Constants.ATTR_PHONE_EXTRA_TYPE_OTHER, Phone.TYPE_OTHER);
-        sKnownPhoneTypeMap_StoI.put(Constants.ATTR_PHONE_EXTRA_TYPE_CALLBACK, Phone.TYPE_CALLBACK);
+        sKnownPhoneTypeMap_StoI.put(Constants.PARAM_PHONE_EXTRA_TYPE_OTHER, Phone.TYPE_OTHER);
+        sKnownPhoneTypeMap_StoI.put(Constants.PARAM_PHONE_EXTRA_TYPE_CALLBACK, Phone.TYPE_CALLBACK);
         sKnownPhoneTypeMap_StoI.put(
-                Constants.ATTR_PHONE_EXTRA_TYPE_COMPANY_MAIN, Phone.TYPE_COMPANY_MAIN);
-        sKnownPhoneTypeMap_StoI.put(Constants.ATTR_PHONE_EXTRA_TYPE_RADIO, Phone.TYPE_RADIO);
-        sKnownPhoneTypeMap_StoI.put(Constants.ATTR_PHONE_EXTRA_TYPE_TTY_TDD, Phone.TYPE_TTY_TDD);
-        sKnownPhoneTypeMap_StoI.put(Constants.ATTR_PHONE_EXTRA_TYPE_ASSISTANT,
+                Constants.PARAM_PHONE_EXTRA_TYPE_COMPANY_MAIN, Phone.TYPE_COMPANY_MAIN);
+        sKnownPhoneTypeMap_StoI.put(Constants.PARAM_PHONE_EXTRA_TYPE_RADIO, Phone.TYPE_RADIO);
+        sKnownPhoneTypeMap_StoI.put(Constants.PARAM_PHONE_EXTRA_TYPE_TTY_TDD, Phone.TYPE_TTY_TDD);
+        sKnownPhoneTypeMap_StoI.put(Constants.PARAM_PHONE_EXTRA_TYPE_ASSISTANT,
                 Phone.TYPE_ASSISTANT);
 
         sPhoneTypesSetUnknownToContacts = new HashSet<String>();
-        sPhoneTypesSetUnknownToContacts.add(Constants.ATTR_TYPE_MODEM);
-        sPhoneTypesSetUnknownToContacts.add(Constants.ATTR_TYPE_BBS);
-        sPhoneTypesSetUnknownToContacts.add(Constants.ATTR_TYPE_VIDEO);
+        sPhoneTypesSetUnknownToContacts.add(Constants.PARAM_TYPE_MODEM);
+        sPhoneTypesSetUnknownToContacts.add(Constants.PARAM_TYPE_BBS);
+        sPhoneTypesSetUnknownToContacts.add(Constants.PARAM_TYPE_VIDEO);
 
         sKnownImPropNameMap_ItoS = new HashMap<Integer, String>();
         sKnownImPropNameMap_ItoS.put(Im.PROTOCOL_AIM, Constants.PROPERTY_X_AIM);
@@ -90,7 +90,7 @@ public class VCardUtils {
         sKnownImPropNameMap_ItoS.put(Im.PROTOCOL_NETMEETING, Constants.PROPERTY_X_NETMEETING);
     }
 
-    public static String getPhoneAttributeString(Integer type) {
+    public static String getPhoneTypeString(Integer type) {
         return sKnownPhoneTypesMap_ItoS.get(type);
     }
 
@@ -107,9 +107,9 @@ public class VCardUtils {
         if (types != null) {
             for (String typeString : types) {
                 typeString = typeString.toUpperCase(); 
-                if (typeString.equals(Constants.ATTR_TYPE_PREF)) {
+                if (typeString.equals(Constants.PARAM_TYPE_PREF)) {
                     hasPref = true;
-                } else if (typeString.equals(Constants.ATTR_TYPE_FAX)) {
+                } else if (typeString.equals(Constants.PARAM_TYPE_FAX)) {
                     isFax = true;
                 } else {
                     if (typeString.startsWith("X-") && type < 0) {
@@ -153,14 +153,14 @@ public class VCardUtils {
         return sKnownImPropNameMap_ItoS.get(protocol);
     }
 
-    public static boolean isValidPhoneAttribute(String phoneAttribute, int vcardType) {
+    public static boolean isValidPhoneType(String phoneType, int vcardType) {
         // TODO: check the following.
         // - it may violate vCard spec
         // - it may contain non-ASCII characters
         //
         // TODO: use vcardType
-        return (phoneAttribute.startsWith("X-") || phoneAttribute.startsWith("x-") ||
-                sPhoneTypesSetUnknownToContacts.contains(phoneAttribute));
+        return (phoneType.startsWith("X-") || phoneType.startsWith("x-") ||
+                sPhoneTypesSetUnknownToContacts.contains(phoneType));
     }
     
     public static String[] sortNameElements(int vcardType,
