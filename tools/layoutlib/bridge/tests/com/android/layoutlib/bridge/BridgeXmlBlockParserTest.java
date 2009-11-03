@@ -41,7 +41,7 @@ public class BridgeXmlBlockParserTest extends TestCase {
         parser = new BridgeXmlBlockParser(parser, null, false /* platformResourceFlag */);
 
         InputStream input = this.getClass().getClassLoader().getResourceAsStream(
-            "/com/android/layoutlib/testdata/layout1.xml");
+            "com/android/layoutlib/testdata/layout1.xml");
         parser.setInput(input, null /*encoding*/);
 
         assertEquals(XmlPullParser.START_DOCUMENT, parser.next());
