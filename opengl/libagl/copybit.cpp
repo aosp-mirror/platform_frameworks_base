@@ -46,13 +46,24 @@ namespace android {
 
 static void textureToCopyBitImage(
         const GGLSurface* surface, int32_t opFormat, 
-        buffer_handle_t buffer, copybit_image_t* img) 
+        android_native_buffer_t* buffer, copybit_image_t* img)
 {
+    uint32_t vstride = 0;
+    if (opFormat == COPYBIT_FORMAT_YCbCr_422_SP ||
+            opFormat == COPYBIT_FORMAT_YCbCr_420_SP) {
+        // NOTE: this static_cast is really not safe b/c we can't know for
+        // sure the buffer passed is of the right type.
+        // However, since we do this only for YUV formats, we should be safe
+        // since only SurfaceFlinger makes use of them.
+        GraphicBuffer* graphicBuffer = static_cast<GraphicBuffer*>(buffer);
+        vstride = graphicBuffer->getVerticalStride();
+    }
+
     img->w      = surface->stride;
-    img->h      = surface->height;
+    img->h      = vstride ? vstride : surface->height;
     img->format = opFormat;
     img->base   = surface->data;
-    img->handle = (native_handle_t *)buffer;
+    img->handle = (native_handle_t *)buffer->handle;
 }
 
 struct clipRectRegion : public copybit_region_t {
@@ -279,8 +290,8 @@ static bool copybit(GLint x, GLint y,
 
     copybit_device_t* copybit = c->copybits.blitEngine;
     copybit_image_t src;
-    buffer_handle_t source_hnd = textureObject->buffer->handle;
-    textureToCopyBitImage(&textureObject->surface, opFormat, source_hnd, &src);
+    textureToCopyBitImage(&textureObject->surface, opFormat,
+            textureObject->buffer, &src);
     copybit_rect_t srect = { Ucr, Vcr + Hcr, Ucr + Wcr, Vcr };
 
     /*
@@ -360,8 +371,8 @@ static bool copybit(GLint x, GLint y,
     }
 
     copybit_image_t dst;
-    buffer_handle_t target_hnd = c->copybits.drawSurfaceBuffer;
-    textureToCopyBitImage(&cbSurface, cbSurface.format, target_hnd, &dst);
+    textureToCopyBitImage(&cbSurface, cbSurface.format,
+            c->copybits.drawSurfaceBuffer, &dst);
     copybit_rect_t drect = {x, y, x+w, y+h};
 
 
