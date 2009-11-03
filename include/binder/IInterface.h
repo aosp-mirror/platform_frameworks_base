@@ -72,21 +72,24 @@ protected:
 // ----------------------------------------------------------------------
 
 #define DECLARE_META_INTERFACE(INTERFACE)                               \
-    static const String16 descriptor;                                   \
-    static sp<I##INTERFACE> asInterface(const sp<IBinder>& obj);        \
-    virtual const String16& getInterfaceDescriptor() const;             \
+    static const android::String16 descriptor;                          \
+    static android::sp<I##INTERFACE> asInterface(                       \
+            const android::sp<android::IBinder>& obj);                  \
+    virtual const android::String16& getInterfaceDescriptor() const;    \
     I##INTERFACE();                                                     \
     virtual ~I##INTERFACE();                                            \
 
 
 #define IMPLEMENT_META_INTERFACE(INTERFACE, NAME)                       \
-    const String16 I##INTERFACE::descriptor(NAME);                      \
-    const String16& I##INTERFACE::getInterfaceDescriptor() const {      \
+    const android::String16 I##INTERFACE::descriptor(NAME);             \
+    const android::String16&                                            \
+            I##INTERFACE::getInterfaceDescriptor() const {              \
         return I##INTERFACE::descriptor;                                \
     }                                                                   \
-    sp<I##INTERFACE> I##INTERFACE::asInterface(const sp<IBinder>& obj)  \
+    android::sp<I##INTERFACE> I##INTERFACE::asInterface(                \
+            const android::sp<android::IBinder>& obj)                   \
     {                                                                   \
-        sp<I##INTERFACE> intr;                                          \
+        android::sp<I##INTERFACE> intr;                                 \
         if (obj != NULL) {                                              \
             intr = static_cast<I##INTERFACE*>(                          \
                 obj->queryLocalInterface(                               \
