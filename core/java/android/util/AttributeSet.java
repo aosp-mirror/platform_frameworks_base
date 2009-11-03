@@ -34,13 +34,13 @@ package android.util;
  * <p>This interface provides an efficient mechanism for retrieving
  * data from compiled XML files, which can be retrieved for a particular
  * XmlPullParser through {@link Xml#asAttributeSet
- * Xml.getAttributeSet()}.  Normally this will return an implementation
+ * Xml.asAttributeSet()}.  Normally this will return an implementation
  * of the interface that works on top of a generic XmlPullParser, however it
  * is more useful in conjunction with compiled XML resources:
  * 
  * <pre>
  * XmlPullParser parser = resources.getXml(myResouce);
- * AttributeSet attributes = Xml.getAttributeSet(parser);</pre>
+ * AttributeSet attributes = Xml.asAttributeSet(parser);</pre>
  * 
  * <p>The implementation returned here, unlike using
  * the implementation on top of a generic XmlPullParser,
