@@ -83,7 +83,8 @@ public class MediaMimeTest extends ActivityInstrumentationTestCase2<MediaFramewo
         assertMediaPlaybackActivityHandles("audio/*");
     }
 
-    @MediumTest
+    // TODO: temporarily remove from medium suite because it hangs whole suite 
+    // @MediumTest
     // Checks the MediaPlaybackActivity handles application/itunes. Some servers
     // set the Content-type header to application/iTunes (with capital T, but
     // the download manager downcasts it) for their MP3 podcasts. This is non
