@@ -251,8 +251,10 @@ class CallbackProxy extends Handler {
                 break;
 
             case PAGE_FINISHED:
+                String finishedUrl = (String) msg.obj;
+                mWebView.onPageFinished(finishedUrl);
                 if (mWebViewClient != null) {
-                    mWebViewClient.onPageFinished(mWebView, (String) msg.obj);
+                    mWebViewClient.onPageFinished(mWebView, finishedUrl);
                 }
                 break;
                 
@@ -777,11 +779,6 @@ class CallbackProxy extends Handler {
     }
 
     public void onPageFinished(String url) {
-        // Do an unsynchronized quick check to avoid posting if no callback has
-        // been set.
-        if (mWebViewClient == null) {
-            return;
-        }
         // Performance probe
         if (PERF_PROBE) {
             // un-comment this if PERF_PROBE is true
