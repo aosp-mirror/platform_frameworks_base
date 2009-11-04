@@ -661,7 +661,7 @@
              for normal behavior. -->
         <attr name="hasCode" format="boolean" />
         <attr name="persistent" />
-        <!-- Specify whether the components in this application are enabled or not (i.e. can be
+        <!-- Specify whether the components in this application are enabled or not (that is, can be
              instantiated by the system).
              If "false", it overrides any component specific values (a value of "true" will not
              override the component specific values). -->
@@ -929,7 +929,7 @@
     <declare-styleable name="AndroidManifestProvider" parent="AndroidManifestApplication">
         <!-- Required name of the class implementing the provider, deriving from
             {@link android.content.ContentProvider}.  This is a fully
-            qualified class name (i.e., com.mycompany.myapp.MyProvider); as a
+            qualified class name (for example, com.mycompany.myapp.MyProvider); as a
             short-hand if the first character of the class
             is a period then it is appended to your package name. -->
         <attr name="name" />
@@ -944,7 +944,7 @@
         <attr name="permission" />
         <attr name="multiprocess" />
         <attr name="initOrder" />
-        <!-- Specify whether this provider is enabled or not (i.e. can be instantiated by the system).
+        <!-- Specify whether this provider is enabled or not (that is, can be instantiated by the system).
              It can also be specified for an application as a whole, in which case a value of "false"
              will override any component specific values (a value of "true" will not override the
              component specific values). -->
@@ -1007,7 +1007,7 @@
     <declare-styleable name="AndroidManifestService" parent="AndroidManifestApplication">
         <!-- Required name of the class implementing the service, deriving from
             {@link android.app.Service}.  This is a fully
-            qualified class name (i.e., com.mycompany.myapp.MyService); as a
+            qualified class name (for example, com.mycompany.myapp.MyService); as a
             short-hand if the first character of the class
             is a period then it is appended to your package name. -->
         <attr name="name" />
@@ -1015,7 +1015,7 @@
         <attr name="icon" />
         <attr name="permission" />
         <attr name="process" />
-        <!-- Specify whether the service is enabled or not (i.e. can be instantiated by the system).
+        <!-- Specify whether the service is enabled or not (that is, can be instantiated by the system).
              It can also be specified for an application as a whole, in which case a value of "false"
              will override any component specific values (a value of "true" will not override the
              component specific values). -->
@@ -1038,7 +1038,7 @@
     <declare-styleable name="AndroidManifestReceiver" parent="AndroidManifestApplication">
         <!-- Required name of the class implementing the receiver, deriving from
             {@link android.content.BroadcastReceiver}.  This is a fully
-            qualified class name (i.e., com.mycompany.myapp.MyReceiver); as a
+            qualified class name (for example, com.mycompany.myapp.MyReceiver); as a
             short-hand if the first character of the class
             is a period then it is appended to your package name. -->
         <attr name="name" />
@@ -1046,7 +1046,7 @@
         <attr name="icon" />
         <attr name="permission" />
         <attr name="process" />
-        <!-- Specify whether the receiver is enabled or not (i.e. can be instantiated by the system).
+        <!-- Specify whether the receiver is enabled or not (that is, can be instantiated by the system).
              It can also be specified for an application as a whole, in which case a value of "false"
              will override any component specific values (a value of "true" will not override the
              component specific values). -->
@@ -1068,7 +1068,7 @@
     <declare-styleable name="AndroidManifestActivity" parent="AndroidManifestApplication">
         <!-- Required name of the class implementing the activity, deriving from
             {@link android.app.Activity}.  This is a fully
-            qualified class name (i.e., com.mycompany.myapp.MyActivity); as a
+            qualified class name (for example, com.mycompany.myapp.MyActivity); as a
             short-hand if the first character of the class
             is a period then it is appended to your package name. -->
         <attr name="name" />
@@ -1090,7 +1090,7 @@
         <attr name="alwaysRetainTaskState" />
         <attr name="stateNotNeeded" />
         <attr name="excludeFromRecents" />
-        <!-- Specify whether the activity is enabled or not (i.e. can be instantiated by the system).
+        <!-- Specify whether the activity is enabled or not (that is, can be instantiated by the system).
              It can also be specified for an application as a whole, in which case a value of "false"
              will override any component specific values (a value of "true" will not override the
              component specific values). -->
@@ -1115,7 +1115,7 @@
     <declare-styleable name="AndroidManifestActivityAlias" parent="AndroidManifestApplication">
         <!-- Required name of the class implementing the activity, deriving from
             {@link android.app.Activity}.  This is a fully
-            qualified class name (i.e., com.mycompany.myapp.MyActivity); as a
+            qualified class name (for example, com.mycompany.myapp.MyActivity); as a
             short-hand if the first character of the class
             is a period then it is appended to your package name. -->
         <attr name="name" />
@@ -1128,7 +1128,7 @@
         <attr name="label" />
         <attr name="icon" />
         <attr name="permission" />
-        <!-- Specify whether the activity-alias is enabled or not (i.e. can be instantiated by the system).
+        <!-- Specify whether the activity-alias is enabled or not (that is, can be instantiated by the system).
              It can also be specified for an application as a whole, in which case a value of "false"
              will override any component specific values (a value of "true" will not override the
              component specific values). -->
@@ -1295,7 +1295,7 @@
     <declare-styleable name="AndroidManifestInstrumentation" parent="AndroidManifest">
         <!-- Required name of the class implementing the instrumentation, deriving from
             {@link android.app.Instrumentation}.  This is a fully
-            qualified class name (i.e., com.mycompany.myapp.MyActivity); as a
+            qualified class name (for example, com.mycompany.myapp.MyActivity); as a
             short-hand if the first character of the class
             is a period then it is appended to your package name. -->
         <attr name="name" />

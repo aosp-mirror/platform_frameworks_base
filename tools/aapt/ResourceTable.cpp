@@ -480,22 +480,22 @@ static status_t compileAttribute(const sp<AaptFile>& in,
                     enumOrFlagsComment.append((attr.type&ResTable_map::TYPE_ENUM)
                                        ? String16(" be one of the following constant values.")
                                        : String16(" be one or more (separated by '|') of the following constant values."));
-                    enumOrFlagsComment.append(String16("</p>\n<table border=\"2\" width=\"85%\" align=\"center\" frame=\"hsides\" rules=\"all\" cellpadding=\"5\">\n"
+                    enumOrFlagsComment.append(String16("</p>\n<table>\n"
                                                 "<colgroup align=\"left\" />\n"
                                                 "<colgroup align=\"left\" />\n"
                                                 "<colgroup align=\"left\" />\n"
-                                                "<tr><th>Constant<th>Value<th>Description</tr>"));
+                                                "<tr><th>Constant</th><th>Value</th><th>Description</th></tr>"));
                 }
                 
-                enumOrFlagsComment.append(String16("\n<tr><th><code>"));
+                enumOrFlagsComment.append(String16("\n<tr><td><code>"));
                 enumOrFlagsComment.append(itemIdent);
-                enumOrFlagsComment.append(String16("</code><td>"));
+                enumOrFlagsComment.append(String16("</code></td><td>"));
                 enumOrFlagsComment.append(value);
-                enumOrFlagsComment.append(String16("<td>"));
+                enumOrFlagsComment.append(String16("</td><td>"));
                 if (block.getComment(&len)) {
                     enumOrFlagsComment.append(String16(block.getComment(&len)));
                 }
-                enumOrFlagsComment.append(String16("</tr>"));
+                enumOrFlagsComment.append(String16("</td></tr>"));
                 
                 err = outTable->addBag(SourcePos(in->getPrintableSource(), block.getLineNumber()),
                                        myPackage,
