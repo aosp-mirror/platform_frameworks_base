@@ -80,6 +80,9 @@ public class RSSurfaceView extends SurfaceView implements SurfaceHolder.Callback
      */
     public void surfaceDestroyed(SurfaceHolder holder) {
         // Surface will be destroyed when we return
+        if (mRS != null) {
+            mRS.contextSetSurface(null);
+        }
         //Log.v(RenderScript.LOG_TAG, "surfaceDestroyed");
     }
 
@@ -88,6 +91,9 @@ public class RSSurfaceView extends SurfaceView implements SurfaceHolder.Callback
      * not normally called or subclassed by clients of RSSurfaceView.
      */
     public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {
+        if (mRS != null) {
+            mRS.contextSetSurface(holder.getSurface());
+        }
         //Log.v(RenderScript.LOG_TAG, "surfaceChanged");
     }
 

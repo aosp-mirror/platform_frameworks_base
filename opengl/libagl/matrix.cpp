@@ -741,19 +741,18 @@ void point4__generic(transform_t const* mx, vec4_t* lhs, vec4_t const* rhs) {
 
 void point4__mvui(transform_t const* mx, vec4_t* lhs, vec4_t const* rhs) {
     // this used for transforming light positions back to object space.
-    // Lights have 3 components positions, so w is always 1.
-    // however, it is used as a switch for directional lights, so we need
+    // w is used as a switch for directional lights, so we need
     // to preserve it.
     const GLfixed* const m = mx->matrix.m;
     const GLfixed rx = rhs->x;
     const GLfixed ry = rhs->y;
     const GLfixed rz = rhs->z;
-    lhs->x = mla3a(rx, m[ 0], ry, m[ 4], rz, m[ 8], m[12]); 
-    lhs->y = mla3a(rx, m[ 1], ry, m[ 5], rz, m[ 9], m[13]);
-    lhs->z = mla3a(rx, m[ 2], ry, m[ 6], rz, m[10], m[14]);
-    lhs->w = rhs->w;
+    const GLfixed rw = rhs->w;
+    lhs->x = mla4(rx, m[ 0], ry, m[ 4], rz, m[ 8], rw, m[12]);
+    lhs->y = mla4(rx, m[ 1], ry, m[ 5], rz, m[ 9], rw, m[13]);
+    lhs->z = mla4(rx, m[ 2], ry, m[ 6], rz, m[10], rw, m[14]);
+    lhs->w = rw;
 }
-
 
 void point2__nop(transform_t const*, vec4_t* lhs, vec4_t const* rhs) {
     lhs->z = 0;
