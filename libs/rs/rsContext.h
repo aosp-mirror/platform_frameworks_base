@@ -93,6 +93,7 @@ public:
 
     void pause();
     void resume();
+    void setSurface(Surface *sur);
 
     void assignName(ObjectBase *obj, const char *name, uint32_t len);
     void removeName(ObjectBase *obj);

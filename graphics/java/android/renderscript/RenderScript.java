@@ -64,6 +64,7 @@ public class RenderScript {
     native void nDeviceSetConfig(int dev, int param, int value);
     native int  nContextCreate(int dev, Surface sur, int ver, boolean useDepth);
     native void nContextDestroy(int con);
+    native void nContextSetSurface(Surface sur);
 
     native void nContextBindRootScript(int script);
     native void nContextBindSampler(int sampler, int slot);
@@ -274,6 +275,11 @@ public class RenderScript {
         Element.initPredefined(this);
         mMessageThread = new MessageThread(this);
         mMessageThread.start();
+    }
+
+    public void contextSetSurface(Surface sur) {
+        mSurface = sur;
+        nContextSetSurface(mSurface);
     }
 
     public void destroy() {
