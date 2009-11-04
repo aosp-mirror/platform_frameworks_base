@@ -36,6 +36,10 @@ ContextPause {
 ContextResume {
 	}
 
+ContextSetSurface {
+	param void *sur
+	}
+
 AssignName {
 	param void *obj
 	param const char *name
