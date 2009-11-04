@@ -80,6 +80,10 @@ public class CDMAPhone extends PhoneBase {
     static final String LOG_TAG = "CDMA";
     private static final boolean DBG = true;
 
+    // Min values used to by needsActivation
+    private static final String UNACTIVATED_MIN2_VALUE = "000000";
+    private static final String UNACTIVATED_MIN_VALUE = "1111110111";
+
     // Default Emergency Callback Mode exit timer
     private static final int DEFAULT_ECM_EXIT_TIMER_VALUE = 300000;
 
@@ -846,6 +850,26 @@ public class CDMAPhone extends PhoneBase {
     /*package*/ void
     updateMessageWaitingIndicator(int mwi) {
         mRuimRecords.setVoiceMessageWaiting(1, mwi);
+    }
+
+    /**
+     * Returns true if CDMA OTA Service Provisioning needs to be performed.
+     */
+    /* package */ boolean
+    needsOtaServiceProvisioning() {
+        String cdmaMin = getCdmaMin();
+        boolean needsProvisioning;
+        if (cdmaMin == null || (cdmaMin.length() < 6)) {
+            if (DBG) Log.d(LOG_TAG, "needsOtaServiceProvisioning: illegal cdmaMin='"
+                                    + cdmaMin + "' assume provisioning needed.");
+            needsProvisioning = true;
+        } else {
+            needsProvisioning = (cdmaMin.equals(UNACTIVATED_MIN_VALUE)
+                    || cdmaMin.substring(0,6).equals(UNACTIVATED_MIN2_VALUE))
+                    || SystemProperties.getBoolean("test_cdma_setup", false);
+        }
+        if (DBG) Log.d(LOG_TAG, "needsOtaServiceProvisioning: ret=" + needsProvisioning);
+        return needsProvisioning;
     }
 
     @Override
