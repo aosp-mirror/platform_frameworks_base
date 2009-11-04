@@ -17,7 +17,6 @@
 package com.android.unit_tests.vcard;
 
 import android.content.ContentValues;
-import android.pim.vcard.VCardComposer;
 import android.pim.vcard.VCardConfig;
 import android.provider.ContactsContract.CommonDataKinds.Email;
 import android.provider.ContactsContract.CommonDataKinds.Event;
@@ -31,7 +30,7 @@ import android.provider.ContactsContract.CommonDataKinds.StructuredName;
 import android.provider.ContactsContract.CommonDataKinds.StructuredPostal;
 import android.provider.ContactsContract.CommonDataKinds.Website;
 
-import com.android.unit_tests.vcard.PropertyNodesVerifier.TypeSet;
+import com.android.unit_tests.vcard.PropertyNodesVerifierElem.TypeSet;
 
 import java.util.Arrays;
 
@@ -44,42 +43,24 @@ public class VCardExporterTests extends VCardTestsBase {
     private static final byte[] sPhotoByteArray =
         VCardImporterTests.sPhotoByteArrayForComplicatedCase;
 
-    private void verifyOneComposition(ExportTestResolver resolver,
-            VCardVerificationHandler handler, int version) {
-        final boolean isV30 = (version == V30);
-
-        final int vcardType = (isV30 ? VCardConfig.VCARD_TYPE_V30_GENERIC_UTF8
-                : VCardConfig.VCARD_TYPE_V21_GENERIC_UTF8);
-        VCardComposer composer = new VCardComposer(new CustomMockContext(resolver), vcardType);
-        composer.addHandler(handler);
-        if (!composer.init(VCardComposer.CONTACTS_TEST_CONTENT_URI, null, null, null)) {
-            fail("init() failed. Reason: " + composer.getErrorReason());
-        }
-        assertFalse(composer.isAfterLast());
-        assertTrue(composer.createOneEntry());
-        assertTrue(composer.isAfterLast());
-        composer.terminate();
-    }
-
     public void testSimpleV21() {
         ExportTestResolver resolver = new ExportTestResolver();
-        resolver.buildInput(StructuredName.CONTENT_ITEM_TYPE)
+        resolver.buildContactEntry().buildData(StructuredName.CONTENT_ITEM_TYPE)
                 .put(StructuredName.FAMILY_NAME, "Ando")
                 .put(StructuredName.GIVEN_NAME, "Roid");
 
-        VCardVerificationHandler handler = new VCardVerificationHandler(this, V21);
-        handler.addPropertyNodesVerifier()
+        VCardVerifier verifier = new VCardVerifier(resolver, V21);
+        verifier.addPropertyNodesVerifierElem()
                 .addNodeWithoutOrder("FN", "Roid Ando")
                 .addNodeWithoutOrder("N", "Ando;Roid;;;", Arrays.asList("Ando", "Roid", "", "", ""));
-
-        verifyOneComposition(resolver, handler, V21);
+        verifier.verify();
     }
 
     private void testStructuredNameBasic(int version) {
-        final boolean isV30 = (version == V30);
+        final boolean isV30 = VCardConfig.isV30(version);
         ExportTestResolver resolver = new ExportTestResolver();
 
-        resolver.buildInput(StructuredName.CONTENT_ITEM_TYPE)
+        resolver.buildContactEntry().buildData(StructuredName.CONTENT_ITEM_TYPE)
                 .put(StructuredName.FAMILY_NAME, "AppropriateFamilyName")
                 .put(StructuredName.GIVEN_NAME, "AppropriateGivenName")
                 .put(StructuredName.MIDDLE_NAME, "AppropriateMiddleName")
@@ -89,8 +70,8 @@ public class VCardExporterTests extends VCardTestsBase {
                 .put(StructuredName.PHONETIC_GIVEN_NAME, "AppropriatePhoneticGiven")
                 .put(StructuredName.PHONETIC_MIDDLE_NAME, "AppropriatePhoneticMiddle");
 
-        VCardVerificationHandler handler = new VCardVerificationHandler(this, version);
-        PropertyNodesVerifier verifier = handler.addPropertyNodesVerifier()
+        VCardVerifier verifier = new VCardVerifier(resolver, version);
+        PropertyNodesVerifierElem elem = verifier.addPropertyNodesVerifierElem()
                 .addNodeWithOrder("N",
                         "AppropriateFamilyName;AppropriateGivenName;AppropriateMiddleName;"
                         + "AppropriatePrefix;AppropriateSuffix",
@@ -104,12 +85,12 @@ public class VCardExporterTests extends VCardTestsBase {
                 .addNodeWithoutOrder("X-PHONETIC-LAST-NAME", "AppropriatePhoneticFamily");
 
         if (isV30) {
-            verifier.addNodeWithoutOrder("SORT-STRING",
+            elem.addNodeWithoutOrder("SORT-STRING",
                     "AppropriatePhoneticGiven AppropriatePhoneticMiddle "
                     + "AppropriatePhoneticFamily");
         }
 
-        verifyOneComposition(resolver, handler, version);
+        verifier.verify();
     }
 
     public void testStructuredNameBasicV21() {
@@ -130,7 +111,8 @@ public class VCardExporterTests extends VCardTestsBase {
         final boolean isV30 = (version == V30);
         ExportTestResolver resolver = new ExportTestResolver();
 
-        resolver.buildInput(StructuredName.CONTENT_ITEM_TYPE)
+        ContactEntry entry = resolver.buildContactEntry();
+        entry.buildData(StructuredName.CONTENT_ITEM_TYPE)
                 .put(StructuredName.FAMILY_NAME, "DoNotEmitFamilyName1")
                 .put(StructuredName.GIVEN_NAME, "DoNotEmitGivenName1")
                 .put(StructuredName.MIDDLE_NAME, "DoNotEmitMiddleName1")
@@ -141,7 +123,7 @@ public class VCardExporterTests extends VCardTestsBase {
                 .put(StructuredName.PHONETIC_MIDDLE_NAME, "DoNotEmitPhoneticMiddle1");
 
         // With "IS_PRIMARY=1". This is what we should use.
-        resolver.buildInput(StructuredName.CONTENT_ITEM_TYPE)
+        entry.buildData(StructuredName.CONTENT_ITEM_TYPE)
                 .put(StructuredName.FAMILY_NAME, "AppropriateFamilyName")
                 .put(StructuredName.GIVEN_NAME, "AppropriateGivenName")
                 .put(StructuredName.MIDDLE_NAME, "AppropriateMiddleName")
@@ -153,7 +135,7 @@ public class VCardExporterTests extends VCardTestsBase {
                 .put(StructuredName.IS_PRIMARY, 1);
 
         // With "IS_PRIMARY=1", but we should ignore this time, since this is second, not first.
-        resolver.buildInput(StructuredName.CONTENT_ITEM_TYPE)
+        entry.buildData(StructuredName.CONTENT_ITEM_TYPE)
                 .put(StructuredName.FAMILY_NAME, "DoNotEmitFamilyName2")
                 .put(StructuredName.GIVEN_NAME, "DoNotEmitGivenName2")
                 .put(StructuredName.MIDDLE_NAME, "DoNotEmitMiddleName2")
@@ -164,8 +146,8 @@ public class VCardExporterTests extends VCardTestsBase {
                 .put(StructuredName.PHONETIC_MIDDLE_NAME, "DoNotEmitPhoneticMiddle2")
                 .put(StructuredName.IS_PRIMARY, 1);
 
-        VCardVerificationHandler handler = new VCardVerificationHandler(this, version);
-        PropertyNodesVerifier verifier = handler.addPropertyNodesVerifier()
+        VCardVerifier verifier = new VCardVerifier(resolver, version);
+        PropertyNodesVerifierElem elem = verifier.addPropertyNodesVerifierElem()
                 .addNodeWithOrder("N",
                         "AppropriateFamilyName;AppropriateGivenName;AppropriateMiddleName;"
                         + "AppropriatePrefix;AppropriateSuffix",
@@ -179,12 +161,12 @@ public class VCardExporterTests extends VCardTestsBase {
                 .addNodeWithoutOrder("X-PHONETIC-LAST-NAME", "AppropriatePhoneticFamily");
 
         if (isV30) {
-            verifier.addNodeWithoutOrder("SORT-STRING",
+            elem.addNodeWithoutOrder("SORT-STRING",
                     "AppropriatePhoneticGiven AppropriatePhoneticMiddle "
                     + "AppropriatePhoneticFamily");
         }
 
-        verifyOneComposition(resolver, handler, version);
+        verifier.verify();
     }
 
     public void testStructuredNameUsePrimaryV21() {
@@ -203,7 +185,8 @@ public class VCardExporterTests extends VCardTestsBase {
         final boolean isV30 = (version == V30);
         ExportTestResolver resolver = new ExportTestResolver();
 
-        resolver.buildInput(StructuredName.CONTENT_ITEM_TYPE)
+        ContactEntry entry = resolver.buildContactEntry();
+        entry.buildData(StructuredName.CONTENT_ITEM_TYPE)
                 .put(StructuredName.FAMILY_NAME, "DoNotEmitFamilyName1")
                 .put(StructuredName.GIVEN_NAME, "DoNotEmitGivenName1")
                 .put(StructuredName.MIDDLE_NAME, "DoNotEmitMiddleName1")
@@ -214,7 +197,7 @@ public class VCardExporterTests extends VCardTestsBase {
                 .put(StructuredName.PHONETIC_MIDDLE_NAME, "DoNotEmitPhoneticMiddle1");
 
         // With "IS_PRIMARY=1", but we should ignore this time.
-        resolver.buildInput(StructuredName.CONTENT_ITEM_TYPE)
+        entry.buildData(StructuredName.CONTENT_ITEM_TYPE)
                 .put(StructuredName.FAMILY_NAME, "DoNotEmitFamilyName2")
                 .put(StructuredName.GIVEN_NAME, "DoNotEmitGivenName2")
                 .put(StructuredName.MIDDLE_NAME, "DoNotEmitMiddleName2")
@@ -226,7 +209,7 @@ public class VCardExporterTests extends VCardTestsBase {
                 .put(StructuredName.IS_PRIMARY, 1);
 
         // With "IS_SUPER_PRIMARY=1". This is what we should use.
-        resolver.buildInput(StructuredName.CONTENT_ITEM_TYPE)
+        entry.buildData(StructuredName.CONTENT_ITEM_TYPE)
                 .put(StructuredName.FAMILY_NAME, "AppropriateFamilyName")
                 .put(StructuredName.GIVEN_NAME, "AppropriateGivenName")
                 .put(StructuredName.MIDDLE_NAME, "AppropriateMiddleName")
@@ -237,7 +220,7 @@ public class VCardExporterTests extends VCardTestsBase {
                 .put(StructuredName.PHONETIC_MIDDLE_NAME, "AppropriatePhoneticMiddle")
                 .put(StructuredName.IS_SUPER_PRIMARY, 1);
 
-        resolver.buildInput(StructuredName.CONTENT_ITEM_TYPE)
+        entry.buildData(StructuredName.CONTENT_ITEM_TYPE)
                 .put(StructuredName.FAMILY_NAME, "DoNotEmitFamilyName3")
                 .put(StructuredName.GIVEN_NAME, "DoNotEmitGivenName3")
                 .put(StructuredName.MIDDLE_NAME, "DoNotEmitMiddleName3")
@@ -248,8 +231,8 @@ public class VCardExporterTests extends VCardTestsBase {
                 .put(StructuredName.PHONETIC_MIDDLE_NAME, "DoNotEmitPhoneticMiddle3")
                 .put(StructuredName.IS_PRIMARY, 1);
 
-        VCardVerificationHandler handler = new VCardVerificationHandler(this, version);
-        PropertyNodesVerifier verifier = handler.addPropertyNodesVerifier()
+        VCardVerifier verifier = new VCardVerifier(resolver, version);
+        PropertyNodesVerifierElem elem = verifier.addPropertyNodesVerifierElem()
                 .addNodeWithOrder("N",
                         "AppropriateFamilyName;AppropriateGivenName;AppropriateMiddleName;"
                         + "AppropriatePrefix;AppropriateSuffix",
@@ -263,12 +246,12 @@ public class VCardExporterTests extends VCardTestsBase {
                 .addNodeWithoutOrder("X-PHONETIC-LAST-NAME", "AppropriatePhoneticFamily");
 
         if (isV30) {
-            verifier.addNodeWithoutOrder("SORT-STRING",
+            elem.addNodeWithoutOrder("SORT-STRING",
                     "AppropriatePhoneticGiven AppropriatePhoneticMiddle"
                     + " AppropriatePhoneticFamily");
         }
 
-        verifyOneComposition(resolver, handler, version);
+        verifier.verify();
     }
 
     public void testStructuredNameUseSuperPrimaryV21() {
@@ -281,28 +264,28 @@ public class VCardExporterTests extends VCardTestsBase {
 
     public void testNickNameV30() {
         ExportTestResolver resolver = new ExportTestResolver();
-        resolver.buildInput(Nickname.CONTENT_ITEM_TYPE)
+        resolver.buildContactEntry().buildData(Nickname.CONTENT_ITEM_TYPE)
                 .put(Nickname.NAME, "Nicky");
 
-        VCardVerificationHandler handler = new VCardVerificationHandler(this, V30);
-        handler.addPropertyVerifierWithEmptyName()
+        VCardVerifier verifier = new VCardVerifier(resolver, V30);
+        verifier.addPropertyNodesVerifierWithEmptyName()
             .addNodeWithOrder("NICKNAME", "Nicky");
 
-        verifyOneComposition(resolver, handler, V30);
+        verifier.verify();
     }
 
     private void testPhoneBasicCommon(int version) {
         ExportTestResolver resolver = new ExportTestResolver();
 
-        resolver.buildInput(Phone.CONTENT_ITEM_TYPE)
+        resolver.buildContactEntry().buildData(Phone.CONTENT_ITEM_TYPE)
                 .put(Phone.NUMBER, "1")
                 .put(Phone.TYPE, Phone.TYPE_HOME);
 
-        VCardVerificationHandler handler = new VCardVerificationHandler(this, version);
-        handler.addPropertyVerifierWithEmptyName()
-                .addNodeWithoutOrder("TEL", "1", new TypeSet("HOME", "VOICE"));
+        VCardVerifier verifier = new VCardVerifier(resolver, version);
+        verifier.addPropertyNodesVerifierWithEmptyName()
+                .addNodeWithoutOrder("TEL", "1", new TypeSet("HOME"));
 
-        verifyOneComposition(resolver, handler, version);
+        verifier.verify();
     }
 
     public void testPhoneBasicV21() {
@@ -319,72 +302,58 @@ public class VCardExporterTests extends VCardTestsBase {
     private void testPhoneVariousTypeSupport(int version) {
         ExportTestResolver resolver = new ExportTestResolver();
 
-        resolver.buildInput(Phone.CONTENT_ITEM_TYPE)
+        ContactEntry entry = resolver.buildContactEntry();
+        entry.buildData(Phone.CONTENT_ITEM_TYPE)
                 .put(Phone.NUMBER, "10")
                 .put(Phone.TYPE, Phone.TYPE_HOME);
-
-        resolver.buildInput(Phone.CONTENT_ITEM_TYPE)
+        entry.buildData(Phone.CONTENT_ITEM_TYPE)
                 .put(Phone.NUMBER, "20")
                 .put(Phone.TYPE, Phone.TYPE_WORK);
-
-        resolver.buildInput(Phone.CONTENT_ITEM_TYPE)
+        entry.buildData(Phone.CONTENT_ITEM_TYPE)
                 .put(Phone.NUMBER, "30")
                 .put(Phone.TYPE, Phone.TYPE_FAX_HOME);
-
-        resolver.buildInput(Phone.CONTENT_ITEM_TYPE)
+        entry.buildData(Phone.CONTENT_ITEM_TYPE)
                 .put(Phone.NUMBER, "40")
                 .put(Phone.TYPE, Phone.TYPE_FAX_WORK);
-
-        resolver.buildInput(Phone.CONTENT_ITEM_TYPE)
+        entry.buildData(Phone.CONTENT_ITEM_TYPE)
                 .put(Phone.NUMBER, "50")
                 .put(Phone.TYPE, Phone.TYPE_MOBILE);
-
-        resolver.buildInput(Phone.CONTENT_ITEM_TYPE)
+        entry.buildData(Phone.CONTENT_ITEM_TYPE)
                 .put(Phone.NUMBER, "60")
                 .put(Phone.TYPE, Phone.TYPE_PAGER);
-
-        resolver.buildInput(Phone.CONTENT_ITEM_TYPE)
+        entry.buildData(Phone.CONTENT_ITEM_TYPE)
                 .put(Phone.NUMBER, "70")
                 .put(Phone.TYPE, Phone.TYPE_OTHER);
-
-        resolver.buildInput(Phone.CONTENT_ITEM_TYPE)
+        entry.buildData(Phone.CONTENT_ITEM_TYPE)
                 .put(Phone.NUMBER, "80")
                 .put(Phone.TYPE, Phone.TYPE_CAR);
-
-        resolver.buildInput(Phone.CONTENT_ITEM_TYPE)
+        entry.buildData(Phone.CONTENT_ITEM_TYPE)
                 .put(Phone.NUMBER, "90")
                 .put(Phone.TYPE, Phone.TYPE_COMPANY_MAIN);
-
-        resolver.buildInput(Phone.CONTENT_ITEM_TYPE)
+        entry.buildData(Phone.CONTENT_ITEM_TYPE)
                 .put(Phone.NUMBER, "100")
                 .put(Phone.TYPE, Phone.TYPE_ISDN);
-
-        resolver.buildInput(Phone.CONTENT_ITEM_TYPE)
+        entry.buildData(Phone.CONTENT_ITEM_TYPE)
                 .put(Phone.NUMBER, "110")
                 .put(Phone.TYPE, Phone.TYPE_MAIN);
-
-        resolver.buildInput(Phone.CONTENT_ITEM_TYPE)
+        entry.buildData(Phone.CONTENT_ITEM_TYPE)
                 .put(Phone.NUMBER, "120")
                 .put(Phone.TYPE, Phone.TYPE_OTHER_FAX);
-
-        resolver.buildInput(Phone.CONTENT_ITEM_TYPE)
+        entry.buildData(Phone.CONTENT_ITEM_TYPE)
                 .put(Phone.NUMBER, "130")
                 .put(Phone.TYPE, Phone.TYPE_TELEX);
-
-        resolver.buildInput(Phone.CONTENT_ITEM_TYPE)
+        entry.buildData(Phone.CONTENT_ITEM_TYPE)
                 .put(Phone.NUMBER, "140")
                 .put(Phone.TYPE, Phone.TYPE_WORK_MOBILE);
-
-        resolver.buildInput(Phone.CONTENT_ITEM_TYPE)
+        entry.buildData(Phone.CONTENT_ITEM_TYPE)
                 .put(Phone.NUMBER, "150")
                 .put(Phone.TYPE, Phone.TYPE_WORK_PAGER);
-
-        resolver.buildInput(Phone.CONTENT_ITEM_TYPE)
+        entry.buildData(Phone.CONTENT_ITEM_TYPE)
                 .put(Phone.NUMBER, "160")
                 .put(Phone.TYPE, Phone.TYPE_MMS);
 
-        VCardVerificationHandler handler = new VCardVerificationHandler(this, version);
-        handler.addPropertyVerifierWithEmptyName()
+        VCardVerifier verifier = new VCardVerifier(resolver, version);
+        verifier.addPropertyNodesVerifierWithEmptyName()
                 .addNodeWithoutOrder("TEL", "10", new TypeSet("HOME"))
                 .addNodeWithoutOrder("TEL", "20", new TypeSet("WORK"))
                 .addNodeWithoutOrder("TEL", "30", new TypeSet("HOME", "FAX"))
@@ -398,9 +367,10 @@ public class VCardExporterTests extends VCardTestsBase {
                 .addNodeWithoutOrder("TEL", "110", new TypeSet("PREF"))
                 .addNodeWithoutOrder("TEL", "120", new TypeSet("FAX"))
                 .addNodeWithoutOrder("TEL", "130", new TypeSet("TLX"))
-                .addNodeWithoutOrder("TEL", "140", new TypeSet("WORK", "MOBILE"))
+                .addNodeWithoutOrder("TEL", "140", new TypeSet("WORK", "CELL"))
                 .addNodeWithoutOrder("TEL", "150", new TypeSet("WORK", "PAGER"))
                 .addNodeWithoutOrder("TEL", "160", new TypeSet("MSG"));
+        verifier.verify();
     }
 
     public void testPhoneVariousTypeSupportV21() {
@@ -416,33 +386,29 @@ public class VCardExporterTests extends VCardTestsBase {
      */
     private void testPhonePrefHandlingCommon(int version) {
         ExportTestResolver resolver = new ExportTestResolver();
-
-        resolver.buildInput(Phone.CONTENT_ITEM_TYPE)
+        ContactEntry entry = resolver.buildContactEntry();
+        entry.buildData(Phone.CONTENT_ITEM_TYPE)
                 .put(Phone.NUMBER, "1")
                 .put(Phone.TYPE, Phone.TYPE_HOME);
-
-        resolver.buildInput(Phone.CONTENT_ITEM_TYPE)
+        entry.buildData(Phone.CONTENT_ITEM_TYPE)
                 .put(Phone.NUMBER, "2")
                 .put(Phone.TYPE, Phone.TYPE_WORK)
                 .put(Phone.IS_PRIMARY, 1);
-
-        resolver.buildInput(Phone.CONTENT_ITEM_TYPE)
+        entry.buildData(Phone.CONTENT_ITEM_TYPE)
                 .put(Phone.NUMBER, "3")
                 .put(Phone.TYPE, Phone.TYPE_FAX_HOME)
                 .put(Phone.IS_PRIMARY, 1);
-
-        resolver.buildInput(Phone.CONTENT_ITEM_TYPE)
+        entry.buildData(Phone.CONTENT_ITEM_TYPE)
                 .put(Phone.NUMBER, "4")
                 .put(Phone.TYPE, Phone.TYPE_FAX_WORK);
 
-        VCardVerificationHandler handler = new VCardVerificationHandler(this, version);
-        handler.addPropertyVerifierWithEmptyName()
+        VCardVerifier verifier = new VCardVerifier(resolver, version);
+        verifier.addPropertyNodesVerifierWithEmptyName()
                 .addNodeWithoutOrder("TEL", "4", new TypeSet("WORK", "FAX"))
                 .addNodeWithoutOrder("TEL", "3", new TypeSet("HOME", "FAX", "PREF"))
-                .addNodeWithoutOrder("TEL", "2", new TypeSet("WORK", "VOICE", "PREF"))
-                .addNodeWithoutOrder("TEL", "1", new TypeSet("HOME", "VOICE"));
-
-        verifyOneComposition(resolver, handler, version);
+                .addNodeWithoutOrder("TEL", "2", new TypeSet("WORK", "PREF"))
+                .addNodeWithoutOrder("TEL", "1", new TypeSet("HOME"));
+        verifier.verify();
     }
 
     public void testPhonePrefHandlingV21() {
@@ -455,15 +421,15 @@ public class VCardExporterTests extends VCardTestsBase {
 
     private void testEmailBasicCommon(int version) {
         ExportTestResolver resolver = new ExportTestResolver();
-        resolver.buildInput(Email.CONTENT_ITEM_TYPE)
+        resolver.buildContactEntry().buildData(Email.CONTENT_ITEM_TYPE)
                 .put(Email.DATA, "sample@example.com");
 
-        VCardVerificationHandler handler = new VCardVerificationHandler(this, version);
+        VCardVerifier verifier = new VCardVerifier(resolver, version);
 
-        handler.addPropertyVerifierWithEmptyName()
+        verifier.addPropertyNodesVerifierWithEmptyName()
             .addNodeWithoutOrder("EMAIL", "sample@example.com");
 
-        verifyOneComposition(resolver, handler, version);
+        verifier.verify();
     }
 
     public void testEmailBasicV21() {
@@ -477,31 +443,29 @@ public class VCardExporterTests extends VCardTestsBase {
     private void testEmailVariousTypeSupportCommon(int version) {
         ExportTestResolver resolver = new ExportTestResolver();
 
-        resolver.buildInput(Email.CONTENT_ITEM_TYPE)
+        ContactEntry entry = resolver.buildContactEntry();
+        entry.buildData(Email.CONTENT_ITEM_TYPE)
                 .put(Email.DATA, "type_home@example.com")
                 .put(Email.TYPE, Email.TYPE_HOME);
-
-        resolver.buildInput(Email.CONTENT_ITEM_TYPE)
+        entry.buildData(Email.CONTENT_ITEM_TYPE)
                 .put(Email.DATA, "type_work@example.com")
                 .put(Email.TYPE, Email.TYPE_WORK);
-
-        resolver.buildInput(Email.CONTENT_ITEM_TYPE)
+        entry.buildData(Email.CONTENT_ITEM_TYPE)
                 .put(Email.DATA, "type_mobile@example.com")
                 .put(Email.TYPE, Email.TYPE_MOBILE);
-
-        resolver.buildInput(Email.CONTENT_ITEM_TYPE)
+        entry.buildData(Email.CONTENT_ITEM_TYPE)
                 .put(Email.DATA, "type_other@example.com")
                 .put(Email.TYPE, Email.TYPE_OTHER);
 
-        VCardVerificationHandler handler = new VCardVerificationHandler(this, version);
+        VCardVerifier verifier = new VCardVerifier(resolver, version);
 
-        handler.addPropertyVerifierWithEmptyName()
+        verifier.addPropertyNodesVerifierWithEmptyName()
                 .addNodeWithoutOrder("EMAIL", "type_home@example.com", new TypeSet("HOME"))
                 .addNodeWithoutOrder("EMAIL", "type_work@example.com", new TypeSet("WORK"))
                 .addNodeWithoutOrder("EMAIL", "type_mobile@example.com", new TypeSet("CELL"))
                 .addNodeWithoutOrder("EMAIL", "type_other@example.com");
 
-        verifyOneComposition(resolver, handler, version);
+        verifier.verify();
     }
 
     public void testEmailVariousTypeSupportV21() {
@@ -515,22 +479,22 @@ public class VCardExporterTests extends VCardTestsBase {
     private void testEmailPrefHandlingCommon(int version) {
         ExportTestResolver resolver = new ExportTestResolver();
 
-        resolver.buildInput(Email.CONTENT_ITEM_TYPE)
+        ContactEntry entry = resolver.buildContactEntry();
+        entry.buildData(Email.CONTENT_ITEM_TYPE)
                 .put(Email.DATA, "type_home@example.com")
                 .put(Email.TYPE, Email.TYPE_HOME)
                 .put(Email.IS_PRIMARY, 1);
-
-        resolver.buildInput(Email.CONTENT_ITEM_TYPE)
+        entry.buildData(Email.CONTENT_ITEM_TYPE)
                 .put(Email.DATA, "type_notype@example.com")
                 .put(Email.IS_PRIMARY, 1);
 
-        VCardVerificationHandler handler = new VCardVerificationHandler(this, version);
+        VCardVerifier verifier = new VCardVerifier(resolver, version);
 
-        handler.addPropertyVerifierWithEmptyName()
+        verifier.addPropertyNodesVerifierWithEmptyName()
                 .addNodeWithoutOrder("EMAIL", "type_notype@example.com", new TypeSet("PREF"))
                 .addNodeWithoutOrder("EMAIL", "type_home@example.com", new TypeSet("HOME", "PREF"));
 
-        verifyOneComposition(resolver, handler, version);
+        verifier.verify();
     }
 
     public void testEmailPrefHandlingV21() {
@@ -547,7 +511,7 @@ public class VCardExporterTests extends VCardTestsBase {
         // adr-value    = 0*6(text-value ";") text-value
         //              ; PO Box, Extended Address, Street, Locality, Region, Postal Code,
         //              ; Country Name
-        resolver.buildInput(StructuredPostal.CONTENT_ITEM_TYPE)
+        resolver.buildContactEntry().buildData(StructuredPostal.CONTENT_ITEM_TYPE)
                 .put(StructuredPostal.POBOX, "Pobox")
                 .put(StructuredPostal.NEIGHBORHOOD, "Neighborhood")
                 .put(StructuredPostal.STREET, "Street")
@@ -555,13 +519,13 @@ public class VCardExporterTests extends VCardTestsBase {
                 .put(StructuredPostal.REGION, "Region")
                 .put(StructuredPostal.POSTCODE, "100")
                 .put(StructuredPostal.COUNTRY, "Country");
-        VCardVerificationHandler handler = new VCardVerificationHandler(this, version);
-        handler.addPropertyVerifierWithEmptyName()
+        VCardVerifier verifier = new VCardVerifier(resolver, version);
+        verifier.addPropertyNodesVerifierWithEmptyName()
                 .addNodeWithoutOrder("ADR", "Pobox;Neighborhood;Street;City;Region;100;Country",
                         Arrays.asList("Pobox", "Neighborhood", "Street", "City",
                                 "Region", "100", "Country"), new TypeSet("HOME"));
 
-        verifyOneComposition(resolver, handler, version);
+        verifier.verify();
     }
 
     public void testPostalOnlyWithStructuredDataV21() {
@@ -575,17 +539,17 @@ public class VCardExporterTests extends VCardTestsBase {
     private void testPostalOnlyWithFormattedAddressCommon(int version) {
         ExportTestResolver resolver = new ExportTestResolver();
 
-        resolver.buildInput(StructuredPostal.CONTENT_ITEM_TYPE)
+        resolver.buildContactEntry().buildData(StructuredPostal.CONTENT_ITEM_TYPE)
                 .put(StructuredPostal.FORMATTED_ADDRESS,
                 "Formatted address CA 123-334 United Statue");
 
-        VCardVerificationHandler handler = new VCardVerificationHandler(this, version);
-        handler.addPropertyVerifierWithEmptyName()
+        VCardVerifier verifier = new VCardVerifier(resolver, version);
+        verifier.addPropertyNodesVerifierWithEmptyName()
                 .addNodeWithOrder("ADR", ";Formatted address CA 123-334 United Statue;;;;;",
                         Arrays.asList("", "Formatted address CA 123-334 United Statue",
                                 "", "", "", "", ""), new TypeSet("HOME"));
 
-        verifyOneComposition(resolver, handler, version);
+        verifier.verify();
     }
 
     public void testPostalOnlyWithFormattedAddressV21() {
@@ -603,19 +567,19 @@ public class VCardExporterTests extends VCardTestsBase {
     private void testPostalWithBothStructuredAndFormattedCommon(int version) {
         ExportTestResolver resolver = new ExportTestResolver();
 
-        resolver.buildInput(StructuredPostal.CONTENT_ITEM_TYPE)
+        resolver.buildContactEntry().buildData(StructuredPostal.CONTENT_ITEM_TYPE)
                 .put(StructuredPostal.POBOX, "Pobox")
                 .put(StructuredPostal.COUNTRY, "Country")
                 .put(StructuredPostal.FORMATTED_ADDRESS,
                         "Formatted address CA 123-334 United Statue");  // Should be ignored
 
-        VCardVerificationHandler handler = new VCardVerificationHandler(this, version);
-        handler.addPropertyVerifierWithEmptyName()
+        VCardVerifier verifier = new VCardVerifier(resolver, version);
+        verifier.addPropertyNodesVerifierWithEmptyName()
                 .addNodeWithoutOrder("ADR", "Pobox;;;;;;Country",
                         Arrays.asList("Pobox", "", "", "", "", "", "Country"),
                         new TypeSet("HOME"));
 
-        verifyOneComposition(resolver, handler, version);
+        verifier.verify();
     }
 
     public void testPostalWithBothStructuredAndFormattedV21() {
@@ -628,7 +592,8 @@ public class VCardExporterTests extends VCardTestsBase {
 
     private void testOrganizationCommon(int version) {
         ExportTestResolver resolver = new ExportTestResolver();
-        resolver.buildInput(Organization.CONTENT_ITEM_TYPE)
+        ContactEntry entry = resolver.buildContactEntry();
+        entry.buildData(Organization.CONTENT_ITEM_TYPE)
                 .put(Organization.COMPANY, "CompanyX")
                 .put(Organization.DEPARTMENT, "DepartmentY")
                 .put(Organization.TITLE, "TitleZ")
@@ -637,20 +602,20 @@ public class VCardExporterTests extends VCardTestsBase {
                 .put(Organization.PHONETIC_NAME, "PhoneticName!")  // Ignored
                 .put(Organization.SYMBOL, "(^o^)/~~");  // Ignore him (her).
 
-        resolver.buildInput(Organization.CONTENT_ITEM_TYPE)
+        entry.buildData(Organization.CONTENT_ITEM_TYPE)
                 .putNull(Organization.COMPANY)
                 .put(Organization.DEPARTMENT, "DepartmentXX")
                 .putNull(Organization.TITLE);
 
-        resolver.buildInput(Organization.CONTENT_ITEM_TYPE)
+        entry.buildData(Organization.CONTENT_ITEM_TYPE)
                 .put(Organization.COMPANY, "CompanyXYZ")
                 .putNull(Organization.DEPARTMENT)
                 .put(Organization.TITLE, "TitleXYZYX");
 
-        VCardVerificationHandler handler = new VCardVerificationHandler(this, version);
+        VCardVerifier verifier = new VCardVerifier(resolver, version);
 
         // Currently we do not use group but depend on the order.
-        handler.addPropertyVerifierWithEmptyName()
+        verifier.addPropertyNodesVerifierWithEmptyName()
                 .addNodeWithOrder("ORG", "CompanyX;DepartmentY",
                         Arrays.asList("CompanyX", "DepartmentY"))
                 .addNodeWithOrder("TITLE", "TitleZ")
@@ -658,7 +623,7 @@ public class VCardExporterTests extends VCardTestsBase {
                 .addNodeWithOrder("ORG", "CompanyXYZ")
                 .addNodeWithOrder("TITLE", "TitleXYZYX");
 
-        verifyOneComposition(resolver, handler, version);
+        verifier.verify();
     }
 
     public void testOrganizationV21() {
@@ -672,46 +637,47 @@ public class VCardExporterTests extends VCardTestsBase {
     private void testImVariousTypeSupportCommon(int version) {
         ExportTestResolver resolver = new ExportTestResolver();
 
-        resolver.buildInput(Im.CONTENT_ITEM_TYPE)
+        ContactEntry entry = resolver.buildContactEntry();
+        entry.buildData(Im.CONTENT_ITEM_TYPE)
                 .put(Im.PROTOCOL, Im.PROTOCOL_AIM)
                 .put(Im.DATA, "aim");
 
-        resolver.buildInput(Im.CONTENT_ITEM_TYPE)
+        entry.buildData(Im.CONTENT_ITEM_TYPE)
                 .put(Im.PROTOCOL, Im.PROTOCOL_MSN)
                 .put(Im.DATA, "msn");
 
-        resolver.buildInput(Im.CONTENT_ITEM_TYPE)
+        entry.buildData(Im.CONTENT_ITEM_TYPE)
                 .put(Im.PROTOCOL, Im.PROTOCOL_YAHOO)
                 .put(Im.DATA, "yahoo");
 
-        resolver.buildInput(Im.CONTENT_ITEM_TYPE)
+        entry.buildData(Im.CONTENT_ITEM_TYPE)
                 .put(Im.PROTOCOL, Im.PROTOCOL_SKYPE)
                 .put(Im.DATA, "skype");
 
-        resolver.buildInput(Im.CONTENT_ITEM_TYPE)
+        entry.buildData(Im.CONTENT_ITEM_TYPE)
                 .put(Im.PROTOCOL, Im.PROTOCOL_QQ)
                 .put(Im.DATA, "qq");
 
-        resolver.buildInput(Im.CONTENT_ITEM_TYPE)
+        entry.buildData(Im.CONTENT_ITEM_TYPE)
                 .put(Im.PROTOCOL, Im.PROTOCOL_GOOGLE_TALK)
                 .put(Im.DATA, "google talk");
 
-        resolver.buildInput(Im.CONTENT_ITEM_TYPE)
+        entry.buildData(Im.CONTENT_ITEM_TYPE)
                 .put(Im.PROTOCOL, Im.PROTOCOL_ICQ)
                 .put(Im.DATA, "icq");
 
-        resolver.buildInput(Im.CONTENT_ITEM_TYPE)
+        entry.buildData(Im.CONTENT_ITEM_TYPE)
                 .put(Im.PROTOCOL, Im.PROTOCOL_JABBER)
                 .put(Im.DATA, "jabber");
 
-        resolver.buildInput(Im.CONTENT_ITEM_TYPE)
+        entry.buildData(Im.CONTENT_ITEM_TYPE)
                 .put(Im.PROTOCOL, Im.PROTOCOL_NETMEETING)
                 .put(Im.DATA, "netmeeting");
 
         // No determined way to express unknown type...
 
-        VCardVerificationHandler handler = new VCardVerificationHandler(this, version);
-        handler.addPropertyVerifierWithEmptyName()
+        VCardVerifier verifier = new VCardVerifier(resolver, version);
+        verifier.addPropertyNodesVerifierWithEmptyName()
                 .addNodeWithoutOrder("X-JABBER", "jabber")
                 .addNodeWithoutOrder("X-ICQ", "icq")
                 .addNodeWithoutOrder("X-GOOGLE-TALK", "google talk")
@@ -722,7 +688,7 @@ public class VCardExporterTests extends VCardTestsBase {
                 .addNodeWithoutOrder("X-NETMEETING", "netmeeting")
                 .addNodeWithoutOrder("X-AIM", "aim");
 
-        verifyOneComposition(resolver, handler, version);
+        verifier.verify();
     }
 
     public void testImBasiV21() {
@@ -736,22 +702,23 @@ public class VCardExporterTests extends VCardTestsBase {
     private void testImPrefHandlingCommon(int version) {
         ExportTestResolver resolver = new ExportTestResolver();
 
-        resolver.buildInput(Im.CONTENT_ITEM_TYPE)
+        ContactEntry entry = resolver.buildContactEntry();
+        entry.buildData(Im.CONTENT_ITEM_TYPE)
                 .put(Im.PROTOCOL, Im.PROTOCOL_AIM)
                 .put(Im.DATA, "aim1");
 
-        resolver.buildInput(Im.CONTENT_ITEM_TYPE)
+        entry.buildData(Im.CONTENT_ITEM_TYPE)
                 .put(Im.PROTOCOL, Im.PROTOCOL_AIM)
                 .put(Im.DATA, "aim2")
                 .put(Im.TYPE, Im.TYPE_HOME)
                 .put(Im.IS_PRIMARY, 1);
 
-        VCardVerificationHandler handler = new VCardVerificationHandler(this, version);
-        handler.addPropertyVerifierWithEmptyName()
+        VCardVerifier verifier = new VCardVerifier(resolver, version);
+        verifier.addPropertyNodesVerifierWithEmptyName()
                 .addNodeWithoutOrder("X-AIM", "aim1")
                 .addNodeWithoutOrder("X-AIM", "aim2", new TypeSet("HOME", "PREF"));
 
-        verifyOneComposition(resolver, handler, version);
+        verifier.verify();
     }
 
     public void testImPrefHandlingV21() {
@@ -765,21 +732,21 @@ public class VCardExporterTests extends VCardTestsBase {
     private void testWebsiteCommon(int version) {
         ExportTestResolver resolver = new ExportTestResolver();
 
-        resolver.buildInput(Website.CONTENT_ITEM_TYPE)
+        ContactEntry entry = resolver.buildContactEntry();
+        entry.buildData(Website.CONTENT_ITEM_TYPE)
                 .put(Website.URL, "http://website.example.android.com/index.html")
                 .put(Website.TYPE, Website.TYPE_BLOG);
 
-        resolver.buildInput(Website.CONTENT_ITEM_TYPE)
+        entry.buildData(Website.CONTENT_ITEM_TYPE)
                 .put(Website.URL, "ftp://ftp.example.android.com/index.html")
                 .put(Website.TYPE, Website.TYPE_FTP);
 
         // We drop TYPE information since vCard (especially 3.0) does not allow us to emit it.
-        VCardVerificationHandler handler = new VCardVerificationHandler(this, version);
-        handler.addPropertyVerifierWithEmptyName()
+        VCardVerifier verifier = new VCardVerifier(resolver, version);
+        verifier.addPropertyNodesVerifierWithEmptyName()
                 .addNodeWithoutOrder("URL", "ftp://ftp.example.android.com/index.html")
                 .addNodeWithoutOrder("URL", "http://website.example.android.com/index.html");
-
-        verifyOneComposition(resolver, handler, version);
+        verifier.verify();
     }
 
     public void testWebsiteV21() {
@@ -793,32 +760,29 @@ public class VCardExporterTests extends VCardTestsBase {
     private void testEventCommon(int version) {
         ExportTestResolver resolver = new ExportTestResolver();
 
-        resolver.buildInput(Event.CONTENT_ITEM_TYPE)
+        ContactEntry entry = resolver.buildContactEntry();
+        entry.buildData(Event.CONTENT_ITEM_TYPE)
                 .put(Event.TYPE, Event.TYPE_ANNIVERSARY)
                 .put(Event.START_DATE, "1982-06-16");
-
-        resolver.buildInput(Event.CONTENT_ITEM_TYPE)
+        entry.buildData(Event.CONTENT_ITEM_TYPE)
                 .put(Event.TYPE, Event.TYPE_BIRTHDAY)
                 .put(Event.START_DATE, "2008-10-22");
-
-        resolver.buildInput(Event.CONTENT_ITEM_TYPE)
+        entry.buildData(Event.CONTENT_ITEM_TYPE)
                 .put(Event.TYPE, Event.TYPE_OTHER)
                 .put(Event.START_DATE, "2018-03-12");
-
-        resolver.buildInput(Event.CONTENT_ITEM_TYPE)
+        entry.buildData(Event.CONTENT_ITEM_TYPE)
                 .put(Event.TYPE, Event.TYPE_CUSTOM)
                 .put(Event.LABEL, "The last day")
                 .put(Event.START_DATE, "When the Tower of Hanoi with 64 rings is completed.");
-
-        resolver.buildInput(Event.CONTENT_ITEM_TYPE)
+        entry.buildData(Event.CONTENT_ITEM_TYPE)
                 .put(Event.TYPE, Event.TYPE_BIRTHDAY)
                 .put(Event.START_DATE, "2009-05-19");
 
-        VCardVerificationHandler handler = new VCardVerificationHandler(this, version);
-        handler.addPropertyVerifierWithEmptyName()
+        VCardVerifier verifier = new VCardVerifier(resolver, version);
+        verifier.addPropertyNodesVerifierWithEmptyName()
                 .addNodeWithoutOrder("BDAY", "2008-10-22");
 
-        verifyOneComposition(resolver, handler, version);
+        verifier.verify();
     }
 
     public void testEventV21() {
@@ -832,19 +796,19 @@ public class VCardExporterTests extends VCardTestsBase {
     private void testNoteCommon(int version) {
         ExportTestResolver resolver = new ExportTestResolver();
 
-        resolver.buildInput(Note.CONTENT_ITEM_TYPE)
+        ContactEntry entry = resolver.buildContactEntry();
+        entry.buildData(Note.CONTENT_ITEM_TYPE)
                 .put(Note.NOTE, "note1");
-
-        resolver.buildInput(Note.CONTENT_ITEM_TYPE)
+        entry.buildData(Note.CONTENT_ITEM_TYPE)
                 .put(Note.NOTE, "note2")
                 .put(Note.IS_PRIMARY, 1);  // Just ignored.
 
-        VCardVerificationHandler handler = new VCardVerificationHandler(this, version);
-        handler.addPropertyVerifierWithEmptyName()
+        VCardVerifier verifier = new VCardVerifier(resolver, version);
+        verifier.addPropertyNodesVerifierWithEmptyName()
                 .addNodeWithOrder("NOTE", "note1")
                 .addNodeWithOrder("NOTE", "note2");
 
-        verifyOneComposition(resolver, handler, version);
+        verifier.verify();
     }
 
     public void testNoteV21() {
@@ -858,23 +822,23 @@ public class VCardExporterTests extends VCardTestsBase {
     private void testPhotoCommon(int version) {
         final boolean isV30 = version == V30;
         ExportTestResolver resolver = new ExportTestResolver();
-        resolver.buildInput(StructuredName.CONTENT_ITEM_TYPE)
+        ContactEntry entry = resolver.buildContactEntry();
+        entry.buildData(StructuredName.CONTENT_ITEM_TYPE)
                 .put(StructuredName.FAMILY_NAME, "PhotoTest");
-
-        resolver.buildInput(Photo.CONTENT_ITEM_TYPE)
+        entry.buildData(Photo.CONTENT_ITEM_TYPE)
                 .put(Photo.PHOTO, sPhotoByteArray);
 
         ContentValues contentValuesForPhoto = new ContentValues();
         contentValuesForPhoto.put("ENCODING", (isV30 ? "b" : "BASE64"));
-        VCardVerificationHandler handler = new VCardVerificationHandler(this, version);
-        handler.addPropertyNodesVerifier()
+        VCardVerifier verifier = new VCardVerifier(resolver, version);
+        verifier.addPropertyNodesVerifierElem()
                 .addNodeWithoutOrder("FN", "PhotoTest")
                 .addNodeWithoutOrder("N", "PhotoTest;;;;",
                         Arrays.asList("PhotoTest", "", "", "", ""))
                 .addNodeWithOrder("PHOTO", null, null, sPhotoByteArray,
                         contentValuesForPhoto, new TypeSet("JPEG"), null);
 
-        verifyOneComposition(resolver, handler, version);
+        verifier.verify();
     }
 
     public void testPhotoV21() {
@@ -888,21 +852,22 @@ public class VCardExporterTests extends VCardTestsBase {
     public void testV30HandleEscape() {
         final int version = V30;
         ExportTestResolver resolver = new ExportTestResolver();
-        resolver.buildInput(StructuredName.CONTENT_ITEM_TYPE)
+        resolver.buildContactEntry().buildData(StructuredName.CONTENT_ITEM_TYPE)
                 .put(StructuredName.FAMILY_NAME, "\\")
                 .put(StructuredName.GIVEN_NAME, ";")
                 .put(StructuredName.MIDDLE_NAME, ",")
                 .put(StructuredName.PREFIX, "\n")
                 .put(StructuredName.DISPLAY_NAME, "[<{Unescaped:Asciis}>]");
-        VCardVerificationHandler handler = new VCardVerificationHandler(this, version);
+        VCardVerifier verifier = new VCardVerifier(resolver, version);
         // Verifies the vCard String correctly escapes each character which must be escaped.
-        handler.addExpectedLine("N:\\\\;\\;;\\,;\\n;")
-                .addExpectedLine("FN:[<{Unescaped:Asciis}>]");
-        handler.addPropertyNodesVerifier()
+        verifier.addLineVerifier()
+                .addExpected("N:\\\\;\\;;\\,;\\n;")
+                .addExpected("FN:[<{Unescaped:Asciis}>]");
+        verifier.addPropertyNodesVerifierElem()
                 .addNodeWithoutOrder("FN", "[<{Unescaped:Asciis}>]")
                 .addNodeWithoutOrder("N", Arrays.asList("\\", ";", ",", "\n", ""));
 
-        verifyOneComposition(resolver, handler, version);
+        verifier.verify();
     }
 
     /**
@@ -912,18 +877,16 @@ public class VCardExporterTests extends VCardTestsBase {
      */
     public void testNickNameV21() {
         ExportTestResolver resolver = new ExportTestResolver();
-        resolver.buildInput(Nickname.CONTENT_ITEM_TYPE)
+        resolver.buildContactEntry().buildData(Nickname.CONTENT_ITEM_TYPE)
                 .put(Nickname.NAME, "Nicky");
 
-        VCardVerificationHandler handler = new VCardVerificationHandler(this, V21);
-        handler.addPropertyVerifierWithEmptyName()
+        VCardVerifier verifier = new VCardVerifier(resolver, V21);
+        verifier.addPropertyNodesVerifierWithEmptyName()
                 .addNodeWithOrder("X-ANDROID-CUSTOM",
                         Nickname.CONTENT_ITEM_TYPE + ";Nicky;;;;;;;;;;;;;;");
-
-        handler.addContentValuesVerifier()
-                .buildExpected(Nickname.CONTENT_ITEM_TYPE)
+        verifier.addImportVerifier()
+                .addExpected(Nickname.CONTENT_ITEM_TYPE)
                         .put(Nickname.NAME, "Nicky");
-
-        verifyOneComposition(resolver, handler, V21);
+        verifier.verify();
     }
 }
