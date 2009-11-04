@@ -1016,10 +1016,10 @@ class CallbackProxy extends Handler {
     public void onProgressChanged(int newProgress) {
         // Synchronize so that mLatestProgress is up-to-date.
         synchronized (this) {
-            mLatestProgress = newProgress;
-            if (mWebChromeClient == null) {
+            if (mWebChromeClient == null || mLatestProgress == newProgress) {
                 return;
             }
+            mLatestProgress = newProgress;
             if (!mProgressUpdatePending) {
                 sendEmptyMessage(PROGRESS);
                 mProgressUpdatePending = true;
