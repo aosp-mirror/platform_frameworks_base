@@ -23,6 +23,7 @@ import android.test.suitebuilder.annotation.Suppress;
 import android.util.Log;
 
 import com.android.mediaframeworktest.MediaNames;
+import com.android.mediaframeworktest.MediaProfileReader;
 /**
  * This metadata test suite test the basic functionality of the 
  * MediaMetadataRetriever
@@ -31,7 +32,7 @@ import com.android.mediaframeworktest.MediaNames;
 public class MediaMetadataTest extends AndroidTestCase {
     
     private static final String TAG = "MediaMetadataTest";
-    
+
     public static enum METADATA_EXPECTEDRESULT{
         FILE_PATH,CD_TRACK, ALBUM,
         ARTIST, AUTHOR, COMPOSER,
@@ -193,12 +194,17 @@ public class MediaMetadataTest extends AndroidTestCase {
     }
      
     private static void validateMetatData(int fileIndex, String meta_data_file[][]) {
+        Log.v(TAG, "filePath = "+ meta_data_file[fileIndex][0]);
+        if ((meta_data_file[fileIndex][0].endsWith("wma") && !MediaProfileReader.getWMAEnable()) ||
+            (meta_data_file[fileIndex][0].endsWith("wmv") && !MediaProfileReader.getWMVEnable())) {
+            Log.v(TAG, "Skip test since windows media is not supported");
+            return;
+        }
         String value = null;
         MediaMetadataRetriever retriever = new MediaMetadataRetriever();
         retriever.setMode(MediaMetadataRetriever.MODE_GET_METADATA_ONLY);
         try {
             retriever.setDataSource(meta_data_file[fileIndex][0]);
-            Log.v(TAG, "filePath = "+ meta_data_file[fileIndex][0]);
         } catch(Exception e) {
             Log.v(TAG, "Failed: "+meta_data_file[fileIndex][0] + " " + e.toString());
             //Set the test case failure whenever it failed to setDataSource
