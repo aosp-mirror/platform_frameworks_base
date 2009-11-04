@@ -532,7 +532,8 @@ public final class Telephony {
              *   <li><em>transactionId (Integer)</em> - The WAP transaction
              *    ID</li>
              *   <li><em>pduType (Integer)</em> - The WAP PDU type</li>
-             *   <li><em>data</em> - The data payload of the message</li>
+             *   <li><em>header (byte[])</em> - The header of the message</li>
+             *   <li><em>data (byte[])</em> - The data payload of the message</li>
              * </ul>
              *
              * <p>If a BroadcastReceiver encounters an error while processing
