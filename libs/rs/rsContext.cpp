@@ -85,17 +85,6 @@ void Context::initEGL()
     }
     //eglChooseConfig(mEGL.mDisplay, configAttribs, &mEGL.mConfig, 1, &mEGL.mNumConfigs);
 
-    if (mWndSurface) {
-        mEGL.mSurface = eglCreateWindowSurface(mEGL.mDisplay, mEGL.mConfig, mWndSurface, NULL);
-    } else {
-        mEGL.mSurface = eglCreateWindowSurface(mEGL.mDisplay, mEGL.mConfig,
-             android_createDisplaySurface(),
-             NULL);
-    }
-    checkEglError("eglCreateWindowSurface");
-    if (mEGL.mSurface == EGL_NO_SURFACE) {
-        LOGE("eglCreateWindowSurface returned EGL_NO_SURFACE");
-    }
 
     mEGL.mContext = eglCreateContext(mEGL.mDisplay, mEGL.mConfig, EGL_NO_CONTEXT, NULL);
     checkEglError("eglCreateContext");
@@ -104,10 +93,10 @@ void Context::initEGL()
     }
     gGLContextCount++;
 
-    EGLBoolean ret = eglMakeCurrent(mEGL.mDisplay, mEGL.mSurface, mEGL.mSurface, mEGL.mContext);
-    checkEglError("eglCreateContext", ret);
-    if (mEGL.mContext == EGL_NO_CONTEXT) {
-        LOGE("eglCreateContext returned EGL_NO_CONTEXT");
+    if (mWndSurface) {
+        setSurface(mWndSurface);
+    } else {
+        setSurface((Surface *)android_createDisplaySurface());
     }
 
     eglQuerySurface(mEGL.mDisplay, mEGL.mSurface, EGL_WIDTH, &mEGL.mWidth);
@@ -134,12 +123,7 @@ void Context::initEGL()
 
 void Context::deinitEGL()
 {
-    EGLBoolean ret = eglMakeCurrent(mEGL.mDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
-    checkEglError("eglCreateContext", ret);
-    if (mEGL.mContext == EGL_NO_CONTEXT) {
-        LOGE("eglCreateContext returned EGL_NO_CONTEXT");
-    }
-
+    setSurface(NULL);
     eglDestroyContext(mEGL.mDisplay, mEGL.mContext);
     checkEglError("eglDestroyContext");
 
@@ -311,6 +295,7 @@ void * Context::threadProc(void *vrsc)
      while (!rsc->mExit) {
          mDraw |= rsc->mIO.playCoreCommands(rsc, !mDraw);
          mDraw &= (rsc->mRootScript.get() != NULL);
+         mDraw &= (rsc->mWndSurface != NULL);
 
          if (mDraw) {
              mDraw = rsc->runRootScript() && !rsc->mPaused;
@@ -439,6 +424,32 @@ Context::~Context()
     pthread_mutex_unlock(&gInitMutex);
 
     objDestroyOOBDestroy();
+}
+
+void Context::setSurface(Surface *sur)
+{
+    EGLBoolean ret;
+    if (mEGL.mSurface != NULL) {
+        ret = eglMakeCurrent(mEGL.mDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
+        checkEglError("eglMakeCurrent", ret);
+
+        ret = eglDestroySurface(mEGL.mDisplay, mEGL.mSurface);
+        checkEglError("eglDestroySurface", ret);
+
+        mEGL.mSurface = NULL;
+    }
+
+    mWndSurface = sur;
+    if (mWndSurface != NULL) {
+        mEGL.mSurface = eglCreateWindowSurface(mEGL.mDisplay, mEGL.mConfig, mWndSurface, NULL);
+        checkEglError("eglCreateWindowSurface");
+        if (mEGL.mSurface == EGL_NO_SURFACE) {
+            LOGE("eglCreateWindowSurface returned EGL_NO_SURFACE");
+        }
+
+        ret = eglMakeCurrent(mEGL.mDisplay, mEGL.mSurface, mEGL.mSurface, mEGL.mContext);
+        checkEglError("eglMakeCurrent", ret);
+    }
 }
 
 void Context::pause()
@@ -754,6 +765,11 @@ void rsi_ContextPause(Context *rsc)
 void rsi_ContextResume(Context *rsc)
 {
     rsc->resume();
+}
+
+void rsi_ContextSetSurface(Context *rsc, void *sur)
+{
+    rsc->setSurface((Surface *)sur);
 }
 
 }
