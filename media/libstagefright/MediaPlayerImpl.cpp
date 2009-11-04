@@ -28,6 +28,7 @@
 #include <media/stagefright/AudioPlayer.h>
 // #include <media/stagefright/CameraSource.h>
 #include <media/stagefright/MediaDebug.h>
+#include <media/stagefright/MediaDefs.h>
 #include <media/stagefright/MediaExtractor.h>
 #include <media/stagefright/MediaPlayerImpl.h>
 #include <media/stagefright/MetaData.h>
@@ -391,8 +392,15 @@ void MediaPlayerImpl::setAudioSource(const sp<MediaSource> &source) {
 
     sp<MetaData> meta = source->getFormat();
 
-    mAudioDecoder = OMXCodec::Create(
-            mClient.interface(), meta, false /* createEncoder */, source);
+    const char *mime;
+    CHECK(meta->findCString(kKeyMIMEType, &mime));
+
+    if (!strcasecmp(mime, MEDIA_MIMETYPE_AUDIO_RAW)) {
+        mAudioDecoder = source;
+    } else {
+        mAudioDecoder = OMXCodec::Create(
+                mClient.interface(), meta, false /* createEncoder */, source);
+    }
 }
 
 void MediaPlayerImpl::setVideoSource(const sp<MediaSource> &source) {
