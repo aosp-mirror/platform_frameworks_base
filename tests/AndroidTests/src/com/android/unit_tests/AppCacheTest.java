@@ -137,7 +137,8 @@ public class AppCacheTest extends AndroidTestCase {
         verifyTestFiles1(cacheDir, "testtmpdir", 5);
     }
     
-    @LargeTest
+    // TODO: flaky test
+    // @LargeTest
     public void testFreeApplicationCacheSomeFiles() throws Exception {
         StatFs st = new StatFs("/data");
         long blks1 = getFreeStorageBlks(st);
