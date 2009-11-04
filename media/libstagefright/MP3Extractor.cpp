@@ -373,7 +373,7 @@ MP3Extractor::MP3Extractor(const sp<DataSource> &source)
         if (mDataSource->getSize(&fileSize) == OK) {
             mMeta->setInt64(
                     kKeyDuration,
-                    8000 * (fileSize - mFirstFramePos) / bitrate);
+                    8000LL * (fileSize - mFirstFramePos) / bitrate);
         }
     }
 }
