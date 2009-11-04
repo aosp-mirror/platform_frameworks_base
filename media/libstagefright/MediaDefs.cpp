@@ -32,5 +32,6 @@ const char *MEDIA_MIMETYPE_AUDIO_AAC = "audio/mp4a-latm";
 const char *MEDIA_MIMETYPE_AUDIO_RAW = "audio/raw";
 
 const char *MEDIA_MIMETYPE_CONTAINER_MPEG4 = "video/mpeg4";
+const char *MEDIA_MIMETYPE_CONTAINER_WAV = "audio/wav";
 
 }  // namespace android
