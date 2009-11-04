@@ -392,7 +392,9 @@ public class VCardComposer {
      * Must call before {{@link #init()}.
      */
     public void addHandler(OneEntryHandler handler) {
-        mHandlerList.add(handler);
+        if (handler != null) {
+            mHandlerList.add(handler);
+        }
     }
 
     /**
@@ -1865,11 +1867,11 @@ public class VCardComposer {
         switch (typeAsPrimitive) {
         case Phone.TYPE_HOME:
             parameterList.addAll(
-                    Arrays.asList(Constants.PARAM_TYPE_HOME, Constants.PARAM_TYPE_VOICE));
+                    Arrays.asList(Constants.PARAM_TYPE_HOME));
             break;
         case Phone.TYPE_WORK:
             parameterList.addAll(
-                    Arrays.asList(Constants.PARAM_TYPE_WORK, Constants.PARAM_TYPE_VOICE));
+                    Arrays.asList(Constants.PARAM_TYPE_WORK));
             break;
         case Phone.TYPE_FAX_HOME:
             parameterList.addAll(
