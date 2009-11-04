@@ -265,7 +265,6 @@ public class TelephonyManager {
 
     /**
      * CDMA phone
-     * @hide
      */
     public static final int PHONE_TYPE_CDMA = RILConstants.CDMA_PHONE;
 
