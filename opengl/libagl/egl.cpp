@@ -635,6 +635,7 @@ static bool supportedCopybitsDestinationFormat(int format) {
     switch (format) {
     case HAL_PIXEL_FORMAT_RGB_565:
     case HAL_PIXEL_FORMAT_RGBA_8888:
+    case HAL_PIXEL_FORMAT_RGBX_8888:
     case HAL_PIXEL_FORMAT_RGBA_4444:
     case HAL_PIXEL_FORMAT_RGBA_5551:
     case HAL_PIXEL_FORMAT_BGRA_8888:
@@ -804,6 +805,7 @@ egl_pbuffer_surface_t::egl_pbuffer_surface_t(EGLDisplay dpy,
         case GGL_PIXEL_FORMAT_A_8:          size *= 1; break;
         case GGL_PIXEL_FORMAT_RGB_565:      size *= 2; break;
         case GGL_PIXEL_FORMAT_RGBA_8888:    size *= 4; break;
+        case GGL_PIXEL_FORMAT_RGBX_8888:    size *= 4; break;
         default:
             LOGE("incompatible pixel format for pbuffer (format=%d)", f);
             pbuffer.data = 0;
@@ -975,7 +977,7 @@ static config_pair_t const config_base_attribute_list[] = {
 // These configs can override the base attribute list
 // NOTE: when adding a config here, don't forget to update eglCreate*Surface()
 
-
+// 565 configs
 static config_pair_t const config_0_attribute_list[] = {
         { EGL_BUFFER_SIZE,     16 },
         { EGL_ALPHA_SIZE,       0 },
@@ -998,7 +1000,31 @@ static config_pair_t const config_1_attribute_list[] = {
         { EGL_SURFACE_TYPE,     EGL_WINDOW_BIT|EGL_PBUFFER_BIT|EGL_PIXMAP_BIT },
 };
 
+// RGB 888 configs
 static config_pair_t const config_2_attribute_list[] = {
+        { EGL_BUFFER_SIZE,     32 },
+        { EGL_ALPHA_SIZE,       0 },
+        { EGL_BLUE_SIZE,        8 },
+        { EGL_GREEN_SIZE,       8 },
+        { EGL_RED_SIZE,         8 },
+        { EGL_DEPTH_SIZE,       0 },
+        { EGL_CONFIG_ID,        6 },
+        { EGL_SURFACE_TYPE,     EGL_WINDOW_BIT|EGL_PBUFFER_BIT|EGL_PIXMAP_BIT },
+};
+
+static config_pair_t const config_3_attribute_list[] = {
+        { EGL_BUFFER_SIZE,     32 },
+        { EGL_ALPHA_SIZE,       0 },
+        { EGL_BLUE_SIZE,        8 },
+        { EGL_GREEN_SIZE,       8 },
+        { EGL_RED_SIZE,         8 },
+        { EGL_DEPTH_SIZE,      16 },
+        { EGL_CONFIG_ID,        7 },
+        { EGL_SURFACE_TYPE,     EGL_WINDOW_BIT|EGL_PBUFFER_BIT|EGL_PIXMAP_BIT },
+};
+
+// 8888 configs
+static config_pair_t const config_4_attribute_list[] = {
         { EGL_BUFFER_SIZE,     32 },
         { EGL_ALPHA_SIZE,       8 },
         { EGL_BLUE_SIZE,        8 },
@@ -1009,7 +1035,7 @@ static config_pair_t const config_2_attribute_list[] = {
         { EGL_SURFACE_TYPE,     EGL_WINDOW_BIT|EGL_PBUFFER_BIT|EGL_PIXMAP_BIT },
 };
 
-static config_pair_t const config_3_attribute_list[] = {
+static config_pair_t const config_5_attribute_list[] = {
         { EGL_BUFFER_SIZE,     32 },
         { EGL_ALPHA_SIZE,       8 },
         { EGL_BLUE_SIZE,        8 },
@@ -1020,7 +1046,8 @@ static config_pair_t const config_3_attribute_list[] = {
         { EGL_SURFACE_TYPE,     EGL_WINDOW_BIT|EGL_PBUFFER_BIT|EGL_PIXMAP_BIT },
 };
 
-static config_pair_t const config_4_attribute_list[] = {
+// A8 configs
+static config_pair_t const config_6_attribute_list[] = {
         { EGL_BUFFER_SIZE,      8 },
         { EGL_ALPHA_SIZE,       8 },
         { EGL_BLUE_SIZE,        0 },
@@ -1031,7 +1058,7 @@ static config_pair_t const config_4_attribute_list[] = {
         { EGL_SURFACE_TYPE,     EGL_WINDOW_BIT|EGL_PBUFFER_BIT|EGL_PIXMAP_BIT },
 };
 
-static config_pair_t const config_5_attribute_list[] = {
+static config_pair_t const config_7_attribute_list[] = {
         { EGL_BUFFER_SIZE,      8 },
         { EGL_ALPHA_SIZE,       8 },
         { EGL_BLUE_SIZE,        0 },
@@ -1049,6 +1076,8 @@ static configs_t const gConfigs[] = {
         { config_3_attribute_list, NELEM(config_3_attribute_list) },
         { config_4_attribute_list, NELEM(config_4_attribute_list) },
         { config_5_attribute_list, NELEM(config_5_attribute_list) },
+        { config_6_attribute_list, NELEM(config_6_attribute_list) },
+        { config_7_attribute_list, NELEM(config_7_attribute_list) },
 };
 
 static config_management_t const gConfigManagement[] = {
@@ -1092,6 +1121,50 @@ static config_pair_t const config_defaults[] = {
     // one needs not be ignored, it must be specified here, eg:
     // { EGL_SURFACE_TYPE, EGL_WINDOW_BIT },
 };
+
+// ----------------------------------------------------------------------------
+
+static status_t getConfigFormatInfo(EGLint configID,
+        int32_t& pixelFormat, int32_t& depthFormat)
+{
+    switch(configID) {
+    case 0:
+        pixelFormat = GGL_PIXEL_FORMAT_RGB_565;
+        depthFormat = 0;
+        break;
+    case 1:
+        pixelFormat = GGL_PIXEL_FORMAT_RGB_565;
+        depthFormat = GGL_PIXEL_FORMAT_Z_16;
+        break;
+    case 2:
+        pixelFormat = GGL_PIXEL_FORMAT_RGBX_8888;
+        depthFormat = 0;
+        break;
+    case 3:
+        pixelFormat = GGL_PIXEL_FORMAT_RGBX_8888;
+        depthFormat = GGL_PIXEL_FORMAT_Z_16;
+        break;
+    case 4:
+        pixelFormat = GGL_PIXEL_FORMAT_RGBA_8888;
+        depthFormat = 0;
+        break;
+    case 5:
+        pixelFormat = GGL_PIXEL_FORMAT_RGBA_8888;
+        depthFormat = GGL_PIXEL_FORMAT_Z_16;
+        break;
+    case 6:
+        pixelFormat = GGL_PIXEL_FORMAT_A_8;
+        depthFormat = 0;
+        break;
+    case 7:
+        pixelFormat = GGL_PIXEL_FORMAT_A_8;
+        depthFormat = GGL_PIXEL_FORMAT_Z_16;
+        break;
+    default:
+        return NAME_NOT_FOUND;
+    }
+    return NO_ERROR;
+}
 
 // ----------------------------------------------------------------------------
 
@@ -1238,32 +1311,7 @@ static EGLSurface createWindowSurface(EGLDisplay dpy, EGLConfig config,
 
     int32_t depthFormat;
     int32_t pixelFormat;
-    switch(configID) {
-    case 0:
-        pixelFormat = GGL_PIXEL_FORMAT_RGB_565;
-        depthFormat = 0;
-        break;
-    case 1:
-        pixelFormat = GGL_PIXEL_FORMAT_RGB_565;
-        depthFormat = GGL_PIXEL_FORMAT_Z_16;
-        break;
-    case 2:
-        pixelFormat = GGL_PIXEL_FORMAT_RGBA_8888;
-        depthFormat = 0;
-        break;
-    case 3:
-        pixelFormat = GGL_PIXEL_FORMAT_RGBA_8888;
-        depthFormat = GGL_PIXEL_FORMAT_Z_16;
-        break;
-    case 4:
-        pixelFormat = GGL_PIXEL_FORMAT_A_8;
-        depthFormat = 0;
-        break;
-    case 5:
-        pixelFormat = GGL_PIXEL_FORMAT_A_8;
-        depthFormat = GGL_PIXEL_FORMAT_Z_16;
-        break;
-    default:
+    if (getConfigFormatInfo(configID, pixelFormat, depthFormat) != NO_ERROR) {
         return setError(EGL_BAD_MATCH, EGL_NO_SURFACE);
     }
 
@@ -1312,32 +1360,7 @@ static EGLSurface createPixmapSurface(EGLDisplay dpy, EGLConfig config,
 
     int32_t depthFormat;
     int32_t pixelFormat;
-    switch(configID) {
-    case 0:
-        pixelFormat = GGL_PIXEL_FORMAT_RGB_565;
-        depthFormat = 0;
-        break;
-    case 1:
-        pixelFormat = GGL_PIXEL_FORMAT_RGB_565;
-        depthFormat = GGL_PIXEL_FORMAT_Z_16;
-        break;
-    case 2:
-        pixelFormat = GGL_PIXEL_FORMAT_RGBA_8888;
-        depthFormat = 0;
-        break;
-    case 3:
-        pixelFormat = GGL_PIXEL_FORMAT_RGBA_8888;
-        depthFormat = GGL_PIXEL_FORMAT_Z_16;
-        break;
-    case 4:
-        pixelFormat = GGL_PIXEL_FORMAT_A_8;
-        depthFormat = 0;
-        break;
-    case 5:
-        pixelFormat = GGL_PIXEL_FORMAT_A_8;
-        depthFormat = GGL_PIXEL_FORMAT_Z_16;
-        break;
-    default:
+    if (getConfigFormatInfo(configID, pixelFormat, depthFormat) != NO_ERROR) {
         return setError(EGL_BAD_MATCH, EGL_NO_SURFACE);
     }
 
@@ -1376,32 +1399,7 @@ static EGLSurface createPbufferSurface(EGLDisplay dpy, EGLConfig config,
 
     int32_t depthFormat;
     int32_t pixelFormat;
-    switch(configID) {
-    case 0:
-        pixelFormat = GGL_PIXEL_FORMAT_RGB_565;
-        depthFormat = 0;
-        break;
-    case 1:
-        pixelFormat = GGL_PIXEL_FORMAT_RGB_565;
-        depthFormat = GGL_PIXEL_FORMAT_Z_16;
-        break;
-    case 2:
-        pixelFormat = GGL_PIXEL_FORMAT_RGBA_8888;
-        depthFormat = 0;
-        break;
-    case 3:
-        pixelFormat = GGL_PIXEL_FORMAT_RGBA_8888;
-        depthFormat = GGL_PIXEL_FORMAT_Z_16;
-        break;
-    case 4:
-        pixelFormat = GGL_PIXEL_FORMAT_A_8;
-        depthFormat = 0;
-        break;
-    case 5:
-        pixelFormat = GGL_PIXEL_FORMAT_A_8;
-        depthFormat = GGL_PIXEL_FORMAT_Z_16;
-        break;
-    default:
+    if (getConfigFormatInfo(configID, pixelFormat, depthFormat) != NO_ERROR) {
         return setError(EGL_BAD_MATCH, EGL_NO_SURFACE);
     }
 
