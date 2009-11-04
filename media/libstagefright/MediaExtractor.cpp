@@ -21,6 +21,7 @@
 #include "include/AMRExtractor.h"
 #include "include/MP3Extractor.h"
 #include "include/MPEG4Extractor.h"
+#include "include/WAVExtractor.h"
 
 #include <media/stagefright/CachingDataSource.h>
 #include <media/stagefright/DataSource.h>
@@ -57,6 +58,8 @@ sp<MediaExtractor> MediaExtractor::Create(
     } else if (!strcasecmp(mime, MEDIA_MIMETYPE_AUDIO_AMR_NB)
             || !strcasecmp(mime, MEDIA_MIMETYPE_AUDIO_AMR_WB)) {
         return new AMRExtractor(source);
+    } else if (!strcasecmp(mime, MEDIA_MIMETYPE_CONTAINER_WAV)) {
+        return new WAVExtractor(source);
     }
 
     return NULL;

@@ -17,6 +17,7 @@
 #include "include/AMRExtractor.h"
 #include "include/MP3Extractor.h"
 #include "include/MPEG4Extractor.h"
+#include "include/WAVExtractor.h"
 
 #include <media/stagefright/DataSource.h>
 #include <media/stagefright/MediaErrors.h>
@@ -87,6 +88,7 @@ void DataSource::RegisterDefaultSniffers() {
     RegisterSniffer(SniffMP3);
     RegisterSniffer(SniffMPEG4);
     RegisterSniffer(SniffAMR);
+    RegisterSniffer(SniffWAV);
 }
 
 }  // namespace android
