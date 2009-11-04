@@ -1260,9 +1260,20 @@ class BackupManagerService extends IBackupManager.Stub {
 
     // ----- Restore handling -----
 
-    private boolean signaturesMatch(Signature[] storedSigs, Signature[] deviceSigs) {
+    private boolean signaturesMatch(Signature[] storedSigs, PackageInfo target) {
+        // If the target resides on the system partition, we allow it to restore
+        // data from the like-named package in a restore set even if the signatures
+        // do not match.  (Unlike general applications, those flashed to the system
+        // partition will be signed with the device's platform certificate, so on
+        // different phones the same system app will have different signatures.)
+        if ((target.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0) {
+            if (DEBUG) Log.v(TAG, "System app " + target.packageName + " - skipping sig check");
+            return true;
+        }
+
         // Allow unsigned apps, but not signed on one device and unsigned on the other
         // !!! TODO: is this the right policy?
+        Signature[] deviceSigs = target.signatures;
         if (DEBUG) Log.v(TAG, "signaturesMatch(): stored=" + storedSigs
                 + " device=" + deviceSigs);
         if ((storedSigs == null || storedSigs.length == 0)
@@ -1465,7 +1476,7 @@ class BackupManagerService extends IBackupManager.Stub {
                         continue;
                     }
 
-                    if (!signaturesMatch(metaInfo.signatures, packageInfo.signatures)) {
+                    if (!signaturesMatch(metaInfo.signatures, packageInfo)) {
                         Log.w(TAG, "Signature mismatch restoring " + packageName);
                         EventLog.writeEvent(RESTORE_AGENT_FAILURE_EVENT, packageName,
                                 "Signature mismatch");
