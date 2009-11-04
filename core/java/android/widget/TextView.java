@@ -3964,8 +3964,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     mHighlightPath = new Path();
 
                 if (selStart == selEnd) {
-                    if ((SystemClock.uptimeMillis() - mShowCursor) % (2 * BLINK)
-                        < BLINK) {
+                    if ((SystemClock.uptimeMillis() - mShowCursor) % (2 * BLINK) < BLINK) {
                         if (mHighlightPathBogus) {
                             mHighlightPath.reset();
                             mLayout.getCursorPath(selStart, mHighlightPath, mText);
@@ -5344,21 +5343,24 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
              * will happen at measure).
              */
             makeNewLayout(want, hintWant, UNKNOWN_BORING, UNKNOWN_BORING,
-                          mRight - mLeft - getCompoundPaddingLeft() - getCompoundPaddingRight(), false);
+                          mRight - mLeft - getCompoundPaddingLeft() - getCompoundPaddingRight(),
+                          false);
 
-            // In a fixed-height view, so use our new text layout.
-            if (mLayoutParams.height != LayoutParams.WRAP_CONTENT &&
-                mLayoutParams.height != LayoutParams.FILL_PARENT) {
-                invalidate();
-                return;
-            }
-
-            // Dynamic height, but height has stayed the same,
-            // so use our new text layout.
-            if (mLayout.getHeight() == oldht &&
-                (mHintLayout == null || mHintLayout.getHeight() == oldht)) {
-                invalidate();
-                return;
+            if (mEllipsize != TextUtils.TruncateAt.MARQUEE) {
+                // In a fixed-height view, so use our new text layout.
+                if (mLayoutParams.height != LayoutParams.WRAP_CONTENT &&
+                    mLayoutParams.height != LayoutParams.FILL_PARENT) {
+                    invalidate();
+                    return;
+                }
+    
+                // Dynamic height, but height has stayed the same,
+                // so use our new text layout.
+                if (mLayout.getHeight() == oldht &&
+                    (mHintLayout == null || mHintLayout.getHeight() == oldht)) {
+                    invalidate();
+                    return;
+                }
             }
 
             // We lose: the height has changed and we have a dynamic height.
