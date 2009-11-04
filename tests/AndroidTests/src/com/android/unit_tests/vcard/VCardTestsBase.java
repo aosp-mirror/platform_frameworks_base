@@ -33,7 +33,11 @@ import android.net.Uri;
 import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
+import android.pim.vcard.ContactStruct;
 import android.pim.vcard.EntryCommitter;
+import android.pim.vcard.EntryHandler;
+import android.pim.vcard.VCardBuilder;
+import android.pim.vcard.VCardBuilderCollection;
 import android.pim.vcard.VCardComposer;
 import android.pim.vcard.VCardConfig;
 import android.pim.vcard.VCardDataBuilder;
@@ -62,6 +66,7 @@ import android.test.mock.MockContentResolver;
 import android.test.mock.MockContext;
 import android.test.mock.MockCursor;
 import android.text.TextUtils;
+import android.util.Log;
 
 import junit.framework.TestCase;
 
@@ -177,24 +182,24 @@ class CustomMockContext extends MockContext {
  * Please do not add each unit test here.
  */
 /* package */ class VCardTestsBase extends AndroidTestCase {
-    public static final int V21 = 0;
-    public static final int V30 = 1;
+    public static final int V21 = VCardConfig.VCARD_TYPE_V21_GENERIC_UTF8;
+    public static final int V30 = VCardConfig.VCARD_TYPE_V30_GENERIC_UTF8;
 
-    public class ImportVerificationResolver extends MockContentResolver {
-        ImportVerificationProvider mVerificationProvider = new ImportVerificationProvider();
+    public class ImportTestResolver extends MockContentResolver {
+        ImportTestProvider mProvider = new ImportTestProvider();
         @Override
         public ContentProviderResult[] applyBatch(String authority,
                 ArrayList<ContentProviderOperation> operations) {
             equalsString(authority, RawContacts.CONTENT_URI.toString());
-            return mVerificationProvider.applyBatch(operations);
+            return mProvider.applyBatch(operations);
         }
 
         public void addExpectedContentValues(ContentValues expectedContentValues) {
-            mVerificationProvider.addExpectedContentValues(expectedContentValues);
+            mProvider.addExpectedContentValues(expectedContentValues);
         }
 
         public void verify() {
-            mVerificationProvider.verify();
+            mProvider.verify();
         }
     }
 
@@ -208,10 +213,10 @@ class CustomMockContext extends MockContext {
                 Relation.CONTENT_ITEM_TYPE, Event.CONTENT_ITEM_TYPE,
                 GroupMembership.CONTENT_ITEM_TYPE));
 
-    public class ImportVerificationProvider extends MockContentProvider {
+    public class ImportTestProvider extends MockContentProvider {
         final Map<String, Collection<ContentValues>> mMimeTypeToExpectedContentValues;
 
-        public ImportVerificationProvider() {
+        public ImportTestProvider() {
             mMimeTypeToExpectedContentValues =
                 new HashMap<String, Collection<ContentValues>>();
             for (String acceptanbleMimeType : sKnownMimeTypeSet) {
@@ -303,11 +308,11 @@ class CustomMockContext extends MockContext {
                     }
                     boolean checked = false;
                     for (ContentValues expectedContentValues : contentValuesCollection) {
-                        /* for testing
+                        /*for testing
                         Log.d("@@@", "expected: "
                                 + convertToEasilyReadableString(expectedContentValues));
                         Log.d("@@@", "actual  : "
-                                + convertToEasilyReadableString(actualContentValues)); */
+                                + convertToEasilyReadableString(actualContentValues));*/
                         if (equalsForContentValues(expectedContentValues,
                                 actualContentValues)) {
                             assertTrue(contentValuesCollection.remove(expectedContentValues));
@@ -346,15 +351,16 @@ class CustomMockContext extends MockContext {
         }
     }
 
-    public class ContentValuesVerifier {
-        private final ImportVerificationResolver mResolver;
-        // private final String mCharset;
+    class ImportVerifierElem {
+        private final ImportTestResolver mResolver;
+        private final EntryHandler mHandler;
 
-        public ContentValuesVerifier() {
-            mResolver = new ImportVerificationResolver();
+        public ImportVerifierElem() {
+            mResolver = new ImportTestResolver();
+            mHandler = new EntryCommitter(mResolver);
         }
 
-        public ContentValuesBuilder buildExpected(String mimeType) {
+        public ContentValuesBuilder addExpected(String mimeType) {
             ContentValues contentValues = new ContentValues();
             contentValues.put(Data.MIMETYPE, mimeType);
             mResolver.addExpectedContentValues(contentValues);
@@ -366,8 +372,7 @@ class CustomMockContext extends MockContext {
             verify(getContext().getResources().openRawResource(resId), vCardType);
         }
 
-        public void verify(InputStream is, int vCardType)
-                throws IOException, VCardException {
+        public void verify(InputStream is, int vCardType) throws IOException, VCardException {
             final VCardParser vCardParser;
             if (VCardConfig.isV30(vCardType)) {
                 vCardParser = new VCardParser_V30(true);  // use StrictParsing
@@ -375,8 +380,8 @@ class CustomMockContext extends MockContext {
                 vCardParser = new VCardParser_V21();
             }
             VCardDataBuilder builder =
-                new VCardDataBuilder(null, null, false, vCardType, null);
-            builder.addEntryHandler(new EntryCommitter(mResolver));
+                    new VCardDataBuilder(null, null, false, vCardType, null);
+            builder.addEntryHandler(mHandler);
             try {
                 vCardParser.parse(is, builder);
             } finally {
@@ -387,7 +392,80 @@ class CustomMockContext extends MockContext {
                     }
                 }
             }
+            verifyResolver();
+        }
+
+        public void verifyResolver() {
             mResolver.verify();
+        }
+
+        public void onParsingStart() {
+            mHandler.onParsingStart();
+        }
+
+        public void onEntryCreated(ContactStruct entry) {
+            mHandler.onEntryCreated(entry);
+        }
+
+        public void onParsingEnd() {
+            mHandler.onParsingEnd();
+        }
+    }
+
+    class ImportVerifier implements EntryHandler {
+        private List<ImportVerifierElem> mImportVerifierElemList =
+            new ArrayList<ImportVerifierElem>();
+        private int mIndex;
+
+        public ImportVerifierElem addImportVerifierElem() {
+            ImportVerifierElem importVerifier = new ImportVerifierElem();
+            mImportVerifierElemList.add(importVerifier);
+            return importVerifier;
+        }
+
+        public void verify(int resId, int vCardType) throws IOException, VCardException {
+            verify(getContext().getResources().openRawResource(resId), vCardType);
+        }
+
+        public void verify(InputStream is, int vCardType) throws IOException, VCardException {
+            final VCardParser vCardParser;
+            if (VCardConfig.isV30(vCardType)) {
+                vCardParser = new VCardParser_V30(true);  // use StrictParsing
+            } else {
+                vCardParser = new VCardParser_V21();
+            }
+            VCardDataBuilder builder =
+                new VCardDataBuilder(null, null, false, vCardType, null);
+            builder.addEntryHandler(this);
+            try {
+                vCardParser.parse(is, builder);
+            } finally {
+                if (is != null) {
+                    try {
+                        is.close();
+                    } catch (IOException e) {
+                    }
+                }
+            }
+        }
+
+        public void onParsingStart() {
+            for (ImportVerifierElem elem : mImportVerifierElemList) {
+                elem.onParsingStart();
+            }
+        }
+
+        public void onEntryCreated(ContactStruct entry) {
+            assertTrue(mIndex < mImportVerifierElemList.size());
+            mImportVerifierElemList.get(mIndex).onEntryCreated(entry);
+            mIndex++;
+        }
+
+        public void onParsingEnd() {
+            for (ImportVerifierElem elem : mImportVerifierElemList) {
+                elem.onParsingEnd();
+                elem.verifyResolver();
+            }
         }
     }
 
@@ -398,24 +476,23 @@ class CustomMockContext extends MockContext {
             addProvider(RawContacts.CONTENT_URI.getAuthority(), mProvider);
         }
 
-        public ContentValuesBuilder buildInput(String mimeType) {
-            return mProvider.buildData(mimeType);
+        public ContactEntry buildContactEntry() {
+            return mProvider.buildInputEntry();
         }
     }
 
     public static class MockEntityIterator implements EntityIterator {
-        Collection<Entity> mEntityCollection;
+        List<Entity> mEntityList;
         Iterator<Entity> mIterator;
 
-        // TODO: Support multiple vCard entries.
-        public MockEntityIterator(Collection<ContentValues> contentValuesCollection) {
-            mEntityCollection = new ArrayList<Entity>();
+        public MockEntityIterator(List<ContentValues> contentValuesList) {
+            mEntityList = new ArrayList<Entity>();
             Entity entity = new Entity(new ContentValues());
-            for (ContentValues contentValues : contentValuesCollection) {
-                entity.addSubValue(Data.CONTENT_URI, contentValues);
+            for (ContentValues contentValues : contentValuesList) {
+                    entity.addSubValue(Data.CONTENT_URI, contentValues);
             }
-            mEntityCollection.add(entity);
-            mIterator = mEntityCollection.iterator();
+            mEntityList.add(entity);
+            mIterator = mEntityList.iterator();
         }
 
         public boolean hasNext() {
@@ -427,15 +504,20 @@ class CustomMockContext extends MockContext {
         }
 
         public void reset() {
-            mIterator = mEntityCollection.iterator();
+            mIterator = mEntityList.iterator();
         }
 
         public void close() {
         }
     }
 
-    public class ExportTestProvider extends MockContentProvider {
-        List<ContentValues> mContentValuesList = new ArrayList<ContentValues>();
+    /**
+     * Represents one contact, which should contain multiple ContentValues like
+     * StructuredName, Email, etc.
+     */
+    static class ContactEntry {
+        private final List<ContentValues> mContentValuesList = new ArrayList<ContentValues>();
+
         public ContentValuesBuilder buildData(String mimeType) {
             ContentValues contentValues = new ContentValues();
             contentValues.put(Data.MIMETYPE, mimeType);
@@ -443,28 +525,50 @@ class CustomMockContext extends MockContext {
             return new ContentValuesBuilder(contentValues);
         }
 
-        @Override
-        public EntityIterator queryEntities(Uri uri, String selection, String[] selectionArgs,
-                String sortOrder) {
-            assert(uri != null);
-            assert(ContentResolver.SCHEME_CONTENT.equals(uri.getScheme()));
-            final String authority = uri.getAuthority();
-            assert(RawContacts.CONTENT_URI.getAuthority().equals(authority));
+        public List<ContentValues> getList() {
+            return mContentValuesList;
+        }
+    }
 
-            return new MockEntityIterator(mContentValuesList);
+    class ExportTestProvider extends MockContentProvider {
+        ArrayList<ContactEntry> mContactEntryList = new ArrayList<ContactEntry>();
+
+        public ContactEntry buildInputEntry() {
+            ContactEntry contactEntry = new ContactEntry();
+            mContactEntryList.add(contactEntry);
+            return contactEntry;
         }
 
         @Override
-        public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs,
+        public EntityIterator queryEntities(Uri uri, String selection, String[] selectionArgs,
                 String sortOrder) {
-            assert(VCardComposer.CONTACTS_TEST_CONTENT_URI.equals(uri));
-            // Support multiple rows.
+            assertTrue(uri != null);
+            assertTrue(ContentResolver.SCHEME_CONTENT.equals(uri.getScheme()));
+            final String authority = uri.getAuthority();
+            assertTrue(RawContacts.CONTENT_URI.getAuthority().equals(authority));
+            assertTrue((Data.CONTACT_ID + "=?").equals(selection));
+            assertEquals(1, selectionArgs.length);
+            int id = Integer.parseInt(selectionArgs[0]);
+            assertTrue(id >= 0 && id < mContactEntryList.size());
+
+            return new MockEntityIterator(mContactEntryList.get(id).getList());
+        }
+
+        @Override
+        public Cursor query(Uri uri, String[] projection,
+                String selection, String[] selectionArgs, String sortOrder) {
+            assertTrue(VCardComposer.CONTACTS_TEST_CONTENT_URI.equals(uri));
+            // In this test, following arguments are not supported.
+            assertNull(selection);
+            assertNull(selectionArgs);
+            assertNull(sortOrder);
+
             return new MockCursor() {
                 int mCurrentPosition = -1;
 
                 @Override
                 public int getCount() {
-                    return 1;
+                    return mContactEntryList.size();
                 }
 
                 @Override
@@ -475,7 +579,7 @@ class CustomMockContext extends MockContext {
 
                 @Override
                 public boolean moveToNext() {
-                    if (mCurrentPosition == 0 || mCurrentPosition == -1) {
+                    if (mCurrentPosition < mContactEntryList.size()) {
                         mCurrentPosition++;
                         return true;
                     } else {
@@ -490,7 +594,7 @@ class CustomMockContext extends MockContext {
 
                 @Override
                 public boolean isAfterLast() {
-                    return mCurrentPosition > 0;
+                    return mCurrentPosition >= mContactEntryList.size();
                 }
 
                 @Override
@@ -502,7 +606,9 @@ class CustomMockContext extends MockContext {
                 @Override
                 public int getInt(int columnIndex) {
                     assertEquals(0, columnIndex);
-                    return 0;
+                    assertTrue(mCurrentPosition >= 0
+                            && mCurrentPosition < mContactEntryList.size());
+                    return mCurrentPosition;
                 }
 
                 @Override
@@ -517,127 +623,249 @@ class CustomMockContext extends MockContext {
         }
     }
 
-    public class VCardVerificationHandler implements VCardComposer.OneEntryHandler {
-        final private TestCase mTestCase;
-        final private List<PropertyNodesVerifier> mPropertyNodesVerifierList;
-        final private boolean mIsV30;
-        // To allow duplication, use list instead of set.
-        // TODO: support multiple vCard entries.
-        final private List<String> mExpectedLineList;
-        final private List<ContentValuesVerifier> mContentValuesVerifierList;
-        final private int mVCardType;
-        int mCount;
+    class LineVerifierElem {
+        private final List<String> mExpectedLineList = new ArrayList<String>();
+        private final boolean mIsV30;
 
-        public VCardVerificationHandler(final TestCase testCase, final int version) {
-            mTestCase = testCase;
-            mPropertyNodesVerifierList = new ArrayList<PropertyNodesVerifier>();
-            mIsV30 = (version == V30);
-            mExpectedLineList = new ArrayList<String>();
-            mContentValuesVerifierList = new ArrayList<ContentValuesVerifier>();
-            mVCardType = (version == V30 ? VCardConfig.VCARD_TYPE_V30_GENERIC_UTF8
-                    : VCardConfig.VCARD_TYPE_V21_GENERIC_UTF8);
-            mCount = 1;
+        public LineVerifierElem(boolean isV30) {
+            mIsV30 = isV30;
         }
 
-        public PropertyNodesVerifier addPropertyNodesVerifier() {
-            PropertyNodesVerifier verifier = new PropertyNodesVerifier(mTestCase);
-            mPropertyNodesVerifierList.add(verifier);
-            verifier.addNodeWithOrder("VERSION", mIsV30 ? "3.0" : "2.1");
-            return verifier;
-        }
-
-        public PropertyNodesVerifier addPropertyVerifierWithEmptyName() {
-            PropertyNodesVerifier verifier = addPropertyNodesVerifier();
-            if (mIsV30) {
-                verifier.addNodeWithOrder("N", "").addNodeWithOrder("FN", "");
+        public LineVerifierElem addExpected(final String line) {
+            if (!TextUtils.isEmpty(line)) {
+                mExpectedLineList.add(line);
             }
-            return verifier;
-        }
-
-        public ContentValuesVerifier addContentValuesVerifier() {
-            ContentValuesVerifier verifier = new ContentValuesVerifier();
-            mContentValuesVerifierList.add(verifier);
-            return verifier;
-        }
-
-        public VCardVerificationHandler addExpectedLine(String line) {
-            mExpectedLineList.add(line);
             return this;
         }
 
-        public boolean onInit(final Context context) {
-            return true;
-        }
-
-        public boolean onEntryCreated(final String vcard) {
-            if (!mExpectedLineList.isEmpty()) {
-                verifyLines(vcard);
-            }
-            verifyNodes(vcard);
-            return true;
-        }
-
-        private void verifyLines(final String vcard) {
+        public void verify(final String vcard) {
             final String[] lineArray = vcard.split("\\r?\\n");
             final int length = lineArray.length;
+            final TestCase testCase = VCardTestsBase.this;
+            boolean beginExists = false;
+            boolean endExists = false;
+            boolean versionExists = false;
+
             for (int i = 0; i < length; i++) {
                 final String line = lineArray[i];
-                // TODO: support multiple vcard entries.
-                if ("BEGIN:VCARD".equals(line) || "END:VCARD".equals(line) ||
-                        (mIsV30 ? "VERSION:3.0" : "VERSION:2.1").equals(line)) {
+                if (TextUtils.isEmpty(line)) {
                     continue;
                 }
+
+                if ("BEGIN:VCARD".equalsIgnoreCase(line)) {
+                    if (beginExists) {
+                        testCase.fail("Multiple \"BEGIN:VCARD\" line found");
+                    } else {
+                        beginExists = true;
+                        continue;
+                    }
+                } else if ("END:VCARD".equalsIgnoreCase(line)) {
+                    if (endExists) {
+                        testCase.fail("Multiple \"END:VCARD\" line found");
+                    } else {
+                        endExists = true;
+                        continue;
+                    }
+                } else if (
+                        (mIsV30 ? "VERSION:3.0" : "VERSION:2.1").equalsIgnoreCase(line)) {
+                    if (versionExists) {
+                        testCase.fail("Multiple VERSION line + found");
+                    } else {
+                        versionExists = true;
+                        continue;
+                    }
+                }
+
+                if (!beginExists) {
+                    testCase.fail(
+                            "Property other than BEGIN came before BEGIN property: " + line);
+                } else if (endExists) {
+                    testCase.fail("Property other than END came after END property: " + line);
+                }
+
                 final int index = mExpectedLineList.indexOf(line);
                 if (index >= 0) {
                     mExpectedLineList.remove(index);
                 } else {
-                    mTestCase.fail("Unexpected line: " + line);
+                    testCase.fail("Unexpected line: " + line);
                 }
             }
+
             if (!mExpectedLineList.isEmpty()) {
                 StringBuffer buffer = new StringBuffer();
                 for (String expectedLine : mExpectedLineList) {
                     buffer.append(expectedLine);
                     buffer.append("\n");
                 }
-                mTestCase.fail("Expected line(s) not found:" + buffer.toString());
+
+                testCase.fail("Expected line(s) not found:" + buffer.toString());
             }
         }
+    }
 
-        private void verifyNodes(final String vcard) {
-            if (mPropertyNodesVerifierList.size() == 0) {
-                mTestCase.fail("Too many vCard entries seems to be inserted(No."
-                        + mCount + " of the entries (No.1 is the first entry))");
+    class LineVerifier implements VCardComposer.OneEntryHandler {
+        private final ArrayList<LineVerifierElem> mLineVerifierElemList;
+        private final boolean mIsV30;
+        private int index;
+
+        public LineVerifier(final boolean isV30) {
+            mLineVerifierElemList = new ArrayList<LineVerifierElem>();
+            mIsV30 = isV30;
+        }
+
+        public LineVerifierElem addLineVerifierElem() {
+            LineVerifierElem lineVerifier = new LineVerifierElem(mIsV30);
+            mLineVerifierElemList.add(lineVerifier);
+            return lineVerifier;
+        }
+
+        public void verify(String vcard) {
+            if (index >= mLineVerifierElemList.size()) {
+                VCardTestsBase.this.fail("Insufficient number of LineVerifier (" + index + ")");
             }
-            PropertyNodesVerifier propertyNodesVerifier =
-                    mPropertyNodesVerifierList.get(0);
-            mPropertyNodesVerifierList.remove(0);
-            VCardParser parser = (mIsV30 ? new VCardParser_V30(true) : new VCardParser_V21());
-            VNodeBuilder builder = new VNodeBuilder();
-            InputStream is;
-            try {
-                is = new ByteArrayInputStream(vcard.getBytes("UTF-8"));
-                mTestCase.assertEquals(true, parser.parse(is, null, builder));
-                is.close();
-                mTestCase.assertEquals(1, builder.vNodeList.size());
-                propertyNodesVerifier.verify(builder.vNodeList.get(0));
-                if (!mContentValuesVerifierList.isEmpty()) {
-                    ContentValuesVerifier contentValuesVerifier =
-                            mContentValuesVerifierList.get(0);
-                    is = new ByteArrayInputStream(vcard.getBytes("UTF-8"));
-                    contentValuesVerifier.verify(is, mVCardType);
-                    is.close();
-                }
-            } catch (IOException e) {
-                mTestCase.fail("Unexpected IOException: " + e.getMessage());
-            } catch (VCardException e) {
-                mTestCase.fail("Unexpected VCardException: " + e.getMessage());
-            } finally {
-                mCount++;
-            }
+
+            LineVerifierElem lineVerifier = mLineVerifierElemList.get(index);
+            lineVerifier.verify(vcard);
+
+            index++;
+        }
+
+        public boolean onEntryCreated(String vcard) {
+            verify(vcard);
+            return true;
+        }
+
+        public boolean onInit(Context context) {
+            return true;
         }
 
         public void onTerminate() {
+        }
+    }
+
+    class VCardVerifier {
+        private class VCardVerifierInternal implements VCardComposer.OneEntryHandler {
+            public boolean onInit(Context context) {
+                return true;
+            }
+            public boolean onEntryCreated(String vcard) {
+                verifyOneVCard(vcard);
+                return true;
+            }
+            public void onTerminate() {
+            }
+        }
+
+        private final VCardVerifierInternal mVCardVerifierInternal;
+        private final ExportTestResolver mResolver;
+        private final int mVCardType;
+        private final boolean mIsV30;
+
+        // To allow duplication, use list instead of set.
+        // When null, we don't need to do the verification.
+        private PropertyNodesVerifier mPropertyNodesVerifier;
+        private LineVerifier mLineVerificationHandler;
+        private ImportVerifier mImportVerifier;
+
+        public VCardVerifier(ExportTestResolver resolver, int vcardType) {
+            mVCardVerifierInternal = new VCardVerifierInternal();
+            mResolver = resolver;
+            mIsV30 = VCardConfig.isV30(vcardType);
+            mVCardType = vcardType;
+        }
+
+        public PropertyNodesVerifierElem addPropertyNodesVerifierElem() {
+            if (mPropertyNodesVerifier == null) {
+                mPropertyNodesVerifier = new PropertyNodesVerifier(VCardTestsBase.this);
+            }
+            PropertyNodesVerifierElem elem =
+                    mPropertyNodesVerifier.addPropertyNodesVerifierElem();
+            elem.addNodeWithOrder("VERSION", (mIsV30 ? "3.0" : "2.1"));
+
+            return elem;
+        }
+
+        public PropertyNodesVerifierElem addPropertyNodesVerifierWithEmptyName() {
+            PropertyNodesVerifierElem elem = addPropertyNodesVerifierElem();
+            if (mIsV30) {
+                elem.addNodeWithOrder("N", "").addNodeWithOrder("FN", "");
+            }
+            return elem;
+        }
+
+        public LineVerifierElem addLineVerifier() {
+            if (mLineVerificationHandler == null) {
+                mLineVerificationHandler = new LineVerifier(mIsV30);
+            }
+            return mLineVerificationHandler.addLineVerifierElem();
+        }
+
+        public ImportVerifierElem addImportVerifier() {
+            if (mImportVerifier == null) {
+                mImportVerifier = new ImportVerifier();
+            }
+
+            return mImportVerifier.addImportVerifierElem();
+        }
+
+        private void verifyOneVCard(final String vcard) {
+            final VCardBuilder builder;
+            if (mImportVerifier != null) {
+                final VNodeBuilder vnodeBuilder = mPropertyNodesVerifier;
+                final VCardDataBuilder vcardDataBuilder = new VCardDataBuilder();
+                vcardDataBuilder.addEntryHandler(mImportVerifier);
+                if (mPropertyNodesVerifier != null) {
+                    builder = new VCardBuilderCollection(Arrays.asList(
+                            vcardDataBuilder, mPropertyNodesVerifier));
+                } else {
+                    builder = vnodeBuilder;
+                }
+            } else {
+                if (mPropertyNodesVerifier != null) {
+                    builder = mPropertyNodesVerifier;
+                } else {
+                    return;
+                }
+            }
+
+            final VCardParser parser =
+                    (mIsV30 ? new VCardParser_V30(true) : new VCardParser_V21());
+            final TestCase testCase = VCardTestsBase.this;
+
+            InputStream is = null;
+            try {
+                is = new ByteArrayInputStream(vcard.getBytes("UTF-8"));
+                testCase.assertEquals(true, parser.parse(is, null, builder));
+            } catch (IOException e) {
+                testCase.fail("Unexpected IOException: " + e.getMessage());
+            } catch (VCardException e) {
+                testCase.fail("Unexpected VCardException: " + e.getMessage());
+            } finally {
+                if (is != null) {
+                    try {
+                        is.close();
+                    } catch (IOException e) {
+                    }
+                }
+            }
+        }
+
+        public void verify() {
+            VCardComposer composer =
+                    new VCardComposer(new CustomMockContext(mResolver), mVCardType);
+            composer.addHandler(mLineVerificationHandler);
+            composer.addHandler(mVCardVerifierInternal);
+            if (!composer.init(VCardComposer.CONTACTS_TEST_CONTENT_URI, null, null, null)) {
+                fail("init() failed. Reason: " + composer.getErrorReason());
+            }
+            assertFalse(composer.isAfterLast());
+            try {
+                while (!composer.isAfterLast()) {
+                    assertTrue(composer.createOneEntry());
+                }
+            } finally {
+                composer.terminate();
+            }
         }
     }
 
@@ -683,6 +911,7 @@ class CustomMockContext extends MockContext {
         } else if (expected == null || actual == null || expected.size() != actual.size()) {
             return false;
         }
+
         for (Entry<String, Object> entry : expected.valueSet()) {
             final String key = entry.getKey();
             final Object value = entry.getValue();

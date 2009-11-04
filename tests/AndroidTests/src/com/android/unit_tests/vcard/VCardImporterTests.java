@@ -19,7 +19,6 @@ package com.android.unit_tests.vcard;
 import android.content.ContentValues;
 import android.pim.vcard.VCardConfig;
 import android.pim.vcard.VCardParser_V21;
-import android.pim.vcard.VCardParser_V30;
 import android.pim.vcard.exception.VCardException;
 import android.provider.ContactsContract.Data;
 import android.provider.ContactsContract.CommonDataKinds.Email;
@@ -33,7 +32,7 @@ import android.provider.ContactsContract.CommonDataKinds.StructuredPostal;
 import android.provider.ContactsContract.CommonDataKinds.Website;
 
 import com.android.unit_tests.R;
-import com.android.unit_tests.vcard.PropertyNodesVerifier.TypeSet;
+import com.android.unit_tests.vcard.PropertyNodesVerifierElem.TypeSet;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -410,53 +409,52 @@ public class VCardImporterTests extends VCardTestsBase {
     }
 
     public void testV21SimpleCase1_Parsing() throws IOException, VCardException {
-        VCardParser_V21 parser = new VCardParser_V21();
-        VNodeBuilder builder = new VNodeBuilder();
-        InputStream is = getContext().getResources().openRawResource(R.raw.v21_simple_1);
-        assertEquals(true, parser.parse(is,"ISO-8859-1", builder));
-        is.close();
-        assertEquals(1, builder.vNodeList.size());
-        PropertyNodesVerifier verifier = new PropertyNodesVerifier(this)
+        PropertyNodesVerifier verifier = new PropertyNodesVerifier(this);
+        verifier.addPropertyNodesVerifierElem()
                 .addNodeWithOrder("N", "Ando;Roid;", Arrays.asList("Ando", "Roid", ""));
-        verifier.verify(builder.vNodeList.get(0));
+        verifier.verify(R.raw.v21_simple_1, V21);
     }
 
     public void testV21SimpleCase1_Type_Generic() throws IOException, VCardException {
-        ContentValuesVerifier verifier = new ContentValuesVerifier();
-        verifier.buildExpected(StructuredName.CONTENT_ITEM_TYPE)
-                .put(StructuredName.FAMILY_NAME, "Ando")
-                .put(StructuredName.GIVEN_NAME, "Roid")
-                .put(StructuredName.DISPLAY_NAME, "Roid Ando");
+        ImportVerifier verifier = new ImportVerifier();
+        verifier.addImportVerifierElem()
+                .addExpected(StructuredName.CONTENT_ITEM_TYPE)
+                        .put(StructuredName.FAMILY_NAME, "Ando")
+                        .put(StructuredName.GIVEN_NAME, "Roid")
+                        .put(StructuredName.DISPLAY_NAME, "Roid Ando");
         verifier.verify(R.raw.v21_simple_1, VCardConfig.VCARD_TYPE_V21_GENERIC_UTF8);
     }
 
     public void testV21SimpleCase1_Type_Japanese() throws IOException, VCardException {
-        ContentValuesVerifier verifier = new ContentValuesVerifier();
-        verifier.buildExpected(StructuredName.CONTENT_ITEM_TYPE)
-                .put(StructuredName.FAMILY_NAME, "Ando")
-                .put(StructuredName.GIVEN_NAME, "Roid")
-                // If name-related strings only contains printable Ascii,
-                // the order is remained to be US's:
-                // "Prefix Given Middle Family Suffix"
-                .put(StructuredName.DISPLAY_NAME, "Roid Ando");
+        ImportVerifier verifier = new ImportVerifier();
+        verifier.addImportVerifierElem()
+                .addExpected(StructuredName.CONTENT_ITEM_TYPE)
+                        .put(StructuredName.FAMILY_NAME, "Ando")
+                        .put(StructuredName.GIVEN_NAME, "Roid")
+                        // If name-related strings only contains printable Ascii,
+                        // the order is remained to be US's:
+                        // "Prefix Given Middle Family Suffix"
+                        .put(StructuredName.DISPLAY_NAME, "Roid Ando");
         verifier.verify(R.raw.v21_simple_1, VCardConfig.VCARD_TYPE_V21_JAPANESE_SJIS);
     }
 
     public void testV21SimpleCase2() throws IOException, VCardException {
-        ContentValuesVerifier verifier = new ContentValuesVerifier();
-        verifier.buildExpected(StructuredName.CONTENT_ITEM_TYPE)
-                .put(StructuredName.DISPLAY_NAME, "Ando Roid");
+        ImportVerifier verifier = new ImportVerifier();
+        verifier.addImportVerifierElem()
+                .addExpected(StructuredName.CONTENT_ITEM_TYPE)
+                        .put(StructuredName.DISPLAY_NAME, "Ando Roid");
         verifier.verify(R.raw.v21_simple_2, VCardConfig.VCARD_TYPE_V21_GENERIC_UTF8);
     }
 
     public void testV21SimpleCase3() throws IOException, VCardException {
-        ContentValuesVerifier verifier = new ContentValuesVerifier();
-        verifier.buildExpected(StructuredName.CONTENT_ITEM_TYPE)
-                .put(StructuredName.FAMILY_NAME, "Ando")
-                .put(StructuredName.GIVEN_NAME, "Roid")
-                // "FN" field should be prefered since it should contain the original order
-                // intended by the author of the file.
-                .put(StructuredName.DISPLAY_NAME, "Ando Roid");
+        ImportVerifier verifier = new ImportVerifier();
+        verifier.addImportVerifierElem()
+                .addExpected(StructuredName.CONTENT_ITEM_TYPE)
+                        .put(StructuredName.FAMILY_NAME, "Ando")
+                        .put(StructuredName.GIVEN_NAME, "Roid")
+                        // "FN" field should be prefered since it should contain the original
+                        // order intended by the author of the file.
+                        .put(StructuredName.DISPLAY_NAME, "Ando Roid");
         verifier.verify(R.raw.v21_simple_3, VCardConfig.VCARD_TYPE_V21_GENERIC_UTF8);
     }
 
@@ -464,18 +462,13 @@ public class VCardImporterTests extends VCardTestsBase {
      * Tests ';' is properly handled by VCardParser implementation.
      */
     public void testV21BackslashCase_Parsing() throws IOException, VCardException {
-        VCardParser_V21 parser = new VCardParser_V21();
-        VNodeBuilder builder = new VNodeBuilder();
-        InputStream is = getContext().getResources().openRawResource(R.raw.v21_backslash);
-        assertEquals(true, parser.parse(is,"ISO-8859-1", builder));
-        is.close();
-        assertEquals(1, builder.vNodeList.size());
-        PropertyNodesVerifier verifier = new PropertyNodesVerifier(this)
+        PropertyNodesVerifier verifier = new PropertyNodesVerifier(this);
+        verifier.addPropertyNodesVerifierElem()
                 .addNodeWithOrder("VERSION", "2.1")
                 .addNodeWithOrder("N", ";A;B\\;C\\;;D;:E;\\\\;",
                         Arrays.asList("", "A;B\\", "C\\;", "D", ":E", "\\\\", ""))
                 .addNodeWithOrder("FN", "A;B\\C\\;D:E\\\\");
-        verifier.verify(builder.vNodeList.get(0));
+        verifier.verify(R.raw.v21_backslash, V21);
     }
 
     /**
@@ -483,23 +476,25 @@ public class VCardImporterTests extends VCardTestsBase {
      * inserts name related data.
      */
     public void testV21BackslashCase() throws IOException, VCardException {
-        ContentValuesVerifier verifier = new ContentValuesVerifier();
-        verifier.buildExpected(StructuredName.CONTENT_ITEM_TYPE)
-                // FAMILY_NAME is empty and removed in this test...
-                .put(StructuredName.GIVEN_NAME, "A;B\\")
-                .put(StructuredName.MIDDLE_NAME, "C\\;")
-                .put(StructuredName.PREFIX, "D")
-                .put(StructuredName.SUFFIX, ":E")
-                .put(StructuredName.DISPLAY_NAME, "A;B\\C\\;D:E\\\\");
+        ImportVerifier verifier = new ImportVerifier();
+        verifier.addImportVerifierElem()
+                .addExpected(StructuredName.CONTENT_ITEM_TYPE)
+                        // FAMILY_NAME is empty and removed in this test...
+                        .put(StructuredName.GIVEN_NAME, "A;B\\")
+                        .put(StructuredName.MIDDLE_NAME, "C\\;")
+                        .put(StructuredName.PREFIX, "D")
+                        .put(StructuredName.SUFFIX, ":E")
+                        .put(StructuredName.DISPLAY_NAME, "A;B\\C\\;D:E\\\\");
         verifier.verify(R.raw.v21_backslash, VCardConfig.VCARD_TYPE_V21_GENERIC_UTF8);
     }
 
     public void testOrgBeforTitle() throws IOException, VCardException {
-        ContentValuesVerifier verifier = new ContentValuesVerifier();
-        verifier.buildExpected(StructuredName.CONTENT_ITEM_TYPE)
+        ImportVerifier verifier = new ImportVerifier();
+        ImportVerifierElem elem = verifier.addImportVerifierElem();
+        elem.addExpected(StructuredName.CONTENT_ITEM_TYPE)
                 .put(StructuredName.DISPLAY_NAME, "Normal Guy");
 
-        verifier.buildExpected(Organization.CONTENT_ITEM_TYPE)
+        elem.addExpected(Organization.CONTENT_ITEM_TYPE)
                 .put(Organization.COMPANY, "Company")
                 .put(Organization.DEPARTMENT, "Organization Devision Room Sheet No.")
                 .put(Organization.TITLE, "Excellent Janitor")
@@ -508,11 +503,12 @@ public class VCardImporterTests extends VCardTestsBase {
     }
 
     public void testTitleBeforOrg() throws IOException, VCardException {
-        ContentValuesVerifier verifier = new ContentValuesVerifier();
-        verifier.buildExpected(StructuredName.CONTENT_ITEM_TYPE)
+        ImportVerifier verifier = new ImportVerifier();
+        ImportVerifierElem elem = verifier.addImportVerifierElem();
+        elem.addExpected(StructuredName.CONTENT_ITEM_TYPE)
                 .put(StructuredName.DISPLAY_NAME, "Nice Guy");
 
-        verifier.buildExpected(Organization.CONTENT_ITEM_TYPE)
+        elem.addExpected(Organization.CONTENT_ITEM_TYPE)
                 .put(Organization.COMPANY, "Marverous")
                 .put(Organization.DEPARTMENT, "Perfect Great Good Bad Poor")
                 .put(Organization.TITLE, "Cool Title")
@@ -525,45 +521,46 @@ public class VCardImporterTests extends VCardTestsBase {
      * The data contain three cases: one "PREF", no "PREF" and multiple "PREF", in each type.
      */
     public void testV21PrefToIsPrimary() throws IOException, VCardException {
-        ContentValuesVerifier verifier = new ContentValuesVerifier();
-        verifier.buildExpected(StructuredName.CONTENT_ITEM_TYPE)
+        ImportVerifier verifier = new ImportVerifier();
+        ImportVerifierElem elem = verifier.addImportVerifierElem();
+        elem.addExpected(StructuredName.CONTENT_ITEM_TYPE)
                 .put(Data.MIMETYPE, StructuredName.CONTENT_ITEM_TYPE)
                 .put(StructuredName.DISPLAY_NAME, "Smith");
 
-        verifier.buildExpected(Phone.CONTENT_ITEM_TYPE)
+        elem.addExpected(Phone.CONTENT_ITEM_TYPE)
                 .put(Phone.NUMBER, "1")
                 .put(Phone.TYPE, Phone.TYPE_HOME);
 
-        verifier.buildExpected(Phone.CONTENT_ITEM_TYPE)
+        elem.addExpected(Phone.CONTENT_ITEM_TYPE)
                 .put(Phone.NUMBER, "2")
                 .put(Phone.TYPE, Phone.TYPE_WORK)
                 .put(Phone.IS_PRIMARY, 1);
 
-        verifier.buildExpected(Phone.CONTENT_ITEM_TYPE)
+        elem.addExpected(Phone.CONTENT_ITEM_TYPE)
                 .put(Phone.NUMBER, "3")
                 .put(Phone.TYPE, Phone.TYPE_ISDN);
 
-        verifier.buildExpected(Email.CONTENT_ITEM_TYPE)
+        elem.addExpected(Email.CONTENT_ITEM_TYPE)
                 .put(Email.DATA, "test@example.com")
                 .put(Email.TYPE, Email.TYPE_HOME)
                 .put(Email.IS_PRIMARY, 1);
 
-        verifier.buildExpected(Email.CONTENT_ITEM_TYPE)
+        elem.addExpected(Email.CONTENT_ITEM_TYPE)
                 .put(Email.DATA, "test2@examination.com")
                 .put(Email.TYPE, Email.TYPE_MOBILE)
                 .put(Email.IS_PRIMARY, 1);
 
-        verifier.buildExpected(Organization.CONTENT_ITEM_TYPE)
+        elem.addExpected(Organization.CONTENT_ITEM_TYPE)
                 .put(Organization.COMPANY, "Company")
                 .put(Organization.TITLE, "Engineer")
                 .put(Organization.TYPE, Organization.TYPE_WORK);
 
-        verifier.buildExpected(Organization.CONTENT_ITEM_TYPE)
+        elem.addExpected(Organization.CONTENT_ITEM_TYPE)
                 .put(Organization.COMPANY, "Mystery")
                 .put(Organization.TITLE, "Blogger")
                 .put(Organization.TYPE, Organization.TYPE_WORK);
 
-        verifier.buildExpected(Organization.CONTENT_ITEM_TYPE)
+        elem.addExpected(Organization.CONTENT_ITEM_TYPE)
                 .put(Organization.COMPANY, "Poetry")
                 .put(Organization.TITLE, "Poet")
                 .put(Organization.TYPE, Organization.TYPE_WORK);
@@ -574,17 +571,12 @@ public class VCardImporterTests extends VCardTestsBase {
      * Tests all the properties in a complicated vCard are correctly parsed by the VCardParser.
      */
     public void testV21ComplicatedCase_Parsing() throws IOException, VCardException {
-        VCardParser_V21 parser = new VCardParser_V21();
-        VNodeBuilder builder = new VNodeBuilder();
-        InputStream is = getContext().getResources().openRawResource(R.raw.v21_complicated);
-        assertEquals(true, parser.parse(is,"ISO-8859-1", builder));
-        is.close();
-        assertEquals(1, builder.vNodeList.size());
         ContentValues contentValuesForQP = new ContentValues();
         contentValuesForQP.put("ENCODING", "QUOTED-PRINTABLE");
         ContentValues contentValuesForPhoto = new ContentValues();
         contentValuesForPhoto.put("ENCODING", "BASE64");
-        PropertyNodesVerifier verifier = new PropertyNodesVerifier(this)
+        PropertyNodesVerifier verifier = new PropertyNodesVerifier(this);
+        verifier.addPropertyNodesVerifierElem()
                 .addNodeWithOrder("VERSION", "2.1")
                 .addNodeWithOrder("N", "Gump;Forrest;Hoge;Pos;Tao",
                         Arrays.asList("Gump", "Forrest", "Hoge", "Pos", "Tao"))
@@ -631,7 +623,7 @@ public class VCardImporterTests extends VCardTestsBase {
                 .addNodeWithOrder("GEO", "35.6563854,139.6994233")
                 .addNodeWithOrder("URL", "http://www.example.com/")
                 .addNodeWithOrder("REV", "20080424T195243Z");
-        verifier.verify(builder.vNodeList.get(0));
+        verifier.verify(R.raw.v21_complicated, V21);
     }
 
     /**
@@ -639,8 +631,9 @@ public class VCardImporterTests extends VCardTestsBase {
      * into ContentResolver.
      */
     public void testV21ComplicatedCase() throws IOException, VCardException {
-        ContentValuesVerifier verifier = new ContentValuesVerifier();
-        verifier.buildExpected(StructuredName.CONTENT_ITEM_TYPE)
+        ImportVerifier verifier = new ImportVerifier();
+        ImportVerifierElem elem = verifier.addImportVerifierElem();
+        elem.addExpected(StructuredName.CONTENT_ITEM_TYPE)
                 .put(StructuredName.FAMILY_NAME, "Gump")
                 .put(StructuredName.GIVEN_NAME, "Forrest")
                 .put(StructuredName.MIDDLE_NAME, "Hoge")
@@ -648,36 +641,36 @@ public class VCardImporterTests extends VCardTestsBase {
                 .put(StructuredName.SUFFIX, "Tao")
                 .put(StructuredName.DISPLAY_NAME, "Joe Due");
         
-        verifier.buildExpected(Organization.CONTENT_ITEM_TYPE)
+        elem.addExpected(Organization.CONTENT_ITEM_TYPE)
                 .put(Organization.TYPE, Organization.TYPE_WORK)
                 .put(Organization.COMPANY, "Gump Shrimp Co.")
                 .put(Organization.DEPARTMENT, "Sales Dept.;Manager Fish keeper")
                 .put(Organization.TITLE, "Shrimp Man");
 
-        verifier.buildExpected(Phone.CONTENT_ITEM_TYPE)
+        elem.addExpected(Phone.CONTENT_ITEM_TYPE)
                 .put(Phone.TYPE, Phone.TYPE_WORK)
                 // Phone number is expected to be formated with NAMP format in default.
                 .put(Phone.NUMBER, "111-555-1212");
 
-        verifier.buildExpected(Phone.CONTENT_ITEM_TYPE)
+        elem.addExpected(Phone.CONTENT_ITEM_TYPE)
                 .put(Phone.TYPE, Phone.TYPE_HOME)
                 .put(Phone.NUMBER, "404-555-1212");
 
-        verifier.buildExpected(Phone.CONTENT_ITEM_TYPE)
+        elem.addExpected(Phone.CONTENT_ITEM_TYPE)
                 .put(Phone.TYPE, Phone.TYPE_MOBILE)
                 .put(Phone.NUMBER, "031-111-1111");
 
-        verifier.buildExpected(Phone.CONTENT_ITEM_TYPE)
+        elem.addExpected(Phone.CONTENT_ITEM_TYPE)
                 .put(Phone.TYPE, Phone.TYPE_CUSTOM)
                 .put(Phone.LABEL, "VIDEO")
                 .put(Phone.NUMBER, "032-222-2222");
 
-        verifier.buildExpected(Phone.CONTENT_ITEM_TYPE)
+        elem.addExpected(Phone.CONTENT_ITEM_TYPE)
                 .put(Phone.TYPE, Phone.TYPE_CUSTOM)
                 .put(Phone.LABEL, "VOICE")
                 .put(Phone.NUMBER, "033-333-3333");
 
-        verifier.buildExpected(StructuredPostal.CONTENT_ITEM_TYPE)
+        elem.addExpected(StructuredPostal.CONTENT_ITEM_TYPE)
                 .put(StructuredPostal.TYPE, StructuredPostal.TYPE_WORK)
                 .put(StructuredPostal.COUNTRY, "United States of America")
                 .put(StructuredPostal.POSTCODE, "30314")
@@ -687,7 +680,7 @@ public class VCardImporterTests extends VCardTestsBase {
                 .put(StructuredPostal.FORMATTED_ADDRESS,
                         "100 Waters Edge Baytown LA 30314 United States of America");
 
-        verifier.buildExpected(StructuredPostal.CONTENT_ITEM_TYPE)
+        elem.addExpected(StructuredPostal.CONTENT_ITEM_TYPE)
                 .put(StructuredPostal.TYPE, StructuredPostal.TYPE_HOME)
                 .put(StructuredPostal.COUNTRY, "United States of America")
                 .put(StructuredPostal.POSTCODE, "30314")
@@ -697,46 +690,41 @@ public class VCardImporterTests extends VCardTestsBase {
                 .put(StructuredPostal.FORMATTED_ADDRESS,
                         "42 Plantation St. Baytown LA 30314 United States of America");
 
-        verifier.buildExpected(Email.CONTENT_ITEM_TYPE)
+        elem.addExpected(Email.CONTENT_ITEM_TYPE)
                 // "TYPE=INTERNET" -> TYPE_CUSTOM + the label "INTERNET"
                 .put(Email.TYPE, Email.TYPE_CUSTOM)
                 .put(Email.LABEL, "INTERNET")
                 .put(Email.DATA, "forrestgump@walladalla.com")
                 .put(Email.IS_PRIMARY, 1);
 
-        verifier.buildExpected(Email.CONTENT_ITEM_TYPE)
+        elem.addExpected(Email.CONTENT_ITEM_TYPE)
                 .put(Email.TYPE, Email.TYPE_MOBILE)
                 .put(Email.DATA, "cell@example.com");
 
-        verifier.buildExpected(Note.CONTENT_ITEM_TYPE)
+        elem.addExpected(Note.CONTENT_ITEM_TYPE)
                 .put(Note.NOTE, "The following note is the example from RFC 2045.");
 
-        verifier.buildExpected(Note.CONTENT_ITEM_TYPE)
+        elem.addExpected(Note.CONTENT_ITEM_TYPE)
                 .put(Note.NOTE,
                         "Now's the time for all folk to come to the aid of their country.");
 
-        verifier.buildExpected(Photo.CONTENT_ITEM_TYPE)
+        elem.addExpected(Photo.CONTENT_ITEM_TYPE)
                 // No information about its image format can be inserted.
                 .put(Photo.PHOTO, sPhotoByteArrayForComplicatedCase);
 
-        verifier.buildExpected(Event.CONTENT_ITEM_TYPE)
+        elem.addExpected(Event.CONTENT_ITEM_TYPE)
                 .put(Event.START_DATE, "19800101")
                 .put(Event.TYPE, Event.TYPE_BIRTHDAY);
 
-        verifier.buildExpected(Website.CONTENT_ITEM_TYPE)
+        elem.addExpected(Website.CONTENT_ITEM_TYPE)
                 .put(Website.URL, "http://www.example.com/")
                 .put(Website.TYPE, Website.TYPE_HOMEPAGE);
         verifier.verify(R.raw.v21_complicated, VCardConfig.VCARD_TYPE_V21_GENERIC_UTF8);
     }
 
     public void testV30Simple_Parsing() throws IOException, VCardException {
-        VCardParser_V21 parser = new VCardParser_V30();
-        VNodeBuilder builder = new VNodeBuilder();
-        InputStream is = getContext().getResources().openRawResource(R.raw.v30_simple);
-        assertEquals(true, parser.parse(is,"ISO-8859-1", builder));
-        is.close();
-        assertEquals(1, builder.vNodeList.size());
-        PropertyNodesVerifier verifier = new PropertyNodesVerifier(this)
+        PropertyNodesVerifier verifier = new PropertyNodesVerifier(this);
+        verifier.addPropertyNodesVerifierElem()
                 .addNodeWithOrder("VERSION", "3.0")
                 .addNodeWithOrder("FN", "And Roid")
                 .addNodeWithOrder("N", "And;Roid;;;", Arrays.asList("And", "Roid", "", "", ""))
@@ -749,24 +737,22 @@ public class VCardImporterTests extends VCardTestsBase {
                 .addNodeWithOrder("X-GN", "group0")
                 .addNodeWithOrder("X-REDUCTION", "0")
                 .addNodeWithOrder("REV", "20081031T065854Z");
-        verifier.verify(builder.vNodeList.get(0));
+        verifier.verify(R.raw.v30_simple, V30);
     }
 
     public void testV30Simple() throws IOException, VCardException {
-        ContentValuesVerifier verifier = new ContentValuesVerifier();
-
-        verifier.buildExpected(StructuredName.CONTENT_ITEM_TYPE)
+        ImportVerifier verifier = new ImportVerifier();
+        ImportVerifierElem elem = verifier.addImportVerifierElem();
+        elem.addExpected(StructuredName.CONTENT_ITEM_TYPE)
                 .put(StructuredName.FAMILY_NAME, "And")
                 .put(StructuredName.GIVEN_NAME, "Roid")
                 .put(StructuredName.DISPLAY_NAME, "And Roid")
                 .put(StructuredName.PHONETIC_GIVEN_NAME, "android");
-
-        verifier.buildExpected(Organization.CONTENT_ITEM_TYPE)
+        elem.addExpected(Organization.CONTENT_ITEM_TYPE)
                 .put(Organization.COMPANY, "Open")
                 .put(Organization.DEPARTMENT, "Handset  Alliance")
                 .put(Organization.TYPE, Organization.TYPE_WORK);
-
-        verifier.buildExpected(Phone.CONTENT_ITEM_TYPE)
+        elem.addExpected(Phone.CONTENT_ITEM_TYPE)
                 .put(Phone.TYPE, Phone.TYPE_CUSTOM)
                 .put(Phone.LABEL, "VOICE")
                 .put(Phone.NUMBER, "030-000-0000")
@@ -775,18 +761,13 @@ public class VCardImporterTests extends VCardTestsBase {
     }
 
     public void testV21Japanese1_Parsing() throws IOException, VCardException {
-        VCardParser_V21 parser = new VCardParser_V21();
-        VNodeBuilder builder = new VNodeBuilder();
-        InputStream is = getContext().getResources().openRawResource(R.raw.v21_japanese_1);
-        assertEquals(true, parser.parse(is,"ISO-8859-1", builder));
-        is.close();
-        assertEquals(1, builder.vNodeList.size());
-        ContentValues contentValuesForShiftJis = new ContentValues();
-        contentValuesForShiftJis.put("CHARSET", "SHIFT_JIS");
         // Though Japanese careers append ";;;;" at the end of the value of "SOUND",
         // vCard 2.1/3.0 specification does not allow multiple values.
         // Do not need to handle it as multiple values.
-        PropertyNodesVerifier verifier = new PropertyNodesVerifier(this)
+        ContentValues contentValuesForShiftJis = new ContentValues();
+        contentValuesForShiftJis.put("CHARSET", "SHIFT_JIS");
+        PropertyNodesVerifier verifier = new PropertyNodesVerifier(this);
+        verifier.addPropertyNodesVerifierElem()
                 .addNodeWithOrder("VERSION", "2.1", null, null, null, null, null)
                 .addNodeWithOrder("N", "\u5B89\u85E4\u30ED\u30A4\u30C9;;;;",
                         Arrays.asList("\u5B89\u85E4\u30ED\u30A4\u30C9", "", "", "", ""),
@@ -797,13 +778,14 @@ public class VCardImporterTests extends VCardTestsBase {
                         new TypeSet("X-IRMC-N"), null)
                 .addNodeWithOrder("TEL", "0300000000", null, null, null,
                         new TypeSet("VOICE", "PREF"), null);
-        verifier.verify(builder.vNodeList.get(0));
+        verifier.verify(R.raw.v21_japanese_1, VCardConfig.VCARD_TYPE_V21_JAPANESE_SJIS);
     }
 
     private void testV21Japanese1Common(int resId, int vcardType, boolean japanese)
             throws IOException, VCardException {
-        ContentValuesVerifier verifier = new ContentValuesVerifier();
-        verifier.buildExpected(StructuredName.CONTENT_ITEM_TYPE)
+        ImportVerifier verifier = new ImportVerifier();
+        ImportVerifierElem elem = verifier.addImportVerifierElem();
+        elem.addExpected(StructuredName.CONTENT_ITEM_TYPE)
                 .put(StructuredName.FAMILY_NAME, "\u5B89\u85E4\u30ED\u30A4\u30C9")
                 .put(StructuredName.DISPLAY_NAME, "\u5B89\u85E4\u30ED\u30A4\u30C9")
                 // While vCard parser does not split "SOUND" property values,
@@ -811,7 +793,7 @@ public class VCardImporterTests extends VCardTestsBase {
                 .put(StructuredName.PHONETIC_FAMILY_NAME,
                         "\uFF71\uFF9D\uFF84\uFF9E\uFF73\uFF9B\uFF72\uFF84\uFF9E");
 
-        verifier.buildExpected(Phone.CONTENT_ITEM_TYPE)
+        elem.addExpected(Phone.CONTENT_ITEM_TYPE)
                 // Phone number formatting is different.
                 .put(Phone.NUMBER, (japanese ? "03-0000-0000" : "030-000-0000"))
                 .put(Phone.TYPE, Phone.TYPE_CUSTOM)
@@ -849,18 +831,13 @@ public class VCardImporterTests extends VCardTestsBase {
     }
 
     public void testV21Japanese2_Parsing() throws IOException, VCardException {
-        VCardParser_V21 parser = new VCardParser_V21();
-        VNodeBuilder builder = new VNodeBuilder();
-        InputStream is = getContext().getResources().openRawResource(R.raw.v21_japanese_2);
-        assertEquals(true, parser.parse(is,"ISO-8859-1", builder));
-        is.close();
-        assertEquals(1, builder.vNodeList.size());
         ContentValues contentValuesForShiftJis = new ContentValues();
         contentValuesForShiftJis.put("CHARSET", "SHIFT_JIS");
         ContentValues contentValuesForQPAndSJ = new ContentValues();
         contentValuesForQPAndSJ.put("ENCODING", "QUOTED-PRINTABLE");
         contentValuesForQPAndSJ.put("CHARSET", "SHIFT_JIS");
-        PropertyNodesVerifier verifier = new PropertyNodesVerifier(this)
+        PropertyNodesVerifier verifier = new PropertyNodesVerifier(this);
+        verifier.addPropertyNodesVerifierElem()
                 .addNodeWithOrder("VERSION", "2.1")
                 .addNodeWithOrder("N", "\u5B89\u85E4;\u30ED\u30A4\u30C9\u0031;;;",
                         Arrays.asList("\u5B89\u85E4", "\u30ED\u30A4\u30C9\u0031",
@@ -885,12 +862,12 @@ public class VCardImporterTests extends VCardTestsBase {
                         null, contentValuesForQPAndSJ, new TypeSet("HOME"), null)
                 .addNodeWithOrder("NOTE", "\u30E1\u30E2", null, null,
                         contentValuesForQPAndSJ, null, null);
-        verifier.verify(builder.vNodeList.get(0));
+        verifier.verify(R.raw.v21_japanese_2, VCardConfig.VCARD_TYPE_V21_JAPANESE_SJIS);
     }
 
     public void testV21Japanese2_Type_Generic_Utf8() throws IOException, VCardException {
-        ContentValuesVerifier verifier = new ContentValuesVerifier();
-        verifier.buildExpected(StructuredName.CONTENT_ITEM_TYPE)
+        ImportVerifierElem verifier = new ImportVerifierElem();
+        verifier.addExpected(StructuredName.CONTENT_ITEM_TYPE)
                 .put(StructuredName.FAMILY_NAME, "\u5B89\u85E4")
                 .put(StructuredName.GIVEN_NAME, "\u30ED\u30A4\u30C9\u0031")
                 .put(StructuredName.DISPLAY_NAME,
@@ -900,7 +877,7 @@ public class VCardImporterTests extends VCardTestsBase {
                 .put(StructuredName.PHONETIC_FAMILY_NAME, "\uFF71\uFF9D\uFF84\uFF9E\uFF73")
                 .put(StructuredName.PHONETIC_GIVEN_NAME, "\uFF9B\uFF72\uFF84\uFF9E\u0031");
 
-        verifier.buildExpected(StructuredPostal.CONTENT_ITEM_TYPE)
+        verifier.addExpected(StructuredPostal.CONTENT_ITEM_TYPE)
                 .put(StructuredPostal.POSTCODE, "150-8512")
                 .put(StructuredPostal.NEIGHBORHOOD,
                         "\u6771\u4EAC\u90FD\u6E0B\u8C37\u533A\u685C" +
@@ -913,21 +890,16 @@ public class VCardImporterTests extends VCardTestsBase {
                         "\u30EB\u30EA\u30A2\u30F3\u30BF\u30EF\u30FC" +
                         "\u0036\u968E 150-8512")
                 .put(StructuredPostal.TYPE, StructuredPostal.TYPE_HOME);
-        verifier.buildExpected(Note.CONTENT_ITEM_TYPE)
+        verifier.addExpected(Note.CONTENT_ITEM_TYPE)
                 .put(Note.NOTE, "\u30E1\u30E2");
         verifier.verify(R.raw.v21_japanese_2, VCardConfig.VCARD_TYPE_V21_GENERIC_UTF8);
     }
 
-    public void testV21MultipleEntryCase() throws IOException, VCardException {
-        VCardParser_V21 parser = new VCardParser_V21();
-        VNodeBuilder builder = new VNodeBuilder();
-        InputStream is = getContext().getResources().openRawResource(R.raw.v21_multiple_entry);
-        assertEquals(true, parser.parse(is,"ISO-8859-1", builder));
-        is.close();
-        assertEquals(3, builder.vNodeList.size());
+    public void testV21MultipleEntryCase_Parse() throws IOException, VCardException {
         ContentValues contentValuesForShiftJis = new ContentValues();
         contentValuesForShiftJis.put("CHARSET", "SHIFT_JIS");
-        PropertyNodesVerifier verifier = new PropertyNodesVerifier(this)
+        PropertyNodesVerifier verifier = new PropertyNodesVerifier(this);
+        verifier.addPropertyNodesVerifierElem()
                 .addNodeWithOrder("VERSION", "2.1")
                 .addNodeWithOrder("N", "\u5B89\u85E4\u30ED\u30A4\u30C9\u0033;;;;",
                         Arrays.asList("\u5B89\u85E4\u30ED\u30A4\u30C9\u0033", "", "", "", ""),
@@ -940,9 +912,8 @@ public class VCardImporterTests extends VCardTestsBase {
                 .addNodeWithOrder("TEL", "10", new TypeSet("X-NEC-HOTEL"))
                 .addNodeWithOrder("TEL", "11", new TypeSet("X-NEC-SCHOOL"))
                 .addNodeWithOrder("TEL", "12", new TypeSet("FAX", "HOME"));
-        verifier.verify(builder.vNodeList.get(0));
-        
-        verifier = new PropertyNodesVerifier(this)
+
+        verifier.addPropertyNodesVerifierElem()
                 .addNodeWithOrder("VERSION", "2.1")
                 .addNodeWithOrder("N", "\u5B89\u85E4\u30ED\u30A4\u30C9\u0034;;;;",
                         Arrays.asList("\u5B89\u85E4\u30ED\u30A4\u30C9\u0034", "", "", "", ""),
@@ -955,8 +926,8 @@ public class VCardImporterTests extends VCardTestsBase {
                 .addNodeWithOrder("TEL", "14", new TypeSet("PAGER"))
                 .addNodeWithOrder("TEL", "15", new TypeSet("X-NEC-FAMILY"))
                 .addNodeWithOrder("TEL", "16", new TypeSet("X-NEC-GIRL"));
-        verifier.verify(builder.vNodeList.get(1));
-        verifier = new PropertyNodesVerifier(this)
+
+        verifier.addPropertyNodesVerifierElem()
                 .addNodeWithOrder("VERSION", "2.1")
                 .addNodeWithOrder("N", "\u5B89\u85E4\u30ED\u30A4\u30C9\u0035;;;;",
                         Arrays.asList("\u5B89\u85E4\u30ED\u30A4\u30C9\u0035", "", "", "", ""),
@@ -969,6 +940,77 @@ public class VCardImporterTests extends VCardTestsBase {
                 .addNodeWithOrder("TEL", "18", new TypeSet("X-NEC-FRIEND"))
                 .addNodeWithOrder("TEL", "19", new TypeSet("X-NEC-PHS"))
                 .addNodeWithOrder("TEL", "20", new TypeSet("X-NEC-RESTAURANT"));
-        verifier.verify(builder.vNodeList.get(2));
+        verifier.verify(R.raw.v21_multiple_entry, VCardConfig.VCARD_TYPE_V21_JAPANESE_SJIS);
+    }
+
+    public void testV21MultipleEntryCase() throws IOException, VCardException {
+        ImportVerifier verifier = new ImportVerifier();
+        ImportVerifierElem elem = verifier.addImportVerifierElem();
+        elem.addExpected(StructuredName.CONTENT_ITEM_TYPE)
+                .put(StructuredName.FAMILY_NAME, "\u5B89\u85E4\u30ED\u30A4\u30C9\u0033")
+                .put(StructuredName.DISPLAY_NAME, "\u5B89\u85E4\u30ED\u30A4\u30C9\u0033")
+                .put(StructuredName.PHONETIC_FAMILY_NAME,
+                        "\uFF71\uFF9D\uFF84\uFF9E\uFF73\uFF9B\uFF72\uFF84\uFF9E\u0033");
+        elem.addExpected(Phone.CONTENT_ITEM_TYPE)
+                .put(Phone.TYPE, Phone.TYPE_CUSTOM)
+                .put(Phone.LABEL, "NEC-SECRET")
+                .put(Phone.NUMBER, "9");
+        elem.addExpected(Phone.CONTENT_ITEM_TYPE)
+                .put(Phone.TYPE, Phone.TYPE_CUSTOM)
+                .put(Phone.LABEL, "NEC-HOTEL")
+                .put(Phone.NUMBER, "10");
+        elem.addExpected(Phone.CONTENT_ITEM_TYPE)
+                .put(Phone.TYPE, Phone.TYPE_CUSTOM)
+                .put(Phone.LABEL, "NEC-SCHOOL")
+                .put(Phone.NUMBER, "11");
+        elem.addExpected(Phone.CONTENT_ITEM_TYPE)
+                .put(Phone.TYPE, Phone.TYPE_FAX_HOME)
+                .put(Phone.NUMBER, "12");
+
+        elem = verifier.addImportVerifierElem();
+        elem.addExpected(StructuredName.CONTENT_ITEM_TYPE)
+                .put(StructuredName.FAMILY_NAME, "\u5B89\u85E4\u30ED\u30A4\u30C9\u0034")
+                .put(StructuredName.DISPLAY_NAME, "\u5B89\u85E4\u30ED\u30A4\u30C9\u0034")
+                .put(StructuredName.PHONETIC_FAMILY_NAME,
+                        "\uFF71\uFF9D\uFF84\uFF9E\uFF73\uFF9B\uFF72\uFF84\uFF9E\u0034");
+        elem.addExpected(Phone.CONTENT_ITEM_TYPE)
+                .put(Phone.TYPE, Phone.TYPE_CUSTOM)
+                .put(Phone.LABEL, "MODEM")
+                .put(Phone.NUMBER, "13");
+        elem.addExpected(Phone.CONTENT_ITEM_TYPE)
+                .put(Phone.TYPE, Phone.TYPE_PAGER)
+                .put(Phone.NUMBER, "14");
+        elem.addExpected(Phone.CONTENT_ITEM_TYPE)
+                .put(Phone.TYPE, Phone.TYPE_CUSTOM)
+                .put(Phone.LABEL, "NEC-FAMILY")
+                .put(Phone.NUMBER, "15");
+        elem.addExpected(Phone.CONTENT_ITEM_TYPE)
+                .put(Phone.TYPE, Phone.TYPE_CUSTOM)
+                .put(Phone.LABEL, "NEC-GIRL")
+                .put(Phone.NUMBER, "16");
+
+        elem = verifier.addImportVerifierElem();
+        elem.addExpected(StructuredName.CONTENT_ITEM_TYPE)
+                .put(StructuredName.FAMILY_NAME, "\u5B89\u85E4\u30ED\u30A4\u30C9\u0035")
+                .put(StructuredName.DISPLAY_NAME, "\u5B89\u85E4\u30ED\u30A4\u30C9\u0035")
+                .put(StructuredName.PHONETIC_FAMILY_NAME,
+                        "\uFF71\uFF9D\uFF84\uFF9E\uFF73\uFF9B\uFF72\uFF84\uFF9E\u0035");
+        elem.addExpected(Phone.CONTENT_ITEM_TYPE)
+                .put(Phone.TYPE, Phone.TYPE_CUSTOM)
+                .put(Phone.LABEL, "NEC-BOY")
+                .put(Phone.NUMBER, "17");
+        elem.addExpected(Phone.CONTENT_ITEM_TYPE)
+                .put(Phone.TYPE, Phone.TYPE_CUSTOM)
+                .put(Phone.LABEL, "NEC-FRIEND")
+                .put(Phone.NUMBER, "18");
+        elem.addExpected(Phone.CONTENT_ITEM_TYPE)
+                .put(Phone.TYPE, Phone.TYPE_CUSTOM)
+                .put(Phone.LABEL, "NEC-PHS")
+                .put(Phone.NUMBER, "19");
+        elem.addExpected(Phone.CONTENT_ITEM_TYPE)
+                .put(Phone.TYPE, Phone.TYPE_CUSTOM)
+                .put(Phone.LABEL, "NEC-RESTAURANT")
+                .put(Phone.NUMBER, "20");
+        verifier.verify(R.raw.v21_multiple_entry, VCardConfig.VCARD_TYPE_V21_JAPANESE_SJIS);
     }
 }

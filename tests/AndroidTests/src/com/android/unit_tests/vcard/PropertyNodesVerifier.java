@@ -17,14 +17,73 @@
 package com.android.unit_tests.vcard;
 
 import android.content.ContentValues;
+import android.pim.vcard.VCardConfig;
+import android.pim.vcard.VCardParser;
+import android.pim.vcard.VCardParser_V21;
+import android.pim.vcard.VCardParser_V30;
+import android.pim.vcard.exception.VCardException;
+import android.test.AndroidTestCase;
+import android.util.Log;
 
+import junit.framework.TestCase;
+
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
-import junit.framework.TestCase;
+public class PropertyNodesVerifier extends VNodeBuilder {
+    private final List<PropertyNodesVerifierElem> mPropertyNodesVerifierElemList;
+    private final AndroidTestCase mAndroidTestCase;
+    private int mIndex;
+
+    public PropertyNodesVerifier(AndroidTestCase testCase) {
+        mPropertyNodesVerifierElemList = new ArrayList<PropertyNodesVerifierElem>();
+        mAndroidTestCase = testCase;
+    }
+
+    public PropertyNodesVerifierElem addPropertyNodesVerifierElem() {
+        PropertyNodesVerifierElem elem = new PropertyNodesVerifierElem(mAndroidTestCase);
+        mPropertyNodesVerifierElemList.add(elem);
+        return elem;
+    }
+
+    public void verify(int resId, int vCardType)
+            throws IOException, VCardException {
+        verify(mAndroidTestCase.getContext().getResources().openRawResource(resId), vCardType);
+    }
+
+    public void verify(InputStream is, int vCardType) throws IOException, VCardException {
+        final VCardParser vCardParser;
+        if (VCardConfig.isV30(vCardType)) {
+            vCardParser = new VCardParser_V30(true);  // use StrictParsing
+        } else {
+            vCardParser = new VCardParser_V21();
+        }
+        try {
+            vCardParser.parse(is, this);
+        } finally {
+            if (is != null) {
+                try {
+                    is.close();
+                } catch (IOException e) {
+                }
+            }
+        }
+    }
+
+    @Override
+    public void endRecord() {
+        super.endRecord();
+        mAndroidTestCase.assertTrue(mIndex < mPropertyNodesVerifierElemList.size());
+        mAndroidTestCase.assertTrue(mIndex < vNodeList.size());
+        mPropertyNodesVerifierElemList.get(mIndex).verify(vNodeList.get(mIndex));
+        mIndex++;
+    }
+}
 
 /**
  * Utility class which verifies input VNode.
@@ -34,7 +93,7 @@ import junit.framework.TestCase;
  * If the node does not exist in the "ordered list", the class refers to
  * "unorderd expected property set" and checks the node is expected somewhere.
  */
-public class PropertyNodesVerifier {
+class PropertyNodesVerifierElem {
     public static class TypeSet extends HashSet<String> {
         public TypeSet(String ... array) {
             super(Arrays.asList(array));
@@ -53,7 +112,7 @@ public class PropertyNodesVerifier {
     private final ArrayList<PropertyNode> mUnorderedNodeList;
     private final TestCase mTestCase;
 
-    public PropertyNodesVerifier(TestCase testCase) {
+    public PropertyNodesVerifierElem(TestCase testCase) {
         mOrderedNodeMap = new HashMap<String, List<PropertyNode>>();
         mUnorderedNodeList = new ArrayList<PropertyNode>();
         mTestCase = testCase;
@@ -61,16 +120,16 @@ public class PropertyNodesVerifier {
 
     // WithOrder
 
-    public PropertyNodesVerifier addNodeWithOrder(String propName, String propValue) {
+    public PropertyNodesVerifierElem addNodeWithOrder(String propName, String propValue) {
         return addNodeWithOrder(propName, propValue, null, null, null, null, null);
     }
 
-    public PropertyNodesVerifier addNodeWithOrder(String propName, String propValue,
+    public PropertyNodesVerifierElem addNodeWithOrder(String propName, String propValue,
             List<String> propValueList) {
         return addNodeWithOrder(propName, propValue, propValueList, null, null, null, null);
     }
 
-    public PropertyNodesVerifier addNodeWithOrder(String propName, List<String> propValueList) {
+    public PropertyNodesVerifierElem addNodeWithOrder(String propName, List<String> propValueList) {
         StringBuffer buffer = new StringBuffer();
         boolean first = true;
         for (String propValueElem : propValueList) {
@@ -85,18 +144,18 @@ public class PropertyNodesVerifier {
                 null, null, null, null);
     }
 
-    public PropertyNodesVerifier addNodeWithOrder(String propName, String propValue,
+    public PropertyNodesVerifierElem addNodeWithOrder(String propName, String propValue,
             TypeSet paramMap_TYPE) {
         return addNodeWithOrder(propName, propValue, null, null, null, paramMap_TYPE, null);
     }
 
-    public PropertyNodesVerifier addNodeWithOrder(String propName, String propValue,
+    public PropertyNodesVerifierElem addNodeWithOrder(String propName, String propValue,
             List<String> propValueList, TypeSet paramMap_TYPE) {
         return addNodeWithOrder(propName, propValue, propValueList, null, null,
                 paramMap_TYPE, null);
     }
 
-    public PropertyNodesVerifier addNodeWithOrder(String propName, String propValue,
+    public PropertyNodesVerifierElem addNodeWithOrder(String propName, String propValue,
             List<String> propValueList, byte[] propValue_bytes,
             ContentValues paramMap, TypeSet paramMap_TYPE, GroupSet propGroupSet) {
         PropertyNode propertyNode = new PropertyNode(propName,
@@ -113,16 +172,16 @@ public class PropertyNodesVerifier {
 
     // WithoutOrder
 
-    public PropertyNodesVerifier addNodeWithoutOrder(String propName, String propValue) {
+    public PropertyNodesVerifierElem addNodeWithoutOrder(String propName, String propValue) {
         return addNodeWithoutOrder(propName, propValue, null, null, null, null, null);
     }
 
-    public PropertyNodesVerifier addNodeWithoutOrder(String propName, String propValue,
+    public PropertyNodesVerifierElem addNodeWithoutOrder(String propName, String propValue,
             List<String> propValueList) {
         return addNodeWithoutOrder(propName, propValue, propValueList, null, null, null, null);
     }
 
-    public PropertyNodesVerifier addNodeWithoutOrder(String propName, List<String> propValueList) {
+    public PropertyNodesVerifierElem addNodeWithoutOrder(String propName, List<String> propValueList) {
         StringBuffer buffer = new StringBuffer();
         boolean first = true;
         for (String propValueElem : propValueList) {
@@ -137,18 +196,18 @@ public class PropertyNodesVerifier {
                 null, null, null, null);
     }
 
-    public PropertyNodesVerifier addNodeWithoutOrder(String propName, String propValue,
+    public PropertyNodesVerifierElem addNodeWithoutOrder(String propName, String propValue,
             TypeSet paramMap_TYPE) {
         return addNodeWithoutOrder(propName, propValue, null, null, null, paramMap_TYPE, null);
     }
 
-    public PropertyNodesVerifier addNodeWithoutOrder(String propName, String propValue,
+    public PropertyNodesVerifierElem addNodeWithoutOrder(String propName, String propValue,
             List<String> propValueList, TypeSet paramMap_TYPE) {
         return addNodeWithoutOrder(propName, propValue, propValueList, null, null,
                 paramMap_TYPE, null);
     }
 
-    public PropertyNodesVerifier addNodeWithoutOrder(String propName, String propValue,
+    public PropertyNodesVerifierElem addNodeWithoutOrder(String propName, String propValue,
             List<String> propValueList, byte[] propValue_bytes,
             ContentValues paramMap, TypeSet paramMap_TYPE, GroupSet propGroupSet) {
         mUnorderedNodeList.add(new PropertyNode(propName, propValue,
@@ -185,8 +244,7 @@ public class PropertyNodesVerifier {
         if (size > 0) {
             for (int i = 0; i < size; i++) {
                 PropertyNode expectedNode = expectedNodeList.get(i);
-                List<PropertyNode> expectedButDifferentValueList =
-                    new ArrayList<PropertyNode>();
+                List<PropertyNode> expectedButDifferentValueList = new ArrayList<PropertyNode>();
                 if (expectedNode.propName.equals(propName)) {
                     if (expectedNode.equals(actualNode)) {
                         expectedNodeList.remove(i);
