@@ -40,6 +40,7 @@
 #include <pixelflinger/pixelflinger.h>
 
 #include <private/ui/android_natives_priv.h>
+#include <private/ui/sw_gralloc_handle.h>
 
 #include <hardware/copybit.h>
 
@@ -449,15 +450,26 @@ void egl_window_surface_v2_t::disconnect()
 status_t egl_window_surface_v2_t::lock(
         android_native_buffer_t* buf, int usage, void** vaddr)
 {
-    int err = module->lock(module, buf->handle, 
-            usage, 0, 0, buf->width, buf->height, vaddr);
+    int err;
+    if (sw_gralloc_handle_t::validate(buf->handle) < 0) {
+        err = module->lock(module, buf->handle,
+                usage, 0, 0, buf->width, buf->height, vaddr);
+    } else {
+        sw_gralloc_handle_t const* hnd =
+                reinterpret_cast<sw_gralloc_handle_t const*>(buf->handle);
+        *vaddr = (void*)hnd->base;
+        err = NO_ERROR;
+    }
     return err;
 }
 
 status_t egl_window_surface_v2_t::unlock(android_native_buffer_t* buf)
 {
     if (!buf) return BAD_VALUE;
-    int err = module->unlock(module, buf->handle);
+    int err = NO_ERROR;
+    if (sw_gralloc_handle_t::validate(buf->handle) < 0) {
+        err = module->unlock(module, buf->handle);
+    }
     return err;
 }
 
