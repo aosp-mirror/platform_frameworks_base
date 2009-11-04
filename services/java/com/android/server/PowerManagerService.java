@@ -1760,7 +1760,8 @@ class PowerManagerService extends IPowerManager.Stub
         try {
             if (mScreenBrightnessOverride >= 0) {
                 return mScreenBrightnessOverride;
-            } else if (mLightSensorBrightness >= 0 && mUseSoftwareAutoBrightness) {
+            } else if (mLightSensorBrightness >= 0 && mUseSoftwareAutoBrightness
+                    && mAutoBrightessEnabled) {
                 return mLightSensorBrightness;
             }
             final int brightness = Settings.System.getInt(mContext.getContentResolver(),
