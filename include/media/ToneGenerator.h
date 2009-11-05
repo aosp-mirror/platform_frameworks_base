@@ -151,7 +151,7 @@ public:
         NUM_SUP_TONES = LAST_SUP_TONE-FIRST_SUP_TONE+1
     };
 
-    ToneGenerator(int streamType, float volume);
+    ToneGenerator(int streamType, float volume, bool threadCanCallJava = false);
     ~ToneGenerator();
 
     bool startTone(int toneType, int durationMs = -1);
@@ -242,6 +242,7 @@ private:
 
     static const ToneDescriptor sToneDescriptors[];
 
+    bool mThreadCanCallJava;
     unsigned int mTotalSmp;  // Total number of audio samples played (gives current time)
     unsigned int mNextSegSmp;  // Position of next segment transition expressed in samples
     // NOTE: because mTotalSmp, mNextSegSmp are stored on 32 bit, current design will operate properly
