@@ -422,31 +422,13 @@ void IPCThreadState::joinThreadPool(bool isMain)
                     << getReturnString(cmd) << endl;
             }
 
-            bool isTainted = false;
-
-            {
-                SchedPolicy policy;
-                get_sched_policy(getpid(), &policy);
-
-                if (policy == SP_BACKGROUND) {
-                    isTainted = true;
-                }
-            }
 
             result = executeCommand(cmd);
 
-            // Make sure that after executing the commands that we put the thread back into the
-            // default cgroup.
-            {
-                int pid = getpid();
-                SchedPolicy policy;
-                get_sched_policy(pid, &policy);
-
-                if (!isTainted && policy == SP_BACKGROUND) {
-                    LOGW("*** THREAD %p (PID %p) was left in SP_BACKGROUND with a priority of %d\n",
-                        (void*)pthread_self(), pid, getpriority(PRIO_PROCESS, pid));
-                }
-            }
+            // Make sure that after executing the command that we put the thread back into the
+            // default cgroup. This is just a failsafe incase the thread's priority or cgroup was 
+            // not properly restored.
+            set_sched_policy(getpid(), SP_FOREGROUND);
         }
         
         // Let this thread exit the thread pool if it is no longer
