@@ -97,7 +97,7 @@ class HeadsetObserver extends UEventObserver {
 
     private synchronized final void update(String newName, int newState) {
         if (newName != mHeadsetName || newState != mHeadsetState) {
-            boolean isUnplug = (newState == 0 && mHeadsetState == 1);
+            boolean isUnplug = (newState == 0 && mHeadsetState > 0);
             mHeadsetName = newName;
             mHeadsetState = newState;
             mAudioRouteNeedsUpdate = true;
@@ -123,7 +123,7 @@ class HeadsetObserver extends UEventObserver {
         Intent intent = new Intent(Intent.ACTION_HEADSET_PLUG);
         intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
 
-        intent.putExtra("state", mHeadsetState);
+        intent.putExtra("state", isUnplug ? 0 : 1);
         intent.putExtra("name", mHeadsetName);
 
         // TODO: Should we require a permission?
@@ -137,7 +137,7 @@ class HeadsetObserver extends UEventObserver {
 
     private synchronized final void updateAudioRoute() {
         if (mAudioRouteNeedsUpdate) {
-            mAudioManager.setWiredHeadsetOn(mHeadsetState == 1);
+            mAudioManager.setWiredHeadsetOn(mHeadsetState > 0);
             mAudioRouteNeedsUpdate = false;
         }
     }
