@@ -104,6 +104,7 @@ void Allocation::uploadToTexture(uint32_t lodOffset)
         glGenTextures(1, &mTextureID);
     }
     glBindTexture(GL_TEXTURE_2D, mTextureID);
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
     Adapter2D adapt(getContext(), this);
     for(uint32_t lod = 0; (lod + lodOffset) < mType->getLODCount(); lod++) {
