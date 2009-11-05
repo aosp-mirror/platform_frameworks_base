@@ -101,11 +101,6 @@ status_t AudioRecord::set(
         return INVALID_OPERATION;
     }
 
-    const sp<IAudioFlinger>& audioFlinger = AudioSystem::get_audio_flinger();
-    if (audioFlinger == 0) {
-        return NO_INIT;
-    }
-
     if (inputSource == AUDIO_SOURCE_DEFAULT) {
         inputSource = AUDIO_SOURCE_MIC;
     }
@@ -171,22 +166,14 @@ status_t AudioRecord::set(
         notificationFrames = frameCount/2;
     }
 
-    // open record channel
-    status_t status;
-    sp<IAudioRecord> record = audioFlinger->openRecord(getpid(), mInput,
-                                                       sampleRate, format,
-                                                       channelCount,
-                                                       frameCount,
-                                                       ((uint16_t)flags) << 16,
-                                                       &status);
-    if (record == 0) {
-        LOGE("AudioFlinger could not create record track, status: %d", status);
+    // create the IAudioRecord
+    status_t status = openRecord(sampleRate, format, channelCount,
+                                 frameCount, flags);
+
+    if (status != NO_ERROR) {
         return status;
     }
-    sp<IMemory> cblk = record->getCblk();
-    if (cblk == 0) {
-        return NO_INIT;
-    }
+
     if (cbf != 0) {
         mClientRecordThread = new ClientRecordThread(*this, threadCanCallJava);
         if (mClientRecordThread == 0) {
@@ -196,11 +183,6 @@ status_t AudioRecord::set(
 
     mStatus = NO_ERROR;
 
-    mAudioRecord = record;
-    mCblkMemory = cblk;
-    mCblk = static_cast<audio_track_cblk_t*>(cblk->pointer());
-    mCblk->buffers = (char*)mCblk + sizeof(audio_track_cblk_t);
-    mCblk->out = 0;
     mFormat = format;
     // Update buffer size in case it has been limited by AudioFlinger during track creation
     mFrameCount = mCblk->frameCount;
@@ -217,6 +199,7 @@ status_t AudioRecord::set(
     mNewPosition = 0;
     mUpdatePeriod = 0;
     mInputSource = (uint8_t)inputSource;
+    mFlags = flags;
 
     return NO_ERROR;
 }
@@ -284,15 +267,26 @@ status_t AudioRecord::start()
     if (android_atomic_or(1, &mActive) == 0) {
         ret = AudioSystem::startInput(mInput);
         if (ret == NO_ERROR) {
-            mNewPosition = mCblk->user + mUpdatePeriod;
-            mCblk->bufferTimeoutMs = MAX_RUN_TIMEOUT_MS;
-            mCblk->waitTimeMs = 0;
-            if (t != 0) {
-               t->run("ClientRecordThread", THREAD_PRIORITY_AUDIO_CLIENT);
-            } else {
-                setpriority(PRIO_PROCESS, 0, THREAD_PRIORITY_AUDIO_CLIENT);
-            }
             ret = mAudioRecord->start();
+            if (ret == DEAD_OBJECT) {
+                LOGV("start() dead IAudioRecord: creating a new one");
+                ret = openRecord(mCblk->sampleRate, mFormat, mChannelCount,
+                        mFrameCount, mFlags);
+            }
+            if (ret == NO_ERROR) {
+                mNewPosition = mCblk->user + mUpdatePeriod;
+                mCblk->bufferTimeoutMs = MAX_RUN_TIMEOUT_MS;
+                mCblk->waitTimeMs = 0;
+                if (t != 0) {
+                   t->run("ClientRecordThread", THREAD_PRIORITY_AUDIO_CLIENT);
+                } else {
+                    setpriority(PRIO_PROCESS, 0, THREAD_PRIORITY_AUDIO_CLIENT);
+                }
+            } else {
+                LOGV("start() failed");
+                AudioSystem::stopInput(mInput);
+                android_atomic_and(~1, &mActive);
+            }
         }
     }
 
@@ -396,10 +390,48 @@ status_t AudioRecord::getPosition(uint32_t *position)
 
 // -------------------------------------------------------------------------
 
+status_t AudioRecord::openRecord(
+        uint32_t sampleRate,
+        int format,
+        int channelCount,
+        int frameCount,
+        uint32_t flags)
+{
+    status_t status;
+    const sp<IAudioFlinger>& audioFlinger = AudioSystem::get_audio_flinger();
+    if (audioFlinger == 0) {
+        return NO_INIT;
+    }
+
+    sp<IAudioRecord> record = audioFlinger->openRecord(getpid(), mInput,
+                                                       sampleRate, format,
+                                                       channelCount,
+                                                       frameCount,
+                                                       ((uint16_t)flags) << 16,
+                                                       &status);
+    if (record == 0) {
+        LOGE("AudioFlinger could not create record track, status: %d", status);
+        return status;
+    }
+    sp<IMemory> cblk = record->getCblk();
+    if (cblk == 0) {
+        LOGE("Could not get control block");
+        return NO_INIT;
+    }
+    mAudioRecord.clear();
+    mAudioRecord = record;
+    mCblkMemory.clear();
+    mCblkMemory = cblk;
+    mCblk = static_cast<audio_track_cblk_t*>(cblk->pointer());
+    mCblk->buffers = (char*)mCblk + sizeof(audio_track_cblk_t);
+    mCblk->out = 0;
+
+    return NO_ERROR;
+}
+
 status_t AudioRecord::obtainBuffer(Buffer* audioBuffer, int32_t waitCount)
 {
     int active;
-    int timeout = 0;
     status_t result;
     audio_track_cblk_t* cblk = mCblk;
     uint32_t framesReq = audioBuffer->frameCount;
@@ -411,25 +443,40 @@ status_t AudioRecord::obtainBuffer(Buffer* audioBuffer, int32_t waitCount)
     uint32_t framesReady = cblk->framesReady();
 
     if (framesReady == 0) {
-        Mutex::Autolock _l(cblk->lock);
+        cblk->lock.lock();
         goto start_loop_here;
         while (framesReady == 0) {
             active = mActive;
-            if (UNLIKELY(!active))
+            if (UNLIKELY(!active)) {
+                cblk->lock.unlock();
                 return NO_MORE_BUFFERS;
-            if (UNLIKELY(!waitCount))
+            }
+            if (UNLIKELY(!waitCount)) {
+                cblk->lock.unlock();
                 return WOULD_BLOCK;
-            timeout = 0;
+            }
             result = cblk->cv.waitRelative(cblk->lock, milliseconds(waitTimeMs));
             if (__builtin_expect(result!=NO_ERROR, false)) {
                 cblk->waitTimeMs += waitTimeMs;
                 if (cblk->waitTimeMs >= cblk->bufferTimeoutMs) {
                     LOGW(   "obtainBuffer timed out (is the CPU pegged?) "
                             "user=%08x, server=%08x", cblk->user, cblk->server);
-                    timeout = 1;
+                    cblk->lock.unlock();
+                    result = mAudioRecord->start();
+                    if (result == DEAD_OBJECT) {
+                        LOGW("obtainBuffer() dead IAudioRecord: creating a new one");
+                        result = openRecord(cblk->sampleRate, mFormat, mChannelCount,
+                                            mFrameCount, mFlags);
+                        if (result == NO_ERROR) {
+                            cblk = mCblk;
+                            cblk->bufferTimeoutMs = MAX_RUN_TIMEOUT_MS;
+                        }
+                    }
+                    cblk->lock.lock();
                     cblk->waitTimeMs = 0;
                 }
                 if (--waitCount == 0) {
+                    cblk->lock.unlock();
                     return TIMED_OUT;
                 }
             }
@@ -437,12 +484,8 @@ status_t AudioRecord::obtainBuffer(Buffer* audioBuffer, int32_t waitCount)
         start_loop_here:
             framesReady = cblk->framesReady();
         }
+        cblk->lock.unlock();
     }
-
-    LOGW_IF(timeout,
-        "*** SERIOUS WARNING *** obtainBuffer() timed out "
-        "but didn't need to be locked. We recovered, but "
-        "this shouldn't happen (user=%08x, server=%08x)", cblk->user, cblk->server);
 
     cblk->waitTimeMs = 0;
 
