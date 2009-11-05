@@ -1201,8 +1201,8 @@
   <public type="attr" name="quickContactBadgeStyleSmallWindowSmall" />
   <public type="attr" name="quickContactBadgeStyleSmallWindowMedium" />
   <public type="attr" name="quickContactBadgeStyleSmallWindowLarge" />
-
   <public type="attr" name="wallpaperAuthor" />
   <public type="attr" name="wallpaperDescription" />
+  <public type="attr" name="autoStart" />
   
 </resources>

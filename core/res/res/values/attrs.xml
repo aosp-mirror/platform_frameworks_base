@@ -2138,6 +2138,8 @@
     </declare-styleable>
     <declare-styleable name="ViewFlipper">
         <attr name="flipInterval" format="integer" min="0" />
+        <!-- When true, automatically start animating -->
+        <attr name="autoStart" format="boolean" />
     </declare-styleable>
     <declare-styleable name="ViewSwitcher">
     </declare-styleable>
