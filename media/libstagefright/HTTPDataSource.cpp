@@ -19,7 +19,7 @@
 #include <media/stagefright/HTTPDataSource.h>
 #include <media/stagefright/HTTPStream.h>
 #include <media/stagefright/MediaDebug.h>
-#include <media/stagefright/string.h>
+#include <media/stagefright/stagefright_string.h>
 
 namespace android {
 

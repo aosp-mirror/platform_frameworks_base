@@ -18,12 +18,12 @@
 #define LOG_TAG "OMX"
 #include <utils/Log.h>
 
-#include <sys/socket.h>
-
-#include "OMX.h"
+#include "../include/OMX.h"
 #include "OMXRenderer.h"
 
 #include "pv_omxcore.h"
+
+#include "../include/OMXNodeInstance.h"
 
 #include <binder/IMemory.h>
 #include <media/stagefright/MediaDebug.h>
@@ -36,47 +36,10 @@
 
 namespace android {
 
-class NodeMeta {
-public:
-    NodeMeta(OMX *owner)
-        : mOwner(owner),
-          mHandle(NULL) {
-    }
-
-    OMX *owner() const {
-        return mOwner;
-    }
-
-    void setHandle(OMX_HANDLETYPE handle) {
-        CHECK_EQ(mHandle, NULL);
-        mHandle = handle;
-    }
-
-    OMX_HANDLETYPE handle() const {
-        return mHandle;
-    }
-
-    void setObserver(const sp<IOMXObserver> &observer) {
-        mObserver = observer;
-    }
-
-    sp<IOMXObserver> observer() {
-        return mObserver;
-    }
-
-private:
-    OMX *mOwner;
-    OMX_HANDLETYPE mHandle;
-    sp<IOMXObserver> mObserver;
-
-    NodeMeta(const NodeMeta &);
-    NodeMeta &operator=(const NodeMeta &);
-};
-
 ////////////////////////////////////////////////////////////////////////////////
 
 struct OMX::CallbackDispatcher : public RefBase {
-    CallbackDispatcher();
+    CallbackDispatcher(OMX *owner);
 
     void post(const omx_message &msg);
 
@@ -85,6 +48,8 @@ protected:
 
 private:
     Mutex mLock;
+
+    OMX *mOwner;
     bool mDone;
     Condition mQueueChanged;
     List<omx_message> mQueue;
@@ -100,8 +65,9 @@ private:
     CallbackDispatcher &operator=(const CallbackDispatcher &);
 };
 
-OMX::CallbackDispatcher::CallbackDispatcher()
-    : mDone(false) {
+OMX::CallbackDispatcher::CallbackDispatcher(OMX *owner)
+    : mOwner(owner),
+      mDone(false) {
     pthread_attr_t attr;
     pthread_attr_init(&attr);
     pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
@@ -130,12 +96,12 @@ void OMX::CallbackDispatcher::post(const omx_message &msg) {
 }
 
 void OMX::CallbackDispatcher::dispatch(const omx_message &msg) {
-    NodeMeta *meta = static_cast<NodeMeta *>(msg.node);
-
-    sp<IOMXObserver> observer = meta->observer();
-    if (observer.get() != NULL) {
-        observer->on_message(msg);
+    OMXNodeInstance *instance = mOwner->findInstance(msg.node);
+    if (instance == NULL) {
+        LOGV("Would have dispatched a message to a node that's already gone.");
+        return;
     }
+    instance->onMessage(msg);
 }
 
 // static
@@ -213,46 +179,30 @@ private:
     BufferMeta &operator=(const BufferMeta &);
 };
 
-// static
-OMX_CALLBACKTYPE OMX::kCallbacks = {
-    &OnEvent, &OnEmptyBufferDone, &OnFillBufferDone
-};
-
-// static
-OMX_ERRORTYPE OMX::OnEvent(
-        OMX_IN OMX_HANDLETYPE hComponent,
-        OMX_IN OMX_PTR pAppData,
-        OMX_IN OMX_EVENTTYPE eEvent,
-        OMX_IN OMX_U32 nData1,
-        OMX_IN OMX_U32 nData2,
-        OMX_IN OMX_PTR pEventData) {
-    NodeMeta *meta = static_cast<NodeMeta *>(pAppData);
-    return meta->owner()->OnEvent(meta, eEvent, nData1, nData2, pEventData);
-}
-
-// static
-OMX_ERRORTYPE OMX::OnEmptyBufferDone(
-        OMX_IN OMX_HANDLETYPE hComponent,
-        OMX_IN OMX_PTR pAppData,
-        OMX_IN OMX_BUFFERHEADERTYPE* pBuffer) {
-    NodeMeta *meta = static_cast<NodeMeta *>(pAppData);
-    return meta->owner()->OnEmptyBufferDone(meta, pBuffer);
-}
-
-// static
-OMX_ERRORTYPE OMX::OnFillBufferDone(
-        OMX_IN OMX_HANDLETYPE hComponent,
-        OMX_IN OMX_PTR pAppData,
-        OMX_IN OMX_BUFFERHEADERTYPE* pBuffer) {
-    NodeMeta *meta = static_cast<NodeMeta *>(pAppData);
-    return meta->owner()->OnFillBufferDone(meta, pBuffer);
-}
-
 OMX::OMX()
-    : mDispatcher(new CallbackDispatcher) {
+    : mDispatcher(new CallbackDispatcher(this)),
+      mNodeCounter(0) {
 }
 
-status_t OMX::list_nodes(List<String8> *list) {
+void OMX::binderDied(const wp<IBinder> &the_late_who) {
+    OMXNodeInstance *instance;
+
+    {
+        Mutex::Autolock autoLock(mLock);
+
+        ssize_t index = mLiveNodes.indexOfKey(the_late_who);
+        CHECK(index >= 0);
+
+        instance = mLiveNodes.editValueAt(index);
+        mLiveNodes.removeItemsAt(index);
+
+        invalidateNodeID_l(instance->nodeID());
+    }
+
+    instance->onObserverDied();
+}
+
+status_t OMX::listNodes(List<String8> *list) {
     OMX_MasterInit();  // XXX Put this somewhere else.
 
     list->clear();
@@ -269,204 +219,132 @@ status_t OMX::list_nodes(List<String8> *list) {
     return OK;
 }
 
-status_t OMX::allocate_node(const char *name, node_id *node) {
+status_t OMX::allocateNode(
+        const char *name, const sp<IOMXObserver> &observer, node_id *node) {
     Mutex::Autolock autoLock(mLock);
 
     *node = 0;
 
     OMX_MasterInit();  // XXX Put this somewhere else.
 
-    NodeMeta *meta = new NodeMeta(this);
+    OMXNodeInstance *instance = new OMXNodeInstance(this, observer);
 
     OMX_HANDLETYPE handle;
     OMX_ERRORTYPE err = OMX_MasterGetHandle(
-            &handle, const_cast<char *>(name), meta, &kCallbacks);
+            &handle, const_cast<char *>(name), instance,
+            &OMXNodeInstance::kCallbacks);
 
     if (err != OMX_ErrorNone) {
         LOGE("FAILED to allocate omx component '%s'", name);
 
-        delete meta;
-        meta = NULL;
+        instance->onGetHandleFailed();
 
         return UNKNOWN_ERROR;
     }
 
-    meta->setHandle(handle);
+    *node = makeNodeID(instance);
 
-    *node = meta;
+    instance->setHandle(*node, handle);
+
+    mLiveNodes.add(observer->asBinder(), instance);
+    observer->asBinder()->linkToDeath(this);
 
     return OK;
 }
 
-status_t OMX::free_node(node_id node) {
-    Mutex::Autolock autoLock(mLock);
+status_t OMX::freeNode(node_id node) {
+    OMXNodeInstance *instance = findInstance(node);
 
-    NodeMeta *meta = static_cast<NodeMeta *>(node);
+    ssize_t index = mLiveNodes.indexOfKey(instance->observer()->asBinder());
+    CHECK(index >= 0);
+    mLiveNodes.removeItemsAt(index);
+    instance->observer()->asBinder()->unlinkToDeath(this);
 
-    OMX_ERRORTYPE err = OMX_MasterFreeHandle(meta->handle());
-
-    delete meta;
-    meta = NULL;
-
-    return (err != OMX_ErrorNone) ? UNKNOWN_ERROR : OK;
+    return instance->freeNode();
 }
 
-status_t OMX::send_command(
+status_t OMX::sendCommand(
         node_id node, OMX_COMMANDTYPE cmd, OMX_S32 param) {
-    Mutex::Autolock autoLock(mLock);
-
-    NodeMeta *meta = static_cast<NodeMeta *>(node);
-    OMX_ERRORTYPE err = OMX_SendCommand(meta->handle(), cmd, param, NULL);
-
-    return (err != OMX_ErrorNone) ? UNKNOWN_ERROR : OK;
+    return findInstance(node)->sendCommand(cmd, param);
 }
 
-status_t OMX::get_parameter(
+status_t OMX::getParameter(
         node_id node, OMX_INDEXTYPE index,
         void *params, size_t size) {
-    Mutex::Autolock autoLock(mLock);
-
-    NodeMeta *meta = static_cast<NodeMeta *>(node);
-    OMX_ERRORTYPE err = OMX_GetParameter(meta->handle(), index, params);
-
-    return (err != OMX_ErrorNone) ? UNKNOWN_ERROR : OK;
+    return findInstance(node)->getParameter(
+            index, params, size);
 }
 
-status_t OMX::set_parameter(
+status_t OMX::setParameter(
         node_id node, OMX_INDEXTYPE index,
         const void *params, size_t size) {
-    Mutex::Autolock autoLock(mLock);
-
-    NodeMeta *meta = static_cast<NodeMeta *>(node);
-    OMX_ERRORTYPE err =
-        OMX_SetParameter(meta->handle(), index, const_cast<void *>(params));
-
-    return (err != OMX_ErrorNone) ? UNKNOWN_ERROR : OK;
+    return findInstance(node)->setParameter(
+            index, params, size);
 }
 
-status_t OMX::get_config(
+status_t OMX::getConfig(
         node_id node, OMX_INDEXTYPE index,
         void *params, size_t size) {
-    Mutex::Autolock autoLock(mLock);
-
-    NodeMeta *meta = static_cast<NodeMeta *>(node);
-    OMX_ERRORTYPE err = OMX_GetConfig(meta->handle(), index, params);
-
-    return (err != OMX_ErrorNone) ? UNKNOWN_ERROR : OK;
+    return findInstance(node)->getConfig(
+            index, params, size);
 }
 
-status_t OMX::set_config(
+status_t OMX::setConfig(
         node_id node, OMX_INDEXTYPE index,
         const void *params, size_t size) {
-    Mutex::Autolock autoLock(mLock);
-
-    NodeMeta *meta = static_cast<NodeMeta *>(node);
-    OMX_ERRORTYPE err =
-        OMX_SetConfig(meta->handle(), index, const_cast<void *>(params));
-
-    return (err != OMX_ErrorNone) ? UNKNOWN_ERROR : OK;
+    return findInstance(node)->setConfig(
+            index, params, size);
 }
 
-status_t OMX::use_buffer(
+status_t OMX::useBuffer(
         node_id node, OMX_U32 port_index, const sp<IMemory> &params,
         buffer_id *buffer) {
-    Mutex::Autolock autoLock(mLock);
-
-    BufferMeta *buffer_meta = new BufferMeta(this, params);
-
-    OMX_BUFFERHEADERTYPE *header;
-
-    NodeMeta *node_meta = static_cast<NodeMeta *>(node);
-    OMX_ERRORTYPE err =
-        OMX_UseBuffer(node_meta->handle(), &header, port_index, buffer_meta,
-                      params->size(), static_cast<OMX_U8 *>(params->pointer()));
-
-    if (err != OMX_ErrorNone) {
-        LOGE("OMX_UseBuffer failed with error %d (0x%08x)", err, err);
-
-        delete buffer_meta;
-        buffer_meta = NULL;
-
-        *buffer = 0;
-        return UNKNOWN_ERROR;
-    }
-
-    *buffer = header;
-
-    return OK;
+    return findInstance(node)->useBuffer(
+            port_index, params, buffer);
 }
 
-status_t OMX::allocate_buffer(
+status_t OMX::allocateBuffer(
         node_id node, OMX_U32 port_index, size_t size,
         buffer_id *buffer) {
-    Mutex::Autolock autoLock(mLock);
-
-    BufferMeta *buffer_meta = new BufferMeta(this, size);
-
-    OMX_BUFFERHEADERTYPE *header;
-
-    NodeMeta *node_meta = static_cast<NodeMeta *>(node);
-    OMX_ERRORTYPE err =
-        OMX_AllocateBuffer(node_meta->handle(), &header, port_index,
-                           buffer_meta, size);
-
-    if (err != OMX_ErrorNone) {
-        delete buffer_meta;
-        buffer_meta = NULL;
-
-        *buffer = 0;
-        return UNKNOWN_ERROR;
-    }
-
-    *buffer = header;
-
-    return OK;
+    return findInstance(node)->allocateBuffer(
+            port_index, size, buffer);
 }
 
-status_t OMX::allocate_buffer_with_backup(
+status_t OMX::allocateBufferWithBackup(
         node_id node, OMX_U32 port_index, const sp<IMemory> &params,
         buffer_id *buffer) {
-    Mutex::Autolock autoLock(mLock);
-
-    BufferMeta *buffer_meta = new BufferMeta(this, params, true);
-
-    OMX_BUFFERHEADERTYPE *header;
-
-    NodeMeta *node_meta = static_cast<NodeMeta *>(node);
-    OMX_ERRORTYPE err =
-        OMX_AllocateBuffer(
-                node_meta->handle(), &header, port_index, buffer_meta,
-                params->size());
-
-    if (err != OMX_ErrorNone) {
-        delete buffer_meta;
-        buffer_meta = NULL;
-
-        *buffer = 0;
-        return UNKNOWN_ERROR;
-    }
-
-    *buffer = header;
-
-    return OK;
+    return findInstance(node)->allocateBufferWithBackup(
+            port_index, params, buffer);
 }
 
-status_t OMX::free_buffer(node_id node, OMX_U32 port_index, buffer_id buffer) {
-    OMX_BUFFERHEADERTYPE *header = (OMX_BUFFERHEADERTYPE *)buffer;
-    BufferMeta *buffer_meta = static_cast<BufferMeta *>(header->pAppPrivate);
+status_t OMX::freeBuffer(node_id node, OMX_U32 port_index, buffer_id buffer) {
+    return findInstance(node)->freeBuffer(
+            port_index, buffer);
+}
 
-    NodeMeta *node_meta = static_cast<NodeMeta *>(node);
-    OMX_ERRORTYPE err =
-        OMX_FreeBuffer(node_meta->handle(), port_index, header);
+status_t OMX::fillBuffer(node_id node, buffer_id buffer) {
+    return findInstance(node)->fillBuffer(buffer);
+}
 
-    delete buffer_meta;
-    buffer_meta = NULL;
+status_t OMX::emptyBuffer(
+        node_id node,
+        buffer_id buffer,
+        OMX_U32 range_offset, OMX_U32 range_length,
+        OMX_U32 flags, OMX_TICKS timestamp) {
+    return findInstance(node)->emptyBuffer(
+            buffer, range_offset, range_length, flags, timestamp);
+}
 
-    return (err != OMX_ErrorNone) ? UNKNOWN_ERROR : OK;
+status_t OMX::getExtensionIndex(
+        node_id node,
+        const char *parameter_name,
+        OMX_INDEXTYPE *index) {
+    return findInstance(node)->getExtensionIndex(
+            parameter_name, index);
 }
 
 OMX_ERRORTYPE OMX::OnEvent(
-        NodeMeta *meta,
+        node_id node,
         OMX_IN OMX_EVENTTYPE eEvent,
         OMX_IN OMX_U32 nData1,
         OMX_IN OMX_U32 nData2,
@@ -475,7 +353,7 @@ OMX_ERRORTYPE OMX::OnEvent(
 
     omx_message msg;
     msg.type = omx_message::EVENT;
-    msg.node = meta;
+    msg.node = node;
     msg.u.event_data.event = eEvent;
     msg.u.event_data.data1 = nData1;
     msg.u.event_data.data2 = nData2;
@@ -484,14 +362,14 @@ OMX_ERRORTYPE OMX::OnEvent(
 
     return OMX_ErrorNone;
 }
-    
+
 OMX_ERRORTYPE OMX::OnEmptyBufferDone(
-        NodeMeta *meta, OMX_IN OMX_BUFFERHEADERTYPE *pBuffer) {
+        node_id node, OMX_IN OMX_BUFFERHEADERTYPE *pBuffer) {
     LOGV("OnEmptyBufferDone buffer=%p", pBuffer);
 
     omx_message msg;
     msg.type = omx_message::EMPTY_BUFFER_DONE;
-    msg.node = meta;
+    msg.node = node;
     msg.u.buffer_data.buffer = pBuffer;
 
     mDispatcher->post(msg);
@@ -500,14 +378,12 @@ OMX_ERRORTYPE OMX::OnEmptyBufferDone(
 }
 
 OMX_ERRORTYPE OMX::OnFillBufferDone(
-        NodeMeta *meta, OMX_IN OMX_BUFFERHEADERTYPE *pBuffer) {
+        node_id node, OMX_IN OMX_BUFFERHEADERTYPE *pBuffer) {
     LOGV("OnFillBufferDone buffer=%p", pBuffer);
-    BufferMeta *buffer_meta = static_cast<BufferMeta *>(pBuffer->pAppPrivate);
-    buffer_meta->CopyFromOMX(pBuffer);
 
     omx_message msg;
     msg.type = omx_message::FILL_BUFFER_DONE;
-    msg.node = meta;
+    msg.node = node;
     msg.u.extended_buffer_data.buffer = pBuffer;
     msg.u.extended_buffer_data.range_offset = pBuffer->nOffset;
     msg.u.extended_buffer_data.range_length = pBuffer->nFilledLen;
@@ -520,62 +396,31 @@ OMX_ERRORTYPE OMX::OnFillBufferDone(
     return OMX_ErrorNone;
 }
 
-status_t OMX::observe_node(
-        node_id node, const sp<IOMXObserver> &observer) {
-    NodeMeta *node_meta = static_cast<NodeMeta *>(node);
+OMX::node_id OMX::makeNodeID(OMXNodeInstance *instance) {
+    // mLock is already held.
 
-    node_meta->setObserver(observer);
+    node_id node = (node_id)++mNodeCounter;
+    mNodeIDToInstance.add(node, instance);
 
-    return OK;
+    return node;
 }
 
-void OMX::fill_buffer(node_id node, buffer_id buffer) {
-    OMX_BUFFERHEADERTYPE *header = (OMX_BUFFERHEADERTYPE *)buffer;
-    header->nFilledLen = 0;
-    header->nOffset = 0;
-    header->nFlags = 0;
+OMXNodeInstance *OMX::findInstance(node_id node) {
+    Mutex::Autolock autoLock(mLock);
 
-    NodeMeta *node_meta = static_cast<NodeMeta *>(node);
+    ssize_t index = mNodeIDToInstance.indexOfKey(node);
 
-    OMX_ERRORTYPE err =
-        OMX_FillThisBuffer(node_meta->handle(), header);
-    CHECK_EQ(err, OMX_ErrorNone);
+    return index < 0 ? NULL : mNodeIDToInstance.valueAt(index);
 }
 
-void OMX::empty_buffer(
-        node_id node,
-        buffer_id buffer,
-        OMX_U32 range_offset, OMX_U32 range_length,
-        OMX_U32 flags, OMX_TICKS timestamp) {
-    OMX_BUFFERHEADERTYPE *header = (OMX_BUFFERHEADERTYPE *)buffer;
-    header->nFilledLen = range_length;
-    header->nOffset = range_offset;
-    header->nFlags = flags;
-    header->nTimeStamp = timestamp;
-
-    BufferMeta *buffer_meta =
-        static_cast<BufferMeta *>(header->pAppPrivate);
-    buffer_meta->CopyToOMX(header);
-
-    NodeMeta *node_meta = static_cast<NodeMeta *>(node);
-
-    OMX_ERRORTYPE err =
-        OMX_EmptyThisBuffer(node_meta->handle(), header);
-    CHECK_EQ(err, OMX_ErrorNone);
+void OMX::invalidateNodeID(node_id node) {
+    Mutex::Autolock autoLock(mLock);
+    invalidateNodeID_l(node);
 }
 
-status_t OMX::get_extension_index(
-        node_id node,
-        const char *parameter_name,
-        OMX_INDEXTYPE *index) {
-    NodeMeta *node_meta = static_cast<NodeMeta *>(node);
-
-    OMX_ERRORTYPE err =
-        OMX_GetExtensionIndex(
-                node_meta->handle(),
-                const_cast<char *>(parameter_name), index);
-
-    return err == OMX_ErrorNone ? OK : UNKNOWN_ERROR;
+void OMX::invalidateNodeID_l(node_id node) {
+    // mLock is held.
+    mNodeIDToInstance.removeItem(node);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

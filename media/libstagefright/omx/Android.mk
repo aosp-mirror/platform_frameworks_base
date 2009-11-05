@@ -11,6 +11,7 @@ LOCAL_C_INCLUDES += $(JNI_H_INCLUDE)
 
 LOCAL_SRC_FILES:=                 \
 	OMX.cpp                   \
+        OMXNodeInstance.cpp       \
         QComHardwareRenderer.cpp  \
         SoftwareRenderer.cpp      \
         TIHardwareRenderer.cpp

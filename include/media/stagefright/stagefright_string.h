@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-#ifndef STRING_H_
+#ifndef STAGEFRIGHT_STRING_H_
 
-#define STRING_H_
+#define STAGEFRIGHT_STRING_H_
 
 #include <utils/String8.h>
 
@@ -51,4 +51,4 @@ private:
 
 }  // namespace android
 
-#endif  // STRING_H_
+#endif  // STAGEFRIGHT_STRING_H_
