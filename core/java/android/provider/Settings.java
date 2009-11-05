@@ -43,8 +43,10 @@ import android.util.Log;
 import java.net.URISyntaxException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 
 
 /**
@@ -476,7 +478,10 @@ public final class Settings {
 
     private static class NameValueCache {
         private final String mVersionSystemProperty;
-        private final HashMap<String, String> mValues = Maps.newHashMap();
+        // the following needs synchronization because this structure is accessed from different
+        // threads and they could be performing clear(), get(), put() at the same time.
+        private final Map<String, String> mValues =
+            	Collections.synchronizedMap(new HashMap<String, String>());
         private long mValuesVersion = 0;
         private final Uri mUri;
 
@@ -491,8 +496,29 @@ public final class Settings {
                 mValues.clear();
                 mValuesVersion = newValuesVersion;
             }
-            if (!mValues.containsKey(name)) {
-                String value = null;
+            /*
+             *  don't look for the key using containsKey() method because (key, object) mapping
+             *  could be removed from mValues before get() is done like so:
+             *
+             *      say, mValues contains mapping for "foo"
+             *      Thread# 1
+             *          performs containsKey("foo")
+             *          receives true
+             *      Thread #2
+             *          triggers mValues.clear()
+             *      Thread#1
+             *          since containsKey("foo") = true, performs get("foo")
+             *          receives null
+             *          thats incorrect!
+             *
+             *    to avoid the above, thread#1 should do get("foo") instead of containsKey("foo")
+             *    since mValues is synchronized, get() will get a consistent value.
+             *
+             *    we don't want to make this method synchronized tho - because
+             *    holding mutex is not desirable while a call could be made to database.
+             */
+            String value = mValues.get(name);
+            if (value == null) {
                 Cursor c = null;
                 try {
                     c = cr.query(mUri, new String[] { Settings.NameValueTable.VALUE },
@@ -505,10 +531,8 @@ public final class Settings {
                 } finally {
                     if (c != null) c.close();
                 }
-                return value;
-            } else {
-                return mValues.get(name);
             }
+            return value;
         }
     }
 
