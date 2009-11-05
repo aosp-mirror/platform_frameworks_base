@@ -33,7 +33,7 @@ LOCAL_SRC_FILES +=                \
         TimeSource.cpp            \
         TimedEventQueue.cpp       \
         AudioPlayer.cpp           \
-        string.cpp
+        stagefright_string.cpp
 
 endif
 

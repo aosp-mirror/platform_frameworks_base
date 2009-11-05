@@ -23,7 +23,7 @@
 #include <media/stagefright/MediaDefs.h>
 #include <media/stagefright/MetaData.h>
 #include <media/stagefright/ShoutcastSource.h>
-#include <media/stagefright/string.h>
+#include <media/stagefright/stagefright_string.h>
 
 namespace android {
 

@@ -284,8 +284,14 @@ sp<IMediaPlayer> MediaPlayerService::create(pid_t pid, const sp<IMediaPlayerClie
     return c;
 }
 
-sp<IOMX> MediaPlayerService::createOMX() {
-    return new OMX;
+sp<IOMX> MediaPlayerService::getOMX() {
+    Mutex::Autolock autoLock(mLock);
+
+    if (mOMX.get() == NULL) {
+        mOMX = new OMX;
+    }
+
+    return mOMX;
 }
 
 status_t MediaPlayerService::AudioCache::dump(int fd, const Vector<String16>& args) const

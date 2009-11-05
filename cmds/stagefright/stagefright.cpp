@@ -283,7 +283,7 @@ int main(int argc, char **argv) {
 
         CHECK(service.get() != NULL);
 
-        sp<IOMX> omx = service->createOMX();
+        sp<IOMX> omx = service->getOMX();
         CHECK(omx.get() != NULL);
 
         const char *kMimeTypes[] = {
@@ -329,11 +329,11 @@ int main(int argc, char **argv) {
 
         CHECK(service.get() != NULL);
 
-        sp<IOMX> omx = service->createOMX();
+        sp<IOMX> omx = service->getOMX();
         CHECK(omx.get() != NULL);
 
         List<String8> list;
-        omx->list_nodes(&list);
+        omx->listNodes(&list);
 
         for (List<String8>::iterator it = list.begin();
              it != list.end(); ++it) {
