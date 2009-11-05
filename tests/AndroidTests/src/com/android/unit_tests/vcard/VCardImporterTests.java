@@ -16,7 +16,6 @@
 
 package com.android.unit_tests.vcard;
 
-import android.content.ContentValues;
 import android.pim.vcard.VCardConfig;
 import android.pim.vcard.exception.VCardException;
 import android.provider.ContactsContract.Data;
@@ -569,10 +568,6 @@ public class VCardImporterTests extends VCardTestsBase {
      * Tests all the properties in a complicated vCard are correctly parsed by the VCardParser.
      */
     public void testV21ComplicatedCase_Parsing() throws IOException, VCardException {
-        ContentValues contentValuesForQP = new ContentValues();
-        contentValuesForQP.put("ENCODING", "QUOTED-PRINTABLE");
-        ContentValues contentValuesForPhoto = new ContentValues();
-        contentValuesForPhoto.put("ENCODING", "BASE64");
         PropertyNodesVerifier verifier = new PropertyNodesVerifier(this);
         verifier.addPropertyNodesVerifierElem()
                 .addNodeWithOrder("VERSION", "2.1")
@@ -596,7 +591,7 @@ public class VCardImporterTests extends VCardTestsBase {
                                 null, null, new TypeSet("WORK"), null)
                 .addNodeWithOrder("LABEL",
                         "100 Waters Edge\r\nBaytown, LA 30314\r\nUnited  States of America",
-                        null, null, contentValuesForQP, new TypeSet("WORK"), null)
+                        null, null, mContentValuesForQP, new TypeSet("WORK"), null)
                 .addNodeWithOrder("ADR",
                         ";;42 Plantation St.;Baytown;LA;30314;United States of America",
                         Arrays.asList("", "", "42 Plantation St.", "Baytown",
@@ -604,7 +599,7 @@ public class VCardImporterTests extends VCardTestsBase {
                                 new TypeSet("HOME"), null)
                 .addNodeWithOrder("LABEL",
                         "42 Plantation St.\r\nBaytown, LA 30314\r\nUnited  States of America",
-                        null, null, contentValuesForQP,
+                        null, null, mContentValuesForQP,
                         new TypeSet("HOME"), null)
                 .addNodeWithOrder("EMAIL", "forrestgump@walladalla.com",
                         new TypeSet("PREF", "INTERNET"))
@@ -612,9 +607,9 @@ public class VCardImporterTests extends VCardTestsBase {
                 .addNodeWithOrder("NOTE", "The following note is the example from RFC 2045.")
                 .addNodeWithOrder("NOTE",
                         "Now's the time for all folk to come to the aid of their country.",
-                        null, null, contentValuesForQP, null, null)
+                        null, null, mContentValuesForQP, null, null)
                 .addNodeWithOrder("PHOTO", null,
-                        null, sPhotoByteArrayForComplicatedCase, contentValuesForPhoto,
+                        null, sPhotoByteArrayForComplicatedCase, mContentValuesForBase64V21,
                         new TypeSet("JPEG"), null)
                 .addNodeWithOrder("X-ATTRIBUTE", "Some String")
                 .addNodeWithOrder("BDAY", "19800101")
@@ -762,17 +757,15 @@ public class VCardImporterTests extends VCardTestsBase {
         // Though Japanese careers append ";;;;" at the end of the value of "SOUND",
         // vCard 2.1/3.0 specification does not allow multiple values.
         // Do not need to handle it as multiple values.
-        ContentValues contentValuesForShiftJis = new ContentValues();
-        contentValuesForShiftJis.put("CHARSET", "SHIFT_JIS");
         PropertyNodesVerifier verifier = new PropertyNodesVerifier(this);
         verifier.addPropertyNodesVerifierElem()
                 .addNodeWithOrder("VERSION", "2.1", null, null, null, null, null)
                 .addNodeWithOrder("N", "\u5B89\u85E4\u30ED\u30A4\u30C9;;;;",
                         Arrays.asList("\u5B89\u85E4\u30ED\u30A4\u30C9", "", "", "", ""),
-                        null, contentValuesForShiftJis, null, null)
+                        null, mContentValuesForSJis, null, null)
                 .addNodeWithOrder("SOUND",
                         "\uFF71\uFF9D\uFF84\uFF9E\uFF73\uFF9B\uFF72\uFF84\uFF9E;;;;",
-                        null, null, contentValuesForShiftJis,
+                        null, null, mContentValuesForSJis,
                         new TypeSet("X-IRMC-N"), null)
                 .addNodeWithOrder("TEL", "0300000000", null, null, null,
                         new TypeSet("VOICE", "PREF"), null);
@@ -829,23 +822,18 @@ public class VCardImporterTests extends VCardTestsBase {
     }
 
     public void testV21Japanese2_Parsing() throws IOException, VCardException {
-        ContentValues contentValuesForShiftJis = new ContentValues();
-        contentValuesForShiftJis.put("CHARSET", "SHIFT_JIS");
-        ContentValues contentValuesForQPAndSJ = new ContentValues();
-        contentValuesForQPAndSJ.put("ENCODING", "QUOTED-PRINTABLE");
-        contentValuesForQPAndSJ.put("CHARSET", "SHIFT_JIS");
         PropertyNodesVerifier verifier = new PropertyNodesVerifier(this);
         verifier.addPropertyNodesVerifierElem()
                 .addNodeWithOrder("VERSION", "2.1")
                 .addNodeWithOrder("N", "\u5B89\u85E4;\u30ED\u30A4\u30C9\u0031;;;",
                         Arrays.asList("\u5B89\u85E4", "\u30ED\u30A4\u30C9\u0031",
                                 "", "", ""),
-                        null, contentValuesForShiftJis, null, null)
+                        null, mContentValuesForSJis, null, null)
                 .addNodeWithOrder("FN", "\u5B89\u85E4\u0020\u30ED\u30A4\u30C9\u0020\u0031",
-                        null, null, contentValuesForShiftJis, null, null)
+                        null, null, mContentValuesForSJis, null, null)
                 .addNodeWithOrder("SOUND",
                         "\uFF71\uFF9D\uFF84\uFF9E\uFF73;\uFF9B\uFF72\uFF84\uFF9E\u0031;;;",
-                        null, null, contentValuesForShiftJis,
+                        null, null, mContentValuesForSJis,
                         new TypeSet("X-IRMC-N"), null)
                 .addNodeWithOrder("ADR",
                         ";\u6771\u4EAC\u90FD\u6E0B\u8C37\u533A\u685C" +
@@ -857,9 +845,9 @@ public class VCardImporterTests extends VCardTestsBase {
                                 "\u4E18\u753A\u0032\u0036\u002D\u0031\u30BB" +
                                 "\u30EB\u30EA\u30A2\u30F3\u30BF\u30EF\u30FC" +
                                 "\u0036\u968E", "", "", "", "150-8512", ""),
-                        null, contentValuesForQPAndSJ, new TypeSet("HOME"), null)
+                        null, mContentValuesForQPAndSJis, new TypeSet("HOME"), null)
                 .addNodeWithOrder("NOTE", "\u30E1\u30E2", null, null,
-                        contentValuesForQPAndSJ, null, null);
+                        mContentValuesForQPAndSJis, null, null);
         verifier.verify(R.raw.v21_japanese_2, VCardConfig.VCARD_TYPE_V21_JAPANESE_SJIS);
     }
 
@@ -895,17 +883,15 @@ public class VCardImporterTests extends VCardTestsBase {
     }
 
     public void testV21MultipleEntryCase_Parse() throws IOException, VCardException {
-        ContentValues contentValuesForShiftJis = new ContentValues();
-        contentValuesForShiftJis.put("CHARSET", "SHIFT_JIS");
         PropertyNodesVerifier verifier = new PropertyNodesVerifier(this);
         verifier.addPropertyNodesVerifierElem()
                 .addNodeWithOrder("VERSION", "2.1")
                 .addNodeWithOrder("N", "\u5B89\u85E4\u30ED\u30A4\u30C9\u0033;;;;",
                         Arrays.asList("\u5B89\u85E4\u30ED\u30A4\u30C9\u0033", "", "", "", ""),
-                        null, contentValuesForShiftJis, null, null)
+                        null, mContentValuesForSJis, null, null)
                 .addNodeWithOrder("SOUND",
                         "\uFF71\uFF9D\uFF84\uFF9E\uFF73\uFF9B\uFF72\uFF84\uFF9E\u0033;;;;",
-                        null, null, contentValuesForShiftJis,
+                        null, null, mContentValuesForSJis,
                         new TypeSet("X-IRMC-N"), null)
                 .addNodeWithOrder("TEL", "9", new TypeSet("X-NEC-SECRET"))
                 .addNodeWithOrder("TEL", "10", new TypeSet("X-NEC-HOTEL"))
@@ -916,10 +902,10 @@ public class VCardImporterTests extends VCardTestsBase {
                 .addNodeWithOrder("VERSION", "2.1")
                 .addNodeWithOrder("N", "\u5B89\u85E4\u30ED\u30A4\u30C9\u0034;;;;",
                         Arrays.asList("\u5B89\u85E4\u30ED\u30A4\u30C9\u0034", "", "", "", ""),
-                        null, contentValuesForShiftJis, null, null)
+                        null, mContentValuesForSJis, null, null)
                 .addNodeWithOrder("SOUND",
                         "\uFF71\uFF9D\uFF84\uFF9E\uFF73\uFF9B\uFF72\uFF84\uFF9E\u0034;;;;",
-                        null, null, contentValuesForShiftJis,
+                        null, null, mContentValuesForSJis,
                         new TypeSet("X-IRMC-N"), null)
                 .addNodeWithOrder("TEL", "13", new TypeSet("MODEM"))
                 .addNodeWithOrder("TEL", "14", new TypeSet("PAGER"))
@@ -930,10 +916,10 @@ public class VCardImporterTests extends VCardTestsBase {
                 .addNodeWithOrder("VERSION", "2.1")
                 .addNodeWithOrder("N", "\u5B89\u85E4\u30ED\u30A4\u30C9\u0035;;;;",
                         Arrays.asList("\u5B89\u85E4\u30ED\u30A4\u30C9\u0035", "", "", "", ""),
-                        null, contentValuesForShiftJis, null, null)
+                        null, mContentValuesForSJis, null, null)
                 .addNodeWithOrder("SOUND",
                         "\uFF71\uFF9D\uFF84\uFF9E\uFF73\uFF9B\uFF72\uFF84\uFF9E\u0035;;;;",
-                        null, null, contentValuesForShiftJis,
+                        null, null, mContentValuesForSJis,
                         new TypeSet("X-IRMC-N"), null)
                 .addNodeWithOrder("TEL", "17", new TypeSet("X-NEC-BOY"))
                 .addNodeWithOrder("TEL", "18", new TypeSet("X-NEC-FRIEND"))
