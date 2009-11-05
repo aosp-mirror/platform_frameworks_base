@@ -209,6 +209,7 @@ aidl_files := \
 	frameworks/base/core/java/android/accounts/IAccountAuthenticatorResponse.aidl \
 	frameworks/base/core/java/android/app/Notification.aidl \
 	frameworks/base/core/java/android/app/PendingIntent.aidl \
+	frameworks/base/core/java/android/bluetooth/BluetoothDevice.aidl \
 	frameworks/base/core/java/android/content/ComponentName.aidl \
 	frameworks/base/core/java/android/content/Intent.aidl \
 	frameworks/base/core/java/android/content/IntentSender.aidl \
