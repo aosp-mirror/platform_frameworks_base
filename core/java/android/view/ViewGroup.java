@@ -150,6 +150,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     /**
      * When set, the drawing method will call {@link #getChildDrawingOrder(int, int)}
      * to get the index of the child to draw for that iteration.
+     * 
+     * @hide
      */
     protected static final int FLAG_USE_CHILD_DRAWING_ORDER = 0x400;
 
@@ -1307,11 +1309,14 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * if you want to change the drawing order of children. By default, it
      * returns i.
      * <p>
-     * NOTE: In order for this method to be called, the
-     * {@link #FLAG_USE_CHILD_DRAWING_ORDER} must be set.
+     * NOTE: In order for this method to be called, you must enable child ordering
+     * first by calling {@link #setChildrenDrawingOrderEnabled(boolean)}.
      *
      * @param i The current iteration.
      * @return The index of the child to draw this iteration.
+     * 
+     * @see #setChildrenDrawingOrderEnabled(boolean)
+     * @see #isChildrenDrawingOrderEnabled()
      */
     protected int getChildDrawingOrder(int childCount, int i) {
         return i;
@@ -2704,6 +2709,35 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      */
     protected void setChildrenDrawnWithCacheEnabled(boolean enabled) {
         setBooleanFlag(FLAG_CHILDREN_DRAWN_WITH_CACHE, enabled);
+    }
+
+    /**
+     * Indicates whether the ViewGroup is drawing its children in the order defined by
+     * {@link #getChildDrawingOrder(int, int)}.
+     *
+     * @return true if children drawing order is defined by {@link #getChildDrawingOrder(int, int)},
+     *         false otherwise
+     *
+     * @see #setChildrenDrawingOrderEnabled(boolean)
+     * @see #getChildDrawingOrder(int, int)
+     */
+    @ViewDebug.ExportedProperty
+    protected boolean isChildrenDrawingOrderEnabled() {
+        return (mGroupFlags & FLAG_USE_CHILD_DRAWING_ORDER) == FLAG_USE_CHILD_DRAWING_ORDER;
+    }
+
+    /**
+     * Tells the ViewGroup whether to draw its children in the order defined by the method
+     * {@link #getChildDrawingOrder(int, int)}.
+     *
+     * @param enabled true if the order of the children when drawing is determined by
+     *        {@link #getChildDrawingOrder(int, int)}, false otherwise
+     *
+     * @see #isChildrenDrawingOrderEnabled()
+     * @see #getChildDrawingOrder(int, int)
+     */
+    protected void setChildrenDrawingOrderEnabled(boolean enabled) {
+        setBooleanFlag(FLAG_USE_CHILD_DRAWING_ORDER, enabled);
     }
 
     private void setBooleanFlag(int flag, boolean value) {
