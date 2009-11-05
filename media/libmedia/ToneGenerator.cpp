@@ -798,7 +798,7 @@ const unsigned char ToneGenerator::sToneMappingTable[NUM_REGIONS-1][NUM_SUP_TONE
 //        none
 //
 ////////////////////////////////////////////////////////////////////////////////
-ToneGenerator::ToneGenerator(int streamType, float volume) {
+ToneGenerator::ToneGenerator(int streamType, float volume, bool threadCanCallJava) {
 
     LOGV("ToneGenerator constructor: streamType=%d, volume=%f\n", streamType, volume);
 
@@ -808,6 +808,7 @@ ToneGenerator::ToneGenerator(int streamType, float volume) {
         LOGE("Unable to marshal AudioFlinger");
         return;
     }
+    mThreadCanCallJava = threadCanCallJava;
     mStreamType = streamType;
     mVolume = volume;
     mpAudioTrack = 0;
@@ -1015,14 +1016,24 @@ bool ToneGenerator::initAudioTrack() {
     }
 
    // Open audio track in mono, PCM 16bit, default sampling rate, default buffer size
-    mpAudioTrack
-            = new AudioTrack(mStreamType, 0, AudioSystem::PCM_16_BIT, AudioSystem::CHANNEL_OUT_MONO, 0, 0, audioCallback, this, 0);
-
+    mpAudioTrack = new AudioTrack();
     if (mpAudioTrack == 0) {
         LOGE("AudioTrack allocation failed");
         goto initAudioTrack_exit;
     }
     LOGV("Create Track: %p\n", mpAudioTrack);
+
+    mpAudioTrack->set(mStreamType,
+                      0,
+                      AudioSystem::PCM_16_BIT,
+                      AudioSystem::CHANNEL_OUT_MONO,
+                      0,
+                      0,
+                      audioCallback,
+                      this,
+                      0,
+                      0,
+                      mThreadCanCallJava);
 
     if (mpAudioTrack->initCheck() != NO_ERROR) {
         LOGE("AudioTrack->initCheck failed");

@@ -122,11 +122,6 @@ status_t AudioTrack::set(
         return INVALID_OPERATION;
     }
 
-    const sp<IAudioFlinger>& audioFlinger = AudioSystem::get_audio_flinger();
-    if (audioFlinger == 0) {
-       LOGE("Could not get audioflinger");
-       return NO_INIT;
-    }
     int afSampleRate;
     if (AudioSystem::getOutputSamplingRate(&afSampleRate, streamType) != NO_ERROR) {
         return NO_INIT;
@@ -217,28 +212,16 @@ status_t AudioTrack::set(
         }
     }
 
-    // create the track
-    status_t status;
-    sp<IAudioTrack> track = audioFlinger->createTrack(getpid(),
-                                                      streamType,
-                                                      sampleRate,
-                                                      format,
-                                                      channelCount,
-                                                      frameCount,
-                                                      ((uint16_t)flags) << 16,
-                                                      sharedBuffer,
-                                                      output,
-                                                      &status);
+    mVolume[LEFT] = 1.0f;
+    mVolume[RIGHT] = 1.0f;
+    // create the IAudioTrack
+    status_t status = createTrack(streamType, sampleRate, format, channelCount,
+                                  frameCount, flags, sharedBuffer, output);
 
-    if (track == 0) {
-        LOGE("AudioFlinger could not create track, status: %d", status);
+    if (status != NO_ERROR) {
         return status;
     }
-    sp<IMemory> cblk = track->getCblk();
-    if (cblk == 0) {
-        LOGE("Could not get control block");
-        return NO_INIT;
-    }
+
     if (cbf != 0) {
         mAudioTrackThread = new AudioTrackThread(*this, threadCanCallJava);
         if (mAudioTrackThread == 0) {
@@ -249,22 +232,6 @@ status_t AudioTrack::set(
 
     mStatus = NO_ERROR;
 
-    mAudioTrack = track;
-    mCblkMemory = cblk;
-    mCblk = static_cast<audio_track_cblk_t*>(cblk->pointer());
-    mCblk->out = 1;
-    // Update buffer size in case it has been limited by AudioFlinger during track creation
-    mFrameCount = mCblk->frameCount;
-    if (sharedBuffer == 0) {
-        mCblk->buffers = (char*)mCblk + sizeof(audio_track_cblk_t);
-    } else {
-        mCblk->buffers = sharedBuffer->pointer();
-         // Force buffer full condition as data is already present in shared memory
-        mCblk->stepUser(mFrameCount);
-    }
-    mCblk->volume[0] = mCblk->volume[1] = 0x1000;
-    mVolume[LEFT] = 1.0f;
-    mVolume[RIGHT] = 1.0f;
     mStreamType = streamType;
     mFormat = format;
     mChannels = channels;
@@ -351,16 +318,27 @@ void AudioTrack::start()
      }
 
     if (android_atomic_or(1, &mActive) == 0) {
-        AudioSystem::startOutput(getOutput(), (AudioSystem::stream_type)mStreamType);
-        mNewPosition = mCblk->server + mUpdatePeriod;
-        mCblk->bufferTimeoutMs = MAX_STARTUP_TIMEOUT_MS;
-        mCblk->waitTimeMs = 0;
-        if (t != 0) {
-           t->run("AudioTrackThread", THREAD_PRIORITY_AUDIO_CLIENT);
-        } else {
-            setpriority(PRIO_PROCESS, 0, THREAD_PRIORITY_AUDIO_CLIENT);
+        audio_io_handle_t output = AudioTrack::getOutput();
+        status_t status = mAudioTrack->start();
+        if (status == DEAD_OBJECT) {
+            LOGV("start() dead IAudioTrack: creating a new one");
+            status = createTrack(mStreamType, mCblk->sampleRate, mFormat, mChannelCount,
+                                 mFrameCount, mFlags, mSharedBuffer, output);
         }
-        mAudioTrack->start();
+        if (status == NO_ERROR) {
+            AudioSystem::startOutput(output, (AudioSystem::stream_type)mStreamType);
+            mNewPosition = mCblk->server + mUpdatePeriod;
+            mCblk->bufferTimeoutMs = MAX_STARTUP_TIMEOUT_MS;
+            mCblk->waitTimeMs = 0;
+            if (t != 0) {
+               t->run("AudioTrackThread", THREAD_PRIORITY_AUDIO_CLIENT);
+            } else {
+                setpriority(PRIO_PROCESS, 0, THREAD_PRIORITY_AUDIO_CLIENT);
+            }
+        } else {
+            LOGV("start() failed");
+            android_atomic_and(~1, &mActive);
+        }
     }
 
     if (t != 0) {
@@ -617,10 +595,67 @@ audio_io_handle_t AudioTrack::getOutput()
 
 // -------------------------------------------------------------------------
 
+status_t AudioTrack::createTrack(
+        int streamType,
+        uint32_t sampleRate,
+        int format,
+        int channelCount,
+        int frameCount,
+        uint32_t flags,
+        const sp<IMemory>& sharedBuffer,
+        audio_io_handle_t output)
+{
+    status_t status;
+    const sp<IAudioFlinger>& audioFlinger = AudioSystem::get_audio_flinger();
+    if (audioFlinger == 0) {
+       LOGE("Could not get audioflinger");
+       return NO_INIT;
+    }
+
+    sp<IAudioTrack> track = audioFlinger->createTrack(getpid(),
+                                                      streamType,
+                                                      sampleRate,
+                                                      format,
+                                                      channelCount,
+                                                      frameCount,
+                                                      ((uint16_t)flags) << 16,
+                                                      sharedBuffer,
+                                                      output,
+                                                      &status);
+
+    if (track == 0) {
+        LOGE("AudioFlinger could not create track, status: %d", status);
+        return status;
+    }
+    sp<IMemory> cblk = track->getCblk();
+    if (cblk == 0) {
+        LOGE("Could not get control block");
+        return NO_INIT;
+    }
+    mAudioTrack.clear();
+    mAudioTrack = track;
+    mCblkMemory.clear();
+    mCblkMemory = cblk;
+    mCblk = static_cast<audio_track_cblk_t*>(cblk->pointer());
+    mCblk->out = 1;
+    // Update buffer size in case it has been limited by AudioFlinger during track creation
+    mFrameCount = mCblk->frameCount;
+    if (sharedBuffer == 0) {
+        mCblk->buffers = (char*)mCblk + sizeof(audio_track_cblk_t);
+    } else {
+        mCblk->buffers = sharedBuffer->pointer();
+         // Force buffer full condition as data is already present in shared memory
+        mCblk->stepUser(mFrameCount);
+    }
+
+    mCblk->volumeLR = (int32_t(int16_t(mVolume[LEFT] * 0x1000)) << 16) | int16_t(mVolume[RIGHT] * 0x1000);
+
+    return NO_ERROR;
+}
+
 status_t AudioTrack::obtainBuffer(Buffer* audioBuffer, int32_t waitCount)
 {
     int active;
-    int timeout = 0;
     status_t result;
     audio_track_cblk_t* cblk = mCblk;
     uint32_t framesReq = audioBuffer->frameCount;
@@ -632,17 +667,20 @@ status_t AudioTrack::obtainBuffer(Buffer* audioBuffer, int32_t waitCount)
     uint32_t framesAvail = cblk->framesAvailable();
 
     if (framesAvail == 0) {
-        Mutex::Autolock _l(cblk->lock);
+        cblk->lock.lock();
         goto start_loop_here;
         while (framesAvail == 0) {
             active = mActive;
             if (UNLIKELY(!active)) {
                 LOGV("Not active and NO_MORE_BUFFERS");
+                cblk->lock.unlock();
                 return NO_MORE_BUFFERS;
             }
-            if (UNLIKELY(!waitCount))
+            if (UNLIKELY(!waitCount)) {
+                cblk->lock.unlock();
                 return WOULD_BLOCK;
-            timeout = 0;
+            }
+
             result = cblk->cv.waitRelative(cblk->lock, milliseconds(waitTimeMs));
             if (__builtin_expect(result!=NO_ERROR, false)) {
                 cblk->waitTimeMs += waitTimeMs;
@@ -654,14 +692,23 @@ status_t AudioTrack::obtainBuffer(Buffer* audioBuffer, int32_t waitCount)
                                 "user=%08x, server=%08x", this, cblk->user, cblk->server);
                         //unlock cblk mutex before calling mAudioTrack->start() (see issue #1617140)
                         cblk->lock.unlock();
-                        mAudioTrack->start();
+                        result = mAudioTrack->start();
+                        if (result == DEAD_OBJECT) {
+                            LOGW("obtainBuffer() dead IAudioTrack: creating a new one");
+                            result = createTrack(mStreamType, cblk->sampleRate, mFormat, mChannelCount,
+                                                 mFrameCount, mFlags, mSharedBuffer, getOutput());
+                            if (result == NO_ERROR) {
+                                cblk = mCblk;
+                                cblk->bufferTimeoutMs = MAX_RUN_TIMEOUT_MS;
+                            }
+                        }
                         cblk->lock.lock();
-                        timeout = 1;
                     }
                     cblk->waitTimeMs = 0;
                 }
 
                 if (--waitCount == 0) {
+                    cblk->lock.unlock();
                     return TIMED_OUT;
                 }
             }
@@ -669,6 +716,7 @@ status_t AudioTrack::obtainBuffer(Buffer* audioBuffer, int32_t waitCount)
         start_loop_here:
             framesAvail = cblk->framesAvailable_l();
         }
+        cblk->lock.unlock();
     }
 
     cblk->waitTimeMs = 0;
@@ -683,11 +731,6 @@ status_t AudioTrack::obtainBuffer(Buffer* audioBuffer, int32_t waitCount)
     if (u + framesReq > bufferEnd) {
         framesReq = bufferEnd - u;
     }
-
-    LOGW_IF(timeout,
-        "*** SERIOUS WARNING *** obtainBuffer() timed out "
-        "but didn't need to be locked. We recovered, but "
-        "this shouldn't happen (user=%08x, server=%08x)", cblk->user, cblk->server);
 
     audioBuffer->flags = mMuted ? Buffer::MUTE : 0;
     audioBuffer->channelCount = mChannelCount;
@@ -991,7 +1034,7 @@ bool audio_track_cblk_t::stepServer(uint32_t frameCount)
         // Mark that we have read the first buffer so that next time stepUser() is called
         // we switch to normal obtainBuffer() timeout period
         if (bufferTimeoutMs == MAX_STARTUP_TIMEOUT_MS) {
-            bufferTimeoutMs = MAX_RUN_TIMEOUT_MS - 1;
+            bufferTimeoutMs = MAX_STARTUP_TIMEOUT_MS - 1;
         }
         // It is possible that we receive a flush()
         // while the mixer is processing a block: in this case,

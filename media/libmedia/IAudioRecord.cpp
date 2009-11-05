@@ -15,6 +15,10 @@
 ** limitations under the License.
 */
 
+#define LOG_TAG "IAudioRecord"
+//#define LOG_NDEBUG 0
+#include <utils/Log.h>
+
 #include <stdint.h>
 #include <sys/types.h>
 
@@ -42,8 +46,13 @@ public:
     {
         Parcel data, reply;
         data.writeInterfaceToken(IAudioRecord::getInterfaceDescriptor());
-        remote()->transact(START, data, &reply);
-        return reply.readInt32();
+        status_t status = remote()->transact(START, data, &reply);
+        if (status == NO_ERROR) {
+            status = reply.readInt32();
+        } else {
+            LOGW("start() error: %s", strerror(-status));
+        }
+        return status;
     }
     
     virtual void stop()
