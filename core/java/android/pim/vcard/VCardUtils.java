@@ -362,7 +362,7 @@ public class VCardUtils {
         if (TextUtils.isEmpty(str)) {
             return true;
         }
-        
+
         final int length = str.length();
         final int asciiFirst = 0x20;
         final int asciiLast = 0x126;

@@ -66,7 +66,6 @@ import android.test.mock.MockContentResolver;
 import android.test.mock.MockContext;
 import android.test.mock.MockCursor;
 import android.text.TextUtils;
-import android.util.Log;
 
 import junit.framework.TestCase;
 
@@ -184,6 +183,35 @@ class CustomMockContext extends MockContext {
 /* package */ class VCardTestsBase extends AndroidTestCase {
     public static final int V21 = VCardConfig.VCARD_TYPE_V21_GENERIC_UTF8;
     public static final int V30 = VCardConfig.VCARD_TYPE_V30_GENERIC_UTF8;
+
+    // Do not modify these during tests.
+    protected final ContentValues mContentValuesForQP;
+    protected final ContentValues mContentValuesForSJis;
+    protected final ContentValues mContentValuesForUtf8;
+    protected final ContentValues mContentValuesForQPAndSJis;
+    protected final ContentValues mContentValuesForQPAndUtf8;
+    protected final ContentValues mContentValuesForBase64V21;
+    protected final ContentValues mContentValuesForBase64V30;
+
+    public VCardTestsBase() {
+        super();
+        mContentValuesForQP = new ContentValues();
+        mContentValuesForQP.put("ENCODING", "QUOTED-PRINTABLE");
+        mContentValuesForSJis = new ContentValues();
+        mContentValuesForSJis.put("CHARSET", "SHIFT_JIS");
+        mContentValuesForUtf8 = new ContentValues();
+        mContentValuesForUtf8.put("CHARSET", "UTF-8");
+        mContentValuesForQPAndSJis = new ContentValues();
+        mContentValuesForQPAndSJis.put("ENCODING", "QUOTED-PRINTABLE");
+        mContentValuesForQPAndSJis.put("CHARSET", "SHIFT_JIS");
+        mContentValuesForQPAndUtf8 = new ContentValues();
+        mContentValuesForQPAndUtf8.put("ENCODING", "QUOTED-PRINTABLE");
+        mContentValuesForQPAndUtf8.put("CHARSET", "UTF-8");
+        mContentValuesForBase64V21 = new ContentValues();
+        mContentValuesForBase64V21.put("ENCODING", "BASE64");
+        mContentValuesForBase64V30 = new ContentValues();
+        mContentValuesForBase64V30.put("ENCODING", "b");
+    }
 
     public class ImportTestResolver extends MockContentResolver {
         ImportTestProvider mProvider = new ImportTestProvider();
@@ -834,7 +862,9 @@ class CustomMockContext extends MockContext {
 
             InputStream is = null;
             try {
-                is = new ByteArrayInputStream(vcard.getBytes("UTF-8"));
+                String charset =
+                    (VCardConfig.usesShiftJis(mVCardType) ? "SHIFT_JIS" : "UTF-8");
+                is = new ByteArrayInputStream(vcard.getBytes(charset));
                 testCase.assertEquals(true, parser.parse(is, null, builder));
             } catch (IOException e) {
                 testCase.fail("Unexpected IOException: " + e.getMessage());
