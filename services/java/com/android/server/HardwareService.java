@@ -283,12 +283,6 @@ public class HardwareService extends IHardwareService.Stub {
         setLight_native(mNativePointer, light, color, mode, onMS, offMS);
     }
 
-    void setAutoBrightness_UNCHECKED(boolean on) {
-        if (mAutoBrightnessAvailable) {
-            setAutoBrightness_native(mNativePointer, on);
-        }
-    }
-
     public void setAttentionLight(boolean on, int color) {
         // Not worthy of a permission.  We shouldn't have a flashlight permission.
         synchronized (this) {
