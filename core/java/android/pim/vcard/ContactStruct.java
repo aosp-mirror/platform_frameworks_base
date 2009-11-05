@@ -730,8 +730,8 @@ public class ContactStruct {
                 // which is correct behavior from the view of vCard 2.1.
                 // But we want it to be separated, so do the separation here.
                 final List<String> phoneticNameList =
-                    VCardUtils.constructListFromValue(propValue,    
-                            VCardConfig.isV30(mVCardType));
+                        VCardUtils.constructListFromValue(propValue,
+                                VCardConfig.isV30(mVCardType));
                 handlePhoneticNameFromSound(phoneticNameList);
             } else {
                 // Ignore this field since Android cannot understand what it is.

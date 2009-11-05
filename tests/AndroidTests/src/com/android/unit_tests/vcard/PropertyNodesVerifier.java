@@ -125,28 +125,31 @@ class PropertyNodesVerifierElem {
     }
 
     public PropertyNodesVerifierElem addNodeWithOrder(String propName, String propValue,
+            ContentValues contentValues) {
+        return addNodeWithOrder(propName, propValue, null, null, contentValues, null, null);
+    }
+
+    public PropertyNodesVerifierElem addNodeWithOrder(String propName, String propValue,
             List<String> propValueList) {
         return addNodeWithOrder(propName, propValue, propValueList, null, null, null, null);
     }
 
     public PropertyNodesVerifierElem addNodeWithOrder(String propName, List<String> propValueList) {
-        StringBuffer buffer = new StringBuffer();
-        boolean first = true;
-        for (String propValueElem : propValueList) {
-            if (first) {
-                first = false;
-            } else {
-                buffer.append(';');
-            }
-            buffer.append(propValueElem);
-        }
-        return addNodeWithOrder(propName, buffer.toString(), propValueList,
+        final String propValue = concatinateListWithSemiColon(propValueList);
+        return addNodeWithOrder(propName, propValue.toString(), propValueList,
                 null, null, null, null);
     }
 
     public PropertyNodesVerifierElem addNodeWithOrder(String propName, String propValue,
             TypeSet paramMap_TYPE) {
         return addNodeWithOrder(propName, propValue, null, null, null, paramMap_TYPE, null);
+    }
+
+    public PropertyNodesVerifierElem addNodeWithOrder(String propName,
+            List<String> propValueList, TypeSet paramMap_TYPE) {
+        final String propValue = concatinateListWithSemiColon(propValueList);
+        return addNodeWithOrder(propName, propValue, propValueList, null, null,
+                paramMap_TYPE, null);
     }
 
     public PropertyNodesVerifierElem addNodeWithOrder(String propName, String propValue,
@@ -177,28 +180,31 @@ class PropertyNodesVerifierElem {
     }
 
     public PropertyNodesVerifierElem addNodeWithoutOrder(String propName, String propValue,
+            ContentValues contentValues) {
+        return addNodeWithoutOrder(propName, propValue, null, null, contentValues, null, null);
+    }
+
+    public PropertyNodesVerifierElem addNodeWithoutOrder(String propName, String propValue,
             List<String> propValueList) {
         return addNodeWithoutOrder(propName, propValue, propValueList, null, null, null, null);
     }
 
     public PropertyNodesVerifierElem addNodeWithoutOrder(String propName, List<String> propValueList) {
-        StringBuffer buffer = new StringBuffer();
-        boolean first = true;
-        for (String propValueElem : propValueList) {
-            if (first) {
-                first = false;
-            } else {
-                buffer.append(';');
-            }
-            buffer.append(propValueElem);
-        }
-        return addNodeWithoutOrder(propName, buffer.toString(), propValueList,
+        final String propValue = concatinateListWithSemiColon(propValueList);
+        return addNodeWithoutOrder(propName, propValue, propValueList,
                 null, null, null, null);
     }
 
     public PropertyNodesVerifierElem addNodeWithoutOrder(String propName, String propValue,
             TypeSet paramMap_TYPE) {
         return addNodeWithoutOrder(propName, propValue, null, null, null, paramMap_TYPE, null);
+    }
+
+    public PropertyNodesVerifierElem addNodeWithoutOrder(String propName,
+            List<String> propValueList, TypeSet paramMap_TYPE) {
+        final String propValue = concatinateListWithSemiColon(propValueList);
+        return addNodeWithoutOrder(propName, propValue, propValueList, null, null,
+                paramMap_TYPE, null);
     }
 
     public PropertyNodesVerifierElem addNodeWithoutOrder(String propName, String propValue,
@@ -289,6 +295,21 @@ class PropertyNodesVerifierElem {
                 }
             }
         }
+    }
+
+    private String concatinateListWithSemiColon(List<String> array) {
+        StringBuffer buffer = new StringBuffer();
+        boolean first = true;
+        for (String propValueElem : array) {
+            if (first) {
+                first = false;
+            } else {
+                buffer.append(';');
+            }
+            buffer.append(propValueElem);
+        }
+
+        return buffer.toString();
     }
 
     private boolean tryFoundExpectedNodeFromUnorderedList(PropertyNode actualNode,
