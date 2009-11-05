@@ -180,7 +180,7 @@ int32_t per_client_cblk_t::lock_layer(size_t i, uint32_t flags)
             return INVALID_OPERATION;
         }
 
-        if (UNLIKELY(state&eLocked)) {
+        if (UNLIKELY(state&eLocked) && !blocking) {
             LOGE("eLocked set when entering lock_layer(), "
                  "layer=%d (lcblk=%p), state=%08x",
                  int(i), layer, int(state));
