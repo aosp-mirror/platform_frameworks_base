@@ -391,6 +391,14 @@ private:
     };
 
             bool processAudioBuffer(const sp<AudioTrackThread>& thread);
+            status_t createTrack(int streamType,
+                                 uint32_t sampleRate,
+                                 int format,
+                                 int channelCount,
+                                 int frameCount,
+                                 uint32_t flags,
+                                 const sp<IMemory>& sharedBuffer,
+                                 audio_io_handle_t output);
 
     sp<IAudioTrack>         mAudioTrack;
     sp<IMemory>             mCblkMemory;

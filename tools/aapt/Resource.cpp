@@ -1285,10 +1285,10 @@ static status_t writeLayoutClasses(
                     hasTable = true;
                     fprintf(fp,
                             "%s   <p>Includes the following attributes:</p>\n"
-                            "%s   <table border=\"2\" width=\"85%%\" align=\"center\" frame=\"hsides\" rules=\"all\" cellpadding=\"5\">\n"
+                            "%s   <table>\n"
                             "%s   <colgroup align=\"left\" />\n"
                             "%s   <colgroup align=\"left\" />\n"
-                            "%s   <tr><th>Attribute<th>Summary</tr>\n",
+                            "%s   <tr><th>Attribute</th><th>Description</th></tr>\n",
                             indentStr,
                             indentStr,
                             indentStr,
@@ -1322,7 +1322,7 @@ static status_t writeLayoutClasses(
                 }
                 String16 name(name8);
                 fixupSymbol(&name);
-                fprintf(fp, "%s   <tr><th><code>{@link #%s_%s %s:%s}</code><td>%s</tr>\n",
+                fprintf(fp, "%s   <tr><td><code>{@link #%s_%s %s:%s}</code></td><td>%s</td></tr>\n",
                         indentStr, nclassName.string(),
                         String8(name).string(),
                         assets->getPackage().string(),
