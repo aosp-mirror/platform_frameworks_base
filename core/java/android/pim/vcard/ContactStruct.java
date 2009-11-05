@@ -471,20 +471,24 @@ public class ContactStruct {
         }
         StringBuilder builder = new StringBuilder();
         String trimed = data.trim();
-        int length = trimed.length();
-        for (int i = 0; i < length; i++) {
-            char ch = trimed.charAt(i);
-            if (('0' <= ch && ch <= '9') || (i == 0 && ch == '+')) {
-                builder.append(ch);
+        final String formattedNumber;
+        if (type == Phone.TYPE_PAGER) {
+            formattedNumber = trimed;
+        } else {
+            final int length = trimed.length();
+            for (int i = 0; i < length; i++) {
+                char ch = trimed.charAt(i);
+                if (('0' <= ch && ch <= '9') || (i == 0 && ch == '+')) {
+                    builder.append(ch);
+                }
             }
-        }
 
-        // Use NANP in default when there's no information about locale.
-        final int formattingType = (VCardConfig.isJapaneseDevice(mVCardType) ?
-                PhoneNumberUtils.FORMAT_JAPAN : PhoneNumberUtils.FORMAT_NANP);
-        final String formattedPhoneNumber =
-                PhoneNumberUtils.formatNumber(builder.toString(), formattingType);
-        PhoneData phoneData = new PhoneData(type, formattedPhoneNumber, label, isPrimary);
+            // Use NANP in default when there's no information about locale.
+            final int formattingType = (VCardConfig.isJapaneseDevice(mVCardType) ?
+                    PhoneNumberUtils.FORMAT_JAPAN : PhoneNumberUtils.FORMAT_NANP);
+            formattedNumber = PhoneNumberUtils.formatNumber(builder.toString(), formattingType);
+        }
+        PhoneData phoneData = new PhoneData(type, formattedNumber, label, isPrimary);
         mPhoneList.add(phoneData);
     }
 
@@ -856,7 +860,8 @@ public class ContactStruct {
             }
         } else if (propName.equals(Constants.PROPERTY_TEL)) {
             final Collection<String> typeCollection = paramMap.get(Constants.PARAM_TYPE);
-            final Object typeObject = VCardUtils.getPhoneTypeFromStrings(typeCollection);
+            final Object typeObject =
+                VCardUtils.getPhoneTypeFromStrings(typeCollection, propValue);
             final int type;
             final String label;
             if (typeObject instanceof Integer) {

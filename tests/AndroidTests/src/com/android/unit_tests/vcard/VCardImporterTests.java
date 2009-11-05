@@ -18,7 +18,6 @@ package com.android.unit_tests.vcard;
 
 import android.content.ContentValues;
 import android.pim.vcard.VCardConfig;
-import android.pim.vcard.VCardParser_V21;
 import android.pim.vcard.exception.VCardException;
 import android.provider.ContactsContract.Data;
 import android.provider.ContactsContract.CommonDataKinds.Email;
@@ -35,7 +34,6 @@ import com.android.unit_tests.R;
 import com.android.unit_tests.vcard.PropertyNodesVerifierElem.TypeSet;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Arrays;
 
 public class VCardImporterTests extends VCardTestsBase {
@@ -866,8 +864,9 @@ public class VCardImporterTests extends VCardTestsBase {
     }
 
     public void testV21Japanese2_Type_Generic_Utf8() throws IOException, VCardException {
-        ImportVerifierElem verifier = new ImportVerifierElem();
-        verifier.addExpected(StructuredName.CONTENT_ITEM_TYPE)
+        ImportVerifier verifier = new ImportVerifier();
+        ImportVerifierElem elem = verifier.addImportVerifierElem();
+        elem.addExpected(StructuredName.CONTENT_ITEM_TYPE)
                 .put(StructuredName.FAMILY_NAME, "\u5B89\u85E4")
                 .put(StructuredName.GIVEN_NAME, "\u30ED\u30A4\u30C9\u0031")
                 .put(StructuredName.DISPLAY_NAME,
@@ -877,7 +876,7 @@ public class VCardImporterTests extends VCardTestsBase {
                 .put(StructuredName.PHONETIC_FAMILY_NAME, "\uFF71\uFF9D\uFF84\uFF9E\uFF73")
                 .put(StructuredName.PHONETIC_GIVEN_NAME, "\uFF9B\uFF72\uFF84\uFF9E\u0031");
 
-        verifier.addExpected(StructuredPostal.CONTENT_ITEM_TYPE)
+        elem.addExpected(StructuredPostal.CONTENT_ITEM_TYPE)
                 .put(StructuredPostal.POSTCODE, "150-8512")
                 .put(StructuredPostal.NEIGHBORHOOD,
                         "\u6771\u4EAC\u90FD\u6E0B\u8C37\u533A\u685C" +
@@ -890,7 +889,7 @@ public class VCardImporterTests extends VCardTestsBase {
                         "\u30EB\u30EA\u30A2\u30F3\u30BF\u30EF\u30FC" +
                         "\u0036\u968E 150-8512")
                 .put(StructuredPostal.TYPE, StructuredPostal.TYPE_HOME);
-        verifier.addExpected(Note.CONTENT_ITEM_TYPE)
+        elem.addExpected(Note.CONTENT_ITEM_TYPE)
                 .put(Note.NOTE, "\u30E1\u30E2");
         verifier.verify(R.raw.v21_japanese_2, VCardConfig.VCARD_TYPE_V21_GENERIC_UTF8);
     }
@@ -1012,5 +1011,29 @@ public class VCardImporterTests extends VCardTestsBase {
                 .put(Phone.LABEL, "NEC-RESTAURANT")
                 .put(Phone.NUMBER, "20");
         verifier.verify(R.raw.v21_multiple_entry, VCardConfig.VCARD_TYPE_V21_JAPANESE_SJIS);
+    }
+
+    public void testPagerV30_Parse() throws IOException, VCardException {
+        PropertyNodesVerifier verifier = new PropertyNodesVerifier(this);
+        verifier.addPropertyNodesVerifierElem()
+                .addNodeWithOrder("VERSION", "3.0")
+                .addNodeWithOrder("N", Arrays.asList("F", "G", "M", "", ""))
+                .addNodeWithOrder("TEL", "6101231234@pagersample.com",
+                        new TypeSet("WORK", "MSG", "PAGER"));
+        verifier.verify(R.raw.v30_comma_separated, VCardConfig.VCARD_TYPE_V30_GENERIC_UTF8);
+    }
+
+    public void testPagerV30() throws IOException, VCardException {
+        ImportVerifier verifier = new ImportVerifier();
+        ImportVerifierElem elem = verifier.addImportVerifierElem();
+        elem.addExpected(StructuredName.CONTENT_ITEM_TYPE)
+                .put(StructuredName.FAMILY_NAME, "F")
+                .put(StructuredName.MIDDLE_NAME, "M")
+                .put(StructuredName.GIVEN_NAME, "G")
+                .put(StructuredName.DISPLAY_NAME, "G M F");
+        elem.addExpected(Phone.CONTENT_ITEM_TYPE)
+                .put(Phone.TYPE, Phone.TYPE_PAGER)
+                .put(Phone.NUMBER, "6101231234@pagersample.com");
+        verifier.verify(R.raw.v30_comma_separated, VCardConfig.VCARD_TYPE_V30_GENERIC_UTF8);
     }
 }
