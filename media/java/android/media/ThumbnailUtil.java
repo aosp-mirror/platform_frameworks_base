@@ -35,9 +35,7 @@ import android.graphics.Rect;
 import android.media.MediaMetadataRetriever;
 import android.media.MediaFile.MediaFileType;
 
-import java.io.ByteArrayOutputStream;
 import java.io.FileDescriptor;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.OutputStream;
 
@@ -296,7 +294,7 @@ public class ThumbnailUtil {
      * @param uri URI of original image
      * @param origId image id
      * @param kind either MINI_KIND or MICRO_KIND
-     * @param saveImage Whether to save MINI_KIND thumbnail obtained in this method.
+     * @param saveMini Whether to save MINI_KIND thumbnail obtained in this method.
      * @return Bitmap
      */
     public static Bitmap createImageThumbnail(ContentResolver cr, String filePath, Uri uri,
@@ -306,20 +304,12 @@ public class ThumbnailUtil {
                 ThumbnailUtil.THUMBNAIL_TARGET_SIZE : ThumbnailUtil.MINI_THUMB_TARGET_SIZE;
         int maxPixels = wantMini ?
                 ThumbnailUtil.THUMBNAIL_MAX_NUM_PIXELS : ThumbnailUtil.MINI_THUMB_MAX_NUM_PIXELS;
-        byte[] thumbData = null;
+        SizedThumbnailBitmap sizedThumbnailBitmap = new SizedThumbnailBitmap();
         Bitmap bitmap = null;
         MediaFileType fileType = MediaFile.getFileType(filePath);
         if (fileType != null && fileType.fileType == MediaFile.FILE_TYPE_JPEG) {
-            thumbData = createThumbnailFromEXIF(filePath, targetSize);
-        }
-
-        if (thumbData != null) {
-            BitmapFactory.Options options = new BitmapFactory.Options();
-            options.inSampleSize = computeSampleSize(options, targetSize, maxPixels);
-            options.inDither = false;
-            options.inPreferredConfig = Bitmap.Config.ARGB_8888;
-            options.inJustDecodeBounds = false;
-            bitmap = BitmapFactory.decodeByteArray(thumbData, 0, thumbData.length, options);
+            createThumbnailFromEXIF(filePath, targetSize, maxPixels, sizedThumbnailBitmap);
+            bitmap = sizedThumbnailBitmap.mBitmap;
         }
 
         if (bitmap == null) {
@@ -331,9 +321,11 @@ public class ThumbnailUtil {
         }
 
         if (saveMini) {
-            if (thumbData != null) {
-                ThumbnailUtil.storeThumbnail(cr, origId, thumbData, bitmap.getWidth(),
-                        bitmap.getHeight());
+            if (sizedThumbnailBitmap.mThumbnailData != null) {
+                ThumbnailUtil.storeThumbnail(cr, origId,
+                        sizedThumbnailBitmap.mThumbnailData,
+                        sizedThumbnailBitmap.mThumbnailWidth,
+                        sizedThumbnailBitmap.mThumbnailHeight);
             } else {
                 ThumbnailUtil.storeThumbnail(cr, origId, bitmap);
             }
@@ -521,31 +513,69 @@ public class ThumbnailUtil {
         }
     }
 
-    // Extract thumbnail in image that meets the targetSize criteria.
-    static byte[] createThumbnailFromEXIF(String filePath, int targetSize) {
-        if (filePath == null) return null;
+    // SizedThumbnailBitmap contains the bitmap, which is downsampled either from
+    // the thumbnail in exif or the full image.
+    // mThumbnailData, mThumbnailWidth and mThumbnailHeight are set together only if mThumbnail is not null.
+    // The width/height of the sized bitmap may be different from mThumbnailWidth/mThumbnailHeight.
+    private static class SizedThumbnailBitmap {
+        public byte[] mThumbnailData;
+        public Bitmap mBitmap;
+        public int mThumbnailWidth;
+        public int mThumbnailHeight;
+    }
 
+    // Creates a bitmap by either downsampling from the thumbnail in EXIF or the full image.
+    // The functions returns a SizedThumbnailBitmap,
+    // which contains a downsampled bitmap and the thumbnail data in EXIF if exists.
+    private static void createThumbnailFromEXIF(String filePath, int targetSize,
+            int maxPixels, SizedThumbnailBitmap sizedThumbBitmap) {
+        if (filePath == null) return;
+
+        ExifInterface exif = null;
+        byte [] thumbData = null;
         try {
-            ExifInterface exif = new ExifInterface(filePath);
-            if (exif == null) return null;
-            byte [] thumbData = exif.getThumbnail();
-            if (thumbData == null) return null;
-            // Sniff the size of the EXIF thumbnail before decoding it. Photos
-            // from the device will pass, but images that are side loaded from
-            // other cameras may not.
-            BitmapFactory.Options options = new BitmapFactory.Options();
-            options.inJustDecodeBounds = true;
-            BitmapFactory.decodeByteArray(thumbData, 0, thumbData.length, options);
-
-            int width = options.outWidth;
-            int height = options.outHeight;
-
-            if (width >= targetSize && height >= targetSize) {
-                return thumbData;
+            exif = new ExifInterface(filePath);
+            if (exif != null) {
+                thumbData = exif.getThumbnail();
             }
         } catch (IOException ex) {
             Log.w(TAG, ex);
         }
-        return null;
+
+        BitmapFactory.Options fullOptions = new BitmapFactory.Options();
+        BitmapFactory.Options exifOptions = new BitmapFactory.Options();
+        int exifThumbWidth = 0;
+        int fullThumbWidth = 0;
+
+        // Compute exifThumbWidth.
+        if (thumbData != null) {
+            exifOptions.inJustDecodeBounds = true;
+            BitmapFactory.decodeByteArray(thumbData, 0, thumbData.length, exifOptions);
+            exifOptions.inSampleSize = computeSampleSize(exifOptions, targetSize, maxPixels);
+            exifThumbWidth = exifOptions.outWidth / exifOptions.inSampleSize;
+        }
+
+        // Compute fullThumbWidth.
+        fullOptions.inJustDecodeBounds = true;
+        BitmapFactory.decodeFile(filePath, fullOptions);
+        fullOptions.inSampleSize = computeSampleSize(fullOptions, targetSize, maxPixels);
+        fullThumbWidth = fullOptions.outWidth / fullOptions.inSampleSize;
+
+        // Choose the larger thumbnail as the returning sizedThumbBitmap.
+        if (exifThumbWidth > fullThumbWidth) {
+            int width = exifOptions.outWidth;
+            int height = exifOptions.outHeight;
+            exifOptions.inJustDecodeBounds = false;
+            sizedThumbBitmap.mBitmap = BitmapFactory.decodeByteArray(thumbData, 0,
+                    thumbData.length, exifOptions);
+            if (sizedThumbBitmap.mBitmap != null) {
+                sizedThumbBitmap.mThumbnailData = thumbData;
+                sizedThumbBitmap.mThumbnailWidth = width;
+                sizedThumbBitmap.mThumbnailHeight = height;
+            }
+        } else {
+            fullOptions.inJustDecodeBounds = false;
+            sizedThumbBitmap.mBitmap = BitmapFactory.decodeFile(filePath, fullOptions);
+        }
     }
 }
