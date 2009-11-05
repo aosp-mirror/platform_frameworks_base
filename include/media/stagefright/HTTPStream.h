@@ -21,7 +21,7 @@
 #include <sys/types.h>
 
 #include <media/stagefright/MediaErrors.h>
-#include <media/stagefright/string.h>
+#include <media/stagefright/stagefright_string.h>
 #include <utils/KeyedVector.h>
 
 namespace android {
