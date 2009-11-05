@@ -98,7 +98,11 @@ public class VCardUtils {
      * Returns Interger when the given types can be parsed as known type. Returns String object
      * when not, which should be set to label. 
      */
-    public static Object getPhoneTypeFromStrings(Collection<String> types) {
+    public static Object getPhoneTypeFromStrings(Collection<String> types,
+            String number) {
+        if (number == null) {
+            number = "";
+        }
         int type = -1;
         String label = null;
         boolean isFax = false;
@@ -117,7 +121,20 @@ public class VCardUtils {
                     }
                     Integer tmp = sKnownPhoneTypeMap_StoI.get(typeString);
                     if (tmp != null) {
-                        type = tmp;
+                        final int typeCandidate = tmp;
+                        // TYPE_PAGER is prefered when the number contains @ surronded by
+                        // a pager number and a domain name.
+                        // e.g.
+                        // o 1111@domain.com
+                        // x @domain.com
+                        // x 1111@
+                        final int indexOfAt = number.indexOf("@");
+                        if ((typeCandidate == Phone.TYPE_PAGER
+                                && 0 < indexOfAt && indexOfAt < number.length() - 1)
+                                || type < 0
+                                || type == Phone.TYPE_CUSTOM) {
+                            type = tmp;
+                        }
                     } else if (type < 0) {
                         type = Phone.TYPE_CUSTOM;
                         label = typeString;
