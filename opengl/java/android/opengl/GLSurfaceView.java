@@ -145,6 +145,7 @@ import android.view.SurfaceView;
  *
  */
 public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback {
+    private final static boolean LOG_THREADS = false;
     /**
      * The renderer only renders
      * when the surface is created, or when {@link #requestRender} is called.
@@ -952,11 +953,15 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
             mRequestRender = true;
             mRenderMode = RENDERMODE_CONTINUOUSLY;
             mRenderer = renderer;
-            setName("GLThread");
         }
 
         @Override
         public void run() {
+            setName("GLThread " + getId());
+            if (LOG_THREADS) {
+                Log.i("GLThread", "starting tid=" + getId());
+            }
+
             /*
              * When the android framework launches a second instance of
              * an activity, the new instance's onCreate() method may be
@@ -967,7 +972,7 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
              */
             try {
                 try {
-                sEglSemaphore.acquire();
+                    sGLThreadManager.start(this);
                 } catch (InterruptedException e) {
                     return;
                 }
@@ -975,7 +980,17 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
             } catch (InterruptedException e) {
                 // fall thru and exit normally
             } finally {
-                sEglSemaphore.release();
+                try {
+                    sGLThreadManager.end(this);
+                } finally {
+                    synchronized(this) {
+                        if (LOG_THREADS) {
+                            Log.i("GLThread", "exiting tid=" +  getId());
+                        }
+                        mDone = true;
+                        notifyAll();
+                    }
+                }
             }
         }
 
@@ -1011,11 +1026,14 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
                             needStart = true;
                         }
                         while (needToWait()) {
+                            if (LOG_THREADS) {
+                                Log.i("GLThread", "needToWait tid=" + getId());
+                            }
                             if (!mHasSurface) {
                                 if (!mWaitingForSurface) {
                                     mEglHelper.destroySurface();
                                     mWaitingForSurface = true;
-                                    notify();
+                                    notifyAll();
                                 }
                             }
                             wait();
@@ -1031,6 +1049,7 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
                         if (mHasSurface && mWaitingForSurface) {
                             changed = true;
                             mWaitingForSurface = false;
+                            notifyAll();
                         }
                     }
                     if (needStart) {
@@ -1071,6 +1090,10 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
         }
 
         private boolean needToWait() {
+            if (sGLThreadManager.shouldQuit(this)) {
+                mDone = true;
+                notifyAll();
+            }
             if (mDone) {
                 return false;
             }
@@ -1093,7 +1116,7 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
             synchronized(this) {
                 mRenderMode = renderMode;
                 if (renderMode == RENDERMODE_CONTINUOUSLY) {
-                    notify();
+                    notifyAll();
                 }
             }
         }
@@ -1107,22 +1130,28 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
         public void requestRender() {
             synchronized(this) {
                 mRequestRender = true;
-                notify();
+                notifyAll();
             }
         }
 
         public void surfaceCreated() {
             synchronized(this) {
+                if (LOG_THREADS) {
+                    Log.i("GLThread", "surfaceCreated tid=" + getId());
+                }
                 mHasSurface = true;
-                notify();
+                notifyAll();
             }
         }
 
         public void surfaceDestroyed() {
             synchronized(this) {
+                if (LOG_THREADS) {
+                    Log.i("GLThread", "surfaceDestroyed tid=" + getId());
+                }
                 mHasSurface = false;
-                notify();
-                while(!mWaitingForSurface && isAlive()) {
+                notifyAll();
+                while(!mWaitingForSurface && isAlive() && ! mDone) {
                     try {
                         wait();
                     } catch (InterruptedException e) {
@@ -1135,13 +1164,15 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
         public void onPause() {
             synchronized (this) {
                 mPaused = true;
+                notifyAll();
             }
         }
 
         public void onResume() {
             synchronized (this) {
                 mPaused = false;
-                notify();
+                mRequestRender = true;
+                notifyAll();
             }
         }
 
@@ -1150,7 +1181,7 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
                 mWidth = w;
                 mHeight = h;
                 mSizeChanged = true;
-                notify();
+                notifyAll();
             }
         }
 
@@ -1159,7 +1190,7 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
             // deadlock!
             synchronized(this) {
                 mDone = true;
-                notify();
+                notifyAll();
             }
             try {
                 join();
@@ -1241,7 +1272,38 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
         }
     }
 
+    static class GLThreadManager {
+        public boolean shouldQuit(GLThread thread) {
+            synchronized(this) {
+                return thread != mMostRecentGLThread;
+            }
+        }
+        public void start(GLThread thread) throws InterruptedException {
+            GLThread oldThread = null;
+            synchronized(this) {
+                mMostRecentGLThread = thread;
+                oldThread = mMostRecentGLThread;
+            }
+            if (oldThread != null) {
+                synchronized(oldThread) {
+                    oldThread.notifyAll();
+                }
+            }
+            sEglSemaphore.acquire();
+        }
+        public void end(GLThread thread) {
+            sEglSemaphore.release();
+            synchronized(this) {
+                if (mMostRecentGLThread == thread) {
+                    mMostRecentGLThread = null;
+                }
+            }
+        }
+        private GLThread mMostRecentGLThread;
+    }
+
     private static final Semaphore sEglSemaphore = new Semaphore(1);
+    private static final GLThreadManager sGLThreadManager = new GLThreadManager();
     private boolean mSizeChanged = true;
 
     private GLThread mGLThread;
