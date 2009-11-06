@@ -136,10 +136,10 @@ public class MediaRecorder
         /** Voice call uplink + downlink audio source */
         public static final int VOICE_CALL = 4;
 
-        /** @hide Microphone audio source with same orientation as camera */
+        /** Microphone audio source with same orientation as camera */
         public static final int CAMCORDER = 5;
 
-        /** @hide Microphone audio source tuned for voice recognition */
+        /** Microphone audio source tuned for voice recognition */
         public static final int VOICE_RECOGNITION = 6;
     }
 
