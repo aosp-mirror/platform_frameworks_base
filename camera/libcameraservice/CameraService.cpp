@@ -1215,20 +1215,27 @@ void CameraService::Client::copyFrameAndPostCopiedFrame(const sp<ICameraClient>&
     // the callback. For efficiency, reuse the same MemoryHeapBase
     // provided it's big enough. Don't allocate the memory or
     // perform the copy if there's no callback.
-    if (mPreviewBuffer == 0) {
-        mPreviewBuffer = new MemoryHeapBase(size, 0, NULL);
-    } else if (size > mPreviewBuffer->virtualSize()) {
-        mPreviewBuffer.clear();
-        mPreviewBuffer = new MemoryHeapBase(size, 0, NULL);
+
+    // hold the lock while we grab a reference to the preview buffer
+    sp<MemoryHeapBase> previewBuffer;
+    {
+        Mutex::Autolock lock(mLock);
+        if (mPreviewBuffer == 0) {
+            mPreviewBuffer = new MemoryHeapBase(size, 0, NULL);
+        } else if (size > mPreviewBuffer->virtualSize()) {
+            mPreviewBuffer.clear();
+            mPreviewBuffer = new MemoryHeapBase(size, 0, NULL);
+        }
         if (mPreviewBuffer == 0) {
             LOGE("failed to allocate space for preview buffer");
             return;
         }
+        previewBuffer = mPreviewBuffer;
     }
-    memcpy(mPreviewBuffer->base(),
+    memcpy(previewBuffer->base(),
            (uint8_t *)heap->base() + offset, size);
 
-    sp<MemoryBase> frame = new MemoryBase(mPreviewBuffer, 0, size);
+    sp<MemoryBase> frame = new MemoryBase(previewBuffer, 0, size);
     if (frame == 0) {
         LOGE("failed to allocate space for frame callback");
         return;
