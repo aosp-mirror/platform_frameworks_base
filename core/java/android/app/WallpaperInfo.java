@@ -5,7 +5,6 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import android.content.ComponentName;
 import android.content.Context;
-import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
@@ -24,7 +23,6 @@ import java.io.IOException;
 
 /**
  * This class is used to specify meta information of a wallpaper service.
- * @hide Live Wallpaper
  */
 public final class WallpaperInfo implements Parcelable {
     static final String TAG = "WallpaperInfo";
