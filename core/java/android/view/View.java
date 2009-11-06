@@ -5549,7 +5549,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * 
      * @see #awakenScrollBars(int)
      */
-    private void onDrawScrollBars(Canvas canvas) {
+    protected final void onDrawScrollBars(Canvas canvas) {
         // scrollbars are drawn only when the animation is running
         final ScrollabilityCache cache = mScrollCache;
         if (cache != null) {
