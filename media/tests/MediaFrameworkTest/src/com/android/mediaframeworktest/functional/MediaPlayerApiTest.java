@@ -242,8 +242,10 @@ public class MediaPlayerApiTest extends ActivityInstrumentationTestCase<MediaFra
     
     @LargeTest
     public void testWMA9SetLooping() throws Exception {
-      boolean isLoop = CodecTest.setLooping(MediaNames.WMA9);  
-      assertTrue("WMA9 setLooping", isLoop);  
+      if (isWMAEnable) {
+        boolean isLoop = CodecTest.setLooping(MediaNames.WMA9);
+        assertTrue("WMA9 setLooping", isLoop);
+      }
     }
     
     @LargeTest
