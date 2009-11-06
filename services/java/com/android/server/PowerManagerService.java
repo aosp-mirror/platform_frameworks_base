@@ -1780,13 +1780,13 @@ class PowerManagerService extends IPowerManager.Stub
         }
     }
 
-    boolean screenIsOn() {
+    public boolean isScreenOn() {
         synchronized (mLocks) {
             return (mPowerState & SCREEN_ON_BIT) != 0;
         }
     }
 
-    boolean screenIsBright() {
+    boolean isScreenBright() {
         synchronized (mLocks) {
             return (mPowerState & SCREEN_BRIGHT) == SCREEN_BRIGHT;
         }
@@ -2089,7 +2089,7 @@ class PowerManagerService extends IPowerManager.Stub
         boolean enabled = (mode == SCREEN_BRIGHTNESS_MODE_AUTOMATIC);
         if (mUseSoftwareAutoBrightness && mAutoBrightessEnabled != enabled) {
             mAutoBrightessEnabled = enabled;
-            if (screenIsOn()) {
+            if (isScreenOn()) {
                 // force recompute of backlight values
                 if (mLightSensorValue >= 0) {
                     int value = (int)mLightSensorValue;
