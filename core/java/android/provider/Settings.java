@@ -2526,6 +2526,13 @@ public final class Settings {
         public static final String OVERRIDE_ACTION =
             "com.google.gservices.intent.action.GSERVICES_OVERRIDE";
 
+        /**
+         * Intent action to set Gservices with new values.  (Requires WRITE_GSERVICES permission.)
+         */
+        @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+        public static final String UPDATE_ACTION =
+            "com.google.gservices.intent.action.GSERVICES_UPDATE";
+
         private static volatile NameValueCache mNameValueCache = null;
         private static final Object mNameValueCacheLock = new Object();
 
