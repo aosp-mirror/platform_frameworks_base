@@ -330,7 +330,8 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
                         phone.getState() == Phone.State.IDLE )
                 && isDataAllowed()
                 && desiredPowerState
-                && !mPendingRestartRadio) {
+                && !mPendingRestartRadio
+                && !mCdmaPhone.needsOtaServiceProvisioning()) {
 
             return setupData(reason);
 
@@ -348,7 +349,8 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
                     " dataOnRoamingEnable=" + getDataOnRoamingEnabled() +
                     " desiredPowerState=" + desiredPowerState +
                     " PendingRestartRadio=" + mPendingRestartRadio +
-                    " MasterDataEnabled=" + mMasterDataEnabled);
+                    " MasterDataEnabled=" + mMasterDataEnabled +
+                    " needsOtaServiceProvisioning=" + mCdmaPhone.needsOtaServiceProvisioning());
             }
             return false;
         }
