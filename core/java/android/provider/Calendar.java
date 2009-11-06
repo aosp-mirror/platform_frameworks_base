@@ -76,6 +76,15 @@ public final class Calendar {
         Uri.parse("content://" + AUTHORITY);
 
     /**
+     * An optional insert, update or delete URI parameter that allows the caller
+     * to specify that it is a sync adapter. The default value is false. If true
+     * the dirty flag is not automatically set and the "syncToNetwork" parameter
+     * is set to false when calling
+     * {@link ContentResolver#notifyChange(android.net.Uri, android.database.ContentObserver, boolean)}.
+     */
+    public static final String CALLER_IS_SYNCADAPTER = "caller_is_syncadapter";
+
+    /**
      * Columns from the Calendars table that other tables join into themselves.
      */
     public interface CalendarsColumns
@@ -341,11 +350,11 @@ public final class Calendar {
          * This field is copied here so that we can efficiently filter out
          * events that are declined without having to look in the Attendees
          * table.
-         * 
+         *
          * <P>Type: INTEGER (int)</P>
          */
         public static final String SELF_ATTENDEE_STATUS = "selfAttendeeStatus";
-        
+
         /**
          * The comments feed uri.
          * <P>Type: TEXT</P>
@@ -868,10 +877,10 @@ public final class Calendar {
          */
         public static final String MAX_BUSYBITS = "maxBusyBits";
     }
-    
+
     public static final class CalendarMetaData implements CalendarMetaDataColumns {
     }
-    
+
     public interface BusyBitsColumns {
         /**
          * The Julian day number.
@@ -895,22 +904,22 @@ public final class Calendar {
          */
         public static final String ALL_DAY_COUNT = "allDayCount";
     }
-    
+
     public static final class BusyBits implements BusyBitsColumns {
         public static final Uri CONTENT_URI = Uri.parse("content://calendar/busybits/when");
 
         public static final String[] PROJECTION = { DAY, BUSYBITS, ALL_DAY_COUNT };
-        
+
         // The number of minutes represented by one busy bit
         public static final int MINUTES_PER_BUSY_INTERVAL = 60;
-        
+
         // The number of intervals in a day
         public static final int INTERVALS_PER_DAY = 24 * 60 / MINUTES_PER_BUSY_INTERVAL;
 
         /**
          * Retrieves the busy bits for the Julian days starting at "startDay"
          * for "numDays".
-         * 
+         *
          * @param cr the ContentResolver
          * @param startDay the first Julian day in the range
          * @param numDays the number of days to load (must be at least 1)
@@ -1038,14 +1047,14 @@ public final class Calendar {
             CalendarAlertsColumns, EventsColumns, CalendarsColumns {
         public static final String TABLE_NAME = "CalendarAlerts";
         public static final Uri CONTENT_URI = Uri.parse("content://calendar/calendar_alerts");
-        
+
         /**
          * This URI is for grouping the query results by event_id and begin
          * time.  This will return one result per instance of an event.  So
          * events with multiple alarms will appear just once, but multiple
          * instances of a repeating event will show up multiple times.
          */
-        public static final Uri CONTENT_URI_BY_INSTANCE = 
+        public static final Uri CONTENT_URI_BY_INSTANCE =
             Uri.parse("content://calendar/calendar_alerts/by_instance");
 
         public static final Uri insert(ContentResolver cr, long eventId,
@@ -1069,11 +1078,11 @@ public final class Calendar {
             return cr.query(CONTENT_URI, projection, selection, selectionArgs,
                     DEFAULT_SORT_ORDER);
         }
-        
+
         /**
          * Finds the next alarm after (or equal to) the given time and returns
          * the time of that alarm or -1 if no such alarm exists.
-         * 
+         *
          * @param cr the ContentResolver
          * @param millis the time in UTC milliseconds
          * @return the next alarm time greater than or equal to "millis", or -1
@@ -1097,13 +1106,13 @@ public final class Calendar {
             }
             return alarmTime;
         }
-        
+
         /**
          * Searches the CalendarAlerts table for alarms that should have fired
          * but have not and then reschedules them.  This method can be called
          * at boot time to restore alarms that may have been lost due to a
          * phone reboot.
-         * 
+         *
          * @param cr the ContentResolver
          * @param context the Context
          * @param manager the AlarmManager
@@ -1131,7 +1140,7 @@ public final class Calendar {
             if (Log.isLoggable(TAG, Log.DEBUG)) {
                 Log.d(TAG, "missed alarms found: " + cursor.getCount());
             }
-            
+
             try {
                 while (cursor.moveToNext()) {
                     long id = cursor.getLong(0);
@@ -1152,14 +1161,14 @@ public final class Calendar {
             } finally {
                 cursor.close();
             }
-            
+
         }
-        
+
         /**
          * Searches for an entry in the CalendarAlerts table that matches
          * the given event id, begin time and alarm time.  If one is found
          * then this alarm already exists and this method returns true.
-         * 
+         *
          * @param cr the ContentResolver
          * @param eventId the event id to match
          * @param begin the start time of the event in UTC millis
