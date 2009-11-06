@@ -365,7 +365,7 @@ public abstract class WallpaperService extends Service {
         
         /**
          * Process a command that was sent to the wallpaper with
-         * {@link WallpaperManager#sendWallpaperCommand(String, int, int, int, Bundle)}.
+         * {@link WallpaperManager#sendWallpaperCommand}.
          * The default implementation does nothing, and always returns null
          * as the result.
          * 
