@@ -149,6 +149,7 @@ status_t OMXNodeInstance::freeNode() {
         }
 
         case OMX_StateLoaded:
+        case OMX_StateInvalid:
             break;
 
         default:
