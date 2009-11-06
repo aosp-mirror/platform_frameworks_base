@@ -135,7 +135,7 @@ public class CdmaSmsAddress extends SmsAddress {
     };
 
     private static final char[] numericCharsSugar = {
-        '(', ')', ' ', '-', '+', '.'
+        '(', ')', ' ', '-', '+', '.', '/', '\\'
     };
 
     private static final SparseBooleanArray numericCharDialableMap = new SparseBooleanArray (
