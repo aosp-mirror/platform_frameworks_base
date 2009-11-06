@@ -1,0 +1,200 @@
+page.title=USB Driver for Windows
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+  <h2>In this document</h2>
+  <ol>
+    <li><a href="#RevisionNotes">Revision Notes</a></li>
+    <li><a href="#WinUsbDriver">Installing the USB Driver for Windows</a></li>
+  </ol>
+  <h2>See also</h2>
+  <ol>
+    <li><a
+    href="{@docRoot}guide/developing/device.html">Developing on a
+    Device</a></li>
+    <li><a
+    href="adding-components.html">Adding SDK Components</a></li>
+  </ol>
+</div>
+</div>
+
+<p>The USB driver for Windows is a downloadable component for the
+Android SDK. If you are developing on Windows and would like to
+connect an Android-powered device to test your applications, then you will need
+to install the USB driver.</p>
+
+<p>This document provides information about the latest version of the
+USB driver and a guide to installing the driver on your development
+computer.</p>
+
+<p class="note"><strong>Note:</strong>
+If you're developing on Mac OS X or Linux, then you do not need to install a
+USB driver. Refer to <a
+href="{@docRoot}guide/developing/device.html#setting-up">Setting up a
+Device</a> to start development with a device.</p>
+
+<h2 id="RevisionNotes">Revision Notes</h2>
+
+<h4>Revision 2</h4>
+<p>Adds support for the Verizon Droid (or similar hardware on
+other carriers). Released November 2009.</p>
+
+<h4>Revision 1</h4>
+<p>This was the initial release of the WinUsb-based driver, with support
+for the T-Mobile G1 and myTouch 3G (and similar devices).</p>
+
+<h2 id="WinUsbDriver">Installing the USB Driver for Windows</h2>
+
+<div class="sidebox-wrapper">
+<div class="sidebox-inner">
+  <p>The USB driver for Windows provides support for the following
+Android-powered
+devices:</p>
+  <ul>
+    <li>T-Mobile G1* / ADP1</li>
+    <li>T-Mobile myTouch 3G* / Google Ion</li>
+    <li>Verizon Droid*</li>
+  </ul>
+  <p>* <em>Or similar hardware on other carriers</em></p>
+  <p>Any additional devices will require Windows drivers provided by
+the hardware manufacturer.</p>
+</div>
+</div>
+
+<p>Before you perform the installation below, you must have the USB
+driver saved to your development computer. To get the USB driver, use
+the AVD and SDK Manager included with the SDK Tools to download the USB driver
+as an SDK component. For more information, read <a
+href="adding-components.html">Adding SDK Components</a>.</p>
+
+<p>Once you have the USB driver saved to your computer, select the
+appropriate procedure below, based on your operating system and whether you're
+installing for the first time or upgrading.</p>
+
+<p>If you are connecting an Android-powered
+device to your computer for the first time, follow the below procedure to
+"Perform a fresh installation." If you have installed one of the older
+USB drivers and would like to upgrade to the latest version, follow the
+procedure to "Upgrade an existing driver."</p>
+
+<p>Once you've completed the USB driver installation,
+please see <a
+href="{@docRoot}guide/developing/device.html">Developing on a Device</a> for
+other important information about using an Android-powered device for
+development.</p>
+
+<ol class="nolist">
+  <li><strong>Windows Vista:</strong>
+    <ol class="nolist">
+      <li><a href="#VistaFreshInstall">Perform a fresh installation</a></li>
+      <li><a href="#VistaUprade">Upgrade an existing driver</a></li>
+    </ol>
+  </li>
+  <li><strong>Windows XP:</strong>
+    <ol class="nolist">
+      <li><a href="#XPFreshInstall">Perform a fresh installation</a></li>
+      <li><a href="#XPUpgrade">Upgrade an existing driver</a></li>
+    </ol>
+  </li>
+</ol>
+
+
+<p class="caution"><strong>Caution:</strong>
+You may make changes to <code>android_winusb.inf</code> file found inside
+<code>usb_driver\</code> (for example, to add support for other devices),
+however, this will lead to security warnings when you install or upgrade the
+driver. Making any other changes to the driver files may break the installation
+process.</p>
+
+<h3 id="VistaFreshInstall">Windows Vista: Perform a fresh installation</h3>
+
+<p>To install the Android USB driver on Windows Vista for the first time:</p>
+
+<ol>
+  <li>Connect your Android-powered device to your computer's USB port. Windows
+  will detect the device and launch the Found New Hardware wizard.</li>
+  <li>Select "Locate and install driver software."</li>
+  <li>Select "Don't search online."</li>
+  <li>Select "I don't have the disk. Show me other options."</li>
+  <li>Select "Browse my computer for driver software."</li>
+  <li>Click "Browse..." and locate the folder where you copied the
+    installation package. As long as you specified the exact location of the 
+    installation package, you may leave "Include subfolders" checked or
+  unchecked&mdash;it doesn't matter.</li>
+  <li>Click "Next." Vista may prompt you to confirm the privilege elevation
+  required for driver installation. Confirm it.</li>
+  <li>When Vista asks if you'd like to install the Google ADB Interface device,
+  click "Install" to install the driver.</li>
+</ol>
+
+
+<h3 id="VistaUpgrade">Windows Vista: Upgrade an existing driver</h3>
+
+<p>To upgrade an existing Android USB driver on Windows Vista with the new
+driver:</p>
+
+<ol>
+  <li>Connect your Android-powered device to your computer's USB port.</li>
+  <li>Right-click on "Computer" from your desktop or Windows Explorer,
+    and select "Manage."</li>
+  <li>Select "Device Manager" in the left pane of the Computer Management
+  window.</li>
+  <li>Locate and expand "ADB Interface" in the right pane.</li>
+  <li>Right-click on "HTC Dream Composite ADB Interface", and select "Update
+  Driver Software..."</li>
+  <li>When Vista starts updating the driver, a prompt will ask how you want to
+  search for the driver
+    software. Select "Browse my computer for driver software."</li>
+  <li>Click "Browse..." and locate the folder where you copied the
+    installation package. As long as you specified the exact location of the 
+    installation package, you may leave "Include subfolders" checked or
+    unchecked&mdash;it doesn't matter.</li>
+  <li>Click "Next." Vista may prompt you to confirm the privilege elevation
+  required for driver installation. Confirm it.</li>
+  <li>When Vista asks if you'd like to install the Google ADB Interface device,
+  click "Install" to install the driver.</li>
+</ol>
+
+
+<h3 id="XPFreshInstall">Windows XP: Perform a fresh installation</h3>
+
+<p>To install the Android USB driver on Windows XP for the first time:</p>
+
+<ol>
+  <li>Connect your Android-powered device to your computer's USB port. Windows 
+    will detect the device and launch the Hardware Update Wizard.</li>
+  <li>Select "Install from a list or specific location" and click
+    "Next."</li>
+  <li>Select "Search for the best driver in these locations"; un-check "Search
+    removable media"; and check "Include this location in the search."</li>
+  <li>Click "Browse..." and locate the folder where you copied the installation 
+    package.</li>
+  <li>Click "Next" to install the driver.</li>
+</ol>
+
+
+<h3 id="XPUpgrade">Windows XP: Upgrade an existing driver</h3>
+
+<p>To upgrade an existing Android USB driver on Windows XP with the new
+driver:</p>
+
+<ol>
+  <li>Connect your Android-powered device to your computer's USB port.</li>
+  <li>Right-click on "My Computer" from your desktop or Windows Explorer,
+    and select "Manage."</li>
+  <li>Select "Device Manager" in the left pane of the Computer Management
+  window.</li>
+  <li>Locate and expand "Android Phone" in the right pane.</li>
+  <li>Right-click "Android Composite ADB Interface" and select "Update
+  Driver..."
+    This will launch the Hardware Update Wizard.</li>
+  <li>Select "Install from a list or specific location" and click
+    "Next."</li>
+  <li>Select "Search for the best driver in these locations"; un-check "Search
+    removable media"; and check "Include this location in the search."</li>
+  <li>Click "Browse..." and locate the folder where you copied the installation 
+    package.</li>
+  <li>Click "Next" to install the driver.</li>
+</ol>
+  
