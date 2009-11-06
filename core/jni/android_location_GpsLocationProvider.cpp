@@ -266,7 +266,9 @@ static void android_location_GpsLocationProvider_delete_aiding_data(JNIEnv* env,
 static void android_location_GpsLocationProvider_wait_for_event(JNIEnv* env, jobject obj)
 {
     pthread_mutex_lock(&sEventMutex);
-    pthread_cond_wait(&sEventCond, &sEventMutex);
+    while (sPendingCallbacks == 0) {
+        pthread_cond_wait(&sEventCond, &sEventMutex);
+    }
 
     // copy and clear the callback flags
     int pendingCallbacks = sPendingCallbacks;
