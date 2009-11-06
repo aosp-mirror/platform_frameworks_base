@@ -147,7 +147,15 @@ void MediaPlayerImpl::play() {
     if (mAudioSource != NULL) {
         mAudioPlayer = new AudioPlayer(mAudioSink);
         mAudioPlayer->setSource(mAudioDecoder);
-        mAudioPlayer->start();
+
+        if (mVideoDecoder == NULL) {
+            // If there is no video, start playing right away,
+            // otherwise we'll start the audio player after we decode
+            // the first video frame, this way we won't be behind right
+            // away.
+            mAudioPlayer->start();
+        }
+
         mTimeSource = mAudioPlayer;
     } else {
         mTimeSource = new SystemTimeSource;
@@ -276,6 +284,10 @@ void MediaPlayerImpl::videoEntry() {
         }
 
         if (firstFrame || seeking) {
+            if (firstFrame && mAudioPlayer != NULL) {
+                // We've deferred starting the audio player until now.
+                mAudioPlayer->start();
+            }
             mTimeSourceDeltaUs = mTimeSource->getRealTimeUs() - pts_us;
             firstFrame = false;
         }
