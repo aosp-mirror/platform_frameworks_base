@@ -16,6 +16,10 @@
 
 package com.android.internal.telephony.cdma.sms;
 
+import static android.telephony.SmsMessage.ENCODING_16BIT;
+import static android.telephony.SmsMessage.MAX_USER_DATA_BYTES;
+import static android.telephony.SmsMessage.MAX_USER_DATA_BYTES_WITH_HEADER;
+
 import android.util.Log;
 import android.util.SparseIntArray;
 
@@ -417,6 +421,21 @@ public final class BearerData {
         } else {
             ted = com.android.internal.telephony.gsm.SmsMessage.calculateLength(
                     msg, force7BitEncoding);
+            if (ted.msgCount == 1 && ted.codeUnitSize == SmsMessage.ENCODING_7BIT) {
+                // We don't support single-segment EMS, so calculate for 16-bit
+                // TODO: Consider supporting single-segment EMS
+                ted.codeUnitCount = msg.length();
+                int octets = ted.codeUnitCount * 2;
+                if (octets > MAX_USER_DATA_BYTES) {
+                    ted.msgCount = (octets / MAX_USER_DATA_BYTES_WITH_HEADER) + 1;
+                    ted.codeUnitsRemaining = (MAX_USER_DATA_BYTES_WITH_HEADER
+                              - (octets % MAX_USER_DATA_BYTES_WITH_HEADER))/2;
+                } else {
+                    ted.msgCount = 1;
+                    ted.codeUnitsRemaining = (MAX_USER_DATA_BYTES - octets)/2;
+                }
+                ted.codeUnitSize = ENCODING_16BIT;
+            }
         }
         return ted;
     }
