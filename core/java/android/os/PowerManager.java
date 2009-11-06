@@ -420,6 +420,26 @@ public class PowerManager
         }
     }
 
+    /**
+      * Returns whether the screen is currently on. The screen could be bright
+      * or dim.
+      *
+      * {@samplecode
+      * PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+      * boolean isScreenOn = pm.isScreenOn();
+      * }
+      *
+      * @return whether the screen is on (bright or dim).
+      */
+    public boolean isScreenOn()
+    {
+        try {
+            return mService.isScreenOn();
+        } catch (RemoteException e) {
+            return false;
+        }
+    }
+
     private PowerManager()
     {
     }
