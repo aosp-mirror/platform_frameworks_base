@@ -126,8 +126,9 @@ public final class BluetoothAdapter {
      * <p>Notification of the result of this activity is posted using the
      * {@link android.app.Activity#onActivityResult} callback. The
      * <code>resultCode</code>
-     * will be the duration (in seconds) of discoverability, or a negative
-     * value if the user rejected discoverability.
+     * will be the duration (in seconds) of discoverability or
+     * {@link android.app.Activity#RESULT_CANCELED} if the user rejected
+     * discoverability or an error has occurred.
      * <p>Applications can also listen for {@link #ACTION_SCAN_MODE_CHANGED}
      * for global notification whenever the scan mode changes.
      * <p>Requires {@link android.Manifest.permission#BLUETOOTH}
@@ -153,8 +154,9 @@ public final class BluetoothAdapter {
      * <p>Notification of the result of this activity is posted using the
      * {@link android.app.Activity#onActivityResult} callback. The
      * <code>resultCode</code>
-     * will be negative if the user did not turn on Bluetooth, and non-negative
-     * if Bluetooth has been turned on.
+     * will be {@link android.app.Activity#RESULT_OK} if Bluetooth has been
+     * turned on or {@link android.app.Activity#RESULT_CANCELED} if the user
+     * has rejected the request or an error has occurred.
      * <p>Applications can also listen for {@link #ACTION_STATE_CHANGED}
      * for global notification whenever Bluetooth is turned on or off.
      * <p>Requires {@link android.Manifest.permission#BLUETOOTH}
