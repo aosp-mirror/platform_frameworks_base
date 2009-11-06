@@ -2349,17 +2349,19 @@ class PowerManagerService extends IPowerManager.Stub
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
-        synchronized (mLocks) {
-            if (mProximitySensorActive) {
-                mProximitySensorActive = false;
-                forceUserActivityLocked();
-            }
+        if (mProximitySensorActive) {
+            mProximitySensorActive = false;
+            forceUserActivityLocked();
         }
     }
 
     private void proximityChangedLocked(boolean active) {
         if (mSpew) {
             Log.d(TAG, "proximityChangedLocked, active: " + active);
+        }
+        if (mProximityCount <= 0) {
+            Log.d(TAG, "Ignoring proximity change after last proximity lock is released");
+            return;
         }
         if (active) {
             goToSleepLocked(SystemClock.uptimeMillis());
