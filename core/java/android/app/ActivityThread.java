@@ -1447,7 +1447,6 @@ public final class ActivityThread {
                 Bundle instrumentationArgs, IInstrumentationWatcher instrumentationWatcher,
                 int debugMode, boolean isRestrictedBackupMode, Configuration config,
                 Map<String, IBinder> services) {
-            Process.setArgV0(processName);
 
             if (services != null) {
                 // Setup the service cache in the ServiceManager
@@ -3818,6 +3817,7 @@ public final class ActivityThread {
         //Process.setUid(data.appInfo.uid);
 
         // send up app name; do this *before* waiting for debugger
+        Process.setArgV0(data.processName);
         android.ddm.DdmHandleAppName.setAppName(data.processName);
 
         /*
