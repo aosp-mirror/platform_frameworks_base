@@ -6095,8 +6095,8 @@ public class WindowManagerService extends IWindowManager.Stub
                     }
                     // XXX end hack
 
-                    boolean screenIsOff = !mPowerManager.screenIsOn();
-                    boolean screenIsDim = !mPowerManager.screenIsBright();
+                    boolean screenIsOff = !mPowerManager.isScreenOn();
+                    boolean screenIsDim = !mPowerManager.isScreenBright();
                     int actions = mPolicy.interceptKeyTq(event, !screenIsOff);
 
                     if ((actions & WindowManagerPolicy.ACTION_GO_TO_SLEEP) != 0) {
@@ -6126,8 +6126,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
 
                 case RawInputEvent.EV_REL: {
-                    boolean screenIsOff = !mPowerManager.screenIsOn();
-                    boolean screenIsDim = !mPowerManager.screenIsBright();
+                    boolean screenIsOff = !mPowerManager.isScreenOn();
+                    boolean screenIsDim = !mPowerManager.isScreenBright();
                     if (screenIsOff) {
                         if (!mPolicy.isWakeRelMovementTq(event.deviceId,
                                 device.classes, event)) {
@@ -6143,8 +6143,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
 
                 case RawInputEvent.EV_ABS: {
-                    boolean screenIsOff = !mPowerManager.screenIsOn();
-                    boolean screenIsDim = !mPowerManager.screenIsBright();
+                    boolean screenIsOff = !mPowerManager.isScreenOn();
+                    boolean screenIsDim = !mPowerManager.isScreenBright();
                     if (screenIsOff) {
                         if (!mPolicy.isWakeAbsMovementTq(event.deviceId,
                                 device.classes, event)) {
