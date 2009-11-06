@@ -424,11 +424,6 @@ void IPCThreadState::joinThreadPool(bool isMain)
 
 
             result = executeCommand(cmd);
-
-            // Make sure that after executing the command that we put the thread back into the
-            // default cgroup. This is just a failsafe incase the thread's priority or cgroup was 
-            // not properly restored.
-            set_sched_policy(getpid(), SP_FOREGROUND);
         }
         
         // Let this thread exit the thread pool if it is no longer
