@@ -47,7 +47,6 @@ import android.view.WindowManagerImpl;
 /**
  * A wallpaper service is responsible for showing a live wallpaper behind
  * applications that would like to sit on top of it.
- * @hide Live Wallpaper
  */
 public abstract class WallpaperService extends Service {
     /**
