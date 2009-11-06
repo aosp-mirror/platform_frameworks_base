@@ -57,7 +57,6 @@ public class WallpaperManager {
     /**
      * Launch an activity for the user to pick the current global live
      * wallpaper.
-     * @hide Live Wallpaper
      */
     public static final String ACTION_LIVE_WALLPAPER_CHOOSER
             = "android.service.wallpaper.LIVE_WALLPAPER_CHOOSER";
@@ -395,7 +394,6 @@ public class WallpaperManager {
      * If the current wallpaper is a live wallpaper component, return the
      * information about that wallpaper.  Otherwise, if it is a static image,
      * simply return null.
-     * @hide Live Wallpaper
      */
     public WallpaperInfo getWallpaperInfo() {
         try {

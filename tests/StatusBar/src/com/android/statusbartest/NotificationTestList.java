@@ -58,6 +58,27 @@ public class NotificationTestList extends TestActivity
     }
 
     private Test[] mTests = new Test[] {
+        new Test("Off and sound") {
+            public void run() {
+                PowerManager pm = (PowerManager)NotificationTestList.this.getSystemService("power");
+                PowerManager.WakeLock wl = 
+                            pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "sound");
+                wl.acquire();
+
+                pm.goToSleep(SystemClock.uptimeMillis());
+
+                Notification n = new Notification();
+                n.sound = Uri.parse("file:///sdcard/virtual-void.mp3");
+                Log.d(TAG, "n.sound=" + n.sound);
+
+                mNM.notify(1, n);
+
+                Log.d(TAG, "releasing wake lock");
+                wl.release();
+                Log.d(TAG, "released wake lock");
+            }
+        },
+
         new Test("No view") {
             public void run() {
                 Notification n = new Notification(R.drawable.icon1, "No view",

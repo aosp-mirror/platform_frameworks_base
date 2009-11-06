@@ -35,7 +35,7 @@ status_t OMXClient::connect() {
 
     CHECK(service.get() != NULL);
 
-    mOMX = service->createOMX();
+    mOMX = service->getOMX();
     CHECK(mOMX.get() != NULL);
 
     return OK;

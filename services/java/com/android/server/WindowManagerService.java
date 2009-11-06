@@ -9629,6 +9629,10 @@ public class WindowManagerService extends IWindowManager.Stub
                     moveInputMethodWindowsIfNeededLocked(false);
                     wallpaperMayChange = true;
                     mLayoutNeeded = true;
+                    // Since the window list has been rebuilt, focus might
+                    // have to be recomputed since the actual order of windows
+                    // might have changed again.
+                    focusMayChange = true;
                 }
                 
                 int adjResult = 0;

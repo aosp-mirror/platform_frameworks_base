@@ -7182,7 +7182,6 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
 
         if (DEBUG_TRANSITION) Log.v(TAG,
                 "Prepare to back transition: task=" + task);
-        mWindowManager.prepareAppTransition(WindowManagerPolicy.TRANSIT_TASK_TO_BACK);
         
         final int N = mHistory.size();
         int bottom = 0;
@@ -7212,7 +7211,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 mNoAnimActivities.add(r);
             }
         } else {
-            mWindowManager.prepareAppTransition(WindowManagerPolicy.TRANSIT_TASK_TO_FRONT);
+            mWindowManager.prepareAppTransition(WindowManagerPolicy.TRANSIT_TASK_TO_BACK);
         }
         mWindowManager.moveAppTokensToBottom(moved);
         if (VALIDATE_TOKENS) {

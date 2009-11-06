@@ -93,6 +93,9 @@ class PowerManagerService extends IPowerManager.Stub
     // How long to wait to debounce light sensor changes.
     private static final int LIGHT_SENSOR_DELAY = 1000;
 
+    // For debouncing the proximity sensor.
+    private static final int PROXIMITY_SENSOR_DELAY = 1000;
+
     // trigger proximity if distance is less than 5 cm
     private static final float PROXIMITY_THRESHOLD = 5.0f;
 
@@ -162,6 +165,8 @@ class PowerManagerService extends IPowerManager.Stub
     private boolean mKeyboardVisible = false;
     private boolean mUserActivityAllowed = true;
     private boolean mProximitySensorActive = false;
+    private int mProximityPendingValue = -1; // -1 == nothing, 0 == inactive, 1 == active
+    private long mLastProximityEventTime;
     private int mTotalDelaySetting;
     private int mKeylightDelay;
     private int mDimDelay;
@@ -886,6 +891,8 @@ class PowerManagerService extends IPowerManager.Stub
         pw.println("  mStayOnWhilePluggedInPartialLock=" + mStayOnWhilePluggedInPartialLock);
         pw.println("  mPreventScreenOnPartialLock=" + mPreventScreenOnPartialLock);
         pw.println("  mProximitySensorActive=" + mProximitySensorActive);
+        pw.println("  mProximityPendingValue=" + mProximityPendingValue);
+        pw.println("  mLastProximityEventTime=" + mLastProximityEventTime);
         pw.println("  mLightSensorEnabled=" + mLightSensorEnabled);
         pw.println("  mLightSensorValue=" + mLightSensorValue);
         pw.println("  mLightSensorPendingValue=" + mLightSensorPendingValue);
@@ -1895,6 +1902,17 @@ class PowerManagerService extends IPowerManager.Stub
         }
     }
 
+    private Runnable mProximityTask = new Runnable() {
+        public void run() {
+            synchronized (mLocks) {
+                if (mProximityPendingValue != -1) {
+                    proximityChangedLocked(mProximityPendingValue == 1);
+                    mProximityPendingValue = -1;
+                }
+            }
+        }
+    };
+
     private Runnable mAutoBrightnessTask = new Runnable() {
         public void run() {
             synchronized (mLocks) {
@@ -2327,14 +2345,33 @@ class PowerManagerService extends IPowerManager.Stub
         long identity = Binder.clearCallingIdentity();
         try {
             mSensorManager.unregisterListener(mProximityListener);
+            mHandler.removeCallbacks(mProximityTask);
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
-        synchronized (mLocks) {
-            if (mProximitySensorActive) {
-                mProximitySensorActive = false;
-                forceUserActivityLocked();
-            }
+        if (mProximitySensorActive) {
+            mProximitySensorActive = false;
+            forceUserActivityLocked();
+        }
+    }
+
+    private void proximityChangedLocked(boolean active) {
+        if (mSpew) {
+            Log.d(TAG, "proximityChangedLocked, active: " + active);
+        }
+        if (mProximityCount <= 0) {
+            Log.d(TAG, "Ignoring proximity change after last proximity lock is released");
+            return;
+        }
+        if (active) {
+            goToSleepLocked(SystemClock.uptimeMillis());
+            mProximitySensorActive = true;
+        } else {
+            // proximity sensor negative events trigger as user activity.
+            // temporarily set mUserActivityAllowed to true so this will work
+            // even when the keyguard is on.
+            mProximitySensorActive = false;
+            forceUserActivityLocked();
         }
     }
 
@@ -2365,23 +2402,22 @@ class PowerManagerService extends IPowerManager.Stub
             long milliseconds = event.timestamp / 1000000;
             synchronized (mLocks) {
                 float distance = event.values[0];
+                long timeSinceLastEvent = milliseconds - mLastProximityEventTime;
+                mLastProximityEventTime = milliseconds;
+                mHandler.removeCallbacks(mProximityTask);
+
                 // compare against getMaximumRange to support sensors that only return 0 or 1
-                if (distance >= 0.0 && distance < PROXIMITY_THRESHOLD &&
-                        distance < mProximitySensor.getMaximumRange()) {
-                    if (mSpew) {
-                        Log.d(TAG, "onSensorChanged: proximity active, distance: " + distance);
-                    }
-                    goToSleepLocked(milliseconds);
-                    mProximitySensorActive = true;
+                boolean active = (distance >= 0.0 && distance < PROXIMITY_THRESHOLD &&
+                        distance < mProximitySensor.getMaximumRange());
+
+                if (timeSinceLastEvent < PROXIMITY_SENSOR_DELAY) {
+                    // enforce delaying atleast PROXIMITY_SENSOR_DELAY before processing
+                    mProximityPendingValue = (active ? 1 : 0);
+                    mHandler.postDelayed(mProximityTask, PROXIMITY_SENSOR_DELAY - timeSinceLastEvent);
                 } else {
-                    // proximity sensor negative events trigger as user activity.
-                    // temporarily set mUserActivityAllowed to true so this will work
-                    // even when the keyguard is on.
-                    if (mSpew) {
-                        Log.d(TAG, "onSensorChanged: proximity inactive, distance: " + distance);
-                    }
-                    mProximitySensorActive = false;
-                    forceUserActivityLocked();
+                    // process the value immediately
+                    mProximityPendingValue = -1;
+                    proximityChangedLocked(active);
                 }
             }
         }

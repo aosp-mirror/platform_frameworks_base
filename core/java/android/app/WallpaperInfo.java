@@ -5,10 +5,10 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import android.content.ComponentName;
 import android.content.Context;
-import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
+import android.content.res.Resources.NotFoundException;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
 import android.graphics.drawable.Drawable;
@@ -23,7 +23,6 @@ import java.io.IOException;
 
 /**
  * This class is used to specify meta information of a wallpaper service.
- * @hide Live Wallpaper
  */
 public final class WallpaperInfo implements Parcelable {
     static final String TAG = "WallpaperInfo";
@@ -45,6 +44,16 @@ public final class WallpaperInfo implements Parcelable {
     final int mThumbnailResource;
 
     /**
+     * Resource identifier for a string indicating the author of the wallpaper.
+     */
+    final int mAuthorResource;
+
+    /**
+     * Resource identifier for a string containing a short description of the wallpaper.
+     */
+    final int mDescriptionResource;
+
+    /**
      * Constructor.
      * 
      * @param context The Context in which we are parsing the wallpaper.
@@ -59,6 +68,8 @@ public final class WallpaperInfo implements Parcelable {
         PackageManager pm = context.getPackageManager();
         String settingsActivityComponent = null;
         int thumbnailRes = -1;
+        int authorRes = -1;
+        int descriptionRes = -1;
         
         XmlResourceParser parser = null;
         try {
@@ -89,6 +100,12 @@ public final class WallpaperInfo implements Parcelable {
             thumbnailRes = sa.getResourceId(
                     com.android.internal.R.styleable.Wallpaper_thumbnail,
                     -1);
+            authorRes = sa.getResourceId(
+                    com.android.internal.R.styleable.Wallpaper_wallpaperAuthor,
+                    -1);
+            descriptionRes = sa.getResourceId(
+                    com.android.internal.R.styleable.Wallpaper_wallpaperDescription,
+                    -1);
 
             sa.recycle();
         } finally {
@@ -97,11 +114,15 @@ public final class WallpaperInfo implements Parcelable {
         
         mSettingsActivityName = settingsActivityComponent;
         mThumbnailResource = thumbnailRes;
+        mAuthorResource = authorRes;
+        mDescriptionResource = descriptionRes;
     }
 
     WallpaperInfo(Parcel source) {
         mSettingsActivityName = source.readString();
         mThumbnailResource = source.readInt();
+        mAuthorResource = source.readInt();
+        mDescriptionResource = source.readInt();
         mService = ResolveInfo.CREATOR.createFromParcel(source);
     }
     
@@ -169,6 +190,32 @@ public final class WallpaperInfo implements Parcelable {
                               mThumbnailResource,
                               null);
     }
+
+    /**
+     * Return a string indicating the author(s) of this wallpaper.
+     */
+    public CharSequence loadAuthor(PackageManager pm) throws NotFoundException {
+        if (mAuthorResource <= 0) throw new NotFoundException();
+        return pm.getText(
+            (mService.resolvePackageName != null)
+                ? mService.resolvePackageName
+                : getPackageName(),
+            mAuthorResource,
+            null);
+    }
+
+    /**
+     * Return a brief summary of this wallpaper's behavior.
+     */
+    public CharSequence loadDescription(PackageManager pm) throws NotFoundException {
+        if (mDescriptionResource <= 0) throw new NotFoundException();
+        return pm.getText(
+            (mService.resolvePackageName != null)
+                ? mService.resolvePackageName
+                : getPackageName(),
+            mDescriptionResource,
+            null);
+    }
     
     /**
      * Return the class name of an activity that provides a settings UI for
@@ -206,6 +253,8 @@ public final class WallpaperInfo implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(mSettingsActivityName);
         dest.writeInt(mThumbnailResource);
+        dest.writeInt(mAuthorResource);
+        dest.writeInt(mDescriptionResource);
         mService.writeToParcel(dest, flags);
     }
 

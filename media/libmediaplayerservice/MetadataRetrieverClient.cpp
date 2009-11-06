@@ -138,6 +138,12 @@ status_t MetadataRetrieverClient::setDataSource(const char *url)
         return UNKNOWN_ERROR;
     }
     player_type playerType = getPlayerType(url);
+#if !defined(NO_OPENCORE) && defined(BUILD_WITH_FULL_STAGEFRIGHT)
+    if (playerType == STAGEFRIGHT_PLAYER) {
+        // Stagefright doesn't support metadata in this branch yet.
+        playerType = PV_PLAYER;
+    }
+#endif
     LOGV("player type = %d", playerType);
     sp<MediaMetadataRetrieverBase> p = createRetriever(playerType);
     if (p == NULL) return NO_INIT;
@@ -176,6 +182,12 @@ status_t MetadataRetrieverClient::setDataSource(int fd, int64_t offset, int64_t 
     }
 
     player_type playerType = getPlayerType(fd, offset, length);
+#if !defined(NO_OPENCORE) && defined(BUILD_WITH_FULL_STAGEFRIGHT)
+    if (playerType == STAGEFRIGHT_PLAYER) {
+        // Stagefright doesn't support metadata in this branch yet.
+        playerType = PV_PLAYER;
+    }
+#endif
     LOGV("player type = %d", playerType);
     sp<MediaMetadataRetrieverBase> p = createRetriever(playerType);
     if (p == NULL) {

@@ -658,7 +658,7 @@ public class GsmAlphabet {
         charToGsm.put('Z', i++);
         charToGsm.put('\u00c4', i++);
         charToGsm.put('\u00d6', i++);
-        charToGsm.put('\u0147', i++);
+        charToGsm.put('\u00d1', i++);
         charToGsm.put('\u00dc', i++);
         charToGsm.put('\u00a7', i++);
 
