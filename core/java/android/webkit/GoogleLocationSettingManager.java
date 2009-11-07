@@ -32,7 +32,6 @@ import java.util.HashSet;
  * Security - Share with Google' and the browser. When this setting is set
  * to true, we allow Geolocation for Google origins. When this setting is
  * set to false, we clear Geolocation permissions for Google origins.
- * @hide pending API council review
  */
 class GoogleLocationSettingManager {
     // The observer used to listen to the system setting.

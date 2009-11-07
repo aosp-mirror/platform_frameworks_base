@@ -71,7 +71,6 @@ public final class GeolocationPermissions {
 
     /**
      * Gets the singleton instance of the class.
-     * @hide
      */
     public static GeolocationPermissions getInstance() {
       if (sInstance == null) {
@@ -188,7 +187,6 @@ public final class GeolocationPermissions {
      * WebCore::SecurityOrigin::toString(). As long as all 'HTML 5 modules'
      * (Database, Geolocation etc) do so, it's safe to match up origins for the
      * purposes of displaying UI.
-     * @hide
      */
     public void getOrigins(ValueCallback<Set> callback) {
         if (callback != null) {
@@ -212,7 +210,6 @@ public final class GeolocationPermissions {
 
     /**
      * Gets the permission state for the specified origin.
-     * @hide
      */
     public void getAllowed(String origin, ValueCallback<Boolean> callback) {
         if (callback == null) {
@@ -245,7 +242,6 @@ public final class GeolocationPermissions {
      * Clears the permission state for the specified origin. This method may be
      * called before the WebKit thread has intialized the message handler.
      * Messages will be queued until this time.
-     * @hide
      */
     public void clear(String origin) {
         // Called on the UI thread.
@@ -266,7 +262,6 @@ public final class GeolocationPermissions {
      * Allows the specified origin. This method may be called before the WebKit
      * thread has intialized the message handler. Messages will be queued until
      * this time.
-     * @hide
      */
     public void allow(String origin) {
         // Called on the UI thread.
@@ -285,7 +280,6 @@ public final class GeolocationPermissions {
 
     /**
      * Clears the permission state for all origins.
-     * @hide
      */
     public void clearAll() {
         // Called on the UI thread.
