@@ -75,7 +75,11 @@
       </li>
     </ul>
     <ul>
-      <li><a href="<?cs var:toroot ?>sdk/tools-notes.html">SDK Tools, Revision 3</a>
+      <li><a href="<?cs var:toroot ?>sdk/tools-notes.html">SDK Tools, r3</a>
+      <span class="new">new!</span>
+      </li>
+      <li><a href="<?cs var:toroot ?>sdk/win-usb.html">USB Driver for
+Windows, r2</a>
       <span class="new">new!</span>
       </li>
     </ul>
