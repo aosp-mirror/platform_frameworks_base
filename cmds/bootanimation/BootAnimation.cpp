@@ -437,6 +437,9 @@ bool BootAnimation::movie()
     nsecs_t lastFrame = systemTime();
     nsecs_t frameDuration = s2ns(1) / animation.fps;
 
+    Region clearReg(Rect(mWidth, mHeight));
+    clearReg.subtractSelf(Rect(xc, yc, xc+animation.width, yc+animation.height));
+
     for (int i=0 ; i<pcount && !exitPending() ; i++) {
         const Animation::Part& part(animation.parts[i]);
         const size_t fcount = part.frames.size();
@@ -460,6 +463,18 @@ bool BootAnimation::movie()
                             frame.map->getDataLength());
                 }
 
+                if (!clearReg.isEmpty()) {
+                    Region::const_iterator head(clearReg.begin());
+                    Region::const_iterator tail(clearReg.end());
+                    glEnable(GL_SCISSOR_TEST);
+                    while (head != tail) {
+                        const Rect& r(*head++);
+                        glScissor(r.left, mHeight - r.bottom,
+                                r.width(), r.height());
+                        glClear(GL_COLOR_BUFFER_BIT);
+                    }
+                    glDisable(GL_SCISSOR_TEST);
+                }
                 glDrawTexiOES(xc, yc, 0, animation.width, animation.height);
                 eglSwapBuffers(mDisplay, mSurface);
 
