@@ -1281,8 +1281,8 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
         public void start(GLThread thread) throws InterruptedException {
             GLThread oldThread = null;
             synchronized(this) {
-                mMostRecentGLThread = thread;
                 oldThread = mMostRecentGLThread;
+                mMostRecentGLThread = thread;
             }
             if (oldThread != null) {
                 synchronized(oldThread) {
