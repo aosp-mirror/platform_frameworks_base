@@ -777,6 +777,12 @@
     <string name="create_contact_using" msgid="4947405226788104538">"Crear contacto "\n"con <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <string name="accessibility_compound_button_selected" msgid="5612776946036285686">"verificado"</string>
     <string name="accessibility_compound_button_unselected" msgid="8864512895673924091">"no verificado"</string>
+    <!-- no translation found for grant_credentials_permission_message_header (6824538733852821001) -->
+    <skip />
+    <!-- no translation found for grant_credentials_permission_message_footer (3125211343379376561) -->
+    <skip />
+    <!-- no translation found for grant_permissions_header_text (2722567482180797717) -->
+    <skip />
     <string name="allow" msgid="7225948811296386551">"Permitir"</string>
     <string name="deny" msgid="2081879885755434506">"Denegar"</string>
     <string name="permission_request_notification_title" msgid="5390555465778213840">"Permiso solicitado"</string>
@@ -790,4 +796,6 @@
     <string name="l2tp_vpn_description" msgid="3750692169378923304">"Protocolo de túnel de nivel 2"</string>
     <string name="l2tp_ipsec_psk_vpn_description" msgid="3945043564008303239">"Clave previamente compartida según L2TP/IPSec VPN"</string>
     <string name="l2tp_ipsec_crt_vpn_description" msgid="5382714073103653577">"Certificado según L2TP/IPSec VPN"</string>
+    <!-- no translation found for upload_file (2897957172366730416) -->
+    <skip />
 </resources>
