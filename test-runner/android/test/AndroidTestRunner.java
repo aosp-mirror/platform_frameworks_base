@@ -133,7 +133,7 @@ public class AndroidTestRunner extends BaseTestRunner {
         }
         return new TestResult();
     }
-    
+
     void setSkipExecution(boolean skip) {
         mSkipExecution = skip;
     }
@@ -165,7 +165,7 @@ public class AndroidTestRunner extends BaseTestRunner {
         for (TestCase testCase : mTestCases) {
             setContextIfAndroidTestCase(testCase, mContext, testContext);
             setInstrumentationIfInstrumentationTestCase(testCase, mInstrumentation);
-            setPerformanceWriterIfPerformanceTestCase(testCase, mPerfWriter);
+            setPerformanceWriterIfPerformanceCollectorTestCase(testCase, mPerfWriter);
             testCase.run(mTestResult);
         }
     }
@@ -188,10 +188,10 @@ public class AndroidTestRunner extends BaseTestRunner {
         }
     }
 
-    private void setPerformanceWriterIfPerformanceTestCase(
+    private void setPerformanceWriterIfPerformanceCollectorTestCase(
             Test test, PerformanceResultsWriter writer) {
-        if (PerformanceTestBase.class.isAssignableFrom(test.getClass())) {
-            ((PerformanceTestBase) test).setPerformanceResultsWriter(writer);
+        if (PerformanceCollectorTestCase.class.isAssignableFrom(test.getClass())) {
+            ((PerformanceCollectorTestCase) test).setPerformanceResultsWriter(writer);
         }
     }
 
