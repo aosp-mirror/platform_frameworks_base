@@ -1299,21 +1299,22 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
 
             GLThread oldThread = null;
             synchronized(this) {
-                mMostRecentGLThread = thread;
                 oldThread = mMostRecentGLThread;
+                mMostRecentGLThread = thread;
+            }
+            if (oldThread != null && ! mMultipleGLESContextsAllowed) {
+                synchronized(oldThread) {
+                    oldThread.notifyAll();
+                }
+            }
 
+            synchronized(this) {
                 while ((! mMultipleGLESContextsAllowed)
                         && mGLContextCount > 0) {
                     wait();
                 }
 
                 mGLContextCount++;
-            }
-
-            if (oldThread != null && ! mMultipleGLESContextsAllowed) {
-                synchronized(oldThread) {
-                    oldThread.notifyAll();
-                }
             }
         }
 
