@@ -229,7 +229,6 @@ public final class WebStorage {
      */
 
     /**
-     * @hide
      * Returns a list of origins having a database
      */
     public void getOrigins(ValueCallback<Map> callback) {
@@ -256,7 +255,6 @@ public final class WebStorage {
     }
 
     /**
-     * @hide
      * Returns the use for a given origin
      */
     public void getUsageForOrigin(String origin, ValueCallback<Long> callback) {
@@ -280,7 +278,6 @@ public final class WebStorage {
     }
 
     /**
-     * @hide
      * Returns the quota for a given origin
      */
     public void getQuotaForOrigin(String origin, ValueCallback<Long> callback) {
@@ -304,7 +301,6 @@ public final class WebStorage {
     }
 
     /**
-     * @hide
      * Set the quota for a given origin
      */
     public void setQuotaForOrigin(String origin, long quota) {
@@ -319,7 +315,6 @@ public final class WebStorage {
     }
 
     /**
-     * @hide
      * Delete a given origin
      */
     public void deleteOrigin(String origin) {
@@ -334,7 +329,6 @@ public final class WebStorage {
     }
 
     /**
-     * @hide
      * Delete all databases
      */
     public void deleteAllData() {
@@ -364,7 +358,6 @@ public final class WebStorage {
     }
 
     /**
-     * @hide
      * Get the global instance of WebStorage.
      * @return A single instance of WebStorage.
      */

@@ -30,9 +30,8 @@ import android.webkit.WebViewCore;
 
 /**
  * Implements the Java side of GeolocationServiceAndroid.
- * @hide Pending API council review.
  */
-public final class GeolocationService implements LocationListener {
+final class GeolocationService implements LocationListener {
 
     // Log tag
     private static final String TAG = "geolocationService";
