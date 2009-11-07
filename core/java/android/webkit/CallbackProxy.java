@@ -170,8 +170,6 @@ class CallbackProxy extends Handler {
     /**
      * Get the WebChromeClient.
      * @return the current WebChromeClient instance.
-     *
-     *@hide pending API council approval.
      */
     public WebChromeClient getWebChromeClient() {
        return mWebChromeClient;
@@ -1251,7 +1249,6 @@ class CallbackProxy extends Handler {
      * @param quotaUpdater An instance of a class encapsulating a callback
      * to WebViewCore to run when the decision to allow or deny a bigger
      * app cache size has been made.
-     * @hide pending API council approval.
      */
     public void onReachedMaxAppCacheSize(long spaceNeeded,
             long totalUsedQuota, WebStorage.QuotaUpdater quotaUpdater) {
@@ -1275,7 +1272,6 @@ class CallbackProxy extends Handler {
      * @param origin The origin requesting Geolocation permsissions.
      * @param callback The callback to call once a permission state has been
      *     obtained.
-     * @hide pending API council review.
      */
     public void onGeolocationPermissionsShowPrompt(String origin,
             GeolocationPermissions.Callback callback) {
@@ -1295,8 +1291,6 @@ class CallbackProxy extends Handler {
     /**
      * Called by WebViewCore to instruct the browser to hide the Geolocation
      * permissions prompt.
-     * origin.
-     * @hide pending API council review.
      */
     public void onGeolocationPermissionsHidePrompt() {
         if (mWebChromeClient == null) {
@@ -1315,7 +1309,6 @@ class CallbackProxy extends Handler {
      *     occurred.
      * @param sourceID The filename of the source file in which the error
      *     occurred.
-     * @hide pending API counsel.
      */
     public void addMessageToConsole(String message, int lineNumber, String sourceID) {
         if (mWebChromeClient == null) {
@@ -1329,9 +1322,6 @@ class CallbackProxy extends Handler {
         sendMessage(msg);
     }
 
-    /**
-     * @hide pending API council approval
-     */
     public boolean onJsTimeout() {
         //always interrupt timedout JS by default
         if (mWebChromeClient == null) {
@@ -1351,9 +1341,6 @@ class CallbackProxy extends Handler {
         return result.getResult();
     }
 
-    /**
-     * @hide pending API council approval
-     */
     public void getVisitedHistory(ValueCallback<String[]> callback) {
         if (mWebChromeClient == null) {
             return;
