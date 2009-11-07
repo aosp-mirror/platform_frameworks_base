@@ -2203,6 +2203,9 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 clearScrollingCache();
             }
             mLastY = Integer.MIN_VALUE;
+            if (mTouchMode == TOUCH_MODE_FLING) {
+                return true;
+            }
             break;
         }
 
