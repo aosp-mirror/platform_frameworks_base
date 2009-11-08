@@ -26,6 +26,7 @@ import android.graphics.RectF;
 import android.graphics.Region;
 import android.graphics.Xfermode;
 import android.graphics.Paint.Align;
+import android.graphics.Paint.FontInfo;
 import android.graphics.Paint.Style;
 import android.graphics.Region.Op;
 
@@ -37,6 +38,7 @@ import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
+import java.util.List;
 import java.util.Stack;
 
 import javax.microedition.khronos.opengles.GL;
@@ -620,18 +622,20 @@ public class Canvas extends _Original_Canvas {
      */
     @Override
     public void drawText(char[] text, int index, int count, float x, float y, Paint paint) {
+        // WARNING: the logic in this method is similar to Paint.measureText.
+        // Any change to this method should be reflected in Paint.measureText
         Graphics2D g = getGraphics2d();
 
         g = (Graphics2D)g.create();
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-        g.setFont(paint.getFont());
-
-        // set the color. because this only handles RGB we have to handle the alpha separately
+        // set the color. because this only handles RGB, the alpha channel is handled
+        // as a composite.
         g.setColor(new Color(paint.getColor()));
         int alpha = paint.getAlpha();
         float falpha = alpha / 255.f;
         g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, falpha));
+
 
         // Paint.TextAlign indicates how the text is positioned relative to X.
         // LEFT is the default and there's nothing to do.
@@ -644,9 +648,83 @@ public class Canvas extends _Original_Canvas {
             }
         }
 
-        g.drawChars(text, index, count, (int)x, (int)y);
+        List<FontInfo> fonts = paint.getFonts();
+        try {
+            if (fonts.size() > 0) {
+                FontInfo mainFont = fonts.get(0);
+                int i = index;
+                int lastIndex = index + count;
+                while (i < lastIndex) {
+                    // always start with the main font.
+                    int upTo = mainFont.mFont.canDisplayUpTo(text, i, lastIndex);
+                    if (upTo == -1) {
+                        // draw all the rest and exit.
+                        g.setFont(mainFont.mFont);
+                        g.drawChars(text, i, lastIndex - i, (int)x, (int)y);
+                        return;
+                    } else if (upTo > 0) {
+                        // draw what's possible
+                        g.setFont(mainFont.mFont);
+                        g.drawChars(text, i, upTo - i, (int)x, (int)y);
 
-        g.dispose();
+                        // compute the width that was drawn to increase x
+                        x += mainFont.mMetrics.charsWidth(text, i, upTo - i);
+
+                        // move index to the first non displayed char.
+                        i = upTo;
+
+                        // don't call continue at this point. Since it is certain the main font
+                        // cannot display the font a index upTo (now ==i), we move on to the
+                        // fallback fonts directly.
+                    }
+
+                    // no char supported, attempt to read the next char(s) with the
+                    // fallback font. In this case we only test the first character
+                    // and then go back to test with the main font.
+                    // Special test for 2-char characters.
+                    boolean foundFont = false;
+                    for (int f = 1 ; f < fonts.size() ; f++) {
+                        FontInfo fontInfo = fonts.get(f);
+
+                        // need to check that the font can display the character. We test
+                        // differently if the char is a high surrogate.
+                        int charCount = Character.isHighSurrogate(text[i]) ? 2 : 1;
+                        upTo = fontInfo.mFont.canDisplayUpTo(text, i, i + charCount);
+                        if (upTo == -1) {
+                            // draw that char
+                            g.setFont(fontInfo.mFont);
+                            g.drawChars(text, i, charCount, (int)x, (int)y);
+
+                            // update x
+                            x += fontInfo.mMetrics.charsWidth(text, i, charCount);
+
+                            // update the index in the text, and move on
+                            i += charCount;
+                            foundFont = true;
+                            break;
+
+                        }
+                    }
+
+                    // in case no font can display the char, display it with the main font.
+                    // (it'll put a square probably)
+                    if (foundFont == false) {
+                        int charCount = Character.isHighSurrogate(text[i]) ? 2 : 1;
+
+                        g.setFont(mainFont.mFont);
+                        g.drawChars(text, i, charCount, (int)x, (int)y);
+
+                        // measure it to advance x
+                        x += mainFont.mMetrics.charsWidth(text, i, charCount);
+
+                        // and move to the next chars.
+                        i += charCount;
+                    }
+                }
+            }
+        } finally {
+            g.dispose();
+        }
     }
 
     /* (non-Javadoc)

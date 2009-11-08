@@ -26,6 +26,9 @@ import java.awt.Toolkit;
 import java.awt.font.FontRenderContext;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * A paint implementation overridden by the LayoutLib bridge.
@@ -39,11 +42,18 @@ public class Paint extends _Original_Paint {
     private Align mAlign = Align.LEFT;
     private Style mStyle = Style.FILL;
     private int mFlags = 0;
-    
-    private Font mFont;
+
+    /**
+     * Class associating a {@link Font} and it's {@link java.awt.FontMetrics}.
+     */
+    public static final class FontInfo {
+        Font mFont;
+        java.awt.FontMetrics mMetrics;
+    }
+
+    private List<FontInfo> mFonts;
     private final FontRenderContext mFontContext = new FontRenderContext(
             new AffineTransform(), true, true);
-    private java.awt.FontMetrics mMetrics;
 
     @SuppressWarnings("hiding")
     public static final int ANTI_ALIAS_FLAG       = _Original_Paint.ANTI_ALIAS_FLAG;
@@ -192,10 +202,11 @@ public class Paint extends _Original_Paint {
     }
     
     /**
-     * Returns the {@link Font} object.
+     * Returns the list of {@link Font} objects. The first item is the main font, the rest
+     * are fall backs for characters not present in the main font.
      */
-    public Font getFont() {
-        return mFont;
+    public List<FontInfo> getFonts() {
+        return mFonts;
     }
     
     private void initFont() {
@@ -206,17 +217,29 @@ public class Paint extends _Original_Paint {
     /**
      * Update the {@link Font} object from the typeface, text size and scaling
      */
+    @SuppressWarnings("deprecation")
     private void updateFontObject() {
         if (mTypeface != null) {
-            // get the typeface font object, and get our font object from it, based on the current size
-            mFont = mTypeface.getFont().deriveFont(mTextSize);
-            if (mScaleX != 1.0 || mSkewX != 0) {
-                // TODO: support skew
-                mFont = mFont.deriveFont(new AffineTransform(
-                        mScaleX, mSkewX, 0, 0, 1, 0));
+            // Get the fonts from the TypeFace object.
+            List<Font> fonts = mTypeface.getFonts();
+
+            // create new font objects as well as FontMetrics, based on the current text size
+            // and skew info.
+            ArrayList<FontInfo> infoList = new ArrayList<FontInfo>(fonts.size());
+            for (Font font : fonts) {
+                FontInfo info = new FontInfo();
+                info.mFont = font.deriveFont(mTextSize);
+                if (mScaleX != 1.0 || mSkewX != 0) {
+                    // TODO: support skew
+                    info.mFont = info.mFont.deriveFont(new AffineTransform(
+                            mScaleX, mSkewX, 0, 0, 1, 0));
+                }
+                info.mMetrics = Toolkit.getDefaultToolkit().getFontMetrics(info.mFont);
+
+                infoList.add(info);
             }
-            
-            mMetrics = Toolkit.getDefaultToolkit().getFontMetrics(mFont);
+
+            mFonts = Collections.unmodifiableList(infoList);
         }
     }
     
@@ -256,34 +279,36 @@ public class Paint extends _Original_Paint {
      * @return the font's recommended interline spacing.
      */
     public float getFontMetrics(FontMetrics metrics) {
-        if (mMetrics != null) {
+        if (mFonts.size() > 0) {
+            java.awt.FontMetrics javaMetrics = mFonts.get(0).mMetrics;
             if (metrics != null) {
-                // ascent stuff should be negatif, but awt returns them as positive.
-                metrics.top = - mMetrics.getMaxAscent();
-                metrics.ascent = - mMetrics.getAscent();
-                metrics.descent = mMetrics.getDescent();
-                metrics.bottom = mMetrics.getMaxDescent();
-                metrics.leading = mMetrics.getLeading();
+                // Android expects negative ascent so we invert the value from Java.
+                metrics.top = - javaMetrics.getMaxAscent();
+                metrics.ascent = - javaMetrics.getAscent();
+                metrics.descent = javaMetrics.getDescent();
+                metrics.bottom = javaMetrics.getMaxDescent();
+                metrics.leading = javaMetrics.getLeading();
             }
-    
-            return mMetrics.getHeight();
+
+            return javaMetrics.getHeight();
         }
         
         return 0;
     }
 
     public int getFontMetricsInt(FontMetricsInt metrics) {
-        if (mMetrics != null) {
+        if (mFonts.size() > 0) {
+            java.awt.FontMetrics javaMetrics = mFonts.get(0).mMetrics;
             if (metrics != null) {
-                // ascent stuff should be negatif, but awt returns them as positive.
-                metrics.top = - mMetrics.getMaxAscent();
-                metrics.ascent = - mMetrics.getAscent();
-                metrics.descent = mMetrics.getDescent();
-                metrics.bottom = mMetrics.getMaxDescent();
-                metrics.leading = mMetrics.getLeading();
+                // Android expects negative ascent so we invert the value from Java.
+                metrics.top = - javaMetrics.getMaxAscent();
+                metrics.ascent = - javaMetrics.getAscent();
+                metrics.descent = javaMetrics.getDescent();
+                metrics.bottom = javaMetrics.getMaxDescent();
+                metrics.leading = javaMetrics.getLeading();
             }
-    
-            return mMetrics.getHeight();
+
+            return javaMetrics.getHeight();
         }
         
         return 0;
@@ -521,9 +546,10 @@ public class Paint extends _Original_Paint {
      */
     @Override
     public float ascent() {
-        if (mMetrics != null) {
-            // ascent stuff should be negatif, but awt returns them as positive.
-            return - mMetrics.getAscent();
+        if (mFonts.size() > 0) {
+            java.awt.FontMetrics javaMetrics = mFonts.get(0).mMetrics;
+            // Android expects negative ascent so we invert the value from Java.
+            return - javaMetrics.getAscent();
         }
         
         return 0;
@@ -538,8 +564,9 @@ public class Paint extends _Original_Paint {
      */
     @Override
     public float descent() {
-        if (mMetrics != null) {
-            return mMetrics.getDescent();
+        if (mFonts.size() > 0) {
+            java.awt.FontMetrics javaMetrics = mFonts.get(0).mMetrics;
+            return javaMetrics.getDescent();
         }
         
         return 0;
@@ -555,10 +582,55 @@ public class Paint extends _Original_Paint {
      */
     @Override
     public float measureText(char[] text, int index, int count) {
-        if (mFont != null && text != null && text.length > 0) {
-            Rectangle2D bounds = mFont.getStringBounds(text, index, index + count, mFontContext);
-            
-            return (float)bounds.getWidth();
+        // WARNING: the logic in this method is similar to Canvas.drawText.
+        // Any change to this method should be reflected in Canvas.drawText
+        if (mFonts.size() > 0) {
+            FontInfo mainFont = mFonts.get(0);
+            int i = index;
+            int lastIndex = index + count;
+            float total = 0f;
+            while (i < lastIndex) {
+                // always start with the main font.
+                int upTo = mainFont.mFont.canDisplayUpTo(text, i, lastIndex);
+                if (upTo == -1) {
+                    // shortcut to exit
+                    return total + mainFont.mMetrics.charsWidth(text, i, lastIndex - i);
+                } else if (upTo > 0) {
+                    total += mainFont.mMetrics.charsWidth(text, i, upTo - i);
+                    i = upTo;
+                    // don't call continue at this point. Since it is certain the main font
+                    // cannot display the font a index upTo (now ==i), we move on to the
+                    // fallback fonts directly.
+                }
+
+                // no char supported, attempt to read the next char(s) with the
+                // fallback font. In this case we only test the first character
+                // and then go back to test with the main font.
+                // Special test for 2-char characters.
+                boolean foundFont = false;
+                for (int f = 1 ; f < mFonts.size() ; f++) {
+                    FontInfo fontInfo = mFonts.get(f);
+
+                    // need to check that the font can display the character. We test
+                    // differently if the char is a high surrogate.
+                    int charCount = Character.isHighSurrogate(text[i]) ? 2 : 1;
+                    upTo = fontInfo.mFont.canDisplayUpTo(text, i, i + charCount);
+                    if (upTo == -1) {
+                        total += fontInfo.mMetrics.charsWidth(text, i, charCount);
+                        i += charCount;
+                        foundFont = true;
+                        break;
+
+                    }
+                }
+
+                // in case no font can display the char, measure it with the main font.
+                if (foundFont == false) {
+                    int size = Character.isHighSurrogate(text[i]) ? 2 : 1;
+                    total += mainFont.mMetrics.charsWidth(text, i, size);
+                    i += size;
+                }
+            }
         }
         
         return 0;
@@ -702,14 +774,30 @@ public class Paint extends _Original_Paint {
     @Override
     public int getTextWidths(char[] text, int index, int count,
                              float[] widths) {
-        if (mMetrics != null) {
+        if (mFonts.size() > 0) {
             if ((index | count) < 0 || index + count > text.length
                     || count > widths.length) {
                 throw new ArrayIndexOutOfBoundsException();
             }
-    
+
+            // FIXME: handle multi-char characters.
+            // Need to figure out if the lengths of the width array takes into account
+            // multi-char characters.
             for (int i = 0; i < count; i++) {
-                widths[i] = mMetrics.charWidth(text[i + index]);
+                char c = text[i + index];
+                boolean found = false;
+                for (FontInfo info : mFonts) {
+                    if (info.mFont.canDisplay(c)) {
+                        widths[i] = info.mMetrics.charWidth(c);
+                        found = true;
+                        break;
+                    }
+                }
+
+                if (found == false) {
+                    // we stop there.
+                    return i;
+                }
             }
             
             return count;
@@ -849,15 +937,18 @@ public class Paint extends _Original_Paint {
      */
     @Override
     public void getTextBounds(char[] text, int index, int count, Rect bounds) {
-        if (mFont != null) {
+        // FIXME
+        if (mFonts.size() > 0) {
             if ((index | count) < 0 || index + count > text.length) {
                 throw new ArrayIndexOutOfBoundsException();
             }
             if (bounds == null) {
                 throw new NullPointerException("need bounds Rect");
             }
-            
-            Rectangle2D rect = mFont.getStringBounds(text, index, index + count, mFontContext);
+
+            FontInfo mainInfo = mFonts.get(0);
+
+            Rectangle2D rect = mainInfo.mFont.getStringBounds(text, index, index + count, mFontContext);
             bounds.set(0, 0, (int)rect.getWidth(), (int)rect.getHeight());
         }
     }

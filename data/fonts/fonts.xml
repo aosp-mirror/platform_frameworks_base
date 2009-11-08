@@ -13,6 +13,10 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
+<!--
+	This is only used by the layoutlib to display
+	layouts in ADT.
+-->
 <fonts>
     <font ttf="DroidSans">
         <name>sans-serif</name>
@@ -39,5 +43,6 @@
         <name>courier new</name>
         <name>monaco</name>
     </font>
-    <font ttf="DroidSansFallback" />
+    <fallback ttf="DroidSansFallback" />
+    <fallback ttf="DroidSansJapanese" />
 </fonts>

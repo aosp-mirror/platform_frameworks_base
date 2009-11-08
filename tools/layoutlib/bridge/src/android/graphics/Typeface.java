@@ -21,9 +21,12 @@ import com.android.layoutlib.bridge.FontLoader;
 import android.content.res.AssetManager;
 
 import java.awt.Font;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
- * Re-implementation of Typeface over java.awt 
+ * Re-implementation of Typeface over java.awt
  */
 public class Typeface {
     private static final String DEFAULT_FAMILY = "sans-serif";
@@ -46,11 +49,11 @@ public class Typeface {
 
     private static Typeface[] sDefaults;
     private static FontLoader mFontLoader;
-    
+
     private final int mStyle;
-    private final Font mFont;
+    private final List<Font> mFonts;
     private final String mFamily;
-    
+
     // Style
     public static final int NORMAL = _Original_Typeface.NORMAL;
     public static final int BOLD = _Original_Typeface.BOLD;
@@ -58,12 +61,13 @@ public class Typeface {
     public static final int BOLD_ITALIC = _Original_Typeface.BOLD_ITALIC;
 
     /**
-     * Returns the underlying {@link Font} object.
+     * Returns the underlying {@link Font} objects. The first item in the list is the real
+     * font. Any other items are fallback fonts for characters not found in the first one.
      */
-    public Font getFont() {
-        return mFont;
+    public List<Font> getFonts() {
+        return mFonts;
     }
-    
+
     /** Returns the typeface's intrinsic style attributes */
     public int getStyle() {
         return mStyle;
@@ -94,9 +98,12 @@ public class Typeface {
         styleBuffer[0] = style;
         Font font = mFontLoader.getFont(familyName, styleBuffer);
         if (font != null) {
-            return new Typeface(familyName, styleBuffer[0], font);
+            ArrayList<Font> list = new ArrayList<Font>();
+            list.add(font);
+            list.addAll(mFontLoader.getFallBackFonts());
+            return new Typeface(familyName, styleBuffer[0], list);
         }
-        
+
         return null;
     }
 
@@ -115,7 +122,10 @@ public class Typeface {
         styleBuffer[0] = style;
         Font font = mFontLoader.getFont(family.mFamily, styleBuffer);
         if (font != null) {
-            return new Typeface(family.mFamily, styleBuffer[0], font);
+            ArrayList<Font> list = new ArrayList<Font>();
+            list.add(font);
+            list.addAll(mFontLoader.getFallBackFonts());
+            return new Typeface(family.mFamily, styleBuffer[0], list);
         }
 
         return null;
@@ -129,7 +139,7 @@ public class Typeface {
     public static Typeface defaultFromStyle(int style) {
         return sDefaults[style];
     }
-    
+
     /**
      * Create a new typeface from the specified font data.
      * @param mgr The application's asset manager
@@ -140,17 +150,17 @@ public class Typeface {
         return null;
         //return new Typeface(nativeCreateFromAsset(mgr, path));
     }
-    
+
     // don't allow clients to call this directly
-    private Typeface(String family, int style, Font f) {
+    private Typeface(String family, int style, List<Font> fonts) {
         mFamily = family;
-        mFont = f;
+        mFonts = Collections.unmodifiableList(fonts);
         mStyle = style;
     }
-    
+
     public static void init(FontLoader fontLoader) {
         mFontLoader = fontLoader;
-        
+
         DEFAULT = create(DEFAULT_FAMILY, NORMAL);
         DEFAULT_BOLD = create(DEFAULT_FAMILY, BOLD);
         SANS_SERIF = create("sans-serif", NORMAL);
@@ -162,14 +172,14 @@ public class Typeface {
                 create(DEFAULT_FAMILY, ITALIC),
                 create(DEFAULT_FAMILY, BOLD_ITALIC),
         };
-        
+
         /*
         DEFAULT         = create((String)null, 0);
         DEFAULT_BOLD    = create((String)null, Typeface.BOLD);
         SANS_SERIF      = create("sans-serif", 0);
         SERIF           = create("serif", 0);
         MONOSPACE       = create("monospace", 0);
-        
+
         sDefaults = new Typeface[] {
             DEFAULT,
             DEFAULT_BOLD,
