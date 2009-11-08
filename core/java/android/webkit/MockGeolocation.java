@@ -19,7 +19,7 @@ package android.webkit;
 /**
  * This class is simply a container for the methods used to configure WebKit's
  * mock Geolocation service for use in LayoutTests.
- * @hide Pending API council review.
+ * @hide
  */
 public final class MockGeolocation {
 

@@ -18,12 +18,10 @@ package android.webkit;
 
 /**
  * A callback interface used to returns values asynchronously
- *
- * @hide pending council approval
  */
-public interface ValueCallback<T>  {
-  /**
-   * Invoked when we have the result
-   */
-  public void onReceiveValue(T value);
+public interface ValueCallback<T> {
+    /**
+     * Invoked when we have the result
+     */
+    public void onReceiveValue(T value);
 };

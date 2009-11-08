@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+//#define LOG_NDEBUG 0
 #define LOG_TAG "AudioPlayer"
 #include <utils/Log.h>
 
@@ -136,7 +137,7 @@ void AudioPlayer::stop() {
     // Make sure to release any buffer we hold onto so that the
     // source is able to stop().
     if (mInputBuffer != NULL) {
-        LOGI("AudioPlayer releasing input buffer.");
+        LOGV("AudioPlayer releasing input buffer.");
 
         mInputBuffer->release();
         mInputBuffer = NULL;
@@ -176,7 +177,7 @@ void AudioPlayer::AudioCallback(int event, void *info) {
 
 void AudioPlayer::fillBuffer(void *data, size_t size) {
     if (mNumFramesPlayed == 0) {
-        LOGI("AudioCallback");
+        LOGV("AudioCallback");
     }
 
     size_t size_done = 0;
@@ -222,6 +223,11 @@ void AudioPlayer::fillBuffer(void *data, size_t size) {
             mPositionTimeRealUs =
                 ((mNumFramesPlayed + size_done / mFrameSize) * 1000000)
                     / mSampleRate;
+
+            LOGV("buffer->size() = %d, "
+                 "mPositionTimeMediaUs=%.2f mPositionTimeRealUs=%.2f",
+                 mInputBuffer->range_length(),
+                 mPositionTimeMediaUs / 1E6, mPositionTimeRealUs / 1E6);
         }
 
         if (mInputBuffer->range_length() == 0) {

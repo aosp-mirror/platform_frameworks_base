@@ -24,7 +24,6 @@ import android.preference.PreferenceActivity;
  * Base class for activities that will be used to configure the settings of
  * a wallpaper.  You should derive from this class to allow it to select the
  * proper theme of the activity depending on how it is being used.
- * @hide Live Wallpaper
  */
 public class WallpaperSettingsActivity extends PreferenceActivity {
     /**

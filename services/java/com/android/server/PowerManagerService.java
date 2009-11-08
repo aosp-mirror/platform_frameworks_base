@@ -212,8 +212,12 @@ class PowerManagerService extends IPowerManager.Stub
     private volatile boolean mPokeAwakeOnSet = false;
     private volatile boolean mInitComplete = false;
     private HashMap<IBinder,PokeLock> mPokeLocks = new HashMap<IBinder,PokeLock>();
+    // mScreenOnTime and mScreenOnStartTime are used for computing total time screen
+    // has been on since boot
     private long mScreenOnTime;
     private long mScreenOnStartTime;
+    // mLastScreenOnTime is the time the screen was last turned on
+    private long mLastScreenOnTime;
     private boolean mPreventScreenOn;
     private int mScreenBrightnessOverride = -1;
     private boolean mUseSoftwareAutoBrightness;
@@ -222,6 +226,7 @@ class PowerManagerService extends IPowerManager.Stub
     private int[] mLcdBacklightValues;
     private int[] mButtonBacklightValues;
     private int[] mKeyboardBacklightValues;
+    private int mLightSensorWarmupTime;
 
     // Used when logging number and duration of touch-down cycles
     private long mTotalTouchDownTime;
@@ -456,6 +461,8 @@ class PowerManagerService extends IPowerManager.Stub
                     com.android.internal.R.array.config_autoBrightnessButtonBacklightValues);
             mKeyboardBacklightValues = resources.getIntArray(
                     com.android.internal.R.array.config_autoBrightnessKeyboardBacklightValues);
+            mLightSensorWarmupTime = resources.getInteger(
+                    com.android.internal.R.integer.config_lightSensorWarmupTime);
         }
 
        ContentResolver resolver = mContext.getContentResolver();
@@ -886,6 +893,7 @@ class PowerManagerService extends IPowerManager.Stub
         pw.println("  mPreventScreenOn=" + mPreventScreenOn
                 + "  mScreenBrightnessOverride=" + mScreenBrightnessOverride);
         pw.println("  mTotalDelaySetting=" + mTotalDelaySetting);
+        pw.println("  mLastScreenOnTime=" + mLastScreenOnTime);
         pw.println("  mBroadcastWakeLock=" + mBroadcastWakeLock);
         pw.println("  mStayOnWhilePluggedInScreenDimLock=" + mStayOnWhilePluggedInScreenDimLock);
         pw.println("  mStayOnWhilePluggedInPartialLock=" + mStayOnWhilePluggedInPartialLock);
@@ -1299,15 +1307,18 @@ class PowerManagerService extends IPowerManager.Stub
 
     private int setScreenStateLocked(boolean on) {
         int err = Power.setScreenState(on);
-        if (err == 0 && mUseSoftwareAutoBrightness) {
-            enableLightSensor(on);
-            if (!on) {
-                // make sure button and key backlights are off too
-                mHardware.setLightBrightness_UNCHECKED(HardwareService.LIGHT_ID_BUTTONS, 0);
-                mHardware.setLightBrightness_UNCHECKED(HardwareService.LIGHT_ID_KEYBOARD, 0);
-                // clear current value so we will update based on the new conditions
-                // when the sensor is reenabled.
-                mLightSensorValue = -1;
+        if (err == 0) {
+            mLastScreenOnTime = (on ? SystemClock.elapsedRealtime() : 0);
+            if (mUseSoftwareAutoBrightness) {
+                enableLightSensor(on);
+                if (!on) {
+                    // make sure button and key backlights are off too
+                    mHardware.setLightBrightness_UNCHECKED(HardwareService.LIGHT_ID_BUTTONS, 0);
+                    mHardware.setLightBrightness_UNCHECKED(HardwareService.LIGHT_ID_KEYBOARD, 0);
+                    // clear current value so we will update based on the new conditions
+                    // when the sensor is reenabled.
+                    mLightSensorValue = -1;
+                }
             }
         }
         return err;
@@ -1780,13 +1791,13 @@ class PowerManagerService extends IPowerManager.Stub
         }
     }
 
-    boolean screenIsOn() {
+    public boolean isScreenOn() {
         synchronized (mLocks) {
             return (mPowerState & SCREEN_ON_BIT) != 0;
         }
     }
 
-    boolean screenIsBright() {
+    boolean isScreenBright() {
         synchronized (mLocks) {
             return (mPowerState & SCREEN_BRIGHT) == SCREEN_BRIGHT;
         }
@@ -2089,7 +2100,7 @@ class PowerManagerService extends IPowerManager.Stub
         boolean enabled = (mode == SCREEN_BRIGHTNESS_MODE_AUTOMATIC);
         if (mUseSoftwareAutoBrightness && mAutoBrightessEnabled != enabled) {
             mAutoBrightessEnabled = enabled;
-            if (screenIsOn()) {
+            if (isScreenOn()) {
                 // force recompute of backlight values
                 if (mLightSensorValue >= 0) {
                     int value = (int)mLightSensorValue;
@@ -2431,13 +2442,15 @@ class PowerManagerService extends IPowerManager.Stub
         public void onSensorChanged(SensorEvent event) {
             synchronized (mLocks) {
                 int value = (int)event.values[0];
+                long milliseconds = event.timestamp / 1000000;
                 if (mDebugLightSensor) {
                     Log.d(TAG, "onSensorChanged: light value: " + value);
                 }
                 mHandler.removeCallbacks(mAutoBrightnessTask);
                 if (mLightSensorValue != value) {
-                    if (mLightSensorValue == -1) {
-                        // process the value immediately
+                    if (mLightSensorValue == -1 ||
+                            milliseconds < mLastScreenOnTime + mLightSensorWarmupTime) {
+                        // process the value immediately if screen has just turned on
                         lightSensorChangedLocked(value);
                     } else {
                         // delay processing to debounce the sensor
