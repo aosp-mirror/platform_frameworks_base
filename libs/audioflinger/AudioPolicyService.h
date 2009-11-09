@@ -152,7 +152,11 @@ private:
     private:
         // descriptor for requested tone playback event
         class AudioCommand {
+
         public:
+            AudioCommand()
+            : mCommand(-1) {}
+
             void dump(char* buffer, size_t size);
 
             int mCommand;   // START_TONE, STOP_TONE ...
@@ -191,6 +195,7 @@ private:
         Condition mWaitWorkCV;
         Vector <AudioCommand *> mAudioCommands; // list of pending commands
         ToneGenerator *mpToneGenerator;     // the tone generator
+        AudioCommand mLastCommand;
     };
 
     // Internal dump utilities.
