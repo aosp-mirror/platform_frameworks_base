@@ -19,9 +19,6 @@ import android.content.Context;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.util.Log;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-
 class PluginUtil {
 
     private static final String LOGTAG = "PluginUtil";
@@ -35,12 +32,7 @@ class PluginUtil {
     static PluginStub getPluginStub(Context context, String packageName, 
             String className) {
         try {
-            Context pluginContext = context.createPackageContext(packageName,
-                    Context.CONTEXT_INCLUDE_CODE |
-                    Context.CONTEXT_IGNORE_SECURITY);
-            ClassLoader pluginCL = pluginContext.getClassLoader();
-
-            Class<?> stubClass = pluginCL.loadClass(className);
+            Class<?> stubClass = getPluginClass(context, packageName, className);
             Object stubObject = stubClass.newInstance();
 
             if (stubObject instanceof PluginStub) {
@@ -55,5 +47,15 @@ class PluginUtil {
             Log.e(LOGTAG, Log.getStackTraceString(e));
         }
         return null;
+    }
+    
+    /* package */
+    static Class<?> getPluginClass(Context context, String packageName,
+            String className) throws NameNotFoundException, ClassNotFoundException {
+        Context pluginContext = context.createPackageContext(packageName,
+                Context.CONTEXT_INCLUDE_CODE |
+                Context.CONTEXT_IGNORE_SECURITY);
+        ClassLoader pluginCL = pluginContext.getClassLoader();
+        return pluginCL.loadClass(className);
     }
 }
