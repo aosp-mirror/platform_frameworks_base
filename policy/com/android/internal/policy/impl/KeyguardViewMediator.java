@@ -424,6 +424,7 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
      * Notify us when the keyguard is hidden by another window
      */
     public void setHidden(boolean isHidden) {
+        if (DEBUG) Log.d(TAG, "setHidden " + isHidden);
         synchronized (KeyguardViewMediator.this) {
             mHidden = isHidden;
             adjustUserActivityLocked();
@@ -904,7 +905,13 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
 
     private void adjustUserActivityLocked() {
         // disable user activity if we are shown and not hidden
-        mRealPowerManager.enableUserActivity(!mShowing || mHidden);
+        if (DEBUG) Log.d(TAG, "adjustUserActivityLocked mShowing: " + mShowing + " mHidden: " + mHidden);
+        boolean enabled = !mShowing || mHidden;
+        mRealPowerManager.enableUserActivity(enabled);
+        if (!enabled && mScreenOn) {
+            // reinstate our short screen timeout policy
+            pokeWakelock();
+        }
     }
 
     /**
