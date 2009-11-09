@@ -282,11 +282,6 @@ public interface WindowManager extends ViewManager {
         /**
          * Window type: panel that slides out from the status bar
          */
-        public static final int TYPE_STATUS_BAR_PANEL   = FIRST_SYSTEM_WINDOW+8;
-        
-        /**
-         * Window type: panel that slides out from the status bar
-         */
         public static final int TYPE_SYSTEM_DIALOG      = FIRST_SYSTEM_WINDOW+8;
     
         /**
@@ -319,6 +314,11 @@ public interface WindowManager extends ViewManager {
          */
         public static final int TYPE_WALLPAPER          = FIRST_SYSTEM_WINDOW+13;
 
+        /**
+         * Window type: panel that slides out from the status bar
+         */
+        public static final int TYPE_STATUS_BAR_PANEL   = FIRST_SYSTEM_WINDOW+14;
+        
         /**
          * End of types of system windows.
          */

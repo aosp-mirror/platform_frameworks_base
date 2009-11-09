@@ -216,6 +216,8 @@ private:
         ThreadBase (const sp<AudioFlinger>& audioFlinger);
         virtual             ~ThreadBase();
 
+        status_t dumpBase(int fd, const Vector<String16>& args);
+
         // base for record and playback
         class TrackBase : public AudioBufferProvider, public RefBase {
 
@@ -678,6 +680,7 @@ private:
                     bool        overflow() { bool tmp = mOverflow; mOverflow = false; return tmp; }
                     bool        setOverflow() { bool tmp = mOverflow; mOverflow = true; return tmp; }
 
+                    void        dump(char* buffer, size_t size);
         private:
             friend class AudioFlinger;
             friend class RecordThread;
