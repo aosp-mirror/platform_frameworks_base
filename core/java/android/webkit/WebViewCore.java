@@ -18,6 +18,7 @@ package android.webkit;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.database.Cursor;
 import android.graphics.Canvas;
 import android.graphics.DrawFilter;
@@ -2167,6 +2168,32 @@ final class WebViewCore {
         }
     }
 
+    // called by JNI
+    private Class<?> getPluginClass(String libName, String clsName) {
+        
+        if (mWebView == null) {
+            return null;
+        }
+        
+        String pkgName = PluginManager.getInstance(null).getPluginsAPKName(libName);
+        if (pkgName == null) {
+            Log.w(LOGTAG, "Unable to resolve " + libName + " to a plugin APK");
+            return null;
+        }
+        
+        Class<?> pluginClass = null;
+        try {
+            pluginClass = PluginUtil.getPluginClass(mWebView.getContext(), pkgName, clsName);
+        } catch (NameNotFoundException e) {
+            Log.e(LOGTAG, "Unable to find plugin classloader for the apk (" + pkgName + ")");
+        } catch (ClassNotFoundException e) {
+            Log.e(LOGTAG, "Unable to find plugin class (" + clsName +
+                    ") in the apk (" + pkgName + ")");
+        }
+
+        return pluginClass;
+    }
+    
     // called by JNI. PluginWidget function to launch an activity and overlays
     // the activity with the View provided by the plugin class.
     private void startFullScreenPluginActivity(String libName, String clsName, int npp) {
