@@ -1440,6 +1440,8 @@ class PowerManagerService extends IPowerManager.Stub
                         sendNotificationLocked(true, -1);
                     }
                 } else {
+                    // cancel light sensor task
+                    mHandler.removeCallbacks(mAutoBrightnessTask);
                     mScreenOffTime = SystemClock.elapsedRealtime();
                     long identity = Binder.clearCallingIdentity();
                     try {
@@ -1803,6 +1805,10 @@ class PowerManagerService extends IPowerManager.Stub
         }
     }
 
+    private boolean isScreenTurningOffLocked() {
+        return (mScreenBrightness.animating && mScreenBrightness.targetValue == 0);
+    }
+
     private void forceUserActivityLocked() {
         // cancel animation so userActivity will succeed
         mScreenBrightness.animating = false;
@@ -1863,7 +1869,7 @@ class PowerManagerService extends IPowerManager.Stub
                         + " force=" + force);
             }
             // ignore user activity if we are in the process of turning off the screen
-            if (mScreenBrightness.animating && mScreenBrightness.targetValue == 0) {
+            if (isScreenTurningOffLocked()) {
                 Log.d(TAG, "ignoring user activity while turning off screen");
                 return;
             }
@@ -2410,7 +2416,7 @@ class PowerManagerService extends IPowerManager.Stub
 
     SensorEventListener mProximityListener = new SensorEventListener() {
         public void onSensorChanged(SensorEvent event) {
-            long milliseconds = event.timestamp / 1000000;
+            long milliseconds = SystemClock.elapsedRealtime();
             synchronized (mLocks) {
                 float distance = event.values[0];
                 long timeSinceLastEvent = milliseconds - mLastProximityEventTime;
@@ -2441,8 +2447,13 @@ class PowerManagerService extends IPowerManager.Stub
     SensorEventListener mLightListener = new SensorEventListener() {
         public void onSensorChanged(SensorEvent event) {
             synchronized (mLocks) {
+                // ignore light sensor while screen is turning off
+                if (isScreenTurningOffLocked()) {
+                    return;
+                }
+
                 int value = (int)event.values[0];
-                long milliseconds = event.timestamp / 1000000;
+                long milliseconds = SystemClock.elapsedRealtime();
                 if (mDebugLightSensor) {
                     Log.d(TAG, "onSensorChanged: light value: " + value);
                 }
