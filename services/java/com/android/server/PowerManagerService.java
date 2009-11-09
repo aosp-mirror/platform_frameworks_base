@@ -158,12 +158,13 @@ class PowerManagerService extends IPowerManager.Stub
     private int[] mBroadcastQueue = new int[] { -1, -1, -1 };
     private int[] mBroadcastWhy = new int[3];
     private int mPartialCount = 0;
-    private int mProximityCount = 0;
     private int mPowerState;
     private boolean mOffBecauseOfUser;
     private int mUserState;
     private boolean mKeyboardVisible = false;
     private boolean mUserActivityAllowed = true;
+    private int mProximityWakeLockCount = 0;
+    private boolean mProximitySensorEnabled = false;
     private boolean mProximitySensorActive = false;
     private int mProximityPendingValue = -1; // -1 == nothing, 0 == inactive, 1 == active
     private long mLastProximityEventTime;
@@ -235,6 +236,7 @@ class PowerManagerService extends IPowerManager.Stub
 
     // could be either static or controllable at runtime
     private static final boolean mSpew = false;
+    private static final boolean mDebugProximitySensor = (true || mSpew);
     private static final boolean mDebugLightSensor = (false || mSpew);
 
     /*
@@ -657,8 +659,8 @@ class PowerManagerService extends IPowerManager.Stub
             }
             Power.acquireWakeLock(Power.PARTIAL_WAKE_LOCK,PARTIAL_NAME);
         } else if ((flags & LOCK_MASK) == PowerManager.PROXIMITY_SCREEN_OFF_WAKE_LOCK) {
-            mProximityCount++;
-            if (mProximityCount == 1) {
+            mProximityWakeLockCount++;
+            if (mProximityWakeLockCount == 1) {
                 enableProximityLockLocked();
             }
         }
@@ -718,9 +720,16 @@ class PowerManagerService extends IPowerManager.Stub
                 Power.releaseWakeLock(PARTIAL_NAME);
             }
         } else if ((wl.flags & LOCK_MASK) == PowerManager.PROXIMITY_SCREEN_OFF_WAKE_LOCK) {
-            mProximityCount--;
-            if (mProximityCount == 0) {
-                disableProximityLockLocked();
+            mProximityWakeLockCount--;
+            if (mProximityWakeLockCount == 0) {
+                if (mProximitySensorActive) {
+                    // wait for proximity sensor to go negative before disabling sensor
+                    if (mDebugProximitySensor) {
+                        Log.d(TAG, "waiting for proximity sensor to go negative");
+                    }
+                } else {
+                    disableProximityLockLocked();
+                }
             }
         }
         // Unlink the lock from the binder.
@@ -898,6 +907,8 @@ class PowerManagerService extends IPowerManager.Stub
         pw.println("  mStayOnWhilePluggedInScreenDimLock=" + mStayOnWhilePluggedInScreenDimLock);
         pw.println("  mStayOnWhilePluggedInPartialLock=" + mStayOnWhilePluggedInPartialLock);
         pw.println("  mPreventScreenOnPartialLock=" + mPreventScreenOnPartialLock);
+        pw.println("  mProximityWakeLockCount=" + mProximityWakeLockCount);
+        pw.println("  mProximitySensorEnabled=" + mProximitySensorEnabled);
         pw.println("  mProximitySensorActive=" + mProximitySensorActive);
         pw.println("  mProximityPendingValue=" + mProximityPendingValue);
         pw.println("  mLastProximityEventTime=" + mLastProximityEventTime);
@@ -2341,43 +2352,49 @@ class PowerManagerService extends IPowerManager.Stub
     }
 
     private void enableProximityLockLocked() {
-        if (mSpew) {
+        if (mDebugProximitySensor) {
             Log.d(TAG, "enableProximityLockLocked");
         }
-        // clear calling identity so sensor manager battery stats are accurate
-        long identity = Binder.clearCallingIdentity();
-        try {
-            mSensorManager.registerListener(mProximityListener, mProximitySensor,
-                    SensorManager.SENSOR_DELAY_NORMAL);
-        } finally {
-            Binder.restoreCallingIdentity(identity);
+        if (!mProximitySensorEnabled) {
+            // clear calling identity so sensor manager battery stats are accurate
+            long identity = Binder.clearCallingIdentity();
+            try {
+                mSensorManager.registerListener(mProximityListener, mProximitySensor,
+                        SensorManager.SENSOR_DELAY_NORMAL);
+                mProximitySensorEnabled = true;
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
         }
     }
 
     private void disableProximityLockLocked() {
-        if (mSpew) {
+        if (mDebugProximitySensor) {
             Log.d(TAG, "disableProximityLockLocked");
         }
-        // clear calling identity so sensor manager battery stats are accurate
-        long identity = Binder.clearCallingIdentity();
-        try {
-            mSensorManager.unregisterListener(mProximityListener);
-            mHandler.removeCallbacks(mProximityTask);
-        } finally {
-            Binder.restoreCallingIdentity(identity);
-        }
-        if (mProximitySensorActive) {
-            mProximitySensorActive = false;
-            forceUserActivityLocked();
+        if (mProximitySensorEnabled) {
+            // clear calling identity so sensor manager battery stats are accurate
+            long identity = Binder.clearCallingIdentity();
+            try {
+                mSensorManager.unregisterListener(mProximityListener);
+                mHandler.removeCallbacks(mProximityTask);
+                mProximitySensorEnabled = false;
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+            if (mProximitySensorActive) {
+                mProximitySensorActive = false;
+                forceUserActivityLocked();
+            }
         }
     }
 
     private void proximityChangedLocked(boolean active) {
-        if (mSpew) {
+        if (mDebugProximitySensor) {
             Log.d(TAG, "proximityChangedLocked, active: " + active);
         }
-        if (mProximityCount <= 0) {
-            Log.d(TAG, "Ignoring proximity change after last proximity lock is released");
+        if (!mProximitySensorEnabled) {
+            Log.d(TAG, "Ignoring proximity change after sensor is disabled");
             return;
         }
         if (active) {
@@ -2389,6 +2406,11 @@ class PowerManagerService extends IPowerManager.Stub
             // even when the keyguard is on.
             mProximitySensorActive = false;
             forceUserActivityLocked();
+
+            if (mProximityWakeLockCount == 0) {
+                // disable sensor if we have no listeners left after proximity negative
+                disableProximityLockLocked();
+            }
         }
     }
 
@@ -2427,6 +2449,9 @@ class PowerManagerService extends IPowerManager.Stub
                 boolean active = (distance >= 0.0 && distance < PROXIMITY_THRESHOLD &&
                         distance < mProximitySensor.getMaximumRange());
 
+                if (mDebugProximitySensor) {
+                    Log.d(TAG, "mProximityListener.onSensorChanged active: " + active);
+                }
                 if (timeSinceLastEvent < PROXIMITY_SENSOR_DELAY) {
                     // enforce delaying atleast PROXIMITY_SENSOR_DELAY before processing
                     mProximityPendingValue = (active ? 1 : 0);
