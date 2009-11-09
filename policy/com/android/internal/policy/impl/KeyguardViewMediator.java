@@ -184,6 +184,9 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
     // answer whether the input should be restricted)
     private boolean mShowing = false;
 
+    // true if the keyguard is hidden by another window
+    private boolean mHidden = false;
+
     /**
      * Helps remember whether the screen has turned on since the last time
      * it turned off due to timeout. see {@link #onScreenTurnedOff(int)}
@@ -415,6 +418,16 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
      */
     public boolean isShowing() {
         return mShowing;
+    }
+
+    /**
+     * Notify us when the keyguard is hidden by another window
+     */
+    public void setHidden(boolean isHidden) {
+        synchronized (KeyguardViewMediator.this) {
+            mHidden = isHidden;
+            adjustUserActivityLocked();
+        }
     }
 
     /**
@@ -860,12 +873,9 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
             if (DEBUG) Log.d(TAG, "handleShow");
             if (!mSystemReady) return;
             
-            // while we're showing, we control the wake state, so ask the power
-            // manager not to honor request for userActivity.
-            mRealPowerManager.enableUserActivity(false);
-
             mKeyguardViewManager.show();
             mShowing = true;
+            adjustUserActivityLocked();
             try {
                 ActivityManagerNative.getDefault().closeSystemDialogs("lock");
             } catch (RemoteException e) {
@@ -885,12 +895,16 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
                 Log.w(TAG, "attempt to hide the keyguard while waking, ignored");
                 return;
             }
-            // When we go away, tell the poewr manager to honor requests from userActivity.
-            mRealPowerManager.enableUserActivity(true);
 
             mKeyguardViewManager.hide();
             mShowing = false;
+            adjustUserActivityLocked();
         }
+    }
+
+    private void adjustUserActivityLocked() {
+        // disable user activity if we are shown and not hidden
+        mRealPowerManager.enableUserActivity(!mShowing || mHidden);
     }
 
     /**
