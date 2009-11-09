@@ -72,6 +72,11 @@ public class VCardParser_V30 extends VCardParser_V21 {
         mStrictParsing = strictParsing;
     }
 
+    public VCardParser_V30(int parseMode) {
+        super(parseMode);
+        mStrictParsing = false;
+    }
+
     @Override
     protected int getVersion() {
         return VCardConfig.FLAG_V30;
@@ -87,18 +92,18 @@ public class VCardParser_V30 extends VCardParser_V21 {
         if (!(sAcceptablePropsWithParam.contains(propertyName) ||
                 acceptablePropsWithoutParam.contains(propertyName) ||
                 propertyName.startsWith("X-")) &&
-                !mWarningValueMap.contains(propertyName)) {
-            mWarningValueMap.add(propertyName);
+                !mUnknownTypeMap.contains(propertyName)) {
+            mUnknownTypeMap.add(propertyName);
             Log.w(LOG_TAG, "Property name unsupported by vCard 3.0: " + propertyName);
         }
         return true;
     }
-    
+
     @Override
     protected boolean isValidEncoding(String encoding) {
         return sAcceptableEncodingV30.contains(encoding.toUpperCase());
     }
-    
+
     @Override
     protected String getLine() throws IOException {
         if (mPreviousLine != null) {

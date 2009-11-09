@@ -1,0 +1,10 @@
+BEGIN:VCARD
+VERSION:2.1
+N:Example;;;;
+FN:Example
+ANNIVERSARY;VALUE=DATE:20091010
+AGENT:Invalid line which must be handled correctly.
+X-CLASS:PUBLIC
+X-REDUCTION:
+X-NO:
+END:VCARD
