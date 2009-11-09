@@ -15,11 +15,11 @@
  */
 package android.pim.vcard;
 
+import android.pim.vcard.exception.VCardAgentNotSupportedException;
 import android.pim.vcard.exception.VCardException;
 import android.pim.vcard.exception.VCardInvalidCommentLineException;
 import android.pim.vcard.exception.VCardInvalidLineException;
 import android.pim.vcard.exception.VCardNestedException;
-import android.pim.vcard.exception.VCardNotSupportedException;
 import android.pim.vcard.exception.VCardVersionException;
 import android.util.Log;
 
@@ -91,8 +91,15 @@ public class VCardParser_V21 extends VCardParser {
     
     // In order to reduce warning message as much as possible, we hold the value which made Logger
     // emit a warning message.
-    protected HashSet<String> mWarningValueMap = new HashSet<String>();
-    
+    protected HashSet<String> mUnknownTypeMap = new HashSet<String>();
+    protected HashSet<String> mUnknownValueMap = new HashSet<String>();
+
+    // It seems Windows Mobile 6.5 uses "AGENT" property with completely wrong usage.
+    // We should just ignore just one line.
+    // e.g.
+    // "AGENT;CHARSET=SHIFT_JIS:some text"
+    private boolean mIgnoreAgentLine = false;
+
     // Just for debugging
     private long mTimeTotal;
     private long mTimeReadStartRecord;
@@ -106,21 +113,41 @@ public class VCardParser_V21 extends VCardParser {
     private long mTimeHandleMiscPropertyValue;
     private long mTimeHandleQuotedPrintable;
     private long mTimeHandleBase64;
-    
+
     /**
      * Create a new VCard parser.
      */
     public VCardParser_V21() {
-        super();
+        this(null, PARSER_MODE_DEFAULT);
+    }
+
+    public VCardParser_V21(int parserMode) {
+        this(null, parserMode);
     }
 
     public VCardParser_V21(VCardSourceDetector detector) {
-        super();
-        if (detector != null && detector.getType() == VCardSourceDetector.TYPE_FOMA) {
-            mNestCount = 1;
+        this(detector, PARSER_MODE_DEFAULT);
+    }
+
+    /**
+     * TODO: Merge detector and parser mode.
+     */
+    public VCardParser_V21(VCardSourceDetector detector, int parserMode) {
+        super(parserMode);
+        if (detector != null) {
+            final int type = detector.getType();
+            if (type == VCardSourceDetector.TYPE_FOMA) {
+                mNestCount = 1;
+            } else if (type == VCardSourceDetector.TYPE_JAPANESE_MOBILE_PHONE) {
+                mIgnoreAgentLine = true;
+            }
+        }
+
+        if (parserMode == PARSER_MODE_SCAN) {
+            mIgnoreAgentLine = true;
         }
     }
-    
+
     /**
      * Parse the file at the given position
      * vcard_file = [wsls] vcard [wsls]
@@ -160,8 +187,8 @@ public class VCardParser_V21 extends VCardParser {
     protected boolean isValidPropertyName(String propertyName) {
         if (!(sAvailablePropertyNameSetV21.contains(propertyName.toUpperCase()) ||
                 propertyName.startsWith("X-")) && 
-                !mWarningValueMap.contains(propertyName)) {
-            mWarningValueMap.add(propertyName);
+                !mUnknownTypeMap.contains(propertyName)) {
+            mUnknownTypeMap.add(propertyName);
             Log.w(LOG_TAG, "Property name unsupported by vCard 2.1: " + propertyName);
         }
         return true;
@@ -554,9 +581,9 @@ public class VCardParser_V21 extends VCardParser {
     protected void handleType(final String ptypeval) {
         String upperTypeValue = ptypeval;
         if (!(sKnownTypeSet.contains(upperTypeValue) || upperTypeValue.startsWith("X-")) && 
-                !mWarningValueMap.contains(ptypeval)) {
-            mWarningValueMap.add(ptypeval);
-            Log.w(LOG_TAG, "Type unsupported by vCard 2.1: " + ptypeval);
+                !mUnknownTypeMap.contains(ptypeval)) {
+            mUnknownTypeMap.add(ptypeval);
+            Log.w(LOG_TAG, "TYPE unsupported by vCard 2.1: " + ptypeval);
         }
         if (mBuilder != null) {
             mBuilder.propertyParamType("TYPE");
@@ -567,15 +594,16 @@ public class VCardParser_V21 extends VCardParser {
     /**
      * pvalueval = "INLINE" / "URL" / "CONTENT-ID" / "CID" / "X-" word
      */
-    protected void handleValue(final String pvalueval) throws VCardException {
-        if (sKnownValueSet.contains(pvalueval.toUpperCase()) ||
-                pvalueval.startsWith("X-")) {
-            if (mBuilder != null) {
-                mBuilder.propertyParamType("VALUE");
-                mBuilder.propertyParamValue(pvalueval);
-            }
-        } else {
-            throw new VCardException("Unknown value \"" + pvalueval + "\"");
+    protected void handleValue(final String pvalueval) {
+        if (!sKnownValueSet.contains(pvalueval.toUpperCase()) &&
+                pvalueval.startsWith("X-") &&
+                !mUnknownValueMap.contains(pvalueval)) {
+            mUnknownValueMap.add(pvalueval);
+            Log.w(LOG_TAG, "VALUE unsupported by vCard 2.1: " + pvalueval);
+        }
+        if (mBuilder != null) {
+            mBuilder.propertyParamType("VALUE");
+            mBuilder.propertyParamValue(pvalueval);
         }
     }
     
@@ -800,9 +828,14 @@ public class VCardParser_V21 extends VCardParser {
      *            items *CRLF "END" [ws] ":" [ws] "VCARD"
      * 
      */
-    protected void handleAgent(String propertyValue) throws VCardException {
-        throw new VCardNotSupportedException("AGENT Property is not supported now.");
-        /* This is insufficient support. Also, AGENT Property is very rare.
+    protected void handleAgent(final String propertyValue) throws VCardException {
+        if (mIgnoreAgentLine) {
+            return;
+        } else {
+            throw new VCardAgentNotSupportedException("AGENT Property is not supported now.");
+        }
+        /* This is insufficient support. Also, AGENT Property is very rare and really hard to
+           understand the content.
            Ignore it for now.
 
         String[] strArray = propertyValue.split(":", 2);
@@ -819,7 +852,7 @@ public class VCardParser_V21 extends VCardParser {
     /**
      * For vCard 3.0.
      */
-    protected String maybeUnescapeText(String text) {
+    protected String maybeUnescapeText(final String text) {
         return text;
     }
 
@@ -827,11 +860,11 @@ public class VCardParser_V21 extends VCardParser {
      * Returns unescaped String if the character should be unescaped. Return null otherwise.
      * e.g. In vCard 2.1, "\;" should be unescaped into ";" while "\x" should not be.
      */
-    protected String maybeUnescapeCharacter(char ch) {
+    protected String maybeUnescapeCharacter(final char ch) {
         return unescapeCharacter(ch);
     }
 
-    public static String unescapeCharacter(char ch) {
+    public static String unescapeCharacter(final char ch) {
         // Original vCard 2.1 specification does not allow transformation
         // "\:" -> ":", "\," -> ",", and "\\" -> "\", but previous implementation of
         // this class allowed them, so keep it as is.
@@ -843,7 +876,7 @@ public class VCardParser_V21 extends VCardParser {
     }
     
     @Override
-    public boolean parse(InputStream is, VCardBuilder builder)
+    public boolean parse(final InputStream is, final VCardBuilder builder)
             throws IOException, VCardException {
         return parse(is, VCardConfig.DEFAULT_CHARSET, builder);
     }

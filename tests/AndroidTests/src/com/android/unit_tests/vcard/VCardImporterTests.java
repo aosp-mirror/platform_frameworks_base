@@ -16,7 +16,10 @@
 
 package com.android.unit_tests.vcard;
 
+import android.content.ContentValues;
 import android.pim.vcard.VCardConfig;
+import android.pim.vcard.VCardParser;
+import android.pim.vcard.VCardParser_V21;
 import android.pim.vcard.exception.VCardException;
 import android.provider.ContactsContract.Data;
 import android.provider.ContactsContract.CommonDataKinds.Email;
@@ -997,6 +1000,35 @@ public class VCardImporterTests extends VCardTestsBase {
                 .put(Phone.LABEL, "NEC-RESTAURANT")
                 .put(Phone.NUMBER, "20");
         verifier.verify(R.raw.v21_multiple_entry, VCardConfig.VCARD_TYPE_V21_JAPANESE_SJIS);
+    }
+
+    public void testIgnoreAgentV21_Parse() throws IOException, VCardException {
+        PropertyNodesVerifier verifier = new PropertyNodesVerifier(this);
+        ContentValues contentValuesForValue = new ContentValues();
+        contentValuesForValue.put("VALUE", "DATE");
+        verifier.addPropertyNodesVerifierElem()
+                .addNodeWithOrder("VERSION", "2.1")
+                .addNodeWithOrder("N", Arrays.asList("Example", "", "", "", ""))
+                .addNodeWithOrder("FN", "Example")
+                .addNodeWithOrder("ANNIVERSARY", "20091010", contentValuesForValue)
+                .addNodeWithOrder("AGENT", "")
+                .addNodeWithOrder("X-CLASS", "PUBLIC")
+                .addNodeWithOrder("X-REDUCTION", "")
+                .addNodeWithOrder("X-NO", "");
+
+        // Only scan mode lets vCard parser accepts invalid AGENT lines like above.
+        verifier.verify(R.raw.v21_winmo_65, V21,
+                new VCardParser_V21(VCardParser.PARSER_MODE_SCAN));
+    }
+
+    public void testIgnoreAgentV21()  throws IOException, VCardException {
+        ImportVerifier verifier = new ImportVerifier();
+        ImportVerifierElem elem = verifier.addImportVerifierElem();
+        elem.addExpected(StructuredName.CONTENT_ITEM_TYPE)
+                .put(StructuredName.FAMILY_NAME, "Example")
+                .put(StructuredName.DISPLAY_NAME, "Example");
+        verifier.verify(R.raw.v21_winmo_65, V21,
+                new VCardParser_V21(VCardParser.PARSER_MODE_SCAN));
     }
 
     public void testPagerV30_Parse() throws IOException, VCardException {

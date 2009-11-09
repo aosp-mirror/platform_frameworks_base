@@ -455,6 +455,11 @@ class CustomMockContext extends MockContext {
             verify(getContext().getResources().openRawResource(resId), vCardType);
         }
 
+        public void verify(int resId, int vCardType, final VCardParser vCardParser)
+                throws IOException, VCardException {
+            verify(getContext().getResources().openRawResource(resId), vCardType, vCardParser);
+        }
+
         public void verify(InputStream is, int vCardType) throws IOException, VCardException {
             final VCardParser vCardParser;
             if (VCardConfig.isV30(vCardType)) {
@@ -462,6 +467,11 @@ class CustomMockContext extends MockContext {
             } else {
                 vCardParser = new VCardParser_V21();
             }
+            verify(is, vCardType, vCardParser);
+        }
+
+        public void verify(InputStream is, int vCardType, final VCardParser vCardParser)
+                throws IOException, VCardException {
             VCardDataBuilder builder =
                 new VCardDataBuilder(null, null, false, vCardType, null);
             builder.addEntryHandler(this);

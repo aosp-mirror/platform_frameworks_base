@@ -21,9 +21,23 @@ import java.io.IOException;
 import java.io.InputStream;
 
 public abstract class VCardParser {
+    public static final int PARSER_MODE_DEFAULT = 0;
+    /**
+     * The parser should ignore "AGENT" properties and nested vCard structure.
+     */
+    public static final int PARSER_MODE_SCAN = 1;
 
+    protected final int mParserMode;
     protected boolean mCanceled;
-    
+
+    public VCardParser() {
+        mParserMode = PARSER_MODE_DEFAULT;
+    }
+
+    public VCardParser(int parserMode) {
+        mParserMode = parserMode;
+    }
+
     /**
      * Parses the given stream and send the VCard data into VCardBuilderBase object.
      * 
