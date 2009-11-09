@@ -283,16 +283,24 @@ public final class CacheManager {
     // only called from WebCore thread
     public static CacheResult getCacheFile(String url,
             Map<String, String> headers) {
+        return getCacheFile(url, 0, headers);
+    }
+
+    // only called from WebCore thread
+    static CacheResult getCacheFile(String url, long postIdentifier,
+            Map<String, String> headers) {
         if (mDisabled) {
             return null;
         }
 
-        CacheResult result = mDataBase.getCache(url);
+        String databaseKey = getDatabaseKey(url, postIdentifier);
+
+        CacheResult result = mDataBase.getCache(databaseKey);
         if (result != null) {
             if (result.contentLength == 0) {
                 if (!checkCacheRedirect(result.httpStatusCode)) {
                     // this should not happen. If it does, remove it.
-                    mDataBase.removeCache(url);
+                    mDataBase.removeCache(databaseKey);
                     return null;
                 }
             } else {
@@ -304,7 +312,7 @@ public final class CacheManager {
                 } catch (FileNotFoundException e) {
                     // the files in the cache directory can be removed by the
                     // system. If it is gone, clean up the database
-                    mDataBase.removeCache(url);
+                    mDataBase.removeCache(databaseKey);
                     return null;
                 }
             }
@@ -352,14 +360,24 @@ public final class CacheManager {
     // only called from WebCore thread
     public static CacheResult createCacheFile(String url, int statusCode,
             Headers headers, String mimeType, boolean forceCache) {
+        return createCacheFile(url, statusCode, headers, mimeType, 0,
+                forceCache);
+    }
+
+    // only called from WebCore thread
+    static CacheResult createCacheFile(String url, int statusCode,
+            Headers headers, String mimeType, long postIdentifier,
+            boolean forceCache) {
         if (!forceCache && mDisabled) {
             return null;
         }
 
+        String databaseKey = getDatabaseKey(url, postIdentifier);
+
         // according to the rfc 2616, the 303 response MUST NOT be cached.
         if (statusCode == 303) {
             // remove the saved cache if there is any
-            mDataBase.removeCache(url);
+            mDataBase.removeCache(databaseKey);
             return null;
         }
 
@@ -367,7 +385,7 @@ public final class CacheManager {
         // header.
         if (checkCacheRedirect(statusCode) && !headers.getSetCookie().isEmpty()) {
             // remove the saved cache if there is any
-            mDataBase.removeCache(url);
+            mDataBase.removeCache(databaseKey);
             return null;
         }
 
@@ -375,9 +393,9 @@ public final class CacheManager {
         if (ret == null) {
             // this should only happen if the headers has "no-store" in the
             // cache-control. remove the saved cache if there is any
-            mDataBase.removeCache(url);
+            mDataBase.removeCache(databaseKey);
         } else {
-            setupFiles(url, ret);
+            setupFiles(databaseKey, ret);
             try {
                 ret.outStream = new FileOutputStream(ret.outFile);
             } catch (FileNotFoundException e) {
@@ -408,6 +426,12 @@ public final class CacheManager {
      */
     // only called from WebCore thread
     public static void saveCacheFile(String url, CacheResult cacheRet) {
+        saveCacheFile(url, 0, cacheRet);
+    }
+
+    // only called from WebCore thread
+    static void saveCacheFile(String url, long postIdentifier,
+            CacheResult cacheRet) {
         try {
             cacheRet.outStream.close();
         } catch (IOException e) {
@@ -434,7 +458,7 @@ public final class CacheManager {
             return;
         }
 
-        mDataBase.addCache(url, cacheRet);
+        mDataBase.addCache(getDatabaseKey(url, postIdentifier), cacheRet);
 
         if (DebugFlags.CACHE_MANAGER) {
             Log.v(LOGTAG, "saveCacheFile for url " + url);
@@ -511,6 +535,11 @@ public final class CacheManager {
         } else {
             return false;
         }
+    }
+
+    private static String getDatabaseKey(String url, long postIdentifier) {
+        if (postIdentifier == 0) return url;
+        return postIdentifier + url;
     }
 
     @SuppressWarnings("deprecation")

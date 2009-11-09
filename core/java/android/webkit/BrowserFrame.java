@@ -541,6 +541,7 @@ class BrowserFrame extends Handler {
                                               String method,
                                               HashMap headers,
                                               byte[] postData,
+                                              long postDataIdentifier,
                                               int cacheMode,
                                               boolean synchronous) {
         PerfChecker checker = new PerfChecker();
@@ -612,8 +613,9 @@ class BrowserFrame extends Handler {
         }
 
         // Create a LoadListener
-        LoadListener loadListener = LoadListener.getLoadListener(mContext, this, url,
-                loaderHandle, synchronous, isMainFramePage);
+        LoadListener loadListener = LoadListener.getLoadListener(mContext,
+                this, url, loaderHandle, synchronous, isMainFramePage,
+                postDataIdentifier);
 
         mCallbackProxy.onLoadResource(url);
 

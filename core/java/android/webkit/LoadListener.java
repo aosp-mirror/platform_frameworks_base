@@ -104,6 +104,7 @@ class LoadListener extends Handler implements EventHandler {
     private SslError mSslError;
     private RequestHandle mRequestHandle;
     private RequestHandle mSslErrorRequestHandle;
+    private long     mPostIdentifier;
 
     // Request data. It is only valid when we are doing a load from the
     // cache. It is needed if the cache returns a redirect
@@ -123,13 +124,13 @@ class LoadListener extends Handler implements EventHandler {
     // Public functions
     // =========================================================================
 
-    public static LoadListener getLoadListener(
-            Context context, BrowserFrame frame, String url,
-            int nativeLoader, boolean synchronous, boolean isMainPageLoader) {
+    public static LoadListener getLoadListener(Context context,
+            BrowserFrame frame, String url, int nativeLoader,
+            boolean synchronous, boolean isMainPageLoader, long postIdentifier) {
 
         sNativeLoaderCount += 1;
-        return new LoadListener(
-            context, frame, url, nativeLoader, synchronous, isMainPageLoader);
+        return new LoadListener(context, frame, url, nativeLoader, synchronous,
+                isMainPageLoader, postIdentifier);
     }
 
     public static int getNativeLoaderCount() {
@@ -137,7 +138,8 @@ class LoadListener extends Handler implements EventHandler {
     }
 
     LoadListener(Context context, BrowserFrame frame, String url,
-            int nativeLoader, boolean synchronous, boolean isMainPageLoader) {
+            int nativeLoader, boolean synchronous, boolean isMainPageLoader,
+            long postIdentifier) {
         if (DebugFlags.LOAD_LISTENER) {
             Log.v(LOGTAG, "LoadListener constructor url=" + url);
         }
@@ -150,6 +152,7 @@ class LoadListener extends Handler implements EventHandler {
             mMessageQueue = new Vector<Message>();
         }
         mIsMainPageLoader = isMainPageLoader;
+        mPostIdentifier = postIdentifier;
     }
 
     /**
@@ -408,9 +411,14 @@ class LoadListener extends Handler implements EventHandler {
                 mStatusCode == HTTP_MOVED_PERMANENTLY ||
                 mStatusCode == HTTP_TEMPORARY_REDIRECT) && 
                 mNativeLoader != 0) {
-            if (!mFromCache && mRequestHandle != null) {
+            // for POST request, only cache the result if there is an identifier
+            // associated with it. postUrl() or form submission should set the
+            // identifier while XHR POST doesn't.
+            if (!mFromCache && mRequestHandle != null
+                    && (!mRequestHandle.getMethod().equals("POST")
+                            || mPostIdentifier != 0)) {
                 mCacheResult = CacheManager.createCacheFile(mUrl, mStatusCode,
-                        headers, mMimeType, false);
+                        headers, mMimeType, mPostIdentifier, false);
             }
             if (mCacheResult != null) {
                 mCacheResult.encoding = mEncoding;
@@ -637,7 +645,7 @@ class LoadListener extends Handler implements EventHandler {
      */
     boolean checkCache(Map<String, String> headers) {
         // Get the cache file name for the current URL
-        CacheResult result = CacheManager.getCacheFile(url(),
+        CacheResult result = CacheManager.getCacheFile(url(), mPostIdentifier,
                 headers);
 
         // Go ahead and set the cache loader to null in case the result is
@@ -862,6 +870,10 @@ class LoadListener extends Handler implements EventHandler {
         }
     }
 
+    long postIdentifier() {
+        return mPostIdentifier;
+    }
+
     void attachRequestHandle(RequestHandle requestHandle) {
         if (DebugFlags.LOAD_LISTENER) {
             Log.v(LOGTAG, "LoadListener.attachRequestHandle(): " +
@@ -908,8 +920,9 @@ class LoadListener extends Handler implements EventHandler {
      * be used. This is just for forward/back navigation to a POST
      * URL.
      */
-    static boolean willLoadFromCache(String url) {
-        boolean inCache = CacheManager.getCacheFile(url, null) != null;
+    static boolean willLoadFromCache(String url, long identifier) {
+        boolean inCache =
+                CacheManager.getCacheFile(url, identifier, null) != null;
         if (DebugFlags.LOAD_LISTENER) {
             Log.v(LOGTAG, "willLoadFromCache: " + url + " in cache: " + 
                     inCache);
@@ -1066,7 +1079,7 @@ class LoadListener extends Handler implements EventHandler {
     void tearDown() {
         if (mCacheResult != null) {
             if (getErrorID() == OK) {
-                CacheManager.saveCacheFile(mUrl, mCacheResult);
+                CacheManager.saveCacheFile(mUrl, mPostIdentifier, mCacheResult);
             }
 
             // we need to reset mCacheResult to be null
@@ -1194,7 +1207,8 @@ class LoadListener extends Handler implements EventHandler {
             // Cache the redirect response
             if (mCacheResult != null) {
                 if (getErrorID() == OK) {
-                    CacheManager.saveCacheFile(mUrl, mCacheResult);
+                    CacheManager.saveCacheFile(mUrl, mPostIdentifier,
+                            mCacheResult);
                 }
                 mCacheResult = null;
             }
