@@ -65,7 +65,6 @@ ANPCanvasInterfaceV0        gCanvasI;
 ANPLogInterfaceV0           gLogI;
 ANPPaintInterfaceV0         gPaintI;
 ANPPathInterfaceV0          gPathI;
-ANPSystemInterfaceV0        gSystemI;
 ANPTypefaceInterfaceV0      gTypefaceI;
 ANPWindowInterfaceV0        gWindowI;
 
