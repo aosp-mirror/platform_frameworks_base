@@ -23,7 +23,6 @@ import android.pim.vcard.VCardParser_V21;
 import android.pim.vcard.VCardParser_V30;
 import android.pim.vcard.exception.VCardException;
 import android.test.AndroidTestCase;
-import android.util.Log;
 
 import junit.framework.TestCase;
 
@@ -56,6 +55,12 @@ public class PropertyNodesVerifier extends VNodeBuilder {
         verify(mAndroidTestCase.getContext().getResources().openRawResource(resId), vCardType);
     }
 
+    public void verify(int resId, int vCardType, final VCardParser vCardParser)
+            throws IOException, VCardException {
+        verify(mAndroidTestCase.getContext().getResources().openRawResource(resId),
+                vCardType, vCardParser);
+    }
+
     public void verify(InputStream is, int vCardType) throws IOException, VCardException {
         final VCardParser vCardParser;
         if (VCardConfig.isV30(vCardType)) {
@@ -63,6 +68,11 @@ public class PropertyNodesVerifier extends VNodeBuilder {
         } else {
             vCardParser = new VCardParser_V21();
         }
+        verify(is, vCardType, vCardParser);
+    }
+
+    public void verify(InputStream is, int vCardType, final VCardParser vCardParser)
+            throws IOException, VCardException {
         try {
             vCardParser.parse(is, this);
         } finally {
