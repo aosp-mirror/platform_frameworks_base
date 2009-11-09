@@ -94,7 +94,7 @@ public class BaseIWindow extends IWindow.Stub {
     public void closeSystemDialogs(String reason) {
     }
     
-    public void dispatchWallpaperOffsets(float x, float y, boolean sync) {
+    public void dispatchWallpaperOffsets(float x, float y, float xStep, float yStep, boolean sync) {
         if (sync) {
             try {
                 mSession.wallpaperOffsetsComplete(asBinder());
