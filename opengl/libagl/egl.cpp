@@ -1205,7 +1205,7 @@ static int isAttributeMatching(int i, EGLint attr, EGLint val)
                 gConfigManagement,
                 0, NELEM(gConfigManagement)-1,
                 attr);
-        if (index >= 0) {
+        if (cfgMgtIndex >= 0) {
             bool match = gConfigManagement[cfgMgtIndex].match(
                     val, configFound[index].value);
             if (match) {
