@@ -2840,6 +2840,11 @@ public final class Settings {
                 "gmail_wait_time_retry_uphill_op";
 
         /**
+         * Controls if Gmail should delay sending operations that have previously failed.
+         */
+        public static final String GMAIL_DELAY_BAD_OP = "gmail_delay_bad_op";
+
+        /**
          * Controls if the protocol buffer version of the protocol will use a multipart request for
          * attachment uploads. Value must be an integer where non-zero means true. Defaults to 0.
          */
