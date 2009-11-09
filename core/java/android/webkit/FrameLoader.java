@@ -242,7 +242,7 @@ class FrameLoader {
             // to load POST content in a history navigation.
             case WebSettings.LOAD_CACHE_ONLY: {
                 CacheResult result = CacheManager.getCacheFile(mListener.url(),
-                        null);
+                        mListener.postIdentifier(), null);
                 if (result != null) {
                     startCacheLoad(result);
                 } else {
@@ -270,7 +270,7 @@ class FrameLoader {
                 // Get the cache file name for the current URL, passing null for
                 // the validation headers causes no validation to occur
                 CacheResult result = CacheManager.getCacheFile(mListener.url(),
-                        null);
+                        mListener.postIdentifier(), null);
                 if (result != null) {
                     startCacheLoad(result);
                     return true;
