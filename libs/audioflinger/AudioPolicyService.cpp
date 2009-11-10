@@ -592,6 +592,8 @@ bool AudioPolicyService::AudioCommandThread::threadLoop()
             if (mAudioCommands[0]->mTime <= curTime) {
                 AudioCommand *command = mAudioCommands[0];
                 mAudioCommands.removeAt(0);
+                mLastCommand = *command;
+
                 switch (command->mCommand) {
                 case START_TONE: {
                     mLock.unlock();
@@ -681,11 +683,15 @@ status_t AudioPolicyService::AudioCommandThread::dump(int fd)
 
     snprintf(buffer, SIZE, "- Commands:\n");
     result = String8(buffer);
-    result.append("   Command Time        Status  Wait pParam\n");
+    result.append("   Command Time        Wait pParam\n");
     for (int i = 0; i < (int)mAudioCommands.size(); i++) {
         mAudioCommands[i]->dump(buffer, SIZE);
         result.append(buffer);
     }
+    result.append("  Last Command\n");
+    mLastCommand.dump(buffer, SIZE);
+    result.append(buffer);
+
     write(fd, result.string(), result.size());
 
     if (locked) mLock.unlock();
@@ -894,11 +900,10 @@ void AudioPolicyService::AudioCommandThread::exit()
 
 void AudioPolicyService::AudioCommandThread::AudioCommand::dump(char* buffer, size_t size)
 {
-    snprintf(buffer, size, "   %02d      %06d.%03d  %03d     %01u    %p\n",
+    snprintf(buffer, size, "   %02d      %06d.%03d  %01u    %p\n",
             mCommand,
             (int)ns2s(mTime),
             (int)ns2ms(mTime)%1000,
-            mStatus,
             mWaitStatus,
             mParam);
 }
