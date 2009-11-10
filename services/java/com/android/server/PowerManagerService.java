@@ -2106,10 +2106,19 @@ class PowerManagerService extends IPowerManager.Stub
 
     /**
      * When the keyguard is up, it manages the power state, and userActivity doesn't do anything.
+     * When disabling user activity we also reset user power state so the keyguard can reset its
+     * short screen timeout when keyguard is unhidden.
      */
     public void enableUserActivity(boolean enabled) {
+        if (mSpew) {
+            Log.d(TAG, "enableUserActivity " + enabled);
+        }
         synchronized (mLocks) {
             mUserActivityAllowed = enabled;
+            if (!enabled) {
+                // cancel timeout and clear mUserState so the keyguard can set a short timeout
+                setTimeoutLocked(SystemClock.uptimeMillis(), 0);
+            }
         }
     }
 
