@@ -572,7 +572,6 @@ public final class MccTable
      * @param mccmnc truncated imsi with just the MCC and MNC - MNC assumed to be from 4th to end
      */
     public static void updateMccMncConfiguration(PhoneBase phone, String mccmnc) {
-        Configuration config = new Configuration();
         int mcc, mnc;
 
         try {
@@ -586,15 +585,18 @@ public final class MccTable
         Log.d(LOG_TAG, "updateMccMncConfiguration: mcc=" + mcc + ", mnc=" + mnc);
 
         if (mcc != 0) {
-            config.mcc = mcc;
             setTimezoneFromMccIfNeeded(phone, mcc);
             setLocaleFromMccIfNeeded(phone, mcc);
             setWifiChannelsFromMccIfNeeded(phone, mcc);
         }
-        if (mnc != 0) {
-            config.mnc = mnc;
-        }
         try {
+            Configuration config = ActivityManagerNative.getDefault().getConfiguration();
+            if (mcc != 0) {
+                config.mcc = mcc;
+            }
+            if (mnc != 0) {
+                config.mnc = mnc;
+            }
             ActivityManagerNative.getDefault().updateConfiguration(config);
         } catch (RemoteException e) {
             Log.e(LOG_TAG, "Can't update configuration", e);
