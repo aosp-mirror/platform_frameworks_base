@@ -53,6 +53,8 @@ import java.io.InputStream;
 public class WallpaperManager {
     private static String TAG = "WallpaperManager";
     private static boolean DEBUG = false;
+    private float mWallpaperXStep = -1;
+    private float mWallpaperYStep = -1;
 
     /**
      * Launch an activity for the user to pick the current global live
@@ -575,18 +577,31 @@ public class WallpaperManager {
      * @param windowToken The window who these offsets should be associated
      * with, as returned by {@link android.view.View#getWindowToken()
      * View.getWindowToken()}.
-     * @param xOffset The offset olong the X dimension, from 0 to 1.
+     * @param xOffset The offset along the X dimension, from 0 to 1.
      * @param yOffset The offset along the Y dimension, from 0 to 1.
      */
     public void setWallpaperOffsets(IBinder windowToken, float xOffset, float yOffset) {
         try {
             //Log.v(TAG, "Sending new wallpaper offsets from app...");
             ViewRoot.getWindowSession(mContext.getMainLooper()).setWallpaperPosition(
-                    windowToken, xOffset, yOffset);
+                    windowToken, xOffset, yOffset, mWallpaperXStep, mWallpaperYStep);
             //Log.v(TAG, "...app returning after sending offsets!");
         } catch (RemoteException e) {
             // Ignore.
         }
+    }
+    
+    /**
+     * For applications that use multiple virtual screens showing a wallpaper,
+     * specify the step size between virtual screens. For example, if the
+     * launcher has 5 virtual screens, it would specify an xStep of 0.5,
+     * since the X offset for those screens are 0.0, 0.5 and 1.0
+     * @param xStep The X offset delta from one screen to the next one 
+     * @param yStep The Y offset delta from one screen to the next one
+     */
+    public void setWallpaperOffsetSteps(float xStep, float yStep) {
+        mWallpaperXStep = xStep;
+        mWallpaperYStep = yStep;
     }
     
     /**
@@ -627,7 +642,7 @@ public class WallpaperManager {
     public void clearWallpaperOffsets(IBinder windowToken) {
         try {
             ViewRoot.getWindowSession(mContext.getMainLooper()).setWallpaperPosition(
-                    windowToken, -1, -1);
+                    windowToken, -1, -1, -1, -1);
         } catch (RemoteException e) {
             // Ignore.
         }
