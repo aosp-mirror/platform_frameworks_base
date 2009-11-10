@@ -388,14 +388,33 @@ static bool copybit(GLint x, GLint y,
 
         copybit_image_t tmpCbImg;
         copybit_rect_t tmpCbRect;
+        copybit_rect_t tmpdrect = drect;
         tmpCbImg.w = w;
         tmpCbImg.h = h;
         tmpCbImg.format = tempCb->format;
         tmpCbImg.handle = (native_handle_t*)tempCb->getNativeBuffer()->handle;
         tmpCbRect.l = 0;
         tmpCbRect.t = 0;
-        tmpCbRect.r = w;
-        tmpCbRect.b = h;
+
+        if (drect.l < 0) {
+            tmpCbRect.l = -tmpdrect.l;
+            tmpdrect.l = 0;
+        }
+        if (drect.t < 0) {
+            tmpCbRect.t = -tmpdrect.t;
+            tmpdrect.t = 0;
+        }
+        if (drect.l + tmpCbImg.w > dst.w) {
+            tmpCbImg.w = dst.w - drect.l;
+            tmpdrect.r = dst.w;
+        }
+        if (drect.t + tmpCbImg.h > dst.h) {
+            tmpCbImg.h = dst.h - drect.t;
+            tmpdrect.b = dst.h;
+        }
+
+        tmpCbRect.r = tmpCbImg.w;
+        tmpCbRect.b = tmpCbImg.h;
 
         if (!err) {
             // first make a copy of the destination buffer
@@ -404,7 +423,7 @@ static bool copybit(GLint x, GLint y,
             copybit->set_parameter(copybit, COPYBIT_PLANE_ALPHA, 0xFF);
             copybit->set_parameter(copybit, COPYBIT_DITHER, COPYBIT_DISABLE);
             err = copybit->stretch(copybit,
-                    &tmpCbImg, &dst, &tmpCbRect, &drect, &tmp_it);
+                    &tmpCbImg, &dst, &tmpCbRect, &tmpdrect, &tmp_it);
         }
         if (!err) {
             // then proceed as usual, but without the alpha plane
@@ -424,7 +443,7 @@ static bool copybit(GLint x, GLint y,
             copybit->set_parameter(copybit, COPYBIT_PLANE_ALPHA, invPlaneAlpha);
             copybit->set_parameter(copybit, COPYBIT_DITHER, COPYBIT_ENABLE);
             err = copybit->stretch(copybit,
-                    &dst, &tmpCbImg, &drect, &tmpCbRect, &it);
+                    &dst, &tmpCbImg, &tmpdrect, &tmpCbRect, &it);
         }
     } else {
         copybit->set_parameter(copybit, COPYBIT_TRANSFORM, transform);
