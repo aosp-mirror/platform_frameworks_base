@@ -26,8 +26,8 @@ sdk.preview=0
 </div>
 </div>
 
-<p>This page describes how to install the Android SDK and set up your
-development environment for the first time.</p>
+<p>This page describes how to install the latest version of the Android SDK 
+and set up your development environment for the first time.</p>
 
 <p>If you encounter any problems during installation, see the 
 <a href="#troubleshooting">Troubleshooting</a> section at the bottom of
@@ -36,14 +36,14 @@ this page.</p>
 <h4>Updating?</h4>
 
 <p>If you are currently using the Android 1.6 SDK, you do not necessarily need
-to install the new SDK, since your existing SDK already includes the Android SDK
-and AVD Manager tool. To develop against the new Android 2.0 platform, for
-example, you could just download the updated SDK Tools (Revision 3) and the
-Android 2.0 platform into your existing SDK.</p>
+to install a newer SDK, since you can already update the platforms, tools, and
+other components using the Android SDK and AVD Manager tool. To develop against
+the latest Android platform, for example, you could just download the latest SDK
+Tools and then add the new Android platform into your existing SDK.</p>
 
 <p>If you are using Android 1.5 SDK or older, you should install the new SDK as
 described in this document and move your application projects to the new
-environment. </p>
+SDK environment. </p>
 
 <h2 id="Preparing">Prepare for Installation</h2>
 
@@ -65,13 +65,15 @@ to install Eclipse, you can download it from this location: </p>
 <h2 id="Installing">Download and Install the SDK</h2>
 
 <p>Download the SDK package that is appropriate for your development computer.
-Unpack the Android SDK archive to a suitable location on your machine. By
-default, the SDK files are unpacked into a directory named
-<code>android-sdk-&lt;machine-platform&gt;</code>. </p>
+You can get the latest version from the <a href="{@docRoot}sdk/index.html">SDK
+download page</a>.</p>
 
-<p>Make a note of the name and location of the unpacked SDK directory on your
-system &mdash; you will need to refer to the SDK directory later, when setting
-up the ADT plugin or when using the SDK tools.</p>
+<p>After downloading, unpack the Android SDK archive to a suitable location on your
+machine. By default, the SDK files are unpacked into a directory named
+<code>android-sdk-&lt;machine-platform&gt;</code>. Make a note of the name and
+location of the unpacked SDK directory on your system &mdash; you will need to
+refer to the SDK directory later, when setting up the ADT plugin or when using
+the SDK tools.</p>
 
 <p>Optionally, you may want to add the location of the SDK's primary
 <code>tools</code> directory to your system <code>PATH</code>. The primary
@@ -128,7 +130,7 @@ debug your application.</p>
 
 <h2 id="components">Add Android Platforms and Other Components</h2>
 
-<div class="sidebox-wrapper">
+<div class="sidebox-wrapper" style="margin-right:2.5em;">
 <div class="sidebox">
 <p>The <strong>Android SDK and AVD Manager</strong> tool is pre-installed in
 your SDK. Using the tool is a key part of performing the initial setup of your
