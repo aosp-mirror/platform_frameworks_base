@@ -676,6 +676,18 @@ public class VCardComposer {
         }
     }
 
+    private boolean containsNonEmptyName(ContentValues contentValues) {
+        final String familyName = contentValues.getAsString(StructuredName.FAMILY_NAME);
+        final String middleName = contentValues.getAsString(StructuredName.MIDDLE_NAME);
+        final String givenName = contentValues.getAsString(StructuredName.GIVEN_NAME);
+        final String prefix = contentValues.getAsString(StructuredName.PREFIX);
+        final String suffix = contentValues.getAsString(StructuredName.SUFFIX);
+        final String displayName = contentValues.getAsString(StructuredName.DISPLAY_NAME);
+        return !(TextUtils.isEmpty(familyName) && TextUtils.isEmpty(middleName) &&
+                TextUtils.isEmpty(givenName) && TextUtils.isEmpty(prefix) &&
+                TextUtils.isEmpty(suffix) && TextUtils.isEmpty(displayName));
+    }
+
     private void appendStructuredNamesInternal(final StringBuilder builder,
             final List<ContentValues> contentValuesList) {
         // For safety, we'll emit just one value around StructuredName, as external importers
@@ -695,12 +707,14 @@ public class VCardComposer {
             } else if (primaryContentValues == null) {
                 // We choose the first "primary" ContentValues
                 // if "super primary" ContentValues does not exist.
-                Integer primary = contentValues.getAsInteger(StructuredName.IS_PRIMARY);
-                if (primary != null && primary > 0) {
+                Integer isPrimary = contentValues.getAsInteger(StructuredName.IS_PRIMARY);
+                if (isPrimary != null && isPrimary > 0 &&
+                        containsNonEmptyName(contentValues)) {
                     primaryContentValues = contentValues;
                     // Do not break, since there may be ContentValues with "super primary"
                     // afterword.
-                } else if (subprimaryContentValues == null) {
+                } else if (subprimaryContentValues == null &&
+                        containsNonEmptyName(contentValues)) {
                     subprimaryContentValues = contentValues;
                 }
             }
