@@ -134,6 +134,8 @@ public abstract class WallpaperService extends Service {
         boolean mOffsetMessageEnqueued;
         float mPendingXOffset;
         float mPendingYOffset;
+        float mPendingXOffsetStep;
+        float mPendingYOffsetStep;
         boolean mPendingSync;
         MotionEvent mPendingMove;
         
@@ -227,11 +229,14 @@ public abstract class WallpaperService extends Service {
             }
 
             @Override
-            public void dispatchWallpaperOffsets(float x, float y, boolean sync) {
+            public void dispatchWallpaperOffsets(float x, float y, float xStep, float yStep,
+                    boolean sync) {
                 synchronized (mLock) {
                     if (DEBUG) Log.v(TAG, "Dispatch wallpaper offsets: " + x + ", " + y);
                     mPendingXOffset = x;
                     mPendingYOffset = y;
+                    mPendingXOffsetStep = xStep;
+                    mPendingYOffsetStep = yStep;
                     if (sync) {
                         mPendingSync = true;
                     }
@@ -360,6 +365,7 @@ public abstract class WallpaperService extends Service {
          * WallpaperManager.setWallpaperOffsets()}.
          */
         public void onOffsetsChanged(float xOffset, float yOffset,
+                float xOffsetStep, float yOffsetStep,
                 int xPixelOffset, int yPixelOffset) {
         }
         
@@ -608,10 +614,14 @@ public abstract class WallpaperService extends Service {
             
             float xOffset;
             float yOffset;
+            float xOffsetStep;
+            float yOffsetStep;
             boolean sync;
             synchronized (mLock) {
                 xOffset = mPendingXOffset;
                 yOffset = mPendingYOffset;
+                xOffsetStep = mPendingXOffsetStep;
+                yOffsetStep = mPendingYOffsetStep;
                 sync = mPendingSync;
                 mPendingSync = false;
                 mOffsetMessageEnqueued = false;
@@ -622,7 +632,7 @@ public abstract class WallpaperService extends Service {
             final int xPixels = availw > 0 ? -(int)(availw*xOffset+.5f) : 0;
             final int availh = mIWallpaperEngine.mReqHeight-mCurHeight;
             final int yPixels = availh > 0 ? -(int)(availh*yOffset+.5f) : 0;
-            onOffsetsChanged(xOffset, yOffset, xPixels, yPixels);
+            onOffsetsChanged(xOffset, yOffset, xOffsetStep, yOffsetStep, xPixels, yPixels);
             
             if (sync) {
                 try {
