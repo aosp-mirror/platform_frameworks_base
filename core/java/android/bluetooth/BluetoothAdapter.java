@@ -36,13 +36,30 @@ import java.util.Set;
 import java.util.UUID;
 
 /**
- * Represents the local Bluetooth adapter.
- *
- * <p>Use {@link #getDefaultAdapter} to get the default local Bluetooth
- * adapter.
- *
- * <p>Use the {@link BluetoothDevice} class for operations on remote Bluetooth
+ * Represents the local device Bluetooth adapter. The {@link BluetoothAdapter}
+ * lets you perform fundamental Bluetooth tasks, such as initiate
+ * device discovery, query a list of bonded (paired) devices,
+ * instantiate a {@link BluetoothDevice} using a known MAC address, and create
+ * a {@link BluetoothServerSocket} to listen for connection requests from other
  * devices.
+ *
+ * <p>To get a {@link BluetoothAdapter} representing the local Bluetooth
+ * adapter, call the static {@link #getDefaultAdapter} method.
+ * Fundamentally, this is your starting point for all
+ * Bluetooth actions. Once you have the local adapter, you can get a set of
+ * {@link BluetoothDevice} objects representing all paired devices with
+ * {@link #getBondedDevices()}; start device discovery with
+ * {@link #startDiscovery()}; or create a {@link BluetoothServerSocket} to
+ * listen for incoming connection requests with
+ * {@link #listenUsingRfcommWithServiceRecord(String,UUID)}.
+ *
+ * <p class="note"><strong>Note:</strong>
+ * Most methods require the {@link android.Manifest.permission#BLUETOOTH}
+ * permission and some also require the
+ * {@link android.Manifest.permission#BLUETOOTH_ADMIN} permission.
+ *
+ * {@see BluetoothDevice}
+ * {@see BluetoothServerSocket}
  */
 public final class BluetoothAdapter {
     private static final String TAG = "BluetoothAdapter";
