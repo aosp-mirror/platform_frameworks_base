@@ -31,16 +31,31 @@ import java.io.UnsupportedEncodingException;
 import java.util.UUID;
 
 /**
- * Represents a remote Bluetooth device.
- *
- * <p>Use {@link BluetoothAdapter#getRemoteDevice} to create a {@link
- * BluetoothDevice}.
+ * Represents a remote Bluetooth device. A {@link BluetoothDevice} lets you
+ * create a connection with the repective device or query information about
+ * it, such as the name, address, class, and bonding state.
  *
  * <p>This class is really just a thin wrapper for a Bluetooth hardware
  * address. Objects of this class are immutable. Operations on this class
  * are performed on the remote Bluetooth hardware address, using the
  * {@link BluetoothAdapter} that was used to create this {@link
  * BluetoothDevice}.
+ *
+ * <p>To get a {@link BluetoothDevice}, use
+ * {@link BluetoothAdapter#getRemoteDevice(String)
+ * BluetoothAdapter.getRemoteDevice(String)} to create one representing a device
+ * of a known MAC address (which you can get through device discovery with
+ * {@link BluetoothAdapter}) or get one from the set of bonded devices
+ * returned by {@link BluetoothAdapter#getBondedDevices()
+ * BluetoothAdapter.getBondedDevices()}. You can then open a
+ * {@link BluetoothSocket} for communciation with the remote device, using
+ * {@link #createRfcommSocketToServiceRecord(UUID)}.
+ *
+ * <p class="note"><strong>Note:</strong>
+ * Requires the {@link android.Manifest.permission#BLUETOOTH} permission.
+ *
+ * {@see BluetoothAdapter}
+ * {@see BluetoothSocket}
  */
 public final class BluetoothDevice implements Parcelable {
     private static final String TAG = "BluetoothDevice";

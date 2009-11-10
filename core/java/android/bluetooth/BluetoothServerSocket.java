@@ -27,29 +27,31 @@ import java.io.IOException;
  * <p>The interface for Bluetooth Sockets is similar to that of TCP sockets:
  * {@link java.net.Socket} and {@link java.net.ServerSocket}. On the server
  * side, use a {@link BluetoothServerSocket} to create a listening server
- * socket. It will return a new, connected {@link BluetoothSocket} on an
- * accepted connection. On the client side, use the same
- * {@link BluetoothSocket} object to both intiate the outgoing connection,
- * and to manage the connected socket.
+ * socket. When a connection is accepted by the {@link BluetoothServerSocket},
+ * it will return a new {@link BluetoothSocket} to manage the connection.
+ * On the client side, use a single {@link BluetoothSocket} to both intiate
+ * an outgoing connection and to manage the connection.
  *
- * <p>The most common type of Bluetooth Socket is RFCOMM. RFCOMM is a
- * connection orientated, streaming transport over Bluetooth. It is also known
- * as the Serial Port Profile (SPP).
+ * <p>The most common type of Bluetooth socket is RFCOMM, which is the type
+ * supported by the Android APIs. RFCOMM is a connection-oriented, streaming
+ * transport over Bluetooth. It is also known as the Serial Port Profile (SPP).
  *
- * <p>Use {@link BluetoothDevice#createRfcommSocketToServiceRecord} to create
- * a new {@link BluetoothSocket} ready for an outgoing connection to a remote
- * {@link BluetoothDevice}.
+ * <p>To create a listenting {@link BluetoothServerSocket} that's ready for
+ * incoming connections, use
+ * {@link BluetoothAdapter#listenUsingRfcommWithServiceRecord
+ * BluetoothAdapter.listenUsingRfcommWithServiceRecord()}. Then call
+ * {@link #accept()} to listen for incoming connection requests. This call
+ * will block until a connection is established, at which point, it will return
+ * a {@link BluetoothSocket} to manage the connection.
  *
- * <p>Use {@link BluetoothAdapter#listenUsingRfcommWithServiceRecord} to
- * create a listening {@link BluetoothServerSocket} ready for incoming
- * connections to the local {@link BluetoothAdapter}.
- *
- * <p>{@link BluetoothSocket} and {@link BluetoothServerSocket} are thread
+ * <p>{@link BluetoothServerSocket} is thread
  * safe. In particular, {@link #close} will always immediately abort ongoing
- * operations and close the socket.
+ * operations and close the server socket.
  *
- * <p>All methods on a {@link BluetoothServerSocket} require
- * {@link android.Manifest.permission#BLUETOOTH}
+ * <p class="note"><strong>Note:</strong>
+ * Requires the {@link android.Manifest.permission#BLUETOOTH} permission.
+ *
+ * {@see BluetoothSocket}
  */
 public final class BluetoothServerSocket implements Closeable {
 
