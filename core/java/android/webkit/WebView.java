@@ -2730,7 +2730,7 @@ public class WebView extends AbsoluteLayout
     */
     @Deprecated
     public static synchronized PluginList getPluginList() {
-        return null;
+        return new PluginList();
     }
 
    /**
