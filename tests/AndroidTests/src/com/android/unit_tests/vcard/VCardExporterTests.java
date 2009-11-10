@@ -889,4 +889,18 @@ public class VCardExporterTests extends VCardTestsBase {
                         .put(Nickname.NAME, "Nicky");
         verifier.verify();
     }
+
+    public void testTolerateBrokenPhoneNumberEntryV21() {
+        ExportTestResolver resolver = new ExportTestResolver();
+        resolver.buildContactEntry().buildData(Phone.CONTENT_ITEM_TYPE)
+                .put(Phone.TYPE, Phone.TYPE_HOME)
+                .put(Phone.NUMBER, "111-222-3333 (Miami)\n444-5555-666 (Tokyo);"
+                        + "777-888-9999 (Chicago);111-222-3333 (Miami)");
+        VCardVerifier verifier = new VCardVerifier(resolver, V21);
+        verifier.addPropertyNodesVerifierWithEmptyName()
+                .addNodeWithoutOrder("TEL", "111-222-3333", new TypeSet("HOME"))
+                .addNodeWithoutOrder("TEL", "444-555-5666", new TypeSet("HOME"))
+                .addNodeWithoutOrder("TEL", "777-888-9999", new TypeSet("HOME"));
+        verifier.verify();
+    }
 }
