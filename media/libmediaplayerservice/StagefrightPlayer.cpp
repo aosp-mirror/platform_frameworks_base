@@ -40,11 +40,13 @@ status_t StagefrightPlayer::setDataSource(const char *url) {
     return err;
 }
 
+// Warning: The filedescriptor passed into this method will only be valid until
+// the method returns, if you want to keep it, dup it!
 status_t StagefrightPlayer::setDataSource(int fd, int64_t offset, int64_t length) {
     LOGV("setDataSource(%d, %lld, %lld)", fd, offset, length);
 
     reset();
-    mPlayer = new MediaPlayerImpl(fd, offset, length);
+    mPlayer = new MediaPlayerImpl(dup(fd), offset, length);
 
     status_t err = mPlayer->initCheck();
     if (err != OK) {
