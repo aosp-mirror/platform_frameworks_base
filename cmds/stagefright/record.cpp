@@ -133,6 +133,8 @@ sp<MediaSource> createSource(const char *filename) {
 int main(int argc, char **argv) {
     android::ProcessState::self()->startThreadPool();
 
+    DataSource::RegisterDefaultSniffers();
+
 #if 1
     if (argc != 2) {
         fprintf(stderr, "usage: %s filename\n", argv[0]);
@@ -142,7 +144,7 @@ int main(int argc, char **argv) {
     OMXClient client;
     CHECK_EQ(client.connect(), OK);
 
-#if 0
+#if 1
     sp<MediaSource> source = createSource(argv[1]);
 
     if (source == NULL) {
