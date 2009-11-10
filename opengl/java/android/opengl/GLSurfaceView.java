@@ -983,33 +983,41 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
              * accesses EGL.
              */
             try {
-                try {
-                    sGLThreadManager.start(this);
-                } catch (InterruptedException e) {
-                    return;
-                }
                 guardedRun();
             } catch (InterruptedException e) {
                 // fall thru and exit normally
             } finally {
-                try {
-                    sGLThreadManager.end(this);
-                } finally {
-                    synchronized(this) {
-                        if (LOG_THREADS) {
-                            Log.i("GLThread", "exiting tid=" +  getId());
-                        }
-                        mDone = true;
-                        notifyAll();
+                synchronized(this) {
+                    if (LOG_THREADS) {
+                        Log.i("GLThread", "exiting tid=" +  getId());
                     }
+                    mDone = true;
+                    notifyAll();
                 }
+            }
+        }
+
+        private void startEgl() throws InterruptedException {
+            if (! mHaveEgl) {
+                mHaveEgl = true;
+                sGLThreadManager.start(this);
+                mEglHelper.start();
+            }
+        }
+
+        private void stopEgl() {
+            if (mHaveEgl) {
+                mHaveEgl = false;
+                mEglHelper.destroySurface();
+                mEglHelper.finish();
+                sGLThreadManager.end(this);
             }
         }
 
         private void guardedRun() throws InterruptedException {
             mEglHelper = new EglHelper();
             try {
-                mEglHelper.start();
+                startEgl();
 
                 GL10 gl = null;
                 boolean tellRendererSurfaceCreated = true;
@@ -1033,20 +1041,30 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
                             r.run();
                         }
                         if (mPaused) {
-                            mEglHelper.destroySurface();
-                            mEglHelper.finish();
+                            stopEgl();
                             needStart = true;
                         }
-                        while (needToWait()) {
-                            if (LOG_THREADS) {
-                                Log.i("GLThread", "needToWait tid=" + getId());
-                            }
+                        while(true) {
                             if (!mHasSurface) {
                                 if (!mWaitingForSurface) {
-                                    mEglHelper.destroySurface();
+                                    stopEgl();
                                     mWaitingForSurface = true;
                                     notifyAll();
                                 }
+                            } else {
+                                boolean shouldHaveEgl = sGLThreadManager.shouldHaveEgl(this);
+                                if (mHaveEgl && (!shouldHaveEgl)) {
+                                    stopEgl();
+                                } else if ((!mHaveEgl) && shouldHaveEgl) {
+                                    startEgl();
+                                    needStart = true;
+                                }
+                            }
+                            if (!needToWait()) {
+                                break;
+                            }
+                            if (LOG_THREADS) {
+                                Log.i("GLThread", "needToWait tid=" + getId());
                             }
                             wait();
                         }
@@ -1065,7 +1083,7 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
                         }
                     }
                     if (needStart) {
-                        mEglHelper.start();
+                        startEgl();
                         tellRendererSurfaceCreated = true;
                         changed = true;
                     }
@@ -1097,21 +1115,16 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
                 /*
                  * clean-up everything...
                  */
-                mEglHelper.destroySurface();
-                mEglHelper.finish();
+                stopEgl();
             }
         }
 
         private boolean needToWait() {
-            if (sGLThreadManager.shouldQuit(this)) {
-                mDone = true;
-                notifyAll();
-            }
             if (mDone) {
                 return false;
             }
 
-            if (mPaused || (! mHasSurface)) {
+            if (mPaused || (! mHasSurface) || (! mHaveEgl)) {
                 return true;
             }
 
@@ -1236,6 +1249,7 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
         private boolean mPaused;
         private boolean mHasSurface;
         private boolean mWaitingForSurface;
+        private boolean mHaveEgl;
         private int mWidth;
         private int mHeight;
         private int mRenderMode;
@@ -1286,6 +1300,16 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
     }
 
     private static class GLThreadManager {
+        public boolean shouldHaveEgl(GLThread thread) {
+            if (mMultipleGLESContextsAllowed) {
+                return true;
+            } else {
+                synchronized(this) {
+                    return thread == mMostRecentGLThread || mMostRecentGLThread == null;
+                }
+            }
+        }
+
         public void start(GLThread thread) throws InterruptedException {
            if (! mGLESVersionCheckComplete) {
                 mGLESVersion = SystemProperties.getInt(
@@ -1335,12 +1359,6 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
                     notifyAll();
                 }
                 mGLESDriverCheckComplete = true;
-            }
-        }
-
-        public boolean shouldQuit(GLThread thread) {
-            synchronized(this) {
-                return thread != mMostRecentGLThread;
             }
         }
 
