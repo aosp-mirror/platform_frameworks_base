@@ -1018,7 +1018,7 @@ sp<AudioFlinger::PlaybackThread::Track>  AudioFlinger::PlaybackThread::createTra
         Mutex::Autolock _l(mLock);
         track = new Track(this, client, streamType, sampleRate, format,
                 channelCount, frameCount, sharedBuffer);
-        if (track->getCblk() == NULL) {
+        if (track->getCblk() == NULL || track->name() < 0) {
             lStatus = NO_MEMORY;
             goto Exit;
         }
