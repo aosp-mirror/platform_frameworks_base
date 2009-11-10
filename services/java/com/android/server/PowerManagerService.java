@@ -2416,7 +2416,7 @@ class PowerManagerService extends IPowerManager.Stub
 
     SensorEventListener mProximityListener = new SensorEventListener() {
         public void onSensorChanged(SensorEvent event) {
-            long milliseconds = event.timestamp / 1000000;
+            long milliseconds = SystemClock.elapsedRealtime();
             synchronized (mLocks) {
                 float distance = event.values[0];
                 long timeSinceLastEvent = milliseconds - mLastProximityEventTime;
@@ -2453,7 +2453,7 @@ class PowerManagerService extends IPowerManager.Stub
                 }
 
                 int value = (int)event.values[0];
-                long milliseconds = event.timestamp / 1000000;
+                long milliseconds = SystemClock.elapsedRealtime();
                 if (mDebugLightSensor) {
                     Log.d(TAG, "onSensorChanged: light value: " + value);
                 }
