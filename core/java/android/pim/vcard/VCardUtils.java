@@ -20,6 +20,7 @@ import android.content.ContentValues;
 import android.provider.ContactsContract.Data;
 import android.provider.ContactsContract.CommonDataKinds.Phone;
 import android.provider.ContactsContract.CommonDataKinds.StructuredPostal;
+import android.telephony.PhoneNumberUtils;
 import android.text.TextUtils;
 
 import java.util.Collection;
@@ -166,6 +167,14 @@ public class VCardUtils {
             break;
         }
         return list;
+    }
+
+    public static int getPhoneNumberFormat(final int vcardType) {
+        if (VCardConfig.isJapaneseDevice(vcardType)) {
+            return PhoneNumberUtils.FORMAT_JAPAN;
+        } else {
+            return PhoneNumberUtils.FORMAT_NANP;
+        }
     }
 
     /**
