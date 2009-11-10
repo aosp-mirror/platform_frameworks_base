@@ -54,8 +54,13 @@ compatibility.</p>
 
 <h2 id="InstallingComponents">Installing SDK Components</h2>
 
-<p>Use the Android SDK and AVD Manager to install new SDK components. 
-You can launch the SDK and AVD Manager in one of these ways:</p>
+<p>Use the Android SDK and AVD Manager to install new SDK components. </p>
+
+<p class="caution"><strong>Important:</strong> Before you install SDK components, 
+we recommend that you disable any antivirus programs that may be running on
+your computer.</p>
+
+<p>You can launch the SDK and AVD Manager in one of these ways:</p>
 <ul>
   <li>Execute the {@code android}</a> tool command with no options. If you
 haven't used the tool before, change to the <code>&lt;sdk&gt;/tools</code>
