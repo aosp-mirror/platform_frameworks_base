@@ -4297,7 +4297,7 @@ public class WebView extends AbsoluteLayout
 
     private int computeMaxScrollY() {
         int maxContentH = computeVerticalScrollRange() + getTitleHeight();
-        return Math.max(maxContentH - getHeight(), getTitleHeight());
+        return Math.max(maxContentH - getViewHeightWithTitle(), getTitleHeight());
     }
 
     public void flingScroll(int vx, int vy) {
