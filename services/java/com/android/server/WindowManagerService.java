@@ -433,6 +433,8 @@ public class WindowManagerService extends IWindowManager.Stub
     int mWallpaperAnimLayerAdjustment;
     float mLastWallpaperX = -1;
     float mLastWallpaperY = -1;
+    float mLastWallpaperXStep = -1;
+    float mLastWallpaperYStep = -1;
     // This is set when we are waiting for a wallpaper to tell us it is done
     // changing its scroll position.
     WindowState mWaitingOnWallpaper;
@@ -1465,9 +1467,11 @@ public class WindowManagerService extends IWindowManager.Stub
         if (visible) {
             if (mWallpaperTarget.mWallpaperX >= 0) {
                 mLastWallpaperX = mWallpaperTarget.mWallpaperX;
+                mLastWallpaperXStep = mWallpaperTarget.mWallpaperXStep;
             }
             if (mWallpaperTarget.mWallpaperY >= 0) {
                 mLastWallpaperY = mWallpaperTarget.mWallpaperY;
+                mLastWallpaperYStep = mWallpaperTarget.mWallpaperYStep;
             }
         }
         
@@ -1570,6 +1574,7 @@ public class WindowManagerService extends IWindowManager.Stub
         boolean changed = false;
         boolean rawChanged = false;
         float wpx = mLastWallpaperX >= 0 ? mLastWallpaperX : 0.5f;
+        float wpxs = mLastWallpaperXStep >= 0 ? mLastWallpaperXStep : -1.0f;
         int availw = wallpaperWin.mFrame.right-wallpaperWin.mFrame.left-dw;
         int offset = availw > 0 ? -(int)(availw*wpx+.5f) : 0;
         changed = wallpaperWin.mXOffset != offset;
@@ -1578,12 +1583,14 @@ public class WindowManagerService extends IWindowManager.Stub
                     + wallpaperWin + " x: " + offset);
             wallpaperWin.mXOffset = offset;
         }
-        if (wallpaperWin.mWallpaperX != wpx) {
+        if (wallpaperWin.mWallpaperX != wpx || wallpaperWin.mWallpaperXStep != wpxs) {
             wallpaperWin.mWallpaperX = wpx;
+            wallpaperWin.mWallpaperXStep = wpxs;
             rawChanged = true;
         }
         
         float wpy = mLastWallpaperY >= 0 ? mLastWallpaperY : 0.5f;
+        float wpys = mLastWallpaperYStep >= 0 ? mLastWallpaperYStep : -1.0f;
         int availh = wallpaperWin.mFrame.bottom-wallpaperWin.mFrame.top-dh;
         offset = availh > 0 ? -(int)(availh*wpy+.5f) : 0;
         if (wallpaperWin.mYOffset != offset) {
@@ -1592,8 +1599,9 @@ public class WindowManagerService extends IWindowManager.Stub
             changed = true;
             wallpaperWin.mYOffset = offset;
         }
-        if (wallpaperWin.mWallpaperY != wpy) {
+        if (wallpaperWin.mWallpaperY != wpy || wallpaperWin.mWallpaperYStep != wpys) {
             wallpaperWin.mWallpaperY = wpy;
+            wallpaperWin.mWallpaperYStep = wpys;
             rawChanged = true;
         }
         
@@ -1606,7 +1614,8 @@ public class WindowManagerService extends IWindowManager.Stub
                     mWaitingOnWallpaper = wallpaperWin;
                 }
                 wallpaperWin.mClient.dispatchWallpaperOffsets(
-                        wallpaperWin.mWallpaperX, wallpaperWin.mWallpaperY, sync);
+                        wallpaperWin.mWallpaperX, wallpaperWin.mWallpaperY,
+                        wallpaperWin.mWallpaperXStep, wallpaperWin.mWallpaperYStep, sync);
                 if (sync) {
                     if (mWaitingOnWallpaper != null) {
                         long start = SystemClock.uptimeMillis();
@@ -2181,10 +2190,13 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    public void setWindowWallpaperPositionLocked(WindowState window, float x, float y) {
+    public void setWindowWallpaperPositionLocked(WindowState window, float x, float y,
+            float xStep, float yStep) {
         if (window.mWallpaperX != x || window.mWallpaperY != y)  {
             window.mWallpaperX = x;
             window.mWallpaperY = y;
+            window.mWallpaperXStep = xStep;
+            window.mWallpaperYStep = yStep;
             if (updateWallpaperOffsetLocked(window, true)) {
                 performLayoutAndPlaceSurfacesLocked();
             }
@@ -6585,12 +6597,12 @@ public class WindowManagerService extends IWindowManager.Stub
             }
         }
 
-        public void setWallpaperPosition(IBinder window, float x, float y) {
+        public void setWallpaperPosition(IBinder window, float x, float y, float xStep, float yStep) {
             synchronized(mWindowMap) {
                 long ident = Binder.clearCallingIdentity();
                 try {
                     setWindowWallpaperPositionLocked(windowForClientLocked(this, window),
-                            x, y);
+                            x, y, xStep, yStep);
                 } finally {
                     Binder.restoreCallingIdentity(ident);
                 }
@@ -6804,7 +6816,12 @@ public class WindowManagerService extends IWindowManager.Stub
         // wallpaper; if a wallpaper window: the currently applied offset.
         float mWallpaperX = -1;
         float mWallpaperY = -1;
-        
+
+        // If a window showing a wallpaper: what fraction of the offset
+        // range corresponds to a full virtual screen.
+        float mWallpaperXStep = -1;
+        float mWallpaperYStep = -1;
+
         // Wallpaper windows: pixels offset based on above variables.
         int mXOffset;
         int mYOffset;
@@ -8036,6 +8053,10 @@ public class WindowManagerService extends IWindowManager.Stub
             if (mWallpaperX != -1 || mWallpaperY != -1) {
                 pw.print(prefix); pw.print("mWallpaperX="); pw.print(mWallpaperX);
                         pw.print(" mWallpaperY="); pw.println(mWallpaperY);
+            }
+            if (mWallpaperXStep != -1 || mWallpaperYStep != -1) {
+                pw.print(prefix); pw.print("mWallpaperXStep="); pw.print(mWallpaperXStep);
+                        pw.print(" mWallpaperYStep="); pw.println(mWallpaperYStep);
             }
         }
 

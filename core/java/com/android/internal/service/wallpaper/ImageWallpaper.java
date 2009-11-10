@@ -102,6 +102,7 @@ public class ImageWallpaper extends WallpaperService {
 
         @Override
         public void onOffsetsChanged(float xOffset, float yOffset,
+                float xOffsetStep, float yOffsetStep,
                 int xPixels, int yPixels) {
             mXOffset = xOffset;
             mYOffset = yOffset;
