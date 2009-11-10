@@ -42,6 +42,7 @@ import com.android.mediaframeworktest.MediaNames;
 
 import java.io.File;
 import java.io.FileDescriptor;
+import java.net.InetAddress;
 
  
 public class MediaFrameworkTest extends Activity {
@@ -142,4 +143,9 @@ public class MediaFrameworkTest extends Activity {
       return super.onKeyDown(keyCode, event);
      
   }  
+
+  public static boolean checkStreamingServer() throws Exception {
+      InetAddress address = InetAddress.getByAddress(MediaNames.STREAM_SERVER);
+      return address.isReachable(10000);
+  }
 }

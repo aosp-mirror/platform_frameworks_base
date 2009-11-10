@@ -489,6 +489,7 @@ public class MediaNames {
   };
   
   //Streaming test files
+  public static final byte [] STREAM_SERVER = new byte[] {(byte)75,(byte)17,(byte)48,(byte)204};
   public static final String STREAM_H264_480_360_1411k = 
       "http://75.17.48.204:10088/yslau/stress_media/h264_regular.mp4";
   public static final String STREAM_WMV = 
