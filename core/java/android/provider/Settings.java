@@ -2651,6 +2651,11 @@ public final class Settings {
         public static final String CHECKIN_INTERVAL = "checkin_interval";
 
         /**
+         * The interval (in seconds) between event log aggregation runs.
+         */
+        public static final String AGGREGATION_INTERVAL_SECONDS = "aggregation_interval_seconds";
+
+        /**
          * Boolean indicating if the market app should force market only checkins on
          * install/uninstall. Any non-0 value is considered true.
          */
