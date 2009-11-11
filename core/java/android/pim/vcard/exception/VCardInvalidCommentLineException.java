@@ -14,16 +14,19 @@
  * limitations under the License.
  */
 
-package android.service.wallpaper;
-
-import android.view.MotionEvent;
+package android.pim.vcard.exception;
 
 /**
- * @hide
+ * Thrown when the vCard has some line starting with '#'. In the specification,
+ * both vCard 2.1 and vCard 3.0 does not allow such line, but some actual exporter emit
+ * such lines.
  */
-oneway interface IWallpaperEngine {
-    void setDesiredSize(int width, int height);
-    void setVisibility(boolean visible);
-    void dispatchPointer(in MotionEvent event);
-	void destroy();
+public class VCardInvalidCommentLineException extends VCardInvalidLineException {
+    public VCardInvalidCommentLineException() {
+        super();
+    }
+
+    public VCardInvalidCommentLineException(final String message) {
+        super(message);
+    }
 }

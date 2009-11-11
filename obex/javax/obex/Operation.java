@@ -163,6 +163,8 @@ public interface Operation {
 
     long getLength();
 
+    int getHeaderLength();
+
     String getType();
 
     InputStream openInputStream() throws IOException;

@@ -54,6 +54,16 @@ public class HardwareService extends IHardwareService.Stub {
     static final int LIGHT_FLASH_TIMED = 1;
     static final int LIGHT_FLASH_HARDWARE = 2;
 
+    /**
+     * Light brightness is managed by a user setting.
+     */
+    static final int BRIGHTNESS_MODE_USER = 0;
+
+    /**
+     * Light brightness is managed by a light sensor.
+     */
+    static final int BRIGHTNESS_MODE_SENSOR = 1;
+
     private final LinkedList<Vibration> mVibrations;
     private Vibration mCurrentVibration;
 
@@ -266,21 +276,21 @@ public class HardwareService extends IHardwareService.Stub {
     }
 
     void setLightOff_UNCHECKED(int light) {
-        setLight_native(mNativePointer, light, 0, LIGHT_FLASH_NONE, 0, 0);
+        setLight_native(mNativePointer, light, 0, LIGHT_FLASH_NONE, 0, 0, 0);
     }
 
-    void setLightBrightness_UNCHECKED(int light, int brightness) {
+    void setLightBrightness_UNCHECKED(int light, int brightness, int brightnessMode) {
         int b = brightness & 0x000000ff;
         b = 0xff000000 | (b << 16) | (b << 8) | b;
-        setLight_native(mNativePointer, light, b, LIGHT_FLASH_NONE, 0, 0);
+        setLight_native(mNativePointer, light, b, LIGHT_FLASH_NONE, 0, 0, brightnessMode);
     }
 
     void setLightColor_UNCHECKED(int light, int color) {
-        setLight_native(mNativePointer, light, color, LIGHT_FLASH_NONE, 0, 0);
+        setLight_native(mNativePointer, light, color, LIGHT_FLASH_NONE, 0, 0, 0);
     }
 
     void setLightFlashing_UNCHECKED(int light, int color, int mode, int onMS, int offMS) {
-        setLight_native(mNativePointer, light, color, mode, onMS, offMS);
+        setLight_native(mNativePointer, light, color, mode, onMS, offMS, 0);
     }
 
     public void setAttentionLight(boolean on, int color) {
@@ -289,7 +299,7 @@ public class HardwareService extends IHardwareService.Stub {
             mAttentionLightOn = on;
             mPulsing = false;
             setLight_native(mNativePointer, LIGHT_ID_ATTENTION, color,
-                    LIGHT_FLASH_HARDWARE, on ? 3 : 0, 0);
+                    LIGHT_FLASH_HARDWARE, on ? 3 : 0, 0, 0);
         }
     }
 
@@ -304,7 +314,7 @@ public class HardwareService extends IHardwareService.Stub {
             if (!mAttentionLightOn && !mPulsing) {
                 mPulsing = true;
                 setLight_native(mNativePointer, LIGHT_ID_ATTENTION, 0x00ffffff,
-                        LIGHT_FLASH_HARDWARE, 7, 0);
+                        LIGHT_FLASH_HARDWARE, 7, 0, 0);
                 mH.sendMessageDelayed(Message.obtain(mH, 1), 3000);
             }
         }
@@ -321,7 +331,7 @@ public class HardwareService extends IHardwareService.Stub {
                     mPulsing = false;
                     setLight_native(mNativePointer, LIGHT_ID_ATTENTION,
                             mAttentionLightOn ? 0xffffffff : 0,
-                            LIGHT_FLASH_NONE, 0, 0);
+                            LIGHT_FLASH_NONE, 0, 0, 0);
                 }
             }
         }
@@ -484,7 +494,7 @@ public class HardwareService extends IHardwareService.Stub {
     private static native void finalize_native(int ptr);
 
     private static native void setLight_native(int ptr, int light, int color, int mode,
-            int onMS, int offMS);
+            int onMS, int offMS, int brightnessMode);
 
     private final Context mContext;
     private final PowerManager.WakeLock mWakeLock;

@@ -124,21 +124,30 @@ public final class ServerOperation implements Operation, BaseStream {
              * It is a PUT request.
              */
             mGetOperation = false;
-        } else {
+
+            /*
+             * Determine if the final bit is set
+             */
+            if ((request & 0x80) == 0) {
+                finalBitSet = false;
+            } else {
+                finalBitSet = true;
+                mRequestFinished = true;
+            }
+        } else if ((request == 0x03) || (request == 0x83)) {
             /*
              * It is a GET request.
              */
             mGetOperation = true;
-        }
 
-        /*
-         * Determine if the final bit is set
-         */
-        if ((request & 0x80) == 0) {
+            // For Get request, final bit set is decided by server side logic
             finalBitSet = false;
+
+            if (request == 0x83) {
+                mRequestFinished = true;
+            }
         } else {
-            finalBitSet = true;
-            mRequestFinished = true;
+            throw new IOException("ServerOperation can not handle such request");
         }
 
         int length = in.read();
@@ -216,11 +225,8 @@ public final class ServerOperation implements Operation, BaseStream {
         }
 
         // wait for get request finished !!!!
-        while (mGetOperation && !finalBitSet) {
+        while (mGetOperation && !mRequestFinished) {
             sendReply(ResponseCodes.OBEX_HTTP_CONTINUE);
-        }
-        if (finalBitSet && mGetOperation) {
-            mRequestFinished = true;
         }
     }
 
@@ -333,6 +339,12 @@ public final class ServerOperation implements Operation, BaseStream {
             out.write(headerArray);
         }
 
+        // For Get operation: if response code is OBEX_HTTP_OK, then this is the
+        // last packet; so set finalBitSet to true.
+        if (mGetOperation && type == ResponseCodes.OBEX_HTTP_OK) {
+            finalBitSet = true;
+        }
+
         if ((finalBitSet) || (headerArray.length < (mMaxPacketLength - 20))) {
             if (bodyLength > 0) {
                 /*
@@ -410,9 +422,10 @@ public final class ServerOperation implements Operation, BaseStream {
                 }
             } else {
 
-                if ((headerID == ObexHelper.OBEX_OPCODE_PUT_FINAL)
-                        || (headerID == ObexHelper.OBEX_OPCODE_GET_FINAL)) {
+                if ((headerID == ObexHelper.OBEX_OPCODE_PUT_FINAL)) {
                     finalBitSet = true;
+                } else if (headerID == ObexHelper.OBEX_OPCODE_GET_FINAL) {
+                    mRequestFinished = true;
                 }
 
                 /*
@@ -584,7 +597,20 @@ public final class ServerOperation implements Operation, BaseStream {
     }
 
     public int getMaxPacketSize() {
-        return mMaxPacketLength - 6;
+        return mMaxPacketLength - 6 - getHeaderLength();
+    }
+
+    public int getHeaderLength() {
+        long id = mListener.getConnectionId();
+        if (id == -1) {
+            replyHeader.mConnectionID = null;
+        } else {
+            replyHeader.mConnectionID = ObexHelper.convertToByteArray(id);
+        }
+
+        byte[] headerArray = ObexHelper.createHeader(replyHeader, false);
+
+        return headerArray.length;
     }
 
     /**
@@ -623,7 +649,7 @@ public final class ServerOperation implements Operation, BaseStream {
         }
 
         if (mPrivateOutput == null) {
-            mPrivateOutput = new PrivateOutputStream(this, mMaxPacketLength - 6);
+            mPrivateOutput = new PrivateOutputStream(this, getMaxPacketSize());
         }
         mPrivateOutputOpen = true;
         return mPrivateOutput;
