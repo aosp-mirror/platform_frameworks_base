@@ -110,22 +110,31 @@ public class ColorMatrix {
         a[18] = aScale;
     }
     
+    /**
+     * Set the rotation on a color axis by the specified values.
+     * axis=0 correspond to a rotation around the RED color
+     * axis=1 correspond to a rotation around the GREEN color
+     * axis=2 correspond to a rotation around the BLUE color
+     */
     public void setRotate(int axis, float degrees) {
         reset();
         float radians = degrees * (float)Math.PI / 180;
         float cosine = FloatMath.cos(radians);
         float sine = FloatMath.sin(radians);
         switch (axis) {
+        // Rotation around the red color
         case 0:
             mArray[6] = mArray[12] = cosine;
             mArray[7] = sine;
             mArray[11] = -sine;
             break;
+        // Rotation around the green color
         case 1:
-            mArray[0] = mArray[17] = cosine;
-            mArray[2] = sine;
-            mArray[15] = -sine;
+            mArray[0] = mArray[12] = cosine;
+            mArray[2] = -sine;
+            mArray[10] = sine;
             break;
+        // Rotation around the blue color
         case 2:
             mArray[0] = mArray[6] = cosine;
             mArray[1] = sine;
