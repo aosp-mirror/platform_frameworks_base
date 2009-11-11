@@ -903,4 +903,34 @@ public class VCardExporterTests extends VCardTestsBase {
                 .addNodeWithoutOrder("TEL", "777-888-9999", new TypeSet("HOME"));
         verifier.verify();
     }
+
+    private void testPickUpNonEmptyContentValuesCommon(int version) {
+        ExportTestResolver resolver = new ExportTestResolver();
+        ContactEntry entry = resolver.buildContactEntry();
+        entry.buildData(StructuredName.CONTENT_ITEM_TYPE)
+                .put(StructuredName.IS_PRIMARY, 1);  // Empty name. Should be ignored.
+        entry.buildData(StructuredName.CONTENT_ITEM_TYPE)
+                .put(StructuredName.FAMILY_NAME, "family1");  // Not primary. Should be ignored.
+        entry.buildData(StructuredName.CONTENT_ITEM_TYPE)
+                .put(StructuredName.IS_PRIMARY, 1)
+                .put(StructuredName.FAMILY_NAME, "family2");  // This entry is what we want.
+        entry.buildData(StructuredName.CONTENT_ITEM_TYPE)
+                .put(StructuredName.IS_PRIMARY, 1)
+                .put(StructuredName.FAMILY_NAME, "family3");
+        entry.buildData(StructuredName.CONTENT_ITEM_TYPE)
+                .put(StructuredName.FAMILY_NAME, "family4");
+        VCardVerifier verifier = new VCardVerifier(resolver, version);
+        verifier.addPropertyNodesVerifierElem()
+                .addNodeWithoutOrder("N", Arrays.asList("family2", "", "", "", ""))
+                .addNodeWithoutOrder("FN", "family2");
+        verifier.verify();
+    }
+
+    public void testPickUpNonEmptyContentValuesV21() {
+        testPickUpNonEmptyContentValuesCommon(V21);
+    }
+
+    public void testPickUpNonEmptyContentValuesV30() {
+        testPickUpNonEmptyContentValuesCommon(V30);
+    }
 }
