@@ -683,22 +683,30 @@ void CameraService::Client::stopPreview()
 {
     LOGD("stopPreview (pid %d)", getCallingPid());
 
-    Mutex::Autolock lock(mLock);
-    if (checkPid() != NO_ERROR) return;
+    // hold main lock during state transition
+    {
+        Mutex::Autolock lock(mLock);
+        if (checkPid() != NO_ERROR) return;
 
-    if (mHardware == 0) {
-        LOGE("mHardware is NULL, returning.");
-        return;
+        if (mHardware == 0) {
+            LOGE("mHardware is NULL, returning.");
+            return;
+        }
+
+        mHardware->stopPreview();
+        mHardware->disableMsgType(CAMERA_MSG_PREVIEW_FRAME);
+        LOGD("stopPreview(), hardware stopped OK");
+
+        if (mSurface != 0 && !mUseOverlay) {
+            mSurface->unregisterBuffers();
+        }
     }
 
-    mHardware->stopPreview();
-    mHardware->disableMsgType(CAMERA_MSG_PREVIEW_FRAME);
-    LOGD("stopPreview(), hardware stopped OK");
-
-    if (mSurface != 0 && !mUseOverlay) {
-        mSurface->unregisterBuffers();
+    // hold preview buffer lock
+    {
+        Mutex::Autolock lock(mPreviewLock);
+        mPreviewBuffer.clear();
     }
-    mPreviewBuffer.clear();
 }
 
 // stop recording mode
@@ -706,24 +714,31 @@ void CameraService::Client::stopRecording()
 {
     LOGD("stopRecording (pid %d)", getCallingPid());
 
-    Mutex::Autolock lock(mLock);
-    if (checkPid() != NO_ERROR) return;
+    // hold main lock during state transition
+    {
+        Mutex::Autolock lock(mLock);
+        if (checkPid() != NO_ERROR) return;
 
-    if (mHardware == 0) {
-        LOGE("mHardware is NULL, returning.");
-        return;
+        if (mHardware == 0) {
+            LOGE("mHardware is NULL, returning.");
+            return;
+        }
+
+        if (mMediaPlayerBeep.get() != NULL) {
+            mMediaPlayerBeep->seekTo(0);
+            mMediaPlayerBeep->start();
+        }
+
+        mHardware->stopRecording();
+        mHardware->disableMsgType(CAMERA_MSG_VIDEO_FRAME);
+        LOGD("stopRecording(), hardware stopped OK");
     }
 
-    if (mMediaPlayerBeep.get() != NULL) {
-        mMediaPlayerBeep->seekTo(0);
-        mMediaPlayerBeep->start();
+    // hold preview buffer lock
+    {
+        Mutex::Autolock lock(mPreviewLock);
+        mPreviewBuffer.clear();
     }
-
-    mHardware->stopRecording();
-    mHardware->disableMsgType(CAMERA_MSG_VIDEO_FRAME);
-    LOGD("stopRecording(), hardware stopped OK");
-
-    mPreviewBuffer.clear();
 }
 
 // release a recording frame
@@ -1216,10 +1231,10 @@ void CameraService::Client::copyFrameAndPostCopiedFrame(const sp<ICameraClient>&
     // provided it's big enough. Don't allocate the memory or
     // perform the copy if there's no callback.
 
-    // hold the lock while we grab a reference to the preview buffer
+    // hold the preview lock while we grab a reference to the preview buffer
     sp<MemoryHeapBase> previewBuffer;
     {
-        Mutex::Autolock lock(mLock);
+        Mutex::Autolock lock(mPreviewLock);
         if (mPreviewBuffer == 0) {
             mPreviewBuffer = new MemoryHeapBase(size, 0, NULL);
         } else if (size > mPreviewBuffer->virtualSize()) {
