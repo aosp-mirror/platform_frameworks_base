@@ -761,27 +761,58 @@ public class VCardComposer {
         }
     }
 
+    private boolean containsNonEmptyName(ContentValues contentValues) {
+        final String familyName = contentValues.getAsString(StructuredName.FAMILY_NAME);
+        final String middleName = contentValues.getAsString(StructuredName.MIDDLE_NAME);
+        final String givenName = contentValues.getAsString(StructuredName.GIVEN_NAME);
+        final String prefix = contentValues.getAsString(StructuredName.PREFIX);
+        final String suffix = contentValues.getAsString(StructuredName.SUFFIX);
+        final String displayName = contentValues.getAsString(StructuredName.DISPLAY_NAME);
+        return !(TextUtils.isEmpty(familyName) && TextUtils.isEmpty(middleName) &&
+                TextUtils.isEmpty(givenName) && TextUtils.isEmpty(prefix) &&
+                TextUtils.isEmpty(suffix) && TextUtils.isEmpty(displayName));
+    }
+
     private void appendStructuredNamesInternal(final StringBuilder builder,
             final List<ContentValues> contentValuesList) {
         // For safety, we'll emit just one value around StructuredName, as external importers
         // may get confused with multiple "N", "FN", etc. properties, though it is valid in
         // vCard spec.
         ContentValues primaryContentValues = null;
+        ContentValues subprimaryContentValues = null;
         for (ContentValues contentValues : contentValuesList) {
+            if (contentValues == null){
+                continue;
+            }
             Integer isSuperPrimary = contentValues.getAsInteger(StructuredName.IS_SUPER_PRIMARY);
-            if (isSuperPrimary != null && isSuperPrimary != 0) {
+            if (isSuperPrimary != null && isSuperPrimary > 0) {
                 // We choose "super primary" ContentValues.
                 primaryContentValues = contentValues;
                 break;
-            } else if (primaryContentValues == null && contentValues != null) {
-                // We choose the first ContentValues if "super primary" ContentValues does not exist.
-                primaryContentValues = contentValues;
+            } else if (primaryContentValues == null) {
+                // We choose the first "primary" ContentValues
+                // if "super primary" ContentValues does not exist.
+                Integer isPrimary = contentValues.getAsInteger(StructuredName.IS_PRIMARY);
+                if (isPrimary != null && isPrimary > 0 &&
+                        containsNonEmptyName(contentValues)) {
+                    primaryContentValues = contentValues;
+                    // Do not break, since there may be ContentValues with "super primary"
+                    // afterword.
+                } else if (subprimaryContentValues == null &&
+                        containsNonEmptyName(contentValues)) {
+                    subprimaryContentValues = contentValues;
+                }
             }
         }
 
         if (primaryContentValues == null) {
-            Log.e(LOG_TAG, "All ContentValues given from database is empty.");
-            primaryContentValues = new ContentValues();
+            if (subprimaryContentValues != null) {
+                // We choose the first ContentValues if any "primary" ContentValues does not exist.
+                primaryContentValues = subprimaryContentValues;
+            } else {
+                Log.e(LOG_TAG, "All ContentValues given from database is empty.");
+                primaryContentValues = new ContentValues();
+            }
         }
 
         final String familyName = primaryContentValues
