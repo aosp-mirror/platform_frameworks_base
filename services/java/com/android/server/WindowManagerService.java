@@ -435,6 +435,7 @@ public class WindowManagerService extends IWindowManager.Stub
     float mLastWallpaperY = -1;
     float mLastWallpaperXStep = -1;
     float mLastWallpaperYStep = -1;
+    boolean mSendingPointersToWallpaper = false;
     // This is set when we are waiting for a wallpaper to tell us it is done
     // changing its scroll position.
     WindowState mWaitingOnWallpaper;
@@ -1749,8 +1750,20 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
                 try {
                     MotionEvent ev = MotionEvent.obtainNoHistory(pointer);
-                    ev.offsetLocation(srcWin.mFrame.left-wallpaper.mFrame.left,
-                            srcWin.mFrame.top-wallpaper.mFrame.top);
+                    if (srcWin != null) {
+                        ev.offsetLocation(srcWin.mFrame.left-wallpaper.mFrame.left,
+                                srcWin.mFrame.top-wallpaper.mFrame.top);
+                    } else {
+                        ev.offsetLocation(-wallpaper.mFrame.left, -wallpaper.mFrame.top);
+                    }
+                    switch (pointer.getAction()) {
+                        case MotionEvent.ACTION_DOWN:
+                            mSendingPointersToWallpaper = true;
+                            break;
+                        case MotionEvent.ACTION_UP:
+                            mSendingPointersToWallpaper = false;
+                            break;
+                    }
                     wallpaper.mClient.dispatchPointer(ev, eventTime, false);
                 } catch (RemoteException e) {
                     Log.w(TAG, "Failure sending pointer to wallpaper", e);
@@ -4836,6 +4849,12 @@ public class WindowManagerService extends IWindowManager.Stub
             if (action != MotionEvent.ACTION_MOVE) {
                 Log.w(TAG, "No window to dispatch pointer action " + ev.getAction());
             }
+            synchronized (mWindowMap) {
+                if (mSendingPointersToWallpaper) {
+                    Log.i(TAG, "Sending skipped pointer to wallpaper!");
+                    sendPointerToWallpaperLocked(null, ev, ev.getEventTime());
+                }
+            }
             if (qev != null) {
                 mQueue.recycleEvent(qev);
             }
@@ -4843,6 +4862,12 @@ public class WindowManagerService extends IWindowManager.Stub
             return INJECT_FAILED;
         }
         if (targetObj == mKeyWaiter.CONSUMED_EVENT_TOKEN) {
+            synchronized (mWindowMap) {
+                if (mSendingPointersToWallpaper) {
+                    Log.i(TAG, "Sending skipped pointer to wallpaper!");
+                    sendPointerToWallpaperLocked(null, ev, ev.getEventTime());
+                }
+            }
             if (qev != null) {
                 mQueue.recycleEvent(qev);
             }
@@ -4963,6 +4988,19 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         synchronized(mWindowMap) {
+            if (!target.isVisibleLw()) {
+                // During this motion dispatch, the target window has become
+                // invisible.
+                if (mSendingPointersToWallpaper) {
+                    sendPointerToWallpaperLocked(null, ev, eventTime);
+                }
+                if (qev != null) {
+                    mQueue.recycleEvent(qev);
+                }
+                ev.recycle();
+                return INJECT_SUCCEEDED;
+            }
+            
             if (qev != null && action == MotionEvent.ACTION_MOVE) {
                 mKeyWaiter.bindTargetWindowLocked(target,
                         KeyWaiter.RETURN_PENDING_POINTER, qev);
@@ -4987,15 +5025,16 @@ public class WindowManagerService extends IWindowManager.Stub
                         mKeyWaiter.mOutsideTouchTargets = null;
                     }
                 }
-                final Rect frame = target.mFrame;
-                ev.offsetLocation(-(float)frame.left, -(float)frame.top);
-                mKeyWaiter.bindTargetWindowLocked(target);
                 
                 // If we are on top of the wallpaper, then the wallpaper also
                 // gets to see this movement.
-                if (mWallpaperTarget == target) {
-                    sendPointerToWallpaperLocked(target, ev, eventTime);
+                if (mWallpaperTarget == target || mSendingPointersToWallpaper) {
+                    sendPointerToWallpaperLocked(null, ev, eventTime);
                 }
+                
+                final Rect frame = target.mFrame;
+                ev.offsetLocation(-(float)frame.left, -(float)frame.top);
+                mKeyWaiter.bindTargetWindowLocked(target);
             }
         }
 
@@ -5918,12 +5957,12 @@ public class WindowManagerService extends IWindowManager.Stub
                         res.offsetLocation(-win.mFrame.left, -win.mFrame.top);
                     }
                 }
-            }
-            
-            if (res != null && returnWhat == RETURN_PENDING_POINTER) {
-                synchronized (mWindowMap) {
-                    if (mWallpaperTarget == win) {
-                        sendPointerToWallpaperLocked(win, res, res.getEventTime());
+                
+                if (res != null && returnWhat == RETURN_PENDING_POINTER) {
+                    synchronized (mWindowMap) {
+                        if (mWallpaperTarget == win || mSendingPointersToWallpaper) {
+                            sendPointerToWallpaperLocked(win, res, res.getEventTime());
+                        }
                     }
                 }
             }
