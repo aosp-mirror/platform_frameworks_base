@@ -3559,4 +3559,14 @@
         <attr name="detailSocialSummary" format="boolean" />
     </declare-styleable>
 
+    <!-- =============================== -->
+    <!-- TabSelector class attributes -->
+    <!-- =============================== -->
+    <eat-comment />
+
+    <declare-styleable name="SlidingTab">
+        <!-- Use "horizontal" for a row, "vertical" for a column.  The default is horizontal. -->
+        <attr name="orientation" />
+    </declare-styleable>
+
 </resources>
