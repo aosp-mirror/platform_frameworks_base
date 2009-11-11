@@ -1027,7 +1027,6 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
     @Override
     public void onWindowFocusChanged(boolean hasWindowFocus) {
         super.onWindowFocusChanged(hasWindowFocus);
-        performValidation();
         if (!hasWindowFocus && !mDropDownAlwaysVisible) {
             dismissDropDown();
         }
@@ -1036,7 +1035,10 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
     @Override
     protected void onFocusChanged(boolean focused, int direction, Rect previouslyFocusedRect) {
         super.onFocusChanged(focused, direction, previouslyFocusedRect);
-        performValidation();
+        // Perform validation if the view is losing focus.
+        if (!focused) {
+            performValidation();
+        }
         if (!focused && !mDropDownAlwaysVisible) {
             dismissDropDown();
         }
