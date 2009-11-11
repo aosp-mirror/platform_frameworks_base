@@ -377,7 +377,7 @@ public class SyncStorageEngine extends Handler {
             int i = mAuthorities.size();
             while (i > 0) {
                 i--;
-                AuthorityInfo authority = mAuthorities.get(i);
+                AuthorityInfo authority = mAuthorities.valueAt(i);
                 if (authority.authority.equals(providerName)
                         && authority.enabled) {
                     return true;
@@ -399,7 +399,7 @@ public class SyncStorageEngine extends Handler {
                 int i = mAuthorities.size();
                 while (i > 0) {
                     i--;
-                    AuthorityInfo authority = mAuthorities.get(i);
+                    AuthorityInfo authority = mAuthorities.valueAt(i);
                     if (authority.authority.equals(providerName)) {
                         authority.enabled = sync;
                     }
@@ -548,7 +548,7 @@ public class SyncStorageEngine extends Handler {
             mPendingOperations.clear();
             final int N = mSyncStatus.size();
             for (int i=0; i<N; i++) {
-                mSyncStatus.get(i).pending = false;
+                mSyncStatus.valueAt(i).pending = false;
             }
             writePendingOperationsLocked();
         }
@@ -843,7 +843,7 @@ public class SyncStorageEngine extends Handler {
             SyncStatusInfo best = null;
             final int N = mSyncStatus.size();
             for (int i=0; i<N; i++) {
-                SyncStatusInfo cur = mSyncStatus.get(i);
+                SyncStatusInfo cur = mSyncStatus.valueAt(i);
                 AuthorityInfo ainfo = mAuthorities.get(cur.authorityId);
                 if (ainfo != null && ainfo.authority.equals(authority)) {
                     if (best == null) {
@@ -864,7 +864,7 @@ public class SyncStorageEngine extends Handler {
         synchronized (mAuthorities) {
             final int N = mSyncStatus.size();
             for (int i=0; i<N; i++) {
-                SyncStatusInfo cur = mSyncStatus.get(i);
+                SyncStatusInfo cur = mSyncStatus.valueAt(i);
                 AuthorityInfo ainfo = mAuthorities.get(cur.authorityId);
                 if (ainfo == null) {
                     continue;
@@ -1131,7 +1131,7 @@ public class SyncStorageEngine extends Handler {
             
             final int N = mAuthorities.size();
             for (int i=0; i<N; i++) {
-                AuthorityInfo authority = mAuthorities.get(i);
+                AuthorityInfo authority = mAuthorities.valueAt(i);
                 out.startTag(null, "authority");
                 out.attribute(null, "id", Integer.toString(authority.ident));
                 out.attribute(null, "account", authority.account);
@@ -1217,7 +1217,7 @@ public class SyncStorageEngine extends Handler {
                     SyncStatusInfo st = null;
                     while (i > 0) {
                         i--;
-                        st = mSyncStatus.get(i);
+                        st = mSyncStatus.valueAt(i);
                         if (st.authorityId == authority.ident) {
                             found = true;
                             break;
