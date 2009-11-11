@@ -41,6 +41,8 @@ import android.provider.ContactsContract.CommonDataKinds.Photo;
 import android.provider.ContactsContract.CommonDataKinds.StructuredName;
 import android.provider.ContactsContract.CommonDataKinds.StructuredPostal;
 import android.provider.ContactsContract.CommonDataKinds.Website;
+import android.telephony.PhoneNumberUtils;
+import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
 import android.text.format.Time;
 import android.util.CharsetUtils;
@@ -1171,13 +1173,39 @@ public class VCardComposer {
                 if (TextUtils.isEmpty(phoneNumber)) {
                     continue;
                 }
-                phoneLineExists = true;
                 int type = (typeAsObject != null ? typeAsObject : Phone.TYPE_HOME);
-                // TODO: Premature, since this allows two phone numbers which are
-                //        same from the view of phone number format (e.g. "100" v.s. "1-0-0")
-                if (!phoneSet.contains(phoneNumber)) {
-                    phoneSet.add(phoneNumber);
-                    appendVCardTelephoneLine(builder, type, label, phoneNumber);
+
+                phoneLineExists = true;
+                if (type == Phone.TYPE_PAGER) {
+                    phoneLineExists = true;
+                    if (!phoneSet.contains(phoneNumber)) {
+                        phoneSet.add(phoneNumber);
+                        appendVCardTelephoneLine(builder, type, label, phoneNumber);
+                    }
+                } else {
+                    // The entry "may" have several phone numbers when the contact entry is
+                    // corrupted because of its original source.
+                    //
+                    // e.g. I encountered the entry like the following.
+                    // "111-222-3333 (Miami)\n444-555-6666 (Broward; 305-653-6796 (Miami); ..."
+                    // This kind of entry is not able to be inserted via Android devices, but
+                    // possible if the source of the data is already corrupted.
+                    List<String> phoneNumberList = splitIfSeveralPhoneNumbersExist(phoneNumber);
+                    if (phoneNumberList.isEmpty()) {
+                        continue;
+                    }
+                    phoneLineExists = true;
+                    for (String actualPhoneNumber : phoneNumberList) {
+                        if (!phoneSet.contains(actualPhoneNumber)) {
+                            final int format = VCardUtils.getPhoneNumberFormat(mVCardType);
+                            SpannableStringBuilder tmpBuilder =
+                                new SpannableStringBuilder(actualPhoneNumber);
+                            PhoneNumberUtils.formatNumber(tmpBuilder, format);
+                            final String formattedPhoneNumber = tmpBuilder.toString();
+                            phoneSet.add(actualPhoneNumber);
+                            appendVCardTelephoneLine(builder, type, label, formattedPhoneNumber);
+                        }
+                    }
                 }
             }
         }
@@ -1185,6 +1213,27 @@ public class VCardComposer {
         if (!phoneLineExists && mIsDoCoMo) {
             appendVCardTelephoneLine(builder, Phone.TYPE_HOME, "", "");
         }
+    }
+
+    private List<String> splitIfSeveralPhoneNumbersExist(final String phoneNumber) {
+        List<String> phoneList = new ArrayList<String>();
+
+        StringBuilder builder = new StringBuilder();
+        final int length = phoneNumber.length();
+        for (int i = 0; i < length; i++) {
+            final char ch = phoneNumber.charAt(i);
+            if (Character.isDigit(ch)) {
+                builder.append(ch);
+            } else if ((ch == ';' || ch == '\n') && builder.length() > 0) {
+                phoneList.add(builder.toString());
+                builder = new StringBuilder();
+            }
+        }
+        if (builder.length() > 0) {
+            phoneList.add(builder.toString());
+        }
+
+        return phoneList;
     }
 
     private void appendEmails(final StringBuilder builder,
