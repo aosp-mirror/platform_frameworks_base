@@ -17,9 +17,14 @@
 package android.content;
 
 import android.content.pm.RegisteredServicesCache;
+import android.content.pm.XmlSerializerAndParser;
 import android.content.res.TypedArray;
-import android.content.Context;
 import android.util.AttributeSet;
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlSerializer;
+import org.xmlpull.v1.XmlPullParserException;
+
+import java.io.IOException;
 
 /**
  * A cache of services that export the {@link android.content.ISyncAdapter} interface.
@@ -31,9 +36,10 @@ import android.util.AttributeSet;
     private static final String SERVICE_INTERFACE = "android.content.SyncAdapter";
     private static final String SERVICE_META_DATA = "android.content.SyncAdapter";
     private static final String ATTRIBUTES_NAME = "sync-adapter";
+    private static final MySerializer sSerializer = new MySerializer();
 
     SyncAdaptersCache(Context context) {
-        super(context, SERVICE_INTERFACE, SERVICE_META_DATA, ATTRIBUTES_NAME);
+        super(context, SERVICE_INTERFACE, SERVICE_META_DATA, ATTRIBUTES_NAME, sSerializer);
     }
 
     public SyncAdapterType parseServiceAttributes(String packageName, AttributeSet attrs) {
@@ -55,6 +61,20 @@ import android.util.AttributeSet;
             return new SyncAdapterType(authority, accountType, userVisible, supportsUploading);
         } finally {
             sa.recycle();
+        }
+    }
+
+    static class MySerializer implements XmlSerializerAndParser<SyncAdapterType> {
+        public void writeAsXml(SyncAdapterType item, XmlSerializer out) throws IOException {
+            out.attribute(null, "authority", item.authority);
+            out.attribute(null, "accountType", item.accountType);
+        }
+    
+        public SyncAdapterType createFromXml(XmlPullParser parser)
+                throws IOException, XmlPullParserException {
+            final String authority = parser.getAttributeValue(null, "authority");
+            final String accountType = parser.getAttributeValue(null, "accountType");
+            return SyncAdapterType.newKey(authority, accountType);
         }
     }
 }
