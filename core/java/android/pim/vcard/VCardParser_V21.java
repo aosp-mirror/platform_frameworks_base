@@ -16,6 +16,8 @@
 package android.pim.vcard;
 
 import android.pim.vcard.exception.VCardException;
+import android.pim.vcard.exception.VCardInvalidCommentLineException;
+import android.pim.vcard.exception.VCardInvalidLineException;
 import android.pim.vcard.exception.VCardNestedException;
 import android.pim.vcard.exception.VCardNotSupportedException;
 import android.pim.vcard.exception.VCardVersionException;
@@ -52,7 +54,7 @@ public class VCardParser_V21 extends VCardParser {
             Arrays.asList("INLINE", "URL", "CONTENT-ID", "CID"));
         
     /** Store the property names available in vCard 2.1 */
-    private static final HashSet<String> sAvailablePropertyNameV21 =
+    private static final HashSet<String> sAvailablePropertyNameSetV21 =
         new HashSet<String>(Arrays.asList(
                 "BEGIN", "LOGO", "PHOTO", "LABEL", "FN", "TITLE", "SOUND",
                 "VERSION", "TEL", "EMAIL", "TZ", "GEO", "NOTE", "URL",
@@ -152,7 +154,7 @@ public class VCardParser_V21 extends VCardParser {
      * @return true when the propertyName is a valid property name.
      */
     protected boolean isValidPropertyName(String propertyName) {
-        if (!(sAvailablePropertyNameV21.contains(propertyName.toUpperCase()) ||
+        if (!(sAvailablePropertyNameSetV21.contains(propertyName.toUpperCase()) ||
                 propertyName.startsWith("X-")) && 
                 !mWarningValueMap.contains(propertyName)) {
             mWarningValueMap.add(propertyName);
@@ -342,7 +344,12 @@ public class VCardParser_V21 extends VCardParser {
                 mBuilder.startProperty();
                 mTimeStartProperty += System.currentTimeMillis() - start;
             }
-            ended = parseItem();
+            try {
+                ended = parseItem();
+            } catch (VCardInvalidCommentLineException e) {
+                Log.e(LOG_TAG, "Invalid line which looks like some comment was found. Ignored.");
+                ended = false;
+            }
             if (mBuilder != null && !ended) {
                 long start = System.currentTimeMillis();
                 mBuilder.endProperty();
@@ -369,7 +376,7 @@ public class VCardParser_V21 extends VCardParser {
             return true;
         }
         if (propertyNameAndValue.length != 2) {
-            throw new VCardException("Invalid line \"" + line + "\""); 
+            throw new VCardInvalidLineException("Invalid line \"" + line + "\"");
         }
         String propertyName = propertyNameAndValue[0].toUpperCase();
         String propertyValue = propertyNameAndValue[1];
@@ -418,7 +425,11 @@ public class VCardParser_V21 extends VCardParser {
         int nameIndex = 0;
 
         String[] propertyNameAndValue = new String[2];
-        
+
+        if (length > 0 && line.charAt(0) == '#') {
+            throw new VCardInvalidCommentLineException();
+        }
+
         for (int i = 0; i < length; i++) {
             char ch = line.charAt(i); 
             switch (state) {
@@ -483,7 +494,7 @@ public class VCardParser_V21 extends VCardParser {
             }
         }
         
-        throw new VCardException("Invalid line: \"" + line + "\"");
+        throw new VCardInvalidLineException("Invalid line: \"" + line + "\"");
     }
     
     
@@ -527,7 +538,7 @@ public class VCardParser_V21 extends VCardParser {
     /**
      * ptypeval = knowntype / "X-" word
      */
-    protected void handleType(String ptypeval) {
+    protected void handleType(final String ptypeval) {
         String upperTypeValue = ptypeval;
         if (!(sKnownTypeSet.contains(upperTypeValue) || upperTypeValue.startsWith("X-")) && 
                 !mWarningValueMap.contains(ptypeval)) {
@@ -543,7 +554,7 @@ public class VCardParser_V21 extends VCardParser {
     /**
      * pvalueval = "INLINE" / "URL" / "CONTENT-ID" / "CID" / "X-" word
      */
-    protected void handleValue(String pvalueval) throws VCardException {
+    protected void handleValue(final String pvalueval) throws VCardException {
         if (sKnownValueSet.contains(pvalueval.toUpperCase()) ||
                 pvalueval.startsWith("X-")) {
             if (mBuilder != null) {
