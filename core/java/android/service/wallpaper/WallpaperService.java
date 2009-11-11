@@ -746,6 +746,12 @@ public abstract class WallpaperService extends Service {
             mCaller.sendMessage(msg);
         }
 
+        public void dispatchPointer(MotionEvent event) {
+            if (mEngine != null) {
+                mEngine.mWindow.onDispatchPointer(event, event.getEventTime(), false);
+            }
+        }
+        
         public void destroy() {
             Message msg = mCaller.obtainMessage(DO_DETACH);
             mCaller.sendMessage(msg);
@@ -805,6 +811,7 @@ public abstract class WallpaperService extends Service {
                             mEngine.mPendingMove = null;
                         }
                     }
+                    if (DEBUG) Log.v(TAG, "Delivering touch event: " + ev);
                     mEngine.onTouchEvent(ev);
                     ev.recycle();
                 } break;
