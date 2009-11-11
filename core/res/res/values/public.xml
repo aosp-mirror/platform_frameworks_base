@@ -1204,5 +1204,11 @@
   <public type="attr" name="wallpaperAuthor" />
   <public type="attr" name="wallpaperDescription" />
   <public type="attr" name="autoStart" />
-  
+
+<!-- ===============================================================
+Resources proposed for Flan.
+ =============================================================== -->
+  <eat-comment />
+  <public type="attr" name="neverEncrypt" />
+
 </resources>
