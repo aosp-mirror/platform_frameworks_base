@@ -181,7 +181,6 @@ private:
         mutable     Condition                   mReady;
                     sp<CameraService>           mCameraService;
                     sp<ISurface>                mSurface;
-                    sp<MemoryHeapBase>          mPreviewBuffer;
                     int                         mPreviewCallbackFlag;
 
                     sp<MediaPlayer>             mMediaPlayerClick;
@@ -197,6 +196,9 @@ private:
                     sp<OverlayRef>              mOverlayRef;
                     int                         mOverlayW;
                     int                         mOverlayH;
+
+        mutable     Mutex                       mPreviewLock;
+                    sp<MemoryHeapBase>          mPreviewBuffer;
     };
 
 // ----------------------------------------------------------------------------
