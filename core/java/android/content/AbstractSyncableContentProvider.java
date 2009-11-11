@@ -135,8 +135,10 @@ public abstract class AbstractSyncableContentProvider extends SyncableContentPro
         public void onCreate(SQLiteDatabase db) {
             bootstrapDatabase(db);
             mSyncState.createDatabase(db);
-            ContentResolver.requestSync(null /* all accounts */,
+            if (!isTemporary()) {
+		ContentResolver.requestSync(null /* all accounts */,
                     mContentUri.getAuthority(), new Bundle());
+	    }
         }
 
         @Override
