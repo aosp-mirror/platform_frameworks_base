@@ -111,8 +111,17 @@ class DockObserver extends UEventObserver {
             try {
                 int newState = Integer.parseInt(event.get("SWITCH_STATE"));
                 if (newState != mDockState) {
+                    int oldState = mDockState;
                     mDockState = newState;
                     if (mSystemReady) {
+                        // Don't force screen on when undocking from the desk dock.
+                        // The change in power state will do this anyway.
+                        // FIXME - we should be configurable.
+                        if (oldState != Intent.EXTRA_DOCK_STATE_DESK ||
+                                newState != Intent.EXTRA_DOCK_STATE_UNDOCKED) {
+                            mPowerManager.userActivityWithForce(SystemClock.uptimeMillis(),
+                                    false, true);
+                        }
                         update();
                     }
                 }
@@ -166,7 +175,6 @@ class DockObserver extends UEventObserver {
                     return;
                 }
                 // Pack up the values and broadcast them to everyone
-                mPowerManager.userActivityWithForce(SystemClock.uptimeMillis(), false, true);
                 Intent intent = new Intent(Intent.ACTION_DOCK_EVENT);
                 intent.putExtra(Intent.EXTRA_DOCK_STATE, mDockState);
                 
