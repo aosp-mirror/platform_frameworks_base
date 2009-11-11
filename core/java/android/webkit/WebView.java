@@ -1525,7 +1525,7 @@ public class WebView extends AbsoluteLayout
         }
         nativeClearCursor(); // start next trackball movement from page edge
         if (bottom) {
-            return pinScrollTo(mScrollX, mContentHeight, true, 0);
+            return pinScrollTo(mScrollX, computeVerticalScrollRange(), true, 0);
         }
         // Page down.
         int h = getHeight();
