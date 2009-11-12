@@ -163,6 +163,12 @@ class PropertyNodesVerifierElem {
     }
 
     public PropertyNodesVerifierElem addNodeWithOrder(String propName, String propValue,
+            ContentValues paramMap, TypeSet paramMap_TYPE) {
+        return addNodeWithOrder(propName, propValue, null, null,
+                paramMap, paramMap_TYPE, null);
+    }
+
+    public PropertyNodesVerifierElem addNodeWithOrder(String propName, String propValue,
             List<String> propValueList, TypeSet paramMap_TYPE) {
         return addNodeWithOrder(propName, propValue, propValueList, null, null,
                 paramMap_TYPE, null);
@@ -221,6 +227,12 @@ class PropertyNodesVerifierElem {
             List<String> propValueList, TypeSet paramMap_TYPE) {
         return addNodeWithoutOrder(propName, propValue, propValueList, null, null,
                 paramMap_TYPE, null);
+    }
+
+    public PropertyNodesVerifierElem addNodeWithoutOrder(String propName, String propValue,
+            ContentValues paramMap, TypeSet paramMap_TYPE) {
+        return addNodeWithoutOrder(propName, propValue, null, null,
+                paramMap, paramMap_TYPE, null);
     }
 
     public PropertyNodesVerifierElem addNodeWithoutOrder(String propName, String propValue,

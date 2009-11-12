@@ -268,7 +268,7 @@ public class VCardExporterTests extends VCardTestsBase {
                 .put(Nickname.NAME, "Nicky");
 
         VCardVerifier verifier = new VCardVerifier(resolver, V30);
-        verifier.addPropertyNodesVerifierWithEmptyName()
+        verifier.addPropertyNodesVerifierElemWithEmptyName()
             .addNodeWithOrder("NICKNAME", "Nicky");
 
         verifier.verify();
@@ -282,7 +282,7 @@ public class VCardExporterTests extends VCardTestsBase {
                 .put(Phone.TYPE, Phone.TYPE_HOME);
 
         VCardVerifier verifier = new VCardVerifier(resolver, version);
-        verifier.addPropertyNodesVerifierWithEmptyName()
+        verifier.addPropertyNodesVerifierElemWithEmptyName()
                 .addNodeWithoutOrder("TEL", "1", new TypeSet("HOME"));
 
         verifier.verify();
@@ -353,7 +353,7 @@ public class VCardExporterTests extends VCardTestsBase {
                 .put(Phone.TYPE, Phone.TYPE_MMS);
 
         VCardVerifier verifier = new VCardVerifier(resolver, version);
-        verifier.addPropertyNodesVerifierWithEmptyName()
+        verifier.addPropertyNodesVerifierElemWithEmptyName()
                 .addNodeWithoutOrder("TEL", "10", new TypeSet("HOME"))
                 .addNodeWithoutOrder("TEL", "20", new TypeSet("WORK"))
                 .addNodeWithoutOrder("TEL", "30", new TypeSet("HOME", "FAX"))
@@ -403,7 +403,7 @@ public class VCardExporterTests extends VCardTestsBase {
                 .put(Phone.TYPE, Phone.TYPE_FAX_WORK);
 
         VCardVerifier verifier = new VCardVerifier(resolver, version);
-        verifier.addPropertyNodesVerifierWithEmptyName()
+        verifier.addPropertyNodesVerifierElemWithEmptyName()
                 .addNodeWithoutOrder("TEL", "4", new TypeSet("WORK", "FAX"))
                 .addNodeWithoutOrder("TEL", "3", new TypeSet("HOME", "FAX", "PREF"))
                 .addNodeWithoutOrder("TEL", "2", new TypeSet("WORK", "PREF"))
@@ -426,7 +426,7 @@ public class VCardExporterTests extends VCardTestsBase {
 
         VCardVerifier verifier = new VCardVerifier(resolver, version);
 
-        verifier.addPropertyNodesVerifierWithEmptyName()
+        verifier.addPropertyNodesVerifierElemWithEmptyName()
             .addNodeWithoutOrder("EMAIL", "sample@example.com");
 
         verifier.verify();
@@ -459,7 +459,7 @@ public class VCardExporterTests extends VCardTestsBase {
 
         VCardVerifier verifier = new VCardVerifier(resolver, version);
 
-        verifier.addPropertyNodesVerifierWithEmptyName()
+        verifier.addPropertyNodesVerifierElemWithEmptyName()
                 .addNodeWithoutOrder("EMAIL", "type_home@example.com", new TypeSet("HOME"))
                 .addNodeWithoutOrder("EMAIL", "type_work@example.com", new TypeSet("WORK"))
                 .addNodeWithoutOrder("EMAIL", "type_mobile@example.com", new TypeSet("CELL"))
@@ -490,7 +490,7 @@ public class VCardExporterTests extends VCardTestsBase {
 
         VCardVerifier verifier = new VCardVerifier(resolver, version);
 
-        verifier.addPropertyNodesVerifierWithEmptyName()
+        verifier.addPropertyNodesVerifierElemWithEmptyName()
                 .addNodeWithoutOrder("EMAIL", "type_notype@example.com", new TypeSet("PREF"))
                 .addNodeWithoutOrder("EMAIL", "type_home@example.com", new TypeSet("HOME", "PREF"));
 
@@ -520,7 +520,7 @@ public class VCardExporterTests extends VCardTestsBase {
                 .put(StructuredPostal.POSTCODE, "100")
                 .put(StructuredPostal.COUNTRY, "Country");
         VCardVerifier verifier = new VCardVerifier(resolver, version);
-        verifier.addPropertyNodesVerifierWithEmptyName()
+        verifier.addPropertyNodesVerifierElemWithEmptyName()
                 .addNodeWithoutOrder("ADR", "Pobox;Neighborhood;Street;City;Region;100;Country",
                         Arrays.asList("Pobox", "Neighborhood", "Street", "City",
                                 "Region", "100", "Country"), new TypeSet("HOME"));
@@ -544,7 +544,7 @@ public class VCardExporterTests extends VCardTestsBase {
                 "Formatted address CA 123-334 United Statue");
 
         VCardVerifier verifier = new VCardVerifier(resolver, version);
-        verifier.addPropertyNodesVerifierWithEmptyName()
+        verifier.addPropertyNodesVerifierElemWithEmptyName()
                 .addNodeWithOrder("ADR", ";Formatted address CA 123-334 United Statue;;;;;",
                         Arrays.asList("", "Formatted address CA 123-334 United Statue",
                                 "", "", "", "", ""), new TypeSet("HOME"));
@@ -574,7 +574,7 @@ public class VCardExporterTests extends VCardTestsBase {
                         "Formatted address CA 123-334 United Statue");  // Should be ignored
 
         VCardVerifier verifier = new VCardVerifier(resolver, version);
-        verifier.addPropertyNodesVerifierWithEmptyName()
+        verifier.addPropertyNodesVerifierElemWithEmptyName()
                 .addNodeWithoutOrder("ADR", "Pobox;;;;;;Country",
                         Arrays.asList("Pobox", "", "", "", "", "", "Country"),
                         new TypeSet("HOME"));
@@ -615,7 +615,7 @@ public class VCardExporterTests extends VCardTestsBase {
         VCardVerifier verifier = new VCardVerifier(resolver, version);
 
         // Currently we do not use group but depend on the order.
-        verifier.addPropertyNodesVerifierWithEmptyName()
+        verifier.addPropertyNodesVerifierElemWithEmptyName()
                 .addNodeWithOrder("ORG", "CompanyX;DepartmentY",
                         Arrays.asList("CompanyX", "DepartmentY"))
                 .addNodeWithOrder("TITLE", "TitleZ")
@@ -677,7 +677,7 @@ public class VCardExporterTests extends VCardTestsBase {
         // No determined way to express unknown type...
 
         VCardVerifier verifier = new VCardVerifier(resolver, version);
-        verifier.addPropertyNodesVerifierWithEmptyName()
+        verifier.addPropertyNodesVerifierElemWithEmptyName()
                 .addNodeWithoutOrder("X-JABBER", "jabber")
                 .addNodeWithoutOrder("X-ICQ", "icq")
                 .addNodeWithoutOrder("X-GOOGLE-TALK", "google talk")
@@ -714,7 +714,7 @@ public class VCardExporterTests extends VCardTestsBase {
                 .put(Im.IS_PRIMARY, 1);
 
         VCardVerifier verifier = new VCardVerifier(resolver, version);
-        verifier.addPropertyNodesVerifierWithEmptyName()
+        verifier.addPropertyNodesVerifierElemWithEmptyName()
                 .addNodeWithoutOrder("X-AIM", "aim1")
                 .addNodeWithoutOrder("X-AIM", "aim2", new TypeSet("HOME", "PREF"));
 
@@ -743,7 +743,7 @@ public class VCardExporterTests extends VCardTestsBase {
 
         // We drop TYPE information since vCard (especially 3.0) does not allow us to emit it.
         VCardVerifier verifier = new VCardVerifier(resolver, version);
-        verifier.addPropertyNodesVerifierWithEmptyName()
+        verifier.addPropertyNodesVerifierElemWithEmptyName()
                 .addNodeWithoutOrder("URL", "ftp://ftp.example.android.com/index.html")
                 .addNodeWithoutOrder("URL", "http://website.example.android.com/index.html");
         verifier.verify();
@@ -779,7 +779,7 @@ public class VCardExporterTests extends VCardTestsBase {
                 .put(Event.START_DATE, "2009-05-19");
 
         VCardVerifier verifier = new VCardVerifier(resolver, version);
-        verifier.addPropertyNodesVerifierWithEmptyName()
+        verifier.addPropertyNodesVerifierElemWithEmptyName()
                 .addNodeWithoutOrder("BDAY", "2008-10-22");
 
         verifier.verify();
@@ -804,7 +804,7 @@ public class VCardExporterTests extends VCardTestsBase {
                 .put(Note.IS_PRIMARY, 1);  // Just ignored.
 
         VCardVerifier verifier = new VCardVerifier(resolver, version);
-        verifier.addPropertyNodesVerifierWithEmptyName()
+        verifier.addPropertyNodesVerifierElemWithEmptyName()
                 .addNodeWithOrder("NOTE", "note1")
                 .addNodeWithOrder("NOTE", "note2");
 
@@ -881,7 +881,7 @@ public class VCardExporterTests extends VCardTestsBase {
                 .put(Nickname.NAME, "Nicky");
 
         VCardVerifier verifier = new VCardVerifier(resolver, V21);
-        verifier.addPropertyNodesVerifierWithEmptyName()
+        verifier.addPropertyNodesVerifierElemWithEmptyName()
                 .addNodeWithOrder("X-ANDROID-CUSTOM",
                         Nickname.CONTENT_ITEM_TYPE + ";Nicky;;;;;;;;;;;;;;");
         verifier.addImportVerifier()
@@ -897,7 +897,7 @@ public class VCardExporterTests extends VCardTestsBase {
                 .put(Phone.NUMBER, "111-222-3333 (Miami)\n444-5555-666 (Tokyo);"
                         + "777-888-9999 (Chicago);111-222-3333 (Miami)");
         VCardVerifier verifier = new VCardVerifier(resolver, V21);
-        verifier.addPropertyNodesVerifierWithEmptyName()
+        verifier.addPropertyNodesVerifierElemWithEmptyName()
                 .addNodeWithoutOrder("TEL", "111-222-3333", new TypeSet("HOME"))
                 .addNodeWithoutOrder("TEL", "444-555-5666", new TypeSet("HOME"))
                 .addNodeWithoutOrder("TEL", "777-888-9999", new TypeSet("HOME"));

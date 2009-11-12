@@ -60,7 +60,8 @@ public class VCardConfig {
     // 0x10 is reserved for safety
     
     private static final int FLAG_CHARSET_UTF8 = 0;
-    private static final int FLAG_CHARSET_SHIFT_JIS = 0x20;
+    private static final int FLAG_CHARSET_SHIFT_JIS = 0x100;
+    private static final int FLAG_CHARSET_MASK = 0xF00;
 
     /**
      * The flag indicating the vCard composer will add some "X-" properties used only in Android
@@ -349,8 +350,8 @@ public class VCardConfig {
         sJapaneseMobileTypeSet.add(VCARD_TYPE_DOCOMO);
     }
 
-    public static int getVCardTypeFromString(String vcardTypeString) {
-        String loweredKey = vcardTypeString.toLowerCase();
+    public static int getVCardTypeFromString(final String vcardTypeString) {
+        final String loweredKey = vcardTypeString.toLowerCase();
         if (sVCardTypeMap.containsKey(loweredKey)) {
             return sVCardTypeMap.get(loweredKey);
         } else {
@@ -360,31 +361,31 @@ public class VCardConfig {
         }
     }
 
-    public static boolean isV30(int vcardType) {
+    public static boolean isV30(final int vcardType) {
         return ((vcardType & FLAG_V30) != 0);  
     }
 
-    public static boolean usesQuotedPrintable(int vcardType) {
+    public static boolean usesQuotedPrintable(final int vcardType) {
         return !isV30(vcardType);
     }
 
-    public static boolean usesUtf8(int vcardType) {
-        return ((vcardType & FLAG_CHARSET_UTF8) != 0);
+    public static boolean usesUtf8(final int vcardType) {
+        return ((vcardType & FLAG_CHARSET_MASK) == FLAG_CHARSET_UTF8);
     }
 
-    public static boolean usesShiftJis(int vcardType) {
-        return ((vcardType & FLAG_CHARSET_SHIFT_JIS) != 0);
+    public static boolean usesShiftJis(final int vcardType) {
+        return ((vcardType & FLAG_CHARSET_MASK) == FLAG_CHARSET_SHIFT_JIS);
     }
-    
-    public static int getNameOrderType(int vcardType) {
+
+    public static int getNameOrderType(final int vcardType) {
         return vcardType & NAME_ORDER_MASK;
     }
 
-    public static boolean usesAndroidSpecificProperty(int vcardType) {
+    public static boolean usesAndroidSpecificProperty(final int vcardType) {
         return ((vcardType & FLAG_USE_ANDROID_PROPERTY) != 0);
     }
 
-    public static boolean usesDefactProperty(int vcardType) {
+    public static boolean usesDefactProperty(final int vcardType) {
         return ((vcardType & FLAG_USE_DEFACT_PROPERTY) != 0);
     }
 
@@ -392,12 +393,12 @@ public class VCardConfig {
         return (VCardConfig.LOG_LEVEL & VCardConfig.LOG_LEVEL_PERFORMANCE_MEASUREMENT) != 0;
     }
 
-    public static boolean refrainsQPToPrimaryProperties(int vcardType) {
+    public static boolean refrainsQPToPrimaryProperties(final int vcardType) {
        return (!usesQuotedPrintable(vcardType) ||
                ((vcardType & FLAG_REFRAIN_QP_TO_PRIMARY_PROPERTIES) != 0));
     }
 
-    public static boolean appendTypeParamName(int vcardType) {
+    public static boolean appendTypeParamName(final int vcardType) {
         return (isV30(vcardType) || ((vcardType & FLAG_APPEND_TYPE_PARAM) != 0));
     }
 
@@ -405,19 +406,19 @@ public class VCardConfig {
      * @return true if the device is Japanese and some Japanese convension is
      * applied to creating "formatted" something like FORMATTED_ADDRESS.
      */
-    public static boolean isJapaneseDevice(int vcardType) {
+    public static boolean isJapaneseDevice(final int vcardType) {
         return sJapaneseMobileTypeSet.contains(vcardType);
     }
 
-    public static boolean needsToConvertPhoneticString(int vcardType) {
+    public static boolean needsToConvertPhoneticString(final int vcardType) {
         return ((vcardType & FLAG_CONVERT_PHONETIC_NAME_STRINGS) != 0);
     }
 
-    public static boolean onlyOneNoteFieldIsAvailable(int vcardType) {
+    public static boolean onlyOneNoteFieldIsAvailable(final int vcardType) {
         return vcardType == VCARD_TYPE_DOCOMO;
     }
 
-    public static boolean isDoCoMo(int vcardType) {
+    public static boolean isDoCoMo(final int vcardType) {
         return ((vcardType & FLAG_DOCOMO) != 0);
     }
 
