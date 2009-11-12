@@ -41,6 +41,7 @@
     <protected-broadcast android:name="android.intent.action.PACKAGE_DATA_CLEARED" />
     <protected-broadcast android:name="android.intent.action.UID_REMOVED" />
     <protected-broadcast android:name="android.intent.action.CONFIGURATION_CHANGED" />
+    <protected-broadcast android:name="android.intent.action.LOCALE_CHANGED" />
     <protected-broadcast android:name="android.intent.action.BATTERY_CHANGED" />
     <protected-broadcast android:name="android.intent.action.BATTERY_LOW" />
     <protected-broadcast android:name="android.intent.action.BATTERY_OKAY" />

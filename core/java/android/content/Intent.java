@@ -1344,6 +1344,12 @@ public class Intent implements Parcelable {
      * can not be restarted will need to watch for this action and handle it
      * appropriately.
      * 
+     * <p class="note">
+     * You can <em>not</em> receive this through components declared
+     * in manifests, only by explicitly registering for it with
+     * {@link Context#registerReceiver(BroadcastReceiver, IntentFilter)
+     * Context.registerReceiver()}.
+     * 
      * <p class="note">This is a protected intent that can only be sent
      * by the system.
      *
@@ -1351,6 +1357,14 @@ public class Intent implements Parcelable {
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_CONFIGURATION_CHANGED = "android.intent.action.CONFIGURATION_CHANGED";
+    /**
+     * Broadcast Action: The current device's locale has changed.
+     * 
+     * <p class="note">This is a protected intent that can only be sent
+     * by the system.
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_LOCALE_CHANGED = "android.intent.action.LOCALE_CHANGED";
     /**
      * Broadcast Action:  This is a <em>sticky broadcast</em> containing the
      * charging state, level, and other information about the battery.
