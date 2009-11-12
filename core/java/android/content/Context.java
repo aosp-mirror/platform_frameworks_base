@@ -1324,7 +1324,6 @@ public abstract class Context {
      * Use with {@link #getSystemService} to retrieve a
      * {@blink android.os.DropBox DropBox} instance for recording
      * diagnostic logs.
-     * @hide
      * @see #getSystemService
      */
     public static final String DROPBOX_SERVICE = "dropbox";
