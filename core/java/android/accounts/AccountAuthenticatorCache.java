@@ -18,10 +18,16 @@ package android.accounts;
 
 import android.content.pm.PackageManager;
 import android.content.pm.RegisteredServicesCache;
+import android.content.pm.XmlSerializerAndParser;
 import android.content.res.TypedArray;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.text.TextUtils;
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlSerializer;
+import org.xmlpull.v1.XmlPullParserException;
+
+import java.io.IOException;
 
 /**
  * A cache of services that export the {@link IAccountAuthenticator} interface. This cache
@@ -33,10 +39,12 @@ import android.text.TextUtils;
 /* package private */ class AccountAuthenticatorCache
         extends RegisteredServicesCache<AuthenticatorDescription> {
     private static final String TAG = "Account";
+    private static final MySerializer sSerializer = new MySerializer();
 
     public AccountAuthenticatorCache(Context context) {
         super(context, AccountManager.ACTION_AUTHENTICATOR_INTENT,
-                AccountManager.AUTHENTICATOR_META_DATA_NAME, AccountManager.AUTHENTICATOR_ATTRIBUTES_NAME);
+                AccountManager.AUTHENTICATOR_META_DATA_NAME,
+                AccountManager.AUTHENTICATOR_ATTRIBUTES_NAME, sSerializer);
     }
 
     public AuthenticatorDescription parseServiceAttributes(String packageName, AttributeSet attrs) {
@@ -60,6 +68,18 @@ import android.text.TextUtils;
                     smallIconId, prefId);
         } finally {
             sa.recycle();
+        }
+    }
+
+    private static class MySerializer implements XmlSerializerAndParser<AuthenticatorDescription> {
+        public void writeAsXml(AuthenticatorDescription item, XmlSerializer out)
+                throws IOException {
+            out.attribute(null, "type", item.type);
+        }
+
+        public AuthenticatorDescription createFromXml(XmlPullParser parser)
+                throws IOException, XmlPullParserException {
+            return AuthenticatorDescription.newKey(parser.getAttributeValue(null, "type"));
         }
     }
 }
