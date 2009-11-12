@@ -500,7 +500,7 @@ public class WebView extends AbsoluteLayout
     private boolean mMinZoomScaleFixed = true;
 
     // initial scale in percent. 0 means using default.
-    private int mInitialScale = 0;
+    private int mInitialScaleInPercent = 0;
 
     // while in the zoom overview mode, the page's width is fully fit to the
     // current window. The page is alive, in another words, you can click to
@@ -1595,7 +1595,7 @@ public class WebView extends AbsoluteLayout
      * @param scaleInPercent The initial scale in percent.
      */
     public void setInitialScale(int scaleInPercent) {
-        mInitialScale = scaleInPercent;
+        mInitialScaleInPercent = scaleInPercent;
     }
 
     /**
@@ -3615,6 +3615,13 @@ public class WebView extends AbsoluteLayout
             mMinZoomScale = Math.min(1.0f, (float) getViewWidth()
                     / (mDrawHistory ? mHistoryPicture.getWidth()
                             : mZoomOverviewWidth));
+            if (mInitialScaleInPercent > 0) {
+                // limit the minZoomScale to the initialScale if it is set
+                float initialScale = mInitialScaleInPercent / 100.0f;
+                if (mMinZoomScale > initialScale) {
+                    mMinZoomScale = initialScale;
+                }
+            }
         }
 
         // we always force, in case our height changed, in which case we still
@@ -4967,7 +4974,9 @@ public class WebView extends AbsoluteLayout
                     WebViewCore.RestoreState restoreState = draw.mRestoreState;
                     if (restoreState != null) {
                         mInZoomOverview = false;
-                        mLastScale = restoreState.mTextWrapScale;
+                        mLastScale = mInitialScaleInPercent > 0
+                                ? mInitialScaleInPercent / 100.0f
+                                        : restoreState.mTextWrapScale;
                         if (restoreState.mMinScale == 0) {
                             if (restoreState.mMobileSite) {
                                 if (draw.mMinPrefWidth >
