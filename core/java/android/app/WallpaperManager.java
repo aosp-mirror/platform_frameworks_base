@@ -195,7 +195,12 @@ public class WallpaperManager {
                 if (mDefaultWallpaper != null) {
                     return mDefaultWallpaper;
                 }
-                mWallpaper = getCurrentWallpaperLocked(context);
+                mWallpaper = null;
+                try {
+                    mWallpaper = getCurrentWallpaperLocked(context);
+                } catch (OutOfMemoryError e) {
+                    Log.w(TAG, "No memory load current wallpaper", e);
+                }
                 if (mWallpaper == null && returnDefault) {
                     mDefaultWallpaper = getDefaultWallpaperLocked(context);
                     return mDefaultWallpaper;
@@ -279,7 +284,12 @@ public class WallpaperManager {
                     } catch (IOException e) {
                     }
                     
-                    return generateBitmap(context, bm, width, height);
+                    try {
+                        return generateBitmap(context, bm, width, height);
+                    } catch (OutOfMemoryError e) {
+                        Log.w(TAG, "Can't generate default bitmap", e);
+                        return bm;
+                    }
                 }
             } catch (RemoteException e) {
             }
