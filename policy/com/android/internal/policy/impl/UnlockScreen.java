@@ -72,9 +72,7 @@ class UnlockScreen extends LinearLayoutWithDefaultTouchRecepient
     private boolean mCreatedInPortrait;
 
     private TextView mCarrier;
-    private TextView mCenterDot;
     private TextView mDate;
-    private TextView mTime;
 
     // are we showing battery information?
     private boolean mShowingBatteryInfo = false;
@@ -169,11 +167,8 @@ class UnlockScreen extends LinearLayoutWithDefaultTouchRecepient
         }
 
         mCarrier = (TextView) findViewById(R.id.carrier);
-        mCenterDot = (TextView) findViewById(R.id.centerDot);
         mDate = (TextView) findViewById(R.id.date);
-        mTime = (TextView) findViewById(R.id.time);
 
-        mCenterDot.setText("|");
         refreshTimeAndDateDisplay();
 
         mStatus1 = (TextView) findViewById(R.id.status1);
@@ -323,7 +318,6 @@ class UnlockScreen extends LinearLayoutWithDefaultTouchRecepient
 
     private void refreshTimeAndDateDisplay() {
         Date now = new Date();
-        mTime.setText(DateFormat.getTimeFormat(getContext()).format(now));
         mDate.setText(DateFormat.getMediumDateFormat(getContext()).format(now));
     }
 
