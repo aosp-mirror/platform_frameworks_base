@@ -79,7 +79,7 @@ void SoftwareRenderer::render(
 
         default:
         {
-            LOGW("Cannot render color format %ld", mColorFormat);
+            LOGW("Cannot render color format %d", mColorFormat);
             break;
         }
     }
