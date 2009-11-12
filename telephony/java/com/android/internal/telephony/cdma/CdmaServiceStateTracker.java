@@ -67,6 +67,15 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
     CdmaCellLocation cellLoc;
     CdmaCellLocation newCellLoc;
 
+     /** if time between NTIZ updates is less than mNitzUpdateSpacing the update may be ignored. */
+    private static final int NITZ_UPDATE_SPACING_DEFAULT = 1000 * 60 * 10;
+    private int mNitzUpdateSpacing = SystemProperties.getInt("ro.nitz_update_spacing",
+            NITZ_UPDATE_SPACING_DEFAULT);
+
+    /** If mNitzUpdateSpacing hasn't been exceeded but update is > mNitzUpdate do the update */
+    private static final int NITZ_UPDATE_DIFF_DEFAULT = 2000;
+    private int mNitzUpdateDiff = SystemProperties.getInt("ro.nitz_update_diff",
+            NITZ_UPDATE_DIFF_DEFAULT);
     /**
      *  Values correspond to ServiceStateTracker.DATA_ACCESS_ definitions.
      */
@@ -1426,45 +1435,62 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
             try {
                 mWakeLock.acquire();
 
+                /**
+                 * Correct the NITZ time by how long its taken to get here.
+                 */
+                long millisSinceNitzReceived
+                        = SystemClock.elapsedRealtime() - nitzReceiveTime;
+
+                if (millisSinceNitzReceived < 0) {
+                    // Sanity check: something is wrong
+                    Log.i(LOG_TAG, "NITZ: not setting time, clock has rolled "
+                                        + "backwards since NITZ time was received, "
+                                        + nitz);
+                    return;
+                }
+
+                if (millisSinceNitzReceived > Integer.MAX_VALUE) {
+                    // If the time is this far off, something is wrong > 24 days!
+                    Log.i(LOG_TAG, "NITZ: not setting time, processing has taken "
+                                    + (millisSinceNitzReceived / (1000 * 60 * 60 * 24))
+                                    + " days");
+                    return;
+                }
+
+                // Note: with range checks above, cast to int is safe
+                c.add(Calendar.MILLISECOND, (int)millisSinceNitzReceived);
+
                 if (getAutoTime()) {
-                    long millisSinceNitzReceived
-                            = SystemClock.elapsedRealtime() - nitzReceiveTime;
+                    /**
+                     * Update system time automatically
+                     */
+                    long gained = c.getTimeInMillis() - System.currentTimeMillis();
+                    long timeSinceLastUpdate = SystemClock.elapsedRealtime() - mSavedAtTime;
 
-                    if (millisSinceNitzReceived < 0) {
-                        // Sanity check: something is wrong
-                        Log.i(LOG_TAG, "NITZ: not setting time, clock has rolled "
-                                            + "backwards since NITZ time was received, "
-                                            + nitz);
+                    if ((timeSinceLastUpdate > mNitzUpdateSpacing)
+                            || (Math.abs(gained) > mNitzUpdateDiff)) {
+                        Log.i(LOG_TAG, "NITZ: Auto updating time of day to " + c.getTime()
+                                + " NITZ receive delay=" + millisSinceNitzReceived
+                                + "ms gained=" + gained + "ms from " + nitz);
+
+                        setAndBroadcastNetworkSetTime(c.getTimeInMillis());
+                    } else {
+                        Log.i(LOG_TAG, "NITZ: ignore, a previous update was "
+                                + timeSinceLastUpdate + "ms ago and gained=" + gained + "ms");
                         return;
                     }
-
-                    if (millisSinceNitzReceived > Integer.MAX_VALUE) {
-                        // If the time is this far off, something is wrong > 24 days!
-                        Log.i(LOG_TAG, "NITZ: not setting time, processing has taken "
-                                        + (millisSinceNitzReceived / (1000 * 60 * 60 * 24))
-                                        + " days");
-                        return;
-                    }
-
-                    // Note: with range checks above, cast to int is safe
-                    c.add(Calendar.MILLISECOND, (int)millisSinceNitzReceived);
-
-                    Log.i(LOG_TAG, "NITZ: Setting time of day to " + c.getTime()
-                            + " NITZ receive delay(ms): " + millisSinceNitzReceived
-                        + " gained(ms): "
-                        + (c.getTimeInMillis() - System.currentTimeMillis())
-                            + " from " + nitz);
-
-                    setAndBroadcastNetworkSetTime(c.getTimeInMillis());
-                    Log.i(LOG_TAG, "NITZ: after Setting time of day");
                 }
+
+                /**
+                 * Update properties and save the time we did the update
+                 */
+                Log.i(LOG_TAG, "NITZ: update nitz time property");
                 SystemProperties.set("gsm.nitz.time", String.valueOf(c.getTimeInMillis()));
-                saveNitzTime(c.getTimeInMillis());
-                if (Config.LOGV) {
-                    long end = SystemClock.elapsedRealtime();
-                    Log.v(LOG_TAG, "NITZ: end=" + end + " dur=" + (end - start));
-                }
+                mSavedTime = c.getTimeInMillis();
+                mSavedAtTime = SystemClock.elapsedRealtime();
             } finally {
+                long end = SystemClock.elapsedRealtime();
+                Log.i(LOG_TAG, "NITZ: end=" + end + " dur=" + (end - start));
                 mWakeLock.release();
             }
         } catch (RuntimeException ex) {
@@ -1483,11 +1509,6 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
 
     private void saveNitzTimeZone(String zoneId) {
         mSavedTimeZone = zoneId;
-    }
-
-    private void saveNitzTime(long time) {
-        mSavedTime = time;
-        mSavedAtTime = SystemClock.elapsedRealtime();
     }
 
     /**
