@@ -126,13 +126,14 @@ public class ImageProcessingActivity extends Activity implements SurfaceHolder.C
     }
 
     public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
+        mRS.contextSetSurface(width, height, holder.getSurface());
     }
 
     public void surfaceDestroyed(SurfaceHolder holder) {
     }
         
     private Script.Invokable createScript() {
-        mRS = new RenderScript(mSurfaceView.getHolder().getSurface(), false, false);
+        mRS = new RenderScript(false, false);
         mRS.mMessageCallback = new FilterCallback();
 
         mParamsType = Type.createFromClass(mRS, Params.class, 1, "Parameters");
