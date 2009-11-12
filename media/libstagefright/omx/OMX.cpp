@@ -27,9 +27,7 @@
 
 #include <binder/IMemory.h>
 #include <media/stagefright/MediaDebug.h>
-#include <media/stagefright/QComHardwareRenderer.h>
 #include <media/stagefright/SoftwareRenderer.h>
-#include <media/stagefright/TIHardwareRenderer.h>
 #include <media/stagefright/VideoRenderer.h>
 
 #include <OMX_Component.h>
@@ -431,27 +429,37 @@ sp<IOMXRenderer> OMX::createRenderer(
         OMX_COLOR_FORMATTYPE colorFormat,
         size_t encodedWidth, size_t encodedHeight,
         size_t displayWidth, size_t displayHeight) {
+    Mutex::Autolock autoLock(mLock);
+
     VideoRenderer *impl = NULL;
 
-    static const int OMX_QCOM_COLOR_FormatYVU420SemiPlanar = 0x7FA30C00;
+    static void *libHandle = NULL;
 
-    if (colorFormat == OMX_QCOM_COLOR_FormatYVU420SemiPlanar
-        && !strncmp(componentName, "OMX.qcom.video.decoder.", 23)) {
-        LOGW("Using QComHardwareRenderer.");
-        impl =
-            new QComHardwareRenderer(
-                    surface,
-                    displayWidth, displayHeight,
-                    encodedWidth, encodedHeight);
-    } else if (colorFormat == OMX_COLOR_FormatCbYCrY
-            && !strcmp(componentName, "OMX.TI.Video.Decoder")) {
-        LOGW("Using TIHardwareRenderer.");
-        impl =
-            new TIHardwareRenderer(
-                    surface,
-                    displayWidth, displayHeight,
-                    encodedWidth, encodedHeight);
-    } else {
+    if (!libHandle) {
+        libHandle = dlopen("libstagefrighthw.so", RTLD_NOW);
+    }
+
+    if (libHandle) {
+        typedef VideoRenderer *(*CreateRendererFunc)(
+                const sp<ISurface> &surface,
+                const char *componentName,
+                OMX_COLOR_FORMATTYPE colorFormat,
+                size_t displayWidth, size_t displayHeight,
+                size_t decodedWidth, size_t decodedHeight);
+
+        CreateRendererFunc func =
+            (CreateRendererFunc)dlsym(
+                    libHandle,
+                    "_Z14createRendererRKN7android2spINS_8ISurfaceEEEPKc20"
+                    "OMX_COLOR_FORMATTYPEjjjj");
+
+        if (func) {
+            impl = (*func)(surface, componentName, colorFormat,
+                    displayWidth, displayHeight, encodedWidth, encodedHeight);
+        }
+    }
+
+    if (!impl) {
         LOGW("Using software renderer.");
         impl = new SoftwareRenderer(
                 colorFormat,
