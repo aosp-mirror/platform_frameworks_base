@@ -20,6 +20,7 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Vibrator;
@@ -41,6 +42,7 @@ import com.android.internal.R;
  *
  */
 public class SlidingTab extends ViewGroup {
+    private static final int ANIMATION_DURATION = 250; // animation transition duration (in ms)
     private static final String LOG_TAG = "SlidingTab";
     private static final boolean DBG = false;
     private static final int HORIZONTAL = 0; // as defined in attrs.xml
@@ -249,10 +251,12 @@ public class SlidingTab extends ViewGroup {
          * @param alignment which side to align the widget to
          */
         void layout(int l, int t, int r, int b, int alignment) {
-            final int handleWidth = tab.getBackground().getIntrinsicWidth();
-            final int handleHeight = tab.getBackground().getIntrinsicHeight();
-            final int targetWidth = target.getDrawable().getIntrinsicWidth();
-            final int targetHeight = target.getDrawable().getIntrinsicHeight();
+            final Drawable tabBackground = tab.getBackground();
+            final int handleWidth = tabBackground.getIntrinsicWidth();
+            final int handleHeight = tabBackground.getIntrinsicHeight();
+            final Drawable targetDrawable = target.getDrawable();
+            final int targetWidth = targetDrawable.getIntrinsicWidth();
+            final int targetHeight = targetDrawable.getIntrinsicHeight();
             final int parentWidth = r - l;
             final int parentHeight = b - t;
 
@@ -347,10 +351,11 @@ public class SlidingTab extends ViewGroup {
             throw new RuntimeException(LOG_TAG + " cannot have UNSPECIFIED dimensions");
         }
 
-        final int leftTabWidth = (int) (mDensity * mLeftSlider.getTabWidth() + 0.5f);
-        final int rightTabWidth = (int) (mDensity * mRightSlider.getTabWidth() + 0.5f);
-        final int leftTabHeight = (int) (mDensity * mLeftSlider.getTabHeight() + 0.5f);
-        final int rightTabHeight = (int) (mDensity * mRightSlider.getTabHeight() + 0.5f);
+        final float density = mDensity;
+        final int leftTabWidth = (int) (density * mLeftSlider.getTabWidth() + 0.5f);
+        final int rightTabWidth = (int) (density * mRightSlider.getTabWidth() + 0.5f);
+        final int leftTabHeight = (int) (density * mLeftSlider.getTabHeight() + 0.5f);
+        final int rightTabHeight = (int) (density * mRightSlider.getTabHeight() + 0.5f);
         final int width;
         final int height;
         if (isHorizontal()) {
@@ -441,14 +446,14 @@ public class SlidingTab extends ViewGroup {
                             OnTriggerListener.LEFT_HANDLE : OnTriggerListener.RIGHT_HANDLE);
 
                         // TODO: This is a place holder for the real animation. It just holds
-                        // the screen for 500ms.
+                        // the screen for the duration of the animation for now.
                         mAnimating = true;
                         mHandler.postDelayed(new Runnable() {
                             public void run() {
                                 resetView();
                                 mAnimating = false;
                             }
-                        }, 500);
+                        }, ANIMATION_DURATION);
                     }
 
                     if (isHorizontal() && (y <= handle.getBottom() && y >= handle.getTop()) ||
