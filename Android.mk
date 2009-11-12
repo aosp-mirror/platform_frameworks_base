@@ -136,7 +136,7 @@ LOCAL_SRC_FILES += \
 	core/java/com/android/internal/appwidget/IAppWidgetService.aidl \
 	core/java/com/android/internal/appwidget/IAppWidgetHost.aidl \
 	core/java/com/android/internal/backup/IBackupTransport.aidl \
-	core/java/com/android/internal/os/IDropBoxService.aidl \
+	core/java/com/android/internal/os/IDropBoxManagerService.aidl \
 	core/java/com/android/internal/os/IResultReceiver.aidl \
 	core/java/com/android/internal/view/IInputContext.aidl \
 	core/java/com/android/internal/view/IInputContextCallback.aidl \
@@ -218,7 +218,7 @@ aidl_files := \
 	frameworks/base/core/java/android/appwidget/AppWidgetProviderInfo.aidl \
 	frameworks/base/core/java/android/net/Uri.aidl \
 	frameworks/base/core/java/android/os/Bundle.aidl \
-	frameworks/base/core/java/android/os/DropBox.aidl \
+	frameworks/base/core/java/android/os/DropBoxManager.aidl \
 	frameworks/base/core/java/android/os/ParcelFileDescriptor.aidl \
 	frameworks/base/core/java/android/os/ParcelUuid.aidl \
 	frameworks/base/core/java/android/view/KeyEvent.aidl \

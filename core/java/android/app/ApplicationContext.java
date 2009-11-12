@@ -70,7 +70,7 @@ import android.net.wifi.IWifiManager;
 import android.net.wifi.WifiManager;
 import android.os.Binder;
 import android.os.Bundle;
-import android.os.DropBox;
+import android.os.DropBoxManager;
 import android.os.FileUtils;
 import android.os.Handler;
 import android.os.IBinder;
@@ -94,7 +94,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.accounts.AccountManager;
 import android.accounts.IAccountManager;
 
-import com.android.internal.os.IDropBoxService;
+import com.android.internal.os.IDropBoxManagerService;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -185,7 +185,7 @@ class ApplicationContext extends Context {
     private ClipboardManager mClipboardManager = null;
     private boolean mRestricted;
     private AccountManager mAccountManager; // protected by mSync
-    private DropBox mDropBox = null;
+    private DropBoxManager mDropBoxManager = null;
 
     private final Object mSync = new Object();
 
@@ -901,7 +901,7 @@ class ApplicationContext extends Context {
         } else if (WALLPAPER_SERVICE.equals(name)) {
             return getWallpaperManager();
         } else if (DROPBOX_SERVICE.equals(name)) {
-            return getDropBox();
+            return getDropBoxManager();
         }
 
         return null;
@@ -1060,15 +1060,15 @@ class ApplicationContext extends Context {
         return mAudioManager;
     }
 
-    private DropBox getDropBox() {
+    private DropBoxManager getDropBoxManager() {
         synchronized (mSync) {
-            if (mDropBox == null) {
+            if (mDropBoxManager == null) {
                 IBinder b = ServiceManager.getService(DROPBOX_SERVICE);
-                IDropBoxService service = IDropBoxService.Stub.asInterface(b);
-                mDropBox = new DropBox(service);
+                IDropBoxManagerService service = IDropBoxManagerService.Stub.asInterface(b);
+                mDropBoxManager = new DropBoxManager(service);
             }
         }
-        return mDropBox;
+        return mDropBoxManager;
     }
 
     @Override
