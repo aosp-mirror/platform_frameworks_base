@@ -180,7 +180,6 @@ class LockScreen extends LinearLayout implements KeyguardScreen, KeyguardUpdateM
         }
 
         mCarrier = (TextView) findViewById(R.id.carrier);
-        mTime = (TextView) findViewById(R.id.time);
         mDate = (TextView) findViewById(R.id.date);
         mStatus1 = (TextView) findViewById(R.id.status1);
         mStatus2 = (TextView) findViewById(R.id.status2);
@@ -371,7 +370,6 @@ class LockScreen extends LinearLayout implements KeyguardScreen, KeyguardUpdateM
 
     private void refreshTimeAndDateDisplay() {
         Date now = new Date();
-        mTime.setText(mTimeFormat.format(now));
         mDate.setText(mDateFormat.format(now));
     }
 
