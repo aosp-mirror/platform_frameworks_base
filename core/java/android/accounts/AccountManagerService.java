@@ -76,7 +76,7 @@ import com.android.internal.telephony.TelephonyIntents;
  */
 public class AccountManagerService
         extends IAccountManager.Stub
-        implements RegisteredServicesCacheListener {
+        implements RegisteredServicesCacheListener<AuthenticatorDescription> {
     private static final String GOOGLE_ACCOUNT_TYPE = "com.google";
 
     private static final String NO_BROADCAST_FLAG = "nobroadcast";
@@ -221,32 +221,27 @@ public class AccountManagerService
         mMessageHandler = new MessageHandler(mMessageThread.getLooper());
 
         mAuthenticatorCache = new AccountAuthenticatorCache(mContext);
-        mAuthenticatorCache.setListener(this);
+        mAuthenticatorCache.setListener(this, null /* Handler */);
 
         mSimWatcher = new SimWatcher(mContext);
         sThis.set(this);
-
-        onRegisteredServicesCacheChanged();
     }
 
-    public void onRegisteredServicesCacheChanged() {
+    public void onServiceChanged(AuthenticatorDescription desc, boolean removed) {
         boolean accountDeleted = false;
         SQLiteDatabase db = mOpenHelper.getWritableDatabase();
         Cursor cursor = db.query(TABLE_ACCOUNTS,
                 new String[]{ACCOUNTS_ID, ACCOUNTS_TYPE, ACCOUNTS_NAME},
-                null, null, null, null, null);
+                ACCOUNTS_TYPE + "=?", new String[]{desc.type}, null, null, null);
         try {
             while (cursor.moveToNext()) {
                 final long accountId = cursor.getLong(0);
                 final String accountType = cursor.getString(1);
                 final String accountName = cursor.getString(2);
-                if (mAuthenticatorCache.getServiceInfo(AuthenticatorDescription.newKey(accountType))
-                        == null) {
-                    Log.d(TAG, "deleting account " + accountName + " because type "
-                            + accountType + " no longer has a registered authenticator");
-                    db.delete(TABLE_ACCOUNTS, ACCOUNTS_ID + "=" + accountId, null);
-                    accountDeleted= true;
-                }
+                Log.d(TAG, "deleting account " + accountName + " because type "
+                        + accountType + " no longer has a registered authenticator");
+                db.delete(TABLE_ACCOUNTS, ACCOUNTS_ID + "=" + accountId, null);
+                accountDeleted = true;
             }
         } finally {
             cursor.close();
