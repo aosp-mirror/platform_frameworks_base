@@ -277,7 +277,8 @@ class PackageManagerService extends IPackageManager.Stub {
     PackageParser.Package mPlatformPackage;
 
     // Set of pending broadcasts for aggregating enable/disable of components.
-    final HashMap<String, String> mPendingBroadcasts = new HashMap<String, String>();
+    final HashMap<String, ArrayList<String>> mPendingBroadcasts
+            = new HashMap<String, ArrayList<String>>();
     static final int SEND_PENDING_BROADCAST = 1;
     // Delay time in millisecs
     static final int BROADCAST_DELAY = 10 * 1000;
@@ -289,30 +290,40 @@ class PackageManagerService extends IPackageManager.Stub {
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case SEND_PENDING_BROADCAST : {
+                    String packages[];
+                    ArrayList components[];
                     int size = 0;
-                    String broadcastList[];
-                    HashMap<String, String> tmpMap;
                     int uids[];
                     synchronized (mPackages) {
+                        if (mPendingBroadcasts == null) {
+                            return;
+                        }
                         size = mPendingBroadcasts.size();
                         if (size <= 0) {
                             // Nothing to be done. Just return
                             return;
                         }
-                        broadcastList = new String[size];
-                        mPendingBroadcasts.keySet().toArray(broadcastList);
-                        tmpMap = new HashMap<String, String>(mPendingBroadcasts);
+                        packages = new String[size];
+                        components = new ArrayList[size];
                         uids = new int[size];
-                        for (int i = 0; i < size; i++) {
-                            PackageSetting ps = mSettings.mPackages.get(mPendingBroadcasts.get(broadcastList[i]));
+                        Iterator<HashMap.Entry<String, ArrayList<String>>>
+                                it = mPendingBroadcasts.entrySet().iterator();
+                        int i = 0;
+                        while (it.hasNext() && i < size) {
+                            HashMap.Entry<String, ArrayList<String>> ent = it.next();
+                            packages[i] = ent.getKey();
+                            components[i] = ent.getValue();
+                            PackageSetting ps = mSettings.mPackages.get(ent.getKey());
                             uids[i] = (ps != null) ? ps.userId : -1;
+                            i++;
                         }
+                        size = i;
                         mPendingBroadcasts.clear();
                     }
                     // Send broadcasts
                     for (int i = 0; i < size; i++) {
-                        String className = broadcastList[i];
-                        sendPackageChangedBroadcast(className, true, tmpMap.get(className), uids[i]);
+                        sendPackageChangedBroadcast(packages[i], true,
+                                (ArrayList<String>)components[i], uids[i]);
                     }
                     break;
                 }
@@ -5023,8 +5034,9 @@ class PackageManagerService extends IPackageManager.Stub {
         final boolean allowedByPermission = (permission == PackageManager.PERMISSION_GRANTED);
         boolean sendNow = false;
         boolean isApp = (className == null);
-        String key = isApp ? packageName : className;
+        String componentName = isApp ? packageName : className;
         int packageUid = -1;
+        ArrayList<String> components;
         synchronized (mPackages) {
             pkgSetting = mSettings.mPackages.get(packageName);
             if (pkgSetting == null) {
@@ -5064,17 +5076,22 @@ class PackageManagerService extends IPackageManager.Stub {
             }
             mSettings.writeLP();
             packageUid = pkgSetting.userId;
+            components = mPendingBroadcasts.get(packageName);
+            boolean newPackage = components == null;
+            if (newPackage) {
+                components = new ArrayList<String>();
+            }
+            if (!components.contains(componentName)) {
+                components.add(componentName);
+            }
             if ((flags&PackageManager.DONT_KILL_APP) == 0) {
                 sendNow = true;
                 // Purge entry from pending broadcast list if another one exists already
                 // since we are sending one right away.
-                if (mPendingBroadcasts.get(key) != null) {
-                    mPendingBroadcasts.remove(key);
-                    // Can ignore empty list since its handled in the handler anyway
-                }
+                mPendingBroadcasts.remove(packageName);
             } else {
-                if (mPendingBroadcasts.get(key) == null) {
-                    mPendingBroadcasts.put(key, packageName);
+                if (newPackage) {
+                    mPendingBroadcasts.put(packageName, components);
                 }
                 if (!mHandler.hasMessages(SEND_PENDING_BROADCAST)) {
                     // Schedule a message
@@ -5087,7 +5104,7 @@ class PackageManagerService extends IPackageManager.Stub {
         try {
             if (sendNow) {
                 sendPackageChangedBroadcast(packageName,
-                        (flags&PackageManager.DONT_KILL_APP) != 0, key, packageUid);
+                        (flags&PackageManager.DONT_KILL_APP) != 0, components, packageUid);
             }
         } finally {
             Binder.restoreCallingIdentity(callingId);
@@ -5095,9 +5112,14 @@ class PackageManagerService extends IPackageManager.Stub {
     }
 
     private void sendPackageChangedBroadcast(String packageName,
-            boolean killFlag, String componentName, int packageUid) {
-        Bundle extras = new Bundle(2);
-        extras.putString(Intent.EXTRA_CHANGED_COMPONENT_NAME, componentName);
+            boolean killFlag, ArrayList<String> componentNames, int packageUid) {
+        if (false) Log.v(TAG, "Sending package changed: package=" + packageName
+                + " components=" + componentNames);
+        Bundle extras = new Bundle(4);
+        extras.putString(Intent.EXTRA_CHANGED_COMPONENT_NAME, componentNames.get(0));
+        String nameList[] = new String[componentNames.size()];
+        componentNames.toArray(nameList);
+        extras.putStringArray(Intent.EXTRA_CHANGED_COMPONENT_NAME_LIST, nameList);
         extras.putBoolean(Intent.EXTRA_DONT_KILL_APP, killFlag);
         extras.putInt(Intent.EXTRA_UID, packageUid);
         sendPackageBroadcast(Intent.ACTION_PACKAGE_CHANGED,  packageName, extras);   
