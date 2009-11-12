@@ -124,7 +124,7 @@
         android:orientation="vertical"
         android:layout_width="wrap_content"
         android:layout_height="fill_parent"
-        android:layout_marginBottom="50dip"
+        android:layout_marginRight="50dip"
         />
 
 </LinearLayout>
