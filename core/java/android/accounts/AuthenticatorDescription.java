@@ -87,6 +87,10 @@ public class AuthenticatorDescription implements Parcelable {
         return type.equals(other.type);
     }
 
+    public String toString() {
+        return "AuthenticatorDescription {type=" + type + "}";
+    }
+
     /** @inhericDoc */
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(type);
