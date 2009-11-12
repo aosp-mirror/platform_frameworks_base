@@ -30,10 +30,12 @@ import android.view.Surface;
  *
  **/
 public class RenderScript {
-    static final String LOG_TAG = "libRS_jni";
+    static final String LOG_TAG = "RenderScript_jni";
     private static final boolean DEBUG  = false;
     @SuppressWarnings({"UnusedDeclaration", "deprecation"})
     private static final boolean LOG_ENABLED = DEBUG ? Config.LOGD : Config.LOGV;
+    int mWidth;
+    int mHeight;
 
 
 
@@ -62,9 +64,9 @@ public class RenderScript {
     native int  nDeviceCreate();
     native void nDeviceDestroy(int dev);
     native void nDeviceSetConfig(int dev, int param, int value);
-    native int  nContextCreate(int dev, Surface sur, int ver, boolean useDepth);
+    native int  nContextCreate(int dev, int ver, boolean useDepth);
     native void nContextDestroy(int con);
-    native void nContextSetSurface(Surface sur);
+    native void nContextSetSurface(int w, int h, Surface sur);
 
     native void nContextBindRootScript(int script);
     native void nContextBindSampler(int sampler, int slot);
@@ -259,27 +261,31 @@ public class RenderScript {
                     mRS.mMessageCallback.mID = msg;
                     mRS.mMessageCallback.run();
                 }
-                //Log.d("rs", "MessageThread msg " + msg + " v1 " + rbuf[0] + " v2 " + rbuf[1] + " v3 " +rbuf[2]);
+                //Log.d(LOG_TAG, "MessageThread msg " + msg + " v1 " + rbuf[0] + " v2 " + rbuf[1] + " v3 " +rbuf[2]);
             }
-            Log.d("rs", "MessageThread exiting.");
+            Log.d(LOG_TAG, "MessageThread exiting.");
         }
     }
 
-    public RenderScript(Surface sur, boolean useDepth, boolean forceSW) {
-        mSurface = sur;
+    public RenderScript(boolean useDepth, boolean forceSW) {
+        mSurface = null;
+        mWidth = 0;
+        mHeight = 0;
         mDev = nDeviceCreate();
         if(forceSW) {
             nDeviceSetConfig(mDev, 0, 1);
         }
-        mContext = nContextCreate(mDev, mSurface, 0, useDepth);
+        mContext = nContextCreate(mDev, 0, useDepth);
         Element.initPredefined(this);
         mMessageThread = new MessageThread(this);
         mMessageThread.start();
     }
 
-    public void contextSetSurface(Surface sur) {
+    public void contextSetSurface(int w, int h, Surface sur) {
         mSurface = sur;
-        nContextSetSurface(mSurface);
+        mWidth = w;
+        mHeight = h;
+        nContextSetSurface(w, h, mSurface);
     }
 
     public void destroy() {
