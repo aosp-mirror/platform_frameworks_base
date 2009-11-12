@@ -502,9 +502,13 @@ public class BluetoothService extends IBluetooth.Stub {
 
         // List of names of Bluetooth devices for which auto pairing should be
         // disabled.
-        private final ArrayList<String> mAutoPairingNameBlacklist =
+        private final ArrayList<String> mAutoPairingExactNameBlacklist =
                 new ArrayList<String>(Arrays.asList(
-                        "Motorola IHF1000", "i.TechBlueBAND", "X5 Stereo v1.3", "BMW", "Audi"));
+                        "Motorola IHF1000", "i.TechBlueBAND", "X5 Stereo v1.3"));
+
+        private final ArrayList<String> mAutoPairingPartialNameBlacklist =
+                new ArrayList<String>(Arrays.asList(
+                        "BMW", "Audi"));
 
         // If this is an outgoing connection, store the address.
         // There can be only 1 pending outgoing connection at a time,
@@ -585,9 +589,12 @@ public class BluetoothService extends IBluetooth.Stub {
 
             String name = getRemoteName(address);
             if (name != null) {
-                for (String blacklistName : mAutoPairingNameBlacklist) {
-                    if (name.equals(blacklistName) ||
-                            name.startsWith(blacklistName)) return true;
+                for (String blacklistName : mAutoPairingExactNameBlacklist) {
+                    if (name.equals(blacklistName)) return true;
+                }
+
+                for (String blacklistName : mAutoPairingPartialNameBlacklist) {
+                    if (name.startsWith(blacklistName)) return true;
                 }
             }
             return false;
