@@ -190,7 +190,6 @@ class LockScreen extends LinearLayout implements KeyguardScreen, KeyguardUpdateM
         mScreenLocked = (TextView) findViewById(R.id.screenLocked);
         mSelector = (SlidingTab) findViewById(R.id.tab_selector);
         mSelector.setLeftHintText(R.string.lockscreen_unlock_label);
-        mSelector.setRightHintText(R.string.lockscreen_mute_unmute_label);
         mEmergencyCallButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 mCallback.takeEmergencyCallAction();
@@ -228,6 +227,9 @@ class LockScreen extends LinearLayout implements KeyguardScreen, KeyguardUpdateM
                         : R.drawable.jog_tab_bar_right_sound_off,
                 mSilentMode ? R.drawable.jog_tab_right_sound_on
                         : R.drawable.jog_tab_right_sound_off);
+
+        mSelector.setRightHintText(mSilentMode ?
+                R.string.lockscreen_sound_on_label : R.string.lockscreen_sound_off_label);
     }
 
     private void resetStatusInfo(KeyguardUpdateMonitor updateMonitor) {
