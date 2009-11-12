@@ -56,7 +56,7 @@ public abstract class KeyInputQueue {
      * Turn on some hacks we have to improve the touch interaction with a
      * certain device whose screen currently is not all that good.
      */
-    static final boolean BAD_TOUCH_HACK = true;
+    static boolean BAD_TOUCH_HACK = false;
     
     private static final String EXCLUDED_DEVICES_PATH = "etc/excluded-input-devices.xml";
 
@@ -282,6 +282,9 @@ public abstract class KeyInputQueue {
             lt = new LatencyTimer(100, 1000);
         }
 
+        BAD_TOUCH_HACK = context.getResources().getBoolean(
+                com.android.internal.R.bool.config_filterTouchEvents);
+        
         mHapticFeedbackCallback = hapticFeedbackCallback;
         
         readExcludedDevices();
