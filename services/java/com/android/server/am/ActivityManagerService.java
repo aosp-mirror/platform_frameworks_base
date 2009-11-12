@@ -12835,8 +12835,15 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                     }
                 }
                 Intent intent = new Intent(Intent.ACTION_CONFIGURATION_CHANGED);
+                intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
                 broadcastIntentLocked(null, null, intent, null, null, 0, null, null,
                         null, false, false, MY_PID, Process.SYSTEM_UID);
+                if ((changes&ActivityInfo.CONFIG_LOCALE) != 0) {
+                    broadcastIntentLocked(null, null,
+                            new Intent(Intent.ACTION_LOCALE_CHANGED),
+                            null, null, 0, null, null,
+                            null, false, false, MY_PID, Process.SYSTEM_UID);
+                }
                 
                 AttributeCache ac = AttributeCache.instance();
                 if (ac != null) {
