@@ -131,7 +131,7 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
-            android:layout_marginBottom="50dip" 
+            android:layout_marginBottom="80dip" 
             />
     
         <!-- emergency call button shown when sim is missing or PUKd -->
