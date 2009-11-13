@@ -102,6 +102,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
 
@@ -2781,72 +2782,156 @@ class PackageManagerService extends IPackageManager.Stub {
         return pkg;
     }
 
-    private int cachePackageSharedLibsLI(PackageParser.Package pkg,
-            File dataPath, File scanFile) {
-        File sharedLibraryDir = new File(dataPath.getPath() + "/lib");
-        final String sharedLibraryABI = Build.CPU_ABI;
-        final String apkLibraryDirectory = "lib/" + sharedLibraryABI + "/";
-        final String apkSharedLibraryPrefix = apkLibraryDirectory + "lib";
-        final String sharedLibrarySuffix = ".so";
-        boolean hasNativeCode = false;
-        boolean installedNativeCode = false;
-        try {
-            ZipFile zipFile = new ZipFile(scanFile);
-            Enumeration<ZipEntry> entries =
-                (Enumeration<ZipEntry>) zipFile.entries();
+    // The following constants are returned by cachePackageSharedLibsForAbiLI
+    // to indicate if native shared libraries were found in the package.
+    // Values are:
+    //    PACKAGE_INSTALL_NATIVE_FOUND_LIBRARIES => native libraries found and installed
+    //    PACKAGE_INSTALL_NATIVE_NO_LIBRARIES     => no native libraries in package
+    //    PACKAGE_INSTALL_NATIVE_ABI_MISMATCH     => native libraries for another ABI found
+    //                                        in package (and not installed)
+    //
+    private static final int PACKAGE_INSTALL_NATIVE_FOUND_LIBRARIES = 0;
+    private static final int PACKAGE_INSTALL_NATIVE_NO_LIBRARIES = 1;
+    private static final int PACKAGE_INSTALL_NATIVE_ABI_MISMATCH = 2;
 
-            while (entries.hasMoreElements()) {
-                ZipEntry entry = entries.nextElement();
-                if (entry.isDirectory()) {
-                    if (!hasNativeCode && entry.getName().startsWith("lib")) {
-                        hasNativeCode = true;
-                    }
-                    continue;
+    // Find all files of the form lib/<cpuAbi>/lib<name>.so in the .apk
+    // and automatically copy them to /data/data/<appname>/lib if present.
+    //
+    // NOTE: this method may throw an IOException if the library cannot
+    // be copied to its final destination, e.g. if there isn't enough
+    // room left on the data partition, or a ZipException if the package
+    // file is malformed.
+    //
+    private int cachePackageSharedLibsForAbiLI( PackageParser.Package  pkg,
+        File dataPath, File scanFile, String cpuAbi)
+    throws IOException, ZipException {
+        File sharedLibraryDir = new File(dataPath.getPath() + "/lib");
+        final String apkLib = "lib/";
+        final int apkLibLen = apkLib.length();
+        final int cpuAbiLen = cpuAbi.length();
+        final String libPrefix = "lib";
+        final int libPrefixLen = libPrefix.length();
+        final String libSuffix = ".so";
+        final int libSuffixLen = libSuffix.length();
+        boolean hasNativeLibraries = false;
+        boolean installedNativeLibraries = false;
+
+        // the minimum length of a valid native shared library of the form
+        // lib/<something>/lib<name>.so.
+        final int minEntryLen  = apkLibLen + 2 + libPrefixLen + 1 + libSuffixLen;
+
+        ZipFile zipFile = new ZipFile(scanFile);
+        Enumeration<ZipEntry> entries =
+            (Enumeration<ZipEntry>) zipFile.entries();
+
+        while (entries.hasMoreElements()) {
+            ZipEntry entry = entries.nextElement();
+            // skip directories
+            if (entry.isDirectory()) {
+                continue;
+            }
+            String entryName = entry.getName();
+
+            // check that the entry looks like lib/<something>/lib<name>.so
+            // here, but don't check the ABI just yet.
+            //
+            // - must be sufficiently long
+            // - must end with libSuffix, i.e. ".so"
+            // - must start with apkLib, i.e. "lib/"
+            if (entryName.length() < minEntryLen ||
+                !entryName.endsWith(libSuffix) ||
+                !entryName.startsWith(apkLib) ) {
+                continue;
+            }
+
+            // file name must start with libPrefix, i.e. "lib"
+            int lastSlash = entryName.lastIndexOf('/');
+
+            if (lastSlash < 0 || 
+                !entryName.regionMatches(lastSlash+1, libPrefix, 0, libPrefixLen) ) {
+                continue;
+            }
+
+            hasNativeLibraries = true;
+
+            // check the cpuAbi now, between lib/ and /lib<name>.so
+            //
+            if (lastSlash != apkLibLen + cpuAbiLen ||
+                !entryName.regionMatches(apkLibLen, cpuAbi, 0, cpuAbiLen) )
+                continue;
+
+            // extract the library file name, ensure it doesn't contain
+            // weird characters. we're guaranteed here that it doesn't contain
+            // a directory separator though.
+            String libFileName = entryName.substring(lastSlash+1);
+            if (!FileUtils.isFilenameSafe(new File(libFileName))) {
+                continue;
+            }
+
+            installedNativeLibraries = true;
+
+            String sharedLibraryFilePath = sharedLibraryDir.getPath() +
+                File.separator + libFileName;
+            File sharedLibraryFile = new File(sharedLibraryFilePath);
+            if (! sharedLibraryFile.exists() ||
+                sharedLibraryFile.length() != entry.getSize() ||
+                sharedLibraryFile.lastModified() != entry.getTime()) {
+                if (Config.LOGD) {
+                    Log.d(TAG, "Caching shared lib " + entry.getName());
                 }
-                String entryName = entry.getName();
-                if (entryName.startsWith("lib/")) {
-                    hasNativeCode = true;
+                if (mInstaller == null) {
+                    sharedLibraryDir.mkdir();
                 }
-                if (! (entryName.startsWith(apkSharedLibraryPrefix)
-                        && entryName.endsWith(sharedLibrarySuffix))) {
-                    continue;
+                cacheSharedLibLI(pkg, zipFile, entry, sharedLibraryDir,
+                        sharedLibraryFile);
+            }
+        }
+        if (!hasNativeLibraries)
+            return PACKAGE_INSTALL_NATIVE_NO_LIBRARIES;
+
+        if (!installedNativeLibraries)
+            return PACKAGE_INSTALL_NATIVE_ABI_MISMATCH;
+
+        return PACKAGE_INSTALL_NATIVE_FOUND_LIBRARIES;
+    }
+
+    // extract shared libraries stored in the APK as lib/<cpuAbi>/lib<name>.so
+    // and copy them to /data/data/<appname>/lib.
+    //
+    // This function will first try the main CPU ABI defined by Build.CPU_ABI
+    // (which corresponds to ro.product.cpu.abi), and also try an alternate
+    // one if ro.product.cpu.abi2 is defined.
+    //
+    private int cachePackageSharedLibsLI(PackageParser.Package  pkg,
+        File dataPath, File scanFile) {
+        final String cpuAbi = Build.CPU_ABI;
+        try {
+            int result = cachePackageSharedLibsForAbiLI(pkg, dataPath, scanFile, cpuAbi);
+
+            // some architectures are capable of supporting several CPU ABIs
+            // for example, 'armeabi-v7a' also supports 'armeabi' native code
+            // this is indicated by the definition of the ro.product.cpu.abi2
+            // system property.
+            //
+            // only scan the package twice in case of ABI mismatch
+            if (result == PACKAGE_INSTALL_NATIVE_ABI_MISMATCH) {
+                String  cpuAbi2 = SystemProperties.get("ro.product.cpu.abi2",null);
+                if (cpuAbi2 != null) {
+                    result = cachePackageSharedLibsForAbiLI(pkg, dataPath, scanFile, cpuAbi2);
                 }
-                String libFileName = entryName.substring(
-                        apkLibraryDirectory.length());
-                if (libFileName.contains("/")
-                        || (!FileUtils.isFilenameSafe(new File(libFileName)))) {
-                    continue;
-                }
-                
-                installedNativeCode = true;
-                
-                String sharedLibraryFilePath = sharedLibraryDir.getPath() +
-                    File.separator + libFileName;
-                File sharedLibraryFile = new File(sharedLibraryFilePath);
-                if (! sharedLibraryFile.exists() ||
-                    sharedLibraryFile.length() != entry.getSize() ||
-                    sharedLibraryFile.lastModified() != entry.getTime()) {
-                    if (Config.LOGD) {
-                        Log.d(TAG, "Caching shared lib " + entry.getName());
-                    }
-                    if (mInstaller == null) {
-                        sharedLibraryDir.mkdir();
-                    }
-                    cacheSharedLibLI(pkg, zipFile, entry, sharedLibraryDir,
-                            sharedLibraryFile);
+
+                if (result == PACKAGE_INSTALL_NATIVE_ABI_MISMATCH) {
+                    Log.w(TAG,"Native ABI mismatch from package file");
+                    return PackageManager.INSTALL_FAILED_INVALID_APK;
                 }
             }
+        } catch (ZipException e) {
+            Log.w(TAG, "Failed to extract data from package file", e);
+            return PackageManager.INSTALL_FAILED_INVALID_APK;
         } catch (IOException e) {
             Log.w(TAG, "Failed to cache package shared libs", e);
             return PackageManager.INSTALL_FAILED_INSUFFICIENT_STORAGE;
         }
-        
-        if (hasNativeCode && !installedNativeCode) {
-            Log.w(TAG, "Install failed: .apk has native code but none for arch "
-                    + Build.CPU_ABI);
-            return PackageManager.INSTALL_FAILED_CPU_ABI_INCOMPATIBLE;
-        }
-        
         return PackageManager.INSTALL_SUCCEEDED;
     }
 
