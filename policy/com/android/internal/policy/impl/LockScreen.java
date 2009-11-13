@@ -82,7 +82,7 @@ class LockScreen extends LinearLayout implements KeyguardScreen, KeyguardUpdateM
 
     private boolean mSilentMode;
     private AudioManager mAudioManager;
-    private java.text.DateFormat mDateFormat;
+    private String mDateFormatString;
     private java.text.DateFormat mTimeFormat;
     private boolean mCreatedInPortrait;
     private boolean mEnableMenuKeyInLockScreen;
@@ -243,7 +243,7 @@ class LockScreen extends LinearLayout implements KeyguardScreen, KeyguardUpdateM
         refreshAlarmDisplay();
 
         mTimeFormat = DateFormat.getTimeFormat(getContext());
-        mDateFormat = getLockScreenDateFormat();
+        mDateFormatString = getContext().getString(R.string.full_wday_month_day_no_year);
         refreshTimeAndDateDisplay();
         updateStatusLines();
     }
@@ -369,29 +369,7 @@ class LockScreen extends LinearLayout implements KeyguardScreen, KeyguardUpdateM
     }
 
     private void refreshTimeAndDateDisplay() {
-        Date now = new Date();
-        mDate.setText(mDateFormat.format(now));
-    }
-
-    /**
-     * @return A localized format like "Fri, Sep 18, 2009"
-     */
-    private java.text.DateFormat getLockScreenDateFormat() {
-        SimpleDateFormat adjusted = null;
-        try {
-            // this call gives us the localized order
-            final SimpleDateFormat dateFormat = (SimpleDateFormat)
-                    java.text.DateFormat.getDateInstance(java.text.DateFormat.FULL);
-            adjusted = new SimpleDateFormat(dateFormat.toPattern()
-                    .replace("MMMM", "MMM")    // we want "Sep", not "September"
-                    .replace("EEEE", "EEE"));  // we want "Fri", no "Friday"
-        } catch (ClassCastException e) {
-            // in case the library implementation changes and this throws a class cast exception
-            // or anything else that is funky
-            Log.e("LockScreen", "couldn't finnagle our custom date format :(", e);
-            return java.text.DateFormat.getDateInstance(java.text.DateFormat.MEDIUM);
-        }
-        return adjusted;
+        mDate.setText(DateFormat.format(mDateFormatString, new Date()));
     }
 
     private void updateStatusLines() {
