@@ -76,6 +76,7 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
     private static final int NITZ_UPDATE_DIFF_DEFAULT = 2000;
     private int mNitzUpdateDiff = SystemProperties.getInt("ro.nitz_update_diff",
             NITZ_UPDATE_DIFF_DEFAULT);
+
     /**
      *  Values correspond to ServiceStateTracker.DATA_ACCESS_ definitions.
      */
@@ -159,6 +160,7 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
         super();
 
         this.phone = phone;
+        cr = phone.getContext().getContentResolver();
         cm = phone.mCM;
         ss = new ServiceState();
         newSS = new ServiceState();
@@ -184,12 +186,9 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
         cm.registerForCdmaOtaProvision(this,EVENT_OTA_PROVISION_STATUS_CHANGE, null);
 
         // System setting property AIRPLANE_MODE_ON is set in Settings.
-        int airplaneMode = Settings.System.getInt(
-                phone.getContext().getContentResolver(),
-                Settings.System.AIRPLANE_MODE_ON, 0);
+        int airplaneMode = Settings.System.getInt(cr, Settings.System.AIRPLANE_MODE_ON, 0);
         mDesiredPowerState = ! (airplaneMode > 0);
 
-        cr = phone.getContext().getContentResolver();
         cr.registerContentObserver(
                 Settings.System.getUriFor(Settings.System.AUTO_TIME), true,
                 mAutoTimeObserver);
@@ -1021,8 +1020,7 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
         }
 
         if (hasRegistered) {
-            Checkin.updateStats(phone.getContext().getContentResolver(),
-                    Checkin.Stats.Tag.PHONE_CDMA_REGISTERED, 1, 0.0);
+            Checkin.updateStats(cr, Checkin.Stats.Tag.PHONE_CDMA_REGISTERED, 1, 0.0);
             networkAttachedRegistrants.notifyRegistrants();
         }
 
@@ -1460,9 +1458,13 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
                      */
                     long gained = c.getTimeInMillis() - System.currentTimeMillis();
                     long timeSinceLastUpdate = SystemClock.elapsedRealtime() - mSavedAtTime;
+                    int nitzUpdateSpacing = Settings.Gservices.getInt(cr,
+                            Settings.Gservices.NITZ_UPDATE_SPACING, mNitzUpdateSpacing);
+                    int nitzUpdateDiff = Settings.Gservices.getInt(cr,
+                            Settings.Gservices.NITZ_UPDATE_DIFF, mNitzUpdateDiff);
 
-                    if ((timeSinceLastUpdate > mNitzUpdateSpacing)
-                            || (Math.abs(gained) > mNitzUpdateDiff)) {
+                    if ((mSavedAtTime == 0) || (timeSinceLastUpdate > nitzUpdateSpacing)
+                            || (Math.abs(gained) > nitzUpdateDiff)) {
                         Log.i(LOG_TAG, "NITZ: Auto updating time of day to " + c.getTime()
                                 + " NITZ receive delay=" + millisSinceNitzReceived
                                 + "ms gained=" + gained + "ms from " + nitz);
@@ -1494,8 +1496,7 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
 
     private boolean getAutoTime() {
         try {
-            return Settings.System.getInt(phone.getContext().getContentResolver(),
-                    Settings.System.AUTO_TIME) > 0;
+            return Settings.System.getInt(cr, Settings.System.AUTO_TIME) > 0;
         } catch (SettingNotFoundException snfe) {
             return true;
         }
@@ -1534,8 +1535,7 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
     }
 
      private void revertToNitz() {
-        if (Settings.System.getInt(phone.getContext().getContentResolver(),
-                Settings.System.AUTO_TIME, 0) == 0) {
+        if (Settings.System.getInt(cr, Settings.System.AUTO_TIME, 0) == 0) {
             return;
         }
         Log.d(LOG_TAG, "Reverting to NITZ: tz='" + mSavedTimeZone

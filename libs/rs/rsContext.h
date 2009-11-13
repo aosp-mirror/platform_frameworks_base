@@ -49,7 +49,7 @@ namespace renderscript {
 class Context
 {
 public:
-    Context(Device *, Surface *, bool useDepth);
+    Context(Device *, bool useDepth);
     ~Context();
 
     static pthread_key_t gThreadTLSKey;
@@ -94,7 +94,7 @@ public:
 
     void pause();
     void resume();
-    void setSurface(Surface *sur);
+    void setSurface(uint32_t w, uint32_t h, Surface *sur);
 
     void assignName(ObjectBase *obj, const char *name, uint32_t len);
     void removeName(ObjectBase *obj);
@@ -188,6 +188,9 @@ protected:
         uint32_t mMinorVersion;
 
     } mGL;
+
+    uint32_t mWidth;
+    uint32_t mHeight;
 
     bool mRunning;
     bool mExit;
