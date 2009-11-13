@@ -769,17 +769,15 @@ import java.util.List;
  *     </tr>
  *     
  *     <tr><th>android:icon</th>
- *         <td>If provided, this icon will be shown in place of the label above the search box.
- *           This is a reference to a drawable (icon) resource. Note that the application icon
- *           is also used as an icon to the left of the search box and you cannot modify this
- *           behavior, so including the icon attribute is unecessary and this may be
- *           deprecated in the future.</td>
+ *         <td><strong>This is deprecated.</strong><br/>The default
+ *           application icon is now always used, so this attribute is
+ *           obsolete.</td>
  *         <td align="center">No</td>
  *     </tr>
  *     
  *     <tr><th>android:hint</th>
- *         <td>This is the text to display in the search text field when no user text has been 
- *             entered.</td>
+ *         <td>This is the text to display in the search text field when no text
+ *             has been entered by the user.</td>
  *         <td align="center">No</td>
  *     </tr>
  *     
@@ -790,17 +788,14 @@ import java.util.List;
  *                 <tbody>
  *                 <tr><th>showSearchLabelAsBadge</th>
  *                     <td>If set, this flag enables the display of the search target (label) 
- *                         above the search box.  If this flag and showSearchIconAsBadge
- *                         (see below) are both not set, no badge will be shown.</td>
+ *                         above the search box. As an alternative, you may
+ *                         want to instead use "hint" text in the search box.
+ *                         See the "android:hint" attribute above.</td>
  *                 </tr>
  *                 <tr><th>showSearchIconAsBadge</th>
- *                     <td>If set, this flag enables the display of the search target (icon)
- *                         above the search box.  If this flag and showSearchLabelAsBadge
- *                         (see above) are both not set, no badge will be shown.  If both flags
- *                         are set, showSearchIconAsBadge has precedence and the icon will be
- *                         shown. Because the application icon is now used to the left of the
- *                         search box by default, using this search mode is no longer necessary
- *                         and may be deprecated in the future.</td>
+ *                     <td><strong>This is deprecated.</strong><br/>The default
+ *                         application icon is now always used, so this
+ *                         option is obsolete.</td>
  *                 </tr>
  *                 <tr><th>queryRewriteFromData</th>
  *                     <td>If set, this flag causes the suggestion column SUGGEST_COLUMN_INTENT_DATA
