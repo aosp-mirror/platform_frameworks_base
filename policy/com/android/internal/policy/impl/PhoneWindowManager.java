@@ -2221,7 +2221,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
     
     public void screenOnStoppedLw() {
-        if (!mKeyguardMediator.isShowing()) {
+        if (!mKeyguardMediator.isShowing() && mPowerManager.isScreenOn()) {
             long curTime = SystemClock.uptimeMillis();
             mPowerManager.userActivity(curTime, false, LocalPowerManager.OTHER_EVENT);
         }
