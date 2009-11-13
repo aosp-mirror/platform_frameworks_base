@@ -92,38 +92,12 @@ void Context::initEGL()
         LOGE("eglCreateContext returned EGL_NO_CONTEXT");
     }
     gGLContextCount++;
-
-    if (mWndSurface) {
-        setSurface(mWndSurface);
-    } else {
-        setSurface((Surface *)android_createDisplaySurface());
-    }
-
-    eglQuerySurface(mEGL.mDisplay, mEGL.mSurface, EGL_WIDTH, &mEGL.mWidth);
-    eglQuerySurface(mEGL.mDisplay, mEGL.mSurface, EGL_HEIGHT, &mEGL.mHeight);
-
-
-    mGL.mVersion = glGetString(GL_VERSION);
-    mGL.mVendor = glGetString(GL_VENDOR);
-    mGL.mRenderer = glGetString(GL_RENDERER);
-    mGL.mExtensions = glGetString(GL_EXTENSIONS);
-
-    LOGV("EGL Version %i %i", mEGL.mMajorVersion, mEGL.mMinorVersion);
-    LOGV("GL Version %s", mGL.mVersion);
-    LOGV("GL Vendor %s", mGL.mVendor);
-    LOGV("GL Renderer %s", mGL.mRenderer);
-    LOGV("GL Extensions %s", mGL.mExtensions);
-
-    if ((strlen((const char *)mGL.mVersion) < 12) || memcmp(mGL.mVersion, "OpenGL ES-CM", 12)) {
-        LOGE("Error, OpenGL ES Lite not supported");
-    } else {
-        sscanf((const char *)mGL.mVersion + 13, "%i.%i", &mGL.mMajorVersion, &mGL.mMinorVersion);
-    }
 }
 
 void Context::deinitEGL()
 {
-    setSurface(NULL);
+    LOGV("deinitEGL");
+    setSurface(0, 0, NULL);
     eglDestroyContext(mEGL.mDisplay, mEGL.mContext);
     checkEglError("eglDestroyContext");
 
@@ -265,9 +239,9 @@ void * Context::threadProc(void *vrsc)
      rsc->props.mLogScripts = getProp("debug.rs.script");
      rsc->props.mLogObjects = getProp("debug.rs.objects");
 
-     pthread_mutex_lock(&gInitMutex);
-     rsc->initEGL();
-     pthread_mutex_unlock(&gInitMutex);
+     //pthread_mutex_lock(&gInitMutex);
+     //rsc->initEGL();
+     //pthread_mutex_unlock(&gInitMutex);
 
      ScriptTLSStruct *tlsStruct = new ScriptTLSStruct;
      if (!tlsStruct) {
@@ -342,7 +316,7 @@ void * Context::threadProc(void *vrsc)
      return NULL;
 }
 
-Context::Context(Device *dev, Surface *sur, bool useDepth)
+Context::Context(Device *dev, bool useDepth)
 {
     pthread_mutex_lock(&gInitMutex);
 
@@ -353,6 +327,7 @@ Context::Context(Device *dev, Surface *sur, bool useDepth)
     mUseDepth = useDepth;
     mPaused = false;
     mObjHead = NULL;
+    memset(&mEGL, 0, sizeof(mEGL));
 
     int status;
     pthread_attr_t threadAttr;
@@ -380,7 +355,7 @@ Context::Context(Device *dev, Surface *sur, bool useDepth)
     sparam.sched_priority = ANDROID_PRIORITY_DISPLAY;
     pthread_attr_setschedparam(&threadAttr, &sparam);
 
-    mWndSurface = sur;
+    mWndSurface = NULL;
 
     objDestroyOOBInit();
     timerInit();
@@ -426,8 +401,10 @@ Context::~Context()
     objDestroyOOBDestroy();
 }
 
-void Context::setSurface(Surface *sur)
+void Context::setSurface(uint32_t w, uint32_t h, Surface *sur)
 {
+    LOGV("setSurface %i %i %p", w, h, sur);
+
     EGLBoolean ret;
     if (mEGL.mSurface != NULL) {
         ret = eglMakeCurrent(mEGL.mDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
@@ -437,10 +414,22 @@ void Context::setSurface(Surface *sur)
         checkEglError("eglDestroySurface", ret);
 
         mEGL.mSurface = NULL;
+        mEGL.mWidth = 0;
+        mEGL.mHeight = 0;
+        mWidth = 0;
+        mHeight = 0;
     }
 
     mWndSurface = sur;
     if (mWndSurface != NULL) {
+        bool first = false;
+        if (!mEGL.mContext) {
+            first = true;
+            pthread_mutex_lock(&gInitMutex);
+            initEGL();
+            pthread_mutex_unlock(&gInitMutex);
+        }
+
         mEGL.mSurface = eglCreateWindowSurface(mEGL.mDisplay, mEGL.mConfig, mWndSurface, NULL);
         checkEglError("eglCreateWindowSurface");
         if (mEGL.mSurface == EGL_NO_SURFACE) {
@@ -449,6 +438,35 @@ void Context::setSurface(Surface *sur)
 
         ret = eglMakeCurrent(mEGL.mDisplay, mEGL.mSurface, mEGL.mSurface, mEGL.mContext);
         checkEglError("eglMakeCurrent", ret);
+
+        eglQuerySurface(mEGL.mDisplay, mEGL.mSurface, EGL_WIDTH, &mEGL.mWidth);
+        eglQuerySurface(mEGL.mDisplay, mEGL.mSurface, EGL_HEIGHT, &mEGL.mHeight);
+        mWidth = w;
+        mHeight = h;
+
+        if ((int)mWidth != mEGL.mWidth || (int)mHeight != mEGL.mHeight) {
+            LOGE("EGL/Surface mismatch  EGL (%i x %i)  SF (%i x %i)", mEGL.mWidth, mEGL.mHeight, mWidth, mHeight);
+        }
+
+        if (first) {
+            mGL.mVersion = glGetString(GL_VERSION);
+            mGL.mVendor = glGetString(GL_VENDOR);
+            mGL.mRenderer = glGetString(GL_RENDERER);
+            mGL.mExtensions = glGetString(GL_EXTENSIONS);
+
+            //LOGV("EGL Version %i %i", mEGL.mMajorVersion, mEGL.mMinorVersion);
+            LOGV("GL Version %s", mGL.mVersion);
+            LOGV("GL Vendor %s", mGL.mVendor);
+            LOGV("GL Renderer %s", mGL.mRenderer);
+            //LOGV("GL Extensions %s", mGL.mExtensions);
+
+            if ((strlen((const char *)mGL.mVersion) < 12) || memcmp(mGL.mVersion, "OpenGL ES-CM", 12)) {
+                LOGE("Error, OpenGL ES Lite not supported");
+            } else {
+                sscanf((const char *)mGL.mVersion + 13, "%i.%i", &mGL.mMajorVersion, &mGL.mMinorVersion);
+            }
+        }
+
     }
 }
 
@@ -767,19 +785,23 @@ void rsi_ContextResume(Context *rsc)
     rsc->resume();
 }
 
-void rsi_ContextSetSurface(Context *rsc, void *sur)
+void rsi_ContextSetSurface(Context *rsc, uint32_t w, uint32_t h, void *sur)
 {
-    rsc->setSurface((Surface *)sur);
+    rsc->setSurface(w, h, (Surface *)sur);
+}
+
+void rsi_ContextSetPriority(Context *rsc, uint32_t p)
+{
 }
 
 }
 }
 
 
-RsContext rsContextCreate(RsDevice vdev, void *sur, uint32_t version, bool useDepth)
+RsContext rsContextCreate(RsDevice vdev, uint32_t version, bool useDepth)
 {
     Device * dev = static_cast<Device *>(vdev);
-    Context *rsc = new Context(dev, (Surface *)sur, useDepth);
+    Context *rsc = new Context(dev, useDepth);
     return rsc;
 }
 
