@@ -950,7 +950,6 @@ public class Paint extends _Original_Paint {
     @Override
     public int breakText(String text, boolean measureForwards,
                                 float maxWidth, float[] measuredWidth) {
-        // NOTE: javadoc doesn't match. Just a guess.
         return breakText(text,
                 0 /* start */, text.length() /* end */,
                 measureForwards, maxWidth, measuredWidth);
@@ -975,7 +974,18 @@ public class Paint extends _Original_Paint {
     @Override
     public int breakText(CharSequence text, int start, int end, boolean measureForwards,
             float maxWidth, float[] measuredWidth) {
-        return super.breakText(text, start, end, measureForwards, maxWidth, measuredWidth);
+        char[] buf = new char[end - start];
+        int result;
+
+        TextUtils.getChars(text, start, end, buf, 0);
+
+        if (measureForwards) {
+            result = breakText(buf, 0, end - start, maxWidth, measuredWidth);
+        } else {
+            result = breakText(buf, 0, -(end - start), maxWidth, measuredWidth);
+        }
+
+        return result;
     }
 
     /**
