@@ -41,7 +41,7 @@
 #include <sys/mman.h>
 #include <sys/stat.h>
 
-#define BINDER_VM_SIZE (1*1024*1024)
+#define BINDER_VM_SIZE ((1*1024*1024) - (4096 *2))
 
 static bool gSingleProcess = false;
 
