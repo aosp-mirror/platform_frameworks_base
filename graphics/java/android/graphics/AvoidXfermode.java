@@ -33,17 +33,20 @@ public class AvoidXfermode extends Xfermode {
         final int nativeInt;
     }
     
-    /**
-     * This xfermode will draw the src everywhere except on top of the opColor
-     * or, depending on the Mode, draw only on top of the opColor.
+    /** This xfermode draws, or doesn't draw, based on the destination's
+     * distance from an op-color.
      *
-     * @param opColor The color to avoid (or to target depending on Mode). Note
-     *                that the alpha in opColor is ignored.
-     * @param tolerance How closely we compare a pixel to the opColor.
-     *                  0 - only operate if exact match
-     *                  255 - maximum gradation (blending) based on how
-     *                  similar the pixel is to our opColor (max tolerance)
-     * @param mode If we should avoid or target the opColor
+     * There are two modes, and each mode interprets a tolerance value.
+     *
+     * AVOID: In this mode, drawing is allowed only on destination pixels that
+     * are different from the op-color.
+     *   Tolerance near 0: avoid anything close to the op-color
+     *   Tolerance near 255: avoid only colors very close to the op-color
+     *
+     * TARGET: In this mode, drawing only occurs on destination pixels that
+     * are similar to the op-color
+     *   Tolerance near 0: draw on colors that are very close to op-color
+     *   Tolerance near 255: draw on colors that  to the op-color
      */
     public AvoidXfermode(int opColor, int tolerance, Mode mode) {
         if (tolerance < 0 || tolerance > 255) {
