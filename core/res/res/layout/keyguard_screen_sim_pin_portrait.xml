@@ -24,7 +24,7 @@
 
     <LinearLayout android:id="@+id/topDisplayGroup"
         android:layout_width="fill_parent"
-        android:layout_height="115dip"
+        android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:orientation="vertical"
             >
@@ -35,8 +35,9 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="9dip"
             android:gravity="center"
+            android:lines="2"
             android:textAppearance="?android:attr/textAppearanceLarge"
-                />
+            />
 
         <RelativeLayout
             android:layout_width="fill_parent"
