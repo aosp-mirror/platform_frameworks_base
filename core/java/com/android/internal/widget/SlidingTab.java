@@ -37,8 +37,11 @@ import com.android.internal.R;
 
 /**
  * A special widget containing two Sliders and a threshold for each.  Moving either slider beyond
- * the threshold will cause the registered OnTriggerListener.onTrigger() to be called with
- * {@link OnTriggerListener#LEFT_HANDLE} or {@link OnTriggerListener#RIGHT_HANDLE} to be called.
+ * the threshold will cause the registered OnTriggerListener.onTrigger() to be called with 
+ * whichHandle being {@link OnTriggerListener#LEFT_HANDLE} or {@link OnTriggerListener#RIGHT_HANDLE}
+ * Equivalently, selecting a tab will result in a call to 
+ * {@link OnTriggerListener#onGrabbedStateChange(View, int)} with one of these two states. Releasing
+ * the tab will result in whichHandle being {@link OnTriggerListener#NO_HANDLE}.
  *
  */
 public class SlidingTab extends ViewGroup {
@@ -50,7 +53,7 @@ public class SlidingTab extends ViewGroup {
     private static final int MSG_ANIMATE = 100;
 
     // TODO: Make these configurable
-    private static final float TARGET_ZONE = 2.0f / 3.0f;
+    private static final float THRESHOLD = 2.0f / 3.0f;
     private static final long VIBRATE_SHORT = 30;
     private static final long VIBRATE_LONG = 40;
 
@@ -71,35 +74,35 @@ public class SlidingTab extends ViewGroup {
     private Slider mRightSlider;
     private Slider mCurrentSlider;
     private boolean mTracking;
-    private float mTargetZone;
+    private float mThreshold;
     private Slider mOtherSlider;
     private boolean mAnimating;
 
     /**
      * Interface definition for a callback to be invoked when a tab is triggered
-     * by moving it beyond a target zone.
+     * by moving it beyond a threshold.
      */
     public interface OnTriggerListener {
         /**
          * The interface was triggered because the user let go of the handle without reaching the
-         * target zone.
+         * threshold.
          */
         public static final int NO_HANDLE = 0;
 
         /**
          * The interface was triggered because the user grabbed the left handle and moved it past
-         * the target zone.
+         * the threshold.
          */
         public static final int LEFT_HANDLE = 1;
 
         /**
          * The interface was triggered because the user grabbed the right handle and moved it past
-         * the target zone.
+         * the threshold.
          */
         public static final int RIGHT_HANDLE = 2;
 
         /**
-         * Called when the user moves a handle beyond the target zone.
+         * Called when the user moves a handle beyond the threshold.
          *
          * @param v The view that was triggered.
          * @param whichHandle  Which "dial handle" the user grabbed,
@@ -146,6 +149,7 @@ public class SlidingTab extends ViewGroup {
         private final ImageView tab;
         private final TextView text;
         private final ImageView target;
+        private int currentState = STATE_NORMAL;
 
         /**
          * Constructor
@@ -223,6 +227,7 @@ public class SlidingTab extends ViewGroup {
             } else {
                 text.setTextAppearance(text.getContext(), R.style.TextAppearance_SlidingTabNormal);
             }
+            currentState = state;
         }
 
         void showTarget() {
@@ -260,8 +265,8 @@ public class SlidingTab extends ViewGroup {
             final int parentWidth = r - l;
             final int parentHeight = b - t;
 
-            final int leftTarget = (int) (TARGET_ZONE * parentWidth) - targetWidth + handleWidth / 2;
-            final int rightTarget = (int) ((1.0f - TARGET_ZONE) * parentWidth) - handleWidth / 2;
+            final int leftTarget = (int) (THRESHOLD * parentWidth) - targetWidth + handleWidth / 2;
+            final int rightTarget = (int) ((1.0f - THRESHOLD) * parentWidth) - handleWidth / 2;
             final int left = (parentWidth - handleWidth) / 2;
             final int right = left + handleWidth;
 
@@ -286,8 +291,8 @@ public class SlidingTab extends ViewGroup {
                 // vertical
                 final int targetLeft = (parentWidth - targetWidth) / 2;
                 final int targetRight = (parentWidth + targetWidth) / 2;
-                final int top = (int) (TARGET_ZONE * parentHeight) + handleHeight / 2 - targetHeight;
-                final int bottom = (int) ((1.0f - TARGET_ZONE) * parentHeight) - handleHeight / 2;
+                final int top = (int) (THRESHOLD * parentHeight) + handleHeight / 2 - targetHeight;
+                final int bottom = (int) ((1.0f - THRESHOLD) * parentHeight) - handleHeight / 2;
                 if (alignment == ALIGN_TOP) {
                     tab.layout(left, 0, right, handleHeight);
                     text.layout(left, 0 - parentHeight, right, 0);
@@ -300,12 +305,34 @@ public class SlidingTab extends ViewGroup {
             }
         }
 
-        public int getTabWidth() {
-            return tab.getDrawable().getIntrinsicWidth();
+        public void updateDrawableStates() {
+            setState(currentState);
         }
 
+        /**
+         * Ensure all the dependent widgets are measured.
+         */
+        public void measure() {
+            tab.measure(View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
+                    View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
+            text.measure(View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
+                    View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
+        }
+
+        /**
+         * Get the measured tab width. Must be called after {@link Slider#measure()}.
+         * @return
+         */
+        public int getTabWidth() {
+            return tab.getMeasuredWidth();
+        }
+
+        /**
+         * Get the measured tab width. Must be called after {@link Slider#measure()}.
+         * @return
+         */
         public int getTabHeight() {
-            return tab.getDrawable().getIntrinsicHeight();
+            return tab.getMeasuredHeight();
         }
     }
 
@@ -351,11 +378,12 @@ public class SlidingTab extends ViewGroup {
             throw new RuntimeException(LOG_TAG + " cannot have UNSPECIFIED dimensions");
         }
 
-        final float density = mDensity;
-        final int leftTabWidth = (int) (density * mLeftSlider.getTabWidth() + 0.5f);
-        final int rightTabWidth = (int) (density * mRightSlider.getTabWidth() + 0.5f);
-        final int leftTabHeight = (int) (density * mLeftSlider.getTabHeight() + 0.5f);
-        final int rightTabHeight = (int) (density * mRightSlider.getTabHeight() + 0.5f);
+        mLeftSlider.measure();
+        mRightSlider.measure();
+        final int leftTabWidth = mLeftSlider.getTabWidth();
+        final int rightTabWidth = mRightSlider.getTabWidth();
+        final int leftTabHeight = mLeftSlider.getTabHeight();
+        final int rightTabHeight = mRightSlider.getTabHeight();
         final int width;
         final int height;
         if (isHorizontal()) {
@@ -400,12 +428,12 @@ public class SlidingTab extends ViewGroup {
                 if (leftHit) {
                     mCurrentSlider = mLeftSlider;
                     mOtherSlider = mRightSlider;
-                    mTargetZone = isHorizontal() ? TARGET_ZONE : 1.0f - TARGET_ZONE;
+                    mThreshold = isHorizontal() ? THRESHOLD : 1.0f - THRESHOLD;
                     setGrabbedState(OnTriggerListener.LEFT_HANDLE);
                 } else {
                     mCurrentSlider = mRightSlider;
                     mOtherSlider = mLeftSlider;
-                    mTargetZone = isHorizontal() ? 1.0f - TARGET_ZONE : TARGET_ZONE;
+                    mThreshold = isHorizontal() ? 1.0f - THRESHOLD : THRESHOLD;
                     setGrabbedState(OnTriggerListener.RIGHT_HANDLE);
                 }
                 mCurrentSlider.setState(Slider.STATE_PRESSED);
@@ -429,16 +457,16 @@ public class SlidingTab extends ViewGroup {
                 case MotionEvent.ACTION_MOVE:
                     moveHandle(x, y);
                     float position = isHorizontal() ? x : y;
-                    float target = mTargetZone * (isHorizontal() ? getWidth() : getHeight());
-                    boolean targetZoneReached;
+                    float target = mThreshold * (isHorizontal() ? getWidth() : getHeight());
+                    boolean thresholdReached;
                     if (isHorizontal()) {
-                        targetZoneReached = mCurrentSlider == mLeftSlider ?
+                        thresholdReached = mCurrentSlider == mLeftSlider ?
                                 position > target : position < target;
                     } else {
-                        targetZoneReached = mCurrentSlider == mLeftSlider ?
+                        thresholdReached = mCurrentSlider == mLeftSlider ?
                                 position < target : position > target;
                     }
-                    if (!mTriggered && targetZoneReached) {
+                    if (!mTriggered && thresholdReached) {
                         mTriggered = true;
                         mTracking = false;
                         mCurrentSlider.setState(Slider.STATE_ACTIVE);
@@ -527,6 +555,7 @@ public class SlidingTab extends ViewGroup {
         mLeftSlider.setTarget(targetId); 
         mLeftSlider.setBarBackgroundResource(barId);
         mLeftSlider.setTabBackgroundResource(tabId);
+        mLeftSlider.updateDrawableStates();
     }
 
     /**
@@ -554,6 +583,7 @@ public class SlidingTab extends ViewGroup {
         mRightSlider.setTarget(targetId); 
         mRightSlider.setBarBackgroundResource(barId);
         mRightSlider.setTabBackgroundResource(tabId);
+        mRightSlider.updateDrawableStates();
     }
 
     /**

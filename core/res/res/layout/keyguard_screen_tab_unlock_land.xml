@@ -33,7 +33,8 @@
             android:layout_width="0dip"
             android:layout_height="fill_parent"
             android:layout_weight="1.0"
-            android:gravity="center_horizontal">
+            android:layout_marginLeft="24dip"
+            android:gravity="left">
 
         <TextView
             android:id="@+id/carrier"
@@ -42,45 +43,62 @@
             android:layout_alignParentTop="true"
             android:layout_marginTop="20dip"
             android:textAppearance="?android:attr/textAppearanceMedium"
-            android:textColor="?android:attr/textColorSecondary"
             />
 
-        <TextView
-            android:id="@+id/time"
+        <com.android.internal.widget.DigitalClock android:id="@+id/time"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@id/carrier"
-            android:layout_marginTop="25dip"
-            android:textAppearance="?android:attr/textAppearanceLarge"
-            android:textSize="55sp"
-            />
+            android:layout_marginBottom="8dip"
+            android:layout_marginTop="56dip"
+            >
+
+            <TextView android:id="@+id/timeDisplay"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="bottom"
+                android:textSize="72sp"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:shadowColor="#C0000000"
+                android:shadowDx="0"
+                android:shadowDy="0"
+                android:shadowRadius="3.0"
+                />
+
+
+            <TextView android:id="@+id/am_pm"
+                android:layout_width="wrap_content"
+                android:layout_height="fill_parent"
+                android:gravity="bottom"
+                android:textSize="22sp"
+                android:singleLine="true"
+                android:layout_marginLeft="8dip"
+                android:layout_marginBottom="-6dip"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:shadowColor="#C0000000"
+                android:shadowDx="0"
+                android:shadowDy="0"
+                android:shadowRadius="3.0"
+                />
+
+        </com.android.internal.widget.DigitalClock>
 
         <TextView
             android:id="@+id/date"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@id/time"
-            android:layout_marginTop="-12dip"
+            android:layout_marginTop="6dip"
             android:textAppearance="?android:attr/textAppearanceMedium"
-            />
-
-        <View
-            android:id="@+id/divider"
-            android:layout_width="fill_parent"
-            android:layout_height="1dip"
-            android:layout_marginTop="10dip"
-            android:layout_below="@id/date"
-            android:background="@android:drawable/divider_horizontal_dark"
             />
 
         <TextView
             android:id="@+id/status1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@id/divider"
+            android:layout_below="@id/date"
             android:layout_marginTop="6dip"
             android:textAppearance="?android:attr/textAppearanceMedium"
-            android:textColor="?android:attr/textColorSecondary"
             android:drawablePadding="4dip"
             />
 
@@ -91,7 +109,6 @@
             android:layout_below="@id/status1"
             android:layout_marginTop="6dip"
             android:textAppearance="?android:attr/textAppearanceMedium"
-            android:textColor="?android:attr/textColorSecondary"
             android:drawablePadding="4dip"
             />
 
@@ -101,7 +118,6 @@
             android:layout_height="wrap_content"
             android:layout_below="@id/status2"
             android:textAppearance="?android:attr/textAppearanceMedium"
-            android:textColor="?android:attr/textColorSecondary"
             android:gravity="center"
             android:layout_marginTop="12dip"
             />
@@ -124,7 +140,7 @@
         android:orientation="vertical"
         android:layout_width="wrap_content"
         android:layout_height="fill_parent"
-        android:layout_marginRight="50dip"
+        android:layout_marginRight="80dip"
         />
 
 </LinearLayout>

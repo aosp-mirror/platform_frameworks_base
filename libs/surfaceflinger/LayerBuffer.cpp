@@ -26,6 +26,8 @@
 #include <ui/GraphicBuffer.h>
 #include <ui/PixelFormat.h>
 #include <ui/FramebufferNativeWindow.h>
+#include <ui/Rect.h>
+#include <ui/Region.h>
 
 #include <hardware/copybit.h>
 
@@ -46,12 +48,15 @@ gralloc_module_t const* LayerBuffer::sGrallocModule = 0;
 LayerBuffer::LayerBuffer(SurfaceFlinger* flinger, DisplayID display,
         const sp<Client>& client, int32_t i)
     : LayerBaseClient(flinger, display, client, i),
-      mNeedsBlending(false)
+      mNeedsBlending(false), mBlitEngine(0)
 {
 }
 
 LayerBuffer::~LayerBuffer()
 {
+    if (mBlitEngine) {
+        copybit_close(mBlitEngine);
+    }
 }
 
 void LayerBuffer::onFirstRef()
@@ -68,6 +73,10 @@ void LayerBuffer::onFirstRef()
         if (hw_get_module(GRALLOC_HARDWARE_MODULE_ID, &module) == 0) {
             sGrallocModule = (gralloc_module_t const *)module;
         }
+    }
+
+    if (hw_get_module(COPYBIT_HARDWARE_MODULE_ID, &module) == 0) {
+        copybit_open(module, &mBlitEngine);
     }
 }
 
@@ -350,6 +359,35 @@ LayerBuffer::BufferSource::BufferSource(LayerBuffer& layer,
         return;
     }
 
+    if (mLayer.mBlitEngine) {
+        // create our temporary buffer and corresponding EGLImageKHR.
+        // note that the size of this buffer doesn't really matter,
+        // the final image will always be drawn with proper aspect ratio.
+
+        int w = buffers.w;
+        int h = buffers.h;
+        mTempGraphicBuffer.clear();
+        mTempGraphicBuffer = new GraphicBuffer(
+                w, h, HAL_PIXEL_FORMAT_RGBX_8888,
+                GraphicBuffer::USAGE_HW_TEXTURE |
+                GraphicBuffer::USAGE_HW_2D);
+
+        if (mTempGraphicBuffer->initCheck() == NO_ERROR) {
+            NativeBuffer& dst(mTempBuffer);
+            dst.img.w = mTempGraphicBuffer->getStride();
+            dst.img.h = mTempGraphicBuffer->getHeight();
+            dst.img.format = mTempGraphicBuffer->getPixelFormat();
+            dst.img.handle = (native_handle_t *)mTempGraphicBuffer->handle;
+            dst.img.base = 0;
+            dst.crop.l = 0;
+            dst.crop.t = 0;
+            dst.crop.r = mTempGraphicBuffer->getWidth();
+            dst.crop.b = mTempGraphicBuffer->getHeight();
+        } else {
+            mTempGraphicBuffer.clear();
+        }
+    }
+
     mBufferHeap = buffers;
     mLayer.setNeedsBlending((info.h_alpha - info.l_alpha) > 0);    
     mBufferSize = info.getScanlineSize(buffers.hor_stride)*buffers.ver_stride;
@@ -438,15 +476,35 @@ void LayerBuffer::BufferSource::onDraw(const Region& clip) const
 
 #if defined(EGL_ANDROID_image_native_buffer)
     if (mLayer.mFlags & DisplayHardware::DIRECT_TEXTURE) {
-         // NOTE: Assume the buffer is  allocated with the proper USAGE flags
-        sp<GraphicBuffer> graphicBuffer = new GraphicBuffer(
-                src.crop.r, src.crop.b, src.img.format, 
-                GraphicBuffer::USAGE_HW_TEXTURE,
-                src.img.w, src.img.handle, false);
+        copybit_device_t* copybit = mLayer.mBlitEngine;
+        if (copybit) {
+            // create our EGLImageKHR the first time
+            if (mTexture.image == EGL_NO_IMAGE_KHR) {
+                err = NO_MEMORY;
+                if (mTempGraphicBuffer!=0) {
+                    err = mLayer.initializeEglImage(
+                            mTempGraphicBuffer, &mTexture);
+                    // once the EGLImage has been created (whether it fails
+                    // or not) we don't need the graphic buffer reference
+                    // anymore.
+                    mTempGraphicBuffer.clear();
+                }
+            }
 
-        graphicBuffer->setVerticalStride(src.img.h);
+            if (err == NO_ERROR) {
+                // NOTE: Assume the buffer is allocated with the proper USAGE flags
+                const NativeBuffer& dst(mTempBuffer);
+                region_iterator clip(Region(Rect(dst.crop.r, dst.crop.b)));
+                copybit->set_parameter(copybit, COPYBIT_TRANSFORM, 0);
+                copybit->set_parameter(copybit, COPYBIT_PLANE_ALPHA, 0xFF);
+                copybit->set_parameter(copybit, COPYBIT_DITHER, COPYBIT_ENABLE);
+                err = copybit->stretch(copybit, &dst.img, &src.img,
+                        &dst.crop, &src.crop, &clip);
 
-        err = mLayer.initializeEglImage(graphicBuffer, &mTexture);
+            }
+        } else {
+            err = INVALID_OPERATION;
+        }
     }
 #endif
     else {
