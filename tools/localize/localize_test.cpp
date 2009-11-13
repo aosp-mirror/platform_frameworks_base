@@ -1,3 +1,4 @@
+#include <cstdio>
 #include "XLIFFFile.h"
 #include "ValuesFile.h"
 #include "localize.h"

@@ -26,9 +26,13 @@
 #endif
 
 #include <private/pixelflinger/ggl_context.h>
+#include <hardware/copybit.h>
+#include <hardware/gralloc.h>
 
 #include <GLES/gl.h>
 #include <GLES/glext.h>
+
+struct android_native_buffer_t;
 
 namespace android {
 
@@ -39,7 +43,7 @@ class EGLSurfaceManager;
 class EGLBufferObjectManager;
 
 namespace gl {
- 
+
 struct ogles_context_t;
 struct matrixx_t;
 struct transform_t;
@@ -96,7 +100,7 @@ struct vec4_t {
 
 struct vertex_t {
     enum {
-        // these constant matter for our clipping 
+        // these constant matter for our clipping
         CLIP_L          = 0x0001,   // clipping flags
         CLIP_R          = 0x0002,
         CLIP_B          = 0x0004,
@@ -106,7 +110,7 @@ struct vertex_t {
 
         EYE             = 0x0040,
         RESERVED        = 0x0080,
-        
+
         USER_CLIP_0     = 0x0100,   // user clipping flags
         USER_CLIP_1     = 0x0200,
         USER_CLIP_2     = 0x0400,
@@ -121,7 +125,7 @@ struct vertex_t {
         USER_CLIP_ALL   = 0x3F00,
         CLIP_ALL        = 0x3F3F,
     };
-    
+
     // the fields below are arranged to minimize d-cache usage
     // we group together, by cache-line, the fields most likely to be used
 
@@ -130,7 +134,7 @@ struct vertex_t {
     vec4_t          eye;
     };
     vec4_t          clip;
-    
+
     uint32_t        flags;
     size_t          index;  // cache tag, and vertex index
     GLfixed         fog;
@@ -142,7 +146,7 @@ struct vertex_t {
     vec4_t          color;
     vec4_t          texture[GGL_TEXTURE_UNIT_COUNT];
     uint32_t        reserved1[4];
-    
+
     inline void clear() {
         flags = index = locked = mru = 0;
     }
@@ -199,7 +203,7 @@ struct array_machine_t {
     GLenum          indicesType;
     buffer_t const* array_buffer;
     buffer_t const* element_array_buffer;
-    
+
     void (*compileElements)(ogles_context_t*, vertex_t*, GLint, GLsizei);
     void (*compileElement)(ogles_context_t*, vertex_t*, GLint);
 
@@ -285,6 +289,7 @@ struct light_t {
     vec4_t      normalizedObjPosition;
     vec4_t      spotDir;
     vec4_t      normalizedSpotDir;
+    vec4_t      objViewer;
     GLfixed     spotExp;
     GLfixed     spotCutoff;
     GLfixed     spotCutoffCosine;
@@ -410,7 +415,7 @@ struct transform_t {
     matrixx_t       matrix;
     uint32_t        flags;
     uint32_t        ops;
-    
+
     union {
         struct {
             void (*point2)(transform_t const* t, vec4_t*, vec4_t const*);
@@ -509,17 +514,17 @@ struct viewport_t {
     GLint       x;
     GLint       y;
     GLsizei     w;
-    GLsizei     h; 
+    GLsizei     h;
     struct {
         GLint       x;
         GLint       y;
-    } surfaceport;  
+    } surfaceport;
     struct {
         GLint       x;
         GLint       y;
         GLsizei     w;
-        GLsizei     h; 
-    } scissor;  
+        GLsizei     h;
+    } scissor;
 };
 
 // ----------------------------------------------------------------------------
@@ -594,6 +599,14 @@ struct prims_t {
     void (*renderTriangle)(GL, vertex_t*, vertex_t*, vertex_t*);
 };
 
+struct copybits_context_t {
+    // A handle to the blit engine, if it exists, else NULL.
+    copybit_device_t*       blitEngine;
+    int32_t                 minScale;
+    int32_t                 maxScale;
+    android_native_buffer_t* drawSurfaceBuffer;
+};
+
 struct ogles_context_t {
     context_t               rasterizer;
     array_machine_t         arrays         __attribute__((aligned(32)));
@@ -617,6 +630,14 @@ struct ogles_context_t {
     uint32_t                transformTextures : 1;
     EGLSurfaceManager*      surfaceManager;
     EGLBufferObjectManager* bufferObjectManager;
+
+    // copybits is only used if LIBAGL_USE_GRALLOC_COPYBITS is
+    // defined, but it is always present because ogles_context_t is a public
+    // struct that is used by clients of libagl. We want the size and offsets
+    // to stay the same, whether or not LIBAGL_USE_GRALLOC_COPYBITS is defined.
+
+    copybits_context_t      copybits;
+
     GLenum                  error;
 
     static inline ogles_context_t* get() {

@@ -21,7 +21,7 @@
 #include <sys/types.h>
 
 #include <utils/Errors.h>
-#include <utils/IInterface.h>
+#include <binder/IInterface.h>
 #include <utils/RefBase.h>
 
 #include <ui/ISurface.h>
@@ -52,12 +52,14 @@ public:
     struct surface_data_t {
         int32_t             token;
         int32_t             identity;
-        sp<IMemoryHeap>     heap[2];
+        uint32_t            width;
+        uint32_t            height;
+        uint32_t            format;
         status_t readFromParcel(const Parcel& parcel);
         status_t writeToParcel(Parcel* parcel) const;
     };
     
-    virtual void getControlBlocks(sp<IMemory>* ctl) const = 0;
+    virtual sp<IMemoryHeap> getControlBlock() const = 0;
 
     virtual sp<ISurface> createSurface( surface_data_t* data,
                                         int pid, 

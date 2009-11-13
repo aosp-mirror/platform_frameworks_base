@@ -367,10 +367,12 @@ static int get_char(JNIEnv* env, const jchar *s, int spos, int mul,
     if (c >= '0' && c <= '9') {
         return (c - '0') * mul;
     } else {
-        char msg[100];
-        sprintf(msg, "Parse error at pos=%d", spos);
-        jniThrowException(env, "android/util/TimeFormatException", msg);
-        *thrown = true;
+        if (!*thrown) {
+            char msg[100];
+            sprintf(msg, "Parse error at pos=%d", spos);
+            jniThrowException(env, "android/util/TimeFormatException", msg);
+            *thrown = true;
+        }
         return 0;
     }
 }

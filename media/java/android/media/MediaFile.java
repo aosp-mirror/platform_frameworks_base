@@ -17,6 +17,7 @@
 package android.media;
 
 import android.content.ContentValues;
+import android.os.SystemProperties;
 import android.provider.MediaStore.Audio;
 import android.provider.MediaStore.Images;
 import android.provider.MediaStore.Video;
@@ -41,8 +42,9 @@ public class MediaFile {
     public static final int FILE_TYPE_AWB     = 5;
     public static final int FILE_TYPE_WMA     = 6;
     public static final int FILE_TYPE_OGG     = 7;
+    public static final int FILE_TYPE_AAC     = 8;
     private static final int FIRST_AUDIO_FILE_TYPE = FILE_TYPE_MP3;
-    private static final int LAST_AUDIO_FILE_TYPE = FILE_TYPE_OGG;
+    private static final int LAST_AUDIO_FILE_TYPE = FILE_TYPE_AAC;
 
     // MIDI file types
     public static final int FILE_TYPE_MID     = 11;
@@ -57,8 +59,9 @@ public class MediaFile {
     public static final int FILE_TYPE_3GPP    = 23;
     public static final int FILE_TYPE_3GPP2   = 24;
     public static final int FILE_TYPE_WMV     = 25;
+    public static final int FILE_TYPE_ASF     = 26;
     private static final int FIRST_VIDEO_FILE_TYPE = FILE_TYPE_MP4;
-    private static final int LAST_VIDEO_FILE_TYPE = FILE_TYPE_WMV;
+    private static final int LAST_VIDEO_FILE_TYPE = FILE_TYPE_ASF;
     
     // Image file types
     public static final int FILE_TYPE_JPEG    = 31;
@@ -101,9 +104,12 @@ public class MediaFile {
         addFileType("WAV", FILE_TYPE_WAV, "audio/x-wav");
         addFileType("AMR", FILE_TYPE_AMR, "audio/amr");
         addFileType("AWB", FILE_TYPE_AWB, "audio/amr-wb");
-        addFileType("WMA", FILE_TYPE_WMA, "audio/x-ms-wma");    
+        if (SystemProperties.getInt("ro.media.dec.aud.wma.enabled", 0) != 0) {
+            addFileType("WMA", FILE_TYPE_WMA, "audio/x-ms-wma");
+        }
         addFileType("OGG", FILE_TYPE_OGG, "application/ogg");
         addFileType("OGA", FILE_TYPE_OGG, "application/ogg");
+        addFileType("AAC", FILE_TYPE_AAC, "audio/aac");
  
         addFileType("MID", FILE_TYPE_MID, "audio/midi");
         addFileType("MIDI", FILE_TYPE_MID, "audio/midi");
@@ -120,7 +126,10 @@ public class MediaFile {
         addFileType("3GPP", FILE_TYPE_3GPP, "video/3gpp");
         addFileType("3G2", FILE_TYPE_3GPP2, "video/3gpp2");
         addFileType("3GPP2", FILE_TYPE_3GPP2, "video/3gpp2");
-        addFileType("WMV", FILE_TYPE_WMV, "video/x-ms-wmv");
+        if (SystemProperties.getInt("ro.media.dec.vid.wmv.enabled", 0) != 0) {
+            addFileType("WMV", FILE_TYPE_WMV, "video/x-ms-wmv");
+            addFileType("ASF", FILE_TYPE_ASF, "video/x-ms-asf");
+        }
 
         addFileType("JPG", FILE_TYPE_JPEG, "image/jpeg");
         addFileType("JPEG", FILE_TYPE_JPEG, "image/jpeg");

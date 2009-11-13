@@ -8,7 +8,7 @@ LOCAL_JAVA_LIBRARIES := framework-tests android.test.runner
 LOCAL_STATIC_JAVA_LIBRARIES := googlelogin-client
 
 # Resource unit tests use a private locale
-LOCAL_AAPT_FLAGS = -c xx_YY -c cs
+LOCAL_AAPT_FLAGS = -c xx_YY -c cs -c 160dpi -c 32dpi -c 240dpi
 
 LOCAL_SRC_FILES := \
 	$(call all-subdir-java-files) \

@@ -16,12 +16,7 @@
 
 package com.android.server;
 
-import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileDescriptor;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -31,7 +26,6 @@ import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.Set;
-import java.util.regex.Pattern;
 
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
@@ -49,10 +43,12 @@ import android.location.IGpsStatusProvider;
 import android.location.ILocationListener;
 import android.location.ILocationManager;
 import android.location.ILocationProvider;
+import android.location.INetInitiatedListener;
 import android.location.Location;
 import android.location.LocationManager;
 import android.location.LocationProvider;
 import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
@@ -63,7 +59,6 @@ import android.os.Message;
 import android.os.PowerManager;
 import android.os.Process;
 import android.os.RemoteException;
-import android.os.SystemClock;
 import android.provider.Settings;
 import android.util.Log;
 import android.util.PrintWriterPrinter;
@@ -71,6 +66,7 @@ import android.util.PrintWriterPrinter;
 import com.android.internal.location.GpsLocationProvider;
 import com.android.internal.location.LocationProviderProxy;
 import com.android.internal.location.MockProvider;
+import com.android.internal.location.GpsNetInitiatedHandler;
 
 /**
  * The service class that manages LocationProviders and issues location
@@ -82,16 +78,8 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
     private static final String TAG = "LocationManagerService";
     private static final boolean LOCAL_LOGV = false;
 
-    // Minimum time interval between last known location writes, in milliseconds.
-    private static final long MIN_LAST_KNOWN_LOCATION_TIME = 60L * 1000L;
-
-    // Max time to hold wake lock for, in milliseconds.
-    private static final long MAX_TIME_FOR_WAKE_LOCK = 60 * 1000L;
-
     // The last time a location was written, by provider name.
     private HashMap<String,Long> mLastWriteTime = new HashMap<String,Long>();
-
-    private static final Pattern PATTERN_COMMA = Pattern.compile(",");
 
     private static final String ACCESS_FINE_LOCATION =
         android.Manifest.permission.ACCESS_FINE_LOCATION;
@@ -118,6 +106,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
     private final Context mContext;
     private IGeocodeProvider mGeocodeProvider;
     private IGpsStatusProvider mGpsStatusProvider;
+    private INetInitiatedListener mNetInitiatedListener;
     private LocationWorkerHandler mLocationHandler;
 
     // Cache the real providers for use in addTestProvider() and removeTestProvider()
@@ -394,7 +383,12 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
     }
 
     public void locationCallbackFinished(ILocationListener listener) {
-        Receiver receiver = getReceiver(listener);
+        //Do not use getReceiver here as that will add the ILocationListener to
+        //the receiver list if it is not found.  If it is not found then the
+        //LocationListener was removed when it had a pending broadcast and should
+        //not be added back.
+        IBinder binder = listener.asBinder();
+        Receiver receiver = mReceivers.get(binder);
         if (receiver != null) {
             synchronized (receiver) {
                 // so wakelock calls will succeed
@@ -409,97 +403,6 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
         public void update(Observable o, Object arg) {
             synchronized (mLock) {
                 updateProvidersLocked();
-            }
-        }
-    }
-
-    private Location readLastKnownLocationLocked(String provider) {
-        Location location = null;
-        String s = null;
-        try {
-            File f = new File(LocationManager.SYSTEM_DIR + "/location."
-                    + provider);
-            if (!f.exists()) {
-                return null;
-            }
-            BufferedReader reader = new BufferedReader(new FileReader(f), 256);
-            s = reader.readLine();
-        } catch (IOException e) {
-            Log.w(TAG, "Unable to read last known location", e);
-        }
-
-        if (s == null) {
-            return null;
-        }
-        try {
-            String[] tokens = PATTERN_COMMA.split(s);
-            int idx = 0;
-            long time = Long.parseLong(tokens[idx++]);
-            double latitude = Double.parseDouble(tokens[idx++]);
-            double longitude = Double.parseDouble(tokens[idx++]);
-            double altitude = Double.parseDouble(tokens[idx++]);
-            float bearing = Float.parseFloat(tokens[idx++]);
-            float speed = Float.parseFloat(tokens[idx++]);
-
-            location = new Location(provider);
-            location.setTime(time);
-            location.setLatitude(latitude);
-            location.setLongitude(longitude);
-            location.setAltitude(altitude);
-            location.setBearing(bearing);
-            location.setSpeed(speed);
-        } catch (NumberFormatException nfe) {
-            Log.e(TAG, "NumberFormatException reading last known location", nfe);
-            return null;
-        }
-
-        return location;
-    }
-
-    private void writeLastKnownLocationLocked(String provider,
-        Location location) {
-        long now = SystemClock.elapsedRealtime();
-        Long last = mLastWriteTime.get(provider);
-        if ((last != null)
-            && (now - last.longValue() < MIN_LAST_KNOWN_LOCATION_TIME)) {
-            return;
-        }
-        mLastWriteTime.put(provider, now);
-
-        StringBuilder sb = new StringBuilder(100);
-        sb.append(location.getTime());
-        sb.append(',');
-        sb.append(location.getLatitude());
-        sb.append(',');
-        sb.append(location.getLongitude());
-        sb.append(',');
-        sb.append(location.getAltitude());
-        sb.append(',');
-        sb.append(location.getBearing());
-        sb.append(',');
-        sb.append(location.getSpeed());
-
-        FileWriter writer = null;
-        try {
-            File d = new File(LocationManager.SYSTEM_DIR);
-            if (!d.exists()) {
-                if (!d.mkdirs()) {
-                    Log.w(TAG, "Unable to create directory to write location");
-                    return;
-                }
-            }
-            File f = new File(LocationManager.SYSTEM_DIR + "/location." + provider);
-            writer = new FileWriter(f);
-            writer.write(sb.toString());
-        } catch (IOException e) {
-            Log.w(TAG, "Unable to write location", e);
-        } finally {
-            if (writer != null) {
-                try {
-                writer.close();
-                } catch (IOException e) {
-                    Log.w(TAG, "Exception closing file", e);
-                }
             }
         }
     }
@@ -541,6 +444,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
             // Create a gps location provider
             GpsLocationProvider provider = new GpsLocationProvider(mContext, this);
             mGpsStatusProvider = provider.getGpsStatusProvider();
+            mNetInitiatedListener = provider.getNetInitiatedListener();
             LocationProviderProxy proxy = new LocationProviderProxy(LocationManager.GPS_PROVIDER, provider);
             addProvider(proxy);
             mGpsLocationProvider = proxy;
@@ -626,7 +530,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
             }
 
             // notify provider of current network state
-            proxy.updateNetworkState(mNetworkState);
+            proxy.updateNetworkState(mNetworkState, null);
         }
     }
 
@@ -850,7 +754,9 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
          */
         void disposeLocked() {
             ArrayList<UpdateRecord> records = mRecordsByProvider.get(this.mProvider);
-            records.remove(this);
+            if (records != null) {
+                records.remove(this);
+            }
         }
 
         @Override
@@ -868,15 +774,6 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
             pw.println(prefix + "mLastFixBroadcast:");
             mLastFixBroadcast.dump(new PrintWriterPrinter(pw), prefix + "  ");
             pw.println(prefix + "mLastStatusBroadcast=" + mLastStatusBroadcast);
-        }
-        
-        /**
-         * Calls dispose().
-         */
-        @Override protected void finalize() {
-            synchronized (mLock) {
-                disposeLocked();
-            }
         }
     }
 
@@ -1030,6 +927,12 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
         try {
             if (mReceivers.remove(receiver.mKey) != null && receiver.isListener()) {
                 receiver.getListener().asBinder().unlinkToDeath(receiver, 0);
+                synchronized(receiver) {
+                    if(receiver.mPendingBroadcasts > 0) {
+                        decrementPendingBroadcasts();
+                        receiver.mPendingBroadcasts = 0;
+                    }
+                }
             }
 
             // Record which providers were associated with this listener
@@ -1108,6 +1011,11 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
     }
 
     public boolean sendExtraCommand(String provider, String command, Bundle extras) {
+        if (provider == null) {
+            // throw NullPointerException to remain compatible with previous implementation
+            throw new NullPointerException();
+        }
+
         // first check for permission to the provider
         checkPermissionsSafe(provider);
         // and check for ACCESS_LOCATION_EXTRA_COMMANDS
@@ -1118,11 +1026,27 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
 
         synchronized (mLock) {
             LocationProviderProxy proxy = mProvidersByName.get(provider);
-            if (provider == null) {
+            if (proxy == null) {
                 return false;
             }
     
             return proxy.sendExtraCommand(command, extras);
+        }
+    }
+
+    public boolean sendNiResponse(int notifId, int userResponse)
+    {
+        if (Binder.getCallingUid() != Process.myUid()) {
+            throw new SecurityException(
+                    "calling sendNiResponse from outside of the system is not allowed");
+        }
+        try {
+            return mNetInitiatedListener.sendNiResponse(notifId, userResponse);
+        }
+        catch (RemoteException e)
+        {
+            Log.e(TAG, "RemoteException in LocationManagerService.sendNiResponse");
+            return false;
         }
     }
 
@@ -1157,13 +1081,13 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
             return mIntent;
         }
 
-        boolean isInProximity(double latitude, double longitude) {
+        boolean isInProximity(double latitude, double longitude, float accuracy) {
             Location loc = new Location("");
             loc.setLatitude(latitude);
             loc.setLongitude(longitude);
 
             double radius = loc.distanceTo(mLocation);
-            return radius <= mRadius;
+            return radius <= Math.max(mRadius,accuracy);
         }
         
         @Override
@@ -1203,6 +1127,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
             long now = System.currentTimeMillis();
             double latitude = loc.getLatitude();
             double longitude = loc.getLongitude();
+            float accuracy = loc.getAccuracy();
             ArrayList<PendingIntent> intentsToRemove = null;
 
             for (ProximityAlert alert : mProximityAlerts.values()) {
@@ -1212,7 +1137,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
                 if ((expiration == -1) || (now <= expiration)) {
                     boolean entered = mProximitiesEntered.contains(alert);
                     boolean inProximity =
-                        alert.isInProximity(latitude, longitude);
+                        alert.isInProximity(latitude, longitude, accuracy);
                     if (!entered && inProximity) {
                         if (LOCAL_LOGV) {
                             Log.v(TAG, "Entered alert");
@@ -1487,16 +1412,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
             return null;
         }
 
-        Location location = mLastKnownLocation.get(provider);
-        if (location == null) {
-            // Get the persistent last known location for the provider
-            location = readLastKnownLocationLocked(provider);
-            if (location != null) {
-                mLastKnownLocation.put(provider, location);
-            }
-        }
-
-        return location;
+        return mLastKnownLocation.get(provider);
     }
 
     private static boolean shouldBroadcastSafe(Location loc, Location lastLoc, UpdateRecord record) {
@@ -1541,7 +1457,6 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
         } else {
             lastLocation.set(location);
         }
-        writeLastKnownLocationLocked(provider, location);
 
         // Fetch latest status update time
         long newStatusUpdateTime = p.getStatusUpdateTime();
@@ -1686,13 +1601,15 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
                 } else {
                     mNetworkState = LocationProvider.TEMPORARILY_UNAVAILABLE;
                 }
+                NetworkInfo info =
+                        (NetworkInfo)intent.getExtra(ConnectivityManager.EXTRA_NETWORK_INFO);
 
                 // Notify location providers of current network state
                 synchronized (mLock) {
                     for (int i = mProviders.size() - 1; i >= 0; i--) {
                         LocationProviderProxy provider = mProviders.get(i);
                         if (provider.requiresNetwork()) {
-                            provider.updateNetworkState(mNetworkState);
+                            provider.updateNetworkState(mNetworkState, info);
                         }
                     }
                 }
@@ -1792,6 +1709,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
         boolean supportsSpeed, boolean supportsBearing, int powerRequirement, int accuracy) {
         checkMockPermissionsSafe();
 
+        long identity = Binder.clearCallingIdentity();
         synchronized (mLock) {
             MockProvider provider = new MockProvider(name, this,
                 requiresNetwork, requiresSatellite,
@@ -1814,6 +1732,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
             mLastKnownLocation.put(name, null);
             updateProvidersLocked();
         }
+        Binder.restoreCallingIdentity(identity);
     }
 
     public void removeTestProvider(String provider) {
@@ -1823,6 +1742,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
             if (mockProvider == null) {
                 throw new IllegalArgumentException("Provider \"" + provider + "\" unknown");
             }
+            long identity = Binder.clearCallingIdentity();
             removeProvider(mProvidersByName.get(provider));
             mMockProviders.remove(mockProvider);
             // reinstall real provider if we were mocking GPS or network provider
@@ -1835,6 +1755,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
             }
             mLastKnownLocation.put(provider, null);
             updateProvidersLocked();
+            Binder.restoreCallingIdentity(identity);
         }
     }
 
@@ -1870,6 +1791,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
             if (mockProvider == null) {
                 throw new IllegalArgumentException("Provider \"" + provider + "\" unknown");
             }
+            long identity = Binder.clearCallingIdentity();
             if (enabled) {
                 mockProvider.enable();
                 mEnabledProviders.add(provider);
@@ -1880,6 +1802,7 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
                 mDisabledProviders.add(provider);
             }
             updateProvidersLocked();
+            Binder.restoreCallingIdentity(identity);
         }
     }
 
@@ -1890,9 +1813,11 @@ public class LocationManagerService extends ILocationManager.Stub implements Run
             if (mockProvider == null) {
                 throw new IllegalArgumentException("Provider \"" + provider + "\" unknown");
             }
+            long identity = Binder.clearCallingIdentity();
             mEnabledProviders.remove(provider);
             mDisabledProviders.remove(provider);
             updateProvidersLocked();
+            Binder.restoreCallingIdentity(identity);
         }
     }
 

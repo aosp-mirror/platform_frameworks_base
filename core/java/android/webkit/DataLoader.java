@@ -16,11 +16,9 @@
 
 package android.webkit;
 
-import org.apache.http.protocol.HTTP;
-
-import android.net.http.Headers;
-
 import java.io.ByteArrayInputStream;
+
+import org.apache.harmony.luni.util.Base64;
 
 /**
  * This class is a concrete implementation of StreamLoader that uses the
@@ -29,8 +27,6 @@ import java.io.ByteArrayInputStream;
  * response headers.
  */
 class DataLoader extends StreamLoader {
-
-    private String mContentType;  // Content mimetype, if supplied in URL
 
     /**
      * Constructor uses the dataURL as the source for an InputStream
@@ -41,16 +37,20 @@ class DataLoader extends StreamLoader {
         super(loadListener);
 
         String url = dataUrl.substring("data:".length());
-        String content;
+        byte[] data = null;
         int commaIndex = url.indexOf(',');
         if (commaIndex != -1) {
-            mContentType = url.substring(0, commaIndex);
-            content = url.substring(commaIndex + 1);
+            String contentType = url.substring(0, commaIndex);
+            data = url.substring(commaIndex + 1).getBytes();
+            loadListener.parseContentTypeHeader(contentType);
+            if ("base64".equals(loadListener.transferEncoding())) {
+                data = Base64.decode(data);
+            }
         } else {
-            content = url;
+            data = url.getBytes();
         }
-        mDataStream = new ByteArrayInputStream(content.getBytes());
-        mContentLength = content.length();
+        mDataStream = new ByteArrayInputStream(data);
+        mContentLength = data.length;
     }
 
     @Override
@@ -60,10 +60,7 @@ class DataLoader extends StreamLoader {
     }
 
     @Override
-    protected void buildHeaders(Headers headers) {
-        if (mContentType != null) {
-            headers.setContentType(mContentType);
-        }
+    protected void buildHeaders(android.net.http.Headers h) {
     }
 
     /**

@@ -16,11 +16,15 @@
 
 package com.android.unit_tests;
 
+import android.telephony.TelephonyManager;
+
 import com.android.internal.telephony.GsmAlphabet;
 import com.android.internal.telephony.SmsHeader;
+import com.android.internal.telephony.cdma.SmsMessage;
 import com.android.internal.telephony.cdma.sms.BearerData;
 import com.android.internal.telephony.cdma.sms.UserData;
 import com.android.internal.telephony.cdma.sms.CdmaSmsAddress;
+import com.android.internal.telephony.SmsMessageBase.TextEncodingDetails;
 import com.android.internal.util.BitwiseInputStream;
 import com.android.internal.util.BitwiseOutputStream;
 import com.android.internal.util.HexDump;
@@ -28,14 +32,83 @@ import com.android.internal.util.HexDump;
 import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.SmallTest;
 
-import java.util.Iterator;
-
-import java.lang.Integer;
-
 import android.util.Log;
 
+import java.util.ArrayList;
+
 public class CdmaSmsTest extends AndroidTestCase {
-    private final static String LOG_TAG = "CDMA";
+    private final static String LOG_TAG = "XXX CdmaSmsTest XXX";
+
+    @SmallTest
+    public void testCdmaSmsAddrParsing() throws Exception {
+        CdmaSmsAddress addr = CdmaSmsAddress.parse("6502531000");
+        assertEquals(addr.ton, CdmaSmsAddress.TON_UNKNOWN);
+        assertEquals(addr.digitMode, CdmaSmsAddress.DIGIT_MODE_4BIT_DTMF);
+        assertEquals(addr.numberMode, CdmaSmsAddress.NUMBER_MODE_NOT_DATA_NETWORK);
+        assertEquals(addr.numberOfDigits, 10);
+        assertEquals(addr.origBytes.length, 10);
+        byte[] data = {6, 5, 10, 2, 5, 3, 1, 10, 10, 10};
+        for (int i = 0; i < data.length; i++) {
+            assertEquals(addr.origBytes[i], data[i]);
+        }
+        addr = CdmaSmsAddress.parse("(650) 253-1000");
+        assertEquals(addr.ton, CdmaSmsAddress.TON_UNKNOWN);
+        assertEquals(addr.digitMode, CdmaSmsAddress.DIGIT_MODE_4BIT_DTMF);
+        assertEquals(addr.numberMode, CdmaSmsAddress.NUMBER_MODE_NOT_DATA_NETWORK);
+        assertEquals(addr.numberOfDigits, 10);
+        assertEquals(addr.origBytes.length, 10);
+        byte[] data2 = {6, 5, 10, 2, 5, 3, 1, 10, 10, 10};
+        for (int i = 0; i < data2.length; i++) {
+            assertEquals(addr.origBytes[i], data2[i]);
+        }
+        addr = CdmaSmsAddress.parse("650.253.1000");
+        assertEquals(addr.ton, CdmaSmsAddress.TON_UNKNOWN);
+        assertEquals(addr.digitMode, CdmaSmsAddress.DIGIT_MODE_4BIT_DTMF);
+        assertEquals(addr.numberMode, CdmaSmsAddress.NUMBER_MODE_NOT_DATA_NETWORK);
+        assertEquals(addr.numberOfDigits, 10);
+        assertEquals(addr.origBytes.length, 10);
+        byte[] data5 = {6, 5, 10, 2, 5, 3, 1, 10, 10, 10};
+        for (int i = 0; i < data2.length; i++) {
+            assertEquals(addr.origBytes[i], data5[i]);
+        }
+        addr = CdmaSmsAddress.parse("(+886) 917 222 555");
+        assertEquals(addr.ton, CdmaSmsAddress.TON_INTERNATIONAL_OR_IP);
+        assertEquals(addr.digitMode, CdmaSmsAddress.DIGIT_MODE_4BIT_DTMF);
+        assertEquals(addr.numberMode, CdmaSmsAddress.NUMBER_MODE_NOT_DATA_NETWORK);
+        assertEquals(addr.numberOfDigits, 12);
+        assertEquals(addr.origBytes.length, 12);
+        byte[] data3 = {8, 8, 6, 9, 1, 7, 2, 2, 2, 5, 5, 5};
+        for (int i = 0; i < data3.length; i++) {
+            assertEquals(addr.origBytes[i], data3[i]);
+        }
+        addr = CdmaSmsAddress.parse("(650) *253-1000 #600");
+        byte[] data4 = {6, 5, 10, 11, 2, 5, 3, 1, 10, 10, 10, 12, 6, 10, 10};
+        for (int i = 0; i < data4.length; i++) {
+            assertEquals(addr.origBytes[i], data4[i]);
+        }
+        String input = "x@y.com,a@b.com";
+        addr = CdmaSmsAddress.parse(input);
+        assertEquals(addr.ton, CdmaSmsAddress.TON_NATIONAL_OR_EMAIL);
+        assertEquals(addr.digitMode, CdmaSmsAddress.DIGIT_MODE_8BIT_CHAR);
+        assertEquals(addr.numberMode, CdmaSmsAddress.NUMBER_MODE_DATA_NETWORK);
+        assertEquals(addr.numberOfDigits, 15);
+        assertEquals(addr.origBytes.length, 15);
+        assertEquals(new String(addr.origBytes), input);
+        addr = CdmaSmsAddress.parse("foo bar");
+        assertEquals(addr.ton, CdmaSmsAddress.TON_UNKNOWN);
+        assertEquals(addr.digitMode, CdmaSmsAddress.DIGIT_MODE_8BIT_CHAR);
+        assertEquals(addr.numberMode, CdmaSmsAddress.NUMBER_MODE_DATA_NETWORK);
+        assertEquals(addr.numberOfDigits, 6);
+        assertEquals(addr.origBytes.length, 6);
+        assertEquals(new String(addr.origBytes), "foobar");
+        addr = CdmaSmsAddress.parse("f\noo\tb   a\rr");
+        assertEquals(new String(addr.origBytes), "foobar");
+        assertEquals(CdmaSmsAddress.parse("f\u0000oo bar"), null);
+        assertEquals(CdmaSmsAddress.parse("f\u0007oo bar"), null);
+        assertEquals(CdmaSmsAddress.parse("f\u0080oo bar"), null);
+        assertEquals(CdmaSmsAddress.parse("f\u1ECFboo\u001fbar"), null);
+        assertEquals(CdmaSmsAddress.parse("f\u0080oo bar"), null);
+    }
 
     @SmallTest
     public void testUserData7bitGsm() throws Exception {
@@ -84,6 +157,15 @@ public class CdmaSmsTest extends AndroidTestCase {
         assertEquals(userData.msgEncoding, revBearerData.userData.msgEncoding);
         assertEquals(userData.payloadStr.length(), revBearerData.userData.numFields);
         assertEquals(userData.payloadStr, revBearerData.userData.payloadStr);
+        userData.payloadStr = "Test \u007f standard \u0000 SMS";
+        revBearerData = BearerData.decode(BearerData.encode(bearerData));
+        assertEquals("Test   standard   SMS", revBearerData.userData.payloadStr);
+        userData.payloadStr = "Test \n standard \r SMS";
+        revBearerData = BearerData.decode(BearerData.encode(bearerData));
+        assertEquals(userData.payloadStr, revBearerData.userData.payloadStr);
+        userData.payloadStr = "";
+        revBearerData = BearerData.decode(BearerData.encode(bearerData));
+        assertEquals(userData.payloadStr, revBearerData.userData.payloadStr);
     }
 
     @SmallTest
@@ -105,6 +187,21 @@ public class CdmaSmsTest extends AndroidTestCase {
         assertEquals(userData.msgEncoding, revBearerData.userData.msgEncoding);
         assertEquals(userData.payloadStr.length(), revBearerData.userData.numFields);
         assertEquals(userData.payloadStr, revBearerData.userData.payloadStr);
+        userData.payloadStr = "1234567";
+        revBearerData = BearerData.decode(BearerData.encode(bearerData));
+        assertEquals(userData.payloadStr, revBearerData.userData.payloadStr);
+        userData.payloadStr = "";
+        revBearerData = BearerData.decode(BearerData.encode(bearerData));
+        assertEquals(userData.payloadStr, revBearerData.userData.payloadStr);
+        userData.payloadStr = "12345678901234567890123456789012345678901234567890" +
+                "12345678901234567890123456789012345678901234567890" +
+                "12345678901234567890123456789012345678901234567890" +
+                "1234567890";
+        revBearerData = BearerData.decode(BearerData.encode(bearerData));
+        assertEquals(userData.payloadStr, revBearerData.userData.payloadStr);
+        userData.payloadStr = "Test \u007f illegal \u0000 SMS chars";
+        revBearerData = BearerData.decode(BearerData.encode(bearerData));
+        assertEquals("Test   illegal   SMS chars", revBearerData.userData.payloadStr);
         userData.payloadStr = "More @ testing\nis great^|^~woohoo";
         revBearerData = BearerData.decode(BearerData.encode(bearerData));
         assertEquals(userData.payloadStr, revBearerData.userData.payloadStr);
@@ -152,6 +249,12 @@ public class CdmaSmsTest extends AndroidTestCase {
         assertEquals(false, revBearerData.hasUserDataHeader);
         assertEquals(userData.msgEncoding, revBearerData.userData.msgEncoding);
         assertEquals(userData.payloadStr.length(), revBearerData.userData.numFields);
+        assertEquals(userData.payloadStr, revBearerData.userData.payloadStr);
+        userData.payloadStr = "1234567";
+        revBearerData = BearerData.decode(BearerData.encode(bearerData));
+        assertEquals(userData.payloadStr, revBearerData.userData.payloadStr);
+        userData.payloadStr = "";
+        revBearerData = BearerData.decode(BearerData.encode(bearerData));
         assertEquals(userData.payloadStr, revBearerData.userData.payloadStr);
     }
 
@@ -437,29 +540,19 @@ public class CdmaSmsTest extends AndroidTestCase {
 
     @SmallTest
     public void testNumberOfMessages() throws Exception {
+        // Note that the message text below does not properly reflect
+        // the message count.  The author of these messages was
+        // apparently unaware that the values are bcd encoded, and the
+        // values being tested against (not the ones in the message
+        // text) are actually correct.
         String pdu1 = "000310409001124896a794e07595f69f199540ea759a0dc8e00b0163";
         BearerData bd1 = BearerData.decode(HexDump.hexStringToByteArray(pdu1));
         assertEquals("Test Voice mail 99", bd1.userData.payloadStr);
-        assertEquals(99, bd1.numberOfMessages);
+        assertEquals(63, bd1.numberOfMessages);
         String pdu2 = "00031040900113489ea794e07595f69f199540ea759a0988c0600b0164";
         BearerData bd2 = BearerData.decode(HexDump.hexStringToByteArray(pdu2));
         assertEquals("Test Voice mail 100", bd2.userData.payloadStr);
-        assertEquals(100, bd2.numberOfMessages);
-    }
-
-    @SmallTest
-    public void testNumberOfMessagesFeedback() throws Exception {
-        BearerData bearerData = new BearerData();
-        bearerData.messageType = BearerData.MESSAGE_TYPE_DELIVER;
-        bearerData.messageId = 0;
-        bearerData.hasUserDataHeader = false;
-        UserData userData = new UserData();
-        userData.payloadStr = "test message count";
-        bearerData.userData = userData;
-        bearerData.numberOfMessages = 27;
-        byte []encodedSms = BearerData.encode(bearerData);
-        BearerData revBearerData = BearerData.decode(encodedSms);
-        assertEquals(bearerData.numberOfMessages, revBearerData.numberOfMessages);
+        assertEquals(64, bd2.numberOfMessages);
     }
 
     @SmallTest
@@ -576,6 +669,16 @@ public class CdmaSmsTest extends AndroidTestCase {
         BearerData bd4 = BearerData.decode(HexDump.hexStringToByteArray(pdu4));
         assertEquals(bd4.alert, 3);
         assertEquals(bd4.userData.payloadStr, "Test Alert 3");
+        String pdu5 = "00031000000126114F4CBCFA20DB979F3C39F2A0C9976" +
+            "69ED979794187665E5D1028EFA7A6840E1062D3D39A900C028000";
+        BearerData bd5 = BearerData.decode(HexDump.hexStringToByteArray(pdu5));
+        assertEquals(bd5.alert, BearerData.ALERT_MEDIUM_PRIO);
+        assertEquals(bd5.userData.payloadStr, "test message delivery alert (with 8 bits)");
+        String pdu6 = "00031000000126114F4CBCFA20DB979F3C39F2A0C9976" +
+            "69ED979794187665E5D1028EFA7A6840C1062D3D39A900C00";
+        BearerData bd6 = BearerData.decode(HexDump.hexStringToByteArray(pdu6));
+        assertEquals(bd6.userData.payloadStr, "test message delivery alert (with 0 bits)");
+        assertEquals(bd6.alertIndicatorSet, false);
     }
 
     @SmallTest
@@ -663,7 +766,6 @@ public class CdmaSmsTest extends AndroidTestCase {
     public void testDisplayMode() throws Exception {
         String pdu1 = "0003104090010c485f4194dfea34becf61b8400f0100";
         BearerData bd1 = BearerData.decode(HexDump.hexStringToByteArray(pdu1));
-        //Log.d(LOG_TAG, "bd1 = " + bd1);
         assertEquals(bd1.displayMode, BearerData.DISPLAY_MODE_IMMEDIATE);
         String pdu2 = "0003104090010c485f4194dfea34becf61b8400f0140";
         BearerData bd2 = BearerData.decode(HexDump.hexStringToByteArray(pdu2));
@@ -707,4 +809,79 @@ public class CdmaSmsTest extends AndroidTestCase {
         assertEquals(bd4.userData.payloadStr, "ABCDEFG");
     }
 
+    @SmallTest
+    public void testUserDataHeaderWithEightCharMsg() throws Exception {
+        BearerData bearerData = new BearerData();
+        bearerData.messageType = BearerData.MESSAGE_TYPE_DELIVER;
+        bearerData.messageId = 55;
+        SmsHeader.ConcatRef concatRef = new SmsHeader.ConcatRef();
+        concatRef.refNumber = 0xEE;
+        concatRef.msgCount = 2;
+        concatRef.seqNumber = 2;
+        concatRef.isEightBits = true;
+        SmsHeader smsHeader = new SmsHeader();
+        smsHeader.concatRef = concatRef;
+        UserData userData = new UserData();
+        userData.payloadStr = "01234567";
+        userData.userDataHeader = smsHeader;
+        bearerData.userData = userData;
+        byte[] encodedSms = BearerData.encode(bearerData);
+        BearerData revBearerData = BearerData.decode(encodedSms);
+        assertEquals(userData.payloadStr, revBearerData.userData.payloadStr);
+    }
+
+    @SmallTest
+    public void testFragmentText() throws Exception {
+        boolean isCdmaPhone = (TelephonyManager.getDefault().getPhoneType() ==
+                TelephonyManager.PHONE_TYPE_CDMA);
+        // Valid 160 character ASCII text.
+        String text1 = "123456789012345678901234567890123456789012345678901234567890" +
+                "1234567890123456789012345678901234567890123456789012345678901234567890" +
+                "12345678901234567890123456789[";
+        TextEncodingDetails ted = SmsMessage.calculateLength(text1, false);
+        assertEquals(ted.msgCount, 1);
+        assertEquals(ted.codeUnitCount, 160);
+        assertEquals(ted.codeUnitSize, 1);
+        if (isCdmaPhone) {
+            ArrayList<String> fragments = android.telephony.SmsMessage.fragmentText(text1);
+            assertEquals(fragments.size(), 1);
+        }
+
+        /*
+           This is not a valid test: we will never encode a single-segment
+           EMS message.  Leaving this here, since we may try to support
+           this in the future.
+
+        // Valid 160 character GSM text -- the last character is
+        // non-ASCII, and so this will currently generate a singleton
+        // EMS message, which is not necessarily supported by Verizon.
+        String text2 = "123456789012345678901234567890123456789012345678901234567890" +
+                "1234567890123456789012345678901234567890123456789012345678901234567890" +
+                "12345678901234567890123456789\u00a3";  // Trailing pound-currency sign.
+        ted = SmsMessage.calculateLength(text2, false);
+        assertEquals(ted.msgCount, 1);
+        assertEquals(ted.codeUnitCount, 160);
+        assertEquals(ted.codeUnitSize, 1);
+        if (isCdmaPhone) {
+            ArrayList<String> fragments = android.telephony.SmsMessage.fragmentText(text2);
+            assertEquals(fragments.size(), 1);
+        }
+        */
+
+        // *IF* we supported single-segment EMS, this text would result in a
+        // single fragment with 7-bit encoding. But we don't, so this text
+        // results in three fragments of 16-bit encoding.
+        String text2 = "123456789012345678901234567890123456789012345678901234567890" +
+                "1234567890123456789012345678901234567890123456789012345678901234567890" +
+                "12345678901234567890123456789\u00a3";  // Trailing pound-currency sign.
+        ted = SmsMessage.calculateLength(text2, false);
+        assertEquals(3, ted.msgCount);
+        assertEquals(160, ted.codeUnitCount);
+        assertEquals(3, ted.codeUnitSize);
+        if (isCdmaPhone) {
+            ArrayList<String> fragments = android.telephony.SmsMessage.fragmentText(text2);
+            assertEquals(3, fragments.size());
+        }
+
+    }
 }

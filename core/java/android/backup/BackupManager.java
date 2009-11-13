@@ -43,7 +43,7 @@ public class BackupManager {
     private static final String TAG = "BackupManager";
 
     /** @hide TODO: REMOVE THIS */
-    public static final boolean EVEN_THINK_ABOUT_DOING_RESTORE = false;
+    public static final boolean EVEN_THINK_ABOUT_DOING_RESTORE = true;
 
     private Context mContext;
     private static IBackupManager sService;

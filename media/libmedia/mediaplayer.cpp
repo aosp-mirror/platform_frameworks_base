@@ -24,13 +24,13 @@
 #include <unistd.h>
 #include <fcntl.h>
 
-#include <utils/IServiceManager.h>
-#include <utils/IPCThreadState.h>
+#include <binder/IServiceManager.h>
+#include <binder/IPCThreadState.h>
 
 #include <media/mediaplayer.h>
 #include <media/AudioTrack.h>
 
-#include <utils/MemoryBase.h>
+#include <binder/MemoryBase.h>
 
 namespace android {
 
@@ -196,12 +196,47 @@ status_t MediaPlayer::setDataSource(int fd, int64_t offset, int64_t length)
     return err;
 }
 
+status_t MediaPlayer::invoke(const Parcel& request, Parcel *reply)
+{
+    Mutex::Autolock _l(mLock);
+    if ((mPlayer != NULL) && ( mCurrentState & MEDIA_PLAYER_INITIALIZED ))
+    {
+         LOGV("invoke %d", request.dataSize());
+         return  mPlayer->invoke(request, reply);
+    }
+    LOGE("invoke failed: wrong state %X", mCurrentState);
+    return INVALID_OPERATION;
+}
+
+status_t MediaPlayer::setMetadataFilter(const Parcel& filter)
+{
+    LOGD("setMetadataFilter");
+    Mutex::Autolock lock(mLock);
+    if (mPlayer == NULL) {
+        return NO_INIT;
+    }
+    return mPlayer->setMetadataFilter(filter);
+}
+
+status_t MediaPlayer::getMetadata(bool update_only, bool apply_filter, Parcel *metadata)
+{
+    LOGD("getMetadata");
+    Mutex::Autolock lock(mLock);
+    if (mPlayer == NULL) {
+        return NO_INIT;
+    }
+    return mPlayer->getMetadata(update_only, apply_filter, metadata);
+}
+
 status_t MediaPlayer::setVideoSurface(const sp<Surface>& surface)
 {
     LOGV("setVideoSurface");
     Mutex::Autolock _l(mLock);
     if (mPlayer == 0) return NO_INIT;
-    return  mPlayer->setVideoSurface(surface->getISurface());
+    if (surface != NULL)
+        return  mPlayer->setVideoSurface(surface->getISurface());
+    else
+        return  mPlayer->setVideoSurface(NULL);
 }
 
 // must call with lock held
@@ -653,6 +688,63 @@ MediaPlayer::DeathNotifier::~DeathNotifier()
     }
     return p;
 
+}
+
+extern "C" {
+#define FLOATING_POINT 1
+#include "fftwrap.h"
+}
+
+static void *ffttable = NULL;
+
+// peeks at the audio data and fills 'data' with the requested kind
+// (currently kind=0 returns mono 16 bit PCM data, and kind=1 returns
+// 256 point FFT data). Return value is number of samples returned,
+// which may be 0.
+/*static*/ int MediaPlayer::snoop(short* data, int len, int kind) {
+
+    sp<IMemory> p;
+    const sp<IMediaPlayerService>& service = getMediaPlayerService();
+    if (service != 0) {
+        // Take a peek at the waveform. The returned data consists of 16 bit mono PCM data.
+        p = service->snoop();
+
+        if (p == NULL) {
+            return 0;
+        }
+
+        if (kind == 0) { // return waveform data
+            int plen = p->size();
+            len *= 2; // number of shorts -> number of bytes
+            short *src = (short*) p->pointer();
+            if (plen > len) {
+                plen = len;
+            }
+            memcpy(data, src, plen);
+            return plen / sizeof(short); // return number of samples
+        } else if (kind == 1) {
+            // TODO: use a more efficient FFT
+            // Right now this uses the speex library, which is compiled to do a float FFT
+            if (!ffttable) ffttable = spx_fft_init(512);
+            short *usrc = (short*) p->pointer();
+            float fsrc[512];
+            for (int i=0;i<512;i++)
+                fsrc[i] = usrc[i];
+            float fdst[512];
+            spx_fft_float(ffttable, fsrc, fdst);
+            if (len > 512) {
+                len = 512;
+            }
+            len /= 2; // only half the output data is valid
+            for (int i=0; i < len; i++)
+                data[i] = fdst[i];
+            return len;
+        }
+
+    } else {
+        LOGE("Unable to locate media service");
+    }
+    return 0;
 }
 
 }; // namespace android

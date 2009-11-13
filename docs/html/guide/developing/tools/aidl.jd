@@ -194,7 +194,6 @@ started.</p>
 <li>Make your class implement the {@link android.os.Parcelable} interface.</li>
 <li>Implement the method <code>public void writeToParcel(Parcel out)</code> that takes the
 current state of the object and writes it to a parcel.</li>
-<li>Implement the method <code>public void readFromParcel(Parcel in)</code> that reads the
 value in a parcel into your object.</li>
 <li>Add a static field called <code>CREATOR</code> to your class which is an object implementing
 the {@link android.os.Parcelable.Creator Parcelable.Creator} interface.</li>

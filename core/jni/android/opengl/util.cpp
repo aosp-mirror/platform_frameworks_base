@@ -1,16 +1,16 @@
 /**
  ** Copyright 2007, The Android Open Source Project
  **
- ** Licensed under the Apache License, Version 2.0 (the "License"); 
- ** you may not use this file except in compliance with the License. 
- ** You may obtain a copy of the License at 
+ ** Licensed under the Apache License, Version 2.0 (the "License");
+ ** you may not use this file except in compliance with the License.
+ ** You may obtain a copy of the License at
  **
- **     http://www.apache.org/licenses/LICENSE-2.0 
+ **     http://www.apache.org/licenses/LICENSE-2.0
  **
- ** Unless required by applicable law or agreed to in writing, software 
- ** distributed under the License is distributed on an "AS IS" BASIS, 
- ** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
- ** See the License for the specific language governing permissions and 
+ ** Unless required by applicable law or agreed to in writing, software
+ ** distributed under the License is distributed on an "AS IS" BASIS,
+ ** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ ** See the License for the specific language governing permissions and
  ** limitations under the License.
  */
 
@@ -53,18 +53,18 @@ public:
     MallocHelper() {
         mData = 0;
     }
-    
+
     ~MallocHelper() {
         if (mData != 0) {
             free(mData);
         }
     }
-    
+
     void* alloc(size_t size) {
         mData = malloc(size);
         return mData;
     }
-    
+
 private:
     void* mData;
 };
@@ -88,17 +88,17 @@ int visibilityTest(float* pWS, float* pPositions, int positionsLength,
     int result = POLY_CLIP_OUT;
     float* pTransformed = 0;
     int transformedIndexCount = 0;
-    
+
     if ( indexCount < 3 ) {
         return POLY_CLIP_OUT;
     }
-    
+
     // Find out how many vertices we need to transform
     // We transform every vertex between the min and max indices, inclusive.
     // This is OK for the data sets we expect to use with this function, but
     // for other loads it might be better to use a more sophisticated vertex
     // cache of some sort.
-    
+
     int minIndex = 65536;
     int maxIndex = -1;
     for(int i = 0; i < indexCount; i++) {
@@ -110,18 +110,18 @@ int visibilityTest(float* pWS, float* pPositions, int positionsLength,
             maxIndex = index;
         }
     }
-    
+
     if ( maxIndex * 3 > positionsLength) {
         return -1;
     }
-    
+
     transformedIndexCount = maxIndex - minIndex + 1;
     pTransformed = (float*) mallocHelper.alloc(transformedIndexCount * 4 * sizeof(float));
-    
+
     if (pTransformed == 0 ) {
         return -2;
     }
-    
+
     // Transform the vertices
     {
         const float* pSrc = pPositions + 3 * minIndex;
@@ -130,9 +130,9 @@ int visibilityTest(float* pWS, float* pPositions, int positionsLength,
             mx4transform(pSrc[0], pSrc[1], pSrc[2], 1.0f, pWS,  pDst);
         }
     }
-    
+
     // Clip the triangles
-    
+
     Poly poly;
     float* pDest = & poly.vert[0].sx;
     for (int i = 0; i < indexCount; i += 3) {
@@ -166,14 +166,14 @@ public:
             mEnv->ReleasePrimitiveArrayCritical(mRef, mBase, mReleaseParam);
         }
     }
-    
+
     // We seperate the bounds check from the initialization because we want to
     // be able to bounds-check multiple arrays, and we can't throw an exception
     // after we've called GetPrimitiveArrayCritical.
-    
+
     // Return true if the bounds check succeeded
     // Else instruct the runtime to throw an exception
-    
+
     bool check() {
         if ( ! mRef) {
             mEnv->ThrowNew(gIAEClass, "array == null");
@@ -190,9 +190,9 @@ public:
         }
         return true;
     }
-    
+
     // Bind the array.
-    
+
     void bind() {
         mBase = (T*) mEnv->GetPrimitiveArrayCritical(mRef, (jboolean *) 0);
         mData = mBase + mOffset;
@@ -201,10 +201,10 @@ public:
     void commitChanges() {
         mReleaseParam = 0;
     }
-    
+
     T* mData;
     int mLength;
-    
+
 private:
     T* mBase;
     JNIEnv* mEnv;
@@ -226,29 +226,29 @@ inline float distance2(float x, float y, float z) {
 inline float distance(float x, float y, float z) {
     return sqrtf(distance2(x, y, z));
 }
-    
+
 static
 void util_computeBoundingSphere(JNIEnv *env, jclass clazz,
         jfloatArray positions_ref, jint positionsOffset, jint positionsCount,
         jfloatArray sphere_ref, jint sphereOffset) {
     FloatArrayHelper positions(env, positions_ref, positionsOffset, 0);
     FloatArrayHelper sphere(env, sphere_ref, sphereOffset, 4);
-    
+
     bool checkOK = positions.check() && sphere.check();
         if (! checkOK) {
         return;
     }
-    
+
     positions.bind();
     sphere.bind();
-    
+
     if ( positionsCount < 1 ) {
         env->ThrowNew(gIAEClass, "positionsCount < 1");
         return;
     }
-    
+
     const float* pSrc = positions.mData;
-    
+
     // find bounding box
     float x0 = *pSrc++;
     float x1 = x0;
@@ -256,7 +256,7 @@ void util_computeBoundingSphere(JNIEnv *env, jclass clazz,
     float y1 = y0;
     float z0 = *pSrc++;
     float z1 = z0;
-    
+
     for(int i = 1; i < positionsCount; i++) {
         {
             float x = *pSrc++;
@@ -286,7 +286,7 @@ void util_computeBoundingSphere(JNIEnv *env, jclass clazz,
             }
         }
     }
-    
+
     // Because we know our input meshes fit pretty well into bounding boxes,
     // just take the diagonal of the box as defining our sphere.
     float* pSphere = sphere.mData;
@@ -297,7 +297,7 @@ void util_computeBoundingSphere(JNIEnv *env, jclass clazz,
     *pSphere++ = y0 + dy * 0.5f;
     *pSphere++ = z0 + dz * 0.5f;
     *pSphere++ = distance(dx, dy, dz) * 0.5f;
-    
+
     sphere.commitChanges();
 }
 
@@ -344,7 +344,7 @@ static void computeFrustum(const float* m, float* f) {
     normalizePlane(f);
     f+= 4;
 
-    // left    
+    // left
     f[0] = m3  + m[0];
     f[1] = m7  + m[4];
     f[2] = m11 + m[8];
@@ -396,20 +396,20 @@ int util_frustumCullSpheres(JNIEnv *env, jclass clazz,
     FloatArrayHelper mvp(env, mvp_ref, mvpOffset, 16);
     FloatArrayHelper spheres(env, spheres_ref, spheresOffset, spheresCount * 4);
     IntArrayHelper results(env, results_ref, resultsOffset, resultsCapacity);
-    
+
     bool initializedOK = mvp.check() && spheres.check() && results.check();
         if (! initializedOK) {
         return -1;
     }
-    
+
     mvp.bind();
     spheres.bind();
     results.bind();
-        
+
     computeFrustum(mvp.mData, frustum);
-    
+
     // Cull the spheres
-    
+
     pSphere = spheres.mData;
     pResults = results.mData;
     outputCount = 0;
@@ -436,27 +436,27 @@ int util_visibilityTest(JNIEnv *env, jclass clazz,
         jfloatArray ws_ref, jint wsOffset,
         jfloatArray positions_ref, jint positionsOffset,
         jcharArray indices_ref, jint indicesOffset, jint indexCount) {
-    
+
     FloatArrayHelper ws(env, ws_ref, wsOffset, 16);
     FloatArrayHelper positions(env, positions_ref, positionsOffset, 0);
     UnsignedShortArrayHelper indices(env, indices_ref, indicesOffset, 0);
-    
+
     bool checkOK = ws.check() && positions.check() && indices.check();
     if (! checkOK) {
         // Return value will be ignored, because an exception has been thrown.
         return -1;
     }
-    
+
     if (indices.mLength < indexCount) {
         env->ThrowNew(gIAEClass, "length < offset + indexCount");
         // Return value will be ignored, because an exception has been thrown.
         return -1;
     }
-    
+
     ws.bind();
     positions.bind();
     indices.bind();
-        
+
     return visibilityTest(ws.mData,
             positions.mData, positions.mLength,
             indices.mData, indexCount);
@@ -496,19 +496,19 @@ void util_multiplyMM(JNIEnv *env, jclass clazz,
     FloatArrayHelper resultMat(env, result_ref, resultOffset, 16);
     FloatArrayHelper lhs(env, lhs_ref, lhsOffset, 16);
     FloatArrayHelper rhs(env, rhs_ref, rhsOffset, 16);
-    
+
     bool checkOK = resultMat.check() && lhs.check() && rhs.check();
-    
+
     if ( !checkOK ) {
         return;
     }
-    
+
     resultMat.bind();
     lhs.bind();
     rhs.bind();
-    
+
     multiplyMM(resultMat.mData, lhs.mData, rhs.mData);
-    
+
     resultMat.commitChanges();
 }
 
@@ -527,19 +527,19 @@ void util_multiplyMV(JNIEnv *env, jclass clazz,
     FloatArrayHelper resultV(env, result_ref, resultOffset, 4);
     FloatArrayHelper lhs(env, lhs_ref, lhsOffset, 16);
     FloatArrayHelper rhs(env, rhs_ref, rhsOffset, 4);
-    
+
     bool checkOK = resultV.check() && lhs.check() && rhs.check();
-    
+
     if ( !checkOK ) {
         return;
     }
-    
+
     resultV.bind();
     lhs.bind();
     rhs.bind();
-    
+
     multiplyMV(resultV.mData, lhs.mData, rhs.mData);
-    
+
     resultV.commitChanges();
 }
 
@@ -550,7 +550,7 @@ static jfieldID nativeBitmapID = 0;
 void nativeUtilsClassInit(JNIEnv *env, jclass clazz)
 {
     jclass bitmapClass = env->FindClass("android/graphics/Bitmap");
-    nativeBitmapID = env->GetFieldID(bitmapClass, "mNativeBitmap", "I");    
+    nativeBitmapID = env->GetFieldID(bitmapClass, "mNativeBitmap", "I");
 }
 
 static int checkFormat(SkBitmap::Config config, int format, int type)
@@ -653,7 +653,7 @@ static jint util_texImage2D(JNIEnv *env, jclass clazz,
     }
     int err = checkFormat(config, internalformat, type);
     if (err)
-        return err; 
+        return err;
     bitmap.lockPixels();
     const int w = bitmap.width();
     const int h = bitmap.height();
@@ -665,14 +665,15 @@ static jint util_texImage2D(JNIEnv *env, jclass clazz,
         }
         const size_t size = bitmap.getSize();
         const size_t palette_size = 256*sizeof(SkPMColor);
-        void* const data = malloc(size + palette_size);
+        const size_t imageSize = size + palette_size;
+        void* const data = malloc(imageSize);
         if (data) {
             void* const pixels = (char*)data + palette_size;
             SkColorTable* ctable = bitmap.getColorTable();
             memcpy(data, ctable->lockColors(), ctable->count() * sizeof(SkPMColor));
             memcpy(pixels, p, size);
             ctable->unlockColors(false);
-            glCompressedTexImage2D(target, level, internalformat, w, h, border, 0, data);
+            glCompressedTexImage2D(target, level, internalformat, w, h, border, imageSize, data);
             free(data);
         } else {
             err = -1;
@@ -700,7 +701,7 @@ static jint util_texSubImage2D(JNIEnv *env, jclass clazz,
     }
     int err = checkFormat(config, format, type);
     if (err)
-        return err; 
+        return err;
     bitmap.lockPixels();
     const int w = bitmap.width();
     const int h = bitmap.height();
@@ -723,22 +724,22 @@ lookupClasses(JNIEnv* env) {
 }
 
 static JNINativeMethod gMatrixMethods[] = {
-    { "multiplyMM", "([FI[FI[FI)V", (void*)util_multiplyMM }, 
-    { "multiplyMV", "([FI[FI[FI)V", (void*)util_multiplyMV }, 
+    { "multiplyMM", "([FI[FI[FI)V", (void*)util_multiplyMM },
+    { "multiplyMV", "([FI[FI[FI)V", (void*)util_multiplyMV },
 };
 
 static JNINativeMethod gVisiblityMethods[] = {
-    { "computeBoundingSphere", "([FII[FI)V", (void*)util_computeBoundingSphere }, 
+    { "computeBoundingSphere", "([FII[FI)V", (void*)util_computeBoundingSphere },
     { "frustumCullSpheres", "([FI[FII[III)I", (void*)util_frustumCullSpheres },
-    { "visibilityTest", "([FI[FI[CII)I", (void*)util_visibilityTest }, 
+    { "visibilityTest", "([FI[FI[CII)I", (void*)util_visibilityTest },
 };
 
 static JNINativeMethod gUtilsMethods[] = {
     {"nativeClassInit", "()V",                          (void*)nativeUtilsClassInit },
-    { "native_getInternalFormat", "(Landroid/graphics/Bitmap;)I", (void*) util_getInternalFormat }, 
-    { "native_getType", "(Landroid/graphics/Bitmap;)I", (void*) util_getType }, 
-    { "native_texImage2D", "(IIILandroid/graphics/Bitmap;II)I", (void*)util_texImage2D }, 
-    { "native_texSubImage2D", "(IIIILandroid/graphics/Bitmap;II)I", (void*)util_texSubImage2D }, 
+    { "native_getInternalFormat", "(Landroid/graphics/Bitmap;)I", (void*) util_getInternalFormat },
+    { "native_getType", "(Landroid/graphics/Bitmap;)I", (void*) util_getType },
+    { "native_texImage2D", "(IIILandroid/graphics/Bitmap;II)I", (void*)util_texImage2D },
+    { "native_texSubImage2D", "(IIIILandroid/graphics/Bitmap;II)I", (void*)util_texSubImage2D },
 };
 
 typedef struct _ClassRegistrationInfo {

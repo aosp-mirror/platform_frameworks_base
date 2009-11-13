@@ -27,10 +27,12 @@ import android.location.IGpsStatusListener;
 import android.location.IGpsStatusProvider;
 import android.location.ILocationManager;
 import android.location.ILocationProvider;
+import android.location.INetInitiatedListener;
 import android.location.Location;
 import android.location.LocationManager;
 import android.location.LocationProvider;
 import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.SntpClient;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -38,21 +40,25 @@ import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
+import android.provider.Settings;
 import android.util.Config;
 import android.util.Log;
 import android.util.SparseIntArray;
 
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.telephony.Phone;
-import com.android.internal.telephony.TelephonyIntents;
+import com.android.internal.location.GpsNetInitiatedHandler;
+import com.android.internal.location.GpsNetInitiatedHandler.GpsNiNotification;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.StringBufferInputStream;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Properties;
+import java.util.Map.Entry;
 
 /**
  * A GPS implementation of LocationProvider used by LocationManager.
@@ -183,8 +189,6 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
     // number of fixes we have received since we started navigating
     private int mFixCount;
 
-    private int mPositionMode = GPS_POSITION_MODE_STANDALONE;
-
     // true if we started navigation
     private boolean mStarted;
 
@@ -198,6 +202,10 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
     // properties loaded from PROPERTIES_FILE
     private Properties mProperties;
     private String mNtpServer;
+    private String mSuplServerHost;
+    private int mSuplServerPort;
+    private String mC2KServerHost;
+    private int mC2KServerPort;
 
     private final Context mContext;
     private final ILocationManager mLocationManager;
@@ -211,6 +219,7 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
     private String mAGpsApn;
     private int mAGpsDataConnectionState;
     private final ConnectivityManager mConnMgr;
+    private final GpsNetInitiatedHandler mNIHandler; 
 
     // Wakelocks
     private final static String WAKELOCK_KEY = "GpsLocationProvider";
@@ -294,22 +303,6 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
             } else if (action.equals(ALARM_TIMEOUT)) {
                 if (DEBUG) Log.d(TAG, "ALARM_TIMEOUT");
                 hibernate();
-            } else if (action.equals(TelephonyIntents.ACTION_ANY_DATA_CONNECTION_STATE_CHANGED)) {
-                String state = intent.getStringExtra(Phone.STATE_KEY);
-                String apnName = intent.getStringExtra(Phone.DATA_APN_KEY);
-                String reason = intent.getStringExtra(Phone.STATE_CHANGE_REASON_KEY);
-
-                if (Config.LOGD) {
-                    Log.d(TAG, "state: " + state +  " apnName: " + apnName + " reason: " + reason);
-                }
-                // FIXME - might not have an APN on CDMA
-                if ("CONNECTED".equals(state) && apnName != null && apnName.length() > 0) {
-                    mAGpsApn = apnName;
-                    if (mAGpsDataConnectionState == AGPS_DATA_CONNECTION_OPENING) {
-                        native_agps_data_conn_open(mAGpsApn);
-                        mAGpsDataConnectionState = AGPS_DATA_CONNECTION_OPEN;
-                    }
-                }
             }
         }
     };
@@ -321,6 +314,7 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
     public GpsLocationProvider(Context context, ILocationManager locationManager) {
         mContext = context;
         mLocationManager = locationManager;
+        mNIHandler= new GpsNetInitiatedHandler(context, this);
 
         // Create a wake lock
         PowerManager powerManager = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
@@ -333,7 +327,6 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(ALARM_WAKEUP);
         intentFilter.addAction(ALARM_TIMEOUT);
-        intentFilter.addAction(TelephonyIntents.ACTION_ANY_DATA_CONNECTION_STATE_CHANGED);
         context.registerReceiver(mBroadcastReciever, intentFilter);
 
         mConnMgr = (ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -349,27 +342,21 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
             stream.close();
             mNtpServer = mProperties.getProperty("NTP_SERVER", null);
 
-            String host = mProperties.getProperty("SUPL_HOST");
+            mSuplServerHost = mProperties.getProperty("SUPL_HOST");
             String portString = mProperties.getProperty("SUPL_PORT");
-            if (host != null && portString != null) {
+            if (mSuplServerHost != null && portString != null) {
                 try {
-                    int port = Integer.parseInt(portString);
-                    native_set_agps_server(AGPS_TYPE_SUPL, host, port);
-                    // use MS-Based position mode if SUPL support is enabled
-                    mPositionMode = GPS_POSITION_MODE_MS_BASED;
+                    mSuplServerPort = Integer.parseInt(portString);
                 } catch (NumberFormatException e) {
                     Log.e(TAG, "unable to parse SUPL_PORT: " + portString);
                 }
             }
 
-            host = mProperties.getProperty("C2K_HOST");
+            mC2KServerHost = mProperties.getProperty("C2K_HOST");
             portString = mProperties.getProperty("C2K_PORT");
-            if (host != null && portString != null) {
+            if (mC2KServerHost != null && portString != null) {
                 try {
-                    int port = Integer.parseInt(portString);
-                    native_set_agps_server(AGPS_TYPE_C2K, host, port);
-                    // use MS-Based position mode if SUPL support is enabled
-                    mPositionMode = GPS_POSITION_MODE_MS_BASED;
+                    mC2KServerPort = Integer.parseInt(portString);
                 } catch (NumberFormatException e) {
                     Log.e(TAG, "unable to parse C2K_PORT: " + portString);
                 }
@@ -387,13 +374,30 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
         return true;
     }
 
-    public void updateNetworkState(int state) {
+    public void updateNetworkState(int state, NetworkInfo info) {
         mNetworkAvailable = (state == LocationProvider.AVAILABLE);
 
         if (Config.LOGD) {
-            Log.d(TAG, "updateNetworkState " + (mNetworkAvailable ? "available" : "unavailable"));
+            Log.d(TAG, "updateNetworkState " + (mNetworkAvailable ? "available" : "unavailable")
+                + " info: " + info);
         }
-        
+
+        if (info != null && info.getType() == ConnectivityManager.TYPE_MOBILE_SUPL
+                && mAGpsDataConnectionState == AGPS_DATA_CONNECTION_OPENING) {
+            String apnName = info.getExtraInfo();
+            if (mNetworkAvailable && apnName != null && apnName.length() > 0) {
+                mAGpsApn = apnName;
+                if (DEBUG) Log.d(TAG, "call native_agps_data_conn_open");
+                native_agps_data_conn_open(apnName);
+                mAGpsDataConnectionState = AGPS_DATA_CONNECTION_OPEN;
+            } else {
+                if (DEBUG) Log.d(TAG, "call native_agps_data_conn_failed");
+                mAGpsApn = null;
+                mAGpsDataConnectionState = AGPS_DATA_CONNECTION_CLOSED;
+                native_agps_data_conn_failed();
+            }
+        }
+
         if (mNetworkAvailable && mNetworkThread != null && mEnabled) {
             // signal the network thread when the network becomes available
             mNetworkThread.signal();
@@ -499,6 +503,13 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
         mEnabled = native_init();
 
         if (mEnabled) {
+            if (mSuplServerHost != null) {
+                native_set_agps_server(AGPS_TYPE_SUPL, mSuplServerHost, mSuplServerPort);
+            }
+            if (mC2KServerHost != null) {
+                native_set_agps_server(AGPS_TYPE_C2K, mC2KServerHost, mC2KServerPort);
+            }
+
             // run event listener thread while we are enabled
             mEventThread = new GpsEventThread();
             mEventThread.start();
@@ -722,7 +733,15 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
         if (!mStarted) {
             if (DEBUG) Log.d(TAG, "startNavigating");
             mStarted = true;
-            if (!native_start(mPositionMode, false, mFixInterval)) {
+            int positionMode;
+            if (Settings.Secure.getInt(mContext.getContentResolver(),
+                    Settings.Secure.ASSISTED_GPS_ENABLED, 1) != 0) {
+                positionMode = GPS_POSITION_MODE_MS_BASED;
+            } else {
+                positionMode = GPS_POSITION_MODE_STANDALONE;
+            }
+
+            if (!native_start(positionMode, false, mFixInterval)) {
                 mStarted = false;
                 Log.e(TAG, "native_start failed in startNavigating()");
                 return;
@@ -1002,12 +1021,128 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
         }
     }
 
+    /**
+     * called from native code to report NMEA data received
+     */
+    private void reportNmea(int index, long timestamp) {
+        synchronized(mListeners) {
+            int size = mListeners.size();
+            if (size > 0) {
+                // don't bother creating the String if we have no listeners
+                int length = native_read_nmea(index, mNmeaBuffer, mNmeaBuffer.length);
+                String nmea = new String(mNmeaBuffer, 0, length);
+
+                for (int i = 0; i < size; i++) {
+                    Listener listener = mListeners.get(i);
+                    try {
+                        listener.mListener.onNmeaReceived(timestamp, nmea);
+                    } catch (RemoteException e) {
+                        Log.w(TAG, "RemoteException in reportNmea");
+                        mListeners.remove(listener);
+                        // adjust for size of list changing
+                        size--;
+                    }
+                }
+            }
+        }
+    }
+
     private void xtraDownloadRequest() {
         if (Config.LOGD) Log.d(TAG, "xtraDownloadRequest");
         if (mNetworkThread != null) {
             mNetworkThread.xtraDownloadRequest();
         }
     }
+
+    //=============================================================
+    // NI Client support
+	//=============================================================
+    private final INetInitiatedListener mNetInitiatedListener = new INetInitiatedListener.Stub() {
+    	// Sends a response for an NI reqeust to HAL.
+    	public boolean sendNiResponse(int notificationId, int userResponse)
+    	{
+        	// TODO Add Permission check
+    		
+    		StringBuilder extrasBuf = new StringBuilder();
+
+    		if (Config.LOGD) Log.d(TAG, "sendNiResponse, notifId: " + notificationId +
+    				", response: " + userResponse);
+    		
+    		native_send_ni_response(notificationId, userResponse);
+    		
+    		return true;
+    	}        
+    };
+        
+    public INetInitiatedListener getNetInitiatedListener() {
+        return mNetInitiatedListener;
+    }
+
+    // Called by JNI function to report an NI request.
+	@SuppressWarnings("deprecation")
+	public void reportNiNotification(
+        	int notificationId,
+        	int niType,
+        	int notifyFlags,
+        	int timeout,
+        	int defaultResponse,
+        	String requestorId,
+        	String text,
+        	int requestorIdEncoding,
+        	int textEncoding,
+        	String extras  // Encoded extra data
+        )
+	{
+		Log.i(TAG, "reportNiNotification: entered");
+		Log.i(TAG, "notificationId: " + notificationId +
+				", niType: " + niType +
+				", notifyFlags: " + notifyFlags +
+				", timeout: " + timeout +
+				", defaultResponse: " + defaultResponse);
+		
+		Log.i(TAG, "requestorId: " + requestorId +
+				", text: " + text +
+				", requestorIdEncoding: " + requestorIdEncoding +
+				", textEncoding: " + textEncoding);
+		
+		GpsNiNotification notification = new GpsNiNotification();
+		
+		notification.notificationId = notificationId;
+		notification.niType = niType;
+		notification.needNotify = (notifyFlags & GpsNetInitiatedHandler.GPS_NI_NEED_NOTIFY) != 0;
+		notification.needVerify = (notifyFlags & GpsNetInitiatedHandler.GPS_NI_NEED_VERIFY) != 0;
+		notification.privacyOverride = (notifyFlags & GpsNetInitiatedHandler.GPS_NI_PRIVACY_OVERRIDE) != 0;
+		notification.timeout = timeout;
+		notification.defaultResponse = defaultResponse;
+		notification.requestorId = requestorId;
+		notification.text = text;
+		notification.requestorIdEncoding = requestorIdEncoding;
+		notification.textEncoding = textEncoding;
+		
+		// Process extras, assuming the format is
+		// one of more lines of "key = value"
+		Bundle bundle = new Bundle();
+		
+		if (extras == null) extras = "";
+		Properties extraProp = new Properties();
+		
+		try {
+			extraProp.load(new StringBufferInputStream(extras));
+		}
+		catch (IOException e)
+		{
+			Log.e(TAG, "reportNiNotification cannot parse extras data: " + extras);
+		}
+		
+		for (Entry<Object, Object> ent : extraProp.entrySet())
+		{
+			bundle.putString((String) ent.getKey(), (String) ent.getValue());
+		}		
+		
+		notification.extras = bundle;
+		
+		mNIHandler.handleNiNotification(notification);		
+	}
 
     private class GpsEventThread extends Thread {
 
@@ -1182,6 +1317,8 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
     private float mSvAzimuths[] = new float[MAX_SVS];
     private int mSvMasks[] = new int[3];
     private int mSvCount;
+    // preallocated to avoid memory allocation in reportNmea()
+    private byte[] mNmeaBuffer = new byte[120];
 
     static { class_init_native(); }
     private static native void class_init_native();
@@ -1199,6 +1336,7 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
     // mask[0] is ephemeris mask and mask[1] is almanac mask
     private native int native_read_sv_status(int[] svs, float[] snrs,
             float[] elevations, float[] azimuths, int[] masks);
+    private native int native_read_nmea(int index, byte[] buffer, int bufferSize);
     private native void native_inject_location(double latitude, double longitude, float accuracy);
 
     // XTRA Support    
@@ -1211,4 +1349,7 @@ public class GpsLocationProvider extends ILocationProvider.Stub {
     private native void native_agps_data_conn_closed();
     private native void native_agps_data_conn_failed();
     private native void native_set_agps_server(int type, String hostname, int port);
+
+    // Network-initiated (NI) Support
+    private native void native_send_ni_response(int notificationId, int userResponse);
 }

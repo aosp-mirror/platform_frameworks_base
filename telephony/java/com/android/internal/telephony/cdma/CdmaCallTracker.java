@@ -72,7 +72,8 @@ public final class CdmaCallTracker extends CallTracker {
 
     CdmaConnection pendingMO;
     boolean hangupPendingMO;
-    boolean pendingCallInECM=false;
+    boolean pendingCallInEcm=false;
+    boolean mIsInEmergencyCall = false;
     CDMAPhone phone;
 
     boolean desiredMute = false;    // false = mute off
@@ -80,6 +81,7 @@ public final class CdmaCallTracker extends CallTracker {
     int pendingCallClirMode;
     Phone.State state = Phone.State.IDLE;
 
+    private boolean mIsEcmTimerCanceled = false;
 
 //    boolean needsPoll;
 
@@ -182,6 +184,14 @@ public final class CdmaCallTracker extends CallTracker {
             throw new CallStateException("cannot dial in current state");
         }
 
+        String inEcm=SystemProperties.get(TelephonyProperties.PROPERTY_INECM_MODE, "false");
+        boolean isPhoneInEcmMode = inEcm.equals("true");
+        boolean isEmergencyCall = PhoneNumberUtils.isEmergencyNumber(dialString);
+
+        // Cancel Ecm timer if a second emergency call is originating in Ecm mode
+        if (isPhoneInEcmMode && isEmergencyCall) {
+            handleEcmTimer(phone.CANCEL_ECM_TIMER);
+        }
 
         // We are initiating a call therefore even if we previously
         // didn't know the state (i.e. Generic was true) we now know
@@ -210,19 +220,22 @@ public final class CdmaCallTracker extends CallTracker {
             // Always unmute when initiating a new call
             setMute(false);
 
-            String inEcm=SystemProperties.get(TelephonyProperties.PROPERTY_INECM_MODE, "false");
-            if(inEcm.equals("false")) {
+            // Check data call
+            disableDataCallInEmergencyCall(dialString);
+
+            // In Ecm mode, if another emergency call is dialed, Ecm mode will not exit.
+            if(!isPhoneInEcmMode || (isPhoneInEcmMode && isEmergencyCall)) {
                 cm.dial(pendingMO.address, clirMode, obtainCompleteMessage());
             } else {
                 phone.exitEmergencyCallbackMode();
                 phone.setOnEcbModeExitResponse(this,EVENT_EXIT_ECM_RESPONSE_CDMA, null);
                 pendingCallClirMode=clirMode;
-                pendingCallInECM=true;
+                pendingCallInEcm=true;
             }
         }
 
         updatePhoneState();
-        phone.notifyCallStateChanged();
+        phone.notifyPreciseCallStateChanged();
 
         return pendingMO;
     }
@@ -236,6 +249,9 @@ public final class CdmaCallTracker extends CallTracker {
     private Connection
     dialThreeWay (String dialString) {
         if (!foregroundCall.isIdle()) {
+            // Check data call
+            disableDataCallInEmergencyCall(dialString);
+
             // Attach the new connection to foregroundCall
             pendingMO = new CdmaConnection(phone.getContext(),
                                 dialString, this, foregroundCall);
@@ -262,6 +278,7 @@ public final class CdmaCallTracker extends CallTracker {
             // triggered by updateParent.
             cwConn.updateParent(ringingCall, foregroundCall);
             cwConn.onConnectedInOrOut();
+            updatePhoneState();
             switchWaitingOrHoldingAndActive();
         } else {
             throw new CallStateException("phone not ringing");
@@ -284,8 +301,14 @@ public final class CdmaCallTracker extends CallTracker {
         // Should we bother with this check?
         if (ringingCall.getState() == CdmaCall.State.INCOMING) {
             throw new CallStateException("cannot be in the incoming state");
-        } else {
+        } else if (foregroundCall.getConnections().size() > 1) {
             flashAndSetGenericTrue();
+        } else {
+            // Send a flash command to CDMA network for putting the other party on hold.
+            // For CDMA networks which do not support this the user would just hear a beep
+            // from the network. For CDMA networks which do support it will put the other
+            // party on hold.
+            cm.sendCDMAFeatureCode("", obtainMessage(EVENT_SWITCH_RESULT));
         }
     }
 
@@ -305,7 +328,7 @@ public final class CdmaCallTracker extends CallTracker {
         internalClearDisconnected();
 
         updatePhoneState();
-        phone.notifyCallStateChanged();
+        phone.notifyPreciseCallStateChanged();
     }
 
     boolean
@@ -320,13 +343,16 @@ public final class CdmaCallTracker extends CallTracker {
     canDial() {
         boolean ret;
         int serviceState = phone.getServiceState().getState();
+        String disableCall = SystemProperties.get(
+                TelephonyProperties.PROPERTY_DISABLE_CALL, "false");
 
-        ret = (serviceState != ServiceState.STATE_POWER_OFF) &&
-                pendingMO == null
+        ret = (serviceState != ServiceState.STATE_POWER_OFF)
+                && pendingMO == null
                 && !ringingCall.isRinging()
+                && !disableCall.equals("true")
                 && (!foregroundCall.getState().isAlive()
-                || (foregroundCall.getState() == CdmaCall.State.ACTIVE)
-                || !backgroundCall.getState().isAlive());
+                    || (foregroundCall.getState() == CdmaCall.State.ACTIVE)
+                    || !backgroundCall.getState().isAlive());
 
         return ret;
     }
@@ -410,7 +436,9 @@ public final class CdmaCallTracker extends CallTracker {
             voiceCallStartedRegistrants.notifyRegistrants (
                     new AsyncResult(null, null, null));
         }
-
+        if (Phone.DEBUG_PHONE) {
+            log("update phone state, old=" + oldState + " new="+ state);
+        }
         if (state != oldState) {
             phone.notifyPhoneStateChanged();
         }
@@ -475,6 +503,11 @@ public final class CdmaCallTracker extends CallTracker {
                     // Someone has already asked to hangup this call
                     if (hangupPendingMO) {
                         hangupPendingMO = false;
+                        // Re-start Ecm timer when an uncompleted emergency call ends
+                        if (mIsEcmTimerCanceled) {
+                            handleEcmTimer(phone.RESTART_ECM_TIMER);
+                        }
+
                         try {
                             if (Phone.DEBUG_PHONE) log(
                                     "poll: hangupPendingMO, hangup conn " + i);
@@ -488,64 +521,73 @@ public final class CdmaCallTracker extends CallTracker {
                         return;
                     }
                 } else {
-                    connections[i] = new CdmaConnection(phone.getContext(), dc, this, i);
-
-                    // it's a ringing call
-                    if (connections[i].getCall() == ringingCall) {
-                        newRinging = connections[i];
-                    } else {
-                        // Something strange happened: a call appeared
-                        // which is neither a ringing call or one we created.
-                        // Either we've crashed and re-attached to an existing
-                        // call, or something else (eg, SIM) initiated the call.
-
-                        Log.i(LOG_TAG,"Phantom call appeared " + dc);
-
-                        // If it's a connected call, set the connect time so that
-                        // it's non-zero.  It may not be accurate, but at least
-                        // it won't appear as a Missed Call.
-                        if (dc.state != DriverCall.State.ALERTING
-                                && dc.state != DriverCall.State.DIALING) {
-                            connections[i].connectTime = System.currentTimeMillis();
-                        }
-
+                    if (Phone.DEBUG_PHONE) {
+                        log("pendingMo=" + pendingMO + ", dc=" + dc);
+                    }
+                    // find if the MT call is a new ring or unknown connection
+                    newRinging = checkMtFindNewRinging(dc,i);
+                    if (newRinging == null) {
                         unknownConnectionAppeared = true;
                     }
+                    checkAndEnableDataCallAfterEmergencyCallDropped();
                 }
                 hasNonHangupStateChanged = true;
             } else if (conn != null && dc == null) {
+                // This case means the RIL has no more active call anymore and
+                // we need to clean up the foregroundCall and ringingCall.
+                // Loop through foreground call connections as
+                // it contains the known logical connections.
                 int count = foregroundCall.connections.size();
-                if (count == 0) {
-                    // Handle an unanswered MO/MT call, there is no
-                    // foregroundCall connections at this time.
-                    droppedDuringPoll.add(conn);
-                } else {
-                    // Loop through foreground call connections as
-                    // it contains the known logical connections.
-                    for (int n = 0; n < count; n++) {
-                        CdmaConnection cn = (CdmaConnection)foregroundCall.connections.get(n);
-                        droppedDuringPoll.add(cn);
-                    }
+                for (int n = 0; n < count; n++) {
+                    if (Phone.DEBUG_PHONE) log("adding fgCall cn " + n + " to droppedDuringPoll");
+                    CdmaConnection cn = (CdmaConnection)foregroundCall.connections.get(n);
+                    droppedDuringPoll.add(cn);
+                }
+                count = ringingCall.connections.size();
+                // Loop through ringing call connections as
+                // it may contain the known logical connections.
+                for (int n = 0; n < count; n++) {
+                    if (Phone.DEBUG_PHONE) log("adding rgCall cn " + n + " to droppedDuringPoll");
+                    CdmaConnection cn = (CdmaConnection)ringingCall.connections.get(n);
+                    droppedDuringPoll.add(cn);
                 }
                 foregroundCall.setGeneric(false);
+                ringingCall.setGeneric(false);
+
+                // Re-start Ecm timer when the connected emergency call ends
+                if (mIsEcmTimerCanceled) {
+                    handleEcmTimer(phone.RESTART_ECM_TIMER);
+                }
+                // If emergency call is not going through while dialing
+                checkAndEnableDataCallAfterEmergencyCallDropped();
+
                 // Dropped connections are removed from the CallTracker
                 // list but kept in the Call list
                 connections[i] = null;
-            } else if (conn != null && dc != null && !conn.compareTo(dc)) {
-                // Connection in CLCC response does not match what
-                // we were tracking. Assume dropped call and new call
-
-                droppedDuringPoll.add(conn);
-                connections[i] = new CdmaConnection (phone.getContext(), dc, this, i);
-
-                if (connections[i].getCall() == ringingCall) {
-                    newRinging = connections[i];
-                } // else something strange happened
-                hasNonHangupStateChanged = true;
             } else if (conn != null && dc != null) { /* implicit conn.compareTo(dc) */
-                boolean changed;
-                changed = conn.update(dc);
-                hasNonHangupStateChanged = hasNonHangupStateChanged || changed;
+                // Call collision case
+                if (conn.isIncoming != dc.isMT) {
+                    if (dc.isMT == true){
+                        // Mt call takes precedence than Mo,drops Mo
+                        droppedDuringPoll.add(conn);
+                        // find if the MT call is a new ring or unknown connection
+                        newRinging = checkMtFindNewRinging(dc,i);
+                        if (newRinging == null) {
+                            unknownConnectionAppeared = true;
+                        }
+                        checkAndEnableDataCallAfterEmergencyCallDropped();
+                    } else {
+                        // Call info stored in conn is not consistent with the call info from dc.
+                        // We should follow the rule of MT calls taking precedence over MO calls
+                        // when there is conflict, so here we drop the call info from dc and
+                        // continue to use the call info from conn, and only take a log.
+                        Log.e(LOG_TAG,"Error in RIL, Phantom call appeared " + dc);
+                    }
+                } else {
+                    boolean changed;
+                    changed = conn.update(dc);
+                    hasNonHangupStateChanged = hasNonHangupStateChanged || changed;
+                }
             }
 
             if (REPEAT_POLLING) {
@@ -578,8 +620,8 @@ public final class CdmaCallTracker extends CallTracker {
             droppedDuringPoll.add(pendingMO);
             pendingMO = null;
             hangupPendingMO = false;
-            if( pendingCallInECM) {
-                pendingCallInECM = false;
+            if( pendingCallInEcm) {
+                pendingCallInEcm = false;
             }
         }
 
@@ -644,7 +686,7 @@ public final class CdmaCallTracker extends CallTracker {
         }
 
         if (hasNonHangupStateChanged || newRinging != null) {
-            phone.notifyCallStateChanged();
+            phone.notifyPreciseCallStateChanged();
         }
 
         //dumpState();
@@ -678,7 +720,8 @@ public final class CdmaCallTracker extends CallTracker {
             // the hangup reason is user ignoring or timing out. So conn.onDisconnect()
             // is not called here. Instead, conn.onLocalDisconnect() is called.
             conn.onLocalDisconnect();
-            phone.notifyCallStateChanged();
+            updatePhoneState();
+            phone.notifyPreciseCallStateChanged();
             return;
         } else {
             try {
@@ -760,6 +803,7 @@ public final class CdmaCallTracker extends CallTracker {
         }
 
         call.onHangupLocal();
+        phone.notifyPreciseCallStateChanged();
     }
 
     /* package */
@@ -821,7 +865,7 @@ public final class CdmaCallTracker extends CallTracker {
         // the status of the call is after a call waiting is answered,
         // 3 way call merged or a switch between calls.
         foregroundCall.setGeneric(true);
-        phone.notifyCallStateChanged();
+        phone.notifyPreciseCallStateChanged();
     }
 
     private Phone.SuppService getFailedService(int what) {
@@ -865,6 +909,7 @@ public final class CdmaCallTracker extends CallTracker {
         // Create a new CdmaConnection which attaches itself to ringingCall.
         ringingCall.setGeneric(false);
         new CdmaConnection(phone.getContext(), cw, this, ringingCall);
+        updatePhoneState();
 
         // Finally notify application
         notifyCallWaitingInfo(cw);
@@ -926,7 +971,7 @@ public final class CdmaCallTracker extends CallTracker {
 
                 updatePhoneState();
 
-                phone.notifyCallStateChanged();
+                phone.notifyPreciseCallStateChanged();
                 droppedDuringPoll.clear();
             break;
 
@@ -945,9 +990,9 @@ public final class CdmaCallTracker extends CallTracker {
 
             case EVENT_EXIT_ECM_RESPONSE_CDMA:
                //no matter the result, we still do the same here
-               if (pendingCallInECM) {
+               if (pendingCallInEcm) {
                    cm.dial(pendingMO.address, pendingCallClirMode, obtainCompleteMessage());
-                   pendingCallInECM = false;
+                   pendingCallInEcm = false;
                }
                phone.unsetOnEcbModeExitResponse(this);
             break;
@@ -965,6 +1010,7 @@ public final class CdmaCallTracker extends CallTracker {
                 if (ar.exception == null) {
                     // Assume 3 way call is connected
                     pendingMO.onConnectedInOrOut();
+                    pendingMO = null;
                 }
             break;
 
@@ -972,6 +1018,88 @@ public final class CdmaCallTracker extends CallTracker {
                throw new RuntimeException("unexpected event not handled");
             }
         }
+    }
+
+    /**
+     * Handle Ecm timer to be canceled or re-started
+     */
+    private void handleEcmTimer(int action) {
+        phone.handleTimerInEmergencyCallbackMode(action);
+        switch(action) {
+        case CDMAPhone.CANCEL_ECM_TIMER: mIsEcmTimerCanceled = true; break;
+        case CDMAPhone.RESTART_ECM_TIMER: mIsEcmTimerCanceled = false; break;
+        default:
+            Log.e(LOG_TAG, "handleEcmTimer, unsupported action " + action);
+        }
+    }
+
+    /**
+     * Disable data call when emergency call is connected
+     */
+    private void disableDataCallInEmergencyCall(String dialString) {
+        if (PhoneNumberUtils.isEmergencyNumber(dialString)) {
+            if (Phone.DEBUG_PHONE) log("disableDataCallInEmergencyCall");
+            mIsInEmergencyCall = true;
+            phone.disableDataConnectivity();
+        }
+    }
+
+    /**
+     * Check and enable data call after an emergency call is dropped if it's
+     * not in ECM
+     */
+    private void checkAndEnableDataCallAfterEmergencyCallDropped() {
+        if (mIsInEmergencyCall) {
+            mIsInEmergencyCall = false;
+            String inEcm=SystemProperties.get(TelephonyProperties.PROPERTY_INECM_MODE, "false");
+            if (Phone.DEBUG_PHONE) {
+                log("checkAndEnableDataCallAfterEmergencyCallDropped,inEcm=" + inEcm);
+            }
+            if (inEcm.compareTo("false") == 0) {
+                // Re-initiate data connection
+                // TODO - can this be changed to phone.enableDataConnectivity();
+                phone.mDataConnection.setDataEnabled(true);
+            }
+        }
+    }
+
+    /**
+     * Check the MT call to see if it's a new ring or
+     * a unknown connection.
+     */
+    private Connection checkMtFindNewRinging(DriverCall dc, int i) {
+
+        Connection newRinging = null;
+
+        connections[i] = new CdmaConnection(phone.getContext(), dc, this, i);
+        // it's a ringing call
+        if (connections[i].getCall() == ringingCall) {
+            newRinging = connections[i];
+            if (Phone.DEBUG_PHONE) log("Notify new ring " + dc);
+        } else {
+            // Something strange happened: a call which is neither
+            // a ringing call nor the one we created. It could be the
+            // call collision result from RIL
+            Log.e(LOG_TAG,"Phantom call appeared " + dc);
+            // If it's a connected call, set the connect time so that
+            // it's non-zero.  It may not be accurate, but at least
+            // it won't appear as a Missed Call.
+            if (dc.state != DriverCall.State.ALERTING
+                && dc.state != DriverCall.State.DIALING) {
+                connections[i].connectTime = System.currentTimeMillis();
+            }
+        }
+        return newRinging;
+    }
+
+    /**
+     * Check if current call is in emergency call
+     *
+     * @return true if it is in emergency call
+     *         false if it is not in emergency call
+     */
+    boolean isInEmergencyCall() {
+        return mIsInEmergencyCall;
     }
 
     protected void log(String msg) {

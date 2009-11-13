@@ -23,6 +23,7 @@
 #include <arpa/inet.h>
 
 extern "C" {
+int ifc_enable(const char *ifname);
 int ifc_disable(const char *ifname);
 int ifc_add_host_route(const char *ifname, uint32_t addr);
 int ifc_remove_host_routes(const char *ifname);
@@ -65,6 +66,16 @@ static struct fieldIds {
     jfieldID serverAddress;
     jfieldID leaseDuration;
 } dhcpInfoFieldIds;
+
+static jint android_net_utils_enableInterface(JNIEnv* env, jobject clazz, jstring ifname)
+{
+    int result;
+
+    const char *nameStr = env->GetStringUTFChars(ifname, NULL);
+    result = ::ifc_enable(nameStr);
+    env->ReleaseStringUTFChars(ifname, nameStr);
+    return (jint)result;
+}
 
 static jint android_net_utils_disableInterface(JNIEnv* env, jobject clazz, jstring ifname)
 {
@@ -209,6 +220,7 @@ static jboolean android_net_utils_configureInterface(JNIEnv* env,
 static JNINativeMethod gNetworkUtilMethods[] = {
     /* name, signature, funcPtr */
 
+    { "enableInterface", "(Ljava/lang/String;)I",  (void *)android_net_utils_enableInterface },
     { "disableInterface", "(Ljava/lang/String;)I",  (void *)android_net_utils_disableInterface },
     { "addHostRoute", "(Ljava/lang/String;I)I",  (void *)android_net_utils_addHostRoute },
     { "removeHostRoutes", "(Ljava/lang/String;)I",  (void *)android_net_utils_removeHostRoutes },

@@ -58,14 +58,15 @@ public class DialogTitle extends TextView {
                             android.R.style.TextAppearance_Medium,
                             android.R.styleable.TextAppearance);
                     final int textSize = a.getDimensionPixelSize(
-                            android.R.styleable.TextAppearance_textSize, 20);
+                            android.R.styleable.TextAppearance_textSize,
+                            (int) (20 * getResources().getDisplayMetrics().density));
 
-                    setTextSize(TypedValue.COMPLEX_UNIT_SP, textSize);
+                    // textSize is already expressed in pixels
+                    setTextSize(TypedValue.COMPLEX_UNIT_PX, textSize);
                     setMaxLines(2);
                     super.onMeasure(widthMeasureSpec, heightMeasureSpec);      
                 }
             }
         }
     }
-   
 }

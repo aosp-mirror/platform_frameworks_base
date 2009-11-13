@@ -25,6 +25,7 @@ import android.provider.BaseColumns;
 import static android.provider.SyncConstValue.*;
 import android.text.TextUtils;
 import android.util.Log;
+import android.accounts.Account;
 
 /**
  * @hide
@@ -55,15 +56,17 @@ public abstract class AbstractTableMerger
 
     private volatile boolean mIsMergeCancelled;
 
-    private static final String SELECT_MARKED = _SYNC_MARK + "> 0 and " + _SYNC_ACCOUNT + "=?";
+    private static final String SELECT_MARKED = _SYNC_MARK + "> 0 and "
+            + _SYNC_ACCOUNT + "=? and " + _SYNC_ACCOUNT_TYPE + "=?";
 
     private static final String SELECT_BY_SYNC_ID_AND_ACCOUNT =
-            _SYNC_ID +"=? and " + _SYNC_ACCOUNT + "=?";
+            _SYNC_ID +"=? and " + _SYNC_ACCOUNT + "=? and " + _SYNC_ACCOUNT_TYPE + "=?";
     private static final String SELECT_BY_ID = BaseColumns._ID +"=?";
 
     private static final String SELECT_UNSYNCED =
-            "(" + _SYNC_ACCOUNT + " IS NULL OR " + _SYNC_ACCOUNT + "=?) AND "
-            + "(" + _SYNC_ID + " IS NULL OR (" + _SYNC_DIRTY + " > 0 AND "
+            "(" + _SYNC_ACCOUNT + " IS NULL OR ("
+                + _SYNC_ACCOUNT + "=? and " + _SYNC_ACCOUNT_TYPE + "=?)) and "
+            + "(" + _SYNC_ID + " IS NULL OR (" + _SYNC_DIRTY + " > 0 and "
                                               + _SYNC_VERSION + " IS NOT NULL))";
 
     public AbstractTableMerger(SQLiteDatabase database,
@@ -134,7 +137,7 @@ public abstract class AbstractTableMerger
      * construct a temporary instance to hold them.
      */
     public void merge(final SyncContext context,
-            final String account,
+            final Account account,
             final SyncableContentProvider serverDiffs,
             TempProviderSyncResult result,
             SyncResult syncResult, SyncableContentProvider temporaryInstanceFactory) {
@@ -157,7 +160,7 @@ public abstract class AbstractTableMerger
      * @hide this is public for testing purposes only
      */
     public void mergeServerDiffs(SyncContext context,
-            String account, SyncableContentProvider serverDiffs, SyncResult syncResult) {
+            Account account, SyncableContentProvider serverDiffs, SyncResult syncResult) {
         boolean diffsArePartial = serverDiffs.getContainsDiffs();
         // mark the current rows so that we can distinguish these from new
         // inserts that occur during the merge
@@ -166,342 +169,340 @@ public abstract class AbstractTableMerger
             mDb.update(mDeletedTable, mSyncMarkValues, null, null);
         }
 
-        // load the local database entries, so we can merge them with the server
-        final String[] accountSelectionArgs = new String[]{account};
-        Cursor localCursor = mDb.query(mTable, syncDirtyProjection,
-                SELECT_MARKED, accountSelectionArgs, null, null,
-                mTable + "." + _SYNC_ID);
-        Cursor deletedCursor;
-        if (mDeletedTable != null) {
-            deletedCursor = mDb.query(mDeletedTable, syncIdAndVersionProjection,
+        Cursor localCursor = null;
+        Cursor deletedCursor = null;
+        Cursor diffsCursor = null;
+        try {
+            // load the local database entries, so we can merge them with the server
+            final String[] accountSelectionArgs = new String[]{account.name, account.type};
+            localCursor = mDb.query(mTable, syncDirtyProjection,
                     SELECT_MARKED, accountSelectionArgs, null, null,
-                    mDeletedTable + "." + _SYNC_ID);
-        } else {
-            deletedCursor =
-                    mDb.rawQuery("select 'a' as _sync_id, 'b' as _sync_version limit 0", null);
-        }
-
-        // Apply updates and insertions from the server
-        Cursor diffsCursor = serverDiffs.query(mTableURL,
-                null, null, null, mTable + "." + _SYNC_ID);
-        int deletedSyncIDColumn = deletedCursor.getColumnIndexOrThrow(_SYNC_ID);
-        int deletedSyncVersionColumn = deletedCursor.getColumnIndexOrThrow(_SYNC_VERSION);
-        int serverSyncIDColumn = diffsCursor.getColumnIndexOrThrow(_SYNC_ID);
-        int serverSyncVersionColumn = diffsCursor.getColumnIndexOrThrow(_SYNC_VERSION);
-        int serverSyncLocalIdColumn = diffsCursor.getColumnIndexOrThrow(_SYNC_LOCAL_ID);
-
-        String lastSyncId = null;
-        int diffsCount = 0;
-        int localCount = 0;
-        localCursor.moveToFirst();
-        deletedCursor.moveToFirst();
-        while (diffsCursor.moveToNext()) {
-            if (mIsMergeCancelled) {
-                localCursor.close();
-                deletedCursor.close();
-                diffsCursor.close();
-                return;
-            }
-            mDb.yieldIfContended();
-            String serverSyncId = diffsCursor.getString(serverSyncIDColumn);
-            String serverSyncVersion = diffsCursor.getString(serverSyncVersionColumn);
-            long localRowId = 0;
-            String localSyncVersion = null;
-
-            diffsCount++;
-            context.setStatusText("Processing " + diffsCount + "/"
-                    + diffsCursor.getCount());
-            if (Log.isLoggable(TAG, Log.VERBOSE)) Log.v(TAG, "processing server entry " +
-                    diffsCount + ", " + serverSyncId);
-
-            if (TRACE) {
-                if (diffsCount == 10) {
-                    Debug.startMethodTracing("atmtrace");
-                }
-                if (diffsCount == 20) {
-                    Debug.stopMethodTracing();
-                }
+                    mTable + "." + _SYNC_ID);
+            if (mDeletedTable != null) {
+                deletedCursor = mDb.query(mDeletedTable, syncIdAndVersionProjection,
+                        SELECT_MARKED, accountSelectionArgs, null, null,
+                        mDeletedTable + "." + _SYNC_ID);
+            } else {
+                deletedCursor =
+                        mDb.rawQuery("select 'a' as _sync_id, 'b' as _sync_version limit 0", null);
             }
 
-            boolean conflict = false;
-            boolean update = false;
-            boolean insert = false;
+            // Apply updates and insertions from the server
+            diffsCursor = serverDiffs.query(mTableURL,
+                    null, null, null, mTable + "." + _SYNC_ID);
+            int deletedSyncIDColumn = deletedCursor.getColumnIndexOrThrow(_SYNC_ID);
+            int deletedSyncVersionColumn = deletedCursor.getColumnIndexOrThrow(_SYNC_VERSION);
+            int serverSyncIDColumn = diffsCursor.getColumnIndexOrThrow(_SYNC_ID);
+            int serverSyncVersionColumn = diffsCursor.getColumnIndexOrThrow(_SYNC_VERSION);
+            int serverSyncLocalIdColumn = diffsCursor.getColumnIndexOrThrow(_SYNC_LOCAL_ID);
 
-            if (Log.isLoggable(TAG, Log.VERBOSE)) {
-                Log.v(TAG, "found event with serverSyncID " + serverSyncId);
-            }
-            if (TextUtils.isEmpty(serverSyncId)) {
-                if (Log.isLoggable(TAG, Log.VERBOSE)) {
-                    Log.e(TAG, "server entry doesn't have a serverSyncID");
-                }
-                continue;
-            }
-
-            // It is possible that the sync adapter wrote the same record multiple times,
-            // e.g. if the same record came via multiple feeds. If this happens just ignore
-            // the duplicate records.
-            if (serverSyncId.equals(lastSyncId)) {
-                if (Log.isLoggable(TAG, Log.VERBOSE)) {
-                    Log.v(TAG, "skipping record with duplicate remote server id " + lastSyncId);
-                }
-                continue;
-            }
-            lastSyncId = serverSyncId;
-
-            String localSyncID = null;
-            boolean localSyncDirty = false;
-
-            while (!localCursor.isAfterLast()) {
+            String lastSyncId = null;
+            int diffsCount = 0;
+            int localCount = 0;
+            localCursor.moveToFirst();
+            deletedCursor.moveToFirst();
+            while (diffsCursor.moveToNext()) {
                 if (mIsMergeCancelled) {
-                    localCursor.deactivate();
-                    deletedCursor.deactivate();
-                    diffsCursor.deactivate();
                     return;
                 }
-                localCount++;
-                localSyncID = localCursor.getString(2);
+                mDb.yieldIfContended();
+                String serverSyncId = diffsCursor.getString(serverSyncIDColumn);
+                String serverSyncVersion = diffsCursor.getString(serverSyncVersionColumn);
+                long localRowId = 0;
+                String localSyncVersion = null;
 
-                // If the local record doesn't have a _sync_id then
-                // it is new. Ignore it for now, we will send an insert
-                // the the server later.
-                if (TextUtils.isEmpty(localSyncID)) {
-                    if (Log.isLoggable(TAG, Log.VERBOSE)) {
-                        Log.v(TAG, "local record " +
-                                localCursor.getLong(1) +
-                                " has no _sync_id, ignoring");
+                diffsCount++;
+                context.setStatusText("Processing " + diffsCount + "/"
+                        + diffsCursor.getCount());
+                if (Log.isLoggable(TAG, Log.VERBOSE)) Log.v(TAG, "processing server entry " +
+                        diffsCount + ", " + serverSyncId);
+
+                if (TRACE) {
+                    if (diffsCount == 10) {
+                        Debug.startMethodTracing("atmtrace");
                     }
-                    localCursor.moveToNext();
-                    localSyncID = null;
+                    if (diffsCount == 20) {
+                        Debug.stopMethodTracing();
+                    }
+                }
+
+                boolean conflict = false;
+                boolean update = false;
+                boolean insert = false;
+
+                if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                    Log.v(TAG, "found event with serverSyncID " + serverSyncId);
+                }
+                if (TextUtils.isEmpty(serverSyncId)) {
+                    if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                        Log.e(TAG, "server entry doesn't have a serverSyncID");
+                    }
                     continue;
                 }
 
-                int comp = serverSyncId.compareTo(localSyncID);
-
-                // the local DB has a record that the server doesn't have
-                if (comp > 0) {
+                // It is possible that the sync adapter wrote the same record multiple times,
+                // e.g. if the same record came via multiple feeds. If this happens just ignore
+                // the duplicate records.
+                if (serverSyncId.equals(lastSyncId)) {
                     if (Log.isLoggable(TAG, Log.VERBOSE)) {
-                        Log.v(TAG, "local record " +
-                                localCursor.getLong(1) +
-                                " has _sync_id " + localSyncID +
-                                " that is < server _sync_id " + serverSyncId);
+                        Log.v(TAG, "skipping record with duplicate remote server id " + lastSyncId);
                     }
-                    if (diffsArePartial) {
-                        localCursor.moveToNext();
-                    } else {
-                        deleteRow(localCursor);
-                        if (mDeletedTable != null) {
-                            mDb.delete(mDeletedTable, _SYNC_ID +"=?", new String[] {localSyncID});
-                        }
-                        syncResult.stats.numDeletes++;
-                        mDb.yieldIfContended();
-                    }
-                    localSyncID = null;
                     continue;
                 }
+                lastSyncId = serverSyncId;
 
-                // the server has a record that the local DB doesn't have
-                if (comp < 0) {
-                    if (Log.isLoggable(TAG, Log.VERBOSE)) {
-                        Log.v(TAG, "local record " +
-                                localCursor.getLong(1) +
-                                " has _sync_id " + localSyncID +
-                                " that is > server _sync_id " + serverSyncId);
+                String localSyncID = null;
+                boolean localSyncDirty = false;
+
+                while (!localCursor.isAfterLast()) {
+                    if (mIsMergeCancelled) {
+                        return;
                     }
-                    localSyncID = null;
-                }
+                    localCount++;
+                    localSyncID = localCursor.getString(2);
 
-                // the server and the local DB both have this record
-                if (comp == 0) {
-                    if (Log.isLoggable(TAG, Log.VERBOSE)) {
-                        Log.v(TAG, "local record " +
-                                localCursor.getLong(1) +
-                                " has _sync_id " + localSyncID +
-                                " that matches the server _sync_id");
-                    }
-                    localSyncDirty = localCursor.getInt(0) != 0;
-                    localRowId = localCursor.getLong(1);
-                    localSyncVersion = localCursor.getString(3);
-                    localCursor.moveToNext();
-                }
-
-                break;
-            }
-
-            // If this record is in the deleted table then update the server version
-            // in the deleted table, if necessary, and then ignore it here.
-            // We will send a deletion indication to the server down a
-            // little further.
-            if (findInCursor(deletedCursor, deletedSyncIDColumn, serverSyncId)) {
-                if (Log.isLoggable(TAG, Log.VERBOSE)) {
-                    Log.v(TAG, "remote record " + serverSyncId + " is in the deleted table");
-                }
-                final String deletedSyncVersion = deletedCursor.getString(deletedSyncVersionColumn);
-                if (!TextUtils.equals(deletedSyncVersion, serverSyncVersion)) {
-                    if (Log.isLoggable(TAG, Log.VERBOSE)) {
-                        Log.v(TAG, "setting version of deleted record " + serverSyncId + " to "
-                                + serverSyncVersion);
-                    }
-                    ContentValues values = new ContentValues();
-                    values.put(_SYNC_VERSION, serverSyncVersion);
-                    mDb.update(mDeletedTable, values, "_sync_id=?", new String[]{serverSyncId});
-                }
-                continue;
-            }
-
-            // If the _sync_local_id is present in the diffsCursor
-            // then this record corresponds to a local record that was just
-            // inserted into the server and the _sync_local_id is the row id
-            // of the local record. Set these fields so that the next check
-            // treats this record as an update, which will allow the
-            // merger to update the record with the server's sync id
-            if (!diffsCursor.isNull(serverSyncLocalIdColumn)) {
-                localRowId = diffsCursor.getLong(serverSyncLocalIdColumn);
-                if (Log.isLoggable(TAG, Log.VERBOSE)) {
-                    Log.v(TAG, "the remote record with sync id " + serverSyncId
-                            + " has a local sync id, " + localRowId);
-                }
-                localSyncID = serverSyncId;
-                localSyncDirty = false;
-                localSyncVersion = null;
-            }
-
-            if (!TextUtils.isEmpty(localSyncID)) {
-                // An existing server item has changed
-                // If serverSyncVersion is null, there is no edit URL;
-                // server won't let this change be written.
-                boolean recordChanged = (localSyncVersion == null) ||
-                        (serverSyncVersion == null) ||
-                        !serverSyncVersion.equals(localSyncVersion);
-                if (recordChanged) {
-                    if (localSyncDirty) {
+                    // If the local record doesn't have a _sync_id then
+                    // it is new. Ignore it for now, we will send an insert
+                    // the the server later.
+                    if (TextUtils.isEmpty(localSyncID)) {
                         if (Log.isLoggable(TAG, Log.VERBOSE)) {
-                            Log.v(TAG, "remote record " + serverSyncId
-                                    + " conflicts with local _sync_id " + localSyncID
-                                    + ", local _id " + localRowId);
+                            Log.v(TAG, "local record " +
+                                    localCursor.getLong(1) +
+                                    " has no _sync_id, ignoring");
                         }
-                        conflict = true;
+                        localCursor.moveToNext();
+                        localSyncID = null;
+                        continue;
+                    }
+
+                    int comp = serverSyncId.compareTo(localSyncID);
+
+                    // the local DB has a record that the server doesn't have
+                    if (comp > 0) {
+                        if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                            Log.v(TAG, "local record " +
+                                    localCursor.getLong(1) +
+                                    " has _sync_id " + localSyncID +
+                                    " that is < server _sync_id " + serverSyncId);
+                        }
+                        if (diffsArePartial) {
+                            localCursor.moveToNext();
+                        } else {
+                            deleteRow(localCursor);
+                            if (mDeletedTable != null) {
+                                mDb.delete(mDeletedTable, _SYNC_ID +"=?", new String[] {localSyncID});
+                            }
+                            syncResult.stats.numDeletes++;
+                            mDb.yieldIfContended();
+                        }
+                        localSyncID = null;
+                        continue;
+                    }
+
+                    // the server has a record that the local DB doesn't have
+                    if (comp < 0) {
+                        if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                            Log.v(TAG, "local record " +
+                                    localCursor.getLong(1) +
+                                    " has _sync_id " + localSyncID +
+                                    " that is > server _sync_id " + serverSyncId);
+                        }
+                        localSyncID = null;
+                    }
+
+                    // the server and the local DB both have this record
+                    if (comp == 0) {
+                        if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                            Log.v(TAG, "local record " +
+                                    localCursor.getLong(1) +
+                                    " has _sync_id " + localSyncID +
+                                    " that matches the server _sync_id");
+                        }
+                        localSyncDirty = localCursor.getInt(0) != 0;
+                        localRowId = localCursor.getLong(1);
+                        localSyncVersion = localCursor.getString(3);
+                        localCursor.moveToNext();
+                    }
+
+                    break;
+                }
+
+                // If this record is in the deleted table then update the server version
+                // in the deleted table, if necessary, and then ignore it here.
+                // We will send a deletion indication to the server down a
+                // little further.
+                if (findInCursor(deletedCursor, deletedSyncIDColumn, serverSyncId)) {
+                    if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                        Log.v(TAG, "remote record " + serverSyncId + " is in the deleted table");
+                    }
+                    final String deletedSyncVersion = deletedCursor.getString(deletedSyncVersionColumn);
+                    if (!TextUtils.equals(deletedSyncVersion, serverSyncVersion)) {
+                        if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                            Log.v(TAG, "setting version of deleted record " + serverSyncId + " to "
+                                    + serverSyncVersion);
+                        }
+                        ContentValues values = new ContentValues();
+                        values.put(_SYNC_VERSION, serverSyncVersion);
+                        mDb.update(mDeletedTable, values, "_sync_id=?", new String[]{serverSyncId});
+                    }
+                    continue;
+                }
+
+                // If the _sync_local_id is present in the diffsCursor
+                // then this record corresponds to a local record that was just
+                // inserted into the server and the _sync_local_id is the row id
+                // of the local record. Set these fields so that the next check
+                // treats this record as an update, which will allow the
+                // merger to update the record with the server's sync id
+                if (!diffsCursor.isNull(serverSyncLocalIdColumn)) {
+                    localRowId = diffsCursor.getLong(serverSyncLocalIdColumn);
+                    if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                        Log.v(TAG, "the remote record with sync id " + serverSyncId
+                                + " has a local sync id, " + localRowId);
+                    }
+                    localSyncID = serverSyncId;
+                    localSyncDirty = false;
+                    localSyncVersion = null;
+                }
+
+                if (!TextUtils.isEmpty(localSyncID)) {
+                    // An existing server item has changed
+                    // If serverSyncVersion is null, there is no edit URL;
+                    // server won't let this change be written.
+                    boolean recordChanged = (localSyncVersion == null) ||
+                            (serverSyncVersion == null) ||
+                            !serverSyncVersion.equals(localSyncVersion);
+                    if (recordChanged) {
+                        if (localSyncDirty) {
+                            if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                                Log.v(TAG, "remote record " + serverSyncId
+                                        + " conflicts with local _sync_id " + localSyncID
+                                        + ", local _id " + localRowId);
+                            }
+                            conflict = true;
+                        } else {
+                            if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                                Log.v(TAG,
+                                        "remote record " +
+                                                serverSyncId +
+                                                " updates local _sync_id " +
+                                                localSyncID + ", local _id " +
+                                                localRowId);
+                            }
+                            update = true;
+                        }
                     } else {
                         if (Log.isLoggable(TAG, Log.VERBOSE)) {
                             Log.v(TAG,
-                                    "remote record " +
-                                            serverSyncId +
-                                            " updates local _sync_id " +
-                                            localSyncID + ", local _id " +
-                                            localRowId);
+                                    "Skipping update: localSyncVersion: " + localSyncVersion +
+                                    ", serverSyncVersion: " + serverSyncVersion);
                         }
-                        update = true;
                     }
                 } else {
+                    // the local db doesn't know about this record so add it
+                    if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                        Log.v(TAG, "remote record " + serverSyncId + " is new, inserting");
+                    }
+                    insert = true;
+                }
+
+                if (update) {
+                    updateRow(localRowId, serverDiffs, diffsCursor);
+                    syncResult.stats.numUpdates++;
+                } else if (conflict) {
+                    resolveRow(localRowId, serverSyncId, serverDiffs, diffsCursor);
+                    syncResult.stats.numUpdates++;
+                } else if (insert) {
+                    insertRow(serverDiffs, diffsCursor);
+                    syncResult.stats.numInserts++;
+                }
+            }
+
+            if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                Log.v(TAG, "processed " + diffsCount + " server entries");
+            }
+
+            // If tombstones aren't in use delete any remaining local rows that
+            // don't have corresponding server rows. Keep the rows that don't
+            // have a sync id since those were created locally and haven't been
+            // synced to the server yet.
+            if (!diffsArePartial) {
+                while (!localCursor.isAfterLast() && !TextUtils.isEmpty(localCursor.getString(2))) {
+                    if (mIsMergeCancelled) {
+                        return;
+                    }
+                    localCount++;
+                    final String localSyncId = localCursor.getString(2);
                     if (Log.isLoggable(TAG, Log.VERBOSE)) {
                         Log.v(TAG,
-                                "Skipping update: localSyncVersion: " + localSyncVersion +
-                                ", serverSyncVersion: " + serverSyncVersion);
+                                "deleting local record " +
+                                        localCursor.getLong(1) +
+                                        " _sync_id " + localSyncId);
                     }
+                    deleteRow(localCursor);
+                    if (mDeletedTable != null) {
+                        mDb.delete(mDeletedTable, _SYNC_ID + "=?", new String[] {localSyncId});
+                    }
+                    syncResult.stats.numDeletes++;
+                    mDb.yieldIfContended();
                 }
-            } else {
-                // the local db doesn't know about this record so add it
-                if (Log.isLoggable(TAG, Log.VERBOSE)) {
-                    Log.v(TAG, "remote record " + serverSyncId + " is new, inserting");
-                }
-                insert = true;
             }
-
-            if (update) {
-                updateRow(localRowId, serverDiffs, diffsCursor);
-                syncResult.stats.numUpdates++;
-            } else if (conflict) {
-                resolveRow(localRowId, serverSyncId, serverDiffs, diffsCursor);
-                syncResult.stats.numUpdates++;
-            } else if (insert) {
-                insertRow(serverDiffs, diffsCursor);
-                syncResult.stats.numInserts++;
-            }
+            if (Log.isLoggable(TAG, Log.VERBOSE)) Log.v(TAG, "checked " + localCount +
+                    " local entries");
+        } finally {
+            if (diffsCursor != null) diffsCursor.close();
+            if (localCursor != null) localCursor.close();
+            if (deletedCursor != null) deletedCursor.close();
         }
 
-        if (Log.isLoggable(TAG, Log.VERBOSE)) {
-            Log.v(TAG, "processed " + diffsCount + " server entries");
-        }
-
-        // If tombstones aren't in use delete any remaining local rows that
-        // don't have corresponding server rows. Keep the rows that don't
-        // have a sync id since those were created locally and haven't been
-        // synced to the server yet.
-        if (!diffsArePartial) {
-            while (!localCursor.isAfterLast() && !TextUtils.isEmpty(localCursor.getString(2))) {
-                if (mIsMergeCancelled) {
-                    localCursor.deactivate();
-                    deletedCursor.deactivate();
-                    diffsCursor.deactivate();
-                    return;
-                }
-                localCount++;
-                final String localSyncId = localCursor.getString(2);
-                if (Log.isLoggable(TAG, Log.VERBOSE)) {
-                    Log.v(TAG,
-                            "deleting local record " +
-                                    localCursor.getLong(1) +
-                                    " _sync_id " + localSyncId);
-                }
-                deleteRow(localCursor);
-                if (mDeletedTable != null) {
-                    mDb.delete(mDeletedTable, _SYNC_ID + "=?", new String[] {localSyncId});
-                }
-                syncResult.stats.numDeletes++;
-                mDb.yieldIfContended();
-            }
-        }
-
-        if (Log.isLoggable(TAG, Log.VERBOSE)) Log.v(TAG, "checked " + localCount +
-                " local entries");
-        diffsCursor.deactivate();
-        localCursor.deactivate();
-        deletedCursor.deactivate();
 
         if (Log.isLoggable(TAG, Log.VERBOSE)) Log.v(TAG, "applying deletions from the server");
 
         // Apply deletions from the server
         if (mDeletedTableURL != null) {
             diffsCursor = serverDiffs.query(mDeletedTableURL, null, null, null, null);
-
-            while (diffsCursor.moveToNext()) {
-                if (mIsMergeCancelled) {
-                    diffsCursor.deactivate();
-                    return;
+            try {
+                while (diffsCursor.moveToNext()) {
+                    if (mIsMergeCancelled) {
+                        return;
+                    }
+                    // delete all rows that match each element in the diffsCursor
+                    fullyDeleteMatchingRows(diffsCursor, account, syncResult);
+                    mDb.yieldIfContended();
                 }
-                // delete all rows that match each element in the diffsCursor
-                fullyDeleteMatchingRows(diffsCursor, account, syncResult);
-                mDb.yieldIfContended();
+            } finally {
+                diffsCursor.close();
             }
-            diffsCursor.deactivate();
         }
     }
 
-    private void fullyDeleteMatchingRows(Cursor diffsCursor, String account,
+    private void fullyDeleteMatchingRows(Cursor diffsCursor, Account account,
             SyncResult syncResult) {
         int serverSyncIdColumn = diffsCursor.getColumnIndexOrThrow(_SYNC_ID);
         final boolean deleteBySyncId = !diffsCursor.isNull(serverSyncIdColumn);
 
         // delete the rows explicitly so that the delete operation can be overridden
-        final Cursor c;
         final String[] selectionArgs;
-        if (deleteBySyncId) {
-            selectionArgs = new String[]{diffsCursor.getString(serverSyncIdColumn), account};
-            c = mDb.query(mTable, new String[]{BaseColumns._ID}, SELECT_BY_SYNC_ID_AND_ACCOUNT,
-                    selectionArgs, null, null, null);
-        } else {
-            int serverSyncLocalIdColumn = diffsCursor.getColumnIndexOrThrow(_SYNC_LOCAL_ID);
-            selectionArgs = new String[]{diffsCursor.getString(serverSyncLocalIdColumn)};
-            c = mDb.query(mTable, new String[]{BaseColumns._ID}, SELECT_BY_ID, selectionArgs,
-                    null, null, null);
-        }
+        Cursor c = null;
         try {
+            if (deleteBySyncId) {
+                selectionArgs = new String[]{diffsCursor.getString(serverSyncIdColumn),
+                        account.name, account.type};
+                c = mDb.query(mTable, new String[]{BaseColumns._ID}, SELECT_BY_SYNC_ID_AND_ACCOUNT,
+                        selectionArgs, null, null, null);
+            } else {
+                int serverSyncLocalIdColumn = diffsCursor.getColumnIndexOrThrow(_SYNC_LOCAL_ID);
+                selectionArgs = new String[]{diffsCursor.getString(serverSyncLocalIdColumn)};
+                c = mDb.query(mTable, new String[]{BaseColumns._ID}, SELECT_BY_ID, selectionArgs,
+                        null, null, null);
+            }
             c.moveToFirst();
             while (!c.isAfterLast()) {
                 deleteRow(c); // advances the cursor
                 syncResult.stats.numDeletes++;
             }
         } finally {
-            c.deactivate();
+          if (c != null) c.close();
         }
         if (deleteBySyncId && mDeletedTable != null) {
             mDb.delete(mDeletedTable, SELECT_BY_SYNC_ID_AND_ACCOUNT, selectionArgs);
@@ -519,43 +520,46 @@ public abstract class AbstractTableMerger
      * Finds local changes, placing the results in the given result object.
      * @param temporaryInstanceFactory As an optimization for the case
      * where there are no client-side diffs, mergeResult may initially
-     * have no {@link android.content.TempProviderSyncResult#tempContentProvider}.  If this is
+     * have no {@link TempProviderSyncResult#tempContentProvider}.  If this is
      * the first in the sequence of AbstractTableMergers to find
      * client-side diffs, it will use the given ContentProvider to
      * create a temporary instance and store its {@link
-     * ContentProvider} in the mergeResult.
+     * android.content.ContentProvider} in the mergeResult.
      * @param account
      * @param syncResult
      */
     private void findLocalChanges(TempProviderSyncResult mergeResult,
-            SyncableContentProvider temporaryInstanceFactory, String account,
+            SyncableContentProvider temporaryInstanceFactory, Account account,
             SyncResult syncResult) {
         SyncableContentProvider clientDiffs = mergeResult.tempContentProvider;
         if (Log.isLoggable(TAG, Log.VERBOSE)) Log.v(TAG, "generating client updates");
 
-        final String[] accountSelectionArgs = new String[]{account};
+        final String[] accountSelectionArgs = new String[]{account.name, account.type};
 
         // Generate the client updates and insertions
         // Create a cursor for dirty records
+        long numInsertsOrUpdates = 0;
         Cursor localChangesCursor = mDb.query(mTable, null, SELECT_UNSYNCED, accountSelectionArgs,
                 null, null, null);
-        long numInsertsOrUpdates = localChangesCursor.getCount();
-        while (localChangesCursor.moveToNext()) {
-            if (mIsMergeCancelled) {
-                localChangesCursor.close();
-                return;
+        try {
+            numInsertsOrUpdates = localChangesCursor.getCount();
+            while (localChangesCursor.moveToNext()) {
+                if (mIsMergeCancelled) {
+                    return;
+                }
+                if (clientDiffs == null) {
+                    clientDiffs = temporaryInstanceFactory.getTemporaryInstance();
+                }
+                mValues.clear();
+                cursorRowToContentValues(localChangesCursor, mValues);
+                mValues.remove("_id");
+                DatabaseUtils.cursorLongToContentValues(localChangesCursor, "_id", mValues,
+                        _SYNC_LOCAL_ID);
+                clientDiffs.insert(mTableURL, mValues);
             }
-            if (clientDiffs == null) {
-                clientDiffs = temporaryInstanceFactory.getTemporaryInstance();
-            }
-            mValues.clear();
-            cursorRowToContentValues(localChangesCursor, mValues);
-            mValues.remove("_id");
-            DatabaseUtils.cursorLongToContentValues(localChangesCursor, "_id", mValues,
-                    _SYNC_LOCAL_ID);
-            clientDiffs.insert(mTableURL, mValues);
+        } finally {
+          localChangesCursor.close();
         }
-        localChangesCursor.close();
 
         // Generate the client deletions
         if (Log.isLoggable(TAG, Log.VERBOSE)) Log.v(TAG, "generating client deletions");
@@ -564,23 +568,25 @@ public abstract class AbstractTableMerger
         if (mDeletedTable != null) {
             Cursor deletedCursor = mDb.query(mDeletedTable,
                     syncIdAndVersionProjection,
-                    _SYNC_ACCOUNT + "=? AND " + _SYNC_ID + " IS NOT NULL", accountSelectionArgs,
+                    _SYNC_ACCOUNT + "=? AND " + _SYNC_ACCOUNT_TYPE + "=? AND "
+                            + _SYNC_ID + " IS NOT NULL", accountSelectionArgs,
                     null, null, mDeletedTable + "." + _SYNC_ID);
-
-            numDeletedEntries = deletedCursor.getCount();
-            while (deletedCursor.moveToNext()) {
-                if (mIsMergeCancelled) {
-                    deletedCursor.close();
-                    return;
+            try {
+                numDeletedEntries = deletedCursor.getCount();
+                while (deletedCursor.moveToNext()) {
+                    if (mIsMergeCancelled) {
+                        return;
+                    }
+                    if (clientDiffs == null) {
+                        clientDiffs = temporaryInstanceFactory.getTemporaryInstance();
+                    }
+                    mValues.clear();
+                    DatabaseUtils.cursorRowToContentValues(deletedCursor, mValues);
+                    clientDiffs.insert(mDeletedTableURL, mValues);
                 }
-                if (clientDiffs == null) {
-                    clientDiffs = temporaryInstanceFactory.getTemporaryInstance();
-                }
-                mValues.clear();
-                DatabaseUtils.cursorRowToContentValues(deletedCursor, mValues);
-                clientDiffs.insert(mDeletedTableURL, mValues);
+            } finally {
+                deletedCursor.close();
             }
-            deletedCursor.close();
         }
 
         if (clientDiffs != null) {

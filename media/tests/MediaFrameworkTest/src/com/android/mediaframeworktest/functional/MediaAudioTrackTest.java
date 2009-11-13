@@ -140,7 +140,7 @@ public class MediaAudioTrackTest extends ActivityInstrumentationTestCase2<MediaF
         
         TestResults res = constructorTestMultiSampleRate(
                 AudioManager.STREAM_MUSIC, AudioTrack.MODE_STREAM, 
-                    AudioFormat.CHANNEL_CONFIGURATION_MONO, AudioFormat.ENCODING_PCM_16BIT,
+                    AudioFormat.CHANNEL_OUT_MONO, AudioFormat.ENCODING_PCM_16BIT,
                 AudioTrack.STATE_INITIALIZED);
 
         assertTrue("testConstructorMono16MusicStream: " + res.mResultLog, res.mResult);
@@ -153,7 +153,7 @@ public class MediaAudioTrackTest extends ActivityInstrumentationTestCase2<MediaF
         
         TestResults res = constructorTestMultiSampleRate(
                 AudioManager.STREAM_MUSIC, AudioTrack.MODE_STREAM, 
-                    AudioFormat.CHANNEL_CONFIGURATION_STEREO, AudioFormat.ENCODING_PCM_16BIT,
+                    AudioFormat.CHANNEL_OUT_STEREO, AudioFormat.ENCODING_PCM_16BIT,
                 AudioTrack.STATE_INITIALIZED);
 
         assertTrue("testConstructorStereo16MusicStream: " + res.mResultLog, res.mResult);
@@ -166,7 +166,7 @@ public class MediaAudioTrackTest extends ActivityInstrumentationTestCase2<MediaF
         
         TestResults res = constructorTestMultiSampleRate(
                 AudioManager.STREAM_MUSIC, AudioTrack.MODE_STATIC, 
-                    AudioFormat.CHANNEL_CONFIGURATION_MONO, AudioFormat.ENCODING_PCM_16BIT,
+                    AudioFormat.CHANNEL_OUT_MONO, AudioFormat.ENCODING_PCM_16BIT,
                 AudioTrack.STATE_NO_STATIC_DATA);
 
         assertTrue("testConstructorMono16MusicStatic: " + res.mResultLog, res.mResult);
@@ -179,7 +179,7 @@ public class MediaAudioTrackTest extends ActivityInstrumentationTestCase2<MediaF
         
         TestResults res = constructorTestMultiSampleRate(
                 AudioManager.STREAM_MUSIC, AudioTrack.MODE_STATIC, 
-                    AudioFormat.CHANNEL_CONFIGURATION_STEREO, AudioFormat.ENCODING_PCM_16BIT,
+                    AudioFormat.CHANNEL_OUT_STEREO, AudioFormat.ENCODING_PCM_16BIT,
                 AudioTrack.STATE_NO_STATIC_DATA);
 
         assertTrue("testConstructorStereo16MusicStatic: " + res.mResultLog, res.mResult);
@@ -196,7 +196,7 @@ public class MediaAudioTrackTest extends ActivityInstrumentationTestCase2<MediaF
         
         TestResults res = constructorTestMultiSampleRate(
                 AudioManager.STREAM_MUSIC, AudioTrack.MODE_STREAM, 
-                    AudioFormat.CHANNEL_CONFIGURATION_MONO, AudioFormat.ENCODING_PCM_8BIT,
+                    AudioFormat.CHANNEL_OUT_MONO, AudioFormat.ENCODING_PCM_8BIT,
                 AudioTrack.STATE_INITIALIZED);
 
         assertTrue("testConstructorMono8MusicStream: " + res.mResultLog, res.mResult);
@@ -208,7 +208,7 @@ public class MediaAudioTrackTest extends ActivityInstrumentationTestCase2<MediaF
         
         TestResults res = constructorTestMultiSampleRate(
                 AudioManager.STREAM_MUSIC, AudioTrack.MODE_STREAM, 
-                    AudioFormat.CHANNEL_CONFIGURATION_STEREO, AudioFormat.ENCODING_PCM_8BIT,
+                    AudioFormat.CHANNEL_OUT_STEREO, AudioFormat.ENCODING_PCM_8BIT,
                 AudioTrack.STATE_INITIALIZED);
 
         assertTrue("testConstructorStereo8MusicStream: " + res.mResultLog, res.mResult);
@@ -220,7 +220,7 @@ public class MediaAudioTrackTest extends ActivityInstrumentationTestCase2<MediaF
         
         TestResults res = constructorTestMultiSampleRate(
                 AudioManager.STREAM_MUSIC, AudioTrack.MODE_STATIC, 
-                    AudioFormat.CHANNEL_CONFIGURATION_MONO, AudioFormat.ENCODING_PCM_8BIT,
+                    AudioFormat.CHANNEL_OUT_MONO, AudioFormat.ENCODING_PCM_8BIT,
                 AudioTrack.STATE_NO_STATIC_DATA);
 
         assertTrue("testConstructorMono8MusicStatic: " + res.mResultLog, res.mResult);
@@ -232,7 +232,7 @@ public class MediaAudioTrackTest extends ActivityInstrumentationTestCase2<MediaF
         
         TestResults res = constructorTestMultiSampleRate(
                 AudioManager.STREAM_MUSIC, AudioTrack.MODE_STATIC, 
-                    AudioFormat.CHANNEL_CONFIGURATION_STEREO, AudioFormat.ENCODING_PCM_8BIT,
+                    AudioFormat.CHANNEL_OUT_STEREO, AudioFormat.ENCODING_PCM_8BIT,
                 AudioTrack.STATE_NO_STATIC_DATA);
 
         assertTrue("testConstructorStereo8MusicStatic: " + res.mResultLog, res.mResult);
@@ -248,15 +248,15 @@ public class MediaAudioTrackTest extends ActivityInstrumentationTestCase2<MediaF
     public void testConstructorStreamType() throws Exception {
         // constants for test
         final int TYPE_TEST_SR = 22050;
-        final int TYPE_TEST_CONF = AudioFormat.CHANNEL_CONFIGURATION_STEREO;
+        final int TYPE_TEST_CONF = AudioFormat.CHANNEL_OUT_STEREO;
         final int TYPE_TEST_FORMAT = AudioFormat.ENCODING_PCM_16BIT;
         final int TYPE_TEST_MODE = AudioTrack.MODE_STREAM;
         final int[] STREAM_TYPES = { AudioManager.STREAM_ALARM, AudioManager.STREAM_BLUETOOTH_SCO, 
                 AudioManager.STREAM_MUSIC, AudioManager.STREAM_NOTIFICATION,
                 AudioManager.STREAM_RING, AudioManager.STREAM_SYSTEM, 
-                AudioManager.STREAM_VOICE_CALL };
+                AudioManager.STREAM_VOICE_CALL, AudioManager.STREAM_DTMF, };
         final String[] STREAM_NAMES = { "STREAM_ALARM", "STREAM_BLUETOOTH_SCO", "STREAM_MUSIC",
-                "STREAM_NOTIFICATION", "STREAM_RING", "STREAM_SYSTEM", "STREAM_VOICE_CALL" };
+                "STREAM_NOTIFICATION", "STREAM_RING", "STREAM_SYSTEM", "STREAM_VOICE_CALL", "STREAM_DTMF" };
         
         boolean localTestRes = true;
         AudioTrack track = null;
@@ -303,7 +303,7 @@ public class MediaAudioTrackTest extends ActivityInstrumentationTestCase2<MediaF
         // constants for test
         final String TEST_NAME = "testPlaybackHeadPositionAfterInit";
         final int TEST_SR = 22050;
-        final int TEST_CONF = AudioFormat.CHANNEL_CONFIGURATION_STEREO;
+        final int TEST_CONF = AudioFormat.CHANNEL_OUT_STEREO;
         final int TEST_FORMAT = AudioFormat.ENCODING_PCM_16BIT;
         final int TEST_MODE = AudioTrack.MODE_STREAM;
         final int TEST_STREAM_TYPE = AudioManager.STREAM_MUSIC;
@@ -324,7 +324,7 @@ public class MediaAudioTrackTest extends ActivityInstrumentationTestCase2<MediaF
         // constants for test
         final String TEST_NAME = "testPlaybackHeadPositionIncrease";
         final int TEST_SR = 22050;
-        final int TEST_CONF = AudioFormat.CHANNEL_CONFIGURATION_STEREO;
+        final int TEST_CONF = AudioFormat.CHANNEL_OUT_STEREO;
         final int TEST_FORMAT = AudioFormat.ENCODING_PCM_16BIT;
         final int TEST_MODE = AudioTrack.MODE_STREAM;
         final int TEST_STREAM_TYPE = AudioManager.STREAM_MUSIC;
@@ -352,7 +352,7 @@ public class MediaAudioTrackTest extends ActivityInstrumentationTestCase2<MediaF
         // constants for test
         final String TEST_NAME = "testPlaybackHeadPositionAfterFlush";
         final int TEST_SR = 22050;
-        final int TEST_CONF = AudioFormat.CHANNEL_CONFIGURATION_STEREO;
+        final int TEST_CONF = AudioFormat.CHANNEL_OUT_STEREO;
         final int TEST_FORMAT = AudioFormat.ENCODING_PCM_16BIT;
         final int TEST_MODE = AudioTrack.MODE_STREAM;
         final int TEST_STREAM_TYPE = AudioManager.STREAM_MUSIC;
@@ -382,7 +382,7 @@ public class MediaAudioTrackTest extends ActivityInstrumentationTestCase2<MediaF
         // constants for test
         final String TEST_NAME = "testPlaybackHeadPositionAfterStop";
         final int TEST_SR = 22050;
-        final int TEST_CONF = AudioFormat.CHANNEL_CONFIGURATION_STEREO;
+        final int TEST_CONF = AudioFormat.CHANNEL_OUT_STEREO;
         final int TEST_FORMAT = AudioFormat.ENCODING_PCM_16BIT;
         final int TEST_MODE = AudioTrack.MODE_STREAM;
         final int TEST_STREAM_TYPE = AudioManager.STREAM_MUSIC;
@@ -413,7 +413,7 @@ public class MediaAudioTrackTest extends ActivityInstrumentationTestCase2<MediaF
         // constants for test
         final String TEST_NAME = "testPlaybackHeadPositionAfterPause";
         final int TEST_SR = 22050;
-        final int TEST_CONF = AudioFormat.CHANNEL_CONFIGURATION_STEREO;
+        final int TEST_CONF = AudioFormat.CHANNEL_OUT_STEREO;
         final int TEST_FORMAT = AudioFormat.ENCODING_PCM_16BIT;
         final int TEST_MODE = AudioTrack.MODE_STREAM;
         final int TEST_STREAM_TYPE = AudioManager.STREAM_MUSIC;
@@ -448,7 +448,7 @@ public class MediaAudioTrackTest extends ActivityInstrumentationTestCase2<MediaF
         // constants for test
         final String TEST_NAME = "testSetStereoVolumeMax";
         final int TEST_SR = 22050;
-        final int TEST_CONF = AudioFormat.CHANNEL_CONFIGURATION_STEREO;
+        final int TEST_CONF = AudioFormat.CHANNEL_OUT_STEREO;
         final int TEST_FORMAT = AudioFormat.ENCODING_PCM_16BIT;
         final int TEST_MODE = AudioTrack.MODE_STREAM;
         final int TEST_STREAM_TYPE = AudioManager.STREAM_MUSIC;
@@ -474,7 +474,7 @@ public class MediaAudioTrackTest extends ActivityInstrumentationTestCase2<MediaF
         // constants for test
         final String TEST_NAME = "testSetStereoVolumeMin";
         final int TEST_SR = 22050;
-        final int TEST_CONF = AudioFormat.CHANNEL_CONFIGURATION_STEREO;
+        final int TEST_CONF = AudioFormat.CHANNEL_OUT_STEREO;
         final int TEST_FORMAT = AudioFormat.ENCODING_PCM_16BIT;
         final int TEST_MODE = AudioTrack.MODE_STREAM;
         final int TEST_STREAM_TYPE = AudioManager.STREAM_MUSIC;
@@ -500,7 +500,7 @@ public class MediaAudioTrackTest extends ActivityInstrumentationTestCase2<MediaF
         // constants for test
         final String TEST_NAME = "testSetStereoVolumeMid";
         final int TEST_SR = 22050;
-        final int TEST_CONF = AudioFormat.CHANNEL_CONFIGURATION_STEREO;
+        final int TEST_CONF = AudioFormat.CHANNEL_OUT_STEREO;
         final int TEST_FORMAT = AudioFormat.ENCODING_PCM_16BIT;
         final int TEST_MODE = AudioTrack.MODE_STREAM;
         final int TEST_STREAM_TYPE = AudioManager.STREAM_MUSIC;
@@ -526,7 +526,7 @@ public class MediaAudioTrackTest extends ActivityInstrumentationTestCase2<MediaF
         // constants for test
         final String TEST_NAME = "testSetPlaybackRate";
         final int TEST_SR = 22050;
-        final int TEST_CONF = AudioFormat.CHANNEL_CONFIGURATION_STEREO;
+        final int TEST_CONF = AudioFormat.CHANNEL_OUT_STEREO;
         final int TEST_FORMAT = AudioFormat.ENCODING_PCM_16BIT;
         final int TEST_MODE = AudioTrack.MODE_STREAM;
         final int TEST_STREAM_TYPE = AudioManager.STREAM_MUSIC;
@@ -552,7 +552,7 @@ public class MediaAudioTrackTest extends ActivityInstrumentationTestCase2<MediaF
         // constants for test
         final String TEST_NAME = "testSetPlaybackRateZero";
         final int TEST_SR = 22050;
-        final int TEST_CONF = AudioFormat.CHANNEL_CONFIGURATION_STEREO;
+        final int TEST_CONF = AudioFormat.CHANNEL_OUT_STEREO;
         final int TEST_FORMAT = AudioFormat.ENCODING_PCM_16BIT;
         final int TEST_MODE = AudioTrack.MODE_STREAM;
         final int TEST_STREAM_TYPE = AudioManager.STREAM_MUSIC;
@@ -574,7 +574,7 @@ public class MediaAudioTrackTest extends ActivityInstrumentationTestCase2<MediaF
         // constants for test
         final String TEST_NAME = "testSetPlaybackRateTwiceOutputSR";
         final int TEST_SR = 22050;
-        final int TEST_CONF = AudioFormat.CHANNEL_CONFIGURATION_STEREO;
+        final int TEST_CONF = AudioFormat.CHANNEL_OUT_STEREO;
         final int TEST_FORMAT = AudioFormat.ENCODING_PCM_16BIT;
         final int TEST_MODE = AudioTrack.MODE_STREAM;
         final int TEST_STREAM_TYPE = AudioManager.STREAM_MUSIC;
@@ -601,7 +601,7 @@ public class MediaAudioTrackTest extends ActivityInstrumentationTestCase2<MediaF
         // constants for test
         final String TEST_NAME = "testSetGetPlaybackRate";
         final int TEST_SR = 22050;
-        final int TEST_CONF = AudioFormat.CHANNEL_CONFIGURATION_STEREO;
+        final int TEST_CONF = AudioFormat.CHANNEL_OUT_STEREO;
         final int TEST_FORMAT = AudioFormat.ENCODING_PCM_16BIT;
         final int TEST_MODE = AudioTrack.MODE_STREAM;
         final int TEST_STREAM_TYPE = AudioManager.STREAM_MUSIC;
@@ -628,7 +628,7 @@ public class MediaAudioTrackTest extends ActivityInstrumentationTestCase2<MediaF
         // constants for test
         final String TEST_NAME = "testSetPlaybackRateUninit";
         final int TEST_SR = 22050;
-        final int TEST_CONF = AudioFormat.CHANNEL_CONFIGURATION_MONO;
+        final int TEST_CONF = AudioFormat.CHANNEL_OUT_MONO;
         final int TEST_FORMAT = AudioFormat.ENCODING_PCM_16BIT;
         final int TEST_MODE = AudioTrack.MODE_STATIC;
         final int TEST_STREAM_TYPE = AudioManager.STREAM_MUSIC;
@@ -655,7 +655,7 @@ public class MediaAudioTrackTest extends ActivityInstrumentationTestCase2<MediaF
         // constants for test
         final String TEST_NAME = "testSetPlaybackHeadPositionPlaying";
         final int TEST_SR = 22050;
-        final int TEST_CONF = AudioFormat.CHANNEL_CONFIGURATION_MONO;
+        final int TEST_CONF = AudioFormat.CHANNEL_OUT_MONO;
         final int TEST_FORMAT = AudioFormat.ENCODING_PCM_16BIT;
         final int TEST_MODE = AudioTrack.MODE_STREAM;
         final int TEST_STREAM_TYPE = AudioManager.STREAM_MUSIC;
@@ -682,7 +682,7 @@ public class MediaAudioTrackTest extends ActivityInstrumentationTestCase2<MediaF
         // constants for test
         final String TEST_NAME = "testSetPlaybackHeadPositionStopped";
         final int TEST_SR = 22050;
-        final int TEST_CONF = AudioFormat.CHANNEL_CONFIGURATION_MONO;
+        final int TEST_CONF = AudioFormat.CHANNEL_OUT_MONO;
         final int TEST_FORMAT = AudioFormat.ENCODING_PCM_16BIT;
         final int TEST_MODE = AudioTrack.MODE_STREAM;
         final int TEST_STREAM_TYPE = AudioManager.STREAM_MUSIC;
@@ -710,7 +710,7 @@ public class MediaAudioTrackTest extends ActivityInstrumentationTestCase2<MediaF
         // constants for test
         final String TEST_NAME = "testSetPlaybackHeadPositionPaused";
         final int TEST_SR = 22050;
-        final int TEST_CONF = AudioFormat.CHANNEL_CONFIGURATION_MONO;
+        final int TEST_CONF = AudioFormat.CHANNEL_OUT_MONO;
         final int TEST_FORMAT = AudioFormat.ENCODING_PCM_16BIT;
         final int TEST_MODE = AudioTrack.MODE_STREAM;
         final int TEST_STREAM_TYPE = AudioManager.STREAM_MUSIC;
@@ -738,7 +738,7 @@ public class MediaAudioTrackTest extends ActivityInstrumentationTestCase2<MediaF
         // constants for test
         final String TEST_NAME = "testSetPlaybackHeadPositionTooFar";
         final int TEST_SR = 22050;
-        final int TEST_CONF = AudioFormat.CHANNEL_CONFIGURATION_MONO;
+        final int TEST_CONF = AudioFormat.CHANNEL_OUT_MONO;
         final int TEST_FORMAT = AudioFormat.ENCODING_PCM_16BIT;
         final int TEST_MODE = AudioTrack.MODE_STREAM;
         final int TEST_STREAM_TYPE = AudioManager.STREAM_MUSIC;
@@ -770,7 +770,7 @@ public class MediaAudioTrackTest extends ActivityInstrumentationTestCase2<MediaF
         // constants for test
         final String TEST_NAME = "testSetLoopPointsStream";
         final int TEST_SR = 22050;
-        final int TEST_CONF = AudioFormat.CHANNEL_CONFIGURATION_MONO;
+        final int TEST_CONF = AudioFormat.CHANNEL_OUT_MONO;
         final int TEST_FORMAT = AudioFormat.ENCODING_PCM_16BIT;
         final int TEST_MODE = AudioTrack.MODE_STREAM;
         final int TEST_STREAM_TYPE = AudioManager.STREAM_MUSIC;
@@ -794,7 +794,7 @@ public class MediaAudioTrackTest extends ActivityInstrumentationTestCase2<MediaF
         // constants for test
         final String TEST_NAME = "testSetLoopPointsStartAfterEnd";
         final int TEST_SR = 22050;
-        final int TEST_CONF = AudioFormat.CHANNEL_CONFIGURATION_MONO;
+        final int TEST_CONF = AudioFormat.CHANNEL_OUT_MONO;
         final int TEST_FORMAT = AudioFormat.ENCODING_PCM_16BIT;
         final int TEST_MODE = AudioTrack.MODE_STATIC;
         final int TEST_STREAM_TYPE = AudioManager.STREAM_MUSIC;
@@ -818,7 +818,7 @@ public class MediaAudioTrackTest extends ActivityInstrumentationTestCase2<MediaF
         // constants for test
         final String TEST_NAME = "testSetLoopPointsSuccess";
         final int TEST_SR = 22050;
-        final int TEST_CONF = AudioFormat.CHANNEL_CONFIGURATION_MONO;
+        final int TEST_CONF = AudioFormat.CHANNEL_OUT_MONO;
         final int TEST_FORMAT = AudioFormat.ENCODING_PCM_16BIT;
         final int TEST_MODE = AudioTrack.MODE_STATIC;
         final int TEST_STREAM_TYPE = AudioManager.STREAM_MUSIC;
@@ -842,7 +842,7 @@ public class MediaAudioTrackTest extends ActivityInstrumentationTestCase2<MediaF
         // constants for test
         final String TEST_NAME = "testSetLoopPointsLoopTooLong";
         final int TEST_SR = 22050;
-        final int TEST_CONF = AudioFormat.CHANNEL_CONFIGURATION_MONO;
+        final int TEST_CONF = AudioFormat.CHANNEL_OUT_MONO;
         final int TEST_FORMAT = AudioFormat.ENCODING_PCM_16BIT;
         final int TEST_MODE = AudioTrack.MODE_STATIC;
         final int TEST_STREAM_TYPE = AudioManager.STREAM_MUSIC;
@@ -868,7 +868,7 @@ public class MediaAudioTrackTest extends ActivityInstrumentationTestCase2<MediaF
         // constants for test
         final String TEST_NAME = "testSetLoopPointsStartTooFar";
         final int TEST_SR = 22050;
-        final int TEST_CONF = AudioFormat.CHANNEL_CONFIGURATION_MONO;
+        final int TEST_CONF = AudioFormat.CHANNEL_OUT_MONO;
         final int TEST_FORMAT = AudioFormat.ENCODING_PCM_16BIT;
         final int TEST_MODE = AudioTrack.MODE_STATIC;
         final int TEST_STREAM_TYPE = AudioManager.STREAM_MUSIC;
@@ -896,7 +896,7 @@ public class MediaAudioTrackTest extends ActivityInstrumentationTestCase2<MediaF
         // constants for test
         final String TEST_NAME = "testSetLoopPointsEndTooFar";
         final int TEST_SR = 22050;
-        final int TEST_CONF = AudioFormat.CHANNEL_CONFIGURATION_MONO;
+        final int TEST_CONF = AudioFormat.CHANNEL_OUT_MONO;
         final int TEST_FORMAT = AudioFormat.ENCODING_PCM_16BIT;
         final int TEST_MODE = AudioTrack.MODE_STATIC;
         final int TEST_STREAM_TYPE = AudioManager.STREAM_MUSIC;
@@ -929,7 +929,7 @@ public class MediaAudioTrackTest extends ActivityInstrumentationTestCase2<MediaF
         // constants for test
         final String TEST_NAME = "testWriteByteOffsetTooBig";
         final int TEST_SR = 22050;
-        final int TEST_CONF = AudioFormat.CHANNEL_CONFIGURATION_MONO;
+        final int TEST_CONF = AudioFormat.CHANNEL_OUT_MONO;
         final int TEST_FORMAT = AudioFormat.ENCODING_PCM_16BIT;
         final int TEST_MODE = AudioTrack.MODE_STREAM;
         final int TEST_STREAM_TYPE = AudioManager.STREAM_MUSIC;
@@ -953,7 +953,7 @@ public class MediaAudioTrackTest extends ActivityInstrumentationTestCase2<MediaF
         // constants for test
         final String TEST_NAME = "testWriteShortOffsetTooBig";
         final int TEST_SR = 22050;
-        final int TEST_CONF = AudioFormat.CHANNEL_CONFIGURATION_MONO;
+        final int TEST_CONF = AudioFormat.CHANNEL_OUT_MONO;
         final int TEST_FORMAT = AudioFormat.ENCODING_PCM_16BIT;
         final int TEST_MODE = AudioTrack.MODE_STREAM;
         final int TEST_STREAM_TYPE = AudioManager.STREAM_MUSIC;
@@ -977,7 +977,7 @@ public class MediaAudioTrackTest extends ActivityInstrumentationTestCase2<MediaF
         // constants for test
         final String TEST_NAME = "testWriteByteSizeTooBig";
         final int TEST_SR = 22050;
-        final int TEST_CONF = AudioFormat.CHANNEL_CONFIGURATION_MONO;
+        final int TEST_CONF = AudioFormat.CHANNEL_OUT_MONO;
         final int TEST_FORMAT = AudioFormat.ENCODING_PCM_16BIT;
         final int TEST_MODE = AudioTrack.MODE_STREAM;
         final int TEST_STREAM_TYPE = AudioManager.STREAM_MUSIC;
@@ -1001,7 +1001,7 @@ public class MediaAudioTrackTest extends ActivityInstrumentationTestCase2<MediaF
         // constants for test
         final String TEST_NAME = "testWriteShortSizeTooBig";
         final int TEST_SR = 22050;
-        final int TEST_CONF = AudioFormat.CHANNEL_CONFIGURATION_MONO;
+        final int TEST_CONF = AudioFormat.CHANNEL_OUT_MONO;
         final int TEST_FORMAT = AudioFormat.ENCODING_PCM_16BIT;
         final int TEST_MODE = AudioTrack.MODE_STREAM;
         final int TEST_STREAM_TYPE = AudioManager.STREAM_MUSIC;
@@ -1025,7 +1025,7 @@ public class MediaAudioTrackTest extends ActivityInstrumentationTestCase2<MediaF
         // constants for test
         final String TEST_NAME = "testWriteByteNegativeOffset";
         final int TEST_SR = 22050;
-        final int TEST_CONF = AudioFormat.CHANNEL_CONFIGURATION_MONO;
+        final int TEST_CONF = AudioFormat.CHANNEL_OUT_MONO;
         final int TEST_FORMAT = AudioFormat.ENCODING_PCM_16BIT;
         final int TEST_MODE = AudioTrack.MODE_STREAM;
         final int TEST_STREAM_TYPE = AudioManager.STREAM_MUSIC;
@@ -1049,7 +1049,7 @@ public class MediaAudioTrackTest extends ActivityInstrumentationTestCase2<MediaF
         // constants for test
         final String TEST_NAME = "testWriteShortNegativeOffset";
         final int TEST_SR = 22050;
-        final int TEST_CONF = AudioFormat.CHANNEL_CONFIGURATION_MONO;
+        final int TEST_CONF = AudioFormat.CHANNEL_OUT_MONO;
         final int TEST_FORMAT = AudioFormat.ENCODING_PCM_16BIT;
         final int TEST_MODE = AudioTrack.MODE_STREAM;
         final int TEST_STREAM_TYPE = AudioManager.STREAM_MUSIC;
@@ -1073,7 +1073,7 @@ public class MediaAudioTrackTest extends ActivityInstrumentationTestCase2<MediaF
         // constants for test
         final String TEST_NAME = "testWriteByteNegativeSize";
         final int TEST_SR = 22050;
-        final int TEST_CONF = AudioFormat.CHANNEL_CONFIGURATION_MONO;
+        final int TEST_CONF = AudioFormat.CHANNEL_OUT_MONO;
         final int TEST_FORMAT = AudioFormat.ENCODING_PCM_16BIT;
         final int TEST_MODE = AudioTrack.MODE_STREAM;
         final int TEST_STREAM_TYPE = AudioManager.STREAM_MUSIC;
@@ -1097,7 +1097,7 @@ public class MediaAudioTrackTest extends ActivityInstrumentationTestCase2<MediaF
         // constants for test
         final String TEST_NAME = "testWriteShortNegativeSize";
         final int TEST_SR = 22050;
-        final int TEST_CONF = AudioFormat.CHANNEL_CONFIGURATION_MONO;
+        final int TEST_CONF = AudioFormat.CHANNEL_OUT_MONO;
         final int TEST_FORMAT = AudioFormat.ENCODING_PCM_16BIT;
         final int TEST_MODE = AudioTrack.MODE_STREAM;
         final int TEST_STREAM_TYPE = AudioManager.STREAM_MUSIC;
@@ -1121,7 +1121,7 @@ public class MediaAudioTrackTest extends ActivityInstrumentationTestCase2<MediaF
         // constants for test
         final String TEST_NAME = "testWriteByte";
         final int TEST_SR = 22050;
-        final int TEST_CONF = AudioFormat.CHANNEL_CONFIGURATION_MONO;
+        final int TEST_CONF = AudioFormat.CHANNEL_OUT_MONO;
         final int TEST_FORMAT = AudioFormat.ENCODING_PCM_16BIT;
         final int TEST_MODE = AudioTrack.MODE_STREAM;
         final int TEST_STREAM_TYPE = AudioManager.STREAM_MUSIC;
@@ -1145,7 +1145,7 @@ public class MediaAudioTrackTest extends ActivityInstrumentationTestCase2<MediaF
         // constants for test
         final String TEST_NAME = "testWriteShort";
         final int TEST_SR = 22050;
-        final int TEST_CONF = AudioFormat.CHANNEL_CONFIGURATION_MONO;
+        final int TEST_CONF = AudioFormat.CHANNEL_OUT_MONO;
         final int TEST_FORMAT = AudioFormat.ENCODING_PCM_16BIT;
         final int TEST_MODE = AudioTrack.MODE_STREAM;
         final int TEST_STREAM_TYPE = AudioManager.STREAM_MUSIC;
@@ -1169,7 +1169,7 @@ public class MediaAudioTrackTest extends ActivityInstrumentationTestCase2<MediaF
         // constants for test
         final String TEST_NAME = "testWriteByte8bit";
         final int TEST_SR = 22050;
-        final int TEST_CONF = AudioFormat.CHANNEL_CONFIGURATION_MONO;
+        final int TEST_CONF = AudioFormat.CHANNEL_OUT_MONO;
         final int TEST_FORMAT = AudioFormat.ENCODING_PCM_8BIT;
         final int TEST_MODE = AudioTrack.MODE_STREAM;
         final int TEST_STREAM_TYPE = AudioManager.STREAM_MUSIC;
@@ -1193,7 +1193,7 @@ public class MediaAudioTrackTest extends ActivityInstrumentationTestCase2<MediaF
         // constants for test
         final String TEST_NAME = "testWriteShort8bit";
         final int TEST_SR = 22050;
-        final int TEST_CONF = AudioFormat.CHANNEL_CONFIGURATION_MONO;
+        final int TEST_CONF = AudioFormat.CHANNEL_OUT_MONO;
         final int TEST_FORMAT = AudioFormat.ENCODING_PCM_8BIT;
         final int TEST_MODE = AudioTrack.MODE_STREAM;
         final int TEST_STREAM_TYPE = AudioManager.STREAM_MUSIC;
@@ -1221,7 +1221,7 @@ public class MediaAudioTrackTest extends ActivityInstrumentationTestCase2<MediaF
       // constant for test
       final String TEST_NAME = "testGetMinBufferSizeTooLowSR";
       final int TEST_SR = 3999;
-      final int TEST_CONF = AudioFormat.CHANNEL_CONFIGURATION_MONO;
+      final int TEST_CONF = AudioFormat.CHANNEL_OUT_MONO;
       final int TEST_FORMAT = AudioFormat.ENCODING_PCM_8BIT;
       final int TEST_MODE = AudioTrack.MODE_STREAM;
       final int TEST_STREAM_TYPE = AudioManager.STREAM_MUSIC;
@@ -1238,7 +1238,7 @@ public class MediaAudioTrackTest extends ActivityInstrumentationTestCase2<MediaF
       // constant for testg
       final String TEST_NAME = "testGetMinBufferSizeTooHighSR";
       final int TEST_SR = 48001;
-      final int TEST_CONF = AudioFormat.CHANNEL_CONFIGURATION_MONO;
+      final int TEST_CONF = AudioFormat.CHANNEL_OUT_MONO;
       final int TEST_FORMAT = AudioFormat.ENCODING_PCM_8BIT;
       final int TEST_MODE = AudioTrack.MODE_STREAM;
       final int TEST_STREAM_TYPE = AudioManager.STREAM_MUSIC;

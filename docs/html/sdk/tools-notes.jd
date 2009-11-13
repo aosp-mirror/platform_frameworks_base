@@ -1,0 +1,70 @@
+page.title=SDK Tools Notes
+@jd:body
+
+<p>SDK Tools is a downloadable component for the Android SDK. It
+includes the complete set of development and debugging tools for the Android
+SDK.</p>
+
+<p>This document provides version-specific information about SDK Tools
+releases. To keep up-to-date on new releases, make sure that you view this page
+at <a
+href="http://developer.android.com/sdk/tools-notes.html">http://developer.
+android.com/sdk/tools-notes.html</a>.</p>
+
+<p>To install SDK Tools in your SDK environment (and replace the
+existing tools), use the Android SDK and AVD Manager. For more information, see
+<a href="{@docRoot}sdk/adding-components.html">Adding SDK Components</a>. </p>
+
+
+<h2 id="3">SDK Tools, Revision 3</h2>
+
+<p>SDK Tools 3 provides several new features for developers and includes
+fixes for several tools issues, as described below. </p>
+
+<h3>Dependencies</h3>
+
+<p>SDK Tools 3 is compatible with ADT 0.9.4 and later, but not
+compatible with earlier versions. If you are developing in Eclipse with ADT, you
+<strong>must</strong> update your ADT plugin to version 0.9.4 or higher if you
+install SDK Tools 3 in your SDK. </p>
+
+<h3>Android tool</h3>
+<ul>
+<li>Adds new <code>android create test-project</code> and <code>android update
+test-project</code> commands to allow for greater flexibility in the location of the
+main and test projects.</li>
+</ul>
+
+<h3>DDMS</h3>
+<ul>
+<li>Adds a button to dump HPROF file for running appplications (app must be able
+to write to the sdcard).</li>
+<li>Button to start/stop profiling of a running application (app must be able to
+write to the sdcard). Upon stop, Traceview will automatically be launched to
+display the trace.</li>
+<li>Fixed DDMS, Traceview, and the AVD Mananger/SDK Updater to run on Mac OS X
+10.6.</li>
+<li>Fixed screenshot support for devices running 32-bit framebuffer.</li>
+</ul>
+
+<h3>Android SDK and AVD Manager</h3>
+<ul>
+<li>Provides a new UI that lets you set options for controlling
+the emulator skin, screen size/density, and scale factor used when launching 
+an AVD.</li>
+<li>Provides improved AVD creation UI, which lets you customize the hardware
+properties of your AVDs.</li>
+<li>Now enforces dependencies between platforms and tools components, and
+between SDK add-ons and platforms.</li>
+</ul>
+
+<h3>Layoutopt, a new tool for optimizing layouts</h3>
+
+<p>The SDK Tools 3 package includes <code>layoutopt</code>, a new command-line 
+tool that helps you optimize your layout hierarchies. When run against your 
+layout files, the tool analyzes their hierarchies and notifies you of 
+inefficiencies and other potential issues. The tool also provides simple 
+solutions for the issues it finds. For usage, see <a 
+href="{@docRoot}guide/developing/tools/layoutopt.html">layoutopt</a>.
+</p>
+

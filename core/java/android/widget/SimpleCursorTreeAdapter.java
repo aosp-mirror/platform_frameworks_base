@@ -26,9 +26,16 @@ import android.view.View;
  * defined in an XML file. You can specify which columns you want, which views
  * you want to display the columns, and the XML file that defines the appearance
  * of these views. Separate XML files for child and groups are possible.
- * TextViews bind the values to their text property (see
- * {@link TextView#setText(CharSequence)}). ImageViews bind the values to their
- * image's Uri property (see {@link ImageView#setImageURI(android.net.Uri)}).
+ *
+ * Binding occurs in two phases. First, if a
+ * {@link android.widget.SimpleCursorTreeAdapter.ViewBinder} is available,
+ * {@link ViewBinder#setViewValue(android.view.View, android.database.Cursor, int)}
+ * is invoked. If the returned value is true, binding has occurred. If the
+ * returned value is false and the view to bind is a TextView,
+ * {@link #setViewText(TextView, String)} is invoked. If the returned value
+ * is false and the view to bind is an ImageView,
+ * {@link #setViewImage(ImageView, String)} is invoked. If no appropriate
+ * binding can be found, an {@link IllegalStateException} is thrown.
  */
 public abstract class SimpleCursorTreeAdapter extends ResourceCursorTreeAdapter {
     /** The indices of columns that contain data to display for a group. */
@@ -47,6 +54,11 @@ public abstract class SimpleCursorTreeAdapter extends ResourceCursorTreeAdapter 
      */
     private int[] mChildTo;
     
+    /**
+     * View binder, if supplied
+     */
+    private ViewBinder mViewBinder;
+
     /**
      * Constructor.
      * 
@@ -193,21 +205,53 @@ public abstract class SimpleCursorTreeAdapter extends ResourceCursorTreeAdapter 
         initFromColumns(childCursor, childFromNames, mChildFrom);
     }
     
+    /**
+     * Returns the {@link ViewBinder} used to bind data to views.
+     *
+     * @return a ViewBinder or null if the binder does not exist
+     *
+     * @see #setViewBinder(android.widget.SimpleCursorTreeAdapter.ViewBinder)
+     */
+    public ViewBinder getViewBinder() {
+        return mViewBinder;
+    }
+
+    /**
+     * Sets the binder used to bind data to views.
+     *
+     * @param viewBinder the binder used to bind data to views, can be null to
+     *        remove the existing binder
+     *
+     * @see #getViewBinder()
+     */
+    public void setViewBinder(ViewBinder viewBinder) {
+        mViewBinder = viewBinder;
+    }
+
     private void bindView(View view, Context context, Cursor cursor, int[] from, int[] to) {
+        final ViewBinder binder = mViewBinder;
+        
         for (int i = 0; i < to.length; i++) {
             View v = view.findViewById(to[i]);
             if (v != null) {
-                String text = cursor.getString(from[i]);
-                if (text == null) {
-                    text = "";
+                boolean bound = false;
+                if (binder != null) {
+                    bound = binder.setViewValue(v, cursor, from[i]);
                 }
-                if (v instanceof TextView) {
-                    ((TextView) v).setText(text);
-                } else if (v instanceof ImageView) {
-                    setViewImage((ImageView) v, text);
-                } else {
-                    throw new IllegalStateException("SimpleCursorAdapter can bind values only to" +
-                            " TextView and ImageView!");
+                
+                if (!bound) {
+                    String text = cursor.getString(from[i]);
+                    if (text == null) {
+                        text = "";
+                    }
+                    if (v instanceof TextView) {
+                        setViewText((TextView) v, text);
+                    } else if (v instanceof ImageView) {
+                        setViewImage((ImageView) v, text);
+                    } else {
+                        throw new IllegalStateException("SimpleCursorTreeAdapter can bind values" +
+                                " only to TextView and ImageView!");
+                    }
                 }
             }
         }
@@ -237,5 +281,49 @@ public abstract class SimpleCursorTreeAdapter extends ResourceCursorTreeAdapter 
         } catch (NumberFormatException nfe) {
             v.setImageURI(Uri.parse(value));
         }
+    }
+
+    /**
+     * Called by bindView() to set the text for a TextView but only if
+     * there is no existing ViewBinder or if the existing ViewBinder cannot
+     * handle binding to an TextView.
+     *
+     * Intended to be overridden by Adapters that need to filter strings
+     * retrieved from the database.
+     * 
+     * @param v TextView to receive text
+     * @param text the text to be set for the TextView
+     */
+    public void setViewText(TextView v, String text) {
+        v.setText(text);
+    }
+
+    /**
+     * This class can be used by external clients of SimpleCursorTreeAdapter
+     * to bind values from the Cursor to views.
+     *
+     * You should use this class to bind values from the Cursor to views
+     * that are not directly supported by SimpleCursorTreeAdapter or to
+     * change the way binding occurs for views supported by
+     * SimpleCursorTreeAdapter.
+     *
+     * @see SimpleCursorTreeAdapter#setViewImage(ImageView, String) 
+     * @see SimpleCursorTreeAdapter#setViewText(TextView, String)
+     */
+    public static interface ViewBinder {
+        /**
+         * Binds the Cursor column defined by the specified index to the specified view.
+         *
+         * When binding is handled by this ViewBinder, this method must return true.
+         * If this method returns false, SimpleCursorTreeAdapter will attempts to handle
+         * the binding on its own.
+         *
+         * @param view the view to bind the data to
+         * @param cursor the cursor to get the data from
+         * @param columnIndex the column at which the data can be found in the cursor
+         *
+         * @return true if the data was bound to the view, false otherwise
+         */
+        boolean setViewValue(View view, Cursor cursor, int columnIndex);
     }
 }

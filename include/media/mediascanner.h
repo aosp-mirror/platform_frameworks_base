@@ -17,7 +17,10 @@
 #ifndef MEDIASCANNER_H
 #define MEDIASCANNER_H
 
-#include <utils.h>
+#include <utils/Log.h>
+#include <utils/threads.h>
+#include <utils/List.h>
+#include <utils/Errors.h>
 #include <pthread.h>
 
 namespace android {
@@ -56,16 +59,17 @@ private:
 class MediaScannerClient
 {
 public:
-	MediaScannerClient();
-	virtual ~MediaScannerClient();
-	void setLocale(const char* locale);
-	void beginFile();
-	bool addStringTag(const char* name, const char* value);
-	void endFile();
-	
-	virtual bool scanFile(const char* path, long long lastModified, long long fileSize) = 0;
-	virtual bool handleStringTag(const char* name, const char* value) = 0;
-	virtual bool setMimeType(const char* mimeType) = 0;
+    MediaScannerClient();
+    virtual ~MediaScannerClient();
+    void setLocale(const char* locale);
+    void beginFile();
+    bool addStringTag(const char* name, const char* value);
+    void endFile();
+
+    virtual bool scanFile(const char* path, long long lastModified, long long fileSize) = 0;
+    virtual bool handleStringTag(const char* name, const char* value) = 0;
+    virtual bool setMimeType(const char* mimeType) = 0;
+    virtual bool addNoMediaFolder(const char* path) = 0;
 
 protected:
     void convertValues(uint32_t encoding);

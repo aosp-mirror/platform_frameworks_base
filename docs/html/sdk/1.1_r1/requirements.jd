@@ -11,7 +11,13 @@ sdk.date=February 2009
 <ul>
   <li>Windows XP (32-bit) or Vista (32- or 64-bit)</li>
   <li>Mac OS X 10.4.8 or later (x86 only)</li>
-  <li>Linux (tested on Linux Ubuntu Dapper Drake)</li>
+  <li>Linux (tested on Linux Ubuntu Dapper Drake)
+    <ul>
+      <li>64-bit distributions must be capable of running 32-bit applications. 
+      For information about how to add support for 32-bit applications, see
+      the <a href="installing.html#installnotes">Installation Notes</a>.</li>
+    </ul>
+  </li>
 </ul>
 
 <h3>Supported Development Environments</h3>

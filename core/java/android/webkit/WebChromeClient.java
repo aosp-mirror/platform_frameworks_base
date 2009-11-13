@@ -18,6 +18,7 @@ package android.webkit;
 
 import android.graphics.Bitmap;
 import android.os.Message;
+import android.view.View;
 
 public class WebChromeClient {
 
@@ -42,6 +43,42 @@ public class WebChromeClient {
      * @param icon A Bitmap containing the favicon for the current page.
      */
     public void onReceivedIcon(WebView view, Bitmap icon) {}
+
+    /**
+     * Notify the host application of the url for an apple-touch-icon.
+     * @param view The WebView that initiated the callback.
+     * @param url The icon url.
+     * @param precomposed True if the url is for a precomposed touch icon.
+     */
+    public void onReceivedTouchIconUrl(WebView view, String url,
+            boolean precomposed) {}
+
+    /**
+     * A callback interface used by the host application to notify
+     * the current page that its custom view has been dismissed.
+     */
+    public interface CustomViewCallback {
+        /**
+         * Invoked when the host application dismisses the
+         * custom view.
+         */
+        public void onCustomViewHidden();
+    }
+
+    /**
+     * Notify the host application that the current page would
+     * like to show a custom View.
+     * @param view is the View object to be shown.
+     * @param callback is the callback to be invoked if and when the view
+     * is dismissed.
+     */
+    public void onShowCustomView(View view, CustomViewCallback callback) {};
+
+    /**
+     * Notify the host application that the current page would
+     * like to hide its custom view.
+     */
+    public void onHideCustomView() {}
 
     /**
      * Request the host application to create a new Webview. The host
@@ -158,6 +195,52 @@ public class WebChromeClient {
         return false;
     }
 
+   /**
+    * Tell the client that the database quota for the origin has been exceeded.
+    * @param url The URL that triggered the notification
+    * @param databaseIdentifier The identifier of the database that caused the
+    *     quota overflow.
+    * @param currentQuota The current quota for the origin.
+    * @param estimatedSize The estimated size of the database.
+    * @param totalUsedQuota is the sum of all origins' quota.
+    * @param quotaUpdater A callback to inform the WebCore thread that a new
+    *     quota is available. This callback must always be executed at some
+    *     point to ensure that the sleeping WebCore thread is woken up.
+    */
+    public void onExceededDatabaseQuota(String url, String databaseIdentifier,
+        long currentQuota, long estimatedSize, long totalUsedQuota,
+        WebStorage.QuotaUpdater quotaUpdater) {
+        // This default implementation passes the current quota back to WebCore.
+        // WebCore will interpret this that new quota was declined.
+        quotaUpdater.updateQuota(currentQuota);
+    }
+
+   /**
+    * Tell the client that the Application Cache has exceeded its max size.
+    * @param spaceNeeded is the amount of disk space that would be needed
+    * in order for the last appcache operation to succeed.
+    * @param totalUsedQuota is the sum of all origins' quota.
+    * @param quotaUpdater A callback to inform the WebCore thread that a new
+    * app cache size is available. This callback must always be executed at
+    * some point to ensure that the sleeping WebCore thread is woken up.
+    */
+    public void onReachedMaxAppCacheSize(long spaceNeeded, long totalUsedQuota,
+            WebStorage.QuotaUpdater quotaUpdater) {
+        quotaUpdater.updateQuota(0);
+    }
+
+    /**
+     * Instructs the client to show a prompt to ask the user to set the
+     * Geolocation permission state for the specified origin.
+     */
+    public void onGeolocationPermissionsShowPrompt(String origin,
+            GeolocationPermissions.Callback callback) {}
+
+    /**
+     * Instructs the client to hide the Geolocation permissions prompt.
+     */
+    public void onGeolocationPermissionsHidePrompt() {}
+
     /**
      * Tell the client that a JavaScript execution timeout has occured. And the
      * client may decide whether or not to interrupt the execution. If the
@@ -167,9 +250,43 @@ public class WebChromeClient {
      * will continue to occur if the script does not finish at the next check
      * point.
      * @return boolean Whether the JavaScript execution should be interrupted.
-     * @hide pending API Council approval
      */
     public boolean onJsTimeout() {
         return true;
     }
+
+    /**
+     * Add a JavaScript error message to the console. Clients should override
+     * this to process the log message as they see fit.
+     * @param message The error message to report.
+     * @param lineNumber The line number of the error.
+     * @param sourceID The name of the source file that caused the error.
+     */
+    public void addMessageToConsole(String message, int lineNumber, String sourceID) {}
+
+    /**
+     * Ask the host application for an icon to represent a <video> element.
+     * This icon will be used if the Web page did not specify a poster attribute.
+     *
+     * @return Bitmap The icon or null if no such icon is available.
+     */
+    public Bitmap getDefaultVideoPoster() {
+        return null;
+    }
+
+    /**
+     * Ask the host application for a custom progress view to show while
+     * a <video> is loading.
+     *
+     * @return View The progress view.
+     */
+    public View getVideoLoadingProgressView() {
+        return null;
+    }
+
+    /** Obtains a list of all visited history items, used for link coloring
+     */
+    public void getVisitedHistory(ValueCallback<String[]> callback) {
+    }
+
 }

@@ -21,8 +21,7 @@
     <string name="gigabyteShort" msgid="3259882455212193214">"GB"</string>
     <string name="terabyteShort" msgid="231613018159186962">"TB"</string>
     <string name="petabyteShort" msgid="5637816680144990219">"PB"</string>
-    <!-- no translation found for fileSizeSuffix (7670819340156489359) -->
-    <skip />
+    <string name="fileSizeSuffix" msgid="7670819340156489359">"<xliff:g id="NUMBER">%1$s</xliff:g><xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="untitled" msgid="6071602020171759109">"&lt;sem título&gt;"</string>
     <string name="ellipsis" msgid="7899829516048813237">"…"</string>
     <string name="emptyPhoneNumber" msgid="7694063042079676517">"(Nenhum número de telefone)"</string>
@@ -50,18 +49,12 @@
     <string name="BaMmi" msgid="455193067926770581">"Bloqueio de chamadas"</string>
     <string name="PwdMmi" msgid="7043715687905254199">"Alteração da senha"</string>
     <string name="PinMmi" msgid="3113117780361190304">"Alteração do PIN"</string>
-    <!-- no translation found for CnipMmi (3110534680557857162) -->
-    <skip />
-    <!-- no translation found for CnirMmi (3062102121430548731) -->
-    <skip />
-    <!-- no translation found for ThreeWCMmi (9051047170321190368) -->
-    <skip />
-    <!-- no translation found for RuacMmi (7827887459138308886) -->
-    <skip />
-    <!-- no translation found for CndMmi (3116446237081575808) -->
-    <skip />
-    <!-- no translation found for DndMmi (1265478932418334331) -->
-    <skip />
+    <string name="CnipMmi" msgid="3110534680557857162">"Chamando número atual"</string>
+    <string name="CnirMmi" msgid="3062102121430548731">"Chamando número restrito"</string>
+    <string name="ThreeWCMmi" msgid="9051047170321190368">"Chamada com três participantes"</string>
+    <string name="RuacMmi" msgid="7827887459138308886">"Rejeição das chamadas indesejadas"</string>
+    <string name="CndMmi" msgid="3116446237081575808">"Chamando número de entrega"</string>
+    <string name="DndMmi" msgid="1265478932418334331">"Não perturbe"</string>
     <string name="CLIRDefaultOnNextCallOn" msgid="429415409145781923">"O ID do chamador assume o padrão de restrito. Próxima chamada: Restrita"</string>
     <string name="CLIRDefaultOnNextCallOff" msgid="3092918006077864624">"O ID do chamador assume o padrão de restrito. Próxima chamada: Não restrita"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="6179425182856418465">"O ID do chamador assume o padrão de não restrito. Próxima chamada: Restrita"</string>
@@ -81,43 +74,27 @@
     <string name="serviceClassDataSync" msgid="7530000519646054776">"Sincronizar"</string>
     <string name="serviceClassPacket" msgid="6991006557993423453">"Pacote"</string>
     <string name="serviceClassPAD" msgid="3235259085648271037">"PAD"</string>
-    <!-- no translation found for roamingText0 (7170335472198694945) -->
-    <skip />
-    <!-- no translation found for roamingText1 (5314861519752538922) -->
-    <skip />
-    <!-- no translation found for roamingText2 (8969929049081268115) -->
-    <skip />
-    <!-- no translation found for roamingText3 (5148255027043943317) -->
-    <skip />
-    <!-- no translation found for roamingText4 (8808456682550796530) -->
-    <skip />
-    <!-- no translation found for roamingText5 (7604063252850354350) -->
-    <skip />
-    <!-- no translation found for roamingText6 (2059440825782871513) -->
-    <skip />
-    <!-- no translation found for roamingText7 (7112078724097233605) -->
-    <skip />
-    <!-- no translation found for roamingText8 (5989569778604089291) -->
-    <skip />
-    <!-- no translation found for roamingText9 (7969296811355152491) -->
-    <skip />
-    <!-- no translation found for roamingText10 (3992906999815316417) -->
-    <skip />
-    <!-- no translation found for roamingText11 (4154476854426920970) -->
-    <skip />
-    <!-- no translation found for roamingText12 (1189071119992726320) -->
-    <skip />
-    <!-- no translation found for roamingTextSearching (8360141885972279963) -->
-    <skip />
+    <string name="roamingText0" msgid="7170335472198694945">"Indicador de roaming ativado"</string>
+    <string name="roamingText1" msgid="5314861519752538922">"Indicador de roaming desativado"</string>
+    <string name="roamingText2" msgid="8969929049081268115">"Indicador de roaming piscando"</string>
+    <string name="roamingText3" msgid="5148255027043943317">"Fora da vizinhança"</string>
+    <string name="roamingText4" msgid="8808456682550796530">"Ao ar livre"</string>
+    <string name="roamingText5" msgid="7604063252850354350">"Roaming - Sistema recomendado"</string>
+    <string name="roamingText6" msgid="2059440825782871513">"Roaming -  Sistema disponível"</string>
+    <string name="roamingText7" msgid="7112078724097233605">"Roaming - Parceiro do Alliance"</string>
+    <string name="roamingText8" msgid="5989569778604089291">"Roaming - Parceiro do Google Premium"</string>
+    <string name="roamingText9" msgid="7969296811355152491">"Roaming - Funcionalidade de serviço completo"</string>
+    <string name="roamingText10" msgid="3992906999815316417">"Roaming - Funcionalidade de serviço parcial"</string>
+    <string name="roamingText11" msgid="4154476854426920970">"Banner de roaming ativado"</string>
+    <string name="roamingText12" msgid="1189071119992726320">"Banner de roaming desativado"</string>
+    <string name="roamingTextSearching" msgid="8360141885972279963">"Pesquisando serviço"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Não encaminhado"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime" msgid="9206251736527085256">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> após <xliff:g id="TIME_DELAY">{2}</xliff:g> segundos"</string>
     <string name="cfTemplateRegistered" msgid="5073237827620166285">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Não encaminhado"</string>
     <string name="cfTemplateRegisteredTime" msgid="6781621964320635172">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Não encaminhado"</string>
-    <!-- no translation found for fcComplete (3118848230966886575) -->
-    <skip />
-    <!-- no translation found for fcError (3327560126588500777) -->
-    <skip />
+    <string name="fcComplete" msgid="3118848230966886575">"Código de recurso concluído."</string>
+    <string name="fcError" msgid="3327560126588500777">"Problema de conexão ou código de recurso inválido."</string>
     <string name="httpErrorOk" msgid="1191919378083472204">"OK"</string>
     <string name="httpError" msgid="2567300624552921790">"A página da web contém um erro."</string>
     <string name="httpErrorLookup" msgid="4517085806977851374">"Não foi possível encontrar o URL."</string>
@@ -134,6 +111,7 @@
     <string name="httpErrorFile" msgid="8250549644091165175">"Não foi possível acessar o arquivo."</string>
     <string name="httpErrorFileNotFound" msgid="5588380756326017105">"O arquivo solicitado não foi encontrado."</string>
     <string name="httpErrorTooManyRequests" msgid="1235396927087188253">"Há muitas solicitações sendo processadas. Tente novamente mais tarde."</string>
+    <string name="notification_title" msgid="1259940370369187045">"Erro de login para <xliff:g id="ACCOUNT">%1$s</xliff:g>"</string>
     <string name="contentServiceSync" msgid="8353523060269335667">"Sincronizar"</string>
     <string name="contentServiceSyncNotificationTitle" msgid="397743349191901458">"Sincronizar"</string>
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"Muitas exclusões de <xliff:g id="CONTENT_TYPE">%s</xliff:g>."</string>
@@ -169,8 +147,8 @@
     <string name="permgroupdesc_location" msgid="2430258821648348660">"Monitora o seu local físico."</string>
     <string name="permgrouplab_network" msgid="5808983377727109831">"Comunicação da rede"</string>
     <string name="permgroupdesc_network" msgid="5035763698958415998">"Permite que os aplicativos acessem diversos recursos de rede."</string>
-    <string name="permgrouplab_accounts" msgid="7140261692496314430">"Suas Contas do Google"</string>
-    <string name="permgroupdesc_accounts" msgid="6735915929704895193">"Acessar as Contas do Google disponíveis."</string>
+    <string name="permgrouplab_accounts" msgid="3359646291125325519">"Suas contas"</string>
+    <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Acessar as contas disponíveis."</string>
     <string name="permgrouplab_hardwareControls" msgid="7998214968791599326">"Controles de hardware"</string>
     <string name="permgroupdesc_hardwareControls" msgid="4357057861225462702">"Acessa o hardware diretamente no aparelho."</string>
     <string name="permgrouplab_phoneCalls" msgid="9067173988325865923">"Chamadas telefônicas"</string>
@@ -179,10 +157,8 @@
     <string name="permgroupdesc_systemTools" msgid="8162102602190734305">"Acesso de nível inferior e controle do sistema."</string>
     <string name="permgrouplab_developmentTools" msgid="3446164584710596513">"Ferramentas de desenvolvimento"</string>
     <string name="permgroupdesc_developmentTools" msgid="9056431193893809814">"Recursos necessários apenas para desenvolvedores de aplicativo."</string>
-    <!-- no translation found for permgrouplab_storage (1971118770546336966) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_storage (9203302214915355774) -->
-    <skip />
+    <string name="permgrouplab_storage" msgid="1971118770546336966">"Armazenamento"</string>
+    <string name="permgroupdesc_storage" msgid="9203302214915355774">"Acessar o cartão SD."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"desativar ou modificar a barra de status"</string>
     <string name="permdesc_statusBar" msgid="1365473595331989732">"Permite que o aplicativo desative a barra de status ou adicione e remova ícones do sistema."</string>
     <string name="permlab_expandStatusBar" msgid="1148198785937489264">"expandir/recolher barra de status"</string>
@@ -215,14 +191,10 @@
     <string name="permdesc_forceBack" msgid="6534109744159919013">"Permite que um aplicativo force o fechamento de qualquer atividade que esteja em primeiro plano. Aplicativos normais não devem precisar disso em momento algum."</string>
     <string name="permlab_dump" msgid="1681799862438954752">"recuperar o estado interno do sistema"</string>
     <string name="permdesc_dump" msgid="2198776174276275220">"Permite que um aplicativo recupere o estado interno do sistema. Aplicativos maliciosos podem recuperar uma grande variedade de informações privadas e de segurança que normalmente não precisariam."</string>
-    <!-- no translation found for permlab_shutdown (7185747824038909016) -->
-    <skip />
-    <!-- no translation found for permdesc_shutdown (7046500838746291775) -->
-    <skip />
-    <!-- no translation found for permlab_stopAppSwitches (4138608610717425573) -->
-    <skip />
-    <!-- no translation found for permdesc_stopAppSwitches (3857886086919033794) -->
-    <skip />
+    <string name="permlab_shutdown" msgid="7185747824038909016">"desligamento parcial"</string>
+    <string name="permdesc_shutdown" msgid="7046500838746291775">"Coloca o gerenciador de atividades em um estado de desligamento. Não executa o desligamento completo."</string>
+    <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"evitar trocas de aplicativo"</string>
+    <string name="permdesc_stopAppSwitches" msgid="3857886086919033794">"Impede que o usuário passe para outro aplicativo."</string>
     <string name="permlab_runSetActivityWatcher" msgid="7811586187574696296">"monitorar e controlar toda inicialização de aplicativo"</string>
     <string name="permdesc_runSetActivityWatcher" msgid="3228701938345388092">"Permite que um aplicativo monitore e controle a maneira como o sistema inicia as atividades. Aplicativos maliciosos podem comprometer todo o sistema. Essa permissão é necessária apenas para desenvolvimento, nunca para uso normal do telefone."</string>
     <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"enviar transmissão removida do pacote"</string>
@@ -237,10 +209,10 @@
     <string name="permdesc_setAlwaysFinish" msgid="8773936403987091620">"Permite que um aplicativo controle se as atividades são sempre concluídas assim que vão para o segundo plano. Aplicativos normais não precisam disso em momento algum."</string>
     <string name="permlab_batteryStats" msgid="7863923071360031652">"modificar estatísticas da bateria"</string>
     <string name="permdesc_batteryStats" msgid="5847319823772230560">"Permite a modificação das estatísticas de bateria coletadas. Não deve ser usado por aplicativos normais."</string>
-    <!-- no translation found for permlab_backup (470013022865453920) -->
-    <skip />
-    <!-- no translation found for permdesc_backup (2305432853944929371) -->
-    <skip />
+    <string name="permlab_backup" msgid="470013022865453920">"controlar backup e restauração do sistema"</string>
+    <string name="permdesc_backup" msgid="4837493065154256525">"Permite que o aplicativo controle o mecanismo de backup e restauração do sistema. Não deve ser usado por aplicativos normais."</string>
+    <string name="permlab_backup_data" msgid="4057625941707926463">"fazer backup e restaurar os dados do aplicativo"</string>
+    <string name="permdesc_backup_data" msgid="8274426305151227766">"Permite que o aplicativo participe no mecanismo de backup e restauração do sistema."</string>
     <string name="permlab_internalSystemWindow" msgid="2148563628140193231">"exibir janelas não autorizadas"</string>
     <string name="permdesc_internalSystemWindow" msgid="5895082268284998469">"Permite a criação de janelas destinadas ao uso pela interface de usuário do sistema interno. Não deve ser usado por aplicativos normais."</string>
     <string name="permlab_systemAlertWindow" msgid="3372321942941168324">"exibir alertas de nível do sistema"</string>
@@ -255,6 +227,8 @@
     <string name="permdesc_readInputState" msgid="5132879321450325445">"Permite que os aplicativos vejam as teclas que você pressiona, mesmo quando estiver interagindo com outro aplicativo (como ao digitar uma senha). Aplicativos normais não devem precisar disso em momento algum."</string>
     <string name="permlab_bindInputMethod" msgid="3360064620230515776">"vincular a um método de entrada"</string>
     <string name="permdesc_bindInputMethod" msgid="3734838321027317228">"Permite que o detentor se sujeite à interface de nível superior de um método de entrada. Aplicativos normais não devem precisar disso em momento algum."</string>
+    <string name="permlab_bindWallpaper" msgid="8716400279937856462">"sujeitar-se a um plano de fundo"</string>
+    <string name="permdesc_bindWallpaper" msgid="5287754520361915347">"Permite que o detentor se sujeite à interface de nível superior de um plano de fundo. Aplicativos normais não devem precisar disso em momento algum."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"alterar orientação da tela"</string>
     <string name="permdesc_setOrientation" msgid="6335814461615851863">"Permite que um aplicativo altere a rotação da tela a qualquer momento. Aplicativos normais não devem precisar disso em momento algum."</string>
     <string name="permlab_signalPersistentProcesses" msgid="4255467255488653854">"enviar sinais de Linux para os aplicativos"</string>
@@ -284,7 +258,7 @@
     <string name="permlab_writeSettings" msgid="1365523497395143704">"modificar configurações globais do sistema"</string>
     <string name="permdesc_writeSettings" msgid="838789419871034696">"Permite que um aplicativo modifique os dados de configuração do sistema. Aplicativos maliciosos podem corromper a configuração do seu sistema."</string>
     <string name="permlab_writeSecureSettings" msgid="204676251876718288">"modificar configurações do sistema de segurança"</string>
-    <string name="permdesc_writeSecureSettings" msgid="4116616249170428132">"Permite que um aplicativo modifique os dados de configuração de segurança dos sistemas. Não deve ser usado por aplicativos normais."</string>
+    <string name="permdesc_writeSecureSettings" msgid="5497873143539034724">"Permite que um aplicativo modifique os dados de configuração de segurança do sistema. Não deve ser usado por aplicativos normais."</string>
     <string name="permlab_writeGservices" msgid="2149426664226152185">"modificar o mapa de serviços do Google"</string>
     <string name="permdesc_writeGservices" msgid="6602362746516676175">"Permite que um aplicativo modifique o mapa de serviços do Google. Não deve ser usado por aplicativos normais."</string>
     <string name="permlab_receiveBootCompleted" msgid="7776779842866993377">"iniciar automaticamente na inicialização"</string>
@@ -307,10 +281,8 @@
     <string name="permdesc_accessMockLocation" msgid="7648286063459727252">"Cria fontes de locais fictícios para teste. Aplicativos maliciosos podem usar isso para substituir o local e/ou o status retornado pelas fontes de locais reais como GPS ou provedores de rede."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"acessar comandos extras do provedor de localização"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="1948144701382451721">"Acessa comandos extras do provedor de localização. Aplicativos maliciosos podem usar isso para interferir na operação do GPS ou de outras fontes de localização."</string>
-    <!-- no translation found for permlab_installLocationProvider (6578101199825193873) -->
-    <skip />
-    <!-- no translation found for permdesc_installLocationProvider (5449175116732002106) -->
-    <skip />
+    <string name="permlab_installLocationProvider" msgid="6578101199825193873">"autorização para instalar um provedor de localização"</string>
+    <string name="permdesc_installLocationProvider" msgid="5449175116732002106">"Cria fontes de locais fictícios para teste. Aplicativos maliciosos podem usar isso para substituir o local e/ou o status retornado pelas fontes de locais reais como GPS ou provedores de rede ou para monitorar e informar sua localização para uma fonte externa."</string>
     <string name="permlab_accessFineLocation" msgid="8116127007541369477">"Localização precisa (GPS)"</string>
     <string name="permdesc_accessFineLocation" msgid="7411213317434337331">"Acessa fontes de localização precisa como o GPS (Global Positioning System) no telefone, onde disponível. Aplicativos maliciosos podem usar isso para determinar onde você está e podem consumir energia adicional da bateria."</string>
     <string name="permlab_accessCoarseLocation" msgid="4642255009181975828">"local aproximado (com base na rede)"</string>
@@ -318,7 +290,7 @@
     <string name="permlab_accessSurfaceFlinger" msgid="2363969641792388947">"acessar SurfaceFlinger"</string>
     <string name="permdesc_accessSurfaceFlinger" msgid="6805241830020733025">"Permite que o aplicativo use recursos de nível inferior do SurfaceFlinger."</string>
     <string name="permlab_readFrameBuffer" msgid="6690504248178498136">"ler o buffer do frame"</string>
-    <string name="permdesc_readFrameBuffer" msgid="5777679658669057819">"Permite que o aplicativo a ser usado leia o conteúdo do buffer de frame."</string>
+    <string name="permdesc_readFrameBuffer" msgid="7530020370469942528">"Permite que o aplicativo leia o conteúdo do buffer de frame."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"alterar as suas configurações de áudio"</string>
     <string name="permdesc_modifyAudioSettings" msgid="5793461287365991922">"Permite que o aplicativo modifique as configurações globais de áudio como volume e roteamento."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"gravar áudio"</string>
@@ -343,6 +315,8 @@
     <string name="permdesc_callPhone" msgid="3369867353692722456">"Permite que o aplicativo ligue para números de telefones sem a sua intervenção. Aplicativos maliciosos podem causar chamadas inesperadas na conta do seu telefone. Observe que isso não permite que o aplicativo ligue para números de emergência."</string>
     <string name="permlab_callPrivileged" msgid="4198349211108497879">"chamar diretamente quaisquer números de telefone"</string>
     <string name="permdesc_callPrivileged" msgid="244405067160028452">"Permite que o aplicativo ligue para qualquer número de telefone, incluindo números de emergência, sem a sua intervenção. Aplicativos maliciosos podem fazer chamadas desnecessárias e ilegais para serviços de emergência."</string>
+    <string name="permlab_performCdmaProvisioning" msgid="5604848095315421425">"iniciar a configuração do telefone CDMA diretamente"</string>
+    <string name="permdesc_performCdmaProvisioning" msgid="6457447676108355905">"Permite que o aplicativo inicie o provisionamento CDMA. Aplicativos maliciosos podem iniciar o provisionamento CDMA desnecessariamente"</string>
     <string name="permlab_locationUpdates" msgid="7785408253364335740">"controlar as notificações de atualização do local"</string>
     <string name="permdesc_locationUpdates" msgid="2300018303720930256">"Permite a ativação/desativação de notificações de atualização do local a partir do rádio. Não deve ser usado por aplicativos normais."</string>
     <string name="permlab_checkinProperties" msgid="7855259461268734914">"acessar propriedades de verificação"</string>
@@ -351,10 +325,8 @@
     <string name="permdesc_bindGadget" msgid="2098697834497452046">"Permite que o aplicativo informe ao sistema quais widgets podem ser usados por quais aplicativos. Com essa permissão, os aplicativos podem conceder acesso aos dados pessoais a outros aplicativos. Não deve ser usado por aplicativos normais."</string>
     <string name="permlab_modifyPhoneState" msgid="8423923777659292228">"modificar estado do telefone"</string>
     <string name="permdesc_modifyPhoneState" msgid="3302284561346956587">"Permite que o aplicativo controle os recursos de telefone do dispositivo. Um aplicativo com essa permissão pode alternar redes, ligar e desligar o rádio do telefone e outras ações parecidas sem notificá-lo."</string>
-    <!-- no translation found for permlab_readPhoneState (2326172951448691631) -->
-    <skip />
-    <!-- no translation found for permdesc_readPhoneState (188877305147626781) -->
-    <skip />
+    <string name="permlab_readPhoneState" msgid="2326172951448691631">"ler estado e identidade do telefone"</string>
+    <string name="permdesc_readPhoneState" msgid="188877305147626781">"Permite que o aplicativo acesse os recursos de telefone do aparelho. Um aplicativo com essa autorização pode determinar o número e o número de série desse telefone, se uma chamada está ativa, o número ao qual a chamada está conectada e outras informações parecidas."</string>
     <string name="permlab_wakeLock" msgid="573480187941496130">"impedir modo de inatividade do telefone"</string>
     <string name="permdesc_wakeLock" msgid="7584036471227467099">"Permite que um aplicativo impeça o telefone de entrar no modo de inatividade."</string>
     <string name="permlab_devicePower" msgid="4928622470980943206">"ligar ou desligar o telefone"</string>
@@ -369,8 +341,16 @@
     <string name="permdesc_masterClear" msgid="5033465107545174514">"Permite que um aplicativo redefina completamente o sistema para as configurações de fábrica, apagando todos os dados, configuração e aplicativos instalados."</string>
     <string name="permlab_setTimeZone" msgid="2945079801013077340">"definir fuso horário"</string>
     <string name="permdesc_setTimeZone" msgid="1902540227418179364">"Permite que um aplicativo altere o fuso horário do telefone."</string>
+    <string name="permlab_accountManagerService" msgid="4829262349691386986">"agir como AccountManagerService"</string>
+    <string name="permdesc_accountManagerService" msgid="6056903274106394752">"Permite que um aplicativo faça chamadas para AccountAuthenticators"</string>
     <string name="permlab_getAccounts" msgid="4549918644233460103">"descobrir contas conhecidas"</string>
     <string name="permdesc_getAccounts" msgid="6839262446413155394">"Permite que um aplicativo obtenha a lista de contas conhecidas pelo telefone."</string>
+    <string name="permlab_authenticateAccounts" msgid="3940505577982882450">"agir como autenticador da conta"</string>
+    <string name="permdesc_authenticateAccounts" msgid="4006839406474208874">"Permite que um aplicativo use os recursos do autenticador de conta do AccountManager, incluindo a criação de contas e a obtenção e definição de senhas."</string>
+    <string name="permlab_manageAccounts" msgid="4440380488312204365">"gerenciar a lista de contas"</string>
+    <string name="permdesc_manageAccounts" msgid="8804114016661104517">"Permite que um aplicativo execute operações como adição e remoção de contas e exclusão de senhas."</string>
+    <string name="permlab_useCredentials" msgid="6401886092818819856">"usar as credenciais de autenticação de uma conta"</string>
+    <string name="permdesc_useCredentials" msgid="7416570544619546974">"Permite que um aplicativo solicite tokens de autenticação."</string>
     <string name="permlab_accessNetworkState" msgid="6865575199464405769">"ver estado da rede"</string>
     <string name="permdesc_accessNetworkState" msgid="558721128707712766">"Permite que um aplicativo veja o estado de todas as redes."</string>
     <string name="permlab_createNetworkSockets" msgid="9121633680349549585">"acesso total da internet"</string>
@@ -385,10 +365,8 @@
     <string name="permdesc_accessWifiState" msgid="485796529139236346">"Permite que um aplicativo veja as informações sobre o estado de Wi-Fi."</string>
     <string name="permlab_changeWifiState" msgid="7280632711057112137">"alterar o estado de Wi-Fi"</string>
     <string name="permdesc_changeWifiState" msgid="2950383153656873267">"Permite que um aplicativo se conecte e desconecte dos pontos de acesso Wi-Fi e faça alterações nas redes Wi-Fi configuradas."</string>
-    <!-- no translation found for permlab_changeWifiMulticastState (1368253871483254784) -->
-    <skip />
-    <!-- no translation found for permdesc_changeWifiMulticastState (8199464507656067553) -->
-    <skip />
+    <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"permitir recebimento de multicast Wi-Fi"</string>
+    <string name="permdesc_changeWifiMulticastState" msgid="8199464507656067553">"Permite que um aplicativo receba pacotes não endereçados diretamente para o seu aparelho. Isso pode ser útil ao detectar os serviços oferecidos nas proximidades. Ele consome mais energia do que o modo não-multicast."</string>
     <string name="permlab_bluetoothAdmin" msgid="1092209628459341292">"administração de Bluetooth"</string>
     <string name="permdesc_bluetoothAdmin" msgid="7256289774667054555">"Permite que um aplicativo configure o telefone Bluetooth local, descubra e pareie com dispositivos remotos."</string>
     <string name="permlab_bluetooth" msgid="8361038707857018732">"criar conexões Bluetooth"</string>
@@ -409,10 +387,8 @@
     <string name="permdesc_readDictionary" msgid="1082972603576360690">"Permite que um aplicativo leia quaisquer palavras, nomes e frases particulares armazenados pelo usuário no dicionário do usuário."</string>
     <string name="permlab_writeDictionary" msgid="6703109511836343341">"gravar no dicionário definido pelo usuário"</string>
     <string name="permdesc_writeDictionary" msgid="2241256206524082880">"Permite que um aplicativo grave novas palavras no dicionário do usuário."</string>
-    <!-- no translation found for permlab_sdcardWrite (8079403759001777291) -->
-    <skip />
-    <!-- no translation found for permdesc_sdcardWrite (6643963204976471878) -->
-    <skip />
+    <string name="permlab_sdcardWrite" msgid="8079403759001777291">"modificar/excluir conteúdo do cartão SD"</string>
+    <string name="permdesc_sdcardWrite" msgid="6643963204976471878">"Permite que um aplicativo grave no cartão SD."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Página inicial"</item>
     <item msgid="869923650527136615">"Celular"</item>
@@ -429,7 +405,6 @@
     <item msgid="1112044410659011023">"Outros"</item>
     <item msgid="2374913952870110618">"Personalizado"</item>
   </string-array>
-    <string name="mobileEmailTypeName" msgid="2858957283716687707">"Celular"</string>
   <string-array name="postalAddressTypes">
     <item msgid="6880257626740047286">"Página inicial"</item>
     <item msgid="5629153956045109251">"Trabalho"</item>
@@ -457,6 +432,58 @@
     <item msgid="2506857312718630823">"ICQ"</item>
     <item msgid="1648797903785279353">"Jabber"</item>
   </string-array>
+    <string name="phoneTypeCustom" msgid="1644738059053355820">"Personalizado"</string>
+    <string name="phoneTypeHome" msgid="2570923463033985887">"Página inicial"</string>
+    <string name="phoneTypeMobile" msgid="6501463557754751037">"Celular"</string>
+    <string name="phoneTypeWork" msgid="8863939667059911633">"Comercial"</string>
+    <string name="phoneTypeFaxWork" msgid="3517792160008890912">"Fax comercial"</string>
+    <string name="phoneTypeFaxHome" msgid="2067265972322971467">"Fax residencial"</string>
+    <string name="phoneTypePager" msgid="7582359955394921732">"Pager"</string>
+    <string name="phoneTypeOther" msgid="1544425847868765990">"Outros"</string>
+    <string name="phoneTypeCallback" msgid="2712175203065678206">"Retorno de chamada"</string>
+    <string name="phoneTypeCar" msgid="8738360689616716982">"Carro"</string>
+    <string name="phoneTypeCompanyMain" msgid="540434356461478916">"Empresa (principal)"</string>
+    <string name="phoneTypeIsdn" msgid="8022453193171370337">"ISDN"</string>
+    <string name="phoneTypeMain" msgid="6766137010628326916">"Principal"</string>
+    <string name="phoneTypeOtherFax" msgid="8587657145072446565">"Outro fax"</string>
+    <string name="phoneTypeRadio" msgid="4093738079908667513">"Rádio"</string>
+    <string name="phoneTypeTelex" msgid="3367879952476250512">"Telex"</string>
+    <string name="phoneTypeTtyTdd" msgid="8606514378585000044">"TTY TDD"</string>
+    <string name="phoneTypeWorkMobile" msgid="1311426989184065709">"Celular comercial"</string>
+    <string name="phoneTypeWorkPager" msgid="649938731231157056">"Pager comercial"</string>
+    <string name="phoneTypeAssistant" msgid="5596772636128562884">"Assistente"</string>
+    <string name="phoneTypeMms" msgid="7254492275502768992">"MMS"</string>
+    <string name="eventTypeBirthday" msgid="2813379844211390740">"Aniversário"</string>
+    <string name="eventTypeAnniversary" msgid="3876779744518284000">"Data comemorativa"</string>
+    <string name="eventTypeOther" msgid="5834288791948564594">"Evento"</string>
+    <string name="emailTypeCustom" msgid="8525960257804213846">"Personalizado"</string>
+    <string name="emailTypeHome" msgid="449227236140433919">"Página inicial"</string>
+    <string name="emailTypeWork" msgid="3548058059601149973">"Comercial"</string>
+    <string name="emailTypeOther" msgid="2923008695272639549">"Outros"</string>
+    <string name="emailTypeMobile" msgid="119919005321166205">"Celular"</string>
+    <string name="postalTypeCustom" msgid="8903206903060479902">"Personalizado"</string>
+    <string name="postalTypeHome" msgid="8165756977184483097">"Página inicial"</string>
+    <string name="postalTypeWork" msgid="5268172772387694495">"Comercial"</string>
+    <string name="postalTypeOther" msgid="2726111966623584341">"Outros"</string>
+    <string name="imTypeCustom" msgid="2074028755527826046">"Personalizado"</string>
+    <string name="imTypeHome" msgid="6241181032954263892">"Página inicial"</string>
+    <string name="imTypeWork" msgid="1371489290242433090">"Comercial"</string>
+    <string name="imTypeOther" msgid="5377007495735915478">"Outros"</string>
+    <string name="imProtocolCustom" msgid="6919453836618749992">"Personalizado"</string>
+    <string name="imProtocolAim" msgid="7050360612368383417">"AIM"</string>
+    <string name="imProtocolMsn" msgid="144556545420769442">"Windows Live"</string>
+    <string name="imProtocolYahoo" msgid="8271439408469021273">"Yahoo"</string>
+    <string name="imProtocolSkype" msgid="9019296744622832951">"Skype"</string>
+    <string name="imProtocolQq" msgid="8887484379494111884">"QQ"</string>
+    <string name="imProtocolGoogleTalk" msgid="3808393979157698766">"Google Talk"</string>
+    <string name="imProtocolIcq" msgid="1574870433606517315">"ICQ"</string>
+    <string name="imProtocolJabber" msgid="2279917630875771722">"Jabber"</string>
+    <string name="imProtocolNetMeeting" msgid="8287625655986827971">"NetMeeting"</string>
+    <string name="orgTypeWork" msgid="29268870505363872">"Comercial"</string>
+    <string name="orgTypeOther" msgid="3951781131570124082">"Outros"</string>
+    <string name="orgTypeCustom" msgid="225523415372088322">"Personalizado"</string>
+    <string name="contact_status_update_attribution" msgid="5112589886094402795">"por meio de <xliff:g id="SOURCE">%1$s</xliff:g>"</string>
+    <string name="contact_status_update_attribution_with_date" msgid="5945386376369979909">"<xliff:g id="DATE">%1$s</xliff:g> via <xliff:g id="SOURCE">%2$s</xliff:g>"</string>
     <string name="keyguard_password_enter_pin_code" msgid="3731488827218876115">"Digite o código PIN"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="1295984114338107718">"Código PIN incorreto!"</string>
     <string name="keyguard_label_text" msgid="861796461028298424">"Para desbloquear, pressione Menu e, em seguida, 0."</string>
@@ -470,8 +497,8 @@
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"Correto!"</string>
     <string name="lockscreen_pattern_wrong" msgid="4817583279053112312">"Tente novamente"</string>
     <string name="lockscreen_plugged_in" msgid="613343852842944435">"Carregando (<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>)"</string>
-    <!-- no translation found for lockscreen_charged (4938930459620989972) -->
-    <skip />
+    <string name="lockscreen_charged" msgid="4938930459620989972">"Carregado."</string>
+    <string name="lockscreen_battery_short" msgid="3617549178603354656">"<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="lockscreen_low_battery" msgid="1482873981919249740">"Conecte o seu carregador."</string>
     <string name="lockscreen_missing_sim_message_short" msgid="7381499217732227295">"Sem cartão SIM."</string>
     <string name="lockscreen_missing_sim_message" msgid="2186920585695169078">"Não há um cartão SIM no telefone."</string>
@@ -485,16 +512,17 @@
     <string name="lockscreen_failed_attempts_almost_glogin" msgid="3351013842320127827">"Você desenhou o seu padrão de desbloqueio incorretamente <xliff:g id="NUMBER_0">%d</xliff:g> vezes. Mais <xliff:g id="NUMBER_1">%d</xliff:g> tentativas incorretas e você receberá uma solicitação para desbloquear o seu telefone usando o seu login do Google."\n\n" Tente novamente em <xliff:g id="NUMBER_2">%d</xliff:g> segundos."</string>
     <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6251480343394389665">"Tente novamente em <xliff:g id="NUMBER">%d</xliff:g> segundos."</string>
     <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"Esqueceu o padrão?"</string>
+    <string name="lockscreen_glogin_forgot_pattern" msgid="2588521501166032747">"Desbloqueio de conta"</string>
     <string name="lockscreen_glogin_too_many_attempts" msgid="2446246026221678244">"Muitas tentativas de padrão!"</string>
     <string name="lockscreen_glogin_instructions" msgid="1816635201812207709">"Para desbloquear, faça login com a sua Conta do Google."</string>
     <string name="lockscreen_glogin_username_hint" msgid="8846881424106484447">"Nome de usuário (e-mail)"</string>
     <string name="lockscreen_glogin_password_hint" msgid="5958028383954738528">"Senha"</string>
     <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"Fazer login"</string>
     <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"Nome de usuário ou senha inválida."</string>
+    <string name="lockscreen_glogin_checking_password" msgid="6758890536332363322">"Verificando..."</string>
     <string name="hour_ampm" msgid="4329881288269772723">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%P</xliff:g>"</string>
     <string name="hour_cap_ampm" msgid="1829009197680861107">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%p</xliff:g>"</string>
-    <!-- no translation found for status_bar_clear_all_button (7774721344716731603) -->
-    <skip />
+    <string name="status_bar_clear_all_button" msgid="7774721344716731603">"Limpar"</string>
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Sem notificações"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Em andamento"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Notificações"</string>
@@ -502,9 +530,8 @@
     <string name="battery_status_charging" msgid="756617993998772213">"Carregando..."</string>
     <string name="battery_low_title" msgid="7923774589611311406">"Conecte o carregador"</string>
     <string name="battery_low_subtitle" msgid="7388781709819722764">"A bateria está ficando baixa:"</string>
-    <string name="battery_low_percent_format" msgid="6564958083485073855">"menos de <xliff:g id="NUMBER">%d%%</xliff:g> restantes."</string>
-    <!-- no translation found for battery_low_why (7655196144309694753) -->
-    <skip />
+    <string name="battery_low_percent_format" msgid="696154104579022959">"<xliff:g id="NUMBER">%d%%</xliff:g> ou menos restante(s)."</string>
+    <string name="battery_low_why" msgid="7279169609518386372">"Uso da bateria"</string>
     <string name="factorytest_failed" msgid="5410270329114212041">"Falha no teste de fábrica"</string>
     <string name="factorytest_not_system" msgid="4435201656767276723">"A ação FACTORY_TEST é suportada apenas para pacotes instalados em /system/app."</string>
     <string name="factorytest_no_action" msgid="872991874799998561">"Nenhum pacote que forneça a ação FACTORY_TEST foi encontrado."</string>
@@ -513,14 +540,11 @@
     <string name="js_dialog_title_default" msgid="6961903213729667573">"JavaScript"</string>
     <string name="js_dialog_before_unload" msgid="1901675448179653089">"Deseja sair desta página?"\n\n"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"Selecione OK para continuar ou Cancelar para permanecer na página atual."</string>
     <string name="save_password_label" msgid="6860261758665825069">"Confirmar"</string>
-    <!-- no translation found for permlab_readHistoryBookmarks (1284843728203412135) -->
-    <skip />
-    <!-- no translation found for permdesc_readHistoryBookmarks (4981489815467617191) -->
-    <skip />
-    <!-- no translation found for permlab_writeHistoryBookmarks (9009434109836280374) -->
-    <skip />
-    <!-- no translation found for permdesc_writeHistoryBookmarks (945571990357114950) -->
-    <skip />
+    <string name="double_tap_toast" msgid="1068216937244567247">"Dica: toque duas vezes para aumentar e diminuir o zoom."</string>
+    <string name="permlab_readHistoryBookmarks" msgid="1284843728203412135">"ler histórico e favoritos do Navegador"</string>
+    <string name="permdesc_readHistoryBookmarks" msgid="4981489815467617191">"Permite que o aplicativo leia todos os URLs visitados pelo Navegador e todos os favoritos do Navegador."</string>
+    <string name="permlab_writeHistoryBookmarks" msgid="9009434109836280374">"gravar histórico e favoritos do Navegador"</string>
+    <string name="permdesc_writeHistoryBookmarks" msgid="945571990357114950">"Permite que um aplicativo modifique o histórico ou os favoritos do Navegador armazenados no seu telefone. Aplicativos maliciosos podem usar isso para apagar ou modificar os dados do seu Navegador."</string>
     <string name="save_password_message" msgid="767344687139195790">"Deseja que o navegador lembre desta senha?"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"Agora não"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"Lembrar"</string>
@@ -599,9 +623,9 @@
     <item quantity="one" msgid="2178576254385739855">"amanhã"</item>
     <item quantity="other" msgid="2973062968038355991">"em <xliff:g id="COUNT">%d</xliff:g> dias"</item>
   </plurals>
-    <string name="preposition_for_date" msgid="4316283606614248634">"em %s"</string>
-    <string name="preposition_for_time" msgid="6179700075291054938">"às %s"</string>
-    <string name="preposition_for_year" msgid="3852279354896963571">"em %s"</string>
+    <string name="preposition_for_date" msgid="9093949757757445117">"em <xliff:g id="DATE">%s</xliff:g>"</string>
+    <string name="preposition_for_time" msgid="5506831244263083793">"às <xliff:g id="TIME">%s</xliff:g>"</string>
+    <string name="preposition_for_year" msgid="5040395640711867177">"em <xliff:g id="YEAR">%s</xliff:g>"</string>
     <string name="day" msgid="8144195776058119424">"dia"</string>
     <string name="days" msgid="4774547661021344602">"dias"</string>
     <string name="hour" msgid="2126771916426189481">"hora"</string>
@@ -614,7 +638,7 @@
     <string name="weeks" msgid="6509623834583944518">"semanas"</string>
     <string name="year" msgid="4001118221013892076">"ano"</string>
     <string name="years" msgid="6881577717993213522">"anos"</string>
-    <string name="every_weekday" msgid="8777593878457748503">"Todos os dias da semana (de segunda a sexta)"</string>
+    <string name="every_weekday" msgid="8777593878457748503">"De segunda a sexta-feira"</string>
     <string name="daily" msgid="5738949095624133403">"Diariamente"</string>
     <string name="weekly" msgid="983428358394268344">"Semanalmente na <xliff:g id="DAY">%s</xliff:g>"</string>
     <string name="monthly" msgid="2667202947170988834">"Mensalmente"</string>
@@ -639,8 +663,8 @@
     <string name="copyAll" msgid="2590829068100113057">"Copiar tudo"</string>
     <string name="paste" msgid="5629880836805036433">"Colar"</string>
     <string name="copyUrl" msgid="2538211579596067402">"Copiar URL"</string>
-    <string name="inputMethod" msgid="7673923508389094672">"Método de entrada"</string>
-    <string name="addToDictionary" msgid="726256909274177272">"Adicionar \"%s\" ao dicionário"</string>
+    <string name="inputMethod" msgid="1653630062304567879">"Método de entrada"</string>
+    <string name="addToDictionary" msgid="8793624991686948709">"Adicionar \"<xliff:g id="WORD">%s</xliff:g>\" ao dicionário"</string>
     <string name="editTextMenuTitle" msgid="1672989176958581452">"Editar texto"</string>
     <string name="low_internal_storage_view_title" msgid="1399732408701697546">"Pouco espaço"</string>
     <string name="low_internal_storage_view_text" msgid="635106544616378836">"O espaço de armazenamento do telefone está ficando baixo."</string>
@@ -665,14 +689,14 @@
     <string name="anr_application_process" msgid="4185842666452210193">"O aplicativo <xliff:g id="APPLICATION">%1$s</xliff:g> (no processo <xliff:g id="PROCESS">%2$s</xliff:g>) não está respondendo."</string>
     <string name="anr_process" msgid="1246866008169975783">"O processo <xliff:g id="PROCESS">%1$s</xliff:g> não está respondendo."</string>
     <string name="force_close" msgid="3653416315450806396">"Forçar fechamento"</string>
-    <!-- no translation found for report (4060218260984795706) -->
-    <skip />
+    <string name="report" msgid="4060218260984795706">"Informar"</string>
     <string name="wait" msgid="7147118217226317732">"Aguardar"</string>
     <string name="debug" msgid="9103374629678531849">"Depurar"</string>
     <string name="sendText" msgid="5132506121645618310">"Selecione uma ação para o texto"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"Volume da campainha"</string>
     <string name="volume_music" msgid="5421651157138628171">"Volume da mídia"</string>
     <string name="volume_music_hint_playing_through_bluetooth" msgid="9165984379394601533">"Reproduzindo por meio de Bluetooth"</string>
+    <string name="volume_music_hint_silent_ringtone_selected" msgid="6158339745293431194">"Toque silencioso selecionado"</string>
     <string name="volume_call" msgid="3941680041282788711">"Volume na chamada"</string>
     <string name="volume_bluetooth_call" msgid="2002891926351151534">"Volume de chamada Bluetooth"</string>
     <string name="volume_alarm" msgid="1985191616042689100">"Volume do alarme"</string>
@@ -716,35 +740,28 @@
     <string name="usb_storage_stop_message" msgid="2390958966725232848">"Antes de desativar o armazenamento USB, desmonte o host USB. Selecione \"Desativar\" para desativar o armazenamento USB."</string>
     <string name="usb_storage_stop_button_mount" msgid="1181858854166273345">"Desativar"</string>
     <string name="usb_storage_stop_button_unmount" msgid="3774611918660582898">"Cancelar"</string>
-    <string name="usb_storage_stop_error_message" msgid="3917317248440072084">"Encontramos um problema ao desativar o armazenamento USB. Verifique se desmontou o host USB e tente novamente."</string>
+    <string name="usb_storage_stop_error_message" msgid="3746037090369246731">"Encontramos um problema ao desativar o armazenamento USB. Verifique se desmontou o host USB e tente novamente."</string>
     <string name="extmedia_format_title" msgid="8663247929551095854">"Formatar cartão SD"</string>
     <string name="extmedia_format_message" msgid="3621369962433523619">"Tem certeza de que deseja formatar o cartão SD? Todos os dados no seu cartão serão perdidos."</string>
     <string name="extmedia_format_button_format" msgid="4131064560127478695">"Formatar"</string>
-    <!-- no translation found for adb_active_notification_title (6729044778949189918) -->
-    <skip />
-    <!-- no translation found for adb_active_notification_message (4661997077344501389) -->
-    <skip />
-    <string name="select_input_method" msgid="2086499663193509436">"Selecionar método de entrada"</string>
+    <string name="adb_active_notification_title" msgid="6729044778949189918">"Depuração USB conectada"</string>
+    <string name="adb_active_notification_message" msgid="8470296818270110396">"Selecione para desativar a depuração USB."</string>
+    <string name="select_input_method" msgid="6865512749462072765">"Selecionar método de entrada"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"candidatos"</u></string>
     <string name="ext_media_checking_notification_title" msgid="5457603418970994050">"Preparando o cartão SD"</string>
-    <!-- no translation found for ext_media_checking_notification_message (8287319882926737053) -->
-    <skip />
+    <string name="ext_media_checking_notification_message" msgid="8287319882926737053">"Procurando erros."</string>
     <string name="ext_media_nofs_notification_title" msgid="780477838241212997">"Cartão SD em branco"</string>
-    <!-- no translation found for ext_media_nofs_notification_message (3817704088027829380) -->
-    <skip />
+    <string name="ext_media_nofs_notification_message" msgid="3817704088027829380">"Cartão SD vazio ou com sistema de arquivos incompatível."</string>
     <string name="ext_media_unmountable_notification_title" msgid="6410723906019100189">"Cartão SD danificado"</string>
-    <!-- no translation found for ext_media_unmountable_notification_message (6902531775948238989) -->
-    <skip />
+    <string name="ext_media_unmountable_notification_message" msgid="6902531775948238989">"O cartão SD está danificado. Talvez seja necessário reformatá-lo."</string>
     <string name="ext_media_badremoval_notification_title" msgid="6872152882604407837">"Cartão SD removido inesperadamente."</string>
     <string name="ext_media_badremoval_notification_message" msgid="7260183293747448241">"Desmonte o cartão SD antes da remoção para evitar a perda de dados."</string>
     <string name="ext_media_safe_unmount_notification_title" msgid="6729801130790616200">"O cartão SD já pode ser removido com segurança."</string>
-    <!-- no translation found for ext_media_safe_unmount_notification_message (568841278138377604) -->
-    <skip />
+    <string name="ext_media_safe_unmount_notification_message" msgid="568841278138377604">"Você pode remover o cartão SD com segurança."</string>
     <string name="ext_media_nomedia_notification_title" msgid="8902518030404381318">"Cartão SD removido"</string>
-    <!-- no translation found for ext_media_nomedia_notification_message (3870120652983659641) -->
-    <skip />
+    <string name="ext_media_nomedia_notification_message" msgid="3870120652983659641">"Cartão SD removido. Insira um novo."</string>
     <string name="activity_list_empty" msgid="4168820609403385789">"Nenhum atividade correspondente foi encontrada"</string>
     <string name="permlab_pkgUsageStats" msgid="8787352074326748892">"atualizar estatísticas de uso do componente"</string>
     <string name="permdesc_pkgUsageStats" msgid="891553695716752835">"Permite a modificação das estatísticas de uso do componente coletadas. Não deve ser usado por aplicativos normais."</string>
@@ -753,13 +770,26 @@
     <string name="ime_action_go" msgid="8320845651737369027">"Ir"</string>
     <string name="ime_action_search" msgid="658110271822807811">"Pesquisar"</string>
     <string name="ime_action_send" msgid="2316166556349314424">"Enviar"</string>
-    <string name="ime_action_next" msgid="3138843904009813834">"Próximo"</string>
+    <string name="ime_action_next" msgid="3138843904009813834">"Avançar"</string>
     <string name="ime_action_done" msgid="8971516117910934605">"Concluído"</string>
     <string name="ime_action_default" msgid="2840921885558045721">"Executar"</string>
     <string name="dial_number_using" msgid="5789176425167573586">"Discar número"\n"usando <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <string name="create_contact_using" msgid="4947405226788104538">"Criar contato "\n"usando <xliff:g id="NUMBER">%s</xliff:g>"</string>
-    <!-- no translation found for accessibility_compound_button_selected (5612776946036285686) -->
-    <skip />
-    <!-- no translation found for accessibility_compound_button_unselected (8864512895673924091) -->
-    <skip />
+    <string name="accessibility_compound_button_selected" msgid="5612776946036285686">"selecionado"</string>
+    <string name="accessibility_compound_button_unselected" msgid="8864512895673924091">"não selecionado"</string>
+    <string name="grant_credentials_permission_message_desc" msgid="6883276587034335667">"Os aplicativos listados estão solicitando autorização para acessar as credenciais de login para a conta <xliff:g id="ACCOUNT">%1$s</xliff:g> do <xliff:g id="APPLICATION">%2$s</xliff:g>. Deseja conceder essa autorização? Em caso afirmativo, sua resposta será lembrada e essa pergunta não será feita novamente."</string>
+    <string name="grant_credentials_permission_message_with_authtokenlabel_desc" msgid="3159007601893584687">"Os aplicativos listados estão solicitando autorização para acessar as credenciais de login <xliff:g id="TYPE">%1$s</xliff:g> para a conta <xliff:g id="ACCOUNT">%2$s</xliff:g> do <xliff:g id="APPLICATION">%3$s</xliff:g>. Deseja conceder essa autorização? Em caso afirmativo, sua resposta será lembrada e essa pergunta não será feita novamente."</string>
+    <string name="allow" msgid="7225948811296386551">"Permitir"</string>
+    <string name="deny" msgid="2081879885755434506">"Negar"</string>
+    <string name="permission_request_notification_title" msgid="5390555465778213840">"Autorização solicitada"</string>
+    <string name="permission_request_notification_with_subtitle" msgid="4325409589686688000">"Solicitada a permissão"\n"para a conta <xliff:g id="ACCOUNT">%s</xliff:g>"</string>
+    <string name="input_method_binding_label" msgid="1283557179944992649">"Método de entrada"</string>
+    <string name="sync_binding_label" msgid="3687969138375092423">"Sincronizar"</string>
+    <string name="accessibility_binding_label" msgid="4148120742096474641">"Acessibilidade"</string>
+    <string name="wallpaper_binding_label" msgid="1240087844304687662">"Papel de parede"</string>
+    <string name="chooser_wallpaper" msgid="7873476199295190279">"Alterar papel de parede"</string>
+    <string name="pptp_vpn_description" msgid="2688045385181439401">"Protocolo de encapsulamento ponto a ponto"</string>
+    <string name="l2tp_vpn_description" msgid="3750692169378923304">"Protocolo de encapsulamento de camada 2"</string>
+    <string name="l2tp_ipsec_psk_vpn_description" msgid="3945043564008303239">"VPN L2TP/IPSec com base em chave pré-compartilhada"</string>
+    <string name="l2tp_ipsec_crt_vpn_description" msgid="5382714073103653577">"VPN L2TP/IPSec com base em certificado"</string>
 </resources>

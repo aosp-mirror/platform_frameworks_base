@@ -35,7 +35,12 @@ public class SignalToneUtil {
     static public final int IS95_CONST_IR_ALERT_MED = 0;
     static public final int IS95_CONST_IR_ALERT_HIGH = 1;
     static public final int IS95_CONST_IR_ALERT_LOW = 2;
-    static public final int TAPIAMSSCDMA_SIGNAL_PITCH_UNKNOWN = 255;
+
+    // Based on 3GPP2 C.S0005-E, seciton 3.7.5.5 Signal,
+    // set TAPIAMSSCDMA_SIGNAL_PITCH_UNKNOWN to 0 to avoid
+    // the alert pitch to be involved in hash calculation for
+    // signal type other than IS54B.
+    static public final int TAPIAMSSCDMA_SIGNAL_PITCH_UNKNOWN = 0;
 
     // public final int int IS95_CONST_IR_SIGNAL_TYPE;
     static public final int IS95_CONST_IR_SIG_ISDN_NORMAL = 0;
@@ -80,6 +85,15 @@ public class SignalToneUtil {
         if ((signalType < 0) || (signalType > 256) || (alertPitch > 256) ||
                 (alertPitch < 0) || (signal > 256) || (signal < 0)) {
             return new Integer(CDMA_INVALID_TONE);
+        }
+        // Based on 3GPP2 C.S0005-E, seciton 3.7.5.5 Signal,
+        // the alert pitch field is ignored by the mobile station unless
+        // SIGNAL_TYPE is '10',IS-54B Alerting.
+        // Set alert pitch to TAPIAMSSCDMA_SIGNAL_PITCH_UNKNOWN
+        // so the alert pitch is not involved in hash calculation
+        // when signal type is not IS-54B.
+        if (signalType != IS95_CONST_IR_SIGNAL_IS54B) {
+            alertPitch = TAPIAMSSCDMA_SIGNAL_PITCH_UNKNOWN;
         }
         return new Integer(signalType * 256 * 256 + alertPitch * 256 + signal);
     }

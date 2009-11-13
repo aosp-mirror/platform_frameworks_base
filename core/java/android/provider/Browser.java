@@ -107,7 +107,8 @@ public class Browser {
     public static final String[] HISTORY_PROJECTION = new String[] {
         BookmarkColumns._ID, BookmarkColumns.URL, BookmarkColumns.VISITS,
         BookmarkColumns.DATE, BookmarkColumns.BOOKMARK, BookmarkColumns.TITLE,
-        BookmarkColumns.FAVICON };
+        BookmarkColumns.FAVICON, BookmarkColumns.THUMBNAIL,
+        BookmarkColumns.TOUCH_ICON };
 
     /* these indices dependent on HISTORY_PROJECTION */
     public static final int HISTORY_PROJECTION_ID_INDEX = 0;
@@ -117,6 +118,14 @@ public class Browser {
     public static final int HISTORY_PROJECTION_BOOKMARK_INDEX = 4;
     public static final int HISTORY_PROJECTION_TITLE_INDEX = 5;
     public static final int HISTORY_PROJECTION_FAVICON_INDEX = 6;
+    /**
+     * @hide
+     */
+    public static final int HISTORY_PROJECTION_THUMBNAIL_INDEX = 7;
+    /**
+     * @hide
+     */
+    public static final int HISTORY_PROJECTION_TOUCH_ICON_INDEX = 8;
 
     /* columns needed to determine whether to truncate history */
     public static final String[] TRUNCATE_HISTORY_PROJECTION = new String[] {
@@ -165,13 +174,29 @@ public class Browser {
     }
 
     public static final void sendString(Context c, String s) {
+        sendString(c, s,
+                c.getText(com.android.internal.R.string.sendText).toString());
+    }
+
+    /**
+     *  Find an application to handle the given string and, if found, invoke
+     *  it with the given string as a parameter.
+     *  @param c Context used to launch the new activity.
+     *  @param stringToSend The string to be handled.
+     *  @param chooserDialogTitle The title of the dialog that allows the user
+     *  to select between multiple applications that are all capable of handling
+     *  the string.
+     *  @hide pending API council approval
+     */
+    public static final void sendString(Context c,
+                                        String stringToSend,
+                                        String chooserDialogTitle) {
         Intent send = new Intent(Intent.ACTION_SEND);
         send.setType("text/plain");
-        send.putExtra(Intent.EXTRA_TEXT, s);
-        
+        send.putExtra(Intent.EXTRA_TEXT, stringToSend);
+
         try {
-            c.startActivity(Intent.createChooser(send,
-                    c.getText(com.android.internal.R.string.sendText)));
+            c.startActivity(Intent.createChooser(send, chooserDialogTitle));
         } catch(android.content.ActivityNotFoundException ex) {
             // if no app handles it, do nothing
         }
@@ -245,6 +270,32 @@ public class Browser {
             c.deactivate();
         } catch (IllegalStateException e) {
             return;
+        }
+    }
+
+    /**
+     *  Returns all the URLs in the history.
+     *  Requires {@link android.Manifest.permission#READ_HISTORY_BOOKMARKS}
+     *  @param cr   The ContentResolver used to access the database.
+     *  @hide pending API council approval
+     */
+    public static final String[] getVisitedHistory(ContentResolver cr) {
+        try {
+            String[] projection = new String[] {
+                "url"
+            };
+            Cursor c = cr.query(BOOKMARKS_URI, projection, "visits > 0", null,
+                    null);
+            String[] str = new String[c.getCount()];
+            int i = 0;
+            while (c.moveToNext()) {
+                str[i] = c.getString(0);
+                i++;
+            }
+            c.deactivate();
+            return str;
+        } catch (IllegalStateException e) {
+            return new String[0];
         }
     }
 
@@ -513,6 +564,14 @@ public class Browser {
         public static final String TITLE = "title";
         public static final String CREATED = "created";
         public static final String FAVICON = "favicon";
+        /**
+         * @hide
+         */
+        public static final String THUMBNAIL = "thumbnail";
+        /**
+         * @hide
+         */
+        public static final String TOUCH_ICON = "touch_icon";
     }
 
     public static class SearchColumns implements BaseColumns {

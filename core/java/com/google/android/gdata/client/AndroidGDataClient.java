@@ -19,6 +19,7 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.entity.InputStreamEntity;
 import org.apache.http.entity.AbstractHttpEntity;
+import org.apache.http.entity.ByteArrayEntity;
 
 import android.content.ContentResolver;
 import android.content.Context;
@@ -26,6 +27,7 @@ import android.net.http.AndroidHttpClient;
 import android.text.TextUtils;
 import android.util.Config;
 import android.util.Log;
+import android.os.SystemProperties;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -54,6 +56,10 @@ public class AndroidGDataClient implements GDataClient {
     private static final String DEFAULT_USER_AGENT_APP_VERSION = "Android-GData/1.1";
 
     private static final int MAX_REDIRECTS = 10;
+
+    // boolean system property that can be used to control whether or not
+    // requests/responses are gzip'd.
+    private static final String NO_GZIP_SYSTEM_PROPERTY = "sync.nogzip";
 
     private final GoogleHttpClient mHttpClient;
     private ContentResolver mResolver;
@@ -212,7 +218,10 @@ public class AndroidGDataClient implements GDataClient {
 
             HttpUriRequest request = creator.createRequest(uri);
 
-            AndroidHttpClient.modifyRequestToAcceptGzipResponse(request);
+            if (!SystemProperties.getBoolean(NO_GZIP_SYSTEM_PROPERTY, false)) {
+                AndroidHttpClient.modifyRequestToAcceptGzipResponse(request);
+            }
+
             // only add the auth token if not null (to allow for GData feeds that do not require
             // authentication.)
             if (!TextUtils.isEmpty(authToken)) {
@@ -487,7 +496,12 @@ public class AndroidGDataClient implements GDataClient {
             }
         }
 
-        AbstractHttpEntity entity = AndroidHttpClient.getCompressedEntity(entryBytes, mResolver);
+        AbstractHttpEntity entity;
+        if (SystemProperties.getBoolean(NO_GZIP_SYSTEM_PROPERTY, false)) {
+            entity = new ByteArrayEntity(entryBytes);
+        } else {
+            entity = AndroidHttpClient.getCompressedEntity(entryBytes, mResolver);
+        }
         entity.setContentType(entry.getContentType());
         return entity;
     }

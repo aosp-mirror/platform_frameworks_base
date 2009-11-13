@@ -8,8 +8,10 @@
 #include "ResourceTable.h"
 #include "XMLNode.h"
 
-#include <utils.h>
-#include <utils/ZipFile.h>
+#include <utils/Log.h>
+#include <utils/threads.h>
+#include <utils/List.h>
+#include <utils/Errors.h>
 
 #include <fcntl.h>
 #include <errno.h>
@@ -231,7 +233,7 @@ static ssize_t indexOfAttribute(const ResXMLTree& tree, uint32_t attrRes)
     return -1;
 }
 
-static String8 getAttribute(const ResXMLTree& tree, const char* ns,
+String8 getAttribute(const ResXMLTree& tree, const char* ns,
                             const char* attr, String8* outError)
 {
     ssize_t idx = tree.indexOfAttribute(ns, attr);
@@ -330,9 +332,11 @@ enum {
     TARGET_SDK_VERSION_ATTR = 0x01010270,
     TEST_ONLY_ATTR = 0x01010272,
     DENSITY_ATTR = 0x0101026c,
+    GL_ES_VERSION_ATTR = 0x01010281,
     SMALL_SCREEN_ATTR = 0x01010284,
     NORMAL_SCREEN_ATTR = 0x01010285,
     LARGE_SCREEN_ATTR = 0x01010286,
+    REQUIRED_ATTR = 0x0101028e,
 };
 
 const char *getComponentName(String8 &pkgName, String8 &componentName) {
@@ -501,8 +505,25 @@ int doDump(Bundle* bundle)
             bool withinActivity = false;
             bool isMainActivity = false;
             bool isLauncherActivity = false;
+            bool isSearchable = false;
             bool withinApplication = false;
             bool withinReceiver = false;
+            bool withinService = false;
+            bool withinIntentFilter = false;
+            bool hasMainActivity = false;
+            bool hasOtherActivities = false;
+            bool hasOtherReceivers = false;
+            bool hasOtherServices = false;
+            bool hasWallpaperService = false;
+            bool hasImeService = false;
+            bool hasWidgetReceivers = false;
+            bool hasIntentFilter = false;
+            bool actMainActivity = false;
+            bool actWidgetReceivers = false;
+            bool actImeService = false;
+            bool actWallpaperService = false;
+            bool specCameraFeature = false;
+            bool hasCameraPermission = false;
             int targetSdk = 0;
             int smallScreen = 1;
             int normalScreen = 1;
@@ -512,9 +533,48 @@ int doDump(Bundle* bundle)
             String8 activityLabel;
             String8 activityIcon;
             String8 receiverName;
+            String8 serviceName;
             while ((code=tree.next()) != ResXMLTree::END_DOCUMENT && code != ResXMLTree::BAD_DOCUMENT) {
                 if (code == ResXMLTree::END_TAG) {
                     depth--;
+                    if (depth < 2) {
+                        withinApplication = false;
+                    } else if (depth < 3) {
+                        if (withinActivity && isMainActivity && isLauncherActivity) {
+                            const char *aName = getComponentName(pkg, activityName);
+                            if (aName != NULL) {
+                                printf("launchable activity name='%s'", aName);
+                            }
+                            printf("label='%s' icon='%s'\n",
+                                    activityLabel.string(),
+                                    activityIcon.string());
+                        }
+                        if (!hasIntentFilter) {
+                            hasOtherActivities |= withinActivity;
+                            hasOtherReceivers |= withinReceiver;
+                            hasOtherServices |= withinService;
+                        }
+                        withinActivity = false;
+                        withinService = false;
+                        withinReceiver = false;
+                        hasIntentFilter = false;
+                        isMainActivity = isLauncherActivity = false;
+                    } else if (depth < 4) {
+                        if (withinIntentFilter) {
+                            if (withinActivity) {
+                                hasMainActivity |= actMainActivity;
+                                hasOtherActivities |= !actMainActivity;
+                            } else if (withinReceiver) {
+                                hasWidgetReceivers |= actWidgetReceivers;
+                                hasOtherReceivers |= !actWidgetReceivers;
+                            } else if (withinService) {
+                                hasImeService |= actImeService;
+                                hasWallpaperService |= actWallpaperService;
+                                hasOtherServices |= (!actImeService && !actWallpaperService);
+                            }
+                        }
+                        withinIntentFilter = false;
+                    }
                     continue;
                 }
                 if (code != ResXMLTree::START_TAG) {
@@ -522,7 +582,7 @@ int doDump(Bundle* bundle)
                 }
                 depth++;
                 String8 tag(tree.getElementName(&len));
-                //printf("Depth %d tag %s\n", depth, tag.string());
+                //printf("Depth %d,  %s\n", depth, tag.string());
                 if (depth == 1) {
                     if (tag != "manifest") {
                         fprintf(stderr, "ERROR: manifest does not start with <manifest> tag\n");
@@ -650,10 +710,42 @@ int doDump(Bundle* bundle)
                                 NORMAL_SCREEN_ATTR, NULL, 1);
                         largeScreen = getIntegerAttribute(tree,
                                 LARGE_SCREEN_ATTR, NULL, 1);
+                    } else if (tag == "uses-feature") {
+                        String8 name = getAttribute(tree, NAME_ATTR, &error);
+
+                        if (name != "" && error == "") {
+                            int req = getIntegerAttribute(tree,
+                                    REQUIRED_ATTR, NULL, 1);
+                            if (name == "android.hardware.camera") {
+                                specCameraFeature = true;
+                            }
+                            printf("uses-feature%s:'%s'\n",
+                                    req ? "" : "-not-required", name.string());
+                        } else {
+                            int vers = getIntegerAttribute(tree,
+                                    GL_ES_VERSION_ATTR, &error);
+                            if (error == "") {
+                                printf("uses-gl-es:'0x%x'\n", vers);
+                            }
+                        }
+                    } else if (tag == "uses-permission") {
+                        String8 name = getAttribute(tree, NAME_ATTR, &error);
+                        if (name != "" && error == "") {
+                            if (name == "android.permission.CAMERA") {
+                                hasCameraPermission = true;
+                            }
+                            printf("uses-permission:'%s'\n", name.string());
+                        } else {
+                            fprintf(stderr, "ERROR getting 'android:name' attribute: %s\n",
+                                    error.string());
+                            goto bail;
+                        }
                     }
                 } else if (depth == 3 && withinApplication) {
                     withinActivity = false;
                     withinReceiver = false;
+                    withinService = false;
+                    hasIntentFilter = false;
                     if(tag == "activity") {
                         withinActivity = true;
                         activityName = getAttribute(tree, NAME_ATTR, &error);
@@ -679,7 +771,10 @@ int doDump(Bundle* bundle)
                             fprintf(stderr, "ERROR getting 'android:name' attribute for uses-library: %s\n", error.string());
                             goto bail;
                         }
-                        printf("uses-library:'%s'\n", libraryName.string());
+                        int req = getIntegerAttribute(tree,
+                                REQUIRED_ATTR, NULL, 1);
+                        printf("uses-library%s:'%s'\n",
+                                req ? "" : "-not-required", libraryName.string());
                     } else if (tag == "receiver") {
                         withinReceiver = true;
                         receiverName = getAttribute(tree, NAME_ATTR, &error);
@@ -688,76 +783,97 @@ int doDump(Bundle* bundle)
                             fprintf(stderr, "ERROR getting 'android:name' attribute for receiver: %s\n", error.string());
                             goto bail;
                         }
+                    } else if (tag == "service") {
+                        withinService = true;
+                        serviceName = getAttribute(tree, NAME_ATTR, &error);
+
+                        if (error != "") {
+                            fprintf(stderr, "ERROR getting 'android:name' attribute for service: %s\n", error.string());
+                            goto bail;
+                        }
                     }
-                } else if (depth == 5) {
-                    if (withinActivity) {
-                        if (tag == "action") {
-                            //printf("LOG: action tag\n");
-                            String8 action = getAttribute(tree, NAME_ATTR, &error);
-                            if (error != "") {
-                                fprintf(stderr, "ERROR getting 'android:name' attribute: %s\n", error.string());
-                                goto bail;
-                            }
+                } else if ((depth == 4) && (tag == "intent-filter")) {
+                    hasIntentFilter = true;
+                    withinIntentFilter = true;
+                    actMainActivity = actWidgetReceivers = actImeService = actWallpaperService = false;
+                } else if ((depth == 5) && withinIntentFilter){
+                    String8 action;
+                    if (tag == "action") {
+                        action = getAttribute(tree, NAME_ATTR, &error);
+                        if (error != "") {
+                            fprintf(stderr, "ERROR getting 'android:name' attribute: %s\n", error.string());
+                            goto bail;
+                        }
+                        if (withinActivity) {
                             if (action == "android.intent.action.MAIN") {
                                 isMainActivity = true;
-                                //printf("LOG: isMainActivity==true\n");
+                                actMainActivity = true;
                             }
-                        } else if (tag == "category") {
-                            String8 category = getAttribute(tree, NAME_ATTR, &error);
-                            if (error != "") {
-                                fprintf(stderr, "ERROR getting 'name' attribute: %s\n", error.string());
-                                goto bail;
+                        } else if (withinReceiver) {
+                            if (action == "android.appwidget.action.APPWIDGET_UPDATE") {
+                                actWidgetReceivers = true;
                             }
+                        } else if (withinService) {
+                            if (action == "android.view.InputMethod") {
+                                actImeService = true;
+                            } else if (action == "android.service.wallpaper.WallpaperService") {
+                                actWallpaperService = true;
+                            }
+                        }
+                        if (action == "android.intent.action.SEARCH") {
+                            isSearchable = true;
+                        }
+                    }
+
+                    if (tag == "category") {
+                        String8 category = getAttribute(tree, NAME_ATTR, &error);
+                        if (error != "") {
+                            fprintf(stderr, "ERROR getting 'name' attribute: %s\n", error.string());
+                            goto bail;
+                        }
+                        if (withinActivity) {
                             if (category == "android.intent.category.LAUNCHER") {
                                 isLauncherActivity = true;
-                                //printf("LOG: isLauncherActivity==true\n");
-                            }
-                        }
-                    } else if (withinReceiver) {
-                        if (tag == "action") {
-                            String8 action = getAttribute(tree, NAME_ATTR, &error);
-                            if (error != "") {
-                                fprintf(stderr, "ERROR getting 'android:name' attribute for receiver: %s\n", error.string());
-                                goto bail;
-                            }
-                            if (action == "android.appwidget.action.APPWIDGET_UPDATE") {
-                                const char *rName = getComponentName(pkg, receiverName);
-                                if (rName != NULL) {
-                                    printf("gadget-receiver:'%s/%s'\n", pkg.string(), rName);
-                                }
                             }
                         }
                     }
-                }
-
-                if (depth < 2) {
-                    withinApplication = false;
-                }
-                if (depth < 3) {
-                    //if (withinActivity) printf("LOG: withinActivity==false\n");
-                    withinActivity = false;
-                    withinReceiver = false;
-                }
-
-                if (depth < 5) {
-                    //if (isMainActivity) printf("LOG: isMainActivity==false\n");
-                    //if (isLauncherActivity) printf("LOG: isLauncherActivity==false\n");
-                    isMainActivity = false;
-                    isLauncherActivity = false;
-                }
-
-                if (withinActivity && isMainActivity && isLauncherActivity) {
-                    printf("launchable activity:");
-                    const char *aName = getComponentName(pkg, activityName);
-                    if (aName != NULL) {
-                        printf(" name='%s'", aName);
-                    }
-                    printf("label='%s' icon='%s'\n",
-                           activityLabel.string(),
-                           activityIcon.string());
                 }
             }
-            
+
+            if (!specCameraFeature && hasCameraPermission) {
+                // For applications that have not explicitly stated their
+                // camera feature requirements, but have requested the camera
+                // permission, we are going to give them compatibility treatment
+                // of requiring the equivalent to original android devices.
+                printf("uses-feature:'android.hardware.camera'\n");
+                printf("uses-feature:'android.hardware.camera.autofocus'\n");
+            }
+
+            if (hasMainActivity) {
+                printf("main\n");
+            }
+            if (hasWidgetReceivers) {
+                printf("app-widget\n");
+            }
+            if (hasImeService) {
+                printf("ime\n");
+            }
+            if (hasWallpaperService) {
+                printf("wallpaper\n");
+            }
+            if (hasOtherActivities) {
+                printf("other-activities\n");
+            }
+            if (isSearchable) {
+                printf("search\n");
+            }
+            if (hasOtherReceivers) {
+                printf("other-receivers\n");
+            }
+            if (hasOtherServices) {
+                printf("other-services\n");
+            }
+
             // Determine default values for any unspecified screen sizes,
             // based on the target SDK of the package.  As of 4 (donut)
             // the screen size support was introduced, so all default to
@@ -776,7 +892,7 @@ int doDump(Bundle* bundle)
             if (normalScreen != 0) printf(" 'normal'");
             if (largeScreen != 0) printf(" 'large'");
             printf("\n");
-            
+
             printf("locales:");
             Vector<String8> locales;
             res.getLocales(&locales);
@@ -789,7 +905,7 @@ int doDump(Bundle* bundle)
                 printf(" '%s'", localeStr);
             }
             printf("\n");
-            
+
             Vector<ResTable_config> configs;
             res.getConfigurations(&configs);
             SortedVector<int> densities;
@@ -799,14 +915,14 @@ int doDump(Bundle* bundle)
                 if (dens == 0) dens = 160;
                 densities.add(dens);
             }
-            
+
             printf("densities:");
             const size_t ND = densities.size();
             for (size_t i=0; i<ND; i++) {
                 printf(" '%d'", densities[i]);
             }
             printf("\n");
-            
+
             AssetDir* dir = assets.openNonAssetDir(assetsCookie, "lib");
             if (dir != NULL) {
                 if (dir->getFileCount() > 0) {
@@ -881,8 +997,15 @@ int doAdd(Bundle* bundle)
             printf(" '%s'... (from gzip)\n", fileName);
             result = zip->addGzip(fileName, String8(fileName).getBasePath().string(), NULL);
         } else {
-            printf(" '%s'...\n", fileName);
-            result = zip->add(fileName, bundle->getCompressionMethod(), NULL);
+            if (bundle->getJunkPath()) {
+                String8 storageName = String8(fileName).getPathLeaf();
+                printf(" '%s' as '%s'...\n", fileName, storageName.string());
+                result = zip->add(fileName, storageName.string(),
+                                  bundle->getCompressionMethod(), NULL);
+            } else {
+                printf(" '%s'...\n", fileName);
+                result = zip->add(fileName, bundle->getCompressionMethod(), NULL);
+            }
         }
         if (result != NO_ERROR) {
             fprintf(stderr, "Unable to add '%s' to '%s'", bundle->getFileSpecEntry(i), zipFileName);
@@ -1041,6 +1164,12 @@ int doPackage(Bundle* bundle)
         if (err < 0) {
             goto bail;
         }
+    }
+
+    // Write out the ProGuard file
+    err = writeProguardFile(bundle, assets);
+    if (err < 0) {
+        goto bail;
     }
 
     // Write the apk

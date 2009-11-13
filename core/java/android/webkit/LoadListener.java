@@ -28,7 +28,6 @@ import android.net.http.SslError;
 
 import android.os.Handler;
 import android.os.Message;
-import android.security.CertTool;
 import android.util.Log;
 import android.webkit.CacheManager.CacheResult;
 
@@ -37,13 +36,10 @@ import com.android.internal.R;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Vector;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
-
-import org.apache.commons.codec.binary.Base64;
 
 class LoadListener extends Handler implements EventHandler {
 
@@ -72,12 +68,12 @@ class LoadListener extends Handler implements EventHandler {
     private static final int HTTP_NOT_FOUND = 404;
     private static final int HTTP_PROXY_AUTH = 407;
 
-    private static HashSet<String> sCertificateMimeTypeMap;
+    private static HashMap<String, String> sCertificateTypeMap;
     static {
-        sCertificateMimeTypeMap = new HashSet<String>();
-        sCertificateMimeTypeMap.add("application/x-x509-ca-cert");
-        sCertificateMimeTypeMap.add("application/x-x509-user-cert");
-        sCertificateMimeTypeMap.add("application/x-pkcs12");
+        sCertificateTypeMap = new HashMap<String, String>();
+        sCertificateTypeMap.put("application/x-x509-ca-cert", CertTool.CERT);
+        sCertificateTypeMap.put("application/x-x509-user-cert", CertTool.CERT);
+        sCertificateTypeMap.put("application/x-pkcs12", CertTool.PKCS12);
     }
 
     private static int sNativeLoaderCount;
@@ -101,6 +97,7 @@ class LoadListener extends Handler implements EventHandler {
     private boolean  mAuthFailed;  // indicates that the prev. auth failed
     private CacheLoader mCacheLoader;
     private CacheManager.CacheResult mCacheResult;
+    private boolean  mFromCache = false;
     private HttpAuthHeader mAuthHeader;
     private int      mErrorID = OK;
     private String   mErrorDescription;
@@ -113,7 +110,6 @@ class LoadListener extends Handler implements EventHandler {
     private String mMethod;
     private Map<String, String> mRequestHeaders;
     private byte[] mPostData;
-    private boolean mIsHighPriority;
     // Flag to indicate that this load is synchronous.
     private boolean mSynchronous;
     private Vector<Message> mMessageQueue;
@@ -142,15 +138,13 @@ class LoadListener extends Handler implements EventHandler {
 
     LoadListener(Context context, BrowserFrame frame, String url,
             int nativeLoader, boolean synchronous, boolean isMainPageLoader) {
-        if (WebView.LOGV_ENABLED) {
+        if (DebugFlags.LOAD_LISTENER) {
             Log.v(LOGTAG, "LoadListener constructor url=" + url);
         }
         mContext = context;
         mBrowserFrame = frame;
         setUrl(url);
         mNativeLoader = nativeLoader;
-        mMimeType = "";
-        mEncoding = "";
         mSynchronous = synchronous;
         if (synchronous) {
             mMessageQueue = new Vector<Message>();
@@ -293,7 +287,7 @@ class LoadListener extends Handler implements EventHandler {
      * directly
      */
     public void headers(Headers headers) {
-        if (WebView.LOGV_ENABLED) Log.v(LOGTAG, "LoadListener.headers");
+        if (DebugFlags.LOAD_LISTENER) Log.v(LOGTAG, "LoadListener.headers");
         sendMessageInternal(obtainMessage(MSG_CONTENT_HEADERS, headers));
     }
 
@@ -301,8 +295,6 @@ class LoadListener extends Handler implements EventHandler {
     private void handleHeaders(Headers headers) {
         if (mCancelled) return;
         mHeaders = headers;
-        mMimeType = "";
-        mEncoding = "";
 
         ArrayList<String> cookies = headers.getSetCookie();
         for (int i = 0; i < cookies.size(); ++i) {
@@ -322,8 +314,8 @@ class LoadListener extends Handler implements EventHandler {
 
             // If we have one of "generic" MIME types, try to deduce
             // the right MIME type from the file extension (if any):
-            if (mMimeType.equalsIgnoreCase("text/plain") ||
-                    mMimeType.equalsIgnoreCase("application/octet-stream")) {
+            if (mMimeType.equals("text/plain") ||
+                    mMimeType.equals("application/octet-stream")) {
 
                 // for attachment, use the filename in the Content-Disposition
                 // to guess the mimetype
@@ -339,17 +331,14 @@ class LoadListener extends Handler implements EventHandler {
                 if (newMimeType != null) {
                     mMimeType = newMimeType;
                 }
-            } else if (mMimeType.equalsIgnoreCase("text/vnd.wap.wml")) {
+            } else if (mMimeType.equals("text/vnd.wap.wml")) {
                 // As we don't support wml, render it as plain text
                 mMimeType = "text/plain";
             } else {
-                // XXX: Until the servers send us either correct xhtml or
-                // text/html, treat application/xhtml+xml as text/html.
                 // It seems that xhtml+xml and vnd.wap.xhtml+xml mime
                 // subtypes are used interchangeably. So treat them the same.
-                if (mMimeType.equalsIgnoreCase("application/xhtml+xml") ||
-                        mMimeType.equals("application/vnd.wap.xhtml+xml")) {
-                    mMimeType = "text/html";
+                if (mMimeType.equals("application/vnd.wap.xhtml+xml")) {
+                    mMimeType = "application/xhtml+xml";
                 }
             }
         } else {
@@ -419,11 +408,10 @@ class LoadListener extends Handler implements EventHandler {
                 mStatusCode == HTTP_MOVED_PERMANENTLY ||
                 mStatusCode == HTTP_TEMPORARY_REDIRECT) && 
                 mNativeLoader != 0) {
-            // Content arriving from a StreamLoader (eg File, Cache or Data)
-            // will not be cached as they have the header:
-            // cache-control: no-store
-            mCacheResult = CacheManager.createCacheFile(mUrl, mStatusCode,
-                    headers, mMimeType, false);
+            if (!mFromCache && mRequestHandle != null) {
+                mCacheResult = CacheManager.createCacheFile(mUrl, mStatusCode,
+                        headers, mMimeType, false);
+            }
             if (mCacheResult != null) {
                 mCacheResult.encoding = mEncoding;
             }
@@ -450,7 +438,7 @@ class LoadListener extends Handler implements EventHandler {
      */
     public void status(int majorVersion, int minorVersion,
             int code, /* Status-Code value */ String reasonPhrase) {
-        if (WebView.LOGV_ENABLED) {
+        if (DebugFlags.LOAD_LISTENER) {
             Log.v(LOGTAG, "LoadListener: from: " + mUrl
                     + " major: " + majorVersion
                     + " minor: " + minorVersion
@@ -464,6 +452,9 @@ class LoadListener extends Handler implements EventHandler {
         status.put("reason", reasonPhrase);
         // New status means new data. Clear the old.
         mDataBuilder.clear();
+        mMimeType = "";
+        mEncoding = "";
+        mTransferEncoding = "";
         sendMessageInternal(obtainMessage(MSG_STATUS, status));
     }
 
@@ -507,7 +498,7 @@ class LoadListener extends Handler implements EventHandler {
      * directly
      */
     public void error(int id, String description) {
-        if (WebView.LOGV_ENABLED) {
+        if (DebugFlags.LOAD_LISTENER) {
             Log.v(LOGTAG, "LoadListener.error url:" +
                     url() + " id:" + id + " description:" + description);
         }
@@ -535,23 +526,10 @@ class LoadListener extends Handler implements EventHandler {
      * mDataBuilder is a thread-safe structure.
      */
     public void data(byte[] data, int length) {
-        if (WebView.LOGV_ENABLED) {
+        if (DebugFlags.LOAD_LISTENER) {
             Log.v(LOGTAG, "LoadListener.data(): url: " + url());
         }
 
-        // Decode base64 data
-        // Note: It's fine that we only decode base64 here and not in the other
-        // data call because the only caller of the stream version is not
-        // base64 encoded.
-        if ("base64".equalsIgnoreCase(mTransferEncoding)) {
-            if (length < data.length) {
-                byte[] trimmedData = new byte[length];
-                System.arraycopy(data, 0, trimmedData, 0, length);
-                data = trimmedData;
-            }
-            data = Base64.decodeBase64(data);
-            length = data.length;
-        }
         // Synchronize on mData because commitLoad may write mData to WebCore
         // and we don't want to replace mData or mDataLength at the same time
         // as a write.
@@ -573,7 +551,7 @@ class LoadListener extends Handler implements EventHandler {
      * directly
      */
     public void endData() {
-        if (WebView.LOGV_ENABLED) {
+        if (DebugFlags.LOAD_LISTENER) {
             Log.v(LOGTAG, "LoadListener.endData(): url: " + url());
         }
         sendMessageInternal(obtainMessage(MSG_CONTENT_FINISHED));
@@ -626,7 +604,8 @@ class LoadListener extends Handler implements EventHandler {
                 // before calling it.
                 if (mCacheLoader != null) {
                     mCacheLoader.load();
-                    if (WebView.LOGV_ENABLED) {
+                    mFromCache = true;
+                    if (DebugFlags.LOAD_LISTENER) {
                         Log.v(LOGTAG, "LoadListener cache load url=" + url());
                     }
                     return;
@@ -646,6 +625,7 @@ class LoadListener extends Handler implements EventHandler {
      * serviced by the Cache. */
     /* package */ void setCacheLoader(CacheLoader c) {
         mCacheLoader = c;
+        mFromCache = true;
     }
 
     /**
@@ -662,6 +642,8 @@ class LoadListener extends Handler implements EventHandler {
         // Go ahead and set the cache loader to null in case the result is
         // null.
         mCacheLoader = null;
+        // reset the flag
+        mFromCache = false;
 
         if (result != null) {
             // The contents of the cache may need to be revalidated so just
@@ -676,12 +658,13 @@ class LoadListener extends Handler implements EventHandler {
                     CacheManager.HEADER_KEY_IFNONEMATCH) &&
                     !headers.containsKey(
                             CacheManager.HEADER_KEY_IFMODIFIEDSINCE)) {
-                if (WebView.LOGV_ENABLED) {
+                if (DebugFlags.LOAD_LISTENER) {
                     Log.v(LOGTAG, "FrameLoader: HTTP URL in cache " +
                             "and usable: " + url());
                 }
                 // Load the cached file
                 mCacheLoader.load();
+                mFromCache = true;
                 return true;
             }
         }
@@ -695,11 +678,22 @@ class LoadListener extends Handler implements EventHandler {
      * directly
      */
     public boolean handleSslErrorRequest(SslError error) {
-        if (WebView.LOGV_ENABLED) {
+        if (DebugFlags.LOAD_LISTENER) {
             Log.v(LOGTAG,
                     "LoadListener.handleSslErrorRequest(): url:" + url() +
                     " primary error: " + error.getPrimaryError() +
                     " certificate: " + error.getCertificate());
+        }
+        // Check the cached preference table before sending a message. This
+        // will prevent waiting for an already available answer.
+        if (Network.getInstance(mContext).checkSslPrefTable(this, error)) {
+            return true;
+        }
+        // Do not post a message for a synchronous request. This will cause a
+        // deadlock. Just bail on the request.
+        if (isSynchronous()) {
+            mRequestHandle.handleSslErrorResponse(false);
+            return true;
         }
         sendMessageInternal(obtainMessage(MSG_SSL_ERROR, error));
         // if it has been canceled, return false so that the network thread
@@ -773,7 +767,7 @@ class LoadListener extends Handler implements EventHandler {
      * are null, cancel the request.
      */
     void handleAuthResponse(String username, String password) {
-        if (WebView.LOGV_ENABLED) {
+        if (DebugFlags.LOAD_LISTENER) {
             Log.v(LOGTAG, "LoadListener.handleAuthResponse: url: " + mUrl
                     + " username: " + username
                     + " password: " + password);
@@ -823,14 +817,12 @@ class LoadListener extends Handler implements EventHandler {
      * @param method
      * @param headers
      * @param postData
-     * @param isHighPriority
      */
     void setRequestData(String method, Map<String, String> headers, 
-            byte[] postData, boolean isHighPriority) {
+            byte[] postData) {
         mMethod = method;
         mRequestHeaders = headers;
         mPostData = postData;
-        mIsHighPriority = isHighPriority;
     }
 
     /**
@@ -870,7 +862,7 @@ class LoadListener extends Handler implements EventHandler {
     }
 
     void attachRequestHandle(RequestHandle requestHandle) {
-        if (WebView.LOGV_ENABLED) {
+        if (DebugFlags.LOAD_LISTENER) {
             Log.v(LOGTAG, "LoadListener.attachRequestHandle(): " +
                     "requestHandle: " +  requestHandle);
         }
@@ -878,7 +870,7 @@ class LoadListener extends Handler implements EventHandler {
     }
 
     void detachRequestHandle() {
-        if (WebView.LOGV_ENABLED) {
+        if (DebugFlags.LOAD_LISTENER) {
             Log.v(LOGTAG, "LoadListener.detachRequestHandle(): " +
                     "requestHandle: " + mRequestHandle);
         }
@@ -917,7 +909,7 @@ class LoadListener extends Handler implements EventHandler {
      */
     static boolean willLoadFromCache(String url) {
         boolean inCache = CacheManager.getCacheFile(url, null) != null;
-        if (WebView.LOGV_ENABLED) {
+        if (DebugFlags.LOAD_LISTENER) {
             Log.v(LOGTAG, "willLoadFromCache: " + url + " in cache: " + 
                     inCache);
         }
@@ -936,6 +928,10 @@ class LoadListener extends Handler implements EventHandler {
 
     String mimeType() {
         return mMimeType;
+    }
+
+    String transferEncoding() {
+        return mTransferEncoding;
     }
 
     /*
@@ -965,9 +961,9 @@ class LoadListener extends Handler implements EventHandler {
 
     // This commits the headers without checking the response status code.
     private void commitHeaders() {
-        if (mIsMainPageLoader && sCertificateMimeTypeMap.contains(mMimeType)) {
+        if (mIsMainPageLoader && sCertificateTypeMap.containsKey(mMimeType)) {
             // In the case of downloading certificate, we will save it to the
-            // Keystore in commitLoad. Do not call webcore.
+            // KeyStore in commitLoad. Do not call webcore.
             return;
         }
 
@@ -992,8 +988,7 @@ class LoadListener extends Handler implements EventHandler {
         // pass content-type content-length and content-encoding
         final int nativeResponse = nativeCreateResponse(
                 mUrl, statusCode, mStatusText,
-                mMimeType, mContentLength, mEncoding,
-                mCacheResult == null ? 0 : mCacheResult.expires / 1000);
+                mMimeType, mContentLength, mEncoding);
         if (mHeaders != null) {
             mHeaders.getHeaders(new Headers.HeaderCallback() {
                     public void header(String name, String value) {
@@ -1011,26 +1006,28 @@ class LoadListener extends Handler implements EventHandler {
     private void commitLoad() {
         if (mCancelled) return;
 
-        if (mIsMainPageLoader && sCertificateMimeTypeMap.contains(mMimeType)) {
-            // In the case of downloading certificate, we will save it to the
-            // Keystore and stop the current loading so that it will not
-            // generate a new history page
-            byte[] cert = new byte[mDataBuilder.getByteSize()];
-            int position = 0;
-            ByteArrayBuilder.Chunk c;
-            while (true) {
-                c = mDataBuilder.getFirstChunk();
-                if (c == null) break;
+        if (mIsMainPageLoader) {
+            String type = sCertificateTypeMap.get(mMimeType);
+            if (type != null) {
+                // In the case of downloading certificate, we will save it to
+                // the KeyStore and stop the current loading so that it will not
+                // generate a new history page
+                byte[] cert = new byte[mDataBuilder.getByteSize()];
+                int offset = 0;
+                while (true) {
+                    ByteArrayBuilder.Chunk c = mDataBuilder.getFirstChunk();
+                    if (c == null) break;
 
-                if (c.mLength != 0) {
-                    System.arraycopy(c.mArray, 0, cert, position, c.mLength);
-                    position += c.mLength;
+                    if (c.mLength != 0) {
+                        System.arraycopy(c.mArray, 0, cert, offset, c.mLength);
+                        offset += c.mLength;
+                    }
+                    mDataBuilder.releaseChunk(c);
                 }
-                mDataBuilder.releaseChunk(c);
+                CertTool.addCertificate(mContext, type, cert);
+                mBrowserFrame.stopLoading();
+                return;
             }
-            CertTool.getInstance().addCertificate(cert, mContext);
-            mBrowserFrame.stopLoading();
-            return;
         }
 
         // Give the data to WebKit now
@@ -1115,7 +1112,7 @@ class LoadListener extends Handler implements EventHandler {
      * EventHandler's method call.
      */
     public void cancel() {
-        if (WebView.LOGV_ENABLED) {
+        if (DebugFlags.LOAD_LISTENER) {
             if (mRequestHandle == null) {
                 Log.v(LOGTAG, "LoadListener.cancel(): no requestHandle");
             } else {
@@ -1221,7 +1218,7 @@ class LoadListener extends Handler implements EventHandler {
                     // Network.requestURL.
                     Network network = Network.getInstance(getContext());
                     if (!network.requestURL(mMethod, mRequestHeaders,
-                            mPostData, this, mIsHighPriority)) {
+                            mPostData, this)) {
                         // Signal a bad url error if we could not load the
                         // redirection.
                         handleError(EventHandler.ERROR_BAD_URL,
@@ -1247,7 +1244,7 @@ class LoadListener extends Handler implements EventHandler {
             tearDown();
         }
 
-        if (WebView.LOGV_ENABLED) {
+        if (DebugFlags.LOAD_LISTENER) {
             Log.v(LOGTAG, "LoadListener.onRedirect(): redirect to: " +
                     redirectTo);
         }
@@ -1260,8 +1257,8 @@ class LoadListener extends Handler implements EventHandler {
     private static final Pattern CONTENT_TYPE_PATTERN =
             Pattern.compile("^((?:[xX]-)?[a-zA-Z\\*]+/[\\w\\+\\*-]+[\\.[\\w\\+-]+]*)$");
 
-    private void parseContentTypeHeader(String contentType) {
-        if (WebView.LOGV_ENABLED) {
+    /* package */ void parseContentTypeHeader(String contentType) {
+        if (DebugFlags.LOAD_LISTENER) {
             Log.v(LOGTAG, "LoadListener.parseContentTypeHeader: " +
                     "contentType: " + contentType);
         }
@@ -1282,13 +1279,14 @@ class LoadListener extends Handler implements EventHandler {
                     mEncoding = contentType.substring(i + 1);
                 }
                 // Trim excess whitespace.
-                mEncoding = mEncoding.trim();
+                mEncoding = mEncoding.trim().toLowerCase();
 
                 if (i < contentType.length() - 1) {
                     // for data: uri the mimeType and encoding have
                     // the form image/jpeg;base64 or text/plain;charset=utf-8
                     // or text/html;charset=utf-8;base64
-                    mTransferEncoding = contentType.substring(i + 1).trim();
+                    mTransferEncoding =
+                            contentType.substring(i + 1).trim().toLowerCase();
                 }
             } else {
                 mMimeType = contentType;
@@ -1308,6 +1306,8 @@ class LoadListener extends Handler implements EventHandler {
                 guessMimeType();
             }
         }
+        // Ensure mMimeType is lower case.
+        mMimeType = mMimeType.toLowerCase();
     }
 
     /**
@@ -1397,7 +1397,8 @@ class LoadListener extends Handler implements EventHandler {
      */
     private boolean ignoreCallbacks() {
         return (mCancelled || mAuthHeader != null ||
-                (mStatusCode > 300 && mStatusCode < 400));
+                // Allow 305 (Use Proxy) to call through.
+                (mStatusCode > 300 && mStatusCode < 400 && mStatusCode != 305));
     }
 
     /**
@@ -1438,7 +1439,7 @@ class LoadListener extends Handler implements EventHandler {
             mMimeType = "text/html";
             String newMimeType = guessMimeTypeFromExtension(mUrl);
             if (newMimeType != null) {
-                mMimeType =  newMimeType;
+                mMimeType = newMimeType;
             }
         }
     }
@@ -1448,23 +1449,12 @@ class LoadListener extends Handler implements EventHandler {
      */
     private String guessMimeTypeFromExtension(String url) {
         // PENDING: need to normalize url
-        if (WebView.LOGV_ENABLED) {
+        if (DebugFlags.LOAD_LISTENER) {
             Log.v(LOGTAG, "guessMimeTypeFromExtension: url = " + url);
         }
 
-        String mimeType =
-                MimeTypeMap.getSingleton().getMimeTypeFromExtension(
-                        MimeTypeMap.getFileExtensionFromUrl(url));
-
-        if (mimeType != null) {
-            // XXX: Until the servers send us either correct xhtml or
-            // text/html, treat application/xhtml+xml as text/html.
-            if (mimeType.equals("application/xhtml+xml")) {
-                mimeType = "text/html";
-            }
-        }
-
-        return mimeType;
+        return MimeTypeMap.getSingleton().getMimeTypeFromExtension(
+                MimeTypeMap.getFileExtensionFromUrl(url));
     }
 
     /**
@@ -1483,7 +1473,7 @@ class LoadListener extends Handler implements EventHandler {
      * Cycle through our messages for synchronous loads.
      */
     /* package */ void loadSynchronousMessages() {
-        if (WebView.DEBUG && !mSynchronous) {
+        if (DebugFlags.LOAD_LISTENER && !mSynchronous) {
             throw new AssertionError();
         }
         // Note: this can be called twice if it is a synchronous network load,
@@ -1510,12 +1500,11 @@ class LoadListener extends Handler implements EventHandler {
      * @param expectedLength An estimate of the content length or the length
      *                       given by the server.
      * @param encoding HTTP encoding.
-     * @param expireTime HTTP expires converted to seconds since the epoch.
      * @return The native response pointer.
      */
     private native int nativeCreateResponse(String url, int statusCode,
             String statusText, String mimeType, long expectedLength,
-            String encoding, long expireTime);
+            String encoding);
 
     /**
      * Add a response header to the native object.

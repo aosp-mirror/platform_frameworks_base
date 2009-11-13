@@ -20,6 +20,7 @@ import android.app.SearchManager.DialogCursorProtocol;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.ContentResolver.OpenResourceIdResult;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
@@ -27,7 +28,6 @@ import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
-import android.graphics.drawable.DrawableContainer;
 import android.graphics.drawable.StateListDrawable;
 import android.net.Uri;
 import android.os.Bundle;
@@ -36,12 +36,13 @@ import android.text.Html;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.SparseArray;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Filter;
 import android.widget.ImageView;
 import android.widget.ResourceCursorAdapter;
 import android.widget.TextView;
-import android.widget.Filter;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -57,6 +58,7 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
 
     private static final boolean DBG = false;
     private static final String LOG_TAG = "SuggestionsAdapter";
+    private static final int QUERY_LIMIT = 50;
 
     private SearchManager mSearchManager;
     private SearchDialog mSearchDialog;
@@ -185,7 +187,7 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
             mSearchDialog.getWindow().getDecorView().post(mStartSpinnerRunnable);
         }
         try {
-            final Cursor cursor = mSearchManager.getSuggestions(mSearchable, query);
+            final Cursor cursor = mSearchManager.getSuggestions(mSearchable, query, QUERY_LIMIT);
             // trigger fill window so the spinner stays up until the results are copied over and
             // closer to being ready
             if (!mGlobalSearchMode && cursor != null) cursor.getCount();
@@ -288,16 +290,37 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
      * @param cursor The cursor
      * @param position The position that was clicked.
      */
-    void callCursorOnClick(Cursor cursor, int position) {
+    void callCursorOnClick(Cursor cursor, int position, int actionKey, String actionMsg) {
         if (!mGlobalSearchMode) return;
-        final Bundle request = new Bundle(1);
+        final Bundle request = new Bundle(5);
         request.putInt(DialogCursorProtocol.METHOD, DialogCursorProtocol.CLICK);
         request.putInt(DialogCursorProtocol.CLICK_SEND_POSITION, position);
         request.putInt(DialogCursorProtocol.CLICK_SEND_MAX_DISPLAY_POS, mMaxDisplayed);
+        if (actionKey != KeyEvent.KEYCODE_UNKNOWN) {
+            request.putInt(DialogCursorProtocol.CLICK_SEND_ACTION_KEY, actionKey);
+            request.putString(DialogCursorProtocol.CLICK_SEND_ACTION_MSG, actionMsg);
+        }
         final Bundle response = cursor.respond(request);
         mMaxDisplayed = -1;
         mListItemToSelect = response.getInt(
                 DialogCursorProtocol.CLICK_RECEIVE_SELECTED_POS, SuggestionsAdapter.NONE);
+    }
+
+    /**
+     * Tell the cursor that a search was started without using a suggestion.
+     *
+     * @param query The search query.
+     */
+    void reportSearch(String query) {
+        if (!mGlobalSearchMode) return;
+        Cursor cursor = getCursor();
+        if (cursor == null) return;
+        final Bundle request = new Bundle(3);
+        request.putInt(DialogCursorProtocol.METHOD, DialogCursorProtocol.SEARCH);
+        request.putString(DialogCursorProtocol.SEARCH_SEND_QUERY, query);
+        request.putInt(DialogCursorProtocol.SEARCH_SEND_MAX_DISPLAY_POS, mMaxDisplayed);
+        // the response is always empty
+        cursor.respond(request);
     }
 
     /**
@@ -378,7 +401,7 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
             Drawable.ConstantState cachedBg = mBackgroundsCache.get(backgroundColor);
             if (cachedBg != null) {
                 if (DBG) Log.d(LOG_TAG, "Background cache hit for color " + backgroundColor);
-                return cachedBg.newDrawable();
+                return cachedBg.newDrawable(mProviderContext.getResources());
             }
             if (DBG) Log.d(LOG_TAG, "Creating new background for color " + backgroundColor);
             ColorDrawable transparent = new ColorDrawable(0);
@@ -550,54 +573,91 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
         if (drawableId == null || drawableId.length() == 0 || "0".equals(drawableId)) {
             return null;
         }
-
-        // First, check the cache.
-        Drawable.ConstantState cached = mOutsideDrawablesCache.get(drawableId);
-        if (cached != null) {
-            if (DBG) Log.d(LOG_TAG, "Found icon in cache: " + drawableId);
-            return cached.newDrawable();
-        }
-
-        Drawable drawable = null;
         try {
-            // Not cached, try using it as a plain resource ID in the provider's context.
+            // First, see if it's just an integer
             int resourceId = Integer.parseInt(drawableId);
+            // It's an int, look for it in the cache
+            String drawableUri = ContentResolver.SCHEME_ANDROID_RESOURCE
+                    + "://" + mProviderContext.getPackageName() + "/" + resourceId;
+            // Must use URI as cache key, since ints are app-specific
+            Drawable drawable = checkIconCache(drawableUri);
+            if (drawable != null) {
+                return drawable;
+            }
+            // Not cached, find it by resource ID
             drawable = mProviderContext.getResources().getDrawable(resourceId);
-            if (DBG) Log.d(LOG_TAG, "Found icon by resource ID: " + drawableId);
+            // Stick it in the cache, using the URI as key
+            storeInIconCache(drawableUri, drawable);
+            return drawable;
         } catch (NumberFormatException nfe) {
-            // The id was not an integer resource id.
-            // Let the ContentResolver handle content, android.resource and file URIs.
-            try {
-                Uri uri = Uri.parse(drawableId);
+            // It's not an integer, use it as a URI
+            Drawable drawable = checkIconCache(drawableId);
+            if (drawable != null) {
+                return drawable;
+            }
+            Uri uri = Uri.parse(drawableId);
+            drawable = getDrawable(uri);
+            storeInIconCache(drawableId, drawable);
+            return drawable;
+        } catch (Resources.NotFoundException nfe) {
+            // It was an integer, but it couldn't be found, bail out
+            Log.w(LOG_TAG, "Icon resource not found: " + drawableId);
+            return null;
+        }
+    }
+
+    /**
+     * Gets a drawable by URI, without using the cache.
+     *
+     * @return A drawable, or {@code null} if the drawable could not be loaded.
+     */
+    private Drawable getDrawable(Uri uri) {
+        try {
+            String scheme = uri.getScheme();
+            if (ContentResolver.SCHEME_ANDROID_RESOURCE.equals(scheme)) {
+                // Load drawables through Resources, to get the source density information
+                OpenResourceIdResult r =
+                    mProviderContext.getContentResolver().getResourceId(uri);
+                try {
+                    return r.r.getDrawable(r.id);
+                } catch (Resources.NotFoundException ex) {
+                    throw new FileNotFoundException("Resource does not exist: " + uri);
+                }
+            } else {
+                // Let the ContentResolver handle content and file URIs.
                 InputStream stream = mProviderContext.getContentResolver().openInputStream(uri);
-                if (stream != null) {
+                if (stream == null) {
+                    throw new FileNotFoundException("Failed to open " + uri);
+                }
+                try {
+                    return Drawable.createFromStream(stream, null);
+                } finally {
                     try {
-                        drawable = Drawable.createFromStream(stream, null);
-                    } finally {
-                        try {
-                            stream.close();
-                        } catch (IOException ex) {
-                            Log.e(LOG_TAG, "Error closing icon stream for " + uri, ex);
-                        }
+                        stream.close();
+                    } catch (IOException ex) {
+                        Log.e(LOG_TAG, "Error closing icon stream for " + uri, ex);
                     }
                 }
-                if (DBG) Log.d(LOG_TAG, "Opened icon input stream: " + drawableId);
-            } catch (FileNotFoundException fnfe) {
-                if (DBG) Log.d(LOG_TAG, "Icon stream not found: " + drawableId);
-                // drawable = null;
             }
-
-            // If we got a drawable for this resource id, then stick it in the
-            // map so we don't do this lookup again.
-            if (drawable != null) {
-                mOutsideDrawablesCache.put(drawableId, drawable.getConstantState());
-            }
-        } catch (Resources.NotFoundException nfe) {
-            if (DBG) Log.d(LOG_TAG, "Icon resource not found: " + drawableId);
-            // drawable = null;
+        } catch (FileNotFoundException fnfe) {
+            Log.w(LOG_TAG, "Icon not found: " + uri + ", " + fnfe.getMessage());
+            return null;
         }
+    }
 
-        return drawable;
+    private Drawable checkIconCache(String resourceUri) {
+        Drawable.ConstantState cached = mOutsideDrawablesCache.get(resourceUri);
+        if (cached == null) {
+            return null;
+        }
+        if (DBG) Log.d(LOG_TAG, "Found icon in cache: " + resourceUri);
+        return cached.newDrawable();
+    }
+
+    private void storeInIconCache(String resourceUri, Drawable drawable) {
+        if (drawable != null) {
+            mOutsideDrawablesCache.put(resourceUri, drawable.getConstantState());
+        }
     }
 
     /**
@@ -646,7 +706,7 @@ class SuggestionsAdapter extends ResourceCursorAdapter {
         // Using containsKey() since we also store null values.
         if (mOutsideDrawablesCache.containsKey(componentIconKey)) {
             Drawable.ConstantState cached = mOutsideDrawablesCache.get(componentIconKey);
-            return cached == null ? null : cached.newDrawable();
+            return cached == null ? null : cached.newDrawable(mProviderContext.getResources());
         }
         // Then try the activity or application icon
         Drawable drawable = getActivityIcon(component);

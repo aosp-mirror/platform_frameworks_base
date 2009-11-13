@@ -51,7 +51,6 @@ public final class CacheManager {
 
     private static final String NO_STORE = "no-store";
     private static final String NO_CACHE = "no-cache";
-    private static final String PRIVATE  = "private";
     private static final String MAX_AGE = "max-age";
 
     private static long CACHE_THRESHOLD = 6 * 1024 * 1024;
@@ -80,12 +79,14 @@ public final class CacheManager {
         int httpStatusCode;
         long contentLength;
         long expires;
+        String expiresString;
         String localPath;
         String lastModified;
         String etag;
         String mimeType;
         String location;
         String encoding;
+        String contentdisposition;
 
         // these fields are NOT saved to the database
         InputStream inStream;
@@ -108,6 +109,10 @@ public final class CacheManager {
             return expires;
         }
 
+        public String getExpiresString() {
+            return expiresString;
+        }
+
         public String getLastModified() {
             return lastModified;
         }
@@ -126,6 +131,10 @@ public final class CacheManager {
 
         public String getEncoding() {
             return encoding;
+        }
+
+        public String getContentDisposition() {
+            return contentdisposition;
         }
 
         // For out-of-package access to the underlying streams.
@@ -321,7 +330,7 @@ public final class CacheManager {
             }
         }
 
-        if (WebView.LOGV_ENABLED) {
+        if (DebugFlags.CACHE_MANAGER) {
             Log.v(LOGTAG, "getCacheFile for url " + url);
         }
 
@@ -340,7 +349,7 @@ public final class CacheManager {
      * @hide - hide createCacheFile since it has a parameter of type headers, which is
      * in a hidden package.
      */
-    // can be called from any thread
+    // only called from WebCore thread
     public static CacheResult createCacheFile(String url, int statusCode,
             Headers headers, String mimeType, boolean forceCache) {
         if (!forceCache && mDisabled) {
@@ -349,17 +358,25 @@ public final class CacheManager {
 
         // according to the rfc 2616, the 303 response MUST NOT be cached.
         if (statusCode == 303) {
+            // remove the saved cache if there is any
+            mDataBase.removeCache(url);
             return null;
         }
 
         // like the other browsers, do not cache redirects containing a cookie
         // header.
         if (checkCacheRedirect(statusCode) && !headers.getSetCookie().isEmpty()) {
+            // remove the saved cache if there is any
+            mDataBase.removeCache(url);
             return null;
         }
 
         CacheResult ret = parseHeaders(statusCode, headers, mimeType);
-        if (ret != null) {
+        if (ret == null) {
+            // this should only happen if the headers has "no-store" in the
+            // cache-control. remove the saved cache if there is any
+            mDataBase.removeCache(url);
+        } else {
             setupFiles(url, ret);
             try {
                 ret.outStream = new FileOutputStream(ret.outFile);
@@ -403,19 +420,23 @@ public final class CacheManager {
         }
 
         cacheRet.contentLength = cacheRet.outFile.length();
-        if (checkCacheRedirect(cacheRet.httpStatusCode)) {
+        boolean redirect = checkCacheRedirect(cacheRet.httpStatusCode);
+        if (redirect) {
             // location is in database, no need to keep the file
             cacheRet.contentLength = 0;
-            cacheRet.localPath = new String();
-            cacheRet.outFile.delete();
-        } else if (cacheRet.contentLength == 0) {
-            cacheRet.outFile.delete();
+            cacheRet.localPath = "";
+        }
+        if ((redirect || cacheRet.contentLength == 0)
+                && !cacheRet.outFile.delete()) {
+            Log.e(LOGTAG, cacheRet.outFile.getPath() + " delete failed.");
+        }
+        if (cacheRet.contentLength == 0) {
             return;
         }
 
         mDataBase.addCache(url, cacheRet);
 
-        if (WebView.LOGV_ENABLED) {
+        if (DebugFlags.CACHE_MANAGER) {
             Log.v(LOGTAG, "saveCacheFile for url " + url);
         }
     }
@@ -444,7 +465,10 @@ public final class CacheManager {
                     // if mBaseDir doesn't exist, files can be null.
                     if (files != null) {
                         for (int i = 0; i < files.length; i++) {
-                            new File(mBaseDir, files[i]).delete();
+                            File f = new File(mBaseDir, files[i]);
+                            if (!f.delete()) {
+                                Log.e(LOGTAG, f.getPath() + " delete failed.");
+                            }
                         }
                     }
                 } catch (SecurityException e) {
@@ -472,7 +496,10 @@ public final class CacheManager {
             ArrayList<String> pathList = mDataBase.trimCache(CACHE_TRIM_AMOUNT);
             int size = pathList.size();
             for (int i = 0; i < size; i++) {
-                new File(mBaseDir, pathList.get(i)).delete();
+                File f = new File(mBaseDir, pathList.get(i));
+                if (!f.delete()) {
+                    Log.e(LOGTAG, f.getPath() + " delete failed.");
+                }
             }
         }
     }
@@ -511,12 +538,7 @@ public final class CacheManager {
                 // cache file. If it is not, resolve the collision.
                 while (file.exists()) {
                     if (checkOldPath) {
-                        // as this is called from http thread through 
-                        // createCacheFile, we need endCacheTransaction before 
-                        // database access.
-                        WebViewCore.endCacheTransaction();
                         CacheResult oldResult = mDataBase.getCache(url);
-                        WebViewCore.startCacheTransaction();
                         if (oldResult != null && oldResult.contentLength > 0) {
                             if (path.equals(oldResult.localPath)) {
                                 path = oldResult.localPath;
@@ -596,19 +618,25 @@ public final class CacheManager {
         if (location != null) ret.location = location;
 
         ret.expires = -1;
-        String expires = headers.getExpires();
-        if (expires != null) {
+        ret.expiresString = headers.getExpires();
+        if (ret.expiresString != null) {
             try {
-                ret.expires = HttpDateTime.parse(expires);
+                ret.expires = HttpDateTime.parse(ret.expiresString);
             } catch (IllegalArgumentException ex) {
                 // Take care of the special "-1" and "0" cases
-                if ("-1".equals(expires) || "0".equals(expires)) {
+                if ("-1".equals(ret.expiresString)
+                        || "0".equals(ret.expiresString)) {
                     // make it expired, but can be used for history navigation
                     ret.expires = 0;
                 } else {
-                    Log.e(LOGTAG, "illegal expires: " + expires);
+                    Log.e(LOGTAG, "illegal expires: " + ret.expiresString);
                 }
             }
+        }
+
+        String contentDisposition = headers.getContentDisposition();
+        if (contentDisposition != null) {
+            ret.contentdisposition = contentDisposition;
         }
 
         String lastModified = headers.getLastModified();
@@ -628,7 +656,7 @@ public final class CacheManager {
                 // must be re-validated on every load. It does not mean that
                 // the content can not be cached. set to expire 0 means it
                 // can only be used in CACHE_MODE_CACHE_ONLY case
-                if (NO_CACHE.equals(controls[i]) || PRIVATE.equals(controls[i])) {
+                if (NO_CACHE.equals(controls[i])) {
                     ret.expires = 0;
                 } else if (controls[i].startsWith(MAX_AGE)) {
                     int separator = controls[i].indexOf('=');

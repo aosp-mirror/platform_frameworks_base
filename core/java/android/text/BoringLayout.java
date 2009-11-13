@@ -19,6 +19,7 @@ package android.text;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.text.style.ParagraphStyle;
 import android.util.FloatMath;
 
 /**
@@ -261,6 +262,14 @@ public class BoringLayout extends Layout implements TextUtils.EllipsizeCallback 
         }
 
         TextUtils.recycle(temp);
+
+        if (boring && text instanceof Spanned) {
+            Spanned sp = (Spanned) text;
+            Object[] styles = sp.getSpans(0, text.length(), ParagraphStyle.class);
+            if (styles.length > 0) {
+                boring = false;
+            }
+        }
 
         if (boring) {
             Metrics fm = metrics;

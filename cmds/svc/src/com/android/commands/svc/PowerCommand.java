@@ -16,7 +16,10 @@
 
 package com.android.commands.svc;
 
+import android.os.Binder;
+import android.os.IBinder;
 import android.os.IPowerManager;
+import android.os.PowerManager;
 import android.os.ServiceManager;
 import android.os.RemoteException;
 import android.os.BatteryManager;
@@ -60,7 +63,10 @@ public class PowerCommand extends Svc.Command {
                     IPowerManager pm
                             = IPowerManager.Stub.asInterface(ServiceManager.getService(Context.POWER_SERVICE));
                     try {
+                        IBinder lock = new Binder();
+                        pm.acquireWakeLock(PowerManager.FULL_WAKE_LOCK, lock, "svc power");
                         pm.setStayOnSetting(val);
+                        pm.releaseWakeLock(lock);
                     }
                     catch (RemoteException e) {
                         System.err.println("Faild to set setting: " + e);

@@ -40,7 +40,7 @@ import java.io.IOException;
  * This class is used to specify meta information of an input method.
  */
 public final class InputMethodInfo implements Parcelable {
-    static final String TAG = "InputMethodMetaInfo";
+    static final String TAG = "InputMethodInfo";
     
     /**
      * The Service that implements this input method component.
@@ -244,7 +244,7 @@ public final class InputMethodInfo implements Parcelable {
     
     @Override
     public String toString() {
-        return "InputMethodMetaInfo{" + mId
+        return "InputMethodInfo{" + mId
                 + ", settings: "
                 + mSettingsActivityName + "}";
     }

@@ -159,8 +159,10 @@ public abstract class PackageManager {
     
     /**
      * {@link PackageInfo} flag: return information about
-     * hardware preferences
-     * {@link PackageInfo#configPreferences}
+     * hardware preferences in
+     * {@link PackageInfo#configPreferences PackageInfo.configPreferences} and
+     * requested features in {@link PackageInfo#reqFeatures
+     * PackageInfo.reqFeatures}. 
      */
     public static final int GET_CONFIGURATIONS = 0x00004000;
 
@@ -398,6 +400,14 @@ public abstract class PackageManager {
      * @hide
      */
     public static final int INSTALL_FAILED_CPU_ABI_INCOMPATIBLE = -16;
+
+    /**
+     * Installation return code: this is passed to the {@link IPackageInstallObserver} by
+     * {@link #installPackage(android.net.Uri, IPackageInstallObserver, int)} if
+     * the new package uses a feature that is not available.
+     * @hide
+     */
+    public static final int INSTALL_FAILED_MISSING_FEATURE = -17;
 
     /**
      * Installation parse return code: this is passed to the {@link IPackageInstallObserver} by
@@ -865,6 +875,7 @@ public abstract class PackageManager {
      * {@link #SIGNATURE_SECOND_NOT_SIGNED}, {@link #SIGNATURE_NO_MATCH},
      * or {@link #SIGNATURE_UNKNOWN_PACKAGE}.
      *
+     * @see #checkSignatures(int, int)
      * @see #SIGNATURE_MATCH
      * @see #SIGNATURE_NEITHER_SIGNED
      * @see #SIGNATURE_FIRST_NOT_SIGNED
@@ -873,6 +884,34 @@ public abstract class PackageManager {
      * @see #SIGNATURE_UNKNOWN_PACKAGE
      */
     public abstract int checkSignatures(String pkg1, String pkg2);
+
+    /**
+     * Like {@link #checkSignatures(String, String)}, but takes UIDs of
+     * the two packages to be checked.  This can be useful, for example,
+     * when doing the check in an IPC, where the UID is the only identity
+     * available.  It is functionally identical to determining the package
+     * associated with the UIDs and checking their signatures.
+     *
+     * @param uid1 First UID whose signature will be compared.
+     * @param uid2 Second UID whose signature will be compared.
+     * @return Returns an integer indicating whether there is a matching
+     * signature: the value is >= 0 if there is a match (or neither package
+     * is signed), or < 0 if there is not a match.  The match result can be
+     * further distinguished with the success (>= 0) constants
+     * {@link #SIGNATURE_MATCH}, {@link #SIGNATURE_NEITHER_SIGNED}; or
+     * failure (< 0) constants {@link #SIGNATURE_FIRST_NOT_SIGNED},
+     * {@link #SIGNATURE_SECOND_NOT_SIGNED}, {@link #SIGNATURE_NO_MATCH},
+     * or {@link #SIGNATURE_UNKNOWN_PACKAGE}.
+     *
+     * @see #checkSignatures(int, int)
+     * @see #SIGNATURE_MATCH
+     * @see #SIGNATURE_NEITHER_SIGNED
+     * @see #SIGNATURE_FIRST_NOT_SIGNED
+     * @see #SIGNATURE_SECOND_NOT_SIGNED
+     * @see #SIGNATURE_NO_MATCH
+     * @see #SIGNATURE_UNKNOWN_PACKAGE
+     */
+    public abstract int checkSignatures(int uid1, int uid2);
 
     /**
      * Retrieve the names of all packages that are associated with a particular
@@ -949,6 +988,24 @@ public abstract class PackageManager {
      * 
      */
     public abstract String[] getSystemSharedLibraryNames();
+
+    /**
+     * Get a list of features that are available on the
+     * system.
+     * 
+     * @return An array of FeatureInfo classes describing the features
+     * that are available on the system, or null if there are none(!!).
+     */
+    public abstract FeatureInfo[] getSystemAvailableFeatures();
+
+    /**
+     * Check whether the given feature name is one of the available
+     * features as returned by {@link #getSystemAvailableFeatures()}.
+     * 
+     * @return Returns true if the devices supports the feature, else
+     * false.
+     */
+    public abstract boolean hasSystemFeature(String name);
 
     /**
      * Determine the best action to perform for a given Intent.  This is how
@@ -1429,8 +1486,6 @@ public abstract class PackageManager {
      * which market the package came from.
      * 
      * @param packageName The name of the package to query
-     *
-     * @hide
      */
     public abstract String getInstallerPackageName(String packageName);
     

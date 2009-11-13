@@ -93,7 +93,8 @@ public final class Configuration implements Parcelable, Comparable<Configuration
     
     /**
      * The kind of keyboard attached to the device.
-     * One of: {@link #KEYBOARD_QWERTY}, {@link #KEYBOARD_12KEY}.
+     * One of: {@link #KEYBOARD_NOKEYS}, {@link #KEYBOARD_QWERTY},
+     * {@link #KEYBOARD_12KEY}.
      */
     public int keyboard;
     
@@ -132,10 +133,22 @@ public final class Configuration implements Parcelable, Comparable<Configuration
     
     /**
      * The kind of navigation method available on the device.
-     * One of: {@link #NAVIGATION_DPAD}, {@link #NAVIGATION_TRACKBALL}, 
-     * {@link #NAVIGATION_WHEEL}. 
+     * One of: {@link #NAVIGATION_NONAV}, {@link #NAVIGATION_DPAD},
+     * {@link #NAVIGATION_TRACKBALL}, {@link #NAVIGATION_WHEEL}.
      */
     public int navigation;
+    
+    public static final int NAVIGATIONHIDDEN_UNDEFINED = 0;
+    public static final int NAVIGATIONHIDDEN_NO = 1;
+    public static final int NAVIGATIONHIDDEN_YES = 2;
+    
+    /**
+     * A flag indicating whether any 5-way or DPAD navigation available.
+     * This will be set on a device with a mechanism to hide the navigation
+     * controls from the user, when that mechanism is closed.  One of:
+     * {@link #NAVIGATIONHIDDEN_NO}, {@link #NAVIGATIONHIDDEN_YES}.
+     */
+    public int navigationHidden;
     
     public static final int ORIENTATION_UNDEFINED = 0;
     public static final int ORIENTATION_PORTRAIT = 1;
@@ -173,6 +186,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         keyboardHidden = o.keyboardHidden;
         hardKeyboardHidden = o.hardKeyboardHidden;
         navigation = o.navigation;
+        navigationHidden = o.navigationHidden;
         orientation = o.orientation;
         screenLayout = o.screenLayout;
     }
@@ -197,6 +211,8 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         sb.append(hardKeyboardHidden);
         sb.append(" nav=");
         sb.append(navigation);
+        sb.append("/");
+        sb.append(navigationHidden);
         sb.append(" orien=");
         sb.append(orientation);
         sb.append(" layout=");
@@ -218,6 +234,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         keyboardHidden = KEYBOARDHIDDEN_UNDEFINED;
         hardKeyboardHidden = HARDKEYBOARDHIDDEN_UNDEFINED;
         navigation = NAVIGATION_UNDEFINED;
+        navigationHidden = NAVIGATIONHIDDEN_UNDEFINED;
         orientation = ORIENTATION_UNDEFINED;
         screenLayout = SCREENLAYOUT_SIZE_UNDEFINED;
     }
@@ -284,6 +301,11 @@ public final class Configuration implements Parcelable, Comparable<Configuration
                 && navigation != delta.navigation) {
             changed |= ActivityInfo.CONFIG_NAVIGATION;
             navigation = delta.navigation;
+        }
+        if (delta.navigationHidden != NAVIGATIONHIDDEN_UNDEFINED
+                && navigationHidden != delta.navigationHidden) {
+            changed |= ActivityInfo.CONFIG_KEYBOARD_HIDDEN;
+            navigationHidden = delta.navigationHidden;
         }
         if (delta.orientation != ORIENTATION_UNDEFINED
                 && orientation != delta.orientation) {
@@ -359,6 +381,10 @@ public final class Configuration implements Parcelable, Comparable<Configuration
                 && navigation != delta.navigation) {
             changed |= ActivityInfo.CONFIG_NAVIGATION;
         }
+        if (delta.navigationHidden != NAVIGATIONHIDDEN_UNDEFINED
+                && navigationHidden != delta.navigationHidden) {
+            changed |= ActivityInfo.CONFIG_KEYBOARD_HIDDEN;
+        }
         if (delta.orientation != ORIENTATION_UNDEFINED
                 && orientation != delta.orientation) {
             changed |= ActivityInfo.CONFIG_ORIENTATION;
@@ -415,6 +441,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         dest.writeInt(keyboardHidden);
         dest.writeInt(hardKeyboardHidden);
         dest.writeInt(navigation);
+        dest.writeInt(navigationHidden);
         dest.writeInt(orientation);
         dest.writeInt(screenLayout);
     }
@@ -447,6 +474,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         keyboardHidden = source.readInt();
         hardKeyboardHidden = source.readInt();
         navigation = source.readInt();
+        navigationHidden = source.readInt();
         orientation = source.readInt();
         screenLayout = source.readInt();
     }
@@ -477,6 +505,8 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         if (n != 0) return n;
         n = this.navigation - that.navigation;
         if (n != 0) return n;
+        n = this.navigationHidden - that.navigationHidden;
+        if (n != 0) return n;
         n = this.orientation - that.orientation;
         if (n != 0) return n;
         n = this.screenLayout - that.screenLayout;
@@ -502,6 +532,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         return ((int)this.fontScale) + this.mcc + this.mnc
                 + this.locale.hashCode() + this.touchscreen
                 + this.keyboard + this.keyboardHidden + this.hardKeyboardHidden
-                + this.navigation + this.orientation + this.screenLayout;
+                + this.navigation + this.navigationHidden
+                + this.orientation + this.screenLayout;
     }
 }

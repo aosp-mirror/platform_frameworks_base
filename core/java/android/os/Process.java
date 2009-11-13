@@ -74,6 +74,12 @@ public class Process {
     public static final int SHELL_UID = 2000;
 
     /**
+     * Defines the UID/GID for the log group.
+     * @hide
+     */
+    public static final int LOG_UID = 1007;
+
+    /**
      * Defines the UID/GID for the WIFI supplicant process.
      * @hide
      */
@@ -739,7 +745,7 @@ public class Process {
     public static final native void sendSignal(int pid, int signal);
     
     /** @hide */
-    public static final native int getFreeMemory();
+    public static final native long getFreeMemory();
     
     /** @hide */
     public static final native void readProcLines(String path,

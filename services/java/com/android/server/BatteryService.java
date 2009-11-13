@@ -26,7 +26,6 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.BatteryManager;
 import android.os.Binder;
-import android.os.Debug;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -43,7 +42,6 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
-
 
 
 /**
@@ -113,17 +111,26 @@ class BatteryService extends Binder {
     private int mLastBatteryVoltage;
     private int mLastBatteryTemperature;
     private boolean mLastBatteryLevelCritical;
-    
+
+    private int mLowBatteryWarningLevel;
+    private int mLowBatteryCloseWarningLevel;
+
     private int mPlugType;
     private int mLastPlugType = -1; // Extra state so we can detect first run
     
     private long mDischargeStartTime;
     private int mDischargeStartLevel;
     
+    private boolean mSentLowBatteryBroadcast = false;
     
     public BatteryService(Context context) {
         mContext = context;
         mBatteryStats = BatteryStatsService.getService();
+
+        mLowBatteryWarningLevel = mContext.getResources().getInteger(
+                com.android.internal.R.integer.config_lowBatteryWarningLevel);
+        mLowBatteryCloseWarningLevel = mContext.getResources().getInteger(
+                com.android.internal.R.integer.config_lowBatteryCloseWarningLevel);
 
         mUEventObserver.startObserving("SUBSYSTEM=power_supply");
 
@@ -171,6 +178,22 @@ class BatteryService extends Binder {
         return mBatteryLevel;
     }
 
+    void systemReady() {
+        // check our power situation now that it is safe to display the shutdown dialog.
+        shutdownIfNoPower();
+    }
+
+    private final void shutdownIfNoPower() {
+        // shut down gracefully if our battery is critically low and we are not powered.
+        // wait until the system has booted before attempting to display the shutdown dialog.
+        if (mBatteryLevel == 0 && !isPowered() && ActivityManagerNative.isSystemReady()) {
+            Intent intent = new Intent(Intent.ACTION_REQUEST_SHUTDOWN);
+            intent.putExtra(Intent.EXTRA_KEY_CONFIRM, false);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            mContext.startActivity(intent);
+        }
+    }
+
     private native void native_update();
 
     private synchronized final void update() {
@@ -178,7 +201,9 @@ class BatteryService extends Binder {
 
         boolean logOutlier = false;
         long dischargeDuration = 0;
-        
+
+        shutdownIfNoPower();
+
         mBatteryLevelCritical = mBatteryLevel <= CRITICAL_BATTERY_LEVEL;
         if (mAcOnline) {
             mPlugType = BatteryManager.BATTERY_PLUGGED_AC;
@@ -247,18 +272,49 @@ class BatteryService extends Binder {
                 logOutlier = true;
             }
             
+            final boolean plugged = mPlugType != BATTERY_PLUGGED_NONE;
+            final boolean oldPlugged = mLastPlugType != BATTERY_PLUGGED_NONE;
+
+            /* The ACTION_BATTERY_LOW broadcast is sent in these situations:
+             * - is just un-plugged (previously was plugged) and battery level is
+             *   less than or equal to WARNING, or
+             * - is not plugged and battery level falls to WARNING boundary
+             *   (becomes <= mLowBatteryWarningLevel).
+             */
+            final boolean sendBatteryLow = !plugged
+                && mBatteryStatus != BatteryManager.BATTERY_STATUS_UNKNOWN
+                && mBatteryLevel <= mLowBatteryWarningLevel
+                && (oldPlugged || mLastBatteryLevel > mLowBatteryWarningLevel);
+            
+            sendIntent();
+            
             // Separate broadcast is sent for power connected / not connected
             // since the standard intent will not wake any applications and some
             // applications may want to have smart behavior based on this.
+            Intent statusIntent = new Intent();
+            statusIntent.setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
             if (mPlugType != 0 && mLastPlugType == 0) {
-                Intent intent = new Intent(Intent.ACTION_POWER_CONNECTED);
-                intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
-                mContext.sendBroadcast(intent);
+                statusIntent.setAction(Intent.ACTION_POWER_CONNECTED);
+                mContext.sendBroadcast(statusIntent);
             }
             else if (mPlugType == 0 && mLastPlugType != 0) {
-                Intent intent = new Intent(Intent.ACTION_POWER_DISCONNECTED);
-                intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
-                mContext.sendBroadcast(intent);
+                statusIntent.setAction(Intent.ACTION_POWER_DISCONNECTED);
+                mContext.sendBroadcast(statusIntent);
+            }
+
+            if (sendBatteryLow) {
+                mSentLowBatteryBroadcast = true;
+                statusIntent.setAction(Intent.ACTION_BATTERY_LOW);
+                mContext.sendBroadcast(statusIntent);
+            } else if (mSentLowBatteryBroadcast && mLastBatteryLevel >= mLowBatteryCloseWarningLevel) {
+                mSentLowBatteryBroadcast = false;
+                statusIntent.setAction(Intent.ACTION_BATTERY_OKAY);
+                mContext.sendBroadcast(statusIntent);
+            }
+            
+            // This needs to be done after sendIntent() so that we get the lastest battery stats.
+            if (logOutlier && dischargeDuration != 0) {
+                logOutlier(dischargeDuration);
             }
             
             mLastBatteryStatus = mBatteryStatus;
@@ -269,13 +325,6 @@ class BatteryService extends Binder {
             mLastBatteryVoltage = mBatteryVoltage;
             mLastBatteryTemperature = mBatteryTemperature;
             mLastBatteryLevelCritical = mBatteryLevelCritical;
-            
-            sendIntent();
-            
-            // This needs to be done after sendIntent() so that we get the lastest battery stats.
-            if (logOutlier && dischargeDuration != 0) {
-                logOutlier(dischargeDuration);
-            }
         }
     }
 
@@ -291,16 +340,16 @@ class BatteryService extends Binder {
         
         int icon = getIcon(mBatteryLevel);
 
-        intent.putExtra("status", mBatteryStatus);
-        intent.putExtra("health", mBatteryHealth);
-        intent.putExtra("present", mBatteryPresent);
-        intent.putExtra("level", mBatteryLevel);
-        intent.putExtra("scale", BATTERY_SCALE);
-        intent.putExtra("icon-small", icon);
-        intent.putExtra("plugged", mPlugType);
-        intent.putExtra("voltage", mBatteryVoltage);
-        intent.putExtra("temperature", mBatteryTemperature);
-        intent.putExtra("technology", mBatteryTechnology);
+        intent.putExtra(BatteryManager.EXTRA_STATUS, mBatteryStatus);
+        intent.putExtra(BatteryManager.EXTRA_HEALTH, mBatteryHealth);
+        intent.putExtra(BatteryManager.EXTRA_PRESENT, mBatteryPresent);
+        intent.putExtra(BatteryManager.EXTRA_LEVEL, mBatteryLevel);
+        intent.putExtra(BatteryManager.EXTRA_SCALE, BATTERY_SCALE);
+        intent.putExtra(BatteryManager.EXTRA_ICON_SMALL, icon);
+        intent.putExtra(BatteryManager.EXTRA_PLUGGED, mPlugType);
+        intent.putExtra(BatteryManager.EXTRA_VOLTAGE, mBatteryVoltage);
+        intent.putExtra(BatteryManager.EXTRA_TEMPERATURE, mBatteryTemperature);
+        intent.putExtra(BatteryManager.EXTRA_TECHNOLOGY, mBatteryTechnology);
 
         if (false) {
             Log.d(TAG, "updateBattery level:" + mBatteryLevel +

@@ -37,4 +37,12 @@ public class SmsResponse {
         this.ackPdu = ackPdu;
         this.errorCode = errorCode;
     }
+
+    public String toString() {
+        String ret = "{ messageRef = " + messageRef
+                        + ", errorCode = " + errorCode
+                        + ", ackPdu = " + ackPdu
+                        + "}";
+        return ret;
+    }
 }

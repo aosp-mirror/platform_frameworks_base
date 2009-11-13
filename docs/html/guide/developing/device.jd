@@ -11,8 +11,16 @@ page.title=Developing on a Device
         <li><a href="#dev-phone-1">Android Dev Phone 1</a></li>
       </ol>
     </li>
-    <li><a href="#setting-up">Setting up a Device for Development</a></li>
-    <li><a href="#WinUsbDriver">Installing the WinUsb Driver</a></li>
+    <li><a href="#setting-up">Setting up a Device for Development</a>
+      <ol>
+        <li><a href="#VendorIds">USB Vendor IDs</a></li>
+      </ol>
+    </li>
+  </ol>
+  <h2>See also</h2>
+  <ol>
+    <li><a
+    href="{@docRoot}sdk/win-usb.html">USB Driver for Windows</a></li>
   </ol>
 </div>
 </div>
@@ -117,27 +125,36 @@ would on the emulator. There are just a few things to do before you can start.</
   <li>Turn on "USB Debugging" on your device.
     <p>On the device, go to the home screen, press <b>MENU</b>, select <b>Applications</b> > <b>Development</b>,
     then enable <b>USB debugging</b>.</p>
-
   </li>
   <li>Setup your system to detect your device.
     <ul>
-      <li>If you're developing on Windows, you need to install a USB driver for adb. 
-        Follow the steps below for <a href="#WinUsbDriver">Installing the WinUsb Driver</a>.</li>
+      <li>If you're developing on Windows, you need to install a USB driver
+      for adb. See the <a href="{@docRoot}sdk/win-usb.html">Windows USB
+      Driver</a> documentation.</li>
       <li>If you're developing on Mac OS X, it just works. Skip this step.</li>
-      <li>If you're developing on Ubuntu Linux, you need to add a rules file:
+      <li>If you're developing on Ubuntu Linux, you need to add a rules file
+that contains a USB configuration for each type of device you want to use for
+development. Each device manufacturer uses a different vendor ID. The
+example rules files below show how to add an entry for a single vendor ID
+(the HTC vendor ID). In order to support more devices, you will need additional
+lines of the same format that provide a different value for the
+<code>SYSFS{idVendor}</code> property. For other IDs, see the table of <a
+href="#VendorIds">USB Vendor IDs</a>, below.
         <ol>
-          <li>Login as root and create this file: <code>/etc/udev/rules.d/51-android.rules</code>.
-            <p>For Gusty/Hardy, edit the file to read: <br/>
-              <code>SUBSYSTEM=="usb", SYSFS{idVendor}=="0bb4", MODE="0666"</code></p>
+          <li>Log in as root and create this file:
+            <code>/etc/udev/rules.d/51-android.rules</code>.
+            <p>For Gusty/Hardy, edit the file to read:<br/>
+            <code>SUBSYSTEM=="usb", SYSFS{idVendor}=="0bb4",
+            MODE="0666"</code></p>
 
-            <p>For Dapper, edit the file to read: <br/>
-              <code>SUBSYSTEM=="usb_device", SYSFS{idVendor}=="0bb4", MODE="0666"</code></p>
+            <p>For Dapper, edit the file to read:<br/>
+            <code>SUBSYSTEM=="usb_device", SYSFS{idVendor}=="0bb4",
+            MODE="0666"</code></p>
           </li>
           <li>Now execute:<br/>
-              <code>chmod a+rx /etc/udev/rules.d/51-android.rules</code>
+              <code>chmod a+r /etc/udev/rules.d/51-android.rules</code>
           </li>
         </ol>
-
       </li>
     </ul>
   </li>
@@ -149,157 +166,30 @@ with a <b>Device Chooser</b> dialog that lists the available emulator(s) and con
 Select the device to install and run the application there.</p>
 
 <p>If using the <a href="{@docRoot}guide/developing/tools/adb.html">Android Debug Bridge</a> (adb), 
-you can issue commands with the <code>-d</code> flag to target your connected device.</p>
+you can issue commands with the <code>-d</code> flag to target your
+connected device.</p>
 
 
-
-
-<h2 id="WinUsbDriver">Installing the WinUsb Driver</h2>
-
-<p>A WinUsb-based driver is needed in order to use your Android-powered device for development on a Windows machine.
-The USB installation package can be found in the <code><em>&lt;sdk></em>\usb_driver\</code> 
-folder of your SDK package.</p>
-
-<p class="note"><strong>Note:</strong> If you are connecting an Android-powered device to your computer
-for the first time, folllow the procedure to "Perform a fresh installation."
-Android SDKs older than version 1.6 included a non-WinUsb-based driver
-for connecting your device. If you installed the older USB driver and it is working properly,
-you do not need to upgrade to the new driver. However, if you are having problems with the driver or 
-would simply like to upgrade to the latest version, follow the procedure to "Upgrade an existing
-driver." </p>
-
-<p>Before you begin installing or upgrading the USB driver, you must
-copy the USB installation package to a secure location on your computer.
-For example, you might want to create a directory at <code>C:\Android\Windows\USB\install\</code> and
-move it there. Once you've moved the installation package, select the appropriate procedure below, 
-based on your operating system and whether you're installing for the first time or upgrading.</p>
-
-<ol class="nolist">
-  <li>Windows Vista:
-    <ol class="nolist">
-      <li><a href="#VistaFreshInstall">Perform a fresh installation</a></li>
-      <li><a href="#VistaUprade">Upgrade an existing driver</a></li>
-    </ol>
-  </li>
-  <li>Windows XP:
-    <ol class="nolist">
-      <li><a href="#XPFreshInstall">Perform a fresh installation</a></li>
-      <li><a href="#XPUpgrade">Upgrade an existing driver</a></li>
-    </ol>
-  </li>
-</ol>
-
-
-<p class="caution"><strong>Caution:</strong>
-You may make changes to <code>android_winusb.inf</code> file found inside <code>usb_driver\</code>
-(e.g., to add support for new devices), 
-however, this will lead to security warnings when you install or upgrade the
-driver. Making any other changes to the driver files may break the installation process.</p>
-
-<h3 id="VistaFreshInstall">Windows Vista: Perform a fresh installation</h3>
-
-<p>To install the Android USB driver on Windows Vista for the first time:</p>
-
-<ol>
-  <li>Connect your Android-powered device to your computer's USB port. Windows will detect the device
-    and launch the Found New Hardware wizard.</li>
-  <li>Select "Locate and install driver software."</li>
-  <li>Select "Don't search online."</li>
-  <li>Select "I don't have the disk. Show me other options."</li>
-  <li>Select "Browse my computer for driver software."</li>
-  <li>Click "Browse..." and locate the folder where you copied the
-    installation package. As long as you specified the exact location of the 
-    installation package, you may leave "Include subfolders" checked or unchecked&mdash;it doesn't matter.</li>
-  <li>Click "Next." Vista may prompt you to confirm the privilege elevation required for driver 
-    installation. Confirm it.</li>
-  <li>When Vista asks if you'd like to install the Google ADB Interface device, click "Install"
-    to install the driver.</li>
-</ol>
-
-<p>Return to <a href="#setting-up">Setting up a Device for Development</a>.</p>
-
-
-
-<h3 id="VistaUpgrade">Windows Vista: Upgrade an existing driver</h3>
-
-<p>To upgrade an existing Android USB driver on Windows Vista with the new one:</p>
-
-<ol>
-  <li>Connect your Android-powered device to your computer's USB port.</li>
-  <li>Right-click on "Computer" from your desktop or Windows Explorer,
-    and select "Manage."</li>
-  <li>Select "Device Manager" in the left pane of the Computer Management window.</li>
-  <li>Locate and expand "ADB Interface" in the right pane.</li>
-  <li>Right-click on "HTC Dream Composite ADB Interface", and select "Update Driver Software..."</li>
-  <li>When Vista starts updating the driver, a prompt will ask how you want to search for the driver 
-    software. Select "Browse my computer for driver software."</li>
-  <li>Click "Browse..." and locate the folder where you copied the
-    installation package. As long as you specified the exact location of the 
-    installation package, you may leave "Include subfolders" checked or unchecked&mdash;it doesn't matter.</li>
-  <li>Click "Next." Vista may prompt you to confirm the privilege elevation required for driver 
-  installation. Confirm it.</li>
-  <li>When Vista asks if you'd like to install the Google ADB Interface device, click "Install"
-    to install the driver.</li>
-</ol>
-
-<p>Return to <a href="#setting-up">Setting up a Device for Development</a>.</p>
-
-
-
-<h3 id="XPFreshInstall">Windows XP: Perform a fresh installation</h3>
-
-<p>To install the Android USB driver on Windows XP for the first time:</p>
-
-<ol>
-  <li>Connect your Android-powered device to your computer's USB port. Windows 
-    will detect the device and launch the Hardware Update Wizard.</li>
-  <li>Select "Install from a list or specific location" and click
-    "Next."</li>
-  <li>Select "Search for the best driver in these locations"; uncheck "Search 
-    removable media"; and check "Include this location in the search."</li>
-  <li>Click "Browse..." and locate the folder where you copied the installation 
-    package.</li>
-  <li>Click "Next" to install the driver.</li>
-</ol>
-
-<p>Return to <a href="#setting-up">Setting up a Device for Development</a>.</p>
-
-
-
-<h3 id="XPUpgrade">Windows XP: Upgrade an existing driver</h3>
-
-<p>To upgrade an existing Android USB driver on Windows XP with the new one:</p>
-
-<ol>
-  <li>Connect your Android-powered device to your computer's USB port.</li>
-  <li>Right-click on "My Computer" from your desktop or Windows Explorer,
-    and select "Manage."</li>
-  <li>Select "Device Manager" in the left pane of the Computer Management window.</li>
-  <li>Locate and expand "Android Phone" in the right pane.</li>
-  <li>Right-click "Android Composite ADB Interface" and select "Update Driver..."
-    This will launch the Hardware Update Wizard.</li>
-  <li>Select "Install from a list or specific location" and click
-    "Next."</li>
-  <li>Select "Search for the best driver in these locations"; uncheck "Search 
-    removable media"; and check "Include this location in the search."</li>
-  <li>Click "Browse..." and locate the folder where you copied the installation 
-    package.</li>
-  <li>Click "Next" to install the driver.</li>
-</ol>
-
-<p>Return to <a href="#setting-up">Setting up a Device for Development</a>.</p>
-  
-
-
-
-
-
-
-
-
-
-
-
-
-
+<h3 id="VendorIds">USB Vendor IDs</h3>
+<p>This table provides a reference to the vendor IDs needed in order to add
+device support on Linux. The USB Vendor ID is the value given to the
+<code>SYSFS{idVendor}</code> property in the rules file.</p>
+<table>
+  <tr>
+    <th>Manufacturer</th><th>USB Vendor ID</th></tr>
+  <tr>
+    <td>Acer</td><td>0502</td></tr>
+  <tr>
+    <td>HTC</td><td>0bb4</td></tr>
+  <tr>
+    <td>Huawei</td><td>12d1</td></tr>
+  <tr>
+    <td>LG</td><td>1004</td></tr>
+  <tr>
+    <td>Motorola</td><td>22b8</td></tr>
+  <tr>
+    <td>Samsung</td><td>04e8</td></tr>
+  <tr>
+    <td>Sony Ericsson</td><td>0fce</td></tr>
+</table>
 

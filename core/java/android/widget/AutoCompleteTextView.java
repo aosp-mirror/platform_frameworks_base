@@ -82,6 +82,8 @@ import com.android.internal.R;
  * @attr ref android.R.styleable#AutoCompleteTextView_dropDownAnchor
  * @attr ref android.R.styleable#AutoCompleteTextView_dropDownWidth
  * @attr ref android.R.styleable#AutoCompleteTextView_dropDownHeight
+ * @attr ref android.R.styleable#AutoCompleteTextView_dropDownVerticalOffset
+ * @attr ref android.R.styleable#AutoCompleteTextView_dropDownHorizontalOffset
  */
 public class AutoCompleteTextView extends EditText implements Filter.FilterListener {
     static final boolean DEBUG = false;
@@ -194,7 +196,7 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
         setFocusable(true);
 
         addTextChangedListener(new MyWatcher());
-
+        
         mPassThroughClickListener = new PassThroughClickListener();
         super.setOnClickListener(mPassThroughClickListener);
     }
@@ -321,8 +323,6 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
      * @return the background drawable
      * 
      * @attr ref android.R.styleable#PopupWindow_popupBackground
-     *
-     * @hide Pending API council approval
      */
     public Drawable getDropDownBackground() {
         return mPopup.getBackground();
@@ -334,8 +334,6 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
      * @param d the drawable to set as the background
      * 
      * @attr ref android.R.styleable#PopupWindow_popupBackground
-     *
-     * @hide Pending API council approval
      */
     public void setDropDownBackgroundDrawable(Drawable d) {
         mPopup.setBackgroundDrawable(d);
@@ -347,14 +345,48 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
      * @param id the id of the drawable to set as the background
      * 
      * @attr ref android.R.styleable#PopupWindow_popupBackground
-     *
-     * @hide Pending API council approval
      */
     public void setDropDownBackgroundResource(int id) {
         mPopup.setBackgroundDrawable(getResources().getDrawable(id));
     }
-
+    
     /**
+     * <p>Sets the vertical offset used for the auto-complete drop-down list.</p>
+     * 
+     * @param offset the vertical offset
+     */
+    public void setDropDownVerticalOffset(int offset) {
+        mDropDownVerticalOffset = offset;
+    }
+    
+    /**
+     * <p>Gets the vertical offset used for the auto-complete drop-down list.</p>
+     * 
+     * @return the vertical offset
+     */
+    public int getDropDownVerticalOffset() {
+        return mDropDownVerticalOffset;
+    }
+    
+    /**
+     * <p>Sets the horizontal offset used for the auto-complete drop-down list.</p>
+     * 
+     * @param offset the horizontal offset
+     */
+    public void setDropDownHorizontalOffset(int offset) {
+        mDropDownHorizontalOffset = offset;
+    }
+    
+    /**
+     * <p>Gets the horizontal offset used for the auto-complete drop-down list.</p>
+     * 
+     * @return the horizontal offset
+     */
+    public int getDropDownHorizontalOffset() {
+        return mDropDownHorizontalOffset;
+    }
+
+     /**
      * <p>Sets the animation style of the auto-complete drop-down list.</p>
      *
      * <p>If the drop-down is showing, calling this method will take effect only
@@ -380,50 +412,6 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
      */
     public int getDropDownAnimationStyle() {
         return mPopup.getAnimationStyle();
-    }
-    
-    /**
-     * <p>Sets the vertical offset used for the auto-complete drop-down list.</p>
-     * 
-     * @param offset the vertical offset
-     *
-     * @hide Pending API council approval
-     */
-    public void setDropDownVerticalOffset(int offset) {
-        mDropDownVerticalOffset = offset;
-    }
-    
-    /**
-     * <p>Gets the vertical offset used for the auto-complete drop-down list.</p>
-     * 
-     * @return the vertical offset
-     *
-     * @hide Pending API council approval
-     */
-    public int getDropDownVerticalOffset() {
-        return mDropDownVerticalOffset;
-    }
-    
-    /**
-     * <p>Sets the horizontal offset used for the auto-complete drop-down list.</p>
-     * 
-     * @param offset the horizontal offset
-     *
-     * @hide Pending API council approval
-     */
-    public void setDropDownHorizontalOffset(int offset) {
-        mDropDownHorizontalOffset = offset;
-    }
-    
-    /**
-     * <p>Gets the horizontal offset used for the auto-complete drop-down list.</p>
-     * 
-     * @return the horizontal offset
-     *
-     * @hide Pending API council approval
-     */
-    public int getDropDownHorizontalOffset() {
-        return mDropDownHorizontalOffset;
     }
 
     /**
@@ -617,12 +605,20 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
 
     @Override
     public boolean onKeyPreIme(int keyCode, KeyEvent event) {
-        if (isPopupShowing()) {
+        if (keyCode == KeyEvent.KEYCODE_BACK && isPopupShowing()
+                && !mDropDownAlwaysVisible) {
             // special case for the back key, we do not even try to send it
             // to the drop down list but instead, consume it immediately
-            if (keyCode == KeyEvent.KEYCODE_BACK && !mDropDownAlwaysVisible) {
-                dismissDropDown();
+            if (event.getAction() == KeyEvent.ACTION_DOWN
+                    && event.getRepeatCount() == 0) {
+                getKeyDispatcherState().startTracking(event, this);
                 return true;
+            } else if (event.getAction() == KeyEvent.ACTION_UP) {
+                getKeyDispatcherState().handleUpEvent(event);
+                if (event.isTracking() && !event.isCanceled()) {
+                    dismissDropDown();
+                    return true;
+                }
             }
         }
         return super.onKeyPreIme(keyCode, event);
@@ -1161,7 +1157,7 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
                 heightSpec = mDropDownHeight;
             }
 
-            mPopup.setOutsideTouchable(mForceIgnoreOutsideTouch ? false : !mDropDownAlwaysVisible);
+            mPopup.setOutsideTouchable(!mForceIgnoreOutsideTouch && !mDropDownAlwaysVisible);
 
             mPopup.update(getDropDownAnchorView(), mDropDownHorizontalOffset,
                     mDropDownVerticalOffset, widthSpec, heightSpec);
@@ -1191,8 +1187,8 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
             
             // use outside touchable to dismiss drop down when touching outside of it, so
             // only set this if the dropdown is not always visible
-            mPopup.setOutsideTouchable(mForceIgnoreOutsideTouch ? false : !mDropDownAlwaysVisible);
-            mPopup.setTouchInterceptor(new PopupTouchIntercepter());
+            mPopup.setOutsideTouchable(!mForceIgnoreOutsideTouch && !mDropDownAlwaysVisible);
+            mPopup.setTouchInterceptor(new PopupTouchInterceptor());
             mPopup.showAsDropDown(getDropDownAnchorView(),
                     mDropDownHorizontalOffset, mDropDownVerticalOffset);
             mDropDownList.setSelection(ListView.INVALID_POSITION);
@@ -1333,7 +1329,7 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
         final int maxHeight = mPopup.getMaxAvailableHeight(
                 getDropDownAnchorView(), mDropDownVerticalOffset, ignoreBottomDecorations);
 
-        if (mDropDownAlwaysVisible) {
+        if (mDropDownAlwaysVisible || mDropDownHeight == ViewGroup.LayoutParams.FILL_PARENT) {
             // getMaxAvailableHeight() subtracts the padding, so we put it back,
             // to get the available height for the whole window
             int padding = 0;
@@ -1416,9 +1412,10 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
         }
     }
 
-    private class PopupTouchIntercepter implements OnTouchListener {
+    private class PopupTouchInterceptor implements OnTouchListener {
         public boolean onTouch(View v, MotionEvent event) {
-            if (event.getAction() == MotionEvent.ACTION_DOWN) {
+            if (event.getAction() == MotionEvent.ACTION_DOWN &&
+                    mPopup != null && mPopup.isShowing()) {
                 mPopup.setInputMethodMode(PopupWindow.INPUT_METHOD_NOT_NEEDED);
                 showDropDown();
             }
@@ -1595,7 +1592,7 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
          */
         CharSequence fixText(CharSequence invalidText);
     }
-
+    
     /**
      * Allows us a private hook into the on click event without preventing users from setting
      * their own click listener.
@@ -1611,5 +1608,5 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
             if (mWrapped != null) mWrapped.onClick(v);
         }
     }
-
+    
 }

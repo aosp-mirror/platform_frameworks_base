@@ -25,6 +25,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.preference.PreferenceManager;
 import android.telephony.CellLocation;
+import android.telephony.PhoneStateListener;
 import android.telephony.ServiceState;
 import android.telephony.SignalStrength;
 import android.util.Log;
@@ -190,6 +191,10 @@ public class PhoneProxy extends Handler implements Phone {
         return mActivePhone.getPhoneName();
     }
 
+    public int getPhoneType() {
+        return mActivePhone.getPhoneType();
+    }
+
     public String[] getActiveApnTypes() {
         return mActivePhone.getActiveApnTypes();
     }
@@ -210,12 +215,12 @@ public class PhoneProxy extends Handler implements Phone {
         mActivePhone.unregisterForUnknownConnection(h);
     }
 
-    public void registerForPhoneStateChanged(Handler h, int what, Object obj) {
-        mActivePhone.registerForPhoneStateChanged(h, what, obj);
+    public void registerForPreciseCallStateChanged(Handler h, int what, Object obj) {
+        mActivePhone.registerForPreciseCallStateChanged(h, what, obj);
     }
 
-    public void unregisterForPhoneStateChanged(Handler h) {
-        mActivePhone.unregisterForPhoneStateChanged(h);
+    public void unregisterForPreciseCallStateChanged(Handler h) {
+        mActivePhone.unregisterForPreciseCallStateChanged(h);
     }
 
     public void registerForNewRingingConnection(Handler h, int what, Object obj) {
@@ -312,6 +317,30 @@ public class PhoneProxy extends Handler implements Phone {
 
     public void unregisterForCdmaOtaStatusChange(Handler h) {
          mActivePhone.unregisterForCdmaOtaStatusChange(h);
+    }
+
+    public void registerForSubscriptionInfoReady(Handler h, int what, Object obj) {
+        mActivePhone.registerForSubscriptionInfoReady(h, what, obj);
+    }
+
+    public void unregisterForSubscriptionInfoReady(Handler h) {
+        mActivePhone.unregisterForSubscriptionInfoReady(h);
+    }
+
+    public void registerForEcmTimerReset(Handler h, int what, Object obj) {
+        mActivePhone.registerForEcmTimerReset(h,what,obj);
+    }
+
+    public void unregisterForEcmTimerReset(Handler h) {
+        mActivePhone.unregisterForEcmTimerReset(h);
+    }
+
+    public void registerForRingbackTone(Handler h, int what, Object obj) {
+        mActivePhone.registerForRingbackTone(h,what,obj);
+    }
+
+    public void unregisterForRingbackTone(Handler h) {
+        mActivePhone.unregisterForRingbackTone(h);
     }
 
     public boolean getIccRecordsLoaded() {
@@ -416,6 +445,10 @@ public class PhoneProxy extends Handler implements Phone {
 
     public String getCdmaMin() {
         return mActivePhone.getCdmaMin();
+    }
+
+    public boolean isMinInfoReady() {
+        return mActivePhone.isMinInfoReady();
     }
 
     public String getCdmaPrlVersion() {
@@ -545,8 +578,8 @@ public class PhoneProxy extends Handler implements Phone {
         return mActivePhone.getCurrentDataConnectionList();
     }
 
-    public void updateServiceLocation(Message response) {
-        mActivePhone.updateServiceLocation(response);
+    public void updateServiceLocation() {
+        mActivePhone.updateServiceLocation();
     }
 
     public void enableLocationUpdates() {
@@ -611,6 +644,10 @@ public class PhoneProxy extends Handler implements Phone {
 
     public int disableApnType(String type) {
         return mActivePhone.disableApnType(type);
+    }
+
+    public boolean isDataConnectivityEnabled() {
+        return mActivePhone.isDataConnectivityEnabled();
     }
 
     public boolean isDataConnectivityPossible() {

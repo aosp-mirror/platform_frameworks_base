@@ -16,6 +16,8 @@
 
 package android.bluetooth;
 
+import android.annotation.SdkConstant;
+import android.annotation.SdkConstant.SdkConstantType;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -49,11 +51,32 @@ import android.util.Log;
  *
  * @hide
  */
-public class BluetoothHeadset {
+public final class BluetoothHeadset {
 
     private static final String TAG = "BluetoothHeadset";
     private static final boolean DBG = false;
 
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_STATE_CHANGED =
+            "android.bluetooth.headset.action.STATE_CHANGED";
+    /**
+     * TODO(API release): Consider incorporating as new state in
+     * HEADSET_STATE_CHANGED
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_AUDIO_STATE_CHANGED =
+            "android.bluetooth.headset.action.AUDIO_STATE_CHANGED";
+    public static final String EXTRA_STATE =
+            "android.bluetooth.headset.extra.STATE";
+    public static final String EXTRA_PREVIOUS_STATE =
+            "android.bluetooth.headset.extra.PREVIOUS_STATE";
+    public static final String EXTRA_AUDIO_STATE =
+            "android.bluetooth.headset.extra.AUDIO_STATE";
+
+    /**
+     * TODO(API release): Consider incorporating as new state in
+     * HEADSET_STATE_CHANGED
+     */
     private IBluetoothHeadset mService;
     private final Context mContext;
     private final ServiceListener mServiceListener;
@@ -163,16 +186,16 @@ public class BluetoothHeadset {
     }
 
     /**
-     * Get the Bluetooth address of the current headset.
-     * @return The Bluetooth address, or null if not in connected or connecting
+     * Get the BluetoothDevice for the current headset.
+     * @return current headset, or null if not in connected or connecting
      *         state, or if this proxy object is not connected to the Headset
      *         service.
      */
-    public String getHeadsetAddress() {
-        if (DBG) log("getHeadsetAddress()");
+    public BluetoothDevice getCurrentHeadset() {
+        if (DBG) log("getCurrentHeadset()");
         if (mService != null) {
             try {
-                return mService.getHeadsetAddress();
+                return mService.getCurrentHeadset();
             } catch (RemoteException e) {Log.e(TAG, e.toString());}
         } else {
             Log.w(TAG, "Proxy not attached to service");
@@ -185,19 +208,19 @@ public class BluetoothHeadset {
      * Request to initiate a connection to a headset.
      * This call does not block. Fails if a headset is already connecting
      * or connected.
-     * Initiates auto-connection if address is null. Tries to connect to all
+     * Initiates auto-connection if device is null. Tries to connect to all
      * devices with priority greater than PRIORITY_AUTO in descending order.
-     * @param address The Bluetooth Address to connect to, or null to
-     *                auto-connect to the last connected headset.
-     * @return        False if there was a problem initiating the connection
-     *                procedure, and no further HEADSET_STATE_CHANGED intents
-     *                will be expected.
+     * @param device device to connect to, or null to auto-connect last connected
+     *               headset
+     * @return       false if there was a problem initiating the connection
+     *               procedure, and no further HEADSET_STATE_CHANGED intents
+     *               will be expected.
      */
-    public boolean connectHeadset(String address) {
-        if (DBG) log("connectHeadset(" + address + ")");
+    public boolean connectHeadset(BluetoothDevice device) {
+        if (DBG) log("connectHeadset(" + device + ")");
         if (mService != null) {
             try {
-                if (mService.connectHeadset(address)) {
+                if (mService.connectHeadset(device)) {
                     return true;
                 }
             } catch (RemoteException e) {Log.e(TAG, e.toString());}
@@ -213,11 +236,11 @@ public class BluetoothHeadset {
      * connecting). Returns false if not connected, or if this proxy object
      * if not currently connected to the headset service.
      */
-    public boolean isConnected(String address) {
-        if (DBG) log("isConnected(" + address + ")");
+    public boolean isConnected(BluetoothDevice device) {
+        if (DBG) log("isConnected(" + device + ")");
         if (mService != null) {
             try {
-                return mService.isConnected(address);
+                return mService.isConnected(device);
             } catch (RemoteException e) {Log.e(TAG, e.toString());}
         } else {
             Log.w(TAG, "Proxy not attached to service");
@@ -295,16 +318,16 @@ public class BluetoothHeadset {
      * auto-connected.
      * Incoming connections are ignored regardless of priority if there is
      * already a headset connected.
-     * @param address Paired headset
+     * @param device paired headset
      * @param priority Integer priority, for example PRIORITY_AUTO or
      *                 PRIORITY_NONE
-     * @return True if successful, false if there was some error.
+     * @return true if successful, false if there was some error
      */
-    public boolean setPriority(String address, int priority) {
-        if (DBG) log("setPriority(" + address + ", " + priority + ")");
+    public boolean setPriority(BluetoothDevice device, int priority) {
+        if (DBG) log("setPriority(" + device + ", " + priority + ")");
         if (mService != null) {
             try {
-                return mService.setPriority(address, priority);
+                return mService.setPriority(device, priority);
             } catch (RemoteException e) {Log.e(TAG, e.toString());}
         } else {
             Log.w(TAG, "Proxy not attached to service");
@@ -315,14 +338,14 @@ public class BluetoothHeadset {
 
     /**
      * Get priority of headset.
-     * @param address Headset
-     * @return non-negative priority, or negative error code on error.
+     * @param device headset
+     * @return non-negative priority, or negative error code on error
      */
-    public int getPriority(String address) {
-        if (DBG) log("getPriority(" + address + ")");
+    public int getPriority(BluetoothDevice device) {
+        if (DBG) log("getPriority(" + device + ")");
         if (mService != null) {
             try {
-                return mService.getPriority(address);
+                return mService.getPriority(device);
             } catch (RemoteException e) {Log.e(TAG, e.toString());}
         } else {
             Log.w(TAG, "Proxy not attached to service");
@@ -354,30 +377,6 @@ public class BluetoothHeadset {
             if (DBG) Log.d(TAG, Log.getStackTraceString(new Throwable()));
         }
         return -1;
-    }
-
-    /**
-     * Check class bits for possible HSP or HFP support.
-     * This is a simple heuristic that tries to guess if a device with the
-     * given class bits might support HSP or HFP. It is not accurate for all
-     * devices. It tries to err on the side of false positives.
-     * @return True if this device might support HSP or HFP.
-     */
-    public static boolean doesClassMatch(int btClass) {
-        // The render service class is required by the spec for HFP, so is a
-        // pretty good signal
-        if (BluetoothClass.Service.hasService(btClass, BluetoothClass.Service.RENDER)) {
-            return true;
-        }
-        // Just in case they forgot the render service class
-        switch (BluetoothClass.Device.getDevice(btClass)) {
-        case BluetoothClass.Device.AUDIO_VIDEO_HANDSFREE:
-        case BluetoothClass.Device.AUDIO_VIDEO_WEARABLE_HEADSET:
-        case BluetoothClass.Device.AUDIO_VIDEO_CAR_AUDIO:
-            return true;
-        default:
-            return false;
-        }
     }
 
     private ServiceConnection mConnection = new ServiceConnection() {

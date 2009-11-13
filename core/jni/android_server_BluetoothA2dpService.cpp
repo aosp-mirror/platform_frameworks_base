@@ -37,12 +37,7 @@
 namespace android {
 
 #ifdef HAVE_BLUETOOTH
-static jmethodID method_onHeadsetCreated;
-static jmethodID method_onHeadsetRemoved;
-static jmethodID method_onSinkConnected;
-static jmethodID method_onSinkDisconnected;
-static jmethodID method_onSinkPlaying;
-static jmethodID method_onSinkStopped;
+static jmethodID method_onSinkPropertyChanged;
 
 typedef struct {
     JavaVM *vm;
@@ -53,11 +48,11 @@ typedef struct {
 
 static native_data_t *nat = NULL;  // global native data
 
-#endif
-
-#ifdef HAVE_BLUETOOTH
-static void onConnectSinkResult(DBusMessage *msg, void *user, void *nat);
-static void onDisconnectSinkResult(DBusMessage *msg, void *user, void *nat);
+static Properties sink_properties[] = {
+        {"State", DBUS_TYPE_STRING},
+        {"Connected", DBUS_TYPE_BOOLEAN},
+        {"Playing", DBUS_TYPE_BOOLEAN},
+      };
 #endif
 
 /* Returns true on success (even if adapter is present but disabled).
@@ -100,94 +95,51 @@ static void cleanupNative(JNIEnv* env, jobject object) {
     }
 #endif
 }
-static jobjectArray listHeadsetsNative(JNIEnv *env, jobject object) {
-#ifdef HAVE_BLUETOOTH
-    LOGV(__FUNCTION__);
-    if (nat) {
-        DBusMessage *reply =
-            dbus_func_args(env, nat->conn, "/org/bluez/audio",
-                           "org.bluez.audio.Manager", "ListHeadsets",
-                           DBUS_TYPE_INVALID);
-        return reply ? dbus_returns_array_of_strings(env, reply) : NULL;
-    }
-#endif
-    return NULL;
-}
 
-static jstring createHeadsetNative(JNIEnv *env, jobject object,
-                                     jstring address) {
+static jobjectArray getSinkPropertiesNative(JNIEnv *env, jobject object,
+                                            jstring path) {
 #ifdef HAVE_BLUETOOTH
     LOGV(__FUNCTION__);
     if (nat) {
-        const char *c_address = env->GetStringUTFChars(address, NULL);
-        LOGV("... address = %s\n", c_address);
-        DBusMessage *reply =
-            dbus_func_args(env, nat->conn, "/org/bluez/audio",
-                           "org.bluez.audio.Manager", "CreateHeadset",
-                           DBUS_TYPE_STRING, &c_address,
-                           DBUS_TYPE_INVALID);
-        env->ReleaseStringUTFChars(address, c_address);
-        return reply ? dbus_returns_string(env, reply) : NULL;
-    }
-#endif
-    return NULL;
-}
+        DBusMessage *msg, *reply;
+        DBusError err;
+        dbus_error_init(&err);
 
-static jstring removeHeadsetNative(JNIEnv *env, jobject object, jstring path) {
-#ifdef HAVE_BLUETOOTH
-    LOGV(__FUNCTION__);
-    if (nat) {
         const char *c_path = env->GetStringUTFChars(path, NULL);
-        DBusMessage *reply =
-            dbus_func_args(env, nat->conn, "/org/bluez/audio",
-                           "org.bluez.audio.Manager", "RemoveHeadset",
-                           DBUS_TYPE_STRING, &c_path,
-                           DBUS_TYPE_INVALID);
+        reply = dbus_func_args_timeout(env,
+                                   nat->conn, -1, c_path,
+                                   "org.bluez.AudioSink", "GetProperties",
+                                   DBUS_TYPE_INVALID);
         env->ReleaseStringUTFChars(path, c_path);
-        return reply ? dbus_returns_string(env, reply) : NULL;
+        if (!reply && dbus_error_is_set(&err)) {
+            LOG_AND_FREE_DBUS_ERROR_WITH_MSG(&err, reply);
+            return NULL;
+        } else if (!reply) {
+            LOGE("DBus reply is NULL in function %s", __FUNCTION__);
+            return NULL;
+        }
+        DBusMessageIter iter;
+        if (dbus_message_iter_init(reply, &iter))
+            return parse_properties(env, &iter, (Properties *)&sink_properties,
+                                 sizeof(sink_properties) / sizeof(Properties));
     }
 #endif
     return NULL;
 }
 
-static jstring getAddressNative(JNIEnv *env, jobject object, jstring path) {
-#ifdef HAVE_BLUETOOTH
-    LOGV(__FUNCTION__);
-    if (nat) {
-        const char *c_path = env->GetStringUTFChars(path, NULL);
-        DBusMessage *reply =
-            dbus_func_args(env, nat->conn, c_path,
-                           "org.bluez.audio.Device", "GetAddress",
-                           DBUS_TYPE_INVALID);
-        env->ReleaseStringUTFChars(path, c_path);
-        return reply ? dbus_returns_string(env, reply) : NULL;
-    }
-#endif
-    return NULL;
-}
 
 static jboolean connectSinkNative(JNIEnv *env, jobject object, jstring path) {
 #ifdef HAVE_BLUETOOTH
     LOGV(__FUNCTION__);
     if (nat) {
         const char *c_path = env->GetStringUTFChars(path, NULL);
-        size_t path_sz = env->GetStringUTFLength(path) + 1;
-        char *c_path_copy = (char *)malloc(path_sz);  // callback data
-        strncpy(c_path_copy, c_path, path_sz);
 
-        bool ret =
-            dbus_func_args_async(env, nat->conn, -1,
-                           onConnectSinkResult, (void *)c_path_copy, nat,
-                           c_path,
-                           "org.bluez.audio.Sink", "Connect",
-                           DBUS_TYPE_INVALID);
+        bool ret = dbus_func_args_async(env, nat->conn, -1, NULL, NULL, nat,
+                                    c_path, "org.bluez.AudioSink", "Connect",
+                                    DBUS_TYPE_INVALID);
 
         env->ReleaseStringUTFChars(path, c_path);
-        if (!ret) {
-            free(c_path_copy);
-            return JNI_FALSE;
-        }
-        return JNI_TRUE;
+        return ret ? JNI_TRUE : JNI_FALSE;
     }
 #endif
     return JNI_FALSE;
@@ -199,114 +151,51 @@ static jboolean disconnectSinkNative(JNIEnv *env, jobject object,
     LOGV(__FUNCTION__);
     if (nat) {
         const char *c_path = env->GetStringUTFChars(path, NULL);
-        size_t path_sz = env->GetStringUTFLength(path) + 1;
-        char *c_path_copy = (char *)malloc(path_sz);  // callback data
-        strncpy(c_path_copy, c_path, path_sz);
 
-        bool ret =
-            dbus_func_args_async(env, nat->conn, -1,
-                           onDisconnectSinkResult, (void *)c_path_copy, nat,
-                           c_path,
-                           "org.bluez.audio.Sink", "Disconnect",
-                           DBUS_TYPE_INVALID);
+        bool ret = dbus_func_args_async(env, nat->conn, -1, NULL, NULL, nat,
+                                    c_path, "org.bluez.AudioSink", "Disconnect",
+                                    DBUS_TYPE_INVALID);
+
         env->ReleaseStringUTFChars(path, c_path);
-        if (!ret) {
-            free(c_path_copy);
-            return JNI_FALSE;
-        }
-        return JNI_TRUE;
+        return ret ? JNI_TRUE : JNI_FALSE;
     }
 #endif
     return JNI_FALSE;
 }
 
-static jboolean isSinkConnectedNative(JNIEnv *env, jobject object, jstring path) {
+static jboolean suspendSinkNative(JNIEnv *env, jobject object,
+                                     jstring path) {
 #ifdef HAVE_BLUETOOTH
     LOGV(__FUNCTION__);
     if (nat) {
         const char *c_path = env->GetStringUTFChars(path, NULL);
-        DBusMessage *reply =
-            dbus_func_args(env, nat->conn, c_path,
-                           "org.bluez.audio.Sink", "IsConnected",
+        bool ret = dbus_func_args_async(env, nat->conn, -1, NULL, NULL, nat,
+                           c_path, "org.bluez.audio.Sink", "Suspend",
                            DBUS_TYPE_INVALID);
         env->ReleaseStringUTFChars(path, c_path);
-        return reply ? dbus_returns_boolean(env, reply) : JNI_FALSE;
+        return ret ? JNI_TRUE : JNI_FALSE;
+    }
+#endif
+    return JNI_FALSE;
+}
+
+static jboolean resumeSinkNative(JNIEnv *env, jobject object,
+                                     jstring path) {
+#ifdef HAVE_BLUETOOTH
+    LOGV(__FUNCTION__);
+    if (nat) {
+        const char *c_path = env->GetStringUTFChars(path, NULL);
+        bool ret = dbus_func_args_async(env, nat->conn, -1, NULL, NULL, nat,
+                           c_path, "org.bluez.audio.Sink", "Resume",
+                           DBUS_TYPE_INVALID);
+        env->ReleaseStringUTFChars(path, c_path);
+        return ret ? JNI_TRUE : JNI_FALSE;
     }
 #endif
     return JNI_FALSE;
 }
 
 #ifdef HAVE_BLUETOOTH
-static void onConnectSinkResult(DBusMessage *msg, void *user, void *natData) {
-    LOGV(__FUNCTION__);
-
-    char *c_path = (char *)user;
-    DBusError err;
-    JNIEnv *env;
-
-    if (nat->vm->GetEnv((void**)&env, nat->envVer) < 0) {
-        LOGE("%s: error finding Env for our VM\n", __FUNCTION__);
-        return;
-    }
-
-    dbus_error_init(&err);
-
-    LOGV("... path = %s", c_path);
-    if (dbus_set_error_from_message(&err, msg)) {
-        /* if (!strcmp(err.name, BLUEZ_DBUS_BASE_IFC ".Error.AuthenticationFailed")) */
-        LOGE("%s: D-Bus error: %s (%s)\n", __FUNCTION__, err.name, err.message);
-        dbus_error_free(&err);
-        env->CallVoidMethod(nat->me,
-                            method_onSinkDisconnected,
-                            env->NewStringUTF(c_path));
-        if (env->ExceptionCheck()) {
-            LOGE("VM Exception occurred in native function %s (%s:%d)",
-                 __FUNCTION__, __FILE__, __LINE__);
-        }
-    } // else Java callback is triggered by signal in a2dp_event_filter
-
-    free(c_path);
-}
-
-static void onDisconnectSinkResult(DBusMessage *msg, void *user, void *natData) {
-    LOGV(__FUNCTION__);
-
-    char *c_path = (char *)user;
-    DBusError err;
-    JNIEnv *env;
-
-    if (nat->vm->GetEnv((void**)&env, nat->envVer) < 0) {
-        LOGE("%s: error finding Env for our VM\n", __FUNCTION__);
-        return;
-    }
-
-    dbus_error_init(&err);
-
-    LOGV("... path = %s", c_path);
-    if (dbus_set_error_from_message(&err, msg)) {
-        /* if (!strcmp(err.name, BLUEZ_DBUS_BASE_IFC ".Error.AuthenticationFailed")) */
-        LOGE("%s: D-Bus error: %s (%s)\n", __FUNCTION__, err.name, err.message);
-        if (strcmp(err.name, "org.bluez.Error.NotConnected") == 0) {
-            // we were already disconnected, so report disconnect
-            env->CallVoidMethod(nat->me,
-                                method_onSinkDisconnected,
-                                env->NewStringUTF(c_path));
-        } else {
-            // Assume it is still connected
-            env->CallVoidMethod(nat->me,
-                                method_onSinkConnected,
-                                env->NewStringUTF(c_path));
-        }
-        dbus_error_free(&err);
-        if (env->ExceptionCheck()) {
-            LOGE("VM Exception occurred in native function %s (%s:%d)",
-                 __FUNCTION__, __FILE__, __LINE__);
-        }
-    } // else Java callback is triggered by signal in a2dp_event_filter
-
-    free(c_path);
-}
-
 DBusHandlerResult a2dp_event_filter(DBusMessage *msg, JNIEnv *env) {
     DBusError err;
 
@@ -324,71 +213,19 @@ DBusHandlerResult a2dp_event_filter(DBusMessage *msg, JNIEnv *env) {
 
     DBusHandlerResult result = DBUS_HANDLER_RESULT_NOT_YET_HANDLED;
 
-    if (dbus_message_is_signal(msg,
-                               "org.bluez.audio.Manager",
-                               "HeadsetCreated")) {
-        char *c_path;
-        if (dbus_message_get_args(msg, &err,
-                                  DBUS_TYPE_STRING, &c_path,
-                                  DBUS_TYPE_INVALID)) {
-            LOGV("... path = %s", c_path);
-            env->CallVoidMethod(nat->me,
-                                method_onHeadsetCreated,
-                                env->NewStringUTF(c_path));
-        } else LOG_AND_FREE_DBUS_ERROR_WITH_MSG(&err, msg);
-        result = DBUS_HANDLER_RESULT_HANDLED;
-    } else if (dbus_message_is_signal(msg,
-                                      "org.bluez.audio.Manager",
-                                      "HeadsetRemoved")) {
-        char *c_path;
-        if (dbus_message_get_args(msg, &err,
-                                  DBUS_TYPE_STRING, &c_path,
-                                  DBUS_TYPE_INVALID)) {
-            LOGV("... path = %s", c_path);
-            env->CallVoidMethod(nat->me,
-                                method_onHeadsetRemoved,
-                                env->NewStringUTF(c_path));
-        } else LOG_AND_FREE_DBUS_ERROR_WITH_MSG(&err, msg);
-        result = DBUS_HANDLER_RESULT_HANDLED;
-    } else if (dbus_message_is_signal(msg,
-                                      "org.bluez.audio.Sink",
-                                      "Connected")) {
+    if (dbus_message_is_signal(msg, "org.bluez.AudioSink",
+                                      "PropertyChanged")) {
+        jobjectArray str_array =
+                    parse_property_change(env, msg, (Properties *)&sink_properties,
+                                sizeof(sink_properties) / sizeof(Properties));
         const char *c_path = dbus_message_get_path(msg);
-        LOGV("... path = %s", c_path);
         env->CallVoidMethod(nat->me,
-                            method_onSinkConnected,
-                            env->NewStringUTF(c_path));
+                            method_onSinkPropertyChanged,
+                            env->NewStringUTF(c_path),
+                            str_array);
         result = DBUS_HANDLER_RESULT_HANDLED;
-    } else if (dbus_message_is_signal(msg,
-                                      "org.bluez.audio.Sink",
-                                      "Disconnected")) {
-        const char *c_path = dbus_message_get_path(msg);
-        LOGV("... path = %s", c_path);
-        env->CallVoidMethod(nat->me,
-                            method_onSinkDisconnected,
-                            env->NewStringUTF(c_path));
-        result = DBUS_HANDLER_RESULT_HANDLED;
-    } else if (dbus_message_is_signal(msg,
-                                      "org.bluez.audio.Sink",
-                                      "Playing")) {
-        const char *c_path = dbus_message_get_path(msg);
-        LOGV("... path = %s", c_path);
-        env->CallVoidMethod(nat->me,
-                            method_onSinkPlaying,
-                            env->NewStringUTF(c_path));
-        result = DBUS_HANDLER_RESULT_HANDLED;
-    } else if (dbus_message_is_signal(msg,
-                                      "org.bluez.audio.Sink",
-                                      "Stopped")) {
-        const char *c_path = dbus_message_get_path(msg);
-        LOGV("... path = %s", c_path);
-        env->CallVoidMethod(nat->me,
-                            method_onSinkStopped,
-                            env->NewStringUTF(c_path));
-        result = DBUS_HANDLER_RESULT_HANDLED;
-    }
-
-    if (result == DBUS_HANDLER_RESULT_NOT_YET_HANDLED) {
+        return result;
+    } else {
         LOGV("... ignored");
     }
     if (env->ExceptionCheck()) {
@@ -407,14 +244,13 @@ static JNINativeMethod sMethods[] = {
     {"initNative", "()Z", (void *)initNative},
     {"cleanupNative", "()V", (void *)cleanupNative},
 
-    /* Bluez audio 3.36 API */
-    {"listHeadsetsNative", "()[Ljava/lang/String;", (void*)listHeadsetsNative},
-    {"createHeadsetNative", "(Ljava/lang/String;)Ljava/lang/String;", (void*)createHeadsetNative},
-    {"removeHeadsetNative", "(Ljava/lang/String;)Z", (void*)removeHeadsetNative},
-    {"getAddressNative", "(Ljava/lang/String;)Ljava/lang/String;", (void*)getAddressNative},
-    {"connectSinkNative", "(Ljava/lang/String;)Z", (void*)connectSinkNative},
-    {"disconnectSinkNative", "(Ljava/lang/String;)Z", (void*)disconnectSinkNative},
-    {"isSinkConnectedNative", "(Ljava/lang/String;)Z", (void*)isSinkConnectedNative},
+    /* Bluez audio 4.40 API */
+    {"connectSinkNative", "(Ljava/lang/String;)Z", (void *)connectSinkNative},
+    {"disconnectSinkNative", "(Ljava/lang/String;)Z", (void *)disconnectSinkNative},
+    {"suspendSinkNative", "(Ljava/lang/String;)Z", (void*)suspendSinkNative},
+    {"resumeSinkNative", "(Ljava/lang/String;)Z", (void*)resumeSinkNative},
+    {"getSinkPropertiesNative", "(Ljava/lang/String;)[Ljava/lang/Object;",
+                                    (void *)getSinkPropertiesNative},
 };
 
 int register_android_server_BluetoothA2dpService(JNIEnv *env) {
@@ -425,12 +261,8 @@ int register_android_server_BluetoothA2dpService(JNIEnv *env) {
     }
 
 #ifdef HAVE_BLUETOOTH
-    method_onHeadsetCreated = env->GetMethodID(clazz, "onHeadsetCreated", "(Ljava/lang/String;)V");
-    method_onHeadsetRemoved = env->GetMethodID(clazz, "onHeadsetRemoved", "(Ljava/lang/String;)V");
-    method_onSinkConnected = env->GetMethodID(clazz, "onSinkConnected", "(Ljava/lang/String;)V");
-    method_onSinkDisconnected = env->GetMethodID(clazz, "onSinkDisconnected", "(Ljava/lang/String;)V");
-    method_onSinkPlaying = env->GetMethodID(clazz, "onSinkPlaying", "(Ljava/lang/String;)V");
-    method_onSinkStopped = env->GetMethodID(clazz, "onSinkStopped", "(Ljava/lang/String;)V");
+    method_onSinkPropertyChanged = env->GetMethodID(clazz, "onSinkPropertyChanged",
+                                          "(Ljava/lang/String;[Ljava/lang/String;)V");
 #endif
 
     return AndroidRuntime::registerNativeMethods(env,

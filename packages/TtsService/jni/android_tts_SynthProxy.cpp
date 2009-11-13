@@ -41,7 +41,7 @@
 #define FILTER_LOWSHELF_ATTENUATION -18.0f // in dB
 #define FILTER_TRANSITION_FREQ 1100.0f     // in Hz
 #define FILTER_SHELF_SLOPE 1.0f            // Q
-#define FILTER_GAIN 6.0f // linear gain
+#define FILTER_GAIN 5.5f // linear gain
 // such a huge gain is justified by how much energy in the low frequencies is "wasted" at the output
 // of the synthesis. The low shelving filter removes it, leaving room for amplification.
 
@@ -153,7 +153,7 @@ class SynthProxyJniStorage {
         AudioTrack*               mAudioOut;
         AudioSystem::stream_type  mStreamType;
         uint32_t                  mSampleRate;
-        AudioSystem::audio_format mAudFormat;
+        uint32_t                  mAudFormat;
         int                       mNbChannels;
         int8_t *                  mBuffer;
         size_t                    mBufferSize;
@@ -200,7 +200,6 @@ class SynthProxyJniStorage {
             mSampleRate = rate;
             mAudFormat  = format;
             mNbChannels = channel;
-
             mStreamType = streamType;
 
             // retrieve system properties to ensure successful creation of the
@@ -221,7 +220,8 @@ class SynthProxyJniStorage {
             if (minBufCount < 2) minBufCount = 2;
             int minFrameCount = (afFrameCount * rate * minBufCount)/afSampleRate;
 
-            mAudioOut = new AudioTrack(mStreamType, rate, format, channel,
+            mAudioOut = new AudioTrack(mStreamType, rate, format,
+                    (channel == 2) ? AudioSystem::CHANNEL_OUT_STEREO : AudioSystem::CHANNEL_OUT_MONO,
                     minFrameCount > 4096 ? minFrameCount : 4096,
                     0, 0, 0, 0); // not using an AudioTrack callback
 
@@ -264,7 +264,7 @@ void prepAudioTrack(SynthProxyJniStorage* pJniData, AudioSystem::stream_type str
  * Directly speaks using AudioTrack or write to file
  */
 static tts_callback_status ttsSynthDoneCB(void *& userdata, uint32_t rate,
-                           AudioSystem::audio_format format, int channel,
+                           uint32_t format, int channel,
                            int8_t *&wav, size_t &bufferSize, tts_synth_status status) {
     //LOGV("ttsSynthDoneCallback: %d bytes", bufferSize);
 
@@ -284,7 +284,7 @@ static tts_callback_status ttsSynthDoneCB(void *& userdata, uint32_t rate,
         }
 
         if (bufferSize > 0) {
-            prepAudioTrack(pJniData, pForAfter->streamType, rate, format, channel);
+            prepAudioTrack(pJniData, pForAfter->streamType, rate, (AudioSystem::audio_format)format, channel);
             if (pJniData->mAudioOut) {
                 applyFilter((int16_t*)wav, bufferSize/2);
                 pJniData->mAudioOut->write(wav, bufferSize);
@@ -721,6 +721,27 @@ android_tts_SynthProxy_stop(JNIEnv *env, jobject thiz, jint jniData)
 }
 
 
+static int
+android_tts_SynthProxy_stopSync(JNIEnv *env, jobject thiz, jint jniData)
+{
+    int result = TTS_FAILURE;
+
+    if (jniData == 0) {
+        LOGE("android_tts_SynthProxy_stop(): invalid JNI data");
+        return result;
+    }
+
+    // perform a regular stop
+    result = android_tts_SynthProxy_stop(env, thiz, jniData);
+    // but wait on the engine having released the engine mutex which protects
+    // the synthesizer resources.
+    engineMutex.lock();
+    engineMutex.unlock();
+
+    return result;
+}
+
+
 static jobjectArray
 android_tts_SynthProxy_getLanguage(JNIEnv *env, jobject thiz, jint jniData)
 {
@@ -777,6 +798,10 @@ static JNINativeMethod gMethods[] = {
     {   "native_stop",
         "(I)I",
         (void*)android_tts_SynthProxy_stop
+    },
+    {   "native_stopSync",
+        "(I)I",
+        (void*)android_tts_SynthProxy_stopSync
     },
     {   "native_speak",
         "(ILjava/lang/String;I)I",

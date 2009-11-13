@@ -20,9 +20,8 @@ package android.hardware;
  * Used for receiving notifications from the SensorManager when
  * sensor values have changed.
  * 
- * This interface is deprecated, use 
+ * @deprecated Use 
  * {@link android.hardware.SensorEventListener SensorEventListener} instead.
- * 
  */
 @Deprecated
 public interface SensorListener {

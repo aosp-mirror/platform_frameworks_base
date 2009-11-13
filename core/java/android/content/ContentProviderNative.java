@@ -33,6 +33,7 @@ import android.os.ParcelFileDescriptor;
 import android.os.Parcelable;
 
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
 
 /**
  * {@hide}
@@ -105,6 +106,20 @@ abstract public class ContentProviderNative extends Binder implements IContentPr
                     return true;
                 }
 
+                case QUERY_ENTITIES_TRANSACTION:
+                {
+                    data.enforceInterface(IContentProvider.descriptor);
+                    Uri url = Uri.CREATOR.createFromParcel(data);
+                    String selection = data.readString();
+                    String[] selectionArgs = data.readStringArray();
+                    String sortOrder = data.readString();
+                    EntityIterator entityIterator = queryEntities(url, selection, selectionArgs,
+                            sortOrder);
+                    reply.writeNoException();
+                    reply.writeStrongBinder(new IEntityIteratorImpl(entityIterator).asBinder());
+                    return true;
+                }
+
                 case GET_TYPE_TRANSACTION:
                 {
                     data.enforceInterface(IContentProvider.descriptor);
@@ -137,6 +152,21 @@ abstract public class ContentProviderNative extends Binder implements IContentPr
                     int count = bulkInsert(url, values);
                     reply.writeNoException();
                     reply.writeInt(count);
+                    return true;
+                }
+
+                case APPLY_BATCH_TRANSACTION:
+                {
+                    data.enforceInterface(IContentProvider.descriptor);
+                    final int numOperations = data.readInt();
+                    final ArrayList<ContentProviderOperation> operations =
+                            new ArrayList<ContentProviderOperation>(numOperations);
+                    for (int i = 0; i < numOperations; i++) {
+                        operations.add(i, ContentProviderOperation.CREATOR.createFromParcel(data));
+                    }
+                    final ContentProviderResult[] results = applyBatch(operations);
+                    reply.writeNoException();
+                    reply.writeTypedArray(results, 0);
                     return true;
                 }
 
@@ -206,15 +236,6 @@ abstract public class ContentProviderNative extends Binder implements IContentPr
                     }
                     return true;
                 }
-
-                case GET_SYNC_ADAPTER_TRANSACTION:
-                {
-                    data.enforceInterface(IContentProvider.descriptor);
-                    ISyncAdapter sa = getSyncAdapter();
-                    reply.writeNoException();
-                    reply.writeStrongBinder(sa != null ? sa.asBinder() : null);
-                    return true;
-                }
             }
         } catch (Exception e) {
             DatabaseUtils.writeExceptionToParcel(reply, e);
@@ -222,6 +243,32 @@ abstract public class ContentProviderNative extends Binder implements IContentPr
         }
 
         return super.onTransact(code, data, reply, flags);
+    }
+
+    /**
+     * @hide
+     */
+    private class IEntityIteratorImpl extends IEntityIterator.Stub {
+        private final EntityIterator mEntityIterator;
+
+        IEntityIteratorImpl(EntityIterator iterator) {
+            mEntityIterator = iterator;
+        }
+        public boolean hasNext() throws RemoteException {
+            return mEntityIterator.hasNext();
+        }
+
+        public Entity next() throws RemoteException {
+            return mEntityIterator.next();
+        }
+
+        public void reset() throws RemoteException {
+            mEntityIterator.reset();
+        }
+
+        public void close() throws RemoteException {
+            mEntityIterator.close();
+        }
     }
 
     public IBinder asBinder()
@@ -297,12 +344,70 @@ final class ContentProviderProxy implements IContentProvider
         BulkCursorToCursorAdaptor adaptor = new BulkCursorToCursorAdaptor();
         IBulkCursor bulkCursor = bulkQuery(url, projection, selection, selectionArgs, sortOrder,
                 adaptor.getObserver(), window);
-         
+
         if (bulkCursor == null) {
             return null;
         }
         adaptor.set(bulkCursor);
         return adaptor;
+    }
+
+    /**
+     * @hide
+     */
+    public EntityIterator queryEntities(Uri url, String selection, String[] selectionArgs,
+            String sortOrder)
+            throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+
+        data.writeInterfaceToken(IContentProvider.descriptor);
+
+        url.writeToParcel(data, 0);
+        data.writeString(selection);
+        data.writeStringArray(selectionArgs);
+        data.writeString(sortOrder);
+
+        mRemote.transact(IContentProvider.QUERY_ENTITIES_TRANSACTION, data, reply, 0);
+
+        DatabaseUtils.readExceptionFromParcel(reply);
+
+        IBinder entityIteratorBinder = reply.readStrongBinder();
+
+        data.recycle();
+        reply.recycle();
+
+        return new RemoteEntityIterator(IEntityIterator.Stub.asInterface(entityIteratorBinder));
+    }
+
+    /**
+     * @hide
+     */
+    static class RemoteEntityIterator implements EntityIterator {
+        private final IEntityIterator mEntityIterator;
+        RemoteEntityIterator(IEntityIterator entityIterator) {
+            mEntityIterator = entityIterator;
+        }
+
+        public boolean hasNext() throws RemoteException {
+            return mEntityIterator.hasNext();
+        }
+
+        public Entity next() throws RemoteException {
+            return mEntityIterator.next();
+        }
+
+        public void reset() throws RemoteException {
+            mEntityIterator.reset();
+        }
+
+        public void close() {
+            try {
+                mEntityIterator.close();
+            } catch (RemoteException e) {
+                // doesn't matter
+            }
+        }
     }
 
     public String getType(Uri url) throws RemoteException
@@ -364,6 +469,28 @@ final class ContentProviderProxy implements IContentProvider
         reply.recycle();
 
         return count;
+    }
+
+    public ContentProviderResult[] applyBatch(ArrayList<ContentProviderOperation> operations)
+            throws RemoteException, OperationApplicationException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+
+        data.writeInterfaceToken(IContentProvider.descriptor);
+        data.writeInt(operations.size());
+        for (ContentProviderOperation operation : operations) {
+            operation.writeToParcel(data, 0);
+        }
+        mRemote.transact(IContentProvider.APPLY_BATCH_TRANSACTION, data, reply, 0);
+
+        DatabaseUtils.readExceptionWithOperationApplicationExceptionFromParcel(reply);
+        final ContentProviderResult[] results =
+                reply.createTypedArray(ContentProviderResult.CREATOR);
+
+        data.recycle();
+        reply.recycle();
+
+        return results;
     }
 
     public int delete(Uri url, String selection, String[] selectionArgs)
@@ -454,23 +581,6 @@ final class ContentProviderProxy implements IContentProvider
         reply.recycle();
 
         return fd;
-    }
-
-    public ISyncAdapter getSyncAdapter() throws RemoteException {
-        Parcel data = Parcel.obtain();
-        Parcel reply = Parcel.obtain();
-
-        data.writeInterfaceToken(IContentProvider.descriptor);
-
-        mRemote.transact(IContentProvider.GET_SYNC_ADAPTER_TRANSACTION, data, reply, 0);
-
-        DatabaseUtils.readExceptionFromParcel(reply);
-        ISyncAdapter syncAdapter = ISyncAdapter.Stub.asInterface(reply.readStrongBinder());
-
-        data.recycle();
-        reply.recycle();
-
-        return syncAdapter;
     }
 
     private IBinder mRemote;

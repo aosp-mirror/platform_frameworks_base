@@ -175,8 +175,7 @@ Vector<TYPE>::Vector()
     : VectorImpl(sizeof(TYPE),
                 ((traits<TYPE>::has_trivial_ctor   ? HAS_TRIVIAL_CTOR   : 0)
                 |(traits<TYPE>::has_trivial_dtor   ? HAS_TRIVIAL_DTOR   : 0)
-                |(traits<TYPE>::has_trivial_copy   ? HAS_TRIVIAL_COPY   : 0)
-                |(traits<TYPE>::has_trivial_assign ? HAS_TRIVIAL_ASSIGN : 0))
+                |(traits<TYPE>::has_trivial_copy   ? HAS_TRIVIAL_COPY   : 0))
                 )
 {
 }

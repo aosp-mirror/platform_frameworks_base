@@ -16,11 +16,15 @@
 
 package android.widget;
 
+import com.android.internal.R;
+
 import android.content.Context;
+import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
@@ -30,7 +34,7 @@ import android.view.View.OnFocusChangeListener;
 
 
 /**
- * 
+ *
  * Displays a list of tab labels representing each page in the parent's tab
  * collection. The container object for this widget is
  * {@link android.widget.TabHost TabHost}. When the user selects a tab, this
@@ -64,25 +68,54 @@ public class TabWidget extends LinearLayout implements OnFocusChangeListener {
         super(context, attrs);
         initTabWidget();
 
-        TypedArray a = 
+        TypedArray a =
             context.obtainStyledAttributes(attrs, com.android.internal.R.styleable.TabWidget,
                     defStyle, 0);
 
         a.recycle();
     }
-    
+
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         mStripMoved = true;
         super.onSizeChanged(w, h, oldw, oldh);
     }
 
+    @Override
+    protected int getChildDrawingOrder(int childCount, int i) {
+        // Always draw the selected tab last, so that drop shadows are drawn
+        // in the correct z-order.
+        if (i == childCount - 1) {
+            return mSelectedTab;
+        } else if (i >= mSelectedTab) {
+            return i + 1;
+        } else {
+            return i;
+        }
+    }
+
     private void initTabWidget() {
         setOrientation(LinearLayout.HORIZONTAL);
-        mBottomLeftStrip = mContext.getResources().getDrawable(
-                com.android.internal.R.drawable.tab_bottom_left);
-        mBottomRightStrip = mContext.getResources().getDrawable(
-                com.android.internal.R.drawable.tab_bottom_right);
+        mGroupFlags |= FLAG_USE_CHILD_DRAWING_ORDER;
+
+        final Context context = mContext;
+        final Resources resources = context.getResources();
+        
+        if (context.getApplicationInfo().targetSdkVersion <= Build.VERSION_CODES.DONUT) {
+            // Donut apps get old color scheme
+            mBottomLeftStrip = resources.getDrawable(
+                    com.android.internal.R.drawable.tab_bottom_left_v4);
+            mBottomRightStrip = resources.getDrawable(
+                    com.android.internal.R.drawable.tab_bottom_right_v4); 
+        } else {
+            // Use modern color scheme for Eclair and beyond
+            mBottomLeftStrip = resources.getDrawable(
+                    com.android.internal.R.drawable.tab_bottom_left);
+            mBottomRightStrip = resources.getDrawable(
+                    com.android.internal.R.drawable.tab_bottom_right); 
+        }
+
+
         // Deal with focus, as we don't want the focus to go by default
         // to a tab other than the current tab
         setFocusable(true);
@@ -156,7 +189,7 @@ public class TabWidget extends LinearLayout implements OnFocusChangeListener {
         }
         super.childDrawableStateChanged(child);
     }
-    
+
     @Override
     public void dispatchDraw(Canvas canvas) {
         super.dispatchDraw(canvas);
@@ -169,17 +202,17 @@ public class TabWidget extends LinearLayout implements OnFocusChangeListener {
         }
 
         View selectedChild = getChildTabViewAt(mSelectedTab);
-        
+
         mBottomLeftStrip.setState(selectedChild.getDrawableState());
         mBottomRightStrip.setState(selectedChild.getDrawableState());
-        
+
         if (mStripMoved) {
             Rect selBounds = new Rect(); // Bounds of the selected tab indicator
             selBounds.left = selectedChild.getLeft();
             selBounds.right = selectedChild.getRight();
             final int myHeight = getHeight();
             mBottomLeftStrip.setBounds(
-                    Math.min(0, selBounds.left 
+                    Math.min(0, selBounds.left
                                  - mBottomLeftStrip.getIntrinsicWidth()),
                     myHeight - mBottomLeftStrip.getIntrinsicHeight(),
                     selBounds.left,
@@ -187,12 +220,12 @@ public class TabWidget extends LinearLayout implements OnFocusChangeListener {
             mBottomRightStrip.setBounds(
                     selBounds.right,
                     myHeight - mBottomRightStrip.getIntrinsicHeight(),
-                    Math.max(getWidth(), 
+                    Math.max(getWidth(),
                             selBounds.right + mBottomRightStrip.getIntrinsicWidth()),
                     myHeight);
             mStripMoved = false;
         }
-        
+
         mBottomLeftStrip.draw(canvas);
         mBottomRightStrip.draw(canvas);
     }
@@ -202,26 +235,26 @@ public class TabWidget extends LinearLayout implements OnFocusChangeListener {
      * This method is used to bring a tab to the front of the Widget,
      * and is used to post to the rest of the UI that a different tab
      * has been brought to the foreground.
-     * 
-     * Note, this is separate from the traditional "focus" that is 
-     * employed from the view logic.  
-     * 
-     * For instance, if we have a list in a tabbed view, a user may be 
-     * navigating up and down the list, moving the UI focus (orange 
-     * highlighting) through the list items.  The cursor movement does 
-     * not effect the "selected" tab though, because what is being 
-     * scrolled through is all on the same tab.  The selected tab only 
-     * changes when we navigate between tabs (moving from the list view 
+     *
+     * Note, this is separate from the traditional "focus" that is
+     * employed from the view logic.
+     *
+     * For instance, if we have a list in a tabbed view, a user may be
+     * navigating up and down the list, moving the UI focus (orange
+     * highlighting) through the list items.  The cursor movement does
+     * not effect the "selected" tab though, because what is being
+     * scrolled through is all on the same tab.  The selected tab only
+     * changes when we navigate between tabs (moving from the list view
      * to the next tabbed view, in this example).
-     * 
+     *
      * To move both the focus AND the selected tab at once, please use
-     * {@link #setCurrentTab}. Normally, the view logic takes care of 
-     * adjusting the focus, so unless you're circumventing the UI, 
+     * {@link #setCurrentTab}. Normally, the view logic takes care of
+     * adjusting the focus, so unless you're circumventing the UI,
      * you'll probably just focus your interest here.
-     * 
+     *
      *  @param index The tab that you want to indicate as the selected
      *  tab (tab brought to the front of the widget)
-     *  
+     *
      *  @see #focusCurrentTab
      */
     public void setCurrentTab(int index) {
@@ -234,19 +267,19 @@ public class TabWidget extends LinearLayout implements OnFocusChangeListener {
         getChildTabViewAt(mSelectedTab).setSelected(true);
         mStripMoved = true;
     }
-    
+
     /**
      * Sets the current tab and focuses the UI on it.
-     * This method makes sure that the focused tab matches the selected 
-     * tab, normally at {@link #setCurrentTab}.  Normally this would not 
-     * be an issue if we go through the UI, since the UI is responsible 
-     * for calling TabWidget.onFocusChanged(), but in the case where we 
-     * are selecting the tab programmatically, we'll need to make sure 
+     * This method makes sure that the focused tab matches the selected
+     * tab, normally at {@link #setCurrentTab}.  Normally this would not
+     * be an issue if we go through the UI, since the UI is responsible
+     * for calling TabWidget.onFocusChanged(), but in the case where we
+     * are selecting the tab programmatically, we'll need to make sure
      * focus keeps up.
-     * 
-     *  @param index The tab that you want focused (highlighted in orange) 
+     *
+     *  @param index The tab that you want focused (highlighted in orange)
      *  and selected (tab brought to the front of the widget)
-     *  
+     *
      *  @see #setCurrentTab
      */
     public void focusCurrentTab(int index) {
@@ -254,18 +287,18 @@ public class TabWidget extends LinearLayout implements OnFocusChangeListener {
 
         // set the tab
         setCurrentTab(index);
-        
+
         // change the focus if applicable.
         if (oldTab != index) {
             getChildTabViewAt(index).requestFocus();
         }
     }
-    
+
     @Override
     public void setEnabled(boolean enabled) {
         super.setEnabled(enabled);
         int count = getTabCount();
-        
+
         for (int i = 0; i < count; i++) {
             View child = getChildTabViewAt(i);
             child.setEnabled(enabled);
@@ -318,7 +351,7 @@ public class TabWidget extends LinearLayout implements OnFocusChangeListener {
             getChildTabViewAt(mSelectedTab).requestFocus();
             return;
         }
-        
+
         if (hasFocus) {
             int i = 0;
             int numTabs = getTabCount();
@@ -354,7 +387,7 @@ public class TabWidget extends LinearLayout implements OnFocusChangeListener {
         /**
          * Informs the TabHost which tab was selected. It also indicates
          * if the tab was clicked/pressed or just focused into.
-         *  
+         *
          * @param tabIndex index of the tab that was selected
          * @param clicked whether the selection changed due to a touch/click
          * or due to focus entering the tab through navigation. Pass true

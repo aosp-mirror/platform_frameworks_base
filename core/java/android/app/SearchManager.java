@@ -27,6 +27,7 @@ import android.os.Handler;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.server.search.SearchableInfo;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
 
@@ -329,8 +330,8 @@ import java.util.List;
  * you'll need to update your searchable activity (or other activities) to receive the intents
  * as you've defined them.</li>
  * <li>Implement a Content Provider that provides suggestions.  If you already have one, and it 
- * has access to your suggestions data.  If not, you'll have to create one.
- * You'll also provide information about your Content Provider in your 
+ * has access to your suggestions data, you can use that provider. If not, you'll have to create 
+ * one. You'll also provide information about your Content Provider in your 
  * package's <a href="{@docRoot}guide/topics/manifest/manifest-intro.html">manifest</a>.</li>
  * <li>Update your searchable activity's XML configuration file.  There are two categories of
  * information used for suggestions:
@@ -768,19 +769,17 @@ import java.util.List;
  *     </tr>
  *     
  *     <tr><th>android:icon</th>
- *         <td>If provided, this icon will be used <i>in place</i> of the label string.  This
- *         is provided in order to present logos or other non-textual banners.</td>
+ *         <td>If provided, this icon will be shown in place of the label above the search box.
+ *           This is a reference to a drawable (icon) resource. Note that the application icon
+ *           is also used as an icon to the left of the search box and you cannot modify this
+ *           behavior, so including the icon attribute is unecessary and this may be
+ *           deprecated in the future.</td>
  *         <td align="center">No</td>
  *     </tr>
  *     
  *     <tr><th>android:hint</th>
  *         <td>This is the text to display in the search text field when no user text has been 
  *             entered.</td>
- *         <td align="center">No</td>
- *     </tr>
- *
- *     <tr><th>android:searchButtonText</th>
- *         <td>If provided, this text will replace the default text in the "Search" button.</td>
  *         <td align="center">No</td>
  *     </tr>
  *     
@@ -791,15 +790,17 @@ import java.util.List;
  *                 <tbody>
  *                 <tr><th>showSearchLabelAsBadge</th>
  *                     <td>If set, this flag enables the display of the search target (label) 
- *                         within the search bar.  If this flag and showSearchIconAsBadge
+ *                         above the search box.  If this flag and showSearchIconAsBadge
  *                         (see below) are both not set, no badge will be shown.</td>
  *                 </tr>
  *                 <tr><th>showSearchIconAsBadge</th>
- *                     <td>If set, this flag enables the display of the search target (icon) within
- *                         the search bar.  If this flag and showSearchLabelAsBadge
+ *                     <td>If set, this flag enables the display of the search target (icon)
+ *                         above the search box.  If this flag and showSearchLabelAsBadge
  *                         (see above) are both not set, no badge will be shown.  If both flags
  *                         are set, showSearchIconAsBadge has precedence and the icon will be
- *                         shown.</td>
+ *                         shown. Because the application icon is now used to the left of the
+ *                         search box by default, using this search mode is no longer necessary
+ *                         and may be deprecated in the future.</td>
  *                 </tr>
  *                 <tr><th>queryRewriteFromData</th>
  *                     <td>If set, this flag causes the suggestion column SUGGEST_COLUMN_INTENT_DATA
@@ -1180,7 +1181,7 @@ import java.util.List;
  *     Bundle appData = new Bundle();
  *     appData.put...();
  *     appData.put...();
- *     startSearch(null, false, appData);
+ *     startSearch(null, false, appData, false);
  *     return true;
  * }</pre> 
  *
@@ -1288,6 +1289,25 @@ public class SearchManager
     public final static String SOURCE = "source";
 
     /**
+     * Intent extra data key: Use {@link android.content.Intent#getBundleExtra
+     * content.Intent.getBundleExtra(SEARCH_MODE)} to get the search mode used
+     * to launch the intent.
+     * The only current value for this is {@link #MODE_GLOBAL_SEARCH_SUGGESTION}.
+     *
+     * @hide
+     */
+    public final static String SEARCH_MODE = "search_mode";
+
+    /**
+     * Value for the {@link #SEARCH_MODE} key.
+     * This is used if the intent was launched by clicking a suggestion in global search
+     * mode (Quick Search Box).
+     *
+     * @hide
+     */
+    public static final String MODE_GLOBAL_SEARCH_SUGGESTION = "global_search_suggestion";
+
+    /**
      * Intent extra data key: Use this key with Intent.ACTION_SEARCH and
      * {@link android.content.Intent#getIntExtra content.Intent.getIntExtra()}
      * to obtain the keycode that the user used to trigger this query.  It will be zero if the
@@ -1342,6 +1362,10 @@ public class SearchManager
                 = "DialogCursorProtocol.CLICK.sendPosition";
         public final static String CLICK_SEND_MAX_DISPLAY_POS
                 = "DialogCursorProtocol.CLICK.sendDisplayPosition";
+        public final static String CLICK_SEND_ACTION_KEY
+                = "DialogCursorProtocol.CLICK.sendActionKey";
+        public final static String CLICK_SEND_ACTION_MSG
+                = "DialogCursorProtocol.CLICK.sendActionMsg";
         public final static String CLICK_RECEIVE_SELECTED_POS
                 = "DialogCursorProtocol.CLICK.receiveSelectedPosition";
 
@@ -1349,6 +1373,14 @@ public class SearchManager
          * When the threshold received in {@link #POST_REFRESH_RECEIVE_DISPLAY_NOTIFY} is displayed.
          */
         public final static int THRESH_HIT = 3;
+
+        /**
+         * When a search is started without using a suggestion.
+         */
+        public final static int SEARCH = 4;
+        public final static String SEARCH_SEND_MAX_DISPLAY_POS
+                = "DialogCursorProtocol.SEARCH.sendDisplayPosition";
+        public final static String SEARCH_SEND_QUERY = "DialogCursorProtocol.SEARCH.query";
     }
 
     /**
@@ -1559,6 +1591,12 @@ public class SearchManager
     public final static String SUGGEST_NEVER_MAKE_SHORTCUT = "_-1";
 
     /**
+     * Query parameter added to suggestion queries to limit the number of suggestions returned.
+     * This limit is only advisory and suggestion providers may chose to ignore it.
+     */
+    public final static String SUGGEST_PARAMETER_LIMIT = "limit";
+
+    /**
      * If a suggestion has this value in {@link #SUGGEST_COLUMN_INTENT_ACTION},
      * the search dialog will switch to a different suggestion source when the
      * suggestion is clicked. 
@@ -1636,7 +1674,17 @@ public class SearchManager
 
     private final Context mContext;
 
+    /**
+     * compact representation of the activity associated with this search manager so
+     * we can say who we are when starting search.  the search managerservice, in turn,
+     * uses this to properly handle the back stack.
+     */
     private int mIdent;
+
+    /**
+     * The package associated with this seach manager.
+     */
+    private String mAssociatedPackage;
     
     // package private since they are used by the inner class SearchManagerCallback
     /* package */ final Handler mHandler;
@@ -1656,11 +1704,15 @@ public class SearchManager
         return mIdent != 0;
     }
     
-    /*package*/ void setIdent(int ident) {
+    /*package*/ void setIdent(int ident, ComponentName component) {
         if (mIdent != 0) {
             throw new IllegalStateException("mIdent already set");
         }
+        if (component == null) {
+            throw new IllegalArgumentException("component must be non-null");
+        }
         mIdent = ident;
+        mAssociatedPackage = component.getPackageName();
     }
     
     /**
@@ -1710,12 +1762,50 @@ public class SearchManager
                             boolean globalSearch) {
         if (mIdent == 0) throw new IllegalArgumentException(
                 "Called from outside of an Activity context");
+        if (!globalSearch && !mAssociatedPackage.equals(launchActivity.getPackageName())) {
+            Log.w(TAG, "invoking app search on a different package " +
+                    "not associated with this search manager");
+        }
         try {
             // activate the search manager and start it up!
             mService.startSearch(initialQuery, selectInitialQuery, launchActivity, appSearchData,
                     globalSearch, mSearchManagerCallback, mIdent);
         } catch (RemoteException ex) {
-            Log.e(TAG, "startSearch() failed: " + ex);
+            Log.e(TAG, "startSearch() failed.", ex);
+        }
+    }
+
+    /**
+     * Similar to {@link #startSearch} but actually fires off the search query after invoking
+     * the search dialog.  Made available for testing purposes.
+     *
+     * @param query The query to trigger.  If empty, request will be ignored.
+     * @param launchActivity The ComponentName of the activity that has launched this search.
+     * @param appSearchData An application can insert application-specific
+     * context here, in order to improve quality or specificity of its own
+     * searches.  This data will be returned with SEARCH intent(s).  Null if
+     * no extra data is required.
+     *
+     * @see #startSearch
+     */
+    public void triggerSearch(String query,
+                              ComponentName launchActivity,
+                              Bundle appSearchData) {
+        if (mIdent == 0) throw new IllegalArgumentException(
+                "Called from outside of an Activity context");
+        if (!mAssociatedPackage.equals(launchActivity.getPackageName())) {
+            throw new IllegalArgumentException("invoking app search on a different package " +
+                    "not associated with this search manager");
+        }
+        if (query == null || TextUtils.getTrimmedLength(query) == 0) {
+            Log.w(TAG, "triggerSearch called with empty query, ignoring.");
+            return;
+        }
+        try {
+            mService.triggerSearch(query, launchActivity, appSearchData, mSearchManagerCallback,
+                    mIdent);
+        } catch (RemoteException ex) {
+            Log.e(TAG, "triggerSearch() failed.", ex);
         }
     }
 
@@ -1836,6 +1926,7 @@ public class SearchManager
     /**
      * @deprecated This method is an obsolete internal implementation detail. Do not use.
      */
+    @Deprecated
     public void onCancel(DialogInterface dialog) {
         throw new UnsupportedOperationException();
     }
@@ -1843,6 +1934,7 @@ public class SearchManager
     /**
      * @deprecated This method is an obsolete internal implementation detail. Do not use.
      */
+    @Deprecated
     public void onDismiss(DialogInterface dialog) {
         throw new UnsupportedOperationException();
     }
@@ -1889,6 +1981,21 @@ public class SearchManager
      * @hide because SearchableInfo is not part of the API.
      */
     public Cursor getSuggestions(SearchableInfo searchable, String query) {
+        return getSuggestions(searchable, query, -1);
+    }
+
+    /**
+     * Gets a cursor with search suggestions.
+     *
+     * @param searchable Information about how to get the suggestions.
+     * @param query The search text entered (so far).
+     * @param limit The query limit to pass to the suggestion provider. This is advisory,
+     *        the returned cursor may contain more rows. Pass {@code -1} for no limit.
+     * @return a cursor with suggestions, or <code>null</null> the suggestion query failed.
+     *
+     * @hide because SearchableInfo is not part of the API.
+     */
+    public Cursor getSuggestions(SearchableInfo searchable, String query, int limit) {
         if (searchable == null) {
             return null;
         }
@@ -1900,7 +2007,9 @@ public class SearchManager
 
         Uri.Builder uriBuilder = new Uri.Builder()
                 .scheme(ContentResolver.SCHEME_CONTENT)
-                .authority(authority);
+                .authority(authority)
+                .query("")  // TODO: Remove, workaround for a bug in Uri.writeToParcel()
+                .fragment("");  // TODO: Remove, workaround for a bug in Uri.writeToParcel()
 
         // if content path provided, insert it now
         final String contentPath = searchable.getSuggestPath();
@@ -1908,7 +2017,7 @@ public class SearchManager
             uriBuilder.appendEncodedPath(contentPath);
         }
 
-        // append standard suggestion query path 
+        // append standard suggestion query path
         uriBuilder.appendPath(SearchManager.SUGGEST_URI_PATH_QUERY);
 
         // get the query selection, may be null
@@ -1921,10 +2030,11 @@ public class SearchManager
             uriBuilder.appendPath(query);
         }
 
-        Uri uri = uriBuilder
-                .query("")     // TODO: Remove, workaround for a bug in Uri.writeToParcel()
-                .fragment("")  // TODO: Remove, workaround for a bug in Uri.writeToParcel()
-                .build();
+        if (limit > 0) {
+            uriBuilder.appendQueryParameter(SUGGEST_PARAMETER_LIMIT, String.valueOf(limit));
+        }
+
+        Uri uri = uriBuilder.build();
 
         // finally, make the query
         return mContext.getContentResolver().query(uri, null, selection, selArgs, null);

@@ -168,5 +168,31 @@ public class Rfc822Token {
 
         return sb.toString();
     }
+
+    public int hashCode() {
+        int result = 17;
+        if (mName != null) result = 31 * result + mName.hashCode();
+        if (mAddress != null) result = 31 * result + mAddress.hashCode();
+        if (mComment != null) result = 31 * result + mComment.hashCode();
+        return result;
+    }
+
+    private static boolean stringEquals(String a, String b) {
+        if (a == null) {
+            return (b == null);
+        } else {
+            return (a.equals(b));
+        }
+    }
+
+    public boolean equals(Object o) {
+        if (!(o instanceof Rfc822Token)) {
+            return false;
+        }
+        Rfc822Token other = (Rfc822Token) o;
+        return (stringEquals(mName, other.mName) &&
+                stringEquals(mAddress, other.mAddress) &&
+                stringEquals(mComment, other.mComment));
+    }
 }
 

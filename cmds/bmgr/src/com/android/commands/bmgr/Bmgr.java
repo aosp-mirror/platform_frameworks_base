@@ -268,7 +268,7 @@ public final class Bmgr {
 
     private void printRestoreSets(RestoreSet[] sets) {
         for (RestoreSet s : sets) {
-            System.out.println("  " + s.token + " : " + s.name);
+            System.out.println("  " + Long.toHexString(s.token) + " : " + s.name);
         }
     }
 
@@ -294,7 +294,7 @@ public final class Bmgr {
     private void doRestore() {
         long token;
         try {
-            token = Long.parseLong(nextArg());
+            token = Long.parseLong(nextArg(), 16);
         } catch (NumberFormatException e) {
             showUsage();
             return;
@@ -311,12 +311,13 @@ public final class Bmgr {
                 return;
             }
             RestoreSet[] sets = mRestore.getAvailableRestoreSets();
-            for (RestoreSet s : sets) {
-                if (s.token == token) {
-                    System.out.println("Scheduling restore: " + s.name);
-                    mRestore.performRestore(token, observer);
-                    didRestore = true;
-                    break;
+            if (sets != null) {
+                for (RestoreSet s : sets) {
+                    if (s.token == token) {
+                        System.out.println("Scheduling restore: " + s.name);
+                        didRestore = (mRestore.performRestore(token, observer) == 0);
+                        break;
+                    }
                 }
             }
             if (!didRestore) {
@@ -327,21 +328,27 @@ public final class Bmgr {
                     printRestoreSets(sets);
                 }
             }
+
+            // if we kicked off a restore successfully, we have to wait for it
+            // to complete before we can shut down the restore session safely
+            if (didRestore) {
+                synchronized (observer) {
+                    while (!observer.done) {
+                        try {
+                            observer.wait();
+                        } catch (InterruptedException ex) {
+                        }
+                    }
+                }
+            }
+
+            // once the restore has finished, close down the session and we're done
             mRestore.endRestoreSession();
         } catch (RemoteException e) {
             System.err.println(e.toString());
             System.err.println(BMGR_NOT_RUNNING_ERR);
         }
 
-        // now wait for it to be done
-        synchronized (observer) {
-            while (!observer.done) {
-                try {
-                    observer.wait();
-                } catch (InterruptedException ex) {
-                }
-            }
-        }
         System.out.println("done");
     }
 

@@ -25,6 +25,7 @@ import android.content.pm.ProviderInfo;
 import android.content.pm.ServiceInfo;
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.os.Debug;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.IBinder;
@@ -71,7 +72,8 @@ public interface IApplicationThread extends IInterface {
             Intent intent, boolean rebind) throws RemoteException;
     void scheduleUnbindService(IBinder token,
             Intent intent) throws RemoteException;
-    void scheduleServiceArgs(IBinder token, int startId, Intent args) throws RemoteException;
+    void scheduleServiceArgs(IBinder token, int startId, int flags, Intent args)
+            throws RemoteException;
     void scheduleStopService(IBinder token) throws RemoteException;
     static final int DEBUG_OFF = 0;
     static final int DEBUG_ON = 1;
@@ -81,6 +83,7 @@ public interface IApplicationThread extends IInterface {
             IInstrumentationWatcher testWatcher, int debugMode, boolean restrictedBackupMode,
             Configuration config, Map<String, IBinder> services) throws RemoteException;
     void scheduleExit() throws RemoteException;
+    void scheduleSuicide() throws RemoteException;
     void requestThumbnail(IBinder token) throws RemoteException;
     void scheduleConfigurationChanged(Configuration config) throws RemoteException;
     void updateTimeZone() throws RemoteException;
@@ -88,7 +91,7 @@ public interface IApplicationThread extends IInterface {
     void dumpService(FileDescriptor fd, IBinder servicetoken, String[] args)
             throws RemoteException;
     void scheduleRegisteredReceiver(IIntentReceiver receiver, Intent intent,
-            int resultCode, String data, Bundle extras, boolean ordered)
+            int resultCode, String data, Bundle extras, boolean ordered, boolean sticky)
             throws RemoteException;
     void scheduleLowMemory() throws RemoteException;
     void scheduleActivityConfigurationChanged(IBinder token) throws RemoteException;
@@ -96,6 +99,7 @@ public interface IApplicationThread extends IInterface {
     void profilerControl(boolean start, String path, ParcelFileDescriptor fd)
             throws RemoteException;
     void setSchedulingGroup(int group) throws RemoteException;
+    void getMemoryInfo(Debug.MemoryInfo outInfo) throws RemoteException;
     
     String descriptor = "android.app.IApplicationThread";
 
@@ -129,4 +133,6 @@ public interface IApplicationThread extends IInterface {
     int SET_SCHEDULING_GROUP_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+28;
     int SCHEDULE_CREATE_BACKUP_AGENT_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+29;
     int SCHEDULE_DESTROY_BACKUP_AGENT_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+30;
+    int GET_MEMORY_INFO_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+31;
+    int SCHEDULE_SUICIDE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+32;
 }

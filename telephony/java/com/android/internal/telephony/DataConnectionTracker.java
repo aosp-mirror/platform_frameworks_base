@@ -24,14 +24,18 @@ import android.os.Message;
 import android.os.RemoteException;
 import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
+import android.text.TextUtils;
 import android.util.Log;
+
+import java.util.ArrayList;
 
 /**
  * {@hide}
  *
  */
 public abstract class DataConnectionTracker extends Handler {
-    private static final boolean DBG = true;
+    protected static final boolean DBG = true;
+    protected final String LOG_TAG = "DataConnectionTracker";
 
     /**
      * IDLE: ready to start data connection setup, default state
@@ -67,7 +71,7 @@ public abstract class DataConnectionTracker extends Handler {
         DORMANT
     }
 
-    //***** Event Codes
+    /***** Event Codes *****/
     protected static final int EVENT_DATA_SETUP_COMPLETE = 1;
     protected static final int EVENT_RADIO_AVAILABLE = 3;
     protected static final int EVENT_RECORDS_LOADED = 4;
@@ -94,12 +98,40 @@ public abstract class DataConnectionTracker extends Handler {
     protected static final int EVENT_PS_RESTRICT_ENABLED = 32;
     protected static final int EVENT_PS_RESTRICT_DISABLED = 33;
     public static final int EVENT_CLEAN_UP_CONNECTION = 34;
+    protected static final int EVENT_CDMA_OTA_PROVISION = 35;
+    protected static final int EVENT_RESTART_RADIO = 36;
+    protected static final int EVENT_SET_MASTER_DATA_ENABLE = 37;
 
-    //***** Constants
-    protected static final int RECONNECT_DELAY_INITIAL_MILLIS = 5 * 1000;
+    /***** Constants *****/
 
-    /** Cap out with 30 min retry interval. */
-    protected static final int RECONNECT_DELAY_MAX_MILLIS = 30 * 60 * 1000;
+    protected static final int APN_INVALID_ID = -1;
+    protected static final int APN_DEFAULT_ID = 0;
+    protected static final int APN_MMS_ID = 1;
+    protected static final int APN_SUPL_ID = 2;
+    protected static final int APN_DUN_ID = 3;
+    protected static final int APN_HIPRI_ID = 4;
+    protected static final int APN_NUM_TYPES = 5;
+
+    protected static final int DISABLED = 0;
+    protected static final int ENABLED = 1;
+
+    // responds to the setDataEnabled call - used independently from the APN requests
+    protected boolean mMasterDataEnabled = true;
+
+    protected boolean[] dataEnabled = new boolean[APN_NUM_TYPES];
+    protected int enabledCount = 0;
+
+    /* Currently requested APN type */
+    protected String mRequestedApnType = Phone.APN_TYPE_DEFAULT;
+
+    /** Retry configuration: A doubling of retry times from 5secs to 30minutes */
+    protected static final String DEFAULT_DATA_RETRY_CONFIG = "default_randomization=2000,"
+        + "5000,10000,20000,40000,80000:5000,160000:5000,"
+        + "320000:5000,640000:5000,1280000:5000,1800000:5000";
+
+    /** Retry configuration for secondary networks: 4 tries in 20 sec */
+    protected static final String SECONDARY_DATA_RETRY_CONFIG =
+            "max_retries=3, 5000, 5000, 5000";
 
     /** Slow poll when attempting connection recovery. */
     protected static final int POLL_NETSTAT_SLOW_MILLIS = 5000;
@@ -145,6 +177,9 @@ public abstract class DataConnectionTracker extends Handler {
     protected int mNoRecvPollCount = 0;
     protected boolean netStatPollEnabled = false;
 
+    /** Manage the behavior of data retry after failure */
+    protected RetryManager mRetryMgr = new RetryManager();
+
     // wifi connection status will be updated by sticky intent
     protected boolean mIsWifiConnected = false;
 
@@ -161,6 +196,8 @@ public abstract class DataConnectionTracker extends Handler {
         super();
         this.phone = phone;
     }
+
+    public abstract void dispose();
 
     public Activity getActivity() {
         return activity;
@@ -201,10 +238,13 @@ public abstract class DataConnectionTracker extends Handler {
         if (getDataOnRoamingEnabled() != enabled) {
             Settings.Secure.putInt(phone.getContext().getContentResolver(),
                 Settings.Secure.DATA_ROAMING, enabled ? 1 : 0);
+            if (phone.getServiceState().getRoaming()) {
+                if (enabled) {
+                    mRetryMgr.resetRetryCount();
+                }
+                sendMessage(obtainMessage(EVENT_ROAMING_ON));
+            }
         }
-        Message roamingMsg = phone.getServiceState().getRoaming() ?
-            obtainMessage(EVENT_ROAMING_ON) : obtainMessage(EVENT_ROAMING_OFF);
-        sendMessage(roamingMsg);
     }
 
     //Retrieve the data roaming setting from the shared preferences.
@@ -218,7 +258,7 @@ public abstract class DataConnectionTracker extends Handler {
     }
 
     // abstract handler methods
-    protected abstract void onTrySetupData(String reason);
+    protected abstract boolean onTrySetupData(String reason);
     protected abstract void onRoamingOff();
     protected abstract void onRoamingOn();
     protected abstract void onRadioAvailable();
@@ -229,9 +269,13 @@ public abstract class DataConnectionTracker extends Handler {
     protected abstract void onVoiceCallEnded();
     protected abstract void onCleanUpConnection(boolean tearDown, String reason);
 
-  //***** Overridden from Handler
+    @Override
     public void handleMessage (Message msg) {
         switch (msg.what) {
+
+            case EVENT_ENABLE_NEW_APN:
+                onEnableApn(msg.arg1, msg.arg2);
+                break;
 
             case EVENT_TRY_SETUP_DATA:
                 String reason = null;
@@ -242,6 +286,9 @@ public abstract class DataConnectionTracker extends Handler {
                 break;
 
             case EVENT_ROAMING_OFF:
+                if (getDataOnRoamingEnabled() == false) {
+                    mRetryMgr.resetRetryCount();
+                }
                 onRoamingOff();
                 break;
 
@@ -279,6 +326,11 @@ public abstract class DataConnectionTracker extends Handler {
                 onCleanUpConnection(tearDown, (String)msg.obj);
                 break;
 
+            case EVENT_SET_MASTER_DATA_ENABLE:
+                boolean enabled = (msg.arg1 == ENABLED) ? true : false;
+                onSetDataEnabled(enabled);
+                break;
+
             default:
                 Log.e("DATA", "Unidentified event = " + msg.what);
                 break;
@@ -290,24 +342,18 @@ public abstract class DataConnectionTracker extends Handler {
      * @return {@code false} if data connectivity has been explicitly disabled,
      * {@code true} otherwise.
      */
-    public abstract boolean getDataEnabled();
+    public synchronized boolean getDataEnabled() {
+        return dataEnabled[APN_DEFAULT_ID];
+    }
 
     /**
      * Report on whether data connectivity is enabled
      * @return {@code false} if data connectivity has been explicitly disabled,
      * {@code true} otherwise.
      */
-    public abstract boolean getAnyDataEnabled();
-
-    /**
-     * Prevent mobile data connections from being established,
-     * or once again allow mobile data connections. If the state
-     * toggles, then either tear down or set up data, as
-     * appropriate to match the new state.
-     * @param enable indicates whether to enable ({@code true}) or disable ({@code false}) data
-     * @return {@code true} if the operation succeeded
-     */
-    public abstract boolean setDataEnabled(boolean enable);
+    public boolean getAnyDataEnabled() {
+        return (enabledCount != 0);
+    }
 
     protected abstract void startNetStatPoll();
 
@@ -316,4 +362,216 @@ public abstract class DataConnectionTracker extends Handler {
     protected abstract void restartRadio();
 
     protected abstract void log(String s);
+
+    protected int apnTypeToId(String type) {
+        if (TextUtils.equals(type, Phone.APN_TYPE_DEFAULT)) {
+            return APN_DEFAULT_ID;
+        } else if (TextUtils.equals(type, Phone.APN_TYPE_MMS)) {
+            return APN_MMS_ID;
+        } else if (TextUtils.equals(type, Phone.APN_TYPE_SUPL)) {
+            return APN_SUPL_ID;
+        } else if (TextUtils.equals(type, Phone.APN_TYPE_DUN)) {
+            return APN_DUN_ID;
+        } else if (TextUtils.equals(type, Phone.APN_TYPE_HIPRI)) {
+            return APN_HIPRI_ID;
+        } else {
+            return APN_INVALID_ID;
+        }
+    }
+
+    protected String apnIdToType(int id) {
+        switch (id) {
+        case APN_DEFAULT_ID:
+            return Phone.APN_TYPE_DEFAULT;
+        case APN_MMS_ID:
+            return Phone.APN_TYPE_MMS;
+        case APN_SUPL_ID:
+            return Phone.APN_TYPE_SUPL;
+        case APN_DUN_ID:
+            return Phone.APN_TYPE_DUN;
+        case APN_HIPRI_ID:
+            return Phone.APN_TYPE_HIPRI;
+        default:
+            Log.e(LOG_TAG, "Unknown id (" + id + ") in apnIdToType");
+            return Phone.APN_TYPE_DEFAULT;
+        }
+    }
+
+    protected abstract boolean isApnTypeActive(String type);
+
+    protected abstract boolean isApnTypeAvailable(String type);
+
+    protected abstract String[] getActiveApnTypes();
+
+    protected abstract String getActiveApnString();
+
+    public abstract ArrayList<DataConnection> getAllDataConnections();
+
+    protected abstract String getInterfaceName(String apnType);
+
+    protected abstract String getIpAddress(String apnType);
+
+    protected abstract String getGateway(String apnType);
+
+    protected abstract String[] getDnsServers(String apnType);
+
+    protected abstract void setState(State s);
+
+    protected synchronized boolean isEnabled(int id) {
+        if (id != APN_INVALID_ID) {
+            return dataEnabled[id];
+        }
+        return false;
+    }
+
+    /**
+     * Ensure that we are connected to an APN of the specified type.
+     * @param type the APN type (currently the only valid values
+     * are {@link Phone#APN_TYPE_MMS} and {@link Phone#APN_TYPE_SUPL})
+     * @return the result of the operation. Success is indicated by
+     * a return value of either {@code Phone.APN_ALREADY_ACTIVE} or
+     * {@code Phone.APN_REQUEST_STARTED}. In the latter case, a broadcast
+     * will be sent by the ConnectivityManager when a connection to
+     * the APN has been established.
+     */
+    public synchronized int enableApnType(String type) {
+        int id = apnTypeToId(type);
+        if (id == APN_INVALID_ID) {
+            return Phone.APN_REQUEST_FAILED;
+        }
+
+        if(DBG) Log.d(LOG_TAG, "enableApnType("+type+"), isApnTypeActive = "
+                + isApnTypeActive(type) + " and state = " + state);
+
+        if (!isApnTypeAvailable(type)) {
+            return Phone.APN_TYPE_NOT_AVAILABLE;
+        }
+
+        // just because it's active doesn't mean we had it explicitly requested before
+        // (a broad default may handle many types).  make sure we mark it enabled
+        // so if the default is disabled we keep the connection for others
+        setEnabled(id, true);
+
+        if (isApnTypeActive(type)) {
+            if (state == State.INITING) return Phone.APN_REQUEST_STARTED;
+            else if (state == State.CONNECTED) return Phone.APN_ALREADY_ACTIVE;
+        }
+        return Phone.APN_REQUEST_STARTED;
+    }
+
+    /**
+     * The APN of the specified type is no longer needed. Ensure that if
+     * use of the default APN has not been explicitly disabled, we are connected
+     * to the default APN.
+     * @param type the APN type. The only valid values are currently
+     * {@link Phone#APN_TYPE_MMS} and {@link Phone#APN_TYPE_SUPL}.
+     * @return
+     */
+    public synchronized int disableApnType(String type) {
+        if (DBG) Log.d(LOG_TAG, "disableApnType("+type+")");
+        int id = apnTypeToId(type);
+        if (id == APN_INVALID_ID) {
+            return Phone.APN_REQUEST_FAILED;
+        }
+        if (isEnabled(id)) {
+            setEnabled(id, false);
+            if (isApnTypeActive(Phone.APN_TYPE_DEFAULT)) {
+                if (dataEnabled[APN_DEFAULT_ID]) {
+                    return Phone.APN_ALREADY_ACTIVE;
+                } else {
+                    return Phone.APN_REQUEST_STARTED;
+                }
+            } else {
+                return Phone.APN_REQUEST_STARTED;
+            }
+        } else {
+            return Phone.APN_REQUEST_FAILED;
+        }
+    }
+
+    private void setEnabled(int id, boolean enable) {
+        if (DBG) Log.d(LOG_TAG, "setEnabled(" + id + ", " + enable + ") with old state = " +
+                dataEnabled[id] + " and enabledCount = " + enabledCount);
+
+        Message msg = obtainMessage(EVENT_ENABLE_NEW_APN);
+        msg.arg1 = id;
+        msg.arg2 = (enable ? ENABLED : DISABLED);
+        sendMessage(msg);
+    }
+
+    protected synchronized void onEnableApn(int apnId, int enabled) {
+        if (DBG) {
+            Log.d(LOG_TAG, "EVENT_APN_ENABLE_REQUEST " + apnId + ", " + enabled);
+            Log.d(LOG_TAG, " dataEnabled = " + dataEnabled[apnId] +
+                    ", enabledCount = " + enabledCount +
+                    ", isApnTypeActive = " + isApnTypeActive(apnIdToType(apnId)));
+        }
+        if (enabled == ENABLED) {
+            if (!dataEnabled[apnId]) {
+                dataEnabled[apnId] = true;
+                enabledCount++;
+            }
+            String type = apnIdToType(apnId);
+            if (!isApnTypeActive(type)) {
+                mRequestedApnType = type;
+                onEnableNewApn();
+            }
+        } else {
+            // disable
+            if (dataEnabled[apnId]) {
+                dataEnabled[apnId] = false;
+                enabledCount--;
+                if (enabledCount == 0) {
+                    onCleanUpConnection(true, Phone.REASON_DATA_DISABLED);
+                } else if (dataEnabled[APN_DEFAULT_ID] == true &&
+                        !isApnTypeActive(Phone.APN_TYPE_DEFAULT)) {
+                    mRequestedApnType = Phone.APN_TYPE_DEFAULT;
+                    onEnableNewApn();
+                }
+            }
+        }
+    }
+
+    /**
+     * Called when we switch APNs.
+     *
+     * mRequestedApnType is set prior to call
+     * To be overridden.
+     */
+    protected void onEnableNewApn() {
+    }
+
+    /**
+     * Prevent mobile data connections from being established,
+     * or once again allow mobile data connections. If the state
+     * toggles, then either tear down or set up data, as
+     * appropriate to match the new state.
+     * <p>This operation only affects the default APN, and if the same APN is
+     * currently being used for MMS traffic, the teardown will not happen
+     * even when {@code enable} is {@code false}.</p>
+     * @param enable indicates whether to enable ({@code true}) or disable ({@code false}) data
+     * @return {@code true} if the operation succeeded
+     */
+    public boolean setDataEnabled(boolean enable) {
+        if (DBG) Log.d(LOG_TAG, "setDataEnabled(" + enable + ")");
+
+        Message msg = obtainMessage(EVENT_SET_MASTER_DATA_ENABLE);
+        msg.arg1 = (enable ? ENABLED : DISABLED);
+        sendMessage(msg);
+        return true;
+    }
+
+    protected void onSetDataEnabled(boolean enable) {
+        if (mMasterDataEnabled != enable) {
+            mMasterDataEnabled = enable;
+            if (enable) {
+                mRetryMgr.resetRetryCount();
+                onTrySetupData(Phone.REASON_DATA_ENABLED);
+            } else {
+                onCleanUpConnection(true, Phone.REASON_DATA_DISABLED);
+           }
+        }
+    }
+
+
 }

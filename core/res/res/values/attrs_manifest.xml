@@ -288,6 +288,12 @@
          ignored and the activity simply finished. -->
     <attr name="finishOnTaskLaunch" format="boolean" />
     
+    <!-- Specify whether an activity should be finished when a "close system
+         windows" request has been made.  This happens, for example, when
+         the home key is pressed, when the device is locked, when a system
+         dialog like recent apps is displayed, etc. -->
+    <attr name="finishOnCloseSystemDialogs" format="boolean" />
+    
     <!-- Specify whether an activity's task should be cleared when it
          is re-launched from the home screen.  As a result, every time the
          user starts the task, they will be brought to its root activity,
@@ -504,8 +510,10 @@
         <!-- The keyboard type has changed, for example the user has plugged
              in an external keyboard. -->
         <flag name="keyboard" value="0x0010" />
-        <!-- The keyboard accessibility has changed, for example the user has
-             slid the keyboard out to expose it. -->
+        <!-- The keyboard or navigation accessibility has changed, for example
+             the user has slid the keyboard out to expose it.  Note that
+             inspite of its name, this applied to any accessibility: keyboard
+             or navigation. -->
         <flag name="keyboardHidden" value="0x0020" />
         <!-- The navigation type has changed.  Should never normally happen. -->
         <flag name="navigation" value="0x0040" />
@@ -580,6 +588,15 @@
     <!-- This is not the attribute you are looking for. -->
     <attr name="allowBackup" format="boolean" />
 
+    <!-- Whether the application in question should be terminated after its
+         settings have been restored.  The default is to do so. -->
+    <attr name="killAfterRestore" format="boolean" />
+
+    <!-- Whether the application needs to have its own Application subclass
+         active during restore.  The default is to run restore with a minimal
+         Application class to avoid interference with application logic. -->
+    <attr name="restoreNeedsApplication" format="boolean" />
+
     <!-- The <code>manifest</code> tag is the root of an
          <code>AndroidManifest.xml</code> file,
          describing the contents of an Android package (.apk) file.  One
@@ -644,7 +661,7 @@
              for normal behavior. -->
         <attr name="hasCode" format="boolean" />
         <attr name="persistent" />
-        <!-- Specify whether the components in this application are enabled or not (i.e. can be
+        <!-- Specify whether the components in this application are enabled or not (that is, can be
              instantiated by the system).
              If "false", it overrides any component specific values (a value of "true" will not
              override the component specific values). -->
@@ -656,6 +673,8 @@
         <attr name="testOnly" />
         <attr name="backupAgent" />
         <attr name="allowBackup" />
+        <attr name="killAfterRestore" />
+        <attr name="restoreNeedsApplication" />
     </declare-styleable>
     
     <!-- The <code>permission</code> tag declares a security permission that can be
@@ -781,6 +800,15 @@
              represent the minor number. For example for GL 1.2 referring to
              0x00000102, the actual value should be set as 0x00010002. -->
         <attr name="glEsVersion" format="integer"/>
+        <!--  The name of the feature that is being used. -->
+        <attr name="name" />
+        <!--  Specify whether this feature is required for the application.
+              The default is true, meaning the application requires the
+              feature, and does not want to be installed on devices that
+              don't support it.  If you set this to false, then this will
+              not impose a restriction on where the application can be
+              installed. -->
+        <attr name="required" format="boolean" />
     </declare-styleable>
 
     <!-- The <code>uses-sdk</code> tag describes the SDK features that the
@@ -823,6 +851,14 @@
     <declare-styleable name="AndroidManifestUsesLibrary" parent="AndroidManifestApplication">
         <!-- Required name of the library you use. -->
         <attr name="name" />
+        <!--  Specify whether this library is required for the application.
+              The default is true, meaning the application requires the
+              library, and does not want to be installed on devices that
+              don't support it.  If you set this to false, then this will
+              allow the application to be installed even if the library
+              doesn't exist, and you will need to check for its presence
+              dynamically at runtime. -->
+        <attr name="required" />
     </declare-styleable>
     
     <!-- The <code>supports-screens</code> specifies the screen dimensions an
@@ -893,7 +929,7 @@
     <declare-styleable name="AndroidManifestProvider" parent="AndroidManifestApplication">
         <!-- Required name of the class implementing the provider, deriving from
             {@link android.content.ContentProvider}.  This is a fully
-            qualified class name (i.e., com.mycompany.myapp.MyProvider); as a
+            qualified class name (for example, com.mycompany.myapp.MyProvider); as a
             short-hand if the first character of the class
             is a period then it is appended to your package name. -->
         <attr name="name" />
@@ -908,7 +944,7 @@
         <attr name="permission" />
         <attr name="multiprocess" />
         <attr name="initOrder" />
-        <!-- Specify whether this provider is enabled or not (i.e. can be instantiated by the system).
+        <!-- Specify whether this provider is enabled or not (that is, can be instantiated by the system).
              It can also be specified for an application as a whole, in which case a value of "false"
              will override any component specific values (a value of "true" will not override the
              component specific values). -->
@@ -971,7 +1007,7 @@
     <declare-styleable name="AndroidManifestService" parent="AndroidManifestApplication">
         <!-- Required name of the class implementing the service, deriving from
             {@link android.app.Service}.  This is a fully
-            qualified class name (i.e., com.mycompany.myapp.MyService); as a
+            qualified class name (for example, com.mycompany.myapp.MyService); as a
             short-hand if the first character of the class
             is a period then it is appended to your package name. -->
         <attr name="name" />
@@ -979,7 +1015,7 @@
         <attr name="icon" />
         <attr name="permission" />
         <attr name="process" />
-        <!-- Specify whether the service is enabled or not (i.e. can be instantiated by the system).
+        <!-- Specify whether the service is enabled or not (that is, can be instantiated by the system).
              It can also be specified for an application as a whole, in which case a value of "false"
              will override any component specific values (a value of "true" will not override the
              component specific values). -->
@@ -1002,7 +1038,7 @@
     <declare-styleable name="AndroidManifestReceiver" parent="AndroidManifestApplication">
         <!-- Required name of the class implementing the receiver, deriving from
             {@link android.content.BroadcastReceiver}.  This is a fully
-            qualified class name (i.e., com.mycompany.myapp.MyReceiver); as a
+            qualified class name (for example, com.mycompany.myapp.MyReceiver); as a
             short-hand if the first character of the class
             is a period then it is appended to your package name. -->
         <attr name="name" />
@@ -1010,7 +1046,7 @@
         <attr name="icon" />
         <attr name="permission" />
         <attr name="process" />
-        <!-- Specify whether the receiver is enabled or not (i.e. can be instantiated by the system).
+        <!-- Specify whether the receiver is enabled or not (that is, can be instantiated by the system).
              It can also be specified for an application as a whole, in which case a value of "false"
              will override any component specific values (a value of "true" will not override the
              component specific values). -->
@@ -1032,7 +1068,7 @@
     <declare-styleable name="AndroidManifestActivity" parent="AndroidManifestApplication">
         <!-- Required name of the class implementing the activity, deriving from
             {@link android.app.Activity}.  This is a fully
-            qualified class name (i.e., com.mycompany.myapp.MyActivity); as a
+            qualified class name (for example, com.mycompany.myapp.MyActivity); as a
             short-hand if the first character of the class
             is a period then it is appended to your package name. -->
         <attr name="name" />
@@ -1048,12 +1084,13 @@
         <attr name="taskAffinity" />
         <attr name="allowTaskReparenting" />
         <attr name="finishOnTaskLaunch" />
+        <attr name="finishOnCloseSystemDialogs" />
         <attr name="clearTaskOnLaunch" />
         <attr name="noHistory" />
         <attr name="alwaysRetainTaskState" />
         <attr name="stateNotNeeded" />
         <attr name="excludeFromRecents" />
-        <!-- Specify whether the activity is enabled or not (i.e. can be instantiated by the system).
+        <!-- Specify whether the activity is enabled or not (that is, can be instantiated by the system).
              It can also be specified for an application as a whole, in which case a value of "false"
              will override any component specific values (a value of "true" will not override the
              component specific values). -->
@@ -1078,7 +1115,7 @@
     <declare-styleable name="AndroidManifestActivityAlias" parent="AndroidManifestApplication">
         <!-- Required name of the class implementing the activity, deriving from
             {@link android.app.Activity}.  This is a fully
-            qualified class name (i.e., com.mycompany.myapp.MyActivity); as a
+            qualified class name (for example, com.mycompany.myapp.MyActivity); as a
             short-hand if the first character of the class
             is a period then it is appended to your package name. -->
         <attr name="name" />
@@ -1091,7 +1128,7 @@
         <attr name="label" />
         <attr name="icon" />
         <attr name="permission" />
-        <!-- Specify whether the activity-alias is enabled or not (i.e. can be instantiated by the system).
+        <!-- Specify whether the activity-alias is enabled or not (that is, can be instantiated by the system).
              It can also be specified for an application as a whole, in which case a value of "false"
              will override any component specific values (a value of "true" will not override the
              component specific values). -->
@@ -1258,7 +1295,7 @@
     <declare-styleable name="AndroidManifestInstrumentation" parent="AndroidManifest">
         <!-- Required name of the class implementing the instrumentation, deriving from
             {@link android.app.Instrumentation}.  This is a fully
-            qualified class name (i.e., com.mycompany.myapp.MyActivity); as a
+            qualified class name (for example, com.mycompany.myapp.MyActivity); as a
             short-hand if the first character of the class
             is a period then it is appended to your package name. -->
         <attr name="name" />

@@ -282,7 +282,9 @@ public final class IconMenuView extends ViewGroup implements ItemInvoker, MenuVi
         itemView.setIconMenuView(this);
         
         // Apply the background to the item view
-        itemView.setBackgroundDrawable(mItemBackground.getConstantState().newDrawable());
+        itemView.setBackgroundDrawable(
+                mItemBackground.getConstantState().newDrawable(
+                        getContext().getResources()));
 
         // This class is the invoker for all its item views 
         itemView.setItemInvoker(this);

@@ -311,7 +311,8 @@ String8 CallStack::toStringSingleLevel(const char* prefix, int32_t level) const
     } else { 
         void const* start = 0;
         name = MapInfo::mapAddressToName(ip, "<unknown>", &start);
-        snprintf(tmp, 256, "pc %08lx  %s", uintptr_t(ip)-uintptr_t(start), name);
+        snprintf(tmp, 256, "pc %08lx  %s", 
+                long(uintptr_t(ip)-uintptr_t(start)), name);
         res.append(tmp);
     }
     res.append("\n");

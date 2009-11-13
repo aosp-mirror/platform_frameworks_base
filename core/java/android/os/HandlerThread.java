@@ -64,7 +64,7 @@ public class HandlerThread extends Thread {
     /**
      * This method returns the Looper associated with this thread. If this thread not been started
      * or for any reason is isAlive() returns false, this method will return null. If this thread 
-     * has been started, this method will blocked until the looper has been initialized.  
+     * has been started, this method will block until the looper has been initialized.  
      * @return The looper.
      */
     public Looper getLooper() {
@@ -82,6 +82,21 @@ public class HandlerThread extends Thread {
             }
         }
         return mLooper;
+    }
+    
+    /**
+     * Ask the currently running looper to quit.  If the thread has not
+     * been started or has finished (that is if {@link #getLooper} returns
+     * null), then false is returned.  Otherwise the looper is asked to
+     * quit and true is returned.
+     */
+    public boolean quit() {
+        Looper looper = getLooper();
+        if (looper != null) {
+            looper.quit();
+            return true;
+        }
+        return false;
     }
     
     /**

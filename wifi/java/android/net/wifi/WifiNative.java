@@ -79,6 +79,8 @@ public class WifiNative {
 
     public native static int getRssiCommand();
 
+    public native static int getRssiApproxCommand();
+
     public native static int getLinkSpeedCommand();
 
     public native static String getMacAddressCommand();

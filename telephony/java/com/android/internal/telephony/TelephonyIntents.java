@@ -220,28 +220,4 @@ public class TelephonyIntents {
      */
     public static final String ACTION_SHOW_NOTICE_ECM_BLOCK_OTHERS
             = "android.intent.action.ACTION_SHOW_NOTICE_ECM_BLOCK_OTHERS";
-
-     /**
-     * Broadcast Action: The MDN changed during the CDMA OTA Process
-     * The intent will have the following extra values:</p>
-     * <ul>
-     *   <li><em>mdn</em> - An Integer of the updated MDN number.</li>
-     * </ul>
-     * 
-     * <p class="note">This is a protected intent that can only be sent
-     * by the system.
-     *
-     * <p class="note">
-     */
-    // TODO(Moto): Generally broadcast intents are for use to allow entities which
-    // may not know about each other to "communicate". This seems quite specific
-    // and maybe using the registrant style would be better.
-
-    // Moto: Since this is used for apps not in the same process of phone, can the
-    // registrant style be used? (Ling Li says: Maybe the "app" can request rather
-    // than save the MDN each time and this intent would not be necessary?)
-    // Moto response: Moto internal discussion is on-going.
-    public static final String ACTION_CDMA_OTA_MDN_CHANGED
-            = "android.intent.action.ACTION_MDN_STATE_CHANGED";
-
 }

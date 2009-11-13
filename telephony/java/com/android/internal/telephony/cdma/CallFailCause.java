@@ -17,9 +17,10 @@
 package com.android.internal.telephony.cdma;
 
 /**
- * Call fail causes from TS 24.008 .
- * These are mostly the cause codes we need to distinguish for the UI.
- * See 22.001 Annex F.4 for mapping of cause codes to local tones.
+ * CDMA Call fail causes covering all the possible failures that are
+ * needed to be distinguished by the UI. CDMA call failure reasons
+ * are derived from the possible call failure scenarios described
+ * in "CDMA IS2000 - Release A (C.S0005-A v6.0)" standard.
  *
  * {@hide}
  *
@@ -50,6 +51,9 @@ public interface CallFailCause {
 
     // For non-emergency number dialed while in emergency callback mode.
     static final int CDMA_NOT_EMERGENCY             = 1008;
+
+    // Access Blocked by CDMA Network.
+    static final int CDMA_ACCESS_BLOCKED            = 1009;
 
     static final int ERROR_UNSPECIFIED = 0xffff;
 }

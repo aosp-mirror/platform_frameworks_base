@@ -23,9 +23,12 @@ import android.util.Log;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 /**
  * CookieManager manages cookies according to RFC2109 spec.
@@ -190,6 +193,31 @@ public final class CookieManager {
         }
     }
 
+    private static final CookieComparator COMPARATOR = new CookieComparator();
+
+    private static final class CookieComparator implements Comparator<Cookie> {
+        public int compare(Cookie cookie1, Cookie cookie2) {
+            // According to RFC 2109, multiple cookies are ordered in a way such
+            // that those with more specific Path attributes precede those with
+            // less specific. Ordering with respect to other attributes (e.g.,
+            // Domain) is unspecified.
+            // As Set is not modified if the two objects are same, we do want to
+            // assign different value for each cookie.
+            int diff = cookie2.path.length() - cookie1.path.length();
+            if (diff == 0) {
+                diff = cookie2.domain.length() - cookie1.domain.length();
+                if (diff == 0) {
+                    diff = cookie2.name.hashCode() - cookie1.name.hashCode();
+                    if (diff == 0) {
+                        Log.w(LOGTAG, "Found two cookies with the same value." +
+                                "cookie1=" + cookie1 + " , cookie2=" + cookie2);
+                    }
+                }
+            }
+            return diff;
+        }
+    }
+
     private CookieManager() {
     }
 
@@ -262,7 +290,7 @@ public final class CookieManager {
         if (!mAcceptCookie || uri == null) {
             return;
         }
-        if (WebView.LOGV_ENABLED) {
+        if (DebugFlags.COOKIE_MANAGER) {
             Log.v(LOGTAG, "setCookie: uri: " + uri + " value: " + value);
         }
 
@@ -401,8 +429,8 @@ public final class CookieManager {
         long now = System.currentTimeMillis();
         boolean secure = HTTPS.equals(uri.mScheme);
         Iterator<Cookie> iter = cookieList.iterator();
-        StringBuilder ret = new StringBuilder(256);
 
+        SortedSet<Cookie> cookieSet = new TreeSet<Cookie>(COMPARATOR);
         while (iter.hasNext()) {
             Cookie cookie = iter.next();
             if (cookie.domainMatch(hostAndPath[0]) &&
@@ -413,26 +441,33 @@ public final class CookieManager {
                     && (!cookie.secure || secure)
                     && cookie.mode != Cookie.MODE_DELETED) {
                 cookie.lastAcessTime = now;
-
-                if (ret.length() > 0) {
-                    ret.append(SEMICOLON);
-                    // according to RC2109, SEMICOLON is office separator,
-                    // but when log in yahoo.com, it needs WHITE_SPACE too.
-                    ret.append(WHITE_SPACE);
-                }
-
-                ret.append(cookie.name);
-                ret.append(EQUAL);
-                ret.append(cookie.value);
+                cookieSet.add(cookie);
             }
         }
+
+        StringBuilder ret = new StringBuilder(256);
+        Iterator<Cookie> setIter = cookieSet.iterator();
+        while (setIter.hasNext()) {
+            Cookie cookie = setIter.next();
+            if (ret.length() > 0) {
+                ret.append(SEMICOLON);
+                // according to RC2109, SEMICOLON is official separator,
+                // but when log in yahoo.com, it needs WHITE_SPACE too.
+                ret.append(WHITE_SPACE);
+            }
+
+            ret.append(cookie.name);
+            ret.append(EQUAL);
+            ret.append(cookie.value);
+        }
+
         if (ret.length() > 0) {
-            if (WebView.LOGV_ENABLED) {
+            if (DebugFlags.COOKIE_MANAGER) {
                 Log.v(LOGTAG, "getCookie: uri: " + uri + " value: " + ret);
             }
             return ret.toString();
         } else {
-            if (WebView.LOGV_ENABLED) {
+            if (DebugFlags.COOKIE_MANAGER) {
                 Log.v(LOGTAG, "getCookie: uri: " + uri
                         + " But can't find cookie.");
             }
@@ -588,7 +623,7 @@ public final class CookieManager {
             Iterator<ArrayList<Cookie>> listIter = cookieLists.iterator();
             while (listIter.hasNext() && count < MAX_RAM_COOKIES_COUNT) {
                 ArrayList<Cookie> list = listIter.next();
-                if (WebView.DEBUG) {
+                if (DebugFlags.COOKIE_MANAGER) {
                     Iterator<Cookie> iter = list.iterator();
                     while (iter.hasNext() && count < MAX_RAM_COOKIES_COUNT) {
                         Cookie cookie = iter.next();
@@ -608,7 +643,7 @@ public final class CookieManager {
 
         ArrayList<Cookie> retlist = new ArrayList<Cookie>();
         if (mapSize >= MAX_RAM_DOMAIN_COUNT || count >= MAX_RAM_COOKIES_COUNT) {
-            if (WebView.DEBUG) {
+            if (DebugFlags.COOKIE_MANAGER) {
                 Log.v(LOGTAG, count + " cookies used " + byteCount
                         + " bytes with " + mapSize + " domains");
             }
@@ -616,7 +651,7 @@ public final class CookieManager {
             int toGo = mapSize / 10 + 1;
             while (toGo-- > 0){
                 String domain = domains[toGo].toString();
-                if (WebView.LOGV_ENABLED) {
+                if (DebugFlags.COOKIE_MANAGER) {
                     Log.v(LOGTAG, "delete domain: " + domain
                             + " from RAM cache");
                 }
@@ -798,22 +833,24 @@ public final class CookieManager {
 
                 // "secure" is a known attribute doesn't use "=";
                 // while sites like live.com uses "secure="
-                if (length - index > SECURE_LENGTH
+                if (length - index >= SECURE_LENGTH
                         && cookieString.substring(index, index + SECURE_LENGTH).
                         equalsIgnoreCase(SECURE)) {
                     index += SECURE_LENGTH;
                     cookie.secure = true;
+                    if (index == length) break;
                     if (cookieString.charAt(index) == EQUAL) index++;
                     continue;
                 }
 
                 // "httponly" is a known attribute doesn't use "=";
                 // while sites like live.com uses "httponly="
-                if (length - index > HTTP_ONLY_LENGTH
+                if (length - index >= HTTP_ONLY_LENGTH
                         && cookieString.substring(index,
                             index + HTTP_ONLY_LENGTH).
                         equalsIgnoreCase(HTTP_ONLY)) {
                     index += HTTP_ONLY_LENGTH;
+                    if (index == length) break;
                     if (cookieString.charAt(index) == EQUAL) index++;
                     // FIXME: currently only parse the attribute
                     continue;

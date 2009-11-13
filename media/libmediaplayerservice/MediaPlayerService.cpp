@@ -27,18 +27,28 @@
 #include <unistd.h>
 
 #include <string.h>
+
 #include <cutils/atomic.h>
+#include <cutils/properties.h> // for property_get
+
+#include <utils/misc.h>
 
 #include <android_runtime/ActivityManager.h>
-#include <utils/IPCThreadState.h>
-#include <utils/IServiceManager.h>
-#include <utils/MemoryHeapBase.h>
-#include <utils/MemoryBase.h>
+
+#include <binder/IPCThreadState.h>
+#include <binder/IServiceManager.h>
+#include <binder/MemoryHeapBase.h>
+#include <binder/MemoryBase.h>
+#include <utils/Errors.h>  // for status_t
+#include <utils/String8.h>
+#include <utils/SystemClock.h>
+#include <utils/Vector.h>
 #include <cutils/properties.h>
 
 #include <media/MediaPlayerInterface.h>
 #include <media/mediarecorder.h>
 #include <media/MediaMetadataRetrieverInterface.h>
+#include <media/Metadata.h>
 #include <media/AudioTrack.h>
 
 #include "MediaRecorderClient.h"
@@ -48,6 +58,10 @@
 #include "MidiFile.h"
 #include "VorbisPlayer.h"
 #include <media/PVPlayer.h>
+#include "TestPlayerStub.h"
+#include "StagefrightPlayer.h"
+
+#include <OMX.h>
 
 /* desktop Linux needs a little help with gettid() */
 #if defined(HAVE_GETTID) && !defined(HAVE_ANDROID_OS)
@@ -60,6 +74,111 @@ pid_t gettid() { return syscall(__NR_gettid);}
 #endif
 #undef __KERNEL__
 #endif
+
+namespace {
+using android::media::Metadata;
+using android::status_t;
+using android::OK;
+using android::BAD_VALUE;
+using android::NOT_ENOUGH_DATA;
+using android::Parcel;
+
+// Max number of entries in the filter.
+const int kMaxFilterSize = 64;  // I pulled that out of thin air.
+
+// FIXME: Move all the metadata related function in the Metadata.cpp
+
+
+// Unmarshall a filter from a Parcel.
+// Filter format in a parcel:
+//
+//  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+// |                       number of entries (n)                   |
+// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+// |                       metadata type 1                         |
+// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+// |                       metadata type 2                         |
+// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+//  ....
+// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+// |                       metadata type n                         |
+// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+//
+// @param p Parcel that should start with a filter.
+// @param[out] filter On exit contains the list of metadata type to be
+//                    filtered.
+// @param[out] status On exit contains the status code to be returned.
+// @return true if the parcel starts with a valid filter.
+bool unmarshallFilter(const Parcel& p,
+                      Metadata::Filter *filter,
+                      status_t *status)
+{
+    int32_t val;
+    if (p.readInt32(&val) != OK)
+    {
+        LOGE("Failed to read filter's length");
+        *status = NOT_ENOUGH_DATA;
+        return false;
+    }
+
+    if( val > kMaxFilterSize || val < 0)
+    {
+        LOGE("Invalid filter len %d", val);
+        *status = BAD_VALUE;
+        return false;
+    }
+
+    const size_t num = val;
+
+    filter->clear();
+    filter->setCapacity(num);
+
+    size_t size = num * sizeof(Metadata::Type);
+
+
+    if (p.dataAvail() < size)
+    {
+        LOGE("Filter too short expected %d but got %d", size, p.dataAvail());
+        *status = NOT_ENOUGH_DATA;
+        return false;
+    }
+
+    const Metadata::Type *data =
+            static_cast<const Metadata::Type*>(p.readInplace(size));
+
+    if (NULL == data)
+    {
+        LOGE("Filter had no data");
+        *status = BAD_VALUE;
+        return false;
+    }
+
+    // TODO: The stl impl of vector would be more efficient here
+    // because it degenerates into a memcpy on pod types. Try to
+    // replace later or use stl::set.
+    for (size_t i = 0; i < num; ++i)
+    {
+        filter->add(*data);
+        ++data;
+    }
+    *status = OK;
+    return true;
+}
+
+// @param filter Of metadata type.
+// @param val To be searched.
+// @return true if a match was found.
+bool findMetadata(const Metadata::Filter& filter, const int32_t val)
+{
+    // Deal with empty and ANY right away
+    if (filter.isEmpty()) return false;
+    if (filter[0] == Metadata::kAny) return true;
+
+    return filter.indexOf(val) >= 0;
+}
+
+}  // anonymous namespace
 
 
 namespace android {
@@ -83,7 +202,7 @@ extmap FILE_EXTS [] =  {
 };
 
 // TODO: Find real cause of Audio/Video delay in PV framework and remove this workaround
-/* static */ const uint32_t MediaPlayerService::AudioOutput::kAudioVideoDelayMs = 96;
+/* static */ const uint32_t MediaPlayerService::AudioOutput::kAudioVideoDelayMs = 0;
 /* static */ int MediaPlayerService::AudioOutput::mMinBufferCount = 4;
 /* static */ bool MediaPlayerService::AudioOutput::mIsOnEmulator = false;
 
@@ -105,9 +224,23 @@ MediaPlayerService::~MediaPlayerService()
 
 sp<IMediaRecorder> MediaPlayerService::createMediaRecorder(pid_t pid)
 {
-    sp<MediaRecorderClient> recorder = new MediaRecorderClient(pid);
+#ifndef NO_OPENCORE
+    sp<MediaRecorderClient> recorder = new MediaRecorderClient(this, pid);
+    wp<MediaRecorderClient> w = recorder;
+    Mutex::Autolock lock(mLock);
+    mMediaRecorderClients.add(w);
+#else
+    sp<MediaRecorderClient> recorder = NULL;
+#endif
     LOGV("Create new media recorder client from pid %d", pid);
     return recorder;
+}
+
+void MediaPlayerService::removeMediaRecorderClient(wp<MediaRecorderClient> client)
+{
+    Mutex::Autolock lock(mLock);
+    mMediaRecorderClients.remove(client);
+    LOGV("Delete media recorder client");
 }
 
 sp<IMediaMetadataRetriever> MediaPlayerService::createMetadataRetriever(pid_t pid)
@@ -149,6 +282,16 @@ sp<IMediaPlayer> MediaPlayerService::create(pid_t pid, const sp<IMediaPlayerClie
     }
     ::close(fd);
     return c;
+}
+
+sp<IOMX> MediaPlayerService::getOMX() {
+    Mutex::Autolock autoLock(mLock);
+
+    if (mOMX.get() == NULL) {
+        mOMX = new OMX;
+    }
+
+    return mOMX;
 }
 
 status_t MediaPlayerService::AudioCache::dump(int fd, const Vector<String16>& args) const
@@ -333,6 +476,13 @@ status_t MediaPlayerService::dump(int fd, const Vector<String16>& args)
             sp<Client> c = mClients[i].promote();
             if (c != 0) c->dump(fd, args);
         }
+        for (int i = 0, n = mMediaRecorderClients.size(); i < n; ++i) {
+            result.append(" MediaRecorderClient\n");
+            sp<MediaRecorderClient> c = mMediaRecorderClients[i].promote();
+            snprintf(buffer, 255, "  pid(%d)\n\n", c->mPid);
+            result.append(buffer);
+        }
+
         result.append(" Files opened and/or mapped:\n");
         snprintf(buffer, SIZE, "/proc/%d/maps", myTid());
         FILE *f = fopen(buffer, "r");
@@ -457,6 +607,7 @@ void MediaPlayerService::Client::disconnect()
         p = mPlayer;
     }
     mClient.clear();
+
     mPlayer.clear();
 
     // clear the notification to prevent callbacks to dead client
@@ -474,7 +625,19 @@ void MediaPlayerService::Client::disconnect()
     IPCThreadState::self()->flushCommands();
 }
 
-static player_type getPlayerType(int fd, int64_t offset, int64_t length)
+static player_type getDefaultPlayerType() {
+#if BUILD_WITH_FULL_STAGEFRIGHT
+    char value[PROPERTY_VALUE_MAX];
+    if (property_get("media.stagefright.enable-player", value, NULL)
+        && (!strcmp(value, "1") || !strcasecmp(value, "true"))) {
+        return STAGEFRIGHT_PLAYER;
+    }
+#endif
+
+    return PV_PLAYER;
+}
+
+player_type getPlayerType(int fd, int64_t offset, int64_t length)
 {
     char buf[20];
     lseek(fd, offset, SEEK_SET);
@@ -504,12 +667,14 @@ static player_type getPlayerType(int fd, int64_t offset, int64_t length)
         EAS_Shutdown(easdata);
     }
 
-    // Fall through to PV
-    return PV_PLAYER;
+    return getDefaultPlayerType();
 }
 
-static player_type getPlayerType(const char* url)
+player_type getPlayerType(const char* url)
 {
+    if (TestPlayerStub::canBeUsed(url)) {
+        return TEST_PLAYER;
+    }
 
     // use MidiFile for MIDI extensions
     int lenURL = strlen(url);
@@ -523,8 +688,7 @@ static player_type getPlayerType(const char* url)
         }
     }
 
-    // Fall through to PV
-    return PV_PLAYER;
+    return getDefaultPlayerType();
 }
 
 static sp<MediaPlayerBase> createPlayer(player_type playerType, void* cookie,
@@ -532,10 +696,12 @@ static sp<MediaPlayerBase> createPlayer(player_type playerType, void* cookie,
 {
     sp<MediaPlayerBase> p;
     switch (playerType) {
+#ifndef NO_OPENCORE
         case PV_PLAYER:
             LOGV(" create PVPlayer");
             p = new PVPlayer();
             break;
+#endif
         case SONIVOX_PLAYER:
             LOGV(" create MidiFile");
             p = new MidiFile();
@@ -543,6 +709,16 @@ static sp<MediaPlayerBase> createPlayer(player_type playerType, void* cookie,
         case VORBIS_PLAYER:
             LOGV(" create VorbisPlayer");
             p = new VorbisPlayer();
+            break;
+#if BUILD_WITH_FULL_STAGEFRIGHT
+        case STAGEFRIGHT_PLAYER:
+            LOGV(" create StagefrightPlayer");
+            p = new StagefrightPlayer;
+            break;
+#endif
+        case TEST_PLAYER:
+            LOGV("Create Test Player stub");
+            p = new TestPlayerStub();
             break;
     }
     if (p != NULL) {
@@ -608,7 +784,11 @@ status_t MediaPlayerService::Client::setDataSource(const char *url)
         // now set data source
         LOGV(" setDataSource");
         mStatus = p->setDataSource(url);
-        if (mStatus == NO_ERROR) mPlayer = p;
+        if (mStatus == NO_ERROR) {
+            mPlayer = p;
+        } else {
+            LOGE("  error: %d", mStatus);
+        }
         return mStatus;
     }
 }
@@ -663,6 +843,73 @@ status_t MediaPlayerService::Client::setVideoSurface(const sp<ISurface>& surface
     sp<MediaPlayerBase> p = getPlayer();
     if (p == 0) return UNKNOWN_ERROR;
     return p->setVideoSurface(surface);
+}
+
+status_t MediaPlayerService::Client::invoke(const Parcel& request,
+                                            Parcel *reply)
+{
+    sp<MediaPlayerBase> p = getPlayer();
+    if (p == NULL) return UNKNOWN_ERROR;
+    return p->invoke(request, reply);
+}
+
+// This call doesn't need to access the native player.
+status_t MediaPlayerService::Client::setMetadataFilter(const Parcel& filter)
+{
+    status_t status;
+    media::Metadata::Filter allow, drop;
+
+    if (unmarshallFilter(filter, &allow, &status) &&
+        unmarshallFilter(filter, &drop, &status)) {
+        Mutex::Autolock lock(mLock);
+
+        mMetadataAllow = allow;
+        mMetadataDrop = drop;
+    }
+    return status;
+}
+
+status_t MediaPlayerService::Client::getMetadata(
+        bool update_only, bool apply_filter, Parcel *reply)
+{
+    sp<MediaPlayerBase> player = getPlayer();
+    if (player == 0) return UNKNOWN_ERROR;
+
+    status_t status;
+    // Placeholder for the return code, updated by the caller.
+    reply->writeInt32(-1);
+
+    media::Metadata::Filter ids;
+
+    // We don't block notifications while we fetch the data. We clear
+    // mMetadataUpdated first so we don't lose notifications happening
+    // during the rest of this call.
+    {
+        Mutex::Autolock lock(mLock);
+        if (update_only) {
+            ids = mMetadataUpdated;
+        }
+        mMetadataUpdated.clear();
+    }
+
+    media::Metadata metadata(reply);
+
+    metadata.appendHeader();
+    status = player->getMetadata(ids, reply);
+
+    if (status != OK) {
+        metadata.resetParcel();
+        LOGE("getMetadata failed %d", status);
+        return status;
+    }
+
+    // FIXME: Implement filtering on the result. Not critical since
+    // filtering takes place on the update notifications already. This
+    // would be when all the metadata are fetch and a filter is set.
+
+    // Everything is fine, update the metadata length.
+    metadata.updateLength();
+    return OK;
 }
 
 status_t MediaPlayerService::Client::prepareAsync()
@@ -784,11 +1031,49 @@ status_t MediaPlayerService::Client::setVolume(float leftVolume, float rightVolu
     return NO_ERROR;
 }
 
+
 void MediaPlayerService::Client::notify(void* cookie, int msg, int ext1, int ext2)
 {
     Client* client = static_cast<Client*>(cookie);
+
+    if (MEDIA_INFO == msg &&
+        MEDIA_INFO_METADATA_UPDATE == ext1) {
+        const media::Metadata::Type metadata_type = ext2;
+
+        if(client->shouldDropMetadata(metadata_type)) {
+            return;
+        }
+
+        // Update the list of metadata that have changed. getMetadata
+        // also access mMetadataUpdated and clears it.
+        client->addNewMetadataUpdate(metadata_type);
+    }
     LOGV("[%d] notify (%p, %d, %d, %d)", client->mConnId, cookie, msg, ext1, ext2);
     client->mClient->notify(msg, ext1, ext2);
+}
+
+
+bool MediaPlayerService::Client::shouldDropMetadata(media::Metadata::Type code) const
+{
+    Mutex::Autolock lock(mLock);
+
+    if (findMetadata(mMetadataDrop, code)) {
+        return true;
+    }
+
+    if (mMetadataAllow.isEmpty() || findMetadata(mMetadataAllow, code)) {
+        return false;
+    } else {
+        return true;
+    }
+}
+
+
+void MediaPlayerService::Client::addNewMetadataUpdate(media::Metadata::Type metadata_type) {
+    Mutex::Autolock lock(mLock);
+    if (mMetadataUpdated.indexOf(metadata_type) < 0) {
+        mMetadataUpdated.add(metadata_type);
+    }
 }
 
 #if CALLBACK_ANTAGONIZER
@@ -924,16 +1209,129 @@ Exit:
     return mem;
 }
 
+/*
+ * Avert your eyes, ugly hack ahead.
+ * The following is to support music visualizations.
+ */
+
+static const int NUMVIZBUF = 32;
+static const int VIZBUFFRAMES = 1024;
+static const int TOTALBUFTIMEMSEC = NUMVIZBUF * VIZBUFFRAMES * 1000 / 44100;
+
+static bool gotMem = false;
+static sp<MemoryBase> mem[NUMVIZBUF];
+static uint64_t timeStamp[NUMVIZBUF];
+static uint64_t lastReadTime;
+static uint64_t lastWriteTime;
+static int writeIdx = 0;
+
+static void allocVizBufs() {
+    if (!gotMem) {
+        for (int i=0;i<NUMVIZBUF;i++) {
+            sp<MemoryHeapBase> heap = new MemoryHeapBase(VIZBUFFRAMES*2, 0, "snooper");
+            mem[i] = new MemoryBase(heap, 0, heap->getSize());
+            timeStamp[i] = 0;
+        }
+        gotMem = true;
+    }
+}
+
+
+/*
+ * Get a buffer of audio data that is about to be played.
+ * We don't synchronize this because in practice the writer
+ * is ahead of the reader, and even if we did happen to catch
+ * a buffer while it's being written, it's just a visualization,
+ * so no harm done.
+ */
+static sp<MemoryBase> getVizBuffer() {
+
+    allocVizBufs();
+
+    lastReadTime = uptimeMillis() + 100; // account for renderer delay (we shouldn't be doing this here)
+
+    // if there is no recent buffer (yet), just return empty handed
+    if (lastWriteTime + TOTALBUFTIMEMSEC < lastReadTime) {
+        //LOGI("@@@@    no audio data to look at yet");
+        return NULL;
+    }
+
+    char buf[200];
+
+    int closestIdx = -1;
+    uint32_t closestTime = 0x7ffffff;
+
+    for (int i = 0; i < NUMVIZBUF; i++) {
+        uint64_t tsi = timeStamp[i];
+        uint64_t diff = tsi > lastReadTime ? tsi - lastReadTime : lastReadTime - tsi;
+        if (diff < closestTime) {
+            closestIdx = i;
+            closestTime = diff;
+        }
+    }
+
+
+    if (closestIdx >= 0) {
+        //LOGI("@@@ return buffer %d, %d/%d", closestIdx, uint32_t(lastReadTime), uint32_t(timeStamp[closestIdx]));
+        return mem[closestIdx];
+    }
+
+    // we won't get here, since we either bailed out early, or got a buffer
+    LOGD("Didn't expect to be here");
+    return NULL;
+}
+
+static void storeVizBuf(const void *data, int len, uint64_t time) {
+    // Copy the data in to the visualizer buffer
+    // Assume a 16 bit stereo source for now.
+    short *viz = (short*)mem[writeIdx]->pointer();
+    short *src = (short*)data;
+    for (int i = 0; i < VIZBUFFRAMES; i++) {
+        // Degrade quality by mixing to mono and clearing the lowest 3 bits.
+        // This should still be good enough for a visualization
+        *viz++ = ((int(src[0]) + int(src[1])) >> 1) & ~0x7;
+        src += 2;
+    }
+    timeStamp[writeIdx++] = time;
+    if (writeIdx >= NUMVIZBUF) {
+        writeIdx = 0;
+    }
+}
+
+static void makeVizBuffers(const char *data, int len, uint64_t time) {
+
+    allocVizBufs();
+
+    uint64_t startTime = time;
+    const int frameSize = 4; // 16 bit stereo sample is 4 bytes
+    while (len >= VIZBUFFRAMES * frameSize) {
+        storeVizBuf(data, len, time);
+        data += VIZBUFFRAMES * frameSize;
+        len -= VIZBUFFRAMES * frameSize;
+        time += 1000 * VIZBUFFRAMES / 44100;
+    }
+    //LOGI("@@@ stored buffers from %d to %d", uint32_t(startTime), uint32_t(time));
+}
+
+sp<IMemory> MediaPlayerService::snoop()
+{
+    sp<MemoryBase> mem = getVizBuffer();
+    return mem;
+}
+
+
 #undef LOG_TAG
 #define LOG_TAG "AudioSink"
 MediaPlayerService::AudioOutput::AudioOutput()
-{
+    : mCallback(NULL),
+      mCallbackCookie(NULL) {
     mTrack = 0;
     mStreamType = AudioSystem::MUSIC;
     mLeftVolume = 1.0;
     mRightVolume = 1.0;
     mLatency = 0;
     mMsecsPerFrame = 0;
+    mNumFramesWritten = 0;
     setMinBufferCount();
 }
 
@@ -997,8 +1395,13 @@ float MediaPlayerService::AudioOutput::msecsPerFrame() const
     return mMsecsPerFrame;
 }
 
-status_t MediaPlayerService::AudioOutput::open(uint32_t sampleRate, int channelCount, int format, int bufferCount)
+status_t MediaPlayerService::AudioOutput::open(
+        uint32_t sampleRate, int channelCount, int format, int bufferCount,
+        AudioCallback cb, void *cookie)
 {
+    mCallback = cb;
+    mCallbackCookie = cookie;
+
     // Check argument "bufferCount" against the mininum buffer count
     if (bufferCount < mMinBufferCount) {
         LOGD("bufferCount (%d) is too small and increased to %d", bufferCount, mMinBufferCount);
@@ -1019,7 +1422,27 @@ status_t MediaPlayerService::AudioOutput::open(uint32_t sampleRate, int channelC
     }
 
     frameCount = (sampleRate*afFrameCount*bufferCount)/afSampleRate;
-    AudioTrack *t = new AudioTrack(mStreamType, sampleRate, format, channelCount, frameCount);
+
+    AudioTrack *t;
+    if (mCallback != NULL) {
+        t = new AudioTrack(
+                mStreamType,
+                sampleRate,
+                format,
+                (channelCount == 2) ? AudioSystem::CHANNEL_OUT_STEREO : AudioSystem::CHANNEL_OUT_MONO,
+                frameCount,
+                0 /* flags */,
+                CallbackWrapper,
+                this);
+    } else {
+        t = new AudioTrack(
+                mStreamType,
+                sampleRate,
+                format,
+                (channelCount == 2) ? AudioSystem::CHANNEL_OUT_STEREO : AudioSystem::CHANNEL_OUT_MONO,
+                frameCount);
+    }
+
     if ((t == 0) || (t->initCheck() != NO_ERROR)) {
         LOGE("Unable to create audio track");
         delete t;
@@ -1040,13 +1463,38 @@ void MediaPlayerService::AudioOutput::start()
     if (mTrack) {
         mTrack->setVolume(mLeftVolume, mRightVolume);
         mTrack->start();
+        mTrack->getPosition(&mNumFramesWritten);
     }
 }
 
 ssize_t MediaPlayerService::AudioOutput::write(const void* buffer, size_t size)
 {
+    LOG_FATAL_IF(mCallback != NULL, "Don't call write if supplying a callback.");
+
     //LOGV("write(%p, %u)", buffer, size);
-    if (mTrack) return mTrack->write(buffer, size);
+    if (mTrack) {
+        // Only make visualization buffers if anyone recently requested visualization data
+        uint64_t now = uptimeMillis();
+        if (lastReadTime + TOTALBUFTIMEMSEC >= now) {
+            // Based on the current play counter, the number of frames written and
+            // the current real time we can calculate the approximate real start
+            // time of the buffer we're about to write.
+            uint32_t pos;
+            mTrack->getPosition(&pos);
+
+            // we're writing ahead by this many frames:
+            int ahead = mNumFramesWritten - pos;
+            //LOGI("@@@ written: %d, playpos: %d, latency: %d", mNumFramesWritten, pos, mTrack->latency());
+            // which is this many milliseconds, assuming 44100 Hz:
+            ahead /= 44;
+
+            makeVizBuffers((const char*)buffer, size, now + ahead + mTrack->latency());
+            lastWriteTime = now;
+        }
+        ssize_t ret = mTrack->write(buffer, size);
+        mNumFramesWritten += ret / 4; // assume 16 bit stereo
+        return ret;
+    }
     return NO_INIT;
 }
 
@@ -1054,6 +1502,7 @@ void MediaPlayerService::AudioOutput::stop()
 {
     LOGV("stop");
     if (mTrack) mTrack->stop();
+    lastWriteTime = 0;
 }
 
 void MediaPlayerService::AudioOutput::flush()
@@ -1066,6 +1515,7 @@ void MediaPlayerService::AudioOutput::pause()
 {
     LOGV("pause");
     if (mTrack) mTrack->pause();
+    lastWriteTime = 0;
 }
 
 void MediaPlayerService::AudioOutput::close()
@@ -1083,6 +1533,20 @@ void MediaPlayerService::AudioOutput::setVolume(float left, float right)
     if (mTrack) {
         mTrack->setVolume(left, right);
     }
+}
+
+// static
+void MediaPlayerService::AudioOutput::CallbackWrapper(
+        int event, void *cookie, void *info) {
+    if (event != AudioTrack::EVENT_MORE_DATA) {
+        return;
+    }
+
+    AudioOutput *me = (AudioOutput *)cookie;
+    AudioTrack::Buffer *buffer = (AudioTrack::Buffer *)info;
+
+    (*me->mCallback)(
+            me, buffer->raw, buffer->size, me->mCallbackCookie);
 }
 
 #undef LOG_TAG
@@ -1105,8 +1569,14 @@ float MediaPlayerService::AudioCache::msecsPerFrame() const
     return mMsecsPerFrame;
 }
 
-status_t MediaPlayerService::AudioCache::open(uint32_t sampleRate, int channelCount, int format, int bufferCount)
+status_t MediaPlayerService::AudioCache::open(
+        uint32_t sampleRate, int channelCount, int format, int bufferCount,
+        AudioCallback cb, void *cookie)
 {
+    if (cb != NULL) {
+        return UNKNOWN_ERROR;  // TODO: implement this.
+    }
+
     LOGV("open(%u, %d, %d, %d)", sampleRate, channelCount, format, bufferCount);
     if (mHeap->getHeapID() < 0) return NO_INIT;
     mSampleRate = sampleRate;
@@ -1171,4 +1641,4 @@ void MediaPlayerService::AudioCache::notify(void* cookie, int msg, int ext1, int
     p->mSignal.signal();
 }
 
-}; // namespace android
+} // namespace android

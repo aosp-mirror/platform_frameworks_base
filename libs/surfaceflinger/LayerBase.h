@@ -20,7 +20,13 @@
 #include <stdint.h>
 #include <sys/types.h>
 
+#include <EGL/egl.h>
+#include <EGL/eglext.h>
+
+#include <private/ui/SharedBufferStack.h>
 #include <private/ui/LayerState.h>
+
+#include <utils/RefBase.h>
 
 #include <ui/Region.h>
 #include <ui/Overlay.h>
@@ -33,14 +39,15 @@ namespace android {
 
 // ---------------------------------------------------------------------------
 
-class SurfaceFlinger;
 class DisplayHardware;
-class GraphicPlane;
 class Client;
+class GraphicBuffer;
+class GraphicPlane;
+class SurfaceFlinger;
 
 // ---------------------------------------------------------------------------
 
-class LayerBase
+class LayerBase : public RefBase
 {
     // poor man's dynamic_cast below
     template<typename T>
@@ -69,10 +76,7 @@ public:
     }
 
     
-    static Vector<GLuint> deletedTextures; 
-
     LayerBase(SurfaceFlinger* flinger, DisplayID display);
-    virtual ~LayerBase();
     
     DisplayID           dpy;
     mutable bool        contentDirty;
@@ -83,6 +87,8 @@ public:
             struct State {
                 uint32_t        w;
                 uint32_t        h;
+                uint32_t        requested_w;
+                uint32_t        requested_h;
                 uint32_t        z;
                 uint8_t         alpha;
                 uint8_t         flags;
@@ -102,7 +108,7 @@ public:
             bool setTransparentRegionHint(const Region& opaque);
             bool setFlags(uint8_t flags, uint8_t mask);
             
-            void commitTransaction(bool skipSize);
+            void commitTransaction();
             bool requestTransaction();
             void forceVisibilityTransaction();
             
@@ -133,11 +139,6 @@ public:
     virtual void initStates(uint32_t w, uint32_t h, uint32_t flags);
     
     /**
-     * setSizeChanged - called when the *current* state's size is changed.
-     */
-    virtual void setSizeChanged(uint32_t w, uint32_t h);
-    
-    /**
      * doTransaction - process the transaction. This is a good place to figure
      * out which attributes of the surface have changed.
      */
@@ -156,13 +157,6 @@ public:
      */
     virtual void setCoveredRegion(const Region& coveredRegion);
     
-    /**
-     * getPhysicalSize - returns the physical size of the drawing state of
-     * the surface. If the surface is backed by a bitmap, this is the size of
-     * the bitmap (as opposed to the size of the drawing state).
-     */
-    virtual Point getPhysicalSize() const;
-
     /**
      * validateVisibility - cache a bunch of things
      */
@@ -195,27 +189,42 @@ public:
     virtual bool needsBlending() const  { return false; }
 
     /**
+     * needsDithering - true if this surface needs dithering
+     */
+    virtual bool needsDithering() const { return false; }
+
+    /**
      * transformed -- true is this surface needs a to be transformed
      */
     virtual bool transformed() const    { return mTransformed; }
 
     /**
      * isSecure - true if this surface is secure, that is if it prevents
-     * screenshots or vns servers.
+     * screenshots or VNC servers.
      */
     virtual bool isSecure() const       { return false; }
 
-            enum { // flags for doTransaction()
-                eVisibleRegion      = 0x00000002,
-                eRestartTransaction = 0x00000008
-            };
+    /** Called from the main thread, when the surface is removed from the
+     * draw list */
+    virtual status_t ditch() { return NO_ERROR; }
+
+    /** called with the state lock when the surface is removed from the
+     *  current list */
+    virtual void onRemoved() { };
+    
+    
+    enum { // flags for doTransaction()
+        eVisibleRegion      = 0x00000002,
+    };
 
 
     inline  const State&    drawingState() const    { return mDrawingState; }
     inline  const State&    currentState() const    { return mCurrentState; }
     inline  State&          currentState()          { return mCurrentState; }
 
-    static int compareCurrentStateZ(LayerBase*const* layerA, LayerBase*const* layerB) {
+    static int compareCurrentStateZ(
+            sp<LayerBase> const * layerA,
+            sp<LayerBase> const * layerB) {
         return layerA[0]->currentState().z - layerB[0]->currentState().z;
     }
 
@@ -229,28 +238,42 @@ protected:
 
           GLuint createTexture() const;
     
-          void drawWithOpenGL(const Region& clip,
-                  GLint textureName,
-                  const GGLSurface& surface,
-                  int transform = 0) const;
+          struct Texture {
+              Texture() : name(-1U), width(0), height(0),
+                  image(EGL_NO_IMAGE_KHR), transform(0), 
+                  NPOTAdjust(false), dirty(true) { }
+              GLuint        name;
+              GLuint        width;
+              GLuint        height;
+              GLuint        potWidth;
+              GLuint        potHeight;
+              GLfloat       wScale;
+              GLfloat       hScale;
+              EGLImageKHR   image;
+              uint32_t      transform;
+              bool          NPOTAdjust;
+              bool          dirty;
+          };
 
+          void clearWithOpenGL(const Region& clip, GLclampx r, GLclampx g,
+                               GLclampx b, GLclampx alpha) const;
           void clearWithOpenGL(const Region& clip) const;
+          void drawWithOpenGL(const Region& clip, const Texture& texture) const;
+          void loadTexture(Texture* texture, 
+                  const Region& dirty, const GGLSurface& t) const;
+          status_t initializeEglImage(
+                  const sp<GraphicBuffer>& buffer, Texture* texture);
 
-          void loadTexture(const Region& dirty,
-                  GLint textureName, const GGLSurface& t,
-                  GLuint& textureWidth, GLuint& textureHeight) const;
-
-          bool canUseCopybit() const;
           
-                SurfaceFlinger* mFlinger;
+                sp<SurfaceFlinger> mFlinger;
                 uint32_t        mFlags;
 
                 // cached during validateVisibility()
                 bool            mTransformed;
+                bool            mUseLinearFiltering;
                 int32_t         mOrientation;
                 GLfixed         mVertices[4][2];
                 Rect            mTransformedBounds;
-                bool            mCanUseCopyBit;
                 int             mLeft;
                 int             mTop;
             
@@ -262,16 +285,16 @@ protected:
                 // don't change, don't need a lock
                 bool            mPremultipliedAlpha;
 
-                // only read
-    const       uint32_t        mIdentity;
-     
                 // atomic
     volatile    int32_t         mInvalidate;
                 
 
+protected:
+    virtual ~LayerBase();
+
 private:
-                void validateTexture(GLint textureName) const;
-    static      int32_t         sIdentity;
+    LayerBase(const LayerBase& rhs);
+    void validateTexture(GLint textureName) const;
 };
 
 
@@ -286,67 +309,67 @@ public:
     virtual char const* getTypeID() const { return typeID; }
     virtual uint32_t getTypeInfo() const { return typeInfo; }
 
+    // lcblk is (almost) only accessed from the main SF thread, in the places
+    // where it's not, a reference to Client must be held
+    SharedBufferServer*     lcblk;
+
     LayerBaseClient(SurfaceFlinger* flinger, DisplayID display, 
-            Client* client, int32_t i);
+            const sp<Client>& client, int32_t i);
     virtual ~LayerBaseClient();
+    virtual void onFirstRef();
 
+    const wp<Client>    client;
 
-    Client*             const client;
-    layer_cblk_t*       const lcblk;
-
+    inline  uint32_t    getIdentity() const { return mIdentity; }
     inline  int32_t     clientIndex() const { return mIndex; }
             int32_t     serverIndex() const;
 
-    virtual sp<Surface> getSurface() const;
    
-            uint32_t    getIdentity() const { return mIdentity; }
+            sp<Surface> getSurface();
+    virtual sp<Surface> createSurface() const;
+    
+    virtual void onRemoved();
 
     class Surface : public BnSurface 
     {
     public:
-        Surface(SurfaceID id, int identity) { 
-            mParams.token = id;
-            mParams.identity = identity;
-        }
-        Surface(SurfaceID id, 
-                const sp<IMemoryHeap>& heap0,
-                const sp<IMemoryHeap>& heap1,
-                int identity)
-        {
-            mParams.token = id;
-            mParams.identity = identity;
-            mParams.heap[0] = heap0;
-            mParams.heap[1] = heap1;
-        }
-        virtual ~Surface() {
-            // TODO: We now have a point here were we can clean-up the
-            // client's mess.
-            // This is also where surface id should be recycled.
-            //LOGD("Surface %d, heaps={%p, %p} destroyed",
-            //        mId, mHeap[0].get(), mHeap[1].get());
-        }
-
-        virtual void getSurfaceData(
-                ISurfaceFlingerClient::surface_data_t* params) const {
-            *params = mParams;
-        }
-
-        virtual status_t registerBuffers(const ISurface::BufferHeap& buffers) 
-                { return INVALID_OPERATION; }
-        virtual void postBuffer(ssize_t offset) { }
-        virtual void unregisterBuffers() { };
-        virtual sp<OverlayRef> createOverlay(
-                uint32_t w, uint32_t h, int32_t format) {
-            return NULL;
-        };
+        int32_t getToken() const { return mToken; }
+        int32_t getIdentity() const { return mIdentity; }
+        
+    protected:
+        Surface(const sp<SurfaceFlinger>& flinger, 
+                SurfaceID id, int identity, 
+                const sp<LayerBaseClient>& owner);
+        virtual ~Surface();
+        virtual status_t onTransact(uint32_t code, const Parcel& data,
+                Parcel* reply, uint32_t flags);
+        sp<LayerBaseClient> getOwner() const;
 
     private:
-        ISurfaceFlingerClient::surface_data_t mParams;
+        virtual sp<GraphicBuffer> requestBuffer(int index, int usage);
+        virtual status_t registerBuffers(const ISurface::BufferHeap& buffers); 
+        virtual void postBuffer(ssize_t offset);
+        virtual void unregisterBuffers();
+        virtual sp<OverlayRef> createOverlay(uint32_t w, uint32_t h,
+                int32_t format);
+
+    protected:
+        friend class LayerBaseClient;
+        sp<SurfaceFlinger>  mFlinger;
+        int32_t             mToken;
+        int32_t             mIdentity;
+        wp<LayerBaseClient> mOwner;
     };
 
-private:
-    int32_t mIndex;
+    friend class Surface;
 
+private:
+                int32_t         mIndex;
+    mutable     Mutex           mLock;
+    mutable     wp<Surface>     mClientSurface;
+    // only read
+    const       uint32_t        mIdentity;
+    static      int32_t         sIdentity;
 };
 
 // ---------------------------------------------------------------------------

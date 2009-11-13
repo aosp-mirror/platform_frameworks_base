@@ -17,33 +17,18 @@
 package com.android.layoutlib.bridge;
 
 import org.kxml2.io.KXmlParser;
-import org.w3c.dom.Document;
 import org.w3c.dom.Node;
-import org.xml.sax.SAXException;
 import org.xmlpull.v1.XmlPullParser;
 
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.net.URL;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
+import java.io.InputStream;
 
 import junit.framework.TestCase;
 
 public class BridgeXmlBlockParserTest extends TestCase {
 
-    private String mXmlPath;
-    private Document mDoc;
-
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        URL url = this.getClass().getClassLoader().getResource("data/layout1.xml");
-        mXmlPath = url.getFile();
-        mDoc = getXmlDocument(mXmlPath);
     }
 
     @Override
@@ -54,7 +39,10 @@ public class BridgeXmlBlockParserTest extends TestCase {
     public void testXmlBlockParser() throws Exception {
         XmlPullParser parser = new KXmlParser();
         parser = new BridgeXmlBlockParser(parser, null, false /* platformResourceFlag */);
-        parser.setInput(new FileReader(new File(mXmlPath)));
+
+        InputStream input = this.getClass().getClassLoader().getResourceAsStream(
+            "com/android/layoutlib/testdata/layout1.xml");
+        parser.setInput(input, null /*encoding*/);
 
         assertEquals(XmlPullParser.START_DOCUMENT, parser.next());
 
@@ -85,24 +73,8 @@ public class BridgeXmlBlockParserTest extends TestCase {
         assertEquals(XmlPullParser.END_TAG, parser.next());
         assertEquals(XmlPullParser.END_DOCUMENT, parser.next());
     }
-    
-    //------------
-    
-    private Document getXmlDocument(String xmlFilePath)
-            throws ParserConfigurationException, SAXException, IOException {
-        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-        
-        // keep comments
-        factory.setIgnoringComments(false);
-        // don't validate our bogus DTD
-        factory.setValidating(false);
-        // we want namespaces
-        factory.setNamespaceAware(true);
-        
-        DocumentBuilder builder = factory.newDocumentBuilder();
-        return builder.parse(new File(xmlFilePath));
-    }
 
+    //------------
 
     /**
      * Quick'n'dirty debug helper that dumps an XML structure to stdout.
@@ -126,7 +98,7 @@ public class BridgeXmlBlockParserTest extends TestCase {
                 "DOCUMENT_FRAGMENT_NODE",
                 "NOTATION_NODE"
         };
-        
+
         String s = String.format("%s<%s> %s %s",
                 prefix,
                 types[node.getNodeType()],
@@ -134,7 +106,7 @@ public class BridgeXmlBlockParserTest extends TestCase {
                 node.getNodeValue() == null ? "" : node.getNodeValue().trim());
 
         System.out.println(s);
-        
+
         n = node.getFirstChild();
         if (n != null) {
             dump(n, prefix + "- ");

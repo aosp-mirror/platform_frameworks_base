@@ -20,6 +20,7 @@ LOCAL_SHARED_LIBRARIES := \
     libcameraservice \
     libmediaplayerservice \
 	libutils \
+	libbinder \
 	libcutils
 
 LOCAL_MODULE:= libsystem_server

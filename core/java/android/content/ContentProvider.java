@@ -34,6 +34,7 @@ import android.os.Process;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
 
 /**
  * Content providers are one of the primary building blocks of Android applications, providing
@@ -130,6 +131,15 @@ public abstract class ContentProvider implements ComponentCallbacks {
                     selectionArgs, sortOrder);
         }
 
+        /**
+         * @hide
+         */
+        public EntityIterator queryEntities(Uri uri, String selection, String[] selectionArgs,
+                String sortOrder) {
+            enforceReadPermission(uri);
+            return ContentProvider.this.queryEntities(uri, selection, selectionArgs, sortOrder);
+        }
+
         public String getType(Uri uri) {
             return ContentProvider.this.getType(uri);
         }
@@ -143,6 +153,20 @@ public abstract class ContentProvider implements ComponentCallbacks {
         public int bulkInsert(Uri uri, ContentValues[] initialValues) {
             enforceWritePermission(uri);
             return ContentProvider.this.bulkInsert(uri, initialValues);
+        }
+
+        public ContentProviderResult[] applyBatch(ArrayList<ContentProviderOperation> operations)
+                throws OperationApplicationException {
+            for (ContentProviderOperation operation : operations) {
+                if (operation.isReadOperation()) {
+                    enforceReadPermission(operation.getUri());
+                }
+
+                if (operation.isWriteOperation()) {
+                    enforceWritePermission(operation.getUri());
+                }
+            }
+            return ContentProvider.this.applyBatch(operations);
         }
 
         public int delete(Uri uri, String selection, String[] selectionArgs) {
@@ -168,12 +192,6 @@ public abstract class ContentProvider implements ComponentCallbacks {
             if (mode != null && mode.startsWith("rw")) enforceWritePermission(uri);
             else enforceReadPermission(uri);
             return ContentProvider.this.openAssetFile(uri, mode);
-        }
-
-        public ISyncAdapter getSyncAdapter() {
-            enforceWritePermission(null);
-            SyncAdapter sa = ContentProvider.this.getSyncAdapter();
-            return sa != null ? sa.getISyncAdapter() : null;
         }
 
         private void enforceReadPermission(Uri uri) {
@@ -377,9 +395,10 @@ public abstract class ContentProvider implements ComponentCallbacks {
      * Example client call:<p>
      * <pre>// Request a specific record.
      * Cursor managedCursor = managedQuery(
-                Contacts.People.CONTENT_URI.addId(2),
+                ContentUris.withAppendedId(Contacts.People.CONTENT_URI, 2),
                 projection,    // Which columns to return.
                 null,          // WHERE clause.
+                null,          // WHERE clause value substitution
                 People.NAME + " ASC");   // Sort order.</pre>
      * Example implementation:<p>
      * <pre>// SQLiteQueryBuilder is a helper class that creates the
@@ -408,19 +427,30 @@ public abstract class ContentProvider implements ComponentCallbacks {
         return c;</pre>
      *
      * @param uri The URI to query. This will be the full URI sent by the client;
-     * if the client is requesting a specific record, the URI will end in a record number
-     * that the implementation should parse and add to a WHERE or HAVING clause, specifying
-     * that _id value.
+     *      if the client is requesting a specific record, the URI will end in a record number
+     *      that the implementation should parse and add to a WHERE or HAVING clause, specifying
+     *      that _id value.
      * @param projection The list of columns to put into the cursor. If
      *      null all columns are included.
      * @param selection A selection criteria to apply when filtering rows.
      *      If null then all rows are included.
+     * @param selectionArgs You may include ?s in selection, which will be replaced by
+     *      the values from selectionArgs, in order that they appear in the selection.
+     *      The values will be bound as Strings.
      * @param sortOrder How the rows in the cursor should be sorted.
-     *        If null then the provider is free to define the sort order.
+     *      If null then the provider is free to define the sort order.
      * @return a Cursor or null.
      */
     public abstract Cursor query(Uri uri, String[] projection,
             String selection, String[] selectionArgs, String sortOrder);
+
+    /**
+     * @hide
+     */
+    public EntityIterator queryEntities(Uri uri, String selection, String[] selectionArgs,
+            String sortOrder) {
+        throw new UnsupportedOperationException();
+    }
 
     /**
      * Return the MIME type of the data at the given URI. This should start with
@@ -519,7 +549,7 @@ public abstract class ContentProvider implements ComponentCallbacks {
     /**
      * Open a file blob associated with a content URI.
      * This method can be called from multiple
-     * threads, as described in
+     * threads, as described inentity
      * <a href="{@docRoot}guide/topics/fundamentals.html#procthread">Application Fundamentals:
      * Processes and Threads</a>.
      * 
@@ -639,23 +669,6 @@ public abstract class ContentProvider implements ComponentCallbacks {
     }
 
     /**
-     * Get the sync adapter that is to be used by this content provider.
-     * This is intended for use by the sync system. If null then this
-     * content provider is considered not syncable.
-     * This method can be called from multiple
-     * threads, as described in
-     * <a href="{@docRoot}guide/topics/fundamentals.html#procthread">Application Fundamentals:
-     * Processes and Threads</a>.
-     * 
-     * @return the SyncAdapter that is to be used by this ContentProvider, or null
-     *   if this ContentProvider is not syncable
-     * @hide
-     */
-    public SyncAdapter getSyncAdapter() {
-        return null;
-    }
-
-    /**
      * Returns true if this instance is a temporary content provider.
      * @return true if this instance is a temporary content provider
      */
@@ -696,5 +709,28 @@ public abstract class ContentProvider implements ComponentCallbacks {
             }
             ContentProvider.this.onCreate();
         }
+    }
+
+    /**
+     * Applies each of the {@link ContentProviderOperation} objects and returns an array
+     * of their results. Passes through OperationApplicationException, which may be thrown
+     * by the call to {@link ContentProviderOperation#apply}.
+     * If all the applications succeed then a {@link ContentProviderResult} array with the
+     * same number of elements as the operations will be returned. It is implementation-specific
+     * how many, if any, operations will have been successfully applied if a call to
+     * apply results in a {@link OperationApplicationException}.
+     * @param operations the operations to apply
+     * @return the results of the applications
+     * @throws OperationApplicationException thrown if an application fails.
+     * See {@link ContentProviderOperation#apply} for more information.
+     */
+    public ContentProviderResult[] applyBatch(ArrayList<ContentProviderOperation> operations)
+            throws OperationApplicationException {
+        final int numOperations = operations.size();
+        final ContentProviderResult[] results = new ContentProviderResult[numOperations];
+        for (int i = 0; i < numOperations; i++) {
+            results[i] = operations.get(i).apply(this, results, i);
+        }
+        return results;
     }
 }

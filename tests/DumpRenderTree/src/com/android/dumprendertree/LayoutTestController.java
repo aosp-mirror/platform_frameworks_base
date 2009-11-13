@@ -58,5 +58,11 @@ public interface LayoutTestController {
     public void queueLoad(String Url, String frameTarget);
 
     public void setAcceptsEditing(boolean b);
-	
+
+    // For storage tests
+    public void dumpDatabaseCallbacks();
+    public void setCanOpenWindows();
+
+    // For Geolocation tests
+    public void setGeolocationPermission(boolean allow);
 }

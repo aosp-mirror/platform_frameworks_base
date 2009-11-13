@@ -17,7 +17,7 @@
 
 #include <stdint.h>
 #include <sys/types.h>
-#include <utils/Parcel.h>
+#include <binder/Parcel.h>
 #include <SkBitmap.h>
 #include <media/IMediaMetadataRetriever.h>
 
@@ -126,15 +126,9 @@ public:
     }
 };
 
-IMPLEMENT_META_INTERFACE(MediaMetadataRetriever, "android.hardware.IMediaMetadataRetriever");
+IMPLEMENT_META_INTERFACE(MediaMetadataRetriever, "android.media.IMediaMetadataRetriever");
 
 // ----------------------------------------------------------------------
-
-#define CHECK_INTERFACE(interface, data, reply) \
-        do { if (!data.enforceInterface(interface::getInterfaceDescriptor())) { \
-            LOGW("Call incorrectly routed to " #interface); \
-            return PERMISSION_DENIED; \
-        } } while (0)
 
 status_t BnMediaMetadataRetriever::onTransact(
     uint32_t code, const Parcel& data, Parcel* reply, uint32_t flags)
@@ -215,4 +209,3 @@ status_t BnMediaMetadataRetriever::onTransact(
 // ----------------------------------------------------------------------------
 
 }; // namespace android
-

@@ -22,6 +22,7 @@ import android.graphics.Bitmap;
 import java.io.FileOutputStream;
 import android.test.AndroidTestCase;
 import com.android.mediaframeworktest.MediaNames;
+import com.android.mediaframeworktest.MediaProfileReader;
 import android.test.suitebuilder.annotation.*;
 
 /**
@@ -38,10 +39,19 @@ public class MediaMetadataRetrieverTest extends AndroidTestCase {
     public static void testAlbumArt() throws Exception {
         Log.v(TAG, "testAlbumArt starts.");
         MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+        MediaProfileReader reader = new MediaProfileReader();
+        boolean supportWMA = reader.getWMAEnable();
+        boolean supportWMV = reader.getWMVEnable();
         retriever.setMode(MediaMetadataRetriever.MODE_GET_METADATA_ONLY);
         for (int i = 0, n = MediaNames.ALBUMART_TEST_FILES.length; i < n; ++i) {
             try {
                 Log.v(TAG, "File " + i + ": " + MediaNames.ALBUMART_TEST_FILES[i]);
+                if ((MediaNames.ALBUMART_TEST_FILES[i].endsWith(".wma") && !supportWMA) ||
+                    (MediaNames.ALBUMART_TEST_FILES[i].endsWith(".wmv") && !supportWMV)
+                   ) {
+                    Log.v(TAG, "windows media is not supported and thus we will skip the test for this file");
+                    continue;
+                }
                 retriever.setDataSource(MediaNames.ALBUMART_TEST_FILES[i]);
                 byte[] albumArt = retriever.extractAlbumArt();
 
@@ -61,15 +71,23 @@ public class MediaMetadataRetrieverTest extends AndroidTestCase {
     }
 
     // Test frame capture
-    // Suppressing until 1259652 is fixed.
-    @Suppress
-    public static void disableTestThumbnailCapture() throws Exception {
+    @LargeTest
+    public static void testThumbnailCapture() throws Exception {
         MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+        MediaProfileReader reader = new MediaProfileReader();
+        boolean supportWMA = reader.getWMAEnable();
+        boolean supportWMV = reader.getWMVEnable();
         Log.v(TAG, "Thumbnail processing starts");
         long startedAt = System.currentTimeMillis();
         for(int i = 0, n = MediaNames.THUMBNAIL_CAPTURE_TEST_FILES.length; i < n; ++i) {
             try {
                 Log.v(TAG, "File " + i + ": " + MediaNames.THUMBNAIL_CAPTURE_TEST_FILES[i]);
+                if ((MediaNames.THUMBNAIL_CAPTURE_TEST_FILES[i].endsWith(".wma") && !supportWMA) ||
+                    (MediaNames.THUMBNAIL_CAPTURE_TEST_FILES[i].endsWith(".wmv") && !supportWMV)
+                   ) {
+                    Log.v(TAG, "windows media is not supported and thus we will skip the test for this file");
+                    continue;
+                }
                 retriever.setDataSource(MediaNames.THUMBNAIL_CAPTURE_TEST_FILES[i]);
                 Bitmap bitmap = retriever.captureFrame();
                 assertTrue(bitmap != null);
@@ -92,10 +110,20 @@ public class MediaMetadataRetrieverTest extends AndroidTestCase {
     
     @LargeTest
     public static void testMetadataRetrieval() throws Exception {
+        MediaProfileReader reader = new MediaProfileReader();
+        boolean supportWMA = reader.getWMAEnable();
+        boolean supportWMV = reader.getWMVEnable();
         MediaMetadataRetriever retriever = new MediaMetadataRetriever();
         retriever.setMode(MediaMetadataRetriever.MODE_GET_METADATA_ONLY);
         for(int i = 0, n = MediaNames.METADATA_RETRIEVAL_TEST_FILES.length; i < n; ++i) {
             try {
+                Log.v(TAG, "File " + i + ": " + MediaNames.METADATA_RETRIEVAL_TEST_FILES[i]);
+                if ((MediaNames.METADATA_RETRIEVAL_TEST_FILES[i].endsWith(".wma") && !supportWMA) ||
+                    (MediaNames.METADATA_RETRIEVAL_TEST_FILES[i].endsWith(".wmv") && !supportWMV)
+                   ) {
+                    Log.v(TAG, "windows media is not supported and thus we will skip the test for this file");
+                    continue;
+                }
                 retriever.setDataSource(MediaNames.METADATA_RETRIEVAL_TEST_FILES[i]);
                 extractAllSupportedMetadataValues(retriever);
             } catch(Exception e) {

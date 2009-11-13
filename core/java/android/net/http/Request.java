@@ -67,9 +67,6 @@ class Request {
     /** Set if I'm using a proxy server */
     HttpHost mProxyHost;
 
-    /** True if request is .html, .js, .css */
-    boolean mHighPriority;
-
     /** True if request has been cancelled */
     volatile boolean mCancelled = false;
 
@@ -102,26 +99,29 @@ class Request {
      * @param eventHandler request will make progress callbacks on
      * this interface
      * @param headers reqeust headers
-     * @param highPriority true for .html, css, .cs
      */
     Request(String method, HttpHost host, HttpHost proxyHost, String path,
             InputStream bodyProvider, int bodyLength,
             EventHandler eventHandler,
-            Map<String, String> headers, boolean highPriority) {
+            Map<String, String> headers) {
         mEventHandler = eventHandler;
         mHost = host;
         mProxyHost = proxyHost;
         mPath = path;
-        mHighPriority = highPriority;
         mBodyProvider = bodyProvider;
         mBodyLength = bodyLength;
 
-        if (bodyProvider == null) {
+        if (bodyProvider == null && !"POST".equalsIgnoreCase(method)) {
             mHttpRequest = new BasicHttpRequest(method, getUri());
         } else {
             mHttpRequest = new BasicHttpEntityEnclosingRequest(
                     method, getUri());
-            setBodyProvider(bodyProvider, bodyLength);
+            // it is ok to have null entity for BasicHttpEntityEnclosingRequest.
+            // By using BasicHttpEntityEnclosingRequest, it will set up the
+            // correct content-length, content-type and content-encoding.
+            if (bodyProvider != null) {
+                setBodyProvider(bodyProvider, bodyLength);
+            }
         }
         addHeader(HOST_HEADER, getHostPort());
 
@@ -255,6 +255,8 @@ class Request {
             // process gzip content encoding
             Header contentEncoding = entity.getContentEncoding();
             InputStream nis = null;
+            byte[] buf = null;
+            int count = 0;
             try {
                 if (contentEncoding != null &&
                     contentEncoding.getValue().equals("gzip")) {
@@ -265,9 +267,8 @@ class Request {
 
                 /* accumulate enough data to make it worth pushing it
                  * up the stack */
-                byte[] buf = mConnection.getBuf();
+                buf = mConnection.getBuf();
                 int len = 0;
-                int count = 0;
                 int lowWater = buf.length / 2;
                 while (len != -1) {
                     len = nis.read(buf, count, buf.length - count);
@@ -284,6 +285,10 @@ class Request {
                 /* InflaterInputStream throws an EOFException when the
                    server truncates gzipped content.  Handle this case
                    as we do truncated non-gzipped content: no error */
+                if (count > 0) {
+                    // if there is uncommited content, we should commit them
+                    mEventHandler.data(buf, count);
+                }
                 if (HttpLog.LOGV) HttpLog.v( "readResponse() handling " + e);
             } catch(IOException e) {
                 // don't throw if we have a non-OK status code
@@ -346,7 +351,7 @@ class Request {
      * for debugging
      */
     public String toString() {
-        return (mHighPriority ? "P*" : "") + mPath;
+        return mPath;
     }
 
 
@@ -412,8 +417,7 @@ class Request {
         }
         return status >= HttpStatus.SC_OK
             && status != HttpStatus.SC_NO_CONTENT
-            && status != HttpStatus.SC_NOT_MODIFIED
-            && status != HttpStatus.SC_RESET_CONTENT;
+            && status != HttpStatus.SC_NOT_MODIFIED;
     }
 
     /**

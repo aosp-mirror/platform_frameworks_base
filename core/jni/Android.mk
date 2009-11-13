@@ -11,9 +11,15 @@ else
 	LOCAL_CFLAGS += -DPACKED=""
 endif
 
+ifeq ($(WITH_JIT),true)
+	LOCAL_CFLAGS += -DWITH_JIT
+endif
+
 ifneq ($(USE_CUSTOM_RUNTIME_HEAP_MAX),)
   LOCAL_CFLAGS += -DCUSTOM_RUNTIME_HEAP_MAX=$(USE_CUSTOM_RUNTIME_HEAP_MAX)
 endif
+
+LOCAL_CFLAGS += -DGL_GLEXT_PROTOTYPES -DEGL_EGLEXT_PROTOTYPES
 
 LOCAL_SRC_FILES:= \
 	ActivityManager.cpp \
@@ -39,7 +45,6 @@ LOCAL_SRC_FILES:= \
 	android_text_AndroidCharacter.cpp \
 	android_text_KeyCharacterMap.cpp \
 	android_os_Debug.cpp \
-	android_os_Exec.cpp \
 	android_os_FileUtils.cpp \
 	android_os_MemoryFile.cpp \
 	android_os_ParcelFileDescriptor.cpp \
@@ -104,13 +109,12 @@ LOCAL_SRC_FILES:= \
 	android_util_FileObserver.cpp \
 	android/opengl/poly_clip.cpp.arm \
 	android/opengl/util.cpp.arm \
-	android_bluetooth_Database.cpp \
 	android_bluetooth_HeadsetBase.cpp \
 	android_bluetooth_common.cpp \
 	android_bluetooth_BluetoothAudioGateway.cpp \
-	android_bluetooth_RfcommSocket.cpp \
+	android_bluetooth_BluetoothSocket.cpp \
 	android_bluetooth_ScoSocket.cpp \
-	android_server_BluetoothDeviceService.cpp \
+	android_server_BluetoothService.cpp \
 	android_server_BluetoothEventLoop.cpp \
 	android_server_BluetoothA2dpService.cpp \
 	android_message_digest_sha1.cpp \
@@ -150,11 +154,11 @@ LOCAL_SHARED_LIBRARIES := \
 	libnativehelper \
 	libcutils \
 	libutils \
+	libbinder \
 	libnetutils \
 	libui \
 	libskiagl \
-	libsgl \
-	libcorecg \
+	libskia \
 	libsqlite \
 	libdvm \
 	libEGL \

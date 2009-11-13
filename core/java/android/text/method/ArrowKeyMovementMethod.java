@@ -22,6 +22,7 @@ import android.graphics.Rect;
 import android.text.*;
 import android.widget.TextView;
 import android.view.View;
+import android.view.ViewConfiguration;
 import android.view.MotionEvent;
 
 // XXX this doesn't extend MetaKeyKeyListener because the signatures
@@ -256,8 +257,32 @@ implements MovementMethod
                               (MetaKeyKeyListener.getMetaState(buffer,
                                 MetaKeyKeyListener.META_SELECTING) != 0);
 
+                DoubleTapState[] tap = buffer.getSpans(0, buffer.length(),
+                                                       DoubleTapState.class);
+                boolean doubletap = false;
+
+                if (tap.length > 0) {
+                    if (event.getEventTime() - tap[0].mWhen <=
+                        ViewConfiguration.getDoubleTapTimeout()) {
+                        if (sameWord(buffer, off, Selection.getSelectionEnd(buffer))) {
+                            doubletap = true;
+                        }
+                    }
+
+                    tap[0].mWhen = event.getEventTime();
+                } else {
+                    DoubleTapState newtap = new DoubleTapState();
+                    newtap.mWhen = event.getEventTime();
+                    buffer.setSpan(newtap, 0, buffer.length(),
+                                   Spannable.SPAN_INCLUSIVE_INCLUSIVE);
+                }
+
                 if (cap) {
                     Selection.extendSelection(buffer, off);
+                } else if (doubletap) {
+                    Selection.setSelection(buffer,
+                                           findWordStart(buffer, off),
+                                           findWordEnd(buffer, off));
                 } else {
                     Selection.setSelection(buffer, off);
                 }
@@ -270,6 +295,62 @@ implements MovementMethod
         }
 
         return handled;
+    }
+
+    private static class DoubleTapState implements NoCopySpan {
+        long mWhen;
+    }
+
+    private static boolean sameWord(CharSequence text, int one, int two) {
+        int start = findWordStart(text, one);
+        int end = findWordEnd(text, one);
+
+        if (end == start) {
+            return false;
+        }
+
+        return start == findWordStart(text, two) &&
+               end == findWordEnd(text, two);
+    }
+
+    // TODO: Unify with TextView.getWordForDictionary()
+    private static int findWordStart(CharSequence text, int start) {
+        for (; start > 0; start--) {
+            char c = text.charAt(start - 1);
+            int type = Character.getType(c);
+
+            if (c != '\'' &&
+                type != Character.UPPERCASE_LETTER &&
+                type != Character.LOWERCASE_LETTER &&
+                type != Character.TITLECASE_LETTER &&
+                type != Character.MODIFIER_LETTER &&
+                type != Character.DECIMAL_DIGIT_NUMBER) {
+                break;
+            }
+        }
+
+        return start;
+    }
+
+    // TODO: Unify with TextView.getWordForDictionary()
+    private static int findWordEnd(CharSequence text, int end) {
+        int len = text.length();
+
+        for (; end < len; end++) {
+            char c = text.charAt(end);
+            int type = Character.getType(c);
+
+            if (c != '\'' &&
+                type != Character.UPPERCASE_LETTER &&
+                type != Character.LOWERCASE_LETTER &&
+                type != Character.TITLECASE_LETTER &&
+                type != Character.MODIFIER_LETTER &&
+                type != Character.DECIMAL_DIGIT_NUMBER) {
+                break;
+            }
+        }
+
+        return end;
     }
 
     public boolean canSelectArbitrarily() {

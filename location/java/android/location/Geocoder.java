@@ -36,11 +36,11 @@ import java.util.List;
  * coordinate into a (partial) address.  The amount of detail in a
  * reverse geocoded location description may vary, for example one
  * might contain the full street address of the closest building, while
- * another might contain only a city name and postal code. 
+ * another might contain only a city name and postal code.
  *
  * The Geocoder class requires a backend service that is not included in
- * the core android framework. The Geocoder query methods will return an
- * empty list if there no backend service in the platform. 
+ * the core android framework.  The Geocoder query methods will return an
+ * empty list if there no backend service in the platform.
  */
 public final class Geocoder {
     private static final String TAG = "Geocoder";

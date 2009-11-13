@@ -16,16 +16,14 @@
 
 package android.provider;
 
+import com.android.internal.telephony.CallerInfo;
+import com.android.internal.telephony.Connection;
+
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.net.Uri;
-import android.provider.Contacts.People;
-import com.android.internal.telephony.CallerInfo;
-import com.android.internal.telephony.Connection;
-
 import android.text.TextUtils;
-import android.util.Log;
 
 /**
  * The CallLog provider contains information about placed and received calls.
@@ -73,7 +71,7 @@ public class CallLog {
         public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/calls";
 
         /**
-         * The type of the the phone number.
+         * The type of the call (incoming, outgoing or missed).
          * <P>Type: INTEGER (int)</P>
          */
         public static final String TYPE = "type";
@@ -179,7 +177,7 @@ public class CallLog {
             }
             
             if ((ci != null) && (ci.person_id > 0)) {
-                People.markAsContacted(resolver, ci.person_id);
+                ContactsContract.Contacts.markAsContacted(resolver, ci.person_id);
             }
             
             Uri result = resolver.insert(CONTENT_URI, values);

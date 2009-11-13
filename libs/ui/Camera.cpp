@@ -19,9 +19,9 @@
 //#define LOG_NDEBUG 0
 #define LOG_TAG "Camera"
 #include <utils/Log.h>
-#include <utils/IServiceManager.h>
+#include <binder/IServiceManager.h>
 #include <utils/threads.h>
-#include <utils/IMemory.h>
+#include <binder/IMemory.h>
 #include <ui/Surface.h>
 #include <ui/Camera.h>
 #include <ui/ICameraService.h>
@@ -242,6 +242,14 @@ status_t Camera::autoFocus()
     return c->autoFocus();
 }
 
+status_t Camera::cancelAutoFocus()
+{
+    LOGV("cancelAutoFocus");
+    sp <ICamera> c = mCamera;
+    if (c == 0) return NO_INIT;
+    return c->cancelAutoFocus();
+}
+
 // take a picture
 status_t Camera::takePicture()
 {
@@ -268,6 +276,15 @@ String8 Camera::getParameters() const
     sp <ICamera> c = mCamera;
     if (c != 0) params = mCamera->getParameters();
     return params;
+}
+
+// send command to camera driver
+status_t Camera::sendCommand(int32_t cmd, int32_t arg1, int32_t arg2)
+{
+    LOGD("sendCommand");
+    sp <ICamera> c = mCamera;
+    if (c == 0) return NO_INIT;
+    return c->sendCommand(cmd, arg1, arg2);
 }
 
 void Camera::setListener(const sp<CameraListener>& listener)

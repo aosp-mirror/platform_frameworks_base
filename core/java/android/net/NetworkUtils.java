@@ -25,6 +25,9 @@ import java.net.UnknownHostException;
  * {@hide}
  */
 public class NetworkUtils {
+    /** Bring the named network interface up. */
+    public native static int enableInterface(String interfaceName);
+
     /** Bring the named network interface down. */
     public native static int disableInterface(String interfaceName);
 

@@ -14,6 +14,11 @@
      limitations under the License.
 -->
 
+<!-- Formatting note: terminate all comments with a period, to avoid breaking 
+     the documentation output. To suppress comment lines from the documentation 
+     output, insert an eat-comment element after the comment lines.
+-->
+
 <resources>
     <!-- These are the standard attributes that make up a complete theme. -->
     <declare-styleable name="Theme">
@@ -28,6 +33,11 @@
         <attr name="colorForegroundInverse" format="color" />
         <!-- Color that matches (as closely as possible) the window background. -->
         <attr name="colorBackground" format="color" />
+        <!-- This is a hint for a solid color that can be used for caching
+             rendered views.  This will be the color of the background when
+             there is a solid background color; it will be null when the
+             background is a texture or translucent. -->
+        <attr name="colorBackgroundCacheHint" format="color" />
         <!-- Default disabled alpha for widgets that set enabled/disabled alpha programmatically. -->
         <attr name="disabledAlpha" format="float" />
         <!-- Default background dim amount when a menu, dialog, or something similar pops up. -->
@@ -42,27 +52,27 @@
         <!-- =========== -->
         <eat-comment />
 
-        <!-- Default appearance of text: color, typeface, size, and style -->
+        <!-- Default appearance of text: color, typeface, size, and style. -->
         <attr name="textAppearance" format="reference" />
         <!-- Default appearance of text against an inverted background:
-             color, typeface, size, and style -->
+             color, typeface, size, and style. -->
         <attr name="textAppearanceInverse" format="reference" />
 
-        <!-- The most prominent text color, for the  -->
+        <!-- The most prominent text color.  -->
         <attr name="textColorPrimary" format="reference|color" />
-        <!-- Secondary text color -->
+        <!-- Secondary text color. -->
         <attr name="textColorSecondary" format="reference|color" />
-        <!-- Tertiary text color -->
+        <!-- Tertiary text color. -->
         <attr name="textColorTertiary" format="reference|color" />
 
-        <!-- Primary inverse text color, useful for inverted backgrounds -->
+        <!-- Primary inverse text color, useful for inverted backgrounds. -->
         <attr name="textColorPrimaryInverse" format="reference|color" />
-        <!-- Secondary inverse text color, useful for inverted backgrounds -->
+        <!-- Secondary inverse text color, useful for inverted backgrounds. -->
         <attr name="textColorSecondaryInverse" format="reference|color" />
-        <!-- Tertiary inverse text color, useful for inverted backgrounds -->
+        <!-- Tertiary inverse text color, useful for inverted backgrounds. -->
         <attr name="textColorTertiaryInverse" format="reference|color" />
 
-        <!-- Inverse hint text color -->
+        <!-- Inverse hint text color. -->
         <attr name="textColorHintInverse" format="reference|color" />
 
         <!-- Bright text color. Only differentiates based on the disabled state. -->
@@ -102,9 +112,9 @@
         <!-- Text color, typeface, size, and style for "small" inverse text. Defaults to secondary inverse text color. -->
         <attr name="textAppearanceSmallInverse" format="reference" />
 
-        <!-- Text color, typeface, size, and style for system search result title. Defaults to primary inverse text color. @hide -->
+        <!-- Text color, typeface, size, and style for system search result title. Defaults to primary inverse text color. -->
         <attr name="textAppearanceSearchResultTitle" format="reference" />
-        <!-- Text color, typeface, size, and style for system search result subtitle. Defaults to primary inverse text color. @hide -->
+        <!-- Text color, typeface, size, and style for system search result subtitle. Defaults to primary inverse text color. -->
         <attr name="textAppearanceSearchResultSubtitle" format="reference" />
 
 
@@ -117,14 +127,14 @@
              to the candidate text as it is edited. -->
         <attr name="candidatesTextStyleSpans" format="reference|string" />
 
-        <!-- Drawable to use for check marks -->
+        <!-- Drawable to use for check marks. -->
         <attr name="textCheckMark" format="reference" />
         <attr name="textCheckMarkInverse" format="reference" />
 
-        <!-- Drawable to use for multiple choice indicators-->
+        <!-- Drawable to use for multiple choice indicators. -->
         <attr name="listChoiceIndicatorMultiple" format="reference" />
 
-        <!-- Drawable to use for single choice indicators-->
+        <!-- Drawable to use for single choice indicators. -->
         <attr name="listChoiceIndicatorSingle" format="reference" />
 
         <!-- ============= -->
@@ -158,9 +168,9 @@
         <!-- =========== -->
         <eat-comment />
 
-        <!-- The preferred list item height -->
+        <!-- The preferred list item height. -->
         <attr name="listPreferredItemHeight" format="dimension" />
-        <!-- The drawable for the list divider -->
+        <!-- The drawable for the list divider. -->
         <!-- The list item height for search results. @hide -->
         <attr name="searchResultListItemHeight" format="dimension" />
         <attr name="listDivider" format="reference" />
@@ -215,6 +225,9 @@
         <attr name="windowIsFloating" format="boolean" />
         <!-- Flag indicating whether this is a translucent window. -->
         <attr name="windowIsTranslucent" format="boolean" />
+        <!-- Flag indicating that this window's background should be the
+        	 user's current wallpaper. -->
+        <attr name="windowShowWallpaper" format="boolean" />
         <!-- This Drawable is overlaid over the foreground of the Window's content area, usually
              to place a shadow below the title.  -->
         <attr name="windowContentOverlay" format="reference" />
@@ -333,9 +346,9 @@
         <attr name="gestureOverlayViewStyle" format="reference" />
         <!-- Default GridView style. -->
         <attr name="gridViewStyle" format="reference" />
-        <!-- The style resource to use for an ImageButton -->
+        <!-- The style resource to use for an ImageButton. -->
         <attr name="imageButtonStyle" format="reference" />
-        <!-- The style resource to use for an ImageButton that is an image well -->
+        <!-- The style resource to use for an ImageButton that is an image well. -->
         <attr name="imageWellStyle" format="reference" />
         <!-- Default ListView style. -->
         <attr name="listViewStyle" format="reference" />
@@ -358,7 +371,7 @@
         <!-- Small inverse ProgressBar style. This is a small circular progress bar. -->
         <attr name="progressBarStyleSmallInverse" format="reference" />
         <!-- Large inverse ProgressBar style. This is a large circular progress bar. -->
-        <attr name="progressBarStyleLargeInverse" format="reference" /> 
+        <attr name="progressBarStyleLargeInverse" format="reference" />
         <!-- Default SeekBar style. -->
         <attr name="seekBarStyle" format="reference" />
         <!-- Default RatingBar style. -->
@@ -393,6 +406,20 @@
         <attr name="spinnerItemStyle" format="reference" />
         <!-- Default MapView style. -->
         <attr name="mapViewStyle" format="reference" />
+        <!-- Default quickcontact badge style. -->
+        <attr name="quickContactBadgeStyle" format="reference" />
+        <!-- Default quickcontact badge style with small quickcontact window. -->
+        <attr name="quickContactBadgeStyleWindowSmall" format="reference" />
+        <!-- Default quickcontact badge style with medium quickcontact window. -->
+        <attr name="quickContactBadgeStyleWindowMedium" format="reference" />
+        <!-- Default quickcontact badge style with large quickcontact window. -->
+        <attr name="quickContactBadgeStyleWindowLarge" format="reference" />
+        <!-- Default quickcontact badge style with small quickcontact window. -->
+        <attr name="quickContactBadgeStyleSmallWindowSmall" format="reference" />
+        <!-- Default quickcontact badge style with medium quickcontact window. -->
+        <attr name="quickContactBadgeStyleSmallWindowMedium" format="reference" />
+        <!-- Default quickcontact badge style with large quickcontact window. -->
+        <attr name="quickContactBadgeStyleSmallWindowLarge" format="reference" />
 
         <!-- =================== -->
         <!-- Preference styles   -->
@@ -519,6 +546,11 @@
              lines, the IME should provide multiple lines if it can.  Corresponds to
              {@link android.text.InputType#TYPE_TEXT_FLAG_IME_MULTI_LINE}. -->
         <flag name="textImeMultiLine" value="0x00040001" />
+        <!-- Can be combined with <var>text</var> and its variations to
+             indicate that the IME should not show any
+             dictionary-based word suggestions.  Corresponds to
+             {@link android.text.InputType#TYPE_TEXT_FLAG_NO_SUGGESTIONS}. -->
+        <flag name="textNoSuggestions" value="0x00080001" />
         <!-- Text that will be used as a URI.  Corresponds to
              {@link android.text.InputType#TYPE_CLASS_TEXT} |
              {@link android.text.InputType#TYPE_TEXT_VARIATION_URI}. -->
@@ -598,7 +630,7 @@
         <flag name="time" value="0x00000024" />
     </attr>
 
-    <!-- Additional features you can enable in an IME associated with an editor,
+    <!-- Additional features you can enable in an IME associated with an editor
          to improve the integration with your application.  The constants
          here correspond to those defined by
          {@link android.view.inputmethod.EditorInfo#imeOptions}. -->
@@ -682,7 +714,7 @@
     <attr name="y" format="dimension" />
 
     <!-- Specifies how to place the content of an object, both
-         on the x and y axis, within the object itself. -->
+         on the x- and y-axis, within the object itself. -->
     <attr name="gravity">
         <!-- Push object to the top of its container, not changing its size. -->
         <flag name="top" value="0x30" />
@@ -720,25 +752,25 @@
          automatically found and converted to clickable links.  The default
          value is "none", disabling this feature. -->
     <attr name="autoLink">
-        <!-- Match no patterns (default) -->
+        <!-- Match no patterns (default). -->
         <flag name="none" value="0x00" />
-        <!-- Match Web URLs -->
+        <!-- Match Web URLs. -->
         <flag name="web" value="0x01" />
-        <!-- Match email addresses -->
+        <!-- Match email addresses. -->
         <flag name="email" value="0x02" />
-        <!-- Match phone numbers -->
+        <!-- Match phone numbers. -->
         <flag name="phone" value="0x04" />
-        <!-- Match map addresses -->
+        <!-- Match map addresses. -->
         <flag name="map" value="0x08" />
-        <!-- Match all patterns (equivalent to web|email|phone|map) -->
+        <!-- Match all patterns (equivalent to web|email|phone|map). -->
         <flag name="all" value="0x0f" />
     </attr>
 
-    <!-- Reference to an array resource that will populate a list/adapter -->
+    <!-- Reference to an array resource that will populate a list/adapter. -->
     <attr name="entries" format="reference" />
 
     <!-- Standard gravity constant that a child can supply to its parent.
-         Defines how to place the view, both its x and y axis, within its parent view group. -->
+         Defines how to place the view, both its x- and y-axis, within its parent view group. -->
     <attr name="layout_gravity">
         <!-- Push object to the top of its container, not changing its size. -->
         <flag name="top" value="0x30" />
@@ -786,7 +818,7 @@
     <eat-comment />
 
     <!-- This enum provides the same keycode values as can be found in
-        {@link android.view.KeyEvent} -->
+        {@link android.view.KeyEvent}. -->
     <attr name="keycode">
         <enum name="KEYCODE_UNKNOWN" value="0" />
         <enum name="KEYCODE_SOFT_LEFT" value="1" />
@@ -900,6 +932,7 @@
         <attr name="windowFullscreen" />
         <attr name="windowIsFloating" />
         <attr name="windowIsTranslucent" />
+        <attr name="windowShowWallpaper" />
         <attr name="windowAnimationStyle" />
         <attr name="windowSoftInputMode" />
         <attr name="windowDisablePreview" />
@@ -933,18 +966,89 @@
         <attr name="windowShowAnimation" format="reference" />
         <!-- The animation used when a window is going from VISIBLE to INVISIBLE. -->
         <attr name="windowHideAnimation" format="reference" />
+        
+        <!--  When opening a new activity, this is the animation that is
+              run on the next activity (which is entering the screen). -->
         <attr name="activityOpenEnterAnimation" format="reference" />
+        <!--  When opening a new activity, this is the animation that is
+              run on the previous activity (which is exiting the screen). -->
         <attr name="activityOpenExitAnimation" format="reference" />
+        <!--  When closing the current activity, this is the animation that is
+              run on the next activity (which is entering the screen). -->
         <attr name="activityCloseEnterAnimation" format="reference" />
+        <!--  When closing the current activity, this is the animation that is
+              run on the current activity (which is exiting the screen). -->
         <attr name="activityCloseExitAnimation" format="reference" />
+        <!--  When opening an activity in a new task, this is the animation that is
+              run on the activity of the new task (which is entering the screen). -->
         <attr name="taskOpenEnterAnimation" format="reference" />
+        <!--  When opening an activity in a new task, this is the animation that is
+              run on the activity of the old task (which is exiting the screen). -->
         <attr name="taskOpenExitAnimation" format="reference" />
+        <!--  When closing the last activity of a task, this is the animation that is
+              run on the activity of the next task (which is entering the screen). -->
         <attr name="taskCloseEnterAnimation" format="reference" />
+        <!--  When opening an activity in a new task, this is the animation that is
+              run on the activity of the old task (which is exiting the screen). -->
         <attr name="taskCloseExitAnimation" format="reference" />
+        <!--  When bringing an existing task to the foreground, this is the
+              animation that is run on the top activity of the task being brought
+              to the foreground (which is entering the screen). -->
         <attr name="taskToFrontEnterAnimation" format="reference" />
+        <!--  When bringing an existing task to the foreground, this is the
+              animation that is run on the current foreground activity
+              (which is exiting the screen). -->
         <attr name="taskToFrontExitAnimation" format="reference" />
+        <!--  When sending the current task to the background, this is the
+              animation that is run on the top activity of the task behind
+              it (which is entering the screen). -->
         <attr name="taskToBackEnterAnimation" format="reference" />
+        <!--  When sending the current task to the background, this is the
+              animation that is run on the top activity of the current task
+              (which is exiting the screen). -->
         <attr name="taskToBackExitAnimation" format="reference" />
+        
+        <!--  When opening a new activity that shows the wallpaper, while
+              currently not showing the wallpaper, this is the animation that
+              is run on the new wallpaper activity (which is entering the screen). -->
+        <attr name="wallpaperOpenEnterAnimation" format="reference" />
+        <!--  When opening a new activity that shows the wallpaper, while
+              currently not showing the wallpaper, this is the animation that
+              is run on the current activity (which is exiting the screen). -->
+        <attr name="wallpaperOpenExitAnimation" format="reference" />
+        <!--  When opening a new activity that hides the wallpaper, while
+              currently showing the wallpaper, this is the animation that
+              is run on the new activity (which is entering the screen). -->
+        <attr name="wallpaperCloseEnterAnimation" format="reference" />
+        <!--  When opening a new activity that hides the wallpaper, while
+              currently showing the wallpaper, this is the animation that
+              is run on the old wallpaper activity (which is exiting the screen). -->
+        <attr name="wallpaperCloseExitAnimation" format="reference" />
+        
+        <!--  When opening a new activity that is on top of the wallpaper
+              when the current activity is also on top of the wallpaper,
+              this is the animation that is run on the new activity
+              (which is entering the screen).  The wallpaper remains
+              static behind the animation. -->
+        <attr name="wallpaperIntraOpenEnterAnimation" format="reference" />
+        <!--  When opening a new activity that is on top of the wallpaper
+              when the current activity is also on top of the wallpaper,
+              this is the animation that is run on the current activity
+              (which is exiting the screen).  The wallpaper remains
+              static behind the animation. -->
+        <attr name="wallpaperIntraOpenExitAnimation" format="reference" />
+        <!--  When closing a foreround activity that is on top of the wallpaper
+              when the previous activity is also on top of the wallpaper,
+              this is the animation that is run on the previous activity
+              (which is entering the screen).  The wallpaper remains
+              static behind the animation. -->
+        <attr name="wallpaperIntraCloseEnterAnimation" format="reference" />
+        <!--  When closing a foreround activity that is on top of the wallpaper
+              when the previous activity is also on top of the wallpaper,
+              this is the animation that is run on the current activity
+              (which is exiting the screen).  The wallpaper remains
+              static behind the animation. -->
+        <attr name="wallpaperIntraCloseExitAnimation" format="reference" />
     </declare-styleable>
 
     <!-- ============================= -->
@@ -1068,6 +1172,12 @@
              set, else it will be false. -->
         <attr name="isScrollContainer" format="boolean" />
 
+          <!-- Defines whether to fade out scrollbars when they are not in use. -->
+         <attr name="fadeScrollbars" format="boolean" />
+         <!-- Defines the delay in milliseconds that a scrollbar takes to fade out. -->
+         <attr name="scrollbarFadeDuration" format="integer" />
+         <!-- Defines the delay in milliseconds that a scrollbar waits before fade out. -->
+        <attr name="scrollbarDefaultDelayBeforeFade" format="integer" />
         <!-- Sets the width of vertical scrollbars and height of horizontal scrollbars. -->
         <attr name="scrollbarSize" format="dimension" />
         <!-- Defines the horizontal scrollbar thumb drawable. -->
@@ -1080,7 +1190,7 @@
         <attr name="scrollbarTrackVertical" format="reference" />
         <!-- Defines whether the horizontal scrollbar track should always be drawn. -->
         <attr name="scrollbarAlwaysDrawHorizontalTrack" format="boolean" />
-        <!-- Defines whether the vertical scrollbar track should always be drawn -->
+        <!-- Defines whether the vertical scrollbar track should always be drawn. -->
         <attr name="scrollbarAlwaysDrawVerticalTrack" format="boolean" />
 
         <!-- Defines which edges should be fadeded on scrolling. -->
@@ -1191,7 +1301,7 @@
              exactly one parameter of type View. For instance, if you specify
              <code>android:onClick="sayHello"</code>, you must declare a
              <code>public void sayHello(View v)</code> method of your context
-             (typically, your Activity.)-->
+             (typically, your Activity). -->
         <attr name="onClick" format="string" />
     </declare-styleable>
 
@@ -1362,7 +1472,7 @@
              value is true. -->
         <attr name="scrollingCache" format="boolean" />
         <!-- When set to true, the list will filter results as the user types. The
-             List's adapter must support the Filterable interface for this to work -->
+             List's adapter must support the Filterable interface for this to work. -->
         <attr name="textFilterEnabled" format="boolean" />
         <!-- Sets the transcript mode for the list. In transcript mode, the list
              scrolls to the bottom to make new items visible when they are added. -->
@@ -1414,15 +1524,15 @@
         <attr name="format" format="string" localization="suggested" />
     </declare-styleable>
     <declare-styleable name="CompoundButton">
-        <!-- Indicates the initial checked state of this button -->
+        <!-- Indicates the initial checked state of this button. -->
         <attr name="checked" format="boolean" />
         <!-- Drawable used for the button graphic (e.g. checkbox, radio button, etc). -->
         <attr name="button" format="reference"/>
     </declare-styleable>
     <declare-styleable name="CheckedTextView">
-        <!-- Indicates the initial checked state of this text -->
+        <!-- Indicates the initial checked state of this text. -->
         <attr name="checked" />
-        <!-- Drawable used for the check mark graphic -->
+        <!-- Drawable used for the check mark graphic. -->
         <attr name="checkMark" format="reference"/>
     </declare-styleable>
     <declare-styleable name="EditText">
@@ -1543,12 +1653,12 @@
         <!-- An optional argument to supply a maximum height for this view.
              See {see android.widget.ImageView#setMaxHeight} for details. -->
         <attr name="maxHeight" format="dimension" />
-        <!-- Set a tinting color for the image -->
+        <!-- Set a tinting color for the image. -->
         <attr name="tint" format="color" />
         <!-- If true, the image view will be baseline aligned with based on its
-             bottom edge -->
+             bottom edge. -->
         <attr name="baselineAlignBottom" format="boolean" />
-         <!-- If true, the image will be cropped to fit within its padding -->
+         <!-- If true, the image will be cropped to fit within its padding. -->
         <attr name="cropToPadding" format="boolean" />
     </declare-styleable>
     <declare-styleable name="ToggleButton">
@@ -1576,7 +1686,7 @@
         <attr name="baselineAligned" format="boolean" />
         <!-- When a linear layout is part of another layout that is baseline
           aligned, it can specify which of its children to baseline align to
-          (i.e which child TextView).-->
+          (that is, which child TextView).-->
         <attr name="baselineAlignedChildIndex" format="integer" min="0"/>
         <!-- Defines the maximum weight sum. If unspecified, the sum is computed
              by adding the layout_weight of all of the children. This can be
@@ -1599,11 +1709,11 @@
              allows up to one item to be in a chosen state. By setting the choiceMode to
              multipleChoice, the list allows any number of items to be chosen. -->
         <attr name="choiceMode">
-            <!-- Normal list that does not indicate choices -->
+            <!-- Normal list that does not indicate choices. -->
             <enum name="none" value="0" />
-            <!-- The list allows up to one choice -->
+            <!-- The list allows up to one choice. -->
             <enum name="singleChoice" value="1" />
-            <!-- The list allows multiple choices -->
+            <!-- The list allows multiple choices. -->
             <enum name="multipleChoice" value="2" />
         </attr>
         <!-- When set to false, the ListView will not draw the divider after each header view.
@@ -1624,7 +1734,7 @@
         <attr name="headerBackground" format="color|reference" />
         <!-- Default background for each menu item. -->
         <attr name="itemBackground" format="color|reference" />
-        <!-- Default animations for the menu -->
+        <!-- Default animations for the menu. -->
         <attr name="windowAnimationStyle" />
         <!-- Default disabled icon alpha for each menu item that shows an icon. -->
         <attr name="itemIconDisabledAlpha" format="float" />
@@ -1638,7 +1748,7 @@
         <attr name="maxItemsPerRow" format="integer" />
         <!-- Defines the maximum number of items to show. -->
         <attr name="maxItems" format="integer" />
-        <!-- 'More' icon -->
+        <!-- 'More' icon. -->
         <attr name="moreIcon" format="reference" />
     </declare-styleable>
 
@@ -1678,7 +1788,7 @@
     </declare-styleable>
 
     <declare-styleable name="SeekBar">
-        <!-- Draws the thumb on a seekbar -->
+        <!-- Draws the thumb on a seekbar. -->
         <attr name="thumb" format="reference" />
         <!-- An offset for the thumb that allows it to extend out of the range of the track. -->
         <attr name="thumbOffset" format="dimension" />
@@ -1705,19 +1815,19 @@
         <attr name="orientation" />
     </declare-styleable>
     <declare-styleable name="TableLayout">
-        <!-- The 0 based index of the columns to stretch. The column indices
+        <!-- The zero-based index of the columns to stretch. The column indices
              must be separated by a comma: 1, 2, 5. Illegal and duplicate
              indices are ignored. You can stretch all columns by using the
              value "*" instead. Note that a column can be marked stretchable
              and shrinkable at the same time. -->
         <attr name="stretchColumns" format="string" />
-       <!-- The 0 based index of the columns to shrink. The column indices
+       <!-- The zero-based index of the columns to shrink. The column indices
              must be separated by a comma: 1, 2, 5. Illegal and duplicate
              indices are ignored. You can shrink all columns by using the
              value "*" instead. Note that a column can be marked stretchable
              and shrinkable at the same time. -->
         <attr name="shrinkColumns" format="string" />
-        <!-- The 0 based index of the columns to collapse. The column indices
+        <!-- The zero-based index of the columns to collapse. The column indices
              must be separated by a comma: 1, 2, 5. Illegal and duplicate
              indices are ignored. -->
         <attr name="collapseColumns" format="string" />
@@ -1779,7 +1889,7 @@
         <attr name="textAppearance" />
         <!-- Size of the text. Recommended dimension type for text is "sp" for scaled-pixels (example: 15sp). -->
         <attr name="textSize" />
-        <!-- Sets the horizontal scaling factor for the text -->
+        <!-- Sets the horizontal scaling factor for the text. -->
         <attr name="textScaleX" format="float" />
         <!-- Typeface (normal, sans, serif, monospace) for the text. -->
         <attr name="typeface" />
@@ -1787,37 +1897,37 @@
         <attr name="textStyle" />
         <!-- Text color for links. -->
         <attr name="textColorLink" />
-        <!-- Makes the cursor visible (the default) or invisible -->
+        <!-- Makes the cursor visible (the default) or invisible. -->
         <attr name="cursorVisible" format="boolean" />
-        <!-- Makes the TextView be at most this many lines tall -->
+        <!-- Makes the TextView be at most this many lines tall. -->
         <attr name="maxLines" format="integer" min="0" />
-        <!-- Makes the TextView be at most this many pixels tall -->
+        <!-- Makes the TextView be at most this many pixels tall. -->
         <attr name="maxHeight" />
-        <!-- Makes the TextView be exactly this many lines tall -->
+        <!-- Makes the TextView be exactly this many lines tall. -->
         <attr name="lines" format="integer" min="0" />
         <!-- Makes the TextView be exactly this many pixels tall.
              You could get the same effect by specifying this number in the
              layout parameters. -->
         <attr name="height" format="dimension" />
-        <!-- Makes the TextView be at least this many lines tall -->
+        <!-- Makes the TextView be at least this many lines tall. -->
         <attr name="minLines" format="integer" min="0" />
-        <!-- Makes the TextView be at least this many pixels tall -->
+        <!-- Makes the TextView be at least this many pixels tall. -->
         <attr name="minHeight" />
-        <!-- Makes the TextView be at most this many ems wide -->
+        <!-- Makes the TextView be at most this many ems wide. -->
         <attr name="maxEms" format="integer" min="0" />
-        <!-- Makes the TextView be at most this many pixels wide -->
+        <!-- Makes the TextView be at most this many pixels wide. -->
         <attr name="maxWidth" />
-        <!-- Makes the TextView be exactly this many ems wide -->
+        <!-- Makes the TextView be exactly this many ems wide. -->
         <attr name="ems" format="integer" min="0" />
         <!-- Makes the TextView be exactly this many pixels wide.
              You could get the same effect by specifying this number in the
              layout parameters. -->
         <attr name="width" format="dimension" />
-        <!-- Makes the TextView be at least this many ems wide -->
+        <!-- Makes the TextView be at least this many ems wide. -->
         <attr name="minEms" format="integer" min="0" />
-        <!-- Makes the TextView be at least this many pixels wide -->
+        <!-- Makes the TextView be at least this many pixels wide. -->
         <attr name="minWidth" />
-        <!-- Specifies how to align the text by the view's x and/or y axis
+        <!-- Specifies how to align the text by the view's x- and/or y-axis
              when the text is smaller than the view. -->
         <attr name="gravity" />
         <!-- Whether the text is allowed to be wider than the view (and
@@ -1841,7 +1951,7 @@
              inputType attributes are found,  the inputType flags will override the value of
              singleLine.) } -->
         <attr name="singleLine" format="boolean" />
-        <!-- {@deprecated Use state_enabled instead.} -->
+        <!-- Specifies whether the TextView is enabled or not. {@deprecated Use state_enabled instead}. -->
         <attr name="enabled" format="boolean" />
         <!-- If the text is selectable, select it all when the view takes
              focus instead of moving the cursor to the start or end. -->
@@ -1945,7 +2055,7 @@
         <!-- The number of times to repeat the marquee animation. Only applied if the
              TextView has marquee enabled. -->
         <attr name="marqueeRepeatLimit" format="integer">
-            <!-- Indicates that marquee should repeat indefinitely  -->
+            <!-- Indicates that marquee should repeat indefinitely. -->
             <enum name="marquee_forever" value="-1" />
         </attr>
         <attr name="inputType" />
@@ -2044,9 +2154,9 @@
         <attr name="prompt" format="reference" />
     </declare-styleable>
     <declare-styleable name="DatePicker">
-        <!-- The first year (inclusive) i.e. 1940 -->
+        <!-- The first year (inclusive), for example "1940". -->
         <attr name="startYear" format="integer" />
-        <!-- The last year (inclusive) i.e. 2010 -->
+        <!-- The last year (inclusive), for example "2010". -->
         <attr name="endYear" format="integer" />
     </declare-styleable>
 
@@ -2055,7 +2165,7 @@
             <!-- Always show only the first line. -->
             <enum name="oneLine" value="1" />
             <!-- When selected show both lines, otherwise show only the first line.
-                 This is the default mode-->
+                 This is the default mode. -->
             <enum name="collapsing" value="2" />
             <!-- Always show both lines. -->
             <enum name="twoLine" value="3" />
@@ -2120,6 +2230,14 @@
         <!-- Indicates whether horizontal (when the orientation is vertical) or vertical
              (when orientation is horizontal) strokes automatically define a gesture. -->
         <attr name="orientation" />
+    </declare-styleable>
+
+    <declare-styleable name="QuickContactBadge">
+        <attr name="quickContactWindowSize">
+            <enum name="modeSmall" value="1" />
+            <enum name="modeMedium" value="2" />
+            <enum name="modeLarge" value="3" />
+        </attr>
     </declare-styleable>
 
     <!-- ======================================= -->
@@ -2193,6 +2311,14 @@
         <attr name="layout_scale" format="float" />
     </declare-styleable>
 
+    <!-- attributes for internal rotary widget used in lock screen and phone app
+      @hide -->
+    <declare-styleable name="RotarySelector">
+        <!-- Use "horizontal" or "vertical".  The default is horizontal. -->
+        <attr name="orientation" />
+    </declare-styleable>
+
+
     <!-- ========================= -->
     <!-- Drawable class attributes -->
     <!-- ========================= -->
@@ -2202,7 +2328,7 @@
     <declare-styleable name="Drawable">
         <!-- Provides initial visibility state of the drawable; the default
              value is false.  See
-             {@link android.graphics.drawable.Drawable#setVisible} -->
+             {@link android.graphics.drawable.Drawable#setVisible}. -->
         <attr name="visible" format="boolean" />
     </declare-styleable>
 
@@ -2220,6 +2346,10 @@
              of the states.  If false, the size will vary based on the
              current state. -->
         <attr name="constantSize" format="boolean" />
+        <!-- Enables or disables dithering of the bitmap if the bitmap does not have the
+             same pixel configuration as the screen (for instance: a ARGB 8888 bitmap with
+             an RGB 565 screen). -->
+        <attr name="dither" format="boolean" />
     </declare-styleable>
 
     <declare-styleable name="AnimationDrawable">
@@ -2344,7 +2474,7 @@
         <attr name="pivotY" />
         <attr name="drawable" />
     </declare-styleable>
-    
+
     <declare-styleable name="InsetDrawable">
         <attr name="visible" />
         <attr name="drawable" />
@@ -2365,8 +2495,8 @@
         <attr name="filter" format="boolean" />
         <!-- Enables or disables dithering of the bitmap if the bitmap does not have the
              same pixel configuration as the screen (for instance: a ARGB 8888 bitmap with
-             an RGB 565 screen.) -->
-        <attr name="dither" format="boolean" />
+             an RGB 565 screen). -->
+        <attr name="dither" />
         <!-- Defines the gravity for the bitmap. The gravity indicates where to position
              the drawable in its container if the bitmap is smaller than the container. -->
         <attr name="gravity" />
@@ -2391,7 +2521,7 @@
         <attr name="src" />
         <!-- Enables or disables dithering of the bitmap if the bitmap does not have the
              same pixel configuration as the screen (for instance: a ARGB 8888 bitmap with
-             an RGB 565 screen.) -->
+             an RGB 565 screen). -->
         <attr name="dither" />
     </declare-styleable>
 
@@ -2533,6 +2663,9 @@
                  content for the duration of the animation. -->
             <enum name="bottom" value="-1" />
         </attr>
+        <!-- Special option for window animations: if this window is on top
+             of a wallpaper, don't animate the wallpaper with it. -->
+        <attr name="detachWallpaper" format="boolean" />
     </declare-styleable>
 
     <declare-styleable name="RotateAnimation">
@@ -2759,9 +2892,11 @@
         For a more in-depth discussion of search configuration, please refer to
         {@link android.app.SearchManager}. -->
     <declare-styleable name="Searchable">
-        <!-- If provided, this icon will be shown in place of the label.  It is typically used
-             in order to identify a searchable application via a logo or branding, instead of
-             plain text.  This is a reference to a drawable (icon) resource.
+        <!-- If provided, this icon will be shown in place of the label above the search box.
+             This is a reference to a drawable (icon) resource. Note that the application icon
+             is also used as an icon to the left of the search box and you cannot modify this
+             behavior, so including the icon attribute is unecessary and this may be
+             deprecated in the future.
              <i>Optional attribute.</i> -->
         <attr name="icon" />
         <!-- This is the user-displayed name of the searchable activity.  <i>Required
@@ -2882,7 +3017,6 @@
              results for "bo", it would not be queried again for "bob".
              The default value is <code>false</code>. <i>Optional attribute.</i>. -->
         <attr name="queryAfterZeroResults" format="boolean" />
-        
         <!-- If provided, this string will be used to describe the searchable item in the
              searchable items settings within system search settings. <i>Optional
              attribute.</i> -->
@@ -3221,7 +3355,7 @@
         <!-- Size of the text for custom keys with some text and no icon. -->
         <attr name="labelTextSize" format="dimension" />
 
-        <!-- Color to use for the label in a key -->
+        <!-- Color to use for the label in a key. -->
         <attr name="keyTextColor" format="color" />
 
         <!-- Layout resource for key press feedback.-->
@@ -3236,7 +3370,7 @@
         <!-- Amount to offset the touch Y coordinate by, for bias correction. -->
         <attr name="verticalCorrection" format="dimension" />
 
-        <!-- Layout resource for popup keyboards -->
+        <!-- Layout resource for popup keyboards. -->
         <attr name="popupLayout" format="reference" />
 
         <attr name="shadowColor" />
@@ -3245,74 +3379,75 @@
 
     <declare-styleable name="KeyboardViewPreviewState">
         <!-- State for {@link android.inputmethodservice.KeyboardView KeyboardView}
-                key preview background -->
+                key preview background. -->
         <attr name="state_long_pressable" format="boolean" />
     </declare-styleable>
 
     <declare-styleable name="Keyboard">
-        <!-- Default width of a key, in pixels or percentage of display width -->
+        <!-- Default width of a key, in pixels or percentage of display width. -->
         <attr name="keyWidth" format="dimension|fraction" />
-        <!-- Default height of a key, in pixels or percentage of display width -->
+        <!-- Default height of a key, in pixels or percentage of display width. -->
         <attr name="keyHeight" format="dimension|fraction" />
-        <!-- Default horizontal gap between keys -->
+        <!-- Default horizontal gap between keys. -->
         <attr name="horizontalGap" format="dimension|fraction" />
-        <!-- Default vertical gap between rows of keys -->
+        <!-- Default vertical gap between rows of keys. -->
         <attr name="verticalGap" format="dimension|fraction" />
     </declare-styleable>
 
     <declare-styleable name="Keyboard_Row">
-        <!-- Row edge flags-->
+        <!-- Row edge flags. -->
         <attr name="rowEdgeFlags">
-            <!-- Row is anchored to the top of the keyboard -->
+            <!-- Row is anchored to the top of the keyboard. -->
             <flag name="top" value="4" />
-            <!-- Row is anchored to the bottom of the keyboard -->
+            <!-- Row is anchored to the bottom of the keyboard. -->
             <flag name="bottom" value="8" />
         </attr>
         <!-- Mode of the keyboard. If the mode doesn't match the
-             requested keyboard mode, the row will be skipped -->
+             requested keyboard mode, the row will be skipped. -->
         <attr name="keyboardMode" format="reference" />
     </declare-styleable>
 
     <declare-styleable name="Keyboard_Key">
-        <!-- The unicode value or comma-separated values that this key outputs -->
+        <!-- The unicode value or comma-separated values that this key outputs. -->
         <attr name="codes" format="integer|string" />
-        <!-- The XML keyboard layout of any popup keyboard -->
+        <!-- The XML keyboard layout of any popup keyboard. -->
         <attr name="popupKeyboard" format="reference" />
-        <!-- The characters to display in the popup keyboard -->
+        <!-- The characters to display in the popup keyboard. -->
         <attr name="popupCharacters" format="string" />
-        <!-- Key edge flags -->
+        <!-- Key edge flags. -->
         <attr name="keyEdgeFlags">
-            <!-- Key is anchored to the left of the keyboard -->
+            <!-- Key is anchored to the left of the keyboard. -->
             <flag name="left" value="1" />
-            <!-- Key is anchored to the right of the keyboard -->
+            <!-- Key is anchored to the right of the keyboard. -->
             <flag name="right" value="2" />
         </attr>
-        <!-- Whether this is a modifier key such as Alt or Shift -->
+        <!-- Whether this is a modifier key such as Alt or Shift. -->
         <attr name="isModifier" format="boolean" />
-        <!-- Whether this is a toggle key -->
+        <!-- Whether this is a toggle key. -->
         <attr name="isSticky" format="boolean" />
-        <!-- Whether long-pressing on this key will make it repeat -->
+        <!-- Whether long-pressing on this key will make it repeat. -->
         <attr name="isRepeatable" format="boolean" />
-        <!-- The icon to show in the popup preview -->
+        <!-- The icon to show in the popup preview. -->
         <attr name="iconPreview" format="reference" />
-        <!-- The string of characters to output when this key is pressed -->
+        <!-- The string of characters to output when this key is pressed. -->
         <attr name="keyOutputText" format="string" />
-        <!-- The label to display on the key -->
+        <!-- The label to display on the key. -->
         <attr name="keyLabel" format="string" />
-        <!-- The icon to display on the key instead of the label -->
+        <!-- The icon to display on the key instead of the label. -->
         <attr name="keyIcon" format="reference" />
         <!-- Mode of the keyboard. If the mode doesn't match the
-             requested keyboard mode, the key will be skipped -->
+             requested keyboard mode, the key will be skipped. -->
         <attr name="keyboardMode" />
     </declare-styleable>
 
     <!-- =============================== -->
     <!-- AppWidget package class attributes -->
     <!-- =============================== -->
-
+    <eat-comment />
+    
     <!-- Use <code>appwidget-provider</code> as the root tag of the XML resource that
-         describes an AppWidget provider.  See TODO android.appwidget package
-         for more info.
+         describes an AppWidget provider.  See {@link android.appwidget android.appwidget}
+         package for more info.
      -->
     <declare-styleable name="AppWidgetProviderInfo">
         <!-- Minimum width of the AppWidget. -->
@@ -3328,6 +3463,100 @@
         <attr name="configure" format="string" />
     </declare-styleable>
 
+    <!-- =============================== -->
+    <!-- App package class attributes -->
+    <!-- =============================== -->
+    <eat-comment />
+    
+    <!-- Use <code>wallpaper</code> as the root tag of the XML resource that
+         describes an
+         {@link android.service.wallpaper.WallpaperService}, which is
+         referenced from its
+         {@link android.service.wallpaper.WallpaperService#SERVICE_META_DATA}
+         meta-data entry.  Described here are the attributes that can be
+         included in that tag. -->
+    <declare-styleable name="Wallpaper">
+        <!-- Component name of an activity that allows the user to modify
+             the current settings for this wallpaper. -->
+        <attr name="settingsActivity" />
+
+        <!-- Reference to a the wallpaper's thumbnail bitmap. -->
+        <attr name="thumbnail" format="reference" />
+
+        <!-- Name of the author of a wallpaper, e.g. Google. -->
+        <attr name="wallpaperAuthor" format="reference" />
+
+        <!-- Short description of the wallpaper's purpose or behavior. -->
+        <attr name="wallpaperDescription" format="reference" />
+    </declare-styleable>
+
+    <!-- =============================== -->
+    <!-- Accounts package class attributes -->
+    <!-- =============================== -->
+    <eat-comment />
+    
+    <!-- Use <code>account-authenticator</code> as the root tag of the XML resource that
+         describes an account authenticator.
+     -->
+    <declare-styleable name="AccountAuthenticator">
+        <!-- The account type this authenticator handles. -->
+        <attr name="accountType" format="string"/>
+        <!-- The user-visible name of the authenticator. -->
+        <attr name="label"/>
+        <!-- The icon of the authenticator. -->
+        <attr name="icon"/>
+        <!-- Smaller icon of the authenticator. -->
+        <attr name="smallIcon" format="reference"/>
+        <!-- A preferences.xml file for authenticator-specific settings. -->
+        <attr name="accountPreferences" format="reference"/>
+    </declare-styleable>
+
+    <!-- =============================== -->
+    <!-- Accounts package class attributes -->
+    <!-- =============================== -->
+    <eat-comment />
+    
+    <!-- Use <code>account-authenticator</code> as the root tag of the XML resource that
+         describes an account authenticator.
+     -->
+    <declare-styleable name="SyncAdapter">
+        <!-- the authority of a content provider. -->
+        <attr name="contentAuthority" format="string"/>
+        <attr name="accountType"/>
+        <attr name="userVisible" format="boolean"/>
+        <attr name="supportsUploading" format="boolean"/>
+    </declare-styleable>
+
+    <!-- =============================== -->
+    <!-- Contacts meta-data attributes -->
+    <!-- =============================== -->
+    <eat-comment />
+    
+    <!-- TODO: remove this deprecated styleable. -->
+    <eat-comment />
+    <declare-styleable name="Icon">
+        <attr name="icon" />
+        <attr name="mimeType" />
+    </declare-styleable>
+
+    <!-- TODO: remove this deprecated styleable -->
+    <eat-comment />
+    <declare-styleable name="IconDefault">
+        <attr name="icon" />
+    </declare-styleable>
+
+    <!-- Maps a specific contact data MIME-type to styling information. -->
+    <declare-styleable name="ContactsDataKind">
+        <!-- Mime-type handled by this mapping. -->
+        <attr name="mimeType" />
+        <!-- Icon used to represent data of this kind. -->
+        <attr name="icon" />
+        <!-- Column in data table that summarizes this data. -->
+        <attr name="summaryColumn" format="string" />
+        <!-- Column in data table that contains details for this data. -->
+        <attr name="detailColumn" format="string" />
+        <!-- Flag indicating that detail should be built from SocialProvider. -->
+        <attr name="detailSocialSummary" format="boolean" />
+    </declare-styleable>
 
 </resources>
-

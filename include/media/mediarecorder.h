@@ -18,7 +18,10 @@
 #ifndef ANDROID_MEDIARECORDER_H
 #define ANDROID_MEDIARECORDER_H
 
-#include <utils.h>
+#include <utils/Log.h>
+#include <utils/threads.h>
+#include <utils/List.h>
+#include <utils/Errors.h>
 #include <media/IMediaPlayerClient.h>
 
 namespace android {
@@ -38,7 +41,9 @@ enum audio_source {
     AUDIO_SOURCE_VOICE_UPLINK = 2,
     AUDIO_SOURCE_VOICE_DOWNLINK = 3,
     AUDIO_SOURCE_VOICE_CALL = 4,
-    AUDIO_SOURCE_MAX = AUDIO_SOURCE_VOICE_CALL,
+    AUDIO_SOURCE_CAMCORDER = 5,
+    AUDIO_SOURCE_VOICE_RECOGNITION = 6,
+    AUDIO_SOURCE_MAX = AUDIO_SOURCE_VOICE_RECOGNITION,
 
     AUDIO_SOURCE_LIST_END  // must be last - used to validate audio source type
 };
@@ -89,10 +94,6 @@ enum video_encoder {
 
     VIDEO_ENCODER_LIST_END // must be the last - used to validate the video encoder type
 };
-
-
-// Maximum frames per second is 24
-#define MEDIA_RECORDER_MAX_FRAME_RATE         24
 
 /*
  * The state machine of the media_recorder uses a set of different state names.

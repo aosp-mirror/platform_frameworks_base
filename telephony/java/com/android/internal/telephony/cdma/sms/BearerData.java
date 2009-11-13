@@ -16,6 +16,10 @@
 
 package com.android.internal.telephony.cdma.sms;
 
+import static android.telephony.SmsMessage.ENCODING_16BIT;
+import static android.telephony.SmsMessage.MAX_USER_DATA_BYTES;
+import static android.telephony.SmsMessage.MAX_USER_DATA_BYTES_WITH_HEADER;
+
 import android.util.Log;
 import android.util.SparseIntArray;
 
@@ -233,22 +237,22 @@ public final class BearerData {
         public static TimeStamp fromByteArray(byte[] data) {
             TimeStamp ts = new TimeStamp();
             // C.S0015-B v2.0, 4.5.4: range is 1996-2095
-            int year = IccUtils.beBcdByteToInt(data[0]);
+            int year = IccUtils.cdmaBcdByteToInt(data[0]);
             if (year > 99 || year < 0) return null;
             ts.year = year >= 96 ? year + 1900 : year + 2000;
-            int month = IccUtils.beBcdByteToInt(data[1]);
+            int month = IccUtils.cdmaBcdByteToInt(data[1]);
             if (month < 1 || month > 12) return null;
             ts.month = month - 1;
-            int day = IccUtils.beBcdByteToInt(data[2]);
+            int day = IccUtils.cdmaBcdByteToInt(data[2]);
             if (day < 1 || day > 31) return null;
             ts.monthDay = day;
-            int hour = IccUtils.beBcdByteToInt(data[3]);
+            int hour = IccUtils.cdmaBcdByteToInt(data[3]);
             if (hour < 0 || hour > 23) return null;
             ts.hour = hour;
-            int minute = IccUtils.beBcdByteToInt(data[4]);
+            int minute = IccUtils.cdmaBcdByteToInt(data[4]);
             if (minute < 0 || minute > 59) return null;
             ts.minute = minute;
-            int second = IccUtils.beBcdByteToInt(data[5]);
+            int second = IccUtils.cdmaBcdByteToInt(data[5]);
             if (second < 0 || second > 59) return null;
             ts.second = second;
             return ts;
@@ -417,6 +421,21 @@ public final class BearerData {
         } else {
             ted = com.android.internal.telephony.gsm.SmsMessage.calculateLength(
                     msg, force7BitEncoding);
+            if (ted.msgCount == 1 && ted.codeUnitSize == SmsMessage.ENCODING_7BIT) {
+                // We don't support single-segment EMS, so calculate for 16-bit
+                // TODO: Consider supporting single-segment EMS
+                ted.codeUnitCount = msg.length();
+                int octets = ted.codeUnitCount * 2;
+                if (octets > MAX_USER_DATA_BYTES) {
+                    ted.msgCount = (octets / MAX_USER_DATA_BYTES_WITH_HEADER) + 1;
+                    ted.codeUnitsRemaining = (MAX_USER_DATA_BYTES_WITH_HEADER
+                              - (octets % MAX_USER_DATA_BYTES_WITH_HEADER))/2;
+                } else {
+                    ted.msgCount = 1;
+                    ted.codeUnitsRemaining = (MAX_USER_DATA_BYTES - octets)/2;
+                }
+                ted.codeUnitSize = ENCODING_16BIT;
+            }
         }
         return ted;
     }
@@ -455,53 +474,117 @@ public final class BearerData {
         }
     }
 
-    private static int calcUdhSeptetPadding(int userDataHeaderLen) {
-        int udhBits = userDataHeaderLen * 8;
-        int udhSeptets = (udhBits + 6) / 7;
-        int paddingBits = (udhSeptets * 7) - udhBits;
-        return paddingBits;
+    private static class Gsm7bitCodingResult {
+        int septets;
+        byte[] data;
     }
 
-    private static byte[] encode7bitGsm(String msg, int paddingBits)
+    private static Gsm7bitCodingResult encode7bitGsm(String msg, int septetOffset, boolean force)
         throws CodingException
     {
         try {
             /*
              * TODO(cleanup): It would be nice if GsmAlphabet provided
              * an option to produce just the data without prepending
-             * the length.
+             * the septet count, as this function is really just a
+             * wrapper to strip that off.  Not to mention that the
+             * septet count is generally known prior to invocation of
+             * the encoder.  Note that it cannot be derived from the
+             * resulting array length, since that cannot distinguish
+             * if the last contains either 1 or 8 valid bits.
+             *
+             * TODO(cleanup): The BitwiseXStreams could also be
+             * extended with byte-wise reversed endianness read/write
+             * routines to allow a corresponding implementation of
+             * stringToGsm7BitPacked, and potentially directly support
+             * access to the main bitwise stream from encode/decode.
              */
-            byte []fullData = GsmAlphabet.stringToGsm7BitPacked(msg, 0, -1, paddingBits, true);
-            byte []data = new byte[fullData.length - 1];
-            System.arraycopy(fullData, 1, data, 0, fullData.length - 1);
-            return data;
+            byte[] fullData = GsmAlphabet.stringToGsm7BitPacked(msg, septetOffset, !force);
+            Gsm7bitCodingResult result = new Gsm7bitCodingResult();
+            result.data = new byte[fullData.length - 1];
+            System.arraycopy(fullData, 1, result.data, 0, fullData.length - 1);
+            result.septets = fullData[0] & 0x00FF;
+            return result;
         } catch (com.android.internal.telephony.EncodeException ex) {
             throw new CodingException("7bit GSM encode failed: " + ex);
+        }
+    }
+
+    private static void encode7bitEms(UserData uData, byte[] udhData, boolean force)
+        throws CodingException
+    {
+        int udhBytes = udhData.length + 1;  // Add length octet.
+        int udhSeptets = ((udhBytes * 8) + 6) / 7;
+        Gsm7bitCodingResult gcr = encode7bitGsm(uData.payloadStr, udhSeptets, force);
+        uData.msgEncoding = UserData.ENCODING_GSM_7BIT_ALPHABET;
+        uData.msgEncodingSet = true;
+        uData.numFields = gcr.septets;
+        uData.payload = gcr.data;
+        uData.payload[0] = (byte)udhData.length;
+        System.arraycopy(udhData, 0, uData.payload, 1, udhData.length);
+    }
+
+    private static void encode16bitEms(UserData uData, byte[] udhData)
+        throws CodingException
+    {
+        byte[] payload = encodeUtf16(uData.payloadStr);
+        int udhBytes = udhData.length + 1;  // Add length octet.
+        int udhCodeUnits = (udhBytes + 1) / 2;
+        int udhPadding = udhBytes % 2;
+        int payloadCodeUnits = payload.length / 2;
+        uData.msgEncoding = UserData.ENCODING_UNICODE_16;
+        uData.msgEncodingSet = true;
+        uData.numFields = udhCodeUnits + payloadCodeUnits;
+        uData.payload = new byte[uData.numFields * 2];
+        uData.payload[0] = (byte)udhData.length;
+        System.arraycopy(udhData, 0, uData.payload, 1, udhData.length);
+        System.arraycopy(payload, 0, uData.payload, udhBytes + udhPadding, payload.length);
+    }
+
+    private static void encodeEmsUserDataPayload(UserData uData)
+        throws CodingException
+    {
+        byte[] headerData = SmsHeader.toByteArray(uData.userDataHeader);
+        if (uData.msgEncodingSet) {
+            if (uData.msgEncoding == UserData.ENCODING_GSM_7BIT_ALPHABET) {
+                encode7bitEms(uData, headerData, true);
+            } else if (uData.msgEncoding == UserData.ENCODING_UNICODE_16) {
+                encode16bitEms(uData, headerData);
+            } else {
+                throw new CodingException("unsupported EMS user data encoding (" +
+                                          uData.msgEncoding + ")");
+            }
+        } else {
+            try {
+                encode7bitEms(uData, headerData, false);
+            } catch (CodingException ex) {
+                encode16bitEms(uData, headerData);
+            }
         }
     }
 
     private static void encodeUserDataPayload(UserData uData)
         throws CodingException
     {
-        // TODO(cleanup): UDH can only occur in EMS mode, meaning
-        // encapsulation of GSM encoding, and so the logic here should
-        // be refactored to more cleanly reflect this constraint.
+        if ((uData.payloadStr == null) && (uData.msgEncoding != UserData.ENCODING_OCTET)) {
+            Log.e(LOG_TAG, "user data with null payloadStr");
+            uData.payloadStr = "";
+        }
 
-        byte[] headerData = null;
-        if (uData.userDataHeader != null) headerData = SmsHeader.toByteArray(uData.userDataHeader);
-        int headerDataLen = (headerData == null) ? 0 : headerData.length + 1;  // + length octet
+        if (uData.userDataHeader != null) {
+            encodeEmsUserDataPayload(uData);
+            return;
+        }
 
-        byte[] payloadData;
-        int codeUnitCount;
         if (uData.msgEncodingSet) {
             if (uData.msgEncoding == UserData.ENCODING_OCTET) {
                 if (uData.payload == null) {
                     Log.e(LOG_TAG, "user data with octet encoding but null payload");
-                    payloadData = new byte[0];
-                    codeUnitCount = 0;
+                    uData.payload = new byte[0];
+                    uData.numFields = 0;
                 } else {
-                    payloadData = uData.payload;
-                    codeUnitCount = uData.payload.length;
+                    uData.payload = uData.payload;
+                    uData.numFields = uData.payload.length;
                 }
             } else {
                 if (uData.payloadStr == null) {
@@ -509,67 +592,52 @@ public final class BearerData {
                     uData.payloadStr = "";
                 }
                 if (uData.msgEncoding == UserData.ENCODING_GSM_7BIT_ALPHABET) {
-                    int paddingBits = calcUdhSeptetPadding(headerDataLen);
-                    payloadData = encode7bitGsm(uData.payloadStr, paddingBits);
-                    codeUnitCount = ((payloadData.length + headerDataLen) * 8) / 7;
+                    Gsm7bitCodingResult gcr = encode7bitGsm(uData.payloadStr, 0, true);
+                    uData.payload = gcr.data;
+                    uData.numFields = gcr.septets;
                 } else if (uData.msgEncoding == UserData.ENCODING_7BIT_ASCII) {
-                    payloadData = encode7bitAscii(uData.payloadStr, true);
-                    codeUnitCount = uData.payloadStr.length();
+                    uData.payload = encode7bitAscii(uData.payloadStr, true);
+                    uData.numFields = uData.payloadStr.length();
                 } else if (uData.msgEncoding == UserData.ENCODING_UNICODE_16) {
-                    payloadData = encodeUtf16(uData.payloadStr);
-                    codeUnitCount = uData.payloadStr.length();
+                    uData.payload = encodeUtf16(uData.payloadStr);
+                    uData.numFields = uData.payloadStr.length();
                 } else {
                     throw new CodingException("unsupported user data encoding (" +
                                               uData.msgEncoding + ")");
                 }
             }
         } else {
-            if (uData.payloadStr == null) {
-                Log.e(LOG_TAG, "user data with null payloadStr");
-                uData.payloadStr = "";
-            }
             try {
-                if (headerData == null) {
-                    payloadData = encode7bitAscii(uData.payloadStr, false);
-                    codeUnitCount = uData.payloadStr.length();
-                    uData.msgEncoding = UserData.ENCODING_7BIT_ASCII;
-                } else {
-                    // If there is a header, we are in EMS mode, in
-                    // which case we use GSM encodings.
-                    int paddingBits = calcUdhSeptetPadding(headerDataLen);
-                    payloadData = encode7bitGsm(uData.payloadStr, paddingBits);
-                    codeUnitCount = ((payloadData.length + headerDataLen) * 8) / 7;
-                    uData.msgEncoding = UserData.ENCODING_GSM_7BIT_ALPHABET;
-                }
+                uData.payload = encode7bitAscii(uData.payloadStr, false);
+                uData.msgEncoding = UserData.ENCODING_7BIT_ASCII;
             } catch (CodingException ex) {
-                payloadData = encodeUtf16(uData.payloadStr);
-                codeUnitCount = uData.payloadStr.length();
+                uData.payload = encodeUtf16(uData.payloadStr);
                 uData.msgEncoding = UserData.ENCODING_UNICODE_16;
             }
+            uData.numFields = uData.payloadStr.length();
             uData.msgEncodingSet = true;
         }
-
-        int totalLength = payloadData.length + headerDataLen;
-        if (totalLength > SmsMessage.MAX_USER_DATA_BYTES) {
-            throw new CodingException("encoded user data too large (" + totalLength +
-                                      " > " + SmsMessage.MAX_USER_DATA_BYTES + " bytes)");
-        }
-
-        uData.numFields = codeUnitCount;
-        uData.payload = new byte[totalLength];
-        if (headerData != null) {
-            uData.payload[0] = (byte)headerData.length;
-            System.arraycopy(headerData, 0, uData.payload, 1, headerData.length);
-        }
-        System.arraycopy(payloadData, 0, uData.payload, headerDataLen, payloadData.length);
     }
 
     private static void encodeUserData(BearerData bData, BitwiseOutputStream outStream)
         throws BitwiseOutputStream.AccessException, CodingException
     {
+        /*
+         * TODO(cleanup): Do we really need to set userData.payload as
+         * a side effect of encoding?  If not, we could avoid data
+         * copies by passing outStream directly.
+         */
         encodeUserDataPayload(bData.userData);
-        /**
-         * XXX/TODO: figure out what the right answer is WRT padding bits
+        bData.hasUserDataHeader = bData.userData.userDataHeader != null;
+
+        if (bData.userData.payload.length > SmsMessage.MAX_USER_DATA_BYTES) {
+            throw new CodingException("encoded user data too large (" +
+                                      bData.userData.payload.length +
+                                      " > " + SmsMessage.MAX_USER_DATA_BYTES + " bytes)");
+        }
+
+        /*
+         * TODO(cleanup): figure out what the right answer is WRT paddingBits field
          *
          *   userData.paddingBits = (userData.payload.length * 8) - (userData.numFields * 7);
          *   userData.paddingBits = 0; // XXX this seems better, but why?
@@ -623,6 +691,12 @@ public final class BearerData {
         }
         return rawData;
     }
+
+    /*
+     * TODO(cleanup): CdmaSmsAddress encoding should make use of
+     * CdmaSmsAddress.parse provided that DTMF encoding is unified,
+     * and the difference in 4bit vs 8bit is resolved.
+     */
 
     private static void encodeCdmaSmsAddress(CdmaSmsAddress addr) throws CodingException {
         if (addr.digitMode == CdmaSmsAddress.DIGIT_MODE_8BIT_CHAR) {
@@ -792,23 +866,34 @@ public final class BearerData {
         return null;
    }
 
-    private static void decodeMessageId(BearerData bData, BitwiseInputStream inStream)
+    private static boolean decodeMessageId(BearerData bData, BitwiseInputStream inStream)
         throws BitwiseInputStream.AccessException, CodingException
     {
-        if (inStream.read(8) != 3) {
-            throw new CodingException("MESSAGE_IDENTIFIER subparam size incorrect");
+        final int EXPECTED_PARAM_SIZE = 3 * 8;
+        boolean decodeSuccess = false;
+        int paramBits = inStream.read(8) * 8;
+        if (paramBits >= EXPECTED_PARAM_SIZE) {
+            paramBits -= EXPECTED_PARAM_SIZE;
+            decodeSuccess = true;
+            bData.messageType = inStream.read(4);
+            bData.messageId = inStream.read(8) << 8;
+            bData.messageId |= inStream.read(8);
+            bData.hasUserDataHeader = (inStream.read(1) == 1);
+            inStream.skip(3);
         }
-        bData.messageType = inStream.read(4);
-        bData.messageId = inStream.read(8) << 8;
-        bData.messageId |= inStream.read(8);
-        bData.hasUserDataHeader = (inStream.read(1) == 1);
-        inStream.skip(3);
+        if ((! decodeSuccess) || (paramBits > 0)) {
+            Log.d(LOG_TAG, "MESSAGE_IDENTIFIER decode " +
+                      (decodeSuccess ? "succeeded" : "failed") +
+                      " (extra bits = " + paramBits + ")");
+        }
+        inStream.skip(paramBits);
+        return decodeSuccess;
     }
 
-    private static void decodeUserData(BearerData bData, BitwiseInputStream inStream)
+    private static boolean decodeUserData(BearerData bData, BitwiseInputStream inStream)
         throws BitwiseInputStream.AccessException
     {
-        int paramBytes = inStream.read(8);
+        int paramBits = inStream.read(8) * 8;
         bData.userData = new UserData();
         bData.userData.msgEncoding = inStream.read(5);
         bData.userData.msgEncodingSet = true;
@@ -821,13 +906,17 @@ public final class BearerData {
         }
         bData.userData.numFields = inStream.read(8);
         consumedBits += 8;
-        int dataBits = (paramBytes * 8) - consumedBits;
+        int dataBits = paramBits - consumedBits;
         bData.userData.payload = inStream.readByteArray(dataBits);
+        return true;
     }
 
     private static String decodeUtf16(byte[] data, int offset, int numFields)
         throws CodingException
     {
+        // Start reading from the next 16-bit aligned boundry after offset.
+        int padding = offset % 2;
+        numFields -= (offset + padding) / 2;
         try {
             return new String(data, offset, numFields * 2, "utf-16be");
         } catch (java.io.UnsupportedEncodingException ex) {
@@ -835,7 +924,7 @@ public final class BearerData {
         }
     }
 
-    private static String decodeIa5(byte[] data, int offset, int numFields)
+    private static String decode7bitAscii(byte[] data, int offset, int numFields)
         throws CodingException
     {
         try {
@@ -850,37 +939,19 @@ public final class BearerData {
             inStream.skip(offset);
             for (int i = 0; i < numFields; i++) {
                 int charCode = inStream.read(7);
-                if ((charCode < UserData.IA5_MAP_BASE_INDEX) ||
-                        (charCode > UserData.IA5_MAP_MAX_INDEX)) {
-                    throw new CodingException("unsupported AI5 character code (" + charCode + ")");
+                if ((charCode >= UserData.ASCII_MAP_BASE_INDEX) &&
+                        (charCode <= UserData.ASCII_MAP_MAX_INDEX)) {
+                    strBuf.append(UserData.ASCII_MAP[charCode - UserData.ASCII_MAP_BASE_INDEX]);
+                } else if (charCode == UserData.ASCII_NL_INDEX) {
+                    strBuf.append('\n');
+                } else if (charCode == UserData.ASCII_CR_INDEX) {
+                    strBuf.append('\r');
+                } else {
+                    /* For other charCodes, they are unprintable, and so simply use SPACE. */
+                    strBuf.append(' ');
                 }
-                strBuf.append(UserData.IA5_MAP[charCode - UserData.IA5_MAP_BASE_INDEX]);
             }
             return strBuf.toString();
-        } catch (BitwiseInputStream.AccessException ex) {
-            throw new CodingException("AI5 decode failed: " + ex);
-        }
-    }
-
-    private static String decode7bitAscii(byte[] data, int offset, int numFields)
-        throws CodingException
-    {
-        try {
-            offset *= 8;
-            BitwiseInputStream inStream = new BitwiseInputStream(data);
-            int wantedBits = offset + (numFields * 7);
-            if (inStream.available() < wantedBits) {
-                throw new CodingException("insufficient data (wanted " + wantedBits +
-                                          " bits, but only have " + inStream.available() + ")");
-            }
-            inStream.skip(offset);
-            byte[] expandedData = new byte[numFields];
-            for (int i = 0; i < numFields; i++) {
-                expandedData[i] = (byte)inStream.read(7);
-            }
-            return new String(expandedData, 0, numFields, "US-ASCII");
-        } catch (java.io.UnsupportedEncodingException ex) {
-            throw new CodingException("7bit ASCII decode failed: " + ex);
         } catch (BitwiseInputStream.AccessException ex) {
             throw new CodingException("7bit ASCII decode failed: " + ex);
         }
@@ -889,16 +960,26 @@ public final class BearerData {
     private static String decode7bitGsm(byte[] data, int offset, int numFields)
         throws CodingException
     {
-        int paddingBits = calcUdhSeptetPadding(offset);
-        numFields -= (((offset * 8) + paddingBits) / 7);
-        // TODO: It seems wrong that only Gsm7 bit encodings would
-        // take into account the header in numFields calculations.
-        // This should be verified.
+        // Start reading from the next 7-bit aligned boundry after offset.
+        int offsetBits = offset * 8;
+        int offsetSeptets = (offsetBits + 6) / 7;
+        numFields -= offsetSeptets;
+        int paddingBits = (offsetSeptets * 7) - offsetBits;
         String result = GsmAlphabet.gsm7BitPackedToString(data, offset, numFields, paddingBits);
         if (result == null) {
             throw new CodingException("7bit GSM decoding failed");
         }
         return result;
+    }
+
+    private static String decodeLatin(byte[] data, int offset, int numFields)
+        throws CodingException
+    {
+        try {
+            return new String(data, offset, numFields - offset, "ISO-8859-1");
+        } catch (java.io.UnsupportedEncodingException ex) {
+            throw new CodingException("ISO-8859-1 decode failed: " + ex);
+        }
     }
 
     private static void decodeUserDataPayload(UserData userData, boolean hasUserDataHeader)
@@ -914,18 +995,32 @@ public final class BearerData {
         }
         switch (userData.msgEncoding) {
         case UserData.ENCODING_OCTET:
-            break;
-        case UserData.ENCODING_7BIT_ASCII:
-            userData.payloadStr = decode7bitAscii(userData.payload, offset, userData.numFields);
+            // Strip off any padding bytes, meaning any differences between the length of the
+            // array and the target length specified by numFields.  This is to avoid any confusion
+            // by code elsewhere that only considers the payload array length.
+            byte[] payload = new byte[userData.numFields];
+            int copyLen = userData.numFields < userData.payload.length
+                    ? userData.numFields : userData.payload.length;
+
+            System.arraycopy(userData.payload, 0, payload, 0, copyLen);
+            userData.payload = payload;
+
+            // There are many devices in the market that send 8bit text sms (latin encoded) as
+            // octet encoded.
+            userData.payloadStr = decodeLatin(userData.payload, offset, userData.numFields);
             break;
         case UserData.ENCODING_IA5:
-            userData.payloadStr = decodeIa5(userData.payload, offset, userData.numFields);
+        case UserData.ENCODING_7BIT_ASCII:
+            userData.payloadStr = decode7bitAscii(userData.payload, offset, userData.numFields);
             break;
         case UserData.ENCODING_UNICODE_16:
             userData.payloadStr = decodeUtf16(userData.payload, offset, userData.numFields);
             break;
         case UserData.ENCODING_GSM_7BIT_ALPHABET:
             userData.payloadStr = decode7bitGsm(userData.payload, offset, userData.numFields);
+            break;
+        case UserData.ENCODING_LATIN:
+            userData.payloadStr = decodeLatin(userData.payload, offset, userData.numFields);
             break;
         default:
             throw new CodingException("unsupported user data encoding ("
@@ -959,7 +1054,7 @@ public final class BearerData {
         try {
             StringBuffer strbuf = new StringBuffer(dataLen);
             while (inStream.available() >= 6) {
-                strbuf.append(UserData.IA5_MAP[inStream.read(6)]);
+                strbuf.append(UserData.ASCII_MAP[inStream.read(6)]);
             }
             String data = strbuf.toString();
             bData.numberOfMessages = Integer.parseInt(data.substring(0, 2));
@@ -1001,7 +1096,7 @@ public final class BearerData {
         }
         StringBuffer strbuf = new StringBuffer(dataLen);
         for (int i = 0; i < numFields; i++) {
-            strbuf.append(UserData.IA5_MAP[inStream.read(6)]);
+            strbuf.append(UserData.ASCII_MAP[inStream.read(6)]);
         }
         bData.userData.payloadStr = strbuf.toString();
     }
@@ -1049,36 +1144,68 @@ public final class BearerData {
         }
     }
 
-    private static void decodeReplyOption(BearerData bData, BitwiseInputStream inStream)
+    private static boolean decodeReplyOption(BearerData bData, BitwiseInputStream inStream)
         throws BitwiseInputStream.AccessException, CodingException
     {
-        int paramBytes = inStream.read(8);
-        if (paramBytes != 1) {
-            throw new CodingException("REPLY_OPTION subparam size incorrect");
+        final int EXPECTED_PARAM_SIZE = 1 * 8;
+        boolean decodeSuccess = false;
+        int paramBits = inStream.read(8) * 8;
+        if (paramBits >= EXPECTED_PARAM_SIZE) {
+            paramBits -= EXPECTED_PARAM_SIZE;
+            decodeSuccess = true;
+            bData.userAckReq     = (inStream.read(1) == 1);
+            bData.deliveryAckReq = (inStream.read(1) == 1);
+            bData.readAckReq     = (inStream.read(1) == 1);
+            bData.reportReq      = (inStream.read(1) == 1);
+            inStream.skip(4);
         }
-        bData.userAckReq     = (inStream.read(1) == 1);
-        bData.deliveryAckReq = (inStream.read(1) == 1);
-        bData.readAckReq     = (inStream.read(1) == 1);
-        bData.reportReq      = (inStream.read(1) == 1);
-        inStream.skip(4);
+        if ((! decodeSuccess) || (paramBits > 0)) {
+            Log.d(LOG_TAG, "REPLY_OPTION decode " +
+                      (decodeSuccess ? "succeeded" : "failed") +
+                      " (extra bits = " + paramBits + ")");
+        }
+        inStream.skip(paramBits);
+        return decodeSuccess;
     }
 
-    private static void decodeMsgCount(BearerData bData, BitwiseInputStream inStream)
+    private static boolean decodeMsgCount(BearerData bData, BitwiseInputStream inStream)
         throws BitwiseInputStream.AccessException, CodingException
     {
-        if (inStream.read(8) != 1) {
-            throw new CodingException("NUMBER_OF_MESSAGES subparam size incorrect");
+        final int EXPECTED_PARAM_SIZE = 1 * 8;
+        boolean decodeSuccess = false;
+        int paramBits = inStream.read(8) * 8;
+        if (paramBits >= EXPECTED_PARAM_SIZE) {
+            paramBits -= EXPECTED_PARAM_SIZE;
+            decodeSuccess = true;
+            bData.numberOfMessages = IccUtils.cdmaBcdByteToInt((byte)inStream.read(8));
         }
-        bData.numberOfMessages = inStream.read(8);
+        if ((! decodeSuccess) || (paramBits > 0)) {
+            Log.d(LOG_TAG, "NUMBER_OF_MESSAGES decode " +
+                      (decodeSuccess ? "succeeded" : "failed") +
+                      " (extra bits = " + paramBits + ")");
+        }
+        inStream.skip(paramBits);
+        return decodeSuccess;
     }
 
-    private static void decodeDepositIndex(BearerData bData, BitwiseInputStream inStream)
+    private static boolean decodeDepositIndex(BearerData bData, BitwiseInputStream inStream)
         throws BitwiseInputStream.AccessException, CodingException
     {
-        if (inStream.read(8) != 2) {
-            throw new CodingException("MESSAGE_DEPOSIT_INDEX subparam size incorrect");
+        final int EXPECTED_PARAM_SIZE = 2 * 8;
+        boolean decodeSuccess = false;
+        int paramBits = inStream.read(8) * 8;
+        if (paramBits >= EXPECTED_PARAM_SIZE) {
+            paramBits -= EXPECTED_PARAM_SIZE;
+            decodeSuccess = true;
+            bData.depositIndex = (inStream.read(8) << 8) | inStream.read(8);
         }
-        bData.depositIndex = (inStream.read(8) << 8) | inStream.read(8);
+        if ((! decodeSuccess) || (paramBits > 0)) {
+            Log.d(LOG_TAG, "MESSAGE_DEPOSIT_INDEX decode " +
+                      (decodeSuccess ? "succeeded" : "failed") +
+                      " (extra bits = " + paramBits + ")");
+        }
+        inStream.skip(paramBits);
+        return decodeSuccess;
     }
 
     private static String decodeDtmfSmsAddress(byte[] rawData, int numFields)
@@ -1112,10 +1239,10 @@ public final class BearerData {
         }
     }
 
-    private static void decodeCallbackNumber(BearerData bData, BitwiseInputStream inStream)
+    private static boolean decodeCallbackNumber(BearerData bData, BitwiseInputStream inStream)
         throws BitwiseInputStream.AccessException, CodingException
     {
-        int paramBytes = inStream.read(8);
+        int paramBits = inStream.read(8) * 8;
         CdmaSmsAddress addr = new CdmaSmsAddress();
         addr.digitMode = inStream.read(1);
         byte fieldBits = 4;
@@ -1128,140 +1255,274 @@ public final class BearerData {
         }
         addr.numberOfDigits = inStream.read(8);
         consumedBits += 8;
-        int remainingBits = (paramBytes * 8) - consumedBits;
+        int remainingBits = paramBits - consumedBits;
         int dataBits = addr.numberOfDigits * fieldBits;
         int paddingBits = remainingBits - dataBits;
         if (remainingBits < dataBits) {
             throw new CodingException("CALLBACK_NUMBER subparam encoding size error (" +
-                                      "remainingBits " + remainingBits + ", dataBits " +
-                                      dataBits + ", paddingBits " + paddingBits + ")");
+                                      "remainingBits + " + remainingBits + ", dataBits + " +
+                                      dataBits + ", paddingBits + " + paddingBits + ")");
         }
         addr.origBytes = inStream.readByteArray(dataBits);
         inStream.skip(paddingBits);
         decodeSmsAddress(addr);
         bData.callbackNumber = addr;
+        return true;
     }
 
-    private static void decodeMsgStatus(BearerData bData, BitwiseInputStream inStream)
+    private static boolean decodeMsgStatus(BearerData bData, BitwiseInputStream inStream)
         throws BitwiseInputStream.AccessException, CodingException
     {
-        if (inStream.read(8) != 1) {
-            throw new CodingException("MESSAGE_STATUS subparam size incorrect");
+        final int EXPECTED_PARAM_SIZE = 1 * 8;
+        boolean decodeSuccess = false;
+        int paramBits = inStream.read(8) * 8;
+        if (paramBits >= EXPECTED_PARAM_SIZE) {
+            paramBits -= EXPECTED_PARAM_SIZE;
+            decodeSuccess = true;
+            bData.errorClass = inStream.read(2);
+            bData.messageStatus = inStream.read(6);
         }
-        bData.errorClass = inStream.read(2);
-        bData.messageStatus = inStream.read(6);
-        bData.messageStatusSet = true;
+        if ((! decodeSuccess) || (paramBits > 0)) {
+            Log.d(LOG_TAG, "MESSAGE_STATUS decode " +
+                      (decodeSuccess ? "succeeded" : "failed") +
+                      " (extra bits = " + paramBits + ")");
+        }
+        inStream.skip(paramBits);
+        bData.messageStatusSet = decodeSuccess;
+        return decodeSuccess;
     }
 
-    private static void decodeMsgCenterTimeStamp(BearerData bData, BitwiseInputStream inStream)
+    private static boolean decodeMsgCenterTimeStamp(BearerData bData, BitwiseInputStream inStream)
         throws BitwiseInputStream.AccessException, CodingException
     {
-        if (inStream.read(8) != 6) {
-            throw new CodingException("MESSAGE_CENTER_TIME_STAMP subparam size incorrect");
+        final int EXPECTED_PARAM_SIZE = 6 * 8;
+        boolean decodeSuccess = false;
+        int paramBits = inStream.read(8) * 8;
+        if (paramBits >= EXPECTED_PARAM_SIZE) {
+            paramBits -= EXPECTED_PARAM_SIZE;
+            decodeSuccess = true;
+            bData.msgCenterTimeStamp = TimeStamp.fromByteArray(inStream.readByteArray(6 * 8));
         }
-        bData.msgCenterTimeStamp = TimeStamp.fromByteArray(inStream.readByteArray(6 * 8));
+        if ((! decodeSuccess) || (paramBits > 0)) {
+            Log.d(LOG_TAG, "MESSAGE_CENTER_TIME_STAMP decode " +
+                      (decodeSuccess ? "succeeded" : "failed") +
+                      " (extra bits = " + paramBits + ")");
+        }
+        inStream.skip(paramBits);
+        return decodeSuccess;
     }
 
-    private static void decodeValidityAbs(BearerData bData, BitwiseInputStream inStream)
+    private static boolean decodeValidityAbs(BearerData bData, BitwiseInputStream inStream)
         throws BitwiseInputStream.AccessException, CodingException
     {
-        if (inStream.read(8) != 6) {
-            throw new CodingException("VALIDITY_PERIOD_ABSOLUTE subparam size incorrect");
+        final int EXPECTED_PARAM_SIZE = 6 * 8;
+        boolean decodeSuccess = false;
+        int paramBits = inStream.read(8) * 8;
+        if (paramBits >= EXPECTED_PARAM_SIZE) {
+            paramBits -= EXPECTED_PARAM_SIZE;
+            decodeSuccess = true;
+            bData.validityPeriodAbsolute = TimeStamp.fromByteArray(inStream.readByteArray(6 * 8));
         }
-        bData.validityPeriodAbsolute = TimeStamp.fromByteArray(inStream.readByteArray(6 * 8));
+        if ((! decodeSuccess) || (paramBits > 0)) {
+            Log.d(LOG_TAG, "VALIDITY_PERIOD_ABSOLUTE decode " +
+                      (decodeSuccess ? "succeeded" : "failed") +
+                      " (extra bits = " + paramBits + ")");
+        }
+        inStream.skip(paramBits);
+        return decodeSuccess;
     }
 
-    private static void decodeDeferredDeliveryAbs(BearerData bData, BitwiseInputStream inStream)
+    private static boolean decodeDeferredDeliveryAbs(BearerData bData, BitwiseInputStream inStream)
         throws BitwiseInputStream.AccessException, CodingException
     {
-        if (inStream.read(8) != 6) {
-            throw new CodingException("DEFERRED_DELIVERY_TIME_ABSOLUTE subparam size incorrect");
+        final int EXPECTED_PARAM_SIZE = 6 * 8;
+        boolean decodeSuccess = false;
+        int paramBits = inStream.read(8) * 8;
+        if (paramBits >= EXPECTED_PARAM_SIZE) {
+            paramBits -= EXPECTED_PARAM_SIZE;
+            decodeSuccess = true;
+            bData.deferredDeliveryTimeAbsolute = TimeStamp.fromByteArray(
+                    inStream.readByteArray(6 * 8));
         }
-        bData.deferredDeliveryTimeAbsolute = TimeStamp.fromByteArray(inStream.readByteArray(6 * 8));
+        if ((! decodeSuccess) || (paramBits > 0)) {
+            Log.d(LOG_TAG, "DEFERRED_DELIVERY_TIME_ABSOLUTE decode " +
+                      (decodeSuccess ? "succeeded" : "failed") +
+                      " (extra bits = " + paramBits + ")");
+        }
+        inStream.skip(paramBits);
+        return decodeSuccess;
     }
 
-    private static void decodeValidityRel(BearerData bData, BitwiseInputStream inStream)
+    private static boolean decodeValidityRel(BearerData bData, BitwiseInputStream inStream)
         throws BitwiseInputStream.AccessException, CodingException
     {
-        if (inStream.read(8) != 1) {
-            throw new CodingException("VALIDITY_PERIOD_RELATIVE subparam size incorrect");
+        final int EXPECTED_PARAM_SIZE = 1 * 8;
+        boolean decodeSuccess = false;
+        int paramBits = inStream.read(8) * 8;
+        if (paramBits >= EXPECTED_PARAM_SIZE) {
+            paramBits -= EXPECTED_PARAM_SIZE;
+            decodeSuccess = true;
+            bData.deferredDeliveryTimeRelative = inStream.read(8);
         }
-        bData.deferredDeliveryTimeRelative = inStream.read(8);
-        bData.deferredDeliveryTimeRelativeSet = true;
+        if ((! decodeSuccess) || (paramBits > 0)) {
+            Log.d(LOG_TAG, "VALIDITY_PERIOD_RELATIVE decode " +
+                      (decodeSuccess ? "succeeded" : "failed") +
+                      " (extra bits = " + paramBits + ")");
+        }
+        inStream.skip(paramBits);
+        bData.deferredDeliveryTimeRelativeSet = decodeSuccess;
+        return decodeSuccess;
     }
 
-    private static void decodeDeferredDeliveryRel(BearerData bData, BitwiseInputStream inStream)
+    private static boolean decodeDeferredDeliveryRel(BearerData bData, BitwiseInputStream inStream)
         throws BitwiseInputStream.AccessException, CodingException
     {
-        if (inStream.read(8) != 1) {
-            throw new CodingException("DEFERRED_DELIVERY_TIME_RELATIVE subparam size incorrect");
+        final int EXPECTED_PARAM_SIZE = 1 * 8;
+        boolean decodeSuccess = false;
+        int paramBits = inStream.read(8) * 8;
+        if (paramBits >= EXPECTED_PARAM_SIZE) {
+            paramBits -= EXPECTED_PARAM_SIZE;
+            decodeSuccess = true;
+            bData.validityPeriodRelative = inStream.read(8);
         }
-        bData.validityPeriodRelative = inStream.read(8);
-        bData.validityPeriodRelativeSet = true;
+        if ((! decodeSuccess) || (paramBits > 0)) {
+            Log.d(LOG_TAG, "DEFERRED_DELIVERY_TIME_RELATIVE decode " +
+                      (decodeSuccess ? "succeeded" : "failed") +
+                      " (extra bits = " + paramBits + ")");
+        }
+        inStream.skip(paramBits);
+        bData.validityPeriodRelativeSet = decodeSuccess;
+        return decodeSuccess;
     }
 
-    private static void decodePrivacyIndicator(BearerData bData, BitwiseInputStream inStream)
+    private static boolean decodePrivacyIndicator(BearerData bData, BitwiseInputStream inStream)
         throws BitwiseInputStream.AccessException, CodingException
     {
-        if (inStream.read(8) != 1) {
-            throw new CodingException("PRIVACY_INDICATOR subparam size incorrect");
+        final int EXPECTED_PARAM_SIZE = 1 * 8;
+        boolean decodeSuccess = false;
+        int paramBits = inStream.read(8) * 8;
+        if (paramBits >= EXPECTED_PARAM_SIZE) {
+            paramBits -= EXPECTED_PARAM_SIZE;
+            decodeSuccess = true;
+            bData.privacy = inStream.read(2);
+            inStream.skip(6);
         }
-        bData.privacy = inStream.read(2);
-        inStream.skip(6);
-        bData.privacyIndicatorSet = true;
+        if ((! decodeSuccess) || (paramBits > 0)) {
+            Log.d(LOG_TAG, "PRIVACY_INDICATOR decode " +
+                      (decodeSuccess ? "succeeded" : "failed") +
+                      " (extra bits = " + paramBits + ")");
+        }
+        inStream.skip(paramBits);
+        bData.privacyIndicatorSet = decodeSuccess;
+        return decodeSuccess;
     }
 
-    private static void decodeLanguageIndicator(BearerData bData, BitwiseInputStream inStream)
+    private static boolean decodeLanguageIndicator(BearerData bData, BitwiseInputStream inStream)
         throws BitwiseInputStream.AccessException, CodingException
     {
-        if (inStream.read(8) != 1) {
-            throw new CodingException("LANGUAGE_INDICATOR subparam size incorrect");
+        final int EXPECTED_PARAM_SIZE = 1 * 8;
+        boolean decodeSuccess = false;
+        int paramBits = inStream.read(8) * 8;
+        if (paramBits >= EXPECTED_PARAM_SIZE) {
+            paramBits -= EXPECTED_PARAM_SIZE;
+            decodeSuccess = true;
+            bData.language = inStream.read(8);
         }
-        bData.language = inStream.read(8);
-        bData.languageIndicatorSet = true;
+        if ((! decodeSuccess) || (paramBits > 0)) {
+            Log.d(LOG_TAG, "LANGUAGE_INDICATOR decode " +
+                      (decodeSuccess ? "succeeded" : "failed") +
+                      " (extra bits = " + paramBits + ")");
+        }
+        inStream.skip(paramBits);
+        bData.languageIndicatorSet = decodeSuccess;
+        return decodeSuccess;
     }
 
-    private static void decodeDisplayMode(BearerData bData, BitwiseInputStream inStream)
+    private static boolean decodeDisplayMode(BearerData bData, BitwiseInputStream inStream)
         throws BitwiseInputStream.AccessException, CodingException
     {
-        if (inStream.read(8) != 1) {
-            throw new CodingException("DISPLAY_MODE subparam size incorrect");
+        final int EXPECTED_PARAM_SIZE = 1 * 8;
+        boolean decodeSuccess = false;
+        int paramBits = inStream.read(8) * 8;
+        if (paramBits >= EXPECTED_PARAM_SIZE) {
+            paramBits -= EXPECTED_PARAM_SIZE;
+            decodeSuccess = true;
+            bData.displayMode = inStream.read(2);
+            inStream.skip(6);
         }
-        bData.displayMode = inStream.read(2);
-        inStream.skip(6);
-        bData.displayModeSet = true;
+        if ((! decodeSuccess) || (paramBits > 0)) {
+            Log.d(LOG_TAG, "DISPLAY_MODE decode " +
+                      (decodeSuccess ? "succeeded" : "failed") +
+                      " (extra bits = " + paramBits + ")");
+        }
+        inStream.skip(paramBits);
+        bData.displayModeSet = decodeSuccess;
+        return decodeSuccess;
     }
 
-    private static void decodePriorityIndicator(BearerData bData, BitwiseInputStream inStream)
+    private static boolean decodePriorityIndicator(BearerData bData, BitwiseInputStream inStream)
         throws BitwiseInputStream.AccessException, CodingException
     {
-        if (inStream.read(8) != 1) {
-            throw new CodingException("PRIORITY_INDICATOR subparam size incorrect");
+        final int EXPECTED_PARAM_SIZE = 1 * 8;
+        boolean decodeSuccess = false;
+        int paramBits = inStream.read(8) * 8;
+        if (paramBits >= EXPECTED_PARAM_SIZE) {
+            paramBits -= EXPECTED_PARAM_SIZE;
+            decodeSuccess = true;
+            bData.priority = inStream.read(2);
+            inStream.skip(6);
         }
-        bData.priority = inStream.read(2);
-        inStream.skip(6);
-        bData.priorityIndicatorSet = true;
+        if ((! decodeSuccess) || (paramBits > 0)) {
+            Log.d(LOG_TAG, "PRIORITY_INDICATOR decode " +
+                      (decodeSuccess ? "succeeded" : "failed") +
+                      " (extra bits = " + paramBits + ")");
+        }
+        inStream.skip(paramBits);
+        bData.priorityIndicatorSet = decodeSuccess;
+        return decodeSuccess;
     }
 
-    private static void decodeMsgDeliveryAlert(BearerData bData, BitwiseInputStream inStream)
+    private static boolean decodeMsgDeliveryAlert(BearerData bData, BitwiseInputStream inStream)
         throws BitwiseInputStream.AccessException, CodingException
     {
-        if (inStream.read(8) != 1) {
-            throw new CodingException("ALERT_ON_MESSAGE_DELIVERY subparam size incorrect");
+        final int EXPECTED_PARAM_SIZE = 1 * 8;
+        boolean decodeSuccess = false;
+        int paramBits = inStream.read(8) * 8;
+        if (paramBits >= EXPECTED_PARAM_SIZE) {
+            paramBits -= EXPECTED_PARAM_SIZE;
+            decodeSuccess = true;
+            bData.alert = inStream.read(2);
+            inStream.skip(6);
         }
-        bData.alert = inStream.read(2);
-        inStream.skip(6);
-        bData.alertIndicatorSet = true;
+        if ((! decodeSuccess) || (paramBits > 0)) {
+            Log.d(LOG_TAG, "ALERT_ON_MESSAGE_DELIVERY decode " +
+                      (decodeSuccess ? "succeeded" : "failed") +
+                      " (extra bits = " + paramBits + ")");
+        }
+        inStream.skip(paramBits);
+        bData.alertIndicatorSet = decodeSuccess;
+        return decodeSuccess;
     }
 
-    private static void decodeUserResponseCode(BearerData bData, BitwiseInputStream inStream)
+    private static boolean decodeUserResponseCode(BearerData bData, BitwiseInputStream inStream)
         throws BitwiseInputStream.AccessException, CodingException
     {
-        if (inStream.read(8) != 1) {
-            throw new CodingException("USER_REPONSE_CODE subparam size incorrect");
+        final int EXPECTED_PARAM_SIZE = 1 * 8;
+        boolean decodeSuccess = false;
+        int paramBits = inStream.read(8) * 8;
+        if (paramBits >= EXPECTED_PARAM_SIZE) {
+            paramBits -= EXPECTED_PARAM_SIZE;
+            decodeSuccess = true;
+            bData.userResponseCode = inStream.read(8);
         }
-        bData.userResponseCode = inStream.read(8);
-        bData.userResponseCodeSet = true;
+        if ((! decodeSuccess) || (paramBits > 0)) {
+            Log.d(LOG_TAG, "USER_REPONSE_CODE decode " +
+                      (decodeSuccess ? "succeeded" : "failed") +
+                      " (extra bits = " + paramBits + ")");
+        }
+        inStream.skip(paramBits);
+        bData.userResponseCodeSet = decodeSuccess;
+        return decodeSuccess;
     }
 
     /**
@@ -1278,72 +1539,73 @@ public final class BearerData {
             BearerData bData = new BearerData();
             int foundSubparamMask = 0;
             while (inStream.available() > 0) {
+                boolean decodeSuccess = false;
                 int subparamId = inStream.read(8);
                 int subparamIdBit = 1 << subparamId;
                 if ((foundSubparamMask & subparamIdBit) != 0) {
                     throw new CodingException("illegal duplicate subparameter (" +
                                               subparamId + ")");
                 }
-                foundSubparamMask |= subparamIdBit;
                 switch (subparamId) {
                 case SUBPARAM_MESSAGE_IDENTIFIER:
-                    decodeMessageId(bData, inStream);
+                    decodeSuccess = decodeMessageId(bData, inStream);
                     break;
                 case SUBPARAM_USER_DATA:
-                    decodeUserData(bData, inStream);
+                    decodeSuccess = decodeUserData(bData, inStream);
                     break;
                 case SUBPARAM_USER_REPONSE_CODE:
-                    decodeUserResponseCode(bData, inStream);
+                    decodeSuccess = decodeUserResponseCode(bData, inStream);
                     break;
                 case SUBPARAM_REPLY_OPTION:
-                    decodeReplyOption(bData, inStream);
+                    decodeSuccess = decodeReplyOption(bData, inStream);
                     break;
                 case SUBPARAM_NUMBER_OF_MESSAGES:
-                    decodeMsgCount(bData, inStream);
+                    decodeSuccess = decodeMsgCount(bData, inStream);
                     break;
                 case SUBPARAM_CALLBACK_NUMBER:
-                    decodeCallbackNumber(bData, inStream);
+                    decodeSuccess = decodeCallbackNumber(bData, inStream);
                     break;
                 case SUBPARAM_MESSAGE_STATUS:
-                    decodeMsgStatus(bData, inStream);
+                    decodeSuccess = decodeMsgStatus(bData, inStream);
                     break;
                 case SUBPARAM_MESSAGE_CENTER_TIME_STAMP:
-                    decodeMsgCenterTimeStamp(bData, inStream);
+                    decodeSuccess = decodeMsgCenterTimeStamp(bData, inStream);
                     break;
                 case SUBPARAM_VALIDITY_PERIOD_ABSOLUTE:
-                    decodeValidityAbs(bData, inStream);
+                    decodeSuccess = decodeValidityAbs(bData, inStream);
                     break;
                 case SUBPARAM_VALIDITY_PERIOD_RELATIVE:
-                    decodeValidityRel(bData, inStream);
+                    decodeSuccess = decodeValidityRel(bData, inStream);
                     break;
                 case SUBPARAM_DEFERRED_DELIVERY_TIME_ABSOLUTE:
-                    decodeDeferredDeliveryAbs(bData, inStream);
+                    decodeSuccess = decodeDeferredDeliveryAbs(bData, inStream);
                     break;
                 case SUBPARAM_DEFERRED_DELIVERY_TIME_RELATIVE:
-                    decodeDeferredDeliveryRel(bData, inStream);
+                    decodeSuccess = decodeDeferredDeliveryRel(bData, inStream);
                     break;
                 case SUBPARAM_PRIVACY_INDICATOR:
-                    decodePrivacyIndicator(bData, inStream);
+                    decodeSuccess = decodePrivacyIndicator(bData, inStream);
                     break;
                 case SUBPARAM_LANGUAGE_INDICATOR:
-                    decodeLanguageIndicator(bData, inStream);
+                    decodeSuccess = decodeLanguageIndicator(bData, inStream);
                     break;
                 case SUBPARAM_MESSAGE_DISPLAY_MODE:
-                    decodeDisplayMode(bData, inStream);
+                    decodeSuccess = decodeDisplayMode(bData, inStream);
                     break;
                 case SUBPARAM_PRIORITY_INDICATOR:
-                    decodePriorityIndicator(bData, inStream);
+                    decodeSuccess = decodePriorityIndicator(bData, inStream);
                     break;
                 case SUBPARAM_ALERT_ON_MESSAGE_DELIVERY:
-                    decodeMsgDeliveryAlert(bData, inStream);
+                    decodeSuccess = decodeMsgDeliveryAlert(bData, inStream);
                     break;
                 case SUBPARAM_MESSAGE_DEPOSIT_INDEX:
-                    decodeDepositIndex(bData, inStream);
+                    decodeSuccess = decodeDepositIndex(bData, inStream);
                     break;
                 default:
                     throw new CodingException("unsupported bearer data subparameter ("
                                               + subparamId + ")");
                 }
+                if (decodeSuccess) foundSubparamMask |= subparamIdBit;
             }
             if ((foundSubparamMask & (1 << SUBPARAM_MESSAGE_IDENTIFIER)) == 0) {
                 throw new CodingException("missing MESSAGE_IDENTIFIER subparam");

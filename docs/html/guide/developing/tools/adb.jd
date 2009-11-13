@@ -313,7 +313,7 @@ emulator-5558&nbsp;&nbsp;device</pre>
 <li><code>&lt;tty&gt;</code> &mdash; the tty for PPP stream. For example <code>dev:/dev/omap_csmi_ttyl</code>. </li>
 <li><code>[parm]... </code> &mdash zero or more PPP/PPPD options, such as <code>defaultroute</code>, <code>local</code>, <code>notty</code>, etc.</li></ul>
 
-<p>Note that you should not automatically start a PDP connection. </p></td>
+<p>Note that you should not automatically start a PPP connection. </p></td>
 <td></td>
 </tr>
 

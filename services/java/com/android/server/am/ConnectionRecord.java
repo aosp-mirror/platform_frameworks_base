@@ -17,6 +17,7 @@
 package com.android.server.am;
 
 import android.app.IServiceConnection;
+import android.app.PendingIntent;
 
 import java.io.PrintWriter;
 
@@ -28,6 +29,8 @@ class ConnectionRecord {
     final HistoryRecord activity;   // If non-null, the owning activity.
     final IServiceConnection conn;  // The client connection.
     final int flags;                // Binding options.
+    final int clientLabel;          // String resource labeling this client.
+    final PendingIntent clientIntent; // How to launch the client.
     String stringName;              // Caching of toString.
     
     void dump(PrintWriter pw, String prefix) {
@@ -40,11 +43,14 @@ class ConnectionRecord {
     }
     
     ConnectionRecord(AppBindRecord _binding, HistoryRecord _activity,
-               IServiceConnection _conn, int _flags) {
+               IServiceConnection _conn, int _flags,
+               int _clientLabel, PendingIntent _clientIntent) {
         binding = _binding;
         activity = _activity;
         conn = _conn;
         flags = _flags;
+        clientLabel = _clientLabel;
+        clientIntent = _clientIntent;
     }
 
     public String toString() {

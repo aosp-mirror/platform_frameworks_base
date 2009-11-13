@@ -134,7 +134,7 @@ static void Region_scale(JNIEnv* env, jobject region, jfloat scale, jobject dst)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#include "Parcel.h"
+#include <binder/Parcel.h>
 #include "android_util_Binder.h"
 
 static SkRegion* Region_createFromParcel(JNIEnv* env, jobject clazz, jobject parcel)

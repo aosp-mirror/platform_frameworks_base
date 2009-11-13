@@ -120,7 +120,7 @@ public class AudioTrack
     public  static final int ERROR_INVALID_OPERATION               = -3;
 
     private static final int ERROR_NATIVESETUP_AUDIOSYSTEM         = -16;
-    private static final int ERROR_NATIVESETUP_INVALIDCHANNELCOUNT = -17;
+    private static final int ERROR_NATIVESETUP_INVALIDCHANNELMASK  = -17;
     private static final int ERROR_NATIVESETUP_INVALIDFORMAT       = -18;
     private static final int ERROR_NATIVESETUP_INVALIDSTREAMTYPE   = -19;
     private static final int ERROR_NATIVESETUP_NATIVEINITFAILED    = -20;
@@ -181,9 +181,14 @@ public class AudioTrack
      */
     private int mSampleRate = 22050;
     /**
-     * The number of input audio channels (1 is mono, 2 is stereo).
+     * The number of audio output channels (1 is mono, 2 is stereo).
      */
     private int mChannelCount = 1;
+    /**
+     * The audio channel mask.
+     */
+    private int mChannels = AudioFormat.CHANNEL_OUT_MONO;
+
     /**
      * The type of the audio stream to play. See
      *   {@link AudioManager#STREAM_VOICE_CALL}, {@link AudioManager#STREAM_SYSTEM},
@@ -198,7 +203,7 @@ public class AudioTrack
     /**
      * The current audio channel configuration.
      */
-    private int mChannelConfiguration = AudioFormat.CHANNEL_CONFIGURATION_MONO;
+    private int mChannelConfiguration = AudioFormat.CHANNEL_OUT_MONO;
     /**
      * The encoding of the audio samples.
      * @see AudioFormat#ENCODING_PCM_8BIT
@@ -235,8 +240,8 @@ public class AudioTrack
      * @param sampleRateInHz the sample rate expressed in Hertz. Examples of rates are (but
      *   not limited to) 44100, 22050 and 11025.
      * @param channelConfig describes the configuration of the audio channels.
-     *   See {@link AudioFormat#CHANNEL_CONFIGURATION_MONO} and
-     *   {@link AudioFormat#CHANNEL_CONFIGURATION_STEREO}
+     *   See {@link AudioFormat#CHANNEL_OUT_MONO} and
+     *   {@link AudioFormat#CHANNEL_OUT_STEREO}
      * @param audioFormat the format in which the audio data is represented.
      *   See {@link AudioFormat#ENCODING_PCM_16BIT} and
      *   {@link AudioFormat#ENCODING_PCM_8BIT}
@@ -266,7 +271,7 @@ public class AudioTrack
 
         // native initialization
         int initResult = native_setup(new WeakReference<AudioTrack>(this),
-                mStreamType, mSampleRate, mChannelCount, mAudioFormat,
+                mStreamType, mSampleRate, mChannels, mAudioFormat,
                 mNativeBufferSizeInBytes, mDataLoadMode);
         if (initResult != SUCCESS) {
             loge("Error code "+initResult+" when initializing AudioTrack.");
@@ -286,6 +291,7 @@ public class AudioTrack
     // postconditions:
     //    mStreamType is valid
     //    mChannelCount is valid
+    //    mChannels is valid
     //    mAudioFormat is valid
     //    mSampleRate is valid
     //    mDataLoadMode is valid
@@ -298,7 +304,8 @@ public class AudioTrack
            && (streamType != AudioManager.STREAM_RING) && (streamType != AudioManager.STREAM_SYSTEM)
            && (streamType != AudioManager.STREAM_VOICE_CALL)
            && (streamType != AudioManager.STREAM_NOTIFICATION)
-           && (streamType != AudioManager.STREAM_BLUETOOTH_SCO)) {
+           && (streamType != AudioManager.STREAM_BLUETOOTH_SCO)
+           && (streamType != AudioManager.STREAM_DTMF)) {
             throw (new IllegalArgumentException("Invalid stream type."));
         } else {
             mStreamType = streamType;
@@ -315,18 +322,23 @@ public class AudioTrack
 
         //--------------
         // channel config
+        mChannelConfiguration = channelConfig;
+
         switch (channelConfig) {
-        case AudioFormat.CHANNEL_CONFIGURATION_DEFAULT:
+        case AudioFormat.CHANNEL_OUT_DEFAULT: //AudioFormat.CHANNEL_CONFIGURATION_DEFAULT
+        case AudioFormat.CHANNEL_OUT_MONO:
         case AudioFormat.CHANNEL_CONFIGURATION_MONO:
             mChannelCount = 1;
-            mChannelConfiguration = AudioFormat.CHANNEL_CONFIGURATION_MONO;
+            mChannels = AudioFormat.CHANNEL_OUT_MONO;
             break;
+        case AudioFormat.CHANNEL_OUT_STEREO:
         case AudioFormat.CHANNEL_CONFIGURATION_STEREO:
             mChannelCount = 2;
-            mChannelConfiguration = AudioFormat.CHANNEL_CONFIGURATION_STEREO;
+            mChannels = AudioFormat.CHANNEL_OUT_STEREO;
             break;
         default:
             mChannelCount = 0;
+            mChannels = AudioFormat.CHANNEL_INVALID;
             mChannelConfiguration = AudioFormat.CHANNEL_CONFIGURATION_INVALID;
             throw(new IllegalArgumentException("Unsupported channel configuration."));
         }
@@ -452,8 +464,8 @@ public class AudioTrack
     /**
      * Returns the configured channel configuration.
 
-     * See {@link AudioFormat#CHANNEL_CONFIGURATION_MONO}
-     * and {@link AudioFormat#CHANNEL_CONFIGURATION_STEREO}.
+     * See {@link AudioFormat#CHANNEL_OUT_MONO}
+     * and {@link AudioFormat#CHANNEL_OUT_STEREO}.
      */
     public int getChannelConfiguration() {
         return mChannelConfiguration;
@@ -531,8 +543,8 @@ public class AudioTrack
      * the expected frequency at which the buffer will be refilled with additional data to play. 
      * @param sampleRateInHz the sample rate expressed in Hertz.
      * @param channelConfig describes the configuration of the audio channels. 
-     *   See {@link AudioFormat#CHANNEL_CONFIGURATION_MONO} and
-     *   {@link AudioFormat#CHANNEL_CONFIGURATION_STEREO}
+     *   See {@link AudioFormat#CHANNEL_OUT_MONO} and
+     *   {@link AudioFormat#CHANNEL_OUT_STEREO}
      * @param audioFormat the format in which the audio data is represented. 
      *   See {@link AudioFormat#ENCODING_PCM_16BIT} and 
      *   {@link AudioFormat#ENCODING_PCM_8BIT}
@@ -544,9 +556,11 @@ public class AudioTrack
     static public int getMinBufferSize(int sampleRateInHz, int channelConfig, int audioFormat) {
         int channelCount = 0;
         switch(channelConfig) {
+        case AudioFormat.CHANNEL_OUT_MONO:
         case AudioFormat.CHANNEL_CONFIGURATION_MONO:
             channelCount = 1;
             break;
+        case AudioFormat.CHANNEL_OUT_STEREO:
         case AudioFormat.CHANNEL_CONFIGURATION_STEREO:
             channelCount = 2;
             break;

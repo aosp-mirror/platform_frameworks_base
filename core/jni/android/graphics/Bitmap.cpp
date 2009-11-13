@@ -5,7 +5,7 @@
 #include "SkDither.h"
 #include "SkUnPreMultiply.h"
 
-#include "Parcel.h"
+#include <binder/Parcel.h>
 #include "android_util_Binder.h"
 #include "android_nio_utils.h"
 #include "CreateJavaOutputStreamAdaptor.h"
@@ -317,6 +317,11 @@ static jboolean Bitmap_hasAlpha(JNIEnv* env, jobject, SkBitmap* bitmap) {
     return !bitmap->isOpaque();
 }
 
+static void Bitmap_setHasAlpha(JNIEnv* env, jobject, SkBitmap* bitmap,
+                               jboolean hasAlpha) {
+    bitmap->setIsOpaque(!hasAlpha);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 static jobject Bitmap_createFromParcel(JNIEnv* env, jobject, jobject parcel) {
@@ -332,6 +337,7 @@ static jobject Bitmap_createFromParcel(JNIEnv* env, jobject, jobject parcel) {
     const int               width = p->readInt32();
     const int               height = p->readInt32();
     const int               rowBytes = p->readInt32();
+    const int               density = p->readInt32();
 
     if (SkBitmap::kARGB_8888_Config != config &&
             SkBitmap::kRGB_565_Config != config &&
@@ -369,12 +375,13 @@ static jobject Bitmap_createFromParcel(JNIEnv* env, jobject, jobject parcel) {
     memcpy(bitmap->getPixels(), p->readInplace(size), size);
     bitmap->unlockPixels();
 
-    return GraphicsJNI::createBitmap(env, bitmap, isMutable, NULL);
+    return GraphicsJNI::createBitmap(env, bitmap, isMutable, NULL, density);
 }
 
 static jboolean Bitmap_writeToParcel(JNIEnv* env, jobject,
                                      const SkBitmap* bitmap,
-                                     jboolean isMutable, jobject parcel) {
+                                     jboolean isMutable, jint density,
+                                     jobject parcel) {
     if (parcel == NULL) {
         SkDebugf("------- writeToParcel null parcel\n");
         return false;
@@ -387,6 +394,7 @@ static jboolean Bitmap_writeToParcel(JNIEnv* env, jobject,
     p->writeInt32(bitmap->width());
     p->writeInt32(bitmap->height());
     p->writeInt32(bitmap->rowBytes());
+    p->writeInt32(density);
 
     if (bitmap->getConfig() == SkBitmap::kIndex8_Config) {
         SkColorTable* ctable = bitmap->getColorTable();
@@ -543,10 +551,11 @@ static JNINativeMethod gBitmapMethods[] = {
     {   "nativeRowBytes",           "(I)I", (void*)Bitmap_rowBytes },
     {   "nativeConfig",             "(I)I", (void*)Bitmap_config },
     {   "nativeHasAlpha",           "(I)Z", (void*)Bitmap_hasAlpha },
+    {   "nativeSetHasAlpha",        "(IZ)V", (void*)Bitmap_setHasAlpha },
     {   "nativeCreateFromParcel",
         "(Landroid/os/Parcel;)Landroid/graphics/Bitmap;",
         (void*)Bitmap_createFromParcel },
-    {   "nativeWriteToParcel",      "(IZLandroid/os/Parcel;)Z",
+    {   "nativeWriteToParcel",      "(IZILandroid/os/Parcel;)Z",
         (void*)Bitmap_writeToParcel },
     {   "nativeExtractAlpha",       "(II[I)Landroid/graphics/Bitmap;",
         (void*)Bitmap_extractAlpha },

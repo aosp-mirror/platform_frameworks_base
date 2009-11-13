@@ -60,6 +60,8 @@ public class QueryParamsImpl extends QueryParams {
             sb.append('?');
         }
         for (String param : params) {
+            String value = mParams.get(param);
+            if (value == null) continue;
             if (first) {
                 first = false;
             } else {
@@ -67,7 +69,7 @@ public class QueryParamsImpl extends QueryParams {
             }
             sb.append(param);
             sb.append('=');
-            String value = mParams.get(param);
+
             String encodedValue = null;
 
             try {

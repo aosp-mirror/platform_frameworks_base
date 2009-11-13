@@ -28,7 +28,10 @@ import java.util.Map;
  * status code. The PluginData class is the container for all these
  * parts.
  *
+ * @deprecated This class was intended to be used by Gears. Since Gears was
+ * deprecated, so is this class.
  */
+@Deprecated
 public final class PluginData {
     /**
      * The content stream.
@@ -47,10 +50,6 @@ public final class PluginData {
     private Map<String, String[]> mHeaders;
 
     /**
-     * The index of the header value in the above mapping.
-     */
-    private int mHeaderValueIndex;
-    /**
      * The associated HTTP response code.
      */
     private int mStatusCode;
@@ -63,7 +62,11 @@ public final class PluginData {
      * @param headers The response headers. Map of
      * lowercase header name to [ unmodified header name, header value]
      * @param length The HTTP response status code.
+     *
+     * @deprecated This class was intended to be used by Gears. Since Gears was
+     * deprecated, so is this class.
      */
+    @Deprecated
     public PluginData(
             InputStream stream,
             long length,
@@ -79,7 +82,11 @@ public final class PluginData {
      * Returns the input stream that contains the plugin content.
      *
      * @return An InputStream instance with the plugin content.
+     *
+     * @deprecated This class was intended to be used by Gears. Since Gears was
+     * deprecated, so is this class.
      */
+    @Deprecated
     public InputStream getInputStream() {
         return mStream;
     }
@@ -88,7 +95,11 @@ public final class PluginData {
      * Returns the length of the plugin content.
      *
      * @return the length of the plugin content.
+     *
+     * @deprecated This class was intended to be used by Gears. Since Gears was
+     * deprecated, so is this class.
      */
+    @Deprecated
     public long getContentLength() {
         return mContentLength;
     }
@@ -100,7 +111,11 @@ public final class PluginData {
      * @return A Map<String, String[]> containing all headers. The
      * mapping is 'lowercase header name' to ['unmodified header
      * name', header value].
+     *
+     * @deprecated This class was intended to be used by Gears. Since Gears was
+     * deprecated, so is this class.
      */
+    @Deprecated
     public Map<String, String[]> getHeaders() {
         return mHeaders;
     }
@@ -109,7 +124,11 @@ public final class PluginData {
      * Returns the HTTP status code for the response.
      *
      * @return The HTTP statue code, e.g 200.
+     *
+     * @deprecated This class was intended to be used by Gears. Since Gears was
+     * deprecated, so is this class.
      */
+    @Deprecated
     public int getStatusCode() {
         return mStatusCode;
     }

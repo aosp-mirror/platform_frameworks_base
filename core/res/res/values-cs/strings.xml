@@ -111,6 +111,7 @@
     <string name="httpErrorFile" msgid="8250549644091165175">"K souboru nelze získat přístup."</string>
     <string name="httpErrorFileNotFound" msgid="5588380756326017105">"Požadovaný soubor nebyl nalezen."</string>
     <string name="httpErrorTooManyRequests" msgid="1235396927087188253">"Je zpracováváno příliš mnoho požadavků. Opakujte akci později."</string>
+    <string name="notification_title" msgid="1259940370369187045">"Chyba přihlášení k účtu <xliff:g id="ACCOUNT">%1$s</xliff:g>"</string>
     <string name="contentServiceSync" msgid="8353523060269335667">"Synchronizace"</string>
     <string name="contentServiceSyncNotificationTitle" msgid="397743349191901458">"Synchronizace"</string>
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"Příliš mnoho smazaných položek služby <xliff:g id="CONTENT_TYPE">%s</xliff:g>."</string>
@@ -146,8 +147,8 @@
     <string name="permgroupdesc_location" msgid="2430258821648348660">"Sleduje vaši fyzickou polohu"</string>
     <string name="permgrouplab_network" msgid="5808983377727109831">"Síťová komunikace"</string>
     <string name="permgroupdesc_network" msgid="5035763698958415998">"Umožňuje aplikacím získat přístup k různým funkcím sítě."</string>
-    <string name="permgrouplab_accounts" msgid="7140261692496314430">"Vaše účty Google"</string>
-    <string name="permgroupdesc_accounts" msgid="6735915929704895193">"Přístup k dostupným účtům Google."</string>
+    <string name="permgrouplab_accounts" msgid="3359646291125325519">"Vaše účty"</string>
+    <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Přístup k dostupným účtům."</string>
     <string name="permgrouplab_hardwareControls" msgid="7998214968791599326">"Řízení hardwaru"</string>
     <string name="permgroupdesc_hardwareControls" msgid="4357057861225462702">"Přímý přístup k hardwaru telefonu."</string>
     <string name="permgrouplab_phoneCalls" msgid="9067173988325865923">"Telefonní hovory"</string>
@@ -209,7 +210,9 @@
     <string name="permlab_batteryStats" msgid="7863923071360031652">"změna statistických údajů o baterii"</string>
     <string name="permdesc_batteryStats" msgid="5847319823772230560">"Umožňuje změnu shromážděných statistických údajů o baterii. Není určeno pro běžné aplikace."</string>
     <string name="permlab_backup" msgid="470013022865453920">"ovládání zálohování a obnovy systému"</string>
-    <string name="permdesc_backup" msgid="2305432853944929371">"Umožňuje aplikaci ovládat mechanizmus zálohování a obnovy systému. Není určeno k použití v běžných aplikacích."</string>
+    <string name="permdesc_backup" msgid="4837493065154256525">"Umožňuje aplikaci ovládat systémový mechanizmus pro zálohování a obnovu dat. Není určeno pro běžné aplikace."</string>
+    <string name="permlab_backup_data" msgid="4057625941707926463">"zálohování a obnovení dat aplikace"</string>
+    <string name="permdesc_backup_data" msgid="8274426305151227766">"Umožňuje aplikaci podílet se na systémovém mechanizmu zálohování a obnovení."</string>
     <string name="permlab_internalSystemWindow" msgid="2148563628140193231">"zobrazení nepovolených oken"</string>
     <string name="permdesc_internalSystemWindow" msgid="5895082268284998469">"Umožňuje vytvoření oken, která mají být použita interním systémem uživatelského rozhraní. Běžné aplikace toto nastavení nepoužívají."</string>
     <string name="permlab_systemAlertWindow" msgid="3372321942941168324">"zobrazení upozornění systémové úrovně"</string>
@@ -224,6 +227,8 @@
     <string name="permdesc_readInputState" msgid="5132879321450325445">"Umožňuje aplikacím sledovat, které klávesy používáte, a to i při práci s jinými aplikacemi (například při zadávání hesla). Běžné aplikace by toto nastavení nikdy neměly vyžadovat."</string>
     <string name="permlab_bindInputMethod" msgid="3360064620230515776">"vazba k metodě zadávání dat"</string>
     <string name="permdesc_bindInputMethod" msgid="3734838321027317228">"Umožňuje držiteli vázat se na nejvyšší úroveň rozhraní pro zadávání dat. Běžné aplikace by toto nastavení nikdy neměly využívat."</string>
+    <string name="permlab_bindWallpaper" msgid="8716400279937856462">"vazba na tapetu"</string>
+    <string name="permdesc_bindWallpaper" msgid="5287754520361915347">"Umožňuje držiteli navázat se na nejvyšší úroveň rozhraní tapety. Běžné aplikace by toto oprávnění nikdy neměly potřebovat."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"změna orientace obrazovky"</string>
     <string name="permdesc_setOrientation" msgid="6335814461615851863">"Umožňuje aplikaci kdykoli změnit orientaci obrazovky. Běžné aplikace by toto nastavení nikdy neměly využívat."</string>
     <string name="permlab_signalPersistentProcesses" msgid="4255467255488653854">"odeslání signálů Linux aplikacím"</string>
@@ -253,7 +258,7 @@
     <string name="permlab_writeSettings" msgid="1365523497395143704">"změna globálních nastavení systému"</string>
     <string name="permdesc_writeSettings" msgid="838789419871034696">"Umožňuje aplikaci upravit data nastavení systému. Škodlivé aplikace mohou poškodit konfiguraci vašeho systému."</string>
     <string name="permlab_writeSecureSettings" msgid="204676251876718288">"změny zabezpečených nastavení systému"</string>
-    <string name="permdesc_writeSecureSettings" msgid="4116616249170428132">"Umožňuje aplikaci změnit data zabezpečených nastavení systému. Běžné aplikace toto nastavení nevyužívají."</string>
+    <string name="permdesc_writeSecureSettings" msgid="5497873143539034724">"Umožňuje aplikaci změnit data zabezpečených nastavení systému. Běžné aplikace toto nastavení nevyužívají."</string>
     <string name="permlab_writeGservices" msgid="2149426664226152185">"změna mapy služeb Google"</string>
     <string name="permdesc_writeGservices" msgid="6602362746516676175">"Umožňuje aplikaci změnit mapu služeb Google. Běžné aplikace toto nastavení nevyužívají."</string>
     <string name="permlab_receiveBootCompleted" msgid="7776779842866993377">"automatické spuštění při startu"</string>
@@ -285,7 +290,7 @@
     <string name="permlab_accessSurfaceFlinger" msgid="2363969641792388947">"přístup ke službě SurfaceFlinger"</string>
     <string name="permdesc_accessSurfaceFlinger" msgid="6805241830020733025">"Umožňuje aplikaci používat nízkoúrovňové funkce SurfaceFlinger."</string>
     <string name="permlab_readFrameBuffer" msgid="6690504248178498136">"čtení vyrovnávací paměti snímků"</string>
-    <string name="permdesc_readFrameBuffer" msgid="5777679658669057819">"Umožňuje aplikaci načíst obsah vyrovnávací paměti snímků."</string>
+    <string name="permdesc_readFrameBuffer" msgid="7530020370469942528">"Umožňuje aplikaci číst obsah vyrovnávací paměti snímků."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"změna vašeho nastavení zvuku"</string>
     <string name="permdesc_modifyAudioSettings" msgid="5793461287365991922">"Umožňuje aplikaci změnit globální nastavení zvuku, například hlasitost či směrování."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"nahrání zvuku"</string>
@@ -310,6 +315,8 @@
     <string name="permdesc_callPhone" msgid="3369867353692722456">"Umožňuje aplikaci bez vašeho zásahu volat na telefonní čísla. Škodlivé aplikace mohou na váš telefonní účet připsat neočekávané hovory. Toto nastavení aplikaci neumožňuje volat na tísňové linky."</string>
     <string name="permlab_callPrivileged" msgid="4198349211108497879">"přímé volání na libovolná telefonní čísla"</string>
     <string name="permdesc_callPrivileged" msgid="244405067160028452">"Umožňuje aplikaci bez vašeho zásahu vytočit jakékoli telefonní číslo, včetně čísel tísňového volání. Škodlivé aplikace mohou provádět zbytečná a nezákonná volání na tísňové linky."</string>
+    <string name="permlab_performCdmaProvisioning" msgid="5604848095315421425">"přímo spustit nastavení telefonu CDMA"</string>
+    <string name="permdesc_performCdmaProvisioning" msgid="6457447676108355905">"Umožňuje aplikaci zahájit poskytování CDMA. Škodlivé aplikace mohou poskytování CDMA zahájit samovolně."</string>
     <string name="permlab_locationUpdates" msgid="7785408253364335740">"ovládání oznámení o aktualizaci polohy"</string>
     <string name="permdesc_locationUpdates" msgid="2300018303720930256">"Umožňuje povolit či zakázat aktualizace polohy prostřednictvím bezdrátového připojení. Aplikace toto nastavení obvykle nepoužívají."</string>
     <string name="permlab_checkinProperties" msgid="7855259461268734914">"přístup k vlastnostem Checkin"</string>
@@ -334,8 +341,16 @@
     <string name="permdesc_masterClear" msgid="5033465107545174514">"Umožňuje aplikaci kompletně obnovit systém do továrního nastavení a vymazat všechna data, konfiguraci a nainstalované aplikace."</string>
     <string name="permlab_setTimeZone" msgid="2945079801013077340">"nastavení časového pásma"</string>
     <string name="permdesc_setTimeZone" msgid="1902540227418179364">"Umožňuje aplikaci změnit časové pásmo telefonu."</string>
+    <string name="permlab_accountManagerService" msgid="4829262349691386986">"role služby AccountManagerService"</string>
+    <string name="permdesc_accountManagerService" msgid="6056903274106394752">"Umožňuje aplikaci volat funkce AccountAuthenticator"</string>
     <string name="permlab_getAccounts" msgid="4549918644233460103">"odhalení známých účtů"</string>
     <string name="permdesc_getAccounts" msgid="6839262446413155394">"Umožňuje aplikaci získat seznam účtů v telefonu."</string>
+    <string name="permlab_authenticateAccounts" msgid="3940505577982882450">"role ověřovatele účtu"</string>
+    <string name="permdesc_authenticateAccounts" msgid="4006839406474208874">"Umožňuje aplikaci používat funkce aplikace AccountManager související s ověřováním účtů – včetně vytváření účtů a získávání a nastavování hesel."</string>
+    <string name="permlab_manageAccounts" msgid="4440380488312204365">"správa seznamu účtů"</string>
+    <string name="permdesc_manageAccounts" msgid="8804114016661104517">"Umožňuje aplikaci provádět operace, jako je přidávání nebo odebírání účtů nebo mazání jejich hesel."</string>
+    <string name="permlab_useCredentials" msgid="6401886092818819856">"používání ověřovacích pověření účtu"</string>
+    <string name="permdesc_useCredentials" msgid="7416570544619546974">"Umožňuje aplikaci požadovat ověřovací tokeny."</string>
     <string name="permlab_accessNetworkState" msgid="6865575199464405769">"zobrazení stavu sítě"</string>
     <string name="permdesc_accessNetworkState" msgid="558721128707712766">"Umožňuje aplikaci zobrazit stav všech sítí."</string>
     <string name="permlab_createNetworkSockets" msgid="9121633680349549585">"plný přístup k Internetu"</string>
@@ -390,7 +405,6 @@
     <item msgid="1112044410659011023">"Ostatní"</item>
     <item msgid="2374913952870110618">"Vlastní"</item>
   </string-array>
-    <string name="mobileEmailTypeName" msgid="2858957283716687707">"Mobilní"</string>
   <string-array name="postalAddressTypes">
     <item msgid="6880257626740047286">"Domů"</item>
     <item msgid="5629153956045109251">"Práce"</item>
@@ -418,6 +432,58 @@
     <item msgid="2506857312718630823">"ICQ"</item>
     <item msgid="1648797903785279353">"Jabber"</item>
   </string-array>
+    <string name="phoneTypeCustom" msgid="1644738059053355820">"Vlastní"</string>
+    <string name="phoneTypeHome" msgid="2570923463033985887">"Domů"</string>
+    <string name="phoneTypeMobile" msgid="6501463557754751037">"Mobil"</string>
+    <string name="phoneTypeWork" msgid="8863939667059911633">"Práce"</string>
+    <string name="phoneTypeFaxWork" msgid="3517792160008890912">"Pracovní fax"</string>
+    <string name="phoneTypeFaxHome" msgid="2067265972322971467">"Domácí fax"</string>
+    <string name="phoneTypePager" msgid="7582359955394921732">"Pager"</string>
+    <string name="phoneTypeOther" msgid="1544425847868765990">"Jiné"</string>
+    <string name="phoneTypeCallback" msgid="2712175203065678206">"Zpětné volání"</string>
+    <string name="phoneTypeCar" msgid="8738360689616716982">"Auto"</string>
+    <string name="phoneTypeCompanyMain" msgid="540434356461478916">"Firma (hlavní)"</string>
+    <string name="phoneTypeIsdn" msgid="8022453193171370337">"ISDN"</string>
+    <string name="phoneTypeMain" msgid="6766137010628326916">"Hlavní"</string>
+    <string name="phoneTypeOtherFax" msgid="8587657145072446565">"Jiný fax"</string>
+    <string name="phoneTypeRadio" msgid="4093738079908667513">"Radiotelefon"</string>
+    <string name="phoneTypeTelex" msgid="3367879952476250512">"Telex"</string>
+    <string name="phoneTypeTtyTdd" msgid="8606514378585000044">"Telefon pro sluchově postižené (TTY/TDD)"</string>
+    <string name="phoneTypeWorkMobile" msgid="1311426989184065709">"Pracovní mobil"</string>
+    <string name="phoneTypeWorkPager" msgid="649938731231157056">"Pracovní pager"</string>
+    <string name="phoneTypeAssistant" msgid="5596772636128562884">"Asistent"</string>
+    <string name="phoneTypeMms" msgid="7254492275502768992">"MMS"</string>
+    <string name="eventTypeBirthday" msgid="2813379844211390740">"Narozeniny"</string>
+    <string name="eventTypeAnniversary" msgid="3876779744518284000">"Výročí"</string>
+    <string name="eventTypeOther" msgid="5834288791948564594">"Událost"</string>
+    <string name="emailTypeCustom" msgid="8525960257804213846">"Vlastní"</string>
+    <string name="emailTypeHome" msgid="449227236140433919">"Domů"</string>
+    <string name="emailTypeWork" msgid="3548058059601149973">"Práce"</string>
+    <string name="emailTypeOther" msgid="2923008695272639549">"Jiné"</string>
+    <string name="emailTypeMobile" msgid="119919005321166205">"Mobil"</string>
+    <string name="postalTypeCustom" msgid="8903206903060479902">"Vlastní"</string>
+    <string name="postalTypeHome" msgid="8165756977184483097">"Domů"</string>
+    <string name="postalTypeWork" msgid="5268172772387694495">"Práce"</string>
+    <string name="postalTypeOther" msgid="2726111966623584341">"Jiné"</string>
+    <string name="imTypeCustom" msgid="2074028755527826046">"Vlastní"</string>
+    <string name="imTypeHome" msgid="6241181032954263892">"Domů"</string>
+    <string name="imTypeWork" msgid="1371489290242433090">"Práce"</string>
+    <string name="imTypeOther" msgid="5377007495735915478">"Jiné"</string>
+    <string name="imProtocolCustom" msgid="6919453836618749992">"Vlastní"</string>
+    <string name="imProtocolAim" msgid="7050360612368383417">"AIM"</string>
+    <string name="imProtocolMsn" msgid="144556545420769442">"Windows Live"</string>
+    <string name="imProtocolYahoo" msgid="8271439408469021273">"Yahoo"</string>
+    <string name="imProtocolSkype" msgid="9019296744622832951">"Skype"</string>
+    <string name="imProtocolQq" msgid="8887484379494111884">"QQ"</string>
+    <string name="imProtocolGoogleTalk" msgid="3808393979157698766">"Google Talk"</string>
+    <string name="imProtocolIcq" msgid="1574870433606517315">"ICQ"</string>
+    <string name="imProtocolJabber" msgid="2279917630875771722">"Jabber"</string>
+    <string name="imProtocolNetMeeting" msgid="8287625655986827971">"NetMeeting"</string>
+    <string name="orgTypeWork" msgid="29268870505363872">"Práce"</string>
+    <string name="orgTypeOther" msgid="3951781131570124082">"Jiné"</string>
+    <string name="orgTypeCustom" msgid="225523415372088322">"Vlastní"</string>
+    <string name="contact_status_update_attribution" msgid="5112589886094402795">"pomocí <xliff:g id="SOURCE">%1$s</xliff:g>"</string>
+    <string name="contact_status_update_attribution_with_date" msgid="5945386376369979909">"<xliff:g id="DATE">%1$s</xliff:g> pomocí <xliff:g id="SOURCE">%2$s</xliff:g>"</string>
     <string name="keyguard_password_enter_pin_code" msgid="3731488827218876115">"Zadejte kód PIN"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="1295984114338107718">"Nesprávný kód PIN"</string>
     <string name="keyguard_label_text" msgid="861796461028298424">"Chcete-li telefon odemknout, stiskněte Menu a poté 0."</string>
@@ -432,6 +498,7 @@
     <string name="lockscreen_pattern_wrong" msgid="4817583279053112312">"Zkuste to prosím znovu"</string>
     <string name="lockscreen_plugged_in" msgid="613343852842944435">"Nabíjení (<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>)"</string>
     <string name="lockscreen_charged" msgid="4938930459620989972">"Nabito."</string>
+    <string name="lockscreen_battery_short" msgid="3617549178603354656">"<xliff:g id="NUMBER">%d</xliff:g> <xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="lockscreen_low_battery" msgid="1482873981919249740">"Připojte dobíjecí zařízení."</string>
     <string name="lockscreen_missing_sim_message_short" msgid="7381499217732227295">"Není vložena SIM karta."</string>
     <string name="lockscreen_missing_sim_message" msgid="2186920585695169078">"V telefonu není žádná karta SIM."</string>
@@ -445,12 +512,14 @@
     <string name="lockscreen_failed_attempts_almost_glogin" msgid="3351013842320127827">"<xliff:g id="NUMBER_0">%d</xliff:g>krát jste nesprávně nakreslili své bezpečnostní gesto. Po dalších neúspěšných pokusech (<xliff:g id="NUMBER_1">%d</xliff:g>) budete požádáni o odemčení telefonu pomocí přihlášení do účtu Google."\n\n" Akci prosím opakujte za několik sekund (<xliff:g id="NUMBER_2">%d</xliff:g>)."</string>
     <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6251480343394389665">"Sekundy zbývající do dalšího pokusu: <xliff:g id="NUMBER">%d</xliff:g>."</string>
     <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"Zapomněli jste gesto?"</string>
+    <string name="lockscreen_glogin_forgot_pattern" msgid="2588521501166032747">"Odemčení účtu"</string>
     <string name="lockscreen_glogin_too_many_attempts" msgid="2446246026221678244">"Gesta: Příliš mnoho pokusů"</string>
     <string name="lockscreen_glogin_instructions" msgid="1816635201812207709">"Chcete-li telefon odemknout, přihlaste se pomocí svého účtu Google"</string>
     <string name="lockscreen_glogin_username_hint" msgid="8846881424106484447">"Uživatelské jméno (e-mail)"</string>
     <string name="lockscreen_glogin_password_hint" msgid="5958028383954738528">"Heslo"</string>
     <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"Přihlásit se"</string>
     <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"Neplatné uživatelské jméno nebo heslo."</string>
+    <string name="lockscreen_glogin_checking_password" msgid="6758890536332363322">"Probíhá kontrola..."</string>
     <string name="hour_ampm" msgid="4329881288269772723">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%P</xliff:g>"</string>
     <string name="hour_cap_ampm" msgid="1829009197680861107">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%p</xliff:g>"</string>
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"Vymazat"</string>
@@ -461,8 +530,8 @@
     <string name="battery_status_charging" msgid="756617993998772213">"Nabíjení..."</string>
     <string name="battery_low_title" msgid="7923774589611311406">"Prosím připojte dobíjecí zařízení"</string>
     <string name="battery_low_subtitle" msgid="7388781709819722764">"Baterie je vybitá:"</string>
-    <string name="battery_low_percent_format" msgid="6564958083485073855">"zbývá méně než <xliff:g id="NUMBER">%d%%</xliff:g>."</string>
-    <string name="battery_low_why" msgid="7655196144309694753">"Proč?"</string>
+    <string name="battery_low_percent_format" msgid="696154104579022959">"Zbývá <xliff:g id="NUMBER">%d%%</xliff:g> nebo méně."</string>
+    <string name="battery_low_why" msgid="7279169609518386372">"Využití baterie"</string>
     <string name="factorytest_failed" msgid="5410270329114212041">"Test továrního nastavení se nezdařil"</string>
     <string name="factorytest_not_system" msgid="4435201656767276723">"Test FACTORY_TEST lze provést pouze u balíčků nainstalovaných ve složce /system/app."</string>
     <string name="factorytest_no_action" msgid="872991874799998561">"Nebyl nalezen žádný balíček umožňující test FACTORY_TEST."</string>
@@ -471,6 +540,7 @@
     <string name="js_dialog_title_default" msgid="6961903213729667573">"JavaScript"</string>
     <string name="js_dialog_before_unload" msgid="1901675448179653089">"Chcete opustit tuto stránku?"\n\n"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"Vyberte OK, chcete-li pokračovat, nebo Zrušit, chcete-li na stránce zůstat."</string>
     <string name="save_password_label" msgid="6860261758665825069">"Potvrdit"</string>
+    <string name="double_tap_toast" msgid="1068216937244567247">"Tip: Dvojitým klepnutím můžete zobrazení přiblížit nebo oddálit."</string>
     <string name="permlab_readHistoryBookmarks" msgid="1284843728203412135">"čtení historie a záložek Prohlížeče"</string>
     <string name="permdesc_readHistoryBookmarks" msgid="4981489815467617191">"Umožňuje aplikaci číst všechny navštívené adresy URL a záložky Prohlížeče."</string>
     <string name="permlab_writeHistoryBookmarks" msgid="9009434109836280374">"zápis do historie a záložek Prohlížeče"</string>
@@ -553,9 +623,9 @@
     <item quantity="one" msgid="2178576254385739855">"zítra"</item>
     <item quantity="other" msgid="2973062968038355991">"zbývající počet dní: <xliff:g id="COUNT">%d</xliff:g>"</item>
   </plurals>
-    <string name="preposition_for_date" msgid="4316283606614248634">"%s"</string>
-    <string name="preposition_for_time" msgid="6179700075291054938">"%s"</string>
-    <string name="preposition_for_year" msgid="3852279354896963571">"v roce %s"</string>
+    <string name="preposition_for_date" msgid="9093949757757445117">"dne <xliff:g id="DATE">%s</xliff:g>"</string>
+    <string name="preposition_for_time" msgid="5506831244263083793">"v <xliff:g id="TIME">%s</xliff:g>"</string>
+    <string name="preposition_for_year" msgid="5040395640711867177">"roku <xliff:g id="YEAR">%s</xliff:g>"</string>
     <string name="day" msgid="8144195776058119424">"den"</string>
     <string name="days" msgid="4774547661021344602">"d."</string>
     <string name="hour" msgid="2126771916426189481">"hodina"</string>
@@ -593,8 +663,8 @@
     <string name="copyAll" msgid="2590829068100113057">"Kopírovat vše"</string>
     <string name="paste" msgid="5629880836805036433">"Vložit"</string>
     <string name="copyUrl" msgid="2538211579596067402">"Kopírovat adresu URL"</string>
-    <string name="inputMethod" msgid="7673923508389094672">"Metoda zadávání dat"</string>
-    <string name="addToDictionary" msgid="726256909274177272">"Přidat „%s“ do slovníku"</string>
+    <string name="inputMethod" msgid="1653630062304567879">"Metoda zadávání dat"</string>
+    <string name="addToDictionary" msgid="8793624991686948709">"Přidat slovo „<xliff:g id="WORD">%s</xliff:g>“ do slovníku"</string>
     <string name="editTextMenuTitle" msgid="1672989176958581452">"Úpravy textu"</string>
     <string name="low_internal_storage_view_title" msgid="1399732408701697546">"Málo paměti"</string>
     <string name="low_internal_storage_view_text" msgid="635106544616378836">"V telefonu zbývá málo místa pro ukládání dat."</string>
@@ -626,6 +696,7 @@
     <string name="volume_ringtone" msgid="6885421406845734650">"Hlasitost vyzvánění"</string>
     <string name="volume_music" msgid="5421651157138628171">"Hlasitost médií"</string>
     <string name="volume_music_hint_playing_through_bluetooth" msgid="9165984379394601533">"Přehrávání pomocí rozhraní Bluetooth"</string>
+    <string name="volume_music_hint_silent_ringtone_selected" msgid="6158339745293431194">"Je vybrán tichý vyzváněcí tón"</string>
     <string name="volume_call" msgid="3941680041282788711">"Hlasitost hovoru"</string>
     <string name="volume_bluetooth_call" msgid="2002891926351151534">"Hlasitost příchozích hovorů při připojení Bluetooth"</string>
     <string name="volume_alarm" msgid="1985191616042689100">"Hlasitost budíku"</string>
@@ -669,13 +740,13 @@
     <string name="usb_storage_stop_message" msgid="2390958966725232848">"Před vypnutím úložiště USB se přesvědčte, zda byl hostitel USB odpojen. Úložiště USB vypnete volbou Vypnout."</string>
     <string name="usb_storage_stop_button_mount" msgid="1181858854166273345">"Vypnout"</string>
     <string name="usb_storage_stop_button_unmount" msgid="3774611918660582898">"Zrušit"</string>
-    <string name="usb_storage_stop_error_message" msgid="3917317248440072084">"Při vypínání úložiště USB došlo k problémům. Zkontrolujte, zda byl hostitel USB odpojen, a zkuste to znovu."</string>
+    <string name="usb_storage_stop_error_message" msgid="3746037090369246731">"Při vypínání úložiště USB došlo k problémům. Zkontrolujte, zda byl hostitel USB odpojen, a zkuste to znovu."</string>
     <string name="extmedia_format_title" msgid="8663247929551095854">"Formátovat kartu SD"</string>
     <string name="extmedia_format_message" msgid="3621369962433523619">"Opravdu chcete kartu SD naformátovat? Všechna data na kartě budou ztracena."</string>
     <string name="extmedia_format_button_format" msgid="4131064560127478695">"Formátovat"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Ladění přes rozhraní USB připojeno"</string>
-    <string name="adb_active_notification_message" msgid="4661997077344501389">"K vašemu telefonu je připojen počítač."</string>
-    <string name="select_input_method" msgid="2086499663193509436">"Výběr metody zadávání dat"</string>
+    <string name="adb_active_notification_message" msgid="8470296818270110396">"Vyberte, chcete-li zakázat ladění USB."</string>
+    <string name="select_input_method" msgid="6865512749462072765">"Výběr metody zadávání dat"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" AÁBCČDĎEÉĚFGHCHIÍJKLMNŇOÓPQRŘSŠTŤUÚVWXYÝZŽ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789AÁBCČDĎEÉĚFGHCHIÍJKLMNŇOÓPQRŘSŠTŤUÚVWXYÝZŽ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"kandidáti"</u></string>
@@ -706,4 +777,19 @@
     <string name="create_contact_using" msgid="4947405226788104538">"Vytvořit kontakt"\n"pro <xliff:g id="NUMBER">%s</xliff:g>."</string>
     <string name="accessibility_compound_button_selected" msgid="5612776946036285686">"Zaškrtnuto"</string>
     <string name="accessibility_compound_button_unselected" msgid="8864512895673924091">"Nezaškrtnuto"</string>
+    <string name="grant_credentials_permission_message_desc" msgid="6883276587034335667">"Uvedené aplikace od <xliff:g id="APPLICATION">%2$s</xliff:g> požadují oprávnění přistupovat k přihlašovacím údajům účtu <xliff:g id="ACCOUNT">%1$s</xliff:g>. Chcete toto oprávnění udělit? Pokud je udělíte, vaše odpověď se uloží a tato výzva se již nebude zobrazovat."</string>
+    <string name="grant_credentials_permission_message_with_authtokenlabel_desc" msgid="3159007601893584687">"Uvedené aplikace požadují od <xliff:g id="APPLICATION">%3$s</xliff:g> oprávnění přistupovat k přihlašovacím údajům (typ: <xliff:g id="TYPE">%1$s</xliff:g>) účtu <xliff:g id="ACCOUNT">%2$s</xliff:g>. Chcete toto oprávnění udělit? Pokud je udělíte, vaše odpověď se uloží a tato výzva se již nebude zobrazovat."</string>
+    <string name="allow" msgid="7225948811296386551">"Povolit"</string>
+    <string name="deny" msgid="2081879885755434506">"Odepřít"</string>
+    <string name="permission_request_notification_title" msgid="5390555465778213840">"Požadováno oprávnění"</string>
+    <string name="permission_request_notification_with_subtitle" msgid="4325409589686688000">"Požadováno oprávnění"\n"pro účet <xliff:g id="ACCOUNT">%s</xliff:g>"</string>
+    <string name="input_method_binding_label" msgid="1283557179944992649">"Metoda zadávání dat"</string>
+    <string name="sync_binding_label" msgid="3687969138375092423">"Synchronizace"</string>
+    <string name="accessibility_binding_label" msgid="4148120742096474641">"Usnadnění"</string>
+    <string name="wallpaper_binding_label" msgid="1240087844304687662">"Tapeta"</string>
+    <string name="chooser_wallpaper" msgid="7873476199295190279">"Změnit tapetu"</string>
+    <string name="pptp_vpn_description" msgid="2688045385181439401">"Protokol PPTP (Point-to-Point Tunneling Protocol)"</string>
+    <string name="l2tp_vpn_description" msgid="3750692169378923304">"Protokol L2TP (Layer 2 Tunneling Protocol)"</string>
+    <string name="l2tp_ipsec_psk_vpn_description" msgid="3945043564008303239">"Síť VPN L2TP/IPSec s předsdíleným klíčem"</string>
+    <string name="l2tp_ipsec_crt_vpn_description" msgid="5382714073103653577">"Síť VPN L2TP/IPSec s certifikátem"</string>
 </resources>

@@ -65,49 +65,61 @@ class CallbackProxy extends Handler {
     // Keep track of multiple progress updates.
     private boolean mProgressUpdatePending;
     // Keep track of the last progress amount.
-    private volatile int mLatestProgress;
+    // Start with 100 to indicate it is not in load for the empty page.
+    private volatile int mLatestProgress = 100;
     // Back/Forward list
     private final WebBackForwardList mBackForwardList;
     // Used to call startActivity during url override.
     private final Context mContext;
 
     // Message Ids
-    private static final int PAGE_STARTED         = 100;
-    private static final int RECEIVED_ICON        = 101;
-    private static final int RECEIVED_TITLE       = 102;
-    private static final int OVERRIDE_URL         = 103;
-    private static final int AUTH_REQUEST         = 104;
-    private static final int SSL_ERROR            = 105;
-    private static final int PROGRESS             = 106;
-    private static final int UPDATE_VISITED       = 107;
-    private static final int LOAD_RESOURCE        = 108;
-    private static final int CREATE_WINDOW        = 109;
-    private static final int CLOSE_WINDOW         = 110;
-    private static final int SAVE_PASSWORD        = 111;
-    private static final int JS_ALERT             = 112;
-    private static final int JS_CONFIRM           = 113;
-    private static final int JS_PROMPT            = 114;
-    private static final int JS_UNLOAD            = 115;
-    private static final int ASYNC_KEYEVENTS      = 116;
-    private static final int TOO_MANY_REDIRECTS   = 117;
-    private static final int DOWNLOAD_FILE        = 118;
-    private static final int REPORT_ERROR         = 119;
-    private static final int RESEND_POST_DATA     = 120;
-    private static final int PAGE_FINISHED        = 121;
-    private static final int REQUEST_FOCUS        = 122;
-    private static final int SCALE_CHANGED        = 123;
-    private static final int RECEIVED_CERTIFICATE = 124;
-    private static final int SWITCH_OUT_HISTORY   = 125;
-    private static final int JS_TIMEOUT           = 126;
+    private static final int PAGE_STARTED                        = 100;
+    private static final int RECEIVED_ICON                       = 101;
+    private static final int RECEIVED_TITLE                      = 102;
+    private static final int OVERRIDE_URL                        = 103;
+    private static final int AUTH_REQUEST                        = 104;
+    private static final int SSL_ERROR                           = 105;
+    private static final int PROGRESS                            = 106;
+    private static final int UPDATE_VISITED                      = 107;
+    private static final int LOAD_RESOURCE                       = 108;
+    private static final int CREATE_WINDOW                       = 109;
+    private static final int CLOSE_WINDOW                        = 110;
+    private static final int SAVE_PASSWORD                       = 111;
+    private static final int JS_ALERT                            = 112;
+    private static final int JS_CONFIRM                          = 113;
+    private static final int JS_PROMPT                           = 114;
+    private static final int JS_UNLOAD                           = 115;
+    private static final int ASYNC_KEYEVENTS                     = 116;
+    private static final int TOO_MANY_REDIRECTS                  = 117;
+    private static final int DOWNLOAD_FILE                       = 118;
+    private static final int REPORT_ERROR                        = 119;
+    private static final int RESEND_POST_DATA                    = 120;
+    private static final int PAGE_FINISHED                       = 121;
+    private static final int REQUEST_FOCUS                       = 122;
+    private static final int SCALE_CHANGED                       = 123;
+    private static final int RECEIVED_CERTIFICATE                = 124;
+    private static final int SWITCH_OUT_HISTORY                  = 125;
+    private static final int EXCEEDED_DATABASE_QUOTA             = 126;
+    private static final int REACHED_APPCACHE_MAXSIZE            = 127;
+    private static final int JS_TIMEOUT                          = 128;
+    private static final int ADD_MESSAGE_TO_CONSOLE              = 129;
+    private static final int GEOLOCATION_PERMISSIONS_SHOW_PROMPT = 130;
+    private static final int GEOLOCATION_PERMISSIONS_HIDE_PROMPT = 131;
+    private static final int RECEIVED_TOUCH_ICON_URL             = 132;
+    private static final int GET_VISITED_HISTORY                 = 133;
 
     // Message triggered by the client to resume execution
-    private static final int NOTIFY               = 200;
+    private static final int NOTIFY                              = 200;
 
     // Result transportation object for returning results across thread
     // boundaries.
-    private class ResultTransport<E> {
+    private static class ResultTransport<E> {
         // Private result object
         private E mResult;
+
+        public ResultTransport(E defaultResult) {
+            mResult = defaultResult;
+        }
 
         public synchronized void setResult(E result) {
             mResult = result;
@@ -142,6 +154,14 @@ class CallbackProxy extends Handler {
      */
     public void setWebChromeClient(WebChromeClient client) {
         mWebChromeClient = client;
+    }
+
+    /**
+     * Get the WebChromeClient.
+     * @return the current WebChromeClient instance.
+     */
+    public WebChromeClient getWebChromeClient() {
+       return mWebChromeClient;
     }
 
     /**
@@ -226,6 +246,13 @@ class CallbackProxy extends Handler {
             case RECEIVED_ICON:
                 if (mWebChromeClient != null) {
                     mWebChromeClient.onReceivedIcon(mWebView, (Bitmap) msg.obj);
+                }
+                break;
+
+            case RECEIVED_TOUCH_ICON_URL:
+                if (mWebChromeClient != null) {
+                    mWebChromeClient.onReceivedTouchIconUrl(mWebView,
+                            (String) msg.obj, msg.arg1 == 1);
                 }
                 break;
 
@@ -386,6 +413,63 @@ class CallbackProxy extends Handler {
                 if (mWebViewClient != null) {
                     mWebViewClient.onUnhandledKeyEvent(mWebView,
                             (KeyEvent) msg.obj);
+                }
+                break;
+
+            case EXCEEDED_DATABASE_QUOTA:
+                if (mWebChromeClient != null) {
+                    HashMap<String, Object> map =
+                            (HashMap<String, Object>) msg.obj;
+                    String databaseIdentifier =
+                            (String) map.get("databaseIdentifier");
+                    String url = (String) map.get("url");
+                    long currentQuota =
+                            ((Long) map.get("currentQuota")).longValue();
+                    long totalUsedQuota =
+                            ((Long) map.get("totalUsedQuota")).longValue();
+                    long estimatedSize =
+                            ((Long) map.get("estimatedSize")).longValue();
+                    WebStorage.QuotaUpdater quotaUpdater =
+                        (WebStorage.QuotaUpdater) map.get("quotaUpdater");
+
+                    mWebChromeClient.onExceededDatabaseQuota(url,
+                            databaseIdentifier, currentQuota, estimatedSize,
+                            totalUsedQuota, quotaUpdater);
+                }
+                break;
+
+            case REACHED_APPCACHE_MAXSIZE:
+                if (mWebChromeClient != null) {
+                    HashMap<String, Object> map =
+                            (HashMap<String, Object>) msg.obj;
+                    long spaceNeeded =
+                            ((Long) map.get("spaceNeeded")).longValue();
+                    long totalUsedQuota =
+                        ((Long) map.get("totalUsedQuota")).longValue();
+                    WebStorage.QuotaUpdater quotaUpdater =
+                        (WebStorage.QuotaUpdater) map.get("quotaUpdater");
+
+                    mWebChromeClient.onReachedMaxAppCacheSize(spaceNeeded,
+                            totalUsedQuota, quotaUpdater);
+                }
+                break;
+
+            case GEOLOCATION_PERMISSIONS_SHOW_PROMPT:
+                if (mWebChromeClient != null) {
+                    HashMap<String, Object> map =
+                            (HashMap<String, Object>) msg.obj;
+                    String origin = (String) map.get("origin");
+                    GeolocationPermissions.Callback callback =
+                            (GeolocationPermissions.Callback)
+                            map.get("callback");
+                    mWebChromeClient.onGeolocationPermissionsShowPrompt(origin,
+                            callback);
+                }
+                break;
+
+            case GEOLOCATION_PERMISSIONS_HIDE_PROMPT:
+                if (mWebChromeClient != null) {
+                    mWebChromeClient.onGeolocationPermissionsHidePrompt();
                 }
                 break;
 
@@ -563,6 +647,19 @@ class CallbackProxy extends Handler {
             case SWITCH_OUT_HISTORY:
                 mWebView.switchOutDrawHistory();
                 break;
+
+            case ADD_MESSAGE_TO_CONSOLE:
+                String message = msg.getData().getString("message");
+                String sourceID = msg.getData().getString("sourceID");
+                int lineNumber = msg.getData().getInt("lineNumber");
+                mWebChromeClient.addMessageToConsole(message, lineNumber, sourceID);
+                break;
+
+            case GET_VISITED_HISTORY:
+                if (mWebChromeClient != null) {
+                    mWebChromeClient.getVisitedHistory((ValueCallback<String[]>)msg.obj);
+                }
+                break;
         }
     }
 
@@ -605,7 +702,40 @@ class CallbackProxy extends Handler {
     //--------------------------------------------------------------------------
 
     // Performance probe
+    private static final boolean PERF_PROBE = false;
     private long mWebCoreThreadTime;
+    private long mWebCoreIdleTime;
+
+    /*
+     * If PERF_PROBE is true, this block needs to be added to MessageQueue.java.
+     * startWait() and finishWait() should be called before and after wait().
+
+    private WaitCallback mWaitCallback = null;
+    public static interface WaitCallback {
+        void startWait();
+        void finishWait();
+    }
+    public final void setWaitCallback(WaitCallback callback) {
+        mWaitCallback = callback;
+    }
+    */
+
+    // un-comment this block if PERF_PROBE is true
+    /*
+    private IdleCallback mIdleCallback = new IdleCallback();
+
+    private final class IdleCallback implements MessageQueue.WaitCallback {
+        private long mStartTime = 0;
+
+        public void finishWait() {
+            mWebCoreIdleTime += SystemClock.uptimeMillis() - mStartTime;
+        }
+
+        public void startWait() {
+            mStartTime = SystemClock.uptimeMillis();
+        }
+    }
+    */
 
     public void onPageStarted(String url, Bitmap favicon) {
         // Do an unsynchronized quick check to avoid posting if no callback has
@@ -614,9 +744,12 @@ class CallbackProxy extends Handler {
             return;
         }
         // Performance probe
-        if (false) {
+        if (PERF_PROBE) {
             mWebCoreThreadTime = SystemClock.currentThreadTimeMillis();
+            mWebCoreIdleTime = 0;
             Network.getInstance(mContext).startTiming();
+            // un-comment this if PERF_PROBE is true
+//            Looper.myQueue().setWaitCallback(mIdleCallback);
         }
         Message msg = obtainMessage(PAGE_STARTED);
         msg.obj = favicon;
@@ -631,10 +764,12 @@ class CallbackProxy extends Handler {
             return;
         }
         // Performance probe
-        if (false) {
+        if (PERF_PROBE) {
+            // un-comment this if PERF_PROBE is true
+//            Looper.myQueue().setWaitCallback(null);
             Log.d("WebCore", "WebCore thread used " + 
                     (SystemClock.currentThreadTimeMillis() - mWebCoreThreadTime)
-                    + " ms");
+                    + " ms and idled " + mWebCoreIdleTime + " ms");
             Network.getInstance(mContext).stopTiming();
         }
         Message msg = obtainMessage(PAGE_FINISHED, url);
@@ -693,7 +828,7 @@ class CallbackProxy extends Handler {
     public boolean shouldOverrideUrlLoading(String url) {
         // We have a default behavior if no client exists so always send the
         // message.
-        ResultTransport<Boolean> res = new ResultTransport<Boolean>();
+        ResultTransport<Boolean> res = new ResultTransport<Boolean>(false);
         Message msg = obtainMessage(OVERRIDE_URL);
         msg.getData().putString("url", url);
         msg.obj = res;
@@ -834,7 +969,7 @@ class CallbackProxy extends Handler {
             String password, Message resumeMsg) {
         // resumeMsg should be null at this point because we want to create it
         // within the CallbackProxy.
-        if (WebView.DEBUG) {
+        if (DebugFlags.CALLBACK_PROXY) {
             junit.framework.Assert.assertNull(resumeMsg);
         }
         resumeMsg = obtainMessage(NOTIFY);
@@ -939,6 +1074,24 @@ class CallbackProxy extends Handler {
         sendMessage(obtainMessage(RECEIVED_ICON, icon));
     }
 
+    /* package */ void onReceivedTouchIconUrl(String url, boolean precomposed) {
+        // We should have a current item but we do not want to crash so check
+        // for null.
+        WebHistoryItem i = mBackForwardList.getCurrentItem();
+        if (i != null) {
+            if (precomposed || i.getTouchIconUrl() != null) {
+                i.setTouchIconUrl(url);
+            }
+        }
+        // Do an unsynchronized quick check to avoid posting if no callback has
+        // been set.
+        if (mWebChromeClient == null) {
+            return;
+        }
+        sendMessage(obtainMessage(RECEIVED_TOUCH_ICON_URL,
+                precomposed ? 1 : 0, 0, url));
+    }
+
     public void onReceivedTitle(String title) {
         // Do an unsynchronized quick check to avoid posting if no callback has
         // been set.
@@ -1037,8 +1190,124 @@ class CallbackProxy extends Handler {
     }
 
     /**
-     * @hide pending API council approval
+     * Called by WebViewCore to inform the Java side that the current origin
+     * has overflowed it's database quota. Called in the WebCore thread so
+     * posts a message to the UI thread that will prompt the WebChromeClient
+     * for what to do. On return back to C++ side, the WebCore thread will
+     * sleep pending a new quota value.
+     * @param url The URL that caused the quota overflow.
+     * @param databaseIdentifier The identifier of the database that the
+     *     transaction that caused the overflow was running on.
+     * @param currentQuota The current quota the origin is allowed.
+     * @param estimatedSize The estimated size of the database.
+     * @param totalUsedQuota is the sum of all origins' quota.
+     * @param quotaUpdater An instance of a class encapsulating a callback
+     *     to WebViewCore to run when the decision to allow or deny more
+     *     quota has been made.
      */
+    public void onExceededDatabaseQuota(
+            String url, String databaseIdentifier, long currentQuota,
+            long estimatedSize, long totalUsedQuota,
+            WebStorage.QuotaUpdater quotaUpdater) {
+        if (mWebChromeClient == null) {
+            quotaUpdater.updateQuota(currentQuota);
+            return;
+        }
+
+        Message exceededQuota = obtainMessage(EXCEEDED_DATABASE_QUOTA);
+        HashMap<String, Object> map = new HashMap();
+        map.put("databaseIdentifier", databaseIdentifier);
+        map.put("url", url);
+        map.put("currentQuota", currentQuota);
+        map.put("estimatedSize", estimatedSize);
+        map.put("totalUsedQuota", totalUsedQuota);
+        map.put("quotaUpdater", quotaUpdater);
+        exceededQuota.obj = map;
+        sendMessage(exceededQuota);
+    }
+
+    /**
+     * Called by WebViewCore to inform the Java side that the appcache has
+     * exceeded its max size.
+     * @param spaceNeeded is the amount of disk space that would be needed
+     * in order for the last appcache operation to succeed.
+     * @param totalUsedQuota is the sum of all origins' quota.
+     * @param quotaUpdater An instance of a class encapsulating a callback
+     * to WebViewCore to run when the decision to allow or deny a bigger
+     * app cache size has been made.
+     */
+    public void onReachedMaxAppCacheSize(long spaceNeeded,
+            long totalUsedQuota, WebStorage.QuotaUpdater quotaUpdater) {
+        if (mWebChromeClient == null) {
+            quotaUpdater.updateQuota(0);
+            return;
+        }
+
+        Message msg = obtainMessage(REACHED_APPCACHE_MAXSIZE);
+        HashMap<String, Object> map = new HashMap();
+        map.put("spaceNeeded", spaceNeeded);
+        map.put("totalUsedQuota", totalUsedQuota);
+        map.put("quotaUpdater", quotaUpdater);
+        msg.obj = map;
+        sendMessage(msg);
+    }
+
+    /**
+     * Called by WebViewCore to instruct the browser to display a prompt to ask
+     * the user to set the Geolocation permission state for the given origin.
+     * @param origin The origin requesting Geolocation permsissions.
+     * @param callback The callback to call once a permission state has been
+     *     obtained.
+     */
+    public void onGeolocationPermissionsShowPrompt(String origin,
+            GeolocationPermissions.Callback callback) {
+        if (mWebChromeClient == null) {
+            return;
+        }
+
+        Message showMessage =
+                obtainMessage(GEOLOCATION_PERMISSIONS_SHOW_PROMPT);
+        HashMap<String, Object> map = new HashMap();
+        map.put("origin", origin);
+        map.put("callback", callback);
+        showMessage.obj = map;
+        sendMessage(showMessage);
+    }
+
+    /**
+     * Called by WebViewCore to instruct the browser to hide the Geolocation
+     * permissions prompt.
+     */
+    public void onGeolocationPermissionsHidePrompt() {
+        if (mWebChromeClient == null) {
+            return;
+        }
+
+        Message hideMessage = obtainMessage(GEOLOCATION_PERMISSIONS_HIDE_PROMPT);
+        sendMessage(hideMessage);
+    }
+
+    /**
+     * Called by WebViewCore when we have a message to be added to the JavaScript
+     * error console. Sends a message to the Java side with the details.
+     * @param message The message to add to the console.
+     * @param lineNumber The lineNumber of the source file on which the error
+     *     occurred.
+     * @param sourceID The filename of the source file in which the error
+     *     occurred.
+     */
+    public void addMessageToConsole(String message, int lineNumber, String sourceID) {
+        if (mWebChromeClient == null) {
+            return;
+        }
+
+        Message msg = obtainMessage(ADD_MESSAGE_TO_CONSOLE);
+        msg.getData().putString("message", message);
+        msg.getData().putString("sourceID", sourceID);
+        msg.getData().putInt("lineNumber", lineNumber);
+        sendMessage(msg);
+    }
+
     public boolean onJsTimeout() {
         //always interrupt timedout JS by default
         if (mWebChromeClient == null) {
@@ -1056,5 +1325,14 @@ class CallbackProxy extends Handler {
             }
         }
         return result.getResult();
+    }
+
+    public void getVisitedHistory(ValueCallback<String[]> callback) {
+        if (mWebChromeClient == null) {
+            return;
+        }
+        Message msg = obtainMessage(GET_VISITED_HISTORY);
+        msg.obj = callback;
+        sendMessage(msg);
     }
 }

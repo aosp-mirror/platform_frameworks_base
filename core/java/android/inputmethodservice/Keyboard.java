@@ -142,7 +142,7 @@ public class Keyboard {
     private int[][] mGridNeighbors;
     private int mProximityThreshold;
     /** Number of key widths from current touch point to search for nearest keys. */
-    private static float SEARCH_DISTANCE = 1.4f;
+    private static float SEARCH_DISTANCE = 1.8f;
 
     /**
      * Container for keys in the keyboard. All keys in a row are at the same Y-coordinate. 

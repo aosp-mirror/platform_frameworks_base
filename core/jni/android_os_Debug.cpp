@@ -200,12 +200,13 @@ static void load_maps(int pid, stats_t* stats)
     fclose(fp);
 }
 
-static void android_os_Debug_getDirtyPages(JNIEnv *env, jobject clazz, jobject object)
+static void android_os_Debug_getDirtyPagesPid(JNIEnv *env, jobject clazz,
+        jint pid, jobject object)
 {
     stats_t stats;
     memset(&stats, 0, sizeof(stats_t));
     
-    load_maps(getpid(), &stats);
+    load_maps(pid, &stats);
 
     env->SetIntField(object, dalvikPss_field, stats.dalvikPss);
     env->SetIntField(object, dalvikPrivateDirty_field, stats.dalvikPrivateDirty);
@@ -218,6 +219,11 @@ static void android_os_Debug_getDirtyPages(JNIEnv *env, jobject clazz, jobject o
     env->SetIntField(object, otherPss_field, stats.otherPss);
     env->SetIntField(object, otherPrivateDirty_field, stats.otherPrivateDirty);
     env->SetIntField(object, otherSharedDirty_field, stats.otherSharedDirty);
+}
+
+static void android_os_Debug_getDirtyPages(JNIEnv *env, jobject clazz, jobject object)
+{
+    android_os_Debug_getDirtyPagesPid(env, clazz, getpid(), object);
 }
 
 static jint read_binder_stat(const char* stat)
@@ -281,6 +287,8 @@ static JNINativeMethod gMethods[] = {
             (void*) android_os_Debug_getNativeHeapFreeSize },
     { "getMemoryInfo",          "(Landroid/os/Debug$MemoryInfo;)V",
             (void*) android_os_Debug_getDirtyPages },
+    { "getMemoryInfo",          "(ILandroid/os/Debug$MemoryInfo;)V",
+            (void*) android_os_Debug_getDirtyPagesPid },
     { "getBinderSentTransactions", "()I",
             (void*) android_os_Debug_getBinderSentTransactions },
     { "getBinderReceivedTransactions", "()I",

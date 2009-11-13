@@ -220,6 +220,8 @@ public class GridView extends AbsListView {
                 selectedView = temp;
             }
 
+            // mReferenceView will change with each call to makeRow()
+            // do not cache in a local variable outside of this loop
             nextTop = mReferenceView.getBottom() + mVerticalSpacing;
 
             pos += mNumColumns;
@@ -233,7 +235,8 @@ public class GridView extends AbsListView {
         final int horizontalSpacing = mHorizontalSpacing;
 
         int last;
-        int nextLeft = mListPadding.left + ((mStretchMode == STRETCH_SPACING_UNIFORM) ? horizontalSpacing : 0);
+        int nextLeft = mListPadding.left +
+                ((mStretchMode == STRETCH_SPACING_UNIFORM) ? horizontalSpacing : 0);
 
         if (!mStackFromBottom) {
             last = Math.min(startPos + mNumColumns, mItemCount);
@@ -252,16 +255,14 @@ public class GridView extends AbsListView {
         final boolean inClick = touchModeDrawsInPressedState();
         final int selectedPosition = mSelectedPosition;
 
-        mReferenceView = null;
-
+        View child = null;
         for (int pos = startPos; pos < last; pos++) {
             // is this the selected item?
             boolean selected = pos == selectedPosition;
             // does the list view have focus or contain focus
 
             final int where = flow ? -1 : pos - startPos;
-            final View child = makeAndAddView(pos, y, flow, nextLeft, selected, where);
-            mReferenceView = child;
+            child = makeAndAddView(pos, y, flow, nextLeft, selected, where);
 
             nextLeft += columnWidth;
             if (pos < last - 1) {
@@ -273,6 +274,8 @@ public class GridView extends AbsListView {
             }
         }
 
+        mReferenceView = child;
+        
         if (selectedView != null) {
             mReferenceViewInSelectedRow = mReferenceView;
         }
@@ -465,6 +468,11 @@ public class GridView extends AbsListView {
         mFirstPosition = motionRowStart;
 
         final View referenceView = mReferenceView;
+        // We didn't have anything to layout, bail out
+        if (referenceView == null) {
+            return null;
+        }
+
         final int verticalSpacing = mVerticalSpacing;
 
         View above;
@@ -1148,9 +1156,12 @@ public class GridView extends AbsListView {
             if (sel != null) {
                positionSelector(sel);
                mSelectedTop = sel.getTop();
+            } else if (mTouchMode > TOUCH_MODE_DOWN && mTouchMode < TOUCH_MODE_SCROLL) {
+                View child = getChildAt(mMotionPosition - mFirstPosition);
+                if (child != null) positionSelector(child);                
             } else {
-               mSelectedTop = 0;
-               mSelectorRect.setEmpty();
+                mSelectedTop = 0;
+                mSelectorRect.setEmpty();
             }
 
             mLayoutMode = LAYOUT_NORMAL;
@@ -1231,8 +1242,12 @@ public class GridView extends AbsListView {
     private void setupChild(View child, int position, int y, boolean flow, int childrenLeft,
             boolean selected, boolean recycled, int where) {
         boolean isSelected = selected && shouldShowSelector();
-
         final boolean updateChildSelected = isSelected != child.isSelected();
+        final int mode = mTouchMode;
+        final boolean isPressed = mode > TOUCH_MODE_DOWN && mode < TOUCH_MODE_SCROLL &&
+                mMotionPosition == position;
+        final boolean updateChildPressed = isPressed != child.isPressed();
+        
         boolean needToMeasure = !recycled || updateChildSelected || child.isLayoutRequested();
 
         // Respect layout params that are already in the view. Otherwise make
@@ -1255,6 +1270,10 @@ public class GridView extends AbsListView {
             if (isSelected) {
                 requestFocus();
             }
+        }
+
+        if (updateChildPressed) {
+            child.setPressed(isPressed);
         }
 
         if (needToMeasure) {
@@ -1329,8 +1348,23 @@ public class GridView extends AbsListView {
      */
     @Override
     void setSelectionInt(int position) {
+        int previousSelectedPosition = mNextSelectedPosition;
+
         setNextSelectedPositionInt(position);
         layoutChildren();
+        
+        final int next = mStackFromBottom ? mItemCount - 1  - mNextSelectedPosition : 
+            mNextSelectedPosition;
+        final int previous = mStackFromBottom ? mItemCount - 1
+                - previousSelectedPosition : previousSelectedPosition;
+
+        final int nextRow = next / mNumColumns;
+        final int previousRow = previous / mNumColumns;
+
+        if (nextRow != previousRow) {
+            awakenScrollBars();
+        }
+
     }
 
     @Override
@@ -1460,6 +1494,7 @@ public class GridView extends AbsListView {
         if (nextPage >= 0) {
             setSelectionInt(nextPage);
             invokeOnItemScrollListener();
+            awakenScrollBars();
             return true;
         }
 
@@ -1485,6 +1520,10 @@ public class GridView extends AbsListView {
             setSelectionInt(mItemCount - 1);
             invokeOnItemScrollListener();
             moved = true;
+        }
+        
+        if (moved) {
+            awakenScrollBars();
         }
 
         return moved;
@@ -1552,6 +1591,10 @@ public class GridView extends AbsListView {
             invokeOnItemScrollListener();
         }
 
+        if (moved) {
+            awakenScrollBars();
+        }
+        
         return moved;
     }
 

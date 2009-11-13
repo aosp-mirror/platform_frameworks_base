@@ -26,6 +26,7 @@ import android.content.pm.ServiceInfo;
 import android.content.res.Configuration;
 import android.os.Binder;
 import android.os.Bundle;
+import android.os.Debug;
 import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.IBinder;
@@ -206,8 +207,14 @@ public abstract class ApplicationThreadNative extends Binder
             data.enforceInterface(IApplicationThread.descriptor);
             IBinder token = data.readStrongBinder();
             int startId = data.readInt();
-            Intent args = Intent.CREATOR.createFromParcel(data);
-            scheduleServiceArgs(token, startId, args);
+            int fl = data.readInt();
+            Intent args;
+            if (data.readInt() != 0) {
+                args = Intent.CREATOR.createFromParcel(data);
+            } else {
+                args = null;
+            }
+            scheduleServiceArgs(token, startId, fl, args);
             return true;
         }
 
@@ -248,6 +255,13 @@ public abstract class ApplicationThreadNative extends Binder
         {
             data.enforceInterface(IApplicationThread.descriptor);
             scheduleExit();
+            return true;
+        }
+
+        case SCHEDULE_SUICIDE_TRANSACTION:
+        {
+            data.enforceInterface(IApplicationThread.descriptor);
+            scheduleSuicide();
             return true;
         }
 
@@ -303,8 +317,9 @@ public abstract class ApplicationThreadNative extends Binder
             String dataStr = data.readString();
             Bundle extras = data.readBundle();
             boolean ordered = data.readInt() != 0;
+            boolean sticky = data.readInt() != 0;
             scheduleRegisteredReceiver(receiver, intent,
-                    resultCode, dataStr, extras, ordered);
+                    resultCode, dataStr, extras, ordered, sticky);
             return true;
         }
 
@@ -362,6 +377,16 @@ public abstract class ApplicationThreadNative extends Binder
             data.enforceInterface(IApplicationThread.descriptor);
             ApplicationInfo appInfo = ApplicationInfo.CREATOR.createFromParcel(data);
             scheduleDestroyBackupAgent(appInfo);
+            return true;
+        }
+
+        case GET_MEMORY_INFO_TRANSACTION:
+        {
+            data.enforceInterface(IApplicationThread.descriptor);
+            Debug.MemoryInfo mi = new Debug.MemoryInfo();
+            getMemoryInfo(mi);
+            reply.writeNoException();
+            mi.writeToParcel(reply, 0);
             return true;
         }
         }
@@ -524,7 +549,8 @@ class ApplicationThreadProxy implements IApplicationThread {
         data.writeInterfaceToken(IApplicationThread.descriptor);
         app.writeToParcel(data, 0);
         data.writeInt(backupMode);
-        mRemote.transact(SCHEDULE_CREATE_BACKUP_AGENT_TRANSACTION, data, null, 0);
+        mRemote.transact(SCHEDULE_CREATE_BACKUP_AGENT_TRANSACTION, data, null,
+                IBinder.FLAG_ONEWAY);
         data.recycle();
     }
 
@@ -532,7 +558,8 @@ class ApplicationThreadProxy implements IApplicationThread {
         Parcel data = Parcel.obtain();
         data.writeInterfaceToken(IApplicationThread.descriptor);
         app.writeToParcel(data, 0);
-        mRemote.transact(SCHEDULE_DESTROY_BACKUP_AGENT_TRANSACTION, data, null, 0);
+        mRemote.transact(SCHEDULE_DESTROY_BACKUP_AGENT_TRANSACTION, data, null,
+                IBinder.FLAG_ONEWAY);
         data.recycle();
     }
     
@@ -571,12 +598,18 @@ class ApplicationThreadProxy implements IApplicationThread {
     }
 
     public final void scheduleServiceArgs(IBinder token, int startId,
-	    Intent args) throws RemoteException {
+	    int flags, Intent args) throws RemoteException {
         Parcel data = Parcel.obtain();
         data.writeInterfaceToken(IApplicationThread.descriptor);
         data.writeStrongBinder(token);
         data.writeInt(startId);
-        args.writeToParcel(data, 0);
+        data.writeInt(flags);
+        if (args != null) {
+            data.writeInt(1);
+            args.writeToParcel(data, 0);
+        } else {
+            data.writeInt(0);
+        }
         mRemote.transact(SCHEDULE_SERVICE_ARGS_TRANSACTION, data, null,
                 IBinder.FLAG_ONEWAY);
         data.recycle();
@@ -627,7 +660,15 @@ class ApplicationThreadProxy implements IApplicationThread {
                 IBinder.FLAG_ONEWAY);
         data.recycle();
     }
-    
+
+    public final void scheduleSuicide() throws RemoteException {
+        Parcel data = Parcel.obtain();
+        data.writeInterfaceToken(IApplicationThread.descriptor);
+        mRemote.transact(SCHEDULE_SUICIDE_TRANSACTION, data, null,
+                IBinder.FLAG_ONEWAY);
+        data.recycle();
+    }
+
     public final void requestThumbnail(IBinder token)
             throws RemoteException {
         Parcel data = Parcel.obtain();
@@ -676,7 +717,7 @@ class ApplicationThreadProxy implements IApplicationThread {
     }
     
     public void scheduleRegisteredReceiver(IIntentReceiver receiver, Intent intent,
-            int resultCode, String dataStr, Bundle extras, boolean ordered)
+            int resultCode, String dataStr, Bundle extras, boolean ordered, boolean sticky)
             throws RemoteException {
         Parcel data = Parcel.obtain();
         data.writeInterfaceToken(IApplicationThread.descriptor);
@@ -686,6 +727,7 @@ class ApplicationThreadProxy implements IApplicationThread {
         data.writeString(dataStr);
         data.writeBundle(extras);
         data.writeInt(ordered ? 1 : 0);
+        data.writeInt(sticky ? 1 : 0);
         mRemote.transact(SCHEDULE_REGISTERED_RECEIVER_TRANSACTION, data, null,
                 IBinder.FLAG_ONEWAY);
         data.recycle();
@@ -741,6 +783,17 @@ class ApplicationThreadProxy implements IApplicationThread {
         mRemote.transact(SET_SCHEDULING_GROUP_TRANSACTION, data, null,
                 IBinder.FLAG_ONEWAY);
         data.recycle();
+    }
+    
+    public void getMemoryInfo(Debug.MemoryInfo outInfo) throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IApplicationThread.descriptor);
+        mRemote.transact(GET_MEMORY_INFO_TRANSACTION, data, reply, 0);
+        reply.readException();
+        outInfo.readFromParcel(reply);
+        data.recycle();
+        reply.recycle();
     }
 }
 

@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "SurfaceFlinger"
-
 #include <assert.h>
 #include <errno.h>
 #include <stdlib.h>

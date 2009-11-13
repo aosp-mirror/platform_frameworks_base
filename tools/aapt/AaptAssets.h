@@ -15,7 +15,7 @@
 #include <utils/String8.h>
 #include <utils/Vector.h>
 #include <utils/RefBase.h>
-#include <utils/ZipFile.h>
+#include "ZipFile.h"
 
 #include "Bundle.h"
 #include "SourcePos.h"
@@ -37,6 +37,7 @@ enum {
     AXIS_TOUCHSCREEN,
     AXIS_KEYSHIDDEN,
     AXIS_KEYBOARD,
+    AXIS_NAVHIDDEN,
     AXIS_NAVIGATION,
     AXIS_SCREENSIZE,
     AXIS_VERSION
@@ -64,6 +65,7 @@ public:
     String8 touchscreen;
     String8 keysHidden;
     String8 keyboard;
+    String8 navHidden;
     String8 navigation;
     String8 screenSize;
     String8 version;
@@ -83,6 +85,7 @@ public:
     static bool getKeysHiddenName(const char* name, ResTable_config* out = NULL);
     static bool getKeyboardName(const char* name, ResTable_config* out = NULL);
     static bool getNavigationName(const char* name, ResTable_config* out = NULL);
+    static bool getNavHiddenName(const char* name, ResTable_config* out = NULL);
     static bool getScreenSizeName(const char* name, ResTable_config* out = NULL);
     static bool getVersionName(const char* name, ResTable_config* out = NULL);
 
@@ -131,7 +134,9 @@ public:
         {
             //printf("new AaptFile created %s\n", (const char*)sourceFile);
         }
-    virtual ~AaptFile() { }
+    virtual ~AaptFile() {
+        free(mData);
+    }
 
     const String8& getPath() const { return mPath; }
     const AaptGroupEntry& getGroupEntry() const { return mGroupEntry; }
@@ -447,7 +452,13 @@ private:
     AaptSymbolEntry                                 mDefSymbol;
 };
 
-class ResourceTypeSet;
+class ResourceTypeSet : public RefBase,
+                        public KeyedVector<String8,sp<AaptGroup> >
+{
+public:
+    ResourceTypeSet();
+};
+
 
 /**
  * Asset hierarchy being operated on.
@@ -455,8 +466,8 @@ class ResourceTypeSet;
 class AaptAssets : public AaptDir
 {
 public:
-    AaptAssets() : AaptDir(String8(), String8()), mHaveIncludedAssets(false) { }
-    virtual ~AaptAssets() { }
+    AaptAssets() : AaptDir(String8(), String8()), mHaveIncludedAssets(false), mRes(NULL) { }
+    virtual ~AaptAssets() { delete mRes; }
 
     const String8& getPackage() const { return mPackage; }
     void setPackage(const String8& package) { mPackage = package; mSymbolsPrivatePackage = package; }
@@ -474,6 +485,8 @@ public:
                      const sp<AaptFile>& file,
                      const String8& resType);
 
+    void addGroupEntry(const AaptGroupEntry& entry) { mGroupEntries.add(entry); }
+    
     ssize_t slurpFromArgs(Bundle* bundle);
 
     virtual ssize_t slurpFullTree(Bundle* bundle,
@@ -498,13 +511,14 @@ public:
     void print() const;
 
     inline const Vector<sp<AaptDir> >& resDirs() { return mDirs; }
+    sp<AaptDir> resDir(const String8& name);
 
     inline sp<AaptAssets> getOverlay() { return mOverlay; }
     inline void setOverlay(sp<AaptAssets>& overlay) { mOverlay = overlay; }
     
     inline KeyedVector<String8, sp<ResourceTypeSet> >* getResources() { return mRes; }
     inline void 
-        setResources(KeyedVector<String8, sp<ResourceTypeSet> >* res) { mRes = res; }
+        setResources(KeyedVector<String8, sp<ResourceTypeSet> >* res) { delete mRes; mRes = res; }
 
 private:
     String8 mPackage;

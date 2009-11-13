@@ -20,6 +20,7 @@ import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.Uri;
+import android.accounts.Account;
 
 /**
  * The SubscribedFeeds provider stores all information about subscribed feeds.
@@ -99,7 +100,7 @@ public class SubscribedFeeds {
         /**
          * The default sort order for this table
          */
-        public static final String DEFAULT_SORT_ORDER = "_SYNC_ACCOUNT ASC";
+        public static final String DEFAULT_SORT_ORDER = "_SYNC_ACCOUNT_TYPE, _SYNC_ACCOUNT ASC";
     }
 
     /**
@@ -114,38 +115,36 @@ public class SubscribedFeeds {
      * @return  the Uri of the feed that was added
      */
     public static Uri addFeed(ContentResolver resolver,
-            String feed, String account,
+            String feed, Account account,
             String authority, String service) {
         ContentValues values = new ContentValues();
         values.put(SubscribedFeeds.Feeds.FEED, feed);
-        values.put(SubscribedFeeds.Feeds._SYNC_ACCOUNT, account);
+        values.put(SubscribedFeeds.Feeds._SYNC_ACCOUNT, account.name);
+        values.put(SubscribedFeeds.Feeds._SYNC_ACCOUNT_TYPE, account.type);
         values.put(SubscribedFeeds.Feeds.AUTHORITY, authority);
         values.put(SubscribedFeeds.Feeds.SERVICE, service);
         return resolver.insert(SubscribedFeeds.Feeds.CONTENT_URI, values);
     }
 
     public static int deleteFeed(ContentResolver resolver,
-            String feed, String account, String authority) {
+            String feed, Account account, String authority) {
         StringBuilder where = new StringBuilder();
         where.append(SubscribedFeeds.Feeds._SYNC_ACCOUNT + "=?");
+        where.append(" AND " + SubscribedFeeds.Feeds._SYNC_ACCOUNT_TYPE + "=?");
         where.append(" AND " + SubscribedFeeds.Feeds.FEED + "=?");
         where.append(" AND " + SubscribedFeeds.Feeds.AUTHORITY + "=?");
         return resolver.delete(SubscribedFeeds.Feeds.CONTENT_URI,
-                where.toString(), new String[] {account, feed, authority});
+                where.toString(), new String[] {account.name, account.type, feed, authority});
     }
 
     public static int deleteFeeds(ContentResolver resolver,
-            String account, String authority) {
+            Account account, String authority) {
         StringBuilder where = new StringBuilder();
         where.append(SubscribedFeeds.Feeds._SYNC_ACCOUNT + "=?");
+        where.append(" AND " + SubscribedFeeds.Feeds._SYNC_ACCOUNT_TYPE + "=?");
         where.append(" AND " + SubscribedFeeds.Feeds.AUTHORITY + "=?");
         return resolver.delete(SubscribedFeeds.Feeds.CONTENT_URI,
-                where.toString(), new String[] {account, authority});
-    }
-
-    public static String gtalkServiceRoutingInfoFromAccountAndResource(
-            String account, String res) {
-        return Uri.parse("gtalk://" + account + "/" + res).toString();
+                where.toString(), new String[] {account.name, account.type, authority});
     }
 
     /**
@@ -157,6 +156,12 @@ public class SubscribedFeeds {
          * <P>Type: TEXT</P>
          */
         public static final String _SYNC_ACCOUNT = SyncConstValue._SYNC_ACCOUNT;
+
+        /**
+         * The account type.
+         * <P>Type: TEXT</P>
+         */
+        public static final String _SYNC_ACCOUNT_TYPE = SyncConstValue._SYNC_ACCOUNT_TYPE;
     }
 
     /**
@@ -199,6 +204,6 @@ public class SubscribedFeeds {
         /**
          * The default sort order for this table
          */
-        public static final String DEFAULT_SORT_ORDER = "_SYNC_ACCOUNT ASC";
+        public static final String DEFAULT_SORT_ORDER = "_SYNC_ACCOUNT_TYPE, _SYNC_ACCOUNT ASC";
     }
 }

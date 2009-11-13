@@ -7,8 +7,8 @@
 
 #define LOG_TAG "appproc"
 
-#include <utils/IPCThreadState.h>
-#include <utils/ProcessState.h>
+#include <binder/IPCThreadState.h>
+#include <binder/ProcessState.h>
 #include <utils/Log.h>
 #include <cutils/process_name.h>
 #include <cutils/memory.h>

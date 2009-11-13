@@ -18,10 +18,9 @@ package com.android.server.status;
 
 import android.app.AlertDialog;
 import android.bluetooth.BluetoothA2dp;
-import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothError;
+import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothHeadset;
-import android.bluetooth.BluetoothIntent;
+import android.bluetooth.BluetoothPbap;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -76,14 +75,7 @@ public class StatusBarPolicy {
     private static StatusBarPolicy sInstance;
 
     // message codes for the handler
-    private static final int EVENT_DATA_CONN_STATE_CHANGED = 2;
-    private static final int EVENT_DATA_ACTIVITY = 3;
     private static final int EVENT_BATTERY_CLOSE = 4;
-
-    // indices into mBatteryThresholds
-    private static final int BATTERY_THRESHOLD_CLOSE_WARNING = 0;
-    private static final int BATTERY_THRESHOLD_WARNING = 1;
-    private static final int BATTERY_THRESHOLD_EMPTY = 2;
 
     private final Context mContext;
     private final StatusBarService mService;
@@ -99,26 +91,21 @@ public class StatusBarPolicy {
     private IBinder mBatteryIcon;
     private IconData mBatteryData;
     private boolean mBatteryFirst = true;
-    private int mBatteryPlugged;
+    private boolean mBatteryPlugged;
     private int mBatteryLevel;
-    private int mBatteryThreshold = 0; // index into mBatteryThresholds
-    private int[] mBatteryThresholds = new int[] { 20, 15, -1 };
     private AlertDialog mLowBatteryDialog;
     private TextView mBatteryLevelTextView;
     private View mBatteryView;
     private int mBatteryViewSequence;
     private boolean mBatteryShowLowOnEndCall = false;
-    private boolean mSentLowBatteryBroadcast = false;
     private static final boolean SHOW_LOW_BATTERY_WARNING = true;
 
     // phone
     private TelephonyManager mPhone;
     private IBinder mPhoneIcon;
-    private IBinder mPhoneEvdoIcon;
 
     //***** Signal strength icons
     private IconData mPhoneData;
-    private IconData mPhoneEvdoData;
     //GSM/UMTS
     private static final int[] sSignalImages = new int[] {
         com.android.internal.R.drawable.stat_sys_signal_0,
@@ -133,14 +120,6 @@ public class StatusBarPolicy {
         com.android.internal.R.drawable.stat_sys_r_signal_2,
         com.android.internal.R.drawable.stat_sys_r_signal_3,
         com.android.internal.R.drawable.stat_sys_r_signal_4
-    };
-    //CDMA
-    private static final int[] sSignalImages_cdma = new int[] {
-        com.android.internal.R.drawable.stat_sys_signal_cdma_0,
-        com.android.internal.R.drawable.stat_sys_signal_cdma_1,
-        com.android.internal.R.drawable.stat_sys_signal_cdma_2,
-        com.android.internal.R.drawable.stat_sys_signal_cdma_3,
-        com.android.internal.R.drawable.stat_sys_signal_cdma_4
     };
     private static final int[] sRoamingIndicatorImages_cdma = new int[] {
         com.android.internal.R.drawable.stat_sys_roaming_cdma_0, //Standard Roaming Indicator
@@ -241,14 +220,6 @@ public class StatusBarPolicy {
 
         // 128-255 Reserved
     };
-    // EVDO
-    private static final int[] sSignalImages_evdo = new int[] {
-        com.android.internal.R.drawable.stat_sys_signal_evdo_0,
-        com.android.internal.R.drawable.stat_sys_signal_evdo_1,
-        com.android.internal.R.drawable.stat_sys_signal_evdo_2,
-        com.android.internal.R.drawable.stat_sys_signal_evdo_3,
-        com.android.internal.R.drawable.stat_sys_signal_evdo_4
-    };
 
     //***** Data connection icons
     private int[] mDataIconList = sDataNetType_g;
@@ -271,20 +242,21 @@ public class StatusBarPolicy {
             com.android.internal.R.drawable.stat_sys_data_out_e,
             com.android.internal.R.drawable.stat_sys_data_inandout_e,
         };
-    //CDMA
-    private static final int[] sDataNetType_evdo = new int[] {
-        com.android.internal.R.drawable.stat_sys_data_connected_evdo,
-        com.android.internal.R.drawable.stat_sys_data_in_evdo,
-        com.android.internal.R.drawable.stat_sys_data_out_evdo,
-        com.android.internal.R.drawable.stat_sys_data_inandout_evdo,
-        com.android.internal.R.drawable.stat_sys_data_dormant_evdo,
+    //3.5G
+    private static final int[] sDataNetType_h = new int[] {
+            com.android.internal.R.drawable.stat_sys_data_connected_h,
+            com.android.internal.R.drawable.stat_sys_data_in_h,
+            com.android.internal.R.drawable.stat_sys_data_out_h,
+            com.android.internal.R.drawable.stat_sys_data_inandout_h,
     };
-    private static final int[] sDataNetType_1xrtt = new int[] {
-        com.android.internal.R.drawable.stat_sys_data_connected_1xrtt,
-        com.android.internal.R.drawable.stat_sys_data_in_1xrtt,
-        com.android.internal.R.drawable.stat_sys_data_out_1xrtt,
-        com.android.internal.R.drawable.stat_sys_data_inandout_1xrtt,
-        com.android.internal.R.drawable.stat_sys_data_dormant_1xrtt,
+
+    //CDMA
+    // Use 3G icons for EVDO data and 1x icons for 1XRTT data
+    private static final int[] sDataNetType_1x = new int[] {
+        com.android.internal.R.drawable.stat_sys_data_connected_1x,
+        com.android.internal.R.drawable.stat_sys_data_in_1x,
+        com.android.internal.R.drawable.stat_sys_data_out_1x,
+        com.android.internal.R.drawable.stat_sys_data_inandout_1x,
     };
 
     // Assume it's all good unless we hear otherwise.  We don't always seem
@@ -300,6 +272,7 @@ public class StatusBarPolicy {
     private IBinder mDataIcon;
     private IconData mDataData;
     private boolean mDataIconVisible;
+    private boolean mHspaDataDistinguishable;
 
     // ringer volume
     private IBinder mVolumeIcon;
@@ -311,6 +284,7 @@ public class StatusBarPolicy {
     private IconData mBluetoothData;
     private int mBluetoothHeadsetState;
     private int mBluetoothA2dpState;
+    private int mBluetoothPbapState;
     private boolean mBluetoothEnabled;
 
     // wifi
@@ -363,6 +337,9 @@ public class StatusBarPolicy {
             else if (action.equals(Intent.ACTION_TIME_CHANGED)) {
                 updateClock();
             }
+            else if (action.equals(Intent.ACTION_BATTERY_CHANGED)) {
+                updateBattery(intent);
+            }
             else if (action.equals(Intent.ACTION_CONFIGURATION_CHANGED)) {
                 updateClock();
             }
@@ -377,12 +354,17 @@ public class StatusBarPolicy {
             else if (action.equals(Intent.ACTION_SYNC_STATE_CHANGED)) {
                 updateSyncState(intent);
             }
-            else if (action.equals(Intent.ACTION_BATTERY_CHANGED)) {
-                updateBattery(intent);
+            else if (action.equals(Intent.ACTION_BATTERY_LOW)) {
+                onBatteryLow(intent);
             }
-            else if (action.equals(BluetoothIntent.BLUETOOTH_STATE_CHANGED_ACTION) ||
-                    action.equals(BluetoothIntent.HEADSET_STATE_CHANGED_ACTION) ||
-                    action.equals(BluetoothA2dp.SINK_STATE_CHANGED_ACTION)) {
+            else if (action.equals(Intent.ACTION_BATTERY_OKAY)
+                    || action.equals(Intent.ACTION_POWER_CONNECTED)) {
+                onBatteryOkay(intent);
+            }
+            else if (action.equals(BluetoothAdapter.ACTION_STATE_CHANGED) ||
+                    action.equals(BluetoothHeadset.ACTION_STATE_CHANGED) ||
+                    action.equals(BluetoothA2dp.ACTION_SINK_STATE_CHANGED) ||
+                    action.equals(BluetoothPbap.PBAP_STATE_CHANGED_ACTION)) {
                 updateBluetooth(intent);
             }
             else if (action.equals(WifiManager.NETWORK_STATE_CHANGED_ACTION) ||
@@ -430,12 +412,6 @@ public class StatusBarPolicy {
                 null, com.android.internal.R.drawable.stat_sys_signal_null, 0, 0);
         mPhoneIcon = service.addIcon(mPhoneData, null);
 
-        // phone_evdo_signal
-        mPhoneEvdoData = IconData.makeIcon("phone_evdo_signal",
-                null, com.android.internal.R.drawable.stat_sys_signal_evdo_0, 0, 0);
-        mPhoneEvdoIcon = service.addIcon(mPhoneEvdoData, null);
-        service.setIconVisibility(mPhoneEvdoIcon, false);
-
         // register for phone state notifications.
         ((TelephonyManager)mContext.getSystemService(Context.TELEPHONY_SERVICE))
                 .listen(mPhoneStateListener,
@@ -473,15 +449,15 @@ public class StatusBarPolicy {
         mBluetoothData = IconData.makeIcon("bluetooth",
                 null, com.android.internal.R.drawable.stat_sys_data_bluetooth, 0, 0);
         mBluetoothIcon = service.addIcon(mBluetoothData, null);
-        BluetoothDevice bluetooth =
-                (BluetoothDevice) mContext.getSystemService(Context.BLUETOOTH_SERVICE);
-        if (bluetooth != null) {
-            mBluetoothEnabled = bluetooth.isEnabled();
+        BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
+        if (adapter != null) {
+            mBluetoothEnabled = adapter.isEnabled();
         } else {
             mBluetoothEnabled = false;
         }
         mBluetoothA2dpState = BluetoothA2dp.STATE_DISCONNECTED;
         mBluetoothHeadsetState = BluetoothHeadset.STATE_DISCONNECTED;
+        mBluetoothPbapState = BluetoothPbap.STATE_DISCONNECTED;
         mService.setIconVisibility(mBluetoothIcon, mBluetoothEnabled);
 
         // Gps status
@@ -490,7 +466,7 @@ public class StatusBarPolicy {
         mGpsFixIconData = IconData.makeIcon("gps",
                 null, com.android.internal.R.drawable.stat_sys_gps_on, 0, 0);
         mGpsIcon = service.addIcon(mGpsEnabledIconData, null);
-        service.setIconVisibility(mGpsIcon, false);           
+        service.setIconVisibility(mGpsIcon, false);
 
         // Alarm clock
         mAlarmClockIconData = IconData.makeIcon(
@@ -513,7 +489,7 @@ public class StatusBarPolicy {
         mVolumeIcon = service.addIcon(mVolumeData, null);
         service.setIconVisibility(mVolumeIcon, false);
         updateVolume();
-        
+
         IntentFilter filter = new IntentFilter();
 
         // Register for Intent broadcasts for...
@@ -521,14 +497,18 @@ public class StatusBarPolicy {
         filter.addAction(Intent.ACTION_TIME_CHANGED);
         filter.addAction(Intent.ACTION_CONFIGURATION_CHANGED);
         filter.addAction(Intent.ACTION_BATTERY_CHANGED);
+        filter.addAction(Intent.ACTION_BATTERY_LOW);
+        filter.addAction(Intent.ACTION_BATTERY_OKAY);
+        filter.addAction(Intent.ACTION_POWER_CONNECTED);
         filter.addAction(Intent.ACTION_TIMEZONE_CHANGED);
         filter.addAction(Intent.ACTION_ALARM_CHANGED);
         filter.addAction(Intent.ACTION_SYNC_STATE_CHANGED);
         filter.addAction(AudioManager.RINGER_MODE_CHANGED_ACTION);
         filter.addAction(AudioManager.VIBRATE_SETTING_CHANGED_ACTION);
-        filter.addAction(BluetoothIntent.BLUETOOTH_STATE_CHANGED_ACTION);
-        filter.addAction(BluetoothIntent.HEADSET_STATE_CHANGED_ACTION);
-        filter.addAction(BluetoothA2dp.SINK_STATE_CHANGED_ACTION);
+        filter.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);
+        filter.addAction(BluetoothHeadset.ACTION_STATE_CHANGED);
+        filter.addAction(BluetoothA2dp.ACTION_SINK_STATE_CHANGED);
+        filter.addAction(BluetoothPbap.PBAP_STATE_CHANGED_ACTION);
         filter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
         filter.addAction(WifiManager.SUPPLICANT_CONNECTION_CHANGE_ACTION);
         filter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
@@ -538,6 +518,14 @@ public class StatusBarPolicy {
         filter.addAction(TelephonyIntents.ACTION_SIM_STATE_CHANGED);
         filter.addAction(TtyIntent.TTY_ENABLED_CHANGE_ACTION);
         mContext.registerReceiver(mIntentReceiver, filter, null, mHandler);
+
+        // load config to determine if to distinguish Hspa data icon
+        try {
+            mHspaDataDistinguishable = mContext.getResources().getBoolean(
+                    com.android.internal.R.bool.config_hspa_data_distinguishable);
+        } catch (Exception e) {
+            mHspaDataDistinguishable = false;
+        }
     }
 
     public static void installIcons(Context context, StatusBarService service) {
@@ -564,38 +552,22 @@ public class StatusBarPolicy {
         //mService.setIconVisibility(mSyncFailingIcon, isFailing && !isActive);
     }
 
-    private void pickNextBatteryLevel(int level) {
-        final int N = mBatteryThresholds.length;
-        for (int i=0; i<N; i++) {
-            if (level >= mBatteryThresholds[i]) {
-                mBatteryThreshold = i;
-                break;
-            }
-        }
-        if (mBatteryThreshold >= N) {
-            mBatteryThreshold = N-1;
-        }
-    }
-
     private final void updateBattery(Intent intent) {
         mBatteryData.iconId = intent.getIntExtra("icon-small", 0);
         mBatteryData.iconLevel = intent.getIntExtra("level", 0);
         mService.updateIcon(mBatteryIcon, mBatteryData, null);
 
-        int plugged = intent.getIntExtra("plugged", 0);
+        boolean plugged = intent.getIntExtra("plugged", 0) != 0;
         int level = intent.getIntExtra("level", -1);
         if (false) {
             Log.d(TAG, "updateBattery level=" + level
                     + " plugged=" + plugged
                     + " mBatteryPlugged=" + mBatteryPlugged
                     + " mBatteryLevel=" + mBatteryLevel
-                    + " mBatteryThreshold=" + mBatteryThreshold
                     + " mBatteryFirst=" + mBatteryFirst);
         }
 
-        int oldPlugged = mBatteryPlugged;
-        int oldThreshold = mBatteryThreshold;
-        pickNextBatteryLevel(level);
+        boolean oldPlugged = mBatteryPlugged;
 
         mBatteryPlugged = plugged;
         mBatteryLevel = level;
@@ -617,49 +589,35 @@ public class StatusBarPolicy {
         }
         */
         if (false) {
-            Log.d(TAG, "plugged=" + plugged + " oldPlugged=" + oldPlugged + " level=" + level
-                    + " mBatteryThreshold=" + mBatteryThreshold + " oldThreshold=" + oldThreshold);
+            Log.d(TAG, "plugged=" + plugged + " oldPlugged=" + oldPlugged + " level=" + level);
         }
-        if (plugged == 0
-                && ((oldPlugged != 0 && level < mBatteryThresholds[BATTERY_THRESHOLD_WARNING])
-                    || (mBatteryThreshold > oldThreshold
-                        && mBatteryThreshold > BATTERY_THRESHOLD_WARNING))) {
-            // Broadcast the low battery warning
-            mSentLowBatteryBroadcast = true;
-            Intent batIntent = new Intent(Intent.ACTION_BATTERY_LOW);
-            batIntent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
-            mContext.sendBroadcast(batIntent);
+    }
 
-            if (SHOW_LOW_BATTERY_WARNING) {
-                if (false) {
-                    Log.d(TAG, "mPhoneState=" + mPhoneState
-                            + " mLowBatteryDialog=" + mLowBatteryDialog
-                            + " mBatteryShowLowOnEndCall=" + mBatteryShowLowOnEndCall);
-                }
+    private void onBatteryLow(Intent intent) {
+        if (SHOW_LOW_BATTERY_WARNING) {
+            if (false) {
+                Log.d(TAG, "mPhoneState=" + mPhoneState
+                      + " mLowBatteryDialog=" + mLowBatteryDialog
+                      + " mBatteryShowLowOnEndCall=" + mBatteryShowLowOnEndCall);
+            }
 
-                if (mPhoneState == TelephonyManager.CALL_STATE_IDLE) {
-                    showLowBatteryWarning();
-                } else {
-                    mBatteryShowLowOnEndCall = true;
-                }
-            }
-        } else if (mBatteryThreshold < BATTERY_THRESHOLD_WARNING) {
-            if (mSentLowBatteryBroadcast == true) {
-                mSentLowBatteryBroadcast = false;
-                Intent batIntent = new Intent(Intent.ACTION_BATTERY_OKAY);
-                batIntent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
-                mContext.sendBroadcast(batIntent);
-            }
-            if (SHOW_LOW_BATTERY_WARNING) {
-                if (mLowBatteryDialog != null) {
-                    mLowBatteryDialog.dismiss();
-                    mBatteryShowLowOnEndCall = false;
-                }
+            if (mPhoneState == TelephonyManager.CALL_STATE_IDLE) {
+                showLowBatteryWarning();
+            } else {
+                mBatteryShowLowOnEndCall = true;
             }
         }
     }
 
-    private void showBatteryView() {    
+    private void onBatteryOkay(Intent intent) {
+        if (mLowBatteryDialog != null
+                && SHOW_LOW_BATTERY_WARNING) {
+            mLowBatteryDialog.dismiss();
+            mBatteryShowLowOnEndCall = false;
+        }
+    }
+
+    private void showBatteryView() {
         closeLastBatteryView();
         if (mLowBatteryDialog != null) {
             mLowBatteryDialog.dismiss();
@@ -675,15 +633,20 @@ public class StatusBarPolicy {
             pixelFormat = bg.getOpacity();
         }
 
+        int flags =  WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+                | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
+                | WindowManager.LayoutParams.FLAG_DIM_BEHIND;
+        
+        if (!mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_sf_slowBlur)) {
+            flags |= WindowManager.LayoutParams.FLAG_BLUR_BEHIND;
+        }
+        
         WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
                 ViewGroup.LayoutParams.WRAP_CONTENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT,
                 WindowManager.LayoutParams.TYPE_TOAST,
-                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
-                    | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
-                    | WindowManager.LayoutParams.FLAG_BLUR_BEHIND
-                    | WindowManager.LayoutParams.FLAG_DIM_BEHIND,
-                pixelFormat);
+                flags, pixelFormat);
 
         // Get the dim amount from the theme
         TypedArray a = mContext.obtainStyledAttributes(
@@ -720,9 +683,9 @@ public class StatusBarPolicy {
     private void showLowBatteryWarning() {
         closeLastBatteryView();
 
-        int level = mBatteryThresholds[mBatteryThreshold > 1 ? mBatteryThreshold - 1 : 0];
+        // Show exact battery level.
         CharSequence levelText = mContext.getString(
-                    com.android.internal.R.string.battery_low_percent_format, level);
+                    com.android.internal.R.string.battery_low_percent_format, mBatteryLevel);
 
         if (mBatteryLevelTextView != null) {
             mBatteryLevelTextView.setText(levelText);
@@ -738,7 +701,7 @@ public class StatusBarPolicy {
                 b.setView(v);
                 b.setIcon(android.R.drawable.ic_dialog_alert);
                 b.setPositiveButton(android.R.string.ok, null);
-                
+
                 final Intent intent = new Intent(Intent.ACTION_POWER_USAGE_SUMMARY);
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
                         | Intent.FLAG_ACTIVITY_MULTIPLE_TASK
@@ -773,7 +736,7 @@ public class StatusBarPolicy {
         }
         if (mPhoneState == TelephonyManager.CALL_STATE_IDLE) {
             if (mBatteryShowLowOnEndCall) {
-                if (mBatteryPlugged == 0) {
+                if (!mBatteryPlugged) {
                     showLowBatteryWarning();
                 }
                 mBatteryShowLowOnEndCall = false;
@@ -819,19 +782,23 @@ public class StatusBarPolicy {
         public void onServiceStateChanged(ServiceState state) {
             mServiceState = state;
             updateSignalStrength();
-            updateCdmaRoamingIcon();
+            updateCdmaRoamingIcon(state);
             updateDataIcon();
         }
 
         @Override
         public void onCallStateChanged(int state, String incomingNumber) {
             updateCallState(state);
+            // In cdma, if a voice call is made, RSSI should switch to 1x.
+            if (isCdma()) {
+                updateSignalStrength();
+            }
         }
 
         @Override
-        public void onDataConnectionStateChanged(int state) {
+        public void onDataConnectionStateChanged(int state, int networkType) {
             mDataState = state;
-            updateDataNetType();
+            updateDataNetType(networkType);
             updateDataIcon();
         }
 
@@ -854,7 +821,7 @@ public class StatusBarPolicy {
             final String lockedReason = intent.getStringExtra(IccCard.INTENT_KEY_LOCKED_REASON);
             if (IccCard.INTENT_VALUE_LOCKED_ON_PIN.equals(lockedReason)) {
                 mSimState = IccCard.State.PIN_REQUIRED;
-            } 
+            }
             else if (IccCard.INTENT_VALUE_LOCKED_ON_PUK.equals(lockedReason)) {
                 mSimState = IccCard.State.PUK_REQUIRED;
             }
@@ -868,7 +835,15 @@ public class StatusBarPolicy {
     }
 
     private boolean isCdma() {
-        return ((mPhone != null) && (mPhone.getPhoneType() == TelephonyManager.PHONE_TYPE_CDMA));
+        return (mSignalStrength != null) && !mSignalStrength.isGsm();
+    }
+
+    private boolean isEvdo() {
+        return ( (mServiceState != null)
+                 && ((mServiceState.getRadioTechnology()
+                        == ServiceState.RADIO_TECHNOLOGY_EVDO_0)
+                     || (mServiceState.getRadioTechnology()
+                        == ServiceState.RADIO_TECHNOLOGY_EVDO_A)));
     }
 
     private boolean hasService() {
@@ -887,9 +862,7 @@ public class StatusBarPolicy {
 
     private final void updateSignalStrength() {
         int iconLevel = -1;
-        int evdoIconLevel = -1;
         int[] iconList;
-        int[] evdoIconList;
 
         if (!hasService()) {
             //Log.d(TAG, "updateSignalStrength: no service");
@@ -900,7 +873,6 @@ public class StatusBarPolicy {
                 mPhoneData.iconId = com.android.internal.R.drawable.stat_sys_signal_null;
             }
             mService.updateIcon(mPhoneIcon, mPhoneData, null);
-            mService.setIconVisibility(mPhoneEvdoIcon,false);
             return;
         }
 
@@ -917,73 +889,75 @@ public class StatusBarPolicy {
             else if (asu >= 4)  iconLevel = 2;
             else iconLevel = 1;
 
+            // Though mPhone is a Manager, this call is not an IPC
             if (mPhone.isNetworkRoaming()) {
                 iconList = sSignalImages_r;
             } else {
                 iconList = sSignalImages;
             }
         } else {
-            iconList = this.sSignalImages_cdma;
+            iconList = this.sSignalImages;
 
-            int cdmaDbm = mSignalStrength.getCdmaDbm();
-            int cdmaEcio = mSignalStrength.getCdmaEcio();
-            int levelDbm = 0;
-            int levelEcio = 0;
-
-            if (cdmaDbm >= -75) levelDbm = 4;
-            else if (cdmaDbm >= -85) levelDbm = 3;
-            else if (cdmaDbm >= -95) levelDbm = 2;
-            else if (cdmaDbm >= -100) levelDbm = 1;
-            else levelDbm = 0;
-
-            // Ec/Io are in dB*10
-            if (cdmaEcio >= -90) levelEcio = 4;
-            else if (cdmaEcio >= -110) levelEcio = 3;
-            else if (cdmaEcio >= -130) levelEcio = 2;
-            else if (cdmaEcio >= -150) levelEcio = 1;
-            else levelEcio = 0;
-
-            iconLevel = (levelDbm < levelEcio) ? levelDbm : levelEcio;
+            // If 3G(EV) and 1x network are available than 3G should be
+            // displayed, displayed RSSI should be from the EV side.
+            // If a voice call is made then RSSI should switch to 1x.
+            if ((mPhoneState == TelephonyManager.CALL_STATE_IDLE) && isEvdo()){
+                iconLevel = getEvdoLevel();
+                if (false) {
+                    Log.d(TAG, "use Evdo level=" + iconLevel + " to replace Cdma Level=" + getCdmaLevel());
+                }
+            } else {
+                iconLevel = getCdmaLevel();
+            }
         }
-
-        if ((mServiceState.getRadioTechnology() == ServiceState.RADIO_TECHNOLOGY_EVDO_0)
-                  || (mServiceState.getRadioTechnology() == ServiceState.RADIO_TECHNOLOGY_EVDO_A)) {
-            // Use Evdo icon
-            evdoIconList = this.sSignalImages_evdo;
-
-            int evdoEcio = mSignalStrength.getEvdoEcio();
-            int evdoSnr = mSignalStrength.getEvdoSnr();
-            int levelEvdoEcio = 0;
-            int levelEvdoSnr = 0;
-
-            // Ec/Io are in dB*10
-            if (evdoEcio >= -650) levelEvdoEcio = 4;
-            else if (evdoEcio >= -750) levelEvdoEcio = 3;
-            else if (evdoEcio >= -900) levelEvdoEcio = 2;
-            else if (evdoEcio >= -1050) levelEvdoEcio = 1;
-            else levelEvdoEcio = 0;
-
-            if (evdoSnr > 7) levelEvdoSnr = 4;
-            else if (evdoSnr > 5) levelEvdoSnr = 3;
-            else if (evdoSnr > 3) levelEvdoSnr = 2;
-            else if (evdoSnr > 1) levelEvdoSnr = 1;
-            else levelEvdoSnr = 0;
-
-            evdoIconLevel = (levelEvdoEcio < levelEvdoSnr) ? levelEvdoEcio : levelEvdoSnr;
-
-            mPhoneEvdoData.iconId = evdoIconList[evdoIconLevel];
-            mService.updateIcon(mPhoneEvdoIcon, mPhoneEvdoData, null);
-            mService.setIconVisibility(mPhoneEvdoIcon,true);
-        } else {
-            mService.setIconVisibility(mPhoneEvdoIcon,false);
-        }
-
         mPhoneData.iconId = iconList[iconLevel];
         mService.updateIcon(mPhoneIcon, mPhoneData, null);
     }
 
-    private final void updateDataNetType() {
-        int net = mPhone.getNetworkType();
+    private int getCdmaLevel() {
+        final int cdmaDbm = mSignalStrength.getCdmaDbm();
+        final int cdmaEcio = mSignalStrength.getCdmaEcio();
+        int levelDbm = 0;
+        int levelEcio = 0;
+
+        if (cdmaDbm >= -75) levelDbm = 4;
+        else if (cdmaDbm >= -85) levelDbm = 3;
+        else if (cdmaDbm >= -95) levelDbm = 2;
+        else if (cdmaDbm >= -100) levelDbm = 1;
+        else levelDbm = 0;
+
+        // Ec/Io are in dB*10
+        if (cdmaEcio >= -90) levelEcio = 4;
+        else if (cdmaEcio >= -110) levelEcio = 3;
+        else if (cdmaEcio >= -130) levelEcio = 2;
+        else if (cdmaEcio >= -150) levelEcio = 1;
+        else levelEcio = 0;
+
+        return (levelDbm < levelEcio) ? levelDbm : levelEcio;
+    }
+
+    private int getEvdoLevel() {
+        int evdoDbm = mSignalStrength.getEvdoDbm();
+        int evdoSnr = mSignalStrength.getEvdoSnr();
+        int levelEvdoDbm = 0;
+        int levelEvdoSnr = 0;
+
+        if (evdoDbm >= -65) levelEvdoDbm = 4;
+        else if (evdoDbm >= -75) levelEvdoDbm = 3;
+        else if (evdoDbm >= -90) levelEvdoDbm = 2;
+        else if (evdoDbm >= -105) levelEvdoDbm = 1;
+        else levelEvdoDbm = 0;
+
+        if (evdoSnr >= 7) levelEvdoSnr = 4;
+        else if (evdoSnr >= 5) levelEvdoSnr = 3;
+        else if (evdoSnr >= 3) levelEvdoSnr = 2;
+        else if (evdoSnr >= 1) levelEvdoSnr = 1;
+        else levelEvdoSnr = 0;
+
+        return (levelEvdoDbm < levelEvdoSnr) ? levelEvdoDbm : levelEvdoSnr;
+    }
+
+    private final void updateDataNetType(int net) {
 
         switch (net) {
         case TelephonyManager.NETWORK_TYPE_EDGE:
@@ -992,16 +966,25 @@ public class StatusBarPolicy {
         case TelephonyManager.NETWORK_TYPE_UMTS:
             mDataIconList = sDataNetType_3g;
             break;
+        case TelephonyManager.NETWORK_TYPE_HSDPA:
+        case TelephonyManager.NETWORK_TYPE_HSUPA:
+        case TelephonyManager.NETWORK_TYPE_HSPA:
+            if (mHspaDataDistinguishable) {
+                mDataIconList = sDataNetType_h;
+            } else {
+                mDataIconList = sDataNetType_3g;
+            }
+            break;
         case TelephonyManager.NETWORK_TYPE_CDMA:
             // display 1xRTT for IS95A/B
-            mDataIconList = this.sDataNetType_1xrtt;
+            mDataIconList = this.sDataNetType_1x;
             break;
         case TelephonyManager.NETWORK_TYPE_1xRTT:
-            mDataIconList = this.sDataNetType_1xrtt;
+            mDataIconList = this.sDataNetType_1x;
             break;
         case TelephonyManager.NETWORK_TYPE_EVDO_0: //fall through
         case TelephonyManager.NETWORK_TYPE_EVDO_A:
-            mDataIconList = sDataNetType_evdo;
+            mDataIconList = sDataNetType_3g;
             break;
         default:
             mDataIconList = sDataNetType_g;
@@ -1054,8 +1037,6 @@ public class StatusBarPolicy {
                         iconId = mDataIconList[3];
                         break;
                     case TelephonyManager.DATA_ACTIVITY_DORMANT:
-                        iconId = mDataIconList[4];
-                        break;
                     default:
                         iconId = mDataIconList[0];
                         break;
@@ -1104,23 +1085,26 @@ public class StatusBarPolicy {
         int iconId = com.android.internal.R.drawable.stat_sys_data_bluetooth;
 
         String action = intent.getAction();
-        if (action.equals(BluetoothIntent.BLUETOOTH_STATE_CHANGED_ACTION)) {
-            int state = intent.getIntExtra(BluetoothIntent.BLUETOOTH_STATE,
-                                           BluetoothError.ERROR);
-            mBluetoothEnabled = state == BluetoothDevice.BLUETOOTH_STATE_ON;
-        } else if (action.equals(BluetoothIntent.HEADSET_STATE_CHANGED_ACTION)) {
-            mBluetoothHeadsetState = intent.getIntExtra(BluetoothIntent.HEADSET_STATE,
+        if (action.equals(BluetoothAdapter.ACTION_STATE_CHANGED)) {
+            int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, BluetoothAdapter.ERROR);
+            mBluetoothEnabled = state == BluetoothAdapter.STATE_ON;
+        } else if (action.equals(BluetoothHeadset.ACTION_STATE_CHANGED)) {
+            mBluetoothHeadsetState = intent.getIntExtra(BluetoothHeadset.EXTRA_STATE,
                     BluetoothHeadset.STATE_ERROR);
-        } else if (action.equals(BluetoothA2dp.SINK_STATE_CHANGED_ACTION)) {
-            mBluetoothA2dpState = intent.getIntExtra(BluetoothA2dp.SINK_STATE,
+        } else if (action.equals(BluetoothA2dp.ACTION_SINK_STATE_CHANGED)) {
+            mBluetoothA2dpState = intent.getIntExtra(BluetoothA2dp.EXTRA_SINK_STATE,
                     BluetoothA2dp.STATE_DISCONNECTED);
+        } else if (action.equals(BluetoothPbap.PBAP_STATE_CHANGED_ACTION)) {
+            mBluetoothPbapState = intent.getIntExtra(BluetoothPbap.PBAP_STATE,
+                    BluetoothPbap.STATE_DISCONNECTED);
         } else {
             return;
         }
 
         if (mBluetoothHeadsetState == BluetoothHeadset.STATE_CONNECTED ||
                 mBluetoothA2dpState == BluetoothA2dp.STATE_CONNECTED ||
-                mBluetoothA2dpState == BluetoothA2dp.STATE_PLAYING) {
+                mBluetoothA2dpState == BluetoothA2dp.STATE_PLAYING ||
+                mBluetoothPbapState == BluetoothPbap.STATE_CONNECTED) {
             iconId = com.android.internal.R.drawable.stat_sys_data_bluetooth_connected;
         }
 
@@ -1213,21 +1197,21 @@ public class StatusBarPolicy {
         final String action = intent.getAction();
         final boolean enabled = intent.getBooleanExtra(TtyIntent.TTY_ENABLED, false);
 
-        Log.i(TAG, "updateTTY: enabled: " + enabled);
+        if (false) Log.v(TAG, "updateTTY: enabled: " + enabled);
 
         if (enabled) {
             // TTY is on
-            Log.i(TAG, "updateTTY: set TTY on");
+            if (false) Log.v(TAG, "updateTTY: set TTY on");
             mService.updateIcon(mTTYModeIcon, mTTYModeEnableIconData, null);
             mService.setIconVisibility(mTTYModeIcon, true);
         } else {
             // TTY is off
-            Log.i(TAG, "updateTTY: set TTY off");
+            if (false) Log.v(TAG, "updateTTY: set TTY off");
             mService.setIconVisibility(mTTYModeIcon, false);
         }
     }
 
-    private final void updateCdmaRoamingIcon() {
+    private final void updateCdmaRoamingIcon(ServiceState state) {
         if (!hasService()) {
             mService.setIconVisibility(mCdmaRoamingIndicatorIcon, false);
             return;
@@ -1239,8 +1223,8 @@ public class StatusBarPolicy {
         }
 
         int[] iconList = sRoamingIndicatorImages_cdma;
-        int iconIndex = mPhone.getCdmaEriIconIndex();
-        int iconMode = mPhone.getCdmaEriIconMode();
+        int iconIndex = state.getCdmaEriIconIndex();
+        int iconMode = state.getCdmaEriIconMode();
 
         if (iconIndex == -1) {
             Log.e(TAG, "getCdmaEriIconIndex returned null, skipping ERI icon update");
@@ -1253,7 +1237,7 @@ public class StatusBarPolicy {
         }
 
         if (iconIndex == EriInfo.ROAMING_INDICATOR_OFF) {
-            Log.d(TAG, "Cdma ROAMING_INDICATOR_OFF, removing ERI icon");
+            if (false) Log.v(TAG, "Cdma ROAMING_INDICATOR_OFF, removing ERI icon");
             mService.setIconVisibility(mCdmaRoamingIndicatorIcon, false);
             return;
         }

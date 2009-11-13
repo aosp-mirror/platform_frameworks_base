@@ -25,6 +25,8 @@ import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteDoneException;
+import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteStatement;
 import android.media.AudioManager;
@@ -56,7 +58,7 @@ import java.util.List;
  * Database helper class for {@link SettingsProvider}.
  * Mostly just has a bit {@link #onCreate} to initialize the database.
  */
-class DatabaseHelper extends SQLiteOpenHelper {
+public class DatabaseHelper extends SQLiteOpenHelper {
     /**
      * Path to file containing default bookmarks, relative to ANDROID_ROOT.
      */
@@ -64,7 +66,12 @@ class DatabaseHelper extends SQLiteOpenHelper {
 
     private static final String TAG = "SettingsProvider";
     private static final String DATABASE_NAME = "settings.db";
-    private static final int DATABASE_VERSION = 35;
+
+    // Please, please please. If you update the database version, check to make sure the
+    // database gets upgraded properly. At a minimum, please confirm that 'upgradeVersion'
+    // is properly propagated through your change.  Not doing so will result in a loss of user
+    // settings.
+    private static final int DATABASE_VERSION = 42;
 
     private Context mContext;
 
@@ -399,7 +406,121 @@ class DatabaseHelper extends SQLiteOpenHelper {
             }
             upgradeVersion = 35;
         }
-        
+            // due to a botched merge from donut to eclair, the initialization of ASSISTED_GPS_ENABLED
+            // was accidentally done out of order here.
+            // to fix this, ASSISTED_GPS_ENABLED is now initialized while upgrading from 38 to 39,
+            // and we intentionally do nothing from 35 to 36 now.
+        if (upgradeVersion == 35) {
+            upgradeVersion = 36;
+        }
+
+        if (upgradeVersion == 36) {
+           // This upgrade adds the STREAM_SYSTEM_ENFORCED type to the list of
+            // types affected by ringer modes (silent, vibrate, etc.)
+            db.beginTransaction();
+            try {
+                db.execSQL("DELETE FROM system WHERE name='"
+                        + Settings.System.MODE_RINGER_STREAMS_AFFECTED + "'");
+                int newValue = (1 << AudioManager.STREAM_RING)
+                        | (1 << AudioManager.STREAM_NOTIFICATION)
+                        | (1 << AudioManager.STREAM_SYSTEM)
+                        | (1 << AudioManager.STREAM_SYSTEM_ENFORCED);
+                db.execSQL("INSERT INTO system ('name', 'value') values ('"
+                        + Settings.System.MODE_RINGER_STREAMS_AFFECTED + "', '"
+                        + String.valueOf(newValue) + "')");
+                db.setTransactionSuccessful();
+            } finally {
+                db.endTransaction();
+            }
+            upgradeVersion = 37;
+        }
+
+        if (upgradeVersion == 37) {
+            db.beginTransaction();
+            try {
+                SQLiteStatement stmt = db.compileStatement("INSERT OR IGNORE INTO system(name,value)"
+                        + " VALUES(?,?);");
+                loadStringSetting(stmt, Settings.System.AIRPLANE_MODE_TOGGLEABLE_RADIOS,
+                        R.string.airplane_mode_toggleable_radios);
+                stmt.close();
+                db.setTransactionSuccessful();
+            } finally {
+                db.endTransaction();
+            }
+            upgradeVersion = 38;
+        }
+
+        if (upgradeVersion == 38) {
+            db.beginTransaction();
+            try {
+                String value =
+                        mContext.getResources().getBoolean(R.bool.assisted_gps_enabled) ? "1" : "0";
+                db.execSQL("INSERT OR IGNORE INTO secure(name,value) values('" +
+                        Settings.Secure.ASSISTED_GPS_ENABLED + "','" + value + "');");
+                db.setTransactionSuccessful();
+            } finally {
+                db.endTransaction();
+            }
+
+            upgradeVersion = 39;
+        }
+
+        if (upgradeVersion == 39) {
+            db.beginTransaction();
+            try {
+                String value =
+                        mContext.getResources().getBoolean(
+                        R.bool.def_screen_brightness_automatic_mode) ? "1" : "0";
+                db.execSQL("INSERT OR IGNORE INTO system(name,value) values('" +
+                        Settings.System.SCREEN_BRIGHTNESS_MODE + "','" + value + "');");
+                db.setTransactionSuccessful();
+            } finally {
+                db.endTransaction();
+            }
+
+            upgradeVersion = 40;
+        }
+
+        if (upgradeVersion == 40) {
+            /*
+             * All animations are now turned on by default!
+             */
+            db.beginTransaction();
+            try {
+                db.execSQL("DELETE FROM system WHERE name='"
+                        + Settings.System.WINDOW_ANIMATION_SCALE + "'");
+                db.execSQL("DELETE FROM system WHERE name='"
+                        + Settings.System.TRANSITION_ANIMATION_SCALE + "'");
+                SQLiteStatement stmt = db.compileStatement("INSERT INTO system(name,value)"
+                        + " VALUES(?,?);");
+                loadDefaultAnimationSettings(stmt);
+                stmt.close();
+                db.setTransactionSuccessful();
+            } finally {
+                db.endTransaction();
+            }
+            upgradeVersion = 41;
+        }
+
+        if (upgradeVersion == 41) {
+            /*
+             * Initialize newly public haptic feedback setting
+             */
+            db.beginTransaction();
+            try {
+                db.execSQL("DELETE FROM system WHERE name='"
+                        + Settings.System.HAPTIC_FEEDBACK_ENABLED + "'");
+                SQLiteStatement stmt = db.compileStatement("INSERT INTO system(name,value)"
+                        + " VALUES(?,?);");
+                loadDefaultHapticSettings(stmt);
+                stmt.close();
+                db.setTransactionSuccessful();
+            } finally {
+                db.endTransaction();
+            }
+            upgradeVersion = 42;
+        }
+
         if (upgradeVersion != currentVersion) {
             Log.w(TAG, "Got stuck trying to upgrade from version " + upgradeVersion
                     + ", must wipe the settings provider");
@@ -560,7 +681,7 @@ class DatabaseHelper extends SQLiteOpenHelper {
         // By default, only the ring/notification and system streams are affected
         loadSetting(stmt, Settings.System.MODE_RINGER_STREAMS_AFFECTED,
                 (1 << AudioManager.STREAM_RING) | (1 << AudioManager.STREAM_NOTIFICATION) |
-                (1 << AudioManager.STREAM_SYSTEM));
+                (1 << AudioManager.STREAM_SYSTEM) | (1 << AudioManager.STREAM_SYSTEM_ENFORCED));
 
         loadSetting(stmt, Settings.System.MUTE_STREAMS_AFFECTED,
                 ((1 << AudioManager.STREAM_MUSIC) |
@@ -627,16 +748,24 @@ class DatabaseHelper extends SQLiteOpenHelper {
         loadStringSetting(stmt, Settings.System.AIRPLANE_MODE_RADIOS,
                 R.string.def_airplane_mode_radios);
 
+        loadStringSetting(stmt, Settings.System.AIRPLANE_MODE_TOGGLEABLE_RADIOS,
+                R.string.airplane_mode_toggleable_radios);
+
         loadBooleanSetting(stmt, Settings.System.AUTO_TIME,
                 R.bool.def_auto_time); // Sync time to NITZ
 
         loadIntegerSetting(stmt, Settings.System.SCREEN_BRIGHTNESS,
                 R.integer.def_screen_brightness);
 
+        loadBooleanSetting(stmt, Settings.System.SCREEN_BRIGHTNESS_MODE,
+                R.bool.def_screen_brightness_automatic_mode);
+
         loadDefaultAnimationSettings(stmt);
 
         loadBooleanSetting(stmt, Settings.System.ACCELEROMETER_ROTATION,
                 R.bool.def_accelerometer_rotation);
+
+        loadDefaultHapticSettings(stmt);
 
         stmt.close();
     }
@@ -646,6 +775,11 @@ class DatabaseHelper extends SQLiteOpenHelper {
                 R.fraction.def_window_animation_scale, 1);
         loadFractionSetting(stmt, Settings.System.TRANSITION_ANIMATION_SCALE,
                 R.fraction.def_window_transition_scale, 1);
+    }
+
+    private void loadDefaultHapticSettings(SQLiteStatement stmt) {
+        loadBooleanSetting(stmt, Settings.System.HAPTIC_FEEDBACK_ENABLED,
+                R.bool.def_haptic_feedback);
     }
 
     private void loadSecureSettings(SQLiteDatabase db) {
@@ -666,6 +800,9 @@ class DatabaseHelper extends SQLiteOpenHelper {
 
         loadStringSetting(stmt, Settings.Secure.LOCATION_PROVIDERS_ALLOWED,
                 R.string.def_location_providers_allowed);
+
+        loadBooleanSetting(stmt, Settings.Secure.ASSISTED_GPS_ENABLED,
+                R.bool.assisted_gps_enabled);
 
         loadIntegerSetting(stmt, Settings.Secure.NETWORK_PREFERENCE,
                 R.integer.def_network_preference);

@@ -75,10 +75,10 @@ import java.util.Set;
  * <p>Some examples of action/data pairs are:</p>
  *
  * <ul>
- *   <li> <p><b>{@link #ACTION_VIEW} <i>content://contacts/1</i></b> -- Display
+ *   <li> <p><b>{@link #ACTION_VIEW} <i>content://contacts/people/1</i></b> -- Display
  *     information about the person whose identifier is "1".</p>
  *   </li>
- *   <li> <p><b>{@link #ACTION_DIAL} <i>content://contacts/1</i></b> -- Display
+ *   <li> <p><b>{@link #ACTION_DIAL} <i>content://contacts/people/1</i></b> -- Display
  *     the phone dialer with the person filled in.</p>
  *   </li>
  *   <li> <p><b>{@link #ACTION_VIEW} <i>tel:123</i></b> -- Display
@@ -89,10 +89,10 @@ import java.util.Set;
  *   <li> <p><b>{@link #ACTION_DIAL} <i>tel:123</i></b> -- Display
  *     the phone dialer with the given number filled in.</p>
  *   </li>
- *   <li> <p><b>{@link #ACTION_EDIT} <i>content://contacts/1</i></b> -- Edit
+ *   <li> <p><b>{@link #ACTION_EDIT} <i>content://contacts/people/1</i></b> -- Edit
  *     information about the person whose identifier is "1".</p>
  *   </li>
- *   <li> <p><b>{@link #ACTION_VIEW} <i>content://contacts/</i></b> -- Display
+ *   <li> <p><b>{@link #ACTION_VIEW} <i>content://contacts/people/</i></b> -- Display
  *     a list of people, which the user can browse through.  This example is a
  *     typical top-level entry into the Contacts application, showing you the
  *     list of people. Selecting a particular person to view would result in a
@@ -156,7 +156,7 @@ import java.util.Set;
  * defined in the Intent class, but applications can also define their own.
  * These strings use java style scoping, to ensure they are unique -- for
  * example, the standard {@link #ACTION_VIEW} is called
- * "android.app.action.VIEW".</p>
+ * "android.intent.action.VIEW".</p>
  *
  * <p>Put together, the set of actions, data types, categories, and extra data
  * defines a language for the system allowing for the expression of phrases
@@ -347,7 +347,7 @@ import java.util.Set;
  *     <li> <p><b>{ action=android.app.action.MAIN,
  *         category=android.app.category.LAUNCHER }</b> is the actual intent
  *         used by the Launcher to populate its top-level list.</p>
- *     <li> <p><b>{ action=android.app.action.VIEW
+ *     <li> <p><b>{ action=android.intent.action.VIEW
  *          data=content://com.google.provider.NotePad/notes }</b>
  *         displays a list of all the notes under
  *         "content://com.google.provider.NotePad/notes", which
@@ -399,7 +399,7 @@ import java.util.Set;
  * NoteEditor activity:</p>
  *
  * <ul>
- *     <li> <p><b>{ action=android.app.action.VIEW
+ *     <li> <p><b>{ action=android.intent.action.VIEW
  *          data=content://com.google.provider.NotePad/notes/<var>{ID}</var> }</b>
  *         shows the user the content of note <var>{ID}</var>.</p>
  *     <li> <p><b>{ action=android.app.action.EDIT
@@ -529,6 +529,8 @@ import java.util.Set;
  *     <li> {@link #CATEGORY_HOME}
  *     <li> {@link #CATEGORY_PREFERENCE}
  *     <li> {@link #CATEGORY_TEST}
+ *     <li> {@link #CATEGORY_CAR_DOCK}
+ *     <li> {@link #CATEGORY_DESK_DOCK}
  * </ul>
  *
  * <h3>Standard Extra Data</h3>
@@ -923,6 +925,16 @@ public class Intent implements Parcelable {
      * get*ArrayListExtra can have either a {@link #EXTRA_TEXT} or {@link
      * #EXTRA_STREAM} field, containing the data to be sent.
      * <p>
+     * Multiple types are supported, and receivers should handle mixed types
+     * whenever possible. The right way for the receiver to check them is to
+     * use the content resolver on each URI. The intent sender should try to
+     * put the most concrete mime type in the intent type, but it can fall
+     * back to {@literal <type>/*} or {@literal *}/* as needed.
+     * <p>
+     * e.g. if you are sending image/jpg and image/jpg, the intent's type can
+     * be image/jpg, but if you are sending image/jpg and image/png, then the
+     * intent's type should be image/*.
+     * <p>
      * Optional standard extras, which may be interpreted by some recipients as
      * appropriate, are: {@link #EXTRA_EMAIL}, {@link #EXTRA_CC},
      * {@link #EXTRA_BCC}, {@link #EXTRA_SUBJECT}.
@@ -1267,6 +1279,8 @@ public class Intent implements Parcelable {
      * enabled or disabled.  The data contains the name of the package.
      * <ul>
      * <li> {@link #EXTRA_UID} containing the integer uid assigned to the package.
+     * <li> {@link #EXTRA_CHANGED_COMPONENT_NAME} containing the class name of the changed component.
+     * <li> {@link #EXTRA_DONT_KILL_APP} containing boolean field to override the default action of restarting the application.
      * </ul>
      * 
      * <p class="note">This is a protected intent that can only be sent
@@ -1316,7 +1330,7 @@ public class Intent implements Parcelable {
     public static final String ACTION_UID_REMOVED = "android.intent.action.UID_REMOVED";
     /**
      * Broadcast Action:  The current system wallpaper has changed.  See
-     * {@link Context#getWallpaper} for retrieving the new wallpaper.
+     * {@link android.app.WallpaperManager} for retrieving the new wallpaper.
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_WALLPAPER_CHANGED = "android.intent.action.WALLPAPER_CHANGED";
@@ -1338,14 +1352,20 @@ public class Intent implements Parcelable {
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_CONFIGURATION_CHANGED = "android.intent.action.CONFIGURATION_CHANGED";
     /**
-     * Broadcast Action:  The charging state, or charge level of the battery has
-     * changed.
+     * Broadcast Action:  This is a <em>sticky broadcast</em> containing the
+     * charging state, level, and other information about the battery.
+     * See {@link android.os.BatteryManager} for documentation on the
+     * contents of the Intent.
      *
      * <p class="note">
      * You can <em>not</em> receive this through components declared
      * in manifests, only by explicitly registering for it with
      * {@link Context#registerReceiver(BroadcastReceiver, IntentFilter)
-     * Context.registerReceiver()}.
+     * Context.registerReceiver()}.  See {@link #ACTION_BATTERY_LOW},
+     * {@link #ACTION_BATTERY_OKAY}, {@link #ACTION_POWER_CONNECTED},
+     * and {@link #ACTION_POWER_DISCONNECTED} for distinct battery-related
+     * broadcasts that are sent and can be received through manifest
+     * receivers.
      * 
      * <p class="note">This is a protected intent that can only be sent
      * by the system.
@@ -1394,13 +1414,14 @@ public class Intent implements Parcelable {
      * by the system.
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    public static final String ACTION_POWER_DISCONNECTED = "android.intent.action.ACTION_POWER_DISCONNECTED";
+    public static final String ACTION_POWER_DISCONNECTED =
+            "android.intent.action.ACTION_POWER_DISCONNECTED";
     /**
      * Broadcast Action:  Device is shutting down.
      * This is broadcast when the device is being shut down (completely turned
      * off, not sleeping).  Once the broadcast is complete, the final shutdown
      * will proceed and all unsaved data lost.  Apps will not normally need
-     * to handle this, since the forground activity will be paused as well.
+     * to handle this, since the foreground activity will be paused as well.
      * 
      * <p class="note">This is a protected intent that can only be sent
      * by the system.
@@ -1408,7 +1429,19 @@ public class Intent implements Parcelable {
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_SHUTDOWN = "android.intent.action.ACTION_SHUTDOWN";
     /**
-     * Broadcast Action:  Indicates low memory condition on the device
+     * Activity Action:  Start this activity to request system shutdown.
+     * The optional boolean extra field {@link #EXTRA_KEY_CONFIRM} can be set to true
+     * to request confirmation from the user before shutting down.
+     *
+     * <p class="note">This is a protected intent that can only be sent
+     * by the system.
+     *
+     * {@hide}
+     */
+    public static final String ACTION_REQUEST_SHUTDOWN = "android.intent.action.ACTION_REQUEST_SHUTDOWN";
+    /**
+     * Broadcast Action:  A sticky broadcast that indicates low memory
+     * condition on the device
      * 
      * <p class="note">This is a protected intent that can only be sent
      * by the system.
@@ -1684,6 +1717,44 @@ public class Intent implements Parcelable {
     public static final String ACTION_REBOOT =
             "android.intent.action.REBOOT";
 
+    /**
+     * Broadcast Action:  A sticky broadcast indicating the phone was docked
+     * or undocked.  Includes the extra
+     * field {@link #EXTRA_DOCK_STATE}, containing the current dock state.
+     * This is intended for monitoring the current dock state.
+     * To launch an activity from a dock state change, use {@link #CATEGORY_CAR_DOCK}
+     * or {@link #CATEGORY_DESK_DOCK} instead.
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_DOCK_EVENT =
+            "android.intent.action.DOCK_EVENT";
+
+    /**
+     * Broadcast Action: a remote intent is to be broadcasted.
+     *
+     * A remote intent is used for remote RPC between devices. The remote intent
+     * is serialized and sent from one device to another device. The receiving
+     * device parses the remote intent and broadcasts it. Note that anyone can
+     * broadcast a remote intent. However, if the intent receiver of the remote intent
+     * does not trust intent broadcasts from arbitrary intent senders, it should require
+     * the sender to hold certain permissions so only trusted sender's broadcast will be
+     * let through.
+     * @hide
+     */
+    public static final String ACTION_REMOTE_INTENT =
+            "android.intent.action.REMOTE_INTENT";
+
+    /**
+     * Broadcast Action: hook for permforming cleanup after a system update.
+     *
+     * The broadcast is sent when the system is booting, before the
+     * BOOT_COMPLETED broadcast.  It is only sent to receivers in the system
+     * image.  A receiver for this should do its work and then disable itself
+     * so that it does not get run again at the next boot.
+     * @hide
+     */
+    public static final String ACTION_PRE_BOOT_COMPLETED =
+            "android.intent.action.PRE_BOOT_COMPLETED";
 
     // ---------------------------------------------------------------------
     // ---------------------------------------------------------------------
@@ -1812,6 +1883,21 @@ public class Intent implements Parcelable {
      */
     public static final String CATEGORY_FRAMEWORK_INSTRUMENTATION_TEST =
             "android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST";
+    /**
+     * An activity to run when device is inserted into a car dock.
+     * Used with {@link #ACTION_MAIN} to launch an activity.
+     * To monitor dock state, use {@link #ACTION_DOCK_EVENT} instead.
+     */
+    @SdkConstant(SdkConstantType.INTENT_CATEGORY)
+    public static final String CATEGORY_CAR_DOCK = "android.intent.category.CAR_DOCK";
+    /**
+     * An activity to run when device is inserted into a car dock.
+     * Used with {@link #ACTION_MAIN} to launch an activity.
+     * To monitor dock state, use {@link #ACTION_DOCK_EVENT} instead.
+     */
+    @SdkConstant(SdkConstantType.INTENT_CATEGORY)
+    public static final String CATEGORY_DESK_DOCK = "android.intent.category.DESK_DOCK";
+
     // ---------------------------------------------------------------------
     // ---------------------------------------------------------------------
     // Standard extra data keys.
@@ -1872,10 +1958,27 @@ public class Intent implements Parcelable {
     public static final String EXTRA_TITLE = "android.intent.extra.TITLE";
 
     /**
+     * A Parcelable[] of {@link Intent} or
+     * {@link android.content.pm.LabeledIntent} objects as set with
+     * {@link #putExtra(String, Parcelable[])} of additional activities to place
+     * a the front of the list of choices, when shown to the user with a
+     * {@link #ACTION_CHOOSER}.
+     */
+    public static final String EXTRA_INITIAL_INTENTS = "android.intent.extra.INITIAL_INTENTS";
+
+    /**
      * A {@link android.view.KeyEvent} object containing the event that
      * triggered the creation of the Intent it is in.
      */
     public static final String EXTRA_KEY_EVENT = "android.intent.extra.KEY_EVENT";
+
+    /**
+     * Set to true in {@link #ACTION_REQUEST_SHUTDOWN} to request confirmation from the user
+     * before shutting down.
+     *
+     * {@hide}
+     */
+    public static final String EXTRA_KEY_CONFIRM = "android.intent.extra.KEY_CONFIRM";
 
     /**
      * Used as an boolean extra field in {@link android.content.Intent#ACTION_PACKAGE_REMOVED} or
@@ -1926,6 +2029,39 @@ public class Intent implements Parcelable {
     public static final String EXTRA_ALARM_COUNT = "android.intent.extra.ALARM_COUNT";
 
     /**
+     * Used as an int extra field in {@link android.content.Intent#ACTION_DOCK_EVENT}
+     * intents to request the dock state.  Possible values are
+     * {@link android.content.Intent#EXTRA_DOCK_STATE_UNDOCKED},
+     * {@link android.content.Intent#EXTRA_DOCK_STATE_DESK}, or
+     * {@link android.content.Intent#EXTRA_DOCK_STATE_CAR}.
+     */
+    public static final String EXTRA_DOCK_STATE = "android.intent.extra.DOCK_STATE";
+
+    /**
+     * Used as an int value for {@link android.content.Intent#EXTRA_DOCK_STATE}
+     * to represent that the phone is not in any dock.
+     */
+    public static final int EXTRA_DOCK_STATE_UNDOCKED = 0;
+
+    /**
+     * Used as an int value for {@link android.content.Intent#EXTRA_DOCK_STATE}
+     * to represent that the phone is in a desk dock.
+     */
+    public static final int EXTRA_DOCK_STATE_DESK = 1;
+
+    /**
+     * Used as an int value for {@link android.content.Intent#EXTRA_DOCK_STATE}
+     * to represent that the phone is in a car dock.
+     */
+    public static final int EXTRA_DOCK_STATE_CAR = 2;
+
+    /**
+     * Boolean that can be supplied as meta-data with a dock activity, to
+     * indicate that the dock should take over the home key when it is active.
+     */
+    public static final String METADATA_DOCK_HOME = "android.dock_home";
+    
+    /**
      * Used as a parcelable extra field in {@link #ACTION_APP_ERROR}, containing
      * the bug report.
      *
@@ -1942,6 +2078,39 @@ public class Intent implements Parcelable {
      */
     public static final String EXTRA_INSTALLER_PACKAGE_NAME
             = "android.intent.extra.INSTALLER_PACKAGE_NAME";
+
+    /**
+     * Used in the extra field in the remote intent. It's astring token passed with the
+     * remote intent.
+     */
+    public static final String EXTRA_REMOTE_INTENT_TOKEN =
+            "android.intent.extra.remote_intent_token";
+
+    /**
+     * Used as an int extra field in {@link android.content.Intent#ACTION_PACKAGE_CHANGED}
+     * intent to supply the name of the component that changed.
+     *
+     */
+    public static final String EXTRA_CHANGED_COMPONENT_NAME =
+            "android.intent.extra.changed_component_name";
+
+    /**
+     * @hide
+     * Magic extra system code can use when binding, to give a label for
+     * who it is that has bound to a service.  This is an integer giving
+     * a framework string resource that can be displayed to the user.
+     */
+    public static final String EXTRA_CLIENT_LABEL =
+            "android.intent.extra.client_label";
+
+    /**
+     * @hide
+     * Magic extra system code can use when binding, to give a PendingIntent object
+     * that can be launched for the user to disable the system's use of this
+     * service.
+     */
+    public static final String EXTRA_CLIENT_INTENT =
+            "android.intent.extra.client_intent";
 
     // ---------------------------------------------------------------------
     // ---------------------------------------------------------------------
@@ -2037,12 +2206,14 @@ public class Intent implements Parcelable {
      * of activity B, then C and D will be finished and B receive the given
      * Intent, resulting in the stack now being: A, B.
      *
-     * <p>The currently running instance of task B in the above example will
+     * <p>The currently running instance of activity B in the above example will
      * either receive the new intent you are starting here in its
      * onNewIntent() method, or be itself finished and restarted with the
      * new intent.  If it has declared its launch mode to be "multiple" (the
-     * default) it will be finished and re-created; for all other launch modes
-     * it will receive the Intent in the current instance.
+     * default) and you have not set {@link #FLAG_ACTIVITY_SINGLE_TOP} in
+     * the same intent, then it will be finished and re-created; for all other
+     * launch modes or if {@link #FLAG_ACTIVITY_SINGLE_TOP} is set then this
+     * Intent will be delivered to the current instance's onNewIntent().
      *
      * <p>This launch mode can also be used to good effect in conjunction with
      * {@link #FLAG_ACTIVITY_NEW_TASK}: if used to start the root activity
@@ -2153,6 +2324,18 @@ public class Intent implements Parcelable {
      */
     public static final int FLAG_ACTIVITY_REORDER_TO_FRONT = 0X00020000;
     /**
+     * If set in an Intent passed to {@link Context#startActivity Context.startActivity()},
+     * this flag will prevent the system from applying an activity transition
+     * animation to go to the next activity state.  This doesn't mean an
+     * animation will never run -- if another activity change happens that doesn't
+     * specify this flag before the activity started here is displayed, then
+     * that transition will be used.  This this flag can be put to good use
+     * when you are going to do a series of activity operations but the
+     * animation seen by the user shouldn't be driven by the first activity
+     * change but rather a later one.
+     */
+    public static final int FLAG_ACTIVITY_NO_ANIMATION = 0X00010000;
+    /**
      * If set, when sending a broadcast only registered receivers will be
      * called -- no BroadcastReceiver components will be launched.
      */
@@ -2171,7 +2354,21 @@ public class Intent implements Parcelable {
      * @hide
      */
     public static final int FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT = 0x20000000;
+    /**
+     * Set when this broadcast is for a boot upgrade, a special mode that
+     * allows the broadcast to be sent before the system is ready and launches
+     * the app process with no providers running in it.
+     * @hide
+     */
+    public static final int FLAG_RECEIVER_BOOT_UPGRADE = 0x10000000;
 
+    /**
+     * @hide Flags that can't be changed with PendingIntent.
+     */
+    public static final int IMMUTABLE_FLAGS =
+            FLAG_GRANT_READ_URI_PERMISSION
+            | FLAG_GRANT_WRITE_URI_PERMISSION;
+    
     // ---------------------------------------------------------------------
     // ---------------------------------------------------------------------
     // toUri() and parseUri() options.
@@ -2352,6 +2549,7 @@ public class Intent implements Parcelable {
      *
      * @param uri The URI to turn into an Intent.
      * @param flags Additional processing flags.  Either 0 or
+     * {@link #URI_INTENT_SCHEME}.
      *
      * @return Intent The newly created Intent object.
      *
@@ -2485,24 +2683,24 @@ public class Intent implements Parcelable {
 
         int i = uri.lastIndexOf('#');
         if (i >= 0) {
-            Uri data = null;
             String action = null;
-            if (i > 0) {
-                data = Uri.parse(uri.substring(0, i));
-            }
+            final int intentFragmentStart = i;
+            boolean isIntentFragment = false;
 
             i++;
 
             if (uri.regionMatches(i, "action(", 0, 7)) {
+                isIntentFragment = true;
                 i += 7;
                 int j = uri.indexOf(')', i);
                 action = uri.substring(i, j);
                 i = j + 1;
             }
 
-            intent = new Intent(action, data);
+            intent = new Intent(action);
 
             if (uri.regionMatches(i, "categories(", 0, 11)) {
+                isIntentFragment = true;
                 i += 11;
                 int j = uri.indexOf(')', i);
                 while (i < j) {
@@ -2517,6 +2715,7 @@ public class Intent implements Parcelable {
             }
 
             if (uri.regionMatches(i, "type(", 0, 5)) {
+                isIntentFragment = true;
                 i += 5;
                 int j = uri.indexOf(')', i);
                 intent.mType = uri.substring(i, j);
@@ -2524,6 +2723,7 @@ public class Intent implements Parcelable {
             }
 
             if (uri.regionMatches(i, "launchFlags(", 0, 12)) {
+                isIntentFragment = true;
                 i += 12;
                 int j = uri.indexOf(')', i);
                 intent.mFlags = Integer.decode(uri.substring(i, j)).intValue();
@@ -2531,6 +2731,7 @@ public class Intent implements Parcelable {
             }
 
             if (uri.regionMatches(i, "component(", 0, 10)) {
+                isIntentFragment = true;
                 i += 10;
                 int j = uri.indexOf(')', i);
                 int sep = uri.indexOf('!', i);
@@ -2543,6 +2744,7 @@ public class Intent implements Parcelable {
             }
 
             if (uri.regionMatches(i, "extras(", 0, 7)) {
+                isIntentFragment = true;
                 i += 7;
 
                 final int closeParen = uri.indexOf(')', i);
@@ -2614,6 +2816,12 @@ public class Intent implements Parcelable {
                 }
             }
 
+            if (isIntentFragment) {
+                intent.mData = Uri.parse(uri.substring(0, intentFragmentStart));
+            } else {
+                intent.mData = Uri.parse(uri);
+            }
+            
             if (intent.mAction == null) {
                 // By default, if no action is specified, then use VIEW.
                 intent.mAction = ACTION_VIEW;
@@ -3403,7 +3611,7 @@ public class Intent implements Parcelable {
             }
         } else {
             ResolveInfo info = pm.resolveActivity(
-                this, PackageManager.MATCH_DEFAULT_ONLY);
+                this, PackageManager.MATCH_DEFAULT_ONLY | flags);
             if (info != null) {
                 ai = info.activityInfo;
             }
@@ -4929,7 +5137,8 @@ public class Intent implements Parcelable {
         }
     };
 
-    private Intent(Parcel in) {
+    /** @hide */
+    protected Intent(Parcel in) {
         readFromParcel(in);
     }
 

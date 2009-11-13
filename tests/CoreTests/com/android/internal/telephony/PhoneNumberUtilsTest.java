@@ -257,19 +257,19 @@ public class PhoneNumberUtilsTest extends TestCase {
 
     @SmallTest
     public void testToCallerIDIndexable() throws Exception {
-        assertEquals("14145", PhoneNumberUtils.toCallerIDMinMatch("17005554141"));
-        assertEquals("14145", PhoneNumberUtils.toCallerIDMinMatch("1-700-555-4141"));
-        assertEquals("14145", PhoneNumberUtils.toCallerIDMinMatch("1-700-555-4141,1234"));
-        assertEquals("14145", PhoneNumberUtils.toCallerIDMinMatch("1-700-555-4141;1234"));
+        assertEquals("1414555", PhoneNumberUtils.toCallerIDMinMatch("17005554141"));
+        assertEquals("1414555", PhoneNumberUtils.toCallerIDMinMatch("1-700-555-4141"));
+        assertEquals("1414555", PhoneNumberUtils.toCallerIDMinMatch("1-700-555-4141,1234"));
+        assertEquals("1414555", PhoneNumberUtils.toCallerIDMinMatch("1-700-555-4141;1234"));
 
         //this seems wrong, or at least useless
-        assertEquals("NN145", PhoneNumberUtils.toCallerIDMinMatch("1-700-555-41NN"));
+        assertEquals("NN14555", PhoneNumberUtils.toCallerIDMinMatch("1-700-555-41NN"));
 
         //<shrug> -- these are all not useful, but not terribly wrong
         assertEquals("", PhoneNumberUtils.toCallerIDMinMatch(""));
         assertEquals("0032", PhoneNumberUtils.toCallerIDMinMatch("2300"));
         assertEquals("0032+", PhoneNumberUtils.toCallerIDMinMatch("+2300"));
-        assertEquals("#130#", PhoneNumberUtils.toCallerIDMinMatch("*#031#"));
+        assertEquals("#130#*", PhoneNumberUtils.toCallerIDMinMatch("*#031#"));
     }
 
     @SmallTest
@@ -309,6 +309,11 @@ public class PhoneNumberUtilsTest extends TestCase {
         number.append("800-55512");
         PhoneNumberUtils.formatNanpNumber(number);
         assertEquals("800-555-12", number.toString());
+
+        number.clear();
+        number.append("46645");
+        PhoneNumberUtils.formatNanpNumber(number);
+        assertEquals("46645", number.toString());
     }
 
     @SmallTest
@@ -329,5 +334,77 @@ public class PhoneNumberUtilsTest extends TestCase {
                              "abc-def-ghi-jkl-mno-pqrs-tuv-wxyz"));
         assertEquals("(800) 222-3334",
                      PhoneNumberUtils.convertKeypadLettersToDigits("(800) ABC-DEFG"));
+    }
+
+    @SmallTest
+    public void testCheckAndProcessPlusCode() {
+        assertEquals("0118475797000",
+                PhoneNumberUtils.cdmaCheckAndProcessPlusCode("+8475797000"));
+        assertEquals("18475797000",
+                PhoneNumberUtils.cdmaCheckAndProcessPlusCode("+18475797000"));
+        assertEquals("0111234567",
+                PhoneNumberUtils.cdmaCheckAndProcessPlusCode("+1234567"));
+        assertEquals("01123456700000",
+                PhoneNumberUtils.cdmaCheckAndProcessPlusCode("+23456700000"));
+        assertEquals("01111875767800",
+                PhoneNumberUtils.cdmaCheckAndProcessPlusCode("+11875767800"));
+        assertEquals("8475797000,18475231753",
+                PhoneNumberUtils.cdmaCheckAndProcessPlusCode("8475797000,+18475231753"));
+        assertEquals("0118475797000,18475231753",
+                PhoneNumberUtils.cdmaCheckAndProcessPlusCode("+8475797000,+18475231753"));
+        assertEquals("8475797000;0118469312345",
+                PhoneNumberUtils.cdmaCheckAndProcessPlusCode("8475797000;+8469312345"));
+        assertEquals("8475797000,0111234567",
+                PhoneNumberUtils.cdmaCheckAndProcessPlusCode("8475797000,+1234567"));
+        assertEquals("847597000;01111875767000",
+                PhoneNumberUtils.cdmaCheckAndProcessPlusCode("847597000;+11875767000"));
+        assertEquals("8475797000,,0118469312345",
+                PhoneNumberUtils.cdmaCheckAndProcessPlusCode("8475797000,,+8469312345"));
+        assertEquals("8475797000;,0118469312345",
+                PhoneNumberUtils.cdmaCheckAndProcessPlusCode("8475797000;,+8469312345"));
+        assertEquals("8475797000,;18475231753",
+                PhoneNumberUtils.cdmaCheckAndProcessPlusCode("8475797000,;+18475231753"));
+        assertEquals("8475797000;,01111875767000",
+                PhoneNumberUtils.cdmaCheckAndProcessPlusCode("8475797000;,+11875767000"));
+        assertEquals("8475797000,;01111875767000",
+                PhoneNumberUtils.cdmaCheckAndProcessPlusCode("8475797000,;+11875767000"));
+        assertEquals("8475797000,,,01111875767000",
+                PhoneNumberUtils.cdmaCheckAndProcessPlusCode("8475797000,,,+11875767000"));
+        assertEquals("8475797000;,,01111875767000",
+                PhoneNumberUtils.cdmaCheckAndProcessPlusCode("8475797000;,,+11875767000"));
+        assertEquals("+;,8475797000",
+                PhoneNumberUtils.cdmaCheckAndProcessPlusCode("+;,8475797000"));
+        assertEquals("8475797000,",
+                PhoneNumberUtils.cdmaCheckAndProcessPlusCode("8475797000,"));
+        assertEquals("847+579-7000",
+                PhoneNumberUtils.cdmaCheckAndProcessPlusCode("847+579-7000"));
+        assertEquals(",8475797000",
+                PhoneNumberUtils.cdmaCheckAndProcessPlusCode(",8475797000"));
+        assertEquals(";;8475797000,,",
+                PhoneNumberUtils.cdmaCheckAndProcessPlusCode(";;8475797000,,"));
+        assertEquals("+this+is$weird;,+",
+                PhoneNumberUtils.cdmaCheckAndProcessPlusCode("+this+is$weird;,+"));
+        assertEquals("",
+                PhoneNumberUtils.cdmaCheckAndProcessPlusCode(""));
+        assertNull(PhoneNumberUtils.cdmaCheckAndProcessPlusCode(null));
+    }
+
+    @SmallTest
+    public void testCheckAndProcessPlusCodeByNumberFormat() {
+        assertEquals("18475797000",
+                PhoneNumberUtils.cdmaCheckAndProcessPlusCodeByNumberFormat("+18475797000",
+                PhoneNumberUtils.FORMAT_NANP,PhoneNumberUtils.FORMAT_NANP));
+        assertEquals("+18475797000",
+                PhoneNumberUtils.cdmaCheckAndProcessPlusCodeByNumberFormat("+18475797000",
+                PhoneNumberUtils.FORMAT_NANP,PhoneNumberUtils.FORMAT_JAPAN));
+        assertEquals("+18475797000",
+                PhoneNumberUtils.cdmaCheckAndProcessPlusCodeByNumberFormat("+18475797000",
+                PhoneNumberUtils.FORMAT_NANP,PhoneNumberUtils.FORMAT_UNKNOWN));
+        assertEquals("+18475797000",
+                PhoneNumberUtils.cdmaCheckAndProcessPlusCodeByNumberFormat("+18475797000",
+                PhoneNumberUtils.FORMAT_JAPAN,PhoneNumberUtils.FORMAT_JAPAN));
+        assertEquals("+18475797000",
+                PhoneNumberUtils.cdmaCheckAndProcessPlusCodeByNumberFormat("+18475797000",
+                PhoneNumberUtils.FORMAT_UNKNOWN,PhoneNumberUtils.FORMAT_UNKNOWN));
     }
 }

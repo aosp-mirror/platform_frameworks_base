@@ -46,6 +46,9 @@ public:
     virtual status_t    reset();
     virtual status_t    setLooping(int loop);
     virtual player_type playerType() { return SONIVOX_PLAYER; }
+    virtual status_t    invoke(const Parcel& request, Parcel *reply) {
+        return INVALID_OPERATION;
+    }
 
 private:
             status_t    createOutputTrack();
@@ -74,4 +77,3 @@ private:
 }; // namespace android
 
 #endif // ANDROID_MIDIFILE_H
-

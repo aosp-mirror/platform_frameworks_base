@@ -40,6 +40,8 @@ interface IRestoreSession {
      * Restore the given set onto the device, replacing the current data of any app
      * contained in the restore set with the data previously backed up.
      *
+     * @return Zero on success; nonzero on error.  The observer will only receive
+     *   progress callbacks if this method returned zero.
      * @param token The token from {@link getAvailableRestoreSets()} corresponding to
      *   the restore set that should be used.
      * @param observer If non-null, this binder points to an object that will receive
@@ -50,6 +52,9 @@ interface IRestoreSession {
     /**
      * End this restore session.  After this method is called, the IRestoreSession binder
      * is no longer valid.
+     *
+     * <p><b>Note:</b> The caller <i>must</i> invoke this method to end the restore session,
+     *   even if {@link getAvailableRestoreSets} or {@link performRestore} failed.
      */
     void endRestoreSession();
 }

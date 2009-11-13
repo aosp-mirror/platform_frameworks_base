@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008 The Android Open Source Project
+ * Copyright (C) 2009 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,515 +16,689 @@
 
 package android.bluetooth;
 
+import android.annotation.SdkConstant;
+import android.annotation.SdkConstant.SdkConstantType;
+import android.os.IBinder;
+import android.os.Parcel;
+import android.os.Parcelable;
+import android.os.ParcelUuid;
 import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.util.Log;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.util.UUID;
 
 /**
- * The Android Bluetooth API is not finalized, and *will* change. Use at your
- * own risk.
+ * Represents a remote Bluetooth device. A {@link BluetoothDevice} lets you
+ * create a connection with the repective device or query information about
+ * it, such as the name, address, class, and bonding state.
  *
- * Manages the local Bluetooth device. Scan for devices, create bondings,
- * power up and down the adapter.
+ * <p>This class is really just a thin wrapper for a Bluetooth hardware
+ * address. Objects of this class are immutable. Operations on this class
+ * are performed on the remote Bluetooth hardware address, using the
+ * {@link BluetoothAdapter} that was used to create this {@link
+ * BluetoothDevice}.
  *
- * @hide
+ * <p>To get a {@link BluetoothDevice}, use
+ * {@link BluetoothAdapter#getRemoteDevice(String)
+ * BluetoothAdapter.getRemoteDevice(String)} to create one representing a device
+ * of a known MAC address (which you can get through device discovery with
+ * {@link BluetoothAdapter}) or get one from the set of bonded devices
+ * returned by {@link BluetoothAdapter#getBondedDevices()
+ * BluetoothAdapter.getBondedDevices()}. You can then open a
+ * {@link BluetoothSocket} for communciation with the remote device, using
+ * {@link #createRfcommSocketToServiceRecord(UUID)}.
+ *
+ * <p class="note"><strong>Note:</strong>
+ * Requires the {@link android.Manifest.permission#BLUETOOTH} permission.
+ *
+ * {@see BluetoothAdapter}
+ * {@see BluetoothSocket}
  */
-public class BluetoothDevice {
+public final class BluetoothDevice implements Parcelable {
+    private static final String TAG = "BluetoothDevice";
 
-    public static final int BLUETOOTH_STATE_OFF = 0;
-    public static final int BLUETOOTH_STATE_TURNING_ON = 1;
-    public static final int BLUETOOTH_STATE_ON = 2;
-    public static final int BLUETOOTH_STATE_TURNING_OFF = 3;
+    /**
+     * Sentinel error value for this class. Guaranteed to not equal any other
+     * integer constant in this class. Provided as a convenience for functions
+     * that require a sentinel error value, for example:
+     * <p><code>Intent.getIntExtra(BluetoothDevice.EXTRA_BOND_STATE,
+     * BluetoothDevice.ERROR)</code>
+     */
+    public static final int ERROR = Integer.MIN_VALUE;
 
-    /** Inquiry scan and page scan are both off.
-     *  Device is neither discoverable nor connectable */
-    public static final int SCAN_MODE_NONE = 0;
-    /** Page scan is on, inquiry scan is off.
-     *  Device is connectable, but not discoverable */
-    public static final int SCAN_MODE_CONNECTABLE = 1;
-    /** Page scan and inquiry scan are on.
-     *  Device is connectable and discoverable */
-    public static final int SCAN_MODE_CONNECTABLE_DISCOVERABLE = 3;
+    /**
+     * Broadcast Action: Remote device discovered.
+     * <p>Sent when a remote device is found during discovery.
+     * <p>Always contains the extra fields {@link #EXTRA_DEVICE} and {@link
+     * #EXTRA_CLASS}. Can contain the extra fields {@link #EXTRA_NAME} and/or
+     * {@link #EXTRA_RSSI} if they are available.
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} to receive.
+     */
+     // TODO: Change API to not broadcast RSSI if not available (incoming connection)
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_FOUND =
+            "android.bluetooth.device.action.FOUND";
 
-    public static final int RESULT_FAILURE = -1;
-    public static final int RESULT_SUCCESS = 0;
+    /**
+     * Broadcast Action: Remote device disappeared.
+     * <p>Sent when a remote device that was found in the last discovery is not
+     * found in the current discovery.
+     * <p>Always contains the extra field {@link #EXTRA_DEVICE}.
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} to receive.
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_DISAPPEARED =
+            "android.bluetooth.device.action.DISAPPEARED";
 
-    /** We do not have a link key for the remote device, and are therefore not
-     * bonded */
-    public static final int BOND_NOT_BONDED = 0;
-    /** We have a link key for the remote device, and are probably bonded. */
-    public static final int BOND_BONDED = 1;
-    /** We are currently attempting bonding */
-    public static final int BOND_BONDING = 2;
+    /**
+     * Broadcast Action: Bluetooth class of a remote device has changed.
+     * <p>Always contains the extra fields {@link #EXTRA_DEVICE} and {@link
+     * #EXTRA_CLASS}.
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} to receive.
+     * @see {@link BluetoothClass}
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_CLASS_CHANGED =
+            "android.bluetooth.device.action.CLASS_CHANGED";
 
-    //TODO: Unify these result codes in BluetoothResult or BluetoothError
+    /**
+     * Broadcast Action: Indicates a low level (ACL) connection has been
+     * established with a remote device.
+     * <p>Always contains the extra field {@link #EXTRA_DEVICE}.
+     * <p>ACL connections are managed automatically by the Android Bluetooth
+     * stack.
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} to receive.
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_ACL_CONNECTED =
+            "android.bluetooth.device.action.ACL_CONNECTED";
+
+    /**
+     * Broadcast Action: Indicates that a low level (ACL) disconnection has
+     * been requested for a remote device, and it will soon be disconnected.
+     * <p>This is useful for graceful disconnection. Applications should use
+     * this intent as a hint to immediately terminate higher level connections
+     * (RFCOMM, L2CAP, or profile connections) to the remote device.
+     * <p>Always contains the extra field {@link #EXTRA_DEVICE}.
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} to receive.
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_ACL_DISCONNECT_REQUESTED =
+            "android.bluetooth.device.action.ACL_DISCONNECT_REQUESTED";
+
+    /**
+     * Broadcast Action: Indicates a low level (ACL) disconnection from a
+     * remote device.
+     * <p>Always contains the extra field {@link #EXTRA_DEVICE}.
+     * <p>ACL connections are managed automatically by the Android Bluetooth
+     * stack.
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} to receive.
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_ACL_DISCONNECTED =
+            "android.bluetooth.device.action.ACL_DISCONNECTED";
+
+    /**
+     * Broadcast Action: Indicates the friendly name of a remote device has
+     * been retrieved for the first time, or changed since the last retrieval.
+     * <p>Always contains the extra fields {@link #EXTRA_DEVICE} and {@link
+     * #EXTRA_NAME}.
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} to receive.
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_NAME_CHANGED =
+            "android.bluetooth.device.action.NAME_CHANGED";
+
+    /**
+     * Broadcast Action: Indicates a change in the bond state of a remote
+     * device. For example, if a device is bonded (paired).
+     * <p>Always contains the extra fields {@link #EXTRA_DEVICE}, {@link
+     * #EXTRA_BOND_STATE} and {@link #EXTRA_PREVIOUS_BOND_STATE}.
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} to receive.
+     */
+    // Note: When EXTRA_BOND_STATE is BOND_NONE then this will also
+    // contain a hidden extra field EXTRA_REASON with the result code.
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_BOND_STATE_CHANGED =
+            "android.bluetooth.device.action.BOND_STATE_CHANGED";
+
+    /**
+     * Used as a Parcelable {@link BluetoothDevice} extra field in every intent
+     * broadcast by this class. It contains the {@link BluetoothDevice} that
+     * the intent applies to.
+     */
+    public static final String EXTRA_DEVICE = "android.bluetooth.device.extra.DEVICE";
+
+    /**
+     * Used as a String extra field in {@link #ACTION_NAME_CHANGED} and {@link
+     * #ACTION_FOUND} intents. It contains the friendly Bluetooth name.
+     */
+    public static final String EXTRA_NAME = "android.bluetooth.device.extra.NAME";
+
+    /**
+     * Used as an optional short extra field in {@link #ACTION_FOUND} intents.
+     * Contains the RSSI value of the remote device as reported by the
+     * Bluetooth hardware.
+     */
+    public static final String EXTRA_RSSI = "android.bluetooth.device.extra.RSSI";
+
+    /**
+     * Used as an Parcelable {@link BluetoothClass} extra field in {@link
+     * #ACTION_FOUND} and {@link #ACTION_CLASS_CHANGED} intents.
+     */
+    public static final String EXTRA_CLASS = "android.bluetooth.device.extra.CLASS";
+
+    /**
+     * Used as an int extra field in {@link #ACTION_BOND_STATE_CHANGED} intents.
+     * Contains the bond state of the remote device.
+     * <p>Possible values are:
+     * {@link #BOND_NONE},
+     * {@link #BOND_BONDING},
+     * {@link #BOND_BONDED}.
+      */
+    public static final String EXTRA_BOND_STATE = "android.bluetooth.device.extra.BOND_STATE";
+    /**
+     * Used as an int extra field in {@link #ACTION_BOND_STATE_CHANGED} intents.
+     * Contains the previous bond state of the remote device.
+     * <p>Possible values are:
+     * {@link #BOND_NONE},
+     * {@link #BOND_BONDING},
+     * {@link #BOND_BONDED}.
+      */
+    public static final String EXTRA_PREVIOUS_BOND_STATE =
+            "android.bluetooth.device.extra.PREVIOUS_BOND_STATE";
+    /**
+     * Indicates the remote device is not bonded (paired).
+     * <p>There is no shared link key with the remote device, so communication
+     * (if it is allowed at all) will be unauthenticated and unencrypted.
+     */
+    public static final int BOND_NONE = 10;
+    /**
+     * Indicates bonding (pairing) is in progress with the remote device.
+     */
+    public static final int BOND_BONDING = 11;
+    /**
+     * Indicates the remote device is bonded (paired).
+     * <p>A shared link keys exists locally for the remote device, so
+     * communication can be authenticated and encrypted.
+     * <p><i>Being bonded (paired) with a remote device does not necessarily
+     * mean the device is currently connected. It just means that the ponding
+     * procedure was compeleted at some earlier time, and the link key is still
+     * stored locally, ready to use on the next connection.
+     * </i>
+     */
+    public static final int BOND_BONDED = 12;
+
+    /** @hide */
+    public static final String EXTRA_REASON = "android.bluetooth.device.extra.REASON";
+    /** @hide */
+    public static final String EXTRA_PAIRING_VARIANT =
+            "android.bluetooth.device.extra.PAIRING_VARIANT";
+    /** @hide */
+    public static final String EXTRA_PASSKEY = "android.bluetooth.device.extra.PASSKEY";
+
+    /**
+     * Broadcast Action: This intent is used to broadcast the {@link UUID}
+     * wrapped as a {@link android.os.ParcelUuid} of the remote device after it
+     * has been fetched. This intent is sent only when the UUIDs of the remote
+     * device are requested to be fetched using Service Discovery Protocol
+     * <p> Always contains the extra field {@link #EXTRA_DEVICE}
+     * <p> Always contains the extra filed {@link #EXTRA_UUID}
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} to receive.
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_UUID =
+            "android.bleutooth.device.action.UUID";
+
+    /**
+     * Broadcast Action: Indicates a failure to retrieve the name of a remote
+     * device.
+     * <p>Always contains the extra field {@link #EXTRA_DEVICE}.
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} to receive.
+     * @hide
+     */
+    //TODO: is this actually useful?
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_NAME_FAILED =
+            "android.bluetooth.device.action.NAME_FAILED";
+
+    /** @hide */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_PAIRING_REQUEST =
+            "android.bluetooth.device.action.PAIRING_REQUEST";
+    /** @hide */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_PAIRING_CANCEL =
+            "android.bluetooth.device.action.PAIRING_CANCEL";
+
+    /** A bond attempt succeeded
+     * @hide */
+    public static final int BOND_SUCCESS = 0;
     /** A bond attempt failed because pins did not match, or remote device did
-     * not respond to pin request in time */
+     * not respond to pin request in time
+     * @hide */
     public static final int UNBOND_REASON_AUTH_FAILED = 1;
     /** A bond attempt failed because the other side explicilty rejected
-     * bonding */
+     * bonding
+     * @hide */
     public static final int UNBOND_REASON_AUTH_REJECTED = 2;
-    /** A bond attempt failed because we canceled the bonding process */
+    /** A bond attempt failed because we canceled the bonding process
+     * @hide */
     public static final int UNBOND_REASON_AUTH_CANCELED = 3;
-    /** A bond attempt failed because we could not contact the remote device */
+    /** A bond attempt failed because we could not contact the remote device
+     * @hide */
     public static final int UNBOND_REASON_REMOTE_DEVICE_DOWN = 4;
-    /** A bond attempt failed because a discovery is in progress */
+    /** A bond attempt failed because a discovery is in progress
+     * @hide */
     public static final int UNBOND_REASON_DISCOVERY_IN_PROGRESS = 5;
-    /** An existing bond was explicitly revoked */
-    public static final int UNBOND_REASON_REMOVED = 6;
+    /** A bond attempt failed because of authentication timeout
+     * @hide */
+    public static final int UNBOND_REASON_AUTH_TIMEOUT = 6;
+    /** A bond attempt failed because of repeated attempts
+     * @hide */
+    public static final int UNBOND_REASON_REPEATED_ATTEMPTS = 7;
+    /** A bond attempt failed because we received an Authentication Cancel
+     *  by remote end
+     * @hide */
+    public static final int UNBOND_REASON_REMOTE_AUTH_CANCELED = 8;
+    /** An existing bond was explicitly revoked
+     * @hide */
+    public static final int UNBOND_REASON_REMOVED = 9;
 
-    private static final String TAG = "BluetoothDevice";
-    
-    private final IBluetoothDevice mService;
+    /** The user will be prompted to enter a pin
+     * @hide */
+    public static final int PAIRING_VARIANT_PIN = 0;
+    /** The user will be prompted to enter a passkey
+     * @hide */
+    public static final int PAIRING_VARIANT_PASSKEY = 1;
+    /** The user will be prompted to confirm the passkey displayed on the screen
+     * @hide */
+    public static final int PAIRING_VARIANT_PASSKEY_CONFIRMATION = 2;
+    /** The user will be prompted to accept or deny the incoming pairing request
+     * @hide */
+    public static final int PAIRING_VARIANT_CONSENT = 3;
+    /** The user will be prompted to enter the passkey displayed on remote device
+     * @hide */
+    public static final int PAIRING_VARIANT_DISPLAY_PASSKEY = 4;
+
     /**
-     * @hide - hide this because it takes a parameter of type
-     * IBluetoothDevice, which is a System private class.
-     * Also note that Context.getSystemService is a factory that
-     * returns a BlueToothDevice. That is the right way to get
-     * a BluetoothDevice.
+     * Used as an extra field in {@link #ACTION_UUID} intents,
+     * Contains the {@link android.os.ParcelUuid}s of the remote device which
+     * is a parcelable version of {@link UUID}.
+     * @hide
      */
-    public BluetoothDevice(IBluetoothDevice service) {
-        mService = service;
+    public static final String EXTRA_UUID = "android.bluetooth.device.extra.UUID";
+
+    /**
+     * Lazy initialization. Guaranteed final after first object constructed, or
+     * getService() called.
+     * TODO: Unify implementation of sService amongst BluetoothFoo API's
+     */
+    private static IBluetooth sService;
+
+    private final String mAddress;
+
+    /*package*/ static IBluetooth getService() {
+        synchronized (BluetoothDevice.class) {
+            if (sService == null) {
+                IBinder b = ServiceManager.getService(BluetoothAdapter.BLUETOOTH_SERVICE);
+                if (b == null) {
+                    throw new RuntimeException("Bluetooth service not available");
+                }
+                sService = IBluetooth.Stub.asInterface(b);
+            }
+        }
+        return sService;
     }
 
     /**
-     * Is Bluetooth currently turned on.
-     *
-     * @return true if Bluetooth enabled, false otherwise.
+     * Create a new BluetoothDevice
+     * Bluetooth MAC address must be upper case, such as "00:11:22:33:AA:BB",
+     * and is validated in this constructor.
+     * @param address valid Bluetooth MAC address
+     * @throws RuntimeException Bluetooth is not available on this platform
+     * @throws IllegalArgumentException address is invalid
+     * @hide
      */
-    public boolean isEnabled() {
-        try {
-            return mService.isEnabled();
-        } catch (RemoteException e) {Log.e(TAG, "", e);}
+    /*package*/ BluetoothDevice(String address) {
+        getService();  // ensures sService is initialized
+        if (!BluetoothAdapter.checkBluetoothAddress(address)) {
+            throw new IllegalArgumentException(address + " is not a valid Bluetooth address");
+        }
+
+        mAddress = address;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o instanceof BluetoothDevice) {
+            return mAddress.equals(((BluetoothDevice)o).getAddress());
+        }
         return false;
     }
 
-    /**
-     * Get the current state of Bluetooth.
-     *
-     * @return One of BLUETOOTH_STATE_ or BluetoothError.ERROR.
-     */
-    public int getBluetoothState() {
-        try {
-            return mService.getBluetoothState();
-        } catch (RemoteException e) {Log.e(TAG, "", e);}
-        return BluetoothError.ERROR;
+    @Override
+    public int hashCode() {
+        return mAddress.hashCode();
     }
 
     /**
-     * Enable the Bluetooth device.
-     * Turn on the underlying hardware.
-     * This is an asynchronous call,
-     * BluetoothIntent.BLUETOOTH_STATE_CHANGED_ACTION can be used to check if
-     * and when the device is sucessfully enabled.
-     * @return false if we cannot enable the Bluetooth device. True does not
-     * imply the device was enabled, it only implies that so far there were no
-     * problems.
+     * Returns a string representation of this BluetoothDevice.
+     * <p>Currently this is the Bluetooth hardware address, for example
+     * "00:11:22:AA:BB:CC". However, you should always use {@link #getAddress}
+     * if you explicitly require the Bluetooth hardware address in case the
+     * {@link #toString} representation changes in the future.
+     * @return string representation of this BluetoothDevice
      */
-    public boolean enable() {
-        try {
-            return mService.enable();
-        } catch (RemoteException e) {Log.e(TAG, "", e);}
-        return false;
+    @Override
+    public String toString() {
+        return mAddress;
+    }
+
+    public int describeContents() {
+        return 0;
+    }
+
+    public static final Parcelable.Creator<BluetoothDevice> CREATOR =
+            new Parcelable.Creator<BluetoothDevice>() {
+        public BluetoothDevice createFromParcel(Parcel in) {
+            return new BluetoothDevice(in.readString());
+        }
+        public BluetoothDevice[] newArray(int size) {
+            return new BluetoothDevice[size];
+        }
+    };
+
+    public void writeToParcel(Parcel out, int flags) {
+        out.writeString(mAddress);
     }
 
     /**
-     * Disable the Bluetooth device.
-     * This turns off the underlying hardware.
-     *
-     * @return true if successful, false otherwise.
+     * Returns the hardware address of this BluetoothDevice.
+     * <p> For example, "00:11:22:AA:BB:CC".
+     * @return Bluetooth hardware address as string
      */
-    public boolean disable() {
-        try {
-            return mService.disable(true);
-        } catch (RemoteException e) {Log.e(TAG, "", e);}
-        return false;
-    }
-
     public String getAddress() {
-        try {
-            return mService.getAddress();
-        } catch (RemoteException e) {Log.e(TAG, "", e);}
-        return null;
+        return mAddress;
     }
 
     /**
-     * Get the friendly Bluetooth name of this device.
+     * Get the friendly Bluetooth name of the remote device.
      *
-     * This name is visible to remote Bluetooth devices. Currently it is only
-     * possible to retrieve the Bluetooth name when Bluetooth is enabled.
+     * <p>The local adapter will automatically retrieve remote names when
+     * performing a device scan, and will cache them. This method just returns
+     * the name for this device from the cache.
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH}
      *
      * @return the Bluetooth name, or null if there was a problem.
      */
     public String getName() {
         try {
-            return mService.getName();
+            return sService.getRemoteName(mAddress);
         } catch (RemoteException e) {Log.e(TAG, "", e);}
         return null;
     }
 
     /**
-     * Set the friendly Bluetooth name of this device.
+     * Start the bonding (pairing) process with the remote device.
+     * <p>This is an asynchronous call, it will return immediately. Register
+     * for {@link #ACTION_BOND_STATE_CHANGED} intents to be notified when
+     * the bonding process completes, and its result.
+     * <p>Android system services will handle the necessary user interactions
+     * to confirm and complete the bonding process.
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN}.
      *
-     * This name is visible to remote Bluetooth devices. The Bluetooth Service
-     * is responsible for persisting this name.
-     *
-     * @param name the name to set
-     * @return     true, if the name was successfully set. False otherwise.
+     * @return false on immediate error, true if bonding will begin
+     * @hide
      */
-    public boolean setName(String name) {
+    public boolean createBond() {
         try {
-            return mService.setName(name);
-        } catch (RemoteException e) {Log.e(TAG, "", e);}
-        return false;
-    }
-
-    public String getVersion() {
-        try {
-            return mService.getVersion();
-        } catch (RemoteException e) {Log.e(TAG, "", e);}
-        return null;
-    }
-    public String getRevision() {
-        try {
-            return mService.getRevision();
-        } catch (RemoteException e) {Log.e(TAG, "", e);}
-        return null;
-    }
-    public String getManufacturer() {
-        try {
-            return mService.getManufacturer();
-        } catch (RemoteException e) {Log.e(TAG, "", e);}
-        return null;
-    }
-    public String getCompany() {
-        try {
-            return mService.getCompany();
-        } catch (RemoteException e) {Log.e(TAG, "", e);}
-        return null;
-    }
-
-    /**
-     * Get the current scan mode.
-     * Used to determine if the local device is connectable and/or discoverable
-     * @return Scan mode, one of SCAN_MODE_* or an error code
-     */
-    public int getScanMode() {
-        try {
-            return mService.getScanMode();
-        } catch (RemoteException e) {Log.e(TAG, "", e);}
-        return BluetoothError.ERROR_IPC;
-    }
-
-    /**
-     * Set the current scan mode.
-     * Used to make the local device connectable and/or discoverable
-     * @param scanMode One of SCAN_MODE_*
-     */
-    public void setScanMode(int scanMode) {
-        try {
-            mService.setScanMode(scanMode);
-        } catch (RemoteException e) {Log.e(TAG, "", e);}
-    }
-
-    public int getDiscoverableTimeout() {
-        try {
-            return mService.getDiscoverableTimeout();
-        } catch (RemoteException e) {Log.e(TAG, "", e);}
-        return -1;
-    }
-    public void setDiscoverableTimeout(int timeout) {
-        try {
-            mService.setDiscoverableTimeout(timeout);
-        } catch (RemoteException e) {Log.e(TAG, "", e);}
-    }
-
-    public boolean startDiscovery() {
-        return startDiscovery(true);
-    }
-    public boolean startDiscovery(boolean resolveNames) {
-        try {
-            return mService.startDiscovery(resolveNames);
-        } catch (RemoteException e) {Log.e(TAG, "", e);}
-        return false;
-    }
-
-    public void cancelDiscovery() {
-        try {
-            mService.cancelDiscovery();
-        } catch (RemoteException e) {Log.e(TAG, "", e);}
-    }
-
-    public boolean isDiscovering() {
-        try {
-            return mService.isDiscovering();
-        } catch (RemoteException e) {Log.e(TAG, "", e);}
-        return false;
-    }
-
-    public boolean startPeriodicDiscovery() {
-        try {
-            return mService.startPeriodicDiscovery();
-        } catch (RemoteException e) {Log.e(TAG, "", e);}
-        return false;
-    }
-    public boolean stopPeriodicDiscovery() {
-        try {
-            return mService.stopPeriodicDiscovery();
-        } catch (RemoteException e) {Log.e(TAG, "", e);}
-        return false;
-    }
-    public boolean isPeriodicDiscovery() {
-        try {
-            return mService.isPeriodicDiscovery();
-        } catch (RemoteException e) {Log.e(TAG, "", e);}
-        return false;
-    }
-
-    public String[] listRemoteDevices() {
-        try {
-            return mService.listRemoteDevices();
-        } catch (RemoteException e) {Log.e(TAG, "", e);}
-        return null;
-    }
-
-    /**
-     * List remote devices that have a low level (ACL) connection.
-     *
-     * RFCOMM, SDP and L2CAP are all built on ACL connections. Devices can have
-     * an ACL connection even when not paired - this is common for SDP queries
-     * or for in-progress pairing requests.
-     *
-     * In most cases you probably want to test if a higher level protocol is
-     * connected, rather than testing ACL connections.
-     *
-     * @return bluetooth hardware addresses of remote devices with a current
-     *         ACL connection. Array size is 0 if no devices have a
-     *         connection. Null on error.
-     */
-    public String[] listAclConnections() {
-        try {
-            return mService.listAclConnections();
-        } catch (RemoteException e) {Log.e(TAG, "", e);}
-        return null;
-    }
-
-    /**
-     * Check if a specified remote device has a low level (ACL) connection.
-     *
-     * RFCOMM, SDP and L2CAP are all built on ACL connections. Devices can have
-     * an ACL connection even when not paired - this is common for SDP queries
-     * or for in-progress pairing requests.
-     *
-     * In most cases you probably want to test if a higher level protocol is
-     * connected, rather than testing ACL connections.
-     *
-     * @param address the Bluetooth hardware address you want to check.
-     * @return true if there is an ACL connection, false otherwise and on
-     *         error.
-     */
-    public boolean isAclConnected(String address) {
-        try {
-            return mService.isAclConnected(address);
+            return sService.createBond(mAddress);
         } catch (RemoteException e) {Log.e(TAG, "", e);}
         return false;
     }
 
     /**
-     * Perform a low level (ACL) disconnection of a remote device.
+     * Cancel an in-progress bonding request started with {@link #createBond}.
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN}.
      *
-     * This forcably disconnects the ACL layer connection to a remote device,
-     * which will cause all RFCOMM, SDP and L2CAP connections to this remote
-     * device to close.
-     *
-     * @param address the Bluetooth hardware address you want to disconnect.
-     * @return true if the device was disconnected, false otherwise and on
-     *         error.
+     * @return true on sucess, false on error
+     * @hide
      */
-    public boolean disconnectRemoteDeviceAcl(String address) {
+    public boolean cancelBondProcess() {
         try {
-            return mService.disconnectRemoteDeviceAcl(address);
+            return sService.cancelBondProcess(mAddress);
         } catch (RemoteException e) {Log.e(TAG, "", e);}
         return false;
     }
 
     /**
-     * Create a bonding with a remote bluetooth device.
+     * Remove bond (pairing) with the remote device.
+     * <p>Delete the link key associated with the remote device, and
+     * immediately terminate connections to that device that require
+     * authentication and encryption.
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN}.
      *
-     * This is an asynchronous call. The result of this bonding attempt can be
-     * observed through BluetoothIntent.BOND_STATE_CHANGED_ACTION intents.
-     *
-     * @param address the remote device Bluetooth address.
-     * @return false If there was an immediate problem creating the bonding,
-     *         true otherwise.
+     * @return true on sucess, false on error
+     * @hide
      */
-    public boolean createBond(String address) {
+    public boolean removeBond() {
         try {
-            return mService.createBond(address);
+            return sService.removeBond(mAddress);
         } catch (RemoteException e) {Log.e(TAG, "", e);}
         return false;
     }
 
     /**
-     * Cancel an in-progress bonding request started with createBond.
+     * Get the bond state of the remote device.
+     * <p>Possible values for the bond state are:
+     * {@link #BOND_NONE},
+     * {@link #BOND_BONDING},
+     * {@link #BOND_BONDED}.
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH}.
+     *
+     * @return the bond state
      */
-    public boolean cancelBondProcess(String address) {
+    public int getBondState() {
         try {
-            return mService.cancelBondProcess(address);
+            return sService.getBondState(mAddress);
         } catch (RemoteException e) {Log.e(TAG, "", e);}
-        return false;
+        return BOND_NONE;
     }
 
     /**
-     * Remove an already exisiting bonding (delete the link key).
+     * Get the Bluetooth class of the remote device.
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH}.
+     *
+     * @return Bluetooth class object, or null on error
      */
-    public boolean removeBond(String address) {
+    public BluetoothClass getBluetoothClass() {
         try {
-            return mService.removeBond(address);
-        } catch (RemoteException e) {Log.e(TAG, "", e);}
-        return false;
-    }
-
-    /**
-     * List remote devices that are bonded (paired) to the local device.
-     *
-     * Bonding (pairing) is the process by which the user enters a pin code for
-     * the device, which generates a shared link key, allowing for
-     * authentication and encryption of future connections. In Android we
-     * require bonding before RFCOMM or SCO connections can be made to a remote
-     * device.
-     *
-     * This function lists which remote devices we have a link key for. It does
-     * not cause any RF transmission, and does not check if the remote device
-     * still has it's link key with us. If the other side no longer has its
-     * link key then the RFCOMM or SCO connection attempt will result in an
-     * error.
-     *
-     * This function does not check if the remote device is in range.
-     *
-     * Remote devices that have an in-progress bonding attempt are not
-     * returned.
-     *
-     * @return bluetooth hardware addresses of remote devices that are
-     *         bonded. Array size is 0 if no devices are bonded. Null on error.
-     */
-    public String[] listBonds() {
-        try {
-            return mService.listBonds();
+            int classInt = sService.getRemoteClass(mAddress);
+            if (classInt == BluetoothClass.ERROR) return null;
+            return new BluetoothClass(classInt);
         } catch (RemoteException e) {Log.e(TAG, "", e);}
         return null;
     }
 
     /**
-     * Get the bonding state of a remote device.
-     *
-     * Result is one of:
-     * BluetoothError.*
-     * BOND_*
-     *
-     * @param address Bluetooth hardware address of the remote device to check.
-     * @return Result code
+     * Get trust state of a remote device.
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH}.
+     * @hide
      */
-    public int getBondState(String address) {
+    public boolean getTrustState() {
         try {
-            return mService.getBondState(address);
-        } catch (RemoteException e) {Log.e(TAG, "", e);}
-        return BluetoothError.ERROR_IPC;
-    }
-
-    public String getRemoteName(String address) {
-        try {
-            return mService.getRemoteName(address);
-        } catch (RemoteException e) {Log.e(TAG, "", e);}
-        return null;
-    }
-
-    public String getRemoteVersion(String address) {
-        try {
-            return mService.getRemoteVersion(address);
-        } catch (RemoteException e) {Log.e(TAG, "", e);}
-        return null;
-    }
-    public String getRemoteRevision(String address) {
-        try {
-            return mService.getRemoteRevision(address);
-        } catch (RemoteException e) {Log.e(TAG, "", e);}
-        return null;
-    }
-    public String getRemoteManufacturer(String address) {
-        try {
-            return mService.getRemoteManufacturer(address);
-        } catch (RemoteException e) {Log.e(TAG, "", e);}
-        return null;
-    }
-    public String getRemoteCompany(String address) {
-        try {
-            return mService.getRemoteCompany(address);
-        } catch (RemoteException e) {Log.e(TAG, "", e);}
-        return null;
-    }
-
-    /**
-     * Returns the RFCOMM channel associated with the 16-byte UUID on
-     * the remote Bluetooth address.
-     *
-     * Performs a SDP ServiceSearchAttributeRequest transaction. The provided
-     * uuid is verified in the returned record. If there was a problem, or the
-     * specified uuid does not exist, -1 is returned.
-     */
-    public boolean getRemoteServiceChannel(String address, short uuid16,
-            IBluetoothDeviceCallback callback) {
-        try {
-            return mService.getRemoteServiceChannel(address, uuid16, callback);
-        } catch (RemoteException e) {Log.e(TAG, "", e);}
+            return sService.getTrustState(mAddress);
+        } catch (RemoteException e) {
+            Log.e(TAG, "", e);
+        }
         return false;
     }
 
     /**
-     * Get the major, minor and servics classes of a remote device.
-     * These classes are encoded as a 32-bit integer. See BluetoothClass.
-     * @param address remote device
-     * @return 32-bit class suitable for use with BluetoothClass, or
-     *         BluetoothClass.ERROR on error
+     * Set trust state for a remote device.
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN}.
+     * @param value the trust state value (true or false)
+     * @hide
      */
-    public int getRemoteClass(String address) {
+    public boolean setTrust(boolean value) {
         try {
-            return mService.getRemoteClass(address);
-        } catch (RemoteException e) {Log.e(TAG, "", e);}
-        return BluetoothClass.ERROR;
+            return sService.setTrust(mAddress, value);
+        } catch (RemoteException e) {
+            Log.e(TAG, "", e);
+        }
+        return false;
     }
 
-    public byte[] getRemoteFeatures(String address) {
+    /** @hide */
+     public ParcelUuid[] getUuids() {
         try {
-            return mService.getRemoteFeatures(address);
-        } catch (RemoteException e) {Log.e(TAG, "", e);}
-        return null;
-    }
-    public String lastSeen(String address) {
-        try {
-            return mService.lastSeen(address);
-        } catch (RemoteException e) {Log.e(TAG, "", e);}
-        return null;
-    }
-    public String lastUsed(String address) {
-        try {
-            return mService.lastUsed(address);
+            return sService.getRemoteUuids(mAddress);
         } catch (RemoteException e) {Log.e(TAG, "", e);}
         return null;
     }
 
-    public boolean setPin(String address, byte[] pin) {
+     /**
+      *  Perform a SDP query on the remote device to get the UUIDs
+      *  supported. This API is asynchronous and an Intent is sent,
+      *  with the UUIDs supported by the remote end. If there is an error
+      *  in getting the SDP records or if the process takes a long time,
+      *  an Intent is sent with the UUIDs that is currently present in the
+      *  cache. Clients should use the {@link getUuids} to get UUIDs
+      *  is SDP is not to be performed.
+      *
+      *  @return False if the sanity check fails, True if the process
+      *               of initiating an ACL connection to the remote device
+      *               was started.
+      *  @hide
+      */
+     public boolean fetchUuidsWithSdp() {
         try {
-            return mService.setPin(address, pin);
+            return sService.fetchRemoteUuids(mAddress, null, null);
         } catch (RemoteException e) {Log.e(TAG, "", e);}
         return false;
     }
-    public boolean cancelPin(String address) {
+
+    /** @hide */
+    public int getServiceChannel(ParcelUuid uuid) {
+         try {
+             return sService.getRemoteServiceChannel(mAddress, uuid);
+         } catch (RemoteException e) {Log.e(TAG, "", e);}
+         return BluetoothDevice.ERROR;
+    }
+
+    /** @hide */
+    public boolean setPin(byte[] pin) {
         try {
-            return mService.cancelPin(address);
+            return sService.setPin(mAddress, pin);
         } catch (RemoteException e) {Log.e(TAG, "", e);}
         return false;
+    }
+
+    /** @hide */
+    public boolean setPasskey(int passkey) {
+        try {
+            return sService.setPasskey(mAddress, passkey);
+        } catch (RemoteException e) {Log.e(TAG, "", e);}
+        return false;
+    }
+
+    /** @hide */
+    public boolean setPairingConfirmation(boolean confirm) {
+        try {
+            return sService.setPairingConfirmation(mAddress, confirm);
+        } catch (RemoteException e) {Log.e(TAG, "", e);}
+        return false;
+    }
+
+    /** @hide */
+    public boolean cancelPairingUserInput() {
+        try {
+            return sService.cancelPairingUserInput(mAddress);
+        } catch (RemoteException e) {Log.e(TAG, "", e);}
+        return false;
+    }
+
+    /**
+     * Create an RFCOMM {@link BluetoothSocket} ready to start a secure
+     * outgoing connection to this remote device on given channel.
+     * <p>The remote device will be authenticated and communication on this
+     * socket will be encrypted.
+     * <p>Use {@link BluetoothSocket#connect} to intiate the outgoing
+     * connection.
+     * <p>Valid RFCOMM channels are in range 1 to 30.
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH}
+     *
+     * @param channel RFCOMM channel to connect to
+     * @return a RFCOMM BluetoothServerSocket ready for an outgoing connection
+     * @throws IOException on error, for example Bluetooth not available, or
+     *                     insufficient permissions
+     * @hide
+     */
+    public BluetoothSocket createRfcommSocket(int channel) throws IOException {
+        return new BluetoothSocket(BluetoothSocket.TYPE_RFCOMM, -1, true, true, this, channel,
+                null);
+    }
+
+    /**
+     * Create an RFCOMM {@link BluetoothSocket} ready to start a secure
+     * outgoing connection to this remote device using SDP lookup of uuid.
+     * <p>This is designed to be used with {@link
+     * BluetoothAdapter#listenUsingRfcommWithServiceRecord} for peer-peer
+     * Bluetooth applications.
+     * <p>Use {@link BluetoothSocket#connect} to intiate the outgoing
+     * connection. This will also perform an SDP lookup of the given uuid to
+     * determine which channel to connect to.
+     * <p>The remote device will be authenticated and communication on this
+     * socket will be encrypted.
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH}
+     *
+     * @param uuid service record uuid to lookup RFCOMM channel
+     * @return a RFCOMM BluetoothServerSocket ready for an outgoing connection
+     * @throws IOException on error, for example Bluetooth not available, or
+     *                     insufficient permissions
+     */
+    public BluetoothSocket createRfcommSocketToServiceRecord(UUID uuid) throws IOException {
+        return new BluetoothSocket(BluetoothSocket.TYPE_RFCOMM, -1, true, true, this, -1,
+                new ParcelUuid(uuid));
+    }
+
+    /**
+     * Construct an insecure RFCOMM socket ready to start an outgoing
+     * connection.
+     * Call #connect on the returned #BluetoothSocket to begin the connection.
+     * The remote device will not be authenticated and communication on this
+     * socket will not be encrypted.
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN}
+     *
+     * @param port    remote port
+     * @return An RFCOMM BluetoothSocket
+     * @throws IOException On error, for example Bluetooth not available, or
+     *                     insufficient permissions.
+     * @hide
+     */
+    public BluetoothSocket createInsecureRfcommSocket(int port) throws IOException {
+        return new BluetoothSocket(BluetoothSocket.TYPE_RFCOMM, -1, false, false, this, port,
+                null);
+    }
+
+    /**
+     * Construct a SCO socket ready to start an outgoing connection.
+     * Call #connect on the returned #BluetoothSocket to begin the connection.
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN}
+     *
+     * @return a SCO BluetoothSocket
+     * @throws IOException on error, for example Bluetooth not available, or
+     *                     insufficient permissions.
+     * @hide
+     */
+    public BluetoothSocket createScoSocket() throws IOException {
+        return new BluetoothSocket(BluetoothSocket.TYPE_SCO, -1, true, true, this, -1, null);
     }
 
     /**
@@ -534,6 +708,7 @@ public class BluetoothDevice {
      * @param pin pin as java String
      * @return the pin code as a UTF8 byte array, or null if it is an invalid
      *         Bluetooth pin.
+     * @hide
      */
     public static byte[] convertPinToBytes(String pin) {
         if (pin == null) {
@@ -552,28 +727,4 @@ public class BluetoothDevice {
         return pinBytes;
     }
 
-    private static final int ADDRESS_LENGTH = 17;
-    /** Sanity check a bluetooth address, such as "00:43:A8:23:10:F0" */
-    public static boolean checkBluetoothAddress(String address) {
-        if (address == null || address.length() != ADDRESS_LENGTH) {
-            return false;
-        }
-        for (int i = 0; i < ADDRESS_LENGTH; i++) {
-            char c = address.charAt(i);
-            switch (i % 3) {
-            case 0:
-            case 1:
-                if (Character.digit(c, 16) != -1) {
-                    break;  // hex character, OK
-                }
-                return false;
-            case 2:
-                if (c == ':') {
-                    break;  // OK
-                }
-                return false;
-            }
-        }
-        return true;
-    }
 }

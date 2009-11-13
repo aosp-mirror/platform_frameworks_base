@@ -16,6 +16,8 @@
 
 package android.view;
 
+import com.android.internal.view.BaseIWindow;
+
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.CompatibilityInfo.Translator;
@@ -32,8 +34,9 @@ import android.os.ParcelFileDescriptor;
 import android.util.AttributeSet;
 import android.util.Config;
 import android.util.Log;
-import java.util.ArrayList;
 
+import java.lang.ref.WeakReference;
+import java.util.ArrayList;
 import java.util.concurrent.locks.ReentrantLock;
 import java.lang.ref.WeakReference;
 
@@ -121,6 +124,8 @@ public class SurfaceView extends View {
     };
     
     boolean mRequestedVisible = false;
+    boolean mWindowVisibility = false;
+    boolean mViewVisibility = false;
     int mRequestedWidth = -1;
     int mRequestedHeight = -1;
     int mRequestedFormat = PixelFormat.OPAQUE;
@@ -173,12 +178,22 @@ public class SurfaceView extends View {
         mSession = getWindowSession();
         mLayout.token = getWindowToken();
         mLayout.setTitle("SurfaceView");
+        mViewVisibility = getVisibility() == VISIBLE;
     }
 
     @Override
     protected void onWindowVisibilityChanged(int visibility) {
         super.onWindowVisibilityChanged(visibility);
-        mRequestedVisible = visibility == VISIBLE;
+        mWindowVisibility = visibility == VISIBLE;
+        mRequestedVisible = mWindowVisibility && mViewVisibility;
+        updateWindow(false);
+    }
+
+    @Override
+    public void setVisibility(int visibility) {
+        super.setVisibility(visibility);
+        mViewVisibility = visibility == VISIBLE;
+        mRequestedVisible = mWindowVisibility && mViewVisibility;
         updateWindow(false);
     }
     
@@ -221,6 +236,10 @@ public class SurfaceView extends View {
 
     @Override
     public boolean gatherTransparentRegion(Region region) {
+        if (mWindowType == WindowManager.LayoutParams.TYPE_APPLICATION_PANEL) {
+            return super.gatherTransparentRegion(region);
+        }
+        
         boolean opaque = true;
         if ((mPrivateFlags & SKIP_DRAW) == 0) {
             // this view draws, remove it from the transparent region
@@ -244,20 +263,24 @@ public class SurfaceView extends View {
 
     @Override
     public void draw(Canvas canvas) {
-        // draw() is not called when SKIP_DRAW is set
-        if ((mPrivateFlags & SKIP_DRAW) == 0) {
-            // punch a whole in the view-hierarchy below us
-            canvas.drawColor(0, PorterDuff.Mode.CLEAR);
+        if (mWindowType != WindowManager.LayoutParams.TYPE_APPLICATION_PANEL) {
+            // draw() is not called when SKIP_DRAW is set
+            if ((mPrivateFlags & SKIP_DRAW) == 0) {
+                // punch a whole in the view-hierarchy below us
+                canvas.drawColor(0, PorterDuff.Mode.CLEAR);
+            }
         }
         super.draw(canvas);
     }
 
     @Override
     protected void dispatchDraw(Canvas canvas) {
-        // if SKIP_DRAW is cleared, draw() has already punched a hole
-        if ((mPrivateFlags & SKIP_DRAW) == SKIP_DRAW) {
-            // punch a whole in the view-hierarchy below us
-            canvas.drawColor(0, PorterDuff.Mode.CLEAR);
+        if (mWindowType != WindowManager.LayoutParams.TYPE_APPLICATION_PANEL) {
+            // if SKIP_DRAW is cleared, draw() has already punched a hole
+            if ((mPrivateFlags & SKIP_DRAW) == SKIP_DRAW) {
+                // punch a whole in the view-hierarchy below us
+                canvas.drawColor(0, PorterDuff.Mode.CLEAR);
+            }
         }
         // reposition ourselves where the surface is 
         mHaveFrame = true;
@@ -265,6 +288,41 @@ public class SurfaceView extends View {
         super.dispatchDraw(canvas);
     }
 
+    /**
+     * Control whether the surface view's surface is placed on top of another
+     * regular surface view in the window (but still behind the window itself).
+     * This is typically used to place overlays on top of an underlying media
+     * surface view.
+     * 
+     * <p>Note that this must be set before the surface view's containing
+     * window is attached to the window manager.
+     * 
+     * <p>Calling this overrides any previous call to {@link #setZOrderOnTop}.
+     */
+    public void setZOrderMediaOverlay(boolean isMediaOverlay) {
+        mWindowType = isMediaOverlay
+                ? WindowManager.LayoutParams.TYPE_APPLICATION_MEDIA_OVERLAY
+                : WindowManager.LayoutParams.TYPE_APPLICATION_MEDIA;
+    }
+    
+    /**
+     * Control whether the surface view's surface is placed on top of its
+     * window.  Normally it is placed behind the window, to allow it to
+     * (for the most part) appear to composite with the views in the
+     * hierarchy.  By setting this, you cause it to be placed above the
+     * window.  This means that none of the contents of the window this
+     * SurfaceView is in will be visible on top of its surface.
+     * 
+     * <p>Note that this must be set before the surface view's containing
+     * window is attached to the window manager.
+     * 
+     * <p>Calling this overrides any previous call to {@link #setZOrderMediaOverlay}.
+     */
+    public void setZOrderOnTop(boolean onTop) {
+        mWindowType = onTop ? WindowManager.LayoutParams.TYPE_APPLICATION_PANEL
+                : WindowManager.LayoutParams.TYPE_APPLICATION_MEDIA;
+    }
+    
     /**
      * Hack to allow special layering of windows.  The type is one of the
      * types in WindowManager.LayoutParams.  This is a hack so:
@@ -279,7 +337,9 @@ public class SurfaceView extends View {
             return;
         }
         ViewRoot viewRoot = (ViewRoot) getRootView().getParent();
-        mTranslator = viewRoot.mTranslator;
+        if (viewRoot != null) {
+            mTranslator = viewRoot.mTranslator;
+        }
 
         Resources res = getContext().getResources();
         if (mTranslator != null || !res.getCompatibilityInfo().supportsScreen()) {
@@ -328,7 +388,9 @@ public class SurfaceView extends View {
                 }
                 
                 mLayout.format = mRequestedFormat;
-                mLayout.flags |=WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
+                mLayout.flags |=WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
+                              | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+                              | WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
                               | WindowManager.LayoutParams.FLAG_SCALED
                               | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
                               | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
@@ -434,7 +496,7 @@ public class SurfaceView extends View {
         updateWindow(false);
     }
 
-    private static class MyWindow extends IWindow.Stub {
+    private static class MyWindow extends BaseIWindow {
         private final WeakReference<SurfaceView> mSurfaceView;
 
         public MyWindow(SurfaceView surfaceView) {
@@ -476,7 +538,8 @@ public class SurfaceView extends View {
             }
         }
 
-        public void dispatchPointer(MotionEvent event, long eventTime) {
+        public void dispatchPointer(MotionEvent event, long eventTime,
+                boolean callWhenDone) {
             Log.w("SurfaceView", "Unexpected pointer event in surface: " + event);
             //if (mSession != null && mSurface != null) {
             //    try {
@@ -486,7 +549,8 @@ public class SurfaceView extends View {
             //}
         }
 
-        public void dispatchTrackball(MotionEvent event, long eventTime) {
+        public void dispatchTrackball(MotionEvent event, long eventTime,
+                boolean callWhenDone) {
             Log.w("SurfaceView", "Unexpected trackball event in surface: " + event);
             //if (mSession != null && mSurface != null) {
             //    try {
@@ -568,9 +632,14 @@ public class SurfaceView extends View {
 
         public void setType(int type) {
             switch (type) {
-            case SURFACE_TYPE_NORMAL:
             case SURFACE_TYPE_HARDWARE:
             case SURFACE_TYPE_GPU:
+                // these are deprecated, treat as "NORMAL"
+                type = SURFACE_TYPE_NORMAL;
+                break;
+            }
+            switch (type) {
+            case SURFACE_TYPE_NORMAL:
             case SURFACE_TYPE_PUSH_BUFFERS:
                 mRequestedType = type;
                 if (mWindow != null) {

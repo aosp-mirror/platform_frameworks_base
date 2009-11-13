@@ -30,6 +30,8 @@ public:
     int right;
     int bottom;
 
+    typedef int value_type;
+
     // we don't provide copy-ctor and operator= on purpose
     // because we want the compiler generated versions
 
@@ -46,7 +48,11 @@ public:
     }
 
     void makeInvalid();
-    
+
+    inline void clear() {
+        left = top = right = bottom = 0;
+    }
+
     // a valid rectangle has a non negative width and height
     inline bool isValid() const {
         return (width()>=0) && (height()>=0);

@@ -18,11 +18,12 @@
 #define ANDROID_IMEDIAPLAYER_H
 
 #include <utils/RefBase.h>
-#include <utils/IInterface.h>
-#include <utils/Parcel.h>
+#include <binder/IInterface.h>
+#include <binder/Parcel.h>
 
 namespace android {
 
+class Parcel;
 class ISurface;
 
 class IMediaPlayer: public IInterface
@@ -45,6 +46,36 @@ public:
     virtual status_t        setAudioStreamType(int type) = 0;
     virtual status_t        setLooping(int loop) = 0;
     virtual status_t        setVolume(float leftVolume, float rightVolume) = 0;
+
+    // Invoke a generic method on the player by using opaque parcels
+    // for the request and reply.
+    // @param request Parcel that must start with the media player
+    // interface token.
+    // @param[out] reply Parcel to hold the reply data. Cannot be null.
+    // @return OK if the invocation was made successfully.
+    virtual status_t        invoke(const Parcel& request, Parcel *reply) = 0;
+
+    // Set a new metadata filter.
+    // @param filter A set of allow and drop rules serialized in a Parcel.
+    // @return OK if the invocation was made successfully.
+    virtual status_t        setMetadataFilter(const Parcel& filter) = 0;
+
+    // Retrieve a set of metadata.
+    // @param update_only Include only the metadata that have changed
+    //                    since the last invocation of getMetadata.
+    //                    The set is built using the unfiltered
+    //                    notifications the native player sent to the
+    //                    MediaPlayerService during that period of
+    //                    time. If false, all the metadatas are considered.
+    // @param apply_filter If true, once the metadata set has been built based
+    //                     on the value update_only, the current filter is
+    //                     applied.
+    // @param[out] metadata On exit contains a set (possibly empty) of metadata.
+    //                      Valid only if the call returned OK.
+    // @return OK if the invocation was made successfully.
+    virtual status_t        getMetadata(bool update_only,
+                                        bool apply_filter,
+                                        Parcel *metadata) = 0;
 };
 
 // ----------------------------------------------------------------------------
@@ -61,4 +92,3 @@ public:
 }; // namespace android
 
 #endif // ANDROID_IMEDIAPLAYER_H
-

@@ -25,22 +25,35 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public abstract class FileObserver {
-    public static final int ACCESS = 0x00000001; /* File was accessed */
-    public static final int MODIFY = 0x00000002; /* File was modified */
-    public static final int ATTRIB = 0x00000004; /* Metadata changed */
-    public static final int CLOSE_WRITE = 0x00000008; /*  Writtable file was  closed */
-    public static final int CLOSE_NOWRITE = 0x00000010; /* Unwrittable file closed */
-    public static final int OPEN = 0x00000020; /* File was opened */
-    public static final int MOVED_FROM = 0x00000040; /* File was moved from X */
-    public static final int MOVED_TO = 0x00000080; /* File was moved to Y */
-    public static final int CREATE = 0x00000100; /* Subfile was created */
-    public static final int DELETE = 0x00000200; /* Subfile was deleted */
-    public static final int DELETE_SELF = 0x00000400; /* Self was deleted */
-    public static final int MOVE_SELF = 0x00000800; /* Self was moved */
+    /** File was accessed */
+    public static final int ACCESS = 0x00000001;
+    /** File was modified */
+    public static final int MODIFY = 0x00000002;
+    /** Metadata changed */
+    public static final int ATTRIB = 0x00000004;
+    /** Writable file was closed */
+    public static final int CLOSE_WRITE = 0x00000008;
+    /** Unwrittable file closed */
+    public static final int CLOSE_NOWRITE = 0x00000010;
+    /** File was opened */
+    public static final int OPEN = 0x00000020;
+    /** File was moved from X */
+    public static final int MOVED_FROM = 0x00000040;
+    /** File was moved to Y */
+    public static final int MOVED_TO = 0x00000080;
+    /** Subfile was created */
+    public static final int CREATE = 0x00000100;
+    /** Subfile was deleted */
+    public static final int DELETE = 0x00000200;
+    /** Self was deleted */
+    public static final int DELETE_SELF = 0x00000400;
+    /** Self was moved */
+    public static final int MOVE_SELF = 0x00000800;
+
     public static final int ALL_EVENTS = ACCESS | MODIFY | ATTRIB | CLOSE_WRITE 
             | CLOSE_NOWRITE | OPEN | MOVED_FROM | MOVED_TO | DELETE | CREATE
 	    | DELETE_SELF | MOVE_SELF;
-    
+
     private static final String LOG_TAG = "FileObserver";
 
     private static class ObserverThread extends Thread {

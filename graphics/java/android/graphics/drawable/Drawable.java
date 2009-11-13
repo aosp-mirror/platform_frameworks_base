@@ -102,7 +102,7 @@ public abstract class Drawable {
     private int[] mStateSet = StateSet.WILD_CARD;
     private int mLevel = 0;
     private int mChangingConfigurations = 0;
-    private Rect mBounds = ZERO_BOUNDS_RECT;
+    private Rect mBounds = ZERO_BOUNDS_RECT;  // lazily becomes a new Rect()
     /*package*/ Callback mCallback = null;
     private boolean mVisible = true;
 
@@ -654,7 +654,7 @@ public abstract class Drawable {
      * Create a drawable from an inputstream
      */
     public static Drawable createFromStream(InputStream is, String srcName) {
-        return createFromResourceStream(null, null, is, srcName);
+        return createFromResourceStream(null, null, is, srcName, null);
     }
 
     /**
@@ -663,6 +663,15 @@ public abstract class Drawable {
      */
     public static Drawable createFromResourceStream(Resources res, TypedValue value,
             InputStream is, String srcName) {
+        return createFromResourceStream(res, value, is, srcName, null);
+    }
+
+    /**
+     * Create a drawable from an inputstream, using the given resources and
+     * value to determine density information.
+     */
+    public static Drawable createFromResourceStream(Resources res, TypedValue value,
+            InputStream is, String srcName, BitmapFactory.Options opts) {
 
         if (is == null) {
             return null;
@@ -683,7 +692,7 @@ public abstract class Drawable {
         // an application in compatibility mode, without scaling those down
         // to the compatibility density only to have them scaled back up when
         // drawn to the screen.
-        BitmapFactory.Options opts = new BitmapFactory.Options();
+        if (opts == null) opts = new BitmapFactory.Options();
         opts.inScreenDensity = DisplayMetrics.DENSITY_DEVICE;
         Bitmap  bm = BitmapFactory.decodeResourceStream(res, value, is, pad, opts);
         if (bm != null) {
@@ -813,7 +822,26 @@ public abstract class Drawable {
     }
 
     public static abstract class ConstantState {
+        /**
+         * Create a new drawable without supplying resources the caller
+         * is running in.  Note that using this means the density-dependent
+         * drawables (like bitmaps) will not be able to update their target
+         * density correctly.
+         */
         public abstract Drawable newDrawable();
+        /**
+         * Create a new Drawable instance from its constant state.  This
+         * must be implemented for drawables that change based on the target
+         * density of their caller (that is depending on whether it is
+         * in compatibility mode).
+         */
+        public Drawable newDrawable(Resources res) {
+            return newDrawable();
+        }
+        /**
+         * Return a bit mask of configuration changes that will impact
+         * this drawable (and thus require completely reloading it).
+         */
         public abstract int getChangingConfigurations();
     }
 

@@ -36,6 +36,10 @@ public class Paint {
     private Typeface    mTypeface;
     private Xfermode    mXfermode;
 
+    private boolean     mHasCompatScaling;
+    private float       mCompatScaling;
+    private float       mInvCompatScaling;
+    
     private static final Style[] sStyleArray = {
         Style.FILL, Style.STROKE, Style.FILL_AND_STROKE
     };
@@ -189,6 +193,7 @@ public class Paint {
     public Paint(int flags) {
         mNativePaint = native_init();
         setFlags(flags | DEFAULT_PAINT_FLAGS);
+        mCompatScaling = mInvCompatScaling = 1;
     }
 
     /**
@@ -200,12 +205,17 @@ public class Paint {
      */
     public Paint(Paint paint) {
         mNativePaint = native_initWithPaint(paint.mNativePaint);
+        mHasCompatScaling = paint.mHasCompatScaling;
+        mCompatScaling = paint.mCompatScaling;
+        mInvCompatScaling = paint.mInvCompatScaling;
     }
 
     /** Restores the paint to its default settings. */
     public void reset() {
         native_reset(mNativePaint);
         setFlags(DEFAULT_PAINT_FLAGS);
+        mHasCompatScaling = false;
+        mCompatScaling = mInvCompatScaling = 1;
     }
     
     /**
@@ -225,9 +235,24 @@ public class Paint {
             mShader         = src.mShader;
             mTypeface       = src.mTypeface;
             mXfermode       = src.mXfermode;
+            mHasCompatScaling = src.mHasCompatScaling;
+            mCompatScaling    = src.mCompatScaling;
+            mInvCompatScaling = src.mInvCompatScaling;
         }
     }
 
+    /** @hide */
+    public void setCompatibilityScaling(float factor) {
+        if (factor == 1.0) {
+            mHasCompatScaling = false;
+            mCompatScaling = mInvCompatScaling = 1.0f;
+        } else {
+            mHasCompatScaling = true;
+            mCompatScaling = factor;
+            mInvCompatScaling = 1.0f/factor;
+        }
+    }
+    
     /**
      * Return the paint's flags. Use the Flag enum to test flag values.
      *
@@ -972,8 +997,17 @@ public class Paint {
      * @param count THe number of characters to measure, beginning with start
      * @return      The width of the text
      */
-    public native float measureText(char[] text, int index, int count);
+    public float measureText(char[] text, int index, int count) {
+        if (!mHasCompatScaling) return native_measureText(text, index, count);
+        final float oldSize = getTextSize();
+        setTextSize(oldSize*mCompatScaling);
+        float w = native_measureText(text, index, count);
+        setTextSize(oldSize);
+        return w*mInvCompatScaling;
+    }
 
+    private native float native_measureText(char[] text, int index, int count);
+    
     /**
      * Return the width of the text.
      *
@@ -982,16 +1016,34 @@ public class Paint {
      * @param end   1 beyond the index of the last character to measure
      * @return      The width of the text
      */
-    public native float measureText(String text, int start, int end);
+    public float measureText(String text, int start, int end) {
+        if (!mHasCompatScaling) return native_measureText(text, start, end);
+        final float oldSize = getTextSize();
+        setTextSize(oldSize*mCompatScaling);
+        float w = native_measureText(text, start, end);
+        setTextSize(oldSize);
+        return w*mInvCompatScaling;
+    }
 
+    private native float native_measureText(String text, int start, int end);
+    
     /**
      * Return the width of the text.
      *
      * @param text  The text to measure
      * @return      The width of the text
      */
-    public native float measureText(String text);
+    public float measureText(String text) {
+        if (!mHasCompatScaling) return native_measureText(text);
+        final float oldSize = getTextSize();
+        setTextSize(oldSize*mCompatScaling);
+        float w = native_measureText(text);
+        setTextSize(oldSize);
+        return w*mInvCompatScaling;
+    }
 
+    private native float native_measureText(String text);
+    
     /**
      * Return the width of the text.
      *
@@ -1013,10 +1065,10 @@ public class Paint {
         }
 
         char[] buf = TemporaryBuffer.obtain(end - start);
-    	TextUtils.getChars(text, start, end, buf, 0);
-    	float result = measureText(buf, 0, end - start);
+        TextUtils.getChars(text, start, end, buf, 0);
+        float result = measureText(buf, 0, end - start);
         TemporaryBuffer.recycle(buf);
-    	return result;
+        return result;
     }
     
     /**
@@ -1036,8 +1088,22 @@ public class Paint {
      * @return The number of chars that were measured. Will always be <=
      *         abs(count).
      */
-    public native int breakText(char[] text, int index, int count,
-                                float maxWidth, float[] measuredWidth);
+    public int breakText(char[] text, int index, int count,
+                                float maxWidth, float[] measuredWidth) {
+        if (!mHasCompatScaling) {
+            return native_breakText(text, index, count, maxWidth, measuredWidth);
+        }
+        final float oldSize = getTextSize();
+        setTextSize(oldSize*mCompatScaling);
+        int res = native_breakText(text, index, count, maxWidth*mCompatScaling,
+                measuredWidth);
+        setTextSize(oldSize);
+        if (measuredWidth != null) measuredWidth[0] *= mInvCompatScaling;
+        return res;
+    }
+
+    private native int native_breakText(char[] text, int index, int count,
+                                        float maxWidth, float[] measuredWidth);
 
     /**
      * Measure the text, stopping early if the measured width exceeds maxWidth.
@@ -1094,8 +1160,22 @@ public class Paint {
      * @return The number of chars that were measured. Will always be <=
      *         abs(count).
      */
-    public native int breakText(String text, boolean measureForwards,
-                                float maxWidth, float[] measuredWidth);
+    public int breakText(String text, boolean measureForwards,
+                                float maxWidth, float[] measuredWidth) {
+        if (!mHasCompatScaling) {
+            return native_breakText(text, measureForwards, maxWidth, measuredWidth);
+        }
+        final float oldSize = getTextSize();
+        setTextSize(oldSize*mCompatScaling);
+        int res = native_breakText(text, measureForwards, maxWidth*mCompatScaling,
+                measuredWidth);
+        setTextSize(oldSize);
+        if (measuredWidth != null) measuredWidth[0] *= mInvCompatScaling;
+        return res;
+    }
+
+    private native int native_breakText(String text, boolean measureForwards,
+                                        float maxWidth, float[] measuredWidth);
 
     /**
      * Return the advance widths for the characters in the string.
@@ -1113,7 +1193,18 @@ public class Paint {
                 || count > widths.length) {
             throw new ArrayIndexOutOfBoundsException();
         }
-        return native_getTextWidths(mNativePaint, text, index, count, widths);
+        
+        if (!mHasCompatScaling) {
+            return native_getTextWidths(mNativePaint, text, index, count, widths);
+        }
+        final float oldSize = getTextSize();
+        setTextSize(oldSize*mCompatScaling);
+        int res = native_getTextWidths(mNativePaint, text, index, count, widths);
+        setTextSize(oldSize);
+        for (int i=0; i<res; i++) {
+            widths[i] *= mInvCompatScaling;
+        }
+        return res;
     }
 
     /**
@@ -1164,7 +1255,18 @@ public class Paint {
         if (end - start > widths.length) {
             throw new ArrayIndexOutOfBoundsException();
         }
-        return native_getTextWidths(mNativePaint, text, start, end, widths);
+        
+        if (!mHasCompatScaling) {
+            return native_getTextWidths(mNativePaint, text, start, end, widths);
+        }
+        final float oldSize = getTextSize();
+        setTextSize(oldSize*mCompatScaling);
+        int res = native_getTextWidths(mNativePaint, text, start, end, widths);
+        setTextSize(oldSize);
+        for (int i=0; i<res; i++) {
+            widths[i] *= mInvCompatScaling;
+        }
+        return res;
     }
     
     /**

@@ -64,6 +64,7 @@ public class GpsXtraDownloader {
         
         if (count == 0) {
             Log.e(TAG, "No XTRA servers were specified in the GPS configuration");
+            return;
         } else {
             mXtraServers = new String[count];
             count = 0;

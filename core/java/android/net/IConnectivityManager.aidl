@@ -17,6 +17,7 @@
 package android.net;
 
 import android.net.NetworkInfo;
+import android.os.IBinder;
 
 /**
  * Interface that answers queries about, and allows changing, the
@@ -39,7 +40,8 @@ interface IConnectivityManager
 
     boolean setRadio(int networkType, boolean turnOn);
 
-    int startUsingNetworkFeature(int networkType, in String feature);
+    int startUsingNetworkFeature(int networkType, in String feature,
+            in IBinder binder);
 
     int stopUsingNetworkFeature(int networkType, in String feature);
 

@@ -25,7 +25,9 @@ import android.pim.DateException;
 
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Formatter;
 import java.util.GregorianCalendar;
+import java.util.Locale;
 import java.util.TimeZone;
 
 /**
@@ -1040,6 +1042,31 @@ public class DateUtils
 
     /**
      * Formats a date or a time range according to the local conventions.
+     * <p>
+     * Note that this is a convenience method. Using it involves creating an
+     * internal {@link java.util.Formatter} instance on-the-fly, which is
+     * somewhat costly in terms of memory and time. This is probably acceptable
+     * if you use the method only rarely, but if you rely on it for formatting a
+     * large number of dates, consider creating and reusing your own
+     * {@link java.util.Formatter} instance and use the version of
+     * {@link #formatDateRange(Context, long, long, int) formatDateRange}
+     * that takes a {@link java.util.Formatter}.
+     * 
+     * @param context the context is required only if the time is shown
+     * @param startMillis the start time in UTC milliseconds
+     * @param endMillis the end time in UTC milliseconds
+     * @param flags a bit mask of options See
+     * {@link #formatDateRange(Context, long, long, int) formatDateRange}
+     * @return a string containing the formatted date/time range.
+     */
+    public static String formatDateRange(Context context, long startMillis,
+            long endMillis, int flags) {
+        Formatter f = new Formatter(new StringBuilder(50), Locale.getDefault());
+        return formatDateRange(context, f, startMillis, endMillis, flags).toString();
+    }
+
+    /**
+     * Formats a date or a time range according to the local conventions.
      * 
      * <p>
      * Example output strings (date formats in these examples are shown using
@@ -1181,14 +1208,17 @@ public class DateUtils
      * instead of "December 31, 2008".
      * 
      * @param context the context is required only if the time is shown
+     * @param formatter the Formatter used for formatting the date range.
+     * Note: be sure to call setLength(0) on StringBuilder passed to
+     * the Formatter constructor unless you want the results to accumulate.
      * @param startMillis the start time in UTC milliseconds
      * @param endMillis the end time in UTC milliseconds
      * @param flags a bit mask of options
      *   
-     * @return a string containing the formatted date/time range.
+     * @return the formatter with the formatted date/time range appended to the string buffer.
      */
-    public static String formatDateRange(Context context, long startMillis,
-                long endMillis, int flags) {
+    public static Formatter formatDateRange(Context context, Formatter formatter, long startMillis,
+            long endMillis, int flags) {
         Resources res = Resources.getSystem();
         boolean showTime = (flags & FORMAT_SHOW_TIME) != 0;
         boolean showWeekDay = (flags & FORMAT_SHOW_WEEKDAY) != 0;
@@ -1423,8 +1453,7 @@ public class DateUtils
 
         if (noMonthDay && startMonthNum == endMonthNum) {
             // Example: "January, 2008"
-            String startDateString = startDate.format(defaultDateFormat);
-            return startDateString;
+            return formatter.format("%s", startDate.format(defaultDateFormat));
         }
 
         if (startYear != endYear || noMonthDay) {
@@ -1436,10 +1465,9 @@ public class DateUtils
 
             // The values that are used in a fullFormat string are specified
             // by position.
-            dateRange = String.format(fullFormat,
+            return formatter.format(fullFormat,
                     startWeekDayString, startDateString, startTimeString,
                     endWeekDayString, endDateString, endTimeString);
-            return dateRange;
         }
 
         // Get the month, day, and year strings for the start and end dates
@@ -1476,12 +1504,11 @@ public class DateUtils
 
             // The values that are used in a fullFormat string are specified
             // by position.
-            dateRange = String.format(fullFormat,
+            return formatter.format(fullFormat,
                     startWeekDayString, startMonthString, startMonthDayString,
                     startYearString, startTimeString,
                     endWeekDayString, endMonthString, endMonthDayString,
                     endYearString, endTimeString);
-            return dateRange;
         }
 
         if (startDay != endDay) {
@@ -1496,12 +1523,11 @@ public class DateUtils
 
             // The values that are used in a fullFormat string are specified
             // by position.
-            dateRange = String.format(fullFormat,
+            return formatter.format(fullFormat,
                     startWeekDayString, startMonthString, startMonthDayString,
                     startYearString, startTimeString,
                     endWeekDayString, endMonthString, endMonthDayString,
                     endYearString, endTimeString);
-            return dateRange;
         }
 
         // Same start and end day
@@ -1522,6 +1548,7 @@ public class DateUtils
             } else {
                 // Example: "10:00 - 11:00 am"
                 String timeFormat = res.getString(com.android.internal.R.string.time1_time2);
+                // Don't use the user supplied Formatter because the result will pollute the buffer.
                 timeString = String.format(timeFormat, startTimeString, endTimeString);
             }
         }
@@ -1545,7 +1572,7 @@ public class DateUtils
                     fullFormat = res.getString(com.android.internal.R.string.time_date);
                 } else {
                     // Example: "Oct 9"
-                    return dateString;
+                    return formatter.format("%s", dateString);
                 }
             }
         } else if (showWeekDay) {
@@ -1554,16 +1581,15 @@ public class DateUtils
                 fullFormat = res.getString(com.android.internal.R.string.time_wday);
             } else {
                 // Example: "Tue"
-                return startWeekDayString;
+                return formatter.format("%s", startWeekDayString);
             }
         } else if (showTime) {
-            return timeString;
+            return formatter.format("%s", timeString);
         }
 
         // The values that are used in a fullFormat string are specified
         // by position.
-        dateRange = String.format(fullFormat, timeString, startWeekDayString, dateString);
-        return dateRange;
+        return formatter.format(fullFormat, timeString, startWeekDayString, dateString);
     }
 
     /**

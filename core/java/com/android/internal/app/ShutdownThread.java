@@ -21,8 +21,8 @@ import android.app.ActivityManagerNative;
 import android.app.IActivityManager;
 import android.app.ProgressDialog;
 import android.app.AlertDialog;
-import android.bluetooth.BluetoothDevice;
-import android.bluetooth.IBluetoothDevice;
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.IBluetooth;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -32,6 +32,7 @@ import android.os.RemoteException;
 import android.os.Power;
 import android.os.ServiceManager;
 import android.os.SystemClock;
+
 import com.android.internal.telephony.ITelephony;
 import android.util.Log;
 import android.view.WindowManager;
@@ -91,7 +92,10 @@ public final class ShutdownThread extends Thread {
                     .setNegativeButton(com.android.internal.R.string.no, null)
                     .create();
             dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG);
-            dialog.getWindow().addFlags(WindowManager.LayoutParams.FLAG_BLUR_BEHIND);
+            if (!context.getResources().getBoolean(
+                    com.android.internal.R.bool.config_sf_slowBlur)) {
+                dialog.getWindow().addFlags(WindowManager.LayoutParams.FLAG_BLUR_BEHIND);
+            }
             dialog.show();
         } else {
             beginShutdownSequence(context);
@@ -111,7 +115,10 @@ public final class ShutdownThread extends Thread {
         pd.setIndeterminate(true);
         pd.setCancelable(false);
         pd.getWindow().setType(WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG);
-        pd.getWindow().addFlags(WindowManager.LayoutParams.FLAG_BLUR_BEHIND);
+        if (!context.getResources().getBoolean(
+                com.android.internal.R.bool.config_sf_slowBlur)) {
+            pd.getWindow().addFlags(WindowManager.LayoutParams.FLAG_BLUR_BEHIND);
+        }
 
         pd.show();
 
@@ -179,13 +186,13 @@ public final class ShutdownThread extends Thread {
         
         final ITelephony phone =
                 ITelephony.Stub.asInterface(ServiceManager.checkService("phone"));
-        final IBluetoothDevice bluetooth =
-                IBluetoothDevice.Stub.asInterface(ServiceManager.checkService(
-                        Context.BLUETOOTH_SERVICE));
+        final IBluetooth bluetooth =
+                IBluetooth.Stub.asInterface(ServiceManager.checkService(
+                        BluetoothAdapter.BLUETOOTH_SERVICE));
         
         try {
             bluetoothOff = bluetooth == null ||
-                           bluetooth.getBluetoothState() == BluetoothDevice.BLUETOOTH_STATE_OFF;
+                           bluetooth.getBluetoothState() == BluetoothAdapter.STATE_OFF;
             if (!bluetoothOff) {
                 Log.w(TAG, "Disabling Bluetooth...");
                 bluetooth.disable(false);  // disable but don't persist new state
@@ -213,7 +220,7 @@ public final class ShutdownThread extends Thread {
             if (!bluetoothOff) {
                 try {
                     bluetoothOff =
-                            bluetooth.getBluetoothState() == BluetoothDevice.BLUETOOTH_STATE_OFF;
+                            bluetooth.getBluetoothState() == BluetoothAdapter.STATE_OFF;
                 } catch (RemoteException ex) {
                     Log.e(TAG, "RemoteException during bluetooth shutdown", ex);
                     bluetoothOff = true;

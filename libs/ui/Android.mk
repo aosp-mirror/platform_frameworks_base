@@ -4,10 +4,13 @@ include $(CLEAR_VARS)
 LOCAL_SRC_FILES:= \
 	Camera.cpp \
 	CameraParameters.cpp \
-	EGLDisplaySurface.cpp \
-	EGLNativeWindowSurface.cpp \
+	EGLUtils.cpp \
 	EventHub.cpp \
 	EventRecurrence.cpp \
+	FramebufferNativeWindow.cpp \
+	GraphicBuffer.cpp \
+	GraphicBufferAllocator.cpp \
+	GraphicBufferMapper.cpp \
 	KeyLayoutMap.cpp \
 	KeyCharacterMap.cpp \
 	ICamera.cpp \
@@ -22,18 +25,23 @@ LOCAL_SRC_FILES:= \
 	PixelFormat.cpp \
 	Rect.cpp \
 	Region.cpp \
+	SharedBufferStack.cpp \
 	Surface.cpp \
-	SurfaceComposerClient.cpp \
-	SurfaceFlingerSynchro.cpp 
+	SurfaceComposerClient.cpp
 
 LOCAL_SHARED_LIBRARIES := \
-	libcorecg \
 	libcutils \
 	libutils \
+	libEGL \
+	libbinder \
 	libpixelflinger \
 	libhardware \
 	libhardware_legacy
 
 LOCAL_MODULE:= libui
+
+ifeq ($(TARGET_SIMULATOR),true)
+    LOCAL_LDLIBS += -lpthread
+endif
 
 include $(BUILD_SHARED_LIBRARY)

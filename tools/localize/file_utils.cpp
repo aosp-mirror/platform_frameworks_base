@@ -8,6 +8,9 @@
 #include <sys/fcntl.h>
 #include <sys/stat.h>
 #include <errno.h>
+#include <string.h>
+#include <stdlib.h>
+#include <cstdio>
 #include "log.h"
 
 using namespace android;

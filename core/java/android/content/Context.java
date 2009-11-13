@@ -488,90 +488,52 @@ public abstract class Context {
     public abstract String[] databaseList();
 
     /**
-     * Like {@link #peekWallpaper}, but always returns a valid Drawable.  If
-     * no wallpaper is set, the system default wallpaper is returned.
-     *
-     * @return Returns a Drawable object that will draw the wallpaper.
+     * @deprecated Use {@link android.app.WallpaperManager#getDrawable
+     * WallpaperManager.get()} instead.
      */
+    @Deprecated
     public abstract Drawable getWallpaper();
 
     /**
-     * Retrieve the current system wallpaper.  This is returned as an
-     * abstract Drawable that you can install in a View to display whatever
-     * wallpaper the user has currently set.  If there is no wallpaper set,
-     * a null pointer is returned.
-     *
-     * @return Returns a Drawable object that will draw the wallpaper or a
-     * null pointer if these is none.
+     * @deprecated Use {@link android.app.WallpaperManager#peekDrawable
+     * WallpaperManager.peek()} instead.
      */
+    @Deprecated
     public abstract Drawable peekWallpaper();
 
     /**
-     * Returns the desired minimum width for the wallpaper. Callers of
-     * {@link #setWallpaper(android.graphics.Bitmap)} or
-     * {@link #setWallpaper(java.io.InputStream)} should check this value
-     * beforehand to make sure the supplied wallpaper respects the desired
-     * minimum width.
-     *
-     * If the returned value is <= 0, the caller should use the width of
-     * the default display instead.
-     *
-     * @return The desired minimum width for the wallpaper. This value should
-     * be honored by applications that set the wallpaper but it is not
-     * mandatory.
+     * @deprecated Use {@link android.app.WallpaperManager#getDesiredMinimumWidth()
+     * WallpaperManager.getDesiredMinimumWidth()} instead.
      */
+    @Deprecated
     public abstract int getWallpaperDesiredMinimumWidth();
 
     /**
-     * Returns the desired minimum height for the wallpaper. Callers of
-     * {@link #setWallpaper(android.graphics.Bitmap)} or
-     * {@link #setWallpaper(java.io.InputStream)} should check this value
-     * beforehand to make sure the supplied wallpaper respects the desired
-     * minimum height.
-     *
-     * If the returned value is <= 0, the caller should use the height of
-     * the default display instead.
-     *
-     * @return The desired minimum height for the wallpaper. This value should
-     * be honored by applications that set the wallpaper but it is not
-     * mandatory.
+     * @deprecated Use {@link android.app.WallpaperManager#getDesiredMinimumHeight()
+     * WallpaperManager.getDesiredMinimumHeight()} instead.
      */
+    @Deprecated
     public abstract int getWallpaperDesiredMinimumHeight();
 
     /**
-     * Change the current system wallpaper to a bitmap.  The given bitmap is
-     * converted to a PNG and stored as the wallpaper.  On success, the intent
-     * {@link Intent#ACTION_WALLPAPER_CHANGED} is broadcast.
-     *
-     * @param bitmap The bitmap to save.
-     *
-     * @throws IOException If an error occurs reverting to the default
-     * wallpaper.
+     * @deprecated Use {@link android.app.WallpaperManager#setBitmap(Bitmap)
+     * WallpaperManager.set()} instead.
      */
+    @Deprecated
     public abstract void setWallpaper(Bitmap bitmap) throws IOException;
 
     /**
-     * Change the current system wallpaper to a specific byte stream.  The
-     * give InputStream is copied into persistent storage and will now be
-     * used as the wallpaper.  Currently it must be either a JPEG or PNG
-     * image.  On success, the intent {@link Intent#ACTION_WALLPAPER_CHANGED}
-     * is broadcast.
-     *
-     * @param data A stream containing the raw data to install as a wallpaper.
-     *
-     * @throws IOException If an error occurs reverting to the default
-     * wallpaper.
+     * @deprecated Use {@link android.app.WallpaperManager#setStream(InputStream)
+     * WallpaperManager.set()} instead.
      */
+    @Deprecated
     public abstract void setWallpaper(InputStream data) throws IOException;
 
     /**
-     * Remove any currently set wallpaper, reverting to the system's default
-     * wallpaper. On success, the intent {@link Intent#ACTION_WALLPAPER_CHANGED}
-     * is broadcast.
-     *
-     * @throws IOException If an error occurs reverting to the default
-     * wallpaper.
+     * @deprecated Use {@link android.app.WallpaperManager#clear
+     * WallpaperManager.clear()} instead.
      */
+    @Deprecated
     public abstract void clearWallpaper() throws IOException;
 
     /**
@@ -595,6 +557,27 @@ public abstract class Context {
      * @see PackageManager#resolveActivity
      */
     public abstract void startActivity(Intent intent);
+
+    /**
+     * Like {@link #startActivity(Intent)}, but taking a IntentSender
+     * to start.  If the IntentSender is for an activity, that activity will be started
+     * as if you had called the regular {@link #startActivity(Intent)}
+     * here; otherwise, its associated action will be executed (such as
+     * sending a broadcast) as if you had called
+     * {@link IntentSender#sendIntent IntentSender.sendIntent} on it.
+     * 
+     * @param intent The IntentSender to launch.
+     * @param fillInIntent If non-null, this will be provided as the
+     * intent parameter to {@link IntentSender#sendIntent}.
+     * @param flagsMask Intent flags in the original IntentSender that you
+     * would like to change.
+     * @param flagsValues Desired values for any bits set in
+     * <var>flagsMask</var>
+     * @param extraFlags Always set to 0.
+     */
+    public abstract void startIntentSender(IntentSender intent,
+            Intent fillInIntent, int flagsMask, int flagsValues, int extraFlags)
+            throws IntentSender.SendIntentException;
 
     /**
      * Broadcast the given intent to all interested BroadcastReceivers.  This
@@ -674,8 +657,7 @@ public abstract class Context {
      * supplying your own BroadcastReceiver when calling, which will be
      * treated as a final receiver at the end of the broadcast -- its
      * {@link BroadcastReceiver#onReceive} method will be called with
-     * the result values collected from the other receivers.  If you use
-     * an <var>resultReceiver</var> with this method, then the broadcast will
+     * the result values collected from the other receivers.  The broadcast will
      * be serialized in the same way as calling
      * {@link #sendOrderedBroadcast(Intent, String)}.
      *
@@ -706,6 +688,7 @@ public abstract class Context {
      * @see #sendBroadcast(Intent, String)
      * @see #sendOrderedBroadcast(Intent, String)
      * @see #sendStickyBroadcast(Intent)
+     * @see #sendStickyOrderedBroadcast(Intent, BroadcastReceiver, Handler, int, String, Bundle)
      * @see android.content.BroadcastReceiver
      * @see #registerReceiver
      * @see android.app.Activity#RESULT_OK
@@ -732,8 +715,55 @@ public abstract class Context {
      * be re-broadcast to future receivers.
      *
      * @see #sendBroadcast(Intent)
+     * @see #sendStickyOrderedBroadcast(Intent, BroadcastReceiver, Handler, int, String, Bundle)
      */
     public abstract void sendStickyBroadcast(Intent intent);
+    
+    /**
+     * Version of {@link #sendStickyBroadcast} that allows you to
+     * receive data back from the broadcast.  This is accomplished by
+     * supplying your own BroadcastReceiver when calling, which will be
+     * treated as a final receiver at the end of the broadcast -- its
+     * {@link BroadcastReceiver#onReceive} method will be called with
+     * the result values collected from the other receivers.  The broadcast will
+     * be serialized in the same way as calling
+     * {@link #sendOrderedBroadcast(Intent, String)}.
+     *
+     * <p>Like {@link #sendBroadcast(Intent)}, this method is
+     * asynchronous; it will return before
+     * resultReceiver.onReceive() is called.  Note that the sticky data
+     * stored is only the data you initially supply to the broadcast, not
+     * the result of any changes made by the receivers.
+     *
+     * <p>See {@link BroadcastReceiver} for more information on Intent broadcasts.
+     *
+     * @param intent The Intent to broadcast; all receivers matching this
+     *               Intent will receive the broadcast.
+     * @param resultReceiver Your own BroadcastReceiver to treat as the final
+     *                       receiver of the broadcast.
+     * @param scheduler A custom Handler with which to schedule the
+     *                  resultReceiver callback; if null it will be
+     *                  scheduled in the Context's main thread.
+     * @param initialCode An initial value for the result code.  Often
+     *                    Activity.RESULT_OK.
+     * @param initialData An initial value for the result data.  Often
+     *                    null.
+     * @param initialExtras An initial value for the result extras.  Often
+     *                      null.
+     *
+     * @see #sendBroadcast(Intent)
+     * @see #sendBroadcast(Intent, String)
+     * @see #sendOrderedBroadcast(Intent, String)
+     * @see #sendStickyBroadcast(Intent)
+     * @see android.content.BroadcastReceiver
+     * @see #registerReceiver
+     * @see android.app.Activity#RESULT_OK
+     */
+    public abstract void sendStickyOrderedBroadcast(Intent intent,
+            BroadcastReceiver resultReceiver,
+            Handler scheduler, int initialCode, String initialData,
+            Bundle initialExtras);
+
 
     /**
      * Remove the data previously sent with {@link #sendStickyBroadcast},
@@ -1110,6 +1140,16 @@ public abstract class Context {
     public static final String LAYOUT_INFLATER_SERVICE = "layout_inflater";
     /**
      * Use with {@link #getSystemService} to retrieve a
+     * {@link android.accounts.AccountManager} for receiving intents at a
+     * time of your choosing.
+     * TODO STOPSHIP perform a final review of the the account apis before shipping
+     *
+     * @see #getSystemService
+     * @see android.accounts.AccountManager
+     */
+    public static final String ACCOUNT_SERVICE = "account";
+    /**
+     * Use with {@link #getSystemService} to retrieve a
      * {@link android.app.ActivityManager} for interacting with the global
      * system state.
      *
@@ -1177,15 +1217,6 @@ public abstract class Context {
      * @see android.hardware.SensorManager
      */
     public static final String SENSOR_SERVICE = "sensor";
-    /**
-     * Use with {@link #getSystemService} to retrieve a {@link
-     * android.bluetooth.BluetoothDevice} for interacting with Bluetooth.
-     *
-     * @see #getSystemService
-     * @see android.bluetooth.BluetoothDevice
-     * @hide
-     */
-    public static final String BLUETOOTH_SERVICE = "bluetooth";
     /**
      * Use with {@link #getSystemService} to retrieve a
      * com.android.server.WallpaperService for accessing wallpapers.

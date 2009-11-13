@@ -113,7 +113,7 @@ public class IntentSender implements Parcelable {
             mHandler = handler;
         }
         public void performReceive(Intent intent, int resultCode,
-                String data, Bundle extras, boolean serialized) {
+                String data, Bundle extras, boolean serialized, boolean sticky) {
             mIntent = intent;
             mResultCode = resultCode;
             mResultData = data;
@@ -246,6 +246,11 @@ public class IntentSender implements Parcelable {
     public static IntentSender readIntentSenderOrNullFromParcel(Parcel in) {
         IBinder b = in.readStrongBinder();
         return b != null ? new IntentSender(b) : null;
+    }
+
+    /** @hide */
+    public IIntentSender getTarget() {
+        return mTarget;
     }
 
     /** @hide */

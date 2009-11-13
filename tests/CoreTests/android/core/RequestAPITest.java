@@ -72,7 +72,7 @@ public class RequestAPITest extends AndroidTestCase implements HttpConstants {
             RequestHandle handle =
                     mRequestQueue.queueRequest(
                             "http://localhost:8080/test1", "GET", headers, null,
-                            null, 0, false);
+                            null, 0);
 
             handle.waitUntilComplete();
             fail("expected exception not thrown");
@@ -121,7 +121,7 @@ public class RequestAPITest extends AndroidTestCase implements HttpConstants {
         mTestWebServer.setKeepAlive(false);
         RequestHandle handle = mRequestQueue.queueRequest(
                 "http://localhost:8080/test1", "GET", headers, null,
-                null, 0, false);
+                null, 0);
         handle.waitUntilComplete();
     }
 
@@ -197,7 +197,7 @@ public class RequestAPITest extends AndroidTestCase implements HttpConstants {
 
         RequestHandle handle = mRequestQueue.queueRequest(
                 "http://localhost:8080/test1", "GET", null, testEventHandler,
-                null, 0, false);
+                null, 0);
 
         Log.d(LOGTAG, "testGet - sent request. Waiting");
         handle.waitUntilComplete();
@@ -231,11 +231,11 @@ public class RequestAPITest extends AndroidTestCase implements HttpConstants {
 
         RequestHandle handle0 = mRequestQueue.queueRequest(
                 "http://localhost:8080/test1", "GET", null, testEventHandler,
-                null, 0, false);
+                null, 0);
         handle0.waitUntilComplete();
         RequestHandle handle1 = mRequestQueue.queueRequest(
                 "http://localhost:8080/test1", "GET", null, testEventHandler2,
-                null, 0, false);
+                null, 0);
         handle1.waitUntilComplete();
 
         /* It's not correct to use same listener for multiple
@@ -270,7 +270,7 @@ public class RequestAPITest extends AndroidTestCase implements HttpConstants {
 
         RequestHandle handle = mRequestQueue.queueRequest(
                 "http://localhost:8080/test1", "HEAD", null, testEventHandler,
-                null, 0, false);
+                null, 0);
 
         Log.d(LOGTAG, "testHead - sent request waiting");
         handle.waitUntilComplete();
@@ -297,7 +297,7 @@ public class RequestAPITest extends AndroidTestCase implements HttpConstants {
 
         RequestHandle handle = mRequestQueue.queueRequest(
                 "http://localhost:8080/test1", "GET", null, testEventHandler,
-                null, 0, false);
+                null, 0);
 
         Log.d(LOGTAG, "testChunked - sent request waiting");
         handle.waitUntilComplete();
@@ -330,7 +330,7 @@ public class RequestAPITest extends AndroidTestCase implements HttpConstants {
             Log.d(LOGTAG, testName + " start - rq = " + mRequestQueue);
 
             RequestHandle requestHandle = mRequestQueue.queueRequest(
-                    "http://localhost:8080/test1", "GET", null, testEventHandler, null, 0, false);
+                    "http://localhost:8080/test1", "GET", null, testEventHandler, null, 0);
             Log.d(LOGTAG, testName + " - sent request waiting");
 
             requestHandle.waitUntilComplete();
@@ -398,10 +398,10 @@ public class RequestAPITest extends AndroidTestCase implements HttpConstants {
         leh2.expectHeaders();
 
         RequestHandle handle0 = mRequestQueue.queueRequest(
-                "http://localhost:8080/test1", "GET", null, testEventHandler, null, 0, false);
+                "http://localhost:8080/test1", "GET", null, testEventHandler, null, 0);
         handle0.waitUntilComplete();
         RequestHandle handle1 = mRequestQueue.queueRequest(
-                "http://localhost:8080/test1", "HEAD", null, testEventHandler, null, 0, false);
+                "http://localhost:8080/test1", "HEAD", null, testEventHandler, null, 0);
 
         Log.d(LOGTAG, "testGetAndHead - sent request. Waiting");
         handle1.waitUntilComplete();
@@ -432,7 +432,7 @@ public class RequestAPITest extends AndroidTestCase implements HttpConstants {
         Log.d(LOGTAG, "testPost start - rq = " + mRequestQueue);
 
         RequestHandle handle = mRequestQueue.queueRequest(
-                "http://localhost:8080/test1", "POST", null, testEventHandler, null, 0, false);
+                "http://localhost:8080/test1", "POST", null, testEventHandler, null, 0);
 
         Log.d(LOGTAG, "testPost - sent request waiting");
         handle.waitUntilComplete();
@@ -470,7 +470,7 @@ public class RequestAPITest extends AndroidTestCase implements HttpConstants {
         InputStream bodyProvider = new ByteArrayInputStream(mBody.getBytes());
 
         RequestHandle handle = mRequestQueue.queueRequest(
-                "http://localhost:8080/test1", "POST", null, testEventHandler, bodyProvider, bodyLength, false);
+                "http://localhost:8080/test1", "POST", null, testEventHandler, bodyProvider, bodyLength);
 
         Log.d(LOGTAG, "testPostWithData - sent request waiting");
         handle.waitUntilComplete();

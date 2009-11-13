@@ -44,8 +44,11 @@ to "{@code http://schemas.android.com/apk/res/android}".</dd>
 
 <dt><a name="package"></a>{@code package}</dt>
 <dd>A full Java package name for the application.  The name should 
-be unique.  For example, applications published by Google could have 
-names in the form <code>com.google.app.<i>application_name</i></code>.
+be unique.  The name may contain uppercase or lowercase letters ('A'
+through 'Z'), numbers, and underscores ('_').  However, individual
+package name parts may only start with letters.  For example, applications
+published by Google could have names in the form
+<code>com.google.app.<i>application_name</i></code>.
 
 <p>
 The package name serves as a unique identifier for the application.  

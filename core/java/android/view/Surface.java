@@ -34,12 +34,18 @@ public class Surface implements Parcelable {
     /** Surface is created hidden */
     public static final int HIDDEN              = 0x00000004;
 
-    /** The surface is to be used by hardware accelerators or DMA engines */
+    /** The surface is to be used by hardware accelerators or DMA engines 
+     * @deprecated this is ignored, this value is set automatically when needed.
+     */
+    @Deprecated
     public static final int HARDWARE            = 0x00000010;
 
     /** Implies "HARDWARE", the surface is to be used by the GPU
      * additionally the backbuffer is never preserved for these
-     * surfaces. */
+     * surfaces. 
+     * @deprecated this is ignored, this value is set automatically when needed.
+     */
+    @Deprecated
     public static final int GPU                 = 0x00000028;
 
     /** The surface contains secure content, special measures will
@@ -135,6 +141,8 @@ public class Surface implements Parcelable {
     @SuppressWarnings("unused")
     private int mSurface;
     @SuppressWarnings("unused")
+    private int mSurfaceControl;
+    @SuppressWarnings("unused")
     private int mSaveCount;
     @SuppressWarnings("unused")
     private Canvas mCanvas;
@@ -173,7 +181,7 @@ public class Surface implements Parcelable {
     public Surface(SurfaceSession s,
             int pid, int display, int w, int h, int format, int flags)
         throws OutOfResourcesException {
-        mCanvas = new Canvas();
+        mCanvas = new CompatibleCanvas();
         init(s,pid,display,w,h,format,flags);
     }
 
@@ -238,7 +246,7 @@ public class Surface implements Parcelable {
     };
 
     /**
-     * Sets the display metrics used to provide canva's width/height in comaptibility mode.
+     * Sets the display metrics used to provide canva's width/height in compatibility mode.
      */
     void setCompatibleDisplayMetrics(DisplayMetrics metrics, Translator translator) {
         mCompatibleDisplayMetrics = metrics;
@@ -263,11 +271,16 @@ public class Surface implements Parcelable {
      */
     public native   boolean isValid();
     
-    /** Call this free the surface up. {@hide} */
-    public native   void clear();
+    /** Free all server-side state associated with this surface and
+     * release this object's reference. {@hide} */
+    public native void destroy();
+    
+    /** Release the local reference to the server-side surface. @hide */
+    public native void release();
     
     /** draw into a surface */
-    public Canvas lockCanvas(Rect dirty) throws OutOfResourcesException {
+    public Canvas lockCanvas(Rect dirty) throws OutOfResourcesException, IllegalArgumentException
+    {
         /* the dirty rectangle may be expanded to the surface's size, if
          * for instance it has been resized or if the bits were lost, since
          * the last call.
@@ -349,7 +362,7 @@ public class Surface implements Parcelable {
 
     @Override
     public String toString() {
-        return "Surface(native-token=" + mSurface + ")";
+        return "Surface(native-token=" + mSurfaceControl + ")";
     }
 
     private Surface(Parcel source) throws OutOfResourcesException {
@@ -362,7 +375,7 @@ public class Surface implements Parcelable {
 
     public native   void readFromParcel(Parcel source);
     public native   void writeToParcel(Parcel dest, int flags);
-
+    
     public static final Parcelable.Creator<Surface> CREATOR
             = new Parcelable.Creator<Surface>()
     {
@@ -383,7 +396,7 @@ public class Surface implements Parcelable {
     /* no user serviceable parts here ... */
     @Override
     protected void finalize() throws Throwable {
-        clear();
+        release();
     }
     
     private native void init(SurfaceSession s,

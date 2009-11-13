@@ -175,6 +175,11 @@ public abstract class Animation implements Cloneable {
      */
     private int mZAdjustment;
     
+    /**
+     * Don't animate the wallpaper.
+     */
+    private boolean mDetachWallpaper = false;
+
     private boolean mMore = true;
     private boolean mOneMoreTime = true;
 
@@ -217,6 +222,8 @@ public abstract class Animation implements Cloneable {
         setRepeatMode(a.getInt(com.android.internal.R.styleable.Animation_repeatMode, RESTART));
 
         setZAdjustment(a.getInt(com.android.internal.R.styleable.Animation_zAdjustment, ZORDER_NORMAL));
+        
+        setDetachWallpaper(a.getBoolean(com.android.internal.R.styleable.Animation_detachWallpaper, false));
         
         ensureInterpolator();
 
@@ -319,7 +326,7 @@ public abstract class Animation implements Cloneable {
      * 
      * @param durationMillis Duration in milliseconds
      *
-     * @throw java.lang.IllegalArgumentException if the duration is < 0
+     * @throws java.lang.IllegalArgumentException if the duration is < 0
      *
      * @attr ref android.R.styleable#Animation_duration
      */
@@ -515,6 +522,19 @@ public abstract class Animation implements Cloneable {
     }
     
     /**
+     * If detachWallpaper is true, and this is a window animation of a window
+     * that has a wallpaper background, then the window will be detached from
+     * the wallpaper while it runs.  That is, the animation will only be applied
+     * to the window, and the wallpaper behind it will remain static.
+     *
+     * @param detachWallpaper true if the wallpaper should be detached from the animation
+     * @attr ref android.R.styleable#Animation_detachWallpaper
+     */
+    public void setDetachWallpaper(boolean detachWallpaper) {
+        mDetachWallpaper = detachWallpaper;
+    }
+
+    /**
      * Gets the acceleration curve type for this animation.
      *
      * @return the {@link Interpolator} associated to this animation
@@ -608,6 +628,14 @@ public abstract class Animation implements Cloneable {
      */
     public int getZAdjustment() {
         return mZAdjustment;
+    }
+
+    /**
+     * Return value of {@link #setDetachWallpaper(boolean)}.
+     * @attr ref android.R.styleable#Animation_detachWallpaper
+     */
+    public boolean getDetachWallpaper() {
+        return mDetachWallpaper;
     }
 
     /**

@@ -18,6 +18,7 @@ package com.android.mediaframeworktest.functional;
 
 import com.android.mediaframeworktest.MediaFrameworkTest;
 import com.android.mediaframeworktest.MediaNames;
+import com.android.mediaframeworktest.MediaProfileReader;
 
 import android.content.Context;
 import android.test.ActivityInstrumentationTestCase;
@@ -35,11 +36,15 @@ import java.io.File;
 public class MediaPlayerApiTest extends ActivityInstrumentationTestCase<MediaFrameworkTest> {    
    private boolean duratoinWithinTolerence = false;
    private String TAG = "MediaPlayerApiTest";
+   private boolean isWMAEnable = false;
+   private boolean isWMVEnable = false;
    
    Context mContext;
   
    public MediaPlayerApiTest() {
      super("com.android.mediaframeworktest", MediaFrameworkTest.class);
+     isWMAEnable = MediaProfileReader.getWMAEnable();
+     isWMVEnable = MediaProfileReader.getWMVEnable();
    }
 
     protected void setUp() throws Exception {
@@ -82,9 +87,11 @@ public class MediaPlayerApiTest extends ActivityInstrumentationTestCase<MediaFra
     
     @MediumTest
     public void testWMA9GetDuration() throws Exception {
-      int duration = CodecTest.getDuration(MediaNames.WMA9); 
-      duratoinWithinTolerence = verifyDuration(duration, MediaNames.WMA9_LENGTH);
-      assertTrue("WMA9 getDuration", duratoinWithinTolerence);  
+      if (isWMAEnable) {
+            int duration = CodecTest.getDuration(MediaNames.WMA9);
+            duratoinWithinTolerence = verifyDuration(duration, MediaNames.WMA9_LENGTH);
+            assertTrue("WMA9 getDuration", duratoinWithinTolerence);
+        }
     }
 
     @MediumTest
@@ -123,8 +130,10 @@ public class MediaPlayerApiTest extends ActivityInstrumentationTestCase<MediaFra
     
     @LargeTest
     public void testWMA9GetCurrentPosition() throws Exception {
-      boolean currentPosition = CodecTest.getCurrentPosition(MediaNames.WMA9);  
-      assertTrue("WMA9 GetCurrentPosition", currentPosition);  
+        if (isWMAEnable) {
+            boolean currentPosition = CodecTest.getCurrentPosition(MediaNames.WMA9);
+            assertTrue("WMA9 GetCurrentPosition", currentPosition);
+        }
     }
     
     @LargeTest
@@ -160,8 +169,10 @@ public class MediaPlayerApiTest extends ActivityInstrumentationTestCase<MediaFra
    
     @LargeTest
     public void testWMA9Pause() throws Exception {
-      boolean isPaused = CodecTest.pause(MediaNames.WMA9);  
-      assertTrue("WMA9 Pause", isPaused);  
+        if (isWMAEnable) {
+            boolean isPaused = CodecTest.pause(MediaNames.WMA9);
+            assertTrue("WMA9 Pause", isPaused);
+        }
     }
   
     @LargeTest
@@ -231,8 +242,10 @@ public class MediaPlayerApiTest extends ActivityInstrumentationTestCase<MediaFra
     
     @LargeTest
     public void testWMA9SetLooping() throws Exception {
-      boolean isLoop = CodecTest.setLooping(MediaNames.WMA9);  
-      assertTrue("WMA9 setLooping", isLoop);  
+      if (isWMAEnable) {
+        boolean isLoop = CodecTest.setLooping(MediaNames.WMA9);
+        assertTrue("WMA9 setLooping", isLoop);
+      }
     }
     
     @LargeTest
@@ -269,8 +282,10 @@ public class MediaPlayerApiTest extends ActivityInstrumentationTestCase<MediaFra
     
     @LargeTest
     public void testWMA9SeekTo() throws Exception {
-      boolean isLoop = CodecTest.seekTo(MediaNames.WMA9);  
-      assertTrue("WMA9 seekTo", isLoop);  
+        if (isWMAEnable) {
+            boolean isLoop = CodecTest.seekTo(MediaNames.WMA9);
+            assertTrue("WMA9 seekTo", isLoop);
+        }
     }
     
     @LargeTest
@@ -309,8 +324,10 @@ public class MediaPlayerApiTest extends ActivityInstrumentationTestCase<MediaFra
     @Suppress
     @LargeTest
     public void testWMA9SeekToEnd() throws Exception {
-      boolean isEnd = CodecTest.seekToEnd(MediaNames.WMA9);  
-      assertTrue("WMA9 seekToEnd", isEnd);  
+        if (isWMAEnable) {
+            boolean isEnd = CodecTest.seekToEnd(MediaNames.WMA9);
+            assertTrue("WMA9 seekToEnd", isEnd);
+        }
     }
     
     @LargeTest
@@ -327,8 +344,10 @@ public class MediaPlayerApiTest extends ActivityInstrumentationTestCase<MediaFra
     
     @LargeTest
     public void testWAVSeekToEnd() throws Exception {
-      boolean isEnd = CodecTest.seekToEnd(MediaNames.WAV);  
-      assertTrue("WAV seekToEnd", isEnd);  
+        if (isWMVEnable) {
+            boolean isEnd = CodecTest.seekToEnd(MediaNames.WAV);
+            assertTrue("WAV seekToEnd", isEnd);
+        }
     }  
     
     @MediumTest
@@ -385,8 +404,12 @@ public class MediaPlayerApiTest extends ActivityInstrumentationTestCase<MediaFra
    
     @LargeTest
     public void testVideoWMVSeekTo() throws Exception {
-      boolean isSeek = CodecTest.videoSeekTo(MediaNames.VIDEO_WMV);
-      assertTrue("WMV SeekTo", isSeek);         
+        Log.v(TAG, "wmv not enable");
+        if (isWMVEnable) {
+            Log.v(TAG, "wmv enable");
+            boolean isSeek = CodecTest.videoSeekTo(MediaNames.VIDEO_WMV);
+            assertTrue("WMV SeekTo", isSeek);
+        }
     }
     
     @LargeTest
@@ -416,6 +439,7 @@ public class MediaPlayerApiTest extends ActivityInstrumentationTestCase<MediaFra
     
     @MediumTest
     public void testPrepareAsyncReset() throws Exception {
+      assertTrue(MediaFrameworkTest.checkStreamingServer());
       boolean isReset = CodecTest.prepareAsyncReset(MediaNames.STREAM_MP3);
       assertTrue("PrepareAsync Reset", isReset);         
     }
@@ -435,12 +459,20 @@ public class MediaPlayerApiTest extends ActivityInstrumentationTestCase<MediaFra
     @LargeTest
     public void testLocalMp3PrepareAsyncCallback() throws Exception {
         boolean onPrepareSuccess = 
-            CodecTest.prepareAsyncCallback(MediaNames.VIDEO_H263_AMR, false);
+            CodecTest.prepareAsyncCallback(MediaNames.MP3CBR, false);
         assertTrue("LocalMp3prepareAsyncCallback", onPrepareSuccess);
+    }
+
+    @LargeTest
+    public void testLocalH263AMRPrepareAsyncCallback() throws Exception {
+        boolean onPrepareSuccess =
+            CodecTest.prepareAsyncCallback(MediaNames.VIDEO_H263_AMR, false);
+        assertTrue("testLocalH263AMRPrepareAsyncCallback", onPrepareSuccess);
     }
     
     @LargeTest
     public void testStreamPrepareAsyncCallback() throws Exception {
+        assertTrue(MediaFrameworkTest.checkStreamingServer());
         boolean onPrepareSuccess = 
             CodecTest.prepareAsyncCallback(MediaNames.STREAM_H264_480_360_1411k, false);
         assertTrue("StreamH264PrepareAsyncCallback", onPrepareSuccess);
@@ -448,6 +480,7 @@ public class MediaPlayerApiTest extends ActivityInstrumentationTestCase<MediaFra
     
     @LargeTest
     public void testStreamPrepareAsyncCallbackReset() throws Exception {
+        assertTrue(MediaFrameworkTest.checkStreamingServer());
         boolean onPrepareSuccess = 
             CodecTest.prepareAsyncCallback(MediaNames.STREAM_H264_480_360_1411k, true);
         assertTrue("StreamH264PrepareAsyncCallback", onPrepareSuccess);

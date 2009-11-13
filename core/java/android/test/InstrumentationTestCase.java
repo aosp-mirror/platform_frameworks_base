@@ -43,8 +43,22 @@ public class InstrumentationTestCase extends TestCase {
      * 
      * @param instrumentation the instrumentation to use with this instance
      */
-    public void injectInsrumentation(Instrumentation instrumentation) {
+    public void injectInstrumentation(Instrumentation instrumentation) {
         mInstrumentation = instrumentation;
+    }
+
+    /**
+     * Injects instrumentation into this test case. This method is
+     * called by the test runner during test setup.
+     *
+     * @param instrumentation the instrumentation to use with this instance
+     *
+     * @deprecated Incorrect spelling,
+     * use {@link #injectInstrumentation(android.app.Instrumentation) instead.
+     */
+    @Deprecated
+    public void injectInsrumentation(Instrumentation instrumentation) {
+        injectInstrumentation(instrumentation);
     }
 
     /**

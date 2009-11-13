@@ -327,11 +327,17 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         mText = "";
 
         mTextPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
+        mTextPaint.density = getResources().getDisplayMetrics().density;
+        mTextPaint.setCompatibilityScaling(
+                getResources().getCompatibilityInfo().applicationScale);
+        
         // If we get the paint from the skin, we should set it to left, since
         // the layout always wants it to be left.
         // mTextPaint.setTextAlign(Paint.Align.LEFT);
 
         mHighlightPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        mHighlightPaint.setCompatibilityScaling(
+                getResources().getCompatibilityInfo().applicationScale);
 
         mMovement = getDefaultMovementMethod();
         mTransformation = null;
@@ -731,7 +737,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             }
         } else if (digits != null) {
             mInput = DigitsKeyListener.getInstance(digits.toString());
-            mInputType = inputType;
+            // If no input type was specified, we will default to generic
+            // text, since we can't tell the IME about the set of digits
+            // that was selected.
+            mInputType = inputType != EditorInfo.TYPE_NULL
+                    ? inputType : EditorInfo.TYPE_CLASS_TEXT;
         } else if (inputType != EditorInfo.TYPE_NULL) {
             setInputType(inputType, true);
             singleLine = (inputType&(EditorInfo.TYPE_MASK_CLASS
@@ -2869,26 +2879,26 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * @attr ref android.R.styleable#TextView_inputType
      */
     public void setInputType(int type) {
+        final boolean wasPassword = isPasswordInputType(mInputType);
+        final boolean wasVisiblePassword = isVisiblePasswordInputType(mInputType);
         setInputType(type, false);
-        final int variation = type&(EditorInfo.TYPE_MASK_CLASS
-                |EditorInfo.TYPE_MASK_VARIATION);
-        final boolean isPassword = variation
-                == (EditorInfo.TYPE_CLASS_TEXT
-                        |EditorInfo.TYPE_TEXT_VARIATION_PASSWORD);
+        final boolean isPassword = isPasswordInputType(type);
+        final boolean isVisiblePassword = isVisiblePasswordInputType(type);
         boolean forceUpdate = false;
         if (isPassword) {
             setTransformationMethod(PasswordTransformationMethod.getInstance());
             setTypefaceByIndex(MONOSPACE, 0);
-        } else if (mTransformation == PasswordTransformationMethod.getInstance()) {
-            // We need to clean up if we were previously in password mode.
-            if (variation != (EditorInfo.TYPE_CLASS_TEXT
-                        |EditorInfo.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD)) {
-                setTypefaceByIndex(-1, -1);
+        } else if (isVisiblePassword) {
+            if (mTransformation == PasswordTransformationMethod.getInstance()) {
+                forceUpdate = true;
             }
-            forceUpdate = true;
-        } else if (variation == (EditorInfo.TYPE_CLASS_TEXT
-                        |EditorInfo.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD)) {
             setTypefaceByIndex(MONOSPACE, 0);
+        } else if (wasPassword || wasVisiblePassword) {
+            // not in password mode, clean up typeface and transformation
+            setTypefaceByIndex(-1, -1);
+            if (mTransformation == PasswordTransformationMethod.getInstance()) {
+                forceUpdate = true;
+            }
         }
         
         boolean multiLine = (type&(EditorInfo.TYPE_MASK_CLASS
@@ -2906,6 +2916,22 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         
         InputMethodManager imm = InputMethodManager.peekInstance();
         if (imm != null) imm.restartInput(this);
+    }
+
+    private boolean isPasswordInputType(int inputType) {
+        final int variation = inputType & (EditorInfo.TYPE_MASK_CLASS
+                | EditorInfo.TYPE_MASK_VARIATION);
+        return variation
+                == (EditorInfo.TYPE_CLASS_TEXT
+                        | EditorInfo.TYPE_TEXT_VARIATION_PASSWORD);
+    }
+
+    private boolean isVisiblePasswordInputType(int inputType) {
+        final int variation = inputType & (EditorInfo.TYPE_MASK_CLASS
+                | EditorInfo.TYPE_MASK_VARIATION);
+        return variation
+                == (EditorInfo.TYPE_CLASS_TEXT
+                        | EditorInfo.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
     }
 
     /**
@@ -3403,7 +3429,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         if (mPopup != null) {
             TextView tv = (TextView) mPopup.getContentView();
             chooseSize(mPopup, mError, tv);
-            mPopup.update(this, getErrorX(), getErrorY(), -1, -1);
+            mPopup.update(this, getErrorX(), getErrorY(),
+                          mPopup.getWidth(), mPopup.getHeight());
         }
 
         restartMarqueeIfNeeded();
@@ -3937,8 +3964,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     mHighlightPath = new Path();
 
                 if (selStart == selEnd) {
-                    if ((SystemClock.uptimeMillis() - mShowCursor) % (2 * BLINK)
-                        < BLINK) {
+                    if ((SystemClock.uptimeMillis() - mShowCursor) % (2 * BLINK) < BLINK) {
                         if (mHighlightPathBogus) {
                             mHighlightPath.reset();
                             mLayout.getCursorPath(selStart, mHighlightPath, mText);
@@ -5317,21 +5343,24 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
              * will happen at measure).
              */
             makeNewLayout(want, hintWant, UNKNOWN_BORING, UNKNOWN_BORING,
-                          mRight - mLeft - getCompoundPaddingLeft() - getCompoundPaddingRight(), false);
+                          mRight - mLeft - getCompoundPaddingLeft() - getCompoundPaddingRight(),
+                          false);
 
-            // In a fixed-height view, so use our new text layout.
-            if (mLayoutParams.height != LayoutParams.WRAP_CONTENT &&
-                mLayoutParams.height != LayoutParams.FILL_PARENT) {
-                invalidate();
-                return;
-            }
-
-            // Dynamic height, but height has stayed the same,
-            // so use our new text layout.
-            if (mLayout.getHeight() == oldht &&
-                (mHintLayout == null || mHintLayout.getHeight() == oldht)) {
-                invalidate();
-                return;
+            if (mEllipsize != TextUtils.TruncateAt.MARQUEE) {
+                // In a fixed-height view, so use our new text layout.
+                if (mLayoutParams.height != LayoutParams.WRAP_CONTENT &&
+                    mLayoutParams.height != LayoutParams.FILL_PARENT) {
+                    invalidate();
+                    return;
+                }
+    
+                // Dynamic height, but height has stayed the same,
+                // so use our new text layout.
+                if (mLayout.getHeight() == oldht &&
+                    (mHintLayout == null || mHintLayout.getHeight() == oldht)) {
+                    invalidate();
+                    return;
+                }
             }
 
             // We lose: the height has changed and we have a dynamic height.
@@ -5553,6 +5582,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
                 if (duration > ANIMATED_SCROLL_GAP) {
                     mScroller.startScroll(mScrollX, mScrollY, dx, dy);
+                    awakenScrollBars(mScroller.getDuration());
                     invalidate();
                 } else {
                     if (!mScroller.isFinished()) {
@@ -5769,7 +5799,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * Causes words in the text that are longer than the view is wide
      * to be ellipsized instead of broken in the middle.  You may also
      * want to {@link #setSingleLine} or {@link #setHorizontallyScrolling}
-     * to constrain the text toa single line.  Use <code>null</code>
+     * to constrain the text to a single line.  Use <code>null</code>
      * to turn off ellipsizing.
      *
      * @attr ref android.R.styleable#TextView_ellipsize
@@ -6914,6 +6944,17 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 type != Character.DECIMAL_DIGIT_NUMBER) {
                 break;
             }
+        }
+
+        boolean hasLetter = false;
+        for (int i = start; i < end; i++) {
+            if (Character.isLetter(mTransformed.charAt(i))) {
+                hasLetter = true;
+                break;
+            }
+        }
+        if (!hasLetter) {
+            return null;
         }
 
         if (start == end) {

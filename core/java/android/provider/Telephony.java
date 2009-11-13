@@ -146,7 +146,13 @@ public final class Telephony {
          * <P>Type: TEXT</P>
          */
         public static final String SERVICE_CENTER = "service_center";
-    }
+
+        /**
+         * Has the message been locked?
+         * <P>Type: INTEGER (boolean)</P>
+         */
+        public static final String LOCKED = "locked";
+}
 
     /**
      * Contains all text based SMS messages.
@@ -484,6 +490,13 @@ public final class Telephony {
             public static final int RESULT_SMS_OUT_OF_MEMORY = 3;
 
             /**
+             * Set by BroadcastReceiver. Indicates the message, while
+             * possibly valid, is of a format or encoding that is not
+             * supported.
+             */
+            public static final int RESULT_SMS_UNSUPPORTED = 4;
+
+            /**
              * Broadcast Action: A new text based SMS message has been received
              * by the device. The intent will have the following extra
              * values:</p>
@@ -550,6 +563,23 @@ public final class Telephony {
             @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
             public static final String SIM_FULL_ACTION =
                 "android.provider.Telephony.SIM_FULL";
+
+            /**
+             * Broadcast Action: An incoming SMS has been rejected by the
+             * telephony framework.  This intent is sent in lieu of any
+             * of the RECEIVED_ACTION intents.  The intent will have the
+             * following extra value:</p>
+             *
+             * <ul>
+             *   <li><em>result</em> - An int result code, eg,
+             *   <code>{@link #RESULT_SMS_OUT_OF_MEMORY}</code>,
+             *   indicating the error returned to the network.</li>
+             * </ul>
+
+             */
+            @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+            public static final String SMS_REJECTED_ACTION =
+                "android.provider.Telephony.SMS_REJECTED";
 
             /**
              * Read the PDUs out of an {@link #SMS_RECEIVED_ACTION} or a
@@ -1008,6 +1038,12 @@ public final class Telephony {
          * <P>Type: INTEGER</P>
          */
         public static final String THREAD_ID = "thread_id";
+
+        /**
+         * Has the message been locked?
+         * <P>Type: INTEGER (boolean)</P>
+         */
+        public static final String LOCKED = "locked";
     }
 
     /**
@@ -1252,6 +1288,21 @@ public final class Telephony {
         }
 
         /**
+         * Returns true if the number is a Phone number
+         *
+         * @param number the input number to be tested
+         * @return true if number is a Phone number
+         */
+        public static boolean isPhoneNumber(String number) {
+            if (TextUtils.isEmpty(number)) {
+                return false;
+            }
+
+            Matcher match = Regex.PHONE_PATTERN.matcher(number);
+            return match.matches();
+        }
+
+        /**
          * Contains all MMS messages in the MMS app's inbox.
          */
         public static final class Inbox implements BaseMmsColumns {
@@ -1416,6 +1467,8 @@ public final class Telephony {
              */
             public static final String _DATA = "_data";
 
+            public static final String TEXT = "text";
+
         }
 
         public static final class Rate {
@@ -1426,6 +1479,21 @@ public final class Telephony {
              * <P>Type: INTEGER</P>
              */
             public static final String SENT_TIME = "sent_time";
+        }
+
+        public static final class ScrapSpace {
+            /**
+             * The content:// style URL for this table
+             */
+            public static final Uri CONTENT_URI = Uri.parse("content://mms/scrapSpace");
+
+            /**
+             * This is the scrap file we use to store the media attachment when the user
+             * chooses to capture a photo to be attached . We pass {#link@Uri} to the Camera app,
+             * which streams the captured image to the uri. Internally we write the media content
+             * to this file. It's named '.temp.jpg' so Gallery won't pick it up.
+             */
+            public static final String SCRAP_FILE_PATH = "/sdcard/mms/scrapSpace/.temp.jpg";
         }
 
         public static final class Intents {
@@ -1492,6 +1560,17 @@ public final class Telephony {
 
         public static final Uri CONTENT_DRAFT_URI = Uri.parse(
                 "content://mms-sms/draft");
+
+        public static final Uri CONTENT_LOCKED_URI = Uri.parse(
+                "content://mms-sms/locked");
+
+        /***
+         * Pass in a query parameter called "pattern" which is the text
+         * to search for.
+         * The sort order is fixed to be thread_id ASC,date DESC.
+         */
+        public static final Uri SEARCH_URI = Uri.parse(
+                "content://mms-sms/search");
 
         // Constants for message protocol types.
         public static final int SMS_PROTO = 0;
@@ -1590,6 +1669,8 @@ public final class Telephony {
 
         public static final String NUMERIC = "numeric";
 
+        public static final String AUTH_TYPE = "authtype";
+
         public static final String TYPE = "type";
 
         public static final String CURRENT = "current";
@@ -1639,7 +1720,3 @@ public final class Telephony {
         public static final String EXTRA_SPN        = "spn";
     }
 }
-
-
-
-

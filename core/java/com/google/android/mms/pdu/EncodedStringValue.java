@@ -269,4 +269,16 @@ public class EncodedStringValue implements Cloneable {
 
         return new EncodedStringValue(value.mCharacterSet, value.mData);
     }
+    
+    public static EncodedStringValue[] encodeStrings(String[] array) {
+        int count = array.length;
+        if (count > 0) {
+            EncodedStringValue[] encodedArray = new EncodedStringValue[count];
+            for (int i = 0; i < count; i++) {
+                encodedArray[i] = new EncodedStringValue(array[i]);
+            }
+            return encodedArray;
+        }
+        return null;
+    }
 }

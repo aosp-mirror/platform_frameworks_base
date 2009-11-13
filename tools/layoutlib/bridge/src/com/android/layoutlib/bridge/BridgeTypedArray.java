@@ -659,8 +659,9 @@ public final class BridgeTypedArray extends TypedArray {
             return null;
         }
 
-        String value = mData[index].getValue();
-        if (value == null || BridgeConstants.REFERENCE_NULL.equals(value)) {
+        IResourceValue value = mData[index];
+        String stringValue = value.getValue();
+        if (stringValue == null || BridgeConstants.REFERENCE_NULL.equals(stringValue)) {
             return null;
         }
 
@@ -672,7 +673,8 @@ public final class BridgeTypedArray extends TypedArray {
 
         // looks like we were unable to resolve the drawable
         mContext.getLogger().warning(String.format(
-                "Unable to resolve drawable \"%1$s\" in attribute \"%2$s\"", value, mNames[index]));
+                "Unable to resolve drawable \"%1$s\" in attribute \"%2$s\"", stringValue,
+                mNames[index]));
 
         return null;
     }

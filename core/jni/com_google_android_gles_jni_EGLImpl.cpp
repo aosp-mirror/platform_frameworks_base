@@ -21,7 +21,6 @@
 #include <EGL/egl.h>
 #include <GLES/gl.h>
 
-#include <ui/EGLNativeWindowSurface.h>
 #include <ui/Surface.h>
 #include <SkBitmap.h>
 #include <SkPixelRef.h>
@@ -338,7 +337,7 @@ not_valid_surface:
         goto not_valid_surface;
 
     jint* base = beginNativeAttribList(_env, attrib_list);
-    EGLSurface sur = eglCreateWindowSurface(dpy, cnf, new EGLNativeWindowSurface(window), base);
+    EGLSurface sur = eglCreateWindowSurface(dpy, cnf, window, base);
     endNativeAttributeList(_env, attrib_list, base);
     return (jint)sur;
 }

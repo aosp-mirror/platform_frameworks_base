@@ -19,9 +19,9 @@ package android.test;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.os.Bundle;
-import android.os.RemoteException;
 import android.os.SystemClock;
 import android.net.Uri;
+import android.accounts.Account;
 
 /**
  * If you would like to test sync a single provider with an
@@ -44,12 +44,12 @@ public class SyncBaseInstrumentation extends InstrumentationTestCase {
      * Syncs the specified provider.
      * @throws Exception
      */
-    protected void syncProvider(Uri uri, String account, String authority) throws Exception {
+    protected void syncProvider(Uri uri, String accountName, String authority) throws Exception {
         Bundle extras = new Bundle();
-        extras.putBoolean(ContentResolver.SYNC_EXTRAS_FORCE, true);
-        extras.putString(ContentResolver.SYNC_EXTRAS_ACCOUNT, account);
+        extras.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
+        Account account = new Account(accountName, "com.google");
 
-        mContentResolver.startSync(uri, extras);
+        ContentResolver.requestSync(account, authority, extras);
         long startTimeInMillis = SystemClock.elapsedRealtime();
         long endTimeInMillis = startTimeInMillis + MAX_TIME_FOR_SYNC_IN_MINS * 60000;
 
@@ -64,7 +64,7 @@ public class SyncBaseInstrumentation extends InstrumentationTestCase {
                 break;
             }
 
-            if (isSyncActive(account, authority)) {
+            if (ContentResolver.isSyncActive(account, authority)) {
                 counter = 0;
                 continue;
             }
@@ -73,24 +73,7 @@ public class SyncBaseInstrumentation extends InstrumentationTestCase {
     }
 
     protected void cancelSyncsandDisableAutoSync() {
-        try {
-            ContentResolver.getContentService().setListenForNetworkTickles(false);
-        } catch (RemoteException e) {
-        }
-        mContentResolver.cancelSync(null);
-    }
-
-    /**
-     * This method tests if any sync is active or not. Sync is considered to be active if the
-     * entry is in either the Pending or Active tables.
-     * @return
-     */
-    private boolean isSyncActive(String account, String authority) {
-        try {
-            return ContentResolver.getContentService().isSyncActive(account,
-                    authority);
-        } catch (RemoteException e) {
-            return false;
-        }
+        ContentResolver.setMasterSyncAutomatically(false);
+        ContentResolver.cancelSync(null /* all accounts */, null /* all authorities */);
     }
 }

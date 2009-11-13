@@ -2,6 +2,7 @@ package android.content.pm;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Printer;
 
 /**
  * Information you can retrieve about a particular application
@@ -24,6 +25,11 @@ public class ServiceInfo extends ComponentInfo
         permission = orig.permission;
     }
 
+    public void dump(Printer pw, String prefix) {
+        super.dumpFront(pw, prefix);
+        pw.println(prefix + "permission=" + permission);
+    }
+    
     public String toString() {
         return "ServiceInfo{"
             + Integer.toHexString(System.identityHashCode(this))

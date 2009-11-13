@@ -21,7 +21,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include <utils/MemoryDealer.h>
+#include <binder/MemoryDealer.h>
 #include <utils/RefBase.h>
 
 #include <jni.h>

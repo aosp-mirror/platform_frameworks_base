@@ -121,9 +121,3 @@ bool RoManager::checkRoInCache(const string& roID)
     return true;
 }
 
-/** see RoManager.h */
-const string& RoManager::getDevicePrivateKey() const
-{
-    string pk;
-    return pk;
-}

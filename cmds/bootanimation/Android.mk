@@ -12,12 +12,13 @@ ifeq ($(TARGET_SIMULATOR),true)
 	endif
 endif
 
+LOCAL_CFLAGS += -DGL_GLEXT_PROTOTYPES -DEGL_EGLEXT_PROTOTYPES
+
 LOCAL_SHARED_LIBRARIES := \
 	libcutils \
 	libutils \
     libui \
-	libcorecg \
-	libsgl \
+	libskia \
     libEGL \
     libGLESv1_CM
 

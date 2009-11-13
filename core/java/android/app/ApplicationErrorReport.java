@@ -171,6 +171,11 @@ public class ApplicationErrorReport implements Parcelable {
         public String throwMethodName;
 
         /**
+         * Line number the exception was thrown from.
+         */
+        public int throwLineNumber;
+
+        /**
          * Stack trace.
          */
         public String stackTrace;
@@ -190,6 +195,7 @@ public class ApplicationErrorReport implements Parcelable {
             throwFileName = in.readString();
             throwClassName = in.readString();
             throwMethodName = in.readString();
+            throwLineNumber = in.readInt();
             stackTrace = in.readString();
         }
 
@@ -202,6 +208,7 @@ public class ApplicationErrorReport implements Parcelable {
             dest.writeString(throwFileName);
             dest.writeString(throwClassName);
             dest.writeString(throwMethodName);
+            dest.writeInt(throwLineNumber);
             dest.writeString(stackTrace);
         }
 
@@ -214,6 +221,7 @@ public class ApplicationErrorReport implements Parcelable {
             pw.println(prefix + "throwFileName: " + throwFileName);
             pw.println(prefix + "throwClassName: " + throwClassName);
             pw.println(prefix + "throwMethodName: " + throwMethodName);
+            pw.println(prefix + "throwLineNumber: " + throwLineNumber);
             pw.println(prefix + "stackTrace: " + stackTrace);
         }
     }

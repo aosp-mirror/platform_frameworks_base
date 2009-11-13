@@ -27,7 +27,7 @@ import android.content.IContentService;
 import android.content.res.Configuration;
 import android.location.LocationManager;
 import android.media.AudioManager;
-import android.os.IHardwareService;
+import android.os.IPowerManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.provider.Settings;
@@ -40,6 +40,7 @@ public class SettingsHelper {
     private Context mContext;
     private AudioManager mAudioManager;
     private IContentService mContentService;
+    private IPowerManager mPowerManager;
     private static final String[] PROVIDERS = { "gmail-ls", "calendar", "contacts" };
 
     private boolean mSilent;
@@ -50,6 +51,8 @@ public class SettingsHelper {
         mAudioManager = (AudioManager) context
                 .getSystemService(Context.AUDIO_SERVICE);
         mContentService = ContentResolver.getContentService();
+        mPowerManager = IPowerManager.Stub.asInterface(
+                ServiceManager.getService("power"));
     }
 
     /**
@@ -94,10 +97,10 @@ public class SettingsHelper {
 
     private void setBrightness(int brightness) {
         try {
-            IHardwareService hardware = IHardwareService.Stub
-                    .asInterface(ServiceManager.getService("hardware"));
-            if (hardware != null) {
-                hardware.setBacklights(brightness);
+            IPowerManager power = IPowerManager.Stub.asInterface(
+                    ServiceManager.getService("power"));
+            if (power != null) {
+                power.setBacklightBrightness(brightness);
             }
         } catch (RemoteException doe) {
 
@@ -113,37 +116,6 @@ public class SettingsHelper {
             mAudioManager.setVibrateSetting(AudioManager.VIBRATE_TYPE_RINGER,
                     mVibrate ? AudioManager.VIBRATE_SETTING_ON
                             : AudioManager.VIBRATE_SETTING_OFF);
-        }
-    }
-
-    byte[] getSyncProviders() {
-        byte[] sync = new byte[1 + PROVIDERS.length];
-        try {
-            sync[0] = (byte) (mContentService.getListenForNetworkTickles() ? 1 : 0);
-            for (int i = 0; i < PROVIDERS.length; i++) {
-                sync[i + 1] = (byte) 
-                        (mContentService.getSyncProviderAutomatically(PROVIDERS[i]) ? 1 : 0);
-            }
-        } catch (RemoteException re) {
-            Log.w(TAG, "Unable to backup sync providers");
-            return sync;
-        }
-        return sync;
-    }
-
-    void setSyncProviders(BackupDataInput backup) {
-        byte[] sync = new byte[backup.getDataSize()];
-
-        try {
-            backup.readEntityData(sync, 0, sync.length);
-            mContentService.setListenForNetworkTickles(sync[0] == 1);
-            for (int i = 0; i < PROVIDERS.length; i++) {
-                mContentService.setSyncProviderAutomatically(PROVIDERS[i], sync[i + 1] > 0);
-            }
-        } catch (RemoteException re) {
-            Log.w(TAG, "Unable to restore sync providers");
-        } catch (java.io.IOException ioe) {
-            Log.w(TAG, "Unable to read sync settings");
         }
     }
 

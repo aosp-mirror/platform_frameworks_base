@@ -37,7 +37,7 @@ public final class WebIconDatabase {
     private final EventHandler mEventHandler = new EventHandler();
 
     // Class to handle messages before WebCore is ready
-    private class EventHandler extends Handler {
+    private static class EventHandler extends Handler {
         // Message ids
         static final int OPEN         = 0;
         static final int CLOSE        = 1;

@@ -72,6 +72,24 @@ public class Touch {
     }
 
     /**
+     * @hide
+     * Returns the maximum scroll value in x.
+     */
+    public static int getMaxScrollX(TextView widget, Layout layout, int y) {
+        int top = layout.getLineForVertical(y);
+        int bottom = layout.getLineForVertical(y + widget.getHeight()
+                - widget.getTotalPaddingTop() -widget.getTotalPaddingBottom());
+        int left = Integer.MAX_VALUE;
+        int right = 0;
+        for (int i = top; i <= bottom; i++) {
+            left = (int) Math.min(left, layout.getLineLeft(i));
+            right = (int) Math.max(right, layout.getLineRight(i));
+        }
+        return right - left - widget.getWidth() - widget.getTotalPaddingLeft()
+                - widget.getTotalPaddingRight();
+    }
+
+    /**
      * Handles touch events for dragging.  You may want to do other actions
      * like moving the cursor on touch as well.
      */

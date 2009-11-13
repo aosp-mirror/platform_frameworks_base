@@ -51,6 +51,7 @@ import java.io.FileOutputStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.HashMap;
 import java.util.HashSet;
 
@@ -105,6 +106,7 @@ class AppWidgetService extends IAppWidgetService.Stub
     }
 
     Context mContext;
+    Locale mLocale;
     PackageManager mPackageManager;
     AlarmManager mAlarmManager;
     ArrayList<Provider> mInstalledProviders = new ArrayList<Provider>();
@@ -130,6 +132,11 @@ class AppWidgetService extends IAppWidgetService.Stub
         // because the system isn't ready to handle them yet.
         mContext.registerReceiver(mBroadcastReceiver,
                 new IntentFilter(Intent.ACTION_BOOT_COMPLETED), null, null);
+
+        // Register for configuration changes so we can update the names
+        // of the widgets when the locale changes.
+        mContext.registerReceiver(mBroadcastReceiver,
+                new IntentFilter(Intent.ACTION_CONFIGURATION_CHANGED), null, null);
 
         // Register for broadcasts about package install, etc., so we can
         // update the provider list.
@@ -473,8 +480,10 @@ class AppWidgetService extends IAppWidgetService.Stub
     public void stopListening(int hostId) {
         synchronized (mAppWidgetIds) {
             Host host = lookupHostLocked(getCallingUid(), hostId);
-            host.callbacks = null;
-            pruneHostLocked(host);
+            if (host != null) {
+                host.callbacks = null;
+                pruneHostLocked(host);
+            }
         }
     }
 
@@ -814,7 +823,10 @@ class AppWidgetService extends IAppWidgetService.Stub
             temp.delete();
         }
 
-        writeStateToFileLocked(temp);
+        if (!writeStateToFileLocked(temp)) {
+            Log.w(TAG, "Failed to persist new settings");
+            return;
+        }
 
         //noinspection ResultOfMethodCallIgnored
         real.delete();
@@ -822,7 +834,7 @@ class AppWidgetService extends IAppWidgetService.Stub
         temp.renameTo(real);
     }
 
-    void writeStateToFileLocked(File file) {
+    boolean writeStateToFileLocked(File file) {
         FileOutputStream stream = null;
         int N;
 
@@ -875,6 +887,7 @@ class AppWidgetService extends IAppWidgetService.Stub
 
             out.endDocument();
             stream.close();
+            return true;
         } catch (IOException e) {
             try {
                 if (stream != null) {
@@ -887,6 +900,7 @@ class AppWidgetService extends IAppWidgetService.Stub
                 //noinspection ResultOfMethodCallIgnored
                 file.delete();
             }
+            return false;
         }
     }
 
@@ -1039,6 +1053,22 @@ class AppWidgetService extends IAppWidgetService.Stub
             //Log.d(TAG, "received " + action);
             if (Intent.ACTION_BOOT_COMPLETED.equals(action)) {
                 sendInitialBroadcasts();
+            } else if (Intent.ACTION_CONFIGURATION_CHANGED.equals(action)) {
+                Locale revised = Locale.getDefault();
+                if (revised == null || mLocale == null ||
+                    !(revised.equals(mLocale))) {
+                    mLocale = revised;
+
+                    synchronized (mAppWidgetIds) {
+                        int N = mInstalledProviders.size();
+                        for (int i=N-1; i>=0; i--) {
+                            Provider p = mInstalledProviders.get(i);
+                            String pkgName = p.info.provider.getPackageName();
+                            updateProvidersForPackageLocked(pkgName);
+                        }
+                        saveStateLocked();
+                    }
+                }
             } else {
                 Uri uri = intent.getData();
                 if (uri == null) {

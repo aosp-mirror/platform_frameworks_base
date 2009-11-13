@@ -45,18 +45,25 @@ public class VpnManager {
     /** Key to the error code of a connectivity broadcast event. */
     public static final String BROADCAST_ERROR_CODE = "err";
     /** Error code to indicate an error from authentication. */
-    public static final int VPN_ERROR_AUTH = 1;
+    public static final int VPN_ERROR_AUTH = 51;
     /** Error code to indicate the connection attempt failed. */
-    public static final int VPN_ERROR_CONNECTION_FAILED = 2;
+    public static final int VPN_ERROR_CONNECTION_FAILED = 101;
     /** Error code to indicate the server is not known. */
-    public static final int VPN_ERROR_UNKNOWN_SERVER = 3;
+    public static final int VPN_ERROR_UNKNOWN_SERVER = 102;
     /** Error code to indicate an error from challenge response. */
-    public static final int VPN_ERROR_CHALLENGE = 4;
+    public static final int VPN_ERROR_CHALLENGE = 5;
     /** Error code to indicate an error of remote server hanging up. */
-    public static final int VPN_ERROR_REMOTE_HUNG_UP = 5;
+    public static final int VPN_ERROR_REMOTE_HUNG_UP = 7;
+    /** Error code to indicate an error of remote PPP server hanging up. */
+    public static final int VPN_ERROR_REMOTE_PPP_HUNG_UP = 48;
+    /** Error code to indicate a PPP negotiation error. */
+    public static final int VPN_ERROR_PPP_NEGOTIATION_FAILED = 42;
     /** Error code to indicate an error of losing connectivity. */
-    public static final int VPN_ERROR_CONNECTION_LOST = 6;
-    private static final int VPN_ERROR_NO_ERROR = 0;
+    public static final int VPN_ERROR_CONNECTION_LOST = 103;
+    /** Largest error code used by VPN. */
+    public static final int VPN_ERROR_LARGEST = 200;
+    /** Error code to indicate a successful connection. */
+    public static final int VPN_ERROR_NO_ERROR = 0;
 
     public static final String PROFILES_PATH = "/data/misc/vpn/profiles";
 

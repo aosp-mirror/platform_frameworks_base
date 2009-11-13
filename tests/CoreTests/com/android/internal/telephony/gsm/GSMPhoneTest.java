@@ -81,7 +81,7 @@ public class GSMPhoneTest extends AndroidTestCase implements PerformanceTestCase
         mRadioControl = mGSMTestHandler.getSimulatedCommands();
 
         mHandler = mGSMTestHandler.getHandler();
-        mGSMPhone.registerForPhoneStateChanged(mHandler, EVENT_PHONE_STATE_CHANGED, null);
+        mGSMPhone.registerForPreciseCallStateChanged(mHandler, EVENT_PHONE_STATE_CHANGED, null);
         mGSMPhone.registerForNewRingingConnection(mHandler, EVENT_RINGING, null);
         mGSMPhone.registerForDisconnect(mHandler, EVENT_DISCONNECT, null);
 
@@ -109,7 +109,7 @@ public class GSMPhoneTest extends AndroidTestCase implements PerformanceTestCase
     protected void tearDown() throws Exception {
         mRadioControl.shutdown();
 
-        mGSMPhone.unregisterForPhoneStateChanged(mHandler);
+        mGSMPhone.unregisterForPreciseCallStateChanged(mHandler);
         mGSMPhone.unregisterForNewRingingConnection(mHandler);
         mGSMPhone.unregisterForDisconnect(mHandler);
         mGSMPhone.setOnPostDialCharacter(mHandler, 0, null);

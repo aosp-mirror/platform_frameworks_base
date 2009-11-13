@@ -1,6 +1,7 @@
 #ifndef DEVICE_TOOLS_AIDL_H
 #define DEVICE_TOOLS_AIDL_H
 
+#include <string.h>
 #include <string>
 #include <vector>
 

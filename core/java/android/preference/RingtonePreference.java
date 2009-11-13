@@ -31,8 +31,9 @@ import android.util.Log;
  * The chosen ringtone's URI will be persisted as a string.
  * <p>
  * If the user chooses the "Default" item, the saved string will be one of
- * {@link System#DEFAULT_RINGTONE_URI} or
- * {@link System#DEFAULT_NOTIFICATION_URI}. If the user chooses the "Silent"
+ * {@link System#DEFAULT_RINGTONE_URI},
+ * {@link System#DEFAULT_NOTIFICATION_URI}, or
+ * {@link System#DEFAULT_ALARM_ALERT_URI}. If the user chooses the "Silent"
  * item, the saved string will be an empty string.
  * 
  * @attr ref android.R.styleable#RingtonePreference_ringtoneType

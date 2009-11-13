@@ -23,7 +23,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 
-class HttpDateTime {
+/** {@hide} */
+public final class HttpDateTime {
 
     /*
      * Regular expression for parsing HTTP-date.
@@ -47,14 +48,16 @@ class HttpDateTime {
      * Wdy, DD Mon YYYY HH:MM:SS
      * Wdy Mon (SP)D HH:MM:SS YYYY
      * Wdy Mon DD HH:MM:SS YYYY GMT
+     * 
+     * HH can be H if the first digit is zero.
      */
     private static final String HTTP_DATE_RFC_REGEXP =
             "([0-9]{1,2})[- ]([A-Za-z]{3,3})[- ]([0-9]{2,4})[ ]"
-            + "([0-9][0-9]:[0-9][0-9]:[0-9][0-9])";
+            + "([0-9]{1,2}:[0-9][0-9]:[0-9][0-9])";
 
     private static final String HTTP_DATE_ANSIC_REGEXP =
             "[ ]([A-Za-z]{3,3})[ ]+([0-9]{1,2})[ ]"
-            + "([0-9][0-9]:[0-9][0-9]:[0-9][0-9])[ ]([0-9]{2,4})";
+            + "([0-9]{1,2}:[0-9][0-9]:[0-9][0-9])[ ]([0-9]{2,4})";
 
     /**
      * The compiled version of the HTTP-date regular expressions.
@@ -65,6 +68,12 @@ class HttpDateTime {
             Pattern.compile(HTTP_DATE_ANSIC_REGEXP);
 
     private static class TimeOfDay {
+        TimeOfDay(int h, int m, int s) {
+            this.hour = h;
+            this.minute = m;
+            this.second = s;
+        }
+        
         int hour;
         int minute;
         int second;
@@ -76,7 +85,7 @@ class HttpDateTime {
         int date = 1;
         int month = Calendar.JANUARY;
         int year = 1970;
-        TimeOfDay timeOfDay = new TimeOfDay();
+        TimeOfDay timeOfDay;
 
         Matcher rfcMatcher = HTTP_DATE_RFC_PATTERN.matcher(timeString);
         if (rfcMatcher.find()) {
@@ -175,21 +184,39 @@ class HttpDateTime {
             } else {
                 return year + 2000;
             }
-        } else
-            return (yearString.charAt(0) - '0') * 1000
+        } else if (yearString.length() == 3) {
+            // According to RFC 2822, three digit years should be added to 1900.
+            int year = (yearString.charAt(0) - '0') * 100
+                    + (yearString.charAt(1) - '0') * 10
+                    + (yearString.charAt(2) - '0');
+            return year + 1900;
+        } else if (yearString.length() == 4) {
+             return (yearString.charAt(0) - '0') * 1000
                     + (yearString.charAt(1) - '0') * 100
                     + (yearString.charAt(2) - '0') * 10
                     + (yearString.charAt(3) - '0');
+        } else {
+             return 1970;
+        }
     }
 
     private static TimeOfDay getTime(String timeString) {
-        TimeOfDay time = new TimeOfDay();
-        time.hour = (timeString.charAt(0) - '0') * 10
-                + (timeString.charAt(1) - '0');
-        time.minute = (timeString.charAt(3) - '0') * 10
-                + (timeString.charAt(4) - '0');
-        time.second = (timeString.charAt(6) - '0') * 10
-                + (timeString.charAt(7) - '0');
-        return time;
+        // HH might be H
+        int i = 0;
+        int hour = timeString.charAt(i++) - '0';
+        if (timeString.charAt(i) != ':')
+            hour = hour * 10 + (timeString.charAt(i++) - '0');
+        // Skip ':'
+        i++;
+        
+        int minute = (timeString.charAt(i++) - '0') * 10
+                    + (timeString.charAt(i++) - '0');
+        // Skip ':'
+        i++;
+        
+        int second = (timeString.charAt(i++) - '0') * 10
+                  + (timeString.charAt(i++) - '0');
+
+        return new TimeOfDay(hour, minute, second);        
     }
 }

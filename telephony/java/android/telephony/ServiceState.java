@@ -83,6 +83,12 @@ public class ServiceState implements Parcelable {
     public static final int RADIO_TECHNOLOGY_EVDO_0 = 7;
     /** @hide */
     public static final int RADIO_TECHNOLOGY_EVDO_A = 8;
+    /** @hide */
+    public static final int RADIO_TECHNOLOGY_HSDPA = 9;
+    /** @hide */
+    public static final int RADIO_TECHNOLOGY_HSUPA = 10;
+    /** @hide */
+    public static final int RADIO_TECHNOLOGY_HSPA = 11;
 
     /**
      * Available registration states for GSM, UMTS and CDMA.
@@ -114,6 +120,8 @@ public class ServiceState implements Parcelable {
     private int mSystemId;
     private int mCdmaRoamingIndicator;
     private int mCdmaDefaultRoamingIndicator;
+    private int mCdmaEriIconIndex;
+    private int mCdmaEriIconMode;
 
     /**
      * Create a new ServiceState from a intent notifier Bundle
@@ -160,6 +168,8 @@ public class ServiceState implements Parcelable {
         mSystemId = s.mSystemId;
         mCdmaRoamingIndicator = s.mCdmaRoamingIndicator;
         mCdmaDefaultRoamingIndicator = s.mCdmaDefaultRoamingIndicator;
+        mCdmaEriIconIndex = s.mCdmaEriIconIndex;
+        mCdmaEriIconMode = s.mCdmaEriIconMode;
     }
 
     /**
@@ -178,6 +188,8 @@ public class ServiceState implements Parcelable {
         mSystemId = in.readInt();
         mCdmaRoamingIndicator = in.readInt();
         mCdmaDefaultRoamingIndicator = in.readInt();
+        mCdmaEriIconIndex = in.readInt();
+        mCdmaEriIconMode = in.readInt();
     }
 
     public void writeToParcel(Parcel out, int flags) {
@@ -193,6 +205,8 @@ public class ServiceState implements Parcelable {
         out.writeInt(mSystemId);
         out.writeInt(mCdmaRoamingIndicator);
         out.writeInt(mCdmaDefaultRoamingIndicator);
+        out.writeInt(mCdmaEriIconIndex);
+        out.writeInt(mCdmaEriIconMode);
     }
 
     public int describeContents() {
@@ -245,6 +259,20 @@ public class ServiceState implements Parcelable {
      */
     public int getCdmaDefaultRoamingIndicator(){
         return this.mCdmaDefaultRoamingIndicator;
+    }
+
+    /**
+     * @hide
+     */
+    public int getCdmaEriIconIndex() {
+        return this.mCdmaEriIconIndex;
+    }
+
+    /**
+     * @hide
+     */
+    public int getCdmaEriIconMode() {
+        return this.mCdmaEriIconMode;
     }
 
     /**
@@ -366,6 +394,15 @@ public class ServiceState implements Parcelable {
         case 8:
             radioTechnology = "EvDo rev. A";
             break;
+        case 9:
+            radioTechnology = "HSDPA";
+            break;
+        case 10:
+            radioTechnology = "HSUPA";
+            break;
+        case 11:
+            radioTechnology = "HSPA";
+            break;
         default:
             Log.w(LOG_TAG, "mRadioTechnology variable out of range.");
         break;
@@ -397,8 +434,11 @@ public class ServiceState implements Parcelable {
         mSystemId = -1;
         mCdmaRoamingIndicator = -1;
         mCdmaDefaultRoamingIndicator = -1;
+        mCdmaEriIconIndex = -1;
+        mCdmaEriIconMode = -1;
     }
 
+    // TODO - can't this be combined with the above func..
     public void setStateOff() {
         mState = STATE_POWER_OFF;
         mRoaming = false;
@@ -412,6 +452,8 @@ public class ServiceState implements Parcelable {
         mSystemId = -1;
         mCdmaRoamingIndicator = -1;
         mCdmaDefaultRoamingIndicator = -1;
+        mCdmaEriIconIndex = -1;
+        mCdmaEriIconMode = -1;
     }
 
     public void setState(int state) {
@@ -434,6 +476,20 @@ public class ServiceState implements Parcelable {
      */
     public void setCdmaDefaultRoamingIndicator (int roaming) {
         this.mCdmaDefaultRoamingIndicator = roaming;
+    }
+
+    /**
+     * @hide
+     */
+    public void setCdmaEriIconIndex(int index) {
+        this.mCdmaEriIconIndex = index;
+    }
+
+    /**
+     * @hide
+     */
+    public void setCdmaEriIconMode(int mode) {
+        this.mCdmaEriIconMode = mode;
     }
 
     public void setOperatorName(String longName, String shortName, String numeric) {

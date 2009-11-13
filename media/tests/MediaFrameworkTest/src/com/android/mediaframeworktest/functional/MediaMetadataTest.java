@@ -23,6 +23,7 @@ import android.test.suitebuilder.annotation.Suppress;
 import android.util.Log;
 
 import com.android.mediaframeworktest.MediaNames;
+import com.android.mediaframeworktest.MediaProfileReader;
 /**
  * This metadata test suite test the basic functionality of the 
  * MediaMetadataRetriever
@@ -31,12 +32,12 @@ import com.android.mediaframeworktest.MediaNames;
 public class MediaMetadataTest extends AndroidTestCase {
     
     private static final String TAG = "MediaMetadataTest";
-    
+
     public static enum METADATA_EXPECTEDRESULT{
         FILE_PATH,CD_TRACK, ALBUM,
         ARTIST, AUTHOR, COMPOSER,
         DATE, GENRE, TITLE,
-        YEAR, DURATION, NUM_TRACKS
+        YEAR, DURATION, NUM_TRACKS, WRITER
     }
     
     public static enum MP3_TEST_FILE{
@@ -130,8 +131,6 @@ public class MediaMetadataTest extends AndroidTestCase {
         validateMetatData(non_mp3_test_file.AMRWB.ordinal(), MediaNames.META_DATA_OTHERS);
     }
     
-    //Bug# 1440173 - skip this test case now
-    @Suppress
     @MediumTest
     public static void testM4A1_Metadata() throws Exception {
         validateMetatData(non_mp3_test_file.M4A1.ordinal(), MediaNames.META_DATA_OTHERS);
@@ -195,12 +194,17 @@ public class MediaMetadataTest extends AndroidTestCase {
     }
      
     private static void validateMetatData(int fileIndex, String meta_data_file[][]) {
+        Log.v(TAG, "filePath = "+ meta_data_file[fileIndex][0]);
+        if ((meta_data_file[fileIndex][0].endsWith("wma") && !MediaProfileReader.getWMAEnable()) ||
+            (meta_data_file[fileIndex][0].endsWith("wmv") && !MediaProfileReader.getWMVEnable())) {
+            Log.v(TAG, "Skip test since windows media is not supported");
+            return;
+        }
         String value = null;
         MediaMetadataRetriever retriever = new MediaMetadataRetriever();
         retriever.setMode(MediaMetadataRetriever.MODE_GET_METADATA_ONLY);
         try {
             retriever.setDataSource(meta_data_file[fileIndex][0]);
-            Log.v(TAG, "filePath = "+ meta_data_file[fileIndex][0]);
         } catch(Exception e) {
             Log.v(TAG, "Failed: "+meta_data_file[fileIndex][0] + " " + e.toString());
             //Set the test case failure whenever it failed to setDataSource
@@ -254,6 +258,10 @@ public class MediaMetadataTest extends AndroidTestCase {
         Log.v(TAG, "Track : "+ value);
         assertEquals(TAG,meta_data_file[fileIndex][meta.NUM_TRACKS.ordinal()], value);
      
+        value = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_WRITER);
+        Log.v(TAG, "Writer : "+ value);
+        assertEquals(TAG,meta_data_file[fileIndex][meta.WRITER.ordinal()], value);
+
         retriever.release();        
     }
 }

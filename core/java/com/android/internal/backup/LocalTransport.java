@@ -41,23 +41,27 @@ public class LocalTransport extends IBackupTransport.Stub {
 
 
     public LocalTransport(Context context) {
-        if (DEBUG) Log.v(TAG, "Transport constructed");
         mContext = context;
         mPackageManager = context.getPackageManager();
     }
 
 
-    public String transportDirName() throws RemoteException {
+    public String transportDirName() {
         return TRANSPORT_DIR_NAME;
     }
 
-    public long requestBackupTime() throws RemoteException {
+    public long requestBackupTime() {
         // any time is a good time for local backup
         return 0;
     }
 
-    public boolean performBackup(PackageInfo packageInfo, ParcelFileDescriptor data)
-            throws RemoteException {
+    public int initializeDevice() {
+        if (DEBUG) Log.v(TAG, "wiping all data");
+        deleteContents(mDataDir);
+        return BackupConstants.TRANSPORT_OK;
+    }
+
+    public int performBackup(PackageInfo packageInfo, ParcelFileDescriptor data) {
         if (DEBUG) Log.v(TAG, "performBackup() pkg=" + packageInfo.packageName);
 
         File packageDir = new File(mDataDir, packageInfo.packageName);
@@ -95,7 +99,7 @@ public class LocalTransport extends IBackupTransport.Stub {
                         entity.write(buf, 0, dataSize);
                     } catch (IOException e) {
                         Log.e(TAG, "Unable to update key file " + entityFile.getAbsolutePath());
-                        return false;
+                        return BackupConstants.TRANSPORT_ERROR;
                     } finally {
                         entity.close();
                     }
@@ -103,15 +107,30 @@ public class LocalTransport extends IBackupTransport.Stub {
                     entityFile.delete();
                 }
             }
-            return true;
+            return BackupConstants.TRANSPORT_OK;
         } catch (IOException e) {
             // oops, something went wrong.  abort the operation and return error.
             Log.v(TAG, "Exception reading backup input:", e);
-            return false;
+            return BackupConstants.TRANSPORT_ERROR;
         }
     }
 
-    public boolean clearBackupData(PackageInfo packageInfo) {
+    // Deletes the contents but not the given directory
+    private void deleteContents(File dirname) {
+        File[] contents = dirname.listFiles();
+        if (contents != null) {
+            for (File f : contents) {
+                if (f.isDirectory()) {
+                    // delete the directory's contents then fall through
+                    // and delete the directory itself.
+                    deleteContents(f);
+                }
+                f.delete();
+            }
+        }
+    }
+
+    public int clearBackupData(PackageInfo packageInfo) {
         if (DEBUG) Log.v(TAG, "clearBackupData() pkg=" + packageInfo.packageName);
 
         File packageDir = new File(mDataDir, packageInfo.packageName);
@@ -119,12 +138,12 @@ public class LocalTransport extends IBackupTransport.Stub {
             f.delete();
         }
         packageDir.delete();
-        return true;
+        return BackupConstants.TRANSPORT_OK;
     }
 
-    public boolean finishBackup() throws RemoteException {
+    public int finishBackup() {
         if (DEBUG) Log.v(TAG, "finishBackup()");
-        return true;
+        return BackupConstants.TRANSPORT_OK;
     }
 
     // Restore handling
@@ -135,11 +154,11 @@ public class LocalTransport extends IBackupTransport.Stub {
         return array;
     }
 
-    public boolean startRestore(long token, PackageInfo[] packages) {
+    public int startRestore(long token, PackageInfo[] packages) {
         if (DEBUG) Log.v(TAG, "start restore " + token);
         mRestorePackages = packages;
         mRestorePackage = -1;
-        return true;
+        return BackupConstants.TRANSPORT_OK;
     }
 
     public String nextRestorePackage() {
@@ -156,7 +175,7 @@ public class LocalTransport extends IBackupTransport.Stub {
         return "";
     }
 
-    public boolean getRestoreData(ParcelFileDescriptor outFd) {
+    public int getRestoreData(ParcelFileDescriptor outFd) {
         if (mRestorePackages == null) throw new IllegalStateException("startRestore not called");
         if (mRestorePackage < 0) throw new IllegalStateException("nextRestorePackage not called");
         File packageDir = new File(mDataDir, mRestorePackages[mRestorePackage].packageName);
@@ -164,9 +183,9 @@ public class LocalTransport extends IBackupTransport.Stub {
         // The restore set is the concatenation of the individual record blobs,
         // each of which is a file in the package's directory
         File[] blobs = packageDir.listFiles();
-        if (blobs == null) {
+        if (blobs == null) {  // nextRestorePackage() ensures the dir exists, so this is an error
             Log.e(TAG, "Error listing directory: " + packageDir);
-            return false;  // nextRestorePackage() ensures the dir exists, so this is an error
+            return BackupConstants.TRANSPORT_ERROR;
         }
 
         // We expect at least some data if the directory exists in the first place
@@ -187,10 +206,10 @@ public class LocalTransport extends IBackupTransport.Stub {
                     in.close();
                 }
             }
-            return true;
+            return BackupConstants.TRANSPORT_OK;
         } catch (IOException e) {
             Log.e(TAG, "Unable to read backup records", e);
-            return false;
+            return BackupConstants.TRANSPORT_ERROR;
         }
     }
 

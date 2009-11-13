@@ -28,6 +28,7 @@ import android.os.IInterface;
 import android.os.ParcelFileDescriptor;
 
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
 
 /**
  * The ipc interface to talk to a content provider.
@@ -43,6 +44,12 @@ public interface IContentProvider extends IInterface {
             CursorWindow window) throws RemoteException;
     public Cursor query(Uri url, String[] projection, String selection,
             String[] selectionArgs, String sortOrder) throws RemoteException;
+    /**
+     * @hide
+     */
+    public EntityIterator queryEntities(Uri url, String selection,
+            String[] selectionArgs, String sortOrder)
+            throws RemoteException;
     public String getType(Uri url) throws RemoteException;
     public Uri insert(Uri url, ContentValues initialValues)
             throws RemoteException;
@@ -55,7 +62,8 @@ public interface IContentProvider extends IInterface {
             throws RemoteException, FileNotFoundException;
     public AssetFileDescriptor openAssetFile(Uri url, String mode)
             throws RemoteException, FileNotFoundException;
-    public ISyncAdapter getSyncAdapter() throws RemoteException;
+    public ContentProviderResult[] applyBatch(ArrayList<ContentProviderOperation> operations)
+            throws RemoteException, OperationApplicationException;
 
     /* IPC constants */
     static final String descriptor = "android.content.IContentProvider";
@@ -65,8 +73,12 @@ public interface IContentProvider extends IInterface {
     static final int INSERT_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 2;
     static final int DELETE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 3;
     static final int UPDATE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 9;
-    static final int GET_SYNC_ADAPTER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 10;
     static final int BULK_INSERT_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 12;
     static final int OPEN_FILE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 13;
     static final int OPEN_ASSET_FILE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 14;
+    /**
+     * @hide
+     */
+    static final int QUERY_ENTITIES_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 18;
+    static final int APPLY_BATCH_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 19;
 }

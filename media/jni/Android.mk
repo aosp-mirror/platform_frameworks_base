@@ -12,20 +12,20 @@ LOCAL_SRC_FILES:= \
 
 LOCAL_SHARED_LIBRARIES := \
     libopencore_player \
-    libopencore_author \
     libomx_amrenc_sharedlibrary \
     libandroid_runtime \
     libnativehelper \
-    libcutils \
     libutils \
+    libbinder \
     libmedia \
-    libsgl \
+    libskia \
     libui
 
 LOCAL_STATIC_LIBRARIES :=
 
 LOCAL_C_INCLUDES += \
     external/tremor/Tremor \
+    frameworks/base/core/jni \
     $(PV_INCLUDES) \
     $(JNI_H_INCLUDE) \
     $(call include-path-for, corecg graphics)

@@ -565,14 +565,15 @@ public class WifiManager {
      * for some reason.
      * @param numChannels the number of allowed channels. Must be greater than 0
      * and less than or equal to 16.
+     * @param persist {@code true} if you want this remembered
      * @return {@code true} if the operation succeeds, {@code false} otherwise, e.g.,
      * {@code numChannels} is out of range.
      *
      * @hide pending API council
      */
-    public boolean setNumAllowedChannels(int numChannels) {
+    public boolean setNumAllowedChannels(int numChannels, boolean persist) {
         try {
-            return mService.setNumAllowedChannels(numChannels);
+            return mService.setNumAllowedChannels(numChannels, persist);
         } catch (RemoteException e) {
             return false;
         }
@@ -959,7 +960,7 @@ public class WifiManager {
          *
          * If this MulticastLock is not reference-counted, the first call to
          * {@code release} (after the radio was multicast locked using
-         * {@linke #acquire}) will unlock the multicast, and subsequent calls
+         * {@link #acquire}) will unlock the multicast, and subsequent calls
          * will be ignored.
          *
          * Note that if any other Wifi Multicast Locks are still outstanding

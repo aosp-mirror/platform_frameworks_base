@@ -17,7 +17,7 @@
 #ifndef ANDROID_MEDIAPLAYER_H
 #define ANDROID_MEDIAPLAYER_H
 
-#include <utils/IMemory.h>
+#include <binder/IMemory.h>
 #include <ui/Surface.h>
 #include <media/IMediaPlayerClient.h>
 #include <media/IMediaPlayer.h>
@@ -97,6 +97,8 @@ enum media_info_type {
     MEDIA_INFO_BAD_INTERLEAVING = 800,
     // The media is not seekable (e.g live stream).
     MEDIA_INFO_NOT_SEEKABLE = 801,
+    // New media metadata is available.
+    MEDIA_INFO_METADATA_UPDATE = 802,
 };
 
 
@@ -151,7 +153,10 @@ public:
             void            notify(int msg, int ext1, int ext2);
     static  sp<IMemory>     decode(const char* url, uint32_t *pSampleRate, int* pNumChannels, int* pFormat);
     static  sp<IMemory>     decode(int fd, int64_t offset, int64_t length, uint32_t *pSampleRate, int* pNumChannels, int* pFormat);
-
+    static  int             snoop(short *data, int len, int kind);
+            status_t        invoke(const Parcel& request, Parcel *reply);
+            status_t        setMetadataFilter(const Parcel& filter);
+            status_t        getMetadata(bool update_only, bool apply_filter, Parcel *metadata);
 private:
             void            clear_l();
             status_t        seekTo_l(int msec);

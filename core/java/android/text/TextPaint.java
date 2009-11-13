@@ -27,6 +27,7 @@ public class TextPaint extends Paint {
     public int baselineShift;
     public int linkColor;
     public int[] drawableState;
+    public float density = 1.0f;
 
     public TextPaint() {
         super();
@@ -51,5 +52,6 @@ public class TextPaint extends Paint {
         baselineShift = tp.baselineShift;
         linkColor = tp.linkColor;
         drawableState = tp.drawableState;
+        density = tp.density;
     }
 }

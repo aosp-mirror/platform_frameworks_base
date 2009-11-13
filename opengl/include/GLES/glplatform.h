@@ -28,12 +28,6 @@
 
 #define GL_APIENTRY KHRONOS_APIENTRY
 
-// XXX: this should probably not be here
-#define GL_DIRECT_TEXTURE_2D_QUALCOMM               0x7E80
-
-// XXX: not sure how this is intended to be used
-#define GL_GLEXT_PROTOTYPES
-
 #endif
 
 #endif /* __glplatform_h_ */

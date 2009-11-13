@@ -16,9 +16,9 @@
 
 package android.webkit;
 
+import android.content.Context;
 import android.os.Handler;
 import android.os.Message;
-import android.security.CertTool;
 import android.util.Log;
 
 final class JWebCoreJavaBridge extends Handler {
@@ -34,20 +34,41 @@ final class JWebCoreJavaBridge extends Handler {
     // Instant timer is used to implement a timer that needs to fire almost
     // immediately.
     private boolean mHasInstantTimer;
+
     // Reference count the pause/resume of timers
     private int mPauseTimerRefCount;
+
+    private boolean mTimerPaused;
+    private boolean mHasDeferredTimers;
+
+    private Context mContext;
+
+    /* package */
+    static final int REFRESH_PLUGINS = 100;
 
     /**
      * Construct a new JWebCoreJavaBridge to interface with
      * WebCore timers and cookies.
      */
-    public JWebCoreJavaBridge() {
+    public JWebCoreJavaBridge(Context context) {
+        mContext = context;
         nativeConstructor();
     }
 
     @Override
     protected void finalize() {
         nativeFinalize();
+    }
+
+    /**
+     * Call native timer callbacks.
+     */
+    private void fireSharedTimer() { 
+        PerfChecker checker = new PerfChecker();
+        // clear the flag so that sharedTimerFired() can set a new timer
+        mHasInstantTimer = false;
+        sharedTimerFired();
+        checker.responseAlert("sharedTimer");
     }
 
     /**
@@ -60,15 +81,20 @@ final class JWebCoreJavaBridge extends Handler {
     public void handleMessage(Message msg) {
         switch (msg.what) {
             case TIMER_MESSAGE: {
-                PerfChecker checker = new PerfChecker();
-                // clear the flag so that sharedTimerFired() can set a new timer
-                mHasInstantTimer = false;
-                sharedTimerFired();
-                checker.responseAlert("sharedTimer");
+                if (mTimerPaused) {
+                    mHasDeferredTimers = true;
+                } else {
+                    fireSharedTimer();
+                }
                 break;
             }
             case FUNCPTR_MESSAGE:
                 nativeServiceFuncPtrQueue();
+                break;
+            case REFRESH_PLUGINS:
+                nativeUpdatePluginDirectories(PluginManager.getInstance(null)
+                        .getPluginDirectories(), ((Boolean) msg.obj)
+                        .booleanValue());
                 break;
         }
     }
@@ -86,7 +112,8 @@ final class JWebCoreJavaBridge extends Handler {
      */
     public void pause() {
         if (--mPauseTimerRefCount == 0) {
-            setDeferringTimers(true);
+            mTimerPaused = true;
+            mHasDeferredTimers = false;
         }
     }
 
@@ -95,7 +122,11 @@ final class JWebCoreJavaBridge extends Handler {
      */
     public void resume() {
         if (++mPauseTimerRefCount == 1) {
-            setDeferringTimers(false);
+           mTimerPaused = false;
+           if (mHasDeferredTimers) {
+               mHasDeferredTimers = false;
+               fireSharedTimer();
+           }
         }
     }
 
@@ -108,10 +139,9 @@ final class JWebCoreJavaBridge extends Handler {
     /**
      * Store a cookie string associated with a url.
      * @param url The url to be used as a key for the cookie.
-     * @param docUrl The policy base url used by WebCore.
      * @param value The cookie string to be stored.
      */
-    private void setCookies(String url, String docUrl, String value) {
+    private void setCookies(String url, String value) {
         if (value.contains("\r") || value.contains("\n")) {
             // for security reason, filter out '\r' and '\n' from the cookie
             int size = value.length();
@@ -152,11 +182,25 @@ final class JWebCoreJavaBridge extends Handler {
     }
 
     /**
+     * Returns an array of plugin directoies
+     */
+    private String[] getPluginDirectories() {
+        return PluginManager.getInstance(null).getPluginDirectories();
+    }
+
+    /**
+     * Returns the path of the plugin data directory
+     */
+    private String getPluginSharedDataDirectory() {
+        return PluginManager.getInstance(null).getPluginSharedDataDirectory();
+    }
+
+    /**
      * setSharedTimer
      * @param timemillis The relative time when the timer should fire
      */
     private void setSharedTimer(long timemillis) {
-        if (WebView.LOGV_ENABLED) Log.v(LOGTAG, "setSharedTimer " + timemillis);
+        if (DebugFlags.J_WEB_CORE_JAVA_BRIDGE) Log.v(LOGTAG, "setSharedTimer " + timemillis);
 
         if (timemillis <= 0) {
             // we don't accumulate the sharedTimer unless it is a delayed
@@ -180,25 +224,27 @@ final class JWebCoreJavaBridge extends Handler {
      * Stop the shared timer.
      */
     private void stopSharedTimer() {
-        if (WebView.LOGV_ENABLED) {
+        if (DebugFlags.J_WEB_CORE_JAVA_BRIDGE) {
             Log.v(LOGTAG, "stopSharedTimer removing all timers");
         }
         removeMessages(TIMER_MESSAGE);
         mHasInstantTimer = false;
+        mHasDeferredTimers = false;
     }
 
     private String[] getKeyStrengthList() {
-        return CertTool.getInstance().getSupportedKeyStrenghs();
+        return CertTool.getKeyStrengthList();
     }
 
     private String getSignedPublicKey(int index, String challenge, String url) {
         // generateKeyPair expects organizations which we don't have. Ignore url.
-        return CertTool.getInstance().generateKeyPair(index, challenge, null);
+        return CertTool.getSignedPublicKey(mContext, index, challenge);
     }
 
     private native void nativeConstructor();
     private native void nativeFinalize();
     private native void sharedTimerFired();
-    private native void setDeferringTimers(boolean defer);
+    private native void nativeUpdatePluginDirectories(String[] directories,
+            boolean reload);
     public native void setNetworkOnLine(boolean online);
 }

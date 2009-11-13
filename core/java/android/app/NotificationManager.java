@@ -61,7 +61,8 @@ public class NotificationManager
 
     private static INotificationManager sService;
 
-    static private INotificationManager getService()
+    /** @hide */
+    static public INotificationManager getService()
     {
         if (sService != null) {
             return sService;
@@ -86,12 +87,27 @@ public class NotificationManager
      */
     public void notify(int id, Notification notification)
     {
+        notify(null, id, notification);
+    }
+
+    /**
+     * Persistent notification on the status bar,
+     *
+     * @param tag An string identifier for this notification unique within your
+     *        application.
+     * @param notification A {@link Notification} object describing how to
+     *        notify the user, other than the view you're providing. Must not be null.
+     * @return the id of the notification that is associated with the string identifier that
+     * can be used to cancel the notification
+     */
+    public void notify(String tag, int id, Notification notification)
+    {
         int[] idOut = new int[1];
         INotificationManager service = getService();
         String pkg = mContext.getPackageName();
         if (localLOGV) Log.v(TAG, pkg + ": notify(" + id + ", " + notification + ")");
         try {
-            service.enqueueNotification(pkg, id, notification, idOut);
+            service.enqueueNotificationWithTag(pkg, tag, id, notification, idOut);
             if (id != idOut[0]) {
                 Log.w(TAG, "notify: id corrupted: sent " + id + ", got back " + idOut[0]);
             }
@@ -106,11 +122,21 @@ public class NotificationManager
      */
     public void cancel(int id)
     {
+        cancel(null, id);
+    }
+
+    /**
+     * Cancel a previously shown notification.  If it's transient, the view
+     * will be hidden.  If it's persistent, it will be removed from the status
+     * bar.
+     */
+    public void cancel(String tag, int id)
+    {
         INotificationManager service = getService();
         String pkg = mContext.getPackageName();
         if (localLOGV) Log.v(TAG, pkg + ": cancel(" + id + ")");
         try {
-            service.cancelNotification(pkg, id);
+            service.cancelNotificationWithTag(pkg, tag, id);
         } catch (RemoteException e) {
         }
     }

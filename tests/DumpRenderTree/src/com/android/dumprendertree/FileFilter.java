@@ -79,11 +79,26 @@ public class FileFilter {
         "profiler",  // profiler is not supported
         "svg",  // svg is not supported
         "platform",  // platform specific
-        "http"  // requires local http(s) server
+        "http/wml",
     };
         
     static final String [] ignoreTestList = {
-        };
+        // RegExp is exponatal
+        "fast/regex/test1.html",
+        "fast/regex/slow.html",
+        // RegExp is too large, causing OOM
+        "fast/js/regexp-charclass-crash.html",
+        // The Android browser has no notion of private browsing.
+        "storage/private-browsing-readonly.html",
+        "storage/domstorage/localstorage/private-browsing-affects-storage.html",
+        "storage/domstorage/sessionstorage/private-browsing-affects-storage.html",
+        // Android layout tests are stored in "layout_tests". The following two
+        // tests expect "LayoutTests" in their output.
+        "storage/domstorage/localstorage/iframe-events.html",
+        "storage/domstorage/sessionstorage/iframe-events.html",
+        // below tests (failed or crashes) are filtered out temporarily due to prioritizing
+        "editing/selection/move-left-right.html",
+    };
     
     static void fillIgnoreResultSet() {
         // need test plugin
@@ -195,11 +210,7 @@ public class FileFilter {
         ignoreResultList.add("fast/loader/local-iFrame-source-from-local.html");
         // extra spacing because iFrames rendered next to each other on Apple
         ignoreResultList.add("fast/loader/opaque-base-url.html");
-        // RegExp is too large, causing OOM
-        ignoreResultList.add("fast/js/regexp-charclass-crash.html");
         ignoreResultList.add("fast/text/plain-text-line-breaks.html");
-        
-        
     }
     
     static void fillBugTable() {

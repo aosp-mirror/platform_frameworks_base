@@ -45,42 +45,89 @@ public class IccCardStatus {
         PINSTATE_ENABLED_PERM_BLOCKED
     };
 
-    public CardState  card_state;
-    public PinState   universal_pin_state;
-    public int        gsm_umts_subscription_app_index;
-    public int        cdma_subscription_app_index;
-    public int        num_applications;
+    private CardState  mCardState;
+    private PinState   mUniversalPinState;
+    private int        mGsmUmtsSubscriptionAppIndex;
+    private int        mCdmaSubscriptionAppIndex;
+    private int        mNumApplications;
 
-    ArrayList<IccCardApplication> application = new ArrayList<IccCardApplication>(CARD_MAX_APPS);
+    private ArrayList<IccCardApplication> mApplications =
+            new ArrayList<IccCardApplication>(CARD_MAX_APPS);
 
-    CardState CardStateFromRILInt(int state) {
-        CardState newState;
-        /* RIL_CardState ril.h */
-        switch(state) {
-            case 0: newState = CardState.CARDSTATE_ABSENT; break;
-            case 1: newState = CardState.CARDSTATE_PRESENT; break;
-            case 2: newState = CardState.CARDSTATE_ERROR; break;
-            default:
-                throw new RuntimeException(
-                            "Unrecognized RIL_CardState: " +state);
-        }
-        return newState;
+    public CardState getCardState() {
+        return mCardState;
     }
 
-    PinState PinStateFromRILInt(int state) {
-        PinState newState;
-        /* RIL_PinState ril.h */
+    public void setCardState(int state) {
         switch(state) {
-            case 0: newState = PinState.PINSTATE_UNKNOWN; break;
-            case 1: newState = PinState.PINSTATE_ENABLED_NOT_VERIFIED; break;
-            case 2: newState = PinState.PINSTATE_ENABLED_VERIFIED; break;
-            case 3: newState = PinState.PINSTATE_DISABLED; break;
-            case 4: newState = PinState.PINSTATE_ENABLED_BLOCKED; break;
-            case 5: newState = PinState.PINSTATE_ENABLED_PERM_BLOCKED; break;
-            default:
-                throw new RuntimeException(
-                            "Unrecognized RIL_PinState: " +state);
+        case 0:
+            mCardState = CardState.CARDSTATE_ABSENT;
+            break;
+        case 1:
+            mCardState = CardState.CARDSTATE_PRESENT;
+            break;
+        case 2:
+            mCardState = CardState.CARDSTATE_ERROR;
+            break;
+        default:
+            throw new RuntimeException("Unrecognized RIL_CardState: " + state);
         }
-        return newState;
+    }
+
+    public void setUniversalPinState(int state) {
+        switch(state) {
+        case 0:
+            mUniversalPinState = PinState.PINSTATE_UNKNOWN;
+            break;
+        case 1:
+            mUniversalPinState = PinState.PINSTATE_ENABLED_NOT_VERIFIED;
+            break;
+        case 2:
+            mUniversalPinState = PinState.PINSTATE_ENABLED_VERIFIED;
+            break;
+        case 3:
+            mUniversalPinState = PinState.PINSTATE_DISABLED;
+            break;
+        case 4:
+            mUniversalPinState = PinState.PINSTATE_ENABLED_BLOCKED;
+            break;
+        case 5:
+            mUniversalPinState = PinState.PINSTATE_ENABLED_PERM_BLOCKED;
+            break;
+        default:
+            throw new RuntimeException("Unrecognized RIL_PinState: " + state);
+        }
+    }
+
+    public int getGsmUmtsSubscriptionAppIndex() {
+        return mGsmUmtsSubscriptionAppIndex;
+    }
+
+    public void setGsmUmtsSubscriptionAppIndex(int gsmUmtsSubscriptionAppIndex) {
+        mGsmUmtsSubscriptionAppIndex = gsmUmtsSubscriptionAppIndex;
+    }
+
+    public int getCdmaSubscriptionAppIndex() {
+        return mCdmaSubscriptionAppIndex;
+    }
+
+    public void setCdmaSubscriptionAppIndex(int cdmaSubscriptionAppIndex) {
+        mCdmaSubscriptionAppIndex = cdmaSubscriptionAppIndex;
+    }
+
+    public int getNumApplications() {
+        return mNumApplications;
+    }
+
+    public void setNumApplications(int numApplications) {
+        mNumApplications = numApplications;
+    }
+
+    public void addApplication(IccCardApplication application) {
+        mApplications.add(application);
+    }
+
+    public IccCardApplication getApplication(int index) {
+        return mApplications.get(index);
     }
 }

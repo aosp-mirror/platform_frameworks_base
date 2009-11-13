@@ -26,13 +26,10 @@ import android.content.pm.PermissionGroupInfo;
 import android.content.pm.PermissionInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.graphics.drawable.Drawable;
-import android.net.Uri;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 
-import java.io.File;
 import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -147,15 +144,6 @@ public class AppSecurityPermissions  implements View.OnClickListener {
         for(PermissionInfo tmpInfo : permSet) {
             mPermsList.add(tmpInfo);
         }
-    }
-    
-    public PackageParser.Package getPackageInfo(Uri packageURI) {
-        final String archiveFilePath = packageURI.getPath();
-        PackageParser packageParser = new PackageParser(archiveFilePath);
-        File sourceFile = new File(archiveFilePath);
-        DisplayMetrics metrics = new DisplayMetrics();
-        metrics.setToDefaults();
-        return packageParser.parsePackage(sourceFile, archiveFilePath, metrics, 0);
     }
     
     private void getAllUsedPermissions(int sharedUid, Set<PermissionInfo> permSet) {

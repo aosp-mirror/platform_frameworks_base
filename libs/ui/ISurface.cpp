@@ -14,18 +14,24 @@
  * limitations under the License.
  */
 
+#define LOG_TAG "ISurface"
+
 #include <stdio.h>
 #include <stdint.h>
 #include <sys/types.h>
 
-#include <utils/Parcel.h>
-#include <utils/IMemory.h>
+#include <binder/Parcel.h>
+#include <binder/IMemory.h>
 
 #include <ui/ISurface.h>
 #include <ui/Overlay.h>
+#include <ui/Surface.h>
 
+#include <ui/GraphicBuffer.h>
 
 namespace android {
+
+// ----------------------------------------------------------------------
 
 ISurface::BufferHeap::BufferHeap() 
     : w(0), h(0), hor_stride(0), ver_stride(0), format(0),
@@ -55,12 +61,25 @@ ISurface::BufferHeap::~BufferHeap()
 {     
 }
 
+// ----------------------------------------------------------------------
+
 class BpSurface : public BpInterface<ISurface>
 {
 public:
     BpSurface(const sp<IBinder>& impl)
         : BpInterface<ISurface>(impl)
     {
+    }
+
+    virtual sp<GraphicBuffer> requestBuffer(int bufferIdx, int usage)
+    {
+        Parcel data, reply;
+        data.writeInterfaceToken(ISurface::getInterfaceDescriptor());
+        data.writeInt32(bufferIdx);
+        data.writeInt32(usage);
+        remote()->transact(REQUEST_BUFFER, data, &reply);
+        sp<GraphicBuffer> buffer = new GraphicBuffer(reply);
+        return buffer;
     }
 
     virtual status_t registerBuffers(const BufferHeap& buffers)
@@ -112,16 +131,17 @@ IMPLEMENT_META_INTERFACE(Surface, "android.ui.ISurface");
 
 // ----------------------------------------------------------------------
 
-#define CHECK_INTERFACE(interface, data, reply) \
-        do { if (!data.enforceInterface(interface::getInterfaceDescriptor())) { \
-            LOGW("Call incorrectly routed to " #interface); \
-            return PERMISSION_DENIED; \
-        } } while (0)
-
 status_t BnSurface::onTransact(
     uint32_t code, const Parcel& data, Parcel* reply, uint32_t flags)
 {
     switch(code) {
+        case REQUEST_BUFFER: {
+            CHECK_INTERFACE(ISurface, data, reply);
+            int bufferIdx = data.readInt32();
+            int usage = data.readInt32();
+            sp<GraphicBuffer> buffer(requestBuffer(bufferIdx, usage));
+            return GraphicBuffer::writeToParcel(reply, buffer.get());
+        }
         case REGISTER_BUFFERS: {
             CHECK_INTERFACE(ISurface, data, reply);
             BufferHeap buffer;

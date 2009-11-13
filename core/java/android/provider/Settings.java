@@ -119,6 +119,20 @@ public final class Settings {
             "android.settings.AIRPLANE_MODE_SETTINGS";
 
     /**
+     * Activity Action: Show settings for accessibility modules.
+     * <p>
+     * In some cases, a matching Activity may not exist, so ensure you
+     * safeguard against this.
+     * <p>
+     * Input: Nothing.
+     * <p>
+     * Output: Nothing.
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_ACCESSIBILITY_SETTINGS =
+            "android.settings.ACCESSIBILITY_SETTINGS";
+
+    /**
      * Activity Action: Show settings to allow configuration of security and
      * location privacy.
      * <p>
@@ -132,6 +146,20 @@ public final class Settings {
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_SECURITY_SETTINGS =
             "android.settings.SECURITY_SETTINGS";
+
+    /**
+     * Activity Action: Show settings to allow configuration of privacy options.
+     * <p>
+     * In some cases, a matching Activity may not exist, so ensure you
+     * safeguard against this.
+     * <p>
+     * Input: Nothing.
+     * <p>
+     * Output: Nothing.
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_PRIVACY_SETTINGS =
+            "android.settings.PRIVACY_SETTINGS";
 
     /**
      * Activity Action: Show settings to allow configuration of Wi-Fi.
@@ -413,8 +441,6 @@ public final class Settings {
 
     private static final String TAG = "Settings";
 
-    private static String sJidResource = null;
-
     public static class SettingNotFoundException extends AndroidException {
         public SettingNotFoundException(String msg) {
             super(msg);
@@ -438,7 +464,7 @@ public final class Settings {
                 resolver.insert(uri, values);
                 return true;
             } catch (SQLException e) {
-                Log.e(TAG, "Can't set key " + name + " in " + uri, e);
+                Log.w(TAG, "Can't set key " + name + " in " + uri, e);
                 return false;
             }
         }
@@ -475,7 +501,7 @@ public final class Settings {
                     mValues.put(name, value);
                 } catch (SQLException e) {
                     // SQL error: return null, but don't cache it.
-                    Log.e(TAG, "Can't get key " + name + " from " + mUri, e);
+                    Log.w(TAG, "Can't get key " + name + " from " + mUri, e);
                 } finally {
                     if (c != null) c.close();
                 }
@@ -879,6 +905,17 @@ public final class Settings {
         public static final String AIRPLANE_MODE_RADIOS = "airplane_mode_radios";
 
         /**
+         * A comma separated list of radios that should to be disabled when airplane mode
+         * is on, but can be manually reenabled by the user.  For example, if RADIO_WIFI is
+         * added to both AIRPLANE_MODE_RADIOS and AIRPLANE_MODE_TOGGLEABLE_RADIOS, then Wifi
+         * will be turned off when entering airplane mode, but the user will be able to reenable
+         * Wifi in the Settings app.
+         *
+         * {@hide}
+         */
+        public static final String AIRPLANE_MODE_TOGGLEABLE_RADIOS = "airplane_mode_toggleable_radios";
+
+        /**
          * The policy for deciding when Wi-Fi should go to sleep (which will in
          * turn switch to using the mobile data as an Internet connection).
          * <p>
@@ -1038,6 +1075,24 @@ public final class Settings {
         public static final String SCREEN_BRIGHTNESS = "screen_brightness";
 
         /**
+         * Control whether to enable automatic brightness mode.
+         * @hide
+         */
+        public static final String SCREEN_BRIGHTNESS_MODE = "screen_brightness_mode";
+
+        /**
+         * SCREEN_BRIGHTNESS_MODE value for manual mode.
+         * @hide
+         */
+        public static final int SCREEN_BRIGHTNESS_MODE_MANUAL = 0;
+
+        /**
+         * SCREEN_BRIGHTNESS_MODE value for manual mode.
+         * @hide
+         */
+        public static final int SCREEN_BRIGHTNESS_MODE_AUTOMATIC = 1;
+
+        /**
          * Control whether the process CPU usage meter should be shown.
          */
         public static final String SHOW_PROCESSES = "show_processes";
@@ -1180,6 +1235,22 @@ public final class Settings {
          * @see #DEFAULT_RINGTONE_URI
          */
         public static final Uri DEFAULT_NOTIFICATION_URI = getUriFor(NOTIFICATION_SOUND);
+
+        /**
+         * Persistent store for the system-wide default alarm alert.
+         *
+         * @see #RINGTONE
+         * @see #DEFAULT_ALARM_ALERT_URI
+         */
+        public static final String ALARM_ALERT = "alarm_alert";
+
+        /**
+         * A {@link Uri} that will point to the current default alarm alert at
+         * any given time.
+         *
+         * @see #DEFAULT_ALARM_ALERT_URI
+         */
+        public static final Uri DEFAULT_ALARM_ALERT_URI = getUriFor(ALARM_ALERT);
 
         /**
          * Setting to enable Auto Replace (AutoText) in text editors. 1 = On, 0 = Off
@@ -1357,6 +1428,7 @@ public final class Settings {
             DIM_SCREEN,
             SCREEN_OFF_TIMEOUT,
             SCREEN_BRIGHTNESS,
+            SCREEN_BRIGHTNESS_MODE,
             VIBRATE_ON,
             NOTIFICATIONS_USE_RING_VOLUME,
             MODE_RINGER,
@@ -1497,18 +1569,17 @@ public final class Settings {
         @Deprecated
         public static final String USE_GOOGLE_MAIL = Secure.USE_GOOGLE_MAIL;
 
-//       /**
-//         * @deprecated Use {@link android.provider.Settings.Secure#WIFI_MAX_DHCP_RETRY_COUNT}
-//         * instead
-//         */
+       /**
+         * @deprecated Use
+         * {@link android.provider.Settings.Secure#WIFI_MAX_DHCP_RETRY_COUNT} instead
+         */
         @Deprecated
         public static final String WIFI_MAX_DHCP_RETRY_COUNT = Secure.WIFI_MAX_DHCP_RETRY_COUNT;
 
-//        /**
-//         * @deprecated Use
-//         * {@link android.provider.Settings.Secure#WIFI_MOBILE_DATA_TRANSITION_WAKELOCK_TIMEOUT_MS}
-//         * instead
-//         */
+        /**
+         * @deprecated Use
+         * {@link android.provider.Settings.Secure#WIFI_MOBILE_DATA_TRANSITION_WAKELOCK_TIMEOUT_MS} instead
+         */
         @Deprecated
         public static final String WIFI_MOBILE_DATA_TRANSITION_WAKELOCK_TIMEOUT_MS =
                 Secure.WIFI_MOBILE_DATA_TRANSITION_WAKELOCK_TIMEOUT_MS;
@@ -1968,6 +2039,12 @@ public final class Settings {
         public static final String LOCATION_PROVIDERS_ALLOWED = "location_providers_allowed";
 
         /**
+         * Whether assisted GPS should be enabled or not.
+         * @hide
+         */
+        public static final String ASSISTED_GPS_ENABLED = "assisted_gps_enabled";
+
+        /**
          * The Logging ID (a unique 64-bit value) as a hex string.
          * Used as a pseudonymous identifier for logging.
          * @deprecated This identifier is poorly initialized and has
@@ -2201,6 +2278,32 @@ public final class Settings {
         public static final String BACKGROUND_DATA = "background_data";
 
         /**
+         * The time in msec, when the LAST_KMSG file was send to the checkin server.
+         * We will only send the LAST_KMSG file if it was modified after this time.
+         *
+         * @hide
+         */
+        public static final String CHECKIN_SEND_LAST_KMSG_TIME = "checkin_kmsg_time";
+
+        /**
+         * The time in msec, when the apanic_console file was send to the checkin server.
+         * We will only send the apanic_console file if it was modified after this time.
+         *
+         * @hide
+         */
+        public static final String CHECKIN_SEND_APANIC_CONSOLE_TIME =
+            "checkin_apanic_console_time";
+
+        /**
+         * The time in msec, when the apanic_thread file was send to the checkin server.
+         * We will only send the apanic_thread file if it was modified after this time.
+         *
+         * @hide
+         */
+        public static final String CHECKIN_SEND_APANIC_THREAD_TIME =
+            "checkin_apanic_thread_time";
+
+        /**
          * The CDMA roaming mode 0 = Home Networks, CDMA default
          *                       1 = Roaming on Affiliated networks
          *                       2 = Roaming on any networks
@@ -2314,7 +2417,6 @@ public final class Settings {
         public static final String[] SETTINGS_TO_BACKUP = {
             ADB_ENABLED,
             ALLOW_MOCK_LOCATION,
-            INSTALL_NON_MARKET_APPS,
             PARENTAL_CONTROL_ENABLED,
             PARENTAL_CONTROL_REDIRECT_URL,
             USB_MASS_STORAGE_ENABLED,
@@ -2330,12 +2432,6 @@ public final class Settings {
             WIFI_NETWORKS_AVAILABLE_REPEAT_DELAY,
             WIFI_NUM_ALLOWED_CHANNELS,
             WIFI_NUM_OPEN_NETWORKS_KEPT,
-            BACKGROUND_DATA,
-            PREFERRED_NETWORK_MODE,
-            PREFERRED_TTY_MODE,
-            CDMA_CELL_BROADCAST_SMS,
-            PREFERRED_CDMA_SUBSCRIPTION,
-            ENHANCED_VOICE_PRIVACY_ENABLED
         };
 
         /**
@@ -2687,15 +2783,30 @@ public final class Settings {
 
         /**
          * Controls whether Gmail will discard uphill operations that repeatedly fail. Value must be
-         * an integer where non-zero means true. Defaults to 1.
+         * an integer where non-zero means true. Defaults to 1. This flag controls Donut devices.
          */
         public static final String GMAIL_DISCARD_ERROR_UPHILL_OP = "gmail_discard_error_uphill_op";
+
+        /**
+         * Controls whether Gmail will discard uphill operations that repeatedly fail. Value must be
+         * an integer where non-zero means true. Defaults to 1. This flag controls Eclair and
+         * future devices.
+         */
+        public static final String GMAIL_DISCARD_ERROR_UPHILL_OP_NEW =
+            "gmail_discard_error_uphill_op_new";
 
         /**
          * Controls how many attempts Gmail will try to upload an uphill operations before it
          * abandons the operation. Defaults to 20.
          */
-        public static final String GMAIL_NUM_RETRY_UPHILL_OP = "gmail_discard_error_uphill_op";
+        public static final String GMAIL_NUM_RETRY_UPHILL_OP = "gmail_num_retry_uphill_op";
+
+        /**
+         * How much time in seconds Gmail will try to upload an uphill operations before it
+         * abandons the operation. Defaults to 36400 (one day).
+         */
+        public static final String GMAIL_WAIT_TIME_RETRY_UPHILL_OP =
+                "gmail_wait_time_retry_uphill_op";
 
         /**
          * Controls if the protocol buffer version of the protocol will use a multipart request for
@@ -2804,6 +2915,12 @@ public final class Settings {
                 "gtalk_nosync_heartbeat_ping_interval_ms";
 
         /**
+         * The maximum heartbeat interval used while on the WIFI network.
+         */
+        public static final String GTALK_SERVICE_WIFI_MAX_HEARTBEAT_INTERVAL_MS =
+                "gtalk_wifi_max_heartbeat_ping_interval_ms";
+
+        /**
          * How long we wait to receive a heartbeat ping acknowledgement (or another packet)
          * from the GTalk server, before deeming the connection dead.
          */
@@ -2856,6 +2973,113 @@ public final class Settings {
         public static final String GTALK_USE_BARE_JID_TIMEOUT_MS = "gtalk_use_barejid_timeout_ms";
 
         /**
+         * This is the threshold of retry number when there is an authentication expired failure
+         * for Google Talk. In some situation, e.g. when a Google Apps account is disabled chat
+         * service, the connection keeps failing. This threshold controls when we should stop
+         * the retrying.
+         */
+        public static final String GTALK_MAX_RETRIES_FOR_AUTH_EXPIRED =
+                "gtalk_max_retries_for_auth_expired";
+
+        /**
+         * a boolean setting indicating whether the GTalkService should use RMQ2 protocol or not.
+         */
+        public static final String GTALK_USE_RMQ2_PROTOCOL =
+                "gtalk_use_rmq2";
+
+        /**
+         * a boolean setting indicating whether the GTalkService should support both RMQ and
+         * RMQ2 protocols. This setting is true for the transitional period when we need to
+         * support both protocols.
+         */
+        public static final String GTALK_SUPPORT_RMQ_AND_RMQ2_PROTOCOLS =
+                "gtalk_support_rmq_and_rmq2";
+
+        /**
+         * a boolean setting controlling whether the rmq2 protocol will include stream ids in
+         * the protobufs. This is used for debugging.
+         */
+        public static final String GTALK_RMQ2_INCLUDE_STREAM_ID =
+                "gtalk_rmq2_include_stream_id";
+
+        /**
+         * when receiving a chat message from the server, the message could be an older message
+         * whose "time sent" is x seconds from now. If x is significant enough, we want to flag
+         * it so the UI can give it some special treatment when displaying the "time sent" for
+         * it. This setting is to control what x is.
+         */
+        public static final String GTALK_OLD_CHAT_MESSAGE_THRESHOLD_IN_SEC =
+                "gtalk_old_chat_msg_threshold_in_sec";
+
+        /**
+         * a setting to control the max connection history record GTalkService stores.
+         */
+        public static final String GTALK_MAX_CONNECTION_HISTORY_RECORDS =
+                "gtalk_max_conn_history_records";
+
+        /**
+         * This is gdata url to lookup album and picture info from picasa web. It also controls
+         * whether url scraping for picasa is enabled (NULL to disable).
+         */
+        public static final String GTALK_PICASA_ALBUM_URL =
+                "gtalk_picasa_album_url";
+
+        /**
+         * This is the url to lookup picture info from flickr. It also controls
+         * whether url scraping for flickr is enabled (NULL to disable).
+         */
+        public static final String GTALK_FLICKR_PHOTO_INFO_URL =
+                "gtalk_flickr_photo_info_url";
+
+        /**
+         * This is the url to lookup an actual picture from flickr.
+         */
+        public static final String GTALK_FLICKR_PHOTO_URL =
+                "gtalk_flickr_photo_url";
+
+        /**
+         * This is the gdata url to lookup info on a youtube video. It also controls
+         * whether url scraping for youtube is enabled (NULL to disable).
+         */
+        public static final String GTALK_YOUTUBE_VIDEO_URL =
+                "gtalk_youtube_video_url";
+
+        /**
+         * Enable/disable GTalk URL scraping for JPG images ("true" to enable).
+         */
+        public static final String GTALK_URL_SCRAPING_FOR_JPG =
+                "gtalk_url_scraping_for_jpg";
+
+        /**
+         * Chat message lifetime (for pruning old chat messages).
+         */
+        public static final String GTALK_CHAT_MESSAGE_LIFETIME =
+                "gtalk_chat_message_lifetime";
+
+        /**
+         * OTR message lifetime (for pruning old otr messages).
+         */
+        public static final String GTALK_OTR_MESSAGE_LIFETIME =
+                "gtalk_otr_message_lifetime";
+
+        /**
+         * Chat expiration time, i.e., time since last message in the chat (for pruning old chats).
+         */
+        public static final String GTALK_CHAT_EXPIRATION_TIME =
+                "gtalk_chat_expiration_time";
+
+        /**
+         * This is the url for getting the app token for server-to-device push messaging.
+         */
+        public static final String PUSH_MESSAGING_REGISTRATION_URL =
+                "push_messaging_registration_url";
+
+        /**
+         * Use android://&lt;it&gt; routing infos for Google Sync Server subcriptions.
+         */
+        public static final String GSYNC_USE_RMQ2_ROUTING_INFO = "gsync_use_rmq2_routing_info";
+
+        /**
          * Enable use of ssl session caching.
          * 'db' - save each session in a (per process) database
          * 'file' - save each session in a (per process) file
@@ -2905,6 +3129,12 @@ public final class Settings {
          */
         public static final String VENDING_REQUIRE_SIM_FOR_PURCHASE =
                 "vending_require_sim_for_purchase";
+
+        /**
+         * Indicates the Vending Machine backup state. It is set if the
+         * Vending application has been backed up at least once.
+         */
+        public static final String VENDING_BACKUP_STATE = "vending_backup_state";
 
         /**
          * The current version id of the Vending Machine terms of service.
@@ -2973,6 +3203,13 @@ public final class Settings {
                 "vending_pd_resend_frequency_ms";
 
         /**
+         * Time before an asset in the 'DOWNLOADING' state is considered ready
+         * for an install kick on the client.
+         */
+        public static final String VENDING_DOWNLOADING_KICK_TIMEOUT_MS =
+                "vending_downloading_kick_ms";
+
+        /**
          * Size of buffer in bytes for Vending to use when reading cache files.
          */
         public static final String VENDING_DISK_INPUT_BUFFER_BYTES =
@@ -2990,6 +3227,25 @@ public final class Settings {
          */
         public static final String VENDING_PROMO_REFRESH_FREQUENCY_MS =
                 "vending_promo_refresh_freq_ms";
+
+        /**
+         * Frequency in milliseconds when we should refresh the provisioning information from
+         * the carrier backend.
+         */
+        public static final String VENDING_CARRIER_PROVISIONING_REFRESH_FREQUENCY_MS =
+                "vending_carrier_ref_freq_ms";
+
+        /**
+         * Interval in milliseconds after which a failed provisioning request should be retried.
+         */
+        public static final String VENDING_CARRIER_PROVISIONING_RETRY_MS =
+            "vending_carrier_prov_retry_ms";
+
+        /**
+         * Buffer in milliseconds for carrier credentials to be considered valid.
+         */
+        public static final String VENDING_CARRIER_CREDENTIALS_BUFFER_MS =
+            "vending_carrier_cred_buf_ms";
 
         /**
          * URL that points to the legal terms of service to display in Settings.
@@ -3225,39 +3481,6 @@ public final class Settings {
                 "short_keylight_delay_ms";
 
         /**
-         * URL that points to the voice search servers. To be factored out of this class.
-         */
-        public static final String VOICE_SEARCH_URL = "voice_search_url";
-
-        /**
-         * Speech encoding used with voice search on 3G networks. To be factored out of this class.
-         */
-        public static final String VOICE_SEARCH_ENCODING_THREE_G = "voice_search_encoding_three_g";
-
-        /**
-         * Speech encoding used with voice search on WIFI networks. To be factored out of this class.
-         */
-        public static final String VOICE_SEARCH_ENCODING_WIFI = "voice_search_encoding_wifi";
-
-        /**
-         * Whether to use automatic gain control in voice search (0 = disable, 1 = enable).
-         * To be factored out of this class.
-         */
-        public static final String VOICE_SEARCH_ENABLE_AGC = "voice_search_enable_agc";
-
-        /**
-         * Whether to use noise suppression in voice search (0 = disable, 1 = enable).
-         * To be factored out of this class.
-         */
-        public static final String VOICE_SEARCH_ENABLE_NS = "voice_search_enable_ns";
-
-        /**
-         * Whether to use the IIR filter in voice search (0 = disable, 1 = enable).
-         * To be factored out of this class.
-         */
-        public static final String VOICE_SEARCH_ENABLE_IIR = "voice_search_enable_iir";
-
-        /**
          * List of test suites (local disk filename) for the automatic instrumentation test runner.
          * The file format is similar to automated_suites.xml, see AutoTesterService.
          * If this setting is missing or empty, the automatic test runner will not start.
@@ -3298,6 +3521,121 @@ public final class Settings {
          * @deprecated
          */
         public static final String USE_LOCATION_FOR_SERVICES = "use_location";
+
+        /**
+         * The length of the calendar sync window into the future.
+         * This specifies the number of days into the future for the sliding window sync.
+         * Setting this to zero will disable sliding sync.
+         */
+        public static final String GOOGLE_CALENDAR_SYNC_WINDOW_DAYS =
+                "google_calendar_sync_window_days";
+
+        /**
+         * How often to update the calendar sync window.
+         * The window will be advanced every n days.
+         */
+        public static final String GOOGLE_CALENDAR_SYNC_WINDOW_UPDATE_DAYS =
+                "google_calendar_sync_window_update_days";
+
+        /**
+         * The number of promoted sources in GlobalSearch.
+         */
+        public static final String SEARCH_NUM_PROMOTED_SOURCES = "search_num_promoted_sources";
+        /**
+         * The maximum number of suggestions returned by GlobalSearch.
+         */
+        public static final String SEARCH_MAX_RESULTS_TO_DISPLAY = "search_max_results_to_display";
+        /**
+         * The number of suggestions GlobalSearch will ask each non-web search source for.
+         */
+        public static final String SEARCH_MAX_RESULTS_PER_SOURCE = "search_max_results_per_source";
+        /**
+         * The number of suggestions the GlobalSearch will ask the web search source for.
+         */
+        public static final String SEARCH_WEB_RESULTS_OVERRIDE_LIMIT =
+                "search_web_results_override_limit";
+        /**
+         * The number of milliseconds that GlobalSearch will wait for suggestions from
+         * promoted sources before continuing with all other sources.
+         */
+        public static final String SEARCH_PROMOTED_SOURCE_DEADLINE_MILLIS =
+                "search_promoted_source_deadline_millis";
+        /**
+         * The number of milliseconds before GlobalSearch aborts search suggesiton queries.
+         */
+        public static final String SEARCH_SOURCE_TIMEOUT_MILLIS = "search_source_timeout_millis";
+        /**
+         * The maximum number of milliseconds that GlobalSearch shows the previous results
+         * after receiving a new query.
+         */
+        public static final String SEARCH_PREFILL_MILLIS = "search_prefill_millis";
+        /**
+         * The maximum age of log data used for shortcuts in GlobalSearch.
+         */
+        public static final String SEARCH_MAX_STAT_AGE_MILLIS = "search_max_stat_age_millis";
+        /**
+         * The maximum age of log data used for source ranking in GlobalSearch.
+         */
+        public static final String SEARCH_MAX_SOURCE_EVENT_AGE_MILLIS =
+                "search_max_source_event_age_millis";
+        /**
+         * The minimum number of impressions needed to rank a source in GlobalSearch.
+         */
+        public static final String SEARCH_MIN_IMPRESSIONS_FOR_SOURCE_RANKING =
+                "search_min_impressions_for_source_ranking";
+        /**
+         * The minimum number of clicks needed to rank a source in GlobalSearch.
+         */
+        public static final String SEARCH_MIN_CLICKS_FOR_SOURCE_RANKING =
+                "search_min_clicks_for_source_ranking";
+        /**
+         * The maximum number of shortcuts shown by GlobalSearch.
+         */
+        public static final String SEARCH_MAX_SHORTCUTS_RETURNED = "search_max_shortcuts_returned";
+        /**
+         * The size of the core thread pool for suggestion queries in GlobalSearch.
+         */
+        public static final String SEARCH_QUERY_THREAD_CORE_POOL_SIZE =
+                "search_query_thread_core_pool_size";
+        /**
+         * The maximum size of the thread pool for suggestion queries in GlobalSearch.
+         */
+        public static final String SEARCH_QUERY_THREAD_MAX_POOL_SIZE =
+                "search_query_thread_max_pool_size";
+        /**
+         * The size of the core thread pool for shortcut refreshing in GlobalSearch.
+         */
+        public static final String SEARCH_SHORTCUT_REFRESH_CORE_POOL_SIZE =
+                "search_shortcut_refresh_core_pool_size";
+        /**
+         * The maximum size of the thread pool for shortcut refreshing in GlobalSearch.
+         */
+        public static final String SEARCH_SHORTCUT_REFRESH_MAX_POOL_SIZE =
+                "search_shortcut_refresh_max_pool_size";
+        /**
+         * The maximun time that excess threads in the GlobalSeach thread pools will
+         * wait before terminating.
+         */
+        public static final String SEARCH_THREAD_KEEPALIVE_SECONDS =
+                "search_thread_keepalive_seconds";
+        /**
+         * The maximum number of concurrent suggestion queries to each source.
+         */
+        public static final String SEARCH_PER_SOURCE_CONCURRENT_QUERY_LIMIT =
+                "search_per_source_concurrent_query_limit";
+
+        /**
+         * Flag for allowing ActivityManagerService to send ACTION_APP_ERROR intents
+         * on application crashes and ANRs. If this is disabled, the crash/ANR dialog
+         * will never display the "Report" button.
+         * Type: int ( 0 = disallow, 1 = allow )
+         */
+        public static final String SEND_ACTION_APP_ERROR = "send_action_app_error";
+
+        /**
+         * Maximum size of /proc/last_kmsg content to upload after reboot.
+         */
+        public static final String LAST_KMSG_KB = "last_kmsg_kb";
 
         /**
          * @deprecated
@@ -3425,7 +3763,7 @@ public final class Settings {
                         // The stored URL is bad...  ignore it.
                     } catch (IllegalArgumentException e) {
                         // Column not found
-                        Log.e(TAG, "Intent column not found", e);
+                        Log.w(TAG, "Intent column not found", e);
                     }
                 }
             } finally {
@@ -3539,42 +3877,6 @@ public final class Settings {
             ResolveInfo info = packageManager.resolveActivity(intent, 0);
             return info != null ? info.loadLabel(packageManager) : "";
         }
-    }
-
-    /**
-     * Returns the GTalk JID resource associated with this device.
-     *
-     * @return  String  the JID resource of the device. It uses the device IMEI in the computation
-     * of the JID resource. If IMEI is not ready (i.e. telephony module not ready), we'll return
-     * an empty string.
-     * @hide
-     */
-    // TODO: we shouldn't not have a permenant Jid resource, as that's an easy target for
-    // spams. We should change it once a while, like when we resubscribe to the subscription feeds
-    // server.
-    // (also, should this live in GTalkService?)
-    public static synchronized String getJidResource() {
-        if (sJidResource != null) {
-            return sJidResource;
-        }
-
-        MessageDigest digest;
-        try {
-            digest = MessageDigest.getInstance("SHA-1");
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException("this should never happen");
-        }
-
-        String deviceId = TelephonyManager.getDefault().getDeviceId();
-        if (TextUtils.isEmpty(deviceId)) {
-            return "";
-        }
-
-        byte[] hashedDeviceId = digest.digest(deviceId.getBytes());
-        String id = new String(Base64.encodeBase64(hashedDeviceId), 0, 12);
-        id = id.replaceAll("/", "_");
-        sJidResource = JID_RESOURCE_PREFIX + id;
-        return sJidResource;
     }
 
     /**

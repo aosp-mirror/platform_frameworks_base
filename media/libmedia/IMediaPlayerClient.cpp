@@ -16,8 +16,8 @@
 */
 
 #include <utils/RefBase.h>
-#include <utils/IInterface.h>
-#include <utils/Parcel.h>
+#include <binder/IInterface.h>
+#include <binder/Parcel.h>
 
 #include <media/IMediaPlayerClient.h>
 
@@ -46,15 +46,9 @@ public:
     }
 };
 
-IMPLEMENT_META_INTERFACE(MediaPlayerClient, "android.hardware.IMediaPlayerClient");
+IMPLEMENT_META_INTERFACE(MediaPlayerClient, "android.media.IMediaPlayerClient");
 
 // ----------------------------------------------------------------------
-
-#define CHECK_INTERFACE(interface, data, reply) \
-        do { if (!data.enforceInterface(interface::getInterfaceDescriptor())) { \
-            LOGW("Call incorrectly routed to " #interface); \
-            return PERMISSION_DENIED; \
-        } } while (0)
 
 status_t BnMediaPlayerClient::onTransact(
     uint32_t code, const Parcel& data, Parcel* reply, uint32_t flags)
@@ -74,4 +68,3 @@ status_t BnMediaPlayerClient::onTransact(
 }
 
 }; // namespace android
-

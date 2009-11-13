@@ -36,6 +36,16 @@ interface ISearchManager {
             boolean globalSearch,
             ISearchManagerCallback searchManagerCallback,
             int ident);
+
+    void triggerSearch(in String query,
+            in ComponentName launchActivity,
+            in Bundle appSearchData,
+            ISearchManagerCallback searchManagerCallback,
+            int ident);
+
     void stopSearch();
+
+
     boolean isVisible();
+
 }

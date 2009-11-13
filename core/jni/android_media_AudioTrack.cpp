@@ -30,8 +30,8 @@
 #include "media/AudioSystem.h"
 #include "media/AudioTrack.h"
 
-#include <utils/MemoryHeapBase.h>
-#include <utils/MemoryBase.h>
+#include <binder/MemoryHeapBase.h>
+#include <binder/MemoryBase.h>
 
 
 // ----------------------------------------------------------------------------
@@ -53,10 +53,11 @@ struct fields_t {
     int       STREAM_MUSIC;          //...  stream type constants
     int       STREAM_ALARM;          //...  stream type constants
     int       STREAM_NOTIFICATION;   //...  stream type constants
-    int       STREAM_BLUETOOTH_SCO;   //...  stream type constants
+    int       STREAM_BLUETOOTH_SCO;  //...  stream type constants
+    int       STREAM_DTMF;           //...  stream type constants
     int       MODE_STREAM;           //...  memory mode
     int       MODE_STATIC;           //...  memory mode
-    jfieldID  nativeTrackInJavaObj; // stores in Java the native AudioTrack object
+    jfieldID  nativeTrackInJavaObj;  // stores in Java the native AudioTrack object
     jfieldID  jniData;      // stores in Java additional resources used by the native AudioTrack
 };
 static fields_t javaAudioTrackFields;
@@ -103,7 +104,7 @@ class AudioTrackJniStorage {
 #define AUDIOTRACK_ERROR_BAD_VALUE                 -2
 #define AUDIOTRACK_ERROR_INVALID_OPERATION         -3
 #define AUDIOTRACK_ERROR_SETUP_AUDIOSYSTEM         -16
-#define AUDIOTRACK_ERROR_SETUP_INVALIDCHANNELCOUNT -17
+#define AUDIOTRACK_ERROR_SETUP_INVALIDCHANNELMASK -17
 #define AUDIOTRACK_ERROR_SETUP_INVALIDFORMAT       -18
 #define AUDIOTRACK_ERROR_SETUP_INVALIDSTREAMTYPE   -19
 #define AUDIOTRACK_ERROR_SETUP_NATIVEINITFAILED    -20
@@ -164,11 +165,11 @@ static void audioCallback(int event, void* user, void *info) {
 // ----------------------------------------------------------------------------
 static int
 android_media_AudioTrack_native_setup(JNIEnv *env, jobject thiz, jobject weak_this,
-        jint streamType, jint sampleRateInHertz, jint nbChannels, 
+        jint streamType, jint sampleRateInHertz, jint channels,
         jint audioFormat, jint buffSizeInBytes, jint memoryMode)
 {
-    LOGV("sampleRate=%d, audioFormat(from Java)=%d, nbChannels=%d, buffSize=%d", 
-        sampleRateInHertz, audioFormat, nbChannels, buffSizeInBytes);
+    LOGV("sampleRate=%d, audioFormat(from Java)=%d, channels=%x, buffSize=%d",
+        sampleRateInHertz, audioFormat, channels, buffSizeInBytes);
     int afSampleRate;
     int afFrameCount;
 
@@ -181,10 +182,11 @@ android_media_AudioTrack_native_setup(JNIEnv *env, jobject thiz, jobject weak_th
         return AUDIOTRACK_ERROR_SETUP_AUDIOSYSTEM;
     }
 
-    if ((nbChannels == 0) || (nbChannels > 2)) {
-        LOGE("Error creating AudioTrack: channel count is not 1 or 2.");
-        return AUDIOTRACK_ERROR_SETUP_INVALIDCHANNELCOUNT;
+    if (!AudioSystem::isOutputChannel(channels)) {
+        LOGE("Error creating AudioTrack: invalid channel mask.");
+        return AUDIOTRACK_ERROR_SETUP_INVALIDCHANNELMASK;
     }
+    int nbChannels = AudioSystem::popCount(channels);
     
     // check the stream type
     AudioSystem::stream_type atStreamType;
@@ -202,6 +204,8 @@ android_media_AudioTrack_native_setup(JNIEnv *env, jobject thiz, jobject weak_th
         atStreamType = AudioSystem::NOTIFICATION;
     } else if (streamType == javaAudioTrackFields.STREAM_BLUETOOTH_SCO) {
         atStreamType = AudioSystem::BLUETOOTH_SCO;
+    } else if (streamType == javaAudioTrackFields.STREAM_DTMF) {
+        atStreamType = AudioSystem::DTMF;
     } else {
         LOGE("Error creating AudioTrack: unknown stream type.");
         return AUDIOTRACK_ERROR_SETUP_INVALIDSTREAMTYPE;
@@ -231,15 +235,7 @@ android_media_AudioTrack_native_setup(JNIEnv *env, jobject thiz, jobject weak_th
     int bytesPerSample = audioFormat == javaAudioTrackFields.PCM16 ? 2 : 1;
     int format = audioFormat == javaAudioTrackFields.PCM16 ? 
             AudioSystem::PCM_16_BIT : AudioSystem::PCM_8_BIT;
-    int frameCount;
-    if (buffSizeInBytes == -1) {
-        // compute the frame count based on the system's output frame count 
-        // and the native sample rate
-        frameCount = (sampleRateInHertz*afFrameCount)/afSampleRate;
-    } else {
-        // compute the frame count based on the specified buffer size
-        frameCount = buffSizeInBytes / (nbChannels * bytesPerSample);
-    }
+    int frameCount = buffSizeInBytes / (nbChannels * bytesPerSample);
     
     AudioTrackJniStorage* lpJniStorage = new AudioTrackJniStorage();
     
@@ -271,7 +267,7 @@ android_media_AudioTrack_native_setup(JNIEnv *env, jobject thiz, jobject weak_th
             atStreamType,// stream type
             sampleRateInHertz,
             format,// word length, PCM
-            nbChannels,
+            channels,
             frameCount,
             0,// flags
             audioCallback, &(lpJniStorage->mCallbackData),//callback, callback data (user)
@@ -291,7 +287,7 @@ android_media_AudioTrack_native_setup(JNIEnv *env, jobject thiz, jobject weak_th
             atStreamType,// stream type
             sampleRateInHertz,
             format,// word length, PCM
-            nbChannels,
+            channels,
             frameCount,
             0,// flags
             audioCallback, &(lpJniStorage->mCallbackData),//callback, callback data (user));
@@ -734,6 +730,8 @@ static jint android_media_AudioTrack_get_output_sample_rate(JNIEnv *env,  jobjec
         nativeStreamType = AudioSystem::NOTIFICATION;
     } else if (javaStreamType == javaAudioTrackFields.STREAM_BLUETOOTH_SCO) {
         nativeStreamType = AudioSystem::BLUETOOTH_SCO;
+    } else if (javaStreamType == javaAudioTrackFields.STREAM_DTMF) {
+        nativeStreamType = AudioSystem::DTMF;
     } else {
         nativeStreamType = AudioSystem::DEFAULT;
     }
@@ -829,6 +827,7 @@ static JNINativeMethod gMethods[] = {
 #define JAVA_CONST_STREAM_ALARM_NAME                    "STREAM_ALARM"
 #define JAVA_CONST_STREAM_NOTIFICATION_NAME             "STREAM_NOTIFICATION"
 #define JAVA_CONST_STREAM_BLUETOOTH_SCO_NAME            "STREAM_BLUETOOTH_SCO"
+#define JAVA_CONST_STREAM_DTMF_NAME                     "STREAM_DTMF"
 #define JAVA_CONST_MODE_STREAM_NAME                     "MODE_STREAM"
 #define JAVA_CONST_MODE_STATIC_NAME                     "MODE_STATIC"
 #define JAVA_NATIVETRACKINJAVAOBJ_FIELD_NAME            "mNativeTrackInJavaObj"
@@ -950,8 +949,10 @@ int register_android_media_AudioTrack(JNIEnv *env)
                JAVA_CONST_STREAM_NOTIFICATION_NAME, &(javaAudioTrackFields.STREAM_NOTIFICATION))
           || !android_media_getIntConstantFromClass(env, audioManagerClass,
                JAVA_AUDIOMANAGER_CLASS_NAME,
-               JAVA_CONST_STREAM_BLUETOOTH_SCO_NAME,
-               &(javaAudioTrackFields.STREAM_BLUETOOTH_SCO))) {
+               JAVA_CONST_STREAM_BLUETOOTH_SCO_NAME, &(javaAudioTrackFields.STREAM_BLUETOOTH_SCO))
+          || !android_media_getIntConstantFromClass(env, audioManagerClass,
+               JAVA_AUDIOMANAGER_CLASS_NAME,
+               JAVA_CONST_STREAM_DTMF_NAME, &(javaAudioTrackFields.STREAM_DTMF))) {
        // error log performed in android_media_getIntConstantFromClass()
        return -1;
     }

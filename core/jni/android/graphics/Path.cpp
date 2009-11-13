@@ -75,9 +75,8 @@ public:
         return result;
     }
  
-    static void computeBounds(JNIEnv* env, jobject clazz, SkPath* obj, jobject bounds, SkPath::BoundsType btype) {
-        SkRect bounds_;
-        obj->computeBounds(&bounds_, btype);
+    static void computeBounds(JNIEnv* env, jobject clazz, SkPath* obj, jobject bounds, int boundstype) {
+        const SkRect& bounds_ = obj->getBounds();
         GraphicsJNI::rect_to_jrectf(bounds_, env, bounds);
     }
  

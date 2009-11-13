@@ -128,13 +128,6 @@ static JNINativeMethod gMethods[] = {
 int register_android_media_ResampleInputStream(JNIEnv *env)
 {
     const char* const kClassPathName = "android/media/ResampleInputStream";
-    jclass clazz;
-
-    clazz = env->FindClass(kClassPathName);
-    if (clazz == NULL) {
-        LOGE("Can't find %s", kClassPathName);
-        return -1;
-    }
 
     return AndroidRuntime::registerNativeMethods(env,
             kClassPathName, gMethods, NELEM(gMethods));

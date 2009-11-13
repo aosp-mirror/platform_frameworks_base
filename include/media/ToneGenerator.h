@@ -151,10 +151,10 @@ public:
         NUM_SUP_TONES = LAST_SUP_TONE-FIRST_SUP_TONE+1
     };
 
-    ToneGenerator(int streamType, float volume);
+    ToneGenerator(int streamType, float volume, bool threadCanCallJava = false);
     ~ToneGenerator();
 
-    bool startTone(int toneType);
+    bool startTone(int toneType, int durationMs = -1);
     void stopTone();
 
     bool isInited() { return (mState == TONE_IDLE)?false:true;}
@@ -167,7 +167,8 @@ private:
         TONE_STARTING,  // ToneGenerator is starting playing
         TONE_PLAYING,  // ToneGenerator is playing
         TONE_STOPPING,  // ToneGenerator is stoping
-        TONE_RESTARTING  //
+        TONE_STOPPED,  // ToneGenerator is stopped: the AudioTrack will be stopped
+        TONE_RESTARTING  // A start request was received in active state (playing or stopping)
     };
 
 
@@ -241,11 +242,14 @@ private:
 
     static const ToneDescriptor sToneDescriptors[];
 
+    bool mThreadCanCallJava;
     unsigned int mTotalSmp;  // Total number of audio samples played (gives current time)
     unsigned int mNextSegSmp;  // Position of next segment transition expressed in samples
     // NOTE: because mTotalSmp, mNextSegSmp are stored on 32 bit, current design will operate properly
     // only if tone duration is less than about 27 Hours(@44100Hz sampling rate). If this time is exceeded,
     // no crash will occur but tone sequence will show a glitch.
+    unsigned int mMaxSmp;  // Maximum number of audio samples played (maximun tone duration)
+    int mDurationMs;  // Maximum tone duration in ms
 
     unsigned short mCurSegment;  // Current segment index in ToneDescriptor segments[]
     unsigned short mCurCount;  // Current sequence repeat count

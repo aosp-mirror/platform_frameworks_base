@@ -18,6 +18,8 @@ package com.android.dumprendertree;
 
 import android.os.Handler;
 import android.os.Message;
+import android.webkit.MockGeolocation;
+import android.webkit.WebStorage;
 
 import java.util.HashMap;
 
@@ -25,7 +27,7 @@ public class CallbackProxy extends Handler implements EventSender, LayoutTestCon
     
     private EventSender mEventSender;
     private LayoutTestController mLayoutTestController;
-    
+
     private static final int EVENT_DOM_LOG = 1;
     private static final int EVENT_FIRE_KBD = 2;
     private static final int EVENT_KEY_DOWN_1 = 3;
@@ -57,6 +59,9 @@ public class CallbackProxy extends Handler implements EventSender, LayoutTestCon
     private static final int LAYOUT_SET_WINDOW_KEY = 38;
     private static final int LAYOUT_TEST_REPAINT = 39;
     private static final int LAYOUT_WAIT_UNTIL_DONE = 40;
+    private static final int LAYOUT_DUMP_DATABASE_CALLBACKS = 41;
+    private static final int LAYOUT_SET_CAN_OPEN_WINDOWS = 42;
+    private static final int SET_GEOLOCATION_PERMISSION = 43;
     
     CallbackProxy(EventSender eventSender, 
             LayoutTestController layoutTestController) {
@@ -190,6 +195,19 @@ public class CallbackProxy extends Handler implements EventSender, LayoutTestCon
         case LAYOUT_WAIT_UNTIL_DONE:
             mLayoutTestController.waitUntilDone();
             break;
+
+        case LAYOUT_DUMP_DATABASE_CALLBACKS:
+            mLayoutTestController.dumpDatabaseCallbacks();
+            break;
+
+        case LAYOUT_SET_CAN_OPEN_WINDOWS:
+            mLayoutTestController.setCanOpenWindows();
+            break;
+
+        case SET_GEOLOCATION_PERMISSION:
+            mLayoutTestController.setGeolocationPermission(
+                    msg.arg1 == 1 ? true : false);
+            break;
         }
     }
 
@@ -314,7 +332,7 @@ public class CallbackProxy extends Handler implements EventSender, LayoutTestCon
     }
 
     public void setWindowIsKey(boolean b) {
-        obtainMessage(LAYOUT_SET_WINDOW_KEY,b ? 1 : 0, 0).sendToTarget();
+        obtainMessage(LAYOUT_SET_WINDOW_KEY, b ? 1 : 0, 0).sendToTarget();
     }
 
     public void testRepaint() {
@@ -325,4 +343,35 @@ public class CallbackProxy extends Handler implements EventSender, LayoutTestCon
         obtainMessage(LAYOUT_WAIT_UNTIL_DONE).sendToTarget();
     }
 
+    public void dumpDatabaseCallbacks() {
+        obtainMessage(LAYOUT_DUMP_DATABASE_CALLBACKS).sendToTarget();
+    }
+
+    public void clearAllDatabases() {
+        WebStorage.getInstance().deleteAllData();
+    }
+
+    public void setDatabaseQuota(long quota) {
+        WebStorage.getInstance().setQuotaForOrigin("file://", quota);
+    }
+
+    public void setCanOpenWindows() {
+        obtainMessage(LAYOUT_SET_CAN_OPEN_WINDOWS).sendToTarget();
+    }
+
+    public void setMockGeolocationPosition(double latitude,
+                                           double longitude,
+                                           double accuracy) {
+        MockGeolocation.getInstance().setPosition(latitude,
+                                                  longitude,
+                                                  accuracy);
+    }
+
+    public void setMockGeolocationError(int code, String message) {
+        MockGeolocation.getInstance().setError(code, message);
+    }
+
+    public void setGeolocationPermission(boolean allow) {
+        obtainMessage(SET_GEOLOCATION_PERMISSION, allow ? 1 : 0, 0).sendToTarget();
+    }
 }

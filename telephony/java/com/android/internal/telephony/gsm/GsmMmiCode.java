@@ -595,7 +595,8 @@ public final class GsmMmiCode  extends Handler implements MmiCode {
                     }
 
                     int isSettingUnconditionalVoice =
-                        ((reason == CommandsInterface.CF_REASON_UNCONDITIONAL) &&
+                        (((reason == CommandsInterface.CF_REASON_UNCONDITIONAL) ||
+                                (reason == CommandsInterface.CF_REASON_ALL)) &&
                                 (((serviceClass & CommandsInterface.SERVICE_CLASS_VOICE) != 0) ||
                                  (serviceClass == CommandsInterface.SERVICE_CLASS_NONE))) ? 1 : 0;
 

@@ -65,8 +65,11 @@ endif
 ## READ ME: ########################################################
 LOCAL_SRC_FILES += \
 	core/java/android/accessibilityservice/IAccessibilityServiceConnection.aidl \
-  core/java/android/accessibilityservice/IEventListener.aidl \
-	core/java/android/accounts/IAccountsService.aidl \
+	core/java/android/accessibilityservice/IEventListener.aidl \
+	core/java/android/accounts/IAccountManager.aidl \
+	core/java/android/accounts/IAccountManagerResponse.aidl \
+	core/java/android/accounts/IAccountAuthenticator.aidl \
+	core/java/android/accounts/IAccountAuthenticatorResponse.aidl \
 	core/java/android/app/IActivityController.aidl \
 	core/java/android/app/IActivityPendingResult.aidl \
 	core/java/android/app/IActivityWatcher.aidl \
@@ -80,15 +83,16 @@ LOCAL_SRC_FILES += \
 	core/java/android/app/IStatusBar.aidl \
 	core/java/android/app/IThumbnailReceiver.aidl \
 	core/java/android/app/ITransientNotification.aidl \
-	core/java/android/app/IWallpaperService.aidl \
-	core/java/android/app/IWallpaperServiceCallback.aidl \
+	core/java/android/app/IWallpaperManager.aidl \
+	core/java/android/app/IWallpaperManagerCallback.aidl \
 	core/java/android/backup/IBackupManager.aidl \
 	core/java/android/backup/IRestoreObserver.aidl \
 	core/java/android/backup/IRestoreSession.aidl \
+	core/java/android/bluetooth/IBluetooth.aidl \
 	core/java/android/bluetooth/IBluetoothA2dp.aidl \
-	core/java/android/bluetooth/IBluetoothDevice.aidl \
-	core/java/android/bluetooth/IBluetoothDeviceCallback.aidl \
+	core/java/android/bluetooth/IBluetoothCallback.aidl \
 	core/java/android/bluetooth/IBluetoothHeadset.aidl \
+	core/java/android/bluetooth/IBluetoothPbap.aidl \
 	core/java/android/content/IContentService.aidl \
 	core/java/android/content/IIntentReceiver.aidl \
 	core/java/android/content/IIntentSender.aidl \
@@ -111,6 +115,9 @@ LOCAL_SRC_FILES += \
 	core/java/android/os/IParentalControlCallback.aidl \
 	core/java/android/os/IPermissionController.aidl \
 	core/java/android/os/IPowerManager.aidl \
+    core/java/android/service/wallpaper/IWallpaperConnection.aidl \
+    core/java/android/service/wallpaper/IWallpaperEngine.aidl \
+    core/java/android/service/wallpaper/IWallpaperService.aidl \
 	core/java/android/text/IClipboard.aidl \
 	core/java/android/view/accessibility/IAccessibilityManager.aidl \
 	core/java/android/view/accessibility/IAccessibilityManagerClient.aidl \
@@ -137,13 +144,13 @@ LOCAL_SRC_FILES += \
 	core/java/com/android/internal/view/IInputMethodClient.aidl \
 	core/java/com/android/internal/view/IInputMethodManager.aidl \
 	core/java/com/android/internal/view/IInputMethodSession.aidl \
-	im/java/android/im/IImPlugin.aidl \
 	location/java/android/location/IGeocodeProvider.aidl \
 	location/java/android/location/IGpsStatusListener.aidl \
 	location/java/android/location/IGpsStatusProvider.aidl \
 	location/java/android/location/ILocationListener.aidl \
 	location/java/android/location/ILocationManager.aidl \
 	location/java/android/location/ILocationProvider.aidl \
+	location/java/android/location/INetInitiatedListener.aidl \
 	media/java/android/media/IAudioService.aidl \
 	media/java/android/media/IMediaScannerListener.aidl \
 	media/java/android/media/IMediaScannerService.aidl \
@@ -195,9 +202,13 @@ framework_built := $(LOCAL_BUILT_MODULE)
 # relative to the root of the build tree.
 # ============================================================
 aidl_files := \
-	frameworks/base/core/java/android/accounts/IAccountsService.aidl \
+	frameworks/base/core/java/android/accounts/IAccountManager.aidl \
+	frameworks/base/core/java/android/accounts/IAccountManagerResponse.aidl \
+	frameworks/base/core/java/android/accounts/IAccountAuthenticator.aidl \
+	frameworks/base/core/java/android/accounts/IAccountAuthenticatorResponse.aidl \
 	frameworks/base/core/java/android/app/Notification.aidl \
 	frameworks/base/core/java/android/app/PendingIntent.aidl \
+	frameworks/base/core/java/android/bluetooth/BluetoothDevice.aidl \
 	frameworks/base/core/java/android/content/ComponentName.aidl \
 	frameworks/base/core/java/android/content/Intent.aidl \
 	frameworks/base/core/java/android/content/IntentSender.aidl \
@@ -207,6 +218,7 @@ aidl_files := \
 	frameworks/base/core/java/android/net/Uri.aidl \
 	frameworks/base/core/java/android/os/Bundle.aidl \
 	frameworks/base/core/java/android/os/ParcelFileDescriptor.aidl \
+	frameworks/base/core/java/android/os/ParcelUuid.aidl \
 	frameworks/base/core/java/android/view/KeyEvent.aidl \
 	frameworks/base/core/java/android/view/MotionEvent.aidl \
 	frameworks/base/core/java/android/view/Surface.aidl \
@@ -221,7 +233,6 @@ aidl_files := \
 	frameworks/base/graphics/java/android/graphics/Bitmap.aidl \
 	frameworks/base/graphics/java/android/graphics/Rect.aidl \
 	frameworks/base/graphics/java/android/graphics/Region.aidl \
-	frameworks/base/im/java/android/im/IImPlugin.aidl \
 	frameworks/base/location/java/android/location/Criteria.aidl \
 	frameworks/base/location/java/android/location/Location.aidl \
 	frameworks/base/telephony/java/android/telephony/ServiceState.aidl \
@@ -333,6 +344,7 @@ framework_docs_LOCAL_DROIDDOC_OPTIONS := \
     -since ./frameworks/base/api/2.xml 2 \
     -since ./frameworks/base/api/3.xml 3 \
     -since ./frameworks/base/api/4.xml 4 \
+    -since ./frameworks/base/api/5.xml 5 \
 		-error 1 -error 2 -warning 3 -error 4 -error 6 -error 8 \
 		-overview $(LOCAL_PATH)/core/java/overview.html
 
@@ -361,18 +373,56 @@ web_docs_sample_code_flags := \
 
 ## SDK version identifiers used in the published docs
   # major[.minor] version for current SDK. (full releases only)
-framework_docs_SDK_VERSION:=1.5
+framework_docs_SDK_VERSION:=2.0
   # release version (ie "Release x")  (full releases only)
-framework_docs_SDK_REL_ID:=3
+framework_docs_SDK_REL_ID:=1
   # name of current SDK directory (full releases only)
 framework_docs_SDK_CURRENT_DIR:=$(framework_docs_SDK_VERSION)_r$(framework_docs_SDK_REL_ID)
   # flag to build offline docs for a preview release
-framework_docs_SDK_PREVIEW:=true
+framework_docs_SDK_PREVIEW:=0
+
+## Latest ADT version identifiers, for reference from published docs
+framework_docs_ADT_VERSION:=0.9.4
+framework_docs_ADT_DOWNLOAD:=ADT-0.9.4.zip
+framework_docs_ADT_BYTES:=3367536
+framework_docs_ADT_CHECKSUM:=4cdecd72b3e28022d8a55891f13e7d43
 
 framework_docs_LOCAL_DROIDDOC_OPTIONS += \
 		-hdf sdk.version $(framework_docs_SDK_VERSION) \
 		-hdf sdk.rel.id $(framework_docs_SDK_REL_ID) \
-		-hdf sdk.current $(framework_docs_SDK_CURRENT_DIR)
+		-hdf sdk.current $(framework_docs_SDK_CURRENT_DIR) \
+		-hdf adt.zip.version $(framework_docs_ADT_VERSION) \
+		-hdf adt.zip.download $(framework_docs_ADT_DOWNLOAD) \
+		-hdf adt.zip.bytes $(framework_docs_ADT_BYTES) \
+		-hdf adt.zip.checksum $(framework_docs_ADT_CHECKSUM) 
+
+# ====  the api stubs and current.xml ===========================
+include $(CLEAR_VARS)
+
+LOCAL_SRC_FILES:=$(framework_docs_LOCAL_SRC_FILES)
+LOCAL_INTERMEDIATE_SOURCES:=$(framework_docs_LOCAL_INTERMEDIATE_SOURCES)
+LOCAL_JAVA_LIBRARIES:=$(framework_docs_LOCAL_JAVA_LIBRARIES)
+LOCAL_MODULE_CLASS:=$(framework_docs_LOCAL_MODULE_CLASS)
+LOCAL_DROIDDOC_SOURCE_PATH:=$(framework_docs_LOCAL_DROIDDOC_SOURCE_PATH)
+LOCAL_DROIDDOC_HTML_DIR:=$(framework_docs_LOCAL_DROIDDOC_HTML_DIR)
+LOCAL_ADDITIONAL_JAVA_DIR:=$(framework_docs_LOCAL_ADDITIONAL_JAVA_DIR)
+
+LOCAL_MODULE := api-stubs
+
+LOCAL_DROIDDOC_OPTIONS:=\
+		$(framework_docs_LOCAL_DROIDDOC_OPTIONS) \
+		-stubs $(TARGET_OUT_COMMON_INTERMEDIATES)/JAVA_LIBRARIES/android_stubs_current_intermediates/src \
+		-apixml $(INTERNAL_PLATFORM_API_FILE) \
+		-nodocs
+
+LOCAL_DROIDDOC_CUSTOM_TEMPLATE_DIR:=build/tools/droiddoc/templates-sdk
+LOCAL_DROIDDOC_CUSTOM_ASSET_DIR:=assets-sdk
+
+include $(BUILD_DROIDDOC)
+
+$(full_target): $(framework_built)
+$(INTERNAL_PLATFORM_API_FILE): $(full_target)
+$(call dist-for-goals,sdk,$(INTERNAL_PLATFORM_API_FILE))
 
 # ====  static html in the sdk ==================================
 include $(CLEAR_VARS)
@@ -392,10 +442,7 @@ LOCAL_DROIDDOC_OPTIONS:=\
 		-title "Android SDK" \
 		-proofread $(OUT_DOCS)/$(LOCAL_MODULE)-proofread.txt \
 		-todo $(OUT_DOCS)/$(LOCAL_MODULE)-docs-todo.html \
-		-stubs $(TARGET_OUT_COMMON_INTERMEDIATES)/JAVA_LIBRARIES/android_stubs_current_intermediates/src \
-		-apixml $(INTERNAL_PLATFORM_API_FILE) \
 		-sdkvalues $(OUT_DOCS) \
-		-warning 3 \
 		-hdf android.whichdoc offline 
 
 ifeq ($(framework_docs_SDK_PREVIEW),true)
@@ -415,8 +462,6 @@ $(static_doc_index_redirect): \
 
 $(full_target): $(static_doc_index_redirect)
 $(full_target): $(framework_built)
-$(INTERNAL_PLATFORM_API_FILE): $(full_target)
-$(call dist-for-goals,sdk,$(INTERNAL_PLATFORM_API_FILE))
 
 
 # ==== docs for the web (on the google app engine server) =======================
@@ -445,6 +490,8 @@ LOCAL_DROIDDOC_CUSTOM_ASSET_DIR:=assets-sdk
 
 include $(BUILD_DROIDDOC)
 
+# explicitly specify that online-sdk depends on framework-res.
+$(full_target): framework-res-package-target
 
 # ==== docs that have all of the stuff that's @hidden =======================
 include $(CLEAR_VARS)
@@ -501,5 +548,3 @@ include $(BUILD_JAVA_LIBRARY)
 ifeq (,$(ONE_SHOT_MAKEFILE))
 include $(call first-makefiles-under,$(LOCAL_PATH))
 endif
-
-

@@ -19,7 +19,6 @@ package com.android.internal.os;
 import android.content.pm.ActivityInfo;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
-import android.content.res.ColorStateList;
 import android.graphics.drawable.Drawable;
 import android.net.LocalServerSocket;
 import android.os.Debug;
@@ -31,6 +30,7 @@ import android.util.Log;
 
 import dalvik.system.VMRuntime;
 import dalvik.system.Zygote;
+import dalvik.system.SamplingProfiler;
 
 import java.io.BufferedReader;
 import java.io.FileDescriptor;
@@ -73,7 +73,7 @@ public class ZygoteInit {
      * never gets destroyed.
      */
     private static Resources mResources;
-    
+
     /**
      * The number of times that the main Zygote loop
      * should run before calling gc() again.
@@ -93,7 +93,26 @@ public class ZygoteInit {
 
     /** Controls whether we should preload resources during zygote init. */
     private static final boolean PRELOAD_RESOURCES = true;
-    
+
+    /**
+     * List of methods we "warm up" in the register map cache.  These were
+     * chosen because they appeared on the stack in GCs in multiple
+     * applications.
+     *
+     * This is in a VM-ready format, to minimize string processing.  If a
+     * class is not already loaded, or a method is not found, the entry
+     * will be skipped.
+     *
+     * This doesn't really merit a separately-generated input file at this
+     * time.  The list is fairly short, and the consequences of failure
+     * are minor.
+     */
+    private static final String[] REGISTER_MAP_METHODS = {
+        // (currently not doing any)
+        //"Landroid/app/Activity;.setContentView:(I)V",
+    };
+
+
     /**
      * Invokes a static "main(argv[]) method on class "className".
      * Converts various failing exceptions into RuntimeExceptions, with
@@ -173,7 +192,7 @@ public class ZygoteInit {
      * RuntimeException on failure.
      */
     private static ZygoteConnection acceptCommandPeer() {
-        try {            
+        try {
             return new ZygoteConnection(sServerSocket.accept());
         } catch (IOException ex) {
             throw new RuntimeException(
@@ -232,7 +251,7 @@ public class ZygoteInit {
      */
     private static void preloadClasses() {
         final VMRuntime runtime = VMRuntime.getRuntime();
-        
+
         InputStream is = ZygoteInit.class.getClassLoader().getResourceAsStream(
                 PRELOADED_CLASSES);
         if (is == null) {
@@ -240,7 +259,7 @@ public class ZygoteInit {
         } else {
             Log.i(TAG, "Preloading classes...");
             long startTime = SystemClock.uptimeMillis();
-            
+
             // Drop root perms while running static initializers.
             setEffectiveGroup(UNPRIVILEGED_GID);
             setEffectiveUser(UNPRIVILEGED_UID);
@@ -256,7 +275,7 @@ public class ZygoteInit {
             Debug.startAllocCounting();
 
             try {
-                BufferedReader br 
+                BufferedReader br
                     = new BufferedReader(new InputStreamReader(is), 256);
 
                 int count = 0;
@@ -328,6 +347,45 @@ public class ZygoteInit {
     }
 
     /**
+     * Pre-caches register maps for methods that are commonly used.
+     */
+    private static void cacheRegisterMaps() {
+        String failed = null;
+        int failure;
+        long startTime = System.nanoTime();
+
+        failure = 0;
+
+        for (int i = 0; i < REGISTER_MAP_METHODS.length; i++) {
+            String str = REGISTER_MAP_METHODS[i];
+
+            if (!Debug.cacheRegisterMap(str)) {
+                if (failed == null)
+                    failed = str;
+                failure++;
+            }
+        }
+
+        long delta = System.nanoTime() - startTime;
+
+        if (failure == REGISTER_MAP_METHODS.length) {
+            if (REGISTER_MAP_METHODS.length > 0) {
+                Log.i(TAG,
+                    "Register map caching failed (precise GC not enabled?)");
+            }
+            return;
+        }
+
+        Log.i(TAG, "Register map cache: found " +
+            (REGISTER_MAP_METHODS.length - failure) + " of " +
+            REGISTER_MAP_METHODS.length + " methods in " +
+            (delta / 1000000L) + "ms");
+        if (failure > 0) {
+            Log.i(TAG, "  First failure: " + failed);
+        }
+    }
+
+    /**
      * Load in commonly used resources, so they can be shared across
      * processes.
      *
@@ -336,7 +394,7 @@ public class ZygoteInit {
      */
     private static void preloadResources() {
         final VMRuntime runtime = VMRuntime.getRuntime();
-        
+
         Debug.startAllocCounting();
         try {
             runtime.gcSoftReferences();
@@ -469,7 +527,7 @@ public class ZygoteInit {
     /**
      * Prepare the arguments and fork for the system server process.
      */
-    private static boolean startSystemServer() 
+    private static boolean startSystemServer()
             throws MethodAndArgsCaller, RuntimeException {
         /* Hardcoded command line to start the system server */
         String args[] = {
@@ -503,8 +561,8 @@ public class ZygoteInit {
                     parsedArgs.gids, debugFlags, null);
         } catch (IllegalArgumentException ex) {
             throw new RuntimeException(ex);
-        } 
- 
+        }
+
         /* For child process */
         if (pid == 0) {
             handleSystemServerProcess(parsedArgs);
@@ -515,13 +573,24 @@ public class ZygoteInit {
 
     public static void main(String argv[]) {
         try {
+            // Start profiling the zygote initialization.
+            SamplingProfilerIntegration.start();
+
             registerZygoteSocket();
             EventLog.writeEvent(LOG_BOOT_PROGRESS_PRELOAD_START,
                 SystemClock.uptimeMillis());
             preloadClasses();
+            //cacheRegisterMaps();
             preloadResources();
             EventLog.writeEvent(LOG_BOOT_PROGRESS_PRELOAD_END,
                 SystemClock.uptimeMillis());
+
+            if (SamplingProfilerIntegration.isEnabled()) {
+                SamplingProfiler sp = SamplingProfiler.getInstance();
+                sp.pause();
+                SamplingProfilerIntegration.writeZygoteSnapshot();
+                sp.shutDown();
+            }
 
             // Do an initial gc to clean up after startup
             gc();

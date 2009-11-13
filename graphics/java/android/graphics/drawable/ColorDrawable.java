@@ -146,6 +146,11 @@ public class ColorDrawable extends Drawable {
         }
 
         @Override
+        public Drawable newDrawable(Resources res) {
+            return new ColorDrawable(this);
+        }
+
+        @Override
         public int getChangingConfigurations() {
             return mChangingConfigurations;
         }

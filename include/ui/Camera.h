@@ -66,15 +66,22 @@ namespace android {
 
 // msgType in notifyCallback and dataCallback functions
 enum {
-    CAMERA_MSG_ERROR = 0,
-    CAMERA_MSG_SHUTTER,
-    CAMERA_MSG_FOCUS,
-    CAMERA_MSG_ZOOM,
-    CAMERA_MSG_PREVIEW_FRAME,
-    CAMERA_MSG_VIDEO_FRAME,
-    CAMERA_MSG_POSTVIEW_FRAME,
-    CAMERA_MSG_RAW_IMAGE,
-    CAMERA_MSG_COMPRESSED_IMAGE
+    CAMERA_MSG_ERROR            = 0x001,
+    CAMERA_MSG_SHUTTER          = 0x002,
+    CAMERA_MSG_FOCUS            = 0x004,
+    CAMERA_MSG_ZOOM             = 0x008,
+    CAMERA_MSG_PREVIEW_FRAME    = 0x010,
+    CAMERA_MSG_VIDEO_FRAME      = 0x020,
+    CAMERA_MSG_POSTVIEW_FRAME   = 0x040,
+    CAMERA_MSG_RAW_IMAGE        = 0x080,
+    CAMERA_MSG_COMPRESSED_IMAGE = 0x100,
+    CAMERA_MSG_ALL_MSGS         = 0x1FF
+};
+
+// cmdType in sendCommand functions
+enum {
+    CAMERA_CMD_START_SMOOTH_ZOOM     = 1,
+    CAMERA_CMD_STOP_SMOOTH_ZOOM      = 2,
 };
 
 // camera fatal errors
@@ -142,6 +149,9 @@ public:
             // autoFocus - status returned from callback
             status_t    autoFocus();
 
+            // cancel auto focus
+            status_t    cancelAutoFocus();
+
             // take a picture - picture returned from callback
             status_t    takePicture();
 
@@ -150,6 +160,9 @@ public:
 
             // get preview/capture parameters - key/value pairs
             String8     getParameters() const;
+
+            // send command to camera driver
+            status_t    sendCommand(int32_t cmd, int32_t arg1, int32_t arg2);
 
             void        setListener(const sp<CameraListener>& listener);
             void        setPreviewCallbackFlags(int preview_callback_flag);

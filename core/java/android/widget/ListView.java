@@ -1328,19 +1328,23 @@ public class ListView extends AbsListView {
 
             // Make sure we are 1) Too low, and 2) Either there are more rows below the
             // last row or the last row is scrolled off the bottom of the drawable area
-            if (topOffset > 0 && (lastPosition < mItemCount - 1 || lastBottom > end))  {
-                if (lastPosition == mItemCount - 1 ) {
-                    // Don't pull the bottom too far up
-                    topOffset = Math.min(topOffset, lastBottom - end);
-                }
-                // Move everything up
-                offsetChildrenTopAndBottom(-topOffset);
-                if (lastPosition < mItemCount - 1) {
-                    // Fill the gap that was opened below the last position with more rows, if
-                    // possible
-                    fillDown(lastPosition + 1, lastChild.getBottom() + mDividerHeight);
-                    // Close up the remaining gap
-                    adjustViewsUpOrDown();
+            if (topOffset > 0) {
+                if (lastPosition < mItemCount - 1 || lastBottom > end)  {
+                    if (lastPosition == mItemCount - 1) {
+                        // Don't pull the bottom too far up
+                        topOffset = Math.min(topOffset, lastBottom - end);
+                    }
+                    // Move everything up
+                    offsetChildrenTopAndBottom(-topOffset);
+                    if (lastPosition < mItemCount - 1) {
+                        // Fill the gap that was opened below the last position with more rows, if
+                        // possible
+                        fillDown(lastPosition + 1, lastChild.getBottom() + mDividerHeight);
+                        // Close up the remaining gap
+                        adjustViewsUpOrDown();
+                    }
+                } else if (lastPosition == mItemCount - 1) {
+                    adjustViewsUpOrDown();                    
                 }
             }
         }
@@ -1428,7 +1432,8 @@ public class ListView extends AbsListView {
                 throw new IllegalStateException("The content of the adapter has changed but "
                         + "ListView did not receive a notification. Make sure the content of "
                         + "your adapter is not modified from a background thread, but only "
-                        + "from the UI thread.");
+                        + "from the UI thread. [in ListView(" + getId() + ", " + getClass() 
+                        + ") with Adapter(" + mAdapter.getClass() + ")]");
             }
 
             setSelectedPositionInt(mNextSelectedPosition);
@@ -1537,37 +1542,42 @@ public class ListView extends AbsListView {
             recycleBin.scrapActiveViews();
 
             if (sel != null) {
-               // the current selected item should get focus if items
-               // are focusable
-               if (mItemsCanFocus && hasFocus() && !sel.hasFocus()) {
-                   final boolean focusWasTaken = (sel == focusLayoutRestoreDirectChild &&
-                           focusLayoutRestoreView.requestFocus()) || sel.requestFocus();
-                   if (!focusWasTaken) {
-                       // selected item didn't take focus, fine, but still want
-                       // to make sure something else outside of the selected view
-                       // has focus
-                       final View focused = getFocusedChild();
-                       if (focused != null) {
-                           focused.clearFocus();
-                       }
-                       positionSelector(sel);
-                   } else {
-                       sel.setSelected(false);
-                       mSelectorRect.setEmpty();
-                   }
-               } else {
-                   positionSelector(sel);
-               }
-               mSelectedTop = sel.getTop();
+                // the current selected item should get focus if items
+                // are focusable
+                if (mItemsCanFocus && hasFocus() && !sel.hasFocus()) {
+                    final boolean focusWasTaken = (sel == focusLayoutRestoreDirectChild &&
+                            focusLayoutRestoreView.requestFocus()) || sel.requestFocus();
+                    if (!focusWasTaken) {
+                        // selected item didn't take focus, fine, but still want
+                        // to make sure something else outside of the selected view
+                        // has focus
+                        final View focused = getFocusedChild();
+                        if (focused != null) {
+                            focused.clearFocus();
+                        }
+                        positionSelector(sel);
+                    } else {
+                        sel.setSelected(false);
+                        mSelectorRect.setEmpty();
+                    }
+                } else {
+                    positionSelector(sel);
+                }
+                mSelectedTop = sel.getTop();
             } else {
-               mSelectedTop = 0;
-               mSelectorRect.setEmpty();
+                if (mTouchMode > TOUCH_MODE_DOWN && mTouchMode < TOUCH_MODE_SCROLL) {
+                    View child = getChildAt(mMotionPosition - mFirstPosition);
+                    if (child != null) positionSelector(child);
+                } else {
+                    mSelectedTop = 0;
+                    mSelectorRect.setEmpty();
+                }
 
-               // even if there is not selected position, we may need to restore
-               // focus (i.e. something focusable in touch mode)
-               if (hasFocus() && focusLayoutRestoreView != null) {
-                   focusLayoutRestoreView.requestFocus();
-               }
+                // even if there is not selected position, we may need to restore
+                // focus (i.e. something focusable in touch mode)
+                if (hasFocus() && focusLayoutRestoreView != null) {
+                    focusLayoutRestoreView.requestFocus();
+                }
             }
 
             // tell focus view we are done mucking with it, if it is still in
@@ -1681,6 +1691,10 @@ public class ListView extends AbsListView {
             boolean selected, boolean recycled) {
         final boolean isSelected = selected && shouldShowSelector();
         final boolean updateChildSelected = isSelected != child.isSelected();
+        final int mode = mTouchMode;
+        final boolean isPressed = mode > TOUCH_MODE_DOWN && mode < TOUCH_MODE_SCROLL &&
+                mMotionPosition == position;
+        final boolean updateChildPressed = isPressed != child.isPressed();
         final boolean needToMeasure = !recycled || updateChildSelected || child.isLayoutRequested();
 
         // Respect layout params that are already in the view. Otherwise make some up...
@@ -1704,6 +1718,10 @@ public class ListView extends AbsListView {
 
         if (updateChildSelected) {
             child.setSelected(isSelected);
+        }
+
+        if (updateChildPressed) {
+            child.setPressed(isPressed);
         }
 
         if (mChoiceMode != CHOICE_MODE_NONE && mCheckStates != null) {
@@ -1800,13 +1818,29 @@ public class ListView extends AbsListView {
 
     /**
      * Makes the item at the supplied position selected.
-     *
+     * 
      * @param position the position of the item to select
      */
     @Override
     void setSelectionInt(int position) {
         setNextSelectedPositionInt(position);
+        boolean awakeScrollbars = false;
+
+        final int selectedPosition = mSelectedPosition;
+
+        if (selectedPosition >= 0) {
+            if (position == selectedPosition - 1) {
+                awakeScrollbars = true;
+            } else if (position == selectedPosition + 1) {
+                awakeScrollbars = true;
+            }
+        }
+
         layoutChildren();
+
+        if (awakeScrollbars) {
+            awakenScrollBars();
+        }
     }
 
     /**
@@ -2066,7 +2100,9 @@ public class ListView extends AbsListView {
 
                 setSelectionInt(position);
                 invokeOnItemScrollListener();
-                invalidate();
+                if (!awakenScrollBars()) {
+                    invalidate();
+                }
 
                 return true;
             }
@@ -2107,7 +2143,8 @@ public class ListView extends AbsListView {
             }
         }
 
-        if (moved) {
+        if (moved && !awakenScrollBars()) {
+            awakenScrollBars();
             invalidate();
         }
 
@@ -2252,7 +2289,9 @@ public class ListView extends AbsListView {
                 positionSelector(selectedView);
                 mSelectedTop = selectedView.getTop();
             }
-            invalidate();
+            if (!awakenScrollBars()) {
+                invalidate();
+            }
             invokeOnItemScrollListener();
             return true;
         }
@@ -3264,12 +3303,13 @@ public class ListView extends AbsListView {
         if (mChoiceMode == CHOICE_MODE_MULTIPLE) {
             mCheckStates.put(position, value);
         } else {
-            // Clear the old value: if something was selected and value == false
-            // then it is unselected
-            mCheckStates.clear();
-            // If value == true, select the appropriate position
+            // Clear all values if we're checking something, or unchecking the currently
+            // selected item
+            if (value || isItemChecked(position)) {
+                mCheckStates.clear();
+            }
             // this may end up selecting the value we just cleared but this way
-            // we don't have to first to a get(position)
+            // we ensure length of mCheckStates is 1, a fact getCheckedItemPosition relies on
             if (value) {
                 mCheckStates.put(position, true);
             }
@@ -3285,11 +3325,12 @@ public class ListView extends AbsListView {
 
     /**
      * Returns the checked state of the specified position. The result is only
-     * valid if the choice mode has not been set to {@link #CHOICE_MODE_SINGLE}
+     * valid if the choice mode has been set to {@link #CHOICE_MODE_SINGLE}
      * or {@link #CHOICE_MODE_MULTIPLE}.
      *
      * @param position The item whose checked state to return
-     * @return The item's checked state
+     * @return The item's checked state or <code>false</code> if choice mode
+     *         is invalid
      *
      * @see #setChoiceMode(int)
      */
@@ -3303,7 +3344,7 @@ public class ListView extends AbsListView {
 
     /**
      * Returns the currently checked item. The result is only valid if the choice
-     * mode has not been set to {@link #CHOICE_MODE_SINGLE}.
+     * mode has been set to {@link #CHOICE_MODE_SINGLE}.
      *
      * @return The position of the currently checked item or
      *         {@link #INVALID_POSITION} if nothing is selected
@@ -3320,10 +3361,12 @@ public class ListView extends AbsListView {
 
     /**
      * Returns the set of checked items in the list. The result is only valid if
-     * the choice mode has not been set to {@link #CHOICE_MODE_SINGLE}.
+     * the choice mode has not been set to {@link #CHOICE_MODE_NONE}.
      *
      * @return  A SparseBooleanArray which will return true for each call to
-     *          get(int position) where position is a position in the list.
+     *          get(int position) where position is a position in the list,
+     *          or <code>null</code> if the choice mode is set to
+     *          {@link #CHOICE_MODE_NONE}.
      */
     public SparseBooleanArray getCheckedItemPositions() {
         if (mChoiceMode != CHOICE_MODE_NONE) {

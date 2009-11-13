@@ -18,9 +18,9 @@
 #define LOG_TAG "Process"
 
 #include <utils/Log.h>
-#include <utils/IPCThreadState.h>
-#include <utils/ProcessState.h>
-#include <utils/IServiceManager.h>
+#include <binder/IPCThreadState.h>
+#include <binder/ProcessState.h>
+#include <binder/IServiceManager.h>
 #include <utils/String8.h>
 #include <utils/Vector.h>
 
@@ -32,6 +32,7 @@
 #include <sys/errno.h>
 #include <sys/resource.h>
 #include <sys/types.h>
+#include <cutils/sched_policy.h>
 #include <dirent.h>
 #include <fcntl.h>
 #include <grp.h>
@@ -50,13 +51,7 @@ pid_t gettid() { return syscall(__NR_gettid);}
 #undef __KERNEL__
 #endif
 
-/*
- * List of cgroup names which map to ANDROID_TGROUP_ values in Thread.h
- * and Process.java
- * These names are used to construct the path to the cgroup control dir
- */
-
-static const char *cgroup_names[] = { NULL, "bg_non_interactive", "fg_boost" };
+#define POLICY_DEBUG 0
 
 using namespace android;
 
@@ -194,28 +189,6 @@ jint android_os_Process_getGidForName(JNIEnv* env, jobject clazz, jstring name)
     return -1;
 }
 
-static int add_pid_to_cgroup(int pid, int grp)
-{
-    int fd;
-    char path[255];
-    char text[64];
-
-    sprintf(path, "/dev/cpuctl/%s/tasks",
-           (cgroup_names[grp] ? cgroup_names[grp] : ""));
-
-    if ((fd = open(path, O_WRONLY)) < 0)
-        return -1;
-
-    sprintf(text, "%d", pid);
-    if (write(fd, text, strlen(text)) < 0) {
-        close(fd);
-        return -1;
-    }
-
-    close(fd);
-    return 0;
-}
-
 void android_os_Process_setThreadGroup(JNIEnv* env, jobject clazz, int pid, jint grp)
 {
     if (grp > ANDROID_TGROUP_MAX || grp < 0) { 
@@ -223,10 +196,9 @@ void android_os_Process_setThreadGroup(JNIEnv* env, jobject clazz, int pid, jint
         return;
     }
 
-    if (add_pid_to_cgroup(pid, grp)) {
-        // If the thread exited on us, don't generate an exception
-        if (errno != ESRCH && errno != ENOENT)
-            signalExceptionForGroupError(env, clazz, errno);
+    if (set_sched_policy(pid, (grp == ANDROID_TGROUP_BG_NONINTERACT) ?
+                                      SP_BACKGROUND : SP_FOREGROUND)) {
+        signalExceptionForGroupError(env, clazz, errno);
     }
 }
 
@@ -242,6 +214,26 @@ void android_os_Process_setProcessGroup(JNIEnv* env, jobject clazz, int pid, jin
         return;
     }
 
+#if POLICY_DEBUG
+    char cmdline[32];
+    int fd;
+
+    strcpy(cmdline, "unknown");
+
+    sprintf(proc_path, "/proc/%d/cmdline", pid);
+    fd = open(proc_path, O_RDONLY);
+    if (fd >= 0) {
+        int rc = read(fd, cmdline, sizeof(cmdline)-1);
+        cmdline[rc] = 0;
+        close(fd);
+    }
+    
+    if (grp == ANDROID_TGROUP_BG_NONINTERACT) {
+        LOGD("setProcessGroup: vvv pid %d (%s)", pid, cmdline);
+    } else {
+        LOGD("setProcessGroup: ^^^ pid %d (%s)", pid, cmdline);
+    }
+#endif
     sprintf(proc_path, "/proc/%d/task", pid);
     if (!(d = opendir(proc_path))) {
         // If the process exited on us, don't generate an exception
@@ -271,13 +263,9 @@ void android_os_Process_setProcessGroup(JNIEnv* env, jobject clazz, int pid, jin
             continue;
         }
      
-        if (add_pid_to_cgroup(t_pid, grp)) {
-            // If the thread exited on us, ignore it and keep going
-            if (errno != ESRCH && errno != ENOENT) {
-                signalExceptionForGroupError(env, clazz, errno);
-                closedir(d);
-                return;
-            }
+        if (set_sched_policy(t_pid, (grp == ANDROID_TGROUP_BG_NONINTERACT) ?
+                                            SP_BACKGROUND : SP_FOREGROUND)) {
+            signalExceptionForGroupError(env, clazz, errno);
         }
     }
     closedir(d);
@@ -286,10 +274,16 @@ void android_os_Process_setProcessGroup(JNIEnv* env, jobject clazz, int pid, jin
 void android_os_Process_setThreadPriority(JNIEnv* env, jobject clazz,
                                               jint pid, jint pri)
 {
+    int rc = 0;
+
     if (pri >= ANDROID_PRIORITY_BACKGROUND) {
-        add_pid_to_cgroup(pid, ANDROID_TGROUP_BG_NONINTERACT);
+        rc = set_sched_policy(pid, SP_BACKGROUND);
     } else if (getpriority(PRIO_PROCESS, pid) >= ANDROID_PRIORITY_BACKGROUND) {
-        add_pid_to_cgroup(pid, ANDROID_TGROUP_DEFAULT);
+        rc = set_sched_policy(pid, SP_FOREGROUND);
+    }
+
+    if (rc) {
+        signalExceptionForGroupError(env, clazz, errno);
     }
 
     if (setpriority(PRIO_PROCESS, pid, pri) < 0) {
@@ -385,7 +379,7 @@ static int pid_compare(const void* v1, const void* v2)
     return *((const jint*)v1) - *((const jint*)v2);
 }
 
-jint android_os_Process_getFreeMemory(JNIEnv* env, jobject clazz)
+static jlong android_os_Process_getFreeMemory(JNIEnv* env, jobject clazz)
 {
     int fd = open("/proc/meminfo", O_RDONLY);
     
@@ -405,7 +399,7 @@ jint android_os_Process_getFreeMemory(JNIEnv* env, jobject clazz)
     buffer[len] = 0;
 
     int numFound = 0;
-    int mem = 0;
+    jlong mem = 0;
     
     static const char* const sums[] = { "MemFree:", "Cached:", NULL };
     static const int sumsLen[] = { strlen("MemFree:"), strlen("Cached:"), NULL };
@@ -424,7 +418,7 @@ jint android_os_Process_getFreeMemory(JNIEnv* env, jobject clazz)
                     p++;
                     if (*p == 0) p--;
                 }
-                mem += atoi(num) * 1024;
+                mem += atoll(num) * 1024;
                 numFound++;
                 break;
             }
@@ -874,7 +868,7 @@ static const JNINativeMethod methods[] = {
     {"setGid", "(I)I", (void*)android_os_Process_setGid},
     {"sendSignal", "(II)V", (void*)android_os_Process_sendSignal},
     {"supportsProcesses", "()Z", (void*)android_os_Process_supportsProcesses},
-    {"getFreeMemory", "()I", (void*)android_os_Process_getFreeMemory},
+    {"getFreeMemory", "()J", (void*)android_os_Process_getFreeMemory},
     {"readProcLines", "(Ljava/lang/String;[Ljava/lang/String;[J)V", (void*)android_os_Process_readProcLines},
     {"getPids", "(Ljava/lang/String;[I)[I", (void*)android_os_Process_getPids},
     {"readProcFile", "(Ljava/lang/String;[I[Ljava/lang/String;[J[F)Z", (void*)android_os_Process_readProcFile},

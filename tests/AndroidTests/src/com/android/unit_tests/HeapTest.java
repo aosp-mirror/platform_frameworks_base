@@ -485,7 +485,8 @@ public class HeapTest extends TestCase {
         }
     }
 
-    @MediumTest
+    // TODO: flaky test
+    //@MediumTest
     public void testOomeLarge() throws Exception {
         /* Just shy of the typical max heap size so that it will actually
          * try to allocate it instead of short-circuiting.
@@ -540,7 +541,8 @@ public class HeapTest extends TestCase {
         }
     }
 
-    @SmallTest
+    // TODO: flaky test
+    //@SmallTest
     public void testExternalOomeLarge() {
         /* Just shy of the typical max heap size so that it will actually
          * try to allocate it instead of short-circuiting.

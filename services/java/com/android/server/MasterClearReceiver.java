@@ -30,8 +30,8 @@ public class MasterClearReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        if (intent.getAction().equals("android.intent.action.GTALK_DATA_MESSAGE_RECEIVED")) {
-            if (!intent.getBooleanExtra("from_trusted_server", false)) {
+        if (intent.getAction().equals(Intent.ACTION_REMOTE_INTENT)) {
+            if (!intent.getBooleanExtra("android.intent.extra.from_trusted_server", false)) {
                 Log.w(TAG, "Ignoring master clear request -- not from trusted server.");
                 return;
             }

@@ -17,6 +17,14 @@
 package com.android.internal.telephony;
 
 import static com.android.internal.telephony.RILConstants.*;
+import static android.telephony.TelephonyManager.NETWORK_TYPE_UNKNOWN;
+import static android.telephony.TelephonyManager.NETWORK_TYPE_EDGE;
+import static android.telephony.TelephonyManager.NETWORK_TYPE_GPRS;
+import static android.telephony.TelephonyManager.NETWORK_TYPE_UMTS;
+import static android.telephony.TelephonyManager.NETWORK_TYPE_HSDPA;
+import static android.telephony.TelephonyManager.NETWORK_TYPE_HSUPA;
+import static android.telephony.TelephonyManager.NETWORK_TYPE_HSPA;
+
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -30,6 +38,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.Parcel;
 import android.os.PowerManager;
+import android.os.SystemProperties;
 import android.os.PowerManager.WakeLock;
 import android.telephony.NeighboringCellInfo;
 import android.telephony.PhoneNumberUtils;
@@ -630,7 +639,7 @@ public final class RIL extends BaseCommands implements CommandsInterface {
     }
 
     public void
-    getIccStatus(Message result) {
+    getIccCardStatus(Message result) {
         //Note: This RIL request has not been renamed to ICC,
         //       but this request is also valid for SIM and RUIM
         RILRequest rr = RILRequest.obtain(RIL_REQUEST_GET_SIM_STATUS, result);
@@ -1237,10 +1246,17 @@ public final class RIL extends BaseCommands implements CommandsInterface {
      */
     public void
     setupDefaultPDP(String apn, String user, String password, Message result) {
-        String radioTechnology = "1"; //0 for CDMA, 1 for GSM/UMTS
+        int radioTechnology;
+        int authType;
         String profile = ""; //profile number, NULL for GSM/UMTS
-        setupDataCall(radioTechnology, profile, apn, user,
-                password, result);
+
+        radioTechnology = RILConstants.SETUP_DATA_TECH_GSM;
+        //TODO(): Add to the APN database, AuthType is set to CHAP/PAP
+        authType = (user != null) ? RILConstants.SETUP_DATA_AUTH_PAP_CHAP
+                : RILConstants.SETUP_DATA_AUTH_NONE;
+
+        setupDataCall(Integer.toString(radioTechnology), profile, apn, user,
+                password, Integer.toString(authType), result);
 
     }
 
@@ -1259,7 +1275,7 @@ public final class RIL extends BaseCommands implements CommandsInterface {
      */
     public void
     setupDataCall(String radioTechnology, String profile, String apn,
-            String user, String password, Message result) {
+            String user, String password, String authType, Message result) {
         RILRequest rr
                 = RILRequest.obtain(RIL_REQUEST_SETUP_DATA_CALL, result);
 
@@ -1270,15 +1286,12 @@ public final class RIL extends BaseCommands implements CommandsInterface {
         rr.mp.writeString(apn);
         rr.mp.writeString(user);
         rr.mp.writeString(password);
-        //TODO(): Add to the APN database, AuthType is set to CHAP/PAP
-        // 0 => Neither PAP nor CHAP will be performed, 3 => PAP / CHAP will be performed.
-        if (user != null)
-            rr.mp.writeString("3");
-        else
-            rr.mp.writeString("0");
+        rr.mp.writeString(authType);
 
-        if (RILJ_LOGD) riljLog(rr.serialString() + "> " + requestToString(rr.mRequest) + " "
-                + apn);
+        if (RILJ_LOGD) riljLog(rr.serialString() + "> "
+                + requestToString(rr.mRequest) + " " + radioTechnology + " "
+                + profile + " " + apn + " " + user + " "
+                + password + " " + authType);
 
         send(rr);
     }
@@ -2161,7 +2174,7 @@ public final class RIL extends BaseCommands implements CommandsInterface {
             case RIL_REQUEST_CDMA_GET_BROADCAST_CONFIG: ret =  responseCdmaBroadcastConfig(p); break;
             case RIL_REQUEST_CDMA_SET_BROADCAST_CONFIG: ret =  responseVoid(p); break;
             case RIL_REQUEST_CDMA_BROADCAST_ACTIVATION: ret =  responseVoid(p); break;
-            case RIL_REQUEST_CDMA_VALIDATE_AKEY: ret =  responseVoid(p); break;
+            case RIL_REQUEST_CDMA_VALIDATE_AND_WRITE_AKEY: ret =  responseVoid(p); break;
             case RIL_REQUEST_CDMA_SUBSCRIPTION: ret =  responseStrings(p); break;
             case RIL_REQUEST_CDMA_WRITE_SMS_TO_RUIM: ret =  responseInts(p); break;
             case RIL_REQUEST_CDMA_DELETE_SMS_ON_RUIM: ret =  responseVoid(p); break;
@@ -2309,6 +2322,7 @@ public final class RIL extends BaseCommands implements CommandsInterface {
             case RIL_UNSOL_CDMA_OTA_PROVISION_STATUS: ret = responseInts(p); break;
             case RIL_UNSOL_CDMA_INFO_REC: ret = responseCdmaInformationRecord(p); break;
             case RIL_UNSOL_OEM_HOOK_RAW: ret = responseRaw(p); break;
+            case RIL_UNSOL_RINGBACK_TONE: ret = responseInts(p); break;
 
             default:
                 throw new RuntimeException("Unrecognized unsol response: " + response);
@@ -2507,6 +2521,7 @@ public final class RIL extends BaseCommands implements CommandsInterface {
                     mRestrictedStateRegistrant.notifyRegistrant(
                                         new AsyncResult (null, ret, null));
                 }
+                break;
 
             case RIL_UNSOL_RESPONSE_SIM_STATUS_CHANGED:
                 if (RILJ_LOGD) unsljLog(response);
@@ -2553,7 +2568,7 @@ public final class RIL extends BaseCommands implements CommandsInterface {
                 break;
 
             case RIL_UNSOL_CDMA_CALL_WAITING:
-                if (RILJ_LOGD) unsljLog(response);
+                if (RILJ_LOGD) unsljLogRet(response, ret);
 
                 if (mCallWaitingInfoRegistrants != null) {
                     mCallWaitingInfoRegistrants.notifyRegistrants(
@@ -2592,6 +2607,14 @@ public final class RIL extends BaseCommands implements CommandsInterface {
                     mUnsolOemHookRawRegistrant.notifyRegistrant(new AsyncResult(null, ret, null));
                 }
                 break;
+
+            case RIL_UNSOL_RINGBACK_TONE:
+                if (RILJ_LOGD) unsljLogvRet(response, ret);
+                if (mRingbackToneRegistrants != null) {
+                    boolean playtone = (((int[])ret)[0] == 1);
+                    mRingbackToneRegistrants.notifyRegistrants(
+                                        new AsyncResult (null, playtone, null));
+                }
         }
     }
 
@@ -2735,24 +2758,22 @@ public final class RIL extends BaseCommands implements CommandsInterface {
 
     private Object
     responseIccCardStatus(Parcel p) {
-        RadioState currentRadioState;
         IccCardApplication ca;
 
-        currentRadioState = getRadioState();
-
         IccCardStatus status = new IccCardStatus();
-        status.card_state                      = status.CardStateFromRILInt(p.readInt());
-        status.universal_pin_state             = status.PinStateFromRILInt(p.readInt());
-        status.gsm_umts_subscription_app_index = p.readInt();
-        status.cdma_subscription_app_index     = p.readInt();
-        status.num_applications                = p.readInt();
+        status.setCardState(p.readInt());
+        status.setUniversalPinState(p.readInt());
+        status.setGsmUmtsSubscriptionAppIndex(p.readInt());
+        status.setCdmaSubscriptionAppIndex(p.readInt());
+        int numApplications = p.readInt();
 
         // limit to maximum allowed applications
-        if (status.num_applications > IccCardStatus.CARD_MAX_APPS) {
-            status.num_applications = IccCardStatus.CARD_MAX_APPS;
+        if (numApplications > IccCardStatus.CARD_MAX_APPS) {
+            numApplications = IccCardStatus.CARD_MAX_APPS;
         }
+        status.setNumApplications(numApplications);
 
-        for (int i = 0 ; i < status.num_applications ; i++) {
+        for (int i = 0 ; i < numApplications ; i++) {
             ca = new IccCardApplication();
             ca.app_type       = ca.AppTypeFromRILInt(p.readInt());
             ca.app_state      = ca.AppStateFromRILInt(p.readInt());
@@ -2762,62 +2783,9 @@ public final class RIL extends BaseCommands implements CommandsInterface {
             ca.pin1_replaced  = p.readInt();
             ca.pin1           = p.readInt();
             ca.pin2           = p.readInt();
-            status.application.add(ca);
+            status.addApplication(ca);
         }
-
-        // this is common for all radio technologies
-        if (!status.card_state.isCardPresent()) {
-            return IccStatus.ICC_ABSENT;
-        }
-
-        // check radio technology
-        if( currentRadioState == RadioState.RADIO_OFF         ||
-            currentRadioState == RadioState.RADIO_UNAVAILABLE ||
-            currentRadioState == RadioState.SIM_NOT_READY     ||
-            currentRadioState == RadioState.RUIM_NOT_READY    ||
-            currentRadioState == RadioState.NV_NOT_READY      ||
-            currentRadioState == RadioState.NV_READY            ) {
-            return IccStatus.ICC_NOT_READY;
-        }
-
-        if( currentRadioState == RadioState.SIM_LOCKED_OR_ABSENT  ||
-            currentRadioState == RadioState.SIM_READY             ||
-            currentRadioState == RadioState.RUIM_LOCKED_OR_ABSENT ||
-            currentRadioState == RadioState.RUIM_READY) {
-
-            int index;
-
-            // check for CDMA radio technology
-            if (currentRadioState == RadioState.RUIM_LOCKED_OR_ABSENT ||
-                currentRadioState == RadioState.RUIM_READY) {
-                index = status.cdma_subscription_app_index;
-            }
-            else {
-                index = status.gsm_umts_subscription_app_index;
-            }
-
-            // check if PIN required
-            if (status.application.get(index).app_state.isPinRequired()) {
-                return IccStatus.ICC_PIN;
-            }
-            if (status.application.get(index).app_state.isPukRequired()) {
-                return IccStatus.ICC_PUK;
-            }
-            if (status.application.get(index).app_state.isSubscriptionPersoEnabled()) {
-                return IccStatus.ICC_NETWORK_PERSONALIZATION;
-            }
-            if (status.application.get(index).app_state.isAppReady()) {
-                return IccStatus.ICC_READY;
-            }
-            if (status.application.get(index).app_state.isAppNotReady()) {
-                return IccStatus.ICC_NOT_READY;
-            }
-            return IccStatus.ICC_NOT_READY;
-        }
-
-        // Unrecognized ICC status. Treat it like a missing ICC.
-        Log.e(LOG_TAG, "Unrecognized RIL_REQUEST_GET_SIM_STATUS result: " + status);
-        return IccStatus.ICC_ABSENT;
+        return status;
     }
 
     private Object
@@ -2917,21 +2885,44 @@ public final class RIL extends BaseCommands implements CommandsInterface {
 
    private Object
    responseCellList(Parcel p) {
-       int num;
+       int num, rssi;
+       String location;
        ArrayList<NeighboringCellInfo> response;
        NeighboringCellInfo cell;
 
        num = p.readInt();
-       response = new ArrayList<NeighboringCellInfo>(num);
+       response = new ArrayList<NeighboringCellInfo>();
 
-       for (int i = 0 ; i < num ; i++) {
-           int rssi = p.readInt();
-           int cid = Integer.valueOf(p.readString(), 16);
-           cell = new NeighboringCellInfo(rssi, cid);
-           response.add(cell);
+       // Determine the radio access type
+       String radioString = SystemProperties.get(
+               TelephonyProperties.PROPERTY_DATA_NETWORK_TYPE, "unknown");
+       int radioType;
+       if (radioString.equals("GPRS")) {
+           radioType = NETWORK_TYPE_GPRS;
+       } else if (radioString.equals("EDGE")) {
+           radioType = NETWORK_TYPE_EDGE;
+       } else if (radioString.equals("UMTS")) {
+           radioType = NETWORK_TYPE_UMTS;
+       } else if (radioString.equals("HSDPA")) {
+           radioType = NETWORK_TYPE_HSDPA;
+       } else if (radioString.equals("HSUPA")) {
+           radioType = NETWORK_TYPE_HSUPA;
+       } else if (radioString.equals("HSPA")) {
+           radioType = NETWORK_TYPE_HSPA;
+       } else {
+           radioType = NETWORK_TYPE_UNKNOWN;
        }
 
-    return response;
+       // Interpret the location based on radio access type
+       if (radioType != NETWORK_TYPE_UNKNOWN) {
+           for (int i = 0 ; i < num ; i++) {
+               rssi = p.readInt();
+               location = p.readString();
+               cell = new NeighboringCellInfo(rssi, location, radioType);
+               response.add(cell);
+           }
+       }
+       return response;
     }
 
     private Object responseGmsBroadcastConfig(Parcel p) {
@@ -3035,7 +3026,7 @@ public final class RIL extends BaseCommands implements CommandsInterface {
         CdmaCallWaitingNotification notification = new CdmaCallWaitingNotification();
 
         notification.number = p.readString();
-        notification.numberPresentation = p.readInt();
+        notification.numberPresentation = notification.presentationFromCLIP(p.readInt());
         notification.name = p.readString();
         notification.namePresentation = notification.numberPresentation;
         notification.isPresent = p.readInt();
@@ -3206,7 +3197,7 @@ public final class RIL extends BaseCommands implements CommandsInterface {
             case RIL_REQUEST_CDMA_GET_BROADCAST_CONFIG: return "RIL_REQUEST_CDMA_GET_BROADCAST_CONFIG";
             case RIL_REQUEST_CDMA_SET_BROADCAST_CONFIG: return "RIL_REQUEST_CDMA_SET_BROADCAST_CONFIG";
             case RIL_REQUEST_GSM_BROADCAST_ACTIVATION: return "RIL_REQUEST_GSM_BROADCAST_ACTIVATION";
-            case RIL_REQUEST_CDMA_VALIDATE_AKEY: return "RIL_REQUEST_CDMA_VALIDATE_AKEY";
+            case RIL_REQUEST_CDMA_VALIDATE_AND_WRITE_AKEY: return "RIL_REQUEST_CDMA_VALIDATE_AND_WRITE_AKEY";
             case RIL_REQUEST_CDMA_BROADCAST_ACTIVATION: return "RIL_REQUEST_CDMA_BROADCAST_ACTIVATION";
             case RIL_REQUEST_CDMA_SUBSCRIPTION: return "RIL_REQUEST_CDMA_SUBSCRIPTION";
             case RIL_REQUEST_CDMA_WRITE_SMS_TO_RUIM: return "RIL_REQUEST_CDMA_WRITE_SMS_TO_RUIM";
@@ -3259,6 +3250,7 @@ public final class RIL extends BaseCommands implements CommandsInterface {
             case RIL_UNSOL_CDMA_OTA_PROVISION_STATUS: return "UNSOL_CDMA_OTA_PROVISION_STATUS";
             case RIL_UNSOL_CDMA_INFO_REC: return "UNSOL_CDMA_INFO_REC";
             case RIL_UNSOL_OEM_HOOK_RAW: return "UNSOL_OEM_HOOK_RAW";
+            case RIL_UNSOL_RINGBACK_TONE: return "UNSOL_RINGBACK_TONG";
             default: return "<unknown reponse>";
         }
     }

@@ -17,6 +17,7 @@
 package android.widget;
 
 import android.content.Context;
+import android.hardware.SensorManager;
 import android.view.ViewConfiguration;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
@@ -79,9 +80,9 @@ public class Scroller  {
         mFinished = true;
         mInterpolator = interpolator;
         float ppi = context.getResources().getDisplayMetrics().density * 160.0f;
-        mDeceleration = 9.8f   // g (m/s^2)
-                      * 39.37f // inch/meter
-                      * ppi    // pixels per inch
+        mDeceleration = SensorManager.GRAVITY_EARTH   // g (m/s^2)
+                      * 39.37f                        // inch/meter
+                      * ppi                           // pixels per inch
                       * ViewConfiguration.getScrollFriction();
     }
     
@@ -131,6 +132,17 @@ public class Scroller  {
         return mCurrY;
     }
     
+    /**
+     * @hide
+     * Returns the current velocity.
+     *
+     * @return The original velocity less the deceleration. Result may be
+     * negative.
+     */
+    public float getCurrVelocity() {
+        return mVelocity - mDeceleration * timePassed() / 2000.0f;
+    }
+
     /**
      * Returns the start X offset in the scroll. 
      * 
@@ -347,7 +359,11 @@ public class Scroller  {
     }
     
     /**
-     * 
+     * Stops the animation. Contrary to {@link #forceFinished(boolean)},
+     * aborting the animating cause the scroller to move to the final x and y
+     * position
+     *
+     * @see #forceFinished(boolean)
      */
     public void abortAnimation() {
         mCurrX = mFinalX;
@@ -356,10 +372,12 @@ public class Scroller  {
     }
     
     /**
-     * Extend the scroll animation. This allows a running animation to 
-     * scroll further and longer, when used with setFinalX() or setFinalY().
+     * Extend the scroll animation. This allows a running animation to scroll
+     * further and longer, when used with {@link #setFinalX(int)} or {@link #setFinalY(int)}.
      *
      * @param extend Additional time to scroll in milliseconds.
+     * @see #setFinalX(int)
+     * @see #setFinalY(int)
      */
     public void extendDuration(int extend) {
         int passed = timePassed();
@@ -367,18 +385,37 @@ public class Scroller  {
         mDurationReciprocal = 1.0f / (float)mDuration;
         mFinished = false;
     }
-    
+
+    /**
+     * Returns the time elapsed since the beginning of the scrolling.
+     *
+     * @return The elapsed time in milliseconds.
+     */
     public int timePassed() {
         return (int)(AnimationUtils.currentAnimationTimeMillis() - mStartTime);
     }
-    
+
+    /**
+     * Sets the final position (X) for this scroller.
+     *
+     * @param newX The new X offset as an absolute distance from the origin.
+     * @see #extendDuration(int)
+     * @see #setFinalY(int)
+     */
     public void setFinalX(int newX) {
         mFinalX = newX;
         mDeltaX = mFinalX - mStartX;
         mFinished = false;
     }
 
-   public void setFinalY(int newY) {
+    /**
+     * Sets the final position (Y) for this scroller.
+     *
+     * @param newY The new Y offset as an absolute distance from the origin.
+     * @see #extendDuration(int)
+     * @see #setFinalX(int)
+     */
+    public void setFinalY(int newY) {
         mFinalY = newY;
         mDeltaY = mFinalY - mStartY;
         mFinished = false;

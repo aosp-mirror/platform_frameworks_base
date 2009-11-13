@@ -48,6 +48,13 @@ static JMetricsID gFontMetrics_fieldID;
 static jclass   gFontMetricsInt_class;
 static JMetricsID gFontMetricsInt_fieldID;
 
+static void defaultSettingsForAndroid(SkPaint* paint) {
+    // looks best we decided
+    paint->setHinting(SkPaint::kSlight_Hinting);
+    // utf16 is required for java
+    paint->setTextEncoding(SkPaint::kUTF16_TextEncoding);
+}
+
 class SkPaintGlue {
 public:
 
@@ -57,8 +64,7 @@ public:
 
     static SkPaint* init(JNIEnv* env, jobject clazz) {
         SkPaint* obj = new SkPaint();
-        // utf16 is required for java
-        obj->setTextEncoding(SkPaint::kUTF16_TextEncoding);
+        defaultSettingsForAndroid(obj);
         return obj;
     }
 
@@ -69,8 +75,7 @@ public:
  
     static void reset(JNIEnv* env, jobject clazz, SkPaint* obj) {
         obj->reset();
-        // utf16 is required for java
-        obj->setTextEncoding(SkPaint::kUTF16_TextEncoding);
+        defaultSettingsForAndroid(obj);
     }
  
     static void assign(JNIEnv* env, jobject clazz, SkPaint* dst, const SkPaint* src) {
@@ -564,11 +569,11 @@ static JNINativeMethod methods[] = {
     {"descent","()F", (void*) SkPaintGlue::descent},
     {"getFontMetrics", "(Landroid/graphics/Paint$FontMetrics;)F", (void*)SkPaintGlue::getFontMetrics},
     {"getFontMetricsInt", "(Landroid/graphics/Paint$FontMetricsInt;)I", (void*)SkPaintGlue::getFontMetricsInt},
-    {"measureText","([CII)F", (void*) SkPaintGlue::measureText_CII},
-    {"measureText","(Ljava/lang/String;)F", (void*) SkPaintGlue::measureText_String},
-    {"measureText","(Ljava/lang/String;II)F", (void*) SkPaintGlue::measureText_StringII},
-    {"breakText","([CIIF[F)I", (void*) SkPaintGlue::breakTextC},
-    {"breakText","(Ljava/lang/String;ZF[F)I", (void*) SkPaintGlue::breakTextS},
+    {"native_measureText","([CII)F", (void*) SkPaintGlue::measureText_CII},
+    {"native_measureText","(Ljava/lang/String;)F", (void*) SkPaintGlue::measureText_String},
+    {"native_measureText","(Ljava/lang/String;II)F", (void*) SkPaintGlue::measureText_StringII},
+    {"native_breakText","([CIIF[F)I", (void*) SkPaintGlue::breakTextC},
+    {"native_breakText","(Ljava/lang/String;ZF[F)I", (void*) SkPaintGlue::breakTextS},
     {"native_getTextWidths","(I[CII[F)I", (void*) SkPaintGlue::getTextWidths___CII_F},
     {"native_getTextWidths","(ILjava/lang/String;II[F)I", (void*) SkPaintGlue::getTextWidths__StringII_F},
     {"native_getTextPath","(I[CIIFFI)V", (void*) SkPaintGlue::getTextPath___CIIFFPath},

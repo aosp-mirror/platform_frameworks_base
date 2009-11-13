@@ -22,10 +22,10 @@ import com.android.internal.util.XmlUtils;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
-import android.content.pm.ApplicationInfo;
 import android.graphics.Movie;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.ColorDrawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.SystemProperties;
 import android.util.AttributeSet;
@@ -51,8 +51,10 @@ public class Resources {
     private static final boolean DEBUG_CONFIG = false;
     private static final boolean TRACE_FOR_PRELOAD = false;
 
-    private static final int sSdkVersion = SystemProperties.getInt(
-            "ro.build.version.sdk", 0);
+    // Use the current SDK version code.  If we are a development build,
+    // also allow the previous SDK version + 1.
+    private static final int sSdkVersion = Build.VERSION.SDK_INT
+            + ("REL".equals(Build.VERSION.CODENAME) ? 0 : 1);
     private static final Object mSync = new Object();
     private static Resources mSystem = null;
     
@@ -64,8 +66,6 @@ public class Resources {
     private static final SparseArray<ColorStateList> mPreloadedColorStateLists
             = new SparseArray<ColorStateList>();
     private static boolean mPreloaded;
-
-    private final LongSparseArray<Drawable.ConstantState> mPreloadedDrawables;
 
     /*package*/ final TypedValue mTmpValue = new TypedValue();
 
@@ -157,11 +157,6 @@ public class Resources {
         }
         updateConfiguration(config, metrics);
         assets.ensureStringBlocks();
-        if (mCompatibilityInfo.isScalingRequired()) {
-            mPreloadedDrawables = emptySparseArray();
-        } else {
-            mPreloadedDrawables = sPreloadedDrawables;
-        }
     }
 
     /**
@@ -1668,9 +1663,9 @@ public class Resources {
             return dr;
         }
 
-        Drawable.ConstantState cs = mPreloadedDrawables.get(key);
+        Drawable.ConstantState cs = sPreloadedDrawables.get(key);
         if (cs != null) {
-            dr = cs.newDrawable();
+            dr = cs.newDrawable(this);
         } else {
             if (value.type >= TypedValue.TYPE_FIRST_COLOR_INT &&
                     value.type <= TypedValue.TYPE_LAST_COLOR_INT) {
@@ -1705,9 +1700,10 @@ public class Resources {
                 } else {
                     try {
                         InputStream is = mAssets.openNonAsset(
-                                value.assetCookie, file, AssetManager.ACCESS_BUFFER);
+                                value.assetCookie, file, AssetManager.ACCESS_STREAMING);
         //                System.out.println("Opened file " + file + ": " + is);
-                        dr = Drawable.createFromResourceStream(this, value, is, file);
+                        dr = Drawable.createFromResourceStream(this, value, is,
+                                file, null);
                         is.close();
         //                System.out.println("Created stream: " + dr);
                     } catch (Exception e) {
@@ -1750,7 +1746,7 @@ public class Resources {
                     //Log.i(TAG, "Returning cached drawable @ #" +
                     //        Integer.toHexString(((Integer)key).intValue())
                     //        + " in " + this + ": " + entry);
-                    return entry.newDrawable();
+                    return entry.newDrawable(this);
                 }
                 else {  // our entry has been purged
                     mDrawableCache.delete(key);
@@ -1974,7 +1970,6 @@ public class Resources {
         mMetrics.setToDefaults();
         updateConfiguration(null, null);
         mAssets.ensureStringBlocks();
-        mPreloadedDrawables = sPreloadedDrawables;
         mCompatibilityInfo = CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO;
     }
 }

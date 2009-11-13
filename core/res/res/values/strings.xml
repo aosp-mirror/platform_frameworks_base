@@ -134,7 +134,7 @@
     <string name="RestrictedOnNormal">Voice/SMS service is blocked.</string>
     <!-- Displayed to tell the user that all voice service is blocked by access control. -->
     <string name="RestrictedOnAll">All voice/SMS services are blocked.</string>
-    
+
     <!-- Mappings between TS 27.007 +CFCC/+CLCK "service classes" and human-readable strings--> <skip />
     <!-- Example: Service was enabled for: Voice, Data -->
     <string name="serviceClassVoice">Voice</string>
@@ -229,6 +229,13 @@
     <!-- Displayed when a request failed because there are too many requests right now. -->
     <string name="httpErrorTooManyRequests">Too many requests are being processed. Try again later.</string>
 
+    <!-- Account notifications --> <skip />
+    <!-- A notification is shown when the AccountManager is unable to
+    supply an auth token without prompting the user to re-enter the
+    password.  This is the text that will scroll through the
+    notification bar (will be seen by the user as he uses another application). -->
+    <string name="notification_title">Sign-in error for <xliff:g id="account" example="foo@gmail.com">%1$s</xliff:g></string>
+
     <!-- Sync notifications --> <skip />
     <!-- A notification is shown when there is a sync error.  This is the text that will scroll through the notification bar (will be seen by the user as he uses another application). -->
     <string name="contentServiceSync">Sync</string>
@@ -299,7 +306,7 @@
 
     <!-- Label for the Android system components when they are shown to the user. -->
     <string name="android_system_label">Android System</string>
-    
+
     <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permgrouplab_costMoney">Services that cost you money</string>
     <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
@@ -330,9 +337,9 @@
         various network features.</string>
 
     <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgrouplab_accounts">Your Google accounts</string>
+    <string name="permgrouplab_accounts">Your accounts</string>
     <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permgroupdesc_accounts">Access the available Google accounts.</string>
+    <string name="permgroupdesc_accounts">Access the available accounts.</string>
 
     <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permgrouplab_hardwareControls">Hardware controls</string>
@@ -542,7 +549,12 @@
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_backup">control system backup and restore</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_backup">Allows the application to control the system's backup and restore mechanism.  Not for use by normal applications.</string>
+    <string name="permdesc_backup">Allows the application to control the system\'s backup and restore mechanism.  Not for use by normal applications.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_backup_data">back up and restore the application\'s data</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_backup_data">Allows the application to participate in the system\'s backup and restore mechanism.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_internalSystemWindow">display unauthorized windows</string>
@@ -590,6 +602,12 @@
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_bindInputMethod">Allows the holder to bind to the top-level
         interface of an input method. Should never be needed for normal applications.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_bindWallpaper">bind to a wallpaper</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_bindWallpaper">Allows the holder to bind to the top-level
+        interface of a wallpaper. Should never be needed for normal applications.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_setOrientation">change screen orientation</string>
@@ -689,7 +707,7 @@
 
     <string name="permlab_writeSecureSettings">modify secure system settings</string>
     <string name="permdesc_writeSecureSettings">Allows an application to modify the
-        system's secure settings data. Not for use by normal applications.</string>
+        system\'s secure settings data. Not for use by normal applications.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_writeGservices">modify the Google services map</string>
@@ -800,7 +818,7 @@
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_readFrameBuffer">read frame buffer</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_readFrameBuffer">Allows application to use
+    <string name="permdesc_readFrameBuffer">Allows application to
         read the content of the frame buffer.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
@@ -878,6 +896,12 @@
         any phone number, including emergency numbers, without your intervention.
         Malicious applications may place unnecessary and illegal calls to emergency
         services.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_performCdmaProvisioning">directly start CDMA phone setup</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_performCdmaProvisioning">Allows the application to start CDMA provisioning.
+        Malicious applications may unnecessarily start CDMA provisioning</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_locationUpdates">control location update notifications</string>
@@ -961,10 +985,38 @@
         the phone\'s time zone.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_accountManagerService">act as the AccountManagerService</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_accountManagerService">Allows an
+    application to make calls to AccountAuthenticators</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_getAccounts">discover known accounts</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_getAccounts">Allows an application to get
       the list of accounts known by the phone.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_authenticateAccounts">act as an account authenticator</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_authenticateAccounts">Allows an application
+    to use the account authenticator capabilities of the
+    AccountManager, including creating accounts and getting and
+    setting their passwords.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_manageAccounts">manage the accounts list</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_manageAccounts">Allows an application to
+    perform operations like adding, and removing accounts and deleting
+    their password.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_useCredentials">use the authentication
+    credentials of an account</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_useCredentials">Allows an application to
+    request authentication tokens.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_accessNetworkState">view network state</string>
@@ -1109,9 +1161,6 @@
         <item>Custom</item>
     </string-array>
 
-    <!-- String which means the type "mobile phone". -->
-    <string name="mobileEmailTypeName">Mobile</string>
-
     <!-- The order of these is important, don't reorder without changing Contacts.java --> <skip />
     <!-- Postal address types from android.provider.Contacts. This could be used when adding a new address for a contact, for example. -->
     <string-array name="postalAddressTypes">
@@ -1150,6 +1199,119 @@
         <item>ICQ</item>
         <item>Jabber</item>
     </string-array>
+
+    <!-- Custom phone number type -->
+    <string name="phoneTypeCustom">Custom</string>
+    <!-- Home phone number type -->
+    <string name="phoneTypeHome">Home</string>
+    <!-- Mobile phone number type -->
+    <string name="phoneTypeMobile">Mobile</string>
+    <!-- Work phone number type -->
+    <string name="phoneTypeWork">Work</string>
+    <!-- Work fax phone number type -->
+    <string name="phoneTypeFaxWork">Work Fax</string>
+    <!-- Home fax phone number type -->
+    <string name="phoneTypeFaxHome">Home Fax</string>
+    <!-- Pager phone number type -->
+    <string name="phoneTypePager">Pager</string>
+    <!-- Other phone number type -->
+    <string name="phoneTypeOther">Other</string>
+    <!-- Callback phone number type -->
+    <string name="phoneTypeCallback">Callback</string>
+    <!-- Car phone number type -->
+    <string name="phoneTypeCar">Car</string>
+    <!-- Company main phone number type -->
+    <string name="phoneTypeCompanyMain">Company Main</string>
+    <!-- ISDN phone number type -->
+    <string name="phoneTypeIsdn">ISDN</string>
+    <!-- Main phone number type -->
+    <string name="phoneTypeMain">Main</string>
+    <!-- Other fax phone number type -->
+    <string name="phoneTypeOtherFax">Other Fax</string>
+    <!-- Radio phone number type -->
+    <string name="phoneTypeRadio">Radio</string>
+    <!-- Telex phone number type -->
+    <string name="phoneTypeTelex">Telex</string>
+    <!-- TTY TDD phone number type -->
+    <string name="phoneTypeTtyTdd">TTY TDD</string>
+    <!-- Work mobile phone number type -->
+    <string name="phoneTypeWorkMobile">Work Mobile</string>
+    <!-- Work pager phone number type -->
+    <string name="phoneTypeWorkPager">Work Pager</string>
+    <!-- Assistant phone number type -->
+    <string name="phoneTypeAssistant">Assistant</string>
+    <!-- MMS phone number type -->
+    <string name="phoneTypeMms">MMS</string>
+
+    <!-- Label for a birthday event -->
+    <string name="eventTypeBirthday">Birthday</string>
+    <!-- Label for an anniversary event -->
+    <string name="eventTypeAnniversary">Anniversary</string>
+    <!-- Label for other events -->
+    <string name="eventTypeOther">Event</string>
+
+    <!-- Custom email type -->
+    <string name="emailTypeCustom">Custom</string>
+    <!-- Home email type -->
+    <string name="emailTypeHome">Home</string>
+    <!-- Work email type -->
+    <string name="emailTypeWork">Work</string>
+    <!-- Other email type -->
+    <string name="emailTypeOther">Other</string>
+    <!-- Mobile email type -->
+    <string name="emailTypeMobile">Mobile</string>
+
+    <!-- Custom postal address type -->
+    <string name="postalTypeCustom">Custom</string>
+    <!-- Home postal address type -->
+    <string name="postalTypeHome">Home</string>
+    <!-- Work postal address type -->
+    <string name="postalTypeWork">Work</string>
+    <!-- Other postal address type -->
+    <string name="postalTypeOther">Other</string>
+
+    <!-- Custom IM address type -->
+    <string name="imTypeCustom">Custom</string>
+    <!-- Home IM address type -->
+    <string name="imTypeHome">Home</string>
+    <!-- Work IM address type -->
+    <string name="imTypeWork">Work</string>
+    <!-- Other IM address type -->
+    <string name="imTypeOther">Other</string>
+
+    <!-- Custom IM address type -->
+    <string name="imProtocolCustom">Custom</string>
+    <!-- AIM IM protocol type -->
+    <string name="imProtocolAim">AIM</string>
+    <!-- MSN IM protocol type -->
+    <string name="imProtocolMsn">Windows Live</string>
+    <!-- Yahoo IM protocol type -->
+    <string name="imProtocolYahoo">Yahoo</string>
+    <!-- Skype IM protocol type -->
+    <string name="imProtocolSkype">Skype</string>
+    <!-- QQ IM protocol type -->
+    <string name="imProtocolQq">QQ</string>
+    <!-- Google Talk IM protocol type -->
+    <string name="imProtocolGoogleTalk">Google Talk</string>
+    <!-- ICQ IM protocol type -->
+    <string name="imProtocolIcq">ICQ</string>
+    <!-- Jabber IM protocol type -->
+    <string name="imProtocolJabber">Jabber</string>
+    <!-- NetMeeting IM protocol type -->
+    <string name="imProtocolNetMeeting">NetMeeting</string>
+
+    <!-- Work organization type -->
+    <string name="orgTypeWork">Work</string>
+    <!-- Other organization type -->
+    <string name="orgTypeOther">Other</string>
+    <!-- Custom organization type -->
+    <string name="orgTypeCustom">Custom</string>
+
+    <!-- Attbution of a contact status update, when the time of update is unknown -->
+    <string name="contact_status_update_attribution">via <xliff:g id="source" example="Google Talk">%1$s</xliff:g></string>
+
+    <!-- Attbution of a contact status update, when the time of update is known -->
+    <string name="contact_status_update_attribution_with_date"><xliff:g id="date" example="3 hours ago">%1$s</xliff:g> via <xliff:g id="source" example="Google Talk">%2$s</xliff:g></string>
 
     <!-- Instructions telling the user to enter their pin to unlock the keyguard.
          Displayed in one line in a large font.  -->
@@ -1196,6 +1358,8 @@
     <!-- When the lock screen is showing, the phone is plugged in and the battery is fully
          charged, say that it is charged. -->
     <string name="lockscreen_charged">Charged.</string>
+    <!-- A short representation of charging information, e.g "34%" -->
+    <string name="lockscreen_battery_short"><xliff:g id="number">%d</xliff:g><xliff:g id="percent">%%</xliff:g></string>
 
     <!-- When the lock screen is showing and the battery is low, warn user to plug
          in the phone soon. -->
@@ -1251,7 +1415,11 @@
          their lock gesture -->
     <string name="lockscreen_forgot_pattern_button_text">Forgot pattern?</string>
 
-    <!-- Title of the unlock screen that uses your Google login and password -->
+    <!-- Title of the unlock screen that uses your Google login and password when the user hit
+         the 'forgot pattern' button.-->
+    <string name="lockscreen_glogin_forgot_pattern">Account unlock</string>
+    <!-- Title of the unlock screen that uses your Google login and password when the user attempted
+         too many patterns and we are forcing them to use their account instead. -->
     <string name="lockscreen_glogin_too_many_attempts">Too many pattern attempts!</string>
     <!-- In the unlock screen, message telling the user that they need to use their Google login and password to unlock the phone -->
     <string name="lockscreen_glogin_instructions">To unlock, sign in with your Google account</string>
@@ -1263,6 +1431,9 @@
     <string name="lockscreen_glogin_submit_button">Sign in</string>
     <!-- Displayed to the user when unlocking the phone with a username and password fails. -->
     <string name="lockscreen_glogin_invalid_input">Invalid username or password.</string>
+
+    <!-- Displayed in a progress dialog while a username and password are being checked. -->
+    <string name="lockscreen_glogin_checking_password">Checking...</string>
 
     <!-- A format string for 12-hour time of day, just the hour, not the minute, with lower-case "am" or "pm" (example: "3pm"). -->
     <string name="hour_ampm">"<xliff:g id="hour" example="3">%-l</xliff:g><xliff:g id="ampm" example="pm">%P</xliff:g>"</string>
@@ -1302,12 +1473,12 @@
     <string name="battery_low_subtitle">The battery is getting low:</string>
 
     <!-- A message that appears when the battery level is getting low in a dialog.  This is appened to the subtitle of the low battery alert. -->
-    <string name="battery_low_percent_format">less than <xliff:g id="number">%d%%</xliff:g>
-    remaining.</string>
+    <string name="battery_low_percent_format"><xliff:g id="number">%d%%</xliff:g>
+    or less remaining.</string>
 
     <!-- When the battery is low, this is the label of the button to go to the
          power usage activity to find out what drained the battery. -->
-    <string name="battery_low_why">Why?</string>
+    <string name="battery_low_why">Battery use</string>
 
     <!-- Title of the alert when something went wrong in the factory test. -->
     <string name="factorytest_failed">Factory test failed</string>
@@ -1322,7 +1493,7 @@
 
     <!-- Do not translate.  WebView User Agent string -->
     <string name="web_user_agent"><xliff:g id="x">Mozilla/5.0 (Linux; U; Android %s)
-        AppleWebKit/528.5+ (KHTML, like Gecko) Version/3.1.2 Mobile Safari/525.20.1</xliff:g></string>
+        AppleWebKit/530.17 (KHTML, like Gecko) Version/4.0 Mobile Safari/530.17</xliff:g></string>
 
     <!-- Title for a JavaScript dialog. "The page at <url of current page> says:" -->
     <string name="js_dialog_title">The page at \'<xliff:g id="title">%s</xliff:g>\' says:</string>
@@ -1334,6 +1505,9 @@
 
     <!-- Title of the WebView save password dialog.  If the user enters a password in a form on a website, a dialog will come up asking if they want to save the password. -->
     <string name="save_password_label">Confirm</string>
+
+    <!-- Toast for double-tap -->
+    <string name="double_tap_toast">Tip: double-tap to zoom in and out.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether
         they want to allow the application to do this. -->
@@ -1378,8 +1552,8 @@
     <string name="menu_delete_shortcut_label">delete</string>
 
     <!-- Strings used for search bar --><skip />
-    
-    <!-- This is the default button label in the system-wide search UI. 
+
+    <!-- This is the default button label in the system-wide search UI.
          It is also used by the home screen's search "widget". It should be short -->
     <string name="search_go">Search</string>
 
@@ -1435,7 +1609,7 @@
         <item quantity="one">tomorrow</item>
         <item quantity="other">in <xliff:g id="count">%d</xliff:g> days</item>
     </plurals>
-    
+
     <!-- This is used to express that something occurred some number of abbreviated seconds in the past (e.g., 5 secs ago). -->
     <plurals name="abbrev_num_seconds_ago">
         <item quantity="one">1 sec ago</item>
@@ -1485,11 +1659,11 @@
     </plurals>
 
     <!-- String used to display the date. Preposition for date display ("on May 29") -->
-    <string name="preposition_for_date">on %s</string>
+    <string name="preposition_for_date">on <xliff:g id="date" example="May 29">%s</xliff:g></string>
     <!-- String used to display the date. Preposition for time display ("at 2:33am") -->
-    <string name="preposition_for_time">at %s</string>
+    <string name="preposition_for_time">at <xliff:g id="time" example="2:33 am">%s</xliff:g></string>
     <!-- String used to display the date. Preposition for year display ("in 2008") -->
-    <string name="preposition_for_year">in %s</string>
+    <string name="preposition_for_year">in <xliff:g id="year" example="2003">%s</xliff:g></string>
 
     <!-- Appened to express the value is this unit of time: singular day -->
     <string name="day">day</string>
@@ -1598,11 +1772,11 @@
     <string name="copyUrl">Copy URL</string>
 
     <!-- EditText context menu -->
-    <string name="inputMethod">Input Method</string>
+    <string name="inputMethod">Input method</string>
 
     <!-- Item on EditText context menu, used to add a word to the
          input method dictionary. -->
-    <string name="addToDictionary">"Add \"%s\" to dictionary</string>
+    <string name="addToDictionary">"Add \"<xliff:g id="word" example="rickroll">%s</xliff:g>\" to dictionary</string>
 
     <!-- Title for EditText context menu -->
     <string name="editTextMenuTitle">Edit text</string>
@@ -1677,6 +1851,8 @@
     <string name="volume_music">Media volume</string>
     <!-- Hint shown in the volume toast to inform the user that the media audio is playing through Bluetooth. -->
     <string name="volume_music_hint_playing_through_bluetooth">Playing through Bluetooth</string>
+    <!-- Hint shown in the volume toast to inform the user that the current ringtone is the silent ringtone. -->
+    <string name="volume_music_hint_silent_ringtone_selected">Silent ringtone selected</string>
     <!-- Title of the dialog where the user is adjusting the phone call volume -->
     <string name="volume_call">In-call volume</string>
     <!-- Title of the dialog where the user is adjusting the phone call volume when connected on bluetooth-->
@@ -1754,7 +1930,7 @@
     <string name="usb_storage_button_mount">Mount</string>
     <!-- See USB_STORAGE.   This is the button text to ignore the plugging in of the phone.. -->
     <string name="usb_storage_button_unmount">Don\'t mount</string>
-    <!-- See USB_STORAGE_DIALOG.  If there was an error mounting, this is the text. --> 
+    <!-- See USB_STORAGE_DIALOG.  If there was an error mounting, this is the text. -->
     <string name="usb_storage_error_message">There is a problem using your SD card for USB storage.</string>
     <!-- USB_STORAGE: When the user connects the phone to a computer via USB, we show a notification asking if he wants to share files across.  This is the title -->
     <string name="usb_storage_notification_title">USB connected</string>
@@ -1775,8 +1951,8 @@
     <string name="usb_storage_stop_button_mount">Turn Off</string>
     <!-- See USB_STORAGE_STOP.   This is the button text to cancel stoping usb storage. -->
     <string name="usb_storage_stop_button_unmount">Cancel</string>
-    <!-- See USB_STORAGE_STOP_DIALOG.  If there was an error stopping, this is the text. --> 
-    <string name="usb_storage_stop_error_message">We've encountered a problem turning off USB storage. Check to make sure you have unmounted the USB host, then try again.</string>
+    <!-- See USB_STORAGE_STOP_DIALOG.  If there was an error stopping, this is the text. -->
+    <string name="usb_storage_stop_error_message">We\'ve encountered a problem turning off USB storage. Check to make sure you have unmounted the USB host, then try again.</string>
 
     <!-- External media format dialog strings -->
     <!-- This is the label for the activity, and should never be visible to the user. -->
@@ -1790,8 +1966,8 @@
     <!-- Title of notification shown when ADB is actively connected to the phone. -->
     <string name="adb_active_notification_title">USB debugging connected</string>
     <!-- Message of notification shown when ADB is actively connected to the phone. -->
-    <string name="adb_active_notification_message">A computer is connected to your phone.</string>
-    
+    <string name="adb_active_notification_message">Select to disable USB debugging.</string>
+
     <!-- Used to replace %s in urls retreived from the signin server with locales.  For Some        -->
     <!-- devices we don't support all the locales we ship to and need to replace the '%s' with a    -->
     <!-- locale string based on mcc values.  By default (0-length string) we don't replace the %s   -->
@@ -1800,11 +1976,11 @@
     <string name="locale_replacement">""</string>
 
     <!-- Title of the pop-up dialog in which the user switches input method components. -->
-    <string name="select_input_method">Select Input Method</string>
-    
+    <string name="select_input_method">Select input method</string>
+
     <string name="fast_scroll_alphabet">\u0020ABCDEFGHIJKLMNOPQRSTUVWXYZ</string>
     <string name="fast_scroll_numeric_alphabet">\u00200123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ</string>
-    
+
     <string name="candidates_style"><u>candidates</u></string>
 
     <!-- External media notification strings -->
@@ -1851,23 +2027,23 @@
 
     <!-- Long label for a button on a full-screen input method for the "Go" action. -->
     <string name="ime_action_go">Go</string>
-    
+
     <!-- Long label for a button on a full-screen input method for the "Search" action. -->
     <string name="ime_action_search">Search</string>
-    
+
     <!-- Long label for a button on a full-screen input method for the "Send" action. -->
     <string name="ime_action_send">Send</string>
-    
+
     <!-- Long label for a button on a full-screen input method for the "Next" action. -->
     <string name="ime_action_next">Next</string>
-    
+
     <!-- Long label for a button on a full-screen input method for the "Done" action. -->
     <string name="ime_action_done">Done</string>
-    
+
     <!-- Long label for a button on a full-screen input method for an unknown action. -->
     <string name="ime_action_default">Execute</string>
-    
-    <!-- Strings for search suggestions. These are going here because they are referenced by both 
+
+    <!-- Strings for search suggestions. These are going here because they are referenced by both
          ContactsProvider and GoogleContactsProvider -->
     <skip />
 
@@ -1878,14 +2054,50 @@
     <!-- This string appears (on two lines) when you type a number into contacts search, to let you create a contact whose phone number is the number you typed.  The first line will be in bigger type than the second. -->
     <string name="create_contact_using">Create contact\nusing <xliff:g id="number" example="555">%s</xliff:g></string>
 
-    <!-- This string array should be overridden by the manufacture to present a list of carrier-id,locale pairs.  This is used at startup to set a default locale by checking the system property ro.carrier for the carrier-id and searching through this array -->
-    <string-array translatable="false" name="carrier_locales">
+    <!-- This string array should be overridden by the manufacture to present a list of carrier-id,locale,wifi-channel sets.  This is used at startup to set system defaults by checking the system property ro.carrier for the carrier-id and searching through this array -->
+    <!-- An Array of [[Carrier-ID]                     -->
+    <!--              [default-locale]                 -->
+    <!--              [default-wifi-allowed-channels]] -->
+    <string-array translatable="false" name="carrier_properties">
     </string-array>
 
-     <!-- Title for the selected state of a CompoundButton. -->
-     <string name="accessibility_compound_button_selected">checked</string>
+    <!-- Title for the selected state of a CompoundButton. -->
+    <string name="accessibility_compound_button_selected">checked</string>
 
-     <!-- Title for the unselected state of a CompoundButton. -->
-     <string name="accessibility_compound_button_unselected">not checked</string>
+    <!-- Title for the unselected state of a CompoundButton. -->
+    <string name="accessibility_compound_button_unselected">not checked</string>
 
+    <string name="grant_credentials_permission_message_desc">The
+    listed applications are requesting permission to access the login credentials for account <xliff:g id="account" example="foo@gmail.com">%1$s</xliff:g> from
+    <xliff:g id="application" example="Google Apps">%2$s</xliff:g>. Do you wish to grant this permission? If so, your answer will be remembered and you will not be prompted
+    again.</string>
+
+    <string name="grant_credentials_permission_message_with_authtokenlabel_desc">The
+    listed applications are requesting permission to access the <xliff:g id="type" example="Contacts">%1$s</xliff:g> login credentials for account <xliff:g id="account" example="foo@gmail.com">%2$s</xliff:g> from
+    <xliff:g id="application" example="Google Apps">%3$s</xliff:g>. Do you wish to grant this permission? If so, your answer will be remembered and you will not be prompted
+    again.</string>
+
+    <string name="allow">Allow</string>
+    <string name="deny">Deny</string>
+    <string name="permission_request_notification_title">Permission Requested</string>
+    <string name="permission_request_notification_with_subtitle">Permission Requested\nfor account <xliff:g id="account" example="foo@gmail.com">%s</xliff:g></string>
+
+    <!-- Label to show for a service that is running because it is an input method. -->
+    <string name="input_method_binding_label">Input method</string>
+    <!-- Label to show for a service that is running because it is a sync adapter. -->
+    <string name="sync_binding_label">Sync</string>
+    <!-- Label to show for a service that is running because it is an accessibility module. -->
+    <string name="accessibility_binding_label">Accessibility</string>
+    <!-- Label to show for a service that is running because it is a wallpaper. -->
+    <string name="wallpaper_binding_label">Wallpaper</string>
+    <!-- Dialog title for user to select a different wallpaper from service list -->
+    <string name="chooser_wallpaper">Change wallpaper</string>
+
+    <!-- Do Not Translate: Alternate eri.xml -->
+    <string name="alternate_eri_file">/data/eri.xml</string>
+
+    <string name="pptp_vpn_description">Point-to-Point Tunneling Protocol</string>
+    <string name="l2tp_vpn_description">Layer 2 Tunneling Protocol</string>
+    <string name="l2tp_ipsec_psk_vpn_description">Pre-shared key based L2TP/IPSec VPN</string>
+    <string name="l2tp_ipsec_crt_vpn_description">Certificate based L2TP/IPSec VPN</string>
 </resources>

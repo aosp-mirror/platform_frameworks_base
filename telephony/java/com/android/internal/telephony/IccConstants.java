@@ -42,6 +42,9 @@ public interface IccConstants {
     static final int EF_CFIS = 0x6FCB;
     static final int EF_IMG = 0x4f20;
 
+    // USIM SIM file ids from TS 31.102
+    public static final int EF_PBR = 0x4F30;
+
     // GSM SIM file ids from CPHS (phase 2, version 4.2) CPHS4_2.WW6
     static final int EF_MAILBOX_CPHS = 0x6F17;
     static final int EF_VOICE_MAIL_INDICATOR_CPHS = 0x6F11;
@@ -59,6 +62,7 @@ public interface IccConstants {
 
     static final String MF_SIM = "3F00";
     static final String DF_TELECOM = "7F10";
+    static final String DF_PHONEBOOK = "5F3A";
     static final String DF_GRAPHICS = "5F50";
     static final String DF_GSM = "7F20";
     static final String DF_CDMA = "7F25";

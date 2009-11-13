@@ -15,6 +15,6 @@
 -->
 
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:state_selected="true" android:color="#323232"/>
-    <item android:color="#FFF"/> <!-- not selected -->
+    <item android:state_selected="true" android:color="#ffffff"/>
+    <item android:color="#808080"/> <!-- not selected -->
 </selector>

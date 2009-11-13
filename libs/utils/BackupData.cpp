@@ -107,7 +107,7 @@ BackupDataWriter::WriteEntityHeader(const String8& key, size_t dataSize)
     } else {
         k = key;
     }
-    if (true) {
+    if (false) {
         LOGD("Writing entity: prefix='%s' key='%s' dataSize=%d", m_keyPrefix.string(), key.string(),
                 dataSize);
     }
@@ -193,8 +193,11 @@ BackupDataReader::Status()
         if ((actual) != (expected)) { \
             if ((actual) == 0) { \
                 m_status = EIO; \
+                m_done = true; \
             } else { \
                 m_status = errno; \
+                LOGD("CHECK_SIZE(a=%ld e=%ld) failed at line %d m_status='%s'", \
+                    long(actual), long(expected), __LINE__, strerror(m_status)); \
             } \
             return m_status; \
         } \
@@ -203,6 +206,7 @@ BackupDataReader::Status()
     do { \
         status_t err = skip_padding(); \
         if (err != NO_ERROR) { \
+            LOGD("SKIP_PADDING FAILED at line %d", __LINE__); \
             m_status = err; \
             return err; \
         } \
@@ -218,10 +222,19 @@ BackupDataReader::ReadNextHeader(bool* done, int* type)
 
     int amt;
 
-    // No error checking here, in case we're at the end of the stream.  Just let read() fail.
-    skip_padding();
+    amt = skip_padding();
+    if (amt == EIO) {
+        *done = m_done = true;
+        return NO_ERROR;
+    }
+    else if (amt != NO_ERROR) {
+        return amt;
+    }
     amt = read(m_fd, &m_header, sizeof(m_header));
     *done = m_done = (amt == 0);
+    if (*done) {
+        return NO_ERROR;
+    }
     CHECK_SIZE(amt, sizeof(m_header));
     m_pos += sizeof(m_header);
     if (type) {
@@ -298,10 +311,12 @@ BackupDataReader::SkipEntityData()
     }
     if (m_header.entity.dataSize > 0) {
         int pos = lseek(m_fd, m_dataEndPos, SEEK_SET);
-        return pos == -1 ? (int)errno : (int)NO_ERROR;
-    } else {
-        return NO_ERROR;
+        if (pos == -1) {
+            return errno;
+        }
     }
+    SKIP_PADDING();
+    return NO_ERROR;
 }
 
 ssize_t
@@ -324,6 +339,10 @@ BackupDataReader::ReadEntityData(void* data, size_t size)
     if (amt < 0) {
         m_status = errno;
         return -1;
+    }
+    if (amt == 0) {
+        m_status = EIO;
+        m_done = true;
     }
     m_pos += amt;
     return amt;

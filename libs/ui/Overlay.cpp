@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-#include <utils/IMemory.h>
-#include <utils/Parcel.h>
+#include <binder/IMemory.h>
+#include <binder/Parcel.h>
 #include <utils/Errors.h>
-#include <utils/MemoryHeapBase.h>
+#include <binder/MemoryHeapBase.h>
 
 #include <ui/IOverlay.h>
 #include <ui/Overlay.h>
@@ -59,6 +59,30 @@ status_t Overlay::queueBuffer(overlay_buffer_t buffer)
     return mOverlayData->queueBuffer(mOverlayData, buffer);
 }
 
+status_t Overlay::resizeInput(uint32_t width, uint32_t height)
+{
+    if (mStatus != NO_ERROR) return mStatus;
+    return mOverlayData->resizeInput(mOverlayData, width, height);
+}
+
+status_t Overlay::setParameter(int param, int value)
+{
+    if (mStatus != NO_ERROR) return mStatus;
+    return mOverlayData->setParameter(mOverlayData, param, value);
+}
+
+status_t Overlay::setCrop(uint32_t x, uint32_t y, uint32_t w, uint32_t h)
+{
+    if (mStatus != NO_ERROR) return mStatus;
+    return mOverlayData->setCrop(mOverlayData, x, y, w, h);
+}
+
+status_t Overlay::getCrop(uint32_t* x, uint32_t* y, uint32_t* w, uint32_t* h)
+{
+    if (mStatus != NO_ERROR) return mStatus;
+    return mOverlayData->getCrop(mOverlayData, x, y, w, h);
+}
+
 int32_t Overlay::getBufferCount() const
 {
     if (mStatus != NO_ERROR) return mStatus;
@@ -73,6 +97,15 @@ void* Overlay::getBufferAddress(overlay_buffer_t buffer)
 
 void Overlay::destroy() {  
     if (mStatus != NO_ERROR) return;
+
+    // Must delete the objects in reverse creation order, thus the
+    //  data side must be closed first and then the destroy send to
+    //  the control side.
+    if (mOverlayData) {
+        overlay_data_close(mOverlayData);
+        mOverlayData = NULL;
+    }
+
     mOverlayRef->mOverlayChannel->destroy();
 }
 

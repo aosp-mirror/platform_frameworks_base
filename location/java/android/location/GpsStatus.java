@@ -115,6 +115,18 @@ public final class GpsStatus {
         void onGpsStatusChanged(int event);
     }
 
+    /**
+     * Used for receiving NMEA sentences from the GPS.
+     * NMEA 0183 is a standard for communicating with marine electronic devices
+     * and is a common method for receiving data from a GPS, typically over a serial port.
+     * See <a href="http://en.wikipedia.org/wiki/NMEA_0183">NMEA 0183</a> for more details.
+     * You can implement this interface and call {@link LocationManager#addNmeaListener}
+     * to receive NMEA data from the GPS engine.
+     */
+    public interface NmeaListener {
+        void onNmeaReceived(long timestamp, String nmea);
+    }
+
     GpsStatus() {
         for (int i = 0; i < mSatellites.length; i++) {
             mSatellites[i] = new GpsSatellite(i + 1);

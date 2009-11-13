@@ -20,6 +20,7 @@
 #include "utils/Log.h"
 
 #include <media/mediaplayer.h>
+#include <media/MediaPlayerInterface.h>
 #include <stdio.h>
 #include <assert.h>
 #include <limits.h>
@@ -30,6 +31,8 @@
 #include "JNIHelp.h"
 #include "android_runtime/AndroidRuntime.h"
 #include "utils/Errors.h"  // for status_t
+#include "android_util_Binder.h"
+#include <binder/Parcel.h>
 
 
 // ----------------------------------------------------------------------------
@@ -98,10 +101,9 @@ void JNIMediaPlayerListener::notify(int msg, int ext1, int ext2)
 
 // ----------------------------------------------------------------------------
 
-static sp<Surface> get_surface(JNIEnv* env, jobject clazz)
+static Surface* get_surface(JNIEnv* env, jobject clazz)
 {
-    Surface* const p = (Surface*)env->GetIntField(clazz, fields.surface_native);
-    return sp<Surface>(p);
+    return (Surface*)env->GetIntField(clazz, fields.surface_native);
 }
 
 static sp<MediaPlayer> getMediaPlayer(JNIEnv* env, jobject thiz)
@@ -202,7 +204,7 @@ static void setVideoSurface(const sp<MediaPlayer>& mp, JNIEnv *env, jobject thiz
 {
     jobject surface = env->GetObjectField(thiz, fields.surface);
     if (surface != NULL) {
-        const sp<Surface>& native_surface = get_surface(env, surface);
+        const sp<Surface> native_surface = get_surface(env, surface);
         LOGV("prepare: surface=%p (id=%d)",
              native_surface.get(), native_surface->ID());
         mp->setVideoSurface(native_surface);
@@ -242,7 +244,7 @@ android_media_MediaPlayer_prepareAsync(JNIEnv *env, jobject thiz)
     }
     jobject surface = env->GetObjectField(thiz, fields.surface);
     if (surface != NULL) {
-        const sp<Surface>& native_surface = get_surface(env, surface);
+        const sp<Surface> native_surface = get_surface(env, surface);
         LOGV("prepareAsync: surface=%p (id=%d)",
              native_surface.get(), native_surface->ID());
         mp->setVideoSurface(native_surface);
@@ -442,6 +444,119 @@ android_media_MediaPlayer_getFrameAt(JNIEnv *env, jobject thiz, jint msec)
     return NULL;
 }
 
+
+// Sends the request and reply parcels to the media player via the
+// binder interface.
+static jint
+android_media_MediaPlayer_invoke(JNIEnv *env, jobject thiz,
+                                 jobject java_request, jobject java_reply)
+{
+    sp<MediaPlayer> media_player = getMediaPlayer(env, thiz);
+    if (media_player == NULL ) {
+        jniThrowException(env, "java/lang/IllegalStateException", NULL);
+        return UNKNOWN_ERROR;
+    }
+
+
+    Parcel *request = parcelForJavaObject(env, java_request);
+    Parcel *reply = parcelForJavaObject(env, java_reply);
+
+    // Don't use process_media_player_call which use the async loop to
+    // report errors, instead returns the status.
+    return media_player->invoke(*request, reply);
+}
+
+// Sends the new filter to the client.
+static jint
+android_media_MediaPlayer_setMetadataFilter(JNIEnv *env, jobject thiz, jobject request)
+{
+    sp<MediaPlayer> media_player = getMediaPlayer(env, thiz);
+    if (media_player == NULL ) {
+        jniThrowException(env, "java/lang/IllegalStateException", NULL);
+        return UNKNOWN_ERROR;
+    }
+
+    Parcel *filter = parcelForJavaObject(env, request);
+
+    if (filter == NULL ) {
+        jniThrowException(env, "java/lang/RuntimeException", "Filter is null");
+        return UNKNOWN_ERROR;
+    }
+
+    return media_player->setMetadataFilter(*filter);
+}
+
+static jboolean
+android_media_MediaPlayer_getMetadata(JNIEnv *env, jobject thiz, jboolean update_only,
+                                      jboolean apply_filter, jobject reply)
+{
+    sp<MediaPlayer> media_player = getMediaPlayer(env, thiz);
+    if (media_player == NULL ) {
+        jniThrowException(env, "java/lang/IllegalStateException", NULL);
+        return false;
+    }
+
+    Parcel *metadata = parcelForJavaObject(env, reply);
+
+    if (metadata == NULL ) {
+        jniThrowException(env, "java/lang/RuntimeException", "Reply parcel is null");
+        return false;
+    }
+
+    metadata->freeData();
+    // On return metadata is positioned at the beginning of the
+    // metadata. Note however that the parcel actually starts with the
+    // return code so you should not rewind the parcel using
+    // setDataPosition(0).
+    return media_player->getMetadata(update_only, apply_filter, metadata) == OK;
+}
+
+// This function gets some field IDs, which in turn causes class initialization.
+// It is called from a static block in MediaPlayer, which won't run until the
+// first time an instance of this class is used.
+static void
+android_media_MediaPlayer_native_init(JNIEnv *env)
+{
+    jclass clazz;
+
+    clazz = env->FindClass("android/media/MediaPlayer");
+    if (clazz == NULL) {
+        jniThrowException(env, "java/lang/RuntimeException", "Can't find android/media/MediaPlayer");
+        return;
+    }
+
+    fields.context = env->GetFieldID(clazz, "mNativeContext", "I");
+    if (fields.context == NULL) {
+        jniThrowException(env, "java/lang/RuntimeException", "Can't find MediaPlayer.mNativeContext");
+        return;
+    }
+
+    fields.post_event = env->GetStaticMethodID(clazz, "postEventFromNative",
+                                               "(Ljava/lang/Object;IIILjava/lang/Object;)V");
+    if (fields.post_event == NULL) {
+        jniThrowException(env, "java/lang/RuntimeException", "Can't find MediaPlayer.postEventFromNative");
+        return;
+    }
+
+    fields.surface = env->GetFieldID(clazz, "mSurface", "Landroid/view/Surface;");
+    if (fields.surface == NULL) {
+        jniThrowException(env, "java/lang/RuntimeException", "Can't find MediaPlayer.mSurface");
+        return;
+    }
+
+    jclass surface = env->FindClass("android/view/Surface");
+    if (surface == NULL) {
+        jniThrowException(env, "java/lang/RuntimeException", "Can't find android/view/Surface");
+        return;
+    }
+
+    fields.surface_native = env->GetFieldID(surface, "mSurface", "I");
+    if (fields.surface_native == NULL) {
+        jniThrowException(env, "java/lang/RuntimeException", "Can't find Surface.mSurface");
+        return;
+    }
+}
+
 static void
 android_media_MediaPlayer_native_setup(JNIEnv *env, jobject thiz, jobject weak_this)
 {
@@ -479,6 +594,18 @@ android_media_MediaPlayer_native_finalize(JNIEnv *env, jobject thiz)
     android_media_MediaPlayer_release(env, thiz);
 }
 
+static jint
+android_media_MediaPlayer_snoop(JNIEnv* env, jobject thiz, jobject data, jint kind) {
+    jshort* ar = (jshort*)env->GetPrimitiveArrayCritical((jarray)data, 0);
+    jsize len = env->GetArrayLength((jarray)data);
+    int ret = 0;
+    if (ar) {
+        ret = MediaPlayer::snoop(ar, len, kind);
+        env->ReleasePrimitiveArrayCritical((jarray)data, ar, 0);
+    }
+    return ret;
+}
+
 // ----------------------------------------------------------------------------
 
 static JNINativeMethod gMethods[] = {
@@ -503,53 +630,20 @@ static JNINativeMethod gMethods[] = {
     {"isLooping",           "()Z",                              (void *)android_media_MediaPlayer_isLooping},
     {"setVolume",           "(FF)V",                            (void *)android_media_MediaPlayer_setVolume},
     {"getFrameAt",          "(I)Landroid/graphics/Bitmap;",     (void *)android_media_MediaPlayer_getFrameAt},
+    {"native_invoke",       "(Landroid/os/Parcel;Landroid/os/Parcel;)I",(void *)android_media_MediaPlayer_invoke},
+    {"native_setMetadataFilter", "(Landroid/os/Parcel;)I",      (void *)android_media_MediaPlayer_setMetadataFilter},
+    {"native_getMetadata", "(ZZLandroid/os/Parcel;)Z",          (void *)android_media_MediaPlayer_getMetadata},
+    {"native_init",         "()V",                              (void *)android_media_MediaPlayer_native_init},
     {"native_setup",        "(Ljava/lang/Object;)V",            (void *)android_media_MediaPlayer_native_setup},
     {"native_finalize",     "()V",                              (void *)android_media_MediaPlayer_native_finalize},
+    {"snoop",               "([SI)I",                           (void *)android_media_MediaPlayer_snoop},
 };
 
 static const char* const kClassPathName = "android/media/MediaPlayer";
 
+// This function only registers the native methods
 static int register_android_media_MediaPlayer(JNIEnv *env)
 {
-    jclass clazz;
-
-    clazz = env->FindClass("android/media/MediaPlayer");
-    if (clazz == NULL) {
-        LOGE("Can't find android/media/MediaPlayer");
-        return -1;
-    }
-
-    fields.context = env->GetFieldID(clazz, "mNativeContext", "I");
-    if (fields.context == NULL) {
-        LOGE("Can't find MediaPlayer.mNativeContext");
-        return -1;
-    }
-
-    fields.post_event = env->GetStaticMethodID(clazz, "postEventFromNative",
-                                               "(Ljava/lang/Object;IIILjava/lang/Object;)V");
-    if (fields.post_event == NULL) {
-        LOGE("Can't find MediaPlayer.postEventFromNative");
-        return -1;
-    }
-
-    fields.surface = env->GetFieldID(clazz, "mSurface", "Landroid/view/Surface;");
-    if (fields.surface == NULL) {
-        LOGE("Can't find MediaPlayer.mSurface");
-        return -1;
-    }
-
-    jclass surface = env->FindClass("android/view/Surface");
-    if (surface == NULL) {
-        LOGE("Can't find android/view/Surface");
-        return -1;
-    }
-
-    fields.surface_native = env->GetFieldID(surface, "mSurface", "I");
-    if (fields.surface_native == NULL) {
-        LOGE("Can't find Surface fields");
-        return -1;
-    }
-
     return AndroidRuntime::registerNativeMethods(env,
                 "android/media/MediaPlayer", gMethods, NELEM(gMethods));
 }

@@ -40,6 +40,7 @@ import java.io.FileWriter;
 import java.io.BufferedWriter;
 
 import android.media.MediaMetadataRetriever;
+import com.android.mediaframeworktest.MediaProfileReader;
 
 /**
  * Junit / Instrumentation - performance measurement for media player and 
@@ -47,7 +48,7 @@ import android.media.MediaMetadataRetriever;
  */
 public class MediaPlayerPerformance extends ActivityInstrumentationTestCase<MediaFrameworkTest> {
 
-    private String TAG = "MediaFrameworkPerformance";
+    private String TAG = "MediaPlayerPerformance";
 
     private SQLiteDatabase mDB;
     private SurfaceHolder mSurfaceHolder = null;
@@ -76,9 +77,11 @@ public class MediaPlayerPerformance extends ActivityInstrumentationTestCase<Medi
 
     public void createDB() {
         mDB = SQLiteDatabase.openOrCreateDatabase("/sdcard/perf.db", null);
-        mDB.execSQL("CREATE TABLE perfdata (_id INTEGER PRIMARY KEY," + 
+        mDB.execSQL("CREATE TABLE IF NOT EXISTS perfdata (_id INTEGER PRIMARY KEY," + 
                 "file TEXT," + "setdatatime LONG," + "preparetime LONG," +
                 "playtime LONG" + ");");
+        //clean the table before adding new data
+        mDB.execSQL("DELETE FROM perfdata");
     }
 
     public void audioPlaybackStartupTime(String[] testFile) {
@@ -137,6 +140,10 @@ public class MediaPlayerPerformance extends ActivityInstrumentationTestCase<Medi
         audioPlaybackStartupTime(MediaNames.MP3FILES);
         audioPlaybackStartupTime(MediaNames.AACFILES);
 
+        //close the database after all transactions
+        if (mDB.isOpen()) {
+            mDB.close();
+        }
     }
 
     public void wmametadatautility(String[] testFile) {
@@ -302,6 +309,8 @@ public class MediaPlayerPerformance extends ActivityInstrumentationTestCase<Medi
     }
 
     public boolean validateMemoryResult (int startPid, int startMemory, Writer output) throws Exception {
+        //Wait for 10 seconds to make sure the memory settle.
+        Thread.sleep(10000);
         mEndPid = getMediaserverPid();
         mEndMemory = getMediaserverVsize();
         Log.v(TAG, "End Memory " + mEndMemory);
@@ -378,23 +387,24 @@ public class MediaPlayerPerformance extends ActivityInstrumentationTestCase<Medi
     @LargeTest
     public void testWMVVideoPlaybackMemoryUsage() throws Exception {
         boolean memoryResult = false;
-        mStartPid = getMediaserverPid();
-
-        File wmvMemoryOut = new File(MEDIA_MEMORY_OUTPUT);
-        Writer output = new BufferedWriter(new FileWriter(wmvMemoryOut, true));
-        output.write("WMV video playback only\n");
-        for (int i = 0; i < NUM_STRESS_LOOP; i++) {
-            mediaStressPlayback(MediaNames.VIDEO_WMV);
-            if (i == 0) {
-              mStartMemory = getMediaserverVsize();
-              output.write("Start memory : " + mStartMemory + "\n");
+        if (MediaProfileReader.getWMVEnable()){
+            mStartPid = getMediaserverPid();
+            File wmvMemoryOut = new File(MEDIA_MEMORY_OUTPUT);
+            Writer output = new BufferedWriter(new FileWriter(wmvMemoryOut, true));
+            output.write("WMV video playback only\n");
+            for (int i = 0; i < NUM_STRESS_LOOP; i++) {
+                mediaStressPlayback(MediaNames.VIDEO_WMV);
+                if (i == 0) {
+                    mStartMemory = getMediaserverVsize();
+                    output.write("Start memory : " + mStartMemory + "\n");
+                }
+                getMemoryWriteToLog(output);
             }
-            getMemoryWriteToLog(output);
+            output.write("\n");
+            memoryResult = validateMemoryResult(mStartPid, mStartMemory, output);
+            output.close();
+            assertTrue("wmv playback memory test", memoryResult);
         }
-        output.write("\n");
-        memoryResult = validateMemoryResult(mStartPid, mStartMemory, output);
-        output.close();
-        assertTrue("wmv playback memory test", memoryResult);
     }
 
     // Test case 4: Capture the memory usage after every 20 video only recorded
