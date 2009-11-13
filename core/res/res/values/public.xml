@@ -1194,4 +1194,15 @@
   <public type="drawable" name="screen_background_dark_transparent" />
   <public type="drawable" name="screen_background_light_transparent" />
   <public type="drawable" name="stat_notify_sdcard_prepare" />
+  
+  <public type="attr" name="quickContactBadgeStyleWindowSmall" />
+  <public type="attr" name="quickContactBadgeStyleWindowMedium" />
+  <public type="attr" name="quickContactBadgeStyleWindowLarge" />
+  <public type="attr" name="quickContactBadgeStyleSmallWindowSmall" />
+  <public type="attr" name="quickContactBadgeStyleSmallWindowMedium" />
+  <public type="attr" name="quickContactBadgeStyleSmallWindowLarge" />
+
+  <public type="attr" name="wallpaperAuthor" />
+  <public type="attr" name="wallpaperDescription" />
+  
 </resources>

@@ -798,7 +798,7 @@ const unsigned char ToneGenerator::sToneMappingTable[NUM_REGIONS-1][NUM_SUP_TONE
 //        none
 //
 ////////////////////////////////////////////////////////////////////////////////
-ToneGenerator::ToneGenerator(int streamType, float volume) {
+ToneGenerator::ToneGenerator(int streamType, float volume, bool threadCanCallJava) {
 
     LOGV("ToneGenerator constructor: streamType=%d, volume=%f\n", streamType, volume);
 
@@ -808,6 +808,7 @@ ToneGenerator::ToneGenerator(int streamType, float volume) {
         LOGE("Unable to marshal AudioFlinger");
         return;
     }
+    mThreadCanCallJava = threadCanCallJava;
     mStreamType = streamType;
     mVolume = volume;
     mpAudioTrack = 0;
@@ -903,10 +904,11 @@ bool ToneGenerator::startTone(int toneType, int durationMs) {
 
     if (mState == TONE_STOPPED) {
         LOGV("Start waiting for previous tone to stop");
-        lStatus = mWaitCbkCond.waitRelative(mLock, seconds(1));
+        lStatus = mWaitCbkCond.waitRelative(mLock, seconds(3));
         if (lStatus != NO_ERROR) {
             LOGE("--- start wait for stop timed out, status %d", lStatus);
             mState = TONE_IDLE;
+            mLock.unlock();
             return lResult;
         }
     }
@@ -921,7 +923,7 @@ bool ToneGenerator::startTone(int toneType, int durationMs) {
             mLock.lock();
             if (mState == TONE_STARTING) {
                 LOGV("Wait for start callback");
-                lStatus = mWaitCbkCond.waitRelative(mLock, seconds(1));
+                lStatus = mWaitCbkCond.waitRelative(mLock, seconds(3));
                 if (lStatus != NO_ERROR) {
                     LOGE("--- Immediate start timed out, status %d", lStatus);
                     mState = TONE_IDLE;
@@ -934,7 +936,7 @@ bool ToneGenerator::startTone(int toneType, int durationMs) {
     } else {
         LOGV("Delayed start\n");
         mState = TONE_RESTARTING;
-        lStatus = mWaitCbkCond.waitRelative(mLock, seconds(1));
+        lStatus = mWaitCbkCond.waitRelative(mLock, seconds(3));
         if (lStatus == NO_ERROR) {
             if (mState != TONE_IDLE) {
                 lResult = true;
@@ -973,7 +975,7 @@ void ToneGenerator::stopTone() {
     if (mState == TONE_PLAYING || mState == TONE_STARTING || mState == TONE_RESTARTING) {
         mState = TONE_STOPPING;
         LOGV("waiting cond");
-        status_t lStatus = mWaitCbkCond.waitRelative(mLock, seconds(1));
+        status_t lStatus = mWaitCbkCond.waitRelative(mLock, seconds(3));
         if (lStatus == NO_ERROR) {
             LOGV("track stop complete, time %d", (unsigned int)(systemTime()/1000000));
         } else {
@@ -1014,14 +1016,24 @@ bool ToneGenerator::initAudioTrack() {
     }
 
    // Open audio track in mono, PCM 16bit, default sampling rate, default buffer size
-    mpAudioTrack
-            = new AudioTrack(mStreamType, 0, AudioSystem::PCM_16_BIT, AudioSystem::CHANNEL_OUT_MONO, 0, 0, audioCallback, this, 0);
-
+    mpAudioTrack = new AudioTrack();
     if (mpAudioTrack == 0) {
         LOGE("AudioTrack allocation failed");
         goto initAudioTrack_exit;
     }
     LOGV("Create Track: %p\n", mpAudioTrack);
+
+    mpAudioTrack->set(mStreamType,
+                      0,
+                      AudioSystem::PCM_16_BIT,
+                      AudioSystem::CHANNEL_OUT_MONO,
+                      0,
+                      0,
+                      audioCallback,
+                      this,
+                      0,
+                      0,
+                      mThreadCanCallJava);
 
     if (mpAudioTrack->initCheck() != NO_ERROR) {
         LOGE("AudioTrack->initCheck failed");
@@ -1086,6 +1098,7 @@ void ToneGenerator::audioCallback(int event, void* user, void *info) {
         bool lSignal = false;
 
         lpToneGen->mLock.lock();
+
 
         // Update pcm frame count and end time (current time at the end of this process)
         lpToneGen->mTotalSmp += lReqSmp;

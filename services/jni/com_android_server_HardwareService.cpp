@@ -100,20 +100,8 @@ static void finalize_native(JNIEnv *env, jobject clazz, int ptr)
     free(devices);
 }
 
-static void setAutoBrightness_native(JNIEnv *env, jobject clazz, int ptr,
-        jboolean automatic)
-{
-    Devices* devices = (Devices*)ptr;
-
-    if (devices->lights[LIGHT_INDEX_BACKLIGHT] == NULL) {
-        return;
-    }
-
-    devices->lights[LIGHT_INDEX_BACKLIGHT]->set_als_mode(automatic ? 0 : 1);
-}
-
 static void setLight_native(JNIEnv *env, jobject clazz, int ptr,
-        int light, int colorARGB, int flashMode, int onMS, int offMS)
+        int light, int colorARGB, int flashMode, int onMS, int offMS, int brightnessMode)
 {
     Devices* devices = (Devices*)ptr;
     light_state_t state;
@@ -127,6 +115,7 @@ static void setLight_native(JNIEnv *env, jobject clazz, int ptr,
     state.flashMode = flashMode;
     state.flashOnMS = onMS;
     state.flashOffMS = offMS;
+    state.brightnessMode = brightnessMode;
 
     devices->lights[light]->set_light(devices->lights[light], &state);
 }
@@ -146,8 +135,7 @@ static void vibratorOff(JNIEnv *env, jobject clazz)
 static JNINativeMethod method_table[] = {
     { "init_native", "()I", (void*)init_native },
     { "finalize_native", "(I)V", (void*)finalize_native },
-    { "setAutoBrightness_native", "(IZ)V", (void*)setAutoBrightness_native },
-    { "setLight_native", "(IIIIII)V", (void*)setLight_native },
+    { "setLight_native", "(IIIIIII)V", (void*)setLight_native },
     { "vibratorOn", "(J)V", (void*)vibratorOn },
     { "vibratorOff", "()V", (void*)vibratorOff }
 };

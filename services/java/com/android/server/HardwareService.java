@@ -52,14 +52,23 @@ public class HardwareService extends IHardwareService.Stub {
 
     static final int LIGHT_FLASH_NONE = 0;
     static final int LIGHT_FLASH_TIMED = 1;
+    static final int LIGHT_FLASH_HARDWARE = 2;
+
+    /**
+     * Light brightness is managed by a user setting.
+     */
+    static final int BRIGHTNESS_MODE_USER = 0;
+
+    /**
+     * Light brightness is managed by a light sensor.
+     */
+    static final int BRIGHTNESS_MODE_SENSOR = 1;
 
     private final LinkedList<Vibration> mVibrations;
     private Vibration mCurrentVibration;
 
     private boolean mAttentionLightOn;
     private boolean mPulsing;
-
-    private boolean mAutoBrightnessAvailable;
 
     private class Vibration implements IBinder.DeathRecipient {
         private final IBinder mToken;
@@ -127,13 +136,10 @@ public class HardwareService extends IHardwareService.Stub {
         mVibrations = new LinkedList<Vibration>();
 
         mBatteryStats = BatteryStatsService.getService();
-        
+
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_SCREEN_OFF);
         context.registerReceiver(mIntentReceiver, filter);
-
-        mAutoBrightnessAvailable = context.getResources().getBoolean(
-                com.android.internal.R.bool.config_automatic_brightness_available);
     }
 
     protected void finalize() throws Throwable {
@@ -244,15 +250,15 @@ public class HardwareService extends IHardwareService.Stub {
             Binder.restoreCallingIdentity(identity);
         }
     }
-    
+
     public boolean getFlashlightEnabled() {
         return Hardware.getFlashlightEnabled();
     }
-    
+
     public void setFlashlightEnabled(boolean on) {
-        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.FLASHLIGHT) 
+        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.FLASHLIGHT)
                 != PackageManager.PERMISSION_GRANTED &&
-                mContext.checkCallingOrSelfPermission(android.Manifest.permission.HARDWARE_TEST) 
+                mContext.checkCallingOrSelfPermission(android.Manifest.permission.HARDWARE_TEST)
                 != PackageManager.PERMISSION_GRANTED) {
             throw new SecurityException("Requires FLASHLIGHT or HARDWARE_TEST permission");
         }
@@ -260,9 +266,9 @@ public class HardwareService extends IHardwareService.Stub {
     }
 
     public void enableCameraFlash(int milliseconds) {
-        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.CAMERA) 
+        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.CAMERA)
                 != PackageManager.PERMISSION_GRANTED &&
-                mContext.checkCallingOrSelfPermission(android.Manifest.permission.HARDWARE_TEST) 
+                mContext.checkCallingOrSelfPermission(android.Manifest.permission.HARDWARE_TEST)
                 != PackageManager.PERMISSION_GRANTED) {
             throw new SecurityException("Requires CAMERA or HARDWARE_TEST permission");
         }
@@ -270,36 +276,30 @@ public class HardwareService extends IHardwareService.Stub {
     }
 
     void setLightOff_UNCHECKED(int light) {
-        setLight_native(mNativePointer, light, 0, LIGHT_FLASH_NONE, 0, 0);
+        setLight_native(mNativePointer, light, 0, LIGHT_FLASH_NONE, 0, 0, 0);
     }
 
-    void setLightBrightness_UNCHECKED(int light, int brightness) {
+    void setLightBrightness_UNCHECKED(int light, int brightness, int brightnessMode) {
         int b = brightness & 0x000000ff;
         b = 0xff000000 | (b << 16) | (b << 8) | b;
-        setLight_native(mNativePointer, light, b, LIGHT_FLASH_NONE, 0, 0);
+        setLight_native(mNativePointer, light, b, LIGHT_FLASH_NONE, 0, 0, brightnessMode);
     }
 
     void setLightColor_UNCHECKED(int light, int color) {
-        setLight_native(mNativePointer, light, color, LIGHT_FLASH_NONE, 0, 0);
+        setLight_native(mNativePointer, light, color, LIGHT_FLASH_NONE, 0, 0, 0);
     }
 
     void setLightFlashing_UNCHECKED(int light, int color, int mode, int onMS, int offMS) {
-        setLight_native(mNativePointer, light, color, mode, onMS, offMS);
+        setLight_native(mNativePointer, light, color, mode, onMS, offMS, 0);
     }
 
-    void setAutoBrightness_UNCHECKED(boolean on) {
-        if (mAutoBrightnessAvailable) {
-            setAutoBrightness_native(mNativePointer, on);
-        }
-    }
-
-    public void setAttentionLight(boolean on) {
+    public void setAttentionLight(boolean on, int color) {
         // Not worthy of a permission.  We shouldn't have a flashlight permission.
         synchronized (this) {
             mAttentionLightOn = on;
             mPulsing = false;
-            setLight_native(mNativePointer, LIGHT_ID_ATTENTION, on ? 0xffffffff : 0,
-                    LIGHT_FLASH_NONE, 0, 0);
+            setLight_native(mNativePointer, LIGHT_ID_ATTENTION, color,
+                    LIGHT_FLASH_HARDWARE, on ? 3 : 0, 0, 0);
         }
     }
 
@@ -313,8 +313,8 @@ public class HardwareService extends IHardwareService.Stub {
             }
             if (!mAttentionLightOn && !mPulsing) {
                 mPulsing = true;
-                setLight_native(mNativePointer, LIGHT_ID_ATTENTION, 0xff101010,
-                        LIGHT_FLASH_NONE, 0, 0);
+                setLight_native(mNativePointer, LIGHT_ID_ATTENTION, 0x00ffffff,
+                        LIGHT_FLASH_HARDWARE, 7, 0, 0);
                 mH.sendMessageDelayed(Message.obtain(mH, 1), 3000);
             }
         }
@@ -331,7 +331,7 @@ public class HardwareService extends IHardwareService.Stub {
                     mPulsing = false;
                     setLight_native(mNativePointer, LIGHT_ID_ATTENTION,
                             mAttentionLightOn ? 0xffffffff : 0,
-                            LIGHT_FLASH_NONE, 0, 0);
+                            LIGHT_FLASH_NONE, 0, 0, 0);
                 }
             }
         }
@@ -402,7 +402,7 @@ public class HardwareService extends IHardwareService.Stub {
     private class VibrateThread extends Thread {
         final Vibration mVibration;
         boolean mDone;
-    
+
         VibrateThread(Vibration vib) {
             mVibration = vib;
             mWakeLock.acquire();
@@ -436,7 +436,7 @@ public class HardwareService extends IHardwareService.Stub {
                 long duration = 0;
 
                 while (!mDone) {
-                    // add off-time duration to any accumulated on-time duration 
+                    // add off-time duration to any accumulated on-time duration
                     if (index < len) {
                         duration += pattern[index++];
                     }
@@ -489,19 +489,18 @@ public class HardwareService extends IHardwareService.Stub {
             }
         }
     };
-    
+
     private static native int init_native();
     private static native void finalize_native(int ptr);
 
-    private static native void setAutoBrightness_native(int ptr, boolean automatic);
     private static native void setLight_native(int ptr, int light, int color, int mode,
-            int onMS, int offMS);
+            int onMS, int offMS, int brightnessMode);
 
     private final Context mContext;
     private final PowerManager.WakeLock mWakeLock;
 
     private final IBatteryStats mBatteryStats;
-    
+
     volatile VibrateThread mThread;
 
     private int mNativePointer;

@@ -485,7 +485,8 @@ public final class ActivityThread {
             return mResources;
         }
 
-        public Application makeApplication(boolean forceDefaultAppClass) {
+        public Application makeApplication(boolean forceDefaultAppClass,
+                Instrumentation instrumentation) {
             if (mApplication != null) {
                 return mApplication;
             }
@@ -512,7 +513,21 @@ public final class ActivityThread {
                 }
             }
             mActivityThread.mAllApplications.add(app);
-            return mApplication = app;
+            mApplication = app;
+            
+            if (instrumentation != null) {
+                try {
+                    instrumentation.callApplicationOnCreate(app);
+                } catch (Exception e) {
+                    if (!instrumentation.onException(app, e)) {
+                        throw new RuntimeException(
+                            "Unable to create application " + app.getClass().getName()
+                            + ": " + e.toString(), e);
+                    }
+                }
+            }
+            
+            return app;
         }
 
         public void removeContextRegistrations(Context context,
@@ -1447,7 +1462,6 @@ public final class ActivityThread {
                 Bundle instrumentationArgs, IInstrumentationWatcher instrumentationWatcher,
                 int debugMode, boolean isRestrictedBackupMode, Configuration config,
                 Map<String, IBinder> services) {
-            Process.setArgV0(processName);
 
             if (services != null) {
                 // Setup the service cache in the ServiceManager
@@ -2379,7 +2393,7 @@ public final class ActivityThread {
         }
 
         try {
-            Application app = r.packageInfo.makeApplication(false);
+            Application app = r.packageInfo.makeApplication(false, mInstrumentation);
 
             if (localLOGV) Log.v(TAG, "Performing launch of " + r);
             if (localLOGV) Log.v(
@@ -2577,7 +2591,7 @@ public final class ActivityThread {
         }
 
         try {
-            Application app = packageInfo.makeApplication(false);
+            Application app = packageInfo.makeApplication(false, mInstrumentation);
 
             if (localLOGV) Log.v(
                 TAG, "Performing receive of " + data.intent
@@ -2731,7 +2745,7 @@ public final class ActivityThread {
             ApplicationContext context = new ApplicationContext();
             context.init(packageInfo, null, this);
 
-            Application app = packageInfo.makeApplication(false);
+            Application app = packageInfo.makeApplication(false, mInstrumentation);
             context.setOuterContext(service);
             service.attach(context, this, data.info.name, data.token, app,
                     ActivityManagerNative.getDefault());
@@ -3818,6 +3832,7 @@ public final class ActivityThread {
         //Process.setUid(data.appInfo.uid);
 
         // send up app name; do this *before* waiting for debugger
+        Process.setArgV0(data.processName);
         android.ddm.DdmHandleAppName.setAppName(data.processName);
 
         /*
@@ -3940,7 +3955,7 @@ public final class ActivityThread {
 
         // If the app is being launched for full backup or restore, bring it up in
         // a restricted environment with the base application class.
-        Application app = data.info.makeApplication(data.restrictedBackupMode);
+        Application app = data.info.makeApplication(data.restrictedBackupMode, null);
         mInitialApplication = app;
 
         List<ProviderInfo> providers = data.providers;

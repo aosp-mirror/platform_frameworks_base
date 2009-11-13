@@ -43,6 +43,12 @@
 
 namespace android {
 
+static const char* kDeadlockedString = "AudioPolicyService may be deadlocked\n";
+static const char* kCmdDeadlockedString = "AudioPolicyService command thread may be deadlocked\n";
+
+static const int kDumpLockRetries = 50;
+static const int kDumpLockSleep = 20000;
+
 static bool checkPermission() {
 #ifndef HAVE_ANDROID_OS
     return true;
@@ -335,17 +341,65 @@ void AudioPolicyService::binderDied(const wp<IBinder>& who) {
     LOGW("binderDied() %p, tid %d, calling tid %d", who.unsafe_get(), gettid(), IPCThreadState::self()->getCallingPid());
 }
 
+static bool tryLock(Mutex& mutex)
+{
+    bool locked = false;
+    for (int i = 0; i < kDumpLockRetries; ++i) {
+        if (mutex.tryLock() == NO_ERROR) {
+            locked = true;
+            break;
+        }
+        usleep(kDumpLockSleep);
+    }
+    return locked;
+}
+
+status_t AudioPolicyService::dumpInternals(int fd)
+{
+    const size_t SIZE = 256;
+    char buffer[SIZE];
+    String8 result;
+
+    snprintf(buffer, SIZE, "PolicyManager Interface: %p\n", mpPolicyManager);
+    result.append(buffer);
+    snprintf(buffer, SIZE, "Command Thread: %p\n", mAudioCommandThread.get());
+    result.append(buffer);
+    snprintf(buffer, SIZE, "Tones Thread: %p\n", mTonePlaybackThread.get());
+    result.append(buffer);
+
+    write(fd, result.string(), result.size());
+    return NO_ERROR;
+}
+
 status_t AudioPolicyService::dump(int fd, const Vector<String16>& args)
 {
     if (checkCallingPermission(String16("android.permission.DUMP")) == false) {
-        dumpPermissionDenial(fd, args);
+        dumpPermissionDenial(fd);
     } else {
+        bool locked = tryLock(mLock);
+        if (!locked) {
+            String8 result(kDeadlockedString);
+            write(fd, result.string(), result.size());
+        }
 
+        dumpInternals(fd);
+        if (mAudioCommandThread != NULL) {
+            mAudioCommandThread->dump(fd);
+        }
+        if (mTonePlaybackThread != NULL) {
+            mTonePlaybackThread->dump(fd);
+        }
+
+        if (mpPolicyManager) {
+            mpPolicyManager->dump(fd);
+        }
+
+        if (locked) mLock.unlock();
     }
     return NO_ERROR;
 }
 
-status_t AudioPolicyService::dumpPermissionDenial(int fd, const Vector<String16>& args)
+status_t AudioPolicyService::dumpPermissionDenial(int fd)
 {
     const size_t SIZE = 256;
     char buffer[SIZE];
@@ -495,6 +549,10 @@ status_t AudioPolicyService::stopTone()
     return NO_ERROR;
 }
 
+status_t AudioPolicyService::setVoiceVolume(float volume, int delayMs)
+{
+    return mAudioCommandThread->voiceVolumeCommand(volume, delayMs);
+}
 
 // -----------  AudioPolicyService::AudioCommandThread implementation ----------
 
@@ -534,6 +592,8 @@ bool AudioPolicyService::AudioCommandThread::threadLoop()
             if (mAudioCommands[0]->mTime <= curTime) {
                 AudioCommand *command = mAudioCommands[0];
                 mAudioCommands.removeAt(0);
+                mLastCommand = *command;
+
                 switch (command->mCommand) {
                 case START_TONE: {
                     mLock.unlock();
@@ -577,6 +637,16 @@ bool AudioPolicyService::AudioCommandThread::threadLoop()
                      }
                      delete data;
                      }break;
+                case SET_VOICE_VOLUME: {
+                    VoiceVolumeData *data = (VoiceVolumeData *)command->mParam;
+                    LOGV("AudioCommandThread() processing set voice volume volume %f", data->mVolume);
+                    command->mStatus = AudioSystem::setVoiceVolume(data->mVolume);
+                    if (command->mWaitStatus) {
+                        command->mCond.signal();
+                        mWaitWorkCV.wait(mLock);
+                    }
+                    delete data;
+                    }break;
                 default:
                     LOGW("AudioCommandThread() unknown command %d", command->mCommand);
                 }
@@ -595,9 +665,42 @@ bool AudioPolicyService::AudioCommandThread::threadLoop()
     return false;
 }
 
+status_t AudioPolicyService::AudioCommandThread::dump(int fd)
+{
+    const size_t SIZE = 256;
+    char buffer[SIZE];
+    String8 result;
+
+    snprintf(buffer, SIZE, "AudioCommandThread %p Dump\n", this);
+    result.append(buffer);
+    write(fd, result.string(), result.size());
+
+    bool locked = tryLock(mLock);
+    if (!locked) {
+        String8 result2(kCmdDeadlockedString);
+        write(fd, result2.string(), result2.size());
+    }
+
+    snprintf(buffer, SIZE, "- Commands:\n");
+    result = String8(buffer);
+    result.append("   Command Time        Wait pParam\n");
+    for (int i = 0; i < (int)mAudioCommands.size(); i++) {
+        mAudioCommands[i]->dump(buffer, SIZE);
+        result.append(buffer);
+    }
+    result.append("  Last Command\n");
+    mLastCommand.dump(buffer, SIZE);
+    result.append(buffer);
+
+    write(fd, result.string(), result.size());
+
+    if (locked) mLock.unlock();
+
+    return NO_ERROR;
+}
+
 void AudioPolicyService::AudioCommandThread::startToneCommand(int type, int stream)
 {
-    Mutex::Autolock _l(mLock);
     AudioCommand *command = new AudioCommand();
     command->mCommand = START_TONE;
     ToneData *data = new ToneData();
@@ -605,6 +708,7 @@ void AudioPolicyService::AudioCommandThread::startToneCommand(int type, int stre
     data->mStream = stream;
     command->mParam = (void *)data;
     command->mWaitStatus = false;
+    Mutex::Autolock _l(mLock);
     insertCommand_l(command);
     LOGV("AudioCommandThread() adding tone start type %d, stream %d", type, stream);
     mWaitWorkCV.signal();
@@ -612,11 +716,11 @@ void AudioPolicyService::AudioCommandThread::startToneCommand(int type, int stre
 
 void AudioPolicyService::AudioCommandThread::stopToneCommand()
 {
-    Mutex::Autolock _l(mLock);
     AudioCommand *command = new AudioCommand();
     command->mCommand = STOP_TONE;
     command->mParam = NULL;
     command->mWaitStatus = false;
+    Mutex::Autolock _l(mLock);
     insertCommand_l(command);
     LOGV("AudioCommandThread() adding tone stop");
     mWaitWorkCV.signal();
@@ -626,7 +730,6 @@ status_t AudioPolicyService::AudioCommandThread::volumeCommand(int stream, float
 {
     status_t status = NO_ERROR;
 
-    Mutex::Autolock _l(mLock);
     AudioCommand *command = new AudioCommand();
     command->mCommand = SET_VOLUME;
     VolumeData *data = new VolumeData();
@@ -639,6 +742,7 @@ status_t AudioPolicyService::AudioCommandThread::volumeCommand(int stream, float
     } else {
         command->mWaitStatus = false;
     }
+    Mutex::Autolock _l(mLock);
     insertCommand_l(command, delayMs);
     LOGV("AudioCommandThread() adding set volume stream %d, volume %f, output %d", stream, volume, output);
     mWaitWorkCV.signal();
@@ -654,7 +758,6 @@ status_t AudioPolicyService::AudioCommandThread::parametersCommand(int ioHandle,
 {
     status_t status = NO_ERROR;
 
-    Mutex::Autolock _l(mLock);
     AudioCommand *command = new AudioCommand();
     command->mCommand = SET_PARAMETERS;
     ParametersData *data = new ParametersData();
@@ -666,8 +769,35 @@ status_t AudioPolicyService::AudioCommandThread::parametersCommand(int ioHandle,
     } else {
         command->mWaitStatus = false;
     }
+    Mutex::Autolock _l(mLock);
     insertCommand_l(command, delayMs);
     LOGV("AudioCommandThread() adding set parameter string %s, io %d ,delay %d", keyValuePairs.string(), ioHandle, delayMs);
+    mWaitWorkCV.signal();
+    if (command->mWaitStatus) {
+        command->mCond.wait(mLock);
+        status =  command->mStatus;
+        mWaitWorkCV.signal();
+    }
+    return status;
+}
+
+status_t AudioPolicyService::AudioCommandThread::voiceVolumeCommand(float volume, int delayMs)
+{
+    status_t status = NO_ERROR;
+
+    AudioCommand *command = new AudioCommand();
+    command->mCommand = SET_VOICE_VOLUME;
+    VoiceVolumeData *data = new VoiceVolumeData();
+    data->mVolume = volume;
+    command->mParam = data;
+    if (delayMs == 0) {
+        command->mWaitStatus = true;
+    } else {
+        command->mWaitStatus = false;
+    }
+    Mutex::Autolock _l(mLock);
+    insertCommand_l(command, delayMs);
+    LOGV("AudioCommandThread() adding set voice volume volume %f", volume);
     mWaitWorkCV.signal();
     if (command->mWaitStatus) {
         command->mCond.wait(mLock);
@@ -766,6 +896,16 @@ void AudioPolicyService::AudioCommandThread::exit()
         mWaitWorkCV.signal();
     }
     requestExitAndWait();
+}
+
+void AudioPolicyService::AudioCommandThread::AudioCommand::dump(char* buffer, size_t size)
+{
+    snprintf(buffer, size, "   %02d      %06d.%03d  %01u    %p\n",
+            mCommand,
+            (int)ns2s(mTime),
+            (int)ns2ms(mTime)%1000,
+            mWaitStatus,
+            mParam);
 }
 
 }; // namespace android

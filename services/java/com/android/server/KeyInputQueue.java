@@ -56,7 +56,7 @@ public abstract class KeyInputQueue {
      * Turn on some hacks we have to improve the touch interaction with a
      * certain device whose screen currently is not all that good.
      */
-    static final boolean BAD_TOUCH_HACK = true;
+    static boolean BAD_TOUCH_HACK = false;
     
     private static final String EXCLUDED_DEVICES_PATH = "etc/excluded-input-devices.xml";
 
@@ -282,6 +282,9 @@ public abstract class KeyInputQueue {
             lt = new LatencyTimer(100, 1000);
         }
 
+        BAD_TOUCH_HACK = context.getResources().getBoolean(
+                com.android.internal.R.bool.config_filterTouchEvents);
+        
         mHapticFeedbackCallback = hapticFeedbackCallback;
         
         readExcludedDevices();
@@ -689,7 +692,8 @@ public abstract class KeyInputQueue {
                                             ev, curTime, curTimeNano);
                                     
                                     if (doMotion && ms.mNextNumPointers > 0
-                                            && ms.mLastNumPointers == 0) {
+                                            && (ms.mLastNumPointers == 0
+                                                    || ms.mSkipLastPointers)) {
                                         doMotion = !generateVirtualKeyDown(di,
                                                 ev, curTime, curTimeNano);
                                     }
@@ -703,7 +707,7 @@ public abstract class KeyInputQueue {
                                             me = ms.generateAbsMotion(di, curTime,
                                                     curTimeNano, mDisplay,
                                                     mOrientation, mGlobalMetaState);
-                                            if (false) Log.v(TAG, "Absolute: x="
+                                            if (DEBUG_POINTERS) Log.v(TAG, "Absolute: x="
                                                     + di.mAbs.mNextData[MotionEvent.SAMPLE_X]
                                                     + " y="
                                                     + di.mAbs.mNextData[MotionEvent.SAMPLE_Y]
@@ -729,6 +733,7 @@ public abstract class KeyInputQueue {
                                                 ms.mLastData, 0,
                                                 num * MotionEvent.NUM_SAMPLE_DATA);
                                         ms.mLastNumPointers = num;
+                                        ms.mSkipLastPointers = true;
                                     }
                                     
                                     ms.finish();

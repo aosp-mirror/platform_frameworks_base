@@ -123,7 +123,15 @@ public class AppWidgetHostView extends FrameLayout {
 
     @Override
     protected void dispatchRestoreInstanceState(SparseArray<Parcelable> container) {
-        final ParcelableSparseArray jail = (ParcelableSparseArray) container.get(generateId());
+        final Parcelable parcelable = container.get(generateId());
+
+        ParcelableSparseArray jail = null;
+        if (parcelable != null && parcelable instanceof ParcelableSparseArray) {
+            jail = (ParcelableSparseArray) parcelable;
+        }
+
+        if (jail == null) jail = new ParcelableSparseArray();
+
         super.dispatchRestoreInstanceState(jail);
     }
 
@@ -139,7 +147,7 @@ public class AppWidgetHostView extends FrameLayout {
 
     /**
      * Process a set of {@link RemoteViews} coming in as an update from the
-     * AppWidget provider. Will animate into these new views as needed.
+     * AppWidget provider. Will animate into these new views as needed
      */
     public void updateAppWidget(RemoteViews remoteViews) {
         if (LOGD) Log.d(TAG, "updateAppWidget called mOld=" + mOld);

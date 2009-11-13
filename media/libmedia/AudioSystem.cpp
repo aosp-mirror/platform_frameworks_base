@@ -335,6 +335,13 @@ status_t AudioSystem::getInputBufferSize(uint32_t sampleRate, int format, int ch
     return NO_ERROR;
 }
 
+status_t AudioSystem::setVoiceVolume(float value)
+{
+    const sp<IAudioFlinger>& af = AudioSystem::get_audio_flinger();
+    if (af == 0) return PERMISSION_DENIED;
+    return af->setVoiceVolume(value);
+}
+
 // ---------------------------------------------------------------------------
 
 void AudioSystem::AudioFlingerClient::binderDied(const wp<IBinder>& who) {

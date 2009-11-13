@@ -269,7 +269,7 @@ public final class ClientOperation implements Operation, BaseStream {
 
         if (mPrivateOutput == null) {
             // there are 3 bytes operation headers and 3 bytes body headers //
-            mPrivateOutput = new PrivateOutputStream(this, mMaxPacketSize - 6);
+            mPrivateOutput = new PrivateOutputStream(this, getMaxPacketSize());
         }
 
         mPrivateOutputOpen = true;
@@ -278,7 +278,13 @@ public final class ClientOperation implements Operation, BaseStream {
     }
 
     public int getMaxPacketSize() {
-        return mMaxPacketSize - 6;
+        return mMaxPacketSize - 6 - getHeaderLength();
+    }
+
+    public int getHeaderLength() {
+        // OPP may need it
+        byte[] headerArray = ObexHelper.createHeader(mRequestHeader, false);
+        return headerArray.length;
     }
 
     /**

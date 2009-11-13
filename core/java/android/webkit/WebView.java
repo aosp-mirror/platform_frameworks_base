@@ -500,7 +500,7 @@ public class WebView extends AbsoluteLayout
     private boolean mMinZoomScaleFixed = true;
 
     // initial scale in percent. 0 means using default.
-    private int mInitialScale = 0;
+    private int mInitialScaleInPercent = 0;
 
     // while in the zoom overview mode, the page's width is fully fit to the
     // current window. The page is alive, in another words, you can click to
@@ -1525,7 +1525,7 @@ public class WebView extends AbsoluteLayout
         }
         nativeClearCursor(); // start next trackball movement from page edge
         if (bottom) {
-            return pinScrollTo(mScrollX, mContentHeight, true, 0);
+            return pinScrollTo(mScrollX, computeVerticalScrollRange(), true, 0);
         }
         // Page down.
         int h = getHeight();
@@ -1595,7 +1595,7 @@ public class WebView extends AbsoluteLayout
      * @param scaleInPercent The initial scale in percent.
      */
     public void setInitialScale(int scaleInPercent) {
-        mInitialScale = scaleInPercent;
+        mInitialScaleInPercent = scaleInPercent;
     }
 
     /**
@@ -1713,6 +1713,7 @@ public class WebView extends AbsoluteLayout
      *            as the data member with "url" as key. The result can be null.
      */
     public void requestImageRef(Message msg) {
+        if (0 == mNativeClass) return; // client isn't initialized
         int contentX = viewToContentX((int) mLastTouchX + mScrollX);
         int contentY = viewToContentY((int) mLastTouchY + mScrollY);
         String ref = nativeImageURI(contentX, contentY);
@@ -2264,7 +2265,6 @@ public class WebView extends AbsoluteLayout
     /**
      * Call this to inform the view that memory is low so that it can
      * free any available memory.
-     * @hide
      */
     public void freeMemory() {
         mWebViewCore.sendMessage(EventHub.FREE_MEMORY);
@@ -2331,6 +2331,7 @@ public class WebView extends AbsoluteLayout
      * @param forward Direction to search.
      */
     public void findNext(boolean forward) {
+        if (0 == mNativeClass) return; // client isn't initialized
         nativeFindNext(forward);
     }
 
@@ -2341,6 +2342,7 @@ public class WebView extends AbsoluteLayout
      *              that were found.
      */
     public int findAll(String find) {
+        if (0 == mNativeClass) return 0; // client isn't initialized
         if (mFindIsUp == false) {
             recordNewContentSize(mContentWidth, mContentHeight + mFindHeight,
                     false);
@@ -2728,7 +2730,7 @@ public class WebView extends AbsoluteLayout
     */
     @Deprecated
     public static synchronized PluginList getPluginList() {
-        return null;
+        return new PluginList();
     }
 
    /**
@@ -2926,12 +2928,12 @@ public class WebView extends AbsoluteLayout
                 animateScroll);
 
         if (mNativeClass == 0) return;
-        if (mShiftIsPressed) {
+        if (mShiftIsPressed && !animateZoom) {
             if (mTouchSelection) {
                 nativeDrawSelectionRegion(canvas);
             } else {
-                nativeDrawSelection(canvas, mSelectX, mSelectY,
-                        mExtendSelection);
+                nativeDrawSelection(canvas, mInvActualScale, getTitleHeight(),
+                        mSelectX, mSelectY, mExtendSelection);
             }
         } else if (drawCursorRing) {
             if (mTouchMode == TOUCH_SHORTPRESS_START_MODE) {
@@ -3410,6 +3412,7 @@ public class WebView extends AbsoluteLayout
             }
             if (isTextInput) {
                 rebuildWebTextView();
+                displaySoftKeyboard(true);
             }
             return true;
         }
@@ -3430,6 +3433,7 @@ public class WebView extends AbsoluteLayout
      * @hide
      */
     public void emulateShiftHeld() {
+        if (0 == mNativeClass) return; // client isn't initialized
         mExtendSelection = false;
         mShiftIsPressed = true;
         nativeHideCursor();
@@ -3611,6 +3615,13 @@ public class WebView extends AbsoluteLayout
             mMinZoomScale = Math.min(1.0f, (float) getViewWidth()
                     / (mDrawHistory ? mHistoryPicture.getWidth()
                             : mZoomOverviewWidth));
+            if (mInitialScaleInPercent > 0) {
+                // limit the minZoomScale to the initialScale if it is set
+                float initialScale = mInitialScaleInPercent / 100.0f;
+                if (mMinZoomScale > initialScale) {
+                    mMinZoomScale = initialScale;
+                }
+            }
         }
 
         // we always force, in case our height changed, in which case we still
@@ -4065,6 +4076,9 @@ public class WebView extends AbsoluteLayout
             return true;
         }
         if (ev.getAction() == MotionEvent.ACTION_DOWN) {
+            if (mShiftIsPressed) {
+                return true; // discard press if copy in progress
+            }
             mTrackballDown = true;
             if (mNativeClass == 0) {
                 return false;
@@ -4093,6 +4107,7 @@ public class WebView extends AbsoluteLayout
                 } else {
                     mExtendSelection = true;
                 }
+                return true; // discard press if copy in progress
             }
             if (DebugFlags.WEB_VIEW) {
                 Log.v(LOGTAG, "onTrackballEvent up ev=" + ev
@@ -4289,7 +4304,7 @@ public class WebView extends AbsoluteLayout
 
     private int computeMaxScrollY() {
         int maxContentH = computeVerticalScrollRange() + getTitleHeight();
-        return Math.max(maxContentH - getHeight(), getTitleHeight());
+        return Math.max(maxContentH - getViewHeightWithTitle(), getTitleHeight());
     }
 
     public void flingScroll(int vx, int vy) {
@@ -4959,7 +4974,9 @@ public class WebView extends AbsoluteLayout
                     WebViewCore.RestoreState restoreState = draw.mRestoreState;
                     if (restoreState != null) {
                         mInZoomOverview = false;
-                        mLastScale = restoreState.mTextWrapScale;
+                        mLastScale = mInitialScaleInPercent > 0
+                                ? mInitialScaleInPercent / 100.0f
+                                        : restoreState.mTextWrapScale;
                         if (restoreState.mMinScale == 0) {
                             if (restoreState.mMobileSite) {
                                 if (draw.mMinPrefWidth >
@@ -5600,8 +5617,8 @@ public class WebView extends AbsoluteLayout
     private native void     nativeDestroy();
     private native void     nativeDrawCursorRing(Canvas content);
     private native void     nativeDrawMatches(Canvas canvas);
-    private native void     nativeDrawSelection(Canvas content
-            , int x, int y, boolean extendSelection);
+    private native void     nativeDrawSelection(Canvas content, float scale,
+            int offset, int x, int y, boolean extendSelection);
     private native void     nativeDrawSelectionRegion(Canvas content);
     private native void     nativeDumpDisplayTree(String urlOrNull);
     private native int      nativeFindAll(String findLower, String findUpper);

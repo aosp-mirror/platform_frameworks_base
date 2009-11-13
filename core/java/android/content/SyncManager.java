@@ -2294,8 +2294,8 @@ class SyncManager implements OnAccountsUpdateListener {
             }
 
             if (!mSyncStorageEngine.deleteFromPending(operationToRemove.pendingOperation)) {
-                throw new IllegalStateException("unable to find pending row for "
-                        + operationToRemove);
+                final String errorMessage = "unable to find pending row for " + operationToRemove;
+                Log.e(TAG, errorMessage, new IllegalStateException(errorMessage));
             }
 
             if (DEBUG_CHECK_DATA_CONSISTENCY) debugCheckDataStructures(true /* check the DB */);
@@ -2314,7 +2314,8 @@ class SyncManager implements OnAccountsUpdateListener {
             }
 
             if (!mSyncStorageEngine.deleteFromPending(operation.pendingOperation)) {
-                throw new IllegalStateException("unable to find pending row for " + operation);
+                final String errorMessage = "unable to find pending row for " + operation;
+                Log.e(TAG, errorMessage, new IllegalStateException(errorMessage));
             }
 
             if (DEBUG_CHECK_DATA_CONSISTENCY) debugCheckDataStructures(true /* check the DB */);
@@ -2336,8 +2337,8 @@ class SyncManager implements OnAccountsUpdateListener {
                 }
 
                 if (!mSyncStorageEngine.deleteFromPending(syncOperation.pendingOperation)) {
-                    throw new IllegalStateException("unable to find pending row for "
-                            + syncOperation);
+                    final String errorMessage = "unable to find pending row for " + syncOperation;
+                    Log.e(TAG, errorMessage, new IllegalStateException(errorMessage));
                 }
 
                 if (DEBUG_CHECK_DATA_CONSISTENCY) debugCheckDataStructures(true /* check the DB */);

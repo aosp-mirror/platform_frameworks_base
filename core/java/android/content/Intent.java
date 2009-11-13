@@ -1275,12 +1275,15 @@ public class Intent implements Parcelable {
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_PACKAGE_REMOVED = "android.intent.action.PACKAGE_REMOVED";
     /**
-     * Broadcast Action: An existing application package has been changed (e.g. a component has been
-     * enabled or disabled.  The data contains the name of the package.
+     * Broadcast Action: An existing application package has been changed (e.g.
+     * a component has been enabled or disabled).  The data contains the name of
+     * the package.
      * <ul>
      * <li> {@link #EXTRA_UID} containing the integer uid assigned to the package.
-     * <li> {@link #EXTRA_CHANGED_COMPONENT_NAME} containing the class name of the changed component.
-     * <li> {@link #EXTRA_DONT_KILL_APP} containing boolean field to override the default action of restarting the application.
+     * <li> {@link #EXTRA_CHANGED_COMPONENT_NAME_LIST} containing the class name
+     * of the changed components.
+     * <li> {@link #EXTRA_DONT_KILL_APP} containing boolean field to override the
+     * default action of restarting the application.
      * </ul>
      * 
      * <p class="note">This is a protected intent that can only be sent
@@ -1344,6 +1347,12 @@ public class Intent implements Parcelable {
      * can not be restarted will need to watch for this action and handle it
      * appropriately.
      * 
+     * <p class="note">
+     * You can <em>not</em> receive this through components declared
+     * in manifests, only by explicitly registering for it with
+     * {@link Context#registerReceiver(BroadcastReceiver, IntentFilter)
+     * Context.registerReceiver()}.
+     * 
      * <p class="note">This is a protected intent that can only be sent
      * by the system.
      *
@@ -1351,6 +1360,14 @@ public class Intent implements Parcelable {
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_CONFIGURATION_CHANGED = "android.intent.action.CONFIGURATION_CHANGED";
+    /**
+     * Broadcast Action: The current device's locale has changed.
+     * 
+     * <p class="note">This is a protected intent that can only be sent
+     * by the system.
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_LOCALE_CHANGED = "android.intent.action.LOCALE_CHANGED";
     /**
      * Broadcast Action:  This is a <em>sticky broadcast</em> containing the
      * charging state, level, and other information about the battery.
@@ -2087,12 +2104,18 @@ public class Intent implements Parcelable {
             "android.intent.extra.remote_intent_token";
 
     /**
-     * Used as an int extra field in {@link android.content.Intent#ACTION_PACKAGE_CHANGED}
-     * intent to supply the name of the component that changed.
-     *
+     * @Deprecated See {@link #EXTRA_CHANGED_COMPONENT_NAME_LIST}; this field
+     * will contain only the first name in the list.
      */
     public static final String EXTRA_CHANGED_COMPONENT_NAME =
             "android.intent.extra.changed_component_name";
+
+    /**
+     * This field is part of {@link android.content.Intent#ACTION_PACKAGE_CHANGED}
+     * and contains a string array of all of the components that have changed.
+     */
+    public static final String EXTRA_CHANGED_COMPONENT_NAME_LIST =
+            "android.intent.extra.changed_component_name_list";
 
     /**
      * @hide

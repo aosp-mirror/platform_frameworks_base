@@ -482,38 +482,17 @@ status_t AudioFlinger::setStreamVolume(int stream, float value, int output)
         }
     }
 
-    status_t ret = NO_ERROR;
-
-    if (stream == AudioSystem::VOICE_CALL ||
-        stream == AudioSystem::BLUETOOTH_SCO) {
-        float hwValue;
-        if (stream == AudioSystem::VOICE_CALL) {
-            hwValue = (float)AudioSystem::logToLinear(value)/100.0f;
-            // offset value to reflect actual hardware volume that never reaches 0
-            // 1% corresponds roughly to first step in VOICE_CALL stream volume setting (see AudioService.java)
-            value = 0.01 + 0.99 * value;
-        } else { // (type == AudioSystem::BLUETOOTH_SCO)
-            hwValue = 1.0f;
-        }
-
-        AutoMutex lock(mHardwareLock);
-        mHardwareStatus = AUDIO_SET_VOICE_VOLUME;
-        ret = mAudioHardware->setVoiceVolume(hwValue);
-        mHardwareStatus = AUDIO_HW_IDLE;
-
-    }
-
     mStreamTypes[stream].volume = value;
 
     if (thread == NULL) {
-        for (uint32_t i = 0; i < mPlaybackThreads.size(); i++)
+        for (uint32_t i = 0; i < mPlaybackThreads.size(); i++) {
            mPlaybackThreads.valueAt(i)->setStreamVolume(stream, value);
-
+        }
     } else {
         thread->setStreamVolume(stream, value);
     }
 
-    return ret;
+    return NO_ERROR;
 }
 
 status_t AudioFlinger::setStreamMute(int stream, bool muted)
@@ -551,11 +530,6 @@ float AudioFlinger::streamVolume(int stream, int output) const
         volume = thread->streamVolume(stream);
     } else {
         volume = mStreamTypes[stream].volume;
-    }
-
-    // remove correction applied by setStreamVolume()
-    if (stream == AudioSystem::VOICE_CALL) {
-        volume = (volume - 0.01) / 0.99 ;
     }
 
     return volume;
@@ -642,6 +616,21 @@ String8 AudioFlinger::getParameters(int ioHandle, const String8& keys)
 size_t AudioFlinger::getInputBufferSize(uint32_t sampleRate, int format, int channelCount)
 {
     return mAudioHardware->getInputBufferSize(sampleRate, format, channelCount);
+}
+
+status_t AudioFlinger::setVoiceVolume(float value)
+{
+    // check calling permissions
+    if (!settingsAllowed()) {
+        return PERMISSION_DENIED;
+    }
+
+    AutoMutex lock(mHardwareLock);
+    mHardwareStatus = AUDIO_SET_VOICE_VOLUME;
+    status_t ret = mAudioHardware->setVoiceVolume(value);
+    mHardwareStatus = AUDIO_HW_IDLE;
+
+    return ret;
 }
 
 void AudioFlinger::registerClient(const sp<IAudioFlingerClient>& client)
@@ -826,6 +815,58 @@ void AudioFlinger::ThreadBase::processConfigEvents()
     mLock.unlock();
 }
 
+status_t AudioFlinger::ThreadBase::dumpBase(int fd, const Vector<String16>& args)
+{
+    const size_t SIZE = 256;
+    char buffer[SIZE];
+    String8 result;
+
+    bool locked = tryLock(mLock);
+    if (!locked) {
+        snprintf(buffer, SIZE, "thread %p maybe dead locked\n", this);
+        write(fd, buffer, strlen(buffer));
+    }
+
+    snprintf(buffer, SIZE, "standby: %d\n", mStandby);
+    result.append(buffer);
+    snprintf(buffer, SIZE, "Sample rate: %d\n", mSampleRate);
+    result.append(buffer);
+    snprintf(buffer, SIZE, "Frame count: %d\n", mFrameCount);
+    result.append(buffer);
+    snprintf(buffer, SIZE, "Channel Count: %d\n", mChannelCount);
+    result.append(buffer);
+    snprintf(buffer, SIZE, "Format: %d\n", mFormat);
+    result.append(buffer);
+    snprintf(buffer, SIZE, "Frame size: %d\n", mFrameSize);
+    result.append(buffer);
+
+    snprintf(buffer, SIZE, "\nPending setParameters commands: \n");
+    result.append(buffer);
+    result.append(" Index Command");
+    for (size_t i = 0; i < mNewParameters.size(); ++i) {
+        snprintf(buffer, SIZE, "\n %02d    ", i);
+        result.append(buffer);
+        result.append(mNewParameters[i]);
+    }
+
+    snprintf(buffer, SIZE, "\n\nPending config events: \n");
+    result.append(buffer);
+    snprintf(buffer, SIZE, " Index event param\n");
+    result.append(buffer);
+    for (size_t i = 0; i < mConfigEvents.size(); i++) {
+        snprintf(buffer, SIZE, " %02d    %02d    %d\n", i, mConfigEvents[i]->mEvent, mConfigEvents[i]->mParam);
+        result.append(buffer);
+    }
+    result.append("\n");
+
+    write(fd, result.string(), result.size());
+
+    if (locked) {
+        mLock.unlock();
+    }
+    return NO_ERROR;
+}
+
 
 // ----------------------------------------------------------------------------
 
@@ -867,7 +908,7 @@ status_t AudioFlinger::PlaybackThread::dumpTracks(int fd, const Vector<String16>
 
     snprintf(buffer, SIZE, "Output thread %p tracks\n", this);
     result.append(buffer);
-    result.append("   Name Clien Typ Fmt Chn Buf S M F SRate LeftV RighV Serv User\n");
+    result.append("   Name Clien Typ Fmt Chn Buf  S M F SRate  LeftV RighV Serv     User\n");
     for (size_t i = 0; i < mTracks.size(); ++i) {
         sp<Track> track = mTracks[i];
         if (track != 0) {
@@ -878,7 +919,7 @@ status_t AudioFlinger::PlaybackThread::dumpTracks(int fd, const Vector<String16>
 
     snprintf(buffer, SIZE, "Output thread %p active tracks\n", this);
     result.append(buffer);
-    result.append("   Name Clien Typ Fmt Chn Buf S M F SRate LeftV RighV Serv User\n");
+    result.append("   Name Clien Typ Fmt Chn Buf  S M F SRate  LeftV RighV Serv     User\n");
     for (size_t i = 0; i < mActiveTracks.size(); ++i) {
         wp<Track> wTrack = mActiveTracks[i];
         if (wTrack != 0) {
@@ -899,7 +940,7 @@ status_t AudioFlinger::PlaybackThread::dumpInternals(int fd, const Vector<String
     char buffer[SIZE];
     String8 result;
 
-    snprintf(buffer, SIZE, "Output thread %p internals\n", this);
+    snprintf(buffer, SIZE, "\nOutput thread %p internals\n", this);
     result.append(buffer);
     snprintf(buffer, SIZE, "last write occurred (msecs): %llu\n", ns2ms(systemTime() - mLastWriteTime));
     result.append(buffer);
@@ -909,9 +950,10 @@ status_t AudioFlinger::PlaybackThread::dumpInternals(int fd, const Vector<String
     result.append(buffer);
     snprintf(buffer, SIZE, "blocked in write: %d\n", mInWrite);
     result.append(buffer);
-    snprintf(buffer, SIZE, "standby: %d\n", mStandby);
-    result.append(buffer);
     write(fd, result.string(), result.size());
+
+    dumpBase(fd, args);
+
     return NO_ERROR;
 }
 
@@ -976,7 +1018,7 @@ sp<AudioFlinger::PlaybackThread::Track>  AudioFlinger::PlaybackThread::createTra
         Mutex::Autolock _l(mLock);
         track = new Track(this, client, streamType, sampleRate, format,
                 channelCount, frameCount, sharedBuffer);
-        if (track->getCblk() == NULL) {
+        if (track->getCblk() == NULL || track->name() < 0) {
             lStatus = NO_MEMORY;
             goto Exit;
         }
@@ -1173,7 +1215,7 @@ AudioFlinger::MixerThread::~MixerThread()
 
 bool AudioFlinger::MixerThread::threadLoop()
 {
-    uint32_t sleepTime = 0;
+    uint32_t sleepTime = 1000;
     uint32_t maxBufferRecoveryInUsecs = getMaxBufferRecoveryInUsecs();
     int16_t* curBuf = mMixBuffer;
     Vector< sp<Track> > tracksToRemove;
@@ -1235,6 +1277,7 @@ bool AudioFlinger::MixerThread::threadLoop()
                     }
 
                     standbyTime = systemTime() + kStandbyTimeInNsecs;
+                    sleepTime = 1000;
                     continue;
                 }
             }
@@ -1503,8 +1546,6 @@ bool AudioFlinger::MixerThread::checkForNewParameters_l()
         AudioParameter param = AudioParameter(keyValuePair);
         int value;
 
-        mNewParameters.removeAt(0);
-
         if (param.getInt(String8(AudioParameter::keySamplingRate), value) == NO_ERROR) {
             reconfig = true;
         }
@@ -1556,6 +1597,9 @@ bool AudioFlinger::MixerThread::checkForNewParameters_l()
                 sendConfigEvent_l(AudioSystem::OUTPUT_CONFIG_CHANGED);
             }
         }
+
+        mNewParameters.removeAt(0);
+
         mParamStatus = status;
         mParamCond.signal();
         mWaitWorkCV.wait(mLock);
@@ -1602,7 +1646,7 @@ AudioFlinger::DirectOutputThread::~DirectOutputThread()
 
 bool AudioFlinger::DirectOutputThread::threadLoop()
 {
-    uint32_t sleepTime = 0;
+    uint32_t sleepTime = 1000;
     uint32_t maxBufferRecoveryInUsecs = getMaxBufferRecoveryInUsecs();
     sp<Track> trackToRemove;
     sp<Track> activeTrack;
@@ -1654,6 +1698,7 @@ bool AudioFlinger::DirectOutputThread::threadLoop()
                     }
 
                     standbyTime = systemTime() + kStandbyTimeInNsecs;
+                    sleepTime = 1000;
                     continue;
                 }
             }
@@ -1827,8 +1872,6 @@ bool AudioFlinger::DirectOutputThread::checkForNewParameters_l()
         AudioParameter param = AudioParameter(keyValuePair);
         int value;
 
-        mNewParameters.removeAt(0);
-
         if (param.getInt(String8(AudioParameter::keyFrameCount), value) == NO_ERROR) {
             // do not accept frame count changes if tracks are open as the track buffer
             // size depends on frame count and correct behavior would not be garantied
@@ -1852,6 +1895,9 @@ bool AudioFlinger::DirectOutputThread::checkForNewParameters_l()
                 sendConfigEvent_l(AudioSystem::OUTPUT_CONFIG_CHANGED);
             }
         }
+
+        mNewParameters.removeAt(0);
+
         mParamStatus = status;
         mParamCond.signal();
         mWaitWorkCV.wait(mLock);
@@ -1890,7 +1936,7 @@ AudioFlinger::DuplicatingThread::~DuplicatingThread()
 
 bool AudioFlinger::DuplicatingThread::threadLoop()
 {
-    uint32_t sleepTime = 0;
+    uint32_t sleepTime = 1000;
     uint32_t maxBufferRecoveryInUsecs = getMaxBufferRecoveryInUsecs();
     int16_t* curBuf = mMixBuffer;
     Vector< sp<Track> > tracksToRemove;
@@ -1951,6 +1997,7 @@ bool AudioFlinger::DuplicatingThread::threadLoop()
                     }
 
                     standbyTime = systemTime() + kStandbyTimeInNsecs;
+                    sleepTime = 1000;
                     continue;
                 }
             }
@@ -2261,7 +2308,7 @@ void AudioFlinger::PlaybackThread::Track::destroy()
 
 void AudioFlinger::PlaybackThread::Track::dump(char* buffer, size_t size)
 {
-    snprintf(buffer, size, "  %5d %5d %3u %3u %3u %3u %1d %1d %1d %5u %5u %5u %04x %04x\n",
+    snprintf(buffer, size, "  %5d %5d %3u %3u %3u %04u %1d %1d %1d %5u %5u %5u  %08x %08x\n",
             mName - AudioMixer::TRACK0,
             (mClient == NULL) ? getpid() : mClient->pid(),
             mStreamType,
@@ -2515,6 +2562,19 @@ void AudioFlinger::RecordThread::RecordTrack::stop()
         // read from buffer
         mCblk->flowControlFlag = 1;
     }
+}
+
+void AudioFlinger::RecordThread::RecordTrack::dump(char* buffer, size_t size)
+{
+    snprintf(buffer, size, "   %05d %03u %03u %04u %01d %05u  %08x %08x\n",
+            (mClient == NULL) ? getpid() : mClient->pid(),
+            mFormat,
+            mCblk->channels,
+            mFrameCount,
+            mState,
+            mCblk->sampleRate,
+            mCblk->server,
+            mCblk->user);
 }
 
 
@@ -3144,13 +3204,34 @@ status_t AudioFlinger::RecordThread::dump(int fd, const Vector<String16>& args)
     String8 result;
     pid_t pid = 0;
 
-    if (mActiveTrack != 0 && mActiveTrack->mClient != 0) {
-        snprintf(buffer, SIZE, "Record client pid: %d\n", mActiveTrack->mClient->pid());
+    snprintf(buffer, SIZE, "\nInput thread %p internals\n", this);
+    result.append(buffer);
+
+    if (mActiveTrack != 0) {
+        result.append("Active Track:\n");
+        result.append("   Clien Fmt Chn Buf  S SRate  Serv     User\n");
+        mActiveTrack->dump(buffer, SIZE);
         result.append(buffer);
+
+        snprintf(buffer, SIZE, "In index: %d\n", mRsmpInIndex);
+        result.append(buffer);
+        snprintf(buffer, SIZE, "In size: %d\n", mInputBytes);
+        result.append(buffer);
+        snprintf(buffer, SIZE, "Resampling: %d\n", (mResampler != 0));
+        result.append(buffer);
+        snprintf(buffer, SIZE, "Out channel count: %d\n", mReqChannelCount);
+        result.append(buffer);
+        snprintf(buffer, SIZE, "Out sample rate: %d\n", mReqSampleRate);
+        result.append(buffer);
+
+
     } else {
         result.append("No record client\n");
     }
     write(fd, result.string(), result.size());
+
+    dumpBase(fd, args);
+
     return NO_ERROR;
 }
 
@@ -3206,8 +3287,6 @@ bool AudioFlinger::RecordThread::checkForNewParameters_l()
         int reqSamplingRate = mReqSampleRate;
         int reqChannelCount = mReqChannelCount;
 
-        mNewParameters.removeAt(0);
-
         if (param.getInt(String8(AudioParameter::keySamplingRate), value) == NO_ERROR) {
             reqSamplingRate = value;
             reconfig = true;
@@ -3249,6 +3328,9 @@ bool AudioFlinger::RecordThread::checkForNewParameters_l()
                 }
             }
         }
+
+        mNewParameters.removeAt(0);
+
         mParamStatus = status;
         mParamCond.signal();
         mWaitWorkCV.wait(mLock);

@@ -208,6 +208,7 @@ aidl_files := \
 	frameworks/base/core/java/android/accounts/IAccountAuthenticatorResponse.aidl \
 	frameworks/base/core/java/android/app/Notification.aidl \
 	frameworks/base/core/java/android/app/PendingIntent.aidl \
+	frameworks/base/core/java/android/bluetooth/BluetoothDevice.aidl \
 	frameworks/base/core/java/android/content/ComponentName.aidl \
 	frameworks/base/core/java/android/content/Intent.aidl \
 	frameworks/base/core/java/android/content/IntentSender.aidl \
@@ -343,7 +344,7 @@ framework_docs_LOCAL_DROIDDOC_OPTIONS := \
     -since ./frameworks/base/api/2.xml 2 \
     -since ./frameworks/base/api/3.xml 3 \
     -since ./frameworks/base/api/4.xml 4 \
-    -since ./frameworks/base/api/current.xml Eclair \
+    -since ./frameworks/base/api/5.xml 5 \
 		-error 1 -error 2 -warning 3 -error 4 -error 6 -error 8 \
 		-overview $(LOCAL_PATH)/core/java/overview.html
 
@@ -380,10 +381,20 @@ framework_docs_SDK_CURRENT_DIR:=$(framework_docs_SDK_VERSION)_r$(framework_docs_
   # flag to build offline docs for a preview release
 framework_docs_SDK_PREVIEW:=0
 
+## Latest ADT version identifiers, for reference from published docs
+framework_docs_ADT_VERSION:=0.9.4
+framework_docs_ADT_DOWNLOAD:=ADT-0.9.4.zip
+framework_docs_ADT_BYTES:=3367536
+framework_docs_ADT_CHECKSUM:=4cdecd72b3e28022d8a55891f13e7d43
+
 framework_docs_LOCAL_DROIDDOC_OPTIONS += \
 		-hdf sdk.version $(framework_docs_SDK_VERSION) \
 		-hdf sdk.rel.id $(framework_docs_SDK_REL_ID) \
-		-hdf sdk.current $(framework_docs_SDK_CURRENT_DIR)
+		-hdf sdk.current $(framework_docs_SDK_CURRENT_DIR) \
+		-hdf adt.zip.version $(framework_docs_ADT_VERSION) \
+		-hdf adt.zip.download $(framework_docs_ADT_DOWNLOAD) \
+		-hdf adt.zip.bytes $(framework_docs_ADT_BYTES) \
+		-hdf adt.zip.checksum $(framework_docs_ADT_CHECKSUM) 
 
 # ====  the api stubs and current.xml ===========================
 include $(CLEAR_VARS)
@@ -479,6 +490,8 @@ LOCAL_DROIDDOC_CUSTOM_ASSET_DIR:=assets-sdk
 
 include $(BUILD_DROIDDOC)
 
+# explicitly specify that online-sdk depends on framework-res.
+$(full_target): framework-res-package-target
 
 # ==== docs that have all of the stuff that's @hidden =======================
 include $(CLEAR_VARS)

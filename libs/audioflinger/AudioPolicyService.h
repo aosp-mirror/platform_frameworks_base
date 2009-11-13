@@ -105,10 +105,13 @@ public:
     virtual String8 getParameters(audio_io_handle_t ioHandle, const String8& keys);
     virtual status_t startTone(ToneGenerator::tone_type tone, AudioSystem::stream_type stream);
     virtual status_t stopTone();
+    virtual status_t setVoiceVolume(float volume, int delayMs = 0);
 
 private:
                         AudioPolicyService();
     virtual             ~AudioPolicyService();
+
+            status_t dumpInternals(int fd);
 
     // Thread used for tone playback and to send audio config commands to audio flinger
     // For tone playback, using a separate thread is necessary to avoid deadlock with mLock because startTone()
@@ -125,11 +128,14 @@ private:
             START_TONE,
             STOP_TONE,
             SET_VOLUME,
-            SET_PARAMETERS
+            SET_PARAMETERS,
+            SET_VOICE_VOLUME
         };
 
         AudioCommandThread ();
         virtual             ~AudioCommandThread();
+
+                    status_t    dump(int fd);
 
         // Thread virtuals
         virtual     void        onFirstRef();
@@ -140,12 +146,19 @@ private:
                     void        stopToneCommand();
                     status_t    volumeCommand(int stream, float volume, int output, int delayMs = 0);
                     status_t    parametersCommand(int ioHandle, const String8& keyValuePairs, int delayMs = 0);
+                    status_t    voiceVolumeCommand(float volume, int delayMs = 0);
                     void        insertCommand_l(AudioCommand *command, int delayMs = 0);
 
     private:
         // descriptor for requested tone playback event
         class AudioCommand {
+
         public:
+            AudioCommand()
+            : mCommand(-1) {}
+
+            void dump(char* buffer, size_t size);
+
             int mCommand;   // START_TONE, STOP_TONE ...
             nsecs_t mTime;  // time stamp
             Condition mCond; // condition for status return
@@ -166,21 +179,27 @@ private:
             float mVolume;
             int mIO;
         };
+
         class ParametersData {
         public:
             int mIO;
             String8 mKeyValuePairs;
         };
 
+        class VoiceVolumeData {
+        public:
+            float mVolume;
+        };
 
         Mutex   mLock;
         Condition mWaitWorkCV;
         Vector <AudioCommand *> mAudioCommands; // list of pending commands
         ToneGenerator *mpToneGenerator;     // the tone generator
+        AudioCommand mLastCommand;
     };
 
     // Internal dump utilities.
-    status_t dumpPermissionDenial(int fd, const Vector<String16>& args);
+    status_t dumpPermissionDenial(int fd);
 
 
     Mutex   mLock;      // prevents concurrent access to AudioPolicy manager functions changing device

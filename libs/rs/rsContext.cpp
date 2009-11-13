@@ -29,6 +29,21 @@ using namespace android;
 using namespace android::renderscript;
 
 pthread_key_t Context::gThreadTLSKey = 0;
+uint32_t Context::gThreadTLSKeyCount = 0;
+uint32_t Context::gGLContextCount = 0;
+pthread_mutex_t Context::gInitMutex = PTHREAD_MUTEX_INITIALIZER;
+
+static void checkEglError(const char* op, EGLBoolean returnVal = EGL_TRUE) {
+    if (returnVal != EGL_TRUE) {
+        fprintf(stderr, "%s() returned %d\n", op, returnVal);
+    }
+
+    for (EGLint error = eglGetError(); error != EGL_SUCCESS; error
+            = eglGetError()) {
+        fprintf(stderr, "after %s() eglError %s (0x%x)\n", op, EGLUtils::strerror(error),
+                error);
+    }
+}
 
 void Context::initEGL()
 {
@@ -57,8 +72,12 @@ void Context::initEGL()
     configAttribsPtr[0] = EGL_NONE;
     rsAssert(configAttribsPtr < (configAttribs + (sizeof(configAttribs) / sizeof(EGLint))));
 
+    LOGV("initEGL start");
     mEGL.mDisplay = eglGetDisplay(EGL_DEFAULT_DISPLAY);
+    checkEglError("eglGetDisplay");
+
     eglInitialize(mEGL.mDisplay, &mEGL.mMajorVersion, &mEGL.mMinorVersion);
+    checkEglError("eglInitialize");
 
     status_t err = EGLUtils::selectConfigForNativeWindow(mEGL.mDisplay, configAttribs, mWndSurface, &mEGL.mConfig);
     if (err) {
@@ -66,16 +85,20 @@ void Context::initEGL()
     }
     //eglChooseConfig(mEGL.mDisplay, configAttribs, &mEGL.mConfig, 1, &mEGL.mNumConfigs);
 
+
+    mEGL.mContext = eglCreateContext(mEGL.mDisplay, mEGL.mConfig, EGL_NO_CONTEXT, NULL);
+    checkEglError("eglCreateContext");
+    if (mEGL.mContext == EGL_NO_CONTEXT) {
+        LOGE("eglCreateContext returned EGL_NO_CONTEXT");
+    }
+    gGLContextCount++;
+
     if (mWndSurface) {
-        mEGL.mSurface = eglCreateWindowSurface(mEGL.mDisplay, mEGL.mConfig, mWndSurface, NULL);
+        setSurface(mWndSurface);
     } else {
-        mEGL.mSurface = eglCreateWindowSurface(mEGL.mDisplay, mEGL.mConfig,
-             android_createDisplaySurface(),
-             NULL);
+        setSurface((Surface *)android_createDisplaySurface());
     }
 
-    mEGL.mContext = eglCreateContext(mEGL.mDisplay, mEGL.mConfig, NULL, NULL);
-    eglMakeCurrent(mEGL.mDisplay, mEGL.mSurface, mEGL.mSurface, mEGL.mContext);
     eglQuerySurface(mEGL.mDisplay, mEGL.mSurface, EGL_WIDTH, &mEGL.mWidth);
     eglQuerySurface(mEGL.mDisplay, mEGL.mSurface, EGL_HEIGHT, &mEGL.mHeight);
 
@@ -97,6 +120,19 @@ void Context::initEGL()
         sscanf((const char *)mGL.mVersion + 13, "%i.%i", &mGL.mMajorVersion, &mGL.mMinorVersion);
     }
 }
+
+void Context::deinitEGL()
+{
+    setSurface(NULL);
+    eglDestroyContext(mEGL.mDisplay, mEGL.mContext);
+    checkEglError("eglDestroyContext");
+
+    gGLContextCount--;
+    if (!gGLContextCount) {
+        eglTerminate(mEGL.mDisplay);
+    }
+}
+
 
 bool Context::runScript(Script *s, uint32_t launchID)
 {
@@ -144,6 +180,12 @@ bool Context::runRootScript()
     }
     mStateFragmentStore.mLast.clear();
     bool ret = runScript(mRootScript.get(), 0);
+
+    GLenum err = glGetError();
+    if (err != GL_NO_ERROR) {
+        LOGE("Pending GL Error, 0x%x", err);
+    }
+
     return ret;
 }
 
@@ -223,7 +265,9 @@ void * Context::threadProc(void *vrsc)
      rsc->props.mLogScripts = getProp("debug.rs.script");
      rsc->props.mLogObjects = getProp("debug.rs.objects");
 
+     pthread_mutex_lock(&gInitMutex);
      rsc->initEGL();
+     pthread_mutex_unlock(&gInitMutex);
 
      ScriptTLSStruct *tlsStruct = new ScriptTLSStruct;
      if (!tlsStruct) {
@@ -251,6 +295,7 @@ void * Context::threadProc(void *vrsc)
      while (!rsc->mExit) {
          mDraw |= rsc->mIO.playCoreCommands(rsc, !mDraw);
          mDraw &= (rsc->mRootScript.get() != NULL);
+         mDraw &= (rsc->mWndSurface != NULL);
 
          if (mDraw) {
              mDraw = rsc->runRootScript() && !rsc->mPaused;
@@ -282,17 +327,25 @@ void * Context::threadProc(void *vrsc)
      rsc->mStateFragmentStore.deinit(rsc);
      ObjectBase::zeroAllUserRef(rsc);
 
+     rsc->mObjDestroy.mNeedToEmpty = true;
+     rsc->objDestroyOOBRun();
+
      glClearColor(0,0,0,0);
      glClear(GL_COLOR_BUFFER_BIT);
      eglSwapBuffers(rsc->mEGL.mDisplay, rsc->mEGL.mSurface);
-     eglTerminate(rsc->mEGL.mDisplay);
-     rsc->objDestroyOOBRun();
+
+     pthread_mutex_lock(&gInitMutex);
+     rsc->deinitEGL();
+     pthread_mutex_unlock(&gInitMutex);
+
      LOGV("RS Thread exited");
      return NULL;
 }
 
 Context::Context(Device *dev, Surface *sur, bool useDepth)
 {
+    pthread_mutex_lock(&gInitMutex);
+
     dev->addContext(this);
     mDev = dev;
     mRunning = false;
@@ -304,16 +357,18 @@ Context::Context(Device *dev, Surface *sur, bool useDepth)
     int status;
     pthread_attr_t threadAttr;
 
-    if (!gThreadTLSKey) {
+    if (!gThreadTLSKeyCount) {
         status = pthread_key_create(&gThreadTLSKey, NULL);
         if (status) {
             LOGE("Failed to init thread tls key.");
+            pthread_mutex_unlock(&gInitMutex);
             return;
         }
-    } else {
-        // HACK: workaround gl hang on start
-        exit(-1);
     }
+    gThreadTLSKeyCount++;
+    pthread_mutex_unlock(&gInitMutex);
+
+    // Global init done at this point.
 
     status = pthread_attr_init(&threadAttr);
     if (status) {
@@ -353,14 +408,48 @@ Context::~Context()
 
     mIO.shutdown();
     int status = pthread_join(mThreadId, &res);
+    mObjDestroy.mNeedToEmpty = true;
     objDestroyOOBRun();
 
+    // Global structure cleanup.
+    pthread_mutex_lock(&gInitMutex);
     if (mDev) {
         mDev->removeContext(this);
-        pthread_key_delete(gThreadTLSKey);
+        --gThreadTLSKeyCount;
+        if (!gThreadTLSKeyCount) {
+            pthread_key_delete(gThreadTLSKey);
+        }
+        mDev = NULL;
     }
+    pthread_mutex_unlock(&gInitMutex);
 
     objDestroyOOBDestroy();
+}
+
+void Context::setSurface(Surface *sur)
+{
+    EGLBoolean ret;
+    if (mEGL.mSurface != NULL) {
+        ret = eglMakeCurrent(mEGL.mDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
+        checkEglError("eglMakeCurrent", ret);
+
+        ret = eglDestroySurface(mEGL.mDisplay, mEGL.mSurface);
+        checkEglError("eglDestroySurface", ret);
+
+        mEGL.mSurface = NULL;
+    }
+
+    mWndSurface = sur;
+    if (mWndSurface != NULL) {
+        mEGL.mSurface = eglCreateWindowSurface(mEGL.mDisplay, mEGL.mConfig, mWndSurface, NULL);
+        checkEglError("eglCreateWindowSurface");
+        if (mEGL.mSurface == EGL_NO_SURFACE) {
+            LOGE("eglCreateWindowSurface returned EGL_NO_SURFACE");
+        }
+
+        ret = eglMakeCurrent(mEGL.mDisplay, mEGL.mSurface, mEGL.mSurface, mEGL.mContext);
+        checkEglError("eglMakeCurrent", ret);
+    }
 }
 
 void Context::pause()
@@ -419,6 +508,7 @@ void Context::setVertex(ProgramVertex *pv)
     } else {
         mVertex.set(pv);
     }
+    mVertex->forceDirty();
 }
 
 void Context::assignName(ObjectBase *obj, const char *name, uint32_t len)
@@ -675,6 +765,11 @@ void rsi_ContextPause(Context *rsc)
 void rsi_ContextResume(Context *rsc)
 {
     rsc->resume();
+}
+
+void rsi_ContextSetSurface(Context *rsc, void *sur)
+{
+    rsc->setSurface((Surface *)sur);
 }
 
 }

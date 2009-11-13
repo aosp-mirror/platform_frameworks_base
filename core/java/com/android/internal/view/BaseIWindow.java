@@ -1,6 +1,7 @@
 package com.android.internal.view;
 
 import android.graphics.Rect;
+import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.view.IWindow;
@@ -93,10 +94,20 @@ public class BaseIWindow extends IWindow.Stub {
     public void closeSystemDialogs(String reason) {
     }
     
-    public void dispatchWallpaperOffsets(float x, float y, boolean sync) {
+    public void dispatchWallpaperOffsets(float x, float y, float xStep, float yStep, boolean sync) {
         if (sync) {
             try {
                 mSession.wallpaperOffsetsComplete(asBinder());
+            } catch (RemoteException e) {
+            }
+        }
+    }
+    
+    public void dispatchWallpaperCommand(String action, int x, int y,
+            int z, Bundle extras, boolean sync) {
+        if (sync) {
+            try {
+                mSession.wallpaperCommandComplete(asBinder(), null);
             } catch (RemoteException e) {
             }
         }

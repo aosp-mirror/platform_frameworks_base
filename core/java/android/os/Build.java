@@ -103,16 +103,19 @@ public class Build {
          * October 2008: The original, first, version of Android.  Yay!
          */
         public static final int BASE = 1;
+        
         /**
          * February 2009: First Android update, officially called 1.1.
          */
         public static final int BASE_1_1 = 2;
+        
         /**
          * May 2009: Android 1.5.
          */
         public static final int CUPCAKE = 3;
+        
         /**
-         * Current work on "Donut" development branch.
+         * September 2009: Android 1.6.
          * 
          * <p>Applications targeting this or a later release will get these
          * new changes in behavior:</p>
@@ -133,8 +136,9 @@ public class Build {
          * </ul>
          */
         public static final int DONUT = 4;
+        
         /**
-         * Current work on "Eclair" development branch.
+         * November 2009: Android 2.0
          * 
          * <p>Applications targeting this or a later release will get these
          * new changes in behavior:</p>
@@ -152,6 +156,11 @@ public class Build {
          * </ul>
          */
         public static final int ECLAIR = 5;
+        
+        /**
+         * Current work on Eclair MR1.
+         */
+        public static final int ECLAIR_MR1 = 6;
     }
     
     /** The type of build, like "user" or "eng". */

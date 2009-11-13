@@ -408,6 +408,17 @@ public class ContactHeaderWidget extends FrameLayout implements View.OnClickList
                 PHONE_LOOKUP_PROJECTION, null, null, null);
     }
 
+    /**
+     * Method to force this widget to forget everything it knows about the contact.
+     * The widget isn't automatically updated or redrawn.
+     *
+     */
+    public void wipeClean() {
+        setPhoto(null);
+        mContactUri = null;
+        mExcludeMimes = null;
+    }
+
     private void startContactQuery(Uri contactUri) {
         mQueryHandler.startQuery(TOKEN_CONTACT_INFO, null, contactUri, ContactQuery.COLUMNS,
                 null, null, null);

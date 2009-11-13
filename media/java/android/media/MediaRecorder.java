@@ -135,6 +135,12 @@ public class MediaRecorder
 
         /** Voice call uplink + downlink audio source */
         public static final int VOICE_CALL = 4;
+
+        /** Microphone audio source with same orientation as camera */
+        public static final int CAMCORDER = 5;
+
+        /** Microphone audio source tuned for voice recognition */
+        public static final int VOICE_RECOGNITION = 6;
     }
 
     /**
@@ -274,7 +280,7 @@ public class MediaRecorder
      * Gets the maximum value for audio sources.
      * @see android.media.MediaRecorder.AudioSource
      */
-    public static final int getAudioSourceMax() { return AudioSource.VOICE_CALL; }
+    public static final int getAudioSourceMax() { return AudioSource.VOICE_RECOGNITION; }
 
     /**
      * Sets the video source to be used for recording. If this method is not

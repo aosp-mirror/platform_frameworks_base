@@ -72,7 +72,7 @@ import com.android.internal.R;
  */
 public class AccountManagerService
         extends IAccountManager.Stub
-        implements RegisteredServicesCacheListener {
+        implements RegisteredServicesCacheListener<AuthenticatorDescription> {
     private static final String GOOGLE_ACCOUNT_TYPE = "com.google";
 
     private static final String NO_BROADCAST_FLAG = "nobroadcast";
@@ -154,6 +154,7 @@ public class AccountManagerService
     private static final boolean isDebuggableMonkeyBuild =
             SystemProperties.getBoolean("ro.monkey", false)
                     && SystemProperties.getBoolean("ro.debuggable", false);
+    private static final Account[] EMPTY_ACCOUNT_ARRAY = new Account[]{};
 
     static {
         ACCOUNTS_CHANGED_INTENT = new Intent(AccountManager.LOGIN_ACCOUNTS_CHANGED_ACTION);
@@ -219,34 +220,29 @@ public class AccountManagerService
         mMessageHandler = new MessageHandler(mMessageThread.getLooper());
 
         mAuthenticatorCache = new AccountAuthenticatorCache(mContext);
-        mAuthenticatorCache.setListener(this);
+        mAuthenticatorCache.setListener(this, null /* Handler */);
         mBindHelper = new AuthenticatorBindHelper(mContext, mAuthenticatorCache, mMessageHandler,
                 MESSAGE_CONNECTED, MESSAGE_DISCONNECTED);
 
         mSimWatcher = new SimWatcher(mContext);
         sThis.set(this);
-
-        onRegisteredServicesCacheChanged();
     }
 
-    public void onRegisteredServicesCacheChanged() {
+    public void onServiceChanged(AuthenticatorDescription desc, boolean removed) {
         boolean accountDeleted = false;
         SQLiteDatabase db = mOpenHelper.getWritableDatabase();
         Cursor cursor = db.query(TABLE_ACCOUNTS,
                 new String[]{ACCOUNTS_ID, ACCOUNTS_TYPE, ACCOUNTS_NAME},
-                null, null, null, null, null);
+                ACCOUNTS_TYPE + "=?", new String[]{desc.type}, null, null, null);
         try {
             while (cursor.moveToNext()) {
                 final long accountId = cursor.getLong(0);
                 final String accountType = cursor.getString(1);
                 final String accountName = cursor.getString(2);
-                if (mAuthenticatorCache.getServiceInfo(AuthenticatorDescription.newKey(accountType))
-                        == null) {
-                    Log.d(TAG, "deleting account " + accountName + " because type "
-                            + accountType + " no longer has a registered authenticator");
-                    db.delete(TABLE_ACCOUNTS, ACCOUNTS_ID + "=" + accountId, null);
-                    accountDeleted= true;
-                }
+                Log.d(TAG, "deleting account " + accountName + " because type "
+                        + accountType + " no longer has a registered authenticator");
+                db.delete(TABLE_ACCOUNTS, ACCOUNTS_ID + "=" + accountId, null);
+                accountDeleted = true;
             }
         } finally {
             cursor.close();
@@ -268,6 +264,10 @@ public class AccountManagerService
     }
 
     private String readPasswordFromDatabase(Account account) {
+        if (account == null) {
+            return null;
+        }
+
         SQLiteDatabase db = mOpenHelper.getReadableDatabase();
         Cursor cursor = db.query(TABLE_ACCOUNTS, new String[]{ACCOUNTS_PASSWORD},
                 ACCOUNTS_NAME + "=? AND " + ACCOUNTS_TYPE+ "=?",
@@ -293,6 +293,10 @@ public class AccountManagerService
     }
 
     private String readUserDataFromDatabase(Account account, String key) {
+        if (account == null) {
+            return null;
+        }
+
         SQLiteDatabase db = mOpenHelper.getReadableDatabase();
         Cursor cursor = db.query(TABLE_EXTRAS, new String[]{EXTRAS_VALUE},
                 EXTRAS_ACCOUNTS_ID
@@ -364,6 +368,9 @@ public class AccountManagerService
         SQLiteDatabase db = mOpenHelper.getWritableDatabase();
         db.beginTransaction();
         try {
+            if (account == null) {
+                return false;
+            }
             boolean noBroadcast = false;
             if (account.type.equals(GOOGLE_ACCOUNT_TYPE)) {
                 // Look for the 'nobroadcast' flag and remove it since we don't want it to persist
@@ -513,6 +520,9 @@ public class AccountManagerService
     }
 
     private boolean saveAuthTokenToDatabase(Account account, String type, String authToken) {
+        if (account == null || type == null) {
+            return false;
+        }
         cancelNotification(getSigninRequiredNotificationId(account));
         SQLiteDatabase db = mOpenHelper.getWritableDatabase();
         db.beginTransaction();
@@ -539,6 +549,9 @@ public class AccountManagerService
     }
 
     public String readAuthTokenFromDatabase(Account account, String authTokenType) {
+        if (account == null || authTokenType == null) {
+            return null;
+        }
         SQLiteDatabase db = mOpenHelper.getReadableDatabase();
         Cursor cursor = db.query(TABLE_AUTHTOKENS, new String[]{AUTHTOKENS_AUTHTOKEN},
                 AUTHTOKENS_ACCOUNTS_ID + "=(select _id FROM accounts WHERE name=? AND type=?) AND "
@@ -586,6 +599,9 @@ public class AccountManagerService
     }
 
     private void setPasswordInDB(Account account, String password) {
+        if (account == null) {
+            return;
+        }
         ContentValues values = new ContentValues();
         values.put(ACCOUNTS_PASSWORD, password);
         mOpenHelper.getWritableDatabase().update(TABLE_ACCOUNTS, values,
@@ -608,23 +624,12 @@ public class AccountManagerService
         }
     }
 
-    private void sendResult(IAccountManagerResponse response, Bundle bundle) {
-        if (response != null) {
-            try {
-                response.onResult(bundle);
-            } catch (RemoteException e) {
-                // if the caller is dead then there is no one to care about remote
-                // exceptions
-                if (Log.isLoggable(TAG, Log.VERBOSE)) {
-                    Log.v(TAG, "failure while notifying response", e);
-                }
-            }
-        }
-    }
-
     public void setUserData(Account account, String key, String value) {
         checkAuthenticateAccountsPermission(account);
         long identityToken = clearCallingIdentity();
+        if (account == null) {
+            return;
+        }
         if (account.type.equals(GOOGLE_ACCOUNT_TYPE) && key.equals("broadcast")) {
             sendAccountsChangedBroadcast();
             return;
@@ -637,6 +642,9 @@ public class AccountManagerService
     }
 
     private void writeUserdataIntoDatabase(Account account, String key, String value) {
+        if (account == null || key == null) {
+            return;
+        }
         SQLiteDatabase db = mOpenHelper.getWritableDatabase();
         db.beginTransaction();
         try {
@@ -1565,8 +1573,10 @@ public class AccountManagerService
     }
 
     private boolean permissionIsGranted(Account account, String authTokenType, int callerUid) {
-        final boolean fromAuthenticator = hasAuthenticatorUid(account.type, callerUid);
-        final boolean hasExplicitGrants = hasExplicitlyGrantedPermission(account, authTokenType);
+        final boolean fromAuthenticator = account != null
+                && hasAuthenticatorUid(account.type, callerUid);
+        final boolean hasExplicitGrants = account != null
+                && hasExplicitlyGrantedPermission(account, authTokenType);
         if (Log.isLoggable(TAG, Log.VERBOSE)) {
             Log.v(TAG, "checkGrantsOrCallingUidAgainstAuthenticator: caller uid "
                     + callerUid + ", account " + account
@@ -1610,7 +1620,7 @@ public class AccountManagerService
 
     private void checkCallingUidAgainstAuthenticator(Account account) {
         final int uid = Binder.getCallingUid();
-        if (!hasAuthenticatorUid(account.type, uid)) {
+        if (account == null || !hasAuthenticatorUid(account.type, uid)) {
             String msg = "caller uid " + uid + " is different than the authenticator's uid";
             Log.w(TAG, msg);
             throw new SecurityException(msg);
@@ -1641,6 +1651,9 @@ public class AccountManagerService
      * @hide
      */
     public void grantAppPermission(Account account, String authTokenType, int uid) {
+        if (account == null  || authTokenType == null) {
+            return;
+        }
         SQLiteDatabase db = mOpenHelper.getWritableDatabase();
         db.beginTransaction();
         try {
@@ -1668,6 +1681,9 @@ public class AccountManagerService
      * @hide
      */
     public void revokeAppPermission(Account account, String authTokenType, int uid) {
+        if (account == null  || authTokenType == null) {
+            return;
+        }
         SQLiteDatabase db = mOpenHelper.getWritableDatabase();
         db.beginTransaction();
         try {

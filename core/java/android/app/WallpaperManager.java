@@ -53,11 +53,12 @@ import java.io.InputStream;
 public class WallpaperManager {
     private static String TAG = "WallpaperManager";
     private static boolean DEBUG = false;
+    private float mWallpaperXStep = -1;
+    private float mWallpaperYStep = -1;
 
     /**
      * Launch an activity for the user to pick the current global live
      * wallpaper.
-     * @hide Live Wallpaper
      */
     public static final String ACTION_LIVE_WALLPAPER_CHOOSER
             = "android.service.wallpaper.LIVE_WALLPAPER_CHOOSER";
@@ -194,7 +195,12 @@ public class WallpaperManager {
                 if (mDefaultWallpaper != null) {
                     return mDefaultWallpaper;
                 }
-                mWallpaper = getCurrentWallpaperLocked(context);
+                mWallpaper = null;
+                try {
+                    mWallpaper = getCurrentWallpaperLocked(context);
+                } catch (OutOfMemoryError e) {
+                    Log.w(TAG, "No memory load current wallpaper", e);
+                }
                 if (mWallpaper == null && returnDefault) {
                     mDefaultWallpaper = getDefaultWallpaperLocked(context);
                     return mDefaultWallpaper;
@@ -278,7 +284,12 @@ public class WallpaperManager {
                     } catch (IOException e) {
                     }
                     
-                    return generateBitmap(context, bm, width, height);
+                    try {
+                        return generateBitmap(context, bm, width, height);
+                    } catch (OutOfMemoryError e) {
+                        Log.w(TAG, "Can't generate default bitmap", e);
+                        return bm;
+                    }
                 }
             } catch (RemoteException e) {
             }
@@ -395,7 +406,6 @@ public class WallpaperManager {
      * If the current wallpaper is a live wallpaper component, return the
      * information about that wallpaper.  Otherwise, if it is a static image,
      * simply return null.
-     * @hide Live Wallpaper
      */
     public WallpaperInfo getWallpaperInfo() {
         try {
@@ -577,14 +587,52 @@ public class WallpaperManager {
      * @param windowToken The window who these offsets should be associated
      * with, as returned by {@link android.view.View#getWindowToken()
      * View.getWindowToken()}.
-     * @param xOffset The offset olong the X dimension, from 0 to 1.
+     * @param xOffset The offset along the X dimension, from 0 to 1.
      * @param yOffset The offset along the Y dimension, from 0 to 1.
      */
     public void setWallpaperOffsets(IBinder windowToken, float xOffset, float yOffset) {
         try {
             //Log.v(TAG, "Sending new wallpaper offsets from app...");
             ViewRoot.getWindowSession(mContext.getMainLooper()).setWallpaperPosition(
-                    windowToken, xOffset, yOffset);
+                    windowToken, xOffset, yOffset, mWallpaperXStep, mWallpaperYStep);
+            //Log.v(TAG, "...app returning after sending offsets!");
+        } catch (RemoteException e) {
+            // Ignore.
+        }
+    }
+    
+    /**
+     * For applications that use multiple virtual screens showing a wallpaper,
+     * specify the step size between virtual screens. For example, if the
+     * launcher has 5 virtual screens, it would specify an xStep of 0.5,
+     * since the X offset for those screens are 0.0, 0.5 and 1.0
+     * @param xStep The X offset delta from one screen to the next one 
+     * @param yStep The Y offset delta from one screen to the next one
+     */
+    public void setWallpaperOffsetSteps(float xStep, float yStep) {
+        mWallpaperXStep = xStep;
+        mWallpaperYStep = yStep;
+    }
+    
+    /**
+     * Send an arbitrary command to the current active wallpaper.
+     * 
+     * @param windowToken The window who these offsets should be associated
+     * with, as returned by {@link android.view.View#getWindowToken()
+     * View.getWindowToken()}.
+     * @param action Name of the command to perform.  This must be a scoped
+     * name to avoid collisions, such as "com.mycompany.wallpaper.DOIT".
+     * @param x Arbitrary integer argument based on command.
+     * @param y Arbitrary integer argument based on command.
+     * @param z Arbitrary integer argument based on command.
+     * @param extras Optional additional information for the command, or null.
+     */
+    public void sendWallpaperCommand(IBinder windowToken, String action,
+            int x, int y, int z, Bundle extras) {
+        try {
+            //Log.v(TAG, "Sending new wallpaper offsets from app...");
+            ViewRoot.getWindowSession(mContext.getMainLooper()).sendWallpaperCommand(
+                    windowToken, action, x, y, z, extras, false);
             //Log.v(TAG, "...app returning after sending offsets!");
         } catch (RemoteException e) {
             // Ignore.
@@ -604,7 +652,7 @@ public class WallpaperManager {
     public void clearWallpaperOffsets(IBinder windowToken) {
         try {
             ViewRoot.getWindowSession(mContext.getMainLooper()).setWallpaperPosition(
-                    windowToken, -1, -1);
+                    windowToken, -1, -1, -1, -1);
         } catch (RemoteException e) {
             // Ignore.
         }

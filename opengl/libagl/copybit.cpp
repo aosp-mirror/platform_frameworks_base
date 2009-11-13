@@ -33,6 +33,10 @@
 #include <hardware/copybit.h>
 #include <private/ui/android_natives_priv.h>
 
+#include <ui/GraphicBuffer.h>
+#include <ui/Region.h>
+#include <ui/Rect.h>
+
 
 #define DEBUG_COPYBIT true
 
@@ -41,13 +45,25 @@
 namespace android {
 
 static void textureToCopyBitImage(
-        const GGLSurface* surface, buffer_handle_t buffer, copybit_image_t* img) 
+        const GGLSurface* surface, int32_t opFormat, 
+        android_native_buffer_t* buffer, copybit_image_t* img)
 {
+    uint32_t vstride = 0;
+    if (opFormat == COPYBIT_FORMAT_YCbCr_422_SP ||
+            opFormat == COPYBIT_FORMAT_YCbCr_420_SP) {
+        // NOTE: this static_cast is really not safe b/c we can't know for
+        // sure the buffer passed is of the right type.
+        // However, since we do this only for YUV formats, we should be safe
+        // since only SurfaceFlinger makes use of them.
+        GraphicBuffer* graphicBuffer = static_cast<GraphicBuffer*>(buffer);
+        vstride = graphicBuffer->getVerticalStride();
+    }
+
     img->w      = surface->stride;
-    img->h      = surface->height;
-    img->format = surface->format;
+    img->h      = vstride ? vstride : surface->height;
+    img->format = opFormat;
     img->base   = surface->data;
-    img->handle = (native_handle_t *)buffer;
+    img->handle = (native_handle_t *)buffer->handle;
 }
 
 struct clipRectRegion : public copybit_region_t {
@@ -69,6 +85,7 @@ private:
     static int iterate_done(copybit_region_t const *, copybit_rect_t*) {
         return 0;
     }
+public:
     copybit_rect_t r;
 };
 
@@ -149,6 +166,8 @@ static bool copybit(GLint x, GLint y,
         int transform,
         ogles_context_t* c)
 {
+    status_t err = NO_ERROR;
+
     // We assume checkContext has already been called and has already
     // returned true.
 
@@ -174,16 +193,6 @@ static bool copybit(GLint x, GLint y,
         dtdy /= screen_h;
     }
     dtdy = -dtdy; // see equation of dtdy above
-    if (dsdx < c->copybits.minScale || dsdx > c->copybits.maxScale
-            || dtdy < c->copybits.minScale || dtdy > c->copybits.maxScale) {
-        // The requested scale is out of the range the hardware
-        // can support.
-        LOGD_IF(DEBUG_COPYBIT,
-                "scale out of range dsdx=%08x (Wcr=%d / w=%d), "
-                "dtdy=%08x (Hcr=%d / h=%d), Ucr=%d, Vcr=%d", 
-                dsdx, Wcr, w, dtdy, Hcr, h, Ucr, Vcr);
-        return false;
-    }
 
     // copybit doesn't say anything about filtering, so we can't
     // discriminate. On msm7k, copybit will always filter.
@@ -205,41 +214,16 @@ static bool copybit(GLint x, GLint y,
     
     const uint32_t enables = c->rasterizer.state.enables;
     int planeAlpha = 255;
+    bool alphaPlaneWorkaround = false;
     static const int tmu = 0;
     texture_t& tev(c->rasterizer.state.texture[tmu]);
-    bool srcTextureHasAlpha = hasAlpha(textureObject->surface.format);
+    int32_t opFormat = textureObject->surface.format;
+    const bool srcTextureHasAlpha = hasAlpha(opFormat);
     if (!srcTextureHasAlpha) {
         planeAlpha = fixedToByte(c->currentColorClamped.a);
     }
 
-    switch (tev.env) {
-    case GGL_REPLACE:
-        break;
-    case GGL_MODULATE:
-        if (! (c->currentColorClamped.r == FIXED_ONE &&
-               c->currentColorClamped.g == FIXED_ONE &&
-               c->currentColorClamped.b == FIXED_ONE)) {
-            LOGD_IF(DEBUG_COPYBIT, 
-                    "MODULATE and non white color (%08x, %08x, %08x)",
-                    c->currentColorClamped.r,
-                    c->currentColorClamped.g,
-                    c->currentColorClamped.b);
-            return false;
-        }
-        if (srcTextureHasAlpha && c->currentColorClamped.a < FIXED_ONE) {
-            LOGD_IF(DEBUG_COPYBIT, 
-                    "MODULATE and texture w/alpha and alpha=%08x)",
-                    c->currentColorClamped.a);
-            return false;
-        }
-        break;
-
-    default:
-        // Incompatible texture environment.
-        LOGD_IF(DEBUG_COPYBIT, "incompatible texture environment");
-        return false;
-    }
-
+    const bool cbHasAlpha = hasAlpha(cbSurface.format);
     bool blending = false;
     if ((enables & GGL_ENABLE_BLENDING)
             && !(c->rasterizer.state.blend.src == GL_ONE
@@ -262,41 +246,228 @@ static bool copybit(GLint x, GLint y,
         }
         blending = true;
     } else {
-        // No blending is OK if we are not using alpha.
-        if (srcTextureHasAlpha || planeAlpha != 255) {
-            // Incompatible alpha
-            LOGD_IF(DEBUG_COPYBIT, "incompatible alpha");
-            return false;
+        if (cbHasAlpha) {
+            // NOTE: the result will be slightly wrong in this case because
+            // the destination alpha channel will be set to 1.0 instead of
+            // the iterated alpha value. *shrug*.
+        }
+        // disable plane blending and src blending for supported formats
+        planeAlpha = 255;
+        if (opFormat == COPYBIT_FORMAT_RGBA_8888) {
+            opFormat = COPYBIT_FORMAT_RGBX_8888;
+        } else {
+            if (srcTextureHasAlpha) {
+                LOGD_IF(DEBUG_COPYBIT, "texture format requires blending");
+                return false;
+            }
         }
     }
 
-    if (srcTextureHasAlpha && planeAlpha != 255) {
-        // Can't do two types of alpha at once.
-        LOGD_IF(DEBUG_COPYBIT, "src alpha and plane alpha");
+    switch (tev.env) {
+    case GGL_REPLACE:
+        break;
+    case GGL_MODULATE:
+        // only cases allowed is:
+        // RGB  source, color={1,1,1,a} -> can be done with GL_REPLACE
+        // RGBA source, color={1,1,1,1} -> can be done with GL_REPLACE
+        if (blending) {
+            if (c->currentColorClamped.r == c->currentColorClamped.a &&
+                c->currentColorClamped.g == c->currentColorClamped.a &&
+                c->currentColorClamped.b == c->currentColorClamped.a) {
+                // TODO: RGBA source, color={1,1,1,a} / regular-blending
+                // is equivalent
+                alphaPlaneWorkaround = true;
+                break;
+            }
+        }
+        LOGD_IF(DEBUG_COPYBIT, "GGL_MODULATE");
+        return false;
+    default:
+        // Incompatible texture environment.
+        LOGD_IF(DEBUG_COPYBIT, "incompatible texture environment");
         return false;
     }
 
-    // LOGW("calling copybits");
-
     copybit_device_t* copybit = c->copybits.blitEngine;
-
-    copybit_image_t dst;
-    buffer_handle_t target_hnd = c->copybits.drawSurfaceBuffer;
-    textureToCopyBitImage(&cbSurface, target_hnd, &dst);
-    copybit_rect_t drect = {x, y, x+w, y+h};
-
     copybit_image_t src;
-    buffer_handle_t source_hnd = textureObject->buffer->handle;
-    textureToCopyBitImage(&textureObject->surface, source_hnd, &src);
+    textureToCopyBitImage(&textureObject->surface, opFormat,
+            textureObject->buffer, &src);
     copybit_rect_t srect = { Ucr, Vcr + Hcr, Ucr + Wcr, Vcr };
 
-    copybit->set_parameter(copybit, COPYBIT_TRANSFORM, transform);
-    copybit->set_parameter(copybit, COPYBIT_PLANE_ALPHA, planeAlpha);
-    copybit->set_parameter(copybit, COPYBIT_DITHER,
-            (enables & GGL_ENABLE_DITHER) ? COPYBIT_ENABLE : COPYBIT_DISABLE);
+    /*
+     *  Below we perform extra passes needed to emulate things the h/w
+     * cannot do.
+     */
 
-    clipRectRegion it(c);
-    status_t err = copybit->stretch(copybit, &dst, &src, &drect, &srect, &it);
+    const GLfixed minScaleInv = gglDivQ(0x10000, c->copybits.minScale, 16);
+    const GLfixed maxScaleInv = gglDivQ(0x10000, c->copybits.maxScale, 16);
+
+    sp<GraphicBuffer> tempBitmap;
+
+    if (dsdx < maxScaleInv || dsdx > minScaleInv ||
+        dtdy < maxScaleInv || dtdy > minScaleInv)
+    {
+        // The requested scale is out of the range the hardware
+        // can support.
+        LOGD_IF(DEBUG_COPYBIT,
+                "scale out of range dsdx=%08x (Wcr=%d / w=%d), "
+                "dtdy=%08x (Hcr=%d / h=%d), Ucr=%d, Vcr=%d",
+                dsdx, Wcr, w, dtdy, Hcr, h, Ucr, Vcr);
+
+        int32_t xscale=0x10000, yscale=0x10000;
+        if (dsdx > minScaleInv)         xscale = c->copybits.minScale;
+        else if (dsdx < maxScaleInv)    xscale = c->copybits.maxScale;
+        if (dtdy > minScaleInv)         yscale = c->copybits.minScale;
+        else if (dtdy < maxScaleInv)    yscale = c->copybits.maxScale;
+        dsdx = gglMulx(dsdx, xscale);
+        dtdy = gglMulx(dtdy, yscale);
+
+        /* we handle only one step of resizing below. Handling an arbitrary
+         * number is relatively easy (replace "if" above by "while"), but requires
+         * two intermediate buffers and so far we never had the need.
+         */
+
+        if (dsdx < maxScaleInv || dsdx > minScaleInv ||
+            dtdy < maxScaleInv || dtdy > minScaleInv) {
+            LOGD_IF(DEBUG_COPYBIT,
+                    "scale out of range dsdx=%08x (Wcr=%d / w=%d), "
+                    "dtdy=%08x (Hcr=%d / h=%d), Ucr=%d, Vcr=%d",
+                    dsdx, Wcr, w, dtdy, Hcr, h, Ucr, Vcr);
+            return false;
+        }
+
+        const int tmp_w = gglMulx(srect.r - srect.l, xscale, 16);
+        const int tmp_h = gglMulx(srect.b - srect.t, yscale, 16);
+
+        LOGD_IF(DEBUG_COPYBIT,
+                "xscale=%08x, yscale=%08x, dsdx=%08x, dtdy=%08x, tmp_w=%d, tmp_h=%d",
+                xscale, yscale, dsdx, dtdy, tmp_w, tmp_h);
+
+        tempBitmap = new GraphicBuffer(
+                    tmp_w, tmp_h, src.format,
+                    GraphicBuffer::USAGE_HW_2D);
+
+        err = tempBitmap->initCheck();
+        if (err == NO_ERROR) {
+            copybit_image_t tmp_dst;
+            copybit_rect_t tmp_rect;
+            tmp_dst.w = tmp_w;
+            tmp_dst.h = tmp_h;
+            tmp_dst.format = tempBitmap->format;
+            tmp_dst.handle = (native_handle_t*)tempBitmap->getNativeBuffer()->handle;
+            tmp_rect.l = 0;
+            tmp_rect.t = 0;
+            tmp_rect.r = tmp_dst.w;
+            tmp_rect.b = tmp_dst.h;
+            region_iterator tmp_it(Region(Rect(tmp_rect.r, tmp_rect.b)));
+            copybit->set_parameter(copybit, COPYBIT_TRANSFORM, 0);
+            copybit->set_parameter(copybit, COPYBIT_PLANE_ALPHA, 0xFF);
+            copybit->set_parameter(copybit, COPYBIT_DITHER, COPYBIT_DISABLE);
+            err = copybit->stretch(copybit,
+                    &tmp_dst, &src, &tmp_rect, &srect, &tmp_it);
+            src = tmp_dst;
+            srect = tmp_rect;
+        }
+    }
+
+    copybit_image_t dst;
+    textureToCopyBitImage(&cbSurface, cbSurface.format,
+            c->copybits.drawSurfaceBuffer, &dst);
+    copybit_rect_t drect = {x, y, x+w, y+h};
+
+
+    /* and now the alpha-plane hack. This handles the "Fade" case of a
+     * texture with an alpha channel.
+     */
+    if (alphaPlaneWorkaround) {
+        sp<GraphicBuffer> tempCb = new GraphicBuffer(
+                    w, h, COPYBIT_FORMAT_RGB_565,
+                    GraphicBuffer::USAGE_HW_2D);
+
+        err = tempCb->initCheck();
+
+        copybit_image_t tmpCbImg;
+        copybit_rect_t tmpCbRect;
+        copybit_rect_t tmpdrect = drect;
+        tmpCbImg.w = w;
+        tmpCbImg.h = h;
+        tmpCbImg.format = tempCb->format;
+        tmpCbImg.handle = (native_handle_t*)tempCb->getNativeBuffer()->handle;
+        tmpCbRect.l = 0;
+        tmpCbRect.t = 0;
+
+        if (drect.l < 0) {
+            tmpCbRect.l = -tmpdrect.l;
+            tmpdrect.l = 0;
+        }
+        if (drect.t < 0) {
+            tmpCbRect.t = -tmpdrect.t;
+            tmpdrect.t = 0;
+        }
+        if (drect.l + tmpCbImg.w > dst.w) {
+            tmpCbImg.w = dst.w - drect.l;
+            tmpdrect.r = dst.w;
+        }
+        if (drect.t + tmpCbImg.h > dst.h) {
+            tmpCbImg.h = dst.h - drect.t;
+            tmpdrect.b = dst.h;
+        }
+
+        tmpCbRect.r = tmpCbImg.w;
+        tmpCbRect.b = tmpCbImg.h;
+
+        if (!err) {
+            // first make a copy of the destination buffer
+            region_iterator tmp_it(Region(Rect(w, h)));
+            copybit->set_parameter(copybit, COPYBIT_TRANSFORM, 0);
+            copybit->set_parameter(copybit, COPYBIT_PLANE_ALPHA, 0xFF);
+            copybit->set_parameter(copybit, COPYBIT_DITHER, COPYBIT_DISABLE);
+            err = copybit->stretch(copybit,
+                    &tmpCbImg, &dst, &tmpCbRect, &tmpdrect, &tmp_it);
+        }
+        if (!err) {
+            // then proceed as usual, but without the alpha plane
+            copybit->set_parameter(copybit, COPYBIT_TRANSFORM, transform);
+            copybit->set_parameter(copybit, COPYBIT_PLANE_ALPHA, 0xFF);
+            copybit->set_parameter(copybit, COPYBIT_DITHER,
+                    (enables & GGL_ENABLE_DITHER) ?
+                            COPYBIT_ENABLE : COPYBIT_DISABLE);
+            clipRectRegion it(c);
+            err = copybit->stretch(copybit, &dst, &src, &drect, &srect, &it);
+        }
+        if (!err) {
+            // finally copy back the destination on top with 1-alphaplane
+            int invPlaneAlpha = 0xFF - fixedToByte(c->currentColorClamped.a);
+            clipRectRegion it(c);
+            copybit->set_parameter(copybit, COPYBIT_TRANSFORM, 0);
+            copybit->set_parameter(copybit, COPYBIT_PLANE_ALPHA, invPlaneAlpha);
+            copybit->set_parameter(copybit, COPYBIT_DITHER, COPYBIT_ENABLE);
+            err = copybit->stretch(copybit,
+                    &dst, &tmpCbImg, &tmpdrect, &tmpCbRect, &it);
+        }
+    } else {
+        copybit->set_parameter(copybit, COPYBIT_TRANSFORM, transform);
+        copybit->set_parameter(copybit, COPYBIT_PLANE_ALPHA, planeAlpha);
+        copybit->set_parameter(copybit, COPYBIT_DITHER,
+                (enables & GGL_ENABLE_DITHER) ?
+                        COPYBIT_ENABLE : COPYBIT_DISABLE);
+        clipRectRegion it(c);
+
+        LOGD_IF(0,
+             "dst={%d, %d, %d, %p, %p}, "
+             "src={%d, %d, %d, %p, %p}, "
+             "drect={%d,%d,%d,%d}, "
+             "srect={%d,%d,%d,%d}, "
+             "it={%d,%d,%d,%d}, " ,
+             dst.w, dst.h, dst.format, dst.base, dst.handle,
+             src.w, src.h, src.format, src.base, src.handle,
+             drect.l, drect.t, drect.r, drect.b,
+             srect.l, srect.t, srect.r, srect.b,
+             it.r.l, it.r.t, it.r.r, it.r.b
+        );
+
+        err = copybit->stretch(copybit, &dst, &src, &drect, &srect, &it);
+    }
     if (err != NO_ERROR) {
         c->textures.tmu[0].texture->try_copybit = false;
     }

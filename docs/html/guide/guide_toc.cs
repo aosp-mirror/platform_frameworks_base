@@ -98,7 +98,7 @@
       </li>
       <li class="toggle-list">
         <div><a href="<?cs var:toroot ?>guide/topics/resources/index.html">
-               <span class="en">Resources and Assests</span> 
+               <span class="en">Resources and Assets</span> 
              </a></div>
         <ul>
           <li><a href="<?cs var:toroot ?>guide/topics/resources/resources-i18n.html">
@@ -255,6 +255,7 @@
       		<li><a href="<?cs var:toroot ?>guide/developing/tools/draw9patch.html">Draw 9-Patch</a></li>
       		<li><a href="<?cs var:toroot ?>guide/developing/tools/emulator.html">Emulator</a></li>
       		<li><a href="<?cs var:toroot ?>guide/developing/tools/hierarchy-viewer.html">Hierarchy Viewer</a></li>
+      		<li><a href="<?cs var:toroot ?>guide/developing/tools/layoutopt.html">layoutopt</a></li>
       		<li><a href="<?cs var:toroot ?>guide/developing/tools/othertools.html#mksdcard">mksdcard</a></li>
       		<li><a href="<?cs var:toroot ?>guide/developing/tools/monkey.html">Monkey</a></li>
       		<li><a href="<?cs var:toroot ?>guide/developing/tools/adb.html#sqlite">sqlite3</a></li>
@@ -325,6 +326,9 @@
                <span class="zh-TW">最佳實務</span>
     </h2>
     <ul>
+      <li><a href="<?cs var:toroot ?>guide/practices/screens_support.html">
+            <span class="en">Supporting Multiple Screens</span>
+          </a></li>
       <li class="toggle-list">
         <div><a href="<?cs var:toroot ?>guide/practices/ui_guidelines/index.html">
                <span class="en">UI Guidelines</span>
@@ -344,6 +348,8 @@
               </a></li>
         </ul>
       </li>
+      </ul>
+      <ul>
       <li><a href="<?cs var:toroot ?>guide/practices/design/performance.html">
             <span class="en">Designing for Performance</span>
           </a></li>

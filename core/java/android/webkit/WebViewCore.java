@@ -1643,8 +1643,6 @@ final class WebViewCore {
 
     final DrawFilter mZoomFilter =
                     new PaintFlagsDrawFilter(ZOOM_BITS, Paint.LINEAR_TEXT_FLAG);
-    final DrawFilter mScrollFilter =
-                    new PaintFlagsDrawFilter(SCROLL_BITS, 0);
 
     /* package */ void drawContentPicture(Canvas canvas, int color,
                                           boolean animatingZoom,
@@ -1653,7 +1651,7 @@ final class WebViewCore {
         if (animatingZoom) {
             df = mZoomFilter;
         } else if (animatingScroll) {
-            df = mScrollFilter;
+            df = null;
         }
         canvas.setDrawFilter(df);
         boolean tookTooLong = nativeDrawContent(canvas, color);

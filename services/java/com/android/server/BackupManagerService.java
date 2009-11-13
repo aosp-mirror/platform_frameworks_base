@@ -76,6 +76,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 class BackupManagerService extends IBackupManager.Stub {
     private static final String TAG = "BackupManagerService";
@@ -84,6 +85,9 @@ class BackupManagerService extends IBackupManager.Stub {
     // How often we perform a backup pass.  Privileged external callers can
     // trigger an immediate pass.
     private static final long BACKUP_INTERVAL = AlarmManager.INTERVAL_HOUR;
+
+    // Random variation in backup scheduling time to avoid server load spikes
+    private static final int FUZZ_MILLIS = 5 * 60 * 1000;
 
     // The amount of time between the initial provisioning of the device and
     // the first backup pass.
@@ -1256,9 +1260,20 @@ class BackupManagerService extends IBackupManager.Stub {
 
     // ----- Restore handling -----
 
-    private boolean signaturesMatch(Signature[] storedSigs, Signature[] deviceSigs) {
+    private boolean signaturesMatch(Signature[] storedSigs, PackageInfo target) {
+        // If the target resides on the system partition, we allow it to restore
+        // data from the like-named package in a restore set even if the signatures
+        // do not match.  (Unlike general applications, those flashed to the system
+        // partition will be signed with the device's platform certificate, so on
+        // different phones the same system app will have different signatures.)
+        if ((target.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0) {
+            if (DEBUG) Log.v(TAG, "System app " + target.packageName + " - skipping sig check");
+            return true;
+        }
+
         // Allow unsigned apps, but not signed on one device and unsigned on the other
         // !!! TODO: is this the right policy?
+        Signature[] deviceSigs = target.signatures;
         if (DEBUG) Log.v(TAG, "signaturesMatch(): stored=" + storedSigs
                 + " device=" + deviceSigs);
         if ((storedSigs == null || storedSigs.length == 0)
@@ -1461,7 +1476,7 @@ class BackupManagerService extends IBackupManager.Stub {
                         continue;
                     }
 
-                    if (!signaturesMatch(metaInfo.signatures, packageInfo.signatures)) {
+                    if (!signaturesMatch(metaInfo.signatures, packageInfo)) {
                         Log.w(TAG, "Signature mismatch restoring " + packageName);
                         EventLog.writeEvent(RESTORE_AGENT_FAILURE_EVENT, packageName,
                                 "Signature mismatch");
@@ -1949,9 +1964,15 @@ class BackupManagerService extends IBackupManager.Stub {
     }
 
     private void startBackupAlarmsLocked(long delayBeforeFirstBackup) {
-        long when = System.currentTimeMillis() + delayBeforeFirstBackup;
-        mAlarmManager.setInexactRepeating(AlarmManager.RTC_WAKEUP, when,
-                BACKUP_INTERVAL, mRunBackupIntent);
+        // We used to use setInexactRepeating(), but that may be linked to
+        // backups running at :00 more often than not, creating load spikes.
+        // Schedule at an exact time for now, and also add a bit of "fuzz".
+
+        Random random = new Random();
+        long when = System.currentTimeMillis() + delayBeforeFirstBackup +
+                random.nextInt(FUZZ_MILLIS);
+        mAlarmManager.setRepeating(AlarmManager.RTC_WAKEUP, when,
+                BACKUP_INTERVAL + random.nextInt(FUZZ_MILLIS), mRunBackupIntent);
         mNextBackupPass = when;
     }
 

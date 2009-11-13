@@ -80,11 +80,13 @@ public:
     void setValues(bool val) { mValues = val; }
     int getCompressionMethod(void) const { return mCompressionMethod; }
     void setCompressionMethod(int val) { mCompressionMethod = val; }
+    bool getJunkPath(void) const { return mJunkPath; }
+    void setJunkPath(bool val) { mJunkPath = val; }
     const char* getOutputAPKFile() const { return mOutputAPKFile; }
     void setOutputAPKFile(const char* val) { mOutputAPKFile = val; }
 
-    /*                                                                
-     * Input options.                                                                
+    /*
+     * Input options.
      */
     const char* getAssetSourceDir() const { return mAssetSourceDir; }
     void setAssetSourceDir(const char* dir) { mAssetSourceDir = dir; }
@@ -119,7 +121,7 @@ public:
     void setVersionCode(const char*  val) { mVersionCode = val; }
     const char* getVersionName() const { return mVersionName; }
     void setVersionName(const char* val) { mVersionName = val; }
-    
+
     /*
      * Set and get the file specification.
      *
@@ -161,6 +163,7 @@ private:
     bool        mPseudolocalize;
     bool        mValues;
     int         mCompressionMethod;
+    bool        mJunkPath;
     const char* mOutputAPKFile;
     const char* mAssetSourceDir;
     const char* mProguardFile;
@@ -173,13 +176,13 @@ private:
     android::Vector<const char*> mJarFiles;
     android::Vector<const char*> mNoCompressExtensions;
     android::Vector<const char*> mResourceSourceDirs;
-    
+
     const char* mMinSdkVersion;
     const char* mTargetSdkVersion;
     const char* mMaxSdkVersion;
     const char* mVersionCode;
     const char* mVersionName;
-    
+
     /* file specification */
     int         mArgc;
     char* const* mArgv;

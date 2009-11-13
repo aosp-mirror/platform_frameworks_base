@@ -52,6 +52,19 @@ Allocation::Allocation(Context *rsc, const Type *type) : ObjectBase(rsc)
 
 Allocation::~Allocation()
 {
+    free(mPtr);
+    mPtr = NULL;
+
+    if (mBufferID) {
+        // Causes a SW crash....
+        //LOGV(" mBufferID %i", mBufferID);
+        //glDeleteBuffers(1, &mBufferID);
+        //mBufferID = 0;
+    }
+    if (mTextureID) {
+        glDeleteTextures(1, &mTextureID);
+        mTextureID = 0;
+    }
 }
 
 void Allocation::setCpuWritable(bool)
@@ -91,6 +104,7 @@ void Allocation::uploadToTexture(uint32_t lodOffset)
         glGenTextures(1, &mTextureID);
     }
     glBindTexture(GL_TEXTURE_2D, mTextureID);
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
     Adapter2D adapt(getContext(), this);
     for(uint32_t lod = 0; (lod + lodOffset) < mType->getLODCount(); lod++) {
@@ -405,7 +419,7 @@ RsAllocation rsi_AllocationCreateFromBitmapBoxed(Context *rsc, uint32_t w, uint3
     const uint8_t * src = static_cast<const uint8_t *>(data);
     for (uint32_t y = 0; y < h; y++) {
         uint8_t * ydst = &tmp[(y + ((h2 - h) >> 1)) * w2 * bpp];
-        memcpy(&ydst[(w2 - w) >> 1], src, w * bpp);
+        memcpy(&ydst[((w2 - w) >> 1) * bpp], src, w * bpp);
         src += w * bpp;
     }
 

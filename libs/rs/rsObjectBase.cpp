@@ -39,6 +39,7 @@ ObjectBase::~ObjectBase()
     rsAssert(!mUserRefCount);
     rsAssert(!mSysRefCount);
     remove();
+    delete[] mName;
 }
 
 void ObjectBase::dumpLOGV(const char *op) const
@@ -112,12 +113,7 @@ bool ObjectBase::decSysRef() const
 
 void ObjectBase::setName(const char *name)
 {
-    delete mName;
-    mName = NULL;
-    if (name) {
-        mName = new char[strlen(name) +1];
-        strcpy(mName, name);
-    }
+    setName(name, strlen(name));
 }
 
 void ObjectBase::setName(const char *name, uint32_t len)

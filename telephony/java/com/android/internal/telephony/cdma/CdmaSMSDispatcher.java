@@ -41,6 +41,7 @@ import com.android.internal.telephony.CommandsInterface;
 import com.android.internal.telephony.SmsHeader;
 import com.android.internal.telephony.SmsMessageBase;
 import com.android.internal.telephony.SMSDispatcher;
+import com.android.internal.telephony.SmsMessageBase.TextEncodingDetails;
 import com.android.internal.telephony.cdma.SmsMessage;
 import com.android.internal.telephony.cdma.sms.SmsEnvelope;
 import com.android.internal.telephony.cdma.sms.UserData;
@@ -100,6 +101,7 @@ final class CdmaSMSDispatcher extends SMSDispatcher {
 
         // If sms is null, means there was a parsing error.
         if (smsb == null) {
+            Log.e(TAG, "dispatchMessage: message is null");
             return Intents.RESULT_SMS_GENERIC_ERROR;
         }
 
@@ -365,8 +367,19 @@ final class CdmaSMSDispatcher extends SMSDispatcher {
          */
 
         int refNumber = getNextConcatenatedRef() & 0x00FF;
+        int msgCount = parts.size();
+        int encoding = android.telephony.SmsMessage.ENCODING_UNKNOWN;
 
-        for (int i = 0, msgCount = parts.size(); i < msgCount; i++) {
+        for (int i = 0; i < msgCount; i++) {
+            TextEncodingDetails details = SmsMessage.calculateLength(parts.get(i), false);
+            if (encoding != details.codeUnitSize
+                    && (encoding == android.telephony.SmsMessage.ENCODING_UNKNOWN
+                            || encoding == android.telephony.SmsMessage.ENCODING_7BIT)) {
+                encoding = details.codeUnitSize;
+            }
+        }
+
+        for (int i = 0; i < msgCount; i++) {
             SmsHeader.ConcatRef concatRef = new SmsHeader.ConcatRef();
             concatRef.refNumber = refNumber;
             concatRef.seqNumber = i + 1;  // 1-based sequence
@@ -388,6 +401,12 @@ final class CdmaSMSDispatcher extends SMSDispatcher {
             UserData uData = new UserData();
             uData.payloadStr = parts.get(i);
             uData.userDataHeader = smsHeader;
+            if (encoding == android.telephony.SmsMessage.ENCODING_7BIT) {
+                uData.msgEncoding = UserData.ENCODING_GSM_7BIT_ALPHABET;
+            } else { // assume UTF-16
+                uData.msgEncoding = UserData.ENCODING_UNICODE_16;
+            }
+            uData.msgEncodingSet = true;
 
             /* By setting the statusReportRequested bit only for the
              * last message fragment, this will result in only one
@@ -480,7 +499,7 @@ final class CdmaSMSDispatcher extends SMSDispatcher {
             return CommandsInterface.CDMA_SMS_FAIL_CAUSE_INVALID_TELESERVICE_ID;
         case Intents.RESULT_SMS_GENERIC_ERROR:
         default:
-            return CommandsInterface.CDMA_SMS_FAIL_CAUSE_OTHER_TERMINAL_PROBLEM;
+            return CommandsInterface.CDMA_SMS_FAIL_CAUSE_ENCODING_PROBLEM;
         }
     }
 }

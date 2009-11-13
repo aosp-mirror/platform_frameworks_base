@@ -846,6 +846,12 @@ public class CdmaSmsTest extends AndroidTestCase {
             ArrayList<String> fragments = android.telephony.SmsMessage.fragmentText(text1);
             assertEquals(fragments.size(), 1);
         }
+
+        /*
+           This is not a valid test: we will never encode a single-segment
+           EMS message.  Leaving this here, since we may try to support
+           this in the future.
+
         // Valid 160 character GSM text -- the last character is
         // non-ASCII, and so this will currently generate a singleton
         // EMS message, which is not necessarily supported by Verizon.
@@ -860,5 +866,22 @@ public class CdmaSmsTest extends AndroidTestCase {
             ArrayList<String> fragments = android.telephony.SmsMessage.fragmentText(text2);
             assertEquals(fragments.size(), 1);
         }
+        */
+
+        // *IF* we supported single-segment EMS, this text would result in a
+        // single fragment with 7-bit encoding. But we don't, so this text
+        // results in three fragments of 16-bit encoding.
+        String text2 = "123456789012345678901234567890123456789012345678901234567890" +
+                "1234567890123456789012345678901234567890123456789012345678901234567890" +
+                "12345678901234567890123456789\u00a3";  // Trailing pound-currency sign.
+        ted = SmsMessage.calculateLength(text2, false);
+        assertEquals(3, ted.msgCount);
+        assertEquals(160, ted.codeUnitCount);
+        assertEquals(3, ted.codeUnitSize);
+        if (isCdmaPhone) {
+            ArrayList<String> fragments = android.telephony.SmsMessage.fragmentText(text2);
+            assertEquals(3, fragments.size());
+        }
+
     }
 }

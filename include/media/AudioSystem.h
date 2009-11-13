@@ -220,6 +220,7 @@ public:
     static status_t getInputBufferSize(uint32_t sampleRate, int format, int channelCount,
         size_t* buffSize);
 
+    static status_t setVoiceVolume(float volume);
 
     //
     // AudioPolicyService interface
@@ -256,11 +257,12 @@ public:
         DEVICE_IN_WIRED_HEADSET = 0x100000,
         DEVICE_IN_AUX_DIGITAL = 0x200000,
         DEVICE_IN_VOICE_CALL = 0x400000,
+        DEVICE_IN_BACK_MIC = 0x800000,
         DEVICE_IN_DEFAULT = 0x80000000,
 
         DEVICE_IN_ALL = (DEVICE_IN_COMMUNICATION | DEVICE_IN_AMBIENT | DEVICE_IN_BUILTIN_MIC |
                 DEVICE_IN_BLUETOOTH_SCO_HEADSET | DEVICE_IN_WIRED_HEADSET | DEVICE_IN_AUX_DIGITAL |
-                DEVICE_IN_VOICE_CALL| DEVICE_IN_DEFAULT)
+                DEVICE_IN_VOICE_CALL | DEVICE_IN_BACK_MIC | DEVICE_IN_DEFAULT)
     };
 
     // device connection states used for setDeviceConnectionState()

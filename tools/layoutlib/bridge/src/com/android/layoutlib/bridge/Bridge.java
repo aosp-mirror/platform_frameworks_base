@@ -36,6 +36,7 @@ import android.graphics.Rect;
 import android.graphics.Region;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -1059,12 +1060,25 @@ public final class Bridge implements ILayoutBridge {
         }
 
         @SuppressWarnings("unused")
-        public void setWallpaperPosition(IBinder window, float x, float y) {
+        public void setWallpaperPosition(IBinder window, float x, float y,
+            float xStep, float yStep) {
             // pass for now.
         }
 
         @SuppressWarnings("unused")
         public void wallpaperOffsetsComplete(IBinder window) {
+            // pass for now.
+        }
+        
+        @SuppressWarnings("unused")
+        public Bundle sendWallpaperCommand(IBinder window, String action, int x, int y,
+                int z, Bundle extras, boolean sync) {
+            // pass for now.
+            return null;
+        }
+        
+        @SuppressWarnings("unused")
+        public void wallpaperCommandComplete(IBinder window, Bundle result) {
             // pass for now.
         }
         
@@ -1127,10 +1141,17 @@ public final class Bridge implements ILayoutBridge {
         }
 
         @SuppressWarnings("unused")
-        public void dispatchWallpaperOffsets(float x, float y, boolean sync) {
+        public void dispatchWallpaperOffsets(float x, float y, float xStep, float yStep,
+                boolean sync) {
             // pass for now.
         }
 
+        @SuppressWarnings("unused")
+        public void dispatchWallpaperCommand(String action, int x, int y,
+                int z, Bundle extras, boolean sync) {
+            // pass for now.
+        }
+        
         @SuppressWarnings("unused")
         public void closeSystemDialogs(String reason) {
             // pass for now.

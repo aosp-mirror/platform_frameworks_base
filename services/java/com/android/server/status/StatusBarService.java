@@ -140,7 +140,7 @@ public class StatusBarService extends IStatusBar.Stub
             boolean down = event.getAction() == KeyEvent.ACTION_DOWN;
             switch (event.getKeyCode()) {
             case KeyEvent.KEYCODE_BACK:
-                if (down) {
+                if (!down) {
                     StatusBarService.this.deactivate();
                 }
                 return true;
@@ -692,6 +692,7 @@ public class StatusBarService extends IStatusBar.Stub
                     mTicker.addEntry(n, StatusBarIcon.getIcon(mContext, data), n.tickerText);
                 }
             }
+            updateExpandedViewPos(EXPANDED_LEAVE_ALONE);
         }
 
         // icon
@@ -950,7 +951,9 @@ public class StatusBarService extends IStatusBar.Stub
         panelSlightlyVisible(true);
         
         updateExpandedViewPos(EXPANDED_LEAVE_ALONE);
-        mExpandedDialog.show();
+        mExpandedParams.flags &= ~WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
+        mExpandedParams.flags |= WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
+        mExpandedDialog.getWindow().setAttributes(mExpandedParams);
         mExpandedView.requestFocus(View.FOCUS_FORWARD);
         mTrackingView.setVisibility(View.VISIBLE);
         
@@ -973,15 +976,24 @@ public class StatusBarService extends IStatusBar.Stub
     }
     
     void animateCollapse() {
-        if (SPEW) Log.d(TAG, "Animate collapse: expanded=" + mExpanded
-                + " expanded visible=" + mExpandedVisible);
+        if (SPEW) {
+            Log.d(TAG, "animateCollapse(): mExpanded=" + mExpanded
+                    + " mExpandedVisible=" + mExpandedVisible
+                    + " mAnimating=" + mAnimating
+                    + " mAnimVel=" + mAnimVel);
+        }
         
         if (!mExpandedVisible) {
             return;
         }
 
-        prepareTracking(mDisplay.getHeight()-1);
-        performFling(mDisplay.getHeight()-1, -2000.0f, true);
+        if (mAnimating) {
+            return;
+        }
+
+        int y = mDisplay.getHeight()-1;
+        prepareTracking(y);
+        performFling(y, -2000.0f, true);
     }
     
     void performExpand() {
@@ -1018,7 +1030,9 @@ public class StatusBarService extends IStatusBar.Stub
         }
         mExpandedVisible = false;
         panelSlightlyVisible(false);
-        mExpandedDialog.hide();
+        mExpandedParams.flags |= WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
+        mExpandedParams.flags &= ~WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
+        mExpandedDialog.getWindow().setAttributes(mExpandedParams);
         mTrackingView.setVisibility(View.GONE);
 
         if ((mDisabled & StatusBarManager.DISABLE_NOTIFICATION_ICONS) == 0) {
@@ -1047,6 +1061,7 @@ public class StatusBarService extends IStatusBar.Stub
             else if (mAnimY < mStatusBarView.getHeight()) {
                 if (SPEW) Log.d(TAG, "Animation completed to collapsed state.");
                 mAnimating = false;
+                updateExpandedViewPos(0);
                 performCollapse();
             }
             else {
@@ -1096,7 +1111,7 @@ public class StatusBarService extends IStatusBar.Stub
         mTracking = true;
         mVelocityTracker = VelocityTracker.obtain();
         boolean opening = !mExpanded;
-        if (!mExpanded) {
+        if (opening) {
             mAnimAccel = 2000.0f;
             mAnimVel = 200;
             mAnimY = mStatusBarView.getHeight();
@@ -1111,16 +1126,13 @@ public class StatusBarService extends IStatusBar.Stub
             mAnimating = true;
             mHandler.sendMessageAtTime(mHandler.obtainMessage(MSG_ANIMATE_REVEAL),
                     mCurAnimationTime);
+            makeExpandedVisible();
         } else {
             // it's open, close it?
             if (mAnimating) {
                 mAnimating = false;
                 mHandler.removeMessages(MSG_ANIMATE);
             }
-        }
-        if (opening) {
-            makeExpandedVisible();
-        } else {
             updateExpandedViewPos(y + mViewDelta);
         }
     }
@@ -1502,17 +1514,18 @@ public class StatusBarService extends IStatusBar.Stub
             }
         }
 
+        final int disph = mDisplay.getHeight();
         lp = mExpandedDialog.getWindow().getAttributes();
         lp.width = ViewGroup.LayoutParams.FILL_PARENT;
         lp.height = ViewGroup.LayoutParams.WRAP_CONTENT;
         lp.x = 0;
-        lp.y = 0;
+        mTrackingPosition = lp.y = -disph; // sufficiently large negative
         lp.type = WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL;
         lp.flags = WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
                 | WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
                 | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
-                | WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM
-                | WindowManager.LayoutParams.FLAG_DITHER;
+                | WindowManager.LayoutParams.FLAG_DITHER
+                | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
         lp.format = pixelFormat;
         lp.gravity = Gravity.TOP | Gravity.FILL_HORIZONTAL;
         lp.setTitle("StatusBarExpanded");
@@ -1525,7 +1538,6 @@ public class StatusBarService extends IStatusBar.Stub
                 new ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT,
                                            ViewGroup.LayoutParams.WRAP_CONTENT));
         mExpandedDialog.show();
-        mExpandedDialog.hide();
         FrameLayout hack = (FrameLayout)mExpandedView.getParent();
         hack.setForeground(null);
     }
@@ -1547,20 +1559,29 @@ public class StatusBarService extends IStatusBar.Stub
 
     void updateExpandedViewPos(int expandedPosition) {
         if (SPEW) {
-            Log.d(TAG, "updateExpandedViewPos before pos=" + expandedPosition
+            Log.d(TAG, "updateExpandedViewPos before expandedPosition=" + expandedPosition
                     + " mTrackingParams.y=" + mTrackingParams.y
                     + " mTrackingPosition=" + mTrackingPosition);
         }
 
-        // If the expanded view is not visible, there is no reason to do
-        // any work.
-        if (!mExpandedVisible) {
-            return;
-        }
-        
-        // tracking view...
         int h = mStatusBarView.getHeight();
         int disph = mDisplay.getHeight();
+
+        // If the expanded view is not visible, make sure they're still off screen.
+        // Maybe the view was resized.
+        if (!mExpandedVisible) {
+            if (mTrackingView != null) {
+                mTrackingPosition = mTrackingParams.y = -disph;
+                WindowManagerImpl.getDefault().updateViewLayout(mTrackingView, mTrackingParams);
+            }
+            if (mExpandedParams != null) {
+                mExpandedParams.y = -disph;
+                mExpandedDialog.getWindow().setAttributes(mExpandedParams);
+            }
+            return;
+        }
+
+        // tracking view...
         int pos;
         if (expandedPosition == EXPANDED_FULL_OPEN) {
             pos = h;
@@ -1671,7 +1692,7 @@ public class StatusBarService extends IStatusBar.Stub
     private View.OnClickListener mClearButtonListener = new View.OnClickListener() {
         public void onClick(View v) {
             mNotificationCallbacks.onClearAll();
-            performCollapse();
+            addPendingOp(OP_EXPAND, null, false);
         }
     };
 

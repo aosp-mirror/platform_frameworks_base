@@ -898,6 +898,7 @@ public final class ViewRoot extends Handler implements ViewParent,
                         // all at once.
                         newSurface = true;
                         fullRedrawNeeded = true;
+                        mPreviousTransparentRegion.setEmpty();
 
                         if (mGlWanted && !mUseGL) {
                             initializeGL();
@@ -2894,10 +2895,21 @@ public final class ViewRoot extends Handler implements ViewParent,
             }
         }
         
-        public void dispatchWallpaperOffsets(float x, float y, boolean sync) {
+        public void dispatchWallpaperOffsets(float x, float y, float xStep, float yStep,
+                boolean sync) {
             if (sync) {
                 try {
                     sWindowSession.wallpaperOffsetsComplete(asBinder());
+                } catch (RemoteException e) {
+                }
+            }
+        }
+        
+        public void dispatchWallpaperCommand(String action, int x, int y,
+                int z, Bundle extras, boolean sync) {
+            if (sync) {
+                try {
+                    sWindowSession.wallpaperCommandComplete(asBinder(), null);
                 } catch (RemoteException e) {
                 }
             }

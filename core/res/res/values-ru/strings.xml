@@ -111,8 +111,7 @@
     <string name="httpErrorFile" msgid="8250549644091165175">"Не удается получить доступ к файлу."</string>
     <string name="httpErrorFileNotFound" msgid="5588380756326017105">"Не удалось найти указанные файлы."</string>
     <string name="httpErrorTooManyRequests" msgid="1235396927087188253">"Обрабатывается слишком много запросов. Повторите попытку позднее."</string>
-    <!-- no translation found for notification_title (1259940370369187045) -->
-    <skip />
+    <string name="notification_title" msgid="1259940370369187045">"Ошибка входа (<xliff:g id="ACCOUNT">%1$s</xliff:g>)"</string>
     <string name="contentServiceSync" msgid="8353523060269335667">"Синхр."</string>
     <string name="contentServiceSyncNotificationTitle" msgid="397743349191901458">"Синхр."</string>
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"Слишком много удалений <xliff:g id="CONTENT_TYPE">%s</xliff:g>."</string>
@@ -148,8 +147,8 @@
     <string name="permgroupdesc_location" msgid="2430258821648348660">"Отслеживание физического местоположения"</string>
     <string name="permgrouplab_network" msgid="5808983377727109831">"Сетевой обмен данными"</string>
     <string name="permgroupdesc_network" msgid="5035763698958415998">"Позволяет приложениям получать доступ к различным сетевым функциям."</string>
-    <string name="permgrouplab_accounts" msgid="7140261692496314430">"Ваши аккаунты Google"</string>
-    <string name="permgroupdesc_accounts" msgid="6735915929704895193">"Входить в доступные аккаунты Google."</string>
+    <string name="permgrouplab_accounts" msgid="3359646291125325519">"Ваши аккаунты"</string>
+    <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Доступ к имеющимся аккаунтам."</string>
     <string name="permgrouplab_hardwareControls" msgid="7998214968791599326">"Элементы управления аппаратным обеспечением"</string>
     <string name="permgroupdesc_hardwareControls" msgid="4357057861225462702">"Прямой доступ к аппаратному обеспечению телефона."</string>
     <string name="permgrouplab_phoneCalls" msgid="9067173988325865923">"Телефонные вызовы"</string>
@@ -388,7 +387,7 @@
     <string name="permdesc_readDictionary" msgid="1082972603576360690">"Позволяет приложению считывать любые слова, имена и фразы личного пользования, которые могут храниться в пользовательском словаре."</string>
     <string name="permlab_writeDictionary" msgid="6703109511836343341">"записывать в пользовательский словарь"</string>
     <string name="permdesc_writeDictionary" msgid="2241256206524082880">"Позволяет приложению записывать новые слова в пользовательский словарь."</string>
-    <string name="permlab_sdcardWrite" msgid="8079403759001777291">"изменить/удалить содержание SD-карты"</string>
+    <string name="permlab_sdcardWrite" msgid="8079403759001777291">"изменять/удалять содержание SD-карты"</string>
     <string name="permdesc_sdcardWrite" msgid="6643963204976471878">"Разрешает приложению запись на SD-карту"</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Домашний"</item>
@@ -433,6 +432,58 @@
     <item msgid="2506857312718630823">"ICQ"</item>
     <item msgid="1648797903785279353">"Jabber"</item>
   </string-array>
+    <string name="phoneTypeCustom" msgid="1644738059053355820">"Особый"</string>
+    <string name="phoneTypeHome" msgid="2570923463033985887">"Дом"</string>
+    <string name="phoneTypeMobile" msgid="6501463557754751037">"Моб."</string>
+    <string name="phoneTypeWork" msgid="8863939667059911633">"Раб."</string>
+    <string name="phoneTypeFaxWork" msgid="3517792160008890912">"Раб. факс"</string>
+    <string name="phoneTypeFaxHome" msgid="2067265972322971467">"Дом. факс"</string>
+    <string name="phoneTypePager" msgid="7582359955394921732">"Пейджер"</string>
+    <string name="phoneTypeOther" msgid="1544425847868765990">"Другой"</string>
+    <string name="phoneTypeCallback" msgid="2712175203065678206">"Обр. вызов"</string>
+    <string name="phoneTypeCar" msgid="8738360689616716982">"В авто"</string>
+    <string name="phoneTypeCompanyMain" msgid="540434356461478916">"Раб., осн."</string>
+    <string name="phoneTypeIsdn" msgid="8022453193171370337">"ISDN"</string>
+    <string name="phoneTypeMain" msgid="6766137010628326916">"Основной"</string>
+    <string name="phoneTypeOtherFax" msgid="8587657145072446565">"Доп. факс"</string>
+    <string name="phoneTypeRadio" msgid="4093738079908667513">"Радио"</string>
+    <string name="phoneTypeTelex" msgid="3367879952476250512">"Телекс"</string>
+    <string name="phoneTypeTtyTdd" msgid="8606514378585000044">"Телетайп"</string>
+    <string name="phoneTypeWorkMobile" msgid="1311426989184065709">"Раб. моб."</string>
+    <string name="phoneTypeWorkPager" msgid="649938731231157056">"Рабочий пейджер"</string>
+    <string name="phoneTypeAssistant" msgid="5596772636128562884">"Секретарь"</string>
+    <string name="phoneTypeMms" msgid="7254492275502768992">"MMS"</string>
+    <string name="eventTypeBirthday" msgid="2813379844211390740">"День рождения"</string>
+    <string name="eventTypeAnniversary" msgid="3876779744518284000">"Юбилей"</string>
+    <string name="eventTypeOther" msgid="5834288791948564594">"Мероприятие"</string>
+    <string name="emailTypeCustom" msgid="8525960257804213846">"Особый"</string>
+    <string name="emailTypeHome" msgid="449227236140433919">"Дом"</string>
+    <string name="emailTypeWork" msgid="3548058059601149973">"Раб."</string>
+    <string name="emailTypeOther" msgid="2923008695272639549">"Другой"</string>
+    <string name="emailTypeMobile" msgid="119919005321166205">"Моб."</string>
+    <string name="postalTypeCustom" msgid="8903206903060479902">"Особый"</string>
+    <string name="postalTypeHome" msgid="8165756977184483097">"Дом"</string>
+    <string name="postalTypeWork" msgid="5268172772387694495">"Раб."</string>
+    <string name="postalTypeOther" msgid="2726111966623584341">"Другой"</string>
+    <string name="imTypeCustom" msgid="2074028755527826046">"Особый"</string>
+    <string name="imTypeHome" msgid="6241181032954263892">"Дом"</string>
+    <string name="imTypeWork" msgid="1371489290242433090">"Раб."</string>
+    <string name="imTypeOther" msgid="5377007495735915478">"Другой"</string>
+    <string name="imProtocolCustom" msgid="6919453836618749992">"Особый"</string>
+    <string name="imProtocolAim" msgid="7050360612368383417">"AIM"</string>
+    <string name="imProtocolMsn" msgid="144556545420769442">"Windows Live"</string>
+    <string name="imProtocolYahoo" msgid="8271439408469021273">"Yahoo"</string>
+    <string name="imProtocolSkype" msgid="9019296744622832951">"Skype"</string>
+    <string name="imProtocolQq" msgid="8887484379494111884">"QQ"</string>
+    <string name="imProtocolGoogleTalk" msgid="3808393979157698766">"Google Talk"</string>
+    <string name="imProtocolIcq" msgid="1574870433606517315">"ICQ"</string>
+    <string name="imProtocolJabber" msgid="2279917630875771722">"Jabber"</string>
+    <string name="imProtocolNetMeeting" msgid="8287625655986827971">"NetMeeting"</string>
+    <string name="orgTypeWork" msgid="29268870505363872">"Раб."</string>
+    <string name="orgTypeOther" msgid="3951781131570124082">"Другой"</string>
+    <string name="orgTypeCustom" msgid="225523415372088322">"Особый"</string>
+    <string name="contact_status_update_attribution" msgid="5112589886094402795">"с помощью <xliff:g id="SOURCE">%1$s</xliff:g>"</string>
+    <string name="contact_status_update_attribution_with_date" msgid="5945386376369979909">"<xliff:g id="DATE">%1$s</xliff:g> с помощью <xliff:g id="SOURCE">%2$s</xliff:g>"</string>
     <string name="keyguard_password_enter_pin_code" msgid="3731488827218876115">"Введите PIN-код"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="1295984114338107718">"Неверный PIN-код!"</string>
     <string name="keyguard_label_text" msgid="861796461028298424">"Для разблокировки нажмите \"Меню\", а затем 0."</string>
@@ -447,6 +498,7 @@
     <string name="lockscreen_pattern_wrong" msgid="4817583279053112312">"Повторите попытку"</string>
     <string name="lockscreen_plugged_in" msgid="613343852842944435">"Идет зарядка (<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>)"</string>
     <string name="lockscreen_charged" msgid="4938930459620989972">"Заряжена."</string>
+    <string name="lockscreen_battery_short" msgid="3617549178603354656">"<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="lockscreen_low_battery" msgid="1482873981919249740">"Подключите зарядное устройство."</string>
     <string name="lockscreen_missing_sim_message_short" msgid="7381499217732227295">"Нет SIM-карты."</string>
     <string name="lockscreen_missing_sim_message" msgid="2186920585695169078">"SIM-карта не установлена."</string>
@@ -478,7 +530,7 @@
     <string name="battery_status_charging" msgid="756617993998772213">"Идет зарядка..."</string>
     <string name="battery_low_title" msgid="7923774589611311406">"Подключите зарядное устройство"</string>
     <string name="battery_low_subtitle" msgid="7388781709819722764">"Батарея разряжена:"</string>
-    <string name="battery_low_percent_format" msgid="6564958083485073855">"осталось менее <xliff:g id="NUMBER">%d%%</xliff:g>"</string>
+    <string name="battery_low_percent_format" msgid="696154104579022959">"Осталось <xliff:g id="NUMBER">%d%%</xliff:g> или меньше."</string>
     <string name="battery_low_why" msgid="7279169609518386372">"Расход заряда батареи"</string>
     <string name="factorytest_failed" msgid="5410270329114212041">"Не удалось провести стандартный тест"</string>
     <string name="factorytest_not_system" msgid="4435201656767276723">"Действие FACTORY_TEST поддерживается только для пакетов, установленных в /system/app."</string>
@@ -488,6 +540,7 @@
     <string name="js_dialog_title_default" msgid="6961903213729667573">"JavaScript"</string>
     <string name="js_dialog_before_unload" msgid="1901675448179653089">"Перейти с этой страницы?"\n\n"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"Нажмите \"ОК\", чтобы продолжить, или \"Отмена\", чтобы остаться на текущей странице."</string>
     <string name="save_password_label" msgid="6860261758665825069">"Подтвердите"</string>
+    <string name="double_tap_toast" msgid="1068216937244567247">"Совет: нажмите дважды, чтобы увеличить и уменьшить масштаб."</string>
     <string name="permlab_readHistoryBookmarks" msgid="1284843728203412135">"считывать историю и закладки браузера"</string>
     <string name="permdesc_readHistoryBookmarks" msgid="4981489815467617191">"Разрешает приложению считывать все URL, посещенные браузером, и все его закладки."</string>
     <string name="permlab_writeHistoryBookmarks" msgid="9009434109836280374">"записывать историю и закладки браузера"</string>
@@ -692,10 +745,8 @@
     <string name="extmedia_format_message" msgid="3621369962433523619">"Отформатировать карту SD? Все данные, находящиеся на карте, будут уничтожены."</string>
     <string name="extmedia_format_button_format" msgid="4131064560127478695">"Формат"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Отладка USB подключена"</string>
-    <!-- no translation found for adb_active_notification_message (8470296818270110396) -->
-    <skip />
-    <!-- no translation found for select_input_method (6865512749462072765) -->
-    <skip />
+    <string name="adb_active_notification_message" msgid="8470296818270110396">"Нажмите, чтобы отключить отладку USB."</string>
+    <string name="select_input_method" msgid="6865512749462072765">"Выберите способ ввода"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"варианты"</u></string>
@@ -726,16 +777,19 @@
     <string name="create_contact_using" msgid="4947405226788104538">"Создать контакт"\n"с номером <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <string name="accessibility_compound_button_selected" msgid="5612776946036285686">"отмечено"</string>
     <string name="accessibility_compound_button_unselected" msgid="8864512895673924091">"не проверено"</string>
-    <string name="grant_credentials_permission_message_desc" msgid="6883276587034335667">"Перечисленные приложения запрашивают разрешение на доступ к регистрационном данным аккаунта <xliff:g id="ACCOUNT">%1$s</xliff:g> из <xliff:g id="APPLICATION">%2$s</xliff:g>. Разрешить доступ? Если да, ваш ответ будет сохранен и это сообщение больше не будет выводиться."</string>
-    <string name="grant_credentials_permission_message_with_authtokenlabel_desc" msgid="3159007601893584687">"Перечисленные приложения запрашивают разрешение на доступ к регистрационном данным <xliff:g id="TYPE">%1$s</xliff:g> аккаунта <xliff:g id="ACCOUNT">%2$s</xliff:g> из <xliff:g id="APPLICATION">%3$s</xliff:g>. Разрешить доступ? Если да, ваш ответ будет сохранен и это сообщение больше не будет выводиться."</string>
+    <string name="grant_credentials_permission_message_desc" msgid="6883276587034335667">"Перечисленные приложения запрашивают разрешение на доступ к регистрационном данным аккаунта <xliff:g id="ACCOUNT">%1$s</xliff:g> из <xliff:g id="APPLICATION">%2$s</xliff:g>. Разрешить доступ? Если да, ответ будет сохранен и это сообщение больше не будет выводиться."</string>
+    <string name="grant_credentials_permission_message_with_authtokenlabel_desc" msgid="3159007601893584687">"Перечисленные приложения запрашивают разрешение на доступ к регистрационном данным <xliff:g id="TYPE">%1$s</xliff:g> аккаунта <xliff:g id="ACCOUNT">%2$s</xliff:g> из <xliff:g id="APPLICATION">%3$s</xliff:g>. Разрешить доступ? Если да, ответ будет сохранен и это сообщение больше не будет выводиться."</string>
     <string name="allow" msgid="7225948811296386551">"Разрешить"</string>
     <string name="deny" msgid="2081879885755434506">"Отклонить"</string>
     <string name="permission_request_notification_title" msgid="5390555465778213840">"Разрешение запрошено"</string>
-    <!-- no translation found for permission_request_notification_with_subtitle (4325409589686688000) -->
-    <skip />
+    <string name="permission_request_notification_with_subtitle" msgid="4325409589686688000">"Требуется разрешение"\n"для аккаунта <xliff:g id="ACCOUNT">%s</xliff:g>"</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"Способ ввода"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"Синхр."</string>
     <string name="accessibility_binding_label" msgid="4148120742096474641">"Специальные возможности"</string>
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"Фоновый рисунок"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"Изменить фоновый рисунок"</string>
+    <string name="pptp_vpn_description" msgid="2688045385181439401">"Протокол PPTP"</string>
+    <string name="l2tp_vpn_description" msgid="3750692169378923304">"Протокол L2TP"</string>
+    <string name="l2tp_ipsec_psk_vpn_description" msgid="3945043564008303239">"L2TP/IPSec VPN (на основе предв. общ. ключа)"</string>
+    <string name="l2tp_ipsec_crt_vpn_description" msgid="5382714073103653577">"L2TP/IPSec VPN (на основе сертификата)"</string>
 </resources>

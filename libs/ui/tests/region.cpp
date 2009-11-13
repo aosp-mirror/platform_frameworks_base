@@ -25,9 +25,16 @@ using namespace android;
 
 int main()
 {
+    Region empty;
     Region reg0( Rect(  0, 0,  100, 100 ) );
     Region reg1 = reg0;
     Region reg2, reg3;
+
+    Region reg4 = empty | reg1;
+    Region reg5 = reg1 | empty;
+
+    reg4.dump("reg4");
+    reg5.dump("reg5");
     
     reg0.dump("reg0");
     reg1.dump("reg1");

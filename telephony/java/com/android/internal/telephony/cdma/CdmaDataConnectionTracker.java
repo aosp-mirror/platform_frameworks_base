@@ -81,7 +81,7 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
 
     private boolean mPendingRestartRadio = false;
     private static final int TIME_DELAYED_TO_RESTART_RADIO =
-            SystemProperties.getInt("ro.cdma.timetoradiorestart", 20000);
+            SystemProperties.getInt("ro.cdma.timetoradiorestart", 60000);
 
     /**
      * Pool size of CdmaDataConnection objects.
@@ -330,7 +330,8 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
                         phone.getState() == Phone.State.IDLE )
                 && isDataAllowed()
                 && desiredPowerState
-                && !mPendingRestartRadio) {
+                && !mPendingRestartRadio
+                && !mCdmaPhone.needsOtaServiceProvisioning()) {
 
             return setupData(reason);
 
@@ -348,7 +349,8 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
                     " dataOnRoamingEnable=" + getDataOnRoamingEnabled() +
                     " desiredPowerState=" + desiredPowerState +
                     " PendingRestartRadio=" + mPendingRestartRadio +
-                    " MasterDataEnabled=" + mMasterDataEnabled);
+                    " MasterDataEnabled=" + mMasterDataEnabled +
+                    " needsOtaServiceProvisioning=" + mCdmaPhone.needsOtaServiceProvisioning());
             }
             return false;
         }

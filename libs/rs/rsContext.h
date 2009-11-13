@@ -53,6 +53,10 @@ public:
     ~Context();
 
     static pthread_key_t gThreadTLSKey;
+    static uint32_t gThreadTLSKeyCount;
+    static uint32_t gGLContextCount;
+    static pthread_mutex_t gInitMutex;
+
     struct ScriptTLSStruct {
         Context * mContext;
         Script * mScript;
@@ -90,6 +94,7 @@ public:
 
     void pause();
     void resume();
+    void setSurface(Surface *sur);
 
     void assignName(ObjectBase *obj, const char *name, uint32_t len);
     void removeName(ObjectBase *obj);
@@ -212,6 +217,7 @@ private:
     Context();
 
     void initEGL();
+    void deinitEGL();
 
     bool runRootScript();
 

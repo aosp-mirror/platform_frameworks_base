@@ -91,6 +91,11 @@ private:
         copybit_rect_t    crop;
     };
 
+    static gralloc_module_t const* sGrallocModule;
+    static gralloc_module_t const* getGrallocModule() {
+        return sGrallocModule;
+    }
+
     class Buffer : public LightRefBase<Buffer> {
     public:
         Buffer(const ISurface::BufferHeap& buffers, ssize_t offset);
@@ -132,7 +137,6 @@ private:
         size_t                          mBufferSize;
         mutable sp<GraphicBuffer>       mTempBitmap;
         mutable LayerBase::Texture      mTexture;
-        copybit_device_t*               mBlitEngine;
     };
     
     class OverlaySource : public Source {

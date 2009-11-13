@@ -51,6 +51,8 @@ pid_t gettid() { return syscall(__NR_gettid);}
 #undef __KERNEL__
 #endif
 
+#define POLICY_DEBUG 0
+
 using namespace android;
 
 static void signalExceptionForPriorityError(JNIEnv* env, jobject obj, int err)
@@ -212,6 +214,26 @@ void android_os_Process_setProcessGroup(JNIEnv* env, jobject clazz, int pid, jin
         return;
     }
 
+#if POLICY_DEBUG
+    char cmdline[32];
+    int fd;
+
+    strcpy(cmdline, "unknown");
+
+    sprintf(proc_path, "/proc/%d/cmdline", pid);
+    fd = open(proc_path, O_RDONLY);
+    if (fd >= 0) {
+        int rc = read(fd, cmdline, sizeof(cmdline)-1);
+        cmdline[rc] = 0;
+        close(fd);
+    }
+    
+    if (grp == ANDROID_TGROUP_BG_NONINTERACT) {
+        LOGD("setProcessGroup: vvv pid %d (%s)", pid, cmdline);
+    } else {
+        LOGD("setProcessGroup: ^^^ pid %d (%s)", pid, cmdline);
+    }
+#endif
     sprintf(proc_path, "/proc/%d/task", pid);
     if (!(d = opendir(proc_path))) {
         // If the process exited on us, don't generate an exception

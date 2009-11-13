@@ -410,6 +410,13 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             = new ArrayList<BroadcastRecord>();
 
     /**
+     * Historical data of past broadcasts, for debugging.
+     */
+    static final int MAX_BROADCAST_HISTORY = 100;
+    final BroadcastRecord[] mBroadcastHistory
+            = new BroadcastRecord[MAX_BROADCAST_HISTORY];
+
+    /**
      * Set when we current have a BROADCAST_INTENT_MSG in flight.
      */
     boolean mBroadcastsScheduled = false;
@@ -2705,13 +2712,31 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
 
             // Have the window manager re-evaluate the orientation of
             // the screen based on the new activity order.
-            Configuration config = mWindowManager.updateOrientationFromAppTokens(
-                    mConfiguration,
-                    next.mayFreezeScreenLocked(next.app) ? next : null);
-            if (config != null) {
-                next.frozenBeforeDestroy = true;
+            boolean updated;
+            synchronized (this) {
+                Configuration config = mWindowManager.updateOrientationFromAppTokens(
+                        mConfiguration,
+                        next.mayFreezeScreenLocked(next.app) ? next : null);
+                if (config != null) {
+                    /*
+                     * Explicitly restore the locale to the one from the
+                     * old configuration, since the one that comes back from
+                     * the window manager has the default (boot) locale.
+                     *
+                     * It looks like previously the locale picker only worked
+                     * by coincidence: usually it would do its setting of
+                     * the locale after the activity transition, so it didn't
+                     * matter that this lost it.  With the synchronized
+                     * block now keeping them from happening at the same time,
+                     * this one always would happen second and undo what the
+                     * locale picker had just done.
+                     */
+                    config.locale = mConfiguration.locale;
+                    next.frozenBeforeDestroy = true;
+                }
+                updated = updateConfigurationLocked(config, next);
             }
-            if (!updateConfigurationLocked(config, next)) {
+            if (!updated) {
                 // The configuration update wasn't able to keep the existing
                 // instance of the activity, and instead started a new one.
                 // We should be all done, but let's just make sure our activity
@@ -5742,7 +5767,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
     public String getCallingPackage(IBinder token) {
         synchronized (this) {
             HistoryRecord r = getCallingRecordLocked(token);
-            return r != null && r.app != null ? r.app.processName : null;
+            return r != null && r.app != null ? r.info.packageName : null;
         }
     }
 
@@ -7164,7 +7189,6 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
 
         if (DEBUG_TRANSITION) Log.v(TAG,
                 "Prepare to back transition: task=" + task);
-        mWindowManager.prepareAppTransition(WindowManagerPolicy.TRANSIT_TASK_TO_BACK);
         
         final int N = mHistory.size();
         int bottom = 0;
@@ -7194,7 +7218,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 mNoAnimActivities.add(r);
             }
         } else {
-            mWindowManager.prepareAppTransition(WindowManagerPolicy.TRANSIT_TASK_TO_FRONT);
+            mWindowManager.prepareAppTransition(WindowManagerPolicy.TRANSIT_TASK_TO_BACK);
         }
         mWindowManager.moveAppTokensToBottom(moved);
         if (VALIDATE_TOKENS) {
@@ -9374,6 +9398,17 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 }
             }
 
+            pw.println(" ");
+            pw.println("  Historical broadcasts:");
+            for (int i=0; i<MAX_BROADCAST_HISTORY; i++) {
+                BroadcastRecord r = mBroadcastHistory[i];
+                if (r == null) {
+                    break;
+                }
+                pw.println("  Historical Broadcast #" + i + ":");
+                r.dump(pw, "    ");
+            }
+            
             pw.println(" ");
             pw.println("  mBroadcastsScheduled=" + mBroadcastsScheduled);
             if (mStickyBroadcasts != null) {
@@ -11593,7 +11628,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                     Intent intent = (Intent)allSticky.get(i);
                     BroadcastRecord r = new BroadcastRecord(intent, null,
                             null, -1, -1, null, receivers, null, 0, null, null,
-                            false, true);
+                            false, true, true);
                     if (mParallelBroadcasts.size() == 0) {
                         scheduleBroadcastsLocked();
                     }
@@ -11818,7 +11853,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             BroadcastRecord r = new BroadcastRecord(intent, callerApp,
                     callerPackage, callingPid, callingUid, requiredPermission,
                     registeredReceivers, resultTo, resultCode, resultData, map,
-                    ordered, false);
+                    ordered, sticky, false);
             if (DEBUG_BROADCAST) Log.v(
                     TAG, "Enqueueing parallel broadcast " + r
                     + ": prev had " + mParallelBroadcasts.size());
@@ -11897,7 +11932,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 || resultTo != null) {
             BroadcastRecord r = new BroadcastRecord(intent, callerApp,
                     callerPackage, callingPid, callingUid, requiredPermission,
-                    receivers, resultTo, resultCode, resultData, map, ordered, false);
+                    receivers, resultTo, resultCode, resultData, map, ordered,
+                    sticky, false);
             if (DEBUG_BROADCAST) Log.v(
                     TAG, "Enqueueing ordered broadcast " + r
                     + ": prev had " + mOrderedBroadcasts.size());
@@ -12115,17 +12151,17 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             }
             long now = SystemClock.uptimeMillis();
             BroadcastRecord r = mOrderedBroadcasts.get(0);
-            if ((r.startTime+BROADCAST_TIMEOUT) > now) {
+            if ((r.receiverTime+BROADCAST_TIMEOUT) > now) {
                 if (DEBUG_BROADCAST) Log.v(TAG,
                         "Premature timeout @ " + now + ": resetting BROADCAST_TIMEOUT_MSG for "
-                        + (r.startTime + BROADCAST_TIMEOUT));
+                        + (r.receiverTime + BROADCAST_TIMEOUT));
                 Message msg = mHandler.obtainMessage(BROADCAST_TIMEOUT_MSG);
-                mHandler.sendMessageAtTime(msg, r.startTime+BROADCAST_TIMEOUT);
+                mHandler.sendMessageAtTime(msg, r.receiverTime+BROADCAST_TIMEOUT);
                 return;
             }
 
             Log.w(TAG, "Timeout of broadcast " + r + " - receiver=" + r.receiver);
-            r.startTime = now;
+            r.receiverTime = now;
             r.anrCount++;
 
             // Current receiver has passed its expiration date.
@@ -12273,7 +12309,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 }
                 performReceive(filter.receiverList.app, filter.receiverList.receiver,
                     new Intent(r.intent), r.resultCode,
-                    r.resultData, r.resultExtras, r.ordered, r.sticky);
+                    r.resultData, r.resultExtras, r.ordered, r.initialSticky);
                 if (ordered) {
                     r.state = BroadcastRecord.CALL_DONE_RECEIVE;
                 }
@@ -12291,6 +12327,17 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         }
     }
 
+    private final void addBroadcastToHistoryLocked(BroadcastRecord r) {
+        if (r.callingUid < 0) {
+            // This was from a registerReceiver() call; ignore it.
+            return;
+        }
+        System.arraycopy(mBroadcastHistory, 0, mBroadcastHistory, 1,
+                MAX_BROADCAST_HISTORY-1);
+        r.finishTime = SystemClock.uptimeMillis();
+        mBroadcastHistory[0] = r;
+    }
+    
     private final void processNextBroadcast(boolean fromMsg) {
         synchronized(this) {
             BroadcastRecord r;
@@ -12308,6 +12355,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             // First, deliver any non-serialized broadcasts right away.
             while (mParallelBroadcasts.size() > 0) {
                 r = mParallelBroadcasts.remove(0);
+                r.dispatchTime = SystemClock.uptimeMillis();
                 final int N = r.receivers.size();
                 if (DEBUG_BROADCAST_LIGHT) Log.v(TAG, "Processing parallel broadcast "
                         + r);
@@ -12318,6 +12366,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                             + target + ": " + r);
                     deliverToRegisteredReceiver(r, (BroadcastFilter)target, false);
                 }
+                addBroadcastToHistoryLocked(r);
                 if (DEBUG_BROADCAST_LIGHT) Log.v(TAG, "Done with parallel broadcast "
                         + r);
             }
@@ -12375,7 +12424,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                         Log.w(TAG, "Hung broadcast discarded after timeout failure:"
                                 + " now=" + now
                                 + " dispatchTime=" + r.dispatchTime
-                                + " startTime=" + r.startTime
+                                + " startTime=" + r.receiverTime
                                 + " intent=" + r.intent
                                 + " numReceivers=" + numReceivers
                                 + " nextReceiver=" + r.nextReceiver
@@ -12419,6 +12468,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                             + r);
                     
                     // ... and on to the next...
+                    addBroadcastToHistoryLocked(r);
                     mOrderedBroadcasts.remove(0);
                     r = null;
                     looped = true;
@@ -12431,17 +12481,17 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
 
             // Keep track of when this receiver started, and make sure there
             // is a timeout message pending to kill it if need be.
-            r.startTime = SystemClock.uptimeMillis();
+            r.receiverTime = SystemClock.uptimeMillis();
             if (recIdx == 0) {
-                r.dispatchTime = r.startTime;
+                r.dispatchTime = r.receiverTime;
 
                 if (DEBUG_BROADCAST_LIGHT) Log.v(TAG, "Processing ordered broadcast "
                         + r);
                 if (DEBUG_BROADCAST) Log.v(TAG,
                         "Submitting BROADCAST_TIMEOUT_MSG for "
-                        + (r.startTime + BROADCAST_TIMEOUT));
+                        + (r.receiverTime + BROADCAST_TIMEOUT));
                 Message msg = mHandler.obtainMessage(BROADCAST_TIMEOUT_MSG);
-                mHandler.sendMessageAtTime(msg, r.startTime+BROADCAST_TIMEOUT);
+                mHandler.sendMessageAtTime(msg, r.receiverTime+BROADCAST_TIMEOUT);
             }
 
             Object nextReceiver = r.receivers.get(recIdx);
@@ -12784,8 +12834,15 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                     }
                 }
                 Intent intent = new Intent(Intent.ACTION_CONFIGURATION_CHANGED);
+                intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
                 broadcastIntentLocked(null, null, intent, null, null, 0, null, null,
                         null, false, false, MY_PID, Process.SYSTEM_UID);
+                if ((changes&ActivityInfo.CONFIG_LOCALE) != 0) {
+                    broadcastIntentLocked(null, null,
+                            new Intent(Intent.ACTION_LOCALE_CHANGED),
+                            null, null, 0, null, null,
+                            null, false, false, MY_PID, Process.SYSTEM_UID);
+                }
                 
                 AttributeCache ac = AttributeCache.instance();
                 if (ac != null) {

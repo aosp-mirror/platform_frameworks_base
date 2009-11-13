@@ -314,6 +314,11 @@ private:
     };
 
             bool processAudioBuffer(const sp<ClientRecordThread>& thread);
+            status_t openRecord(uint32_t sampleRate,
+                                int format,
+                                int channelCount,
+                                int frameCount,
+                                uint32_t flags);
 
     sp<IAudioRecord>        mAudioRecord;
     sp<IMemory>             mCblkMemory;
@@ -341,6 +346,7 @@ private:
     uint32_t                mNewPosition;
     uint32_t                mUpdatePeriod;
     audio_io_handle_t       mInput;
+    uint32_t                mFlags;
 };
 
 }; // namespace android

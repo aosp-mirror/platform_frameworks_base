@@ -227,17 +227,22 @@ public class InstrumentationTestRunner extends Instrumentation implements TestSu
      */
     private static final String REPORT_KEY_COVERAGE_PATH = "coverageFilePath";
     /**
+     * If included at the start of reporting keys, this prefix marks the key as a performance
+     * metric.
+     */
+    private static final String REPORT_KEY_PREFIX = "performance.";
+    /**
      * If included in the status or final bundle sent to an IInstrumentationWatcher, this key
      * reports the cpu time in milliseconds of the current test.
      */
     private static final String REPORT_KEY_PERF_CPU_TIME =
-        "performance." + PerformanceCollector.METRIC_KEY_CPU_TIME;
+        REPORT_KEY_PREFIX + PerformanceCollector.METRIC_KEY_CPU_TIME;
     /**
      * If included in the status or final bundle sent to an IInstrumentationWatcher, this key
      * reports the run time in milliseconds of the current test.
      */
     private static final String REPORT_KEY_PERF_EXECUTION_TIME =
-        "performance." + PerformanceCollector.METRIC_KEY_EXECUTION_TIME;
+        REPORT_KEY_PREFIX + PerformanceCollector.METRIC_KEY_EXECUTION_TIME;
 
     /**
      * The test is starting.
@@ -739,11 +744,9 @@ public class InstrumentationTestRunner extends Instrumentation implements TestSu
         }
 
         public void writeEndSnapshot(Bundle results) {
-            // Copy all snapshot data fields as type long into mResults, which
-            // is outputted via Instrumentation.finish
-            for (String key : results.keySet()) {
-                mResults.putLong(key, results.getLong(key));
-            }
+            // Copy all snapshot data fields into mResults, which is outputted
+            // via Instrumentation.finish
+            mResults.putAll(results);
         }
 
         public void writeStartTiming(String label) {
@@ -766,6 +769,18 @@ public class InstrumentationTestRunner extends Instrumentation implements TestSu
                         iteration.getLong(PerformanceCollector.METRIC_KEY_EXECUTION_TIME));
                 i++;
             }
+        }
+
+        public void writeMeasurement(String label, long value) {
+            mTestResult.putLong(REPORT_KEY_PREFIX + label, value);
+        }
+
+        public void writeMeasurement(String label, float value) {
+            mTestResult.putFloat(REPORT_KEY_PREFIX + label, value);
+        }
+
+        public void writeMeasurement(String label, String value) {
+            mTestResult.putString(REPORT_KEY_PREFIX + label, value);
         }
 
         // TODO report the end of the cycle

@@ -79,8 +79,7 @@ public class FileFilter {
         "profiler",  // profiler is not supported
         "svg",  // svg is not supported
         "platform",  // platform specific
-        "http",  // requires local http(s) server
-        "fast/workers",
+        "http/wml",
     };
         
     static final String [] ignoreTestList = {

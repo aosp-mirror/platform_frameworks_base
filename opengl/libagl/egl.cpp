@@ -40,6 +40,7 @@
 #include <pixelflinger/pixelflinger.h>
 
 #include <private/ui/android_natives_priv.h>
+#include <private/ui/sw_gralloc_handle.h>
 
 #include <hardware/copybit.h>
 
@@ -449,15 +450,26 @@ void egl_window_surface_v2_t::disconnect()
 status_t egl_window_surface_v2_t::lock(
         android_native_buffer_t* buf, int usage, void** vaddr)
 {
-    int err = module->lock(module, buf->handle, 
-            usage, 0, 0, buf->width, buf->height, vaddr);
+    int err;
+    if (sw_gralloc_handle_t::validate(buf->handle) < 0) {
+        err = module->lock(module, buf->handle,
+                usage, 0, 0, buf->width, buf->height, vaddr);
+    } else {
+        sw_gralloc_handle_t const* hnd =
+                reinterpret_cast<sw_gralloc_handle_t const*>(buf->handle);
+        *vaddr = (void*)hnd->base;
+        err = NO_ERROR;
+    }
     return err;
 }
 
 status_t egl_window_surface_v2_t::unlock(android_native_buffer_t* buf)
 {
     if (!buf) return BAD_VALUE;
-    int err = module->unlock(module, buf->handle);
+    int err = NO_ERROR;
+    if (sw_gralloc_handle_t::validate(buf->handle) < 0) {
+        err = module->unlock(module, buf->handle);
+    }
     return err;
 }
 
@@ -623,6 +635,7 @@ static bool supportedCopybitsDestinationFormat(int format) {
     switch (format) {
     case HAL_PIXEL_FORMAT_RGB_565:
     case HAL_PIXEL_FORMAT_RGBA_8888:
+    case HAL_PIXEL_FORMAT_RGBX_8888:
     case HAL_PIXEL_FORMAT_RGBA_4444:
     case HAL_PIXEL_FORMAT_RGBA_5551:
     case HAL_PIXEL_FORMAT_BGRA_8888:
@@ -651,7 +664,7 @@ EGLBoolean egl_window_surface_v2_t::bindDrawSurface(ogles_context_t* gl)
         if (supportedCopybitsDestinationFormat(buffer.format)) {
             buffer_handle_t handle = this->buffer->handle;
             if (handle != NULL) {
-                gl->copybits.drawSurfaceBuffer = handle;
+                gl->copybits.drawSurfaceBuffer = this->buffer;
             }
         }
     }
@@ -792,6 +805,7 @@ egl_pbuffer_surface_t::egl_pbuffer_surface_t(EGLDisplay dpy,
         case GGL_PIXEL_FORMAT_A_8:          size *= 1; break;
         case GGL_PIXEL_FORMAT_RGB_565:      size *= 2; break;
         case GGL_PIXEL_FORMAT_RGBA_8888:    size *= 4; break;
+        case GGL_PIXEL_FORMAT_RGBX_8888:    size *= 4; break;
         default:
             LOGE("incompatible pixel format for pbuffer (format=%d)", f);
             pbuffer.data = 0;
@@ -953,12 +967,17 @@ static config_pair_t const config_base_attribute_list[] = {
         { EGL_BIND_TO_TEXTURE_RGB,        EGL_FALSE                         },
         { EGL_MIN_SWAP_INTERVAL,          1                                 },
         { EGL_MAX_SWAP_INTERVAL,          1                                 },
+        { EGL_LUMINANCE_SIZE,             0                                 },
+        { EGL_ALPHA_MASK_SIZE,            0                                 },
+        { EGL_COLOR_BUFFER_TYPE,          EGL_RGB_BUFFER                    },
         { EGL_RENDERABLE_TYPE,            EGL_OPENGL_ES_BIT                 },
+        { EGL_CONFORMANT,                 0                                 }
 };
 
 // These configs can override the base attribute list
 // NOTE: when adding a config here, don't forget to update eglCreate*Surface()
 
+// 565 configs
 static config_pair_t const config_0_attribute_list[] = {
         { EGL_BUFFER_SIZE,     16 },
         { EGL_ALPHA_SIZE,       0 },
@@ -981,7 +1000,31 @@ static config_pair_t const config_1_attribute_list[] = {
         { EGL_SURFACE_TYPE,     EGL_WINDOW_BIT|EGL_PBUFFER_BIT|EGL_PIXMAP_BIT },
 };
 
+// RGB 888 configs
 static config_pair_t const config_2_attribute_list[] = {
+        { EGL_BUFFER_SIZE,     32 },
+        { EGL_ALPHA_SIZE,       0 },
+        { EGL_BLUE_SIZE,        8 },
+        { EGL_GREEN_SIZE,       8 },
+        { EGL_RED_SIZE,         8 },
+        { EGL_DEPTH_SIZE,       0 },
+        { EGL_CONFIG_ID,        6 },
+        { EGL_SURFACE_TYPE,     EGL_WINDOW_BIT|EGL_PBUFFER_BIT|EGL_PIXMAP_BIT },
+};
+
+static config_pair_t const config_3_attribute_list[] = {
+        { EGL_BUFFER_SIZE,     32 },
+        { EGL_ALPHA_SIZE,       0 },
+        { EGL_BLUE_SIZE,        8 },
+        { EGL_GREEN_SIZE,       8 },
+        { EGL_RED_SIZE,         8 },
+        { EGL_DEPTH_SIZE,      16 },
+        { EGL_CONFIG_ID,        7 },
+        { EGL_SURFACE_TYPE,     EGL_WINDOW_BIT|EGL_PBUFFER_BIT|EGL_PIXMAP_BIT },
+};
+
+// 8888 configs
+static config_pair_t const config_4_attribute_list[] = {
         { EGL_BUFFER_SIZE,     32 },
         { EGL_ALPHA_SIZE,       8 },
         { EGL_BLUE_SIZE,        8 },
@@ -992,7 +1035,7 @@ static config_pair_t const config_2_attribute_list[] = {
         { EGL_SURFACE_TYPE,     EGL_WINDOW_BIT|EGL_PBUFFER_BIT|EGL_PIXMAP_BIT },
 };
 
-static config_pair_t const config_3_attribute_list[] = {
+static config_pair_t const config_5_attribute_list[] = {
         { EGL_BUFFER_SIZE,     32 },
         { EGL_ALPHA_SIZE,       8 },
         { EGL_BLUE_SIZE,        8 },
@@ -1003,7 +1046,8 @@ static config_pair_t const config_3_attribute_list[] = {
         { EGL_SURFACE_TYPE,     EGL_WINDOW_BIT|EGL_PBUFFER_BIT|EGL_PIXMAP_BIT },
 };
 
-static config_pair_t const config_4_attribute_list[] = {
+// A8 configs
+static config_pair_t const config_6_attribute_list[] = {
         { EGL_BUFFER_SIZE,      8 },
         { EGL_ALPHA_SIZE,       8 },
         { EGL_BLUE_SIZE,        0 },
@@ -1014,7 +1058,7 @@ static config_pair_t const config_4_attribute_list[] = {
         { EGL_SURFACE_TYPE,     EGL_WINDOW_BIT|EGL_PBUFFER_BIT|EGL_PIXMAP_BIT },
 };
 
-static config_pair_t const config_5_attribute_list[] = {
+static config_pair_t const config_7_attribute_list[] = {
         { EGL_BUFFER_SIZE,      8 },
         { EGL_ALPHA_SIZE,       8 },
         { EGL_BLUE_SIZE,        0 },
@@ -1032,6 +1076,8 @@ static configs_t const gConfigs[] = {
         { config_3_attribute_list, NELEM(config_3_attribute_list) },
         { config_4_attribute_list, NELEM(config_4_attribute_list) },
         { config_5_attribute_list, NELEM(config_5_attribute_list) },
+        { config_6_attribute_list, NELEM(config_6_attribute_list) },
+        { config_7_attribute_list, NELEM(config_7_attribute_list) },
 };
 
 static config_management_t const gConfigManagement[] = {
@@ -1062,11 +1108,63 @@ static config_management_t const gConfigManagement[] = {
         { EGL_BIND_TO_TEXTURE_RGB,        config_management_t::exact   },
         { EGL_MIN_SWAP_INTERVAL,          config_management_t::exact   },
         { EGL_MAX_SWAP_INTERVAL,          config_management_t::exact   },
+        { EGL_LUMINANCE_SIZE,             config_management_t::atLeast },
+        { EGL_ALPHA_MASK_SIZE,            config_management_t::atLeast },
+        { EGL_COLOR_BUFFER_TYPE,          config_management_t::exact   },
+        { EGL_RENDERABLE_TYPE,            config_management_t::mask    },
+        { EGL_CONFORMANT,                 config_management_t::mask    }
 };
 
+
 static config_pair_t const config_defaults[] = {
-        { EGL_SURFACE_TYPE,        EGL_WINDOW_BIT },
+    // attributes that are not specified are simply ignored, if a particular
+    // one needs not be ignored, it must be specified here, eg:
+    // { EGL_SURFACE_TYPE, EGL_WINDOW_BIT },
 };
+
+// ----------------------------------------------------------------------------
+
+static status_t getConfigFormatInfo(EGLint configID,
+        int32_t& pixelFormat, int32_t& depthFormat)
+{
+    switch(configID) {
+    case 0:
+        pixelFormat = GGL_PIXEL_FORMAT_RGB_565;
+        depthFormat = 0;
+        break;
+    case 1:
+        pixelFormat = GGL_PIXEL_FORMAT_RGB_565;
+        depthFormat = GGL_PIXEL_FORMAT_Z_16;
+        break;
+    case 2:
+        pixelFormat = GGL_PIXEL_FORMAT_RGBX_8888;
+        depthFormat = 0;
+        break;
+    case 3:
+        pixelFormat = GGL_PIXEL_FORMAT_RGBX_8888;
+        depthFormat = GGL_PIXEL_FORMAT_Z_16;
+        break;
+    case 4:
+        pixelFormat = GGL_PIXEL_FORMAT_RGBA_8888;
+        depthFormat = 0;
+        break;
+    case 5:
+        pixelFormat = GGL_PIXEL_FORMAT_RGBA_8888;
+        depthFormat = GGL_PIXEL_FORMAT_Z_16;
+        break;
+    case 6:
+        pixelFormat = GGL_PIXEL_FORMAT_A_8;
+        depthFormat = 0;
+        break;
+    case 7:
+        pixelFormat = GGL_PIXEL_FORMAT_A_8;
+        depthFormat = GGL_PIXEL_FORMAT_Z_16;
+        break;
+    default:
+        return NAME_NOT_FOUND;
+    }
+    return NO_ERROR;
+}
 
 // ----------------------------------------------------------------------------
 
@@ -1213,32 +1311,7 @@ static EGLSurface createWindowSurface(EGLDisplay dpy, EGLConfig config,
 
     int32_t depthFormat;
     int32_t pixelFormat;
-    switch(configID) {
-    case 0:
-        pixelFormat = GGL_PIXEL_FORMAT_RGB_565;
-        depthFormat = 0;
-        break;
-    case 1:
-        pixelFormat = GGL_PIXEL_FORMAT_RGB_565;
-        depthFormat = GGL_PIXEL_FORMAT_Z_16;
-        break;
-    case 2:
-        pixelFormat = GGL_PIXEL_FORMAT_RGBA_8888;
-        depthFormat = 0;
-        break;
-    case 3:
-        pixelFormat = GGL_PIXEL_FORMAT_RGBA_8888;
-        depthFormat = GGL_PIXEL_FORMAT_Z_16;
-        break;
-    case 4:
-        pixelFormat = GGL_PIXEL_FORMAT_A_8;
-        depthFormat = 0;
-        break;
-    case 5:
-        pixelFormat = GGL_PIXEL_FORMAT_A_8;
-        depthFormat = GGL_PIXEL_FORMAT_Z_16;
-        break;
-    default:
+    if (getConfigFormatInfo(configID, pixelFormat, depthFormat) != NO_ERROR) {
         return setError(EGL_BAD_MATCH, EGL_NO_SURFACE);
     }
 
@@ -1287,32 +1360,7 @@ static EGLSurface createPixmapSurface(EGLDisplay dpy, EGLConfig config,
 
     int32_t depthFormat;
     int32_t pixelFormat;
-    switch(configID) {
-    case 0:
-        pixelFormat = GGL_PIXEL_FORMAT_RGB_565;
-        depthFormat = 0;
-        break;
-    case 1:
-        pixelFormat = GGL_PIXEL_FORMAT_RGB_565;
-        depthFormat = GGL_PIXEL_FORMAT_Z_16;
-        break;
-    case 2:
-        pixelFormat = GGL_PIXEL_FORMAT_RGBA_8888;
-        depthFormat = 0;
-        break;
-    case 3:
-        pixelFormat = GGL_PIXEL_FORMAT_RGBA_8888;
-        depthFormat = GGL_PIXEL_FORMAT_Z_16;
-        break;
-    case 4:
-        pixelFormat = GGL_PIXEL_FORMAT_A_8;
-        depthFormat = 0;
-        break;
-    case 5:
-        pixelFormat = GGL_PIXEL_FORMAT_A_8;
-        depthFormat = GGL_PIXEL_FORMAT_Z_16;
-        break;
-    default:
+    if (getConfigFormatInfo(configID, pixelFormat, depthFormat) != NO_ERROR) {
         return setError(EGL_BAD_MATCH, EGL_NO_SURFACE);
     }
 
@@ -1351,32 +1399,7 @@ static EGLSurface createPbufferSurface(EGLDisplay dpy, EGLConfig config,
 
     int32_t depthFormat;
     int32_t pixelFormat;
-    switch(configID) {
-    case 0:
-        pixelFormat = GGL_PIXEL_FORMAT_RGB_565;
-        depthFormat = 0;
-        break;
-    case 1:
-        pixelFormat = GGL_PIXEL_FORMAT_RGB_565;
-        depthFormat = GGL_PIXEL_FORMAT_Z_16;
-        break;
-    case 2:
-        pixelFormat = GGL_PIXEL_FORMAT_RGBA_8888;
-        depthFormat = 0;
-        break;
-    case 3:
-        pixelFormat = GGL_PIXEL_FORMAT_RGBA_8888;
-        depthFormat = GGL_PIXEL_FORMAT_Z_16;
-        break;
-    case 4:
-        pixelFormat = GGL_PIXEL_FORMAT_A_8;
-        depthFormat = 0;
-        break;
-    case 5:
-        pixelFormat = GGL_PIXEL_FORMAT_A_8;
-        depthFormat = GGL_PIXEL_FORMAT_Z_16;
-        break;
-    default:
+    if (getConfigFormatInfo(configID, pixelFormat, depthFormat) != NO_ERROR) {
         return setError(EGL_BAD_MATCH, EGL_NO_SURFACE);
     }
 
@@ -1513,7 +1536,7 @@ EGLBoolean eglChooseConfig( EGLDisplay dpy, const EGLint *attrib_list,
         numAttributes++;
         EGLint attr = *attrib_list++;
         EGLint val  = *attrib_list++;
-        for (int i=0 ; i<numConfigs ; i++) {
+        for (int i=0 ; possibleMatch && i<numConfigs ; i++) {
             if (!(possibleMatch & (1<<i)))
                 continue;
             if (isAttributeMatching(i, attr, val) == 0) {
@@ -1523,15 +1546,15 @@ EGLBoolean eglChooseConfig( EGLDisplay dpy, const EGLint *attrib_list,
     }
 
     // now, handle the attributes which have a useful default value
-    for (size_t j=0 ; j<NELEM(config_defaults) ; j++) {
-        // see if this attribute was specified, if not apply its
+    for (size_t j=0 ; possibleMatch && j<NELEM(config_defaults) ; j++) {
+        // see if this attribute was specified, if not, apply its
         // default value
         if (binarySearch<config_pair_t>(
                 (config_pair_t const*)attrib_list,
                 0, numAttributes-1,
                 config_defaults[j].key) < 0)
         {
-            for (int i=0 ; i<numConfigs ; i++) {
+            for (int i=0 ; possibleMatch && i<numConfigs ; i++) {
                 if (!(possibleMatch & (1<<i)))
                     continue;
                 if (isAttributeMatching(i,

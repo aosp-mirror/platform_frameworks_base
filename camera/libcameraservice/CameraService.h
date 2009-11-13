@@ -23,10 +23,9 @@
 #include <ui/CameraHardwareInterface.h>
 #include <ui/Camera.h>
 
-class android::MemoryHeapBase;
-
 namespace android {
 
+class MemoryHeapBase;
 class MediaPlayer;
 
 // ----------------------------------------------------------------------------
@@ -146,12 +145,13 @@ private:
         static      sp<Client>  getClientFromCookie(void* user);
 
                     void        handlePreviewData(const sp<IMemory>&);
-                    void        handleShutter();
+                    void        handleShutter(image_rect_type *image);
                     void        handlePostview(const sp<IMemory>&);
                     void        handleRawPicture(const sp<IMemory>&);
                     void        handleCompressedPicture(const sp<IMemory>&);
 
-                    void        copyFrameAndPostCopiedFrame(sp<IMemoryHeap> heap, size_t offset, size_t size);
+                    void        copyFrameAndPostCopiedFrame(const sp<ICameraClient>& client,
+                                    const sp<IMemoryHeap>& heap, size_t offset, size_t size);
 
         // camera operation mode
         enum camera_mode {
@@ -181,7 +181,6 @@ private:
         mutable     Condition                   mReady;
                     sp<CameraService>           mCameraService;
                     sp<ISurface>                mSurface;
-                    sp<MemoryHeapBase>          mPreviewBuffer;
                     int                         mPreviewCallbackFlag;
 
                     sp<MediaPlayer>             mMediaPlayerClick;
@@ -197,6 +196,9 @@ private:
                     sp<OverlayRef>              mOverlayRef;
                     int                         mOverlayW;
                     int                         mOverlayH;
+
+        mutable     Mutex                       mPreviewLock;
+                    sp<MemoryHeapBase>          mPreviewBuffer;
     };
 
 // ----------------------------------------------------------------------------

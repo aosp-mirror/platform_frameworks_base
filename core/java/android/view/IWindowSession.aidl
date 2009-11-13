@@ -19,6 +19,7 @@ package android.view;
 
 import android.graphics.Rect;
 import android.graphics.Region;
+import android.os.Bundle;
 import android.view.IWindow;
 import android.view.MotionEvent;
 import android.view.WindowManager;
@@ -112,8 +113,15 @@ interface IWindowSession {
     /**
      * For windows with the wallpaper behind them, and the wallpaper is
      * larger than the screen, set the offset within the screen.
+     * For multi screen launcher type applications, xstep and ystep indicate
+     * how big the increment is from one screen to another.
      */
-    void setWallpaperPosition(IBinder windowToken, float x, float y);
+    void setWallpaperPosition(IBinder windowToken, float x, float y, float xstep, float ystep);
     
     void wallpaperOffsetsComplete(IBinder window);
+    
+    Bundle sendWallpaperCommand(IBinder window, String action, int x, int y,
+            int z, in Bundle extras, boolean sync);
+    
+    void wallpaperCommandComplete(IBinder window, in Bundle result);
 }

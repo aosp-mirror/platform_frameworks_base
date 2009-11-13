@@ -27,6 +27,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Rect;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
@@ -46,7 +47,6 @@ import android.view.WindowManagerImpl;
 /**
  * A wallpaper service is responsible for showing a live wallpaper behind
  * applications that would like to sit on top of it.
- * @hide Live Wallpaper
  */
 public abstract class WallpaperService extends Service {
     /**
@@ -73,10 +73,20 @@ public abstract class WallpaperService extends Service {
     private static final int MSG_UPDATE_SURFACE = 10000;
     private static final int MSG_VISIBILITY_CHANGED = 10010;
     private static final int MSG_WALLPAPER_OFFSETS = 10020;
+    private static final int MSG_WALLPAPER_COMMAND = 10025;
     private static final int MSG_WINDOW_RESIZED = 10030;
     private static final int MSG_TOUCH_EVENT = 10040;
     
     private Looper mCallbackLooper;
+    
+    static final class WallpaperCommand {
+        String action;
+        int x;
+        int y;
+        int z;
+        Bundle extras;
+        boolean sync;
+    }
     
     /**
      * The actual implementation of a wallpaper.  A wallpaper service may
@@ -124,6 +134,8 @@ public abstract class WallpaperService extends Service {
         boolean mOffsetMessageEnqueued;
         float mPendingXOffset;
         float mPendingYOffset;
+        float mPendingXOffsetStep;
+        float mPendingYOffsetStep;
         boolean mPendingSync;
         MotionEvent mPendingMove;
         
@@ -217,11 +229,14 @@ public abstract class WallpaperService extends Service {
             }
 
             @Override
-            public void dispatchWallpaperOffsets(float x, float y, boolean sync) {
+            public void dispatchWallpaperOffsets(float x, float y, float xStep, float yStep,
+                    boolean sync) {
                 synchronized (mLock) {
                     if (DEBUG) Log.v(TAG, "Dispatch wallpaper offsets: " + x + ", " + y);
                     mPendingXOffset = x;
                     mPendingYOffset = y;
+                    mPendingXOffsetStep = xStep;
+                    mPendingYOffsetStep = yStep;
                     if (sync) {
                         mPendingSync = true;
                     }
@@ -233,6 +248,22 @@ public abstract class WallpaperService extends Service {
                 }
             }
             
+            public void dispatchWallpaperCommand(String action, int x, int y,
+                    int z, Bundle extras, boolean sync) {
+                synchronized (mLock) {
+                    if (DEBUG) Log.v(TAG, "Dispatch wallpaper command: " + x + ", " + y);
+                    WallpaperCommand cmd = new WallpaperCommand();
+                    cmd.action = action;
+                    cmd.x = x;
+                    cmd.y = y;
+                    cmd.z = z;
+                    cmd.extras = extras;
+                    cmd.sync = sync;
+                    Message msg = mCaller.obtainMessage(MSG_WALLPAPER_COMMAND);
+                    msg.obj = cmd;
+                    mCaller.sendMessage(msg);
+                }
+            }
         };
         
         /**
@@ -334,7 +365,30 @@ public abstract class WallpaperService extends Service {
          * WallpaperManager.setWallpaperOffsets()}.
          */
         public void onOffsetsChanged(float xOffset, float yOffset,
+                float xOffsetStep, float yOffsetStep,
                 int xPixelOffset, int yPixelOffset) {
+        }
+        
+        /**
+         * Process a command that was sent to the wallpaper with
+         * {@link WallpaperManager#sendWallpaperCommand}.
+         * The default implementation does nothing, and always returns null
+         * as the result.
+         * 
+         * @param action The name of the command to perform.  This tells you
+         * what to do and how to interpret the rest of the arguments.
+         * @param x Generic integer parameter.
+         * @param y Generic integer parameter.
+         * @param z Generic integer parameter.
+         * @param extras Any additional parameters.
+         * @param resultRequested If true, the caller is requesting that
+         * a result, appropriate for the command, be returned back.
+         * @return If returning a result, create a Bundle and place the
+         * result data in to it.  Otherwise return null.
+         */
+        public Bundle onCommand(String action, int x, int y, int z,
+                Bundle extras, boolean resultRequested) {
+            return null;
         }
         
         /**
@@ -560,10 +614,14 @@ public abstract class WallpaperService extends Service {
             
             float xOffset;
             float yOffset;
+            float xOffsetStep;
+            float yOffsetStep;
             boolean sync;
             synchronized (mLock) {
                 xOffset = mPendingXOffset;
                 yOffset = mPendingYOffset;
+                xOffsetStep = mPendingXOffsetStep;
+                yOffsetStep = mPendingYOffsetStep;
                 sync = mPendingSync;
                 mPendingSync = false;
                 mOffsetMessageEnqueued = false;
@@ -574,12 +632,29 @@ public abstract class WallpaperService extends Service {
             final int xPixels = availw > 0 ? -(int)(availw*xOffset+.5f) : 0;
             final int availh = mIWallpaperEngine.mReqHeight-mCurHeight;
             final int yPixels = availh > 0 ? -(int)(availh*yOffset+.5f) : 0;
-            onOffsetsChanged(xOffset, yOffset, xPixels, yPixels);
+            onOffsetsChanged(xOffset, yOffset, xOffsetStep, yOffsetStep, xPixels, yPixels);
             
             if (sync) {
                 try {
                     if (DEBUG) Log.v(TAG, "Reporting offsets change complete");
                     mSession.wallpaperOffsetsComplete(mWindow.asBinder());
+                } catch (RemoteException e) {
+                }
+            }
+        }
+        
+        void doCommand(WallpaperCommand cmd) {
+            Bundle result;
+            if (!mDestroyed) {
+                result = onCommand(cmd.action, cmd.x, cmd.y, cmd.z,
+                        cmd.extras, cmd.sync);
+            } else {
+                result = null;
+            }
+            if (cmd.sync) {
+                try {
+                    if (DEBUG) Log.v(TAG, "Reporting command complete");
+                    mSession.wallpaperCommandComplete(mWindow.asBinder(), result);
                 } catch (RemoteException e) {
                 }
             }
@@ -671,6 +746,12 @@ public abstract class WallpaperService extends Service {
             mCaller.sendMessage(msg);
         }
 
+        public void dispatchPointer(MotionEvent event) {
+            if (mEngine != null) {
+                mEngine.mWindow.onDispatchPointer(event, event.getEventTime(), false);
+            }
+        }
+        
         public void destroy() {
             Message msg = mCaller.obtainMessage(DO_DETACH);
             mCaller.sendMessage(msg);
@@ -709,6 +790,10 @@ public abstract class WallpaperService extends Service {
                 case MSG_WALLPAPER_OFFSETS: {
                     mEngine.doOffsetsChanged();
                 } break;
+                case MSG_WALLPAPER_COMMAND: {
+                    WallpaperCommand cmd = (WallpaperCommand)message.obj;
+                    mEngine.doCommand(cmd);
+                } break;
                 case MSG_WINDOW_RESIZED: {
                     final boolean reportDraw = message.arg1 != 0;
                     mEngine.updateSurface(true, false);
@@ -726,6 +811,7 @@ public abstract class WallpaperService extends Service {
                             mEngine.mPendingMove = null;
                         }
                     }
+                    if (DEBUG) Log.v(TAG, "Delivering touch event: " + ev);
                     mEngine.onTouchEvent(ev);
                     ev.recycle();
                 } break;
