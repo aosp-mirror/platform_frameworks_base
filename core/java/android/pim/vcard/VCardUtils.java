@@ -23,6 +23,7 @@ import android.provider.ContactsContract.CommonDataKinds.Phone;
 import android.provider.ContactsContract.CommonDataKinds.StructuredPostal;
 import android.telephony.PhoneNumberUtils;
 import android.text.TextUtils;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -181,26 +182,36 @@ public class VCardUtils {
                 sPhoneTypesSetUnknownToContacts.contains(phoneType));
     }
     
-    public static String[] sortNameElements(int vcardType,
-            String familyName, String middleName, String givenName) {
-        String[] list = new String[3];
-        switch (VCardConfig.getNameOrderType(vcardType)) {
-        case VCardConfig.NAME_ORDER_JAPANESE:
-            // TODO: Should handle Ascii case?
-            list[0] = familyName;
-            list[1] = middleName;
-            list[2] = givenName; 
-            break;
-        case VCardConfig.NAME_ORDER_EUROPE:
-            list[0] = middleName;
-            list[1] = givenName;
-            list[2] = familyName;
-            break;
-        default:
-            list[0] = givenName;
-            list[1] = middleName;
-            list[2] = familyName;
-            break;
+    public static String[] sortNameElements(final int vcardType,
+            final String familyName, final String middleName, final String givenName) {
+        final String[] list = new String[3];
+        final int nameOrderType = VCardConfig.getNameOrderType(vcardType);
+        switch (nameOrderType) {
+            case VCardConfig.NAME_ORDER_JAPANESE: {
+                if (containsOnlyPrintableAscii(familyName) &&
+                        containsOnlyPrintableAscii(givenName)) {
+                    list[0] = givenName;
+                    list[1] = middleName;
+                    list[2] = familyName;
+                } else {
+                    list[0] = familyName;
+                    list[1] = middleName;
+                    list[2] = givenName;
+                }
+                break;
+            }
+            case VCardConfig.NAME_ORDER_EUROPE: {
+                list[0] = middleName;
+                list[1] = givenName;
+                list[2] = familyName;
+                break;
+            }
+            default: {
+                list[0] = givenName;
+                list[1] = middleName;
+                list[2] = familyName;
+                break;
+            }
         }
         return list;
     }
@@ -302,24 +313,23 @@ public class VCardUtils {
         return dataArray;
     }
     
-    public static String constructNameFromElements(int nameOrderType,
-            String familyName, String middleName, String givenName) {
-        return constructNameFromElements(nameOrderType, familyName, middleName, givenName,
+    public static String constructNameFromElements(final int vcardType,
+            final String familyName, final String middleName, final String givenName) {
+        return constructNameFromElements(vcardType, familyName, middleName, givenName,
                 null, null);
     }
 
-    public static String constructNameFromElements(int nameOrderType,
-            String familyName, String middleName, String givenName,
-            String prefix, String suffix) {
-        StringBuilder builder = new StringBuilder();
-        String[] nameList = sortNameElements(nameOrderType,
-                familyName, middleName, givenName);
+    public static String constructNameFromElements(final int vcardType,
+            final String familyName, final String middleName, final String givenName,
+            final String prefix, final String suffix) {
+        final StringBuilder builder = new StringBuilder();
+        final String[] nameList = sortNameElements(vcardType, familyName, middleName, givenName);
         boolean first = true;
         if (!TextUtils.isEmpty(prefix)) {
             first = false;
             builder.append(prefix);
         }
-        for (String namePart : nameList) {
+        for (final String namePart : nameList) {
             if (!TextUtils.isEmpty(namePart)) {
                 if (first) {
                     first = false;

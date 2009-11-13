@@ -20,8 +20,10 @@ import android.content.ContentProviderOperation;
 import android.content.ContentResolver;
 import android.content.OperationApplicationException;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.RemoteException;
 import android.provider.ContactsContract;
+import android.provider.ContactsContract.Contacts;
 import android.provider.ContactsContract.Data;
 import android.provider.ContactsContract.Groups;
 import android.provider.ContactsContract.RawContacts;
@@ -675,14 +677,51 @@ public class ContactStruct {
      */
     @SuppressWarnings("fallthrough")
     private void handlePhoneticNameFromSound(List<String> elems) {
-        // Family, Given, Middle. (1-3)
-        // This is not from specification but mere assumption. Some Japanese phones use this order.
+        if (!(TextUtils.isEmpty(mPhoneticFamilyName) &&
+                TextUtils.isEmpty(mPhoneticMiddleName) &&
+                TextUtils.isEmpty(mPhoneticGivenName))) {
+            // This means the other properties like "X-PHONETIC-FIRST-NAME" was already found.
+            // Ignore "SOUND;X-IRMC-N".
+            return;
+        }
+
         int size;
         if (elems == null || (size = elems.size()) < 1) {
             return;
         }
+
+        // Assume that the order is "Family, Given, Middle".
+        // This is not from specification but mere assumption. Some Japanese phones use this order.
         if (size > 3) {
             size = 3;
+        }
+
+        if (elems.get(0).length() > 0) {
+            boolean onlyFirstElemIsNonEmpty = true;
+            for (int i = 1; i < size; i++) {
+                if (elems.get(i).length() > 0) {
+                    onlyFirstElemIsNonEmpty = false;
+                    break;
+                }
+            }
+            if (onlyFirstElemIsNonEmpty) {
+                final String[] namesArray = elems.get(0).split(" ");
+                final int nameArrayLength = namesArray.length;
+                if (nameArrayLength == 3) {
+                    // Assume the string is "Family Middle Given".
+                    mPhoneticFamilyName = namesArray[0];
+                    mPhoneticMiddleName = namesArray[1];
+                    mPhoneticGivenName = namesArray[2];
+                } else if (nameArrayLength == 2) {
+                    // Assume the string is "Family Given" based on the Japanese mobile
+                    // phones' preference.
+                    mPhoneticFamilyName = namesArray[0];
+                    mPhoneticGivenName = namesArray[1];
+                } else {
+                    mPhoneticFullName = elems.get(0);
+                }
+                return;
+            }
         }
 
         switch (size) {
@@ -976,36 +1015,8 @@ public class ContactStruct {
         if (!TextUtils.isEmpty(mFullName)) {
             mDisplayName = mFullName;
         } else if (!(TextUtils.isEmpty(mFamilyName) && TextUtils.isEmpty(mGivenName))) {
-            StringBuilder builder = new StringBuilder();
-            List<String> nameList;
-            switch (VCardConfig.getNameOrderType(mVCardType)) {
-            case VCardConfig.NAME_ORDER_JAPANESE:
-                if (VCardUtils.containsOnlyPrintableAscii(mFamilyName) &&
-                        VCardUtils.containsOnlyPrintableAscii(mGivenName)) {
-                    nameList = Arrays.asList(mPrefix, mGivenName, mMiddleName, mFamilyName, mSuffix);
-                } else {
-                    nameList = Arrays.asList(mPrefix, mFamilyName, mMiddleName, mGivenName, mSuffix);
-                }
-                break;
-            case VCardConfig.NAME_ORDER_EUROPE:
-                nameList = Arrays.asList(mPrefix, mMiddleName, mGivenName, mFamilyName, mSuffix);
-                break;
-            default:
-                nameList = Arrays.asList(mPrefix, mGivenName, mMiddleName, mFamilyName, mSuffix);
-                break;
-            }
-            boolean first = true;
-            for (String namePart : nameList) {
-                if (!TextUtils.isEmpty(namePart)) {
-                    if (first) {
-                        first = false;
-                    } else {
-                        builder.append(' ');
-                    }
-                    builder.append(namePart);
-                }
-            }
-            mDisplayName = builder.toString();
+            mDisplayName = VCardUtils.constructNameFromElements(mVCardType,
+                    mFamilyName, mMiddleName, mGivenName, mPrefix, mSuffix);
         } else if (!(TextUtils.isEmpty(mPhoneticFamilyName) &&
                 TextUtils.isEmpty(mPhoneticGivenName))) {
             mDisplayName = VCardUtils.constructNameFromElements(mVCardType,
@@ -1280,6 +1291,15 @@ public class ContactStruct {
         } catch (OperationApplicationException e) {
             Log.e(LOG_TAG, String.format("%s: %s", e.toString(), e.getMessage()));
         }
+    }
+
+    public static ContactStruct buildFromResolver(ContentResolver resolver) {
+        return buildFromResolver(resolver, Contacts.CONTENT_URI);
+    }
+
+    public static ContactStruct buildFromResolver(ContentResolver resolver, Uri uri) {
+
+        return null;
     }
 
     private boolean nameFieldsAreEmpty() {

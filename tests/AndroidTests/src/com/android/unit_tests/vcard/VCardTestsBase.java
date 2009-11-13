@@ -349,10 +349,14 @@ class CustomMockContext extends MockContext {
                         }
                     }
                     if (!checked) {
-                        final String failMsg =
-                            "Unexpected ContentValues for MimeType " + mimeType
-                            + ": " + actualContentValues;
-                        fail(failMsg);
+                        final StringBuilder builder = new StringBuilder();
+                        builder.append("Unexpected: ");
+                        builder.append(convertToEasilyReadableString(actualContentValues));
+                        builder.append("\nExpected: ");
+                        for (ContentValues expectedContentValues : contentValuesCollection) {
+                            builder.append(convertToEasilyReadableString(expectedContentValues));
+                        }
+                        fail(builder.toString());
                     }
                 } else {
                     fail("Unexpected Uri has come: " + uri);
@@ -823,7 +827,7 @@ class CustomMockContext extends MockContext {
             return elem;
         }
 
-        public PropertyNodesVerifierElem addPropertyNodesVerifierWithEmptyName() {
+        public PropertyNodesVerifierElem addPropertyNodesVerifierElemWithEmptyName() {
             PropertyNodesVerifierElem elem = addPropertyNodesVerifierElem();
             if (mIsV30) {
                 elem.addNodeWithOrder("N", "").addNodeWithOrder("FN", "");
@@ -847,14 +851,16 @@ class CustomMockContext extends MockContext {
         }
 
         private void verifyOneVCard(final String vcard) {
+            // Log.d("@@@", vcard);
             final VCardBuilder builder;
             if (mImportVerifier != null) {
                 final VNodeBuilder vnodeBuilder = mPropertyNodesVerifier;
-                final VCardDataBuilder vcardDataBuilder = new VCardDataBuilder();
+                final VCardDataBuilder vcardDataBuilder =
+                        new VCardDataBuilder(mVCardType);
                 vcardDataBuilder.addEntryHandler(mImportVerifier);
                 if (mPropertyNodesVerifier != null) {
                     builder = new VCardBuilderCollection(Arrays.asList(
-                            vcardDataBuilder, mPropertyNodesVerifier));
+                            mPropertyNodesVerifier, vcardDataBuilder));
                 } else {
                     builder = vnodeBuilder;
                 }

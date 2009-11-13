@@ -784,7 +784,7 @@ public class VCardImporterTests extends VCardTestsBase {
                 .put(StructuredName.DISPLAY_NAME, "\u5B89\u85E4\u30ED\u30A4\u30C9")
                 // While vCard parser does not split "SOUND" property values,
                 // ContactStruct care it.
-                .put(StructuredName.PHONETIC_FAMILY_NAME,
+                .put(StructuredName.PHONETIC_GIVEN_NAME,
                         "\uFF71\uFF9D\uFF84\uFF9E\uFF73\uFF9B\uFF72\uFF84\uFF9E");
 
         elem.addExpected(Phone.CONTENT_ITEM_TYPE)
@@ -937,7 +937,7 @@ public class VCardImporterTests extends VCardTestsBase {
         elem.addExpected(StructuredName.CONTENT_ITEM_TYPE)
                 .put(StructuredName.FAMILY_NAME, "\u5B89\u85E4\u30ED\u30A4\u30C9\u0033")
                 .put(StructuredName.DISPLAY_NAME, "\u5B89\u85E4\u30ED\u30A4\u30C9\u0033")
-                .put(StructuredName.PHONETIC_FAMILY_NAME,
+                .put(StructuredName.PHONETIC_GIVEN_NAME,
                         "\uFF71\uFF9D\uFF84\uFF9E\uFF73\uFF9B\uFF72\uFF84\uFF9E\u0033");
         elem.addExpected(Phone.CONTENT_ITEM_TYPE)
                 .put(Phone.TYPE, Phone.TYPE_CUSTOM)
@@ -959,7 +959,7 @@ public class VCardImporterTests extends VCardTestsBase {
         elem.addExpected(StructuredName.CONTENT_ITEM_TYPE)
                 .put(StructuredName.FAMILY_NAME, "\u5B89\u85E4\u30ED\u30A4\u30C9\u0034")
                 .put(StructuredName.DISPLAY_NAME, "\u5B89\u85E4\u30ED\u30A4\u30C9\u0034")
-                .put(StructuredName.PHONETIC_FAMILY_NAME,
+                .put(StructuredName.PHONETIC_GIVEN_NAME,
                         "\uFF71\uFF9D\uFF84\uFF9E\uFF73\uFF9B\uFF72\uFF84\uFF9E\u0034");
         elem.addExpected(Phone.CONTENT_ITEM_TYPE)
                 .put(Phone.TYPE, Phone.TYPE_CUSTOM)
@@ -981,7 +981,7 @@ public class VCardImporterTests extends VCardTestsBase {
         elem.addExpected(StructuredName.CONTENT_ITEM_TYPE)
                 .put(StructuredName.FAMILY_NAME, "\u5B89\u85E4\u30ED\u30A4\u30C9\u0035")
                 .put(StructuredName.DISPLAY_NAME, "\u5B89\u85E4\u30ED\u30A4\u30C9\u0035")
-                .put(StructuredName.PHONETIC_FAMILY_NAME,
+                .put(StructuredName.PHONETIC_GIVEN_NAME,
                         "\uFF71\uFF9D\uFF84\uFF9E\uFF73\uFF9B\uFF72\uFF84\uFF9E\u0035");
         elem.addExpected(Phone.CONTENT_ITEM_TYPE)
                 .put(Phone.TYPE, Phone.TYPE_CUSTOM)
@@ -1029,6 +1029,18 @@ public class VCardImporterTests extends VCardTestsBase {
                 .put(StructuredName.DISPLAY_NAME, "Example");
         verifier.verify(R.raw.v21_winmo_65, V21,
                 new VCardParser_V21(VCardParser.PARSER_MODE_SCAN));
+    }
+
+    public void testTolerateInvalidCommentLikeLineV21() throws IOException, VCardException {
+        ImportVerifier verifier = new ImportVerifier();
+        ImportVerifierElem elem = verifier.addImportVerifierElem();
+        elem.addExpected(StructuredName.CONTENT_ITEM_TYPE)
+                .put(StructuredName.GIVEN_NAME, "Conference Call")
+                .put(StructuredName.DISPLAY_NAME, "Conference Call");
+        elem.addExpected(Note.CONTENT_ITEM_TYPE)
+                .put(Note.NOTE, "This is an (sharp ->#<- sharp) example. "
+                        + "This message must NOT be ignored.");
+        verifier.verify(R.raw.v21_invalid_comment_line, V21);
     }
 
     public void testPagerV30_Parse() throws IOException, VCardException {

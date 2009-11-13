@@ -1,0 +1,10 @@
+BEGIN:vCard
+VERSION:2.1
+UID:357
+N:;Conference Call
+FN:Conference Call
+# This line must be ignored.
+NOTE;ENCODING=QUOTED-PRINTABLE:This is an (sharp ->=
+#<- sharp) example. This message must NOT be ignored.
+# This line must be ignored too.
+END:vCard
