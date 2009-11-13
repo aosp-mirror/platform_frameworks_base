@@ -682,10 +682,18 @@ public class VCardComposer {
         final String givenName = contentValues.getAsString(StructuredName.GIVEN_NAME);
         final String prefix = contentValues.getAsString(StructuredName.PREFIX);
         final String suffix = contentValues.getAsString(StructuredName.SUFFIX);
+        final String phoneticFamilyName =
+                contentValues.getAsString(StructuredName.PHONETIC_FAMILY_NAME);
+        final String phoneticMiddleName =
+                contentValues.getAsString(StructuredName.PHONETIC_MIDDLE_NAME);
+        final String phoneticGivenName =
+                contentValues.getAsString(StructuredName.PHONETIC_GIVEN_NAME);
         final String displayName = contentValues.getAsString(StructuredName.DISPLAY_NAME);
         return !(TextUtils.isEmpty(familyName) && TextUtils.isEmpty(middleName) &&
                 TextUtils.isEmpty(givenName) && TextUtils.isEmpty(prefix) &&
-                TextUtils.isEmpty(suffix) && TextUtils.isEmpty(displayName));
+                TextUtils.isEmpty(suffix) && TextUtils.isEmpty(phoneticFamilyName) &&
+                TextUtils.isEmpty(phoneticMiddleName) && TextUtils.isEmpty(phoneticGivenName) &&
+                TextUtils.isEmpty(displayName));
     }
 
     private void appendStructuredNamesInternal(final StringBuilder builder,
@@ -865,17 +873,18 @@ public class VCardComposer {
             builder.append(VCARD_ITEM_SEPARATOR);
             builder.append(VCARD_ITEM_SEPARATOR);
             builder.append(VCARD_END_OF_LINE);
-            if (mIsV30) {
-                builder.append(Constants.PROPERTY_FN);
-                // TODO: Not allowed formally...
-                if (shouldAppendCharsetParameter(displayName)) {
-                    builder.append(VCARD_PARAM_SEPARATOR);
-                    builder.append(mVCardCharsetParameter);
-                }
-                builder.append(VCARD_DATA_SEPARATOR);
-                builder.append(encodedDisplayName);
-                builder.append(VCARD_END_OF_LINE);
+            builder.append(Constants.PROPERTY_FN);
+
+            // Note: "CHARSET" param is not allowed in vCard 3.0, but we may add it
+            //       when it would be useful for external importers, assuming no external
+            //       importer allows this vioration.
+            if (shouldAppendCharsetParameter(displayName)) {
+                builder.append(VCARD_PARAM_SEPARATOR);
+                builder.append(mVCardCharsetParameter);
             }
+            builder.append(VCARD_DATA_SEPARATOR);
+            builder.append(encodedDisplayName);
+            builder.append(VCARD_END_OF_LINE);
         } else if (mIsV30) {
             // vCard 3.0 specification requires these fields.
             appendVCardLine(builder, Constants.PROPERTY_N, "");
@@ -913,15 +922,12 @@ public class VCardComposer {
                         .constructNameFromElements(mVCardType,
                                 phoneticFamilyName, phoneticMiddleName, phoneticGivenName);
                 builder.append(Constants.PROPERTY_SORT_STRING);
-
-                // Do not need to care about QP, since vCard 3.0 does not allow it.
-                final String encodedSortString = escapeCharacters(sortString);
-                if (shouldAppendCharsetParameter(encodedSortString)) {
+                if (shouldAppendCharsetParameter(sortString)) {
                     builder.append(VCARD_PARAM_SEPARATOR);
                     builder.append(mVCardCharsetParameter);
                 }
                 builder.append(VCARD_DATA_SEPARATOR);
-                builder.append(encodedSortString);
+                builder.append(escapeCharacters(sortString));
                 builder.append(VCARD_END_OF_LINE);
             } else if (mIsJapaneseMobilePhone) {
                 // Note: There is no appropriate property for expressing
@@ -964,11 +970,31 @@ public class VCardComposer {
                     builder.append(mVCardCharsetParameter);
                 }
                 builder.append(VCARD_DATA_SEPARATOR);
-                builder.append(encodedPhoneticFamilyName);
+                // DoCoMo's specification requires vCard composer to use just the first
+                // column.
+                {
+                    boolean first = true;
+                    if (!TextUtils.isEmpty(encodedPhoneticFamilyName)) {
+                        builder.append(encodedPhoneticFamilyName);
+                        first = false;
+                    }
+                    if (!TextUtils.isEmpty(encodedPhoneticMiddleName)) {
+                        if (first) {
+                            first = false;
+                        } else {
+                            builder.append(' ');
+                        }
+                        builder.append(encodedPhoneticMiddleName);
+                    }
+                    if (!TextUtils.isEmpty(encodedPhoneticGivenName)) {
+                        if (!first) {
+                            builder.append(' ');
+                        }
+                        builder.append(encodedPhoneticGivenName);
+                    }
+                }
                 builder.append(VCARD_ITEM_SEPARATOR);
-                builder.append(encodedPhoneticGivenName);
                 builder.append(VCARD_ITEM_SEPARATOR);
-                builder.append(encodedPhoneticMiddleName);
                 builder.append(VCARD_ITEM_SEPARATOR);
                 builder.append(VCARD_ITEM_SEPARATOR);
                 builder.append(VCARD_END_OF_LINE);
@@ -988,7 +1014,8 @@ public class VCardComposer {
         if (mUsesDefactProperty) {
             if (!TextUtils.isEmpty(phoneticGivenName)) {
                 final boolean reallyUseQuotedPrintable =
-                    !VCardUtils.containsOnlyNonCrLfPrintableAscii(phoneticGivenName);
+                    (mUsesQuotedPrintable &&
+                            !VCardUtils.containsOnlyNonCrLfPrintableAscii(phoneticGivenName));
                 final String encodedPhoneticGivenName;
                 if (reallyUseQuotedPrintable) {
                     encodedPhoneticGivenName = encodeQuotedPrintable(phoneticGivenName);
@@ -996,7 +1023,7 @@ public class VCardComposer {
                     encodedPhoneticGivenName = escapeCharacters(phoneticGivenName);
                 }
                 builder.append(Constants.PROPERTY_X_PHONETIC_FIRST_NAME);
-                if (shouldAppendCharsetParameter(encodedPhoneticGivenName)) {
+                if (shouldAppendCharsetParameter(phoneticGivenName)) {
                     builder.append(VCARD_PARAM_SEPARATOR);
                     builder.append(mVCardCharsetParameter);
                 }
@@ -1010,7 +1037,8 @@ public class VCardComposer {
             }
             if (!TextUtils.isEmpty(phoneticMiddleName)) {
                 final boolean reallyUseQuotedPrintable =
-                    !VCardUtils.containsOnlyNonCrLfPrintableAscii(phoneticMiddleName);
+                    (mUsesQuotedPrintable &&
+                            !VCardUtils.containsOnlyNonCrLfPrintableAscii(phoneticMiddleName));
                 final String encodedPhoneticMiddleName;
                 if (reallyUseQuotedPrintable) {
                     encodedPhoneticMiddleName = encodeQuotedPrintable(phoneticMiddleName);
@@ -1018,7 +1046,7 @@ public class VCardComposer {
                     encodedPhoneticMiddleName = escapeCharacters(phoneticMiddleName);
                 }
                 builder.append(Constants.PROPERTY_X_PHONETIC_MIDDLE_NAME);
-                if (shouldAppendCharsetParameter(encodedPhoneticMiddleName)) {
+                if (shouldAppendCharsetParameter(phoneticMiddleName)) {
                     builder.append(VCARD_PARAM_SEPARATOR);
                     builder.append(mVCardCharsetParameter);
                 }
@@ -1032,7 +1060,8 @@ public class VCardComposer {
             }
             if (!TextUtils.isEmpty(phoneticFamilyName)) {
                 final boolean reallyUseQuotedPrintable =
-                    !VCardUtils.containsOnlyNonCrLfPrintableAscii(phoneticFamilyName);
+                    (mUsesQuotedPrintable &&
+                            !VCardUtils.containsOnlyNonCrLfPrintableAscii(phoneticFamilyName));
                 final String encodedPhoneticFamilyName;
                 if (reallyUseQuotedPrintable) {
                     encodedPhoneticFamilyName = encodeQuotedPrintable(phoneticFamilyName);
@@ -1040,7 +1069,7 @@ public class VCardComposer {
                     encodedPhoneticFamilyName = escapeCharacters(phoneticFamilyName);
                 }
                 builder.append(Constants.PROPERTY_X_PHONETIC_LAST_NAME);
-                if (shouldAppendCharsetParameter(encodedPhoneticFamilyName)) {
+                if (shouldAppendCharsetParameter(phoneticFamilyName)) {
                     builder.append(VCARD_PARAM_SEPARATOR);
                     builder.append(mVCardCharsetParameter);
                 }
@@ -2255,8 +2284,7 @@ public class VCardComposer {
      * to know this text is NOT UTF-8 but Shift_Jis.
      */
     private boolean shouldAppendCharsetParameter(final String propertyValue) {
-        return (!VCardUtils.containsOnlyPrintableAscii(propertyValue) &&
-                        (!mIsV30 || !mUsesUtf8));
+        return (!(mIsV30 && mUsesUtf8) && !VCardUtils.containsOnlyPrintableAscii(propertyValue));
     }
 
     private boolean shouldAppendCharsetParameters(final List<String> propertyValueList) {

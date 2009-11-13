@@ -106,4 +106,102 @@ public class VCardJapanizationTests extends VCardTestsBase {
                 .addNodeWithoutOrder("X-DCM-HMN-MODE", "");
         verifier.verify();
     }
+
+    private void testPhoneticNameCommon(int vcardType) {
+        ExportTestResolver resolver = new ExportTestResolver();
+        resolver.buildContactEntry().buildData(StructuredName.CONTENT_ITEM_TYPE)
+                .put(StructuredName.PHONETIC_FAMILY_NAME, "\u3084\u307E\u3060")
+                .put(StructuredName.PHONETIC_MIDDLE_NAME, "\u30DF\u30C9\u30EB\u30CD\u30FC\u30E0")
+                .put(StructuredName.PHONETIC_GIVEN_NAME, "\u305F\u308D\u3046");
+
+        final ContentValues contentValues =
+            (VCardConfig.usesShiftJis(vcardType) ?
+                    (VCardConfig.isV30(vcardType) ? mContentValuesForSJis :
+                            mContentValuesForQPAndSJis) :
+                    (VCardConfig.isV30(vcardType) ? null : mContentValuesForQPAndUtf8));
+        VCardVerifier verifier = new VCardVerifier(resolver, vcardType);
+        PropertyNodesVerifierElem elem = verifier.addPropertyNodesVerifierElemWithEmptyName();
+        elem.addNodeWithoutOrder("X-PHONETIC-LAST-NAME", "\u3084\u307E\u3060",
+                        contentValues)
+                .addNodeWithoutOrder("X-PHONETIC-MIDDLE-NAME",
+                        "\u30DF\u30C9\u30EB\u30CD\u30FC\u30E0",
+                        contentValues)
+                .addNodeWithoutOrder("X-PHONETIC-FIRST-NAME", "\u305F\u308D\u3046",
+                        contentValues);
+        if (VCardConfig.isV30(vcardType)) {
+            elem.addNodeWithoutOrder("SORT-STRING",
+                    "\u3084\u307E\u3060 \u30DF\u30C9\u30EB\u30CD\u30FC\u30E0 \u305F\u308D\u3046",
+                    contentValues);
+        }
+        ContentValuesBuilder builder = verifier.addImportVerifier()
+                .addExpected(StructuredName.CONTENT_ITEM_TYPE);
+        builder.put(StructuredName.PHONETIC_FAMILY_NAME, "\u3084\u307E\u3060")
+                .put(StructuredName.PHONETIC_MIDDLE_NAME, "\u30DF\u30C9\u30EB\u30CD\u30FC\u30E0")
+                .put(StructuredName.PHONETIC_GIVEN_NAME, "\u305F\u308D\u3046")
+                .put(StructuredName.DISPLAY_NAME,
+                        "\u3084\u307E\u3060 \u30DF\u30C9\u30EB\u30CD\u30FC\u30E0 " +
+                        "\u305F\u308D\u3046");
+        verifier.verify();
+    }
+
+    public void testPhoneticNameForJapaneseV21Utf8() {
+        testPhoneticNameCommon(VCardConfig.VCARD_TYPE_V21_JAPANESE_UTF8);
+    }
+
+    public void testPhoneticNameForJapaneseV21Sjis() {
+        testPhoneticNameCommon(VCardConfig.VCARD_TYPE_V21_JAPANESE_SJIS);
+    }
+
+    public void testPhoneticNameForJapaneseV30Utf8() {
+        testPhoneticNameCommon(VCardConfig.VCARD_TYPE_V30_JAPANESE_UTF8);
+    }
+
+    public void testPhoneticNameForJapaneseV30SJis() {
+        testPhoneticNameCommon(VCardConfig.VCARD_TYPE_V30_JAPANESE_SJIS);
+    }
+
+    public void testPhoneticNameForMobileV21_1() {
+        ExportTestResolver resolver = new ExportTestResolver();
+        resolver.buildContactEntry().buildData(StructuredName.CONTENT_ITEM_TYPE)
+                .put(StructuredName.PHONETIC_FAMILY_NAME, "\u3084\u307E\u3060")
+                .put(StructuredName.PHONETIC_MIDDLE_NAME, "\u30DF\u30C9\u30EB\u30CD\u30FC\u30E0")
+                .put(StructuredName.PHONETIC_GIVEN_NAME, "\u305F\u308D\u3046");
+
+        VCardVerifier verifier = new VCardVerifier(resolver,
+                VCardConfig.VCARD_TYPE_V21_JAPANESE_MOBILE);
+        verifier.addPropertyNodesVerifierElem()
+                .addNodeWithoutOrder("SOUND",
+                        "\uFF94\uFF8F\uFF80\uFF9E \uFF90\uFF84\uFF9E\uFF99\uFF88\uFF70\uFF91 " +
+                        "\uFF80\uFF9B\uFF73;;;;",
+                        mContentValuesForSJis, new TypeSet("X-IRMC-N"));
+        ContentValuesBuilder builder = verifier.addImportVerifier()
+                .addExpected(StructuredName.CONTENT_ITEM_TYPE);
+        builder.put(StructuredName.PHONETIC_FAMILY_NAME, "\uFF94\uFF8F\uFF80\uFF9E")
+                .put(StructuredName.PHONETIC_MIDDLE_NAME,
+                        "\uFF90\uFF84\uFF9E\uFF99\uFF88\uFF70\uFF91")
+                .put(StructuredName.PHONETIC_GIVEN_NAME, "\uFF80\uFF9B\uFF73")
+                .put(StructuredName.DISPLAY_NAME,
+                        "\uFF94\uFF8F\uFF80\uFF9E \uFF90\uFF84\uFF9E\uFF99\uFF88\uFF70\uFF91 " +
+                        "\uFF80\uFF9B\uFF73");
+        verifier.verify();
+    }
+
+    public void testPhoneticNameForMobileV21_2() {
+        ExportTestResolver resolver = new ExportTestResolver();
+        resolver.buildContactEntry().buildData(StructuredName.CONTENT_ITEM_TYPE)
+                .put(StructuredName.PHONETIC_FAMILY_NAME, "\u3084\u307E\u3060")
+                .put(StructuredName.PHONETIC_GIVEN_NAME, "\u305F\u308D\u3046");
+
+        VCardVerifier verifier = new VCardVerifier(resolver,
+                VCardConfig.VCARD_TYPE_V21_JAPANESE_MOBILE);
+        verifier.addPropertyNodesVerifierElem()
+                .addNodeWithoutOrder("SOUND", "\uFF94\uFF8F\uFF80\uFF9E \uFF80\uFF9B\uFF73;;;;",
+                                mContentValuesForSJis, new TypeSet("X-IRMC-N"));
+        ContentValuesBuilder builder = verifier.addImportVerifier()
+                .addExpected(StructuredName.CONTENT_ITEM_TYPE);
+        builder.put(StructuredName.PHONETIC_FAMILY_NAME, "\uFF94\uFF8F\uFF80\uFF9E")
+                .put(StructuredName.PHONETIC_GIVEN_NAME, "\uFF80\uFF9B\uFF73")
+                .put(StructuredName.DISPLAY_NAME, "\uFF94\uFF8F\uFF80\uFF9E \uFF80\uFF9B\uFF73");
+        verifier.verify();
+    }
 }
