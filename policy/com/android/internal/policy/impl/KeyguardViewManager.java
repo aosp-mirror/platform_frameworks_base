@@ -48,7 +48,7 @@ public class KeyguardViewManager implements KeyguardWindowController {
 
     private WindowManager.LayoutParams mWindowLayoutParams;
     private boolean mNeedsInput = false;
-    
+
     private FrameLayout mKeyguardHost;
     private KeyguardViewBase mKeyguardView;
 
@@ -101,6 +101,8 @@ public class KeyguardViewManager implements KeyguardWindowController {
 
             final int stretch = ViewGroup.LayoutParams.FILL_PARENT;
             int flags = WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN
+                    | WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER
+                    | WindowManager.LayoutParams.FLAG_KEEP_SURFACE_WHILE_ANIMATING
                     /*| WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
                     | WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR*/ ;
             if (!mNeedsInput) {
@@ -108,7 +110,7 @@ public class KeyguardViewManager implements KeyguardWindowController {
             }
             WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
                     stretch, stretch, WindowManager.LayoutParams.TYPE_KEYGUARD,
-                    flags, PixelFormat.OPAQUE);
+                    flags, PixelFormat.TRANSLUCENT);
             lp.softInputMode = WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN;
             lp.windowAnimations = com.android.internal.R.style.Animation_LockScreen;
             lp.screenOrientation = ActivityInfo.SCREEN_ORIENTATION_NOSENSOR;
@@ -152,7 +154,7 @@ public class KeyguardViewManager implements KeyguardWindowController {
             mViewManager.updateViewLayout(mKeyguardHost, mWindowLayoutParams);
         }
     }
-    
+
     /**
      * Reset the state of the view.
      */
@@ -195,10 +197,14 @@ public class KeyguardViewManager implements KeyguardWindowController {
      *
      * @param keyCode The wake key.
      */
-    public void wakeWhenReadyTq(int keyCode) {
+    public boolean wakeWhenReadyTq(int keyCode) {
         if (DEBUG) Log.d(TAG, "wakeWhenReady(" + keyCode + ")");
         if (mKeyguardView != null) {
             mKeyguardView.wakeWhenReadyTq(keyCode);
+            return true;
+        } else {
+            Log.w(TAG, "mKeyguardView is null in wakeWhenReadyTq");
+            return false;
         }
     }
 
@@ -209,10 +215,19 @@ public class KeyguardViewManager implements KeyguardWindowController {
         if (DEBUG) Log.d(TAG, "hide()");
         if (mKeyguardHost != null) {
             mKeyguardHost.setVisibility(View.GONE);
+            // Don't do this right away, so we can let the view continue to animate
+            // as it goes away.
             if (mKeyguardView != null) {
-                mKeyguardHost.removeView(mKeyguardView);
-                mKeyguardView.cleanUp();
+                final KeyguardViewBase lastView = mKeyguardView;
                 mKeyguardView = null;
+                mKeyguardHost.postDelayed(new Runnable() {
+                    public void run() {
+                        synchronized (KeyguardViewManager.this) {
+                            mKeyguardHost.removeView(lastView);
+                            lastView.cleanUp();
+                        }
+                    }
+                }, 500);
             }
         }
     }

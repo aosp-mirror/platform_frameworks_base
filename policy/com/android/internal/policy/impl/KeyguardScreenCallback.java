@@ -28,9 +28,18 @@ public interface KeyguardScreenCallback extends KeyguardViewCallback {
     void goToLockScreen();
 
     /**
-     * Transitino to th unlock screen.
+     * Transition to the unlock screen.
      */
     void goToUnlockScreen();
+
+    /**
+     * The user reported that they forgot their pattern (or not, when they want to back out of the
+     * forgot pattern screen).
+     *
+     * @param isForgotten True if the user hit the forgot pattern, false if they want to back out
+     *        of the account screen.
+     */
+    void forgotPattern(boolean isForgotten);
 
     /**
      * @return Whether the keyguard requires some sort of PIN.

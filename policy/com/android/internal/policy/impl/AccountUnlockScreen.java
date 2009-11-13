@@ -19,38 +19,39 @@ package com.android.internal.policy.impl;
 import com.android.internal.R;
 import com.android.internal.widget.LockPatternUtils;
 
-import android.accounts.AccountsServiceConstants;
-import android.accounts.IAccountsService;
-import android.content.ComponentName;
+import android.accounts.Account;
+import android.accounts.AccountManager;
+import android.accounts.OperationCanceledException;
+import android.accounts.AccountManagerFuture;
+import android.accounts.AuthenticatorException;
+import android.accounts.AccountManagerCallback;
 import android.content.Context;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.graphics.Rect;
-import android.os.IBinder;
-import android.os.RemoteException;
 import android.text.Editable;
 import android.text.InputFilter;
 import android.text.LoginFilter;
 import android.text.TextWatcher;
-import android.text.TextUtils;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.app.Dialog;
+import android.app.ProgressDialog;
+import android.os.Bundle;
+
+import java.io.IOException;
 
 /**
  * When the user forgets their password a bunch of times, we fall back on their
  * account's login/password to unlock the phone (and reset their lock pattern).
- *
- * <p>This class is useful only on platforms that support the
- * IAccountsService.
  */
 public class AccountUnlockScreen extends RelativeLayout implements KeyguardScreen,
-        View.OnClickListener, ServiceConnection, TextWatcher {
+        View.OnClickListener, TextWatcher {
     private static final String LOCK_PATTERN_PACKAGE = "com.android.settings";
     private static final String LOCK_PATTERN_CLASS =
             "com.android.settings.ChooseLockPattern";
@@ -62,7 +63,6 @@ public class AccountUnlockScreen extends RelativeLayout implements KeyguardScree
 
     private final KeyguardScreenCallback mCallback;
     private final LockPatternUtils mLockPatternUtils;
-    private IAccountsService mAccountsService;
 
     private TextView mTopHeader;
     private TextView mInstructions;
@@ -72,14 +72,16 @@ public class AccountUnlockScreen extends RelativeLayout implements KeyguardScree
     private Button mEmergencyCall;
 
     /**
+     * Shown while making asynchronous check of password.
+     */
+    private ProgressDialog mCheckingDialog;
+
+    /**
      * AccountUnlockScreen constructor.
-     *
-     * @throws IllegalStateException if the IAccountsService is not
-     * available on the current platform.
      */
     public AccountUnlockScreen(Context context,
-            KeyguardScreenCallback callback,
-            LockPatternUtils lockPatternUtils) {
+                               KeyguardScreenCallback callback,
+                               LockPatternUtils lockPatternUtils) {
         super(context);
         mCallback = callback;
         mLockPatternUtils = lockPatternUtils;
@@ -88,6 +90,9 @@ public class AccountUnlockScreen extends RelativeLayout implements KeyguardScree
                 R.layout.keyguard_screen_glogin_unlock, this, true);
 
         mTopHeader = (TextView) findViewById(R.id.topHeader);
+        mTopHeader.setText(mLockPatternUtils.isPermanentlyLocked() ?
+                R.string.lockscreen_glogin_too_many_attempts :
+                R.string.lockscreen_glogin_forgot_pattern);
 
         mInstructions = (TextView) findViewById(R.id.instructions);
 
@@ -103,14 +108,6 @@ public class AccountUnlockScreen extends RelativeLayout implements KeyguardScree
 
         mEmergencyCall = (Button) findViewById(R.id.emergencyCall);
         mEmergencyCall.setOnClickListener(this);
-
-        Log.v("AccountUnlockScreen", "debug: Connecting to accounts service");
-        final boolean connected = mContext.bindService(AccountsServiceConstants.SERVICE_INTENT,
-                this, Context.BIND_AUTO_CREATE);
-        if (!connected) {
-            Log.v("AccountUnlockScreen", "debug: Couldn't connect to accounts service");
-            throw new IllegalStateException("couldn't bind to accounts service");
-        }
     }
 
     public void afterTextChanged(Editable s) {
@@ -150,30 +147,16 @@ public class AccountUnlockScreen extends RelativeLayout implements KeyguardScree
 
     /** {@inheritDoc} */
     public void cleanUp() {
-        mContext.unbindService(this);
+        if (mCheckingDialog != null) {
+            mCheckingDialog.hide();
+        }
     }
 
     /** {@inheritDoc} */
     public void onClick(View v) {
         mCallback.pokeWakelock();
         if (v == mOk) {
-            if (checkPassword()) {
-                // clear out forgotten password
-                mLockPatternUtils.setPermanentlyLocked(false);
-
-                // launch the 'choose lock pattern' activity so
-                // the user can pick a new one if they want to
-                Intent intent = new Intent();
-                intent.setClassName(LOCK_PATTERN_PACKAGE, LOCK_PATTERN_CLASS);
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                mContext.startActivity(intent);
-
-                // close the keyguard
-                mCallback.keyguardDone(true);
-            } else {
-                mInstructions.setText(R.string.lockscreen_glogin_invalid_input);
-                mPassword.setText("");
-            }
+            asyncCheckPassword();
         }
 
         if (v == mEmergencyCall) {
@@ -181,11 +164,37 @@ public class AccountUnlockScreen extends RelativeLayout implements KeyguardScree
         }
     }
 
+    private void onCheckPasswordResult(boolean success) {
+        if (success) {
+            // clear out forgotten password
+            mLockPatternUtils.setPermanentlyLocked(false);
+            mLockPatternUtils.setLockPatternEnabled(false);
+            mLockPatternUtils.saveLockPattern(null);
+
+            // launch the 'choose lock pattern' activity so
+            // the user can pick a new one if they want to
+            Intent intent = new Intent();
+            intent.setClassName(LOCK_PATTERN_PACKAGE, LOCK_PATTERN_CLASS);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            mContext.startActivity(intent);
+
+            // close the keyguard
+            mCallback.keyguardDone(true);
+        } else {
+            mInstructions.setText(R.string.lockscreen_glogin_invalid_input);
+            mPassword.setText("");
+        }
+    }
+
     @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
         if (event.getAction() == KeyEvent.ACTION_DOWN
                 && event.getKeyCode() == KeyEvent.KEYCODE_BACK) {
-            mCallback.goToLockScreen();
+            if (mLockPatternUtils.isPermanentlyLocked()) {
+                mCallback.goToLockScreen();
+            } else {
+                mCallback.forgotPattern(false);
+            }
             return true;
         }
         return super.dispatchKeyEvent(event);
@@ -207,33 +216,25 @@ public class AccountUnlockScreen extends RelativeLayout implements KeyguardScree
      * @return an account name from the database, or null if we can't
      * find a single best match.
      */
-    private String findIntendedAccount(String username) {
-        String[] accounts = null;
-        try {
-            accounts = mAccountsService.getAccounts();
-        } catch (RemoteException e) {
-            return null;
-        }
-        if (accounts == null) {
-            return null;
-        }
+    private Account findIntendedAccount(String username) {
+        Account[] accounts = AccountManager.get(mContext).getAccounts();
 
         // Try to figure out which account they meant if they
         // typed only the username (and not the domain), or got
         // the case wrong.
 
-        String bestAccount = null;
+        Account bestAccount = null;
         int bestScore = 0;
-        for (String a: accounts) {
+        for (Account a: accounts) {
             int score = 0;
-            if (username.equals(a)) {
+            if (username.equals(a.name)) {
                 score = 4;
-            } else if (username.equalsIgnoreCase(a)) {
+            } else if (username.equalsIgnoreCase(a.name)) {
                 score = 3;
             } else if (username.indexOf('@') < 0) {
-                int i = a.indexOf('@');
+                int i = a.name.indexOf('@');
                 if (i >= 0) {
-                    String aUsername = a.substring(0, i);
+                    String aUsername = a.name.substring(0, i);
                     if (username.equals(aUsername)) {
                         score = 2;
                     } else if (username.equalsIgnoreCase(aUsername)) {
@@ -251,28 +252,64 @@ public class AccountUnlockScreen extends RelativeLayout implements KeyguardScree
         return bestAccount;
     }
 
-    private boolean checkPassword() {
+    private void asyncCheckPassword() {
+        mCallback.pokeWakelock(AWAKE_POKE_MILLIS);
         final String login = mLogin.getText().toString();
         final String password = mPassword.getText().toString();
-        try {
-            String account = findIntendedAccount(login);
-            if (account == null) {
-                return false;
-            }
-            return mAccountsService.shouldUnlock(account, password);
-        } catch (RemoteException e) {
-            return false;
+        Account account = findIntendedAccount(login);
+        if (account == null) {
+            onCheckPasswordResult(false);
+            return;
         }
+        getProgressDialog().show();
+        Bundle options = new Bundle();
+        options.putString(AccountManager.KEY_PASSWORD, password);
+        AccountManager.get(mContext).confirmCredentials(account, options, null /* activity */,
+                new AccountManagerCallback<Bundle>() {
+            public void run(AccountManagerFuture<Bundle> future) {
+                try {
+                    mCallback.pokeWakelock(AWAKE_POKE_MILLIS);
+                    final Bundle result = future.getResult();
+                    final boolean verified = result.getBoolean(AccountManager.KEY_BOOLEAN_RESULT);
+                    // ensure on UI thread
+                    mLogin.post(new Runnable() {
+                        public void run() {
+                            onCheckPasswordResult(verified);
+                        }
+                    });
+                } catch (OperationCanceledException e) {
+                    onCheckPasswordResult(false);
+                } catch (IOException e) {
+                    onCheckPasswordResult(false);
+                } catch (AuthenticatorException e) {
+                    onCheckPasswordResult(false);
+                } finally {
+                    mLogin.post(new Runnable() {
+                        public void run() {
+                            getProgressDialog().hide();
+                        }
+                    });
+                }
+            }
+        }, null /* handler */);
     }
 
-    /** {@inheritDoc} */
-    public void onServiceConnected(ComponentName name, IBinder service) {
-        Log.v("AccountUnlockScreen", "debug: About to grab as interface");
-        mAccountsService = IAccountsService.Stub.asInterface(service);
-    }
-
-    /** {@inheritDoc} */
-    public void onServiceDisconnected(ComponentName name) {
-        mAccountsService = null;
+    private Dialog getProgressDialog() {
+        if (mCheckingDialog == null) {
+            mCheckingDialog = new ProgressDialog(mContext);
+            mCheckingDialog.setMessage(
+                    mContext.getString(R.string.lockscreen_glogin_checking_password));
+            mCheckingDialog.setIndeterminate(true);
+            mCheckingDialog.setCancelable(false);
+            mCheckingDialog.getWindow().setType(
+                    WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG);
+            if (!mContext.getResources().getBoolean(
+                    com.android.internal.R.bool.config_sf_slowBlur)) {
+                mCheckingDialog.getWindow().setFlags(
+                        WindowManager.LayoutParams.FLAG_BLUR_BEHIND,
+                        WindowManager.LayoutParams.FLAG_BLUR_BEHIND);
+            }
+        }
+        return mCheckingDialog;
     }
 }

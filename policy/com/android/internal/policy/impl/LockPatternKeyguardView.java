@@ -16,41 +16,47 @@
 
 package com.android.internal.policy.impl;
 
-import android.accounts.AccountsServiceConstants;
-import android.accounts.IAccountsService;
+import com.android.internal.R;
+import com.android.internal.telephony.IccCard;
+import com.android.internal.widget.LockPatternUtils;
+
+import android.accounts.Account;
+import android.accounts.AccountManager;
+import android.accounts.AccountManagerCallback;
+import android.accounts.AccountManagerFuture;
+import android.accounts.AuthenticatorException;
+import android.accounts.OperationCanceledException;
 import android.app.AlertDialog;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.ServiceConnection;
-import android.os.IBinder;
-import android.os.RemoteException;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.ColorFilter;
+import android.graphics.PixelFormat;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.SystemProperties;
-import com.android.internal.telephony.IccCard;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.WindowManager;
-import android.graphics.drawable.Drawable;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.PixelFormat;
-import android.graphics.ColorFilter;
-import com.android.internal.R;
-import com.android.internal.widget.LockPatternUtils;
+
+import java.io.IOException;
 
 /**
  * The host view for all of the screens of the pattern unlock screen.  There are
  * two {@link Mode}s of operation, lock and unlock.  This will show the appropriate
- * screen, and listen for callbacks via {@link com.android.internal.policy.impl.KeyguardScreenCallback
+ * screen, and listen for callbacks via
+ * {@link com.android.internal.policy.impl.KeyguardScreenCallback}
  * from the current screen.
  *
- * This view, in turn, communicates back to {@link com.android.internal.policy.impl.KeyguardViewManager}
+ * This view, in turn, communicates back to
+ * {@link com.android.internal.policy.impl.KeyguardViewManager}
  * via its {@link com.android.internal.policy.impl.KeyguardViewCallback}, as appropriate.
  */
-public class LockPatternKeyguardView extends KeyguardViewBase {
+public class LockPatternKeyguardView extends KeyguardViewBase
+        implements AccountManagerCallback<Account[]> {
 
     // intent action for launching emergency dialer activity.
     static final String ACTION_EMERGENCY_DIAL = "com.android.phone.EmergencyDialer.DIAL";
@@ -60,12 +66,12 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
 
     private final KeyguardUpdateMonitor mUpdateMonitor;
     private final KeyguardWindowController mWindowController;
-    
+
     private View mLockScreen;
     private View mUnlockScreen;
 
     private boolean mScreenOn = false;
-    private boolean mHasAccount = false; // assume they don't have an account until we know better
+    private boolean mEnableFallback = false; // assume no fallback UI until we know better
 
 
     /**
@@ -114,9 +120,12 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
     private Mode mMode = Mode.LockScreen;
 
     /**
-     * Keeps track of what mode the current unlock screen is
+     * Keeps track of what mode the current unlock screen is (cached from most recent computation in
+     * {@link #getUnlockMode}).
      */
     private UnlockMode mUnlockScreenMode;
+
+    private boolean mForgotPattern;
 
     /**
      * If true, it means we are in the process of verifying that the user
@@ -131,11 +140,6 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
     private final LockPatternUtils mLockPatternUtils;
 
     /**
-     * Used to fetch accounts from GLS.
-     */
-    private ServiceConnection mServiceConnection;
-
-    /**
      * @return Whether we are stuck on the lock screen because the sim is
      *   missing.
      */
@@ -143,6 +147,22 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
         return mRequiresSim
                 && (!mUpdateMonitor.isDeviceProvisioned())
                 && (mUpdateMonitor.getSimState() == IccCard.State.ABSENT);
+    }
+
+    public void run(AccountManagerFuture<Account[]> future) {
+        // We err on the side of caution.
+        // In case of error we assume we have a SAML account.
+        boolean hasSAMLAccount = true;
+        try {
+            hasSAMLAccount = future.getResult().length > 0;
+        } catch (OperationCanceledException e) {
+        } catch (IOException e) {
+        } catch (AuthenticatorException e) {
+        }
+        mEnableFallback = !hasSAMLAccount;
+        if (mUnlockScreen instanceof UnlockScreen) {
+            ((UnlockScreen)mUnlockScreen).setEnableFallback(true);
+        }
     }
 
     /**
@@ -158,9 +178,21 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
             LockPatternUtils lockPatternUtils,
             KeyguardWindowController controller) {
         super(context);
+
+        final boolean hasAccount = AccountManager.get(context).getAccounts().length > 0;
+        if (hasAccount) {
+            /* If we have a SAML account which requires web login we can not use the
+             fallback screen UI to ask the user for credentials.
+             For now we will disable fallback screen in this case.
+             Ultimately we could consider bringing up a web login from GLS
+             but need to make sure that it will work in the "locked screen" mode. */
+            String[] features = new String[] {"saml"};
+            AccountManager.get(context).getAccountsByTypeAndFeatures(
+                    "com.google", features, this, null);
+        }
         
-        asyncCheckForAccount();
-        
+        mEnableFallback = false;
+
         mRequiresSim =
                 TextUtils.isEmpty(SystemProperties.get("keyguard.no_require_sim"));
 
@@ -169,10 +201,11 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
         mWindowController = controller;
 
         mMode = getInitialMode();
-        
+
         mKeyguardScreenCallback = new KeyguardScreenCallback() {
 
             public void goToLockScreen() {
+                mForgotPattern = false;
                 if (mIsVerifyUnlockOnly) {
                     // navigating away from unlock screen during verify mode means
                     // we are done and the user failed to authenticate.
@@ -193,6 +226,13 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
                 if (!isSecure()) {
                     getCallback().keyguardDone(true);
                 } else {
+                    updateScreen(Mode.UnlockScreen);
+                }
+            }
+
+            public void forgotPattern(boolean isForgotten) {
+                if (mEnableFallback) {
+                    mForgotPattern = isForgotten;
                     updateScreen(Mode.UnlockScreen);
                 }
             }
@@ -235,11 +275,11 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
             public void reportFailedPatternAttempt() {
                 mUpdateMonitor.reportFailedAttempt();
                 final int failedAttempts = mUpdateMonitor.getFailedAttempts();
-                if (mHasAccount && failedAttempts ==
-                        (LockPatternUtils.FAILED_ATTEMPTS_BEFORE_RESET 
+                if (mEnableFallback && failedAttempts ==
+                        (LockPatternUtils.FAILED_ATTEMPTS_BEFORE_RESET
                                 - LockPatternUtils.FAILED_ATTEMPTS_BEFORE_TIMEOUT)) {
                     showAlmostAtAccountLoginDialog();
-                } else if (mHasAccount
+                } else if (mEnableFallback
                         && failedAttempts >= LockPatternUtils.FAILED_ATTEMPTS_BEFORE_RESET) {
                     mLockPatternUtils.setPermanentlyLocked(true);
                     updateScreen(mMode);
@@ -248,9 +288,9 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
                     showTimeoutDialog();
                 }
             }
-            
+
             public boolean doesFallbackUnlockScreenExist() {
-                return mHasAccount;
+                return mEnableFallback;
             }
         };
 
@@ -262,9 +302,11 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
         setDescendantFocusability(FOCUS_AFTER_DESCENDANTS);
 
         // wall paper background
-        final BitmapDrawable drawable = (BitmapDrawable) context.getWallpaper();
-        setBackgroundDrawable(
-                new FastBitmapDrawable(drawable.getBitmap()));
+        if (false) {
+            final BitmapDrawable drawable = (BitmapDrawable) context.getWallpaper();
+            setBackgroundDrawable(
+                    new FastBitmapDrawable(drawable.getBitmap()));
+        }
 
         // create both the lock and unlock screen so they are quickly available
         // when the screen turns on
@@ -277,45 +319,18 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
         updateScreen(mMode);
     }
 
-    /** 
-     * Asynchronously checks for at least one account. This will set mHasAccount
-     * to true if an account is found.
-     */
-    private void asyncCheckForAccount() {
-        
-        mServiceConnection = new ServiceConnection() {
-            public void onServiceConnected(ComponentName className, IBinder service) {
-                try {
-                    IAccountsService accountsService = IAccountsService.Stub.asInterface(service);
-                    String accounts[] = accountsService.getAccounts();
-                    mHasAccount = (accounts.length > 0);
-                } catch (RemoteException e) {
-                    // Not much we can do here...
-                    Log.e(TAG, "Gls died while attempting to get accounts: " + e);
-                } finally {
-                    getContext().unbindService(mServiceConnection);
-                    mServiceConnection = null;
-                }
-            }
-
-            public void onServiceDisconnected(ComponentName className) {
-                // nothing to do here
-            }
-        };
-        boolean status = getContext().bindService(AccountsServiceConstants.SERVICE_INTENT,
-                mServiceConnection, Context.BIND_AUTO_CREATE);
-        if (!status) Log.e(TAG, "Failed to bind to GLS while checking for account");
-    }
 
     @Override
     public void reset() {
         mIsVerifyUnlockOnly = false;
+        mForgotPattern = false;
         updateScreen(getInitialMode());
     }
 
     @Override
     public void onScreenTurnedOff() {
         mScreenOn = false;
+        mForgotPattern = false;
         if (mMode == Mode.LockScreen) {
            ((KeyguardScreen) mLockScreen).onPause();
         } else {
@@ -423,7 +438,7 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
         // do this before changing visibility so focus isn't requested before the input
         // flag is set
         mWindowController.setNeedsInput(((KeyguardScreen)visibleScreen).needsInput());
-        
+
 
         if (mScreenOn) {
             if (goneScreen.getVisibility() == View.VISIBLE) {
@@ -454,12 +469,14 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
 
     View createUnlockScreenFor(UnlockMode unlockMode) {
         if (unlockMode == UnlockMode.Pattern) {
-            return new UnlockScreen(
+            UnlockScreen view = new UnlockScreen(
                     mContext,
                     mLockPatternUtils,
                     mUpdateMonitor,
                     mKeyguardScreenCallback,
                     mUpdateMonitor.getFailedAttempts());
+            view.setEnableFallback(mEnableFallback);
+            return view;
         } else if (unlockMode == UnlockMode.SimPin) {
             return new SimUnlockScreen(
                     mContext,
@@ -525,7 +542,7 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
         final IccCard.State simState = mUpdateMonitor.getSimState();
         if (stuckOnLockScreenBecauseSimMissing() || (simState == IccCard.State.PUK_REQUIRED)) {
             return Mode.LockScreen;
-        } else if (mUpdateMonitor.isKeyboardOpen() && isSecure()) {
+        } else if (isSecure()) {
             return Mode.UnlockScreen;
         } else {
             return Mode.LockScreen;
@@ -540,7 +557,7 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
         if (simState == IccCard.State.PIN_REQUIRED || simState == IccCard.State.PUK_REQUIRED) {
             return UnlockMode.SimPin;
         } else {
-            return mLockPatternUtils.isPermanentlyLocked() ?
+            return (mForgotPattern || mLockPatternUtils.isPermanentlyLocked()) ?
                     UnlockMode.Account:
                     UnlockMode.Pattern;
         }
@@ -558,9 +575,12 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
                 .setNeutralButton(R.string.ok, null)
                 .create();
         dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG);
-        dialog.getWindow().setFlags(
-                WindowManager.LayoutParams.FLAG_BLUR_BEHIND,
-                WindowManager.LayoutParams.FLAG_BLUR_BEHIND);
+        if (!mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_sf_slowBlur)) {
+            dialog.getWindow().setFlags(
+                    WindowManager.LayoutParams.FLAG_BLUR_BEHIND,
+                    WindowManager.LayoutParams.FLAG_BLUR_BEHIND);
+        }
         dialog.show();
     }
 
@@ -578,15 +598,20 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
                 .setNeutralButton(R.string.ok, null)
                 .create();
         dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG);
-        dialog.getWindow().setFlags(
-                WindowManager.LayoutParams.FLAG_BLUR_BEHIND,
-                WindowManager.LayoutParams.FLAG_BLUR_BEHIND);
+        if (!mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_sf_slowBlur)) {
+            dialog.getWindow().setFlags(
+                    WindowManager.LayoutParams.FLAG_BLUR_BEHIND,
+                    WindowManager.LayoutParams.FLAG_BLUR_BEHIND);
+        }
         dialog.show();
     }
 
     /**
-     * Used to put wallpaper on the background of the lock screen.  Centers it Horizontally and
-     * vertically.
+     * Used to put wallpaper on the background of the lock screen.  Centers it
+     * Horizontally and pins the bottom (assuming that the lock screen is aligned
+     * with the bottom, so the wallpaper should extend above the top into the
+     * status bar).
      */
     static private class FastBitmapDrawable extends Drawable {
         private Bitmap mBitmap;
@@ -602,7 +627,7 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
             canvas.drawBitmap(
                     mBitmap,
                     (getBounds().width() - mBitmap.getWidth()) / 2,
-                    (getBounds().height() - mBitmap.getHeight()) / 2,
+                    (getBounds().height() - mBitmap.getHeight()),
                     null);
         }
 
