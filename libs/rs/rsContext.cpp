@@ -443,6 +443,7 @@ void Context::setSurface(uint32_t w, uint32_t h, Surface *sur)
         eglQuerySurface(mEGL.mDisplay, mEGL.mSurface, EGL_HEIGHT, &mEGL.mHeight);
         mWidth = w;
         mHeight = h;
+        mStateVertex.updateSize(this, w, h);
 
         if ((int)mWidth != mEGL.mWidth || (int)mHeight != mEGL.mHeight) {
             LOGE("EGL/Surface mismatch  EGL (%i x %i)  SF (%i x %i)", mEGL.mWidth, mEGL.mHeight, mWidth, mHeight);
