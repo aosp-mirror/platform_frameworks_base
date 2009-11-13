@@ -12817,6 +12817,11 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
 
                 mConfiguration = newConfig;
                 Log.i(TAG, "Config changed: " + newConfig);
+                
+                AttributeCache ac = AttributeCache.instance();
+                if (ac != null) {
+                    ac.updateConfiguration(mConfiguration);
+                }
 
                 Message msg = mHandler.obtainMessage(UPDATE_CONFIGURATION_MSG);
                 msg.obj = new Configuration(mConfiguration);
@@ -12843,11 +12848,6 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                             new Intent(Intent.ACTION_LOCALE_CHANGED),
                             null, null, 0, null, null,
                             null, false, false, MY_PID, Process.SYSTEM_UID);
-                }
-                
-                AttributeCache ac = AttributeCache.instance();
-                if (ac != null) {
-                    ac.updateConfiguration(mConfiguration);
                 }
             }
         }
