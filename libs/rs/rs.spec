@@ -37,7 +37,13 @@ ContextResume {
 	}
 
 ContextSetSurface {
+	param uint32_t width
+	param uint32_t height
 	param void *sur
+	}
+
+ContextSetPriority {
+	param uint32_t priority
 	}
 
 AssignName {
