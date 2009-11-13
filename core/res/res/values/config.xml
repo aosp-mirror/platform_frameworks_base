@@ -214,4 +214,8 @@
          it will be removed when the lower-level touch driver generates better
          data. -->
     <bool name="config_filterTouchEvents">false</bool>
+    
+    <!-- Component name of the default wallpaper. This will be ImageWallpaper if not 
+         specified -->
+    <string name="default_wallpaper_component">@null</string>
 </resources>
