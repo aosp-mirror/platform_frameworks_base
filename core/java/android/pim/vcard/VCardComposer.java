@@ -2378,8 +2378,10 @@ public class VCardComposer {
         appendVCardLine(builder, Constants.PROPERTY_FN, phoneName, needCharset, false);
         appendVCardLine(builder, Constants.PROPERTY_N, phoneName, needCharset, false);
 
-        String label = Integer.toString(phonetype);
-        appendVCardTelephoneLine(builder, phonetype, label, phoneNumber, false);
+        if (!TextUtils.isEmpty(phoneNumber)) {
+            String label = Integer.toString(phonetype);
+            appendVCardTelephoneLine(builder, phonetype, label, phoneNumber, false);
+        }
 
         appendVCardLine(builder, Constants.PROPERTY_END, VCARD_DATA_VCARD);
 
