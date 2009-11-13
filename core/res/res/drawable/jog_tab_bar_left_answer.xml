@@ -17,12 +17,12 @@
 <!-- StateListDrawable used for buttons in the in-call onscreen touch UI. -->
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:state_pressed="true" 
-        android:drawable="@drawable/jog_tab_bar_pressed" />
+        android:drawable="@drawable/jog_tab_bar_left_end_pressed" />
 
     <item android:state_enabled="true"
-        android:drawable="@drawable/jog_tab_bar_normal" />
+        android:drawable="@drawable/jog_tab_bar_left_end_normal" />
 
     <item android:state_active="true"
-        android:drawable="@drawable/jog_tab_bar_confirm_green" />
+        android:drawable="@drawable/jog_tab_bar_left_end_confirm_green" />
         
 </selector>

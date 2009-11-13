@@ -1678,6 +1678,7 @@ public class Intent implements Parcelable {
      * <ul>
      *   <li><em>state</em> - 0 for unplugged, 1 for plugged. </li>
      *   <li><em>name</em> - Headset type, human readable string </li>
+     *   <li><em>microphone</em> - 1 if headset has a microphone, 0 otherwise </li>
      * </ul>
      * </ul>
      */
