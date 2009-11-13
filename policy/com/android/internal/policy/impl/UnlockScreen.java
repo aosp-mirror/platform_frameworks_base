@@ -71,6 +71,8 @@ class UnlockScreen extends LinearLayoutWithDefaultTouchRecepient
 
     private boolean mCreatedInPortrait;
 
+    private String mDateFormatString;
+
     private TextView mCarrier;
     private TextView mDate;
 
@@ -169,6 +171,7 @@ class UnlockScreen extends LinearLayoutWithDefaultTouchRecepient
         mCarrier = (TextView) findViewById(R.id.carrier);
         mDate = (TextView) findViewById(R.id.date);
 
+        mDateFormatString = getContext().getString(R.string.full_wday_month_day_no_year);
         refreshTimeAndDateDisplay();
 
         mStatus1 = (TextView) findViewById(R.id.status1);
@@ -317,8 +320,7 @@ class UnlockScreen extends LinearLayoutWithDefaultTouchRecepient
 
 
     private void refreshTimeAndDateDisplay() {
-        Date now = new Date();
-        mDate.setText(DateFormat.getMediumDateFormat(getContext()).format(now));
+        mDate.setText(DateFormat.format(mDateFormatString, new Date()));
     }
 
 
