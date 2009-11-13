@@ -1185,7 +1185,6 @@ void AudioFlinger::PlaybackThread::readOutputParameters()
     mFrameSize = mOutput->frameSize();
     mFrameCount = mOutput->bufferSize() / mFrameSize;
 
-    mMinBytesToWrite = (mOutput->latency() * mSampleRate * mFrameSize) / 1000;
     // FIXME - Current mixer implementation only supports stereo output: Always
     // Allocate a stereo buffer even if HW output is mono.
     if (mMixBuffer != NULL) delete mMixBuffer;
@@ -1215,23 +1214,25 @@ AudioFlinger::MixerThread::~MixerThread()
 
 bool AudioFlinger::MixerThread::threadLoop()
 {
-    uint32_t sleepTime = 1000;
-    uint32_t maxBufferRecoveryInUsecs = getMaxBufferRecoveryInUsecs();
     int16_t* curBuf = mMixBuffer;
     Vector< sp<Track> > tracksToRemove;
-    size_t enabledTracks = 0;
+    uint32_t mixerStatus = MIXER_IDLE;
     nsecs_t standbyTime = systemTime();
     size_t mixBufferSize = mFrameCount * mFrameSize;
     // FIXME: Relaxed timing because of a certain device that can't meet latency
     // Should be reduced to 2x after the vendor fixes the driver issue
     nsecs_t maxPeriod = seconds(mFrameCount) / mSampleRate * 3;
     nsecs_t lastWarning = 0;
+    bool longStandbyExit = false;
+    uint32_t activeSleepTime = activeSleepTimeUs();
+    uint32_t idleSleepTime = idleSleepTimeUs();
+    uint32_t sleepTime = idleSleepTime;
 
     while (!exitPending())
     {
         processConfigEvents();
 
-        enabledTracks = 0;
+        mixerStatus = MIXER_IDLE;
         { // scope for mLock
 
             Mutex::Autolock _l(mLock);
@@ -1241,7 +1242,8 @@ bool AudioFlinger::MixerThread::threadLoop()
                 // FIXME: Relaxed timing because of a certain device that can't meet latency
                 // Should be reduced to 2x after the vendor fixes the driver issue
                 maxPeriod = seconds(mFrameCount) / mSampleRate * 3;
-                maxBufferRecoveryInUsecs = getMaxBufferRecoveryInUsecs();
+                activeSleepTime = activeSleepTimeUs();
+                idleSleepTime = idleSleepTimeUs();
             }
 
             const SortedVector< wp<Track> >& activeTracks = mActiveTracks;
@@ -1277,15 +1279,15 @@ bool AudioFlinger::MixerThread::threadLoop()
                     }
 
                     standbyTime = systemTime() + kStandbyTimeInNsecs;
-                    sleepTime = 1000;
+                    sleepTime = idleSleepTime;
                     continue;
                 }
             }
 
-            enabledTracks = prepareTracks_l(activeTracks, &tracksToRemove);
+            mixerStatus = prepareTracks_l(activeTracks, &tracksToRemove);
        }
 
-        if (LIKELY(enabledTracks)) {
+        if (LIKELY(mixerStatus == MIXER_TRACKS_READY)) {
             // mix buffers...
             mAudioMixer->process(curBuf);
             sleepTime = 0;
@@ -1294,15 +1296,22 @@ bool AudioFlinger::MixerThread::threadLoop()
             // If no tracks are ready, sleep once for the duration of an output
             // buffer size, then write 0s to the output
             if (sleepTime == 0) {
-                sleepTime = maxBufferRecoveryInUsecs;
-            } else if (mBytesWritten != 0) {
+                if (mixerStatus == MIXER_TRACKS_ENABLED) {
+                    sleepTime = activeSleepTime;
+                } else {
+                    sleepTime = idleSleepTime;
+                }
+            } else if (mBytesWritten != 0 ||
+                       (mixerStatus == MIXER_TRACKS_ENABLED && longStandbyExit)) {
+                LOGV("NO DATA READY, %p", this);
                 memset (curBuf, 0, mixBufferSize);
                 sleepTime = 0;
+                LOGV_IF((mBytesWritten == 0 && (mixerStatus == MIXER_TRACKS_ENABLED && longStandbyExit)), "anticipated start");
             }
         }
 
         if (mSuspended) {
-            sleepTime = maxBufferRecoveryInUsecs;
+            sleepTime = idleSleepTime;
         }
         // sleepTime == 0 means we must write to audio hardware
         if (sleepTime == 0) {
@@ -1312,7 +1321,6 @@ bool AudioFlinger::MixerThread::threadLoop()
             if (bytesWritten > 0) mBytesWritten += bytesWritten;
             mNumWrites++;
             mInWrite = false;
-            mStandby = false;
             nsecs_t now = systemTime();
             nsecs_t delta = now - mLastWriteTime;
             if (delta > maxPeriod) {
@@ -1322,7 +1330,11 @@ bool AudioFlinger::MixerThread::threadLoop()
                             ns2ms(delta), mNumDelayedWrites, this);
                     lastWarning = now;
                 }
+                if (mStandby) {
+                    longStandbyExit = true;
+                }
             }
+            mStandby = false;
         } else {
             usleep(sleepTime);
         }
@@ -1342,10 +1354,10 @@ bool AudioFlinger::MixerThread::threadLoop()
 }
 
 // prepareTracks_l() must be called with ThreadBase::mLock held
-size_t AudioFlinger::MixerThread::prepareTracks_l(const SortedVector< wp<Track> >& activeTracks, Vector< sp<Track> > *tracksToRemove)
+uint32_t AudioFlinger::MixerThread::prepareTracks_l(const SortedVector< wp<Track> >& activeTracks, Vector< sp<Track> > *tracksToRemove)
 {
 
-    size_t enabledTracks = 0;
+    uint32_t mixerStatus = MIXER_IDLE;
     // find out which tracks need to be processed
     size_t count = activeTracks.size();
     for (size_t i=0 ; i<count ; i++) {
@@ -1415,7 +1427,7 @@ size_t AudioFlinger::MixerThread::prepareTracks_l(const SortedVector< wp<Track> 
 
             // reset retry count
             track->mRetryCount = kMaxTrackRetries;
-            enabledTracks++;
+            mixerStatus = MIXER_TRACKS_READY;
         } else {
             //LOGV("track %d u=%08x, s=%08x [NOT READY]", track->name(), cblk->user, cblk->server);
             if (track->isStopped()) {
@@ -1432,16 +1444,11 @@ size_t AudioFlinger::MixerThread::prepareTracks_l(const SortedVector< wp<Track> 
                 if (--(track->mRetryCount) <= 0) {
                     LOGV("BUFFER TIMEOUT: remove(%d) from active list on thread %p", track->name(), this);
                     tracksToRemove->add(track);
+                } else if (mixerStatus != MIXER_TRACKS_READY) {
+                    mixerStatus = MIXER_TRACKS_ENABLED;
                 }
-                // For tracks using static shared memory buffer, make sure that we have
-                // written enough data to audio hardware before disabling the track
-                // NOTE: this condition with arrive before track->mRetryCount <= 0 so we
-                // don't care about code removing track from active list above.
-                if ((track->mSharedBuffer == 0) || (mBytesWritten >= mMinBytesToWrite)) {
-                    mAudioMixer->disable(AudioMixer::MIXING);
-                } else {
-                    enabledTracks++;
-                }
+
+                mAudioMixer->disable(AudioMixer::MIXING);
             }
         }
     }
@@ -1459,7 +1466,7 @@ size_t AudioFlinger::MixerThread::prepareTracks_l(const SortedVector< wp<Track> 
         }
     }
 
-    return enabledTracks;
+    return mixerStatus;
 }
 
 void AudioFlinger::MixerThread::getTracks(
@@ -1621,14 +1628,14 @@ status_t AudioFlinger::MixerThread::dumpInternals(int fd, const Vector<String16>
     return NO_ERROR;
 }
 
-uint32_t AudioFlinger::MixerThread::getMaxBufferRecoveryInUsecs()
+uint32_t AudioFlinger::MixerThread::activeSleepTimeUs()
 {
-    uint32_t time = ((mFrameCount * 1000) / mSampleRate) * 1000;
-    // Add some margin with regard to scheduling precision
-    if (time > 10000) {
-        time -= 10000;
-    }
-    return time;
+    return (uint32_t)(mOutput->latency() * 1000) / 2;
+}
+
+uint32_t AudioFlinger::MixerThread::idleSleepTimeUs()
+{
+    return (uint32_t)((mFrameCount * 1000) / mSampleRate) * 1000;
 }
 
 // ----------------------------------------------------------------------------
@@ -1646,17 +1653,22 @@ AudioFlinger::DirectOutputThread::~DirectOutputThread()
 
 bool AudioFlinger::DirectOutputThread::threadLoop()
 {
-    uint32_t sleepTime = 1000;
-    uint32_t maxBufferRecoveryInUsecs = getMaxBufferRecoveryInUsecs();
+    uint32_t mixerStatus = MIXER_IDLE;
     sp<Track> trackToRemove;
     sp<Track> activeTrack;
     nsecs_t standbyTime = systemTime();
     int8_t *curBuf;
     size_t mixBufferSize = mFrameCount*mFrameSize;
+    uint32_t activeSleepTime = activeSleepTimeUs();
+    uint32_t idleSleepTime = idleSleepTimeUs();
+    uint32_t sleepTime = idleSleepTime;
+
 
     while (!exitPending())
     {
         processConfigEvents();
+
+        mixerStatus = MIXER_IDLE;
 
         { // scope for the mLock
 
@@ -1664,7 +1676,8 @@ bool AudioFlinger::DirectOutputThread::threadLoop()
 
             if (checkForNewParameters_l()) {
                 mixBufferSize = mFrameCount*mFrameSize;
-                maxBufferRecoveryInUsecs = getMaxBufferRecoveryInUsecs();
+                activeSleepTime = activeSleepTimeUs();
+                idleSleepTime = idleSleepTimeUs();
             }
 
             // put audio hardware into standby after short delay
@@ -1698,7 +1711,7 @@ bool AudioFlinger::DirectOutputThread::threadLoop()
                     }
 
                     standbyTime = systemTime() + kStandbyTimeInNsecs;
-                    sleepTime = 1000;
+                    sleepTime = idleSleepTime;
                     continue;
                 }
             }
@@ -1753,6 +1766,7 @@ bool AudioFlinger::DirectOutputThread::threadLoop()
                     // reset retry count
                     track->mRetryCount = kMaxTrackRetries;
                     activeTrack = t;
+                    mixerStatus = MIXER_TRACKS_READY;
                 } else {
                     //LOGV("track %d u=%08x, s=%08x [NOT READY]", track->name(), cblk->user, cblk->server);
                     if (track->isStopped()) {
@@ -1768,16 +1782,10 @@ bool AudioFlinger::DirectOutputThread::threadLoop()
                         if (--(track->mRetryCount) <= 0) {
                             LOGV("BUFFER TIMEOUT: remove(%d) from active list", track->name());
                             trackToRemove = track;
+                        } else {
+                            mixerStatus = MIXER_TRACKS_ENABLED;
                         }
-
-                        // For tracks using static shared memry buffer, make sure that we have
-                        // written enough data to audio hardware before disabling the track
-                        // NOTE: this condition with arrive before track->mRetryCount <= 0 so we
-                        // don't care about code removing track from active list above.
-                        if ((track->mSharedBuffer != 0) && (mBytesWritten < mMinBytesToWrite)) {
-                            activeTrack = t;
-                        }
-                     }
+                    }
                 }
             }
 
@@ -1791,7 +1799,7 @@ bool AudioFlinger::DirectOutputThread::threadLoop()
             }
        }
 
-        if (activeTrack != 0) {
+        if (LIKELY(mixerStatus == MIXER_TRACKS_READY)) {
             AudioBufferProvider::Buffer buffer;
             size_t frameCount = mFrameCount;
             curBuf = (int8_t *)mMixBuffer;
@@ -1812,7 +1820,11 @@ bool AudioFlinger::DirectOutputThread::threadLoop()
             standbyTime = systemTime() + kStandbyTimeInNsecs;
         } else {
             if (sleepTime == 0) {
-                sleepTime = maxBufferRecoveryInUsecs;
+                if (mixerStatus == MIXER_TRACKS_ENABLED) {
+                    sleepTime = activeSleepTime;
+                } else {
+                    sleepTime = idleSleepTime;
+                }
             } else if (mBytesWritten != 0 && AudioSystem::isLinearPCM(mFormat)) {
                 memset (mMixBuffer, 0, mFrameCount * mFrameSize);
                 sleepTime = 0;
@@ -1820,7 +1832,7 @@ bool AudioFlinger::DirectOutputThread::threadLoop()
         }
 
         if (mSuspended) {
-            sleepTime = maxBufferRecoveryInUsecs;
+            sleepTime = idleSleepTime;
         }
         // sleepTime == 0 means we must write to audio hardware
         if (sleepTime == 0) {
@@ -1905,15 +1917,22 @@ bool AudioFlinger::DirectOutputThread::checkForNewParameters_l()
     return reconfig;
 }
 
-uint32_t AudioFlinger::DirectOutputThread::getMaxBufferRecoveryInUsecs()
+uint32_t AudioFlinger::DirectOutputThread::activeSleepTimeUs()
 {
     uint32_t time;
     if (AudioSystem::isLinearPCM(mFormat)) {
-        time = ((mFrameCount * 1000) / mSampleRate) * 1000;
-        // Add some margin with regard to scheduling precision
-        if (time > 10000) {
-            time -= 10000;
-        }
+        time = (uint32_t)(mOutput->latency() * 1000) / 2;
+    } else {
+        time = 10000;
+    }
+    return time;
+}
+
+uint32_t AudioFlinger::DirectOutputThread::idleSleepTimeUs()
+{
+    uint32_t time;
+    if (AudioSystem::isLinearPCM(mFormat)) {
+        time = (uint32_t)((mFrameCount * 1000) / mSampleRate) * 1000;
     } else {
         time = 10000;
     }
@@ -1936,28 +1955,30 @@ AudioFlinger::DuplicatingThread::~DuplicatingThread()
 
 bool AudioFlinger::DuplicatingThread::threadLoop()
 {
-    uint32_t sleepTime = 1000;
-    uint32_t maxBufferRecoveryInUsecs = getMaxBufferRecoveryInUsecs();
     int16_t* curBuf = mMixBuffer;
     Vector< sp<Track> > tracksToRemove;
-    size_t enabledTracks = 0;
+    uint32_t mixerStatus = MIXER_IDLE;
     nsecs_t standbyTime = systemTime();
     size_t mixBufferSize = mFrameCount*mFrameSize;
     SortedVector< sp<OutputTrack> > outputTracks;
     uint32_t writeFrames = 0;
+    uint32_t activeSleepTime = activeSleepTimeUs();
+    uint32_t idleSleepTime = idleSleepTimeUs();
+    uint32_t sleepTime = idleSleepTime;
 
     while (!exitPending())
     {
         processConfigEvents();
 
-        enabledTracks = 0;
+        mixerStatus = MIXER_IDLE;
         { // scope for the mLock
 
             Mutex::Autolock _l(mLock);
 
             if (checkForNewParameters_l()) {
                 mixBufferSize = mFrameCount*mFrameSize;
-                maxBufferRecoveryInUsecs = getMaxBufferRecoveryInUsecs();
+                activeSleepTime = activeSleepTimeUs();
+                idleSleepTime = idleSleepTimeUs();
             }
 
             const SortedVector< wp<Track> >& activeTracks = mActiveTracks;
@@ -1997,22 +2018,26 @@ bool AudioFlinger::DuplicatingThread::threadLoop()
                     }
 
                     standbyTime = systemTime() + kStandbyTimeInNsecs;
-                    sleepTime = 1000;
+                    sleepTime = idleSleepTime;
                     continue;
                 }
             }
 
-            enabledTracks = prepareTracks_l(activeTracks, &tracksToRemove);
+            mixerStatus = prepareTracks_l(activeTracks, &tracksToRemove);
         }
 
-        if (LIKELY(enabledTracks)) {
+        if (LIKELY(mixerStatus == MIXER_TRACKS_READY)) {
             // mix buffers...
             mAudioMixer->process(curBuf);
             sleepTime = 0;
             writeFrames = mFrameCount;
         } else {
             if (sleepTime == 0) {
-                sleepTime = maxBufferRecoveryInUsecs;
+                if (mixerStatus == MIXER_TRACKS_ENABLED) {
+                    sleepTime = activeSleepTime;
+                } else {
+                    sleepTime = idleSleepTime;
+                }
             } else if (mBytesWritten != 0) {
                 // flush remaining overflow buffers in output tracks
                 for (size_t i = 0; i < outputTracks.size(); i++) {
@@ -2026,7 +2051,7 @@ bool AudioFlinger::DuplicatingThread::threadLoop()
         }
 
         if (mSuspended) {
-            sleepTime = maxBufferRecoveryInUsecs;
+            sleepTime = idleSleepTime;
         }
         // sleepTime == 0 means we must write to audio hardware
         if (sleepTime == 0) {
