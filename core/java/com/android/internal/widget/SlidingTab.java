@@ -309,12 +309,30 @@ public class SlidingTab extends ViewGroup {
             setState(currentState);
         }
 
-        public int getTabWidth() {
-            return tab.getDrawable().getIntrinsicWidth();
+        /**
+         * Ensure all the dependent widgets are measured.
+         */
+        public void measure() {
+            tab.measure(View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
+                    View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
+            text.measure(View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
+                    View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
         }
 
+        /**
+         * Get the measured tab width. Must be called after {@link Slider#measure()}.
+         * @return
+         */
+        public int getTabWidth() {
+            return tab.getMeasuredWidth();
+        }
+
+        /**
+         * Get the measured tab width. Must be called after {@link Slider#measure()}.
+         * @return
+         */
         public int getTabHeight() {
-            return tab.getDrawable().getIntrinsicHeight();
+            return tab.getMeasuredHeight();
         }
     }
 
@@ -360,11 +378,12 @@ public class SlidingTab extends ViewGroup {
             throw new RuntimeException(LOG_TAG + " cannot have UNSPECIFIED dimensions");
         }
 
-        final float density = mDensity;
-        final int leftTabWidth = (int) (density * mLeftSlider.getTabWidth() + 0.5f);
-        final int rightTabWidth = (int) (density * mRightSlider.getTabWidth() + 0.5f);
-        final int leftTabHeight = (int) (density * mLeftSlider.getTabHeight() + 0.5f);
-        final int rightTabHeight = (int) (density * mRightSlider.getTabHeight() + 0.5f);
+        mLeftSlider.measure();
+        mRightSlider.measure();
+        final int leftTabWidth = mLeftSlider.getTabWidth();
+        final int rightTabWidth = mRightSlider.getTabWidth();
+        final int leftTabHeight = mLeftSlider.getTabHeight();
+        final int rightTabHeight = mRightSlider.getTabHeight();
         final int width;
         final int height;
         if (isHorizontal()) {
