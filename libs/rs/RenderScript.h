@@ -55,7 +55,7 @@ RsDevice rsDeviceCreate();
 void rsDeviceDestroy(RsDevice);
 void rsDeviceSetConfig(RsDevice, RsDeviceParam, int32_t value);
 
-RsContext rsContextCreate(RsDevice, void *, uint32_t version, bool useDepth);
+RsContext rsContextCreate(RsDevice, uint32_t version, bool useDepth);
 void rsContextDestroy(RsContext);
 void rsObjDestroyOOB(RsContext, void *);
 
