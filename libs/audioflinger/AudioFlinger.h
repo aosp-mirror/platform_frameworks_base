@@ -361,6 +361,12 @@ private:
             DUPLICATING
         };
 
+        enum mixer_state {
+            MIXER_IDLE,
+            MIXER_TRACKS_ENABLED,
+            MIXER_TRACKS_READY
+        };
+
         // playback track
         class Track : public TrackBase {
         public:
@@ -530,7 +536,8 @@ private:
 
         virtual int             getTrackName_l() = 0;
         virtual void            deleteTrackName_l(int name) = 0;
-        virtual uint32_t        getMaxBufferRecoveryInUsecs() = 0;
+        virtual uint32_t        activeSleepTimeUs() = 0;
+        virtual uint32_t        idleSleepTimeUs() = 0;
 
     private:
 
@@ -562,7 +569,6 @@ private:
         int                             mNumWrites;
         int                             mNumDelayedWrites;
         bool                            mInWrite;
-        int                             mMinBytesToWrite;
     };
 
     class MixerThread : public PlaybackThread {
@@ -582,10 +588,11 @@ private:
         virtual     status_t    dumpInternals(int fd, const Vector<String16>& args);
 
     protected:
-        size_t prepareTracks_l(const SortedVector< wp<Track> >& activeTracks, Vector< sp<Track> > *tracksToRemove);
+                    uint32_t    prepareTracks_l(const SortedVector< wp<Track> >& activeTracks, Vector< sp<Track> > *tracksToRemove);
         virtual     int         getTrackName_l();
         virtual     void        deleteTrackName_l(int name);
-        virtual     uint32_t    getMaxBufferRecoveryInUsecs();
+        virtual     uint32_t    activeSleepTimeUs();
+        virtual     uint32_t    idleSleepTimeUs();
 
         AudioMixer*                     mAudioMixer;
     };
@@ -604,7 +611,8 @@ private:
     protected:
         virtual     int         getTrackName_l();
         virtual     void        deleteTrackName_l(int name);
-        virtual     uint32_t    getMaxBufferRecoveryInUsecs();
+        virtual     uint32_t    activeSleepTimeUs();
+        virtual     uint32_t    idleSleepTimeUs();
 
     private:
         float mLeftVolume;

@@ -318,26 +318,35 @@ void AudioTrack::start()
      }
 
     if (android_atomic_or(1, &mActive) == 0) {
-        audio_io_handle_t output = AudioTrack::getOutput();
+        audio_io_handle_t output = getOutput();
+        AudioSystem::startOutput(output, (AudioSystem::stream_type)mStreamType);
+        mNewPosition = mCblk->server + mUpdatePeriod;
+        mCblk->bufferTimeoutMs = MAX_STARTUP_TIMEOUT_MS;
+        mCblk->waitTimeMs = 0;
+        if (t != 0) {
+           t->run("AudioTrackThread", THREAD_PRIORITY_AUDIO_CLIENT);
+        } else {
+            setpriority(PRIO_PROCESS, 0, THREAD_PRIORITY_AUDIO_CLIENT);
+        }
+
         status_t status = mAudioTrack->start();
         if (status == DEAD_OBJECT) {
             LOGV("start() dead IAudioTrack: creating a new one");
             status = createTrack(mStreamType, mCblk->sampleRate, mFormat, mChannelCount,
                                  mFrameCount, mFlags, mSharedBuffer, output);
-        }
-        if (status == NO_ERROR) {
-            AudioSystem::startOutput(output, (AudioSystem::stream_type)mStreamType);
             mNewPosition = mCblk->server + mUpdatePeriod;
             mCblk->bufferTimeoutMs = MAX_STARTUP_TIMEOUT_MS;
             mCblk->waitTimeMs = 0;
-            if (t != 0) {
-               t->run("AudioTrackThread", THREAD_PRIORITY_AUDIO_CLIENT);
-            } else {
-                setpriority(PRIO_PROCESS, 0, THREAD_PRIORITY_AUDIO_CLIENT);
-            }
-        } else {
+        }
+        if (status != NO_ERROR) {
             LOGV("start() failed");
             android_atomic_and(~1, &mActive);
+            if (t != 0) {
+                t->requestExit();
+            } else {
+                setpriority(PRIO_PROCESS, 0, ANDROID_PRIORITY_NORMAL);
+            }
+            AudioSystem::stopOutput(output, (AudioSystem::stream_type)mStreamType);
         }
     }
 
