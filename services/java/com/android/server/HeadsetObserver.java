@@ -43,9 +43,6 @@ class HeadsetObserver extends UEventObserver {
 
     private static final int BIT_HEADSET = (1 << 0);
     private static final int BIT_HEADSET_NO_MIC = (1 << 1);
-    private static final int BIT_TTY = (1 << 2);
-    private static final int BIT_FM_HEADSET = (1 << 3);
-    private static final int BIT_FM_SPEAKER = (1 << 4);
 
     private int mHeadsetState;
     private int mPrevHeadsetState;
@@ -102,15 +99,18 @@ class HeadsetObserver extends UEventObserver {
     }
 
     private synchronized final void update(String newName, int newState) {
-        if (newName != mHeadsetName || newState != mHeadsetState) {
+        // Retain only relevant bits
+        int headsetState = newState & (BIT_HEADSET|BIT_HEADSET_NO_MIC);
+
+        if (headsetState != mHeadsetState) {
             boolean isUnplug = false;
-            if ( (mHeadsetState & BIT_HEADSET) > 0 || (mHeadsetState & BIT_HEADSET_NO_MIC) > 0) {
-                if ((newState & BIT_HEADSET) == 0 && (newState & BIT_HEADSET_NO_MIC) == 0)
-                    isUnplug = true;
+            if (((mHeadsetState & BIT_HEADSET) != 0 && (headsetState & BIT_HEADSET) == 0) ||
+                ((mHeadsetState & BIT_HEADSET_NO_MIC) != 0 && (headsetState & BIT_HEADSET_NO_MIC) == 0)) {
+                isUnplug = true;
             }
             mHeadsetName = newName;
             mPrevHeadsetState = mHeadsetState;
-            mHeadsetState = newState;
+            mHeadsetState = headsetState;
             mPendingIntent = true;
 
             if (isUnplug) {
@@ -135,9 +135,23 @@ class HeadsetObserver extends UEventObserver {
         //  Pack up the values and broadcast them to everyone
         Intent intent = new Intent(Intent.ACTION_HEADSET_PLUG);
         intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
+        int state = 0;
+        int microphone = 0;
 
-        intent.putExtra("state", mHeadsetState);
+        if ((mHeadsetState & BIT_HEADSET) != (mPrevHeadsetState & BIT_HEADSET)) {
+            microphone = 1;
+            if ((mHeadsetState & BIT_HEADSET) != 0) {
+                state = 1;
+            }
+        } else if ((mHeadsetState & BIT_HEADSET_NO_MIC) != (mPrevHeadsetState & BIT_HEADSET_NO_MIC)) {
+            if ((mHeadsetState & BIT_HEADSET_NO_MIC) != 0) {
+                state = 1;
+            }
+        }
+
+        intent.putExtra("state", state);
         intent.putExtra("name", mHeadsetName);
+        intent.putExtra("microphone", microphone);
 
         // TODO: Should we require a permission?
         ActivityManagerNative.broadcastStickyIntent(intent, null);
