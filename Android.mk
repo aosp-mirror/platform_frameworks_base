@@ -523,7 +523,6 @@ include $(BUILD_DROIDDOC)
 ext_dirs := \
 	../../external/apache-http/src \
 	../../external/gdata/src \
-	../../external/protobuf/src \
 	../../external/tagsoup/src
 
 ext_src_files := $(call all-java-files-under,$(ext_dirs))
