@@ -520,12 +520,9 @@
     <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"Zaloguj"</string>
     <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"Błędna nazwa użytkownika lub hasło."</string>
     <string name="lockscreen_glogin_checking_password" msgid="6758890536332363322">"Trwa sprawdzanie..."</string>
-    <!-- no translation found for lockscreen_unlock_label (737440483220667054) -->
-    <skip />
-    <!-- no translation found for lockscreen_sound_on_label (9068877576513425970) -->
-    <skip />
-    <!-- no translation found for lockscreen_sound_off_label (996822825154319026) -->
-    <skip />
+    <string name="lockscreen_unlock_label" msgid="737440483220667054">"Odblokuj"</string>
+    <string name="lockscreen_sound_on_label" msgid="9068877576513425970">"Włącz dźwięk"</string>
+    <string name="lockscreen_sound_off_label" msgid="996822825154319026">"Wyłącz dźwięk"</string>
     <string name="hour_ampm" msgid="4329881288269772723">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%P</xliff:g>"</string>
     <string name="hour_cap_ampm" msgid="1829009197680861107">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%p</xliff:g>"</string>
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"Wyczyść"</string>
@@ -599,7 +596,7 @@
   </plurals>
   <plurals name="abbrev_num_seconds_ago">
     <item quantity="one" msgid="1849036840200069118">"sekundę temu"</item>
-    <item quantity="other" msgid="3699169366650930415">"<xliff:g id="COUNT">%d</xliff:g> sek. temu"</item>
+    <item quantity="other" msgid="3699169366650930415">"<xliff:g id="COUNT">%d</xliff:g> s temu"</item>
   </plurals>
   <plurals name="abbrev_num_minutes_ago">
     <item quantity="one" msgid="6361490147113871545">"minutę temu"</item>
@@ -615,7 +612,7 @@
   </plurals>
   <plurals name="abbrev_in_num_seconds">
     <item quantity="one" msgid="5842225370795066299">"za sekundę"</item>
-    <item quantity="other" msgid="5495880108825805108">"za <xliff:g id="COUNT">%d</xliff:g> sek."</item>
+    <item quantity="other" msgid="5495880108825805108">"za <xliff:g id="COUNT">%d</xliff:g> s"</item>
   </plurals>
   <plurals name="abbrev_in_num_minutes">
     <item quantity="one" msgid="562786149928284878">"za minutę"</item>
