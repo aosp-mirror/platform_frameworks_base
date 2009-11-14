@@ -50,7 +50,7 @@
             android:layout_height="wrap_content"
             android:layout_below="@id/carrier"
             android:layout_marginBottom="8dip"
-            android:layout_marginTop="16dip"
+            android:layout_marginTop="60dip"
             android:layout_marginLeft="24dip"
             >
 
