@@ -109,7 +109,7 @@ private:
 
     ~SurfaceControl();
 
-    status_t validate(SharedClient const* cblk) const;
+    status_t validate() const;
     void destroy();
     
     sp<SurfaceComposerClient>   mClient;
@@ -190,7 +190,7 @@ private:
 
     status_t getBufferLocked(int index, int usage);
    
-           status_t validate(SharedClient const* cblk) const;
+           status_t validate() const;
 
     inline const GraphicBufferMapper& getBufferMapper() const { return mBufferMapper; }
     inline GraphicBufferMapper& getBufferMapper() { return mBufferMapper; }
