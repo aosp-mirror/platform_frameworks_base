@@ -471,6 +471,7 @@ public class SlidingTab extends ViewGroup {
                         mCurrentSlider.setState(Slider.STATE_ACTIVE);
                         dispatchTriggerEvent(mCurrentSlider == mLeftSlider ?
                             OnTriggerListener.LEFT_HANDLE : OnTriggerListener.RIGHT_HANDLE);
+                        setGrabbedState(OnTriggerListener.NO_HANDLE);
 
                         // TODO: This is a place holder for the real animation. It just holds
                         // the screen for the duration of the animation for now.
