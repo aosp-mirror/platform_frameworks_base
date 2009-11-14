@@ -37,9 +37,9 @@ import com.android.internal.R;
 
 /**
  * A special widget containing two Sliders and a threshold for each.  Moving either slider beyond
- * the threshold will cause the registered OnTriggerListener.onTrigger() to be called with 
+ * the threshold will cause the registered OnTriggerListener.onTrigger() to be called with
  * whichHandle being {@link OnTriggerListener#LEFT_HANDLE} or {@link OnTriggerListener#RIGHT_HANDLE}
- * Equivalently, selecting a tab will result in a call to 
+ * Equivalently, selecting a tab will result in a call to
  * {@link OnTriggerListener#onGrabbedStateChange(View, int)} with one of these two states. Releasing
  * the tab will result in whichHandle being {@link OnTriggerListener#NO_HANDLE}.
  *
@@ -122,9 +122,9 @@ public class SlidingTab extends ViewGroup {
     }
 
     /**
-     * Simple container class for all things pertinent to a slider.  
+     * Simple container class for all things pertinent to a slider.
      * A slider consists of 3 Views:
-     * 
+     *
      * {@link #tab} is the tab shown on the screen in the default state.
      * {@link #text} is the view revealed as the user slides the tab out.
      * {@link #target} is the target the user must drag the slider past to trigger the slider.
@@ -153,7 +153,7 @@ public class SlidingTab extends ViewGroup {
 
         /**
          * Constructor
-         * 
+         *
          * @param parent the container view of this one
          * @param tabId drawable for the tab
          * @param barId drawable for the bar
@@ -191,18 +191,17 @@ public class SlidingTab extends ViewGroup {
         void setIcon(int iconId) {
             tab.setImageResource(iconId);
         }
-        
+
         void setTabBackgroundResource(int tabId) {
             tab.setBackgroundResource(tabId);
         }
-        
+
         void setBarBackgroundResource(int barId) {
             text.setBackgroundResource(barId);
         }
-        
+
         void setHintText(int resId) {
-            // TODO: Text should be blank if widget is vertical
-            text.setText(resId); 
+            text.setText(resId);
         }
 
         void hide() {
@@ -354,12 +353,12 @@ public class SlidingTab extends ViewGroup {
         mDensity = r.getDisplayMetrics().density;
         if (DBG) log("- Density: " + mDensity);
 
-        mLeftSlider = new Slider(this, 
-                R.drawable.jog_tab_left_generic, 
+        mLeftSlider = new Slider(this,
+                R.drawable.jog_tab_left_generic,
                 R.drawable.jog_tab_bar_left_generic,
                 R.drawable.jog_tab_target_gray);
-        mRightSlider = new Slider(this, 
-                R.drawable.jog_tab_right_generic, 
+        mRightSlider = new Slider(this,
+                R.drawable.jog_tab_right_generic,
                 R.drawable.jog_tab_bar_right_generic,
                 R.drawable.jog_tab_target_gray);
 
@@ -548,11 +547,11 @@ public class SlidingTab extends ViewGroup {
      * @param iconId the resource ID of the icon drawable
      * @param targetId the resource of the target drawable
      * @param barId the resource of the bar drawable (stateful)
-     * @param tabId the resource of the 
+     * @param tabId the resource of the
      */
     public void setLeftTabResources(int iconId, int targetId, int barId, int tabId) {
         mLeftSlider.setIcon(iconId);
-        mLeftSlider.setTarget(targetId); 
+        mLeftSlider.setTarget(targetId);
         mLeftSlider.setBarBackgroundResource(barId);
         mLeftSlider.setTabBackgroundResource(tabId);
         mLeftSlider.updateDrawableStates();
@@ -564,7 +563,9 @@ public class SlidingTab extends ViewGroup {
      * @param resId
      */
     public void setLeftHintText(int resId) {
-        mLeftSlider.setHintText(resId);
+        if (isHorizontal()) {
+            mLeftSlider.setHintText(resId);
+        }
     }
 
     /**
@@ -576,11 +577,11 @@ public class SlidingTab extends ViewGroup {
      * @param iconId the resource ID of the icon drawable
      * @param targetId the resource of the target drawable
      * @param barId the resource of the bar drawable (stateful)
-     * @param tabId the resource of the 
+     * @param tabId the resource of the
      */
     public void setRightTabResources(int iconId, int targetId, int barId, int tabId) {
         mRightSlider.setIcon(iconId);
-        mRightSlider.setTarget(targetId); 
+        mRightSlider.setTarget(targetId);
         mRightSlider.setBarBackgroundResource(barId);
         mRightSlider.setTabBackgroundResource(tabId);
         mRightSlider.updateDrawableStates();
@@ -592,7 +593,9 @@ public class SlidingTab extends ViewGroup {
      * @param resId
      */
     public void setRightHintText(int resId) {
-        mRightSlider.setHintText(resId);
+        if (isHorizontal()) {
+            mRightSlider.setHintText(resId);
+        }
     }
 
     /**
