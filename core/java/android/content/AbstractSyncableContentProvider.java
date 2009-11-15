@@ -690,6 +690,7 @@ public abstract class AbstractSyncableContentProvider extends SyncableContentPro
             while (c.moveToNext()) {
                 String accountName = c.getString(0);
                 String accountType = c.getString(1);
+		if ("localhost".equals(accountType)) continue;
                 if (TextUtils.isEmpty(accountName)) {
                     continue;
                 }
