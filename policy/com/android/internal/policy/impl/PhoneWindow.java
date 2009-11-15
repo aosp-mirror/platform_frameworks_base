@@ -20,6 +20,7 @@ import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 import static android.view.WindowManager.LayoutParams.FLAG_FULLSCREEN;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
+import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
 
 import com.android.internal.view.menu.ContextMenuBuilder;
 import com.android.internal.view.menu.MenuBuilder;
@@ -34,7 +35,6 @@ import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
-import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
@@ -124,6 +124,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
      * this is 0, there is no key held down.
      */
     private int mPanelChordingKey;
+    private boolean mPanelMayLongPress;
 
     private ImageView mLeftIconView;
 
@@ -155,120 +156,6 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
     private TelephonyManager mTelephonyManager = null;
     
-    private boolean mSearchKeyDownReceived;
-
-    private boolean mKeycodeCallTimeoutActive = false;
-
-    private boolean mKeycodeCameraTimeoutActive = false;
-
-    static final int MSG_MENU_LONG_PRESS = 1;
-    static final int MSG_MENU_LONG_PRESS_COMPLETE = 2;
-    static final int MSG_CALL_LONG_PRESS = 3;
-    static final int MSG_CALL_LONG_PRESS_COMPLETE = 4;
-    static final int MSG_CAMERA_LONG_PRESS = 5;
-    static final int MSG_CAMERA_LONG_PRESS_COMPLETE = 6;
-    static final int MSG_SEARCH_LONG_PRESS = 7;
-    static final int MSG_SEARCH_LONG_PRESS_COMPLETE = 8;
-
-    private final Handler mKeycodeMenuTimeoutHandler = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case MSG_MENU_LONG_PRESS: {
-                    if (mPanelChordingKey == 0) return;
-                    // Before actually doing the long press, enqueue another
-                    // message and do the processing there.  This helps if
-                    // the app isn't being responsive, and finally woke up --
-                    // if the window manager wasn't told about it processing
-                    // the down key for too long, it would enqueue the key up
-                    // at a time after the timeout of this message.  So we go
-                    // through another message, to make sure we process an up
-                    // before continuing.
-                    mKeycodeMenuTimeoutHandler.sendEmptyMessage(
-                            MSG_MENU_LONG_PRESS_COMPLETE);
-                    break;
-                }
-                case MSG_CALL_LONG_PRESS: {
-                    if (!mKeycodeCallTimeoutActive) return;
-                    // See above.
-                    mKeycodeMenuTimeoutHandler.sendEmptyMessage(
-                            MSG_CALL_LONG_PRESS_COMPLETE);
-                    break;
-                }
-                case MSG_CAMERA_LONG_PRESS: {
-                    if (!mKeycodeCameraTimeoutActive) return;
-                    // See above.
-                    Message newMessage = Message.obtain(msg);
-                    newMessage.what = MSG_CAMERA_LONG_PRESS_COMPLETE;
-                    mKeycodeMenuTimeoutHandler.sendMessage(newMessage);
-                    break;
-                }
-                case MSG_SEARCH_LONG_PRESS: {
-                    if (!mSearchKeyDownReceived) return;
-                    // See above.
-                    Message newMessage = Message.obtain(msg);
-                    newMessage.what = MSG_SEARCH_LONG_PRESS_COMPLETE;
-                    mKeycodeMenuTimeoutHandler.sendMessage(newMessage);
-                    break;
-                }
-                case MSG_MENU_LONG_PRESS_COMPLETE: {
-                    if (mPanelChordingKey == 0) return;
-                    mPanelChordingKey = 0;
-                    mDecor.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
-                    InputMethodManager imm = (InputMethodManager)
-                            getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-                    if (imm != null) {
-                        imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
-                    }
-                } break;
-                case MSG_CALL_LONG_PRESS_COMPLETE: {
-                    if (!mKeycodeCallTimeoutActive) return;
-                    mKeycodeCallTimeoutActive = false;
-                    mDecor.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
-                    // launch the VoiceDialer
-                    Intent intent = new Intent(Intent.ACTION_VOICE_COMMAND);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    try {
-                        sendCloseSystemWindows();
-                        getContext().startActivity(intent);
-                    } catch (ActivityNotFoundException e) {
-                        startCallActivity();
-                    }
-                } break;
-                case MSG_CAMERA_LONG_PRESS_COMPLETE: {
-                    if (!mKeycodeCameraTimeoutActive) return;
-                    mKeycodeCameraTimeoutActive = false;
-                    mDecor.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
-                    sendCloseSystemWindows();
-                    // Broadcast an intent that the Camera button was longpressed
-                    Intent intent = new Intent(Intent.ACTION_CAMERA_BUTTON, null);
-                    intent.putExtra(Intent.EXTRA_KEY_EVENT, (KeyEvent) msg.obj);
-                    getContext().sendOrderedBroadcast(intent, null);
-                } break;
-                case MSG_SEARCH_LONG_PRESS_COMPLETE: {
-                    if (getKeyguardManager().inKeyguardRestrictedInputMode() ||
-                            !mSearchKeyDownReceived) {
-                        mSearchKeyDownReceived = false;
-                        return;
-                    }
-                    mDecor.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
-                    // launch the search activity
-                    Intent intent = new Intent(Intent.ACTION_SEARCH_LONG_PRESS);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    try {
-                        sendCloseSystemWindows();
-                        getContext().startActivity(intent);
-                        // Only clear this if we successfully start the
-                        // activity; otherwise we will allow the normal short
-                        // press action to be performed.
-                        mSearchKeyDownReceived = false;
-                    } catch (ActivityNotFoundException e) {
-                    }
-                } break;
-            }
-        }
-    };
-
     public PhoneWindow(Context context) {
         super(context);
         mLayoutInflater = LayoutInflater.from(context);
@@ -295,11 +182,9 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             /* Custom title feature is enabled and the user is trying to enable another feature */
             throw new AndroidRuntimeException("You cannot combine custom titles with other title features");
         }
-        /*  FEATURE_OPENGL disabled for 1.0
         if (featureId == FEATURE_OPENGL) {
             getAttributes().memoryType = WindowManager.LayoutParams.MEMORY_TYPE_GPU;
         }
-        */
         return super.requestFeature(featureId);
     }
 
@@ -567,7 +452,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
         WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
                 WRAP_CONTENT, WRAP_CONTENT,
-                st.x, st.y, WindowManager.LayoutParams.TYPE_APPLICATION_PANEL,
+                st.x, st.y, WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG,
                 WindowManager.LayoutParams.FLAG_DITHER
                 | WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM,
                 st.decorView.mDefaultOpacity);
@@ -649,19 +534,35 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
      * @return Whether the key was handled.
      */
     public final boolean onKeyDownPanel(int featureId, KeyEvent event) {
-        // The panel key was pushed, so set the chording key
-        mPanelChordingKey = event.getKeyCode();
-
-        PanelFeatureState st = getPanelState(featureId, true);
-        if (!st.isOpen) {
-            if (getContext().getResources().getConfiguration().keyboard
-                    == Configuration.KEYBOARD_NOKEYS) {
-                mKeycodeMenuTimeoutHandler.removeMessages(MSG_MENU_LONG_PRESS);
-                mKeycodeMenuTimeoutHandler.sendMessageDelayed(
-                        mKeycodeMenuTimeoutHandler.obtainMessage(MSG_MENU_LONG_PRESS),
-                        ViewConfiguration.getLongPressTimeout());
+        final int keyCode = event.getKeyCode();
+        
+        if (event.getRepeatCount() == 0) {
+            // The panel key was pushed, so set the chording key
+            mPanelChordingKey = keyCode;
+            mPanelMayLongPress = false;
+            
+            PanelFeatureState st = getPanelState(featureId, true);
+            if (!st.isOpen) {
+                if (getContext().getResources().getConfiguration().keyboard
+                        == Configuration.KEYBOARD_NOKEYS) {
+                    mPanelMayLongPress = true;
+                }
+                return preparePanel(st, event);
             }
-            return preparePanel(st, event);
+            
+        } else if (mPanelMayLongPress && mPanelChordingKey == keyCode
+                && (event.getFlags()&KeyEvent.FLAG_LONG_PRESS) != 0) {
+            // We have had a long press while in a state where this
+            // should be executed...  do it!
+            mPanelChordingKey = 0;
+            mPanelMayLongPress = false;
+            InputMethodManager imm = (InputMethodManager)
+                    getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+            if (imm != null) {
+                mDecor.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
+                imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
+            }
+            
         }
 
         return false;
@@ -676,8 +577,12 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         // The panel key was released, so clear the chording key
         if (mPanelChordingKey != 0) {
             mPanelChordingKey = 0;
-            mKeycodeMenuTimeoutHandler.removeMessages(MSG_MENU_LONG_PRESS);
+            mPanelMayLongPress = false;
 
+            if (event.isCanceled()) {
+                return;
+            }
+            
             boolean playSoundEffect = false;
             PanelFeatureState st = getPanelState(featureId, true);
             if (st.isOpen || st.isHandled) {
@@ -1214,6 +1119,11 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
      * @see android.view.KeyEvent
      */
     protected boolean onKeyDown(int featureId, int keyCode, KeyEvent event) {
+        final KeyEvent.DispatcherState dispatcher =
+                mDecor != null ? mDecor.getKeyDispatcherState() : null;
+        //Log.i(TAG, "Key down: repeat=" + event.getRepeatCount()
+        //        + " flags=0x" + Integer.toHexString(event.getFlags()));
+        
         switch (keyCode) {
             case KeyEvent.KEYCODE_VOLUME_UP:
             case KeyEvent.KEYCODE_VOLUME_DOWN: {
@@ -1260,21 +1170,25 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             }
 
             case KeyEvent.KEYCODE_CAMERA: {
-                if (getKeyguardManager().inKeyguardRestrictedInputMode()) {
+                if (getKeyguardManager().inKeyguardRestrictedInputMode()
+                        || dispatcher == null) {
                     break;
                 }
-                if (event.getRepeatCount() > 0) break;
-                mKeycodeCameraTimeoutActive = true;
-                mKeycodeMenuTimeoutHandler.removeMessages(MSG_CAMERA_LONG_PRESS);
-                Message message = mKeycodeMenuTimeoutHandler.obtainMessage(MSG_CAMERA_LONG_PRESS);
-                message.obj = event;
-                mKeycodeMenuTimeoutHandler.sendMessageDelayed(message,
-                        ViewConfiguration.getLongPressTimeout());
+                if (event.getRepeatCount() == 0) {
+                    dispatcher.startTracking(event, this);
+                } else if (event.isLongPress() && dispatcher.isTracking(event)) {
+                    dispatcher.performedLongPress(event);
+                    mDecor.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
+                    sendCloseSystemWindows();
+                    // Broadcast an intent that the Camera button was longpressed
+                    Intent intent = new Intent(Intent.ACTION_CAMERA_BUTTON, null);
+                    intent.putExtra(Intent.EXTRA_KEY_EVENT, event);
+                    getContext().sendOrderedBroadcast(intent, null);
+                }
                 return true;
             }
 
             case KeyEvent.KEYCODE_MENU: {
-                if (event.getRepeatCount() > 0) break;
                 onKeyDownPanel((featureId < 0) ? FEATURE_OPTIONS_PANEL : featureId, event);
                 return true;
             }
@@ -1282,48 +1196,61 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             case KeyEvent.KEYCODE_BACK: {
                 if (event.getRepeatCount() > 0) break;
                 if (featureId < 0) break;
-                if (featureId == FEATURE_OPTIONS_PANEL) {
-                    PanelFeatureState st = getPanelState(featureId, false);
-                    if (st != null && st.isInExpandedMode) {
-                        // If the user is in an expanded menu and hits back, it
-                        // should go back to the icon menu
-                        reopenMenu(true);
-                        return true;
-                    }
-                }
-                closePanel(featureId);
+                // Currently don't do anything with long press.
+                dispatcher.startTracking(event, this);
                 return true;
             }
 
             case KeyEvent.KEYCODE_CALL: {
-                if (getKeyguardManager().inKeyguardRestrictedInputMode()) {
+                if (getKeyguardManager().inKeyguardRestrictedInputMode()
+                        || dispatcher == null) {
                     break;
                 }
-                if (event.getRepeatCount() > 0) break;
-                mKeycodeCallTimeoutActive = true;
-                mKeycodeMenuTimeoutHandler.removeMessages(MSG_CALL_LONG_PRESS);
-                mKeycodeMenuTimeoutHandler.sendMessageDelayed(
-                        mKeycodeMenuTimeoutHandler.obtainMessage(MSG_CALL_LONG_PRESS),
-                        ViewConfiguration.getLongPressTimeout());
+                if (event.getRepeatCount() == 0) {
+                    dispatcher.startTracking(event, this);
+                } else if (event.isLongPress() && dispatcher.isTracking(event)) {
+                    dispatcher.performedLongPress(event);
+                    mDecor.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
+                    // launch the VoiceDialer
+                    Intent intent = new Intent(Intent.ACTION_VOICE_COMMAND);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    try {
+                        sendCloseSystemWindows();
+                        getContext().startActivity(intent);
+                    } catch (ActivityNotFoundException e) {
+                        startCallActivity();
+                    }
+                }
                 return true;
             }
 
             case KeyEvent.KEYCODE_SEARCH: {
+                if (getKeyguardManager().inKeyguardRestrictedInputMode()
+                        || dispatcher == null) {
+                    break;
+                }
                 if (event.getRepeatCount() == 0) {
-                    mSearchKeyDownReceived = true;
+                    dispatcher.startTracking(event, this);
+                } else if (event.isLongPress() && dispatcher.isTracking(event)) {
                     Configuration config = getContext().getResources().getConfiguration(); 
                     if (config.keyboard == Configuration.KEYBOARD_NOKEYS
-                            || config.hardKeyboardHidden == Configuration.HARDKEYBOARDHIDDEN_YES) {
-                        // If this device does not have a hardware keyboard,
-                        // or that keyboard is hidden, then we can't use the
-                        // search key for chording to perform shortcuts;
-                        // instead, we will let the user long press,
-                        mKeycodeMenuTimeoutHandler.removeMessages(MSG_SEARCH_LONG_PRESS);
-                        mKeycodeMenuTimeoutHandler.sendMessageDelayed(
-                                mKeycodeMenuTimeoutHandler.obtainMessage(MSG_SEARCH_LONG_PRESS),
-                                ViewConfiguration.getLongPressTimeout());
+                            || config.hardKeyboardHidden
+                                    == Configuration.HARDKEYBOARDHIDDEN_YES) {
+                        // launch the search activity
+                        Intent intent = new Intent(Intent.ACTION_SEARCH_LONG_PRESS);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        try {
+                            sendCloseSystemWindows();
+                            getContext().startActivity(intent);
+                            mDecor.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
+                            // Only clear this if we successfully start the
+                            // activity; otherwise we will allow the normal short
+                            // press action to be performed.
+                            dispatcher.performedLongPress(event);
+                        } catch (ActivityNotFoundException e) {
+                            // Ignore
+                        }
                     }
-                    return true;
                 }
                 break;
             }
@@ -1349,6 +1276,14 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
      * @see android.view.KeyEvent
      */
     protected boolean onKeyUp(int featureId, int keyCode, KeyEvent event) {
+        final KeyEvent.DispatcherState dispatcher =
+                mDecor != null ? mDecor.getKeyDispatcherState() : null;
+        if (dispatcher != null) {
+            dispatcher.handleUpEvent(event);
+        }
+        //Log.i(TAG, "Key up: repeat=" + event.getRepeatCount()
+        //        + " flags=0x" + Integer.toHexString(event.getFlags()));
+        
         switch (keyCode) {
             case KeyEvent.KEYCODE_VOLUME_UP:
             case KeyEvent.KEYCODE_VOLUME_DOWN: {
@@ -1374,6 +1309,24 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                 return true;
             }
 
+            case KeyEvent.KEYCODE_BACK: {
+                if (featureId < 0) break;
+                if (event.isTracking() && !event.isCanceled()) {
+                    if (featureId == FEATURE_OPTIONS_PANEL) {
+                        PanelFeatureState st = getPanelState(featureId, false);
+                        if (st != null && st.isInExpandedMode) {
+                            // If the user is in an expanded menu and hits back, it
+                            // should go back to the icon menu
+                            reopenMenu(true);
+                            return true;
+                        }
+                    }
+                    closePanel(featureId);
+                    return true;
+                }
+                break;
+            }
+
             case KeyEvent.KEYCODE_HEADSETHOOK:
             case KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE:
             case KeyEvent.KEYCODE_MEDIA_STOP:
@@ -1391,11 +1344,9 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                 if (getKeyguardManager().inKeyguardRestrictedInputMode()) {
                     break;
                 }
-                if (event.getRepeatCount() > 0) break; // Can a key up event repeat?
-                mKeycodeMenuTimeoutHandler.removeMessages(MSG_CAMERA_LONG_PRESS);
-                if (!mKeycodeCameraTimeoutActive) break;
-                mKeycodeCameraTimeoutActive = false;
-                // Add short press behavior here if desired
+                if (event.isTracking() && !event.isCanceled()) {
+                    // Add short press behavior here if desired
+                }
                 return true;
             }
 
@@ -1403,11 +1354,9 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                 if (getKeyguardManager().inKeyguardRestrictedInputMode()) {
                     break;
                 }
-                if (event.getRepeatCount() > 0) break;
-                mKeycodeMenuTimeoutHandler.removeMessages(MSG_CALL_LONG_PRESS);
-                if (!mKeycodeCallTimeoutActive) break;
-                mKeycodeCallTimeoutActive = false;
-                startCallActivity();
+                if (event.isTracking() && !event.isCanceled()) {
+                    startCallActivity();
+                }
                 return true;
             }
 
@@ -1416,13 +1365,12 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                  * Do this in onKeyUp since the Search key is also used for
                  * chording quick launch shortcuts.
                  */
-                if (getKeyguardManager().inKeyguardRestrictedInputMode() ||
-                        !mSearchKeyDownReceived) {
-                    mSearchKeyDownReceived = false;
+                if (getKeyguardManager().inKeyguardRestrictedInputMode()) {
                     break;
                 }
-                mSearchKeyDownReceived = false;
-                launchDefaultSearch();
+                if (event.isTracking() && !event.isCanceled()) {
+                    launchDefaultSearch();
+                }
                 return true;
             }
         }
@@ -1584,9 +1532,11 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         PanelFeatureState st;
         for (int i = panels.length - 1; i >= 0; i--) {
             st = panels[i];
-            if ((st != null) && st.isOpen) {
-                // Clear st.isOpen (openPanel will not open if it's already open)
-                st.isOpen = false;
+            // We restore the panel if it was last open; we skip it if it
+            // now is open, to avoid a race condition if the user immediately
+            // opens it when we are resuming.
+            if ((st != null) && !st.isOpen && st.wasLastOpen) {
+                st.isInExpandedMode = st.wasLastExpanded;
                 openPanel(st, null);
             }
         }
@@ -1606,8 +1556,6 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
         private final Rect mFrameOffsets = new Rect();
 
-        private final Paint mBlackPaint = new Paint();
-
         private boolean mChanging;
 
         private Drawable mMenuBackground;
@@ -1617,7 +1565,6 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         public DecorView(Context context, int featureId) {
             super(context);
             mFeatureId = featureId;
-            mBlackPaint.setColor(0xFF000000);
         }
 
         @Override
@@ -2009,16 +1956,11 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         public void onWindowFocusChanged(boolean hasWindowFocus) {
             super.onWindowFocusChanged(hasWindowFocus);
 
-            // no KEYCODE_CALL events active across focus changes
-            mKeycodeMenuTimeoutHandler.removeMessages(MSG_MENU_LONG_PRESS);
-            mKeycodeMenuTimeoutHandler.removeMessages(MSG_CALL_LONG_PRESS);
-            mKeycodeMenuTimeoutHandler.removeMessages(MSG_CAMERA_LONG_PRESS);
-            mKeycodeCallTimeoutActive = false;
-            mKeycodeCameraTimeoutActive = false;
+            mPanelMayLongPress = false;
 
             // If the user is chording a menu shortcut, release the chord since
             // this window lost focus
-            if (!hasWindowFocus && mPanelChordingKey > 0) {
+            if (!hasWindowFocus && mPanelChordingKey != 0) {
                 closePanel(FEATURE_OPTIONS_PANEL);
             }
 
@@ -2031,6 +1973,11 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         @Override
         protected void onAttachedToWindow() {
             super.onAttachedToWindow();
+            
+            final Callback cb = getCallback();
+            if (cb != null && mFeatureId < 0) {
+                cb.onAttachedToWindow();
+            }
 
             if (mFeatureId == -1) {
                 /*
@@ -2041,6 +1988,23 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                  * should be shown again.
                  */
                 openPanelsAfterRestore();
+            }
+        }
+
+        @Override
+        protected void onDetachedFromWindow() {
+            super.onDetachedFromWindow();
+            
+            final Callback cb = getCallback();
+            if (cb != null && mFeatureId < 0) {
+                cb.onDetachedFromWindow();
+            }
+        }
+        
+        @Override
+        public void onCloseSystemDialogs(String reason) {
+            if (mFeatureId >= 0) {
+                closeAllPanels();
             }
         }
     }
@@ -2095,6 +2059,10 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
         if (a.getBoolean(com.android.internal.R.styleable.Window_windowFullscreen, false)) {
             setFlags(FLAG_FULLSCREEN, FLAG_FULLSCREEN&(~getForcedWindowFlags()));
+        }
+
+        if (a.getBoolean(com.android.internal.R.styleable.Window_windowShowWallpaper, false)) {
+            setFlags(FLAG_SHOW_WALLPAPER, FLAG_SHOW_WALLPAPER&(~getForcedWindowFlags()));
         }
 
         WindowManager.LayoutParams params = getAttributes();
@@ -2606,6 +2574,10 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
         boolean refreshDecorView;
 
+        boolean wasLastOpen;
+        
+        boolean wasLastExpanded;
+        
         /**
          * Contains the state of the menu when told to freeze.
          */
@@ -2654,8 +2626,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         void onRestoreInstanceState(Parcelable state) {
             SavedState savedState = (SavedState) state;
             featureId = savedState.featureId;
-            isOpen = savedState.isOpen;
-            isInExpandedMode = savedState.isInExpandedMode;
+            wasLastOpen = savedState.isOpen;
+            wasLastExpanded = savedState.isInExpandedMode;
             frozenMenuState = savedState.menuState;
 
             /*

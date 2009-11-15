@@ -70,8 +70,11 @@ public class PowerDialog extends Dialog implements OnClickListener,
         setContentView(com.android.internal.R.layout.power_dialog);
 
         getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_DIALOG);
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_BLUR_BEHIND,
-                WindowManager.LayoutParams.FLAG_BLUR_BEHIND);
+        if (!getContext().getResources().getBoolean(
+                com.android.internal.R.bool.config_sf_slowBlur)) {
+            getWindow().setFlags(WindowManager.LayoutParams.FLAG_BLUR_BEHIND,
+                    WindowManager.LayoutParams.FLAG_BLUR_BEHIND);
+        }
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM,
                 WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
 
