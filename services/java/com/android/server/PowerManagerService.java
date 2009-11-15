@@ -1254,7 +1254,7 @@ class PowerManagerService extends IPowerManager.Stub
                 // Forcibly turn on the screen if it's supposed to be on.  (This
                 // handles the case where the screen is currently off because of
                 // a prior preventScreenOn(true) call.)
-                if ((mPowerState & SCREEN_ON_BIT) != 0) {
+                if (!mProximitySensorActive && (mPowerState & SCREEN_ON_BIT) != 0) {
                     if (mSpew) {
                         Log.d(TAG,
                               "preventScreenOn: turning on after a prior preventScreenOn(true)!");
@@ -1835,8 +1835,10 @@ class PowerManagerService extends IPowerManager.Stub
     }
 
     private void forceUserActivityLocked() {
-        // cancel animation so userActivity will succeed
-        mScreenBrightness.animating = false;
+        if (isScreenTurningOffLocked()) {
+            // cancel animation so userActivity will succeed
+            mScreenBrightness.animating = false;
+        }
         boolean savedActivityAllowed = mUserActivityAllowed;
         mUserActivityAllowed = true;
         userActivity(SystemClock.uptimeMillis(), false);
