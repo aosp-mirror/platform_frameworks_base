@@ -864,6 +864,13 @@ struct ResTable_config
         KEYSHIDDEN_SOFT = 0x0003,
     };
     
+    enum {
+        MASK_NAVHIDDEN = 0x000c,
+        NAVHIDDEN_ANY = 0x0000,
+        NAVHIDDEN_NO = 0x0004,
+        NAVHIDDEN_YES = 0x0008,
+    };
+    
     union {
         struct {
             uint8_t keyboard;
@@ -1011,7 +1018,8 @@ struct ResTable_config
         if (orientation != o.orientation) diffs |= CONFIG_ORIENTATION;
         if (density != o.density) diffs |= CONFIG_DENSITY;
         if (touchscreen != o.touchscreen) diffs |= CONFIG_TOUCHSCREEN;
-        if (((inputFlags^o.inputFlags)&MASK_KEYSHIDDEN) != 0) diffs |= CONFIG_KEYBOARD_HIDDEN;
+        if (((inputFlags^o.inputFlags)&(MASK_KEYSHIDDEN|MASK_NAVHIDDEN)) != 0)
+                diffs |= CONFIG_KEYBOARD_HIDDEN;
         if (keyboard != o.keyboard) diffs |= CONFIG_KEYBOARD;
         if (navigation != o.navigation) diffs |= CONFIG_NAVIGATION;
         if (screenSize != o.screenSize) diffs |= CONFIG_SCREEN_SIZE;
@@ -1080,6 +1088,11 @@ struct ResTable_config
             if (((inputFlags^o.inputFlags) & MASK_KEYSHIDDEN) != 0) {
                 if (!(inputFlags & MASK_KEYSHIDDEN)) return false;
                 if (!(o.inputFlags & MASK_KEYSHIDDEN)) return true;
+            }
+
+            if (((inputFlags^o.inputFlags) & MASK_NAVHIDDEN) != 0) {
+                if (!(inputFlags & MASK_NAVHIDDEN)) return false;
+                if (!(o.inputFlags & MASK_NAVHIDDEN)) return true;
             }
 
             if (keyboard != o.keyboard) {
@@ -1225,6 +1238,18 @@ struct ResTable_config
                     }
                 }
 
+                const int navHidden = inputFlags & MASK_NAVHIDDEN;
+                const int oNavHidden = o.inputFlags & MASK_NAVHIDDEN;
+                if (navHidden != oNavHidden) {
+                    const int reqNavHidden =
+                            requested->inputFlags & MASK_NAVHIDDEN;
+                    if (reqNavHidden) {
+
+                        if (!navHidden) return false;
+                        if (!oNavHidden) return true;
+                    }
+                }
+
                 if ((keyboard != o.keyboard) && requested->keyboard) {
                     return (keyboard);
                 }
@@ -1247,7 +1272,7 @@ struct ResTable_config
 
             if (version || o.version) {
                 if ((sdkVersion != o.sdkVersion) && requested->sdkVersion) {
-                    return (sdkVersion);
+                    return (sdkVersion > o.sdkVersion);
                 }
 
                 if ((minorVersion != o.minorVersion) &&
@@ -1332,6 +1357,12 @@ struct ResTable_config
                     return false;
                 }
             }
+            const int navHidden = inputFlags&MASK_NAVHIDDEN;
+            const int setNavHidden = settings.inputFlags&MASK_NAVHIDDEN;
+            if (setNavHidden != 0 && navHidden != 0
+                && navHidden != setNavHidden) {
+                return false;
+            }
             if (settings.keyboard != 0 && keyboard != 0
                 && keyboard != settings.keyboard) {
                 return false;
@@ -1353,7 +1384,7 @@ struct ResTable_config
         }
         if (version != 0) {
             if (settings.sdkVersion != 0 && sdkVersion != 0
-                && sdkVersion != settings.sdkVersion) {
+                && sdkVersion > settings.sdkVersion) {
                 return false;
             }
             if (settings.minorVersion != 0 && minorVersion != 0

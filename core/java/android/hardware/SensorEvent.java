@@ -115,8 +115,19 @@ public class SensorEvent {
      * <p>{@link android.hardware.Sensor#TYPE_MAGNETIC_FIELD Sensor.TYPE_MAGNETIC_FIELD}:<p>
      *  All values are in micro-Tesla (uT) and measure the ambient magnetic
      *  field in the X, Y and Z axis.
-     *  
-     */    
+     *
+     * <p>{@link android.hardware.Sensor#TYPE_LIGHT Sensor.TYPE_LIGHT}:<p>
+     *
+     *  <p>values[0]: Ambient light level in SI lux units
+     *
+     * <p>{@link android.hardware.Sensor#TYPE_PROXIMITY Sensor.TYPE_PROXIMITY}:<p>
+     *
+     *  <p>values[0]: Proximity sensor distance measured in centimeters
+     *
+     *  <p> Note that some proximity sensors only support a binary "close" or "far" measurement.
+     *   In this case, the sensor should report its maxRange value in the "far" state and a value
+     *   less than maxRange in the "near" state.
+     */
     public final float[] values;
 
     /**

@@ -147,7 +147,7 @@ public final class PendingIntent implements Parcelable {
             mHandler = handler;
         }
         public void performReceive(Intent intent, int resultCode,
-                String data, Bundle extras, boolean serialized) {
+                String data, Bundle extras, boolean serialized, boolean sticky) {
             mIntent = intent;
             mResultCode = resultCode;
             mResultData = data;
@@ -519,7 +519,8 @@ public final class PendingIntent implements Parcelable {
         mTarget = IIntentSender.Stub.asInterface(target);
     }
 
-    /*package*/ IIntentSender getTarget() {
+    /** @hide */
+    public IIntentSender getTarget() {
         return mTarget;
     }
 }

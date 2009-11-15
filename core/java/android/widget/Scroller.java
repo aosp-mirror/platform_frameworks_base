@@ -133,6 +133,17 @@ public class Scroller  {
     }
     
     /**
+     * @hide
+     * Returns the current velocity.
+     *
+     * @return The original velocity less the deceleration. Result may be
+     * negative.
+     */
+    public float getCurrVelocity() {
+        return mVelocity - mDeceleration * timePassed() / 2000.0f;
+    }
+
+    /**
      * Returns the start X offset in the scroll. 
      * 
      * @return The start X offset as an absolute distance from the origin.

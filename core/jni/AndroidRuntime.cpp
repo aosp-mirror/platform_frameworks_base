@@ -19,12 +19,12 @@
 //#define LOG_NDEBUG 0
 
 #include <android_runtime/AndroidRuntime.h>
-#include <utils/IBinder.h>
-#include <utils/IServiceManager.h>
+#include <binder/IBinder.h>
+#include <binder/IServiceManager.h>
 #include <utils/Log.h>
 #include <utils/misc.h>
-#include <utils/Parcel.h>
-#include <utils/string_array.h>
+#include <binder/Parcel.h>
+#include <utils/StringArray.h>
 #include <utils/threads.h>
 #include <cutils/properties.h>
 
@@ -130,7 +130,6 @@ extern int register_android_os_Power(JNIEnv *env);
 extern int register_android_os_StatFs(JNIEnv *env);
 extern int register_android_os_SystemProperties(JNIEnv *env);
 extern int register_android_os_Hardware(JNIEnv* env);
-extern int register_android_os_Exec(JNIEnv *env);
 extern int register_android_os_SystemClock(JNIEnv* env);
 extern int register_android_os_FileObserver(JNIEnv *env);
 extern int register_android_os_FileUtils(JNIEnv *env);
@@ -147,7 +146,7 @@ extern int register_android_bluetooth_HeadsetBase(JNIEnv* env);
 extern int register_android_bluetooth_BluetoothAudioGateway(JNIEnv* env);
 extern int register_android_bluetooth_BluetoothSocket(JNIEnv *env);
 extern int register_android_bluetooth_ScoSocket(JNIEnv *env);
-extern int register_android_server_BluetoothDeviceService(JNIEnv* env);
+extern int register_android_server_BluetoothService(JNIEnv* env);
 extern int register_android_server_BluetoothEventLoop(JNIEnv *env);
 extern int register_android_server_BluetoothA2dpService(JNIEnv* env);
 extern int register_android_ddm_DdmHandleNativeHeap(JNIEnv *env);
@@ -508,11 +507,17 @@ static void readLocale(char* language, char* region)
     //LOGD("language=%s region=%s\n", language, region);
 }
 
-void AndroidRuntime::start(const char* className, const bool startSystemServer)
+/*
+ * Start the Dalvik Virtual Machine.
+ *
+ * Various arguments, most determined by system properties, are passed in.
+ * The "mOptions" vector is updated.
+ *
+ * Returns 0 on success.
+ */
+int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
 {
-    LOGD("\n>>>>>>>>>>>>>> AndroidRuntime START <<<<<<<<<<<<<<\n");
-
-    JNIEnv* env;
+    int result = -1;
     JavaVMInitArgs initArgs;
     JavaVMOption opt;
     char propBuf[PROPERTY_VALUE_MAX];
@@ -520,25 +525,20 @@ void AndroidRuntime::start(const char* className, const bool startSystemServer)
     char dexoptFlagsBuf[PROPERTY_VALUE_MAX];
     char enableAssertBuf[sizeof("-ea:")-1 + PROPERTY_VALUE_MAX];
     char jniOptsBuf[sizeof("-Xjniopts:")-1 + PROPERTY_VALUE_MAX];
+    char heapsizeOptsBuf[sizeof("-Xmx")-1 + PROPERTY_VALUE_MAX];
     char* stackTraceFile = NULL;
-    char* slashClassName = NULL;
-    char* cp;
     bool checkJni = false;
+    bool checkDexSum = false;
     bool logStdio = false;
-    enum { kEMDefault, kEMIntPortable, kEMIntFast } executionMode = kEMDefault;
+    enum {
+      kEMDefault,
+      kEMIntPortable,
+      kEMIntFast,
+#if defined(WITH_JIT)
+      kEMJitCompiler,
+#endif
+    } executionMode = kEMDefault;
 
-    blockSigpipe();
-
-    /* 
-     * 'startSystemServer == true' means runtime is obslete and not run from 
-     * init.rc anymore, so we print out the boot start event here.
-     */
-    if (startSystemServer) {
-        /* track our progress through the boot sequence */
-        const int LOG_BOOT_PROGRESS_START = 3000;
-        LOG_EVENT_LONG(LOG_BOOT_PROGRESS_START, 
-                       ns2ms(systemTime(SYSTEM_TIME_MONOTONIC)));
-    }
 
     property_get("dalvik.vm.checkjni", propBuf, "");
     if (strcmp(propBuf, "true") == 0) {
@@ -556,9 +556,18 @@ void AndroidRuntime::start(const char* className, const bool startSystemServer)
         executionMode = kEMIntPortable;
     } else if (strcmp(propBuf, "int:fast") == 0) {
         executionMode = kEMIntFast;
+#if defined(WITH_JIT)
+    } else if (strcmp(propBuf, "int:jit") == 0) {
+        executionMode = kEMJitCompiler;
+#endif
     }
 
     property_get("dalvik.vm.stack-trace-file", stackTraceFileBuf, "");
+
+    property_get("dalvik.vm.check-dex-sum", propBuf, "");
+    if (strcmp(propBuf, "true") == 0) {
+        checkDexSum = true;
+    }
 
     property_get("log.redirect-stdio", propBuf, "");
     if (strcmp(propBuf, "true") == 0) {
@@ -570,19 +579,6 @@ void AndroidRuntime::start(const char* className, const bool startSystemServer)
 
     strcpy(jniOptsBuf, "-Xjniopts:");
     property_get("dalvik.vm.jniopts", jniOptsBuf+10, "");
-
-    const char* rootDir = getenv("ANDROID_ROOT");
-    if (rootDir == NULL) {
-        rootDir = "/system";
-        if (!hasDir("/system")) {
-            LOG_FATAL("No root directory specified, and /android does not exist.");
-            return;
-        }
-        setenv("ANDROID_ROOT", rootDir, 1);
-    }
-
-    const char* kernelHack = getenv("LD_ASSUME_KERNEL");
-    //LOGD("Found LD_ASSUME_KERNEL='%s'\n", kernelHack);
 
     /* route exit() to our handler */
     opt.extraInfo = (void*) runtime_exit;
@@ -602,16 +598,10 @@ void AndroidRuntime::start(const char* className, const bool startSystemServer)
     mOptions.add(opt);
     //options[curOpt++].optionString = "-verbose:class";
 
-#ifdef CUSTOM_RUNTIME_HEAP_MAX
-#define __make_max_heap_opt(val) #val
-#define _make_max_heap_opt(val) "-Xmx" __make_max_heap_opt(val)
-    opt.optionString = _make_max_heap_opt(CUSTOM_RUNTIME_HEAP_MAX);
-#undef __make_max_heap_opt
-#undef _make_max_heap_opt
-#else
-    /* limit memory use to 16MB */
-    opt.optionString = "-Xmx16m";
-#endif
+    strcpy(heapsizeOptsBuf, "-Xmx");
+    property_get("dalvik.vm.heapsize", heapsizeOptsBuf+4, "16m");
+    //LOGI("Heap size: %s", heapsizeOptsBuf);
+    opt.optionString = heapsizeOptsBuf;
     mOptions.add(opt);
 
     /*
@@ -657,6 +647,10 @@ void AndroidRuntime::start(const char* className, const bool startSystemServer)
         if (opc != NULL) {
             opt.optionString = "-Xgenregmap";
             mOptions.add(opt);
+
+            /* turn on precise GC while we're at it */
+            opt.optionString = "-Xgc:precise";
+            mOptions.add(opt);
         }
     }
 
@@ -696,13 +690,87 @@ void AndroidRuntime::start(const char* className, const bool startSystemServer)
         //opt.optionString = "-verbose:jni";
         //mOptions.add(opt);
     }
+
+#if defined(WITH_JIT)
+    /* Minimal profile threshold to trigger JIT compilation */
+    char jitThresholdBuf[sizeof("-Xthreshold:") + PROPERTY_VALUE_MAX];
+    property_get("dalvik.vm.jit.threshold", propBuf, "");
+    if (strlen(propBuf) > 0) {
+        strcpy(jitThresholdBuf, "-Xthreshold:");
+        strcat(jitThresholdBuf, propBuf);
+        opt.optionString = jitThresholdBuf;
+        mOptions.add(opt);
+    }
+
+    /* Force interpreter-only mode for selected opcodes. Eg "1-0a,3c,f1-ff" */
+    char jitOpBuf[sizeof("-Xjitop:") + PROPERTY_VALUE_MAX];
+    property_get("dalvik.vm.jit.op", propBuf, "");
+    if (strlen(propBuf) > 0) {
+        strcpy(jitOpBuf, "-Xjitop:");
+        strcat(jitOpBuf, propBuf);
+        opt.optionString = jitOpBuf;
+        mOptions.add(opt);
+    }
+
+    /*
+     * Reverse the polarity of dalvik.vm.jit.op and force interpreter-only
+     * for non-selected opcodes.
+     */
+    property_get("dalvik.vm.jit.includeop", propBuf, "");
+    if (strlen(propBuf) > 0) {
+        opt.optionString = "-Xincludeselectedop";
+        mOptions.add(opt);
+    }
+
+    /* Force interpreter-only mode for selected methods */
+    char jitMethodBuf[sizeof("-Xjitmethod:") + PROPERTY_VALUE_MAX];
+    property_get("dalvik.vm.jit.method", propBuf, "");
+    if (strlen(propBuf) > 0) {
+        strcpy(jitMethodBuf, "-Xjitmethod:");
+        strcat(jitMethodBuf, propBuf);
+        opt.optionString = jitMethodBuf;
+        mOptions.add(opt);
+    }
+
+    /*
+     * Reverse the polarity of dalvik.vm.jit.method and force interpreter-only
+     * for non-selected methods.
+     */
+    property_get("dalvik.vm.jit.includemethod", propBuf, "");
+    if (strlen(propBuf) > 0) {
+        opt.optionString = "-Xincludeselectedmethod";
+        mOptions.add(opt);
+    }
+
+    /*
+     * Enable profile collection on JIT'ed code.
+     */
+    property_get("dalvik.vm.jit.profile", propBuf, "");
+    if (strlen(propBuf) > 0) {
+        opt.optionString = "-Xjitprofile";
+        mOptions.add(opt);
+    }
+#endif
+
     if (executionMode == kEMIntPortable) {
         opt.optionString = "-Xint:portable";
         mOptions.add(opt);
     } else if (executionMode == kEMIntFast) {
         opt.optionString = "-Xint:fast";
         mOptions.add(opt);
+#if defined(WITH_JIT)
+    } else if (executionMode == kEMJitCompiler) {
+        opt.optionString = "-Xint:jit";
+        mOptions.add(opt);
+#endif
     }
+
+    if (checkDexSum) {
+        /* perform additional DEX checksum tests */
+        opt.optionString = "-Xcheckdexsum";
+        mOptions.add(opt);
+    }
+
     if (logStdio) {
         /* convert stdout/stderr to log messages */
         opt.optionString = "-Xlog-stdio";
@@ -770,10 +838,60 @@ void AndroidRuntime::start(const char* className, const bool startSystemServer)
      * If this call succeeds, the VM is ready, and we can start issuing
      * JNI calls.
      */
-    if (JNI_CreateJavaVM(&mJavaVM, &env, &initArgs) < 0) {
+    if (JNI_CreateJavaVM(pJavaVM, pEnv, &initArgs) < 0) {
         LOGE("JNI_CreateJavaVM failed\n");
         goto bail;
     }
+
+    result = 0;
+
+bail:
+    free(stackTraceFile);
+    return result;
+}
+
+/*
+ * Start the Android runtime.  This involves starting the virtual machine
+ * and calling the "static void main(String[] args)" method in the class
+ * named by "className".
+ */
+void AndroidRuntime::start(const char* className, const bool startSystemServer)
+{
+    LOGD("\n>>>>>>>>>>>>>> AndroidRuntime START <<<<<<<<<<<<<<\n");
+
+    char* slashClassName = NULL;
+    char* cp;
+    JNIEnv* env;
+
+    blockSigpipe();
+
+    /* 
+     * 'startSystemServer == true' means runtime is obslete and not run from 
+     * init.rc anymore, so we print out the boot start event here.
+     */
+    if (startSystemServer) {
+        /* track our progress through the boot sequence */
+        const int LOG_BOOT_PROGRESS_START = 3000;
+        LOG_EVENT_LONG(LOG_BOOT_PROGRESS_START, 
+                       ns2ms(systemTime(SYSTEM_TIME_MONOTONIC)));
+    }
+
+    const char* rootDir = getenv("ANDROID_ROOT");
+    if (rootDir == NULL) {
+        rootDir = "/system";
+        if (!hasDir("/system")) {
+            LOG_FATAL("No root directory specified, and /android does not exist.");
+            goto bail;
+        }
+        setenv("ANDROID_ROOT", rootDir, 1);
+    }
+
+    //const char* kernelHack = getenv("LD_ASSUME_KERNEL");
+    //LOGD("Found LD_ASSUME_KERNEL='%s'\n", kernelHack);
+
+    /* start the virtual machine */
+    if (startVm(&mJavaVM, &env) != 0)
+        goto bail;
 
     /*
      * Register android functions.
@@ -844,7 +962,6 @@ void AndroidRuntime::start(const char* className, const bool startSystemServer)
 
 bail:
     free(slashClassName);
-    free(stackTraceFile);
 }
 
 void AndroidRuntime::start()
@@ -1094,7 +1211,6 @@ static const RegJNIRec gRegJNI[] = {
     REG_JNI(register_android_database_SQLiteQuery),
     REG_JNI(register_android_database_SQLiteStatement),
     REG_JNI(register_android_os_Debug),
-    REG_JNI(register_android_os_Exec),
     REG_JNI(register_android_os_FileObserver),
     REG_JNI(register_android_os_FileUtils),
     REG_JNI(register_android_os_ParcelFileDescriptor),
@@ -1120,7 +1236,7 @@ static const RegJNIRec gRegJNI[] = {
     REG_JNI(register_android_bluetooth_BluetoothAudioGateway),
     REG_JNI(register_android_bluetooth_BluetoothSocket),
     REG_JNI(register_android_bluetooth_ScoSocket),
-    REG_JNI(register_android_server_BluetoothDeviceService),
+    REG_JNI(register_android_server_BluetoothService),
     REG_JNI(register_android_server_BluetoothEventLoop),
     REG_JNI(register_android_server_BluetoothA2dpService),
     REG_JNI(register_android_message_digest_sha1),

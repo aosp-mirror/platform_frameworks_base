@@ -27,10 +27,11 @@ import com.android.internal.telephony.BaseCommands;
 import com.android.internal.telephony.CommandException;
 import com.android.internal.telephony.CommandsInterface;
 import com.android.internal.telephony.DataCallState;
+import com.android.internal.telephony.IccCard;
+import com.android.internal.telephony.Phone;
 import com.android.internal.telephony.gsm.CallFailCause;
 import com.android.internal.telephony.gsm.SmsBroadcastConfigInfo;
 import com.android.internal.telephony.gsm.SuppServiceNotification;
-import com.android.internal.telephony.Phone;
 
 import java.util.ArrayList;
 
@@ -103,39 +104,8 @@ public final class SimulatedCommands extends BaseCommands
 
     //***** CommandsInterface implementation
 
-    public void getIccStatus(Message result) {
-        switch (mState) {
-            case SIM_READY:
-                resultSuccess(result, IccStatus.ICC_READY);
-                break;
-
-            case SIM_LOCKED_OR_ABSENT:
-                returnSimLockedStatus(result);
-                break;
-
-            default:
-                resultSuccess(result, IccStatus.ICC_NOT_READY);
-                break;
-        }
-    }
-
-    private void returnSimLockedStatus(Message result) {
-        switch (mSimLockedState) {
-            case REQUIRE_PIN:
-                Log.i(LOG_TAG, "[SimCmd] returnSimLockedStatus: ICC_PIN");
-                resultSuccess(result, IccStatus.ICC_PIN);
-                break;
-
-            case REQUIRE_PUK:
-                Log.i(LOG_TAG, "[SimCmd] returnSimLockedStatus: ICC_PUK");
-                resultSuccess(result, IccStatus.ICC_PUK);
-                break;
-
-            default:
-                Log.i(LOG_TAG,
-                        "[SimCmd] returnSimLockedStatus: mSimLockedState==NONE !?");
-                break;
-        }
+    public void getIccCardStatus(Message result) {
+        unimplemented(result);
     }
 
     public void supplyIccPin(String pin, Message result)  {
@@ -974,7 +944,7 @@ public final class SimulatedCommands extends BaseCommands
     }
 
     public void setupDataCall(String radioTechnology, String profile, String apn, String user,
-            String password, Message result) {
+            String password, String authType, Message result) {
         unimplemented(result);
     }
 

@@ -82,15 +82,6 @@ public interface CommandsInterface {
         }
     }
 
-    enum IccStatus {
-        ICC_ABSENT,
-        ICC_NOT_READY,
-        ICC_READY,
-        ICC_PIN,
-        ICC_PUK,
-        ICC_NETWORK_PERSONALIZATION
-    }
-
     //***** Constants
 
     // Used as parameter to dial() and setCLIR() below
@@ -153,9 +144,11 @@ public interface CommandsInterface {
     static final int GSM_SMS_FAIL_CAUSE_MEMORY_CAPACITY_EXCEEDED    = 0xD3;
     static final int GSM_SMS_FAIL_CAUSE_UNSPECIFIED_ERROR           = 0xFF;
 
-    // CDMA SMS fail cause for acknowledgeLastIncomingCdmaSms.  From TS N.S00005, 6.5.2.125.
+    // CDMA SMS fail cause for acknowledgeLastIncomingCdmaSms.  From TS N.S0005, 6.5.2.125.
+    static final int CDMA_SMS_FAIL_CAUSE_INVALID_TELESERVICE_ID     = 4;
     static final int CDMA_SMS_FAIL_CAUSE_RESOURCE_SHORTAGE          = 35;
     static final int CDMA_SMS_FAIL_CAUSE_OTHER_TERMINAL_PROBLEM     = 39;
+    static final int CDMA_SMS_FAIL_CAUSE_ENCODING_PROBLEM           = 96;
 
     //***** Methods
 
@@ -533,14 +526,16 @@ public interface CommandsInterface {
      void registerForCdmaOtaProvision(Handler h,int what, Object obj);
      void unregisterForCdmaOtaProvision(Handler h);
 
-    /**
-     * Returns current ICC status.
-     *
-     * AsyncResult.result is IccStatus
-     *
-     */
-
-    void getIccStatus(Message result);
+     /**
+      * Registers the handler when out-band ringback tone is needed.<p>
+      *
+      *  Messages received from this:
+      *  Message.obj will be an AsyncResult
+      *  AsyncResult.userObj = obj
+      *  AsyncResult.result = boolean. <p>
+      */
+     void registerForRingbackTone(Handler h, int what, Object obj);
+     void unregisterForRingbackTone(Handler h);
 
     /**
      * Supply the ICC PIN to the ICC card
@@ -625,8 +620,9 @@ public interface CommandsInterface {
      *  ar.exception carries exception on failure
      *  ar.userObject contains the orignal value of result.obj
      *  ar.result contains a List of DataCallState
-     *  @deprecated
+     *  @deprecated Do not use.
      */
+    @Deprecated
     void getPDPContextList(Message result);
 
     /**
@@ -797,8 +793,9 @@ public interface CommandsInterface {
      * cause code returned as int[0] in Message.obj.response
      * returns an integer cause code defined in TS 24.008
      * section 6.1.3.1.3 or close approximation
-     * @deprecated
+     * @deprecated Do not use.
      */
+    @Deprecated
     void getLastPdpFailCause (Message result);
 
     /**
@@ -1243,8 +1240,10 @@ public interface CommandsInterface {
      * Request the device MDN / H_SID / H_NID / MIN.
      * "response" is const char **
      *   [0] is MDN if CDMA subscription is available
-     *   [1] is H_SID (Home SID) if CDMA subscription is available
-     *   [2] is H_NID (Home NID) if CDMA subscription is available
+     *   [1] is a comma separated list of H_SID (Home SID) in decimal format
+     *       if CDMA subscription is available
+     *   [2] is a comma separated list of H_NID (Home NID) in decimal format
+     *       if CDMA subscription is available
      *   [3] is MIN (10 digits, MIN2+MIN1) if CDMA subscription is available
      */
     public void getCDMASubscription(Message response);
@@ -1258,6 +1257,7 @@ public interface CommandsInterface {
 
     /** Set the Phone type created */
     void setPhoneType(int phoneType);
+
     /**
      *  Query the CDMA roaming preference setting
      *
@@ -1316,11 +1316,13 @@ public interface CommandsInterface {
      *            the username for APN, or NULL
      * @param password
      *            the password for APN, or NULL
+     * @param authType
+     *            the PAP / CHAP auth type. Values is one of SETUP_DATA_AUTH_*
      * @param result
      *            Callback message
      */
     public void setupDataCall(String radioTechnology, String profile, String apn,
-            String user, String password, Message result);
+            String user, String password, String authType, Message result);
 
     /**
      * Deactivate packet data connection
@@ -1366,4 +1368,12 @@ public interface CommandsInterface {
      * @param response callback message
      */
     public void exitEmergencyCallbackMode(Message response);
+
+    /**
+     * Request the status of the ICC and UICC cards.
+     *
+     * @param response
+     *          Callback message containing {@link IccCardStatus} structure for the card.
+     */
+    public void getIccCardStatus(Message result);
 }

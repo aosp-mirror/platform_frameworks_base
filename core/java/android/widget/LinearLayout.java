@@ -59,7 +59,7 @@ public class LinearLayout extends ViewGroup {
      * Note: this is orthogonal to {@link #mBaselineAligned}, which is concerned
      * with whether the children of this layout are baseline aligned.
      */
-    private int mBaselineAlignedChildIndex = 0;
+    private int mBaselineAlignedChildIndex = -1;
 
     /**
      * The additional offset to the child's baseline.

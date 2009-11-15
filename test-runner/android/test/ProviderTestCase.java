@@ -15,6 +15,7 @@ import android.database.DatabaseUtils;
  * @deprecated this class extends InstrumentationTestCase but should extend AndroidTestCase. Use
  * ProviderTestCase2, which corrects this problem, instead.
  */
+@Deprecated
 public abstract class ProviderTestCase<T extends ContentProvider>
        extends InstrumentationTestCase {
 

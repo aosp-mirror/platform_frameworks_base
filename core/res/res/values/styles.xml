@@ -49,15 +49,15 @@
         <item name="centerMedium">@android:drawable/popup_center_medium</item>
     </style>
     
-    <!-- Animations -->
+    <!-- Base style for animations.  This style specifies no animations. -->
     <style name="Animation" />
     
     <!-- Standard animations for a full-screen window or activity. -->
     <style name="Animation.Activity">
-        <item name="activityOpenEnterAnimation">@anim/task_open_enter</item>
-        <item name="activityOpenExitAnimation">@anim/task_open_exit</item>
-        <item name="activityCloseEnterAnimation">@anim/task_close_enter</item>
-        <item name="activityCloseExitAnimation">@anim/task_close_exit</item>
+        <item name="activityOpenEnterAnimation">@anim/activity_open_enter</item>
+        <item name="activityOpenExitAnimation">@anim/activity_open_exit</item>
+        <item name="activityCloseEnterAnimation">@anim/activity_close_enter</item>
+        <item name="activityCloseExitAnimation">@anim/activity_close_exit</item>
         <item name="taskOpenEnterAnimation">@anim/task_open_enter</item>
         <item name="taskOpenExitAnimation">@anim/task_open_exit</item>
         <item name="taskCloseEnterAnimation">@anim/task_close_enter</item>
@@ -66,6 +66,14 @@
         <item name="taskToFrontExitAnimation">@anim/task_open_exit</item>
         <item name="taskToBackEnterAnimation">@anim/task_close_enter</item>
         <item name="taskToBackExitAnimation">@anim/task_close_exit</item>
+        <item name="wallpaperOpenEnterAnimation">@anim/wallpaper_open_enter</item>
+        <item name="wallpaperOpenExitAnimation">@anim/wallpaper_open_exit</item>
+        <item name="wallpaperCloseEnterAnimation">@anim/wallpaper_close_enter</item>
+        <item name="wallpaperCloseExitAnimation">@anim/wallpaper_close_exit</item>
+        <item name="wallpaperIntraOpenEnterAnimation">@anim/wallpaper_intra_open_enter</item>
+        <item name="wallpaperIntraOpenExitAnimation">@anim/wallpaper_intra_open_exit</item>
+        <item name="wallpaperIntraCloseEnterAnimation">@anim/wallpaper_intra_close_enter</item>
+        <item name="wallpaperIntraCloseExitAnimation">@anim/wallpaper_intra_close_exit</item>
     </style>
 
     <!-- Standard animations for a non-full-screen window or activity. -->
@@ -80,8 +88,15 @@
         <item name="windowExitAnimation">@anim/status_bar_exit</item>
     </style>
 
-    <!-- Standard animations for a translucent window or activity. -->
+    <!-- Standard animations for a translucent window or activity.  This
+         style is <em>not<em> used by default for the translucent theme
+         (since translucent activities are a special case that have no
+         clear UI paradigm), but you can make your own specialized theme
+         with this animation style if you would like to have the standard
+         platform transition animation. -->
     <style name="Animation.Translucent">
+        <item name="windowEnterAnimation">@anim/translucent_enter</item>
+        <item name="windowExitAnimation">@anim/translucent_exit</item>
     </style>
 
     <!-- Standard animations for a non-full-screen window or activity. -->
@@ -130,8 +145,7 @@
         <item name="windowExitAnimation">@anim/slide_out_down</item>
     </style>
 
-    <!-- Window animations that are applied to input method overlay windows.
-         {@hide Pending API council approval} -->
+    <!-- Window animations that are applied to input method overlay windows. -->
     <style name="Animation.InputMethod">
         <item name="windowEnterAnimation">@anim/input_method_enter</item>
         <item name="windowExitAnimation">@anim/input_method_exit</item>
@@ -151,11 +165,23 @@
         <item name="windowExitAnimation">@anim/search_bar_exit</item>
     </style>
 
-    <!-- Window animations that are applied to the zoom buttons overlay window.
-         {@hide Pending API council approval} -->
+    <!-- Window animations that are applied to the zoom buttons overlay window. -->
     <style name="Animation.ZoomButtons">
         <item name="windowEnterAnimation">@anim/fade_in</item>
         <item name="windowExitAnimation">@anim/fade_out</item>
+    </style>
+
+    <!-- Standard animations for wallpapers. -->
+    <style name="Animation.Wallpaper">
+        <item name="windowEnterAnimation">@anim/wallpaper_enter</item>
+        <item name="windowExitAnimation">@anim/wallpaper_exit</item>
+    </style>
+
+    <!-- A special animation we can use for recent applications,
+         for devices that can support it (do alpha transformations). -->
+    <style name="Animation.RecentApplications">
+        <item name="windowEnterAnimation">@anim/recent_enter</item>
+        <item name="windowExitAnimation">@anim/recent_exit</item>
     </style>
 
     <!-- Status Bar Styles -->
@@ -299,7 +325,7 @@
         <item name="android:minHeight">20dip</item>
         <item name="android:maxHeight">20dip</item>
         <item name="android:thumb">@android:drawable/seek_thumb</item>
-        <item name="android:thumbOffset">8px</item>
+        <item name="android:thumbOffset">8dip</item>
         <item name="android:focusable">true</item>
     </style>
 
@@ -337,7 +363,7 @@
     </style>
     
     <style name="Widget.TextView.ListSeparator">
-        <item name="android:background">@android:drawable/dark_header</item>
+        <item name="android:background">@android:drawable/dark_header_dither</item>
         <item name="android:layout_width">fill_parent</item>
         <item name="android:layout_height">25dip</item>
         <item name="android:textStyle">bold</item>
@@ -349,7 +375,7 @@
 
     <style name="Widget.TextView.ListSeparator.White">
         <item name="android:textColor">?textColorPrimaryInverse</item>
-        <item name="android:background">@android:drawable/light_header</item>
+        <item name="android:background">@android:drawable/light_header_dither</item>
     </style>
 
     <style name="Widget.EditText">
@@ -391,8 +417,8 @@
         <item name="android:completionThreshold">2</item>
         <item name="android:dropDownSelector">@android:drawable/list_selector_background</item>
         <item name="android:popupBackground">@android:drawable/spinner_dropdown_background</item>
-        <item name="android:dropDownVerticalOffset">-6px</item>
-        <item name="android:dropDownHorizontalOffset">0px</item>
+        <item name="android:dropDownVerticalOffset">-6dip</item>
+        <item name="android:dropDownHorizontalOffset">0dip</item>
         <item name="android:dropDownWidth">wrap_content</item>
     </style>
 
@@ -433,13 +459,13 @@
 
     <style name="Widget.ListView" parent="Widget.AbsListView">
         <item name="android:listSelector">@android:drawable/list_selector_background</item>
-        <item name="android:cacheColorHint">?android:attr/colorBackground</item>
+        <item name="android:cacheColorHint">?android:attr/colorBackgroundCacheHint</item>
         <item name="android:divider">@android:drawable/divider_horizontal_dark_opaque</item>
     </style>
     
     <style name="Widget.ListView.White" parent="Widget.AbsListView">
         <item name="android:listSelector">@android:drawable/list_selector_background</item>
-        <item name="android:background">@android:color/white</item>
+        <item name="android:cacheColorHint">?android:attr/colorBackgroundCacheHint</item>
         <item name="android:divider">@android:drawable/divider_horizontal_bright_opaque</item>
     </style>    
 
@@ -475,7 +501,7 @@
     <style name="Widget.Gallery">
         <item name="android:fadingEdge">horizontal</item>
         <item name="android:gravity">center_vertical</item>
-        <item name="android:spacing">-20px</item>
+        <item name="android:spacing">-20dip</item>
         <item name="android:unselectedAlpha">0.85</item>
     </style>
     
@@ -489,13 +515,53 @@
         <item name="android:keyTextSize">22sp</item>
         <item name="android:keyTextColor">#FFFFFFFF</item>
         <item name="android:keyPreviewLayout">@android:layout/keyboard_key_preview</item>
-        <item name="android:keyPreviewOffset">-12dp</item>
-        <item name="android:keyPreviewHeight">80dp</item>
+        <item name="android:keyPreviewOffset">-12dip</item>
+        <item name="android:keyPreviewHeight">80dip</item>
         <item name="android:labelTextSize">14sp</item>
         <item name="android:popupLayout">@android:layout/keyboard_popup_keyboard</item>
         <item name="android:verticalCorrection">-10dip</item>
         <item name="android:shadowColor">#BB000000</item>
         <item name="android:shadowRadius">2.75</item>
+    </style>
+
+    <style name="Widget.QuickContactBadge">
+        <item name="android:layout_width">50dip</item>
+        <item name="android:layout_height">56dip</item>
+        <item name="android:background">@android:drawable/quickcontact_badge</item>
+        <item name="android:clickable">true</item>
+        <item name="android:scaleType">fitCenter</item>
+    </style>
+    
+    <style name="Widget.QuickContactBadgeSmall">
+        <item name="android:layout_width">39dip</item>
+        <item name="android:layout_height">42dip</item>
+        <item name="android:background">@android:drawable/quickcontact_badge_small</item>
+        <item name="android:clickable">true</item>
+        <item name="android:scaleType">fitCenter</item>
+    </style>
+
+    <style name="Widget.QuickContactBadge.WindowSmall">
+        <item name="android:quickContactWindowSize">modeSmall</item>
+    </style>
+
+    <style name="Widget.QuickContactBadge.WindowMedium">
+        <item name="android:quickContactWindowSize">modeMedium</item>
+    </style>
+
+    <style name="Widget.QuickContactBadge.WindowLarge">
+        <item name="android:quickContactWindowSize">modeLarge</item>
+    </style>
+    
+    <style name="Widget.QuickContactBadgeSmall.WindowSmall">
+        <item name="android:quickContactWindowSize">modeSmall</item>
+    </style>
+
+    <style name="Widget.QuickContactBadgeSmall.WindowMedium">
+        <item name="android:quickContactWindowSize">modeMedium</item>
+    </style>
+
+    <style name="Widget.QuickContactBadgeSmall.WindowLarge">
+        <item name="android:quickContactWindowSize">modeLarge</item>
     </style>
 
     <!-- Text Appearances -->
@@ -659,12 +725,12 @@
     </style>
     
     <style name="Preference.PreferenceScreen">
-        <item name="android:widgetLayout">@android:layout/preferences</item>
     </style>
 
     <style name="Preference.DialogPreference">
         <item name="android:positiveButtonText">@android:string/ok</item>
         <item name="android:negativeButtonText">@android:string/cancel</item>
+        <item name="android:widgetLayout">@android:layout/preference_dialog</item>
     </style>
     
     <style name="Preference.DialogPreference.YesNoPreference">
@@ -680,6 +746,7 @@
         <item name="android:ringtoneType">ringtone</item>
         <item name="android:showSilent">true</item>
         <item name="android:showDefault">true</item>
+        <item name="android:widgetLayout">@android:layout/preference_dialog</item>
     </style>
 
     <!-- Other Misc Styles -->
@@ -687,8 +754,8 @@
 
     <style name="MediaButton">
         <item name="android:background">@android:drawable/media_button_background</item>
-        <item name="android:layout_width">71px</item>
-        <item name="android:layout_height">52px</item>
+        <item name="android:layout_width">71dip</item>
+        <item name="android:layout_height">52dip</item>
     </style>
 
     <style name="MediaButton.Previous">

@@ -23,8 +23,10 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
+import android.content.pm.LabeledIntent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.PatternMatcher;
@@ -61,11 +63,11 @@ public class ResolverActivity extends AlertActivity implements
     protected void onCreate(Bundle savedInstanceState) {
         onCreate(savedInstanceState, new Intent(getIntent()),
                 getResources().getText(com.android.internal.R.string.whichApplication),
-                true);
+                null, true);
     }
 
     protected void onCreate(Bundle savedInstanceState, Intent intent,
-            CharSequence title, boolean alwaysUseOption) {
+            CharSequence title, Intent[] initialIntents, boolean alwaysUseOption) {
         super.onCreate(savedInstanceState);
         mPm = getPackageManager();
         intent.setComponent(null);
@@ -86,7 +88,7 @@ public class ResolverActivity extends AlertActivity implements
                                                         com.android.internal.R.id.clearDefaultHint);
             mClearDefaultHint.setVisibility(View.GONE);
         }
-        mAdapter = new ResolveListAdapter(this, intent);
+        mAdapter = new ResolveListAdapter(this, intent, initialIntents);
         if (mAdapter.getCount() > 1) {
             ap.mAdapter = mAdapter;
         } else if (mAdapter.getCount() == 1) {
@@ -185,12 +187,16 @@ public class ResolverActivity extends AlertActivity implements
     private final class DisplayResolveInfo {
         ResolveInfo ri;
         CharSequence displayLabel;
+        Drawable displayIcon;
         CharSequence extendedInfo;
+        Intent origIntent;
 
-        DisplayResolveInfo(ResolveInfo pri, CharSequence pLabel, CharSequence pInfo) {
+        DisplayResolveInfo(ResolveInfo pri, CharSequence pLabel,
+                CharSequence pInfo, Intent pOrigIntent) {
             ri = pri;
             displayLabel = pLabel;
             extendedInfo = pInfo;
+            origIntent = pOrigIntent;
         }
     }
 
@@ -200,7 +206,8 @@ public class ResolverActivity extends AlertActivity implements
 
         private List<DisplayResolveInfo> mList;
 
-        public ResolveListAdapter(Context context, Intent intent) {
+        public ResolveListAdapter(Context context, Intent intent,
+                Intent[] initialIntents) {
             mIntent = new Intent(intent);
             mIntent.setComponent(null);
             mInflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -234,9 +241,39 @@ public class ResolverActivity extends AlertActivity implements
                             new ResolveInfo.DisplayNameComparator(mPm);
                     Collections.sort(rList, rComparator);
                 }
+                
+                mList = new ArrayList<DisplayResolveInfo>();
+                
+                // First put the initial items at the top.
+                if (initialIntents != null) {
+                    for (int i=0; i<initialIntents.length; i++) {
+                        Intent ii = initialIntents[i];
+                        if (ii == null) {
+                            continue;
+                        }
+                        ActivityInfo ai = ii.resolveActivityInfo(
+                                getPackageManager(), 0);
+                        if (ai == null) {
+                            Log.w("ResolverActivity", "No activity found for "
+                                    + ii);
+                            continue;
+                        }
+                        ResolveInfo ri = new ResolveInfo();
+                        ri.activityInfo = ai;
+                        if (ii instanceof LabeledIntent) {
+                            LabeledIntent li = (LabeledIntent)ii;
+                            ri.resolvePackageName = li.getSourcePackage();
+                            ri.labelRes = li.getLabelResource();
+                            ri.nonLocalizedLabel = li.getNonLocalizedLabel();
+                            ri.icon = li.getIconResource();
+                        }
+                        mList.add(new DisplayResolveInfo(ri,
+                                ri.loadLabel(getPackageManager()), null, ii));
+                    }
+                }
+                
                 // Check for applications with same name and use application name or
                 // package name if necessary
-                mList = new ArrayList<DisplayResolveInfo>();
                 r0 = rList.get(0);
                 int start = 0;
                 CharSequence r0Label =  r0.loadLabel(mPm);
@@ -268,7 +305,7 @@ public class ResolverActivity extends AlertActivity implements
             int num = end - start+1;
             if (num == 1) {
                 // No duplicate labels. Use label for entry at start
-                mList.add(new DisplayResolveInfo(ro, roLabel, null));
+                mList.add(new DisplayResolveInfo(ro, roLabel, null, null));
             } else {
                 boolean usePkg = false;
                 CharSequence startApp = ro.activityInfo.applicationInfo.loadLabel(mPm);
@@ -298,11 +335,11 @@ public class ResolverActivity extends AlertActivity implements
                     if (usePkg) {
                         // Use application name for all entries from start to end-1
                         mList.add(new DisplayResolveInfo(add, roLabel,
-                                add.activityInfo.packageName));
+                                add.activityInfo.packageName, null));
                     } else {
                         // Use package name for all entries from start to end-1
                         mList.add(new DisplayResolveInfo(add, roLabel,
-                                add.activityInfo.applicationInfo.loadLabel(mPm)));
+                                add.activityInfo.applicationInfo.loadLabel(mPm), null));
                     }
                 }
             }
@@ -321,10 +358,13 @@ public class ResolverActivity extends AlertActivity implements
                 return null;
             }
 
-            Intent intent = new Intent(mIntent);
+            DisplayResolveInfo dri = mList.get(position);
+            
+            Intent intent = new Intent(dri.origIntent != null
+                    ? dri.origIntent : mIntent);
             intent.addFlags(Intent.FLAG_ACTIVITY_FORWARD_RESULT
                     |Intent.FLAG_ACTIVITY_PREVIOUS_IS_TOP);
-            ActivityInfo ai = mList.get(position).ri.activityInfo;
+            ActivityInfo ai = dri.ri.activityInfo;
             intent.setComponent(new ComponentName(
                     ai.applicationInfo.packageName, ai.name));
             return intent;
@@ -365,7 +405,10 @@ public class ResolverActivity extends AlertActivity implements
             } else {
                 text2.setVisibility(View.GONE);
             }
-            icon.setImageDrawable(info.ri.loadIcon(mPm));
+            if (info.displayIcon == null) {
+                info.displayIcon = info.ri.loadIcon(mPm);
+            }
+            icon.setImageDrawable(info.displayIcon);
         }
     }
 

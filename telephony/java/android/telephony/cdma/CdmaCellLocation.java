@@ -20,23 +20,39 @@ import android.os.Bundle;
 import android.telephony.CellLocation;
 
 /**
- * Represents the cell location on a GSM phone.
- * @hide
+ * Represents the cell location on a CDMA phone.
  */
 public class CdmaCellLocation extends CellLocation {
     private int mBaseStationId = -1;
-    private int mBaseStationLatitude = -1;
-    private int mBaseStationLongitude = -1;
+
+    /**
+     * Latitude is a decimal number as specified in 3GPP2 C.S0005-A v6.0.
+     * It is represented in units of 0.25 seconds and ranges from -1296000
+     * to 1296000, both values inclusive (corresponding to a range of -90
+     * to +90 degrees). Integer.MAX_VALUE is considered invalid value.
+     */
+    private int mBaseStationLatitude = Integer.MAX_VALUE;
+
+    /**
+     * Longitude is a decimal number as specified in 3GPP2 C.S0005-A v6.0.
+     * It is represented in units of 0.25 seconds and ranges from -2592000
+     * to 2592000, both values inclusive (corresponding to a range of -180
+     * to +180 degrees). Integer.MAX_VALUE is considered invalid value.
+     */
+    private int mBaseStationLongitude = Integer.MAX_VALUE;
+
     private int mSystemId = -1;
     private int mNetworkId = -1;
 
     /**
-     * Empty constructor.  Initializes the LAC and CID to -1.
+     * Empty constructor.
+     * Initializes the BID, SID, NID and base station latitude and longitude
+     * to invalid values.
      */
     public CdmaCellLocation() {
         this.mBaseStationId = -1;
-        this.mBaseStationLatitude = -1;
-        this.mBaseStationLongitude = -1;
+        this.mBaseStationLatitude = Integer.MAX_VALUE;
+        this.mBaseStationLongitude = Integer.MAX_VALUE;
         this.mSystemId = -1;
         this.mNetworkId = -1;
     }
@@ -60,14 +76,14 @@ public class CdmaCellLocation extends CellLocation {
     }
 
     /**
-     * @return cdma base station latitude, -1 if unknown
+     * @return cdma base station latitude, Integer.MAX_VALUE if unknown
      */
     public int getBaseStationLatitude() {
         return this.mBaseStationLatitude;
     }
 
     /**
-     * @return cdma base station longitude, -1 if unknown
+     * @return cdma base station longitude, Integer.MAX_VALUE if unknown
      */
     public int getBaseStationLongitude() {
         return this.mBaseStationLongitude;
@@ -88,12 +104,12 @@ public class CdmaCellLocation extends CellLocation {
     }
 
     /**
-     * Invalidate this object.  The cell location data is set to -1.
+     * Invalidate this object.  The cell location data is set to invalid values.
      */
     public void setStateInvalid() {
         this.mBaseStationId = -1;
-        this.mBaseStationLatitude = -1;
-        this.mBaseStationLongitude = -1;
+        this.mBaseStationLatitude = Integer.MAX_VALUE;
+        this.mBaseStationLongitude = Integer.MAX_VALUE;
         this.mSystemId = -1;
         this.mNetworkId = -1;
     }

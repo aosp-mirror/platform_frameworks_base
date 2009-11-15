@@ -14,8 +14,6 @@
  ** limitations under the License.
  */
 
-#define LOG_TAG "GLES_CM"
-
 #include <ctype.h>
 #include <string.h>
 #include <errno.h>
@@ -32,6 +30,9 @@
 #include "egl_impl.h"
 
 using namespace android;
+
+// set this to 1 for crude GL debugging
+#define CHECK_FOR_GL_ERRORS     0
 
 // ----------------------------------------------------------------------------
 // extensions for the framework
@@ -73,14 +74,22 @@ void glVertexPointerBounds(GLint size, GLenum type,
 #undef CALL_GL_API
 #undef CALL_GL_API_RETURN
 
-#if USE_FAST_TLS_KEY
+#if USE_FAST_TLS_KEY && !CHECK_FOR_GL_ERRORS
+
+    #ifdef HAVE_ARM_TLS_REGISTER
+        #define GET_TLS(reg) \
+            "mrc p15, 0, " #reg ", c13, c0, 3 \n"
+    #else
+        #define GET_TLS(reg) \
+            "mov   " #reg ", #0xFFFF0FFF      \n"  \
+            "ldr   " #reg ", [" #reg ", #-15] \n"
+    #endif
 
     #define API_ENTRY(_api) __attribute__((naked)) _api
 
     #define CALL_GL_API(_api, ...)                              \
          asm volatile(                                          \
-            "mov   r12, #0xFFFF0FFF   \n"                       \
-            "ldr   r12, [r12, #-15]   \n"                       \
+            GET_TLS(r12)                                        \
             "ldr   r12, [r12, %[tls]] \n"                       \
             "cmp   r12, #0            \n"                       \
             "ldrne pc,  [r12, %[api]] \n"                       \
@@ -90,19 +99,34 @@ void glVertexPointerBounds(GLint size, GLenum type,
               [api] "J"(__builtin_offsetof(gl_hooks_t, gl._api))    \
             :                                                   \
             );
-    
+
     #define CALL_GL_API_RETURN(_api, ...) \
         CALL_GL_API(_api, __VA_ARGS__) \
         return 0; // placate gcc's warnings. never reached.
 
 #else
 
+    #if CHECK_FOR_GL_ERRORS
+    
+        #define CHECK_GL_ERRORS(_api) \
+            do { GLint err = glGetError(); \
+                LOGE_IF(err != GL_NO_ERROR, "%s failed (0x%04X)", #_api, err); \
+            } while(false);
+
+    #else
+
+        #define CHECK_GL_ERRORS(_api) do { } while(false);
+
+    #endif
+
+
     #define API_ENTRY(_api) _api
 
     #define CALL_GL_API(_api, ...)                                      \
         gl_hooks_t::gl_t const * const _c = &getGlThreadSpecific()->gl; \
-        _c->_api(__VA_ARGS__)
-    
+        _c->_api(__VA_ARGS__);                                          \
+        CHECK_GL_ERRORS(_api)
+
     #define CALL_GL_API_RETURN(_api, ...)                               \
         gl_hooks_t::gl_t const * const _c = &getGlThreadSpecific()->gl; \
         return _c->_api(__VA_ARGS__)
@@ -121,16 +145,25 @@ extern "C" {
 
 
 /*
- * These GL calls are special because they need to call into EGL to retrieve
- * some informations before they can execute.
+ * These GL calls are special because they need to EGL to retrieve some
+ * informations before they can execute.
  */
+
+extern "C" void __glEGLImageTargetTexture2DOES(GLenum target, GLeglImageOES image);
+extern "C" void __glEGLImageTargetRenderbufferStorageOES(GLenum target, GLeglImageOES image);
 
 
 void glEGLImageTargetTexture2DOES(GLenum target, GLeglImageOES image)
 {
+    GLeglImageOES implImage = 
+        (GLeglImageOES)egl_get_image_for_current_context((EGLImageKHR)image);
+    __glEGLImageTargetTexture2DOES(target, implImage);
 }
 
 void glEGLImageTargetRenderbufferStorageOES(GLenum target, GLeglImageOES image)
 {
+    GLeglImageOES implImage = 
+        (GLeglImageOES)egl_get_image_for_current_context((EGLImageKHR)image);
+    __glEGLImageTargetRenderbufferStorageOES(target, image);
 }
 

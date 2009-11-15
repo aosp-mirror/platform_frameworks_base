@@ -2,6 +2,9 @@ package android.test;
 
 import com.google.android.collect.Lists;
 
+import android.accounts.AccountManager;
+import android.accounts.OnAccountsUpdateListener;
+import android.accounts.Account;
 import android.content.ContextWrapper;
 import android.content.ContentResolver;
 import android.content.Intent;
@@ -11,6 +14,7 @@ import android.content.BroadcastReceiver;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.Handler;
 
 import java.util.List;
 import java.io.File;
@@ -22,6 +26,7 @@ import java.io.File;
 public class IsolatedContext extends ContextWrapper {
 
     private ContentResolver mResolver;
+    private final MockAccountManager mMockAccountManager;
 
     private List<Intent> mBroadcastIntents = Lists.newArrayList();
 
@@ -29,6 +34,7 @@ public class IsolatedContext extends ContextWrapper {
             ContentResolver resolver, Context targetContext) {
         super(targetContext);
         mResolver = resolver;
+        mMockAccountManager = new MockAccountManager();
     }
 
     /** Returns the list of intents that were broadcast since the last call to this method. */
@@ -79,10 +85,27 @@ public class IsolatedContext extends ContextWrapper {
 
     @Override
     public Object getSystemService(String name) {
-        // No services exist in this context.
+        if (Context.ACCOUNT_SERVICE.equals(name)) {
+            return mMockAccountManager;
+        }
+        // No other services exist in this context.
         return null;
     }
 
+    private class MockAccountManager extends AccountManager {
+        public MockAccountManager() {
+            super(IsolatedContext.this, null /* IAccountManager */, null /* handler */);
+        }
+
+        public void addOnAccountsUpdatedListener(OnAccountsUpdateListener listener,
+                Handler handler, boolean updateImmediately) {
+            // do nothing
+        }
+
+        public Account[] getAccounts() {
+            return new Account[]{};
+        }
+    }
     @Override
     public File getFilesDir() {
         return new File("/dev/null");

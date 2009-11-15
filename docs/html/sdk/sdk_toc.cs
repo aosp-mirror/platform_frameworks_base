@@ -1,107 +1,149 @@
 <?cs if:!sdk.redirect ?>
-<ul>
-  <li><?cs 
-   if:android.whichdoc != "online" ?>
-    <h2>Android <?cs var:sdk.version ?> <?cs 
-      if: sdk.preview ?>Early Look SDK<?cs 
-      else ?>SDK, r<?cs var:sdk.rel.id ?><?cs 
-      /if ?></h2><?cs 
-   else ?>
-    <h2><span class="en">Current SDK Release</span>
-        <span class="de">Aktuelle SDK-Version</span>
-        <span class="es">Versión actual del SDK</span>
-        <span class="fr">Version actuelle du SDK</span>
-        <span class="it">Release SDK attuale</span>
-        <span class="ja">現在リリースされている SDK</span>
-        <span class="zh-CN">当前的 SDK 版本</span>
-        <span class="zh-TW">目前 SDK 發行版本</span>
-    </h2><?cs 
-   /if ?>
-    <ul><?cs 
-     if:android.whichdoc == "online" ?>
-      <li><a href="<?cs var:toroot ?>sdk/<?cs
-        if:sdk.preview ?>preview<?cs
-			  else ?><?cs var:sdk.current ?><?cs
-			  /if ?>/index.html">
+<ul><?cs 
+  if:android.whichdoc == "online" ?>
+  <li>
+    <h2>
+      <span class="en">Android SDK Starter Package</span>
+      <span style="display:none" class="de">Aktuelle SDK-Version</span>
+      <span style="display:none" class="es">Versión actual del SDK</span>
+      <span style="display:none" class="fr">Version actuelle du SDK</span>
+      <span style="display:none" class="it">Release SDK attuale</span>
+      <span style="display:none" class="ja">現在リリースされている SDK</span>
+      <span style="display:none" class="zh-CN">当前的 SDK 版本</span>
+      <span style="display:none" class="zh-TW">目前 SDK 發行版本</span>
+    </h2>
+    <ul>
+      <li><a href="<?cs var:toroot ?>sdk/index.html">
           <span class="en">Download</span>
-          <span class="de">Herunterladen</span>
-          <span class="es">Descargar</span>
-          <span class="fr">Téléchargement</span>
-          <span class="it">Download</span>
-          <span class="ja">ダウンロード</span>
-          <span class="zh-CN">下载</span>
-          <span class="zh-TW">下載</span>
-         </a></li><?cs 
-     /if ?>
-      <li><a href="<?cs var:toroot ?>sdk/<?cs
-        if:sdk.preview ?>preview<?cs
-			  else ?><?cs var:sdk.current ?><?cs
-			  /if ?>/installing.html">
+          <span style="display:none" class="de">Herunterladen</span>
+          <span style="display:none" class="es">Descargar</span>
+          <span style="display:none" class="fr">Téléchargement</span>
+          <span style="display:none" class="it">Download</span>
+          <span style="display:none" class="ja">ダウンロード</span>
+          <span style="display:none" class="zh-CN">下载</span>
+          <span style="display:none" class="zh-TW">下載</span>
+        </a></li>
+      <li><a href="<?cs var:toroot ?>sdk/installing.html">
           <span class="en">Installing</span>
-          <span class="de">Installieren</span>
-          <span class="es">Instalación</span>
-          <span class="fr">Installation</span>
-          <span class="it">Installazione</span>
-          <span class="ja">インストール</span>
-          <span class="zh-CN">安装</span>
-          <span class="zh-TW">安裝</span>
-      </a></li>
-      <li><a href="<?cs var:toroot ?>sdk/<?cs
-        if:sdk.preview ?>preview<?cs
-			  else ?><?cs var:sdk.current ?><?cs
-			  /if ?>/upgrading.html">Upgrading</a></li>
-      <li><a href="<?cs var:toroot ?>sdk/<?cs
-        if:sdk.preview ?>preview<?cs
-			  else ?><?cs var:sdk.current ?><?cs
-			  /if ?>/requirements.html">System Requirements</a></li>
-    </ul>
-    <ul>
-      <li><a href="<?cs var:toroot ?>sdk/terms.html">SDK Terms and Conditions</a></li>
-      <li><a href="<?cs var:toroot ?><?cs 
-        if:sdk.current == "preview" ?>sdk/preview/index.html<?cs 
-        else ?>sdk/RELEASENOTES.html<?cs 
-        /if ?>">SDK Release Notes</a></li>
-    </ul><?cs 
- if:android.whichdoc == "online" ?>
-  <li>
-    <h2><span class="en">System Image Version Notes</span>
-        <span class="de">Versionshinweise zum Systemabbild</span>
-        <span class="es">Notas de la versión de System Image</span>
-        <span class="fr">Notes de version de l'image système</span>
-        <span class="it">Note sulla versione dell'immagine <br />di sistema</span>
-        <span class="ja">システム イメージ バージョンに<br />関する注意事項</span>
-        <span class="zh-CN">系统图片版本说明</span>
-        <span class="zh-TW">系統影像版本資訊</span>
-    </h2>
-    <ul>
-      <li><a href="<?cs var:toroot ?>sdk/android-1.5.html">Android 1.5 Version Notes</a></li>
-      <li><a href="<?cs var:toroot ?>sdk/android-1.1.html">Android 1.1 Version Notes</a></li>
-    </ul>
-  </li>
-  <li>
-    <h2>Native Development Tools</h2>
-    <ul>
-      <li><a href="<?cs var:toroot ?>sdk/ndk/1.5_r1/index.html">Android 1.5 NDK, r1</a></li>
-    </ul>
-  </li>
-  <li>
-     <h2>
-        <span class="en">Previous SDK Releases</span>
-        <span class="de">Frühere SDK-Releases</span>
-        <span class="es">Versiones anteriores del SDK</span>
-        <span class="fr">Anciennes versions du SDK</span>
-        <span class="it">Release SDK precedenti</span>
-        <span class="ja">SDK の過去のリリース</span>
-        <span class="zh-CN">以前的 SDK 版本</span>
-        <span class="zh-TW">較舊的 SDK 發行版本</span>
-    </h2>
-    <ul>
-      <li><a href="<?cs var:toroot ?>sdk/1.1_r1/index.html">Android 1.1 SDK, r1</a></li>
-      <li><a href="<?cs var:toroot ?>sdk/1.0_r2/index.html">Android 1.0 SDK, r2</a></li>
-      <li><a href="<?cs var:toroot ?>sdk/older_releases.html">Other Releases</a></li>
+          <span style="display:none" class="de">Installieren</span>
+          <span style="display:none" class="es">Instalación</span>
+          <span style="display:none" class="fr">Installation</span>
+          <span style="display:none" class="it">Installazione</span>
+          <span style="display:none" class="ja">インストール</span>
+          <span style="display:none" class="zh-CN">安装</span>
+          <span style="display:none" class="zh-TW">安裝</span>
+        </a></li>
+
     </ul>
   </li><?cs 
- /if ?>
+  /if ?>
+  <li>
+    <h2>
+      <span class="en">Downloadable SDK Components</span>
+      <span style="display:none" class="de"></span>
+      <span style="display:none" class="es"></span>
+      <span style="display:none" class="fr"></span>
+      <span style="display:none" class="it"></span>
+      <span style="display:none" class="ja"></span>
+      <span style="display:none" class="zh-CN"></span>
+      <span style="display:none" class="zh-TW"></span>
+    </h2>
+    <ul>
+      <li><a href="<?cs var:toroot ?>sdk/adding-components.html">
+      <span class="en">Adding SDK Components</span>
+      <span style="display:none" class="de"></span>
+      <span style="display:none" class="es"></span>
+      <span style="display:none" class="fr"></span>
+      <span style="display:none" class="it"></span>
+      <span style="display:none" class="ja"></span>
+      <span style="display:none" class="zh-CN"></span>
+      <span style="display:none" class="zh-TW"></span></a>
+      </li>
+    </ul>
+    <ul>
+      <li><a href="<?cs var:toroot ?>sdk/android-2.0.html">Android 2.0 Platform</a>
+      <span class="new">new!</span>
+      </li>
+      <li><a href="<?cs var:toroot ?>sdk/android-1.6.html">Android 1.6 Platform</a></li>
+      <li><a href="<?cs var:toroot ?>sdk/android-1.5.html">Android 1.5 Platform</a></li>
+      <li class="toggle-list">
+        <div><a href="#" onclick="toggle(this.parentNode.parentNode,true); return false;">Older Platforms</a></div>
+        <ul> 
+          <li><a href="<?cs var:toroot ?>sdk/android-1.1.html">Android 1.1 Platform</a>
+          </li>
+        </ul>
+      </li>
+    </ul>
+    <ul>
+      <li><a href="<?cs var:toroot ?>sdk/tools-notes.html">SDK Tools, r3</a>
+      <span class="new">new!</span>
+      </li>
+      <li><a href="<?cs var:toroot ?>sdk/win-usb.html">USB Driver for
+Windows, r2</a>
+      <span class="new">new!</span>
+      </li>
+    </ul>
+  </li>
+  <li>
+      <h2>
+      <span class="en">ADT Plugin for Eclipse</span>
+      <span style="display:none" class="de"></span>
+      <span style="display:none" class="es"></span>
+      <span style="display:none" class="fr"></span>
+      <span style="display:none" class="it"></span>
+      <span style="display:none" class="ja"></span>
+      <span style="display:none" class="zh-CN"></span>
+      <span style="display:none" class="zh-TW"></span>
+      </h2>
+    <ul>
+      <li><a href="<?cs var:toroot ?>sdk/eclipse-adt.html">Installing and Updating
+      <span style="display:none" class="de"></span>
+      <span style="display:none" class="es"></span>
+      <span style="display:none" class="fr"></span>
+      <span style="display:none" class="it"></span>
+      <span style="display:none" class="ja"></span>
+      <span style="display:none" class="zh-CN"></span>
+      <span style="display:none" class="zh-TW"></span></a>
+      </li>
+      </ul>
+      <ul>
+      <li><a href="<?cs var:toroot ?>sdk/adt-notes.html">ADT <?cs var:adt.zip.version ?> 
+          <span class="new">new!</span></span></a>
+      </li>
+    </ul>
+  </li>
+  <li>
+    <h2><span class="en">Native Development Tools</span>
+      <span style="display:none" class="de"></span>
+      <span style="display:none" class="es"></span>
+      <span style="display:none" class="fr"></span>
+      <span style="display:none" class="it"></span>
+      <span style="display:none" class="ja"></span>
+      <span style="display:none" class="zh-CN"></span>
+      <span style="display:none" class="zh-TW"></span>
+    </h2>
+    <ul>
+      <li><a href="<?cs var:toroot ?>sdk/ndk/1.6_r1/index.html">Android 1.6 NDK, r1</a></li>
+    </ul>
+  </li>
+  <li>
+    <h2>
+      <span class="en">More Information</span>
+      <span style="display:none" class="de"></span>
+      <span style="display:none" class="es"></span>
+      <span style="display:none" class="fr"></span>
+      <span style="display:none" class="it"></span>
+      <span style="display:none" class="ja"></span>
+      <span style="display:none" class="zh-CN"></span>
+      <span style="display:none" class="zh-TW"></span>
+    </h2>
+    <ul>
+      <li><a href="<?cs var:toroot ?>sdk/requirements.html">SDK System Requirements</a></li>
+      <li><a href="<?cs var:toroot ?>sdk/terms.html">SDK Terms and Conditions</a></li>
+      <li><a href="<?cs var:toroot ?>sdk/RELEASENOTES.html">SDK Release Notes</a></li>
+    </ul>
+  </li>
+
 </ul>
 
 <script type="text/javascript">

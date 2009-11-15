@@ -28,7 +28,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.database.Cursor;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.os.BatteryStats;
 import android.os.Binder;
 import android.os.Handler;
@@ -48,6 +53,8 @@ import android.util.Log;
 import android.view.WindowManagerPolicy;
 import static android.provider.Settings.System.DIM_SCREEN;
 import static android.provider.Settings.System.SCREEN_BRIGHTNESS;
+import static android.provider.Settings.System.SCREEN_BRIGHTNESS_MODE;
+import static android.provider.Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC;
 import static android.provider.Settings.System.SCREEN_OFF_TIMEOUT;
 import static android.provider.Settings.System.STAY_ON_WHILE_PLUGGED_IN;
 
@@ -58,7 +65,8 @@ import java.util.HashMap;
 import java.util.Observable;
 import java.util.Observer;
 
-class PowerManagerService extends IPowerManager.Stub implements LocalPowerManager, Watchdog.Monitor {
+class PowerManagerService extends IPowerManager.Stub
+        implements LocalPowerManager, Watchdog.Monitor {
 
     private static final String TAG = "PowerManagerService";
     static final String PARTIAL_NAME = "PowerManagerService";
@@ -72,7 +80,8 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
     private static final int LOCK_MASK = PowerManager.PARTIAL_WAKE_LOCK
                                         | PowerManager.SCREEN_DIM_WAKE_LOCK
                                         | PowerManager.SCREEN_BRIGHT_WAKE_LOCK
-                                        | PowerManager.FULL_WAKE_LOCK;
+                                        | PowerManager.FULL_WAKE_LOCK
+                                        | PowerManager.PROXIMITY_SCREEN_OFF_WAKE_LOCK;
 
     //                       time since last state:               time since last event:
     // The short keylight delay comes from Gservices; this is the default.
@@ -80,6 +89,15 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
     private static final int MEDIUM_KEYLIGHT_DELAY = 15000;       // t+15 sec
     private static final int LONG_KEYLIGHT_DELAY = 6000;        // t+6 sec
     private static final int LONG_DIM_TIME = 7000;              // t+N-5 sec
+
+    // How long to wait to debounce light sensor changes.
+    private static final int LIGHT_SENSOR_DELAY = 2000;
+
+    // For debouncing the proximity sensor.
+    private static final int PROXIMITY_SENSOR_DELAY = 1000;
+
+    // trigger proximity if distance is less than 5 cm
+    private static final float PROXIMITY_THRESHOLD = 5.0f;
 
     // Cached Gservices settings; see updateGservicesValues()
     private int mShortKeylightDelay = SHORT_KEYLIGHT_DELAY_DEFAULT;
@@ -116,6 +134,8 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
     static final boolean ANIMATE_KEYBOARD_LIGHTS = false;
     
     static final int ANIM_STEPS = 60/4;
+    // Slower animation for autobrightness changes
+    static final int AUTOBRIGHTNESS_ANIM_STEPS = 60;
 
     // These magic numbers are the initial state of the LEDs at boot.  Ideally
     // we should read them from the driver, but our current hardware returns 0
@@ -143,6 +163,11 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
     private int mUserState;
     private boolean mKeyboardVisible = false;
     private boolean mUserActivityAllowed = true;
+    private int mProximityWakeLockCount = 0;
+    private boolean mProximitySensorEnabled = false;
+    private boolean mProximitySensorActive = false;
+    private int mProximityPendingValue = -1; // -1 == nothing, 0 == inactive, 1 == active
+    private long mLastProximityEventTime;
     private int mTotalDelaySetting;
     private int mKeylightDelay;
     private int mDimDelay;
@@ -175,16 +200,34 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
     private IActivityManager mActivityService;
     private IBatteryStats mBatteryStats;
     private BatteryService mBatteryService;
+    private SensorManager mSensorManager;
+    private Sensor mProximitySensor;
+    private Sensor mLightSensor;
+    private boolean mLightSensorEnabled;
+    private float mLightSensorValue = -1;
+    private float mLightSensorPendingValue = -1;
+    private int mLightSensorBrightness = -1;
     private boolean mDimScreen = true;
     private long mNextTimeout;
     private volatile int mPokey = 0;
     private volatile boolean mPokeAwakeOnSet = false;
     private volatile boolean mInitComplete = false;
     private HashMap<IBinder,PokeLock> mPokeLocks = new HashMap<IBinder,PokeLock>();
+    // mScreenOnTime and mScreenOnStartTime are used for computing total time screen
+    // has been on since boot
     private long mScreenOnTime;
     private long mScreenOnStartTime;
+    // mLastScreenOnTime is the time the screen was last turned on
+    private long mLastScreenOnTime;
     private boolean mPreventScreenOn;
     private int mScreenBrightnessOverride = -1;
+    private boolean mUseSoftwareAutoBrightness;
+    private boolean mAutoBrightessEnabled;
+    private int[] mAutoBrightnessLevels;
+    private int[] mLcdBacklightValues;
+    private int[] mButtonBacklightValues;
+    private int[] mKeyboardBacklightValues;
+    private int mLightSensorWarmupTime;
 
     // Used when logging number and duration of touch-down cycles
     private long mTotalTouchDownTime;
@@ -193,6 +236,8 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
 
     // could be either static or controllable at runtime
     private static final boolean mSpew = false;
+    private static final boolean mDebugProximitySensor = (true || mSpew);
+    private static final boolean mDebugLightSensor = (false || mSpew);
 
     /*
     static PrintStream mLog;
@@ -290,10 +335,7 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
                     // temporarily set mUserActivityAllowed to true so this will work
                     // even when the keyguard is on.
                     synchronized (mLocks) {
-                        boolean savedActivityAllowed = mUserActivityAllowed;
-                        mUserActivityAllowed = true;
-                        userActivity(SystemClock.uptimeMillis(), false);
-                        mUserActivityAllowed = savedActivityAllowed;
+                        forceUserActivityLocked();
                     }
                 }
             }
@@ -332,6 +374,9 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
 
                  // DIM_SCREEN
                 //mDimScreen = getInt(DIM_SCREEN) != 0;
+
+                // SCREEN_BRIGHTNESS_MODE
+                setScreenBrightnessMode(getInt(SCREEN_BRIGHTNESS_MODE));
 
                 // recalculate everything
                 setScreenOffTimeoutsLocked();
@@ -404,12 +449,32 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
         mScreenOffIntent = new Intent(Intent.ACTION_SCREEN_OFF);
         mScreenOffIntent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
 
-        ContentResolver resolver = mContext.getContentResolver();
+        Resources resources = mContext.getResources();
+
+        // read settings for auto-brightness
+        mUseSoftwareAutoBrightness = resources.getBoolean(
+                com.android.internal.R.bool.config_automatic_brightness_available);
+        if (mUseSoftwareAutoBrightness) {
+            mAutoBrightnessLevels = resources.getIntArray(
+                    com.android.internal.R.array.config_autoBrightnessLevels);
+            mLcdBacklightValues = resources.getIntArray(
+                    com.android.internal.R.array.config_autoBrightnessLcdBacklightValues);
+            mButtonBacklightValues = resources.getIntArray(
+                    com.android.internal.R.array.config_autoBrightnessButtonBacklightValues);
+            mKeyboardBacklightValues = resources.getIntArray(
+                    com.android.internal.R.array.config_autoBrightnessKeyboardBacklightValues);
+            mLightSensorWarmupTime = resources.getInteger(
+                    com.android.internal.R.integer.config_lightSensorWarmupTime);
+        }
+
+       ContentResolver resolver = mContext.getContentResolver();
         Cursor settingsCursor = resolver.query(Settings.System.CONTENT_URI, null,
                 "(" + Settings.System.NAME + "=?) or ("
                         + Settings.System.NAME + "=?) or ("
+                        + Settings.System.NAME + "=?) or ("
                         + Settings.System.NAME + "=?)",
-                new String[]{STAY_ON_WHILE_PLUGGED_IN, SCREEN_OFF_TIMEOUT, DIM_SCREEN},
+                new String[]{STAY_ON_WHILE_PLUGGED_IN, SCREEN_OFF_TIMEOUT, DIM_SCREEN,
+                        SCREEN_BRIGHTNESS_MODE},
                 null);
         mSettings = new ContentQueryMap(settingsCursor, Settings.System.NAME, true, mHandler);
         SettingsObserver settingsObserver = new SettingsObserver();
@@ -430,9 +495,14 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
         // And explicitly do the initial update of our cached settings
         updateGservicesValues();
 
-        // turn everything on
-        setPowerState(ALL_BRIGHT);
-        
+        if (mUseSoftwareAutoBrightness) {
+            // turn the screen on
+            setPowerState(SCREEN_BRIGHT);
+        } else {
+            // turn everything on
+            setPowerState(ALL_BRIGHT);
+        }
+
         synchronized (mHandlerThread) {
             mInitComplete = true;
             mHandlerThread.notifyAll();
@@ -527,7 +597,11 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
             switch (wl.flags & LOCK_MASK)
             {
                 case PowerManager.FULL_WAKE_LOCK:
-                    wl.minState = (mKeyboardVisible ? ALL_BRIGHT : SCREEN_BUTTON_BRIGHT);
+                    if (mUseSoftwareAutoBrightness) {
+                        wl.minState = SCREEN_BRIGHT;
+                    } else {
+                        wl.minState = (mKeyboardVisible ? ALL_BRIGHT : SCREEN_BUTTON_BRIGHT);
+                    }
                     break;
                 case PowerManager.SCREEN_BRIGHT_WAKE_LOCK:
                     wl.minState = SCREEN_BRIGHT;
@@ -536,6 +610,7 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
                     wl.minState = SCREEN_DIM;
                     break;
                 case PowerManager.PARTIAL_WAKE_LOCK:
+                case PowerManager.PROXIMITY_SCREEN_OFF_WAKE_LOCK:
                     break;
                 default:
                     // just log and bail.  we're in the server, so don't
@@ -583,6 +658,11 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
                 }
             }
             Power.acquireWakeLock(Power.PARTIAL_WAKE_LOCK,PARTIAL_NAME);
+        } else if ((flags & LOCK_MASK) == PowerManager.PROXIMITY_SCREEN_OFF_WAKE_LOCK) {
+            mProximityWakeLockCount++;
+            if (mProximityWakeLockCount == 1) {
+                enableProximityLockLocked();
+            }
         }
         if (newlock) {
             acquireUid = wl.uid;
@@ -638,6 +718,18 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
             if (mPartialCount == 0) {
                 if (LOG_PARTIAL_WL) EventLog.writeEvent(LOG_POWER_PARTIAL_WAKE_STATE, 0, wl.tag);
                 Power.releaseWakeLock(PARTIAL_NAME);
+            }
+        } else if ((wl.flags & LOCK_MASK) == PowerManager.PROXIMITY_SCREEN_OFF_WAKE_LOCK) {
+            mProximityWakeLockCount--;
+            if (mProximityWakeLockCount == 0) {
+                if (mProximitySensorActive) {
+                    // wait for proximity sensor to go negative before disabling sensor
+                    if (mDebugProximitySensor) {
+                        Log.d(TAG, "waiting for proximity sensor to go negative");
+                    }
+                } else {
+                    disableProximityLockLocked();
+                }
             }
         }
         // Unlink the lock from the binder.
@@ -745,15 +837,17 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
         switch (type)
         {
             case PowerManager.FULL_WAKE_LOCK:
-                return "FULL_WAKE_LOCK         ";
+                return "FULL_WAKE_LOCK                ";
             case PowerManager.SCREEN_BRIGHT_WAKE_LOCK:
-                return "SCREEN_BRIGHT_WAKE_LOCK";
+                return "SCREEN_BRIGHT_WAKE_LOCK       ";
             case PowerManager.SCREEN_DIM_WAKE_LOCK:
-                return "SCREEN_DIM_WAKE_LOCK   ";
+                return "SCREEN_DIM_WAKE_LOCK          ";
             case PowerManager.PARTIAL_WAKE_LOCK:
-                return "PARTIAL_WAKE_LOCK      ";
+                return "PARTIAL_WAKE_LOCK             ";
+            case PowerManager.PROXIMITY_SCREEN_OFF_WAKE_LOCK:
+                return "PROXIMITY_SCREEN_OFF_WAKE_LOCK";
             default:
-                return "???                    ";
+                return "???                           ";
         }
     }
 
@@ -808,10 +902,21 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
         pw.println("  mPreventScreenOn=" + mPreventScreenOn
                 + "  mScreenBrightnessOverride=" + mScreenBrightnessOverride);
         pw.println("  mTotalDelaySetting=" + mTotalDelaySetting);
+        pw.println("  mLastScreenOnTime=" + mLastScreenOnTime);
         pw.println("  mBroadcastWakeLock=" + mBroadcastWakeLock);
         pw.println("  mStayOnWhilePluggedInScreenDimLock=" + mStayOnWhilePluggedInScreenDimLock);
         pw.println("  mStayOnWhilePluggedInPartialLock=" + mStayOnWhilePluggedInPartialLock);
         pw.println("  mPreventScreenOnPartialLock=" + mPreventScreenOnPartialLock);
+        pw.println("  mProximityWakeLockCount=" + mProximityWakeLockCount);
+        pw.println("  mProximitySensorEnabled=" + mProximitySensorEnabled);
+        pw.println("  mProximitySensorActive=" + mProximitySensorActive);
+        pw.println("  mProximityPendingValue=" + mProximityPendingValue);
+        pw.println("  mLastProximityEventTime=" + mLastProximityEventTime);
+        pw.println("  mLightSensorEnabled=" + mLightSensorEnabled);
+        pw.println("  mLightSensorValue=" + mLightSensorValue);
+        pw.println("  mLightSensorPendingValue=" + mLightSensorPendingValue);
+        pw.println("  mUseSoftwareAutoBrightness=" + mUseSoftwareAutoBrightness);
+        pw.println("  mAutoBrightessEnabled=" + mAutoBrightessEnabled);
         mScreenBrightness.dump(pw, "  mScreenBrightness: ");
         mKeyboardBrightness.dump(pw, "  mKeyboardBrightness: ");
         mButtonBrightness.dump(pw, "  mButtonBrightness: ");
@@ -1136,7 +1241,7 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
 
                 // Finally, set the flag that prevents the screen from turning on.
                 // (Below, in setPowerState(), we'll check mPreventScreenOn and
-                // we *won't* call Power.setScreenState(true) if it's set.)
+                // we *won't* call setScreenStateLocked(true) if it's set.)
                 mPreventScreenOn = true;
             } else {
                 // (Re)enable the screen.
@@ -1154,9 +1259,9 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
                         Log.d(TAG,
                               "preventScreenOn: turning on after a prior preventScreenOn(true)!");
                     }
-                    int err = Power.setScreenState(true);
+                    int err = setScreenStateLocked(true);
                     if (err != 0) {
-                        Log.w(TAG, "preventScreenOn: error from Power.setScreenState(): " + err);
+                        Log.w(TAG, "preventScreenOn: error from setScreenStateLocked(): " + err);
                     }
                 }
 
@@ -1211,6 +1316,30 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
             }
         };
 
+    private int setScreenStateLocked(boolean on) {
+        int err = Power.setScreenState(on);
+        if (err == 0) {
+            mLastScreenOnTime = (on ? SystemClock.elapsedRealtime() : 0);
+            if (mUseSoftwareAutoBrightness) {
+                enableLightSensor(on);
+                if (!on) {
+                    // make sure button and key backlights are off too
+                    int brightnessMode = (mUseSoftwareAutoBrightness
+                            ? HardwareService.BRIGHTNESS_MODE_SENSOR
+                            : HardwareService.BRIGHTNESS_MODE_USER);
+                    mHardware.setLightBrightness_UNCHECKED(HardwareService.LIGHT_ID_BUTTONS, 0,
+                        brightnessMode);
+                    mHardware.setLightBrightness_UNCHECKED(HardwareService.LIGHT_ID_KEYBOARD, 0,
+                        brightnessMode);
+                    // clear current value so we will update based on the new conditions
+                    // when the sensor is reenabled.
+                    mLightSensorValue = -1;
+                }
+            }
+        }
+        return err;
+    }
+
     private void setPowerState(int state)
     {
         setPowerState(state, false, false);
@@ -1230,6 +1359,10 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
             if (noChangeLights) {
                 newState = (newState & ~LIGHTS_MASK) | (mPowerState & LIGHTS_MASK);
             }
+            if (mProximitySensorActive) {
+                // don't turn on the screen when the proximity sensor lock is held
+                newState = (newState & ~SCREEN_BRIGHT);
+            }
 
             if (batteryIsLow()) {
                 newState |= BATTERY_LOW_BIT;
@@ -1239,15 +1372,15 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
             if (newState == mPowerState) {
                 return;
             }
-            
-            if (!mDoneBooting) {
+
+            if (!mDoneBooting && !mUseSoftwareAutoBrightness) {
                 newState |= ALL_BRIGHT;
             }
 
             boolean oldScreenOn = (mPowerState & SCREEN_ON_BIT) != 0;
             boolean newScreenOn = (newState & SCREEN_ON_BIT) != 0;
 
-            if (mSpew) {
+            if (mPowerState != newState) {
                 Log.d(TAG, "setPowerState: mPowerState=" + mPowerState
                         + " newState=" + newState + " noChangeLights=" + noChangeLights);
                 Log.d(TAG, "  oldKeyboardBright=" + ((mPowerState & KEYBOARD_BRIGHT_BIT) != 0)
@@ -1295,7 +1428,7 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
                         reallyTurnScreenOn = false;
                     }
                     if (reallyTurnScreenOn) {
-                        err = Power.setScreenState(true);
+                        err = setScreenStateLocked(true);
                         long identity = Binder.clearCallingIdentity();
                         try {
                             mBatteryStats.noteScreenBrightness(
@@ -1307,7 +1440,7 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
                             Binder.restoreCallingIdentity(identity);
                         }
                     } else {
-                        Power.setScreenState(false);
+                        setScreenStateLocked(false);
                         // But continue as if we really did turn the screen on...
                         err = 0;
                     }
@@ -1323,6 +1456,8 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
                         sendNotificationLocked(true, -1);
                     }
                 } else {
+                    // cancel light sensor task
+                    mHandler.removeCallbacks(mAutoBrightnessTask);
                     mScreenOffTime = SystemClock.elapsedRealtime();
                     long identity = Binder.clearCallingIdentity();
                     try {
@@ -1352,7 +1487,7 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
         EventLog.writeEvent(LOG_POWER_SCREEN_STATE, 0, becauseOfUser ? 1 : 0,
                 mTotalTouchDownTime, mTouchCycles);
         mLastTouchDown = 0;
-        int err = Power.setScreenState(false);
+        int err = setScreenStateLocked(false);
         if (mScreenOnStartTime != 0) {
             mScreenOnTime += SystemClock.elapsedRealtime() - mScreenOnStartTime;
             mScreenOnStartTime = 0;
@@ -1499,9 +1634,10 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
                 } finally {
                     Binder.restoreCallingIdentity(identity);
                 }
-                mScreenBrightness.setTargetLocked(brightness,
-                        steps, INITIAL_SCREEN_BRIGHTNESS, nominalCurrentValue);
-                startAnimation = true;
+                if (mScreenBrightness.setTargetLocked(brightness,
+                        steps, INITIAL_SCREEN_BRIGHTNESS, nominalCurrentValue)) {
+                    startAnimation = true;
+                }
             } else {
                 if ((newState & SCREEN_BRIGHT_BIT) == 0) {
                     // dim or turn off backlight, depending on if the screen is on
@@ -1549,14 +1685,23 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
     }
 
     private void setLightBrightness(int mask, int value) {
+        int brightnessMode = (mAutoBrightessEnabled
+                            ? HardwareService.BRIGHTNESS_MODE_SENSOR
+                            : HardwareService.BRIGHTNESS_MODE_USER);
         if ((mask & SCREEN_BRIGHT_BIT) != 0) {
-            mHardware.setLightBrightness_UNCHECKED(HardwareService.LIGHT_ID_BACKLIGHT, value);
+            mHardware.setLightBrightness_UNCHECKED(HardwareService.LIGHT_ID_BACKLIGHT, value,
+                brightnessMode);
         }
+        brightnessMode = (mUseSoftwareAutoBrightness
+                            ? HardwareService.BRIGHTNESS_MODE_SENSOR
+                            : HardwareService.BRIGHTNESS_MODE_USER);
         if ((mask & BUTTON_BRIGHT_BIT) != 0) {
-            mHardware.setLightBrightness_UNCHECKED(HardwareService.LIGHT_ID_BUTTONS, value);
+            mHardware.setLightBrightness_UNCHECKED(HardwareService.LIGHT_ID_BUTTONS, value,
+                brightnessMode);
         }
         if ((mask & KEYBOARD_BRIGHT_BIT) != 0) {
-            mHardware.setLightBrightness_UNCHECKED(HardwareService.LIGHT_ID_KEYBOARD, value);
+            mHardware.setLightBrightness_UNCHECKED(HardwareService.LIGHT_ID_KEYBOARD, value,
+                brightnessMode);
         }
     }
 
@@ -1580,11 +1725,13 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
                     + " delta=" + delta);
         }
         
-        void setTargetLocked(int target, int stepsToTarget, int initialValue,
+        boolean setTargetLocked(int target, int stepsToTarget, int initialValue,
                 int nominalCurrentValue) {
             if (!initialized) {
                 initialized = true;
                 curValue = (float)initialValue;
+            } else if (targetValue == target) {
+                return false;
             }
             targetValue = target;
             delta = (targetValue -
@@ -1598,6 +1745,7 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
                         + noticeMe);
             }
             animating = true;
+            return true;
         }
         
         boolean stepLocked() {
@@ -1657,6 +1805,9 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
         try {
             if (mScreenBrightnessOverride >= 0) {
                 return mScreenBrightnessOverride;
+            } else if (mLightSensorBrightness >= 0 && mUseSoftwareAutoBrightness
+                    && mAutoBrightessEnabled) {
+                return mLightSensorBrightness;
             }
             final int brightness = Settings.System.getInt(mContext.getContentResolver(),
                                                           SCREEN_BRIGHTNESS);
@@ -1667,16 +1818,29 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
         }
     }
 
-    boolean screenIsOn() {
+    public boolean isScreenOn() {
         synchronized (mLocks) {
             return (mPowerState & SCREEN_ON_BIT) != 0;
         }
     }
 
-    boolean screenIsBright() {
+    boolean isScreenBright() {
         synchronized (mLocks) {
             return (mPowerState & SCREEN_BRIGHT) == SCREEN_BRIGHT;
         }
+    }
+
+    private boolean isScreenTurningOffLocked() {
+        return (mScreenBrightness.animating && mScreenBrightness.targetValue == 0);
+    }
+
+    private void forceUserActivityLocked() {
+        // cancel animation so userActivity will succeed
+        mScreenBrightness.animating = false;
+        boolean savedActivityAllowed = mUserActivityAllowed;
+        mUserActivityAllowed = true;
+        userActivity(SystemClock.uptimeMillis(), false);
+        mUserActivityAllowed = savedActivityAllowed;
     }
 
     public void userActivityWithForce(long time, boolean noChangeLights, boolean force) {
@@ -1712,7 +1876,6 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
             return;
         }
 
-
         if (false) {
             if (((mPokey & POKE_LOCK_IGNORE_CHEEK_EVENTS) != 0)) {
                 Log.d(TAG, "userActivity !!!");//, new RuntimeException());
@@ -1726,13 +1889,21 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
                 Log.d(TAG, "userActivity mLastEventTime=" + mLastEventTime + " time=" + time
                         + " mUserActivityAllowed=" + mUserActivityAllowed
                         + " mUserState=0x" + Integer.toHexString(mUserState)
-                        + " mWakeLockState=0x" + Integer.toHexString(mWakeLockState));
+                        + " mWakeLockState=0x" + Integer.toHexString(mWakeLockState)
+                        + " mProximitySensorActive=" + mProximitySensorActive
+                        + " force=" + force);
+            }
+            // ignore user activity if we are in the process of turning off the screen
+            if (isScreenTurningOffLocked()) {
+                Log.d(TAG, "ignoring user activity while turning off screen");
+                return;
             }
             if (mLastEventTime <= time || force) {
                 mLastEventTime = time;
-                if (mUserActivityAllowed || force) {
-                    // Only turn on button backlights if a button was pressed.
-                    if (eventType == BUTTON_EVENT) {
+                if ((mUserActivityAllowed && !mProximitySensorActive) || force) {
+                    // Only turn on button backlights if a button was pressed
+                    // and auto brightness is disabled
+                    if (eventType == BUTTON_EVENT && !mUseSoftwareAutoBrightness) {
                         mUserState = (mKeyboardVisible ? ALL_BRIGHT : SCREEN_BUTTON_BRIGHT);
                     } else {
                         // don't clear button/keyboard backlights when the screen is touched.
@@ -1752,6 +1923,122 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
                     mWakeLockState = mLocks.reactivateScreenLocksLocked();
                     setPowerState(mUserState | mWakeLockState, noChangeLights, true);
                     setTimeoutLocked(time, SCREEN_BRIGHT);
+                }
+            }
+        }
+    }
+
+    private int getAutoBrightnessValue(int sensorValue, int[] values) {
+        try {
+            int i;
+            for (i = 0; i < mAutoBrightnessLevels.length; i++) {
+                if (sensorValue < mAutoBrightnessLevels[i]) {
+                    break;
+                }
+            }
+            return values[i];
+        } catch (Exception e) {
+            // guard against null pointer or index out of bounds errors
+            Log.e(TAG, "getAutoBrightnessValue", e);
+            return 255;
+        }
+    }
+
+    private Runnable mProximityTask = new Runnable() {
+        public void run() {
+            synchronized (mLocks) {
+                if (mProximityPendingValue != -1) {
+                    proximityChangedLocked(mProximityPendingValue == 1);
+                    mProximityPendingValue = -1;
+                }
+            }
+        }
+    };
+
+    private Runnable mAutoBrightnessTask = new Runnable() {
+        public void run() {
+            synchronized (mLocks) {
+                int value = (int)mLightSensorPendingValue;
+                if (value >= 0) {
+                    mLightSensorPendingValue = -1;
+                    lightSensorChangedLocked(value);
+                }
+            }
+        }
+    };
+
+    private void lightSensorChangedLocked(int value) {
+        if (mDebugLightSensor) {
+            Log.d(TAG, "lightSensorChangedLocked " + value);
+        }
+
+        if (mLightSensorValue != value) {
+            mLightSensorValue = value;
+            if ((mPowerState & BATTERY_LOW_BIT) == 0) {
+                int lcdValue = getAutoBrightnessValue(value, mLcdBacklightValues);
+                int buttonValue = getAutoBrightnessValue(value, mButtonBacklightValues);
+                int keyboardValue;
+                if (mKeyboardVisible) {
+                    keyboardValue = getAutoBrightnessValue(value, mKeyboardBacklightValues);
+                } else {
+                    keyboardValue = 0;
+                }
+                mLightSensorBrightness = lcdValue;
+
+                if (mDebugLightSensor) {
+                    Log.d(TAG, "lcdValue " + lcdValue);
+                    Log.d(TAG, "buttonValue " + buttonValue);
+                    Log.d(TAG, "keyboardValue " + keyboardValue);
+                }
+
+                boolean startAnimation = false;
+                if (mAutoBrightessEnabled && mScreenBrightnessOverride < 0) {
+                    if (ANIMATE_SCREEN_LIGHTS) {
+                        if (mScreenBrightness.setTargetLocked(lcdValue,
+                                AUTOBRIGHTNESS_ANIM_STEPS, INITIAL_SCREEN_BRIGHTNESS,
+                                (int)mScreenBrightness.curValue)) {
+                            startAnimation = true;
+                        }
+                    } else {
+                        int brightnessMode = (mAutoBrightessEnabled
+                                            ? HardwareService.BRIGHTNESS_MODE_SENSOR
+                                            : HardwareService.BRIGHTNESS_MODE_USER);
+                        mHardware.setLightBrightness_UNCHECKED(HardwareService.LIGHT_ID_BACKLIGHT,
+                                lcdValue, brightnessMode);
+                    }
+                }
+                if (ANIMATE_BUTTON_LIGHTS) {
+                    if (mButtonBrightness.setTargetLocked(buttonValue,
+                            AUTOBRIGHTNESS_ANIM_STEPS, INITIAL_BUTTON_BRIGHTNESS,
+                            (int)mButtonBrightness.curValue)) {
+                        startAnimation = true;
+                    }
+                } else {
+                    int brightnessMode = (mUseSoftwareAutoBrightness
+                                        ? HardwareService.BRIGHTNESS_MODE_SENSOR
+                                        : HardwareService.BRIGHTNESS_MODE_USER);
+                    mHardware.setLightBrightness_UNCHECKED(HardwareService.LIGHT_ID_BUTTONS,
+                            buttonValue, brightnessMode);
+                }
+                if (ANIMATE_KEYBOARD_LIGHTS) {
+                    if (mKeyboardBrightness.setTargetLocked(keyboardValue,
+                            AUTOBRIGHTNESS_ANIM_STEPS, INITIAL_BUTTON_BRIGHTNESS,
+                            (int)mKeyboardBrightness.curValue)) {
+                        startAnimation = true;
+                    }
+                } else {
+                    int brightnessMode = (mUseSoftwareAutoBrightness
+                                        ? HardwareService.BRIGHTNESS_MODE_SENSOR
+                                        : HardwareService.BRIGHTNESS_MODE_USER);
+                    mHardware.setLightBrightness_UNCHECKED(HardwareService.LIGHT_ID_KEYBOARD,
+                            keyboardValue, brightnessMode);
+                }
+                if (startAnimation) {
+                    if (mDebugLightSensor) {
+                        Log.i(TAG, "lightSensorChangedLocked scheduling light animator");
+                    }
+                    mHandler.removeCallbacks(mLightAnimator);
+                    mHandler.post(mLightAnimator);
                 }
             }
         }
@@ -1816,16 +2103,60 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
     }
     
     public void setKeyboardVisibility(boolean visible) {
-        mKeyboardVisible = visible;
+        synchronized (mLocks) {
+            if (mSpew) {
+                Log.d(TAG, "setKeyboardVisibility: " + visible);
+            }
+            if (mKeyboardVisible != visible) {
+                mKeyboardVisible = visible;
+                // don't signal user activity if the screen is off; other code
+                // will take care of turning on due to a true change to the lid
+                // switch and synchronized with the lock screen.
+                if ((mPowerState & SCREEN_ON_BIT) != 0) {
+                    if (mUseSoftwareAutoBrightness) {
+                        // force recompute of backlight values
+                        if (mLightSensorValue >= 0) {
+                            int value = (int)mLightSensorValue;
+                            mLightSensorValue = -1;
+                            lightSensorChangedLocked(value);
+                        }
+                    }
+                    userActivity(SystemClock.uptimeMillis(), false, BUTTON_EVENT, true);
+                }
+            }
+        }
     }
 
     /**
      * When the keyguard is up, it manages the power state, and userActivity doesn't do anything.
+     * When disabling user activity we also reset user power state so the keyguard can reset its
+     * short screen timeout when keyguard is unhidden.
      */
     public void enableUserActivity(boolean enabled) {
+        if (mSpew) {
+            Log.d(TAG, "enableUserActivity " + enabled);
+        }
         synchronized (mLocks) {
             mUserActivityAllowed = enabled;
-            mLastEventTime = SystemClock.uptimeMillis(); // we might need to pass this in
+            if (!enabled) {
+                // cancel timeout and clear mUserState so the keyguard can set a short timeout
+                setTimeoutLocked(SystemClock.uptimeMillis(), 0);
+            }
+        }
+    }
+
+    private void setScreenBrightnessMode(int mode) {
+        boolean enabled = (mode == SCREEN_BRIGHTNESS_MODE_AUTOMATIC);
+        if (mUseSoftwareAutoBrightness && mAutoBrightessEnabled != enabled) {
+            mAutoBrightessEnabled = enabled;
+            if (isScreenOn()) {
+                // force recompute of backlight values
+                if (mLightSensorValue >= 0) {
+                    int value = (int)mLightSensorValue;
+                    mLightSensorValue = -1;
+                    lightSensorChangedLocked(value);
+                }
+            }
         }
     }
 
@@ -1975,6 +2306,14 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
     }
     
     void systemReady() {
+        mSensorManager = new SensorManager(mHandlerThread.getLooper());
+        mProximitySensor = mSensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY);
+        // don't bother with the light sensor if auto brightness is handled in hardware
+        if (mUseSoftwareAutoBrightness) {
+            mLightSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
+            enableLightSensor(true);
+        }
+
         synchronized (mLocks) {
             Log.d(TAG, "system ready!");
             mDoneBooting = true;
@@ -1996,4 +2335,206 @@ class PowerManagerService extends IPowerManager.Stub implements LocalPowerManage
     public void monitor() {
         synchronized (mLocks) { }
     }
+
+    public int getSupportedWakeLockFlags() {
+        int result = PowerManager.PARTIAL_WAKE_LOCK
+                   | PowerManager.FULL_WAKE_LOCK
+                   | PowerManager.SCREEN_DIM_WAKE_LOCK;
+
+        if (mProximitySensor != null) {
+            result |= PowerManager.PROXIMITY_SCREEN_OFF_WAKE_LOCK;
+        }
+
+        return result;
+    }
+
+    public void setBacklightBrightness(int brightness) {
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.DEVICE_POWER, null);
+        // Don't let applications turn the screen all the way off
+        brightness = Math.max(brightness, Power.BRIGHTNESS_DIM);
+        mHardware.setLightBrightness_UNCHECKED(HardwareService.LIGHT_ID_BACKLIGHT, brightness,
+                HardwareService.BRIGHTNESS_MODE_USER);
+        mHardware.setLightBrightness_UNCHECKED(HardwareService.LIGHT_ID_KEYBOARD,
+            (mKeyboardVisible ? brightness : 0), HardwareService.BRIGHTNESS_MODE_USER);
+        mHardware.setLightBrightness_UNCHECKED(HardwareService.LIGHT_ID_BUTTONS, brightness,
+            HardwareService.BRIGHTNESS_MODE_USER);
+        long identity = Binder.clearCallingIdentity();
+        try {
+            mBatteryStats.noteScreenBrightness(brightness);
+        } catch (RemoteException e) {
+            Log.w(TAG, "RemoteException calling noteScreenBrightness on BatteryStatsService", e);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+
+        // update our animation state
+        if (ANIMATE_SCREEN_LIGHTS) {
+            mScreenBrightness.curValue = brightness;
+            mScreenBrightness.animating = false;
+            mScreenBrightness.targetValue = -1;
+        }
+        if (ANIMATE_KEYBOARD_LIGHTS) {
+            mKeyboardBrightness.curValue = brightness;
+            mKeyboardBrightness.animating = false;
+            mKeyboardBrightness.targetValue = -1;
+        }
+        if (ANIMATE_BUTTON_LIGHTS) {
+            mButtonBrightness.curValue = brightness;
+            mButtonBrightness.animating = false;
+            mButtonBrightness.targetValue = -1;
+        }
+    }
+
+    private void enableProximityLockLocked() {
+        if (mDebugProximitySensor) {
+            Log.d(TAG, "enableProximityLockLocked");
+        }
+        if (!mProximitySensorEnabled) {
+            // clear calling identity so sensor manager battery stats are accurate
+            long identity = Binder.clearCallingIdentity();
+            try {
+                mSensorManager.registerListener(mProximityListener, mProximitySensor,
+                        SensorManager.SENSOR_DELAY_NORMAL);
+                mProximitySensorEnabled = true;
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+    }
+
+    private void disableProximityLockLocked() {
+        if (mDebugProximitySensor) {
+            Log.d(TAG, "disableProximityLockLocked");
+        }
+        if (mProximitySensorEnabled) {
+            // clear calling identity so sensor manager battery stats are accurate
+            long identity = Binder.clearCallingIdentity();
+            try {
+                mSensorManager.unregisterListener(mProximityListener);
+                mHandler.removeCallbacks(mProximityTask);
+                mProximitySensorEnabled = false;
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+            if (mProximitySensorActive) {
+                mProximitySensorActive = false;
+                forceUserActivityLocked();
+            }
+        }
+    }
+
+    private void proximityChangedLocked(boolean active) {
+        if (mDebugProximitySensor) {
+            Log.d(TAG, "proximityChangedLocked, active: " + active);
+        }
+        if (!mProximitySensorEnabled) {
+            Log.d(TAG, "Ignoring proximity change after sensor is disabled");
+            return;
+        }
+        if (active) {
+            goToSleepLocked(SystemClock.uptimeMillis());
+            mProximitySensorActive = true;
+        } else {
+            // proximity sensor negative events trigger as user activity.
+            // temporarily set mUserActivityAllowed to true so this will work
+            // even when the keyguard is on.
+            mProximitySensorActive = false;
+            forceUserActivityLocked();
+
+            if (mProximityWakeLockCount == 0) {
+                // disable sensor if we have no listeners left after proximity negative
+                disableProximityLockLocked();
+            }
+        }
+    }
+
+    private void enableLightSensor(boolean enable) {
+        if (mDebugLightSensor) {
+            Log.d(TAG, "enableLightSensor " + enable);
+        }
+        if (mSensorManager != null && mLightSensorEnabled != enable) {
+            mLightSensorEnabled = enable;
+            // clear calling identity so sensor manager battery stats are accurate
+            long identity = Binder.clearCallingIdentity();
+            try {
+                if (enable) {
+                    mSensorManager.registerListener(mLightListener, mLightSensor,
+                            SensorManager.SENSOR_DELAY_NORMAL);
+                } else {
+                    mSensorManager.unregisterListener(mLightListener);
+                    mHandler.removeCallbacks(mAutoBrightnessTask);
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+    }
+
+    SensorEventListener mProximityListener = new SensorEventListener() {
+        public void onSensorChanged(SensorEvent event) {
+            long milliseconds = SystemClock.elapsedRealtime();
+            synchronized (mLocks) {
+                float distance = event.values[0];
+                long timeSinceLastEvent = milliseconds - mLastProximityEventTime;
+                mLastProximityEventTime = milliseconds;
+                mHandler.removeCallbacks(mProximityTask);
+
+                // compare against getMaximumRange to support sensors that only return 0 or 1
+                boolean active = (distance >= 0.0 && distance < PROXIMITY_THRESHOLD &&
+                        distance < mProximitySensor.getMaximumRange());
+
+                if (mDebugProximitySensor) {
+                    Log.d(TAG, "mProximityListener.onSensorChanged active: " + active);
+                }
+                if (timeSinceLastEvent < PROXIMITY_SENSOR_DELAY) {
+                    // enforce delaying atleast PROXIMITY_SENSOR_DELAY before processing
+                    mProximityPendingValue = (active ? 1 : 0);
+                    mHandler.postDelayed(mProximityTask, PROXIMITY_SENSOR_DELAY - timeSinceLastEvent);
+                } else {
+                    // process the value immediately
+                    mProximityPendingValue = -1;
+                    proximityChangedLocked(active);
+                }
+            }
+        }
+
+        public void onAccuracyChanged(Sensor sensor, int accuracy) {
+            // ignore
+        }
+    };
+
+    SensorEventListener mLightListener = new SensorEventListener() {
+        public void onSensorChanged(SensorEvent event) {
+            synchronized (mLocks) {
+                // ignore light sensor while screen is turning off
+                if (isScreenTurningOffLocked()) {
+                    return;
+                }
+
+                int value = (int)event.values[0];
+                long milliseconds = SystemClock.elapsedRealtime();
+                if (mDebugLightSensor) {
+                    Log.d(TAG, "onSensorChanged: light value: " + value);
+                }
+                mHandler.removeCallbacks(mAutoBrightnessTask);
+                if (mLightSensorValue != value) {
+                    if (mLightSensorValue == -1 ||
+                            milliseconds < mLastScreenOnTime + mLightSensorWarmupTime) {
+                        // process the value immediately if screen has just turned on
+                        lightSensorChangedLocked(value);
+                    } else {
+                        // delay processing to debounce the sensor
+                        mLightSensorPendingValue = value;
+                        mHandler.postDelayed(mAutoBrightnessTask, LIGHT_SENSOR_DELAY);
+                    }
+                } else {
+                    mLightSensorPendingValue = -1;
+                }
+            }
+        }
+
+        public void onAccuracyChanged(Sensor sensor, int accuracy) {
+            // ignore
+        }
+    };
 }

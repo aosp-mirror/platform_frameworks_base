@@ -480,22 +480,22 @@ static status_t compileAttribute(const sp<AaptFile>& in,
                     enumOrFlagsComment.append((attr.type&ResTable_map::TYPE_ENUM)
                                        ? String16(" be one of the following constant values.")
                                        : String16(" be one or more (separated by '|') of the following constant values."));
-                    enumOrFlagsComment.append(String16("</p>\n<table border=\"2\" width=\"85%\" align=\"center\" frame=\"hsides\" rules=\"all\" cellpadding=\"5\">\n"
+                    enumOrFlagsComment.append(String16("</p>\n<table>\n"
                                                 "<colgroup align=\"left\" />\n"
                                                 "<colgroup align=\"left\" />\n"
                                                 "<colgroup align=\"left\" />\n"
-                                                "<tr><th>Constant<th>Value<th>Description</tr>"));
+                                                "<tr><th>Constant</th><th>Value</th><th>Description</th></tr>"));
                 }
                 
-                enumOrFlagsComment.append(String16("\n<tr><th><code>"));
+                enumOrFlagsComment.append(String16("\n<tr><td><code>"));
                 enumOrFlagsComment.append(itemIdent);
-                enumOrFlagsComment.append(String16("</code><td>"));
+                enumOrFlagsComment.append(String16("</code></td><td>"));
                 enumOrFlagsComment.append(value);
-                enumOrFlagsComment.append(String16("<td>"));
+                enumOrFlagsComment.append(String16("</td><td>"));
                 if (block.getComment(&len)) {
                     enumOrFlagsComment.append(String16(block.getComment(&len)));
                 }
-                enumOrFlagsComment.append(String16("</tr>"));
+                enumOrFlagsComment.append(String16("</td></tr>"));
                 
                 err = outTable->addBag(SourcePos(in->getPrintableSource(), block.getLineNumber()),
                                        myPackage,
@@ -663,6 +663,7 @@ status_t compileResourceFile(Bundle* bundle,
     const String16 public16("public");
     const String16 public_padding16("public-padding");
     const String16 private_symbols16("private-symbols");
+    const String16 add_resource16("add-resource");
     const String16 skip16("skip");
     const String16 eat_comment16("eat-comment");
 
@@ -960,6 +961,36 @@ status_t compileResourceFile(Bundle* bundle,
                 }
                 continue;
 
+            } else if (strcmp16(block.getElementName(&len), add_resource16.string()) == 0) {
+                SourcePos srcPos(in->getPrintableSource(), block.getLineNumber());
+            
+                String16 typeName;
+                ssize_t typeIdx = block.indexOfAttribute(NULL, "type");
+                if (typeIdx < 0) {
+                    srcPos.error("A 'type' attribute is required for <add-resource>\n");
+                    hasErrors = localHasErrors = true;
+                }
+                typeName = String16(block.getAttributeStringValue(typeIdx, &len));
+
+                String16 name;
+                ssize_t nameIdx = block.indexOfAttribute(NULL, "name");
+                if (nameIdx < 0) {
+                    srcPos.error("A 'name' attribute is required for <add-resource>\n");
+                    hasErrors = localHasErrors = true;
+                }
+                name = String16(block.getAttributeStringValue(nameIdx, &len));
+
+                outTable->canAddEntry(srcPos, myPackage, typeName, name);
+
+                while ((code=block.next()) != ResXMLTree::END_DOCUMENT && code != ResXMLTree::BAD_DOCUMENT) {
+                    if (code == ResXMLTree::END_TAG) {
+                        if (strcmp16(block.getElementName(&len), add_resource16.string()) == 0) {
+                            break;
+                        }
+                    }
+                }
+                continue;
+                
             } else if (strcmp16(block.getElementName(&len), declare_styleable16.string()) == 0) {
                 SourcePos srcPos(in->getPrintableSource(), block.getLineNumber());
                                 
@@ -1557,9 +1588,21 @@ status_t ResourceTable::startBag(const SourcePos& sourcePos,
     }
 #endif
     if (overlay && !hasBagOrEntry(package, type, name)) {
-        sourcePos.error("Can't add new bags in an overlay.  See '%s'\n",
-                        String8(name).string());
-        return UNKNOWN_ERROR;
+        bool canAdd = false;
+        sp<Package> p = mPackages.valueFor(package);
+        if (p != NULL) {
+            sp<Type> t = p->getTypes().valueFor(type);
+            if (t != NULL) {
+                if (t->getCanAddEntries().indexOf(name) >= 0) {
+                    canAdd = true;
+                }
+            }
+        }
+        if (!canAdd) {
+            sourcePos.error("Resource does not already exist in overlay at '%s'; use <add-resource> to add.\n",
+                            String8(name).string());
+            return UNKNOWN_ERROR;
+        }
     }
     sp<Entry> e = getEntry(package, type, name, sourcePos, overlay, params);
     if (e == NULL) {
@@ -1722,6 +1765,15 @@ bool ResourceTable::appendTypeComment(const String16& package,
         }
     }
     return false;
+}
+
+void ResourceTable::canAddEntry(const SourcePos& pos,
+        const String16& package, const String16& type, const String16& name)
+{
+    sp<Type> t = getType(package, type, pos);
+    if (t != NULL) {
+        t->canAddEntry(name);
+    }
 }
 
 size_t ResourceTable::size() const {
@@ -2312,13 +2364,12 @@ ResourceTable::validateLocalizations(void)
                         String8 region(config.string(), 2);
                         if (configSet.find(region) == configSet.end()) {
                             if (configSet.count(defaultLocale) == 0) {
-                                fprintf(stdout, "aapt: error: "
+                                fprintf(stdout, "aapt: warning: "
                                         "*** string '%s' has no default or required localization "
                                         "for '%s' in %s\n",
                                         String8(nameIter->first).string(),
                                         config.string(),
                                         mBundle->getResourceSourceDirs()[0]);
-                                err = UNKNOWN_ERROR;
                             }
                         }
                     }
@@ -3215,6 +3266,11 @@ status_t ResourceTable::Type::addPublic(const SourcePos& sourcePos,
     return NO_ERROR;
 }
 
+void ResourceTable::Type::canAddEntry(const String16& name)
+{
+    mCanAddEntries.add(name);
+}
+
 sp<ResourceTable::Entry> ResourceTable::Type::getEntry(const String16& entry,
                                                        const SourcePos& sourcePos,
                                                        const ResTable_config* config,
@@ -3224,9 +3280,10 @@ sp<ResourceTable::Entry> ResourceTable::Type::getEntry(const String16& entry,
     int pos = -1;
     sp<ConfigList> c = mConfigs.valueFor(entry);
     if (c == NULL) {
-        if (overlay == true) {
-            sourcePos.error("Resource %s appears in overlay but not"
-                            " in the base package.\n", String8(entry).string());
+        if (overlay == true && mCanAddEntries.indexOf(entry) < 0) {
+            sourcePos.error("Resource at %s appears in overlay but not"
+                            " in the base package; use <add-resource> to add.\n",
+                            String8(entry).string());
             return NULL;
         }
         c = new ConfigList(entry, sourcePos);
@@ -3554,26 +3611,26 @@ sp<const ResourceTable::Entry> ResourceTable::getEntry(uint32_t resID,
 
     }
     if (p == NULL) {
-        fprintf(stderr, "WARNING: Package not found for resource #%08x\n", resID);
+        fprintf(stderr, "warning: Package not found for resource #%08x\n", resID);
         return NULL;
     }
 
     int tid = Res_GETTYPE(resID);
     if (tid < 0 || tid >= (int)p->getOrderedTypes().size()) {
-        fprintf(stderr, "WARNING: Type not found for resource #%08x\n", resID);
+        fprintf(stderr, "warning: Type not found for resource #%08x\n", resID);
         return NULL;
     }
     sp<Type> t = p->getOrderedTypes()[tid];
 
     int eid = Res_GETENTRY(resID);
     if (eid < 0 || eid >= (int)t->getOrderedConfigs().size()) {
-        fprintf(stderr, "WARNING: Entry not found for resource #%08x\n", resID);
+        fprintf(stderr, "warning: Entry not found for resource #%08x\n", resID);
         return NULL;
     }
 
     sp<ConfigList> c = t->getOrderedConfigs()[eid];
     if (c == NULL) {
-        fprintf(stderr, "WARNING: Entry not found for resource #%08x\n", resID);
+        fprintf(stderr, "warning: Entry not found for resource #%08x\n", resID);
         return NULL;
     }
     
@@ -3581,7 +3638,7 @@ sp<const ResourceTable::Entry> ResourceTable::getEntry(uint32_t resID,
     if (config) cdesc = *config;
     sp<Entry> e = c->getEntries().valueFor(cdesc);
     if (c == NULL) {
-        fprintf(stderr, "WARNING: Entry configuration not found for resource #%08x\n", resID);
+        fprintf(stderr, "warning: Entry configuration not found for resource #%08x\n", resID);
         return NULL;
     }
     
@@ -3599,7 +3656,7 @@ const ResourceTable::Item* ResourceTable::getItem(uint32_t resID, uint32_t attrI
     for (size_t i=0; i<N; i++) {
         const Item& it = e->getBag().valueAt(i);
         if (it.bagKeyId == 0) {
-            fprintf(stderr, "WARNING: ID not yet assigned to '%s' in bag '%s'\n",
+            fprintf(stderr, "warning: ID not yet assigned to '%s' in bag '%s'\n",
                     String8(e->getName()).string(),
                     String8(e->getBag().keyAt(i)).string());
         }
@@ -3627,7 +3684,7 @@ bool ResourceTable::getItemValue(
                     break;
                 }
             }
-            fprintf(stderr, "WARNING: Circular reference detected in key '%s' of bag '%s'\n",
+            fprintf(stderr, "warning: Circular reference detected in key '%s' of bag '%s'\n",
                     String8(e->getName()).string(),
                     String8(e->getBag().keyAt(i)).string());
             return false;

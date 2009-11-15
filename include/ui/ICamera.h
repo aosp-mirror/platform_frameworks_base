@@ -18,10 +18,10 @@
 #define ANDROID_HARDWARE_ICAMERA_H
 
 #include <utils/RefBase.h>
-#include <utils/IInterface.h>
-#include <utils/Parcel.h>
+#include <binder/IInterface.h>
+#include <binder/Parcel.h>
 #include <ui/ISurface.h>
-#include <utils/IMemory.h>
+#include <binder/IMemory.h>
 #include <utils/String8.h>
 #include <ui/Camera.h>
 
@@ -76,6 +76,9 @@ public:
     // auto focus
     virtual status_t        autoFocus() = 0;
 
+    // cancel auto focus
+    virtual status_t        cancelAutoFocus() = 0;
+
     // take a picture
     virtual status_t        takePicture() = 0;
 
@@ -84,6 +87,9 @@ public:
 
     // get preview/capture parameters - key/value pairs
     virtual String8         getParameters() const = 0;
+
+    // send command to camera driver
+    virtual status_t        sendCommand(int32_t cmd, int32_t arg1, int32_t arg2) = 0;
 };
 
 // ----------------------------------------------------------------------------

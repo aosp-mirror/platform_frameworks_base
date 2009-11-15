@@ -16,16 +16,20 @@
 
 package android.bluetooth;
 
+import android.bluetooth.BluetoothDevice;
+
 /**
  * System private API for Bluetooth A2DP service
  *
  * {@hide}
  */
 interface IBluetoothA2dp {
-    int connectSink(in String address);
-    int disconnectSink(in String address);
-    List<String> listConnectedSinks();
-    int getSinkState(in String address);
-    int setSinkPriority(in String address, int priority);
-    int getSinkPriority(in String address);
+    boolean connectSink(in BluetoothDevice device);
+    boolean disconnectSink(in BluetoothDevice device);
+    boolean suspendSink(in BluetoothDevice device);
+    boolean resumeSink(in BluetoothDevice device);
+    BluetoothDevice[] getConnectedSinks();  // change to Set<> once AIDL supports
+    int getSinkState(in BluetoothDevice device);
+    boolean setSinkPriority(in BluetoothDevice device, int priority);
+    int getSinkPriority(in BluetoothDevice device);
 }

@@ -2,16 +2,16 @@
 **
 ** Copyright 2006, The Android Open Source Project
 **
-** Licensed under the Apache License, Version 2.0 (the "License"); 
-** you may not use this file except in compliance with the License. 
-** You may obtain a copy of the License at 
+** Licensed under the Apache License, Version 2.0 (the "License");
+** you may not use this file except in compliance with the License.
+** You may obtain a copy of the License at
 **
-**     http://www.apache.org/licenses/LICENSE-2.0 
+**     http://www.apache.org/licenses/LICENSE-2.0
 **
-** Unless required by applicable law or agreed to in writing, software 
-** distributed under the License is distributed on an "AS IS" BASIS, 
-** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
-** See the License for the specific language governing permissions and 
+** Unless required by applicable law or agreed to in writing, software
+** distributed under the License is distributed on an "AS IS" BASIS,
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+** See the License for the specific language governing permissions and
 ** limitations under the License.
 */
 
@@ -22,6 +22,12 @@
 #include "state.h"
 #include "texture.h"
 #include "TextureObjectManager.h"
+
+#include <private/ui/android_natives_priv.h>
+
+#ifdef LIBAGL_USE_GRALLOC_COPYBITS
+#include "copybit.h"
+#endif // LIBAGL_USE_GRALLOC_COPYBITS
 
 namespace android {
 
@@ -48,7 +54,7 @@ void ogles_init_texture(ogles_context_t* c)
     // each context has a default named (0) texture (not shared)
     c->textures.defaultTexture = new EGLTextureObject();
     c->textures.defaultTexture->incStrong(c);
-    
+
     // bind the default texture to each texture unit
     for (int i=0; i<GGL_TEXTURE_UNIT_COUNT ; i++) {
         bindTextureTmu(c, i, 0, c->textures.defaultTexture);
@@ -96,7 +102,7 @@ void validate_tmu(ogles_context_t* c, int i)
     }
 }
 
-void ogles_validate_texture_impl(ogles_context_t* c)
+void ogles_validate_texture(ogles_context_t* c)
 {
     for (int i=0 ; i<GGL_TEXTURE_UNIT_COUNT ; i++) {
         if (c->rasterizer.state.texture[i].enable)
@@ -108,6 +114,66 @@ void ogles_validate_texture_impl(ogles_context_t* c)
 static
 void invalidate_texture(ogles_context_t* c, int tmu, uint8_t flags = 0xFF) {
     c->textures.tmu[tmu].dirty = flags;
+}
+
+/*
+ * If the active textures are EGLImage, they need to be locked before
+ * they can be used.
+ *
+ * FIXME: code below is far from being optimal
+ *
+ */
+
+void ogles_lock_textures(ogles_context_t* c)
+{
+    for (int i=0 ; i<GGL_TEXTURE_UNIT_COUNT ; i++) {
+        if (c->rasterizer.state.texture[i].enable) {
+            texture_unit_t& u(c->textures.tmu[i]);
+            android_native_buffer_t* native_buffer = u.texture->buffer;
+            if (native_buffer) {
+                c->rasterizer.procs.activeTexture(c, i);
+                hw_module_t const* pModule;
+                if (hw_get_module(GRALLOC_HARDWARE_MODULE_ID, &pModule))
+                    continue;
+
+                gralloc_module_t const* module =
+                    reinterpret_cast<gralloc_module_t const*>(pModule);
+
+                void* vaddr;
+                int err = module->lock(module, native_buffer->handle,
+                        GRALLOC_USAGE_SW_READ_OFTEN,
+                        0, 0, native_buffer->width, native_buffer->height,
+                        &vaddr);
+
+                u.texture->setImageBits(vaddr);
+                c->rasterizer.procs.bindTexture(c, &(u.texture->surface));
+            }
+        }
+    }
+}
+
+void ogles_unlock_textures(ogles_context_t* c)
+{
+    for (int i=0 ; i<GGL_TEXTURE_UNIT_COUNT ; i++) {
+        if (c->rasterizer.state.texture[i].enable) {
+            texture_unit_t& u(c->textures.tmu[i]);
+            android_native_buffer_t* native_buffer = u.texture->buffer;
+            if (native_buffer) {
+                c->rasterizer.procs.activeTexture(c, i);
+                hw_module_t const* pModule;
+                if (hw_get_module(GRALLOC_HARDWARE_MODULE_ID, &pModule))
+                    continue;
+
+                gralloc_module_t const* module =
+                    reinterpret_cast<gralloc_module_t const*>(pModule);
+
+                module->unlock(module, native_buffer->handle);
+                u.texture->setImageBits(NULL);
+                c->rasterizer.procs.bindTexture(c, &(u.texture->surface));
+            }
+        }
+    }
+    c->rasterizer.procs.activeTexture(c, c->textures.active);
 }
 
 // ----------------------------------------------------------------------------
@@ -255,7 +321,7 @@ sp<EGLTextureObject> getAndBindActiveTextureObject(ogles_context_t* c)
         u.texture->decStrong(c);
 
     if (name == 0) {
-        // 0 is our local texture object, not shared with anyone. 
+        // 0 is our local texture object, not shared with anyone.
         // But it affects all bound TMUs immediately.
         // (we need to invalidate all units bound to this texture object)
         tex = c->textures.defaultTexture;
@@ -273,7 +339,7 @@ sp<EGLTextureObject> getAndBindActiveTextureObject(ogles_context_t* c)
     u.texture = tex.get();
     u.texture->incStrong(c);
     u.name = name;
-    invalidate_texture(c, active);    
+    invalidate_texture(c, active);
     return tex;
 }
 
@@ -282,7 +348,7 @@ void bindTextureTmu(
 {
     if (tex.get() == c->textures.tmu[tmu].texture)
         return;
-    
+
     // free the reference to the previously bound object
     texture_unit_t& u(c->textures.tmu[tmu]);
     if (u.texture)
@@ -310,7 +376,7 @@ int createTextureSurface(ogles_context_t* c,
     if (formatIdx == 0) { // we don't know what to do with this
         return GL_INVALID_OPERATION;
     }
-    
+
     // figure out the size we need as well as the stride
     const GGLFormat& pixelFormat(c->rasterizer.formats[formatIdx]);
     const int32_t align = c->textures.unpackAlignment-1;
@@ -341,6 +407,49 @@ int createTextureSurface(ogles_context_t* c,
     *outSurface = &tex->surface;
     *outSize = size;
     return 0;
+}
+
+static size_t dataSizePalette4(int numLevels, int width, int height, int format)
+{
+    int indexBits = 8;
+    int entrySize = 0;
+    switch (format) {
+    case GL_PALETTE4_RGB8_OES:
+        indexBits = 4;
+        /* FALLTHROUGH */
+    case GL_PALETTE8_RGB8_OES:
+        entrySize = 3;
+        break;
+
+    case GL_PALETTE4_RGBA8_OES:
+        indexBits = 4;
+        /* FALLTHROUGH */
+    case GL_PALETTE8_RGBA8_OES:
+        entrySize = 4;
+        break;
+
+    case GL_PALETTE4_R5_G6_B5_OES:
+    case GL_PALETTE4_RGBA4_OES:
+    case GL_PALETTE4_RGB5_A1_OES:
+        indexBits = 4;
+        /* FALLTHROUGH */
+    case GL_PALETTE8_R5_G6_B5_OES:
+    case GL_PALETTE8_RGBA4_OES:
+    case GL_PALETTE8_RGB5_A1_OES:
+        entrySize = 2;
+        break;
+    }
+
+    size_t size = (1 << indexBits) * entrySize; // palette size
+
+    for (int i=0 ; i< numLevels ; i++) {
+        int w = (width  >> i) ? : 1;
+        int h = (height >> i) ? : 1;
+        int levelSize = h * ((w * indexBits) / 8) ? : 1;
+        size += levelSize;
+    }
+
+    return size;
 }
 
 static void decodePalette4(const GLvoid *data, int level, int width, int height,
@@ -377,6 +486,7 @@ static void decodePalette4(const GLvoid *data, int level, int width, int height,
     }
 
     const int paletteSize = (1 << indexBits) * entrySize;
+
     uint8_t const* pixels = (uint8_t *)data + paletteSize;
     for (int i=0 ; i<level ; i++) {
         int w = (width  >> i) ? : 1;
@@ -530,8 +640,8 @@ static void texParameterx(
         ogles_error(c, GL_INVALID_ENUM);
         return;
     }
-    
-    EGLTextureObject* textureObject = c->textures.tmu[c->textures.active].texture;    
+
+    EGLTextureObject* textureObject = c->textures.tmu[c->textures.active].texture;
     switch (pname) {
     case GL_TEXTURE_WRAP_S:
         if ((param == GL_REPEAT) ||
@@ -581,12 +691,11 @@ invalid_enum:
 }
 
 
-static void drawTexxOES(GLfixed x, GLfixed y, GLfixed z, GLfixed w, GLfixed h,
+
+static void drawTexxOESImp(GLfixed x, GLfixed y, GLfixed z, GLfixed w, GLfixed h,
         ogles_context_t* c)
 {
-    // quickly reject empty rects
-    if ((w|h) <= 0)
-        return;                
+    ogles_lock_textures(c);
 
     const GGLSurface& cbSurface = c->rasterizer.state.buffers.color.s;
     y = gglIntToFixed(cbSurface.height) - (y + h);
@@ -610,7 +719,7 @@ static void drawTexxOES(GLfixed x, GLfixed y, GLfixed z, GLfixed w, GLfixed h,
                 GGL_TEXTURE_2D, GGL_TEXTURE_WRAP_T, GGL_CLAMP);
         u.dirty = 0xFF; // XXX: should be more subtle
 
-        EGLTextureObject* textureObject = u.texture;  
+        EGLTextureObject* textureObject = u.texture;
         const GLint Ucr = textureObject->crop_rect[0] << 16;
         const GLint Vcr = textureObject->crop_rect[1] << 16;
         const GLint Wcr = textureObject->crop_rect[2] << 16;
@@ -641,11 +750,30 @@ static void drawTexxOES(GLfixed x, GLfixed y, GLfixed z, GLfixed w, GLfixed h,
     c->rasterizer.procs.disable(c, GGL_W_LERP);
     c->rasterizer.procs.disable(c, GGL_AA);
     c->rasterizer.procs.shadeModel(c, GL_FLAT);
-    c->rasterizer.procs.recti(c, 
+    c->rasterizer.procs.recti(c,
             gglFixedToIntRound(x),
             gglFixedToIntRound(y),
             gglFixedToIntRound(x)+w,
             gglFixedToIntRound(y)+h);
+
+    ogles_unlock_textures(c);
+}
+
+static void drawTexxOES(GLfixed x, GLfixed y, GLfixed z, GLfixed w, GLfixed h,
+        ogles_context_t* c)
+{
+#ifdef LIBAGL_USE_GRALLOC_COPYBITS
+    if (drawTexiOESWithCopybit(gglFixedToIntRound(x),
+            gglFixedToIntRound(y), gglFixedToIntRound(z),
+            gglFixedToIntRound(w), gglFixedToIntRound(h), c)) {
+        return;
+    }
+#else
+    // quickly reject empty rects
+    if ((w|h) <= 0)
+        return;
+#endif
+    drawTexxOESImp(x, y, z, w, h, c);
 }
 
 static void drawTexiOES(GLint x, GLint y, GLint z, GLint w, GLint h, ogles_context_t* c)
@@ -656,14 +784,21 @@ static void drawTexiOES(GLint x, GLint y, GLint z, GLint w, GLint h, ogles_conte
     // which is a lot faster.
 
     if (ggl_likely(c->rasterizer.state.enabled_tmu == 1)) {
+#ifdef LIBAGL_USE_GRALLOC_COPYBITS
+        if (drawTexiOESWithCopybit(x, y, z, w, h, c)) {
+            return;
+        }
+#endif
         const int tmu = 0;
         texture_unit_t& u(c->textures.tmu[tmu]);
-        EGLTextureObject* textureObject = u.texture;  
+        EGLTextureObject* textureObject = u.texture;
         const GLint Wcr = textureObject->crop_rect[2];
         const GLint Hcr = textureObject->crop_rect[3];
 
         if ((w == Wcr) && (h == -Hcr)) {
+#ifndef LIBAGL_USE_GRALLOC_COPYBITS
             if ((w|h) <= 0) return; // quickly reject empty rects
+#endif
 
             if (u.dirty) {
                 c->rasterizer.procs.activeTexture(c, tmu);
@@ -679,14 +814,14 @@ static void drawTexiOES(GLint x, GLint y, GLint z, GLint w, GLint h, ogles_conte
                     GGL_TEXTURE_GEN_MODE, GGL_ONE_TO_ONE);
             u.dirty = 0xFF; // XXX: should be more subtle
             c->rasterizer.procs.activeTexture(c, c->textures.active);
-            
+
             const GGLSurface& cbSurface = c->rasterizer.state.buffers.color.s;
             y = cbSurface.height - (y + h);
             const GLint Ucr = textureObject->crop_rect[0];
             const GLint Vcr = textureObject->crop_rect[1];
             const GLint s0  = Ucr - x;
             const GLint t0  = (Vcr + Hcr) - y;
-            
+
             const GLuint tw = textureObject->surface.width;
             const GLuint th = textureObject->surface.height;
             if ((uint32_t(s0+x+w) > tw) || (uint32_t(t0+y+h) > th)) {
@@ -694,7 +829,9 @@ static void drawTexiOES(GLint x, GLint y, GLint z, GLint w, GLint h, ogles_conte
                 // in this case, so we just use the slow case, which
                 // at least won't crash
                 goto slow_case;
-            } 
+            }
+
+            ogles_lock_textures(c);
 
             c->rasterizer.procs.texCoord2i(c, s0, t0);
             const uint32_t enables = c->rasterizer.state.enables;
@@ -706,12 +843,15 @@ static void drawTexiOES(GLint x, GLint y, GLint z, GLint w, GLint h, ogles_conte
             c->rasterizer.procs.disable(c, GGL_AA);
             c->rasterizer.procs.shadeModel(c, GL_FLAT);
             c->rasterizer.procs.recti(c, x, y, x+w, y+h);
+
+            ogles_unlock_textures(c);
+
             return;
         }
     }
 
 slow_case:
-    drawTexxOES(
+    drawTexxOESImp(
             gglIntToFixed(x), gglIntToFixed(y), gglIntToFixed(z),
             gglIntToFixed(w), gglIntToFixed(h),
             c);
@@ -749,7 +889,7 @@ void glBindTexture(GLenum target, GLuint texture)
     }
 
     // Bind or create a texture
-    sp<EGLTextureObject> tex;    
+    sp<EGLTextureObject> tex;
     if (texture == 0) {
         // 0 is our local texture object
         tex = c->textures.defaultTexture;
@@ -837,7 +977,7 @@ void glPixelStorei(GLenum pname, GLint param)
     if ((pname != GL_PACK_ALIGNMENT) && (pname != GL_UNPACK_ALIGNMENT)) {
         ogles_error(c, GL_INVALID_ENUM);
         return;
-    }    
+    }
     if ((param<=0 || param>8) || (param & (param-1))) {
         ogles_error(c, GL_INVALID_VALUE);
         return;
@@ -952,7 +1092,7 @@ void glCompressedTexImage2D(
     }
 
     // "uncompress" the texture since pixelflinger doesn't support
-    // any compressed texture format natively. 
+    // any compressed texture format natively.
     GLenum format;
     GLenum type;
     switch (internalformat) {
@@ -995,6 +1135,12 @@ void glCompressedTexImage2D(
     GGLSurface* surface;
     // all mipmap levels are specified at once.
     const int numLevels = level<0 ? -level : 1;
+
+    if (dataSizePalette4(numLevels, width, height, format) > imageSize) {
+        ogles_error(c, GL_INVALID_VALUE);
+        return;
+    }
+
     for (int i=0 ; i<numLevels ; i++) {
         int lod_w = (width  >> i) ? : 1;
         int lod_h = (height >> i) ? : 1;
@@ -1016,7 +1162,7 @@ void glTexImage2D(
         GLenum format, GLenum type, const GLvoid *pixels)
 {
     ogles_context_t* c = ogles_context_t::get();
-    if (target != GL_TEXTURE_2D && target != GL_DIRECT_TEXTURE_2D_QUALCOMM) {
+    if (target != GL_TEXTURE_2D) {
         ogles_error(c, GL_INVALID_ENUM);
         return;
     }
@@ -1024,7 +1170,7 @@ void glTexImage2D(
         ogles_error(c, GL_INVALID_VALUE);
         return;
     }
-    if (format != internalformat) {
+    if (format != (GLenum)internalformat) {
         ogles_error(c, GL_INVALID_OPERATION);
         return;
     }
@@ -1034,16 +1180,10 @@ void glTexImage2D(
 
     int32_t size = 0;
     GGLSurface* surface = 0;
-    if (target != GL_DIRECT_TEXTURE_2D_QUALCOMM) {
-        int error = createTextureSurface(c, &surface, &size,
-                level, format, type, width, height);
-        if (error) {
-            ogles_error(c, error);
-            return;
-        }
-    } else if (pixels == 0 || level != 0) {
-        // pixel can't be null for direct texture
-        ogles_error(c, GL_INVALID_OPERATION);
+    int error = createTextureSurface(c, &surface, &size,
+            level, format, type, width, height);
+    if (error) {
+        ogles_error(c, error);
         return;
     }
 
@@ -1064,18 +1204,12 @@ void glTexImage2D(
         userSurface.compressedFormat = 0;
         userSurface.data = (GLubyte*)pixels;
 
-        if (target != GL_DIRECT_TEXTURE_2D_QUALCOMM) {
-            int err = copyPixels(c, *surface, 0, 0, userSurface, 0, 0, width, height); 
-            if (err) {
-                ogles_error(c, err);
-                return;
-            }
-            generateMipmap(c, level);
-        } else {
-            // bind it to the texture unit
-            sp<EGLTextureObject> tex = getAndBindActiveTextureObject(c);
-            tex->setSurface(&userSurface);
+        int err = copyPixels(c, *surface, 0, 0, userSurface, 0, 0, width, height);
+        if (err) {
+            ogles_error(c, err);
+            return;
         }
+        generateMipmap(c, level);
     }
 }
 
@@ -1118,6 +1252,11 @@ void glTexSubImage2D(
         ogles_error(c, GL_INVALID_OPERATION);
         return;
     }
+
+    if (format != tex->internalformat) {
+        ogles_error(c, GL_INVALID_OPERATION);
+        return;
+    }
     if ((xoffset + width  > GLsizei(surface.width)) ||
         (yoffset + height > GLsizei(surface.height))) {
         ogles_error(c, GL_INVALID_VALUE);
@@ -1150,7 +1289,7 @@ void glTexSubImage2D(
 
     int err = copyPixels(c,
             surface, xoffset, yoffset,
-            userSurface, 0, 0, width, height); 
+            userSurface, 0, 0, width, height);
     if (err) {
         ogles_error(c, err);
         return;
@@ -1203,7 +1342,7 @@ void glCopyTexImage2D(
     case GL_LUMINANCE_ALPHA:
     case GL_LUMINANCE:
         type = GL_UNSIGNED_BYTE;
-        break;    
+        break;
     }
 
     // figure out the format to use for the new texture
@@ -1213,7 +1352,7 @@ void glCopyTexImage2D(
     case GGL_PIXEL_FORMAT_RGBA_5551:
     case GGL_PIXEL_FORMAT_RGBA_4444:
         format = internalformat;
-        break;    
+        break;
     case GGL_PIXEL_FORMAT_RGBX_8888:
     case GGL_PIXEL_FORMAT_RGB_888:
     case GGL_PIXEL_FORMAT_RGB_565:
@@ -1222,7 +1361,7 @@ void glCopyTexImage2D(
         case GL_LUMINANCE:
         case GL_RGB:
             format = internalformat;
-            break;    
+            break;
         }
         break;
     }
@@ -1242,7 +1381,7 @@ void glCopyTexImage2D(
         ogles_error(c, error);
         return;
     }
-    
+
     // The bottom row is stored first in textures
     GGLSurface txSurface(*surface);
     txSurface.stride = -txSurface.stride;
@@ -1252,7 +1391,7 @@ void glCopyTexImage2D(
 
     int err = copyPixels(c,
             txSurface, 0, 0,
-            cbSurface, x, y, cbSurface.width, cbSurface.height);  
+            cbSurface, x, y, cbSurface.width, cbSurface.height);
     if (err) {
         ogles_error(c, err);
     }
@@ -1302,7 +1441,7 @@ void glCopyTexSubImage2D(
 
     int err = copyPixels(c,
             surface, xoffset, yoffset,
-            cbSurface, x, y, width, height);  
+            cbSurface, x, y, width, height);
     if (err) {
         ogles_error(c, err);
         return;
@@ -1372,7 +1511,7 @@ void glReadPixels(
         return;
     }
 
-    ggl->colorBuffer(ggl, &userSurface);  // destination is user buffer 
+    ggl->colorBuffer(ggl, &userSurface);  // destination is user buffer
     ggl->bindTexture(ggl, &readSurface);  // source is read-buffer
     ggl->texCoord2i(ggl, x, readSurface.height - (y + height));
     ggl->recti(ggl, 0, 0, width, height);
@@ -1425,4 +1564,44 @@ void glDrawTexfOES(GLfloat x, GLfloat y, GLfloat z, GLfloat w, GLfloat h){
 void glDrawTexxOES(GLfixed x, GLfixed y, GLfixed z, GLfixed w, GLfixed h) {
     ogles_context_t* c = ogles_context_t::get();
     drawTexxOES(x, y, z, w, h, c);
+}
+
+// ----------------------------------------------------------------------------
+#if 0
+#pragma mark -
+#pragma mark EGL Image Extension
+#endif
+
+void glEGLImageTargetTexture2DOES(GLenum target, GLeglImageOES image)
+{
+    ogles_context_t* c = ogles_context_t::get();
+    if (target != GL_TEXTURE_2D) {
+        ogles_error(c, GL_INVALID_ENUM);
+        return;
+    }
+
+    android_native_buffer_t* native_buffer = (android_native_buffer_t*)image;
+    if (native_buffer->common.magic != ANDROID_NATIVE_BUFFER_MAGIC) {
+        ogles_error(c, GL_INVALID_VALUE);
+        return;
+    }
+    if (native_buffer->common.version != sizeof(android_native_buffer_t)) {
+        ogles_error(c, GL_INVALID_VALUE);
+        return;
+    }
+
+    // bind it to the texture unit
+    sp<EGLTextureObject> tex = getAndBindActiveTextureObject(c);
+    tex->setImage(native_buffer);
+
+#ifdef LIBAGL_USE_GRALLOC_COPYBITS
+    tex->try_copybit = false;
+    if (c->copybits.blitEngine != NULL) {
+        tex->try_copybit = true;
+    }
+#endif // LIBAGL_USE_GRALLOC_COPYBITS
+}
+
+void glEGLImageTargetRenderbufferStorageOES(GLenum target, GLeglImageOES image)
+{
 }

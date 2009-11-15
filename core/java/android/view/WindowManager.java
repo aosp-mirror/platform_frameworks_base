@@ -282,11 +282,6 @@ public interface WindowManager extends ViewManager {
         /**
          * Window type: panel that slides out from the status bar
          */
-        public static final int TYPE_STATUS_BAR_PANEL   = FIRST_SYSTEM_WINDOW+8;
-        
-        /**
-         * Window type: panel that slides out from the status bar
-         */
         public static final int TYPE_SYSTEM_DIALOG      = FIRST_SYSTEM_WINDOW+8;
     
         /**
@@ -314,6 +309,17 @@ public interface WindowManager extends ViewManager {
         public static final int TYPE_INPUT_METHOD_DIALOG= FIRST_SYSTEM_WINDOW+12;
 
         /**
+         * Window type: wallpaper window, placed behind any window that wants
+         * to sit on top of the wallpaper.
+         */
+        public static final int TYPE_WALLPAPER          = FIRST_SYSTEM_WINDOW+13;
+
+        /**
+         * Window type: panel that slides out from the status bar
+         */
+        public static final int TYPE_STATUS_BAR_PANEL   = FIRST_SYSTEM_WINDOW+14;
+        
+        /**
          * End of types of system windows.
          */
         public static final int LAST_SYSTEM_WINDOW      = 2999;
@@ -323,8 +329,6 @@ public interface WindowManager extends ViewManager {
          * Default is normal.
          * 
          * @see #MEMORY_TYPE_NORMAL
-         * @see #MEMORY_TYPE_HARDWARE
-         * @see #MEMORY_TYPE_GPU
          * @see #MEMORY_TYPE_PUSH_BUFFERS
          */
         public int memoryType;
@@ -332,10 +336,16 @@ public interface WindowManager extends ViewManager {
         /** Memory type: The window's surface is allocated in main memory. */
         public static final int MEMORY_TYPE_NORMAL = 0;
         /** Memory type: The window's surface is configured to be accessible
-         * by DMA engines and hardware accelerators. */
+         * by DMA engines and hardware accelerators.
+         * @deprecated this is ignored, this value is set automatically when needed.
+         */
+        @Deprecated
         public static final int MEMORY_TYPE_HARDWARE = 1;
         /** Memory type: The window's surface is configured to be accessible
-         * by graphics accelerators. */
+         * by graphics accelerators. 
+         * @deprecated this is ignored, this value is set automatically when needed.
+         */
+        @Deprecated
         public static final int MEMORY_TYPE_GPU = 2;
         /** Memory type: The window's surface doesn't own its buffers and
          * therefore cannot be locked. Instead the buffers are pushed to
@@ -478,17 +488,53 @@ public interface WindowManager extends ViewManager {
          * is locked. This will let application windows take precedence over
          * key guard or any other lock screens. Can be used with
          * {@link #FLAG_KEEP_SCREEN_ON} to turn screen on and display windows
-         * directly before showing the key guard window
-         *
-         * {@hide} */
+         * directly before showing the key guard window.  Can be used with
+         * {@link #FLAG_DISMISS_KEYGUARD} to automatically fully dismisss
+         * non-secure keyguards.  This flag only applies to the top-most
+         * full-screen window.
+         */
         public static final int FLAG_SHOW_WHEN_LOCKED = 0x00080000;
 
+        /** Window flag: ask that the system wallpaper be shown behind
+         * your window.  The window surface must be translucent to be able
+         * to actually see the wallpaper behind it; this flag just ensures
+         * that the wallpaper surface will be there if this window actually
+         * has translucent regions.
+         */
+        public static final int FLAG_SHOW_WALLPAPER = 0x00100000;
+        
+        /** Window flag: when set as a window is being added or made
+         * visible, once the window has been shown then the system will
+         * poke the power manager's user activity (as if the user had woken
+         * up the device) to turn the screen on. */
+        public static final int FLAG_TURN_SCREEN_ON = 0x00200000;
+        
+        /** Window flag: when set the window will cause the keyguard to
+         * be dismissed, only if it is not a secure lock keyguard.  Because such
+         * a keyguard is not needed for security, it will never re-appear if
+         * the user navigates to another window (in contrast to
+         * {@link #FLAG_SHOW_WHEN_LOCKED}, which will only temporarily
+         * hide both secure and non-secure keyguards but ensure they reappear
+         * when the user moves to another UI that doesn't hide them).
+         * If the keyguard is currently active and is secure (requires an
+         * unlock pattern) than the user will still need to confirm it before
+         * seeing this window, unless {@link #FLAG_SHOW_WHEN_LOCKED} has
+         * also been set. */
+        public static final int FLAG_DISMISS_KEYGUARD = 0x00400000;
+        
+        /** Window flag: *sigh* The lock screen wants to continue running its
+         * animation while it is fading.  A kind-of hack to allow this.  Maybe
+         * in the future we just make this the default behavior.
+         *
+         * {@hide} */
+        public static final int FLAG_KEEP_SURFACE_WHILE_ANIMATING = 0x10000000;
+        
         /** Window flag: special flag to limit the size of the window to be
          * original size ([320x480] x density). Used to create window for applications
          * running under compatibility mode.
          *
          * {@hide} */
-        public static final int FLAG_COMPATIBLE_WINDOW = 0x00100000;
+        public static final int FLAG_COMPATIBLE_WINDOW = 0x20000000;
 
         /** Window flag: a special option intended for system dialogs.  When
          * this flag is set, the window will demand focus unconditionally when

@@ -18,7 +18,7 @@
 #include <stdint.h>
 #include <sys/types.h>
 
-#include <utils/Parcel.h>
+#include <binder/Parcel.h>
 
 #include <media/IMediaPlayer.h>
 #include <ui/ISurface.h>
@@ -39,7 +39,10 @@ enum {
     RESET,
     SET_AUDIO_STREAM_TYPE,
     SET_LOOPING,
-    SET_VOLUME
+    SET_VOLUME,
+    INVOKE,
+    SET_METADATA_FILTER,
+    GET_METADATA,
 };
 
 class BpMediaPlayer: public BpInterface<IMediaPlayer>
@@ -170,17 +173,37 @@ public:
         remote()->transact(SET_VOLUME, data, &reply);
         return reply.readInt32();
     }
+
+    status_t invoke(const Parcel& request, Parcel *reply)
+    { // Avoid doing any extra copy. The interface descriptor should
+      // have been set by MediaPlayer.java.
+        return remote()->transact(INVOKE, request, reply);
+    }
+
+    status_t setMetadataFilter(const Parcel& request)
+    {
+        Parcel reply;
+        // Avoid doing any extra copy of the request. The interface
+        // descriptor should have been set by MediaPlayer.java.
+        remote()->transact(SET_METADATA_FILTER, request, &reply);
+        return reply.readInt32();
+    }
+
+    status_t getMetadata(bool update_only, bool apply_filter, Parcel *reply)
+    {
+        Parcel request;
+        request.writeInterfaceToken(IMediaPlayer::getInterfaceDescriptor());
+        // TODO: Burning 2 ints for 2 boolean. Should probably use flags in an int here.
+        request.writeInt32(update_only);
+        request.writeInt32(apply_filter);
+        remote()->transact(GET_METADATA, request, reply);
+        return reply->readInt32();
+    }
 };
 
-IMPLEMENT_META_INTERFACE(MediaPlayer, "android.hardware.IMediaPlayer");
+IMPLEMENT_META_INTERFACE(MediaPlayer, "android.media.IMediaPlayer");
 
 // ----------------------------------------------------------------------
-
-#define CHECK_INTERFACE(interface, data, reply) \
-        do { if (!data.enforceInterface(interface::getInterfaceDescriptor())) { \
-            LOGW("Call incorrectly routed to " #interface); \
-            return PERMISSION_DENIED; \
-        } } while (0)
 
 status_t BnMediaPlayer::onTransact(
     uint32_t code, const Parcel& data, Parcel* reply, uint32_t flags)
@@ -266,6 +289,24 @@ status_t BnMediaPlayer::onTransact(
             reply->writeInt32(setVolume(data.readFloat(), data.readFloat()));
             return NO_ERROR;
         } break;
+        case INVOKE: {
+            CHECK_INTERFACE(IMediaPlayer, data, reply);
+            invoke(data, reply);
+            return NO_ERROR;
+        } break;
+        case SET_METADATA_FILTER: {
+            CHECK_INTERFACE(IMediaPlayer, data, reply);
+            reply->writeInt32(setMetadataFilter(data));
+            return NO_ERROR;
+        } break;
+        case GET_METADATA: {
+            CHECK_INTERFACE(IMediaPlayer, data, reply);
+            const status_t retcode = getMetadata(data.readInt32(), data.readInt32(), reply);
+            reply->setDataPosition(0);
+            reply->writeInt32(retcode);
+            reply->setDataPosition(0);
+            return NO_ERROR;
+        } break;
         default:
             return BBinder::onTransact(code, data, reply, flags);
     }
@@ -274,4 +315,3 @@ status_t BnMediaPlayer::onTransact(
 // ----------------------------------------------------------------------------
 
 }; // namespace android
-

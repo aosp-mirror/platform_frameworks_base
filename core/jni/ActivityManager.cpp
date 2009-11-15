@@ -16,9 +16,9 @@
 
 #include <unistd.h>
 #include <android_runtime/ActivityManager.h>
-#include <utils/IBinder.h>
-#include <utils/IServiceManager.h>
-#include <utils/Parcel.h>
+#include <binder/IBinder.h>
+#include <binder/IServiceManager.h>
+#include <binder/Parcel.h>
 #include <utils/String8.h>
 
 namespace android {

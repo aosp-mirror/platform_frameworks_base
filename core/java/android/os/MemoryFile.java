@@ -52,7 +52,7 @@ public class MemoryFile
     private static native void native_write(FileDescriptor fd, int address, byte[] buffer,
             int srcOffset, int destOffset, int count, boolean isUnpinned) throws IOException;
     private static native void native_pin(FileDescriptor fd, boolean pin) throws IOException;
-    private static native boolean native_is_ashmem_region(FileDescriptor fd) throws IOException;
+    private static native int native_get_mapped_size(FileDescriptor fd) throws IOException;
 
     private FileDescriptor mFD;        // ashmem file descriptor
     private int mAddress;   // address of ashmem memory
@@ -300,7 +300,20 @@ public class MemoryFile
      * @hide
      */
     public static boolean isMemoryFile(FileDescriptor fd) throws IOException {
-        return native_is_ashmem_region(fd);
+        return (native_get_mapped_size(fd) >= 0);
+    }
+
+    /**
+     * Returns the size of the memory file, rounded up to a page boundary, that
+     * the file descriptor refers to, or -1 if the file descriptor does not
+     * refer to a memory file.
+     *
+     * @throws IOException If <code>fd</code> is not a valid file descriptor.
+     *
+     * @hide
+     */
+    public static int getMappedSize(FileDescriptor fd) throws IOException {
+        return native_get_mapped_size(fd);
     }
 
     /**

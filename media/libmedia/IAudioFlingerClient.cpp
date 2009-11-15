@@ -20,14 +20,15 @@
 #include <stdint.h>
 #include <sys/types.h>
 
-#include <utils/Parcel.h>
+#include <binder/Parcel.h>
 
 #include <media/IAudioFlingerClient.h>
+#include <media/AudioSystem.h>
 
 namespace android {
 
 enum {
-    AUDIO_OUTPUT_CHANGED = IBinder::FIRST_CALL_TRANSACTION
+    IO_CONFIG_CHANGED = IBinder::FIRST_CALL_TRANSACTION
 };
 
 class BpAudioFlingerClient : public BpInterface<IAudioFlingerClient>
@@ -38,12 +39,25 @@ public:
     {
     }
 
-    void a2dpEnabledChanged(bool enabled)
+    void ioConfigChanged(int event, int ioHandle, void *param2)
     {
         Parcel data, reply;
         data.writeInterfaceToken(IAudioFlingerClient::getInterfaceDescriptor());
-        data.writeInt32((int)enabled);
-        remote()->transact(AUDIO_OUTPUT_CHANGED, data, &reply, IBinder::FLAG_ONEWAY);
+        data.writeInt32(event);
+        data.writeInt32(ioHandle);
+        if (event == AudioSystem::STREAM_CONFIG_CHANGED) {
+            uint32_t stream = *(uint32_t *)param2;
+            LOGV("ioConfigChanged stream %d", stream);
+            data.writeInt32(stream);
+        } else if (event != AudioSystem::OUTPUT_CLOSED && event != AudioSystem::INPUT_CLOSED) {
+            AudioSystem::OutputDescriptor *desc = (AudioSystem::OutputDescriptor *)param2;
+            data.writeInt32(desc->samplingRate);
+            data.writeInt32(desc->format);
+            data.writeInt32(desc->channels);
+            data.writeInt32(desc->frameCount);
+            data.writeInt32(desc->latency);
+        }
+        remote()->transact(IO_CONFIG_CHANGED, data, &reply, IBinder::FLAG_ONEWAY);
     }
 };
 
@@ -51,20 +65,30 @@ IMPLEMENT_META_INTERFACE(AudioFlingerClient, "android.media.IAudioFlingerClient"
 
 // ----------------------------------------------------------------------
 
-#define CHECK_INTERFACE(interface, data, reply) \
-        do { if (!data.enforceInterface(interface::getInterfaceDescriptor())) { \
-            LOGW("Call incorrectly routed to " #interface); \
-            return PERMISSION_DENIED; \
-        } } while (0)
-
 status_t BnAudioFlingerClient::onTransact(
     uint32_t code, const Parcel& data, Parcel* reply, uint32_t flags)
 {
     switch(code) {
-        case AUDIO_OUTPUT_CHANGED: {
+    case IO_CONFIG_CHANGED: {
             CHECK_INTERFACE(IAudioFlingerClient, data, reply);
-            bool enabled = (bool)data.readInt32();
-            a2dpEnabledChanged(enabled);
+            int event = data.readInt32();
+            int ioHandle = data.readInt32();
+            void *param2 = 0;
+            AudioSystem::OutputDescriptor desc;
+            uint32_t stream;
+            if (event == AudioSystem::STREAM_CONFIG_CHANGED) {
+                stream = data.readInt32();
+                param2 = &stream;
+                LOGV("STREAM_CONFIG_CHANGED stream %d", stream);
+            } else if (event != AudioSystem::OUTPUT_CLOSED && event != AudioSystem::INPUT_CLOSED) {
+                desc.samplingRate = data.readInt32();
+                desc.format = data.readInt32();
+                desc.channels = data.readInt32();
+                desc.frameCount = data.readInt32();
+                desc.latency = data.readInt32();
+                param2 = &desc;
+            }
+            ioConfigChanged(event, ioHandle, param2);
             return NO_ERROR;
         } break;
         default:

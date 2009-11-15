@@ -17,6 +17,7 @@
 package com.android.internal.telephony.cdma;
 
 import android.os.Parcel;
+import android.os.SystemProperties;
 import android.text.format.Time;
 import android.util.Config;
 import android.util.Log;
@@ -25,10 +26,12 @@ import com.android.internal.telephony.GsmAlphabet;
 import com.android.internal.telephony.IccUtils;
 import com.android.internal.telephony.SmsHeader;
 import com.android.internal.telephony.SmsMessageBase;
+import com.android.internal.telephony.TelephonyProperties;
 import com.android.internal.telephony.cdma.sms.BearerData;
 import com.android.internal.telephony.cdma.sms.CdmaSmsAddress;
 import com.android.internal.telephony.cdma.sms.SmsEnvelope;
 import com.android.internal.telephony.cdma.sms.UserData;
+import com.android.internal.util.HexDump;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -37,7 +40,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.util.Random;
 
 /**
  * TODO(cleanup): these constants are disturbing... are they not just
@@ -67,6 +69,7 @@ import static android.telephony.SmsMessage.MessageClass;
  */
 public class SmsMessage extends SmsMessageBase {
     static final String LOG_TAG = "CDMA";
+    static private final String LOGGABLE_TAG = "CDMA:SMS";
 
     /**
      *  Status of a previously submitted SMS.
@@ -75,14 +78,6 @@ public class SmsMessage extends SmsMessageBase {
      *  See C.S0015-B, v2.0, 4.5.21 for a detailed description of possible values.
      */
     private int status;
-
-    /** The next message ID for the BearerData. Shall be a random value on first use.
-     * (See C.S0015-B, v2.0, 4.3.1.5)
-     */
-    private static int nextMessageId = 0;
-
-    /** Specifies if this is the first SMS message submit */
-    private static boolean firstSMS = true;
 
     /** Specifies if a return of an acknowledgment is requested for send SMS */
     private static final int RETURN_NO_ACK  = 0;
@@ -329,7 +324,7 @@ public class SmsMessage extends SmsMessageBase {
      *         address, if applicable, and the encoded message.
      *         Returns null on encode error.
      */
-    public static SubmitPdu getSubmitPdu(String scAddr, String destAddr, short destPort,
+    public static SubmitPdu getSubmitPdu(String scAddr, String destAddr, int destPort,
             byte[] data, boolean statusReportRequested) {
 
         /**
@@ -429,12 +424,9 @@ public class SmsMessage extends SmsMessageBase {
         return (status << 16);
     }
 
-    /**
-     *  Note: This function is a GSM specific functionality which is not supported in CDMA mode.
-     */
+    /** Return true iff the bearer data message type is DELIVERY_ACK. */
     public boolean isStatusReportMessage() {
-        Log.w(LOG_TAG, "isStatusReportMessage: is not supported in CDMA mode.");
-        return false;
+        return (mBearerData.messageType == BearerData.MESSAGE_TYPE_DELIVERY_ACK);
     }
 
     /**
@@ -518,6 +510,7 @@ public class SmsMessage extends SmsMessageBase {
         originatingAddress = addr;
         env.origAddress = addr;
         mEnvelope = env;
+        mPdu = pdu;
 
         parseSms();
     }
@@ -526,23 +519,30 @@ public class SmsMessage extends SmsMessageBase {
      * Parses a SMS message from its BearerData stream. (mobile-terminated only)
      */
     protected void parseSms() {
+        // Message Waiting Info Record defined in 3GPP2 C.S-0005, 3.7.5.6
+        // It contains only an 8-bit number with the number of messages waiting
+        if (mEnvelope.teleService == SmsEnvelope.TELESERVICE_MWI) {
+            mBearerData = new BearerData();
+            if (mEnvelope.bearerData != null) {
+                mBearerData.numberOfMessages = 0x000000FF & mEnvelope.bearerData[0];
+            }
+            if (Config.DEBUG) {
+                Log.d(LOG_TAG, "parseSms: get MWI " +
+                      Integer.toString(mBearerData.numberOfMessages));
+            }
+            return;
+        }
         mBearerData = BearerData.decode(mEnvelope.bearerData);
+        if (Log.isLoggable(LOGGABLE_TAG, Log.VERBOSE)) {
+            Log.d(LOG_TAG, "MT raw BearerData = '" +
+                      HexDump.toHexString(mEnvelope.bearerData) + "'");
+            Log.d(LOG_TAG, "MT (decoded) BearerData = " + mBearerData);
+        }
         messageRef = mBearerData.messageId;
         if (mBearerData.userData != null) {
             userData = mBearerData.userData.payload;
             userDataHeader = mBearerData.userData.userDataHeader;
             messageBody = mBearerData.userData.payloadStr;
-        }
-
-        // TP-Message-Type-Indicator (See 3GPP2 C.S0015-B, v2, 4.5.1)
-        switch (mBearerData.messageType) {
-        case BearerData.MESSAGE_TYPE_USER_ACK:
-        case BearerData.MESSAGE_TYPE_READ_ACK:
-        case BearerData.MESSAGE_TYPE_DELIVER:
-        case BearerData.MESSAGE_TYPE_DELIVERY_ACK:
-            break;
-        default:
-            throw new RuntimeException("Unsupported message type: " + mBearerData.messageType);
         }
 
         if (originatingAddress != null) {
@@ -557,11 +557,26 @@ public class SmsMessage extends SmsMessageBase {
 
         if (Config.LOGD) Log.d(LOG_TAG, "SMS SC timestamp: " + scTimeMillis);
 
-        // TODO(Teleca): do we really want this test to occur only for DELIVERY_ACKs?
-        if ((mBearerData.messageType == BearerData.MESSAGE_TYPE_DELIVERY_ACK) &&
-                (mBearerData.errorClass != BearerData.ERROR_UNDEFINED)) {
-            status = mBearerData.errorClass << 8;
-            status |= mBearerData.messageStatus;
+        // Message Type (See 3GPP2 C.S0015-B, v2, 4.5.1)
+        if (mBearerData.messageType == BearerData.MESSAGE_TYPE_DELIVERY_ACK) {
+            // The BearerData MsgStatus subparameter should only be
+            // included for DELIVERY_ACK messages.  If it occurred for
+            // other messages, it would be unclear what the status
+            // being reported refers to.  The MsgStatus subparameter
+            // is primarily useful to indicate error conditions -- a
+            // message without this subparameter is assumed to
+            // indicate successful delivery (status == 0).
+            if (! mBearerData.messageStatusSet) {
+                Log.d(LOG_TAG, "DELIVERY_ACK message without msgStatus (" +
+                        (userData == null ? "also missing" : "does have") +
+                        " userData).");
+                status = 0;
+            } else {
+                status = mBearerData.errorClass << 8;
+                status |= mBearerData.messageStatus;
+            }
+        } else if (mBearerData.messageType != BearerData.MESSAGE_TYPE_DELIVER) {
+            throw new RuntimeException("Unsupported message type: " + mBearerData.messageType);
         }
 
         if (messageBody != null) {
@@ -583,36 +598,28 @@ public class SmsMessage extends SmsMessageBase {
         }
     }
 
-    private static CdmaSmsAddress parseCdmaSmsAddr(String addrStr) {
-        // see C.S0015-B, v2.0, 3.4.3.3
-        CdmaSmsAddress addr = new CdmaSmsAddress();
-        addr.digitMode = CdmaSmsAddress.DIGIT_MODE_8BIT_CHAR;
-        try {
-            addr.origBytes = addrStr.getBytes("UTF-8");
-        } catch  (java.io.UnsupportedEncodingException ex) {
-            Log.e(LOG_TAG, "CDMA address parsing failed: " + ex);
-            return null;
-        }
-        addr.numberOfDigits = (byte)addr.origBytes.length;
-        addr.numberMode = CdmaSmsAddress.NUMBER_MODE_NOT_DATA_NETWORK;
-        addr.numberPlan = CdmaSmsAddress.NUMBERING_PLAN_ISDN_TELEPHONY;
-        addr.ton = CdmaSmsAddress.TON_INTERNATIONAL_OR_IP;
-        return addr;
-    }
-
     /**
-     * Set the nextMessageId to a random value between 0 and 65536
-     * See C.S0015-B, v2.0, 4.3.1.5
+     * Calculate the next message id, starting at 1 and iteratively
+     * incrementing within the range 1..65535 remembering the state
+     * via a persistent system property.  (See C.S0015-B, v2.0,
+     * 4.3.1.5) Since this routine is expected to be accessed via via
+     * binder-call, and hence should be threadsafe, it has been
+     * synchronized.
      */
-    private static void setNextMessageId() {
-        // Message ID, modulo 65536
-        if(firstSMS) {
-            Random generator = new Random();
-            nextMessageId = generator.nextInt(65536);
-            firstSMS = false;
-        } else {
-            nextMessageId = ++nextMessageId & 0xFFFF;
+    private synchronized static int getNextMessageId() {
+        // Testing and dialog with partners has indicated that
+        // msgId==0 is (sometimes?) treated specially by lower levels.
+        // Specifically, the ID is not preserved for delivery ACKs.
+        // Hence, avoid 0 -- constraining the range to 1..65535.
+        int msgId = SystemProperties.getInt(TelephonyProperties.PROPERTY_CDMA_MSG_ID, 1);
+        String nextMsgId = Integer.toString((msgId % 0xFFFF) + 1);
+        SystemProperties.set(TelephonyProperties.PROPERTY_CDMA_MSG_ID, nextMsgId);
+        if (Log.isLoggable(LOGGABLE_TAG, Log.VERBOSE)) {
+            Log.d(LOG_TAG, "next " + TelephonyProperties.PROPERTY_CDMA_MSG_ID + " = " + nextMsgId);
+            Log.d(LOG_TAG, "readback gets " +
+                    SystemProperties.get(TelephonyProperties.PROPERTY_CDMA_MSG_ID));
         }
+        return msgId;
     }
 
     /**
@@ -626,14 +633,19 @@ public class SmsMessage extends SmsMessageBase {
          * TODO(cleanup): give this function a more meaningful name.
          */
 
-        CdmaSmsAddress destAddr = parseCdmaSmsAddr(destAddrStr);
+        /**
+         * TODO(cleanup): Make returning null from the getSubmitPdu
+         * variations meaningful -- clean up the error feedback
+         * mechanism, and avoid null pointer exceptions.
+         */
+
+        CdmaSmsAddress destAddr = CdmaSmsAddress.parse(destAddrStr);
         if (destAddr == null) return null;
 
         BearerData bearerData = new BearerData();
         bearerData.messageType = BearerData.MESSAGE_TYPE_SUBMIT;
 
-        if (userData != null) setNextMessageId();
-        bearerData.messageId = nextMessageId;
+        bearerData.messageId = getNextMessageId();
 
         bearerData.deliveryAckReq = statusReportRequested;
         bearerData.userAckReq = false;
@@ -641,13 +653,16 @@ public class SmsMessage extends SmsMessageBase {
         bearerData.reportReq = false;
 
         bearerData.userData = userData;
-        bearerData.hasUserDataHeader = (userData.userDataHeader != null);
+
+        byte[] encodedBearerData = BearerData.encode(bearerData);
+        if (Log.isLoggable(LOGGABLE_TAG, Log.VERBOSE)) {
+            Log.d(LOG_TAG, "MO (encoded) BearerData = " + bearerData);
+            Log.d(LOG_TAG, "MO raw BearerData = '" + HexDump.toHexString(encodedBearerData) + "'");
+        }
+        if (encodedBearerData == null) return null;
 
         int teleservice = bearerData.hasUserDataHeader ?
                 SmsEnvelope.TELESERVICE_WEMT : SmsEnvelope.TELESERVICE_WMT;
-
-        byte[] encodedBearerData = BearerData.encode(bearerData);
-        if (encodedBearerData == null) return null;
 
         SmsEnvelope envelope = new SmsEnvelope();
         envelope.messageType = SmsEnvelope.MESSAGE_TYPE_POINT_TO_POINT;
@@ -728,9 +743,8 @@ public class SmsMessage extends SmsMessageBase {
             dos.close();
 
             /**
-             * TODO(cleanup) -- This is the only place where mPdu is
-             * defined, and this is not obviously the only place where
-             * it needs to be defined.  It would be much nicer if
+             * TODO(cleanup) -- The mPdu field is managed in
+             * a fragile manner, and it would be much nicer if
              * accessing the serialized representation used a less
              * fragile mechanism.  Maybe the getPdu method could
              * generate a representation if there was not yet one?
@@ -780,5 +794,20 @@ public class SmsMessage extends SmsMessageBase {
         return mBearerData.numberOfMessages;
     }
 
+    /**
+     * Returns a byte array that can be use to uniquely identify a received SMS message.
+     * C.S0015-B  4.3.1.6 Unique Message Identification.
+     *
+     * @return byte array uniquely identifying the message.
+     * @hide
+     */
+    /* package */ byte[] getIncomingSmsFingerprint() {
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
 
+        output.write(mEnvelope.teleService);
+        output.write(mEnvelope.origAddress.origBytes, 0, mEnvelope.origAddress.origBytes.length);
+        output.write(mEnvelope.bearerData, 0, mEnvelope.bearerData.length);
+
+        return output.toByteArray();
+    }
 }

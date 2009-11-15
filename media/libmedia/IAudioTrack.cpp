@@ -15,10 +15,14 @@
 ** limitations under the License.
 */
 
+#define LOG_TAG "IAudioTrack"
+//#define LOG_NDEBUG 0
+#include <utils/Log.h>
+
 #include <stdint.h>
 #include <sys/types.h>
 
-#include <utils/Parcel.h>
+#include <binder/Parcel.h>
 
 #include <media/IAudioTrack.h>
 
@@ -45,8 +49,13 @@ public:
     {
         Parcel data, reply;
         data.writeInterfaceToken(IAudioTrack::getInterfaceDescriptor());
-        remote()->transact(START, data, &reply);
-        return reply.readInt32();
+        status_t status = remote()->transact(START, data, &reply);
+        if (status == NO_ERROR) {
+            status = reply.readInt32();
+        } else {
+            LOGW("start() error: %s", strerror(-status));
+        }
+        return status;
     }
     
     virtual void stop()
@@ -81,21 +90,19 @@ public:
     virtual sp<IMemory> getCblk() const
     {
         Parcel data, reply;
+        sp<IMemory> cblk;
         data.writeInterfaceToken(IAudioTrack::getInterfaceDescriptor());
-        remote()->transact(GET_CBLK, data, &reply);
-        return interface_cast<IMemory>(reply.readStrongBinder());
+        status_t status = remote()->transact(GET_CBLK, data, &reply);
+        if (status == NO_ERROR) {
+            cblk = interface_cast<IMemory>(reply.readStrongBinder());
+        }
+        return cblk;
     }    
 };
 
 IMPLEMENT_META_INTERFACE(AudioTrack, "android.media.IAudioTrack");
 
 // ----------------------------------------------------------------------
-
-#define CHECK_INTERFACE(interface, data, reply) \
-        do { if (!data.enforceInterface(interface::getInterfaceDescriptor())) { \
-            LOGW("Call incorrectly routed to " #interface); \
-            return PERMISSION_DENIED; \
-        } } while (0)
 
 status_t BnAudioTrack::onTransact(
     uint32_t code, const Parcel& data, Parcel* reply, uint32_t flags)

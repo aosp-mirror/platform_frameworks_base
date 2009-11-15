@@ -18,10 +18,13 @@ package com.android.server;
 
 import android.content.Context;
 import android.content.res.Configuration;
-import android.os.SystemClock;
+import android.os.Environment;
+import android.os.LatencyTimer;
 import android.os.PowerManager;
+import android.os.SystemClock;
 import android.util.Log;
 import android.util.SparseArray;
+import android.util.Xml;
 import android.view.Display;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -29,10 +32,38 @@ import android.view.RawInputEvent;
 import android.view.Surface;
 import android.view.WindowManagerPolicy;
 
+import com.android.internal.util.XmlUtils;
+
+import org.xmlpull.v1.XmlPullParser;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+
 public abstract class KeyInputQueue {
     static final String TAG = "KeyInputQueue";
 
-    SparseArray<InputDevice> mDevices = new SparseArray<InputDevice>();
+    static final boolean DEBUG = false;
+    static final boolean DEBUG_VIRTUAL_KEYS = false;
+    static final boolean DEBUG_POINTERS = false;
+    
+    /**
+     * Turn on some hacks we have to improve the touch interaction with a
+     * certain device whose screen currently is not all that good.
+     */
+    static final boolean BAD_TOUCH_HACK = true;
+    
+    private static final String EXCLUDED_DEVICES_PATH = "etc/excluded-input-devices.xml";
+
+    final SparseArray<InputDevice> mDevices = new SparseArray<InputDevice>();
+    final SparseArray<InputDevice> mIgnoredDevices = new SparseArray<InputDevice>();
+    final ArrayList<VirtualKey> mVirtualKeys = new ArrayList<VirtualKey>();
+    final HapticFeedbackCallback mHapticFeedbackCallback;
     
     int mGlobalMetaState = 0;
     boolean mHaveGlobalMetaState = false;
@@ -43,9 +74,13 @@ public abstract class KeyInputQueue {
     int mCacheCount;
 
     Display mDisplay = null;
+    int mDisplayWidth;
+    int mDisplayHeight;
     
     int mOrientation = Surface.ROTATION_0;
     int[] mKeyRotationMap = null;
+    
+    VirtualKey mPressedVirtualKey = null;
     
     PowerManager.WakeLock mWakeLock;
 
@@ -73,14 +108,21 @@ public abstract class KeyInputQueue {
     public static final int FILTER_REMOVE = 0;
     public static final int FILTER_KEEP = 1;
     public static final int FILTER_ABORT = -1;
-    
+
+    private static final boolean MEASURE_LATENCY = false;
+    private LatencyTimer lt;
+
     public interface FilterCallback {
         int filterEvent(QueuedEvent ev);
     }
     
+    public interface HapticFeedbackCallback {
+        void virtualKeyFeedback(KeyEvent event);
+    }
+    
     static class QueuedEvent {
         InputDevice inputDevice;
-        long when;
+        long whenNano;
         int flags; // From the raw event
         int classType; // One of the class constants in InputEvent
         Object event;
@@ -88,7 +130,7 @@ public abstract class KeyInputQueue {
 
         void copyFrom(QueuedEvent that) {
             this.inputDevice = that.inputDevice;
-            this.when = that.when;
+            this.whenNano = that.whenNano;
             this.flags = that.flags;
             this.classType = that.classType;
             this.event = that.event;
@@ -106,7 +148,144 @@ public abstract class KeyInputQueue {
         QueuedEvent next;
     }
 
-    KeyInputQueue(Context context) {
+    /**
+     * A key that exists as a part of the touch-screen, outside of the normal
+     * display area of the screen.
+     */
+    static class VirtualKey {
+        int scancode;
+        int centerx;
+        int centery;
+        int width;
+        int height;
+        
+        int hitLeft;
+        int hitTop;
+        int hitRight;
+        int hitBottom;
+        
+        InputDevice lastDevice;
+        int lastKeycode;
+        
+        boolean checkHit(int x, int y) {
+            return (x >= hitLeft && x <= hitRight
+                    && y >= hitTop && y <= hitBottom);
+        }
+        
+        void computeHitRect(InputDevice dev, int dw, int dh) {
+            if (dev == lastDevice) {
+                return;
+            }
+            
+            if (DEBUG_VIRTUAL_KEYS) Log.v(TAG, "computeHitRect for " + scancode
+                    + ": dev=" + dev + " absX=" + dev.absX + " absY=" + dev.absY);
+            
+            lastDevice = dev;
+            
+            int minx = dev.absX.minValue;
+            int maxx = dev.absX.maxValue;
+            
+            int halfw = width/2;
+            int left = centerx - halfw;
+            int right = centerx + halfw;
+            hitLeft = minx + ((left*maxx-minx)/dw);
+            hitRight = minx + ((right*maxx-minx)/dw);
+            
+            int miny = dev.absY.minValue;
+            int maxy = dev.absY.maxValue;
+            
+            int halfh = height/2;
+            int top = centery - halfh;
+            int bottom = centery + halfh;
+            hitTop = miny + ((top*maxy-miny)/dh);
+            hitBottom = miny + ((bottom*maxy-miny)/dh);
+        }
+    }
+
+    private void readVirtualKeys(String deviceName) {
+        try {
+            FileInputStream fis = new FileInputStream(
+                    "/sys/board_properties/virtualkeys." + deviceName);
+            InputStreamReader isr = new InputStreamReader(fis);
+            BufferedReader br = new BufferedReader(isr, 2048);
+            String str = br.readLine();
+            if (str != null) {
+                String[] it = str.split(":");
+                if (DEBUG_VIRTUAL_KEYS) Log.v(TAG, "***** VIRTUAL KEYS: " + it);
+                final int N = it.length-6;
+                for (int i=0; i<=N; i+=6) {
+                    if (!"0x01".equals(it[i])) {
+                        Log.w(TAG, "Unknown virtual key type at elem #" + i
+                                + ": " + it[i]);
+                        continue;
+                    }
+                    try {
+                        VirtualKey sb = new VirtualKey();
+                        sb.scancode = Integer.parseInt(it[i+1]);
+                        sb.centerx = Integer.parseInt(it[i+2]);
+                        sb.centery = Integer.parseInt(it[i+3]);
+                        sb.width = Integer.parseInt(it[i+4]);
+                        sb.height = Integer.parseInt(it[i+5]);
+                        if (DEBUG_VIRTUAL_KEYS) Log.v(TAG, "Virtual key "
+                                + sb.scancode + ": center=" + sb.centerx + ","
+                                + sb.centery + " size=" + sb.width + "x"
+                                + sb.height);
+                        mVirtualKeys.add(sb);
+                    } catch (NumberFormatException e) {
+                        Log.w(TAG, "Bad number at region " + i + " in: "
+                                + str, e);
+                    }
+                }
+            }
+            br.close();
+        } catch (FileNotFoundException e) {
+            Log.i(TAG, "No virtual keys found");
+        } catch (IOException e) {
+            Log.w(TAG, "Error reading virtual keys", e);
+        }
+    }
+
+    private void readExcludedDevices() {
+        // Read partner-provided list of excluded input devices
+        XmlPullParser parser = null;
+        // Environment.getRootDirectory() is a fancy way of saying ANDROID_ROOT or "/system".
+        File confFile = new File(Environment.getRootDirectory(), EXCLUDED_DEVICES_PATH);
+        FileReader confreader = null;
+        try {
+            confreader = new FileReader(confFile);
+            parser = Xml.newPullParser();
+            parser.setInput(confreader);
+            XmlUtils.beginDocument(parser, "devices");
+
+            while (true) {
+                XmlUtils.nextElement(parser);
+                if (!"device".equals(parser.getName())) {
+                    break;
+                }
+                String name = parser.getAttributeValue(null, "name");
+                if (name != null) {
+                    if (DEBUG) Log.v(TAG, "addExcludedDevice " + name);
+                    addExcludedDevice(name);
+                }
+            }
+        } catch (FileNotFoundException e) {
+            // It's ok if the file does not exist.
+        } catch (Exception e) {
+            Log.e(TAG, "Exception while parsing '" + confFile.getAbsolutePath() + "'", e);
+        } finally {
+            try { if (confreader != null) confreader.close(); } catch (IOException e) { }
+        }
+    }
+
+    KeyInputQueue(Context context, HapticFeedbackCallback  hapticFeedbackCallback) {
+        if (MEASURE_LATENCY) {
+            lt = new LatencyTimer(100, 1000);
+        }
+
+        mHapticFeedbackCallback = hapticFeedbackCallback;
+        
+        readExcludedDevices();
+        
         PowerManager pm = (PowerManager)context.getSystemService(
                                                         Context.POWER_SERVICE);
         mWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
@@ -123,6 +302,12 @@ public abstract class KeyInputQueue {
 
     public void setDisplay(Display display) {
         mDisplay = display;
+        
+        // We assume at this point that the display dimensions reflect the
+        // natural, unrotated display.  We will perform hit tests for soft
+        // buttons based on that display.
+        mDisplayWidth = display.getWidth();
+        mDisplayHeight = display.getHeight();
     }
     
     public void getInputConfiguration(Configuration config) {
@@ -149,22 +334,76 @@ public abstract class KeyInputQueue {
                         config.navigation
                                 = Configuration.NAVIGATION_TRACKBALL;
                         //Log.i("foo", "***** HAVE TRACKBALL!");
+                    } else if ((d.classes&RawInputEvent.CLASS_DPAD) != 0) {
+                        config.navigation
+                                = Configuration.NAVIGATION_DPAD;
+                        //Log.i("foo", "***** HAVE DPAD!");
                     }
                 }
             }
         }
     }
     
+    public int getScancodeState(int code) {
+        synchronized (mFirst) {
+            VirtualKey vk = mPressedVirtualKey;
+            if (vk != null) {
+                if (vk.scancode == code) {
+                    return 2;
+                }
+            }
+            return nativeGetScancodeState(code);
+        }
+    }
+    
+    public int getScancodeState(int deviceId, int code) {
+        synchronized (mFirst) {
+            VirtualKey vk = mPressedVirtualKey;
+            if (vk != null) {
+                if (vk.scancode == code) {
+                    return 2;
+                }
+            }
+            return nativeGetScancodeState(deviceId, code);
+        }
+    }
+    
+    public int getKeycodeState(int code) {
+        synchronized (mFirst) {
+            VirtualKey vk = mPressedVirtualKey;
+            if (vk != null) {
+                if (vk.lastKeycode == code) {
+                    return 2;
+                }
+            }
+            return nativeGetKeycodeState(code);
+        }
+    }
+    
+    public int getKeycodeState(int deviceId, int code) {
+        synchronized (mFirst) {
+            VirtualKey vk = mPressedVirtualKey;
+            if (vk != null) {
+                if (vk.lastKeycode == code) {
+                    return 2;
+                }
+            }
+            return nativeGetKeycodeState(deviceId, code);
+        }
+    }
+    
     public static native String getDeviceName(int deviceId);
     public static native int getDeviceClasses(int deviceId);
+    public static native void addExcludedDevice(String deviceName);
     public static native boolean getAbsoluteInfo(int deviceId, int axis,
             InputDevice.AbsoluteInfo outInfo);
     public static native int getSwitchState(int sw);
     public static native int getSwitchState(int deviceId, int sw);
-    public static native int getScancodeState(int sw);
-    public static native int getScancodeState(int deviceId, int sw);
-    public static native int getKeycodeState(int sw);
-    public static native int getKeycodeState(int deviceId, int sw);
+    public static native int nativeGetScancodeState(int code);
+    public static native int nativeGetScancodeState(int deviceId, int code);
+    public static native int nativeGetKeycodeState(int code);
+    public static native int nativeGetKeycodeState(int deviceId, int code);
+    public static native int scancodeToKeycode(int deviceId, int scancode);
     public static native boolean hasKeys(int[] keycodes, boolean[] keyExists);
     
     public static KeyEvent newKeyEvent(InputDevice device, long downTime,
@@ -181,12 +420,13 @@ public abstract class KeyInputQueue {
     
     Thread mThread = new Thread("InputDeviceReader") {
         public void run() {
+            if (DEBUG) Log.v(TAG, "InputDeviceReader.run()");
             android.os.Process.setThreadPriority(
                     android.os.Process.THREAD_PRIORITY_URGENT_DISPLAY);
             
-            try {
-                RawInputEvent ev = new RawInputEvent();
-                while (true) {
+            RawInputEvent ev = new RawInputEvent();
+            while (true) {
+                try {
                     InputDevice di;
 
                     // block, doesn't release the monitor
@@ -207,23 +447,50 @@ public abstract class KeyInputQueue {
                     if (ev.type == RawInputEvent.EV_DEVICE_ADDED) {
                         synchronized (mFirst) {
                             di = newInputDevice(ev.deviceId);
-                            mDevices.put(ev.deviceId, di);
-                            configChanged = true;
+                            if (di.classes != 0) {
+                                // If this device is some kind of input class,
+                                // we care about it.
+                                mDevices.put(ev.deviceId, di);
+                                if ((di.classes & RawInputEvent.CLASS_TOUCHSCREEN) != 0) {
+                                    readVirtualKeys(di.name);
+                                }
+                                // The configuration may have changed because
+                                // of this device.
+                                configChanged = true;
+                            } else {
+                                // We won't do anything with this device.
+                                mIgnoredDevices.put(ev.deviceId, di);
+                                Log.i(TAG, "Ignoring non-input device: id=0x"
+                                        + Integer.toHexString(di.id)
+                                        + ", name=" + di.name);
+                            }
                         }
                     } else if (ev.type == RawInputEvent.EV_DEVICE_REMOVED) {
                         synchronized (mFirst) {
-                            Log.i(TAG, "Device removed: id=0x"
-                                    + Integer.toHexString(ev.deviceId));
+                            if (false) {
+                                Log.i(TAG, "Device removed: id=0x"
+                                        + Integer.toHexString(ev.deviceId));
+                            }
                             di = mDevices.get(ev.deviceId);
                             if (di != null) {
                                 mDevices.delete(ev.deviceId);
+                                // The configuration may have changed because
+                                // of this device.
                                 configChanged = true;
+                            } else if ((di=mIgnoredDevices.get(ev.deviceId)) != null) {
+                                mIgnoredDevices.remove(ev.deviceId);
                             } else {
-                                Log.w(TAG, "Bad device id: " + ev.deviceId);
+                                Log.w(TAG, "Removing bad device id: "
+                                        + Integer.toHexString(ev.deviceId));
+                                continue;
                             }
                         }
                     } else {
                         di = getInputDevice(ev.deviceId);
+                        if (di == null) {
+                            // This may be some junk from an ignored device.
+                            continue;
+                        }
                         
                         // first crack at it
                         send = preprocessEvent(di, ev);
@@ -235,13 +502,9 @@ public abstract class KeyInputQueue {
                         }
                     }
 
-                    if (di == null) {
-                        continue;
-                    }
-                    
                     if (configChanged) {
                         synchronized (mFirst) {
-                            addLocked(di, SystemClock.uptimeMillis(), 0,
+                            addLocked(di, System.nanoTime(), 0,
                                     RawInputEvent.CLASS_CONFIGURATION_CHANGED,
                                     null);
                         }
@@ -256,6 +519,7 @@ public abstract class KeyInputQueue {
                         // timebase as SystemClock.uptimeMillis().
                         //curTime = gotOne ? ev.when : SystemClock.uptimeMillis();
                         final long curTime = SystemClock.uptimeMillis();
+                        final long curTimeNano = System.nanoTime();
                         //Log.i(TAG, "curTime=" + curTime + ", systemClock=" + SystemClock.uptimeMillis());
                         
                         final int classes = di.classes;
@@ -271,95 +535,376 @@ public abstract class KeyInputQueue {
                             boolean down;
                             if (ev.value != 0) {
                                 down = true;
-                                di.mDownTime = curTime;
+                                di.mKeyDownTime = curTime;
                             } else {
                                 down = false;
                             }
                             int keycode = rotateKeyCodeLocked(ev.keycode);
-                            addLocked(di, curTime, ev.flags,
+                            addLocked(di, curTimeNano, ev.flags,
                                     RawInputEvent.CLASS_KEYBOARD,
-                                    newKeyEvent(di, di.mDownTime, curTime, down,
+                                    newKeyEvent(di, di.mKeyDownTime, curTime, down,
                                             keycode, 0, scancode,
                                             ((ev.flags & WindowManagerPolicy.FLAG_WOKE_HERE) != 0)
                                              ? KeyEvent.FLAG_WOKE_HERE : 0));
+                            
                         } else if (ev.type == RawInputEvent.EV_KEY) {
+                            // Single touch protocol: touch going down or up.
                             if (ev.scancode == RawInputEvent.BTN_TOUCH &&
-                                    (classes&RawInputEvent.CLASS_TOUCHSCREEN) != 0) {
+                                    (classes&(RawInputEvent.CLASS_TOUCHSCREEN
+                                            |RawInputEvent.CLASS_TOUCHSCREEN_MT))
+                                            == RawInputEvent.CLASS_TOUCHSCREEN) {
                                 di.mAbs.changed = true;
-                                di.mAbs.down = ev.value != 0;
-                            }
-                            if (ev.scancode == RawInputEvent.BTN_MOUSE &&
+                                di.mAbs.mDown[0] = ev.value != 0;
+                            
+                            // Trackball (mouse) protocol: press down or up.
+                            } else if (ev.scancode == RawInputEvent.BTN_MOUSE &&
                                     (classes&RawInputEvent.CLASS_TRACKBALL) != 0) {
                                 di.mRel.changed = true;
-                                di.mRel.down = ev.value != 0;
+                                di.mRel.mNextNumPointers = ev.value != 0 ? 1 : 0;
                                 send = true;
                             }
     
+                        // Process position events from multitouch protocol.
+                        } else if (ev.type == RawInputEvent.EV_ABS &&
+                                (classes&RawInputEvent.CLASS_TOUCHSCREEN_MT) != 0) {
+                            if (ev.scancode == RawInputEvent.ABS_MT_TOUCH_MAJOR) {
+                                di.mAbs.changed = true;
+                                di.mAbs.mNextData[di.mAbs.mAddingPointerOffset
+                                        + MotionEvent.SAMPLE_PRESSURE] = ev.value;
+                            } else if (ev.scancode == RawInputEvent.ABS_MT_POSITION_X) {
+                                di.mAbs.changed = true;
+                                di.mAbs.mNextData[di.mAbs.mAddingPointerOffset
+                                    + MotionEvent.SAMPLE_X] = ev.value;
+                                if (DEBUG_POINTERS) Log.v(TAG, "MT @"
+                                        + di.mAbs.mAddingPointerOffset
+                                        + " X:" + ev.value);
+                            } else if (ev.scancode == RawInputEvent.ABS_MT_POSITION_Y) {
+                                di.mAbs.changed = true;
+                                di.mAbs.mNextData[di.mAbs.mAddingPointerOffset
+                                    + MotionEvent.SAMPLE_Y] = ev.value;
+                                if (DEBUG_POINTERS) Log.v(TAG, "MT @"
+                                        + di.mAbs.mAddingPointerOffset
+                                        + " Y:" + ev.value);
+                            } else if (ev.scancode == RawInputEvent.ABS_MT_WIDTH_MAJOR) {
+                                di.mAbs.changed = true;
+                                di.mAbs.mNextData[di.mAbs.mAddingPointerOffset
+                                    + MotionEvent.SAMPLE_SIZE] = ev.value;
+                            }
+                        
+                        // Process position events from single touch protocol.
                         } else if (ev.type == RawInputEvent.EV_ABS &&
                                 (classes&RawInputEvent.CLASS_TOUCHSCREEN) != 0) {
                             if (ev.scancode == RawInputEvent.ABS_X) {
                                 di.mAbs.changed = true;
-                                di.mAbs.x = ev.value;
+                                di.curTouchVals[MotionEvent.SAMPLE_X] = ev.value;
                             } else if (ev.scancode == RawInputEvent.ABS_Y) {
                                 di.mAbs.changed = true;
-                                di.mAbs.y = ev.value;
+                                di.curTouchVals[MotionEvent.SAMPLE_Y] = ev.value;
                             } else if (ev.scancode == RawInputEvent.ABS_PRESSURE) {
                                 di.mAbs.changed = true;
-                                di.mAbs.pressure = ev.value;
+                                di.curTouchVals[MotionEvent.SAMPLE_PRESSURE] = ev.value;
+                                di.curTouchVals[MotionEvent.NUM_SAMPLE_DATA
+                                                 + MotionEvent.SAMPLE_PRESSURE] = ev.value;
                             } else if (ev.scancode == RawInputEvent.ABS_TOOL_WIDTH) {
                                 di.mAbs.changed = true;
-                                di.mAbs.size = ev.value;
+                                di.curTouchVals[MotionEvent.SAMPLE_SIZE] = ev.value;
+                                di.curTouchVals[MotionEvent.NUM_SAMPLE_DATA
+                                                 + MotionEvent.SAMPLE_SIZE] = ev.value;
                             }
     
+                        // Process movement events from trackball (mouse) protocol.
                         } else if (ev.type == RawInputEvent.EV_REL &&
                                 (classes&RawInputEvent.CLASS_TRACKBALL) != 0) {
                             // Add this relative movement into our totals.
                             if (ev.scancode == RawInputEvent.REL_X) {
                                 di.mRel.changed = true;
-                                di.mRel.x += ev.value;
+                                di.mRel.mNextData[MotionEvent.SAMPLE_X] += ev.value;
                             } else if (ev.scancode == RawInputEvent.REL_Y) {
                                 di.mRel.changed = true;
-                                di.mRel.y += ev.value;
+                                di.mRel.mNextData[MotionEvent.SAMPLE_Y] += ev.value;
                             }
                         }
                         
-                        if (send || ev.type == RawInputEvent.EV_SYN) {
+                        // Handle multitouch protocol sync: tells us that the
+                        // driver has returned all data for -one- of the pointers
+                        // that is currently down.
+                        if (ev.type == RawInputEvent.EV_SYN
+                                && ev.scancode == RawInputEvent.SYN_MT_REPORT
+                                && di.mAbs != null) {
+                            di.mAbs.changed = true;
+                            if (di.mAbs.mNextData[MotionEvent.SAMPLE_PRESSURE] > 0) {
+                                // If the value is <= 0, the pointer is not
+                                // down, so keep it in the count.
+                                
+                                if (di.mAbs.mNextData[di.mAbs.mAddingPointerOffset
+                                                      + MotionEvent.SAMPLE_PRESSURE] != 0) {
+                                    final int num = di.mAbs.mNextNumPointers+1;
+                                    di.mAbs.mNextNumPointers = num;
+                                    if (DEBUG_POINTERS) Log.v(TAG,
+                                            "MT_REPORT: now have " + num + " pointers");
+                                    final int newOffset = (num <= InputDevice.MAX_POINTERS)
+                                            ? (num * MotionEvent.NUM_SAMPLE_DATA)
+                                            : (InputDevice.MAX_POINTERS *
+                                                    MotionEvent.NUM_SAMPLE_DATA);
+                                    di.mAbs.mAddingPointerOffset = newOffset;
+                                    di.mAbs.mNextData[newOffset
+                                            + MotionEvent.SAMPLE_PRESSURE] = 0;
+                                } else {
+                                    if (DEBUG_POINTERS) Log.v(TAG, "MT_REPORT: no pointer");
+                                }
+                            }
+                        
+                        // Handle general event sync: all data for the current
+                        // event update has been delivered.
+                        } else if (send || (ev.type == RawInputEvent.EV_SYN
+                                && ev.scancode == RawInputEvent.SYN_REPORT)) {
                             if (mDisplay != null) {
                                 if (!mHaveGlobalMetaState) {
                                     computeGlobalMetaStateLocked();
                                 }
                                 
                                 MotionEvent me;
-                                me = di.mAbs.generateMotion(di, curTime, true,
-                                        mDisplay, mOrientation, mGlobalMetaState);
-                                if (false) Log.v(TAG, "Absolute: x=" + di.mAbs.x
-                                        + " y=" + di.mAbs.y + " ev=" + me);
-                                if (me != null) {
-                                    if (WindowManagerPolicy.WATCH_POINTER) {
-                                        Log.i(TAG, "Enqueueing: " + me);
+                                
+                                InputDevice.MotionState ms = di.mAbs;
+                                if (ms.changed) {
+                                    ms.changed = false;
+                                    
+                                    if ((classes&(RawInputEvent.CLASS_TOUCHSCREEN
+                                            |RawInputEvent.CLASS_TOUCHSCREEN_MT))
+                                            == RawInputEvent.CLASS_TOUCHSCREEN) {
+                                        ms.mNextNumPointers = 0;
+                                        if (ms.mDown[0]) {
+                                            System.arraycopy(di.curTouchVals, 0,
+                                                    ms.mNextData, 0,
+                                                    MotionEvent.NUM_SAMPLE_DATA);
+                                            ms.mNextNumPointers++;
+                                        }
                                     }
-                                    addLocked(di, curTime, ev.flags,
-                                            RawInputEvent.CLASS_TOUCHSCREEN, me);
+                                    
+                                    if (BAD_TOUCH_HACK) {
+                                        ms.dropBadPoint(di);
+                                    }
+                                    
+                                    boolean doMotion = !monitorVirtualKey(di,
+                                            ev, curTime, curTimeNano);
+                                    
+                                    if (doMotion && ms.mNextNumPointers > 0
+                                            && (ms.mLastNumPointers == 0
+                                                    || ms.mSkipLastPointers)) {
+                                        doMotion = !generateVirtualKeyDown(di,
+                                                ev, curTime, curTimeNano);
+                                    }
+                                    
+                                    if (doMotion) {
+                                        // XXX Need to be able to generate
+                                        // multiple events here, for example
+                                        // if two fingers change up/down state
+                                        // at the same time.
+                                        do {
+                                            me = ms.generateAbsMotion(di, curTime,
+                                                    curTimeNano, mDisplay,
+                                                    mOrientation, mGlobalMetaState);
+                                            if (DEBUG_POINTERS) Log.v(TAG, "Absolute: x="
+                                                    + di.mAbs.mNextData[MotionEvent.SAMPLE_X]
+                                                    + " y="
+                                                    + di.mAbs.mNextData[MotionEvent.SAMPLE_Y]
+                                                    + " ev=" + me);
+                                            if (me != null) {
+                                                if (WindowManagerPolicy.WATCH_POINTER) {
+                                                    Log.i(TAG, "Enqueueing: " + me);
+                                                }
+                                                addLocked(di, curTimeNano, ev.flags,
+                                                        RawInputEvent.CLASS_TOUCHSCREEN, me);
+                                            }
+                                        } while (ms.hasMore());
+                                    } else {
+                                        // We are consuming movement in the
+                                        // virtual key area...  but still
+                                        // propagate this to the previous
+                                        // data for comparisons.
+                                        int num = ms.mNextNumPointers;
+                                        if (num > InputDevice.MAX_POINTERS) {
+                                            num = InputDevice.MAX_POINTERS;
+                                        }
+                                        System.arraycopy(ms.mNextData, 0,
+                                                ms.mLastData, 0,
+                                                num * MotionEvent.NUM_SAMPLE_DATA);
+                                        ms.mLastNumPointers = num;
+                                        ms.mSkipLastPointers = true;
+                                    }
+                                    
+                                    ms.finish();
                                 }
-                                me = di.mRel.generateMotion(di, curTime, false,
-                                        mDisplay, mOrientation, mGlobalMetaState);
-                                if (false) Log.v(TAG, "Relative: x=" + di.mRel.x
-                                        + " y=" + di.mRel.y + " ev=" + me);
-                                if (me != null) {
-                                    addLocked(di, curTime, ev.flags,
-                                            RawInputEvent.CLASS_TRACKBALL, me);
+                                
+                                ms = di.mRel;
+                                if (ms.changed) {
+                                    ms.changed = false;
+                                    
+                                    me = ms.generateRelMotion(di, curTime,
+                                            curTimeNano,
+                                            mOrientation, mGlobalMetaState);
+                                    if (false) Log.v(TAG, "Relative: x="
+                                            + di.mRel.mNextData[MotionEvent.SAMPLE_X]
+                                            + " y="
+                                            + di.mRel.mNextData[MotionEvent.SAMPLE_Y]
+                                            + " ev=" + me);
+                                    if (me != null) {
+                                        addLocked(di, curTimeNano, ev.flags,
+                                                RawInputEvent.CLASS_TRACKBALL, me);
+                                    }
+                                    
+                                    ms.finish();
                                 }
                             }
                         }
                     }
+                
+                } catch (RuntimeException exc) {
+                    Log.e(TAG, "InputReaderThread uncaught exception", exc);
                 }
-            }
-            catch (RuntimeException exc) {
-                Log.e(TAG, "InputReaderThread uncaught exception", exc);
             }
         }
     };
 
+    private boolean isInsideDisplay(InputDevice dev) {
+        final InputDevice.AbsoluteInfo absx = dev.absX;
+        final InputDevice.AbsoluteInfo absy = dev.absY;
+        final InputDevice.MotionState absm = dev.mAbs;
+        if (absx == null || absy == null || absm == null) {
+            return true;
+        }
+        
+        if (absm.mNextData[MotionEvent.SAMPLE_X] >= absx.minValue
+                && absm.mNextData[MotionEvent.SAMPLE_X] <= absx.maxValue
+                && absm.mNextData[MotionEvent.SAMPLE_Y] >= absy.minValue
+                && absm.mNextData[MotionEvent.SAMPLE_Y] <= absy.maxValue) {
+            if (DEBUG_VIRTUAL_KEYS) Log.v(TAG, "Input ("
+                    + absm.mNextData[MotionEvent.SAMPLE_X]
+                    + "," + absm.mNextData[MotionEvent.SAMPLE_Y]
+                    + ") inside of display");
+            return true;
+        }
+        
+        return false;
+    }
+    
+    private VirtualKey findVirtualKey(InputDevice dev) {
+        final int N = mVirtualKeys.size();
+        if (N <= 0) {
+            return null;
+        }
+        
+        final InputDevice.MotionState absm = dev.mAbs;
+        for (int i=0; i<N; i++) {
+            VirtualKey sb = mVirtualKeys.get(i);
+            sb.computeHitRect(dev, mDisplayWidth, mDisplayHeight);
+            if (DEBUG_VIRTUAL_KEYS) Log.v(TAG, "Hit test ("
+                    + absm.mNextData[MotionEvent.SAMPLE_X] + ","
+                    + absm.mNextData[MotionEvent.SAMPLE_Y] + ") in code "
+                    + sb.scancode + " - (" + sb.hitLeft
+                    + "," + sb.hitTop + ")-(" + sb.hitRight + ","
+                    + sb.hitBottom + ")");
+            if (sb.checkHit(absm.mNextData[MotionEvent.SAMPLE_X],
+                    absm.mNextData[MotionEvent.SAMPLE_Y])) {
+                if (DEBUG_VIRTUAL_KEYS) Log.v(TAG, "Hit!");
+                return sb;
+            }
+        }
+        
+        return null;
+    }
+    
+    private boolean generateVirtualKeyDown(InputDevice di, RawInputEvent ev,
+            long curTime, long curTimeNano) {
+        if (isInsideDisplay(di)) {
+            // Didn't consume event.
+            return false;
+        }
+        
+        
+        VirtualKey vk = findVirtualKey(di);
+        if (vk != null) {
+            final InputDevice.MotionState ms = di.mAbs;
+            mPressedVirtualKey = vk;
+            vk.lastKeycode = scancodeToKeycode(di.id, vk.scancode);
+            ms.mLastNumPointers = ms.mNextNumPointers;
+            di.mKeyDownTime = curTime;
+            if (DEBUG_VIRTUAL_KEYS) Log.v(TAG,
+                    "Generate key down for: " + vk.scancode
+                    + " (keycode=" + vk.lastKeycode + ")");
+            KeyEvent event = newKeyEvent(di, di.mKeyDownTime, curTime, true,
+                    vk.lastKeycode, 0, vk.scancode,
+                    KeyEvent.FLAG_VIRTUAL_HARD_KEY);
+            mHapticFeedbackCallback.virtualKeyFeedback(event);
+            addLocked(di, curTimeNano, ev.flags, RawInputEvent.CLASS_KEYBOARD,
+                    event);
+        }
+        
+        // We always consume the event, even if we didn't
+        // generate a key event.  There are two reasons for
+        // this: to avoid spurious touches when holding
+        // the edges of the device near the touchscreen,
+        // and to avoid reporting events if there are virtual
+        // keys on the touchscreen outside of the display
+        // area.
+        // Note that for all of this we are only looking at the
+        // first pointer, since what we are handling here is the
+        // first pointer going down, and this is the coordinate
+        // that will be used to dispatch the event.
+        if (false) {
+            final InputDevice.AbsoluteInfo absx = di.absX;
+            final InputDevice.AbsoluteInfo absy = di.absY;
+            final InputDevice.MotionState absm = di.mAbs;
+            Log.v(TAG, "Rejecting ("
+                + absm.mNextData[MotionEvent.SAMPLE_X] + ","
+                + absm.mNextData[MotionEvent.SAMPLE_Y] + "): outside of ("
+                + absx.minValue + "," + absy.minValue
+                + ")-(" + absx.maxValue + ","
+                + absx.maxValue + ")");
+        }
+        return true;
+    }
+    
+    private boolean monitorVirtualKey(InputDevice di, RawInputEvent ev,
+            long curTime, long curTimeNano) {
+        VirtualKey vk = mPressedVirtualKey;
+        if (vk == null) {
+            return false;
+        }
+        
+        final InputDevice.MotionState ms = di.mAbs;
+        if (ms.mNextNumPointers <= 0) {
+            mPressedVirtualKey = null;
+            ms.mLastNumPointers = 0;
+            if (DEBUG_VIRTUAL_KEYS) Log.v(TAG, "Generate key up for: " + vk.scancode);
+            KeyEvent event = newKeyEvent(di, di.mKeyDownTime, curTime, false,
+                    vk.lastKeycode, 0, vk.scancode,
+                    KeyEvent.FLAG_VIRTUAL_HARD_KEY);
+            mHapticFeedbackCallback.virtualKeyFeedback(event);
+            addLocked(di, curTimeNano, ev.flags, RawInputEvent.CLASS_KEYBOARD,
+                    event);
+            return true;
+            
+        } else if (isInsideDisplay(di)) {
+            // Whoops the pointer has moved into
+            // the display area!  Cancel the
+            // virtual key and start a pointer
+            // motion.
+            mPressedVirtualKey = null;
+            if (DEBUG_VIRTUAL_KEYS) Log.v(TAG, "Cancel key up for: " + vk.scancode);
+            KeyEvent event = newKeyEvent(di, di.mKeyDownTime, curTime, false,
+                    vk.lastKeycode, 0, vk.scancode,
+                    KeyEvent.FLAG_CANCELED | KeyEvent.FLAG_VIRTUAL_HARD_KEY);
+            mHapticFeedbackCallback.virtualKeyFeedback(event);
+            addLocked(di, curTimeNano, ev.flags, RawInputEvent.CLASS_KEYBOARD,
+                    event);
+            ms.mLastNumPointers = 0;
+            return false;
+        }
+        
+        return true;
+    }
+    
     /**
      * Returns a new meta state for the given keys and old state.
      */
@@ -497,6 +1042,29 @@ public abstract class KeyInputQueue {
         }
     }
 
+    /**
+     * Return true if the queue has an up event pending that corresponds
+     * to the same key as the given key event.
+     */
+    boolean hasKeyUpEvent(KeyEvent origEvent) {
+        synchronized (mFirst) {
+            final int keyCode = origEvent.getKeyCode();
+            QueuedEvent cur = mLast.prev;
+            while (cur.prev != null) {
+                if (cur.classType == RawInputEvent.CLASS_KEYBOARD) {
+                    KeyEvent ke = (KeyEvent)cur.event;
+                    if (ke.getAction() == KeyEvent.ACTION_UP
+                            && ke.getKeyCode() == keyCode) {
+                        return true;
+                    }
+                }
+                cur = cur.prev;
+            }
+        }
+        
+        return false;
+    }
+    
     void recycleEvent(QueuedEvent ev) {
         synchronized (mFirst) {
             //Log.i(TAG, "Recycle event: " + ev);
@@ -506,8 +1074,8 @@ public abstract class KeyInputQueue {
             if (ev.event == ev.inputDevice.mRel.currentMove) {
                 if (false) Log.i(TAG, "Detach rel " + ev.event);
                 ev.inputDevice.mRel.currentMove = null;
-                ev.inputDevice.mRel.x = 0;
-                ev.inputDevice.mRel.y = 0;
+                ev.inputDevice.mRel.mNextData[MotionEvent.SAMPLE_X] = 0;
+                ev.inputDevice.mRel.mNextData[MotionEvent.SAMPLE_Y] = 0;
             }
             recycleLocked(ev);
         }
@@ -530,7 +1098,7 @@ public abstract class KeyInputQueue {
         }
     }
     
-    private QueuedEvent obtainLocked(InputDevice device, long when,
+    private QueuedEvent obtainLocked(InputDevice device, long whenNano,
             int flags, int classType, Object event) {
         QueuedEvent ev;
         if (mCacheCount == 0) {
@@ -542,7 +1110,7 @@ public abstract class KeyInputQueue {
             mCacheCount--;
         }
         ev.inputDevice = device;
-        ev.when = when;
+        ev.whenNano = whenNano;
         ev.flags = flags;
         ev.classType = classType;
         ev.event = event;
@@ -561,13 +1129,13 @@ public abstract class KeyInputQueue {
         }
     }
 
-    private void addLocked(InputDevice device, long when, int flags,
+    private void addLocked(InputDevice device, long whenNano, int flags,
             int classType, Object event) {
         boolean poke = mFirst.next == mLast;
 
-        QueuedEvent ev = obtainLocked(device, when, flags, classType, event);
+        QueuedEvent ev = obtainLocked(device, whenNano, flags, classType, event);
         QueuedEvent p = mLast.prev;
-        while (p != mFirst && ev.when < p.when) {
+        while (p != mFirst && ev.whenNano < p.whenNano) {
             p = p.prev;
         }
 
@@ -578,31 +1146,48 @@ public abstract class KeyInputQueue {
         ev.inQueue = true;
 
         if (poke) {
+            long time;
+            if (MEASURE_LATENCY) {
+                time = System.nanoTime();
+            }
             mFirst.notify();
             mWakeLock.acquire();
+            if (MEASURE_LATENCY) {
+                lt.sample("1 addLocked-queued event ", System.nanoTime() - time);
+            }
         }
     }
 
     private InputDevice newInputDevice(int deviceId) {
         int classes = getDeviceClasses(deviceId);
         String name = getDeviceName(deviceId);
-        Log.i(TAG, "Device added: id=0x" + Integer.toHexString(deviceId)
-                + ", name=" + name
-                + ", classes=" + Integer.toHexString(classes));
-        InputDevice.AbsoluteInfo absX;
-        InputDevice.AbsoluteInfo absY;
-        InputDevice.AbsoluteInfo absPressure;
-        InputDevice.AbsoluteInfo absSize;
-        if ((classes&RawInputEvent.CLASS_TOUCHSCREEN) != 0) {
-            absX = loadAbsoluteInfo(deviceId, RawInputEvent.ABS_X, "X");
-            absY = loadAbsoluteInfo(deviceId, RawInputEvent.ABS_Y, "Y");
-            absPressure = loadAbsoluteInfo(deviceId, RawInputEvent.ABS_PRESSURE, "Pressure");
-            absSize = loadAbsoluteInfo(deviceId, RawInputEvent.ABS_TOOL_WIDTH, "Size");
-        } else {
-            absX = null;
-            absY = null;
-            absPressure = null;
-            absSize = null;
+        InputDevice.AbsoluteInfo absX = null;
+        InputDevice.AbsoluteInfo absY = null;
+        InputDevice.AbsoluteInfo absPressure = null;
+        InputDevice.AbsoluteInfo absSize = null;
+        if (classes != 0) {
+            Log.i(TAG, "Device added: id=0x" + Integer.toHexString(deviceId)
+                    + ", name=" + name
+                    + ", classes=" + Integer.toHexString(classes));
+            if ((classes&RawInputEvent.CLASS_TOUCHSCREEN_MT) != 0) {
+                absX = loadAbsoluteInfo(deviceId,
+                        RawInputEvent.ABS_MT_POSITION_X, "X");
+                absY = loadAbsoluteInfo(deviceId,
+                        RawInputEvent.ABS_MT_POSITION_Y, "Y");
+                absPressure = loadAbsoluteInfo(deviceId,
+                        RawInputEvent.ABS_MT_TOUCH_MAJOR, "Pressure");
+                absSize = loadAbsoluteInfo(deviceId,
+                        RawInputEvent.ABS_MT_WIDTH_MAJOR, "Size");
+            } else if ((classes&RawInputEvent.CLASS_TOUCHSCREEN) != 0) {
+                absX = loadAbsoluteInfo(deviceId,
+                        RawInputEvent.ABS_X, "X");
+                absY = loadAbsoluteInfo(deviceId,
+                        RawInputEvent.ABS_Y, "Y");
+                absPressure = loadAbsoluteInfo(deviceId,
+                        RawInputEvent.ABS_PRESSURE, "Pressure");
+                absSize = loadAbsoluteInfo(deviceId,
+                        RawInputEvent.ABS_TOOL_WIDTH, "Size");
+            }
         }
         
         return new InputDevice(deviceId, classes, name, absX, absY, absPressure, absSize);

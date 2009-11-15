@@ -22,10 +22,12 @@ import android.content.Intent;
 import android.content.pm.ConfigurationInfo;
 import android.content.pm.IPackageDataObserver;
 import android.graphics.Bitmap;
+import android.os.Debug;
 import android.os.RemoteException;
 import android.os.Handler;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.SystemProperties;
 import android.text.TextUtils;
 import java.util.List;
 
@@ -45,6 +47,26 @@ public class ActivityManager {
         mHandler = handler;
     }
 
+    /**
+     * Return the approximate per-application memory class of the current
+     * device.  This gives you an idea of how hard a memory limit you should
+     * impose on your application to let the overall system work best.  The
+     * returned value is in megabytes; the baseline Android memory class is
+     * 16 (which happens to be the Java heap limit of those devices); some
+     * device with more memory may return 24 or even higher numbers.
+     */
+    public int getMemoryClass() {
+        return staticGetMemoryClass();
+    }
+    
+    /** @hide */
+    static public int staticGetMemoryClass() {
+        // Really brain dead right now -- just take this from the configured
+        // vm heap size, and assume it is in megabytes and thus ends with "m".
+        String vmHeapSize = SystemProperties.get("dalvik.vm.heapsize", "16m");
+        return Integer.parseInt(vmHeapSize.substring(0, vmHeapSize.length()-1));
+    }
+    
     /**
      * Information you can retrieve about tasks that the user has most recently
      * started or visited.
@@ -289,6 +311,11 @@ public class ActivityManager {
         public int pid;
         
         /**
+         * The UID that owns this service.
+         */
+        public int uid;
+        
+        /**
          * The name of the process this service runs in.
          */
         public String process;
@@ -299,7 +326,7 @@ public class ActivityManager {
         public boolean foreground;
         
         /**
-         * The time when the service was first made activity, either by someone
+         * The time when the service was first made active, either by someone
          * starting or binding to it.
          */
         public long activeSince;
@@ -332,6 +359,48 @@ public class ActivityManager {
          */
         public long restarting;
         
+        /**
+         * Bit for {@link #flags}: set if this service has been
+         * explicitly started.
+         */
+        public static final int FLAG_STARTED = 1<<0;
+        
+        /**
+         * Bit for {@link #flags}: set if the service has asked to
+         * run as a foreground process.
+         */
+        public static final int FLAG_FOREGROUND = 1<<1;
+        
+        /**
+         * Bit for {@link #flags): set if the service is running in a
+         * core system process.
+         */
+        public static final int FLAG_SYSTEM_PROCESS = 1<<2;
+        
+        /**
+         * Bit for {@link #flags): set if the service is running in a
+         * persistent process.
+         */
+        public static final int FLAG_PERSISTENT_PROCESS = 1<<3;
+        
+        /**
+         * Running flags.
+         */
+        public int flags;
+        
+        /**
+         * For special services that are bound to by system code, this is
+         * the package that holds the binding.
+         */
+        public String clientPackage;
+        
+        /**
+         * For special services that are bound to by system code, this is
+         * a string resource providing a user-visible label for who the
+         * client is.
+         */
+        public int clientLabel;
+        
         public RunningServiceInfo() {
         }
 
@@ -342,6 +411,7 @@ public class ActivityManager {
         public void writeToParcel(Parcel dest, int flags) {
             ComponentName.writeToParcel(service, dest);
             dest.writeInt(pid);
+            dest.writeInt(uid);
             dest.writeString(process);
             dest.writeInt(foreground ? 1 : 0);
             dest.writeLong(activeSince);
@@ -350,11 +420,15 @@ public class ActivityManager {
             dest.writeInt(crashCount);
             dest.writeLong(lastActivityTime);
             dest.writeLong(restarting);
+            dest.writeInt(this.flags);
+            dest.writeString(clientPackage);
+            dest.writeInt(clientLabel);
         }
 
         public void readFromParcel(Parcel source) {
             service = ComponentName.readFromParcel(source);
             pid = source.readInt();
+            uid = source.readInt();
             process = source.readString();
             foreground = source.readInt() != 0;
             activeSince = source.readLong();
@@ -363,6 +437,9 @@ public class ActivityManager {
             crashCount = source.readInt();
             lastActivityTime = source.readLong();
             restarting = source.readLong();
+            flags = source.readInt();
+            clientPackage = source.readString();
+            clientLabel = source.readInt();
         }
         
         public static final Creator<RunningServiceInfo> CREATOR = new Creator<RunningServiceInfo>() {
@@ -394,6 +471,22 @@ public class ActivityManager {
         try {
             return (List<RunningServiceInfo>)ActivityManagerNative.getDefault()
                     .getServices(maxNum, 0);
+        } catch (RemoteException e) {
+            // System dead, we will be dead too soon!
+            return null;
+        }
+    }
+    
+    /**
+     * Returns a PendingIntent you can start to show a control panel for the
+     * given running service.  If the service does not have a control panel,
+     * null is returned.
+     */
+    public PendingIntent getRunningServiceControlPanel(ComponentName service)
+            throws SecurityException {
+        try {
+            return ActivityManagerNative.getDefault()
+                    .getRunningServiceControlPanel(service);
         } catch (RemoteException e) {
             // System dead, we will be dead too soon!
             return null;
@@ -613,6 +706,11 @@ public class ActivityManager {
          */
         public int pid;
         
+        /**
+         * The user id of this process.
+         */
+        public int uid;
+        
         public String pkgList[];
         
         /**
@@ -666,8 +764,51 @@ public class ActivityManager {
          */
         public int lru;
         
+        /**
+         * Constant for {@link #importanceReasonCode}: nothing special has
+         * been specified for the reason for this level.
+         */
+        public static final int REASON_UNKNOWN = 0;
+        
+        /**
+         * Constant for {@link #importanceReasonCode}: one of the application's
+         * content providers is being used by another process.  The pid of
+         * the client process is in {@link #importanceReasonPid} and the
+         * target provider in this process is in
+         * {@link #importanceReasonComponent}.
+         */
+        public static final int REASON_PROVIDER_IN_USE = 1;
+        
+        /**
+         * Constant for {@link #importanceReasonCode}: one of the application's
+         * content providers is being used by another process.  The pid of
+         * the client process is in {@link #importanceReasonPid} and the
+         * target provider in this process is in
+         * {@link #importanceReasonComponent}.
+         */
+        public static final int REASON_SERVICE_IN_USE = 2;
+        
+        /**
+         * The reason for {@link #importance}, if any.
+         */
+        public int importanceReasonCode;
+        
+        /**
+         * For the specified values of {@link #importanceReasonCode}, this
+         * is the process ID of the other process that is a client of this
+         * process.  This will be 0 if no other process is using this one.
+         */
+        public int importanceReasonPid;
+        
+        /**
+         * For the specified values of {@link #importanceReasonCode}, this
+         * is the name of the component that is being used in this process.
+         */
+        public ComponentName importanceReasonComponent;
+        
         public RunningAppProcessInfo() {
             importance = IMPORTANCE_FOREGROUND;
+            importanceReasonCode = REASON_UNKNOWN;
         }
         
         public RunningAppProcessInfo(String pProcessName, int pPid, String pArr[]) {
@@ -683,17 +824,25 @@ public class ActivityManager {
         public void writeToParcel(Parcel dest, int flags) {
             dest.writeString(processName);
             dest.writeInt(pid);
+            dest.writeInt(uid);
             dest.writeStringArray(pkgList);
             dest.writeInt(importance);
             dest.writeInt(lru);
+            dest.writeInt(importanceReasonCode);
+            dest.writeInt(importanceReasonPid);
+            ComponentName.writeToParcel(importanceReasonComponent, dest);
         }
 
         public void readFromParcel(Parcel source) {
             processName = source.readString();
             pid = source.readInt();
+            uid = source.readInt();
             pkgList = source.readStringArray();
             importance = source.readInt();
             lru = source.readInt();
+            importanceReasonCode = source.readInt();
+            importanceReasonPid = source.readInt();
+            importanceReasonComponent = ComponentName.readFromParcel(source);
         }
 
         public static final Creator<RunningAppProcessInfo> CREATOR = 
@@ -721,6 +870,22 @@ public class ActivityManager {
     public List<RunningAppProcessInfo> getRunningAppProcesses() {
         try {
             return ActivityManagerNative.getDefault().getRunningAppProcesses();
+        } catch (RemoteException e) {
+            return null;
+        }
+    }
+    
+    /**
+     * Return information about the memory usage of one or more processes.
+     * 
+     * @param pids The pids of the processes whose memory usage is to be
+     * retrieved.
+     * @return Returns an array of memory information, one for each
+     * requested pid.
+     */
+    public Debug.MemoryInfo[] getProcessMemoryInfo(int[] pids) {
+        try {
+            return ActivityManagerNative.getDefault().getProcessMemoryInfo(pids);
         } catch (RemoteException e) {
             return null;
         }

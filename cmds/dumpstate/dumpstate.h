@@ -61,6 +61,15 @@
     run_command(&c, TIMEOUT);   \
 }
 
+#define EXEC1(cmd, a1)          \
+{                               \
+    static struct Command c = { \
+        "/system/bin/" cmd,     \
+        { cmd, a1, 0 }          \
+    };                          \
+    run_command(&c, TIMEOUT);   \
+}
+
 #define EXEC2(cmd, a1, a2)      \
 {                               \
     static struct Command c = { \
@@ -68,6 +77,15 @@
         { cmd, a1, a2, 0 }      \
     };                          \
     run_command(&c, TIMEOUT);   \
+}
+
+#define EXEC3(cmd, a1, a2, a3)      \
+{                                   \
+    static struct Command c = {     \
+        "/system/bin/" cmd,         \
+        { cmd, a1, a2, a3, 0 }      \
+    };                              \
+    run_command(&c, TIMEOUT);       \
 }
 
 #define EXEC4(cmd, a1, a2, a3, a4)  \

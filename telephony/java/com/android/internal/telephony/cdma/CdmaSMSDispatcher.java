@@ -19,18 +19,24 @@ package com.android.internal.telephony.cdma;
 
 import android.app.Activity;
 import android.app.PendingIntent;
+import android.app.PendingIntent.CanceledException;
 import android.content.ContentValues;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.os.AsyncResult;
 import android.os.Message;
+import android.os.SystemProperties;
 import android.provider.Telephony;
 import android.provider.Telephony.Sms.Intents;
 import android.preference.PreferenceManager;
 import android.util.Config;
 import android.util.Log;
+import android.telephony.SmsManager;
+import android.telephony.SmsMessage.MessageClass;
 
+import com.android.internal.telephony.TelephonyProperties;
 import com.android.internal.telephony.CommandsInterface;
 import com.android.internal.telephony.SmsHeader;
 import com.android.internal.telephony.SmsMessageBase;
@@ -42,13 +48,18 @@ import com.android.internal.util.HexDump;
 
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.lang.Boolean;
 
 
 final class CdmaSMSDispatcher extends SMSDispatcher {
     private static final String TAG = "CDMA";
 
     private CDMAPhone mCdmaPhone;
+
+    private byte[] mLastDispatchedSmsFingerprint;
+    private byte[] mLastAcknowledgedSmsFingerprint;
 
     CdmaSMSDispatcher(CDMAPhone phone) {
         super(phone);
@@ -67,35 +78,51 @@ final class CdmaSMSDispatcher extends SMSDispatcher {
         Log.d(TAG, "handleStatusReport is a special GSM function, should never be called in CDMA!");
     }
 
+    private void handleCdmaStatusReport(SmsMessage sms) {
+        for (int i = 0, count = deliveryPendingList.size(); i < count; i++) {
+            SmsTracker tracker = deliveryPendingList.get(i);
+            if (tracker.mMessageRef == sms.messageRef) {
+                // Found it.  Remove from list and broadcast.
+                deliveryPendingList.remove(i);
+                PendingIntent intent = tracker.mDeliveryIntent;
+                Intent fillIn = new Intent();
+                fillIn.putExtra("pdu", sms.getPdu());
+                try {
+                    intent.send(mContext, Activity.RESULT_OK, fillIn);
+                } catch (CanceledException ex) {}
+                break;  // Only expect to see one tracker matching this message.
+            }
+        }
+    }
+
     /** {@inheritDoc} */
     protected int dispatchMessage(SmsMessageBase smsb) {
 
         // If sms is null, means there was a parsing error.
         if (smsb == null) {
+            Log.e(TAG, "dispatchMessage: message is null");
             return Intents.RESULT_SMS_GENERIC_ERROR;
         }
 
-        // Decode BD stream and set sms variables.
+        String inEcm=SystemProperties.get(TelephonyProperties.PROPERTY_INECM_MODE, "false");
+        if (inEcm.equals("true")) {
+            return Activity.RESULT_OK;
+        }
+
+        // See if we have a network duplicate SMS.
         SmsMessage sms = (SmsMessage) smsb;
+        mLastDispatchedSmsFingerprint = sms.getIncomingSmsFingerprint();
+        if (mLastAcknowledgedSmsFingerprint != null &&
+                Arrays.equals(mLastDispatchedSmsFingerprint, mLastAcknowledgedSmsFingerprint)) {
+            return Intents.RESULT_SMS_HANDLED;
+        }
+        // Decode BD stream and set sms variables.
         sms.parseSms();
         int teleService = sms.getTeleService();
         boolean handled = false;
 
-        if (sms.getUserData() == null) {
-            if (Config.LOGD) {
-                Log.d(TAG, "Received SMS without user data");
-            }
-            handled = true;
-        }
-
-        if (handled) {
-            return Intents.RESULT_SMS_HANDLED;
-        }
-
-        if (SmsEnvelope.TELESERVICE_WAP == teleService){
-            return processCdmaWapPdu(sms.getUserData(), sms.messageRef,
-                    sms.getOriginatingAddress());
-        } else if (SmsEnvelope.TELESERVICE_VMN == teleService) {
+        if ((SmsEnvelope.TELESERVICE_VMN == teleService) ||
+                (SmsEnvelope.TELESERVICE_MWI == teleService)) {
             // handling Voicemail
             int voicemailCount = sms.getNumOfVoicemails();
             Log.d(TAG, "Voicemail count=" + voicemailCount);
@@ -106,10 +133,44 @@ final class CdmaSMSDispatcher extends SMSDispatcher {
             editor.putInt(CDMAPhone.VM_COUNT_CDMA, voicemailCount);
             editor.commit();
             ((CDMAPhone) mPhone).updateMessageWaitingIndicator(voicemailCount);
+            handled = true;
+        } else if (((SmsEnvelope.TELESERVICE_WMT == teleService) ||
+                (SmsEnvelope.TELESERVICE_WEMT == teleService)) &&
+                sms.isStatusReportMessage()) {
+            handleCdmaStatusReport(sms);
+            handled = true;
+        } else if ((sms.getUserData() == null)) {
+            if (Config.LOGD) {
+                Log.d(TAG, "Received SMS without user data");
+            }
+            handled = true;
+        }
+
+        if (handled) {
             return Intents.RESULT_SMS_HANDLED;
         }
 
-        /**
+        if (!mStorageAvailable && (sms.getMessageClass() != MessageClass.CLASS_0)) {
+            // It's a storable message and there's no storage available.  Bail.
+            // (See C.S0015-B v2.0 for a description of "Immediate Display"
+            // messages, which we represent as CLASS_0.)
+            return Intents.RESULT_SMS_OUT_OF_MEMORY;
+        }
+
+        if (SmsEnvelope.TELESERVICE_WAP == teleService) {
+            return processCdmaWapPdu(sms.getUserData(), sms.messageRef,
+                    sms.getOriginatingAddress());
+        }
+
+        // Reject (NAK) any messages with teleservice ids that have
+        // not yet been handled and also do not correspond to the two
+        // kinds that are processed below.
+        if ((SmsEnvelope.TELESERVICE_WMT != teleService) &&
+                (SmsEnvelope.TELESERVICE_WEMT != teleService)) {
+            return Intents.RESULT_SMS_UNSUPPORTED;
+        }
+
+        /*
          * TODO(cleanup): Why are we using a getter method for this
          * (and for so many other sms fields)?  Trivial getters and
          * setters like this are direct violations of the style guide.
@@ -122,11 +183,12 @@ final class CdmaSMSDispatcher extends SMSDispatcher {
          */
         SmsHeader smsHeader = sms.getUserDataHeader();
 
-        /**
+        /*
          * TODO(cleanup): Since both CDMA and GSM use the same header
          * format, this dispatch processing is naturally identical,
          * and code should probably not be replicated explicitly.
          */
+
         // See if message is partial or port addressed.
         if ((smsHeader == null) || (smsHeader.concatRef == null)) {
             // Message is not partial (not part of concatenated sequence).
@@ -248,13 +310,15 @@ final class CdmaSMSDispatcher extends SMSDispatcher {
 
         // Build up the data stream
         ByteArrayOutputStream output = new ByteArrayOutputStream();
-        for (int i = 0; i < totalSegments-1; i++) {
+        for (int i = 0; i < totalSegments; i++) {
             // reassemble the (WSP-)pdu
-            output.write(pdus[i], 0, pdus[i].length);
+            if (i == segment) {
+                // This one isn't in the DB, so add it
+                output.write(pdu, index, pdu.length - index);
+            } else {
+                output.write(pdus[i], 0, pdus[i].length);
+            }
         }
-
-        // This one isn't in the DB, so add it
-        output.write(pdu, index, pdu.length - index);
 
         byte[] datagram = output.toByteArray();
         // Dispatch the PDU to applications
@@ -271,6 +335,22 @@ final class CdmaSMSDispatcher extends SMSDispatcher {
             return Activity.RESULT_OK;
         }
         }
+    }
+
+    /** {@inheritDoc} */
+    protected void sendData(String destAddr, String scAddr, int destPort,
+            byte[] data, PendingIntent sentIntent, PendingIntent deliveryIntent) {
+        SmsMessage.SubmitPdu pdu = SmsMessage.getSubmitPdu(
+                scAddr, destAddr, destPort, data, (deliveryIntent != null));
+        sendSubmitPdu(pdu, sentIntent, deliveryIntent);
+    }
+
+    /** {@inheritDoc} */
+    protected void sendText(String destAddr, String scAddr, String text,
+            PendingIntent sentIntent, PendingIntent deliveryIntent) {
+        SmsMessage.SubmitPdu pdu = SmsMessage.getSubmitPdu(
+                scAddr, destAddr, text, (deliveryIntent != null), null);
+        sendSubmitPdu(pdu, sentIntent, deliveryIntent);
     }
 
     /** {@inheritDoc} */
@@ -310,17 +390,31 @@ final class CdmaSMSDispatcher extends SMSDispatcher {
             uData.payloadStr = parts.get(i);
             uData.userDataHeader = smsHeader;
 
+            /* By setting the statusReportRequested bit only for the
+             * last message fragment, this will result in only one
+             * callback to the sender when that last fragment delivery
+             * has been acknowledged. */
             SmsMessage.SubmitPdu submitPdu = SmsMessage.getSubmitPdu(destAddr,
-                    uData, deliveryIntent != null);
+                    uData, (deliveryIntent != null) && (i == (msgCount - 1)));
 
             sendSubmitPdu(submitPdu, sentIntent, deliveryIntent);
         }
     }
 
-    protected void sendSubmitPdu(SmsMessage.SubmitPdu submitPdu, PendingIntent sentIntent,
-            PendingIntent deliveryIntent) {
-        sendRawPdu(submitPdu.encodedScAddress, submitPdu.encodedMessage,
-                sentIntent, deliveryIntent);
+    protected void sendSubmitPdu(SmsMessage.SubmitPdu pdu,
+            PendingIntent sentIntent, PendingIntent deliveryIntent) {
+        if (SystemProperties.getBoolean(TelephonyProperties.PROPERTY_INECM_MODE, false)) {
+            if (sentIntent != null) {
+                try {
+                    sentIntent.send(SmsManager.RESULT_ERROR_NO_SERVICE);
+                } catch (CanceledException ex) {}
+            }
+            if (Config.LOGD) {
+                Log.d(TAG, "Block SMS in Emergency Callback mode");
+            }
+            return;
+        }
+        sendRawPdu(pdu.encodedScAddress, pdu.encodedMessage, sentIntent, deliveryIntent);
     }
 
     /** {@inheritDoc} */
@@ -343,8 +437,20 @@ final class CdmaSMSDispatcher extends SMSDispatcher {
     /** {@inheritDoc} */
     protected void acknowledgeLastIncomingSms(boolean success, int result, Message response){
         // FIXME unit test leaves cm == null. this should change
+
+        String inEcm=SystemProperties.get(TelephonyProperties.PROPERTY_INECM_MODE, "false");
+        if (inEcm.equals("true")) {
+            return;
+        }
+
         if (mCm != null) {
-            mCm.acknowledgeLastIncomingCdmaSms(success, resultToCause(result), response);
+            int causeCode = resultToCause(result);
+            mCm.acknowledgeLastIncomingCdmaSms(success, causeCode, response);
+
+            if (causeCode == 0) {
+                mLastAcknowledgedSmsFingerprint = mLastDispatchedSmsFingerprint;
+            }
+            mLastDispatchedSmsFingerprint = null;
         }
     }
 
@@ -365,15 +471,17 @@ final class CdmaSMSDispatcher extends SMSDispatcher {
 
     private int resultToCause(int rc) {
         switch (rc) {
-            case Activity.RESULT_OK:
-            case Intents.RESULT_SMS_HANDLED:
-                // Cause code is ignored on success.
-                return 0;
-            case Intents.RESULT_SMS_OUT_OF_MEMORY:
-                return CommandsInterface.CDMA_SMS_FAIL_CAUSE_RESOURCE_SHORTAGE;
-            case Intents.RESULT_SMS_GENERIC_ERROR:
-            default:
-                return CommandsInterface.CDMA_SMS_FAIL_CAUSE_OTHER_TERMINAL_PROBLEM;
+        case Activity.RESULT_OK:
+        case Intents.RESULT_SMS_HANDLED:
+            // Cause code is ignored on success.
+            return 0;
+        case Intents.RESULT_SMS_OUT_OF_MEMORY:
+            return CommandsInterface.CDMA_SMS_FAIL_CAUSE_RESOURCE_SHORTAGE;
+        case Intents.RESULT_SMS_UNSUPPORTED:
+            return CommandsInterface.CDMA_SMS_FAIL_CAUSE_INVALID_TELESERVICE_ID;
+        case Intents.RESULT_SMS_GENERIC_ERROR:
+        default:
+            return CommandsInterface.CDMA_SMS_FAIL_CAUSE_ENCODING_PROBLEM;
         }
     }
 }

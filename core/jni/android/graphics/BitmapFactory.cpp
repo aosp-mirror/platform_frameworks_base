@@ -314,14 +314,15 @@ static jobject nullObjectReturn(const char msg[]) {
 }
 
 static SkPixelRef* installPixelRef(SkBitmap* bitmap, SkStream* stream,
-                                   int sampleSize) {
-    SkPixelRef* pr;
+                                   int sampleSize, bool ditherImage) {
+    SkImageRef* pr;
     // only use ashmem for large images, since mmaps come at a price
     if (bitmap->getSize() >= 32 * 1024) {
         pr = new SkImageRef_ashmem(stream, bitmap->config(), sampleSize);
     } else {
         pr = new SkImageRef_GlobalPool(stream, bitmap->config(), sampleSize);
     }
+    pr->setDitherImage(ditherImage);
     bitmap->setPixelRef(pr)->unref();
     return pr;
 }
@@ -440,7 +441,7 @@ static jobject doDecode(JNIEnv* env, SkStream* stream, jobject padding,
 
     SkPixelRef* pr;
     if (isPurgeable) {
-        pr = installPixelRef(bitmap, stream, sampleSize);
+        pr = installPixelRef(bitmap, stream, sampleSize, doDither);
     } else {
         // if we get here, we're in kDecodePixels_Mode and will therefore
         // already have a pixelref installed.

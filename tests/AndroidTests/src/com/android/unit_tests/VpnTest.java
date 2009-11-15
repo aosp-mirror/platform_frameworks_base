@@ -130,7 +130,6 @@ public class VpnTest extends AndroidTestCase {
 
     private void testVpnType(VpnType type) {
         assertFalse(TextUtils.isEmpty(type.getDisplayName()));
-        assertNotNull(type.getDescription());
         assertNotNull(type.getProfileClass());
     }
 

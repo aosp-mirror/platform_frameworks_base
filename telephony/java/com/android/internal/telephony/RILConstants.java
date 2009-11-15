@@ -79,6 +79,14 @@ public interface RILConstants {
     int CDM_TTY_HCO_MODE = 2;
     int CDM_TTY_VCO_MODE = 3;
 
+    /* Setup a packet data connection. See ril.h RIL_REQUEST_SETUP_DATA_CALL */
+    int SETUP_DATA_TECH_CDMA      = 0;
+    int SETUP_DATA_TECH_GSM       = 1;
+    int SETUP_DATA_AUTH_NONE      = 0;
+    int SETUP_DATA_AUTH_PAP       = 1;
+    int SETUP_DATA_AUTH_CHAP      = 2;
+    int SETUP_DATA_AUTH_PAP_CHAP  = 3;
+
 /*
 cat include/telephony/ril.h | \
    egrep '^#define' | \
@@ -202,7 +210,7 @@ cat include/telephony/ril.h | \
     int RIL_REQUEST_CDMA_QUERY_PREFERRED_VOICE_PRIVACY_MODE = 83;
     int RIL_REQUEST_CDMA_FLASH = 84;
     int RIL_REQUEST_CDMA_BURST_DTMF = 85;
-    int RIL_REQUEST_CDMA_VALIDATE_AKEY = 86;
+    int RIL_REQUEST_CDMA_VALIDATE_AND_WRITE_AKEY = 86;
     int RIL_REQUEST_CDMA_SEND_SMS = 87;
     int RIL_REQUEST_CDMA_SMS_ACKNOWLEDGE = 88;
     int RIL_REQUEST_GSM_GET_BROADCAST_CONFIG = 89;
@@ -250,4 +258,5 @@ cat include/telephony/ril.h | \
     int RIL_UNSOL_CDMA_OTA_PROVISION_STATUS = 1026;
     int RIL_UNSOL_CDMA_INFO_REC = 1027;
     int RIL_UNSOL_OEM_HOOK_RAW = 1028;
+    int RIL_UNSOL_RINGBACK_TONE = 1029;
 }

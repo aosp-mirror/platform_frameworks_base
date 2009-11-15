@@ -34,6 +34,8 @@ import android.speech.tts.ITts.Stub;
 import android.speech.tts.ITtsCallback;
 import android.speech.tts.TextToSpeech;
 import android.util.Log;
+
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -120,6 +122,7 @@ public class TtsService extends Service implements OnCompletionListener {
     private static final String ACTION = "android.intent.action.START_TTS_SERVICE";
     private static final String CATEGORY = "android.intent.category.TTS";
     private static final String PKGNAME = "android.tts";
+    protected static final String SERVICE_TAG = "TtsService";
 
     private final RemoteCallbackList<ITtsCallback> mCallbacks
             = new RemoteCallbackList<ITtsCallback>();
@@ -138,6 +141,7 @@ public class TtsService extends Service implements OnCompletionListener {
 
     private ContentResolver mResolver;
 
+    // lock for the speech queue (mSpeechQueue) and the current speech item (mCurrentSpeechItem)
     private final ReentrantLock speechQueueLock = new ReentrantLock();
     private final ReentrantLock synthesizerLock = new ReentrantLock();
 
@@ -145,7 +149,7 @@ public class TtsService extends Service implements OnCompletionListener {
     @Override
     public void onCreate() {
         super.onCreate();
-        Log.i("TtsService", "TtsService.onCreate()");
+        Log.v("TtsService", "TtsService.onCreate()");
 
         mResolver = getContentResolver();
 
@@ -173,10 +177,7 @@ public class TtsService extends Service implements OnCompletionListener {
     public void onDestroy() {
         super.onDestroy();
 
-        // TODO replace the call to stopAll() with a method to clear absolutely all upcoming
-        // uses of the native synth, including synthesis to a file, and delete files for which
-        // synthesis was not complete.
-        stopAll("");
+        killAllUtterances();
 
         // Don't hog the media player
         cleanUpPlayer();
@@ -188,6 +189,8 @@ public class TtsService extends Service implements OnCompletionListener {
 
         // Unregister all callbacks.
         mCallbacks.kill();
+
+        Log.v(SERVICE_TAG, "onDestroy() completed");
     }
 
 
@@ -279,7 +282,6 @@ public class TtsService extends Service implements OnCompletionListener {
 
 
     private int isLanguageAvailable(String lang, String country, String variant) {
-        //Log.v("TtsService", "TtsService.isLanguageAvailable(" + lang + ", " + country + ", " +variant+")");
         int res = TextToSpeech.LANG_NOT_SUPPORTED;
         try {
             res = sNativeSynth.isLanguageAvailable(lang, country, variant);
@@ -301,7 +303,7 @@ public class TtsService extends Service implements OnCompletionListener {
 
 
     private int setLanguage(String callingApp, String lang, String country, String variant) {
-        Log.v("TtsService", "TtsService.setLanguage(" + lang + ", " + country + ", " + variant + ")");
+        Log.v(SERVICE_TAG, "TtsService.setLanguage(" + lang + ", " + country + ", " + variant + ")");
         int res = TextToSpeech.ERROR;
         try {
             if (isDefaultEnforced()) {
@@ -385,7 +387,7 @@ public class TtsService extends Service implements OnCompletionListener {
      *            engines.
      */
     private int speak(String callingApp, String text, int queueMode, ArrayList<String> params) {
-        Log.v("TtsService", "TTS service received " + text);
+        Log.v(SERVICE_TAG, "TTS service received " + text);
         if (queueMode == TextToSpeech.QUEUE_FLUSH) {
             stop(callingApp);
         } else if (queueMode == 2) {
@@ -434,7 +436,7 @@ public class TtsService extends Service implements OnCompletionListener {
             speechQueueAvailable =
                     speechQueueLock.tryLock(SPEECHQUEUELOCK_TIMEOUT, TimeUnit.MILLISECONDS);
             if (speechQueueAvailable) {
-                Log.i("TtsService", "Stopping");
+                Log.i(SERVICE_TAG, "Stopping");
                 for (int i = mSpeechQueue.size() - 1; i > -1; i--){
                     if (mSpeechQueue.get(i).mCallingApp.equals(callingApp)){
                         mSpeechQueue.remove(i);
@@ -461,10 +463,13 @@ public class TtsService extends Service implements OnCompletionListener {
                 } else {
                     result = TextToSpeech.SUCCESS;
                 }
-                Log.i("TtsService", "Stopped");
+                Log.i(SERVICE_TAG, "Stopped");
+            } else {
+                Log.e(SERVICE_TAG, "TTS stop(): queue locked longer than expected");
+                result = TextToSpeech.ERROR;
             }
         } catch (InterruptedException e) {
-          Log.e("TtsService", "TTS stop: tryLock interrupted");
+          Log.e(SERVICE_TAG, "TTS stop: tryLock interrupted");
           e.printStackTrace();
         } finally {
             // This check is needed because finally will always run; even if the
@@ -476,6 +481,63 @@ public class TtsService extends Service implements OnCompletionListener {
         }
     }
 
+
+    /**
+     * Stops all speech output, both rendered to a file and directly spoken, and removes any
+     * utterances still in the queue globally. Files that were being written are deleted.
+     */
+    @SuppressWarnings("finally")
+    private int killAllUtterances() {
+        int result = TextToSpeech.ERROR;
+        boolean speechQueueAvailable = false;
+
+        try {
+            speechQueueAvailable = speechQueueLock.tryLock(SPEECHQUEUELOCK_TIMEOUT,
+                    TimeUnit.MILLISECONDS);
+            if (speechQueueAvailable) {
+                // remove every single entry in the speech queue
+                mSpeechQueue.clear();
+
+                // clear the current speech item
+                if (mCurrentSpeechItem != null) {
+                    result = sNativeSynth.stopSync();
+                    mKillList.put(mCurrentSpeechItem, true);
+                    mIsSpeaking = false;
+
+                    // was the engine writing to a file?
+                    if (mCurrentSpeechItem.mType == SpeechItem.TEXT_TO_FILE) {
+                        // delete the file that was being written
+                        if (mCurrentSpeechItem.mFilename != null) {
+                            File tempFile = new File(mCurrentSpeechItem.mFilename);
+                            Log.v(SERVICE_TAG, "Leaving behind " + mCurrentSpeechItem.mFilename);
+                            if (tempFile.exists()) {
+                                Log.v(SERVICE_TAG, "About to delete "
+                                        + mCurrentSpeechItem.mFilename);
+                                if (tempFile.delete()) {
+                                    Log.v(SERVICE_TAG, "file successfully deleted");
+                                }
+                            }
+                        }
+                    }
+
+                    mCurrentSpeechItem = null;
+                }
+            } else {
+                Log.e(SERVICE_TAG, "TTS killAllUtterances(): queue locked longer than expected");
+                result = TextToSpeech.ERROR;
+            }
+        } catch (InterruptedException e) {
+            Log.e(SERVICE_TAG, "TTS killAllUtterances(): tryLock interrupted");
+            result = TextToSpeech.ERROR;
+        } finally {
+            // This check is needed because finally will always run, even if the
+            // method returns somewhere in the try block.
+            if (speechQueueAvailable) {
+                speechQueueLock.unlock();
+            }
+            return result;
+        }
+    }
 
 
     /**
@@ -516,10 +578,13 @@ public class TtsService extends Service implements OnCompletionListener {
                 } else {
                     result = TextToSpeech.SUCCESS;
                 }
-                Log.i("TtsService", "Stopped all");
+                Log.i(SERVICE_TAG, "Stopped all");
+            } else {
+                Log.e(SERVICE_TAG, "TTS stopAll(): queue locked longer than expected");
+                result = TextToSpeech.ERROR;
             }
         } catch (InterruptedException e) {
-          Log.e("TtsService", "TTS stopAll: tryLock interrupted");
+          Log.e(SERVICE_TAG, "TTS stopAll: tryLock interrupted");
           e.printStackTrace();
         } finally {
             // This check is needed because finally will always run; even if the
@@ -646,11 +711,11 @@ public class TtsService extends Service implements OnCompletionListener {
                             sNativeSynth.speak(speechItem.mText, streamType);
                         } catch (NullPointerException e) {
                             // synth will become null during onDestroy()
-                            Log.v("TtsService", " null synth, can't speak");
+                            Log.v(SERVICE_TAG, " null synth, can't speak");
                         }
                     }
                 } catch (InterruptedException e) {
-                    Log.e("TtsService", "TTS speakInternalOnly(): tryLock interrupted");
+                    Log.e(SERVICE_TAG, "TTS speakInternalOnly(): tryLock interrupted");
                     e.printStackTrace();
                 } finally {
                     // This check is needed because finally will always run;
@@ -667,7 +732,7 @@ public class TtsService extends Service implements OnCompletionListener {
             }
         }
         Thread synth = (new Thread(new SynthThread()));
-        //synth.setPriority(Thread.MIN_PRIORITY);
+        synth.setPriority(Thread.MAX_PRIORITY);
         synth.start();
     }
 
@@ -676,7 +741,7 @@ public class TtsService extends Service implements OnCompletionListener {
             public void run() {
                 boolean synthAvailable = false;
                 String utteranceId = "";
-                Log.i("TtsService", "Synthesizing to " + speechItem.mFilename);
+                Log.i(SERVICE_TAG, "Synthesizing to " + speechItem.mFilename);
                 try {
                     synthAvailable = synthesizerLock.tryLock();
                     if (!synthAvailable) {
@@ -720,11 +785,11 @@ public class TtsService extends Service implements OnCompletionListener {
                             sNativeSynth.synthesizeToFile(speechItem.mText, speechItem.mFilename);
                         } catch (NullPointerException e) {
                             // synth will become null during onDestroy()
-                            Log.v("TtsService", " null synth, can't synthesize to file");
+                            Log.v(SERVICE_TAG, " null synth, can't synthesize to file");
                         }
                     }
                 } catch (InterruptedException e) {
-                    Log.e("TtsService", "TTS synthToFileInternalOnly(): tryLock interrupted");
+                    Log.e(SERVICE_TAG, "TTS synthToFileInternalOnly(): tryLock interrupted");
                     e.printStackTrace();
                 } finally {
                     // This check is needed because finally will always run;
@@ -741,7 +806,7 @@ public class TtsService extends Service implements OnCompletionListener {
             }
         }
         Thread synth = (new Thread(new SynthThread()));
-        //synth.setPriority(Thread.MIN_PRIORITY);
+        synth.setPriority(Thread.MAX_PRIORITY);
         synth.start();
     }
 
@@ -769,7 +834,7 @@ public class TtsService extends Service implements OnCompletionListener {
         if (cb == null){
             return;
         }
-        Log.i("TtsService", "TTS callback: dispatch started");
+        Log.v(SERVICE_TAG, "TTS callback: dispatch started");
         // Broadcast to all clients the new value.
         final int N = mCallbacks.beginBroadcast();
         try {
@@ -779,7 +844,7 @@ public class TtsService extends Service implements OnCompletionListener {
             // the dead object for us.
         }
         mCallbacks.finishBroadcast();
-        Log.i("TtsService", "TTS callback: dispatch completed to " + N);
+        Log.v(SERVICE_TAG, "TTS callback: dispatch completed to " + N);
     }
 
     private SpeechItem splitCurrentTextIfNeeded(SpeechItem currentSpeechItem){
@@ -816,11 +881,12 @@ public class TtsService extends Service implements OnCompletionListener {
             speechQueueAvailable =
                     speechQueueLock.tryLock(SPEECHQUEUELOCK_TIMEOUT, TimeUnit.MILLISECONDS);
             if (!speechQueueAvailable) {
-                Log.e("TtsService", "processSpeechQueue - Speech queue is unavailable.");
+                Log.e(SERVICE_TAG, "processSpeechQueue - Speech queue is unavailable.");
                 return;
             }
             if (mSpeechQueue.size() < 1) {
                 mIsSpeaking = false;
+                mKillList.clear();
                 broadcastTtsQueueProcessingCompleted();
                 return;
             }
@@ -830,7 +896,7 @@ public class TtsService extends Service implements OnCompletionListener {
             SoundResource sr = getSoundResource(mCurrentSpeechItem);
             // Synth speech as needed - synthesizer should call
             // processSpeechQueue to continue running the queue
-            Log.i("TtsService", "TTS processing: " + mCurrentSpeechItem.mText);
+            Log.v(SERVICE_TAG, "TTS processing: " + mCurrentSpeechItem.mText);
             if (sr == null) {
                 if (mCurrentSpeechItem.mType == SpeechItem.TEXT) {
                     mCurrentSpeechItem = splitCurrentTextIfNeeded(mCurrentSpeechItem);
@@ -886,7 +952,7 @@ public class TtsService extends Service implements OnCompletionListener {
                 mSpeechQueue.remove(0);
             }
         } catch (InterruptedException e) {
-          Log.e("TtsService", "TTS processSpeechQueue: tryLock interrupted");
+          Log.e(SERVICE_TAG, "TTS processSpeechQueue: tryLock interrupted");
           e.printStackTrace();
         } finally {
             // This check is needed because finally will always run; even if the

@@ -28,12 +28,9 @@ import android.telephony.SignalStrength;
  * {@hide}
  */
 public abstract class ServiceStateTracker extends Handler {
+
     /**
-     *  The access technology currently in use:
-     *  0 = unknown
-     *  1 = GPRS only
-     *  2 = EDGE
-     *  3 = UMTS
+     *  Access technology currently in use.
      */
     protected static final int DATA_ACCESS_UNKNOWN = 0;
     protected static final int DATA_ACCESS_GPRS = 1;
@@ -44,7 +41,9 @@ public abstract class ServiceStateTracker extends Handler {
     protected static final int DATA_ACCESS_CDMA_1xRTT = 6;
     protected static final int DATA_ACCESS_CDMA_EvDo_0 = 7;
     protected static final int DATA_ACCESS_CDMA_EvDo_A = 8;
-    //***** Instance Variables
+    protected static final int DATA_ACCESS_HSDPA = 9;
+    protected static final int DATA_ACCESS_HSUPA = 10;
+    protected static final int DATA_ACCESS_HSPA = 11;
 
     protected CommandsInterface cm;
 
@@ -53,34 +52,36 @@ public abstract class ServiceStateTracker extends Handler {
 
     public SignalStrength mSignalStrength;
 
-    // Used as a unique identifier to track requests associated with a poll
-    // and ignore stale responses.The value is a count-down of expected responses
-    // in this pollingContext
+    /**
+     * A unique identifier to track requests associated with a poll
+     * and ignore stale responses.  The value is a count-down of
+     * expected responses in this pollingContext.
+     */
     protected int[] pollingContext;
     protected boolean mDesiredPowerState;
 
-    protected boolean dontPollSignalStrength = false; // Default is to poll strength
-    // If we're getting unsolicited signal strength updates from the radio,
-    // set value to true and don't bother polling any more
+    /**
+     * By default, strength polling is enabled.  However, if we're
+     * getting unsolicited signal strength updates from the radio, set
+     * value to true and don't bother polling any more.
+     */
+    protected boolean dontPollSignalStrength = false;
 
     protected RegistrantList networkAttachedRegistrants = new RegistrantList();
     protected RegistrantList roamingOnRegistrants = new RegistrantList();
     protected RegistrantList roamingOffRegistrants = new RegistrantList();
 
-    //***** Constants
-
     protected  static final boolean DBG = true;
 
-    // signal strength poll rate
+    /** Signal strength poll rate. */
     protected static final int POLL_PERIOD_MILLIS = 20 * 1000;
 
-    // waiting period before recheck gprs and voice registration
+    /** Waiting period before recheck gprs and voice registration. */
     public static final int DEFAULT_GPRS_CHECK_PERIOD_MILLIS = 60 * 1000;
 
-    public static final int MAX_NUM_DATA_STATE_READS = 15;
     public static final int DATA_STATE_POLL_SLEEP_MS = 100;
 
-    //*****GSM events
+    /** GSM events */
     protected static final int EVENT_RADIO_STATE_CHANGED               = 1;
     protected static final int EVENT_NETWORK_STATE_CHANGED             = 2;
     protected static final int EVENT_GET_SIGNAL_STRENGTH               = 3;
@@ -102,7 +103,7 @@ public abstract class ServiceStateTracker extends Handler {
     protected static final int EVENT_CHECK_REPORT_GPRS                 = 22;
     protected static final int EVENT_RESTRICTED_STATE_CHANGED          = 23;
 
-    //*****CDMA events:
+    /** CDMA events */
     protected static final int EVENT_POLL_STATE_REGISTRATION_CDMA      = 24;
     protected static final int EVENT_POLL_STATE_OPERATOR_CDMA          = 25;
     protected static final int EVENT_RUIM_READY                        = 26;
@@ -116,14 +117,17 @@ public abstract class ServiceStateTracker extends Handler {
     protected static final int EVENT_POLL_STATE_CDMA_SUBSCRIPTION      = 34;
     protected static final int EVENT_NV_READY                          = 35;
     protected static final int EVENT_ERI_FILE_LOADED                   = 36;
+    protected static final int EVENT_OTA_PROVISION_STATUS_CHANGE       = 37;
+    protected static final int EVENT_SET_RADIO_POWER_OFF               = 38;
 
-    //***** Time Zones
     protected static final String TIMEZONE_PROPERTY = "persist.sys.timezone";
 
-    // List of ISO codes for countries that can have an offset of GMT+0
-    // when not in daylight savings time.  This ignores some small places
-    // such as the Canary Islands (Spain) and Danmarkshavn (Denmark).
-    // The list must be sorted by code.
+    /**
+     * List of ISO codes for countries that can have an offset of
+     * GMT+0 when not in daylight savings time.  This ignores some
+     * small places such as the Canary Islands (Spain) and
+     * Danmarkshavn (Denmark).  The list must be sorted by code.
+    */
     protected static final String[] GMT_COUNTRY_CODES = {
         "bf", // Burkina Faso
         "ci", // Cote d'Ivoire
@@ -147,11 +151,10 @@ public abstract class ServiceStateTracker extends Handler {
         "uk", // U.K
     };
 
-    //***** Registration denied reason
+    /** Reason for registration denial. */
     protected static final String REGISTRATION_DENIED_GEN  = "General";
     protected static final String REGISTRATION_DENIED_AUTH = "Authentication Failure";
 
-    //***** Constructors
     public ServiceStateTracker() {
 
     }
@@ -216,8 +219,6 @@ public abstract class ServiceStateTracker extends Handler {
                 obtainMessage(EVENT_GET_PREFERRED_NETWORK_TYPE, onComplete));
     }
 
-
-    //***** Called from Phone
     public void
     setRadioPower(boolean power) {
         mDesiredPowerState = power;
@@ -225,26 +226,54 @@ public abstract class ServiceStateTracker extends Handler {
         setPowerStateToDesired();
     }
 
+    /**
+     * These two flags manage the behavior of the cell lock -- the
+     * lock should be held if either flag is true.  The intention is
+     * to allow temporary aquisition of the lock to get a single
+     * update.  Such a lock grab and release can thus be made to not
+     * interfere with more permanent lock holds -- in other words, the
+     * lock will only be released if both flags are false, and so
+     * releases by temporary users will only affect the lock state if
+     * there is no continuous user.
+     */
+    private boolean mWantContinuousLocationUpdates;
+    private boolean mWantSingleLocationUpdate;
 
-    public void enableLocationUpdates() {
+    public void enableSingleLocationUpdate() {
+        if (mWantSingleLocationUpdate || mWantContinuousLocationUpdates) return;
+        mWantSingleLocationUpdate = true;
         cm.setLocationUpdates(true, obtainMessage(EVENT_LOCATION_UPDATES_ENABLED));
     }
 
-    public void disableLocationUpdates() {
-        cm.setLocationUpdates(false, null);
+    public void enableLocationUpdates() {
+        if (mWantSingleLocationUpdate || mWantContinuousLocationUpdates) return;
+        mWantContinuousLocationUpdates = true;
+        cm.setLocationUpdates(true, obtainMessage(EVENT_LOCATION_UPDATES_ENABLED));
     }
 
-    //***** Overridden from Handler
+    protected void disableSingleLocationUpdate() {
+        mWantSingleLocationUpdate = false;
+        if (!mWantSingleLocationUpdate && !mWantContinuousLocationUpdates) {
+            cm.setLocationUpdates(false, null);
+        }
+    }
+
+    public void disableLocationUpdates() {
+        mWantContinuousLocationUpdates = false;
+        if (!mWantSingleLocationUpdate && !mWantContinuousLocationUpdates) {
+            cm.setLocationUpdates(false, null);
+        }
+    }
+
     public abstract void handleMessage(Message msg);
 
-    //***** Protected abstract Methods
     protected abstract void handlePollStateResult(int what, AsyncResult ar);
     protected abstract void updateSpnDisplay();
     protected abstract void setPowerStateToDesired();
 
     /** Cancel a pending (if any) pollState() operation */
     protected void cancelPollState() {
-        // This will effectively cancel the rest of the poll requests
+        // This will effectively cancel the rest of the poll requests.
         pollingContext = new int[1];
     }
 }

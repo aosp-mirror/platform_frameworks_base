@@ -2,7 +2,7 @@ LOCAL_PATH:= $(call my-dir)
 include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES:= \
-	finish.c
+	finish.cpp
 
 LOCAL_SHARED_LIBRARIES := \
 	libcutils \
@@ -13,5 +13,7 @@ LOCAL_SHARED_LIBRARIES := \
 LOCAL_MODULE:= test-opengl-finish
 
 LOCAL_MODULE_TAGS := optional
+
+LOCAL_CFLAGS := -DGL_GLEXT_PROTOTYPES
 
 include $(BUILD_EXECUTABLE)

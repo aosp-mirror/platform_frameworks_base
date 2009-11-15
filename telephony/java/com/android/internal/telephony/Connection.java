@@ -15,6 +15,7 @@
  */
 
 package com.android.internal.telephony;
+import android.util.Log;
 
 /**
  * {@hide}
@@ -27,6 +28,7 @@ public abstract class Connection {
     public static int PRESENTATION_UNKNOWN = 3;    // no specified or unknown by network
     public static int PRESENTATION_PAYPHONE = 4;   // show pay phone info
 
+    private static String LOG_TAG = "TelephonyConnection";
 
     public enum DisconnectCause {
         NOT_DISCONNECTED,               /* has not yet disconnected */
@@ -56,7 +58,9 @@ public abstract class Connection {
         CDMA_RETRY_ORDER,               /* requeseted service is rejected, retry delay is set */
         CDMA_ACCESS_FAILURE,
         CDMA_PREEMPTED,
-        CDMA_NOT_EMERGENCY              /* not an emergency call */
+        CDMA_NOT_EMERGENCY,              /* not an emergency call */
+        CDMA_ACCESS_BLOCKED,            /* Access Blocked by CDMA network */
+        ERROR_UNSPECIFIED
     }
 
     Object userData;
@@ -268,4 +272,25 @@ public abstract class Connection {
      */
     public abstract int getNumberPresentation();
 
+    /**
+     * Build a human representation of a connection instance, suitable for debugging.
+     * Don't log personal stuff unless in debug mode.
+     * @return a string representing the internal state of this connection.
+     */
+    public String toString() {
+        StringBuilder str = new StringBuilder(128);
+
+        if (Log.isLoggable(LOG_TAG, Log.DEBUG)) {
+            str.append("addr: " + getAddress())
+                    .append(" pres.: " + getNumberPresentation())
+                    .append(" dial: " + getOrigDialString())
+                    .append(" postdial: " + getRemainingPostDialString())
+                    .append(" cnap name: " + getCnapName())
+                    .append("(" + getCnapNamePresentation() + ")");
+        }
+        str.append(" incoming: " + isIncoming())
+                .append(" state: " + getState())
+                .append(" post dial state: " + getPostDialState());
+        return str.toString();
+    }
 }

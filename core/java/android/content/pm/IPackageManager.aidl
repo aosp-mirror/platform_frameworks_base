@@ -22,6 +22,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.FeatureInfo;
 import android.content.pm.IPackageInstallObserver;
 import android.content.pm.IPackageDeleteObserver;
 import android.content.pm.IPackageDataObserver;
@@ -74,6 +75,8 @@ interface IPackageManager {
     boolean isProtectedBroadcast(String actionName);
     
     int checkSignatures(String pkg1, String pkg2);
+    
+    int checkUidSignatures(int uid1, int uid2);
     
     String[] getPackagesForUid(int uid);
     
@@ -274,6 +277,14 @@ interface IPackageManager {
      */
     String[] getSystemSharedLibraryNames();
 
+    /**
+     * Get a list of features that are available on the
+     * system.
+     */
+    FeatureInfo[] getSystemAvailableFeatures();
+
+    boolean hasSystemFeature(String name);
+    
     void enterSafeMode();
     boolean isSafeMode();
     void systemReady();

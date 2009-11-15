@@ -57,6 +57,13 @@ public class HandlerCaller {
         mCallback = callback;
     }
 
+    public HandlerCaller(Context context, Looper looper, Callback callback) {
+        mContext = context;
+        mMainLooper = looper;
+        mH = new MyHandler(mMainLooper);
+        mCallback = callback;
+    }
+
     public SomeArgs obtainArgs() {
         synchronized (mH) {
             SomeArgs args = mArgsPool;
@@ -91,6 +98,18 @@ public class HandlerCaller {
         }
         
         mH.sendMessage(msg);
+    }
+    
+    public boolean hasMessages(int what) {
+        return mH.hasMessages(what);
+    }
+    
+    public void removeMessages(int what) {
+        mH.removeMessages(what);
+    }
+    
+    public void removeMessages(int what, Object obj) {
+        mH.removeMessages(what, obj);
     }
     
     public void sendMessage(Message msg) {
@@ -130,6 +149,14 @@ public class HandlerCaller {
     
     public Message obtainMessageIIO(int what, int arg1, int arg2, Object arg3) {
         return mH.obtainMessage(what, arg1, arg2, arg3);
+    }
+    
+    public Message obtainMessageIIOO(int what, int arg1, int arg2,
+            Object arg3, Object arg4) {
+        SomeArgs args = obtainArgs();
+        args.arg1 = arg3;
+        args.arg2 = arg4;
+        return mH.obtainMessage(what, arg1, arg2, args);
     }
     
     public Message obtainMessageIOO(int what, int arg1, Object arg2, Object arg3) {

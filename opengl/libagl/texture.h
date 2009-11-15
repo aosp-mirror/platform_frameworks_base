@@ -32,13 +32,9 @@ namespace android {
 
 void ogles_init_texture(ogles_context_t* c);
 void ogles_uninit_texture(ogles_context_t* c);
-void ogles_validate_texture_impl(ogles_context_t* c);
-
-inline void ogles_validate_texture(ogles_context_t* c) {
-    if (c->rasterizer.state.enables & GGL_ENABLE_TMUS)
-        ogles_validate_texture_impl(c);
-}
-
+void ogles_validate_texture(ogles_context_t* c);
+void ogles_lock_textures(ogles_context_t* c);
+void ogles_unlock_textures(ogles_context_t* c);
 
 }; // namespace android
 

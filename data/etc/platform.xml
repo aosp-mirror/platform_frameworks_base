@@ -133,6 +133,7 @@
     <assign-permission name="android.permission.READ_FRAME_BUFFER" uid="shell" />
     <assign-permission name="android.permission.DEVICE_POWER" uid="shell" />
     <assign-permission name="android.permission.INSTALL_LOCATION_PROVIDER" uid="shell" />
+    <assign-permission name="android.permission.BACKUP" uid="shell" />
 
     <assign-permission name="android.permission.MODIFY_AUDIO_SETTINGS" uid="media" />
     <assign-permission name="android.permission.ACCESS_DRM" uid="media" />
@@ -145,7 +146,7 @@
 
     <library name="android.test.runner"
             file="/system/framework/android.test.runner.jar" />
-    <library name="com.android.im.plugin"
-            file="/system/framework/com.android.im.plugin.jar"/>          
+    <library name="javax.obex"
+            file="/system/framework/javax.obex.jar"/>
 
 </permissions>

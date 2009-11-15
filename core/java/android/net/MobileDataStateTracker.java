@@ -32,9 +32,6 @@ import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.text.TextUtils;
 
-import java.util.List;
-import java.util.ArrayList;
-
 /**
  * Track the state of mobile data connectivity. This is done by
  * receiving broadcast intents from the Phone process whenever
@@ -45,36 +42,49 @@ import java.util.ArrayList;
 public class MobileDataStateTracker extends NetworkStateTracker {
 
     private static final String TAG = "MobileDataStateTracker";
-    private static final boolean DBG = false;
+    private static final boolean DBG = true;
 
     private Phone.DataState mMobileDataState;
     private ITelephony mPhoneService;
-    private static final String[] sDnsPropNames = {
-          "net.rmnet0.dns1",
-          "net.rmnet0.dns2",
-          "net.eth0.dns1",
-          "net.eth0.dns2",
-          "net.eth0.dns3",
-          "net.eth0.dns4",
-          "net.gprs.dns1",
-          "net.gprs.dns2"
-    };
-    private List<String> mDnsServers;
-    private String mInterfaceName;
-    private int mDefaultGatewayAddr;
-    private int mLastCallingPid = -1;
+
+    private String mApnType;
+    private String mApnName;
+    private boolean mEnabled;
+    private BroadcastReceiver mStateReceiver;
 
     /**
      * Create a new MobileDataStateTracker
      * @param context the application context of the caller
      * @param target a message handler for getting callbacks about state changes
+     * @param netType the ConnectivityManager network type
+     * @param apnType the Phone apnType
+     * @param tag the name of this network
      */
-    public MobileDataStateTracker(Context context, Handler target) {
-        super(context, target, ConnectivityManager.TYPE_MOBILE,
-              TelephonyManager.getDefault().getNetworkType(), "MOBILE",
-              TelephonyManager.getDefault().getNetworkTypeName());
+    public MobileDataStateTracker(Context context, Handler target,
+            int netType, String apnType, String tag) {
+        super(context, target, netType,
+                TelephonyManager.getDefault().getNetworkType(), tag,
+                TelephonyManager.getDefault().getNetworkTypeName());
+        mApnType = apnType;
         mPhoneService = null;
-        mDnsServers = new ArrayList<String>();
+        if(netType == ConnectivityManager.TYPE_MOBILE) {
+            mEnabled = true;
+        } else {
+            mEnabled = false;
+        }
+
+        mDnsPropNames = new String[] {
+                "net.rmnet0.dns1",
+                "net.rmnet0.dns2",
+                "net.eth0.dns1",
+                "net.eth0.dns2",
+                "net.eth0.dns3",
+                "net.eth0.dns4",
+                "net.gprs.dns1",
+                "net.gprs.dns2",
+                "net.ppp0.dns1",
+                "net.ppp0.dns2"};
+
     }
 
     /**
@@ -86,105 +96,133 @@ public class MobileDataStateTracker extends NetworkStateTracker {
         filter.addAction(TelephonyIntents.ACTION_DATA_CONNECTION_FAILED);
         filter.addAction(TelephonyIntents.ACTION_SERVICE_STATE_CHANGED);
 
-        Intent intent = mContext.registerReceiver(new MobileDataStateReceiver(), filter);
+        mStateReceiver = new MobileDataStateReceiver();
+        Intent intent = mContext.registerReceiver(mStateReceiver, filter);
         if (intent != null)
             mMobileDataState = getMobileDataState(intent);
         else
             mMobileDataState = Phone.DataState.DISCONNECTED;
     }
 
-    private static Phone.DataState getMobileDataState(Intent intent) {
+    private Phone.DataState getMobileDataState(Intent intent) {
         String str = intent.getStringExtra(Phone.STATE_KEY);
-        if (str != null)
-            return Enum.valueOf(Phone.DataState.class, str);
-        else
-            return Phone.DataState.DISCONNECTED;
+        if (str != null) {
+            String apnTypeList =
+                    intent.getStringExtra(Phone.DATA_APN_TYPES_KEY);
+            if (isApnTypeIncluded(apnTypeList)) {
+                return Enum.valueOf(Phone.DataState.class, str);
+            }
+        }
+        return Phone.DataState.DISCONNECTED;
+    }
+
+    private boolean isApnTypeIncluded(String typeList) {
+        /* comma seperated list - split and check */
+        if (typeList == null)
+            return false;
+
+        String[] list = typeList.split(",");
+        for(int i=0; i< list.length; i++) {
+            if (TextUtils.equals(list[i], mApnType) ||
+                TextUtils.equals(list[i], Phone.APN_TYPE_ALL)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private class MobileDataStateReceiver extends BroadcastReceiver {
         public void onReceive(Context context, Intent intent) {
-            if (intent.getAction().equals(TelephonyIntents.ACTION_ANY_DATA_CONNECTION_STATE_CHANGED)) {
-                Phone.DataState state = getMobileDataState(intent);
-                String reason = intent.getStringExtra(Phone.STATE_CHANGE_REASON_KEY);
-                String apnName = intent.getStringExtra(Phone.DATA_APN_KEY);
-                boolean unavailable = intent.getBooleanExtra(Phone.NETWORK_UNAVAILABLE_KEY, false);
-                if (DBG) Log.d(TAG, "Received " + intent.getAction() +
-                    " broadcast - state = " + state
-                    + ", unavailable = " + unavailable
-                    + ", reason = " + (reason == null ? "(unspecified)" : reason));
-                mNetworkInfo.setIsAvailable(!unavailable);
-                if (mMobileDataState != state) {
-                    mMobileDataState = state;
+            synchronized(this) {
+                if (intent.getAction().equals(TelephonyIntents.
+                        ACTION_ANY_DATA_CONNECTION_STATE_CHANGED)) {
+                    Phone.DataState state = getMobileDataState(intent);
+                    String reason = intent.getStringExtra(Phone.STATE_CHANGE_REASON_KEY);
+                    String apnName = intent.getStringExtra(Phone.DATA_APN_KEY);
+                    String apnTypeList = intent.getStringExtra(Phone.DATA_APN_TYPES_KEY);
+                    mApnName = apnName;
 
-                    switch (state) {
-                    case DISCONNECTED:
-                        setDetailedState(DetailedState.DISCONNECTED, reason, apnName);
-                        if (mInterfaceName != null) {
-                            NetworkUtils.resetConnections(mInterfaceName);
+                    boolean unavailable = intent.getBooleanExtra(Phone.NETWORK_UNAVAILABLE_KEY,
+                            false);
+
+                    // set this regardless of the apnTypeList.  It's all the same radio/network
+                    // underneath
+                    mNetworkInfo.setIsAvailable(!unavailable);
+
+                    if (isApnTypeIncluded(apnTypeList)) {
+                        if (mEnabled == false) {
+                            // if we're not enabled but the APN Type is supported by this connection
+                            // we should record the interface name if one's provided.  If the user
+                            // turns on this network we will need the interfacename but won't get
+                            // a fresh connected message - TODO fix this when we get per-APN
+                            // notifications
+                            if (state == Phone.DataState.CONNECTED) {
+                                if (DBG) Log.d(TAG, "replacing old mInterfaceName (" +
+                                        mInterfaceName + ") with " +
+                                        intent.getStringExtra(Phone.DATA_IFACE_NAME_KEY) +
+                                        " for " + mApnType);
+                                mInterfaceName = intent.getStringExtra(Phone.DATA_IFACE_NAME_KEY);
+                            }
+                            return;
                         }
-                        mInterfaceName = null;
-                        mDefaultGatewayAddr = 0;
-                        break;
-                    case CONNECTING:
-                        setDetailedState(DetailedState.CONNECTING, reason, apnName);
-                        break;
-                    case SUSPENDED:
-                        setDetailedState(DetailedState.SUSPENDED, reason, apnName);
-                        break;
-                    case CONNECTED:
-                        mInterfaceName = intent.getStringExtra(Phone.DATA_IFACE_NAME_KEY);
-                        if (mInterfaceName == null) {
-                            Log.d(TAG, "CONNECTED event did not supply interface name.");
-                        }
-                        setupDnsProperties();
-                        setDetailedState(DetailedState.CONNECTED, reason, apnName);
-                        break;
+                    } else {
+                        return;
                     }
+
+                    if (DBG) Log.d(TAG, mApnType + " Received state= " + state + ", old= " +
+                            mMobileDataState + ", reason= " +
+                            (reason == null ? "(unspecified)" : reason) +
+                            ", apnTypeList= " + apnTypeList);
+
+                    if (mMobileDataState != state) {
+                        mMobileDataState = state;
+                        switch (state) {
+                            case DISCONNECTED:
+                                if(isTeardownRequested()) {
+                                    mEnabled = false;
+                                    setTeardownRequested(false);
+                                }
+
+                                setDetailedState(DetailedState.DISCONNECTED, reason, apnName);
+                                if (mInterfaceName != null) {
+                                    NetworkUtils.resetConnections(mInterfaceName);
+                                }
+                                // can't do this here - ConnectivityService needs it to clear stuff
+                                // it's ok though - just leave it to be refreshed next time
+                                // we connect.
+                                //if (DBG) Log.d(TAG, "clearing mInterfaceName for "+ mApnType +
+                                //        " as it DISCONNECTED");
+                                //mInterfaceName = null;
+                                //mDefaultGatewayAddr = 0;
+                                break;
+                            case CONNECTING:
+                                setDetailedState(DetailedState.CONNECTING, reason, apnName);
+                                break;
+                            case SUSPENDED:
+                                setDetailedState(DetailedState.SUSPENDED, reason, apnName);
+                                break;
+                            case CONNECTED:
+                                mInterfaceName = intent.getStringExtra(Phone.DATA_IFACE_NAME_KEY);
+                                if (mInterfaceName == null) {
+                                    Log.d(TAG, "CONNECTED event did not supply interface name.");
+                                }
+                                setDetailedState(DetailedState.CONNECTED, reason, apnName);
+                                break;
+                        }
+                    }
+                } else if (intent.getAction().
+                        equals(TelephonyIntents.ACTION_DATA_CONNECTION_FAILED)) {
+                    mEnabled = false;
+                    String reason = intent.getStringExtra(Phone.FAILURE_REASON_KEY);
+                    String apnName = intent.getStringExtra(Phone.DATA_APN_KEY);
+                    if (DBG) Log.d(TAG, "Received " + intent.getAction() + " broadcast" +
+                            reason == null ? "" : "(" + reason + ")");
+                    setDetailedState(DetailedState.FAILED, reason, apnName);
                 }
-            } else if (intent.getAction().equals(TelephonyIntents.ACTION_DATA_CONNECTION_FAILED)) {
-                String reason = intent.getStringExtra(Phone.FAILURE_REASON_KEY);
-                String apnName = intent.getStringExtra(Phone.DATA_APN_KEY);
-                if (DBG) Log.d(TAG, "Received " + intent.getAction() + " broadcast" +
-                    reason == null ? "" : "(" + reason + ")");
-                setDetailedState(DetailedState.FAILED, reason, apnName);
+                TelephonyManager tm = TelephonyManager.getDefault();
+                setRoamingStatus(tm.isNetworkRoaming());
+                setSubtype(tm.getNetworkType(), tm.getNetworkTypeName());
             }
-            TelephonyManager tm = TelephonyManager.getDefault();
-            setRoamingStatus(tm.isNetworkRoaming());
-            setSubtype(tm.getNetworkType(), tm.getNetworkTypeName());
-        }
-    }
-
-    /**
-     * Make sure that route(s) exist to the carrier DNS server(s).
-     */
-    public void addPrivateRoutes() {
-        if (mInterfaceName != null) {
-            for (String addrString : mDnsServers) {
-                int addr = NetworkUtils.lookupHost(addrString);
-                if (addr != -1) {
-                    NetworkUtils.addHostRoute(mInterfaceName, addr);
-                }
-            }
-        }
-    }
-
-    public void removePrivateRoutes() {
-        if(mInterfaceName != null) {
-            NetworkUtils.removeHostRoutes(mInterfaceName);
-        }
-    }
-
-    public void removeDefaultRoute() {
-        if(mInterfaceName != null) {
-            mDefaultGatewayAddr = NetworkUtils.getDefaultRoute(mInterfaceName);
-            NetworkUtils.removeDefaultRoute(mInterfaceName);
-        }
-    }
-
-    public void restoreDefaultRoute() {
-        // 0 is not a valid address for a gateway
-        if (mInterfaceName != null && mDefaultGatewayAddr != 0) {
-            NetworkUtils.setDefaultRoute(mInterfaceName, mDefaultGatewayAddr);
         }
     }
 
@@ -219,15 +257,6 @@ public class MobileDataStateTracker extends NetworkStateTracker {
     }
 
     /**
-     * Return the IP addresses of the DNS servers available for the mobile data
-     * network interface.
-     * @return a list of DNS addresses, with no holes.
-     */
-    public String[] getNameServers() {
-        return getNameServerList(sDnsPropNames);
-    }
-
-    /**
      * {@inheritDoc}
      * The mobile data network subtype indicates what generation network technology is in effect,
      * e.g., GPRS, EDGE, UMTS, etc.
@@ -254,8 +283,20 @@ public class MobileDataStateTracker extends NetworkStateTracker {
         case TelephonyManager.NETWORK_TYPE_UMTS:
             networkTypeStr = "umts";
             break;
+        case TelephonyManager.NETWORK_TYPE_HSDPA:
+            networkTypeStr = "hsdpa";
+            break;
+        case TelephonyManager.NETWORK_TYPE_HSUPA:
+            networkTypeStr = "hsupa";
+            break;
+        case TelephonyManager.NETWORK_TYPE_HSPA:
+            networkTypeStr = "hspa";
+            break;
         case TelephonyManager.NETWORK_TYPE_CDMA:
             networkTypeStr = "cdma";
+            break;
+        case TelephonyManager.NETWORK_TYPE_1xRTT:
+            networkTypeStr = "1xrtt";
             break;
         case TelephonyManager.NETWORK_TYPE_EVDO_0:
             networkTypeStr = "evdo";
@@ -273,54 +314,58 @@ public class MobileDataStateTracker extends NetworkStateTracker {
      */
     @Override
     public boolean teardown() {
-        getPhoneService(false);
-        /*
-         * If the phone process has crashed in the past, we'll get a
-         * RemoteException and need to re-reference the service.
-         */
-        for (int retry = 0; retry < 2; retry++) {
-            if (mPhoneService == null) {
-                Log.w(TAG,
-                    "Ignoring mobile data teardown request because could not acquire PhoneService");
-                break;
-            }
-
-            try {
-                return mPhoneService.disableDataConnectivity();
-            } catch (RemoteException e) {
-                if (retry == 0) getPhoneService(true);
-            }
-        }
-
-        Log.w(TAG, "Failed to tear down mobile data connectivity");
-        return false;
+        // since we won't get a notification currently (TODO - per APN notifications)
+        // we won't get a disconnect message until all APN's on the current connection's
+        // APN list are disabled.  That means privateRoutes for DNS and such will remain on -
+        // not a problem since that's all shared with whatever other APN is still on, but
+        // ugly.
+        setTeardownRequested(true);
+        return (setEnableApn(mApnType, false) != Phone.APN_REQUEST_FAILED);
     }
 
     /**
      * Re-enable mobile data connectivity after a {@link #teardown()}.
      */
     public boolean reconnect() {
-        getPhoneService(false);
-        /*
-         * If the phone process has crashed in the past, we'll get a
-         * RemoteException and need to re-reference the service.
-         */
-        for (int retry = 0; retry < 2; retry++) {
-            if (mPhoneService == null) {
-                Log.w(TAG,
-                    "Ignoring mobile data connect request because could not acquire PhoneService");
+        setTeardownRequested(false);
+        switch (setEnableApn(mApnType, true)) {
+            case Phone.APN_ALREADY_ACTIVE:
+                // TODO - remove this when we get per-apn notifications
+                mEnabled = true;
+                // need to set self to CONNECTING so the below message is handled.
+                mMobileDataState = Phone.DataState.CONNECTING;
+                setDetailedState(DetailedState.CONNECTING, Phone.REASON_APN_CHANGED, null);
+                //send out a connected message
+                Intent intent = new Intent(TelephonyIntents.
+                        ACTION_ANY_DATA_CONNECTION_STATE_CHANGED);
+                intent.putExtra(Phone.STATE_KEY, Phone.DataState.CONNECTED.toString());
+                intent.putExtra(Phone.STATE_CHANGE_REASON_KEY, Phone.REASON_APN_CHANGED);
+                intent.putExtra(Phone.DATA_APN_TYPES_KEY, mApnType);
+                intent.putExtra(Phone.DATA_APN_KEY, mApnName);
+                intent.putExtra(Phone.DATA_IFACE_NAME_KEY, mInterfaceName);
+                intent.putExtra(Phone.NETWORK_UNAVAILABLE_KEY, false);
+                if (mStateReceiver != null) mStateReceiver.onReceive(mContext, intent);
                 break;
-            }
-
-            try {
-                return mPhoneService.enableDataConnectivity();
-            } catch (RemoteException e) {
-                if (retry == 0) getPhoneService(true);
-            }
+            case Phone.APN_REQUEST_STARTED:
+                mEnabled = true;
+                // no need to do anything - we're already due some status update intents
+                break;
+            case Phone.APN_REQUEST_FAILED:
+                if (mPhoneService == null && mApnType == Phone.APN_TYPE_DEFAULT) {
+                    // on startup we may try to talk to the phone before it's ready
+                    // just leave mEnabled as it is for the default apn.
+                    return false;
+                }
+                // else fall through
+            case Phone.APN_TYPE_NOT_AVAILABLE:
+                mEnabled = false;
+                break;
+            default:
+                Log.e(TAG, "Error in reconnect - unexpected response.");
+                mEnabled = false;
+                break;
         }
-
-        Log.w(TAG, "Failed to set up mobile data connectivity");
-        return false;
+        return mEnabled;
     }
 
     /**
@@ -374,14 +419,7 @@ public class MobileDataStateTracker extends NetworkStateTracker {
      * </ul>
      */
     public int startUsingNetworkFeature(String feature, int callingPid, int callingUid) {
-        if (TextUtils.equals(feature, Phone.FEATURE_ENABLE_MMS)) {
-            mLastCallingPid = callingPid;
-            return setEnableApn(Phone.APN_TYPE_MMS, true);
-        } else if (TextUtils.equals(feature, Phone.FEATURE_ENABLE_SUPL)) {
-            return setEnableApn(Phone.APN_TYPE_SUPL, true);
-        } else {
-            return -1;
-        }
+        return -1;
     }
 
     /**
@@ -397,13 +435,7 @@ public class MobileDataStateTracker extends NetworkStateTracker {
      * the value {@code -1} always indicates failure.
      */
     public int stopUsingNetworkFeature(String feature, int callingPid, int callingUid) {
-        if (TextUtils.equals(feature, Phone.FEATURE_ENABLE_MMS)) {
-            return setEnableApn(Phone.APN_TYPE_MMS, false);
-        } else if (TextUtils.equals(feature, Phone.FEATURE_ENABLE_SUPL)) {
-            return setEnableApn(Phone.APN_TYPE_SUPL, false);
-        } else {
-            return -1;
-        }
+        return -1;
     }
 
     /**
@@ -415,10 +447,11 @@ public class MobileDataStateTracker extends NetworkStateTracker {
      */
     @Override
     public boolean requestRouteToHost(int hostAddress) {
+        if (DBG) {
+            Log.d(TAG, "Requested host route to " + Integer.toHexString(hostAddress) +
+                    " for " + mApnType + "(" + mInterfaceName + ")");
+        }
         if (mInterfaceName != null && hostAddress != -1) {
-            if (DBG) {
-                Log.d(TAG, "Requested host route to " + Integer.toHexString(hostAddress));
-            }
             return NetworkUtils.addHostRoute(mInterfaceName, hostAddress) == 0;
         } else {
             return false;
@@ -431,43 +464,6 @@ public class MobileDataStateTracker extends NetworkStateTracker {
 
         sb.append(mMobileDataState);
         return sb.toString();
-    }
-
-    private void setupDnsProperties() {
-        mDnsServers.clear();
-        // Set up per-process DNS server list on behalf of the MMS process
-        int i = 1;
-        if (mInterfaceName != null) {
-            for (String propName : sDnsPropNames) {
-                if (propName.indexOf(mInterfaceName) != -1) {
-                    String propVal = SystemProperties.get(propName);
-                    if (propVal != null && propVal.length() != 0 && !propVal.equals("0.0.0.0")) {
-                        mDnsServers.add(propVal);
-                        if (mLastCallingPid != -1) {
-                            SystemProperties.set("net.dns"  + i + "." + mLastCallingPid, propVal);
-                        }
-                        ++i;
-                    }
-                }
-            }
-        }
-        if (i == 1) {
-            Log.d(TAG, "DNS server addresses are not known.");
-        } else if (mLastCallingPid != -1) {
-            /*
-            * Bump the property that tells the name resolver library
-            * to reread the DNS server list from the properties.
-            */
-            String propVal = SystemProperties.get("net.dnschange");
-            if (propVal.length() != 0) {
-                try {
-                    int n = Integer.parseInt(propVal);
-                    SystemProperties.set("net.dnschange", "" + (n+1));
-                } catch (NumberFormatException e) {
-                }
-            }
-        }
-        mLastCallingPid = -1;
     }
 
    /**

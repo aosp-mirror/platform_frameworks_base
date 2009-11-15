@@ -77,7 +77,7 @@ public class AnimationDrawable extends DrawableContainer implements Runnable, An
     private boolean mMutated;
 
     public AnimationDrawable() {
-        this(null);
+        this(null, null);
     }
 
     @Override
@@ -297,8 +297,9 @@ public class AnimationDrawable extends DrawableContainer implements Runnable, An
         private int[] mDurations;
         private boolean mOneShot;
 
-        AnimationState(AnimationState orig, AnimationDrawable owner) {
-            super(orig, owner);
+        AnimationState(AnimationState orig, AnimationDrawable owner,
+                Resources res) {
+            super(orig, owner, res);
 
             if (orig != null) {
                 mDurations = orig.mDurations;
@@ -311,7 +312,12 @@ public class AnimationDrawable extends DrawableContainer implements Runnable, An
 
         @Override
         public Drawable newDrawable() {
-            return new AnimationDrawable(this);
+            return new AnimationDrawable(this, null);
+        }
+
+        @Override
+        public Drawable newDrawable(Resources res) {
+            return new AnimationDrawable(this, res);
         }
 
         public void addFrame(Drawable dr, int dur) {
@@ -330,8 +336,8 @@ public class AnimationDrawable extends DrawableContainer implements Runnable, An
         }
     }
 
-    private AnimationDrawable(AnimationState state) {
-        AnimationState as = new AnimationState(state, this);
+    private AnimationDrawable(AnimationState state, Resources res) {
+        AnimationState as = new AnimationState(state, this, res);
         mAnimationState = as;
         setConstantState(as);
         if (state != null) {

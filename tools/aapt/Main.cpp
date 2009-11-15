@@ -6,8 +6,10 @@
 #include "Main.h"
 #include "Bundle.h"
 
-#include <utils.h>
-#include <utils/ZipFile.h>
+#include <utils/Log.h>
+#include <utils/threads.h>
+#include <utils/List.h>
+#include <utils/Errors.h>
 
 #include <stdlib.h>
 #include <getopt.h>
@@ -57,9 +59,9 @@ void usage(void)
         "        [-0 extension [-0 extension ...]] [-g tolerance] [-j jarfile] \\\n"
         "        [--min-sdk-version VAL] [--target-sdk-version VAL] \\\n"
         "        [--max-sdk-version VAL] [--app-version VAL] \\\n"
-        "        [--app-version-name TEXT] \\\n"
+        "        [--app-version-name TEXT]\\\n"
         "        [-I base-package [-I base-package ...]] \\\n"
-        "        [-A asset-source-dir] [-P public-definitions-file] \\\n"
+        "        [-A asset-source-dir]  [-G class-list-file] [-P public-definitions-file] \\\n"
         "        [-S resource-sources [-S resource-sources ...]] "
         "        [-F apk-file] [-J R-file-dir] \\\n"
         "        [raw-files-dir [raw-files-dir] ...]\n"
@@ -97,6 +99,7 @@ void usage(void)
         "   -f  force overwrite of existing files\n"
         "   -g  specify a pixel tolerance to force images to grayscale, default 0\n"
         "   -j  specify a jar or zip file containing classes to include\n"
+        "   -k  junk path of file(s) added\n"
         "   -m  make package directories under location specified by -J\n"
 #if 0
         "   -p  pseudolocalize the default configuration\n"
@@ -107,6 +110,7 @@ void usage(void)
         "   -z  require localization of resource attributes marked with\n"
         "       localization=\"suggested\"\n"
         "   -A  additional directory in which to find raw asset files\n"
+        "   -G  A file to output proguard options into.\n"
         "   -F  specify the apk file to output\n"
         "   -I  add an existing package to base include set\n"
         "   -J  specify where to output R.java resource constant definitions\n"
@@ -233,6 +237,9 @@ int main(int argc, char* const argv[])
                 bundle.setGrayscaleTolerance(tolerance);
                 printf("%s: Images with deviation <= %d will be forced to grayscale.\n", prog, tolerance);
                 break;
+            case 'k':
+                bundle.setJunkPath(true);
+                break;
             case 'm':
                 bundle.setMakePackageDirs(true);
                 break;
@@ -271,6 +278,17 @@ int main(int argc, char* const argv[])
                 }
                 convertPath(argv[0]);
                 bundle.setAssetSourceDir(argv[0]);
+                break;
+            case 'G':
+                argc--;
+                argv++;
+                if (!argc) {
+                    fprintf(stderr, "ERROR: No argument supplied for '-G' option\n");
+                    wantUsage = true;
+                    goto bail;
+                }
+                convertPath(argv[0]);
+                bundle.setProguardFile(argv[0]);
                 break;
             case 'I':
                 argc--;

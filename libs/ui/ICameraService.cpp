@@ -18,9 +18,9 @@
 #include <stdint.h>
 #include <sys/types.h>
 
-#include <utils/Parcel.h>
-#include <utils/IPCThreadState.h>
-#include <utils/IServiceManager.h>
+#include <binder/Parcel.h>
+#include <binder/IPCThreadState.h>
+#include <binder/IServiceManager.h>
 
 #include <ui/ICameraService.h>
 
@@ -48,12 +48,6 @@ public:
 IMPLEMENT_META_INTERFACE(CameraService, "android.hardware.ICameraService");
 
 // ----------------------------------------------------------------------
-
-#define CHECK_INTERFACE(interface, data, reply) \
-        do { if (!data.enforceInterface(interface::getInterfaceDescriptor())) { \
-            LOGW("Call incorrectly routed to " #interface); \
-            return PERMISSION_DENIED; \
-        } } while (0)
 
 status_t BnCameraService::onTransact(
     uint32_t code, const Parcel& data, Parcel* reply, uint32_t flags)

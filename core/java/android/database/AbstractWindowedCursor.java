@@ -166,6 +166,48 @@ public abstract class AbstractWindowedCursor extends AbstractCursor
         return mWindow.isBlob(mPos, columnIndex);
     }
 
+    public boolean isString(int columnIndex)
+    {
+        checkPosition();
+
+        synchronized(mUpdatedRows) {
+            if (isFieldUpdated(columnIndex)) {
+                Object object = getUpdatedField(columnIndex);
+                return object == null || object instanceof String;
+            }
+        }
+
+        return mWindow.isString(mPos, columnIndex);
+    }
+
+    public boolean isLong(int columnIndex)
+    {
+        checkPosition();
+
+        synchronized(mUpdatedRows) {
+            if (isFieldUpdated(columnIndex)) {
+                Object object = getUpdatedField(columnIndex);
+                return object != null && (object instanceof Integer || object instanceof Long);
+            }
+        }
+
+        return mWindow.isLong(mPos, columnIndex);
+    }
+
+    public boolean isFloat(int columnIndex)
+    {
+        checkPosition();
+
+        synchronized(mUpdatedRows) {
+            if (isFieldUpdated(columnIndex)) {
+                Object object = getUpdatedField(columnIndex);
+                return object != null && (object instanceof Float || object instanceof Double);
+            }
+        }
+
+        return mWindow.isFloat(mPos, columnIndex);
+    }
+
     @Override
     protected void checkPosition()
     {

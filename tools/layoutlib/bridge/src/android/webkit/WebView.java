@@ -240,13 +240,6 @@ public class WebView extends MockView {
         return null;
     }
 
-    public static synchronized PluginList getPluginList() {
-        return null;
-    }
-
-    public void refreshPlugins(boolean reloadOpenPages) {
-    }
-
     public View getZoomControls() {
         return null;
     }

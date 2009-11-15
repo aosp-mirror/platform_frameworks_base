@@ -6,7 +6,7 @@
   
   Instructions:
   Download this file
-  Add <script src="sorttable.js"></script> to your HTML
+  Add <script src="sorttable.js"> to your HTML
   Add class="sortable" to any table you'd like to make sortable
   Click on the headers to sort
   
@@ -88,6 +88,7 @@ sorttable = {
 	      }
 	      // make it clickable to sort
 	      headrow[i].sorttable_columnindex = i;
+	      headrow[i].style.cursor = "pointer";
 	      headrow[i].sorttable_tbody = table.tBodies[0];
 	      dean_addEvent(headrow[i],"click", function(e) {
 

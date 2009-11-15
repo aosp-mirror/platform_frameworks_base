@@ -104,7 +104,7 @@ public final class Debug
      * This class is used to retrieved various statistics about the memory mappings for this
      * process. The returns info broken down by dalvik, native, and other. All results are in kB.
      */
-    public static class MemoryInfo {
+    public static class MemoryInfo implements Parcelable {
         /** The proportional set size for dalvik. */
         public int dalvikPss;
         /** The private dirty pages used by dalvik. */
@@ -125,6 +125,71 @@ public final class Debug
         public int otherPrivateDirty;
         /** The shared dirty pages used by everything else. */
         public int otherSharedDirty;
+        
+        public MemoryInfo() {
+        }
+
+        /**
+         * Return total PSS memory usage in kB.
+         */
+        public int getTotalPss() {
+            return dalvikPss + nativePss + otherPss;
+        }
+        
+        /**
+         * Return total private dirty memory usage in kB.
+         */
+        public int getTotalPrivateDirty() {
+            return dalvikPrivateDirty + nativePrivateDirty + otherPrivateDirty;
+        }
+        
+        /**
+         * Return total shared dirty memory usage in kB.
+         */
+        public int getTotalSharedDirty() {
+            return dalvikSharedDirty + nativeSharedDirty + otherSharedDirty;
+        }
+        
+        public int describeContents() {
+            return 0;
+        }
+
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeInt(dalvikPss);
+            dest.writeInt(dalvikPrivateDirty);
+            dest.writeInt(dalvikSharedDirty);
+            dest.writeInt(nativePss);
+            dest.writeInt(nativePrivateDirty);
+            dest.writeInt(nativeSharedDirty);
+            dest.writeInt(otherPss);
+            dest.writeInt(otherPrivateDirty);
+            dest.writeInt(otherSharedDirty);
+        }
+
+        public void readFromParcel(Parcel source) {
+            dalvikPss = source.readInt();
+            dalvikPrivateDirty = source.readInt();
+            dalvikSharedDirty = source.readInt();
+            nativePss = source.readInt();
+            nativePrivateDirty = source.readInt();
+            nativeSharedDirty = source.readInt();
+            otherPss = source.readInt();
+            otherPrivateDirty = source.readInt();
+            otherSharedDirty = source.readInt();
+        }
+        
+        public static final Creator<MemoryInfo> CREATOR = new Creator<MemoryInfo>() {
+            public MemoryInfo createFromParcel(Parcel source) {
+                return new MemoryInfo(source);
+            }
+            public MemoryInfo[] newArray(int size) {
+                return new MemoryInfo[size];
+            }
+        };
+
+        private MemoryInfo(Parcel source) {
+            readFromParcel(source);
+        }
     }
 
 
@@ -556,6 +621,13 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
     public static native void getMemoryInfo(MemoryInfo memoryInfo);
 
     /**
+     * Note: currently only works when the requested pid has the same UID
+     * as the caller.
+     * @hide
+     */
+    public static native void getMemoryInfo(int pid, MemoryInfo memoryInfo);
+
+    /**
      * Establish an object allocation limit in the current thread.  Useful
      * for catching regressions in code that is expected to operate
      * without causing any allocations.
@@ -660,6 +732,25 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
      * exist in the current process.
      */
     public static final native int getBinderDeathObjectCount();
+
+    /**
+     * Primes the register map cache.
+     *
+     * Only works for classes in the bootstrap class loader.  Does not
+     * cause classes to be loaded if they're not already present.
+     *
+     * The classAndMethodDesc argument is a concatentation of the VM-internal
+     * class descriptor, method name, and method descriptor.  Examples:
+     *     Landroid/os/Looper;.loop:()V
+     *     Landroid/app/ActivityThread;.main:([Ljava/lang/String;)V
+     *
+     * @param classAndMethodDesc the method to prepare
+     *
+     * @hide
+     */
+    public static final boolean cacheRegisterMap(String classAndMethodDesc) {
+        return VMDebug.cacheRegisterMap(classAndMethodDesc);
+    }
 
     /**
      * API for gathering and querying instruction counts.

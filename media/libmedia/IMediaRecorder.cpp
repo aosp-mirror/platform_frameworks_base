@@ -18,7 +18,7 @@
 //#define LOG_NDEBUG 0
 #define LOG_TAG "IMediaRecorder"
 #include <utils/Log.h>
-#include <utils/Parcel.h>
+#include <binder/Parcel.h>
 #include <ui/ISurface.h>
 #include <ui/ICamera.h>
 #include <media/IMediaPlayerClient.h>
@@ -264,15 +264,9 @@ public:
     }
 };
 
-IMPLEMENT_META_INTERFACE(MediaRecorder, "android.hardware.IMediaRecorder");
+IMPLEMENT_META_INTERFACE(MediaRecorder, "android.media.IMediaRecorder");
 
 // ----------------------------------------------------------------------
-
-#define CHECK_INTERFACE(interface, data, reply) \
-    do { if (!data.enforceInterface(interface::getInterfaceDescriptor())) { \
-        LOGW("Call incorrectly routed to " #interface); \
-        return PERMISSION_DENIED; \
-    } } while (0)
 
 status_t BnMediaRecorder::onTransact(
                                      uint32_t code, const Parcel& data, Parcel* reply, uint32_t flags)

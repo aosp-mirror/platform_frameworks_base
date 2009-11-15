@@ -47,6 +47,7 @@ public class TelephonyTests {
         suite.addTestSuite(SimUtilsTest.class);
         suite.addTestSuite(SimPhoneBookTest.class);
         suite.addTestSuite(SimSmsTest.class);
+        suite.addTestSuite(TelephonyUtilsTest.class);
 
         return suite;
     }

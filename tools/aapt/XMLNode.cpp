@@ -219,8 +219,13 @@ moveon:
             }
             spanStack.pop();
 
-            if (empty) {
-                fprintf(stderr, "%s:%d: WARNING: empty '%s' span found in text '%s'\n",
+            /*
+             * This warning seems to be just an irritation to most people,
+             * since it is typically introduced by translators who then never
+             * see the warning.
+             */
+            if (0 && empty) {
+                fprintf(stderr, "%s:%d: warning: empty '%s' span found in text '%s'\n",
                         fileName, inXml->getLineNumber(),
                         String8(spanTag).string(), String8(*outString).string());
 
@@ -486,6 +491,7 @@ XMLNode::XMLNode(const String8& filename, const String16& s1, const String16& s2
 XMLNode::XMLNode(const String8& filename)
     : mFilename(filename)
 {
+    memset(&mCharsValue, 0, sizeof(mCharsValue));
 }
 
 XMLNode::type XMLNode::getType() const

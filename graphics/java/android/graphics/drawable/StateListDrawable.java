@@ -50,11 +50,22 @@ import android.util.StateSet;
  * @attr ref android.R.styleable#DrawableStates_state_pressed
  */
 public class StateListDrawable extends DrawableContainer {
+    /**
+     * To be proper, we should have a getter for dither (and alpha, etc.)
+     * so that proxy classes like this can save/restore their delegates'
+     * values, but we don't have getters. Since we do have setters
+     * (e.g. setDither), which this proxy forwards on, we have to have some
+     * default/initial setting.
+     *
+     * The initial setting for dither is now true, since it almost always seems
+     * to improve the quality at negligible cost.
+     */
+    private static final boolean DEFAULT_DITHER = true;
     private final StateListState mStateListState;
     private boolean mMutated;
 
     public StateListDrawable() {
-        this(null);
+        this(null, null);
     }
 
     /**
@@ -104,6 +115,9 @@ public class StateListDrawable extends DrawableContainer {
                 com.android.internal.R.styleable.StateListDrawable_variablePadding, false));
         mStateListState.setConstantSize(a.getBoolean(
                 com.android.internal.R.styleable.StateListDrawable_constantSize, false));
+
+        setDither(a.getBoolean(com.android.internal.R.styleable.StateListDrawable_dither,
+                               DEFAULT_DITHER));
 
         a.recycle();
 
@@ -234,8 +248,8 @@ public class StateListDrawable extends DrawableContainer {
     static final class StateListState extends DrawableContainerState {
         private int[][] mStateSets;
 
-        StateListState(StateListState orig, StateListDrawable owner) {
-            super(orig, owner);
+        StateListState(StateListState orig, StateListDrawable owner, Resources res) {
+            super(orig, owner, res);
 
             if (orig != null) {
                 mStateSets = orig.mStateSets;
@@ -263,7 +277,12 @@ public class StateListDrawable extends DrawableContainer {
 
         @Override
         public Drawable newDrawable() {
-            return new StateListDrawable(this);
+            return new StateListDrawable(this, null);
+        }
+
+        @Override
+        public Drawable newDrawable(Resources res) {
+            return new StateListDrawable(this, res);
         }
 
         @Override
@@ -275,8 +294,8 @@ public class StateListDrawable extends DrawableContainer {
         }
     }
 
-    private StateListDrawable(StateListState state) {
-        StateListState as = new StateListState(state, this);
+    private StateListDrawable(StateListState state, Resources res) {
+        StateListState as = new StateListState(state, this, res);
         mStateListState = as;
         setConstantState(as);
         onStateChange(getState());

@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="android.tts">
-    <application android:label="TTS Service">
+    <application android:label="TTS Service"
+        android:icon="@drawable/ic_launcher_text_to_speech">
         <service android:enabled="true"
                  android:name=".TtsService"
                  android:label="TTS Service">

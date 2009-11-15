@@ -20,7 +20,7 @@
 
 #include <utils/Errors.h>  // for status_t
 #include <utils/threads.h>
-#include <utils/IMemory.h>
+#include <binder/IMemory.h>
 #include <media/IMediaMetadataRetriever.h>
 
 namespace android {
@@ -52,9 +52,22 @@ enum {
     METADATA_KEY_VIDEO_FORMAT    = 18,
     METADATA_KEY_VIDEO_HEIGHT    = 19,
     METADATA_KEY_VIDEO_WIDTH     = 20,
+    METADATA_KEY_WRITER          = 21,
     // Add more here...
 };
 
+// The intended mode of operations:$
+// METADATA_MODE_NOOP: Experimental - just add and remove data source.$
+// METADATA_MODE_FRAME_CAPTURE_ONLY: For capture frame/thumbnail only.$
+// METADATA_MODE_METADATA_RETRIEVAL_ONLY: For meta data retrieval only.$
+// METADATA_MODE_FRAME_CAPTURE_AND_METADATA_RETRIEVAL: For both frame capture
+//   and meta data retrieval.$
+enum {
+    METADATA_MODE_NOOP                                 = 0x00,
+    METADATA_MODE_FRAME_CAPTURE_ONLY                   = 0x01,
+    METADATA_MODE_METADATA_RETRIEVAL_ONLY              = 0x02,
+    METADATA_MODE_FRAME_CAPTURE_AND_METADATA_RETRIEVAL = 0x03
+};
 
 class MediaMetadataRetriever: public RefBase
 {

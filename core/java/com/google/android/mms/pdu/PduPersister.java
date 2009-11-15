@@ -31,6 +31,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.net.Uri;
+import android.provider.Telephony;
 import android.provider.Telephony.Mms;
 import android.provider.Telephony.MmsSms;
 import android.provider.Telephony.Threads;
@@ -53,6 +54,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
+
+import com.google.android.mms.pdu.EncodedStringValue;
 
 /**
  * This class is the high-level manager of PDU storage.
@@ -159,6 +162,7 @@ public class PduPersister {
         Part.CONTENT_TYPE,
         Part.FILENAME,
         Part.NAME,
+        Part.TEXT
     };
 
     private static final int PART_COLUMN_ID                  = 0;
@@ -169,6 +173,7 @@ public class PduPersister {
     private static final int PART_COLUMN_CONTENT_TYPE        = 5;
     private static final int PART_COLUMN_FILENAME            = 6;
     private static final int PART_COLUMN_NAME                = 7;
+    private static final int PART_COLUMN_TEXT                = 8;
 
     private static final HashMap<Uri, Integer> MESSAGE_BOX_MAP;
     // These map are used for convenience in persist() and load().
@@ -414,26 +419,36 @@ public class PduPersister {
                     ByteArrayOutputStream baos = new ByteArrayOutputStream();
                     InputStream is = null;
 
-                    try {
-                        is = mContentResolver.openInputStream(partURI);
+                    // Store simple string values directly in the database instead of an
+                    // external file.  This makes the text searchable and retrieval slightly
+                    // faster.
+                    if ("text/plain".equals(type) || "application/smil".equals(type)) {
+                        String text = c.getString(PART_COLUMN_TEXT);
+                        byte [] blob = new EncodedStringValue(text).getTextString();
+                        baos.write(blob, 0, blob.length);
+                    } else {
 
-                        byte[] buffer = new byte[256];
-                        int len = is.read(buffer);
-                        while (len >= 0) {
-                            baos.write(buffer, 0, len);
-                            len = is.read(buffer);
-                        }
-                    } catch (IOException e) {
-                        Log.e(TAG, "Failed to load part data", e);
-                        c.close();
-                        throw new MmsException(e);
-                    } finally {
-                        if (is != null) {
-                            try {
-                                is.close();
-                            } catch (IOException e) {
-                                Log.e(TAG, "Failed to close stream", e);
-                            } // Ignore
+                        try {
+                            is = mContentResolver.openInputStream(partURI);
+
+                            byte[] buffer = new byte[256];
+                            int len = is.read(buffer);
+                            while (len >= 0) {
+                                baos.write(buffer, 0, len);
+                                len = is.read(buffer);
+                            }
+                        } catch (IOException e) {
+                            Log.e(TAG, "Failed to load part data", e);
+                            c.close();
+                            throw new MmsException(e);
+                        } finally {
+                            if (is != null) {
+                                try {
+                                    is.close();
+                                } catch (IOException e) {
+                                    Log.e(TAG, "Failed to close stream", e);
+                                } // Ignore
+                            }
                         }
                     }
                     part.setData(baos.toByteArray());
@@ -719,29 +734,37 @@ public class PduPersister {
         InputStream is = null;
 
         try {
-            os = mContentResolver.openOutputStream(uri);
             byte[] data = part.getData();
-            if (data == null) {
-                Uri dataUri = part.getDataUri();
-                if ((dataUri == null) || (dataUri == uri)) {
-                    Log.w(TAG, "Can't find data for this part.");
-                    return;
-                }
-                is = mContentResolver.openInputStream(dataUri);
-                
-                if (LOCAL_LOGV) {
-                    Log.v(TAG, "Saving data to: " + uri);
-                }
-
-                byte[] buffer = new byte[256];
-                for (int len = 0; (len = is.read(buffer)) != -1; ) {
-                    os.write(buffer, 0, len);
+            if ("text/plain".equals(contentType) || "application/smil".equals(contentType)) {
+                ContentValues cv = new ContentValues();
+                cv.put(Telephony.Mms.Part.TEXT, new EncodedStringValue(data).getString());
+                if (mContentResolver.update(uri, cv, null, null) != 1) {
+                    throw new MmsException("unable to update " + uri.toString());
                 }
             } else {
-                if (LOCAL_LOGV) {
-                    Log.v(TAG, "Saving data to: " + uri);
+                os = mContentResolver.openOutputStream(uri);
+                if (data == null) {
+                    Uri dataUri = part.getDataUri();
+                    if ((dataUri == null) || (dataUri == uri)) {
+                        Log.w(TAG, "Can't find data for this part.");
+                        return;
+                    }
+                    is = mContentResolver.openInputStream(dataUri);
+
+                    if (LOCAL_LOGV) {
+                        Log.v(TAG, "Saving data to: " + uri);
+                    }
+
+                    byte[] buffer = new byte[256];
+                    for (int len = 0; (len = is.read(buffer)) != -1; ) {
+                        os.write(buffer, 0, len);
+                    }
+                } else {
+                    if (LOCAL_LOGV) {
+                        Log.v(TAG, "Saving data to: " + uri);
+                    }
+                    os.write(data);
                 }
-                os.write(data);
             }
         } catch (FileNotFoundException e) {
             Log.e(TAG, "Failed to open Input/Output stream.", e);
@@ -787,7 +810,7 @@ public class PduPersister {
     public void updateHeaders(Uri uri, SendReq sendReq) {
         PDU_CACHE_INSTANCE.purge(uri);
 
-        ContentValues values = new ContentValues(9);
+        ContentValues values = new ContentValues(10);
         byte[] contentType = sendReq.getContentType();
         if (contentType != null) {
             values.put(Mms.CONTENT_TYPE, toIsoString(contentType));
@@ -832,6 +855,13 @@ public class PduPersister {
         if (subject != null) {
             values.put(Mms.SUBJECT, toIsoString(subject.getTextString()));
             values.put(Mms.SUBJECT_CHARSET, subject.getCharacterSet());
+        } else {
+            values.put(Mms.SUBJECT, "");
+        }
+        
+        long messageSize = sendReq.getMessageSize();
+        if (messageSize > 0) {
+            values.put(Mms.MESSAGE_SIZE, messageSize);
         }
 
         PduHeaders headers = sendReq.getPduHeaders();
@@ -998,6 +1028,7 @@ public class PduPersister {
                     + "content://mms/drafts, content://mms/outbox, "
                     + "content://mms/temp.");
         }
+        PDU_CACHE_INSTANCE.purge(uri);
 
         PduHeaders header = pdu.getPduHeaders();
         PduBody body = null;

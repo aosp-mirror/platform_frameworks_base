@@ -212,7 +212,7 @@ public final class GsmCallTracker extends CallTracker {
         }
 
         updatePhoneState();
-        phone.notifyCallStateChanged();
+        phone.notifyPreciseCallStateChanged();
 
         return pendingMO;
     }
@@ -279,7 +279,7 @@ public final class GsmCallTracker extends CallTracker {
         internalClearDisconnected();
 
         updatePhoneState();
-        phone.notifyCallStateChanged();
+        phone.notifyPreciseCallStateChanged();
     }
 
     boolean
@@ -294,12 +294,15 @@ public final class GsmCallTracker extends CallTracker {
     canDial() {
         boolean ret;
         int serviceState = phone.getServiceState().getState();
+        String disableCall = SystemProperties.get(
+                TelephonyProperties.PROPERTY_DISABLE_CALL, "false");
 
-        ret = (serviceState != ServiceState.STATE_POWER_OFF) &&
-                pendingMO == null
+        ret = (serviceState != ServiceState.STATE_POWER_OFF)
+                && pendingMO == null
                 && !ringingCall.isRinging()
+                && !disableCall.equals("true")
                 && (!foregroundCall.getState().isAlive()
-                || !backgroundCall.getState().isAlive());
+                    || !backgroundCall.getState().isAlive());
 
         return ret;
     }
@@ -600,7 +603,7 @@ public final class GsmCallTracker extends CallTracker {
         }
 
         if (hasNonHangupStateChanged || newRinging != null) {
-            phone.notifyCallStateChanged();
+            phone.notifyPreciseCallStateChanged();
         }
 
         //dumpState();
@@ -738,6 +741,7 @@ public final class GsmCallTracker extends CallTracker {
         }
 
         call.onHangupLocal();
+        phone.notifyPreciseCallStateChanged();
     }
 
     /* package */
@@ -883,7 +887,7 @@ public final class GsmCallTracker extends CallTracker {
 
                 updatePhoneState();
 
-                phone.notifyCallStateChanged();
+                phone.notifyPreciseCallStateChanged();
                 droppedDuringPoll.clear();
             break;
 

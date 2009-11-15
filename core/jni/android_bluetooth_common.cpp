@@ -36,6 +36,43 @@
 namespace android {
 
 #ifdef HAVE_BLUETOOTH
+
+static Properties remote_device_properties[] = {
+    {"Address",  DBUS_TYPE_STRING},
+    {"Name", DBUS_TYPE_STRING},
+    {"Icon", DBUS_TYPE_STRING},
+    {"Class", DBUS_TYPE_UINT32},
+    {"UUIDs", DBUS_TYPE_ARRAY},
+    {"Paired", DBUS_TYPE_BOOLEAN},
+    {"Connected", DBUS_TYPE_BOOLEAN},
+    {"Trusted", DBUS_TYPE_BOOLEAN},
+    {"Alias", DBUS_TYPE_STRING},
+    {"Nodes", DBUS_TYPE_ARRAY},
+    {"Adapter", DBUS_TYPE_OBJECT_PATH},
+    {"LegacyPairing", DBUS_TYPE_BOOLEAN},
+    {"RSSI", DBUS_TYPE_INT16},
+    {"TX", DBUS_TYPE_UINT32}
+};
+
+static Properties adapter_properties[] = {
+    {"Address", DBUS_TYPE_STRING},
+    {"Name", DBUS_TYPE_STRING},
+    {"Class", DBUS_TYPE_UINT32},
+    {"Powered", DBUS_TYPE_BOOLEAN},
+    {"Discoverable", DBUS_TYPE_BOOLEAN},
+    {"DiscoverableTimeout", DBUS_TYPE_UINT32},
+    {"Pairable", DBUS_TYPE_BOOLEAN},
+    {"PairableTimeout", DBUS_TYPE_UINT32},
+    {"Discovering", DBUS_TYPE_BOOLEAN},
+    {"Devices", DBUS_TYPE_ARRAY},
+};
+
+typedef union {
+    char *str_val;
+    int int_val;
+    char **array_val;
+} property_value;
+
 jfieldID get_field(JNIEnv *env, jclass clazz, const char *member,
                    const char *mtype) {
     jfieldID field = env->GetFieldID(clazz, member, mtype);
@@ -332,6 +369,44 @@ jboolean dbus_returns_boolean(JNIEnv *env, DBusMessage *reply) {
     return ret;
 }
 
+static void set_object_array_element(JNIEnv *env, jobjectArray strArray,
+                                     const char *value, int index) {
+    jstring obj;
+    obj = env->NewStringUTF(value);
+    env->SetObjectArrayElement(strArray, index, obj);
+    env->DeleteLocalRef(obj);
+}
+
+jobjectArray dbus_returns_array_of_object_path(JNIEnv *env,
+                                               DBusMessage *reply) {
+
+    DBusError err;
+    char **list;
+    int i, len;
+    jobjectArray strArray = NULL;
+
+    dbus_error_init(&err);
+    if (dbus_message_get_args (reply,
+                               &err,
+                               DBUS_TYPE_ARRAY, DBUS_TYPE_OBJECT_PATH,
+                               &list, &len,
+                               DBUS_TYPE_INVALID)) {
+        jclass stringClass;
+        jstring classNameStr;
+
+        stringClass = env->FindClass("java/lang/String");
+        strArray = env->NewObjectArray(len, stringClass, NULL);
+
+        for (i = 0; i < len; i++)
+            set_object_array_element(env, strArray, list[i], i);
+    } else {
+        LOG_AND_FREE_DBUS_ERROR_WITH_MSG(&err, reply);
+    }
+
+    dbus_message_unref(reply);
+    return strArray;
+}
+
 jobjectArray dbus_returns_array_of_strings(JNIEnv *env, DBusMessage *reply) {
 
     DBusError err;
@@ -353,11 +428,8 @@ jobjectArray dbus_returns_array_of_strings(JNIEnv *env, DBusMessage *reply) {
         stringClass = env->FindClass("java/lang/String");
         strArray = env->NewObjectArray(len, stringClass, NULL);
 
-        for (i = 0; i < len; i++) {
-            //LOGV("%s:    array[%d] = [%s]", __FUNCTION__, i, list[i]);
-            env->SetObjectArrayElement(strArray, i,
-                                       env->NewStringUTF(list[i]));
-        }
+        for (i = 0; i < len; i++)
+            set_object_array_element(env, strArray, list[i], i);
     } else {
         LOG_AND_FREE_DBUS_ERROR_WITH_MSG(&err, reply);
     }
@@ -388,6 +460,251 @@ jbyteArray dbus_returns_array_of_bytes(JNIEnv *env, DBusMessage *reply) {
 
     dbus_message_unref(reply);
     return byteArray;
+}
+
+void append_variant(DBusMessageIter *iter, int type, void *val)
+{
+    DBusMessageIter value_iter;
+    char var_type[2] = { type, '\0'};
+    dbus_message_iter_open_container(iter, DBUS_TYPE_VARIANT, var_type, &value_iter);
+    dbus_message_iter_append_basic(&value_iter, type, val);
+    dbus_message_iter_close_container(iter, &value_iter);
+}
+
+int get_property(DBusMessageIter iter, Properties *properties,
+                  int max_num_properties, int *prop_index, property_value *value, int *len) {
+    DBusMessageIter prop_val, array_val_iter;
+    char *property = NULL;
+    uint32_t array_type;
+    char *str_val;
+    int i, j, type, int_val;
+
+    if (dbus_message_iter_get_arg_type(&iter) != DBUS_TYPE_STRING)
+        return -1;
+    dbus_message_iter_get_basic(&iter, &property);
+    if (!dbus_message_iter_next(&iter))
+        return -1;
+    if (dbus_message_iter_get_arg_type(&iter) != DBUS_TYPE_VARIANT)
+        return -1;
+    for (i = 0; i <  max_num_properties; i++) {
+        if (!strncmp(property, properties[i].name, strlen(property)))
+            break;
+    }
+    *prop_index = i;
+    if (i == max_num_properties)
+        return -1;
+
+    dbus_message_iter_recurse(&iter, &prop_val);
+    type = properties[*prop_index].type;
+    if (dbus_message_iter_get_arg_type(&prop_val) != type) {
+        LOGE("Property type mismatch in get_property: %d, expected:%d, index:%d",
+             dbus_message_iter_get_arg_type(&prop_val), type, *prop_index);
+        return -1;
+    }
+
+    switch(type) {
+    case DBUS_TYPE_STRING:
+    case DBUS_TYPE_OBJECT_PATH:
+        dbus_message_iter_get_basic(&prop_val, &value->str_val);
+        *len = 1;
+        break;
+    case DBUS_TYPE_UINT32:
+    case DBUS_TYPE_INT16:
+    case DBUS_TYPE_BOOLEAN:
+        dbus_message_iter_get_basic(&prop_val, &int_val);
+        value->int_val = int_val;
+        *len = 1;
+        break;
+    case DBUS_TYPE_ARRAY:
+        dbus_message_iter_recurse(&prop_val, &array_val_iter);
+        array_type = dbus_message_iter_get_arg_type(&array_val_iter);
+        *len = 0;
+        value->array_val = NULL;
+        if (array_type == DBUS_TYPE_OBJECT_PATH ||
+            array_type == DBUS_TYPE_STRING){
+            j = 0;
+            do {
+               j ++;
+            } while(dbus_message_iter_next(&array_val_iter));
+            dbus_message_iter_recurse(&prop_val, &array_val_iter);
+            // Allocate  an array of char *
+            *len = j;
+            char **tmp = (char **)malloc(sizeof(char *) * *len);
+            if (!tmp)
+                return -1;
+            j = 0;
+            do {
+               dbus_message_iter_get_basic(&array_val_iter, &tmp[j]);
+               j ++;
+            } while(dbus_message_iter_next(&array_val_iter));
+            value->array_val = tmp;
+        }
+        break;
+    default:
+        return -1;
+    }
+    return 0;
+}
+
+void create_prop_array(JNIEnv *env, jobjectArray strArray, Properties *property,
+                       property_value *value, int len, int *array_index ) {
+    char **prop_val = NULL;
+    char buf[32] = {'\0'}, buf1[32] = {'\0'};
+    int i;
+
+    char *name = property->name;
+    int prop_type = property->type;
+
+    set_object_array_element(env, strArray, name, *array_index);
+    *array_index += 1;
+
+    if (prop_type == DBUS_TYPE_UINT32 || prop_type == DBUS_TYPE_INT16) {
+        sprintf(buf, "%d", value->int_val);
+        set_object_array_element(env, strArray, buf, *array_index);
+        *array_index += 1;
+    } else if (prop_type == DBUS_TYPE_BOOLEAN) {
+        sprintf(buf, "%s", value->int_val ? "true" : "false");
+
+        set_object_array_element(env, strArray, buf, *array_index);
+        *array_index += 1;
+    } else if (prop_type == DBUS_TYPE_ARRAY) {
+        // Write the length first
+        sprintf(buf1, "%d", len);
+        set_object_array_element(env, strArray, buf1, *array_index);
+        *array_index += 1;
+
+        prop_val = value->array_val;
+        for (i = 0; i < len; i++) {
+            set_object_array_element(env, strArray, prop_val[i], *array_index);
+            *array_index += 1;
+        }
+    } else {
+        set_object_array_element(env, strArray, (const char *) value->str_val, *array_index);
+        *array_index += 1;
+    }
+}
+
+jobjectArray parse_properties(JNIEnv *env, DBusMessageIter *iter, Properties *properties,
+                              const int max_num_properties) {
+    DBusMessageIter dict_entry, dict;
+    jobjectArray strArray = NULL;
+    property_value value;
+    int i, size = 0,array_index = 0;
+    int len = 0, prop_type = DBUS_TYPE_INVALID, prop_index = -1, type;
+    struct {
+        property_value value;
+        int len;
+        bool used;
+    } values[max_num_properties];
+    int t, j;
+
+    jclass stringClass = env->FindClass("java/lang/String");
+    DBusError err;
+    dbus_error_init(&err);
+
+    for (i = 0; i < max_num_properties; i++) {
+        values[i].used = false;
+    }
+
+    if(dbus_message_iter_get_arg_type(iter) != DBUS_TYPE_ARRAY)
+        goto failure;
+    dbus_message_iter_recurse(iter, &dict);
+    do {
+        len = 0;
+        if (dbus_message_iter_get_arg_type(&dict) != DBUS_TYPE_DICT_ENTRY)
+            goto failure;
+        dbus_message_iter_recurse(&dict, &dict_entry);
+
+        if (!get_property(dict_entry, properties, max_num_properties, &prop_index,
+                          &value, &len)) {
+            size += 2;
+            if (properties[prop_index].type == DBUS_TYPE_ARRAY)
+                size += len;
+            values[prop_index].value = value;
+            values[prop_index].len = len;
+            values[prop_index].used = true;
+        } else {
+            goto failure;
+        }
+    } while(dbus_message_iter_next(&dict));
+
+    strArray = env->NewObjectArray(size, stringClass, NULL);
+
+    for (i = 0; i < max_num_properties; i++) {
+        if (values[i].used) {
+            create_prop_array(env, strArray, &properties[i], &values[i].value, values[i].len,
+                              &array_index);
+
+            if (properties[i].type == DBUS_TYPE_ARRAY && values[i].used
+                   && values[i].value.array_val != NULL)
+                free(values[i].value.array_val);
+        }
+
+    }
+    return strArray;
+
+failure:
+    if (dbus_error_is_set(&err))
+        LOG_AND_FREE_DBUS_ERROR(&err);
+    for (i = 0; i < max_num_properties; i++)
+        if (properties[i].type == DBUS_TYPE_ARRAY && values[i].used == true
+                                        && values[i].value.array_val != NULL)
+            free(values[i].value.array_val);
+    return NULL;
+}
+
+jobjectArray parse_property_change(JNIEnv *env, DBusMessage *msg,
+                           Properties *properties, int max_num_properties) {
+    DBusMessageIter iter;
+    DBusError err;
+    jobjectArray strArray = NULL;
+    jclass stringClass= env->FindClass("java/lang/String");
+    int len = 0, prop_index = -1;
+    int array_index = 0, size = 0;
+    property_value value;
+
+    dbus_error_init(&err);
+    if (!dbus_message_iter_init(msg, &iter))
+        goto failure;
+
+    if (!get_property(iter, properties, max_num_properties,
+                      &prop_index, &value, &len)) {
+        size += 2;
+        if (properties[prop_index].type == DBUS_TYPE_ARRAY)
+            size += len;
+        strArray = env->NewObjectArray(size, stringClass, NULL);
+
+        create_prop_array(env, strArray, &properties[prop_index],
+                          &value, len, &array_index);
+
+        if (properties[prop_index].type == DBUS_TYPE_ARRAY && value.array_val != NULL)
+             free(value.array_val);
+
+        return strArray;
+    }
+failure:
+    LOG_AND_FREE_DBUS_ERROR_WITH_MSG(&err, msg);
+    return NULL;
+}
+
+jobjectArray parse_adapter_property_change(JNIEnv *env, DBusMessage *msg) {
+    return parse_property_change(env, msg, (Properties *) &adapter_properties,
+                    sizeof(adapter_properties) / sizeof(Properties));
+}
+
+jobjectArray parse_remote_device_property_change(JNIEnv *env, DBusMessage *msg) {
+    return parse_property_change(env, msg, (Properties *) &remote_device_properties,
+                    sizeof(remote_device_properties) / sizeof(Properties));
+}
+
+jobjectArray parse_adapter_properties(JNIEnv *env, DBusMessageIter *iter) {
+    return parse_properties(env, iter, (Properties *) &adapter_properties,
+                            sizeof(adapter_properties) / sizeof(Properties));
+}
+
+jobjectArray parse_remote_device_properties(JNIEnv *env, DBusMessageIter *iter) {
+    return parse_properties(env, iter, (Properties *) &remote_device_properties,
+                          sizeof(remote_device_properties) / sizeof(Properties));
 }
 
 int get_bdaddr(const char *str, bdaddr_t *ba) {

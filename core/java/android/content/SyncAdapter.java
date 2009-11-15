@@ -18,6 +18,7 @@ package android.content;
 
 import android.os.Bundle;
 import android.os.RemoteException;
+import android.accounts.Account;
 
 /**
  * @hide
@@ -29,12 +30,12 @@ public abstract class SyncAdapter {
     public static final int LOG_SYNC_DETAILS = 2743;
 
     class Transport extends ISyncAdapter.Stub {
-        public void startSync(ISyncContext syncContext, String account,
+        public void startSync(ISyncContext syncContext, String authority, Account account,
                 Bundle extras) throws RemoteException {
-            SyncAdapter.this.startSync(new SyncContext(syncContext), account, extras);
+            SyncAdapter.this.startSync(new SyncContext(syncContext), account, authority, extras);
         }
 
-        public void cancelSync() throws RemoteException {
+        public void cancelSync(ISyncContext syncContext) throws RemoteException {
             SyncAdapter.this.cancelSync();
         }
     }
@@ -42,9 +43,9 @@ public abstract class SyncAdapter {
     Transport mTransport = new Transport();
 
     /**
-     * Get the Transport object.  (note this is package private).
+     * Get the Transport object.
      */
-    final ISyncAdapter getISyncAdapter()
+    public final ISyncAdapter getISyncAdapter()
     {
         return mTransport;
     }
@@ -57,9 +58,11 @@ public abstract class SyncAdapter {
      * @param syncContext the ISyncContext used to indicate the progress of the sync. When
      *   the sync is finished (successfully or not) ISyncContext.onFinished() must be called.
      * @param account the account that should be synced
+     * @param authority the authority if the sync request
      * @param extras SyncAdapter-specific parameters
      */
-    public abstract void startSync(SyncContext syncContext, String account, Bundle extras);
+    public abstract void startSync(SyncContext syncContext, Account account, String authority, 
+            Bundle extras);
 
     /**
      * Cancel the most recently initiated sync. Due to race conditions, this may arrive

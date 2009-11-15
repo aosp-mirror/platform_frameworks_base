@@ -23,6 +23,8 @@ import android.util.AttributeSet;
 
 import com.android.internal.R;
 
+import java.lang.ref.WeakReference;
+
 /**
  * A ViewStub is an invisible, zero-sized View that can be used to lazily inflate
  * layout resources at runtime.
@@ -67,6 +69,8 @@ import com.android.internal.R;
 public final class ViewStub extends View {
     private int mLayoutResource = 0;
     private int mInflatedId;
+
+    private WeakReference<View> mInflatedViewRef;
 
     private OnInflateListener mInflateListener;
 
@@ -196,9 +200,15 @@ public final class ViewStub extends View {
      */
     @Override
     public void setVisibility(int visibility) {
-        super.setVisibility(visibility);
-
-        if (visibility == VISIBLE || visibility == INVISIBLE) {
+        if (mInflatedViewRef != null) {
+            View view = mInflatedViewRef.get();
+            if (view != null) {
+                view.setVisibility(visibility);
+            } else {
+                throw new IllegalStateException("setVisibility called on un-referenced view");
+            }
+        } else if (visibility == VISIBLE || visibility == INVISIBLE) {
+            super.setVisibility(visibility);
             inflate();
         }
     }
@@ -233,6 +243,8 @@ public final class ViewStub extends View {
                 } else {
                     parent.addView(view, index);
                 }
+
+                mInflatedViewRef = new WeakReference(view);
 
                 if (mInflateListener != null) {
                     mInflateListener.onInflate(this, view);

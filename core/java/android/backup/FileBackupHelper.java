@@ -26,6 +26,7 @@ import java.io.FileDescriptor;
 /** @hide */
 public class FileBackupHelper extends FileBackupHelperBase implements BackupHelper {
     private static final String TAG = "FileBackupHelper";
+    private static final boolean DEBUG = false;
 
     Context mContext;
     File mFilesDir;
@@ -60,8 +61,7 @@ public class FileBackupHelper extends FileBackupHelperBase implements BackupHelp
     }
 
     public void restoreEntity(BackupDataInputStream data) {
-        // TODO: turn this off before ship
-        Log.d(TAG, "got entity '" + data.getKey() + "' size=" + data.size());
+        if (DEBUG) Log.d(TAG, "got entity '" + data.getKey() + "' size=" + data.size());
         String key = data.getKey();
         if (isKeyInList(key, mFiles)) {
             File f = new File(mFilesDir, key);

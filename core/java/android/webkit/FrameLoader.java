@@ -28,7 +28,6 @@ class FrameLoader {
 
     private final LoadListener mListener;
     private final String mMethod;
-    private final boolean mIsHighPriority;
     private final WebSettings mSettings;
     private Map<String, String> mHeaders;
     private byte[] mPostData;
@@ -52,11 +51,10 @@ class FrameLoader {
     private static final String LOGTAG = "webkit";
     
     FrameLoader(LoadListener listener, WebSettings settings,
-            String method, boolean highPriority) {
+            String method) {
         mListener = listener;
         mHeaders = null;
         mMethod = method;
-        mIsHighPriority = highPriority;
         mCacheMode = WebSettings.LOAD_NORMAL;
         mSettings = settings;
     }
@@ -97,17 +95,6 @@ class FrameLoader {
     public boolean executeLoad() {
         String url = mListener.url();
 
-        // Attempt to decode the percent-encoded url.
-        try {
-            url = new String(URLUtil.decode(url.getBytes()));
-        } catch (IllegalArgumentException e) {
-            // Fail with a bad url error if the decode fails.
-            mListener.error(EventHandler.ERROR_BAD_URL,
-                    mListener.getContext().getString(
-                            com.android.internal.R.string.httpErrorBadUrl));
-            return false;
-        }
-
         if (URLUtil.isNetworkUrl(url)){
             if (mSettings.getBlockNetworkLoads()) {
                 mListener.error(EventHandler.ERROR_BAD_URL,
@@ -115,12 +102,19 @@ class FrameLoader {
                                 com.android.internal.R.string.httpErrorBadUrl));
                 return false;
             }
+            // Make sure it is correctly URL encoded before sending the request
+            if (!URLUtil.verifyURLEncoding(url)) {
+                mListener.error(EventHandler.ERROR_BAD_URL,
+                        mListener.getContext().getString(
+                        com.android.internal.R.string.httpErrorBadUrl));
+                return false;
+            }
             mNetwork = Network.getInstance(mListener.getContext());
             return handleHTTPLoad();
         } else if (handleLocalFile(url, mListener, mSettings)) {
             return true;
         }
-        if (WebView.LOGV_ENABLED) {
+        if (DebugFlags.FRAME_LOADER) {
             Log.v(LOGTAG, "FrameLoader.executeLoad: url protocol not supported:"
                     + mListener.url());
         }
@@ -134,6 +128,18 @@ class FrameLoader {
     /* package */
     static boolean handleLocalFile(String url, LoadListener loadListener,
             WebSettings settings) {
+        // Attempt to decode the percent-encoded url before passing to the
+        // local loaders.
+        try {
+            url = new String(URLUtil.decode(url.getBytes()));
+        } catch (IllegalArgumentException e) {
+            loadListener.error(EventHandler.ERROR_BAD_URL,
+                    loadListener.getContext().getString(
+                            com.android.internal.R.string.httpErrorBadUrl));
+            // Return true here so we do not trigger an unsupported scheme
+            // error.
+            return true;
+        }
         if (URLUtil.isAssetUrl(url)) {
             FileLoader.requestUrl(url, loadListener, loadListener.getContext(),
                     true, settings.getAllowFileAccess());
@@ -166,21 +172,17 @@ class FrameLoader {
         populateStaticHeaders();
         populateHeaders();
 
-        // response was handled by UrlIntercept, don't issue HTTP request
-        if (handleUrlIntercept()) return true;
-
         // response was handled by Cache, don't issue HTTP request
         if (handleCache()) {
             // push the request data down to the LoadListener
             // as response from the cache could be a redirect
             // and we may need to initiate a network request if the cache
             // can't satisfy redirect URL
-            mListener.setRequestData(mMethod, mHeaders, mPostData, 
-                    mIsHighPriority);
+            mListener.setRequestData(mMethod, mHeaders, mPostData);
             return true;
         }
 
-        if (WebView.LOGV_ENABLED) {
+        if (DebugFlags.FRAME_LOADER) {
             Log.v(LOGTAG, "FrameLoader: http " + mMethod + " load for: "
                     + mListener.url());
         }
@@ -190,7 +192,7 @@ class FrameLoader {
         
         try {
             ret = mNetwork.requestURL(mMethod, mHeaders,
-                    mPostData, mListener, mIsHighPriority);
+                    mPostData, mListener);
         } catch (android.net.ParseException ex) {
             error = EventHandler.ERROR_BAD_URL;
         } catch (java.lang.RuntimeException ex) {
@@ -207,11 +209,11 @@ class FrameLoader {
     }
 
     /*
-     * This function is used by handleUrlInterecpt and handleCache to
+     * This function is used by handleCache to
      * setup a load from the byte stream in a CacheResult.
      */
     private void startCacheLoad(CacheResult result) {
-        if (WebView.LOGV_ENABLED) {
+        if (DebugFlags.FRAME_LOADER) {
             Log.v(LOGTAG, "FrameLoader: loading from cache: "
                   + mListener.url());
         }
@@ -220,30 +222,6 @@ class FrameLoader {
                 new CacheLoader(mListener, result);
         mListener.setCacheLoader(cacheLoader);
         cacheLoader.load();
-    }
-
-    /*
-     * This function is used by handleHTTPLoad to allow URL
-     * interception. This can be used to provide alternative load
-     * methods such as locally stored versions or for debugging.
-     *
-     * Returns true if the response was handled by UrlIntercept.
-     */
-    private boolean handleUrlIntercept() {
-        // Check if the URL can be served from UrlIntercept. If
-        // successful, return the data just like a cache hit.
-
-        PluginData data = UrlInterceptRegistry.getPluginData(
-                mListener.url(), mHeaders);
-
-        if(data != null) {
-            PluginContentLoader loader =
-                    new PluginContentLoader(mListener, data);
-            loader.load();
-            return true;
-        }
-        // Not intercepted. Carry on as normal.
-        return false;
     }
 
     /*
@@ -285,7 +263,7 @@ class FrameLoader {
             // of it's state. If it is not in the cache, then go to the 
             // network.
             case WebSettings.LOAD_CACHE_ELSE_NETWORK: {
-                if (WebView.LOGV_ENABLED) {
+                if (DebugFlags.FRAME_LOADER) {
                     Log.v(LOGTAG, "FrameLoader: checking cache: "
                             + mListener.url());
                 }

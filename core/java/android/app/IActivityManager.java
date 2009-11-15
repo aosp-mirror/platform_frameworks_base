@@ -23,6 +23,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.IIntentSender;
 import android.content.IIntentReceiver;
+import android.content.IntentSender;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ConfigurationInfo;
 import android.content.pm.IPackageDataObserver;
@@ -30,6 +31,7 @@ import android.content.pm.ProviderInfo;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.net.Uri;
+import android.os.Debug;
 import android.os.RemoteException;
 import android.os.IBinder;
 import android.os.IInterface;
@@ -76,10 +78,16 @@ public interface IActivityManager extends IInterface {
     public static final int START_CLASS_NOT_FOUND = -2;
     public static final int START_FORWARD_AND_REQUEST_CONFLICT = -3;
     public static final int START_PERMISSION_DENIED = -4;
+    public static final int START_NOT_ACTIVITY = -5;
+    public static final int START_CANCELED = -6;
     public int startActivity(IApplicationThread caller,
             Intent intent, String resolvedType, Uri[] grantedUriPermissions,
             int grantedMode, IBinder resultTo, String resultWho, int requestCode,
             boolean onlyIfNeeded, boolean debug) throws RemoteException;
+    public int startActivityIntentSender(IApplicationThread caller,
+            IntentSender intent, Intent fillInIntent, String resolvedType,
+            IBinder resultTo, String resultWho, int requestCode,
+            int flagsMask, int flagsValues) throws RemoteException;
     public boolean startNextMatchingActivity(IBinder callingActivity,
             Intent intent) throws RemoteException;
     public boolean finishActivity(IBinder token, int code, Intent data)
@@ -101,7 +109,7 @@ public interface IActivityManager extends IInterface {
     public void setPersistent(IBinder token, boolean isPersistent) throws RemoteException;
     public void attachApplication(IApplicationThread app) throws RemoteException;
     /* oneway */
-    public void activityIdle(IBinder token) throws RemoteException;
+    public void activityIdle(IBinder token, Configuration config) throws RemoteException;
     public void activityPaused(IBinder token, Bundle state) throws RemoteException;
     /* oneway */
     public void activityStopped(IBinder token,
@@ -125,13 +133,15 @@ public interface IActivityManager extends IInterface {
     public void finishOtherInstances(IBinder token, ComponentName className) throws RemoteException;
     /* oneway */
     public void reportThumbnail(IBinder token,
-                                Bitmap thumbnail, CharSequence description) throws RemoteException;
+            Bitmap thumbnail, CharSequence description) throws RemoteException;
     public ContentProviderHolder getContentProvider(IApplicationThread caller,
-                                                    String name) throws RemoteException;
+            String name) throws RemoteException;
     public void removeContentProvider(IApplicationThread caller,
-        String name) throws RemoteException;
+            String name) throws RemoteException;
     public void publishContentProviders(IApplicationThread caller,
-                                        List<ContentProviderHolder> providers) throws RemoteException;
+            List<ContentProviderHolder> providers) throws RemoteException;
+    public PendingIntent getRunningServiceControlPanel(ComponentName service)
+            throws RemoteException;
     public ComponentName startService(IApplicationThread caller, Intent service,
             String resolvedType) throws RemoteException;
     public int stopService(IApplicationThread caller, Intent service,
@@ -139,7 +149,7 @@ public interface IActivityManager extends IInterface {
     public boolean stopServiceToken(ComponentName className, IBinder token,
             int startId) throws RemoteException;
     public void setServiceForeground(ComponentName className, IBinder token,
-            boolean isForeground) throws RemoteException;
+            int id, Notification notification, boolean keepNotification) throws RemoteException;
     public int bindService(IApplicationThread caller, IBinder token,
             Intent service, String resolvedType,
             IServiceConnection connection, int flags) throws RemoteException;
@@ -149,13 +159,15 @@ public interface IActivityManager extends IInterface {
     public void unbindFinished(IBinder token, Intent service,
             boolean doRebind) throws RemoteException;
     /* oneway */
-    public void serviceDoneExecuting(IBinder token) throws RemoteException;
+    public void serviceDoneExecuting(IBinder token, int type, int startId,
+            int res) throws RemoteException;
     public IBinder peekService(Intent service, String resolvedType) throws RemoteException;
     
     public boolean bindBackupAgent(ApplicationInfo appInfo, int backupRestoreMode)
             throws RemoteException;
     public void backupAgentCreated(String packageName, IBinder agent) throws RemoteException;
     public void unbindBackupAgent(ApplicationInfo appInfo) throws RemoteException;
+    public void killApplicationProcess(String processName, int uid) throws RemoteException;
     
     public boolean startInstrumentation(ComponentName className, String profileFile,
             int flags, Bundle arguments, IInstrumentationWatcher watcher)
@@ -230,7 +242,6 @@ public interface IActivityManager extends IInterface {
     // Special low-level communication with activity manager.
     public void startRunning(String pkg, String cls, String action,
             String data) throws RemoteException;
-    public void systemReady() throws RemoteException;
     // Returns 1 if the user wants to debug.
     public int handleApplicationError(IBinder app,
             int flags,    /* 1 == can debug */
@@ -270,6 +281,12 @@ public interface IActivityManager extends IInterface {
     public void killApplicationWithUid(String pkg, int uid) throws RemoteException;
     
     public void closeSystemDialogs(String reason) throws RemoteException;
+    
+    public Debug.MemoryInfo[] getProcessMemoryInfo(int[] pids)
+            throws RemoteException;
+    
+    public void overridePendingTransition(IBinder token, String packageName,
+            int enterAnim, int exitAnim) throws RemoteException;
     
     /*
      * Private non-Binder interfaces
@@ -362,7 +379,7 @@ public interface IActivityManager extends IInterface {
     int PUBLISH_CONTENT_PROVIDERS_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+29;
     int SET_PERSISTENT_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+30;
     int FINISH_SUB_ACTIVITY_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+31;
-    int SYSTEM_READY_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+32;
+    int GET_RUNNING_SERVICE_CONTROL_PANEL_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+32;
     int START_SERVICE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+33;
     int STOP_SERVICE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+34;
     int BIND_SERVICE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+35;
@@ -427,4 +444,8 @@ public interface IActivityManager extends IInterface {
     int START_ACTIVITY_IN_PACKAGE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+94;
     int KILL_APPLICATION_WITH_UID_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+95;
     int CLOSE_SYSTEM_DIALOGS_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+96;
+    int GET_PROCESS_MEMORY_INFO_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+97;
+    int KILL_APPLICATION_PROCESS_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+98;
+    int START_ACTIVITY_INTENT_SENDER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+99;
+    int OVERRIDE_PENDING_TRANSITION_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+100;
 }

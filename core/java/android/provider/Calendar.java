@@ -32,6 +32,7 @@ import android.text.format.DateUtils;
 import android.text.format.Time;
 import android.util.Config;
 import android.util.Log;
+import android.accounts.Account;
 import com.android.internal.database.ArrayListCursor;
 import com.google.android.gdata.client.AndroidGDataClient;
 import com.google.android.gdata.client.AndroidXmlParserFactory;
@@ -80,6 +81,11 @@ public final class Calendar {
     public interface CalendarsColumns
     {
         /**
+         * A string that uniquely identifies this contact to its source
+         */
+        public static final String SOURCE_ID = "sourceid";
+
+        /**
          * The color of the calendar
          * <P>Type: INTEGER (color value)</P>
          */
@@ -104,6 +110,7 @@ public final class Calendar {
         public static final int EDITOR_ACCESS = 600;
         /** Full access to the calendar */
         public static final int OWNER_ACCESS = 700;
+        /** Domain admin */
         public static final int ROOT_ACCESS = 800;
 
         /**
@@ -124,6 +131,12 @@ public final class Calendar {
          * <p>Type: INTEGER (boolean)</p>
          */
         public static final String SYNC_EVENTS = "sync_events";
+
+        /**
+         * Sync state data.
+         * <p>Type: String (blob)</p>
+         */
+        public static final String SYNC_STATE = "sync_state";
     }
 
     /**
@@ -157,11 +170,12 @@ public final class Calendar {
          * @param account the account whose rows should be deleted
          * @return the count of rows that were deleted
          */
-        public static int deleteCalendarsForAccount(ContentResolver cr,
-                String account) {
+        public static int deleteCalendarsForAccount(ContentResolver cr, Account account) {
             // delete all calendars that match this account
-            return Calendar.Calendars.delete(cr, Calendar.Calendars._SYNC_ACCOUNT + "=?",
-                    new String[] {account});
+            return Calendar.Calendars.delete(cr,
+                    Calendar.Calendars._SYNC_ACCOUNT + "=? AND "
+                            + Calendar.Calendars._SYNC_ACCOUNT_TYPE + "=?",
+                    new String[] {account.name, account.type});
         }
 
         /**
@@ -169,9 +183,6 @@ public final class Calendar {
          */
         public static final Uri CONTENT_URI =
             Uri.parse("content://calendar/calendars");
-
-        public static final Uri LIVE_CONTENT_URI =
-            Uri.parse("content://calendar/calendars?update=1");
 
         /**
          * The default sort order for this table
@@ -207,6 +218,13 @@ public final class Calendar {
          * <P>Type: INTEGER (boolean)</P>
          */
         public static final String HIDDEN = "hidden";
+
+        /**
+         * The owner account for this calendar, based on the calendar feed.
+         * This will be different from the _SYNC_ACCOUNT for delegated calendars.
+         * <P>Type: String</P>
+         */
+        public static final String OWNER_ACCOUNT = "ownerAccount";
     }
 
     public interface AttendeesColumns {
@@ -448,6 +466,54 @@ public final class Calendar {
          * <P>Type: INTEGER (long; millis since epoch)</P>
          */
         public static final String LAST_DATE = "lastDate";
+
+        /**
+         * Whether the event has attendee information.  True if the event
+         * has full attendee data, false if the event has information about
+         * self only.
+         * <P>Type: INTEGER (boolean)</P>
+         */
+        public static final String HAS_ATTENDEE_DATA = "hasAttendeeData";
+
+        /**
+         * Whether guests can modify the event.
+         * <P>Type: INTEGER (boolean)</P>
+         */
+        public static final String GUESTS_CAN_MODIFY = "guestsCanModify";
+
+        /**
+         * Whether guests can invite other guests.
+         * <P>Type: INTEGER (boolean)</P>
+         */
+        public static final String GUESTS_CAN_INVITE_OTHERS = "guestsCanInviteOthers";
+
+        /**
+         * Whether guests can see the list of attendees.
+         * <P>Type: INTEGER (boolean)</P>
+         */
+        public static final String GUESTS_CAN_SEE_GUESTS = "guestsCanSeeGuests";
+
+        /**
+         * Email of the organizer (owner) of the event.
+         * <P>Type: STRING</P>
+         */
+        public static final String ORGANIZER = "organizer";
+
+        /**
+         * Whether the user can invite others to the event.
+         * The GUESTS_CAN_INVITE_OTHERS is a setting that applies to an arbitrary guest,
+         * while CAN_INVITE_OTHERS indicates if the user can invite others (either through
+         * GUESTS_CAN_INVITE_OTHERS or because the user has modify access to the event).
+         * <P>Type: INTEGER (boolean, readonly)</P>
+         */
+        public static final String CAN_INVITE_OTHERS = "canInviteOthers";
+
+        /**
+         * The owner account for this calendar, based on the calendar (foreign
+         * key into the calendars table).
+         * <P>Type: String</P>
+         */
+        public static final String OWNER_ACCOUNT = "ownerAccount";
     }
 
     /**
@@ -694,6 +760,8 @@ public final class Calendar {
          * The content:// style URL for this table
          */
         public static final Uri CONTENT_URI = Uri.parse("content://calendar/instances/when");
+        public static final Uri CONTENT_BY_DAY_URI =
+            Uri.parse("content://calendar/instances/whenbyday");
 
         /**
          * The default sort order for this table.

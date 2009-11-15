@@ -37,6 +37,7 @@ import com.android.internal.telephony.SmsMessageBase;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import static android.telephony.SmsMessage.MessageClass;
 
 final class GsmSMSDispatcher extends SMSDispatcher {
     private static final String TAG = "GSM";
@@ -111,6 +112,12 @@ final class GsmSMSDispatcher extends SMSDispatcher {
             return Intents.RESULT_SMS_HANDLED;
         }
 
+        if (!mStorageAvailable && (sms.getMessageClass() != MessageClass.CLASS_0)) {
+            // It's a storable message and there's no storage available.  Bail.
+            // (See TS 23.038 for a description of class 0 messages.)
+            return Intents.RESULT_SMS_OUT_OF_MEMORY;
+        }
+
         SmsHeader smsHeader = sms.getUserDataHeader();
          // See if message is partial or port addressed.
         if ((smsHeader == null) || (smsHeader.concatRef == null)) {
@@ -134,6 +141,22 @@ final class GsmSMSDispatcher extends SMSDispatcher {
             // Process the message part.
             return processMessagePart(sms, smsHeader.concatRef, smsHeader.portAddrs);
         }
+    }
+
+    /** {@inheritDoc} */
+    protected void sendData(String destAddr, String scAddr, int destPort,
+            byte[] data, PendingIntent sentIntent, PendingIntent deliveryIntent) {
+        SmsMessage.SubmitPdu pdu = SmsMessage.getSubmitPdu(
+                scAddr, destAddr, destPort, data, (deliveryIntent != null));
+        sendRawPdu(pdu.encodedScAddress, pdu.encodedMessage, sentIntent, deliveryIntent);
+    }
+
+    /** {@inheritDoc} */
+    protected void sendText(String destAddr, String scAddr, String text,
+            PendingIntent sentIntent, PendingIntent deliveryIntent) {
+        SmsMessage.SubmitPdu pdu = SmsMessage.getSubmitPdu(
+                scAddr, destAddr, text, (deliveryIntent != null));
+        sendRawPdu(pdu.encodedScAddress, pdu.encodedMessage, sentIntent, deliveryIntent);
     }
 
     /** {@inheritDoc} */

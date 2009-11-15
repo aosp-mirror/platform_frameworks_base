@@ -26,7 +26,11 @@ import android.webkit.WebView;
 /**
  * Represents a plugin (Java equivalent of the PluginPackageAndroid
  * C++ class in libs/WebKitLib/WebKit/WebCore/plugins/android/)
+ *
+ * @deprecated This interface was intended to be used by Gears. Since Gears was
+ * deprecated, so is this class.
  */
+@Deprecated
 public class Plugin {
     public interface PreferencesClickHandler {
         public void handleClickEvent(Context context);
@@ -38,6 +42,11 @@ public class Plugin {
     private String mDescription;
     private PreferencesClickHandler mHandler;
 
+    /**
+     * @deprecated This interface was intended to be used by Gears. Since Gears was
+     * deprecated, so is this class.
+     */
+    @Deprecated
     public Plugin(String name,
                   String path,
                   String fileName,
@@ -49,49 +58,103 @@ public class Plugin {
         mHandler = new DefaultClickHandler();
     }
 
+    /**
+     * @deprecated This interface was intended to be used by Gears. Since Gears was
+     * deprecated, so is this class.
+     */
+    @Deprecated
     public String toString() {
         return mName;
     }
 
+    /**
+     * @deprecated This interface was intended to be used by Gears. Since Gears was
+     * deprecated, so is this class.
+     */
+    @Deprecated
     public String getName() {
         return mName;
     }
 
+    /**
+     * @deprecated This interface was intended to be used by Gears. Since Gears was
+     * deprecated, so is this class.
+     */
+    @Deprecated
     public String getPath() {
         return mPath;
     }
 
+    /**
+     * @deprecated This interface was intended to be used by Gears. Since Gears was
+     * deprecated, so is this class.
+     */
+    @Deprecated
     public String getFileName() {
         return mFileName;
     }
 
+    /**
+     * @deprecated This interface was intended to be used by Gears. Since Gears was
+     * deprecated, so is this class.
+     */
+    @Deprecated
     public String getDescription() {
         return mDescription;
     }
 
+    /**
+     * @deprecated This interface was intended to be used by Gears. Since Gears was
+     * deprecated, so is this class.
+     */
+    @Deprecated
     public void setName(String name) {
         mName = name;
     }
 
+    /**
+     * @deprecated This interface was intended to be used by Gears. Since Gears was
+     * deprecated, so is this class.
+     */
+    @Deprecated
     public void setPath(String path) {
         mPath = path;
     }
 
+    /**
+     * @deprecated This interface was intended to be used by Gears. Since Gears was
+     * deprecated, so is this class.
+     */
+    @Deprecated
     public void setFileName(String fileName) {
         mFileName = fileName;
     }
 
+    /**
+     * @deprecated This interface was intended to be used by Gears. Since Gears was
+     * deprecated, so is this class.
+     */
+    @Deprecated
     public void setDescription(String description) {
         mDescription = description;
     }
 
+    /**
+     * @deprecated This interface was intended to be used by Gears. Since Gears was
+     * deprecated, so is this class.
+     */
+    @Deprecated
     public void setClickHandler(PreferencesClickHandler handler) {
         mHandler = handler;
     }
 
    /**
     * Invokes the click handler for this plugin.
+    *
+    * @deprecated This interface was intended to be used by Gears. Since Gears was
+    * deprecated, so is this class.
     */
+    @Deprecated
     public void dispatchClickEvent(Context context) {
         if (mHandler != null) {
             mHandler.handleClickEvent(context);
@@ -100,11 +163,15 @@ public class Plugin {
 
    /**
     * Default click handler. The plugins should implement their own.
+    *
+    * @deprecated This interface was intended to be used by Gears. Since Gears was
+    * deprecated, so is this class.
     */
+    @Deprecated
     private class DefaultClickHandler implements PreferencesClickHandler,
                                                  DialogInterface.OnClickListener {
         private AlertDialog mDialog;
-
+        @Deprecated
         public void handleClickEvent(Context context) {
             // Show a simple popup dialog containing the description
             // string of the plugin.
@@ -117,7 +184,11 @@ public class Plugin {
                         .show();
             }
         }
-
+        /**
+         * @deprecated This interface was intended to be used by Gears. Since Gears was
+         * deprecated, so is this class.
+         */
+        @Deprecated
         public void onClick(DialogInterface dialog, int which) {
             mDialog.dismiss();
             mDialog = null;

@@ -15,8 +15,8 @@
  */
 
 #include <hardware_legacy/IMountService.h>
-#include <utils/BpBinder.h>
-#include <utils/IServiceManager.h>
+#include <binder/BpBinder.h>
+#include <binder/IServiceManager.h>
 
 #include <stdio.h>
 #include <stdlib.h>

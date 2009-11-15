@@ -65,14 +65,15 @@ public class LayoutTestsAutoRunner extends InstrumentationTestRunner {
             } catch (Exception e) {
             }
         }
-        
+
         String r = (String)icicle.get("rebaseline");
         this.mRebaseline = (r != null && r.toLowerCase().equals("true"));
-        super.onCreate(icicle);
-        
+
         String logtime = (String) icicle.get("logtime");
         this.mLogtime = (logtime != null
                 && logtime.toLowerCase().equals("true"));
+
+        super.onCreate(icicle);
     }
     
     public String mTestPath = null;

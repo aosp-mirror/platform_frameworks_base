@@ -1,16 +1,16 @@
 /*
 ** Copyright 2006, The Android Open Source Project
 **
-** Licensed under the Apache License, Version 2.0 (the "License"); 
-** you may not use this file except in compliance with the License. 
-** You may obtain a copy of the License at 
+** Licensed under the Apache License, Version 2.0 (the "License");
+** you may not use this file except in compliance with the License.
+** You may obtain a copy of the License at
 **
-**     http://www.apache.org/licenses/LICENSE-2.0 
+**     http://www.apache.org/licenses/LICENSE-2.0
 **
-** Unless required by applicable law or agreed to in writing, software 
-** distributed under the License is distributed on an "AS IS" BASIS, 
-** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
-** See the License for the specific language governing permissions and 
+** Unless required by applicable law or agreed to in writing, software
+** distributed under the License is distributed on an "AS IS" BASIS,
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+** See the License for the specific language governing permissions and
 ** limitations under the License.
 */
 
@@ -30,6 +30,8 @@
 #include <private/pixelflinger/ggl_context.h>
 
 #include <GLES/gl.h>
+#include <EGL/egl.h>
+#include <EGL/eglext.h>
 
 #include "Tokenizer.h"
 #include "TokenManager.h"
@@ -39,22 +41,20 @@ namespace android {
 
 // ----------------------------------------------------------------------------
 
-class EGLTextureObject
+class EGLTextureObject : public LightRefBase<EGLTextureObject>
 {
 public:
                     EGLTextureObject();
                    ~EGLTextureObject();
 
-    // protocol for sp<>
-    inline  void        incStrong(const void* id) const;
-    inline  void        decStrong(const void* id) const;
-    inline  uint32_t    getStrongCount() const;
+    status_t    setSurface(GGLSurface const* s);
+    status_t    setImage(android_native_buffer_t* buffer);
+    void        setImageBits(void* vaddr) { surface.data = (GGLubyte*)vaddr; }
 
-    status_t            setSurface(GGLSurface const* s);
     status_t            reallocate(GLint level,
                             int w, int h, int s,
                             int format, int compressedFormat, int bpr);
-    inline  size_t      size() const;
+    inline  size_t      size() const { return mSize; }
     const GGLSurface&   mip(int lod) const;
     GGLSurface&         editMip(int lod);
     bool                hasMipmaps() const { return mMipmaps!=0; }
@@ -65,7 +65,6 @@ private:
         status_t        allocateMipmaps();
             void        freeMipmaps();
             void        init();
-    mutable int32_t     mCount;
     size_t              mSize;
     GGLSurface          *mMipmaps;
     int                 mNumExtraLod;
@@ -81,35 +80,21 @@ public:
     GLint               crop_rect[4];
     GLint               generate_mipmap;
     GLint               direct;
+#ifdef LIBAGL_USE_GRALLOC_COPYBITS
+    bool                try_copybit;
+#endif // LIBAGL_USE_GRALLOC_COPYBITS
+    android_native_buffer_t* buffer;
 };
-
-void EGLTextureObject::incStrong(const void* id) const {
-    android_atomic_inc(&mCount);
-}
-void EGLTextureObject::decStrong(const void* id) const {
-    if (android_atomic_dec(&mCount) == 1) {
-        delete this;
-    }
-}
-uint32_t EGLTextureObject::getStrongCount() const {
-    return mCount;
-}
-size_t EGLTextureObject::size() const {
-    return mSize;
-}
 
 // ----------------------------------------------------------------------------
 
-class EGLSurfaceManager : public TokenManager
+class EGLSurfaceManager :
+    public LightRefBase<EGLSurfaceManager>,
+    public TokenManager
 {
 public:
                 EGLSurfaceManager();
                 ~EGLSurfaceManager();
-
-    // protocol for sp<>
-    inline  void    incStrong(const void* id) const;
-    inline  void    decStrong(const void* id) const;
-    typedef void    weakref_type;
 
     sp<EGLTextureObject>    createTexture(GLuint name);
     sp<EGLTextureObject>    removeTexture(GLuint name);
@@ -118,20 +103,9 @@ public:
     sp<EGLTextureObject>    texture(GLuint name);
 
 private:
-    mutable int32_t                             mCount;
     mutable Mutex                               mLock;
     KeyedVector< GLuint, sp<EGLTextureObject> > mTextures;
 };
-
-void EGLSurfaceManager::incStrong(const void* id) const {
-    android_atomic_inc(&mCount);
-}
-void EGLSurfaceManager::decStrong(const void* id) const {
-    if (android_atomic_dec(&mCount) == 1) {
-        delete this;
-    }
-}
-
 
 // ----------------------------------------------------------------------------
 }; // namespace android

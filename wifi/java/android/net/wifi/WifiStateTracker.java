@@ -39,6 +39,7 @@ import android.util.Log;
 import android.util.Config;
 import android.app.Notification;
 import android.app.PendingIntent;
+import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothHeadset;
 import android.bluetooth.BluetoothA2dp;
 import android.content.ContentResolver;
@@ -49,6 +50,7 @@ import com.android.internal.app.IBatteryStats;
 
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Set;
 import java.net.UnknownHostException;
 
 /**
@@ -88,6 +90,7 @@ public class WifiStateTracker extends NetworkStateTracker {
      */ 
     private static final int EVENT_DRIVER_STATE_CHANGED              = 12;
     private static final int EVENT_PASSWORD_KEY_MAY_BE_INCORRECT     = 13;
+    private static final int EVENT_MAYBE_START_SCAN_POST_DISCONNECT  = 14;
 
     /**
      * Interval in milliseconds between polling for connection
@@ -124,6 +127,14 @@ public class WifiStateTracker extends NetworkStateTracker {
     private static final int RECONNECT_DELAY_MSECS = 2000;
 
     /**
+     * When the supplicant disconnects from an AP it sometimes forgets
+     * to restart scanning.  Wait this delay before asking it to start
+     * scanning (in case it forgot).  15 sec is the standard delay between
+     * scans.
+     */
+    private static final int KICKSTART_SCANNING_DELAY_MSECS = 15000;
+
+    /**
      * The maximum number of times we will retry a connection to an access point
      * for which we have failed in acquiring an IP address from DHCP. A value of
      * N means that we will make N+1 connection attempts in all.
@@ -145,6 +156,14 @@ public class WifiStateTracker extends NetworkStateTracker {
      * The current number of WPA supplicant loop iterations:
      */
     private int mNumSupplicantLoopIterations = 0;
+
+    /**
+     * The current number of supplicant state changes.  This is used to determine
+     * if we've received any new info since we found out it was DISCONNECTED or
+     * INACTIVE.  If we haven't for X ms, we then request a scan - it should have
+     * done that automatically, but sometimes some firmware does not.
+     */
+    private int mNumSupplicantStateChanges = 0;
 
     /**
      * True if we received an event that that a password-key may be incorrect.
@@ -182,6 +201,10 @@ public class WifiStateTracker extends NetworkStateTracker {
     private int mLastNetworkId = -1;
     private boolean mUseStaticIp = false;
     private int mReconnectCount;
+
+    // used to store the (non-persisted) num determined during device boot 
+    // (from mcc or other phone info) before the driver is started.
+    private int mNumAllowedChannels = 0;
 
     // Variables relating to the 'available networks' notification
     
@@ -238,7 +261,6 @@ public class WifiStateTracker extends NetworkStateTracker {
     private SettingsObserver mSettingsObserver;
     
     private boolean mIsScanModeActive;
-    private boolean mIsScanModeSetDueToAHiddenNetwork;
     private boolean mEnableRssiPolling;
 
     // Wi-Fi run states:
@@ -311,7 +333,6 @@ public class WifiStateTracker extends NetworkStateTracker {
         mScanResults = new ArrayList<ScanResult>();
         // Allocate DHCP info object once, and fill it in on each request
         mDhcpInfo = new DhcpInfo();
-        mIsScanModeSetDueToAHiddenNetwork = false;
         mRunState = RUN_STATE_STARTING;
 
         // Setting is in seconds
@@ -376,6 +397,14 @@ public class WifiStateTracker extends NetworkStateTracker {
      */
     public String[] getNameServers() {
         return getNameServerList(sDnsPropNames);
+    }
+
+    /**
+     * Return the name of our WLAN network interface.
+     * @return the name of our interface.
+     */
+    public String getInterfaceName() {
+        return mInterfaceName;
     }
 
     /**
@@ -576,9 +605,12 @@ public class WifiStateTracker extends NetworkStateTracker {
         try {
             return setNumAllowedChannels(
                     Settings.Secure.getInt(mContext.getContentResolver(),
-                                           Settings.Secure.WIFI_NUM_ALLOWED_CHANNELS));
+                    Settings.Secure.WIFI_NUM_ALLOWED_CHANNELS));
         } catch (Settings.SettingNotFoundException e) {
-            // if setting doesn't exist, stick with the driver default
+            if (mNumAllowedChannels != 0) {
+                WifiNative.setNumAllowedChannelsCommand(mNumAllowedChannels);
+            }
+            // otherwise, use the driver default
         }
         return true;
     }
@@ -592,6 +624,7 @@ public class WifiStateTracker extends NetworkStateTracker {
      * {@code numChannels} is outside the valid range.
      */
     public synchronized boolean setNumAllowedChannels(int numChannels) {
+        mNumAllowedChannels = numChannels;
         return WifiNative.setNumAllowedChannelsCommand(numChannels);
     }
 
@@ -631,10 +664,10 @@ public class WifiStateTracker extends NetworkStateTracker {
 
     private void checkIsBluetoothPlaying() {
         boolean isBluetoothPlaying = false;
-        List<String> connected = mBluetoothA2dp.listConnectedSinks();
+        Set<BluetoothDevice> connected = mBluetoothA2dp.getConnectedSinks();
 
-        for (String address : connected) {
-            if (mBluetoothA2dp.getSinkState(address) == BluetoothA2dp.STATE_PLAYING) {
+        for (BluetoothDevice device : connected) {
+            if (mBluetoothA2dp.getSinkState(device) == BluetoothA2dp.STATE_PLAYING) {
                 isBluetoothPlaying = true;
                 break;
             }
@@ -768,6 +801,9 @@ public class WifiStateTracker extends NetworkStateTracker {
                     mBluetoothA2dp = new BluetoothA2dp(mContext);
                 }
                 checkIsBluetoothPlaying();
+
+                // initialize this after the supplicant is alive
+                setNumAllowedChannels();
                 break;
 
             case EVENT_SUPPLICANT_DISCONNECT:
@@ -790,7 +826,7 @@ public class WifiStateTracker extends NetworkStateTracker {
                     WifiNative.closeSupplicantConnection();
                 }
                 if (died) {
-                    resetInterface();
+                    resetInterface(false);
                 }
                 // When supplicant dies, kill the DHCP thread
                 if (mDhcpTarget != null) {
@@ -812,7 +848,16 @@ public class WifiStateTracker extends NetworkStateTracker {
                 }
                 break;
 
+            case EVENT_MAYBE_START_SCAN_POST_DISCONNECT:
+                // Only do this if we haven't gotten a new supplicant status since the timer
+                // started
+                if (mNumSupplicantStateChanges == msg.arg1) {
+                    WifiNative.scanCommand(false); // do a passive scan
+                }
+                break;
+
             case EVENT_SUPPLICANT_STATE_CHANGED:
+                mNumSupplicantStateChanges++;
                 SupplicantStateChangeResult supplicantStateResult =
                     (SupplicantStateChangeResult) msg.obj;
                 SupplicantState newState = supplicantStateResult.state;
@@ -829,6 +874,17 @@ public class WifiStateTracker extends NetworkStateTracker {
                                       " ==> " + newState);
 
                 int networkId = supplicantStateResult.networkId;
+
+                /*
+                 * If we get disconnect or inactive we need to start our
+                 * watchdog timer to start a scan
+                 */
+                if (newState == SupplicantState.DISCONNECTED ||
+                        newState == SupplicantState.INACTIVE) {
+                    sendMessageDelayed(obtainMessage(EVENT_MAYBE_START_SCAN_POST_DISCONNECT,
+                            mNumSupplicantStateChanges, 0), KICKSTART_SCANNING_DELAY_MSECS);
+                }
+
 
                 /*
                  * Did we get to DISCONNECTED state due to an
@@ -888,6 +944,7 @@ public class WifiStateTracker extends NetworkStateTracker {
                             }
                         }
                     } else if (newState == SupplicantState.DISCONNECTED) {
+                        mHaveIpAddress = false;
                         if (isDriverStopped() || mDisconnectExpected) {
                             handleDisconnectedState(DetailedState.DISCONNECTED);
                         } else {
@@ -988,20 +1045,17 @@ public class WifiStateTracker extends NetworkStateTracker {
                     setNotificationVisible(false, 0, false, 0);
                     boolean wasDisconnectPending = mDisconnectPending;
                     cancelDisconnect();
-                    if (!TextUtils.equals(mWifiInfo.getSSID(), mLastSsid)) {
-                        /*
-                         * The connection is fully configured as far as link-level
-                         * connectivity is concerned, but we may still need to obtain
-                         * an IP address. But do this only if we are connecting to
-                         * a different network than we were connected to previously.
-                         */
-                        if (wasDisconnectPending) {
-                            DetailedState saveState = getNetworkInfo().getDetailedState();
-                            handleDisconnectedState(DetailedState.DISCONNECTED);
-                            setDetailedStateInternal(saveState);
-                        }
-                        configureInterface();
+                    /*
+                     * The connection is fully configured as far as link-level
+                     * connectivity is concerned, but we may still need to obtain
+                     * an IP address.
+                     */
+                    if (wasDisconnectPending) {
+                        DetailedState saveState = getNetworkInfo().getDetailedState();
+                        handleDisconnectedState(DetailedState.DISCONNECTED);
+                        setDetailedStateInternal(saveState);
                     }
+                    configureInterface();
                     mLastBssid = result.BSSID;
                     mLastSsid = mWifiInfo.getSSID();
                     mLastNetworkId = result.networkId;
@@ -1023,17 +1077,12 @@ public class WifiStateTracker extends NetworkStateTracker {
                  * On receiving the first scan results after connecting to
                  * the supplicant, switch scan mode over to passive.
                  */
-                if (!mIsScanModeSetDueToAHiddenNetwork) {
-                    // This is the only place at the moment where we set
-                    // the scan mode NOT due to a hidden network. This is
-                    // what the second parameter value (false) stands for.
-                    setScanMode(false, false);
-                }
+                setScanMode(false);
                 break;
 
             case EVENT_POLL_INTERVAL:
                 if (mWifiInfo.getSupplicantState() != SupplicantState.UNINITIALIZED) {
-                    requestPolledInfo(mWifiInfo);
+                    requestPolledInfo(mWifiInfo, true);
                     checkPollTimer();
                 }
                 break;
@@ -1164,9 +1213,7 @@ public class WifiStateTracker extends NetworkStateTracker {
         return disabledNetwork;
     }
 
-    public synchronized void setScanMode(
-        boolean isScanModeActive, boolean setDueToAHiddenNetwork) {
-        mIsScanModeSetDueToAHiddenNetwork = setDueToAHiddenNetwork;
+    public synchronized void setScanMode(boolean isScanModeActive) {
         if (mIsScanModeActive != isScanModeActive) {
             WifiNative.setScanModeCommand(mIsScanModeActive = isScanModeActive);
         }
@@ -1206,7 +1253,7 @@ public class WifiStateTracker extends NetworkStateTracker {
             cancelDisconnect();
         }
         mDisconnectExpected = false;
-        resetInterface();
+        resetInterface(true);
         setDetailedState(newState);
         sendNetworkStateChangeBroadcast(mLastBssid);
         mWifiInfo.setBSSID(null);
@@ -1219,7 +1266,7 @@ public class WifiStateTracker extends NetworkStateTracker {
      * Resets the Wi-Fi interface by clearing any state, resetting any sockets
      * using the interface, stopping DHCP, and disabling the interface.
      */
-    public void resetInterface() {
+    public void resetInterface(boolean reenable) {
         mHaveIpAddress = false;
         mObtainingIpAddress = false;
         mWifiInfo.setIpAddress(0);
@@ -1227,9 +1274,9 @@ public class WifiStateTracker extends NetworkStateTracker {
         /*
          * Reset connection depends on both the interface and the IP assigned,
          * so it should be done before any chance of the IP being lost.
-         */  
+         */
         NetworkUtils.resetConnections(mInterfaceName);
-        
+
         // Stop DHCP
         if (mDhcpTarget != null) {
             mDhcpTarget.setCancelCallback(true);
@@ -1238,8 +1285,10 @@ public class WifiStateTracker extends NetworkStateTracker {
         if (!NetworkUtils.stopDhcp(mInterfaceName)) {
             Log.e(TAG, "Could not stop DHCP");
         }
-        
+
         NetworkUtils.disableInterface(mInterfaceName);
+        // we no longer net to start the interface (driver does this for us)
+        // and it led to problems - removed.
     }
 
     /**
@@ -1278,7 +1327,7 @@ public class WifiStateTracker extends NetworkStateTracker {
      */
     public WifiInfo requestConnectionInfo() {
         requestConnectionStatus(mWifiInfo);
-        requestPolledInfo(mWifiInfo);
+        requestPolledInfo(mWifiInfo, false);
         return mWifiInfo;
     }
 
@@ -1333,10 +1382,14 @@ public class WifiStateTracker extends NetworkStateTracker {
      * Get the dynamic information that is not reported via events.
      * @param info the object into which the information should be captured.
      */
-    private synchronized void requestPolledInfo(WifiInfo info)
+    private synchronized void requestPolledInfo(WifiInfo info, boolean polling)
     {
-        int newRssi = WifiNative.getRssiCommand();
-        if (newRssi != -1 && -200 < newRssi && newRssi < 100) { // screen out invalid values
+        int newRssi = (polling ? WifiNative.getRssiApproxCommand() : WifiNative.getRssiCommand());
+        if (newRssi != -1 && -200 < newRssi && newRssi < 256) { // screen out invalid values
+            /* some implementations avoid negative values by adding 256
+             * so we need to adjust for that here.
+             */
+            if (newRssi > 0) newRssi -= 256;
             info.setRssi(newRssi);
             /*
              * Rather then sending the raw RSSI out every time it
@@ -1453,6 +1506,7 @@ public class WifiStateTracker extends NetworkStateTracker {
     public synchronized boolean restart() {
         if (mRunState == RUN_STATE_STOPPED) {
             mRunState = RUN_STATE_STARTING;
+            resetInterface(true);
             return WifiNative.startDriverCommand();
         } else if (mRunState == RUN_STATE_STOPPING) {
             mRunState = RUN_STATE_STARTING;
@@ -1879,7 +1933,7 @@ public class WifiStateTracker extends NetworkStateTracker {
                         oDns2 != mDhcpInfo.dns2));
 
             if (changed) {
-                resetInterface();
+                resetInterface(true);
                 configureInterface();
                 if (mUseStaticIp) {
                     mTarget.sendEmptyMessage(EVENT_CONFIGURATION_CHANGED);

@@ -75,6 +75,7 @@ class ProcessRecord implements Watchdog.PssRequestor {
     boolean reportLowMemory;    // Set to true when waiting to report low mem
     int lastPss;                // Last pss size reported by app.
     String adjType;             // Debugging: primary thing impacting oom_adj.
+    int adjTypeCode;            // Debugging: adj code to report to app.
     Object adjSource;           // Debugging: option dependent object.
     Object adjTarget;           // Debugging: target component impacting oom_adj.
     
@@ -93,7 +94,8 @@ class ProcessRecord implements Watchdog.PssRequestor {
     // class (String) -> ContentProviderRecord
     final HashMap pubProviders = new HashMap(); 
     // All ContentProviderRecord process is using
-    final HashSet conProviders = new HashSet(); 
+    final HashMap<ContentProviderRecord, Integer> conProviders
+            = new HashMap<ContentProviderRecord, Integer>(); 
     
     boolean persistent;         // always keep this application running?
     boolean crashing;           // are we in the process of crashing?

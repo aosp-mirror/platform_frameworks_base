@@ -130,6 +130,7 @@ public abstract class BatteryStats implements Parcelable {
     private static final String MISC_DATA = "m";
     private static final String SCREEN_BRIGHTNESS_DATA = "br";
     private static final String SIGNAL_STRENGTH_TIME_DATA = "sgt";
+    private static final String SIGNAL_SCANNING_TIME_DATA = "sst";
     private static final String SIGNAL_STRENGTH_COUNT_DATA = "sgc";
     private static final String DATA_CONNECTION_TIME_DATA = "dct";
     private static final String DATA_CONNECTION_COUNT_DATA = "dcc";
@@ -314,6 +315,15 @@ public abstract class BatteryStats implements Parcelable {
              * @return foreground cpu time in microseconds
              */
             public abstract long getForegroundTime(int which);
+
+            /**
+             * Returns the approximate cpu time spent in microseconds, at a certain CPU speed.
+             * @param speedStep the index of the CPU speed. This is not the actual speed of the
+             * CPU.
+             * @param which one of STATS_TOTAL, STATS_LAST, STATS_CURRENT or STATS_UNPLUGGED
+             * @see BatteryStats#getCpuSpeedSteps()
+             */
+            public abstract long getTimeAtCpuSpeedStep(int speedStep, int which);
         }
 
         /**
@@ -428,6 +438,15 @@ public abstract class BatteryStats implements Parcelable {
      * {@hide}
      */
     public abstract long getPhoneSignalStrengthTime(int strengthBin,
+            long batteryRealtime, int which);
+
+    /**
+     * Returns the time in microseconds that the phone has been trying to
+     * acquire a signal.
+     *
+     * {@hide}
+     */
+    public abstract long getPhoneSignalScanningTime(
             long batteryRealtime, int which);
 
     /**
@@ -572,6 +591,9 @@ public abstract class BatteryStats implements Parcelable {
     public abstract long computeRealtime(long curTime, int which);
     
     public abstract Map<String, ? extends Timer> getKernelWakelockStats();
+
+    /** Returns the number of different speeds that the CPU can run at */
+    public abstract int getCpuSpeedSteps();
 
     private final static void formatTimeRaw(StringBuilder out, long seconds) {
         long days = seconds / (60 * 60 * 24);
@@ -811,6 +833,8 @@ public abstract class BatteryStats implements Parcelable {
             args[i] = getPhoneSignalStrengthTime(i, batteryRealtime, which) / 1000;
         }
         dumpLine(pw, 0 /* uid */, category, SIGNAL_STRENGTH_TIME_DATA, args);
+        dumpLine(pw, 0 /* uid */, category, SIGNAL_SCANNING_TIME_DATA,
+                getPhoneSignalScanningTime(batteryRealtime, which) / 1000);
         for (int i=0; i<NUM_SIGNAL_STRENGTH_BINS; i++) {
             args[i] = getPhoneSignalStrengthCount(i, which);
         }
@@ -1118,7 +1142,13 @@ public abstract class BatteryStats implements Parcelable {
         }
         if (!didOne) sb.append("No activity");
         pw.println(sb.toString());
-        
+
+        sb.setLength(0);
+        sb.append(prefix);
+        sb.append("  Signal scanning time: ");
+        formatTimeMs(sb, getPhoneSignalScanningTime(batteryRealtime, which) / 1000);
+        pw.println(sb.toString());
+
         sb.setLength(0);
         sb.append(prefix);
         sb.append("  Radio types: ");

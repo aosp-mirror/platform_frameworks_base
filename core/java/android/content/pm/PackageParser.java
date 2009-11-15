@@ -27,6 +27,7 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.PatternMatcher;
 import android.util.AttributeSet;
@@ -84,8 +85,9 @@ public class PackageParser {
 
     private String mArchiveSourcePath;
     private String[] mSeparateProcesses;
-    private int mSdkVersion;
-    private String mSdkCodename;
+    private static final int SDK_VERSION = Build.VERSION.SDK_INT;
+    private static final String SDK_CODENAME = "REL".equals(Build.VERSION.CODENAME)
+            ? null : Build.VERSION.CODENAME;
 
     private int mParseError = PackageManager.INSTALL_SUCCEEDED;
 
@@ -152,11 +154,6 @@ public class PackageParser {
         mSeparateProcesses = procs;
     }
 
-    public void setSdkVersion(int sdkVersion, String codename) {
-        mSdkVersion = sdkVersion;
-        mSdkCodename = codename;
-    }
-
     private static final boolean isPackageFilename(String name) {
         return name.endsWith(".apk");
     }
@@ -184,20 +181,31 @@ public class PackageParser {
             int N = p.configPreferences.size();
             if (N > 0) {
                 pi.configPreferences = new ConfigurationInfo[N];
-                for (int i=0; i<N; i++) {
-                    pi.configPreferences[i] = p.configPreferences.get(i);
-                }
+                p.configPreferences.toArray(pi.configPreferences);
+            }
+            N = p.reqFeatures != null ? p.reqFeatures.size() : 0;
+            if (N > 0) {
+                pi.reqFeatures = new FeatureInfo[N];
+                p.reqFeatures.toArray(pi.reqFeatures);
             }
         }
         if ((flags&PackageManager.GET_ACTIVITIES) != 0) {
             int N = p.activities.size();
             if (N > 0) {
-                pi.activities = new ActivityInfo[N];
-                for (int i=0; i<N; i++) {
+                if ((flags&PackageManager.GET_DISABLED_COMPONENTS) != 0) {
+                    pi.activities = new ActivityInfo[N];
+                } else {
+                    int num = 0;
+                    for (int i=0; i<N; i++) {
+                        if (p.activities.get(i).info.enabled) num++;
+                    }
+                    pi.activities = new ActivityInfo[num];
+                }
+                for (int i=0, j=0; i<N; i++) {
                     final Activity activity = p.activities.get(i);
                     if (activity.info.enabled
                         || (flags&PackageManager.GET_DISABLED_COMPONENTS) != 0) {
-                        pi.activities[i] = generateActivityInfo(p.activities.get(i), flags);
+                        pi.activities[j++] = generateActivityInfo(p.activities.get(i), flags);
                     }
                 }
             }
@@ -205,12 +213,20 @@ public class PackageParser {
         if ((flags&PackageManager.GET_RECEIVERS) != 0) {
             int N = p.receivers.size();
             if (N > 0) {
-                pi.receivers = new ActivityInfo[N];
-                for (int i=0; i<N; i++) {
+                if ((flags&PackageManager.GET_DISABLED_COMPONENTS) != 0) {
+                    pi.receivers = new ActivityInfo[N];
+                } else {
+                    int num = 0;
+                    for (int i=0; i<N; i++) {
+                        if (p.receivers.get(i).info.enabled) num++;
+                    }
+                    pi.receivers = new ActivityInfo[num];
+                }
+                for (int i=0, j=0; i<N; i++) {
                     final Activity activity = p.receivers.get(i);
                     if (activity.info.enabled
                         || (flags&PackageManager.GET_DISABLED_COMPONENTS) != 0) {
-                        pi.receivers[i] = generateActivityInfo(p.receivers.get(i), flags);
+                        pi.receivers[j++] = generateActivityInfo(p.receivers.get(i), flags);
                     }
                 }
             }
@@ -218,12 +234,20 @@ public class PackageParser {
         if ((flags&PackageManager.GET_SERVICES) != 0) {
             int N = p.services.size();
             if (N > 0) {
-                pi.services = new ServiceInfo[N];
-                for (int i=0; i<N; i++) {
+                if ((flags&PackageManager.GET_DISABLED_COMPONENTS) != 0) {
+                    pi.services = new ServiceInfo[N];
+                } else {
+                    int num = 0;
+                    for (int i=0; i<N; i++) {
+                        if (p.services.get(i).info.enabled) num++;
+                    }
+                    pi.services = new ServiceInfo[num];
+                }
+                for (int i=0, j=0; i<N; i++) {
                     final Service service = p.services.get(i);
                     if (service.info.enabled
                         || (flags&PackageManager.GET_DISABLED_COMPONENTS) != 0) {
-                        pi.services[i] = generateServiceInfo(p.services.get(i), flags);
+                        pi.services[j++] = generateServiceInfo(p.services.get(i), flags);
                     }
                 }
             }
@@ -231,12 +255,20 @@ public class PackageParser {
         if ((flags&PackageManager.GET_PROVIDERS) != 0) {
             int N = p.providers.size();
             if (N > 0) {
-                pi.providers = new ProviderInfo[N];
-                for (int i=0; i<N; i++) {
+                if ((flags&PackageManager.GET_DISABLED_COMPONENTS) != 0) {
+                    pi.providers = new ProviderInfo[N];
+                } else {
+                    int num = 0;
+                    for (int i=0; i<N; i++) {
+                        if (p.providers.get(i).info.enabled) num++;
+                    }
+                    pi.providers = new ProviderInfo[num];
+                }
+                for (int i=0, j=0; i<N; i++) {
                     final Provider provider = p.providers.get(i);
                     if (provider.info.enabled
                         || (flags&PackageManager.GET_DISABLED_COMPONENTS) != 0) {
-                        pi.providers[i] = generateProviderInfo(p.providers.get(i), flags);
+                        pi.providers[j++] = generateProviderInfo(p.providers.get(i), flags);
                     }
                 }
             }
@@ -268,8 +300,8 @@ public class PackageParser {
             }
         }
         if ((flags&PackageManager.GET_SIGNATURES) != 0) {
-            int N = p.mSignatures.length;
-            if (N > 0) {
+           int N = (p.mSignatures != null) ? p.mSignatures.length : 0;
+           if (N > 0) {
                 pi.signatures = new Signature[N];
                 System.arraycopy(p.mSignatures, 0, pi.signatures, 0, N);
             }
@@ -758,19 +790,37 @@ public class PackageParser {
                 XmlUtils.skipCurrentTag(parser);
 
             } else if (tagName.equals("uses-feature")) {
-                ConfigurationInfo cPref = new ConfigurationInfo();
+                FeatureInfo fi = new FeatureInfo();
                 sa = res.obtainAttributes(attrs,
                         com.android.internal.R.styleable.AndroidManifestUsesFeature);
-                cPref.reqGlEsVersion = sa.getInt(
-                        com.android.internal.R.styleable.AndroidManifestUsesFeature_glEsVersion,
-                        ConfigurationInfo.GL_ES_VERSION_UNDEFINED);
+                fi.name = sa.getNonResourceString(
+                        com.android.internal.R.styleable.AndroidManifestUsesFeature_name);
+                if (fi.name == null) {
+                    fi.reqGlEsVersion = sa.getInt(
+                            com.android.internal.R.styleable.AndroidManifestUsesFeature_glEsVersion,
+                            FeatureInfo.GL_ES_VERSION_UNDEFINED);
+                }
+                if (sa.getBoolean(
+                        com.android.internal.R.styleable.AndroidManifestUsesFeature_required,
+                        true)) {
+                    fi.flags |= FeatureInfo.FLAG_REQUIRED;
+                }
                 sa.recycle();
-                pkg.configPreferences.add(cPref);
+                if (pkg.reqFeatures == null) {
+                    pkg.reqFeatures = new ArrayList<FeatureInfo>();
+                }
+                pkg.reqFeatures.add(fi);
+                
+                if (fi.name == null) {
+                    ConfigurationInfo cPref = new ConfigurationInfo();
+                    cPref.reqGlEsVersion = fi.reqGlEsVersion;
+                    pkg.configPreferences.add(cPref);
+                }
 
                 XmlUtils.skipCurrentTag(parser);
 
             } else if (tagName.equals("uses-sdk")) {
-                if (mSdkVersion > 0) {
+                if (SDK_VERSION > 0) {
                     sa = res.obtainAttributes(attrs,
                             com.android.internal.R.styleable.AndroidManifestUsesSdk);
 
@@ -803,15 +853,15 @@ public class PackageParser {
                     
                     int maxVers = sa.getInt(
                             com.android.internal.R.styleable.AndroidManifestUsesSdk_maxSdkVersion,
-                            mSdkVersion);
+                            SDK_VERSION);
 
                     sa.recycle();
 
                     if (minCode != null) {
-                        if (!minCode.equals(mSdkCodename)) {
-                            if (mSdkCodename != null) {
+                        if (!minCode.equals(SDK_CODENAME)) {
+                            if (SDK_CODENAME != null) {
                                 outError[0] = "Requires development platform " + minCode
-                                        + " (current platform is " + mSdkCodename + ")";
+                                        + " (current platform is " + SDK_CODENAME + ")";
                             } else {
                                 outError[0] = "Requires development platform " + minCode
                                         + " but this is a release platform.";
@@ -819,18 +869,18 @@ public class PackageParser {
                             mParseError = PackageManager.INSTALL_FAILED_OLDER_SDK;
                             return null;
                         }
-                    } else if (minVers > mSdkVersion) {
+                    } else if (minVers > SDK_VERSION) {
                         outError[0] = "Requires newer sdk version #" + minVers
-                                + " (current version is #" + mSdkVersion + ")";
+                                + " (current version is #" + SDK_VERSION + ")";
                         mParseError = PackageManager.INSTALL_FAILED_OLDER_SDK;
                         return null;
                     }
                     
                     if (targetCode != null) {
-                        if (!targetCode.equals(mSdkCodename)) {
-                            if (mSdkCodename != null) {
+                        if (!targetCode.equals(SDK_CODENAME)) {
+                            if (SDK_CODENAME != null) {
                                 outError[0] = "Requires development platform " + targetCode
-                                        + " (current platform is " + mSdkCodename + ")";
+                                        + " (current platform is " + SDK_CODENAME + ")";
                             } else {
                                 outError[0] = "Requires development platform " + targetCode
                                         + " but this is a release platform.";
@@ -845,9 +895,9 @@ public class PackageParser {
                         pkg.applicationInfo.targetSdkVersion = targetVers;
                     }
                     
-                    if (maxVers < mSdkVersion) {
+                    if (maxVers < SDK_VERSION) {
                         outError[0] = "Requires older sdk version #" + maxVers
-                                + " (current version is #" + mSdkVersion + ")";
+                                + " (current version is #" + SDK_VERSION + ")";
                         mParseError = PackageManager.INSTALL_FAILED_OLDER_SDK;
                         return null;
                     }
@@ -918,8 +968,9 @@ public class PackageParser {
                 return null;
 
             } else {
-                Log.w(TAG, "Bad element under <manifest>: "
-                      + parser.getName());
+                Log.w(TAG, "Unknown element under <manifest>: " + parser.getName()
+                        + " at " + mArchiveSourcePath + " "
+                        + parser.getPositionDescription());
                 XmlUtils.skipCurrentTag(parser);
                 continue;
             }
@@ -931,6 +982,7 @@ public class PackageParser {
         }
 
         final int NP = PackageParser.NEW_PERMISSIONS.length;
+        StringBuilder implicitPerms = null;
         for (int ip=0; ip<NP; ip++) {
             final PackageParser.NewPermissionInfo npi
                     = PackageParser.NEW_PERMISSIONS[ip];
@@ -938,15 +990,19 @@ public class PackageParser {
                 break;
             }
             if (!pkg.requestedPermissions.contains(npi.name)) {
-                Log.i(TAG, "Impliciting adding " + npi.name + " to old pkg "
-                        + pkg.packageName);
+                if (implicitPerms == null) {
+                    implicitPerms = new StringBuilder(128);
+                    implicitPerms.append(pkg.packageName);
+                    implicitPerms.append(": compat added ");
+                } else {
+                    implicitPerms.append(' ');
+                }
+                implicitPerms.append(npi.name);
                 pkg.requestedPermissions.add(npi.name);
             }
         }
-        
-        if (pkg.usesLibraries.size() > 0) {
-            pkg.usesLibraryFiles = new String[pkg.usesLibraries.size()];
-            pkg.usesLibraries.toArray(pkg.usesLibraryFiles);
+        if (implicitPerms != null) {
+            Log.i(TAG, implicitPerms.toString());
         }
         
         if (supportsSmallScreens < 0 || (supportsSmallScreens > 0
@@ -1278,12 +1334,28 @@ public class PackageParser {
                 com.android.internal.R.styleable.AndroidManifestApplication_allowBackup, true);
         if (allowBackup) {
             ai.flags |= ApplicationInfo.FLAG_ALLOW_BACKUP;
+
+            // backupAgent, killAfterRestore, and restoreNeedsApplication are only relevant
+            // if backup is possible for the given application.
             String backupAgent = sa.getNonResourceString(
                     com.android.internal.R.styleable.AndroidManifestApplication_backupAgent);
             if (backupAgent != null) {
                 ai.backupAgentName = buildClassName(pkgName, backupAgent, outError);
-                Log.v(TAG, "android:backupAgent = " + ai.backupAgentName
-                        + " from " + pkgName + "+" + backupAgent);
+                if (false) {
+                    Log.v(TAG, "android:backupAgent = " + ai.backupAgentName
+                            + " from " + pkgName + "+" + backupAgent);
+                }
+
+                if (sa.getBoolean(
+                        com.android.internal.R.styleable.AndroidManifestApplication_killAfterRestore,
+                        true)) {
+                    ai.flags |= ApplicationInfo.FLAG_KILL_AFTER_RESTORE;
+                }
+                if (sa.getBoolean(
+                        com.android.internal.R.styleable.AndroidManifestApplication_restoreNeedsApplication,
+                        false)) {
+                    ai.flags |= ApplicationInfo.FLAG_RESTORE_NEEDS_APPLICATION;
+                }
             }
         }
         
@@ -1434,19 +1506,37 @@ public class PackageParser {
 
                 String lname = sa.getNonResourceString(
                         com.android.internal.R.styleable.AndroidManifestUsesLibrary_name);
+                boolean req = sa.getBoolean(
+                        com.android.internal.R.styleable.AndroidManifestUsesLibrary_required,
+                        true);
 
                 sa.recycle();
 
-                if (lname != null && !owner.usesLibraries.contains(lname)) {
-                    owner.usesLibraries.add(lname.intern());
+                if (lname != null) {
+                    if (req) {
+                        if (owner.usesLibraries == null) {
+                            owner.usesLibraries = new ArrayList<String>();
+                        }
+                        if (!owner.usesLibraries.contains(lname)) {
+                            owner.usesLibraries.add(lname.intern());
+                        }
+                    } else {
+                        if (owner.usesOptionalLibraries == null) {
+                            owner.usesOptionalLibraries = new ArrayList<String>();
+                        }
+                        if (!owner.usesOptionalLibraries.contains(lname)) {
+                            owner.usesOptionalLibraries.add(lname.intern());
+                        }
+                    }
                 }
 
                 XmlUtils.skipCurrentTag(parser);
 
             } else {
                 if (!RIGID_PARSER) {
-                    Log.w(TAG, "Problem in package " + mArchiveSourcePath + ":");
-                    Log.w(TAG, "Unknown element under <application>: " + tagName);
+                    Log.w(TAG, "Unknown element under <application>: " + tagName
+                            + " at " + mArchiveSourcePath + " "
+                            + parser.getPositionDescription());
                     XmlUtils.skipCurrentTag(parser);
                     continue;
                 } else {
@@ -1491,25 +1581,6 @@ public class PackageParser {
         return true;
     }
 
-    private boolean parseComponentInfo(Package owner, int flags,
-            ComponentInfo outInfo, String[] outError, String tag, TypedArray sa,
-            int nameRes, int labelRes, int iconRes, int processRes,
-            int enabledRes) {
-        if (!parsePackageItemInfo(owner, outInfo, outError, tag, sa,
-                nameRes, labelRes, iconRes)) {
-            return false;
-        }
-
-        if (processRes != 0) {
-            outInfo.processName = buildProcessName(owner.applicationInfo.packageName,
-                    owner.applicationInfo.processName, sa.getNonResourceString(processRes),
-                    flags, mSeparateProcesses, outError);
-        }
-        outInfo.enabled = sa.getBoolean(enabledRes, true);
-
-        return outError[0] == null;
-    }
-    
     private Activity parseActivity(Package owner, Resources res,
             XmlPullParser parser, AttributeSet attrs, int flags, String[] outError,
             boolean receiver) throws XmlPullParserException, IOException {
@@ -1609,6 +1680,12 @@ public class PackageParser {
             a.info.flags |= ActivityInfo.FLAG_ALLOW_TASK_REPARENTING;
         }
 
+        if (sa.getBoolean(
+                com.android.internal.R.styleable.AndroidManifestActivity_finishOnCloseSystemDialogs,
+                false)) {
+            a.info.flags |= ActivityInfo.FLAG_FINISH_ON_CLOSE_SYSTEM_DIALOGS;
+        }
+
         if (!receiver) {
             a.info.launchMode = sa.getInt(
                     com.android.internal.R.styleable.AndroidManifestActivity_launchMode,
@@ -1648,8 +1725,9 @@ public class PackageParser {
                     return null;
                 }
                 if (intent.countActions() == 0) {
-                    Log.w(TAG, "Intent filter for activity " + intent
-                            + " defines no actions");
+                    Log.w(TAG, "No actions in intent filter at "
+                            + mArchiveSourcePath + " "
+                            + parser.getPositionDescription());
                 } else {
                     a.intents.add(intent);
                 }
@@ -1662,9 +1740,13 @@ public class PackageParser {
                 if (!RIGID_PARSER) {
                     Log.w(TAG, "Problem in package " + mArchiveSourcePath + ":");
                     if (receiver) {
-                        Log.w(TAG, "Unknown element under <receiver>: " + parser.getName());
+                        Log.w(TAG, "Unknown element under <receiver>: " + parser.getName()
+                                + " at " + mArchiveSourcePath + " "
+                                + parser.getPositionDescription());
                     } else {
-                        Log.w(TAG, "Unknown element under <activity>: " + parser.getName());
+                        Log.w(TAG, "Unknown element under <activity>: " + parser.getName()
+                                + " at " + mArchiveSourcePath + " "
+                                + parser.getPositionDescription());
                     }
                     XmlUtils.skipCurrentTag(parser);
                     continue;
@@ -1792,8 +1874,9 @@ public class PackageParser {
                     return null;
                 }
                 if (intent.countActions() == 0) {
-                    Log.w(TAG, "Intent filter for activity alias " + intent
-                            + " defines no actions");
+                    Log.w(TAG, "No actions in intent filter at "
+                            + mArchiveSourcePath + " "
+                            + parser.getPositionDescription());
                 } else {
                     a.intents.add(intent);
                 }
@@ -1804,8 +1887,9 @@ public class PackageParser {
                 }
             } else {
                 if (!RIGID_PARSER) {
-                    Log.w(TAG, "Problem in package " + mArchiveSourcePath + ":");
-                    Log.w(TAG, "Unknown element under <activity-alias>: " + parser.getName());
+                    Log.w(TAG, "Unknown element under <activity-alias>: " + parser.getName()
+                            + " at " + mArchiveSourcePath + " "
+                            + parser.getPositionDescription());
                     XmlUtils.skipCurrentTag(parser);
                     continue;
                 }
@@ -1968,8 +2052,9 @@ public class PackageParser {
                     outInfo.info.grantUriPermissions = true;
                 } else {
                     if (!RIGID_PARSER) {
-                        Log.w(TAG, "Problem in package " + mArchiveSourcePath + ":");
-                        Log.w(TAG, "No path, pathPrefix, or pathPattern for <path-permission>");
+                        Log.w(TAG, "Unknown element under <path-permission>: "
+                                + parser.getName() + " at " + mArchiveSourcePath + " "
+                                + parser.getPositionDescription());
                         XmlUtils.skipCurrentTag(parser);
                         continue;
                     }
@@ -2009,8 +2094,9 @@ public class PackageParser {
 
                 if (!havePerm) {
                     if (!RIGID_PARSER) {
-                        Log.w(TAG, "Problem in package " + mArchiveSourcePath + ":");
-                        Log.w(TAG, "No readPermission or writePermssion for <path-permission>");
+                        Log.w(TAG, "No readPermission or writePermssion for <path-permission>: "
+                                + parser.getName() + " at " + mArchiveSourcePath + " "
+                                + parser.getPositionDescription());
                         XmlUtils.skipCurrentTag(parser);
                         continue;
                     }
@@ -2054,8 +2140,9 @@ public class PackageParser {
                     }
                 } else {
                     if (!RIGID_PARSER) {
-                        Log.w(TAG, "Problem in package " + mArchiveSourcePath + ":");
-                        Log.w(TAG, "No path, pathPrefix, or pathPattern for <path-permission>");
+                        Log.w(TAG, "No path, pathPrefix, or pathPattern for <path-permission>: "
+                                + parser.getName() + " at " + mArchiveSourcePath + " "
+                                + parser.getPositionDescription());
                         XmlUtils.skipCurrentTag(parser);
                         continue;
                     }
@@ -2066,9 +2153,9 @@ public class PackageParser {
 
             } else {
                 if (!RIGID_PARSER) {
-                    Log.w(TAG, "Problem in package " + mArchiveSourcePath + ":");
                     Log.w(TAG, "Unknown element under <provider>: "
-                            + parser.getName());
+                            + parser.getName() + " at " + mArchiveSourcePath + " "
+                            + parser.getPositionDescription());
                     XmlUtils.skipCurrentTag(parser);
                     continue;
                 }
@@ -2146,9 +2233,9 @@ public class PackageParser {
                 }
             } else {
                 if (!RIGID_PARSER) {
-                    Log.w(TAG, "Problem in package " + mArchiveSourcePath + ":");
                     Log.w(TAG, "Unknown element under <service>: "
-                            + parser.getName());
+                            + parser.getName() + " at " + mArchiveSourcePath + " "
+                            + parser.getPositionDescription());
                     XmlUtils.skipCurrentTag(parser);
                     continue;
                 }
@@ -2185,9 +2272,9 @@ public class PackageParser {
                 }
             } else {
                 if (!RIGID_PARSER) {
-                    Log.w(TAG, "Problem in package " + mArchiveSourcePath + ":");
                     Log.w(TAG, "Unknown element under " + tag + ": "
-                            + parser.getName());
+                            + parser.getName() + " at " + mArchiveSourcePath + " "
+                            + parser.getPositionDescription());
                     XmlUtils.skipCurrentTag(parser);
                     continue;
                 }
@@ -2243,8 +2330,9 @@ public class PackageParser {
                     data.putFloat(name, v.getFloat());
                 } else {
                     if (!RIGID_PARSER) {
-                        Log.w(TAG, "Problem in package " + mArchiveSourcePath + ":");
-                        Log.w(TAG, "<meta-data> only supports string, integer, float, color, boolean, and resource reference types");
+                        Log.w(TAG, "<meta-data> only supports string, integer, float, color, boolean, and resource reference types: "
+                                + parser.getName() + " at " + mArchiveSourcePath + " "
+                                + parser.getPositionDescription());
                     } else {
                         outError[0] = "<meta-data> only supports string, integer, float, color, boolean, and resource reference types";
                         data = null;
@@ -2278,6 +2366,7 @@ public class PackageParser {
                 com.android.internal.R.styleable.AndroidManifestIntentFilter_priority, 0);
         if (priority > 0 && isActivity && (flags&PARSE_IS_SYSTEM) == 0) {
             Log.w(TAG, "Activity with priority > 0, forcing to 0 at "
+                    + mArchiveSourcePath + " "
                     + parser.getPositionDescription());
             priority = 0;
         }
@@ -2375,8 +2464,9 @@ public class PackageParser {
                 sa.recycle();
                 XmlUtils.skipCurrentTag(parser);
             } else if (!RIGID_PARSER) {
-                Log.w(TAG, "Problem in package " + mArchiveSourcePath + ":");
-                Log.w(TAG, "Unknown element under <intent-filter>: " + parser.getName());
+                Log.w(TAG, "Unknown element under <intent-filter>: "
+                        + parser.getName() + " at " + mArchiveSourcePath + " "
+                        + parser.getPositionDescription());
                 XmlUtils.skipCurrentTag(parser);
             } else {
                 outError[0] = "Bad element under <intent-filter>: " + parser.getName();
@@ -2416,7 +2506,8 @@ public class PackageParser {
 
         public ArrayList<String> protectedBroadcasts;
         
-        public final ArrayList<String> usesLibraries = new ArrayList<String>();
+        public ArrayList<String> usesLibraries = null;
+        public ArrayList<String> usesOptionalLibraries = null;
         public String[] usesLibraryFiles = null;
 
         // We store the application meta-data independently to avoid multiple unwanted references
@@ -2463,6 +2554,11 @@ public class PackageParser {
          */
         public final ArrayList<ConfigurationInfo> configPreferences =
                 new ArrayList<ConfigurationInfo>();
+
+        /*
+         *  Applications requested features
+         */
+        public ArrayList<FeatureInfo> reqFeatures = null;
 
         public Package(String _name) {
             packageName = _name;

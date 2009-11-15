@@ -18,8 +18,8 @@
 #define ANDROID_HARDWARE_ICAMERASERVICE_H
 
 #include <utils/RefBase.h>
-#include <utils/IInterface.h>
-#include <utils/Parcel.h>
+#include <binder/IInterface.h>
+#include <binder/Parcel.h>
 
 #include <ui/ICameraClient.h>
 #include <ui/ICamera.h>

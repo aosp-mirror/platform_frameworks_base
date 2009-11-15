@@ -83,7 +83,7 @@ public final class Gmail {
     public static final String LABEL_OUTBOX = "^^out";
 
     public static final String AUTHORITY = "gmail-ls";
-    private static final String TAG = "gmail-ls";
+    private static final String TAG = "Gmail";
     private static final String AUTHORITY_PLUS_CONVERSATIONS =
             "content://" + AUTHORITY + "/conversations/";
     private static final String AUTHORITY_PLUS_LABELS =
@@ -1521,8 +1521,9 @@ public final class Gmail {
 
         /**
          * Returns the number of conversation with a given label.
-         * @deprecated
+         * @deprecated Use {@link #getLabelId} instead.
          */
+        @Deprecated
         public int getNumConversations(String label) {
             return getNumConversations(getLabelId(label));
         }
@@ -1534,8 +1535,9 @@ public final class Gmail {
 
         /**
          * Returns the number of unread conversation with a given label.
-         * @deprecated
+         * @deprecated Use {@link #getLabelId} instead.
          */
+        @Deprecated
         public int getNumUnreadConversations(String label) {
             return getNumUnreadConversations(getLabelId(label));
         }
@@ -1546,11 +1548,12 @@ public final class Gmail {
                     getLabelIdValues(labelId).getAsInteger(LabelColumns.NUM_UNREAD_CONVERSATIONS);
             // There seems to be a race condition here that can get the label maps into a bad
             // state and lose state on a particular label.
-            if (unreadConversations == null) {
-                return 0;
-            } else {
-                return unreadConversations;
+            int result = 0;
+            if (unreadConversations != null) {
+                result = unreadConversations < 0 ? 0 : unreadConversations;
             }
+
+            return result;
         }
 
         /**
@@ -2040,8 +2043,9 @@ public final class Gmail {
         }
 
         /**
-         * @deprecated
+         * @deprecated Always returns true.
          */
+        @Deprecated
         public boolean getExpanded() {
             return true;
         }

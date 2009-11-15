@@ -24,7 +24,7 @@ import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.provider.Contacts;
+import android.provider.ContactsContract.PhoneLookup;
 import android.telephony.PhoneNumberUtils;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
@@ -37,7 +37,7 @@ import android.util.Log;
 public class CallerInfoAsyncQuery {
 
     private static final boolean DBG = false;
-    private static final String LOG_TAG = "PHONE";
+    private static final String LOG_TAG = "CallerInfoAsyncQuery";
 
     private static final int EVENT_NEW_QUERY = 1;
     private static final int EVENT_ADD_LISTENER = 2;
@@ -46,9 +46,6 @@ public class CallerInfoAsyncQuery {
     private static final int EVENT_VOICEMAIL_NUMBER = 5;
 
     private CallerInfoAsyncQueryHandler mHandler;
-
-    // Don't keep checking VM if it's going to throw an exception for this proc.
-    private static boolean sSkipVmCheck = false;
 
     /**
      * Interface for a CallerInfoAsyncQueryHandler result return.
@@ -223,26 +220,11 @@ public class CallerInfoAsyncQuery {
                 // voicemail number, and adjust other data (including photoResource)
                 // accordingly.
                 if (cw.event == EVENT_EMERGENCY_NUMBER) {
-                    mCallerInfo = new CallerInfo();
                     // Note we're setting the phone number here (refer to javadoc
                     // comments at the top of CallerInfo class).
-                    mCallerInfo.phoneNumber = mQueryContext.getString(com.android.internal
-                            .R.string.emergency_call_dialog_number_for_display);
-                    mCallerInfo.photoResource = com.android.internal.R.drawable.picture_emergency;
-
+                    mCallerInfo = new CallerInfo().markAsEmergency(mQueryContext);
                 } else if (cw.event == EVENT_VOICEMAIL_NUMBER) {
-                    mCallerInfo = new CallerInfo();
-                    try {
-                        // Note we're setting the phone number here (refer to javadoc
-                        // comments at the top of CallerInfo class).
-                        mCallerInfo.phoneNumber =
-                                TelephonyManager.getDefault().getVoiceMailAlphaTag();
-                    } catch (SecurityException ex) {
-                        // Should never happen: if this process does not have
-                        // permission to retrieve VM tag, it should not have
-                        // permission to retrieve VM number and would not generate
-                        // an EVENT_VOICEMAIL_NUMBER.  But if it happens, don't crash.
-                    }
+                    mCallerInfo = new CallerInfo().markAsVoiceMail();
                 } else {
                     mCallerInfo = CallerInfo.getCallerInfo(mQueryContext, mQueryUri, cursor);
                     // Use the number entered by the user for display.
@@ -262,7 +244,7 @@ public class CallerInfoAsyncQuery {
             //notify the listener that the query is complete.
             if (cw.listener != null) {
                 if (DBG) log("notifying listener: " + cw.listener.getClass().toString() +
-                        " for token: " + token);
+                             " for token: " + token + mCallerInfo);
                 cw.listener.onQueryComplete(token, cw.cookie, mCallerInfo);
             }
         }
@@ -303,7 +285,7 @@ public class CallerInfoAsyncQuery {
     public static CallerInfoAsyncQuery startQuery(int token, Context context, String number,
             OnQueryCompleteListener listener, Object cookie) {
         //contruct the URI object and start Query.
-        Uri contactRef = Uri.withAppendedPath(Contacts.Phones.CONTENT_FILTER_URL, number);
+        Uri contactRef = Uri.withAppendedPath(PhoneLookup.CONTENT_FILTER_URI, Uri.encode(number));
 
         CallerInfoAsyncQuery c = new CallerInfoAsyncQuery();
         c.allocate(context, contactRef);
@@ -319,23 +301,10 @@ public class CallerInfoAsyncQuery {
         // check to see if these are recognized numbers, and use shortcuts if we can.
         if (PhoneNumberUtils.isEmergencyNumber(number)) {
             cw.event = EVENT_EMERGENCY_NUMBER;
+        } else if (PhoneNumberUtils.isVoiceMailNumber(number)) {
+            cw.event = EVENT_VOICEMAIL_NUMBER;
         } else {
-            String vmNumber = null;
-            if (!sSkipVmCheck){
-                try {
-                    vmNumber = TelephonyManager.getDefault().getVoiceMailNumber();
-                } catch (SecurityException ex) {
-                    // Don't crash if this process doesn't have permission to
-                    // retrieve VM number.  It's still allowed to look up caller info.
-                    // But don't try it again.
-                    sSkipVmCheck = true;
-                }
-            }
-            if (PhoneNumberUtils.compare(number, vmNumber)) {
-                cw.event = EVENT_VOICEMAIL_NUMBER;
-            } else {
-                cw.event = EVENT_NEW_QUERY;
-            }
+            cw.event = EVENT_NEW_QUERY;
         }
 
         c.mHandler.startQuery (token, cw, contactRef, null, null, null, null);
@@ -390,4 +359,3 @@ public class CallerInfoAsyncQuery {
         Log.d(LOG_TAG, msg);
     }
 }
-

@@ -1740,7 +1740,11 @@ bool ResTable::getResourceName(uint32_t resID, resource_name* outName) const
     const int e = Res_GETENTRY(resID);
 
     if (p < 0) {
-        LOGW("No package identifier when getting name for resource number 0x%08x", resID);
+        if (Res_GETPACKAGE(resID)+1 == 0) {
+            LOGW("No package identifier when getting name for resource number 0x%08x", resID);
+        } else {
+            LOGW("Resources don't contain package for resource number 0x%08x", resID);
+        }
         return false;
     }
     if (t < 0) {
@@ -1786,7 +1790,11 @@ ssize_t ResTable::getResource(uint32_t resID, Res_value* outValue, bool mayBeBag
     const int e = Res_GETENTRY(resID);
 
     if (p < 0) {
-        LOGW("No package identifier when getting value for resource number 0x%08x", resID);
+        if (Res_GETPACKAGE(resID)+1 == 0) {
+            LOGW("No package identifier when getting name for resource number 0x%08x", resID);
+        } else {
+            LOGW("Resources don't contain package for resource number 0x%08x", resID);
+        }
         return BAD_INDEX;
     }
     if (t < 0) {
@@ -3284,7 +3292,16 @@ bool ResTable::collectString(String16* outString,
                     break;
                 }
                 if (c == '\'' && (quoted == 0 || quoted == '\'')) {
-                    break;
+                    /*
+                     * In practice, when people write ' instead of \'
+                     * in a string, they are doing it by accident
+                     * instead of really meaning to use ' as a quoting
+                     * character.  Warn them so they don't lose it.
+                     */
+                    if (outErrorMsg) {
+                        *outErrorMsg = "Apostrophe not preceded by \\";
+                    }
+                    return false;
                 }
             }
             p++;

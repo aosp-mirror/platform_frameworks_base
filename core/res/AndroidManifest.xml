@@ -25,7 +25,7 @@
     <!-- Special broadcasts that only the system can send -->
     <!-- ================================================ -->
     <eat-comment />
-    
+
     <protected-broadcast android:name="android.intent.action.SCREEN_OFF" />
     <protected-broadcast android:name="android.intent.action.SCREEN_ON" />
     <protected-broadcast android:name="android.intent.action.USER_PRESENT" />
@@ -51,12 +51,33 @@
     <protected-broadcast android:name="android.intent.action.DEVICE_STORAGE_OK" />
     <protected-broadcast android:name="android.intent.action.NEW_OUTGOING_CALL" />
     <protected-broadcast android:name="android.intent.action.REBOOT" />
-    
+
+    <protected-broadcast android:name="android.backup.intent.RUN" />
+    <protected-broadcast android:name="android.backup.intent.CLEAR" />
+    <protected-broadcast android:name="android.backup.intent.INIT" />
+
+    <protected-broadcast android:name="android.bluetooth.adapter.action.STATE_CHANGED" />
+    <protected-broadcast android:name="android.bluetooth.adapter.action.SCAN_MODE_CHANGED" />
+    <protected-broadcast android:name="android.bluetooth.adapter.action.DISCOVERY_STARTED" />
+    <protected-broadcast android:name="android.bluetooth.adapter.action.DISCOVERY_FINISHED" />
+    <protected-broadcast android:name="android.bluetooth.adapter.action.LOCAL_NAME_CHANGED" />
+    <protected-broadcast android:name="android.bluetooth.device.action.FOUND" />
+    <protected-broadcast android:name="android.bluetooth.device.action.DISAPPEARED" />
+    <protected-broadcast android:name="android.bluetooth.device.action.CLASS_CHANGED" />
+    <protected-broadcast android:name="android.bluetooth.device.action.ACL_CONNECTED" />
+    <protected-broadcast android:name="android.bluetooth.device.action.ACL_DISCONNECT_REQUESTED" />
+    <protected-broadcast android:name="android.bluetooth.device.action.ACL_DISCONNECTED" />
+    <protected-broadcast android:name="android.bluetooth.device.action.NAME_CHANGED" />
+    <protected-broadcast android:name="android.bluetooth.device.action.BOND_STATE_CHANGED" />
+    <protected-broadcast android:name="android.bluetooth.device.action.NAME_FAILED" />
+    <protected-broadcast android:name="android.bluetooth.device.action.PAIRING_REQUEST" />
+    <protected-broadcast android:name="android.bluetooth.device.action.PAIRING_CANCEL" />
+
     <!-- ====================================== -->
     <!-- Permissions for things that cost money -->
     <!-- ====================================== -->
     <eat-comment />
-    
+
     <!-- Used for permissions that can be used to make the user spend money
          without their direct involvement.  For example, this is the group
          for permissions that allow you to directly place phone calls,
@@ -85,7 +106,7 @@
     <!-- Permissions for accessing messages -->
     <!-- ================================== -->
     <eat-comment />
-    
+
     <!-- Used for permissions that allow an application to send messages
          on behalf of the user or intercept messages being received by the
          user.  This is primarily intended for SMS/MMS messaging, such as
@@ -135,7 +156,7 @@
     <!-- Permissions for accessing personal info (contacts and calendar) -->
     <!-- =============================================================== -->
     <eat-comment />
-    
+
     <!-- Used for permissions that provide access to the user's private data,
          such as contacts, calendar events, e-mail messages, etc.  This includes
          both reading and writing of this data (which should generally be
@@ -189,8 +210,8 @@
         android:description="@string/permdesc_writeCalendar" />
 
     <!-- Allows an application to read the user dictionary. This should
-         really only be required by an IME, or a dictionary editor like 
-         the Settings app. 
+         really only be required by an IME, or a dictionary editor like
+         the Settings app.
          @hide Pending API council approval -->
     <permission android:name="android.permission.READ_USER_DICTIONARY"
         android:permissionGroup="android.permission-group.PERSONAL_INFO"
@@ -226,7 +247,7 @@
     <!-- Permissions for accessing location info -->
     <!-- ======================================= -->
     <eat-comment />
-    
+
     <!-- Used for permissions that allow access to the user's current
          location. -->
     <permission-group android:name="android.permission-group.LOCATION"
@@ -271,7 +292,7 @@
     <!-- Permissions for accessing networks -->
     <!-- ======================================= -->
     <eat-comment />
-    
+
     <!-- Used for permissions that provide access to networking services.  The
          main permission here is internet access, but this is also an
          appropriate group for accessing or modifying any network configuration
@@ -308,16 +329,21 @@
         android:description="@string/permdesc_bluetooth"
         android:label="@string/permlab_bluetooth" />
 
+    <!-- Allows applications to call into AccountAuthenticators. Only
+    the system can get this permission. -->
+    <permission android:name="android.permission.ACCOUNT_MANAGER"
+        android:permissionGroup="android.permission-group.ACCOUNTS"
+        android:protectionLevel="signature"
+        android:description="@string/permdesc_accountManagerService"
+        android:label="@string/permlab_accountManagerService" />
+
     <!-- ================================== -->
     <!-- Permissions for accessing accounts -->
     <!-- ================================== -->
     <eat-comment />
-    
-    <!-- Permissions for direct access to Google accounts.
-         Note that while right now this is only used for Google accounts,
-         we expect in the future to have a more general account management
-         facility so this is specified as a general platform permission
-         group for accessing accounts. -->
+
+    <!-- Permissions for direct access to the accounts managed
+         by the Account Manager. -->
     <permission-group android:name="android.permission-group.ACCOUNTS"
         android:label="@string/permgrouplab_accounts"
         android:description="@string/permgroupdesc_accounts" />
@@ -329,11 +355,33 @@
         android:description="@string/permdesc_getAccounts"
         android:label="@string/permlab_getAccounts" />
 
+    <!-- Allows an application to act as an AccountAuthenticator for
+         the AccountManager -->
+    <permission android:name="android.permission.AUTHENTICATE_ACCOUNTS"
+        android:permissionGroup="android.permission-group.ACCOUNTS"
+        android:protectionLevel="dangerous"
+        android:label="@string/permlab_authenticateAccounts"
+        android:description="@string/permdesc_authenticateAccounts" />
+
+    <!-- Allows an application to request authtokens from the AccountManager -->
+    <permission android:name="android.permission.USE_CREDENTIALS"
+        android:permissionGroup="android.permission-group.ACCOUNTS"
+        android:protectionLevel="dangerous"
+        android:label="@string/permlab_useCredentials"
+        android:description="@string/permdesc_useCredentials" />
+
+    <!-- Allows an application to manage the list of accounts in the AccountManager -->
+    <permission android:name="android.permission.MANAGE_ACCOUNTS"
+        android:permissionGroup="android.permission-group.ACCOUNTS"
+        android:protectionLevel="dangerous"
+        android:label="@string/permlab_manageAccounts"
+        android:description="@string/permdesc_manageAccounts" />
+
     <!-- ================================== -->
     <!-- Permissions for accessing hardware -->
     <!-- ================================== -->
     <eat-comment />
-    
+
     <!-- Used for permissions that provide direct access to the hardware on
          the device.  This includes audio, the camera, vibrator, etc. -->
     <permission-group android:name="android.permission-group.HARDWARE_CONTROLS"
@@ -386,7 +434,7 @@
     <!-- Permissions associated with telephony state -->
     <!-- =========================================== -->
     <eat-comment />
-    
+
     <!-- Used for permissions that are associated with accessing and modifyign
          telephony state: intercepting outgoing calls, reading
          and modifying the phone state.  Note that
@@ -440,7 +488,7 @@
     <!-- Permissions for low-level system interaction -->
     <!-- ============================================ -->
     <eat-comment />
-    
+
     <!-- Group of permissions that are related to system APIs.  Many
          of these are not permissions the user will be expected to understand,
          and such permissions should generally be marked as "normal" protection
@@ -664,7 +712,7 @@
                 android:description="@string/permdesc_writeApnSettings"
                 android:label="@string/permlab_writeApnSettings" />
 
-    <!-- Allows an application to allow access the subscribed feeds 
+    <!-- Allows an application to allow access the subscribed feeds
          ContentProvider. -->
     <permission android:name="android.permission.SUBSCRIBED_FEEDS_READ"
         android:permissionGroup="android.permission-group.SYSTEM_TOOLS"
@@ -676,7 +724,7 @@
         android:label="@string/permlab_subscribedFeedsWrite"
         android:description="@string/permdesc_subscribedFeedsWrite"
         android:protectionLevel="dangerous" />
-        
+
     <!-- Allows applications to change network connectivity state -->
     <permission android:name="android.permission.CHANGE_NETWORK_STATE"
         android:permissionGroup="android.permission-group.SYSTEM_TOOLS"
@@ -727,7 +775,7 @@
     <!-- Permissions for special development tools -->
     <!-- ========================================= -->
     <eat-comment />
-    
+
     <!-- Group of permissions that are related to development features.  These
          are not permissions that should appear in normal applications; they
          protect APIs that are intended only to be used for development
@@ -863,6 +911,14 @@
         android:description="@string/permdesc_bindInputMethod"
         android:protectionLevel="signature" />
 
+    <!-- Must be required by wallpaper services, to ensure that only the
+         system can bind to them.
+         @hide Live Wallpaper -->
+    <permission android:name="android.permission.BIND_WALLPAPER"
+        android:label="@string/permlab_bindWallpaper"
+        android:description="@string/permdesc_bindWallpaper"
+        android:protectionLevel="signatureOrSystem" />
+
     <!-- Allows low-level access to setting the orientation (actually
          rotation) of the screen.  Not for use by normal applications. -->
     <permission android:name="android.permission.SET_ORIENTATION"
@@ -974,6 +1030,12 @@
         android:description="@string/permdesc_callPrivileged"
         android:protectionLevel="signatureOrSystem" />
 
+    <!-- Allows an application to perform CDMA OTA provisioning @hide -->
+    <permission android:name="android.permission.PERFORM_CDMA_PROVISIONING"
+        android:label="@string/permlab_performCdmaProvisioning"
+        android:description="@string/permdesc_performCdmaProvisioning"
+        android:protectionLevel="signatureOrSystem" />
+
     <!-- Allows enabling/disabling location update notifications from
          the radio. Not for use by normal applications. -->
     <permission android:name="android.permission.CONTROL_LOCATION_UPDATES"
@@ -1006,6 +1068,13 @@
     <permission android:name="android.permission.BACKUP"
         android:label="@string/permlab_backup"
         android:description="@string/permdesc_backup"
+        android:protectionLevel="signatureOrSystem" />
+
+    <!-- Allows an application to participate in the backup and restore process
+         @hide -->
+    <permission android:name="android.permission.BACKUP_DATA"
+        android:label="@string/permlab_backup_data"
+        android:description="@string/permdesc_backup_data"
         android:protectionLevel="signatureOrSystem" />
 
     <!-- Allows an application to tell the AppWidget service which application
@@ -1051,15 +1120,24 @@
         android:permissionGroup="android.permission-group.SYSTEM_TOOLS"
         android:protectionLevel="signature" />
 
+    <!-- Allows applications to set a live wallpaper.
+         @hide XXX Change to signature once the picker is moved to its
+         own apk as Ghod Intended. -->
+    <permission android:name="android.permission.SET_WALLPAPER_COMPONENT"
+        android:permissionGroup="android.permission-group.SYSTEM_TOOLS"
+        android:protectionLevel="signatureOrSystem" />
+
     <application android:process="system"
                  android:persistent="true"
                  android:hasCode="false"
                  android:label="@string/android_system_label"
                  android:allowClearUserData="false"
-                 android:backupAgent="com.android.internal.backup.SystemBackupAgent"
+                 android:backupAgent="com.android.server.SystemBackupAgent"
+                 android:killAfterRestore="false"
                  android:icon="@drawable/ic_launcher_android">
         <activity android:name="com.android.internal.app.ChooserActivity"
                 android:theme="@style/Theme.Dialog.Alert"
+                android:finishOnCloseSystemDialogs="true"
                 android:excludeFromRecents="true"
                 android:multiprocess="true">
             <intent-filter>
@@ -1089,8 +1167,35 @@
                 android:excludeFromRecents="true">
         </activity>
 
+        <activity android:name="android.accounts.ChooseAccountActivity"
+                android:excludeFromRecents="true"
+                android:exported="true">
+        </activity>
+
+        <activity android:name="android.accounts.GrantCredentialsPermissionActivity"
+                android:excludeFromRecents="true"
+                android:exported="true">
+        </activity>
+
+        <activity android:name="com.android.server.ShutdownActivity"
+            android:permission="android.permission.SHUTDOWN"
+            android:excludeFromRecents="true">
+            <intent-filter>
+                <action android:name="android.intent.action.ACTION_REQUEST_SHUTDOWN" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        <activity android:name="com.android.internal.app.NetInitiatedActivity"
+                android:theme="@style/Theme.Dialog.Alert"
+                android:excludeFromRecents="true">
+        </activity>
+
         <service android:name="com.android.server.LoadAverageService"
-            android:exported="true" />
+                android:exported="true" />
+
+        <service android:name="com.android.internal.service.wallpaper.ImageWallpaper"
+                android:permission="android.permission.BIND_WALLPAPER">
+        </service>
 
         <receiver android:name="com.android.server.BootReceiver" >
             <intent-filter>
@@ -1101,7 +1206,7 @@
         <receiver android:name="com.android.server.MasterClearReceiver"
             android:permission="android.permission.MASTER_CLEAR" >
             <intent-filter>
-                <action android:name="android.intent.action.GTALK_DATA_MESSAGE_RECEIVED" />
+                <action android:name="android.intent.action.REMOTE_INTENT" />
                 <category android:name="android.intent.category.MASTER_CLEAR" />
             </intent-filter>
         </receiver>

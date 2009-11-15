@@ -27,7 +27,7 @@ import android.os.Handler;
 import java.util.HashMap;
 
 /**
- * The IM provider stores all information about roster contacts, chat messages, presence, etc.
+ * The GTalk provider stores all information about roster contacts, chat messages, presence, etc.
  *
  * @hide
  */
@@ -38,7 +38,7 @@ public class Im {
     private Im() {}
 
     /**
-     * The Columns for IM providers (i.e. AIM, Y!, GTalk)
+     * The Columns for IM providers
      */
     public interface ProviderColumns {
         /**
@@ -138,6 +138,7 @@ public class Im {
         public static final String ACTIVE_ACCOUNT_USERNAME = "account_username";
         public static final String ACTIVE_ACCOUNT_PW = "account_pw";
         public static final String ACTIVE_ACCOUNT_LOCKED = "account_locked";
+        public static final String ACTIVE_ACCOUNT_KEEP_SIGNED_IN = "account_keepSignedIn";
         public static final String ACCOUNT_PRESENCE_STATUS = "account_presenceStatus";
         public static final String ACCOUNT_CONNECTION_STATUS = "account_connStatus";
 
@@ -145,20 +146,20 @@ public class Im {
          * The content:// style URL for this table
          */
         public static final Uri CONTENT_URI =
-            Uri.parse("content://im/providers");
+            Uri.parse("content://com.google.android.providers.talk/providers");
 
         public static final Uri CONTENT_URI_WITH_ACCOUNT =
-            Uri.parse("content://im/providers/account");
+            Uri.parse("content://com.google.android.providers.talk/providers/account");
 
         /**
          * The MIME type of {@link #CONTENT_URI} providing a directory of
          * people.
          */
         public static final String CONTENT_TYPE =
-                "vnd.android.cursor.dir/im-providers";
+                "vnd.android.cursor.dir/gtalk-providers";
 
         public static final String CONTENT_ITEM_TYPE =
-                "vnd.android.cursor.item/im-providers";
+                "vnd.android.cursor.item/gtalk-providers";
 
         /**
          * The default sort order for this table
@@ -252,21 +253,21 @@ public class Im {
          * The content:// style URL for this table
          */
         public static final Uri CONTENT_URI =
-            Uri.parse("content://im/accounts");
+            Uri.parse("content://com.google.android.providers.talk/accounts");
 
         /**
          * The MIME type of {@link #CONTENT_URI} providing a directory of
          * account.
          */
         public static final String CONTENT_TYPE =
-                "vnd.android.cursor.dir/im-accounts";
+                "vnd.android.cursor.dir/gtalk-accounts";
 
         /**
          * The MIME type of a {@link #CONTENT_URI} subdirectory of a single
          * account.
          */
         public static final String CONTENT_ITEM_TYPE =
-                "vnd.android.cursor.item/im-accounts";
+                "vnd.android.cursor.item/gtalk-accounts";
 
         /**
          * The default sort order for this table
@@ -325,19 +326,19 @@ public class Im {
          * The content:// style URL for this table
          */
         public static final Uri CONTENT_URI =
-            Uri.parse("content://im/accountStatus");
+            Uri.parse("content://com.google.android.providers.talk/accountStatus");
 
         /**
          * The MIME type of {@link #CONTENT_URI} providing a directory of account status.
          */
         public static final String CONTENT_TYPE =
-                "vnd.android.cursor.dir/im-account-status";
+                "vnd.android.cursor.dir/gtalk-account-status";
 
         /**
          * The MIME type of a {@link #CONTENT_URI} subdirectory of a single account status.
          */
         public static final String CONTENT_ITEM_TYPE =
-                "vnd.android.cursor.item/im-account-status";
+                "vnd.android.cursor.item/gtalk-account-status";
 
         /**
          * The default sort order for this table
@@ -521,83 +522,83 @@ public class Im {
          * The content:// style URL for this table
          */
         public static final Uri CONTENT_URI =
-            Uri.parse("content://im/contacts");
+            Uri.parse("content://com.google.android.providers.talk/contacts");
 
         /**
          * The content:// style URL for contacts joined with presence
          */
         public static final Uri CONTENT_URI_WITH_PRESENCE =
-            Uri.parse("content://im/contactsWithPresence");
+            Uri.parse("content://com.google.android.providers.talk/contactsWithPresence");
 
         /**
          * The content:// style URL for barebone contacts, not joined with any other table
          */
         public static final Uri CONTENT_URI_CONTACTS_BAREBONE =
-            Uri.parse("content://im/contactsBarebone");
+            Uri.parse("content://com.google.android.providers.talk/contactsBarebone");
 
         /**
          * The content:// style URL for contacts who have an open chat session
          */
         public static final Uri CONTENT_URI_CHAT_CONTACTS =
-            Uri.parse("content://im/contacts/chatting");
+            Uri.parse("content://com.google.android.providers.talk/contacts_chatting");
 
         /**
          * The content:// style URL for contacts who have been blocked
          */
         public static final Uri CONTENT_URI_BLOCKED_CONTACTS =
-            Uri.parse("content://im/contacts/blocked");
+            Uri.parse("content://com.google.android.providers.talk/contacts/blocked");
 
         /**
          * The content:// style URL for contacts by provider and account
          */
         public static final Uri CONTENT_URI_CONTACTS_BY =
-            Uri.parse("content://im/contacts");
+            Uri.parse("content://com.google.android.providers.talk/contacts");
 
         /**
          * The content:// style URL for contacts by provider and account,
          * and who have an open chat session
          */
         public static final Uri CONTENT_URI_CHAT_CONTACTS_BY =
-            Uri.parse("content://im/contacts/chatting");
+            Uri.parse("content://com.google.android.providers.talk/contacts/chatting");
 
         /**
          * The content:// style URL for contacts by provider and account,
          * and who are online
          */
         public static final Uri CONTENT_URI_ONLINE_CONTACTS_BY =
-            Uri.parse("content://im/contacts/online");
+            Uri.parse("content://com.google.android.providers.talk/contacts/online");
 
         /**
          * The content:// style URL for contacts by provider and account,
          * and who are offline
          */
         public static final Uri CONTENT_URI_OFFLINE_CONTACTS_BY =
-            Uri.parse("content://im/contacts/offline");
+            Uri.parse("content://com.google.android.providers.talk/contacts/offline");
 
         /**
          * The content:// style URL for operations on bulk contacts
          */
         public static final Uri BULK_CONTENT_URI =
-                Uri.parse("content://im/bulk_contacts");
+                Uri.parse("content://com.google.android.providers.talk/bulk_contacts");
 
         /**
          * The content:// style URL for the count of online contacts in each
          * contact list by provider and account.
          */
         public static final Uri CONTENT_URI_ONLINE_COUNT =
-            Uri.parse("content://im/contacts/onlineCount");
+            Uri.parse("content://com.google.android.providers.talk/contacts/onlineCount");
 
         /**
          * The MIME type of {@link #CONTENT_URI} providing a directory of
          * people.
          */
-        public static final String CONTENT_TYPE = "vnd.android.cursor.dir/im-contacts";
+        public static final String CONTENT_TYPE = "vnd.android.cursor.dir/gtalk-contacts";
 
         /**
          * The MIME type of a {@link #CONTENT_URI} subdirectory of a single
          * person.
          */
-        public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/im-contacts";
+        public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/gtalk-contacts";
 
         /**
          * The default sort order for this table
@@ -633,21 +634,21 @@ public class Im {
          * The content:// style URL for this table
          */
         public static final Uri CONTENT_URI =
-            Uri.parse("content://im/contactLists");
+            Uri.parse("content://com.google.android.providers.talk/contactLists");
 
         /**
          * The MIME type of {@link #CONTENT_URI} providing a directory of
          * people.
          */
         public static final String CONTENT_TYPE =
-                "vnd.android.cursor.dir/im-contactLists";
+                "vnd.android.cursor.dir/gtalk-contactLists";
 
         /**
          * The MIME type of a {@link #CONTENT_URI} subdirectory of a single
          * person.
          */
         public static final String CONTENT_ITEM_TYPE =
-                "vnd.android.cursor.item/im-contactLists";
+                "vnd.android.cursor.item/gtalk-contactLists";
 
         /**
          * The default sort order for this table
@@ -698,21 +699,21 @@ public class Im {
          * The content:// style URL for this table
          */
         public static final Uri CONTENT_URI =
-            Uri.parse("content://im/blockedList");
+            Uri.parse("content://com.google.android.providers.talk/blockedList");
 
         /**
          * The MIME type of {@link #CONTENT_URI} providing a directory of
          * people.
          */
         public static final String CONTENT_TYPE =
-                "vnd.android.cursor.dir/im-blockedList";
+                "vnd.android.cursor.dir/gtalk-blockedList";
 
         /**
          * The MIME type of a {@link #CONTENT_URI} subdirectory of a single
          * person.
          */
         public static final String CONTENT_ITEM_TYPE =
-                "vnd.android.cursor.item/im-blockedList";
+                "vnd.android.cursor.item/gtalk-blockedList";
 
         /**
          * The default sort order for this table
@@ -821,21 +822,21 @@ public class Im {
          * The content:// style URL for this table
          */
         public static final Uri CONTENT_URI =
-            Uri.parse("content://im/contactsEtag");
+            Uri.parse("content://com.google.android.providers.talk/contactsEtag");
 
         /**
          * The MIME type of {@link #CONTENT_URI} providing a directory of
          * people.
          */
         public static final String CONTENT_TYPE =
-                "vnd.android.cursor.dir/im-contactsEtag";
+                "vnd.android.cursor.dir/gtalk-contactsEtag";
 
         /**
          * The MIME type of a {@link #CONTENT_URI} subdirectory of a single
          * person.
          */
         public static final String CONTENT_ITEM_TYPE =
-                "vnd.android.cursor.item/im-contactsEtag";
+                "vnd.android.cursor.item/gtalk-contactsEtag";
     }
 
     /**
@@ -871,14 +872,22 @@ public class Im {
     }
 
     /**
-     * The common columns for both one-to-one chat messages or group chat messages.
+     * The common columns for messages table
      */
-    public interface BaseMessageColumns {
+    public interface MessageColumns {
         /**
-         * The user this message belongs to
-         * <P>Type: TEXT</P>
+         * The thread_id column stores the contact id of the contact the message belongs to.
+         * For groupchat messages, the thread_id stores the group id, which is the contact id
+         * of the temporary group contact created for the groupchat. So there should be no
+         * collision between groupchat message thread id and regular message thread id. 
          */
-        String CONTACT = "contact";
+        String THREAD_ID = "thread_id";
+
+        /**
+         * The nickname. This is used for groupchat messages to indicate the participant's
+         * nickname. For non groupchat messages, this field should be left empty.
+         */
+        String NICKNAME = "nickname";
 
         /**
          * The body
@@ -887,10 +896,19 @@ public class Im {
         String BODY = "body";
 
         /**
-         * The date this message is sent or received
+         * The date this message is sent or received. This represents the display date for
+         * the message.
          * <P>Type: INTEGER</P>
          */
         String DATE = "date";
+
+        /**
+         * The real date for this message. While 'date' can be modified by the client
+         * to account for server time skew, the real_date is the original timestamp set
+         * by the server for incoming messages.
+         * <P>Type: INTEGER</P>
+         */
+        String REAL_DATE = "real_date";
 
         /**
          * Message Type, see {@link MessageType}
@@ -917,48 +935,130 @@ public class Im {
          * <P>Type: STRING</P>
          */
         String PACKET_ID = "packet_id";
-    }
-
-    /**
-     * Columns from the Messages table.
-     */
-    public interface MessagesColumns extends BaseMessageColumns{
-        /**
-         * The provider id
-         * <P> Type: INTEGER </P>
-         */
-        String PROVIDER = "provider";
 
         /**
-         * The account id
-         * <P> Type: INTEGER </P>
+         * Is groupchat message or not
+         * <P>Type: INTEGER</P>
          */
-        String ACCOUNT = "account";
+        String IS_GROUP_CHAT = "is_muc";
+
+        /**
+         * A hint that the UI should show the sent time of this message
+         * <P>Type: INTEGER</P>
+         */
+        String DISPLAY_SENT_TIME = "show_ts";
     }
 
     /**
      * This table contains messages.
      */
-    public static final class Messages implements BaseColumns, MessagesColumns {
+    public static final class Messages implements BaseColumns, MessageColumns {
         /**
          * no public constructor since this is a utility class
          */
         private Messages() {}
 
         /**
-         * Gets the Uri to query messages by contact.
+         * Gets the Uri to query messages by thread id.
          *
-         * @param providerId the provider id of the contact.
+         * @param threadId the thread id of the message.
+         * @return the Uri
+         */
+        public static final Uri getContentUriByThreadId(long threadId) {
+            Uri.Builder builder = CONTENT_URI_MESSAGES_BY_THREAD_ID.buildUpon();
+            ContentUris.appendId(builder, threadId);
+            return builder.build();
+        }
+
+        /**
+         * @deprecated
+         *
+         * Gets the Uri to query messages by account and contact.
+         *
          * @param accountId the account id of the contact.
          * @param username the user name of the contact.
          * @return the Uri
          */
-        public static final Uri getContentUriByContact(long providerId,
-                long accountId, String username) {
-            Uri.Builder builder = CONTENT_URI_MESSAGES_BY.buildUpon();
-            ContentUris.appendId(builder, providerId);
+        public static final Uri getContentUriByContact(long accountId, String username) {
+            Uri.Builder builder = CONTENT_URI_MESSAGES_BY_ACCOUNT_AND_CONTACT.buildUpon();
             ContentUris.appendId(builder, accountId);
             builder.appendPath(username);
+            return builder.build();
+        }
+
+        /**
+         * Gets the Uri to query messages by provider.
+         *
+         * @param providerId the service provider id.
+         * @return the Uri
+         */
+        public static final Uri getContentUriByProvider(long providerId) {
+            Uri.Builder builder = CONTENT_URI_MESSAGES_BY_PROVIDER.buildUpon();
+            ContentUris.appendId(builder, providerId);
+            return builder.build();
+        }
+
+        /**
+         * Gets the Uri to query off the record messages by account.
+         *
+         * @param accountId the account id.
+         * @return the Uri
+         */
+        public static final Uri getContentUriByAccount(long accountId) {
+            Uri.Builder builder = CONTENT_URI_BY_ACCOUNT.buildUpon();
+            ContentUris.appendId(builder, accountId);
+            return builder.build();
+        }
+
+        /**
+         * Gets the Uri to query off the record messages by thread id.
+         *
+         * @param threadId the thread id of the message.
+         * @return the Uri
+         */
+        public static final Uri getOtrMessagesContentUriByThreadId(long threadId) {
+            Uri.Builder builder = OTR_MESSAGES_CONTENT_URI_BY_THREAD_ID.buildUpon();
+            ContentUris.appendId(builder, threadId);
+            return builder.build();
+        }
+
+        /**
+         * @deprecated
+         *
+         * Gets the Uri to query off the record messages by account and contact.
+         *
+         * @param accountId the account id of the contact.
+         * @param username the user name of the contact.
+         * @return the Uri
+         */
+        public static final Uri getOtrMessagesContentUriByContact(long accountId, String username) {
+            Uri.Builder builder = OTR_MESSAGES_CONTENT_URI_BY_ACCOUNT_AND_CONTACT.buildUpon();
+            ContentUris.appendId(builder, accountId);
+            builder.appendPath(username);
+            return builder.build();
+        }
+
+        /**
+         * Gets the Uri to query off the record messages by provider.
+         *
+         * @param providerId the service provider id.
+         * @return the Uri
+         */
+        public static final Uri getOtrMessagesContentUriByProvider(long providerId) {
+            Uri.Builder builder = OTR_MESSAGES_CONTENT_URI_BY_PROVIDER.buildUpon();
+            ContentUris.appendId(builder, providerId);
+            return builder.build();
+        }
+
+        /**
+         * Gets the Uri to query off the record messages by account.
+         *
+         * @param accountId the account id.
+         * @return the Uri
+         */
+        public static final Uri getOtrMessagesContentUriByAccount(long accountId) {
+            Uri.Builder builder = OTR_MESSAGES_CONTENT_URI_BY_ACCOUNT.buildUpon();
+            ContentUris.appendId(builder, accountId);
             return builder.build();
         }
 
@@ -966,32 +1066,86 @@ public class Im {
          * The content:// style URL for this table
          */
         public static final Uri CONTENT_URI =
-            Uri.parse("content://im/messages");
+                Uri.parse("content://com.google.android.providers.talk/messages");
 
         /**
-         * The content:// style URL for messages by provider and account
+         * The content:// style URL for messages by thread id
          */
-        public static final Uri CONTENT_URI_MESSAGES_BY =
-            Uri.parse("content://im/messagesBy");
+        public static final Uri CONTENT_URI_MESSAGES_BY_THREAD_ID =
+                Uri.parse("content://com.google.android.providers.talk/messagesByThreadId");
+
+        /**
+         * The content:// style URL for messages by account and contact
+         */
+        public static final Uri CONTENT_URI_MESSAGES_BY_ACCOUNT_AND_CONTACT =
+                Uri.parse("content://com.google.android.providers.talk/messagesByAcctAndContact");
+
+        /**
+         * The content:// style URL for messages by provider
+         */
+        public static final Uri CONTENT_URI_MESSAGES_BY_PROVIDER =
+                Uri.parse("content://com.google.android.providers.talk/messagesByProvider");
+
+        /**
+         * The content:// style URL for messages by account
+         */
+        public static final Uri CONTENT_URI_BY_ACCOUNT =
+                Uri.parse("content://com.google.android.providers.talk/messagesByAccount");
+
+        /**
+         * The content:// style url for off the record messages
+         */
+        public static final Uri OTR_MESSAGES_CONTENT_URI =
+                Uri.parse("content://com.google.android.providers.talk/otrMessages");
+
+        /**
+         * The content:// style url for off the record messages by thread id
+         */
+        public static final Uri OTR_MESSAGES_CONTENT_URI_BY_THREAD_ID =
+                Uri.parse("content://com.google.android.providers.talk/otrMessagesByThreadId");
+
+        /**
+         * The content:// style url for off the record messages by account and contact
+         */
+        public static final Uri OTR_MESSAGES_CONTENT_URI_BY_ACCOUNT_AND_CONTACT =
+                Uri.parse("content://com.google.android.providers.talk/otrMessagesByAcctAndContact");
+
+        /**
+         * The content:// style URL for off the record messages by provider
+         */
+        public static final Uri OTR_MESSAGES_CONTENT_URI_BY_PROVIDER =
+                Uri.parse("content://com.google.android.providers.talk/otrMessagesByProvider");
+
+        /**
+         * The content:// style URL for off the record messages by account
+         */
+        public static final Uri OTR_MESSAGES_CONTENT_URI_BY_ACCOUNT =
+                Uri.parse("content://com.google.android.providers.talk/otrMessagesByAccount");
 
         /**
          * The MIME type of {@link #CONTENT_URI} providing a directory of
          * people.
          */
-        public static final String CONTENT_TYPE = "vnd.android.cursor.dir/im-messages";
+        public static final String CONTENT_TYPE =
+                "vnd.android.cursor.dir/gtalk-messages";
 
         /**
          * The MIME type of a {@link #CONTENT_URI} subdirectory of a single
          * person.
          */
         public static final String CONTENT_ITEM_TYPE =
-                "vnd.android.cursor.item/im-messages";
+                "vnd.android.cursor.item/gtalk-messages";
 
         /**
          * The default sort order for this table
          */
         public static final String DEFAULT_SORT_ORDER = "date ASC";
 
+        /**
+         * The "contact" column. This is not a real column in the messages table, but a
+         * temoprary column created when querying for messages (joined with the contacts table)
+         */
+        public static final String CONTACT = "contact";
     }
 
     /**
@@ -1021,21 +1175,21 @@ public class Im {
         private GroupMembers(){}
 
         public static final Uri CONTENT_URI =
-            Uri.parse("content://im/groupMembers");
+            Uri.parse("content://com.google.android.providers.talk/groupMembers");
 
         /**
          * The MIME type of {@link #CONTENT_URI} providing a directory of
          * group members.
          */
         public static final String CONTENT_TYPE =
-            "vnd.android.cursor.dir/im-groupMembers";
+            "vnd.android.cursor.dir/gtalk-groupMembers";
 
         /**
          * The MIME type of a {@link #CONTENT_URI} subdirectory of a single
          * group member.
          */
         public static final String CONTENT_ITEM_TYPE =
-                "vnd.android.cursor.item/im-groupMembers";
+                "vnd.android.cursor.item/gtalk-groupMembers";
     }
 
     /**
@@ -1101,82 +1255,21 @@ public class Im {
          * The content:// style URL for this table
          */
         public static final Uri CONTENT_URI =
-            Uri.parse("content://im/invitations");
+            Uri.parse("content://com.google.android.providers.talk/invitations");
 
         /**
          * The MIME type of {@link #CONTENT_URI} providing a directory of
          * invitations.
          */
         public static final String CONTENT_TYPE =
-            "vnd.android.cursor.dir/im-invitations";
+            "vnd.android.cursor.dir/gtalk-invitations";
 
         /**
          * The MIME type of a {@link #CONTENT_URI} subdirectory of a single
          * invitation.
          */
         public static final String CONTENT_ITEM_TYPE =
-                "vnd.android.cursor.item/im-invitations";
-    }
-
-    /**
-     * Columns from the GroupMessages table
-     */
-    public interface GroupMessageColumns extends BaseMessageColumns {
-        /**
-         * The group this message belongs to
-         * <p>Type: TEXT</p>
-         */
-        String GROUP = "groupId";
-    }
-
-    /**
-     * This table contains group messages.
-     */
-    public final static class GroupMessages implements BaseColumns,
-            GroupMessageColumns {
-        private GroupMessages() {}
-
-        /**
-         * Gets the Uri to query group messages by group.
-         *
-         * @param groupId the group id.
-         * @return the Uri
-         */
-        public static final Uri getContentUriByGroup(long groupId) {
-            Uri.Builder builder = CONTENT_URI_GROUP_MESSAGES_BY.buildUpon();
-            ContentUris.appendId(builder, groupId);
-            return builder.build();
-        }
-
-        /**
-         * The content:// style URL for this table
-         */
-        public static final Uri CONTENT_URI =
-            Uri.parse("content://im/groupMessages");
-
-        /**
-         * The content:// style URL for group messages by provider and account
-         */
-        public static final Uri CONTENT_URI_GROUP_MESSAGES_BY =
-            Uri.parse("content://im/groupMessagesBy");
-
-        /**
-         * The MIME type of {@link #CONTENT_URI} providing a directory of
-         * group messages.
-         */
-        public static final String CONTENT_TYPE = "vnd.android.cursor.dir/im-groupMessages";
-
-        /**
-         * The MIME type of a {@link #CONTENT_URI} subdirectory of a single
-         * group message.
-         */
-        public static final String CONTENT_ITEM_TYPE =
-                "vnd.android.cursor.item/im-groupMessages";
-
-        /**
-         * The default sort order for this table
-         */
-        public static final String DEFAULT_SORT_ORDER = "date ASC";
+                "vnd.android.cursor.item/gtalk-invitations";
     }
 
     /**
@@ -1218,24 +1311,25 @@ public class Im {
         /**
          * The content:// style URL for this table
          */
-        public static final Uri CONTENT_URI = Uri.parse("content://im/avatars");
+        public static final Uri CONTENT_URI =
+            Uri.parse("content://com.google.android.providers.talk/avatars");
 
         /**
          * The content:// style URL for avatars by provider, account and contact
          */
         public static final Uri CONTENT_URI_AVATARS_BY =
-                Uri.parse("content://im/avatarsBy");
+                Uri.parse("content://com.google.android.providers.talk/avatarsBy");
 
         /**
          * The MIME type of {@link #CONTENT_URI} providing the avatars
          */
-        public static final String CONTENT_TYPE = "vnd.android.cursor.dir/im-avatars";
+        public static final String CONTENT_TYPE = "vnd.android.cursor.dir/gtalk-avatars";
 
         /**
          * The MIME type of a {@link #CONTENT_URI}
          */
         public static final String CONTENT_ITEM_TYPE =
-                "vnd.android.cursor.item/im-avatars";
+                "vnd.android.cursor.item/gtalk-avatars";
 
         /**
          * The default sort order for this table
@@ -1313,28 +1407,31 @@ public class Im {
         /**
          * The content:// style URL for this table
          */
-        public static final Uri CONTENT_URI = Uri.parse("content://im/presence");
+        public static final Uri CONTENT_URI =
+            Uri.parse("content://com.google.android.providers.talk/presence");
 
         /**
-         * The content URL for IM presences for an account
+         * The content URL for Talk presences for an account
          */
-        public static final Uri CONTENT_URI_BY_ACCOUNT = Uri.parse("content://im/presence/account");
+        public static final Uri CONTENT_URI_BY_ACCOUNT =
+            Uri.parse("content://com.google.android.providers.talk/presence/account");
 
         /**
          * The content:// style URL for operations on bulk contacts
          */
-        public static final Uri BULK_CONTENT_URI = Uri.parse("content://im/bulk_presence");
+        public static final Uri BULK_CONTENT_URI =
+            Uri.parse("content://com.google.android.providers.talk/bulk_presence");
 
         /**
          * The content:// style URL for seeding presences for a given account id.
          */
         public static final Uri SEED_PRESENCE_BY_ACCOUNT_CONTENT_URI =
-                Uri.parse("content://im/seed_presence/account");
+                Uri.parse("content://com.google.android.providers.talk/seed_presence/account");
 
         /**
          * The MIME type of a {@link #CONTENT_URI} providing a directory of presence
          */
-        public static final String CONTENT_TYPE = "vnd.android.cursor.dir/im-presence";
+        public static final String CONTENT_TYPE = "vnd.android.cursor.dir/gtalk-presence";
 
         /**
          * The default sort order for this table
@@ -1384,7 +1481,7 @@ public class Im {
          * <P>Type: TEXT</P>
          */
         String UNSENT_COMPOSED_MESSAGE = "unsent_composed_message";
-        
+
         /**
          * A value from 0-9 indicating which quick-switch chat screen slot this
          * chat is occupying.  If none (for instance, this is the 12th active chat)
@@ -1407,22 +1504,23 @@ public class Im {
          * The content:// style URL for this table
          */
         public static final Uri CONTENT_URI =
-            Uri.parse("content://im/chats");
+            Uri.parse("content://com.google.android.providers.talk/chats");
 
         /**
          * The content URL for all chats that belong to the account
          */
-        public static final Uri CONTENT_URI_BY_ACCOUNT = Uri.parse("content://im/chats/account");
+        public static final Uri CONTENT_URI_BY_ACCOUNT =
+            Uri.parse("content://com.google.android.providers.talk/chats/account");
 
         /**
          * The MIME type of {@link #CONTENT_URI} providing a directory of chats.
          */
-        public static final String CONTENT_TYPE = "vnd.android.cursor.dir/im-chats";
+        public static final String CONTENT_TYPE = "vnd.android.cursor.dir/gtalk-chats";
 
         /**
          * The MIME type of a {@link #CONTENT_URI} subdirectory of a single chat.
          */
-        public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/im-chats";
+        public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/gtalk-chats";
 
         /**
          * The default sort order for this table
@@ -1450,19 +1548,20 @@ public class Im {
         /**
          * The content:// style URI for this table
          */
-        public static final Uri CONTENT_URI = Uri.parse("content://im/sessionCookies");
+        public static final Uri CONTENT_URI =
+            Uri.parse("content://com.google.android.providers.talk/sessionCookies");
 
         /**
          * The content:// style URL for session cookies by provider and account
          */
         public static final Uri CONTENT_URI_SESSION_COOKIES_BY =
-            Uri.parse("content://im/sessionCookiesBy");
+            Uri.parse("content://com.google.android.providers.talk/sessionCookiesBy");
 
         /**
          * The MIME type of {@link #CONTENT_URI} providing a directory of
          * people.
          */
-        public static final String CONTENT_TYPE = "vnd.android-dir/im-sessionCookies";
+        public static final String CONTENT_TYPE = "vnd.android-dir/gtalk-sessionCookies";
     }
 
     /**
@@ -1497,12 +1596,12 @@ public class Im {
          * The content:// style URI for this table
          */
         public static final Uri CONTENT_URI =
-                Uri.parse("content://im/providerSettings");
+                Uri.parse("content://com.google.android.providers.talk/providerSettings");
 
         /**
          * The MIME type of {@link #CONTENT_URI} providing provider settings
          */
-        public static final String CONTENT_TYPE = "vnd.android-dir/im-providerSettings";
+        public static final String CONTENT_TYPE = "vnd.android-dir/gtalk-providerSettings";
 
         /**
          * A boolean value to indicate whether this provider should show the offline contacts
@@ -1512,13 +1611,13 @@ public class Im {
         /** controls whether or not the GTalk service automatically connect to server. */
         public static final String SETTING_AUTOMATICALLY_CONNECT_GTALK = "gtalk_auto_connect";
 
-        /** controls whether or not the IM service will be automatically started after boot */
+        /** controls whether or not the GTalk service will be automatically started after boot */
         public static final String SETTING_AUTOMATICALLY_START_SERVICE = "auto_start_service";
 
         /** controls whether or not the offline contacts will be hided */
         public static final String SETTING_HIDE_OFFLINE_CONTACTS = "hide_offline_contacts";
 
-        /** controls whether or not enable the IM notification */
+        /** controls whether or not enable the GTalk notification */
         public static final String SETTING_ENABLE_NOTIFICATION = "enable_notification";
 
         /** specifies whether or not to vibrate */
@@ -1533,6 +1632,18 @@ public class Im {
 
         /** specifies whether or not to show mobile indicator to friends */
         public static final String SETTING_SHOW_MOBILE_INDICATOR = "mobile_indicator";
+
+        /** specifies whether or not to show as away when device is idle */
+        public static final String SETTING_SHOW_AWAY_ON_IDLE = "show_away_on_idle";
+
+        /** specifies whether or not to upload heartbeat stat upon login */
+        public static final String SETTING_UPLOAD_HEARTBEAT_STAT = "upload_heartbeat_stat";
+
+        /** specifies the last heartbeat interval received from the server */
+        public static final String SETTING_HEARTBEAT_INTERVAL = "heartbeat_interval";
+
+        /** specifiy the JID resource used for Google Talk connection */
+        public static final String SETTING_JID_RESOURCE = "jid_resource";
 
         /**
          * Used for reliable message queue (RMQ). This is for storing the last rmq id received
@@ -1698,10 +1809,10 @@ public class Im {
         }
 
         /**
-         * A convenience method to set whether or not enable the IM notification.
+         * A convenience method to set whether or not enable the GTalk notification.
          *
          * @param contentResolver The ContentResolver to use to access the setting table.
-         * @param enable Whether enable the IM notification
+         * @param enable Whether enable the GTalk notification
          */
         public static void setEnableNotification(ContentResolver contentResolver, long providerId,
                 boolean enable) {
@@ -1740,6 +1851,47 @@ public class Im {
                 boolean showMobileIndicator) {
             putBooleanValue(contentResolver, providerId, SETTING_SHOW_MOBILE_INDICATOR,
                     showMobileIndicator);
+        }
+
+        /**
+         * A convenience method to set whether or not to show as away when device is idle.
+         *
+         * @param contentResolver The ContentResolver to use to access the setting table.
+         * @param showAway Whether or not to show as away when device is idle.
+         */
+        public static void setShowAwayOnIdle(ContentResolver contentResolver,
+                long providerId, boolean showAway) {
+            putBooleanValue(contentResolver, providerId, SETTING_SHOW_AWAY_ON_IDLE, showAway);
+        }
+
+        /**
+         * A convenience method to set whether or not to upload heartbeat stat.
+         *
+         * @param contentResolver The ContentResolver to use to access the setting table.
+         * @param uploadStat Whether or not to upload heartbeat stat.
+         */
+        public static void setUploadHeartbeatStat(ContentResolver contentResolver,
+                long providerId, boolean uploadStat) {
+            putBooleanValue(contentResolver, providerId, SETTING_UPLOAD_HEARTBEAT_STAT, uploadStat);
+        }
+
+        /**
+         * A convenience method to set the heartbeat interval last received from the server.
+         *
+         * @param contentResolver The ContentResolver to use to access the setting table.
+         * @param interval The heartbeat interval last received from the server.
+         */
+        public static void setHeartbeatInterval(ContentResolver contentResolver,
+                long providerId, long interval) {
+            putLongValue(contentResolver, providerId, SETTING_HEARTBEAT_INTERVAL, interval);
+        }
+
+        /**
+         * A convenience method to set the jid resource.
+         */
+        public static void setJidResource(ContentResolver contentResolver,
+                                          long providerId, String jidResource) {
+            putStringValue(contentResolver, providerId, SETTING_JID_RESOURCE, jidResource);
         }
 
         public static class QueryMap extends ContentQueryMap {
@@ -1798,18 +1950,18 @@ public class Im {
             }
 
             /**
-             * Set whether or not enable the IM notification.
+             * Set whether or not enable the GTalk notification.
              *
-             * @param enable Whether or not enable the IM notification.
+             * @param enable Whether or not enable the GTalk notification.
              */
             public void setEnableNotification(boolean enable) {
                 ProviderSettings.setEnableNotification(mContentResolver, mProviderId, enable);
             }
 
             /**
-             * Check if the IM notification is enabled.
+             * Check if the GTalk notification is enabled.
              *
-             * @return Whether or not enable the IM notification.
+             * @return Whether or not enable the GTalk notification.
              */
             public boolean getEnableNotification() {
                 return getBoolean(SETTING_ENABLE_NOTIFICATION,
@@ -1817,7 +1969,7 @@ public class Im {
             }
 
             /**
-             * Set whether or not to vibrate on IM notification.
+             * Set whether or not to vibrate on GTalk notification.
              *
              * @param vibrate Whether or not to vibrate.
              */
@@ -1826,7 +1978,7 @@ public class Im {
             }
 
             /**
-             * Gets whether or not to vibrate on IM notification.
+             * Gets whether or not to vibrate on GTalk notification.
              *
              * @return Whether or not to vibrate.
              */
@@ -1872,6 +2024,79 @@ public class Im {
             }
 
             /**
+             * Set whether or not to show as away when device is idle.
+             *
+             * @param showAway whether or not to show as away when device is idle.
+             */
+            public void setShowAwayOnIdle(boolean showAway) {
+                ProviderSettings.setShowAwayOnIdle(mContentResolver, mProviderId, showAway);
+            }
+
+            /**
+             * Get whether or not to show as away when device is idle.
+             *
+             * @return Whether or not to show as away when device is idle.
+             */
+            public boolean getShowAwayOnIdle() {
+                return getBoolean(SETTING_SHOW_AWAY_ON_IDLE,
+                        true /* by default show as away on idle*/);
+            }
+
+            /**
+             * Set whether or not to upload heartbeat stat.
+             *
+             * @param uploadStat whether or not to upload heartbeat stat.
+             */
+            public void setUploadHeartbeatStat(boolean uploadStat) {
+                ProviderSettings.setUploadHeartbeatStat(mContentResolver, mProviderId, uploadStat);
+            }
+
+            /**
+             * Get whether or not to upload heartbeat stat.
+             *
+             * @return Whether or not to upload heartbeat stat.
+             */
+            public boolean getUploadHeartbeatStat() {
+                return getBoolean(SETTING_UPLOAD_HEARTBEAT_STAT,
+                        false /* by default do not upload */);
+            }
+
+            /**
+             * Set the last received heartbeat interval from the server.
+             *
+             * @param interval the last received heartbeat interval from the server.
+             */
+            public void setHeartbeatInterval(long interval) {
+                ProviderSettings.setHeartbeatInterval(mContentResolver, mProviderId, interval);
+            }
+
+            /**
+             * Get the last received heartbeat interval from the server.
+             *
+             * @return the last received heartbeat interval from the server.
+             */
+            public long getHeartbeatInterval() {
+                return getLong(SETTING_HEARTBEAT_INTERVAL, 0L /* an invalid default interval */);
+            }
+
+            /**
+             * Set the JID resource.
+             *
+             * @param jidResource the jid resource to be stored.
+             */
+            public void setJidResource(String jidResource) {
+                ProviderSettings.setJidResource(mContentResolver, mProviderId, jidResource);
+            }
+            /**
+             * Get the JID resource used for the Google Talk connection
+             *
+             * @return the JID resource stored.
+             */
+            public String getJidResource() {
+                return getString(SETTING_JID_RESOURCE, null);
+            }
+
+            /**
              * Convenience function for retrieving a single settings value
              * as a boolean.
              *
@@ -1909,21 +2134,78 @@ public class Im {
                 ContentValues values = getValues(name);
                 return values != null ? values.getAsInteger(VALUE) : def;
             }
+
+            /**
+             * Convenience function for retrieving a single settings value
+             * as a Long.
+             *
+             * @param name The name of the setting to retrieve.
+             * @param def The value to return if the setting is not defined.
+             * @return The setting's current value or 'def' if it is not defined.
+             */
+            private long getLong(String name, long def) {
+                ContentValues values = getValues(name);
+                return values != null ? values.getAsLong(VALUE) : def;
+            }
         }
 
     }
+
+
+    /**
+     * Columns for GTalk branding resource map cache table. This table caches the result of
+     * loading the branding resources to speed up GTalk landing page start.
+     */
+    public interface BrandingResourceMapCacheColumns {
+        /**
+         * The provider ID
+         * <P>Type: INTEGER</P>
+         */
+        String PROVIDER_ID = "provider_id";
+        /**
+         * The application resource ID
+         * <P>Type: INTEGER</P>
+         */
+        String APP_RES_ID = "app_res_id";
+        /**
+         * The plugin resource ID
+         * <P>Type: INTEGER</P>
+         */
+        String PLUGIN_RES_ID = "plugin_res_id";
+    }
+
+    /**
+     * The table for caching the result of loading GTalk branding resources.
+     */
+    public static final class BrandingResourceMapCache
+        implements BaseColumns, BrandingResourceMapCacheColumns {
+        /**
+         * The content:// style URL for this table.
+         */
+        public static final Uri CONTENT_URI =
+            Uri.parse("content://com.google.android.providers.talk/brandingResMapCache");
+    }
+
+
+
+    /**
+     * //TODO: move these to MCS specific provider.
+     * The following are MCS stuff, and should really live in a separate provider specific to
+     * MCS code.
+     */
 
     /**
      * Columns from OutgoingRmq table
      */
     public interface OutgoingRmqColumns {
         String RMQ_ID = "rmq_id";
-        String TYPE = "type";
         String TIMESTAMP = "ts";
         String DATA = "data";
+        String PROTOBUF_TAG = "type";
     }
 
     /**
+     * //TODO: we should really move these to their own provider and database.
      * The table for storing outgoing rmq packets.
      */
     public static final class OutgoingRmq implements BaseColumns, OutgoingRmqColumns {
@@ -1963,13 +2245,14 @@ public class Im {
         /**
          * The content:// style URL for this table.
          */
-        public static final Uri CONTENT_URI = Uri.parse("content://im/outgoingRmqMessages");
+        public static final Uri CONTENT_URI =
+            Uri.parse("content://com.google.android.providers.talk/outgoingRmqMessages");
 
         /**
          * The content:// style URL for the highest rmq id for the outgoing rmq messages
          */
         public static final Uri CONTENT_URI_FOR_HIGHEST_RMQ_ID =
-                Uri.parse("content://im/outgoingHighestRmqId");
+                Uri.parse("content://com.google.android.providers.talk/outgoingHighestRmqId");
 
         /**
          * The default sort order for this table.
@@ -1986,6 +2269,7 @@ public class Im {
     }
 
     /**
+     * //TODO: move these out into their own provider and database
      * The table for storing the last client rmq id sent to the server.
      */
     public static final class LastRmqId implements BaseColumns, LastRmqIdColumns {
@@ -2042,39 +2326,27 @@ public class Im {
         /**
          * The content:// style URL for this table.
          */
-        public static final Uri CONTENT_URI = Uri.parse("content://im/lastRmqId");
+        public static final Uri CONTENT_URI =
+            Uri.parse("content://com.google.android.providers.talk/lastRmqId");
     }
 
     /**
-     * Columns for IM branding resource map cache table. This table caches the result of
-     * loading the branding resources to speed up IM landing page start.
+     * Columns for the s2dRmqIds table, which stores the server-to-device message
+     * persistent ids. These are used in the RMQ2 protocol, where in the login request, the
+     * client selective acks these s2d ids to the server.
      */
-    public interface BrandingResourceMapCacheColumns {
-        /**
-         * The provider ID
-         * <P>Type: INTEGER</P>
-         */
-        String PROVIDER_ID = "provider_id";
-        /**
-         * The application resource ID
-         * <P>Type: INTEGER</P>
-         */
-        String APP_RES_ID = "app_res_id";
-        /**
-         * The plugin resource ID
-         * <P>Type: INTEGER</P>
-         */
-        String PLUGIN_RES_ID = "plugin_res_id";
+    public interface ServerToDeviceRmqIdsColumn {
+        String RMQ_ID = "rmq_id";
     }
 
-    /**
-     * The table for caching the result of loading IM branding resources.
-     */
-    public static final class BrandingResourceMapCache
-        implements BaseColumns, BrandingResourceMapCacheColumns {
+    public static final class ServerToDeviceRmqIds implements BaseColumns,
+            ServerToDeviceRmqIdsColumn {
+
         /**
          * The content:// style URL for this table.
          */
-        public static final Uri CONTENT_URI = Uri.parse("content://im/brandingResMapCache");
+        public static final Uri CONTENT_URI =
+            Uri.parse("content://com.google.android.providers.talk/s2dids");
     }
+
 }

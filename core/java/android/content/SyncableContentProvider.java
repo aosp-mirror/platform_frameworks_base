@@ -19,6 +19,7 @@ package android.content;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
+import android.accounts.Account;
 
 import java.util.Map;
 
@@ -31,6 +32,16 @@ import java.util.Map;
  */
 public abstract class SyncableContentProvider extends ContentProvider {
     protected abstract boolean isTemporary();
+
+    private volatile TempProviderSyncAdapter mTempProviderSyncAdapter;
+
+    public void setTempProviderSyncAdapter(TempProviderSyncAdapter syncAdapter) {
+        mTempProviderSyncAdapter = syncAdapter;
+    }
+
+    public TempProviderSyncAdapter getTempProviderSyncAdapter() {
+        return mTempProviderSyncAdapter;
+    }
 
     /**
      * Close resources that must be closed. You must call this to properly release
@@ -110,7 +121,7 @@ public abstract class SyncableContentProvider extends ContentProvider {
      * @param context the sync context for the operation
      * @param account
      */
-    public abstract void onSyncStart(SyncContext context, String account);
+    public abstract void onSyncStart(SyncContext context, Account account);
 
     /**
      * Called right after a sync is completed
@@ -124,7 +135,7 @@ public abstract class SyncableContentProvider extends ContentProvider {
      * The account of the most recent call to onSyncStart()
      * @return the account
      */
-    public abstract String getSyncingAccount();
+    public abstract Account getSyncingAccount();
 
     /**
      * Merge diffs from a sync source with this content provider.
@@ -194,7 +205,7 @@ public abstract class SyncableContentProvider extends ContentProvider {
      * Make sure that there are no entries for accounts that no longer exist
      * @param accountsArray the array of currently-existing accounts
      */
-    protected abstract void onAccountsChanged(String[] accountsArray);
+    protected abstract void onAccountsChanged(Account[] accountsArray);
 
     /**
      * A helper method to delete all rows whose account is not in the accounts
@@ -203,26 +214,24 @@ public abstract class SyncableContentProvider extends ContentProvider {
      *
      * @param accounts a map of existing accounts
      * @param table the table to delete from
-     * @param accountColumnName the name of the column that is expected
-     * to hold the account.
      */
-    protected abstract void deleteRowsForRemovedAccounts(Map<String, Boolean> accounts,
-            String table, String accountColumnName);
+    protected abstract void deleteRowsForRemovedAccounts(Map<Account, Boolean> accounts,
+            String table);
 
     /**
      * Called when the sync system determines that this provider should no longer
      * contain records for the specified account.
      */
-    public abstract void wipeAccount(String account);
+    public abstract void wipeAccount(Account account);
 
     /**
      * Retrieves the SyncData bytes for the given account. The byte array returned may be null.
      */
-    public abstract byte[] readSyncDataBytes(String account);
+    public abstract byte[] readSyncDataBytes(Account account);
 
     /**
      * Sets the SyncData bytes for the given account. The bytes array may be null.
      */
-    public abstract void writeSyncDataBytes(String account, byte[] data);
+    public abstract void writeSyncDataBytes(Account account, byte[] data);
 }
 

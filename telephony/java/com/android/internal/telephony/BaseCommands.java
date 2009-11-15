@@ -64,6 +64,7 @@ public abstract class BaseCommands implements CommandsInterface {
     protected RegistrantList mLineControlInfoRegistrants = new RegistrantList();
     protected RegistrantList mT53ClirInfoRegistrants = new RegistrantList();
     protected RegistrantList mT53AudCntrlInfoRegistrants = new RegistrantList();
+    protected RegistrantList mRingbackToneRegistrants = new RegistrantList();
 
     protected Registrant mSMSRegistrant;
     protected Registrant mNITZTimeRegistrant;
@@ -569,6 +570,15 @@ public abstract class BaseCommands implements CommandsInterface {
         mT53AudCntrlInfoRegistrants.remove(h);
     }
 
+    public void registerForRingbackTone(Handler h, int what, Object obj) {
+        Registrant r = new Registrant (h, what, obj);
+        mRingbackToneRegistrants.add(r);
+    }
+
+    public void unregisterForRingbackTone(Handler h) {
+        mRingbackToneRegistrants.remove(h);
+    }
+
     //***** Protected Methods
     /**
      * Store new RadioState and send notification based on the changes
@@ -666,7 +676,7 @@ public abstract class BaseCommands implements CommandsInterface {
                 mRadioTechnologyChangedRegistrants.notifyRegistrants();
             }
 
-            if (mState.isGsm() && !oldState.isOn() && (mPhoneType == RILConstants.CDMA_PHONE)) {
+            if (mState.isGsm() && !oldState.isOn() && (mPhoneType == Phone.PHONE_TYPE_CDMA)) {
                 Log.d(LOG_TAG,"Notifying: radio technology change CDMA OFF to GSM");
                 mRadioTechnologyChangedRegistrants.notifyRegistrants();
             }
@@ -676,7 +686,7 @@ public abstract class BaseCommands implements CommandsInterface {
                 mRadioTechnologyChangedRegistrants.notifyRegistrants();
             }
 
-            if (mState.isCdma() && !oldState.isOn() && (mPhoneType == RILConstants.GSM_PHONE)) {
+            if (mState.isCdma() && !oldState.isOn() && (mPhoneType == Phone.PHONE_TYPE_GSM)) {
                 Log.d(LOG_TAG,"Notifying: radio technology change GSM OFF to CDMA");
                 mRadioTechnologyChangedRegistrants.notifyRegistrants();
             }

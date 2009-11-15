@@ -41,6 +41,7 @@ import android.net.wifi.WifiConfiguration;
 import android.net.wifi.SupplicantState;
 import android.net.NetworkStateTracker;
 import android.net.DhcpInfo;
+import android.net.NetworkUtils;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -92,6 +93,9 @@ public class WifiService extends IWifiManager.Stub {
     private boolean mDeviceIdle;
     private int mPluggedType;
 
+    // true if the user enabled Wifi while in airplane mode
+    private boolean mAirplaneModeOverwridden;
+
     private final LockList mLocks = new LockList();
     // some wifi lock statistics
     private int mFullLocksAcquired;
@@ -142,28 +146,6 @@ public class WifiService extends IWifiManager.Stub {
     private final  WifiHandler mWifiHandler;
 
     /*
-     * Map used to keep track of hidden networks presence, which
-     * is needed to switch between active and passive scan modes.
-     * If there is at least one hidden network that is currently
-     * present (enabled), we want to do active scans instead of
-     * passive.
-     */
-    private final Map<Integer, Boolean> mIsHiddenNetworkPresent;
-    /*
-     * The number of currently present hidden networks. When this
-     * counter goes from 0 to 1 or from 1 to 0, we change the
-     * scan mode to active or passive respectively. Initially, we
-     * set the counter to 0 and we increment it every time we add
-     * a new present (enabled) hidden network.
-     */
-    private int mNumHiddenNetworkPresent;
-    /*
-     * Whether we change the scan mode is due to a hidden network
-     * (in this class, this is always the case)
-     */
-    private final static boolean SET_DUE_TO_A_HIDDEN_NETWORK = true;
-
-    /*
      * Cache of scan results objects (size is somewhat arbitrary)
      */
     private static final int SCAN_RESULT_CACHE_SIZE = 80;
@@ -195,12 +177,6 @@ public class WifiService extends IWifiManager.Stub {
         mWifiStateTracker.enableRssiPolling(true);
         mBatteryStats = BatteryStatsService.getService();
         
-        /*
-         * Initialize the hidden-networks state
-         */
-        mIsHiddenNetworkPresent = new HashMap<Integer, Boolean>();
-        mNumHiddenNetworkPresent = 0;
-
         mScanResultCache = new LinkedHashMap<String, ScanResult>(
             SCAN_RESULT_CACHE_SIZE, 0.75f, true) {
                 /*
@@ -246,161 +222,14 @@ public class WifiService extends IWifiManager.Stub {
                 new BroadcastReceiver() {
                     @Override
                     public void onReceive(Context context, Intent intent) {
+                        // clear our flag indicating the user has overwridden airplane mode
+                        mAirplaneModeOverwridden = false;
                         updateWifiState();
                     }
                 },
                 new IntentFilter(Intent.ACTION_AIRPLANE_MODE_CHANGED));
 
         setWifiEnabledBlocking(wifiEnabled, false, Process.myUid());
-    }
-
-    /**
-     * Initializes the hidden networks state. Must be called when we
-     * enable Wi-Fi.
-     */
-    private synchronized void initializeHiddenNetworksState() {
-        // First, reset the state
-        resetHiddenNetworksState();
-
-        // ... then add networks that are marked as hidden
-        List<WifiConfiguration> networks = getConfiguredNetworks();
-        if (!networks.isEmpty()) {
-            for (WifiConfiguration config : networks) {
-                if (config != null && config.hiddenSSID) {
-                    addOrUpdateHiddenNetwork(
-                        config.networkId,
-                        config.status != WifiConfiguration.Status.DISABLED);
-                }
-            }
-
-        }
-    }
-
-    /**
-     * Resets the hidden networks state.
-     */
-    private synchronized void resetHiddenNetworksState() {
-        mNumHiddenNetworkPresent = 0;
-        mIsHiddenNetworkPresent.clear();
-    }
-
-    /**
-     * Marks all but netId network as not present.
-     */
-    private synchronized void markAllHiddenNetworksButOneAsNotPresent(int netId) {
-        for (Map.Entry<Integer, Boolean> entry : mIsHiddenNetworkPresent.entrySet()) {
-            if (entry != null) {
-                Integer networkId = entry.getKey();
-                if (networkId != netId) {
-                    updateNetworkIfHidden(
-                        networkId, false);
-                }
-            }
-        }
-    }
-
-    /**
-     * Updates the netId network presence status if netId is an existing
-     * hidden network.
-     */
-    private synchronized void updateNetworkIfHidden(int netId, boolean present) {
-        if (isHiddenNetwork(netId)) {
-            addOrUpdateHiddenNetwork(netId, present);
-        }
-    }
-
-    /**
-     * Updates the netId network presence status if netId is an existing
-     * hidden network. If the network does not exist, adds the network.
-     */
-    private synchronized void addOrUpdateHiddenNetwork(int netId, boolean present) {
-        if (0 <= netId) {
-
-            // If we are adding a new entry or modifying an existing one
-            Boolean isPresent = mIsHiddenNetworkPresent.get(netId);
-            if (isPresent == null || isPresent != present) {
-                if (present) {
-                    incrementHiddentNetworkPresentCounter();
-                } else {
-                    // If we add a new hidden network, no need to change
-                    // the counter (it must be 0)
-                    if (isPresent != null) {
-                        decrementHiddentNetworkPresentCounter();
-                    }
-                }
-                mIsHiddenNetworkPresent.put(netId, present);
-            }
-        } else {
-            Log.e(TAG, "addOrUpdateHiddenNetwork(): Invalid (negative) network id!");
-        }
-    }
-
-    /**
-     * Removes the netId network if it is hidden (being kept track of).
-     */
-    private synchronized void removeNetworkIfHidden(int netId) {
-        if (isHiddenNetwork(netId)) {
-            removeHiddenNetwork(netId);
-        }
-    }
-
-    /**
-     * Removes the netId network. For the call to be successful, the network
-     * must be hidden.
-     */
-    private synchronized void removeHiddenNetwork(int netId) {
-        if (0 <= netId) {
-            Boolean isPresent =
-                mIsHiddenNetworkPresent.remove(netId);
-            if (isPresent != null) {
-                // If we remove an existing hidden network that is not
-                // present, no need to change the counter
-                if (isPresent) {
-                    decrementHiddentNetworkPresentCounter();
-                }
-            } else {
-                if (DBG) {
-                    Log.d(TAG, "removeHiddenNetwork(): Removing a non-existent network!");
-                }
-            }
-        } else {
-            Log.e(TAG, "removeHiddenNetwork(): Invalid (negative) network id!");
-        }
-    }
-
-    /**
-     * Returns true if netId is an existing hidden network.
-     */
-    private synchronized boolean isHiddenNetwork(int netId) {
-        return mIsHiddenNetworkPresent.containsKey(netId);
-    }
-
-    /**
-     * Increments the present (enabled) hidden networks counter. If the
-     * counter value goes from 0 to 1, changes the scan mode to active.
-     */
-    private void incrementHiddentNetworkPresentCounter() {
-        ++mNumHiddenNetworkPresent;
-        if (1 == mNumHiddenNetworkPresent) {
-            // Switch the scan mode to "active"
-            mWifiStateTracker.setScanMode(true, SET_DUE_TO_A_HIDDEN_NETWORK);
-        }
-    }
-
-    /**
-     * Decrements the present (enabled) hidden networks counter. If the
-     * counter goes from 1 to 0, changes the scan mode back to passive.
-     */
-    private void decrementHiddentNetworkPresentCounter() {
-        if (0 < mNumHiddenNetworkPresent) {
-            --mNumHiddenNetworkPresent;
-            if (0 == mNumHiddenNetworkPresent) {
-                // Switch the scan mode to "passive"
-                mWifiStateTracker.setScanMode(false, SET_DUE_TO_A_HIDDEN_NETWORK);
-            }
-        } else {
-            Log.e(TAG, "Hidden-network counter invariant violation!");
-        }
     }
 
     private boolean getPersistedWifiEnabled() {
@@ -466,8 +295,14 @@ public class WifiService extends IWifiManager.Stub {
         if (mWifiHandler == null) return false;
 
         synchronized (mWifiHandler) {
+            // caller may not have WAKE_LOCK permission - it's not required here
+            long ident = Binder.clearCallingIdentity();
             sWakeLock.acquire();
+            Binder.restoreCallingIdentity(ident);
+
             mLastEnableUid = Binder.getCallingUid();
+            // set a flag if the user is enabling Wifi while in airplane mode
+            mAirplaneModeOverwridden = (enable && isAirplaneModeOn() && isAirplaneToggleable());
             sendEnableMessage(enable, true, Binder.getCallingUid());
         }
 
@@ -488,7 +323,7 @@ public class WifiService extends IWifiManager.Stub {
         if (mWifiState == eventualWifiState) {
             return true;
         }
-        if (enable && isAirplaneModeOn()) {
+        if (enable && isAirplaneModeOn() && !mAirplaneModeOverwridden) {
             return false;
         }
 
@@ -522,7 +357,7 @@ public class WifiService extends IWifiManager.Stub {
             }
 
             // We must reset the interface before we unload the driver
-            mWifiStateTracker.resetInterface();
+            mWifiStateTracker.resetInterface(false);
 
             if (!WifiNative.unloadDriver()) {
                 Log.e(TAG, "Failed to unload Wi-Fi driver.");
@@ -542,15 +377,6 @@ public class WifiService extends IWifiManager.Stub {
             persistWifiEnabled(enable);
         }
         setWifiEnabledState(eventualWifiState, uid);
-
-        /*
-         * Initialize the hidden networks state and the number of allowed
-         * radio channels if Wi-Fi is being turned on.
-         */
-        if (enable) {
-            mWifiStateTracker.setNumAllowedChannels();
-            initializeHiddenNetworksState();
-        }
 
         return true;
     }
@@ -843,6 +669,15 @@ public class WifiService extends IWifiManager.Stub {
                 }
             }
         }
+
+        for (WifiConfiguration.EnterpriseField field :
+                config.enterpriseFields) {
+            value = WifiNative.getNetworkVariableCommand(netId,
+                    field.varName());
+            if (!TextUtils.isEmpty(value)) {
+                field.setValue(value);
+            }
+        }
     }
 
     /**
@@ -883,15 +718,6 @@ public class WifiService extends IWifiManager.Stub {
             doReconfig = currentPriority != config.priority;
         }
         mNeedReconfig = mNeedReconfig || doReconfig;
-
-        /*
-         * If we have hidden networks, we may have to change the scan mode
-         */
-        if (config.hiddenSSID) {
-            // Mark the network as present unless it is disabled
-            addOrUpdateHiddenNetwork(
-                netId, config.status != WifiConfiguration.Status.DISABLED);
-        }
 
         setVariables: {
             /*
@@ -1064,103 +890,20 @@ public class WifiService extends IWifiManager.Stub {
                 break setVariables;
             }
 
-            if ((config.eap != null) && !WifiNative.setNetworkVariableCommand(
+            for (WifiConfiguration.EnterpriseField field
+                    : config.enterpriseFields) {
+                String varName = field.varName();
+                String value = field.value();
+                if ((value != null) && !WifiNative.setNetworkVariableCommand(
                     netId,
-                    WifiConfiguration.eapVarName,
-                    config.eap)) {
-                if (DBG) {
-                    Log.d(TAG, config.SSID + ": failed to set eap: "+
-                          config.eap);
+                    varName,
+                    value)) {
+                    if (DBG) {
+                        Log.d(TAG, config.SSID + ": failed to set " + varName +
+                              ": " + value);
+                    }
+                    break setVariables;
                 }
-                break setVariables;
-            }
-
-            if ((config.phase2 != null) && !WifiNative.setNetworkVariableCommand(
-                    netId,
-                    WifiConfiguration.phase2VarName,
-                    config.phase2)) {
-                if (DBG) {
-                    Log.d(TAG, config.SSID + ": failed to set phase2: "+
-                          config.phase2);
-                }
-                break setVariables;
-            }
-
-            if ((config.identity != null) && !WifiNative.setNetworkVariableCommand(
-                    netId,
-                    WifiConfiguration.identityVarName,
-                    config.identity)) {
-                if (DBG) {
-                    Log.d(TAG, config.SSID + ": failed to set identity: "+
-                          config.identity);
-                }
-                break setVariables;
-            }
-
-            if ((config.anonymousIdentity != null) && !WifiNative.setNetworkVariableCommand(
-                    netId,
-                    WifiConfiguration.anonymousIdentityVarName,
-                    config.anonymousIdentity)) {
-                if (DBG) {
-                    Log.d(TAG, config.SSID + ": failed to set anonymousIdentity: "+
-                          config.anonymousIdentity);
-                }
-                break setVariables;
-            }
-
-            if ((config.password != null) && !WifiNative.setNetworkVariableCommand(
-                    netId,
-                    WifiConfiguration.passwordVarName,
-                    config.password)) {
-                if (DBG) {
-                    Log.d(TAG, config.SSID + ": failed to set password: "+
-                          config.password);
-                }
-                break setVariables;
-            }
-
-            if ((config.clientCert != null) && !WifiNative.setNetworkVariableCommand(
-                    netId,
-                    WifiConfiguration.clientCertVarName,
-                    config.clientCert)) {
-                if (DBG) {
-                    Log.d(TAG, config.SSID + ": failed to set clientCert: "+
-                          config.clientCert);
-                }
-                break setVariables;
-            }
-
-            if ((config.caCert != null) && !WifiNative.setNetworkVariableCommand(
-                    netId,
-                    WifiConfiguration.caCertVarName,
-                    config.caCert)) {
-                if (DBG) {
-                    Log.d(TAG, config.SSID + ": failed to set caCert: "+
-                          config.caCert);
-                }
-                break setVariables;
-            }
-
-            if ((config.privateKey != null) && !WifiNative.setNetworkVariableCommand(
-                    netId,
-                    WifiConfiguration.privateKeyVarName,
-                    config.privateKey)) {
-                if (DBG) {
-                    Log.d(TAG, config.SSID + ": failed to set privateKey: "+
-                          config.privateKey);
-                }
-                break setVariables;
-            }
-
-            if ((config.privateKeyPasswd != null) && !WifiNative.setNetworkVariableCommand(
-                    netId,
-                    WifiConfiguration.privateKeyPasswdVarName,
-                    config.privateKeyPasswd)) {
-                if (DBG) {
-                    Log.d(TAG, config.SSID + ": failed to set privateKeyPasswd: "+
-                          config.privateKeyPasswd);
-                }
-                break setVariables;
             }
 
             return netId;
@@ -1231,11 +974,6 @@ public class WifiService extends IWifiManager.Stub {
     public boolean removeNetwork(int netId) {
         enforceChangePermission();
 
-        /*
-         * If we have hidden networks, we may have to change the scan mode
-         */
-        removeNetworkIfHidden(netId);
-
         return mWifiStateTracker.removeNetwork(netId);
     }
 
@@ -1249,18 +987,14 @@ public class WifiService extends IWifiManager.Stub {
     public boolean enableNetwork(int netId, boolean disableOthers) {
         enforceChangePermission();
 
-        /*
-         * If we have hidden networks, we may have to change the scan mode
-         */
-         synchronized(this) {
-             if (disableOthers) {
-                 markAllHiddenNetworksButOneAsNotPresent(netId);
-             }
-             updateNetworkIfHidden(netId, true);
-         }
-
         synchronized (mWifiStateTracker) {
-            return WifiNative.enableNetworkCommand(netId, disableOthers);
+            String ifname = mWifiStateTracker.getInterfaceName();
+            NetworkUtils.enableInterface(ifname);
+            boolean result = WifiNative.enableNetworkCommand(netId, disableOthers);
+            if (!result) {
+                NetworkUtils.disableInterface(ifname);
+            }
+            return result;
         }
     }
 
@@ -1272,11 +1006,6 @@ public class WifiService extends IWifiManager.Stub {
      */
     public boolean disableNetwork(int netId) {
         enforceChangePermission();
-
-        /*
-         * If we have hidden networks, we may have to change the scan mode
-         */
-        updateNetworkIfHidden(netId, false);
 
         synchronized (mWifiStateTracker) {
             return WifiNative.disableNetworkCommand(netId);
@@ -1375,45 +1104,49 @@ public class WifiService extends IWifiManager.Stub {
                         level = 0;
                     }
 
-                    // bssid is the hash key
-                    scanResult = mScanResultCache.get(bssid);
+                    /*
+                     * The formatting of the results returned by
+                     * wpa_supplicant is intended to make the fields
+                     * line up nicely when printed,
+                     * not to make them easy to parse. So we have to
+                     * apply some heuristics to figure out which field
+                     * is the SSID and which field is the flags.
+                     */
+                    String ssid;
+                    String flags;
+                    if (result.length == 4) {
+                        if (result[3].charAt(0) == '[') {
+                            flags = result[3];
+                            ssid = "";
+                        } else {
+                            flags = "";
+                            ssid = result[3];
+                        }
+                    } else if (result.length == 5) {
+                        flags = result[3];
+                        ssid = result[4];
+                    } else {
+                        // Here, we must have 3 fields: no flags and ssid
+                        // set
+                        flags = "";
+                        ssid = "";
+                    }
+
+                    // bssid + ssid is the hash key
+                    String key = bssid + ssid;
+                    scanResult = mScanResultCache.get(key);
                     if (scanResult != null) {
                         scanResult.level = level;
+                        scanResult.SSID = ssid;
+                        scanResult.capabilities = flags;
+                        scanResult.frequency = frequency;
                     } else {
-                        /*
-                         * The formatting of the results returned by
-                         * wpa_supplicant is intended to make the fields
-                         * line up nicely when printed,
-                         * not to make them easy to parse. So we have to
-                         * apply some heuristics to figure out which field
-                         * is the SSID and which field is the flags.
-                         */
-                        String ssid;
-                        String flags;
-                        if (result.length == 4) {
-                            if (result[3].charAt(0) == '[') {
-                                flags = result[3];
-                                ssid = "";
-                            } else {
-                                flags = "";
-                                ssid = result[3];
-                            }
-                        } else if (result.length == 5) {
-                            flags = result[3];
-                            ssid = result[4];
-                        } else {
-                            // Here, we must have 3 fields: no flags and ssid
-                            // set
-                            flags = "";
-                            ssid = "";
-                        }
-
                         // Do not add scan results that have no SSID set
                         if (0 < ssid.trim().length()) {
                             scanResult =
                                 new ScanResult(
                                     ssid, bssid, flags, level, frequency);
-                            mScanResultCache.put(bssid, scanResult);
+                            mScanResultCache.put(key, scanResult);
                         }
                     }
                 } else {
@@ -1479,14 +1212,17 @@ public class WifiService extends IWifiManager.Stub {
      * Set the number of radio frequency channels that are allowed to be used
      * in the current regulatory domain. This method should be used only
      * if the correct number of channels cannot be determined automatically
-     * for some reason. If the operation is successful, the new value is
+     * for some reason. If the operation is successful, the new value may be
      * persisted as a Secure setting.
      * @param numChannels the number of allowed channels. Must be greater than 0
      * and less than or equal to 16.
+     * @param persist {@code true} if the setting should be remembered.
      * @return {@code true} if the operation succeeds, {@code false} otherwise, e.g.,
      * {@code numChannels} is outside the valid range.
      */
-    public boolean setNumAllowedChannels(int numChannels) {
+    public boolean setNumAllowedChannels(int numChannels, boolean persist) {
+        Log.i(TAG, "WifiService trying to setNumAllowed to "+numChannels+
+                " with persist set to "+persist);
         enforceChangePermission();
         /*
          * Validate the argument. We'd like to let the Wi-Fi driver do this,
@@ -1505,9 +1241,11 @@ public class WifiService extends IWifiManager.Stub {
             return false;
         }
 
-        Settings.Secure.putInt(mContext.getContentResolver(),
-                               Settings.Secure.WIFI_NUM_ALLOWED_CHANNELS,
-                               numChannels);
+        if (persist) {
+            Settings.Secure.putInt(mContext.getContentResolver(),
+                                   Settings.Secure.WIFI_NUM_ALLOWED_CHANNELS,
+                                   numChannels);
+        }
         mWifiStateTracker.setNumAllowedChannels(numChannels);
         return true;
     }
@@ -1586,9 +1324,16 @@ public class WifiService extends IWifiManager.Stub {
                 if (!shouldWifiStayAwake(stayAwakeConditions, mPluggedType)) {
                     WifiInfo info = mWifiStateTracker.requestConnectionInfo();
                     if (info.getSupplicantState() != SupplicantState.COMPLETED) {
-                        // do not keep Wifi awake when screen is off if Wifi is not associated
-                        mDeviceIdle = true;
-                        updateWifiState();
+                        // we used to go to sleep immediately, but this caused some race conditions
+                        // we don't have time to track down for this release.  Delay instead, but not
+                        // as long as we would if connected (below)
+                        // TODO - fix the race conditions and switch back to the immediate turn-off
+                        long triggerTime = System.currentTimeMillis() + (2*60*1000); // 2 min
+                        Log.d(TAG, "setting ACTION_DEVICE_IDLE timer for 120,000 ms");
+                        mAlarmManager.set(AlarmManager.RTC_WAKEUP, triggerTime, mIdleIntent);
+                        //  // do not keep Wifi awake when screen is off if Wifi is not associated
+                        //  mDeviceIdle = true;
+                        //  updateWifiState();
                     } else {
                         long triggerTime = System.currentTimeMillis() + idleMillis;
                         Log.d(TAG, "setting ACTION_DEVICE_IDLE timer for " + idleMillis + "ms");
@@ -1619,10 +1364,10 @@ public class WifiService extends IWifiManager.Stub {
                     return;
                 }
                 mPluggedType = pluggedType;
-            } else if (action.equals(BluetoothA2dp.SINK_STATE_CHANGED_ACTION)) {
+            } else if (action.equals(BluetoothA2dp.ACTION_SINK_STATE_CHANGED)) {
                 boolean isBluetoothPlaying =
                         intent.getIntExtra(
-                                BluetoothA2dp.SINK_STATE,
+                                BluetoothA2dp.EXTRA_SINK_STATE,
                                 BluetoothA2dp.STATE_DISCONNECTED) == BluetoothA2dp.STATE_PLAYING;
                 mWifiStateTracker.setBluetoothScanMode(isBluetoothPlaying);
             } else {
@@ -1688,7 +1433,7 @@ public class WifiService extends IWifiManager.Stub {
 
     private void updateWifiState() {
         boolean wifiEnabled = getPersistedWifiEnabled();
-        boolean airplaneMode = isAirplaneModeOn();
+        boolean airplaneMode = isAirplaneModeOn() && !mAirplaneModeOverwridden;
         boolean lockHeld = mLocks.hasLocks();
         int strongestLockMode;
         boolean wifiShouldBeEnabled = wifiEnabled && !airplaneMode;
@@ -1741,7 +1486,7 @@ public class WifiService extends IWifiManager.Stub {
         intentFilter.addAction(Intent.ACTION_SCREEN_OFF);
         intentFilter.addAction(Intent.ACTION_BATTERY_CHANGED);
         intentFilter.addAction(ACTION_DEVICE_IDLE);
-        intentFilter.addAction(BluetoothA2dp.SINK_STATE_CHANGED_ACTION);
+        intentFilter.addAction(BluetoothA2dp.ACTION_SINK_STATE_CHANGED);
         mContext.registerReceiver(mReceiver, intentFilter);
     }
     
@@ -1750,6 +1495,13 @@ public class WifiService extends IWifiManager.Stub {
                 Settings.System.AIRPLANE_MODE_RADIOS);
         return airplaneModeRadios == null
             || airplaneModeRadios.contains(Settings.System.RADIO_WIFI);
+    }
+
+    private boolean isAirplaneToggleable() {
+        String toggleableRadios = Settings.System.getString(mContext.getContentResolver(),
+                Settings.System.AIRPLANE_MODE_TOGGLEABLE_RADIOS);
+        return toggleableRadios != null
+            && toggleableRadios.contains(Settings.System.RADIO_WIFI);
     }
 
     /**
@@ -1950,8 +1702,10 @@ public class WifiService extends IWifiManager.Stub {
     }
 
     private boolean acquireWifiLockLocked(WifiLock wifiLock) {
+        Log.d(TAG, "acquireWifiLockLocked: " + wifiLock);
+
         mLocks.addLock(wifiLock);
-        
+
         int uid = Binder.getCallingUid();
         long ident = Binder.clearCallingIdentity();
         try {
@@ -1969,7 +1723,7 @@ public class WifiService extends IWifiManager.Stub {
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
-        
+
         updateWifiState();
         return true;
     }
@@ -1983,8 +1737,11 @@ public class WifiService extends IWifiManager.Stub {
 
     private boolean releaseWifiLockLocked(IBinder lock) {
         boolean hadLock;
-        
+
         WifiLock wifiLock = mLocks.removeLock(lock);
+
+        Log.d(TAG, "releaseWifiLockLocked: " + wifiLock);
+
         hadLock = (wifiLock != null);
 
         if (hadLock) {
@@ -2006,7 +1763,7 @@ public class WifiService extends IWifiManager.Stub {
                 Binder.restoreCallingIdentity(ident);
             }
         }
-        
+        // TODO - should this only happen if you hadLock?
         updateWifiState();
         return hadLock;
     }
@@ -2068,7 +1825,9 @@ public class WifiService extends IWifiManager.Stub {
             // our new size == 1 (first call), but this function won't
             // be called often and by making the stopPacket call each
             // time we're less fragile and self-healing.
-            WifiNative.stopPacketFiltering();
+            synchronized (mWifiStateTracker) {
+                WifiNative.stopPacketFiltering();
+            }
         }
 
         int uid = Binder.getCallingUid();
@@ -2104,7 +1863,9 @@ public class WifiService extends IWifiManager.Stub {
             removed.unlinkDeathRecipient();
         }
         if (mMulticasters.size() == 0) {
-            WifiNative.startPacketFiltering();
+            synchronized (mWifiStateTracker) {
+                WifiNative.startPacketFiltering();
+            }
         }
 
         Long ident = Binder.clearCallingIdentity();

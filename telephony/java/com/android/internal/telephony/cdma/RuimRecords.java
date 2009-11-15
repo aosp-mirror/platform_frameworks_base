@@ -28,7 +28,7 @@ import com.android.internal.telephony.AdnRecordLoader;
 import com.android.internal.telephony.CommandsInterface;
 import com.android.internal.telephony.TelephonyProperties;
 import com.android.internal.telephony.cdma.RuimCard;
-import com.android.internal.telephony.gsm.MccTable;
+import com.android.internal.telephony.MccTable;
 
 // can't be used since VoiceMailConstants is not public
 //import com.android.internal.telephony.gsm.VoiceMailConstants;
@@ -36,10 +36,6 @@ import com.android.internal.telephony.IccException;
 import com.android.internal.telephony.IccRecords;
 import com.android.internal.telephony.IccUtils;
 import com.android.internal.telephony.PhoneProxy;
-
-import com.android.internal.telephony.TelephonyIntents;
-import android.app.ActivityManagerNative;
-import android.content.Intent;
 
 
 /**
@@ -51,7 +47,7 @@ public final class RuimRecords extends IccRecords {
     private static final boolean DBG = true;
     private boolean  m_ota_commited=false;
 
-    //***** Instance Variables
+    // ***** Instance Variables
 
     private String mImsi;
     private String mMyMobileNumber;
@@ -59,13 +55,12 @@ public final class RuimRecords extends IccRecords {
 
     private String mPrlVersion;
 
-    //***** Event Constants
+    // ***** Event Constants
 
     private static final int EVENT_RUIM_READY = 1;
     private static final int EVENT_RADIO_OFF_OR_NOT_AVAILABLE = 2;
     private static final int EVENT_GET_DEVICE_IDENTITY_DONE = 4;
     private static final int EVENT_GET_ICCID_DONE = 5;
-    private static final int EVENT_NV_READY = 9;
     private static final int EVENT_GET_CDMA_SUBSCRIPTION_DONE = 10;
     private static final int EVENT_UPDATE_DONE = 14;
     private static final int EVENT_GET_SST_DONE = 17;
@@ -76,7 +71,7 @@ public final class RuimRecords extends IccRecords {
     private static final int EVENT_GET_SMS_DONE = 22;
 
     private static final int EVENT_RUIM_REFRESH = 31;
-    private static final int EVENT_OTA_PROVISION_STATUS_CHANGE = 32;
+
 
     RuimRecords(CDMAPhone p) {
         super(p);
@@ -90,14 +85,12 @@ public final class RuimRecords extends IccRecords {
 
 
         p.mCM.registerForRUIMReady(this, EVENT_RUIM_READY, null);
-        p.mCM.registerForNVReady(this, EVENT_NV_READY, null);
         p.mCM.registerForOffOrNotAvailable(this, EVENT_RADIO_OFF_OR_NOT_AVAILABLE, null);
         // NOTE the EVENT_SMS_ON_RUIM is not registered
         p.mCM.setOnIccRefresh(this, EVENT_RUIM_REFRESH, null);
 
         // Start off by setting empty state
         onRadioOffOrNotAvailable();
-        p.mCM.registerForCdmaOtaProvision(this,EVENT_OTA_PROVISION_STATUS_CHANGE, null);
 
     }
 
@@ -106,8 +99,6 @@ public final class RuimRecords extends IccRecords {
         phone.mCM.unregisterForRUIMReady(this);
         phone.mCM.unregisterForOffOrNotAvailable( this);
         phone.mCM.unSetOnIccRefresh(this);
-        phone.mCM.unregisterForNVReady(this);
-        phone.mCM.unregisterForCdmaOtaProvision(this);
     }
 
     @Override
@@ -118,7 +109,7 @@ public final class RuimRecords extends IccRecords {
     @Override
     protected void onRadioOffOrNotAvailable() {
         countVoiceMessages = 0;
-        mncLength = 0;
+        mncLength = UNINITIALIZED;
         iccid = null;
 
         adnCache.reset();
@@ -176,7 +167,7 @@ public final class RuimRecords extends IccRecords {
         }
 
         // TODO(Moto): mncLength is not set anywhere.
-        if (mncLength != 0) {
+        if (mncLength != UNINITIALIZED && mncLength != UNKNOWN) {
             // Length = length of MCC + length of MNC
             // TODO: change spec name
             // length of mcc = 3 (3GPP2 C.S0005 - Section 2.3)
@@ -202,9 +193,7 @@ public final class RuimRecords extends IccRecords {
             case EVENT_RUIM_READY:
                 onRuimReady();
             break;
-            case EVENT_NV_READY:
-                onNvReady();
-            break;
+
             case EVENT_RADIO_OFF_OR_NOT_AVAILABLE:
                 onRadioOffOrNotAvailable();
             break;
@@ -221,15 +210,7 @@ public final class RuimRecords extends IccRecords {
                 if (ar.exception != null) {
                     break;
                 }
-                if (m_ota_commited) {
-                    if (mMyMobileNumber != localTemp[0]) {
-                        Intent intent = new Intent(TelephonyIntents.ACTION_CDMA_OTA_MDN_CHANGED);
-                        intent.putExtra("mdn", localTemp[0]);
-                        Log.d(LOG_TAG,"Broadcasting intent MDN Change in OTA ");
-                        ActivityManagerNative.broadcastStickyIntent(intent, null);
-                    }
-                    m_ota_commited = false;
-                }
+
                 mMyMobileNumber = localTemp[0];
                 mMin2Min1 = localTemp[3];
                 mPrlVersion = localTemp[4];
@@ -281,21 +262,6 @@ public final class RuimRecords extends IccRecords {
                 }
                 break;
 
-            case EVENT_OTA_PROVISION_STATUS_CHANGE:
-                m_ota_commited=false;
-                ar = (AsyncResult)msg.obj;
-                if (ar.exception == null) {
-                    int[] ints = (int[]) ar.result;
-                    int otaStatus = ints[0];
-                    if (otaStatus == phone.CDMA_OTA_PROVISION_STATUS_COMMITTED) {
-                        m_ota_commited=true;
-                        phone.mCM.getCDMASubscription(obtainMessage(EVENT_GET_CDMA_SUBSCRIPTION_DONE));
-                    } else if (otaStatus == phone.CDMA_OTA_PROVISION_STATUS_OTAPA_STOPPED) {
-                        phone.mCM.getCDMASubscription(obtainMessage(EVENT_GET_CDMA_SUBSCRIPTION_DONE));
-                    }
-                 }
-                 break;
-
         }}catch (RuntimeException exc) {
             // I don't want these exceptions to be fatal
             Log.w(LOG_TAG, "Exception parsing RUIM record", exc);
@@ -329,7 +295,7 @@ public final class RuimRecords extends IccRecords {
 
         recordsLoadedRegistrants.notifyRegistrants(
             new AsyncResult(null, null, null));
-        ((CDMAPhone) phone).mRuimCard.broadcastRuimStateChangedIntent(
+        ((CDMAPhone) phone).mRuimCard.broadcastIccStateChangedIntent(
                 RuimCard.INTENT_VALUE_ICC_LOADED, null);
     }
 
@@ -338,7 +304,7 @@ public final class RuimRecords extends IccRecords {
           READY is sent before IMSI ready
         */
 
-        ((CDMAPhone) phone).mRuimCard.broadcastRuimStateChangedIntent(
+        ((CDMAPhone) phone).mRuimCard.broadcastIccStateChangedIntent(
                 RuimCard.INTENT_VALUE_ICC_READY, null);
 
         fetchRuimRecords();
@@ -347,10 +313,6 @@ public final class RuimRecords extends IccRecords {
 
     }
 
-    private void onNvReady() {
-        phone.mCM.getCDMASubscription(obtainMessage(EVENT_GET_CDMA_SUBSCRIPTION_DONE));
-
-    }
 
     private void fetchRuimRecords() {
         recordsRequested = true;

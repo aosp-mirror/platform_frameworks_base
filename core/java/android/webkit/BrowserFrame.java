@@ -16,6 +16,7 @@
 
 package android.webkit;
 
+import android.app.ActivityManager;
 import android.content.Context;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
@@ -31,6 +32,7 @@ import junit.framework.Assert;
 
 import java.net.URLEncoder;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Iterator;
 
 class BrowserFrame extends Handler {
@@ -59,7 +61,7 @@ class BrowserFrame extends Handler {
     private boolean mIsMainFrame;
 
     // Attached Javascript interfaces
-    private HashMap mJSInterfaceMap;
+    private Map<String, Object> mJSInterfaceMap;
 
     // message ids
     // a message posted when a frame loading is completed
@@ -98,20 +100,27 @@ class BrowserFrame extends Handler {
      * XXX: Called by WebCore thread.
      */
     public BrowserFrame(Context context, WebViewCore w, CallbackProxy proxy,
-            WebSettings settings) {
+            WebSettings settings, Map<String, Object> javascriptInterfaces) {
         // Create a global JWebCoreJavaBridge to handle timers and
         // cookies in the WebCore thread.
         if (sJavaBridge == null) {
-            sJavaBridge = new JWebCoreJavaBridge();
+            sJavaBridge = new JWebCoreJavaBridge(context);
             // set WebCore native cache size
-            sJavaBridge.setCacheSize(4 * 1024 * 1024);
+            ActivityManager am = (ActivityManager) context
+                    .getSystemService(Context.ACTIVITY_SERVICE);
+            if (am.getMemoryClass() > 16) {
+                sJavaBridge.setCacheSize(8 * 1024 * 1024);
+            } else {
+                sJavaBridge.setCacheSize(4 * 1024 * 1024);
+            }
             // initialize CacheManager
             CacheManager.init(context);
             // create CookieSyncManager with current Context
             CookieSyncManager.createInstance(context);
+            // create PluginManager with current Context
+            PluginManager.getInstance(context);
         }
-        AssetManager am = context.getAssets();
-        nativeCreateFrame(w, am, proxy.getBackForwardList());
+        mJSInterfaceMap = javascriptInterfaces;
 
         mSettings = settings;
         mContext = context;
@@ -119,7 +128,10 @@ class BrowserFrame extends Handler {
         mDatabase = WebViewDatabase.getInstance(context);
         mWebViewCore = w;
 
-        if (WebView.LOGV_ENABLED) {
+        AssetManager am = context.getAssets();
+        nativeCreateFrame(w, am, proxy.getBackForwardList());
+
+        if (DebugFlags.BROWSER_FRAME) {
             Log.v(LOGTAG, "BrowserFrame constructor: this=" + this);
         }
     }
@@ -217,7 +229,6 @@ class BrowserFrame extends Handler {
 
     private void resetLoadingStates() {
         mCommitted = true;
-        mWebViewCore.mEndScaleZoom = mFirstLayoutDone == false;
         mFirstLayoutDone = true;
     }
 
@@ -240,7 +251,6 @@ class BrowserFrame extends Handler {
             // blocking the update in {@link #loadStarted}
             mWebViewCore.contentDraw();
         }
-        mWebViewCore.mEndScaleZoom = true;
     }
 
     /**
@@ -341,17 +351,16 @@ class BrowserFrame extends Handler {
         switch (msg.what) {
             case FRAME_COMPLETED: {
                 if (mSettings.getSavePassword() && hasPasswordField()) {
-                    if (WebView.DEBUG) {
-                        Assert.assertNotNull(mCallbackProxy.getBackForwardList()
-                                .getCurrentItem());
-                    }
-                    WebAddress uri = new WebAddress(
-                            mCallbackProxy.getBackForwardList().getCurrentItem()
-                            .getUrl());
-                    String schemePlusHost = uri.mScheme + uri.mHost;
-                    String[] up = mDatabase.getUsernamePassword(schemePlusHost);
-                    if (up != null && up[0] != null) {
-                        setUsernamePassword(up[0], up[1]);
+                    WebHistoryItem item = mCallbackProxy.getBackForwardList()
+                            .getCurrentItem();
+                    if (item != null) {
+                        WebAddress uri = new WebAddress(item.getUrl());
+                        String schemePlusHost = uri.mScheme + uri.mHost;
+                        String[] up =
+                                mDatabase.getUsernamePassword(schemePlusHost);
+                        if (up != null && up[0] != null) {
+                            setUsernamePassword(up[0], up[1]);
+                        }
                     }
                 }
                 CacheManager.trimCacheIfNeeded();
@@ -463,8 +472,6 @@ class BrowserFrame extends Handler {
      * @param postData If the method is "POST" postData is sent as the request
      *                 body. Is null when empty.
      * @param cacheMode The cache mode to use when loading this resource.
-     * @param isHighPriority True if this resource needs to be put at the front
-     *                       of the network queue.
      * @param synchronous True if the load is synchronous.
      * @return A newly created LoadListener object.
      */
@@ -474,7 +481,6 @@ class BrowserFrame extends Handler {
                                               HashMap headers,
                                               byte[] postData,
                                               int cacheMode,
-                                              boolean isHighPriority,
                                               boolean synchronous) {
         PerfChecker checker = new PerfChecker();
 
@@ -490,7 +496,7 @@ class BrowserFrame extends Handler {
             }
             if (mSettings.getSavePassword() && hasPasswordField()) {
                 try {
-                    if (WebView.DEBUG) {
+                    if (DebugFlags.BROWSER_FRAME) {
                         Assert.assertNotNull(mCallbackProxy.getBackForwardList()
                                 .getCurrentItem());
                     }
@@ -538,10 +544,10 @@ class BrowserFrame extends Handler {
         // is this resource the main-frame top-level page?
         boolean isMainFramePage = mIsMainFrame;
 
-        if (WebView.LOGV_ENABLED) {
+        if (DebugFlags.BROWSER_FRAME) {
             Log.v(LOGTAG, "startLoadingResource: url=" + url + ", method="
-                    + method + ", postData=" + postData + ", isHighPriority="
-                    + isHighPriority + ", isMainFramePage=" + isMainFramePage);
+                    + method + ", postData=" + postData + ", isMainFramePage="
+                    + isMainFramePage);
         }
 
         // Create a LoadListener
@@ -551,23 +557,17 @@ class BrowserFrame extends Handler {
         mCallbackProxy.onLoadResource(url);
 
         if (LoadListener.getNativeLoaderCount() > MAX_OUTSTANDING_REQUESTS) {
+            // send an error message, so that loadListener can be deleted
+            // after this is returned. This is important as LoadListener's 
+            // nativeError will remove the request from its DocLoader's request
+            // list. But the set up is not done until this method is returned.
             loadListener.error(
                     android.net.http.EventHandler.ERROR, mContext.getString(
                             com.android.internal.R.string.httpErrorTooManyRequests));
-            loadListener.notifyError();
-            loadListener.tearDown();
-            return null;
+            return loadListener;
         }
 
-        // during synchronous load, the WebViewCore thread is blocked, so we
-        // need to endCacheTransaction first so that http thread won't be 
-        // blocked in setupFile() when createCacheFile.
-        if (synchronous) {
-            CacheManager.endCacheTransaction();
-        }
-
-        FrameLoader loader = new FrameLoader(loadListener, mSettings,
-                method, isHighPriority);
+        FrameLoader loader = new FrameLoader(loadListener, mSettings, method);
         loader.setHeaders(headers);
         loader.setPostData(postData);
         // Set the load mode to the mode used for the current page.
@@ -580,10 +580,6 @@ class BrowserFrame extends Handler {
             checker.responseAlert("startLoadingResource fail");
         }
         checker.responseAlert("startLoadingResource succeed");
-
-        if (synchronous) {
-            CacheManager.startCacheTransaction();
-        }
 
         return !synchronous ? loadListener : null;
     }
@@ -613,6 +609,11 @@ class BrowserFrame extends Handler {
      */
     private void didReceiveIcon(Bitmap icon) {
         mCallbackProxy.onReceivedIcon(icon);
+    }
+
+    // Called by JNI when an apple-touch-icon attribute was found.
+    private void didReceiveTouchIconUrl(String url, boolean precomposed) {
+        mCallbackProxy.onReceivedTouchIconUrl(url, precomposed);
     }
 
     /**
@@ -677,6 +678,7 @@ class BrowserFrame extends Handler {
     // these ids need to be in sync with enum RAW_RES_ID in WebFrame
     private static final int NODOMAIN = 1;
     private static final int LOADERROR = 2;
+    private static final int DRAWABLEDIR = 3;
 
     String getRawResFilename(int id) {
         int resid;
@@ -689,13 +691,31 @@ class BrowserFrame extends Handler {
                 resid = com.android.internal.R.raw.loaderror;
                 break;
 
+            case DRAWABLEDIR:
+                // use one known resource to find the drawable directory
+                resid = com.android.internal.R.drawable.btn_check_off;
+                break;
+
             default:
                 Log.e(LOGTAG, "getRawResFilename got incompatible resource ID");
-                return new String();
+                return "";
         }
         TypedValue value = new TypedValue();
         mContext.getResources().getValue(resid, value, true);
+        if (id == DRAWABLEDIR) {
+            String path = value.string.toString();
+            int index = path.lastIndexOf('/');
+            if (index < 0) {
+                Log.e(LOGTAG, "Can't find drawable directory.");
+                return "";
+            }
+            return path.substring(0, index + 1);
+        }
         return value.string.toString();
+    }
+
+    private float density() {
+        return mContext.getResources().getDisplayMetrics().density;
     }
 
     //==========================================================================

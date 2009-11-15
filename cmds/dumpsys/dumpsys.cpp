@@ -6,9 +6,9 @@
 #define LOG_TAG "dumpsys"
 
 #include <utils/Log.h>
-#include <utils/Parcel.h>
-#include <utils/ProcessState.h>
-#include <utils/IServiceManager.h>
+#include <binder/Parcel.h>
+#include <binder/ProcessState.h>
+#include <binder/IServiceManager.h>
 #include <utils/TextOutput.h>
 #include <utils/Vector.h>
 

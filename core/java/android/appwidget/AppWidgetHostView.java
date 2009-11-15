@@ -24,16 +24,17 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.os.SystemClock;
+import android.os.Parcelable;
+import android.os.Parcel;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.util.SparseArray;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.RemoteViews;
 import android.widget.TextView;
-import android.widget.FrameLayout.LayoutParams;
 
 /**
  * Provides the glue to show AppWidget views. This class offers automatic animation
@@ -108,6 +109,32 @@ public class AppWidgetHostView extends FrameLayout {
         return mInfo;
     }
 
+    @Override
+    protected void dispatchSaveInstanceState(SparseArray<Parcelable> container) {
+        final ParcelableSparseArray jail = new ParcelableSparseArray();
+        super.dispatchSaveInstanceState(jail);
+        container.put(generateId(), jail);
+    }
+
+    private int generateId() {
+        final int id = getId();
+        return id == View.NO_ID ? mAppWidgetId : id;
+    }
+
+    @Override
+    protected void dispatchRestoreInstanceState(SparseArray<Parcelable> container) {
+        final Parcelable parcelable = container.get(generateId());
+
+        ParcelableSparseArray jail = null;
+        if (parcelable != null && parcelable instanceof ParcelableSparseArray) {
+            jail = (ParcelableSparseArray) parcelable;
+        }
+
+        if (jail == null) jail = new ParcelableSparseArray();
+
+        super.dispatchRestoreInstanceState(jail);
+    }
+
     /** {@inheritDoc} */
     @Override
     public LayoutParams generateLayoutParams(AttributeSet attrs) {
@@ -120,7 +147,7 @@ public class AppWidgetHostView extends FrameLayout {
 
     /**
      * Process a set of {@link RemoteViews} coming in as an update from the
-     * AppWidget provider. Will animate into these new views as needed.
+     * AppWidget provider. Will animate into these new views as needed
      */
     public void updateAppWidget(RemoteViews remoteViews) {
         if (LOGD) Log.d(TAG, "updateAppWidget called mOld=" + mOld);
@@ -303,6 +330,7 @@ public class AppWidgetHostView extends FrameLayout {
             if (mInfo != null) {
                 Context theirContext = mContext.createPackageContext(
                         mInfo.provider.getPackageName(), Context.CONTEXT_RESTRICTED);
+                mRemoteContext = theirContext;
                 LayoutInflater inflater = (LayoutInflater)
                         theirContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
                 inflater = inflater.cloneInContext(theirContext);
@@ -317,8 +345,8 @@ public class AppWidgetHostView extends FrameLayout {
             exception = e;
         }
         
-        if (exception != null && LOGD) {
-            Log.w(TAG, "Error inflating AppWidget " + mInfo, exception);
+        if (exception != null) {
+            Log.w(TAG, "Error inflating AppWidget " + mInfo + ": " + exception.toString());
         }
         
         if (defaultView == null) {
@@ -338,5 +366,37 @@ public class AppWidgetHostView extends FrameLayout {
         // TODO: get this color from somewhere.
         tv.setBackgroundColor(Color.argb(127, 0, 0, 0));
         return tv;
+    }
+
+    private static class ParcelableSparseArray extends SparseArray<Parcelable> implements Parcelable {
+        public int describeContents() {
+            return 0;
+        }
+
+        public void writeToParcel(Parcel dest, int flags) {
+            final int count = size();
+            dest.writeInt(count);
+            for (int i = 0; i < count; i++) {
+                dest.writeInt(keyAt(i));
+                dest.writeParcelable(valueAt(i), 0);
+            }
+        }
+
+        public static final Parcelable.Creator<ParcelableSparseArray> CREATOR =
+                new Parcelable.Creator<ParcelableSparseArray>() {
+                    public ParcelableSparseArray createFromParcel(Parcel source) {
+                        final ParcelableSparseArray array = new ParcelableSparseArray();
+                        final ClassLoader loader = array.getClass().getClassLoader();
+                        final int count = source.readInt();
+                        for (int i = 0; i < count; i++) {
+                            array.put(source.readInt(), source.readParcelable(loader));
+                        }
+                        return array;
+                    }
+
+                    public ParcelableSparseArray[] newArray(int size) {
+                        return new ParcelableSparseArray[size];
+                    }
+                };
     }
 }

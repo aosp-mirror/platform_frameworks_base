@@ -36,6 +36,7 @@ import java.io.IOException;
  */
 public abstract class BackupAgent extends ContextWrapper {
     private static final String TAG = "BackupAgent";
+    private static final boolean DEBUG = false;
 
     public BackupAgent() {
         super(null);
@@ -116,7 +117,7 @@ public abstract class BackupAgent extends ContextWrapper {
                 ParcelFileDescriptor data,
                 ParcelFileDescriptor newState) throws RemoteException {
             // !!! TODO - real implementation; for now just invoke the callbacks directly
-            Log.v(TAG, "doBackup() invoked");
+            if (DEBUG) Log.v(TAG, "doBackup() invoked");
             BackupDataOutput output = new BackupDataOutput(data.getFileDescriptor());
             try {
                 BackupAgent.this.onBackup(oldState, output, newState);
@@ -132,7 +133,7 @@ public abstract class BackupAgent extends ContextWrapper {
         public void doRestore(ParcelFileDescriptor data, int appVersionCode,
                 ParcelFileDescriptor newState) throws RemoteException {
             // !!! TODO - real implementation; for now just invoke the callbacks directly
-            Log.v(TAG, "doRestore() invoked");
+            if (DEBUG) Log.v(TAG, "doRestore() invoked");
             BackupDataInput input = new BackupDataInput(data.getFileDescriptor());
             try {
                 BackupAgent.this.onRestore(input, appVersionCode, newState);

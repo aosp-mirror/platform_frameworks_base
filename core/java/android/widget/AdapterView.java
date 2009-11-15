@@ -163,7 +163,7 @@ public abstract class AdapterView<T extends Adapter> extends ViewGroup {
     /**
      * View to show if there are no items to show.
      */
-    View mEmptyView;
+    private View mEmptyView;
 
     /**
      * The number of items in the current adapter.

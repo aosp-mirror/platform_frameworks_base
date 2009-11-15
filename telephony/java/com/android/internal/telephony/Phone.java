@@ -22,6 +22,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.preference.PreferenceManager;
 import android.telephony.CellLocation;
+import android.telephony.PhoneStateListener;
 import android.telephony.ServiceState;
 import android.telephony.SignalStrength;
 
@@ -98,8 +99,9 @@ public interface Phone {
     static final String PHONE_NAME_KEY = "phoneName";
     static final String FAILURE_REASON_KEY = "reason";
     static final String STATE_CHANGE_REASON_KEY = "reason";
-    static final String DATA_APN_TYPE_KEY = "apnType";
+    static final String DATA_APN_TYPES_KEY = "apnType";
     static final String DATA_APN_KEY = "apn";
+
     static final String DATA_IFACE_NAME_KEY = "iface";
     static final String NETWORK_UNAVAILABLE_KEY = "networkUnvailable";
     static final String PHONE_IN_ECM_STATE = "phoneinECMState";
@@ -119,10 +121,16 @@ public interface Phone {
     static final String APN_TYPE_MMS = "mms";
     /** APN type for SUPL assisted GPS */
     static final String APN_TYPE_SUPL = "supl";
+    /** APN type for DUN traffic */
+    static final String APN_TYPE_DUN = "dun";
+    /** APN type for HiPri traffic */
+    static final String APN_TYPE_HIPRI = "hipri";
 
     // "Features" accessible through the connectivity manager
     static final String FEATURE_ENABLE_MMS = "enableMMS";
     static final String FEATURE_ENABLE_SUPL = "enableSUPL";
+    static final String FEATURE_ENABLE_DUN = "enableDUN";
+    static final String FEATURE_ENABLE_HIPRI = "enableHIPRI";
 
     /**
      * Return codes for <code>enableApnType()</code>
@@ -146,6 +154,7 @@ public interface Phone {
     static final String REASON_CDMA_DATA_DETACHED = "cdmaDataDetached";
     static final String REASON_APN_CHANGED = "apnChanged";
     static final String REASON_APN_SWITCHED = "apnSwitched";
+    static final String REASON_APN_FAILED = "apnFailed";
     static final String REASON_RESTORE_DEFAULT_APN = "restoreDefaultApn";
     static final String REASON_RADIO_TURNED_OFF = "radioTurnedOff";
     static final String REASON_PDP_RESET = "pdpReset";
@@ -163,6 +172,11 @@ public interface Phone {
     static final int BM_AUS_BAND    = 4; // GSM-900 / DCS-1800 / WCDMA-850 / WCDMA-IMT-2000
     static final int BM_AUS2_BAND   = 5; // GSM-900 / DCS-1800 / WCDMA-850
     static final int BM_BOUNDARY    = 6; // upper band boundary
+
+    // Radio Type
+    static final int PHONE_TYPE_NONE = RILConstants.NO_PHONE;
+    static final int PHONE_TYPE_GSM = RILConstants.GSM_PHONE;
+    static final int PHONE_TYPE_CDMA = RILConstants.CDMA_PHONE;
 
     // Used for preferred network type
     // Note NT_* substitute RILConstants.NETWORK_MODE_* above the Phone
@@ -260,8 +274,8 @@ public interface Phone {
 
     /**
      * Get current coarse-grained voice call state.
-     * Use {@link #registerForPhoneStateChanged(Handler, int, Object)
-     * registerForPhoneStateChanged()} for change notification. <p>
+     * Use {@link #registerForPreciseCallStateChanged(Handler, int, Object)
+     * registerForPreciseCallStateChanged()} for change notification. <p>
      * If the phone has an active call and call waiting occurs,
      * then the phone state is RINGING not OFFHOOK
      * <strong>Note:</strong>
@@ -277,6 +291,12 @@ public interface Phone {
      *  @return The string name.
      */
     String getPhoneName();
+
+    /**
+     * Return a numerical identifier for the phone radio interface.
+     * @return PHONE_TYPE_XXX as defined above.
+     */
+    int getPhoneType();
 
     /**
      * Returns an array of string identifiers for the APN types serviced by the
@@ -315,18 +335,21 @@ public interface Phone {
     void unregisterForUnknownConnection(Handler h);
 
     /**
-     * Notifies when any aspect of the voice call state changes.
+     * Register for getting notifications for change in the Call State {@link Call.State}
+     * This is called PreciseCallState because the call state is more precise than the
+     * {@link Phone.State} which can be obtained using the {@link PhoneStateListener}
+     *
      * Resulting events will have an AsyncResult in <code>Message.obj</code>.
      * AsyncResult.userData will be set to the obj argument here.
      * The <em>h</em> parameter is held only by a weak reference.
      */
-    void registerForPhoneStateChanged(Handler h, int what, Object obj);
+    void registerForPreciseCallStateChanged(Handler h, int what, Object obj);
 
     /**
      * Unregisters for voice call state change notifications.
      * Extraneous calls are tolerated silently.
      */
-    void unregisterForPhoneStateChanged(Handler h);
+    void unregisterForPreciseCallStateChanged(Handler h);
 
 
     /**
@@ -366,6 +389,23 @@ public interface Phone {
      */
 
     void unregisterForIncomingRing(Handler h);
+
+    /**
+     * Notifies when out-band ringback tone is needed.<p>
+     *
+     *  Messages received from this:
+     *  Message.obj will be an AsyncResult
+     *  AsyncResult.userObj = obj
+     *  AsyncResult.result = boolean, true to start play ringback tone
+     *                       and false to stop. <p>
+     */
+    void registerForRingbackTone(Handler h, int what, Object obj);
+
+    /**
+     * Unregisters for ringback tone notification.
+     */
+
+    void unregisterForRingbackTone(Handler h);
 
 
     /**
@@ -421,6 +461,20 @@ public interface Phone {
      * Extraneous calls are tolerated silently
      */
     void unregisterForMmiComplete(Handler h);
+
+    /**
+     * Registration point for Ecm timer reset
+     * @param h handler to notify
+     * @param what user-defined message code
+     * @param obj placed in Message.obj
+     */
+    public void registerForEcmTimerReset(Handler h, int what, Object obj);
+
+    /**
+     * Unregister for notification for Ecm timer reset
+     * @param h Handler to be removed from the registrant list.
+     */
+    public void unregisterForEcmTimerReset(Handler h);
 
     /**
      * Returns a list of MMI codes that are pending. (They have initiated
@@ -538,6 +592,20 @@ public interface Phone {
     void unregisterForCdmaOtaStatusChange(Handler h);
 
     /**
+     * Registration point for subscription info ready
+     * @param h handler to notify
+     * @param what what code of message when delivered
+     * @param obj placed in Message.obj
+     */
+    public void registerForSubscriptionInfoReady(Handler h, int what, Object obj);
+
+    /**
+     * Unregister for notifications for subscription info
+     * @param h Handler to be removed from the registrant list.
+     */
+    public void unregisterForSubscriptionInfoReady(Handler h);
+
+    /**
      * Returns SIM record load state. Use
      * <code>getSimCard().registerForReady()</code> for change notification.
      *
@@ -556,8 +624,8 @@ public interface Phone {
     /**
      * Answers a ringing or waiting call. Active calls, if any, go on hold.
      * Answering occurs asynchronously, and final notification occurs via
-     * {@link #registerForPhoneStateChanged(android.os.Handler, int,
-     * java.lang.Object) registerForPhoneStateChanged()}.
+     * {@link #registerForPreciseCallStateChanged(android.os.Handler, int,
+     * java.lang.Object) registerForPreciseCallStateChanged()}.
      *
      * @exception CallStateException when no call is ringing or waiting
      */
@@ -567,8 +635,8 @@ public interface Phone {
      * Reject (ignore) a ringing call. In GSM, this means UDUB
      * (User Determined User Busy). Reject occurs asynchronously,
      * and final notification occurs via
-     * {@link #registerForPhoneStateChanged(android.os.Handler, int,
-     * java.lang.Object) registerForPhoneStateChanged()}.
+     * {@link #registerForPreciseCallStateChanged(android.os.Handler, int,
+     * java.lang.Object) registerForPreciseCallStateChanged()}.
      *
      * @exception CallStateException when no call is ringing or waiting
      */
@@ -578,8 +646,8 @@ public interface Phone {
      * Places any active calls on hold, and makes any held calls
      *  active. Switch occurs asynchronously and may fail.
      * Final notification occurs via
-     * {@link #registerForPhoneStateChanged(android.os.Handler, int,
-     * java.lang.Object) registerForPhoneStateChanged()}.
+     * {@link #registerForPreciseCallStateChanged(android.os.Handler, int,
+     * java.lang.Object) registerForPreciseCallStateChanged()}.
      *
      * @exception CallStateException if a call is ringing, waiting, or
      * dialing/alerting. In these cases, this operation may not be performed.
@@ -596,8 +664,8 @@ public interface Phone {
     /**
      * Conferences holding and active. Conference occurs asynchronously
      * and may fail. Final notification occurs via
-     * {@link #registerForPhoneStateChanged(android.os.Handler, int,
-     * java.lang.Object) registerForPhoneStateChanged()}.
+     * {@link #registerForPreciseCallStateChanged(android.os.Handler, int,
+     * java.lang.Object) registerForPreciseCallStateChanged()}.
      *
      * @exception CallStateException if canConference() would return false.
      * In these cases, this operation may not be performed.
@@ -631,8 +699,8 @@ public interface Phone {
      * Connects the two calls and disconnects the subscriber from both calls
      * Explicit Call Transfer occurs asynchronously
      * and may fail. Final notification occurs via
-     * {@link #registerForPhoneStateChanged(android.os.Handler, int,
-     * java.lang.Object) registerForPhoneStateChanged()}.
+     * {@link #registerForPreciseCallStateChanged(android.os.Handler, int,
+     * java.lang.Object) registerForPreciseCallStateChanged()}.
      *
      * @exception CallStateException if canTransfer() would return false.
      * In these cases, this operation may not be performed.
@@ -659,8 +727,8 @@ public interface Phone {
      * IDLE, ACTIVE, DIALING, ALERTING, or DISCONNECTED.
      *
      * State change notification is available via
-     * {@link #registerForPhoneStateChanged(android.os.Handler, int,
-     * java.lang.Object) registerForPhoneStateChanged()}.
+     * {@link #registerForPreciseCallStateChanged(android.os.Handler, int,
+     * java.lang.Object) registerForPreciseCallStateChanged()}.
      */
     Call getForegroundCall();
 
@@ -676,8 +744,8 @@ public interface Phone {
      * IDLE, HOLDING or DISCONNECTED.
      *
      * State change notification is available via
-     * {@link #registerForPhoneStateChanged(android.os.Handler, int,
-     * java.lang.Object) registerForPhoneStateChanged()}.
+     * {@link #registerForPreciseCallStateChanged(android.os.Handler, int,
+     * java.lang.Object) registerForPreciseCallStateChanged()}.
      */
     Call getBackgroundCall();
 
@@ -693,8 +761,8 @@ public interface Phone {
      * IDLE, INCOMING, WAITING or DISCONNECTED.
      *
      * State change notification is available via
-     * {@link #registerForPhoneStateChanged(android.os.Handler, int,
-     * java.lang.Object) registerForPhoneStateChanged()}.
+     * {@link #registerForPreciseCallStateChanged(android.os.Handler, int,
+     * java.lang.Object) registerForPreciseCallStateChanged()}.
      */
     Call getRingingCall();
 
@@ -1067,8 +1135,8 @@ public interface Phone {
 
     /**
      * Gets current mute status. Use
-     * {@link #registerForPhoneStateChanged(android.os.Handler, int,
-     * java.lang.Object) registerForPhoneStateChanged()}
+     * {@link #registerForPreciseCallStateChanged(android.os.Handler, int,
+     * java.lang.Object) registerForPreciseCallStateChanged()}
      * as a change notifcation, although presently phone state changed is not
      * fired when setMute() is called.
      *
@@ -1150,17 +1218,9 @@ public interface Phone {
     List<DataConnection> getCurrentDataConnectionList ();
 
     /**
-     * Udpate LAC and CID in service state for currnet GSM netowrk registration
-     *
-     * If get different LAC and/or CID, notifyServiceState will be sent
-     *
-     * @param
-     * <strong>On failure</strong>,
-     * (((AsyncResult)response.obj).result) == null and
-     * (((AsyncResult)response.obj).exception) being an instance of
-     * com.android.internal.telephony.gsm.CommandException
+     * Update the ServiceState CellLocation for current network registration.
      */
-    void updateServiceLocation(Message response);
+    void updateServiceLocation();
 
     /**
      * Enable location update notifications.
@@ -1262,6 +1322,13 @@ public interface Phone {
     boolean disableDataConnectivity();
 
     /**
+     * Report the current state of data connectivity (enabled or disabled)
+     * @return {@code false} if data connectivity has been explicitly disabled,
+     * {@code true} otherwise.
+     */
+    boolean isDataConnectivityEnabled();
+
+    /**
      * Enables the specified APN type. Only works for "special" APN types,
      * i.e., not the default APN.
      * @param type The desired APN type. Cannot be {@link #APN_TYPE_DEFAULT}.
@@ -1342,7 +1409,7 @@ public interface Phone {
      */
     String getIccSerialNumber();
 
-    //***** CDMA support methods
+    /* CDMA support methods */
 
     /*
      * TODO(Moto) TODO(Teleca): can getCdmaMin, getEsn, getMeid use more generic calls
@@ -1353,6 +1420,13 @@ public interface Phone {
      * Retrieves the MIN for CDMA phones.
      */
     String getCdmaMin();
+
+    /**
+     * Check if subscription data has been assigned to mMin
+     *
+     * return true if MIN info is ready; false otherwise.
+     */
+    boolean isMinInfoReady();
 
     /**
      *  Retrieves PRL Version for CDMA phones

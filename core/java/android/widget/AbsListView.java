@@ -546,6 +546,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
 
     private void initAbsListView() {
         // Setting focusable in touch mode will set the focusable property to true
+        setClickable(true);
         setFocusableInTouchMode(true);
         setWillNotDraw(false);
         setAlwaysDrawnWithCacheEnabled(false);
@@ -1433,6 +1434,10 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
      * this is a long press.
      */
     void keyPressed() {
+        if (!isEnabled() || !isClickable()) {
+            return;
+        }
+
         Drawable selector = mSelector;
         Rect selectorRect = mSelectorRect;
         if (selector != null && (isFocused() || touchModeDrawsInPressedState())
@@ -1450,8 +1455,8 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             Drawable d = selector.getCurrent();
             if (d != null && d instanceof TransitionDrawable) {
                 if (longClickable) {
-                    ((TransitionDrawable) d).startTransition(ViewConfiguration
-                            .getLongPressTimeout());
+                    ((TransitionDrawable) d).startTransition(
+                            ViewConfiguration.getLongPressTimeout());
                 } else {
                     ((TransitionDrawable) d).resetTransition();
                 }
@@ -1732,18 +1737,29 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     }
 
     @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        return false;
+    }
+
+    @Override
     public boolean onKeyUp(int keyCode, KeyEvent event) {
         switch (keyCode) {
         case KeyEvent.KEYCODE_DPAD_CENTER:
         case KeyEvent.KEYCODE_ENTER:
-            if (isPressed() && mSelectedPosition >= 0 && mAdapter != null &&
+            if (!isEnabled()) {
+                return true;
+            }
+            if (isClickable() && isPressed() &&
+                    mSelectedPosition >= 0 && mAdapter != null &&
                     mSelectedPosition < mAdapter.getCount()) {
+
                 final View view = getChildAt(mSelectedPosition - mFirstPosition);
                 performItemClick(view, mSelectedPosition, mSelectedRowId);
                 setPressed(false);
                 if (view != null) view.setPressed(false);
                 return true;
             }
+            break;
         }
         return super.onKeyUp(keyCode, event);
     }
@@ -1892,6 +1908,12 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
 
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
+        if (!isEnabled()) {
+            // A disabled view that is clickable still consumes the touch
+            // events, it just doesn't respond to them.
+            return isClickable() || isLongClickable();
+        }
+
         if (mFastScroller != null) {
             boolean intercepted = mFastScroller.onTouchEvent(ev);
             if (intercepted) {
@@ -1974,7 +1996,10 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 if (y != mLastY) {
                     deltaY -= mMotionCorrection;
                     int incrementalDeltaY = mLastY != Integer.MIN_VALUE ? y - mLastY : deltaY;
-                    trackMotionScroll(deltaY, incrementalDeltaY);
+                    // No need to do all this work if we're not going to move anyway
+                    if (incrementalDeltaY != 0) {
+                        trackMotionScroll(deltaY, incrementalDeltaY);
+                    }
 
                     // Check to see if we have bumped into the scroll limit
                     View motionView = this.getChildAt(mMotionPosition - mFirstPosition);
@@ -2041,7 +2066,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                             if (mSelector != null) {
                                 Drawable d = mSelector.getCurrent();
                                 if (d != null && d instanceof TransitionDrawable) {
-                                    ((TransitionDrawable)d).resetTransition();
+                                    ((TransitionDrawable) d).resetTransition();
                                 }
                             }
                             postDelayed(new Runnable() {
@@ -2065,15 +2090,27 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 mTouchMode = TOUCH_MODE_REST;
                 break;
             case TOUCH_MODE_SCROLL:
-                final VelocityTracker velocityTracker = mVelocityTracker;
-                velocityTracker.computeCurrentVelocity(1000, mMaximumVelocity);
-                final int initialVelocity = (int) velocityTracker.getYVelocity();
-                if (Math.abs(initialVelocity) > mMinimumVelocity && (getChildCount() > 0)) {
-                    if (mFlingRunnable == null) {
-                        mFlingRunnable = new FlingRunnable();
+                final int childCount = getChildCount();
+                if (childCount > 0) {
+                    if (mFirstPosition == 0 && getChildAt(0).getTop() >= mListPadding.top &&
+                            mFirstPosition + childCount < mItemCount &&
+                            getChildAt(childCount - 1).getBottom() <=
+                                    getHeight() - mListPadding.bottom) {
+                        mTouchMode = TOUCH_MODE_REST;
+                        reportScrollStateChange(OnScrollListener.SCROLL_STATE_IDLE);
+                    } else {
+                        final VelocityTracker velocityTracker = mVelocityTracker;
+                        velocityTracker.computeCurrentVelocity(1000, mMaximumVelocity);
+                        final int initialVelocity = (int) velocityTracker.getYVelocity();
+    
+                        if (Math.abs(initialVelocity) > mMinimumVelocity) {
+                            if (mFlingRunnable == null) {
+                                mFlingRunnable = new FlingRunnable();
+                            }
+                            reportScrollStateChange(OnScrollListener.SCROLL_STATE_FLING);
+                            mFlingRunnable.start(-initialVelocity);
+                        }
                     }
-                    reportScrollStateChange(OnScrollListener.SCROLL_STATE_FLING);
-                    mFlingRunnable.start(-initialVelocity);
                 } else {
                     mTouchMode = TOUCH_MODE_REST;
                     reportScrollStateChange(OnScrollListener.SCROLL_STATE_IDLE);
@@ -2166,6 +2203,9 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 clearScrollingCache();
             }
             mLastY = Integer.MIN_VALUE;
+            if (mTouchMode == TOUCH_MODE_FLING) {
+                return true;
+            }
             break;
         }
 
@@ -2407,7 +2447,9 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         if (spaceAbove >= absIncrementalDeltaY && spaceBelow >= absIncrementalDeltaY) {
             hideSelector();
             offsetChildrenTopAndBottom(incrementalDeltaY);
-            invalidate();
+            if (!awakenScrollBars()) {
+                invalidate();
+            }
             mMotionViewNewTop = mMotionViewOriginalTop + deltaY;
         } else {
             final int firstPosition = mFirstPosition;
@@ -2490,6 +2532,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             mBlockLayoutRequests = false;
 
             invokeOnItemScrollListener();
+            awakenScrollBars();
         }
     }
 
@@ -2908,10 +2951,16 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             okToSend = false;
             break;
         case KeyEvent.KEYCODE_BACK:
-            if (mFiltered && mPopup != null && mPopup.isShowing() &&
-                    event.getAction() == KeyEvent.ACTION_DOWN) {
-                handled = true;
-                mTextFilter.setText("");
+            if (mFiltered && mPopup != null && mPopup.isShowing()) {
+                if (event.getAction() == KeyEvent.ACTION_DOWN
+                        && event.getRepeatCount() == 0) {
+                    getKeyDispatcherState().startTracking(event, this);
+                    handled = true;
+                } else if (event.getAction() == KeyEvent.ACTION_UP
+                        && event.isTracking() && !event.isCanceled()) {
+                    handled = true;
+                    mTextFilter.setText("");
+                }
             }
             okToSend = false;
             break;

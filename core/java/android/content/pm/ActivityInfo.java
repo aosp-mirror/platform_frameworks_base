@@ -127,12 +127,20 @@ public class ActivityInfo extends ComponentInfo
      */
     public static final int FLAG_NO_HISTORY = 0x0080;
     /**
+     * Bit in {@link #flags} indicating that, when a request to close system
+     * windows happens, this activity is finished.
+     * Set from the
+     * {@link android.R.attr#finishOnCloseSystemDialogs} attribute.
+     */
+    public static final int FLAG_FINISH_ON_CLOSE_SYSTEM_DIALOGS = 0x0100;
+    /**
      * Options that have been set in the activity declaration in the
      * manifest: {@link #FLAG_MULTIPROCESS},
      * {@link #FLAG_FINISH_ON_TASK_LAUNCH}, {@link #FLAG_CLEAR_TASK_ON_LAUNCH},
      * {@link #FLAG_ALWAYS_RETAIN_TASK_STATE},
      * {@link #FLAG_STATE_NOT_NEEDED}, {@link #FLAG_EXCLUDE_FROM_RECENTS},
-     * {@link #FLAG_ALLOW_TASK_REPARENTING}, {@link #FLAG_NO_HISTORY}.
+     * {@link #FLAG_ALLOW_TASK_REPARENTING}, {@link #FLAG_NO_HISTORY},
+     * {@link #FLAG_FINISH_ON_CLOSE_SYSTEM_DIALOGS}.
      */
     public int flags;
 
@@ -217,7 +225,9 @@ public class ActivityInfo extends ComponentInfo
     public static final int CONFIG_KEYBOARD = 0x0010;
     /**
      * Bit in {@link #configChanges} that indicates that the activity
-     * can itself handle changes to the keyboard being hidden/exposed. 
+     * can itself handle changes to the keyboard or navigation being hidden/exposed.
+     * Note that inspite of the name, this applies to the changes to any
+     * hidden states: keyboard or navigation.
      * Set from the {@link android.R.attr#configChanges} attribute.
      */
     public static final int CONFIG_KEYBOARD_HIDDEN = 0x0020;

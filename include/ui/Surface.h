@@ -28,48 +28,41 @@
 #include <ui/Region.h>
 #include <ui/ISurfaceFlingerClient.h>
 
+#include <ui/egl/android_natives.h>
+
 namespace android {
 
 // ---------------------------------------------------------------------------
 
+class GraphicBufferMapper;
+class IOMX;
 class Rect;
+class Surface;
 class SurfaceComposerClient;
+class SharedClient;
+class SharedBufferClient;
 
-class Surface : public RefBase
+// ---------------------------------------------------------------------------
+
+class SurfaceControl : public RefBase
 {
-
 public:
-    struct SurfaceInfo {
-        uint32_t    w;
-        uint32_t    h;
-        uint32_t    bpr;
-        PixelFormat format;
-        void*       bits;
-        void*       base;
-        uint32_t    reserved[2];
-    };
-
-    bool        isValid() const { return this && mToken>=0 && mClient!=0; }
+    static bool isValid(const sp<SurfaceControl>& surface) {
+        return (surface != 0) && surface->isValid();
+    }
+    bool isValid() {
+        return mToken>=0 && mClient!=0;
+    }
+    static bool isSameSurface(
+            const sp<SurfaceControl>& lhs, const sp<SurfaceControl>& rhs);
+        
     SurfaceID   ID() const      { return mToken; }
-
-    status_t    lock(SurfaceInfo* info, bool blocking = true);
-    status_t    lock(SurfaceInfo* info, Region* dirty, bool blocking = true);
-    status_t    unlockAndPost();
-    status_t    unlock();
-
-    void*       heapBase(int i) const;
     uint32_t    getFlags() const { return mFlags; }
+    uint32_t    getIdentity() const { return mIdentity; }
 
-    // setSwapRectangle() is mainly used by EGL
-    void        setSwapRectangle(const Rect& r);
-    const Rect& swapRectangle() const;
-    status_t    nextBuffer(SurfaceInfo* info);
-
-    sp<Surface>         dup() const;
-    static sp<Surface>  readFromParcel(Parcel* parcel);
-    static status_t     writeToParcel(const sp<Surface>& surface, Parcel* parcel);
-    static bool         isSameSurface(const sp<Surface>& lhs, const sp<Surface>& rhs);
-
+    // release surface data from java
+    void        clear();
+    
     status_t    setLayer(int32_t layer);
     status_t    setPosition(int32_t x, int32_t y);
     status_t    setSize(uint32_t w, uint32_t h);
@@ -83,8 +76,17 @@ public:
     status_t    setMatrix(float dsdx, float dtdx, float dsdy, float dtdy);
     status_t    setFreezeTint(uint32_t tint);
 
-    uint32_t    getIdentity() const { return mIdentity; }
+    static status_t writeSurfaceToParcel(
+            const sp<SurfaceControl>& control, Parcel* parcel);
+
+    sp<Surface> getSurface() const;
+
 private:
+    // can't be copied
+    SurfaceControl& operator = (SurfaceControl& rhs);
+    SurfaceControl(const SurfaceControl& rhs);
+
+    
     friend class SurfaceComposerClient;
 
     // camera and camcorder need access to the ISurface binder interface for preview
@@ -92,43 +94,158 @@ private:
     friend class MediaRecorder;
     // mediaplayer needs access to ISurface for display
     friend class MediaPlayer;
+    // for testing
     friend class Test;
     const sp<ISurface>& getISurface() const { return mSurface; }
+    
 
+    friend class Surface;
+
+    SurfaceControl(
+            const sp<SurfaceComposerClient>& client,
+            const sp<ISurface>& surface,
+            const ISurfaceFlingerClient::surface_data_t& data,
+            uint32_t w, uint32_t h, PixelFormat format, uint32_t flags);
+
+    ~SurfaceControl();
+
+    status_t validate(SharedClient const* cblk) const;
+    void destroy();
+    
+    sp<SurfaceComposerClient>   mClient;
+    sp<ISurface>                mSurface;
+    SurfaceID                   mToken;
+    uint32_t                    mIdentity;
+    uint32_t                    mWidth;
+    uint32_t                    mHeight;
+    PixelFormat                 mFormat;
+    uint32_t                    mFlags;
+    mutable Mutex               mLock;
+    
+    mutable sp<Surface>         mSurfaceData;
+};
+    
+// ---------------------------------------------------------------------------
+
+class Surface 
+    : public EGLNativeBase<android_native_window_t, Surface, RefBase>
+{
+public:
+    struct SurfaceInfo {
+        uint32_t    w;
+        uint32_t    h;
+        uint32_t    s;
+        uint32_t    usage;
+        PixelFormat format;
+        void*       bits;
+        uint32_t    reserved[2];
+    };
+
+    Surface(const Parcel& data);
+
+    static bool isValid(const sp<Surface>& surface) {
+        return (surface != 0) && surface->isValid();
+    }
+
+    static bool isSameSurface(
+            const sp<Surface>& lhs, const sp<Surface>& rhs);
+
+    bool        isValid();
+    SurfaceID   ID() const          { return mToken; }
+    uint32_t    getFlags() const    { return mFlags; }
+    uint32_t    getIdentity() const { return mIdentity; }
+
+    // the lock/unlock APIs must be used from the same thread
+    status_t    lock(SurfaceInfo* info, bool blocking = true);
+    status_t    lock(SurfaceInfo* info, Region* dirty, bool blocking = true);
+    status_t    unlockAndPost();
+
+    // setSwapRectangle() is intended to be used by GL ES clients
+    void        setSwapRectangle(const Rect& r);
+
+private:
     // can't be copied
     Surface& operator = (Surface& rhs);
     Surface(const Surface& rhs);
 
-    Surface(const sp<SurfaceComposerClient>& client,
-            const sp<ISurface>& surface,
-            const ISurfaceFlingerClient::surface_data_t& data,
-            uint32_t w, uint32_t h, PixelFormat format, uint32_t flags,
-            bool owner = true);
+    Surface(const sp<SurfaceControl>& control);
+    void init();
+     ~Surface();
+  
+    friend class SurfaceComposerClient;
+    friend class SurfaceControl;
 
-    Surface(Surface const* rhs);
+    
+    // camera and camcorder need access to the ISurface binder interface for preview
+    friend class Camera;
+    friend class MediaRecorder;
+    // mediaplayer needs access to ISurface for display
+    friend class MediaPlayer;
+    friend class IOMX;
+    // this is just to be able to write some unit tests
+    friend class Test;
 
-    ~Surface();
+    sp<SurfaceComposerClient> getClient() const;
+    sp<ISurface> getISurface() const;
 
-    Region dirtyRegion() const;
-    void setDirtyRegion(const Region& region) const;
+    status_t getBufferLocked(int index, int usage);
+   
+           status_t validate(SharedClient const* cblk) const;
 
-    // this locks protects calls to lockSurface() / unlockSurface()
-    // and is called by SurfaceComposerClient.
-    Mutex& getLock() const { return mSurfaceLock; }
+    inline const GraphicBufferMapper& getBufferMapper() const { return mBufferMapper; }
+    inline GraphicBufferMapper& getBufferMapper() { return mBufferMapper; }
+    
+    static int setSwapInterval(android_native_window_t* window, int interval);
+    static int dequeueBuffer(android_native_window_t* window, android_native_buffer_t** buffer);
+    static int lockBuffer(android_native_window_t* window, android_native_buffer_t* buffer);
+    static int queueBuffer(android_native_window_t* window, android_native_buffer_t* buffer);
+    static int query(android_native_window_t* window, int what, int* value);
+    static int perform(android_native_window_t* window, int operation, ...);
 
+    int dequeueBuffer(android_native_buffer_t** buffer);
+    int lockBuffer(android_native_buffer_t* buffer);
+    int queueBuffer(android_native_buffer_t* buffer);
+    int query(int what, int* value);
+    int perform(int operation, va_list args);
+
+    status_t dequeueBuffer(sp<GraphicBuffer>* buffer);
+
+    
+    void setUsage(uint32_t reqUsage);
+    uint32_t getUsage() const;
+    
+    // constants
     sp<SurfaceComposerClient>   mClient;
     sp<ISurface>                mSurface;
-    sp<IMemoryHeap>             mHeap[2];
     SurfaceID                   mToken;
     uint32_t                    mIdentity;
     PixelFormat                 mFormat;
     uint32_t                    mFlags;
-    const bool                  mOwner;
-    mutable void*               mSurfaceHeapBase[2];
+    GraphicBufferMapper&        mBufferMapper;
+    SharedBufferClient*         mSharedBufferClient;
+
+    // protected by mSurfaceLock
+    Rect                        mSwapRectangle;
+    uint32_t                    mUsage;
+    
+    // protected by mSurfaceLock. These are also used from lock/unlock
+    // but in that case, they must be called form the same thread.
+    sp<GraphicBuffer>           mBuffers[2];
     mutable Region              mDirtyRegion;
-    mutable Rect                mSwapRectangle;
-    mutable uint8_t             mBackbufferIndex;
+
+    // must be used from the lock/unlock thread
+    sp<GraphicBuffer>           mLockedBuffer;
+    sp<GraphicBuffer>           mPostedBuffer;
+    mutable Region              mOldDirtyRegion;
+    bool                        mNeedFullUpdate;
+
+    // query() must be called from dequeueBuffer() thread
+    uint32_t                    mWidth;
+    uint32_t                    mHeight;
+
+    // Inherently thread-safe
     mutable Mutex               mSurfaceLock;
+    mutable Mutex               mApiLock;
 };
 
 }; // namespace android

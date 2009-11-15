@@ -24,6 +24,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IIntentSender;
+import android.content.IntentSender;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
@@ -34,6 +35,7 @@ import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -788,8 +790,8 @@ public class Activity extends ContextThemeWrapper
      * @see #onPostCreate
      */
     protected void onCreate(Bundle savedInstanceState) {
-        mVisibleFromClient = mWindow.getWindowStyle().getBoolean(
-                com.android.internal.R.styleable.Window_windowNoDisplay, true);
+        mVisibleFromClient = !mWindow.getWindowStyle().getBoolean(
+                com.android.internal.R.styleable.Window_windowNoDisplay, false);
         mCalled = true;
     }
 
@@ -1752,8 +1754,17 @@ public class Activity extends ContextThemeWrapper
      * 
      * <p>If the focused view didn't want this event, this method is called.
      *
-     * <p>The default implementation handles KEYCODE_BACK to stop the activity
-     * and go back, and other default key handling if configured with {@link #setDefaultKeyMode}.
+     * <p>The default implementation takes care of {@link KeyEvent#KEYCODE_BACK}
+     * by calling {@link #onBackPressed()}, though the behavior varies based
+     * on the application compatibility mode: for
+     * {@link android.os.Build.VERSION_CODES#ECLAIR} or later applications,
+     * it will set up the dispatch to call {@link #onKeyUp} where the action
+     * will be performed; for earlier applications, it will perform the
+     * action immediately in on-down, as those versions of the platform
+     * behaved.
+     * 
+     * <p>Other additional default key handling may be performed
+     * if configured with {@link #setDefaultKeyMode}.
      * 
      * @return Return <code>true</code> to prevent this event from being propagated
      * further, or <code>false</code> to indicate that you have not handled 
@@ -1762,16 +1773,24 @@ public class Activity extends ContextThemeWrapper
      * @see android.view.KeyEvent
      */
     public boolean onKeyDown(int keyCode, KeyEvent event)  {
-        if (keyCode == KeyEvent.KEYCODE_BACK && event.getRepeatCount() == 0) {
-            finish();
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            if (getApplicationInfo().targetSdkVersion
+                    >= Build.VERSION_CODES.ECLAIR) {
+                event.startTracking();
+            } else {
+                onBackPressed();
+            }
             return true;
         }
         
         if (mDefaultKeyMode == DEFAULT_KEYS_DISABLE) {
             return false;
         } else if (mDefaultKeyMode == DEFAULT_KEYS_SHORTCUT) {
-            return getWindow().performPanelShortcut(Window.FEATURE_OPTIONS_PANEL, 
-                                                    keyCode, event, Menu.FLAG_ALWAYS_PERFORM_CLOSE);
+            if (getWindow().performPanelShortcut(Window.FEATURE_OPTIONS_PANEL, 
+                    keyCode, event, Menu.FLAG_ALWAYS_PERFORM_CLOSE)) {
+                return true;
+            }
+            return false;
         } else {
             // Common code for DEFAULT_KEYS_DIALER & DEFAULT_KEYS_SEARCH_*
             boolean clearSpannable = false;
@@ -1780,8 +1799,8 @@ public class Activity extends ContextThemeWrapper
                 clearSpannable = true;
                 handled = false;
             } else {
-                handled = TextKeyListener.getInstance().onKeyDown(null, mDefaultKeySsb, 
-                                                                  keyCode, event);
+                handled = TextKeyListener.getInstance().onKeyDown(
+                        null, mDefaultKeySsb, keyCode, event);
                 if (handled && mDefaultKeySsb.length() > 0) {
                     // something useable has been typed - dispatch it now.
 
@@ -1813,10 +1832,22 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
+     * Default implementation of {@link KeyEvent.Callback#onKeyLongPress(int, KeyEvent)
+     * KeyEvent.Callback.onKeyLongPress()}: always returns false (doesn't handle
+     * the event).
+     */
+    public boolean onKeyLongPress(int keyCode, KeyEvent event) {
+        return false;
+    }
+
+    /**
      * Called when a key was released and not handled by any of the views
      * inside of the activity. So, for example, key presses while the cursor 
      * is inside a TextView will not trigger the event (unless it is a navigation
      * to another object) because TextView handles its own key presses.
+     * 
+     * <p>The default implementation handles KEYCODE_BACK to stop the activity
+     * and go back.
      * 
      * @return Return <code>true</code> to prevent this event from being propagated
      * further, or <code>false</code> to indicate that you have not handled 
@@ -1825,6 +1856,14 @@ public class Activity extends ContextThemeWrapper
      * @see KeyEvent
      */
     public boolean onKeyUp(int keyCode, KeyEvent event) {
+        if (getApplicationInfo().targetSdkVersion
+                >= Build.VERSION_CODES.ECLAIR) {
+            if (keyCode == KeyEvent.KEYCODE_BACK && event.isTracking()
+                    && !event.isCanceled()) {
+                onBackPressed();
+                return true;
+            }
+        }
         return false;
     }
 
@@ -1835,6 +1874,15 @@ public class Activity extends ContextThemeWrapper
      */
     public boolean onKeyMultiple(int keyCode, int repeatCount, KeyEvent event) {
         return false;
+    }
+    
+    /**
+     * Called when the activity has detected the user's press of the back
+     * key.  The default implementation simply finishes the current activity,
+     * but you can override this to do whatever you want.
+     */
+    public void onBackPressed() {
+        finish();
     }
     
     /**
@@ -1909,9 +1957,10 @@ public class Activity extends ContextThemeWrapper
     /**
      * Called when the current {@link Window} of the activity gains or loses
      * focus.  This is the best indicator of whether this activity is visible
-     * to the user.
+     * to the user.  The default implementation clears the key tracking
+     * state, so should always be called.
      * 
-     * <p>Note that this provides information what global focus state, which
+     * <p>Note that this provides information about global focus state, which
      * is managed independently of activity lifecycles.  As such, while focus
      * changes will generally have some relation to lifecycle changes (an
      * activity that is stopped will not generally get window focus), you
@@ -1930,8 +1979,29 @@ public class Activity extends ContextThemeWrapper
      * 
      * @see #hasWindowFocus()
      * @see #onResume
+     * @see View#onWindowFocusChanged(boolean)
      */
     public void onWindowFocusChanged(boolean hasFocus) {
+    }
+    
+    /**
+     * Called when the main window associated with the activity has been
+     * attached to the window manager.
+     * See {@link View#onAttachedToWindow() View.onAttachedToWindow()}
+     * for more information.
+     * @see View#onAttachedToWindow
+     */
+    public void onAttachedToWindow() {
+    }
+    
+    /**
+     * Called when the main window associated with the activity has been
+     * detached from the window manager.
+     * See {@link View#onDetachedFromWindow() View.onDetachedFromWindow()}
+     * for more information.
+     * @see View#onDetachedFromWindow
+     */
+    public void onDetachedFromWindow() {
     }
     
     /**
@@ -1964,10 +2034,14 @@ public class Activity extends ContextThemeWrapper
      */
     public boolean dispatchKeyEvent(KeyEvent event) {
         onUserInteraction();
-        if (getWindow().superDispatchKeyEvent(event)) {
+        Window win = getWindow();
+        if (win.superDispatchKeyEvent(event)) {
             return true;
         }
-        return event.dispatch(this);
+        View decor = mDecor;
+        if (decor == null) decor = win.getDecorView();
+        return event.dispatch(this, decor != null
+                ? decor.getKeyDispatcherState() : null, this);
     }
 
     /**
@@ -2394,6 +2468,7 @@ public class Activity extends ContextThemeWrapper
      *
      * @param id The id of the managed dialog.
      *
+     * @see Dialog
      * @see #onCreateDialog(int)
      * @see #onPrepareDialog(int, Dialog)
      * @see #dismissDialog(int)
@@ -2479,16 +2554,17 @@ public class Activity extends ContextThemeWrapper
     /**
      * This hook is called when the user signals the desire to start a search.
      * 
-     * <p>You can use this function as a simple way to launch the search UI, in response to a 
-     * menu item, search button, or other widgets within your activity.  Unless overidden, 
-     * calling this function is the same as calling:
-     * <p>The default implementation simply calls 
-     * {@link #startSearch startSearch(null, false, null, false)}, launching a local search.
+     * <p>You can use this function as a simple way to launch the search UI, in response to a
+     * menu item, search button, or other widgets within your activity. Unless overidden, 
+     * calling this function is the same as calling
+     * {@link #startSearch startSearch(null, false, null, false)}, which launches
+     * search for the current activity as specified in its manifest, see {@link SearchManager}.
      * 
      * <p>You can override this function to force global search, e.g. in response to a dedicated
      * search key, or to block search entirely (by simply returning false).
      * 
-     * @return Returns true if search launched, false if activity blocks it
+     * @return Returns {@code true} if search launched, and {@code false} if activity blocks it.
+     *         The default implementation always returns {@code true}.
      * 
      * @see android.app.SearchManager
      */
@@ -2532,6 +2608,21 @@ public class Activity extends ContextThemeWrapper
         ensureSearchManager();
         mSearchManager.startSearch(initialQuery, selectInitialQuery, getComponentName(),
                         appSearchData, globalSearch); 
+    }
+
+    /**
+     * Similar to {@link #startSearch}, but actually fires off the search query after invoking
+     * the search dialog.  Made available for testing purposes.
+     *
+     * @param query The query to trigger.  If empty, the request will be ignored.
+     * @param appSearchData An application can insert application-specific
+     * context here, in order to improve quality or specificity of its own
+     * searches.  This data will be returned with SEARCH intent(s).  Null if
+     * no extra data is required.
+     */
+    public void triggerSearch(String query, Bundle appSearchData) {
+        ensureSearchManager();
+        mSearchManager.triggerSearch(query, getComponentName(), appSearchData);
     }
 
     /**
@@ -2608,10 +2699,8 @@ public class Activity extends ContextThemeWrapper
     }
 
     @Override
-    protected void onApplyThemeResource(Resources.Theme theme,
-                                      int resid,
-                                      boolean first)
-    {
+    protected void onApplyThemeResource(Resources.Theme theme, int resid,
+            boolean first) {
         if (mParent == null) {
             super.onApplyThemeResource(theme, resid, first);
         } else {
@@ -2682,6 +2771,68 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
+     * Like {@link #startActivityForResult(Intent, int)}, but allowing you
+     * to use a IntentSender to describe the activity to be started.  If
+     * the IntentSender is for an activity, that activity will be started
+     * as if you had called the regular {@link #startActivityForResult(Intent, int)}
+     * here; otherwise, its associated action will be executed (such as
+     * sending a broadcast) as if you had called
+     * {@link IntentSender#sendIntent IntentSender.sendIntent} on it.
+     * 
+     * @param intent The IntentSender to launch.
+     * @param requestCode If >= 0, this code will be returned in
+     *                    onActivityResult() when the activity exits.
+     * @param fillInIntent If non-null, this will be provided as the
+     * intent parameter to {@link IntentSender#sendIntent}.
+     * @param flagsMask Intent flags in the original IntentSender that you
+     * would like to change.
+     * @param flagsValues Desired values for any bits set in
+     * <var>flagsMask</var>
+     * @param extraFlags Always set to 0.
+     */
+    public void startIntentSenderForResult(IntentSender intent, int requestCode,
+            Intent fillInIntent, int flagsMask, int flagsValues, int extraFlags)
+            throws IntentSender.SendIntentException {
+        if (mParent == null) {
+            startIntentSenderForResultInner(intent, requestCode, fillInIntent,
+                    flagsMask, flagsValues, this);
+        } else {
+            mParent.startIntentSenderFromChild(this, intent, requestCode,
+                    fillInIntent, flagsMask, flagsValues, extraFlags);
+        }
+    }
+
+    private void startIntentSenderForResultInner(IntentSender intent, int requestCode,
+            Intent fillInIntent, int flagsMask, int flagsValues, Activity activity)
+            throws IntentSender.SendIntentException {
+        try {
+            String resolvedType = null;
+            if (fillInIntent != null) {
+                resolvedType = fillInIntent.resolveTypeIfNeeded(getContentResolver());
+            }
+            int result = ActivityManagerNative.getDefault()
+                .startActivityIntentSender(mMainThread.getApplicationThread(), intent,
+                        fillInIntent, resolvedType, mToken, activity.mEmbeddedID,
+                        requestCode, flagsMask, flagsValues);
+            if (result == IActivityManager.START_CANCELED) {
+                throw new IntentSender.SendIntentException();
+            }
+            Instrumentation.checkStartActivityResult(result, null);
+        } catch (RemoteException e) {
+        }
+        if (requestCode >= 0) {
+            // If this start is requesting a result, we can avoid making
+            // the activity visible until the result is received.  Setting
+            // this code during onCreate(Bundle savedInstanceState) or onResume() will keep the
+            // activity hidden during this time, to avoid flickering.
+            // This can only be done when a result is requested because
+            // that guarantees we will get information back when the
+            // activity is finished, no matter what happens to it.
+            mStartedActivity = true;
+        }
+    }
+
+    /**
      * Launch a new activity.  You will not receive any information about when
      * the activity exits.  This implementation overrides the base version,
      * providing information about
@@ -2702,6 +2853,28 @@ public class Activity extends ContextThemeWrapper
     @Override
     public void startActivity(Intent intent) {
         startActivityForResult(intent, -1);
+    }
+
+    /**
+     * Like {@link #startActivity(Intent)}, but taking a IntentSender
+     * to start; see
+     * {@link #startIntentSenderForResult(IntentSender, int, Intent, int, int, int)}
+     * for more information.
+     * 
+     * @param intent The IntentSender to launch.
+     * @param fillInIntent If non-null, this will be provided as the
+     * intent parameter to {@link IntentSender#sendIntent}.
+     * @param flagsMask Intent flags in the original IntentSender that you
+     * would like to change.
+     * @param flagsValues Desired values for any bits set in
+     * <var>flagsMask</var>
+     * @param extraFlags Always set to 0.
+     */
+    public void startIntentSender(IntentSender intent,
+            Intent fillInIntent, int flagsMask, int flagsValues, int extraFlags)
+            throws IntentSender.SendIntentException {
+        startIntentSenderForResult(intent, -1, fillInIntent, flagsMask,
+                flagsValues, extraFlags);
     }
 
     /**
@@ -2824,6 +2997,37 @@ public class Activity extends ContextThemeWrapper
         }
     }
 
+    /**
+     * Like {@link #startActivityFromChild(Activity, Intent, int)}, but
+     * taking a IntentSender; see
+     * {@link #startIntentSenderForResult(IntentSender, int, Intent, int, int, int)}
+     * for more information.
+     */
+    public void startIntentSenderFromChild(Activity child, IntentSender intent,
+            int requestCode, Intent fillInIntent, int flagsMask, int flagsValues,
+            int extraFlags)
+            throws IntentSender.SendIntentException {
+        startIntentSenderForResultInner(intent, requestCode, fillInIntent,
+                flagsMask, flagsValues, child);
+    }
+
+    /**
+     * Call immediately after one of the flavors of {@link #startActivity(Intent)}
+     * or {@link #finish} to specify an explicit transition animation to
+     * perform next.
+     * @param enterAnim A resource ID of the animation resource to use for
+     * the incoming activity.  Use 0 for no animation.
+     * @param exitAnim A resource ID of the animation resource to use for
+     * the outgoing activity.  Use 0 for no animation.
+     */
+    public void overridePendingTransition(int enterAnim, int exitAnim) {
+        try {
+            ActivityManagerNative.getDefault().overridePendingTransition(
+                    mToken, getPackageName(), enterAnim, exitAnim);
+        } catch (RemoteException e) {
+        }
+    }
+    
     /**
      * Call this to set the result that your activity will return to its
      * caller.
@@ -3255,7 +3459,7 @@ public class Activity extends ContextThemeWrapper
                 throw new IllegalArgumentException("no ident");
             }
         }
-        mSearchManager.setIdent(ident);
+        mSearchManager.setIdent(ident, getComponentName());
     }
     
     @Override

@@ -23,10 +23,9 @@
 #include <ui/CameraHardwareInterface.h>
 #include <ui/Camera.h>
 
-class android::MemoryHeapBase;
-
 namespace android {
 
+class MemoryHeapBase;
 class MediaPlayer;
 
 // ----------------------------------------------------------------------------
@@ -110,6 +109,9 @@ private:
         // auto focus
         virtual status_t        autoFocus();
 
+        // cancel auto focus
+        virtual status_t        cancelAutoFocus();
+
         // take a picture - returns an IMemory (ref-counted mmap)
         virtual status_t        takePicture();
 
@@ -118,6 +120,9 @@ private:
 
         // get preview/capture parameters - key/value pairs
         virtual String8         getParameters() const;
+
+        // send command to camera driver
+        virtual status_t        sendCommand(int32_t cmd, int32_t arg1, int32_t arg2);
 
         // our client...
         const sp<ICameraClient>&    getCameraClient() const { return mCameraClient; }
@@ -132,22 +137,21 @@ private:
 
                     status_t    checkPid();
 
-        static      void        recordingCallback(nsecs_t timestamp, const sp<IMemory>& mem, void* user);
-        static      void        previewCallback(const sp<IMemory>& mem, void* user);
-        static      void        shutterCallback(void *user);
-        static      void        yuvPictureCallback(const sp<IMemory>& mem, void* user);
-        static      void        jpegPictureCallback(const sp<IMemory>& mem, void* user);
-        static      void        autoFocusCallback(bool focused, void* user);
+        static      void        notifyCallback(int32_t msgType, int32_t ext1, int32_t ext2, void* user);
+        static      void        dataCallback(int32_t msgType, const sp<IMemory>& dataPtr, void* user);
+        static      void        dataCallbackTimestamp(nsecs_t timestamp, int32_t msgType,
+                                                      const sp<IMemory>& dataPtr, void* user);
+
         static      sp<Client>  getClientFromCookie(void* user);
 
-                    void        postShutter();
-                    void        postRaw(const sp<IMemory>& mem);
-                    void        postJpeg(const sp<IMemory>& mem);
-                    void        postPreviewFrame(const sp<IMemory>& mem);
-                    void        postRecordingFrame(nsecs_t timestamp, const sp<IMemory>& frame);
-                    void        copyFrameAndPostCopiedFrame(sp<IMemoryHeap> heap, size_t offset, size_t size);
-                    void        postError(status_t error);
-                    void        postAutoFocus(bool focused);
+                    void        handlePreviewData(const sp<IMemory>&);
+                    void        handleShutter(image_rect_type *image);
+                    void        handlePostview(const sp<IMemory>&);
+                    void        handleRawPicture(const sp<IMemory>&);
+                    void        handleCompressedPicture(const sp<IMemory>&);
+
+                    void        copyFrameAndPostCopiedFrame(const sp<ICameraClient>& client,
+                                    const sp<IMemoryHeap>& heap, size_t offset, size_t size);
 
         // camera operation mode
         enum camera_mode {
@@ -177,7 +181,6 @@ private:
         mutable     Condition                   mReady;
                     sp<CameraService>           mCameraService;
                     sp<ISurface>                mSurface;
-                    sp<MemoryHeapBase>          mPreviewBuffer;
                     int                         mPreviewCallbackFlag;
 
                     sp<MediaPlayer>             mMediaPlayerClick;
@@ -189,6 +192,13 @@ private:
                     sp<CameraHardwareInterface> mHardware;
                     pid_t                       mClientPid;
                     bool                        mUseOverlay;
+
+                    sp<OverlayRef>              mOverlayRef;
+                    int                         mOverlayW;
+                    int                         mOverlayH;
+
+        mutable     Mutex                       mPreviewLock;
+                    sp<MemoryHeapBase>          mPreviewBuffer;
     };
 
 // ----------------------------------------------------------------------------

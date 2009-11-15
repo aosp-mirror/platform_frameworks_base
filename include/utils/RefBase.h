@@ -156,6 +156,10 @@ public:
             delete static_cast<const T*>(this);
         }
     }
+    //! DEBUGGING ONLY: Get current strong ref count.
+    inline int32_t getStrongCount() const {
+        return mCount;
+    }
     
 protected:
     inline ~LightRefBase() { }

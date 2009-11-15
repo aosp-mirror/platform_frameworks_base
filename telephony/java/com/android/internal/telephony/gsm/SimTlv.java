@@ -47,7 +47,6 @@ public class SimTlv
 
     public boolean nextObject() {
         if (!hasValidTlvObject) return false;
-
         curOffset = curDataOffset + curDataLength;
         hasValidTlvObject = parseCurrentTlvObject();
         return hasValidTlvObject;
@@ -88,11 +87,12 @@ public class SimTlv
 
     private boolean parseCurrentTlvObject() {
         // 0x00 and 0xff are invalid tag values
-        if (record[curOffset] == 0 || (record[curOffset] & 0xff) == 0xff) {
-            return false;
-        }
 
         try {
+            if (record[curOffset] == 0 || (record[curOffset] & 0xff) == 0xff) {
+                return false;
+            }
+
             if ((record[curOffset + 1] & 0xff) < 0x80) {
                 // one byte length 0 - 0x7f
                 curDataLength = record[curOffset + 1] & 0xff;

@@ -16,14 +16,16 @@
 
 package com.android.internal.telephony;
 
-import android.util.SparseArray;
-import android.util.Log;
-import android.os.Message;
-import android.os.Handler;
 import android.os.AsyncResult;
+import android.os.Handler;
+import android.os.Message;
+import android.util.Log;
+import android.util.SparseArray;
+
+import com.android.internal.telephony.gsm.UsimPhoneBookManager;
+
 import java.util.ArrayList;
 import java.util.Iterator;
-import com.android.internal.telephony.IccConstants;
 
 /**
  * {@hide}
@@ -32,6 +34,7 @@ public final class AdnRecordCache extends Handler implements IccConstants {
     //***** Instance Variables
 
     PhoneBase phone;
+    private UsimPhoneBookManager mUsimPhoneBookManager;
 
     // Indexed by EF ID
     SparseArray<ArrayList<AdnRecord>> adnLikeFiles
@@ -55,6 +58,7 @@ public final class AdnRecordCache extends Handler implements IccConstants {
 
     public AdnRecordCache(PhoneBase phone) {
         this.phone = phone;
+        mUsimPhoneBookManager = new UsimPhoneBookManager(phone, this);
     }
 
     //***** Called from SIMRecords
@@ -64,6 +68,7 @@ public final class AdnRecordCache extends Handler implements IccConstants {
      */
     public void reset() {
         adnLikeFiles.clear();
+        mUsimPhoneBookManager.reset();
 
         clearWaiters();
         clearUserWriters();
@@ -103,14 +108,14 @@ public final class AdnRecordCache extends Handler implements IccConstants {
      *
      * See 3GPP TS 51.011 for this mapping
      */
-    private int
-    extensionEfForEf(int efid) {
+    int extensionEfForEf(int efid) {
         switch (efid) {
             case EF_MBDN: return EF_EXT6;
             case EF_ADN: return EF_EXT1;
             case EF_SDN: return EF_EXT3;
             case EF_FDN: return EF_EXT2;
             case EF_MSISDN: return EF_EXT1;
+            case EF_PBR: return 0; // The EF PBR doesn't have an extension record
             default: return -1;
         }
     }
@@ -223,11 +228,15 @@ public final class AdnRecordCache extends Handler implements IccConstants {
      * record
      */
     public void
-    requestLoadAllAdnLike (int efid, Message response) {
+    requestLoadAllAdnLike (int efid, int extensionEf, Message response) {
         ArrayList<Message> waiters;
         ArrayList<AdnRecord> result;
 
-        result = getRecordsIfLoaded(efid);
+        if (efid == EF_PBR) {
+            result = mUsimPhoneBookManager.loadEfFilesFromUsim();
+        } else {
+            result = getRecordsIfLoaded(efid);
+        }
 
         // Have we already loaded this efid?
         if (result != null) {
@@ -258,9 +267,8 @@ public final class AdnRecordCache extends Handler implements IccConstants {
 
         adnLikeWaiters.put(efid, waiters);
 
-        int extensionEF = extensionEfForEf(efid);
 
-        if (extensionEF < 0) {
+        if (extensionEf < 0) {
             // respond with error if not known ADN-like record
 
             if (response != null) {
@@ -272,7 +280,7 @@ public final class AdnRecordCache extends Handler implements IccConstants {
             return;
         }
 
-        new AdnRecordLoader(phone).loadAllFromEF(efid, extensionEF,
+        new AdnRecordLoader(phone).loadAllFromEF(efid, extensionEf,
             obtainMessage(EVENT_LOAD_ALL_ADN_LIKE_DONE, efid, 0));
     }
 
@@ -311,7 +319,7 @@ public final class AdnRecordCache extends Handler implements IccConstants {
                 adnLikeWaiters.delete(efid);
 
                 if (ar.exception == null) {
-                    adnLikeFiles.put(efid, (ArrayList<AdnRecord>) (ar.result));
+                    adnLikeFiles.put(efid, (ArrayList<AdnRecord>) ar.result);
                 }
                 notifyWaiters(waiters, ar);
                 break;

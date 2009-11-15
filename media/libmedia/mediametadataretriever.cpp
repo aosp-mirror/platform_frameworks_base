@@ -18,8 +18,8 @@
 //#define LOG_NDEBUG 0
 #define LOG_TAG "MediaMetadataRetriever"
 
-#include <utils/IServiceManager.h>
-#include <utils/IPCThreadState.h>
+#include <binder/IServiceManager.h>
+#include <binder/IPCThreadState.h>
 #include <media/mediametadataretriever.h>
 #include <media/IMediaPlayerService.h>
 #include <utils/Log.h>

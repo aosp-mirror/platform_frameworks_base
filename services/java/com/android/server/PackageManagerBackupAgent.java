@@ -51,7 +51,7 @@ import java.util.List;
  */
 public class PackageManagerBackupAgent extends BackupAgent {
     private static final String TAG = "PMBA";
-    private static final boolean DEBUG = true;
+    private static final boolean DEBUG = false;
 
     // key under which we store global metadata (individual app metadata
     // is stored using the package name as a key)
@@ -195,7 +195,6 @@ public class PackageManagerBackupAgent extends BackupAgent {
 
                         byte[] sigs = flattenSignatureArray(info.signatures);
 
-                        // !!! TODO: take out this debugging
                         if (DEBUG) {
                             Log.v(TAG, "+ metadata for " + packName
                                     + " version=" + info.versionCode
@@ -214,7 +213,6 @@ public class PackageManagerBackupAgent extends BackupAgent {
             // mentioned in the saved state file, but appear to no longer be present
             // on the device.  Write a deletion entity for them.
             for (String app : mExisting) {
-                // !!! TODO: take out this msg
                 if (DEBUG) Log.v(TAG, "- removing metadata for deleted pkg " + app);
                 try {
                     data.writeEntityHeader(app, -1);
@@ -266,7 +264,6 @@ public class PackageManagerBackupAgent extends BackupAgent {
                 mStoredSdkVersion = storedSdkVersion;
                 mStoredIncrementalVersion = in.readUTF();
                 mHasMetadata = true;
-                // !!! TODO: remove this debugging output
                 if (DEBUG) {
                     Log.i(TAG, "Restore set version " + storedSystemVersion
                             + " is compatible with OS version " + Build.VERSION.SDK_INT
@@ -277,7 +274,6 @@ public class PackageManagerBackupAgent extends BackupAgent {
                 // it's a file metadata record
                 int versionCode = in.readInt();
                 Signature[] sigs = unflattenSignatureArray(in);
-//              !!! TODO: take out this debugging
                 if (DEBUG) {
                     Log.i(TAG, "   restored metadata for " + key
                             + " dataSize=" + dataSize
@@ -326,7 +322,14 @@ public class PackageManagerBackupAgent extends BackupAgent {
 
         try {
             int num = in.readInt();
-            Log.v(TAG, " ... unflatten read " + num);
+            if (DEBUG) Log.v(TAG, " ... unflatten read " + num);
+
+            // Sensical?
+            if (num > 20) {
+                Log.e(TAG, "Suspiciously large sig count in restore data; aborting");
+                throw new IllegalStateException("Bad restore state");
+            }
+
             sigs = new Signature[num];
             for (int i = 0; i < num; i++) {
                 int len = in.readInt();
@@ -340,7 +343,7 @@ public class PackageManagerBackupAgent extends BackupAgent {
                 Log.w(TAG, "Empty signature block found");
             }
         } catch (IOException e) {
-            Log.d(TAG, "Unable to unflatten sigs");
+            Log.e(TAG, "Unable to unflatten sigs");
             return null;
         }
 

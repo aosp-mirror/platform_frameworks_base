@@ -16,17 +16,18 @@
 
 package android.content;
 
+import android.accounts.Account;
 import android.os.Parcel;
 import android.os.Parcelable.Creator;
 
 /** @hide */
 public class ActiveSyncInfo {
     public final int authorityId;
-    public final String account;
+    public final Account account;
     public final String authority;
     public final long startTime;
     
-    ActiveSyncInfo(int authorityId, String account, String authority,
+    ActiveSyncInfo(int authorityId, Account account, String authority,
             long startTime) {
         this.authorityId = authorityId;
         this.account = account;
@@ -40,14 +41,14 @@ public class ActiveSyncInfo {
 
     public void writeToParcel(Parcel parcel, int flags) {
         parcel.writeInt(authorityId);
-        parcel.writeString(account);
+        account.writeToParcel(parcel, 0);
         parcel.writeString(authority);
         parcel.writeLong(startTime);
     }
 
     ActiveSyncInfo(Parcel parcel) {
         authorityId = parcel.readInt();
-        account = parcel.readString();
+        account = new Account(parcel);
         authority = parcel.readString();
         startTime = parcel.readLong();
     }

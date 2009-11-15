@@ -21,6 +21,7 @@ import com.android.internal.policy.PolicyManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.ComponentName;
+import android.content.ContextWrapper;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
@@ -480,17 +481,15 @@ public class Dialog implements DialogInterface, Window.Callback,
      * 
      * <p>If the focused view didn't want this event, this method is called.
      *
-     * <p>The default implementation handles KEYCODE_BACK to close the
-     * dialog.
+     * <p>The default implementation consumed the KEYCODE_BACK to later
+     * handle it in {@link #onKeyUp}.
      *
      * @see #onKeyUp
      * @see android.view.KeyEvent
      */
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK) {
-            if (mCancelable) {
-                cancel();
-            }
+            event.startTracking();
             return true;
         }
 
@@ -498,12 +497,29 @@ public class Dialog implements DialogInterface, Window.Callback,
     }
 
     /**
+     * Default implementation of {@link KeyEvent.Callback#onKeyLongPress(int, KeyEvent)
+     * KeyEvent.Callback.onKeyLongPress()}: always returns false (doesn't handle
+     * the event).
+     */
+    public boolean onKeyLongPress(int keyCode, KeyEvent event) {
+        return false;
+    }
+
+    /**
      * A key was released.
      * 
+     * <p>The default implementation handles KEYCODE_BACK to close the
+     * dialog.
+     *
      * @see #onKeyDown
      * @see KeyEvent
      */
     public boolean onKeyUp(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK && event.isTracking()
+                && !event.isCanceled()) {
+            onBackPressed();
+            return true;
+        }
         return false;
     }
 
@@ -514,6 +530,17 @@ public class Dialog implements DialogInterface, Window.Callback,
      */
     public boolean onKeyMultiple(int keyCode, int repeatCount, KeyEvent event) {
         return false;
+    }
+    
+    /**
+     * Called when the dialog has detected the user's press of the back
+     * key.  The default implementation simply cancels the dialog (only if
+     * it is cancelable), but you can override this to do whatever you want.
+     */
+    public void onBackPressed() {
+        if (mCancelable) {
+            cancel();
+        }
     }
     
     /**
@@ -576,6 +603,12 @@ public class Dialog implements DialogInterface, Window.Callback,
     public void onWindowFocusChanged(boolean hasFocus) {
     }
 
+    public void onAttachedToWindow() {
+    }
+    
+    public void onDetachedFromWindow() {
+    }
+    
     /**
      * Called to process key events.  You can override this to intercept all 
      * key events before they are dispatched to the window.  Be sure to call 
@@ -592,7 +625,8 @@ public class Dialog implements DialogInterface, Window.Callback,
         if (mWindow.superDispatchKeyEvent(event)) {
             return true;
         }
-        return event.dispatch(this);
+        return event.dispatch(this, mDecor != null
+                ? mDecor.getKeyDispatcherState() : null, this);
     }
 
     /**
@@ -795,12 +829,29 @@ public class Dialog implements DialogInterface, Window.Callback,
 
         // associate search with owner activity if possible (otherwise it will default to
         // global search).
-        final ComponentName appName = mOwnerActivity == null ? null
-                : mOwnerActivity.getComponentName();
+        final ComponentName appName = getAssociatedActivity();
         final boolean globalSearch = (appName == null);
         searchManager.startSearch(null, false, appName, null, globalSearch);
         dismiss();
         return true;
+    }
+
+    /**
+     * @return The activity associated with this dialog, or null if there is no assocaited activity.
+     */
+    private ComponentName getAssociatedActivity() {
+        Activity activity = mOwnerActivity;
+        Context context = getContext();
+        while (activity == null && context != null) {
+            if (context instanceof Activity) {
+                activity = (Activity) context;  // found it!
+            } else {
+                context = (context instanceof ContextWrapper) ?
+                        ((ContextWrapper) context).getBaseContext() : // unwrap one level
+                        null;                                         // done
+            }
+        }
+        return activity == null ? null : activity.getComponentName();
     }
 
 

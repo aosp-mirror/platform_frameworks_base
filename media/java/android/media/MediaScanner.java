@@ -99,6 +99,7 @@ public class MediaScanner
 {
     static {
         System.loadLibrary("media_jni");
+        native_init();
     }
 
     private final static String TAG = "MediaScanner";
@@ -307,10 +308,14 @@ public class MediaScanner
     private boolean mDefaultRingtoneSet;
     /** Whether the scanner has set a default sound for the notification ringtone. */
     private boolean mDefaultNotificationSet;
+    /** Whether the scanner has set a default sound for the alarm ringtone. */
+    private boolean mDefaultAlarmSet;
     /** The filename for the default sound for the ringer ringtone. */
     private String mDefaultRingtoneFilename;
     /** The filename for the default sound for the notification ringtone. */
     private String mDefaultNotificationFilename;
+    /** The filename for the default sound for the alarm ringtone. */
+    private String mDefaultAlarmAlertFilename;
     /**
      * The prefix for system properties that define the default sound for
      * ringtones. Concatenate the name of the setting from Settings
@@ -369,6 +374,8 @@ public class MediaScanner
                 + Settings.System.RINGTONE);
         mDefaultNotificationFilename = SystemProperties.get(DEFAULT_RINGTONE_PROPERTY_PREFIX
                 + Settings.System.NOTIFICATION_SOUND);
+        mDefaultAlarmAlertFilename = SystemProperties.get(DEFAULT_RINGTONE_PROPERTY_PREFIX
+                + Settings.System.ALARM_ALERT);
     }
 
     private MyMediaScannerClient mClient = new MyMediaScannerClient();
@@ -389,6 +396,7 @@ public class MediaScanner
         private String mPath;
         private long mLastModified;
         private long mFileSize;
+        private String mWriter;
 
         public FileCacheEntry beginFile(String path, String mimeType, long lastModified, long fileSize) {
 
@@ -472,11 +480,14 @@ public class MediaScanner
             mDuration = 0;
             mPath = path;
             mLastModified = lastModified;
+            mWriter = null;
 
             return entry;
         }
 
         public void scanFile(String path, long lastModified, long fileSize) {
+            // This is the callback funtion from native codes.
+            // Log.v(TAG, "scanFile: "+path);
             doScanFile(path, null, lastModified, fileSize, false);
         }
 
@@ -484,6 +495,22 @@ public class MediaScanner
             doScanFile(path, mimeType, lastModified, fileSize, false);
         }
 
+        private boolean isMetadataSupported(int fileType) {
+            if (mFileType == MediaFile.FILE_TYPE_MP3 ||
+                    mFileType == MediaFile.FILE_TYPE_MP4 ||
+                    mFileType == MediaFile.FILE_TYPE_M4A ||
+                    mFileType == MediaFile.FILE_TYPE_3GPP ||
+                    mFileType == MediaFile.FILE_TYPE_3GPP2 ||
+                    mFileType == MediaFile.FILE_TYPE_OGG ||
+                    mFileType == MediaFile.FILE_TYPE_AAC ||
+                    mFileType == MediaFile.FILE_TYPE_MID ||
+                    mFileType == MediaFile.FILE_TYPE_WMA) {
+                // we only extract metadata from MP3, M4A, OGG, MID, AAC and WMA files.
+                // check MP4 files, to determine if they contain only audio.
+                return true;
+            }
+            return false;
+        }
         public Uri doScanFile(String path, String mimeType, long lastModified, long fileSize, boolean scanAlways) {
             Uri result = null;
 //            long t1 = System.currentTimeMillis();
@@ -499,16 +526,7 @@ public class MediaScanner
                     boolean music = (lowpath.indexOf(MUSIC_DIR) > 0) ||
                         (!ringtones && !notifications && !alarms && !podcasts);
 
-                    if (mFileType == MediaFile.FILE_TYPE_MP3 ||
-                            mFileType == MediaFile.FILE_TYPE_MP4 ||
-                            mFileType == MediaFile.FILE_TYPE_M4A ||
-                            mFileType == MediaFile.FILE_TYPE_3GPP ||
-                            mFileType == MediaFile.FILE_TYPE_3GPP2 ||
-                            mFileType == MediaFile.FILE_TYPE_OGG ||
-                            mFileType == MediaFile.FILE_TYPE_MID ||
-                            mFileType == MediaFile.FILE_TYPE_WMA) {
-                        // we only extract metadata from MP3, M4A, OGG, MID and WMA files.
-                        // check MP4 files, to determine if they contain only audio.
+                    if( isMetadataSupported(mFileType) ) {
                         processFile(path, mimeType, this);
                     } else if (MediaFile.isImageFileType(mFileType)) {
                         // we used to compute the width and height but it's not worth it
@@ -586,10 +604,19 @@ public class MediaScanner
                 mTrack = (num * 1000) + (mTrack % 1000);
             } else if (name.equalsIgnoreCase("duration")) {
                 mDuration = parseSubstring(value, 0, 0);
+            } else if (name.equalsIgnoreCase("writer") || name.startsWith("writer;")) {
+                mWriter = value.trim();
             }
         }
 
         public void setMimeType(String mimeType) {
+            if ("audio/mp4".equals(mMimeType) &&
+                    mimeType.startsWith("video")) {
+                // for feature parity with Donut, we force m4a files to keep the
+                // audio/mp4 mimetype, even if they are really "enhanced podcasts"
+                // with a video track
+                return;
+            }
             mMimeType = mimeType;
             mFileType = MediaFile.getFileTypeForMimeType(mimeType);
         }
@@ -701,13 +728,44 @@ public class MediaScanner
                 values.put(Audio.Media.IS_MUSIC, music);
                 values.put(Audio.Media.IS_PODCAST, podcasts);
             } else if (mFileType == MediaFile.FILE_TYPE_JPEG) {
-                HashMap<String, String> exifData =
-                        ExifInterface.loadExifData(entry.mPath);
-                if (exifData != null) {
-                    float[] latlng = ExifInterface.getLatLng(exifData);
-                    if (latlng != null) {
+                ExifInterface exif = null;
+                try {
+                    exif = new ExifInterface(entry.mPath);
+                } catch (IOException ex) {
+                    // exif is null
+                }
+                if (exif != null) {
+                    float[] latlng = new float[2];
+                    if (exif.getLatLong(latlng)) {
                         values.put(Images.Media.LATITUDE, latlng[0]);
                         values.put(Images.Media.LONGITUDE, latlng[1]);
+                    }
+
+                    long time = exif.getDateTime();
+                    if (time != -1) {
+                        values.put(Images.Media.DATE_TAKEN, time);
+                    }
+
+                    int orientation = exif.getAttributeInt(
+                        ExifInterface.TAG_ORIENTATION, -1);
+                    if (orientation != -1) {
+                        // We only recognize a subset of orientation tag values.
+                        int degree;
+                        switch(orientation) {
+                            case ExifInterface.ORIENTATION_ROTATE_90:
+                                degree = 90;
+                                break;
+                            case ExifInterface.ORIENTATION_ROTATE_180:
+                                degree = 180;
+                                break;
+                            case ExifInterface.ORIENTATION_ROTATE_270:
+                                degree = 270;
+                                break;
+                            default:
+                                degree = 0;
+                                break;
+                        }
+                        values.put(Images.Media.ORIENTATION, degree);
                     }
                 }
             }
@@ -779,6 +837,12 @@ public class MediaScanner
                     setSettingIfNotSet(Settings.System.RINGTONE, tableUri, rowId);
                     mDefaultRingtoneSet = true;
                 }
+            } else if (alarms && !mDefaultAlarmSet) {
+                if (TextUtils.isEmpty(mDefaultAlarmAlertFilename) ||
+                        doesPathHaveFilename(entry.mPath, mDefaultAlarmAlertFilename)) {
+                    setSettingIfNotSet(Settings.System.ALARM_ALERT, tableUri, rowId);
+                    mDefaultAlarmSet = true;
+                }
             }
 
             return result;
@@ -800,6 +864,22 @@ public class MediaScanner
                 // Set the setting to the given URI
                 Settings.System.putString(mContext.getContentResolver(), settingName,
                         ContentUris.withAppendedId(uri, rowId).toString());
+            }
+        }
+
+        public void addNoMediaFolder(String path) {
+            ContentValues values = new ContentValues();
+            values.put(MediaStore.Images.ImageColumns.DATA, "");
+            String [] pathSpec = new String[] {path + '%'};
+            try {
+                mMediaProvider.update(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values,
+                        MediaStore.Images.ImageColumns.DATA + " LIKE ?", pathSpec);
+                mMediaProvider.update(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, values,
+                        MediaStore.Images.ImageColumns.DATA + " LIKE ?", pathSpec);
+                mMediaProvider.update(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, values,
+                        MediaStore.Images.ImageColumns.DATA + " LIKE ?", pathSpec);
+            } catch (RemoteException e) {
+                throw new RuntimeException();
             }
         }
 
@@ -1200,7 +1280,8 @@ public class MediaScanner
             }
         }
 
-        if (bestMatch == null) {
+        // if the match is not for an audio file, bail out
+        if (bestMatch == null || ! mAudioUri.equals(bestMatch.mTableUri)) {
             return false;
         }
 
@@ -1412,6 +1493,7 @@ public class MediaScanner
 
     public native byte[] extractAlbumArt(FileDescriptor fd);
 
+    private static native final void native_init();
     private native final void native_setup();
     private native final void native_finalize();
     @Override

@@ -60,15 +60,18 @@ public class SyncStats implements Parcelable {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append("numAuthExceptions: ").append(numAuthExceptions);
-        sb.append(" numIoExceptions: ").append(numIoExceptions);
-        sb.append(" numParseExceptions: ").append(numParseExceptions);
-        sb.append(" numConflictDetectedExceptions: ").append(numConflictDetectedExceptions);
-        sb.append(" numInserts: ").append(numInserts);
-        sb.append(" numUpdates: ").append(numUpdates);
-        sb.append(" numDeletes: ").append(numDeletes);
-        sb.append(" numEntries: ").append(numEntries);
-        sb.append(" numSkippedEntries: ").append(numSkippedEntries);
+        sb.append(" stats [");
+        if (numAuthExceptions > 0) sb.append(" numAuthExceptions: ").append(numAuthExceptions);
+        if (numIoExceptions > 0) sb.append(" numIoExceptions: ").append(numIoExceptions);
+        if (numParseExceptions > 0) sb.append(" numParseExceptions: ").append(numParseExceptions);
+        if (numConflictDetectedExceptions > 0)
+            sb.append(" numConflictDetectedExceptions: ").append(numConflictDetectedExceptions);
+        if (numInserts > 0) sb.append(" numInserts: ").append(numInserts);
+        if (numUpdates > 0) sb.append(" numUpdates: ").append(numUpdates);
+        if (numDeletes > 0) sb.append(" numDeletes: ").append(numDeletes);
+        if (numEntries > 0) sb.append(" numEntries: ").append(numEntries);
+        if (numSkippedEntries > 0) sb.append(" numSkippedEntries: ").append(numSkippedEntries);
+        sb.append("]");
         return sb.toString();
     }
 

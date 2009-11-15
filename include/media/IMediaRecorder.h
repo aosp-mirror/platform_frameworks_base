@@ -18,7 +18,7 @@
 #ifndef ANDROID_IMEDIARECORDER_H
 #define ANDROID_IMEDIARECORDER_H
 
-#include <utils/IInterface.h>
+#include <binder/IInterface.h>
 
 namespace android {
 

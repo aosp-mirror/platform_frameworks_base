@@ -22,10 +22,16 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.SystemProperties;
 import android.provider.Contacts;
+import android.provider.ContactsContract;
 import android.text.Editable;
 import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
+import android.util.Log;
 import android.util.SparseIntArray;
+
+import static com.android.internal.telephony.TelephonyProperties.PROPERTY_ICC_OPERATOR_ISO_COUNTRY;
+import static com.android.internal.telephony.TelephonyProperties.PROPERTY_IDP_STRING;
+import static com.android.internal.telephony.TelephonyProperties.PROPERTY_OPERATOR_ISO_COUNTRY;
 
 import java.util.Locale;
 import java.util.regex.Matcher;
@@ -55,6 +61,9 @@ public class PhoneNumberUtils
      */
     public static final int TOA_International = 0x91;
     public static final int TOA_Unknown = 0x81;
+
+    static final String LOG_TAG = "PhoneNumberUtils";
+    private static final boolean DBG = false;
 
     /*
      * global-phone-number = ["+"] 1*( DIGIT / written-sep )
@@ -102,6 +111,11 @@ public class PhoneNumberUtils
         return c == PAUSE || c == WAIT;
     }
 
+    /** Returns true if ch is not dialable or alpha char */
+    private static boolean isSeparator(char ch) {
+        return !isDialable(ch) && !(('a' <= ch && ch <= 'z') || ('A' <= ch && ch <= 'Z'));
+    }
+
     /** Extracts the phone number from an Intent.
      *
      * @param intent the intent to get the number of
@@ -120,6 +134,8 @@ public class PhoneNumberUtils
             return uri.getSchemeSpecificPart();
         }
 
+        // TODO: We don't check for SecurityException here (requires
+        // READ_PHONE_STATE permission).
         if (scheme.equals("voicemail")) {
             return TelephonyManager.getDefault().getVoiceMailNumber();
         }
@@ -129,15 +145,23 @@ public class PhoneNumberUtils
         }
 
         String type = intent.resolveType(context);
+        String phoneColumn = null;
 
-        Cursor c = context.getContentResolver().query(
-                uri, new String[]{ Contacts.People.Phones.NUMBER },
-                null, null, null);
+        // Correctly read out the phone entry based on requested provider
+        final String authority = uri.getAuthority();
+        if (Contacts.AUTHORITY.equals(authority)) {
+            phoneColumn = Contacts.People.Phones.NUMBER;
+        } else if (ContactsContract.AUTHORITY.equals(authority)) {
+            phoneColumn = ContactsContract.CommonDataKinds.Phone.NUMBER;
+        }
+
+        final Cursor c = context.getContentResolver().query(uri, new String[] {
+            phoneColumn
+        }, null, null, null);
         if (c != null) {
             try {
                 if (c.moveToFirst()) {
-                    number = c.getString(
-                            c.getColumnIndex(Contacts.People.Phones.NUMBER));
+                    number = c.getString(c.getColumnIndex(phoneColumn));
                 }
             } finally {
                 c.close();
@@ -218,6 +242,9 @@ public class PhoneNumberUtils
         }
     }
 
+    private static void log(String msg) {
+        Log.d(LOG_TAG, msg);
+    }
     /** index of the last character of the network portion
      *  (eg anything after is a post-dial string)
      */
@@ -271,18 +298,48 @@ public class PhoneNumberUtils
     }
 
     /**
+     * Compare phone numbers a and b, return true if they're identical enough for caller ID purposes.
+     */
+    public static boolean compare(String a, String b) {
+        // We've used loose comparation at least Eclair, which may change in the future.
+
+        return compare(a, b, false);
+    }
+
+    /**
+     * Compare phone numbers a and b, and return true if they're identical
+     * enough for caller ID purposes. Checks a resource to determine whether
+     * to use a strict or loose comparison algorithm.
+     */
+    public static boolean compare(Context context, String a, String b) {
+        boolean useStrict = context.getResources().getBoolean(
+               com.android.internal.R.bool.config_use_strict_phone_number_comparation);
+        return compare(a, b, useStrict);
+    }
+
+    /**
+     * @hide only for testing.
+     */
+    public static boolean compare(String a, String b, boolean useStrictComparation) {
+        return (useStrictComparation ? compareStrictly(a, b) : compareLoosely(a, b));
+    }
+
+    /**
      * Compare phone numbers a and b, return true if they're identical
      * enough for caller ID purposes.
      *
      * - Compares from right to left
-     * - requires MIN_MATCH (5) characters to match
+     * - requires MIN_MATCH (7) characters to match
      * - handles common trunk prefixes and international prefixes
      *   (basically, everything except the Russian trunk prefix)
      *
-     * Tolerates nulls
+     * Note that this method does not return false even when the two phone numbers
+     * are not exactly same; rather; we can call this method "similar()", not "equals()".
+     *
+     * @hide
      */
     public static boolean
-    compare(String a, String b) {
+    compareLoosely(String a, String b) {
         int ia, ib;
         int matched;
 
@@ -369,6 +426,160 @@ public class PhoneNumberUtils
     }
 
     /**
+     * @hide
+     */
+    public static boolean
+    compareStrictly(String a, String b) {
+        return compareStrictly(a, b, true);
+    }
+
+    /**
+     * @hide
+     */
+    public static boolean
+    compareStrictly(String a, String b, boolean acceptInvalidCCCPrefix) {
+        if (a == null || b == null) {
+            return a == b;
+        } else if (a.length() == 0 && b.length() == 0) {
+            return false;
+        }
+
+        int forwardIndexA = 0;
+        int forwardIndexB = 0;
+
+        CountryCallingCodeAndNewIndex cccA =
+            tryGetCountryCallingCodeAndNewIndex(a, acceptInvalidCCCPrefix);
+        CountryCallingCodeAndNewIndex cccB =
+            tryGetCountryCallingCodeAndNewIndex(b, acceptInvalidCCCPrefix);
+        boolean bothHasCountryCallingCode = false;
+        boolean okToIgnorePrefix = true;
+        boolean trunkPrefixIsOmittedA = false;
+        boolean trunkPrefixIsOmittedB = false;
+        if (cccA != null && cccB != null) {
+            if (cccA.countryCallingCode != cccB.countryCallingCode) {
+                // Different Country Calling Code. Must be different phone number.
+                return false;
+            }
+            // When both have ccc, do not ignore trunk prefix. Without this,
+            // "+81123123" becomes same as "+810123123" (+81 == Japan)
+            okToIgnorePrefix = false;
+            bothHasCountryCallingCode = true;
+            forwardIndexA = cccA.newIndex;
+            forwardIndexB = cccB.newIndex;
+        } else if (cccA == null && cccB == null) {
+            // When both do not have ccc, do not ignore trunk prefix. Without this,
+            // "123123" becomes same as "0123123"
+            okToIgnorePrefix = false;
+        } else {
+            if (cccA != null) {
+                forwardIndexA = cccA.newIndex;
+            } else {
+                int tmp = tryGetTrunkPrefixOmittedIndex(b, 0);
+                if (tmp >= 0) {
+                    forwardIndexA = tmp;
+                    trunkPrefixIsOmittedA = true;
+                }
+            }
+            if (cccB != null) {
+                forwardIndexB = cccB.newIndex;
+            } else {
+                int tmp = tryGetTrunkPrefixOmittedIndex(b, 0);
+                if (tmp >= 0) {
+                    forwardIndexB = tmp;
+                    trunkPrefixIsOmittedB = true;
+                }
+            }
+        }
+
+        int backwardIndexA = a.length() - 1;
+        int backwardIndexB = b.length() - 1;
+        while (backwardIndexA >= forwardIndexA && backwardIndexB >= forwardIndexB) {
+            boolean skip_compare = false;
+            final char chA = a.charAt(backwardIndexA);
+            final char chB = b.charAt(backwardIndexB);
+            if (isSeparator(chA)) {
+                backwardIndexA--;
+                skip_compare = true;
+            }
+            if (isSeparator(chB)) {
+                backwardIndexB--;
+                skip_compare = true;
+            }
+
+            if (!skip_compare) {
+                if (chA != chB) {
+                    return false;
+                }
+                backwardIndexA--;
+                backwardIndexB--;
+            }
+        }
+
+        if (okToIgnorePrefix) {
+            if ((trunkPrefixIsOmittedA && forwardIndexA <= backwardIndexA) ||
+                !checkPrefixIsIgnorable(a, forwardIndexA, backwardIndexA)) {
+                if (acceptInvalidCCCPrefix) {
+                    // Maybe the code handling the special case for Thailand makes the
+                    // result garbled, so disable the code and try again.
+                    // e.g. "16610001234" must equal to "6610001234", but with
+                    //      Thailand-case handling code, they become equal to each other.
+                    //
+                    // Note: we select simplicity rather than adding some complicated
+                    //       logic here for performance(like "checking whether remaining
+                    //       numbers are just 66 or not"), assuming inputs are small
+                    //       enough.
+                    return compare(a, b, false);
+                } else {
+                    return false;
+                }
+            }
+            if ((trunkPrefixIsOmittedB && forwardIndexB <= backwardIndexB) ||
+                !checkPrefixIsIgnorable(b, forwardIndexA, backwardIndexB)) {
+                if (acceptInvalidCCCPrefix) {
+                    return compare(a, b, false);
+                } else {
+                    return false;
+                }
+            }
+        } else {
+            // In the US, 1-650-555-1234 must be equal to 650-555-1234,
+            // while 090-1234-1234 must not be equalt to 90-1234-1234 in Japan.
+            // This request exists just in US (with 1 trunk (NDD) prefix).
+            // In addition, "011 11 7005554141" must not equal to "+17005554141",
+            // while "011 1 7005554141" must equal to "+17005554141"
+            //
+            // In this comparison, we ignore the prefix '1' just once, when
+            // - at least either does not have CCC, or
+            // - the remaining non-separator number is 1
+            boolean maybeNamp = !bothHasCountryCallingCode;
+            while (backwardIndexA >= forwardIndexA) {
+                final char chA = a.charAt(backwardIndexA);
+                if (isDialable(chA)) {
+                    if (maybeNamp && tryGetISODigit(chA) == 1) {
+                        maybeNamp = false;
+                    } else {
+                        return false;
+                    }
+                }
+                backwardIndexA--;
+            }
+            while (backwardIndexB >= forwardIndexB) {
+                final char chB = b.charAt(backwardIndexB);
+                if (isDialable(chB)) {
+                    if (maybeNamp && tryGetISODigit(chB) == 1) {
+                        maybeNamp = false;
+                    } else {
+                        return false;
+                    }
+                }
+                backwardIndexB--;
+            }
+        }
+
+        return true;
+    }
+
+    /**
      * Returns the rightmost MIN_MATCH (5) characters in the network portion
      * in *reversed* order
      *
@@ -450,54 +661,6 @@ public class PhoneNumberUtils
         }
 
         return TOA_Unknown;
-    }
-
-    /**
-     * Phone numbers are stored in "lookup" form in the database
-     * as reversed strings to allow for caller ID lookup
-     *
-     * This method takes a phone number and makes a valid SQL "LIKE"
-     * string that will match the lookup form
-     *
-     */
-    /** all of a up to len must be an international prefix or
-     *  separators/non-dialing digits
-     */
-    private static boolean
-    matchIntlPrefix(String a, int len) {
-        /* '([^0-9*#+pwn]\+[^0-9*#+pwn] | [^0-9*#+pwn]0(0|11)[^0-9*#+pwn] )$' */
-        /*        0       1                           2 3 45               */
-
-        int state = 0;
-        for (int i = 0 ; i < len ; i++) {
-            char c = a.charAt(i);
-
-            switch (state) {
-                case 0:
-                    if      (c == '+') state = 1;
-                    else if (c == '0') state = 2;
-                    else if (isNonSeparator(c)) return false;
-                break;
-
-                case 2:
-                    if      (c == '0') state = 3;
-                    else if (c == '1') state = 4;
-                    else if (isNonSeparator(c)) return false;
-                break;
-
-                case 4:
-                    if      (c == '1') state = 5;
-                    else if (isNonSeparator(c)) return false;
-                break;
-
-                default:
-                    if (isNonSeparator(c)) return false;
-                break;
-
-            }
-        }
-
-        return state == 1 || state == 3 || state == 5;
     }
 
     /**
@@ -732,6 +895,14 @@ public class PhoneNumberUtils
         return true;
     }
 
+    private static boolean isNonSeparator(String address) {
+        for (int i = 0, count = address.length(); i < count; i++) {
+            if (!isNonSeparator(address.charAt(i))) {
+                return false;
+            }
+        }
+        return true;
+    }
     /**
      * Note: calls extractNetworkPortion(), so do not use for
      * SIM EF[ADN] style records
@@ -805,76 +976,6 @@ public class PhoneNumberUtils
         return result;
     }
 
-    /** all of 'a' up to len must match non-US trunk prefix ('0') */
-    private static boolean
-    matchTrunkPrefix(String a, int len) {
-        boolean found;
-
-        found = false;
-
-        for (int i = 0 ; i < len ; i++) {
-            char c = a.charAt(i);
-
-            if (c == '0' && !found) {
-                found = true;
-            } else if (isNonSeparator(c)) {
-                return false;
-            }
-        }
-
-        return found;
-    }
-
-    /** all of 'a' up to len must be a (+|00|011)country code)
-     *  We're fast and loose with the country code. Any \d{1,3} matches */
-    private static boolean
-    matchIntlPrefixAndCC(String a, int len) {
-        /*  [^0-9*#+pwn]*(\+|0(0|11)\d\d?\d? [^0-9*#+pwn] $ */
-        /*      0          1 2 3 45  6 7  8                 */
-
-        int state = 0;
-        for (int i = 0 ; i < len ; i++ ) {
-            char c = a.charAt(i);
-
-            switch (state) {
-                case 0:
-                    if      (c == '+') state = 1;
-                    else if (c == '0') state = 2;
-                    else if (isNonSeparator(c)) return false;
-                break;
-
-                case 2:
-                    if      (c == '0') state = 3;
-                    else if (c == '1') state = 4;
-                    else if (isNonSeparator(c)) return false;
-                break;
-
-                case 4:
-                    if      (c == '1') state = 5;
-                    else if (isNonSeparator(c)) return false;
-                break;
-
-                case 1:
-                case 3:
-                case 5:
-                    if      (isISODigit(c)) state = 6;
-                    else if (isNonSeparator(c)) return false;
-                break;
-
-                case 6:
-                case 7:
-                    if      (isISODigit(c)) state++;
-                    else if (isNonSeparator(c)) return false;
-                break;
-
-                default:
-                    if (isNonSeparator(c)) return false;
-            }
-        }
-
-        return state == 6 || state == 7 || state == 8;
-    }
-
     //================ Number formatting =========================
 
     /** The current locale is unknown, look for a country code or don't format */
@@ -903,7 +1004,7 @@ public class PhoneNumberUtils
         "JM", // Jamaica
         "PR", // Puerto Rico
         "MS", // Montserrat
-        "NP", // Northern Mariana Islands
+        "MP", // Northern Mariana Islands
         "KN", // Saint Kitts and Nevis
         "LC", // Saint Lucia
         "VC", // Saint Vincent and the Grenadines
@@ -936,17 +1037,7 @@ public class PhoneNumberUtils
     public static int getFormatTypeForLocale(Locale locale) {
         String country = locale.getCountry();
 
-        // Check for the NANP countries
-        int length = NANP_COUNTRIES.length;
-        for (int i = 0; i < length; i++) {
-            if (NANP_COUNTRIES[i].equals(country)) {
-                return FORMAT_NANP;
-            }
-        }
-        if (locale.equals(Locale.JAPAN)) {
-            return FORMAT_JAPAN;
-        }
-        return FORMAT_UNKNOWN;
+        return getFormatTypeFromCountryCode(country);
     }
 
     /**
@@ -990,6 +1081,7 @@ public class PhoneNumberUtils
      * as:
      *
      * <p><code>
+     * xxxxx
      * xxx-xxxx
      * xxx-xxx-xxxx
      * 1-xxx-xxx-xxxx
@@ -1003,7 +1095,11 @@ public class PhoneNumberUtils
         if (length > "+1-nnn-nnn-nnnn".length()) {
             // The string is too long to be formatted
             return;
+        } else if (length <= 5) {
+            // The string is either a shortcode or too short to be formatted
+            return;
         }
+
         CharSequence saved = text.subSequence(0, length);
 
         // Strip the dashes first, as we're going to add them back
@@ -1118,10 +1214,24 @@ public class PhoneNumberUtils
         JapanesePhoneNumberFormatter.format(text);
     }
 
-    // Three and four digit phone numbers for either special services
-    // or from the network (eg carrier-originated SMS messages) should
-    // not match
-    static final int MIN_MATCH = 5;
+    // Three and four digit phone numbers for either special services,
+    // or 3-6 digit addresses from the network (eg carrier-originated SMS messages) should
+    // not match.
+    //
+    // This constant used to be 5, but SMS short codes has increased in length and
+    // can be easily 6 digits now days. Most countries have SMS short code length between
+    // 3 to 6 digits. The exceptions are
+    //
+    // Australia: Short codes are six or eight digits in length, starting with the prefix "19"
+    //            followed by an additional four or six digits and two.
+    // Czech Republic: Codes are seven digits in length for MO and five (not billed) or
+    //            eight (billed) for MT direction
+    //
+    // see http://en.wikipedia.org/wiki/Short_code#Regional_differences for reference
+    //
+    // However, in order to loose match 650-555-1212 and 555-1212, we need to set the min match
+    // to 7.
+    static final int MIN_MATCH = 7;
 
     /**
      * isEmergencyNumber: checks a given number against the list of
@@ -1132,6 +1242,9 @@ public class PhoneNumberUtils
      * listed in the ril / sim, then return true, otherwise false.
      */
     public static boolean isEmergencyNumber(String number) {
+        // If the number passed in is null, just return false:
+        if (number == null) return false;
+
         // Strip the separators from the number before comparing it
         // to the list.
         number = extractNetworkPortion(number);
@@ -1153,6 +1266,35 @@ public class PhoneNumberUtils
 
         //no ecclist system property, so use our own list.
         return (number.equals("112") || number.equals("911"));
+    }
+
+    /**
+     * isVoiceMailNumber: checks a given number against the voicemail
+     *   number provided by the RIL and SIM card. The caller must have
+     *   the READ_PHONE_STATE credential.
+     *
+     * @param number the number to look up.
+     * @return true if the number is in the list of voicemail. False
+     * otherwise, including if the caller does not have the permission
+     * to read the VM number.
+     * @hide TODO: pending API Council approval
+     */
+    public static boolean isVoiceMailNumber(String number) {
+        String vmNumber;
+
+        try {
+            vmNumber = TelephonyManager.getDefault().getVoiceMailNumber();
+        } catch (SecurityException ex) {
+            return false;
+        }
+
+        // Strip the separators from the number before comparing it
+        // to the list.
+        number = extractNetworkPortion(number);
+
+        // compare tolerates null so we need to make sure that we
+        // don't return true when both are null.
+        return !TextUtils.isEmpty(number) && compare(number, vmNumber);
     }
 
     /**
@@ -1215,4 +1357,601 @@ public class PhoneNumberUtils
         KEYPAD_MAP.put('w', '9'); KEYPAD_MAP.put('x', '9'); KEYPAD_MAP.put('y', '9'); KEYPAD_MAP.put('z', '9');
         KEYPAD_MAP.put('W', '9'); KEYPAD_MAP.put('X', '9'); KEYPAD_MAP.put('Y', '9'); KEYPAD_MAP.put('Z', '9');
     }
+
+    //================ Plus Code formatting =========================
+    private static final char PLUS_SIGN_CHAR = '+';
+    private static final String PLUS_SIGN_STRING = "+";
+    private static final String NANP_IDP_STRING = "011";
+    private static final int NANP_LENGTH = 10;
+
+    /**
+     * This function checks if there is a plus sign (+) in the passed-in dialing number.
+     * If there is, it processes the plus sign based on the default telephone
+     * numbering plan of the system when the phone is activated and the current
+     * telephone numbering plan of the system that the phone is camped on.
+     * Currently, we only support the case that the default and current telephone
+     * numbering plans are North American Numbering Plan(NANP).
+     *
+     * The passed-in dialStr should only contain the valid format as described below,
+     * 1) the 1st character in the dialStr should be one of the really dialable
+     *    characters listed below
+     *    ISO-LATIN characters 0-9, *, # , +
+     * 2) the dialStr should already strip out the separator characters,
+     *    every character in the dialStr should be one of the non separator characters
+     *    listed below
+     *    ISO-LATIN characters 0-9, *, # , +, WILD, WAIT, PAUSE
+     *
+     * Otherwise, this function returns the dial string passed in
+     *
+     * @param dialStr the original dial string
+     * @return the converted dial string if the current/default countries belong to NANP,
+     * and if there is the "+" in the original dial string. Otherwise, the original dial
+     * string returns.
+     *
+     * This API is for CDMA only
+     *
+     * @hide TODO: pending API Council approval
+     */
+    public static String cdmaCheckAndProcessPlusCode(String dialStr) {
+        if (!TextUtils.isEmpty(dialStr)) {
+            if (isReallyDialable(dialStr.charAt(0)) &&
+                isNonSeparator(dialStr)) {
+                String currIso = SystemProperties.get(PROPERTY_OPERATOR_ISO_COUNTRY, "");
+                String defaultIso = SystemProperties.get(PROPERTY_ICC_OPERATOR_ISO_COUNTRY, "");
+                if (!TextUtils.isEmpty(currIso) && !TextUtils.isEmpty(defaultIso)) {
+                    return cdmaCheckAndProcessPlusCodeByNumberFormat(dialStr,
+                            getFormatTypeFromCountryCode(currIso),
+                            getFormatTypeFromCountryCode(defaultIso));
+                }
+            }
+        }
+        return dialStr;
+    }
+
+    /**
+     * This function should be called from checkAndProcessPlusCode only
+     * And it is used for test purpose also.
+     *
+     * It checks the dial string by looping through the network portion,
+     * post dial portion 1, post dial porting 2, etc. If there is any
+     * plus sign, then process the plus sign.
+     * Currently, this function supports the plus sign conversion within NANP only.
+     * Specifically, it handles the plus sign in the following ways:
+     * 1)+1NANP,remove +, e.g.
+     *   +18475797000 is converted to 18475797000,
+     * 2)+NANP or +non-NANP Numbers,replace + with the current NANP IDP, e.g,
+     *   +8475797000 is converted to 0118475797000,
+     *   +11875767800 is converted to 01111875767800
+     * 3)+1NANP in post dial string(s), e.g.
+     *   8475797000;+18475231753 is converted to 8475797000;18475231753
+     *
+     *
+     * @param dialStr the original dial string
+     * @param currFormat the numbering system of the current country that the phone is camped on
+     * @param defaultFormat the numbering system of the country that the phone is activated on
+     * @return the converted dial string if the current/default countries belong to NANP,
+     * and if there is the "+" in the original dial string. Otherwise, the original dial
+     * string returns.
+     *
+     * @hide
+     */
+    public static String
+    cdmaCheckAndProcessPlusCodeByNumberFormat(String dialStr,int currFormat,int defaultFormt) {
+        String retStr = dialStr;
+
+        // Checks if the plus sign character is in the passed-in dial string
+        if (dialStr != null &&
+            dialStr.lastIndexOf(PLUS_SIGN_STRING) != -1) {
+            // Format the string based on the rules for the country the number is from,
+            // and the current country the phone is camped on.
+            if ((currFormat == defaultFormt) && (currFormat == FORMAT_NANP)) {
+                // Handle case where default and current telephone numbering plans are NANP.
+                String postDialStr = null;
+                String tempDialStr = dialStr;
+
+                // Sets the retStr to null since the conversion will be performed below.
+                retStr = null;
+                if (DBG) log("checkAndProcessPlusCode,dialStr=" + dialStr);
+                // This routine is to process the plus sign in the dial string by loop through
+                // the network portion, post dial portion 1, post dial portion 2... etc. if
+                // applied
+                do {
+                    String networkDialStr;
+                    networkDialStr = extractNetworkPortion(tempDialStr);
+                    // Handles the conversion within NANP
+                    networkDialStr = processPlusCodeWithinNanp(networkDialStr);
+
+                    // Concatenates the string that is converted from network portion
+                    if (!TextUtils.isEmpty(networkDialStr)) {
+                        if (retStr == null) {
+                            retStr = networkDialStr;
+                        } else {
+                            retStr = retStr.concat(networkDialStr);
+                        }
+                    } else {
+                        // This should never happen since we checked the if dialStr is null
+                        // and if it contains the plus sign in the beginning of this function.
+                        // The plus sign is part of the network portion.
+                        Log.e("checkAndProcessPlusCode: null newDialStr", networkDialStr);
+                        return dialStr;
+                    }
+                    postDialStr = extractPostDialPortion(tempDialStr);
+                    if (!TextUtils.isEmpty(postDialStr)) {
+                        int dialableIndex = findDialableIndexFromPostDialStr(postDialStr);
+
+                        // dialableIndex should always be greater than 0
+                        if (dialableIndex >= 1) {
+                            retStr = appendPwCharBackToOrigDialStr(dialableIndex,
+                                     retStr,postDialStr);
+                            // Skips the P/W character, extracts the dialable portion
+                            tempDialStr = postDialStr.substring(dialableIndex);
+                        } else {
+                            // Non-dialable character such as P/W should not be at the end of
+                            // the dial string after P/W processing in CdmaConnection.java
+                            // Set the postDialStr to "" to break out of the loop
+                            if (dialableIndex < 0) {
+                                postDialStr = "";
+                            }
+                            Log.e("wrong postDialStr=", postDialStr);
+                        }
+                    }
+                    if (DBG) log("checkAndProcessPlusCode,postDialStr=" + postDialStr);
+                } while (!TextUtils.isEmpty(postDialStr) && !TextUtils.isEmpty(tempDialStr));
+            } else {
+                // TODO: Support NANP international conversion and other telephone numbering plans.
+                // Currently the phone is never used in non-NANP system, so return the original
+                // dial string.
+                Log.e("checkAndProcessPlusCode:non-NANP not supported", dialStr);
+            }
+        }
+        return retStr;
+     }
+
+    // This function gets the default international dialing prefix
+    private static String getDefaultIdp( ) {
+        String ps = null;
+        SystemProperties.get(PROPERTY_IDP_STRING, ps);
+        if (TextUtils.isEmpty(ps)) {
+            ps = NANP_IDP_STRING;
+        }
+        return ps;
+    }
+
+    private static boolean isTwoToNine (char c) {
+        if (c >= '2' && c <= '9') {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    private static int getFormatTypeFromCountryCode (String country) {
+        // Check for the NANP countries
+        int length = NANP_COUNTRIES.length;
+        for (int i = 0; i < length; i++) {
+            if (NANP_COUNTRIES[i].compareToIgnoreCase(country) == 0) {
+                return FORMAT_NANP;
+            }
+        }
+        if ("jp".compareToIgnoreCase(country) == 0) {
+            return FORMAT_JAPAN;
+        }
+        return FORMAT_UNKNOWN;
+    }
+
+    /**
+     * This function checks if the passed in string conforms to the NANP format
+     * i.e. NXX-NXX-XXXX, N is any digit 2-9 and X is any digit 0-9
+     */
+    private static boolean isNanp (String dialStr) {
+        boolean retVal = false;
+        if (dialStr != null) {
+            if (dialStr.length() == NANP_LENGTH) {
+                if (isTwoToNine(dialStr.charAt(0)) &&
+                    isTwoToNine(dialStr.charAt(3))) {
+                    retVal = true;
+                    for (int i=1; i<NANP_LENGTH; i++ ) {
+                        char c=dialStr.charAt(i);
+                        if (!PhoneNumberUtils.isISODigit(c)) {
+                            retVal = false;
+                            break;
+                        }
+                    }
+                }
+            }
+        } else {
+            Log.e("isNanp: null dialStr passed in", dialStr);
+        }
+        return retVal;
+    }
+
+   /**
+    * This function checks if the passed in string conforms to 1-NANP format
+    */
+    private static boolean isOneNanp(String dialStr) {
+        boolean retVal = false;
+        if (dialStr != null) {
+            String newDialStr = dialStr.substring(1);
+            if ((dialStr.charAt(0) == '1') && isNanp(newDialStr)) {
+                retVal = true;
+            }
+        } else {
+            Log.e("isOneNanp: null dialStr passed in", dialStr);
+        }
+        return retVal;
+    }
+
+    /**
+     * This function handles the plus code conversion within NANP CDMA network
+     * If the number format is
+     * 1)+1NANP,remove +,
+     * 2)other than +1NANP, any + numbers,replace + with the current IDP
+     */
+    private static String processPlusCodeWithinNanp(String networkDialStr) {
+        String retStr = networkDialStr;
+
+        if (DBG) log("processPlusCodeWithinNanp,networkDialStr=" + networkDialStr);
+        // If there is a plus sign at the beginning of the dial string,
+        // Convert the plus sign to the default IDP since it's an international number
+        if (networkDialStr != null &
+            networkDialStr.charAt(0) == PLUS_SIGN_CHAR &&
+            networkDialStr.length() > 1) {
+            String newStr = networkDialStr.substring(1);
+            if (isOneNanp(newStr)) {
+                // Remove the leading plus sign
+                retStr = newStr;
+             } else {
+                 String idpStr = getDefaultIdp();
+                 // Replaces the plus sign with the default IDP
+                 retStr = networkDialStr.replaceFirst("[+]", idpStr);
+            }
+        }
+        if (DBG) log("processPlusCodeWithinNanp,retStr=" + retStr);
+        return retStr;
+    }
+
+    // This function finds the index of the dialable character(s)
+    // in the post dial string
+    private static int findDialableIndexFromPostDialStr(String postDialStr) {
+        for (int index = 0;index < postDialStr.length();index++) {
+             char c = postDialStr.charAt(index);
+             if (isReallyDialable(c)) {
+                return index;
+             }
+        }
+        return -1;
+    }
+
+    // This function appends the non-diablable P/W character to the original
+    // dial string based on the dialable index passed in
+    private static String
+    appendPwCharBackToOrigDialStr(int dialableIndex,String origStr, String dialStr) {
+        String retStr;
+
+        // There is only 1 P/W character before the dialable characters
+        if (dialableIndex == 1) {
+            StringBuilder ret = new StringBuilder(origStr);
+            ret = ret.append(dialStr.charAt(0));
+            retStr = ret.toString();
+        } else {
+            // It means more than 1 P/W characters in the post dial string,
+            // appends to retStr
+            String nonDigitStr = dialStr.substring(0,dialableIndex);
+            retStr = origStr.concat(nonDigitStr);
+        }
+        return retStr;
+    }
+
+    //===== Begining of utility methods used in compareLoosely() =====
+
+    /**
+     * Phone numbers are stored in "lookup" form in the database
+     * as reversed strings to allow for caller ID lookup
+     *
+     * This method takes a phone number and makes a valid SQL "LIKE"
+     * string that will match the lookup form
+     *
+     */
+    /** all of a up to len must be an international prefix or
+     *  separators/non-dialing digits
+     */
+    private static boolean
+    matchIntlPrefix(String a, int len) {
+        /* '([^0-9*#+pwn]\+[^0-9*#+pwn] | [^0-9*#+pwn]0(0|11)[^0-9*#+pwn] )$' */
+        /*        0       1                           2 3 45               */
+
+        int state = 0;
+        for (int i = 0 ; i < len ; i++) {
+            char c = a.charAt(i);
+
+            switch (state) {
+                case 0:
+                    if      (c == '+') state = 1;
+                    else if (c == '0') state = 2;
+                    else if (isNonSeparator(c)) return false;
+                break;
+
+                case 2:
+                    if      (c == '0') state = 3;
+                    else if (c == '1') state = 4;
+                    else if (isNonSeparator(c)) return false;
+                break;
+
+                case 4:
+                    if      (c == '1') state = 5;
+                    else if (isNonSeparator(c)) return false;
+                break;
+
+                default:
+                    if (isNonSeparator(c)) return false;
+                break;
+
+            }
+        }
+
+        return state == 1 || state == 3 || state == 5;
+    }
+
+    /** all of 'a' up to len must be a (+|00|011)country code)
+     *  We're fast and loose with the country code. Any \d{1,3} matches */
+    private static boolean
+    matchIntlPrefixAndCC(String a, int len) {
+        /*  [^0-9*#+pwn]*(\+|0(0|11)\d\d?\d? [^0-9*#+pwn] $ */
+        /*      0          1 2 3 45  6 7  8                 */
+
+        int state = 0;
+        for (int i = 0 ; i < len ; i++ ) {
+            char c = a.charAt(i);
+
+            switch (state) {
+                case 0:
+                    if      (c == '+') state = 1;
+                    else if (c == '0') state = 2;
+                    else if (isNonSeparator(c)) return false;
+                break;
+
+                case 2:
+                    if      (c == '0') state = 3;
+                    else if (c == '1') state = 4;
+                    else if (isNonSeparator(c)) return false;
+                break;
+
+                case 4:
+                    if      (c == '1') state = 5;
+                    else if (isNonSeparator(c)) return false;
+                break;
+
+                case 1:
+                case 3:
+                case 5:
+                    if      (isISODigit(c)) state = 6;
+                    else if (isNonSeparator(c)) return false;
+                break;
+
+                case 6:
+                case 7:
+                    if      (isISODigit(c)) state++;
+                    else if (isNonSeparator(c)) return false;
+                break;
+
+                default:
+                    if (isNonSeparator(c)) return false;
+            }
+        }
+
+        return state == 6 || state == 7 || state == 8;
+    }
+
+    /** all of 'a' up to len must match non-US trunk prefix ('0') */
+    private static boolean
+    matchTrunkPrefix(String a, int len) {
+        boolean found;
+
+        found = false;
+
+        for (int i = 0 ; i < len ; i++) {
+            char c = a.charAt(i);
+
+            if (c == '0' && !found) {
+                found = true;
+            } else if (isNonSeparator(c)) {
+                return false;
+            }
+        }
+
+        return found;
+    }
+
+    //===== End of utility methods used only in compareLoosely() =====
+
+    //===== Beggining of utility methods used only in compareStrictly() ====
+
+    /*
+     * If true, the number is country calling code.
+     */
+    private static final boolean COUNTLY_CALLING_CALL[] = {
+        true, true, false, false, false, false, false, true, false, false,
+        false, false, false, false, false, false, false, false, false, false,
+        true, false, false, false, false, false, false, true, true, false,
+        true, true, true, true, true, false, true, false, false, true,
+        true, false, false, true, true, true, true, true, true, true,
+        false, true, true, true, true, true, true, true, true, false,
+        true, true, true, true, true, true, true, false, false, false,
+        false, false, false, false, false, false, false, false, false, false,
+        false, true, true, true, true, false, true, false, false, true,
+        true, true, true, true, true, true, false, false, true, false,
+    };
+    private static final int CCC_LENGTH = COUNTLY_CALLING_CALL.length;
+
+    /**
+     * @return true when input is valid Country Calling Code.
+     */
+    private static boolean isCountryCallingCode(int countryCallingCodeCandidate) {
+        return countryCallingCodeCandidate > 0 && countryCallingCodeCandidate < CCC_LENGTH &&
+                COUNTLY_CALLING_CALL[countryCallingCodeCandidate];
+    }
+
+    /**
+     * Returns interger corresponding to the input if input "ch" is
+     * ISO-LATIN characters 0-9.
+     * Returns -1 otherwise
+     */
+    private static int tryGetISODigit(char ch) {
+        if ('0' <= ch && ch <= '9') {
+            return ch - '0';
+        } else {
+            return -1;
+        }
+    }
+
+    private static class CountryCallingCodeAndNewIndex {
+        public final int countryCallingCode;
+        public final int newIndex;
+        public CountryCallingCodeAndNewIndex(int countryCode, int newIndex) {
+            this.countryCallingCode = countryCode;
+            this.newIndex = newIndex;
+        }
+    }
+
+    /*
+     * Note that this function does not strictly care the country calling code with
+     * 3 length (like Morocco: +212), assuming it is enough to use the first two
+     * digit to compare two phone numbers.
+     */
+    private static CountryCallingCodeAndNewIndex tryGetCountryCallingCodeAndNewIndex(
+        String str, boolean acceptThailandCase) {
+        // Rough regexp:
+        //  ^[^0-9*#+]*((\+|0(0|11)\d\d?|166) [^0-9*#+] $
+        //         0        1 2 3 45  6 7  89
+        //
+        // In all the states, this function ignores separator characters.
+        // "166" is the special case for the call from Thailand to the US. Uguu!
+        int state = 0;
+        int ccc = 0;
+        final int length = str.length();
+        for (int i = 0 ; i < length ; i++ ) {
+            char ch = str.charAt(i);
+            switch (state) {
+                case 0:
+                    if      (ch == '+') state = 1;
+                    else if (ch == '0') state = 2;
+                    else if (ch == '1') {
+                        if (acceptThailandCase) {
+                            state = 8;
+                        } else {
+                            return null;
+                        }
+                    } else if (isDialable(ch)) {
+                        return null;
+                    }
+                break;
+
+                case 2:
+                    if      (ch == '0') state = 3;
+                    else if (ch == '1') state = 4;
+                    else if (isDialable(ch)) {
+                        return null;
+                    }
+                break;
+
+                case 4:
+                    if      (ch == '1') state = 5;
+                    else if (isDialable(ch)) {
+                        return null;
+                    }
+                break;
+
+                case 1:
+                case 3:
+                case 5:
+                case 6:
+                case 7:
+                    {
+                        int ret = tryGetISODigit(ch);
+                        if (ret > 0) {
+                            ccc = ccc * 10 + ret;
+                            if (ccc >= 100 || isCountryCallingCode(ccc)) {
+                                return new CountryCallingCodeAndNewIndex(ccc, i + 1);
+                            }
+                            if (state == 1 || state == 3 || state == 5) {
+                                state = 6;
+                            } else {
+                                state++;
+                            }
+                        } else if (isDialable(ch)) {
+                            return null;
+                        }
+                    }
+                    break;
+                case 8:
+                    if (ch == '6') state = 9;
+                    else if (isDialable(ch)) {
+                        return null;
+                    }
+                    break;
+                case 9:
+                    if (ch == '6') {
+                        return new CountryCallingCodeAndNewIndex(66, i + 1);
+                    } else {
+                        return null;
+                    }
+                default:
+                    return null;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Currently this function simply ignore the first digit assuming it is
+     * trunk prefix. Actually trunk prefix is different in each country.
+     *
+     * e.g.
+     * "+79161234567" equals "89161234567" (Russian trunk digit is 8)
+     * "+33123456789" equals "0123456789" (French trunk digit is 0)
+     *
+     */
+    private static int tryGetTrunkPrefixOmittedIndex(String str, int currentIndex) {
+        int length = str.length();
+        for (int i = currentIndex ; i < length ; i++) {
+            final char ch = str.charAt(i);
+            if (tryGetISODigit(ch) >= 0) {
+                return i + 1;
+            } else if (isDialable(ch)) {
+                return -1;
+            }
+        }
+        return -1;
+    }
+
+    /**
+     * Return true if the prefix of "str" is "ignorable". Here, "ignorable" means
+     * that "str" has only one digit and separater characters. The one digit is
+     * assumed to be trunk prefix.
+     */
+    private static boolean checkPrefixIsIgnorable(final String str,
+            int forwardIndex, int backwardIndex) {
+        boolean trunk_prefix_was_read = false;
+        while (backwardIndex >= forwardIndex) {
+            if (tryGetISODigit(str.charAt(backwardIndex)) >= 0) {
+                if (trunk_prefix_was_read) {
+                    // More than one digit appeared, meaning that "a" and "b"
+                    // is different.
+                    return false;
+                } else {
+                    // Ignore just one digit, assuming it is trunk prefix.
+                    trunk_prefix_was_read = true;
+                }
+            } else if (isDialable(str.charAt(backwardIndex))) {
+                // Trunk prefix is a digit, not "*", "#"...
+                return false;
+            }
+            backwardIndex--;
+        }
+
+        return true;
+    }
+
+    //==== End of utility methods used only in compareStrictly() =====
 }

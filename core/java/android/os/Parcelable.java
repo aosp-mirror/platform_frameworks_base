@@ -28,13 +28,17 @@ package android.os;
  * <pre>
  * public class MyParcelable implements Parcelable {
  *     private int mData;
- *     
+ *
+ *     public int describeContents() {
+ *         return 0;
+ *     }
+ *
  *     public void writeToParcel(Parcel out, int flags) {
  *         out.writeInt(mData);
  *     }
  *
- *     public static final Parcelable.Creator<MyParcelable> CREATOR
- *             = new Parcelable.Creator<MyParcelable>() {
+ *     public static final Parcelable.Creator&lt;MyParcelable&gt; CREATOR
+ *             = new Parcelable.Creator&lt;MyParcelable&gt;() {
  *         public MyParcelable createFromParcel(Parcel in) {
  *             return new MyParcelable(in);
  *         }
@@ -42,7 +46,7 @@ package android.os;
  *         public MyParcelable[] newArray(int size) {
  *             return new MyParcelable[size];
  *         }
- *     }
+ *     };
  *     
  *     private MyParcelable(Parcel in) {
  *         mData = in.readInt();

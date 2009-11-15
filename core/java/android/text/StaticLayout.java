@@ -968,7 +968,13 @@ extends Layout
             fm.bottom = bottom;
 
             for (int i = 0; i < chooseht.length; i++) {
-                chooseht[i].chooseHeight(text, start, end, choosehtv[i], v, fm);
+                if (chooseht[i] instanceof LineHeightSpan.WithDensity) {
+                    ((LineHeightSpan.WithDensity) chooseht[i]).
+                        chooseHeight(text, start, end, choosehtv[i], v, fm, paint);
+
+                } else {
+                    chooseht[i].chooseHeight(text, start, end, choosehtv[i], v, fm);
+                }
             }
 
             above = fm.ascent;

@@ -30,6 +30,7 @@
         <item name="colorForeground">@android:color/bright_foreground_dark</item>
         <item name="colorForegroundInverse">@android:color/bright_foreground_dark_inverse</item>
         <item name="colorBackground">@android:color/background_dark</item>
+        <item name="colorBackgroundCacheHint">?android:attr/colorBackground</item>
         <item name="disabledAlpha">0.5</item>
         <item name="backgroundDimAmount">0.6</item>
 
@@ -59,11 +60,7 @@
         <item name="textAppearanceLargeInverse">@android:style/TextAppearance.Large.Inverse</item>
         <item name="textAppearanceMediumInverse">@android:style/TextAppearance.Medium.Inverse</item>
         <item name="textAppearanceSmallInverse">@android:style/TextAppearance.Small.Inverse</item>
-
-        <!-- @hide -->
         <item name="textAppearanceSearchResultTitle">@android:style/TextAppearance.SearchResult.Title</item>
-        
-        <!-- @hide -->
         <item name="textAppearanceSearchResultSubtitle">@android:style/TextAppearance.SearchResult.Subtitle</item>
         
         <item name="textAppearanceButton">@android:style/TextAppearance.Widget.Button</item>
@@ -112,6 +109,7 @@
         <item name="windowFullscreen">false</item>
         <item name="windowIsFloating">false</item>
         <item name="windowContentOverlay">@android:drawable/title_bar_shadow</item>
+        <item name="windowShowWallpaper">false</item>
         <item name="windowTitleStyle">@android:style/WindowTitle</item>
         <item name="windowTitleSize">25dip</item>
         <item name="windowTitleBackgroundStyle">@android:style/WindowTitleBackground</item>
@@ -129,6 +127,8 @@
         <item name="panelTextAppearance">?android:attr/textAppearanceInverse</item>
 
         <!-- Scrollbar attributes -->
+        <item name="scrollbarFadeDuration">250</item>
+        <item name="scrollbarDefaultDelayBeforeFade">300</item> 
         <item name="scrollbarSize">10dip</item>
         <item name="scrollbarThumbHorizontal">@android:drawable/scrollbar_handle_horizontal</item>
         <item name="scrollbarThumbVertical">@android:drawable/scrollbar_handle_vertical</item>
@@ -175,6 +175,12 @@
         <item name="spinnerItemStyle">@android:style/Widget.TextView.SpinnerItem</item>
         <item name="dropDownHintAppearance">@android:style/TextAppearance.Widget.DropDownHint</item>
         <item name="keyboardViewStyle">@android:style/Widget.KeyboardView</item>
+        <item name="quickContactBadgeStyleWindowSmall">@android:style/Widget.QuickContactBadge.WindowSmall</item>
+        <item name="quickContactBadgeStyleWindowMedium">@android:style/Widget.QuickContactBadge.WindowMedium</item>
+        <item name="quickContactBadgeStyleWindowLarge">@android:style/Widget.QuickContactBadge.WindowLarge</item>
+        <item name="quickContactBadgeStyleSmallWindowSmall">@android:style/Widget.QuickContactBadgeSmall.WindowSmall</item>
+        <item name="quickContactBadgeStyleSmallWindowMedium">@android:style/Widget.QuickContactBadgeSmall.WindowMedium</item>
+        <item name="quickContactBadgeStyleSmallWindowLarge">@android:style/Widget.QuickContactBadgeSmall.WindowLarge</item>
         
         <!-- Preference styles -->
         <item name="preferenceScreenStyle">@android:style/Preference.PreferenceScreen</item>
@@ -280,25 +286,77 @@
         <item name="android:windowContentOverlay">@null</item>
     </style>
     
+    <!-- Default theme for windows that want to have the user's selected
+    	 wallpaper appear behind them.  -->
+    <style name="Theme.Wallpaper">
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:colorBackgroundCacheHint">@null</item>
+        <item name="android:windowShowWallpaper">true</item>
+    </style>
+
+    <!-- Variant of the translucent theme with no title bar -->
+    <style name="Theme.Wallpaper.NoTitleBar">
+        <item name="android:windowNoTitle">true</item>
+    </style>
+
+    <!-- Variant of the translucent theme that has no title bar and
+         fills the entire screen -->
+    <style name="Theme.Wallpaper.NoTitleBar.Fullscreen">
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+    </style>
+
+    <!-- Theme for a wallpaper's setting activity that is designed to be on
+         top of a dark background. -->
+    <style name="Theme.WallpaperSettings">
+        <item name="android:windowBackground">@android:drawable/screen_background_dark_transparent</item>
+        <item name="android:colorBackgroundCacheHint">@null</item>
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowAnimationStyle">@android:style/Animation.Translucent</item>
+    </style>
+
+    <!-- Theme for a wallpaper's setting activity that is designed to be on
+         top of a light background. -->
+    <style name="Theme.Light.WallpaperSettings">
+        <item name="android:windowBackground">@android:drawable/screen_background_light_transparent</item>
+        <item name="android:colorBackgroundCacheHint">@null</item>
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowAnimationStyle">@android:style/Animation.Translucent</item>
+    </style>
+
+    <!-- Style to apply on top of a wallpaper settings theme when it is being
+         shown on top of the real wallpaper -->
+    <style name="ActiveWallpaperSettings">
+    </style>
+    
+    <!-- Style to apply on top of a wallpaper settings theme when it is being
+         shown on top of the real wallpaper -->
+    <style name="PreviewWallpaperSettings">
+    </style>
+    
     <!-- Default theme for translucent activities, that is windows that allow you
          to see through them to the windows behind.  This sets up the translucent
          flag and appropriate animations for your windows.  -->
     <style name="Theme.Translucent">
         <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:colorBackgroundCacheHint">@null</item>
         <item name="android:windowIsTranslucent">true</item>
-        <item name="android:windowAnimationStyle">@android:style/Animation.Translucent</item>
+        <!-- Note that we use the base animation style here (that is no
+             animations) because we really have no idea how this kind of
+             activity will be used. -->
+        <item name="android:windowAnimationStyle">@android:style/Animation</item>
     </style>
 
     <!-- Variant of the translucent theme with no title bar -->
     <style name="Theme.Translucent.NoTitleBar">
         <item name="android:windowNoTitle">true</item>
+        <item name="android:windowContentOverlay">@null</item>
     </style>
 
     <!-- Variant of the translucent theme that has no title bar and
          fills the entire screen -->
     <style name="Theme.Translucent.NoTitleBar.Fullscreen">
         <item name="android:windowFullscreen">true</item>
-        <item name="android:windowContentOverlay">@null</item>
     </style>
     
     <!-- Default theme for activities that don't actually display a UI; that
@@ -306,7 +364,7 @@
     <style name="Theme.NoDisplay">
         <item name="android:windowBackground">@null</item>
         <item name="android:windowContentOverlay">@null</item>
-        <item name="android:windowIsTranslucent">false</item>
+        <item name="android:windowIsTranslucent">true</item>
         <item name="android:windowAnimationStyle">@null</item>
         <item name="android:windowDisablePreview">true</item>
         <item name="android:windowNoDisplay">true</item>
@@ -326,6 +384,8 @@
         <item name="android:windowAnimationStyle">@android:style/Animation.Dialog</item>
         <item name="android:windowSoftInputMode">stateUnspecified|adjustPan</item>
 
+        <item name="android:colorBackgroundCacheHint">@null</item>
+        
         <item name="textAppearance">@android:style/TextAppearance</item>
         <item name="textAppearanceInverse">@android:style/TextAppearance.Inverse</item>
 
@@ -369,6 +429,7 @@
          background, and turns off dimming behind the window. -->
     <style name="Theme.Panel">
         <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:colorBackgroundCacheHint">@null</item>
         <item name="android:windowFrame">@null</item>
         <item name="android:windowContentOverlay">@null</item>
         <item name="android:windowIsFloating">true</item>
@@ -383,6 +444,7 @@
          background, and turns off dimming behind the window. -->
     <style name="Theme.Light.Panel">
         <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:colorBackgroundCacheHint">@null</item>
         <item name="android:windowFrame">@null</item>
         <item name="android:windowContentOverlay">@null</item>
         <item name="android:windowIsFloating">true</item>
@@ -448,4 +510,10 @@
         <item name="windowContentOverlay">@null</item>
         <item name="textAppearance">@style/TextAppearance.Theme.Dialog.AppError</item>
     </style>
+    
+    <!-- Special theme for the recent apps dialog, to allow customization
+         with overlays. -->
+    <style name="Theme.Dialog.RecentApplications">
+    </style>
+    
 </resources>

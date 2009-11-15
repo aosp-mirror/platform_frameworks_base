@@ -45,6 +45,9 @@ public abstract class AbstractInputMethodService extends Service
         implements KeyEvent.Callback {
     private InputMethod mInputMethod;
     
+    final KeyEvent.DispatcherState mDispatcherState
+            = new KeyEvent.DispatcherState();
+
     /**
      * Base class for derived classes to implement their {@link InputMethod}
      * interface.  This takes care of basic maintenance of the input method,
@@ -129,7 +132,8 @@ public abstract class AbstractInputMethodService extends Service
          * callbacks on the service, and tell the client when this is done.
          */
         public void dispatchKeyEvent(int seq, KeyEvent event, EventCallback callback) {
-            boolean handled = event.dispatch(AbstractInputMethodService.this);
+            boolean handled = event.dispatch(AbstractInputMethodService.this,
+                    mDispatcherState, this);
             if (callback != null) {
                 callback.finishedEvent(seq, handled);
             }
@@ -145,6 +149,16 @@ public abstract class AbstractInputMethodService extends Service
                 callback.finishedEvent(seq, handled);
             }
         }
+    }
+    
+    /**
+     * Return the global {@link KeyEvent.DispatcherState KeyEvent.DispatcherState}
+     * for used for processing events from the target application.
+     * Normally you will not need to use this directly, but
+     * just use the standard high-level event callbacks like {@link #onKeyDown}.
+     */
+    public KeyEvent.DispatcherState getKeyDispatcherState() {
+        return mDispatcherState;
     }
     
     /**

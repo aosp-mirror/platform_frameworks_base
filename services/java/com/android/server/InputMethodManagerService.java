@@ -32,6 +32,7 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import android.app.ActivityManagerNative;
 import android.app.AlertDialog;
+import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -40,6 +41,7 @@ import android.content.IntentFilter;
 import android.content.DialogInterface.OnCancelListener;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
@@ -178,6 +180,11 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     
     final HashMap<IBinder, ClientState> mClients
             = new HashMap<IBinder, ClientState>();
+    
+    /**
+     * Set once the system is ready to run third party code.
+     */
+    boolean mSystemReady;
     
     /**
      * Id of the currently selected input method.
@@ -360,16 +367,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                         // Uh oh, current input method is no longer around!
                         // Pick another one...
                         Log.i(TAG, "Current input method removed: " + curInputMethodId);
-                        List<InputMethodInfo> enabled = getEnabledInputMethodListLocked();
-                        if (enabled != null && enabled.size() > 0) {
-                            changed = true;
-                            curIm = enabled.get(0);
-                            curInputMethodId = curIm.getId();
-                            Log.i(TAG, "Switching to: " + curInputMethodId);
-                            Settings.Secure.putString(mContext.getContentResolver(),
-                                    Settings.Secure.DEFAULT_INPUT_METHOD,
-                                    curInputMethodId);
-                        } else if (curIm != null) {
+                        if (!chooseNewDefaultIME()) {
                             changed = true;
                             curIm = null;
                             curInputMethodId = "";
@@ -383,16 +381,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 } else if (curIm == null) {
                     // We currently don't have a default input method... is
                     // one now available?
-                    List<InputMethodInfo> enabled = getEnabledInputMethodListLocked();
-                    if (enabled != null && enabled.size() > 0) {
-                        changed = true;
-                        curIm = enabled.get(0);
-                        curInputMethodId = curIm.getId();
-                        Log.i(TAG, "New default input method: " + curInputMethodId);
-                        Settings.Secure.putString(mContext.getContentResolver(),
-                                Settings.Secure.DEFAULT_INPUT_METHOD,
-                                curInputMethodId);
-                    }
+                    changed = chooseNewDefaultIME();
                 }
                 
                 if (changed) {
@@ -508,6 +497,16 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     public void systemReady() {
+        synchronized (mMethodMap) {
+            if (!mSystemReady) {
+                mSystemReady = true;
+                try {
+                    startInputInnerLocked();
+                } catch (RuntimeException e) {
+                    Log.w(TAG, "Unexpected exception", e);
+                }
+            }
+        }
     }
     
     public List<InputMethodInfo> getInputMethodList() {
@@ -727,6 +726,20 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             }
         }
         
+        return startInputInnerLocked();
+    }
+    
+    InputBindResult startInputInnerLocked() {
+        if (mCurMethodId == null) {
+            return mNoBinding;
+        }
+        
+        if (!mSystemReady) {
+            // If the system is not yet ready, we shouldn't be running third
+            // party code.
+            return new InputBindResult(null, mCurMethodId, mCurSeq);
+        }
+        
         InputMethodInfo info = mMethodMap.get(mCurMethodId);
         if (info == null) {
             throw new IllegalArgumentException("Unknown id: " + mCurMethodId);
@@ -736,6 +749,10 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         
         mCurIntent = new Intent(InputMethod.SERVICE_INTERFACE);
         mCurIntent.setComponent(info.getComponent());
+        mCurIntent.putExtra(Intent.EXTRA_CLIENT_LABEL,
+                com.android.internal.R.string.input_method_binding_label);
+        mCurIntent.putExtra(Intent.EXTRA_CLIENT_INTENT, PendingIntent.getActivity(
+                mContext, 0, new Intent(Settings.ACTION_INPUT_METHOD_SETTINGS), 0));
         if (mContext.bindService(mCurIntent, this, Context.BIND_AUTO_CREATE)) {
             mLastBindTime = SystemClock.uptimeMillis();
             mHaveConnection = true;
@@ -777,17 +794,20 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         synchronized (mMethodMap) {
             if (mCurIntent != null && name.equals(mCurIntent.getComponent())) {
                 mCurMethod = IInputMethod.Stub.asInterface(service);
+                if (mCurToken == null) {
+                    Log.w(TAG, "Service connected without a token!");
+                    unbindCurrentMethodLocked(false);
+                    return;
+                }
+                if (DEBUG) Log.v(TAG, "Initiating attach with token: " + mCurToken);
+                executeOrSendMessage(mCurMethod, mCaller.obtainMessageOO(
+                        MSG_ATTACH_TOKEN, mCurMethod, mCurToken));
                 if (mCurClient != null) {
-                    if (DEBUG) Log.v(TAG, "Initiating attach with token: " + mCurToken);
+                    if (DEBUG) Log.v(TAG, "Creating first session while with client "
+                            + mCurClient);
                     executeOrSendMessage(mCurMethod, mCaller.obtainMessageOO(
-                            MSG_ATTACH_TOKEN, mCurMethod, mCurToken));
-                    if (mCurClient != null) {
-                        if (DEBUG) Log.v(TAG, "Creating first session while with client "
-                                + mCurClient);
-                        executeOrSendMessage(mCurMethod, mCaller.obtainMessageOO(
-                                MSG_CREATE_SESSION, mCurMethod,
-                                new MethodCallback(mCurMethod)));
-                    }
+                            MSG_CREATE_SESSION, mCurMethod,
+                            new MethodCallback(mCurMethod)));
                 }
             }
         }
@@ -977,6 +997,11 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             mShowExplicitlyRequested = true;
             mShowForced = true;
         }
+        
+        if (!mSystemReady) {
+            return false;
+        }
+        
         boolean res = false;
         if (mCurMethod != null) {
             executeOrSendMessage(mCurMethod, mCaller.obtainMessageIOO(
@@ -1327,6 +1352,23 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         return false;
     }
 
+    private boolean isSystemIme(InputMethodInfo inputMethod) {
+        return (inputMethod.getServiceInfo().applicationInfo.flags
+                & ApplicationInfo.FLAG_SYSTEM) != 0;
+    }
+
+    private boolean chooseNewDefaultIME() {
+        List<InputMethodInfo> enabled = getEnabledInputMethodListLocked();
+        if (enabled != null && enabled.size() > 0) {
+            Settings.Secure.putString(mContext.getContentResolver(),
+                    Settings.Secure.DEFAULT_INPUT_METHOD,
+                    enabled.get(0).getId());
+            return true;
+        }
+
+        return false;
+    }
+
     void buildInputMethodListLocked(ArrayList<InputMethodInfo> list,
             HashMap<String, InputMethodInfo> map) {
         list.clear();
@@ -1357,6 +1399,11 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 list.add(p);
                 map.put(p.getId(), p);
 
+                // System IMEs are enabled by default
+                if (isSystemIme(p)) {
+                    setInputMethodEnabled(p.getId(), true);
+                }
+
                 if (DEBUG) {
                     Log.d(TAG, "Found a third-party input method " + p);
                 }
@@ -1365,6 +1412,14 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 Log.w(TAG, "Unable to load input method " + compName, e);
             } catch (IOException e) {
                 Log.w(TAG, "Unable to load input method " + compName, e);
+            }
+        }
+
+        String defaultIme = Settings.Secure.getString(mContext
+                .getContentResolver(), Settings.Secure.DEFAULT_INPUT_METHOD);
+        if (!map.containsKey(defaultIme)) {
+            if (chooseNewDefaultIME()) {
+                updateFromSettingsLocked();
             }
         }
     }
@@ -1612,7 +1667,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     + " mShowExplicitlyRequested=" + mShowExplicitlyRequested
                     + " mShowForced=" + mShowForced
                     + " mInputShown=" + mInputShown);
-            p.println("  mScreenOn=" + mScreenOn);
+            p.println("  mSystemReady=" + mSystemReady + " mScreenOn=" + mScreenOn);
         }
         
         if (client != null) {

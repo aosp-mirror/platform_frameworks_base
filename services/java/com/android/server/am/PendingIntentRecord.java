@@ -22,6 +22,7 @@ import android.content.IIntentReceiver;
 import android.app.PendingIntent;
 import android.content.Intent;
 import android.os.Binder;
+import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
 
@@ -172,6 +173,14 @@ class PendingIntentRecord extends IIntentSender.Stub {
 
     public int send(int code, Intent intent, String resolvedType,
             IIntentReceiver finishedReceiver) {
+        return sendInner(code, intent, resolvedType, finishedReceiver,
+                null, null, 0, 0, 0);
+    }
+    
+    int sendInner(int code, Intent intent, String resolvedType,
+            IIntentReceiver finishedReceiver,
+            IBinder resultTo, String resultWho, int requestCode,
+            int flagsMask, int flagsValues) {
         synchronized(owner) {
             if (!canceled) {
                 sent = true;
@@ -189,6 +198,9 @@ class PendingIntentRecord extends IIntentSender.Stub {
                 } else {
                     resolvedType = key.requestResolvedType;
                 }
+                flagsMask &= ~Intent.IMMUTABLE_FLAGS;
+                flagsValues &= flagsMask;
+                finalIntent.setFlags((finalIntent.getFlags()&~flagsMask) | flagsValues);
                 
                 final long origId = Binder.clearCallingIdentity();
                 
@@ -198,7 +210,7 @@ class PendingIntentRecord extends IIntentSender.Stub {
                         try {
                             owner.startActivityInPackage(uid,
                                     finalIntent, resolvedType,
-                                    null, null, 0, false);
+                                    resultTo, resultWho, requestCode, false);
                         } catch (RuntimeException e) {
                             Log.w(ActivityManagerService.TAG,
                                     "Unable to send startActivity intent", e);
@@ -236,7 +248,7 @@ class PendingIntentRecord extends IIntentSender.Stub {
                 if (sendFinish) {
                     try {
                         finishedReceiver.performReceive(new Intent(finalIntent), 0,
-                                null, null, false);
+                                null, null, false, false);
                     } catch (RemoteException e) {
                     }
                 }
@@ -246,7 +258,7 @@ class PendingIntentRecord extends IIntentSender.Stub {
                 return 0;
             }
         }
-        return -1;
+        return IActivityManager.START_CANCELED;
     }
     
     protected void finalize() throws Throwable {

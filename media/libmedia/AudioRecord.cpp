@@ -28,12 +28,13 @@
 
 #include <media/AudioSystem.h>
 #include <media/AudioRecord.h>
+#include <media/mediarecorder.h>
 
-#include <utils/IServiceManager.h>
+#include <binder/IServiceManager.h>
 #include <utils/Log.h>
-#include <utils/MemoryDealer.h>
-#include <utils/Parcel.h>
-#include <utils/IPCThreadState.h>
+#include <binder/MemoryDealer.h>
+#include <binder/Parcel.h>
+#include <binder/IPCThreadState.h>
 #include <utils/Timers.h>
 #include <cutils/atomic.h>
 
@@ -45,7 +46,7 @@ namespace android {
 // ---------------------------------------------------------------------------
 
 AudioRecord::AudioRecord()
-    : mStatus(NO_INIT)
+    : mStatus(NO_INIT), mInput(0)
 {
 }
 
@@ -53,15 +54,15 @@ AudioRecord::AudioRecord(
         int inputSource,
         uint32_t sampleRate,
         int format,
-        int channelCount,
+        uint32_t channels,
         int frameCount,
         uint32_t flags,
         callback_t cbf,
         void* user,
         int notificationFrames)
-    : mStatus(NO_INIT)
+    : mStatus(NO_INIT), mInput(0)
 {
-    mStatus = set(inputSource, sampleRate, format, channelCount,
+    mStatus = set(inputSource, sampleRate, format, channels,
             frameCount, flags, cbf, user, notificationFrames);
 }
 
@@ -78,6 +79,7 @@ AudioRecord::~AudioRecord()
         }
         mAudioRecord.clear();
         IPCThreadState::self()->flushCommands();
+        AudioSystem::releaseInput(mInput);
     }
 }
 
@@ -85,7 +87,7 @@ status_t AudioRecord::set(
         int inputSource,
         uint32_t sampleRate,
         int format,
-        int channelCount,
+        uint32_t channels,
         int frameCount,
         uint32_t flags,
         callback_t cbf,
@@ -94,18 +96,13 @@ status_t AudioRecord::set(
         bool threadCanCallJava)
 {
 
-    LOGV("set(): sampleRate %d, channelCount %d, frameCount %d",sampleRate, channelCount, frameCount);
+    LOGV("set(): sampleRate %d, channels %d, frameCount %d",sampleRate, channels, frameCount);
     if (mAudioRecord != 0) {
         return INVALID_OPERATION;
     }
 
-    const sp<IAudioFlinger>& audioFlinger = AudioSystem::get_audio_flinger();
-    if (audioFlinger == 0) {
-        return NO_INIT;
-    }
-
-    if (inputSource == DEFAULT_INPUT) {
-        inputSource = MIC_INPUT;
+    if (inputSource == AUDIO_SOURCE_DEFAULT) {
+        inputSource = AUDIO_SOURCE_MIC;
     }
 
     if (sampleRate == 0) {
@@ -115,15 +112,21 @@ status_t AudioRecord::set(
     if (format == 0) {
         format = AudioSystem::PCM_16_BIT;
     }
-    if (channelCount == 0) {
-        channelCount = 1;
-    }
-
     // validate parameters
-    if (format != AudioSystem::PCM_16_BIT) {
+    if (!AudioSystem::isValidFormat(format)) {
+        LOGE("Invalid format");
         return BAD_VALUE;
     }
-    if (channelCount != 1 && channelCount != 2) {
+
+    if (!AudioSystem::isInputChannel(channels)) {
+        return BAD_VALUE;
+    }
+    int channelCount = AudioSystem::popCount(channels);
+
+    mInput = AudioSystem::getInput(inputSource,
+                                    sampleRate, format, channels, (AudioSystem::audio_in_acoustics)flags);
+    if (mInput == 0) {
+        LOGE("Could not get audio output for stream type %d", inputSource);
         return BAD_VALUE;
     }
 
@@ -132,14 +135,22 @@ status_t AudioRecord::set(
     if (AudioSystem::getInputBufferSize(sampleRate, format, channelCount, &inputBuffSizeInBytes)
             != NO_ERROR) {
         LOGE("AudioSystem could not query the input buffer size.");
-        return NO_INIT;    
+        return NO_INIT;
     }
+
     if (inputBuffSizeInBytes == 0) {
         LOGE("Recording parameters are not supported: sampleRate %d, channelCount %d, format %d",
             sampleRate, channelCount, format);
         return BAD_VALUE;
     }
+
     int frameSizeInBytes = channelCount * (format == AudioSystem::PCM_16_BIT ? 2 : 1);
+    if (AudioSystem::isLinearPCM(format)) {
+        frameSizeInBytes = channelCount * (format == AudioSystem::PCM_16_BIT ? sizeof(int16_t) : sizeof(int8_t));
+    } else {
+        frameSizeInBytes = sizeof(int8_t);
+    }
+
 
     // We use 2* size of input buffer for ping pong use of record buffer.
     int minFrameCount = 2 * inputBuffSizeInBytes / frameSizeInBytes;
@@ -155,22 +166,14 @@ status_t AudioRecord::set(
         notificationFrames = frameCount/2;
     }
 
-    // open record channel
-    status_t status;
-    sp<IAudioRecord> record = audioFlinger->openRecord(getpid(), inputSource,
-                                                       sampleRate, format,
-                                                       channelCount,
-                                                       frameCount,
-                                                       ((uint16_t)flags) << 16, 
-                                                       &status);
-    if (record == 0) {
-        LOGE("AudioFlinger could not create record track, status: %d", status);
+    // create the IAudioRecord
+    status_t status = openRecord(sampleRate, format, channelCount,
+                                 frameCount, flags);
+
+    if (status != NO_ERROR) {
         return status;
     }
-    sp<IMemory> cblk = record->getCblk();
-    if (cblk == 0) {
-        return NO_INIT;
-    }
+
     if (cbf != 0) {
         mClientRecordThread = new ClientRecordThread(*this, threadCanCallJava);
         if (mClientRecordThread == 0) {
@@ -180,15 +183,10 @@ status_t AudioRecord::set(
 
     mStatus = NO_ERROR;
 
-    mAudioRecord = record;
-    mCblkMemory = cblk;
-    mCblk = static_cast<audio_track_cblk_t*>(cblk->pointer());
-    mCblk->buffers = (char*)mCblk + sizeof(audio_track_cblk_t);
-    mCblk->out = 0;
     mFormat = format;
     // Update buffer size in case it has been limited by AudioFlinger during track creation
     mFrameCount = mCblk->frameCount;
-    mChannelCount = channelCount;
+    mChannelCount = (uint8_t)channelCount;
     mActive = 0;
     mCbf = cbf;
     mNotificationFrames = notificationFrames;
@@ -201,6 +199,7 @@ status_t AudioRecord::set(
     mNewPosition = 0;
     mUpdatePeriod = 0;
     mInputSource = (uint8_t)inputSource;
+    mFlags = flags;
 
     return NO_ERROR;
 }
@@ -234,7 +233,11 @@ uint32_t AudioRecord::frameCount() const
 
 int AudioRecord::frameSize() const
 {
-    return channelCount()*((format() == AudioSystem::PCM_8_BIT) ? sizeof(uint8_t) : sizeof(int16_t));
+    if (AudioSystem::isLinearPCM(mFormat)) {
+        return channelCount()*((format() == AudioSystem::PCM_8_BIT) ? sizeof(uint8_t) : sizeof(int16_t));
+    } else {
+        return sizeof(uint8_t);
+    }
 }
 
 int AudioRecord::inputSource() const
@@ -262,15 +265,29 @@ status_t AudioRecord::start()
      }
 
     if (android_atomic_or(1, &mActive) == 0) {
-        mNewPosition = mCblk->user + mUpdatePeriod;
-        mCblk->bufferTimeoutMs = MAX_RUN_TIMEOUT_MS;
-        mCblk->waitTimeMs = 0;
-        if (t != 0) {
-           t->run("ClientRecordThread", THREAD_PRIORITY_AUDIO_CLIENT);
-        } else {
-            setpriority(PRIO_PROCESS, 0, THREAD_PRIORITY_AUDIO_CLIENT);
+        ret = AudioSystem::startInput(mInput);
+        if (ret == NO_ERROR) {
+            ret = mAudioRecord->start();
+            if (ret == DEAD_OBJECT) {
+                LOGV("start() dead IAudioRecord: creating a new one");
+                ret = openRecord(mCblk->sampleRate, mFormat, mChannelCount,
+                        mFrameCount, mFlags);
+            }
+            if (ret == NO_ERROR) {
+                mNewPosition = mCblk->user + mUpdatePeriod;
+                mCblk->bufferTimeoutMs = MAX_RUN_TIMEOUT_MS;
+                mCblk->waitTimeMs = 0;
+                if (t != 0) {
+                   t->run("ClientRecordThread", THREAD_PRIORITY_AUDIO_CLIENT);
+                } else {
+                    setpriority(PRIO_PROCESS, 0, THREAD_PRIORITY_AUDIO_CLIENT);
+                }
+            } else {
+                LOGV("start() failed");
+                AudioSystem::stopInput(mInput);
+                android_atomic_and(~1, &mActive);
+            }
         }
-        ret = mAudioRecord->start();
     }
 
     if (t != 0) {
@@ -301,6 +318,7 @@ status_t AudioRecord::stop()
         } else {
             setpriority(PRIO_PROCESS, 0, ANDROID_PRIORITY_NORMAL);
         }
+        AudioSystem::stopInput(mInput);
     }
 
     if (t != 0) {
@@ -372,10 +390,48 @@ status_t AudioRecord::getPosition(uint32_t *position)
 
 // -------------------------------------------------------------------------
 
+status_t AudioRecord::openRecord(
+        uint32_t sampleRate,
+        int format,
+        int channelCount,
+        int frameCount,
+        uint32_t flags)
+{
+    status_t status;
+    const sp<IAudioFlinger>& audioFlinger = AudioSystem::get_audio_flinger();
+    if (audioFlinger == 0) {
+        return NO_INIT;
+    }
+
+    sp<IAudioRecord> record = audioFlinger->openRecord(getpid(), mInput,
+                                                       sampleRate, format,
+                                                       channelCount,
+                                                       frameCount,
+                                                       ((uint16_t)flags) << 16,
+                                                       &status);
+    if (record == 0) {
+        LOGE("AudioFlinger could not create record track, status: %d", status);
+        return status;
+    }
+    sp<IMemory> cblk = record->getCblk();
+    if (cblk == 0) {
+        LOGE("Could not get control block");
+        return NO_INIT;
+    }
+    mAudioRecord.clear();
+    mAudioRecord = record;
+    mCblkMemory.clear();
+    mCblkMemory = cblk;
+    mCblk = static_cast<audio_track_cblk_t*>(cblk->pointer());
+    mCblk->buffers = (char*)mCblk + sizeof(audio_track_cblk_t);
+    mCblk->out = 0;
+
+    return NO_ERROR;
+}
+
 status_t AudioRecord::obtainBuffer(Buffer* audioBuffer, int32_t waitCount)
 {
     int active;
-    int timeout = 0;
     status_t result;
     audio_track_cblk_t* cblk = mCblk;
     uint32_t framesReq = audioBuffer->frameCount;
@@ -387,25 +443,40 @@ status_t AudioRecord::obtainBuffer(Buffer* audioBuffer, int32_t waitCount)
     uint32_t framesReady = cblk->framesReady();
 
     if (framesReady == 0) {
-        Mutex::Autolock _l(cblk->lock);
+        cblk->lock.lock();
         goto start_loop_here;
         while (framesReady == 0) {
             active = mActive;
-            if (UNLIKELY(!active))
+            if (UNLIKELY(!active)) {
+                cblk->lock.unlock();
                 return NO_MORE_BUFFERS;
-            if (UNLIKELY(!waitCount))
+            }
+            if (UNLIKELY(!waitCount)) {
+                cblk->lock.unlock();
                 return WOULD_BLOCK;
-            timeout = 0;
+            }
             result = cblk->cv.waitRelative(cblk->lock, milliseconds(waitTimeMs));
             if (__builtin_expect(result!=NO_ERROR, false)) {
                 cblk->waitTimeMs += waitTimeMs;
                 if (cblk->waitTimeMs >= cblk->bufferTimeoutMs) {
                     LOGW(   "obtainBuffer timed out (is the CPU pegged?) "
                             "user=%08x, server=%08x", cblk->user, cblk->server);
-                    timeout = 1;
+                    cblk->lock.unlock();
+                    result = mAudioRecord->start();
+                    if (result == DEAD_OBJECT) {
+                        LOGW("obtainBuffer() dead IAudioRecord: creating a new one");
+                        result = openRecord(cblk->sampleRate, mFormat, mChannelCount,
+                                            mFrameCount, mFlags);
+                        if (result == NO_ERROR) {
+                            cblk = mCblk;
+                            cblk->bufferTimeoutMs = MAX_RUN_TIMEOUT_MS;
+                        }
+                    }
+                    cblk->lock.lock();
                     cblk->waitTimeMs = 0;
                 }
                 if (--waitCount == 0) {
+                    cblk->lock.unlock();
                     return TIMED_OUT;
                 }
             }
@@ -413,15 +484,11 @@ status_t AudioRecord::obtainBuffer(Buffer* audioBuffer, int32_t waitCount)
         start_loop_here:
             framesReady = cblk->framesReady();
         }
+        cblk->lock.unlock();
     }
 
-    LOGW_IF(timeout,
-        "*** SERIOUS WARNING *** obtainBuffer() timed out "
-        "but didn't need to be locked. We recovered, but "
-        "this shouldn't happen (user=%08x, server=%08x)", cblk->user, cblk->server);
-
     cblk->waitTimeMs = 0;
-    
+
     if (framesReq > framesReady) {
         framesReq = framesReady;
     }
@@ -437,7 +504,7 @@ status_t AudioRecord::obtainBuffer(Buffer* audioBuffer, int32_t waitCount)
     audioBuffer->channelCount= mChannelCount;
     audioBuffer->format      = mFormat;
     audioBuffer->frameCount  = framesReq;
-    audioBuffer->size        = framesReq*mChannelCount*sizeof(int16_t);
+    audioBuffer->size        = framesReq*cblk->frameSize;
     audioBuffer->raw         = (int8_t*)cblk->buffer(u);
     active = mActive;
     return active ? status_t(NO_ERROR) : status_t(STOPPED);
@@ -468,7 +535,7 @@ ssize_t AudioRecord::read(void* buffer, size_t userSize)
 
     do {
 
-        audioBuffer.frameCount = userSize/mChannelCount/sizeof(int16_t);
+        audioBuffer.frameCount = userSize/frameSize();
 
         // Calling obtainBuffer() with a negative wait count causes
         // an (almost) infinite wait time.
@@ -519,8 +586,8 @@ bool AudioRecord::processAudioBuffer(const sp<ClientRecordThread>& thread)
 
     do {
         audioBuffer.frameCount = frames;
-        // Calling obtainBuffer() with a wait count of 1 
-        // limits wait time to WAIT_PERIOD_MS. This prevents from being 
+        // Calling obtainBuffer() with a wait count of 1
+        // limits wait time to WAIT_PERIOD_MS. This prevents from being
         // stuck here not being able to handle timed events (position, markers).
         status_t err = obtainBuffer(&audioBuffer, 1);
         if (err < NO_ERROR) {
@@ -548,14 +615,14 @@ bool AudioRecord::processAudioBuffer(const sp<ClientRecordThread>& thread)
         if (readSize > reqSize) readSize = reqSize;
 
         audioBuffer.size = readSize;
-        audioBuffer.frameCount = readSize/mChannelCount/sizeof(int16_t);
+        audioBuffer.frameCount = readSize/frameSize();
         frames -= audioBuffer.frameCount;
 
         releaseBuffer(&audioBuffer);
 
     } while (frames);
 
-    
+
     // Manage overrun callback
     if (mActive && (mCblk->framesAvailable_l() == 0)) {
         LOGV("Overrun user: %x, server: %x, flowControlFlag %d", mCblk->user, mCblk->server, mCblk->flowControlFlag);

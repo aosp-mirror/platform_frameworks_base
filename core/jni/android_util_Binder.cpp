@@ -25,12 +25,12 @@
 #include <stdio.h>
 
 #include <utils/Atomic.h>
-#include <utils/IInterface.h>
-#include <utils/IPCThreadState.h>
+#include <binder/IInterface.h>
+#include <binder/IPCThreadState.h>
 #include <utils/Log.h>
-#include <utils/Parcel.h>
-#include <utils/ProcessState.h>
-#include <utils/IServiceManager.h>
+#include <binder/Parcel.h>
+#include <binder/ProcessState.h>
+#include <binder/IServiceManager.h>
 
 #include <android_runtime/AndroidRuntime.h>
 

@@ -61,6 +61,7 @@ import static android.telephony.SmsManager.RESULT_ERROR_GENERIC_FAILURE;
 import static android.telephony.SmsManager.RESULT_ERROR_NO_SERVICE;
 import static android.telephony.SmsManager.RESULT_ERROR_NULL_PDU;
 import static android.telephony.SmsManager.RESULT_ERROR_RADIO_OFF;
+import static android.telephony.SmsManager.RESULT_ERROR_LIMIT_EXCEEDED;
 
 
 public abstract class SMSDispatcher extends Handler {
@@ -105,6 +106,9 @@ public abstract class SMSDispatcher extends Handler {
     /** Alert is timeout */
     static final protected int EVENT_ALERT_TIMEOUT = 9;
 
+    /** Stop the sending */
+    static final protected int EVENT_STOP_SENDING = 10;
+
     protected Phone mPhone;
     protected Context mContext;
     protected ContentResolver mResolver;
@@ -120,6 +124,8 @@ public abstract class SMSDispatcher extends Handler {
     private static final int SEND_RETRY_DELAY = 2000;
     /** single part SMS */
     private static final int SINGLE_PART_SMS = 1;
+    /** Message sending queue limit */
+    private static final int MO_MSG_QUEUE_LIMIT = 5;
 
     /**
      * Message reference for a CONCATENATED_8_BIT_REFERENCE or
@@ -130,7 +136,7 @@ public abstract class SMSDispatcher extends Handler {
 
     private SmsCounter mCounter;
 
-    private SmsTracker mSTracker;
+    private ArrayList mSTrackers = new ArrayList(MO_MSG_QUEUE_LIMIT);
 
     /** Wake lock to ensure device stays awake while dispatching the SMS intent. */
     private PowerManager.WakeLock mWakeLock;
@@ -144,7 +150,8 @@ public abstract class SMSDispatcher extends Handler {
     private static SmsMessage mSmsMessage;
     private static SmsMessageBase mSmsMessageBase;
     private SmsMessageBase.SubmitPduBase mSubmitPduBase;
-    private boolean mStorageAvailable = true;
+
+    protected boolean mStorageAvailable = true;
 
     protected static int getNextConcatenatedRef() {
         sConcatenatedRef += 1;
@@ -214,7 +221,6 @@ public abstract class SMSDispatcher extends Handler {
         mContext = phone.getContext();
         mResolver = mContext.getContentResolver();
         mCm = phone.mCM;
-        mSTracker = null;
 
         createWakelock();
 
@@ -289,19 +295,16 @@ public abstract class SMSDispatcher extends Handler {
 
             sms = (SmsMessage) ar.result;
             try {
-                if (mStorageAvailable) {
-                    int result = dispatchMessage(sms.mWrappedSmsMessage);
-                    if (result != Activity.RESULT_OK) {
-                        // RESULT_OK means that message was broadcast for app(s) to handle.
-                        // Any other result, we should ack here.
-                        boolean handled = (result == Intents.RESULT_SMS_HANDLED);
-                        acknowledgeLastIncomingSms(handled, result, null);
-                    }
-                } else {
-                    acknowledgeLastIncomingSms(false, Intents.RESULT_SMS_OUT_OF_MEMORY, null);
+                int result = dispatchMessage(sms.mWrappedSmsMessage);
+                if (result != Activity.RESULT_OK) {
+                    // RESULT_OK means that message was broadcast for app(s) to handle.
+                    // Any other result, we should ack here.
+                    boolean handled = (result == Intents.RESULT_SMS_HANDLED);
+                    notifyAndAcknowledgeLastIncomingSms(handled, result, null);
                 }
             } catch (RuntimeException ex) {
-                acknowledgeLastIncomingSms(false, Intents.RESULT_SMS_GENERIC_ERROR, null);
+                Log.e(TAG, "Exception dispatching message", ex);
+                notifyAndAcknowledgeLastIncomingSms(false, Intents.RESULT_SMS_GENERIC_ERROR, null);
             }
 
             break;
@@ -330,17 +333,41 @@ public abstract class SMSDispatcher extends Handler {
         case EVENT_ALERT_TIMEOUT:
             ((AlertDialog)(msg.obj)).dismiss();
             msg.obj = null;
-            mSTracker = null;
+            if (mSTrackers.isEmpty() == false) {
+                try {
+                    SmsTracker sTracker = (SmsTracker)mSTrackers.remove(0);
+                    sTracker.mSentIntent.send(RESULT_ERROR_LIMIT_EXCEEDED);
+                } catch (CanceledException ex) {
+                    Log.e(TAG, "failed to send back RESULT_ERROR_LIMIT_EXCEEDED");
+                }
+            }
+            if (Config.LOGD) {
+                Log.d(TAG, "EVENT_ALERT_TIMEOUT, message stop sending");
+            }
             break;
 
         case EVENT_SEND_CONFIRMED_SMS:
-            if (mSTracker!=null) {
-                if (isMultipartTracker(mSTracker)) {
-                    sendMultipartSms(mSTracker);
+            if (mSTrackers.isEmpty() == false) {
+                SmsTracker sTracker = (SmsTracker)mSTrackers.remove(mSTrackers.size() - 1);
+                if (isMultipartTracker(sTracker)) {
+                    sendMultipartSms(sTracker);
                 } else {
-                    sendSms(mSTracker);
+                    sendSms(sTracker);
                 }
-                mSTracker = null;
+                removeMessages(EVENT_ALERT_TIMEOUT, msg.obj);
+            }
+            break;
+
+        case EVENT_STOP_SENDING:
+            if (mSTrackers.isEmpty() == false) {
+                // Remove the latest one.
+                try {
+                    SmsTracker sTracker = (SmsTracker)mSTrackers.remove(mSTrackers.size() - 1);
+                    sTracker.mSentIntent.send(RESULT_ERROR_LIMIT_EXCEEDED);
+                } catch (CanceledException ex) {
+                    Log.e(TAG, "failed to send back RESULT_ERROR_LIMIT_EXCEEDED");
+                }
+                removeMessages(EVENT_ALERT_TIMEOUT, msg.obj);
             }
             break;
         }
@@ -445,7 +472,11 @@ public abstract class SMSDispatcher extends Handler {
             } else if (tracker.mSentIntent != null) {
                 // Done retrying; return an error to the app.
                 try {
-                    tracker.mSentIntent.send(RESULT_ERROR_GENERIC_FAILURE);
+                    Intent fillIn = new Intent();
+                    if (ar.result != null) {
+                        fillIn.putExtra("errorCode", ((SmsResponse)ar.result).errorCode);
+                    }
+                    tracker.mSentIntent.send(mContext, RESULT_ERROR_GENERIC_FAILURE, fillIn);
                 } catch (CanceledException ex) {}
             }
         }
@@ -602,12 +633,66 @@ public abstract class SMSDispatcher extends Handler {
         dispatch(intent, "android.permission.RECEIVE_SMS");
     }
 
+    /**
+     * Send a data based SMS to a specific application port.
+     *
+     * @param destAddr the address to send the message to
+     * @param scAddr is the service center address or null to use
+     *  the current default SMSC
+     * @param destPort the port to deliver the message to
+     * @param data the body of the message to send
+     * @param sentIntent if not NULL this <code>PendingIntent</code> is
+     *  broadcast when the message is sucessfully sent, or failed.
+     *  The result code will be <code>Activity.RESULT_OK<code> for success,
+     *  or one of these errors:<br>
+     *  <code>RESULT_ERROR_GENERIC_FAILURE</code><br>
+     *  <code>RESULT_ERROR_RADIO_OFF</code><br>
+     *  <code>RESULT_ERROR_NULL_PDU</code><br>
+     *  For <code>RESULT_ERROR_GENERIC_FAILURE</code> the sentIntent may include
+     *  the extra "errorCode" containing a radio technology specific value,
+     *  generally only useful for troubleshooting.<br>
+     *  The per-application based SMS control checks sentIntent. If sentIntent
+     *  is NULL the caller will be checked against all unknown applicaitons,
+     *  which cause smaller number of SMS to be sent in checking period.
+     * @param deliveryIntent if not NULL this <code>PendingIntent</code> is
+     *  broadcast when the message is delivered to the recipient.  The
+     *  raw pdu of the status report is in the extended data ("pdu").
+     */
+    protected abstract void sendData(String destAddr, String scAddr, int destPort,
+            byte[] data, PendingIntent sentIntent, PendingIntent deliveryIntent);
+
+    /**
+     * Send a text based SMS.
+     *
+     * @param destAddr the address to send the message to
+     * @param scAddr is the service center address or null to use
+     *  the current default SMSC
+     * @param text the body of the message to send
+     * @param sentIntent if not NULL this <code>PendingIntent</code> is
+     *  broadcast when the message is sucessfully sent, or failed.
+     *  The result code will be <code>Activity.RESULT_OK<code> for success,
+     *  or one of these errors:<br>
+     *  <code>RESULT_ERROR_GENERIC_FAILURE</code><br>
+     *  <code>RESULT_ERROR_RADIO_OFF</code><br>
+     *  <code>RESULT_ERROR_NULL_PDU</code><br>
+     *  For <code>RESULT_ERROR_GENERIC_FAILURE</code> the sentIntent may include
+     *  the extra "errorCode" containing a radio technology specific value,
+     *  generally only useful for troubleshooting.<br>
+     *  The per-application based SMS control checks sentIntent. If sentIntent
+     *  is NULL the caller will be checked against all unknown applications,
+     *  which cause smaller number of SMS to be sent in checking period.
+     * @param deliveryIntent if not NULL this <code>PendingIntent</code> is
+     *  broadcast when the message is delivered to the recipient.  The
+     *  raw pdu of the status report is in the extended data ("pdu").
+     */
+    protected abstract void sendText(String destAddr, String scAddr,
+            String text, PendingIntent sentIntent, PendingIntent deliveryIntent);
 
     /**
      * Send a multi-part text based SMS.
      *
-     * @param destinationAddress the address to send the message to
-     * @param scAddress is the service center address or null to use
+     * @param destAddr the address to send the message to
+     * @param scAddr is the service center address or null to use
      *   the current default SMSC
      * @param parts an <code>ArrayList</code> of strings that, in order,
      *   comprise the original message
@@ -628,7 +713,7 @@ public abstract class SMSDispatcher extends Handler {
      *   to the recipient.  The raw pdu of the status report is in the
      *   extended data ("pdu").
      */
-    protected abstract void sendMultipartText(String destinationAddress, String scAddress,
+    protected abstract void sendMultipartText(String destAddr, String scAddr,
             ArrayList<String> parts, ArrayList<PendingIntent> sentIntents,
             ArrayList<PendingIntent> deliveryIntents);
 
@@ -689,6 +774,15 @@ public abstract class SMSDispatcher extends Handler {
      * An SmsTracker for the current message.
      */
     protected void handleReachSentLimit(SmsTracker tracker) {
+        if (mSTrackers.size() >= MO_MSG_QUEUE_LIMIT) {
+            // Deny the sending when the queue limit is reached.
+            try {
+                tracker.mSentIntent.send(RESULT_ERROR_LIMIT_EXCEEDED);
+            } catch (CanceledException ex) {
+                Log.e(TAG, "failed to send back RESULT_ERROR_LIMIT_EXCEEDED");
+            }
+            return;
+        }
 
         Resources r = Resources.getSystem();
 
@@ -698,13 +792,13 @@ public abstract class SMSDispatcher extends Handler {
                 .setTitle(r.getString(R.string.sms_control_title))
                 .setMessage(appName + " " + r.getString(R.string.sms_control_message))
                 .setPositiveButton(r.getString(R.string.sms_control_yes), mListener)
-                .setNegativeButton(r.getString(R.string.sms_control_no), null)
+                .setNegativeButton(r.getString(R.string.sms_control_no), mListener)
                 .create();
 
         d.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
         d.show();
 
-        mSTracker = tracker;
+        mSTrackers.add(tracker);
         sendMessageDelayed ( obtainMessage(EVENT_ALERT_TIMEOUT, d),
                 DEFAULT_SMS_TIMOUEOUT);
     }
@@ -770,6 +864,25 @@ public abstract class SMSDispatcher extends Handler {
             int result, Message response);
 
     /**
+     * Notify interested apps if the framework has rejected an incoming SMS,
+     * and send an acknowledge message to the network.
+     * @param success indicates that last message was successfully received.
+     * @param result result code indicating any error
+     * @param response callback message sent when operation completes.
+     */
+    private void notifyAndAcknowledgeLastIncomingSms(boolean success,
+            int result, Message response) {
+        if (!success) {
+            // broadcast SMS_REJECTED_ACTION intent
+            Intent intent = new Intent(Intents.SMS_REJECTED_ACTION);
+            intent.putExtra("result", result);
+            mWakeLock.acquire(WAKE_LOCK_TIMEOUT);
+            mContext.sendBroadcast(intent, "android.permission.RECEIVE_SMS");
+        }
+        acknowledgeLastIncomingSms(success, result, response);
+    }
+
+    /**
      * Check if a SmsTracker holds multi-part Sms
      *
      * @param tracker a SmsTracker could hold a multi-part Sms
@@ -815,6 +928,9 @@ public abstract class SMSDispatcher extends Handler {
                 if (which == DialogInterface.BUTTON_POSITIVE) {
                     Log.d(TAG, "click YES to send out sms");
                     sendMessage(obtainMessage(EVENT_SEND_CONFIRMED_SMS));
+                } else if (which == DialogInterface.BUTTON_NEGATIVE) {
+                    Log.d(TAG, "click NO to stop sending");
+                    sendMessage(obtainMessage(EVENT_STOP_SENDING));
                 }
             }
         };

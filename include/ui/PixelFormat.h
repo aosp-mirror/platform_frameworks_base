@@ -84,6 +84,13 @@ typedef int32_t PixelFormat;
 
 struct PixelFormatInfo
 {
+    enum {
+        INDEX_ALPHA   = 0,
+        INDEX_RED     = 1,
+        INDEX_GREEN   = 2,
+        INDEX_BLUE    = 3
+    };
+    
     enum { // components
         ALPHA               = 1,
         RGB                 = 2,
@@ -95,20 +102,33 @@ struct PixelFormatInfo
         Y_CB_CR_I           = 8,
     };
 
+    struct szinfo {
+        uint8_t h;
+        uint8_t l;
+    };
+    
     inline PixelFormatInfo() : version(sizeof(PixelFormatInfo)) { }
     size_t getScanlineSize(unsigned int width) const;
+    size_t getSize(size_t ci) const { 
+        return (ci <= 3) ? (cinfo[ci].h - cinfo[ci].l) : 0;
+    }
     size_t      version;
     PixelFormat format;
     size_t      bytesPerPixel;
     size_t      bitsPerPixel;
-    uint8_t     h_alpha;
-    uint8_t     l_alpha;
-    uint8_t     h_red;
-    uint8_t     l_red;
-    uint8_t     h_green;
-    uint8_t     l_green;
-    uint8_t     h_blue;
-    uint8_t     l_blue;
+    union {
+        szinfo      cinfo[4];
+        struct {
+            uint8_t     h_alpha;
+            uint8_t     l_alpha;    
+            uint8_t     h_red;
+            uint8_t     l_red;
+            uint8_t     h_green;
+            uint8_t     l_green;
+            uint8_t     h_blue;
+            uint8_t     l_blue;
+        };
+    };
     uint8_t     components;
     uint8_t     reserved0[3];
     uint32_t    reserved1;

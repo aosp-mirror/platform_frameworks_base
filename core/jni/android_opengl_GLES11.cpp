@@ -144,6 +144,10 @@ android_glBufferData__IILjava_nio_Buffer_2I
 
     if (data_buf) {
         data = (GLvoid *)getPointer(_env, data_buf, &_array, &_remaining);
+        if (_remaining < size) {
+            _env->ThrowNew(IAEClass, "remaining() < size");
+            goto exit;
+        }
     }
     glBufferData(
         (GLenum)target,
@@ -151,6 +155,8 @@ android_glBufferData__IILjava_nio_Buffer_2I
         (GLvoid *)data,
         (GLenum)usage
     );
+
+exit:
     if (_array) {
         releasePointer(_env, _array, data, JNI_FALSE);
     }
@@ -165,12 +171,18 @@ android_glBufferSubData__IIILjava_nio_Buffer_2
     GLvoid *data = (GLvoid *) 0;
 
     data = (GLvoid *)getPointer(_env, data_buf, &_array, &_remaining);
+    if (_remaining < size) {
+        _env->ThrowNew(IAEClass, "remaining() < size");
+        goto exit;
+    }
     glBufferSubData(
         (GLenum)target,
         (GLintptr)offset,
         (GLsizeiptr)size,
         (GLvoid *)data
     );
+
+exit:
     if (_array) {
         releasePointer(_env, _array, data, JNI_FALSE);
     }

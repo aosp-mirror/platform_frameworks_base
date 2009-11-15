@@ -18,7 +18,11 @@ package android.test.mock;
 
 import android.content.ContentValues;
 import android.content.IContentProvider;
-import android.content.ISyncAdapter;
+import android.content.Entity;
+import android.content.EntityIterator;
+import android.content.ContentProviderResult;
+import android.content.ContentProviderOperation;
+import android.content.OperationApplicationException;
 import android.content.res.AssetFileDescriptor;
 import android.database.Cursor;
 import android.database.CursorWindow;
@@ -30,6 +34,7 @@ import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
 
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
 
 /**
  * Mock implementation of IContentProvider that does nothing.  All methods are non-functional and 
@@ -62,11 +67,6 @@ public class MockContentProvider implements IContentProvider {
     }
 
     @SuppressWarnings("unused")
-    public ISyncAdapter getSyncAdapter() throws RemoteException {
-        throw new UnsupportedOperationException("unimplemented mock method");
-    }
-
-    @SuppressWarnings("unused")
     public String getType(Uri url) throws RemoteException {
         throw new UnsupportedOperationException("unimplemented mock method");
     }
@@ -87,9 +87,22 @@ public class MockContentProvider implements IContentProvider {
             throws FileNotFoundException {
         throw new UnsupportedOperationException("unimplemented mock method");
     }
-    
+
+    public ContentProviderResult[] applyBatch(ArrayList<ContentProviderOperation> operations)
+            throws RemoteException, OperationApplicationException {
+        throw new UnsupportedOperationException("unimplemented mock method");
+    }
+
     @SuppressWarnings("unused")
     public Cursor query(Uri url, String[] projection, String selection, String[] selectionArgs,
+            String sortOrder) throws RemoteException {
+        throw new UnsupportedOperationException("unimplemented mock method");
+    }
+
+    /**
+     * @hide
+     */
+    public EntityIterator queryEntities(Uri url, String selection, String[] selectionArgs,
             String sortOrder) throws RemoteException {
         throw new UnsupportedOperationException("unimplemented mock method");
     }

@@ -58,7 +58,7 @@ interface IWifiManager
 
     int getNumAllowedChannels();
 
-    boolean setNumAllowedChannels(int numChannels);
+    boolean setNumAllowedChannels(int numChannels, boolean persist);
 
     int[] getValidChannelCounts();
     

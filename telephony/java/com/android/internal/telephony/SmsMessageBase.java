@@ -116,6 +116,16 @@ public abstract class SmsMessageBase {
          * android.telephony.SmsMessage ENCODING_*).
          */
         public int codeUnitSize;
+
+        @Override
+        public String toString() {
+            return "TextEncodingDetails " +
+                    "{ msgCount=" + msgCount +
+                    ", codeUnitCount=" + codeUnitCount +
+                    ", codeUnitsRemaining=" + codeUnitsRemaining +
+                    ", codeUnitSize=" + codeUnitSize +
+                    " }";
+        }
     }
 
     // TODO(): This class is duplicated in SmsMessage.java. Refactor accordingly.
@@ -353,60 +363,30 @@ public abstract class SmsMessageBase {
     }
 
     /**
-     * Try to parse this message as an email gateway message -> Neither
-     * of the standard ways are currently supported: There are two ways
-     * specified in TS 23.040 Section 3.8 (not supported via this mechanism) -
-     * SMS message "may have its TP-PID set for internet electronic mail - MT
+     * Try to parse this message as an email gateway message
+     * There are two ways specified in TS 23.040 Section 3.8 :
+     *  - SMS message "may have its TP-PID set for internet electronic mail - MT
      * SMS format: [<from-address><space>]<message> - "Depending on the
      * nature of the gateway, the destination/origination address is either
      * derived from the content of the SMS TP-OA or TP-DA field, or the
      * TP-OA/TP-DA field contains a generic gateway address and the to/from
-     * address is added at the beginning as shown above." - multiple addreses
-     * separated by commas, no spaces - subject field delimited by '()' or '##'
-     * and '#' Section 9.2.3.24.11
+     * address is added at the beginning as shown above." (which is supported here)
+     * - Multiple addreses separated by commas, no spaces, Subject field delimited
+     * by '()' or '##' and '#' Section 9.2.3.24.11 (which are NOT supported here)
      */
     protected void extractEmailAddressFromMessageBody() {
 
-        /*
-         * a little guesswork here. I haven't found doc for this.
-         * the format could be either
+        /* Some carriers may use " /" delimiter as below
          *
          * 1. [x@y][ ]/[subject][ ]/[body]
          * -or-
          * 2. [x@y][ ]/[body]
          */
-        int slash = 0, slash2 = 0, atSymbol = 0;
-
-        try {
-            slash = messageBody.indexOf(" /");
-            if (slash == -1) {
-                return;
-            }
-
-            atSymbol = messageBody.indexOf('@');
-            if (atSymbol == -1 || atSymbol > slash) {
-                return;
-            }
-
-            emailFrom = messageBody.substring(0, slash);
-
-            slash2 = messageBody.indexOf(" /", slash + 2);
-
-            if (slash2 == -1) {
-                pseudoSubject = null;
-                emailBody = messageBody.substring(slash + 2);
-            } else {
-                pseudoSubject = messageBody.substring(slash + 2, slash2);
-                emailBody = messageBody.substring(slash2 + 2);
-            }
-
-            isEmail = true;
-        } catch (Exception ex) {
-            Log.w(LOG_TAG,
-                    "extractEmailAddressFromMessageBody: exception slash="
-                    + slash + ", atSymbol=" + atSymbol + ", slash2="
-                    + slash2, ex);
-        }
+         String[] parts = messageBody.split("( /)|( )", 2);
+         if (parts.length < 2) return;
+         emailFrom = parts[0];
+         emailBody = parts[1];
+         isEmail = true;
     }
 
 }

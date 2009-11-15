@@ -20,20 +20,19 @@
 #include <stdint.h>
 #include <sys/types.h>
 
-#include <utils/IMemory.h>
-#include <private/ui/LayerState.h>
-#include <EGL/eglnatives.h>
-
 #include "LayerBase.h"
-#include "LayerBitmap.h"
+
+struct copybit_device_t;
 
 namespace android {
 
 // ---------------------------------------------------------------------------
 
-class MemoryDealer;
+class Buffer;
 class Region;
 class OverlayRef;
+
+// ---------------------------------------------------------------------------
 
 class LayerBuffer : public LayerBaseClient
 {
@@ -47,10 +46,10 @@ class LayerBuffer : public LayerBaseClient
         virtual void postBuffer(ssize_t offset);
         virtual void unregisterBuffers();
         virtual bool transformed() const;
+        virtual void destroy() { }
     protected:
         LayerBuffer& mLayer;
     };
-
 
 public:
     static const uint32_t typeInfo;
@@ -59,12 +58,14 @@ public:
     virtual uint32_t getTypeInfo() const { return typeInfo; }
 
             LayerBuffer(SurfaceFlinger* flinger, DisplayID display,
-                        Client* client, int32_t i);
+                    const sp<Client>& client, int32_t i);
         virtual ~LayerBuffer();
 
+    virtual void onFirstRef();
     virtual bool needsBlending() const;
 
-    virtual sp<LayerBaseClient::Surface> getSurface() const;
+    virtual sp<LayerBaseClient::Surface> createSurface() const;
+    virtual status_t ditch();
     virtual void onDraw(const Region& clip) const;
     virtual uint32_t doTransaction(uint32_t flags);
     virtual void unlockPageFlip(const Transform& planeTransform, Region& outDirtyRegion);
@@ -78,15 +79,22 @@ public:
     sp<Source> getSource() const;
     sp<Source> clearSource();
     void setNeedsBlending(bool blending);
-    const Rect& getTransformedBounds() const {
+    Rect getTransformedBounds() const {
         return mTransformedBounds;
     }
+
+    void serverDestroy();
 
 private:
     struct NativeBuffer {
         copybit_image_t   img;
         copybit_rect_t    crop;
     };
+
+    static gralloc_module_t const* sGrallocModule;
+    static gralloc_module_t const* getGrallocModule() {
+        return sGrallocModule;
+    }
 
     class Buffer : public LightRefBase<Buffer> {
     public:
@@ -120,15 +128,15 @@ private:
         virtual void postBuffer(ssize_t offset);
         virtual void unregisterBuffers();
         virtual bool transformed() const;
+        virtual void destroy() { }
     private:
-        mutable Mutex   mLock;
-        sp<Buffer>      mBuffer;
-        status_t        mStatus;
-        ISurface::BufferHeap mBufferHeap;
-        size_t          mBufferSize;
-        mutable sp<MemoryDealer> mTemporaryDealer;
-        mutable LayerBitmap mTempBitmap;
-        mutable GLuint  mTextureName;
+        mutable Mutex                   mBufferSourceLock;
+        sp<Buffer>                      mBuffer;
+        status_t                        mStatus;
+        ISurface::BufferHeap            mBufferHeap;
+        size_t                          mBufferSize;
+        mutable sp<GraphicBuffer>       mTempBitmap;
+        mutable LayerBase::Texture      mTexture;
     };
     
     class OverlaySource : public Source {
@@ -137,30 +145,26 @@ private:
                 sp<OverlayRef>* overlayRef, 
                 uint32_t w, uint32_t h, int32_t format);
         virtual ~OverlaySource();
+        virtual void onDraw(const Region& clip) const;
         virtual void onTransaction(uint32_t flags);
         virtual void onVisibilityResolved(const Transform& planeTransform);
+        virtual void destroy();
     private:
-        void serverDestroy(); 
-        void destroyOverlay(); 
+
         class OverlayChannel : public BnOverlay {
-            mutable Mutex mLock;
-            sp<OverlaySource> mSource;
+            wp<LayerBuffer> mLayer;
             virtual void destroy() {
-                sp<OverlaySource> source;
-                { // scope for the lock;
-                    Mutex::Autolock _l(mLock);
-                    source = mSource;
-                    mSource.clear();
-                }
-                if (source != 0) {
-                    source->serverDestroy();
+                sp<LayerBuffer> layer(mLayer.promote());
+                if (layer != 0) {
+                    layer->serverDestroy();
                 }
             }
         public:
-            OverlayChannel(const sp<OverlaySource>& source)
-                : mSource(source) {
+            OverlayChannel(const sp<LayerBuffer>& layer)
+                : mLayer(layer) {
             }
         };
+        
         friend class OverlayChannel;
         bool mVisibilityChanged;
 
@@ -172,41 +176,35 @@ private:
         int32_t mFormat;
         int32_t mWidthStride;
         int32_t mHeightStride;
-        mutable Mutex mLock;
+        mutable Mutex mOverlaySourceLock;
+        bool mInitialized;
     };
 
 
-    class SurfaceBuffer : public LayerBaseClient::Surface
+    class SurfaceLayerBuffer : public LayerBaseClient::Surface
     {
     public:
-                SurfaceBuffer(SurfaceID id, LayerBuffer* owner);
-        virtual ~SurfaceBuffer();
-        virtual status_t onTransact(
-            uint32_t code, const Parcel& data, Parcel* reply, uint32_t flags);
+        SurfaceLayerBuffer(const sp<SurfaceFlinger>& flinger,
+                        SurfaceID id, const sp<LayerBuffer>& owner);
+        virtual ~SurfaceLayerBuffer();
+
         virtual status_t registerBuffers(const ISurface::BufferHeap& buffers);
         virtual void postBuffer(ssize_t offset);
         virtual void unregisterBuffers();
+        
         virtual sp<OverlayRef> createOverlay(
                 uint32_t w, uint32_t h, int32_t format);
-       void disown();
     private:
-        LayerBuffer* getOwner() const {
-            Mutex::Autolock _l(mLock);
-            return mOwner;
+        sp<LayerBuffer> getOwner() const {
+            return static_cast<LayerBuffer*>(Surface::getOwner().get());
         }
-        mutable Mutex   mLock;
-        LayerBuffer*    mOwner;
     };
-
-    friend class SurfaceFlinger;
-    sp<SurfaceBuffer>   getClientSurface() const;
 
     mutable Mutex   mLock;
     sp<Source>      mSource;
-
+    sp<Surface>     mSurface;
     bool            mInvalidate;
     bool            mNeedsBlending;
-    mutable wp<SurfaceBuffer> mClientSurface;
 };
 
 // ---------------------------------------------------------------------------

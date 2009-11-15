@@ -65,4 +65,6 @@
   <item type="id" name="startSelectingText" />
   <item type="id" name="stopSelectingText" />
   <item type="id" name="addToDictionary" />
+  <item type="id" name="accountPreferences" />
+  <item type="id" name="smallIcon" />
 </resources>

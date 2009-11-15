@@ -27,6 +27,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.IntentSender;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
@@ -1098,6 +1099,13 @@ public final class BridgeContext extends Context {
     }
 
     @Override
+    public void sendStickyOrderedBroadcast(Intent intent,
+            BroadcastReceiver resultReceiver, Handler scheduler, int initialCode, String initialData,
+           Bundle initialExtras) {
+        // TODO Auto-generated method stub
+    }
+    
+    @Override
     public void setTheme(int arg0) {
         // TODO Auto-generated method stub
 
@@ -1123,6 +1131,13 @@ public final class BridgeContext extends Context {
 
     }
 
+    @Override
+    public void startIntentSender(IntentSender intent,
+            Intent fillInIntent, int flagsMask, int flagsValues, int extraFlags)
+            throws IntentSender.SendIntentException {
+        // TODO Auto-generated method stub
+    }
+    
     @Override
     public boolean startInstrumentation(ComponentName arg0, String arg1,
             Bundle arg2) {

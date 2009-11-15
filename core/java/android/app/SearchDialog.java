@@ -30,7 +30,6 @@ import android.content.pm.ResolveInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources;
 import android.database.Cursor;
-import android.graphics.drawable.Animatable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
@@ -51,7 +50,6 @@ import android.util.Log;
 import android.view.ContextThemeWrapper;
 import android.view.Gravity;
 import android.view.KeyEvent;
-import android.view.Menu;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
@@ -65,9 +63,9 @@ import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.ListAdapter;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemSelectedListener;
 
@@ -98,6 +96,10 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
     
     // The extra key used in an intent to the speech recognizer for in-app voice search.
     private static final String EXTRA_CALLING_PACKAGE = "calling_package";
+    
+    // The string used for privateImeOptions to identify to the IME that it should not show
+    // a microphone button since one already exists in the search dialog.
+    private static final String IME_OPTION_NO_MICROPHONE = "nm";
 
     private static final int SEARCH_PLATE_LEFT_PADDING_GLOBAL = 12;
     private static final int SEARCH_PLATE_LEFT_PADDING_NON_GLOBAL = 7;
@@ -129,8 +131,8 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
     private ArrayList<ComponentName> mPreviousComponents;
 
     // For voice searching
-    private Intent mVoiceWebSearchIntent;
-    private Intent mVoiceAppSearchIntent;
+    private final Intent mVoiceWebSearchIntent;
+    private final Intent mVoiceAppSearchIntent;
 
     // support for AutoCompleteTextView suggestions display
     private SuggestionsAdapter mSuggestionsAdapter;
@@ -158,17 +160,24 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
      */
     public SearchDialog(Context context) {
         super(context, com.android.internal.R.style.Theme_GlobalSearchBar);
+
+        // Save voice intent for later queries/launching
+        mVoiceWebSearchIntent = new Intent(RecognizerIntent.ACTION_WEB_SEARCH);
+        mVoiceWebSearchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        mVoiceWebSearchIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+                RecognizerIntent.LANGUAGE_MODEL_WEB_SEARCH);
+
+        mVoiceAppSearchIntent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+        mVoiceAppSearchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
     }
 
     /**
-     * We create the search dialog just once, and it stays around (hidden)
-     * until activated by the user.
+     * Create the search dialog and any resources that are used for the
+     * entire lifetime of the dialog.
      */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        setContentView(com.android.internal.R.layout.search_bar);
 
         Window theWindow = getWindow();
         WindowManager.LayoutParams lp = theWindow.getAttributes();
@@ -182,7 +191,21 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
         lp.softInputMode = WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
         theWindow.setAttributes(lp);
 
+        // Touching outside of the search dialog will dismiss it
+        setCanceledOnTouchOutside(true);        
+    }
+
+    /**
+     * We recreate the dialog view each time it becomes visible so as to limit
+     * the scope of any problems with the contained resources.
+     */
+    private void createContentView() {
+        setContentView(com.android.internal.R.layout.search_bar);
+
         // get the view elements for local access
+        SearchBar searchBar = (SearchBar) findViewById(com.android.internal.R.id.search_bar);
+        searchBar.setSearchDialog(this);
+
         mBadgeLabel = (TextView) findViewById(com.android.internal.R.id.search_badge);
         mSearchAutoComplete = (SearchAutoComplete)
                 findViewById(com.android.internal.R.id.search_src_text);
@@ -192,7 +215,10 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
         mSearchPlate = findViewById(com.android.internal.R.id.search_plate);
         mWorkingSpinner = getContext().getResources().
                 getDrawable(com.android.internal.R.drawable.search_spinner);
-        
+        mSearchAutoComplete.setCompoundDrawablesWithIntrinsicBounds(
+                null, null, mWorkingSpinner, null);
+        setWorking(false);
+
         // attach listeners
         mSearchAutoComplete.addTextChangedListener(mTextWatcher);
         mSearchAutoComplete.setOnKeyListener(mTextKeyListener);
@@ -203,25 +229,10 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
         mVoiceButton.setOnClickListener(mVoiceButtonClickListener);
         mVoiceButton.setOnKeyListener(mButtonsKeyListener);
 
-        mSearchAutoComplete.setSearchDialog(this);
-        
         // pre-hide all the extraneous elements
         mBadgeLabel.setVisibility(View.GONE);
 
         // Additional adjustments to make Dialog work for Search
-
-        // Touching outside of the search dialog will dismiss it 
-        setCanceledOnTouchOutside(true);
-
-        // Save voice intent for later queries/launching
-        mVoiceWebSearchIntent = new Intent(RecognizerIntent.ACTION_WEB_SEARCH);
-        mVoiceWebSearchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        mVoiceWebSearchIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
-                RecognizerIntent.LANGUAGE_MODEL_WEB_SEARCH);
-        
-        mVoiceAppSearchIntent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
-        mVoiceAppSearchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-
         mSearchAutoCompleteImeOptions = mSearchAutoComplete.getImeOptions();
     }
 
@@ -356,9 +367,13 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
         // isDefaultSearchable() should always give the same result.
         mGlobalSearchMode = globalSearch || searchManager.isDefaultSearchable(mSearchable);
         mActivityContext = mSearchable.getActivityContext(getContext());
-        
+
         // show the dialog. this will call onStart().
-        if (!isShowing()) {            
+        if (!isShowing()) {
+            // Recreate the search bar view every time the dialog is shown, to get rid
+            // of any bad state in the AutoCompleteTextView etc
+            createContentView();
+
             // The Dialog uses a ContextThemeWrapper for the context; use this to change the
             // theme out from underneath us, between the global search theme and the in-app
             // search theme. They are identical except that the global search theme does not
@@ -408,15 +423,9 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
      * @param working true to show spinner, false to hide spinner
      */
     public void setWorking(boolean working) {
-        if (working) {
-            mSearchAutoComplete.setCompoundDrawablesWithIntrinsicBounds(
-                    null, null, mWorkingSpinner, null);
-            ((Animatable) mWorkingSpinner).start();
-        } else {
-            mSearchAutoComplete.setCompoundDrawablesWithIntrinsicBounds(
-                    null, null, null, null);
-            ((Animatable) mWorkingSpinner).stop();
-        }
+        mWorkingSpinner.setAlpha(working ? 255 : 0);
+        mWorkingSpinner.setVisible(working, false);
+        mWorkingSpinner.invalidateSelf();
     }
     
     /**
@@ -502,6 +511,7 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
             updateSearchAppIcon();
             updateSearchBadge();
             updateQueryHint();
+            mSearchAutoComplete.showDropDownAfterLayout();
         } 
     }
     
@@ -537,6 +547,14 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
             mSearchAutoComplete.setInputType(inputType);
             mSearchAutoCompleteImeOptions = mSearchable.getImeOptions();
             mSearchAutoComplete.setImeOptions(mSearchAutoCompleteImeOptions);
+            
+            // If the search dialog is going to show a voice search button, then don't let
+            // the soft keyboard display a microphone button if it would have otherwise.
+            if (mSearchable.getVoiceSearchEnabled()) {
+                mSearchAutoComplete.setPrivateImeOptions(IME_OPTION_NO_MICROPHONE);
+            } else {
+                mSearchAutoComplete.setPrivateImeOptions(null);
+            }
         }
     }
     
@@ -740,16 +758,10 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
             return false;
         }
 
-        // handle back key to go back to previous searchable, etc.
-        if (handleBackKey(keyCode, event)) {
+        if (keyCode == KeyEvent.KEYCODE_SEARCH && event.getRepeatCount() == 0) {
+            event.startTracking();
+            // Consume search key for later use.
             return true;
-        }
-        
-        if (keyCode == KeyEvent.KEYCODE_SEARCH) {
-            // If the search key is pressed, toggle between global and in-app search. If we are
-            // currently doing global search and there is no in-app search context to toggle to,
-            // just don't do anything.
-            return toggleGlobalSearch();
         }
 
         // if it's an action specified by the searchable activity, launch the
@@ -759,8 +771,26 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
             launchQuerySearch(keyCode, actionKey.getQueryActionMsg());
             return true;
         }
-        
-        return false;
+
+        return super.onKeyDown(keyCode, event);
+    }
+    
+    @Override
+    public boolean onKeyUp(int keyCode, KeyEvent event) {
+        if (DBG) Log.d(LOG_TAG, "onKeyUp(" + keyCode + "," + event + ")");
+        if (mSearchable == null) {
+            return false;
+        }
+
+        if (keyCode == KeyEvent.KEYCODE_SEARCH && event.isTracking()
+                && !event.isCanceled()) {
+            // If the search key is pressed, toggle between global and in-app search. If we are
+            // currently doing global search and there is no in-app search context to toggle to,
+            // just don't do anything.
+            return toggleGlobalSearch();
+        }
+
+        return super.onKeyUp(keyCode, event);
     }
     
     /**
@@ -1120,7 +1150,7 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
     /**
      * Launch a search for the text in the query text field.
      */
-    protected void launchQuerySearch()  {
+    public void launchQuerySearch()  {
         launchQuerySearch(KeyEvent.KEYCODE_UNKNOWN, null);
     }
 
@@ -1136,7 +1166,12 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
         String query = mSearchAutoComplete.getText().toString();
         String action = mGlobalSearchMode ? Intent.ACTION_WEB_SEARCH : Intent.ACTION_SEARCH;
         Intent intent = createIntent(action, null, null, query, null,
-                actionKey, actionMsg);
+                actionKey, actionMsg, null);
+        // Allow GlobalSearch to log and create shortcut for searches launched by
+        // the search button, enter key or an action key.
+        if (mGlobalSearchMode) {
+            mSuggestionsAdapter.reportSearch(query);
+        }
         launchIntent(intent);
     }
     
@@ -1169,7 +1204,7 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
             // report back about the click
             if (mGlobalSearchMode) {
                 // in global search mode, do it via cursor
-                mSuggestionsAdapter.callCursorOnClick(c, position);
+                mSuggestionsAdapter.callCursorOnClick(c, position, actionKey, actionMsg);
             } else if (intent != null
                     && mPreviousComponents != null
                     && !mPreviousComponents.isEmpty()) {
@@ -1206,7 +1241,7 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
         cv.put(SearchManager.SUGGEST_COLUMN_INTENT_ACTION, intent.getAction());
         cv.put(SearchManager.SUGGEST_COLUMN_INTENT_DATA, intent.getDataString());
         cv.put(SearchManager.SUGGEST_COLUMN_INTENT_COMPONENT_NAME,
-                        intent.getStringExtra(SearchManager.COMPONENT_NAME_KEY));
+                intent.getComponent().flattenToShortString());
 
         // ensure the icons will work for global search
         cv.put(SearchManager.SUGGEST_COLUMN_ICON_1,
@@ -1292,6 +1327,12 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
             // intent, and to avoid the extra step of going through GlobalSearch.
             if (mGlobalSearchMode) {
                 launchGlobalSearchIntent(intent);
+                if (mStoredComponentName != null) {
+                    // If we're embedded in an application, dismiss the dialog.
+                    // This ensures that if the intent is handled by the current
+                    // activity, it's not obscured by the dialog.
+                    dismiss();
+                }
             } else {
                 // If the intent was created from a suggestion, it will always have an explicit
                 // component here.
@@ -1463,6 +1504,13 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
     }
 
     /**
+     * Checks if there are any previous searchable components in the history stack.
+     */
+    private boolean hasPreviousComponent() {
+        return mPreviousComponents != null && !mPreviousComponents.isEmpty();
+    }
+
+    /**
      * Saves the previous component that was searched, so that we can go
      * back to it.
      */
@@ -1480,14 +1528,10 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
      *         no previous component.
      */
     private ComponentName popPreviousComponent() {
-        if (mPreviousComponents == null) {
+        if (!hasPreviousComponent()) {
             return null;
         }
-        int size = mPreviousComponents.size();
-        if (size == 0) {
-            return null;
-        }
-        return mPreviousComponents.remove(size - 1);
+        return mPreviousComponents.remove(mPreviousComponents.size() - 1);
     }
     
     /**
@@ -1500,17 +1544,17 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
         if (previous == null) {
             return false;
         }
+
         if (!show(previous, mAppSearchData, false)) {
             Log.w(LOG_TAG, "Failed to switch to source " + previous);
             return false;
         }
-        
+
         // must touch text to trigger suggestions
         // TODO: should this be the text as it was when the user left
         // the source that we are now going back to?
         String query = mSearchAutoComplete.getText().toString();
         setUserQuery(query);
-        
         return true;
     }
     
@@ -1563,9 +1607,10 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
 
             String query = getColumnString(c, SearchManager.SUGGEST_COLUMN_QUERY);
             String extraData = getColumnString(c, SearchManager.SUGGEST_COLUMN_INTENT_EXTRA_DATA);
+            String mode = mGlobalSearchMode ? SearchManager.MODE_GLOBAL_SEARCH_SUGGESTION : null;
 
             return createIntent(action, dataUri, extraData, query, componentName, actionKey,
-                    actionMsg);
+                    actionMsg, mode);
         } catch (RuntimeException e ) {
             int rowNum;
             try {                       // be really paranoid now
@@ -1591,13 +1636,21 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
      *        or {@link KeyEvent#KEYCODE_UNKNOWN} if none.
      * @param actionMsg The message for the action key that was pressed,
      *        or <code>null</code> if none.
+     * @param mode The search mode, one of the acceptable values for
+     *             {@link SearchManager#SEARCH_MODE}, or {@code null}.
      * @return The intent.
      */
     private Intent createIntent(String action, Uri data, String extraData, String query,
-            String componentName, int actionKey, String actionMsg) {
+            String componentName, int actionKey, String actionMsg, String mode) {
         // Now build the Intent
         Intent intent = new Intent(action);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        // We need CLEAR_TOP to avoid reusing an old task that has other activities
+        // on top of the one we want. We don't want to do this in in-app search though,
+        // as it can be destructive to the activity stack.
+        if (mGlobalSearchMode) {
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        }
         if (data != null) {
             intent.setData(data);
         }
@@ -1617,6 +1670,9 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
         if (actionKey != KeyEvent.KEYCODE_UNKNOWN) {
             intent.putExtra(SearchManager.ACTION_KEY, actionKey);
             intent.putExtra(SearchManager.ACTION_MSG, actionMsg);
+        }
+        if (mode != null) {
+            intent.putExtra(SearchManager.SEARCH_MODE, mode);
         }
         // Only allow 3rd-party intents from GlobalSearch
         if (!mGlobalSearchMode) {
@@ -1648,15 +1704,59 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
         }
         return result;
     }
-        
+
+    /**
+     * The root element in the search bar layout. This is a custom view just to override
+     * the handling of the back button.
+     */
+    public static class SearchBar extends LinearLayout {
+
+        private SearchDialog mSearchDialog;
+
+        public SearchBar(Context context, AttributeSet attrs) {
+            super(context, attrs);
+        }
+
+        public SearchBar(Context context) {
+            super(context);
+        }
+
+        public void setSearchDialog(SearchDialog searchDialog) {
+            mSearchDialog = searchDialog;
+        }
+
+        /**
+         * Overrides the handling of the back key to move back to the previous sources or dismiss
+         * the search dialog, instead of dismissing the input method.
+         */
+        @Override
+        public boolean dispatchKeyEventPreIme(KeyEvent event) {
+            if (DBG) Log.d(LOG_TAG, "onKeyPreIme(" + event + ")");
+            if (mSearchDialog != null && event.getKeyCode() == KeyEvent.KEYCODE_BACK) {
+                KeyEvent.DispatcherState state = getKeyDispatcherState();
+                if (state != null) {
+                    if (event.getAction() == KeyEvent.ACTION_DOWN
+                            && event.getRepeatCount() == 0) {
+                        state.startTracking(event, this);
+                        return true;
+                    } else if (event.getAction() == KeyEvent.ACTION_UP
+                            && !event.isCanceled() && state.isTracking(event)) {
+                        mSearchDialog.onBackPressed();
+                        return true;
+                    }
+                }
+            }
+            return super.dispatchKeyEventPreIme(event);
+        }
+    }
+
     /**
      * Local subclass for AutoCompleteTextView.
      */
     public static class SearchAutoComplete extends AutoCompleteTextView {
 
         private int mThreshold;
-        private SearchDialog mSearchDialog;
-        
+
         public SearchAutoComplete(Context context) {
             super(context);
             mThreshold = getThreshold();
@@ -1672,10 +1772,6 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
             mThreshold = getThreshold();
         }
 
-        private void setSearchDialog(SearchDialog searchDialog) {
-            mSearchDialog = searchDialog;
-        }
-        
         @Override
         public void setThreshold(int threshold) {
             super.setThreshold(threshold);
@@ -1729,54 +1825,26 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
             return mThreshold <= 0 || super.enoughToFilter();
         }
 
-        /**
-         * {@link AutoCompleteTextView#onKeyPreIme(int, KeyEvent)}) dismisses the drop-down on BACK,
-         * so we must override this method to modify the BACK behavior.
-         */
-        @Override
-        public boolean onKeyPreIme(int keyCode, KeyEvent event) {
-            if (mSearchDialog.mSearchable == null) {
-                return false;
-            }
-            if (keyCode == KeyEvent.KEYCODE_BACK && event.getAction() == KeyEvent.ACTION_DOWN) {
-                if (mSearchDialog.backToPreviousComponent()) {
-                    return true;
-                }
-                // If the drop-down obscures the keyboard, the user wouldn't see anything
-                // happening when pressing back, so we dismiss the entire dialog instead.
-                //
-                // also: if there is no text entered, we also want to dismiss the whole dialog,
-                // not just the soft keyboard.  the exception to this is if there are shortcuts
-                // that aren't displayed (e.g are being obscured by the soft keyboard); in that
-                // case we want to dismiss the soft keyboard so the user can see the rest of the
-                // shortcuts.
-                if (isInputMethodNotNeeded() ||
-                        (isEmpty() && getDropDownChildCount() >= getAdapterCount())) {
-                    mSearchDialog.cancel();
-                    return true;
-                }
-                return false; // will dismiss soft keyboard if necessary
-            }
-            return false;
-        }
+    }
 
-        private int getAdapterCount() {
-            final ListAdapter adapter = getAdapter();
-            return adapter == null ? 0 : adapter.getCount();
+    @Override
+    public void onBackPressed() {
+        // If the input method is covering the search dialog completely,
+        // e.g. in landscape mode with no hard keyboard, dismiss just the input method
+        InputMethodManager imm = (InputMethodManager)getContext()
+                .getSystemService(Context.INPUT_METHOD_SERVICE);
+        if (imm != null && imm.isFullscreenMode() &&
+                imm.hideSoftInputFromWindow(getWindow().getDecorView().getWindowToken(), 0)) {
+            return;
         }
-    }
-    
-    protected boolean handleBackKey(int keyCode, KeyEvent event) {
-        if (keyCode == KeyEvent.KEYCODE_BACK && event.getAction() == KeyEvent.ACTION_DOWN) {
-            if (backToPreviousComponent()) {
-                return true;
-            }
+        // Otherwise, go back to any previous source (e.g. back to QSB when
+        // pivoted into a source.
+        if (!backToPreviousComponent()) {
+            // If no previous source, close search dialog
             cancel();
-            return true;
         }
-        return false;
     }
-    
+
     /**
      * Implements OnItemClickListener
      */

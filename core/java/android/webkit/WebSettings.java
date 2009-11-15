@@ -17,14 +17,13 @@
 package android.webkit;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
 import android.provider.Checkin;
-
 import java.lang.SecurityException;
-
 import java.util.Locale;
 
 /**
@@ -75,7 +74,6 @@ public class WebSettings {
      * FAR makes 100% looking like in 240dpi
      * MEDIUM makes 100% looking like in 160dpi
      * CLOSE makes 100% looking like in 120dpi
-     * @hide Pending API council approval
      */
     public enum ZoomDensity {
         FAR(150),      // 240dpi
@@ -150,7 +148,6 @@ public class WebSettings {
     private String          mUserAgent;
     private boolean         mUseDefaultUserAgent;
     private String          mAcceptLanguage;
-    private String          mPluginsPath = "";
     private int             mMinimumFontSize = 8;
     private int             mMinimumLogicalFontSize = 8;
     private int             mDefaultFontSize = 16;
@@ -165,6 +162,17 @@ public class WebSettings {
     private boolean         mUseWideViewport = false;
     private boolean         mSupportMultipleWindows = false;
     private boolean         mShrinksStandaloneImagesToFit = false;
+    // HTML5 API flags
+    private boolean         mAppCacheEnabled = false;
+    private boolean         mDatabaseEnabled = false;
+    private boolean         mDomStorageEnabled = false;
+    private boolean         mWorkersEnabled = false;  // only affects V8.
+    private boolean         mGeolocationEnabled = true;
+    // HTML5 configuration parameters
+    private long            mAppCacheMaxSize = Long.MAX_VALUE;
+    private String          mAppCachePath = "";
+    private String          mDatabasePath = "";
+    private String          mGeolocationDatabasePath = "";
     // Don't need to synchronize the get/set methods as they
     // are basic types, also none of these values are used in
     // native WebCore code.
@@ -179,9 +187,13 @@ public class WebSettings {
     private boolean         mSupportZoom = true;
     private boolean         mBuiltInZoomControls = false;
     private boolean         mAllowFileAccess = true;
+    private boolean         mLoadWithOverviewMode = false;
 
-    // The Gears permissions manager. Only in Donut.
-    static GearsPermissionsManager sGearsPermissionsManager;
+    // private WebSettings, not accessible by the host activity
+    static private int      mDoubleTapToastCount = 3;
+
+    private static final String PREF_FILE = "WebViewSettings";
+    private static final String DOUBLE_TAP_TOAST_COUNT = "double_tap_toast_count";
 
     // Class to handle messages before WebCore is ready.
     private class EventHandler {
@@ -189,6 +201,8 @@ public class WebSettings {
         static final int SYNC = 0;
         // Message id for setting priority
         static final int PRIORITY = 1;
+        // Message id for writing double-tap toast count
+        static final int SET_DOUBLE_TAP_TOAST_COUNT = 2;
         // Actual WebCore thread handler
         private Handler mHandler;
 
@@ -203,7 +217,6 @@ public class WebSettings {
                     switch (msg.what) {
                         case SYNC:
                             synchronized (WebSettings.this) {
-                                checkGearsPermissions();
                                 if (mBrowserFrame.mNativeFrame != 0) {
                                     nativeSync(mBrowserFrame.mNativeFrame);
                                 }
@@ -213,6 +226,16 @@ public class WebSettings {
 
                         case PRIORITY: {
                             setRenderPriority();
+                            break;
+                        }
+
+                        case SET_DOUBLE_TAP_TOAST_COUNT: {
+                            SharedPreferences.Editor editor = mContext
+                                    .getSharedPreferences(PREF_FILE,
+                                            Context.MODE_PRIVATE).edit();
+                            editor.putInt(DOUBLE_TAP_TOAST_COUNT,
+                                    mDoubleTapToastCount);
+                            editor.commit();
                             break;
                         }
                     }
@@ -251,13 +274,13 @@ public class WebSettings {
 
     // User agent strings.
     private static final String DESKTOP_USERAGENT =
-            "Mozilla/5.0 (Macintosh; U; Intel Mac OS X; en)"
-            + " AppleWebKit/528.5+ (KHTML, like Gecko) Version/3.1.2"
-            + " Safari/525.20.1";
+            "Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_5_7; en-us)"
+            + " AppleWebKit/530.17 (KHTML, like Gecko) Version/4.0"
+            + " Safari/530.17";
     private static final String IPHONE_USERAGENT = 
-            "Mozilla/5.0 (iPhone; U; CPU iPhone 2_1 like Mac OS X; en)"
-            + " AppleWebKit/528.5+ (KHTML, like Gecko) Version/3.1.2"
-            + " Mobile/5F136 Safari/525.20.1";
+            "Mozilla/5.0 (iPhone; U; CPU iPhone OS 3_0 like Mac OS X; en-us)"
+            + " AppleWebKit/528.18 (KHTML, like Gecko) Version/4.0"
+            + " Mobile/7A341 Safari/528.16";
     private static Locale sLocale;
     private static Object sLockForLocaleSettings;
     
@@ -351,11 +374,13 @@ public class WebSettings {
             // default to "en"
             buffer.append("en");
         }
-        
-        final String model = Build.MODEL;
-        if (model.length() > 0) {
-            buffer.append("; ");
-            buffer.append(model);
+        // add the model for the release build
+        if ("REL".equals(Build.VERSION.CODENAME)) {
+            final String model = Build.MODEL;
+            if (model.length() > 0) {
+                buffer.append("; ");
+                buffer.append(model);
+            }
         }
         final String id = Build.ID;
         if (id.length() > 0) {
@@ -425,6 +450,20 @@ public class WebSettings {
     }
 
     /**
+     * Set whether the WebView loads a page with overview mode.
+     */
+    public void setLoadWithOverviewMode(boolean overview) {
+        mLoadWithOverviewMode = overview;
+    }
+
+    /**
+     * Returns true if this WebView loads page with overview mode
+     */
+    public boolean getLoadWithOverviewMode() {
+        return mLoadWithOverviewMode;
+    }
+
+    /**
      * Store whether the WebView is saving form data.
      */
     public void setSaveFormData(boolean save) {
@@ -480,7 +519,6 @@ public class WebSettings {
      * thread.
      * @param zoom A ZoomDensity value
      * @see WebSettings.ZoomDensity
-     * @hide Pending API council approval
      */
     public void setDefaultZoom(ZoomDensity zoom) {
         if (mDefaultZoom != zoom) {
@@ -494,7 +532,6 @@ public class WebSettings {
      * thread.
      * @return A ZoomDensity value
      * @see WebSettings.ZoomDensity
-     * @hide Pending API council approval
      */
     public ZoomDensity getDefaultZoom() {
         return mDefaultZoom;
@@ -939,13 +976,144 @@ public class WebSettings {
     }
 
     /**
-     * Set a custom path to plugins used by the WebView. The client
-     * must ensure it exists before this call.
-     * @param pluginsPath String path to the directory containing plugins.
+     * TODO: need to add @Deprecated
      */
     public synchronized void setPluginsPath(String pluginsPath) {
-        if (pluginsPath != null && !pluginsPath.equals(mPluginsPath)) {
-            mPluginsPath = pluginsPath;
+    }
+
+    /**
+     * Set the path to where database storage API databases should be saved.
+     * This will update WebCore when the Sync runs in the C++ side.
+     * @param databasePath String path to the directory where databases should
+     *     be saved. May be the empty string but should never be null.
+     */
+    public synchronized void setDatabasePath(String databasePath) {
+        if (databasePath != null && !databasePath.equals(mDatabasePath)) {
+            mDatabasePath = databasePath;
+            postSync();
+        }
+    }
+
+    /**
+     * Set the path where the Geolocation permissions database should be saved.
+     * This will update WebCore when the Sync runs in the C++ side.
+     * @param databasePath String path to the directory where the Geolocation
+     *     permissions database should be saved. May be the empty string but
+     *     should never be null.
+     */
+    public synchronized void setGeolocationDatabasePath(String databasePath) {
+        if (databasePath != null && !databasePath.equals(mDatabasePath)) {
+            mGeolocationDatabasePath = databasePath;
+            postSync();
+        }
+    }
+
+    /**
+     * Tell the WebView to enable Application Caches API.
+     * @param flag True if the WebView should enable Application Caches.
+     */
+    public synchronized void setAppCacheEnabled(boolean flag) {
+        if (mAppCacheEnabled != flag) {
+            mAppCacheEnabled = flag;
+            postSync();
+        }
+    }
+
+    /**
+     * Set a custom path to the Application Caches files. The client
+     * must ensure it exists before this call.
+     * @param appCachePath String path to the directory containing Application
+     * Caches files. The appCache path can be the empty string but should not
+     * be null. Passing null for this parameter will result in a no-op.
+     */
+    public synchronized void setAppCachePath(String appCachePath) {
+        if (appCachePath != null && !appCachePath.equals(mAppCachePath)) {
+            mAppCachePath = appCachePath;
+            postSync();
+        }
+    }
+
+    /**
+     * Set the maximum size for the Application Caches content.
+     * @param appCacheMaxSize the maximum size in bytes.
+     */
+    public synchronized void setAppCacheMaxSize(long appCacheMaxSize) {
+        if (appCacheMaxSize != mAppCacheMaxSize) {
+            mAppCacheMaxSize = appCacheMaxSize;
+            postSync();
+        }
+    }
+
+    /**
+     * Set whether the database storage API is enabled.
+     * @param flag boolean True if the WebView should use the database storage
+     *     API.
+     */
+    public synchronized void setDatabaseEnabled(boolean flag) {
+       if (mDatabaseEnabled != flag) {
+           mDatabaseEnabled = flag;
+           postSync();
+       }
+    }
+
+    /**
+     * Set whether the DOM storage API is enabled.
+     * @param flag boolean True if the WebView should use the DOM storage
+     *     API.
+     */
+    public synchronized void setDomStorageEnabled(boolean flag) {
+       if (mDomStorageEnabled != flag) {
+           mDomStorageEnabled = flag;
+           postSync();
+       }
+    }
+
+    /**
+     * Returns true if the DOM Storage API's are enabled.
+     * @return True if the DOM Storage API's are enabled.
+     */
+    public synchronized boolean getDomStorageEnabled() {
+       return mDomStorageEnabled;
+    }
+
+    /**
+     * Return the path to where database storage API databases are saved for
+     * the current WebView.
+     * @return the String path to the database storage API databases.
+     */
+    public synchronized String getDatabasePath() {
+        return mDatabasePath;
+    }
+
+    /**
+     * Returns true if database storage API is enabled.
+     * @return True if the database storage API is enabled.
+     */
+    public synchronized boolean getDatabaseEnabled() {
+        return mDatabaseEnabled;
+    }
+
+    /**
+     * Tell the WebView to enable WebWorkers API.
+     * @param flag True if the WebView should enable WebWorkers.
+     * Note that this flag only affects V8. JSC does not have
+     * an equivalent setting.
+     * @hide pending api council approval
+     */
+    public synchronized void setWorkersEnabled(boolean flag) {
+        if (mWorkersEnabled != flag) {
+            mWorkersEnabled = flag;
+            postSync();
+        }
+    }
+
+    /**
+     * Sets whether Geolocation is enabled.
+     * @param flag Whether Geolocation should be enabled.
+     */
+    public synchronized void setGeolocationEnabled(boolean flag) {
+        if (mGeolocationEnabled != flag) {
+            mGeolocationEnabled = flag;
             postSync();
         }
     }
@@ -967,11 +1135,10 @@ public class WebSettings {
     }
 
     /**
-     * Return the current path used for plugins in the WebView.
-     * @return The string path to the WebView plugins.
+     * TODO: need to add @Deprecated
      */
     public synchronized String getPluginsPath() {
-        return mPluginsPath;
+        return "";
     }
 
     /**
@@ -1146,6 +1313,19 @@ public class WebSettings {
         }
      }
 
+    int getDoubleTapToastCount() {
+        return mDoubleTapToastCount;
+    }
+
+    void setDoubleTapToastCount(int count) {
+        if (mDoubleTapToastCount != count) {
+            mDoubleTapToastCount = count;
+            // write the settings in the non-UI thread
+            mEventHandler.sendMessage(Message.obtain(null,
+                    EventHandler.SET_DOUBLE_TAP_TOAST_COUNT));
+        }
+    }
+
     /**
      * Transfer messages from the queue to the new WebCoreThread. Called from
      * WebCore thread.
@@ -1153,13 +1333,29 @@ public class WebSettings {
     /*package*/
     synchronized void syncSettingsAndCreateHandler(BrowserFrame frame) {
         mBrowserFrame = frame;
-        if (WebView.DEBUG) {
+        if (DebugFlags.WEB_SETTINGS) {
             junit.framework.Assert.assertTrue(frame.mNativeFrame != 0);
         }
-        checkGearsPermissions();
+
+        GoogleLocationSettingManager.getInstance().start(mContext);
+
+        SharedPreferences sp = mContext.getSharedPreferences(PREF_FILE,
+                Context.MODE_PRIVATE);
+        if (mDoubleTapToastCount > 0) {
+            mDoubleTapToastCount = sp.getInt(DOUBLE_TAP_TOAST_COUNT,
+                    mDoubleTapToastCount);
+        }
         nativeSync(frame.mNativeFrame);
         mSyncPending = false;
         mEventHandler.createHandler();
+    }
+
+    /**
+     * Let the Settings object know that our owner is being destroyed.
+     */
+    /*package*/
+    synchronized void onDestroyed() {
+        GoogleLocationSettingManager.getInstance().stop();
     }
 
     private int pin(int size) {
@@ -1170,23 +1366,6 @@ public class WebSettings {
             return 72;
         }
         return size;
-    }
-
-    private void checkGearsPermissions() {
-        // Did we already check the permissions at startup?
-        if (sGearsPermissionsManager != null) {
-            return;
-        }
-        // Is the pluginsPath sane?
-        String pluginsPath = getPluginsPath();
-        if (pluginsPath == null || pluginsPath.length() == 0) {
-            // We don't yet have a meaningful plugin path, so
-            // we can't do anything about the Gears permissions.
-            return;
-        }
-        sGearsPermissionsManager =
-            new GearsPermissionsManager(mContext, pluginsPath);
-        sGearsPermissionsManager.doCheckAndStartObserver();
     }
 
     /* Post a SYNC message to handle syncing the native settings. */

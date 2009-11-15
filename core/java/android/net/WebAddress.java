@@ -54,7 +54,7 @@ public class WebAddress {
     static Pattern sAddressPattern = Pattern.compile(
             /* scheme    */ "(?:(http|HTTP|https|HTTPS|file|FILE)\\:\\/\\/)?" +
             /* authority */ "(?:([-A-Za-z0-9$_.+!*'(),;?&=]+(?:\\:[-A-Za-z0-9$_.+!*'(),;?&=]+)?)@)?" +
-            /* host      */ "([-A-Za-z0-9%]+(?:\\.[-A-Za-z0-9%]+)*)?" +
+            /* host      */ "([-A-Za-z0-9%_]+(?:\\.[-A-Za-z0-9%_]+)*|\\[[0-9a-fA-F:\\.]+\\])?" +
             /* port      */ "(?:\\:([0-9]+))?" +
             /* path      */ "(\\/?.*)?");
 

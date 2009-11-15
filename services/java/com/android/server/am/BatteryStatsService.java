@@ -16,6 +16,7 @@
 
 package com.android.server.am;
 
+import android.bluetooth.BluetoothHeadset;
 import android.content.Context;
 import android.os.Binder;
 import android.os.IBinder;
@@ -23,11 +24,11 @@ import android.os.Parcel;
 import android.os.Process;
 import android.os.ServiceManager;
 import android.telephony.SignalStrength;
-import android.telephony.TelephonyManager;
 import android.util.Log;
 
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.os.BatteryStatsImpl;
+import com.android.internal.os.PowerProfile;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -49,6 +50,10 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
     public void publish(Context context) {
         mContext = context;
         ServiceManager.addService("batteryinfo", asBinder());
+        mStats.setNumSpeedSteps(new PowerProfile(mContext).getNumSpeedSteps());
+        mStats.setRadioScanningTimeout(mContext.getResources().getInteger(
+                com.android.internal.R.integer.config_radioScanningTimeout)
+                * 1000L);
     }
     
     public void shutdown() {
@@ -193,10 +198,10 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
         }
     }
 
-    public void noteAirplaneMode(boolean airplaneMode) {
+    public void notePhoneState(int state) {
         enforceCallingPermission();
         synchronized (mStats) {
-            mStats.noteAirplaneModeLocked(airplaneMode);
+            mStats.notePhoneStateLocked(state);
         }
     }
 
@@ -258,8 +263,10 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
 
     public void noteBluetoothOn() {
         enforceCallingPermission();
+        BluetoothHeadset headset = new BluetoothHeadset(mContext, null);
         synchronized (mStats) {
             mStats.noteBluetoothOnLocked();
+            mStats.setBtHeadset(headset);
         }
     }
     

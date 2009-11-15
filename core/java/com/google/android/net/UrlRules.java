@@ -20,6 +20,7 @@ import android.content.ContentResolver;
 import android.database.Cursor;
 import android.provider.Checkin;
 import android.provider.Settings;
+import android.util.Config;
 import android.util.Log;
 
 import java.util.ArrayList;
@@ -53,6 +54,9 @@ import java.util.regex.Pattern;
  * </pre>
  */
 public class UrlRules {
+    public static final String TAG = "UrlRules";
+    public static final boolean LOCAL_LOGV = Config.LOGV || false;
+
     /** Thrown when the rewrite rules can't be parsed. */
     public static class RuleFormatException extends Exception {
         public RuleFormatException(String msg) { super(msg); }
@@ -192,10 +196,11 @@ public class UrlRules {
                 Settings.Gservices.PROVISIONING_DIGEST);
         if (sCachedDigest != null && sCachedDigest.equals(digest)) {
             // The digest is the same, so the rules are the same.
+            if (LOCAL_LOGV) Log.v(TAG, "Using cached rules for digest: " + digest);
             return sCachedRules;
         }
 
-        // Get all the Gservices settings with names starting with "url:".
+        if (LOCAL_LOGV) Log.v(TAG, "Scanning for Gservices \"url:*\" rules");
         Cursor cursor = resolver.query(Settings.Gservices.CONTENT_URI,
                 new String[] {
                     Settings.Gservices.NAME,
@@ -210,16 +215,18 @@ public class UrlRules {
                     String name = cursor.getString(0).substring(4);  // "url:X"
                     String value = cursor.getString(1);
                     if (value == null || value.length() == 0) continue;
+                    if (LOCAL_LOGV) Log.v(TAG, "  Rule " + name + ": " + value);
                     rules.add(new Rule(name, value));
                 } catch (RuleFormatException e) {
                     // Oops, Gservices has an invalid rule!  Skip it.
-                    Log.e("UrlRules", "Invalid rule from Gservices", e);
+                    Log.e(TAG, "Invalid rule from Gservices", e);
                     Checkin.logEvent(resolver,
                         Checkin.Events.Tag.GSERVICES_ERROR, e.toString());
                 }
             }
             sCachedRules = new UrlRules(rules.toArray(new Rule[rules.size()]));
             sCachedDigest = digest;
+            if (LOCAL_LOGV) Log.v(TAG, "New rules stored for digest: " + digest);
         } finally {
             cursor.close();
         }

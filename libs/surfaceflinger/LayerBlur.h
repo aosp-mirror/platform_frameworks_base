@@ -39,7 +39,7 @@ public:
     virtual uint32_t getTypeInfo() const { return typeInfo; }
     
                 LayerBlur(SurfaceFlinger* flinger, DisplayID display,
-                        Client* client, int32_t i);
+                        const sp<Client>& client, int32_t i);
         virtual ~LayerBlur();
 
     virtual void onDraw(const Region& clip) const;
@@ -56,6 +56,12 @@ private:
     mutable bool    mAutoRefreshPending;
             nsecs_t mCacheAge;
     mutable GLuint  mTextureName;
+    mutable GLfloat mWidthScale;
+    mutable GLfloat mHeightScale;
+    mutable GLfloat mYOffset;
+    mutable GLint   mReadFormat;
+    mutable GLint   mReadType;
+    mutable uint32_t mBlurFormat;
 };
 
 // ---------------------------------------------------------------------------

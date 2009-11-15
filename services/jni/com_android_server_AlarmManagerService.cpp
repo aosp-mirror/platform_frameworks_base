@@ -19,8 +19,8 @@
 
 #include "JNIHelp.h"
 #include "jni.h"
-#include "utils/Log.h"
-#include "utils/misc.h"
+#include <utils/Log.h>
+#include <utils/misc.h>
 
 #include <fcntl.h>
 #include <stdio.h>

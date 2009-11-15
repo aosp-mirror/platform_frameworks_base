@@ -36,6 +36,7 @@ import android.graphics.Rect;
 import android.graphics.Region;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -312,11 +313,29 @@ public final class Bridge implements ILayoutBridge {
     }
 
     /*
+     * For compatilibty purposes, we implement the old deprecated version of computeLayout.
      * (non-Javadoc)
      * @see com.android.layoutlib.api.ILayoutBridge#computeLayout(com.android.layoutlib.api.IXmlPullParser, java.lang.Object, int, int, int, float, float, java.lang.String, boolean, java.util.Map, java.util.Map, com.android.layoutlib.api.IProjectCallback, com.android.layoutlib.api.ILayoutLog)
      */
     public ILayoutResult computeLayout(IXmlPullParser layoutDescription, Object projectKey,
             int screenWidth, int screenHeight, int density, float xdpi, float ydpi,
+            String themeName, boolean isProjectTheme,
+            Map<String, Map<String, IResourceValue>> projectResources,
+            Map<String, Map<String, IResourceValue>> frameworkResources,
+            IProjectCallback customViewLoader, ILayoutLog logger) {
+        return computeLayout(layoutDescription, projectKey,
+                screenWidth, screenHeight, false /* renderFullSize */,
+                density, xdpi, ydpi, themeName, isProjectTheme,
+                projectResources, frameworkResources, customViewLoader, logger);
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see com.android.layoutlib.api.ILayoutBridge#computeLayout(com.android.layoutlib.api.IXmlPullParser, java.lang.Object, int, int, boolean, int, float, float, java.lang.String, boolean, java.util.Map, java.util.Map, com.android.layoutlib.api.IProjectCallback, com.android.layoutlib.api.ILayoutLog)
+     */
+    public ILayoutResult computeLayout(IXmlPullParser layoutDescription, Object projectKey,
+            int screenWidth, int screenHeight, boolean renderFullSize,
+            int density, float xdpi, float ydpi,
             String themeName, boolean isProjectTheme,
             Map<String, Map<String, IResourceValue>> projectResources,
             Map<String, Map<String, IResourceValue>> frameworkResources,
@@ -341,6 +360,7 @@ public final class Bridge implements ILayoutBridge {
         try {
             // setup the display Metrics.
             DisplayMetrics metrics = new DisplayMetrics();
+            metrics.densityDpi = density;
             metrics.density = density / (float) DisplayMetrics.DENSITY_DEFAULT;
             metrics.scaledDensity = metrics.density;
             metrics.widthPixels = screenWidth;
@@ -388,20 +408,44 @@ public final class Bridge implements ILayoutBridge {
 
             // get the background drawable
             if (windowBackground != null) {
-                Drawable d = ResourceHelper.getDrawable(windowBackground.getValue(),
+                Drawable d = ResourceHelper.getDrawable(windowBackground,
                         context, true /* isFramework */);
                 root.setBackgroundDrawable(d);
             }
 
-            int w_spec = MeasureSpec.makeMeasureSpec(screenWidth, MeasureSpec.EXACTLY);
-            int h_spec = MeasureSpec.makeMeasureSpec(screenHeight - screenOffset,
-                    MeasureSpec.EXACTLY);
-
             // measure the views
+            int w_spec, h_spec;
+
+            if (renderFullSize) {
+                // measure the full size needed by the layout.
+                w_spec = MeasureSpec.makeMeasureSpec(screenWidth,
+                        MeasureSpec.UNSPECIFIED); // this lets us know the actual needed size
+                h_spec = MeasureSpec.makeMeasureSpec(screenHeight - screenOffset,
+                        MeasureSpec.UNSPECIFIED); // this lets us know the actual needed size
+                view.measure(w_spec, h_spec);
+
+                int neededWidth = root.getChildAt(0).getMeasuredWidth();
+                if (neededWidth > screenWidth) {
+                    screenWidth = neededWidth;
+                }
+
+                int neededHeight = root.getChildAt(0).getMeasuredHeight();
+                if (neededHeight > screenHeight - screenOffset) {
+                    screenHeight = neededHeight + screenOffset;
+                }
+            }
+
+            // remeasure with only the size we need
+            // This must always be done before the call to layout
+            w_spec = MeasureSpec.makeMeasureSpec(screenWidth, MeasureSpec.EXACTLY);
+            h_spec = MeasureSpec.makeMeasureSpec(screenHeight - screenOffset,
+                    MeasureSpec.EXACTLY);
             view.measure(w_spec, h_spec);
+
+            // now do the layout.
             view.layout(0, screenOffset, screenWidth, screenHeight);
 
-            // draw them
+            // draw the views
             Canvas canvas = new Canvas(screenWidth, screenHeight - screenOffset, logger);
 
             root.draw(canvas);
@@ -1009,11 +1053,40 @@ public final class Bridge implements ILayoutBridge {
             // pass for now.
         }
 
+        @SuppressWarnings("unused")
         public void setInsets(IWindow window, int touchable, Rect contentInsets,
                 Rect visibleInsets) {
             // pass for now.
         }
 
+        @SuppressWarnings("unused")
+        public void setWallpaperPosition(IBinder window, float x, float y,
+            float xStep, float yStep) {
+            // pass for now.
+        }
+
+        @SuppressWarnings("unused")
+        public void wallpaperOffsetsComplete(IBinder window) {
+            // pass for now.
+        }
+        
+        @SuppressWarnings("unused")
+        public Bundle sendWallpaperCommand(IBinder window, String action, int x, int y,
+                int z, Bundle extras, boolean sync) {
+            // pass for now.
+            return null;
+        }
+        
+        @SuppressWarnings("unused")
+        public void wallpaperCommandComplete(IBinder window, Bundle result) {
+            // pass for now.
+        }
+        
+        @SuppressWarnings("unused")
+        public void closeSystemDialogs(String reason) {
+            // pass for now.
+        }
+        
         public IBinder asBinder() {
             // pass for now.
             return null;
@@ -1041,12 +1114,12 @@ public final class Bridge implements ILayoutBridge {
         }
 
         @SuppressWarnings("unused")
-        public void dispatchPointer(MotionEvent arg0, long arg1) throws RemoteException {
+        public void dispatchPointer(MotionEvent arg0, long arg1, boolean arg2) throws RemoteException {
             // pass for now.
         }
 
         @SuppressWarnings("unused")
-        public void dispatchTrackball(MotionEvent arg0, long arg1) throws RemoteException {
+        public void dispatchTrackball(MotionEvent arg0, long arg1, boolean arg2) throws RemoteException {
             // pass for now.
         }
 
@@ -1067,6 +1140,23 @@ public final class Bridge implements ILayoutBridge {
             // pass for now.
         }
 
+        @SuppressWarnings("unused")
+        public void dispatchWallpaperOffsets(float x, float y, float xStep, float yStep,
+                boolean sync) {
+            // pass for now.
+        }
+
+        @SuppressWarnings("unused")
+        public void dispatchWallpaperCommand(String action, int x, int y,
+                int z, Bundle extras, boolean sync) {
+            // pass for now.
+        }
+        
+        @SuppressWarnings("unused")
+        public void closeSystemDialogs(String reason) {
+            // pass for now.
+        }
+        
         public IBinder asBinder() {
             // pass for now.
             return null;

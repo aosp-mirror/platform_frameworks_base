@@ -4,8 +4,9 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.Cursor;
 import android.net.Uri;
-import android.accounts.AccountMonitor;
-import android.accounts.AccountMonitorListener;
+import android.accounts.OnAccountsUpdateListener;
+import android.accounts.Account;
+import android.accounts.AccountManager;
 import android.provider.SyncConstValue;
 import android.util.Config;
 import android.util.Log;
@@ -14,9 +15,12 @@ import android.text.TextUtils;
 
 import java.util.Collections;
 import java.util.Map;
-import java.util.HashMap;
 import java.util.Vector;
 import java.util.ArrayList;
+import java.util.Set;
+import java.util.HashSet;
+
+import com.google.android.collect.Maps;
 
 /**
  * A specialization of the ContentProvider that centralizes functionality
@@ -32,25 +36,29 @@ public abstract class AbstractSyncableContentProvider extends SyncableContentPro
     private final String mDatabaseName;
     private final int mDatabaseVersion;
     private final Uri mContentUri;
-    private AccountMonitor mAccountMonitor;
 
     /** the account set in the last call to onSyncStart() */
-    private String mSyncingAccount;
+    private Account mSyncingAccount;
 
     private SyncStateContentProviderHelper mSyncState = null;
 
-    private static final String[] sAccountProjection = new String[] {SyncConstValue._SYNC_ACCOUNT};
+    private static final String[] sAccountProjection =
+            new String[] {SyncConstValue._SYNC_ACCOUNT, SyncConstValue._SYNC_ACCOUNT_TYPE};
 
     private boolean mIsTemporary;
 
     private AbstractTableMerger mCurrentMerger = null;
     private boolean mIsMergeCancelled = false;
 
-    private static final String SYNC_ACCOUNT_WHERE_CLAUSE = SyncConstValue._SYNC_ACCOUNT + "=?";
+    private static final String SYNC_ACCOUNT_WHERE_CLAUSE =
+            SyncConstValue._SYNC_ACCOUNT + "=? AND " + SyncConstValue._SYNC_ACCOUNT_TYPE + "=?";
 
     protected boolean isTemporary() {
         return mIsTemporary;
     }
+
+    private final ThreadLocal<Boolean> mApplyingBatch = new ThreadLocal<Boolean>();
+    private final ThreadLocal<Set<Uri>> mPendingBatchNotifications = new ThreadLocal<Set<Uri>>();
 
     /**
      * Indicates whether or not this ContentProvider contains a full
@@ -127,13 +135,16 @@ public abstract class AbstractSyncableContentProvider extends SyncableContentPro
         public void onCreate(SQLiteDatabase db) {
             bootstrapDatabase(db);
             mSyncState.createDatabase(db);
+            ContentResolver.requestSync(null /* all accounts */,
+                    mContentUri.getAuthority(), new Bundle());
         }
 
         @Override
         public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
             if (!upgradeDatabase(db, oldVersion, newVersion)) {
                 mSyncState.discardSyncData(db, null /* all accounts */);
-                getContext().getContentResolver().startSync(mContentUri, new Bundle());
+                ContentResolver.requestSync(null /* all accounts */,
+                        mContentUri.getAuthority(), new Bundle());
             }
         }
 
@@ -150,23 +161,36 @@ public abstract class AbstractSyncableContentProvider extends SyncableContentPro
         mOpenHelper = new AbstractSyncableContentProvider.DatabaseHelper(getContext(),
                 mDatabaseName);
         mSyncState = new SyncStateContentProviderHelper(mOpenHelper);
-
-        AccountMonitorListener listener = new AccountMonitorListener() {
-            public void onAccountsUpdated(String[] accounts) {
-                // Some providers override onAccountsChanged(); give them a database to work with.
-                mDb = mOpenHelper.getWritableDatabase();
-                onAccountsChanged(accounts);
-                TempProviderSyncAdapter syncAdapter = (TempProviderSyncAdapter)getSyncAdapter();
-                if (syncAdapter != null) {
-                    syncAdapter.onAccountsChanged(accounts);
-                }
-            }
-        };
-        mAccountMonitor = new AccountMonitor(getContext(), listener);
+        AccountManager.get(getContext()).addOnAccountsUpdatedListener(
+                new OnAccountsUpdateListener() {
+                    public void onAccountsUpdated(Account[] accounts) {
+                        // Some providers override onAccountsChanged(); give them a database to
+                        // work with.
+                        mDb = mOpenHelper.getWritableDatabase();
+                        // Only call onAccountsChanged on GAIA accounts; otherwise, the contacts and
+                        // calendar providers will choke as they try to sync unknown accounts with
+                        // AbstractGDataSyncAdapter, which will put acore into a crash loop
+                        ArrayList<Account> gaiaAccounts = new ArrayList<Account>();
+                        for (Account acct: accounts) {
+                            if (acct.type.equals("com.google")) {
+                                gaiaAccounts.add(acct);
+                            }
+                        }
+                        accounts = new Account[gaiaAccounts.size()];
+                        int i = 0;
+                        for (Account acct: gaiaAccounts) {
+                            accounts[i++] = acct;
+                        }
+                        onAccountsChanged(accounts);
+                        TempProviderSyncAdapter syncAdapter = getTempProviderSyncAdapter();
+                        if (syncAdapter != null) {
+                            syncAdapter.onAccountsChanged(accounts);
+                        }
+                    }
+                }, null /* handler */, true /* updateImmediately */);
 
         return true;
     }
-
     /**
      * Get a non-persistent instance of this content provider.
      * You must call {@link #close} on the returned
@@ -236,147 +260,117 @@ public abstract class AbstractSyncableContentProvider extends SyncableContentPro
         return Collections.emptyList();
     }
 
-    /**
-     * <p>
-     * Call mOpenHelper.getWritableDatabase() and mDb.beginTransaction().
-     * {@link #endTransaction} MUST be called after calling this method.
-     * Those methods should be used like this:
-     * </p>
-     *
-     * <pre class="prettyprint">
-     * boolean successful = false;
-     * beginTransaction();
-     * try {
-     *     // Do something related to mDb
-     *     successful = true;
-     *     return ret;
-     * } finally {
-     *     endTransaction(successful);
-     * }
-     * </pre>
-     *
-     * @hide This method is dangerous from the view of database manipulation, though using
-     * this makes batch insertion/update/delete much faster.
-     */
-    public final void beginTransaction() {
+    @Override
+    public final int update(final Uri url, final ContentValues values,
+            final String selection, final String[] selectionArgs) {
         mDb = mOpenHelper.getWritableDatabase();
-        mDb.beginTransaction();
-    }
-
-    /**
-     * <p>
-     * Call mDb.endTransaction(). If successful is true, try to call
-     * mDb.setTransactionSuccessful() before calling mDb.endTransaction().
-     * This method MUST be used with {@link #beginTransaction()}.
-     * </p>
-     *
-     * @hide This method is dangerous from the view of database manipulation, though using
-     * this makes batch insertion/update/delete much faster.
-     */
-    public final void endTransaction(boolean successful) {
+        final boolean notApplyingBatch = !applyingBatch();
+        if (notApplyingBatch) {
+            mDb.beginTransaction();
+        }
         try {
-            if (successful) {
-                // setTransactionSuccessful() must be called just once during opening the
-                // transaction.
+            if (isTemporary() && mSyncState.matches(url)) {
+                int numRows = mSyncState.asContentProvider().update(
+                        url, values, selection, selectionArgs);
+                if (notApplyingBatch) {
+                    mDb.setTransactionSuccessful();
+                }
+                return numRows;
+            }
+
+            int result = updateInternal(url, values, selection, selectionArgs);
+            if (notApplyingBatch) {
                 mDb.setTransactionSuccessful();
             }
-        } finally {
-            mDb.endTransaction();
-        }
-    }
-
-    @Override
-    public final int update(final Uri uri, final ContentValues values,
-            final String selection, final String[] selectionArgs) {
-        boolean successful = false;
-        beginTransaction();
-        try {
-            int ret = nonTransactionalUpdate(uri, values, selection, selectionArgs);
-            successful = true;
-            return  ret;
-        } finally {
-            endTransaction(successful);
-        }
-    }
-
-    /**
-     * @hide
-     */
-    public final int nonTransactionalUpdate(final Uri uri, final ContentValues values,
-            final String selection, final String[] selectionArgs) {
-        if (isTemporary() && mSyncState.matches(uri)) {
-            int numRows = mSyncState.asContentProvider().update(
-                    uri, values, selection, selectionArgs);
-            return numRows;
-        }
-
-        int result = updateInternal(uri, values, selection, selectionArgs);
-        if (!isTemporary() && result > 0) {
-            getContext().getContentResolver().notifyChange(uri, null /* observer */,
-                    changeRequiresLocalSync(uri));
-        }
-
-        return result;
-    }
-
-    @Override
-    public final int delete(final Uri uri, final String selection,
-            final String[] selectionArgs) {
-        boolean successful = false;
-        beginTransaction();
-        try {
-            int ret = nonTransactionalDelete(uri, selection, selectionArgs);
-            successful = true;
-            return ret;
-        } finally {
-            endTransaction(successful);
-        }
-    }
-
-    /**
-     * @hide
-     */
-    public final int nonTransactionalDelete(final Uri uri, final String selection,
-            final String[] selectionArgs) {
-        if (isTemporary() && mSyncState.matches(uri)) {
-            int numRows = mSyncState.asContentProvider().delete(uri, selection, selectionArgs);
-            return numRows;
-        }
-        int result = deleteInternal(uri, selection, selectionArgs);
-        if (!isTemporary() && result > 0) {
-            getContext().getContentResolver().notifyChange(uri, null /* observer */,
-                    changeRequiresLocalSync(uri));
-        }
-        return result;
-    }
-
-    @Override
-    public final Uri insert(final Uri uri, final ContentValues values) {
-        boolean successful = false;
-        beginTransaction();
-        try {
-            Uri ret = nonTransactionalInsert(uri, values);
-            successful = true;
-            return ret;
-        } finally {
-            endTransaction(successful);
-        }
-    }
-
-    /**
-     * @hide
-     */
-    public final Uri nonTransactionalInsert(final Uri uri, final ContentValues values) {
-        if (isTemporary() && mSyncState.matches(uri)) {
-            Uri result = mSyncState.asContentProvider().insert(uri, values);
+            if (!isTemporary() && result > 0) {
+                if (notApplyingBatch) {
+                    getContext().getContentResolver().notifyChange(url, null /* observer */,
+                            changeRequiresLocalSync(url));
+                } else {
+                    mPendingBatchNotifications.get().add(url);
+                }
+            }
             return result;
+        } finally {
+            if (notApplyingBatch) {
+                mDb.endTransaction();
+            }
         }
-        Uri result = insertInternal(uri, values);
-        if (!isTemporary() && result != null) {
-            getContext().getContentResolver().notifyChange(uri, null /* observer */,
-                    changeRequiresLocalSync(uri));
+    }
+
+    @Override
+    public final int delete(final Uri url, final String selection,
+            final String[] selectionArgs) {
+        mDb = mOpenHelper.getWritableDatabase();
+        final boolean notApplyingBatch = !applyingBatch();
+        if (notApplyingBatch) {
+            mDb.beginTransaction();
         }
-        return result;
+        try {
+            if (isTemporary() && mSyncState.matches(url)) {
+                int numRows = mSyncState.asContentProvider().delete(url, selection, selectionArgs);
+                if (notApplyingBatch) {
+                    mDb.setTransactionSuccessful();
+                }
+                return numRows;
+            }
+            int result = deleteInternal(url, selection, selectionArgs);
+            if (notApplyingBatch) {
+                mDb.setTransactionSuccessful();
+            }
+            if (!isTemporary() && result > 0) {
+                if (notApplyingBatch) {
+                    getContext().getContentResolver().notifyChange(url, null /* observer */,
+                            changeRequiresLocalSync(url));
+                } else {
+                    mPendingBatchNotifications.get().add(url);
+                }
+            }
+            return result;
+        } finally {
+            if (notApplyingBatch) {
+                mDb.endTransaction();
+            }
+        }
+    }
+
+    private boolean applyingBatch() {
+        return mApplyingBatch.get() != null && mApplyingBatch.get();
+    }
+
+    @Override
+    public final Uri insert(final Uri url, final ContentValues values) {
+        mDb = mOpenHelper.getWritableDatabase();
+        final boolean notApplyingBatch = !applyingBatch();
+        if (notApplyingBatch) {
+            mDb.beginTransaction();
+        }
+        try {
+            if (isTemporary() && mSyncState.matches(url)) {
+                Uri result = mSyncState.asContentProvider().insert(url, values);
+                if (notApplyingBatch) {
+                    mDb.setTransactionSuccessful();
+                }
+                return result;
+            }
+            Uri result = insertInternal(url, values);
+            if (notApplyingBatch) {
+                mDb.setTransactionSuccessful();
+            }
+            if (!isTemporary() && result != null) {
+                if (notApplyingBatch) {
+                    getContext().getContentResolver().notifyChange(url, null /* observer */,
+                            changeRequiresLocalSync(url));
+                } else {
+                    mPendingBatchNotifications.get().add(url);
+                }
+            }
+            return result;
+        } finally {
+            if (notApplyingBatch) {
+                mDb.endTransaction();
+            }
+        }
     }
 
     @Override
@@ -411,6 +405,92 @@ public abstract class AbstractSyncableContentProvider extends SyncableContentPro
     }
 
     /**
+     * <p>
+     * Start batch transaction. {@link #endTransaction} MUST be called after 
+     * calling this method. Those methods should be used like this:
+     * </p>
+     *
+     * <pre class="prettyprint">
+     * boolean successful = false;
+     * beginBatch()
+     * try {
+     *     // Do something related to mDb
+     *     successful = true;
+     *     return ret;
+     * } finally {
+     *     endBatch(successful);
+     * }
+     * </pre>
+     *
+     * @hide This method should be used only when {@link ContentProvider#applyBatch} is not enough and must be
+     * used with {@link #endBatch}.
+     * e.g. If returned value has to be used during one transaction, this method might be useful.
+     */
+    public final void beginBatch() {
+        // initialize if this is the first time this thread has applied a batch
+        if (mApplyingBatch.get() == null) {
+            mApplyingBatch.set(false);
+            mPendingBatchNotifications.set(new HashSet<Uri>());
+        }
+
+        if (applyingBatch()) {
+            throw new IllegalStateException(
+                    "applyBatch is not reentrant but mApplyingBatch is already set");
+        }
+        SQLiteDatabase db = getDatabase();
+        db.beginTransaction();
+        boolean successful = false;
+        try {
+            mApplyingBatch.set(true);
+            successful = true;
+        } finally {
+            if (!successful) {
+                // Something unexpected happened. We must call endTransaction() at least.
+                db.endTransaction();
+            }
+        }
+    }
+
+    /**
+     * <p>
+     * Finish batch transaction. If "successful" is true, try to call
+     * mDb.setTransactionSuccessful() before calling mDb.endTransaction().
+     * This method MUST be used with {@link #beginBatch()}.
+     * </p>
+     *
+     * @hide This method must be used with {@link #beginTransaction}
+     */
+    public final void endBatch(boolean successful) {
+        try {
+            if (successful) {
+                // setTransactionSuccessful() must be called just once during opening the
+                // transaction.
+                mDb.setTransactionSuccessful();
+            }
+        } finally {
+            mApplyingBatch.set(false);
+            getDatabase().endTransaction();
+            for (Uri url : mPendingBatchNotifications.get()) {
+                getContext().getContentResolver().notifyChange(url, null /* observer */,
+                        changeRequiresLocalSync(url));
+            }
+        }
+    }
+
+    public ContentProviderResult[] applyBatch(ArrayList<ContentProviderOperation> operations)
+            throws OperationApplicationException {
+        boolean successful = false;
+        beginBatch();
+        try {
+            ContentProviderResult[] results = super.applyBatch(operations);
+            successful = true;
+            return results;
+        } finally {
+            endBatch(successful);
+        }
+    }
+
+    /**
      * Check if changes to this URI can be syncable changes.
      * @param uri the URI of the resource that was changed
      * @return true if changes to this URI can be syncable changes, false otherwise
@@ -437,8 +517,8 @@ public abstract class AbstractSyncableContentProvider extends SyncableContentPro
      * @param context the sync context for the operation
      * @param account
      */
-    public void onSyncStart(SyncContext context, String account) {
-        if (TextUtils.isEmpty(account)) {
+    public void onSyncStart(SyncContext context, Account account) {
+        if (account == null) {
             throw new IllegalArgumentException("you passed in an empty account");
         }
         mSyncingAccount = account;
@@ -457,7 +537,7 @@ public abstract class AbstractSyncableContentProvider extends SyncableContentPro
      * The account of the most recent call to onSyncStart()
      * @return the account
      */
-    public String getSyncingAccount() {
+    public Account getSyncingAccount() {
         return mSyncingAccount;
     }
 
@@ -568,12 +648,11 @@ public abstract class AbstractSyncableContentProvider extends SyncableContentPro
      * Make sure that there are no entries for accounts that no longer exist
      * @param accountsArray the array of currently-existing accounts
      */
-    protected void onAccountsChanged(String[] accountsArray) {
-        Map<String, Boolean> accounts = new HashMap<String, Boolean>();
-        for (String account : accountsArray) {
+    protected void onAccountsChanged(Account[] accountsArray) {
+        Map<Account, Boolean> accounts = Maps.newHashMap();
+        for (Account account : accountsArray) {
             accounts.put(account, false);
         }
-        accounts.put(SyncConstValue.NON_SYNCABLE_ACCOUNT, false);
 
         SQLiteDatabase db = mOpenHelper.getWritableDatabase();
         Map<String, String> tableMap = db.getSyncedTables();
@@ -585,8 +664,7 @@ public abstract class AbstractSyncableContentProvider extends SyncableContentPro
         try {
             mSyncState.onAccountsChanged(accountsArray);
             for (String table : tables) {
-                deleteRowsForRemovedAccounts(accounts, table,
-                        SyncConstValue._SYNC_ACCOUNT);
+                deleteRowsForRemovedAccounts(accounts, table);
             }
             db.setTransactionSuccessful();
         } finally {
@@ -601,23 +679,23 @@ public abstract class AbstractSyncableContentProvider extends SyncableContentPro
      *
      * @param accounts a map of existing accounts
      * @param table the table to delete from
-     * @param accountColumnName the name of the column that is expected
-     * to hold the account.
      */
-    protected void deleteRowsForRemovedAccounts(Map<String, Boolean> accounts,
-            String table, String accountColumnName) {
+    protected void deleteRowsForRemovedAccounts(Map<Account, Boolean> accounts, String table) {
         SQLiteDatabase db = mOpenHelper.getWritableDatabase();
         Cursor c = db.query(table, sAccountProjection, null, null,
-                accountColumnName, null, null);
+                "_sync_account, _sync_account_type", null, null);
         try {
             while (c.moveToNext()) {
-                String account = c.getString(0);
-                if (TextUtils.isEmpty(account)) {
+                String accountName = c.getString(0);
+                String accountType = c.getString(1);
+                if (TextUtils.isEmpty(accountName)) {
                     continue;
                 }
+                Account account = new Account(accountName, accountType);
                 if (!accounts.containsKey(account)) {
                     int numDeleted;
-                    numDeleted = db.delete(table, accountColumnName + "=?", new String[]{account});
+                    numDeleted = db.delete(table, "_sync_account=? AND _sync_account_type=?",
+                            new String[]{account.name, account.type});
                     if (Config.LOGV) {
                         Log.v(TAG, "deleted " + numDeleted
                                 + " records from table " + table
@@ -634,7 +712,7 @@ public abstract class AbstractSyncableContentProvider extends SyncableContentPro
      * Called when the sync system determines that this provider should no longer
      * contain records for the specified account.
      */
-    public void wipeAccount(String account) {
+    public void wipeAccount(Account account) {
         SQLiteDatabase db = mOpenHelper.getWritableDatabase();
         Map<String, String> tableMap = db.getSyncedTables();
         ArrayList<String> tables = new ArrayList<String>();
@@ -649,7 +727,8 @@ public abstract class AbstractSyncableContentProvider extends SyncableContentPro
 
             // remove the data in the synced tables
             for (String table : tables) {
-                db.delete(table, SYNC_ACCOUNT_WHERE_CLAUSE, new String[]{account});
+                db.delete(table, SYNC_ACCOUNT_WHERE_CLAUSE,
+                        new String[]{account.name, account.type});
             }
             db.setTransactionSuccessful();
         } finally {
@@ -660,14 +739,14 @@ public abstract class AbstractSyncableContentProvider extends SyncableContentPro
     /**
      * Retrieves the SyncData bytes for the given account. The byte array returned may be null.
      */
-    public byte[] readSyncDataBytes(String account) {
+    public byte[] readSyncDataBytes(Account account) {
         return mSyncState.readSyncDataBytes(mOpenHelper.getReadableDatabase(), account);
     }
 
     /**
      * Sets the SyncData bytes for the given account. The byte array may be null.
      */
-    public void writeSyncDataBytes(String account, byte[] data) {
+    public void writeSyncDataBytes(Account account, byte[] data) {
         mSyncState.writeSyncDataBytes(mOpenHelper.getWritableDatabase(), account, data);
     }
 }

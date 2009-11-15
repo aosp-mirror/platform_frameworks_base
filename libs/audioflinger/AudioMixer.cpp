@@ -610,7 +610,6 @@ void AudioMixer::track__16BitsMono(track_t* t, int32_t* out, size_t frameCount, 
     t->in = in;
 }
 
-inline
 void AudioMixer::ditherAndClamp(int32_t* out, int32_t const *sums, size_t c)
 {
     for (size_t i=0 ; i<c ; i++) {

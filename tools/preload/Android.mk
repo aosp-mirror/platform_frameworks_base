@@ -8,6 +8,7 @@ LOCAL_SRC_FILES := \
 	MemoryUsage.java \
 	Operation.java \
 	Policy.java \
+	PrintBugReports.java \
 	PrintCsv.java \
 	PrintHtmlDiff.java \
 	PrintPsTree.java \

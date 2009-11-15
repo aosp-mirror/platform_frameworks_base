@@ -30,6 +30,7 @@ import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.text.TextUtils;
+import android.accounts.Account;
 import android.util.Config;
 import android.util.Log;
 
@@ -40,18 +41,39 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.List;
+import java.util.ArrayList;
 
 
 /**
  * This class provides applications access to the content model.
  */
 public abstract class ContentResolver {
-    public final static String SYNC_EXTRAS_ACCOUNT = "account";
+    /**
+     * @deprecated instead use
+     * {@link #requestSync(android.accounts.Account, String, android.os.Bundle)}
+     */
+    @Deprecated
+    public static final String SYNC_EXTRAS_ACCOUNT = "account";
     public static final String SYNC_EXTRAS_EXPEDITED = "expedited";
+    /**
+     * @deprecated instead use
+     * {@link #SYNC_EXTRAS_MANUAL}
+     */
+    @Deprecated
     public static final String SYNC_EXTRAS_FORCE = "force";
+    public static final String SYNC_EXTRAS_MANUAL = "force";
     public static final String SYNC_EXTRAS_UPLOAD = "upload";
     public static final String SYNC_EXTRAS_OVERRIDE_TOO_MANY_DELETIONS = "deletions_override";
     public static final String SYNC_EXTRAS_DISCARD_LOCAL_DELETIONS = "discard_deletions";
+
+    /**
+     * Set by the SyncManager to request that the SyncAdapter initialize itself for
+     * the given account/authority pair. One required initialization step is to
+     * ensure that {@link #setIsSyncable(android.accounts.Account, String, int)} has been
+     * called with a >= 0 value. When this flag is set the SyncAdapter does not need to
+     * do a full sync, though it is allowed to do so.
+     */
+    public static final String SYNC_EXTRAS_INITIALIZE = "initialize";
 
     public static final String SCHEME_CONTENT = "content";
     public static final String SCHEME_ANDROID_RESOURCE = "android.resource";
@@ -88,7 +110,35 @@ public abstract class ContentResolver {
      * in the cursor is the same.
      */
     public static final String CURSOR_DIR_BASE_TYPE = "vnd.android.cursor.dir";
-    
+
+    /** @hide */
+    public static final int SYNC_ERROR_SYNC_ALREADY_IN_PROGRESS = 1;
+    /** @hide */
+    public static final int SYNC_ERROR_AUTHENTICATION = 2;
+    /** @hide */
+    public static final int SYNC_ERROR_IO = 3;
+    /** @hide */
+    public static final int SYNC_ERROR_PARSE = 4;
+    /** @hide */
+    public static final int SYNC_ERROR_CONFLICT = 5;
+    /** @hide */
+    public static final int SYNC_ERROR_TOO_MANY_DELETIONS = 6;
+    /** @hide */
+    public static final int SYNC_ERROR_TOO_MANY_RETRIES = 7;
+    /** @hide */
+    public static final int SYNC_ERROR_INTERNAL = 8;
+
+    /** @hide */
+    public static final int SYNC_OBSERVER_TYPE_SETTINGS = 1<<0;
+    /** @hide */
+    public static final int SYNC_OBSERVER_TYPE_PENDING = 1<<1;
+    /** @hide */
+    public static final int SYNC_OBSERVER_TYPE_ACTIVE = 1<<2;
+    /** @hide */
+    public static final int SYNC_OBSERVER_TYPE_STATUS = 1<<3;
+    /** @hide */
+    public static final int SYNC_OBSERVER_TYPE_ALL = 0x7fffffff;
+
     public ContentResolver(Context context) {
         mContext = context;
     }
@@ -161,6 +211,96 @@ public abstract class ContentResolver {
             return null;
         } catch(RuntimeException e) {
             releaseProvider(provider);
+            throw e;
+        }
+    }
+
+    /**
+     * EntityIterator wrapper that releases the associated ContentProviderClient when the
+     * iterator is closed.
+     * @hide
+     */
+    private class EntityIteratorWrapper implements EntityIterator {
+        private final EntityIterator mInner;
+        private final ContentProviderClient mClient;
+        private volatile boolean mClientReleased;
+
+        EntityIteratorWrapper(EntityIterator inner, ContentProviderClient client) {
+            mInner = inner;
+            mClient = client;
+            mClientReleased = false;
+        }
+
+        public boolean hasNext() throws RemoteException {
+            if (mClientReleased) {
+                throw new IllegalStateException("this iterator is already closed");
+            }
+            return mInner.hasNext();
+        }
+
+        public Entity next() throws RemoteException {
+            if (mClientReleased) {
+                throw new IllegalStateException("this iterator is already closed");
+            }
+            return mInner.next();
+        }
+
+        public void reset() throws RemoteException {
+            if (mClientReleased) {
+                throw new IllegalStateException("this iterator is already closed");
+            }
+            mInner.reset();
+        }
+
+        public void close() {
+            mClient.release();
+            mInner.close();
+            mClientReleased = true;
+        }
+
+        protected void finalize() throws Throwable {
+            if (!mClientReleased) {
+                mClient.release();
+            }
+            super.finalize();
+        }
+    }
+
+    /**
+     * Query the given URI, returning an {@link EntityIterator} over the result set.
+     *
+     * @param uri The URI, using the content:// scheme, for the content to
+     *         retrieve.
+     * @param selection A filter declaring which rows to return, formatted as an
+     *         SQL WHERE clause (excluding the WHERE itself). Passing null will
+     *         return all rows for the given URI.
+     * @param selectionArgs You may include ?s in selection, which will be
+     *         replaced by the values from selectionArgs, in the order that they
+     *         appear in the selection. The values will be bound as Strings.
+     * @param sortOrder How to order the rows, formatted as an SQL ORDER BY
+     *         clause (excluding the ORDER BY itself). Passing null will use the
+     *         default sort order, which may be unordered.
+     * @return An EntityIterator object
+     * @throws RemoteException thrown if a RemoteException is encountered while attempting
+     *   to communicate with a remote provider.
+     * @throws IllegalArgumentException thrown if there is no provider that matches the uri
+     * @hide
+     */
+    public final EntityIterator queryEntities(Uri uri,
+            String selection, String[] selectionArgs, String sortOrder) throws RemoteException {
+        ContentProviderClient provider = acquireContentProviderClient(uri);
+        if (provider == null) {
+            throw new IllegalArgumentException("Unknown URL " + uri);
+        }
+        try {
+            EntityIterator entityIterator =
+                    provider.queryEntities(uri, selection, selectionArgs, sortOrder);
+            return new EntityIteratorWrapper(entityIterator, provider);
+        } catch(RuntimeException e) {
+            provider.release();
+            throw e;
+        } catch(RemoteException e) {
+            provider.release();
             throw e;
         }
     }
@@ -389,12 +529,22 @@ public abstract class ContentResolver {
         }
     }
 
-    class OpenResourceIdResult {
-        Resources r;
-        int id;
+    /**
+     * A resource identified by the {@link Resources} that contains it, and a resource id.
+     *
+     * @hide
+     */
+    public class OpenResourceIdResult {
+        public Resources r;
+        public int id;
     }
-    
-    OpenResourceIdResult getResourceId(Uri uri) throws FileNotFoundException {
+
+    /**
+     * Resolves an android.resource URI to a {@link Resources} and a resource id.
+     *
+     * @hide
+     */
+    public OpenResourceIdResult getResourceId(Uri uri) throws FileNotFoundException {
         String authority = uri.getAuthority();
         Resources r;
         if (TextUtils.isEmpty(authority)) {
@@ -481,6 +631,36 @@ public abstract class ContentResolver {
             return null;
         } finally {
             releaseProvider(provider);
+        }
+    }
+
+    /**
+     * Applies each of the {@link ContentProviderOperation} objects and returns an array
+     * of their results. Passes through OperationApplicationException, which may be thrown
+     * by the call to {@link ContentProviderOperation#apply}.
+     * If all the applications succeed then a {@link ContentProviderResult} array with the
+     * same number of elements as the operations will be returned. It is implementation-specific
+     * how many, if any, operations will have been successfully applied if a call to
+     * apply results in a {@link OperationApplicationException}.
+     * @param authority the authority of the ContentProvider to which this batch should be applied
+     * @param operations the operations to apply
+     * @return the results of the applications
+     * @throws OperationApplicationException thrown if an application fails.
+     * See {@link ContentProviderOperation#apply} for more information.
+     * @throws RemoteException thrown if a RemoteException is encountered while attempting
+     *   to communicate with a remote provider.
+     */
+    public ContentProviderResult[] applyBatch(String authority,
+            ArrayList<ContentProviderOperation> operations)
+            throws RemoteException, OperationApplicationException {
+        ContentProviderClient provider = acquireContentProviderClient(authority);
+        if (provider == null) {
+            throw new IllegalArgumentException("Unknown authority " + authority);
+        }
+        try {
+            return provider.applyBatch(operations);
+        } finally {
+            provider.release();
         }
     }
 
@@ -592,6 +772,46 @@ public abstract class ContentResolver {
     }
 
     /**
+     * Returns a {@link ContentProviderClient} that is associated with the {@link ContentProvider}
+     * that services the content at uri, starting the provider if necessary. Returns
+     * null if there is no provider associated wih the uri. The caller must indicate that they are
+     * done with the provider by calling {@link ContentProviderClient#release} which will allow
+     * the system to release the provider it it determines that there is no other reason for
+     * keeping it active.
+     * @param uri specifies which provider should be acquired
+     * @return a {@link ContentProviderClient} that is associated with the {@link ContentProvider}
+     * that services the content at uri or null if there isn't one.
+     */
+    public final ContentProviderClient acquireContentProviderClient(Uri uri) {
+        IContentProvider provider = acquireProvider(uri);
+        if (provider != null) {
+            return new ContentProviderClient(this, provider);
+        }
+
+        return null;
+    }
+
+    /**
+     * Returns a {@link ContentProviderClient} that is associated with the {@link ContentProvider}
+     * with the authority of name, starting the provider if necessary. Returns
+     * null if there is no provider associated wih the uri. The caller must indicate that they are
+     * done with the provider by calling {@link ContentProviderClient#release} which will allow
+     * the system to release the provider it it determines that there is no other reason for
+     * keeping it active.
+     * @param name specifies which provider should be acquired
+     * @return a {@link ContentProviderClient} that is associated with the {@link ContentProvider}
+     * with the authority of name or null if there isn't one.
+     */
+    public final ContentProviderClient acquireContentProviderClient(String name) {
+        IContentProvider provider = acquireProvider(name);
+        if (provider != null) {
+            return new ContentProviderClient(this, provider);
+        }
+
+        return null;
+    }
+
+    /**
      * Register an observer class that gets callbacks when data identified by a
      * given content URI changes.
      *
@@ -676,11 +896,43 @@ public abstract class ContentResolver {
      *
      * @param uri the uri of the provider to sync or null to sync all providers.
      * @param extras any extras to pass to the SyncAdapter.
+     * @deprecated instead use
+     * {@link #requestSync(android.accounts.Account, String, android.os.Bundle)}
      */
+    @Deprecated
     public void startSync(Uri uri, Bundle extras) {
+        Account account = null;
+        if (extras != null) {
+            String accountName = extras.getString(SYNC_EXTRAS_ACCOUNT);
+            if (!TextUtils.isEmpty(accountName)) {
+                account = new Account(accountName, "com.google");
+            }
+            extras.remove(SYNC_EXTRAS_ACCOUNT);
+        }
+        requestSync(account, uri != null ? uri.getAuthority() : null, extras);
+    }
+
+    /**
+     * Start an asynchronous sync operation. If you want to monitor the progress
+     * of the sync you may register a SyncObserver. Only values of the following
+     * types may be used in the extras bundle:
+     * <ul>
+     * <li>Integer</li>
+     * <li>Long</li>
+     * <li>Boolean</li>
+     * <li>Float</li>
+     * <li>Double</li>
+     * <li>String</li>
+     * </ul>
+     *
+     * @param account which account should be synced
+     * @param authority which authority should be synced
+     * @param extras any extras to pass to the SyncAdapter.
+     */
+    public static void requestSync(Account account, String authority, Bundle extras) {
         validateSyncExtrasBundle(extras);
         try {
-            getContentService().startSync(uri, extras);
+            getContentService().requestSync(account, authority, extras);
         } catch (RemoteException e) {
         }
     }
@@ -694,6 +946,7 @@ public abstract class ContentResolver {
      * <li>Float</li>
      * <li>Double</li>
      * <li>String</li>
+     * <li>Account</li>
      * <li>null</li>
      * </ul>
      * @param extras the Bundle to check
@@ -709,6 +962,7 @@ public abstract class ContentResolver {
                 if (value instanceof Float) continue;
                 if (value instanceof Double) continue;
                 if (value instanceof String) continue;
+                if (value instanceof Account) continue;
                 throw new IllegalArgumentException("unexpected value type: "
                         + value.getClass().getName());
             }
@@ -719,12 +973,210 @@ public abstract class ContentResolver {
         }
     }
 
+    /**
+     * Cancel any active or pending syncs that match the Uri. If the uri is null then
+     * all syncs will be canceled.
+     *
+     * @param uri the uri of the provider to sync or null to sync all providers.
+     * @deprecated instead use {@link #cancelSync(android.accounts.Account, String)}
+     */
+    @Deprecated
     public void cancelSync(Uri uri) {
+        cancelSync(null /* all accounts */, uri != null ? uri.getAuthority() : null);
+    }
+
+    /**
+     * Cancel any active or pending syncs that match account and authority. The account and
+     * authority can each independently be set to null, which means that syncs with any account
+     * or authority, respectively, will match.
+     *
+     * @param account filters the syncs that match by this account
+     * @param authority filters the syncs that match by this authority
+     */
+    public static void cancelSync(Account account, String authority) {
         try {
-            getContentService().cancelSync(uri);
+            getContentService().cancelSync(account, authority);
         } catch (RemoteException e) {
         }
     }
+
+    /**
+     * Get information about the SyncAdapters that are known to the system.
+     * @return an array of SyncAdapters that have registered with the system
+     */
+    public static SyncAdapterType[] getSyncAdapterTypes() {
+        try {
+            return getContentService().getSyncAdapterTypes();
+        } catch (RemoteException e) {
+            throw new RuntimeException("the ContentService should always be reachable", e);
+        }
+    }
+
+    /**
+     * Check if the provider should be synced when a network tickle is received
+     *
+     * @param account the account whose setting we are querying
+     * @param authority the provider whose setting we are querying
+     * @return true if the provider should be synced when a network tickle is received
+     */
+    public static boolean getSyncAutomatically(Account account, String authority) {
+        try {
+            return getContentService().getSyncAutomatically(account, authority);
+        } catch (RemoteException e) {
+            throw new RuntimeException("the ContentService should always be reachable", e);
+        }
+    }
+
+    /**
+     * Set whether or not the provider is synced when it receives a network tickle.
+     *
+     * @param account the account whose setting we are querying
+     * @param authority the provider whose behavior is being controlled
+     * @param sync true if the provider should be synced when tickles are received for it
+     */
+    public static void setSyncAutomatically(Account account, String authority, boolean sync) {
+        try {
+            getContentService().setSyncAutomatically(account, authority, sync);
+        } catch (RemoteException e) {
+            // exception ignored; if this is thrown then it means the runtime is in the midst of
+            // being restarted
+        }
+    }
+
+    /**
+     * Check if this account/provider is syncable.
+     * @return >0 if it is syncable, 0 if not, and <0 if the state isn't known yet.
+     */
+    public static int getIsSyncable(Account account, String authority) {
+        try {
+            return getContentService().getIsSyncable(account, authority);
+        } catch (RemoteException e) {
+            throw new RuntimeException("the ContentService should always be reachable", e);
+        }
+    }
+
+    /**
+     * Set whether this account/provider is syncable.
+     * @param syncable >0 denotes syncable, 0 means not syncable, <0 means unknown
+     */
+    public static void setIsSyncable(Account account, String authority, int syncable) {
+        try {
+            getContentService().setIsSyncable(account, authority, syncable);
+        } catch (RemoteException e) {
+            // exception ignored; if this is thrown then it means the runtime is in the midst of
+            // being restarted
+        }
+    }
+
+    /**
+     * Gets the master auto-sync setting that applies to all the providers and accounts.
+     * If this is false then the per-provider auto-sync setting is ignored.
+     *
+     * @return the master auto-sync setting that applies to all the providers and accounts
+     */
+    public static boolean getMasterSyncAutomatically() {
+        try {
+            return getContentService().getMasterSyncAutomatically();
+        } catch (RemoteException e) {
+            throw new RuntimeException("the ContentService should always be reachable", e);
+        }
+    }
+
+    /**
+     * Sets the master auto-sync setting that applies to all the providers and accounts.
+     * If this is false then the per-provider auto-sync setting is ignored.
+     *
+     * @param sync the master auto-sync setting that applies to all the providers and accounts
+     */
+    public static void setMasterSyncAutomatically(boolean sync) {
+        try {
+            getContentService().setMasterSyncAutomatically(sync);
+        } catch (RemoteException e) {
+            // exception ignored; if this is thrown then it means the runtime is in the midst of
+            // being restarted
+        }
+    }
+
+    /**
+     * Returns true if there is currently a sync operation for the given
+     * account or authority in the pending list, or actively being processed.
+     * @param account the account whose setting we are querying
+     * @param authority the provider whose behavior is being queried
+     * @return true if a sync is active for the given account or authority.
+     */
+    public static boolean isSyncActive(Account account, String authority) {
+        try {
+            return getContentService().isSyncActive(account, authority);
+        } catch (RemoteException e) {
+            throw new RuntimeException("the ContentService should always be reachable", e);
+        }
+    }
+
+    /**
+     * If a sync is active returns the information about it, otherwise returns false.
+     * @return the ActiveSyncInfo for the currently active sync or null if one is not active.
+     * @hide
+     */
+    public static ActiveSyncInfo getActiveSync() {
+        try {
+            return getContentService().getActiveSync();
+        } catch (RemoteException e) {
+            throw new RuntimeException("the ContentService should always be reachable", e);
+        }
+    }
+
+    /**
+     * Returns the status that matches the authority.
+     * @param account the account whose setting we are querying
+     * @param authority the provider whose behavior is being queried
+     * @return the SyncStatusInfo for the authority, or null if none exists
+     * @hide
+     */
+    public static SyncStatusInfo getSyncStatus(Account account, String authority) {
+        try {
+            return getContentService().getSyncStatus(account, authority);
+        } catch (RemoteException e) {
+            throw new RuntimeException("the ContentService should always be reachable", e);
+        }
+    }
+
+    /**
+     * Return true if the pending status is true of any matching authorities.
+     * @param account the account whose setting we are querying
+     * @param authority the provider whose behavior is being queried
+     * @return true if there is a pending sync with the matching account and authority
+     */
+    public static boolean isSyncPending(Account account, String authority) {
+        try {
+            return getContentService().isSyncPending(account, authority);
+        } catch (RemoteException e) {
+            throw new RuntimeException("the ContentService should always be reachable", e);
+        }
+    }
+
+    public static Object addStatusChangeListener(int mask, final SyncStatusObserver callback) {
+        try {
+            ISyncStatusObserver.Stub observer = new ISyncStatusObserver.Stub() {
+                public void onStatusChanged(int which) throws RemoteException {
+                    callback.onStatusChanged(which);
+                }
+            };
+            getContentService().addStatusChangeListener(mask, observer);
+            return observer;
+        } catch (RemoteException e) {
+            throw new RuntimeException("the ContentService should always be reachable", e);
+        }
+    }
+
+    public static void removeStatusChangeListener(Object handle) {
+        try {
+            getContentService().removeStatusChangeListener((ISyncStatusObserver.Stub) handle);
+        } catch (RemoteException e) {
+            // exception ignored; if this is thrown then it means the runtime is in the midst of
+            // being restarted
+        }
+    }
+
 
     private final class CursorWrapperInner extends CursorWrapper {
         private IContentProvider mContentProvider;

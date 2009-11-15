@@ -19,10 +19,12 @@ package android.media;
 import android.content.Context;
 import android.net.Uri;
 import android.os.PowerManager;
+import android.os.SystemClock;
 import android.util.Log;
 
 import java.io.IOException;
 import java.lang.IllegalStateException;
+import java.util.LinkedList;
 
 /**
  * Plays a series of audio URIs, but does all the hard work on another thread
@@ -31,18 +33,49 @@ import java.lang.IllegalStateException;
 public class AsyncPlayer {
     private static final int PLAY = 1;
     private static final int STOP = 2;
+    private static final boolean mDebug = false;
 
     private static final class Command {
-        Command next;
         int code;
         Context context;
         Uri uri;
         boolean looping;
         int stream;
+        long requestTime;
 
         public String toString() {
             return "{ code=" + code + " looping=" + looping + " stream=" + stream
                     + " uri=" + uri + " }";
+        }
+    }
+
+    private LinkedList<Command> mCmdQueue = new LinkedList();
+
+    private void startSound(Command cmd) {
+        // Preparing can be slow, so if there is something else
+        // is playing, let it continue until we're done, so there
+        // is less of a glitch.
+        try {
+            if (mDebug) Log.d(mTag, "Starting playback");
+            MediaPlayer player = new MediaPlayer();
+            player.setAudioStreamType(cmd.stream);
+            player.setDataSource(cmd.context, cmd.uri);
+            player.setLooping(cmd.looping);
+            player.prepare();
+            player.start();
+            if (mPlayer != null) {
+                mPlayer.release();
+            }
+            mPlayer = player;
+            long delay = SystemClock.uptimeMillis() - cmd.requestTime;
+            if (delay > 1000) {
+                Log.w(mTag, "Notification sound delayed by " + delay + "msecs");
+            }
+        }
+        catch (IOException e) {
+            Log.w(mTag, "error loading sound for " + cmd.uri, e);
+        } catch (IllegalStateException e) {
+            Log.w(mTag, "IllegalStateException (content provider died?) " + cmd.uri, e);
         }
     }
 
@@ -55,41 +88,23 @@ public class AsyncPlayer {
             while (true) {
                 Command cmd = null;
 
-                synchronized (mLock) {
-                    if (mHead != null) {
-                        cmd = mHead;
-                        mHead = cmd.next;
-                        if (mTail == cmd) {
-                            mTail = null;
-                        }
-                    }
+                synchronized (mCmdQueue) {
+                    if (mDebug) Log.d(mTag, "RemoveFirst");
+                    cmd = mCmdQueue.removeFirst();
                 }
 
                 switch (cmd.code) {
                 case PLAY:
-                    try {
-                        // Preparing can be slow, so if there is something else
-                        // is playing, let it continue until we're done, so there
-                        // is less of a glitch.
-                        MediaPlayer player = new MediaPlayer();
-                        player.setAudioStreamType(cmd.stream);
-                        player.setDataSource(cmd.context, cmd.uri);
-                        player.setLooping(cmd.looping);
-                        player.prepare();
-                        player.start();
-                        if (mPlayer != null) {
-                            mPlayer.release();
-                        }
-                        mPlayer = player;
-                    }
-                    catch (IOException e) {
-                        Log.w(mTag, "error loading sound for " + cmd.uri, e);
-                    } catch (IllegalStateException e) {
-                        Log.w(mTag, "IllegalStateException (content provider died?) " + cmd.uri, e);
-                    }
+                    if (mDebug) Log.d(mTag, "PLAY");
+                    startSound(cmd);
                     break;
                 case STOP:
+                    if (mDebug) Log.d(mTag, "STOP");
                     if (mPlayer != null) {
+                        long delay = SystemClock.uptimeMillis() - cmd.requestTime;
+                        if (delay > 1000) {
+                            Log.w(mTag, "Notification stop delayed by " + delay + "msecs");
+                        }
                         mPlayer.stop();
                         mPlayer.release();
                         mPlayer = null;
@@ -99,8 +114,8 @@ public class AsyncPlayer {
                     break;
                 }
 
-                synchronized (mLock) {
-                    if (mHead == null) {
+                synchronized (mCmdQueue) {
+                    if (mCmdQueue.size() == 0) {
                         // nothing left to do, quit
                         // doing this check after we're done prevents the case where they
                         // added it during the operation from spawning two threads and
@@ -115,11 +130,8 @@ public class AsyncPlayer {
     }
 
     private String mTag;
-    private Command mHead;
-    private Command mTail;
     private Thread mThread;
     private MediaPlayer mPlayer;
-    private Object mLock = new Object();
     private PowerManager.WakeLock mWakeLock;
 
     // The current state according to the caller.  Reality lags behind
@@ -154,12 +166,13 @@ public class AsyncPlayer {
      */
     public void play(Context context, Uri uri, boolean looping, int stream) {
         Command cmd = new Command();
+        cmd.requestTime = SystemClock.uptimeMillis();
         cmd.code = PLAY;
         cmd.context = context;
         cmd.uri = uri;
         cmd.looping = looping;
         cmd.stream = stream;
-        synchronized (mLock) {
+        synchronized (mCmdQueue) {
             enqueueLocked(cmd);
             mState = PLAY;
         }
@@ -170,11 +183,12 @@ public class AsyncPlayer {
      * at this point.  Calling this multiple times has no ill effects.
      */
     public void stop() {
-        synchronized (mLock) {
+        synchronized (mCmdQueue) {
             // This check allows stop to be called multiple times without starting
             // a thread that ends up doing nothing.
             if (mState != STOP) {
                 Command cmd = new Command();
+                cmd.requestTime = SystemClock.uptimeMillis();
                 cmd.code = STOP;
                 enqueueLocked(cmd);
                 mState = STOP;
@@ -183,12 +197,7 @@ public class AsyncPlayer {
     }
 
     private void enqueueLocked(Command cmd) {
-        if (mTail == null) {
-            mHead = cmd;
-        } else {
-            mTail.next = cmd;
-        }
-        mTail = cmd;
+        mCmdQueue.add(cmd);
         if (mThread == null) {
             acquireWakeLock();
             mThread = new Thread();

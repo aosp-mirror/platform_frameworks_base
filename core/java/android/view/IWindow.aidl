@@ -18,10 +18,10 @@
 package android.view;
 
 import android.graphics.Rect;
+import android.os.Bundle;
+import android.os.ParcelFileDescriptor;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
-
-import android.os.ParcelFileDescriptor;
 
 /**
  * API back to a client window that the Window Manager uses to inform it of
@@ -46,8 +46,8 @@ oneway interface IWindow {
     void resized(int w, int h, in Rect coveredInsets, in Rect visibleInsets,
             boolean reportDraw);
     void dispatchKey(in KeyEvent event);
-    void dispatchPointer(in MotionEvent event, long eventTime);
-    void dispatchTrackball(in MotionEvent event, long eventTime);
+    void dispatchPointer(in MotionEvent event, long eventTime, boolean callWhenDone);
+    void dispatchTrackball(in MotionEvent event, long eventTime, boolean callWhenDone);
     void dispatchAppVisibility(boolean visible);
     void dispatchGetNewSurface();
 
@@ -56,4 +56,14 @@ oneway interface IWindow {
      * to date on the current state showing navigational focus (touch mode) too.
      */
     void windowFocusChanged(boolean hasFocus, boolean inTouchMode);
+    
+    void closeSystemDialogs(String reason);
+    
+    /**
+     * Called for wallpaper windows when their offsets change.
+     */
+    void dispatchWallpaperOffsets(float x, float y, float xStep, float yStep, boolean sync);
+    
+    void dispatchWallpaperCommand(String action, int x, int y,
+            int z, in Bundle extras, boolean sync);
 }

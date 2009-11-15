@@ -18,6 +18,7 @@ package android.app;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ComponentInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.res.Resources;
@@ -52,9 +53,9 @@ import java.util.List;
  *
  */
 public abstract class LauncherActivity extends ListActivity {
-
     Intent mIntent;
     PackageManager mPackageManager;
+    IconResizer mIconResizer;
     
     /**
      * An item in the list
@@ -70,13 +71,17 @@ public abstract class LauncherActivity extends ListActivity {
         ListItem(PackageManager pm, ResolveInfo resolveInfo, IconResizer resizer) {
             this.resolveInfo = resolveInfo;
             label = resolveInfo.loadLabel(pm);
-            if (label == null && resolveInfo.activityInfo != null) {
+            ComponentInfo ci = resolveInfo.activityInfo;
+            if (ci == null) ci = resolveInfo.serviceInfo;
+            if (label == null && ci != null) {
                 label = resolveInfo.activityInfo.name;
             }
             
-            icon = resizer.createIconThumbnail(resolveInfo.loadIcon(pm));
-            packageName = resolveInfo.activityInfo.applicationInfo.packageName;
-            className = resolveInfo.activityInfo.name;
+            if (resizer != null) {
+                icon = resizer.createIconThumbnail(resolveInfo.loadIcon(pm));
+            }
+            packageName = ci.applicationInfo.packageName;
+            className = ci.name;
         }
 
         public ListItem() {
@@ -90,13 +95,15 @@ public abstract class LauncherActivity extends ListActivity {
         private final Object lock = new Object();
         private ArrayList<ListItem> mOriginalValues;
 
+        protected final IconResizer mIconResizer;
         protected final LayoutInflater mInflater;
 
         protected List<ListItem> mActivitiesList;
 
         private Filter mFilter;
         
-        public ActivityAdapter() {
+        public ActivityAdapter(IconResizer resizer) {
+            mIconResizer = resizer;
             mInflater = (LayoutInflater) LauncherActivity.this.getSystemService(
                     Context.LAYOUT_INFLATER_SERVICE);
             mActivitiesList = makeListItems();
@@ -151,6 +158,10 @@ public abstract class LauncherActivity extends ListActivity {
         private void bindView(View view, ListItem item) {
             TextView text = (TextView) view;
             text.setText(item.label);
+            if (item.icon == null) {
+                item.icon = mIconResizer.createIconThumbnail(
+                        item.resolveInfo.loadIcon(getPackageManager()));
+            }
             text.setCompoundDrawablesWithIntrinsicBounds(item.icon, null, null, null);
         }
         
@@ -325,12 +336,13 @@ public abstract class LauncherActivity extends ListActivity {
     
         requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
         setProgressBarIndeterminateVisibility(true);
-        setContentView(com.android.internal.R.layout.activity_list);
-        
+        onSetContentView();
             
+        mIconResizer = new IconResizer();
+        
         mIntent = new Intent(getTargetIntent());
         mIntent.setComponent(null);
-        mAdapter = new ActivityAdapter();
+        mAdapter = new ActivityAdapter(mIconResizer);
         
         setListAdapter(mAdapter);
         getListView().setTextFilterEnabled(true);
@@ -338,10 +350,17 @@ public abstract class LauncherActivity extends ListActivity {
         setProgressBarIndeterminateVisibility(false);
     }
 
+    /**
+     * Override to call setContentView() with your own content view to
+     * customize the list layout.
+     */
+    protected void onSetContentView() {
+        setContentView(com.android.internal.R.layout.activity_list);
+    }
+
     @Override
     protected void onListItemClick(ListView l, View v, int position, long id) {
-        Intent intent = ((ActivityAdapter)mAdapter).intentForPosition(position);
-
+        Intent intent = intentForPosition(position);
         startActivity(intent);
     }
     
@@ -374,21 +393,26 @@ public abstract class LauncherActivity extends ListActivity {
     }
 
     /**
+     * Perform query on package manager for list items.  The default
+     * implementation queries for activities.
+     */
+    protected List<ResolveInfo> onQueryPackageManager(Intent queryIntent) {
+        return mPackageManager.queryIntentActivities(queryIntent, /* no flags */ 0);
+    }
+    
+    /**
      * Perform the query to determine which results to show and return a list of them.
      */
     public List<ListItem> makeListItems() {
         // Load all matching activities and sort correctly
-        List<ResolveInfo> list = mPackageManager.queryIntentActivities(mIntent,
-                /* no flags */ 0);
+        List<ResolveInfo> list = onQueryPackageManager(mIntent);
         Collections.sort(list, new ResolveInfo.DisplayNameComparator(mPackageManager));
-        
-        IconResizer resizer = new IconResizer();
         
         ArrayList<ListItem> result = new ArrayList<ListItem>(list.size());
         int listSize = list.size();
         for (int i = 0; i < listSize; i++) {
             ResolveInfo resolveInfo = list.get(i);
-            result.add(new ListItem(mPackageManager, resolveInfo, resizer));
+            result.add(new ListItem(mPackageManager, resolveInfo, null));
         }
 
         return result;

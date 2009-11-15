@@ -249,7 +249,7 @@ public class ZoomButtonsController implements View.OnTouchListener {
         lp.height = LayoutParams.WRAP_CONTENT;
         lp.width = LayoutParams.FILL_PARENT;
         lp.type = LayoutParams.TYPE_APPLICATION_PANEL;
-        lp.format = PixelFormat.TRANSPARENT;
+        lp.format = PixelFormat.TRANSLUCENT;
         lp.windowAnimations = com.android.internal.R.style.Animation_ZoomButtons;
         mContainerLayoutParams = lp;
 
@@ -476,7 +476,21 @@ public class ZoomButtonsController implements View.OnTouchListener {
         if (isInterestingKey(keyCode)) {
 
             if (keyCode == KeyEvent.KEYCODE_BACK) {
-                setVisible(false);
+                if (event.getAction() == KeyEvent.ACTION_DOWN
+                        && event.getRepeatCount() == 0) {
+                    if (mOwnerView != null) {
+                        KeyEvent.DispatcherState ds = mOwnerView.getKeyDispatcherState();
+                        if (ds != null) {
+                            ds.startTracking(event, this);
+                        }
+                    }
+                    return true;
+                } else if (event.getAction() == KeyEvent.ACTION_UP
+                        && event.isTracking() && !event.isCanceled()) {
+                    setVisible(false);
+                    return true;
+                }
+                
             } else {
                 dismissControlsDelayed(ZOOM_CONTROLS_TIMEOUT);
             }

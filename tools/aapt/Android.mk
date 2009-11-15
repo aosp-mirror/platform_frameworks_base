@@ -17,7 +17,10 @@ LOCAL_SRC_FILES := \
 	ResourceTable.cpp \
 	Images.cpp \
 	Resource.cpp \
-    SourcePos.cpp
+    SourcePos.cpp \
+    ZipEntry.cpp \
+    ZipFile.cpp
+
 
 LOCAL_CFLAGS += -Wno-format-y2k
 

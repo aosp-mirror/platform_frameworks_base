@@ -25,14 +25,17 @@
 #include <string.h>
 #include <cutils/atomic.h>
 #include <android_runtime/ActivityManager.h>
-#include <utils/IPCThreadState.h>
-#include <utils/IServiceManager.h>
-#include <utils/MemoryHeapBase.h>
-#include <utils/MemoryBase.h>
+#include <binder/IPCThreadState.h>
+#include <binder/IServiceManager.h>
+#include <binder/MemoryHeapBase.h>
+#include <binder/MemoryBase.h>
 #include <media/PVMediaRecorder.h>
 #include <utils/String16.h>
 
+#include <media/AudioTrack.h>
+
 #include "MediaRecorderClient.h"
+#include "MediaPlayerService.h"
 
 namespace android {
 
@@ -80,6 +83,7 @@ status_t MediaRecorderClient::setVideoSource(int vs)
     Mutex::Autolock lock(mLock);
     if (mRecorder == NULL)	{
         LOGE("recorder is not initialized");
+        return NO_INIT;
     }
     return mRecorder->setVideoSource((video_source)vs);
 }
@@ -93,6 +97,7 @@ status_t MediaRecorderClient::setAudioSource(int as)
     Mutex::Autolock lock(mLock);
     if (mRecorder == NULL)  {
         LOGE("recorder is not initialized");
+        return NO_INIT;
     }
     return mRecorder->setAudioSource((audio_source)as);
 }
@@ -271,15 +276,18 @@ status_t MediaRecorderClient::release()
     if (mRecorder != NULL) {
         delete mRecorder;
         mRecorder = NULL;
+        wp<MediaRecorderClient> client(this);
+        mMediaPlayerService->removeMediaRecorderClient(client);
     }
     return NO_ERROR;
 }
 
-MediaRecorderClient::MediaRecorderClient(pid_t pid)
+MediaRecorderClient::MediaRecorderClient(const sp<MediaPlayerService>& service, pid_t pid)
 {
     LOGV("Client constructor");
     mPid = pid;
     mRecorder = new PVMediaRecorder();
+    mMediaPlayerService = service;
 }
 
 MediaRecorderClient::~MediaRecorderClient()

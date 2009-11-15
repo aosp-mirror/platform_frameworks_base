@@ -26,16 +26,185 @@
          strictly needed. -->
     <bool name="config_sf_limitedAlpha">false</bool>
     
+    <!-- Flag indicating whether the surface flinger is inefficient
+         at performing a blur.  Used by parts of the UI to turn off
+         the blur effect where it isn't worth the performance hit. -->
+    <bool name="config_sf_slowBlur">false</bool>
+    
     <!-- The duration (in milliseconds) of a short animation. -->
-    <integer name="config_shortAnimTime">100</integer>
+    <integer name="config_shortAnimTime">150</integer>
     
     <!-- The duration (in milliseconds) of a medium-length animation. -->
-    <integer name="config_mediumAnimTime">150</integer>
+    <integer name="config_mediumAnimTime">300</integer>
     
     <!-- The duration (in milliseconds) of a long animation. -->
-    <integer name="config_longAnimTime">300</integer>
+    <integer name="config_longAnimTime">400</integer>
 
-    <!-- Flag indicating whether Last Name comes before First Name.
-         This becomes true in Japan, for example.-->
-    <bool name="config_lastname_comes_before_firstname">false</bool>
+    <!-- The duration (in milliseconds) that the radio will scan for a signal
+         when there's no network connection. If the scan doesn't timeout, use zero -->
+    <integer name="config_radioScanningTimeout">0</integer>
+
+    <!-- XXXXX NOTE THE FOLLOWING RESOURCES USE THE WRONG NAMING CONVENTION.
+         Please don't copy them, copy anything else. -->
+         
+    <!-- This string array should be overridden by the device to present a list of network attributes.  This is used by the connectivity manager to decide which networks can coexist based on the hardward -->
+    <!-- An Array of "[type-name],[associated radio-name],[priority]  -->
+    <string-array translatable="false" name="networkAttributes">
+        <item>"default,wifi,0"</item>
+        <item>"default,mobile,0"</item>
+        <item>"mms,mobile,1"</item>
+        <item>"supl,mobile,1"</item>
+        <item>"dun,mobile,1"</item>
+        <item>"hipri,mobile,2"</item>
+    </string-array>
+
+    <!-- This string array should be overridden by the device to present a list of radio attributes.  This is used by the connectivity manager to decide which networks can coexist based on the hardware -->
+    <!-- An Array of "[radio-name],[priority]                        -->
+    <!--              [# simultaneous connection types]"             -->
+    <string-array translatable="false" name="radioAttributes">
+        <item>"wifi,1,1"</item>
+        <item>"mobile,0,1"</item>
+    </string-array>
+    
+    <!-- Flag indicating whether the keyguard should be bypassed when
+         the slider is open.  This can be set or unset depending how easily
+         the slider can be opened (for example, in a pocket or purse). -->
+    <bool name="config_bypass_keyguard_if_slider_open">true</bool>
+    
+    <!-- Flag indicating whether the we should enable the automatic brightness in Settings.
+         Software implementation will be used if config_hardware_auto_brightness_available is not set -->
+    <bool name="config_automatic_brightness_available">false</bool>
+    
+    <!-- XXXXXX END OF RESOURCES USING WRONG NAMING CONVENTION -->
+
+    <!-- The number of degrees to rotate the display when the keyboard is open. -->
+    <integer name="config_lidOpenRotation">90</integer>
+
+    <!-- The number of degrees to rotate the display when the device is in a desk dock.
+         A value of -1 means no change in orientation by default. -->
+    <integer name="config_deskDockRotation">-1</integer>
+
+    <!-- The number of degrees to rotate the display when the device is in a car dock.
+         A value of -1 means no change in orientation by default. -->
+    <integer name="config_carDockRotation">-1</integer>
+
+    <!-- Control whether being in the desk dock (and powered) always
+         keeps the screen on.  By default it stays on when plugged in to
+         AC.  0 will not keep it on; or together 1 to stay on when plugged
+         in to AC and 2 to stay on when plugged in to USB.  (So 3 for both.) -->
+    <integer name="config_deskDockKeepsScreenOn">1</integer>
+
+    <!-- Control whether being in the car dock (and powered) always
+         keeps the screen on.  By default it stays on when plugged in to
+         AC.  0 will not keep it on; or together 1 to stay on when plugged
+         in to AC and 2 to stay on when plugged in to USB.  (So 3 for both.) -->
+    <integer name="config_carDockKeepsScreenOn">1</integer>
+
+    <!-- Control whether being in the desk dock should enable accelerometer based screen orientation -->
+    <bool name="config_deskDockEnablesAccelerometer">false</bool>
+
+    <!-- Control whether being in the car dock should enable accelerometer based screen orientation -->
+    <bool name="config_carDockEnablesAccelerometer">false</bool>
+
+    <!-- Indicate whether the lid state impacts the accessibility of
+         the physical keyboard.  0 means it doesn't, 1 means it is accessible
+         when the lid is open, 2 means it is accessible when the lid is
+         closed.  The default is 1. -->
+    <integer name="config_lidKeyboardAccessibility">1</integer>
+
+    <!-- Indicate whether the lid state impacts the accessibility of
+         the physical keyboard.  0 means it doesn't, 1 means it is accessible
+         when the lid is open, 2 means it is accessible when the lid is
+         closed.  The default is 0. -->
+    <integer name="config_lidNavigationAccessibility">0</integer>
+
+    <!-- Vibrator pattern for feedback about a long screen/key press -->
+    <integer-array name="config_longPressVibePattern">
+        <item>0</item>
+        <item>1</item>
+        <item>20</item>
+        <item>21</item>
+    </integer-array>
+    
+    <!-- Vibrator pattern for feedback about touching a virtual key -->
+    <integer-array name="config_virtualKeyVibePattern">
+        <item>0</item>
+        <item>10</item>
+        <item>20</item>
+        <item>30</item>
+    </integer-array>
+
+    <!-- Vibrator pattern for feedback about booting with safe mode disabled -->
+    <integer-array name="config_safeModeDisabledVibePattern">
+        <item>0</item>
+        <item>1</item>
+        <item>20</item>
+        <item>21</item>
+    </integer-array>
+
+    <!-- Vibrator pattern for feedback about booting with safe mode disabled -->
+    <integer-array name="config_safeModeEnabledVibePattern">
+        <item>0</item>
+        <item>1</item>
+        <item>20</item>
+        <item>21</item>
+        <item>500</item>
+        <item>600</item>
+    </integer-array>
+
+    <bool name="config_use_strict_phone_number_comparation">false</bool>
+
+    <!-- Display low battery warning when battery level dips to this value -->
+    <integer name="config_lowBatteryWarningLevel">15</integer>
+
+    <!-- Close low battery warning when battery level reaches this value -->
+    <integer name="config_lowBatteryCloseWarningLevel">20</integer>
+
+    <!-- Allow the menu hard key to be disabled in LockScreen on some devices -->
+    <bool name="config_disableMenuKeyInLockScreen">false</bool>
+
+    <!-- Control whether status bar should distinguish HSPA data icon form UMTS data icon on devices -->
+    <bool name="config_hspa_data_distinguishable">false</bool>
+
+    <!-- Array of light sensor LUX values to define our levels for auto backlight brightness support.
+         The N entries of this array define N + 1 zones as follows:
+
+         Zone 0:        0 <= LUX < array[0]
+         Zone 1:        array[0] <= LUX < array[1]
+         ...
+         Zone N:        array[N - 1] <= LUX < array[N]
+         Zone N + 1:    array[N] <= LUX < infinity
+
+         Must be overridden in platform specific overlays -->
+    <integer-array name="config_autoBrightnessLevels">
+    </integer-array>
+
+    <!-- Array of output values for LCD backlight corresponding to the LUX values
+         in the config_autoBrightnessLevels array.  This array should have size one greater
+         than the size of the config_autoBrightnessLevels array.
+         This must be overridden in platform specific overlays -->
+    <integer-array name="config_autoBrightnessLcdBacklightValues">
+    </integer-array>
+
+    <!-- Array of output values for button backlight corresponding to the LUX values
+         in the config_autoBrightnessLevels array.  This array should have size one greater
+         than the size of the config_autoBrightnessLevels array.
+         This must be overridden in platform specific overlays -->
+    <integer-array name="config_autoBrightnessButtonBacklightValues">
+    </integer-array>
+
+    <!-- Array of output values for keyboard backlight corresponding to the LUX values
+         in the config_autoBrightnessLevels array.  This array should have size one greater
+         than the size of the config_autoBrightnessLevels array.
+         This must be overridden in platform specific overlays -->
+    <integer-array name="config_autoBrightnessKeyboardBacklightValues">
+    </integer-array>
+
+    <!-- Amount of time it takes for the light sensor to warm up in milliseconds.
+         For this time after the screen turns on, the Power Manager
+         will not debounce light sensor readings -->
+    <integer name="config_lightSensorWarmupTime">0</integer>
+
+    <!-- Enables swipe versus poly-finger touch disambiguation in the KeyboardView -->
+    <bool name="config_swipeDisambiguation">true</bool>
 </resources>

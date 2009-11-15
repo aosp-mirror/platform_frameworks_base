@@ -45,13 +45,6 @@ static String8 parseResourceName(const String8& leaf)
     }
 }
 
-class ResourceTypeSet : public RefBase,
-                        public KeyedVector<String8,sp<AaptGroup> >
-{
-public:
-    ResourceTypeSet();
-};
-
 ResourceTypeSet::ResourceTypeSet()
     :RefBase(),
      KeyedVector<String8,sp<AaptGroup> >()
@@ -181,7 +174,7 @@ static sp<AaptFile> getResourceFile(const sp<AaptAssets>& assets, bool makeIfNec
 static status_t parsePackage(const sp<AaptAssets>& assets, const sp<AaptGroup>& grp)
 {
     if (grp->getFiles().size() != 1) {
-        fprintf(stderr, "WARNING: Multiple AndroidManifest.xml files found, using %s\n",
+        fprintf(stderr, "warning: Multiple AndroidManifest.xml files found, using %s\n",
                 grp->getFiles().valueAt(0)->getPrintableSource().string());
     }
 
@@ -279,15 +272,16 @@ static status_t preProcessImages(Bundle* bundle, const sp<AaptAssets>& assets,
     ResourceDirIterator it(set, String8("drawable"));
     Vector<sp<AaptFile> > newNameFiles;
     Vector<String8> newNamePaths;
+    bool hasErrors = false;
     ssize_t res;
     while ((res=it.next()) == NO_ERROR) {
         res = preProcessImage(bundle, assets, it.getFile(), NULL);
-        if (res != NO_ERROR) {
-            return res;
+        if (res < NO_ERROR) {
+            hasErrors = true;
         }
     }
 
-    return NO_ERROR;
+    return (hasErrors || (res < NO_ERROR)) ? UNKNOWN_ERROR : NO_ERROR;
 }
 
 status_t postProcessImages(const sp<AaptAssets>& assets,
@@ -295,15 +289,16 @@ status_t postProcessImages(const sp<AaptAssets>& assets,
                            const sp<ResourceTypeSet>& set)
 {
     ResourceDirIterator it(set, String8("drawable"));
+    bool hasErrors = false;
     ssize_t res;
     while ((res=it.next()) == NO_ERROR) {
         res = postProcessImage(assets, table, it.getFile());
-        if (res != NO_ERROR) {
-            return res;
+        if (res < NO_ERROR) {
+            hasErrors = true;
         }
     }
 
-    return res < NO_ERROR ? res : (status_t)NO_ERROR;
+    return (hasErrors || (res < NO_ERROR)) ? UNKNOWN_ERROR : NO_ERROR;
 }
 
 static void collect_files(const sp<AaptDir>& dir,
@@ -426,17 +421,22 @@ static void checkForIds(const String8& path, ResXMLParser& parser)
         if (code == ResXMLTree::START_TAG) {
             ssize_t index = parser.indexOfAttribute(NULL, "id");
             if (index >= 0) {
-                fprintf(stderr, "%s:%d: WARNING: found plain 'id' attribute; did you mean the new 'android:id' name?\n",
+                fprintf(stderr, "%s:%d: warning: found plain 'id' attribute; did you mean the new 'android:id' name?\n",
                         path.string(), parser.getLineNumber());
             }
         }
     }
 }
 
-static bool applyFileOverlay(const sp<AaptAssets>& assets,
+static bool applyFileOverlay(Bundle *bundle,
+                             const sp<AaptAssets>& assets,
                              const sp<ResourceTypeSet>& baseSet,
                              const char *resType)
 {
+    if (bundle->getVerbose()) {
+        printf("applyFileOverlay for %s\n", resType);
+    }
+
     // Replace any base level files in this category with any found from the overlay
     // Also add any found only in the overlay.
     sp<AaptAssets> overlay = assets->getOverlay();
@@ -455,6 +455,9 @@ static bool applyFileOverlay(const sp<AaptAssets>& assets,
             // non-overlay "baseset".
             size_t overlayCount = overlaySet->size();
             for (size_t overlayIndex=0; overlayIndex<overlayCount; overlayIndex++) {
+                if (bundle->getVerbose()) {
+                    printf("trying overlaySet Key=%s\n",overlaySet->keyAt(overlayIndex).string());
+                }
                 size_t baseIndex = baseSet->indexOfKey(overlaySet->keyAt(overlayIndex));
                 if (baseIndex < UNKNOWN_ERROR) {
                     // look for same flavor.  For a given file (strings.xml, for example)
@@ -462,30 +465,57 @@ static bool applyFileOverlay(const sp<AaptAssets>& assets,
                     // the same flavor.
                     sp<AaptGroup> overlayGroup = overlaySet->valueAt(overlayIndex);
                     sp<AaptGroup> baseGroup = baseSet->valueAt(baseIndex);
-                   
-                    DefaultKeyedVector<AaptGroupEntry, sp<AaptFile> > baseFiles = 
-                            baseGroup->getFiles();
-                    DefaultKeyedVector<AaptGroupEntry, sp<AaptFile> > overlayFiles = 
+
+                    DefaultKeyedVector<AaptGroupEntry, sp<AaptFile> > overlayFiles =
                             overlayGroup->getFiles();
+                    if (bundle->getVerbose()) {
+                        DefaultKeyedVector<AaptGroupEntry, sp<AaptFile> > baseFiles =
+                                baseGroup->getFiles();
+                        for (size_t i=0; i < baseFiles.size(); i++) {
+                            printf("baseFile %d has flavor %s\n", i,
+                                    baseFiles.keyAt(i).toString().string());
+                        }
+                        for (size_t i=0; i < overlayFiles.size(); i++) {
+                            printf("overlayFile %d has flavor %s\n", i,
+                                    overlayFiles.keyAt(i).toString().string());
+                        }
+                    }
+
                     size_t overlayGroupSize = overlayFiles.size();
-                    for (size_t overlayGroupIndex = 0; 
-                            overlayGroupIndex<overlayGroupSize; 
+                    for (size_t overlayGroupIndex = 0;
+                            overlayGroupIndex<overlayGroupSize;
                             overlayGroupIndex++) {
-                        size_t baseFileIndex = 
-                                baseFiles.indexOfKey(overlayFiles.keyAt(overlayGroupIndex));
+                        size_t baseFileIndex =
+                                baseGroup->getFiles().indexOfKey(overlayFiles.
+                                keyAt(overlayGroupIndex));
                         if(baseFileIndex < UNKNOWN_ERROR) {
+                            if (bundle->getVerbose()) {
+                                printf("found a match (%d) for overlay file %s, for flavor %s\n",
+                                        baseFileIndex,
+                                        overlayGroup->getLeaf().string(),
+                                        overlayFiles.keyAt(overlayGroupIndex).toString().string());
+                            }
                             baseGroup->removeFile(baseFileIndex);
                         } else {
                             // didn't find a match fall through and add it..
                         }
                         baseGroup->addFile(overlayFiles.valueAt(overlayGroupIndex));
+                        assets->addGroupEntry(overlayFiles.keyAt(overlayGroupIndex));
                     }
                 } else {
                     // this group doesn't exist (a file that's only in the overlay)
-                    fprintf(stderr, "aapt: error: "
-                            "*** Resource file '%s' exists only in an overlay\n",
-                            overlaySet->keyAt(overlayIndex).string());
-                    return false;
+                    baseSet->add(overlaySet->keyAt(overlayIndex),
+                            overlaySet->valueAt(overlayIndex));
+                    // make sure all flavors are defined in the resources.
+                    sp<AaptGroup> overlayGroup = overlaySet->valueAt(overlayIndex);
+                    DefaultKeyedVector<AaptGroupEntry, sp<AaptFile> > overlayFiles =
+                            overlayGroup->getFiles();
+                    size_t overlayGroupSize = overlayFiles.size();
+                    for (size_t overlayGroupIndex = 0;
+                            overlayGroupIndex<overlayGroupSize;
+                            overlayGroupIndex++) {
+                        assets->addGroupEntry(overlayFiles.keyAt(overlayGroupIndex));
+                    }
                 }
             }
             // this overlay didn't have resources for this type
@@ -619,13 +649,13 @@ status_t buildResources(Bundle* bundle, const sp<AaptAssets>& assets)
         current = current->getOverlay();
     }
     // apply the overlay files to the base set
-    if (!applyFileOverlay(assets, drawables, "drawable") ||
-            !applyFileOverlay(assets, layouts, "layout") ||
-            !applyFileOverlay(assets, anims, "anim") ||
-            !applyFileOverlay(assets, xmls, "xml") ||
-            !applyFileOverlay(assets, raws, "raw") ||
-            !applyFileOverlay(assets, colors, "color") ||
-            !applyFileOverlay(assets, menus, "menu")) {
+    if (!applyFileOverlay(bundle, assets, drawables, "drawable") ||
+            !applyFileOverlay(bundle, assets, layouts, "layout") ||
+            !applyFileOverlay(bundle, assets, anims, "anim") ||
+            !applyFileOverlay(bundle, assets, xmls, "xml") ||
+            !applyFileOverlay(bundle, assets, raws, "raw") ||
+            !applyFileOverlay(bundle, assets, colors, "color") ||
+            !applyFileOverlay(bundle, assets, menus, "menu")) {
         return UNKNOWN_ERROR;
     }
 
@@ -1118,6 +1148,7 @@ status_t buildResources(Bundle* bundle, const sp<AaptAssets>& assets)
                 printf("  Writing public definitions to %s.\n", bundle->getPublicOutputFile());
             }
             table.writePublicDefinitions(String16(assets->getPackage()), fp);
+            fclose(fp);
         }
 
         NOISY(
@@ -1135,7 +1166,6 @@ status_t buildResources(Bundle* bundle, const sp<AaptAssets>& assets)
             return err;
         }
     }
-
     return err;
 }
 
@@ -1234,10 +1264,16 @@ static status_t writeLayoutClasses(
 
         NA = idents.size();
 
+        bool deprecated = false;
+        
         String16 comment = symbols->getComment(realClassName);
         fprintf(fp, "%s/** ", indentStr);
         if (comment.size() > 0) {
-            fprintf(fp, "%s\n", String8(comment).string());
+            String8 cmt(comment);
+            fprintf(fp, "%s\n", cmt.string());
+            if (strstr(cmt.string(), "@deprecated") != NULL) {
+                deprecated = true;
+            }
         } else {
             fprintf(fp, "Attributes that can be used with a %s.\n", nclassName.string());
         }
@@ -1249,10 +1285,10 @@ static status_t writeLayoutClasses(
                     hasTable = true;
                     fprintf(fp,
                             "%s   <p>Includes the following attributes:</p>\n"
-                            "%s   <table border=\"2\" width=\"85%%\" align=\"center\" frame=\"hsides\" rules=\"all\" cellpadding=\"5\">\n"
+                            "%s   <table>\n"
                             "%s   <colgroup align=\"left\" />\n"
                             "%s   <colgroup align=\"left\" />\n"
-                            "%s   <tr><th>Attribute<th>Summary</tr>\n",
+                            "%s   <tr><th>Attribute</th><th>Description</th></tr>\n",
                             indentStr,
                             indentStr,
                             indentStr,
@@ -1286,7 +1322,7 @@ static status_t writeLayoutClasses(
                 }
                 String16 name(name8);
                 fixupSymbol(&name);
-                fprintf(fp, "%s   <tr><th><code>{@link #%s_%s %s:%s}</code><td>%s</tr>\n",
+                fprintf(fp, "%s   <tr><td><code>{@link #%s_%s %s:%s}</code></td><td>%s</td></tr>\n",
                         indentStr, nclassName.string(),
                         String8(name).string(),
                         assets->getPackage().string(),
@@ -1313,6 +1349,10 @@ static status_t writeLayoutClasses(
         }
         fprintf(fp, "%s */\n", getIndentSpace(indent));
 
+        if (deprecated) {
+            fprintf(fp, "%s@Deprecated\n", indentStr);
+        }
+        
         fprintf(fp,
                 "%spublic static final int[] %s = {\n"
                 "%s",
@@ -1361,11 +1401,17 @@ static status_t writeLayoutClasses(
                 //printf("%s:%s/%s: 0x%08x\n", String8(package16).string(),
                 //    String8(attr16).string(), String8(name16).string(), typeSpecFlags);
                 const bool pub = (typeSpecFlags&ResTable_typeSpec::SPEC_PUBLIC) != 0;
-                    
+                
+                bool deprecated = false;
+                
                 fprintf(fp, "%s/**\n", indentStr);
                 if (comment.size() > 0) {
+                    String8 cmt(comment);
                     fprintf(fp, "%s  <p>\n%s  @attr description\n", indentStr, indentStr);
-                    fprintf(fp, "%s  %s\n", indentStr, String8(comment).string());
+                    fprintf(fp, "%s  %s\n", indentStr, cmt.string());
+                    if (strstr(cmt.string(), "@deprecated") != NULL) {
+                        deprecated = true;
+                    }
                 } else {
                     fprintf(fp,
                             "%s  <p>This symbol is the offset where the {@link %s.R.attr#%s}\n"
@@ -1377,7 +1423,11 @@ static status_t writeLayoutClasses(
                             indentStr, nclassName.string());
                 }
                 if (typeComment.size() > 0) {
-                    fprintf(fp, "\n\n%s  %s\n", indentStr, String8(typeComment).string());
+                    String8 cmt(typeComment);
+                    fprintf(fp, "\n\n%s  %s\n", indentStr, cmt.string());
+                    if (strstr(cmt.string(), "@deprecated") != NULL) {
+                        deprecated = true;
+                    }
                 }
                 if (comment.size() > 0) {
                     if (pub) {
@@ -1395,6 +1445,9 @@ static status_t writeLayoutClasses(
                 fprintf(fp, "%s  @attr name %s:%s\n", indentStr,
                         "android", String8(name).string());
                 fprintf(fp, "%s*/\n", indentStr);
+                if (deprecated) {
+                    fprintf(fp, "%s@Deprecated\n", indentStr);
+                }
                 fprintf(fp,
                         "%spublic static final int %s_%s = %d;\n",
                         indentStr, nclassName.string(),
@@ -1436,11 +1489,16 @@ static status_t writeSymbolClass(
         }
         String16 comment(sym.comment);
         bool haveComment = false;
+        bool deprecated = false;
         if (comment.size() > 0) {
             haveComment = true;
+            String8 cmt(comment);
             fprintf(fp,
                     "%s/** %s\n",
-                    getIndentSpace(indent), String8(comment).string());
+                    getIndentSpace(indent), cmt.string());
+            if (strstr(cmt.string(), "@deprecated") != NULL) {
+                deprecated = true;
+            }
         } else if (sym.isPublic && !includePrivate) {
             sym.sourcePos.warning("No comment for public symbol %s:%s/%s",
                 assets->getPackage().string(), className.string(),
@@ -1448,19 +1506,24 @@ static status_t writeSymbolClass(
         }
         String16 typeComment(sym.typeComment);
         if (typeComment.size() > 0) {
+            String8 cmt(typeComment);
             if (!haveComment) {
                 haveComment = true;
                 fprintf(fp,
-                        "%s/** %s\n",
-                        getIndentSpace(indent), String8(typeComment).string());
+                        "%s/** %s\n", getIndentSpace(indent), cmt.string());
             } else {
                 fprintf(fp,
-                        "%s %s\n",
-                        getIndentSpace(indent), String8(typeComment).string());
+                        "%s %s\n", getIndentSpace(indent), cmt.string());
+            }
+            if (strstr(cmt.string(), "@deprecated") != NULL) {
+                deprecated = true;
             }
         }
         if (haveComment) {
             fprintf(fp,"%s */\n", getIndentSpace(indent));
+        }
+        if (deprecated) {
+            fprintf(fp, "%s@Deprecated\n", getIndentSpace(indent));
         }
         fprintf(fp, "%spublic static final int %s=0x%08x;\n",
                 getIndentSpace(indent),
@@ -1480,16 +1543,24 @@ static status_t writeSymbolClass(
             return UNKNOWN_ERROR;
         }
         String16 comment(sym.comment);
+        bool deprecated = false;
         if (comment.size() > 0) {
+            String8 cmt(comment);
             fprintf(fp,
                     "%s/** %s\n"
                      "%s */\n",
-                    getIndentSpace(indent), String8(comment).string(),
+                    getIndentSpace(indent), cmt.string(),
                     getIndentSpace(indent));
+            if (strstr(cmt.string(), "@deprecated") != NULL) {
+                deprecated = true;
+            }
         } else if (sym.isPublic && !includePrivate) {
             sym.sourcePos.warning("No comment for public symbol %s:%s/%s",
                 assets->getPackage().string(), className.string(),
                 String8(sym.name).string());
+        }
+        if (deprecated) {
+            fprintf(fp, "%s@Deprecated\n", getIndentSpace(indent));
         }
         fprintf(fp, "%spublic static final String %s=\"%s\";\n",
                 getIndentSpace(indent),
@@ -1584,4 +1655,231 @@ status_t writeResourceSymbols(Bundle* bundle, const sp<AaptAssets>& assets,
     }
 
     return NO_ERROR;
+}
+
+
+
+class ProguardKeepSet
+{
+public:
+    // { rule --> { file locations } }
+    KeyedVector<String8, SortedVector<String8> > rules;
+
+    void add(const String8& rule, const String8& where);
+};
+
+void ProguardKeepSet::add(const String8& rule, const String8& where)
+{
+    ssize_t index = rules.indexOfKey(rule);
+    if (index < 0) {
+        index = rules.add(rule, SortedVector<String8>());
+    }
+    rules.editValueAt(index).add(where);
+}
+
+status_t
+writeProguardForAndroidManifest(ProguardKeepSet* keep, const sp<AaptAssets>& assets)
+{
+    status_t err;
+    ResXMLTree tree;
+    size_t len;
+    ResXMLTree::event_code_t code;
+    int depth = 0;
+    bool inApplication = false;
+    String8 error;
+    sp<AaptGroup> assGroup;
+    sp<AaptFile> assFile;
+    String8 pkg;
+
+    // First, look for a package file to parse.  This is required to
+    // be able to generate the resource information.
+    assGroup = assets->getFiles().valueFor(String8("AndroidManifest.xml"));
+    if (assGroup == NULL) {
+        fprintf(stderr, "ERROR: No AndroidManifest.xml file found.\n");
+        return -1;
+    }
+
+    if (assGroup->getFiles().size() != 1) {
+        fprintf(stderr, "warning: Multiple AndroidManifest.xml files found, using %s\n",
+                assGroup->getFiles().valueAt(0)->getPrintableSource().string());
+    }
+
+    assFile = assGroup->getFiles().valueAt(0);
+
+    err = parseXMLResource(assFile, &tree);
+    if (err != NO_ERROR) {
+        return err;
+    }
+
+    tree.restart();
+
+    while ((code=tree.next()) != ResXMLTree::END_DOCUMENT && code != ResXMLTree::BAD_DOCUMENT) {
+        if (code == ResXMLTree::END_TAG) {
+            if (/* name == "Application" && */ depth == 2) {
+                inApplication = false;
+            }
+            depth--;
+            continue;
+        }
+        if (code != ResXMLTree::START_TAG) {
+            continue;
+        }
+        depth++;
+        String8 tag(tree.getElementName(&len));
+        // printf("Depth %d tag %s\n", depth, tag.string());
+        if (depth == 1) {
+            if (tag != "manifest") {
+                fprintf(stderr, "ERROR: manifest does not start with <manifest> tag\n");
+                return -1;
+            }
+            pkg = getAttribute(tree, NULL, "package", NULL);
+        } else if (depth == 2 && tag == "application") {
+            inApplication = true;
+        }
+        if (inApplication) {
+            if (tag == "application" || tag == "activity" || tag == "service" || tag == "receiver"
+                    || tag == "provider") {
+                String8 name = getAttribute(tree, "http://schemas.android.com/apk/res/android",
+                        "name", &error);
+                if (error != "") {
+                    fprintf(stderr, "ERROR: %s\n", error.string());
+                    return -1;
+                }
+                // asdf     --> package.asdf
+                // .asdf  .a.b  --> package.asdf package.a.b
+                // asdf.adsf --> asdf.asdf
+                String8 rule("-keep class ");
+                const char* p = name.string();
+                const char* q = strchr(p, '.');
+                if (p == q) {
+                    rule += pkg;
+                    rule += name;
+                } else if (q == NULL) {
+                    rule += pkg;
+                    rule += ".";
+                    rule += name;
+                } else {
+                    rule += name;
+                }
+
+                String8 location = tag;
+                location += " ";
+                location += assFile->getSourceFile();
+                char lineno[20];
+                sprintf(lineno, ":%d", tree.getLineNumber());
+                location += lineno;
+
+                keep->add(rule, location);
+            }
+        }
+    }
+
+    return NO_ERROR;
+}
+
+status_t
+writeProguardForLayout(ProguardKeepSet* keep, const sp<AaptFile>& layoutFile)
+{
+    status_t err;
+    ResXMLTree tree;
+    size_t len;
+    ResXMLTree::event_code_t code;
+
+    err = parseXMLResource(layoutFile, &tree);
+    if (err != NO_ERROR) {
+        return err;
+    }
+
+    tree.restart();
+
+    while ((code=tree.next()) != ResXMLTree::END_DOCUMENT && code != ResXMLTree::BAD_DOCUMENT) {
+        if (code != ResXMLTree::START_TAG) {
+            continue;
+        }
+        String8 tag(tree.getElementName(&len));
+
+        // If there is no '.', we'll assume that it's one of the built in names.
+        if (strchr(tag.string(), '.')) {
+            String8 rule("-keep class ");
+            rule += tag;
+            rule += " { <init>(...); }";
+
+            String8 location("view ");
+            location += layoutFile->getSourceFile();
+            char lineno[20];
+            sprintf(lineno, ":%d", tree.getLineNumber());
+            location += lineno;
+
+            keep->add(rule, location);
+        }
+    }
+
+    return NO_ERROR;
+}
+
+status_t
+writeProguardForLayouts(ProguardKeepSet* keep, const sp<AaptAssets>& assets)
+{
+    status_t err;
+    sp<AaptDir> layout = assets->resDir(String8("layout"));
+
+    if (layout != NULL) {
+        const KeyedVector<String8,sp<AaptGroup> > groups = layout->getFiles();
+        const size_t N = groups.size();
+        for (size_t i=0; i<N; i++) {
+            const sp<AaptGroup>& group = groups.valueAt(i);
+            const DefaultKeyedVector<AaptGroupEntry, sp<AaptFile> >& files = group->getFiles();
+            const size_t M = files.size();
+            for (size_t j=0; j<M; j++) {
+                err = writeProguardForLayout(keep, files.valueAt(j));
+                if (err < 0) {
+                    return err;
+                }
+            }
+        }
+    }
+    return NO_ERROR;
+}
+
+status_t
+writeProguardFile(Bundle* bundle, const sp<AaptAssets>& assets)
+{
+    status_t err = -1;
+
+    if (!bundle->getProguardFile()) {
+        return NO_ERROR;
+    }
+
+    ProguardKeepSet keep;
+
+    err = writeProguardForAndroidManifest(&keep, assets);
+    if (err < 0) {
+        return err;
+    }
+
+    err = writeProguardForLayouts(&keep, assets);
+    if (err < 0) {
+        return err;
+    }
+
+    FILE* fp = fopen(bundle->getProguardFile(), "w+");
+    if (fp == NULL) {
+        fprintf(stderr, "ERROR: Unable to open class file %s: %s\n",
+                bundle->getProguardFile(), strerror(errno));
+        return UNKNOWN_ERROR;
+    }
+
+    const KeyedVector<String8, SortedVector<String8> >& rules = keep.rules;
+    const size_t N = rules.size();
+    for (size_t i=0; i<N; i++) {
+        const SortedVector<String8>& locations = rules.valueAt(i);
+        const size_t M = locations.size();
+        for (size_t j=0; j<M; j++) {
+            fprintf(fp, "# %s\n", locations.itemAt(j).string());
+        }
+        fprintf(fp, "%s\n\n", rules.keyAt(i).string());
+    }
+    fclose(fp);
+
+    return err;
 }

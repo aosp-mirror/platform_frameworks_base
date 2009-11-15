@@ -161,8 +161,8 @@ public class CdmaConnection extends Connection {
 
         isIncoming = false;
         cnapName = null;
-        cnapNamePresentation = 0;
-        numberPresentation = 0;
+        cnapNamePresentation = Connection.PRESENTATION_ALLOWED;
+        numberPresentation = Connection.PRESENTATION_ALLOWED;
         createTime = System.currentTimeMillis();
 
         if (parent != null) {
@@ -221,10 +221,6 @@ public class CdmaConnection extends Connection {
         return isIncoming == c.isMT && equalsHandlesNulls(address, cAddress);
     }
 
-    public String
-    toString() {
-        return (isIncoming ? "incoming" : "outgoing");
-    }
 
     public String getOrigDialString(){
         return dialString;
@@ -422,6 +418,8 @@ public class CdmaConnection extends Connection {
                 return DisconnectCause.CDMA_PREEMPTED;
             case CallFailCause.CDMA_NOT_EMERGENCY:
                 return DisconnectCause.CDMA_NOT_EMERGENCY;
+            case CallFailCause.CDMA_ACCESS_BLOCKED:
+                return DisconnectCause.CDMA_ACCESS_BLOCKED;
             case CallFailCause.ERROR_UNSPECIFIED:
             case CallFailCause.NORMAL_CLEARING:
             default:
@@ -435,8 +433,10 @@ public class CdmaConnection extends Connection {
                 } else if (phone.mCM.getRadioState() != CommandsInterface.RadioState.NV_READY
                         && phone.getIccCard().getState() != RuimCard.State.READY) {
                     return DisconnectCause.ICC_ERROR;
-                } else {
+                } else if (causeCode==CallFailCause.NORMAL_CLEARING) {
                     return DisconnectCause.NORMAL;
+                } else {
+                    return DisconnectCause.ERROR_UNSPECIFIED;
                 }
         }
     }
@@ -490,6 +490,8 @@ public class CdmaConnection extends Connection {
 
         newParent = parentFromDCState(dc.state);
 
+        if (Phone.DEBUG_PHONE) log("parent= " +parent +", newParent= " + newParent);
+
         if (!equalsHandlesNulls(address, dc.number)) {
             if (Phone.DEBUG_PHONE) log("update: phone # changed!");
             address = dc.number;
@@ -507,7 +509,7 @@ public class CdmaConnection extends Connection {
             cnapName = dc.name;
         }
 
-        log("--dssds----"+cnapName);
+        if (Phone.DEBUG_PHONE) log("--dssds----"+cnapName);
         cnapNamePresentation = dc.namePresentation;
         numberPresentation = dc.numberPresentation;
 
@@ -527,9 +529,7 @@ public class CdmaConnection extends Connection {
         /** Some state-transition events */
 
         if (Phone.DEBUG_PHONE) log(
-                "update: parent=" + parent +
-                ", hasNewParent=" + (newParent != parent) +
-                ", wasConnectingInOrOut=" + wasConnectingInOrOut +
+                "Update, wasConnectingInOrOut=" + wasConnectingInOrOut +
                 ", wasHolding=" + wasHolding +
                 ", isConnectingInOrOut=" + isConnectingInOrOut() +
                 ", changed=" + changed);
@@ -816,15 +816,12 @@ public class CdmaConnection extends Connection {
         return c == PhoneNumberUtils.WAIT;
     }
 
-
-
-
     // This function is to find the next PAUSE character index if
     // multiple pauses in a row. Otherwise it finds the next non PAUSE or
     // non WAIT character index.
     private static int
     findNextPCharOrNonPOrNonWCharIndex(String phoneNumber, int currIndex) {
-        boolean wMatched = false;
+        boolean wMatched = isWait(phoneNumber.charAt(currIndex));
         int index = currIndex + 1;
         int length = phoneNumber.length();
         while (index < length) {
@@ -861,17 +858,20 @@ public class CdmaConnection extends Connection {
         // Append the PW char
         ret = (isPause(c)) ? PhoneNumberUtils.PAUSE : PhoneNumberUtils.WAIT;
 
-        // if there is a PAUSE in at the begining of PW character sequences, and this
-        // PW character sequences has more than 2 PAUSE and WAIT Characters,skip P, append W
-        if (isPause(c) &&  (nextNonPwCharIndex > (currPwIndex + 1))) {
+        // If the nextNonPwCharIndex is greater than currPwIndex + 1,
+        // it means the PW sequence contains not only P characters.
+        // Since for the sequence that only contains P character,
+        // the P character is handled one by one, the nextNonPwCharIndex
+        // equals to currPwIndex + 1.
+        // In this case, skip P, append W.
+        if (nextNonPwCharIndex > (currPwIndex + 1)) {
             ret = PhoneNumberUtils.WAIT;
         }
         return ret;
     }
 
-
     /**
-     * format orignal dial string
+     * format original dial string
      * 1) convert international dialing prefix "+" to
      *    string specified per region
      *
@@ -883,6 +883,11 @@ public class CdmaConnection extends Connection {
      *    and if there is any WAIT in PAUSE/WAIT sequence, treat them like WAIT.
      */
     public static String formatDialString(String phoneNumber) {
+        /**
+         * TODO(cleanup): This function should move to PhoneNumberUtils, and
+         * tests should be added.
+         */
+
         if (phoneNumber == null) {
             return null;
         }
@@ -890,20 +895,10 @@ public class CdmaConnection extends Connection {
         StringBuilder ret = new StringBuilder();
         char c;
         int currIndex = 0;
+
         while (currIndex < length) {
             c = phoneNumber.charAt(currIndex);
-            if (PhoneNumberUtils.isDialable(c)) {
-                if (c == '+') {
-                    String ps = null;
-                    SystemProperties.get(TelephonyProperties.PROPERTY_IDP_STRING, ps);
-                    if (TextUtils.isEmpty(ps)) {
-                        ps = "011";
-                    }
-                    ret.append(ps);
-                } else {
-                    ret.append(c);
-                }
-            } else if (isPause(c) || isWait(c)) {
+            if (isPause(c) || isWait(c)) {
                 if (currIndex < length - 1) {
                     // if PW not at the end
                     int nextIndex = findNextPCharOrNonPOrNonWCharIndex(phoneNumber, currIndex);
@@ -911,7 +906,9 @@ public class CdmaConnection extends Connection {
                     if (nextIndex < length) {
                         char pC = findPOrWCharToAppend(phoneNumber, currIndex, nextIndex);
                         ret.append(pC);
-                        // If PW char is immediately followed by non-PW char
+                        // If PW char sequence has more than 2 PW characters,
+                        // skip to the last PW character since the sequence already be
+                        // converted to WAIT character
                         if (nextIndex > (currIndex + 1)) {
                             currIndex = nextIndex - 1;
                         }
@@ -925,7 +922,7 @@ public class CdmaConnection extends Connection {
             }
             currIndex++;
         }
-        return ret.toString();
+        return PhoneNumberUtils.cdmaCheckAndProcessPlusCode(ret.toString());
     }
 
     private void log(String msg) {

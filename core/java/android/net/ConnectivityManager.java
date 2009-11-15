@@ -18,6 +18,7 @@ package android.net;
 
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.os.Binder;
 import android.os.RemoteException;
 
 /**
@@ -114,15 +115,64 @@ public class ConnectivityManager
     public static final String ACTION_BACKGROUND_DATA_SETTING_CHANGED =
             "android.net.conn.BACKGROUND_DATA_SETTING_CHANGED";
 
-    public static final int TYPE_MOBILE = 0;
-    public static final int TYPE_WIFI   = 1;
+    /**
+     * The Default Mobile data connection.  When active, all data traffic
+     * will use this connection by default.  Should not coexist with other
+     * default connections.
+     */
+    public static final int TYPE_MOBILE      = 0;
+    /**
+     * The Default WIFI data connection.  When active, all data traffic
+     * will use this connection by default.  Should not coexist with other
+     * default connections.
+     */
+    public static final int TYPE_WIFI        = 1;
+    /**
+     * An MMS-specific Mobile data connection.  This connection may be the
+     * same as {@link #TYPEMOBILE} but it may be different.  This is used
+     * by applications needing to talk to the carrier's Multimedia Messaging
+     * Service servers.  It may coexist with default data connections.
+     * {@hide}
+     */
+    public static final int TYPE_MOBILE_MMS  = 2;
+    /**
+     * A SUPL-specific Mobile data connection.  This connection may be the
+     * same as {@link #TYPEMOBILE} but it may be different.  This is used
+     * by applications needing to talk to the carrier's Secure User Plane
+     * Location servers for help locating the device.  It may coexist with
+     * default data connections.
+     * {@hide}
+     */
+    public static final int TYPE_MOBILE_SUPL = 3;
+    /**
+     * A DUN-specific Mobile data connection.  This connection may be the
+     * same as {@link #TYPEMOBILE} but it may be different.  This is used
+     * by applicaitons performing a Dial Up Networking bridge so that
+     * the carrier is aware of DUN traffic.  It may coexist with default data
+     * connections.
+     * {@hide}
+     */
+    public static final int TYPE_MOBILE_DUN  = 4;
+    /**
+     * A High Priority Mobile data connection.  This connection is typically
+     * the same as {@link #TYPEMOBILE} but the routing setup is different.
+     * Only requesting processes will have access to the Mobile DNS servers
+     * and only IP's explicitly requested via {@link #requestRouteToHost}
+     * will route over this interface.
+     *{@hide}
+     */
+    public static final int TYPE_MOBILE_HIPRI = 5;
+    /** {@hide} */
+    public static final int MAX_RADIO_TYPE   = TYPE_WIFI;
+    /** {@hide} */
+    public static final int MAX_NETWORK_TYPE = TYPE_MOBILE_HIPRI;
 
     public static final int DEFAULT_NETWORK_PREFERENCE = TYPE_WIFI;
 
     private IConnectivityManager mService;
 
     static public boolean isNetworkTypeValid(int networkType) {
-        return networkType == TYPE_WIFI || networkType == TYPE_MOBILE;
+        return networkType >= 0 && networkType <= MAX_NETWORK_TYPE;
     }
 
     public void setNetworkPreference(int preference) {
@@ -195,7 +245,8 @@ public class ConnectivityManager
      */
     public int startUsingNetworkFeature(int networkType, String feature) {
         try {
-            return mService.startUsingNetworkFeature(networkType, feature);
+            return mService.startUsingNetworkFeature(networkType, feature,
+                    new Binder());
         } catch (RemoteException e) {
             return -1;
         }

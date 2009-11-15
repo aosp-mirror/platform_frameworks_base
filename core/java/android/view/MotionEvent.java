@@ -19,7 +19,7 @@ package android.view;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.SystemClock;
-import android.util.Config;
+import android.util.Log;
 
 /**
  * Object used to report movement (mouse, pen, finger, trackball) events.  This
@@ -27,17 +27,26 @@ import android.util.Config;
  * it is being used for.
  */
 public final class MotionEvent implements Parcelable {
+    static final boolean DEBUG_POINTERS = false;
+    
+    /**
+     * Bit mask of the parts of the action code that are the action itself.
+     */
+    public static final int ACTION_MASK             = 0xff;
+    
     /**
      * Constant for {@link #getAction}: A pressed gesture has started, the
      * motion contains the initial starting location.
      */
     public static final int ACTION_DOWN             = 0;
+    
     /**
      * Constant for {@link #getAction}: A pressed gesture has finished, the
      * motion contains the final release location as well as any intermediate
      * points since the last down or move event.
      */
     public static final int ACTION_UP               = 1;
+    
     /**
      * Constant for {@link #getAction}: A change has happened during a
      * press gesture (between {@link #ACTION_DOWN} and {@link #ACTION_UP}).
@@ -45,12 +54,14 @@ public final class MotionEvent implements Parcelable {
      * points since the last down or move event.
      */
     public static final int ACTION_MOVE             = 2;
+    
     /**
      * Constant for {@link #getAction}: The current gesture has been aborted.
      * You will not receive any more points in it.  You should treat this as
      * an up event, but not perform any action that you normally would.
      */
     public static final int ACTION_CANCEL           = 3;
+    
     /**
      * Constant for {@link #getAction}: A movement has happened outside of the
      * normal bounds of the UI element.  This does not provide a full gesture,
@@ -58,6 +69,70 @@ public final class MotionEvent implements Parcelable {
      */
     public static final int ACTION_OUTSIDE          = 4;
 
+    /**
+     * A non-primary pointer has gone down.  The bits in
+     * {@link #ACTION_POINTER_ID_MASK} indicate which pointer changed.
+     */
+    public static final int ACTION_POINTER_DOWN     = 5;
+    
+    /**
+     * Synonym for {@link #ACTION_POINTER_DOWN} with
+     * {@link #ACTION_POINTER_ID_MASK} of 0: the primary pointer has gone done.
+     */
+    public static final int ACTION_POINTER_1_DOWN   = ACTION_POINTER_DOWN | 0x0000;
+    
+    /**
+     * Synonym for {@link #ACTION_POINTER_DOWN} with
+     * {@link #ACTION_POINTER_ID_MASK} of 1: the secondary pointer has gone done.
+     */
+    public static final int ACTION_POINTER_2_DOWN   = ACTION_POINTER_DOWN | 0x0100;
+    
+    /**
+     * Synonym for {@link #ACTION_POINTER_DOWN} with
+     * {@link #ACTION_POINTER_ID_MASK} of 2: the tertiary pointer has gone done.
+     */
+    public static final int ACTION_POINTER_3_DOWN   = ACTION_POINTER_DOWN | 0x0200;
+    
+    /**
+     * A non-primary pointer has gone up.  The bits in
+     * {@link #ACTION_POINTER_ID_MASK} indicate which pointer changed.
+     */
+    public static final int ACTION_POINTER_UP       = 6;
+    
+    /**
+     * Synonym for {@link #ACTION_POINTER_UP} with
+     * {@link #ACTION_POINTER_ID_MASK} of 0: the primary pointer has gone up.
+     */
+    public static final int ACTION_POINTER_1_UP     = ACTION_POINTER_UP | 0x0000;
+    
+    /**
+     * Synonym for {@link #ACTION_POINTER_UP} with
+     * {@link #ACTION_POINTER_ID_MASK} of 1: the secondary pointer has gone up.
+     */
+    public static final int ACTION_POINTER_2_UP     = ACTION_POINTER_UP | 0x0100;
+    
+    /**
+     * Synonym for {@link #ACTION_POINTER_UP} with
+     * {@link #ACTION_POINTER_ID_MASK} of 2: the tertiary pointer has gone up.
+     */
+    public static final int ACTION_POINTER_3_UP     = ACTION_POINTER_UP | 0x0200;
+    
+    /**
+     * Bits in the action code that represent a pointer ID, used with
+     * {@link #ACTION_POINTER_DOWN} and {@link #ACTION_POINTER_UP}.  Pointer IDs
+     * start at 0, with 0 being the primary (first) pointer in the motion.  Note
+     * that this not <em>not</em> an index into the array of pointer values,
+     * which is compacted to only contain pointers that are down; the pointer
+     * ID for a particular index can be found with {@link #findPointerIndex}.
+     */
+    public static final int ACTION_POINTER_ID_MASK  = 0xff00;
+    
+    /**
+     * Bit shift for the action bits holding the pointer identifier as
+     * defined by {@link #ACTION_POINTER_ID_MASK}.
+     */
+    public static final int ACTION_POINTER_ID_SHIFT = 8;
+    
     private static final boolean TRACK_RECYCLED_LOCATION = false;
 
     /**
@@ -80,34 +155,83 @@ public final class MotionEvent implements Parcelable {
      */
     public static final int EDGE_RIGHT = 0x00000008;
 
+    /**
+     * Offset for the sample's X coordinate.
+     * @hide
+     */
+    static public final int SAMPLE_X = 0;
+    
+    /**
+     * Offset for the sample's Y coordinate.
+     * @hide
+     */
+    static public final int SAMPLE_Y = 1;
+    
+    /**
+     * Offset for the sample's X coordinate.
+     * @hide
+     */
+    static public final int SAMPLE_PRESSURE = 2;
+    
+    /**
+     * Offset for the sample's X coordinate.
+     * @hide
+     */
+    static public final int SAMPLE_SIZE = 3;
+    
+    /**
+     * Number of data items for each sample.
+     * @hide
+     */
+    static public final int NUM_SAMPLE_DATA = 4;
+    
+    /**
+     * Number of possible pointers.
+     * @hide
+     */
+    static public final int BASE_AVAIL_POINTERS = 5;
+    
+    static private final int BASE_AVAIL_SAMPLES = 8;
+    
     static private final int MAX_RECYCLED = 10;
     static private Object gRecyclerLock = new Object();
     static private int gRecyclerUsed = 0;
     static private MotionEvent gRecyclerTop = null;
 
     private long mDownTime;
-    private long mEventTime;
+    private long mEventTimeNano;
     private int mAction;
-    private float mX;
-    private float mY;
     private float mRawX;
     private float mRawY;
-    private float mPressure;
-    private float mSize;
-    private int mMetaState;
-    private int mNumHistory;
-    private float[] mHistory;
-    private long[] mHistoryTimes;
     private float mXPrecision;
     private float mYPrecision;
     private int mDeviceId;
     private int mEdgeFlags;
+    private int mMetaState;
+    
+    // Here is the actual event data.  Note that the order of the array
+    // is a little odd: the first entry is the most recent, and the ones
+    // following it are the historical data from oldest to newest.  This
+    // allows us to easily retrieve the most recent data, without having
+    // to copy the arrays every time a new sample is added.
+    
+    private int mNumPointers;
+    private int mNumSamples;
+    // Array of mNumPointers size of identifiers for each pointer of data.
+    private int[] mPointerIdentifiers;
+    // Array of (mNumSamples * mNumPointers * NUM_SAMPLE_DATA) size of event data.
+    private float[] mDataSamples;
+    // Array of mNumSamples size of time stamps.
+    private long[] mTimeSamples;
 
     private MotionEvent mNext;
     private RuntimeException mRecycledLocation;
     private boolean mRecycled;
 
     private MotionEvent() {
+        mPointerIdentifiers = new int[BASE_AVAIL_POINTERS];
+        mDataSamples = new float[BASE_AVAIL_POINTERS*BASE_AVAIL_SAMPLES*NUM_SAMPLE_DATA];
+        mTimeSamples = new long[BASE_AVAIL_SAMPLES];
     }
 
     static private MotionEvent obtain() {
@@ -124,6 +248,86 @@ public final class MotionEvent implements Parcelable {
         }
     }
 
+    /**
+     * Create a new MotionEvent, filling in all of the basic values that
+     * define the motion.
+     * 
+     * @param downTime The time (in ms) when the user originally pressed down to start 
+     * a stream of position events.  This must be obtained from {@link SystemClock#uptimeMillis()}.
+     * @param eventTime  The the time (in ms) when this specific event was generated.  This 
+     * must be obtained from {@link SystemClock#uptimeMillis()}.
+     * @param eventTimeNano  The the time (in ns) when this specific event was generated.  This 
+     * must be obtained from {@link System#nanoTime()}.
+     * @param action The kind of action being performed -- one of either
+     * {@link #ACTION_DOWN}, {@link #ACTION_MOVE}, {@link #ACTION_UP}, or
+     * {@link #ACTION_CANCEL}.
+     * @param pointers The number of points that will be in this event.
+     * @param inPointerIds An array of <em>pointers</em> values providing
+     * an identifier for each pointer.
+     * @param inData An array of <em>pointers*NUM_SAMPLE_DATA</em> of initial
+     * data samples for the event.
+     * @param metaState The state of any meta / modifier keys that were in effect when
+     * the event was generated.
+     * @param xPrecision The precision of the X coordinate being reported.
+     * @param yPrecision The precision of the Y coordinate being reported.
+     * @param deviceId The id for the device that this event came from.  An id of
+     * zero indicates that the event didn't come from a physical device; other
+     * numbers are arbitrary and you shouldn't depend on the values.
+     * @param edgeFlags A bitfield indicating which edges, if any, where touched by this
+     * MotionEvent.
+     *
+     * @hide
+     */
+    static public MotionEvent obtainNano(long downTime, long eventTime, long eventTimeNano,
+            int action, int pointers, int[] inPointerIds, float[] inData, int metaState,
+            float xPrecision, float yPrecision, int deviceId, int edgeFlags) {
+        MotionEvent ev = obtain();
+        ev.mDeviceId = deviceId;
+        ev.mEdgeFlags = edgeFlags;
+        ev.mDownTime = downTime;
+        ev.mEventTimeNano = eventTimeNano;
+        ev.mAction = action;
+        ev.mMetaState = metaState;
+        ev.mRawX = inData[SAMPLE_X];
+        ev.mRawY = inData[SAMPLE_Y];
+        ev.mXPrecision = xPrecision;
+        ev.mYPrecision = yPrecision;
+        ev.mNumPointers = pointers;
+        ev.mNumSamples = 1;
+        
+        int[] pointerIdentifiers = ev.mPointerIdentifiers;
+        if (pointerIdentifiers.length < pointers) {
+            ev.mPointerIdentifiers = pointerIdentifiers = new int[pointers];
+        }
+        System.arraycopy(inPointerIds, 0, pointerIdentifiers, 0, pointers);
+        
+        final int ND = pointers * NUM_SAMPLE_DATA;
+        float[] dataSamples = ev.mDataSamples;
+        if (dataSamples.length < ND) {
+            ev.mDataSamples = dataSamples = new float[ND];
+        }
+        System.arraycopy(inData, 0, dataSamples, 0, ND);
+        
+        ev.mTimeSamples[0] = eventTime;
+
+        if (DEBUG_POINTERS) {
+            StringBuilder sb = new StringBuilder(128);
+            sb.append("New:");
+            for (int i=0; i<pointers; i++) {
+                sb.append(" #");
+                sb.append(ev.mPointerIdentifiers[i]);
+                sb.append("(");
+                sb.append(ev.mDataSamples[(i*NUM_SAMPLE_DATA) + SAMPLE_X]);
+                sb.append(",");
+                sb.append(ev.mDataSamples[(i*NUM_SAMPLE_DATA) + SAMPLE_Y]);
+                sb.append(")");
+            }
+            Log.v("MotionEvent", sb.toString());
+        }
+        
+        return ev;
+    }
+    
     /**
      * Create a new MotionEvent, filling in all of the basic values that
      * define the motion.
@@ -162,15 +366,82 @@ public final class MotionEvent implements Parcelable {
         ev.mDeviceId = deviceId;
         ev.mEdgeFlags = edgeFlags;
         ev.mDownTime = downTime;
-        ev.mEventTime = eventTime;
+        ev.mEventTimeNano = eventTime * 1000000;
         ev.mAction = action;
-        ev.mX = ev.mRawX = x;
-        ev.mY = ev.mRawY = y;
-        ev.mPressure = pressure;
-        ev.mSize = size;
         ev.mMetaState = metaState;
         ev.mXPrecision = xPrecision;
         ev.mYPrecision = yPrecision;
+
+        ev.mNumPointers = 1;
+        ev.mNumSamples = 1;
+        int[] pointerIds = ev.mPointerIdentifiers;
+        pointerIds[0] = 0;
+        float[] data = ev.mDataSamples;
+        data[SAMPLE_X] = ev.mRawX = x;
+        data[SAMPLE_Y] = ev.mRawY = y;
+        data[SAMPLE_PRESSURE] = pressure;
+        data[SAMPLE_SIZE] = size;
+        ev.mTimeSamples[0] = eventTime;
+
+        return ev;
+    }
+
+    /**
+     * Create a new MotionEvent, filling in all of the basic values that
+     * define the motion.
+     *
+     * @param downTime The time (in ms) when the user originally pressed down to start
+     * a stream of position events.  This must be obtained from {@link SystemClock#uptimeMillis()}.
+     * @param eventTime  The the time (in ms) when this specific event was generated.  This
+     * must be obtained from {@link SystemClock#uptimeMillis()}.
+     * @param action The kind of action being performed -- one of either
+     * {@link #ACTION_DOWN}, {@link #ACTION_MOVE}, {@link #ACTION_UP}, or
+     * {@link #ACTION_CANCEL}.
+     * @param pointers The number of pointers that are active in this event.
+     * @param x The X coordinate of this event.
+     * @param y The Y coordinate of this event.
+     * @param pressure The current pressure of this event.  The pressure generally
+     * ranges from 0 (no pressure at all) to 1 (normal pressure), however
+     * values higher than 1 may be generated depending on the calibration of
+     * the input device.
+     * @param size A scaled value of the approximate size of the area being pressed when
+     * touched with the finger. The actual value in pixels corresponding to the finger
+     * touch is normalized with a device specific range of values
+     * and scaled to a value between 0 and 1.
+     * @param metaState The state of any meta / modifier keys that were in effect when
+     * the event was generated.
+     * @param xPrecision The precision of the X coordinate being reported.
+     * @param yPrecision The precision of the Y coordinate being reported.
+     * @param deviceId The id for the device that this event came from.  An id of
+     * zero indicates that the event didn't come from a physical device; other
+     * numbers are arbitrary and you shouldn't depend on the values.
+     * @param edgeFlags A bitfield indicating which edges, if any, where touched by this
+     * MotionEvent.
+     */
+    static public MotionEvent obtain(long downTime, long eventTime, int action,
+            int pointers, float x, float y, float pressure, float size, int metaState,
+            float xPrecision, float yPrecision, int deviceId, int edgeFlags) {
+        MotionEvent ev = obtain();
+        ev.mDeviceId = deviceId;
+        ev.mEdgeFlags = edgeFlags;
+        ev.mDownTime = downTime;
+        ev.mEventTimeNano = eventTime * 1000000;
+        ev.mAction = action;
+        ev.mNumPointers = pointers;
+        ev.mMetaState = metaState;
+        ev.mXPrecision = xPrecision;
+        ev.mYPrecision = yPrecision;
+
+        ev.mNumPointers = 1;
+        ev.mNumSamples = 1;
+        int[] pointerIds = ev.mPointerIdentifiers;
+        pointerIds[0] = 0;
+        float[] data = ev.mDataSamples;
+        data[SAMPLE_X] = ev.mRawX = x;
+        data[SAMPLE_Y] = ev.mRawY = y;
+        data[SAMPLE_PRESSURE] = pressure;
+        data[SAMPLE_SIZE] = size;
+        ev.mTimeSamples[0] = eventTime;
 
         return ev;
     }
@@ -198,15 +469,23 @@ public final class MotionEvent implements Parcelable {
         ev.mDeviceId = 0;
         ev.mEdgeFlags = 0;
         ev.mDownTime = downTime;
-        ev.mEventTime = eventTime;
+        ev.mEventTimeNano = eventTime * 1000000;
         ev.mAction = action;
-        ev.mX = ev.mRawX = x;
-        ev.mY = ev.mRawY = y;
-        ev.mPressure = 1.0f;
-        ev.mSize = 1.0f;
+        ev.mNumPointers = 1;
         ev.mMetaState = metaState;
         ev.mXPrecision = 1.0f;
         ev.mYPrecision = 1.0f;
+
+        ev.mNumPointers = 1;
+        ev.mNumSamples = 1;
+        int[] pointerIds = ev.mPointerIdentifiers;
+        pointerIds[0] = 0;
+        float[] data = ev.mDataSamples;
+        data[SAMPLE_X] = ev.mRawX = x;
+        data[SAMPLE_Y] = ev.mRawY = y;
+        data[SAMPLE_PRESSURE] = 1.0f;
+        data[SAMPLE_SIZE] = 1.0f;
+        ev.mTimeSamples[0] = eventTime;
 
         return ev;
     }
@@ -217,43 +496,17 @@ public final class MotionEvent implements Parcelable {
      * @hide
      */
     public void scale(float scale) {
-        mX *= scale;
-        mY *= scale;
         mRawX *= scale;
         mRawY *= scale;
-        mSize *= scale;
         mXPrecision *= scale;
         mYPrecision *= scale;
-        if (mHistory != null) {
-            float[] history = mHistory;
-            int length = history.length;
-            for (int i = 0; i < length; i += 4) {
-                history[i] *= scale;        // X
-                history[i + 1] *= scale;    // Y
-                // no need to scale pressure ([i+2])
-                history[i + 3] *= scale;    // Size, TODO: square this?
-            }
-        }
-    }
-
-    /**
-     * Translate the coordination of the event by given x and y.
-     *
-     * @hide
-     */
-    public void translate(float dx, float dy) {
-        mX += dx;
-        mY += dy;
-        mRawX += dx;
-        mRawY += dx;
-        if (mHistory != null) {
-            float[] history = mHistory;
-            int length = history.length;
-            for (int i = 0; i < length; i += 4) {
-                history[i] += dx;        // X
-                history[i + 1] += dy;    // Y
-                // no need to translate pressure (i+2) and size (i+3) 
-            }
+        float[] history = mDataSamples;
+        final int length = mNumPointers * mNumSamples * NUM_SAMPLE_DATA;
+        for (int i = 0; i < length; i += NUM_SAMPLE_DATA) {
+            history[i + SAMPLE_X] *= scale;
+            history[i + SAMPLE_Y] *= scale;
+            // no need to scale pressure
+            history[i + SAMPLE_SIZE] *= scale;    // TODO: square this?
         }
     }
 
@@ -265,24 +518,74 @@ public final class MotionEvent implements Parcelable {
         ev.mDeviceId = o.mDeviceId;
         ev.mEdgeFlags = o.mEdgeFlags;
         ev.mDownTime = o.mDownTime;
-        ev.mEventTime = o.mEventTime;
+        ev.mEventTimeNano = o.mEventTimeNano;
         ev.mAction = o.mAction;
-        ev.mX = o.mX;
+        ev.mNumPointers = o.mNumPointers;
         ev.mRawX = o.mRawX;
-        ev.mY = o.mY;
         ev.mRawY = o.mRawY;
-        ev.mPressure = o.mPressure;
-        ev.mSize = o.mSize;
         ev.mMetaState = o.mMetaState;
         ev.mXPrecision = o.mXPrecision;
         ev.mYPrecision = o.mYPrecision;
-        final int N = o.mNumHistory;
-        ev.mNumHistory = N;
-        if (N > 0) {
-            // could be more efficient about this...
-            ev.mHistory = (float[])o.mHistory.clone();
-            ev.mHistoryTimes = (long[])o.mHistoryTimes.clone();
+        
+        final int NS = ev.mNumSamples = o.mNumSamples;
+        if (ev.mTimeSamples.length >= NS) {
+            System.arraycopy(o.mTimeSamples, 0, ev.mTimeSamples, 0, NS);
+        } else {
+            ev.mTimeSamples = (long[])o.mTimeSamples.clone();
         }
+        
+        final int NP = (ev.mNumPointers=o.mNumPointers);
+        if (ev.mPointerIdentifiers.length >= NP) {
+            System.arraycopy(o.mPointerIdentifiers, 0, ev.mPointerIdentifiers, 0, NP);
+        } else {
+            ev.mPointerIdentifiers = (int[])o.mPointerIdentifiers.clone();
+        }
+        
+        final int ND = NP * NS * NUM_SAMPLE_DATA;
+        if (ev.mDataSamples.length >= ND) {
+            System.arraycopy(o.mDataSamples, 0, ev.mDataSamples, 0, ND);
+        } else {
+            ev.mDataSamples = (float[])o.mDataSamples.clone();
+        }
+        
+        return ev;
+    }
+
+    /**
+     * Create a new MotionEvent, copying from an existing one, but not including
+     * any historical point information.
+     */
+    static public MotionEvent obtainNoHistory(MotionEvent o) {
+        MotionEvent ev = obtain();
+        ev.mDeviceId = o.mDeviceId;
+        ev.mEdgeFlags = o.mEdgeFlags;
+        ev.mDownTime = o.mDownTime;
+        ev.mEventTimeNano = o.mEventTimeNano;
+        ev.mAction = o.mAction;
+        ev.mNumPointers = o.mNumPointers;
+        ev.mRawX = o.mRawX;
+        ev.mRawY = o.mRawY;
+        ev.mMetaState = o.mMetaState;
+        ev.mXPrecision = o.mXPrecision;
+        ev.mYPrecision = o.mYPrecision;
+        
+        ev.mNumSamples = 1;
+        ev.mTimeSamples[0] = o.mTimeSamples[0];
+        
+        final int NP = (ev.mNumPointers=o.mNumPointers);
+        if (ev.mPointerIdentifiers.length >= NP) {
+            System.arraycopy(o.mPointerIdentifiers, 0, ev.mPointerIdentifiers, 0, NP);
+        } else {
+            ev.mPointerIdentifiers = (int[])o.mPointerIdentifiers.clone();
+        }
+        
+        final int ND = NP * NUM_SAMPLE_DATA;
+        if (ev.mDataSamples.length >= ND) {
+            System.arraycopy(o.mDataSamples, 0, ev.mDataSamples, 0, ND);
+        } else {
+            ev.mDataSamples = (float[])o.mDataSamples.clone();
+        }
+        
         return ev;
     }
 
@@ -305,7 +608,7 @@ public final class MotionEvent implements Parcelable {
         synchronized (gRecyclerLock) {
             if (gRecyclerUsed < MAX_RECYCLED) {
                 gRecyclerUsed++;
-                mNumHistory = 0;
+                mNumSamples = 0;
                 mNext = gRecyclerTop;
                 gRecyclerTop = this;
             }
@@ -333,44 +636,145 @@ public final class MotionEvent implements Parcelable {
      * Returns the time (in ms) when this specific event was generated.
      */
     public final long getEventTime() {
-        return mEventTime;
+        return mTimeSamples[0];
     }
 
     /**
-     * Returns the X coordinate of this event.  Whole numbers are pixels; the
-     * value may have a fraction for input devices that are sub-pixel precise.
+     * Returns the time (in ns) when this specific event was generated.
+     * The value is in nanosecond precision but it may not have nanosecond accuracy.
+     *
+     * @hide
+     */
+    public final long getEventTimeNano() {
+        return mEventTimeNano;
+    }
+
+    /**
+     * {@link #getX(int)} for the first pointer index (may be an
+     * arbitrary pointer identifier).
      */
     public final float getX() {
-        return mX;
+        return mDataSamples[SAMPLE_X];
     }
 
     /**
-     * Returns the Y coordinate of this event.  Whole numbers are pixels; the
-     * value may have a fraction for input devices that are sub-pixel precise.
+     * {@link #getY(int)} for the first pointer index (may be an
+     * arbitrary pointer identifier).
      */
     public final float getY() {
-        return mY;
+        return mDataSamples[SAMPLE_Y];
     }
 
     /**
-     * Returns the current pressure of this event.  The pressure generally
+     * {@link #getPressure(int)} for the first pointer index (may be an
+     * arbitrary pointer identifier).
+     */
+    public final float getPressure() {
+        return mDataSamples[SAMPLE_PRESSURE];
+    }
+
+    /**
+     * {@link #getSize(int)} for the first pointer index (may be an
+     * arbitrary pointer identifier).
+     */
+    public final float getSize() {
+        return mDataSamples[SAMPLE_SIZE];
+    }
+
+    /**
+     * The number of pointers of data contained in this event.  Always
+     * >= 1.
+     */
+    public final int getPointerCount() {
+        return mNumPointers;
+    }
+    
+    /**
+     * Return the pointer identifier associated with a particular pointer
+     * data index is this event.  The identifier tells you the actual pointer
+     * number associated with the data, accounting for individual pointers
+     * going up and down since the start of the current gesture.
+     * @param pointerIndex Raw index of pointer to retrieve.  Value may be from 0
+     * (the first pointer that is down) to {@link #getPointerCount()}-1.
+     */
+    public final int getPointerId(int pointerIndex) {
+        return mPointerIdentifiers[pointerIndex];
+    }
+    
+    /**
+     * Given a pointer identifier, find the index of its data in the event.
+     * 
+     * @param pointerId The identifier of the pointer to be found.
+     * @return Returns either the index of the pointer (for use with
+     * {@link #getX(int) et al.), or -1 if there is no data available for
+     * that pointer identifier.
+     */
+    public final int findPointerIndex(int pointerId) {
+        int i = mNumPointers;
+        while (i > 0) {
+            i--;
+            if (mPointerIdentifiers[i] == pointerId) {
+                return i;
+            }
+        }
+        return -1;
+    }
+    
+    /**
+     * Returns the X coordinate of this event for the given pointer
+     * <em>index</em> (use {@link #getPointerId(int)} to find the pointer
+     * identifier for this index).
+     * Whole numbers are pixels; the 
+     * value may have a fraction for input devices that are sub-pixel precise. 
+     * @param pointerIndex Raw index of pointer to retrieve.  Value may be from 0
+     * (the first pointer that is down) to {@link #getPointerCount()}-1.
+     */
+    public final float getX(int pointerIndex) {
+        return mDataSamples[(pointerIndex*NUM_SAMPLE_DATA) + SAMPLE_X];
+    }
+
+    /**
+     * Returns the Y coordinate of this event for the given pointer
+     * <em>index</em> (use {@link #getPointerId(int)} to find the pointer
+     * identifier for this index).
+     * Whole numbers are pixels; the
+     * value may have a fraction for input devices that are sub-pixel precise.
+     * @param pointerIndex Raw index of pointer to retrieve.  Value may be from 0
+     * (the first pointer that is down) to {@link #getPointerCount()}-1.
+     */
+    public final float getY(int pointerIndex) {
+        return mDataSamples[(pointerIndex*NUM_SAMPLE_DATA) + SAMPLE_Y];
+    }
+
+    /**
+     * Returns the current pressure of this event for the given pointer
+     * <em>index</em> (use {@link #getPointerId(int)} to find the pointer
+     * identifier for this index).
+     * The pressure generally
      * ranges from 0 (no pressure at all) to 1 (normal pressure), however
      * values higher than 1 may be generated depending on the calibration of
      * the input device.
+     * @param pointerIndex Raw index of pointer to retrieve.  Value may be from 0
+     * (the first pointer that is down) to {@link #getPointerCount()}-1.
      */
-    public final float getPressure() {
-        return mPressure;
+    public final float getPressure(int pointerIndex) {
+        return mDataSamples[(pointerIndex*NUM_SAMPLE_DATA) + SAMPLE_PRESSURE];
     }
 
     /**
-     * Returns a scaled value of the approximate size, of the area being pressed when
-     * touched with the finger. The actual value in pixels corresponding to the finger
-     * touch  is normalized with the device specific range of values
+     * Returns a scaled value of the approximate size for the given pointer
+     * <em>index</em> (use {@link #getPointerId(int)} to find the pointer
+     * identifier for this index).
+     * This represents some approximation of the area of the screen being
+     * pressed; the actual value in pixels corresponding to the
+     * touch is normalized with the device specific range of values
      * and scaled to a value between 0 and 1. The value of size can be used to
      * determine fat touch events.
+     * @param pointerIndex Raw index of pointer to retrieve.  Value may be from 0
+     * (the first pointer that is down) to {@link #getPointerCount()}-1.
      */
-    public final float getSize() {
-        return mSize;
+    public final float getSize(int pointerIndex) {
+        return mDataSamples[(pointerIndex*NUM_SAMPLE_DATA) + SAMPLE_SIZE];
     }
 
     /**
@@ -436,7 +840,7 @@ public final class MotionEvent implements Parcelable {
      * @return Returns the number of historical points in the event.
      */
     public final int getHistorySize() {
-        return mNumHistory;
+        return mNumSamples - 1;
     }
 
     /**
@@ -450,63 +854,111 @@ public final class MotionEvent implements Parcelable {
      * @see #getEventTime
      */
     public final long getHistoricalEventTime(int pos) {
-        return mHistoryTimes[pos];
+        return mTimeSamples[pos + 1];
     }
 
     /**
-     * Returns a historical X coordinate that occurred between this event
-     * and the previous event.  Only applies to ACTION_MOVE events.
+     * {@link #getHistoricalX(int)} for the first pointer index (may be an
+     * arbitrary pointer identifier).
+     */
+    public final float getHistoricalX(int pos) {
+        return mDataSamples[((pos + 1) * NUM_SAMPLE_DATA * mNumPointers) + SAMPLE_X];
+    }
+
+    /**
+     * {@link #getHistoricalY(int)} for the first pointer index (may be an
+     * arbitrary pointer identifier).
+     */
+    public final float getHistoricalY(int pos) {
+        return mDataSamples[((pos + 1) * NUM_SAMPLE_DATA * mNumPointers) + SAMPLE_Y];
+    }
+
+    /**
+     * {@link #getHistoricalPressure(int)} for the first pointer index (may be an
+     * arbitrary pointer identifier).
+     */
+    public final float getHistoricalPressure(int pos) {
+        return mDataSamples[((pos + 1) * NUM_SAMPLE_DATA * mNumPointers) + SAMPLE_PRESSURE];
+    }
+
+    /**
+     * {@link #getHistoricalSize(int)} for the first pointer index (may be an
+     * arbitrary pointer identifier).
+     */
+    public final float getHistoricalSize(int pos) {
+        return mDataSamples[((pos + 1) * NUM_SAMPLE_DATA * mNumPointers) + SAMPLE_SIZE];
+    }
+
+    /**
+     * Returns a historical X coordinate, as per {@link #getX(int)}, that
+     * occurred between this event and the previous event for the given pointer.
+     * Only applies to ACTION_MOVE events.
      *
+     * @param pointerIndex Raw index of pointer to retrieve.  Value may be from 0
+     * (the first pointer that is down) to {@link #getPointerCount()}-1.
      * @param pos Which historical value to return; must be less than
      * {@link #getHistorySize}
      *
      * @see #getHistorySize
      * @see #getX
      */
-    public final float getHistoricalX(int pos) {
-        return mHistory[pos*4];
+    public final float getHistoricalX(int pointerIndex, int pos) {
+        return mDataSamples[((pos + 1) * NUM_SAMPLE_DATA * mNumPointers)
+                            + (pointerIndex * NUM_SAMPLE_DATA) + SAMPLE_X];
     }
 
     /**
-     * Returns a historical Y coordinate that occurred between this event
-     * and the previous event.  Only applies to ACTION_MOVE events.
+     * Returns a historical Y coordinate, as per {@link #getY(int)}, that
+     * occurred between this event and the previous event for the given pointer.
+     * Only applies to ACTION_MOVE events.
      *
+     * @param pointerIndex Raw index of pointer to retrieve.  Value may be from 0
+     * (the first pointer that is down) to {@link #getPointerCount()}-1.
      * @param pos Which historical value to return; must be less than
      * {@link #getHistorySize}
      *
      * @see #getHistorySize
      * @see #getY
      */
-    public final float getHistoricalY(int pos) {
-        return mHistory[pos*4 + 1];
+    public final float getHistoricalY(int pointerIndex, int pos) {
+        return mDataSamples[((pos + 1) * NUM_SAMPLE_DATA * mNumPointers)
+                            + (pointerIndex * NUM_SAMPLE_DATA) + SAMPLE_Y];
     }
 
     /**
-     * Returns a historical pressure coordinate that occurred between this event
-     * and the previous event.  Only applies to ACTION_MOVE events.
+     * Returns a historical pressure coordinate, as per {@link #getPressure(int)},
+     * that occurred between this event and the previous event for the given
+     * pointer.  Only applies to ACTION_MOVE events.
      *
+     * @param pointerIndex Raw index of pointer to retrieve.  Value may be from 0
+     * (the first pointer that is down) to {@link #getPointerCount()}-1.
      * @param pos Which historical value to return; must be less than
      * {@link #getHistorySize}
-     *
+     * 
      * @see #getHistorySize
      * @see #getPressure
      */
-    public final float getHistoricalPressure(int pos) {
-        return mHistory[pos*4 + 2];
+    public final float getHistoricalPressure(int pointerIndex, int pos) {
+        return mDataSamples[((pos + 1) * NUM_SAMPLE_DATA * mNumPointers)
+                            + (pointerIndex * NUM_SAMPLE_DATA) + SAMPLE_PRESSURE];
     }
 
     /**
-     * Returns a historical size coordinate that occurred between this event
-     * and the previous event.  Only applies to ACTION_MOVE events.
+     * Returns a historical size coordinate, as per {@link #getSize(int)}, that
+     * occurred between this event and the previous event for the given pointer.
+     * Only applies to ACTION_MOVE events.
      *
+     * @param pointerIndex Raw index of pointer to retrieve.  Value may be from 0
+     * (the first pointer that is down) to {@link #getPointerCount()}-1.
      * @param pos Which historical value to return; must be less than
      * {@link #getHistorySize}
-     *
+     * 
      * @see #getHistorySize
      * @see #getSize
      */
-    public final float getHistoricalSize(int pos) {
-        return mHistory[pos*4 + 3];
+    public final float getHistoricalSize(int pointerIndex, int pos) {
+        return mDataSamples[((pos + 1) * NUM_SAMPLE_DATA * mNumPointers)
+                            + (pointerIndex * NUM_SAMPLE_DATA) + SAMPLE_SIZE];
     }
 
     /**
@@ -556,16 +1008,11 @@ public final class MotionEvent implements Parcelable {
      * @param deltaY Amount to add to the current Y coordinate of the event.
      */
     public final void offsetLocation(float deltaX, float deltaY) {
-        mX += deltaX;
-        mY += deltaY;
-        final int N = mNumHistory*4;
-        if (N <= 0) {
-            return;
-        }
-        final float[] pos = mHistory;
-        for (int i=0; i<N; i+=4) {
-            pos[i] += deltaX;
-            pos[i+1] += deltaY;
+        final int N = mNumPointers*mNumSamples*4;
+        final float[] pos = mDataSamples;
+        for (int i=0; i<N; i+=NUM_SAMPLE_DATA) {
+            pos[i+SAMPLE_X] += deltaX;
+            pos[i+SAMPLE_Y] += deltaY;
         }
     }
 
@@ -577,8 +1024,8 @@ public final class MotionEvent implements Parcelable {
      * @param y New absolute Y location.
      */
     public final void setLocation(float x, float y) {
-        float deltaX = x-mX;
-        float deltaY = y-mY;
+        float deltaX = x-mDataSamples[SAMPLE_X];
+        float deltaY = y-mDataSamples[SAMPLE_Y];
         if (deltaX != 0 || deltaY != 0) {
             offsetLocation(deltaX, deltaY);
         }
@@ -590,58 +1037,119 @@ public final class MotionEvent implements Parcelable {
      * the future, the current values in the event will be added to a list of
      * historic values.
      *
+     * @param eventTime The time stamp for this data.
      * @param x The new X position.
      * @param y The new Y position.
      * @param pressure The new pressure.
      * @param size The new size.
+     * @param metaState Meta key state.
      */
     public final void addBatch(long eventTime, float x, float y,
             float pressure, float size, int metaState) {
-        float[] history = mHistory;
-        long[] historyTimes = mHistoryTimes;
-        int N;
-        int avail;
-        if (history == null) {
-            mHistory = history = new float[8*4];
-            mHistoryTimes = historyTimes = new long[8];
-            mNumHistory = N = 0;
-            avail = 8;
-        } else {
-            N = mNumHistory;
-            avail = history.length/4;
-            if (N == avail) {
-                avail += 8;
-                float[] newHistory = new float[avail*4];
-                System.arraycopy(history, 0, newHistory, 0, N*4);
-                mHistory = history = newHistory;
-                long[] newHistoryTimes = new long[avail];
-                System.arraycopy(historyTimes, 0, newHistoryTimes, 0, N);
-                mHistoryTimes = historyTimes = newHistoryTimes;
-            }
+        float[] data = mDataSamples;
+        long[] times = mTimeSamples;
+        
+        final int NP = mNumPointers;
+        final int NS = mNumSamples;
+        final int NI = NP*NS;
+        final int ND = NI * NUM_SAMPLE_DATA;
+        if (data.length <= ND) {
+            final int NEW_ND = ND + (NP * (BASE_AVAIL_SAMPLES * NUM_SAMPLE_DATA));
+            float[] newData = new float[NEW_ND];
+            System.arraycopy(data, 0, newData, 0, ND);
+            mDataSamples = data = newData;
         }
+        if (times.length <= NS) {
+            final int NEW_NS = NS + BASE_AVAIL_SAMPLES;
+            long[] newHistoryTimes = new long[NEW_NS];
+            System.arraycopy(times, 0, newHistoryTimes, 0, NS);
+            mTimeSamples = times = newHistoryTimes;
+        }
+        
+        times[NS] = times[0];
+        times[0] = eventTime;
+        
+        final int pos = NS*NUM_SAMPLE_DATA;
+        data[pos+SAMPLE_X] = data[SAMPLE_X];
+        data[pos+SAMPLE_Y] = data[SAMPLE_Y];
+        data[pos+SAMPLE_PRESSURE] = data[SAMPLE_PRESSURE];
+        data[pos+SAMPLE_SIZE] = data[SAMPLE_SIZE];
+        data[SAMPLE_X] = x;
+        data[SAMPLE_Y] = y;
+        data[SAMPLE_PRESSURE] = pressure;
+        data[SAMPLE_SIZE] = size;
+        mNumSamples = NS+1;
 
-        historyTimes[N] = mEventTime;
-
-        final int pos = N*4;
-        history[pos] = mX;
-        history[pos+1] = mY;
-        history[pos+2] = mPressure;
-        history[pos+3] = mSize;
-        mNumHistory = N+1;
-
-        mEventTime = eventTime;
-        mX = mRawX = x;
-        mY = mRawY = y;
-        mPressure = pressure;
-        mSize = size;
+        mRawX = x;
+        mRawY = y;
         mMetaState |= metaState;
+    }
+
+    /**
+     * Add a new movement to the batch of movements in this event.  The
+     * input data must contain (NUM_SAMPLE_DATA * {@link #getPointerCount()})
+     * samples of data.
+     *
+     * @param eventTime The time stamp for this data.
+     * @param inData The actual data.
+     * @param metaState Meta key state.
+     * 
+     * @hide
+     */
+    public final void addBatch(long eventTime, float[] inData, int metaState) {
+        float[] data = mDataSamples;
+        long[] times = mTimeSamples;
+        
+        final int NP = mNumPointers;
+        final int NS = mNumSamples;
+        final int NI = NP*NS;
+        final int ND = NI * NUM_SAMPLE_DATA;
+        if (data.length < (ND+(NP*NUM_SAMPLE_DATA))) {
+            final int NEW_ND = ND + (NP * (BASE_AVAIL_SAMPLES * NUM_SAMPLE_DATA));
+            float[] newData = new float[NEW_ND];
+            System.arraycopy(data, 0, newData, 0, ND);
+            mDataSamples = data = newData;
+        }
+        if (times.length < (NS+1)) {
+            final int NEW_NS = NS + BASE_AVAIL_SAMPLES;
+            long[] newHistoryTimes = new long[NEW_NS];
+            System.arraycopy(times, 0, newHistoryTimes, 0, NS);
+            mTimeSamples = times = newHistoryTimes;
+        }
+        
+        times[NS] = times[0];
+        times[0] = eventTime;
+        
+        System.arraycopy(data, 0, data, ND, mNumPointers*NUM_SAMPLE_DATA);
+        System.arraycopy(inData, 0, data, 0, mNumPointers*NUM_SAMPLE_DATA);
+        
+        mNumSamples = NS+1;
+
+        mRawX = inData[SAMPLE_X];
+        mRawY = inData[SAMPLE_Y];
+        mMetaState |= metaState;
+        
+        if (DEBUG_POINTERS) {
+            StringBuilder sb = new StringBuilder(128);
+            sb.append("Add:");
+            for (int i=0; i<mNumPointers; i++) {
+                sb.append(" #");
+                sb.append(mPointerIdentifiers[i]);
+                sb.append("(");
+                sb.append(mDataSamples[(i*NUM_SAMPLE_DATA) + SAMPLE_X]);
+                sb.append(",");
+                sb.append(mDataSamples[(i*NUM_SAMPLE_DATA) + SAMPLE_Y]);
+                sb.append(")");
+            }
+            Log.v("MotionEvent", sb.toString());
+        }
     }
 
     @Override
     public String toString() {
         return "MotionEvent{" + Integer.toHexString(System.identityHashCode(this))
-            + " action=" + mAction + " x=" + mX
-            + " y=" + mY + " pressure=" + mPressure + " size=" + mSize + "}";
+            + " action=" + mAction + " x=" + getX()
+            + " y=" + getY() + " pressure=" + getPressure() + " size=" + getSize() + "}";
     }
 
     public static final Parcelable.Creator<MotionEvent> CREATOR
@@ -663,26 +1171,29 @@ public final class MotionEvent implements Parcelable {
 
     public void writeToParcel(Parcel out, int flags) {
         out.writeLong(mDownTime);
-        out.writeLong(mEventTime);
+        out.writeLong(mEventTimeNano);
         out.writeInt(mAction);
-        out.writeFloat(mX);
-        out.writeFloat(mY);
-        out.writeFloat(mPressure);
-        out.writeFloat(mSize);
         out.writeInt(mMetaState);
         out.writeFloat(mRawX);
         out.writeFloat(mRawY);
-        final int N = mNumHistory;
-        out.writeInt(N);
-        if (N > 0) {
-            final int N4 = N*4;
+        final int NP = mNumPointers;
+        out.writeInt(NP);
+        final int NS = mNumSamples;
+        out.writeInt(NS);
+        final int NI = NP*NS;
+        if (NI > 0) {
             int i;
-            float[] history = mHistory;
-            for (i=0; i<N4; i++) {
+            int[] state = mPointerIdentifiers;
+            for (i=0; i<NP; i++) {
+                out.writeInt(state[i]);
+            }
+            final int ND = NI*NUM_SAMPLE_DATA;
+            float[] history = mDataSamples;
+            for (i=0; i<ND; i++) {
                 out.writeFloat(history[i]);
             }
-            long[] times = mHistoryTimes;
-            for (i=0; i<N; i++) {
+            long[] times = mTimeSamples;
+            for (i=0; i<NS; i++) {
                 out.writeLong(times[i]);
             }
         }
@@ -694,30 +1205,37 @@ public final class MotionEvent implements Parcelable {
 
     private void readFromParcel(Parcel in) {
         mDownTime = in.readLong();
-        mEventTime = in.readLong();
+        mEventTimeNano = in.readLong();
         mAction = in.readInt();
-        mX = in.readFloat();
-        mY = in.readFloat();
-        mPressure = in.readFloat();
-        mSize = in.readFloat();
         mMetaState = in.readInt();
         mRawX = in.readFloat();
         mRawY = in.readFloat();
-        final int N = in.readInt();
-        if ((mNumHistory=N) > 0) {
-            final int N4 = N*4;
-            float[] history = mHistory;
-            if (history == null || history.length < N4) {
-                mHistory = history = new float[N4 + (4*4)];
+        final int NP = in.readInt();
+        mNumPointers = NP;
+        final int NS = in.readInt();
+        mNumSamples = NS;
+        final int NI = NP*NS;
+        if (NI > 0) {
+            int[] ids = mPointerIdentifiers;
+            if (ids.length < NP) {
+                mPointerIdentifiers = ids = new int[NP];
             }
-            for (int i=0; i<N4; i++) {
+            for (int i=0; i<NP; i++) {
+                ids[i] = in.readInt();
+            }
+            float[] history = mDataSamples;
+            final int ND = NI*NUM_SAMPLE_DATA;
+            if (history.length < ND) {
+                mDataSamples = history = new float[ND];
+            }
+            for (int i=0; i<ND; i++) {
                 history[i] = in.readFloat();
             }
-            long[] times = mHistoryTimes;
-            if (times == null || times.length < N) {
-                mHistoryTimes = times = new long[N + 4];
+            long[] times = mTimeSamples;
+            if (times == null || times.length < NS) {
+                mTimeSamples = times = new long[NS];
             }
-            for (int i=0; i<N; i++) {
+            for (int i=0; i<NS; i++) {
                 times[i] = in.readLong();
             }
         }

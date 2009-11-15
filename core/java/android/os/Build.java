@@ -70,6 +70,7 @@ public class Build {
          * 
          * @deprecated Use {@link #SDK_INT} to easily get this as an integer.
          */
+        @Deprecated
         public static final String SDK = getString("ro.build.version.sdk");
 
         /**
@@ -102,16 +103,19 @@ public class Build {
          * October 2008: The original, first, version of Android.  Yay!
          */
         public static final int BASE = 1;
+        
         /**
          * February 2009: First Android update, officially called 1.1.
          */
         public static final int BASE_1_1 = 2;
+        
         /**
          * May 2009: Android 1.5.
          */
         public static final int CUPCAKE = 3;
+        
         /**
-         * Current work on "Donut" development branch.
+         * September 2009: Android 1.6.
          * 
          * <p>Applications targeting this or a later release will get these
          * new changes in behavior:</p>
@@ -132,6 +136,31 @@ public class Build {
          * </ul>
          */
         public static final int DONUT = 4;
+        
+        /**
+         * November 2009: Android 2.0
+         * 
+         * <p>Applications targeting this or a later release will get these
+         * new changes in behavior:</p>
+         * <ul>
+         * <li> The {@link android.app.Service#onStartCommand
+         * Service.onStartCommand} function will return the new
+         * {@link android.app.Service#START_STICKY} behavior instead of the
+         * old compatibility {@link android.app.Service#START_STICKY_COMPATIBILITY}.
+         * <li> The {@link android.app.Activity} class will now execute back
+         * key presses on the key up instead of key down, to be able to detect
+         * canceled presses from virtual keys.
+         * <li> The {@link android.widget.TabWidget} class will use a new color scheme
+         * for tabs. In the new scheme, the foreground tab has a medium gray background
+         * the background tabs have a dark gray background.
+         * </ul>
+         */
+        public static final int ECLAIR = 5;
+        
+        /**
+         * Current work on Eclair MR1.
+         */
+        public static final int ECLAIR_MR1 = 6;
     }
     
     /** The type of build, like "user" or "eng". */

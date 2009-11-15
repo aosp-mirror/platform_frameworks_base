@@ -263,6 +263,13 @@ public interface WindowManagerPolicy {
         boolean isVisibleLw();
         
         /**
+         * Like {@link #isVisibleLw}, but also counts a window that is currently
+         * "hidden" behind the keyguard as visible.  This allows us to apply
+         * things like window flags that impact the keyguard.
+         */
+        boolean isVisibleOrBehindKeyguardLw();
+        
+        /**
          * Is this window currently visible to the user on-screen?  It is 
          * displayed either if it is visible or it is currently running an 
          * animation before no longer being visible.  Must be called with the
@@ -314,36 +321,60 @@ public interface WindowManagerPolicy {
         public boolean showLw(boolean doAnimation);
     }
 
-    /** No transition happening. */
+    /**
+     * Bit mask that is set for all enter transition.
+     */
+    public final int TRANSIT_ENTER_MASK = 0x1000;
+    
+    /**
+     * Bit mask that is set for all exit transitions.
+     */
+    public final int TRANSIT_EXIT_MASK = 0x2000;
+    
+    /** Not set up for a transition. */
+    public final int TRANSIT_UNSET = -1;
+    /** No animation for transition. */
     public final int TRANSIT_NONE = 0;
     /** Window has been added to the screen. */
-    public final int TRANSIT_ENTER = 1;
+    public final int TRANSIT_ENTER = 1 | TRANSIT_ENTER_MASK;
     /** Window has been removed from the screen. */
-    public final int TRANSIT_EXIT = 2;
+    public final int TRANSIT_EXIT = 2 | TRANSIT_EXIT_MASK;
     /** Window has been made visible. */
-    public final int TRANSIT_SHOW = 3;
+    public final int TRANSIT_SHOW = 3 | TRANSIT_ENTER_MASK;
     /** Window has been made invisible. */
-    public final int TRANSIT_HIDE = 4;
+    public final int TRANSIT_HIDE = 4 | TRANSIT_EXIT_MASK;
     /** The "application starting" preview window is no longer needed, and will
      * animate away to show the real window. */
     public final int TRANSIT_PREVIEW_DONE = 5;
     /** A window in a new activity is being opened on top of an existing one
      * in the same task. */
-    public final int TRANSIT_ACTIVITY_OPEN = 6;
+    public final int TRANSIT_ACTIVITY_OPEN = 6 | TRANSIT_ENTER_MASK;
     /** The window in the top-most activity is being closed to reveal the
      * previous activity in the same task. */
-    public final int TRANSIT_ACTIVITY_CLOSE = 7;
+    public final int TRANSIT_ACTIVITY_CLOSE = 7 | TRANSIT_EXIT_MASK;
     /** A window in a new task is being opened on top of an existing one
      * in another activity's task. */
-    public final int TRANSIT_TASK_OPEN = 8;
+    public final int TRANSIT_TASK_OPEN = 8 | TRANSIT_ENTER_MASK;
     /** A window in the top-most activity is being closed to reveal the
      * previous activity in a different task. */
-    public final int TRANSIT_TASK_CLOSE = 9;
+    public final int TRANSIT_TASK_CLOSE = 9 | TRANSIT_EXIT_MASK;
     /** A window in an existing task is being displayed on top of an existing one
      * in another activity's task. */
-    public final int TRANSIT_TASK_TO_FRONT = 10;
+    public final int TRANSIT_TASK_TO_FRONT = 10 | TRANSIT_ENTER_MASK;
     /** A window in an existing task is being put below all other tasks. */
-    public final int TRANSIT_TASK_TO_BACK = 11;
+    public final int TRANSIT_TASK_TO_BACK = 11 | TRANSIT_EXIT_MASK;
+    /** A window in a new activity that doesn't have a wallpaper is being
+     * opened on top of one that does, effectively closing the wallpaper. */
+    public final int TRANSIT_WALLPAPER_CLOSE = 12 | TRANSIT_EXIT_MASK;
+    /** A window in a new activity that does have a wallpaper is being
+     * opened on one that didn't, effectively opening the wallpaper. */
+    public final int TRANSIT_WALLPAPER_OPEN = 13 | TRANSIT_ENTER_MASK;
+    /** A window in a new activity is being opened on top of an existing one,
+     * and both are on top of the wallpaper. */
+    public final int TRANSIT_WALLPAPER_INTRA_OPEN = 14 | TRANSIT_ENTER_MASK;
+    /** The window in the top-most activity is being closed to reveal the
+     * previous activity, and both are on top of he wallpaper. */
+    public final int TRANSIT_WALLPAPER_INTRA_CLOSE = 15 | TRANSIT_EXIT_MASK;
     
     /** Screen turned off because of power button */
     public final int OFF_BECAUSE_OF_USER = 1;
@@ -423,6 +454,27 @@ public interface WindowManagerPolicy {
      */
     public int subWindowTypeToLayerLw(int type);
 
+    /**
+     * Get the highest layer (actually one more than) that the wallpaper is
+     * allowed to be in.
+     */
+    public int getMaxWallpaperLayer();
+    
+    /**
+     * Return whether the given window should forcibly hide everything
+     * behind it.  Typically returns true for the keyguard.
+     */
+    public boolean doesForceHide(WindowState win, WindowManager.LayoutParams attrs);
+    
+    /**
+     * Determine if a window that is behind one that is force hiding
+     * (as determined by {@link #doesForceHide}) should actually be hidden.
+     * For example, typically returns false for the status bar.  Be careful
+     * to return false for any window that you may hide yourself, since this
+     * will conflict with what you set.
+     */
+    public boolean canBeForceHidden(WindowState win, WindowManager.LayoutParams attrs);
+    
     /**
      * Called when the system would like to show a UI to indicate that an
      * application is starting.  You can use this to add a
@@ -504,6 +556,11 @@ public interface WindowManagerPolicy {
     public int selectAnimationLw(WindowState win, int transit);
 
     /**
+     * Create and return an animation to re-display a force hidden window.
+     */
+    public Animation createForceHideEnterAnimation();
+    
+    /**
      * Called from the key queue thread before a key is dispatched to the
      * input thread.
      *
@@ -533,14 +590,15 @@ public interface WindowManagerPolicy {
      * @param win The window that currently has focus.  This is where the key
      *            event will normally go.
      * @param code Key code.
-     * @param metaKeys TODO
+     * @param metaKeys bit mask of meta keys that are held.
      * @param down Is this a key press (true) or release (false)?
      * @param repeatCount Number of times a key down has repeated.
+     * @param flags event's flags.
      * @return Returns true if the policy consumed the event and it should
      * not be further dispatched.
      */
     public boolean interceptKeyTi(WindowState win, int code,
-                               int metaKeys, boolean down, int repeatCount);
+                               int metaKeys, boolean down, int repeatCount, int flags);
 
     /**
      * Called when layout of the windows is about to start.
@@ -581,11 +639,18 @@ public interface WindowManagerPolicy {
      * returned, all windows given to layoutWindow() <em>must</em> have had a
      * frame assigned.
      *  
-     * @return Return true if layout state may have changed (so that another 
-     *         layout will be performed).
+     * @return Return any bit set of {@link #FINISH_LAYOUT_REDO_LAYOUT}
+     * and {@link #FINISH_LAYOUT_REDO_CONFIG}.
      */
-    public boolean finishLayoutLw();
+    public int finishLayoutLw();
 
+    /** Layout state may have changed (so another layout will be performed) */
+    static final int FINISH_LAYOUT_REDO_LAYOUT = 0x0001;
+    /** Configuration state may have changed */
+    static final int FINISH_LAYOUT_REDO_CONFIG = 0x0002;
+    /** Wallpaper may need to move */
+    static final int FINISH_LAYOUT_REDO_WALLPAPER = 0x0004;
+    
     /**
      * Called when animation of the windows is about to start.
      * 
@@ -755,7 +820,7 @@ public interface WindowManagerPolicy {
             boolean displayEnabled);
     
     /**
-     * Called when the system is mostly done booting to dentermine whether
+     * Called when the system is mostly done booting to determine whether
      * the system should go into safe mode.
      */
     public boolean detectSafeMode();
@@ -792,8 +857,20 @@ public interface WindowManagerPolicy {
     public boolean performHapticFeedbackLw(WindowState win, int effectId, boolean always);
     
     /**
+     * A special function that is called from the very low-level input queue
+     * to provide feedback to the user.  Currently only called for virtual
+     * keys.
+     */
+    public void keyFeedbackFromInput(KeyEvent event);
+    
+    /**
      * Called when we have stopped keeping the screen on because a window
      * requesting this is no longer visible.
      */
     public void screenOnStoppedLw();
+
+    /**
+     * Return false to disable key repeat events from being generated.
+     */
+    public boolean allowKeyRepeat();
 }

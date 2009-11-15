@@ -36,6 +36,14 @@ public final class SmsEnvelope{
     static public final int TELESERVICE_WAP               = 0x1004;
     static public final int TELESERVICE_WEMT              = 0x1005;
 
+    /**
+     * The following are defined as extensions to the standard teleservices
+     */
+    // Voice mail notification through Message Waiting Indication in CDMA mode or Analog mode.
+    // Defined in 3GPP2 C.S-0005, 3.7.5.6, an Info Record containing an 8-bit number with the
+    // number of messages waiting, it's used by some CDMA carriers for a voice mail count.
+    static public final int TELESERVICE_MWI               = 0x40000;
+
     // ServiceCategories for Cell Broadcast, see 3GPP2 C.R1001 table 9.3.1-1
     //static public final int SERVICECATEGORY_EMERGENCY      = 0x0010;
     //...

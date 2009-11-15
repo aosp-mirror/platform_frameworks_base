@@ -88,7 +88,7 @@ NodeImpl* NodeIterator::findPreviousOrderNode(NodeImpl* node)
             node = node->getLastChild();
     } else {
         if (node == scopeNode)
-            node == NULL;
+            node = NULL;
         else
             node = node->getParentNode();
     }

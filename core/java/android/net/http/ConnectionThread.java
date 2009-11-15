@@ -32,8 +32,8 @@ class ConnectionThread extends Thread {
     static final int WAIT_TICK = 1000;
 
     // Performance probe
-    long mStartThreadTime;
     long mCurrentThreadTime;
+    long mTotalThreadTime;
 
     private boolean mWaiting;
     private volatile boolean mRunning = true;
@@ -69,12 +69,21 @@ class ConnectionThread extends Thread {
      */
     public void run() {
         android.os.Process.setThreadPriority(
+                android.os.Process.THREAD_PRIORITY_DEFAULT +
                 android.os.Process.THREAD_PRIORITY_LESS_FAVORABLE);
 
-        mStartThreadTime = -1;
-        mCurrentThreadTime = SystemClock.currentThreadTimeMillis();
+        // these are used to get performance data. When it is not in the timing,
+        // mCurrentThreadTime is 0. When it starts timing, mCurrentThreadTime is
+        // first set to -1, it will be set to the current thread time when the
+        // next request starts.
+        mCurrentThreadTime = 0;
+        mTotalThreadTime = 0;
 
         while (mRunning) {
+            if (mCurrentThreadTime == -1) {
+                mCurrentThreadTime = SystemClock.currentThreadTimeMillis();
+            }
+
             Request request;
 
             /* Get a request to process */
@@ -86,14 +95,14 @@ class ConnectionThread extends Thread {
                     if (HttpLog.LOGV) HttpLog.v("ConnectionThread: Waiting for work");
                     mWaiting = true;
                     try {
-                        if (mStartThreadTime != -1) {
-                            mCurrentThreadTime = SystemClock
-                                    .currentThreadTimeMillis();
-                        }
                         mRequestFeeder.wait();
                     } catch (InterruptedException e) {
                     }
                     mWaiting = false;
+                    if (mCurrentThreadTime != 0) {
+                        mCurrentThreadTime = SystemClock
+                                .currentThreadTimeMillis();
+                    }
                 }
             } else {
                 if (HttpLog.LOGV) HttpLog.v("ConnectionThread: new request " +
@@ -123,6 +132,12 @@ class ConnectionThread extends Thread {
                     mConnection.closeConnection();
                 }
                 mConnection = null;
+
+                if (mCurrentThreadTime > 0) {
+                    long start = mCurrentThreadTime;
+                    mCurrentThreadTime = SystemClock.currentThreadTimeMillis();
+                    mTotalThreadTime += mCurrentThreadTime - start;
+                }
             }
 
         }

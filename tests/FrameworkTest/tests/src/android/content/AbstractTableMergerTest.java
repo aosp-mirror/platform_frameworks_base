@@ -8,6 +8,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.test.AndroidTestCase;
 import android.text.TextUtils;
+import android.accounts.Account;
 
 import java.util.ArrayList;
 import java.util.Map;
@@ -26,7 +27,7 @@ public class AbstractTableMergerTest extends AndroidTestCase {
     static final Uri TABLE_URI = Uri.withAppendedPath(CONTENT_URI, TABLE_NAME);
     static final Uri DELETED_TABLE_URI = Uri.withAppendedPath(CONTENT_URI, DELETED_TABLE_NAME);
 
-    private final String ACCOUNT = "account@goo.com";
+    private final Account ACCOUNT = new Account("account@goo.com", "example.type");
 
     private final ArrayList<Expectation> mExpectations = Lists.newArrayList();
 
@@ -65,25 +66,31 @@ public class AbstractTableMergerTest extends AndroidTestCase {
         mExpectations.clear();
     }
 
-    ContentValues newValues(String data, String syncId, String syncAccount,
+    ContentValues newValues(String data, String syncId, Account syncAccount,
             String syncTime, String syncVersion, Long syncLocalId) {
         ContentValues values = new ContentValues();
         if (data != null) values.put("data", data);
         if (syncTime != null) values.put("_sync_time", syncTime);
         if (syncVersion != null) values.put("_sync_version", syncVersion);
         if (syncId != null) values.put("_sync_id", syncId);
-        if (syncAccount != null) values.put("_sync_account", syncAccount);
+        if (syncAccount != null) {
+            values.put("_sync_account", syncAccount.name);
+            values.put("_sync_account_type", syncAccount.type);
+        }
         values.put("_sync_local_id", syncLocalId);
         values.put("_sync_dirty", 0);
         return values;
     }
 
-    ContentValues newDeletedValues(String syncId, String syncAccount, String syncVersion,
+    ContentValues newDeletedValues(String syncId, Account syncAccount, String syncVersion,
             Long syncLocalId) {
         ContentValues values = new ContentValues();
         if (syncVersion != null) values.put("_sync_version", syncVersion);
         if (syncId != null) values.put("_sync_id", syncId);
-        if (syncAccount != null) values.put("_sync_account", syncAccount);
+        if (syncAccount != null) {
+            values.put("_sync_account", syncAccount.name);
+            values.put("_sync_account_type", syncAccount.type);
+        }
         if (syncLocalId != null) values.put("_sync_local_id", syncLocalId);
         return values;
     }
@@ -380,6 +387,7 @@ public class AbstractTableMergerTest extends AndroidTestCase {
                     + "_sync_local_id INTEGER, "
                     + "_sync_dirty INTEGER NOT NULL DEFAULT 0, "
                     + "_sync_account TEXT, "
+                    + "_sync_account_type TEXT, "
                     + "_sync_mark INTEGER)");
 
             mDb.execSQL("CREATE TABLE deleted_items ("
@@ -388,6 +396,7 @@ public class AbstractTableMergerTest extends AndroidTestCase {
                     + "_sync_id TEXT, "
                     + "_sync_local_id INTEGER, "
                     + "_sync_account TEXT, "
+                    + "_sync_account_type TEXT, "
                     + "_sync_mark INTEGER)");
         }
 
@@ -501,7 +510,7 @@ public class AbstractTableMergerTest extends AndroidTestCase {
             throw new UnsupportedOperationException();
         }
 
-        public void onSyncStart(SyncContext context, String account) {
+        public void onSyncStart(SyncContext context, Account account) {
             throw new UnsupportedOperationException();
         }
 
@@ -509,7 +518,7 @@ public class AbstractTableMergerTest extends AndroidTestCase {
             throw new UnsupportedOperationException();
         }
 
-        public String getSyncingAccount() {
+        public Account getSyncingAccount() {
             throw new UnsupportedOperationException();
         }
 
@@ -544,24 +553,24 @@ public class AbstractTableMergerTest extends AndroidTestCase {
             throw new UnsupportedOperationException();
         }
 
-        protected void onAccountsChanged(String[] accountsArray) {
+        protected void onAccountsChanged(Account[] accountsArray) {
             throw new UnsupportedOperationException();
         }
 
-        protected void deleteRowsForRemovedAccounts(Map<String, Boolean> accounts, String table,
-                String accountColumnName) {
+        protected void deleteRowsForRemovedAccounts(Map<Account, Boolean> accounts, String table
+        ) {
             throw new UnsupportedOperationException();
         }
 
-        public void wipeAccount(String account) {
+        public void wipeAccount(Account account) {
             throw new UnsupportedOperationException();
         }
 
-        public byte[] readSyncDataBytes(String account) {
+        public byte[] readSyncDataBytes(Account account) {
             throw new UnsupportedOperationException();
         }
 
-        public void writeSyncDataBytes(String account, byte[] data) {
+        public void writeSyncDataBytes(Account account, byte[] data) {
             throw new UnsupportedOperationException();
         }
     }

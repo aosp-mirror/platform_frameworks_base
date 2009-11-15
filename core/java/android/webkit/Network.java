@@ -132,11 +132,11 @@ class Network {
      * XXX: Must be created in the same thread as WebCore!!!!!
      */
     private Network(Context context) {
-        if (WebView.DEBUG) {
+        if (DebugFlags.NETWORK) {
             Assert.assertTrue(Thread.currentThread().
                     getName().equals(WebViewCore.THREAD_NAME));
         }
-        mSslErrorHandler = new SslErrorHandler(this);
+        mSslErrorHandler = new SslErrorHandler();
         mHttpAuthHandler = new HttpAuthHandler(this);
 
         mRequestQueue = new RequestQueue(context);
@@ -149,14 +149,12 @@ class Network {
      * @param headers The http headers.
      * @param postData The body of the request.
      * @param loader A LoadListener for receiving the results of the request.
-     * @param isHighPriority True if this is high priority request.
      * @return True if the request was successfully queued.
      */
     public boolean requestURL(String method,
                               Map<String, String> headers,
                               byte [] postData,
-                              LoadListener loader,
-                              boolean isHighPriority) {
+                              LoadListener loader) {
 
         String url = loader.url();
 
@@ -188,7 +186,7 @@ class Network {
 
         RequestHandle handle = q.queueRequest(
                 url, loader.getWebAddress(), method, headers, loader,
-                bodyProvider, bodyLength, isHighPriority);
+                bodyProvider, bodyLength);
         loader.attachRequestHandle(handle);
 
         if (loader.isSynchronous()) {
@@ -232,7 +230,7 @@ class Network {
      * connecting through the proxy.
      */
     public synchronized void setProxyUsername(String proxyUsername) {
-        if (WebView.DEBUG) {
+        if (DebugFlags.NETWORK) {
             Assert.assertTrue(isValidProxySet());
         }
 
@@ -252,7 +250,7 @@ class Network {
      * connecting through the proxy.
      */
     public synchronized void setProxyPassword(String proxyPassword) {
-        if (WebView.DEBUG) {
+        if (DebugFlags.NETWORK) {
             Assert.assertTrue(isValidProxySet());
         }
 
@@ -266,7 +264,7 @@ class Network {
      * @return True iff succeeds.
      */
     public boolean saveState(Bundle outState) {
-        if (WebView.LOGV_ENABLED) {
+        if (DebugFlags.NETWORK) {
             Log.v(LOGTAG, "Network.saveState()");
         }
 
@@ -280,7 +278,7 @@ class Network {
      * @return True iff succeeds.
      */
     public boolean restoreState(Bundle inState) {
-        if (WebView.LOGV_ENABLED) {
+        if (DebugFlags.NETWORK) {
             Log.v(LOGTAG, "Network.restoreState()");
         }
 
@@ -300,10 +298,18 @@ class Network {
      * @param loader The loader that resulted in SSL errors.
      */
     public void handleSslErrorRequest(LoadListener loader) {
-        if (WebView.DEBUG) Assert.assertNotNull(loader);
+        if (DebugFlags.NETWORK) Assert.assertNotNull(loader);
         if (loader != null) {
             mSslErrorHandler.handleSslErrorRequest(loader);
         }
+    }
+
+    /* package */ boolean checkSslPrefTable(LoadListener loader,
+            SslError error) {
+        if (loader != null && error != null) {
+            return mSslErrorHandler.checkSslPrefTable(loader, error);
+        }
+        return false;
     }
 
      /**
@@ -313,7 +319,7 @@ class Network {
      * authentication request.
      */
     public void handleAuthRequest(LoadListener loader) {
-        if (WebView.DEBUG) Assert.assertNotNull(loader);
+        if (DebugFlags.NETWORK) Assert.assertNotNull(loader);
         if (loader != null) {
             mHttpAuthHandler.handleAuthRequest(loader);
         }

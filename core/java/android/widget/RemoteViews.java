@@ -17,8 +17,9 @@
 package android.widget;
 
 import android.app.PendingIntent;
-import android.app.PendingIntent.CanceledException;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentSender;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.graphics.Bitmap;
 import android.graphics.PorterDuff;
@@ -137,9 +138,12 @@ public class RemoteViews implements Parcelable, Filter {
                     public void onClick(View v) {
                         try {
                             // TODO: Unregister this handler if PendingIntent.FLAG_ONE_SHOT?
-                            pendingIntent.send();
-                        } catch (CanceledException e) {
-                            throw new ActionException(e.toString());
+                            v.getContext().startIntentSender(
+                                    pendingIntent.getIntentSender(), null,
+                                    Intent.FLAG_ACTIVITY_NEW_TASK,
+                                    Intent.FLAG_ACTIVITY_NEW_TASK, 0);
+                        } catch (IntentSender.SendIntentException e) {
+                            android.util.Log.e(LOG_TAG, "Cannot send pending intent: ", e);
                         }
                     }
                 };

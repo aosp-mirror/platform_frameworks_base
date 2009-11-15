@@ -35,6 +35,7 @@ public class MediaMetadataRetriever
 {
     static {
         System.loadLibrary("media_jni");
+        native_init();
     }
 
     // The field below is accessed by native methods
@@ -211,7 +212,8 @@ public class MediaMetadataRetriever
      * allocated internally.
      */
     public native void release();
-    private native void native_setup(); 
+    private native void native_setup();
+    private static native void native_init();
 
     private native final void native_finalize();
 
@@ -252,5 +254,6 @@ public class MediaMetadataRetriever
     public static final int METADATA_KEY_VIDEO_FORMAT    = 18;
     public static final int METADATA_KEY_VIDEO_HEIGHT    = 19;
     public static final int METADATA_KEY_VIDEO_WIDTH     = 20;
+    public static final int METADATA_KEY_WRITER          = 21;
     // Add more here...
 }

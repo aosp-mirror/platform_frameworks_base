@@ -42,6 +42,7 @@ import com.android.mediaframeworktest.MediaNames;
 
 import java.io.File;
 import java.io.FileDescriptor;
+import java.net.InetAddress;
 
  
 public class MediaFrameworkTest extends Activity {
@@ -69,10 +70,6 @@ public class MediaFrameworkTest extends Activity {
         setContentView(R.layout.surface_view);
         mSurfaceView = (SurfaceView)findViewById(R.id.surface_view);
         ViewGroup.LayoutParams lp = mSurfaceView.getLayoutParams();
-        lp.width = 320;
-        lp.height = 240;
-        mSurfaceView.setLayoutParams(lp);
-        mSurfaceView.getHolder().setFixedSize(320, 240);  
         mSurfaceView.getHolder().setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
         
         //Get the midi fd
@@ -146,4 +143,9 @@ public class MediaFrameworkTest extends Activity {
       return super.onKeyDown(keyCode, event);
      
   }  
+
+  public static boolean checkStreamingServer() throws Exception {
+      InetAddress address = InetAddress.getByAddress(MediaNames.STREAM_SERVER);
+      return address.isReachable(10000);
+  }
 }

@@ -49,8 +49,8 @@ public class HttpAuthHandler extends Handler {
 
 
     // Message id for handling the user response
-    private final int AUTH_PROCEED = 100;
-    private final int AUTH_CANCEL = 200;
+    private static final int AUTH_PROCEED = 100;
+    private static final int AUTH_CANCEL = 200;
 
     /**
      * Creates a new HTTP authentication handler with an empty

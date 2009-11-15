@@ -29,6 +29,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -47,14 +48,13 @@ import javax.xml.parsers.SAXParserFactory;
  */
 public final class FontLoader {
     private static final String FONTS_DEFINITIONS = "fonts.xml";
-    
+
     private static final String NODE_FONTS = "fonts";
     private static final String NODE_FONT = "font";
     private static final String NODE_NAME = "name";
-    
-    private static final String ATTR_TTF = "ttf";
+    private static final String NODE_FALLBACK = "fallback";
 
-    private static final String[] NODE_LEVEL = { NODE_FONTS, NODE_FONT, NODE_NAME };
+    private static final String ATTR_TTF = "ttf";
 
     private static final String FONT_EXT = ".ttf";
 
@@ -62,7 +62,7 @@ public final class FontLoader {
     private static final String[] FONT_STYLE_BOLD = { "-Bold" };
     private static final String[] FONT_STYLE_ITALIC = { "-Italic" };
     private static final String[] FONT_STYLE_BOLDITALIC = { "-BoldItalic" };
-    
+
     // list of font style, in the order matching the Typeface Font style
     private static final String[][] FONT_STYLES = {
         FONT_STYLE_DEFAULT,
@@ -70,23 +70,25 @@ public final class FontLoader {
         FONT_STYLE_ITALIC,
         FONT_STYLE_BOLDITALIC
     };
-    
+
     private final Map<String, String> mFamilyToTtf = new HashMap<String, String>();
     private final Map<String, Map<Integer, Font>> mTtfToFontMap =
         new HashMap<String, Map<Integer, Font>>();
-    
+
+    private List<Font> mFallBackFonts = null;
+
     public static FontLoader create(String fontOsLocation) {
         try {
             SAXParserFactory parserFactory = SAXParserFactory.newInstance();
                 parserFactory.setNamespaceAware(true);
-    
+
             SAXParser parser = parserFactory.newSAXParser();
             File f = new File(fontOsLocation + File.separator + FONTS_DEFINITIONS);
-            
+
             FontDefinitionParser definitionParser = new FontDefinitionParser(
                     fontOsLocation + File.separator);
             parser.parse(new FileInputStream(f), definitionParser);
-            
+
             return definitionParser.getFontLoader();
         } catch (ParserConfigurationException e) {
             // return null below
@@ -101,12 +103,35 @@ public final class FontLoader {
         return null;
     }
 
-    private FontLoader(List<FontInfo> fontList) {
+    private FontLoader(List<FontInfo> fontList, List<String> fallBackList) {
         for (FontInfo info : fontList) {
             for (String family : info.families) {
                 mFamilyToTtf.put(family, info.ttf);
             }
         }
+
+        ArrayList<Font> list = new ArrayList<Font>();
+        for (String path : fallBackList) {
+            File f = new File(path + FONT_EXT);
+            if (f.isFile()) {
+                try {
+                    Font font = Font.createFont(Font.TRUETYPE_FONT, f);
+                    if (font != null) {
+                        list.add(font);
+                    }
+                } catch (FontFormatException e) {
+                    // skip this font name
+                } catch (IOException e) {
+                    // skip this font name
+                }
+            }
+        }
+
+        mFallBackFonts = Collections.unmodifiableList(list);
+    }
+
+    public List<Font> getFallBackFonts() {
+        return mFallBackFonts;
     }
 
     public synchronized Font getFont(String family, int[] style) {
@@ -116,25 +141,25 @@ public final class FontLoader {
 
         // get the ttf name from the family
         String ttf = mFamilyToTtf.get(family);
-        
+
         if (ttf == null) {
             return null;
         }
-        
+
         // get the font from the ttf
         Map<Integer, Font> styleMap = mTtfToFontMap.get(ttf);
-        
+
         if (styleMap == null) {
             styleMap = new HashMap<Integer, Font>();
             mTtfToFontMap.put(ttf, styleMap);
         }
-        
+
         Font f = styleMap.get(style);
-        
+
         if (f != null) {
             return f;
         }
-        
+
         // if it doesn't exist, we create it, and we can't, we try with a simpler style
         switch (style[0]) {
             case Typeface.NORMAL:
@@ -178,7 +203,7 @@ public final class FontLoader {
     private Font getFont(String ttf, String[] fontFileSuffix) {
         for (String suffix : fontFileSuffix) {
             String name = ttf + suffix + FONT_EXT;
-            
+
             File f = new File(name);
             if (f.isFile()) {
                 try {
@@ -193,14 +218,14 @@ public final class FontLoader {
                 }
             }
         }
-        
+
         return null;
     }
 
     private final static class FontInfo {
         String ttf;
         final Set<String> families;
-        
+
         FontInfo() {
             families = new HashSet<String>();
         }
@@ -208,19 +233,19 @@ public final class FontLoader {
 
     private final static class FontDefinitionParser extends DefaultHandler {
         private final String mOsFontsLocation;
-        
-        private int mDepth = 0;
+
         private FontInfo mFontInfo = null;
         private final StringBuilder mBuilder = new StringBuilder();
-        private final List<FontInfo> mFontList = new ArrayList<FontInfo>();
-        
+        private List<FontInfo> mFontList;
+        private List<String> mFallBackList;
+
         private FontDefinitionParser(String osFontsLocation) {
             super();
             mOsFontsLocation = osFontsLocation;
         }
-        
+
         FontLoader getFontLoader() {
-            return new FontLoader(mFontList);
+            return new FontLoader(mFontList, mFallBackList);
         }
 
         /* (non-Javadoc)
@@ -229,10 +254,11 @@ public final class FontLoader {
         @Override
         public void startElement(String uri, String localName, String name, Attributes attributes)
                 throws SAXException {
-            if (localName.equals(NODE_LEVEL[mDepth])) {
-                mDepth++;
-                
-                if (mDepth == 2) { // font level.
+            if (NODE_FONTS.equals(localName)) {
+                mFontList = new ArrayList<FontInfo>();
+                mFallBackList = new ArrayList<String>();
+            } else if (NODE_FONT.equals(localName)) {
+                if (mFontList != null) {
                     String ttf = attributes.getValue(ATTR_TTF);
                     if (ttf != null) {
                         mFontInfo = new FontInfo();
@@ -240,7 +266,18 @@ public final class FontLoader {
                         mFontList.add(mFontInfo);
                     }
                 }
+            } else if (NODE_NAME.equals(localName)) {
+                // do nothing, we'll handle the name in the endElement
+            } else if (NODE_FALLBACK.equals(localName)) {
+                if (mFallBackList != null) {
+                    String ttf = attributes.getValue(ATTR_TTF);
+                    if (ttf != null) {
+                        mFallBackList.add(mOsFontsLocation + ttf);
+                    }
+                }
             }
+
+            mBuilder.setLength(0);
 
             super.startElement(uri, localName, name, attributes);
         }
@@ -248,34 +285,31 @@ public final class FontLoader {
         /* (non-Javadoc)
          * @see org.xml.sax.helpers.DefaultHandler#characters(char[], int, int)
          */
-        @SuppressWarnings("unused")
         @Override
         public void characters(char[] ch, int start, int length) throws SAXException {
-            if (mFontInfo != null) {
-                mBuilder.append(ch, start, length);
-            }
+            mBuilder.append(ch, start, length);
         }
 
         /* (non-Javadoc)
          * @see org.xml.sax.helpers.DefaultHandler#endElement(java.lang.String, java.lang.String, java.lang.String)
          */
-        @SuppressWarnings("unused")
         @Override
         public void endElement(String uri, String localName, String name) throws SAXException {
-            if (localName.equals(NODE_LEVEL[mDepth-1])) {
-                mDepth--;
-                if (mDepth == 2) { // end of a <name> node
-                    if (mFontInfo != null) {
-                        String family = trimXmlWhitespaces(mBuilder.toString());
-                        mFontInfo.families.add(family);
-                        mBuilder.setLength(0);
-                    }
-                } else if (mDepth == 1) { // end of a <font> node
-                    mFontInfo = null;
+            if (NODE_FONTS.equals(localName)) {
+                // top level, do nothing
+            } else if (NODE_FONT.equals(localName)) {
+                mFontInfo = null;
+            } else if (NODE_NAME.equals(localName)) {
+                // handle a new name for an existing Font Info
+                if (mFontInfo != null) {
+                    String family = trimXmlWhitespaces(mBuilder.toString());
+                    mFontInfo.families.add(family);
                 }
+            } else if (NODE_FALLBACK.equals(localName)) {
+                // nothing to do here.
             }
         }
-        
+
         private String trimXmlWhitespaces(String value) {
             if (value == null) {
                 return null;
@@ -283,7 +317,7 @@ public final class FontLoader {
 
             // look for carriage return and replace all whitespace around it by just 1 space.
             int index;
-            
+
             while ((index = value.indexOf('\n')) != -1) {
                 // look for whitespace on each side
                 int left = index - 1;
@@ -294,7 +328,7 @@ public final class FontLoader {
                         break;
                     }
                 }
-                
+
                 int right = index + 1;
                 int count = value.length();
                 while (right < count) {
@@ -304,7 +338,7 @@ public final class FontLoader {
                         break;
                     }
                 }
-                
+
                 // remove all between left and right (non inclusive) and replace by a single space.
                 String leftString = null;
                 if (left >= 0) {
@@ -314,7 +348,7 @@ public final class FontLoader {
                 if (right < count) {
                     rightString = value.substring(right);
                 }
-                
+
                 if (leftString != null) {
                     value = leftString;
                     if (rightString != null) {
@@ -324,24 +358,24 @@ public final class FontLoader {
                     value = rightString != null ? rightString : "";
                 }
             }
-            
+
             // now we un-escape the string
             int length = value.length();
             char[] buffer = value.toCharArray();
-            
+
             for (int i = 0 ; i < length ; i++) {
                 if (buffer[i] == '\\') {
                     if (buffer[i+1] == 'n') {
                         // replace the char with \n
                         buffer[i+1] = '\n';
                     }
-                    
+
                     // offset the rest of the buffer since we go from 2 to 1 char
                     System.arraycopy(buffer, i+1, buffer, i, length - i - 1);
                     length--;
                 }
             }
-            
+
             return new String(buffer, 0, length);
         }
 

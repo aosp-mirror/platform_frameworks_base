@@ -21,10 +21,10 @@
 #include <stdint.h>
 #include <sys/types.h>
 
-#include <utils/Parcel.h>
-#include <utils/IMemory.h>
-#include <utils/IPCThreadState.h>
-#include <utils/IServiceManager.h>
+#include <binder/Parcel.h>
+#include <binder/IMemory.h>
+#include <binder/IPCThreadState.h>
+#include <binder/IServiceManager.h>
 
 #include <ui/ISurface.h>
 #include <ui/ISurfaceFlingerClient.h>
@@ -64,12 +64,12 @@ public:
     {
     }
 
-    virtual void getControlBlocks(sp<IMemory>* ctl) const
+    virtual sp<IMemoryHeap> getControlBlock() const
     {
         Parcel data, reply;
         data.writeInterfaceToken(ISurfaceFlingerClient::getInterfaceDescriptor());
         remote()->transact(GET_CBLK, data, &reply);
-        *ctl  = interface_cast<IMemory>(reply.readStrongBinder());
+        return interface_cast<IMemoryHeap>(reply.readStrongBinder());
     }
 
     virtual sp<ISurface> createSurface( surface_data_t* params,
@@ -118,12 +118,6 @@ IMPLEMENT_META_INTERFACE(SurfaceFlingerClient, "android.ui.ISurfaceFlingerClient
 
 // ----------------------------------------------------------------------
 
-#define CHECK_INTERFACE(interface, data, reply) \
-        do { if (!data.enforceInterface(interface::getInterfaceDescriptor())) { \
-            LOGW("Call incorrectly routed to " #interface); \
-            return PERMISSION_DENIED; \
-        } } while (0)
-
 status_t BnSurfaceFlingerClient::onTransact(
     uint32_t code, const Parcel& data, Parcel* reply, uint32_t flags)
 {
@@ -132,8 +126,7 @@ status_t BnSurfaceFlingerClient::onTransact(
     switch(code) {
         case GET_CBLK: {
             CHECK_INTERFACE(ISurfaceFlingerClient, data, reply);
-            sp<IMemory> ctl;
-            getControlBlocks(&ctl);
+            sp<IMemoryHeap> ctl(getControlBlock());
             reply->writeStrongBinder(ctl->asBinder());
             return NO_ERROR;
         } break;
@@ -196,10 +189,11 @@ status_t BnSurfaceFlingerClient::onTransact(
 
 status_t ISurfaceFlingerClient::surface_data_t::readFromParcel(const Parcel& parcel)
 {
-    token = parcel.readInt32();
-    identity  = parcel.readInt32();
-    heap[0] = interface_cast<IMemoryHeap>(parcel.readStrongBinder());
-    heap[1] = interface_cast<IMemoryHeap>(parcel.readStrongBinder());
+    token    = parcel.readInt32();
+    identity = parcel.readInt32();
+    width    = parcel.readInt32();
+    height   = parcel.readInt32();
+    format   = parcel.readInt32();
     return NO_ERROR;
 }
 
@@ -207,8 +201,9 @@ status_t ISurfaceFlingerClient::surface_data_t::writeToParcel(Parcel* parcel) co
 {
     parcel->writeInt32(token);
     parcel->writeInt32(identity);
-    parcel->writeStrongBinder(heap[0]!=0 ? heap[0]->asBinder() : NULL);
-    parcel->writeStrongBinder(heap[1]!=0 ? heap[1]->asBinder() : NULL);
+    parcel->writeInt32(width);
+    parcel->writeInt32(height);
+    parcel->writeInt32(format);
     return NO_ERROR;
 }
 

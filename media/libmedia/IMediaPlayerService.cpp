@@ -17,11 +17,14 @@
 
 #include <stdint.h>
 #include <sys/types.h>
-#include <utils/Parcel.h>
 
-#include <utils/IMemory.h>
+#include <binder/Parcel.h>
+#include <binder/IMemory.h>
 #include <media/IMediaPlayerService.h>
 #include <media/IMediaRecorder.h>
+#include <media/IOMX.h>
+
+#include <utils/Errors.h>  // for status_t
 
 namespace android {
 
@@ -32,6 +35,8 @@ enum {
     DECODE_FD,
     CREATE_MEDIA_RECORDER,
     CREATE_METADATA_RETRIEVER,
+    GET_OMX,
+    SNOOP
 };
 
 class BpMediaPlayerService: public BpInterface<IMediaPlayerService>
@@ -109,17 +114,26 @@ public:
         *pFormat = reply.readInt32();
         return interface_cast<IMemory>(reply.readStrongBinder());
     }
+
+    virtual sp<IMemory> snoop()
+    {
+        Parcel data, reply;
+        data.writeInterfaceToken(IMediaPlayerService::getInterfaceDescriptor());
+        remote()->transact(SNOOP, data, &reply);
+        return interface_cast<IMemory>(reply.readStrongBinder());
+    }
+
+    virtual sp<IOMX> getOMX() {
+        Parcel data, reply;
+        data.writeInterfaceToken(IMediaPlayerService::getInterfaceDescriptor());
+        remote()->transact(GET_OMX, data, &reply);
+        return interface_cast<IOMX>(reply.readStrongBinder());
+    }
 };
 
-IMPLEMENT_META_INTERFACE(MediaPlayerService, "android.hardware.IMediaPlayerService");
+IMPLEMENT_META_INTERFACE(MediaPlayerService, "android.media.IMediaPlayerService");
 
 // ----------------------------------------------------------------------
-
-#define CHECK_INTERFACE(interface, data, reply) \
-        do { if (!data.enforceInterface(interface::getInterfaceDescriptor())) { \
-            LOGW("Call incorrectly routed to " #interface); \
-            return PERMISSION_DENIED; \
-        } } while (0)
 
 status_t BnMediaPlayerService::onTransact(
     uint32_t code, const Parcel& data, Parcel* reply, uint32_t flags)
@@ -173,6 +187,12 @@ status_t BnMediaPlayerService::onTransact(
             reply->writeStrongBinder(player->asBinder());
             return NO_ERROR;
         } break;
+        case SNOOP: {
+            CHECK_INTERFACE(IMediaPlayerService, data, reply);
+            sp<IMemory> snooped_audio = snoop();
+            reply->writeStrongBinder(snooped_audio->asBinder());
+            return NO_ERROR;
+        } break;
         case CREATE_MEDIA_RECORDER: {
             CHECK_INTERFACE(IMediaPlayerService, data, reply);
             pid_t pid = data.readInt32();
@@ -185,6 +205,12 @@ status_t BnMediaPlayerService::onTransact(
             pid_t pid = data.readInt32();
             sp<IMediaMetadataRetriever> retriever = createMetadataRetriever(pid);
             reply->writeStrongBinder(retriever->asBinder());
+            return NO_ERROR;
+        } break;
+        case GET_OMX: {
+            CHECK_INTERFACE(IMediaPlayerService, data, reply);
+            sp<IOMX> omx = getOMX();
+            reply->writeStrongBinder(omx->asBinder());
             return NO_ERROR;
         } break;
         default:

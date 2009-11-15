@@ -16,6 +16,7 @@
 
 package android.content;
 
+import android.accounts.Account;
 import android.database.IContentObserver;
 import android.database.sqlite.SQLiteException;
 import android.net.Uri;
@@ -160,7 +161,9 @@ public final class ContentService extends IContentService.Stub {
             }
             if (syncToNetwork) {
                 SyncManager syncManager = getSyncManager();
-                if (syncManager != null) syncManager.scheduleLocalSync(uri);
+                if (syncManager != null) {
+                    syncManager.scheduleLocalSync(null /* all accounts */, uri.getAuthority());
+                }
             }
         } finally {
             restoreCallingIdentity(identityToken);
@@ -186,14 +189,17 @@ public final class ContentService extends IContentService.Stub {
         }
     }
 
-    public void startSync(Uri url, Bundle extras) {
+    public void requestSync(Account account, String authority, Bundle extras) {
         ContentResolver.validateSyncExtrasBundle(extras);
         // This makes it so that future permission checks will be in the context of this
         // process rather than the caller's process. We will restore this before returning.
         long identityToken = clearCallingIdentity();
         try {
             SyncManager syncManager = getSyncManager();
-            if (syncManager != null) syncManager.startSync(url, extras);
+            if (syncManager != null) {
+                syncManager.scheduleSync(account, authority, extras, 0 /* no delay */,
+                        false /* onlyThoseWithUnkownSyncableState */);
+            }
         } finally {
             restoreCallingIdentity(identityToken);
         }
@@ -201,34 +207,50 @@ public final class ContentService extends IContentService.Stub {
 
     /**
      * Clear all scheduled sync operations that match the uri and cancel the active sync
-     * if it matches the uri. If the uri is null, clear all scheduled syncs and cancel
-     * the active one, if there is one.
-     * @param uri Filter on the sync operations to cancel, or all if null.
+     * if they match the authority and account, if they are present.
+     * @param account filter the pending and active syncs to cancel using this account
+     * @param authority filter the pending and active syncs to cancel using this authority
      */
-    public void cancelSync(Uri uri) {
+    public void cancelSync(Account account, String authority) {
         // This makes it so that future permission checks will be in the context of this
         // process rather than the caller's process. We will restore this before returning.
         long identityToken = clearCallingIdentity();
         try {
             SyncManager syncManager = getSyncManager();
             if (syncManager != null) {
-                syncManager.clearScheduledSyncOperations(uri);
-                syncManager.cancelActiveSync(uri);
+                syncManager.clearScheduledSyncOperations(account, authority);
+                syncManager.cancelActiveSync(account, authority);
             }
         } finally {
             restoreCallingIdentity(identityToken);
         }
     }
 
-    public boolean getSyncProviderAutomatically(String providerName) {
+    /**
+     * Get information about the SyncAdapters that are known to the system.
+     * @return an array of SyncAdapters that have registered with the system
+     */
+    public SyncAdapterType[] getSyncAdapterTypes() {
+        // This makes it so that future permission checks will be in the context of this
+        // process rather than the caller's process. We will restore this before returning.
+        long identityToken = clearCallingIdentity();
+        try {
+            SyncManager syncManager = getSyncManager();
+            return syncManager.getSyncAdapterTypes();
+        } finally {
+            restoreCallingIdentity(identityToken);
+        }
+    }
+
+    public boolean getSyncAutomatically(Account account, String providerName) {
         mContext.enforceCallingOrSelfPermission(Manifest.permission.READ_SYNC_SETTINGS,
                 "no permission to read the sync settings");
         long identityToken = clearCallingIdentity();
         try {
             SyncManager syncManager = getSyncManager();
             if (syncManager != null) {
-                return syncManager.getSyncStorageEngine().getSyncProviderAutomatically(
-                        null, providerName);
+                return syncManager.getSyncStorageEngine().getSyncAutomatically(
+                        account, providerName);
             }
         } finally {
             restoreCallingIdentity(identityToken);
@@ -236,51 +258,82 @@ public final class ContentService extends IContentService.Stub {
         return false;
     }
 
-    public void setSyncProviderAutomatically(String providerName, boolean sync) {
+    public void setSyncAutomatically(Account account, String providerName, boolean sync) {
         mContext.enforceCallingOrSelfPermission(Manifest.permission.WRITE_SYNC_SETTINGS,
                 "no permission to write the sync settings");
         long identityToken = clearCallingIdentity();
         try {
             SyncManager syncManager = getSyncManager();
             if (syncManager != null) {
-                syncManager.getSyncStorageEngine().setSyncProviderAutomatically(
-                        null, providerName, sync);
+                syncManager.getSyncStorageEngine().setSyncAutomatically(
+                        account, providerName, sync);
             }
         } finally {
             restoreCallingIdentity(identityToken);
         }
     }
 
-    public boolean getListenForNetworkTickles() {
+    public int getIsSyncable(Account account, String providerName) {
         mContext.enforceCallingOrSelfPermission(Manifest.permission.READ_SYNC_SETTINGS,
                 "no permission to read the sync settings");
         long identityToken = clearCallingIdentity();
         try {
             SyncManager syncManager = getSyncManager();
             if (syncManager != null) {
-                return syncManager.getSyncStorageEngine().getListenForNetworkTickles();
+                return syncManager.getSyncStorageEngine().getIsSyncable(
+                        account, providerName);
             }
         } finally {
             restoreCallingIdentity(identityToken);
         }
-        return false;
+        return -1;
     }
-    
-    public void setListenForNetworkTickles(boolean flag) {
+
+    public void setIsSyncable(Account account, String providerName, int syncable) {
         mContext.enforceCallingOrSelfPermission(Manifest.permission.WRITE_SYNC_SETTINGS,
                 "no permission to write the sync settings");
         long identityToken = clearCallingIdentity();
         try {
             SyncManager syncManager = getSyncManager();
             if (syncManager != null) {
-                syncManager.getSyncStorageEngine().setListenForNetworkTickles(flag);
+                syncManager.getSyncStorageEngine().setIsSyncable(
+                        account, providerName, syncable);
             }
         } finally {
             restoreCallingIdentity(identityToken);
         }
     }
 
-    public boolean isSyncActive(String account, String authority) {
+    public boolean getMasterSyncAutomatically() {
+        mContext.enforceCallingOrSelfPermission(Manifest.permission.READ_SYNC_SETTINGS,
+                "no permission to read the sync settings");
+        long identityToken = clearCallingIdentity();
+        try {
+            SyncManager syncManager = getSyncManager();
+            if (syncManager != null) {
+                return syncManager.getSyncStorageEngine().getMasterSyncAutomatically();
+            }
+        } finally {
+            restoreCallingIdentity(identityToken);
+        }
+        return false;
+    }
+
+    public void setMasterSyncAutomatically(boolean flag) {
+        mContext.enforceCallingOrSelfPermission(Manifest.permission.WRITE_SYNC_SETTINGS,
+                "no permission to write the sync settings");
+        long identityToken = clearCallingIdentity();
+        try {
+            SyncManager syncManager = getSyncManager();
+            if (syncManager != null) {
+                syncManager.getSyncStorageEngine().setMasterSyncAutomatically(flag);
+            }
+        } finally {
+            restoreCallingIdentity(identityToken);
+        }
+    }
+
+    public boolean isSyncActive(Account account, String authority) {
         mContext.enforceCallingOrSelfPermission(Manifest.permission.READ_SYNC_STATS,
                 "no permission to read the sync stats");
         long identityToken = clearCallingIdentity();
@@ -295,7 +348,7 @@ public final class ContentService extends IContentService.Stub {
         }
         return false;
     }
-    
+
     public ActiveSyncInfo getActiveSync() {
         mContext.enforceCallingOrSelfPermission(Manifest.permission.READ_SYNC_STATS,
                 "no permission to read the sync stats");
@@ -310,65 +363,62 @@ public final class ContentService extends IContentService.Stub {
         }
         return null;
     }
-    
-    public SyncStatusInfo getStatusByAuthority(String authority) {
+
+    public SyncStatusInfo getSyncStatus(Account account, String authority) {
         mContext.enforceCallingOrSelfPermission(Manifest.permission.READ_SYNC_STATS,
                 "no permission to read the sync stats");
         long identityToken = clearCallingIdentity();
         try {
             SyncManager syncManager = getSyncManager();
             if (syncManager != null) {
-                return syncManager.getSyncStorageEngine().getStatusByAuthority(
-                        authority);
+                return syncManager.getSyncStorageEngine().getStatusByAccountAndAuthority(
+                    account, authority);
             }
         } finally {
             restoreCallingIdentity(identityToken);
         }
         return null;
     }
-    
-    public boolean isAuthorityPending(String account, String authority) {
+
+    public boolean isSyncPending(Account account, String authority) {
         mContext.enforceCallingOrSelfPermission(Manifest.permission.READ_SYNC_STATS,
                 "no permission to read the sync stats");
         long identityToken = clearCallingIdentity();
         try {
             SyncManager syncManager = getSyncManager();
             if (syncManager != null) {
-                return syncManager.getSyncStorageEngine().isAuthorityPending(
-                        account, authority);
+                return syncManager.getSyncStorageEngine().isSyncPending(account, authority);
             }
         } finally {
             restoreCallingIdentity(identityToken);
         }
         return false;
     }
-    
+
     public void addStatusChangeListener(int mask, ISyncStatusObserver callback) {
         long identityToken = clearCallingIdentity();
         try {
             SyncManager syncManager = getSyncManager();
             if (syncManager != null) {
-                syncManager.getSyncStorageEngine().addStatusChangeListener(
-                        mask, callback);
+                syncManager.getSyncStorageEngine().addStatusChangeListener(mask, callback);
             }
         } finally {
             restoreCallingIdentity(identityToken);
         }
     }
-    
+
     public void removeStatusChangeListener(ISyncStatusObserver callback) {
         long identityToken = clearCallingIdentity();
         try {
             SyncManager syncManager = getSyncManager();
             if (syncManager != null) {
-                syncManager.getSyncStorageEngine().removeStatusChangeListener(
-                        callback);
+                syncManager.getSyncStorageEngine().removeStatusChangeListener(callback);
             }
         } finally {
             restoreCallingIdentity(identityToken);
         }
     }
-    
+
     public static IContentService main(Context context, boolean factoryTest) {
         ContentService service = new ContentService(context, factoryTest);
         ServiceManager.addService(ContentResolver.CONTENT_SERVICE_NAME, service);

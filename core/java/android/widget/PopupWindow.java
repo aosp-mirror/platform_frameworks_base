@@ -817,6 +817,7 @@ public class PopupWindow {
      * @param p the layout parameters of the popup's content view
      */
     private void invokePopup(WindowManager.LayoutParams p) {
+        p.packageName = mContext.getPackageName();
         mWindowManager.addView(mPopupView, p);
     }
 
@@ -1322,8 +1323,16 @@ public class PopupWindow {
         @Override
         public boolean dispatchKeyEvent(KeyEvent event) {
             if (event.getKeyCode() == KeyEvent.KEYCODE_BACK) {
-                dismiss();
-                return true;
+                if (event.getAction() == KeyEvent.ACTION_DOWN
+                        && event.getRepeatCount() == 0) {
+                    getKeyDispatcherState().startTracking(event, this);
+                    return true;
+                } else if (event.getAction() == KeyEvent.ACTION_UP
+                        && event.isTracking() && !event.isCanceled()) {
+                    dismiss();
+                    return true;
+                }
+                return super.dispatchKeyEvent(event);
             } else {
                 return super.dispatchKeyEvent(event);
             }

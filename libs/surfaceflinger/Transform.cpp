@@ -177,10 +177,10 @@ Region Transform::transform(const Region& reg) const
     Region out;
     if (UNLIKELY(transformed())) {
         if (LIKELY(preserveRects())) {
-            Rect r;
-            Region::iterator iterator(reg);
-            while (iterator.iterate(&r)) {
-                out.orSelf(transform(r));
+            Region::const_iterator it = reg.begin();
+            Region::const_iterator const end = reg.end();
+            while (it != end) {
+                out.orSelf(transform(*it++));
             }
         } else {
             out.set(transform(reg.bounds()));

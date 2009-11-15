@@ -44,6 +44,9 @@ struct image_info
             }
             free(allocRows);
         }
+        free(info9Patch.xDivs);
+        free(info9Patch.yDivs);
+        free(info9Patch.colors);
     }
 
     png_uint_32 width;
@@ -833,6 +836,7 @@ static void write_png(const char* imageName,
     int i;
 
     png_unknown_chunk unknowns[1];
+    unknowns[0].data = NULL;
 
     png_bytepp outRows = (png_bytepp) malloc((int) imageInfo.height * png_sizeof(png_bytep));
     if (outRows == (png_bytepp) 0) {
@@ -939,6 +943,7 @@ static void write_png(const char* imageName,
         free(outRows[i]);
     }
     free(outRows);
+    free(unknowns[0].data);
 
     png_get_IHDR(write_ptr, write_info, &width, &height,
        &bit_depth, &color_type, &interlace_type,

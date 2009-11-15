@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2009 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.android.dumprendertree;
 
 import android.app.Activity;
@@ -58,6 +74,8 @@ public class ReliabilityTest extends ActivityInstrumentationTestCase2<Reliabilit
 
         Intent intent = new Intent(runner.getContext(), ReliabilityTestActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        ReliabilityTestActivity activity = (ReliabilityTestActivity)runner.startActivitySync(
+            intent);
         //read from BufferedReader instead of populating a list in advance,
         //this will avoid excessive memory usage in case of a large list
         while((url = listReader.readLine()) != null) {
@@ -67,8 +85,6 @@ public class ReliabilityTest extends ActivityInstrumentationTestCase2<Reliabilit
             start = System.currentTimeMillis();
             Log.v(LOGTAG, "Testing URL: " + url);
             FsUtils.updateTestStatus(TEST_STATUS_FILE, url);
-            ReliabilityTestActivity activity = (ReliabilityTestActivity)runner.startActivitySync(
-                    intent);
             activity.reset();
             //use message to send new URL to avoid interacting with
             //WebView in non-UI thread
@@ -94,11 +110,11 @@ public class ReliabilityTest extends ActivityInstrumentationTestCase2<Reliabilit
             if(runner.mLogtime) {
                 writeLoadTime(url, activity.getPageLoadTime());
             }
-            activity.finish();
             System.runFinalization();
             System.gc();
             System.gc();
         }
+        activity.finish();
         FsUtils.updateTestStatus(TEST_STATUS_FILE, TEST_DONE);
 //        activity.finish();
         listReader.close();

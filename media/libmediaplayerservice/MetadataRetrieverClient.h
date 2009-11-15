@@ -18,9 +18,12 @@
 #ifndef ANDROID_MEDIAMETADATARETRIEVERSERVICE_H
 #define ANDROID_MEDIAMETADATARETRIEVERSERVICE_H
 
-#include <utils.h>
+#include <utils/Log.h>
+#include <utils/threads.h>
+#include <utils/List.h>
+#include <utils/Errors.h>
 #include <utils/KeyedVector.h>
-#include <utils/IMemory.h>
+#include <binder/IMemory.h>
 
 #include <media/MediaMetadataRetrieverInterface.h>
 
@@ -51,12 +54,23 @@ public:
 private:
     friend class MediaPlayerService;
 
+    class Priority
+    {
+    public:
+        Priority(int newPriority);
+        ~Priority();
+    private:
+        Priority();
+        int         mOldPriority;
+    };
+
     explicit MetadataRetrieverClient(pid_t pid);
     virtual ~MetadataRetrieverClient();
 
     mutable Mutex                          mLock;
     sp<MediaMetadataRetrieverBase>         mRetriever;
     pid_t                                  mPid;
+    int                                    mMode;
 
     // Keep the shared memory copy of album art and capture frame (for thumbnail)
     sp<MemoryDealer>                       mAlbumArtDealer;

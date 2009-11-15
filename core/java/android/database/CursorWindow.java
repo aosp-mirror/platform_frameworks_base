@@ -263,7 +263,58 @@ public class CursorWindow extends SQLiteClosable implements Parcelable {
         }
     }
 
+    /**
+     * Checks if a field contains a long
+     *
+     * @param row the row to read from, row - getStartPosition() being the actual row in the window
+     * @param col the column to read from
+     * @return {@code true} if given field is a long
+     */
+    public boolean isLong(int row, int col) {
+        acquireReference();
+        try {
+            return isInteger_native(row - mStartPos, col);
+        } finally {
+            releaseReference();
+        }
+    }
+
+    /**
+     * Checks if a field contains a float.
+     *
+     * @param row the row to read from, row - getStartPosition() being the actual row in the window
+     * @param col the column to read from
+     * @return {@code true} if given field is a float
+     */
+    public boolean isFloat(int row, int col) {
+        acquireReference();
+        try {
+            return isFloat_native(row - mStartPos, col);
+        } finally {
+            releaseReference();
+        }
+    }
+
+    /**
+     * Checks if a field contains either a String or is null.
+     *
+     * @param row the row to read from, row - getStartPosition() being the actual row in the window
+     * @param col the column to read from
+     * @return {@code true} if given field is {@code NULL} or a String
+     */
+    public boolean isString(int row, int col) {
+        acquireReference();
+        try {
+            return isString_native(row - mStartPos, col);
+        } finally {
+            releaseReference();
+        }
+    }
+
     private native boolean isBlob_native(int row, int col);
+    private native boolean isString_native(int row, int col);
+    private native boolean isInteger_native(int row, int col);
+    private native boolean isFloat_native(int row, int col);
 
     /**
      * Returns a String for the given field.

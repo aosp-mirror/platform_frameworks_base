@@ -16,15 +16,26 @@
 
 package android.graphics.drawable;
 
+import android.content.res.Resources;
 import android.graphics.*;
 
 public class DrawableContainer extends Drawable implements Drawable.Callback {
-    
+
+    /**
+     * To be proper, we should have a getter for dither (and alpha, etc.)
+     * so that proxy classes like this can save/restore their delegates'
+     * values, but we don't have getters. Since we do have setters
+     * (e.g. setDither), which this proxy forwards on, we have to have some
+     * default/initial setting.
+     *
+     * The initial setting for dither is now true, since it almost always seems
+     * to improve the quality at negligible cost.
+     */
+    private static final boolean DEFAULT_DITHER = true;
     private DrawableContainerState mDrawableContainerState;
     private Drawable mCurrDrawable;
     private int mAlpha = 0xFF;
     private ColorFilter mColorFilter;
-    private boolean mDither;
 
     private int mCurIndex = -1;
     private boolean mMutated;
@@ -71,10 +82,10 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
 
     @Override
     public void setDither(boolean dither) {
-        if (mDither != dither) {
-            mDither = dither;
+        if (mDrawableContainerState.mDither != dither) {
+            mDrawableContainerState.mDither = dither;
             if (mCurrDrawable != null) {
-                mCurrDrawable.setDither(mDither);
+                mCurrDrawable.setDither(mDrawableContainerState.mDither);
             }
         }
     }
@@ -200,7 +211,7 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
             if (d != null) {
                 d.setVisible(isVisible(), true);
                 d.setAlpha(mAlpha);
-                d.setDither(mDither);
+                d.setDither(mDrawableContainerState.mDither);
                 d.setColorFilter(mColorFilter);
                 d.setState(getState());
                 d.setLevel(getLevel());
@@ -237,7 +248,7 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
             final int N = mDrawableContainerState.getChildCount();
             final Drawable[] drawables = mDrawableContainerState.getChildren();
             for (int i = 0; i < N; i++) {
-                drawables[i].mutate();
+                if (drawables[i] != null) drawables[i].mutate();
             }
             mMutated = true;
         }
@@ -273,8 +284,11 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
         boolean     mCanConstantState;
 
         boolean     mPaddingChecked = false;
+        
+        boolean     mDither = DEFAULT_DITHER;        
 
-        DrawableContainerState(DrawableContainerState orig, DrawableContainer owner) {
+        DrawableContainerState(DrawableContainerState orig, DrawableContainer owner,
+                Resources res) {
             mOwner = owner;
 
             if (orig != null) {
@@ -288,7 +302,11 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
 
                 final int N = mNumChildren;
                 for (int i=0; i<N; i++) {
-                    mDrawables[i] = origDr[i].getConstantState().newDrawable();
+                    if (res != null) {
+                        mDrawables[i] = origDr[i].getConstantState().newDrawable(res);
+                    } else {
+                        mDrawables[i] = origDr[i].getConstantState().newDrawable();
+                    }
                     mDrawables[i].setCallback(owner);
                 }
 
@@ -306,6 +324,8 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
                 mOpacity = orig.mOpacity;
                 mHaveStateful = orig.mHaveStateful;
                 mStateful = orig.mStateful;
+                
+                mDither = orig.mDither;
 
             } else {
                 mDrawables = new Drawable[10];

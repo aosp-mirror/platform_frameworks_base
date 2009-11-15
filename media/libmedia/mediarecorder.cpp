@@ -20,7 +20,7 @@
 #include <utils/Log.h>
 #include <ui/Surface.h>
 #include <media/mediarecorder.h>
-#include <utils/IServiceManager.h>
+#include <binder/IServiceManager.h>
 #include <utils/String8.h>
 #include <media/IMediaPlayerService.h>
 #include <media/IMediaRecorder.h>

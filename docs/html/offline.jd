@@ -6,33 +6,44 @@ page.title=Welcome
 
 <h1>Welcome to the Android SDK!</h1>
 
-<img src="{@docRoot}images/android_icon_125.png" style="float:right; margin:1em 6em 6em;" />
+<img src="{@docRoot}assets/images/home/sdk-large.png" style="float:right; margin:-2em 3em 3em;" />
 
-<p>If you've just downloaded the SDK, then continue with  
-<a href="{@docRoot}sdk/{@sdkCurrent}/installing.html">Installing the Android SDK</a>.</p>
+<h3>If you've downloaded the Android SDK for the first time...</h3>
 
-<p>If you're upgrading from a previously installed version, then refer to the 
-<a href="{@docRoot}sdk/{@sdkCurrent}/upgrading.html">Upgrading</a> guide.</p>
+<p>Follow the online guide to 
+<a href="{@docRoot}sdk/installing.html">Installing 
+the Android SDK</a>, which will help you setup your development environment
+(including the Android Development Tools plugin for Eclipse) 
+so you can start developing Android apps.</p>
 
-<p>Once you've completed the SDK installation, you can start learning about
-development on the Android framework by reading the <a
-href="{@docRoot}guide/index.html">Developer's Guide</a>. The SDK package
-also includes a wide variety of code samples specific to each Android
-platform. You can find the samples at this location: </p>
+<p>Once your environment is setup, look at the
+<a href="{@docRoot}sdk/installing.html#NextSteps">Next
+Steps</a> for some suggestions on how to begin learning about Android.</p>
 
-<p style="margin-left:2em"><code>&lt;sdk&gt;/platforms/android-&lt;version&gt;/samples/</code></p>
+<h3>If you've just installed new SDK components using the <em>SDK and AVD Manager</em>...</h3>
 
-<p>Please note that you are currently viewing a local, offline version of the
-Android developer documentation. The offline documentation offers the same
-content and features as the online documentation, but since the search
-capability is network-based, it will not work while you are offline.
-Autocompletion for API packages and classes, also offered from the search box,
-is available both online and offline and loads the reference documentation for
-the item you select.</p>
+<p>There's no additional setup.</p>
 
-<p>For the most current, fully searchable documentation, please visit</p>
+<p>Newly installed Android platforms are automatically saved in the 
+<code><em>&lt;sdk_dir>/</em>platforms/</code> directory of your existing SDK;
+new add-ons are saved in the <code><em>&lt;sdk_dir>/</em>add-ons/</code>
+directory; and new documentation is saved in the existing
+<code><em>&lt;sdk_dir>/</em>docs/</code> directory (old docs are replaced).</p>
 
-<p style="margin-left:2em;"><a href="http://developer.android.com/index.html">
-http://developer.android.com</a>.</p>
+
+<hr style="margin:2em 0;" />
+
+<p>Note that you are currently viewing a local, offline version of the
+Android developer documentation. The offline documentation offers almost all the same
+content and features as the online documentation. Because some features
+such as search and videos are network-based, not everything will work if you
+are not connected to the Internet.</p>
+
+<p>For the most current documentation and a fully-functional experience, please visit:</p>
+<p style="margin-left:2em;">
+<a href="http://developer.android.com">http://developer.android.com</a></strong>.
+</p>
+
+
 
 </div>

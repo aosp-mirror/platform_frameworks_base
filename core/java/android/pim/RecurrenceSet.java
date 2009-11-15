@@ -223,6 +223,7 @@ public class RecurrenceSet {
         return true;
     }
 
+    // This can be removed when the old CalendarSyncAdapter is removed.
     public static boolean populateComponent(Cursor cursor,
                                             ICalendar.Component component) {
         
@@ -268,6 +269,64 @@ public class RecurrenceSet {
             dtstartTime = new Time(Time.TIMEZONE_UTC);
         }
         
+        dtstartTime.set(dtstart);
+        // make sure the time is printed just as a date, if all day.
+        // TODO: android.pim.Time really should take care of this for us.
+        if (allDay) {
+            dtstartProp.addParameter(new ICalendar.Parameter("VALUE", "DATE"));
+            dtstartTime.allDay = true;
+            dtstartTime.hour = 0;
+            dtstartTime.minute = 0;
+            dtstartTime.second = 0;
+        }
+
+        dtstartProp.setValue(dtstartTime.format2445());
+        component.addProperty(dtstartProp);
+        ICalendar.Property durationProp = new ICalendar.Property("DURATION");
+        durationProp.setValue(duration);
+        component.addProperty(durationProp);
+
+        addPropertiesForRuleStr(component, "RRULE", rruleStr);
+        addPropertyForDateStr(component, "RDATE", rdateStr);
+        addPropertiesForRuleStr(component, "EXRULE", exruleStr);
+        addPropertyForDateStr(component, "EXDATE", exdateStr);
+        return true;
+    }
+
+public static boolean populateComponent(ContentValues values,
+                                            ICalendar.Component component) {
+        long dtstart = -1;
+        if (values.containsKey(Calendar.Events.DTSTART)) {
+            dtstart = values.getAsLong(Calendar.Events.DTSTART);
+        }
+        String duration = values.getAsString(Calendar.Events.DURATION);
+        String tzid = values.getAsString(Calendar.Events.EVENT_TIMEZONE);
+        String rruleStr = values.getAsString(Calendar.Events.RRULE);
+        String rdateStr = values.getAsString(Calendar.Events.RDATE);
+        String exruleStr = values.getAsString(Calendar.Events.EXRULE);
+        String exdateStr = values.getAsString(Calendar.Events.EXDATE);
+        boolean allDay = values.getAsInteger(Calendar.Events.ALL_DAY) == 1;
+
+        if ((dtstart == -1) ||
+            (TextUtils.isEmpty(duration))||
+            ((TextUtils.isEmpty(rruleStr))&&
+                (TextUtils.isEmpty(rdateStr)))) {
+                // no recurrence.
+                return false;
+        }
+
+        ICalendar.Property dtstartProp = new ICalendar.Property("DTSTART");
+        Time dtstartTime = null;
+        if (!TextUtils.isEmpty(tzid)) {
+            if (!allDay) {
+                dtstartProp.addParameter(new ICalendar.Parameter("TZID", tzid));
+            }
+            dtstartTime = new Time(tzid);
+        } else {
+            // use the "floating" timezone
+            dtstartTime = new Time(Time.TIMEZONE_UTC);
+        }
+
         dtstartTime.set(dtstart);
         // make sure the time is printed just as a date, if all day.
         // TODO: android.pim.Time really should take care of this for us.
@@ -351,10 +410,14 @@ public class RecurrenceSet {
 
         Time end = new Time(endTzid);
         end.parse(dtendProperty.getValue());
-        long durationMillis = end.toMillis(false /* use isDst */) 
+        long durationMillis = end.toMillis(false /* use isDst */)
                 - start.toMillis(false /* use isDst */);
         long durationSeconds = (durationMillis / 1000);
-        return "P" + durationSeconds + "S";
+        if (start.allDay && (durationSeconds % 86400) == 0) {
+            return "P" + (durationSeconds / 86400) + "D"; // Server wants this instead of P86400S
+        } else {
+            return "P" + durationSeconds + "S";
+        }
     }
 
     private static String flattenProperties(ICalendar.Component component,

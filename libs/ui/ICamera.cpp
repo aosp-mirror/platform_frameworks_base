@@ -20,7 +20,7 @@
 #include <utils/Log.h>
 #include <stdint.h>
 #include <sys/types.h>
-#include <utils/Parcel.h>
+#include <binder/Parcel.h>
 #include <ui/ICamera.h>
 
 namespace android {
@@ -32,9 +32,11 @@ enum {
     START_PREVIEW,
     STOP_PREVIEW,
     AUTO_FOCUS,
+    CANCEL_AUTO_FOCUS,
     TAKE_PICTURE,
     SET_PARAMETERS,
     GET_PARAMETERS,
+    SEND_COMMAND,
     CONNECT,
     LOCK,
     UNLOCK,
@@ -162,6 +164,17 @@ public:
         return ret;
     }
 
+    // cancel focus
+    status_t cancelAutoFocus()
+    {
+        LOGV("cancelAutoFocus");
+        Parcel data, reply;
+        data.writeInterfaceToken(ICamera::getInterfaceDescriptor());
+        remote()->transact(CANCEL_AUTO_FOCUS, data, &reply);
+        status_t ret = reply.readInt32();
+        return ret;
+    }
+
     // take a picture - returns an IMemory (ref-counted mmap)
     status_t takePicture()
     {
@@ -193,6 +206,17 @@ public:
         remote()->transact(GET_PARAMETERS, data, &reply);
         return reply.readString8();
     }
+    virtual status_t sendCommand(int32_t cmd, int32_t arg1, int32_t arg2)
+    {
+        LOGD("sendCommand");
+        Parcel data, reply;
+        data.writeInterfaceToken(ICamera::getInterfaceDescriptor());
+        data.writeInt32(cmd);
+        data.writeInt32(arg1);
+        data.writeInt32(arg2);
+        remote()->transact(SEND_COMMAND, data, &reply);
+        return reply.readInt32();
+    }
     virtual status_t connect(const sp<ICameraClient>& cameraClient)
     {
         Parcel data, reply;
@@ -220,12 +244,6 @@ public:
 IMPLEMENT_META_INTERFACE(Camera, "android.hardware.ICamera");
 
 // ----------------------------------------------------------------------
-
-#define CHECK_INTERFACE(interface, data, reply) \
-        do { if (!data.enforceInterface(interface::getInterfaceDescriptor())) { \
-            LOGW("Call incorrectly routed to " #interface); \
-            return PERMISSION_DENIED; \
-        } } while (0)
 
 status_t BnCamera::onTransact(
     uint32_t code, const Parcel& data, Parcel* reply, uint32_t flags)
@@ -300,6 +318,12 @@ status_t BnCamera::onTransact(
             reply->writeInt32(autoFocus());
             return NO_ERROR;
         } break;
+        case CANCEL_AUTO_FOCUS: {
+            LOGV("CANCEL_AUTO_FOCUS");
+            CHECK_INTERFACE(ICamera, data, reply);
+            reply->writeInt32(cancelAutoFocus());
+            return NO_ERROR;
+        } break;
         case TAKE_PICTURE: {
             LOGV("TAKE_PICTURE");
             CHECK_INTERFACE(ICamera, data, reply);
@@ -317,6 +341,15 @@ status_t BnCamera::onTransact(
             LOGV("GET_PARAMETERS");
             CHECK_INTERFACE(ICamera, data, reply);
              reply->writeString8(getParameters());
+            return NO_ERROR;
+         } break;
+        case SEND_COMMAND: {
+            LOGD("SEND_COMMAND");
+            CHECK_INTERFACE(ICamera, data, reply);
+            int command = data.readInt32();
+            int arg1 = data.readInt32();
+            int arg2 = data.readInt32();
+            reply->writeInt32(sendCommand(command, arg1, arg2));
             return NO_ERROR;
          } break;
         case CONNECT: {

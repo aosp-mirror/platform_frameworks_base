@@ -102,7 +102,7 @@ abstract class StreamLoader extends Handler {
                 // to pass data to the loader
                 mData = new byte[8192];
                 sendHeaders();
-                while (!sendData());
+                while (!sendData() && !mHandler.cancelled());
                 closeStreamAndSendEndData();
                 mHandler.loadSynchronousMessages();
             }
@@ -113,8 +113,12 @@ abstract class StreamLoader extends Handler {
      * @see android.os.Handler#handleMessage(android.os.Message)
      */
     public void handleMessage(Message msg) {
-        if (WebView.DEBUG && mHandler.isSynchronous()) {
+        if (DebugFlags.STREAM_LOADER && mHandler.isSynchronous()) {
             throw new AssertionError();
+        }
+        if (mHandler.cancelled()) {
+            closeStreamAndSendEndData();
+            return;
         }
         switch(msg.what) {
             case MSG_STATUS:
@@ -153,7 +157,6 @@ abstract class StreamLoader extends Handler {
         if (mContentLength > 0) {
             headers.setContentLength(mContentLength);
         }
-        headers.setCacheControl(NO_STORE);
         buildHeaders(headers);
         mHandler.headers(headers);
     }

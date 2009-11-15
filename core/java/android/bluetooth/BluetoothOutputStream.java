@@ -24,7 +24,6 @@ import java.io.OutputStream;
  *
  * Used to read from a Bluetooth socket.
  *
- * TODO: Implement bulk reads (instead of one byte at a time).
  * @hide
  */
 /*package*/ final class BluetoothOutputStream extends OutputStream {
@@ -52,6 +51,37 @@ import java.io.OutputStream;
      * @since Android 1.0
      */
     public void write(int oneByte) throws IOException {
-        mSocket.writeNative(oneByte);
+        byte b[] = new byte[1];
+        b[0] = (byte)oneByte;
+        mSocket.write(b, 0, 1);
+    }
+
+    /**
+     * Writes {@code count} bytes from the byte array {@code buffer} starting
+     * at position {@code offset} to this stream.
+     *
+     * @param b
+     *            the buffer to be written.
+     * @param offset
+     *            the start position in {@code buffer} from where to get bytes.
+     * @param count
+     *            the number of bytes from {@code buffer} to write to this
+     *            stream.
+     * @throws IOException
+     *             if an error occurs while writing to this stream.
+     * @throws IndexOutOfBoundsException
+     *             if {@code offset < 0} or {@code count < 0}, or if
+     *             {@code offset + count} is bigger than the length of
+     *             {@code buffer}.
+     * @since Android 1.0
+     */
+    public void write(byte[] b, int offset, int count) throws IOException {
+        if (b == null) {
+            throw new NullPointerException("buffer is null");
+        }
+        if ((offset | count) < 0 || count > b.length - offset) {
+            throw new IndexOutOfBoundsException("invalid offset or length");
+        }
+        mSocket.write(b, offset, count);
     }
 }

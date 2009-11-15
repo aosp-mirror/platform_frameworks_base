@@ -16,6 +16,7 @@
 
 package android.graphics.drawable;
 
+import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.os.SystemClock;
 
@@ -72,7 +73,7 @@ public class TransitionDrawable extends LayerDrawable implements Drawable.Callba
      * 2 layers are required for this drawable to work properly.
      */
     public TransitionDrawable(Drawable[] layers) {
-        this(new TransitionState(null, null), layers);
+        this(new TransitionState(null, null, null), layers);
     }
 
     /**
@@ -82,11 +83,11 @@ public class TransitionDrawable extends LayerDrawable implements Drawable.Callba
      * @see #TransitionDrawable(Drawable[])
      */
     TransitionDrawable() {
-        this(new TransitionState(null, null));
+        this(new TransitionState(null, null, null), (Resources)null);
     }
 
-    private TransitionDrawable(TransitionState state) {
-        super(state);
+    private TransitionDrawable(TransitionState state, Resources res) {
+        super(state, res);
     }
 
     private TransitionDrawable(TransitionState state, Drawable[] layers) {
@@ -94,8 +95,8 @@ public class TransitionDrawable extends LayerDrawable implements Drawable.Callba
     }
 
     @Override
-    LayerState createConstantState(LayerState state) {
-        return new TransitionState((TransitionState) state, this);
+    LayerState createConstantState(LayerState state, Resources res) {
+        return new TransitionState((TransitionState) state, this, res);
     }
     
     /**
@@ -229,13 +230,19 @@ public class TransitionDrawable extends LayerDrawable implements Drawable.Callba
     }
 
     static class TransitionState extends LayerState {
-        TransitionState(TransitionState orig, TransitionDrawable owner) {
-            super(orig, owner);
+        TransitionState(TransitionState orig, TransitionDrawable owner,
+                Resources res) {
+            super(orig, owner, res);
         }
 
         @Override
         public Drawable newDrawable() {
-            return new TransitionDrawable(this);
+            return new TransitionDrawable(this, (Resources)null);
+        }
+
+        @Override
+        public Drawable newDrawable(Resources res) {
+            return new TransitionDrawable(this, res);
         }
 
         @Override

@@ -73,7 +73,7 @@ import java.util.List;
  *   </ul>
  * </li>
  * <li> '\n': 1 byte - an automatically generated newline, used to help detect and recover from log
- *                     corruption and enable stansard unix tools like grep, tail and wc to operate
+ *                     corruption and enable standard unix tools like grep, tail and wc to operate
  *                     on event logs. </li>
  * </ul>
  *
@@ -123,10 +123,6 @@ public class EventLog {
                 throw new IllegalArgumentException(
                         "A List must have fewer than "
                         + Byte.MAX_VALUE + " items in it.");
-            }
-            if (items.length < 1) {
-                throw new IllegalArgumentException(
-                        "A List must have at least one item in it.");
             }
             for (int i = 0; i < items.length; i++) {
                 final Object item = items[i];
@@ -192,17 +188,21 @@ public class EventLog {
             return decodeObject();
         }
 
+        public byte[] getRawData() {
+            return mBuffer.array();
+        }
+
         /** @return the loggable item at the current position in mBuffer. */
         private Object decodeObject() {
             if (mBuffer.remaining() < 1) return null;
             switch (mBuffer.get()) {
             case INT:
                 if (mBuffer.remaining() < 4) return null;
-                return mBuffer.getInt();
+                return (Integer) mBuffer.getInt();
 
             case LONG:
                 if (mBuffer.remaining() < 8) return null;
-                return mBuffer.getLong();
+                return (Long) mBuffer.getLong();
 
             case STRING:
                 try {
@@ -219,7 +219,7 @@ public class EventLog {
             case LIST:
                 if (mBuffer.remaining() < 1) return null;
                 int length = mBuffer.get();
-                if (length <= 0) return null;
+                if (length < 0) return null;
                 Object[] array = new Object[length];
                 for (int i = 0; i < length; ++i) {
                     array[i] = decodeObject();
@@ -284,5 +284,14 @@ public class EventLog {
      * @throws IOException if something goes wrong reading events
      */
     public static native void readEvents(int[] tags, Collection<Event> output)
+            throws IOException;
+
+    /**
+     * Read events from a file.
+     * @param path to read from
+     * @param output container to add events into
+     * @throws IOException if something goes wrong reading events
+     */
+    public static native void readEvents(String path, Collection<Event> output)
             throws IOException;
 }

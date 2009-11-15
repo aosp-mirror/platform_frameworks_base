@@ -170,7 +170,7 @@ public final class CookieSyncManager extends WebSyncManager {
     }
 
     protected void syncFromRamToFlash() {
-        if (WebView.LOGV_ENABLED) {
+        if (DebugFlags.COOKIE_SYNC_MANAGER) {
             Log.v(LOGTAG, "CookieSyncManager::syncFromRamToFlash STARTS");
         }
 
@@ -187,7 +187,7 @@ public final class CookieSyncManager extends WebSyncManager {
                 CookieManager.getInstance().deleteLRUDomain();
         syncFromRamToFlash(lruList);
 
-        if (WebView.LOGV_ENABLED) {
+        if (DebugFlags.COOKIE_SYNC_MANAGER) {
             Log.v(LOGTAG, "CookieSyncManager::syncFromRamToFlash DONE");
         }
     }

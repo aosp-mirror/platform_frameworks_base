@@ -16,16 +16,23 @@
 
 use strict;
 
+sub rtrim($)
+{
+    my $string = shift;
+    $string =~ s/\s+$//;
+    return $string;
+}
+
 while (my $line = <>) {
   next if $line =~ /^\//;
   next if $line =~ /^#/;
   next if $line =~ /^\s*$/;
-  if ($line !~ /^GL_API\s+(.+)\s+GL_APIENTRY\s+([\w]+)\s*\(([^\)]+)\);/) {
+  if ($line !~ /^GL_API(CALL)?\s+(.+)\s+GL_APIENTRY\s+([\w]+)\s*\(([^\)]+)\);/) {
     next;
   }
-  my $type = $1;
-  my $name = $2;
-  my $args = $3;
+  my $type = rtrim($2);
+  my $name = $3;
+  my $args = $4;
 
   #printf("%s", $line);
   

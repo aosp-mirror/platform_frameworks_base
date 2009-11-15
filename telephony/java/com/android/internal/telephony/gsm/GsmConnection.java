@@ -180,11 +180,6 @@ public class GsmConnection extends Connection {
         return isIncoming == c.isMT && equalsHandlesNulls(address, cAddress);
     }
 
-    public String
-    toString() {
-        return (isIncoming ? "incoming" : "outgoing");
-    }
-
     public String getAddress() {
         return address;
     }
@@ -381,10 +376,14 @@ public class GsmConnection extends Connection {
                     } else if (phone.mSST.rs.isCsNormalRestricted()) {
                         return DisconnectCause.CS_RESTRICTED_NORMAL;
                     } else {
-                        return DisconnectCause.NORMAL;
+                        return DisconnectCause.ERROR_UNSPECIFIED;
                     }
-                } else {
+                } else if (causeCode == CallFailCause.NORMAL_CLEARING) {
                     return DisconnectCause.NORMAL;
+                } else {
+                    // If nothing else matches, report unknown call drop reason
+                    // to app, not NORMAL call end.
+                    return DisconnectCause.ERROR_UNSPECIFIED;
                 }
         }
     }

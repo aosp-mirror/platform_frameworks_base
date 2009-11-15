@@ -19,19 +19,31 @@
 
 #ifdef __cplusplus
 
+#include <sys/types.h>
 #include <ui/ISurface.h>
 #include <utils/RefBase.h>
+#include <utils/Errors.h>
 
 #include <media/mediaplayer.h>
 #include <media/AudioSystem.h>
+#include <media/Metadata.h>
 
 namespace android {
+
+class Parcel;
+template<typename T> class SortedVector;
 
 enum player_type {
     PV_PLAYER = 1,
     SONIVOX_PLAYER = 2,
-    VORBIS_PLAYER = 3
+    VORBIS_PLAYER = 3,
+    STAGEFRIGHT_PLAYER = 4,
+    // Test players are available only in the 'test' and 'eng' builds.
+    // The shared library with the test player is passed passed as an
+    // argument to the 'test:' url in the setDataSource call.
+    TEST_PLAYER = 5,
 };
+
 
 #define DEFAULT_AUDIOSINK_BUFFERCOUNT 4
 #define DEFAULT_AUDIOSINK_BUFFERSIZE 1200
@@ -45,10 +57,12 @@ typedef void (*notify_callback_f)(void* cookie, int msg, int ext1, int ext2);
 class MediaPlayerBase : public RefBase
 {
 public:
-
     // AudioSink: abstraction layer for audio output
     class AudioSink : public RefBase {
     public:
+        typedef void (*AudioCallback)(
+                AudioSink *audioSink, void *buffer, size_t size, void *cookie);
+
         virtual             ~AudioSink() {}
         virtual bool        ready() const = 0; // audio output is open and ready
         virtual bool        realtime() const = 0; // audio output is real-time output
@@ -58,7 +72,17 @@ public:
         virtual ssize_t     frameSize() const = 0;
         virtual uint32_t    latency() const = 0;
         virtual float       msecsPerFrame() const = 0;
-        virtual status_t    open(uint32_t sampleRate, int channelCount, int format=AudioSystem::PCM_16_BIT, int bufferCount=DEFAULT_AUDIOSINK_BUFFERCOUNT) = 0;
+
+        // If no callback is specified, use the "write" API below to submit
+        // audio data. Otherwise return a full buffer of audio data on each
+        // callback.
+        virtual status_t    open(
+                uint32_t sampleRate, int channelCount,
+                int format=AudioSystem::PCM_16_BIT,
+                int bufferCount=DEFAULT_AUDIOSINK_BUFFERCOUNT,
+                AudioCallback cb = NULL,
+                void *cookie = NULL) = 0;
+
         virtual void        start() = 0;
         virtual ssize_t     write(const void* buffer, size_t size) = 0;
         virtual void        stop() = 0;
@@ -88,6 +112,26 @@ public:
     virtual player_type playerType() = 0;
     virtual void        setNotifyCallback(void* cookie, notify_callback_f notifyFunc) {
                             mCookie = cookie; mNotify = notifyFunc; }
+    // Invoke a generic method on the player by using opaque parcels
+    // for the request and reply.
+    //
+    // @param request Parcel that is positioned at the start of the
+    //                data sent by the java layer.
+    // @param[out] reply Parcel to hold the reply data. Cannot be null.
+    // @return OK if the call was successful.
+    virtual status_t    invoke(const Parcel& request, Parcel *reply) = 0;
+
+    // The Client in the MetadataPlayerService calls this method on
+    // the native player to retrieve all or a subset of metadata.
+    //
+    // @param ids SortedList of metadata ID to be fetch. If empty, all
+    //            the known metadata should be returned.
+    // @param[inout] records Parcel where the player appends its metadata.
+    // @return OK if the call was successful.
+    virtual status_t    getMetadata(const media::Metadata::Filter& ids,
+                                    Parcel *records) {
+        return INVALID_OPERATION;
+    };
 
 protected:
     virtual void        sendEvent(int msg, int ext1=0, int ext2=0) { if (mNotify) mNotify(mCookie, msg, ext1, ext2); }

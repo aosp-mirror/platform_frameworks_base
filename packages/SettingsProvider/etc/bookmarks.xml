@@ -39,10 +39,12 @@
         package="com.android.calendar"
         class="com.android.calendar.LaunchActivity"
         shortcut="l" />
+<!--
     <bookmark
         package="com.google.android.apps.maps"
         class="com.google.android.maps.MapsActivity"
         shortcut="m" />
+-->
     <bookmark
         package="com.android.music"
         class="com.android.music.MusicBrowserActivity"

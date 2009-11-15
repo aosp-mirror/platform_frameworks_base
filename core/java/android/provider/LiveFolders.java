@@ -40,12 +40,11 @@ import android.annotation.SdkConstant;
  * to retrieve the folder's content.</p>
  *
  * <h3>Setting up the live folder activity</h3>
- * <p>The following code sample shows how to write an activity that creates a live fodler:</p>
+ * <p>The following code sample shows how to write an activity that creates a live folder:</p>
  * <pre>
  * public static class MyLiveFolder extends Activity {
  *     public static final Uri CONTENT_URI = Uri.parse("content://my.app/live");
  *
- *     @Override
  *     protected void onCreate(Bundle savedInstanceState) {
  *         super.onCreate(savedInstanceState);
  *

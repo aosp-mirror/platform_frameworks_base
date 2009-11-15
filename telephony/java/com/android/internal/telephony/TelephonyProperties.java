@@ -109,4 +109,31 @@ public interface TelephonyProperties
 
     /** The international dialing prefix conversion string */
     static final String PROPERTY_IDP_STRING = "ro.cdma.idpstring";
+
+    /**
+     * Defines the schema for the carrier specified OTASP number
+     */
+    static final String PROPERTY_OTASP_NUM_SCHEMA = "ro.cdma.otaspnumschema";
+
+    /**
+     * Disable all calls including Emergency call when it set to true.
+     */
+    static final String PROPERTY_DISABLE_CALL = "ro.telephony.disable-call";
+
+    /**
+     * Set to true for vendor RIL's that send multiple UNSOL_CALL_RING notifications.
+     */
+    static final String PROPERTY_RIL_SENDS_MULTIPLE_CALL_RING =
+        "ro.telephony.call_ring.multiple";
+
+    /**
+     * The number of milli-seconds between CALL_RING notifications.
+     */
+    static final String PROPERTY_CALL_RING_DELAY = "ro.telephony.call_ring.delay";
+
+    /**
+     * Track CDMA SMS message id numbers to ensure they increment
+     * monotonically, regardless of reboots.
+     */
+    static final String PROPERTY_CDMA_MSG_ID = "persist.radio.cdma.msgid";
 }

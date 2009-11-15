@@ -21,10 +21,14 @@
 #include <string.h>
 #include <errno.h>
 
+#include <pthread.h>
+
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
 #include <GLES/gl.h>
 #include <GLES/glext.h>
+#include <GLES2/gl2.h>
+#include <GLES2/gl2ext.h>
 
 #if !defined(__arm__)
 #define USE_SLOW_BINDING            1
@@ -56,13 +60,12 @@ const unsigned int NUM_DISPLAYS = 1;
 enum {
     IMPL_HARDWARE = 0,
     IMPL_SOFTWARE,
-    
-    IMPL_NUM_DRIVERS_IMPLEMENTATIONS,
-
-    IMPL_CONTEXT_LOST = IMPL_NUM_DRIVERS_IMPLEMENTATIONS,
-    IMPL_NO_CONTEXT,
-    
     IMPL_NUM_IMPLEMENTATIONS
+};
+
+enum {
+    GLESv1_INDEX = 0,
+    GLESv2_INDEX = 1,
 };
 
 // ----------------------------------------------------------------------------
@@ -74,14 +77,14 @@ enum {
 #define GL_ENTRY(_r, _api, ...) _r (*_api)(__VA_ARGS__);
 #define EGL_ENTRY(_r, _api, ...) _r (*_api)(__VA_ARGS__);
 
+struct egl_t {
+    #include "EGL/egl_entries.in"
+};
+
 struct gl_hooks_t {
     struct gl_t {
-        #include "gl_entries.in"
-        #include "glext_entries.in"
+        #include "entries.in"
     } gl;
-    struct egl_t {
-        #include "egl_entries.in"
-    } egl;
     struct gl_ext_t {
         void (*extensions[MAX_NUMBER_OF_GL_EXTENSIONS])(void);
     } ext;
@@ -92,8 +95,15 @@ struct gl_hooks_t {
 
 // ----------------------------------------------------------------------------
 
-extern gl_hooks_t gHooks[IMPL_NUM_IMPLEMENTATIONS];
+extern gl_hooks_t gHooks[2][IMPL_NUM_IMPLEMENTATIONS];
+extern gl_hooks_t gHooksNoContext;
 extern pthread_key_t gGLWrapperKey;
+extern "C" void gl_unimplemented();
+
+extern char const * const gl_names[];
+extern char const * const egl_names[];
+
+// ----------------------------------------------------------------------------
 
 #if USE_FAST_TLS_KEY
 
@@ -114,7 +124,7 @@ static gl_hooks_t const* getGlThreadSpecific() {
     gl_hooks_t const * volatile * tls_hooks = get_tls_hooks();
     gl_hooks_t const* hooks = tls_hooks[TLS_SLOT_OPENGL_API];
     if (hooks) return hooks;
-    return &gHooks[IMPL_NO_CONTEXT];
+    return &gHooksNoContext;
 }
 
 #else
@@ -126,7 +136,7 @@ static inline void setGlThreadSpecific(gl_hooks_t const *value) {
 static gl_hooks_t const* getGlThreadSpecific() {
     gl_hooks_t const* hooks =  static_cast<gl_hooks_t*>(pthread_getspecific(gGLWrapperKey));
     if (hooks) return hooks;
-    return &gHooks[IMPL_NO_CONTEXT];
+    return &gHooksNoContext;
 }
 
 #endif

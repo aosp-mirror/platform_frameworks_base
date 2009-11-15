@@ -34,22 +34,22 @@ class SkBitmap;
 namespace android {
 
 class AssetManager;
-class EGLNativeWindowSurface;
 
 // ---------------------------------------------------------------------------
 
-class BootAnimation : public Thread
+class BootAnimation : public Thread, public IBinder::DeathRecipient
 {
 public:
                 BootAnimation();
     virtual     ~BootAnimation();
 
-    const sp<SurfaceComposerClient>& session() const;
+    sp<SurfaceComposerClient> session() const;
 
 private:
     virtual bool        threadLoop();
     virtual status_t    readyToRun();
     virtual void        onFirstRef();
+    virtual void        binderDied(const wp<IBinder>& who);
 
     struct Texture {
         GLint   w;
@@ -57,8 +57,31 @@ private:
         GLuint  name;
     };
 
+    struct Animation {
+        struct Frame {
+            String8 name;
+            FileMap* map;
+            mutable GLuint tid;
+            bool operator < (const Frame& rhs) const {
+                return name < rhs.name;
+            }
+        };
+        struct Part {
+            int count;
+            int pause;
+            String8 path;
+            SortedVector<Frame> frames;
+        };
+        int fps;
+        int width;
+        int height;
+        Vector<Part> parts;
+    };
+
     status_t initTexture(Texture* texture, AssetManager& asset, const char* name);
+    status_t initTexture(void* buffer, size_t len);
     bool android();
+    bool movie();
 
     sp<SurfaceComposerClient>       mSession;
     AssetManager mAssets;
@@ -68,8 +91,10 @@ private:
     EGLDisplay  mDisplay;
     EGLDisplay  mContext;
     EGLDisplay  mSurface;
+    sp<SurfaceControl> mFlingerSurfaceControl;
     sp<Surface> mFlingerSurface;
-    sp<EGLNativeWindowSurface> mNativeWindowSurface;
+    bool        mAndroidAnimation;
+    ZipFileRO   mZip;
 };
 
 // ---------------------------------------------------------------------------

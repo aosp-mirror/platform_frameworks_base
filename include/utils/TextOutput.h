@@ -28,8 +28,8 @@ namespace android {
 class TextOutput
 {
 public:
-                        TextOutput() { }
-    virtual             ~TextOutput() { }
+                        TextOutput();
+    virtual             ~TextOutput();
     
     virtual status_t    print(const char* txt, size_t len) = 0;
     virtual void        moveIndent(int delta) = 0;

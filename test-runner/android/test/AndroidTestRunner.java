@@ -18,6 +18,8 @@ package android.test;
 
 import android.app.Instrumentation;
 import android.content.Context;
+import android.os.PerformanceCollector.PerformanceResultsWriter;
+
 import com.google.android.collect.Lists;
 import junit.framework.Test;
 import junit.framework.TestCase;
@@ -39,6 +41,7 @@ public class AndroidTestRunner extends BaseTestRunner {
 
     private List<TestListener> mTestListeners = Lists.newArrayList();
     private Instrumentation mInstrumentation;
+    private PerformanceResultsWriter mPerfWriter;
 
     @SuppressWarnings("unchecked")
     public void setTestClassName(String testClassName, String testMethodName) {
@@ -158,16 +161,19 @@ public class AndroidTestRunner extends BaseTestRunner {
             mTestResult.addListener(testListener);
         }
 
+        Context testContext = mInstrumentation == null ? mContext : mInstrumentation.getContext();
         for (TestCase testCase : mTestCases) {
-            setContextIfAndroidTestCase(testCase, mContext);
+            setContextIfAndroidTestCase(testCase, mContext, testContext);
             setInstrumentationIfInstrumentationTestCase(testCase, mInstrumentation);
+            setPerformanceWriterIfPerformanceTestCase(testCase, mPerfWriter);
             testCase.run(mTestResult);
         }
     }
 
-    private void setContextIfAndroidTestCase(Test test, Context context) {
+    private void setContextIfAndroidTestCase(Test test, Context context, Context testContext) {
         if (AndroidTestCase.class.isAssignableFrom(test.getClass())) {
             ((AndroidTestCase) test).setContext(context);
+            ((AndroidTestCase) test).setTestContext(testContext);
         }
     }
 
@@ -178,12 +184,35 @@ public class AndroidTestRunner extends BaseTestRunner {
     private void setInstrumentationIfInstrumentationTestCase(
             Test test, Instrumentation instrumentation) {
         if (InstrumentationTestCase.class.isAssignableFrom(test.getClass())) {
-            ((InstrumentationTestCase) test).injectInsrumentation(instrumentation);
+            ((InstrumentationTestCase) test).injectInstrumentation(instrumentation);
         }
     }
 
-    public void setInstrumentaiton(Instrumentation instrumentation) {
+    private void setPerformanceWriterIfPerformanceTestCase(
+            Test test, PerformanceResultsWriter writer) {
+        if (PerformanceTestBase.class.isAssignableFrom(test.getClass())) {
+            ((PerformanceTestBase) test).setPerformanceResultsWriter(writer);
+        }
+    }
+
+    public void setInstrumentation(Instrumentation instrumentation) {
         mInstrumentation = instrumentation;
+    }
+
+    /**
+     * @deprecated Incorrect spelling,
+     * use {@link #setInstrumentation(android.app.Instrumentation)} instead.
+     */
+    @Deprecated
+    public void setInstrumentaiton(Instrumentation instrumentation) {
+        setInstrumentation(instrumentation);
+    }
+
+    /**
+     * {@hide} Pending approval for public API.
+     */
+    public void setPerformanceResultsWriter(PerformanceResultsWriter writer) {
+        mPerfWriter = writer;
     }
 
     @Override

@@ -9,9 +9,9 @@
 
 #include <utils/Debug.h>
 #include <utils/Log.h>
-#include <utils/Parcel.h>
+#include <binder/Parcel.h>
 #include <utils/String8.h>
-#include <utils/ProcessState.h>
+#include <binder/ProcessState.h>
 
 #include <private/utils/Static.h>
 

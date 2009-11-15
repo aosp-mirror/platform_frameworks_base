@@ -28,7 +28,10 @@
 #include <sqlite3.h>
 #include <sqlite3_android.h>
 #include <string.h>
-#include <utils.h>
+#include <utils/Log.h>
+#include <utils/threads.h>
+#include <utils/List.h>
+#include <utils/Errors.h>
 #include <ctype.h>
 
 #include <stdio.h>

@@ -7,7 +7,10 @@
 #define __BUNDLE_H
 
 #include <stdlib.h>
-#include <utils.h>      // android
+#include <utils/Log.h>
+#include <utils/threads.h>
+#include <utils/List.h>
+#include <utils/Errors.h>
 #include <utils/String8.h>
 #include <utils/Vector.h>
 
@@ -36,7 +39,7 @@ public:
           mRequireLocalization(false), mPseudolocalize(false),
           mValues(false),
           mCompressionMethod(0), mOutputAPKFile(NULL),
-          mAssetSourceDir(NULL),
+          mAssetSourceDir(NULL), mProguardFile(NULL),
           mAndroidManifestFile(NULL), mPublicOutputFile(NULL),
           mRClassDir(NULL), mResourceIntermediatesDir(NULL),
           mMinSdkVersion(NULL), mTargetSdkVersion(NULL), mMaxSdkVersion(NULL),
@@ -77,14 +80,18 @@ public:
     void setValues(bool val) { mValues = val; }
     int getCompressionMethod(void) const { return mCompressionMethod; }
     void setCompressionMethod(int val) { mCompressionMethod = val; }
+    bool getJunkPath(void) const { return mJunkPath; }
+    void setJunkPath(bool val) { mJunkPath = val; }
     const char* getOutputAPKFile() const { return mOutputAPKFile; }
     void setOutputAPKFile(const char* val) { mOutputAPKFile = val; }
 
-    /*                                                                
-     * Input options.                                                                
+    /*
+     * Input options.
      */
     const char* getAssetSourceDir() const { return mAssetSourceDir; }
     void setAssetSourceDir(const char* dir) { mAssetSourceDir = dir; }
+    const char* getProguardFile() const { return mProguardFile; }
+    void setProguardFile(const char* file) { mProguardFile = file; }
     const android::Vector<const char*>& getResourceSourceDirs() const { return mResourceSourceDirs; }
     void addResourceSourceDir(const char* dir) { mResourceSourceDirs.insertAt(dir,0); }
     const char* getAndroidManifestFile() const { return mAndroidManifestFile; }
@@ -114,7 +121,7 @@ public:
     void setVersionCode(const char*  val) { mVersionCode = val; }
     const char* getVersionName() const { return mVersionName; }
     void setVersionName(const char* val) { mVersionName = val; }
-    
+
     /*
      * Set and get the file specification.
      *
@@ -156,8 +163,10 @@ private:
     bool        mPseudolocalize;
     bool        mValues;
     int         mCompressionMethod;
+    bool        mJunkPath;
     const char* mOutputAPKFile;
     const char* mAssetSourceDir;
+    const char* mProguardFile;
     const char* mAndroidManifestFile;
     const char* mPublicOutputFile;
     const char* mRClassDir;
@@ -167,13 +176,13 @@ private:
     android::Vector<const char*> mJarFiles;
     android::Vector<const char*> mNoCompressExtensions;
     android::Vector<const char*> mResourceSourceDirs;
-    
+
     const char* mMinSdkVersion;
     const char* mTargetSdkVersion;
     const char* mMaxSdkVersion;
     const char* mVersionCode;
     const char* mVersionName;
-    
+
     /* file specification */
     int         mArgc;
     char* const* mArgv;

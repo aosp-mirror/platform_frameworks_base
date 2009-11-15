@@ -226,7 +226,8 @@ public class CameraTest extends ActivityInstrumentationTestCase<MediaFrameworkTe
      * Test case 1: Take a picture and verify all the callback
      * functions are called properly.
      */
-    @LargeTest
+    // TODO: add this back to LargeTest once bug 2141755 is fixed
+    // @LargeTest
     public void testTakePicture() throws Exception {  
         synchronized (lock) {
             initializeMessageLooper();

@@ -218,7 +218,7 @@ public class SmsMessage {
                     index, data);
         }
 
-        return new SmsMessage(wrappedMessage);
+        return wrappedMessage != null ? new SmsMessage(wrappedMessage) : null;
     }
 
     /**
@@ -309,8 +309,13 @@ public class SmsMessage {
         while (pos < textLen) {
             int nextPos = 0;  // Counts code units.
             if (ted.codeUnitSize == ENCODING_7BIT) {
-                // For multi-segment messages, CDMA 7bit equals GSM 7bit encoding (EMS mode).
-                nextPos = GsmAlphabet.findGsmSeptetLimitIndex(text, pos, limit);
+                if (activePhone == PHONE_TYPE_CDMA && ted.msgCount == 1) {
+                    // For a singleton CDMA message, the encoding must be ASCII...
+                    nextPos = pos + Math.min(limit, textLen - pos);
+                } else {
+                    // For multi-segment messages, CDMA 7bit equals GSM 7bit encoding (EMS mode).
+                    nextPos = GsmAlphabet.findGsmSeptetLimitIndex(text, pos, limit);
+                }
             } else {  // Assume unicode.
                 nextPos = pos + Math.min(limit / 2, textLen - pos);
             }
@@ -344,6 +349,25 @@ public class SmsMessage {
     public static int[] calculateLength(String messageBody, boolean use7bitOnly) {
         return calculateLength((CharSequence)messageBody, use7bitOnly);
     }
+
+    /*
+     * TODO(cleanup): It looks like there is now no useful reason why
+     * apps should generate pdus themselves using these routines,
+     * instead of handing the raw data to SMSDispatcher (and thereby
+     * have the phone process do the encoding).  Moreover, CDMA now
+     * has shared state (in the form of the msgId system property)
+     * which can only be modified by the phone process, and hence
+     * makes the output of these routines incorrect.  Since they now
+     * serve no purpose, they should probably just return null
+     * directly, and be deprecated.  Going further in that direction,
+     * the above parsers of serialized pdu data should probably also
+     * be gotten rid of, hiding all but the necessarily visible
+     * structured data from client apps.  A possible concern with
+     * doing this is that apps may be using these routines to generate
+     * pdus that are then sent elsewhere, some network server, for
+     * example, and that always returning null would thereby break
+     * otherwise useful apps.
+     */
 
     /**
      * Get an SMS-SUBMIT PDU for a destination address and a message

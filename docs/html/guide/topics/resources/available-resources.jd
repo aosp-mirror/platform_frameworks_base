@@ -36,6 +36,7 @@ parent.link=index.html
       </ol>
     </li>
     <li><a href="#stylesandthemes">Styles and Themes</a></li>
+    <li><a href="#Searchable">Searchable</a></li>
   </ol>
 
 </div>
@@ -86,7 +87,7 @@ XML files such as <a href="#layoutresources">layouts</a>.</p>
     <code>&lt;color&gt;</code> tags.
 </p>
 <p>
-    <strong>Resource source file location</strong>: res/values/<em>colors</em>.xml (file name is arbitrary)
+    <strong>Resource source file location</strong>: {@code res/values/<em>colors</em>.xml} (File name is arbitrary.)
 </p>
 <p>
     <strong>Compiled resource datatype:</strong> Resource pointer to a Java int.
@@ -183,7 +184,7 @@ tags.
     <strong>Source file format:</strong> XML file requiring a <code>&lt;?xml version="1.0" encoding="utf-8"?&gt;</code> declaration, and a root <code>&lt;resources&gt;</code> element containing one or more <code>&lt;string&gt;</code> tags.
 </p>
 <p>
-    <strong>Resource source file location</strong>: res/values/<em>strings</em>.xml (file name is arbitrary)
+    <strong>Resource source file location</strong>: {@code res/values/<em>strings</em>.xml} (File name is arbitrary.)
 </p>
 <p>
     <strong>Compiled resource datatype:</strong> Resource pointer to a Java CharSequence.
@@ -338,8 +339,8 @@ version="1.0" encoding="utf-8"?&gt;</code> declaration, and a root
 <code>&lt;resources&gt;</code> element containing one or more
 <code>&lt;dimen&gt;</code> tags.</p>
 
-<p><strong>Resource source file location</strong>: res/values/dimens.xml (File
-name is arbitrary; standard practice is to put all dimensions in one file
+<p><strong>Resource source file location</strong>: {@code res/values/dimens.xml} (File
+name is arbitrary, but standard practice is to put all dimensions in one file
 devoted to dimensions.)</p>
 <p><strong>Compiled resource datatype:</strong> Resource pointer to a
 dimension.</p>
@@ -424,7 +425,7 @@ res/drawable/my_picture.png would be referenced as R.drawable.my_picture).</p>
     <strong>Source file formats:</strong> png (preferred), jpg (acceptable), gif (discouraged). One resource per file.
 </p>
 <p>
-    <strong>Resource file location</strong>: res/drawable/<em>some_file</em>.png or <em>some_file</em>.jpg or <em>some_file</em>.gif.
+    <strong>Resource file location</strong>: {@code res/drawable/<em>some_file</em>.png}
 </p>
 <p>
     <strong>Compiled resource datatype:</strong> Resource pointer to a {@link android.graphics.drawable.BitmapDrawable BitmapDrawable}.
@@ -453,7 +454,8 @@ version="1.0" encoding="utf-8"?&gt;</code> declaration, and a root
 <code>&lt;resources&gt;</code> element containing one or more
 <code>&lt;drawable&gt;</code> tags.</p>
 <p>
-    <strong>Resource source file location</strong>: res/values/colors.xml (File name is arbitrary; standard practice is to put the PaintDrawable items in the file along with the <a href="resources-i18n.html#numericcolorresources">numeric color values</a>.)
+    <strong>Resource source file location</strong>: {@code res/values/colors.xml} (File name is arbitrary, but standard practice is to put the PaintDrawable 
+    items in the file along with the <a href="resources-i18n.html#numericcolorresources">numeric color values</a>.)
 </p>
 <p>
     <strong>Compiled resource datatype:</strong> Resource pointer to a {@link android.graphics.drawable.PaintDrawable}.
@@ -540,7 +542,7 @@ tv.setBackground(redDrawable);
     <strong>Source file format:</strong> PNG &mdash; one resource per file
 </p>
 <p>
-    <strong>Resource source file location</strong>: res/drawable/<em>some_name</em>.9.png (must end in .9.png)
+    <strong>Resource source file location</strong>: {@code res/drawable/<em>some_name</em>.9.png} (Filename must end in {@code .9.png})
 </p>
 <p>
     <strong>Compiled resource datatype:</strong> Resource pointer to a {@link android.graphics.drawable.NinePatchDrawable NinePatchDrawable}.
@@ -573,7 +575,7 @@ in <a href="{@docRoot}guide/topics/graphics/2d-graphics.html#nine-patch">2D Grap
     <strong>Source file format:</strong> XML file, one resource per file, one root tag with no <code>&lt;?xml&gt;</code> declaration
 </p>
 <p>
-    <strong>Resource file location</strong>: res/anim/<em>some_file</em>.xml
+    <strong>Resource file location</strong>: {@code res/anim/<em>some_file</em>.xml}
 </p>
 <p>
     <strong>Compiled resource datatype:</strong> Resource pointer to an {@link android.view.animation.Animation}.
@@ -906,7 +908,7 @@ res/layout/<em>some_file</em>.xml.</p>
 </p>
 <pre>
 &lt;<em>ViewGroupClass</em> xmlns:android="http://schemas.android.com/apk/res/android"
-                id="@+id/<em>string_name</em>" (attributes)&gt;
+                android:id="@+id/<em>string_name</em>" (attributes)&gt;
    &lt;<em>widget</em> or other nested <em>ViewGroupClass</em>&gt;+
    &lt;requestFocus/&gt;(0 or 1 per layout file, assigned to any element)
 &lt;/<em>ViewGroupClass</em>&gt;
@@ -917,7 +919,7 @@ res/layout/<em>some_file</em>.xml.</p>
     </dt>
     <dd>
         <p>The file must have a single root element. This can be a ViewGroup class that contains other elements, or a widget (or custom item) if it's only one object. By default, you can use any (case-sensitive) Android {@link android.widget widget} or {@link android.view.ViewGroup ViewGroup} class name as an element. These elements support attributes that apply to the underlying class, but the naming is not as clear. How to discover what attributes are supported for what tags is discussed below. You should not assume that any nesting is valid (for example you cannot enclose <code>&lt;TextView&gt;</code> elements inside a <code>&lt;ListLayout&gt;</code>).</p>
-        <p>If a class derives from another class, the XML element inherits all the attributes from the element that it "derives" from. So, for example, <code>&lt;EditText&gt;</code> is the corresponding XML element for the EditText class. It exposes its own unique attributes (<code>EditText_numeric</code>), as well as all attributes supported by <code>&lt;TextView&gt;</code> and <code>&lt;View&gt;</code>. For the <em>id</em> attribute of a tag in XML, you should use a special syntax: "@+id/<em>somestringvalue</em>". The "@+" syntax creates a resource number in the R.id class, if one doesn't exist, or uses it, if it does exist. When declaring an ID value for an XML tag, use this syntax. Example: <code>&lt;TextView id="@+id/nameTextbox"/&gt;</code>, and refer to it this way in Java: <code>findViewById(R.id.nameTextbox)</code>. All elements support the following values:</p>
+        <p>If a class derives from another class, the XML element inherits all the attributes from the element that it "derives" from. So, for example, <code>&lt;EditText&gt;</code> is the corresponding XML element for the EditText class. It exposes its own unique attributes (<code>EditText_numeric</code>), as well as all attributes supported by <code>&lt;TextView&gt;</code> and <code>&lt;View&gt;</code>. For the <em>id</em> attribute of a tag in XML, you should use a special syntax: "@+id/<em>somestringvalue</em>". The "@+" syntax creates a resource number in the R.id class, if one doesn't exist, or uses it, if it does exist. When declaring an ID value for an XML tag, use this syntax. Example: <code>&lt;TextView android:id="@+id/nameTextbox"/&gt;</code>, and refer to it this way in Java: <code>findViewById(R.id.nameTextbox)</code>. All elements support the following values:</p>
         <ul>
             <li>
                 <em>id</em> - An ID value used to access this element in Java. Typically you will use the syntax @+id/<em>string_name</em> to generate an ID for you in the id.xml file if you haven't created one yourself.
@@ -1005,7 +1007,7 @@ res/layout/<em>some_file</em>.xml.</p>
              android:paddingBottom="4"            // TextView.paddingBottom
              android:text="@string/redirect_getter"/&gt; // TextView.text
 
-   &lt;EditText id="@+id/text"
+   &lt;EditText android:id="@+id/text"
              android:layout_width="fill_parent"   // EditText.LayoutParams.width
              android:layout_height="wrap_content" // EditText.LayoutParams.height
              android:layout_weight="0"            // EditText.LinearLayoutParams.weight
@@ -1013,7 +1015,7 @@ res/layout/<em>some_file</em>.xml.</p>
        &lt;requestFocus /&gt;
    &lt;/EditText&gt;
 
-   &lt;Button id="@+id/apply"
+   &lt;Button android:id="@+id/apply"
            android:layout_width="wrap_content"  // Button.LayoutParams.width
            android:layout_height="wrap_content" // Button.LayoutParams.height
            android:text="@string/apply" /&gt;      // TextView.text
@@ -1045,7 +1047,7 @@ setContentView(R.layout.main_screen);
         <strong>Java implementation file</strong> - The implementation file. The class must extend {@link android.view.View View} or a subclass. See LabelView.java in ApiDemos.
     </li>
     <li>
-        <strong>res/values/attrs.xml</strong> - Defines the XML element, and the attributes that it supports, for clients to use to instantiate your object in their layout XML file. Define your element in a <code>&lt;declare-styleable id=<em>your_java_class_name</em>&gt;</code>. See res/layout/attrs.xml in ApiDemos.
+        <strong>res/values/attrs.xml</strong> - Defines the XML element, and the attributes that it supports, for clients to use to instantiate your object in their layout XML file. Define your element in a <code>&lt;declare-styleable name=<em>your_java_class_name</em>&gt;</code>. See res/values/attrs.xml in ApiDemos.
     </li>
     <li>
         <strong>res/layout/<em>your_class</em>.xml</strong> [<em>optional</em>] - An optional XML file to describe the layout of your object. This could also be done in Java. See custom_view_1.xml in ApiDemos.
@@ -1055,7 +1057,7 @@ setContentView(R.layout.main_screen);
     <strong>Source file format:</strong> XML file without an <code>&lt;?xml&gt;</code> declaration, and a <code>&lt;resources&gt;</code> root element containing one or more custom element tags.
 </p>
 <p>
-    <strong>Resource file location</strong>: res/values/<em>attrs</em>.xml (file name is arbitrary).
+    <strong>Resource file location</strong>: {@code res/values/<em>attrs</em>.xml} (File name is arbitrary.)
 </p>
 <p>
     <strong>Compiled resource datatype:</strong> Resource pointer to a {@link android.view.View} (or subclass) resource.
@@ -1084,7 +1086,7 @@ setContentView(R.layout.main_screen);
     <strong>Source file format:</strong> XML file requiring a <code>&lt;?xml version="1.0" encoding="utf-8"?&gt;</code> declaration, and a root <code>&lt;resources&gt;</code> element containing one or more <code>&lt;style&gt;</code> tags.
 </p>
 <p>
-    <strong>Resource source file location</strong>: res/values/styles.xml (file name is arbitrary). The file name is arbitrary, but standard practice is to put all styles into a file named styles.xml.
+    <strong>Resource source file location</strong>: {@code res/values/styles.xml} (File name is arbitrary, but standard practice is to put all styles into a file named styles.xml.)
 </p>
 <p>
     <strong>Compiled resource datatype:</strong> Resource pointer to a Java CharSequence.
@@ -1133,3 +1135,317 @@ setContentView(R.layout.main_screen);
 
 <p>For examples of how to declare and apply styles and themes, read 
 <a href="{@docRoot}guide/topics/ui/themes.html">Applying Styles and Themes</a>.</p>
+
+
+
+<h2 id="Searchable">Searchable</h2>
+
+<p>To make search appear to the user as a seamless system-wide feature, the Android framework 
+offers APIs that let applications control how they are searched.
+Applications can customize how search is invoked, how the search dialog looks, and what type of 
+search results are available, including suggestions that are shown as the user types.</p>
+
+<p>In order to utilize the Android search framework, an application must provide a search configuration
+in the form of an XML resource.
+This section describes the search configuration XML in terms of its syntax and usage. For a more
+complete discussion about how to implement search features for your application, see
+<!-- <a href="{@docRoot}guide/topics/search/index.html">Search</a> -->
+{@link android.app.SearchManager}.</p>
+
+<p>
+  <strong>Source file format:</strong> 
+  XML file requiring a <code>&lt;?xml version="1.0" encoding="utf-8"?&gt;</code> 
+  declaration, and a root <code>&lt;searchable&gt;</code> element.
+</p>
+
+<p>
+  <strong>Resource source file location</strong>: {@code res/xml/searchable.xml} 
+  (The file name is arbitrary, but standard practice is to use searchable.xml.)
+</p>
+
+<p>
+  <strong>Compiled resource datatype:</strong> 
+  Resource pointer to an xml object.
+</p>
+
+<p>
+  <strong>Resource reference name:</strong>
+</p>
+
+<ul>
+  <li>
+    <strong>Java:</strong> 
+    <code>R.xml.<em>filename</em></code>.
+  </li>
+  <li>
+    <strong>XML:</strong> 
+    <code>@[<em>package</em>:]xml/<em>filename</em></code> (e.g., <code>@xml/searchable</code>).
+  </li>
+</ul>
+
+<p>
+  <strong>Syntax</strong>
+</p>
+
+<pre>
+&lt;searchable xmlns:android="http://schemas.android.com/apk/res/android
+     android:label="@string/search_label" 
+     ... &gt;
+     <em>&lt;actionkey
+          android:keycode="KEYCODE_CALL"
+          ... &gt;</em>     
+&lt;/searchable&gt;
+</pre>
+
+<dl>
+  <dt>
+    &lt;searchable&gt;
+  </dt>
+  <dd>
+    Defines all application search configurations, including settings for text and voice searches
+    performed within the application. It accepts the following attributes:
+    <ul>
+      <li>
+        <em>label</em> - <strong>Required</strong>. This is the name for your application, as it 
+        will appear to the user. This will be visible only if <em>searchMode</em> is set to 
+        "showSearchLabelAsBadge" (see below).
+      </li>
+      <li>
+        <em>hint</em> -	This is the text to display in the search text field when no text has 
+        been entered. This is recommended in order to provide context to the search about to be 
+        performed (e.g., "Search the Dictionary").
+      </li>
+      <li>
+        <em>searchMode</em> - If provided and non-zero, this sets additional modes for control
+        of the search presentation. The following mode values are accepted: 
+        <ul>
+          <li>
+            <em>showSearchLabelAsBadge</em> - If set, this enables the display of the 
+            search target (label) within the search bar.
+          </li>
+          <li>
+            <em>queryRewriteFromData</em> - If set, this causes the suggestion column 
+            SUGGEST_COLUMN_INTENT_DATA to be considered as the text for suggestion query 
+            rewriting. This should only be used when the values in 
+            SUGGEST_COLUMN_INTENT_DATA are suitable for user inspection and editing -
+            typically, HTTP/HTTPS Uri's.
+          </li>
+          <li>
+            <em>queryRewriteFromText</em> - If set, this causes the suggestion 
+            column SUGGEST_COLUMN_TEXT_1 to be considered as the text for suggestion query
+            rewriting. This should be used for suggestions in which no query 
+            text is provided and the SUGGEST_COLUMN_INTENT_DATA values are not suitable 
+            for user inspection and editing.
+          </li>
+        </ul>
+        <p>More than one of the above values for <em>searchMode</em> can be used at once. For 
+        example, you can declare two modes at once, like this:
+        <code>searchMode="queryRewriteFromData|queryRewriteFromText"</code>
+      </li>
+      <li>
+        <em>inputType</em> - If provided, supplies a hint about the type of search text 
+        the user will be entering. For most searches, in which free form text is expected, 
+        this attribute is not needed. See
+        {@link android.R.attr#inputType} for a list of suitable values for this attribute.
+      </li>
+      <li>
+        <em>imeOptions</em> - If provided, supplies additional options for the input method. 
+        For most searches, in  which free form text is expected, this attribute is not needed, 
+        and will default to "actionSearch". See 
+        {@link android.R.attr#imeOptions} for a list of suitable values for this attribute.
+      </li>
+    </ul>
+    
+    <p>If you have defined a content provider to generate search suggestions, you need to
+    provide some more searchable metadata in order to configure communications with the content
+    provider. The following are additional {@code &lt;searchable>} attributes for use when 
+    providing search suggestions:</p>
+    
+    <ul>
+      <li>
+        <em>searchSuggestAuthority</em> - <strong>Required to provide search suggestions</strong>. 
+        This value must match the authority string provided in the provider section of your manifest.
+      </li>
+      <li>
+        <em>searchSuggestPath</em> - If provided, this path will be inserted in the suggestions 
+        query Uri, after the authority you have provide but before the standard suggestions path.
+        This is only required if you have a single content provider issuing different types 
+        of suggestions (e.g. for different data types) and you need 
+        a way to disambiguate the suggestions queries when they are received.
+      </li>
+      <li>
+        <em>searchSuggestSelection</em> - If provided, this value will be passed into your 
+        query function as the selection parameter. Typically this will be a WHERE clause for 
+        your database, and will contain a single question mark, which represents the actual query
+        string that has been typed by the user. However, you can also use any non-null value to simply
+        trigger the delivery of the query text (via selection arguments), and then use the query 
+        text in any way appropriate for your provider (ignoring the actual text of the selection parameter.)
+      </li>
+      <li>
+        <em>searchSuggestIntentAction</em> - The default Intent action to be used when a user 
+        clicks on a search suggestion.
+        If provided, and not overridden by the selected suggestion, this value will 
+        be placed in the action field of the {@link android.content.Intent} when the 
+        user clicks a suggestion.
+      </li>
+      <li>
+        <em>searchSuggestIntentData</em> - The default Intent data to be used when a user 
+        clicks on a search suggestion.
+        If provided, and not overridden by the selected suggestion, this value will be 
+        placed in the data field of the {@link android.content.Intent} when the user clicks 
+        a suggestion.
+      </li>
+    </ul>
+    
+    <p>Beyond providing search suggestions while using your application's local search, you 
+    can also configure your search suggestions to be made available to Quick Search Box, 
+    which will allow users so receive search suggestions from your application content from outside
+    your application. The following are additional {@code &lt;searchable>} attributes for use when 
+    providing search suggestions to Quick Search Box:</p>
+    
+    <ul>
+      <li>
+        <em>includeInGlobalSearch</em> - <strong>Required to provide search suggestions in
+        Quick Search Box</strong>. If true, this indicates the search suggestions provided by your 
+        application should be included in the globally accessible Quick Search Box. The user must
+        still enable your application as a searchable item in the system search settings in order
+        for your suggestions to appear in Quick Search Box.
+      </li>
+      <li>
+        <em>searchSettingsDescription</em> - If provided, this provides a brief description
+        of the search suggestions that you provide to Quick Search Box, 
+        and will be displayed in the search settings entry for your application.
+      </li>
+      <li>
+        <em>queryAfterZeroResults</em> - Indicates whether a source should be invoked for 
+        supersets of queries it has returned zero results for in the past. For example, if a
+        source returned zero results for "bo", it would be ignored for "bob". If set to false,
+        this source will only be ignored for a single session; the next time the search dialog
+        is invoked, all sources will be queried. The default value is false.
+      </li>
+      <li>
+        <em>searchSuggestThreshold</em> - Indicates the minimum number of characters needed to
+        trigger a source lookup from Quick Search Box. Only guarantees that a source will not be
+        queried for anything shorter than the threshold. The default value is 0.
+      </li>
+    </ul>
+    
+    <p>To enable voice search for your Activity, you can add fields to the searchable metadata 
+    that enable and configure voice search. The following are additional {@code &lt;searchable>} 
+    attributes for use when implementing voice search:</p>
+    
+    <ul>
+        <li>
+          <em>voiceSearchMode</em> -  <strong>Required to provide voice search 
+          capabilities</strong>. 
+          If provided and non-zero, enables voice search. 
+          (Voice search may not be provided by the device, in which case these flags will
+          have no effect.) The following mode values are accepted:
+          <ul>
+            <li>
+              <em>showVoiceSearchButton</em> - If set, display a voice search button. This only 
+              takes effect if voice search is available on the device. If set, then "launchWebSearch" 
+              or "launchRecognizer" must also be set.
+            </li>
+            <li>
+              <em>launchWebSearch</em> - If set, the voice search button will take the user directly 
+              to a built-in voice web search activity. Most applications will not use this flag, as 
+              it will take the user away from the activity in which search was invoked.
+            </li>
+            <li>
+              <em>launchRecognizer</em> - If set, the voice search button will take 
+              the user directly to a built-in voice recording activity. This activity 
+              will prompt the user to speak, transcribe the spoken text, and forward the resulting 
+              query text to the searchable activity, just as if the user had typed it into the 
+              search UI and clicked the search button.
+            </li>
+          </ul>
+        </li>
+        <li>
+          <em>voiceLanguageModel</em> - A string constant from 
+          {@link android.speech.RecognizerIntent}.
+          If provided, this specifies the language model that 
+          should be used by the voice recognition system. See 
+          {@link android.speech.RecognizerIntent#EXTRA_LANGUAGE_MODEL } for more 
+          information. If not provided, the default value 
+          {@link android.speech.RecognizerIntent#LANGUAGE_MODEL_FREE_FORM } will be used.
+        </li>
+        <li>
+          <em>voicePromptText</em> - A string. If provided, this specifies a prompt 
+          that will be displayed during voice input. If not provided, a default prompt 
+          will be displayed.
+        </li>
+        <li>
+          <em>voiceLanguage</em> - A string constant from {@link java.util.Locale}. 
+          If provided, this specifies the spoken language to be expected. 
+          This is only needed if it is different from the current value of 
+          {@link java.util.Locale#getDefault()}. 
+        </li>
+        <li>
+          <em>voiceMaxResults</em> - If provided, enforces the maximum number of results to return, 
+          including the "best" result which will always be provided as the SEARCH intent's primary 
+          query. Must be one or greater. Use EXTRA_RESULTS to get the results from the intent. 
+          If not provided, the recognizer will choose how many results to return.
+        </li>
+    </ul>
+  </dd>
+  
+  <dt>
+      &lt;actionkey&gt;
+  </dt>
+  <dd>
+    Defines a shortcut key for a search action.
+    <ul>
+      <li>
+        <em>keycode</em> - <strong>Required</strong>. This attribute denotes the action key
+        you wish to respond to. Note that not all action keys are actually supported using 
+        this mechanism, as many of them are used for typing, 
+        navigation, or system functions. This will be added to the 
+        {@link android.content.Intent#ACTION_SEARCH ACTION_SEARCH} Intent that is passed to your 
+        searchable Activity. To examine the key code, use 
+        {@link android.content.Intent#getIntExtra getIntExtra(SearchManager.ACTION_KEY)}.
+        Note that, in addition to the keycode, you must also provide one or more of 
+        the action specifier attributes below.
+      </li>
+      <li>
+        <em>queryActionMsg</em> - If you wish to handle an action key during normal 
+        search query entry, you must define an action string here. This will be added to the
+        {@link android.content.Intent#ACTION_SEARCH ACTION_SEARCH} Intent that is 
+        passed to your searchable Activity. To examine the string, use 
+        {@link android.content.Intent#getStringExtra
+        getStringExtra(SearchManager.ACTION_MSG)}.
+      </li>
+      <li>
+        <em>suggestActionMsg</em> - If you wish to handle an action key while a 
+        suggestion is being displayed and selected, there are two ways to handle this. 
+        If all of your suggestions can handle the action key, you can simply define 
+        the action message using this attribute. This will be added to the 
+        {@link android.content.Intent#ACTION_SEARCH} Intent that is passed to your 
+        searchable Activity. To examine the string, 
+        use {@link android.content.Intent#getStringExtra 
+        getStringExtra(SearchManager.ACTION_MSG)}.
+      </li>
+      <li>
+        <em>suggestActionMsgColumn</em> - If you wish to handle an action key while
+        a suggestion is being displayed and selected, but you do not wish to enable
+        this action key for every suggestion, then you can use this attribute to control 
+        it on a suggestion-by-suggestion basis. First, you must define a column 
+        (and name it here) where your suggestions will include the action string. Then,
+        in your content provider, you must provide this column, and when desired, 
+        provide data in this column. The search manager will look at your suggestion cursor, 
+        using the string provided here in order to select a column, and will use 
+        that to select a string from the cursor. That string will be added to the 
+        {@link android.content.Intent#ACTION_SEARCH ACTION_SEARCH} 
+        Intent that is passed to your searchable Activity. To examine 
+        the string, use {@link android.content.Intent#getStringExtra 
+        getStringExtra(SearchManager.ACTION_MSG)}. If the data does not exist for the 
+        selection suggestion, the action key will be ignored.
+      </li>
+    </ul>
+  </dd>
+</dl>
+
+
+
+
+

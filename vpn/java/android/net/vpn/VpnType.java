@@ -16,26 +16,28 @@
 
 package android.net.vpn;
 
+import com.android.internal.R;
+
 /**
  * Enumeration of all supported VPN types.
  * {@hide}
  */
 public enum VpnType {
-    PPTP("PPTP", "", PptpProfile.class),
-    L2TP("L2TP", "", L2tpProfile.class),
-    L2TP_IPSEC_PSK("L2TP/IPSec PSK", "Pre-shared key based L2TP/IPSec VPN",
+    PPTP("PPTP", R.string.pptp_vpn_description, PptpProfile.class),
+    L2TP("L2TP", R.string.l2tp_vpn_description, L2tpProfile.class),
+    L2TP_IPSEC_PSK("L2TP/IPSec PSK", R.string.l2tp_ipsec_psk_vpn_description,
             L2tpIpsecPskProfile.class),
-    L2TP_IPSEC("L2TP/IPSec CRT", "Certificate based L2TP/IPSec VPN",
+    L2TP_IPSEC("L2TP/IPSec CRT", R.string.l2tp_ipsec_crt_vpn_description,
             L2tpIpsecProfile.class);
 
     private String mDisplayName;
-    private String mDescription;
+    private int mDescriptionId;
     private Class<? extends VpnProfile> mClass;
 
-    VpnType(String displayName, String description,
+    VpnType(String displayName, int descriptionId,
             Class<? extends VpnProfile> klass) {
         mDisplayName = displayName;
-        mDescription = description;
+        mDescriptionId = descriptionId;
         mClass = klass;
     }
 
@@ -43,8 +45,8 @@ public enum VpnType {
         return mDisplayName;
     }
 
-    public String getDescription() {
-        return mDescription;
+    public int getDescriptionId() {
+        return mDescriptionId;
     }
 
     public Class<? extends VpnProfile> getProfileClass() {

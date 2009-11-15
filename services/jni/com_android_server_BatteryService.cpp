@@ -18,8 +18,8 @@
 
 #include "JNIHelp.h"
 #include "jni.h"
-#include "utils/Log.h"
-#include "utils/misc.h"
+#include <utils/Log.h>
+#include <utils/misc.h>
 
 #include <fcntl.h>
 #include <stdio.h>
@@ -31,6 +31,7 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <unistd.h>
+#include <dirent.h>
 
 #if HAVE_ANDROID_OS
 #include <linux/ioctl.h>
@@ -38,15 +39,7 @@
 
 namespace android {
 
-#define AC_ONLINE_PATH "/sys/class/power_supply/ac/online"
-#define USB_ONLINE_PATH "/sys/class/power_supply/usb/online"
-#define BATTERY_STATUS_PATH "/sys/class/power_supply/battery/status"
-#define BATTERY_HEALTH_PATH "/sys/class/power_supply/battery/health"
-#define BATTERY_PRESENT_PATH "/sys/class/power_supply/battery/present"
-#define BATTERY_CAPACITY_PATH "/sys/class/power_supply/battery/capacity"
-#define BATTERY_VOLTAGE_PATH "/sys/class/power_supply/battery/batt_vol"
-#define BATTERY_TEMPERATURE_PATH "/sys/class/power_supply/battery/batt_temp"
-#define BATTERY_TECHNOLOGY_PATH "/sys/class/power_supply/battery/technology"
+#define POWER_SUPPLY_PATH "/sys/class/power_supply"
 
 struct FieldIds {
     // members
@@ -76,6 +69,21 @@ struct BatteryManagerConstants {
     jint healthUnspecifiedFailure;
 };
 static BatteryManagerConstants gConstants;
+
+struct PowerSupplyPaths {
+    char* acOnlinePath;
+    char* usbOnlinePath;
+    char* batteryStatusPath;
+    char* batteryHealthPath;
+    char* batteryPresentPath;
+    char* batteryCapacityPath;
+    char* batteryVoltagePath;
+    char* batteryTemperaturePath;
+    char* batteryTechnologyPath;
+};
+static PowerSupplyPaths gPaths;
+
+static int gVoltageDivisor = 1;
 
 static jint getBatteryStatus(const char* status)
 {
@@ -126,6 +134,8 @@ static jint getBatteryHealth(const char* status)
 
 static int readFromFile(const char* path, char* buf, size_t size)
 {
+    if (!path)
+        return -1;
     int fd = open(path, O_RDONLY, 0);
     if (fd == -1) {
         LOGE("Could not open '%s'", path);
@@ -171,29 +181,43 @@ static void setIntField(JNIEnv* env, jobject obj, const char* path, jfieldID fie
     env->SetIntField(obj, fieldID, value);
 }
 
+static void setVoltageField(JNIEnv* env, jobject obj, const char* path, jfieldID fieldID)
+{
+    const int SIZE = 128;
+    char buf[SIZE];
+
+    jint value = 0;
+    if (readFromFile(path, buf, SIZE) > 0) {
+        value = atoi(buf);
+        value /= gVoltageDivisor;
+    }
+    env->SetIntField(obj, fieldID, value);
+}
+
+
 static void android_server_BatteryService_update(JNIEnv* env, jobject obj)
 {
-    setBooleanField(env, obj, AC_ONLINE_PATH, gFieldIds.mAcOnline);
-    setBooleanField(env, obj, USB_ONLINE_PATH, gFieldIds.mUsbOnline);
-    setBooleanField(env, obj, BATTERY_PRESENT_PATH, gFieldIds.mBatteryPresent);
+    setBooleanField(env, obj, gPaths.acOnlinePath, gFieldIds.mAcOnline);
+    setBooleanField(env, obj, gPaths.usbOnlinePath, gFieldIds.mUsbOnline);
+    setBooleanField(env, obj, gPaths.batteryPresentPath, gFieldIds.mBatteryPresent);
     
-    setIntField(env, obj, BATTERY_CAPACITY_PATH, gFieldIds.mBatteryLevel);
-    setIntField(env, obj, BATTERY_VOLTAGE_PATH, gFieldIds.mBatteryVoltage);
-    setIntField(env, obj, BATTERY_TEMPERATURE_PATH, gFieldIds.mBatteryTemperature);
+    setIntField(env, obj, gPaths.batteryCapacityPath, gFieldIds.mBatteryLevel);
+    setVoltageField(env, obj, gPaths.batteryVoltagePath, gFieldIds.mBatteryVoltage);
+    setIntField(env, obj, gPaths.batteryTemperaturePath, gFieldIds.mBatteryTemperature);
     
     const int SIZE = 128;
     char buf[SIZE];
     
-    if (readFromFile(BATTERY_STATUS_PATH, buf, SIZE) > 0)
+    if (readFromFile(gPaths.batteryStatusPath, buf, SIZE) > 0)
         env->SetIntField(obj, gFieldIds.mBatteryStatus, getBatteryStatus(buf));
     else
         env->SetIntField(obj, gFieldIds.mBatteryStatus,
                          gConstants.statusUnknown);
     
-    if (readFromFile(BATTERY_HEALTH_PATH, buf, SIZE) > 0)
+    if (readFromFile(gPaths.batteryHealthPath, buf, SIZE) > 0)
         env->SetIntField(obj, gFieldIds.mBatteryHealth, getBatteryHealth(buf));
 
-    if (readFromFile(BATTERY_TECHNOLOGY_PATH, buf, SIZE) > 0)
+    if (readFromFile(gPaths.batteryTechnologyPath, buf, SIZE) > 0)
         env->SetObjectField(obj, gFieldIds.mBatteryTechnology, env->NewStringUTF(buf));
 }
 
@@ -204,6 +228,101 @@ static JNINativeMethod sMethods[] = {
 
 int register_android_server_BatteryService(JNIEnv* env)
 {
+    char    path[PATH_MAX];
+    struct dirent* entry;
+
+    DIR* dir = opendir(POWER_SUPPLY_PATH);
+    if (dir == NULL) {
+        LOGE("Could not open %s\n", POWER_SUPPLY_PATH);
+        return -1;
+    }
+    while ((entry = readdir(dir))) {
+        const char* name = entry->d_name;
+
+        // ignore "." and ".."
+        if (name[0] == '.' && (name[1] == 0 || (name[1] == '.' && name[2] == 0))) {
+            continue;
+        }
+
+        char buf[20];
+        // Look for "type" file in each subdirectory
+        snprintf(path, sizeof(path), "%s/%s/type", POWER_SUPPLY_PATH, name);
+        int length = readFromFile(path, buf, sizeof(buf));
+        if (length > 0) {
+            if (buf[length - 1] == '\n')
+                buf[length - 1] = 0;
+
+            if (strcmp(buf, "Mains") == 0) {
+                snprintf(path, sizeof(path), "%s/%s/online", POWER_SUPPLY_PATH, name);
+                if (access(path, R_OK) == 0)
+                    gPaths.acOnlinePath = strdup(path);
+            }
+            else if (strcmp(buf, "USB") == 0) {
+                snprintf(path, sizeof(path), "%s/%s/online", POWER_SUPPLY_PATH, name);
+                if (access(path, R_OK) == 0)
+                    gPaths.usbOnlinePath = strdup(path);
+            }
+            else if (strcmp(buf, "Battery") == 0) {
+                snprintf(path, sizeof(path), "%s/%s/status", POWER_SUPPLY_PATH, name);
+                if (access(path, R_OK) == 0)
+                    gPaths.batteryStatusPath = strdup(path);
+                snprintf(path, sizeof(path), "%s/%s/health", POWER_SUPPLY_PATH, name);
+                if (access(path, R_OK) == 0)
+                    gPaths.batteryHealthPath = strdup(path);
+                snprintf(path, sizeof(path), "%s/%s/present", POWER_SUPPLY_PATH, name);
+                if (access(path, R_OK) == 0)
+                    gPaths.batteryPresentPath = strdup(path);
+                snprintf(path, sizeof(path), "%s/%s/capacity", POWER_SUPPLY_PATH, name);
+                if (access(path, R_OK) == 0)
+                    gPaths.batteryCapacityPath = strdup(path);
+
+                snprintf(path, sizeof(path), "%s/%s/voltage_now", POWER_SUPPLY_PATH, name);
+                if (access(path, R_OK) == 0) {
+                    gPaths.batteryVoltagePath = strdup(path);
+                    // voltage_now is in microvolts, not millivolts
+                    gVoltageDivisor = 1000;
+                } else {
+                    snprintf(path, sizeof(path), "%s/%s/batt_vol", POWER_SUPPLY_PATH, name);
+                    if (access(path, R_OK) == 0)
+                        gPaths.batteryVoltagePath = strdup(path);
+                }
+
+                snprintf(path, sizeof(path), "%s/%s/temp", POWER_SUPPLY_PATH, name);
+                if (access(path, R_OK) == 0) {
+                    gPaths.batteryTemperaturePath = strdup(path);
+                } else {
+                    snprintf(path, sizeof(path), "%s/%s/batt_temp", POWER_SUPPLY_PATH, name);
+                    if (access(path, R_OK) == 0)
+                        gPaths.batteryTemperaturePath = strdup(path);
+                }
+
+                snprintf(path, sizeof(path), "%s/%s/technology", POWER_SUPPLY_PATH, name);
+                if (access(path, R_OK) == 0)
+                    gPaths.batteryTechnologyPath = strdup(path);
+            }
+        }
+    }
+    closedir(dir);
+
+    if (!gPaths.acOnlinePath)
+        LOGE("acOnlinePath not found");
+    if (!gPaths.usbOnlinePath)
+        LOGE("usbOnlinePath not found");
+    if (!gPaths.batteryStatusPath)
+        LOGE("batteryStatusPath not found");
+    if (!gPaths.batteryHealthPath)
+        LOGE("batteryHealthPath not found");
+    if (!gPaths.batteryPresentPath)
+        LOGE("batteryPresentPath not found");
+    if (!gPaths.batteryCapacityPath)
+        LOGE("batteryCapacityPath not found");
+    if (!gPaths.batteryVoltagePath)
+        LOGE("batteryVoltagePath not found");
+    if (!gPaths.batteryTemperaturePath)
+        LOGE("batteryTemperaturePath not found");
+    if (!gPaths.batteryTechnologyPath)
+        LOGE("batteryTechnologyPath not found");
+
     jclass clazz = env->FindClass("com/android/server/BatteryService");
 
     if (clazz == NULL) {
