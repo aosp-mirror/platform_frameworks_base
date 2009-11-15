@@ -204,9 +204,8 @@ class LockScreen extends LinearLayout implements KeyguardScreen, KeyguardUpdateM
         updateMonitor.registerConfigurationChangeCallback(this);
 
         mAudioManager = (AudioManager) getContext().getSystemService(Context.AUDIO_SERVICE);
-        mSilentMode = mAudioManager.getRingerMode() == AudioManager.RINGER_MODE_SILENT;
+        mSilentMode = isSilentMode();
 
-        mSelector.setOnTriggerListener(this);
         mSelector.setLeftTabResources(
                 R.drawable.ic_jog_dial_unlock,
                 R.drawable.jog_tab_target_green,
@@ -215,7 +214,13 @@ class LockScreen extends LinearLayout implements KeyguardScreen, KeyguardUpdateM
 
         updateRightTabResources();
 
+        mSelector.setOnTriggerListener(this);
+
         resetStatusInfo(updateMonitor);
+    }
+
+    private boolean isSilentMode() {
+        return mAudioManager.getRingerMode() == AudioManager.RINGER_MODE_SILENT;
     }
 
     private void updateRightTabResources() {
@@ -226,9 +231,6 @@ class LockScreen extends LinearLayout implements KeyguardScreen, KeyguardUpdateM
                         : R.drawable.jog_tab_bar_right_sound_off,
                 mSilentMode ? R.drawable.jog_tab_right_sound_on
                         : R.drawable.jog_tab_right_sound_off);
-
-        mSelector.setRightHintText(mSilentMode ?
-                R.string.lockscreen_sound_on_label : R.string.lockscreen_sound_off_label);
     }
 
     private void resetStatusInfo(KeyguardUpdateMonitor updateMonitor) {
@@ -281,7 +283,11 @@ class LockScreen extends LinearLayout implements KeyguardScreen, KeyguardUpdateM
 
     /** {@inheritDoc} */
     public void onGrabbedStateChange(View v, int grabbedState) {
-        // TODO: Update onscreen hint text based on the new state.
+        if (grabbedState == SlidingTab.OnTriggerListener.RIGHT_HANDLE) {
+            mSilentMode = isSilentMode();
+            mSelector.setRightHintText(mSilentMode ? R.string.lockscreen_sound_on_label
+                    : R.string.lockscreen_sound_off_label);
+        }
         mCallback.pokeWakelock();
     }
 
