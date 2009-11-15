@@ -126,6 +126,11 @@ class WallpaperManagerService extends IWallpaperManager.Stub {
     int mWidth = -1;
     int mHeight = -1;
     String mName = "";
+    
+    /**
+     * The component name of the currently set live wallpaper. This will be null if the
+     * wallpaper uses the built in ImageWallpaper component to display a bitmap.
+     */
     ComponentName mWallpaperComponent;
     WallpaperConnection mWallpaperConnection;
     long mLastDiedTime;
@@ -366,6 +371,7 @@ class WallpaperManagerService extends IWallpaperManager.Stub {
                     // See if there is a default wallpaper component specified
                     // Only look for this if the wallpaper is not being set to a bitmap
                     realComponentName = ComponentName.unflattenFromString(defaultComponent);
+                    componentName = realComponentName;
                 }
                 if (realComponentName == null) {
                     // Fall back to static image wallpaper
