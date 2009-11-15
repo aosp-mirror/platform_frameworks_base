@@ -39,18 +39,16 @@
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
             android:layout_alignParentRight="true"
-            android:layout_marginTop="16dip"
-            android:layout_marginRight="16dip"
+            android:layout_marginRight="8dip"
             android:textAppearance="?android:attr/textAppearanceMedium"
             />
 
         <com.android.internal.widget.DigitalClock android:id="@+id/time"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
+            android:layout_below="@id/carrier"
             android:layout_alignParentLeft="true"
             android:layout_marginBottom="8dip"
-            android:layout_marginTop="16dip"
             android:layout_marginLeft="24dip"
             >
 
@@ -89,7 +87,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@id/time"
-            android:layout_marginLeft="24dip"
+            android:layout_marginLeft="16dip"
             android:textAppearance="?android:attr/textAppearanceMedium"
             />
     
@@ -112,7 +110,7 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="3dip"
-        android:layout_marginLeft="24dip"
+        android:layout_marginLeft="16dip"
         android:gravity="left"
         >
         <TextView
