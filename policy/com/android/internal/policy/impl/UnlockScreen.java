@@ -27,6 +27,7 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.text.format.DateFormat;
 import android.text.TextUtils;
+import android.util.Log;
 import com.android.internal.R;
 import com.android.internal.telephony.IccCard;
 import com.android.internal.widget.LinearLayoutWithDefaultTouchRecepient;
@@ -45,6 +46,7 @@ class UnlockScreen extends LinearLayoutWithDefaultTouchRecepient
         implements KeyguardScreen, KeyguardUpdateMonitor.ConfigurationChangeCallback,
         KeyguardUpdateMonitor.InfoCallback, KeyguardUpdateMonitor.SimStateCallback {
 
+    private static final boolean DEBUG = false;
     private static final String TAG = "UnlockScreen";
 
     // how long before we clear the wrong pattern
@@ -162,6 +164,12 @@ class UnlockScreen extends LinearLayoutWithDefaultTouchRecepient
         mTotalFailedPatternAttempts = totalFailedAttempts;
         mFailedPatternAttemptsSinceLastTimeout = totalFailedAttempts % LockPatternUtils.FAILED_ATTEMPTS_BEFORE_TIMEOUT;
 
+        if (DEBUG) Log.d(TAG,
+            "UnlockScreen() ctor: totalFailedAttempts="
+                 + totalFailedAttempts + ", mFailedPat...="
+                 + mFailedPatternAttemptsSinceLastTimeout 
+                 );
+
         if (mUpdateMonitor.isInPortrait()) {
             LayoutInflater.from(context).inflate(R.layout.keyguard_screen_unlock_portrait, this, true);
         } else {
@@ -239,6 +247,7 @@ class UnlockScreen extends LinearLayoutWithDefaultTouchRecepient
     }
 
     public void setEnableFallback(boolean state) {
+        if (DEBUG) Log.d(TAG, "setEnableFallback(" + state + ")");
         mEnableFallback = state;
     }
     
