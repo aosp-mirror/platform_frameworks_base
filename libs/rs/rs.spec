@@ -43,7 +43,7 @@ ContextSetSurface {
 	}
 
 ContextSetPriority {
-	param uint32_t priority
+	param int32_t priority
 	}
 
 AssignName {

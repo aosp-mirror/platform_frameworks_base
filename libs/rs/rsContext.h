@@ -95,6 +95,7 @@ public:
     void pause();
     void resume();
     void setSurface(uint32_t w, uint32_t h, Surface *sur);
+    void setPriority(int32_t p);
 
     void assignName(ObjectBase *obj, const char *name, uint32_t len);
     void removeName(ObjectBase *obj);
@@ -198,6 +199,7 @@ protected:
     bool mPaused;
 
     pthread_t mThreadId;
+    pid_t mNativeThreadId;
 
     ObjectBaseRef<Script> mRootScript;
     ObjectBaseRef<ProgramFragment> mFragment;
