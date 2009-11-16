@@ -19,6 +19,7 @@ package com.android.internal.widget;
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
+import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
@@ -30,6 +31,12 @@ import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
+import android.view.animation.AnimationSet;
+import android.view.animation.LinearInterpolator;
+import android.view.animation.TranslateAnimation;
+import android.view.animation.Animation.AnimationListener;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.ImageView.ScaleType;
@@ -45,25 +52,24 @@ import com.android.internal.R;
  *
  */
 public class SlidingTab extends ViewGroup {
-    private static final int ANIMATION_DURATION = 250; // animation transition duration (in ms)
     private static final String LOG_TAG = "SlidingTab";
     private static final boolean DBG = false;
     private static final int HORIZONTAL = 0; // as defined in attrs.xml
     private static final int VERTICAL = 1;
-    private static final int MSG_ANIMATE = 100;
 
     // TODO: Make these configurable
     private static final float THRESHOLD = 2.0f / 3.0f;
     private static final long VIBRATE_SHORT = 30;
     private static final long VIBRATE_LONG = 40;
+    private static final int TRACKING_MARGIN = 50;
+    private static final int ANIM_DURATION = 250; // Time for most animations (in ms)
+    private static final int ANIM_TARGET_TIME = 500; // Time to show targets (in ms)
 
     private OnTriggerListener mOnTriggerListener;
     private int mGrabbedState = OnTriggerListener.NO_HANDLE;
     private boolean mTriggered = false;
     private Vibrator mVibrator;
     private float mDensity; // used to scale dimensions for bitmaps.
-
-    private final SlidingTabHandler mHandler = new SlidingTabHandler();
 
     /**
      * Either {@link #HORIZONTAL} or {@link #VERTICAL}.
@@ -77,6 +83,7 @@ public class SlidingTab extends ViewGroup {
     private float mThreshold;
     private Slider mOtherSlider;
     private boolean mAnimating;
+    private Rect mTmpRect;
 
     /**
      * Interface definition for a callback to be invoked when a tab is triggered
@@ -121,6 +128,12 @@ public class SlidingTab extends ViewGroup {
         void onGrabbedStateChange(View v, int grabbedState);
     }
 
+    // TODO: For debugging; remove after glitches debugged.
+    @Override
+    protected void dispatchDraw(Canvas canvas) {
+        super.dispatchDraw(canvas);
+    }
+
     /**
      * Simple container class for all things pertinent to a slider.
      * A slider consists of 3 Views:
@@ -138,6 +151,7 @@ public class SlidingTab extends ViewGroup {
         public static final int ALIGN_RIGHT = 1;
         public static final int ALIGN_TOP = 2;
         public static final int ALIGN_BOTTOM = 3;
+        public static final int ALIGN_UNKNOWN = 4;
 
         /**
          * States for the view.
@@ -150,6 +164,8 @@ public class SlidingTab extends ViewGroup {
         private final TextView text;
         private final ImageView target;
         private int currentState = STATE_NORMAL;
+        private int alignment = ALIGN_UNKNOWN;
+        private int alignment_value;
 
         /**
          * Constructor
@@ -205,10 +221,34 @@ public class SlidingTab extends ViewGroup {
         }
 
         void hide() {
-            // TODO: Animate off the screen
-            text.setVisibility(View.INVISIBLE);
-            tab.setVisibility(View.INVISIBLE);
+            boolean horiz = alignment == ALIGN_LEFT || alignment == ALIGN_RIGHT;
+            int dx = horiz ? (alignment == ALIGN_LEFT ? alignment_value - tab.getRight()
+                    : alignment_value - tab.getLeft()) : 0;
+            int dy = horiz ? 0 : (alignment == ALIGN_TOP ? alignment_value - tab.getBottom()
+                    : alignment_value - tab.getTop());
+
+            Animation trans = new TranslateAnimation(0, dx, 0, dy);
+            trans.setDuration(ANIM_DURATION);
+            trans.setFillAfter(true);
+            tab.startAnimation(trans);
+            text.startAnimation(trans);
             target.setVisibility(View.INVISIBLE);
+        }
+
+        void show(boolean animate) {
+            text.setVisibility(View.VISIBLE);
+            tab.setVisibility(View.VISIBLE);
+            //target.setVisibility(View.INVISIBLE);
+            if (animate) {
+                boolean horiz = alignment == ALIGN_LEFT || alignment == ALIGN_RIGHT;
+                int dx = horiz ? (alignment == ALIGN_LEFT ? tab.getWidth() : -tab.getWidth()) : 0;
+                int dy = horiz ? 0: (alignment == ALIGN_TOP ? tab.getHeight() : -tab.getHeight());
+
+                Animation trans = new TranslateAnimation(-dx, 0, -dy, 0);
+                trans.setDuration(ANIM_DURATION);
+                tab.startAnimation(trans);
+                text.startAnimation(trans);
+            }
         }
 
         void setState(int state) {
@@ -230,15 +270,39 @@ public class SlidingTab extends ViewGroup {
         }
 
         void showTarget() {
+            AlphaAnimation alphaAnim = new AlphaAnimation(0.0f, 1.0f);
+            alphaAnim.setDuration(ANIM_TARGET_TIME);
+            target.startAnimation(alphaAnim);
             target.setVisibility(View.VISIBLE);
+            target.startAnimation(alphaAnim);
         }
 
-        void reset() {
+        void reset(boolean animate) {
             setState(STATE_NORMAL);
             text.setVisibility(View.VISIBLE);
             text.setTextAppearance(text.getContext(), R.style.TextAppearance_SlidingTabNormal);
             tab.setVisibility(View.VISIBLE);
             target.setVisibility(View.INVISIBLE);
+            final boolean horiz = alignment == ALIGN_LEFT || alignment == ALIGN_RIGHT;
+            int dx = horiz ? (alignment == ALIGN_LEFT ?  alignment_value - tab.getLeft()
+                    : alignment_value - tab.getRight()) : 0;
+            int dy = horiz ? 0 : (alignment == ALIGN_TOP ? alignment_value - tab.getTop()
+                    : alignment_value - tab.getBottom());
+            if (animate) {
+                TranslateAnimation trans = new TranslateAnimation(0, dx, 0, dy);
+                trans.setDuration(ANIM_DURATION);
+                trans.setFillAfter(false);
+                text.startAnimation(trans);
+                tab.startAnimation(trans);
+            } else {
+                if (horiz) {
+                    text.offsetLeftAndRight(dx);
+                    tab.offsetLeftAndRight(dx);
+                } else {
+                    text.offsetTopAndBottom(dy);
+                    tab.offsetTopAndBottom(dy);
+                }
+            }
         }
 
         void setTarget(int targetId) {
@@ -255,6 +319,7 @@ public class SlidingTab extends ViewGroup {
          * @param alignment which side to align the widget to
          */
         void layout(int l, int t, int r, int b, int alignment) {
+            this.alignment = alignment;
             final Drawable tabBackground = tab.getBackground();
             final int handleWidth = tabBackground.getIntrinsicWidth();
             final int handleHeight = tabBackground.getIntrinsicHeight();
@@ -280,11 +345,13 @@ public class SlidingTab extends ViewGroup {
                     text.layout(0 - parentWidth, top, 0, bottom);
                     text.setGravity(Gravity.RIGHT);
                     target.layout(leftTarget, targetTop, leftTarget + targetWidth, targetBottom);
+                    alignment_value = l;
                 } else {
                     tab.layout(parentWidth - handleWidth, top, parentWidth, bottom);
                     text.layout(parentWidth, top, parentWidth + parentWidth, bottom);
                     target.layout(rightTarget, targetTop, rightTarget + targetWidth, targetBottom);
                     text.setGravity(Gravity.TOP);
+                    alignment_value = r;
                 }
             } else {
                 // vertical
@@ -296,10 +363,12 @@ public class SlidingTab extends ViewGroup {
                     tab.layout(left, 0, right, handleHeight);
                     text.layout(left, 0 - parentHeight, right, 0);
                     target.layout(targetLeft, top, targetRight, top + targetHeight);
+                    alignment_value = t;
                 } else {
                     tab.layout(left, parentHeight - handleHeight, right, parentHeight);
                     text.layout(left, parentHeight, right, parentHeight + parentHeight);
                     target.layout(targetLeft, bottom, targetRight, bottom + targetHeight);
+                    alignment_value = b;
                 }
             }
         }
@@ -333,6 +402,12 @@ public class SlidingTab extends ViewGroup {
         public int getTabHeight() {
             return tab.getMeasuredHeight();
         }
+
+        public void startAnimation(Animation animation) {
+            tab.startAnimation(animation);
+            text.startAnimation(animation);
+            target.setVisibility(View.GONE);
+        }
     }
 
     public SlidingTab(Context context) {
@@ -344,6 +419,9 @@ public class SlidingTab extends ViewGroup {
      */
     public SlidingTab(Context context, AttributeSet attrs) {
         super(context, attrs);
+
+        // Allocate a temporary once that can be used everywhere.
+        mTmpRect = new Rect();
 
         TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.SlidingTab);
         mOrientation = a.getInt(R.styleable.SlidingTab_orientation, HORIZONTAL);
@@ -401,19 +479,17 @@ public class SlidingTab extends ViewGroup {
         final float x = event.getX();
         final float y = event.getY();
 
-        final Rect frame = new Rect();
-
         if (mAnimating) {
             return false;
         }
 
         View leftHandle = mLeftSlider.tab;
-        leftHandle.getHitRect(frame);
-        boolean leftHit = frame.contains((int) x, (int) y);
+        leftHandle.getHitRect(mTmpRect);
+        boolean leftHit = mTmpRect.contains((int) x, (int) y);
 
         View rightHandle = mRightSlider.tab;
-        rightHandle.getHitRect(frame);
-        boolean rightHit = frame.contains((int)x, (int) y);
+        rightHandle.getHitRect(mTmpRect);
+        boolean rightHit = mTmpRect.contains((int)x, (int) y);
 
         if (!mTracking && !(leftHit || rightHit)) {
             return false;
@@ -451,40 +527,31 @@ public class SlidingTab extends ViewGroup {
             final int action = event.getAction();
             final float x = event.getX();
             final float y = event.getY();
-            final View handle = mCurrentSlider.tab;
+
             switch (action) {
                 case MotionEvent.ACTION_MOVE:
-                    moveHandle(x, y);
-                    float position = isHorizontal() ? x : y;
-                    float target = mThreshold * (isHorizontal() ? getWidth() : getHeight());
-                    boolean thresholdReached;
-                    if (isHorizontal()) {
-                        thresholdReached = mCurrentSlider == mLeftSlider ?
-                                position > target : position < target;
-                    } else {
-                        thresholdReached = mCurrentSlider == mLeftSlider ?
-                                position < target : position > target;
-                    }
-                    if (!mTriggered && thresholdReached) {
-                        mTriggered = true;
-                        mTracking = false;
-                        mCurrentSlider.setState(Slider.STATE_ACTIVE);
-                        dispatchTriggerEvent(mCurrentSlider == mLeftSlider ?
-                            OnTriggerListener.LEFT_HANDLE : OnTriggerListener.RIGHT_HANDLE);
+                    if (withinView(x, y, this) ) {
+                        moveHandle(x, y);
+                        float position = isHorizontal() ? x : y;
+                        float target = mThreshold * (isHorizontal() ? getWidth() : getHeight());
+                        boolean thresholdReached;
+                        if (isHorizontal()) {
+                            thresholdReached = mCurrentSlider == mLeftSlider ?
+                                    position > target : position < target;
+                        } else {
+                            thresholdReached = mCurrentSlider == mLeftSlider ?
+                                    position < target : position > target;
+                        }
+                        if (!mTriggered && thresholdReached) {
+                            mTriggered = true;
+                            mTracking = false;
+                            mCurrentSlider.setState(Slider.STATE_ACTIVE);
+                            dispatchTriggerEvent(mCurrentSlider == mLeftSlider ?
+                                OnTriggerListener.LEFT_HANDLE : OnTriggerListener.RIGHT_HANDLE);
 
-                        // TODO: This is a place holder for the real animation. It just holds
-                        // the screen for the duration of the animation for now.
-                        mAnimating = true;
-                        mHandler.postDelayed(new Runnable() {
-                            public void run() {
-                                resetView();
-                                mAnimating = false;
-                            }
-                        }, ANIMATION_DURATION);
-                    }
-
-                    if (isHorizontal() && (y <= handle.getBottom() && y >= handle.getTop()) ||
-                            !isHorizontal() && (x >= handle.getLeft() && x <= handle.getRight()) ) {
+                            startAnimating();
+                            setGrabbedState(OnTriggerListener.NO_HANDLE);
+                        }
                         break;
                     }
                     // Intentionally fall through - we're outside tracking rectangle
@@ -493,7 +560,10 @@ public class SlidingTab extends ViewGroup {
                 case MotionEvent.ACTION_CANCEL:
                     mTracking = false;
                     mTriggered = false;
-                    resetView();
+                    mOtherSlider.show(true);
+                    mCurrentSlider.reset(false);
+                    mCurrentSlider = null;
+                    mOtherSlider = null;
                     setGrabbedState(OnTriggerListener.NO_HANDLE);
                     break;
             }
@@ -502,14 +572,68 @@ public class SlidingTab extends ViewGroup {
         return mTracking || super.onTouchEvent(event);
     }
 
+    void startAnimating() {
+        mAnimating = true;
+        final Animation appear = new AlphaAnimation(0.5f, 1.0f); appear.setDuration(ANIM_DURATION);
+        final Animation trans;
+        Slider slider = mCurrentSlider;
+        int dx;
+        int dy;
+        if (isHorizontal()) {
+            int right = slider.tab.getRight();
+            int width = slider.tab.getWidth();
+            int left = slider.tab.getLeft();
+            int viewWidth = getWidth();
+            dx =  slider == mRightSlider ? - (right + viewWidth - width)
+                    : (viewWidth - left) + viewWidth - width;
+            dy = 0;
+        } else {
+            int top = slider.tab.getTop();
+            int bottom = slider.tab.getBottom();
+            int height = slider.tab.getHeight();
+            int viewHeight = getHeight();
+            dx = 0;
+            dy =  slider == mRightSlider ? (top + viewHeight - height)
+                    : - ((viewHeight - bottom) + viewHeight - height);
+        }
+        trans = new TranslateAnimation(0, dx, 0, dy);
+        trans.setDuration(ANIM_DURATION);
+        trans.setInterpolator(new LinearInterpolator());
+
+        trans.setAnimationListener(new AnimationListener() {
+            public void onAnimationEnd(Animation animation) {
+                resetView();
+                mLeftSlider.startAnimation(appear);
+                mRightSlider.startAnimation(appear);
+                mAnimating = false;
+            }
+
+            public void onAnimationRepeat(Animation animation) {
+
+            }
+
+            public void onAnimationStart(Animation animation) {
+
+            }
+
+        });
+
+        slider.startAnimation(trans);
+    }
+
+    private boolean withinView(final float x, final float y, final View view) {
+        return isHorizontal() && y > - TRACKING_MARGIN && y < TRACKING_MARGIN + view.getHeight()
+            || !isHorizontal() && x > -TRACKING_MARGIN && x < TRACKING_MARGIN + view.getWidth();
+    }
+
     private boolean isHorizontal() {
         return mOrientation == HORIZONTAL;
     }
 
     private void resetView() {
-        mLeftSlider.reset();
-        mRightSlider.reset();
-        onLayout(true, getLeft(), getTop(), getLeft() + getWidth(), getTop() + getHeight());
+        mLeftSlider.reset(false);
+        mRightSlider.reset(false);
+        // onLayout(true, getLeft(), getTop(), getLeft() + getWidth(), getTop() + getHeight());
     }
 
     @Override
@@ -639,22 +763,6 @@ public class SlidingTab extends ViewGroup {
             if (mOnTriggerListener != null) {
                 mOnTriggerListener.onGrabbedStateChange(this, mGrabbedState);
             }
-        }
-    }
-
-    private class SlidingTabHandler extends Handler {
-        public void handleMessage(Message m) {
-            switch (m.what) {
-                case MSG_ANIMATE:
-                    doAnimation();
-                    break;
-            }
-        }
-    }
-
-    private void doAnimation() {
-        if (mAnimating) {
-
         }
     }
 
