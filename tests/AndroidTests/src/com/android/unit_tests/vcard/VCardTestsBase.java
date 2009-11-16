@@ -33,14 +33,14 @@ import android.net.Uri;
 import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
-import android.pim.vcard.ContactStruct;
-import android.pim.vcard.EntryCommitter;
-import android.pim.vcard.EntryHandler;
-import android.pim.vcard.VCardBuilder;
-import android.pim.vcard.VCardBuilderCollection;
+import android.pim.vcard.VCardEntry;
+import android.pim.vcard.VCardEntryCommitter;
+import android.pim.vcard.VCardEntryHandler;
+import android.pim.vcard.VCardInterpreter;
+import android.pim.vcard.VCardInterPreterCollection;
 import android.pim.vcard.VCardComposer;
 import android.pim.vcard.VCardConfig;
-import android.pim.vcard.VCardDataBuilder;
+import android.pim.vcard.VCardEntryConstructor;
 import android.pim.vcard.VCardParser;
 import android.pim.vcard.VCardParser_V21;
 import android.pim.vcard.VCardParser_V30;
@@ -385,11 +385,11 @@ class CustomMockContext extends MockContext {
 
     class ImportVerifierElem {
         private final ImportTestResolver mResolver;
-        private final EntryHandler mHandler;
+        private final VCardEntryHandler mHandler;
 
         public ImportVerifierElem() {
             mResolver = new ImportTestResolver();
-            mHandler = new EntryCommitter(mResolver);
+            mHandler = new VCardEntryCommitter(mResolver);
         }
 
         public ContentValuesBuilder addExpected(String mimeType) {
@@ -411,8 +411,8 @@ class CustomMockContext extends MockContext {
             } else {
                 vCardParser = new VCardParser_V21();
             }
-            VCardDataBuilder builder =
-                    new VCardDataBuilder(null, null, false, vCardType, null);
+            VCardEntryConstructor builder =
+                    new VCardEntryConstructor(null, null, false, vCardType, null);
             builder.addEntryHandler(mHandler);
             try {
                 vCardParser.parse(is, builder);
@@ -432,19 +432,19 @@ class CustomMockContext extends MockContext {
         }
 
         public void onParsingStart() {
-            mHandler.onParsingStart();
+            mHandler.onStart();
         }
 
-        public void onEntryCreated(ContactStruct entry) {
+        public void onEntryCreated(VCardEntry entry) {
             mHandler.onEntryCreated(entry);
         }
 
         public void onParsingEnd() {
-            mHandler.onParsingEnd();
+            mHandler.onEnd();
         }
     }
 
-    class ImportVerifier implements EntryHandler {
+    class ImportVerifier implements VCardEntryHandler {
         private List<ImportVerifierElem> mImportVerifierElemList =
             new ArrayList<ImportVerifierElem>();
         private int mIndex;
@@ -476,8 +476,8 @@ class CustomMockContext extends MockContext {
 
         public void verify(InputStream is, int vCardType, final VCardParser vCardParser)
                 throws IOException, VCardException {
-            VCardDataBuilder builder =
-                new VCardDataBuilder(null, null, false, vCardType, null);
+            VCardEntryConstructor builder =
+                new VCardEntryConstructor(null, null, false, vCardType, null);
             builder.addEntryHandler(this);
             try {
                 vCardParser.parse(is, builder);
@@ -491,19 +491,19 @@ class CustomMockContext extends MockContext {
             }
         }
 
-        public void onParsingStart() {
+        public void onStart() {
             for (ImportVerifierElem elem : mImportVerifierElemList) {
                 elem.onParsingStart();
             }
         }
 
-        public void onEntryCreated(ContactStruct entry) {
+        public void onEntryCreated(VCardEntry entry) {
             assertTrue(mIndex < mImportVerifierElemList.size());
             mImportVerifierElemList.get(mIndex).onEntryCreated(entry);
             mIndex++;
         }
 
-        public void onParsingEnd() {
+        public void onEnd() {
             for (ImportVerifierElem elem : mImportVerifierElemList) {
                 elem.onParsingEnd();
                 elem.verifyResolver();
@@ -802,6 +802,7 @@ class CustomMockContext extends MockContext {
         private final ExportTestResolver mResolver;
         private final int mVCardType;
         private final boolean mIsV30;
+        private final boolean mIsDoCoMo;
 
         // To allow duplication, use list instead of set.
         // When null, we don't need to do the verification.
@@ -813,6 +814,7 @@ class CustomMockContext extends MockContext {
             mVCardVerifierInternal = new VCardVerifierInternal();
             mResolver = resolver;
             mIsV30 = VCardConfig.isV30(vcardType);
+            mIsDoCoMo = VCardConfig.isDoCoMo(vcardType);
             mVCardType = vcardType;
         }
 
@@ -831,6 +833,8 @@ class CustomMockContext extends MockContext {
             PropertyNodesVerifierElem elem = addPropertyNodesVerifierElem();
             if (mIsV30) {
                 elem.addNodeWithOrder("N", "").addNodeWithOrder("FN", "");
+            } else if (mIsDoCoMo) {
+                elem.addNodeWithOrder("N", "");
             }
             return elem;
         }
@@ -852,14 +856,14 @@ class CustomMockContext extends MockContext {
 
         private void verifyOneVCard(final String vcard) {
             // Log.d("@@@", vcard);
-            final VCardBuilder builder;
+            final VCardInterpreter builder;
             if (mImportVerifier != null) {
                 final VNodeBuilder vnodeBuilder = mPropertyNodesVerifier;
-                final VCardDataBuilder vcardDataBuilder =
-                        new VCardDataBuilder(mVCardType);
+                final VCardEntryConstructor vcardDataBuilder =
+                        new VCardEntryConstructor(mVCardType);
                 vcardDataBuilder.addEntryHandler(mImportVerifier);
                 if (mPropertyNodesVerifier != null) {
-                    builder = new VCardBuilderCollection(Arrays.asList(
+                    builder = new VCardInterPreterCollection(Arrays.asList(
                             mPropertyNodesVerifier, vcardDataBuilder));
                 } else {
                     builder = vnodeBuilder;

@@ -19,28 +19,33 @@ import android.content.ContentResolver;
 import android.util.Log;
 
 /**
- * EntryHandler implementation which commits the entry to Contacts Provider 
+ * EntryHandler implementation which commits the entry to ContentResolver.
+ *
+ * Note:
+ * Each vCard may contain big photo images encoded by BASE64,
+ * If we store all vCard entries in memory, OutOfMemoryError may be thrown.
+ * Thus, this class push each VCard entry into ContentResolver immediately.
  */
-public class EntryCommitter implements EntryHandler {
+public class VCardEntryCommitter implements VCardEntryHandler {
     public static String LOG_TAG = "vcard.EntryComitter";
 
     private ContentResolver mContentResolver;
     private long mTimeToCommit;
     
-    public EntryCommitter(ContentResolver resolver) {
+    public VCardEntryCommitter(ContentResolver resolver) {
         mContentResolver = resolver;
     }
 
-    public void onParsingStart() {
+    public void onStart() {
     }
     
-    public void onParsingEnd() {
+    public void onEnd() {
         if (VCardConfig.showPerformanceLog()) {
             Log.d(LOG_TAG, String.format("time to commit entries: %d ms", mTimeToCommit));
         }
     }
 
-    public void onEntryCreated(final ContactStruct contactStruct) {
+    public void onEntryCreated(final VCardEntry contactStruct) {
         long start = System.currentTimeMillis();
         contactStruct.pushIntoContentResolver(mContentResolver);
         mTimeToCommit += System.currentTimeMillis() - start;

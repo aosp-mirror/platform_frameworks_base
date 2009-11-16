@@ -25,7 +25,7 @@ import java.util.Set;
  * Currently this implementation is very premature.
  * @hide
  */
-public class VCardSourceDetector implements VCardBuilder {
+public class VCardSourceDetector implements VCardInterpreter {
     // Should only be used in package. 
     static final int TYPE_UNKNOWN = 0;
     static final int TYPE_APPLE = 1;

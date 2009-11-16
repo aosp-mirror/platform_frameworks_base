@@ -196,7 +196,7 @@ public class VCardComposer {
      * An useful example handler, which emits VCard String to outputstream one by one.
      * </p>
      * <p>
-     * The input OutputStream object is closed() on {{@link #onTerminate()}.
+     * The input OutputStream object is closed() on {@link #onTerminate()}.
      * Must not close the stream outside.
      * </p>
      */
@@ -353,7 +353,8 @@ public class VCardComposer {
     /**
      * Construct for supporting call log entry vCard composing.
      */
-    public VCardComposer(Context context, int vcardType, boolean careHandlerErrors) {
+    public VCardComposer(final Context context, final int vcardType,
+            final boolean careHandlerErrors) {
         mContext = context;
         mVCardType = vcardType;
         mCareHandlerErrors = careHandlerErrors;
@@ -403,7 +404,7 @@ public class VCardComposer {
     }
 
     /**
-     * Must call before {{@link #init()}.
+     * Must be called before {@link #init()}.
      */
     public void addHandler(OneEntryHandler handler) {
         if (handler != null) {
@@ -510,8 +511,7 @@ public class VCardComposer {
         } catch (OutOfMemoryError error) {
             // Maybe some data (e.g. photo) is too big to have in memory. But it
             // should be rare.
-            Log.e(LOG_TAG, "OutOfMemoryError occured. Ignore the entry: "
-                    + name);
+            Log.e(LOG_TAG, "OutOfMemoryError occured. Ignore the entry: " + name);
             System.gc();
             // TODO: should tell users what happened?
             return true;
@@ -676,7 +676,7 @@ public class VCardComposer {
         }
     }
 
-    private boolean containsNonEmptyName(ContentValues contentValues) {
+    private boolean containsNonEmptyName(final ContentValues contentValues) {
         final String familyName = contentValues.getAsString(StructuredName.FAMILY_NAME);
         final String middleName = contentValues.getAsString(StructuredName.MIDDLE_NAME);
         final String givenName = contentValues.getAsString(StructuredName.GIVEN_NAME);
@@ -715,7 +715,7 @@ public class VCardComposer {
             } else if (primaryContentValues == null) {
                 // We choose the first "primary" ContentValues
                 // if "super primary" ContentValues does not exist.
-                Integer isPrimary = contentValues.getAsInteger(StructuredName.IS_PRIMARY);
+                final Integer isPrimary = contentValues.getAsInteger(StructuredName.IS_PRIMARY);
                 if (isPrimary != null && isPrimary > 0 &&
                         containsNonEmptyName(contentValues)) {
                     primaryContentValues = contentValues;
@@ -897,11 +897,11 @@ public class VCardComposer {
         final String phoneticMiddleName;
         final String phoneticGivenName;
         {
-            String tmpPhoneticFamilyName =
+            final String tmpPhoneticFamilyName =
                 primaryContentValues.getAsString(StructuredName.PHONETIC_FAMILY_NAME);
-            String tmpPhoneticMiddleName =
+            final String tmpPhoneticMiddleName =
                 primaryContentValues.getAsString(StructuredName.PHONETIC_MIDDLE_NAME);
-            String tmpPhoneticGivenName =
+            final String tmpPhoneticGivenName =
                 primaryContentValues.getAsString(StructuredName.PHONETIC_GIVEN_NAME);
             if (mNeedsToConvertPhoneticString) {
                 phoneticFamilyName = VCardUtils.toHalfWidthString(tmpPhoneticFamilyName);
@@ -913,10 +913,11 @@ public class VCardComposer {
                 phoneticGivenName = tmpPhoneticGivenName;
             }
         }
+
         if (!(TextUtils.isEmpty(phoneticFamilyName)
                 && TextUtils.isEmpty(phoneticMiddleName)
                 && TextUtils.isEmpty(phoneticGivenName))) {
-
+            // Try to emit the field(s) related to phonetic name.
             if (mIsV30) {
                 final String sortString = VCardUtils
                         .constructNameFromElements(mVCardType,
@@ -937,6 +938,12 @@ public class VCardComposer {
                 //       since it is supported by
                 //       a lot of Japanese mobile phones. This is "X-" property, so
                 //       any parser hopefully would not get confused with this.
+                //
+                //       Also, DoCoMo's specification requires vCard composer to use just the first
+                //       column.
+                //       i.e.
+                //       o  SOUND;X-IRMC-N:Miyakawa Daisuke;;;;
+                //       x  SOUND;X-IRMC-N:Miyakawa;Daisuke;;;
                 builder.append(Constants.PROPERTY_SOUND);
                 builder.append(VCARD_PARAM_SEPARATOR);
                 builder.append(Constants.PARAM_TYPE_X_IRMC_N);
@@ -970,8 +977,6 @@ public class VCardComposer {
                     builder.append(mVCardCharsetParameter);
                 }
                 builder.append(VCARD_DATA_SEPARATOR);
-                // DoCoMo's specification requires vCard composer to use just the first
-                // column.
                 {
                     boolean first = true;
                     if (!TextUtils.isEmpty(encodedPhoneticFamilyName)) {
@@ -999,16 +1004,18 @@ public class VCardComposer {
                 builder.append(VCARD_ITEM_SEPARATOR);
                 builder.append(VCARD_END_OF_LINE);
             }
-        } else if (mIsDoCoMo) {
-            builder.append(Constants.PROPERTY_SOUND);
-            builder.append(VCARD_PARAM_SEPARATOR);
-            builder.append(Constants.PARAM_TYPE_X_IRMC_N);
-            builder.append(VCARD_DATA_SEPARATOR);
-            builder.append(VCARD_ITEM_SEPARATOR);
-            builder.append(VCARD_ITEM_SEPARATOR);
-            builder.append(VCARD_ITEM_SEPARATOR);
-            builder.append(VCARD_ITEM_SEPARATOR);
-            builder.append(VCARD_END_OF_LINE);
+        } else {  // If phonetic name fields are all empty
+            if (mIsDoCoMo) {
+                builder.append(Constants.PROPERTY_SOUND);
+                builder.append(VCARD_PARAM_SEPARATOR);
+                builder.append(Constants.PARAM_TYPE_X_IRMC_N);
+                builder.append(VCARD_DATA_SEPARATOR);
+                builder.append(VCARD_ITEM_SEPARATOR);
+                builder.append(VCARD_ITEM_SEPARATOR);
+                builder.append(VCARD_ITEM_SEPARATOR);
+                builder.append(VCARD_ITEM_SEPARATOR);
+                builder.append(VCARD_END_OF_LINE);
+            }
         }
 
         if (mUsesDefactProperty) {
@@ -1252,48 +1259,50 @@ public class VCardComposer {
         }
     }
 
+    private static final Map<Integer, Integer> sPostalTypePriorityMap;
+
+    static {
+        sPostalTypePriorityMap = new HashMap<Integer, Integer>();
+        sPostalTypePriorityMap.put(StructuredPostal.TYPE_HOME, 0);
+        sPostalTypePriorityMap.put(StructuredPostal.TYPE_WORK, 1);
+        sPostalTypePriorityMap.put(StructuredPostal.TYPE_OTHER, 2);
+        sPostalTypePriorityMap.put(StructuredPostal.TYPE_CUSTOM, 3);
+    }
+
     /**
      * Tries to append just one line. If there's no appropriate address
      * information, append an empty line.
      */
     private void appendPostalsForDoCoMo(final StringBuilder builder,
             final List<ContentValues> contentValuesList) {
-        // TODO: from old, inefficient code. fix this.
-        if (appendPostalsForDoCoMoInternal(builder, contentValuesList,
-                StructuredPostal.TYPE_HOME)) {
-            return;
-        }
-        if (appendPostalsForDoCoMoInternal(builder, contentValuesList,
-                StructuredPostal.TYPE_WORK)) {
-            return;
-        }
-        if (appendPostalsForDoCoMoInternal(builder, contentValuesList,
-                StructuredPostal.TYPE_OTHER)) {
-            return;
-        }
-        if (appendPostalsForDoCoMoInternal(builder, contentValuesList,
-                StructuredPostal.TYPE_CUSTOM)) {
-            return;
-        }
-
-        Log.w(LOG_TAG,
-                "Should not come here. Must have at least one postal data.");
-    }
-
-    private boolean appendPostalsForDoCoMoInternal(final StringBuilder builder,
-            final List<ContentValues> contentValuesList, Integer preferedType) {
+        int currentPriority = Integer.MAX_VALUE;
+        int currentType = Integer.MAX_VALUE;
+        ContentValues currentContentValues = null;
         for (ContentValues contentValues : contentValuesList) {
-            final Integer type = contentValues.getAsInteger(StructuredPostal.TYPE);
-            final String label = contentValues.getAsString(StructuredPostal.LABEL);
-            if (type == preferedType) {
-                // Note: Not sure why we need to emit "empty" line even when actual
-                //       data does not exist. There may be some reason or may not.
-                //       We keep safer side since the previous implementation did so.
-                appendVCardPostalLine(builder, type, label, contentValues, true, true);
-                return true;
+            if (contentValues == null) {
+                continue;
+            }
+            final Integer typeAsInteger = contentValues.getAsInteger(StructuredPostal.TYPE);
+            final Integer priorityAsInteger = sPostalTypePriorityMap.get(typeAsInteger);
+            final int priority =
+                    (priorityAsInteger != null ? priorityAsInteger : Integer.MAX_VALUE);
+            if (priority < currentPriority) {
+                currentPriority = priority;
+                currentType = typeAsInteger;
+                currentContentValues = contentValues;
+                if (priority == 0) {
+                    break;
+                }
             }
         }
-        return false;
+
+        if (currentContentValues == null) {
+            Log.w(LOG_TAG, "Should not come here. Must have at least one postal data.");
+            return;
+        }
+
+        final String label = currentContentValues.getAsString(StructuredPostal.LABEL);
+        appendVCardPostalLine(builder, currentType, label, currentContentValues, false, true);
     }
 
     private void appendPostalsForGeneric(final StringBuilder builder,
@@ -1302,9 +1311,9 @@ public class VCardComposer {
             if (contentValues == null) {
                 continue;
             }
-            final Integer typeAsObject = contentValues.getAsInteger(StructuredPostal.TYPE);
-            final int type = (typeAsObject != null ?
-                    typeAsObject : DEFAULT_POSTAL_TYPE);
+            final Integer typeAsInteger = contentValues.getAsInteger(StructuredPostal.TYPE);
+            final int type = (typeAsInteger != null ?
+                    typeAsInteger : DEFAULT_POSTAL_TYPE);
             final String label = contentValues.getAsString(StructuredPostal.LABEL);
             final Integer isPrimaryAsInteger =
                 contentValues.getAsInteger(StructuredPostal.IS_PRIMARY);
@@ -1525,9 +1534,9 @@ public class VCardComposer {
                     photoType = "GIF";
                 } else if (data.length >= 4 && data[0] == (byte) 0x89
                         && data[1] == 'P' && data[2] == 'N' && data[3] == 'G') {
-                    // Note: vCard 2.1 officially does not support PNG, but we may
-                    // have it and using X- word like "X-PNG" may not let importers
-                    // know it is PNG. So we use the String "PNG" as is...
+                    // Note: vCard 2.1 officially does not support PNG, but we may have it and
+                    //       using X- word like "X-PNG" may not let importers know it is PNG.
+                    //       So we use the String "PNG" as is...
                     photoType = "PNG";
                 } else if (data.length >= 2 && data[0] == (byte) 0xff
                         && data[1] == (byte) 0xd8) {
@@ -1599,7 +1608,7 @@ public class VCardComposer {
         rawDataList.add(mimeType);
         final List<String> columnNameList;
         if (Nickname.CONTENT_ITEM_TYPE.equals(mimeType)) {
-            
+
         } else {
             // If you add the other field, please check all the columns are able to be
             // converted to String.
@@ -1851,7 +1860,7 @@ public class VCardComposer {
                 break;
             }
             case StructuredPostal.TYPE_CUSTOM: {
-                if (mUsesAndroidProperty && !TextUtils.isEmpty(label)
+                if (!TextUtils.isEmpty(label)
                         && VCardUtils.containsOnlyAlphaDigitHyphen(label)) {
                     // We're not sure whether the label is valid in the spec
                     // ("IANA-token" in the vCard 3.0 is unclear...)
@@ -1871,17 +1880,14 @@ public class VCardComposer {
         }
 
         // Actual data construction starts from here.
-        // TODO: add a new version of appendVCardLine() for this purpose.
         
         builder.append(Constants.PROPERTY_ADR);
-        builder.append(VCARD_PARAM_SEPARATOR);
 
         // Parameters
         {
-            boolean shouldAppendParamSeparator = false;
             if (!parameterList.isEmpty()) {
+                builder.append(VCARD_PARAM_SEPARATOR);
                 appendTypeParameters(builder, parameterList);
-                shouldAppendParamSeparator = true;
             }
 
             if (appendCharset) {
@@ -1889,19 +1895,13 @@ public class VCardComposer {
                 // but we will add it since the information should be useful for importers,
                 //
                 // Assume no parser does not emit error with this parameter in vCard 3.0.
-                if (shouldAppendParamSeparator) {
-                    builder.append(VCARD_PARAM_SEPARATOR);
-                }
+                builder.append(VCARD_PARAM_SEPARATOR);
                 builder.append(mVCardCharsetParameter);
-                shouldAppendParamSeparator = true;
             }
 
             if (reallyUseQuotedPrintable) {
-                if (shouldAppendParamSeparator) {
-                    builder.append(VCARD_PARAM_SEPARATOR);
-                }
+                builder.append(VCARD_PARAM_SEPARATOR);
                 builder.append(VCARD_PARAM_ENCODING_QP);
-                shouldAppendParamSeparator = true;
             }
         }
 
@@ -1916,13 +1916,9 @@ public class VCardComposer {
         final String typeAsString;
         switch (type) {
             case Email.TYPE_CUSTOM: {
-                // For backward compatibility.
-                // Detail: Until Donut, there isn't TYPE_MOBILE for email while there is now.
-                //         To support mobile type at that time, this custom label had been used.
-                if (android.provider.Contacts.ContactMethodsColumns.MOBILE_EMAIL_TYPE_NAME
-                        .equals(label)) {
+                if (VCardUtils.isMobilePhoneLabel(label)) {
                     typeAsString = Constants.PARAM_TYPE_CELL;
-                } else if (mUsesAndroidProperty && !TextUtils.isEmpty(label)
+                } else if (!TextUtils.isEmpty(label)
                         && VCardUtils.containsOnlyAlphaDigitHyphen(label)) {
                     typeAsString = "X-" + label;
                 } else {
@@ -1966,102 +1962,126 @@ public class VCardComposer {
     }
 
     private void appendVCardTelephoneLine(final StringBuilder builder,
-            final Integer typeAsObject, final String label,
+            final Integer typeAsInteger, final String label,
             final String encodedData, boolean isPrimary) {
         builder.append(Constants.PROPERTY_TEL);
         builder.append(VCARD_PARAM_SEPARATOR);
 
-        final int typeAsPrimitive;
-        if (typeAsObject == null) {
-            typeAsPrimitive = Phone.TYPE_OTHER;
+        final int type;
+        if (typeAsInteger == null) {
+            type = Phone.TYPE_OTHER;
         } else {
-            typeAsPrimitive = typeAsObject;
+            type = typeAsInteger;
         }
 
         ArrayList<String> parameterList = new ArrayList<String>();
-        switch (typeAsPrimitive) {
-        case Phone.TYPE_HOME:
-            parameterList.addAll(
-                    Arrays.asList(Constants.PARAM_TYPE_HOME));
-            break;
-        case Phone.TYPE_WORK:
-            parameterList.addAll(
-                    Arrays.asList(Constants.PARAM_TYPE_WORK));
-            break;
-        case Phone.TYPE_FAX_HOME:
-            parameterList.addAll(
-                    Arrays.asList(Constants.PARAM_TYPE_HOME, Constants.PARAM_TYPE_FAX));
-            break;
-        case Phone.TYPE_FAX_WORK:
-            parameterList.addAll(
-                    Arrays.asList(Constants.PARAM_TYPE_WORK, Constants.PARAM_TYPE_FAX));
-            break;
-        case Phone.TYPE_MOBILE:
-            parameterList.add(Constants.PARAM_TYPE_CELL);
-            break;
-        case Phone.TYPE_PAGER:
-            if (mIsDoCoMo) {
-                // Not sure about the reason, but previous implementation had
-                // used "VOICE" instead of "PAGER"
-                parameterList.add(Constants.PARAM_TYPE_VOICE);
-            } else {
-                parameterList.add(Constants.PARAM_TYPE_PAGER);
+        switch (type) {
+            case Phone.TYPE_HOME: {
+                parameterList.addAll(
+                        Arrays.asList(Constants.PARAM_TYPE_HOME));
+                break;
             }
-            break;
-        case Phone.TYPE_OTHER:
-            parameterList.add(Constants.PARAM_TYPE_VOICE);
-            break;
-        case Phone.TYPE_CAR:
-            parameterList.add(Constants.PARAM_TYPE_CAR);
-            break;
-        case Phone.TYPE_COMPANY_MAIN:
-            // There's no relevant field in vCard (at least 2.1).
-            parameterList.add(Constants.PARAM_TYPE_WORK);
-            isPrimary = true;
-            break;
-        case Phone.TYPE_ISDN:
-            parameterList.add(Constants.PARAM_TYPE_ISDN);
-            break;
-        case Phone.TYPE_MAIN:
-            isPrimary = true;
-            break;
-        case Phone.TYPE_OTHER_FAX:
-            parameterList.add(Constants.PARAM_TYPE_FAX);
-            break;
-        case Phone.TYPE_TELEX:
-            parameterList.add(Constants.PARAM_TYPE_TLX);
-            break;
-        case Phone.TYPE_WORK_MOBILE:
-            parameterList.addAll(
-                    Arrays.asList(Constants.PARAM_TYPE_WORK, Constants.PARAM_TYPE_CELL));
-            break;
-        case Phone.TYPE_WORK_PAGER:
-            parameterList.add(Constants.PARAM_TYPE_WORK);
-            // See above.
-            if (mIsDoCoMo) {
-                parameterList.add(Constants.PARAM_TYPE_VOICE);
-            } else {
-                parameterList.add(Constants.PARAM_TYPE_PAGER);
+            case Phone.TYPE_WORK: {
+                parameterList.addAll(
+                        Arrays.asList(Constants.PARAM_TYPE_WORK));
+                break;
             }
-            break;
-        case Phone.TYPE_MMS:
-            parameterList.add(Constants.PARAM_TYPE_MSG);
-            break;
-        case Phone.TYPE_CUSTOM:
-            if (mUsesAndroidProperty && !TextUtils.isEmpty(label)
-                        && VCardUtils.containsOnlyAlphaDigitHyphen(label)) {
-                // Note: Strictly, vCard 2.1 does not allow "X-" parameter without
-                //       "TYPE=" string.
-                parameterList.add("X-" + label);
-            } else {
-                // Just ignore the custom type.
-                parameterList.add(Constants.PARAM_TYPE_VOICE);
+            case Phone.TYPE_FAX_HOME: {
+                parameterList.addAll(
+                        Arrays.asList(Constants.PARAM_TYPE_HOME, Constants.PARAM_TYPE_FAX));
+                break;
             }
-            break;
-        case Phone.TYPE_RADIO:
-        case Phone.TYPE_TTY_TDD:
-        default:
-            break;
+            case Phone.TYPE_FAX_WORK: {
+                parameterList.addAll(
+                        Arrays.asList(Constants.PARAM_TYPE_WORK, Constants.PARAM_TYPE_FAX));
+                break;
+            }
+            case Phone.TYPE_MOBILE: {
+                parameterList.add(Constants.PARAM_TYPE_CELL);
+                break;
+            }
+            case Phone.TYPE_PAGER: {
+                if (mIsDoCoMo) {
+                    // Not sure about the reason, but previous implementation had
+                    // used "VOICE" instead of "PAGER"
+                    parameterList.add(Constants.PARAM_TYPE_VOICE);
+                } else {
+                    parameterList.add(Constants.PARAM_TYPE_PAGER);
+                }
+                break;
+            }
+            case Phone.TYPE_OTHER: {
+                parameterList.add(Constants.PARAM_TYPE_VOICE);
+                break;
+            }
+            case Phone.TYPE_CAR: {
+                parameterList.add(Constants.PARAM_TYPE_CAR);
+                break;
+            }
+            case Phone.TYPE_COMPANY_MAIN: {
+                // There's no relevant field in vCard (at least 2.1).
+                parameterList.add(Constants.PARAM_TYPE_WORK);
+                isPrimary = true;
+                break;
+            }
+            case Phone.TYPE_ISDN: {
+                parameterList.add(Constants.PARAM_TYPE_ISDN);
+                break;
+            }
+            case Phone.TYPE_MAIN: {
+                isPrimary = true;
+                break;
+            }
+            case Phone.TYPE_OTHER_FAX: {
+                parameterList.add(Constants.PARAM_TYPE_FAX);
+                break;
+            }
+            case Phone.TYPE_TELEX: {
+                parameterList.add(Constants.PARAM_TYPE_TLX);
+                break;
+            }
+            case Phone.TYPE_WORK_MOBILE: {
+                parameterList.addAll(
+                        Arrays.asList(Constants.PARAM_TYPE_WORK, Constants.PARAM_TYPE_CELL));
+                break;
+            }
+            case Phone.TYPE_WORK_PAGER: {
+                parameterList.add(Constants.PARAM_TYPE_WORK);
+                // See above.
+                if (mIsDoCoMo) {
+                    parameterList.add(Constants.PARAM_TYPE_VOICE);
+                } else {
+                    parameterList.add(Constants.PARAM_TYPE_PAGER);
+                }
+                break;
+            }
+            case Phone.TYPE_MMS: {
+                parameterList.add(Constants.PARAM_TYPE_MSG);
+                break;
+            }
+            case Phone.TYPE_CUSTOM: {
+                if (TextUtils.isEmpty(label)) {
+                    // Just ignore the custom type.
+                    parameterList.add(Constants.PARAM_TYPE_VOICE);
+                } else if (VCardUtils.isMobilePhoneLabel(label)) {
+                    parameterList.add(Constants.PARAM_TYPE_CELL);
+                } else {
+                    final String upperLabel = label.toUpperCase();
+                    if (VCardUtils.isValidInV21ButUnknownToContactsPhoteType(upperLabel)) {
+                        parameterList.add(upperLabel);
+                    } else if (VCardUtils.containsOnlyAlphaDigitHyphen(label)) {
+                        // Note: Strictly, vCard 2.1 does not allow "X-" parameter without
+                        //       "TYPE=" string.
+                        parameterList.add("X-" + label);
+                    }
+                }
+                break;
+            }
+            case Phone.TYPE_RADIO:
+            case Phone.TYPE_TTY_TDD:
+            default: {
+                break;
+            }
         }
 
         if (isPrimary) {
@@ -2069,7 +2089,7 @@ public class VCardComposer {
         }
 
         if (parameterList.isEmpty()) {
-            appendUncommonPhoneType(builder, typeAsPrimitive);
+            appendUncommonPhoneType(builder, type);
         } else {
             appendTypeParameters(builder, parameterList);
         }
@@ -2203,7 +2223,7 @@ public class VCardComposer {
             final String propertyName,
             final List<String> parameterList,
             final List<String> rawDataList, final boolean needCharset,
-            boolean needQuotedPrintable) {
+            final boolean needQuotedPrintable) {
         builder.append(propertyName);
         if (parameterList != null && parameterList.size() > 0) {
             builder.append(VCARD_PARAM_SEPARATOR);
@@ -2223,8 +2243,10 @@ public class VCardComposer {
                 builder.append(VCARD_PARAM_ENCODING_QP);
                 encodedData = encodeQuotedPrintable(rawData);
             } else {
-                // TODO: one line may be too huge, which may be invalid in vCard spec, though
-                //       several (even well-known) applications do not care this.
+                // TODO: one line may be too huge, which may be invalid in vCard 3.0
+                //        (which says "When generating a content line, lines longer than
+                //        75 characters SHOULD be folded"), though several
+                //        (even well-known) applications do not care this.
                 encodedData = escapeCharacters(rawData);
             }
 
@@ -2305,7 +2327,7 @@ public class VCardComposer {
         }
         {
             // Replace "\n" and "\r" with "\r\n".
-            StringBuilder tmpBuilder = new StringBuilder();
+            final StringBuilder tmpBuilder = new StringBuilder();
             int length = str.length();
             for (int i = 0; i < length; i++) {
                 char ch = str.charAt(i);
