@@ -158,6 +158,16 @@ nContextCreate(JNIEnv *_env, jobject _this, jint dev, jint ver, jboolean useDept
 }
 
 static void
+nContextSetPriority(JNIEnv *_env, jobject _this, jint p)
+{
+    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
+    LOG_API("ContextSetPriority, con(%p), priority(%i)", con, p);
+    rsContextSetPriority(con, p);
+}
+
+
+
+static void
 nContextSetSurface(JNIEnv *_env, jobject _this, jint width, jint height, jobject wnd)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
@@ -1333,6 +1343,7 @@ static JNINativeMethod methods[] = {
 {"nDeviceDestroy",                 "(I)V",                                 (void*)nDeviceDestroy },
 {"nDeviceSetConfig",               "(III)V",                               (void*)nDeviceSetConfig },
 {"nContextCreate",                 "(IIZ)I",                               (void*)nContextCreate },
+{"nContextSetPriority",            "(I)V",                                 (void*)nContextSetPriority },
 {"nContextSetSurface",             "(IILandroid/view/Surface;)V",          (void*)nContextSetSurface },
 {"nContextDestroy",                "(I)V",                                 (void*)nContextDestroy },
 {"nContextPause",                  "()V",                                  (void*)nContextPause },
