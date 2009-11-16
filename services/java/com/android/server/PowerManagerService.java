@@ -154,6 +154,7 @@ class PowerManagerService extends IPowerManager.Stub
     private final int MY_UID;
 
     private boolean mDoneBooting = false;
+    private boolean mBootCompleted = false;
     private int mStayOnConditions = 0;
     private int[] mBroadcastQueue = new int[] { -1, -1, -1 };
     private int[] mBroadcastWhy = new int[3];
@@ -342,6 +343,13 @@ class PowerManagerService extends IPowerManager.Stub
         }
     }
 
+    private final class BootCompletedReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            bootCompleted();
+        }
+    }
+
     /**
      * Set the setting that determines whether the device stays on when plugged in.
      * The argument is a bit string, with each bit specifying a power source that,
@@ -487,6 +495,9 @@ class PowerManagerService extends IPowerManager.Stub
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_BATTERY_CHANGED);
         mContext.registerReceiver(new BatteryReceiver(), filter);
+        filter = new IntentFilter();
+        filter.addAction(Intent.ACTION_BOOT_COMPLETED);
+        mContext.registerReceiver(new BootCompletedReceiver(), filter);
 
         // Listen for Gservices changes
         IntentFilter gservicesChangedFilter =
@@ -958,7 +969,7 @@ class PowerManagerService extends IPowerManager.Stub
 
     private void setTimeoutLocked(long now, int nextState)
     {
-        if (mDoneBooting) {
+        if (mBootCompleted) {
             mHandler.removeCallbacks(mTimeoutTask);
             mTimeoutTask.nextState = nextState;
             long when = now;
@@ -1373,7 +1384,7 @@ class PowerManagerService extends IPowerManager.Stub
                 return;
             }
 
-            if (!mDoneBooting && !mUseSoftwareAutoBrightness) {
+            if (!mBootCompleted && !mUseSoftwareAutoBrightness) {
                 newState |= ALL_BRIGHT;
             }
 
@@ -2326,6 +2337,13 @@ class PowerManagerService extends IPowerManager.Stub
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }
+        }
+    }
+
+    void bootCompleted() {
+        Log.d(TAG, "bootCompleted");
+        synchronized (mLocks) {
+            mBootCompleted = true;
             userActivity(SystemClock.uptimeMillis(), false, BUTTON_EVENT, true);
             updateWakeLockLocked();
             mLocks.notifyAll();
