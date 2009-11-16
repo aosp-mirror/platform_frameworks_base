@@ -27,8 +27,6 @@ import android.os.Debug;
 import android.os.Looper;
 import android.os.Parcelable;
 import android.os.PerformanceCollector;
-import android.os.Process;
-import android.os.SystemClock;
 import android.os.PerformanceCollector.PerformanceResultsWriter;
 import android.test.suitebuilder.TestMethod;
 import android.test.suitebuilder.TestPredicates;
@@ -226,23 +224,6 @@ public class InstrumentationTestRunner extends Instrumentation implements TestSu
      * identifies the path to the generated code coverage file.
      */
     private static final String REPORT_KEY_COVERAGE_PATH = "coverageFilePath";
-    /**
-     * If included at the start of reporting keys, this prefix marks the key as a performance
-     * metric.
-     */
-    private static final String REPORT_KEY_PREFIX = "performance.";
-    /**
-     * If included in the status or final bundle sent to an IInstrumentationWatcher, this key
-     * reports the cpu time in milliseconds of the current test.
-     */
-    private static final String REPORT_KEY_PERF_CPU_TIME =
-        REPORT_KEY_PREFIX + PerformanceCollector.METRIC_KEY_CPU_TIME;
-    /**
-     * If included in the status or final bundle sent to an IInstrumentationWatcher, this key
-     * reports the run time in milliseconds of the current test.
-     */
-    private static final String REPORT_KEY_PERF_EXECUTION_TIME =
-        REPORT_KEY_PREFIX + PerformanceCollector.METRIC_KEY_EXECUTION_TIME;
 
     /**
      * The test is starting.
@@ -630,9 +611,9 @@ public class InstrumentationTestRunner extends Instrumentation implements TestSu
         int mTestNum = 0;
         int mTestResultCode = 0;
         String mTestClass = null;
+        PerformanceCollector mPerfCollector = new PerformanceCollector();
         boolean mIsTimedTest = false;
-        long mCpuTime = 0;
-        long mExecTime = 0;
+        boolean mIncludeDetailedStats = false;
 
         public WatcherResultPrinter(int numTests) {
             mResultTemplate = new Bundle();
@@ -675,20 +656,28 @@ public class InstrumentationTestRunner extends Instrumentation implements TestSu
             mTestResultCode = 0;
 
             mIsTimedTest = false;
+            mIncludeDetailedStats = false;
             try {
-                // Look for TimedTest annotation on both test class and test
-                // method
-                mIsTimedTest = test.getClass().isAnnotationPresent(TimedTest.class) ||
-                    test.getClass().getMethod(testName).isAnnotationPresent(TimedTest.class);
+                // Look for TimedTest annotation on both test class and test method
+                if (test.getClass().getMethod(testName).isAnnotationPresent(TimedTest.class)) {
+                    mIsTimedTest = true;
+                    mIncludeDetailedStats = test.getClass().getMethod(testName).getAnnotation(
+                            TimedTest.class).includeDetailedStats();
+                } else if (test.getClass().isAnnotationPresent(TimedTest.class)) {
+                    mIsTimedTest = true;
+                    mIncludeDetailedStats = test.getClass().getAnnotation(
+                            TimedTest.class).includeDetailedStats();
+                }
             } catch (SecurityException e) {
                 throw new IllegalStateException(e);
             } catch (NoSuchMethodException e) {
                 throw new IllegalStateException(e);
             }
 
-            if (mIsTimedTest) {
-                mExecTime = SystemClock.uptimeMillis();
-                mCpuTime = Process.getElapsedCpuTime();
+            if (mIsTimedTest && mIncludeDetailedStats) {
+                mPerfCollector.beginSnapshot("");
+            } else if (mIsTimedTest) {
+                mPerfCollector.startTiming("");
             }
         }
 
@@ -720,11 +709,10 @@ public class InstrumentationTestRunner extends Instrumentation implements TestSu
          * @see junit.framework.TestListener#endTest(Test)
          */
         public void endTest(Test test) {
-            if (mIsTimedTest) {
-                mCpuTime = Process.getElapsedCpuTime() - mCpuTime;
-                mExecTime = SystemClock.uptimeMillis() - mExecTime;
-                mTestResult.putLong(REPORT_KEY_PERF_CPU_TIME, mCpuTime);
-                mTestResult.putLong(REPORT_KEY_PERF_EXECUTION_TIME, mExecTime);
+            if (mIsTimedTest && mIncludeDetailedStats) {
+                mTestResult.putAll(mPerfCollector.endSnapshot());
+            } else if (mIsTimedTest) {
+                writeStopTiming(mPerfCollector.stopTiming(""));
             }
 
             if (mTestResultCode == 0) {
@@ -760,7 +748,7 @@ public class InstrumentationTestRunner extends Instrumentation implements TestSu
             for (Parcelable p :
                     results.getParcelableArrayList(PerformanceCollector.METRIC_KEY_ITERATIONS)) {
                 Bundle iteration = (Bundle)p;
-                String index = "performance.iteration" + i + ".";
+                String index = "iteration" + i + ".";
                 mTestResult.putString(index + PerformanceCollector.METRIC_KEY_LABEL,
                         iteration.getString(PerformanceCollector.METRIC_KEY_LABEL));
                 mTestResult.putLong(index + PerformanceCollector.METRIC_KEY_CPU_TIME,
@@ -772,15 +760,15 @@ public class InstrumentationTestRunner extends Instrumentation implements TestSu
         }
 
         public void writeMeasurement(String label, long value) {
-            mTestResult.putLong(REPORT_KEY_PREFIX + label, value);
+            mTestResult.putLong(label, value);
         }
 
         public void writeMeasurement(String label, float value) {
-            mTestResult.putFloat(REPORT_KEY_PREFIX + label, value);
+            mTestResult.putFloat(label, value);
         }
 
         public void writeMeasurement(String label, String value) {
-            mTestResult.putString(REPORT_KEY_PREFIX + label, value);
+            mTestResult.putString(label, value);
         }
 
         // TODO report the end of the cycle
