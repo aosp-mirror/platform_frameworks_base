@@ -462,60 +462,16 @@ public class VCardUtils {
         return true;
     }
     
-    // TODO: Replace wth the method in Base64 class.
-    private static char PAD = '=';
-    private static final char[] ENCODE64 = {
-        'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P',
-        'Q','R','S','T','U','V','W','X','Y','Z','a','b','c','d','e','f',
-        'g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v',
-        'w','x','y','z','0','1','2','3','4','5','6','7','8','9','+','/'
-    };
-
-    static public String encodeBase64(byte[] data) {
-        if (data == null) {
-            return "";
-        }
-
-        char[] charBuffer = new char[(data.length + 2) / 3 * 4];
-        int position = 0;
-        int _3byte = 0;
-        for (int i=0; i<data.length-2; i+=3) {
-            _3byte = ((data[i] & 0xFF) << 16) + ((data[i+1] & 0xFF) << 8) + (data[i+2] & 0xFF);
-            charBuffer[position++] = ENCODE64[_3byte >> 18];
-            charBuffer[position++] = ENCODE64[(_3byte >> 12) & 0x3F];
-            charBuffer[position++] = ENCODE64[(_3byte >>  6) & 0x3F];
-            charBuffer[position++] = ENCODE64[_3byte & 0x3F];
-        }
-        switch(data.length % 3) {
-        case 1: // [111111][11 0000][0000 00][000000]
-            _3byte = ((data[data.length-1] & 0xFF) << 16);
-            charBuffer[position++] = ENCODE64[_3byte >> 18];
-            charBuffer[position++] = ENCODE64[(_3byte >> 12) & 0x3F];
-            charBuffer[position++] = PAD;
-            charBuffer[position++] = PAD;
-            break;
-        case 2: // [111111][11 1111][1111 00][000000]
-            _3byte = ((data[data.length-2] & 0xFF) << 16) + ((data[data.length-1] & 0xFF) << 8);
-            charBuffer[position++] = ENCODE64[_3byte >> 18];
-            charBuffer[position++] = ENCODE64[(_3byte >> 12) & 0x3F];
-            charBuffer[position++] = ENCODE64[(_3byte >>  6) & 0x3F];
-            charBuffer[position++] = PAD;
-            break;
-        }
-
-        return new String(charBuffer);
-    }
-    
     static public String toHalfWidthString(String orgString) {
         if (TextUtils.isEmpty(orgString)) {
             return null;
         }
-        StringBuilder builder = new StringBuilder();
-        int length = orgString.length();
+        final StringBuilder builder = new StringBuilder();
+        final int length = orgString.length();
         for (int i = 0; i < length; i++) {
             // All Japanese character is able to be expressed by char.
             // Do not need to use String#codepPointAt().
-            char ch = orgString.charAt(i);
+            final char ch = orgString.charAt(i);
             CharSequence halfWidthText = JapaneseUtils.tryGetHalfWidthText(ch);
             if (halfWidthText != null) {
                 builder.append(halfWidthText);
