@@ -594,11 +594,9 @@ void OMXCodec::setVideoInputFormat(
         CHECK(!"Should not be here. Not a supported video mime type.");
     }
 
-    OMX_COLOR_FORMATTYPE colorFormat =
-        0 ? OMX_COLOR_FormatYCbYCr : OMX_COLOR_FormatCbYCrY;
-
-    if (!strncmp("OMX.qcom.video.encoder.", mComponentName, 23)) {
-        colorFormat = OMX_COLOR_FormatYUV420SemiPlanar;
+    OMX_COLOR_FORMATTYPE colorFormat = OMX_COLOR_FormatYUV420SemiPlanar;
+    if (!strcasecmp("OMX.TI.Video.encoder", mComponentName)) {
+        colorFormat = OMX_COLOR_FormatYCbYCr;
     }
 
     CHECK_EQ(setVideoPortFormatType(
@@ -665,6 +663,12 @@ void OMXCodec::setVideoInputFormat(
 
         case OMX_VIDEO_CodingH263:
             break;
+
+        case OMX_VIDEO_CodingAVC:
+        {
+            CHECK_EQ(setupAVCEncoderParameters(), OK);
+            break;
+        }
 
         default:
             CHECK(!"Support for this compressionFormat to be implemented.");
@@ -744,6 +748,64 @@ status_t OMXCodec::setupMPEG4EncoderParameters() {
     err = mOMX->setParameter(
             mNode, OMX_IndexParamVideoErrorCorrection,
             &errorCorrectionType, sizeof(errorCorrectionType));
+    CHECK_EQ(err, OK);
+
+    return OK;
+}
+
+status_t OMXCodec::setupAVCEncoderParameters() {
+    OMX_VIDEO_PARAM_AVCTYPE h264type;
+    InitOMXParams(&h264type);
+    h264type.nPortIndex = kPortIndexOutput;
+
+    status_t err = mOMX->getParameter(
+            mNode, OMX_IndexParamVideoAvc, &h264type, sizeof(h264type));
+    CHECK_EQ(err, OK);
+
+    h264type.nAllowedPictureTypes =
+        OMX_VIDEO_PictureTypeI | OMX_VIDEO_PictureTypeP;
+
+    h264type.nSliceHeaderSpacing = 0;
+    h264type.nBFrames = 0;
+    h264type.bUseHadamard = OMX_TRUE;
+    h264type.nRefFrames = 1;
+    h264type.nRefIdx10ActiveMinus1 = 0;
+    h264type.nRefIdx11ActiveMinus1 = 0;
+    h264type.bEnableUEP = OMX_FALSE;
+    h264type.bEnableFMO = OMX_FALSE;
+    h264type.bEnableASO = OMX_FALSE;
+    h264type.bEnableRS = OMX_FALSE;
+    h264type.eProfile = OMX_VIDEO_AVCProfileBaseline;
+    h264type.eLevel = OMX_VIDEO_AVCLevel1b;
+    h264type.bFrameMBsOnly = OMX_TRUE;
+    h264type.bMBAFF = OMX_FALSE;
+    h264type.bEntropyCodingCABAC = OMX_FALSE;
+    h264type.bWeightedPPrediction = OMX_FALSE;
+    h264type.bconstIpred = OMX_FALSE;
+    h264type.bDirect8x8Inference = OMX_FALSE;
+    h264type.bDirectSpatialTemporal = OMX_FALSE;
+    h264type.nCabacInitIdc = 0;
+    h264type.eLoopFilterMode = OMX_VIDEO_AVCLoopFilterEnable;
+
+    err = mOMX->setParameter(
+            mNode, OMX_IndexParamVideoAvc, &h264type, sizeof(h264type));
+    CHECK_EQ(err, OK);
+
+    OMX_VIDEO_PARAM_BITRATETYPE bitrateType;
+    InitOMXParams(&bitrateType);
+    bitrateType.nPortIndex = kPortIndexOutput;
+
+    err = mOMX->getParameter(
+            mNode, OMX_IndexParamVideoBitrate,
+            &bitrateType, sizeof(bitrateType));
+    CHECK_EQ(err, OK);
+
+    bitrateType.eControlRate = OMX_Video_ControlRateVariable;
+    bitrateType.nTargetBitrate = 1000000;
+
+    err = mOMX->setParameter(
+            mNode, OMX_IndexParamVideoBitrate,
+            &bitrateType, sizeof(bitrateType));
     CHECK_EQ(err, OK);
 
     return OK;
@@ -848,7 +910,6 @@ void OMXCodec::setVideoOutputFormat(
             mNode, OMX_IndexParamPortDefinition, &def, sizeof(def));
     CHECK_EQ(err, OK);
 }
-
 
 OMXCodec::OMXCodec(
         const sp<IOMX> &omx, IOMX::node_id node, uint32_t quirks,
@@ -1177,6 +1238,9 @@ void OMXCodec::on_message(const omx_message &msg) {
 
                 if (msg.u.extended_buffer_data.flags & OMX_BUFFERFLAG_SYNCFRAME) {
                     buffer->meta_data()->setInt32(kKeyIsSyncFrame, true);
+                }
+                if (msg.u.extended_buffer_data.flags & OMX_BUFFERFLAG_CODECCONFIG) {
+                    buffer->meta_data()->setInt32(kKeyIsCodecConfig, true);
                 }
 
                 buffer->meta_data()->setPointer(
@@ -1738,6 +1802,13 @@ void OMXCodec::drainInputBuffer(BufferInfo *info) {
     }
 
     info->mOwnedByComponent = true;
+
+    // This component does not ever signal the EOS flag on output buffers,
+    // Thanks for nothing.
+    if (mSignalledEOS && !strcmp(mComponentName, "OMX.TI.Video.encoder")) {
+        mNoMoreOutputData = true;
+        mBufferFilled.signal();
+    }
 }
 
 void OMXCodec::fillOutputBuffer(BufferInfo *info) {

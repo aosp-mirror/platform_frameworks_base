@@ -26,6 +26,7 @@
 
 namespace android {
 
+class ICamera;
 class IMemory;
 class ISurface;
 class Camera;
@@ -33,8 +34,11 @@ class Camera;
 class CameraSource : public MediaSource {
 public:
     static CameraSource *Create();
+    static CameraSource *CreateFromICamera(const sp<ICamera> &icamera);
 
     virtual ~CameraSource();
+
+    void setPreviewSurface(const sp<ISurface> &surface);
 
     virtual status_t start(MetaData *params = NULL);
     virtual status_t stop();
@@ -48,6 +52,7 @@ private:
     friend class CameraSourceListener;
 
     sp<Camera> mCamera;
+    sp<ISurface> mPreviewSurface;
 
     Mutex mLock;
     Condition mFrameAvailableCondition;
