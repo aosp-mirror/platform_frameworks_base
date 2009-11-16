@@ -17,7 +17,7 @@ package android.pim.vcard;
 
 import java.util.List;
 
-public interface VCardBuilder {
+public interface VCardInterpreter {
     void start();
 
     void end();
@@ -27,7 +27,7 @@ public interface VCardBuilder {
      */
     void startRecord(String type);
 
-    /** END:VXX */
+    /** END:VCARD */
     void endRecord();
 
     void startProperty();

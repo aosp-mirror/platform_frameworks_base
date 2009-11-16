@@ -16,7 +16,7 @@
 package com.android.unit_tests.vcard;
 
 import android.content.ContentValues;
-import android.pim.vcard.VCardBuilder;
+import android.pim.vcard.VCardInterpreter;
 import android.pim.vcard.VCardConfig;
 import android.util.CharsetUtils;
 import android.util.Log;
@@ -39,8 +39,8 @@ import java.util.List;
  *
  * Previously used in main vCard handling code but now exists only for testing.
  */
-public class VNodeBuilder implements VCardBuilder {
-    static private String LOG_TAG = "VDATABuilder"; 
+public class VNodeBuilder implements VCardInterpreter {
+    static private String LOG_TAG = "VNodeBuilder"; 
     
     /**
      * If there's no other information available, this class uses this charset for encoding

@@ -64,7 +64,7 @@ public abstract class VCardParser {
      * @return Returns true for success. Otherwise returns false.
      * @throws IOException, VCardException
      */
-    public abstract boolean parse(InputStream is, VCardBuilder builder)
+    public abstract boolean parse(InputStream is, VCardInterpreter builder)
             throws IOException, VCardException;
     
     /**
@@ -82,7 +82,7 @@ public abstract class VCardParser {
      * @return Returns true when successful. Otherwise returns false.
      * @throws IOException, VCardException
      */
-    public abstract boolean parse(InputStream is, String charset, VCardBuilder builder)
+    public abstract boolean parse(InputStream is, String charset, VCardInterpreter builder)
             throws IOException, VCardException;
     
     /**
@@ -91,7 +91,7 @@ public abstract class VCardParser {
      * @hide 
      */
     public abstract void parse(InputStream is, String charset,
-            VCardBuilder builder, boolean canceled)
+            VCardInterpreter builder, boolean canceled)
         throws IOException, VCardException;
     
     /**

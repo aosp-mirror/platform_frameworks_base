@@ -19,6 +19,7 @@ package com.android.unit_tests.vcard;
 import android.content.ContentValues;
 import android.pim.vcard.VCardConfig;
 import android.provider.ContactsContract.CommonDataKinds.StructuredName;
+import android.provider.ContactsContract.CommonDataKinds.StructuredPostal;
 
 import com.android.unit_tests.vcard.PropertyNodesVerifierElem.TypeSet;
 
@@ -202,6 +203,127 @@ public class VCardJapanizationTests extends VCardTestsBase {
         builder.put(StructuredName.PHONETIC_FAMILY_NAME, "\uFF94\uFF8F\uFF80\uFF9E")
                 .put(StructuredName.PHONETIC_GIVEN_NAME, "\uFF80\uFF9B\uFF73")
                 .put(StructuredName.DISPLAY_NAME, "\uFF94\uFF8F\uFF80\uFF9E \uFF80\uFF9B\uFF73");
+        verifier.verify();
+    }
+
+    /**
+     * Verifies that only one address field is emitted toward DoCoMo phones.
+     * Prefered type must (should?) be: HOME > WORK > OTHER > CUSTOM
+     */
+    public void testAdrressFieldEmittionForDoCoMo_1() {
+        ExportTestResolver resolver = new ExportTestResolver();
+        ContactEntry entry = resolver.buildContactEntry();
+        entry.buildData(StructuredPostal.CONTENT_ITEM_TYPE)
+                .put(StructuredPostal.TYPE, StructuredPostal.TYPE_WORK)
+                .put(StructuredPostal.POBOX, "1");
+        entry.buildData(StructuredPostal.CONTENT_ITEM_TYPE)
+                .put(StructuredPostal.TYPE, StructuredPostal.TYPE_OTHER)
+                .put(StructuredPostal.POBOX, "2");
+        entry.buildData(StructuredPostal.CONTENT_ITEM_TYPE)
+                .put(StructuredPostal.TYPE, StructuredPostal.TYPE_HOME)
+                .put(StructuredPostal.POBOX, "3");
+        entry.buildData(StructuredPostal.CONTENT_ITEM_TYPE)
+                .put(StructuredPostal.TYPE, StructuredPostal.TYPE_CUSTOM)
+                .put(StructuredPostal.LABEL, "custom")
+                .put(StructuredPostal.POBOX, "4");
+
+        VCardVerifier verifier = new VCardVerifier(resolver, VCardConfig.VCARD_TYPE_DOCOMO);
+        verifier.addPropertyNodesVerifierElemWithEmptyName()
+                .addNodeWithoutOrder("TEL", "", new TypeSet("HOME"))
+                .addNodeWithoutOrder("EMAIL", "", new TypeSet("HOME"))
+                .addNodeWithoutOrder("X-CLASS", "PUBLIC")
+                .addNodeWithoutOrder("X-REDUCTION", "")
+                .addNodeWithoutOrder("X-NO", "")
+                .addNodeWithoutOrder("X-DCM-HMN-MODE", "")
+                .addNodeWithoutOrder("ADR",
+                        Arrays.asList("3", "", "", "", "", "", ""), new TypeSet("HOME"));
+        verifier.verify();
+    }
+
+    public void testAdrressFieldEmittionForDoCoMo_2() {
+        ExportTestResolver resolver = new ExportTestResolver();
+        ContactEntry entry = resolver.buildContactEntry();
+        entry.buildData(StructuredPostal.CONTENT_ITEM_TYPE)
+                .put(StructuredPostal.TYPE, StructuredPostal.TYPE_OTHER)
+                .put(StructuredPostal.POBOX, "1");
+        entry.buildData(StructuredPostal.CONTENT_ITEM_TYPE)
+                .put(StructuredPostal.TYPE, StructuredPostal.TYPE_WORK)
+                .put(StructuredPostal.POBOX, "2");
+        entry.buildData(StructuredPostal.CONTENT_ITEM_TYPE)
+                .put(StructuredPostal.TYPE, StructuredPostal.TYPE_CUSTOM)
+                .put(StructuredPostal.LABEL, "custom")
+                .put(StructuredPostal.POBOX, "3");
+
+        VCardVerifier verifier = new VCardVerifier(resolver, VCardConfig.VCARD_TYPE_DOCOMO);
+        verifier.addPropertyNodesVerifierElemWithEmptyName()
+                .addNodeWithoutOrder("TEL", "", new TypeSet("HOME"))
+                .addNodeWithoutOrder("EMAIL", "", new TypeSet("HOME"))
+                .addNodeWithoutOrder("X-CLASS", "PUBLIC")
+                .addNodeWithoutOrder("X-REDUCTION", "")
+                .addNodeWithoutOrder("X-NO", "")
+                .addNodeWithoutOrder("X-DCM-HMN-MODE", "")
+                .addNodeWithoutOrder("ADR",
+                        Arrays.asList("2", "", "", "", "", "", ""), new TypeSet("WORK"));
+        verifier.verify();
+    }
+
+    public void testAdrressFieldEmittionForDoCoMo_3() {
+        ExportTestResolver resolver = new ExportTestResolver();
+        ContactEntry entry = resolver.buildContactEntry();
+        entry.buildData(StructuredPostal.CONTENT_ITEM_TYPE)
+                .put(StructuredPostal.TYPE, StructuredPostal.TYPE_CUSTOM)
+                .put(StructuredPostal.LABEL, "custom1")
+                .put(StructuredPostal.POBOX, "1");
+        entry.buildData(StructuredPostal.CONTENT_ITEM_TYPE)
+                .put(StructuredPostal.TYPE, StructuredPostal.TYPE_OTHER)
+                .put(StructuredPostal.POBOX, "2");
+        entry.buildData(StructuredPostal.CONTENT_ITEM_TYPE)
+                .put(StructuredPostal.TYPE, StructuredPostal.TYPE_CUSTOM)
+                .put(StructuredPostal.LABEL, "custom2")
+                .put(StructuredPostal.POBOX, "3");
+
+        VCardVerifier verifier = new VCardVerifier(resolver, VCardConfig.VCARD_TYPE_DOCOMO);
+        verifier.addPropertyNodesVerifierElemWithEmptyName()
+                .addNodeWithoutOrder("TEL", "", new TypeSet("HOME"))
+                .addNodeWithoutOrder("EMAIL", "", new TypeSet("HOME"))
+                .addNodeWithoutOrder("X-CLASS", "PUBLIC")
+                .addNodeWithoutOrder("X-REDUCTION", "")
+                .addNodeWithoutOrder("X-NO", "")
+                .addNodeWithoutOrder("X-DCM-HMN-MODE", "")
+                .addNodeWithoutOrder("ADR", Arrays.asList("2", "", "", "", "", "", ""));
+        verifier.verify();
+    }
+
+    /**
+     * Verifies the vCard exporter tolerates null TYPE.
+     */
+    public void testAdrressFieldEmittionForDoCoMo_4() {
+        ExportTestResolver resolver = new ExportTestResolver();
+        ContactEntry entry = resolver.buildContactEntry();
+        entry.buildData(StructuredPostal.CONTENT_ITEM_TYPE)
+                .put(StructuredPostal.POBOX, "1");
+        entry.buildData(StructuredPostal.CONTENT_ITEM_TYPE)
+                .put(StructuredPostal.TYPE, StructuredPostal.TYPE_OTHER)
+                .put(StructuredPostal.POBOX, "2");
+        entry.buildData(StructuredPostal.CONTENT_ITEM_TYPE)
+                .put(StructuredPostal.TYPE, StructuredPostal.TYPE_HOME)
+                .put(StructuredPostal.POBOX, "3");
+        entry.buildData(StructuredPostal.CONTENT_ITEM_TYPE)
+                .put(StructuredPostal.TYPE, StructuredPostal.TYPE_WORK)
+                .put(StructuredPostal.POBOX, "4");
+        entry.buildData(StructuredPostal.CONTENT_ITEM_TYPE)
+                .put(StructuredPostal.POBOX, "5");
+
+        VCardVerifier verifier = new VCardVerifier(resolver, VCardConfig.VCARD_TYPE_DOCOMO);
+        verifier.addPropertyNodesVerifierElemWithEmptyName()
+                .addNodeWithoutOrder("TEL", "", new TypeSet("HOME"))
+                .addNodeWithoutOrder("EMAIL", "", new TypeSet("HOME"))
+                .addNodeWithoutOrder("X-CLASS", "PUBLIC")
+                .addNodeWithoutOrder("X-REDUCTION", "")
+                .addNodeWithoutOrder("X-NO", "")
+                .addNodeWithoutOrder("X-DCM-HMN-MODE", "")
+                .addNodeWithoutOrder("ADR",
+                        Arrays.asList("3", "", "", "", "", "", ""), new TypeSet("HOME"));
         verifier.verify();
     }
 }
