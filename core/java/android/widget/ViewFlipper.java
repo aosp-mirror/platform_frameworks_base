@@ -24,6 +24,7 @@ import android.content.res.TypedArray;
 import android.os.Handler;
 import android.os.Message;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.widget.RemoteViews.RemoteView;
 
 /**
@@ -36,6 +37,9 @@ import android.widget.RemoteViews.RemoteView;
  */
 @RemoteView
 public class ViewFlipper extends ViewAnimator {
+    private static final String TAG = "ViewFlipper";
+    private static final boolean LOGD = true;
+
     private static final int DEFAULT_INTERVAL = 3000;
 
     private int mFlipInterval = DEFAULT_INTERVAL;
@@ -150,6 +154,10 @@ public class ViewFlipper extends ViewAnimator {
                 mHandler.removeMessages(FLIP_MSG);
             }
             mRunning = running;
+        }
+        if (LOGD) {
+            Log.d(TAG, "updateRunning() mVisible=" + mVisible + ", mStarted=" + mStarted
+                    + ", mUserPresent=" + mUserPresent + ", mRunning=" + mRunning);
         }
     }
 
