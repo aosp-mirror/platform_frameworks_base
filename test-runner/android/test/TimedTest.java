@@ -20,13 +20,17 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 /**
- * This annotation can be used on an {@link junit.framework.TestCase}'s test
- * methods. When the annotation is present, the test method is timed and the
- * results written through instrumentation output. It can also be used on the
- * class itself, which is equivalent to tagging all test methods with this
- * annotation.
+ * This annotation can be used on an {@link junit.framework.TestCase}'s test methods. When the
+ * annotation is present, the test method is timed and the results written through instrumentation
+ * output. It can also be used on the class itself, which is equivalent to tagging all test methods
+ * with this annotation.
+ * <p/>
+ * Setting {@link #includeDetailedStats()} to true causes additional metrics such as memory usage
+ * and binder transactions to be gathered and written through instrumentation output.
  *
  * {@hide} Pending approval for public API.
  */
 @Retention(RetentionPolicy.RUNTIME)
-public @interface TimedTest { }
+public @interface TimedTest {
+    boolean includeDetailedStats() default false;
+}
