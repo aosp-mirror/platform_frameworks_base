@@ -1142,8 +1142,6 @@ com.google.common.io.android.AndroidHttpConnectionFactory$AndroidGoogleHttpConne
 com.google.common.io.android.AndroidPersistentStore
 com.google.common.io.android.GoogleHttpClient
 com.google.common.io.android.J2SeTcpConnectionFactory
-com.google.common.io.protocol.ProtoBuf
-com.google.common.io.protocol.ProtoBufType
 com.google.common.lang.ThreadFactory
 com.google.common.task.AbstractTask
 com.google.common.task.Task
