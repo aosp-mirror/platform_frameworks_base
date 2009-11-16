@@ -20,7 +20,17 @@
 namespace android {
 
 FileSource::FileSource(const char *filename)
-    : mFile(fopen(filename, "rb")) {
+    : mFile(fopen(filename, "rb")),
+      mOffset(0),
+      mLength(-1) {
+}
+
+FileSource::FileSource(int fd, int64_t offset, int64_t length)
+    : mFile(fdopen(fd, "rb")),
+      mOffset(offset),
+      mLength(length) {
+    CHECK(offset >= 0);
+    CHECK(length >= 0);
 }
 
 FileSource::~FileSource() {
@@ -37,12 +47,33 @@ status_t FileSource::initCheck() const {
 ssize_t FileSource::readAt(off_t offset, void *data, size_t size) {
     Mutex::Autolock autoLock(mLock);
 
-    int err = fseeko(mFile, offset, SEEK_SET);
+    if (mLength >= 0) {
+        if (offset >= mLength) {
+            return 0;  // read beyond EOF.
+        }
+        int64_t numAvailable = mLength - offset;
+        if ((int64_t)size > numAvailable) {
+            size = numAvailable;
+        }
+    }
+
+    int err = fseeko(mFile, offset + mOffset, SEEK_SET);
     CHECK(err != -1);
 
-    ssize_t result = fread(data, 1, size, mFile);
+    return fread(data, 1, size, mFile);
+}
 
-    return result;
+status_t FileSource::getSize(off_t *size) {
+    if (mLength >= 0) {
+        *size = mLength;
+
+        return OK;
+    }
+
+    fseek(mFile, SEEK_END, 0);
+    *size = ftello(mFile);
+
+    return OK;
 }
 
 }  // namespace android

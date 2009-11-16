@@ -29,16 +29,21 @@ namespace android {
 class FileSource : public DataSource {
 public:
     FileSource(const char *filename);
+    FileSource(int fd, int64_t offset, int64_t length);
 
     virtual status_t initCheck() const;
 
     virtual ssize_t readAt(off_t offset, void *data, size_t size);
+
+    virtual status_t getSize(off_t *size);
 
 protected:
     virtual ~FileSource();
 
 private:
     FILE *mFile;
+    int64_t mOffset;
+    int64_t mLength;
     Mutex mLock;
 
     FileSource(const FileSource &);
