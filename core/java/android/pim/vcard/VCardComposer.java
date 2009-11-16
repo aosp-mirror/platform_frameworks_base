@@ -47,6 +47,8 @@ import android.text.format.Time;
 import android.util.CharsetUtils;
 import android.util.Log;
 
+import org.apache.commons.codec.binary.Base64;
+
 import java.io.BufferedWriter;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -100,9 +102,8 @@ import java.util.Set;
  * } </pre>
  */
 public class VCardComposer {
-    private static final String LOG_TAG = "vcard.VCardComposer";
+    private static final String LOG_TAG = "VCardComposer";
 
-    // TODO: Should be configurable?
     public static final int DEFAULT_PHONE_TYPE = Phone.TYPE_HOME;
     public static final int DEFAULT_POSTAL_TYPE = StructuredPostal.TYPE_HOME;
     public static final int DEFAULT_EMAIL_TYPE = Email.TYPE_OTHER;
@@ -1545,8 +1546,8 @@ public class VCardComposer {
                     Log.d(LOG_TAG, "Unknown photo type. Ignore.");
                     continue;
                 }
-                final String photoString = VCardUtils.encodeBase64(data);
-                if (photoString.length() > 0) {
+                final String photoString = new String(Base64.encodeBase64(data));
+                if (!TextUtils.isEmpty(photoString)) {
                     appendVCardPhotoLine(builder, photoString, photoType);
                 }
             }
