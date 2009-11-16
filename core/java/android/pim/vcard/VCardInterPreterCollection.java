@@ -18,81 +18,81 @@ package android.pim.vcard;
 import java.util.Collection;
 import java.util.List;
 
-public class VCardBuilderCollection implements VCardBuilder {
+public class VCardInterPreterCollection implements VCardInterpreter {
 
-    private final Collection<VCardBuilder> mVCardBuilderCollection;
+    private final Collection<VCardInterpreter> mVCardBuilderCollection;
     
-    public VCardBuilderCollection(Collection<VCardBuilder> vBuilderCollection) {
+    public VCardInterPreterCollection(Collection<VCardInterpreter> vBuilderCollection) {
         mVCardBuilderCollection = vBuilderCollection; 
     }
     
-    public Collection<VCardBuilder> getVCardBuilderBaseCollection() {
+    public Collection<VCardInterpreter> getCollection() {
         return mVCardBuilderCollection;
     }
     
     public void start() {
-        for (VCardBuilder builder : mVCardBuilderCollection) {
+        for (VCardInterpreter builder : mVCardBuilderCollection) {
             builder.start();
         }
     }
     
     public void end() {
-        for (VCardBuilder builder : mVCardBuilderCollection) {
+        for (VCardInterpreter builder : mVCardBuilderCollection) {
             builder.end();
         }
     }
 
     public void startRecord(String type) {
-        for (VCardBuilder builder : mVCardBuilderCollection) {
+        for (VCardInterpreter builder : mVCardBuilderCollection) {
             builder.startRecord(type);
         }
     }
     
     public void endRecord() {
-        for (VCardBuilder builder : mVCardBuilderCollection) {
+        for (VCardInterpreter builder : mVCardBuilderCollection) {
             builder.endRecord();
         }
     }
 
     public void startProperty() {
-        for (VCardBuilder builder : mVCardBuilderCollection) {
+        for (VCardInterpreter builder : mVCardBuilderCollection) {
             builder.startProperty();
         }
     }
 
     
     public void endProperty() {
-        for (VCardBuilder builder : mVCardBuilderCollection) {
+        for (VCardInterpreter builder : mVCardBuilderCollection) {
             builder.endProperty();
         }
     }
 
     public void propertyGroup(String group) {
-        for (VCardBuilder builder : mVCardBuilderCollection) {
+        for (VCardInterpreter builder : mVCardBuilderCollection) {
             builder.propertyGroup(group);
         }
     }
 
     public void propertyName(String name) {
-        for (VCardBuilder builder : mVCardBuilderCollection) {
+        for (VCardInterpreter builder : mVCardBuilderCollection) {
             builder.propertyName(name);
         }
     }
 
     public void propertyParamType(String type) {
-        for (VCardBuilder builder : mVCardBuilderCollection) {
+        for (VCardInterpreter builder : mVCardBuilderCollection) {
             builder.propertyParamType(type);
         }
     }
 
     public void propertyParamValue(String value) {
-        for (VCardBuilder builder : mVCardBuilderCollection) {
+        for (VCardInterpreter builder : mVCardBuilderCollection) {
             builder.propertyParamValue(value);
         }
     }
 
     public void propertyValues(List<String> values) {
-        for (VCardBuilder builder : mVCardBuilderCollection) {
+        for (VCardInterpreter builder : mVCardBuilderCollection) {
             builder.propertyValues(values);
         }
     }

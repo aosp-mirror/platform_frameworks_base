@@ -72,7 +72,7 @@ public class VCardParser_V21 extends VCardParser {
     private String mPreviousLine;
     
     /** The builder to build parsed data */
-    protected VCardBuilder mBuilder = null;
+    protected VCardInterpreter mBuilder = null;
 
     /** 
      * The encoding type. "Encoding" in vCard is different from "Charset".
@@ -876,13 +876,13 @@ public class VCardParser_V21 extends VCardParser {
     }
     
     @Override
-    public boolean parse(final InputStream is, final VCardBuilder builder)
+    public boolean parse(final InputStream is, final VCardInterpreter builder)
             throws IOException, VCardException {
         return parse(is, VCardConfig.DEFAULT_CHARSET, builder);
     }
     
     @Override
-    public boolean parse(InputStream is, String charset, VCardBuilder builder)
+    public boolean parse(InputStream is, String charset, VCardInterpreter builder)
             throws IOException, VCardException {
         if (charset == null) {
             charset = VCardConfig.DEFAULT_CHARSET;
@@ -914,7 +914,7 @@ public class VCardParser_V21 extends VCardParser {
     }
     
     @Override
-    public void parse(InputStream is, String charset, VCardBuilder builder, boolean canceled)
+    public void parse(InputStream is, String charset, VCardInterpreter builder, boolean canceled)
             throws IOException, VCardException {
         mCanceled = canceled;
         parse(is, charset, builder);
