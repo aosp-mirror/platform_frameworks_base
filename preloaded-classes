@@ -712,8 +712,6 @@ com.google.android.net.UrlRules
 com.google.android.net.UrlRules$Rule
 com.google.android.util.SimplePullParser
 com.google.common.Config
-com.google.common.io.protocol.ProtoBuf
-com.google.common.io.protocol.ProtoBufType
 com.google.common.util.text.TextUtil
 com.ibm.icu4jni.charset.CharsetDecoderICU
 com.ibm.icu4jni.charset.CharsetEncoderICU
