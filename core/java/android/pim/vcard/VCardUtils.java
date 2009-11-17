@@ -50,41 +50,44 @@ public class VCardUtils {
         sKnownPhoneTypesMap_ItoS = new HashMap<Integer, String>();
         sKnownPhoneTypeMap_StoI = new HashMap<String, Integer>();
 
-        sKnownPhoneTypesMap_ItoS.put(Phone.TYPE_CAR, Constants.PARAM_TYPE_CAR);
-        sKnownPhoneTypeMap_StoI.put(Constants.PARAM_TYPE_CAR, Phone.TYPE_CAR);
-        sKnownPhoneTypesMap_ItoS.put(Phone.TYPE_PAGER, Constants.PARAM_TYPE_PAGER);
-        sKnownPhoneTypeMap_StoI.put(Constants.PARAM_TYPE_PAGER, Phone.TYPE_PAGER);
-        sKnownPhoneTypesMap_ItoS.put(Phone.TYPE_ISDN, Constants.PARAM_TYPE_ISDN);
-        sKnownPhoneTypeMap_StoI.put(Constants.PARAM_TYPE_ISDN, Phone.TYPE_ISDN);
+        sKnownPhoneTypesMap_ItoS.put(Phone.TYPE_CAR, VCardConstants.PARAM_TYPE_CAR);
+        sKnownPhoneTypeMap_StoI.put(VCardConstants.PARAM_TYPE_CAR, Phone.TYPE_CAR);
+        sKnownPhoneTypesMap_ItoS.put(Phone.TYPE_PAGER, VCardConstants.PARAM_TYPE_PAGER);
+        sKnownPhoneTypeMap_StoI.put(VCardConstants.PARAM_TYPE_PAGER, Phone.TYPE_PAGER);
+        sKnownPhoneTypesMap_ItoS.put(Phone.TYPE_ISDN, VCardConstants.PARAM_TYPE_ISDN);
+        sKnownPhoneTypeMap_StoI.put(VCardConstants.PARAM_TYPE_ISDN, Phone.TYPE_ISDN);
         
-        sKnownPhoneTypeMap_StoI.put(Constants.PARAM_TYPE_HOME, Phone.TYPE_HOME);
-        sKnownPhoneTypeMap_StoI.put(Constants.PARAM_TYPE_WORK, Phone.TYPE_WORK);
-        sKnownPhoneTypeMap_StoI.put(Constants.PARAM_TYPE_CELL, Phone.TYPE_MOBILE);
+        sKnownPhoneTypeMap_StoI.put(VCardConstants.PARAM_TYPE_HOME, Phone.TYPE_HOME);
+        sKnownPhoneTypeMap_StoI.put(VCardConstants.PARAM_TYPE_WORK, Phone.TYPE_WORK);
+        sKnownPhoneTypeMap_StoI.put(VCardConstants.PARAM_TYPE_CELL, Phone.TYPE_MOBILE);
                 
-        sKnownPhoneTypeMap_StoI.put(Constants.PARAM_PHONE_EXTRA_TYPE_OTHER, Phone.TYPE_OTHER);
-        sKnownPhoneTypeMap_StoI.put(Constants.PARAM_PHONE_EXTRA_TYPE_CALLBACK, Phone.TYPE_CALLBACK);
+        sKnownPhoneTypeMap_StoI.put(VCardConstants.PARAM_PHONE_EXTRA_TYPE_OTHER, Phone.TYPE_OTHER);
+        sKnownPhoneTypeMap_StoI.put(VCardConstants.PARAM_PHONE_EXTRA_TYPE_CALLBACK,
+                Phone.TYPE_CALLBACK);
         sKnownPhoneTypeMap_StoI.put(
-                Constants.PARAM_PHONE_EXTRA_TYPE_COMPANY_MAIN, Phone.TYPE_COMPANY_MAIN);
-        sKnownPhoneTypeMap_StoI.put(Constants.PARAM_PHONE_EXTRA_TYPE_RADIO, Phone.TYPE_RADIO);
-        sKnownPhoneTypeMap_StoI.put(Constants.PARAM_PHONE_EXTRA_TYPE_TTY_TDD, Phone.TYPE_TTY_TDD);
-        sKnownPhoneTypeMap_StoI.put(Constants.PARAM_PHONE_EXTRA_TYPE_ASSISTANT,
+                VCardConstants.PARAM_PHONE_EXTRA_TYPE_COMPANY_MAIN, Phone.TYPE_COMPANY_MAIN);
+        sKnownPhoneTypeMap_StoI.put(VCardConstants.PARAM_PHONE_EXTRA_TYPE_RADIO, Phone.TYPE_RADIO);
+        sKnownPhoneTypeMap_StoI.put(VCardConstants.PARAM_PHONE_EXTRA_TYPE_TTY_TDD,
+                Phone.TYPE_TTY_TDD);
+        sKnownPhoneTypeMap_StoI.put(VCardConstants.PARAM_PHONE_EXTRA_TYPE_ASSISTANT,
                 Phone.TYPE_ASSISTANT);
 
         sPhoneTypesUnknownToContactsSet = new HashSet<String>();
-        sPhoneTypesUnknownToContactsSet.add(Constants.PARAM_TYPE_MODEM);
-        sPhoneTypesUnknownToContactsSet.add(Constants.PARAM_TYPE_BBS);
-        sPhoneTypesUnknownToContactsSet.add(Constants.PARAM_TYPE_VIDEO);
+        sPhoneTypesUnknownToContactsSet.add(VCardConstants.PARAM_TYPE_MODEM);
+        sPhoneTypesUnknownToContactsSet.add(VCardConstants.PARAM_TYPE_BBS);
+        sPhoneTypesUnknownToContactsSet.add(VCardConstants.PARAM_TYPE_VIDEO);
 
         sKnownImPropNameMap_ItoS = new HashMap<Integer, String>();
-        sKnownImPropNameMap_ItoS.put(Im.PROTOCOL_AIM, Constants.PROPERTY_X_AIM);
-        sKnownImPropNameMap_ItoS.put(Im.PROTOCOL_MSN, Constants.PROPERTY_X_MSN);
-        sKnownImPropNameMap_ItoS.put(Im.PROTOCOL_YAHOO, Constants.PROPERTY_X_YAHOO);
-        sKnownImPropNameMap_ItoS.put(Im.PROTOCOL_SKYPE, Constants.PROPERTY_X_SKYPE_USERNAME);
-        sKnownImPropNameMap_ItoS.put(Im.PROTOCOL_GOOGLE_TALK, Constants.PROPERTY_X_GOOGLE_TALK);
-        sKnownImPropNameMap_ItoS.put(Im.PROTOCOL_ICQ, Constants.PROPERTY_X_ICQ);
-        sKnownImPropNameMap_ItoS.put(Im.PROTOCOL_JABBER, Constants.PROPERTY_X_JABBER);
-        sKnownImPropNameMap_ItoS.put(Im.PROTOCOL_QQ, Constants.PROPERTY_X_QQ);
-        sKnownImPropNameMap_ItoS.put(Im.PROTOCOL_NETMEETING, Constants.PROPERTY_X_NETMEETING);
+        sKnownImPropNameMap_ItoS.put(Im.PROTOCOL_AIM, VCardConstants.PROPERTY_X_AIM);
+        sKnownImPropNameMap_ItoS.put(Im.PROTOCOL_MSN, VCardConstants.PROPERTY_X_MSN);
+        sKnownImPropNameMap_ItoS.put(Im.PROTOCOL_YAHOO, VCardConstants.PROPERTY_X_YAHOO);
+        sKnownImPropNameMap_ItoS.put(Im.PROTOCOL_SKYPE, VCardConstants.PROPERTY_X_SKYPE_USERNAME);
+        sKnownImPropNameMap_ItoS.put(Im.PROTOCOL_GOOGLE_TALK,
+                VCardConstants.PROPERTY_X_GOOGLE_TALK);
+        sKnownImPropNameMap_ItoS.put(Im.PROTOCOL_ICQ, VCardConstants.PROPERTY_X_ICQ);
+        sKnownImPropNameMap_ItoS.put(Im.PROTOCOL_JABBER, VCardConstants.PROPERTY_X_JABBER);
+        sKnownImPropNameMap_ItoS.put(Im.PROTOCOL_QQ, VCardConstants.PROPERTY_X_QQ);
+        sKnownImPropNameMap_ItoS.put(Im.PROTOCOL_NETMEETING, VCardConstants.PROPERTY_X_NETMEETING);
 
         // \u643A\u5E2F\u96FB\u8A71 = Full-width Hiragana "Keitai-Denwa" (mobile phone)
         // \u643A\u5E2F = Full-width Hiragana "Keitai" (mobile phone)
@@ -119,9 +122,9 @@ public class VCardUtils {
                     continue;
                 }
                 typeString = typeString.toUpperCase();
-                if (typeString.equals(Constants.PARAM_TYPE_PREF)) {
+                if (typeString.equals(VCardConstants.PARAM_TYPE_PREF)) {
                     hasPref = true;
-                } else if (typeString.equals(Constants.PARAM_TYPE_FAX)) {
+                } else if (typeString.equals(VCardConstants.PARAM_TYPE_FAX)) {
                     isFax = true;
                 } else {
                     if (typeString.startsWith("X-") && type < 0) {
