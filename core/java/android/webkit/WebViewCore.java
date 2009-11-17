@@ -506,6 +506,7 @@ final class WebViewCore {
             int framePtr, int x, int y);
 
     private native String nativeRetrieveHref(int framePtr, int nodePtr);
+    private native String nativeRetrieveAnchorText(int framePtr, int nodePtr);
 
     private native void nativeTouchUp(int touchGeneration,
             int framePtr, int nodePtr, int x, int y);
@@ -1160,8 +1161,10 @@ final class WebViewCore {
 
                         case REQUEST_CURSOR_HREF: {
                             Message hrefMsg = (Message) msg.obj;
-                            String res = nativeRetrieveHref(msg.arg1, msg.arg2);
-                            hrefMsg.getData().putString("url", res);
+                            hrefMsg.getData().putString("url",
+                                    nativeRetrieveHref(msg.arg1, msg.arg2));
+                            hrefMsg.getData().putString("title",
+                                    nativeRetrieveAnchorText(msg.arg1, msg.arg2));
                             hrefMsg.sendToTarget();
                             break;
                         }
