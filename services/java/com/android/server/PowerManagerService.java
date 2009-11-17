@@ -1403,7 +1403,7 @@ class PowerManagerService extends IPowerManager.Stub
             boolean oldScreenOn = (mPowerState & SCREEN_ON_BIT) != 0;
             boolean newScreenOn = (newState & SCREEN_ON_BIT) != 0;
 
-            if (mPowerState != newState) {
+            if (mSpew) {
                 Log.d(TAG, "setPowerState: mPowerState=" + mPowerState
                         + " newState=" + newState + " noChangeLights=" + noChangeLights);
                 Log.d(TAG, "  oldKeyboardBright=" + ((mPowerState & KEYBOARD_BRIGHT_BIT) != 0)
