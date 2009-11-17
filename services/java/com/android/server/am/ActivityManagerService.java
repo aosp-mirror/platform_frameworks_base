@@ -185,6 +185,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
     static final int LOG_AM_SERVICE_CRASHED_TOO_MUCH = 30034;
     static final int LOG_AM_SCHEDULE_SERVICE_RESTART = 30035;
     static final int LOG_AM_PROVIDER_LOST_PROCESS = 30036;
+    static final int LOG_AM_PROCESS_START_TIMEOUT = 30037;
     
     static final int LOG_BOOT_PROGRESS_AMS_READY = 3040;
     static final int LOG_BOOT_PROGRESS_ENABLE_SCREEN = 3050;
@@ -5199,13 +5200,23 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         
         if (gone) {
             Log.w(TAG, "Process " + app + " failed to attach");
+            EventLog.writeEvent(LOG_AM_PROCESS_START_TIMEOUT, pid, app.info.uid,
+                    app.processName);
             mProcessNames.remove(app.processName, app.info.uid);
-            Process.killProcess(pid);
-            if (mPendingBroadcast != null && mPendingBroadcast.curApp.pid == pid) {
-                Log.w(TAG, "Unattached app died before broadcast acknowledged, skipping");
-                mPendingBroadcast = null;
-                scheduleBroadcastsLocked();
+            // Take care of any launching providers waiting for this process.
+            checkAppInLaunchingProvidersLocked(app, true);
+            // Take care of any services that are waiting for the process.
+            for (int i=0; i<mPendingServices.size(); i++) {
+                ServiceRecord sr = mPendingServices.get(i);
+                if (app.info.uid == sr.appInfo.uid
+                        && app.processName.equals(sr.processName)) {
+                    Log.w(TAG, "Forcing bringing down service: " + sr);
+                    mPendingServices.remove(i);
+                    i--;
+                    bringDownServiceLocked(sr, true);
+                }
             }
+            Process.killProcess(pid);
             if (mBackupTarget != null && mBackupTarget.app.pid == pid) {
                 Log.w(TAG, "Unattached app died before backup, skipping");
                 try {
@@ -5215,6 +5226,11 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 } catch (RemoteException e) {
                     // Can't happen; the backup manager is local
                 }
+            }
+            if (mPendingBroadcast != null && mPendingBroadcast.curApp.pid == pid) {
+                Log.w(TAG, "Unattached app died before broadcast acknowledged, skipping");
+                mPendingBroadcast = null;
+                scheduleBroadcastsLocked();
             }
         } else {
             Log.w(TAG, "Spurious process start timeout - pid not known for " + app);
@@ -9949,23 +9965,11 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             app.pubProviders.clear();
         }
         
-        // Look through the content providers we are waiting to have launched,
-        // and if any run in this process then either schedule a restart of
-        // the process or kill the client waiting for it if this process has
-        // gone bad.
-        for (int i=0; i<NL; i++) {
-            ContentProviderRecord cpr = (ContentProviderRecord)
-                    mLaunchingProviders.get(i);
-            if (cpr.launchingApp == app) {
-                if (!app.bad) {
-                    restart = true;
-                } else {
-                    removeDyingProviderLocked(app, cpr);
-                    NL = mLaunchingProviders.size();
-                }
-            }
+        // Take care of any launching providers waiting for this process.
+        if (checkAppInLaunchingProvidersLocked(app, false)) {
+            restart = true;
         }
-
+        
         // Unregister from connected content providers.
         if (!app.conProviders.isEmpty()) {
             Iterator it = app.conProviders.keySet().iterator();
@@ -10060,6 +10064,28 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         }
     }
 
+    boolean checkAppInLaunchingProvidersLocked(ProcessRecord app, boolean alwaysBad) {
+        // Look through the content providers we are waiting to have launched,
+        // and if any run in this process then either schedule a restart of
+        // the process or kill the client waiting for it if this process has
+        // gone bad.
+        int NL = mLaunchingProviders.size();
+        boolean restart = false;
+        for (int i=0; i<NL; i++) {
+            ContentProviderRecord cpr = (ContentProviderRecord)
+                    mLaunchingProviders.get(i);
+            if (cpr.launchingApp == app) {
+                if (!alwaysBad && !app.bad) {
+                    restart = true;
+                } else {
+                    removeDyingProviderLocked(app, cpr);
+                    NL = mLaunchingProviders.size();
+                }
+            }
+        }
+        return restart;
+    }
+    
     // =========================================================
     // SERVICES
     // =========================================================
