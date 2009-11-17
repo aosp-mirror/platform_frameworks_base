@@ -31,7 +31,8 @@
 namespace android {
 
 TimedEventQueue::TimedEventQueue()
-    : mRunning(false),
+    : mNextEventID(1),
+      mRunning(false),
       mStopped(false) {
 }
 
@@ -76,25 +77,28 @@ void TimedEventQueue::stop(bool flush) {
     mRunning = false;
 }
 
-void TimedEventQueue::postEvent(const sp<Event> &event) {
+TimedEventQueue::event_id TimedEventQueue::postEvent(const sp<Event> &event) {
     // Reserve an earlier timeslot an INT64_MIN to be able to post
     // the StopEvent to the absolute head of the queue.
-    postTimedEvent(event, INT64_MIN + 1);
+    return postTimedEvent(event, INT64_MIN + 1);
 }
 
-void TimedEventQueue::postEventToBack(const sp<Event> &event) {
-    postTimedEvent(event, INT64_MAX);
+TimedEventQueue::event_id TimedEventQueue::postEventToBack(
+        const sp<Event> &event) {
+    return postTimedEvent(event, INT64_MAX);
 }
 
-void TimedEventQueue::postEventWithDelay(
+TimedEventQueue::event_id TimedEventQueue::postEventWithDelay(
         const sp<Event> &event, int64_t delay_us) {
     CHECK(delay_us >= 0);
-    postTimedEvent(event, getRealTimeUs() + delay_us);
+    return postTimedEvent(event, getRealTimeUs() + delay_us);
 }
 
-void TimedEventQueue::postTimedEvent(
+TimedEventQueue::event_id TimedEventQueue::postTimedEvent(
         const sp<Event> &event, int64_t realtime_us) {
     Mutex::Autolock autoLock(mLock);
+
+    event->setEventID(mNextEventID++);
 
     List<QueueItem>::iterator it = mQueue.begin();
     while (it != mQueue.end() && realtime_us >= (*it).realtime_us) {
@@ -112,27 +116,58 @@ void TimedEventQueue::postTimedEvent(
     mQueue.insert(it, item);
 
     mQueueNotEmptyCondition.signal();
+
+    return event->eventID();
 }
 
-bool TimedEventQueue::cancelEvent(const sp<Event> &event) {
-    Mutex::Autolock autoLock(mLock);
+static bool MatchesEventID(
+        void *cookie, const sp<TimedEventQueue::Event> &event) {
+    TimedEventQueue::event_id *id =
+        static_cast<TimedEventQueue::event_id *>(cookie);
 
-    List<QueueItem>::iterator it = mQueue.begin();
-    while (it != mQueue.end() && (*it).event != event) {
-        ++it;
-    }
-
-    if (it == mQueue.end()) {
+    if (event->eventID() != *id) {
         return false;
     }
 
-    if (it == mQueue.begin()) {
-        mQueueHeadChangedCondition.signal();
-    }
-
-    mQueue.erase(it);
+    *id = 0;
 
     return true;
+}
+
+bool TimedEventQueue::cancelEvent(event_id id) {
+    CHECK(id != 0);
+
+    cancelEvents(&MatchesEventID, &id, true /* stopAfterFirstMatch */);
+
+    // if MatchesEventID found a match, it will have set id to 0
+    // (which is not a valid event_id).
+
+    return id == 0;
+}
+
+void TimedEventQueue::cancelEvents(
+        bool (*predicate)(void *cookie, const sp<Event> &event),
+        void *cookie,
+        bool stopAfterFirstMatch) {
+    Mutex::Autolock autoLock(mLock);
+
+    List<QueueItem>::iterator it = mQueue.begin();
+    while (it != mQueue.end()) {
+        if (!(*predicate)(cookie, (*it).event)) {
+            ++it;
+            continue;
+        }
+
+        if (it == mQueue.begin()) {
+            mQueueHeadChangedCondition.signal();
+        }
+
+        it = mQueue.erase(it);
+
+        if (stopAfterFirstMatch) {
+            return;
+        }
+    }
 }
 
 // static
