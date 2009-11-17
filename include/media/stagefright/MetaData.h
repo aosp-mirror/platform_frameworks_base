@@ -38,7 +38,8 @@ enum {
     kKeyESDS              = 'esds',  // raw data
     kKeyAVCC              = 'avcc',  // raw data
     kKeyWantsNALFragments = 'NALf',
-    kKeyIsSyncFrame       = 'sync',
+    kKeyIsSyncFrame       = 'sync',  // int32_t (bool)
+    kKeyIsCodecConfig     = 'conf',  // int32_t (bool)
     kKeyTime              = 'time',  // int64_t (usecs)
     kKeyDuration          = 'dura',  // int64_t (usecs)
     kKeyColorFormat       = 'colf',
