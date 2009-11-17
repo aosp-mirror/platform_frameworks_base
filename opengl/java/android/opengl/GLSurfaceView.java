@@ -147,6 +147,10 @@ import android.view.SurfaceView;
  */
 public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback {
     private final static boolean LOG_THREADS = false;
+    private final static boolean LOG_SURFACE = false;
+    private final static boolean LOG_RENDERER = false;
+    // Work-around for bug 2263168
+    private final static boolean DRAW_TWICE_AFTER_SIZE_CHANGED = true;
     /**
      * The renderer only renders
      * when the surface is created, or when {@link #requestRender} is called.
@@ -892,7 +896,7 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
                 gl = mGLWrapper.wrap(gl);
             }
 
-            if ((mDebugFlags & (DEBUG_CHECK_GL_ERROR | DEBUG_LOG_GL_CALLS))!= 0) {
+            if ((mDebugFlags & (DEBUG_CHECK_GL_ERROR | DEBUG_LOG_GL_CALLS)) != 0) {
                 int configFlags = 0;
                 Writer log = null;
                 if ((mDebugFlags & DEBUG_CHECK_GL_ERROR) != 0) {
@@ -962,7 +966,6 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
     class GLThread extends Thread {
         GLThread(Renderer renderer) {
             super();
-            mDone = false;
             mWidth = 0;
             mHeight = 0;
             mRequestRender = true;
@@ -995,7 +998,7 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
                 mHaveEgl = false;
                 mEglHelper.destroySurface();
                 mEglHelper.finish();
-                sGLThreadManager.releaseEglSurface(this);
+                sGLThreadManager.releaseEglSurfaceLocked(this);
             }
         }
 
@@ -1003,81 +1006,89 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
             mEglHelper = new EglHelper();
             try {
                 GL10 gl = null;
-                boolean tellRendererSurfaceCreated = true;
-                boolean tellRendererSurfaceChanged = true;
+                boolean createEglSurface = false;
+                boolean sizeChanged = false;
+                int w = 0;
+                int h = 0;
+                Runnable event = null;
 
-                /*
-                 * This is our main activity thread's loop, we go until
-                 * asked to quit.
-                 */
-                while (!isDone()) {
-                    /*
-                     *  Update the asynchronous state (window size)
-                     */
-                    int w = 0;
-                    int h = 0;
-                    boolean changed = false;
-                    boolean needStart = false;
-                    boolean eventsWaiting = false;
-
+                while (true) {
                     synchronized (sGLThreadManager) {
                         while (true) {
-                            // Manage acquiring and releasing the SurfaceView
-                            // surface and the EGL surface.
-                            if (mPaused) {
-                                stopEglLocked();
-                            }
-                            if (!mHasSurface) {
-                                if (!mWaitingForSurface) {
-                                    stopEglLocked();
-                                    mWaitingForSurface = true;
-                                    sGLThreadManager.notifyAll();
-                                }
-                            } else {
-                                if (!mHaveEgl) {
-                                    if (sGLThreadManager.tryAcquireEglSurface(this)) {
-                                        mHaveEgl = true;
-                                        mEglHelper.start();
-                                        mRequestRender = true;
-                                        needStart = true;
-                                    }
-                                }
-                            }
-
-                            // Check if we need to wait. If not, update any state
-                            // that needs to be updated, copy any state that
-                            // needs to be copied, and use "break" to exit the
-                            // wait loop.
-
-                            if (mDone) {
+                            if (mShouldExit) {
                                 return;
                             }
 
-                            if (mEventsWaiting) {
-                                eventsWaiting = true;
-                                mEventsWaiting = false;
+                            if (! mEventQueue.isEmpty()) {
+                                event = mEventQueue.remove(0);
                                 break;
                             }
 
-                            if ( (! mPaused) && mHasSurface && mHaveEgl
-                                    && (mWidth > 0) && (mHeight > 0)
-                                    && (mRequestRender || (mRenderMode == RENDERMODE_CONTINUOUSLY))
-                                    ) {
-                                changed = mSizeChanged;
-                                w = mWidth;
-                                h = mHeight;
-                                mSizeChanged = false;
-                                mRequestRender = false;
-                                if (mHasSurface && mWaitingForSurface) {
-                                    changed = true;
-                                    mWaitingForSurface = false;
+                            // Do we need to release the EGL surface?
+                            if (mHaveEgl && mPaused) {
+                                if (LOG_SURFACE) {
+                                    Log.i("GLThread", "releasing EGL surface because paused tid=" + getId());
+                                }
+                                stopEglLocked();
+                            }
+
+                            // Have we lost the surface view surface?
+                            if ((! mHasSurface) && (! mWaitingForSurface)) {
+                                if (LOG_SURFACE) {
+                                    Log.i("GLThread", "noticed surfaceView surface lost tid=" + getId());
+                                }
+                                if (mHaveEgl) {
+                                    stopEglLocked();
+                                }
+                                mWaitingForSurface = true;
+                                sGLThreadManager.notifyAll();
+                            }
+
+                            // Have we acquired the surface view surface?
+                            if (mHasSurface && mWaitingForSurface) {
+                                if (LOG_SURFACE) {
+                                    Log.i("GLThread", "noticed surfaceView surface acquired tid=" + getId());
+                                }
+                                mWaitingForSurface = false;
+                                sGLThreadManager.notifyAll();
+                            }
+
+                            // Ready to draw?
+                            if ((!mPaused) && mHasSurface
+                                && (mWidth > 0) && (mHeight > 0)
+                                && (mRequestRender || (mRenderMode == RENDERMODE_CONTINUOUSLY))) {
+
+                                // If we don't have an egl surface, try to acquire one.
+                                if ((! mHaveEgl) && sGLThreadManager.tryAcquireEglSurfaceLocked(this)) {
+                                    mHaveEgl = true;
+                                    mEglHelper.start();
+                                    createEglSurface = true;
+                                    sizeChanged = true;
                                     sGLThreadManager.notifyAll();
                                 }
-                                break;
+
+                                if (mHaveEgl) {
+                                    if (mSizeChanged) {
+                                        sizeChanged = true;
+                                        w = mWidth;
+                                        h = mHeight;
+                                        if (DRAW_TWICE_AFTER_SIZE_CHANGED) {
+                                            // We keep mRequestRender true so that we draw twice after the size changes.
+                                            // (Once because of mSizeChanged, the second time because of mRequestRender.)
+                                            // This forces the updated graphics onto the screen.
+                                        } else {
+                                            mRequestRender = false;
+                                        }
+                                        mSizeChanged = false;
+                                    } else {
+                                        mRequestRender = false;
+                                    }
+                                    sGLThreadManager.notifyAll();
+                                    break;
+                                }
                             }
 
-                            // By design, this is the only place where we wait().
-
+                            // By design, this is the only place in a GLThread thread where we wait().
                             if (LOG_THREADS) {
                                 Log.i("GLThread", "waiting tid=" + getId());
                             }
@@ -1085,49 +1096,40 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
                         }
                     } // end of synchronized(sGLThreadManager)
 
-                    /*
-                     * Handle queued events
-                     */
-                    if (eventsWaiting) {
-                        Runnable r;
-                        while ((r = getEvent()) != null) {
-                            r.run();
-                            if (isDone()) {
-                                return;
-                            }
-                        }
-                        // Go back and see if we need to wait to render.
+                    if (event != null) {
+                        event.run();
+                        event = null;
                         continue;
                     }
 
-                    if (needStart) {
-                        tellRendererSurfaceCreated = true;
-                        changed = true;
-                    }
-                    if (changed) {
+                    if (createEglSurface) {
                         gl = (GL10) mEglHelper.createSurface(getHolder());
                         sGLThreadManager.checkGLDriver(gl);
-                        tellRendererSurfaceChanged = true;
-                    }
-                    if (tellRendererSurfaceCreated) {
+                        if (LOG_RENDERER) {
+                            Log.w("GLThread", "onSurfaceCreated");
+                        }
                         mRenderer.onSurfaceCreated(gl, mEglHelper.mEglConfig);
-                        tellRendererSurfaceCreated = false;
+                        createEglSurface = false;
                     }
-                    if (tellRendererSurfaceChanged) {
-                        mRenderer.onSurfaceChanged(gl, w, h);
-                        tellRendererSurfaceChanged = false;
-                    }
-                    if ((w > 0) && (h > 0)) {
-                        /* draw a frame here */
-                        mRenderer.onDrawFrame(gl);
 
-                        /*
-                         * Once we're done with GL, we need to call swapBuffers()
-                         * to instruct the system to display the rendered frame
-                         */
-                        mEglHelper.swap();
+                    if (sizeChanged) {
+                        if (LOG_RENDERER) {
+                            Log.w("GLThread", "onSurfaceChanged(" + w + ", " + h + ")");
+                        }
+                        mRenderer.onSurfaceChanged(gl, w, h);
+                        sizeChanged = false;
                     }
-                 }
+
+                    if (LOG_RENDERER) {
+                        Log.w("GLThread", "onDrawFrame");
+                    }
+                    mRenderer.onDrawFrame(gl);
+                    if(!mEglHelper.swap()) {
+                        if (LOG_SURFACE) {
+                            Log.i("GLThread", "egl surface lost tid=" + getId());
+                        }
+                    }
+                }
             } finally {
                 /*
                  * clean-up everything...
@@ -1138,21 +1140,13 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
             }
         }
 
-        private boolean isDone() {
-            synchronized (sGLThreadManager) {
-                return mDone;
-            }
-        }
-
         public void setRenderMode(int renderMode) {
             if ( !((RENDERMODE_WHEN_DIRTY <= renderMode) && (renderMode <= RENDERMODE_CONTINUOUSLY)) ) {
                 throw new IllegalArgumentException("renderMode");
             }
             synchronized(sGLThreadManager) {
                 mRenderMode = renderMode;
-                if (renderMode == RENDERMODE_CONTINUOUSLY) {
-                    sGLThreadManager.notifyAll();
-                }
+                sGLThreadManager.notifyAll();
             }
         }
 
@@ -1186,7 +1180,7 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
                 }
                 mHasSurface = false;
                 sGLThreadManager.notifyAll();
-                while(!mWaitingForSurface && isAlive() && ! mDone) {
+                while((!mWaitingForSurface) && (!mExited)) {
                     try {
                         sGLThreadManager.wait();
                     } catch (InterruptedException e) {
@@ -1216,6 +1210,7 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
                 mWidth = w;
                 mHeight = h;
                 mSizeChanged = true;
+                mRequestRender = true;
                 sGLThreadManager.notifyAll();
             }
         }
@@ -1224,13 +1219,15 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
             // don't call this from GLThread thread or it is a guaranteed
             // deadlock!
             synchronized(sGLThreadManager) {
-                mDone = true;
+                mShouldExit = true;
                 sGLThreadManager.notifyAll();
-            }
-            try {
-                join();
-            } catch (InterruptedException ex) {
-                Thread.currentThread().interrupt();
+                while (! mExited) {
+                    try {
+                        sGLThreadManager.wait();
+                    } catch (InterruptedException ex) {
+                        Thread.currentThread().interrupt();
+                    }
+                }
             }
         }
 
@@ -1239,28 +1236,19 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
          * @param r the runnable to be run on the GL rendering thread.
          */
         public void queueEvent(Runnable r) {
-            synchronized(this) {
+            if (r == null) {
+                throw new IllegalArgumentException("r must not be null");
+            }
+            synchronized(sGLThreadManager) {
                 mEventQueue.add(r);
-                synchronized(sGLThreadManager) {
-                    mEventsWaiting = true;
-                    sGLThreadManager.notifyAll();
-                }
+                sGLThreadManager.notifyAll();
             }
-        }
-
-        private Runnable getEvent() {
-            synchronized(this) {
-                if (mEventQueue.size() > 0) {
-                    return mEventQueue.remove(0);
-                }
-
-            }
-            return null;
         }
 
         // Once the thread is started, all accesses to the following member
         // variables are protected by the sGLThreadManager monitor
-        private boolean mDone;
+        private boolean mShouldExit;
+        private boolean mExited;
         private boolean mPaused;
         private boolean mHasSurface;
         private boolean mWaitingForSurface;
@@ -1269,11 +1257,10 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
         private int mHeight;
         private int mRenderMode;
         private boolean mRequestRender;
-        private boolean mEventsWaiting;
+        private ArrayList<Runnable> mEventQueue = new ArrayList<Runnable>();
         // End of member variables protected by the sGLThreadManager monitor.
 
         private Renderer mRenderer;
-        private ArrayList<Runnable> mEventQueue = new ArrayList<Runnable>();
         private EglHelper mEglHelper;
     }
 
@@ -1323,7 +1310,7 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
             if (LOG_THREADS) {
                 Log.i("GLThread", "exiting tid=" +  thread.getId());
             }
-            thread.mDone = true;
+            thread.mExited = true;
             if (mEglOwner == thread) {
                 mEglOwner = null;
             }
@@ -1331,11 +1318,17 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
         }
 
         /*
+<<<<<<< HEAD
          * Tries to acquire the right to use an EGL
          * surface. Does not block.
+=======
+         * Tries once to acquire the right to use an EGL
+         * surface. Does not block. Requires that we are already
+         * in the sGLThreadManager monitor when this is called.
+>>>>>>> dc49acb0
          * @return true if the right to use an EGL surface was acquired.
          */
-        public synchronized boolean tryAcquireEglSurface(GLThread thread) {
+        public boolean tryAcquireEglSurfaceLocked(GLThread thread) {
             if (mEglOwner == thread || mEglOwner == null) {
                 mEglOwner = thread;
                 notifyAll();
@@ -1347,8 +1340,11 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
             }
             return false;
         }
-
-        public synchronized void releaseEglSurface(GLThread thread) {
+        /*
+         * Releases the EGL surface. Requires that we are already in the
+         * sGLThreadManager monitor when this is called.
+         */
+        public void releaseEglSurfaceLocked(GLThread thread) {
             if (mEglOwner == thread) {
                 mEglOwner = null;
             }
