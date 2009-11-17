@@ -3572,39 +3572,33 @@ public class WebView extends AbsoluteLayout
         return copiedSomething;
     }
 
-    // Set this as a hierarchy change listener so we can know when this view
-    // is removed and still have access to our parent.
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-        ViewParent parent = getParent();
-        if (parent instanceof ViewGroup) {
-            ViewGroup p = (ViewGroup) parent;
-            p.setOnHierarchyChangeListener(this);
-        }
+        if (hasWindowFocus()) onWindowFocusChanged(true);
     }
 
     @Override
     protected void onDetachedFromWindow() {
+        clearTextEntry();
         super.onDetachedFromWindow();
-        ViewParent parent = getParent();
-        if (parent instanceof ViewGroup) {
-            ViewGroup p = (ViewGroup) parent;
-            p.setOnHierarchyChangeListener(null);
-        }
-
         // Clean up the zoom controller
         mZoomButtonsController.setVisible(false);
     }
 
-    // Implementation for OnHierarchyChangeListener
+    /**
+     * @deprecated WebView no longer needs to implement
+     * ViewGroup.OnHierarchyChangeListener.  This method does nothing now.
+     */
+    @Deprecated
     public void onChildViewAdded(View parent, View child) {}
 
-    public void onChildViewRemoved(View p, View child) {
-        if (child == this) {
-            clearTextEntry();
-        }
-    }
+    /**
+     * @deprecated WebView no longer needs to implement
+     * ViewGroup.OnHierarchyChangeListener.  This method does nothing now.
+     */
+    @Deprecated
+    public void onChildViewRemoved(View p, View child) {}
 
     /**
      * @deprecated WebView should not have implemented
