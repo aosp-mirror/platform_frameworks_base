@@ -30,23 +30,17 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-/**
- * VBuilder for VCard. VCard may contain big photo images encoded by BASE64,
- * If we store all VNode entries in memory like VDataBuilder.java,
- * OutOfMemoryError may be thrown. Thus, this class push each VCard entry into
- * ContentResolver immediately.
- */
-public class VCardDataBuilder implements VCardBuilder {
-    static private String LOG_TAG = "VCardDataBuilder"; 
+public class VCardEntryConstructor implements VCardInterpreter {
+    private static String LOG_TAG = "VCardEntryConstructor";
     
     /**
      * If there's no other information available, this class uses this charset for encoding
      * byte arrays.
      */
     static public String TARGET_CHARSET = "UTF-8"; 
-    
-    private ContactStruct.Property mCurrentProperty = new ContactStruct.Property();
-    private ContactStruct mCurrentContactStruct;
+
+    private VCardEntry.Property mCurrentProperty = new VCardEntry.Property();
+    private VCardEntry mCurrentContactStruct;
     private String mParamType;
     
     /**
@@ -66,23 +60,20 @@ public class VCardDataBuilder implements VCardBuilder {
     // Just for testing.
     private long mTimePushIntoContentResolver;
     
-    private List<EntryHandler> mEntryHandlers = new ArrayList<EntryHandler>();
+    private List<VCardEntryHandler> mEntryHandlers = new ArrayList<VCardEntryHandler>();
     
-    public VCardDataBuilder() {
+    public VCardEntryConstructor() {
         this(null, null, false, VCardConfig.VCARD_TYPE_V21_GENERIC_UTF8, null);
     }
 
-    /**
-     * @hide 
-     */
-    public VCardDataBuilder(int vcardType) {
+    public VCardEntryConstructor(int vcardType) {
         this(null, null, false, vcardType, null);
     }
 
     /**
      * @hide 
      */
-    public VCardDataBuilder(String charset,
+    public VCardEntryConstructor(String charset,
             boolean strictLineBreakParsing, int vcardType, Account account) {
         this(null, charset, strictLineBreakParsing, vcardType, account);
     }
@@ -90,7 +81,7 @@ public class VCardDataBuilder implements VCardBuilder {
     /**
      * @hide
      */
-    public VCardDataBuilder(String sourceCharset,
+    public VCardEntryConstructor(String sourceCharset,
             String targetCharset,
             boolean strictLineBreakParsing,
             int vcardType,
@@ -109,20 +100,20 @@ public class VCardDataBuilder implements VCardBuilder {
         mVCardType = vcardType;
         mAccount = account;
     }
-    
-    public void addEntryHandler(EntryHandler entryHandler) {
+
+    public void addEntryHandler(VCardEntryHandler entryHandler) {
         mEntryHandlers.add(entryHandler);
     }
     
     public void start() {
-        for (EntryHandler entryHandler : mEntryHandlers) {
-            entryHandler.onParsingStart();
+        for (VCardEntryHandler entryHandler : mEntryHandlers) {
+            entryHandler.onStart();
         }
     }
 
     public void end() {
-        for (EntryHandler entryHandler : mEntryHandlers) {
-            entryHandler.onParsingEnd();
+        for (VCardEntryHandler entryHandler : mEntryHandlers) {
+            entryHandler.onEnd();
         }
     }
 
@@ -135,7 +126,7 @@ public class VCardDataBuilder implements VCardBuilder {
      */
     public void clear() {
         mCurrentContactStruct = null;
-        mCurrentProperty = new ContactStruct.Property();
+        mCurrentProperty = new VCardEntry.Property();
     }
 
     /**
@@ -153,12 +144,12 @@ public class VCardDataBuilder implements VCardBuilder {
             Log.e(LOG_TAG, "This is not VCARD!");
         }
 
-        mCurrentContactStruct = new ContactStruct(mVCardType, mAccount);
+        mCurrentContactStruct = new VCardEntry(mVCardType, mAccount);
     }
 
     public void endRecord() {
         mCurrentContactStruct.consolidateFields();
-        for (EntryHandler entryHandler : mEntryHandlers) {
+        for (VCardEntryHandler entryHandler : mEntryHandlers) {
             entryHandler.onEntryCreated(mCurrentContactStruct);
         }
         mCurrentContactStruct = null;

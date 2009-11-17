@@ -17,16 +17,16 @@ package android.pim.vcard;
 
 import java.util.List;
 
-public class VCardEntryCounter implements VCardBuilder {
+public class VCardEntryCounter implements VCardInterpreter {
     private int mCount;
-    
+
     public int getCount() {
         return mCount;
     }
-    
+
     public void start() {
     }
-    
+
     public void end() {
     }
 
@@ -36,10 +36,10 @@ public class VCardEntryCounter implements VCardBuilder {
     public void endRecord() {
         mCount++;
     }
-    
+
     public void startProperty() {
     }
-    
+
     public void endProperty() {
     }
 

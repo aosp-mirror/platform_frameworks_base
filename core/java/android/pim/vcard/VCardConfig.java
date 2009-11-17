@@ -159,17 +159,31 @@ public class VCardConfig {
 
     /**
      * <P>
-     * The flag indicating the vCard composer "for 2.1" emits "TYPE=" string every time
-     * possible. The default behavior does not emit it and is valid, while adding "TYPE="
-     * is also valid. In vCrad 3.0, this flag is unnecessary, since "TYPE=" is MUST in
-     * vCard 3.0 specification.
-     *
-     * If you are targeting to some importer which cannot accept type parameters
-     * without "TYPE=" string (which should be rare though), please use this flag.
-     *
-     * XXX: Really rare?
-     *
-     * e.g. int vcardType = (VCARD_TYPE_V21_GENERIC | FLAG_APPEND_TYPE_PARAM);
+     * The flag indicating the vCard composer "for 2.1" emits "TYPE=" string toward TYPE params
+     * every time possible. The default behavior does not emit it and is valid in the spec.
+     * In vCrad 3.0, this flag is unnecessary, since "TYPE=" is MUST in vCard 3.0 specification.
+     * </P>
+     * <P>
+     * Detail:
+     * How more than one TYPE fields are expressed is different between vCard 2.1 and vCard 3.0.
+     * </p>
+     * <P>
+     * e.g.<BR />
+     * 1) Probably valid in both vCard 2.1 and vCard 3.0: "ADR;TYPE=DOM;TYPE=HOME:..."<BR />
+     * 2) Valid in vCard 2.1 but not in vCard 3.0: "ADR;DOM;HOME:..."<BR />
+     * 3) Valid in vCard 3.0 but not in vCard 2.1: "ADR;TYPE=DOM,HOME:..."<BR />
+     * </P>
+     * <P>
+     * 2) had been the default of VCard exporter/importer in Android, but it is found that
+     * some external exporter is not able to parse the type format like 2) but only 3).
+     * </P>
+     * <P>
+     * If you are targeting to the importer which cannot accept TYPE params without "TYPE="
+     * strings (which should be rare though), please use this flag.
+     * </P>
+     * <P>
+     * Example usage: int vcardType = (VCARD_TYPE_V21_GENERIC | FLAG_APPEND_TYPE_PARAM);
+     * </P>
      */
     public static final int FLAG_APPEND_TYPE_PARAM = 0x04000000;
 
@@ -177,13 +191,13 @@ public class VCardConfig {
 
     /**
      * <P>
-     * General vCard format with the version 2.1. Uses UTF-8 for the charset.
+     * Generic vCard format with the vCard 2.1. Uses UTF-8 for the charset.
      * When composing a vCard entry, the US convension will be used toward formatting
-     * some values
+     * some values.
      * </P>
      * <P>
      * e.g. The order of the display name would be "Prefix Given Middle Family Suffix",
-     * while it should be "Prefix Family Middle Given Suffix" in Japan.
+     * while it should be "Prefix Family Middle Given Suffix" in Japan for example.
      * </P>
      */
     public static final int VCARD_TYPE_V21_GENERIC_UTF8 =
@@ -197,7 +211,7 @@ public class VCardConfig {
      * General vCard format with the version 3.0. Uses UTF-8 for the charset.
      * </P>
      * <P>
-     * Not ready yet. Use with caution when you use this.
+     * Not fully ready yet. Use with caution when you use this.
      * </P>
      */
     public static final int VCARD_TYPE_V30_GENERIC_UTF8 =
@@ -220,7 +234,7 @@ public class VCardConfig {
     
     /**
      * <P>
-     * General vCard format with the version 3.0 with some Europe convension. Uses UTF-8
+     * General vCard format with the version 3.0 with some Europe convension. Uses UTF-8.
      * </P>
      * <P>
      * Not ready yet. Use with caution when you use this.
@@ -407,6 +421,9 @@ public class VCardConfig {
      * applied to creating "formatted" something like FORMATTED_ADDRESS.
      */
     public static boolean isJapaneseDevice(final int vcardType) {
+        // TODO: Some mask will be required so that this method wrongly interpret
+        //        Japanese"-like" vCard type.
+        //        e.g. VCARD_TYPE_V21_JAPANESE_SJIS | FLAG_APPEND_TYPE_PARAMS
         return sJapaneseMobileTypeSet.contains(vcardType);
     }
 

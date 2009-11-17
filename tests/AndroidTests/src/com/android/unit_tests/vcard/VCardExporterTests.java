@@ -419,6 +419,62 @@ public class VCardExporterTests extends VCardTestsBase {
         testPhonePrefHandlingCommon(V30);
     }
 
+    private void testMiscPhoneTypeHandling(int vcardType) {
+        ExportTestResolver resolver = new ExportTestResolver();
+        ContactEntry entry = resolver.buildContactEntry();
+        entry.buildData(Phone.CONTENT_ITEM_TYPE)
+                .put(Phone.NUMBER, "1")
+                .put(Phone.TYPE, Phone.TYPE_CUSTOM)
+                .put(Phone.LABEL, "Modem");
+        entry.buildData(Phone.CONTENT_ITEM_TYPE)
+                .put(Phone.NUMBER, "2")
+                .put(Phone.TYPE, Phone.TYPE_CUSTOM)
+                .put(Phone.LABEL, "MSG");
+        entry.buildData(Phone.CONTENT_ITEM_TYPE)
+                .put(Phone.NUMBER, "3")
+                .put(Phone.TYPE, Phone.TYPE_CUSTOM)
+                .put(Phone.LABEL, "BBS");
+        entry.buildData(Phone.CONTENT_ITEM_TYPE)
+                .put(Phone.NUMBER, "4")
+                .put(Phone.TYPE, Phone.TYPE_CUSTOM)
+                .put(Phone.LABEL, "VIDEO");
+        entry.buildData(Phone.CONTENT_ITEM_TYPE)
+                .put(Phone.NUMBER, "5")
+                .put(Phone.TYPE, Phone.TYPE_CUSTOM);
+        entry.buildData(Phone.CONTENT_ITEM_TYPE)
+                .put(Phone.NUMBER, "6")
+                .put(Phone.TYPE, Phone.TYPE_CUSTOM)
+                .put(Phone.LABEL, "_AUTO_CELL");  // The old indicator for the type mobile.
+        entry.buildData(Phone.CONTENT_ITEM_TYPE)
+                .put(Phone.NUMBER, "7")
+                .put(Phone.TYPE, Phone.TYPE_CUSTOM)
+                .put(Phone.LABEL, "\u643A\u5E2F");  // Mobile phone in Japanese Kanji
+        entry.buildData(Phone.CONTENT_ITEM_TYPE)
+                .put(Phone.NUMBER, "8")
+                .put(Phone.TYPE, Phone.TYPE_CUSTOM)
+                .put(Phone.LABEL, "invalid");
+
+        VCardVerifier verifier = new VCardVerifier(resolver, vcardType);
+        PropertyNodesVerifierElem elem = verifier.addPropertyNodesVerifierElemWithEmptyName();
+        elem.addNodeWithoutOrder("TEL", "1", new TypeSet("MODEM"))
+                .addNodeWithoutOrder("TEL", "2", new TypeSet("MSG"))
+                .addNodeWithoutOrder("TEL", "3", new TypeSet("BBS"))
+                .addNodeWithoutOrder("TEL", "4", new TypeSet("VIDEO"))
+                .addNodeWithoutOrder("TEL", "5", new TypeSet("VOICE"))
+                .addNodeWithoutOrder("TEL", "6", new TypeSet("CELL"))
+                .addNodeWithoutOrder("TEL", "7", new TypeSet("CELL"))
+                .addNodeWithoutOrder("TEL", "8", new TypeSet("X-invalid"));
+        verifier.verify();
+    }
+
+    public void testPhoneTypeHandlingV21() {
+        testMiscPhoneTypeHandling(V21);
+    }
+
+    public void testPhoneTypeHandlingV30() {
+        testMiscPhoneTypeHandling(V30);
+    }
+
     private void testEmailBasicCommon(int version) {
         ExportTestResolver resolver = new ExportTestResolver();
         resolver.buildContactEntry().buildData(Email.CONTENT_ITEM_TYPE)

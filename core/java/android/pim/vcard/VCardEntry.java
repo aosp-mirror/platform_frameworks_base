@@ -54,8 +54,11 @@ import java.util.Map;
 /**
  * This class bridges between data structure of Contact app and VCard data.
  */
-public class ContactStruct {
-    private static final String LOG_TAG = "vcard.ContactStruct";
+public class VCardEntry {
+    private static final String LOG_TAG = "VCardEntry";
+
+    private static final String ACCOUNT_TYPE_GOOGLE = "com.google";
+    private static final String GOOGLE_MY_CONTACTS_GROUP = "System Group: My Contacts";
 
     // Key: the name shown in VCard. e.g. "X-AIM", "X-ICQ"
     // Value: the result of {@link Contacts.ContactMethods#encodePredefinedImProtocol}
@@ -72,7 +75,7 @@ public class ContactStruct {
         sImMap.put(Constants.ImportOnly.PROPERTY_X_GOOGLE_TALK_WITH_SPACE,
                 Im.PROTOCOL_GOOGLE_TALK);
     }
-    
+
     static public class PhoneData {
         public final int type;
         public final String data;
@@ -448,15 +451,15 @@ public class ContactStruct {
     private final int mVCardType;
     private final Account mAccount;
 
-    public ContactStruct() {
+    public VCardEntry() {
         this(VCardConfig.VCARD_TYPE_V21_GENERIC_UTF8);
     }
 
-    public ContactStruct(int vcardType) {
+    public VCardEntry(int vcardType) {
         this(vcardType, null);
     }
 
-    public ContactStruct(int vcardType, Account account) {
+    public VCardEntry(int vcardType, Account account) {
         mVCardType = vcardType;
         mAccount = account;
     }
@@ -921,16 +924,14 @@ public class ContactStruct {
         } else if (propName.equals(Constants.PROPERTY_X_SKYPE_PSTNNUMBER)) {
             // The phone number available via Skype.
             Collection<String> typeCollection = paramMap.get(Constants.PARAM_TYPE);
-            // XXX: should use TYPE_CUSTOM + the label "Skype"? (which may need localization)
-            int type = Phone.TYPE_OTHER;
-            final String label = null;
+            final int type = Phone.TYPE_OTHER;
             final boolean isPrimary;
             if (typeCollection != null && typeCollection.contains(Constants.PARAM_TYPE_PREF)) {
                 isPrimary = true;
             } else {
                 isPrimary = false;
             }
-            addPhone(type, propValue, label, isPrimary);
+            addPhone(type, propValue, null, isPrimary);
         } else if (sImMap.containsKey(propName)) {
             final int protocol = sImMap.get(propName);
             boolean isPrimary = false;
@@ -1045,10 +1046,6 @@ public class ContactStruct {
         }
     }
 
-    // From GoogleSource.java in Contacts app.
-    private static final String ACCOUNT_TYPE_GOOGLE = "com.google";
-    private static final String GOOGLE_MY_CONTACTS_GROUP = "System Group: My Contacts";
-
     public void pushIntoContentResolver(ContentResolver resolver) {
         ArrayList<ContentProviderOperation> operationList =
             new ArrayList<ContentProviderOperation>();  
@@ -1060,7 +1057,6 @@ public class ContactStruct {
             builder.withValue(RawContacts.ACCOUNT_TYPE, mAccount.type);
 
             // Assume that caller side creates this group if it does not exist.
-            // TODO: refactor this code along with the change in GoogleSource.java
             if (ACCOUNT_TYPE_GOOGLE.equals(mAccount.type)) {
                 final Cursor cursor = resolver.query(Groups.CONTENT_URI, new String[] {
                         Groups.SOURCE_ID },
@@ -1293,11 +1289,11 @@ public class ContactStruct {
         }
     }
 
-    public static ContactStruct buildFromResolver(ContentResolver resolver) {
+    public static VCardEntry buildFromResolver(ContentResolver resolver) {
         return buildFromResolver(resolver, Contacts.CONTENT_URI);
     }
 
-    public static ContactStruct buildFromResolver(ContentResolver resolver, Uri uri) {
+    public static VCardEntry buildFromResolver(ContentResolver resolver, Uri uri) {
 
         return null;
     }

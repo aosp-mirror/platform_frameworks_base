@@ -16,7 +16,8 @@
 package com.android.unit_tests.vcard;
 
 import android.content.ContentValues;
-import android.pim.vcard.ContactStruct;
+import android.pim.vcard.VCardEntry;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -28,7 +29,7 @@ import java.util.Set;
  * Previously used in main vCard handling code but now exists only for testing.
  *
  * Especially useful for testing parser code (VCardParser), since all properties can be
- * checked via this class unlike {@link ContactStruct}, which only emits the result of
+ * checked via this class unlike {@link VCardEntry}, which only emits the result of
  * interpretation of the content of each vCard. We cannot know whether vCard parser or
  * ContactStruct is wrong withouth this class.
  */
@@ -123,7 +124,10 @@ public class PropertyNode {
             return false;
         } else if (!paramMap.equals(node.paramMap)) {
             return false;
-        } else if (!paramMap_TYPE.equals(node.paramMap_TYPE)) {
+        } else if (!(paramMap_TYPE.size() == node.paramMap_TYPE.size()) &&
+                !paramMap_TYPE.equals(node.paramMap_TYPE)) {
+            Log.d("@@@", "paramMap_Type: " + paramMap_TYPE.size() + ", "
+                    + node.paramMap_TYPE.size());
             return false;
         } else if (!propGroupSet.equals(node.propGroupSet)) {
             return false;
@@ -154,10 +158,33 @@ public class PropertyNode {
         builder.append(propName);
         builder.append(", paramMap: ");
         builder.append(paramMap.toString());
-        builder.append(", propmMap_TYPE: ");
-        builder.append(paramMap_TYPE.toString());
-        builder.append(", propGroupSet: ");
-        builder.append(propGroupSet.toString());
+        builder.append(", paramMap_TYPE: [");
+        boolean first = true;
+        for (String elem : paramMap_TYPE) {
+            if (first) {
+                first = false;
+            } else {
+                builder.append(", ");
+            }
+            builder.append('"');
+            builder.append(elem);
+            builder.append('"');
+        }
+        builder.append("]");
+        if (!propGroupSet.isEmpty()) {
+            builder.append(", propGroupSet: [");
+            for (String elem : propGroupSet) {
+                if (first) {
+                    first = false;
+                } else {
+                    builder.append(", ");
+                }
+                builder.append('"');
+                builder.append(elem);
+                builder.append('"');
+            }
+            builder.append("]");
+        }
         if (propValue_vector != null && propValue_vector.size() > 1) {
             builder.append(", propValue_vector size: ");
             builder.append(propValue_vector.size());

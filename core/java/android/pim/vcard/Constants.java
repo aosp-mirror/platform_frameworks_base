@@ -83,18 +83,6 @@ package android.pim.vcard;
 
     public static final String PARAM_TYPE = "TYPE";
 
-    // How more than one TYPE fields are expressed is different between vCard 2.1 and vCard 3.0
-    //
-    // e.g.
-    // 1) Probably valid in both vCard 2.1 and vCard 3.0: "ADR;TYPE=DOM;TYPE=HOME:..." 
-    // 2) Valid in vCard 2.1 but not in vCard 3.0: "ADR;DOM;HOME:..."
-    // 3) Valid in vCard 3.0 but not in vCard 2.1: "ADR;TYPE=DOM,HOME:..."
-    //
-    // 2) has been the default of VCard exporter/importer in Android, but we can see the other
-    // formats in vCard data emitted by the other softwares/devices.
-    //
-    // So we are currently not sure which type is the best; probably we will have to change which
-    // type should be emitted depending on the device.
     public static final String PARAM_TYPE_HOME = "HOME";
     public static final String PARAM_TYPE_WORK = "WORK";
     public static final String PARAM_TYPE_FAX = "FAX";
@@ -117,7 +105,6 @@ package android.pim.vcard;
     public static final String PARAM_TYPE_TLX = "TLX";  // Telex
 
     // Phone types existing in vCard 2.1 but not known to ContactsContract.
-    // TODO: should make parser make these TYPE_CUSTOM.
     public static final String PARAM_TYPE_MODEM = "MODEM";
     public static final String PARAM_TYPE_MSG = "MSG";
     public static final String PARAM_TYPE_BBS = "BBS";
@@ -156,8 +143,10 @@ package android.pim.vcard;
         public static final String PROPERTY_X_GOOGLE_TALK_WITH_SPACE = "X-GOOGLE TALK";
     }
 
-    // TODO: Should be in ContactsContract?
     /* package */ static final int MAX_DATA_COLUMN = 15;
+
+    /* package */ static final int MAX_CHARACTER_NUMS_QP = 76;
+    static final int MAX_CHARACTER_NUMS_BASE64_V30 = 75;
 
     private Constants() {
     }
