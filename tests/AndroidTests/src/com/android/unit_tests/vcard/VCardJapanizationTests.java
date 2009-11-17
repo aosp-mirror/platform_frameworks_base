@@ -27,15 +27,14 @@ import java.util.Arrays;
 
 public class VCardJapanizationTests extends VCardTestsBase {
     private void testNameUtf8Common(int vcardType) {
-        ExportTestResolver resolver = new ExportTestResolver();
-        resolver.buildContactEntry().buildData(StructuredName.CONTENT_ITEM_TYPE)
+        VCardVerifier verifier = new VCardVerifier(vcardType);
+        ContactEntry entry = verifier.addInputEntry();
+        entry.buildData(StructuredName.CONTENT_ITEM_TYPE)
                 .put(StructuredName.FAMILY_NAME, "\u3075\u308B\u3069")
                 .put(StructuredName.GIVEN_NAME, "\u3091\u308A\u304B")
                 .put(StructuredName.MIDDLE_NAME, "B")
                 .put(StructuredName.PREFIX, "Dr.")
                 .put(StructuredName.SUFFIX, "Ph.D");
-
-        VCardVerifier verifier = new VCardVerifier(resolver, vcardType);
         ContentValues contentValues =
             (VCardConfig.isV30(vcardType) ? null : mContentValuesForQPAndUtf8);
         verifier.addPropertyNodesVerifierElem()
@@ -57,16 +56,15 @@ public class VCardJapanizationTests extends VCardTestsBase {
     }
 
     public void testNameShiftJis() {
-        ExportTestResolver resolver = new ExportTestResolver();
-        resolver.buildContactEntry().buildData(StructuredName.CONTENT_ITEM_TYPE)
+        VCardVerifier verifier = new VCardVerifier(VCardConfig.VCARD_TYPE_V30_JAPANESE_SJIS);
+        ContactEntry entry = verifier.addInputEntry();
+        entry.buildData(StructuredName.CONTENT_ITEM_TYPE)
                 .put(StructuredName.FAMILY_NAME, "\u3075\u308B\u3069")
                 .put(StructuredName.GIVEN_NAME, "\u3091\u308A\u304B")
                 .put(StructuredName.MIDDLE_NAME, "B")
                 .put(StructuredName.PREFIX, "Dr.")
                 .put(StructuredName.SUFFIX, "Ph.D");
 
-        VCardVerifier verifier = new VCardVerifier(resolver,
-                VCardConfig.VCARD_TYPE_V30_JAPANESE_SJIS);
         verifier.addPropertyNodesVerifierElem()
                 .addNodeWithoutOrder("FN", "Dr. \u3075\u308B\u3069 B \u3091\u308A\u304B Ph.D",
                         mContentValuesForSJis)
@@ -81,16 +79,15 @@ public class VCardJapanizationTests extends VCardTestsBase {
      * DoCoMo phones require all name elements should be in "family name" field.
      */
     public void testNameDoCoMo() {
-        ExportTestResolver resolver = new ExportTestResolver();
-        resolver.buildContactEntry().buildData(StructuredName.CONTENT_ITEM_TYPE)
+        VCardVerifier verifier = new VCardVerifier(VCardConfig.VCARD_TYPE_DOCOMO);
+        ContactEntry entry = verifier.addInputEntry();
+        entry.buildData(StructuredName.CONTENT_ITEM_TYPE)
                 .put(StructuredName.FAMILY_NAME, "\u3075\u308B\u3069")
                 .put(StructuredName.GIVEN_NAME, "\u3091\u308A\u304B")
                 .put(StructuredName.MIDDLE_NAME, "B")
                 .put(StructuredName.PREFIX, "Dr.")
                 .put(StructuredName.SUFFIX, "Ph.D");
 
-        VCardVerifier verifier = new VCardVerifier(resolver,
-                VCardConfig.VCARD_TYPE_DOCOMO);
         final String fullName = "Dr. \u3075\u308B\u3069 B \u3091\u308A\u304B Ph.D";
         verifier.addPropertyNodesVerifierElem()
                 .addNodeWithoutOrder("N", fullName + ";;;;",
@@ -109,8 +106,9 @@ public class VCardJapanizationTests extends VCardTestsBase {
     }
 
     private void testPhoneticNameCommon(int vcardType) {
-        ExportTestResolver resolver = new ExportTestResolver();
-        resolver.buildContactEntry().buildData(StructuredName.CONTENT_ITEM_TYPE)
+        VCardVerifier verifier = new VCardVerifier(vcardType);
+        ContactEntry entry = verifier.addInputEntry();
+        entry.buildData(StructuredName.CONTENT_ITEM_TYPE)
                 .put(StructuredName.PHONETIC_FAMILY_NAME, "\u3084\u307E\u3060")
                 .put(StructuredName.PHONETIC_MIDDLE_NAME, "\u30DF\u30C9\u30EB\u30CD\u30FC\u30E0")
                 .put(StructuredName.PHONETIC_GIVEN_NAME, "\u305F\u308D\u3046");
@@ -120,7 +118,6 @@ public class VCardJapanizationTests extends VCardTestsBase {
                     (VCardConfig.isV30(vcardType) ? mContentValuesForSJis :
                             mContentValuesForQPAndSJis) :
                     (VCardConfig.isV30(vcardType) ? null : mContentValuesForQPAndUtf8));
-        VCardVerifier verifier = new VCardVerifier(resolver, vcardType);
         PropertyNodesVerifierElem elem = verifier.addPropertyNodesVerifierElemWithEmptyName();
         elem.addNodeWithoutOrder("X-PHONETIC-LAST-NAME", "\u3084\u307E\u3060",
                         contentValues)
@@ -162,14 +159,13 @@ public class VCardJapanizationTests extends VCardTestsBase {
     }
 
     public void testPhoneticNameForMobileV21_1() {
-        ExportTestResolver resolver = new ExportTestResolver();
-        resolver.buildContactEntry().buildData(StructuredName.CONTENT_ITEM_TYPE)
+        VCardVerifier verifier = new VCardVerifier(VCardConfig.VCARD_TYPE_V21_JAPANESE_MOBILE);
+        ContactEntry entry = verifier.addInputEntry();
+        entry.buildData(StructuredName.CONTENT_ITEM_TYPE)
                 .put(StructuredName.PHONETIC_FAMILY_NAME, "\u3084\u307E\u3060")
                 .put(StructuredName.PHONETIC_MIDDLE_NAME, "\u30DF\u30C9\u30EB\u30CD\u30FC\u30E0")
                 .put(StructuredName.PHONETIC_GIVEN_NAME, "\u305F\u308D\u3046");
 
-        VCardVerifier verifier = new VCardVerifier(resolver,
-                VCardConfig.VCARD_TYPE_V21_JAPANESE_MOBILE);
         verifier.addPropertyNodesVerifierElem()
                 .addNodeWithoutOrder("SOUND",
                         "\uFF94\uFF8F\uFF80\uFF9E \uFF90\uFF84\uFF9E\uFF99\uFF88\uFF70\uFF91 " +
@@ -188,13 +184,12 @@ public class VCardJapanizationTests extends VCardTestsBase {
     }
 
     public void testPhoneticNameForMobileV21_2() {
-        ExportTestResolver resolver = new ExportTestResolver();
-        resolver.buildContactEntry().buildData(StructuredName.CONTENT_ITEM_TYPE)
+        VCardVerifier verifier = new VCardVerifier(VCardConfig.VCARD_TYPE_V21_JAPANESE_MOBILE);
+        ContactEntry entry = verifier.addInputEntry();
+        entry.buildData(StructuredName.CONTENT_ITEM_TYPE)
                 .put(StructuredName.PHONETIC_FAMILY_NAME, "\u3084\u307E\u3060")
                 .put(StructuredName.PHONETIC_GIVEN_NAME, "\u305F\u308D\u3046");
 
-        VCardVerifier verifier = new VCardVerifier(resolver,
-                VCardConfig.VCARD_TYPE_V21_JAPANESE_MOBILE);
         verifier.addPropertyNodesVerifierElem()
                 .addNodeWithoutOrder("SOUND", "\uFF94\uFF8F\uFF80\uFF9E \uFF80\uFF9B\uFF73;;;;",
                                 mContentValuesForSJis, new TypeSet("X-IRMC-N"));
@@ -211,8 +206,8 @@ public class VCardJapanizationTests extends VCardTestsBase {
      * Prefered type must (should?) be: HOME > WORK > OTHER > CUSTOM
      */
     public void testAdrressFieldEmittionForDoCoMo_1() {
-        ExportTestResolver resolver = new ExportTestResolver();
-        ContactEntry entry = resolver.buildContactEntry();
+        VCardVerifier verifier = new VCardVerifier(VCardConfig.VCARD_TYPE_DOCOMO);
+        ContactEntry entry = verifier.addInputEntry();
         entry.buildData(StructuredPostal.CONTENT_ITEM_TYPE)
                 .put(StructuredPostal.TYPE, StructuredPostal.TYPE_WORK)
                 .put(StructuredPostal.POBOX, "1");
@@ -227,7 +222,6 @@ public class VCardJapanizationTests extends VCardTestsBase {
                 .put(StructuredPostal.LABEL, "custom")
                 .put(StructuredPostal.POBOX, "4");
 
-        VCardVerifier verifier = new VCardVerifier(resolver, VCardConfig.VCARD_TYPE_DOCOMO);
         verifier.addPropertyNodesVerifierElemWithEmptyName()
                 .addNodeWithoutOrder("TEL", "", new TypeSet("HOME"))
                 .addNodeWithoutOrder("EMAIL", "", new TypeSet("HOME"))
@@ -241,8 +235,8 @@ public class VCardJapanizationTests extends VCardTestsBase {
     }
 
     public void testAdrressFieldEmittionForDoCoMo_2() {
-        ExportTestResolver resolver = new ExportTestResolver();
-        ContactEntry entry = resolver.buildContactEntry();
+        VCardVerifier verifier = new VCardVerifier(VCardConfig.VCARD_TYPE_DOCOMO);
+        ContactEntry entry = verifier.addInputEntry();
         entry.buildData(StructuredPostal.CONTENT_ITEM_TYPE)
                 .put(StructuredPostal.TYPE, StructuredPostal.TYPE_OTHER)
                 .put(StructuredPostal.POBOX, "1");
@@ -254,7 +248,6 @@ public class VCardJapanizationTests extends VCardTestsBase {
                 .put(StructuredPostal.LABEL, "custom")
                 .put(StructuredPostal.POBOX, "3");
 
-        VCardVerifier verifier = new VCardVerifier(resolver, VCardConfig.VCARD_TYPE_DOCOMO);
         verifier.addPropertyNodesVerifierElemWithEmptyName()
                 .addNodeWithoutOrder("TEL", "", new TypeSet("HOME"))
                 .addNodeWithoutOrder("EMAIL", "", new TypeSet("HOME"))
@@ -268,8 +261,8 @@ public class VCardJapanizationTests extends VCardTestsBase {
     }
 
     public void testAdrressFieldEmittionForDoCoMo_3() {
-        ExportTestResolver resolver = new ExportTestResolver();
-        ContactEntry entry = resolver.buildContactEntry();
+        VCardVerifier verifier = new VCardVerifier(VCardConfig.VCARD_TYPE_DOCOMO);
+        ContactEntry entry = verifier.addInputEntry();
         entry.buildData(StructuredPostal.CONTENT_ITEM_TYPE)
                 .put(StructuredPostal.TYPE, StructuredPostal.TYPE_CUSTOM)
                 .put(StructuredPostal.LABEL, "custom1")
@@ -282,7 +275,6 @@ public class VCardJapanizationTests extends VCardTestsBase {
                 .put(StructuredPostal.LABEL, "custom2")
                 .put(StructuredPostal.POBOX, "3");
 
-        VCardVerifier verifier = new VCardVerifier(resolver, VCardConfig.VCARD_TYPE_DOCOMO);
         verifier.addPropertyNodesVerifierElemWithEmptyName()
                 .addNodeWithoutOrder("TEL", "", new TypeSet("HOME"))
                 .addNodeWithoutOrder("EMAIL", "", new TypeSet("HOME"))
@@ -298,8 +290,8 @@ public class VCardJapanizationTests extends VCardTestsBase {
      * Verifies the vCard exporter tolerates null TYPE.
      */
     public void testAdrressFieldEmittionForDoCoMo_4() {
-        ExportTestResolver resolver = new ExportTestResolver();
-        ContactEntry entry = resolver.buildContactEntry();
+        VCardVerifier verifier = new VCardVerifier(VCardConfig.VCARD_TYPE_DOCOMO);
+        ContactEntry entry = verifier.addInputEntry();
         entry.buildData(StructuredPostal.CONTENT_ITEM_TYPE)
                 .put(StructuredPostal.POBOX, "1");
         entry.buildData(StructuredPostal.CONTENT_ITEM_TYPE)
@@ -314,7 +306,6 @@ public class VCardJapanizationTests extends VCardTestsBase {
         entry.buildData(StructuredPostal.CONTENT_ITEM_TYPE)
                 .put(StructuredPostal.POBOX, "5");
 
-        VCardVerifier verifier = new VCardVerifier(resolver, VCardConfig.VCARD_TYPE_DOCOMO);
         verifier.addPropertyNodesVerifierElemWithEmptyName()
                 .addNodeWithoutOrder("TEL", "", new TypeSet("HOME"))
                 .addNodeWithoutOrder("EMAIL", "", new TypeSet("HOME"))
