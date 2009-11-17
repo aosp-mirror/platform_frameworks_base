@@ -20,10 +20,15 @@
 #include <ui/FramebufferNativeWindow.h>
 #include <ui/EGLUtils.h>
 
+#include <sys/types.h>
+#include <sys/resource.h>
+
 #include <cutils/properties.h>
 
 #include <GLES/gl.h>
 #include <GLES/glext.h>
+
+#include <cutils/sched_policy.h>
 
 using namespace android;
 using namespace android::renderscript;
@@ -234,6 +239,9 @@ static bool getProp(const char *str)
 void * Context::threadProc(void *vrsc)
 {
      Context *rsc = static_cast<Context *>(vrsc);
+     rsc->mNativeThreadId = gettid();
+
+     setpriority(PRIO_PROCESS, rsc->mNativeThreadId, ANDROID_PRIORITY_DISPLAY);
 
      rsc->props.mLogTimes = getProp("debug.rs.profile");
      rsc->props.mLogScripts = getProp("debug.rs.script");
@@ -316,6 +324,25 @@ void * Context::threadProc(void *vrsc)
      return NULL;
 }
 
+void Context::setPriority(int32_t p)
+{
+    // Note: If we put this in the proper "background" policy
+    // the wallpapers can become completly unresponsive at times.
+    // This is probably not what we want for something the user is actively
+    // looking at.
+#if 0
+    SchedPolicy pol = SP_FOREGROUND;
+    if (p > 0) {
+        pol = SP_BACKGROUND;
+    }
+    if (!set_sched_policy(mNativeThreadId, pol)) {
+        // success; reset the priority as well
+    }
+#else
+        setpriority(PRIO_PROCESS, mNativeThreadId, p);
+#endif
+}
+
 Context::Context(Device *dev, bool useDepth)
 {
     pthread_mutex_lock(&gInitMutex);
@@ -350,10 +377,6 @@ Context::Context(Device *dev, bool useDepth)
         LOGE("Failed to init thread attribute.");
         return;
     }
-
-    sched_param sparam;
-    sparam.sched_priority = ANDROID_PRIORITY_DISPLAY;
-    pthread_attr_setschedparam(&threadAttr, &sparam);
 
     mWndSurface = NULL;
 
@@ -783,8 +806,9 @@ void rsi_ContextSetSurface(Context *rsc, uint32_t w, uint32_t h, void *sur)
     rsc->setSurface(w, h, (Surface *)sur);
 }
 
-void rsi_ContextSetPriority(Context *rsc, uint32_t p)
+void rsi_ContextSetPriority(Context *rsc, int32_t p)
 {
+    rsc->setPriority(p);
 }
 
 }

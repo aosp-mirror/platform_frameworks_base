@@ -67,6 +67,7 @@ public class RenderScript {
     native int  nContextCreate(int dev, int ver, boolean useDepth);
     native void nContextDestroy(int con);
     native void nContextSetSurface(int w, int h, Surface sur);
+    native void nContextSetPriority(int p);
 
     native void nContextBindRootScript(int script);
     native void nContextBindSampler(int sampler, int slot);
@@ -218,6 +219,7 @@ public class RenderScript {
     Element mElement_XY_F32;
     Element mElement_XYZ_F32;
 
+
     ///////////////////////////////////////////////////////////////////////////////////
     //
 
@@ -228,6 +230,20 @@ public class RenderScript {
         }
     }
     public RSMessage mMessageCallback = null;
+
+    public enum Priority {
+        LOW (5),     //ANDROID_PRIORITY_BACKGROUND + 5
+        NORMAL (-4);  //ANDROID_PRIORITY_DISPLAY
+
+        int mID;
+        Priority(int id) {
+            mID = id;
+        }
+    }
+
+    public void contextSetPriority(Priority p) {
+        nContextSetPriority(p.mID);
+    }
 
     private static class MessageThread extends Thread {
         RenderScript mRS;
