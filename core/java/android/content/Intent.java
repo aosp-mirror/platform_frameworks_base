@@ -2105,10 +2105,10 @@ public class Intent implements Parcelable {
             "android.intent.extra.remote_intent_token";
 
     /**
-     * @Deprecated See {@link #EXTRA_CHANGED_COMPONENT_NAME_LIST}; this field
+     * @deprecated See {@link #EXTRA_CHANGED_COMPONENT_NAME_LIST}; this field
      * will contain only the first name in the list.
      */
-    public static final String EXTRA_CHANGED_COMPONENT_NAME =
+    @Deprecated public static final String EXTRA_CHANGED_COMPONENT_NAME =
             "android.intent.extra.changed_component_name";
 
     /**
