@@ -59,11 +59,12 @@ public final class AssetManager {
     private static final String TAG = "AssetManager";
     private static final boolean localLOGV = Config.LOGV || false;
     
-    private static final Object mSync = new Object();
-    private static final TypedValue mValue = new TypedValue();
-    private static final long[] mOffsets = new long[2];
-    private static AssetManager mSystem = null;
+    private static final Object sSync = new Object();
+    private static AssetManager sSystem = null;
 
+    private final TypedValue mValue = new TypedValue();
+    private final long[] mOffsets = new long[2];
+    
     // For communication with native code.
     private int mObject;
 
@@ -71,9 +72,7 @@ public final class AssetManager {
     
     private int mNumRefs = 1;
     private boolean mOpen = true;
-    private String mAssetDir;
-    private String mAppName;
-
+ 
     /**
      * Create a new AssetManager containing only the basic system assets.
      * Applications will not generally use this method, instead retrieving the
@@ -82,7 +81,7 @@ public final class AssetManager {
      * {@hide}
      */
     public AssetManager() {
-        synchronized (mSync) {
+        synchronized (this) {
             init();
             if (localLOGV) Log.v(TAG, "New asset manager: " + this);
             ensureSystemAssets();
@@ -90,11 +89,11 @@ public final class AssetManager {
     }
 
     private static void ensureSystemAssets() {
-        synchronized (mSync) {
-            if (mSystem == null) {
+        synchronized (sSync) {
+            if (sSystem == null) {
                 AssetManager system = new AssetManager(true);
                 system.makeStringBlocks(false);
-                mSystem = system;
+                sSystem = system;
             }
         }
     }
@@ -111,14 +110,14 @@ public final class AssetManager {
      */
     public static AssetManager getSystem() {
         ensureSystemAssets();
-        return mSystem;
+        return sSystem;
     }
 
     /**
      * Close this asset manager.
      */
     public void close() {
-        synchronized(mSync) {
+        synchronized(this) {
             //System.out.println("Release: num=" + mNumRefs
             //                   + ", released=" + mReleased);
             if (mOpen) {
@@ -133,7 +132,7 @@ public final class AssetManager {
      * identifier for the current configuration / skin.
      */
     /*package*/ final CharSequence getResourceText(int ident) {
-        synchronized (mSync) {
+        synchronized (this) {
             TypedValue tmpValue = mValue;
             int block = loadResourceValue(ident, tmpValue, true);
             if (block >= 0) {
@@ -151,7 +150,7 @@ public final class AssetManager {
      * identifier for the current configuration / skin.
      */
     /*package*/ final CharSequence getResourceBagText(int ident, int bagEntryId) {
-        synchronized (mSync) {
+        synchronized (this) {
             TypedValue tmpValue = mValue;
             int block = loadResourceBagValue(ident, bagEntryId, tmpValue, true);
             if (block >= 0) {
@@ -229,7 +228,7 @@ public final class AssetManager {
 
     /*package*/ final void ensureStringBlocks() {
         if (mStringBlocks == null) {
-            synchronized (mSync) {
+            synchronized (this) {
                 if (mStringBlocks == null) {
                     makeStringBlocks(true);
                 }
@@ -238,14 +237,14 @@ public final class AssetManager {
     }
 
     private final void makeStringBlocks(boolean copyFromSystem) {
-        final int sysNum = copyFromSystem ? mSystem.mStringBlocks.length : 0;
+        final int sysNum = copyFromSystem ? sSystem.mStringBlocks.length : 0;
         final int num = getStringBlockCount();
         mStringBlocks = new StringBlock[num];
         if (localLOGV) Log.v(TAG, "Making string blocks for " + this
                 + ": " + num);
         for (int i=0; i<num; i++) {
             if (i < sysNum) {
-                mStringBlocks[i] = mSystem.mStringBlocks[i];
+                mStringBlocks[i] = sSystem.mStringBlocks[i];
             } else {
                 mStringBlocks[i] = new StringBlock(getNativeStringBlock(i), true);
             }
@@ -293,7 +292,7 @@ public final class AssetManager {
      */
     public final InputStream open(String fileName, int accessMode)
         throws IOException {
-        synchronized (mSync) {
+        synchronized (this) {
             if (!mOpen) {
                 throw new RuntimeException("Assetmanager has been closed");
             }
@@ -308,7 +307,7 @@ public final class AssetManager {
 
     public final AssetFileDescriptor openFd(String fileName)
             throws IOException {
-        synchronized (mSync) {
+        synchronized (this) {
             if (!mOpen) {
                 throw new RuntimeException("Assetmanager has been closed");
             }
@@ -384,7 +383,7 @@ public final class AssetManager {
      */
     public final InputStream openNonAsset(int cookie, String fileName, int accessMode)
         throws IOException {
-        synchronized (mSync) {
+        synchronized (this) {
             if (!mOpen) {
                 throw new RuntimeException("Assetmanager has been closed");
             }
@@ -404,7 +403,7 @@ public final class AssetManager {
     
     public final AssetFileDescriptor openNonAssetFd(int cookie,
             String fileName) throws IOException {
-        synchronized (mSync) {
+        synchronized (this) {
             if (!mOpen) {
                 throw new RuntimeException("Assetmanager has been closed");
             }
@@ -463,7 +462,7 @@ public final class AssetManager {
      */
     /*package*/ final XmlBlock openXmlBlockAsset(int cookie, String fileName)
         throws IOException {
-        synchronized (mSync) {
+        synchronized (this) {
             if (!mOpen) {
                 throw new RuntimeException("Assetmanager has been closed");
             }
@@ -477,13 +476,13 @@ public final class AssetManager {
     }
 
     /*package*/ void xmlBlockGone() {
-        synchronized (mSync) {
+        synchronized (this) {
             decRefsLocked();
         }
     }
 
     /*package*/ final int createTheme() {
-        synchronized (mSync) {
+        synchronized (this) {
             if (!mOpen) {
                 throw new RuntimeException("Assetmanager has been closed");
             }
@@ -493,7 +492,7 @@ public final class AssetManager {
     }
 
     /*package*/ final void releaseTheme(int theme) {
-        synchronized (mSync) {
+        synchronized (this) {
             deleteTheme(theme);
             decRefsLocked();
         }
@@ -523,7 +522,7 @@ public final class AssetManager {
             return len > Integer.MAX_VALUE ? Integer.MAX_VALUE : (int)len;
         }
         public final void close() throws IOException {
-            synchronized (AssetManager.mSync) {
+            synchronized (AssetManager.this) {
                 if (mAsset != 0) {
                     destroyAsset(mAsset);
                     mAsset = 0;
