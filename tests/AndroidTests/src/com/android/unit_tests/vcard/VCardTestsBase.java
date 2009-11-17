@@ -37,7 +37,7 @@ import android.pim.vcard.VCardEntry;
 import android.pim.vcard.VCardEntryCommitter;
 import android.pim.vcard.VCardEntryHandler;
 import android.pim.vcard.VCardInterpreter;
-import android.pim.vcard.VCardInterPreterCollection;
+import android.pim.vcard.VCardInterpreterCollection;
 import android.pim.vcard.VCardComposer;
 import android.pim.vcard.VCardConfig;
 import android.pim.vcard.VCardEntryConstructor;
@@ -863,7 +863,7 @@ class CustomMockContext extends MockContext {
                         new VCardEntryConstructor(mVCardType);
                 vcardDataBuilder.addEntryHandler(mImportVerifier);
                 if (mPropertyNodesVerifier != null) {
-                    builder = new VCardInterPreterCollection(Arrays.asList(
+                    builder = new VCardInterpreterCollection(Arrays.asList(
                             mPropertyNodesVerifier, vcardDataBuilder));
                 } else {
                     builder = vnodeBuilder;

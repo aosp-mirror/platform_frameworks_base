@@ -23,12 +23,12 @@ import java.util.Arrays;
 import java.util.HashSet;
 
 /**
- * This class is used to parse vcard3.0. <br>
- * Please refer to vCard Specification 3.0 (http://tools.ietf.org/html/rfc2426)
+ * The class used to parse vCard 3.0.
+ * Please refer to vCard Specification 3.0 (http://tools.ietf.org/html/rfc2426).
  */
 public class VCardParser_V30 extends VCardParser_V21 {
-    private static final String LOG_TAG = "vcard.VCardParser_V30";
-    
+    private static final String LOG_TAG = "VCardParser_V30";
+
     private static final HashSet<String> sAcceptablePropsWithParam = new HashSet<String>(
             Arrays.asList(
                     "BEGIN", "LOGO", "PHOTO", "LABEL", "FN", "TITLE", "SOUND", 
@@ -185,17 +185,17 @@ public class VCardParser_V30 extends VCardParser_V21 {
     
     
     /**
-     * vcard = [group "."] "BEGIN" ":" "VCARD" 1*CRLF
-     *         1*(contentline)
+     * vcard = [group "."] "BEGIN" ":" "VCARD" 1 * CRLF
+     *         1 * (contentline)
      *         ;A vCard object MUST include the VERSION, FN and N types.
-     *         [group "."] "END" ":" "VCARD" 1*CRLF
+     *         [group "."] "END" ":" "VCARD" 1 * CRLF
      */
     @Override
     protected boolean readBeginVCard(boolean allowGarbage) throws IOException, VCardException {
         // TODO: vCard 3.0 supports group.
         return super.readBeginVCard(allowGarbage);
     }
-    
+
     @Override
     protected void readEndVCard(boolean useCache, boolean allowGarbage)
             throws IOException, VCardException {
@@ -222,14 +222,9 @@ public class VCardParser_V30 extends VCardParser_V21 {
             }
         }
     }
-    
+
     @Override
     protected void handleAnyParam(String paramName, String paramValue) {
-        // vCard 3.0 accept comma-separated multiple values, but
-        // current PropertyNode does not accept it.
-        // For now, we do not split the values.
-        //
-        // TODO: fix this.
         super.handleAnyParam(paramName, paramValue);
     }
 
@@ -266,7 +261,7 @@ public class VCardParser_V30 extends VCardParser_V21 {
 
     @Override
     protected void handleAgent(String propertyValue) {
-        // The way how vCard 3.0 supports "AGENT" is completely different from vCard 2.0.
+        // The way how vCard 3.0 supports "AGENT" is completely different from vCard 2.1.
         //
         // e.g.
         // AGENT:BEGIN:VCARD\nFN:Joe Friday\nTEL:+1-919-555-7878\n
@@ -281,13 +276,13 @@ public class VCardParser_V30 extends VCardParser_V21 {
         // AGENT;VALUE=uri:
         //  CID:JQPUBLIC.part3.960129T083020.xyzMail@host3.com
         //
-        // This is not VCARD. Should we support this?
-        // throw new VCardException("AGENT in vCard 3.0 is not supported yet.");
+        // This is not vCard. Should we support this?
+        //
+        // Just ignore the line for now, since we cannot know how to handle it...
         if (!mEmittedAgentWarning) {
             Log.w(LOG_TAG, "AGENT in vCard 3.0 is not supported yet. Ignore it");
             mEmittedAgentWarning = true;
         }
-        // Just ignore the line for now, since we cannot know how to handle it...
     }
     
     /**
@@ -298,7 +293,7 @@ public class VCardParser_V30 extends VCardParser_V21 {
     protected String getBase64(String firstString) throws IOException, VCardException {
         StringBuilder builder = new StringBuilder();
         builder.append(firstString);
-        
+
         while (true) {
             String line = getLine();
             if (line == null) {
@@ -322,8 +317,8 @@ public class VCardParser_V30 extends VCardParser_V21 {
      *              ; \\ encodes \, \n or \N encodes newline
      *              ; \; encodes ;, \, encodes ,
      *              
-     * Note: Apple escape ':' into '\:' while does not escape '\'
-     */ 
+     * Note: Apple escapes ':' into '\:' while does not escape '\'
+     */
     @Override
     protected String maybeUnescapeText(String text) {
         return unescapeText(text);
@@ -347,7 +342,7 @@ public class VCardParser_V30 extends VCardParser_V21 {
         }
         return builder.toString();        
     }
-    
+
     @Override
     protected String maybeUnescapeCharacter(char ch) {
         return unescapeCharacter(ch);

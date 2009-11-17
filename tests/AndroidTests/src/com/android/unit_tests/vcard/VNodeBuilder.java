@@ -115,11 +115,10 @@ public class VNodeBuilder implements VCardInterpreter {
     // I leave this code as is since I'm not familiar with vcalendar specification.
     // But I believe we should refactor this code in the future.
     // Until this, the last entry has to be removed when some error occurs.
-    public void startRecord(String type) {
-        
+    public void startEntry() {
         VNode vnode = new VNode();
         vnode.parseStatus = 1;
-        vnode.VName = type;
+        vnode.VName = "VCARD";
         // I feel this should be done in endRecord(), but it cannot be done because of
         // the reason above.
         vNodeList.add(vnode);
@@ -127,7 +126,7 @@ public class VNodeBuilder implements VCardInterpreter {
         mCurrentVNode = vNodeList.get(mNodeListPos);
     }
 
-    public void endRecord() {
+    public void endEntry() {
         VNode endNode = vNodeList.get(mNodeListPos);
         endNode.parseStatus = 0;
         while(mNodeListPos > 0){
