@@ -65,14 +65,14 @@ public class VCardEntry {
     private static final Map<String, Integer> sImMap = new HashMap<String, Integer>();
 
     static {
-        sImMap.put(Constants.PROPERTY_X_AIM, Im.PROTOCOL_AIM);
-        sImMap.put(Constants.PROPERTY_X_MSN, Im.PROTOCOL_MSN);
-        sImMap.put(Constants.PROPERTY_X_YAHOO, Im.PROTOCOL_YAHOO);
-        sImMap.put(Constants.PROPERTY_X_ICQ, Im.PROTOCOL_ICQ);
-        sImMap.put(Constants.PROPERTY_X_JABBER, Im.PROTOCOL_JABBER);
-        sImMap.put(Constants.PROPERTY_X_SKYPE_USERNAME, Im.PROTOCOL_SKYPE);
-        sImMap.put(Constants.PROPERTY_X_GOOGLE_TALK, Im.PROTOCOL_GOOGLE_TALK);
-        sImMap.put(Constants.ImportOnly.PROPERTY_X_GOOGLE_TALK_WITH_SPACE,
+        sImMap.put(VCardConstants.PROPERTY_X_AIM, Im.PROTOCOL_AIM);
+        sImMap.put(VCardConstants.PROPERTY_X_MSN, Im.PROTOCOL_MSN);
+        sImMap.put(VCardConstants.PROPERTY_X_YAHOO, Im.PROTOCOL_YAHOO);
+        sImMap.put(VCardConstants.PROPERTY_X_ICQ, Im.PROTOCOL_ICQ);
+        sImMap.put(VCardConstants.PROPERTY_X_JABBER, Im.PROTOCOL_JABBER);
+        sImMap.put(VCardConstants.PROPERTY_X_SKYPE_USERNAME, Im.PROTOCOL_SKYPE);
+        sImMap.put(VCardConstants.PROPERTY_X_GOOGLE_TALK, Im.PROTOCOL_GOOGLE_TALK);
+        sImMap.put(VCardConstants.ImportOnly.PROPERTY_X_GOOGLE_TALK_WITH_SPACE,
                 Im.PROTOCOL_GOOGLE_TALK);
     }
 
@@ -749,24 +749,25 @@ public class VCardEntry {
         }
         final String propValue = listToString(propValueList).trim();
         
-        if (propName.equals(Constants.PROPERTY_VERSION)) {
+        if (propName.equals(VCardConstants.PROPERTY_VERSION)) {
             // vCard version. Ignore this.
-        } else if (propName.equals(Constants.PROPERTY_FN)) {
+        } else if (propName.equals(VCardConstants.PROPERTY_FN)) {
             mFullName = propValue;
-        } else if (propName.equals(Constants.PROPERTY_NAME) && mFullName == null) {
+        } else if (propName.equals(VCardConstants.PROPERTY_NAME) && mFullName == null) {
             // Only in vCard 3.0. Use this if FN, which must exist in vCard 3.0 but may not
             // actually exist in the real vCard data, does not exist.
             mFullName = propValue;
-        } else if (propName.equals(Constants.PROPERTY_N)) {
+        } else if (propName.equals(VCardConstants.PROPERTY_N)) {
             handleNProperty(propValueList);
-        } else if (propName.equals(Constants.PROPERTY_SORT_STRING)) {
+        } else if (propName.equals(VCardConstants.PROPERTY_SORT_STRING)) {
             mPhoneticFullName = propValue;
-        } else if (propName.equals(Constants.PROPERTY_NICKNAME) ||
-                propName.equals(Constants.ImportOnly.PROPERTY_X_NICKNAME)) {
+        } else if (propName.equals(VCardConstants.PROPERTY_NICKNAME) ||
+                propName.equals(VCardConstants.ImportOnly.PROPERTY_X_NICKNAME)) {
             addNickName(propValue);
-        } else if (propName.equals(Constants.PROPERTY_SOUND)) {
-            Collection<String> typeCollection = paramMap.get(Constants.PARAM_TYPE);
-            if (typeCollection != null && typeCollection.contains(Constants.PARAM_TYPE_X_IRMC_N)) {
+        } else if (propName.equals(VCardConstants.PROPERTY_SOUND)) {
+            Collection<String> typeCollection = paramMap.get(VCardConstants.PARAM_TYPE);
+            if (typeCollection != null
+                    && typeCollection.contains(VCardConstants.PARAM_TYPE_X_IRMC_N)) {
                 // As of 2009-10-08, Parser side does not split a property value into separated
                 // values using ';' (in other words, propValueList.size() == 1),
                 // which is correct behavior from the view of vCard 2.1.
@@ -778,7 +779,7 @@ public class VCardEntry {
             } else {
                 // Ignore this field since Android cannot understand what it is.
             }
-        } else if (propName.equals(Constants.PROPERTY_ADR)) {
+        } else if (propName.equals(VCardConstants.PROPERTY_ADR)) {
             boolean valuesAreAllEmpty = true;
             for (String value : propValueList) {
                 if (value.length() > 0) {
@@ -793,25 +794,25 @@ public class VCardEntry {
             int type = -1;
             String label = "";
             boolean isPrimary = false;
-            Collection<String> typeCollection = paramMap.get(Constants.PARAM_TYPE);
+            Collection<String> typeCollection = paramMap.get(VCardConstants.PARAM_TYPE);
             if (typeCollection != null) {
                 for (String typeString : typeCollection) {
                     typeString = typeString.toUpperCase();
-                    if (typeString.equals(Constants.PARAM_TYPE_PREF)) {
+                    if (typeString.equals(VCardConstants.PARAM_TYPE_PREF)) {
                         isPrimary = true;
-                    } else if (typeString.equals(Constants.PARAM_TYPE_HOME)) {
+                    } else if (typeString.equals(VCardConstants.PARAM_TYPE_HOME)) {
                         type = StructuredPostal.TYPE_HOME;
                         label = "";
-                    } else if (typeString.equals(Constants.PARAM_TYPE_WORK) || 
-                            typeString.equalsIgnoreCase(Constants.PARAM_EXTRA_TYPE_COMPANY)) {
+                    } else if (typeString.equals(VCardConstants.PARAM_TYPE_WORK) || 
+                            typeString.equalsIgnoreCase(VCardConstants.PARAM_EXTRA_TYPE_COMPANY)) {
                         // "COMPANY" seems emitted by Windows Mobile, which is not
                         // specifically supported by vCard 2.1. We assume this is same
                         // as "WORK".
                         type = StructuredPostal.TYPE_WORK;
                         label = "";
-                    } else if (typeString.equals(Constants.PARAM_ADR_TYPE_PARCEL) ||
-                            typeString.equals(Constants.PARAM_ADR_TYPE_DOM) ||
-                            typeString.equals(Constants.PARAM_ADR_TYPE_INTL)) {
+                    } else if (typeString.equals(VCardConstants.PARAM_ADR_TYPE_PARCEL) ||
+                            typeString.equals(VCardConstants.PARAM_ADR_TYPE_DOM) ||
+                            typeString.equals(VCardConstants.PARAM_ADR_TYPE_INTL)) {
                         // We do not have any appropriate way to store this information.
                     } else {
                         if (typeString.startsWith("X-") && type < 0) {
@@ -830,21 +831,21 @@ public class VCardEntry {
             }
 
             addPostal(type, propValueList, label, isPrimary);
-        } else if (propName.equals(Constants.PROPERTY_EMAIL)) {
+        } else if (propName.equals(VCardConstants.PROPERTY_EMAIL)) {
             int type = -1;
             String label = null;
             boolean isPrimary = false;
-            Collection<String> typeCollection = paramMap.get(Constants.PARAM_TYPE);
+            Collection<String> typeCollection = paramMap.get(VCardConstants.PARAM_TYPE);
             if (typeCollection != null) {
                 for (String typeString : typeCollection) {
                     typeString = typeString.toUpperCase();
-                    if (typeString.equals(Constants.PARAM_TYPE_PREF)) {
+                    if (typeString.equals(VCardConstants.PARAM_TYPE_PREF)) {
                         isPrimary = true;
-                    } else if (typeString.equals(Constants.PARAM_TYPE_HOME)) {
+                    } else if (typeString.equals(VCardConstants.PARAM_TYPE_HOME)) {
                         type = Email.TYPE_HOME;
-                    } else if (typeString.equals(Constants.PARAM_TYPE_WORK)) {
+                    } else if (typeString.equals(VCardConstants.PARAM_TYPE_WORK)) {
                         type = Email.TYPE_WORK;
-                    } else if (typeString.equals(Constants.PARAM_TYPE_CELL)) {
+                    } else if (typeString.equals(VCardConstants.PARAM_TYPE_CELL)) {
                         type = Email.TYPE_MOBILE;
                     } else {
                         if (typeString.startsWith("X-") && type < 0) {
@@ -862,26 +863,26 @@ public class VCardEntry {
                 type = Email.TYPE_OTHER;
             }
             addEmail(type, propValue, label, isPrimary);
-        } else if (propName.equals(Constants.PROPERTY_ORG)) {
+        } else if (propName.equals(VCardConstants.PROPERTY_ORG)) {
             // vCard specification does not specify other types.
             final int type = Organization.TYPE_WORK;
             boolean isPrimary = false;
-            Collection<String> typeCollection = paramMap.get(Constants.PARAM_TYPE);
+            Collection<String> typeCollection = paramMap.get(VCardConstants.PARAM_TYPE);
             if (typeCollection != null) {
                 for (String typeString : typeCollection) {
-                    if (typeString.equals(Constants.PARAM_TYPE_PREF)) {
+                    if (typeString.equals(VCardConstants.PARAM_TYPE_PREF)) {
                         isPrimary = true;
                     }
                 }
             }
             handleOrgValue(type, propValueList, isPrimary);
-        } else if (propName.equals(Constants.PROPERTY_TITLE)) {
+        } else if (propName.equals(VCardConstants.PROPERTY_TITLE)) {
             handleTitleValue(propValue);
-        } else if (propName.equals(Constants.PROPERTY_ROLE)) {
+        } else if (propName.equals(VCardConstants.PROPERTY_ROLE)) {
             // This conflicts with TITLE. Ignore for now...
             // handleTitleValue(propValue);
-        } else if (propName.equals(Constants.PROPERTY_PHOTO) ||
-                propName.equals(Constants.PROPERTY_LOGO)) {
+        } else if (propName.equals(VCardConstants.PROPERTY_PHOTO) ||
+                propName.equals(VCardConstants.PROPERTY_LOGO)) {
             Collection<String> paramMapValue = paramMap.get("VALUE");
             if (paramMapValue != null && paramMapValue.contains("URL")) {
                 // Currently we do not have appropriate example for testing this case.
@@ -891,7 +892,7 @@ public class VCardEntry {
                 boolean isPrimary = false;
                 if (typeCollection != null) {
                     for (String typeValue : typeCollection) {
-                        if (Constants.PARAM_TYPE_PREF.equals(typeValue)) {
+                        if (VCardConstants.PARAM_TYPE_PREF.equals(typeValue)) {
                             isPrimary = true;
                         } else if (formatName == null){
                             formatName = typeValue;
@@ -900,8 +901,8 @@ public class VCardEntry {
                 }
                 addPhotoBytes(formatName, propBytes, isPrimary);
             }
-        } else if (propName.equals(Constants.PROPERTY_TEL)) {
-            final Collection<String> typeCollection = paramMap.get(Constants.PARAM_TYPE);
+        } else if (propName.equals(VCardConstants.PROPERTY_TEL)) {
+            final Collection<String> typeCollection = paramMap.get(VCardConstants.PARAM_TYPE);
             final Object typeObject =
                 VCardUtils.getPhoneTypeFromStrings(typeCollection, propValue);
             final int type;
@@ -915,18 +916,18 @@ public class VCardEntry {
             }
             
             final boolean isPrimary;
-            if (typeCollection != null && typeCollection.contains(Constants.PARAM_TYPE_PREF)) {
+            if (typeCollection != null && typeCollection.contains(VCardConstants.PARAM_TYPE_PREF)) {
                 isPrimary = true;
             } else {
                 isPrimary = false;
             }
             addPhone(type, propValue, label, isPrimary);
-        } else if (propName.equals(Constants.PROPERTY_X_SKYPE_PSTNNUMBER)) {
+        } else if (propName.equals(VCardConstants.PROPERTY_X_SKYPE_PSTNNUMBER)) {
             // The phone number available via Skype.
-            Collection<String> typeCollection = paramMap.get(Constants.PARAM_TYPE);
+            Collection<String> typeCollection = paramMap.get(VCardConstants.PARAM_TYPE);
             final int type = Phone.TYPE_OTHER;
             final boolean isPrimary;
-            if (typeCollection != null && typeCollection.contains(Constants.PARAM_TYPE_PREF)) {
+            if (typeCollection != null && typeCollection.contains(VCardConstants.PARAM_TYPE_PREF)) {
                 isPrimary = true;
             } else {
                 isPrimary = false;
@@ -936,15 +937,15 @@ public class VCardEntry {
             final int protocol = sImMap.get(propName);
             boolean isPrimary = false;
             int type = -1;
-            final Collection<String> typeCollection = paramMap.get(Constants.PARAM_TYPE);
+            final Collection<String> typeCollection = paramMap.get(VCardConstants.PARAM_TYPE);
             if (typeCollection != null) {
                 for (String typeString : typeCollection) {
-                    if (typeString.equals(Constants.PARAM_TYPE_PREF)) {
+                    if (typeString.equals(VCardConstants.PARAM_TYPE_PREF)) {
                         isPrimary = true;
                     } else if (type < 0) {
-                        if (typeString.equalsIgnoreCase(Constants.PARAM_TYPE_HOME)) {
+                        if (typeString.equalsIgnoreCase(VCardConstants.PARAM_TYPE_HOME)) {
                             type = Im.TYPE_HOME;
-                        } else if (typeString.equalsIgnoreCase(Constants.PARAM_TYPE_WORK)) {
+                        } else if (typeString.equalsIgnoreCase(VCardConstants.PARAM_TYPE_WORK)) {
                             type = Im.TYPE_WORK;
                         }
                     }
@@ -954,22 +955,22 @@ public class VCardEntry {
                 type = Phone.TYPE_HOME;
             }
             addIm(protocol, null, type, propValue, isPrimary);
-        } else if (propName.equals(Constants.PROPERTY_NOTE)) {
+        } else if (propName.equals(VCardConstants.PROPERTY_NOTE)) {
             addNote(propValue);
-        } else if (propName.equals(Constants.PROPERTY_URL)) {
+        } else if (propName.equals(VCardConstants.PROPERTY_URL)) {
             if (mWebsiteList == null) {
                 mWebsiteList = new ArrayList<String>(1);
             }
             mWebsiteList.add(propValue);
-        } else if (propName.equals(Constants.PROPERTY_BDAY)) {
+        } else if (propName.equals(VCardConstants.PROPERTY_BDAY)) {
             mBirthday = propValue;
-        } else if (propName.equals(Constants.PROPERTY_X_PHONETIC_FIRST_NAME)) {
+        } else if (propName.equals(VCardConstants.PROPERTY_X_PHONETIC_FIRST_NAME)) {
             mPhoneticGivenName = propValue;
-        } else if (propName.equals(Constants.PROPERTY_X_PHONETIC_MIDDLE_NAME)) {
+        } else if (propName.equals(VCardConstants.PROPERTY_X_PHONETIC_MIDDLE_NAME)) {
             mPhoneticMiddleName = propValue;
-        } else if (propName.equals(Constants.PROPERTY_X_PHONETIC_LAST_NAME)) {
+        } else if (propName.equals(VCardConstants.PROPERTY_X_PHONETIC_LAST_NAME)) {
             mPhoneticFamilyName = propValue;
-        } else if (propName.equals(Constants.PROPERTY_X_ANDROID_CUSTOM)) {
+        } else if (propName.equals(VCardConstants.PROPERTY_X_ANDROID_CUSTOM)) {
             final List<String> customPropertyList =
                 VCardUtils.constructListFromValue(propValue,
                         VCardConfig.isV30(mVCardType));
@@ -1247,10 +1248,10 @@ public class VCardEntry {
                 int size = customPropertyList.size();
                 if (size < 2 || TextUtils.isEmpty(customPropertyList.get(0))) {
                     continue;
-                } else if (size > Constants.MAX_DATA_COLUMN + 1) {
-                    size = Constants.MAX_DATA_COLUMN + 1;
+                } else if (size > VCardConstants.MAX_DATA_COLUMN + 1) {
+                    size = VCardConstants.MAX_DATA_COLUMN + 1;
                     customPropertyList =
-                        customPropertyList.subList(0, Constants.MAX_DATA_COLUMN + 2);
+                        customPropertyList.subList(0, VCardConstants.MAX_DATA_COLUMN + 2);
                 }
 
                 int i = 0;

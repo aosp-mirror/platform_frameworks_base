@@ -18,8 +18,7 @@ package android.pim.vcard;
 /**
  * Constants used in both exporter and importer code.
  */
-/* package */ class Constants {
-
+public class VCardConstants {
     public static final String VERSION_V21 = "2.1";
     public static final String VERSION_V30 = "3.0";
 
@@ -148,6 +147,6 @@ package android.pim.vcard;
     /* package */ static final int MAX_CHARACTER_NUMS_QP = 76;
     static final int MAX_CHARACTER_NUMS_BASE64_V30 = 75;
 
-    private Constants() {
+    private VCardConstants() {
     }
 }
