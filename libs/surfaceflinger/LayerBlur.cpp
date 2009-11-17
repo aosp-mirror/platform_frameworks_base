@@ -169,6 +169,7 @@ void LayerBlur::onDraw(const Region& clip) const
             // This reads the frame-buffer, so a h/w GL would have to
             // finish() its rendering first. we don't want to do that
             // too often. Read data is 4-bytes aligned.
+            glFinish();
             glReadPixels(X, Y, w, h, mReadFormat, mReadType, pixels);
 
             // blur that texture.
