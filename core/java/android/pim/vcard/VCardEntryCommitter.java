@@ -19,26 +19,29 @@ import android.content.ContentResolver;
 import android.util.Log;
 
 /**
- * EntryHandler implementation which commits the entry to ContentResolver.
- *
- * Note:
+ * <P>
+ * {@link VCardEntryHandler} implementation which commits the entry to ContentResolver.
+ * </P>
+ * <P>
+ * Note:<BR />
  * Each vCard may contain big photo images encoded by BASE64,
  * If we store all vCard entries in memory, OutOfMemoryError may be thrown.
  * Thus, this class push each VCard entry into ContentResolver immediately.
+ * </P>
  */
 public class VCardEntryCommitter implements VCardEntryHandler {
-    public static String LOG_TAG = "vcard.EntryComitter";
+    public static String LOG_TAG = "VCardEntryComitter";
 
-    private ContentResolver mContentResolver;
+    private final ContentResolver mContentResolver;
     private long mTimeToCommit;
-    
+
     public VCardEntryCommitter(ContentResolver resolver) {
         mContentResolver = resolver;
     }
 
     public void onStart() {
     }
-    
+
     public void onEnd() {
         if (VCardConfig.showPerformanceLog()) {
             Log.d(LOG_TAG, String.format("time to commit entries: %d ms", mTimeToCommit));

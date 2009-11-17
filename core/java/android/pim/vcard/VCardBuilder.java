@@ -89,7 +89,7 @@ public class VCardBuilder {
     private final boolean mIsJapaneseMobilePhone;
     private final boolean mOnlyOneNoteFieldIsAvailable;
     private final boolean mIsDoCoMo;
-    private final boolean mUsesQuotedPrintable;
+    private final boolean mShouldUseQuotedPrintable;
     private final boolean mUsesAndroidProperty;
     private final boolean mUsesDefactProperty;
     private final boolean mUsesUtf8;
@@ -110,7 +110,7 @@ public class VCardBuilder {
         mVCardType = vcardType;
 
         mIsV30 = VCardConfig.isV30(vcardType);
-        mUsesQuotedPrintable = VCardConfig.usesQuotedPrintable(vcardType);
+        mShouldUseQuotedPrintable = VCardConfig.shouldUseQuotedPrintable(vcardType);
         mIsDoCoMo = VCardConfig.isDoCoMo(vcardType);
         mIsJapaneseMobilePhone = VCardConfig.needsToConvertPhoneticString(vcardType);
         mOnlyOneNoteFieldIsAvailable = VCardConfig.onlyOneNoteFieldIsAvailable(vcardType);
@@ -529,7 +529,7 @@ public class VCardBuilder {
         if (mUsesDefactProperty) {
             if (!TextUtils.isEmpty(phoneticGivenName)) {
                 final boolean reallyUseQuotedPrintable =
-                    (mUsesQuotedPrintable &&
+                    (mShouldUseQuotedPrintable &&
                             !VCardUtils.containsOnlyNonCrLfPrintableAscii(phoneticGivenName));
                 final String encodedPhoneticGivenName;
                 if (reallyUseQuotedPrintable) {
@@ -552,7 +552,7 @@ public class VCardBuilder {
             }
             if (!TextUtils.isEmpty(phoneticMiddleName)) {
                 final boolean reallyUseQuotedPrintable =
-                    (mUsesQuotedPrintable &&
+                    (mShouldUseQuotedPrintable &&
                             !VCardUtils.containsOnlyNonCrLfPrintableAscii(phoneticMiddleName));
                 final String encodedPhoneticMiddleName;
                 if (reallyUseQuotedPrintable) {
@@ -575,7 +575,7 @@ public class VCardBuilder {
             }
             if (!TextUtils.isEmpty(phoneticFamilyName)) {
                 final boolean reallyUseQuotedPrintable =
-                    (mUsesQuotedPrintable &&
+                    (mShouldUseQuotedPrintable &&
                             !VCardUtils.containsOnlyNonCrLfPrintableAscii(phoneticFamilyName));
                 final String encodedPhoneticFamilyName;
                 if (reallyUseQuotedPrintable) {
@@ -846,7 +846,7 @@ public class VCardBuilder {
                 if (!appendCharset && !VCardUtils.containsOnlyPrintableAscii(data)) {
                     appendCharset = true;
                 }
-                if (mUsesQuotedPrintable &&
+                if (mShouldUseQuotedPrintable &&
                         !VCardUtils.containsOnlyNonCrLfPrintableAscii(data)) {
                     reallyUseQuotedPrintable = true;
                     break;
@@ -1017,13 +1017,13 @@ public class VCardBuilder {
                 final String orgline = orgBuilder.toString();
                 appendLine(VCardConstants.PROPERTY_ORG, orgline,
                         !VCardUtils.containsOnlyPrintableAscii(orgline),
-                        (mUsesQuotedPrintable &&
+                        (mShouldUseQuotedPrintable &&
                                 !VCardUtils.containsOnlyNonCrLfPrintableAscii(orgline)));
 
                 if (!TextUtils.isEmpty(title)) {
                     appendLine(VCardConstants.PROPERTY_TITLE, title,
                             !VCardUtils.containsOnlyPrintableAscii(title),
-                            (mUsesQuotedPrintable &&
+                            (mShouldUseQuotedPrintable &&
                                     !VCardUtils.containsOnlyNonCrLfPrintableAscii(title)));
                 }
             }
@@ -1094,7 +1094,7 @@ public class VCardBuilder {
                 final boolean shouldAppendCharsetInfo =
                     !VCardUtils.containsOnlyPrintableAscii(noteStr);
                 final boolean reallyUseQuotedPrintable =
-                        (mUsesQuotedPrintable &&
+                        (mShouldUseQuotedPrintable &&
                             !VCardUtils.containsOnlyNonCrLfPrintableAscii(noteStr));
                 appendLine(VCardConstants.PROPERTY_NOTE, noteStr,
                         shouldAppendCharsetInfo, reallyUseQuotedPrintable);
@@ -1105,7 +1105,7 @@ public class VCardBuilder {
                         final boolean shouldAppendCharsetInfo =
                                 !VCardUtils.containsOnlyPrintableAscii(noteStr);
                         final boolean reallyUseQuotedPrintable =
-                                (mUsesQuotedPrintable &&
+                                (mShouldUseQuotedPrintable &&
                                     !VCardUtils.containsOnlyNonCrLfPrintableAscii(noteStr));
                         appendLine(VCardConstants.PROPERTY_NOTE, noteStr,
                                 shouldAppendCharsetInfo, reallyUseQuotedPrintable);
@@ -1541,9 +1541,10 @@ public class VCardBuilder {
     public void appendLineWithCharsetAndQPDetection(final String propertyName,
             final List<String> parameterList, final String rawValue) {
         final boolean needCharset =
-            (mUsesQuotedPrintable && !VCardUtils.containsOnlyPrintableAscii(rawValue));
+                !VCardUtils.containsOnlyPrintableAscii(rawValue);
         final boolean reallyUseQuotedPrintable =
-            !VCardUtils.containsOnlyNonCrLfPrintableAscii(rawValue);
+                (mShouldUseQuotedPrintable &&
+                        !VCardUtils.containsOnlyNonCrLfPrintableAscii(rawValue));
         appendLine(propertyName, parameterList,
                 rawValue, needCharset, reallyUseQuotedPrintable);
     }
@@ -1553,7 +1554,7 @@ public class VCardBuilder {
         boolean needCharset = false;
         boolean reallyUseQuotedPrintable = false;
         for (String rawValue : rawValueList) {
-            if (!needCharset && mUsesQuotedPrintable &&
+            if (!needCharset && mShouldUseQuotedPrintable &&
                     !VCardUtils.containsOnlyPrintableAscii(rawValue)) {
                 needCharset = true;
             }

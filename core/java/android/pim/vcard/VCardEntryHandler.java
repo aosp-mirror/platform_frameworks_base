@@ -15,6 +15,10 @@
  */
 package android.pim.vcard;
 
+/**
+ * The interface called by {@link VCardEntryConstructor}. Useful when you don't want to
+ * handle detailed information as what {@link VCardParser} provides via {@link VCardInterpreter}.
+ */
 public interface VCardEntryHandler {
     /**
      * Called when the parsing started.
