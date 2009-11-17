@@ -799,10 +799,11 @@ class CustomMockContext extends MockContext {
         }
 
         private final VCardVerifierInternal mVCardVerifierInternal;
-        private final ExportTestResolver mResolver;
         private final int mVCardType;
         private final boolean mIsV30;
         private final boolean mIsDoCoMo;
+
+        private ExportTestResolver mInputResolver;
 
         // To allow duplication, use list instead of set.
         // When null, we don't need to do the verification.
@@ -810,12 +811,20 @@ class CustomMockContext extends MockContext {
         private LineVerifier mLineVerificationHandler;
         private ImportVerifier mImportVerifier;
 
-        public VCardVerifier(ExportTestResolver resolver, int vcardType) {
+        public VCardVerifier(int vcardType) {
             mVCardVerifierInternal = new VCardVerifierInternal();
-            mResolver = resolver;
             mIsV30 = VCardConfig.isV30(vcardType);
             mIsDoCoMo = VCardConfig.isDoCoMo(vcardType);
             mVCardType = vcardType;
+
+            mInputResolver = null;
+        }
+
+        public ContactEntry addInputEntry() {
+            if (mInputResolver == null) {
+                mInputResolver = new ExportTestResolver();
+            }
+            return mInputResolver.buildContactEntry();
         }
 
         public PropertyNodesVerifierElem addPropertyNodesVerifierElem() {
@@ -902,7 +911,7 @@ class CustomMockContext extends MockContext {
 
         public void verify() {
             VCardComposer composer =
-                    new VCardComposer(new CustomMockContext(mResolver), mVCardType);
+                    new VCardComposer(new CustomMockContext(mInputResolver), mVCardType);
             composer.addHandler(mLineVerificationHandler);
             composer.addHandler(mVCardVerifierInternal);
             if (!composer.init(VCardComposer.CONTACTS_TEST_CONTENT_URI, null, null, null)) {
