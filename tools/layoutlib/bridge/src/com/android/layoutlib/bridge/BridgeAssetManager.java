@@ -32,21 +32,21 @@ public class BridgeAssetManager extends AssetManager {
      * {@link Bridge} calls this method after setting up a new bridge.
      */
     /*package*/ static AssetManager initSystem() {
-        if (!(AssetManager.mSystem instanceof BridgeAssetManager)) {
+        if (!(AssetManager.sSystem instanceof BridgeAssetManager)) {
             // Note that AssetManager() creates a system AssetManager and we override it
             // with our BridgeAssetManager.
-            AssetManager.mSystem = new BridgeAssetManager();
-            AssetManager.mSystem.makeStringBlocks(false);
+            AssetManager.sSystem = new BridgeAssetManager();
+            AssetManager.sSystem.makeStringBlocks(false);
         }
-        return AssetManager.mSystem;
+        return AssetManager.sSystem;
     }
     
     /**
-     * Clears the static {@link AssetManager#mSystem} to make sure we don't leave objects
+     * Clears the static {@link AssetManager#sSystem} to make sure we don't leave objects
      * around that would prevent us from unloading the library.
      */
     /*package*/ static void clearSystem() {
-        AssetManager.mSystem = null;
+        AssetManager.sSystem = null;
     }
     
     private BridgeAssetManager() {
