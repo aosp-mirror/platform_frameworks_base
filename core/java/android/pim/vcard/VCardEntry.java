@@ -46,6 +46,7 @@ import android.util.Log;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -57,11 +58,11 @@ import java.util.Map;
 public class VCardEntry {
     private static final String LOG_TAG = "VCardEntry";
 
+    private final static int DEFAULT_ORGANIZATION_TYPE = Organization.TYPE_WORK;
+
     private static final String ACCOUNT_TYPE_GOOGLE = "com.google";
     private static final String GOOGLE_MY_CONTACTS_GROUP = "System Group: My Contacts";
 
-    // Key: the name shown in VCard. e.g. "X-AIM", "X-ICQ"
-    // Value: the result of {@link Contacts.ContactMethods#encodePredefinedImProtocol}
     private static final Map<String, Integer> sImMap = new HashMap<String, Integer>();
 
     static {
@@ -107,9 +108,6 @@ public class VCardEntry {
         }
     }
 
-    /**
-     * @hide only for testing
-     */
     static public class EmailData {
         public final int type;
         public final String data;
@@ -154,17 +152,12 @@ public class VCardEntry {
         public final String region;
         public final String postalCode;
         public final String country;
-
         public final int type;
-        
-        // Used only when type variable is TYPE_CUSTOM.
         public final String label;
-
-        // isPrimary is changable only when there's no appropriate one existing in
-        // the original VCard.
         public boolean isPrimary;
-        public PostalData(int type, List<String> propValueList,
-                String label, boolean isPrimary) {
+
+        public PostalData(final int type, final List<String> propValueList,
+                final String label, boolean isPrimary) {
             this.type = type;
             dataArray = new String[ADDR_MAX_DATA_SIZE];
 
@@ -173,9 +166,9 @@ public class VCardEntry {
                 size = ADDR_MAX_DATA_SIZE;
             }
 
-            // adr-value    = 0*6(text-value ";") text-value
-            //              ; PO Box, Extended Address, Street, Locality, Region, Postal
-            //              ; Code, Country Name
+            // adr-value = 0*6(text-value ";") text-value
+            //           ; PO Box, Extended Address, Street, Locality, Region, Postal
+            //           ; Code, Country Name
             //
             // Use Iterator assuming List may be LinkedList, though actually it is
             // always ArrayList in the current implementation.
@@ -197,7 +190,6 @@ public class VCardEntry {
             this.region = dataArray[4];
             this.postalCode = dataArray[5];
             this.country = dataArray[6];
-            
             this.label = label;
             this.isPrimary = isPrimary;
         }
@@ -207,15 +199,15 @@ public class VCardEntry {
             if (!(obj instanceof PostalData)) {
                 return false;
             }
-            PostalData postalData = (PostalData)obj;
+            final PostalData postalData = (PostalData)obj;
             return (Arrays.equals(dataArray, postalData.dataArray) && 
                     (type == postalData.type &&
                             (type == StructuredPostal.TYPE_CUSTOM ?
                                     (label == postalData.label) : true)) &&
                     (isPrimary == postalData.isPrimary));
         }
-        
-        public String getFormattedAddress(int vcardType) {
+
+        public String getFormattedAddress(final int vcardType) {
             StringBuilder builder = new StringBuilder();
             boolean empty = true;
             if (VCardConfig.isJapaneseDevice(vcardType)) {
@@ -225,9 +217,10 @@ public class VCardEntry {
                     if (!TextUtils.isEmpty(addressPart)) {
                         if (!empty) {
                             builder.append(' ');
+                        } else {
+                            empty = false;
                         }
                         builder.append(addressPart);
-                        empty = false;
                     }
                 }
             } else {
@@ -236,9 +229,10 @@ public class VCardEntry {
                     if (!TextUtils.isEmpty(addressPart)) {
                         if (!empty) {
                             builder.append(' ');
+                        } else {
+                            empty = false;
                         }
                         builder.append(addressPart);
-                        empty = false;
                     }
                 }
             }
@@ -252,17 +246,16 @@ public class VCardEntry {
                     type, label, isPrimary);
         }
     }
-    
+
     static public class OrganizationData {
         public final int type;
-        // non-final is Intended: we may change the values since this info is separated into
+        // non-final is Intentional: we may change the values since this info is separated into
         // two parts in vCard: "ORG" + "TITLE".
         public String companyName;
         public String departmentName;
         public String titleName;
-        // isPrimary is changable only when there's no appropriate one existing in
-        // the original VCard.
         public boolean isPrimary;
+
         public OrganizationData(int type,
                 String companyName,
                 String departmentName,
@@ -302,16 +295,16 @@ public class VCardEntry {
         public final int type;
         public final String data;
         public final boolean isPrimary;
-        
-        public ImData(int protocol, String customProtocol, int type,
-                String data, boolean isPrimary) {
+
+        public ImData(final int protocol, final String customProtocol, final int type,
+                final String data, final boolean isPrimary) {
             this.protocol = protocol;
             this.customProtocol = customProtocol;
             this.type = type;
             this.data = data;
             this.isPrimary = isPrimary;
         }
-        
+
         @Override
         public boolean equals(Object obj) {
             if (!(obj instanceof ImData)) {
@@ -324,7 +317,7 @@ public class VCardEntry {
                     && (data != null ? data.equals(imData.data) : (imData.data == null))
                     && isPrimary == imData.isPrimary);
         }
-        
+
         @Override
         public String toString() {
             return String.format(
@@ -333,7 +326,7 @@ public class VCardEntry {
         }
     }
     
-    static public class PhotoData {
+    public static class PhotoData {
         public static final String FORMAT_FLASH = "SWF";
         public final int type;
         public final String formatName;  // used when type is not defined in ContactsContract.
@@ -367,13 +360,13 @@ public class VCardEntry {
         }
     }
     
-    static /* package */ class Property {
+    /* package */ static class Property {
         private String mPropertyName;
         private Map<String, Collection<String>> mParameterMap =
             new HashMap<String, Collection<String>>();
         private List<String> mPropertyValueList = new ArrayList<String>();
         private byte[] mPropertyBytes;
-        
+
         public void setPropertyName(final String propertyName) {
             mPropertyName = propertyName;
         }
@@ -464,18 +457,12 @@ public class VCardEntry {
         mAccount = account;
     }
 
-    /**
-     * Add a phone info to phoneList.
-     * @param data phone number
-     * @param type type col of content://contacts/phones
-     * @param label lable col of content://contacts/phones
-     */
-    private void addPhone(int type, String data, String label, boolean isPrimary){
+    private void addPhone(int type, String data, String label, boolean isPrimary) {
         if (mPhoneList == null) {
             mPhoneList = new ArrayList<PhoneData>();
         }
-        StringBuilder builder = new StringBuilder();
-        String trimed = data.trim();
+        final StringBuilder builder = new StringBuilder();
+        final String trimed = data.trim();
         final String formattedNumber;
         if (type == Phone.TYPE_PAGER) {
             formattedNumber = trimed;
@@ -532,13 +519,15 @@ public class VCardEntry {
                 departmentName, titleName, isPrimary));
     }
 
-    private static final List<String> sEmptyList = new ArrayList<String>(0);
-    
+    private static final List<String> sEmptyList =
+            Collections.unmodifiableList(new ArrayList<String>(0));
+
     /**
      * Set "ORG" related values to the appropriate data. If there's more than one
-     * OrganizationData objects, this input data are attached to the last one which does not
-     * have valid values (not including empty but only null). If there's no
-     * OrganizationData object, a new OrganizationData is created, whose title is set to null.
+     * {@link OrganizationData} objects, this input data are attached to the last one which
+     * does not have valid values (not including empty but only null). If there's no
+     * {@link OrganizationData} object, a new {@link OrganizationData} is created,
+     * whose title is set to null.
      */
     private void handleOrgValue(final int type, List<String> orgList, boolean isPrimary) {
         if (orgList == null) {
@@ -595,8 +584,6 @@ public class VCardEntry {
         // added via handleTitleValue().
         addNewOrganization(type, companyName, departmentName, null, isPrimary);
     }
-
-    private final static int DEFAULT_ORGANIZATION_TYPE = Organization.TYPE_WORK;
 
     /**
      * Set "title" value to the appropriate data. If there's more than one
@@ -658,25 +645,20 @@ public class VCardEntry {
         }
 
         switch (size) {
-        // fallthrough
-        case 5:
-            mSuffix = elems.get(4);
-        case 4:
-            mPrefix = elems.get(3);
-        case 3:
-            mMiddleName = elems.get(2);
-        case 2:
-            mGivenName = elems.get(1);
-        default:
-            mFamilyName = elems.get(0);
+            // fallthrough
+            case 5: mSuffix = elems.get(4);
+            case 4: mPrefix = elems.get(3);
+            case 3: mMiddleName = elems.get(2);
+            case 2: mGivenName = elems.get(1);
+            default: mFamilyName = elems.get(0);
         }
     }
 
     /**
-     * Some Japanese mobile phones use this field for phonetic name,
-     *  since vCard 2.1 does not have "SORT-STRING" type.
-     * Also, in some cases, the field has some ';'s in it.
-     * Assume the ';' means the same meaning in N property
+     * Note: Some Japanese mobile phones use this field for phonetic name,
+     *       since vCard 2.1 does not have "SORT-STRING" type.
+     *       Also, in some cases, the field has some ';'s in it.
+     *       Assume the ';' means the same meaning in N property
      */
     @SuppressWarnings("fallthrough")
     private void handlePhoneticNameFromSound(List<String> elems) {
@@ -728,18 +710,15 @@ public class VCardEntry {
         }
 
         switch (size) {
-        // fallthrough
-        case 3:
-            mPhoneticMiddleName = elems.get(2);
-        case 2:
-            mPhoneticGivenName = elems.get(1);
-        default:
-            mPhoneticFamilyName = elems.get(0);
+            // fallthrough
+            case 3: mPhoneticMiddleName = elems.get(2);
+            case 2: mPhoneticGivenName = elems.get(1);
+            default: mPhoneticFamilyName = elems.get(0);
         }
     }
 
-    public void addProperty(Property property) {
-        String propName = property.mPropertyName;
+    public void addProperty(final Property property) {
+        final String propName = property.mPropertyName;
         final Map<String, Collection<String>> paramMap = property.mParameterMap;
         final List<String> propValueList = property.mPropertyValueList;
         byte[] propBytes = property.mPropertyBytes;

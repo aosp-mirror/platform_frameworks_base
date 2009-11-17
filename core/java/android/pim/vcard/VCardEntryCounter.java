@@ -17,6 +17,9 @@ package android.pim.vcard;
 
 import java.util.List;
 
+/**
+ * The class which just counts the number of vCard entries in the specified input.
+ */
 public class VCardEntryCounter implements VCardInterpreter {
     private int mCount;
 
@@ -30,10 +33,10 @@ public class VCardEntryCounter implements VCardInterpreter {
     public void end() {
     }
 
-    public void startRecord(String type) {
+    public void startEntry() {
     }
 
-    public void endRecord() {
+    public void endEntry() {
         mCount++;
     }
 

@@ -27,10 +27,7 @@ import java.util.Set;
  * but in VCardUtils.
  */
 public class VCardConfig {
-    private static final String LOG_TAG = "vcard.VCardConfig";
-
-    // TODO: may be better to make the instance of this available and stop using static methods and
-    //        one integer. 
+    private static final String LOG_TAG = "VCardConfig";
 
     /* package */ static final int LOG_LEVEL_NONE = 0;
     /* package */ static final int LOG_LEVEL_PERFORMANCE_MEASUREMENT = 0x1;
@@ -43,9 +40,6 @@ public class VCardConfig {
     // Assumes that "iso-8859-1" is able to map "all" 8bit characters to some unicode and
     // decode the unicode to the original charset. If not, this setting will cause some bug. 
     public static final String DEFAULT_CHARSET = "iso-8859-1";
-    
-    // TODO: make the other codes use this flag
-    public static final boolean IGNORE_CASE_EXCEPT_VALUE = true;
     
     public static final int FLAG_V21 = 0;
     public static final int FLAG_V30 = 1;
@@ -319,7 +313,7 @@ public class VCardConfig {
                 FLAG_CONVERT_PHONETIC_NAME_STRINGS |
                 FLAG_REFRAIN_QP_TO_PRIMARY_PROPERTIES);
 
-    public static final String VCARD_TYPE_V21_JAPANESE_MOBILE_STR = "v21_japanese_mobile";
+    /* package */ static final String VCARD_TYPE_V21_JAPANESE_MOBILE_STR = "v21_japanese_mobile";
 
     /**
      * <P>
@@ -334,7 +328,7 @@ public class VCardConfig {
     public static final int VCARD_TYPE_DOCOMO =
         (VCARD_TYPE_V21_JAPANESE_MOBILE | FLAG_DOCOMO);
 
-    private static final String VCARD_TYPE_DOCOMO_STR = "docomo";
+    /* package */ static final String VCARD_TYPE_DOCOMO_STR = "docomo";
     
     public static int VCARD_TYPE_DEFAULT = VCARD_TYPE_V21_GENERIC_UTF8;
 
@@ -369,7 +363,6 @@ public class VCardConfig {
         if (sVCardTypeMap.containsKey(loweredKey)) {
             return sVCardTypeMap.get(loweredKey);
         } else {
-            // XXX: should return the value indicating the input is invalid?
             Log.e(LOG_TAG, "Unknown vCard type String: \"" + vcardTypeString + "\"");
             return VCARD_TYPE_DEFAULT;
         }
@@ -379,7 +372,7 @@ public class VCardConfig {
         return ((vcardType & FLAG_V30) != 0);  
     }
 
-    public static boolean usesQuotedPrintable(final int vcardType) {
+    public static boolean shouldUseQuotedPrintable(final int vcardType) {
         return !isV30(vcardType);
     }
 
@@ -408,7 +401,7 @@ public class VCardConfig {
     }
 
     public static boolean refrainsQPToPrimaryProperties(final int vcardType) {
-       return (!usesQuotedPrintable(vcardType) ||
+       return (!shouldUseQuotedPrintable(vcardType) ||
                ((vcardType & FLAG_REFRAIN_QP_TO_PRIMARY_PROPERTIES) != 0));
     }
 

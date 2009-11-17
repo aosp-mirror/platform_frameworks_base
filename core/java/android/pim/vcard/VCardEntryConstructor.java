@@ -32,69 +32,60 @@ import java.util.List;
 
 public class VCardEntryConstructor implements VCardInterpreter {
     private static String LOG_TAG = "VCardEntryConstructor";
-    
+
     /**
      * If there's no other information available, this class uses this charset for encoding
-     * byte arrays.
+     * byte arrays to String.
      */
-    static public String TARGET_CHARSET = "UTF-8"; 
+    /* package */ static final String DEFAULT_CHARSET_FOR_DECODED_BYTES = "UTF-8";
 
     private VCardEntry.Property mCurrentProperty = new VCardEntry.Property();
     private VCardEntry mCurrentContactStruct;
     private String mParamType;
     
     /**
-     * The charset using which VParser parses the text.
+     * The charset using which {@link VCardInterpreter} parses the text.
      */
-    private String mSourceCharset;
-    
+    private String mInputCharset;
+
     /**
      * The charset with which byte array is encoded to String.
      */
-    private String mTargetCharset;
-    private boolean mStrictLineBreakParsing;
-    
+    final private String mCharsetForDecodedBytes;
+    final private boolean mStrictLineBreakParsing;
     final private int mVCardType;
     final private Account mAccount;
     
-    // Just for testing.
+    /** For measuring performance. */
     private long mTimePushIntoContentResolver;
-    
-    private List<VCardEntryHandler> mEntryHandlers = new ArrayList<VCardEntryHandler>();
-    
+
+    final private List<VCardEntryHandler> mEntryHandlers = new ArrayList<VCardEntryHandler>();
+
     public VCardEntryConstructor() {
         this(null, null, false, VCardConfig.VCARD_TYPE_V21_GENERIC_UTF8, null);
     }
 
-    public VCardEntryConstructor(int vcardType) {
+    public VCardEntryConstructor(final int vcardType) {
         this(null, null, false, vcardType, null);
     }
 
-    /**
-     * @hide 
-     */
-    public VCardEntryConstructor(String charset,
-            boolean strictLineBreakParsing, int vcardType, Account account) {
+    public VCardEntryConstructor(final String charset, final boolean strictLineBreakParsing,
+            final int vcardType, final Account account) {
         this(null, charset, strictLineBreakParsing, vcardType, account);
     }
 
-    /**
-     * @hide
-     */
-    public VCardEntryConstructor(String sourceCharset,
-            String targetCharset,
-            boolean strictLineBreakParsing,
-            int vcardType,
-            Account account) {
-        if (sourceCharset != null) {
-            mSourceCharset = sourceCharset;
+    public VCardEntryConstructor(final String inputCharset, final String charsetForDetodedBytes,
+            final boolean strictLineBreakParsing, final int vcardType,
+            final Account account) {
+        if (inputCharset != null) {
+            mInputCharset = inputCharset;
         } else {
-            mSourceCharset = VCardConfig.DEFAULT_CHARSET;
+            mInputCharset = VCardConfig.DEFAULT_CHARSET;
         }
-        if (targetCharset != null) {
-            mTargetCharset = targetCharset;
+        if (charsetForDetodedBytes != null) {
+            mCharsetForDecodedBytes = charsetForDetodedBytes;
         } else {
-            mTargetCharset = TARGET_CHARSET;
+            mCharsetForDecodedBytes = DEFAULT_CHARSET_FOR_DECODED_BYTES;
         }
         mStrictLineBreakParsing = strictLineBreakParsing;
         mVCardType = vcardType;
@@ -118,11 +109,7 @@ public class VCardEntryConstructor implements VCardInterpreter {
     }
 
     /**
-     * Called when the parse failed between startRecord() and endRecord().
-     * Currently it happens only when the vCard format is 3.0.
-     * (VCardVersionException is thrown by VCardParser_V21 and this object is reused by
-     * VCardParser_V30. At that time, startRecord() is called twice before endRecord() is called.)
-     * TODO: Should this be in VCardBuilder interface?
+     * Called when the parse failed between {@link #startEntry()} and {@link #endEntry()}.
      */
     public void clear() {
         mCurrentContactStruct = null;
@@ -132,22 +119,14 @@ public class VCardEntryConstructor implements VCardInterpreter {
     /**
      * Assume that VCard is not nested. In other words, this code does not accept 
      */
-    public void startRecord(String type) {
-        // TODO: add the method clear() instead of using null for reducing GC?
+    public void startEntry() {
         if (mCurrentContactStruct != null) {
-            // This means startRecord() is called inside startRecord() - endRecord() block.
-            // TODO: should throw some Exception
             Log.e(LOG_TAG, "Nested VCard code is not supported now.");
         }
-        if (!type.equalsIgnoreCase("VCARD")) {
-            // TODO: add test case for this
-            Log.e(LOG_TAG, "This is not VCARD!");
-        }
-
         mCurrentContactStruct = new VCardEntry(mVCardType, mAccount);
     }
 
-    public void endRecord() {
+    public void endEntry() {
         mCurrentContactStruct.consolidateFields();
         for (VCardEntryHandler entryHandler : mEntryHandlers) {
             entryHandler.onEntryCreated(mCurrentContactStruct);
@@ -168,9 +147,8 @@ public class VCardEntryConstructor implements VCardInterpreter {
     }
 
     public void propertyGroup(String group) {
-        // ContactStruct does not support Group.
     }
-    
+
     public void propertyParamType(String type) {
         if (mParamType != null) {
             Log.e(LOG_TAG, "propertyParamType() is called more than once " +
@@ -187,26 +165,26 @@ public class VCardEntryConstructor implements VCardInterpreter {
         mCurrentProperty.addParameter(mParamType, value);
         mParamType = null;
     }
-    
-    private String encodeString(String originalString, String targetCharset) {
-        if (mSourceCharset.equalsIgnoreCase(targetCharset)) {
+
+    private String encodeString(String originalString, String charsetForDecodedBytes) {
+        if (mInputCharset.equalsIgnoreCase(charsetForDecodedBytes)) {
             return originalString;
         }
-        Charset charset = Charset.forName(mSourceCharset);
+        Charset charset = Charset.forName(mInputCharset);
         ByteBuffer byteBuffer = charset.encode(originalString);
         // byteBuffer.array() "may" return byte array which is larger than
         // byteBuffer.remaining(). Here, we keep on the safe side.
         byte[] bytes = new byte[byteBuffer.remaining()];
         byteBuffer.get(bytes);
         try {
-            return new String(bytes, targetCharset);
+            return new String(bytes, charsetForDecodedBytes);
         } catch (UnsupportedEncodingException e) {
-            Log.e(LOG_TAG, "Failed to encode: charset=" + targetCharset);
+            Log.e(LOG_TAG, "Failed to encode: charset=" + charsetForDecodedBytes);
             return null;
         }
     }
-    
-    private String handleOneValue(String value, String targetCharset, String encoding) {
+
+    private String handleOneValue(String value, String charsetForDecodedBytes, String encoding) {
         if (encoding != null) {
             if (encoding.equals("BASE64") || encoding.equals("B")) {
                 mCurrentProperty.setPropertyBytes(Base64.decodeBase64(value.getBytes()));
@@ -272,9 +250,9 @@ public class VCardEntryConstructor implements VCardInterpreter {
                 }
                 byte[] bytes;
                 try {
-                    bytes = builder.toString().getBytes(mSourceCharset);
+                    bytes = builder.toString().getBytes(mInputCharset);
                 } catch (UnsupportedEncodingException e1) {
-                    Log.e(LOG_TAG, "Failed to encode: charset=" + mSourceCharset);
+                    Log.e(LOG_TAG, "Failed to encode: charset=" + mInputCharset);
                     bytes = builder.toString().getBytes();
                 }
                 
@@ -286,38 +264,37 @@ public class VCardEntryConstructor implements VCardInterpreter {
                 }
 
                 try {
-                    return new String(bytes, targetCharset);
+                    return new String(bytes, charsetForDecodedBytes);
                 } catch (UnsupportedEncodingException e) {
-                    Log.e(LOG_TAG, "Failed to encode: charset=" + targetCharset);
+                    Log.e(LOG_TAG, "Failed to encode: charset=" + charsetForDecodedBytes);
                     return new String(bytes);
                 }
             }
             // Unknown encoding. Fall back to default.
         }
-        return encodeString(value, targetCharset);
+        return encodeString(value, charsetForDecodedBytes);
     }
     
     public void propertyValues(List<String> values) {
-        if (values == null || values.size() == 0) {
+        if (values == null || values.isEmpty()) {
             return;
         }
 
         final Collection<String> charsetCollection = mCurrentProperty.getParameters("CHARSET");
-        String charset =
+        final String charset =
             ((charsetCollection != null) ? charsetCollection.iterator().next() : null);
-        String targetCharset = CharsetUtils.nameForDefaultVendor(charset); 
-        
         final Collection<String> encodingCollection = mCurrentProperty.getParameters("ENCODING");
-        String encoding =
+        final String encoding =
             ((encodingCollection != null) ? encodingCollection.iterator().next() : null);
-        
-        if (targetCharset == null || targetCharset.length() == 0) {
-            targetCharset = mTargetCharset;
+
+        String charsetForDecodedBytes = CharsetUtils.nameForDefaultVendor(charset);
+        if (charsetForDecodedBytes == null || charsetForDecodedBytes.length() == 0) {
+            charsetForDecodedBytes = mCharsetForDecodedBytes;
         }
-        
-        for (String value : values) {
+
+        for (final String value : values) {
             mCurrentProperty.addToPropertyValueList(
-                    handleOneValue(value, targetCharset, encoding));
+                    handleOneValue(value, charsetForDecodedBytes, encoding));
         }
     }
 
