@@ -75,6 +75,13 @@ MPEG4Writer::MPEG4Writer(const char *filename)
     CHECK(mFile != NULL);
 }
 
+MPEG4Writer::MPEG4Writer(int fd)
+    : mFile(fdopen(fd, "wb")),
+      mOffset(0),
+      mMdatOffset(0) {
+    CHECK(mFile != NULL);
+}
+
 MPEG4Writer::~MPEG4Writer() {
     stop();
 
@@ -199,6 +206,27 @@ off_t MPEG4Writer::addSample(MediaBuffer *buffer) {
            1, buffer->range_length(), mFile);
 
     mOffset += buffer->range_length();
+
+    return old_offset;
+}
+
+off_t MPEG4Writer::addLengthPrefixedSample(MediaBuffer *buffer) {
+    Mutex::Autolock autoLock(mLock);
+
+    off_t old_offset = mOffset;
+
+    size_t length = buffer->range_length();
+    CHECK(length < 65536);
+
+    uint8_t x = length >> 8;
+    fwrite(&x, 1, 1, mFile);
+    x = length & 0xff;
+    fwrite(&x, 1, 1, mFile);
+
+    fwrite((const uint8_t *)buffer->data() + buffer->range_offset(),
+           1, length, mFile);
+
+    mOffset += length + 2;
 
     return old_offset;
 }
@@ -348,15 +376,65 @@ void *MPEG4Writer::Track::ThreadWrapper(void *me) {
 }
 
 void MPEG4Writer::Track::threadEntry() {
-    bool is_mpeg4 = false;
     sp<MetaData> meta = mSource->getFormat();
     const char *mime;
     meta->findCString(kKeyMIMEType, &mime);
-    is_mpeg4 = !strcasecmp(mime, MEDIA_MIMETYPE_VIDEO_MPEG4);
+    bool is_mpeg4 = !strcasecmp(mime, MEDIA_MIMETYPE_VIDEO_MPEG4);
+    bool is_avc = !strcasecmp(mime, MEDIA_MIMETYPE_VIDEO_AVC);
+    int32_t count = 0;
 
     MediaBuffer *buffer;
     while (!mDone && mSource->read(&buffer) == OK) {
         if (buffer->range_length() == 0) {
+            buffer->release();
+            buffer = NULL;
+
+            continue;
+        }
+
+        ++count;
+
+        if (is_avc && count < 3) {
+            size_t size = buffer->range_length();
+
+            switch (count) {
+                case 1:
+                {
+                    CHECK_EQ(mCodecSpecificData, NULL);
+                    mCodecSpecificData = malloc(size + 8);
+                    uint8_t *header = (uint8_t *)mCodecSpecificData;
+                    header[0] = 1;
+                    header[1] = 0x42;  // profile
+                    header[2] = 0x80;
+                    header[3] = 0x1e;  // level
+                    header[4] = 0xfc | 3;
+                    header[5] = 0xe0 | 1;
+                    header[6] = size >> 8;
+                    header[7] = size & 0xff;
+                    memcpy(&header[8],
+                            (const uint8_t *)buffer->data() + buffer->range_offset(),
+                            size);
+
+                    mCodecSpecificDataSize = size + 8;
+                    break;
+                }
+
+                case 2:
+                {
+                    size_t offset = mCodecSpecificDataSize;
+                    mCodecSpecificDataSize += size + 3;
+                    mCodecSpecificData = realloc(mCodecSpecificData, mCodecSpecificDataSize);
+                    uint8_t *header = (uint8_t *)mCodecSpecificData;
+                    header[offset] = 1;
+                    header[offset + 1] = size >> 8;
+                    header[offset + 2] = size & 0xff;
+                    memcpy(&header[offset + 3],
+                            (const uint8_t *)buffer->data() + buffer->range_offset(),
+                            size);
+                    break;
+                }
+            }
+
             buffer->release();
             buffer = NULL;
 
@@ -393,10 +471,11 @@ void MPEG4Writer::Track::threadEntry() {
             buffer->set_range(buffer->range_offset() + offset, size - offset);
         }
 
-        off_t offset = mOwner->addSample(buffer);
+        off_t offset = is_avc ? mOwner->addLengthPrefixedSample(buffer)
+                              : mOwner->addSample(buffer);
 
         SampleInfo info;
-        info.size = buffer->range_length();
+        info.size = is_avc ? buffer->range_length() + 2 : buffer->range_length();
         info.offset = offset;
 
         int64_t timestampUs;
@@ -556,6 +635,8 @@ void MPEG4Writer::Track::writeTrackHeader(int32_t trackID) {
                     mOwner->beginBox("mp4v");
                 } else if (!strcasecmp(MEDIA_MIMETYPE_VIDEO_H263, mime)) {
                     mOwner->beginBox("s263");
+                } else if (!strcasecmp(MEDIA_MIMETYPE_VIDEO_AVC, mime)) {
+                    mOwner->beginBox("avc1");
                 } else {
                     LOGE("Unknown mime type '%s'.", mime);
                     CHECK(!"should not be here, unknown mime type.");
@@ -631,8 +712,13 @@ void MPEG4Writer::Track::writeTrackHeader(int32_t trackID) {
                           mOwner->writeInt8(0);   // profile: 0
 
                       mOwner->endBox();  // d263
+                  } else if (!strcasecmp(MEDIA_MIMETYPE_VIDEO_AVC, mime)) {
+                      mOwner->beginBox("avcC");
+                        mOwner->write(mCodecSpecificData, mCodecSpecificDataSize);
+                      mOwner->endBox();  // avcC
                   }
-                mOwner->endBox();  // mp4v or s263
+
+                mOwner->endBox();  // mp4v, s263 or avc1
             }
           mOwner->endBox();  // stsd
 

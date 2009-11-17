@@ -19,6 +19,7 @@
 #include <OMX_Component.h>
 
 #include <binder/IServiceManager.h>
+#include <cutils/properties.h> // for property_get
 #include <media/stagefright/CameraSource.h>
 #include <media/stagefright/MediaDebug.h>
 #include <media/stagefright/MediaDefs.h>
@@ -123,6 +124,17 @@ CameraSource *CameraSource::Create() {
     return new CameraSource(camera);
 }
 
+// static
+CameraSource *CameraSource::CreateFromICamera(const sp<ICamera> &icamera) {
+    sp<Camera> camera = Camera::create(icamera);
+
+    if (camera.get() == NULL) {
+        return NULL;
+    }
+
+    return new CameraSource(camera);
+}
+
 CameraSource::CameraSource(const sp<Camera> &camera)
     : mCamera(camera),
       mWidth(0),
@@ -130,6 +142,13 @@ CameraSource::CameraSource(const sp<Camera> &camera)
       mFirstFrameTimeUs(0),
       mNumFrames(0),
       mStarted(false) {
+    char value[PROPERTY_VALUE_MAX];
+    if (property_get("ro.hardware", value, NULL) && !strcmp(value, "sholes")) {
+        // The hardware encoder(s) do not support yuv420, but only YCbYCr,
+        // fortunately the camera also supports this, so we needn't transcode.
+        mCamera->setParameters(String8("preview-format=yuv422i-yuyv"));
+    }
+
     String8 s = mCamera->getParameters();
     printf("params: \"%s\"\n", s.string());
 
@@ -143,13 +162,18 @@ CameraSource::~CameraSource() {
     }
 }
 
+void CameraSource::setPreviewSurface(const sp<ISurface> &surface) {
+    mPreviewSurface = surface;
+}
+
 status_t CameraSource::start(MetaData *) {
     CHECK(!mStarted);
 
     mCamera->setListener(new CameraSourceListener(this));
 
-    sp<ISurface> dummy = new DummySurface;
-    status_t err = mCamera->setPreviewDisplay(dummy);
+    status_t err =
+        mCamera->setPreviewDisplay(
+                mPreviewSurface != NULL ? mPreviewSurface : new DummySurface);
     CHECK_EQ(err, OK);
 
     mCamera->setPreviewCallbackFlags(
