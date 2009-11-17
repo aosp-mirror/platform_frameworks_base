@@ -62,7 +62,7 @@ public class VCardSourceDetector implements VCardInterpreter {
     public void end() {
     }
 
-    public void startRecord(String type) {
+    public void startEntry() {
     }    
 
     public void startProperty() {
@@ -72,7 +72,7 @@ public class VCardSourceDetector implements VCardInterpreter {
     public void endProperty() {
     }
 
-    public void endRecord() {
+    public void endEntry() {
     }
 
     public void propertyGroup(String group) {
