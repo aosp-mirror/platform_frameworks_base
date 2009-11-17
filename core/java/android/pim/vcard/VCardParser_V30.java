@@ -84,7 +84,7 @@ public class VCardParser_V30 extends VCardParser_V21 {
 
     @Override
     protected String getVersionString() {
-        return Constants.VERSION_V30;
+        return VCardConstants.VERSION_V30;
     }
 
     @Override

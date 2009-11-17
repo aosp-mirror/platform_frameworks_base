@@ -178,7 +178,7 @@ public class VCardParser_V21 extends VCardParser {
     }
 
     protected String getVersionString() {
-        return Constants.VERSION_V21;
+        return VCardConstants.VERSION_V21;
     }
 
     /**
