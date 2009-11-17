@@ -24,6 +24,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <cutils/atomic.h>
+#include <cutils/properties.h> // for property_get
 #include <android_runtime/ActivityManager.h>
 #include <binder/IPCThreadState.h>
 #include <binder/IServiceManager.h>
@@ -36,6 +37,8 @@
 
 #include "MediaRecorderClient.h"
 #include "MediaPlayerService.h"
+
+#include "StagefrightRecorder.h"
 
 namespace android {
 
@@ -286,7 +289,18 @@ MediaRecorderClient::MediaRecorderClient(const sp<MediaPlayerService>& service, 
 {
     LOGV("Client constructor");
     mPid = pid;
-    mRecorder = new PVMediaRecorder();
+
+#if BUILD_WITH_FULL_STAGEFRIGHT
+    char value[PROPERTY_VALUE_MAX];
+    if (property_get("media.stagefright.enable-record", value, NULL)
+        && (!strcmp(value, "1") || !strcasecmp(value, "true"))) {
+        mRecorder = new StagefrightRecorder;
+    } else
+#endif
+    {
+        mRecorder = new PVMediaRecorder();
+    }
+
     mMediaPlayerService = service;
 }
 

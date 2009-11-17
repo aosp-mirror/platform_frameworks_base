@@ -33,6 +33,7 @@ class MetaData;
 class MPEG4Writer : public RefBase {
 public:
     MPEG4Writer(const char *filename);
+    MPEG4Writer(int fd);
 
     void addSource(const sp<MediaSource> &source);
     status_t start();
@@ -65,6 +66,7 @@ private:
     List<off_t> mBoxes;
 
     off_t addSample(MediaBuffer *buffer);
+    off_t addLengthPrefixedSample(MediaBuffer *buffer);
 
     MPEG4Writer(const MPEG4Writer &);
     MPEG4Writer &operator=(const MPEG4Writer &);

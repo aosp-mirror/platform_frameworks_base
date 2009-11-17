@@ -22,8 +22,7 @@
 
 namespace android {
 
-class PVMediaRecorder;
-class ISurface;
+class MediaRecorderBase;
 class MediaPlayerService;
 
 class MediaRecorderClient : public BnMediaRecorder
@@ -59,7 +58,7 @@ private:
 
     pid_t			 mPid;
     Mutex			 mLock;
-    PVMediaRecorder              *mRecorder;
+    MediaRecorderBase            *mRecorder;
     sp<MediaPlayerService>       mMediaPlayerService;
 };
 
