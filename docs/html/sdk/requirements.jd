@@ -12,7 +12,8 @@ Android applications using the Android Development Tools, revision 3. </p>
     <ul>
       <li>64-bit distributions must be capable of running 32-bit applications. 
       For information about how to add support for 32-bit applications, see
-      the <a href="installing.html#InstallationNotes">Installation Notes</a>.</li>
+      the <a href="installing.html#troublehooting">Ubuntu Linux
+installation notes</a>.</li>
     </ul>
   </li>
 </ul>
@@ -23,15 +24,19 @@ Android applications using the Android Development Tools, revision 3. </p>
     <ul>
       <li><a href="http://www.eclipse.org/downloads/">Eclipse</a> 3.4 (Ganymede) or 3.5 (Galileo)
         <ul>
-        <li>Note: Eclipse 3.3 has not been fully tested with ADT 0.9.3 and support can no longer be guaranteed. We suggest you upgrade to 
-          Eclipse 3.4 or 3.5.</li>
-        <li>Recommended Eclipse IDE packages: Eclipse IDE for Java EE Developers, Eclipse IDE for Java Developers, Eclipse for RCP/Plug-in Developers</li>
-        <li>Eclipse <a href="http://www.eclipse.org/jdt">JDT</a> plugin (included in most Eclipse IDE packages) </li>
-        <li>Eclipse Classic IDE package is not supported.</li>
+        <li>Note: Eclipse 3.3 has not been tested with the latest version of 
+ADT and support can no longer be guaranteed. We suggest you upgrade to Eclipse
+3.4 or 3.5.</li>
+        <li>Recommended Eclipse IDE packages: Eclipse IDE for Java EE
+Developers, Eclipse IDE for Java Developers, Eclipse for RCP/Plug-in
+Developers, or Eclipse Classic (3.5.1+)</li>
+        <li>Eclipse <a href="http://www.eclipse.org/jdt">JDT</a> plugin
+(included in most Eclipse IDE packages) </li>
         </ul>
       </li>     
       <li><a href="http://java.sun.com/javase/downloads/index.jsp">JDK 5 or JDK 6</a> (JRE alone is not sufficient)</li>
-      <li><a href="installing.html#installingplugin">Android Development Tools plugin</a> (optional)</li>
+      <li><a href="eclipse-adt.html">Android Development Tools
+plugin</a> (optional)</li>
       <li><strong>Not</strong> compatible with Gnu Compiler for Java (gcj)</li>
     </ul>
   </li>
