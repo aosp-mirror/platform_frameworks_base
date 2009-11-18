@@ -504,6 +504,16 @@ public class WebView extends AbsoluteLayout
         "REQUEST_KEYBOARD" //                = 27;
     };
 
+    // If the site doesn't use the viewport meta tag to specify the viewport,
+    // use DEFAULT_VIEWPORT_WIDTH as the default viewport width
+    static final int DEFAULT_VIEWPORT_WIDTH = 800;
+
+    // normally we try to fit the content to the minimum preferred width
+    // calculated by the Webkit. To avoid the bad behavior when some site's
+    // minimum preferred width keeps growing when changing the viewport width or
+    // the minimum preferred width is huge, an upper limit is needed.
+    static int sMaxViewportWidth = DEFAULT_VIEWPORT_WIDTH;
+
     // default scale limit. Depending on the display density
     private static float DEFAULT_MAX_ZOOM_SCALE;
     private static float DEFAULT_MIN_ZOOM_SCALE;
@@ -523,7 +533,7 @@ public class WebView extends AbsoluteLayout
 
     // ideally mZoomOverviewWidth should be mContentWidth. But sites like espn,
     // engadget always have wider mContentWidth no matter what viewport size is.
-    int mZoomOverviewWidth = WebViewCore.DEFAULT_VIEWPORT_WIDTH;
+    int mZoomOverviewWidth = DEFAULT_VIEWPORT_WIDTH;
     float mLastScale;
 
     // default scale. Depending on the display density.
@@ -3732,6 +3742,14 @@ public class WebView extends AbsoluteLayout
             mZoomCenterY = getViewHeight() * .5f;
         }
 
+        // adjust the max viewport width depending on the view dimensions. This
+        // is to ensure the scaling is not going insane. So do not shrink it if
+        // the view size is temporarily smaller, e.g. when soft keyboard is up.
+        int newMaxViewportWidth = (int) (Math.max(w, h) / DEFAULT_MIN_ZOOM_SCALE);
+        if (newMaxViewportWidth > sMaxViewportWidth) {
+            sMaxViewportWidth = newMaxViewportWidth;
+        }
+
         // update mMinZoomScale if the minimum zoom scale is not fixed
         if (!mMinZoomScaleFixed) {
             // when change from narrow screen to wide screen, the new viewWidth
@@ -5165,8 +5183,11 @@ public class WebView extends AbsoluteLayout
                         mPictureListener.onNewPicture(WebView.this, capturePicture());
                     }
                     if (useWideViewport) {
-                        mZoomOverviewWidth = Math.max(draw.mMinPrefWidth,
-                                draw.mViewPoint.x);
+                        // limit mZoomOverviewWidth to sMaxViewportWidth so that
+                        // if the page doesn't behave well, the WebView won't go
+                        // insane.
+                        mZoomOverviewWidth = Math.min(sMaxViewportWidth, Math
+                                .max(draw.mMinPrefWidth, draw.mViewPoint.x));
                     }
                     if (!mMinZoomScaleFixed) {
                         mMinZoomScale = (float) viewWidth / mZoomOverviewWidth;
