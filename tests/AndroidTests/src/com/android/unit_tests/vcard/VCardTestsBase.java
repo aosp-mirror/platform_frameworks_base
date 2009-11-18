@@ -957,8 +957,9 @@ class CustomMockContext extends MockContext {
             final String value = entry.getValue();
             builder.append(' ');
             builder.append(key);
-            builder.append('=');
+            builder.append("=\"");
             builder.append(value);
+            builder.append('"');
         }
         return builder.toString();
     }

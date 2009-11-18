@@ -74,6 +74,7 @@ public class VCardUtils {
 
         sPhoneTypesUnknownToContactsSet = new HashSet<String>();
         sPhoneTypesUnknownToContactsSet.add(VCardConstants.PARAM_TYPE_MODEM);
+        sPhoneTypesUnknownToContactsSet.add(VCardConstants.PARAM_TYPE_MSG);
         sPhoneTypesUnknownToContactsSet.add(VCardConstants.PARAM_TYPE_BBS);
         sPhoneTypesUnknownToContactsSet.add(VCardConstants.PARAM_TYPE_VIDEO);
 
@@ -399,10 +400,10 @@ public class VCardUtils {
 
         final int length = str.length();
         final int asciiFirst = 0x20;
-        final int asciiLast = 0x126;
+        final int asciiLast = 0x7E;  // included
         for (int i = 0; i < length; i = str.offsetByCodePoints(i, 1)) {
-            int c = str.codePointAt(i);
-            if (c < asciiFirst || asciiLast < c) {
+            final int c = str.codePointAt(i);
+            if (!((asciiFirst <= c && c <= asciiLast) || c == '\r' || c == '\n')) {
                 return false;
             }
         }
@@ -421,10 +422,10 @@ public class VCardUtils {
 
         final int length = str.length();
         final int asciiFirst = 0x20;
-        final int asciiLast = 0x126;
+        final int asciiLast = 0x7E;  // included
         for (int i = 0; i < length; i = str.offsetByCodePoints(i, 1)) {
-            int c = str.codePointAt(i);
-            if (c < asciiFirst || asciiLast < c || c == '\n' || c == '\r') {
+            final int c = str.codePointAt(i);
+            if (!(asciiFirst <= c && c <= asciiLast)) {
                 return false;
             }
         }
@@ -445,19 +446,19 @@ public class VCardUtils {
             return true;
         }
 
-        final int lowerAlphabetFirst = 0x41;  // included ('A')
-        final int lowerAlphabetLast = 0x5b;  // not included ('[')
-        final int upperAlphabetFirst = 0x61;  // included ('a')
-        final int upperAlphabetLast = 0x7b;  // included ('{')
-        final int digitFirst = 0x30;  // included ('0')
-        final int digitLast = 0x39;  // included ('9')
+        final int upperAlphabetFirst = 0x41;  // A
+        final int upperAlphabetAfterLast = 0x5b;  // [
+        final int lowerAlphabetFirst = 0x61;  // a
+        final int lowerAlphabetAfterLast = 0x7b;  // {
+        final int digitFirst = 0x30;  // 0
+        final int digitAfterLast = 0x3A;  // :
         final int hyphen = '-';
         final int length = str.length();
         for (int i = 0; i < length; i = str.offsetByCodePoints(i, 1)) {
             int codepoint = str.codePointAt(i);
-            if (!((lowerAlphabetFirst <= codepoint && codepoint < lowerAlphabetLast) ||
-                    (upperAlphabetFirst <= codepoint && codepoint < upperAlphabetLast) ||
-                    (digitFirst <= codepoint && codepoint < digitLast) ||
+            if (!((lowerAlphabetFirst <= codepoint && codepoint < lowerAlphabetAfterLast) ||
+                    (upperAlphabetFirst <= codepoint && codepoint < upperAlphabetAfterLast) ||
+                    (digitFirst <= codepoint && codepoint < digitAfterLast) ||
                     (codepoint == hyphen))) {
                 return false;
             }

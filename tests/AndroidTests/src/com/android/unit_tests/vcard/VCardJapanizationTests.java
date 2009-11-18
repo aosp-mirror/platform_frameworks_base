@@ -18,10 +18,14 @@ package com.android.unit_tests.vcard;
 
 import android.content.ContentValues;
 import android.pim.vcard.VCardConfig;
+import android.provider.ContactsContract.CommonDataKinds.Note;
+import android.provider.ContactsContract.CommonDataKinds.Phone;
 import android.provider.ContactsContract.CommonDataKinds.StructuredName;
 import android.provider.ContactsContract.CommonDataKinds.StructuredPostal;
 
 import com.android.unit_tests.vcard.PropertyNodesVerifierElem.TypeSet;
+import com.android.unit_tests.vcard.VCardTestsBase.ContactEntry;
+import com.android.unit_tests.vcard.VCardTestsBase.VCardVerifier;
 
 import java.util.Arrays;
 
@@ -315,6 +319,55 @@ public class VCardJapanizationTests extends VCardTestsBase {
                 .addNodeWithoutOrder("X-DCM-HMN-MODE", "")
                 .addNodeWithoutOrder("ADR",
                         Arrays.asList("3", "", "", "", "", "", ""), new TypeSet("HOME"));
+        verifier.verify();
+    }
+
+    private void testJapanesePhoneNumberCommon(int vcardType) {
+        VCardVerifier verifier = new VCardVerifier(vcardType);
+        ContactEntry entry = verifier.addInputEntry();
+        entry.buildData(Phone.CONTENT_ITEM_TYPE)
+                .put(Phone.NUMBER, "0312341234")
+                .put(Phone.TYPE, Phone.TYPE_HOME);
+        entry.buildData(Phone.CONTENT_ITEM_TYPE)
+                .put(Phone.NUMBER, "09012341234")
+                .put(Phone.TYPE, Phone.TYPE_MOBILE);
+        verifier.addPropertyNodesVerifierElemWithEmptyName()
+                .addNodeWithoutOrder("TEL", "03-1234-1234", new TypeSet("HOME"))
+                .addNodeWithoutOrder("TEL", "090-1234-1234", new TypeSet("WORK"));
+    }
+
+    public void testJapanesePhoneNumberV21_1() {
+        testJapanesePhoneNumberCommon(VCardConfig.VCARD_TYPE_V21_JAPANESE_UTF8);
+    }
+
+    public void testJapanesePhoneNumberDoCoMo() {
+        testJapanesePhoneNumberCommon(VCardConfig.VCARD_TYPE_DOCOMO);
+    }
+
+    public void testJapanesePhoneNumberV30() {
+        testJapanesePhoneNumberCommon(VCardConfig.VCARD_TYPE_V30_JAPANESE_UTF8);
+    }
+
+    public void testNoteDoCoMo() {
+        VCardVerifier verifier = new VCardVerifier(VCardConfig.VCARD_TYPE_DOCOMO);
+        ContactEntry entry = verifier.addInputEntry();
+        entry.buildData(Note.CONTENT_ITEM_TYPE)
+                .put(Note.NOTE, "note1");
+        entry.buildData(Note.CONTENT_ITEM_TYPE)
+                .put(Note.NOTE, "note2");
+        entry.buildData(Note.CONTENT_ITEM_TYPE)
+                .put(Note.NOTE, "note3");
+
+        // More than one note fields must be aggregated into one note.
+        verifier.addPropertyNodesVerifierElemWithEmptyName()
+                .addNodeWithoutOrder("TEL", "", new TypeSet("HOME"))
+                .addNodeWithoutOrder("EMAIL", "", new TypeSet("HOME"))
+                .addNodeWithoutOrder("X-CLASS", "PUBLIC")
+                .addNodeWithoutOrder("X-REDUCTION", "")
+                .addNodeWithoutOrder("X-NO", "")
+                .addNodeWithoutOrder("X-DCM-HMN-MODE", "")
+                .addNodeWithoutOrder("ADR", "", new TypeSet("HOME"))
+                .addNodeWithoutOrder("NOTE", "note1\nnote2\nnote3", mContentValuesForQP);
         verifier.verify();
     }
 }
