@@ -190,3 +190,15 @@ void ObjectBase::zeroAllUserRef(Context *rsc)
     }
 }
 
+void ObjectBase::dumpAll(Context *rsc)
+{
+    if (rsc->props.mLogObjects) {
+        LOGV("Dumping all objects");
+        const ObjectBase * o = rsc->mObjHead;
+        while (o) {
+            o->dumpLOGV("  ");
+            o = o->mNext;
+        }
+    }
+}
+
