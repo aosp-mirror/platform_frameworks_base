@@ -124,10 +124,6 @@ final class WebViewCore {
     private int mWebkitScrollX = 0;
     private int mWebkitScrollY = 0;
 
-    // If the site doesn't use viewport meta tag to specify the viewport, use
-    // DEFAULT_VIEWPORT_WIDTH as default viewport width
-    static final int DEFAULT_VIEWPORT_WIDTH = 800;
-
     // The thread name used to identify the WebCore thread and for use in
     // debugging other classes that require operation within the WebCore thread.
     /* package */ static final String THREAD_NAME = "WebViewCoreThread";
@@ -1522,7 +1518,7 @@ final class WebViewCore {
             if (mViewportWidth == -1) {
                 if (mSettings.getLayoutAlgorithm() ==
                         WebSettings.LayoutAlgorithm.NORMAL) {
-                    width = DEFAULT_VIEWPORT_WIDTH;
+                    width = WebView.DEFAULT_VIEWPORT_WIDTH;
                 } else {
                     /*
                      * if a page's minimum preferred width is wider than the
@@ -1536,8 +1532,9 @@ final class WebViewCore {
                      * In the worse case, the native width will be adjusted when
                      * next zoom or screen orientation change happens.
                      */
-                    width = Math.max(w, Math.max(DEFAULT_VIEWPORT_WIDTH,
-                            nativeGetContentMinPrefWidth()));
+                    width = Math.min(WebView.sMaxViewportWidth, Math.max(w,
+                            Math.max(WebView.DEFAULT_VIEWPORT_WIDTH,
+                                    nativeGetContentMinPrefWidth())));
                 }
             } else {
                 width = Math.max(w, mViewportWidth);
@@ -1637,7 +1634,7 @@ final class WebViewCore {
             draw.mViewPoint = new Point(mCurrentViewWidth, mCurrentViewHeight);
             if (mSettings.getUseWideViewPort()) {
                 draw.mMinPrefWidth = Math.max(
-                        mViewportWidth == -1 ? DEFAULT_VIEWPORT_WIDTH
+                        mViewportWidth == -1 ? WebView.DEFAULT_VIEWPORT_WIDTH
                                 : (mViewportWidth == 0 ? mCurrentViewWidth
                                         : mViewportWidth),
                         nativeGetContentMinPrefWidth());
