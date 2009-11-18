@@ -534,7 +534,6 @@ LOCAL_SRC_FILES := $(ext_src_files)
 
 LOCAL_NO_STANDARD_LIBRARIES := true
 LOCAL_JAVA_LIBRARIES := core
-LOCAL_STATIC_JAVA_LIBRARIES := libgoogleclient
 
 LOCAL_MODULE := ext
 
