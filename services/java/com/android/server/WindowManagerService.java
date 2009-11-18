@@ -4192,6 +4192,22 @@ public class WindowManagerService extends IWindowManager.Stub
         return mQueue.getScancodeState(devid, sw);
     }
 
+    public int getTrackballScancodeState(int sw) {
+        if (!checkCallingPermission(android.Manifest.permission.READ_INPUT_STATE,
+                "getTrackballScancodeState()")) {
+            throw new SecurityException("Requires READ_INPUT_STATE permission");
+        }
+        return mQueue.getTrackballScancodeState(sw);
+    }
+
+    public int getDPadScancodeState(int sw) {
+        if (!checkCallingPermission(android.Manifest.permission.READ_INPUT_STATE,
+                "getDPadScancodeState()")) {
+            throw new SecurityException("Requires READ_INPUT_STATE permission");
+        }
+        return mQueue.getDPadScancodeState(sw);
+    }
+
     public int getKeycodeState(int sw) {
         if (!checkCallingPermission(android.Manifest.permission.READ_INPUT_STATE,
                 "getKeycodeState()")) {
@@ -4206,6 +4222,22 @@ public class WindowManagerService extends IWindowManager.Stub
             throw new SecurityException("Requires READ_INPUT_STATE permission");
         }
         return mQueue.getKeycodeState(devid, sw);
+    }
+
+    public int getTrackballKeycodeState(int sw) {
+        if (!checkCallingPermission(android.Manifest.permission.READ_INPUT_STATE,
+                "getTrackballKeycodeState()")) {
+            throw new SecurityException("Requires READ_INPUT_STATE permission");
+        }
+        return mQueue.getTrackballKeycodeState(sw);
+    }
+
+    public int getDPadKeycodeState(int sw) {
+        if (!checkCallingPermission(android.Manifest.permission.READ_INPUT_STATE,
+                "getDPadKeycodeState()")) {
+            throw new SecurityException("Requires READ_INPUT_STATE permission");
+        }
+        return mQueue.getDPadKeycodeState(sw);
     }
 
     public boolean hasKeys(int[] keycodes, boolean[] keyExists) {
