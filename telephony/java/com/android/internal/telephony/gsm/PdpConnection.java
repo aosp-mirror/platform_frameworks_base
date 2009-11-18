@@ -17,10 +17,10 @@
 package com.android.internal.telephony.gsm;
 
 import android.os.*;
-import android.text.util.Regex;
 import android.util.EventLog;
 import android.util.Log;
 
+import com.android.common.Patterns;
 import com.android.internal.telephony.CommandException;
 import com.android.internal.telephony.CommandsInterface;
 import com.android.internal.telephony.DataConnection;
@@ -318,7 +318,7 @@ public class PdpConnection extends DataConnection {
     private boolean isIpAddress(String address) {
         if (address == null) return false;
 
-        return Regex.IP_ADDRESS_PATTERN.matcher(apn.mmsProxy).matches();
+        return Patterns.IP_ADDRESS.matcher(apn.mmsProxy).matches();
     }
 
     public ApnSetting getApn() {
