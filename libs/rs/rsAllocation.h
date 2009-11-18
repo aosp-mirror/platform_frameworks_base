@@ -65,6 +65,8 @@ public:
     void enableGLVertexBuffers() const;
     void setupGLIndexBuffers() const;
 
+    virtual void dumpLOGV(const char *prefix) const;
+
 
 protected:
     ObjectBaseRef<const Type> mType;

@@ -190,6 +190,24 @@ void Allocation::subData(uint32_t xoff, uint32_t yoff, uint32_t zoff,
 {
 }
 
+void Allocation::dumpLOGV(const char *prefix) const
+{
+    ObjectBase::dumpLOGV(prefix);
+
+    String8 s(prefix);
+    s.append(" type ");
+    if (mType.get()) {
+        mType->dumpLOGV(s.string());
+    }
+
+    LOGV("%s allocation ptr=%p mCpuWrite=%i, mCpuRead=%i, mGpuWrite=%i, mGpuRead=%i",
+          prefix, mPtr, mCpuWrite, mCpuRead, mGpuWrite, mGpuRead);
+
+    LOGV("%s allocation mIsTexture=%i mIsTextureID=%i, mIsVertexBuffer=%i, mBufferID=%i",
+          prefix, mIsTexture, mTextureID, mIsVertexBuffer, mBufferID);
+
+
+}
 
 
 /////////////////
