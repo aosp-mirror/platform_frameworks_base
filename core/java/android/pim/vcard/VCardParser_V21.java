@@ -95,12 +95,6 @@ public class VCardParser_V21 extends VCardParser {
     protected Set<String> mUnknownTypeMap = new HashSet<String>();
     protected Set<String> mUnknownValueMap = new HashSet<String>();
 
-    // It seems Windows Mobile 6.5 uses "AGENT" property with completely wrong usage.
-    // We should just ignore just one line.
-    // e.g.
-    // "AGENT;CHARSET=SHIFT_JIS:some text"
-    private boolean mIgnoreInvalidAgentLine = false;
-
     // For measuring performance.
     private long mTimeTotal;
     private long mTimeReadStartRecord;
@@ -116,33 +110,20 @@ public class VCardParser_V21 extends VCardParser {
     private long mTimeHandleBase64;
 
     public VCardParser_V21() {
-        this(null, PARSER_MODE_DEFAULT);
-    }
-
-    public VCardParser_V21(int parserMode) {
-        this(null, parserMode);
+        this(VCardConfig.PARSE_TYPE_UNKNOWN);
     }
 
     public VCardParser_V21(VCardSourceDetector detector) {
-        this(detector, PARSER_MODE_DEFAULT);
+        this(detector.getEstimatedType());
     }
 
     /**
      * TODO: Merge detector and parser mode.
      */
-    public VCardParser_V21(VCardSourceDetector detector, int parserMode) {
-        super(parserMode);
-        if (detector != null) {
-            final int type = detector.getType();
-            if (type == VCardSourceDetector.TYPE_FOMA) {
-                mNestCount = 1;
-            } else if (type == VCardSourceDetector.TYPE_JAPANESE_MOBILE_PHONE) {
-                mIgnoreInvalidAgentLine = true;
-            }
-        }
-
-        if (parserMode == PARSER_MODE_SCAN) {
-            mIgnoreInvalidAgentLine = true;
+    public VCardParser_V21(int parseType) {
+        super(parseType);
+        if (parseType == VCardConfig.PARSE_TYPE_FOMA) {
+            mNestCount = 1;
         }
     }
 
@@ -827,24 +808,13 @@ public class VCardParser_V21 extends VCardParser {
      *         items *CRLF "END" [ws] ":" [ws] "VCARD"
      */
     protected void handleAgent(final String propertyValue) throws VCardException {
-        if (mIgnoreInvalidAgentLine && !propertyValue.toUpperCase().contains("BEGIN:VCARD")) {
+        if (!propertyValue.toUpperCase().contains("BEGIN:VCARD")) {
+            // Apparently invalid line seen in Windows Mobile 6.5. Ignore them.
             return;
         } else {
             throw new VCardAgentNotSupportedException("AGENT Property is not supported now.");
         }
-        /* This is insufficient support. Also, AGENT Property is very rare and really hard to
-           understand the content.
-           Ignore it for now.
-
-        String[] strArray = propertyValue.split(":", 2);
-        if (!(strArray.length == 2 ||
-                strArray[0].trim().equalsIgnoreCase("BEGIN") && 
-                strArray[1].trim().equalsIgnoreCase("VCARD"))) {
-            throw new VCardException("BEGIN:VCARD != \"" + propertyValue + "\"");
-        }
-        parseItems();
-        readEndVCard();
-        */
+        // TODO: Support AGENT property.
     }
     
     /**

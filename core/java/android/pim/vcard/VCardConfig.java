@@ -37,6 +37,12 @@ public class VCardConfig {
 
     /* package */ static final int LOG_LEVEL = LOG_LEVEL_NONE;
 
+    /* package */ static final int PARSE_TYPE_UNKNOWN = 0;
+    /* package */ static final int PARSE_TYPE_APPLE = 1;
+    /* package */ static final int PARSE_TYPE_MOBILE_PHONE_JP = 2;  // For Japanese mobile phones.
+    /* package */ static final int PARSE_TYPE_FOMA = 3;  // For Japanese FOMA mobile phones.
+    /* package */ static final int PARSE_TYPE_WINDOWS_MOBILE_JP = 4;
+
     // Assumes that "iso-8859-1" is able to map "all" 8bit characters to some unicode and
     // decode the unicode to the original charset. If not, this setting will cause some bug. 
     public static final String DEFAULT_CHARSET = "iso-8859-1";
@@ -108,31 +114,26 @@ public class VCardConfig {
      * </P>
      * <P>
      * We added this Android-specific notion since some (incomplete) vCard exporters for vCard 2.1
-     * do NOT use Quoted-Printable encoding toward some properties like "N", "FN", etc. even when
-     * their values contain non-ascii or/and CR/LF, while they use the encoding in the other
-     * properties like "ADR", "ORG", etc.
+     * do NOT use Quoted-Printable encoding toward some properties related names like "N", "FN", etc.
+     * even when their values contain non-ascii or/and CR/LF, while they use the encoding in the
+     * other properties like "ADR", "ORG", etc.
      * <P>
      * We are afraid of the case where some vCard importer also forget handling QP presuming QP is
      * not used in such fields.
      * </P>
      * <P>
      * This flag is useful when some target importer you are going to focus on does not accept
-     * such "primary" property values with Quoted-Printable encoding.
+     * such properties with Quoted-Printable encoding.
      * </P>
      * <P>
      * Again, we should not use this flag at all for complying vCard 2.1 spec.
-     * </P>
-     * <P>
-     * We will change the behavior around this flag in the future, after understanding the other
-     * real vCard cases around this problem. Please use this flag with extreme caution even when
-     * needed.
      * </P>
      * <P>
      * In vCard 3.0, Quoted-Printable is explicitly "prohibitted", so we don't need to care this
      * kind of problem (hopefully).
      * </P>
      */
-    public static final int FLAG_REFRAIN_QP_TO_PRIMARY_PROPERTIES = 0x10000000;
+    public static final int FLAG_REFRAIN_QP_TO_NAME_PROPERTIES = 0x10000000;
 
     /**
      * <P>
@@ -311,7 +312,7 @@ public class VCardConfig {
     public static final int VCARD_TYPE_V21_JAPANESE_MOBILE =
         (FLAG_V21 | NAME_ORDER_JAPANESE | FLAG_CHARSET_SHIFT_JIS |
                 FLAG_CONVERT_PHONETIC_NAME_STRINGS |
-                FLAG_REFRAIN_QP_TO_PRIMARY_PROPERTIES);
+                FLAG_REFRAIN_QP_TO_NAME_PROPERTIES);
 
     /* package */ static final String VCARD_TYPE_V21_JAPANESE_MOBILE_STR = "v21_japanese_mobile";
 
@@ -400,9 +401,9 @@ public class VCardConfig {
         return (VCardConfig.LOG_LEVEL & VCardConfig.LOG_LEVEL_PERFORMANCE_MEASUREMENT) != 0;
     }
 
-    public static boolean refrainsQPToPrimaryProperties(final int vcardType) {
+    public static boolean shouldRefrainQPToNameProperties(final int vcardType) {
        return (!shouldUseQuotedPrintable(vcardType) ||
-               ((vcardType & FLAG_REFRAIN_QP_TO_PRIMARY_PROPERTIES) != 0));
+               ((vcardType & FLAG_REFRAIN_QP_TO_NAME_PROPERTIES) != 0));
     }
 
     public static boolean appendTypeParamName(final int vcardType) {

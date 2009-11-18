@@ -95,7 +95,7 @@ public class VCardBuilder {
     private final boolean mUsesUtf8;
     private final boolean mUsesShiftJis;
     private final boolean mAppendTypeParamName;
-    private final boolean mRefrainsQPToPrimaryProperties;
+    private final boolean mRefrainsQPToNameProperties;
     private final boolean mNeedsToConvertPhoneticString;
 
     private final boolean mShouldAppendCharsetParam;
@@ -118,7 +118,7 @@ public class VCardBuilder {
         mUsesDefactProperty = VCardConfig.usesDefactProperty(vcardType);
         mUsesUtf8 = VCardConfig.usesUtf8(vcardType);
         mUsesShiftJis = VCardConfig.usesShiftJis(vcardType);
-        mRefrainsQPToPrimaryProperties = VCardConfig.refrainsQPToPrimaryProperties(vcardType);
+        mRefrainsQPToNameProperties = VCardConfig.shouldRefrainQPToNameProperties(vcardType);
         mAppendTypeParamName = VCardConfig.appendTypeParamName(vcardType);
         mNeedsToConvertPhoneticString = VCardConfig.needsToConvertPhoneticString(vcardType);
 
@@ -255,7 +255,7 @@ public class VCardBuilder {
             final boolean reallyAppendCharsetParameterToName =
                     shouldAppendCharsetParam(familyName, givenName, middleName, prefix, suffix);
             final boolean reallyUseQuotedPrintableToName =
-                    (!mRefrainsQPToPrimaryProperties &&
+                    (!mRefrainsQPToNameProperties &&
                             !(VCardUtils.containsOnlyNonCrLfPrintableAscii(familyName) &&
                                     VCardUtils.containsOnlyNonCrLfPrintableAscii(givenName) &&
                                     VCardUtils.containsOnlyNonCrLfPrintableAscii(middleName) &&
@@ -273,7 +273,7 @@ public class VCardBuilder {
             final boolean reallyAppendCharsetParameterToFN =
                     shouldAppendCharsetParam(formattedName);
             final boolean reallyUseQuotedPrintableToFN =
-                    !mRefrainsQPToPrimaryProperties &&
+                    !mRefrainsQPToNameProperties &&
                     !VCardUtils.containsOnlyNonCrLfPrintableAscii(formattedName);
 
             final String encodedFamily;
@@ -353,7 +353,7 @@ public class VCardBuilder {
             mBuilder.append(VCARD_END_OF_LINE);
         } else if (!TextUtils.isEmpty(displayName)) {
             final boolean reallyUseQuotedPrintableToDisplayName =
-                (!mRefrainsQPToPrimaryProperties &&
+                (!mRefrainsQPToNameProperties &&
                         !VCardUtils.containsOnlyNonCrLfPrintableAscii(displayName));
             final String encodedDisplayName =
                     reallyUseQuotedPrintableToDisplayName ?
@@ -471,7 +471,7 @@ public class VCardBuilder {
             mBuilder.append(VCardConstants.PARAM_TYPE_X_IRMC_N);
 
             boolean reallyUseQuotedPrintable =
-                (!mRefrainsQPToPrimaryProperties
+                (!mRefrainsQPToNameProperties
                         && !(VCardUtils.containsOnlyNonCrLfPrintableAscii(
                                 phoneticFamilyName)
                                 && VCardUtils.containsOnlyNonCrLfPrintableAscii(
@@ -976,12 +976,8 @@ public class VCardBuilder {
 
                 // Note: vCard 3.0 does not allow any parameter addition toward "URL"
                 //       property, while there's no document in vCard 2.1.
-                //
-                // TODO: Should we allow adding it when appropriate?
-                //       (Actually, we drop some data. Using "group.X-URL-TYPE" or something
-                //        may help)
                 if (!TextUtils.isEmpty(website)) {
-                    appendLine(VCardConstants.PROPERTY_URL, website);
+                    appendLineWithCharsetAndQPDetection(VCardConstants.PROPERTY_URL, website);
                 }
             }
         }
@@ -1041,23 +1037,9 @@ public class VCardBuilder {
                 if (data == null) {
                     continue;
                 }
-                final String photoType;
-                // Use some heuristics for guessing the format of the image.
-                // TODO: there should be some general API for detecting the file format.
-                if (data.length >= 3 && data[0] == 'G' && data[1] == 'I'
-                        && data[2] == 'F') {
-                    photoType = "GIF";
-                } else if (data.length >= 4 && data[0] == (byte) 0x89
-                        && data[1] == 'P' && data[2] == 'N' && data[3] == 'G') {
-                    // Note: vCard 2.1 officially does not support PNG, but we may have it and
-                    //       using X- word like "X-PNG" may not let importers know it is PNG.
-                    //       So we use the String "PNG" as is...
-                    photoType = "PNG";
-                } else if (data.length >= 2 && data[0] == (byte) 0xff
-                        && data[1] == (byte) 0xd8) {
-                    photoType = "JPEG";
-                } else {
-                    Log.d(LOG_TAG, "Unknown photo type. Ignore.");
+                final String photoType = VCardUtils.guessImageType(data);
+                if (photoType == null) {
+                    Log.d(LOG_TAG, "Unknown photo type. Ignored.");
                     continue;
                 }
                 final String photoString = new String(Base64.encodeBase64(data));
@@ -1761,7 +1743,6 @@ public class VCardBuilder {
 
         return builder.toString();
     }
-
 
     /**
      * Append '\' to the characters which should be escaped. The character set is different
