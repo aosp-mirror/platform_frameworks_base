@@ -159,6 +159,15 @@ public class PowerManager
     public static final int PROXIMITY_SCREEN_OFF_WAKE_LOCK = WAKE_BIT_PROXIMITY_SCREEN_OFF;
 
     /**
+     * Flag for {@link WakeLock#release release(int)} to defer releasing a
+     * {@link #WAKE_BIT_PROXIMITY_SCREEN_OFF} wakelock until the proximity sensor returns
+     * a negative value.
+     *
+     * {@hide}
+     */
+    public static final int WAIT_FOR_PROXIMITY_NEGATIVE = 1;
+
+    /**
      * Normally wake locks don't actually wake the device, they just cause
      * it to remain on once it's already on.  Think of the video player
      * app as the normal behavior.  Notifications that pop up and want
@@ -267,10 +276,26 @@ public class PowerManager
          */
         public void release()
         {
+            release(0);
+        }
+
+        /**
+         * Release your claim to the CPU or screen being on.
+         * @param flags Combination of flag values to modify the release behavior.
+         *              Currently only {@link #WAIT_FOR_PROXIMITY_NEGATIVE} is supported.
+         *
+         * <p>
+         * It may turn off shortly after you release it, or it may not if there
+         * are other wake locks held.
+         *
+         * {@hide}
+         */
+        public void release(int flags)
+        {
             synchronized (mToken) {
                 if (!mRefCounted || --mCount == 0) {
                     try {
-                        mService.releaseWakeLock(mToken);
+                        mService.releaseWakeLock(mToken, flags);
                     } catch (RemoteException e) {
                     }
                     mHeld = false;
@@ -302,7 +327,7 @@ public class PowerManager
             synchronized (mToken) {
                 if (mHeld) {
                     try {
-                        mService.releaseWakeLock(mToken);
+                        mService.releaseWakeLock(mToken, 0);
                     } catch (RemoteException e) {
                     }
                     RuntimeInit.crash(TAG, new Exception(
