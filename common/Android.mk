@@ -14,11 +14,12 @@
 
 LOCAL_PATH := $(call my-dir)
 
+# Note: the source code is in java/, not src/, because this code is also part of
+# the framework library, and build/core/pathmap.mk expects a java/ subdirectory.
+
 include $(CLEAR_VARS)
 LOCAL_MODULE := android-common
-LOCAL_NO_STANDARD_LIBRARIES := true
-LOCAL_JAVA_LIBRARIES := core ext
-LOCAL_SRC_FILES := $(call all-java-files-under, src)
+LOCAL_SRC_FILES := $(call all-java-files-under, java)
 include $(BUILD_STATIC_JAVA_LIBRARY)
 
 # Include this library in the build server's output directory
