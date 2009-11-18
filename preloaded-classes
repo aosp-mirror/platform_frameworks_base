@@ -710,9 +710,6 @@ com.google.android.mms.pdu.PduPersister
 com.google.android.net.GoogleHttpClient
 com.google.android.net.UrlRules
 com.google.android.net.UrlRules$Rule
-com.google.android.util.SimplePullParser
-com.google.common.Config
-com.google.common.util.text.TextUtil
 com.ibm.icu4jni.charset.CharsetDecoderICU
 com.ibm.icu4jni.charset.CharsetEncoderICU
 com.ibm.icu4jni.charset.CharsetICU
