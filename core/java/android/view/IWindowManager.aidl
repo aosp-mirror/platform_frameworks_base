@@ -104,8 +104,12 @@ interface IWindowManager
     int getSwitchStateForDevice(int devid, int sw);
     int getScancodeState(int sw);
     int getScancodeStateForDevice(int devid, int sw);
+    int getTrackballScancodeState(int sw);
+    int getDPadScancodeState(int sw);
     int getKeycodeState(int sw);
     int getKeycodeStateForDevice(int devid, int sw);
+    int getTrackballKeycodeState(int sw);
+    int getDPadKeycodeState(int sw);
     
     // Report whether the hardware supports the given keys; returns true if successful
     boolean hasKeys(in int[] keycodes, inout boolean[] keyExists);
