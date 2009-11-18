@@ -424,6 +424,9 @@ public class PduPersister {
                     // faster.
                     if ("text/plain".equals(type) || "application/smil".equals(type)) {
                         String text = c.getString(PART_COLUMN_TEXT);
+                        if (text == null) {
+                            text = "";
+                        }
                         byte [] blob = new EncodedStringValue(text).getTextString();
                         baos.write(blob, 0, blob.length);
                     } else {
@@ -858,7 +861,7 @@ public class PduPersister {
         } else {
             values.put(Mms.SUBJECT, "");
         }
-        
+
         long messageSize = sendReq.getMessageSize();
         if (messageSize > 0) {
             values.put(Mms.MESSAGE_SIZE, messageSize);
