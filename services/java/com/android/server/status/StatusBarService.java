@@ -85,10 +85,8 @@ import java.util.Set;
 public class StatusBarService extends IStatusBar.Stub
 {
     static final String TAG = "StatusBar";
-    static final boolean DEBUG = false;
     static final boolean SPEW = false;
-    static final boolean DBG = false;
-        
+
     static final int EXPANDED_LEAVE_ALONE = -10000;
     static final int EXPANDED_FULL_OPEN = -10001;
 
@@ -656,7 +654,7 @@ public class StatusBarService extends IStatusBar.Stub
 
     /* private */ void performAddUpdateIcon(IBinder key, IconData data, NotificationData n)
                         throws StatusBarException {
-        if (DBG) {
+        if (SPEW) {
             Log.d(TAG, "performAddUpdateIcon icon=" + data + " notification=" + n + " key=" + key);
         }
         // notification
@@ -748,7 +746,7 @@ public class StatusBarService extends IStatusBar.Stub
 
     /* private */ void performSetIconVisibility(IBinder key, boolean visible) {
         synchronized (mIconMap) {
-            if (DBG) {
+            if (SPEW) {
                 Log.d(TAG, "performSetIconVisibility key=" + key + " visible=" + visible);
             }
             StatusBarIcon icon = mIconMap.get(key);
@@ -758,7 +756,7 @@ public class StatusBarService extends IStatusBar.Stub
     
     /* private */ void performRemoveIcon(IBinder key) {
         synchronized (this) {
-            if (DBG) {
+            if (SPEW) {
                 Log.d(TAG, "performRemoveIcon key=" + key);
             }
             StatusBarIcon icon = mIconMap.remove(key);
@@ -997,7 +995,7 @@ public class StatusBarService extends IStatusBar.Stub
     }
     
     void performExpand() {
-        if (SPEW) Log.d(TAG, "Perform expand: expanded=" + mExpanded);
+        if (SPEW) Log.d(TAG, "performExpand: mExpanded=" + mExpanded);
         if ((mDisabled & StatusBarManager.DISABLE_EXPAND) != 0) {
             return ;
         }
@@ -1022,8 +1020,8 @@ public class StatusBarService extends IStatusBar.Stub
     }
 
     void performCollapse() {
-        if (SPEW) Log.d(TAG, "Perform collapse: expanded=" + mExpanded
-                + " expanded visible=" + mExpandedVisible);
+        if (SPEW) Log.d(TAG, "performCollapse: mExpanded=" + mExpanded
+                + " mExpandedVisible=" + mExpandedVisible);
         
         if (!mExpandedVisible) {
             return;
@@ -1668,7 +1666,7 @@ public class StatusBarService extends IStatusBar.Stub
         // act accordingly
         if ((diff & StatusBarManager.DISABLE_EXPAND) != 0) {
             if ((net & StatusBarManager.DISABLE_EXPAND) != 0) {
-                performCollapse();
+                animateCollapse();
             }
         }
         if ((diff & StatusBarManager.DISABLE_NOTIFICATION_ICONS) != 0) {
