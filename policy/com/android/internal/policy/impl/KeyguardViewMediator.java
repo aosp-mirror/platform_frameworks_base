@@ -422,6 +422,13 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
     }
 
     /**
+     * Is the keyguard currently showing and not being force hidden?
+     */
+    public boolean isShowingAndNotHidden() {
+        return mShowing && !mHidden;
+    }
+
+    /**
      * Notify us when the keyguard is hidden by another window
      */
     public void setHidden(boolean isHidden) {
