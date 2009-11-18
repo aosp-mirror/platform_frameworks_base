@@ -122,21 +122,17 @@ public class PropertyNode {
         
         if (propName == null || !propName.equals(node.propName)) {
             return false;
-        } else if (!paramMap.equals(node.paramMap)) {
+        } else if (!paramMap_TYPE.equals(node.paramMap_TYPE)) {
             return false;
-        } else if (!(paramMap_TYPE.size() == node.paramMap_TYPE.size()) &&
-                !paramMap_TYPE.equals(node.paramMap_TYPE)) {
-            Log.d("@@@", "paramMap_Type: " + paramMap_TYPE.size() + ", "
-                    + node.paramMap_TYPE.size());
+        } else if (!paramMap_TYPE.equals(node.paramMap_TYPE)) {
             return false;
         } else if (!propGroupSet.equals(node.propGroupSet)) {
             return false;
         }
-        
+
         if (propValue_bytes != null && Arrays.equals(propValue_bytes, node.propValue_bytes)) {
             return true;
         } else {
-            // Log.d("@@@", propValue + ", " + node.propValue);
             if (!propValue.equals(node.propValue)) {
                 return false;
             }
@@ -173,6 +169,7 @@ public class PropertyNode {
         builder.append("]");
         if (!propGroupSet.isEmpty()) {
             builder.append(", propGroupSet: [");
+            first = true;
             for (String elem : propGroupSet) {
                 if (first) {
                     first = false;
@@ -193,8 +190,9 @@ public class PropertyNode {
             builder.append(", propValue_bytes size: ");
             builder.append(propValue_bytes.length);
         }
-        builder.append(", propValue: ");
+        builder.append(", propValue: \"");
         builder.append(propValue);
+        builder.append("\"");
         return builder.toString();
     }
 }
