@@ -1072,7 +1072,7 @@ public class VCardBuilder {
     public VCardBuilder appendNotes(final List<ContentValues> contentValuesList) {
         if (contentValuesList != null) {
             if (mOnlyOneNoteFieldIsAvailable) {
-                StringBuilder noteBuilder = new StringBuilder();
+                final StringBuilder noteBuilder = new StringBuilder();
                 boolean first = true;
                 for (final ContentValues contentValues : contentValuesList) {
                     String note = contentValues.getAsString(Note.NOTE);
@@ -1593,8 +1593,7 @@ public class VCardBuilder {
     }
 
     public void appendLine(final String propertyName, final List<String> parameterList,
-            final String rawValue, final boolean needCharset,
-            boolean needQuotedPrintable) {
+            final String rawValue, final boolean needCharset, boolean needQuotedPrintable) {
         mBuilder.append(propertyName);
         if (parameterList != null && parameterList.size() > 0) {
             mBuilder.append(VCARD_PARAM_SEPARATOR);
@@ -1725,31 +1724,12 @@ public class VCardBuilder {
         return false;
     }
 
-    private String encodeQuotedPrintable(String str) {
+    private String encodeQuotedPrintable(final String str) {
         if (TextUtils.isEmpty(str)) {
             return "";
         }
-        {
-            // Replace "\n" and "\r" with "\r\n".
-            final StringBuilder tmpBuilder = new StringBuilder();
-            int length = str.length();
-            for (int i = 0; i < length; i++) {
-                char ch = str.charAt(i);
-                if (ch == '\r') {
-                    if (i + 1 < length && str.charAt(i + 1) == '\n') {
-                        i++;
-                    }
-                    tmpBuilder.append("\r\n");
-                } else if (ch == '\n') {
-                    tmpBuilder.append("\r\n");
-                } else {
-                    tmpBuilder.append(ch);
-                }
-            }
-            str = tmpBuilder.toString();
-        }
 
-        final StringBuilder tmpBuilder = new StringBuilder();
+        final StringBuilder builder = new StringBuilder();
         int index = 0;
         int lineCount = 0;
         byte[] strArray = null;
@@ -1762,7 +1742,7 @@ public class VCardBuilder {
             strArray = str.getBytes();
         }
         while (index < strArray.length) {
-            tmpBuilder.append(String.format("=%02X", strArray[index]));
+            builder.append(String.format("=%02X", strArray[index]));
             index += 1;
             lineCount += 3;
 
@@ -1774,12 +1754,12 @@ public class VCardBuilder {
                 // it will become
                 // 6 bytes.
                 // 76 - 6 - 3 = 67
-                tmpBuilder.append("=\r\n");
+                builder.append("=\r\n");
                 lineCount = 0;
             }
         }
 
-        return tmpBuilder.toString();
+        return builder.toString();
     }
 
 
