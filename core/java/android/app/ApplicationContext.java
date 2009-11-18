@@ -466,14 +466,7 @@ class ApplicationContext extends Context {
 
     @Override
     public SQLiteDatabase openOrCreateDatabase(String name, int mode, CursorFactory factory) {
-        File dir = getDatabasesDir();
-        if (!dir.isDirectory() && dir.mkdir()) {
-            FileUtils.setPermissions(dir.getPath(),
-                FileUtils.S_IRWXU|FileUtils.S_IRWXG|FileUtils.S_IXOTH,
-                -1, -1);
-        }
-
-        File f = makeFilename(dir, name);
+        File f = validateFilePath(name, true);
         SQLiteDatabase db = SQLiteDatabase.openOrCreateDatabase(f, factory);
         setFilePermissionsFromMode(f.getPath(), mode, 0);
         return db;
@@ -482,7 +475,7 @@ class ApplicationContext extends Context {
     @Override
     public boolean deleteDatabase(String name) {
         try {
-            File f = makeFilename(getDatabasesDir(), name);
+            File f = validateFilePath(name, false);
             return f.delete();
         } catch (Exception e) {
         }
@@ -491,7 +484,7 @@ class ApplicationContext extends Context {
 
     @Override
     public File getDatabasePath(String name) {
-        return makeFilename(getDatabasesDir(), name);
+        return validateFilePath(name, false);
     }
 
     @Override
@@ -1454,12 +1447,35 @@ class ApplicationContext extends Context {
         FileUtils.setPermissions(name, perms, -1, -1);
     }
 
+    private File validateFilePath(String name, boolean createDirectory) {
+        File dir;
+        File f;
+
+        if (name.charAt(0) == File.separatorChar) {
+            String dirPath = name.substring(0, name.lastIndexOf(File.separatorChar));
+            dir = new File(dirPath);
+            name = name.substring(name.lastIndexOf(File.separatorChar));
+            f = new File(dir, name);
+        } else {
+            dir = getDatabasesDir();
+            f = makeFilename(dir, name);
+        }
+
+        if (createDirectory && !dir.isDirectory() && dir.mkdir()) {
+            FileUtils.setPermissions(dir.getPath(),
+                FileUtils.S_IRWXU|FileUtils.S_IRWXG|FileUtils.S_IXOTH,
+                -1, -1);
+        }
+
+        return f;
+    }
+
     private File makeFilename(File base, String name) {
         if (name.indexOf(File.separatorChar) < 0) {
             return new File(base, name);
         }
         throw new IllegalArgumentException(
-            "File " + name + " contains a path separator");
+                "File " + name + " contains a path separator");
     }
 
     // ----------------------------------------------------------------------

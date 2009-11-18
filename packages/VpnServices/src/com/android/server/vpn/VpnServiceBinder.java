@@ -26,7 +26,9 @@ import android.net.vpn.PptpProfile;
 import android.net.vpn.VpnManager;
 import android.net.vpn.VpnProfile;
 import android.net.vpn.VpnState;
+import android.os.Environment;
 import android.os.IBinder;
+import android.os.SystemProperties;
 import android.util.Log;
 
 import java.io.File;
@@ -45,10 +47,17 @@ public class VpnServiceBinder extends Service {
     private static final String TAG = VpnServiceBinder.class.getSimpleName();
     private static final boolean DBG = true;
 
-    private static final String STATES_FILE_PATH = "/data/misc/vpn/.states";
+    private static final String STATES_FILE_RELATIVE_PATH = "/misc/vpn/.states";
 
     // The actual implementation is delegated to the VpnService class.
     private VpnService<? extends VpnProfile> mService;
+
+    // TODO(oam): Test VPN when EFS is enabled (will do later)...
+    private static String getStateFilePath() {
+        // This call will return the correcu directory whether Encrypted FS is enabled or not
+        // Disabled: /data/misc/vpn/.states   Enabled: /data/secure/misc/vpn/.states
+	return Environment.getSecureDataDirectory().getPath() + STATES_FILE_RELATIVE_PATH;
+    }
 
     private final IBinder mBinder = new IVpnService.Stub() {
         public boolean connect(VpnProfile p, String username, String password) {
@@ -84,14 +93,14 @@ public class VpnServiceBinder extends Service {
     void saveStates() throws IOException {
         if (DBG) Log.d("VpnServiceBinder", "     saving states");
         ObjectOutputStream oos =
-                new ObjectOutputStream(new FileOutputStream(STATES_FILE_PATH));
+                new ObjectOutputStream(new FileOutputStream(getStateFilePath()));
         oos.writeObject(mService);
         oos.close();
     }
 
     void removeStates() {
         try {
-            File f = new File(STATES_FILE_PATH);
+            File f = new File(getStateFilePath());
             if (f.exists()) f.delete();
         } catch (Throwable e) {
             if (DBG) Log.d("VpnServiceBinder", "     remove states: " + e);
@@ -134,7 +143,7 @@ public class VpnServiceBinder extends Service {
     private void checkSavedStates() {
         try {
             ObjectInputStream ois = new ObjectInputStream(new FileInputStream(
-                    STATES_FILE_PATH));
+                    getStateFilePath()));
             mService = (VpnService<? extends VpnProfile>) ois.readObject();
             mService.recover(this);
             ois.close();

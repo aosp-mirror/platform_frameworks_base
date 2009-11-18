@@ -22,6 +22,10 @@ import android.app.IActivityManager;
 import android.app.IApplicationThread;
 import android.app.IBackupAgent;
 import android.app.PendingIntent;
+import android.backup.IBackupManager;
+import android.backup.IRestoreObserver;
+import android.backup.IRestoreSession;
+import android.backup.RestoreSet;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -31,11 +35,10 @@ import android.content.ServiceConnection;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageDataObserver;
 import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.PackageManager;
 import android.content.pm.Signature;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.net.Uri;
-import android.provider.Settings;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Environment;
@@ -47,20 +50,15 @@ import android.os.PowerManager;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
+import android.os.SystemProperties;
+import android.provider.Settings;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.SparseArray;
 
-import android.backup.IBackupManager;
-import android.backup.IRestoreObserver;
-import android.backup.IRestoreSession;
-import android.backup.RestoreSet;
-
 import com.android.internal.backup.BackupConstants;
-import com.android.internal.backup.LocalTransport;
 import com.android.internal.backup.IBackupTransport;
-
-import com.android.server.PackageManagerBackupAgent;
+import com.android.internal.backup.LocalTransport;
 import com.android.server.PackageManagerBackupAgent.Metadata;
 
 import java.io.EOFException;
@@ -70,7 +68,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.RandomAccessFile;
-import java.lang.String;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -232,7 +229,10 @@ class BackupManagerService extends IBackupManager.Stub {
                 Settings.Secure.BACKUP_ENABLED, 0) != 0;
         mProvisioned = Settings.Secure.getInt(context.getContentResolver(),
                 Settings.Secure.BACKUP_PROVISIONED, 0) != 0;
-        mBaseStateDir = new File(Environment.getDataDirectory(), "backup");
+        // If Encrypted file systems is enabled or disabled, this call will return the
+        // correct directory.
+        mBaseStateDir = new File(Environment.getSecureDataDirectory(), "backup");
+        mBaseStateDir.mkdirs();
         mDataDir = Environment.getDownloadCacheDirectory();
 
         // Alarm receivers for scheduled backups & initialization operations
