@@ -369,7 +369,6 @@ android.text.style.UpdateAppearance
 android.text.style.UpdateLayout
 android.text.style.WrapTogetherSpan
 android.text.util.Linkify
-android.text.util.Regex
 android.util.AndroidRuntimeException
 android.util.AttributeSet
 android.util.DisplayMetrics

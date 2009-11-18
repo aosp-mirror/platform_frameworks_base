@@ -28,9 +28,10 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.telephony.SmsMessage;
 import android.text.TextUtils;
-import android.text.util.Regex;
 import android.util.Config;
 import android.util.Log;
+
+import com.android.common.Patterns;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -1290,7 +1291,7 @@ public final class Telephony {
             }
 
             String s = extractAddrSpec(address);
-            Matcher match = Regex.EMAIL_ADDRESS_PATTERN.matcher(s);
+            Matcher match = Patterns.EMAIL_ADDRESS.matcher(s);
             return match.matches();
         }
 
@@ -1305,7 +1306,7 @@ public final class Telephony {
                 return false;
             }
 
-            Matcher match = Regex.PHONE_PATTERN.matcher(number);
+            Matcher match = Patterns.PHONE.matcher(number);
             return match.matches();
         }
 
