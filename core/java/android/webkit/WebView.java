@@ -2428,12 +2428,14 @@ public class WebView extends AbsoluteLayout
      * Clear the highlighting surrounding text matches created by findAll.
      */
     public void clearMatches() {
+        if (mNativeClass == 0)
+            return;
         if (mFindIsUp) {
             recordNewContentSize(mContentWidth, mContentHeight - mFindHeight,
                     false);
             mFindIsUp = false;
         }
-        nativeSetFindIsDown();
+        nativeSetFindIsUp();
         // Now that the dialog has been removed, ensure that we scroll to a
         // location that is not beyond the end of the page.
         pinScrollTo(mScrollX, mScrollY, false, 0);
@@ -5879,7 +5881,7 @@ public class WebView extends AbsoluteLayout
     private native void     nativeRecordButtons(boolean focused,
             boolean pressed, boolean invalidate);
     private native void     nativeSelectBestAt(Rect rect);
-    private native void     nativeSetFindIsDown();
+    private native void     nativeSetFindIsUp();
     private native void     nativeSetFollowedLink(boolean followed);
     private native void     nativeSetHeightCanMeasure(boolean measure);
     // Returns a value corresponding to CachedFrame::ImeAction
