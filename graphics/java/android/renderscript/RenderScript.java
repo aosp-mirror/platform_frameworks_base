@@ -68,6 +68,7 @@ public class RenderScript {
     native void nContextDestroy(int con);
     native void nContextSetSurface(int w, int h, Surface sur);
     native void nContextSetPriority(int p);
+    native void nContextDump(int bits);
 
     native void nContextBindRootScript(int script);
     native void nContextBindSampler(int sampler, int slot);
@@ -302,6 +303,10 @@ public class RenderScript {
         mWidth = w;
         mHeight = h;
         nContextSetSurface(w, h, mSurface);
+    }
+
+    public void contextDump(int bits) {
+        nContextDump(bits);
     }
 
     public void destroy() {

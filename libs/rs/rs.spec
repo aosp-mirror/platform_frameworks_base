@@ -42,6 +42,10 @@ ContextSetSurface {
 	param void *sur
 	}
 
+ContextDump {
+	param int32_t bits
+}
+
 ContextSetPriority {
 	param int32_t priority
 	}

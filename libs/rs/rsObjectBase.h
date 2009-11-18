@@ -49,6 +49,7 @@ public:
     void setContext(Context *);
 
     static void zeroAllUserRef(Context *rsc);
+    static void dumpAll(Context *rsc);
 
     virtual void dumpLOGV(const char *prefix) const;
 
