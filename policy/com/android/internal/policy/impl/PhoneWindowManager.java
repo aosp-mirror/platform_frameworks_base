@@ -441,7 +441,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (mGlobalActions == null) {
             mGlobalActions = new GlobalActions(mContext);
         }
-        final boolean keyguardShowing = mKeyguardMediator.isShowing();
+        final boolean keyguardShowing = mKeyguardMediator.isShowingAndNotHidden();
         mGlobalActions.showDialog(keyguardShowing, isDeviceProvisioned());
         if (keyguardShowing) {
             // since it took two seconds of long press to bring this up,
@@ -1108,7 +1108,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
      * given the situation with the keyguard.
      */
     void launchHomeFromHotKey() {
-        if (!mHideLockScreen && mKeyguardMediator.isShowing()) {
+        if (mKeyguardMediator.isShowingAndNotHidden()) {
             // don't launch home if keyguard showing
         } else if (!mHideLockScreen && mKeyguardMediator.isInputRestricted()) {
             // when in keyguard restricted mode, must first verify unlock
@@ -1923,7 +1923,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     /** {@inheritDoc} */
     public boolean keyguardIsShowingTq() {
-        return mKeyguardMediator.isShowing();
+        return mKeyguardMediator.isShowingAndNotHidden();
     }
 
     /** {@inheritDoc} */
@@ -2193,7 +2193,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     public boolean performHapticFeedbackLw(WindowState win, int effectId, boolean always) {
         final boolean hapticsDisabled = Settings.System.getInt(mContext.getContentResolver(),
                 Settings.System.HAPTIC_FEEDBACK_ENABLED, 0) == 0;
-        if (!always && (hapticsDisabled || mKeyguardMediator.isShowing())) {
+        if (!always && (hapticsDisabled || mKeyguardMediator.isShowingAndNotHidden())) {
             return false;
         }
         switch (effectId) {
@@ -2221,7 +2221,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
     
     public void screenOnStoppedLw() {
-        if (!mKeyguardMediator.isShowing() && mPowerManager.isScreenOn()) {
+        if (!mKeyguardMediator.isShowingAndNotHidden() && mPowerManager.isScreenOn()) {
             long curTime = SystemClock.uptimeMillis();
             mPowerManager.userActivity(curTime, false, LocalPowerManager.OTHER_EVENT);
         }
