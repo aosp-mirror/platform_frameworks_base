@@ -119,6 +119,14 @@ public class ContactHeaderWidget extends FrameLayout implements View.OnClickList
         int CONTACT_STATUS_RES_PACKAGE = 8;
         int CONTACT_STATUS_LABEL = 9;
     }
+    
+    private interface PhotoQuery {
+        String[] COLUMNS = new String[] {
+            Photo.PHOTO
+        };
+        
+        int PHOTO = 0;
+    }
 
     //Projection used for looking up contact id from phone number
     protected static final String[] PHONE_LOOKUP_PROJECTION = new String[] {
@@ -144,6 +152,7 @@ public class ContactHeaderWidget extends FrameLayout implements View.OnClickList
     private static final int TOKEN_CONTACT_INFO = 0;
     private static final int TOKEN_PHONE_LOOKUP = 1;
     private static final int TOKEN_EMAIL_LOOKUP = 2;
+    private static final int TOKEN_PHOTO_QUERY = 3;
 
     public ContactHeaderWidget(Context context) {
         this(context, null);
@@ -229,9 +238,34 @@ public class ContactHeaderWidget extends FrameLayout implements View.OnClickList
         protected void onQueryComplete(int token, Object cookie, Cursor cursor) {
             try{
                 switch (token) {
-                    case TOKEN_CONTACT_INFO: {
-                        bindContactInfo(cursor);
+                    case TOKEN_PHOTO_QUERY: {
+                        //Set the photo
+                        Bitmap photoBitmap = null;
+                        if (cursor != null && cursor.moveToFirst() 
+                                && !cursor.isNull(PhotoQuery.PHOTO)) {
+                            byte[] photoData = cursor.getBlob(PhotoQuery.PHOTO);
+                            photoBitmap = BitmapFactory.decodeByteArray(photoData, 0,
+                                    photoData.length, null);
+                        }
+                            
+                        if (photoBitmap == null) {
+                            photoBitmap = loadPlaceholderPhoto(null);
+                        }
+                        mPhotoView.setImageBitmap(photoBitmap);
+                        if (cookie != null && cookie instanceof Uri) {
+                            mPhotoView.assignContactUri((Uri) cookie);
+                        }
                         invalidate();
+                        break;
+                    }
+                    case TOKEN_CONTACT_INFO: {
+                        if (cursor != null && cursor.moveToFirst()) {
+                            bindContactInfo(cursor);
+                            Uri lookupUri = Contacts.getLookupUri(cursor.getLong(ContactQuery._ID), 
+                                    cursor.getString(ContactQuery.LOOKUP_KEY));
+                            startPhotoQuery(cursor.getLong(ContactQuery.PHOTO_ID), lookupUri);
+                            invalidate();
+                        }
                         break;
                     }
                     case TOKEN_PHONE_LOOKUP: {
@@ -375,8 +409,6 @@ public class ContactHeaderWidget extends FrameLayout implements View.OnClickList
      */
     public void bindFromContactUri(Uri contactUri) {
         mContactUri = contactUri;
-        long contactId = ContentUris.parseId(contactUri);
-
         startContactQuery(contactUri);
     }
 
@@ -424,29 +456,23 @@ public class ContactHeaderWidget extends FrameLayout implements View.OnClickList
                 null, null, null);
     }
 
+    protected void startPhotoQuery(long photoId, Uri lookupKey) {
+        mQueryHandler.startQuery(TOKEN_PHOTO_QUERY, lookupKey, 
+                ContentUris.withAppendedId(Data.CONTENT_URI, photoId), PhotoQuery.COLUMNS,
+                null, null, null);
+    }
+    
     /**
      * Bind the contact details provided by the given {@link Cursor}.
      */
     protected void bindContactInfo(Cursor c) {
-        if (c == null || !c.moveToFirst()) return;
-
         // TODO: Bring back phonetic name
         final String displayName = c.getString(ContactQuery.DISPLAY_NAME);
-        final long contactId = c.getLong(ContactQuery._ID);
-        final String lookupKey = c.getString(ContactQuery.LOOKUP_KEY);
         final String phoneticName = null;
         this.setDisplayName(displayName, null);
 
         final boolean starred = c.getInt(ContactQuery.STARRED) != 0;
         mStarredView.setChecked(starred);
-
-        //Set the photo
-        Bitmap photoBitmap = loadContactPhoto(c.getLong(ContactQuery.PHOTO_ID), null);
-        if (photoBitmap == null) {
-            photoBitmap = loadPlaceholderPhoto(null);
-        }
-        mPhotoView.setImageBitmap(photoBitmap);
-        mPhotoView.assignContactUri(Contacts.getLookupUri(contactId, lookupKey));
 
         //Set the presence status
         if (!c.isNull(ContactQuery.CONTACT_PRESENCE_STATUS)) {
@@ -552,30 +578,6 @@ public class ContactHeaderWidget extends FrameLayout implements View.OnClickList
                 break;
             }
         }
-    }
-
-    private Bitmap loadContactPhoto(long photoId, BitmapFactory.Options options) {
-        Cursor photoCursor = null;
-        Bitmap photoBm = null;
-
-        try {
-            photoCursor = mContentResolver.query(
-                    ContentUris.withAppendedId(Data.CONTENT_URI, photoId),
-                    new String[] { Photo.PHOTO },
-                    null, null, null);
-
-            if (photoCursor != null && photoCursor.moveToFirst() && !photoCursor.isNull(0)) {
-                byte[] photoData = photoCursor.getBlob(0);
-                photoBm = BitmapFactory.decodeByteArray(photoData, 0,
-                        photoData.length, options);
-            }
-        } finally {
-            if (photoCursor != null) {
-                photoCursor.close();
-            }
-        }
-
-        return photoBm;
     }
 
     private Bitmap loadPlaceholderPhoto(BitmapFactory.Options options) {
