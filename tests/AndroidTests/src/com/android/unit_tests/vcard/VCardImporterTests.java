@@ -1017,8 +1017,7 @@ public class VCardImporterTests extends VCardTestsBase {
                 .addNodeWithOrder("X-NO", "");
 
         // Only scan mode lets vCard parser accepts invalid AGENT lines like above.
-        verifier.verify(R.raw.v21_winmo_65, V21,
-                new VCardParser_V21(VCardParser.PARSER_MODE_SCAN));
+        verifier.verify(R.raw.v21_winmo_65, V21, new VCardParser_V21());
     }
 
     public void testIgnoreAgentV21()  throws IOException, VCardException {
@@ -1027,8 +1026,7 @@ public class VCardImporterTests extends VCardTestsBase {
         elem.addExpected(StructuredName.CONTENT_ITEM_TYPE)
                 .put(StructuredName.FAMILY_NAME, "Example")
                 .put(StructuredName.DISPLAY_NAME, "Example");
-        verifier.verify(R.raw.v21_winmo_65, V21,
-                new VCardParser_V21(VCardParser.PARSER_MODE_SCAN));
+        verifier.verify(R.raw.v21_winmo_65, V21, new VCardParser_V21());
     }
 
     public void testTolerateInvalidCommentLikeLineV21() throws IOException, VCardException {

@@ -23,6 +23,7 @@ import android.provider.ContactsContract.CommonDataKinds.Phone;
 import android.provider.ContactsContract.CommonDataKinds.StructuredPostal;
 import android.telephony.PhoneNumberUtils;
 import android.text.TextUtils;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -466,7 +467,7 @@ public class VCardUtils {
         return true;
     }
     
-    static public String toHalfWidthString(String orgString) {
+    public static String toHalfWidthString(String orgString) {
         if (TextUtils.isEmpty(orgString)) {
             return null;
         }
@@ -485,7 +486,31 @@ public class VCardUtils {
         }
         return builder.toString();
     }
-    
+
+    /**
+     * Guesses the format of input image. Currently just the first few bytes are used.
+     * The type "GIF", "PNG", or "JPEG" is returned when possible. Returns null when
+     * the guess failed.
+     * @param input Image as byte array.
+     * @return The image type or null when the type cannot be determined.
+     */
+    public static String guessImageType(final byte[] input) {
+        if (input.length >= 3 && input[0] == 'G' && input[1] == 'I' && input[2] == 'F') {
+            return "GIF";
+        } else if (input.length >= 4 && input[0] == (byte) 0x89
+                && input[1] == 'P' && input[2] == 'N' && input[3] == 'G') {
+            // Note: vCard 2.1 officially does not support PNG, but we may have it and
+            //       using X- word like "X-PNG" may not let importers know it is PNG.
+            //       So we use the String "PNG" as is...
+            return "PNG";
+        } else if (input.length >= 2 && input[0] == (byte) 0xff
+                && input[1] == (byte) 0xd8) {
+            return "JPEG";
+        } else {
+            return null;
+        }
+    }
+
     private VCardUtils() {
     }
 }
