@@ -26,14 +26,6 @@ import java.util.Set;
  * @hide
  */
 public class VCardSourceDetector implements VCardInterpreter {
-    // Should only be used in package. 
-    static final int TYPE_UNKNOWN = 0;
-    static final int TYPE_APPLE = 1;
-    static final int TYPE_JAPANESE_MOBILE_PHONE = 2;  // Used in Japanese mobile phones.
-    static final int TYPE_FOMA = 3;  // Used in some Japanese FOMA mobile phones.
-    static final int TYPE_WINDOWS_MOBILE_JP = 4;
-    // TODO: Excel, etc.
-
     private static Set<String> APPLE_SIGNS = new HashSet<String>(Arrays.asList(
             "X-PHONETIC-FIRST-NAME", "X-PHONETIC-MIDDLE-NAME", "X-PHONETIC-LAST-NAME",
             "X-ABADR", "X-ABUID"));
@@ -51,7 +43,7 @@ public class VCardSourceDetector implements VCardInterpreter {
             "X-SD-DESCRIPTION"));
     private static String TYPE_FOMA_CHARSET_SIGN = "X-SD-CHAR_CODE";
     
-    private int mType = TYPE_UNKNOWN;
+    private int mType = VCardConfig.PARSE_TYPE_UNKNOWN;
     // Some mobile phones (like FOMA) tells us the charset of the data.
     private boolean mNeedParseSpecifiedCharset;
     private String mSpecifiedCharset;
@@ -80,21 +72,21 @@ public class VCardSourceDetector implements VCardInterpreter {
     
     public void propertyName(String name) {
         if (name.equalsIgnoreCase(TYPE_FOMA_CHARSET_SIGN)) {
-            mType = TYPE_FOMA;
+            mType = VCardConfig.PARSE_TYPE_FOMA;
             mNeedParseSpecifiedCharset = true;
             return;
         }
-        if (mType != TYPE_UNKNOWN) {
+        if (mType != VCardConfig.PARSE_TYPE_UNKNOWN) {
             return;
         }
         if (WINDOWS_MOBILE_PHONE_SIGNS.contains(name)) {
-            mType = TYPE_WINDOWS_MOBILE_JP;
+            mType = VCardConfig.PARSE_TYPE_WINDOWS_MOBILE_JP;
         } else if (FOMA_SIGNS.contains(name)) {
-            mType = TYPE_FOMA;
+            mType = VCardConfig.PARSE_TYPE_FOMA;
         } else if (JAPANESE_MOBILE_PHONE_SIGNS.contains(name)) {
-            mType = TYPE_JAPANESE_MOBILE_PHONE;
+            mType = VCardConfig.PARSE_TYPE_MOBILE_PHONE_JP;
         } else if (APPLE_SIGNS.contains(name)) {
-            mType = TYPE_APPLE;
+            mType = VCardConfig.PARSE_TYPE_APPLE;
         }
     }
 
@@ -110,7 +102,7 @@ public class VCardSourceDetector implements VCardInterpreter {
         }
     }
 
-    int getType() {
+    /* package */ int getEstimatedType() {
         return mType;
     }
     
@@ -124,14 +116,14 @@ public class VCardSourceDetector implements VCardInterpreter {
             return mSpecifiedCharset;
         }
         switch (mType) {
-        case TYPE_WINDOWS_MOBILE_JP:
-        case TYPE_FOMA:
-        case TYPE_JAPANESE_MOBILE_PHONE:
-            return "SHIFT_JIS";
-        case TYPE_APPLE:
-            return "UTF-8";
-        default:
-            return null;
+            case VCardConfig.PARSE_TYPE_WINDOWS_MOBILE_JP:
+            case VCardConfig.PARSE_TYPE_FOMA:
+            case VCardConfig.PARSE_TYPE_MOBILE_PHONE_JP:
+                return "SHIFT_JIS";
+            case VCardConfig.PARSE_TYPE_APPLE:
+                return "UTF-8";
+            default:
+                return null;
         }
     }
 }

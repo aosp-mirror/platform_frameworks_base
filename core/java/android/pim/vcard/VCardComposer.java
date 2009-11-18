@@ -144,11 +144,6 @@ public class VCardComposer {
     private static final Uri sDataRequestUri;
     private static final Map<Integer, String> sImMap;
 
-    /**
-     * See the comment in {@link VCardConfig#FLAG_REFRAIN_QP_TO_PRIMARY_PROPERTIES}.
-     */
-    private static final Set<String> sPrimaryPropertyNameSet;
-
     static {
         Uri.Builder builder = RawContacts.CONTENT_URI.buildUpon();
         builder.appendQueryParameter(Data.FOR_EXPORT_ONLY, "1");
@@ -161,12 +156,6 @@ public class VCardComposer {
         sImMap.put(Im.PROTOCOL_JABBER, VCardConstants.PROPERTY_X_JABBER);
         sImMap.put(Im.PROTOCOL_SKYPE, VCardConstants.PROPERTY_X_SKYPE_USERNAME);
         // Google talk is a special case.
-
-        // TODO: incomplete. Implement properly
-        sPrimaryPropertyNameSet = new HashSet<String>();
-        sPrimaryPropertyNameSet.add(VCardConstants.PROPERTY_N);
-        sPrimaryPropertyNameSet.add(VCardConstants.PROPERTY_FN);
-        sPrimaryPropertyNameSet.add(VCardConstants.PROPERTY_SOUND);
     }
 
     public static interface OneEntryHandler {
