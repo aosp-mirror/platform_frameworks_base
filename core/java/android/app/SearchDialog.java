@@ -43,7 +43,6 @@ import android.text.Editable;
 import android.text.InputType;
 import android.text.TextUtils;
 import android.text.TextWatcher;
-import android.text.util.Regex;
 import android.util.AndroidRuntimeException;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -68,6 +67,8 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemSelectedListener;
+
+import com.android.common.Patterns;
 
 import java.util.ArrayList;
 import java.util.WeakHashMap;
@@ -823,7 +824,7 @@ public class SearchDialog extends Dialog implements OnItemClickListener, OnItemS
                 // The user changed the query, check if it is a URL and if so change the search
                 // button in the soft keyboard to the 'Go' button.
                 int options = (mSearchAutoComplete.getImeOptions() & (~EditorInfo.IME_MASK_ACTION));
-                if (Regex.WEB_URL_PATTERN.matcher(mUserQuery).matches()) {
+                if (Patterns.WEB_URL.matcher(mUserQuery).matches()) {
                     options = options | EditorInfo.IME_ACTION_GO;
                 } else {
                     options = options | EditorInfo.IME_ACTION_SEARCH;
