@@ -733,7 +733,6 @@ android.text.style.UnderlineSpan
 android.text.util.Linkify
 android.text.util.Linkify$1
 android.text.util.Linkify$4
-android.text.util.Regex
 android.text.util.Rfc822Tokenizer
 android.text.util.Rfc822Validator
 android.util.AttributeSet

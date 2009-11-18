@@ -17,7 +17,6 @@
 package android.core;
 
 import android.test.suitebuilder.annotation.SmallTest;
-import android.text.util.Regex;
 
 import junit.framework.TestCase;
 

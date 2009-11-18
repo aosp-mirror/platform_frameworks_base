@@ -37,8 +37,9 @@ import android.text.Spanned;
 import android.text.TextUtils;
 import android.text.TextUtils.SimpleStringSplitter;
 import android.text.style.CharacterStyle;
-import android.text.util.Regex;
 import android.util.Log;
+
+import com.android.common.Patterns;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -192,7 +193,7 @@ public final class Gmail {
      */
     public static String getEmailFromAddressString(String addressString) {
         String result = addressString;
-        Matcher match = Regex.EMAIL_ADDRESS_PATTERN.matcher(addressString);
+        Matcher match = Patterns.EMAIL_ADDRESS.matcher(addressString);
         if (match.find()) {
             result = addressString.substring(match.start(), match.end());
         }

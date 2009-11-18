@@ -25,6 +25,8 @@ import android.text.Spanned;
 import android.webkit.WebView;
 import android.widget.TextView;
 
+import com.android.common.Patterns;
+
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
@@ -133,7 +135,7 @@ public class Linkify {
      */
     public static final TransformFilter sPhoneNumberTransformFilter = new TransformFilter() {
         public final String transformUrl(final Matcher match, String url) {
-            return Regex.digitsAndPlusOnly(match);
+            return Patterns.digitsAndPlusOnly(match);
         }
     };
 
@@ -207,19 +209,19 @@ public class Linkify {
         ArrayList<LinkSpec> links = new ArrayList<LinkSpec>();
 
         if ((mask & WEB_URLS) != 0) {
-            gatherLinks(links, text, Regex.WEB_URL_PATTERN,
+            gatherLinks(links, text, Patterns.WEB_URL,
                 new String[] { "http://", "https://", "rtsp://" },
                 sUrlMatchFilter, null);
         }
 
         if ((mask & EMAIL_ADDRESSES) != 0) {
-            gatherLinks(links, text, Regex.EMAIL_ADDRESS_PATTERN,
+            gatherLinks(links, text, Patterns.EMAIL_ADDRESS,
                 new String[] { "mailto:" },
                 null, null);
         }
 
         if ((mask & PHONE_NUMBERS) != 0) {
-            gatherLinks(links, text, Regex.PHONE_PATTERN,
+            gatherLinks(links, text, Patterns.PHONE,
                 new String[] { "tel:" },
                 sPhoneNumberMatchFilter, sPhoneNumberTransformFilter);
         }
