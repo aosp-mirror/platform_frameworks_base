@@ -209,6 +209,24 @@ void Allocation::removeProgramToDirty(const Program *p)
     rsAssert(0);
 }
 
+void Allocation::dumpLOGV(const char *prefix) const
+{
+    ObjectBase::dumpLOGV(prefix);
+
+    String8 s(prefix);
+    s.append(" type ");
+    if (mType.get()) {
+        mType->dumpLOGV(s.string());
+    }
+
+    LOGV("%s allocation ptr=%p mCpuWrite=%i, mCpuRead=%i, mGpuWrite=%i, mGpuRead=%i",
+          prefix, mPtr, mCpuWrite, mCpuRead, mGpuWrite, mGpuRead);
+
+    LOGV("%s allocation mIsTexture=%i mIsTextureID=%i, mIsVertexBuffer=%i, mBufferID=%i",
+          prefix, mIsTexture, mTextureID, mIsVertexBuffer, mBufferID);
+
+}
+
 void Allocation::sendDirty() const
 {
     for (size_t ct=0; ct < mToDirtyList.size(); ct++) {

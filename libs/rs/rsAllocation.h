@@ -68,6 +68,8 @@ public:
     void addProgramToDirty(const Program *);
     void removeProgramToDirty(const Program *);
 
+    virtual void dumpLOGV(const char *prefix) const;
+
 protected:
     void sendDirty() const;
 

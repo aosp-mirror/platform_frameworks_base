@@ -189,9 +189,16 @@ static void
 nContextDestroy(JNIEnv *_env, jobject _this, jint con)
 {
     LOG_API("nContextDestroy, con(%p)", (RsContext)con);
-    return rsContextDestroy((RsContext)con);
+    rsContextDestroy((RsContext)con);
 }
 
+static void
+nContextDump(JNIEnv *_env, jobject _this, jint bits)
+{
+    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
+    LOG_API("nContextDump, con(%p)  bits(%i)", (RsContext)con, bits);
+    rsContextDump((RsContext)con, bits);
+}
 
 static void
 nContextPause(JNIEnv *_env, jobject _this)
@@ -1346,6 +1353,7 @@ static JNINativeMethod methods[] = {
 {"nContextSetPriority",            "(I)V",                                 (void*)nContextSetPriority },
 {"nContextSetSurface",             "(IILandroid/view/Surface;)V",          (void*)nContextSetSurface },
 {"nContextDestroy",                "(I)V",                                 (void*)nContextDestroy },
+{"nContextDump",                   "(I)V",                                 (void*)nContextDump },
 {"nContextPause",                  "()V",                                  (void*)nContextPause },
 {"nContextResume",                 "()V",                                  (void*)nContextResume },
 {"nAssignName",                    "(I[B)V",                               (void*)nAssignName },

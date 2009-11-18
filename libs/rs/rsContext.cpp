@@ -811,6 +811,11 @@ void rsi_ContextSetPriority(Context *rsc, int32_t p)
     rsc->setPriority(p);
 }
 
+void rsi_ContextDump(Context *rsc, int32_t bits)
+{
+    ObjectBase::dumpAll(rsc);
+}
+
 }
 }
 
