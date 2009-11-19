@@ -2278,6 +2278,48 @@
   </text>
 </comment>
 <comment>
+  <identifier id="android.telephony.TelephonyManager"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.telephony.TelephonyManager.DATA_ACTIVITY_DORMANT"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.telephony.TelephonyManager.NETWORK_TYPE_1xRTT"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.telephony.TelephonyManager.NETWORK_TYPE_CDMA"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.telephony.TelephonyManager.NETWORK_TYPE_EVDO_0"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.telephony.TelephonyManager.NETWORK_TYPE_EVDO_A"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.telephony.TelephonyManager.PHONE_TYPE_CDMA"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
   <identifier id="android.telephony.gsm"/>
   <text>
     InsertCommentsHere
@@ -3148,109 +3190,25 @@
   </text>
 </comment>
 <comment>
-  <identifier id="java.lang"/>
+  <identifier id="java.util.concurrent"/>
   <text>
     InsertCommentsHere
   </text>
 </comment>
 <comment>
-  <identifier id="java.lang.String"/>
+  <identifier id="java.util.concurrent.TimeUnit"/>
   <text>
     InsertCommentsHere
   </text>
 </comment>
 <comment>
-  <identifier id="java.lang.String.ctor_changed()"/>
+  <identifier id="java.util.concurrent.locks"/>
   <text>
     InsertCommentsHere
   </text>
 </comment>
 <comment>
-  <identifier id="java.lang.String.ctor_changed(byte[])"/>
-  <text>
-    InsertCommentsHere
-  </text>
-</comment>
-<comment>
-  <identifier id="java.lang.String.ctor_changed(byte[], int)"/>
-  <text>
-    InsertCommentsHere
-  </text>
-</comment>
-<comment>
-  <identifier id="java.lang.String.ctor_changed(byte[], int, int)"/>
-  <text>
-    InsertCommentsHere
-  </text>
-</comment>
-<comment>
-  <identifier id="java.lang.String.ctor_changed(byte[], int, int, int)"/>
-  <text>
-    InsertCommentsHere
-  </text>
-</comment>
-<comment>
-  <identifier id="java.net"/>
-  <text>
-    InsertCommentsHere
-  </text>
-</comment>
-<comment>
-  <identifier id="java.net.Socket"/>
-  <text>
-    InsertCommentsHere
-  </text>
-</comment>
-<comment>
-  <identifier id="java.net.Socket.ctor_changed()"/>
-  <text>
-    InsertCommentsHere
-  </text>
-</comment>
-<comment>
-  <identifier id="java.net.Socket.ctor_changed(java.lang.String, int)"/>
-  <text>
-    InsertCommentsHere
-  </text>
-</comment>
-<comment>
-  <identifier id="java.net.Socket.ctor_changed(java.lang.String, int, java.net.InetAddress, int)"/>
-  <text>
-    InsertCommentsHere
-  </text>
-</comment>
-<comment>
-  <identifier id="java.net.Socket.ctor_changed(java.net.Proxy)"/>
-  <text>
-    InsertCommentsHere
-  </text>
-</comment>
-<comment>
-  <identifier id="java.net.Socket.ctor_changed(java.net.SocketImpl)"/>
-  <text>
-    InsertCommentsHere
-  </text>
-</comment>
-<comment>
-  <identifier id="java.util"/>
-  <text>
-    InsertCommentsHere
-  </text>
-</comment>
-<comment>
-  <identifier id="java.util.Date"/>
-  <text>
-    InsertCommentsHere
-  </text>
-</comment>
-<comment>
-  <identifier id="java.util.Date.ctor_changed()"/>
-  <text>
-    InsertCommentsHere
-  </text>
-</comment>
-<comment>
-  <identifier id="java.util.Date.ctor_changed(int, int, int, int, int, int)"/>
+  <identifier id="java.util.concurrent.locks.AbstractQueuedSynchronizer"/>
   <text>
     InsertCommentsHere
   </text>

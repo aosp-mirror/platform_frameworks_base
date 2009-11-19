@@ -1,0 +1,7 @@
+NO DOC BLOCK: android.os.Build.VERSION_CODES Field ECLAIR_0_1
+NO DOC BLOCK: android.R.attr Field quickContactBadgeStyleSmallWindowLarge
+NO DOC BLOCK: android.R.attr Field quickContactBadgeStyleSmallWindowMedium
+NO DOC BLOCK: android.R.attr Field quickContactBadgeStyleSmallWindowSmall
+NO DOC BLOCK: android.R.attr Field quickContactBadgeStyleWindowLarge
+NO DOC BLOCK: android.R.attr Field quickContactBadgeStyleWindowMedium
+NO DOC BLOCK: android.R.attr Field quickContactBadgeStyleWindowSmall

@@ -22,7 +22,6 @@ body{overflow:auto;}
 </style>
 </noscript>
 <style type="text/css">
-body{background-image:url();padding:12px;}
 </style>
 </HEAD>
 <BODY>
@@ -55,7 +54,7 @@ body{background-image:url();padding:12px;}
       </tr>
       <tr>
         <td class="diffspec">Generated</td>
-        <td class="diffvalue">2009.04.20 09:15</td>
+        <td class="diffvalue">2009.11.19 19:35</td>
       </tr>
     </table>
     </div><!-- End and-diff-id -->
@@ -68,14 +67,36 @@ body{background-image:url();padding:12px;}
   </div> <!-- End and-diff-id -->
   </div> <!-- End headerRight -->
   </div> <!-- End header -->
-<div id="body-content">
+<div id="body-content" xstyle="padding:12px;padding-right:18px;">
 <div id="doc-content" style="position:relative;">
 <div id="mainBodyFluid">
 <H2>
-Class dalvik.system.<A HREF="../../../../reference/dalvik/system/Zygote.html" target="_top"><font size="+3"><tt>Zygote</tt></font></A>
+Class dalvik.system.<A HREF="../../../../reference/dalvik/system/Zygote.html" target="_top"><font size="+2"><code>Zygote</code></font></A>
 </H2>
 <a NAME="constructors"></a>
 <a NAME="methods"></a>
+<p>
+<a NAME="Removed"></a>
+<TABLE summary="Removed Methods" WIDTH="100%">
+<TR>
+  <TH VALIGN="TOP" COLSPAN=2>Removed Methods</FONT></TD>
+</TH>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="dalvik.system.Zygote.forkAndSpecialize_removed(int, int, int[], boolean, int[][])"></A>
+  <nobr><code>int</code>&nbsp;forkAndSpecialize(<code>int,</nobr> int<nobr>,</nobr> int[]<nobr>,</nobr> boolean<nobr>,</nobr> int[][]<nobr><nobr></code>)</nobr>
+  </TD>
+  <TD>&nbsp;</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="dalvik.system.Zygote.forkSystemServer_removed(int, int, int[], boolean, int[][])"></A>
+  <nobr><code>int</code>&nbsp;forkSystemServer(<code>int,</nobr> int<nobr>,</nobr> int[]<nobr>,</nobr> boolean<nobr>,</nobr> int[][]<nobr><nobr></code>)</nobr>
+  </TD>
+  <TD>&nbsp;</TD>
+</TR>
+</TABLE>
+&nbsp;
 <p>
 <a NAME="Added"></a>
 <TABLE summary="Added Methods" WIDTH="100%">
@@ -85,42 +106,28 @@ Class dalvik.system.<A HREF="../../../../reference/dalvik/system/Zygote.html" ta
 <TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
   <TD VALIGN="TOP" WIDTH="25%">
   <A NAME="dalvik.system.Zygote.forkAndSpecialize_added(int, int, int[], int, int[][])"></A>
-  <nobr><code>int</code>&nbsp;<A HREF="../../../../reference/dalvik/system/Zygote.html#forkAndSpecialize(int, int, int[], int, int[][])" target="_top"><xfont size="+1"><tt>forkAndSpecialize</tt></font></A>(<code>int,</nobr> int<nobr>,</nobr> int[]<nobr>,</nobr> int<nobr>,</nobr> int[][]<nobr><nobr></code>)</nobr>
+  <nobr><code>int</code>&nbsp;<A HREF="../../../../reference/dalvik/system/Zygote.html#forkAndSpecialize(int, int, int[], int, int[][])" target="_top"><code>forkAndSpecialize</code></A>(<code>int,</nobr> int<nobr>,</nobr> int[]<nobr>,</nobr> int<nobr>,</nobr> int[][]<nobr><nobr></code>)</nobr>
+  </TD>
+  <TD>&nbsp;</TD>
+</TR>
+<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
+  <TD VALIGN="TOP" WIDTH="25%">
+  <A NAME="dalvik.system.Zygote.forkAndSpecialize_added(int, int, int[], boolean, int[][])"></A>
+  <nobr><code>int</code>&nbsp;<A HREF="../../../../reference/dalvik/system/Zygote.html#forkAndSpecialize(int, int, int[], boolean, int[][])" target="_top"><code>forkAndSpecialize</code></A>(<code>int,</nobr> int<nobr>,</nobr> int[]<nobr>,</nobr> boolean<nobr>,</nobr> int[][]<nobr><nobr></code>)</nobr>
   </TD>
   <TD>&nbsp;</TD>
 </TR>
 <TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
   <TD VALIGN="TOP" WIDTH="25%">
   <A NAME="dalvik.system.Zygote.forkSystemServer_added(int, int, int[], int, int[][])"></A>
-  <nobr><code>int</code>&nbsp;<A HREF="../../../../reference/dalvik/system/Zygote.html#forkSystemServer(int, int, int[], int, int[][])" target="_top"><xfont size="+1"><tt>forkSystemServer</tt></font></A>(<code>int,</nobr> int<nobr>,</nobr> int[]<nobr>,</nobr> int<nobr>,</nobr> int[][]<nobr><nobr></code>)</nobr>
-  </TD>
-  <TD>&nbsp;</TD>
-</TR>
-</TABLE>
-&nbsp;
-<p>
-<a NAME="Changed"></a>
-<TABLE summary="Changed Methods" WIDTH="100%">
-<TR>
-  <TH VALIGN="TOP" COLSPAN=3>Changed Methods</FONT></TD>
-</TH>
-<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
-  <TD VALIGN="TOP" WIDTH="25%">
-  <A NAME="dalvik.system.Zygote.forkAndSpecialize_changed(int, int, int[], boolean, int[][])"></A>
-  <nobr><code>int</code>&nbsp;<A HREF="../../../../reference/dalvik/system/Zygote.html#forkAndSpecialize(int, int, int[], boolean, int[][])" target="_top"><xfont size="+1"><tt>forkAndSpecialize</tt></font></A>(<code>int,</nobr> int<nobr>,</nobr> int[]<nobr>,</nobr> boolean<nobr>,</nobr> int[][]<nobr><nobr></code>)  </nobr>
-  </TD>
-  <TD VALIGN="TOP" WIDTH="30%">
-<b>Now deprecated</b>.<br>
+  <nobr><code>int</code>&nbsp;<A HREF="../../../../reference/dalvik/system/Zygote.html#forkSystemServer(int, int, int[], int, int[][])" target="_top"><code>forkSystemServer</code></A>(<code>int,</nobr> int<nobr>,</nobr> int[]<nobr>,</nobr> int<nobr>,</nobr> int[][]<nobr><nobr></code>)</nobr>
   </TD>
   <TD>&nbsp;</TD>
 </TR>
 <TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
   <TD VALIGN="TOP" WIDTH="25%">
-  <A NAME="dalvik.system.Zygote.forkSystemServer_changed(int, int, int[], boolean, int[][])"></A>
-  <nobr><code>int</code>&nbsp;<A HREF="../../../../reference/dalvik/system/Zygote.html#forkSystemServer(int, int, int[], boolean, int[][])" target="_top"><xfont size="+1"><tt>forkSystemServer</tt></font></A>(<code>int,</nobr> int<nobr>,</nobr> int[]<nobr>,</nobr> boolean<nobr>,</nobr> int[][]<nobr><nobr></code>)  </nobr>
-  </TD>
-  <TD VALIGN="TOP" WIDTH="30%">
-<b>Now deprecated</b>.<br>
+  <A NAME="dalvik.system.Zygote.forkSystemServer_added(int, int, int[], boolean, int[][])"></A>
+  <nobr><code>int</code>&nbsp;<A HREF="../../../../reference/dalvik/system/Zygote.html#forkSystemServer(int, int, int[], boolean, int[][])" target="_top"><code>forkSystemServer</code></A>(<code>int,</nobr> int<nobr>,</nobr> int[]<nobr>,</nobr> boolean<nobr>,</nobr> int[][]<nobr><nobr></code>)</nobr>
   </TD>
   <TD>&nbsp;</TD>
 </TR>
@@ -136,21 +143,21 @@ Class dalvik.system.<A HREF="../../../../reference/dalvik/system/Zygote.html" ta
 <TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
   <TD VALIGN="TOP" WIDTH="25%">
   <A NAME="dalvik.system.Zygote.DEBUG_ENABLE_ASSERT"></A>
-  <nobr><code>int</code>&nbsp;<A HREF="../../../../reference/dalvik/system/Zygote.html#DEBUG_ENABLE_ASSERT" target="_top"><xfont size="+1"><tt>DEBUG_ENABLE_ASSERT</tt></font></A></nobr>
+  <nobr><code>int</code>&nbsp;<A HREF="../../../../reference/dalvik/system/Zygote.html#DEBUG_ENABLE_ASSERT" target="_top"><code>DEBUG_ENABLE_ASSERT</code></A></nobr>
   </TD>
   <TD>&nbsp;</TD>
 </TR>
 <TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
   <TD VALIGN="TOP" WIDTH="25%">
   <A NAME="dalvik.system.Zygote.DEBUG_ENABLE_CHECKJNI"></A>
-  <nobr><code>int</code>&nbsp;<A HREF="../../../../reference/dalvik/system/Zygote.html#DEBUG_ENABLE_CHECKJNI" target="_top"><xfont size="+1"><tt>DEBUG_ENABLE_CHECKJNI</tt></font></A></nobr>
+  <nobr><code>int</code>&nbsp;<A HREF="../../../../reference/dalvik/system/Zygote.html#DEBUG_ENABLE_CHECKJNI" target="_top"><code>DEBUG_ENABLE_CHECKJNI</code></A></nobr>
   </TD>
   <TD>&nbsp;</TD>
 </TR>
 <TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
   <TD VALIGN="TOP" WIDTH="25%">
   <A NAME="dalvik.system.Zygote.DEBUG_ENABLE_DEBUGGER"></A>
-  <nobr><code>int</code>&nbsp;<A HREF="../../../../reference/dalvik/system/Zygote.html#DEBUG_ENABLE_DEBUGGER" target="_top"><xfont size="+1"><tt>DEBUG_ENABLE_DEBUGGER</tt></font></A></nobr>
+  <nobr><code>int</code>&nbsp;<A HREF="../../../../reference/dalvik/system/Zygote.html#DEBUG_ENABLE_DEBUGGER" target="_top"><code>DEBUG_ENABLE_DEBUGGER</code></A></nobr>
   </TD>
   <TD>&nbsp;</TD>
 </TR>

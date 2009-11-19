@@ -84,7 +84,6 @@ NO DOC BLOCK: android.app.WallpaperManager Class
 NO DOC BLOCK: android.webkit.WebStorage Class
 NO DOC BLOCK: android.webkit.WebStorage.QuotaUpdater Interface
 NO DOC BLOCK: android.text.style.AbsoluteSizeSpan Constructor (int, boolean)
-NO DOC BLOCK: android.graphics.drawable.BitmapDrawable Constructor (android.content.res.Resources)
 NO DOC BLOCK: android.graphics.drawable.BitmapDrawable Constructor (android.content.res.Resources, java.lang.String)
 NO DOC BLOCK: android.graphics.drawable.BitmapDrawable Constructor (android.content.res.Resources, java.io.InputStream)
 NO DOC BLOCK: android.content.ContentResolver Method acquireContentProviderClient(android.net.Uri)
@@ -356,7 +355,6 @@ NO DOC BLOCK: android.app.ActivityManager.RunningServiceInfo Field clientPackage
 NO DOC BLOCK: android.R.attr Field colorBackgroundCacheHint
 NO DOC BLOCK: android.R.attr Field contentAuthority
 NO DOC BLOCK: android.os.Debug.MemoryInfo Field CREATOR
-NO DOC BLOCK: android.telephony.TelephonyManager Field DATA_ACTIVITY_DORMANT
 NO DOC BLOCK: android.provider.Settings.System Field DEFAULT_ALARM_ALERT_URI
 NO DOC BLOCK: android.text.TextPaint Field density
 NO DOC BLOCK: android.R.attr Field detachWallpaper
@@ -446,14 +444,9 @@ NO DOC BLOCK: android.content.res.Configuration Field navigationHidden
 NO DOC BLOCK: android.content.res.Configuration Field NAVIGATIONHIDDEN_NO
 NO DOC BLOCK: android.content.res.Configuration Field NAVIGATIONHIDDEN_UNDEFINED
 NO DOC BLOCK: android.content.res.Configuration Field NAVIGATIONHIDDEN_YES
-NO DOC BLOCK: android.telephony.TelephonyManager Field NETWORK_TYPE_1xRTT
-NO DOC BLOCK: android.telephony.TelephonyManager Field NETWORK_TYPE_CDMA
-NO DOC BLOCK: android.telephony.TelephonyManager Field NETWORK_TYPE_EVDO_0
-NO DOC BLOCK: android.telephony.TelephonyManager Field NETWORK_TYPE_EVDO_A
 NO DOC BLOCK: android.telephony.TelephonyManager Field NETWORK_TYPE_HSDPA
 NO DOC BLOCK: android.telephony.TelephonyManager Field NETWORK_TYPE_HSPA
 NO DOC BLOCK: android.telephony.TelephonyManager Field NETWORK_TYPE_HSUPA
-NO DOC BLOCK: android.telephony.TelephonyManager Field PHONE_TYPE_CDMA
 NO DOC BLOCK: android.app.ActivityManager.RunningAppProcessInfo Field REASON_PROVIDER_IN_USE
 NO DOC BLOCK: android.app.ActivityManager.RunningAppProcessInfo Field REASON_SERVICE_IN_USE
 NO DOC BLOCK: android.app.ActivityManager.RunningAppProcessInfo Field REASON_UNKNOWN
