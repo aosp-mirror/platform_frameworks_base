@@ -83,6 +83,7 @@ Android platform.</p>
 
 <table>
   <tr><th>Platform Version</th><th>API Level</th></tr>
+  <tr><td>Android 2.0.1</td><td>6</td></tr>
   <tr><td>Android 2.0</td><td>5</td></tr>
   <tr><td>Android 1.6</td><td>4</td></tr>
   <tr><td>Android 1.5</td><td>3</td></tr>
@@ -111,7 +112,7 @@ the Android system itself. </p>
 <p>Applications can use a manifest element provided by the framework API &mdash;
 <code>&lt;uses-sdk&gt;</code> &mdash; to describe the minimum and maximum API
 Levels under which they are able to run, as well as the preferred API Level that
-they are designed to support. The element offers two key attributes:</p>
+they are designed to support. The element offers three key attributes:</p>
 
 <ul>
 <li><code>android:minSdkVersion</code> &mdash; Specifies the minimum API Level
