@@ -306,7 +306,7 @@ class PowerManagerService extends IPowerManager.Stub
 
         public void release() {
             if (!mRefCounted || --mCount == 0) {
-                PowerManagerService.this.releaseWakeLockLocked(mToken, false);
+                PowerManagerService.this.releaseWakeLockLockedmToken, 0, false);
             }
             if (mCount < 0) {
                 throw new RuntimeException("WakeLock under-locked " + mTag);
@@ -545,7 +545,7 @@ class PowerManagerService extends IPowerManager.Stub
         }
         public void binderDied() {
             synchronized (mLocks) {
-                releaseWakeLockLocked(this.binder, true);
+                releaseWakeLockLocked(this.binder, 0, true);
             }
         }
         final int flags;
@@ -690,18 +690,18 @@ class PowerManagerService extends IPowerManager.Stub
         }
     }
 
-    public void releaseWakeLock(IBinder lock) {
+    public void releaseWakeLock(IBinder lock, int flags) {
         int uid = Binder.getCallingUid();
         if (uid != Process.myUid()) {
             mContext.enforceCallingOrSelfPermission(android.Manifest.permission.WAKE_LOCK, null);
         }
 
         synchronized (mLocks) {
-            releaseWakeLockLocked(lock, false);
+            releaseWakeLockLocked(lock, flags, false);
         }
     }
 
-    private void releaseWakeLockLocked(IBinder lock, boolean death) {
+    private void releaseWakeLockLocked(IBinder lock, int flags, boolean death) {
         int releaseUid;
         String releaseName;
         int releaseType;
@@ -733,7 +733,8 @@ class PowerManagerService extends IPowerManager.Stub
         } else if ((wl.flags & LOCK_MASK) == PowerManager.PROXIMITY_SCREEN_OFF_WAKE_LOCK) {
             mProximityWakeLockCount--;
             if (mProximityWakeLockCount == 0) {
-                if (mProximitySensorActive) {
+                if (mProximitySensorActive &&
+                        ((flags & PowerManager.WAIT_FOR_PROXIMITY_NEGATIVE) != 0)) {
                     // wait for proximity sensor to go negative before disabling sensor
                     if (mDebugProximitySensor) {
                         Log.d(TAG, "waiting for proximity sensor to go negative");
@@ -1908,6 +1909,11 @@ class PowerManagerService extends IPowerManager.Stub
             if (isScreenTurningOffLocked()) {
                 Log.d(TAG, "ignoring user activity while turning off screen");
                 return;
+            }
+            // Disable proximity sensor if if user presses power key while we are in the
+            // "waiting for proximity sensor to go negative" state.
+            if (mProximitySensorActive && mProximityWakeLockCount == 0) {
+                mProximitySensorActive = false;
             }
             if (mLastEventTime <= time || force) {
                 mLastEventTime = time;

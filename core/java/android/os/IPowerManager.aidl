@@ -22,7 +22,7 @@ interface IPowerManager
 {
     void acquireWakeLock(int flags, IBinder lock, String tag);
     void goToSleep(long time);
-    void releaseWakeLock(IBinder lock);
+    void releaseWakeLock(IBinder lock, int flags);
     void userActivity(long when, boolean noChangeLights);
     void userActivityWithForce(long when, boolean noChangeLights, boolean force);
     void setPokeLock(int pokey, IBinder lock, String tag);

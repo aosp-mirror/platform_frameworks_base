@@ -66,7 +66,7 @@ public class PowerCommand extends Svc.Command {
                         IBinder lock = new Binder();
                         pm.acquireWakeLock(PowerManager.FULL_WAKE_LOCK, lock, "svc power");
                         pm.setStayOnSetting(val);
-                        pm.releaseWakeLock(lock);
+                        pm.releaseWakeLock(lock, 0);
                     }
                     catch (RemoteException e) {
                         System.err.println("Faild to set setting: " + e);
