@@ -372,6 +372,39 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
         setEGLConfigChooser(new ComponentSizeChooser(redSize, greenSize,
                 blueSize, alphaSize, depthSize, stencilSize));
     }
+
+    /**
+     * Inform the default EGLContextFactory and default EGLConfigChooser
+     * which EGLContext client version to pick.
+     * <p>Use this method to create an OpenGL ES 2.0-compatible context.
+     * Example:
+     * <pre class="prettyprint">
+     *     public MyView(Context context) {
+     *         super(context);
+     *         setEGLContextClientVersion(2); // Pick an OpenGL ES 2.0 context.
+     *         setRenderer(new MyRenderer());
+     *     }
+     * </pre>
+     * <p>Note: Activities which require OpenGL ES 2.0 should indicate this by
+     * setting @lt;uses-feature android:glEsVersion="0x00020000" /> in the activity's
+     * AndroidManifest.xml file.
+     * <p>If this method is called, it must be called before {@link #setRenderer(Renderer)}
+     * is called.
+     * <p>This method only affects the behavior of the default EGLContexFactory and the
+     * default EGLConfigChooser. If
+     * {@link #setEGLContextFactory(EGLContextFactory)} has been called, then the supplied
+     * EGLContextFactory is responsible for creating an OpenGL ES 2.0-compatible context.
+     * If
+     * {@link #setEGLConfigChooser(EGLConfigChooser)} has been called, then the supplied
+     * EGLConfigChooser is responsible for choosing an OpenGL ES 2.0-compatible config.
+     * @param version The EGLContext client version to choose. Use 2 for OpenGL ES 2.0
+     * @hide
+     */
+    public void setEGLContextClientVersion(int version) {
+        checkRenderThreadState();
+        mEGLContextClientVersion = version;
+    }
+
     /**
      * Set the rendering mode. When renderMode is
      * RENDERMODE_CONTINUOUSLY, the renderer is called
@@ -623,10 +656,15 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
         void destroyContext(EGL10 egl, EGLDisplay display, EGLContext context);
     }
 
-    private static class DefaultContextFactory implements EGLContextFactory {
+    private class DefaultContextFactory implements EGLContextFactory {
+        private int EGL_CONTEXT_CLIENT_VERSION = 0x3098;
 
         public EGLContext createContext(EGL10 egl, EGLDisplay display, EGLConfig config) {
-            return egl.eglCreateContext(display, config, EGL10.EGL_NO_CONTEXT, null);
+            int[] attrib_list = {EGL_CONTEXT_CLIENT_VERSION, mEGLContextClientVersion,
+                    EGL10.EGL_NONE };
+
+            return egl.eglCreateContext(display, config, EGL10.EGL_NO_CONTEXT,
+                    mEGLContextClientVersion != 0 ? attrib_list : null);
         }
 
         public void destroyContext(EGL10 egl, EGLDisplay display,
@@ -680,11 +718,12 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
         EGLConfig chooseConfig(EGL10 egl, EGLDisplay display);
     }
 
-    private static abstract class BaseConfigChooser
+    private abstract class BaseConfigChooser
             implements EGLConfigChooser {
         public BaseConfigChooser(int[] configSpec) {
-            mConfigSpec = configSpec;
+            mConfigSpec = filterConfigSpec(configSpec);
         }
+
         public EGLConfig chooseConfig(EGL10 egl, EGLDisplay display) {
             int[] num_config = new int[1];
             if (!egl.eglChooseConfig(display, mConfigSpec, null, 0,
@@ -715,9 +754,25 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
                 EGLConfig[] configs);
 
         protected int[] mConfigSpec;
+
+        private int[] filterConfigSpec(int[] configSpec) {
+            if (mEGLContextClientVersion != 2) {
+                return configSpec;
+            }
+            /* We know none of the subclasses define EGL_RENDERABLE_TYPE.
+             * And we know the configSpec is well formed.
+             */
+            int len = configSpec.length;
+            int[] newConfigSpec = new int[len + 2];
+            System.arraycopy(configSpec, 0, newConfigSpec, 0, len-1);
+            newConfigSpec[len-1] = EGL10.EGL_RENDERABLE_TYPE;
+            newConfigSpec[len] = 4; /* EGL_OPENGL_ES2_BIT */
+            newConfigSpec[len+1] = EGL10.EGL_NONE;
+            return newConfigSpec;
+        }
     }
 
-    private static class ComponentSizeChooser extends BaseConfigChooser {
+    private class ComponentSizeChooser extends BaseConfigChooser {
         public ComponentSizeChooser(int redSize, int greenSize, int blueSize,
                 int alphaSize, int depthSize, int stencilSize) {
             super(new int[] {
@@ -793,7 +848,7 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
      * RGB565 as possible, with or without a depth buffer.
      *
      */
-    private static class SimpleEGLConfigChooser extends ComponentSizeChooser {
+    private class SimpleEGLConfigChooser extends ComponentSizeChooser {
         public SimpleEGLConfigChooser(boolean withDepthBuffer) {
             super(4, 4, 4, 0, withDepthBuffer ? 16 : 0, 0);
             // Adjust target values. This way we'll accept a 4444 or
@@ -1401,4 +1456,5 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
     private EGLWindowSurfaceFactory mEGLWindowSurfaceFactory;
     private GLWrapper mGLWrapper;
     private int mDebugFlags;
+    private int mEGLContextClientVersion;
 }
