@@ -40,6 +40,13 @@
 
 namespace android {
 
+static void releaseBufferIfNonNULL(MediaBuffer **buffer) {
+    if (*buffer) {
+        (*buffer)->release();
+        *buffer = NULL;
+    }
+}
+
 MediaPlayerImpl::MediaPlayerImpl(const char *uri)
     : mInitCheck(NO_INIT),
       mTimeSource(NULL),
@@ -51,7 +58,7 @@ MediaPlayerImpl::MediaPlayerImpl(const char *uri)
       mPlaying(false),
       mPaused(false),
       mSeeking(false) {
-    LOGI("MediaPlayerImpl(%s)", uri);
+    LOGV("MediaPlayerImpl(%s)", uri);
     DataSource::RegisterDefaultSniffers();
 
     status_t err = mClient.connect();
@@ -103,7 +110,7 @@ MediaPlayerImpl::MediaPlayerImpl(int fd, int64_t offset, int64_t length)
       mPlaying(false),
       mPaused(false),
       mSeeking(false) {
-    LOGI("MediaPlayerImpl(%d, %lld, %lld)", fd, offset, length);
+    LOGV("MediaPlayerImpl(%d, %lld, %lld)", fd, offset, length);
     DataSource::RegisterDefaultSniffers();
 
     status_t err = mClient.connect();
@@ -140,7 +147,7 @@ MediaPlayerImpl::~MediaPlayerImpl() {
 }
 
 void MediaPlayerImpl::play() {
-    LOGI("play");
+    LOGV("play");
 
     if (mPlaying) {
         if (mPaused) {
@@ -229,6 +236,8 @@ void MediaPlayerImpl::videoEntry() {
     bool firstFrame = true;
     bool eof = false;
 
+    MediaBuffer *lastBuffer = NULL;
+
     status_t err = mVideoDecoder->start();
     CHECK_EQ(err, OK);
 
@@ -241,7 +250,9 @@ void MediaPlayerImpl::videoEntry() {
         {
             Mutex::Autolock autoLock(mLock);
             if (mSeeking) {
-                LOGI("seek-options to %lld", mSeekTimeUs);
+                releaseBufferIfNonNULL(&lastBuffer);
+
+                LOGV("seek-options to %lld", mSeekTimeUs);
                 options.setSeekTo(mSeekTimeUs);
 
                 mSeeking = false;
@@ -301,19 +312,21 @@ void MediaPlayerImpl::videoEntry() {
             firstFrame = false;
         }
 
-        displayOrDiscardFrame(buffer, pts_us);
+        displayOrDiscardFrame(&lastBuffer, buffer, pts_us);
     }
+
+    releaseBufferIfNonNULL(&lastBuffer);
 
     mVideoDecoder->stop();
 }
 
 void MediaPlayerImpl::displayOrDiscardFrame(
+        MediaBuffer **lastBuffer,
         MediaBuffer *buffer, int64_t pts_us) {
     for (;;) {
         if (!mPlaying || mPaused) {
-            buffer->release();
-            buffer = NULL;
-
+            releaseBufferIfNonNULL(lastBuffer);
+            *lastBuffer = buffer;
             return;
         }
 
@@ -332,15 +345,13 @@ void MediaPlayerImpl::displayOrDiscardFrame(
         if (delay_us < -15000) {
             // We're late.
 
-            LOGI("we're late by %lld ms, dropping a frame\n",
+            LOGV("we're late by %lld ms, dropping a frame\n",
                  -delay_us / 1000);
 
-            buffer->release();
-            buffer = NULL;
+            releaseBufferIfNonNULL(lastBuffer);
+            *lastBuffer = buffer;
             return;
         } else if (delay_us > 100000) {
-            LOGI("we're much too early (by %lld ms)\n",
-                 delay_us / 1000);
             usleep(100000);
             continue;
         } else if (delay_us > 0) {
@@ -352,13 +363,14 @@ void MediaPlayerImpl::displayOrDiscardFrame(
 
     {
         Mutex::Autolock autoLock(mLock);
+
         if (mVideoRenderer.get() != NULL) {
             sendFrameToISurface(buffer);
         }
     }
 
-    buffer->release();
-    buffer = NULL;
+    releaseBufferIfNonNULL(lastBuffer);
+    *lastBuffer = buffer;
 }
 
 void MediaPlayerImpl::init() {
@@ -410,7 +422,7 @@ void MediaPlayerImpl::init() {
 }
 
 void MediaPlayerImpl::setAudioSource(const sp<MediaSource> &source) {
-    LOGI("setAudioSource");
+    LOGV("setAudioSource");
     mAudioSource = source;
 
     sp<MetaData> meta = source->getFormat();
@@ -420,7 +432,7 @@ void MediaPlayerImpl::setAudioSource(const sp<MediaSource> &source) {
 }
 
 void MediaPlayerImpl::setVideoSource(const sp<MediaSource> &source) {
-    LOGI("setVideoSource");
+    LOGV("setVideoSource");
     mVideoSource = source;
 
     sp<MetaData> meta = source->getFormat();
@@ -441,7 +453,7 @@ void MediaPlayerImpl::setVideoSource(const sp<MediaSource> &source) {
 }
 
 void MediaPlayerImpl::setSurface(const sp<Surface> &surface) {
-    LOGI("setSurface %p", surface.get());
+    LOGV("setSurface %p", surface.get());
     Mutex::Autolock autoLock(mLock);
 
     depopulateISurface();
@@ -455,7 +467,7 @@ void MediaPlayerImpl::setSurface(const sp<Surface> &surface) {
 }
 
 void MediaPlayerImpl::setISurface(const sp<ISurface> &isurface) {
-    LOGI("setISurface %p", isurface.get());
+    LOGV("setISurface %p", isurface.get());
     Mutex::Autolock autoLock(mLock);
 
     depopulateISurface();
@@ -499,7 +511,7 @@ MediaSource *MediaPlayerImpl::makeShoutcastSource(const char *uri) {
         host = string(host, 0, colon - host.c_str());
     }
 
-    LOGI("Connecting to host '%s', port %d, path '%s'",
+    LOGV("Connecting to host '%s', port %d, path '%s'",
          host.c_str(), port, path.c_str());
 
     HTTPStream *http = new HTTPStream;
@@ -533,7 +545,7 @@ MediaSource *MediaPlayerImpl::makeShoutcastSource(const char *uri) {
 
             http->disconnect();
 
-            LOGI("Redirecting to %s\n", location.c_str());
+            LOGV("Redirecting to %s\n", location.c_str());
 
             host = string(location, 0, slashPos);
 
@@ -588,7 +600,7 @@ int64_t MediaPlayerImpl::getPosition() {
 }
 
 status_t MediaPlayerImpl::seekTo(int64_t time) {
-    LOGI("seekTo %lld", time);
+    LOGV("seekTo %lld", time);
 
     if (mPaused) {
         return UNKNOWN_ERROR;
@@ -651,7 +663,7 @@ void MediaPlayerImpl::sendFrameToISurface(MediaBuffer *buffer) {
 
 void MediaPlayerImpl::setAudioSink(
         const sp<MediaPlayerBase::AudioSink> &audioSink) {
-    LOGI("setAudioSink %p", audioSink.get());
+    LOGV("setAudioSink %p", audioSink.get());
     mAudioSink = audioSink;
 }
 
