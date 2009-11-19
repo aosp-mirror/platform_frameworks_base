@@ -3482,11 +3482,11 @@
         <!-- Reference to a the wallpaper's thumbnail bitmap. -->
         <attr name="thumbnail" format="reference" />
 
-        <!-- Name of the author of a wallpaper, e.g. Google. -->
-        <attr name="wallpaperAuthor" format="reference" />
+        <!-- Name of the author of this component, e.g. Google. -->
+        <attr name="author" format="reference" />
 
-        <!-- Short description of the wallpaper's purpose or behavior. -->
-        <attr name="wallpaperDescription" format="reference" />
+        <!-- Short description of the component's purpose or behavior. -->
+        <attr name="description" />
     </declare-styleable>
 
     <!-- =============================== -->
