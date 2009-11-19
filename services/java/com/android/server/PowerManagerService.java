@@ -186,6 +186,7 @@ class PowerManagerService extends IPowerManager.Stub
     private UnsynchronizedWakeLock mStayOnWhilePluggedInScreenDimLock;
     private UnsynchronizedWakeLock mStayOnWhilePluggedInPartialLock;
     private UnsynchronizedWakeLock mPreventScreenOnPartialLock;
+    private UnsynchronizedWakeLock mProximityPartialLock;
     private HandlerThread mHandlerThread;
     private Handler mHandler;
     private TimeoutTask mTimeoutTask = new TimeoutTask();
@@ -284,6 +285,7 @@ class PowerManagerService extends IPowerManager.Stub
         IBinder mToken;
         int mCount = 0;
         boolean mRefCounted;
+        boolean mHeld;
 
         UnsynchronizedWakeLock(int flags, String tag, boolean refCounted) {
             mFlags = flags;
@@ -298,6 +300,7 @@ class PowerManagerService extends IPowerManager.Stub
                 try {
                     PowerManagerService.this.acquireWakeLockLocked(mFlags, mToken,
                             MY_UID, mTag);
+                    mHeld = true;
                 } finally {
                     Binder.restoreCallingIdentity(ident);
                 }
@@ -306,16 +309,22 @@ class PowerManagerService extends IPowerManager.Stub
 
         public void release() {
             if (!mRefCounted || --mCount == 0) {
-                PowerManagerService.this.releaseWakeLockLockedmToken, 0, false);
+                PowerManagerService.this.releaseWakeLockLocked(mToken, 0, false);
+                mHeld = false;
             }
             if (mCount < 0) {
                 throw new RuntimeException("WakeLock under-locked " + mTag);
             }
         }
 
+        public boolean isHeld()
+        {
+            return mHeld;
+        }
+
         public String toString() {
             return "UnsynchronizedWakeLock(mFlags=0x" + Integer.toHexString(mFlags)
-                    + " mCount=" + mCount + ")";
+                    + " mCount=" + mCount + " mHeld=" + mHeld + ")";
         }
     }
 
@@ -451,6 +460,8 @@ class PowerManagerService extends IPowerManager.Stub
                                 PowerManager.PARTIAL_WAKE_LOCK, "StayOnWhilePluggedIn Partial", false);
         mPreventScreenOnPartialLock = new UnsynchronizedWakeLock(
                                 PowerManager.PARTIAL_WAKE_LOCK, "PreventScreenOn Partial", false);
+        mProximityPartialLock = new UnsynchronizedWakeLock(
+                                PowerManager.PARTIAL_WAKE_LOCK, "Proximity Partial", false);
 
         mScreenOnIntent = new Intent(Intent.ACTION_SCREEN_ON);
         mScreenOnIntent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
@@ -919,6 +930,7 @@ class PowerManagerService extends IPowerManager.Stub
         pw.println("  mStayOnWhilePluggedInScreenDimLock=" + mStayOnWhilePluggedInScreenDimLock);
         pw.println("  mStayOnWhilePluggedInPartialLock=" + mStayOnWhilePluggedInPartialLock);
         pw.println("  mPreventScreenOnPartialLock=" + mPreventScreenOnPartialLock);
+        pw.println("  mProximityPartialLock=" + mProximityPartialLock);
         pw.println("  mProximityWakeLockCount=" + mProximityWakeLockCount);
         pw.println("  mProximitySensorEnabled=" + mProximitySensorEnabled);
         pw.println("  mProximitySensorActive=" + mProximitySensorActive);
@@ -1266,7 +1278,7 @@ class PowerManagerService extends IPowerManager.Stub
                 // Forcibly turn on the screen if it's supposed to be on.  (This
                 // handles the case where the screen is currently off because of
                 // a prior preventScreenOn(true) call.)
-                if ((mPowerState & SCREEN_ON_BIT) != 0) {
+                if (!mProximitySensorActive && (mPowerState & SCREEN_ON_BIT) != 0) {
                     if (mSpew) {
                         Log.d(TAG,
                               "preventScreenOn: turning on after a prior preventScreenOn(true)!");
@@ -1847,8 +1859,10 @@ class PowerManagerService extends IPowerManager.Stub
     }
 
     private void forceUserActivityLocked() {
-        // cancel animation so userActivity will succeed
-        mScreenBrightness.animating = false;
+        if (isScreenTurningOffLocked()) {
+            // cancel animation so userActivity will succeed
+            mScreenBrightness.animating = false;
+        }
         boolean savedActivityAllowed = mUserActivityAllowed;
         mUserActivityAllowed = true;
         userActivity(SystemClock.uptimeMillis(), false);
@@ -1967,6 +1981,9 @@ class PowerManagerService extends IPowerManager.Stub
                 if (mProximityPendingValue != -1) {
                     proximityChangedLocked(mProximityPendingValue == 1);
                     mProximityPendingValue = -1;
+                }
+                if (mProximityPartialLock.isHeld()) {
+                    mProximityPartialLock.release();
                 }
             }
         }
@@ -2436,6 +2453,9 @@ class PowerManagerService extends IPowerManager.Stub
             try {
                 mSensorManager.unregisterListener(mProximityListener);
                 mHandler.removeCallbacks(mProximityTask);
+                if (mProximityPartialLock.isHeld()) {
+                    mProximityPartialLock.release();
+                }
                 mProximitySensorEnabled = false;
             } finally {
                 Binder.restoreCallingIdentity(identity);
@@ -2502,6 +2522,7 @@ class PowerManagerService extends IPowerManager.Stub
                 long timeSinceLastEvent = milliseconds - mLastProximityEventTime;
                 mLastProximityEventTime = milliseconds;
                 mHandler.removeCallbacks(mProximityTask);
+                boolean proximityTaskQueued = false;
 
                 // compare against getMaximumRange to support sensors that only return 0 or 1
                 boolean active = (distance >= 0.0 && distance < PROXIMITY_THRESHOLD &&
@@ -2514,10 +2535,20 @@ class PowerManagerService extends IPowerManager.Stub
                     // enforce delaying atleast PROXIMITY_SENSOR_DELAY before processing
                     mProximityPendingValue = (active ? 1 : 0);
                     mHandler.postDelayed(mProximityTask, PROXIMITY_SENSOR_DELAY - timeSinceLastEvent);
+                    proximityTaskQueued = true;
                 } else {
                     // process the value immediately
                     mProximityPendingValue = -1;
                     proximityChangedLocked(active);
+                }
+
+                // update mProximityPartialLock state
+                boolean held = mProximityPartialLock.isHeld();
+                if (!held && proximityTaskQueued) {
+                    // hold wakelock until mProximityTask runs
+                    mProximityPartialLock.acquire();
+                } else if (held && !proximityTaskQueued) {
+                    mProximityPartialLock.release();
                 }
             }
         }
