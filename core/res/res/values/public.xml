@@ -1195,16 +1195,6 @@
   <public type="drawable" name="screen_background_light_transparent" id="0x010800aa" />
   <public type="drawable" name="stat_notify_sdcard_prepare" id="0x010800ab" />
   
-  <public type="attr" name="quickContactBadgeStyleWindowSmall" />
-  <public type="attr" name="quickContactBadgeStyleWindowMedium" />
-  <public type="attr" name="quickContactBadgeStyleWindowLarge" />
-  <public type="attr" name="quickContactBadgeStyleSmallWindowSmall" />
-  <public type="attr" name="quickContactBadgeStyleSmallWindowMedium" />
-  <public type="attr" name="quickContactBadgeStyleSmallWindowLarge" />
-  <public type="attr" name="wallpaperAuthor" />
-  <public type="attr" name="wallpaperDescription" />
-  <public type="attr" name="autoStart" />
-
 <!-- ===============================================================
      Resources added in version 6 of the platform (Eclair 2.0.1).
      =============================================================== -->
