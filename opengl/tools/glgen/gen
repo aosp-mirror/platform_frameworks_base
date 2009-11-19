@@ -63,7 +63,7 @@ rm src/*.class
 
 pushd out > /dev/null
 mkdir classes
-javac -d classes com/google/android/gles_jni/GLImpl.java javax/microedition/khronos/opengles/GL10.java javax/microedition/khronos/opengles/GL10Ext.java javax/microedition/khronos/opengles/GL11.java javax/microedition/khronos/opengles/GL11Ext.java javax/microedition/khronos/opengles/GL11ExtensionPack.java android/opengl/GLES10.java android/opengl/GLES10Ext.java android/opengl/GLES11.java android/opengl/GLES11Ext.java
+javac -d classes com/google/android/gles_jni/GLImpl.java javax/microedition/khronos/opengles/GL10.java javax/microedition/khronos/opengles/GL10Ext.java javax/microedition/khronos/opengles/GL11.java javax/microedition/khronos/opengles/GL11Ext.java javax/microedition/khronos/opengles/GL11ExtensionPack.java android/opengl/GLES10.java android/opengl/GLES10Ext.java android/opengl/GLES11.java android/opengl/GLES11Ext.java android/opengl/GLES20.java
 popd > /dev/null
 JAVA_RESULT=$?
 if [ $JAVA_RESULT -ne 0 ]; then
@@ -109,7 +109,7 @@ do
     compareGenerated ../../java/javax/microedition/khronos/opengles generated/javax/microedition/khronos/opengles $x
 done
 
-for x in GLES10 GLES10Ext GLES11 GLES11Ext
+for x in GLES10 GLES10Ext GLES11 GLES11Ext GLES20
 do
     compareGenerated ../../java/android/opengl generated/android/opengl ${x}.java
     compareGenerated ../../../core/jni generated/C android_opengl_${x}.cpp

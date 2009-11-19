@@ -32,6 +32,7 @@ LOCAL_SRC_FILES:= \
 	android_opengl_GLES10Ext.cpp \
 	android_opengl_GLES11.cpp \
 	android_opengl_GLES11Ext.cpp \
+	android_opengl_GLES20.cpp \
 	android_database_CursorWindow.cpp \
 	android_database_SQLiteDebug.cpp \
 	android_database_SQLiteDatabase.cpp \
@@ -163,6 +164,7 @@ LOCAL_SHARED_LIBRARIES := \
 	libdvm \
 	libEGL \
 	libGLESv1_CM \
+	libGLESv2 \
 	libhardware \
 	libhardware_legacy \
 	libsonivox \
