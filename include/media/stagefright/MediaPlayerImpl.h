@@ -112,7 +112,9 @@ private:
 
     MediaSource *makeShoutcastSource(const char *path);
 
-    void displayOrDiscardFrame(MediaBuffer *buffer, int64_t pts_us);
+    void displayOrDiscardFrame(
+            MediaBuffer **lastBuffer, MediaBuffer *buffer, int64_t pts_us);
+
     void populateISurface();
     void depopulateISurface();
     void sendFrameToISurface(MediaBuffer *buffer);
