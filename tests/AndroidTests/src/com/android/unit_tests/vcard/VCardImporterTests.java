@@ -18,7 +18,6 @@ package com.android.unit_tests.vcard;
 
 import android.content.ContentValues;
 import android.pim.vcard.VCardConfig;
-import android.pim.vcard.VCardParser;
 import android.pim.vcard.VCardParser_V21;
 import android.pim.vcard.exception.VCardException;
 import android.provider.ContactsContract.Data;
@@ -869,7 +868,7 @@ public class VCardImporterTests extends VCardTestsBase {
 
         elem.addExpected(StructuredPostal.CONTENT_ITEM_TYPE)
                 .put(StructuredPostal.POSTCODE, "150-8512")
-                .put(StructuredPostal.NEIGHBORHOOD,
+                .put(StructuredPostal.STREET,
                         "\u6771\u4EAC\u90FD\u6E0B\u8C37\u533A\u685C" +
                         "\u4E18\u753A\u0032\u0036\u002D\u0031\u30BB" +
                         "\u30EB\u30EA\u30A2\u30F3\u30BF\u30EF\u30FC" +
