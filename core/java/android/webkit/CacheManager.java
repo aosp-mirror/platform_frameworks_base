@@ -74,6 +74,11 @@ public final class CacheManager {
     // Flag to clear the cache when the CacheManager is initialized
     private static boolean mClearCacheOnInit = false;
 
+    /**
+     * This class represents a resource retrieved from the HTTP cache.
+     * Instances of this class can be obtained by invoking the
+     * CacheManager.getCacheFile() method.
+     */
     public static class CacheResult {
         // these fields are saved to the database
         int httpStatusCode;
