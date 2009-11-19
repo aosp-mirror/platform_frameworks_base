@@ -210,8 +210,6 @@ public class VCardJapanizationTests extends VCardTestsBase {
         ContactEntry entry = verifier.addInputEntry();
         entry.buildData(StructuredPostal.CONTENT_ITEM_TYPE)
                 .put(StructuredPostal.POBOX, "\u79C1\u66F8\u7BB107")
-                .put(StructuredPostal.NEIGHBORHOOD,
-                "\u30A2\u30D1\u30FC\u30C8\u0020\u0033\u0034\u53F7\u5BA4")
                 .put(StructuredPostal.STREET, "\u96DB\u898B\u6CA2\u6751")
                 .put(StructuredPostal.CITY, "\u9E7F\u9AA8\u5E02")
                 .put(StructuredPostal.REGION, "\u00D7\u00D7\u770C")
@@ -233,29 +231,22 @@ public class VCardJapanizationTests extends VCardTestsBase {
         // LABEL must be ignored in vCard 2.1. As for vCard 3.0, the current behavior is
         // same as that in vCard 3.0, which can be changed in the future.
         elem.addNodeWithoutOrder("ADR", Arrays.asList("\u79C1\u66F8\u7BB107",
-                "\u30A2\u30D1\u30FC\u30C8\u0020\u0033\u0034\u53F7\u5BA4",
-                "\u96DB\u898B\u6CA2\u6751", "\u9E7F\u9AA8\u5E02", "\u00D7\u00D7\u770C",
+                "", "\u96DB\u898B\u6CA2\u6751", "\u9E7F\u9AA8\u5E02", "\u00D7\u00D7\u770C",
                 "494-1313", "\u65E5\u672C"),
                 contentValues);
-        // NEIGHBORHOOD is "not" used. Instead, "Extended address" is appended into the
-        // other field with a space.
         verifier.addImportVerifier().addExpected(StructuredPostal.CONTENT_ITEM_TYPE)
                 .put(StructuredPostal.POBOX, "\u79C1\u66F8\u7BB107")
-                .put(StructuredPostal.STREET, "\u96DB\u898B\u6CA2\u6751 "
-                        + "\u30A2\u30D1\u30FC\u30C8\u0020\u0033\u0034\u53F7\u5BA4")
-                        .put(StructuredPostal.CITY, "\u9E7F\u9AA8\u5E02")
+                .put(StructuredPostal.STREET, "\u96DB\u898B\u6CA2\u6751")
+                .put(StructuredPostal.CITY, "\u9E7F\u9AA8\u5E02")
                 .put(StructuredPostal.REGION, "\u00D7\u00D7\u770C")
                 .put(StructuredPostal.POSTCODE, "494-1313")
                 .put(StructuredPostal.COUNTRY, "\u65E5\u672C")
                 .put(StructuredPostal.FORMATTED_ADDRESS,
                         "\u65E5\u672C 494-1313 \u00D7\u00D7\u770C \u9E7F\u9AA8\u5E02 " +
-                        "\u96DB\u898B\u6CA2\u6751 "
-                        + "\u30A2\u30D1\u30FC\u30C8\u0020\u0033\u0034\u53F7\u5BA4 " +
-                        "\u79C1\u66F8\u7BB107")
+                        "\u96DB\u898B\u6CA2\u6751 " + "\u79C1\u66F8\u7BB107")
                 .put(StructuredPostal.TYPE, StructuredPostal.TYPE_HOME);
         verifier.verify();
     }
-
     public void testPostalAddresswithJapaneseV21() {
         testPostalAddressWithJapaneseCommon(VCardConfig.VCARD_TYPE_V21_JAPANESE_SJIS);
     }

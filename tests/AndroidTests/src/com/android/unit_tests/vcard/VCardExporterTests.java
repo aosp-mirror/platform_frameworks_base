@@ -563,9 +563,11 @@ public class VCardExporterTests extends VCardTestsBase {
         // adr-value    = 0*6(text-value ";") text-value
         //              ; PO Box, Extended Address, Street, Locality, Region, Postal Code,
         //              ; Country Name
+        //
+        // The NEIGHBORHOOD field is appended after the CITY field.
         verifier.addPropertyNodesVerifierElemWithEmptyName()
                 .addNodeWithoutOrder("ADR",
-                        Arrays.asList("Pobox", "Neighborhood", "Street", "City",
+                        Arrays.asList("Pobox", "", "Street", "City Neighborhood",
                                 "Region", "100", "Country"), new TypeSet("WORK"));
         verifier.verify();
     }
@@ -576,6 +578,44 @@ public class VCardExporterTests extends VCardTestsBase {
 
     public void testPostalAddressV30() {
         testPostalAddressCommon(V30);
+    }
+
+    private void testPostalAddressNonNeighborhood(int vcardType) {
+        VCardVerifier verifier = new VCardVerifier(vcardType);
+        ContactEntry entry = verifier.addInputEntry();
+        entry.buildData(StructuredPostal.CONTENT_ITEM_TYPE)
+                .put(StructuredPostal.CITY, "City");
+        verifier.addPropertyNodesVerifierElemWithEmptyName()
+                .addNodeWithoutOrder("ADR",
+                        Arrays.asList("", "", "", "City", "", "", ""), new TypeSet("HOME"));
+        verifier.verify();
+    }
+
+    public void testPostalAddressNonNeighborhoodV21() {
+        testPostalAddressNonNeighborhood(V21);
+    }
+
+    public void testPostalAddressNonNeighborhoodV30() {
+        testPostalAddressNonNeighborhood(V30);
+    }
+
+    private void testPostalAddressNonCity(int vcardType) {
+        VCardVerifier verifier = new VCardVerifier(vcardType);
+        ContactEntry entry = verifier.addInputEntry();
+        entry.buildData(StructuredPostal.CONTENT_ITEM_TYPE)
+                .put(StructuredPostal.NEIGHBORHOOD, "Neighborhood");
+        verifier.addPropertyNodesVerifierElemWithEmptyName()
+                .addNodeWithoutOrder("ADR",
+                        Arrays.asList("", "", "", "Neighborhood", "", "", ""), new TypeSet("HOME"));
+        verifier.verify();
+    }
+
+    public void testPostalAddressNonCityV21() {
+        testPostalAddressNonCity(V21);
+    }
+
+    public void testPostalAddressNonCityV30() {
+        testPostalAddressNonCity(V30);
     }
 
     private void testPostalOnlyWithFormattedAddressCommon(int vcardType) {
