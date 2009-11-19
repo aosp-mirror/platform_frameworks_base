@@ -256,9 +256,22 @@ public class VCardUtils {
             builder.withValue(StructuredPostal.LABEL, postalData.label);
         }
 
+        final String streetString;
+        if (TextUtils.isEmpty(postalData.street)) {
+            if (TextUtils.isEmpty(postalData.extendedAddress)) {
+                streetString = null;
+            } else {
+                streetString = postalData.extendedAddress;
+            }
+        } else {
+            if (TextUtils.isEmpty(postalData.extendedAddress)) {
+                streetString = postalData.street;
+            } else {
+                streetString = postalData.street + " " + postalData.extendedAddress;
+            }
+        }
         builder.withValue(StructuredPostal.POBOX, postalData.pobox);
-        builder.withValue(StructuredPostal.NEIGHBORHOOD, postalData.extendedAddress);
-        builder.withValue(StructuredPostal.STREET, postalData.street);
+        builder.withValue(StructuredPostal.STREET, streetString);
         builder.withValue(StructuredPostal.CITY, postalData.localty);
         builder.withValue(StructuredPostal.REGION, postalData.region);
         builder.withValue(StructuredPostal.POSTCODE, postalData.postalCode);
