@@ -101,10 +101,10 @@ public final class WallpaperInfo implements Parcelable {
                     com.android.internal.R.styleable.Wallpaper_thumbnail,
                     -1);
             authorRes = sa.getResourceId(
-                    com.android.internal.R.styleable.Wallpaper_wallpaperAuthor,
+                    com.android.internal.R.styleable.Wallpaper_author,
                     -1);
             descriptionRes = sa.getResourceId(
-                    com.android.internal.R.styleable.Wallpaper_wallpaperDescription,
+                    com.android.internal.R.styleable.Wallpaper_description,
                     -1);
 
             sa.recycle();
