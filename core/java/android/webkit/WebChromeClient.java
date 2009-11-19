@@ -256,13 +256,13 @@ public class WebChromeClient {
     }
 
     /**
-     * Add a JavaScript error message to the console. Clients should override
-     * this to process the log message as they see fit.
+     * Report a JavaScript error message to the host application. The ChromeClient
+     * should override this to process the log message as they see fit.
      * @param message The error message to report.
      * @param lineNumber The line number of the error.
      * @param sourceID The name of the source file that caused the error.
      */
-    public void addMessageToConsole(String message, int lineNumber, String sourceID) {}
+    public void onConsoleMessage(String message, int lineNumber, String sourceID) {}
 
     /**
      * When not playing, video elements are represented by a 'poster' image. The
