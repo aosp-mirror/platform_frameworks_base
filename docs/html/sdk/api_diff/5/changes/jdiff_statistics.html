@@ -45,16 +45,16 @@ body{overflow:auto;}
         <td colspan="2" class="diffspechead">API Diff Specification</td>
       </tr>
       <tr>
-        <td class="diffspec" style="padding-top:.25em">To Version:</td>
+        <td class="diffspec" style="padding-top:.25em">To Level:</td>
         <td class="diffvaluenew" style="padding-top:.25em">5</td>
       </tr>
       <tr>
-        <td class="diffspec">From Version:</td>
+        <td class="diffspec">From Level:</td>
         <td class="diffvalueold">4</td>
       </tr>
       <tr>
         <td class="diffspec">Generated</td>
-        <td class="diffvalue">2009.10.21 21:05</td>
+        <td class="diffvalue">2009.11.19 19:35</td>
       </tr>
     </table>
     </div><!-- End and-diff-id -->
@@ -71,29 +71,71 @@ body{overflow:auto;}
 <div id="doc-content" style="position:relative;">
 <div id="mainBodyFluid">
 <h1>API&nbsp;Change&nbsp;Statistics</h1>
-<p>
-The percent change statistic reported for all elements in the &quot;to&quot; API Level specification is defined recursively as follows:</p>
-<pre>
-Percentage difference = 100 * (added + removed + 2*changed)
-                        -----------------------------------
-                        sum of public elements in BOTH APIs
-</pre>
-<p>where <code>added</code> is the number of packages added, <code>removed</code> is the number of packages removed, and <code>changed</code> is the number of packages changed.
-This definition is applied recursively for the classes and their program elements, so the value for a changed package will be less than 1, unless every class in that package has changed.
-The definition ensures that if all packages are removed and all new packages are
-added, the change will be 100%. Values are rounded here, so a value of 0% indicates a percentage difference of less than 0.5%.</p>
-<p>The overall difference between the two APIs is approximately <span style="color:222;font-weight:bold;">2%</span>.
+<p>The overall difference between API Levels 4 and 5 is approximately <span style="color:222;font-weight:bold;">2.16%</span>.
 </p>
-<br><h2>Contents</h2>
-<dl><dt><a href="#packages">Changed Packages</a></dt> <dd>Sorted by percentage difference</dd>
-<dt><a href="#classes">Changed Classes and <i>Interfaces</i></a></dt><dd>Sorted by percentage difference</dd>
-<dt><a href="#numbers">Total of Differences</a></dt><dd>Listed by number and type</dd></dl>
+<br>
+<a name="numbers"></a>
+<h2>Total of Differences, by Number and Type</h2>
+<p>
+The table below lists the numbers of program elements (packages, classes, constructors, methods, and fields) that were added, changed, or removed. The table includes only the highest-level program elements &mdash; that is, if a class with two methods was added, the number of methods added does not include those two methods, but the number of classes added does include that class.
+</p>
+<TABLE summary="Number of differences" WIDTH="100%">
+<TR>
+  <th>Type</th>
+  <TH ALIGN="center"><b>Additions</b></TH>
+  <TH ALIGN="center"><b>Changes</b></TH>
+  <TH ALIGN="center">Removals</TH>
+  <TH ALIGN="center"><b>Total</b></TH>
+</TR>
+<TR>
+  <TD>Packages</TD>
+  <TD ALIGN="right">3</TD>
+  <TD ALIGN="right">30</TD>
+  <TD ALIGN="right">0</TD>
+  <TD ALIGN="right">33</TD>
+</TR>
+<TR>
+  <TD>Classes and <i>Interfaces</i></TD>
+  <TD ALIGN="right">85</TD>
+  <TD ALIGN="right">128</TD>
+  <TD ALIGN="right">0</TD>
+  <TD ALIGN="right">213</TD>
+</TR>
+<TR>
+  <TD>Constructors</TD>
+  <TD ALIGN="right">3</TD>
+  <TD ALIGN="right">11</TD>
+  <TD ALIGN="right">0</TD>
+  <TD ALIGN="right">14</TD>
+</TR>
+<TR>
+  <TD>Methods</TD>
+  <TD ALIGN="right">202</TD>
+  <TD ALIGN="right">67</TD>
+  <TD ALIGN="right">0</TD>
+  <TD ALIGN="right">269</TD>
+</TR>
+<TR>
+  <TD>Fields</TD>
+  <TD ALIGN="right">234</TD>
+  <TD ALIGN="right">205</TD>
+  <TD ALIGN="right">1</TD>
+  <TD ALIGN="right">440</TD>
+</TR>
+<TR>
+  <TD style="background-color:#FAFAFA"><b>Total</b></TD>
+  <TD  style="background-color:#FAFAFA" ALIGN="right"><strong>527</strong></TD>
+  <TD  style="background-color:#FAFAFA" ALIGN="right"><strong>441</strong></TD>
+  <TD  style="background-color:#FAFAFA" ALIGN="right"><strong>1</strong></TD>
+  <TD  style="background-color:#FAFAFA" ALIGN="right"><strong>969</strong></TD>
+</TR>
+</TABLE>
 <br>
 <a name="packages"></a>
 <h2>Changed Packages, Sorted by Percentage Difference</h2>
 <TABLE summary="Packages sorted by percentage difference" WIDTH="100%">
 <TR>
-  <TH  WIDTH="10%">Percentage Difference</TH>
+  <TH  WIDTH="10%">Percentage Difference*</TH>
   <TH>Package</TH>
 </TR>
 <TR>
@@ -137,16 +179,16 @@ added, the change will be 100%. Values are rounded here, so a value of 0% indica
   <TD><A HREF="pkg_android.app.html">android.app</A></TD>
 </TR>
 <TR>
-  <TD ALIGN="center">4</TD>
-  <TD><A HREF="pkg_android.telephony.html">android.telephony</A></TD>
-</TR>
-<TR>
   <TD ALIGN="center">3</TD>
   <TD><A HREF="pkg_android.media.html">android.media</A></TD>
 </TR>
 <TR>
   <TD ALIGN="center">3</TD>
   <TD><A HREF="pkg_android.text.format.html">android.text.format</A></TD>
+</TR>
+<TR>
+  <TD ALIGN="center">3</TD>
+  <TD><A HREF="pkg_android.telephony.html">android.telephony</A></TD>
 </TR>
 <TR>
   <TD ALIGN="center">2</TD>
@@ -158,10 +200,6 @@ added, the change will be 100%. Values are rounded here, so a value of 0% indica
 </TR>
 <TR>
   <TD ALIGN="center">2</TD>
-  <TD><A HREF="pkg_android.text.style.html">android.text.style</A></TD>
-</TR>
-<TR>
-  <TD ALIGN="center">1</TD>
   <TD><A HREF="pkg_android.view.html">android.view</A></TD>
 </TR>
 <TR>
@@ -170,11 +208,15 @@ added, the change will be 100%. Values are rounded here, so a value of 0% indica
 </TR>
 <TR>
   <TD ALIGN="center">1</TD>
-  <TD><A HREF="pkg_android.graphics.drawable.html">android.graphics.drawable</A></TD>
+  <TD><A HREF="pkg_android.text.style.html">android.text.style</A></TD>
 </TR>
 <TR>
   <TD ALIGN="center">1</TD>
   <TD><A HREF="pkg_android.widget.html">android.widget</A></TD>
+</TR>
+<TR>
+  <TD ALIGN="center">1</TD>
+  <TD><A HREF="pkg_android.graphics.drawable.html">android.graphics.drawable</A></TD>
 </TR>
 <TR>
   <TD ALIGN="center">&lt;1</TD>
@@ -206,10 +248,6 @@ added, the change will be 100%. Values are rounded here, so a value of 0% indica
 </TR>
 <TR>
   <TD ALIGN="center">&lt;1</TD>
-  <TD><A HREF="pkg_java.net.html">java.net</A></TD>
-</TR>
-<TR>
-  <TD ALIGN="center">&lt;1</TD>
   <TD><A HREF="pkg_android.text.html">android.text</A></TD>
 </TR>
 <TR>
@@ -218,23 +256,16 @@ added, the change will be 100%. Values are rounded here, so a value of 0% indica
 </TR>
 <TR>
   <TD ALIGN="center">&lt;1</TD>
-  <TD><A HREF="pkg_java.util.html">java.util</A></TD>
-</TR>
-<TR>
-  <TD ALIGN="center">&lt;1</TD>
-  <TD><A HREF="pkg_java.lang.html">java.lang</A></TD>
-</TR>
-<TR>
-  <TD ALIGN="center">&lt;1</TD>
   <TD><A HREF="pkg_android.graphics.html">android.graphics</A></TD>
 </TR>
 </TABLE>
+<p style="font-size:10px">* See <a href="#calculation">Calculation of Change Percentages</a>, below.</p>
 <br>
 <a name="classes"></a>
 <h2>Changed Classes and <i>Interfaces</i>, Sorted by Percentage Difference</h2>
 <TABLE summary="Classes sorted by percentage difference" WIDTH="100%">
 <TR WIDTH="20%">
-  <TH WIDTH="10%"><b>Percentage<br>Difference</b></TH>
+  <TH WIDTH="10%">Percentage<br>Difference*</TH>
   <TH><b>Class or <i>Interface</i></b></TH>
 </TR>
 <TR>
@@ -463,11 +494,6 @@ android.app.ActivityManager.RunningServiceInfo</A></TD>
 android.widget.SimpleCursorTreeAdapter</A></TD>
 </TR>
 <TR>
-  <TD ALIGN="center">18</TD>
-  <TD><A HREF="android.graphics.drawable.BitmapDrawable.html">
-android.graphics.drawable.BitmapDrawable</A></TD>
-</TR>
-<TR>
   <TD ALIGN="center">17</TD>
   <TD><A HREF="android.app.ActivityManager.RunningAppProcessInfo.html">
 android.app.ActivityManager.RunningAppProcessInfo</A></TD>
@@ -519,11 +545,6 @@ android.text.format.Formatter</A></TD>
 </TR>
 <TR>
   <TD ALIGN="center">14</TD>
-  <TD><A HREF="android.text.style.ImageSpan.html">
-android.text.style.ImageSpan</A></TD>
-</TR>
-<TR>
-  <TD ALIGN="center">14</TD>
   <TD><A HREF="android.view.HapticFeedbackConstants.html">
 android.view.HapticFeedbackConstants</A></TD>
 </TR>
@@ -536,6 +557,11 @@ android.view.HapticFeedbackConstants</A></TD>
   <TD ALIGN="center">12</TD>
   <TD><A HREF="android.hardware.Camera.html">
 android.hardware.Camera</A></TD>
+</TR>
+<TR>
+  <TD ALIGN="center">12</TD>
+  <TD><A HREF="android.graphics.drawable.BitmapDrawable.html">
+android.graphics.drawable.BitmapDrawable</A></TD>
 </TR>
 <TR>
   <TD ALIGN="center">12</TD>
@@ -564,11 +590,6 @@ dalvik.system.VMStack</A></TD>
 </TR>
 <TR>
   <TD ALIGN="center">10</TD>
-  <TD><A HREF="java.net.Socket.html">
-java.net.Socket</A></TD>
-</TR>
-<TR>
-  <TD ALIGN="center">10</TD>
   <TD><A HREF="java.util.concurrent.BlockingQueue.html">
 <i>java.util.concurrent.BlockingQueue</i></A></TD>
 </TR>
@@ -589,11 +610,6 @@ android.os.HandlerThread</A></TD>
 </TR>
 <TR>
   <TD ALIGN="center">8</TD>
-  <TD><A HREF="android.telephony.TelephonyManager.html">
-android.telephony.TelephonyManager</A></TD>
-</TR>
-<TR>
-  <TD ALIGN="center">8</TD>
   <TD><A HREF="android.widget.AutoCompleteTextView.html">
 android.widget.AutoCompleteTextView</A></TD>
 </TR>
@@ -601,11 +617,6 @@ android.widget.AutoCompleteTextView</A></TD>
   <TD ALIGN="center">8</TD>
   <TD><A HREF="android.provider.MediaStore.Images.Thumbnails.html">
 android.provider.MediaStore.Images.Thumbnails</A></TD>
-</TR>
-<TR>
-  <TD ALIGN="center">8</TD>
-  <TD><A HREF="android.graphics.drawable.NinePatchDrawable.html">
-android.graphics.drawable.NinePatchDrawable</A></TD>
 </TR>
 <TR>
   <TD ALIGN="center">7</TD>
@@ -624,18 +635,8 @@ android.media.AudioManager</A></TD>
 </TR>
 <TR>
   <TD ALIGN="center">6</TD>
-  <TD><A HREF="java.lang.String.html">
-java.lang.String</A></TD>
-</TR>
-<TR>
-  <TD ALIGN="center">6</TD>
   <TD><A HREF="android.view.Window.Callback.html">
 <i>android.view.Window.Callback</i></A></TD>
-</TR>
-<TR>
-  <TD ALIGN="center">6</TD>
-  <TD><A HREF="java.util.Date.html">
-java.util.Date</A></TD>
 </TR>
 <TR>
   <TD ALIGN="center">6</TD>
@@ -721,6 +722,11 @@ android.test.mock.MockPackageManager</A></TD>
   <TD ALIGN="center">3</TD>
   <TD><A HREF="android.view.ViewConfiguration.html">
 android.view.ViewConfiguration</A></TD>
+</TR>
+<TR>
+  <TD ALIGN="center">3</TD>
+  <TD><A HREF="android.telephony.TelephonyManager.html">
+android.telephony.TelephonyManager</A></TD>
 </TR>
 <TR>
   <TD ALIGN="center">3</TD>
@@ -894,71 +900,29 @@ android.inputmethodservice.InputMethodService</A></TD>
 </TR>
 <TR>
   <TD ALIGN="center">&lt;1</TD>
+  <TD><A HREF="android.view.ViewGroup.html">
+android.view.ViewGroup</A></TD>
+</TR>
+<TR>
+  <TD ALIGN="center">&lt;1</TD>
   <TD><A HREF="android.media.ToneGenerator.html">
 android.media.ToneGenerator</A></TD>
 </TR>
 </TABLE>
+<p style="font-size:10px">* See <a href="#calculation">Calculation of Change Percentages</a>, below.</p>
 <br>
-<a name="numbers"></a>
-<h2>Total of Differences, by Number and Type</h2>
+<h2 id="calculation">Calculation of Change Percentages</h2>
 <p>
-The table below lists the numbers of program elements (packages, classes, constructors, methods, and fields) that were removed, added or changed. The table includes only the highest-level program elements &mdash; that is, if a class with two methods was added, the number of methods added does not include those two methods, but the number of classes added does include that class.
-</p>
-<TABLE summary="Number of differences" WIDTH="100%">
-<TR>
-  <TH COLSPAN=5 NOWRAP>
-  Number of Differences</TH>
-</TR>
-<TR>
-  <TH>&nbsp;</TD>
-  <TH ALIGN="center"><b>Removals</b></TH>
-  <TH ALIGN="center"><b>Additions</b></TH>
-  <TH ALIGN="center"><b>Changes</b></TH>
-  <TH ALIGN="center"><b>Total</b></TH>
-</TR>
-<TR>
-  <TD>Packages</TD>
-  <TD ALIGN="right">0</TD>
-  <TD ALIGN="right">3</TD>
-  <TD ALIGN="right">33</TD>
-  <TD ALIGN="right">36</TD>
-</TR>
-<TR>
-  <TD>Classes and <i>Interfaces</i></TD>
-  <TD ALIGN="right">0</TD>
-  <TD ALIGN="right">85</TD>
-  <TD ALIGN="right">132</TD>
-  <TD ALIGN="right">217</TD>
-</TR>
-<TR>
-  <TD>Constructors</TD>
-  <TD ALIGN="right">2</TD>
-  <TD ALIGN="right">4</TD>
-  <TD ALIGN="right">26</TD>
-  <TD ALIGN="right">32</TD>
-</TR>
-<TR>
-  <TD>Methods</TD>
-  <TD ALIGN="right">0</TD>
-  <TD ALIGN="right">202</TD>
-  <TD ALIGN="right">67</TD>
-  <TD ALIGN="right">269</TD>
-</TR>
-<TR>
-  <TD>Fields</TD>
-  <TD ALIGN="right">0</TD>
-  <TD ALIGN="right">240</TD>
-  <TD ALIGN="right">205</TD>
-  <TD ALIGN="right">445</TD>
-</TR>
-<TR>
-  <TD><b>Total</b></TD>
-  <TD ALIGN="right">2</TD>
-  <TD ALIGN="right">534</TD>
-  <TD ALIGN="right">463</TD>
-  <TD ALIGN="right">999</TD>
-</TR>
-</TABLE>
+The percent change statistic reported for all elements in the &quot;to&quot; API Level specification is defined recursively as follows:</p>
+<pre>
+Percentage difference = 100 * (added + removed + 2*changed)
+                        -----------------------------------
+                        sum of public elements in BOTH APIs
+</pre>
+<p>where <code>added</code> is the number of packages added, <code>removed</code> is the number of packages removed, and <code>changed</code> is the number of packages changed.
+This definition is applied recursively for the classes and their program elements, so the value for a changed package will be less than 1, unless every class in that package has changed.
+The definition ensures that if all packages are removed and all new packages are
+added, the change will be 100%.</p>
       </div>	
       <div id="footer">
         <div id="copyright">

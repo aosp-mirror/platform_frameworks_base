@@ -22,7 +22,6 @@ body{overflow:auto;}
 </style>
 </noscript>
 <style type="text/css">
-body{background-image:url();padding:12px;}
 </style>
 </HEAD>
 <body class="gc-documentation">
@@ -55,7 +54,7 @@ body{background-image:url();padding:12px;}
       </tr>
       <tr>
         <td class="diffspec">Generated</td>
-        <td class="diffvalue">2009.04.20 09:15</td>
+        <td class="diffvalue">2009.11.19 19:35</td>
       </tr>
     </table>
     </div><!-- End and-diff-id -->
@@ -68,12 +67,13 @@ body{background-image:url();padding:12px;}
   </div> <!-- End and-diff-id -->
   </div> <!-- End headerRight -->
   </div> <!-- End header -->
-<div id="body-content">
+<div id="body-content" xstyle="padding:12px;padding-right:18px;">
 <div id="doc-content" style="position:relative;">
 <div id="mainBodyFluid">
     <div id="docTitleContainer">
 <h1>Android&nbsp;API&nbsp;Differences&nbsp;Report</h1>
-<p>This report details the changes in the core Android framework API between two API Level 
+<p>This report details the changes in the core Android framework API between two <a 
+href="http://developer.android.com/guide/appendix/api-levels.html" target="_top">API Level</a> 
 specifications. It shows additions, modifications, and removals for packages, classes, methods, and fields. 
 The report also includes general statistics that characterize the extent and type of the differences.</p>
 <p>This report is based a comparison of the Android API specifications 
@@ -83,7 +83,7 @@ older API. So, for example, API elements marked as removed are no longer present
 API specification.</p>
 <p>To navigate the report, use the "Select a Diffs Index" and "Filter the Index" 
 controls on the left. The report uses text formatting to indicate <em>interface names</em>, 
-<a href= ><tt>links to reference documentation</tt></a>, and <a href= >links to change 
+<a href= ><code>links to reference documentation</code></a>, and <a href= >links to change 
 description</a>. The statistics are accessible from the "Statistics" link in the upper-right corner.</p>
 <p>For more information about the Android framework API and SDK, 
 see the <a href="http://developer.android.com/index.html" target="_top">Android Developers site</a>.</p>
@@ -96,42 +96,42 @@ see the <a href="http://developer.android.com/index.html" target="_top">Android 
 <TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
   <TD VALIGN="TOP" WIDTH="25%">
   <A NAME="android.appwidget"></A>
-  <nobr><A HREF="../../../../reference/android/appwidget/package-summary.html" target="_top"><xfont size="+1"><tt>android.appwidget</tt></font></A></nobr>
+  <nobr><A HREF="../../../../reference/android/appwidget/package-summary.html" target="_top"><code>android.appwidget</code></A></nobr>
   </TD>
   <TD>&nbsp;</TD>
 </TR>
 <TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
   <TD VALIGN="TOP" WIDTH="25%">
   <A NAME="android.inputmethodservice"></A>
-  <nobr><A HREF="../../../../reference/android/inputmethodservice/package-summary.html" target="_top"><xfont size="+1"><tt>android.inputmethodservice</tt></font></A></nobr>
+  <nobr><A HREF="../../../../reference/android/inputmethodservice/package-summary.html" target="_top"><code>android.inputmethodservice</code></A></nobr>
   </TD>
   <TD>&nbsp;</TD>
 </TR>
 <TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
   <TD VALIGN="TOP" WIDTH="25%">
   <A NAME="android.speech"></A>
-  <nobr><A HREF="../../../../reference/android/speech/package-summary.html" target="_top"><xfont size="+1"><tt>android.speech</tt></font></A></nobr>
+  <nobr><A HREF="../../../../reference/android/speech/package-summary.html" target="_top"><code>android.speech</code></A></nobr>
   </TD>
   <TD>&nbsp;</TD>
 </TR>
 <TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
   <TD VALIGN="TOP" WIDTH="25%">
   <A NAME="android.text.format"></A>
-  <nobr><A HREF="../../../../reference/android/text/format/package-summary.html" target="_top"><xfont size="+1"><tt>android.text.format</tt></font></A></nobr>
+  <nobr><A HREF="../../../../reference/android/text/format/package-summary.html" target="_top"><code>android.text.format</code></A></nobr>
   </TD>
   <TD>&nbsp;</TD>
 </TR>
 <TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
   <TD VALIGN="TOP" WIDTH="25%">
   <A NAME="android.view.inputmethod"></A>
-  <nobr><A HREF="../../../../reference/android/view/inputmethod/package-summary.html" target="_top"><xfont size="+1"><tt>android.view.inputmethod</tt></font></A></nobr>
+  <nobr><A HREF="../../../../reference/android/view/inputmethod/package-summary.html" target="_top"><code>android.view.inputmethod</code></A></nobr>
   </TD>
   <TD>&nbsp;</TD>
 </TR>
 <TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
   <TD VALIGN="TOP" WIDTH="25%">
   <A NAME="java.beans"></A>
-  <nobr><A HREF="../../../../reference/java/beans/package-summary.html" target="_top"><xfont size="+1"><tt>java.beans</tt></font></A></nobr>
+  <nobr><A HREF="../../../../reference/java/beans/package-summary.html" target="_top"><code>java.beans</code></A></nobr>
   </TD>
   <TD>&nbsp;</TD>
 </TR>
@@ -378,27 +378,6 @@ see the <a href="http://developer.android.com/index.html" target="_top">Android 
   <TD VALIGN="TOP" WIDTH="25%">
   <A NAME="java.lang"></A>
   <nobr><A HREF="pkg_java.lang.html">java.lang</A></nobr>
-  </TD>
-  <TD>&nbsp;</TD>
-</TR>
-<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
-  <TD VALIGN="TOP" WIDTH="25%">
-  <A NAME="java.lang.reflect"></A>
-  <nobr><A HREF="pkg_java.lang.reflect.html">java.lang.reflect</A></nobr>
-  </TD>
-  <TD>&nbsp;</TD>
-</TR>
-<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
-  <TD VALIGN="TOP" WIDTH="25%">
-  <A NAME="java.net"></A>
-  <nobr><A HREF="pkg_java.net.html">java.net</A></nobr>
-  </TD>
-  <TD>&nbsp;</TD>
-</TR>
-<TR BGCOLOR="#FFFFFF" CLASS="TableRowColor">
-  <TD VALIGN="TOP" WIDTH="25%">
-  <A NAME="java.util"></A>
-  <nobr><A HREF="pkg_java.util.html">java.util</A></nobr>
   </TD>
   <TD>&nbsp;</TD>
 </TR>
