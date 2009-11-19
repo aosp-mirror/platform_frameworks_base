@@ -59,6 +59,7 @@ import static android.provider.Settings.System.SCREEN_OFF_TIMEOUT;
 import static android.provider.Settings.System.STAY_ON_WHILE_PLUGGED_IN;
 
 import java.io.FileDescriptor;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -2090,6 +2091,20 @@ class PowerManagerService extends IPowerManager.Stub
         }
     }
     
+    /**
+     * Reboot the device immediately, passing 'reason' (may be null)
+     * to the underlying __reboot system call.  Should not return.
+     */
+    public void reboot(String reason)
+    {
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.REBOOT, null);
+        try {
+            Power.reboot(reason);
+        } catch (IOException e) {
+            Log.e(TAG, "reboot failed", e);
+        }
+    }
+
     /**
      * Returns the time the screen has been on since boot, in millis.
      * @return screen on time
