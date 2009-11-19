@@ -97,7 +97,6 @@ AudioTrack::~AudioTrack()
         }
         mAudioTrack.clear();
         IPCThreadState::self()->flushCommands();
-        AudioSystem::releaseOutput(getOutput());
     }
 }
 
@@ -318,8 +317,6 @@ void AudioTrack::start()
      }
 
     if (android_atomic_or(1, &mActive) == 0) {
-        audio_io_handle_t output = getOutput();
-        AudioSystem::startOutput(output, (AudioSystem::stream_type)mStreamType);
         mNewPosition = mCblk->server + mUpdatePeriod;
         mCblk->bufferTimeoutMs = MAX_STARTUP_TIMEOUT_MS;
         mCblk->waitTimeMs = 0;
@@ -333,10 +330,13 @@ void AudioTrack::start()
         if (status == DEAD_OBJECT) {
             LOGV("start() dead IAudioTrack: creating a new one");
             status = createTrack(mStreamType, mCblk->sampleRate, mFormat, mChannelCount,
-                                 mFrameCount, mFlags, mSharedBuffer, output);
-            mNewPosition = mCblk->server + mUpdatePeriod;
-            mCblk->bufferTimeoutMs = MAX_STARTUP_TIMEOUT_MS;
-            mCblk->waitTimeMs = 0;
+                                 mFrameCount, mFlags, mSharedBuffer, getOutput());
+            if (status == NO_ERROR) {
+                status = mAudioTrack->start();
+                if (status == NO_ERROR) {
+                    mNewPosition = mCblk->server + mUpdatePeriod;
+                }
+            }
         }
         if (status != NO_ERROR) {
             LOGV("start() failed");
@@ -346,7 +346,6 @@ void AudioTrack::start()
             } else {
                 setpriority(PRIO_PROCESS, 0, ANDROID_PRIORITY_NORMAL);
             }
-            AudioSystem::stopOutput(output, (AudioSystem::stream_type)mStreamType);
         }
     }
 
@@ -383,7 +382,6 @@ void AudioTrack::stop()
         } else {
             setpriority(PRIO_PROCESS, 0, ANDROID_PRIORITY_NORMAL);
         }
-        AudioSystem::stopOutput(getOutput(), (AudioSystem::stream_type)mStreamType);
     }
 
     if (t != 0) {
@@ -418,9 +416,7 @@ void AudioTrack::pause()
 {
     LOGV("pause");
     if (android_atomic_and(~1, &mActive) == 1) {
-        mActive = 0;
         mAudioTrack->pause();
-        AudioSystem::stopOutput(getOutput(), (AudioSystem::stream_type)mStreamType);
     }
 }
 
@@ -658,7 +654,8 @@ status_t AudioTrack::createTrack(
     }
 
     mCblk->volumeLR = (int32_t(int16_t(mVolume[LEFT] * 0x1000)) << 16) | int16_t(mVolume[RIGHT] * 0x1000);
-
+    mCblk->bufferTimeoutMs = MAX_STARTUP_TIMEOUT_MS;
+    mCblk->waitTimeMs = 0;
     return NO_ERROR;
 }
 
@@ -709,6 +706,7 @@ status_t AudioTrack::obtainBuffer(Buffer* audioBuffer, int32_t waitCount)
                             if (result == NO_ERROR) {
                                 cblk = mCblk;
                                 cblk->bufferTimeoutMs = MAX_RUN_TIMEOUT_MS;
+                                mAudioTrack->start();
                             }
                         }
                         cblk->lock.lock();
