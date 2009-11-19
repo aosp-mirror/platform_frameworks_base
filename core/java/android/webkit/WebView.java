@@ -4682,7 +4682,9 @@ public class WebView extends AbsoluteLayout
         switchOutDrawHistory();
         float scale = mActualScale * 0.8f;
         if (scale < (mMinZoomScale + 0.1f)
-                && mWebViewCore.getSettings().getUseWideViewPort()) {
+                && mWebViewCore.getSettings().getUseWideViewPort()
+                && mZoomOverviewWidth > Math.ceil(getViewWidth()
+                        * mInvActualScale)) {
             // when zoom out to min scale, switch to overview mode
             doDoubleTap();
             return true;
@@ -4829,9 +4831,15 @@ public class WebView extends AbsoluteLayout
         }
         settings.setDoubleTapToastCount(0);
         if (mInZoomOverview) {
-            // Force the titlebar fully reveal in overview mode
-            if (mScrollY < getTitleHeight()) mScrollY = 0;
-            zoomWithPreview((float) getViewWidth() / mZoomOverviewWidth);
+            float newScale = (float) getViewWidth() / mZoomOverviewWidth;
+            if (Math.abs(mActualScale - newScale) < 0.01f) {
+                // reset mInZoomOverview to false if scale doesn't change
+                mInZoomOverview = false;
+            } else {
+                // Force the titlebar fully reveal in overview mode
+                if (mScrollY < getTitleHeight()) mScrollY = 0;
+                zoomWithPreview(newScale);
+            }
         } else {
             // mLastTouchX and mLastTouchY are the point in the current viewport
             int contentX = viewToContentX((int) mLastTouchX + mScrollX);
