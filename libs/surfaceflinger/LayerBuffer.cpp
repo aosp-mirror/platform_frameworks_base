@@ -118,7 +118,12 @@ uint32_t LayerBuffer::doTransaction(uint32_t flags)
     sp<Source> source(getSource());
     if (source != 0)
         source->onTransaction(flags);
-    return LayerBase::doTransaction(flags);    
+    uint32_t res = LayerBase::doTransaction(flags);
+    // we always want filtering for these surfaces
+    if (!(mFlags & DisplayHardware::SLOW_CONFIG)) {
+        mUseLinearFiltering = true;
+    }
+    return res;
 }
 
 void LayerBuffer::unlockPageFlip(const Transform& planeTransform,
