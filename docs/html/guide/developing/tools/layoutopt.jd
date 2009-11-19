@@ -45,7 +45,7 @@ samples/useless.xml
    11:17 This LinearLayout layout or its FrameLayout parent is useless</pre>
 
 <p>The <code>layoutopt</code> tool is available in SDK Tools, Revision 3 or
-later. If you do not have SDK Tools 3 or later installed in your SDK, you can
+later. If you do not have SDK Tools r3 or later installed in your SDK, you can
 download it from the Android SDK repository site using the Android SDK and AVD
 Manager. For information, see <a
 href="{@docRoot}sdk/adding-components.html">Adding SDK Components</a>.</p>

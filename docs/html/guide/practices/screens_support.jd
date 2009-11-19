@@ -700,9 +700,7 @@ to the baseline screen configuration.</td>
 example, if your application is designed to run on both Android 1.5 (API Level
 3) and Android 1.6 (API Level 4 and higher), you can use the <code>-v4</code>
 qualifier to tag any resources that should be excluded when your application is
-running on Android 1.5 (API Level 3). Using the version qualifier is necessary
-in some cases, if the older platform is inadvertently loading resources from a
-directory containing resources for a newer platform. </td>
+running on Android 1.5 (API Level 3).  </td>
 </tr>
 </table>
 

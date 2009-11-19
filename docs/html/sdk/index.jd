@@ -1,19 +1,19 @@
 page.title=Android SDK
 sdk.redirect=0
-sdk.version=2.0
-sdk.date=October 2009
+sdk.version=2.0.1
+sdk.date=December 2009
 
-sdk.win_download=android-sdk_r3-windows.zip
-sdk.win_bytes=23070805
-sdk.win_checksum=bd7b57d5df37bd55ea101e76b24260a8
+sdk.win_download=android-sdk_r4-windows.zip
+sdk.win_bytes=23069119
+sdk.win_checksum=c48b407de852ba483869f17337e90997
 
-sdk.mac_download=android-sdk_r3-mac.zip
-sdk.mac_bytes=19653431
-sdk.mac_checksum=f6674bf45e5e36811eea7e584f0c1d67
+sdk.mac_download=android-sdk_r4-mac.zip
+sdk.mac_bytes=19657927
+sdk.mac_checksum=b08512765aa9b0369bb9b8fecdf763e3
 
-sdk.linux_download=android-sdk_r3-linux.tgz
-sdk.linux_bytes=15986291
-sdk.linux_checksum=3e1534e7fc15d154ff81616f0dc1545c
+sdk.linux_download=android-sdk_r4-linux.tgz
+sdk.linux_bytes=15984887
+sdk.linux_checksum=ef84b08fd9da84f4c4ae77564fe4eaee
 
 @jd:body
 
