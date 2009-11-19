@@ -22,7 +22,8 @@ import junit.framework.TestCase;
 
 public class VCardUtilsTests extends TestCase {
     public void testContainsOnlyPrintableAscii() {
-        assertTrue(VCardUtils.containsOnlyPrintableAscii(null));
+        assertTrue(VCardUtils.containsOnlyPrintableAscii((String)null));
+        assertTrue(VCardUtils.containsOnlyPrintableAscii((String[])null));
         assertTrue(VCardUtils.containsOnlyPrintableAscii(""));
         assertTrue(VCardUtils.containsOnlyPrintableAscii("abcdefghijklmnopqrstuvwxyz"));
         assertTrue(VCardUtils.containsOnlyPrintableAscii("ABCDEFGHIJKLMNOPQRSTUVWXYZ"));
@@ -37,7 +38,8 @@ public class VCardUtilsTests extends TestCase {
     }
 
     public void testContainsOnlyNonCrLfPrintableAscii() {
-        assertTrue(VCardUtils.containsOnlyNonCrLfPrintableAscii(null));
+        assertTrue(VCardUtils.containsOnlyNonCrLfPrintableAscii((String)null));
+        assertTrue(VCardUtils.containsOnlyNonCrLfPrintableAscii((String[])null));
         assertTrue(VCardUtils.containsOnlyNonCrLfPrintableAscii(""));
         assertTrue(VCardUtils.containsOnlyNonCrLfPrintableAscii("abcdefghijklmnopqrstuvwxyz"));
         assertTrue(VCardUtils.containsOnlyNonCrLfPrintableAscii("ABCDEFGHIJKLMNOPQRSTUVWXYZ"));
@@ -53,7 +55,8 @@ public class VCardUtilsTests extends TestCase {
     }
 
     public void testContainsOnlyAlphaDigitHyphen() {
-        assertTrue(VCardUtils.containsOnlyAlphaDigitHyphen(null));
+        assertTrue(VCardUtils.containsOnlyAlphaDigitHyphen((String)null));
+        assertTrue(VCardUtils.containsOnlyAlphaDigitHyphen((String[])null));
         assertTrue(VCardUtils.containsOnlyAlphaDigitHyphen(""));
         assertTrue(VCardUtils.containsOnlyNonCrLfPrintableAscii("abcdefghijklmnopqrstuvwxyz"));
         assertTrue(VCardUtils.containsOnlyNonCrLfPrintableAscii("ABCDEFGHIJKLMNOPQRSTUVWXYZ"));

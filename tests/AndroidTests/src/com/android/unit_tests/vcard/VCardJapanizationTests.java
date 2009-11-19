@@ -205,11 +205,50 @@ public class VCardJapanizationTests extends VCardTestsBase {
         verifier.verify();
     }
 
+    private void testPostalAddressWithJapaneseCommon(int vcardType) {
+        VCardVerifier verifier = new VCardVerifier(vcardType);
+        ContactEntry entry = verifier.addInputEntry();
+        entry.buildData(StructuredPostal.CONTENT_ITEM_TYPE)
+                .put(StructuredPostal.POBOX, "\u79C1\u66F8\u7BB107")
+                .put(StructuredPostal.NEIGHBORHOOD,
+                        "\u30A2\u30D1\u30FC\u30C8\u0020\u0033\u0034\u53F7\u5BA4")
+                .put(StructuredPostal.STREET, "\u96DB\u898B\u6CA2\u6751")
+                .put(StructuredPostal.CITY, "\u9E7F\u9AA8\u5E02")
+                .put(StructuredPostal.REGION, "\u00D7\u00D7\u770C")
+                .put(StructuredPostal.POSTCODE, "494-1313")
+                .put(StructuredPostal.COUNTRY, "\u65E5\u672C")
+                .put(StructuredPostal.FORMATTED_ADDRESS,
+                        "\u3053\u3093\u306A\u3068\u3053\u308D\u3092\u898B"
+                        + "\u308B\u306A\u3093\u3066\u6687\u4EBA\u3067\u3059\u304B\uFF1F")
+                .put(StructuredPostal.TYPE, StructuredPostal.TYPE_CUSTOM)
+                .put(StructuredPostal.LABEL, "\u304A\u3082\u3061\u304B\u3048\u308A");
+
+        ContentValues contentValues = (VCardConfig.usesShiftJis(vcardType) ?
+                (VCardConfig.isV30(vcardType) ? mContentValuesForSJis :
+                    mContentValuesForQPAndSJis) :
+                (VCardConfig.isV30(vcardType) ? mContentValuesForUtf8 :
+                    mContentValuesForQPAndUtf8));
+
+        PropertyNodesVerifierElem elem = verifier.addPropertyNodesVerifierElemWithEmptyName();
+        // LABEL must be ignored in vCard 2.1. As for vCard 3.0, the current behavior is
+        // same as that in vCard 3.0, which can be changed in the future.
+        elem.addNodeWithoutOrder("ADR", Arrays.asList("\u79C1\u66F8\u7BB107",
+                "\u30A2\u30D1\u30FC\u30C8\u0020\u0033\u0034\u53F7\u5BA4",
+                "\u96DB\u898B\u6CA2\u6751", "\u9E7F\u9AA8\u5E02", "\u00D7\u00D7\u770C",
+                "494-1313", "\u65E5\u672C"),
+                contentValues);
+        verifier.verify();
+    }
+
+    public void testPostalAddresswithJapaneseV21() {
+        testPostalAddressWithJapaneseCommon(VCardConfig.VCARD_TYPE_V21_JAPANESE_SJIS);
+    }
+
     /**
      * Verifies that only one address field is emitted toward DoCoMo phones.
      * Prefered type must (should?) be: HOME > WORK > OTHER > CUSTOM
      */
-    public void testAdrressFieldEmittionForDoCoMo_1() {
+    public void testPostalAdrressForDoCoMo_1() {
         VCardVerifier verifier = new VCardVerifier(VCardConfig.VCARD_TYPE_DOCOMO);
         ContactEntry entry = verifier.addInputEntry();
         entry.buildData(StructuredPostal.CONTENT_ITEM_TYPE)
@@ -238,7 +277,7 @@ public class VCardJapanizationTests extends VCardTestsBase {
         verifier.verify();
     }
 
-    public void testAdrressFieldEmittionForDoCoMo_2() {
+    public void testPostalAdrressForDoCoMo_2() {
         VCardVerifier verifier = new VCardVerifier(VCardConfig.VCARD_TYPE_DOCOMO);
         ContactEntry entry = verifier.addInputEntry();
         entry.buildData(StructuredPostal.CONTENT_ITEM_TYPE)
@@ -264,7 +303,7 @@ public class VCardJapanizationTests extends VCardTestsBase {
         verifier.verify();
     }
 
-    public void testAdrressFieldEmittionForDoCoMo_3() {
+    public void testPostalAdrressForDoCoMo_3() {
         VCardVerifier verifier = new VCardVerifier(VCardConfig.VCARD_TYPE_DOCOMO);
         ContactEntry entry = verifier.addInputEntry();
         entry.buildData(StructuredPostal.CONTENT_ITEM_TYPE)
@@ -293,7 +332,7 @@ public class VCardJapanizationTests extends VCardTestsBase {
     /**
      * Verifies the vCard exporter tolerates null TYPE.
      */
-    public void testAdrressFieldEmittionForDoCoMo_4() {
+    public void testPostalAdrressForDoCoMo_4() {
         VCardVerifier verifier = new VCardVerifier(VCardConfig.VCARD_TYPE_DOCOMO);
         ContactEntry entry = verifier.addInputEntry();
         entry.buildData(StructuredPostal.CONTENT_ITEM_TYPE)
