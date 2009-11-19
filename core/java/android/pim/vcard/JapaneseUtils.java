@@ -370,7 +370,7 @@ import java.util.Map;
      * @param ch input character
      * @return CharSequence object if the mapping for ch exists. Return null otherwise.
      */
-    public static CharSequence tryGetHalfWidthText(char ch) {
+    public static String tryGetHalfWidthText(char ch) {
         if (sHalfWidthMap.containsKey(ch)) {
             return sHalfWidthMap.get(ch);
         } else {

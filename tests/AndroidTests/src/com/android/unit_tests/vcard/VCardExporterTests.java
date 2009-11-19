@@ -546,12 +546,9 @@ public class VCardExporterTests extends VCardTestsBase {
         testEmailPrefHandlingCommon(V30);
     }
 
-    private void testPostalOnlyWithStructuredDataCommon(int vcardType) {
+    private void testPostalAddressCommon(int vcardType) {
         VCardVerifier verifier = new VCardVerifier(vcardType);
         ContactEntry entry = verifier.addInputEntry();
-        // adr-value    = 0*6(text-value ";") text-value
-        //              ; PO Box, Extended Address, Street, Locality, Region, Postal Code,
-        //              ; Country Name
         entry.buildData(StructuredPostal.CONTENT_ITEM_TYPE)
                 .put(StructuredPostal.POBOX, "Pobox")
                 .put(StructuredPostal.NEIGHBORHOOD, "Neighborhood")
@@ -559,27 +556,33 @@ public class VCardExporterTests extends VCardTestsBase {
                 .put(StructuredPostal.CITY, "City")
                 .put(StructuredPostal.REGION, "Region")
                 .put(StructuredPostal.POSTCODE, "100")
-                .put(StructuredPostal.COUNTRY, "Country");
+                .put(StructuredPostal.COUNTRY, "Country")
+                .put(StructuredPostal.FORMATTED_ADDRESS, "Formatted Address")
+                .put(StructuredPostal.TYPE, StructuredPostal.TYPE_WORK);
 
+        // adr-value    = 0*6(text-value ";") text-value
+        //              ; PO Box, Extended Address, Street, Locality, Region, Postal Code,
+        //              ; Country Name
         verifier.addPropertyNodesVerifierElemWithEmptyName()
-                .addNodeWithoutOrder("ADR", "Pobox;Neighborhood;Street;City;Region;100;Country",
+                .addNodeWithoutOrder("ADR",
                         Arrays.asList("Pobox", "Neighborhood", "Street", "City",
-                                "Region", "100", "Country"), new TypeSet("HOME"));
+                                "Region", "100", "Country"), new TypeSet("WORK"));
         verifier.verify();
     }
 
-    public void testPostalOnlyWithStructuredDataV21() {
-        testPostalOnlyWithStructuredDataCommon(V21);
+    public void testPostalAddressV21() {
+        testPostalAddressCommon(V21);
     }
 
-    public void testPostalOnlyWithStructuredDataV30() {
-        testPostalOnlyWithStructuredDataCommon(V30);
+    public void testPostalAddressV30() {
+        testPostalAddressCommon(V30);
     }
 
     private void testPostalOnlyWithFormattedAddressCommon(int vcardType) {
         VCardVerifier verifier = new VCardVerifier(vcardType);
         ContactEntry entry = verifier.addInputEntry();
         entry.buildData(StructuredPostal.CONTENT_ITEM_TYPE)
+                .put(StructuredPostal.REGION, "")  // Must be ignored.
                 .put(StructuredPostal.FORMATTED_ADDRESS,
                 "Formatted address CA 123-334 United Statue");
 
@@ -587,7 +590,6 @@ public class VCardExporterTests extends VCardTestsBase {
                 .addNodeWithOrder("ADR", ";Formatted address CA 123-334 United Statue;;;;;",
                         Arrays.asList("", "Formatted address CA 123-334 United Statue",
                                 "", "", "", "", ""), new TypeSet("HOME"));
-
         verifier.verify();
     }
 

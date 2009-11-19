@@ -835,66 +835,90 @@ public class VCardBuilder {
      * @return null when there's no information available to construct the data.
      */
     private PostalStruct tryConstructPostalStruct(ContentValues contentValues) {
-        boolean reallyUseQuotedPrintable = false;
-        boolean appendCharset = false;
-
-        boolean dataArrayExists = false;
-        String[] dataArray = VCardUtils.getVCardPostalElements(contentValues);
-        for (String data : dataArray) {
-            if (!TextUtils.isEmpty(data)) {
-                dataArrayExists = true;
-                if (!appendCharset && !VCardUtils.containsOnlyPrintableAscii(data)) {
-                    appendCharset = true;
-                }
-                if (mShouldUseQuotedPrintable &&
-                        !VCardUtils.containsOnlyNonCrLfPrintableAscii(data)) {
-                    reallyUseQuotedPrintable = true;
-                    break;
-                }
-            }
-        }
-
-        if (dataArrayExists) {
-            StringBuffer addressBuffer = new StringBuffer();
-            boolean first = true;
-            for (String data : dataArray) {
-                if (first) {
-                    first = false;
-                } else {
-                    addressBuffer.append(VCARD_ITEM_SEPARATOR);
-                }
-                if (!TextUtils.isEmpty(data)) {
-                    if (reallyUseQuotedPrintable) {
-                        addressBuffer.append(encodeQuotedPrintable(data));
-                    } else {
-                        addressBuffer.append(escapeCharacters(data));
-                    }
-                }
-            }
-            return new PostalStruct(reallyUseQuotedPrintable, appendCharset,
-                    addressBuffer.toString());
-        }
-
-        String formattedAddress =
-            contentValues.getAsString(StructuredPostal.FORMATTED_ADDRESS);
-        if (!TextUtils.isEmpty(formattedAddress)) {
-            reallyUseQuotedPrintable =
-                !VCardUtils.containsOnlyPrintableAscii(formattedAddress);
-            appendCharset =
-                !VCardUtils.containsOnlyNonCrLfPrintableAscii(formattedAddress);
+        // adr-value    = 0*6(text-value ";") text-value
+        //              ; PO Box, Extended Address, Street, Locality, Region, Postal
+        //              ; Code, Country Name
+        final String rawPoBox = contentValues.getAsString(StructuredPostal.POBOX);
+        final String rawExtendedAddress = contentValues.getAsString(StructuredPostal.NEIGHBORHOOD);
+        final String rawStreet = contentValues.getAsString(StructuredPostal.STREET);
+        final String rawLocality = contentValues.getAsString(StructuredPostal.CITY);
+        final String rawRegion = contentValues.getAsString(StructuredPostal.REGION);
+        final String rawPostalCode = contentValues.getAsString(StructuredPostal.POSTCODE);
+        final String rawCountry = contentValues.getAsString(StructuredPostal.COUNTRY);
+        final String[] rawAddressArray = new String[]{
+                rawPoBox, rawExtendedAddress, rawStreet, rawLocality,
+                rawRegion, rawPostalCode, rawCountry};
+        if (!VCardUtils.areAllEmpty(rawAddressArray)) {
+            final boolean reallyUseQuotedPrintable =
+                (mShouldUseQuotedPrintable &&
+                        !VCardUtils.containsOnlyNonCrLfPrintableAscii(rawAddressArray));
+            final boolean appendCharset =
+                !VCardUtils.containsOnlyPrintableAscii(rawAddressArray);
+            final String encodedPoBox;
+            final String encodedExtendedAddress;
+            final String encodedStreet;
+            final String encodedLocality;
+            final String encodedRegion;
+            final String encodedPostalCode;
+            final String encodedCountry;
             if (reallyUseQuotedPrintable) {
-                formattedAddress = encodeQuotedPrintable(formattedAddress);
+                encodedPoBox = encodeQuotedPrintable(rawPoBox);
+                encodedExtendedAddress = encodeQuotedPrintable(rawExtendedAddress);
+                encodedStreet = encodeQuotedPrintable(rawStreet);
+                encodedLocality = encodeQuotedPrintable(rawLocality);
+                encodedRegion = encodeQuotedPrintable(rawRegion);
+                encodedPostalCode = encodeQuotedPrintable(rawPostalCode);
+                encodedCountry = encodeQuotedPrintable(rawCountry);
             } else {
-                formattedAddress = escapeCharacters(formattedAddress);
+                encodedPoBox = escapeCharacters(rawPoBox);
+                encodedExtendedAddress = escapeCharacters(rawExtendedAddress);
+                encodedStreet = escapeCharacters(rawStreet);
+                encodedLocality = escapeCharacters(rawLocality);
+                encodedRegion = escapeCharacters(rawRegion);
+                encodedPostalCode = escapeCharacters(rawPostalCode);
+                encodedCountry = escapeCharacters(rawCountry);
             }
-            // We use the second value ("Extended Address").
-            //
-            // adr-value    = 0*6(text-value ";") text-value
-            //              ; PO Box, Extended Address, Street, Locality, Region, Postal
-            //              ; Code, Country Name
-            StringBuffer addressBuffer = new StringBuffer();
+            final StringBuffer addressBuffer = new StringBuffer();
+            addressBuffer.append(encodedPoBox);
             addressBuffer.append(VCARD_ITEM_SEPARATOR);
-            addressBuffer.append(formattedAddress);
+            addressBuffer.append(encodedExtendedAddress);
+            addressBuffer.append(VCARD_ITEM_SEPARATOR);
+            addressBuffer.append(encodedStreet);
+            addressBuffer.append(VCARD_ITEM_SEPARATOR);
+            addressBuffer.append(encodedLocality);
+            addressBuffer.append(VCARD_ITEM_SEPARATOR);
+            addressBuffer.append(encodedRegion);
+            addressBuffer.append(VCARD_ITEM_SEPARATOR);
+            addressBuffer.append(encodedPostalCode);
+            addressBuffer.append(VCARD_ITEM_SEPARATOR);
+            addressBuffer.append(encodedCountry);
+            return new PostalStruct(
+                    reallyUseQuotedPrintable, appendCharset, addressBuffer.toString());
+        } else {  // VCardUtils.areAllEmpty(rawAddressArray) == true
+            // Try to use FORMATTED_ADDRESS instead.
+            final String rawFormattedAddress =
+                contentValues.getAsString(StructuredPostal.FORMATTED_ADDRESS);
+            if (TextUtils.isEmpty(rawFormattedAddress)) {
+                return null;
+            }
+            final boolean reallyUseQuotedPrintable =
+                (mShouldUseQuotedPrintable &&
+                        !VCardUtils.containsOnlyNonCrLfPrintableAscii(rawFormattedAddress));
+            final boolean appendCharset =
+                !VCardUtils.containsOnlyPrintableAscii(rawFormattedAddress);
+            final String encodedFormattedAddress;
+            if (reallyUseQuotedPrintable) {
+                encodedFormattedAddress = encodeQuotedPrintable(rawFormattedAddress);
+            } else {
+                encodedFormattedAddress = escapeCharacters(rawFormattedAddress);
+            }
+
+            // We use the second value ("Extended Address") just because Japanese mobile phones
+            // do so. If the other importer expects the value be in the other field, some flag may
+            // be needed.
+            final StringBuffer addressBuffer = new StringBuffer();
+            addressBuffer.append(VCARD_ITEM_SEPARATOR);
+            addressBuffer.append(encodedFormattedAddress);
             addressBuffer.append(VCARD_ITEM_SEPARATOR);
             addressBuffer.append(VCARD_ITEM_SEPARATOR);
             addressBuffer.append(VCARD_ITEM_SEPARATOR);
@@ -903,7 +927,6 @@ public class VCardBuilder {
             return new PostalStruct(
                     reallyUseQuotedPrintable, appendCharset, addressBuffer.toString());
         }
-        return null;  // There's no data available.
     }
 
     public VCardBuilder appendIms(final List<ContentValues> contentValuesList) {
@@ -1653,13 +1676,22 @@ public class VCardBuilder {
         // We may have to make this comma separated form like "TYPE=DOM,WORK" in the future,
         // which would be recommended way in vcard 3.0 though not valid in vCard 2.1.
         boolean first = true;
-        for (String type : types) {
+        for (final String typeValue : types) {
+            // Note: vCard 3.0 specifies the different type of acceptable type Strings, but
+            //       we don't emit that kind of vCard 3.0 specific type since there should be
+            //       high probabilyty in which external importers cannot understand them.
+            //
+            // e.g. TYPE="\u578B\u306B\u3087" (vCard 3.0 allows non-Ascii characters if they
+            //      are quoted.)
+            if (!VCardUtils.isV21Word(typeValue)) {
+                continue;
+            }
             if (first) {
                 first = false;
             } else {
                 mBuilder.append(VCARD_PARAM_SEPARATOR);
             }
-            appendTypeParameter(type);
+            appendTypeParameter(typeValue);
         }
     }
 
