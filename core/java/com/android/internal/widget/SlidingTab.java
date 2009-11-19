@@ -17,6 +17,7 @@
 package com.android.internal.widget;
 
 import android.content.Context;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
@@ -150,6 +151,14 @@ public class SlidingTab extends ViewGroup {
     // TODO: For debugging; remove after glitches debugged.
     @Override
     protected void dispatchDraw(Canvas canvas) {
+        int orientation = getResources().getConfiguration().orientation;
+        if (mOrientation == HORIZONTAL && orientation != Configuration.ORIENTATION_PORTRAIT
+                || mOrientation == VERTICAL && orientation != Configuration.ORIENTATION_LANDSCAPE) {
+            // UBER HACK ALERT.  This is a workaround for a configuration race condition between
+            // orientation changed notification and the resize notification. This just prevents
+            // us from drawing under this circumstance, though the view will still be wrong.
+            return;
+        }
         super.dispatchDraw(canvas);
     }
 

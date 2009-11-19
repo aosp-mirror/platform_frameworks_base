@@ -528,11 +528,7 @@
         <flag name="fontScale" value="0x40000000" />
     </attr>
     
-    <!-- A longer descriptive text about a particular application or
-         permission that can be granted.  This must be a reference 
-         to a string resource; unlike
-    	 the {@link android.R.attr#label} attribute, this can not be a
-    	 raw string. -->
+    <!-- Descriptive text for the associated data. -->
     <attr name="description" format="reference" />
     
     <!-- The name of the application package that an Instrumentation object

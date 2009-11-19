@@ -46,7 +46,12 @@ import android.view.WindowManagerImpl;
 
 /**
  * A wallpaper service is responsible for showing a live wallpaper behind
- * applications that would like to sit on top of it.
+ * applications that would like to sit on top of it.  This service object
+ * itself does very little -- its only purpose is to generate instances of
+ * {@link Engine} as needed.  Implementing a wallpaper thus
+ * involves subclassing from this, subclassing an Engine implementation,
+ * and implementing {@link #onCreateEngine()} to return a new instance of
+ * your engine.
  */
 public abstract class WallpaperService extends Service {
     /**
@@ -861,5 +866,11 @@ public abstract class WallpaperService extends Service {
         mCallbackLooper = looper;
     }
     
+    /**
+     * Must be implemented to return a new instance of the wallpaper's engine.
+     * Note that multiple instances may be active at the same time, such as
+     * when the wallpaper is currently set as the active wallpaper and the user
+     * is in the wallpaper picker viewing a preview of it as well.
+     */
     public abstract Engine onCreateEngine();
 }
