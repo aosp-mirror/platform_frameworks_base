@@ -57,7 +57,7 @@ public final class BatteryStatsImpl extends BatteryStats {
     private static final int MAGIC = 0xBA757475; // 'BATSTATS' 
 
     // Current on-disk Parcel version
-    private static final int VERSION = 41;
+    private static final int VERSION = 42;
 
     private static int sNumSpeedSteps;
 
