@@ -44,8 +44,12 @@ public class CType {
         baseType.equals("void");
     }
 
+    public boolean isConstCharPointer() {
+        return isConst && isPointer && baseType.equals("char");
+    }
+
     public boolean isTypedPointer() {
-    return isPointer() && !isVoid();
+    return isPointer() && !isVoid() && !isConstCharPointer();
     }
 
     public void setBaseType(String baseType) {
