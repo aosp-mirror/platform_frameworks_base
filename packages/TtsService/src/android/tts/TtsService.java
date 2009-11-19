@@ -1326,6 +1326,17 @@ public class TtsService extends Service implements OnCompletionListener {
             return mSelf.synthesizeToFile(callingApp, text, speakingParams, filename);
         }
 
+        /**
+         * Sets the speech synthesis engine for the TTS by specifying its packagename
+         *
+         * @param packageName  the packageName of the speech synthesis engine (ie, "com.svox.pico")
+         *
+         * @return SUCCESS or ERROR as defined in android.speech.tts.TextToSpeech.
+         */
+        public int setEngineByPackageName(String packageName) {
+            return mSelf.setEngine(packageName);
+        }
+
     };
 
 }

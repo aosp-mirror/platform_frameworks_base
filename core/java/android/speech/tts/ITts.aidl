@@ -60,4 +60,6 @@ interface ITts {
     int unregisterCallback(in String callingApp, ITtsCallback cb);
 
     int playSilence(in String callingApp, in long duration, in int queueMode, in String[] params);
+
+    int setEngineByPackageName(in String enginePackageName);
 }

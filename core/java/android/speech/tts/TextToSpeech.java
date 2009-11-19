@@ -1254,4 +1254,44 @@ public class TextToSpeech {
         }
     }
 
+    /**
+     * Sets the speech synthesis engine to be used by its packagename.
+     *
+     * @param enginePackageName
+     *            The packagename for the synthesis engine (ie, "com.svox.pico")
+     *
+     * @return Code indicating success or failure. See {@link #ERROR} and {@link #SUCCESS}.
+     */
+    public int setEngineByPackageName(String enginePackageName) {
+        synchronized (mStartLock) {
+            int result = TextToSpeech.ERROR;
+            if (!mStarted) {
+                return result;
+            }
+            try {
+                result = mITts.setEngineByPackageName(enginePackageName);
+            } catch (RemoteException e) {
+                // TTS died; restart it.
+                Log.e("TextToSpeech.java - setEngineByPackageName", "RemoteException");
+                e.printStackTrace();
+                mStarted = false;
+                initTts();
+            } catch (NullPointerException e) {
+                // TTS died; restart it.
+                Log.e("TextToSpeech.java - setEngineByPackageName", "NullPointerException");
+                e.printStackTrace();
+                mStarted = false;
+                initTts();
+            } catch (IllegalStateException e) {
+                // TTS died; restart it.
+                Log.e("TextToSpeech.java - setEngineByPackageName", "IllegalStateException");
+                e.printStackTrace();
+                mStarted = false;
+                initTts();
+            } finally {
+                return result;
+            }
+        }
+    }
+
 }
