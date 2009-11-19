@@ -839,14 +839,14 @@ public class VCardBuilder {
         //              ; PO Box, Extended Address, Street, Locality, Region, Postal
         //              ; Code, Country Name
         final String rawPoBox = contentValues.getAsString(StructuredPostal.POBOX);
-        final String rawExtendedAddress = contentValues.getAsString(StructuredPostal.NEIGHBORHOOD);
+        final String rawNeighborhood = contentValues.getAsString(StructuredPostal.NEIGHBORHOOD);
         final String rawStreet = contentValues.getAsString(StructuredPostal.STREET);
         final String rawLocality = contentValues.getAsString(StructuredPostal.CITY);
         final String rawRegion = contentValues.getAsString(StructuredPostal.REGION);
         final String rawPostalCode = contentValues.getAsString(StructuredPostal.POSTCODE);
         final String rawCountry = contentValues.getAsString(StructuredPostal.COUNTRY);
         final String[] rawAddressArray = new String[]{
-                rawPoBox, rawExtendedAddress, rawStreet, rawLocality,
+                rawPoBox, rawNeighborhood, rawStreet, rawLocality,
                 rawRegion, rawPostalCode, rawCountry};
         if (!VCardUtils.areAllEmpty(rawAddressArray)) {
             final boolean reallyUseQuotedPrintable =
@@ -855,33 +855,55 @@ public class VCardBuilder {
             final boolean appendCharset =
                 !VCardUtils.containsOnlyPrintableAscii(rawAddressArray);
             final String encodedPoBox;
-            final String encodedExtendedAddress;
             final String encodedStreet;
             final String encodedLocality;
             final String encodedRegion;
             final String encodedPostalCode;
             final String encodedCountry;
+            final String encodedNeighborhood;
+
+            final String rawLocality2;
+            // This looks inefficient since we encode rawLocality and rawNeighborhood twice,
+            // but this is intentional.
+            //
+            // QP encoding may add line feeds when needed and the result of
+            // - encodeQuotedPrintable(rawLocality + " " + rawNeighborhood)
+            // may be different from
+            // - encodedLocality + " " + encodedNeighborhood.
+            //
+            // We use safer way.
+            if (TextUtils.isEmpty(rawLocality)) {
+                if (TextUtils.isEmpty(rawNeighborhood)) {
+                    rawLocality2 = "";
+                } else {
+                    rawLocality2 = rawNeighborhood;
+                }
+            } else {
+                if (TextUtils.isEmpty(rawNeighborhood)) {
+                    rawLocality2 = rawLocality;
+                } else {
+                    rawLocality2 = rawLocality + " " + rawNeighborhood;
+                }
+            }
             if (reallyUseQuotedPrintable) {
                 encodedPoBox = encodeQuotedPrintable(rawPoBox);
-                encodedExtendedAddress = encodeQuotedPrintable(rawExtendedAddress);
                 encodedStreet = encodeQuotedPrintable(rawStreet);
-                encodedLocality = encodeQuotedPrintable(rawLocality);
+                encodedLocality = encodeQuotedPrintable(rawLocality2);
                 encodedRegion = encodeQuotedPrintable(rawRegion);
                 encodedPostalCode = encodeQuotedPrintable(rawPostalCode);
                 encodedCountry = encodeQuotedPrintable(rawCountry);
             } else {
                 encodedPoBox = escapeCharacters(rawPoBox);
-                encodedExtendedAddress = escapeCharacters(rawExtendedAddress);
                 encodedStreet = escapeCharacters(rawStreet);
-                encodedLocality = escapeCharacters(rawLocality);
+                encodedLocality = escapeCharacters(rawLocality2);
                 encodedRegion = escapeCharacters(rawRegion);
                 encodedPostalCode = escapeCharacters(rawPostalCode);
                 encodedCountry = escapeCharacters(rawCountry);
+                encodedNeighborhood = escapeCharacters(rawNeighborhood);
             }
             final StringBuffer addressBuffer = new StringBuffer();
             addressBuffer.append(encodedPoBox);
             addressBuffer.append(VCARD_ITEM_SEPARATOR);
-            addressBuffer.append(encodedExtendedAddress);
             addressBuffer.append(VCARD_ITEM_SEPARATOR);
             addressBuffer.append(encodedStreet);
             addressBuffer.append(VCARD_ITEM_SEPARATOR);
