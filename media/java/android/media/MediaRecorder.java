@@ -136,10 +136,12 @@ public class MediaRecorder
         /** Voice call uplink + downlink audio source */
         public static final int VOICE_CALL = 4;
 
-        /** Microphone audio source with same orientation as camera */
+        /** Microphone audio source with same orientation as camera if available, the main
+         *  device microphone otherwise */
         public static final int CAMCORDER = 5;
 
-        /** Microphone audio source tuned for voice recognition */
+        /** Microphone audio source tuned for voice recognition if available, behaves like
+         *  {@link #DEFAULT} otherwise. */
         public static final int VOICE_RECOGNITION = 6;
     }
 
