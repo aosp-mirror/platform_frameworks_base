@@ -6,6 +6,7 @@ public class JType {
     String baseType;
     boolean isArray;
     boolean isClass;
+    boolean isString;
 
     static HashMap<CType,JType> typeMapping = new HashMap<CType,JType>();
     static HashMap<CType,JType> arrayTypeMapping = new HashMap<CType,JType>();
@@ -27,7 +28,10 @@ public class JType {
     typeMapping.put(new CType("GLubyte"), new JType("byte"));
     typeMapping.put(new CType("GLuint"), new JType("int"));
     typeMapping.put(new CType("void"), new JType("void"));
-    typeMapping.put(new CType("GLubyte", true, true), new JType("String"));
+    typeMapping.put(new CType("GLubyte", true, true), new JType("String", false, false));
+    typeMapping.put(new CType("char", false, true), new JType("byte"));
+    typeMapping.put(new CType("char", true, true), new JType("String", false, false));
+    typeMapping.put(new CType("int"), new JType("int"));
 
     // Untyped pointers map to untyped Buffers
     typeMapping.put(new CType("GLvoid", true, true),
@@ -42,6 +46,8 @@ public class JType {
     // Typed pointers map to typed Buffers
     typeMapping.put(new CType("GLboolean", false, true),
             new JType("java.nio.IntBuffer", true, false));
+    typeMapping.put(new CType("GLenum", false, true),
+            new JType("java.nio.IntBuffer", true, false));
     typeMapping.put(new CType("GLfixed", false, true),
             new JType("java.nio.IntBuffer", true, false));
     typeMapping.put(new CType("GLfixed", true, true),
@@ -54,6 +60,8 @@ public class JType {
             new JType("java.nio.IntBuffer", true, false));
     typeMapping.put(new CType("GLint", true, true),
             new JType("java.nio.IntBuffer", true, false));
+    typeMapping.put(new CType("GLsizei", false, true),
+            new JType("java.nio.IntBuffer", true, false));
     typeMapping.put(new CType("GLuint", false, true),
             new JType("java.nio.IntBuffer", true, false));
     typeMapping.put(new CType("GLuint", true, true),
@@ -62,8 +70,11 @@ public class JType {
             new JType("java.nio.ShortBuffer", true, false));
 
     // Typed pointers map to arrays + offsets
+    arrayTypeMapping.put(new CType("char", false, true),
+            new JType("byte", false, true));
     arrayTypeMapping.put(new CType("GLboolean", false, true),
                  new JType("boolean", false, true));
+    arrayTypeMapping.put(new CType("GLenum", false, true), new JType("int", false, true));
     arrayTypeMapping.put(new CType("GLfixed", true, true), new JType("int", false, true));
     arrayTypeMapping.put(new CType("GLfixed", false, true), new JType("int", false, true));
     arrayTypeMapping.put(new CType("GLfloat", false, true), new JType("float", false, true));
@@ -71,6 +82,8 @@ public class JType {
     arrayTypeMapping.put(new CType("GLint", false, true), new JType("int", false, true));
     arrayTypeMapping.put(new CType("GLint", true, true), new JType("int", false, true));
     arrayTypeMapping.put(new CType("GLshort", true, true), new JType("short", false, true));
+    arrayTypeMapping.put(new CType("GLsizei", false, true), new JType("int", false, true));
+    arrayTypeMapping.put(new CType("GLsizei", true, true), new JType("int", false, true));
     arrayTypeMapping.put(new CType("GLuint", false, true), new JType("int", false, true));
     arrayTypeMapping.put(new CType("GLuint", true, true), new JType("int", false, true));
     arrayTypeMapping.put(new CType("GLintptr"), new JType("int", false, true));
@@ -107,6 +120,10 @@ public class JType {
 
     public boolean isClass() {
     return isClass;
+    }
+
+    public boolean isString() {
+        return baseType.equals("String");
     }
 
     public boolean isPrimitive() {
