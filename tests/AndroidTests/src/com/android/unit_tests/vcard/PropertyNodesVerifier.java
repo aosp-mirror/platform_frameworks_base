@@ -139,6 +139,12 @@ class PropertyNodesVerifierElem {
         return addNodeWithOrder(propName, propValue, null, null, contentValues, null, null);
     }
 
+    public PropertyNodesVerifierElem addNodeWithOrder(String propName,
+            List<String> propValueList, ContentValues contentValues) {
+        return addNodeWithOrder(propName, null, propValueList,
+                null, contentValues, null, null);
+    }
+
     public PropertyNodesVerifierElem addNodeWithOrder(String propName, String propValue,
             List<String> propValueList) {
         return addNodeWithOrder(propName, propValue, propValueList, null, null, null, null);
@@ -157,8 +163,7 @@ class PropertyNodesVerifierElem {
 
     public PropertyNodesVerifierElem addNodeWithOrder(String propName,
             List<String> propValueList, TypeSet paramMap_TYPE) {
-        final String propValue = concatinateListWithSemiColon(propValueList);
-        return addNodeWithOrder(propName, propValue, propValueList, null, null,
+        return addNodeWithOrder(propName, null, propValueList, null, null,
                 paramMap_TYPE, null);
     }
 
@@ -177,6 +182,9 @@ class PropertyNodesVerifierElem {
     public PropertyNodesVerifierElem addNodeWithOrder(String propName, String propValue,
             List<String> propValueList, byte[] propValue_bytes,
             ContentValues paramMap, TypeSet paramMap_TYPE, GroupSet propGroupSet) {
+        if (propValue == null && propValueList != null) {
+            propValue = concatinateListWithSemiColon(propValueList);
+        }
         PropertyNode propertyNode = new PropertyNode(propName,
                 propValue, propValueList, propValue_bytes,
                 paramMap, paramMap_TYPE, propGroupSet);
@@ -200,14 +208,20 @@ class PropertyNodesVerifierElem {
         return addNodeWithoutOrder(propName, propValue, null, null, contentValues, null, null);
     }
 
+    public PropertyNodesVerifierElem addNodeWithoutOrder(String propName,
+            List<String> propValueList, ContentValues contentValues) {
+        return addNodeWithoutOrder(propName, null,
+                propValueList, null, contentValues, null, null);
+    }
+
     public PropertyNodesVerifierElem addNodeWithoutOrder(String propName, String propValue,
             List<String> propValueList) {
         return addNodeWithoutOrder(propName, propValue, propValueList, null, null, null, null);
     }
 
-    public PropertyNodesVerifierElem addNodeWithoutOrder(String propName, List<String> propValueList) {
-        final String propValue = concatinateListWithSemiColon(propValueList);
-        return addNodeWithoutOrder(propName, propValue, propValueList,
+    public PropertyNodesVerifierElem addNodeWithoutOrder(String propName,
+            List<String> propValueList) {
+        return addNodeWithoutOrder(propName, null, propValueList,
                 null, null, null, null);
     }
 
@@ -238,6 +252,9 @@ class PropertyNodesVerifierElem {
     public PropertyNodesVerifierElem addNodeWithoutOrder(String propName, String propValue,
             List<String> propValueList, byte[] propValue_bytes,
             ContentValues paramMap, TypeSet paramMap_TYPE, GroupSet propGroupSet) {
+        if (propValue == null && propValueList != null) {
+            propValue = concatinateListWithSemiColon(propValueList);
+        }
         mUnorderedNodeList.add(new PropertyNode(propName, propValue,
                 propValueList, propValue_bytes, paramMap, paramMap_TYPE, propGroupSet));
         return this;

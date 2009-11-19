@@ -16,14 +16,12 @@
 package android.pim.vcard;
 
 import android.content.ContentProviderOperation;
-import android.content.ContentValues;
 import android.provider.ContactsContract.Data;
 import android.provider.ContactsContract.CommonDataKinds.Im;
 import android.provider.ContactsContract.CommonDataKinds.Phone;
 import android.provider.ContactsContract.CommonDataKinds.StructuredPostal;
 import android.telephony.PhoneNumberUtils;
 import android.text.TextUtils;
-import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -245,8 +243,7 @@ public class VCardUtils {
      * Inserts postal data into the builder object.
      * 
      * Note that the data structure of ContactsContract is different from that defined in vCard.
-     * So some conversion may be performed in this method. See also
-     * {{@link #getVCardPostalElements(ContentValues)}
+     * So some conversion may be performed in this method.
      */
     public static void insertStructuredPostalDataUsingContactsStruct(int vcardType,
             final ContentProviderOperation.Builder builder,
@@ -260,9 +257,6 @@ public class VCardUtils {
         }
 
         builder.withValue(StructuredPostal.POBOX, postalData.pobox);
-        // TODO: Japanese phone seems to use this field for expressing all the address including
-        // region, city, etc. Not sure we're ok to store them into NEIGHBORHOOD, while it would be
-        // better than dropping them all.
         builder.withValue(StructuredPostal.NEIGHBORHOOD, postalData.extendedAddress);
         builder.withValue(StructuredPostal.STREET, postalData.street);
         builder.withValue(StructuredPostal.CITY, postalData.localty);
@@ -277,59 +271,6 @@ public class VCardUtils {
         }
     }
 
-    /**
-     * Returns String[] containing address information based on vCard spec
-     * (PO Box, Extended Address, Street, Locality, Region, Postal Code, Country Name).
-     * All String objects are non-null ("" is used when the relevant data is empty).
-     *
-     * Note that the data structure of ContactsContract is different from that defined in vCard.
-     * So some conversion may be performed in this method. See also
-     * {{@link #insertStructuredPostalDataUsingContactsStruct(int,
-     * android.content.ContentProviderOperation.Builder,
-     * android.pim.vcard.VCardEntry.PostalData)}
-     */
-    public static String[] getVCardPostalElements(ContentValues contentValues) {
-        // adr-value    = 0*6(text-value ";") text-value
-        //              ; PO Box, Extended Address, Street, Locality, Region, Postal
-        //              ; Code, Country Name
-        String[] dataArray = new String[7];
-        dataArray[0] = contentValues.getAsString(StructuredPostal.POBOX);
-        if (dataArray[0] == null) {
-            dataArray[0] = "";
-        }
-        // We keep all the data in StructuredPostal, presuming NEIGHBORHOOD is
-        // similar to "Extended Address".
-        dataArray[1] = contentValues.getAsString(StructuredPostal.NEIGHBORHOOD);
-        if (dataArray[1] == null) {
-            dataArray[1] = "";
-        }
-        dataArray[2] = contentValues.getAsString(StructuredPostal.STREET);
-        if (dataArray[2] == null) {
-            dataArray[2] = "";
-        }
-        // Assume that localty == city
-        dataArray[3] = contentValues.getAsString(StructuredPostal.CITY);
-        if (dataArray[3] == null) {
-            dataArray[3] = "";
-        }
-        String region = contentValues.getAsString(StructuredPostal.REGION);
-        if (!TextUtils.isEmpty(region)) {
-            dataArray[4] = region;
-        } else {
-            dataArray[4] = "";
-        }
-        dataArray[5] = contentValues.getAsString(StructuredPostal.POSTCODE);
-        if (dataArray[5] == null) {
-            dataArray[5] = "";
-        }
-        dataArray[6] = contentValues.getAsString(StructuredPostal.COUNTRY);
-        if (dataArray[6] == null) {
-            dataArray[6] = "";
-        }
-
-        return dataArray;
-    }
-    
     public static String constructNameFromElements(final int vcardType,
             final String familyName, final String middleName, final String givenName) {
         return constructNameFromElements(vcardType, familyName, middleName, givenName,
@@ -394,18 +335,22 @@ public class VCardUtils {
         return list;
     }
 
-    public static boolean containsOnlyPrintableAscii(String str) {
-        if (TextUtils.isEmpty(str)) {
+    public static boolean containsOnlyPrintableAscii(final String...values) {
+        if (values == null) {
             return true;
         }
-
-        final int length = str.length();
         final int asciiFirst = 0x20;
         final int asciiLast = 0x7E;  // included
-        for (int i = 0; i < length; i = str.offsetByCodePoints(i, 1)) {
-            final int c = str.codePointAt(i);
-            if (!((asciiFirst <= c && c <= asciiLast) || c == '\r' || c == '\n')) {
-                return false;
+        for (final String value : values) {
+            if (TextUtils.isEmpty(value)) {
+                continue;
+            }
+            final int length = value.length();
+            for (int i = 0; i < length; i = value.offsetByCodePoints(i, 1)) {
+                final int c = value.codePointAt(i);
+                if (!((asciiFirst <= c && c <= asciiLast) || c == '\r' || c == '\n')) {
+                    return false;
+                }
             }
         }
         return true;
@@ -416,17 +361,50 @@ public class VCardUtils {
      * or not, which is required by vCard 2.1.
      * See the definition of "7bit" in vCard 2.1 spec for more information.
      */
-    public static boolean containsOnlyNonCrLfPrintableAscii(String str) {
-        if (TextUtils.isEmpty(str)) {
+    public static boolean containsOnlyNonCrLfPrintableAscii(final String...values) {
+        if (values == null) {
             return true;
         }
-
-        final int length = str.length();
         final int asciiFirst = 0x20;
         final int asciiLast = 0x7E;  // included
-        for (int i = 0; i < length; i = str.offsetByCodePoints(i, 1)) {
-            final int c = str.codePointAt(i);
-            if (!(asciiFirst <= c && c <= asciiLast)) {
+        for (final String value : values) {
+            if (TextUtils.isEmpty(value)) {
+                continue;
+            }
+            final int length = value.length();
+            for (int i = 0; i < length; i = value.offsetByCodePoints(i, 1)) {
+                final int c = value.codePointAt(i);
+                if (!(asciiFirst <= c && c <= asciiLast)) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    private static final Set<Character> sUnAcceptableAsciiInV21WordSet =
+        new HashSet<Character>(Arrays.asList('[', ']', '=', ':', '.', ',', ' '));
+
+    /**
+     * <P>
+     * Returns true when the given String is categorized as "word" specified in vCard spec 2.1.
+     * </P>
+     * <P>
+     * vCard 2.1 specifies:<BR />
+     * word = &lt;any printable 7bit us-ascii except []=:., &gt;
+     * </P>
+     */
+    public static boolean isV21Word(final String value) {
+        if (TextUtils.isEmpty(value)) {
+            return true;
+        }
+        final int asciiFirst = 0x20;
+        final int asciiLast = 0x7E;  // included
+        final int length = value.length();
+        for (int i = 0; i < length; i = value.offsetByCodePoints(i, 1)) {
+            final int c = value.codePointAt(i);
+            if (!(asciiFirst <= c && c <= asciiLast) ||
+                    sUnAcceptableAsciiInV21WordSet.contains((char)c)) {
                 return false;
             }
         }
@@ -442,11 +420,10 @@ public class VCardUtils {
      *       such kind of input but must never output it unless the target is very specific
      *       to the device which is able to parse the malformed input. 
      */
-    public static boolean containsOnlyAlphaDigitHyphen(String str) {
-        if (TextUtils.isEmpty(str)) {
+    public static boolean containsOnlyAlphaDigitHyphen(final String...values) {
+        if (values == null) {
             return true;
         }
-
         final int upperAlphabetFirst = 0x41;  // A
         final int upperAlphabetAfterLast = 0x5b;  // [
         final int lowerAlphabetFirst = 0x61;  // a
@@ -454,30 +431,35 @@ public class VCardUtils {
         final int digitFirst = 0x30;  // 0
         final int digitAfterLast = 0x3A;  // :
         final int hyphen = '-';
-        final int length = str.length();
-        for (int i = 0; i < length; i = str.offsetByCodePoints(i, 1)) {
-            int codepoint = str.codePointAt(i);
-            if (!((lowerAlphabetFirst <= codepoint && codepoint < lowerAlphabetAfterLast) ||
+        for (final String str : values) {
+            if (TextUtils.isEmpty(str)) {
+                continue;
+            }
+            final int length = str.length();
+            for (int i = 0; i < length; i = str.offsetByCodePoints(i, 1)) {
+                int codepoint = str.codePointAt(i);
+                if (!((lowerAlphabetFirst <= codepoint && codepoint < lowerAlphabetAfterLast) ||
                     (upperAlphabetFirst <= codepoint && codepoint < upperAlphabetAfterLast) ||
                     (digitFirst <= codepoint && codepoint < digitAfterLast) ||
                     (codepoint == hyphen))) {
-                return false;
+                    return false;
+                }
             }
         }
         return true;
     }
     
-    public static String toHalfWidthString(String orgString) {
+    public static String toHalfWidthString(final String orgString) {
         if (TextUtils.isEmpty(orgString)) {
             return null;
         }
         final StringBuilder builder = new StringBuilder();
         final int length = orgString.length();
-        for (int i = 0; i < length; i++) {
+        for (int i = 0; i < length; i = orgString.offsetByCodePoints(i, 1)) {
             // All Japanese character is able to be expressed by char.
             // Do not need to use String#codepPointAt().
             final char ch = orgString.charAt(i);
-            CharSequence halfWidthText = JapaneseUtils.tryGetHalfWidthText(ch);
+            final String halfWidthText = JapaneseUtils.tryGetHalfWidthText(ch);
             if (halfWidthText != null) {
                 builder.append(halfWidthText);
             } else {
@@ -495,6 +477,9 @@ public class VCardUtils {
      * @return The image type or null when the type cannot be determined.
      */
     public static String guessImageType(final byte[] input) {
+        if (input == null) {
+            return null;
+        }
         if (input.length >= 3 && input[0] == 'G' && input[1] == 'I' && input[2] == 'F') {
             return "GIF";
         } else if (input.length >= 4 && input[0] == (byte) 0x89
@@ -509,6 +494,22 @@ public class VCardUtils {
         } else {
             return null;
         }
+    }
+
+    /**
+     * @return True when all the given values are null or empty Strings.
+     */
+    public static boolean areAllEmpty(final String...values) {
+        if (values == null) {
+            return true;
+        }
+
+        for (final String value : values) {
+            if (!TextUtils.isEmpty(value)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private VCardUtils() {
