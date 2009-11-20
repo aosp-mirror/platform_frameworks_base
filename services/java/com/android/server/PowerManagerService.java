@@ -216,10 +216,6 @@ class PowerManagerService extends IPowerManager.Stub
     private volatile boolean mPokeAwakeOnSet = false;
     private volatile boolean mInitComplete = false;
     private HashMap<IBinder,PokeLock> mPokeLocks = new HashMap<IBinder,PokeLock>();
-    // mScreenOnTime and mScreenOnStartTime are used for computing total time screen
-    // has been on since boot
-    private long mScreenOnTime;
-    private long mScreenOnStartTime;
     // mLastScreenOnTime is the time the screen was last turned on
     private long mLastScreenOnTime;
     private boolean mPreventScreenOn;
@@ -417,7 +413,6 @@ class PowerManagerService extends IPowerManager.Stub
         
         // Add ourself to the Watchdog monitors.
         Watchdog.getInstance().addMonitor(this);
-        mScreenOnStartTime = SystemClock.elapsedRealtime();
     }
 
     private ContentQueryMap mSettings;
@@ -1470,7 +1465,6 @@ class PowerManagerService extends IPowerManager.Stub
                         err = 0;
                     }
 
-                    mScreenOnStartTime = SystemClock.elapsedRealtime();
                     mLastTouchDown = 0;
                     mTotalTouchDownTime = 0;
                     mTouchCycles = 0;
@@ -1513,10 +1507,6 @@ class PowerManagerService extends IPowerManager.Stub
                 mTotalTouchDownTime, mTouchCycles);
         mLastTouchDown = 0;
         int err = setScreenStateLocked(false);
-        if (mScreenOnStartTime != 0) {
-            mScreenOnTime += SystemClock.elapsedRealtime() - mScreenOnStartTime;
-            mScreenOnStartTime = 0;
-        }
         if (err == 0) {
             int why = becauseOfUser
                     ? WindowManagerPolicy.OFF_BECAUSE_OF_USER
@@ -2102,20 +2092,6 @@ class PowerManagerService extends IPowerManager.Stub
             Power.reboot(reason);
         } catch (IOException e) {
             Log.e(TAG, "reboot failed", e);
-        }
-    }
-
-    /**
-     * Returns the time the screen has been on since boot, in millis.
-     * @return screen on time
-     */
-    public long getScreenOnTime() {
-        synchronized (mLocks) {
-            if (mScreenOnStartTime == 0) {
-                return mScreenOnTime;
-            } else {
-                return SystemClock.elapsedRealtime() - mScreenOnStartTime + mScreenOnTime;
-            }
         }
     }
 
