@@ -29,8 +29,6 @@ public class SQLiteStatement extends SQLiteProgram
 {
     private static final String TAG = "SQLiteStatement";
 
-    private final String mSql;
-
     /**
      * Don't use SQLiteStatement constructor directly, please use
      * {@link SQLiteDatabase#compileStatement(String)}
@@ -39,11 +37,6 @@ public class SQLiteStatement extends SQLiteProgram
      */
     /* package */ SQLiteStatement(SQLiteDatabase db, String sql) {
         super(db, sql);
-        if (SQLiteDebug.DEBUG_SQL_STATEMENTS) {
-            mSql = sql;
-        } else {
-            mSql = null;
-        }
     }
 
     /**
@@ -67,7 +60,7 @@ public class SQLiteStatement extends SQLiteProgram
             if (logStats) {
                 mDatabase.logTimeStat(false /* write */, startTime, SystemClock.elapsedRealtime());
             }
-        } finally {                    
+        } finally {
             releaseReference();
             mDatabase.unlock();
         }

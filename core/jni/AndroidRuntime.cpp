@@ -116,6 +116,7 @@ extern int register_android_view_Display(JNIEnv* env);
 extern int register_android_view_Surface(JNIEnv* env);
 extern int register_android_view_ViewRoot(JNIEnv* env);
 extern int register_android_database_CursorWindow(JNIEnv* env);
+extern int register_android_database_SQLiteCompiledSql(JNIEnv* env);
 extern int register_android_database_SQLiteDatabase(JNIEnv* env);
 extern int register_android_database_SQLiteDebug(JNIEnv* env);
 extern int register_android_database_SQLiteProgram(JNIEnv* env);
@@ -1219,6 +1220,7 @@ static const RegJNIRec gRegJNI[] = {
     REG_JNI(register_com_android_internal_graphics_NativeUtils),
 
     REG_JNI(register_android_database_CursorWindow),
+    REG_JNI(register_android_database_SQLiteCompiledSql),
     REG_JNI(register_android_database_SQLiteDatabase),
     REG_JNI(register_android_database_SQLiteDebug),
     REG_JNI(register_android_database_SQLiteProgram),
