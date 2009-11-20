@@ -130,13 +130,13 @@ public final class BluetoothAdapter {
 
     /**
      * Activity Action: Show a system activity that requests discoverable mode.
-     * <p>This activity will also request the user to turn on Bluetooth if it
+     * This activity will also request the user to turn on Bluetooth if it
      * is not currently enabled.
      * <p>Discoverable mode is equivalent to {@link
      * #SCAN_MODE_CONNECTABLE_DISCOVERABLE}. It allows remote devices to see
      * this Bluetooth adapter when they perform a discovery.
-     * <p>For privacy, Android is not by default discoverable.
-     * <p>The sender can optionally use extra field {@link
+     * <p>For privacy, Android is not discoverable by default.
+     * <p>The sender of this Intent can optionally use extra field {@link
      * #EXTRA_DISCOVERABLE_DURATION} to request the duration of
      * discoverability. Currently the default duration is 120 seconds, and
      * maximum duration is capped at 300 seconds for each request.
@@ -147,7 +147,8 @@ public final class BluetoothAdapter {
      * {@link android.app.Activity#RESULT_CANCELED} if the user rejected
      * discoverability or an error has occurred.
      * <p>Applications can also listen for {@link #ACTION_SCAN_MODE_CHANGED}
-     * for global notification whenever the scan mode changes.
+     * for global notification whenever the scan mode changes. For example, an
+     * application can be notified when the device has ended discoverability.
      * <p>Requires {@link android.Manifest.permission#BLUETOOTH}
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
@@ -549,7 +550,10 @@ public final class BluetoothAdapter {
      * remote Bluetooth devices should not be attempted while discovery is in
      * progress, and existing connections will experience limited bandwidth
      * and high latency. Use {@link #cancelDiscovery()} to cancel an ongoing
-     * discovery.
+     * discovery. Discovery is not managed by the Activity,
+     * but is run as a system service, so an application should always call
+     * {@link BluetoothAdapter#cancelDiscovery()} even if it
+     * did not directly request a discovery, just to be sure.
      * <p>Device discovery will only find remote devices that are currently
      * <i>discoverable</i> (inquiry scan enabled). Many Bluetooth devices are
      * not discoverable by default, and need to be entered into a special mode.
@@ -567,6 +571,13 @@ public final class BluetoothAdapter {
     /**
      * Cancel the current device discovery process.
      * <p>Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN}.
+     * <p>Because discovery is a heavyweight precedure for the Bluetooth
+     * adapter, this method should always be called before attempting to connect
+     * to a remote device with {@link
+     * android.bluetooth.BluetoothSocket#connect()}. Discovery is not managed by
+     * the  Activity, but is run as a system service, so an application should
+     * always call cancel discovery even if it did not directly request a
+     * discovery, just to be sure.
      *
      * @return true on success, false on error
      */
