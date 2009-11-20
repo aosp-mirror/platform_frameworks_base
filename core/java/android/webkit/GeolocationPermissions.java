@@ -26,8 +26,22 @@ import java.util.Set;
 
 
 /**
- * Implements the Java side of GeolocationPermissions. Simply marshalls calls
- * from the UI thread to the WebKit thread.
+ * This class is used to get Geolocation permissions from, and set them on the
+ * WebView. For example, it could be used to allow a user to manage Geolocation
+ * permissions from a browser's UI.
+ *
+ * Permissions are managed on a per-origin basis, as required by the
+ * Geolocation spec - http://dev.w3.org/geo/api/spec-source.html. An origin
+ * specifies the scheme, host and port of particular frame. An origin is
+ * represented here as a string, using the output of
+ * WebCore::SecurityOrigin::toString.
+ *
+ * This class is the Java counterpart of the WebKit C++ GeolocationPermissions
+ * class. It simply marshalls calls from the UI thread to the WebKit thread.
+ *
+ * Within WebKit, Geolocation permissions may be applied either temporarily
+ * (for the duration of the page) or permanently. This class deals only with
+ * permanent permissions.
  */
 public final class GeolocationPermissions {
     /**
@@ -92,8 +106,8 @@ public final class GeolocationPermissions {
                     switch (msg.what) {
                         case RETURN_ORIGINS: {
                             Map values = (Map) msg.obj;
-                            Set origins = (Set) values.get(ORIGINS);
-                            ValueCallback<Set> callback = (ValueCallback<Set>) values.get(CALLBACK);
+                            Set<String> origins = (Set<String>) values.get(ORIGINS);
+                            ValueCallback<Set<String> > callback = (ValueCallback<Set<String> >) values.get(CALLBACK);
                             callback.onReceiveValue(origins);
                         } break;
                         case RETURN_ALLOWED: {
@@ -122,10 +136,9 @@ public final class GeolocationPermissions {
                         case GET_ORIGINS: {
                             getOriginsImpl();
                             ValueCallback callback = (ValueCallback) msg.obj;
-                            Set origins = new HashSet(mOrigins);
                             Map values = new HashMap<String, Object>();
                             values.put(CALLBACK, callback);
-                            values.put(ORIGINS, origins);
+                            values.put(ORIGINS, mOrigins);
                             postUIMessage(Message.obtain(null, RETURN_ORIGINS, values));
                             } break;
                         case GET_ALLOWED: {
@@ -185,15 +198,17 @@ public final class GeolocationPermissions {
      * Gets the set of origins for which Geolocation permissions are stored.
      * Note that we represent the origins as strings. These are created using
      * WebCore::SecurityOrigin::toString(). As long as all 'HTML 5 modules'
-     * (Database, Geolocation etc) do so, it's safe to match up origins for the
-     * purposes of displaying UI.
+     * (Database, Geolocation etc) do so, it's safe to match up origins based
+     * on this string.
+     *
+     * Callback is a ValueCallback object whose onReceiveValue method will be
+     * called asynchronously with the set of origins.
      */
-    public void getOrigins(ValueCallback<Set> callback) {
+    public void getOrigins(ValueCallback<Set<String> > callback) {
         if (callback != null) {
             if (WebViewCore.THREAD_NAME.equals(Thread.currentThread().getName())) {
                 getOriginsImpl();
-                Set origins = new HashSet(mOrigins);
-                callback.onReceiveValue(origins);
+                callback.onReceiveValue(mOrigins);
             } else {
                 postMessage(Message.obtain(null, GET_ORIGINS, callback));
             }
@@ -210,6 +225,9 @@ public final class GeolocationPermissions {
 
     /**
      * Gets the permission state for the specified origin.
+     *
+     * Callback is a ValueCallback object whose onReceiveValue method will be
+     * called asynchronously with the permission state for the origin.
      */
     public void getAllowed(String origin, ValueCallback<Boolean> callback) {
         if (callback == null) {
@@ -231,7 +249,7 @@ public final class GeolocationPermissions {
     }
 
     /**
-     * Helper method to get the permission state.
+     * Helper method to get the permission state for the specified origin.
      */
     private void getAllowedImpl(String origin) {
         // Called on the WebKit thread.
