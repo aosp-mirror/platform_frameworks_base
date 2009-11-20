@@ -1536,13 +1536,10 @@ public class VCardBuilder {
     }
 
     public void appendAndroidSpecificProperty(final String mimeType, ContentValues contentValues) {
-        List<String> rawValueList = new ArrayList<String>();
-        rawValueList.add(mimeType);
-        final List<String> columnNameList;
         if (!sAllowedAndroidPropertySet.contains(mimeType)) {
             return;
         }
-
+        final List<String> rawValueList = new ArrayList<String>();
         for (int i = 1; i <= VCardConstants.MAX_DATA_COLUMN; i++) {
             String value = contentValues.getAsString("data" + i);
             if (value == null) {
@@ -1551,8 +1548,38 @@ public class VCardBuilder {
             rawValueList.add(value);
         }
 
-        appendLineWithCharsetAndQPDetection(
-                VCardConstants.PROPERTY_X_ANDROID_CUSTOM, rawValueList);
+        boolean needCharset =
+            (mShouldAppendCharsetParam &&
+                    !VCardUtils.containsOnlyNonCrLfPrintableAscii(rawValueList));
+        boolean reallyUseQuotedPrintable =
+            (mShouldUseQuotedPrintable &&
+                    !VCardUtils.containsOnlyNonCrLfPrintableAscii(rawValueList));
+        mBuilder.append(VCardConstants.PROPERTY_X_ANDROID_CUSTOM);
+        if (needCharset) {
+            mBuilder.append(VCARD_PARAM_SEPARATOR);
+            mBuilder.append(mVCardCharsetParameter);
+        }
+        if (reallyUseQuotedPrintable) {
+            mBuilder.append(VCARD_PARAM_SEPARATOR);
+            mBuilder.append(VCARD_PARAM_ENCODING_QP);
+        }
+        mBuilder.append(VCARD_DATA_SEPARATOR);
+        mBuilder.append(mimeType);  // Should not be encoded.
+        for (String rawValue : rawValueList) {
+            final String encodedValue;
+            if (reallyUseQuotedPrintable) {
+                encodedValue = encodeQuotedPrintable(rawValue);
+            } else {
+                // TODO: one line may be too huge, which may be invalid in vCard 3.0
+                //        (which says "When generating a content line, lines longer than
+                //        75 characters SHOULD be folded"), though several
+                //        (even well-known) applications do not care this.
+                encodedValue = escapeCharacters(rawValue);
+            }
+            mBuilder.append(VCARD_ITEM_SEPARATOR);
+            mBuilder.append(encodedValue);
+        }
+        mBuilder.append(VCARD_END_OF_LINE);
     }
 
     public void appendLineWithCharsetAndQPDetection(final String propertyName,
@@ -1560,7 +1587,7 @@ public class VCardBuilder {
         appendLineWithCharsetAndQPDetection(propertyName, null, rawValue);
     }
 
-    private void appendLineWithCharsetAndQPDetection(
+    public void appendLineWithCharsetAndQPDetection(
             final String propertyName, final List<String> rawValueList) {
         appendLineWithCharsetAndQPDetection(propertyName, null, rawValueList);
     }
@@ -1578,22 +1605,12 @@ public class VCardBuilder {
 
     public void appendLineWithCharsetAndQPDetection(final String propertyName,
             final List<String> parameterList, final List<String> rawValueList) {
-        boolean needCharset = false;
-        boolean reallyUseQuotedPrintable = false;
-        for (String rawValue : rawValueList) {
-            if (!needCharset && mShouldUseQuotedPrintable &&
-                    !VCardUtils.containsOnlyPrintableAscii(rawValue)) {
-                needCharset = true;
-            }
-            if (!reallyUseQuotedPrintable &&
-                    !VCardUtils.containsOnlyNonCrLfPrintableAscii(rawValue)) {
-                reallyUseQuotedPrintable = true;
-            }
-            if (needCharset && reallyUseQuotedPrintable) {
-                break;
-            }
-        }
-
+        boolean needCharset =
+            (mShouldAppendCharsetParam &&
+                    !VCardUtils.containsOnlyNonCrLfPrintableAscii(rawValueList));
+        boolean reallyUseQuotedPrintable =
+            (mShouldUseQuotedPrintable &&
+                    !VCardUtils.containsOnlyNonCrLfPrintableAscii(rawValueList));
         appendLine(propertyName, parameterList, rawValueList,
                 needCharset, reallyUseQuotedPrintable);
     }
@@ -1610,8 +1627,9 @@ public class VCardBuilder {
     }
 
     public void appendLine(final String propertyName,
-            final String rawValue, final boolean needCharset, boolean needQuotedPrintable) {
-        appendLine(propertyName, null, rawValue, needCharset, needQuotedPrintable);
+            final String rawValue, final boolean needCharset,
+            boolean reallyUseQuotedPrintable) {
+        appendLine(propertyName, null, rawValue, needCharset, reallyUseQuotedPrintable);
     }
 
     public void appendLine(final String propertyName, final List<String> parameterList,
@@ -1620,7 +1638,8 @@ public class VCardBuilder {
     }
 
     public void appendLine(final String propertyName, final List<String> parameterList,
-            final String rawValue, final boolean needCharset, boolean needQuotedPrintable) {
+            final String rawValue, final boolean needCharset,
+            boolean reallyUseQuotedPrintable) {
         mBuilder.append(propertyName);
         if (parameterList != null && parameterList.size() > 0) {
             mBuilder.append(VCARD_PARAM_SEPARATOR);
@@ -1632,7 +1651,7 @@ public class VCardBuilder {
         }
 
         final String encodedValue;
-        if (needQuotedPrintable) {
+        if (reallyUseQuotedPrintable) {
             mBuilder.append(VCARD_PARAM_SEPARATOR);
             mBuilder.append(VCARD_PARAM_ENCODING_QP);
             encodedValue = encodeQuotedPrintable(rawValue);
@@ -1664,14 +1683,16 @@ public class VCardBuilder {
             mBuilder.append(VCARD_PARAM_SEPARATOR);
             mBuilder.append(mVCardCharsetParameter);
         }
+        if (needQuotedPrintable) {
+            mBuilder.append(VCARD_PARAM_SEPARATOR);
+            mBuilder.append(VCARD_PARAM_ENCODING_QP);
+        }
 
         mBuilder.append(VCARD_DATA_SEPARATOR);
         boolean first = true;
         for (String rawValue : rawValueList) {
             final String encodedValue;
             if (needQuotedPrintable) {
-                mBuilder.append(VCARD_PARAM_SEPARATOR);
-                mBuilder.append(VCARD_PARAM_ENCODING_QP);
                 encodedValue = encodeQuotedPrintable(rawValue);
             } else {
                 // TODO: one line may be too huge, which may be invalid in vCard 3.0
