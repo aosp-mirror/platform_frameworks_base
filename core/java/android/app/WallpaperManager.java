@@ -59,6 +59,7 @@ public class WallpaperManager {
     /**
      * Launch an activity for the user to pick the current global live
      * wallpaper.
+     * @hide
      */
     public static final String ACTION_LIVE_WALLPAPER_CHOOSER
             = "android.service.wallpaper.LIVE_WALLPAPER_CHOOSER";
@@ -406,6 +407,7 @@ public class WallpaperManager {
      * If the current wallpaper is a live wallpaper component, return the
      * information about that wallpaper.  Otherwise, if it is a static image,
      * simply return null.
+     * @hide
      */
     public WallpaperInfo getWallpaperInfo() {
         try {
@@ -608,6 +610,7 @@ public class WallpaperManager {
      * since the X offset for those screens are 0.0, 0.5 and 1.0
      * @param xStep The X offset delta from one screen to the next one 
      * @param yStep The Y offset delta from one screen to the next one
+     * @hide
      */
     public void setWallpaperOffsetSteps(float xStep, float yStep) {
         mWallpaperXStep = xStep;
@@ -626,6 +629,7 @@ public class WallpaperManager {
      * @param y Arbitrary integer argument based on command.
      * @param z Arbitrary integer argument based on command.
      * @param extras Optional additional information for the command, or null.
+     * @hide
      */
     public void sendWallpaperCommand(IBinder windowToken, String action,
             int x, int y, int z, Bundle extras) {

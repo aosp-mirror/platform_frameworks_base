@@ -230,6 +230,7 @@ public final class WebStorage {
 
     /**
      * Returns a list of origins having a database
+     * @hide
      */
     public void getOrigins(ValueCallback<Map> callback) {
         if (callback != null) {
@@ -256,6 +257,7 @@ public final class WebStorage {
 
     /**
      * Returns the use for a given origin
+     * @hide
      */
     public void getUsageForOrigin(String origin, ValueCallback<Long> callback) {
         if (callback == null) {
@@ -279,6 +281,7 @@ public final class WebStorage {
 
     /**
      * Returns the quota for a given origin
+     * @hide
      */
     public void getQuotaForOrigin(String origin, ValueCallback<Long> callback) {
         if (callback == null) {
@@ -302,6 +305,7 @@ public final class WebStorage {
 
     /**
      * Set the quota for a given origin
+     * @hide
      */
     public void setQuotaForOrigin(String origin, long quota) {
         if (origin != null) {
@@ -316,6 +320,7 @@ public final class WebStorage {
 
     /**
      * Delete a given origin
+     * @hide
      */
     public void deleteOrigin(String origin) {
         if (origin != null) {
@@ -330,6 +335,7 @@ public final class WebStorage {
 
     /**
      * Delete all databases
+     * @hide
      */
     public void deleteAllData() {
         if (WebViewCore.THREAD_NAME.equals(Thread.currentThread().getName())) {
@@ -360,6 +366,7 @@ public final class WebStorage {
     /**
      * Get the global instance of WebStorage.
      * @return A single instance of WebStorage.
+     * @hide
      */
     public static WebStorage getInstance() {
       if (sWebStorage == null) {

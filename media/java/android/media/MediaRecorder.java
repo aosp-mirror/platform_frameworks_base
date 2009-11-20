@@ -137,11 +137,15 @@ public class MediaRecorder
         public static final int VOICE_CALL = 4;
 
         /** Microphone audio source with same orientation as camera if available, the main
-         *  device microphone otherwise */
+         *  device microphone otherwise
+         *  @hide
+         **/
         public static final int CAMCORDER = 5;
 
         /** Microphone audio source tuned for voice recognition if available, behaves like
-         *  {@link #DEFAULT} otherwise. */
+         *  {@link #DEFAULT} otherwise.
+         *  @hide
+         **/
         public static final int VOICE_RECOGNITION = 6;
     }
 

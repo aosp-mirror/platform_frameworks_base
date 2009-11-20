@@ -159,6 +159,7 @@ class CallbackProxy extends Handler {
     /**
      * Get the WebChromeClient.
      * @return the current WebChromeClient instance.
+     * @hide
      */
     public WebChromeClient getWebChromeClient() {
        return mWebChromeClient;
@@ -1235,6 +1236,7 @@ class CallbackProxy extends Handler {
      * @param quotaUpdater An instance of a class encapsulating a callback
      * to WebViewCore to run when the decision to allow or deny a bigger
      * app cache size has been made.
+     * @hide
      */
     public void onReachedMaxAppCacheSize(long spaceNeeded,
             long totalUsedQuota, WebStorage.QuotaUpdater quotaUpdater) {
@@ -1258,6 +1260,7 @@ class CallbackProxy extends Handler {
      * @param origin The origin requesting Geolocation permsissions.
      * @param callback The callback to call once a permission state has been
      *     obtained.
+     * @hide
      */
     public void onGeolocationPermissionsShowPrompt(String origin,
             GeolocationPermissions.Callback callback) {
@@ -1277,6 +1280,7 @@ class CallbackProxy extends Handler {
     /**
      * Called by WebViewCore to instruct the browser to hide the Geolocation
      * permissions prompt.
+     * @hide
      */
     public void onGeolocationPermissionsHidePrompt() {
         if (mWebChromeClient == null) {
@@ -1295,6 +1299,7 @@ class CallbackProxy extends Handler {
      *     occurred.
      * @param sourceID The filename of the source file in which the error
      *     occurred.
+     * @hide
      */
     public void addMessageToConsole(String message, int lineNumber, String sourceID) {
         if (mWebChromeClient == null) {
@@ -1308,6 +1313,7 @@ class CallbackProxy extends Handler {
         sendMessage(msg);
     }
 
+    /** @hide */
     public boolean onJsTimeout() {
         //always interrupt timedout JS by default
         if (mWebChromeClient == null) {
@@ -1327,6 +1333,7 @@ class CallbackProxy extends Handler {
         return result.getResult();
     }
 
+    /** @hide */
     public void getVisitedHistory(ValueCallback<String[]> callback) {
         if (mWebChromeClient == null) {
             return;

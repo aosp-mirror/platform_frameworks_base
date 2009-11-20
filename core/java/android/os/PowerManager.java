@@ -455,6 +455,7 @@ public class PowerManager
       * }
       *
       * @return whether the screen is on (bright or dim).
+      * @hide
       */
     public boolean isScreenOn()
     {
@@ -488,4 +489,3 @@ public class PowerManager
     IPowerManager mService;
     Handler mHandler;
 }
-

@@ -49,6 +49,7 @@ public class WebChromeClient {
      * @param view The WebView that initiated the callback.
      * @param url The icon url.
      * @param precomposed True if the url is for a precomposed touch icon.
+     * @hide
      */
     public void onReceivedTouchIconUrl(WebView view, String url,
             boolean precomposed) {}
@@ -56,6 +57,7 @@ public class WebChromeClient {
     /**
      * A callback interface used by the host application to notify
      * the current page that its custom view has been dismissed.
+     * @hide
      */
     public interface CustomViewCallback {
         /**
@@ -71,12 +73,14 @@ public class WebChromeClient {
      * @param view is the View object to be shown.
      * @param callback is the callback to be invoked if and when the view
      * is dismissed.
+     * @hide
      */
     public void onShowCustomView(View view, CustomViewCallback callback) {};
 
     /**
      * Notify the host application that the current page would
      * like to hide its custom view.
+     * @hide
      */
     public void onHideCustomView() {}
 
@@ -223,6 +227,7 @@ public class WebChromeClient {
     * @param quotaUpdater A callback to inform the WebCore thread that a new
     * app cache size is available. This callback must always be executed at
     * some point to ensure that the sleeping WebCore thread is woken up.
+    * @hide
     */
     public void onReachedMaxAppCacheSize(long spaceNeeded, long totalUsedQuota,
             WebStorage.QuotaUpdater quotaUpdater) {
@@ -250,6 +255,7 @@ public class WebChromeClient {
      * will continue to occur if the script does not finish at the next check
      * point.
      * @return boolean Whether the JavaScript execution should be interrupted.
+     * @hide
      */
     public boolean onJsTimeout() {
         return true;
@@ -261,6 +267,7 @@ public class WebChromeClient {
      * @param message The error message to report.
      * @param lineNumber The line number of the error.
      * @param sourceID The name of the source file that caused the error.
+     * @hide
      */
     public void addMessageToConsole(String message, int lineNumber, String sourceID) {}
 
@@ -269,6 +276,7 @@ public class WebChromeClient {
      * This icon will be used if the Web page did not specify a poster attribute.
      *
      * @return Bitmap The icon or null if no such icon is available.
+     * @hide
      */
     public Bitmap getDefaultVideoPoster() {
         return null;
@@ -279,12 +287,14 @@ public class WebChromeClient {
      * a <video> is loading.
      *
      * @return View The progress view.
+     * @hide
      */
     public View getVideoLoadingProgressView() {
         return null;
     }
 
     /** Obtains a list of all visited history items, used for link coloring
+     * @hide
      */
     public void getVisitedHistory(ValueCallback<String[]> callback) {
     }

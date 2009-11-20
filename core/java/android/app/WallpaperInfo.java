@@ -23,6 +23,7 @@ import java.io.IOException;
 
 /**
  * This class is used to specify meta information of a wallpaper service.
+ * @hide
  */
 public final class WallpaperInfo implements Parcelable {
     static final String TAG = "WallpaperInfo";

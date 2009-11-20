@@ -2265,6 +2265,7 @@ public class WebView extends AbsoluteLayout
     /**
      * Call this to inform the view that memory is low so that it can
      * free any available memory.
+     * @hide
      */
     public void freeMemory() {
         mWebViewCore.sendMessage(EventHub.FREE_MEMORY);

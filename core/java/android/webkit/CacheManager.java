@@ -109,6 +109,7 @@ public final class CacheManager {
             return expires;
         }
 
+        /** @hide */
         public String getExpiresString() {
             return expiresString;
         }
@@ -133,6 +134,7 @@ public final class CacheManager {
             return encoding;
         }
 
+        /** @hide */
         public String getContentDisposition() {
             return contentdisposition;
         }

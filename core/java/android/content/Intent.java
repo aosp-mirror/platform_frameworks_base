@@ -1365,6 +1365,7 @@ public class Intent implements Parcelable {
      * 
      * <p class="note">This is a protected intent that can only be sent
      * by the system.
+     * @hide
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_LOCALE_CHANGED = "android.intent.action.LOCALE_CHANGED";
@@ -2114,6 +2115,7 @@ public class Intent implements Parcelable {
     /**
      * This field is part of {@link android.content.Intent#ACTION_PACKAGE_CHANGED}
      * and contains a string array of all of the components that have changed.
+     * @hide
      */
     public static final String EXTRA_CHANGED_COMPONENT_NAME_LIST =
             "android.intent.extra.changed_component_name_list";

@@ -23,6 +23,7 @@ import android.os.RemoteException;
 
 /**
  * Used by Account Authenticators to return a response.
+ * @hide
  */
 public class AccountManagerResponse implements Parcelable {
     private IAccountManagerResponse mResponse;

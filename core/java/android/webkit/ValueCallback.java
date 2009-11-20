@@ -18,6 +18,7 @@ package android.webkit;
 
 /**
  * A callback interface used to returns values asynchronously
+ * @hide
  */
 public interface ValueCallback<T> {
     /**

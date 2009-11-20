@@ -4956,6 +4956,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * invalidate/draw passes.
      *
      * @return True if this View is guaranteed to be fully opaque, false otherwise.
+     * @hide
      */
     @ViewDebug.ExportedProperty
     public boolean isOpaque() {
@@ -5548,6 +5549,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * @param canvas the canvas on which to draw the scrollbars
      * 
      * @see #awakenScrollBars(int)
+     * @hide
      */
     protected final void onDrawScrollBars(Canvas canvas) {
         // scrollbars are drawn only when the animation is running

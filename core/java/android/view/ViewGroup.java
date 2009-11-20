@@ -2720,6 +2720,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      *
      * @see #setChildrenDrawingOrderEnabled(boolean)
      * @see #getChildDrawingOrder(int, int)
+     * @hide
      */
     @ViewDebug.ExportedProperty
     protected boolean isChildrenDrawingOrderEnabled() {
@@ -2735,6 +2736,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      *
      * @see #isChildrenDrawingOrderEnabled()
      * @see #getChildDrawingOrder(int, int)
+     * @hide
      */
     protected void setChildrenDrawingOrderEnabled(boolean enabled) {
         setBooleanFlag(FLAG_USE_CHILD_DRAWING_ORDER, enabled);

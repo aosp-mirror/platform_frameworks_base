@@ -74,6 +74,7 @@ public class WebSettings {
      * FAR makes 100% looking like in 240dpi
      * MEDIUM makes 100% looking like in 160dpi
      * CLOSE makes 100% looking like in 120dpi
+     * @hide
      */
     public enum ZoomDensity {
         FAR(150),      // 240dpi
@@ -451,6 +452,7 @@ public class WebSettings {
 
     /**
      * Set whether the WebView loads a page with overview mode.
+     * @hide
      */
     public void setLoadWithOverviewMode(boolean overview) {
         mLoadWithOverviewMode = overview;
@@ -458,6 +460,7 @@ public class WebSettings {
 
     /**
      * Returns true if this WebView loads page with overview mode
+     * @hide
      */
     public boolean getLoadWithOverviewMode() {
         return mLoadWithOverviewMode;
@@ -519,6 +522,7 @@ public class WebSettings {
      * thread.
      * @param zoom A ZoomDensity value
      * @see WebSettings.ZoomDensity
+     * @hide
      */
     public void setDefaultZoom(ZoomDensity zoom) {
         if (mDefaultZoom != zoom) {
@@ -532,6 +536,7 @@ public class WebSettings {
      * thread.
      * @return A ZoomDensity value
      * @see WebSettings.ZoomDensity
+     * @hide
      */
     public ZoomDensity getDefaultZoom() {
         return mDefaultZoom;
@@ -1011,6 +1016,7 @@ public class WebSettings {
     /**
      * Tell the WebView to enable Application Caches API.
      * @param flag True if the WebView should enable Application Caches.
+     * @hide
      */
     public synchronized void setAppCacheEnabled(boolean flag) {
         if (mAppCacheEnabled != flag) {
@@ -1025,6 +1031,7 @@ public class WebSettings {
      * @param appCachePath String path to the directory containing Application
      * Caches files. The appCache path can be the empty string but should not
      * be null. Passing null for this parameter will result in a no-op.
+     * @hide
      */
     public synchronized void setAppCachePath(String appCachePath) {
         if (appCachePath != null && !appCachePath.equals(mAppCachePath)) {
@@ -1036,6 +1043,7 @@ public class WebSettings {
     /**
      * Set the maximum size for the Application Caches content.
      * @param appCacheMaxSize the maximum size in bytes.
+     * @hide
      */
     public synchronized void setAppCacheMaxSize(long appCacheMaxSize) {
         if (appCacheMaxSize != mAppCacheMaxSize) {
@@ -1060,6 +1068,7 @@ public class WebSettings {
      * Set whether the DOM storage API is enabled.
      * @param flag boolean True if the WebView should use the DOM storage
      *     API.
+     * @hide
      */
     public synchronized void setDomStorageEnabled(boolean flag) {
        if (mDomStorageEnabled != flag) {
@@ -1071,6 +1080,7 @@ public class WebSettings {
     /**
      * Returns true if the DOM Storage API's are enabled.
      * @return True if the DOM Storage API's are enabled.
+     * @hide
      */
     public synchronized boolean getDomStorageEnabled() {
        return mDomStorageEnabled;
