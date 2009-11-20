@@ -117,9 +117,6 @@ public class VCardParser_V21 extends VCardParser {
         this(detector.getEstimatedType());
     }
 
-    /**
-     * TODO: Merge detector and parser mode.
-     */
     public VCardParser_V21(int parseType) {
         super(parseType);
         if (parseType == VCardConfig.PARSE_TYPE_FOMA) {
