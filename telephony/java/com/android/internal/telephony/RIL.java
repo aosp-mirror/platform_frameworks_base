@@ -208,7 +208,12 @@ public final class RIL extends BaseCommands implements CommandsInterface {
     private static final boolean DBG = false;
     static final boolean RILJ_LOGD = Config.LOGD;
     static final boolean RILJ_LOGV = DBG ? Config.LOGD : Config.LOGV;
-    static int WAKE_LOCK_TIMEOUT = 5000;
+
+    /**
+     * Wake lock timeout should be longer than the longest timeout in
+     * the vendor ril.
+     */
+    private static final int DEFAULT_WAKE_LOCK_TIMEOUT = 30000;
 
     //***** Instance Variables
 
@@ -219,6 +224,7 @@ public final class RIL extends BaseCommands implements CommandsInterface {
     RILReceiver mReceiver;
     private Context mContext;
     WakeLock mWakeLock;
+    int mWakeLockTimeout;
     int mRequestMessagesPending;
 
     // Is this the first radio state change?
@@ -603,6 +609,8 @@ public final class RIL extends BaseCommands implements CommandsInterface {
         PowerManager pm = (PowerManager)context.getSystemService(Context.POWER_SERVICE);
         mWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, LOG_TAG);
         mWakeLock.setReferenceCounted(false);
+        mWakeLockTimeout = SystemProperties.getInt(TelephonyProperties.PROPERTY_WAKE_LOCK_TIMEOUT,
+                DEFAULT_WAKE_LOCK_TIMEOUT);
         mRequestMessagesPending = 0;
 
         mContext = context;
@@ -1996,7 +2004,7 @@ public final class RIL extends BaseCommands implements CommandsInterface {
 
             mSender.removeMessages(EVENT_WAKE_LOCK_TIMEOUT);
             Message msg = mSender.obtainMessage(EVENT_WAKE_LOCK_TIMEOUT);
-            mSender.sendMessageDelayed(msg, WAKE_LOCK_TIMEOUT);
+            mSender.sendMessageDelayed(msg, mWakeLockTimeout);
         }
     }
 
