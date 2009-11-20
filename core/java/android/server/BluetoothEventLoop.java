@@ -292,9 +292,9 @@ class BluetoothEventLoop {
             mBluetoothService.setProperty(name, propValues[1]);
         } else if (name.equals("Pairable") || name.equals("Discoverable")) {
             String pairable = name.equals("Pairable") ? propValues[1] :
-                mBluetoothService.getProperty("Pairable");
+                mBluetoothService.getPropertyInternal("Pairable");
             String discoverable = name.equals("Discoverable") ? propValues[1] :
-                mBluetoothService.getProperty("Discoverable");
+                mBluetoothService.getPropertyInternal("Discoverable");
 
             // This shouldn't happen, unless Adapter Properties are null.
             if (pairable == null || discoverable == null)
