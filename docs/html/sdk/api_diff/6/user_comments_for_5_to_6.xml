@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="iso-8859-1" standalone="no"?>
+<comments
+  xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+  xsi:noNamespaceSchemaLocation='comments.xsd'
+  name="5_to_6"
+  jdversion="1.1.0">
+
+<!-- Use this file to enter an API change description. For example, when you remove a class, 
+     you can enter a comment for that class that points developers to the replacement class. 
+     You can also provide a change summary for modified API, to give an overview of the changes 
+     why they were made, workarounds, etc.  -->
+
+<!-- When the API diffs report is generated, the comments in this file get added to the tables of 
+     removed, added, and modified packages, classes, methods, and fields. This file does not ship 
+     with the final report. -->
+
+<!-- The id attribute in an identifier element identifies the change as noted in the report. 
+     An id has the form package[.class[.[ctor|method|field].signature]], where [] indicates optional 
+     text. A comment element can have multiple identifier elements, which will will cause the same 
+     text to appear at each place in the report, but will be converted to separate comments when the 
+     comments file is used. -->
+
+<!-- HTML tags in the text field will appear in the report. You also need to close p HTML elements, 
+     used for paragraphs - see the top-level documentation. -->
+
+<!-- You can include standard javadoc links in your change descriptions. You can use the @first command  
+     to cause jdiff to include the first line of the API documentation. You also need to close p HTML 
+     elements, used for paragraphs - see the top-level documentation. -->
+
+<comment>
+  <identifier id="android"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.R.attr"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.R.attr.quickContactBadgeStyleSmallWindowLarge"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.R.attr.quickContactBadgeStyleSmallWindowMedium"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.R.attr.quickContactBadgeStyleSmallWindowSmall"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.R.attr.quickContactBadgeStyleWindowLarge"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.R.attr.quickContactBadgeStyleWindowMedium"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.R.attr.quickContactBadgeStyleWindowSmall"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.accounts"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.accounts.AbstractAccountAuthenticator"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.accounts.AbstractAccountAuthenticator.confirmCredentials_changed(android.accounts.AccountAuthenticatorResponse, android.accounts.Account, android.os.Bundle)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.accounts.AbstractAccountAuthenticator.updateCredentials_changed(android.accounts.AccountAuthenticatorResponse, android.accounts.Account, java.lang.String, android.os.Bundle)"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.os"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.os.Build.VERSION_CODES"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.os.Build.VERSION_CODES.ECLAIR_0_1"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.view"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.view.WindowManager.LayoutParams"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+
+</comments>
