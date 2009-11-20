@@ -352,6 +352,13 @@ public class VCardUtils {
         if (values == null) {
             return true;
         }
+        return containsOnlyPrintableAscii(Arrays.asList(values));
+    }
+
+    public static boolean containsOnlyPrintableAscii(final Collection<String> values) {
+        if (values == null) {
+            return true;
+        }
         final int asciiFirst = 0x20;
         final int asciiLast = 0x7E;  // included
         for (final String value : values) {
@@ -378,6 +385,13 @@ public class VCardUtils {
         if (values == null) {
             return true;
         }
+        return containsOnlyNonCrLfPrintableAscii(Arrays.asList(values));
+    }
+
+    public static boolean containsOnlyNonCrLfPrintableAscii(final Collection<String> values) {
+        if (values == null) {
+            return true;
+        }
         final int asciiFirst = 0x20;
         final int asciiLast = 0x7E;  // included
         for (final String value : values) {
@@ -399,32 +413,6 @@ public class VCardUtils {
         new HashSet<Character>(Arrays.asList('[', ']', '=', ':', '.', ',', ' '));
 
     /**
-     * <P>
-     * Returns true when the given String is categorized as "word" specified in vCard spec 2.1.
-     * </P>
-     * <P>
-     * vCard 2.1 specifies:<BR />
-     * word = &lt;any printable 7bit us-ascii except []=:., &gt;
-     * </P>
-     */
-    public static boolean isV21Word(final String value) {
-        if (TextUtils.isEmpty(value)) {
-            return true;
-        }
-        final int asciiFirst = 0x20;
-        final int asciiLast = 0x7E;  // included
-        final int length = value.length();
-        for (int i = 0; i < length; i = value.offsetByCodePoints(i, 1)) {
-            final int c = value.codePointAt(i);
-            if (!(asciiFirst <= c && c <= asciiLast) ||
-                    sUnAcceptableAsciiInV21WordSet.contains((char)c)) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    /**
      * This is useful since vCard 3.0 often requires the ("X-") properties and groups
      * should contain only alphabets, digits, and hyphen.
      * 
@@ -434,6 +422,13 @@ public class VCardUtils {
      *       to the device which is able to parse the malformed input. 
      */
     public static boolean containsOnlyAlphaDigitHyphen(final String...values) {
+        if (values == null) {
+            return true;
+        }
+        return containsOnlyAlphaDigitHyphen(Arrays.asList(values));
+    }
+
+    public static boolean containsOnlyAlphaDigitHyphen(final Collection<String> values) {
         if (values == null) {
             return true;
         }
@@ -461,7 +456,33 @@ public class VCardUtils {
         }
         return true;
     }
-    
+
+    /**
+     * <P>
+     * Returns true when the given String is categorized as "word" specified in vCard spec 2.1.
+     * </P>
+     * <P>
+     * vCard 2.1 specifies:<BR />
+     * word = &lt;any printable 7bit us-ascii except []=:., &gt;
+     * </P>
+     */
+    public static boolean isV21Word(final String value) {
+        if (TextUtils.isEmpty(value)) {
+            return true;
+        }
+        final int asciiFirst = 0x20;
+        final int asciiLast = 0x7E;  // included
+        final int length = value.length();
+        for (int i = 0; i < length; i = value.offsetByCodePoints(i, 1)) {
+            final int c = value.codePointAt(i);
+            if (!(asciiFirst <= c && c <= asciiLast) ||
+                    sUnAcceptableAsciiInV21WordSet.contains((char)c)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     public static String toHalfWidthString(final String orgString) {
         if (TextUtils.isEmpty(orgString)) {
             return null;
