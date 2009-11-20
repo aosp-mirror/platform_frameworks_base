@@ -44,7 +44,9 @@ public interface LocalPowerManager {
     void enableUserActivity(boolean enabled);
 
     // the same as the method on PowerManager
-    public void userActivity(long time, boolean noChangeLights, int eventType);
+    void userActivity(long time, boolean noChangeLights, int eventType);
 
     boolean isScreenOn();
+
+    void setScreenBrightnessOverride(int brightness);
 }
