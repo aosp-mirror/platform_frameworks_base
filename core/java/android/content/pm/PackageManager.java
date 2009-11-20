@@ -514,6 +514,68 @@ public abstract class PackageManager {
     public static final int DONT_DELETE_DATA = 0x00000001;
 
     /**
+     * Feature for {@link #getSystemAvailableFeatures} and
+     * {@link #hasSystemFeature}: The device has a camera facing away
+     * from the screen.
+     */
+    public static final String FEATURE_CAMERA = "android.hardware.camera";
+    
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and
+     * {@link #hasSystemFeature}: The device's camera supports auto-focus.
+     */
+    public static final String FEATURE_CAMERA_AUTOFOCUS = "android.hardware.camera.autofocus";
+    
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and
+     * {@link #hasSystemFeature}: The device's camera supports flash.
+     */
+    public static final String FEATURE_CAMERA_FLASH = "android.hardware.camera.flash";
+    
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and
+     * {@link #hasSystemFeature}: The device includes a light sensor.
+     */
+    public static final String FEATURE_SENSOR_LIGHT = "android.hardware.sensor.light";
+    
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and
+     * {@link #hasSystemFeature}: The device includes a proximity sensor.
+     */
+    public static final String FEATURE_SENSOR_PROXIMITY = "android.hardware.sensor.proximity";
+    
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and
+     * {@link #hasSystemFeature}: The device has a telephony radio with data
+     * communication support.
+     */
+    public static final String FEATURE_TELEPHONY = "android.hardware.telephony";
+    
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and
+     * {@link #hasSystemFeature}: The device has a CDMA telephony stack.
+     */
+    public static final String FEATURE_TELEPHONY_CDMA = "android.hardware.telephony.cdma";
+    
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and
+     * {@link #hasSystemFeature}: The device has a GSM telephony stack.
+     */
+    public static final String FEATURE_TELEPHONY_GSM = "android.hardware.telephony.gsm";
+    
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and
+     * {@link #hasSystemFeature}: The device's touch screen supports multitouch.
+     */
+    public static final String FEATURE_TOUCHSCREEN_MULTITOUCH = "android.hardware.touchscreen.multitouch";
+    
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and
+     * {@link #hasSystemFeature}: The device supports live wallpapers.
+     */
+    public static final String FEATURE_LIVE_WALLPAPER = "android.software.live_wallpaper";
+    
+    /**
      * Retrieve overall information about an application package that is
      * installed on the system.
      *
