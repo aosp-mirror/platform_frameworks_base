@@ -467,7 +467,7 @@ public class PowerManager
 
     /**
      * Reboot the device.  Will not return if the reboot is
-     * successful.  Requires the {@link android.Manifest#REBOOT}
+     * successful.  Requires the {@link android.Manifest.permission#REBOOT}
      * permission.
      *
      * @param reason code to pass to the kernel (e.g., "recovery") to
