@@ -136,4 +136,9 @@ public interface TelephonyProperties
      * monotonically, regardless of reboots.
      */
     static final String PROPERTY_CDMA_MSG_ID = "persist.radio.cdma.msgid";
+
+    /**
+     * Property to override DEFAULT_WAKE_LOCK_TIMEOUT
+     */
+    static final String PROPERTY_WAKE_LOCK_TIMEOUT = "ro.ril.wake_lock_timeout";
 }
