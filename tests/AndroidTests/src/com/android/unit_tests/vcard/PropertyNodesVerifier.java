@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.android.unit_tests.vcard;
 
 import android.content.ContentValues;
@@ -34,7 +33,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
-public class PropertyNodesVerifier extends VNodeBuilder {
+/* package */ class PropertyNodesVerifier extends VNodeBuilder {
     private final List<PropertyNodesVerifierElem> mPropertyNodesVerifierElemList;
     private final AndroidTestCase mAndroidTestCase;
     private int mIndex;
@@ -103,7 +102,7 @@ public class PropertyNodesVerifier extends VNodeBuilder {
  * If the node does not exist in the "ordered list", the class refers to
  * "unorderd expected property set" and checks the node is expected somewhere.
  */
-class PropertyNodesVerifierElem {
+/* package */ class PropertyNodesVerifierElem {
     public static class TypeSet extends HashSet<String> {
         public TypeSet(String ... array) {
             super(Arrays.asList(array));
@@ -130,56 +129,60 @@ class PropertyNodesVerifierElem {
 
     // WithOrder
 
-    public PropertyNodesVerifierElem addNodeWithOrder(String propName, String propValue) {
-        return addNodeWithOrder(propName, propValue, null, null, null, null, null);
+    public PropertyNodesVerifierElem addExpectedNodeWithOrder(String propName, String propValue) {
+        return addExpectedNodeWithOrder(propName, propValue, null, null, null, null, null);
     }
 
-    public PropertyNodesVerifierElem addNodeWithOrder(String propName, String propValue,
-            ContentValues contentValues) {
-        return addNodeWithOrder(propName, propValue, null, null, contentValues, null, null);
-    }
-
-    public PropertyNodesVerifierElem addNodeWithOrder(String propName,
-            List<String> propValueList, ContentValues contentValues) {
-        return addNodeWithOrder(propName, null, propValueList,
+    public PropertyNodesVerifierElem addExpectedNodeWithOrder(
+            String propName, String propValue, ContentValues contentValues) {
+        return addExpectedNodeWithOrder(propName, propValue, null,
                 null, contentValues, null, null);
     }
 
-    public PropertyNodesVerifierElem addNodeWithOrder(String propName, String propValue,
-            List<String> propValueList) {
-        return addNodeWithOrder(propName, propValue, propValueList, null, null, null, null);
+    public PropertyNodesVerifierElem addExpectedNodeWithOrder(
+            String propName, List<String> propValueList, ContentValues contentValues) {
+        return addExpectedNodeWithOrder(propName, null, propValueList,
+                null, contentValues, null, null);
     }
 
-    public PropertyNodesVerifierElem addNodeWithOrder(String propName, List<String> propValueList) {
+    public PropertyNodesVerifierElem addExpectedNodeWithOrder(
+            String propName, String propValue, List<String> propValueList) {
+        return addExpectedNodeWithOrder(propName, propValue, propValueList, null,
+                null, null, null);
+    }
+
+    public PropertyNodesVerifierElem addExpectedNodeWithOrder(
+            String propName, List<String> propValueList) {
         final String propValue = concatinateListWithSemiColon(propValueList);
-        return addNodeWithOrder(propName, propValue.toString(), propValueList,
+        return addExpectedNodeWithOrder(propName, propValue.toString(), propValueList,
                 null, null, null, null);
     }
 
-    public PropertyNodesVerifierElem addNodeWithOrder(String propName, String propValue,
+    public PropertyNodesVerifierElem addExpectedNodeWithOrder(String propName, String propValue,
             TypeSet paramMap_TYPE) {
-        return addNodeWithOrder(propName, propValue, null, null, null, paramMap_TYPE, null);
+        return addExpectedNodeWithOrder(propName, propValue, null,
+                null, null, paramMap_TYPE, null);
     }
 
-    public PropertyNodesVerifierElem addNodeWithOrder(String propName,
+    public PropertyNodesVerifierElem addExpectedNodeWithOrder(String propName,
             List<String> propValueList, TypeSet paramMap_TYPE) {
-        return addNodeWithOrder(propName, null, propValueList, null, null,
+        return addExpectedNodeWithOrder(propName, null, propValueList, null, null,
                 paramMap_TYPE, null);
     }
 
-    public PropertyNodesVerifierElem addNodeWithOrder(String propName, String propValue,
+    public PropertyNodesVerifierElem addExpectedNodeWithOrder(String propName, String propValue,
             ContentValues paramMap, TypeSet paramMap_TYPE) {
-        return addNodeWithOrder(propName, propValue, null, null,
+        return addExpectedNodeWithOrder(propName, propValue, null, null,
                 paramMap, paramMap_TYPE, null);
     }
 
-    public PropertyNodesVerifierElem addNodeWithOrder(String propName, String propValue,
+    public PropertyNodesVerifierElem addExpectedNodeWithOrder(String propName, String propValue,
             List<String> propValueList, TypeSet paramMap_TYPE) {
-        return addNodeWithOrder(propName, propValue, propValueList, null, null,
+        return addExpectedNodeWithOrder(propName, propValue, propValueList, null, null,
                 paramMap_TYPE, null);
     }
 
-    public PropertyNodesVerifierElem addNodeWithOrder(String propName, String propValue,
+    public PropertyNodesVerifierElem addExpectedNodeWithOrder(String propName, String propValue,
             List<String> propValueList, byte[] propValue_bytes,
             ContentValues paramMap, TypeSet paramMap_TYPE, GroupSet propGroupSet) {
         if (propValue == null && propValueList != null) {
@@ -199,57 +202,57 @@ class PropertyNodesVerifierElem {
 
     // WithoutOrder
 
-    public PropertyNodesVerifierElem addNodeWithoutOrder(String propName, String propValue) {
-        return addNodeWithoutOrder(propName, propValue, null, null, null, null, null);
+    public PropertyNodesVerifierElem addExpectedNode(String propName, String propValue) {
+        return addExpectedNode(propName, propValue, null, null, null, null, null);
     }
 
-    public PropertyNodesVerifierElem addNodeWithoutOrder(String propName, String propValue,
+    public PropertyNodesVerifierElem addExpectedNode(String propName, String propValue,
             ContentValues contentValues) {
-        return addNodeWithoutOrder(propName, propValue, null, null, contentValues, null, null);
+        return addExpectedNode(propName, propValue, null, null, contentValues, null, null);
     }
 
-    public PropertyNodesVerifierElem addNodeWithoutOrder(String propName,
+    public PropertyNodesVerifierElem addExpectedNode(String propName,
             List<String> propValueList, ContentValues contentValues) {
-        return addNodeWithoutOrder(propName, null,
+        return addExpectedNode(propName, null,
                 propValueList, null, contentValues, null, null);
     }
 
-    public PropertyNodesVerifierElem addNodeWithoutOrder(String propName, String propValue,
+    public PropertyNodesVerifierElem addExpectedNode(String propName, String propValue,
             List<String> propValueList) {
-        return addNodeWithoutOrder(propName, propValue, propValueList, null, null, null, null);
+        return addExpectedNode(propName, propValue, propValueList, null, null, null, null);
     }
 
-    public PropertyNodesVerifierElem addNodeWithoutOrder(String propName,
+    public PropertyNodesVerifierElem addExpectedNode(String propName,
             List<String> propValueList) {
-        return addNodeWithoutOrder(propName, null, propValueList,
+        return addExpectedNode(propName, null, propValueList,
                 null, null, null, null);
     }
 
-    public PropertyNodesVerifierElem addNodeWithoutOrder(String propName, String propValue,
+    public PropertyNodesVerifierElem addExpectedNode(String propName, String propValue,
             TypeSet paramMap_TYPE) {
-        return addNodeWithoutOrder(propName, propValue, null, null, null, paramMap_TYPE, null);
+        return addExpectedNode(propName, propValue, null, null, null, paramMap_TYPE, null);
     }
 
-    public PropertyNodesVerifierElem addNodeWithoutOrder(String propName,
+    public PropertyNodesVerifierElem addExpectedNode(String propName,
             List<String> propValueList, TypeSet paramMap_TYPE) {
         final String propValue = concatinateListWithSemiColon(propValueList);
-        return addNodeWithoutOrder(propName, propValue, propValueList, null, null,
+        return addExpectedNode(propName, propValue, propValueList, null, null,
                 paramMap_TYPE, null);
     }
 
-    public PropertyNodesVerifierElem addNodeWithoutOrder(String propName, String propValue,
+    public PropertyNodesVerifierElem addExpectedNode(String propName, String propValue,
             List<String> propValueList, TypeSet paramMap_TYPE) {
-        return addNodeWithoutOrder(propName, propValue, propValueList, null, null,
+        return addExpectedNode(propName, propValue, propValueList, null, null,
                 paramMap_TYPE, null);
     }
 
-    public PropertyNodesVerifierElem addNodeWithoutOrder(String propName, String propValue,
+    public PropertyNodesVerifierElem addExpectedNode(String propName, String propValue,
             ContentValues paramMap, TypeSet paramMap_TYPE) {
-        return addNodeWithoutOrder(propName, propValue, null, null,
+        return addExpectedNode(propName, propValue, null, null,
                 paramMap, paramMap_TYPE, null);
     }
 
-    public PropertyNodesVerifierElem addNodeWithoutOrder(String propName, String propValue,
+    public PropertyNodesVerifierElem addExpectedNode(String propName, String propValue,
             List<String> propValueList, byte[] propValue_bytes,
             ContentValues paramMap, TypeSet paramMap_TYPE, GroupSet propGroupSet) {
         if (propValue == null && propValueList != null) {
