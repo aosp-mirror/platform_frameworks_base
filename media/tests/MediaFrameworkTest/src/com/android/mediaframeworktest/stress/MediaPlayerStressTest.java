@@ -86,6 +86,7 @@ public class MediaPlayerStressTest extends ActivityInstrumentationTestCase2<Medi
 
         } catch (Exception e) {
             Log.v(TAG, e.toString());
+            assertTrue("testStressHWDecoderRelease", false);
         }
     }
 
@@ -139,6 +140,7 @@ public class MediaPlayerStressTest extends ActivityInstrumentationTestCase2<Medi
 
         } catch (Exception e) {
             Log.v(TAG, e.toString());
+            assertTrue("testStressGetCurrentPosition", false);
         }
     }
 }
