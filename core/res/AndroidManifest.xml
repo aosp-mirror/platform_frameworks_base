@@ -943,7 +943,7 @@
     <permission android:name="android.permission.DELETE_CACHE_FILES"
         android:label="@string/permlab_deleteCacheFiles"
         android:description="@string/permdesc_deleteCacheFiles"
-        android:protectionLevel="signature" />
+        android:protectionLevel="signatureOrSystem" />
 
     <!-- Allows an application to delete packages. -->
     <permission android:name="android.permission.DELETE_PACKAGES"
@@ -981,7 +981,7 @@
     <permission android:name="android.permission.REBOOT"
         android:label="@string/permlab_reboot"
         android:description="@string/permdesc_reboot"
-        android:protectionLevel="signature" />
+        android:protectionLevel="signatureOrSystem" />
 
    <!-- Allows low-level access to power management -->
     <permission android:name="android.permission.DEVICE_POWER"
