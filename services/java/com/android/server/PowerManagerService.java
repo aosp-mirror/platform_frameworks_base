@@ -209,7 +209,9 @@ class PowerManagerService extends IPowerManager.Stub
     private boolean mLightSensorEnabled;
     private float mLightSensorValue = -1;
     private float mLightSensorPendingValue = -1;
-    private int mLightSensorBrightness = -1;
+    private int mLightSensorScreenBrightness = -1;
+    private int mLightSensorButtonBrightness = -1;
+    private int mLightSensorKeyboardBrightness = -1;
     private boolean mDimScreen = true;
     private long mNextTimeout;
     private volatile int mPokey = 0;
@@ -220,6 +222,7 @@ class PowerManagerService extends IPowerManager.Stub
     private long mLastScreenOnTime;
     private boolean mPreventScreenOn;
     private int mScreenBrightnessOverride = -1;
+    private int mButtonBrightnessOverride = -1;
     private boolean mUseSoftwareAutoBrightness;
     private boolean mAutoBrightessEnabled;
     private int[] mAutoBrightnessLevels;
@@ -919,7 +922,8 @@ class PowerManagerService extends IPowerManager.Stub
         pw.println("  mKeylightDelay=" + mKeylightDelay + " mDimDelay=" + mDimDelay
                 + " mScreenOffDelay=" + mScreenOffDelay);
         pw.println("  mPreventScreenOn=" + mPreventScreenOn
-                + "  mScreenBrightnessOverride=" + mScreenBrightnessOverride);
+                + "  mScreenBrightnessOverride=" + mScreenBrightnessOverride
+                + "  mButtonBrightnessOverride=" + mButtonBrightnessOverride);
         pw.println("  mTotalDelaySetting=" + mTotalDelaySetting);
         pw.println("  mLastScreenOnTime=" + mLastScreenOnTime);
         pw.println("  mBroadcastWakeLock=" + mBroadcastWakeLock);
@@ -933,8 +937,11 @@ class PowerManagerService extends IPowerManager.Stub
         pw.println("  mProximityPendingValue=" + mProximityPendingValue);
         pw.println("  mLastProximityEventTime=" + mLastProximityEventTime);
         pw.println("  mLightSensorEnabled=" + mLightSensorEnabled);
-        pw.println("  mLightSensorValue=" + mLightSensorValue);
-        pw.println("  mLightSensorPendingValue=" + mLightSensorPendingValue);
+        pw.println("  mLightSensorValue=" + mLightSensorValue
+                + " mLightSensorPendingValue=" + mLightSensorPendingValue);
+        pw.println("  mLightSensorScreenBrightness=" + mLightSensorScreenBrightness
+                + " mLightSensorButtonBrightness=" + mLightSensorButtonBrightness
+                + " mLightSensorKeyboardBrightness=" + mLightSensorKeyboardBrightness);
         pw.println("  mUseSoftwareAutoBrightness=" + mUseSoftwareAutoBrightness);
         pw.println("  mAutoBrightessEnabled=" + mAutoBrightessEnabled);
         mScreenBrightness.dump(pw, "  mScreenBrightness: ");
@@ -1302,7 +1309,18 @@ class PowerManagerService extends IPowerManager.Stub
             }
         }
     }
-    
+
+    public void setButtonBrightnessOverride(int brightness) {
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.DEVICE_POWER, null);
+
+         synchronized (mLocks) {
+           if (mButtonBrightnessOverride != brightness) {
+                mButtonBrightnessOverride = brightness;
+                updateLightsLocked(mPowerState, BUTTON_BRIGHT_BIT | KEYBOARD_BRIGHT_BIT);
+            }
+        }
+    }
+
     /**
      * Sanity-check that gets called 5 seconds after any call to
      * preventScreenOn(true).  This ensures that the original call
@@ -1451,8 +1469,7 @@ class PowerManagerService extends IPowerManager.Stub
                         err = setScreenStateLocked(true);
                         long identity = Binder.clearCallingIdentity();
                         try {
-                            mBatteryStats.noteScreenBrightness(
-                                    getPreferredBrightness());
+                            mBatteryStats.noteScreenBrightness(getPreferredBrightness());
                             mBatteryStats.noteScreenOn();
                         } catch (RemoteException e) {
                             Log.w(TAG, "RemoteException calling noteScreenOn on BatteryStatsService", e);
@@ -1523,6 +1540,8 @@ class PowerManagerService extends IPowerManager.Stub
 
     private void updateLightsLocked(int newState, int forceState) {
         final int oldState = mPowerState;
+        newState = applyButtonState(newState);
+        newState = applyKeyboardState(newState);
         final int realDifference = (newState ^ oldState);
         final int difference = realDifference | forceState;
         if (difference == 0) {
@@ -1541,9 +1560,9 @@ class PowerManagerService extends IPowerManager.Stub
                 if ((newState & KEYBOARD_BRIGHT_BIT) == 0) {
                     mKeyboardBrightness.setTargetLocked(Power.BRIGHTNESS_OFF,
                             ANIM_STEPS, INITIAL_KEYBOARD_BRIGHTNESS,
-                            preferredBrightness);
+                            Power.BRIGHTNESS_ON);
                 } else {
-                    mKeyboardBrightness.setTargetLocked(preferredBrightness,
+                    mKeyboardBrightness.setTargetLocked(Power.BRIGHTNESS_ON,
                             ANIM_STEPS, INITIAL_KEYBOARD_BRIGHTNESS,
                             Power.BRIGHTNESS_OFF);
                 }
@@ -1562,9 +1581,9 @@ class PowerManagerService extends IPowerManager.Stub
                 if ((newState & BUTTON_BRIGHT_BIT) == 0) {
                     mButtonBrightness.setTargetLocked(Power.BRIGHTNESS_OFF,
                             ANIM_STEPS, INITIAL_BUTTON_BRIGHTNESS,
-                            preferredBrightness);
+                            Power.BRIGHTNESS_ON);
                 } else {
-                    mButtonBrightness.setTargetLocked(preferredBrightness,
+                    mButtonBrightness.setTargetLocked(Power.BRIGHTNESS_ON,
                             ANIM_STEPS, INITIAL_BUTTON_BRIGHTNESS,
                             Power.BRIGHTNESS_OFF);
                 }
@@ -1820,9 +1839,9 @@ class PowerManagerService extends IPowerManager.Stub
         try {
             if (mScreenBrightnessOverride >= 0) {
                 return mScreenBrightnessOverride;
-            } else if (mLightSensorBrightness >= 0 && mUseSoftwareAutoBrightness
+            } else if (mLightSensorScreenBrightness >= 0 && mUseSoftwareAutoBrightness
                     && mAutoBrightessEnabled) {
-                return mLightSensorBrightness;
+                return mLightSensorScreenBrightness;
             }
             final int brightness = Settings.System.getInt(mContext.getContentResolver(),
                                                           SCREEN_BRIGHTNESS);
@@ -1830,6 +1849,40 @@ class PowerManagerService extends IPowerManager.Stub
             return Math.max(brightness, Power.BRIGHTNESS_DIM);
         } catch (SettingNotFoundException snfe) {
             return Power.BRIGHTNESS_ON;
+        }
+    }
+
+    private int applyButtonState(int state) {
+        int brightness = -1;
+        if (mButtonBrightnessOverride >= 0) {
+            brightness = mButtonBrightnessOverride;
+        } else if (mLightSensorButtonBrightness >= 0 && mUseSoftwareAutoBrightness) {
+            brightness = mLightSensorButtonBrightness;
+        }
+        if (brightness > 0) {
+            return state | BUTTON_BRIGHT_BIT;
+        } else if (brightness == 0) {
+            return state & ~BUTTON_BRIGHT_BIT;
+        } else {
+            return state;
+        }
+    }
+
+    private int applyKeyboardState(int state) {
+        int brightness = -1;
+        if (!mKeyboardVisible) {
+            brightness = 0;
+        } else if (mButtonBrightnessOverride >= 0) {
+            brightness = mButtonBrightnessOverride;
+        } else if (mLightSensorKeyboardBrightness >= 0 && mUseSoftwareAutoBrightness) {
+            brightness =  mLightSensorKeyboardBrightness;
+        }
+        if (brightness > 0) {
+            return state | KEYBOARD_BRIGHT_BIT;
+        } else if (brightness == 0) {
+            return state & ~KEYBOARD_BRIGHT_BIT;
+        } else {
+            return state;
         }
     }
 
@@ -2008,7 +2061,9 @@ class PowerManagerService extends IPowerManager.Stub
                 } else {
                     keyboardValue = 0;
                 }
-                mLightSensorBrightness = lcdValue;
+                mLightSensorScreenBrightness = lcdValue;
+                mLightSensorButtonBrightness = buttonValue;
+                mLightSensorKeyboardBrightness = keyboardValue;
 
                 if (mDebugLightSensor) {
                     Log.d(TAG, "lcdValue " + lcdValue);
@@ -2032,31 +2087,35 @@ class PowerManagerService extends IPowerManager.Stub
                                 lcdValue, brightnessMode);
                     }
                 }
-                if (ANIMATE_BUTTON_LIGHTS) {
-                    if (mButtonBrightness.setTargetLocked(buttonValue,
-                            AUTOBRIGHTNESS_ANIM_STEPS, INITIAL_BUTTON_BRIGHTNESS,
-                            (int)mButtonBrightness.curValue)) {
-                        startAnimation = true;
+                if (mButtonBrightnessOverride < 0) {
+                    if (ANIMATE_BUTTON_LIGHTS) {
+                        if (mButtonBrightness.setTargetLocked(buttonValue,
+                                AUTOBRIGHTNESS_ANIM_STEPS, INITIAL_BUTTON_BRIGHTNESS,
+                                (int)mButtonBrightness.curValue)) {
+                            startAnimation = true;
+                        }
+                    } else {
+                        int brightnessMode = (mUseSoftwareAutoBrightness
+                                            ? HardwareService.BRIGHTNESS_MODE_SENSOR
+                                            : HardwareService.BRIGHTNESS_MODE_USER);
+                        mHardware.setLightBrightness_UNCHECKED(HardwareService.LIGHT_ID_BUTTONS,
+                                buttonValue, brightnessMode);
                     }
-                } else {
-                    int brightnessMode = (mUseSoftwareAutoBrightness
-                                        ? HardwareService.BRIGHTNESS_MODE_SENSOR
-                                        : HardwareService.BRIGHTNESS_MODE_USER);
-                    mHardware.setLightBrightness_UNCHECKED(HardwareService.LIGHT_ID_BUTTONS,
-                            buttonValue, brightnessMode);
                 }
-                if (ANIMATE_KEYBOARD_LIGHTS) {
-                    if (mKeyboardBrightness.setTargetLocked(keyboardValue,
-                            AUTOBRIGHTNESS_ANIM_STEPS, INITIAL_BUTTON_BRIGHTNESS,
-                            (int)mKeyboardBrightness.curValue)) {
-                        startAnimation = true;
+                if (mButtonBrightnessOverride < 0 || !mKeyboardVisible) {
+                    if (ANIMATE_KEYBOARD_LIGHTS) {
+                        if (mKeyboardBrightness.setTargetLocked(keyboardValue,
+                                AUTOBRIGHTNESS_ANIM_STEPS, INITIAL_BUTTON_BRIGHTNESS,
+                                (int)mKeyboardBrightness.curValue)) {
+                            startAnimation = true;
+                        }
+                    } else {
+                        int brightnessMode = (mUseSoftwareAutoBrightness
+                                            ? HardwareService.BRIGHTNESS_MODE_SENSOR
+                                            : HardwareService.BRIGHTNESS_MODE_USER);
+                        mHardware.setLightBrightness_UNCHECKED(HardwareService.LIGHT_ID_KEYBOARD,
+                                keyboardValue, brightnessMode);
                     }
-                } else {
-                    int brightnessMode = (mUseSoftwareAutoBrightness
-                                        ? HardwareService.BRIGHTNESS_MODE_SENSOR
-                                        : HardwareService.BRIGHTNESS_MODE_USER);
-                    mHardware.setLightBrightness_UNCHECKED(HardwareService.LIGHT_ID_KEYBOARD,
-                            keyboardValue, brightnessMode);
                 }
                 if (startAnimation) {
                     if (mDebugLightSensor) {
