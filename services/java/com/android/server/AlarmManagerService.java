@@ -44,6 +44,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -260,8 +261,11 @@ class AlarmManagerService extends IAlarmManager.Stub {
             
             // Update the kernel timezone information
             // Kernel tracks time offsets as 'minutes west of GMT'
-            int gmtOffset = (zone.getRawOffset() + zone.getDSTSavings()) / 60000;
-            setKernelTimezone(mDescriptor, -(gmtOffset));
+            int gmtOffset = zone.getRawOffset();
+            if (zone.inDaylightTime(new Date(System.currentTimeMillis()))) {
+                gmtOffset += zone.getDSTSavings();
+            }
+            setKernelTimezone(mDescriptor, -(gmtOffset / 60000));
         }
 
         TimeZone.setDefault(null);
