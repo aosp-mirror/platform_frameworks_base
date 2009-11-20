@@ -1548,24 +1548,36 @@ void glDeleteBuffers(GLsizei n, const GLuint* buffers)
         GLuint name = buffers[i];
         if (name) {
             // unbind bound deleted buffers...
-            if (c->arrays.element_array_buffer->name == name) {
-                c->arrays.element_array_buffer = 0;
+            if (c->arrays.element_array_buffer) {
+                if (c->arrays.element_array_buffer->name == name) {
+                    c->arrays.element_array_buffer = 0;
+                }
             }
-            if (c->arrays.array_buffer->name == name) {
-                c->arrays.array_buffer = 0;
+            if (c->arrays.array_buffer) {
+                if (c->arrays.array_buffer->name == name) {
+                    c->arrays.array_buffer = 0;
+                }
             }
-            if (c->arrays.vertex.bo->name == name) {
-                c->arrays.vertex.bo = 0;
+            if (c->arrays.vertex.bo) {
+                if (c->arrays.vertex.bo->name == name) {
+                    c->arrays.vertex.bo = 0;
+                }
             }
-            if (c->arrays.normal.bo->name == name) {
-                c->arrays.normal.bo = 0;
+            if (c->arrays.normal.bo) {
+                if (c->arrays.normal.bo->name == name) {
+                    c->arrays.normal.bo = 0;
+                }
             }
-            if (c->arrays.color.bo->name == name) {
-                c->arrays.color.bo = 0;
+            if (c->arrays.color.bo) {
+                if (c->arrays.color.bo->name == name) {
+                    c->arrays.color.bo = 0;
+                }
             }
             for (int t=0 ; t<GGL_TEXTURE_UNIT_COUNT ; t++) {
-                if (c->arrays.texture[t].bo->name == name) {
-                    c->arrays.texture[t].bo = 0;
+                if (c->arrays.texture[t].bo) {
+                    if (c->arrays.texture[t].bo->name == name) {
+                        c->arrays.texture[t].bo = 0;
+                    }
                 }
             }
         }
