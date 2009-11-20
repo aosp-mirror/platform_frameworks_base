@@ -42,7 +42,11 @@ import java.io.IOException;
  * BluetoothAdapter.listenUsingRfcommWithServiceRecord()}. Then call
  * {@link #accept()} to listen for incoming connection requests. This call
  * will block until a connection is established, at which point, it will return
- * a {@link BluetoothSocket} to manage the connection.
+ * a {@link BluetoothSocket} to manage the connection. Once the {@link
+ * BluetoothSocket} is acquired, it's a good idea to call {@link #close()} on
+ * the {@link BluetoothServerSocket} when it's no longer needed for accepting
+ * connections. Closing the {@link BluetoothServerSocket} will <em>not</em>
+ * close the returned {@link BluetoothSocket}.
  *
  * <p>{@link BluetoothServerSocket} is thread
  * safe. In particular, {@link #close} will always immediately abort ongoing
@@ -105,6 +109,8 @@ public final class BluetoothServerSocket implements Closeable {
      * Immediately close this socket, and release all associated resources.
      * <p>Causes blocked calls on this socket in other threads to immediately
      * throw an IOException.
+     * <p>Closing the {@link BluetoothServerSocket} will <em>not</em>
+     * close any {@link BluetoothSocket} received from {@link #accept()}.
      */
     public void close() throws IOException {
         synchronized (this) {
