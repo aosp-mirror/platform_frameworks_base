@@ -84,6 +84,8 @@ static void dumpstate(int full) {
         EXEC("dmesg");
         PRINT("------ KERNEL WAKELOCKS ------");
         DUMP("/proc/wakelocks");
+        PRINT("------ KERNEL CPUFREQ ------");
+        DUMP("/sys/devices/system/cpu/cpu0/cpufreq/stats/time_in_state");
         PRINT("");
         PRINT("------ PROCESSES ------");
         EXEC1("ps", "-P");
