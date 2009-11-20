@@ -3,19 +3,24 @@
 #include <utils/Log.h>
 
 #include "StagefrightPlayer.h"
-#include <media/stagefright/MediaPlayerImpl.h>
+
+#include "AwesomePlayer.h"
 
 namespace android {
 
 StagefrightPlayer::StagefrightPlayer()
-    : mPlayer(NULL) {
+    : mPlayer(new AwesomePlayer) {
     LOGV("StagefrightPlayer");
+
+    mPlayer->setListener(this);
 }
 
 StagefrightPlayer::~StagefrightPlayer() {
     LOGV("~StagefrightPlayer");
     reset();
-    LOGV("~StagefrightPlayer done.");
+
+    delete mPlayer;
+    mPlayer = NULL;
 }
 
 status_t StagefrightPlayer::initCheck() {
@@ -25,62 +30,32 @@ status_t StagefrightPlayer::initCheck() {
 
 status_t StagefrightPlayer::setDataSource(const char *url) {
     LOGV("setDataSource('%s')", url);
-
-    reset();
-    mPlayer = new MediaPlayerImpl(url);
-
-    status_t err = mPlayer->initCheck();
-    if (err != OK) {
-        delete mPlayer;
-        mPlayer = NULL;
-    } else {
-        mPlayer->setAudioSink(mAudioSink);
-    }
-
-    return err;
+    return mPlayer->setDataSource(url);
 }
 
 // Warning: The filedescriptor passed into this method will only be valid until
 // the method returns, if you want to keep it, dup it!
 status_t StagefrightPlayer::setDataSource(int fd, int64_t offset, int64_t length) {
     LOGV("setDataSource(%d, %lld, %lld)", fd, offset, length);
-
-    reset();
-    mPlayer = new MediaPlayerImpl(dup(fd), offset, length);
-
-    status_t err = mPlayer->initCheck();
-    if (err != OK) {
-        delete mPlayer;
-        mPlayer = NULL;
-    } else {
-        mPlayer->setAudioSink(mAudioSink);
-    }
-
-    return err;
+    return mPlayer->setDataSource(dup(fd), offset, length);
 }
 
 status_t StagefrightPlayer::setVideoSurface(const sp<ISurface> &surface) {
     LOGV("setVideoSurface");
 
-    if (mPlayer == NULL) {
-        return NO_INIT;
-    }
-
     mPlayer->setISurface(surface);
-
     return OK;
 }
 
 status_t StagefrightPlayer::prepare() {
     LOGV("prepare");
 
-    if (mPlayer == NULL) {
-        return NO_INIT;
+    int32_t width, height;
+    if (mPlayer->getVideoDimensions(&width, &height) != OK) {
+        width = height = 0;
     }
 
-    sendEvent(
-            MEDIA_SET_VIDEO_SIZE,
-            mPlayer->getWidth(), mPlayer->getHeight());
+    sendEvent(MEDIA_SET_VIDEO_SIZE, width, height);
 
     return OK;
 }
@@ -102,54 +77,30 @@ status_t StagefrightPlayer::prepareAsync() {
 status_t StagefrightPlayer::start() {
     LOGV("start");
 
-    if (mPlayer == NULL) {
-        return NO_INIT;
-    }
-
-    mPlayer->play();
-
-    return OK;
+    return mPlayer->play();
 }
 
 status_t StagefrightPlayer::stop() {
     LOGV("stop");
 
-    if (mPlayer == NULL) {
-        return NO_INIT;
-    }
-
-    reset();
-
-    return OK;
+    return pause();  // what's the difference?
 }
 
 status_t StagefrightPlayer::pause() {
     LOGV("pause");
 
-    if (mPlayer == NULL) {
-        return NO_INIT;
-    }
-
-    mPlayer->pause();
-
-    return OK;
+    return mPlayer->pause();
 }
 
 bool StagefrightPlayer::isPlaying() {
     LOGV("isPlaying");
-    return mPlayer != NULL && mPlayer->isPlaying();
+    return mPlayer->isPlaying();
 }
 
 status_t StagefrightPlayer::seekTo(int msec) {
     LOGV("seekTo");
 
-    if (mPlayer == NULL) {
-        return NO_INIT;
-    }
-
     status_t err = mPlayer->seekTo((int64_t)msec * 1000);
-
-    sendEvent(MEDIA_SEEK_COMPLETE);
 
     return err;
 }
@@ -157,37 +108,45 @@ status_t StagefrightPlayer::seekTo(int msec) {
 status_t StagefrightPlayer::getCurrentPosition(int *msec) {
     LOGV("getCurrentPosition");
 
-    if (mPlayer == NULL) {
-        return NO_INIT;
+    int64_t positionUs;
+    status_t err = mPlayer->getPosition(&positionUs);
+
+    if (err != OK) {
+        return err;
     }
 
-    *msec = mPlayer->getPosition() / 1000;
+    *msec = (positionUs + 500) / 1000;
+
     return OK;
 }
 
 status_t StagefrightPlayer::getDuration(int *msec) {
     LOGV("getDuration");
 
-    if (mPlayer == NULL) {
-        return NO_INIT;
+    int64_t durationUs;
+    status_t err = mPlayer->getDuration(&durationUs);
+
+    if (err != OK) {
+        return err;
     }
 
-    *msec = mPlayer->getDuration() / 1000;
+    *msec = (durationUs + 500) / 1000;
+
     return OK;
 }
 
 status_t StagefrightPlayer::reset() {
     LOGV("reset");
 
-    delete mPlayer;
-    mPlayer = NULL;
+    mPlayer->reset();
 
     return OK;
 }
 
 status_t StagefrightPlayer::setLooping(int loop) {
     LOGV("setLooping");
-    return UNKNOWN_ERROR;
+
+    return mPlayer->setLooping(loop);
 }
 
 player_type StagefrightPlayer::playerType() {
@@ -202,9 +161,7 @@ status_t StagefrightPlayer::invoke(const Parcel &request, Parcel *reply) {
 void StagefrightPlayer::setAudioSink(const sp<AudioSink> &audioSink) {
     MediaPlayerInterface::setAudioSink(audioSink);
 
-    if (mPlayer != NULL) {
-        mPlayer->setAudioSink(audioSink);
-    }
+    mPlayer->setAudioSink(audioSink);
 }
 
 }  // namespace android

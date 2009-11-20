@@ -19,13 +19,13 @@
 #include <binder/ProcessState.h>
 #include <media/stagefright/AudioPlayer.h>
 #include <media/stagefright/CameraSource.h>
+#include <media/stagefright/FileSource.h>
 #include <media/stagefright/MediaBufferGroup.h>
 #include <media/stagefright/MediaDebug.h>
 #include <media/stagefright/MediaDefs.h>
 #include <media/stagefright/MetaData.h>
 #include <media/stagefright/MediaExtractor.h>
 #include <media/stagefright/MPEG4Writer.h>
-#include <media/stagefright/MmapSource.h>
 #include <media/stagefright/OMXClient.h>
 #include <media/stagefright/OMXCodec.h>
 #include <media/MediaPlayerInterface.h>
@@ -105,7 +105,7 @@ sp<MediaSource> createSource(const char *filename) {
     sp<MediaSource> source;
 
     sp<MediaExtractor> extractor =
-        MediaExtractor::Create(new MmapSource(filename));
+        MediaExtractor::Create(new FileSource(filename));
 
     size_t num_tracks = extractor->countTracks();
 
