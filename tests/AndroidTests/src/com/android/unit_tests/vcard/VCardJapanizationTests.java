@@ -18,6 +18,7 @@ package com.android.unit_tests.vcard;
 
 import android.content.ContentValues;
 import android.pim.vcard.VCardConfig;
+import android.provider.ContactsContract.CommonDataKinds.Nickname;
 import android.provider.ContactsContract.CommonDataKinds.Note;
 import android.provider.ContactsContract.CommonDataKinds.Phone;
 import android.provider.ContactsContract.CommonDataKinds.StructuredName;
@@ -417,5 +418,17 @@ public class VCardJapanizationTests extends VCardTestsBase {
                 .addExpectedNode("X-DCM-HMN-MODE", "")
                 .addExpectedNode("ADR", "", new TypeSet("HOME"))
                 .addExpectedNode("NOTE", "note1\nnote2\nnote3", mContentValuesForQP);
+    }
+
+    public void testAndroidCustomV21() {
+        mVerifier.initForExportTest(VCardConfig.VCARD_TYPE_V21_GENERIC_UTF8);
+        mVerifier.addInputEntry().addContentValues(Nickname.CONTENT_ITEM_TYPE)
+                .put(Nickname.NAME, "\u304D\u3083\u30FC\u30A8\u30C3\u30C1\u30FC");
+        mVerifier.addPropertyNodesVerifierElemWithEmptyName()
+                .addExpectedNode("X-ANDROID-CUSTOM",
+                        Arrays.asList(Nickname.CONTENT_ITEM_TYPE,
+                                "\u304D\u3083\u30FC\u30A8\u30C3\u30C1\u30FC",
+                                "", "", "", "", "", "", "", "", "", "", "", "", "", ""),
+                        mContentValuesForQPAndUtf8);
     }
 }
