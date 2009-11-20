@@ -33,6 +33,7 @@ LOCAL_SRC_FILES:= \
 	android_opengl_GLES11.cpp \
 	android_opengl_GLES11Ext.cpp \
 	android_database_CursorWindow.cpp \
+	android_database_SQLiteCompiledSql.cpp \
 	android_database_SQLiteDebug.cpp \
 	android_database_SQLiteDatabase.cpp \
 	android_database_SQLiteProgram.cpp \

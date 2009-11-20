@@ -16,6 +16,8 @@
 
 package android.database.sqlite;
 
+import com.google.android.collect.Maps;
+
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
@@ -29,6 +31,7 @@ import android.util.EventLog;
 import android.util.Log;
 
 import java.io.File;
+import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Locale;
@@ -217,6 +220,34 @@ public class SQLiteDatabase extends SQLiteClosable {
 
     private WeakHashMap<SQLiteClosable, Object> mPrograms;
 
+    /**
+     * for each instance of this class, a cache is maintained to store
+     * the compiled query statement ids returned by sqlite database.
+     *     key = sql statement with "?" for bind args
+     *     value = {@link SQLiteCompiledSql}
+     * If an application opens the database and keeps it open during its entire life, then
+     * there will not be an overhead of compilation of sql statements by sqlite.
+     *
+     * why is this cache NOT static? because sqlite attaches compiledsql statements to the
+     * struct created when {@link SQLiteDatabase#openDatabase(String, CursorFactory, int)} is
+     * invoked.
+     *
+     * this cache has an upper limit of mMaxSqlCacheSize (settable by calling the method
+     * (@link setMaxCacheSize(int)}). its default is 0 - i.e., no caching by default because
+     * most of the apps don't use "?" syntax in their sql, caching is not useful for them.
+     */
+    private Map<String, SQLiteCompiledSql> mCompiledQueries = Maps.newHashMap();
+    private int mMaxSqlCacheSize = 0; // no caching by default
+    private static final int MAX_SQL_CACHE_SIZE = 1000;
+
+    /** maintain stats about number of cache hits and misses */
+    private int mNumCacheHits;
+    private int mNumCacheMisses;
+
+    /** the following 2 members maintain the time when a database is opened and closed */
+    private String mTimeOpened = null;
+    private String mTimeClosed = null;
+
     private final RuntimeException mLeakedException;
 
     // package visible, since callers will access directly to minimize overhead in the case
@@ -251,6 +282,9 @@ public class SQLiteDatabase extends SQLiteClosable {
     @Override
     protected void onAllReferencesReleased() {
         if (isOpen()) {
+            if (SQLiteDebug.DEBUG_SQL_CACHE) {
+                mTimeClosed = getTime();
+            }
             dbclose();
         }
     }
@@ -796,6 +830,13 @@ public class SQLiteDatabase extends SQLiteClosable {
             SQLiteClosable program = entry.getKey();
             if (program != null) {
                 program.onAllReferencesReleasedFromContainer();
+            }
+        }
+
+        // finalize all compiled sql statement objects in compiledQueries cache
+        synchronized (mCompiledQueries) {
+            for (SQLiteCompiledSql compiledStatement : mCompiledQueries.values()) {
+                compiledStatement.releaseSqlStatement();
             }
         }
     }
@@ -1695,14 +1736,24 @@ public class SQLiteDatabase extends SQLiteClosable {
             " SQLiteDatabase created and never closed");
         mFactory = factory;
         dbopen(mPath, mFlags);
+        if (SQLiteDebug.DEBUG_SQL_CACHE) {
+            mTimeOpened = getTime();
+        }
         mPrograms = new WeakHashMap<SQLiteClosable,Object>();
         try {
             setLocale(Locale.getDefault());
         } catch (RuntimeException e) {
             Log.e(TAG, "Failed to setLocale() when constructing, closing the database", e);
             dbclose();
+            if (SQLiteDebug.DEBUG_SQL_CACHE) {
+                mTimeClosed = getTime();
+            }
             throw e;
         }
+    }
+
+    private String getTime() {
+        return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS ").format(System.currentTimeMillis());
     }
 
     /**
@@ -1731,6 +1782,112 @@ public class SQLiteDatabase extends SQLiteClosable {
      */
     public final String getPath() {
         return mPath;
+    }
+
+    /**
+     * set the max size of the compiled sql cache for this database after purging the cache.
+     * (size of the cache = number of compiled-sql-statements stored in the cache)
+     *
+     * synchronized because we don't want t threads to change cache size at the same time.
+     * @param cacheSize the size of the cache. can be (0 to MAX_SQL_CACHE_SIZE)
+     */
+    public void setMaxSqlCacheSize(int cacheSize) {
+        synchronized(mCompiledQueries) {
+            resetCompiledSqlCache();
+            mMaxSqlCacheSize = (cacheSize > MAX_SQL_CACHE_SIZE) ? MAX_SQL_CACHE_SIZE
+                    : (cacheSize < 0) ? 0 : cacheSize;
+        }
+    }
+
+    /**
+     * remove everything from the compiled sql cache
+     */
+    public void resetCompiledSqlCache() {
+        synchronized(mCompiledQueries) {
+            mCompiledQueries.clear();
+        }
+    }
+
+    /**
+     * adds the given sql and its compiled-statement-id-returned-by-sqlite to the
+     * cache of compiledQueries attached to 'this'.
+     *
+     * if there is already a {@link SQLiteCompiledSql} in compiledQueries for the given sql,
+     * the new {@link SQLiteCompiledSql} object is NOT inserted into the cache (i.e.,the current
+     * mapping is NOT replaced with the new mapping).
+     *
+     * @return true if the given obj is added to cache. false otherwise.
+     */
+    /* package */ boolean addToCompiledQueries(String sql, SQLiteCompiledSql compiledStatement) {
+        if (mMaxSqlCacheSize == 0) {
+            // for this database, there is no cache of compiled sql.
+            if (SQLiteDebug.DEBUG_SQL_CACHE) {
+                Log.v(TAG, "|NOT adding_sql_to_cache|" + getPath() + "|" + sql);
+            }
+            return false;
+        }
+
+        SQLiteCompiledSql compiledSql = null;
+        synchronized(mCompiledQueries) {
+            // don't insert the new mapping if a mapping already exists
+            compiledSql = mCompiledQueries.get(sql);
+            if (compiledSql != null) {
+                return false;
+            }
+            // add this <sql, compiledStatement> to the cache
+            if (mCompiledQueries.size() == mMaxSqlCacheSize) {
+                /* reached max cachesize. before adding new entry, remove an entry from the
+                 * cache. we don't want to wipe out the entire cache because of this:
+                 * GCing {@link SQLiteCompiledSql} requires call to sqlite3_finalize
+                 * JNI method. If entire cache is wiped out, it could be cause a big GC activity
+                 * just because a (rogue) process is using the cache incorrectly.
+                 */
+                Set<String> keySet = mCompiledQueries.keySet();
+                for (String s : keySet) {
+                    mCompiledQueries.remove(s);
+                    break;
+                }
+            }
+            compiledSql = new SQLiteCompiledSql(this, sql);
+            mCompiledQueries.put(sql, compiledSql);
+        }
+        if (SQLiteDebug.DEBUG_SQL_CACHE) {
+            Log.v(TAG, "|adding_sql_to_cache|" + getPath() + "|" + mCompiledQueries.size() + "|" +
+                    sql);
+        }
+        return true;
+    }
+
+    /**
+     * from the compiledQueries cache, returns the compiled-statement-id for the given sql.
+     * returns null, if not found in the cache.
+     */
+    /* package */ SQLiteCompiledSql getCompiledStatementForSql(String sql) {
+        SQLiteCompiledSql compiledStatement = null;
+        boolean cacheHit;
+        synchronized(mCompiledQueries) {
+            if (mMaxSqlCacheSize == 0) {
+                // for this database, there is no cache of compiled sql.
+                if (SQLiteDebug.DEBUG_SQL_CACHE) {
+                    Log.v(TAG, "|cache NOT found|" + getPath());
+                }
+                return null;
+            }
+            cacheHit = (compiledStatement = mCompiledQueries.get(sql)) != null;
+        }
+        if (cacheHit) {
+            mNumCacheHits++;
+        } else {
+            mNumCacheMisses++;
+        }
+
+        if (SQLiteDebug.DEBUG_SQL_CACHE) {
+            Log.v(TAG, "|cache_stats|" +
+                    getPath() + "|" + mCompiledQueries.size() +
+                    "|" + mNumCacheHits + "|" + mNumCacheMisses +
+                    "|" + cacheHit + "|" + mTimeOpened + "|" + mTimeClosed + "|" + sql);
+        }
+        return compiledStatement;
     }
 
     /* package */ void logTimeStat(boolean read, long begin, long end) {

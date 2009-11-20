@@ -27,6 +27,9 @@ public abstract class SQLiteProgram extends SQLiteClosable {
     /** The database this program is compiled against. */
     protected SQLiteDatabase mDatabase;
 
+    /** The SQL used to create this query */
+    /* package */ final String mSql;
+
     /**
      * Native linkage, do not modify. This comes from the database and should not be modified
      * in here or in the native code.
@@ -34,87 +37,88 @@ public abstract class SQLiteProgram extends SQLiteClosable {
     protected int nHandle = 0;
 
     /**
-     * Native linkage, do not modify. When non-0 this holds a reference to a valid
-     * sqlite3_statement object. It is only updated by the native code, but may be
-     * checked in this class when the database lock is held to determine if there
-     * is a valid native-side program or not.
+     * the compiledSql object for the given sql statement.
+     */
+    private SQLiteCompiledSql compiledSql;
+    private boolean myCompiledSqlIsInCache;
+
+    /**
+     * compiledSql statement id is populated with the corresponding object from the above
+     * member compiledSql.
+     * this member is used by the native_bind_* methods
      */
     protected int nStatement = 0;
 
-    /**
-     * Used to find out where a cursor was allocated in case it never got
-     * released.
-     */
-    private StackTraceElement[] mStackTraceElements;    
- 
     /* package */ SQLiteProgram(SQLiteDatabase db, String sql) {
         if (SQLiteDebug.DEBUG_SQL_STATEMENTS) {
-            mStackTraceElements = new Exception().getStackTrace();
+            Log.d(TAG, "processing sql: " + sql);
         }
-        
+
         mDatabase = db;
+        mSql = sql;
         db.acquireReference();
         db.addSQLiteClosable(this);
         this.nHandle = db.mNativeHandle;
-        compile(sql, false);
-    }    
-    
+
+        compiledSql = db.getCompiledStatementForSql(sql);
+        if (compiledSql == null) {
+            // create a new compiled-sql obj
+            compiledSql = new SQLiteCompiledSql(db, sql);
+
+            // add it to the cache of compiled-sqls
+            myCompiledSqlIsInCache = db.addToCompiledQueries(sql, compiledSql);
+        } else {
+            myCompiledSqlIsInCache = true;
+        }
+        nStatement = compiledSql.nStatement;
+    }
+
     @Override
     protected void onAllReferencesReleased() {
-        // Note that native_finalize() checks to make sure that nStatement is
-        // non-null before destroying it.
-        native_finalize();
+        // release the compiled sql statement used by me if it is NOT in cache
+        if (!myCompiledSqlIsInCache) {
+            compiledSql.releaseSqlStatement();
+            compiledSql = null; // so that GC doesn't call finalize() on it
+        }
         mDatabase.releaseReference();
         mDatabase.removeSQLiteClosable(this);
     }
-    
+
     @Override
-    protected void onAllReferencesReleasedFromContainer(){
-        // Note that native_finalize() checks to make sure that nStatement is
-        // non-null before destroying it.
-        native_finalize();
-        mDatabase.releaseReference();        
+    protected void onAllReferencesReleasedFromContainer() {
+        // release the compiled sql statement used by me if it is NOT in cache
+        if (!myCompiledSqlIsInCache) {
+            compiledSql.releaseSqlStatement();
+            compiledSql = null; // so that GC doesn't call finalize() on it
+        }
+        mDatabase.releaseReference();
     }
 
     /**
      * Returns a unique identifier for this program.
-     * 
+     *
      * @return a unique identifier for this program
      */
     public final int getUniqueId() {
-        return nStatement;
+        return compiledSql.nStatement;
+    }
+
+    /* package */ String getSqlString() {
+        return mSql;
     }
 
     /**
-     * Compiles the given SQL into a SQLite byte code program using sqlite3_prepare_v2(). If
-     * this method has been called previously without a call to close and forCompilation is set
-     * to false the previous compilation will be used. Setting forceCompilation to true will
-     * always re-compile the program and should be done if you pass differing SQL strings to this
-     * method.
-     *
-     * <P>Note: this method acquires the database lock.</P>
+     * @deprecated use this.compiledStatement.compile instead
      *
      * @param sql the SQL string to compile
      * @param forceCompilation forces the SQL to be recompiled in the event that there is an
      *  existing compiled SQL program already around
      */
+    @Deprecated
     protected void compile(String sql, boolean forceCompilation) {
-        // Only compile if we don't have a valid statement already or the caller has
-        // explicitly requested a recompile. 
-        if (nStatement == 0 || forceCompilation) {
-            mDatabase.lock();
-            try {
-                // Note that the native_compile() takes care of destroying any previously
-                // existing programs before it compiles.
-                acquireReference();                
-                native_compile(sql);
-            } finally {
-                releaseReference();
-                mDatabase.unlock();
-            }        
-        }
-    } 
-  
+        // TODO is there a need for this?
+    }
+
     /**
      * Bind a NULL value to this statement. The value remains bound until
      * {@link #clearBindings} is called.
@@ -221,37 +225,18 @@ public abstract class SQLiteProgram extends SQLiteClosable {
             releaseReference();
         } finally {
             mDatabase.unlock();
-        }        
-    }
-    
-    /**
-     * Make sure that the native resource is cleaned up.
-     */
-    @Override
-    protected void finalize() {
-        if (nStatement != 0) {
-            if (SQLiteDebug.DEBUG_SQL_STATEMENTS) {
-                String message = "Finalizing " + this +  
-                    " that has not been closed";
-
-                Log.d(TAG, message + "\nThis cursor was created in:");
-                for (StackTraceElement ste : mStackTraceElements) {
-                    Log.d(TAG, "      " + ste);
-                }
-            }
-            // when in finalize() it is already removed from weakhashmap
-            // so it is safe to not removed itself from db
-            onAllReferencesReleasedFromContainer();
         }
     }
 
     /**
      * Compiles SQL into a SQLite program.
-     * 
+     *
      * <P>The database lock must be held when calling this method.
      * @param sql The SQL to compile.
      */
+    @Deprecated
     protected final native void native_compile(String sql);
+    @Deprecated
     protected final native void native_finalize();
 
     protected final native void native_bind_null(int index);
