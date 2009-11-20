@@ -465,6 +465,22 @@ public class PowerManager
         }
     }
 
+    /**
+     * Reboot the device.  Will not return if the reboot is
+     * successful.  Requires the {@link android.Manifest#REBOOT}
+     * permission.
+     *
+     * @param reason code to pass to the kernel (e.g., "recovery") to
+     *               request special boot modes, or null.
+     */
+    public void reboot(String reason)
+    {
+        try {
+            mService.reboot(reason);
+        } catch (RemoteException e) {
+        }
+    }
+
     private PowerManager()
     {
     }
@@ -488,4 +504,3 @@ public class PowerManager
     IPowerManager mService;
     Handler mHandler;
 }
-
