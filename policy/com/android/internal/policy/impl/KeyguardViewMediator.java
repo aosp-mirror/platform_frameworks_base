@@ -22,6 +22,7 @@ import com.android.internal.widget.LockPatternUtils;
 import android.app.ActivityManagerNative;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
+import android.app.StatusBarManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -135,6 +136,7 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
     
     private Context mContext;
     private AlarmManager mAlarmManager;
+    private StatusBarManager mStatusBarManager;
 
     private boolean mSystemReady;
     
@@ -446,6 +448,7 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
             if (mHidden != isHidden) {
                 mHidden = isHidden;
                 adjustUserActivityLocked();
+                adjustStatusBarLocked();
             }
         }
     }
@@ -899,6 +902,7 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
             mKeyguardViewManager.show();
             mShowing = true;
             adjustUserActivityLocked();
+            adjustStatusBarLocked();
             try {
                 ActivityManagerNative.getDefault().closeSystemDialogs("lock");
             } catch (RemoteException e) {
@@ -922,6 +926,7 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
             mKeyguardViewManager.hide();
             mShowing = false;
             adjustUserActivityLocked();
+            adjustStatusBarLocked();
         }
     }
 
@@ -933,6 +938,23 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
         if (!enabled && mScreenOn) {
             // reinstate our short screen timeout policy
             pokeWakelock();
+        }
+    }
+
+    private void adjustStatusBarLocked() {
+        if (mStatusBarManager == null) {
+            mStatusBarManager = (StatusBarManager)
+                    mContext.getSystemService(Context.STATUS_BAR_SERVICE);
+        }
+        if (mStatusBarManager == null) {
+            Log.w(TAG, "Could not get status bar manager");
+        } else {
+            // if the keyguard is shown, allow the status bar to open
+            // only if the keyguard is insecure and is covered by another window
+            boolean enable = !mShowing || (mHidden && !isSecure());
+            mStatusBarManager.disable(enable ?
+                         StatusBarManager.DISABLE_NONE :
+                         StatusBarManager.DISABLE_EXPAND);
         }
     }
 
