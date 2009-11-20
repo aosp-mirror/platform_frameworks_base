@@ -1390,12 +1390,6 @@
   </text>
 </comment>
 <comment>
-  <identifier id="android.graphics.drawable.BitmapDrawable.ctor_added(android.content.res.Resources)"/>
-  <text>
-    InsertCommentsHere
-  </text>
-</comment>
-<comment>
   <identifier id="android.graphics.drawable.BitmapDrawable.ctor_added(android.content.res.Resources, java.io.InputStream)"/>
   <text>
     InsertCommentsHere
@@ -1420,18 +1414,6 @@
   </text>
 </comment>
 <comment>
-  <identifier id="android.graphics.drawable.BitmapDrawable.ctor_removed()"/>
-  <text>
-    InsertCommentsHere
-  </text>
-</comment>
-<comment>
-  <identifier id="android.graphics.drawable.BitmapDrawable.ctor_removed(android.graphics.Bitmap)"/>
-  <text>
-    InsertCommentsHere
-  </text>
-</comment>
-<comment>
   <identifier id="android.graphics.drawable.Drawable"/>
   <text>
     InsertCommentsHere
@@ -1451,18 +1433,6 @@
 </comment>
 <comment>
   <identifier id="android.graphics.drawable.Drawable.createFromResourceStream_added(android.content.res.Resources, android.util.TypedValue, java.io.InputStream, java.lang.String, android.graphics.BitmapFactory.Options)"/>
-  <text>
-    InsertCommentsHere
-  </text>
-</comment>
-<comment>
-  <identifier id="android.graphics.drawable.NinePatchDrawable"/>
-  <text>
-    InsertCommentsHere
-  </text>
-</comment>
-<comment>
-  <identifier id="android.graphics.drawable.NinePatchDrawable.ctor_changed(android.graphics.Bitmap, byte[], android.graphics.Rect, java.lang.String)"/>
   <text>
     InsertCommentsHere
   </text>
@@ -4468,36 +4438,6 @@
   </text>
 </comment>
 <comment>
-  <identifier id="android.telephony.TelephonyManager.DATA_ACTIVITY_DORMANT"/>
-  <text>
-    InsertCommentsHere
-  </text>
-</comment>
-<comment>
-  <identifier id="android.telephony.TelephonyManager.NETWORK_TYPE_1xRTT"/>
-  <text>
-    InsertCommentsHere
-  </text>
-</comment>
-<comment>
-  <identifier id="android.telephony.TelephonyManager.NETWORK_TYPE_CDMA"/>
-  <text>
-    InsertCommentsHere
-  </text>
-</comment>
-<comment>
-  <identifier id="android.telephony.TelephonyManager.NETWORK_TYPE_EVDO_0"/>
-  <text>
-    InsertCommentsHere
-  </text>
-</comment>
-<comment>
-  <identifier id="android.telephony.TelephonyManager.NETWORK_TYPE_EVDO_A"/>
-  <text>
-    InsertCommentsHere
-  </text>
-</comment>
-<comment>
   <identifier id="android.telephony.TelephonyManager.NETWORK_TYPE_HSDPA"/>
   <text>
     InsertCommentsHere
@@ -4511,12 +4451,6 @@
 </comment>
 <comment>
   <identifier id="android.telephony.TelephonyManager.NETWORK_TYPE_HSUPA"/>
-  <text>
-    InsertCommentsHere
-  </text>
-</comment>
-<comment>
-  <identifier id="android.telephony.TelephonyManager.PHONE_TYPE_CDMA"/>
   <text>
     InsertCommentsHere
   </text>
@@ -4709,24 +4643,6 @@
 </comment>
 <comment>
   <identifier id="android.text.style.AbsoluteSizeSpan.getDip_added()"/>
-  <text>
-    InsertCommentsHere
-  </text>
-</comment>
-<comment>
-  <identifier id="android.text.style.ImageSpan"/>
-  <text>
-    InsertCommentsHere
-  </text>
-</comment>
-<comment>
-  <identifier id="android.text.style.ImageSpan.ctor_changed(android.graphics.Bitmap)"/>
-  <text>
-    InsertCommentsHere
-  </text>
-</comment>
-<comment>
-  <identifier id="android.text.style.ImageSpan.ctor_changed(android.graphics.Bitmap, int)"/>
   <text>
     InsertCommentsHere
   </text>
@@ -5141,6 +5057,18 @@
 </comment>
 <comment>
   <identifier id="android.view.ViewConfiguration.getScrollDefaultDelay_added()"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.view.ViewGroup"/>
+  <text>
+    InsertCommentsHere
+  </text>
+</comment>
+<comment>
+  <identifier id="android.view.ViewGroup.FLAG_USE_CHILD_DRAWING_ORDER"/>
   <text>
     InsertCommentsHere
   </text>
@@ -5873,114 +5801,6 @@
 </comment>
 <comment>
   <identifier id="dalvik.system.Zygote"/>
-  <text>
-    InsertCommentsHere
-  </text>
-</comment>
-<comment>
-  <identifier id="java.lang"/>
-  <text>
-    InsertCommentsHere
-  </text>
-</comment>
-<comment>
-  <identifier id="java.lang.String"/>
-  <text>
-    InsertCommentsHere
-  </text>
-</comment>
-<comment>
-  <identifier id="java.lang.String.ctor_changed()"/>
-  <text>
-    InsertCommentsHere
-  </text>
-</comment>
-<comment>
-  <identifier id="java.lang.String.ctor_changed(byte[])"/>
-  <text>
-    InsertCommentsHere
-  </text>
-</comment>
-<comment>
-  <identifier id="java.lang.String.ctor_changed(byte[], int)"/>
-  <text>
-    InsertCommentsHere
-  </text>
-</comment>
-<comment>
-  <identifier id="java.lang.String.ctor_changed(byte[], int, int)"/>
-  <text>
-    InsertCommentsHere
-  </text>
-</comment>
-<comment>
-  <identifier id="java.lang.String.ctor_changed(byte[], int, int, int)"/>
-  <text>
-    InsertCommentsHere
-  </text>
-</comment>
-<comment>
-  <identifier id="java.net"/>
-  <text>
-    InsertCommentsHere
-  </text>
-</comment>
-<comment>
-  <identifier id="java.net.Socket"/>
-  <text>
-    InsertCommentsHere
-  </text>
-</comment>
-<comment>
-  <identifier id="java.net.Socket.ctor_changed()"/>
-  <text>
-    InsertCommentsHere
-  </text>
-</comment>
-<comment>
-  <identifier id="java.net.Socket.ctor_changed(java.lang.String, int)"/>
-  <text>
-    InsertCommentsHere
-  </text>
-</comment>
-<comment>
-  <identifier id="java.net.Socket.ctor_changed(java.lang.String, int, java.net.InetAddress, int)"/>
-  <text>
-    InsertCommentsHere
-  </text>
-</comment>
-<comment>
-  <identifier id="java.net.Socket.ctor_changed(java.net.Proxy)"/>
-  <text>
-    InsertCommentsHere
-  </text>
-</comment>
-<comment>
-  <identifier id="java.net.Socket.ctor_changed(java.net.SocketImpl)"/>
-  <text>
-    InsertCommentsHere
-  </text>
-</comment>
-<comment>
-  <identifier id="java.util"/>
-  <text>
-    InsertCommentsHere
-  </text>
-</comment>
-<comment>
-  <identifier id="java.util.Date"/>
-  <text>
-    InsertCommentsHere
-  </text>
-</comment>
-<comment>
-  <identifier id="java.util.Date.ctor_changed()"/>
-  <text>
-    InsertCommentsHere
-  </text>
-</comment>
-<comment>
-  <identifier id="java.util.Date.ctor_changed(int, int, int, int, int, int)"/>
   <text>
     InsertCommentsHere
   </text>
