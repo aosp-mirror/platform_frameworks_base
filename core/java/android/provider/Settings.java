@@ -3296,6 +3296,12 @@ public final class Settings {
             "vending_carrier_cred_buf_ms";
 
         /**
+         * Whether to turn on performance logging in the Market client.
+         */
+        public static final String VENDING_LOG_PERFORMANCE =
+            "vending_log_perf";
+
+        /**
          * URL that points to the legal terms of service to display in Settings.
          * <p>
          * This should be a https URL. For a pretty user-friendly URL, use
