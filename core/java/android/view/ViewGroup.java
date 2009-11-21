@@ -151,7 +151,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * When set, the drawing method will call {@link #getChildDrawingOrder(int, int)}
      * to get the index of the child to draw for that iteration.
      * 
-     * @hide
      */
     protected static final int FLAG_USE_CHILD_DRAWING_ORDER = 0x400;
 
@@ -1309,14 +1308,11 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * if you want to change the drawing order of children. By default, it
      * returns i.
      * <p>
-     * NOTE: In order for this method to be called, you must enable child ordering
-     * first by calling {@link #setChildrenDrawingOrderEnabled(boolean)}.
+     * NOTE: In order for this method to be called, the
+     * {@link #FLAG_USE_CHILD_DRAWING_ORDER} must be set.
      *
      * @param i The current iteration.
      * @return The index of the child to draw this iteration.
-     * 
-     * @see #setChildrenDrawingOrderEnabled(boolean)
-     * @see #isChildrenDrawingOrderEnabled()
      */
     protected int getChildDrawingOrder(int childCount, int i) {
         return i;

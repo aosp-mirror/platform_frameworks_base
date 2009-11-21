@@ -1280,8 +1280,8 @@ public class Intent implements Parcelable {
      * the package.
      * <ul>
      * <li> {@link #EXTRA_UID} containing the integer uid assigned to the package.
-     * <li> {@link #EXTRA_CHANGED_COMPONENT_NAME_LIST} containing the class name
-     * of the changed components.
+     * <li> {@link #EXTRA_CHANGED_COMPONENT_NAME} containing the class name of the
+     * changed component.
      * <li> {@link #EXTRA_DONT_KILL_APP} containing boolean field to override the
      * default action of restarting the application.
      * </ul>
