@@ -674,32 +674,13 @@ void AudioFlinger::binderDied(const wp<IBinder>& who) {
 }
 
 // audioConfigChanged_l() must be called with AudioFlinger::mLock held
-void AudioFlinger::audioConfigChanged_l(int event, const sp<ThreadBase>& thread, void *param2) {
-    int ioHandle = 0;
-
-    for (size_t i = 0; i < mPlaybackThreads.size(); i++) {
-        if (mPlaybackThreads.valueAt(i) == thread) {
-            ioHandle = mPlaybackThreads.keyAt(i);
-            break;
-        }
-    }
-    if (ioHandle == 0) {
-        for (size_t i = 0; i < mRecordThreads.size(); i++) {
-            if (mRecordThreads.valueAt(i) == thread) {
-                ioHandle = mRecordThreads.keyAt(i);
-                break;
-            }
-        }
-    }
-
-    if (ioHandle != 0) {
-        size_t size = mNotificationClients.size();
-        for (size_t i = 0; i < size; i++) {
-            sp<IBinder> binder = mNotificationClients.itemAt(i);
-            LOGV("audioConfigChanged_l() Notifying change to client %p", binder.get());
-            sp<IAudioFlingerClient> client = interface_cast<IAudioFlingerClient> (binder);
-            client->ioConfigChanged(event, ioHandle, param2);
-        }
+void AudioFlinger::audioConfigChanged_l(int event, int ioHandle, void *param2) {
+    size_t size = mNotificationClients.size();
+    for (size_t i = 0; i < size; i++) {
+        sp<IBinder> binder = mNotificationClients.itemAt(i);
+        LOGV("audioConfigChanged_l() Notifying change to client %p", binder.get());
+        sp<IAudioFlingerClient> client = interface_cast<IAudioFlingerClient> (binder);
+        client->ioConfigChanged(event, ioHandle, param2);
     }
 }
 
@@ -712,10 +693,10 @@ void AudioFlinger::removeClient_l(pid_t pid)
 
 // ----------------------------------------------------------------------------
 
-AudioFlinger::ThreadBase::ThreadBase(const sp<AudioFlinger>& audioFlinger)
+AudioFlinger::ThreadBase::ThreadBase(const sp<AudioFlinger>& audioFlinger, int id)
     :   Thread(false),
         mAudioFlinger(audioFlinger), mSampleRate(0), mFrameCount(0), mChannelCount(0),
-        mFormat(0), mFrameSize(1), mStandby(false)
+        mFormat(0), mFrameSize(1), mStandby(false), mId(id), mExiting(false)
 {
 }
 
@@ -734,6 +715,7 @@ void AudioFlinger::ThreadBase::exit()
     LOGV("ThreadBase::exit");
     {
         AutoMutex lock(&mLock);
+        mExiting = true;
         requestExit();
         mWaitWorkCV.signal();
     }
@@ -870,8 +852,8 @@ status_t AudioFlinger::ThreadBase::dumpBase(int fd, const Vector<String16>& args
 
 // ----------------------------------------------------------------------------
 
-AudioFlinger::PlaybackThread::PlaybackThread(const sp<AudioFlinger>& audioFlinger, AudioStreamOut* output)
-    :   ThreadBase(audioFlinger),
+AudioFlinger::PlaybackThread::PlaybackThread(const sp<AudioFlinger>& audioFlinger, AudioStreamOut* output, int id)
+    :   ThreadBase(audioFlinger, id),
         mMixBuffer(0), mSuspended(0), mBytesWritten(0), mOutput(output),
         mLastWriteTime(0), mNumWrites(0), mNumDelayedWrites(0), mInWrite(false)
 {
@@ -1106,15 +1088,6 @@ status_t AudioFlinger::PlaybackThread::addTrack_l(const sp<Track>& track)
 {
     status_t status = ALREADY_EXISTS;
 
-    // here the track could be either new, or restarted
-    // in both cases "unstop" the track
-    if (track->isPaused()) {
-        track->mState = TrackBase::RESUMING;
-        LOGV("PAUSED => RESUMING (%d) on thread %p", track->name(), this);
-    } else {
-        track->mState = TrackBase::ACTIVE;
-        LOGV("? => ACTIVE (%d) on thread %p", track->name(), this);
-    }
     // set retry count for buffer fill
     track->mRetryCount = kMaxTrackStartupRetries;
     if (mActiveTracks.indexOf(track) < 0) {
@@ -1173,7 +1146,7 @@ void AudioFlinger::PlaybackThread::audioConfigChanged(int event, int param) {
         break;
     }
     Mutex::Autolock _l(mAudioFlinger->mLock);
-    mAudioFlinger->audioConfigChanged_l(event, this, param2);
+    mAudioFlinger->audioConfigChanged_l(event, mId, param2);
 }
 
 void AudioFlinger::PlaybackThread::readOutputParameters()
@@ -1194,8 +1167,8 @@ void AudioFlinger::PlaybackThread::readOutputParameters()
 
 // ----------------------------------------------------------------------------
 
-AudioFlinger::MixerThread::MixerThread(const sp<AudioFlinger>& audioFlinger, AudioStreamOut* output)
-    :   PlaybackThread(audioFlinger, output),
+AudioFlinger::MixerThread::MixerThread(const sp<AudioFlinger>& audioFlinger, AudioStreamOut* output, int id)
+    :   PlaybackThread(audioFlinger, output, id),
         mAudioMixer(0)
 {
     mType = PlaybackThread::MIXER;
@@ -1303,7 +1276,6 @@ bool AudioFlinger::MixerThread::threadLoop()
                 }
             } else if (mBytesWritten != 0 ||
                        (mixerStatus == MIXER_TRACKS_ENABLED && longStandbyExit)) {
-                LOGV("NO DATA READY, %p", this);
                 memset (curBuf, 0, mixBufferSize);
                 sleepTime = 0;
                 LOGV_IF((mBytesWritten == 0 && (mixerStatus == MIXER_TRACKS_ENABLED && longStandbyExit)), "anticipated start");
@@ -1639,8 +1611,8 @@ uint32_t AudioFlinger::MixerThread::idleSleepTimeUs()
 }
 
 // ----------------------------------------------------------------------------
-AudioFlinger::DirectOutputThread::DirectOutputThread(const sp<AudioFlinger>& audioFlinger, AudioStreamOut* output)
-    :   PlaybackThread(audioFlinger, output),
+AudioFlinger::DirectOutputThread::DirectOutputThread(const sp<AudioFlinger>& audioFlinger, AudioStreamOut* output, int id)
+    :   PlaybackThread(audioFlinger, output, id),
     mLeftVolume (1.0), mRightVolume(1.0)
 {
     mType = PlaybackThread::DIRECT;
@@ -1941,8 +1913,8 @@ uint32_t AudioFlinger::DirectOutputThread::idleSleepTimeUs()
 
 // ----------------------------------------------------------------------------
 
-AudioFlinger::DuplicatingThread::DuplicatingThread(const sp<AudioFlinger>& audioFlinger, AudioFlinger::MixerThread* mainThread)
-    :   MixerThread(audioFlinger, mainThread->getOutput())
+AudioFlinger::DuplicatingThread::DuplicatingThread(const sp<AudioFlinger>& audioFlinger, AudioFlinger::MixerThread* mainThread, int id)
+    :   MixerThread(audioFlinger, mainThread->getOutput(), id)
 {
     mType = PlaybackThread::DUPLICATING;
     addOutputTrack(mainThread);
@@ -2305,8 +2277,10 @@ AudioFlinger::PlaybackThread::Track::~Track()
     LOGV("PlaybackThread::Track destructor");
     sp<ThreadBase> thread = mThread.promote();
     if (thread != 0) {
-        Mutex::Autolock _l(thread->mLock);
+        thread->mLock.lock();
         mState = TERMINATED;
+        thread->mLock.unlock();
+        AudioSystem::releaseOutput(thread->id());
     }
 }
 
@@ -2324,6 +2298,9 @@ void AudioFlinger::PlaybackThread::Track::destroy()
     { // scope for mLock
         sp<ThreadBase> thread = mThread.promote();
         if (thread != 0) {
+            if (!isOutputTrack() && (mState == ACTIVE || mState == RESUMING)) {
+                AudioSystem::stopOutput(thread->id(), (AudioSystem::stream_type)mStreamType);
+            }
             Mutex::Autolock _l(thread->mLock);
             PlaybackThread *playbackThread = (PlaybackThread *)thread.get();
             playbackThread->destroyTrack_l(this);
@@ -2405,14 +2382,37 @@ bool AudioFlinger::PlaybackThread::Track::isReady() const {
 
 status_t AudioFlinger::PlaybackThread::Track::start()
 {
+    status_t status = NO_ERROR;
     LOGV("start(%d), calling thread %d", mName, IPCThreadState::self()->getCallingPid());
     sp<ThreadBase> thread = mThread.promote();
     if (thread != 0) {
         Mutex::Autolock _l(thread->mLock);
-        PlaybackThread *playbackThread = (PlaybackThread *)thread.get();
-        playbackThread->addTrack_l(this);
+        int state = mState;
+        // here the track could be either new, or restarted
+        // in both cases "unstop" the track
+        if (mState == PAUSED) {
+            mState = TrackBase::RESUMING;
+            LOGV("PAUSED => RESUMING (%d) on thread %p", mName, this);
+        } else {
+            mState = TrackBase::ACTIVE;
+            LOGV("? => ACTIVE (%d) on thread %p", mName, this);
+        }
+
+        if (!isOutputTrack() && state != ACTIVE && state != RESUMING) {
+            thread->mLock.unlock();
+            status = AudioSystem::startOutput(thread->id(), (AudioSystem::stream_type)mStreamType);
+            thread->mLock.lock();
+        }
+        if (status == NO_ERROR) {
+            PlaybackThread *playbackThread = (PlaybackThread *)thread.get();
+            playbackThread->addTrack_l(this);
+        } else {
+            mState = state;
+        }
+    } else {
+        status = BAD_VALUE;
     }
-    return NO_ERROR;
+    return status;
 }
 
 void AudioFlinger::PlaybackThread::Track::stop()
@@ -2421,6 +2421,7 @@ void AudioFlinger::PlaybackThread::Track::stop()
     sp<ThreadBase> thread = mThread.promote();
     if (thread != 0) {
         Mutex::Autolock _l(thread->mLock);
+        int state = mState;
         if (mState > STOPPED) {
             mState = STOPPED;
             // If the track is not active (PAUSED and buffers full), flush buffers
@@ -2429,6 +2430,11 @@ void AudioFlinger::PlaybackThread::Track::stop()
                 reset();
             }
             LOGV("(> STOPPED) => STOPPED (%d) on thread %p", mName, playbackThread);
+        }
+        if (!isOutputTrack() && (state == ACTIVE || state == RESUMING)) {
+            thread->mLock.unlock();
+            AudioSystem::stopOutput(thread->id(), (AudioSystem::stream_type)mStreamType);
+            thread->mLock.lock();
         }
     }
 }
@@ -2442,6 +2448,11 @@ void AudioFlinger::PlaybackThread::Track::pause()
         if (mState == ACTIVE || mState == RESUMING) {
             mState = PAUSING;
             LOGV("ACTIVE/RESUMING => PAUSING (%d) on thread %p", mName, thread.get());
+            if (!isOutputTrack()) {
+                thread->mLock.unlock();
+                AudioSystem::stopOutput(thread->id(), (AudioSystem::stream_type)mStreamType);
+                thread->mLock.lock();
+            }
         }
     }
 }
@@ -2525,6 +2536,10 @@ AudioFlinger::RecordThread::RecordTrack::RecordTrack(
 
 AudioFlinger::RecordThread::RecordTrack::~RecordTrack()
 {
+    sp<ThreadBase> thread = mThread.promote();
+    if (thread != 0) {
+        AudioSystem::releaseInput(thread->id());
+    }
 }
 
 status_t AudioFlinger::RecordThread::RecordTrack::getNextBuffer(AudioBufferProvider::Buffer* buffer)
@@ -2572,8 +2587,9 @@ status_t AudioFlinger::RecordThread::RecordTrack::start()
     if (thread != 0) {
         RecordThread *recordThread = (RecordThread *)thread.get();
         return recordThread->start(this);
+    } else {
+        return BAD_VALUE;
     }
-    return NO_INIT;
 }
 
 void AudioFlinger::RecordThread::RecordTrack::stop()
@@ -3010,8 +3026,8 @@ status_t AudioFlinger::RecordHandle::onTransact(
 
 // ----------------------------------------------------------------------------
 
-AudioFlinger::RecordThread::RecordThread(const sp<AudioFlinger>& audioFlinger, AudioStreamIn *input, uint32_t sampleRate, uint32_t channels) :
-    ThreadBase(audioFlinger),
+AudioFlinger::RecordThread::RecordThread(const sp<AudioFlinger>& audioFlinger, AudioStreamIn *input, uint32_t sampleRate, uint32_t channels, int id) :
+    ThreadBase(audioFlinger, id),
     mInput(input), mResampler(0), mRsmpOutBuffer(0), mRsmpInBuffer(0)
 {
     mReqChannelCount = AudioSystem::popCount(channels);
@@ -3039,6 +3055,7 @@ void AudioFlinger::RecordThread::onFirstRef()
 
     run(buffer, PRIORITY_URGENT_AUDIO);
 }
+
 bool AudioFlinger::RecordThread::threadLoop()
 {
     AudioBufferProvider::Buffer buffer;
@@ -3084,6 +3101,10 @@ bool AudioFlinger::RecordThread::threadLoop()
         }
 
         if (mActiveTrack != 0) {
+            if (mActiveTrack->mState != TrackBase::ACTIVE) {
+                usleep(5000);
+                continue;
+            }
             buffer.frameCount = mFrameCount;
             if (LIKELY(mActiveTrack->getNextBuffer(&buffer) == NO_ERROR)) {
                 size_t framesOut = buffer.frameCount;
@@ -3181,6 +3202,8 @@ bool AudioFlinger::RecordThread::threadLoop()
     }
     mActiveTrack.clear();
 
+    mStartStopCond.broadcast();
+
     LOGV("RecordThread %p exiting", this);
     return false;
 }
@@ -3188,37 +3211,71 @@ bool AudioFlinger::RecordThread::threadLoop()
 status_t AudioFlinger::RecordThread::start(RecordThread::RecordTrack* recordTrack)
 {
     LOGV("RecordThread::start");
-    AutoMutex lock(&mLock);
+    sp <ThreadBase> strongMe = this;
+    status_t status = NO_ERROR;
+    {
+        AutoMutex lock(&mLock);
+        if (mActiveTrack != 0) {
+            if (recordTrack != mActiveTrack.get()) {
+                status = -EBUSY;
+            } else if (mActiveTrack->mState == TrackBase::PAUSING) {
+                mActiveTrack->mState = TrackBase::RESUMING;
+            }
+            return status;
+        }
 
-    if (mActiveTrack != 0) {
-        if (recordTrack != mActiveTrack.get()) return -EBUSY;
-
-        if (mActiveTrack->mState == TrackBase::PAUSING) mActiveTrack->mState = TrackBase::RESUMING;
-
-        return NO_ERROR;
-    }
-
-    mActiveTrack = recordTrack;
-    mActiveTrack->mState = TrackBase::RESUMING;
-    // signal thread to start
-    LOGV("Signal record thread");
-    mWaitWorkCV.signal();
-    mStartStopCond.wait(mLock);
-    if (mActiveTrack != 0) {
+        recordTrack->mState = TrackBase::IDLE;
+        mActiveTrack = recordTrack;
+        mLock.unlock();
+        status_t status = AudioSystem::startInput(mId);
+        mLock.lock();
+        if (status != NO_ERROR) {
+            mActiveTrack.clear();
+            return status;
+        }
+        mActiveTrack->mState = TrackBase::RESUMING;
+        // signal thread to start
+        LOGV("Signal record thread");
+        mWaitWorkCV.signal();
+        // do not wait for mStartStopCond if exiting
+        if (mExiting) {
+            mActiveTrack.clear();
+            status = INVALID_OPERATION;
+            goto startError;
+        }
+        mStartStopCond.wait(mLock);
+        if (mActiveTrack == 0) {
+            LOGV("Record failed to start");
+            status = BAD_VALUE;
+            goto startError;
+        }
         LOGV("Record started OK");
-        return NO_ERROR;
-    } else {
-        LOGV("Record failed to start");
-        return BAD_VALUE;
+        return status;
     }
+startError:
+    AudioSystem::stopInput(mId);
+    return status;
 }
 
 void AudioFlinger::RecordThread::stop(RecordThread::RecordTrack* recordTrack) {
     LOGV("RecordThread::stop");
-    AutoMutex lock(&mLock);
-    if (mActiveTrack != 0 && recordTrack == mActiveTrack.get()) {
-        mActiveTrack->mState = TrackBase::PAUSING;
-        mStartStopCond.wait(mLock);
+    sp <ThreadBase> strongMe = this;
+    {
+        AutoMutex lock(&mLock);
+        if (mActiveTrack != 0 && recordTrack == mActiveTrack.get()) {
+            mActiveTrack->mState = TrackBase::PAUSING;
+            // do not wait for mStartStopCond if exiting
+            if (mExiting) {
+                return;
+            }
+            mStartStopCond.wait(mLock);
+            // if we have been restarted, recordTrack == mActiveTrack.get() here
+            if (mActiveTrack == 0 || recordTrack != mActiveTrack.get()) {
+                mLock.unlock();
+                AudioSystem::stopInput(mId);
+                mLock.lock();
+            }
+        }
     }
 }
 
@@ -3388,7 +3445,7 @@ void AudioFlinger::RecordThread::audioConfigChanged(int event, int param) {
         break;
     }
     Mutex::Autolock _l(mAudioFlinger->mLock);
-    mAudioFlinger->audioConfigChanged_l(event, this, param2);
+    mAudioFlinger->audioConfigChanged_l(event, mId, param2);
 }
 
 void AudioFlinger::RecordThread::readInputParameters()
@@ -3476,13 +3533,13 @@ int AudioFlinger::openOutput(uint32_t *pDevices,
         if ((flags & AudioSystem::OUTPUT_FLAG_DIRECT) ||
             (format != AudioSystem::PCM_16_BIT) ||
             (channels != AudioSystem::CHANNEL_OUT_STEREO)) {
-            thread = new DirectOutputThread(this, output);
-            LOGV("openOutput() created direct output: ID %d thread %p", (mNextThreadId + 1), thread);
+            thread = new DirectOutputThread(this, output, ++mNextThreadId);
+            LOGV("openOutput() created direct output: ID %d thread %p", mNextThreadId, thread);
         } else {
-            thread = new MixerThread(this, output);
-            LOGV("openOutput() created mixer output: ID %d thread %p", (mNextThreadId + 1), thread);
+            thread = new MixerThread(this, output, ++mNextThreadId);
+            LOGV("openOutput() created mixer output: ID %d thread %p", mNextThreadId, thread);
         }
-        mPlaybackThreads.add(++mNextThreadId, thread);
+        mPlaybackThreads.add(mNextThreadId, thread);
 
         if (pSamplingRate) *pSamplingRate = samplingRate;
         if (pFormat) *pFormat = format;
@@ -3505,9 +3562,9 @@ int AudioFlinger::openDuplicateOutput(int output1, int output2)
     }
 
 
-    DuplicatingThread *thread = new DuplicatingThread(this, thread1);
+    DuplicatingThread *thread = new DuplicatingThread(this, thread1, ++mNextThreadId);
     thread->addOutputTrack(thread2);
-    mPlaybackThreads.add(++mNextThreadId, thread);
+    mPlaybackThreads.add(mNextThreadId, thread);
     return mNextThreadId;
 }
 
@@ -3534,7 +3591,7 @@ status_t AudioFlinger::closeOutput(int output)
             }
         }
         void *param2 = 0;
-        audioConfigChanged_l(AudioSystem::OUTPUT_CLOSED, thread, param2);
+        audioConfigChanged_l(AudioSystem::OUTPUT_CLOSED, output, param2);
         mPlaybackThreads.removeItem(output);
     }
     thread->exit();
@@ -3628,8 +3685,8 @@ int AudioFlinger::openInput(uint32_t *pDevices,
 
     if (input != 0) {
          // Start record thread
-        thread = new RecordThread(this, input, reqSamplingRate, reqChannels);
-        mRecordThreads.add(++mNextThreadId, thread);
+        thread = new RecordThread(this, input, reqSamplingRate, reqChannels, ++mNextThreadId);
+        mRecordThreads.add(mNextThreadId, thread);
         LOGV("openInput() created record thread: ID %d thread %p", mNextThreadId, thread);
         if (pSamplingRate) *pSamplingRate = reqSamplingRate;
         if (pFormat) *pFormat = format;
@@ -3655,7 +3712,7 @@ status_t AudioFlinger::closeInput(int input)
 
         LOGV("closeInput() %d", input);
         void *param2 = 0;
-        audioConfigChanged_l(AudioSystem::INPUT_CLOSED, thread, param2);
+        audioConfigChanged_l(AudioSystem::INPUT_CLOSED, input, param2);
         mRecordThreads.removeItem(input);
     }
     thread->exit();
