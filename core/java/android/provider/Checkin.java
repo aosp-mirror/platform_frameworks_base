@@ -74,6 +74,7 @@ public final class Checkin {
             CARRIER_BUG_REPORT,
             CHECKIN_FAILURE,
             CHECKIN_SUCCESS,
+            CPUFREQ_STATS,
             FOTA_BEGIN,
             FOTA_FAILURE,
             FOTA_INSTALL,
