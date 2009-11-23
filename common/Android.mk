@@ -24,3 +24,6 @@ include $(BUILD_STATIC_JAVA_LIBRARY)
 
 # Include this library in the build server's output directory
 $(call dist-for-goals, droid, $(LOCAL_BUILT_MODULE):android-common.jar)
+
+# Build the test package
+include $(call all-makefiles-under,$(LOCAL_PATH))

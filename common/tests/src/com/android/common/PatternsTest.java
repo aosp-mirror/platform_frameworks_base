@@ -28,10 +28,10 @@ public class PatternsTest extends TestCase {
     public void testTldPattern() throws Exception {
         boolean t;
 
-        t = Patterns.TOP_LEVEL_DOMAIN_PATTERN.matcher("com").matches();
+        t = Patterns.TOP_LEVEL_DOMAIN.matcher("com").matches();
         assertTrue("Missed valid TLD", t);
 
-        t = Patterns.TOP_LEVEL_DOMAIN_PATTERN.matcher("xer").matches();
+        t = Patterns.TOP_LEVEL_DOMAIN.matcher("xer").matches();
         assertFalse("Matched invalid TLD!", t);
     }
 
@@ -39,19 +39,19 @@ public class PatternsTest extends TestCase {
     public void testUrlPattern() throws Exception {
         boolean t;
 
-        t = Patterns.WEB_URL_PATTERN.matcher("http://www.google.com").matches();
+        t = Patterns.WEB_URL.matcher("http://www.google.com").matches();
         assertTrue("Valid URL", t);
 
-        t = Patterns.WEB_URL_PATTERN.matcher("ftp://www.example.com").matches();
+        t = Patterns.WEB_URL.matcher("ftp://www.example.com").matches();
         assertFalse("Matched invalid protocol", t);
 
-        t = Patterns.WEB_URL_PATTERN.matcher("http://www.example.com:8080").matches();
+        t = Patterns.WEB_URL.matcher("http://www.example.com:8080").matches();
         assertTrue("Didn't match valid URL with port", t);
 
-        t = Patterns.WEB_URL_PATTERN.matcher("http://www.example.com:8080/?foo=bar").matches();
+        t = Patterns.WEB_URL.matcher("http://www.example.com:8080/?foo=bar").matches();
         assertTrue("Didn't match valid URL with port and query args", t);
 
-        t = Patterns.WEB_URL_PATTERN.matcher("http://www.example.com:8080/~user/?foo=bar").matches();
+        t = Patterns.WEB_URL.matcher("http://www.example.com:8080/~user/?foo=bar").matches();
         assertTrue("Didn't match valid URL with ~", t);
     }
 
@@ -59,10 +59,10 @@ public class PatternsTest extends TestCase {
     public void testIpPattern() throws Exception {
         boolean t;
 
-        t = Patterns.IP_ADDRESS_PATTERN.matcher("172.29.86.3").matches();
+        t = Patterns.IP_ADDRESS.matcher("172.29.86.3").matches();
         assertTrue("Valid IP", t);
 
-        t = Patterns.IP_ADDRESS_PATTERN.matcher("1234.4321.9.9").matches();
+        t = Patterns.IP_ADDRESS.matcher("1234.4321.9.9").matches();
         assertFalse("Invalid IP", t);
     }
 
@@ -70,10 +70,10 @@ public class PatternsTest extends TestCase {
     public void testDomainPattern() throws Exception {
         boolean t;
 
-        t = Patterns.DOMAIN_NAME_PATTERN.matcher("mail.example.com").matches();
+        t = Patterns.DOMAIN_NAME.matcher("mail.example.com").matches();
         assertTrue("Valid domain", t);
 
-        t = Patterns.DOMAIN_NAME_PATTERN.matcher("__+&42.xer").matches();
+        t = Patterns.DOMAIN_NAME.matcher("__+&42.xer").matches();
         assertFalse("Invalid domain", t);
     }
 
@@ -81,10 +81,10 @@ public class PatternsTest extends TestCase {
     public void testPhonePattern() throws Exception {
         boolean t;
 
-        t = Patterns.PHONE_PATTERN.matcher("(919) 555-1212").matches();
+        t = Patterns.PHONE.matcher("(919) 555-1212").matches();
         assertTrue("Valid phone", t);
 
-        t = Patterns.PHONE_PATTERN.matcher("2334 9323/54321").matches();
+        t = Patterns.PHONE.matcher("2334 9323/54321").matches();
         assertFalse("Invalid phone", t);
 
         String[] tests = {
@@ -115,7 +115,7 @@ public class PatternsTest extends TestCase {
         };
 
         for (String test : tests) {
-            Matcher m = Patterns.PHONE_PATTERN.matcher(test);
+            Matcher m = Patterns.PHONE.matcher(test);
 
             assertTrue("Valid phone " + test, m.find());
         }
