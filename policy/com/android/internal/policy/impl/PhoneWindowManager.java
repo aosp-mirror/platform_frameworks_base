@@ -1718,8 +1718,14 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     mHandler.removeCallbacks(mPowerLongPress);
                     if (mShouldTurnOffOnKeyUp) {
                         mShouldTurnOffOnKeyUp = false;
-                        boolean gohome = (mEndcallBehavior & ENDCALL_HOME) != 0;
-                        boolean sleeps = (mEndcallBehavior & ENDCALL_SLEEPS) != 0;
+                        boolean gohome, sleeps;
+                        if (code == KeyEvent.KEYCODE_ENDCALL) {
+                            gohome = (mEndcallBehavior & ENDCALL_HOME) != 0;
+                            sleeps = (mEndcallBehavior & ENDCALL_SLEEPS) != 0;
+                        } else {
+                            gohome = false;
+                            sleeps = true;
+                        }
                         if (keyguardShowing
                                 || (sleeps && !gohome)
                                 || (gohome && !goHome() && sleeps)) {
