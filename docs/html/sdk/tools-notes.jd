@@ -15,18 +15,55 @@ android.com/sdk/tools-notes.html</a>.</p>
 existing tools), use the Android SDK and AVD Manager. For more information, see
 <a href="{@docRoot}sdk/adding-components.html">Adding SDK Components</a>. </p>
 
+<h2 id="4">SDK Tools, Revision 4</h2>
+
+<p>December 2009. SDK Tools r4 provides several new features for developers and includes
+fixes for several issues, as described below. </p>
+
+<h3>Dependencies</h3>
+
+<p>SDK Tools r4 is compatible with ADT 0.9.5 and later, but not
+compatible with earlier versions. If you are developing in Eclipse with ADT, you
+<strong>must</strong> update your ADT plugin to version 0.9.5 or higher if you
+install SDK Tools r4 in your SDK. </p>
+
+<h3>General notes</h3>
+<ul>
+<li>Launcher script now forces GDK_NATIVE_WINDOW=true (linux only), to fix a 
+compatibility issue between GTK and SWT.</li>
+</ul>
+
+<h3>Android SDK and AVD Manager</h3>
+<ul>
+<li>AVD Launch dialog now shows scale value.</li>
+<li>Fixes potential NPE in SDK Manager on AVD launch, for older AVD with no 
+skin name specified.</li>
+<li>Fixes XML validation issue in on older Java versions.</li>
+<li>No longer forces the use of Java 1.5 on Mac OS X.</li>
+</ul>
+
+<h3>Emulator</h3>
+<ul>
+<li>No longer limits the size of the system partition.</li>
+</ul>
+
+<h3>Ant build tools</h3>
+<ul>
+<li>.apk packaging now properly ignores vi swap files as well as hidden files.</li>
+</ul>
+
 
 <h2 id="3">SDK Tools, Revision 3</h2>
 
-<p>SDK Tools 3 provides several new features for developers and includes
+<p>October 2009. SDK Tools r3 provides several new features for developers and includes
 fixes for several tools issues, as described below. </p>
 
 <h3>Dependencies</h3>
 
-<p>SDK Tools 3 is compatible with ADT 0.9.4 and later, but not
+<p>SDK Tools r3 is compatible with ADT 0.9.4 and later, but not
 compatible with earlier versions. If you are developing in Eclipse with ADT, you
 <strong>must</strong> update your ADT plugin to version 0.9.4 or higher if you
-install SDK Tools 3 in your SDK. </p>
+install SDK Tools r3 in your SDK. </p>
 
 <h3>Android tool</h3>
 <ul>
@@ -60,7 +97,7 @@ between SDK add-ons and platforms.</li>
 
 <h3>Layoutopt, a new tool for optimizing layouts</h3>
 
-<p>The SDK Tools 3 package includes <code>layoutopt</code>, a new command-line 
+<p>The SDK Tools r3 package includes <code>layoutopt</code>, a new command-line 
 tool that helps you optimize your layout hierarchies. When run against your 
 layout files, the tool analyzes their hierarchies and notifies you of 
 inefficiencies and other potential issues. The tool also provides simple 
