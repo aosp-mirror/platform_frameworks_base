@@ -49,4 +49,5 @@ public interface LocalPowerManager {
     boolean isScreenOn();
 
     void setScreenBrightnessOverride(int brightness);
+    void setButtonBrightnessOverride(int brightness);
 }

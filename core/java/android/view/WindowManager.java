@@ -649,7 +649,28 @@ public interface WindowManager extends ViewManager {
          * be cleared automatically after the window is displayed.
          */
         public static final int SOFT_INPUT_IS_FORWARD_NAVIGATION = 0x100;
-        
+
+        /**
+         * Default value for {@link #screenBrightness} and {@link #buttonBrightness}
+         * indicating that the brightness value is not overridden for this window
+         * and normal brightness policy should be used.
+         */
+        public static final float BRIGHTNESS_OVERRIDE_NONE = -1.0f;
+
+        /**
+         * Value for {@link #screenBrightness} and {@link #buttonBrightness}
+         * indicating that the screen or button backlight brightness should be set
+         * to the lowest value when this window is in front.
+         */
+        public static final float BRIGHTNESS_OVERRIDE_OFF = 0.0f;
+
+        /**
+         * Value for {@link #screenBrightness} and {@link #buttonBrightness}
+         * indicating that the screen or button backlight brightness should be set
+         * to the hightest value when this window is in front.
+         */
+        public static final float BRIGHTNESS_OVERRIDE_FULL = 1.0f;
+
         /**
          * Desired operating mode for any soft input area.  May any combination
          * of:
@@ -717,8 +738,16 @@ public interface WindowManager extends ViewManager {
          * preferred screen brightness.  0 to 1 adjusts the brightness from
          * dark to full bright.
          */
-        public float screenBrightness = -1.0f;
+        public float screenBrightness = BRIGHTNESS_OVERRIDE_NONE;
         
+        /**
+         * This can be used to override the standard behavior of the button and
+         * keyboard backlights.  A value of less than 0, the default, means to
+         * use the standard backlight behavior.  0 to 1 adjusts the brightness
+         * from dark to full bright.
+         */
+        public float buttonBrightness = BRIGHTNESS_OVERRIDE_NONE;
+
         /**
          * Identifier for this window.  This will usually be filled in for
          * you.
@@ -816,6 +845,7 @@ public interface WindowManager extends ViewManager {
             out.writeFloat(alpha);
             out.writeFloat(dimAmount);
             out.writeFloat(screenBrightness);
+            out.writeFloat(buttonBrightness);
             out.writeStrongBinder(token);
             out.writeString(packageName);
             TextUtils.writeToParcel(mTitle, out, parcelableFlags);
@@ -851,6 +881,7 @@ public interface WindowManager extends ViewManager {
             alpha = in.readFloat();
             dimAmount = in.readFloat();
             screenBrightness = in.readFloat();
+            buttonBrightness = in.readFloat();
             token = in.readStrongBinder();
             packageName = in.readString();
             mTitle = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
@@ -870,6 +901,8 @@ public interface WindowManager extends ViewManager {
         public static final int SOFT_INPUT_MODE_CHANGED = 1<<9;
         public static final int SCREEN_ORIENTATION_CHANGED = 1<<10;
         public static final int SCREEN_BRIGHTNESS_CHANGED = 1<<11;
+        /** {@hide} */
+        public static final int BUTTON_BRIGHTNESS_CHANGED = 1<<12;
     
         // internal buffer to backup/restore parameters under compatibility mode.
         private int[] mCompatibilityParamsBackup = null;
@@ -970,6 +1003,10 @@ public interface WindowManager extends ViewManager {
             if (screenBrightness != o.screenBrightness) {
                 screenBrightness = o.screenBrightness;
                 changes |= SCREEN_BRIGHTNESS_CHANGED;
+            }
+            if (buttonBrightness != o.buttonBrightness) {
+                buttonBrightness = o.buttonBrightness;
+                changes |= BUTTON_BRIGHTNESS_CHANGED;
             }
     
             if (screenOrientation != o.screenOrientation) {
