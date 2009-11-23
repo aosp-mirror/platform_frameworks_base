@@ -32,14 +32,14 @@ public:
     virtual sp<MediaSource> getTrack(size_t index);
     virtual sp<MetaData> getTrackMetaData(size_t index, uint32_t flags);
 
-    static sp<MetaData> makeAMRFormat(bool isWide);
-
 protected:
     virtual ~AMRExtractor();
 
 private:
     sp<DataSource> mDataSource;
+    sp<MetaData> mMeta;
     status_t mInitCheck;
+    size_t mFrameSize;
     bool mIsWide;
 
     AMRExtractor(const AMRExtractor &);

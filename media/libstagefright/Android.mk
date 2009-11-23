@@ -17,6 +17,7 @@ ifeq ($(BUILD_WITH_FULL_STAGEFRIGHT),true)
 LOCAL_SRC_FILES +=                \
         AMRExtractor.cpp          \
         AudioPlayer.cpp           \
+        AwesomePlayer.cpp         \
         CachingDataSource.cpp     \
         CameraSource.cpp          \
         DataSource.cpp            \
@@ -28,8 +29,6 @@ LOCAL_SRC_FILES +=                \
         MPEG4Extractor.cpp        \
         MPEG4Writer.cpp           \
         MediaExtractor.cpp        \
-        MediaPlayerImpl.cpp       \
-        MmapSource.cpp            \
         SampleTable.cpp           \
         ShoutcastSource.cpp       \
         TimeSource.cpp            \

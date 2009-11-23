@@ -24,11 +24,11 @@
 #include <media/stagefright/CachingDataSource.h>
 #include <media/stagefright/ColorConverter.h>
 #include <media/stagefright/DataSource.h>
+#include <media/stagefright/FileSource.h>
 #include <media/stagefright/HTTPDataSource.h>
 #include <media/stagefright/MediaDebug.h>
 #include <media/stagefright/MediaExtractor.h>
 #include <media/stagefright/MetaData.h>
-#include <media/stagefright/MmapSource.h>
 #include <media/stagefright/OMXCodec.h>
 
 namespace android {
@@ -58,7 +58,7 @@ status_t StagefrightMetadataRetriever::setDataSource(
     LOGV("setDataSource(%d, %lld, %lld)", fd, offset, length);
 
     mExtractor = MediaExtractor::Create(
-            new MmapSource(fd, offset, length));
+            new FileSource(fd, offset, length));
 
     return OK;
 }
