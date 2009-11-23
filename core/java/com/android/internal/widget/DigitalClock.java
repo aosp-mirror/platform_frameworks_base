@@ -61,7 +61,12 @@ public class DigitalClock extends LinearLayout {
                             Intent.ACTION_TIMEZONE_CHANGED)) {
                     mCalendar = Calendar.getInstance();
                 }
-                updateTime();
+                // Post a runnable to avoid blocking the broadcast.
+                mHandler.post(new Runnable() {
+                        public void run() {
+                            updateTime();
+                        }
+                });
             }
         };
 
@@ -133,7 +138,7 @@ public class DigitalClock extends LinearLayout {
             filter.addAction(Intent.ACTION_TIME_TICK);
             filter.addAction(Intent.ACTION_TIME_CHANGED);
             filter.addAction(Intent.ACTION_TIMEZONE_CHANGED);
-            mContext.registerReceiver(mIntentReceiver, filter, null, mHandler);
+            mContext.registerReceiver(mIntentReceiver, filter);
         }
 
         /* monitor 12/24-hour display preference */
