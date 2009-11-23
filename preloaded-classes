@@ -630,8 +630,6 @@ android.provider.Settings$Secure
 android.provider.Settings$SettingNotFoundException
 android.provider.Settings$System
 android.provider.SocialContract
-android.provider.SocialContract$Activities
-android.provider.SubscribedFeeds$Feeds
 android.provider.Telephony$BaseMmsColumns
 android.provider.Telephony$Mms
 android.provider.Telephony$Mms$Draft
