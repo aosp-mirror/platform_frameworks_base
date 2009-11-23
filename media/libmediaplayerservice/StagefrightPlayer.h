@@ -22,7 +22,7 @@
 
 namespace android {
 
-class MediaPlayerImpl;
+struct AwesomePlayer;
 
 class StagefrightPlayer : public MediaPlayerInterface {
 public:
@@ -49,7 +49,7 @@ public:
     virtual void setAudioSink(const sp<AudioSink> &audioSink);
 
 private:
-    MediaPlayerImpl *mPlayer;
+    AwesomePlayer *mPlayer;
 
     StagefrightPlayer(const StagefrightPlayer &);
     StagefrightPlayer &operator=(const StagefrightPlayer &);

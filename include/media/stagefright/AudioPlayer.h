@@ -30,11 +30,19 @@ class AudioTrack;
 
 class AudioPlayer : public TimeSource {
 public:
+    enum {
+        REACHED_EOS,
+        SEEK_COMPLETE
+    };
+
     AudioPlayer(const sp<MediaPlayerBase::AudioSink> &audioSink);
     virtual ~AudioPlayer();
 
     // Caller retains ownership of "source".
     void setSource(const sp<MediaSource> &source);
+
+    void setListenerCallback(
+            void (*notify)(void *cookie, int what), void *cookie);
 
     // Return time in us.
     virtual int64_t getRealTimeUs();
@@ -75,6 +83,9 @@ private:
     int64_t mSeekTimeUs;
 
     bool mStarted;
+
+    void (*mListenerCallback)(void *cookie, int what);
+    void *mListenerCookie;
 
     sp<MediaPlayerBase::AudioSink> mAudioSink;
 
