@@ -635,6 +635,15 @@ status_t MPEG4Extractor::parseChunk(off_t *offset, int depth) {
                 return err;
             }
 
+            size_t max_size;
+            CHECK_EQ(mLastTrack->sampleTable->getMaxSampleSize(&max_size), OK);
+
+            // Assume that a given buffer only contains at most 10 fragments,
+            // each fragment originally prefixed with a 2 byte length will
+            // have a 4 byte header (0x00 0x00 0x00 0x01) after conversion,
+            // and thus will grow by 2 bytes per fragment.
+            mLastTrack->meta->setInt32(kKeyMaxInputSize, max_size + 10 * 2);
+
             *offset += chunk_size;
             break;
         }
@@ -792,15 +801,10 @@ status_t MPEG4Source::start(MetaData *params) {
 
     mGroup = new MediaBufferGroup;
 
-    size_t max_size;
-    status_t err = mSampleTable->getMaxSampleSize(&max_size);
-    CHECK_EQ(err, OK);
+    int32_t max_size;
+    CHECK(mFormat->findInt32(kKeyMaxInputSize, &max_size));
 
-    // Assume that a given buffer only contains at most 10 fragments,
-    // each fragment originally prefixed with a 2 byte length will
-    // have a 4 byte header (0x00 0x00 0x00 0x01) after conversion,
-    // and thus will grow by 2 bytes per fragment.
-    mGroup->add_buffer(new MediaBuffer(max_size + 10 * 2));
+    mGroup->add_buffer(new MediaBuffer(max_size));
 
     mSrcBuffer = new uint8_t[max_size];
 
