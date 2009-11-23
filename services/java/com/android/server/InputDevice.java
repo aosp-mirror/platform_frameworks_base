@@ -288,6 +288,10 @@ public class InputDevice {
                         + " weight: (" + x + "," + y + ")");
                 mAveragedData[ioff + MotionEvent.SAMPLE_X] = x;
                 mAveragedData[ioff + MotionEvent.SAMPLE_Y] = y;
+                mAveragedData[ioff + MotionEvent.SAMPLE_PRESSURE] =
+                        rawData[ioff + MotionEvent.SAMPLE_PRESSURE];
+                mAveragedData[ioff + MotionEvent.SAMPLE_SIZE] =
+                        rawData[ioff + MotionEvent.SAMPLE_SIZE];
             }
             return mAveragedData;
         }
