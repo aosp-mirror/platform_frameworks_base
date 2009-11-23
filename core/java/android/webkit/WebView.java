@@ -3291,6 +3291,35 @@ public class WebView extends AbsoluteLayout
         }
     }
 
+    /**
+     * Dump the display tree to "/sdcard/displayTree.txt"
+     *
+     * @hide debug only
+     */
+    public void dumpDisplayTree() {
+        nativeDumpDisplayTree(getUrl());
+    }
+
+    /**
+     * Dump the dom tree to adb shell if "toFile" is False, otherwise dump it to
+     * "/sdcard/domTree.txt"
+     *
+     * @hide debug only
+     */
+    public void dumpDomTree(boolean toFile) {
+        mWebViewCore.sendMessage(EventHub.DUMP_DOMTREE, toFile ? 1 : 0, 0);
+    }
+
+    /**
+     * Dump the render tree to adb shell if "toFile" is False, otherwise dump it
+     * to "/sdcard/renderTree.txt"
+     *
+     * @hide debug only
+     */
+    public void dumpRenderTree(boolean toFile) {
+        mWebViewCore.sendMessage(EventHub.DUMP_RENDERTREE, toFile ? 1 : 0, 0);
+    }
+
     // This is used to determine long press with the center key.  Does not
     // affect long press with the trackball/touch.
     private boolean mGotCenterDown = false;
@@ -3380,24 +3409,15 @@ public class WebView extends AbsoluteLayout
         if (getSettings().getNavDump()) {
             switch (keyCode) {
                 case KeyEvent.KEYCODE_4:
-                    // "/data/data/com.android.browser/displayTree.txt"
-                    nativeDumpDisplayTree(getUrl());
+                    dumpDisplayTree();
                     break;
                 case KeyEvent.KEYCODE_5:
                 case KeyEvent.KEYCODE_6:
-                    // 5: dump the dom tree to the file
-                    // "/data/data/com.android.browser/domTree.txt"
-                    // 6: dump the dom tree to the adb log
-                    mWebViewCore.sendMessage(EventHub.DUMP_DOMTREE,
-                            (keyCode == KeyEvent.KEYCODE_5) ? 1 : 0, 0);
+                    dumpDomTree(keyCode == KeyEvent.KEYCODE_5);
                     break;
                 case KeyEvent.KEYCODE_7:
                 case KeyEvent.KEYCODE_8:
-                    // 7: dump the render tree to the file
-                    // "/data/data/com.android.browser/renderTree.txt"
-                    // 8: dump the render tree to the adb log
-                    mWebViewCore.sendMessage(EventHub.DUMP_RENDERTREE,
-                            (keyCode == KeyEvent.KEYCODE_7) ? 1 : 0, 0);
+                    dumpRenderTree(keyCode == KeyEvent.KEYCODE_7);
                     break;
                 case KeyEvent.KEYCODE_9:
                     nativeInstrumentReport();
