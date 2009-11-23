@@ -16,6 +16,7 @@
 
 package android.database.sqlite;
 
+import android.os.Debug;
 import android.os.SystemClock;
 import android.util.Log;
 
@@ -47,9 +48,8 @@ public class SQLiteStatement extends SQLiteProgram
      *         some reason
      */
     public void execute() {
+        long timeStart = Debug.threadCpuTimeNanos();
         mDatabase.lock();
-        boolean logStats = mDatabase.mLogStats;
-        long startTime = logStats ? SystemClock.elapsedRealtime() : 0;
 
         acquireReference();
         try {
@@ -57,9 +57,7 @@ public class SQLiteStatement extends SQLiteProgram
                 Log.v(TAG, "execute() for [" + mSql + "]");
             }
             native_execute();
-            if (logStats) {
-                mDatabase.logTimeStat(false /* write */, startTime, SystemClock.elapsedRealtime());
-            }
+            mDatabase.logTimeStat(mSql, timeStart);
         } finally {
             releaseReference();
             mDatabase.unlock();
@@ -77,9 +75,8 @@ public class SQLiteStatement extends SQLiteProgram
      *         some reason
      */
     public long executeInsert() {
+        long timeStart = Debug.threadCpuTimeNanos();
         mDatabase.lock();
-        boolean logStats = mDatabase.mLogStats;
-        long startTime = logStats ? SystemClock.elapsedRealtime() : 0;
 
         acquireReference();
         try {
@@ -87,9 +84,7 @@ public class SQLiteStatement extends SQLiteProgram
                 Log.v(TAG, "executeInsert() for [" + mSql + "]");
             }
             native_execute();
-            if (logStats) {
-                mDatabase.logTimeStat(false /* write */, startTime, SystemClock.elapsedRealtime());
-            }
+            mDatabase.logTimeStat(mSql, timeStart);
             return mDatabase.lastInsertRow();
         } finally {
             releaseReference();
@@ -106,9 +101,8 @@ public class SQLiteStatement extends SQLiteProgram
      * @throws android.database.sqlite.SQLiteDoneException if the query returns zero rows
      */
     public long simpleQueryForLong() {
+        long timeStart = Debug.threadCpuTimeNanos();
         mDatabase.lock();
-        boolean logStats = mDatabase.mLogStats;
-        long startTime = logStats ? SystemClock.elapsedRealtime() : 0;
 
         acquireReference();
         try {
@@ -116,9 +110,7 @@ public class SQLiteStatement extends SQLiteProgram
                 Log.v(TAG, "simpleQueryForLong() for [" + mSql + "]");
             }
             long retValue = native_1x1_long();
-            if (logStats) {
-                mDatabase.logTimeStat(false /* write */, startTime, SystemClock.elapsedRealtime());
-            }
+            mDatabase.logTimeStat(mSql, timeStart);
             return retValue;
         } finally {
             releaseReference();
@@ -135,9 +127,8 @@ public class SQLiteStatement extends SQLiteProgram
      * @throws android.database.sqlite.SQLiteDoneException if the query returns zero rows
      */
     public String simpleQueryForString() {
+        long timeStart = Debug.threadCpuTimeNanos();
         mDatabase.lock();
-        boolean logStats = mDatabase.mLogStats;
-        long startTime = logStats ? SystemClock.elapsedRealtime() : 0;
 
         acquireReference();
         try {
@@ -145,9 +136,7 @@ public class SQLiteStatement extends SQLiteProgram
                 Log.v(TAG, "simpleQueryForString() for [" + mSql + "]");
             }
             String retValue = native_1x1_string();
-            if (logStats) {
-                mDatabase.logTimeStat(false /* write */, startTime, SystemClock.elapsedRealtime());
-            }
+            mDatabase.logTimeStat(mSql, timeStart);
             return retValue;
         } finally {
             releaseReference();
