@@ -9313,6 +9313,7 @@ public class WindowManagerService extends IWindowManager.Stub
         boolean orientationChangeComplete = true;
         Session holdScreen = null;
         float screenBrightness = -1;
+        float buttonBrightness = -1;
         boolean focusDisplayed = false;
         boolean animating = false;
 
@@ -10072,6 +10073,10 @@ public class WindowManagerService extends IWindowManager.Stub
                                 && screenBrightness < 0) {
                             screenBrightness = w.mAttrs.screenBrightness;
                         }
+                        if (!syswin && w.mAttrs.buttonBrightness >= 0
+                                && buttonBrightness < 0) {
+                            buttonBrightness = w.mAttrs.buttonBrightness;
+                        }
                         if (attrs.type == WindowManager.LayoutParams.TYPE_SYSTEM_DIALOG
                                 || attrs.type == WindowManager.LayoutParams.TYPE_KEYGUARD
                                 || attrs.type == WindowManager.LayoutParams.TYPE_SYSTEM_ERROR) {
@@ -10317,6 +10322,12 @@ public class WindowManagerService extends IWindowManager.Stub
         } else {
             mPowerManager.setScreenBrightnessOverride((int)
                     (screenBrightness * Power.BRIGHTNESS_ON));
+        }
+        if (buttonBrightness < 0 || buttonBrightness > 1.0f) {
+            mPowerManager.setButtonBrightnessOverride(-1);
+        } else {
+            mPowerManager.setButtonBrightnessOverride((int)
+                    (buttonBrightness * Power.BRIGHTNESS_ON));
         }
         if (holdScreen != mHoldingScreenOn) {
             mHoldingScreenOn = holdScreen;
