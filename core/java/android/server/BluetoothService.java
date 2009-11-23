@@ -531,7 +531,7 @@ public class BluetoothService extends IBluetooth.Stub {
                 return;
             }
             String []bonds = null;
-            String val = getProperty("Devices");
+            String val = getPropertyInternal("Devices");
             if (val != null) {
                 bonds = val.split(",");
             }
@@ -681,7 +681,6 @@ public class BluetoothService extends IBluetooth.Stub {
     /*package*/synchronized void getAllProperties() {
 
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
-        if (!isEnabledInternal()) return;
         mAdapterProperties.clear();
 
         String properties[] = (String [])getAdapterPropertiesNative();
@@ -806,7 +805,12 @@ public class BluetoothService extends IBluetooth.Stub {
         return true;
     }
 
-    /*package*/ synchronized String getProperty (String name) {
+    /*package*/ synchronized String getProperty(String name) {
+        if (!isEnabledInternal()) return null;
+        return getPropertyInternal(name);
+    }
+
+    /*package*/ synchronized String getPropertyInternal(String name) {
         if (!mAdapterProperties.isEmpty())
             return mAdapterProperties.get(name);
         getAllProperties();
@@ -1639,7 +1643,7 @@ public class BluetoothService extends IBluetooth.Stub {
     }
 
     /*package*/ String getAddressFromObjectPath(String objectPath) {
-        String adapterObjectPath = getProperty("ObjectPath");
+        String adapterObjectPath = getPropertyInternal("ObjectPath");
         if (adapterObjectPath == null || objectPath == null) {
             Log.e(TAG, "getAddressFromObjectPath: AdpaterObjectPath:" + adapterObjectPath +
                     "  or deviceObjectPath:" + objectPath + " is null");
@@ -1659,7 +1663,7 @@ public class BluetoothService extends IBluetooth.Stub {
     }
 
     /*package*/ String getObjectPathFromAddress(String address) {
-        String path = getProperty("ObjectPath");
+        String path = getPropertyInternal("ObjectPath");
         if (path == null) {
             Log.e(TAG, "Error: Object Path is null");
             return null;
