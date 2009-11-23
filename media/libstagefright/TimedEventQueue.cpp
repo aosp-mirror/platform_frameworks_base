@@ -135,7 +135,9 @@ static bool MatchesEventID(
 }
 
 bool TimedEventQueue::cancelEvent(event_id id) {
-    CHECK(id != 0);
+    if (id == 0) {
+        return false;
+    }
 
     cancelEvents(&MatchesEventID, &id, true /* stopAfterFirstMatch */);
 
@@ -162,6 +164,7 @@ void TimedEventQueue::cancelEvents(
             mQueueHeadChangedCondition.signal();
         }
 
+        (*it).event->setEventID(0);
         it = mQueue.erase(it);
 
         if (stopAfterFirstMatch) {
@@ -228,7 +231,12 @@ void TimedEventQueue::threadEntry() {
                 }
             }
 
+            if (mQueue.empty()) {
+                continue;
+            }
+
             event = (*it).event;
+            event->setEventID(0);
             mQueue.erase(it);
         }
 

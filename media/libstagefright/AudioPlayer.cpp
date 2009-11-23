@@ -47,6 +47,12 @@ AudioPlayer::~AudioPlayer() {
     }
 }
 
+void AudioPlayer::setListenerCallback(
+        void (*notify)(void *cookie, int what), void *cookie) {
+    mListenerCallback = notify;
+    mListenerCookie = cookie;
+}
+
 void AudioPlayer::setSource(const sp<MediaSource> &source) {
     CHECK_EQ(mSource, NULL);
     mSource = source;
@@ -195,7 +201,6 @@ void AudioPlayer::fillBuffer(void *data, size_t size) {
                     mInputBuffer->release();
                     mInputBuffer = NULL;
                 }
-                mSeeking = false;
             }
         }
 
@@ -205,7 +210,19 @@ void AudioPlayer::fillBuffer(void *data, size_t size) {
             CHECK((err == OK && mInputBuffer != NULL)
                    || (err != OK && mInputBuffer == NULL));
 
+            if (mSeeking) {
+                mSeeking = false;
+
+                if (mListenerCallback) {
+                    (*mListenerCallback)(mListenerCookie, SEEK_COMPLETE);
+                }
+            }
+
             if (err != OK) {
+                if (mListenerCallback) {
+                    (*mListenerCallback)(mListenerCookie, REACHED_EOS);
+                }
+
                 memset((char *)data + size_done, 0, size_remaining);
                 break;
             }

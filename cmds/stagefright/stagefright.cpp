@@ -24,15 +24,14 @@
 #include <binder/ProcessState.h>
 #include <media/IMediaPlayerService.h>
 #include <media/stagefright/CachingDataSource.h>
+#include <media/stagefright/FileSource.h>
 #include <media/stagefright/HTTPDataSource.h>
 #include <media/stagefright/JPEGSource.h>
 #include <media/stagefright/MediaDebug.h>
 #include <media/stagefright/MediaDefs.h>
-#include <media/stagefright/MediaPlayerImpl.h>
 #include <media/stagefright/MediaExtractor.h>
 #include <media/stagefright/MediaSource.h>
 #include <media/stagefright/MetaData.h>
-#include <media/stagefright/MmapSource.h>
 #include <media/stagefright/OMXClient.h>
 #include <media/stagefright/OMXCodec.h>
 
@@ -51,9 +50,6 @@ static int64_t getNowUs() {
 
 static void playSource(OMXClient *client, const sp<MediaSource> &source) {
     sp<MetaData> meta = source->getFormat();
-
-    int64_t durationUs;
-    CHECK(meta->findInt64(kKeyDuration, &durationUs));
 
     const char *mime;
     CHECK(meta->findCString(kKeyMIMEType, &mime));
@@ -74,6 +70,9 @@ static void playSource(OMXClient *client, const sp<MediaSource> &source) {
     rawSource->start();
 
     if (gReproduceBug >= 3 && gReproduceBug <= 5) {
+        int64_t durationUs;
+        CHECK(meta->findInt64(kKeyDuration, &durationUs));
+
         status_t err;
         MediaBuffer *buffer;
         MediaSource::ReadOptions options;
@@ -368,7 +367,7 @@ int main(int argc, char **argv) {
             dataSource = new HTTPDataSource(filename);
             dataSource = new CachingDataSource(dataSource, 64 * 1024, 10);
         } else {
-            dataSource = new MmapSource(filename);
+            dataSource = new FileSource(filename);
         }
 
         bool isJPEG = false;

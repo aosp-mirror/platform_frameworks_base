@@ -33,7 +33,10 @@ namespace android {
 
 class AMRSource : public MediaSource {
 public:
-    AMRSource(const sp<DataSource> &source, bool isWide);
+    AMRSource(const sp<DataSource> &source,
+              const sp<MetaData> &meta,
+              size_t frameSize,
+              bool isWide);
 
     virtual status_t start(MetaData *params = NULL);
     virtual status_t stop();
@@ -48,6 +51,8 @@ protected:
 
 private:
     sp<DataSource> mDataSource;
+    sp<MetaData> mMeta;
+    size_t mFrameSize;
     bool mIsWide;
 
     off_t mOffset;
@@ -61,15 +66,63 @@ private:
 
 ////////////////////////////////////////////////////////////////////////////////
 
+static size_t getFrameSize(bool isWide, unsigned FT) {
+    static const size_t kFrameSizeNB[8] = {
+        95, 103, 118, 134, 148, 159, 204, 244
+    };
+    static const size_t kFrameSizeWB[9] = {
+        132, 177, 253, 285, 317, 365, 397, 461, 477
+    };
+
+    size_t frameSize = isWide ? kFrameSizeWB[FT] : kFrameSizeNB[FT];
+
+    // Round up bits to bytes and add 1 for the header byte.
+    frameSize = (frameSize + 7) / 8 + 1;
+
+    return frameSize;
+}
+
 AMRExtractor::AMRExtractor(const sp<DataSource> &source)
     : mDataSource(source),
       mInitCheck(NO_INIT) {
     String8 mimeType;
     float confidence;
-    if (SniffAMR(mDataSource, &mimeType, &confidence)) {
-        mInitCheck = OK;
-        mIsWide = (mimeType == MEDIA_MIMETYPE_AUDIO_AMR_WB);
+    if (!SniffAMR(mDataSource, &mimeType, &confidence)) {
+        return;
     }
+
+    mIsWide = (mimeType == MEDIA_MIMETYPE_AUDIO_AMR_WB);
+
+    mMeta = new MetaData;
+    mMeta->setCString(
+            kKeyMIMEType, mIsWide ? MEDIA_MIMETYPE_AUDIO_AMR_WB
+                                  : MEDIA_MIMETYPE_AUDIO_AMR_NB);
+
+    mMeta->setInt32(kKeyChannelCount, 1);
+    mMeta->setInt32(kKeySampleRate, mIsWide ? 16000 : 8000);
+
+    size_t offset = mIsWide ? 9 : 6;
+    uint8_t header;
+    if (mDataSource->readAt(offset, &header, 1) != 1) {
+        return;
+    }
+
+    unsigned FT = (header >> 3) & 0x0f;
+
+    if (FT > 8 || (!mIsWide && FT > 7)) {
+        return;
+    }
+
+    mFrameSize = getFrameSize(mIsWide, FT);
+
+    off_t streamSize;
+    if (mDataSource->getSize(&streamSize) == OK) {
+        off_t numFrames = streamSize / mFrameSize;
+
+        mMeta->setInt64(kKeyDuration, 20000ll * numFrames);
+    }
+
+    mInitCheck = OK;
 }
 
 AMRExtractor::~AMRExtractor() {
@@ -84,7 +137,7 @@ sp<MediaSource> AMRExtractor::getTrack(size_t index) {
         return NULL;
     }
 
-    return new AMRSource(mDataSource, mIsWide);
+    return new AMRSource(mDataSource, mMeta, mFrameSize, mIsWide);
 }
 
 sp<MetaData> AMRExtractor::getTrackMetaData(size_t index, uint32_t flags) {
@@ -92,26 +145,17 @@ sp<MetaData> AMRExtractor::getTrackMetaData(size_t index, uint32_t flags) {
         return NULL;
     }
 
-    return makeAMRFormat(mIsWide);
-}
-
-// static
-sp<MetaData> AMRExtractor::makeAMRFormat(bool isWide) {
-    sp<MetaData> meta = new MetaData;
-    meta->setCString(
-            kKeyMIMEType, isWide ? MEDIA_MIMETYPE_AUDIO_AMR_WB
-                                 : MEDIA_MIMETYPE_AUDIO_AMR_NB);
-
-    meta->setInt32(kKeyChannelCount, 1);
-    meta->setInt32(kKeySampleRate, isWide ? 16000 : 8000);
-
-    return meta;
+    return mMeta;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-AMRSource::AMRSource(const sp<DataSource> &source, bool isWide)
+AMRSource::AMRSource(
+        const sp<DataSource> &source, const sp<MetaData> &meta,
+        size_t frameSize, bool isWide)
     : mDataSource(source),
+      mMeta(meta),
+      mFrameSize(frameSize),
       mIsWide(isWide),
       mOffset(mIsWide ? 9 : 6),
       mCurrentTimeUs(0),
@@ -148,12 +192,19 @@ status_t AMRSource::stop() {
 }
 
 sp<MetaData> AMRSource::getFormat() {
-    return AMRExtractor::makeAMRFormat(mIsWide);
+    return mMeta;
 }
 
 status_t AMRSource::read(
         MediaBuffer **out, const ReadOptions *options) {
     *out = NULL;
+
+    int64_t seekTimeUs;
+    if (options && options->getSeekTo(&seekTimeUs)) {
+        int64_t seekFrame = seekTimeUs / 20000ll;  // 20ms per frame.
+        mCurrentTimeUs = seekFrame * 20000ll;
+        mOffset = seekFrame * mFrameSize + (mIsWide ? 9 : 6);
+    }
 
     uint8_t header;
     ssize_t n = mDataSource->readAt(mOffset, &header, 1);
@@ -180,17 +231,8 @@ status_t AMRSource::read(
         return ERROR_MALFORMED;
     }
 
-    static const size_t kFrameSizeNB[8] = {
-        95, 103, 118, 134, 148, 159, 204, 244
-    };
-    static const size_t kFrameSizeWB[9] = {
-        132, 177, 253, 285, 317, 365, 397, 461, 477
-    };
-
-    size_t frameSize = mIsWide ? kFrameSizeWB[FT] : kFrameSizeNB[FT];
-
-    // Round up bits to bytes and add 1 for the header byte.
-    frameSize = (frameSize + 7) / 8 + 1;
+    size_t frameSize = getFrameSize(mIsWide, FT);
+    CHECK_EQ(frameSize, mFrameSize);
 
     n = mDataSource->readAt(mOffset, buffer->data(), frameSize);
 
