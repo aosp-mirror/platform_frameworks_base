@@ -42,6 +42,7 @@
 #define TABLE_GETENTRY(x) //x
 #define TABLE_SUPER_NOISY(x) //x
 #define LOAD_TABLE_NOISY(x) //x
+#define TABLE_THEME(x) //x
 
 namespace android {
 
@@ -1447,18 +1448,23 @@ ssize_t ResTable::Theme::getAttribute(uint32_t resID, Res_value* outValue,
         const uint32_t t = Res_GETTYPE(resID);
         const uint32_t e = Res_GETENTRY(resID);
 
-        TABLE_NOISY(LOGV("Looking up attr 0x%08x in theme %p", resID, this));
+        TABLE_THEME(LOGI("Looking up attr 0x%08x in theme %p", resID, this));
 
         if (p >= 0) {
             const package_info* const pi = mPackages[p];
+            TABLE_THEME(LOGI("Found package: %p", pi));
             if (pi != NULL) {
+                TABLE_THEME(LOGI("Desired type index is %ld in avail %d", t, pi->numTypes));
                 if (t < pi->numTypes) {
                     const type_info& ti = pi->types[t];
+                    TABLE_THEME(LOGI("Desired entry index is %ld in avail %d", e, ti.numEntries));
                     if (e < ti.numEntries) {
                         const theme_entry& te = ti.entries[e];
-                            if (outTypeSpecFlags != NULL) {
-                                *outTypeSpecFlags |= te.typeSpecFlags;
-                            }
+                        if (outTypeSpecFlags != NULL) {
+                            *outTypeSpecFlags |= te.typeSpecFlags;
+                        }
+                        TABLE_THEME(LOGI("Theme value: type=0x%x, data=0x%08x",
+                                te.value.dataType, te.value.data));
                         const uint8_t type = te.value.dataType;
                         if (type == Res_value::TYPE_ATTRIBUTE) {
                             if (cnt > 0) {
@@ -1492,6 +1498,8 @@ ssize_t ResTable::Theme::resolveAttributeReference(Res_value* inOutValue,
     if (inOutValue->dataType == Res_value::TYPE_ATTRIBUTE) {
         uint32_t newTypeSpecFlags;
         blockIndex = getAttribute(inOutValue->data, inOutValue, &newTypeSpecFlags);
+        TABLE_THEME(LOGI("Resolving attr reference: blockIndex=%d, type=0x%x, data=%p\n",
+             (int)blockIndex, (int)inOutValue->dataType, (void*)inOutValue->data));
         if (inoutTypeSpecFlags != NULL) *inoutTypeSpecFlags |= newTypeSpecFlags;
         //printf("Retrieved attribute new type=0x%x\n", inOutValue->dataType);
         if (blockIndex < 0) {
@@ -1911,8 +1919,8 @@ ssize_t ResTable::resolveReference(Res_value* value, ssize_t blockIndex,
         uint32_t newFlags = 0;
         const ssize_t newIndex = getResource(value->data, value, true, &newFlags,
                 outConfig);
-        //LOGI("Resolving reference d=%p: newIndex=%d, t=0x%02x, d=%p\n",
-        //     (void*)lastRef, (int)newIndex, (int)value->dataType, (void*)value->data);
+        TABLE_THEME(LOGI("Resolving reference %p: newIndex=%d, type=0x%x, data=%p\n",
+             (void*)lastRef, (int)newIndex, (int)value->dataType, (void*)value->data));
         //printf("Getting reference 0x%08x: newIndex=%d\n", value->data, newIndex);
         if (inoutTypeSpecFlags != NULL) *inoutTypeSpecFlags |= newFlags;
         if (newIndex < 0) {

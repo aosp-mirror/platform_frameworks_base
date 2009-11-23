@@ -268,7 +268,7 @@ public:
      * Returned value:
      *  handle on audio hardware input
      */
-            audio_io_handle_t    getInput() { return mInput; }
+            audio_io_handle_t    getInput();
 
     /* obtains a buffer of "frameCount" frames. The buffer must be
      * filled entirely. If the track is stopped, obtainBuffer() returns
@@ -318,7 +318,8 @@ private:
                                 int format,
                                 int channelCount,
                                 int frameCount,
-                                uint32_t flags);
+                                uint32_t flags,
+                                audio_io_handle_t input);
 
     sp<IAudioRecord>        mAudioRecord;
     sp<IMemory>             mCblkMemory;
@@ -345,8 +346,8 @@ private:
     bool                    mMarkerReached;
     uint32_t                mNewPosition;
     uint32_t                mUpdatePeriod;
-    audio_io_handle_t       mInput;
     uint32_t                mFlags;
+    uint32_t                mChannels;
 };
 
 }; // namespace android
