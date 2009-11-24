@@ -4787,7 +4787,7 @@ public class WebView extends AbsoluteLayout
     }
 
     /**
-     * Do a touch up from a WebTextView.  This will be handled by webkit to
+     * Due a touch up from a WebTextView.  This will be handled by webkit to
      * change the selection.
      * @param event MotionEvent in the WebTextView's coordinates.
      */
@@ -4797,10 +4797,7 @@ public class WebView extends AbsoluteLayout
         }
         int x = viewToContentX((int) event.getX() + mWebTextView.getLeft());
         int y = viewToContentY((int) event.getY() + mWebTextView.getTop());
-        if (nativeFocusNodePointer() != nativeCursorNodePointer()) {
-            nativeMotionUp(x, y, mNavSlop);
-        }
-        nativeTextInputMotionUp(x, y);
+        nativeMotionUp(x, y, mNavSlop);
     }
 
     /**
@@ -5941,12 +5938,6 @@ public class WebView extends AbsoluteLayout
     private native void     nativeSetHeightCanMeasure(boolean measure);
     // Returns a value corresponding to CachedFrame::ImeAction
     /* package */ native int  nativeTextFieldAction();
-    /**
-     * Perform a click on a currently focused text input.  Since it is already
-     * focused, there is no need to go through the nativeMotionUp code, which
-     * may change the Cursor.
-     */
-    private native void     nativeTextInputMotionUp(int x, int y);
     private native int      nativeTextGeneration();
     // Never call this version except by updateCachedTextfield(String) -
     // we always want to pass in our generation number.
