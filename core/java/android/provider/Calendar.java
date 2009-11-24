@@ -33,17 +33,6 @@ import android.text.format.Time;
 import android.util.Config;
 import android.util.Log;
 import android.accounts.Account;
-import com.android.internal.database.ArrayListCursor;
-import com.google.android.gdata.client.AndroidGDataClient;
-import com.google.android.gdata.client.AndroidXmlParserFactory;
-import com.google.wireless.gdata.calendar.client.CalendarClient;
-import com.google.wireless.gdata.calendar.data.EventEntry;
-import com.google.wireless.gdata.calendar.data.Who;
-import com.google.wireless.gdata.calendar.parser.xml.XmlCalendarGDataParserFactory;
-import com.google.wireless.gdata.data.StringUtils;
-
-import java.util.ArrayList;
-import java.util.Vector;
 
 /**
  * The Calendar provider contains all calendar events.
@@ -547,8 +536,6 @@ public final class Calendar {
                                AttendeesColumns.ATTENDEE_TYPE,
                                AttendeesColumns.ATTENDEE_STATUS };
 
-        private static CalendarClient sCalendarClient = null;
-
         public static final Cursor query(ContentResolver cr, String[] projection) {
             return cr.query(CONTENT_URI, projection, null, null, DEFAULT_SORT_ORDER);
         }
@@ -600,7 +587,7 @@ public final class Calendar {
 
             // where
             String where = extractValue(event, "LOCATION");
-            if (!StringUtils.isEmpty(where)) {
+            if (!TextUtils.isEmpty(where)) {
                 values.put(EVENT_LOCATION, where);
             }
 
@@ -684,47 +671,6 @@ public final class Calendar {
             }
 
             return cr.insert(CONTENT_URI, values);
-        }
-
-        /**
-         * Returns a singleton instance of the CalendarClient used to fetch entries from the
-         * calendar server.
-         * @param cr The ContentResolver used to lookup the address of the calendar server in the
-         * settings database.
-         * @return The singleton instance of the CalendarClient used to fetch entries from the
-         * calendar server.
-         */
-        private static synchronized CalendarClient getCalendarClient(ContentResolver cr) {
-            if (sCalendarClient == null) {
-                sCalendarClient = new CalendarClient(
-                        new AndroidGDataClient(cr),
-                        new XmlCalendarGDataParserFactory(new AndroidXmlParserFactory()));
-            }
-            return sCalendarClient;
-        }
-
-        /**
-         * Extracts the attendees information out of event and adds it to a new ArrayList of columns
-         * within the supplied ArrayList of rows.  These rows are expected to be used within an
-         * {@link ArrayListCursor}.
-         */
-        private static final void extractAttendeesIntoArrayList(EventEntry event,
-                ArrayList<ArrayList> rows) {
-            Log.d(TAG, "EVENT: " + event.toString());
-            Vector<Who> attendees = (Vector<Who>) event.getAttendees();
-
-            int numAttendees = attendees == null ? 0 : attendees.size();
-
-            for (int i = 0; i < numAttendees; ++i) {
-                Who attendee = attendees.elementAt(i);
-                ArrayList row = new ArrayList();
-                row.add(attendee.getValue());
-                row.add(attendee.getEmail());
-                row.add(attendee.getRelationship());
-                row.add(attendee.getType());
-                row.add(attendee.getStatus());
-                rows.add(row);
-            }
         }
 
         /**
