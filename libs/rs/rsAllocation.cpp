@@ -222,7 +222,7 @@ void Allocation::dumpLOGV(const char *prefix) const
     LOGV("%s allocation ptr=%p mCpuWrite=%i, mCpuRead=%i, mGpuWrite=%i, mGpuRead=%i",
           prefix, mPtr, mCpuWrite, mCpuRead, mGpuWrite, mGpuRead);
 
-    LOGV("%s allocation mIsTexture=%i mIsTextureID=%i, mIsVertexBuffer=%i, mBufferID=%i",
+    LOGV("%s allocation mIsTexture=%i mTextureID=%i, mIsVertexBuffer=%i, mBufferID=%i",
           prefix, mIsTexture, mTextureID, mIsVertexBuffer, mBufferID);
 
 }
@@ -424,7 +424,6 @@ RsAllocation rsi_AllocationCreateFromBitmap(Context *rsc, uint32_t w, uint32_t h
         LOGE("Memory allocation failure");
         return NULL;
     }
-    texAlloc->incUserRef();
 
     ElementConverter_t cvt = pickConverter(dst, src);
     cvt(texAlloc->getPtr(), data, w * h);
