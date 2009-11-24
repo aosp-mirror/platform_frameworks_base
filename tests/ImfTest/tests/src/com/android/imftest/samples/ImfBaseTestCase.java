@@ -17,6 +17,8 @@
 package com.android.imftest.samples;
 
 import android.app.Activity;
+import android.app.KeyguardManager;
+import android.content.Context;
 import android.os.SystemClock;
 import android.test.InstrumentationTestCase;
 import android.view.KeyEvent;
@@ -58,6 +60,11 @@ public abstract class ImfBaseTestCase<T extends Activity> extends Instrumentatio
         mTargetActivity = launchActivity(TARGET_PACKAGE_NAME, mTargetActivityClass, null);
         mExpectAutoPop = mTargetActivity.getResources().getBoolean(R.bool.def_expect_ime_autopop);
         mImm = InputMethodManager.getInstance(mTargetActivity);
+
+        KeyguardManager keyguardManager =
+            (KeyguardManager) getInstrumentation().getContext().getSystemService(
+                    Context.KEYGUARD_SERVICE);
+        keyguardManager.newKeyguardLock("imftest").disableKeyguard();
     }
     
     // Utility test methods
