@@ -462,7 +462,7 @@ sp<OMXCodec> OMXCodec::Create(
     }
 
     int32_t maxInputSize;
-    if (createEncoder && meta->findInt32(kKeyMaxInputSize, &maxInputSize)) {
+    if (meta->findInt32(kKeyMaxInputSize, &maxInputSize)) {
         codec->setMinBufferSize(kPortIndexInput, (OMX_U32)maxInputSize);
     }
 
@@ -487,12 +487,18 @@ void OMXCodec::setMinBufferSize(OMX_U32 portIndex, OMX_U32 size) {
 
     if (def.nBufferSize < size) {
         def.nBufferSize = size;
-
     }
 
     err = mOMX->setParameter(
             mNode, OMX_IndexParamPortDefinition, &def, sizeof(def));
     CHECK_EQ(err, OK);
+
+    err = mOMX->getParameter(
+            mNode, OMX_IndexParamPortDefinition, &def, sizeof(def));
+    CHECK_EQ(err, OK);
+
+    // Make sure the setting actually stuck.
+    CHECK(def.nBufferSize >= size);
 }
 
 status_t OMXCodec::setVideoPortFormatType(
