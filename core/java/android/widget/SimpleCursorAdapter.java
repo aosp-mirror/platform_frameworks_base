@@ -74,7 +74,7 @@ public class SimpleCursorAdapter extends ResourceCursorAdapter {
      * @param context The context where the ListView associated with this
      *            SimpleListItemFactory is running
      * @param layout resource identifier of a layout file that defines the views
-     *            for this list item. Thelayout file should include at least
+     *            for this list item. The layout file should include at least
      *            those named views defined in "to"
      * @param c The database cursor.  Can be null if the cursor is not available yet.
      * @param from A list of column names representing the data to bind to the UI.  Can be null 
