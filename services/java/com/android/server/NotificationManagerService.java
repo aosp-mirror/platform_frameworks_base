@@ -86,7 +86,7 @@ class NotificationManagerService extends INotificationManager.Stub
 
     private WorkerHandler mHandler;
     private StatusBarService mStatusBarService;
-    private HardwareService mHardware;
+    private LightsService mLightsService;
 
     private NotificationRecord mSoundNotification;
     private AsyncPlayer mSound;
@@ -363,11 +363,11 @@ class NotificationManagerService extends INotificationManager.Stub
     private final SettingsObserver mSettingsObserver;
     
     NotificationManagerService(Context context, StatusBarService statusBar,
-            HardwareService hardware)
+            LightsService lights)
     {
         super();
         mContext = context;
-        mHardware = hardware;
+        mLightsService = lights;
         mAm = ActivityManagerNative.getDefault();
         mSound = new AsyncPlayer(TAG);
         mSound.setUsesWakeLock(context);
@@ -678,7 +678,7 @@ class NotificationManagerService extends INotificationManager.Stub
                     long identity = Binder.clearCallingIdentity();
                     try {
                         r.statusBarKey = mStatusBarService.addIcon(icon, n);
-                        mHardware.pulseBreathingLight();
+                        mLightsService.pulseBreathingLight();
                     }
                     finally {
                         Binder.restoreCallingIdentity(identity);
@@ -969,24 +969,24 @@ class NotificationManagerService extends INotificationManager.Stub
         // Battery low always shows, other states only show if charging.
         if (mBatteryLow) {
             if (mBatteryCharging) {
-                mHardware.setLightColor_UNCHECKED(HardwareService.LIGHT_ID_BATTERY,
+                mLightsService.setLightColor(LightsService.LIGHT_ID_BATTERY,
                     BATTERY_LOW_ARGB);
             } else {
                 // Flash when battery is low and not charging
-                mHardware.setLightFlashing_UNCHECKED(HardwareService.LIGHT_ID_BATTERY,
-                    BATTERY_LOW_ARGB, HardwareService.LIGHT_FLASH_TIMED,
+                mLightsService.setLightFlashing(LightsService.LIGHT_ID_BATTERY,
+                    BATTERY_LOW_ARGB, LightsService.LIGHT_FLASH_TIMED,
                     BATTERY_BLINK_ON, BATTERY_BLINK_OFF);
             }
         } else if (mBatteryCharging) {
             if (mBatteryFull) {
-                mHardware.setLightColor_UNCHECKED(HardwareService.LIGHT_ID_BATTERY,
+                mLightsService.setLightColor(LightsService.LIGHT_ID_BATTERY,
                         BATTERY_FULL_ARGB);
             } else {
-                mHardware.setLightColor_UNCHECKED(HardwareService.LIGHT_ID_BATTERY,
+                mLightsService.setLightColor(LightsService.LIGHT_ID_BATTERY,
                         BATTERY_MEDIUM_ARGB);
             }
         } else {
-            mHardware.setLightOff_UNCHECKED(HardwareService.LIGHT_ID_BATTERY);
+            mLightsService.setLightOff(LightsService.LIGHT_ID_BATTERY);
         }
 
         // handle notification lights
@@ -998,12 +998,12 @@ class NotificationManagerService extends INotificationManager.Stub
             }
         }
         if (mLedNotification == null) {
-            mHardware.setLightOff_UNCHECKED(HardwareService.LIGHT_ID_NOTIFICATIONS);
+            mLightsService.setLightOff(LightsService.LIGHT_ID_NOTIFICATIONS);
         } else {
-            mHardware.setLightFlashing_UNCHECKED(
-                    HardwareService.LIGHT_ID_NOTIFICATIONS,
+            mLightsService.setLightFlashing(
+                    LightsService.LIGHT_ID_NOTIFICATIONS,
                     mLedNotification.notification.ledARGB,
-                    HardwareService.LIGHT_FLASH_TIMED,
+                    LightsService.LIGHT_FLASH_TIMED,
                     mLedNotification.notification.ledOnMS,
                     mLedNotification.notification.ledOffMS);
         }

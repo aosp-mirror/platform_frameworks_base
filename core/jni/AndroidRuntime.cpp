@@ -130,7 +130,6 @@ extern int register_android_os_ParcelFileDescriptor(JNIEnv *env);
 extern int register_android_os_Power(JNIEnv *env);
 extern int register_android_os_StatFs(JNIEnv *env);
 extern int register_android_os_SystemProperties(JNIEnv *env);
-extern int register_android_os_Hardware(JNIEnv* env);
 extern int register_android_os_SystemClock(JNIEnv* env);
 extern int register_android_os_FileObserver(JNIEnv *env);
 extern int register_android_os_FileUtils(JNIEnv *env);
@@ -1166,7 +1165,6 @@ static const RegJNIRec gRegJNI[] = {
     REG_JNI(register_android_text_KeyCharacterMap),
     REG_JNI(register_android_os_Process),
     REG_JNI(register_android_os_Binder),
-    REG_JNI(register_android_os_Hardware),
     REG_JNI(register_android_view_Display),
     REG_JNI(register_android_nio_utils),
     REG_JNI(register_android_graphics_PixelFormat),

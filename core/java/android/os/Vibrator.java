@@ -23,14 +23,14 @@ package android.os;
  */
 public class Vibrator
 {
-    IHardwareService mService;
+    IVibratorService mService;
     private final Binder mToken = new Binder();
 
     /** @hide */
     public Vibrator()
     {
-        mService = IHardwareService.Stub.asInterface(
-                ServiceManager.getService("hardware"));
+        mService = IVibratorService.Stub.asInterface(
+                ServiceManager.getService("vibrator"));
     }
 
     /**

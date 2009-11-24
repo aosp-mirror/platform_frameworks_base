@@ -16,19 +16,13 @@
 
 package com.android.server;
 
-import com.android.internal.app.IBatteryStats;
-import com.android.server.am.BatteryStatsService;
-
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.os.Handler;
-import android.os.Hardware;
-import android.os.IHardwareService;
-import android.os.Message;
-import android.os.Power;
+import android.os.IVibratorService;
 import android.os.PowerManager;
 import android.os.Process;
 import android.os.RemoteException;
@@ -40,35 +34,11 @@ import android.util.Log;
 import java.util.LinkedList;
 import java.util.ListIterator;
 
-public class HardwareService extends IHardwareService.Stub {
-    private static final String TAG = "HardwareService";
-
-    static final int LIGHT_ID_BACKLIGHT = 0;
-    static final int LIGHT_ID_KEYBOARD = 1;
-    static final int LIGHT_ID_BUTTONS = 2;
-    static final int LIGHT_ID_BATTERY = 3;
-    static final int LIGHT_ID_NOTIFICATIONS = 4;
-    static final int LIGHT_ID_ATTENTION = 5;
-
-    static final int LIGHT_FLASH_NONE = 0;
-    static final int LIGHT_FLASH_TIMED = 1;
-    static final int LIGHT_FLASH_HARDWARE = 2;
-
-    /**
-     * Light brightness is managed by a user setting.
-     */
-    static final int BRIGHTNESS_MODE_USER = 0;
-
-    /**
-     * Light brightness is managed by a light sensor.
-     */
-    static final int BRIGHTNESS_MODE_SENSOR = 1;
+public class VibratorService extends IVibratorService.Stub {
+    private static final String TAG = "VibratorService";
 
     private final LinkedList<Vibration> mVibrations;
     private Vibration mCurrentVibration;
-
-    private boolean mAttentionLightOn;
-    private boolean mPulsing;
 
     private class Vibration implements IBinder.DeathRecipient {
         private final IBinder mToken;
@@ -120,12 +90,10 @@ public class HardwareService extends IHardwareService.Stub {
         }
     }
 
-    HardwareService(Context context) {
+    VibratorService(Context context) {
         // Reset the hardware to a default state, in case this is a runtime
         // restart instead of a fresh boot.
         vibratorOff();
-
-        mNativePointer = init_native();
 
         mContext = context;
         PowerManager pm = (PowerManager)context.getSystemService(
@@ -135,16 +103,9 @@ public class HardwareService extends IHardwareService.Stub {
 
         mVibrations = new LinkedList<Vibration>();
 
-        mBatteryStats = BatteryStatsService.getService();
-
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_SCREEN_OFF);
         context.registerReceiver(mIntentReceiver, filter);
-    }
-
-    protected void finalize() throws Throwable {
-        finalize_native(mNativePointer);
-        super.finalize();
     }
 
     public void vibrate(long milliseconds, IBinder token) {
@@ -250,92 +211,6 @@ public class HardwareService extends IHardwareService.Stub {
             Binder.restoreCallingIdentity(identity);
         }
     }
-
-    public boolean getFlashlightEnabled() {
-        return Hardware.getFlashlightEnabled();
-    }
-
-    public void setFlashlightEnabled(boolean on) {
-        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.FLASHLIGHT)
-                != PackageManager.PERMISSION_GRANTED &&
-                mContext.checkCallingOrSelfPermission(android.Manifest.permission.HARDWARE_TEST)
-                != PackageManager.PERMISSION_GRANTED) {
-            throw new SecurityException("Requires FLASHLIGHT or HARDWARE_TEST permission");
-        }
-        Hardware.setFlashlightEnabled(on);
-    }
-
-    public void enableCameraFlash(int milliseconds) {
-        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.CAMERA)
-                != PackageManager.PERMISSION_GRANTED &&
-                mContext.checkCallingOrSelfPermission(android.Manifest.permission.HARDWARE_TEST)
-                != PackageManager.PERMISSION_GRANTED) {
-            throw new SecurityException("Requires CAMERA or HARDWARE_TEST permission");
-        }
-        Hardware.enableCameraFlash(milliseconds);
-    }
-
-    void setLightOff_UNCHECKED(int light) {
-        setLight_native(mNativePointer, light, 0, LIGHT_FLASH_NONE, 0, 0, 0);
-    }
-
-    void setLightBrightness_UNCHECKED(int light, int brightness, int brightnessMode) {
-        int b = brightness & 0x000000ff;
-        b = 0xff000000 | (b << 16) | (b << 8) | b;
-        setLight_native(mNativePointer, light, b, LIGHT_FLASH_NONE, 0, 0, brightnessMode);
-    }
-
-    void setLightColor_UNCHECKED(int light, int color) {
-        setLight_native(mNativePointer, light, color, LIGHT_FLASH_NONE, 0, 0, 0);
-    }
-
-    void setLightFlashing_UNCHECKED(int light, int color, int mode, int onMS, int offMS) {
-        setLight_native(mNativePointer, light, color, mode, onMS, offMS, 0);
-    }
-
-    public void setAttentionLight(boolean on, int color) {
-        // Not worthy of a permission.  We shouldn't have a flashlight permission.
-        synchronized (this) {
-            mAttentionLightOn = on;
-            mPulsing = false;
-            setLight_native(mNativePointer, LIGHT_ID_ATTENTION, color,
-                    LIGHT_FLASH_HARDWARE, on ? 3 : 0, 0, 0);
-        }
-    }
-
-    public void pulseBreathingLight() {
-        synchronized (this) {
-            // HACK: Added at the last minute of cupcake -- design this better;
-            // Don't reuse the attention light -- make another one.
-            if (false) {
-                Log.d(TAG, "pulseBreathingLight mAttentionLightOn=" + mAttentionLightOn
-                        + " mPulsing=" + mPulsing);
-            }
-            if (!mAttentionLightOn && !mPulsing) {
-                mPulsing = true;
-                setLight_native(mNativePointer, LIGHT_ID_ATTENTION, 0x00ffffff,
-                        LIGHT_FLASH_HARDWARE, 7, 0, 0);
-                mH.sendMessageDelayed(Message.obtain(mH, 1), 3000);
-            }
-        }
-    }
-
-    private Handler mH = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            synchronized (this) {
-                if (false) {
-                    Log.d(TAG, "pulse cleanup handler firing mPulsing=" + mPulsing);
-                }
-                if (mPulsing) {
-                    mPulsing = false;
-                    setLight_native(mNativePointer, LIGHT_ID_ATTENTION,
-                            mAttentionLightOn ? 0xffffffff : 0,
-                            LIGHT_FLASH_NONE, 0, 0, 0);
-                }
-            }
-        }
-    };
 
     private final Runnable mVibrationRunnable = new Runnable() {
         public void run() {
@@ -452,7 +327,7 @@ public class HardwareService extends IHardwareService.Stub {
                         // duration is saved for delay() at top of loop
                         duration = pattern[index++];
                         if (duration > 0) {
-                            HardwareService.this.vibratorOn(duration);
+                            VibratorService.this.vibratorOn(duration);
                         }
                     } else {
                         if (repeat < 0) {
@@ -490,20 +365,12 @@ public class HardwareService extends IHardwareService.Stub {
         }
     };
 
-    private static native int init_native();
-    private static native void finalize_native(int ptr);
-
-    private static native void setLight_native(int ptr, int light, int color, int mode,
-            int onMS, int offMS, int brightnessMode);
+    private Handler mH = new Handler();
 
     private final Context mContext;
     private final PowerManager.WakeLock mWakeLock;
 
-    private final IBatteryStats mBatteryStats;
-
     volatile VibrateThread mThread;
-
-    private int mNativePointer;
 
     native static void vibratorOn(long milliseconds);
     native static void vibratorOff();
