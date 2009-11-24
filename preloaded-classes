@@ -698,8 +698,9 @@ com.android.internal.widget.LinearLayoutWithDefaultTouchRecepient
 com.android.internal.widget.LockPatternView
 com.android.internal.widget.NumberPicker
 com.android.internal.widget.NumberPickerButton
-com.google.android.gdata.client.AndroidGDataClient
-com.google.android.gdata.client.AndroidGDataClient$PostRequestCreator
+com.android.internal.widget.RotarySelector
+com.android.internal.widget.Smileys
+com.google.android.gles_jni.EGLDisplayImpl
 com.google.android.gles_jni.EGLImpl
 com.google.android.gles_jni.GLImpl
 com.google.android.mms.ContentType
