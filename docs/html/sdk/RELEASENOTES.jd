@@ -28,16 +28,16 @@ keep your development environment up-to-date. </li>
 
 <p>Note that if you are currently using the Android 1.6 SDK, you do not
 necessarily need to install the new SDK, since your existing SDK already
-includes the Android SDK and AVD Manager tool. To develop against Android 2.0,
-for example, you could just download the Android 2.0 platform into your existing
+includes the Android SDK and AVD Manager tool. To develop against Android 2.0.1,
+for example, you could just download the Android 2.0.1 platform into your existing
 SDK. </p>
 
 <p>Release notes for Android platforms and other SDK components are
 now available from the "SDK" tab, under "Downloadable SDK Components."</p>
 
 <ul>
-<li>Notes for the Android 2.0 platform are in the <a
-href="{@docRoot}sdk/android-2.0.html">Android 2.0, Release 1</a> document. </li>
+<li>Notes for the Android 2.0.1 platform are in the <a
+href="{@docRoot}sdk/android-2.0.1.html">Android 2.0.1, Release 1</a> document. </li>
 <li>You can find information about tools changes in the <a
 href="{@docRoot}sdk/tools-notes.html">SDK Tools Notes</a> and <a
 href="{@docRoot}sdk/adt-notes.html">ADT Plugin Notes</a>.</li>
