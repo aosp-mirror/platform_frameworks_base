@@ -88,7 +88,7 @@ bool Allocation::fixAllocation()
     return false;
 }
 
-void Allocation::uploadToTexture(uint32_t lodOffset)
+void Allocation::uploadToTexture(Context *rsc, uint32_t lodOffset)
 {
     //rsAssert(!mTextureId);
     rsAssert(lodOffset < mType->getLODCount());
@@ -102,6 +102,15 @@ void Allocation::uploadToTexture(uint32_t lodOffset)
 
     if (!mTextureID) {
         glGenTextures(1, &mTextureID);
+
+        if (!mTextureID) {
+            // This should not happen, however, its likely the cause of the
+            // white sqare bug.
+            // Force a crash to 1: restart the app, 2: make sure we get a bugreport.
+            LOGE("Upload to texture failed to gen mTextureID");
+            rsc->dumpDebug();
+            ((char *)0)[0] = 0;
+        }
     }
     glBindTexture(GL_TEXTURE_2D, mTextureID);
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
@@ -238,7 +247,7 @@ RsAllocation rsi_AllocationCreateSized(Context *rsc, RsElement e, size_t count)
 void rsi_AllocationUploadToTexture(Context *rsc, RsAllocation va, uint32_t baseMipLevel)
 {
     Allocation *alloc = static_cast<Allocation *>(va);
-    alloc->uploadToTexture(baseMipLevel);
+    alloc->uploadToTexture(rsc, baseMipLevel);
 }
 
 void rsi_AllocationUploadToBufferObject(Context *rsc, RsAllocation va)
