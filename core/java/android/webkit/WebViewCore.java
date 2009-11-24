@@ -41,6 +41,8 @@ import android.view.KeyEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
+import android.webkit.plugin.SurfaceDrawingModel;
+import android.webkit.plugin.WebkitPlugin;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -2175,15 +2177,16 @@ final class WebViewCore {
             return null;
         }
         
-        String pkgName = PluginManager.getInstance(null).getPluginsAPKName(libName);
+        PluginManager pluginManager = PluginManager.getInstance(null);
+
+        String pkgName = pluginManager.getPluginsAPKName(libName);
         if (pkgName == null) {
             Log.w(LOGTAG, "Unable to resolve " + libName + " to a plugin APK");
             return null;
         }
         
-        Class<?> pluginClass = null;
         try {
-            pluginClass = PluginUtil.getPluginClass(mWebView.getContext(), pkgName, clsName);
+            return pluginManager.getPluginClass(pkgName, clsName);
         } catch (NameNotFoundException e) {
             Log.e(LOGTAG, "Unable to find plugin classloader for the apk (" + pkgName + ")");
         } catch (ClassNotFoundException e) {
@@ -2191,12 +2194,29 @@ final class WebViewCore {
                     ") in the apk (" + pkgName + ")");
         }
 
-        return pluginClass;
+        return null;
     }
-    
+
+    private WebkitPlugin createPluginJavaInstance(String libName, int npp) {
+        
+        if (mWebView == null) {
+            return null;
+        }
+
+        PluginManager pluginManager = PluginManager.getInstance(null);
+
+        String pkgName = pluginManager.getPluginsAPKName(libName);
+        if (pkgName == null) {
+            Log.w(LOGTAG, "Unable to resolve " + libName + " to a plugin APK");
+            return null;
+        }
+
+        return pluginManager.getPluginInstance(pkgName, npp);
+    }
+
     // called by JNI. PluginWidget function to launch an activity and overlays
     // the activity with the View provided by the plugin class.
-    private void startFullScreenPluginActivity(String libName, String clsName, int npp) {
+    private void startFullScreenPluginActivity(String libName, int npp) {
         if (mWebView == null) {
             return;
         }
@@ -2209,40 +2229,33 @@ final class WebViewCore {
 
         Intent intent = new Intent("android.intent.webkit.PLUGIN");
         intent.putExtra(PluginActivity.INTENT_EXTRA_PACKAGE_NAME, pkgName);
-        intent.putExtra(PluginActivity.INTENT_EXTRA_CLASS_NAME, clsName);
         intent.putExtra(PluginActivity.INTENT_EXTRA_NPP_INSTANCE, npp);
         mWebView.getContext().startActivity(intent);
     }
 
     // called by JNI.  PluginWidget functions for creating an embedded View for
     // the surface drawing model.
-    private ViewManager.ChildView createSurface(String libName, String clsName,
-            int npp, int x, int y, int width, int height) {
+    private ViewManager.ChildView createSurface(WebkitPlugin webkitPlugin,
+            int x, int y, int width, int height) {
+        
         if (mWebView == null) {
             return null;
         }
 
-        String pkgName = PluginManager.getInstance(null).getPluginsAPKName(libName);
-        if (pkgName == null) {
-            Log.w(LOGTAG, "Unable to resolve " + libName + " to a plugin APK");
+        SurfaceDrawingModel embeddedSurface = webkitPlugin.getEmbeddedSurface();
+        if(embeddedSurface == null) {
+            Log.e(LOGTAG, "Attempted to create an embedded surface with a null drawing model");
             return null;
         }
 
-        PluginStub stub =PluginUtil.getPluginStub(mWebView.getContext(),pkgName, clsName);
-        if (stub == null) {
-            Log.e(LOGTAG, "Unable to find plugin class (" + clsName +
-                    ") in the apk (" + pkgName + ")");
-            return null;
-        }
-
-        View pluginView = stub.getEmbeddedView(npp, mWebView.getContext());
+        View pluginView = embeddedSurface.getSurface();
 
         ViewManager.ChildView view = mWebView.mViewManager.createView();
         view.mView = pluginView;
         view.attachView(x, y, width, height);
         return view;
     }
-    
+
     private void updateSurface(ViewManager.ChildView childView, int x, int y,
             int width, int height) {
         childView.attachView(x, y, width, height);
