@@ -2923,12 +2923,27 @@ public class WebView extends AbsoluteLayout
         Rect vBox = contentToViewRect(contentBounds);
         Rect visibleRect = new Rect();
         calcOurVisibleRect(visibleRect);
-        if (allowIntersect ? Rect.intersects(visibleRect, vBox) :
-                visibleRect.contains(vBox)) {
+        // The IME may have shown, resulting in the textfield being offscreen.
+        // If so, the textfield will be scrolled on screen, so treat it as
+        // though it is on screen.  If it is on screen, place the WebTextView in
+        // its new place, accounting for our new scroll/zoom values.
+        InputMethodManager imm = InputMethodManager.peekInstance();
+        if ((imm != null && imm.isActive(mWebTextView))
+                || (allowIntersect ? Rect.intersects(visibleRect, vBox)
+                : visibleRect.contains(vBox))) {
             mWebTextView.setRect(vBox.left, vBox.top, vBox.width(),
                     vBox.height());
+            mWebTextView.setTextSize(TypedValue.COMPLEX_UNIT_PX,
+                    contentToViewDimension(
+                    nativeFocusCandidateTextSize()));
             return true;
         } else {
+            // The textfield is now off screen.  The user probably
+            // was not zooming to see the textfield better.  Remove
+            // the WebTextView.  If the user types a key, and the
+            // textfield is still in focus, we will reconstruct
+            // the WebTextView and scroll it back on screen.
+            mWebTextView.remove();
             return false;
         }
     }
@@ -2974,25 +2989,11 @@ public class WebView extends AbsoluteLayout
                 invalidate();
                 if (mNeedToAdjustWebTextView) {
                     mNeedToAdjustWebTextView = false;
-                    // As a result of the zoom, the textfield is now on
-                    // screen.  Place the WebTextView in its new place,
-                    // accounting for our new scroll/zoom values.
-                    if (didUpdateTextViewBounds(false)) {
-                        mWebTextView.setTextSize(TypedValue.COMPLEX_UNIT_PX,
-                                contentToViewDimension(
-                                nativeFocusCandidateTextSize()));
+                    if (didUpdateTextViewBounds(false)
+                            && nativeFocusCandidateIsPassword()) {
                         // If it is a password field, start drawing the
                         // WebTextView once again.
-                        if (nativeFocusCandidateIsPassword()) {
-                            mWebTextView.setInPassword(true);
-                        }
-                    } else {
-                        // The textfield is now off screen.  The user probably
-                        // was not zooming to see the textfield better.  Remove
-                        // the WebTextView.  If the user types a key, and the
-                        // textfield is still in focus, we will reconstruct
-                        // the WebTextView and scroll it back on screen.
-                        mWebTextView.remove();
+                        mWebTextView.setInPassword(true);
                     }
                 }
             }
@@ -3059,7 +3060,12 @@ public class WebView extends AbsoluteLayout
         }
         if (mFocusSizeChanged) {
             mFocusSizeChanged = false;
-            didUpdateTextViewBounds(true);
+            // If we are zooming, this will get handled above, when the zoom
+            // finishes.  We also do not need to do this unless the WebTextView
+            // is showing.
+            if (!animateZoom && inEditingMode()) {
+                didUpdateTextViewBounds(true);
+            }
         }
     }
 
