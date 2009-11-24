@@ -351,7 +351,9 @@ sp<OMXCodec> OMXCodec::Create(
         uint8_t profile = ptr[1];
         uint8_t level = ptr[3];
 
-        CHECK((ptr[4] >> 2) == 0x3f);  // reserved
+        // There is decodable content out there that fails the following
+        // assertion, let's be lenient for now...
+        // CHECK((ptr[4] >> 2) == 0x3f);  // reserved
 
         size_t lengthSize = 1 + (ptr[4] & 3);
 
