@@ -572,9 +572,9 @@ void AwesomePlayer::onEvent(int32_t code) {
 
     int64_t latenessUs = nowUs - timeUs;
 
-    if (latenessUs > 20000) {
-        // We're more than 20ms late.
-        LOGV("we're late by %lld us (%.2f secs)", latenessUs, latenessUs / 1E6);
+    if (latenessUs > 40000) {
+        // We're more than 40ms late.
+        LOGI("we're late by %lld us (%.2f secs)", latenessUs, latenessUs / 1E6);
 
         mVideoBuffer->release();
         mVideoBuffer = NULL;
