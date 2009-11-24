@@ -726,6 +726,24 @@ void Context::deinitToClient()
     mIO.mToClient.shutdown();
 }
 
+void Context::dumpDebug() const
+{
+    LOGE("RS Context debug %p", this);
+    LOGE("RS Context debug");
+
+    LOGE(" EGL ver %i %i", mEGL.mMajorVersion, mEGL.mMinorVersion);
+    LOGE(" EGL context %p  surface %p,  w=%i h=%i  Display=%p", mEGL.mContext,
+         mEGL.mSurface, mEGL.mWidth, mEGL.mHeight, mEGL.mDisplay);
+    LOGE(" GL vendor: %s", mGL.mVendor);
+    LOGE(" GL renderer: %s", mGL.mRenderer);
+    LOGE(" GL Version: %s", mGL.mVersion);
+    LOGE(" GL Extensions: %s", mGL.mExtensions);
+    LOGE(" GL int Versions %i %i", mGL.mMajorVersion, mGL.mMinorVersion);
+    LOGE(" RS width %i, height %i", mWidth, mHeight);
+    LOGE(" RS running %i, exit %i, useDepth %i, paused %i", mRunning, mExit, mUseDepth, mPaused);
+    LOGE(" RS pThreadID %li, nativeThreadID %i", mThreadId, mNativeThreadId);
+
+}
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 //

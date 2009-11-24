@@ -162,6 +162,8 @@ public:
         bool mLogObjects;
     } props;
 
+    void dumpDebug() const;
+
     mutable const ObjectBase * mObjHead;
 
 protected:
