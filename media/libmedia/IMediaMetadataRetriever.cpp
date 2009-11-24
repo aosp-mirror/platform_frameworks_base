@@ -41,6 +41,15 @@ pid_t gettid() { return syscall(__NR_gettid);}
 #undef __KERNEL__
 #endif
 
+static int myTid() {
+#ifdef HAVE_GETTID
+    return gettid();
+#else
+    return getpid();
+#endif
+}
+
+#undef LOG_TAG
 #define LOG_TAG "IMediaMetadataRetriever"
 #include <utils/Log.h>
 #include <cutils/sched_policy.h>
@@ -50,18 +59,18 @@ namespace android {
 static void sendSchedPolicy(Parcel& data)
 {
     SchedPolicy policy;
-    get_sched_policy(gettid(), &policy);
+    get_sched_policy(myTid(), &policy);
     data.writeInt32(policy);
 }
 
 static void setSchedPolicy(const Parcel& data)
 {
     SchedPolicy policy = (SchedPolicy) data.readInt32();
-    set_sched_policy(gettid(), policy);
+    set_sched_policy(myTid(), policy);
 }
 static void restoreSchedPolicy()
 {
-    set_sched_policy(gettid(), SP_FOREGROUND);
+    set_sched_policy(myTid(), SP_FOREGROUND);
 }
 }; // end namespace android
 #endif
