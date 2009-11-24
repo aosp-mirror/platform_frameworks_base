@@ -54,16 +54,6 @@ public:
 private:
     friend class MediaPlayerService;
 
-    class Priority
-    {
-    public:
-        Priority(int newPriority);
-        ~Priority();
-    private:
-        Priority();
-        int         mOldPriority;
-    };
-
     explicit MetadataRetrieverClient(pid_t pid);
     virtual ~MetadataRetrieverClient();
 

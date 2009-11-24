@@ -21,6 +21,51 @@
 #include <SkBitmap.h>
 #include <media/IMediaMetadataRetriever.h>
 
+// The binder is supposed to propagate the scheduler group across
+// the binder interface so that remote calls are executed with
+// the same priority as local calls. This is currently not working
+// so this change puts in a temporary hack to fix the issue with
+// metadata retrieval which can be a huge CPU hit if done on a
+// foreground thread.
+#ifndef DISABLE_GROUP_SCHEDULE_HACK
+
+/* desktop Linux needs a little help with gettid() */
+#if defined(HAVE_GETTID) && !defined(HAVE_ANDROID_OS)
+#define __KERNEL__
+# include <linux/unistd.h>
+#ifdef _syscall0
+_syscall0(pid_t,gettid)
+#else
+pid_t gettid() { return syscall(__NR_gettid);}
+#endif
+#undef __KERNEL__
+#endif
+
+#define LOG_TAG "IMediaMetadataRetriever"
+#include <utils/Log.h>
+#include <cutils/sched_policy.h>
+
+namespace android {
+
+static void sendSchedPolicy(Parcel& data)
+{
+    SchedPolicy policy;
+    get_sched_policy(gettid(), &policy);
+    data.writeInt32(policy);
+}
+
+static void setSchedPolicy(const Parcel& data)
+{
+    SchedPolicy policy = (SchedPolicy) data.readInt32();
+    set_sched_policy(gettid(), policy);
+}
+static void restoreSchedPolicy()
+{
+    set_sched_policy(gettid(), SP_FOREGROUND);
+}
+}; // end namespace android
+#endif
+
 namespace android {
 
 enum {
@@ -30,7 +75,7 @@ enum {
     SET_MODE,
     GET_MODE,
     CAPTURE_FRAME,
-    EXTARCT_ALBUM_ART,
+    EXTRACT_ALBUM_ART,
     EXTRACT_METADATA,
 };
 
@@ -92,6 +137,9 @@ public:
     {
         Parcel data, reply;
         data.writeInterfaceToken(IMediaMetadataRetriever::getInterfaceDescriptor());
+#ifndef DISABLE_GROUP_SCHEDULE_HACK
+        sendSchedPolicy(data);
+#endif
         remote()->transact(CAPTURE_FRAME, data, &reply);
         status_t ret = reply.readInt32();
         if (ret != NO_ERROR) {
@@ -104,7 +152,10 @@ public:
     {
         Parcel data, reply;
         data.writeInterfaceToken(IMediaMetadataRetriever::getInterfaceDescriptor());
-        remote()->transact(EXTARCT_ALBUM_ART, data, &reply);
+#ifndef DISABLE_GROUP_SCHEDULE_HACK
+        sendSchedPolicy(data);
+#endif
+        remote()->transact(EXTRACT_ALBUM_ART, data, &reply);
         status_t ret = reply.readInt32();
         if (ret != NO_ERROR) {
             return NULL;
@@ -116,6 +167,9 @@ public:
     {
         Parcel data, reply;
         data.writeInterfaceToken(IMediaMetadataRetriever::getInterfaceDescriptor());
+#ifndef DISABLE_GROUP_SCHEDULE_HACK
+        sendSchedPolicy(data);
+#endif
         data.writeInt32(keyCode);
         remote()->transact(EXTRACT_METADATA, data, &reply);
         status_t ret = reply.readInt32();
@@ -169,6 +223,9 @@ status_t BnMediaMetadataRetriever::onTransact(
         } break;
         case CAPTURE_FRAME: {
             CHECK_INTERFACE(IMediaMetadataRetriever, data, reply);
+#ifndef DISABLE_GROUP_SCHEDULE_HACK
+            setSchedPolicy(data);
+#endif
             sp<IMemory> bitmap = captureFrame();
             if (bitmap != 0) {  // Don't send NULL across the binder interface
                 reply->writeInt32(NO_ERROR);
@@ -176,10 +233,16 @@ status_t BnMediaMetadataRetriever::onTransact(
             } else {
                 reply->writeInt32(UNKNOWN_ERROR);
             }
+#ifndef DISABLE_GROUP_SCHEDULE_HACK
+            restoreSchedPolicy();
+#endif
             return NO_ERROR;
         } break;
-        case EXTARCT_ALBUM_ART: {
+        case EXTRACT_ALBUM_ART: {
             CHECK_INTERFACE(IMediaMetadataRetriever, data, reply);
+#ifndef DISABLE_GROUP_SCHEDULE_HACK
+            setSchedPolicy(data);
+#endif
             sp<IMemory> albumArt = extractAlbumArt();
             if (albumArt != 0) {  // Don't send NULL across the binder interface
                 reply->writeInt32(NO_ERROR);
@@ -187,10 +250,16 @@ status_t BnMediaMetadataRetriever::onTransact(
             } else {
                 reply->writeInt32(UNKNOWN_ERROR);
             }
+#ifndef DISABLE_GROUP_SCHEDULE_HACK
+            restoreSchedPolicy();
+#endif
             return NO_ERROR;
         } break;
         case EXTRACT_METADATA: {
             CHECK_INTERFACE(IMediaMetadataRetriever, data, reply);
+#ifndef DISABLE_GROUP_SCHEDULE_HACK
+            setSchedPolicy(data);
+#endif
             int keyCode = data.readInt32();
             const char* value = extractMetadata(keyCode);
             if (value != NULL) {  // Don't send NULL across the binder interface
@@ -199,6 +268,9 @@ status_t BnMediaMetadataRetriever::onTransact(
             } else {
                 reply->writeInt32(UNKNOWN_ERROR);
             }
+#ifndef DISABLE_GROUP_SCHEDULE_HACK
+            restoreSchedPolicy();
+#endif
             return NO_ERROR;
         } break;
         default:
