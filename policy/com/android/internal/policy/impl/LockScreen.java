@@ -36,7 +36,6 @@ import android.os.SystemProperties;
 
 import java.util.Date;
 import java.io.File;
-import java.text.SimpleDateFormat;
 
 /**
  * The screen within {@link LockPatternKeyguardView} that shows general
@@ -562,7 +561,7 @@ class LockScreen extends LinearLayout implements KeyguardScreen, KeyguardUpdateM
     public boolean needsInput() {
         return false;
     }
-    
+
     /** {@inheritDoc} */
     public void onPause() {
 
@@ -576,5 +575,14 @@ class LockScreen extends LinearLayout implements KeyguardScreen, KeyguardUpdateM
     /** {@inheritDoc} */
     public void cleanUp() {
         mUpdateMonitor.removeCallback(this);
+    }
+
+    /** {@inheritDoc} */
+    public void onRingerModeChanged(int state) {
+        boolean silent = AudioManager.RINGER_MODE_SILENT == state;
+        if (silent != mSilentMode) {
+            mSilentMode = silent;
+            updateRightTabResources();
+        }
     }
 }
