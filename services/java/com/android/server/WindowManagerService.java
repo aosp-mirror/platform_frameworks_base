@@ -3541,24 +3541,35 @@ public class WindowManagerService extends IWindowManager.Stub
                 wtoken.inPendingTransaction = true;
                 if (visible) {
                     mOpeningApps.add(wtoken);
-                    wtoken.allDrawn = false;
                     wtoken.startingDisplayed = false;
                     wtoken.startingMoved = false;
-                    wtoken.waitingToShow = true;
-
-                    if (wtoken.clientHidden) {
-                        // In the case where we are making an app visible
-                        // but holding off for a transition, we still need
-                        // to tell the client to make its windows visible so
-                        // they get drawn.  Otherwise, we will wait on
-                        // performing the transition until all windows have
-                        // been drawn, they never will be, and we are sad.
-                        wtoken.clientHidden = false;
-                        wtoken.sendAppVisibilityToClients();
+                    
+                    // If the token is currently hidden (should be the
+                    // common case), then we need to set up to wait for
+                    // its windows to be ready.
+                    if (wtoken.hidden) {
+                        wtoken.allDrawn = false;
+                        wtoken.waitingToShow = true;
+    
+                        if (wtoken.clientHidden) {
+                            // In the case where we are making an app visible
+                            // but holding off for a transition, we still need
+                            // to tell the client to make its windows visible so
+                            // they get drawn.  Otherwise, we will wait on
+                            // performing the transition until all windows have
+                            // been drawn, they never will be, and we are sad.
+                            wtoken.clientHidden = false;
+                            wtoken.sendAppVisibilityToClients();
+                        }
                     }
                 } else {
                     mClosingApps.add(wtoken);
-                    wtoken.waitingToHide = true;
+                    
+                    // If the token is currently visible (should be the
+                    // common case), then set up to wait for it to be hidden.
+                    if (!wtoken.hidden) {
+                        wtoken.waitingToHide = true;
+                    }
                 }
                 return;
             }
