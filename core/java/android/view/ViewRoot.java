@@ -1407,8 +1407,8 @@ public final class ViewRoot extends Handler implements ViewParent,
 
             // When in touch mode, focus points to the previously focused view,
             // which may have been removed from the view hierarchy. The following
-            // line checks whether the view is still in the hierarchy
-            if (focus == null || focus.getParent() == null) {
+            // line checks whether the view is still in our hierarchy.
+            if (focus == null || focus.mAttachInfo != mAttachInfo) {
                 mRealFocusedView = null;
                 return false;
             }
