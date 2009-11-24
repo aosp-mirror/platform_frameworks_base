@@ -154,6 +154,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     static public final String SYSTEM_DIALOG_REASON_KEY = "reason";
     static public final String SYSTEM_DIALOG_REASON_GLOBAL_ACTIONS = "globalactions";
     static public final String SYSTEM_DIALOG_REASON_RECENT_APPS = "recentapps";
+    static public final String SYSTEM_DIALOG_REASON_HOME_KEY = "homekey";
 
     final Object mLock = new Object();
     
@@ -1120,7 +1121,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                             ActivityManagerNative.getDefault().stopAppSwitches();
                         } catch (RemoteException e) {
                         }
-                        sendCloseSystemWindows();
+                        sendCloseSystemWindows(SYSTEM_DIALOG_REASON_HOME_KEY);
                         startDockOrHome();
                     }
                 }
@@ -1131,7 +1132,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 ActivityManagerNative.getDefault().stopAppSwitches();
             } catch (RemoteException e) {
             }
-            sendCloseSystemWindows();
+            sendCloseSystemWindows(SYSTEM_DIALOG_REASON_HOME_KEY);
             startDockOrHome();
         }
     }
