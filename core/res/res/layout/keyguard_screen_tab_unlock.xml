@@ -21,130 +21,125 @@
   state of the device, as well as instructions on how to get past it
   depending on the state of the device.  It is the same for landscape
   and portrait.-->
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tabunlock="http://schemas.android.com/apk/res/com.android.tabunlock"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
+    android:background="#70000000"
+    android:gravity="center_horizontal"
     android:id="@+id/root">
+    
+    <TextView
+        android:id="@+id/carrier"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentRight="true"
+        android:layout_marginTop="10dip"
+        android:layout_marginRight="8dip"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        />
 
-    <RelativeLayout
+    <!-- time and date -->
+    <com.android.internal.widget.DigitalClock android:id="@+id/time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/carrier"
+        android:layout_marginBottom="10dip"
+        android:layout_marginTop="52dip"
+        android:layout_marginLeft="20dip"
+        >
+
+        <TextView android:id="@+id/timeDisplay"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="bottom"
+            android:textSize="72sp"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:shadowColor="#C0000000"
+            android:shadowDx="0"
+            android:shadowDy="0"
+            android:shadowRadius="3.0"
+            />
+
+
+        <TextView android:id="@+id/am_pm"
+            android:layout_width="wrap_content"
+            android:layout_height="fill_parent"
+            android:gravity="bottom"
+            android:textSize="22sp"
+            android:singleLine="true"
+            android:layout_marginLeft="8dip"
+            android:layout_marginBottom="-6dip"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:shadowColor="#C0000000"
+            android:shadowDx="0"
+            android:shadowDy="0"
+            android:shadowRadius="3.0"
+            />
+
+    </com.android.internal.widget.DigitalClock>
+
+    <TextView
+        android:id="@+id/date"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/time"
+        android:layout_marginLeft="24dip"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        />
+
+    <TextView
+        android:id="@+id/status1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/date"
+        android:layout_marginTop="4dip"
+        android:layout_marginLeft="24dip"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:drawablePadding="4dip"
+        />
+
+    <TextView
+        android:id="@+id/status2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/status1"
+        android:layout_marginTop="4dip"
+        android:layout_marginLeft="24dip"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:drawablePadding="4dip"
+        />
+
+    <TextView
+        android:id="@+id/screenLocked"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/status2"
+        android:layout_marginLeft="24dip"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:layout_marginTop="12dip"
+        />
+
+    <com.android.internal.widget.SlidingTab
+        android:id="@+id/tab_selector"
+        android:orientation="horizontal"
         android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:background="#70000000"
-        android:gravity="center_horizontal">
-    
-        <TextView
-            android:id="@+id/carrier"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
-            android:layout_alignParentRight="true"
-            android:layout_marginTop="16dip"
-            android:layout_marginRight="16dip"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            />
-    
-        <!-- time and date -->
-        <com.android.internal.widget.DigitalClock android:id="@+id/time"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/carrier"
-            android:layout_marginBottom="8dip"
-            android:layout_marginTop="16dip"
-            android:layout_marginLeft="24dip"
-            >
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="80dip" 
+        />
 
-            <TextView android:id="@+id/timeDisplay"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:gravity="bottom"
-                android:textSize="72sp"
-                android:textAppearance="?android:attr/textAppearanceMedium"
-                android:shadowColor="#C0000000"
-                android:shadowDx="0"
-                android:shadowDy="0"
-                android:shadowRadius="3.0"
-                />
+    <!-- emergency call button shown when sim is missing or PUKd -->
+    <Button
+        android:id="@+id/emergencyCallButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/screenLocked"
+        android:layout_marginTop="24dip"
+        android:drawableLeft="@drawable/ic_emergency"
+        android:drawablePadding="8dip"
+       />
 
+</RelativeLayout>
 
-            <TextView android:id="@+id/am_pm"
-                android:layout_width="wrap_content"
-                android:layout_height="fill_parent"
-                android:gravity="bottom"
-                android:textSize="22sp"
-                android:singleLine="true"
-                android:layout_marginLeft="8dip"
-                android:layout_marginBottom="-6dip"
-                android:textAppearance="?android:attr/textAppearanceMedium"
-                android:shadowColor="#C0000000"
-                android:shadowDx="0"
-                android:shadowDy="0"
-                android:shadowRadius="3.0"
-                />
-
-        </com.android.internal.widget.DigitalClock>
-    
-        <TextView
-            android:id="@+id/date"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/time"
-            android:layout_marginLeft="24dip"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            />
-    
-        <TextView
-            android:id="@+id/status1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/date"
-            android:layout_marginTop="6dip"
-            android:layout_marginLeft="24dip"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:drawablePadding="4dip"
-            />
-
-        <TextView
-            android:id="@+id/status2"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/status1"
-            android:layout_marginTop="6dip"
-            android:layout_marginLeft="24dip"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:drawablePadding="4dip"
-            />
-    
-        <TextView
-            android:id="@+id/screenLocked"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/status2"
-            android:layout_marginLeft="24dip"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:layout_marginTop="12dip"
-            />
-    
-        <com.android.internal.widget.SlidingTab
-            android:id="@+id/tab_selector"
-            android:orientation="horizontal"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:layout_marginBottom="80dip" 
-            />
-    
-        <!-- emergency call button shown when sim is missing or PUKd -->
-        <Button
-            android:id="@+id/emergencyCallButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/screenLocked"
-            android:layout_marginTop="24dip"
-            android:drawableLeft="@drawable/ic_emergency"
-            android:drawablePadding="8dip"
-           />
-    
-    </RelativeLayout>
-
-</FrameLayout>
