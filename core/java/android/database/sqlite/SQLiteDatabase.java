@@ -18,6 +18,7 @@ package android.database.sqlite;
 
 import com.google.android.collect.Maps;
 
+import android.app.ActivityThread;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
@@ -36,6 +37,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 import java.util.WeakHashMap;
 import java.util.concurrent.locks.ReentrantLock;
@@ -203,6 +205,11 @@ public class SQLiteDatabase extends SQLiteClosable {
 
     private long mLastLockMessageTime = 0L;
 
+    // always log queries which take 100ms+; shorter queries are sampled accordingly
+    private static final int QUERY_LOG_TIME_IN_NANOS = 100 * 1000000;
+    private static final int QUERY_LOG_SQL_LENGTH = 64;
+    private final Random mRandom = new Random();
+
     /** Used by native code, do not rename */
     /* package */ int mNativeHandle = 0;
 
@@ -249,10 +256,6 @@ public class SQLiteDatabase extends SQLiteClosable {
     private String mTimeClosed = null;
 
     private final RuntimeException mLeakedException;
-
-    // package visible, since callers will access directly to minimize overhead in the case
-    // that logging is not enabled.
-    /* package */ final boolean mLogStats;
 
     // System property that enables logging of slow queries. Specify the threshold in ms.
     private static final String LOG_SLOW_QUERIES_PROPERTY = "db.log.slow_query_threshold";
@@ -1643,8 +1646,7 @@ public class SQLiteDatabase extends SQLiteClosable {
      * @throws SQLException If the SQL string is invalid for some reason
      */
     public void execSQL(String sql) throws SQLException {
-        boolean logStats = mLogStats;
-        long timeStart = logStats ? SystemClock.elapsedRealtime() : 0;
+        long timeStart = Debug.threadCpuTimeNanos();
         lock();
         try {
             native_execSQL(sql);
@@ -1654,9 +1656,7 @@ public class SQLiteDatabase extends SQLiteClosable {
         } finally {
             unlock();
         }
-        if (logStats) {
-            logTimeStat(false /* not a read */, timeStart, SystemClock.elapsedRealtime());
-        }
+        logTimeStat(sql, timeStart);
     }
 
     /**
@@ -1673,8 +1673,7 @@ public class SQLiteDatabase extends SQLiteClosable {
             throw new IllegalArgumentException("Empty bindArgs");
         }
 
-        boolean logStats = mLogStats;
-        long timeStart = logStats ? SystemClock.elapsedRealtime() : 0;
+        long timeStart = Debug.threadCpuTimeNanos();
         lock();
         SQLiteStatement statement = null;
         try {
@@ -1695,9 +1694,7 @@ public class SQLiteDatabase extends SQLiteClosable {
             }
             unlock();
         }
-        if (logStats) {
-            logTimeStat(false /* not a read */, timeStart, SystemClock.elapsedRealtime());
-        }
+        logTimeStat(sql, timeStart);
     }
 
     @Override
@@ -1729,7 +1726,6 @@ public class SQLiteDatabase extends SQLiteClosable {
         }
         mFlags = flags;
         mPath = path;
-        mLogStats = "1".equals(android.os.SystemProperties.get("db.logstats"));
         mSlowQueryThreshold = SystemProperties.getInt(LOG_SLOW_QUERIES_PROPERTY, -1);
 
         mLeakedException = new IllegalStateException(path +
@@ -1890,8 +1886,35 @@ public class SQLiteDatabase extends SQLiteClosable {
         return compiledStatement;
     }
 
-    /* package */ void logTimeStat(boolean read, long begin, long end) {
-        EventLog.writeEvent(EVENT_DB_OPERATION, mPath, read ? 0 : 1, end - begin);
+    /* package */ void logTimeStat(String sql, long beginNanos) {
+        // Sample fast queries in proportion to the time taken.
+        // Quantize the % first, so the logged sampling probability
+        // exactly equals the actual sampling rate for this query.
+
+        int samplePercent;
+        long nanos = Debug.threadCpuTimeNanos() - beginNanos;
+        if (nanos >= QUERY_LOG_TIME_IN_NANOS) {
+            samplePercent = 100;
+        } else {
+            samplePercent = (int) (100 * nanos / QUERY_LOG_TIME_IN_NANOS) + 1;
+            if (mRandom.nextInt(100) < samplePercent) return;
+        }
+
+        if (sql.length() > QUERY_LOG_SQL_LENGTH) sql = sql.substring(0, QUERY_LOG_SQL_LENGTH);
+
+        // ActivityThread.currentPackageName() only returns non-null if the
+        // current thread is an application main thread.  This parameter tells
+        // us whether an event loop is blocked, and if so, which app it is.
+        //
+        // Sadly, there's no fast way to determine app name if this is *not* a
+        // main thread, or when we are invoked via Binder (e.g. ContentProvider).
+        // Hopefully the full path to the database will be informative enough.
+
+        String blockingPackage = ActivityThread.currentPackageName();
+        if (blockingPackage == null) blockingPackage = "";
+
+        int millis = (int) (nanos / 1000000);
+        EventLog.writeEvent(EVENT_DB_OPERATION, mPath, sql, millis, blockingPackage, samplePercent);
     }
 
     /**

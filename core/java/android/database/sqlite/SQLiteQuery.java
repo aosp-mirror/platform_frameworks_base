@@ -17,6 +17,7 @@
 package android.database.sqlite;
 
 import android.database.CursorWindow;
+import android.os.Debug;
 import android.os.SystemClock;
 import android.util.Log;
 
@@ -57,10 +58,9 @@ public class SQLiteQuery extends SQLiteProgram {
      */
     /* package */ int fillWindow(CursorWindow window,  
             int maxRead, int lastPos) {
+        long timeStart = Debug.threadCpuTimeNanos();
         mDatabase.lock();
 
-        boolean logStats = mDatabase.mLogStats;
-        long startTime = logStats ? SystemClock.elapsedRealtime() : 0;
         try {
             acquireReference();
             try {
@@ -75,10 +75,7 @@ public class SQLiteQuery extends SQLiteProgram {
                 if (SQLiteDebug.DEBUG_SQL_STATEMENTS) {
                     Log.d(TAG, "fillWindow(): " + mSql);
                 }
-                if (logStats) {
-                    mDatabase.logTimeStat(true /* read */, startTime,
-                            SystemClock.elapsedRealtime());
-                }
+                mDatabase.logTimeStat(mSql, timeStart);
                 return numRows;
             } catch (IllegalStateException e){
                 // simply ignore it
