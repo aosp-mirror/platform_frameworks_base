@@ -84,7 +84,7 @@ public class BootReceiver extends BroadcastReceiver {
 
         ContentResolver cr = context.getContentResolver();
         logBootFile(cr, db, "/cache/recovery/log", "SYSTEM_RECOVERY_LOG");
-        logBootFile(cr, db, "/data/dontpanic/last_kmsg", "SYSTEM_LAST_KMSG");
+        logBootFile(cr, db, "/proc/last_kmsg", "SYSTEM_LAST_KMSG");
         logBootFile(cr, db, "/data/dontpanic/apanic_console", "APANIC_CONSOLE");
         logBootFile(cr, db, "/data/dontpanic/apanic_threads", "APANIC_THREADS");
     }
