@@ -237,7 +237,6 @@ sp<IMemory> MetadataRetrieverClient::captureFrame()
 {
     LOGV("captureFrame");
     Mutex::Autolock lock(mLock);
-    Priority priority(ANDROID_PRIORITY_BACKGROUND);
     mThumbnail.clear();
     mThumbnailDealer.clear();
     if (mRetriever == NULL) {
@@ -279,7 +278,6 @@ sp<IMemory> MetadataRetrieverClient::extractAlbumArt()
 {
     LOGV("extractAlbumArt");
     Mutex::Autolock lock(mLock);
-    Priority priority(ANDROID_PRIORITY_BACKGROUND);
     mAlbumArt.clear();
     mAlbumArtDealer.clear();
     if (mRetriever == NULL) {
@@ -321,19 +319,7 @@ const char* MetadataRetrieverClient::extractMetadata(int keyCode)
         LOGE("retriever is not initialized");
         return NULL;
     }
-    Priority priority(ANDROID_PRIORITY_BACKGROUND);
     return mRetriever->extractMetadata(keyCode);
-}
-
-MetadataRetrieverClient::Priority::Priority(int newPriority)
-{
-    mOldPriority = getpriority(PRIO_PROCESS, 0);
-    setpriority(PRIO_PROCESS, 0, newPriority);
-}
-
-MetadataRetrieverClient::Priority::~Priority()
-{
-    setpriority(PRIO_PROCESS, 0, mOldPriority);
 }
 
 }; // namespace android

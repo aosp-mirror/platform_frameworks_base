@@ -224,20 +224,22 @@ public class WindowManagerService extends IWindowManager.Stub
     /**
      * Condition waited on by {@link #reenableKeyguard} to know the call to
      * the window policy has finished.
+     * This is set to true only if mKeyguardTokenWatcher.acquired() has
+     * actually disabled the keyguard.
      */
-    private boolean mWaitingUntilKeyguardReenabled = false;
+    private boolean mKeyguardDisabled = false;
 
-
-    final TokenWatcher mKeyguardDisabled = new TokenWatcher(
-            new Handler(), "WindowManagerService.mKeyguardDisabled") {
+    final TokenWatcher mKeyguardTokenWatcher = new TokenWatcher(
+            new Handler(), "WindowManagerService.mKeyguardTokenWatcher") {
         public void acquired() {
             mPolicy.enableKeyguard(false);
+            mKeyguardDisabled = true;
         }
         public void released() {
             mPolicy.enableKeyguard(true);
-            synchronized (mKeyguardDisabled) {
-                mWaitingUntilKeyguardReenabled = false;
-                mKeyguardDisabled.notifyAll();
+            synchronized (mKeyguardTokenWatcher) {
+                mKeyguardDisabled = false;
+                mKeyguardTokenWatcher.notifyAll();
             }
         }
     };
@@ -2447,7 +2449,12 @@ public class WindowManagerService extends IWindowManager.Stub
             boolean assignLayers = false;
 
             if (imMayMove) {
-                if (moveInputMethodWindowsIfNeededLocked(false)) {
+                if (moveInputMethodWindowsIfNeededLocked(false) || displayed) {
+                    // Little hack here -- we -should- be able to rely on the
+                    // function to return true if the IME has moved and needs
+                    // its layer recomputed.  However, if the IME was hidden
+                    // and isn't actually moved in the list, its layer may be
+                    // out of data so we make sure to recompute it.
                     assignLayers = true;
                 }
             }
@@ -4040,8 +4047,8 @@ public class WindowManagerService extends IWindowManager.Stub
             != PackageManager.PERMISSION_GRANTED) {
             throw new SecurityException("Requires DISABLE_KEYGUARD permission");
         }
-        synchronized (mKeyguardDisabled) {
-            mKeyguardDisabled.acquire(token, tag);
+        synchronized (mKeyguardTokenWatcher) {
+            mKeyguardTokenWatcher.acquire(token, tag);
         }
     }
 
@@ -4050,16 +4057,20 @@ public class WindowManagerService extends IWindowManager.Stub
             != PackageManager.PERMISSION_GRANTED) {
             throw new SecurityException("Requires DISABLE_KEYGUARD permission");
         }
-        synchronized (mKeyguardDisabled) {
-            mKeyguardDisabled.release(token);
+        synchronized (mKeyguardTokenWatcher) {
+            mKeyguardTokenWatcher.release(token);
 
-            if (!mKeyguardDisabled.isAcquired()) {
-                // if we are the last one to reenable the keyguard wait until
-                // we have actaully finished reenabling until returning
-                mWaitingUntilKeyguardReenabled = true;
-                while (mWaitingUntilKeyguardReenabled) {
+            if (!mKeyguardTokenWatcher.isAcquired()) {
+                // If we are the last one to reenable the keyguard wait until
+                // we have actaully finished reenabling until returning.
+                // It is possible that reenableKeyguard() can be called before
+                // the previous disableKeyguard() is handled, in which case
+                // neither mKeyguardTokenWatcher.acquired() or released() would
+                // be called.  In that case mKeyguardDisabled will be false here
+                // and we have nothing to wait for.
+                while (mKeyguardDisabled) {
                     try {
-                        mKeyguardDisabled.wait();
+                        mKeyguardTokenWatcher.wait();
                     } catch (InterruptedException e) {
                         Thread.currentThread().interrupt();
                     }
@@ -10863,7 +10874,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     public void monitor() {
         synchronized (mWindowMap) { }
-        synchronized (mKeyguardDisabled) { }
+        synchronized (mKeyguardTokenWatcher) { }
         synchronized (mKeyWaiter) { }
     }
 

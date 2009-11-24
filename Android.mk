@@ -345,6 +345,7 @@ framework_docs_LOCAL_DROIDDOC_OPTIONS := \
     -since ./frameworks/base/api/3.xml 3 \
     -since ./frameworks/base/api/4.xml 4 \
     -since ./frameworks/base/api/5.xml 5 \
+    -since ./frameworks/base/api/6.xml 6 \
 		-error 1 -error 2 -warning 3 -error 4 -error 6 -error 8 \
 		-overview $(LOCAL_PATH)/core/java/overview.html
 
@@ -373,7 +374,7 @@ web_docs_sample_code_flags := \
 
 ## SDK version identifiers used in the published docs
   # major[.minor] version for current SDK. (full releases only)
-framework_docs_SDK_VERSION:=2.0
+framework_docs_SDK_VERSION:=2.0.1
   # release version (ie "Release x")  (full releases only)
 framework_docs_SDK_REL_ID:=1
   # name of current SDK directory (full releases only)
@@ -382,10 +383,10 @@ framework_docs_SDK_CURRENT_DIR:=$(framework_docs_SDK_VERSION)_r$(framework_docs_
 framework_docs_SDK_PREVIEW:=0
 
 ## Latest ADT version identifiers, for reference from published docs
-framework_docs_ADT_VERSION:=0.9.4
-framework_docs_ADT_DOWNLOAD:=ADT-0.9.4.zip
-framework_docs_ADT_BYTES:=3367536
-framework_docs_ADT_CHECKSUM:=4cdecd72b3e28022d8a55891f13e7d43
+framework_docs_ADT_VERSION:=0.9.5
+framework_docs_ADT_DOWNLOAD:=ADT-0.9.5.zip
+framework_docs_ADT_BYTES:=3372982
+framework_docs_ADT_CHECKSUM:=227ec538359fbe417ccde7f0ad614a96
 
 framework_docs_LOCAL_DROIDDOC_OPTIONS += \
 		-hdf sdk.version $(framework_docs_SDK_VERSION) \
@@ -440,6 +441,7 @@ LOCAL_MODULE := offline-sdk
 LOCAL_DROIDDOC_OPTIONS:=\
 		$(framework_docs_LOCAL_DROIDDOC_OPTIONS) \
                 $(web_docs_sample_code_flags) \
+                -offlinemode \
 		-title "Android SDK" \
 		-proofread $(OUT_DOCS)/$(LOCAL_MODULE)-proofread.txt \
 		-todo $(OUT_DOCS)/$(LOCAL_MODULE)-docs-todo.html \
