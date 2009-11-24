@@ -104,7 +104,7 @@ class UnlockScreen extends LinearLayoutWithDefaultTouchRecepient
      * Keeps track of the last time we poked the wake lock during dispatching
      * of the touch event, initalized to something gauranteed to make us
      * poke it when the user starts drawing the pattern.
-     * @see #dispatchTouchEvent(android.view.MotionEvent) 
+     * @see #dispatchTouchEvent(android.view.MotionEvent)
      */
     private long mLastPokeTime = -UNLOCK_PATTERN_WAKE_INTERVAL_MS;
 
@@ -167,7 +167,7 @@ class UnlockScreen extends LinearLayoutWithDefaultTouchRecepient
         if (DEBUG) Log.d(TAG,
             "UnlockScreen() ctor: totalFailedAttempts="
                  + totalFailedAttempts + ", mFailedPat...="
-                 + mFailedPatternAttemptsSinceLastTimeout 
+                 + mFailedPatternAttemptsSinceLastTimeout
                  );
 
         if (mUpdateMonitor.isInPortrait()) {
@@ -250,7 +250,7 @@ class UnlockScreen extends LinearLayoutWithDefaultTouchRecepient
         if (DEBUG) Log.d(TAG, "setEnableFallback(" + state + ")");
         mEnableFallback = state;
     }
-    
+
     private void resetStatusInfo() {
         mInstructions = null;
         mShowingBatteryInfo = mUpdateMonitor.shouldShowBatteryInfo();
@@ -368,6 +368,11 @@ class UnlockScreen extends LinearLayoutWithDefaultTouchRecepient
         mCarrier.setText(LockScreen.getCarrierString(plmn, spn));
     }
 
+    /** {@inheritDoc} */
+    public void onRingerModeChanged(int state) {
+        // not currently used
+    }
+
     // ---------- SimStateCallback
 
     /** {@inheritDoc} */
@@ -391,7 +396,7 @@ class UnlockScreen extends LinearLayoutWithDefaultTouchRecepient
     public boolean needsInput() {
         return false;
     }
-    
+
     /** {@inheritDoc} */
     public void onPause() {
         if (mCountdownTimer != null) {
@@ -409,9 +414,9 @@ class UnlockScreen extends LinearLayoutWithDefaultTouchRecepient
         mLockPatternView.enableInput();
         mLockPatternView.setEnabled(true);
         mLockPatternView.clearPattern();
-        
+
         // show "forgot pattern?" button if we have an alternate authentication method
-        mForgotPatternButton.setVisibility(mCallback.doesFallbackUnlockScreenExist() 
+        mForgotPatternButton.setVisibility(mCallback.doesFallbackUnlockScreenExist()
                 ? View.VISIBLE : View.INVISIBLE);
 
         // if the user is currently locked out, enforce it.
@@ -457,7 +462,7 @@ class UnlockScreen extends LinearLayoutWithDefaultTouchRecepient
 
         public void onPatternCellAdded(List<Cell> pattern) {
             // To guard against accidental poking of the wakelock, look for
-            // the user actually trying to draw a pattern of some minimal length. 
+            // the user actually trying to draw a pattern of some minimal length.
             if (pattern.size() > MIN_PATTERN_BEFORE_POKE_WAKELOCK) {
                 mCallback.pokeWakelock(UNLOCK_PATTERN_WAKE_INTERVAL_MS);
             }
