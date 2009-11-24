@@ -9,7 +9,8 @@
                  android:process="system"
                  android:backupAgent="SettingsBackupAgent"
                  android:killAfterRestore="false"
-                 android:icon="@drawable/ic_launcher_settings">
+                 android:icon="@drawable/ic_launcher_settings"
+                 android:neverEncrypt="true">
 
         <provider android:name="SettingsProvider" android:authorities="settings"
                   android:multiprocess="false"

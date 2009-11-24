@@ -16,11 +16,15 @@
 
 package android.net.vpn;
 
+import java.io.File;
+
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.os.Environment;
+import android.os.SystemProperties;
 import android.util.Log;
 
 /**
@@ -65,7 +69,7 @@ public class VpnManager {
     /** Error code to indicate a successful connection. */
     public static final int VPN_ERROR_NO_ERROR = 0;
 
-    public static final String PROFILES_PATH = "/data/misc/vpn/profiles";
+    private static final String PROFILES_PATH = "/misc/vpn/profiles";
 
     private static final String PACKAGE_PREFIX =
             VpnManager.class.getPackage().getName() + ".";
@@ -77,7 +81,13 @@ public class VpnManager {
     private static final String ACTION_VPN_SETTINGS =
             PACKAGE_PREFIX + "SETTINGS";
 
-    private static final String TAG = VpnManager.class.getSimpleName();
+    public static final String TAG = VpnManager.class.getSimpleName();
+
+    // TODO(oam): Test VPN when EFS is enabled (will do later)...
+    public static String getProfilePath() {
+        // This call will return the correct path if Encrypted FS is enabled or not.
+        return Environment.getSecureDataDirectory().getPath() + PROFILES_PATH;
+    }
 
     /**
      * Returns all supported VPN types.

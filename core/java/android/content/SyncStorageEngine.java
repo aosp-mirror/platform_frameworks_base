@@ -16,16 +16,11 @@
 
 package android.content;
 
-import com.android.internal.os.AtomicFile;
-import com.android.internal.util.ArrayUtils;
-import com.android.internal.util.FastXmlSerializer;
-
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
 
 import android.accounts.Account;
-import android.backup.IBackupManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
@@ -37,10 +32,14 @@ import android.os.Message;
 import android.os.Parcel;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
-import android.os.ServiceManager;
+import android.os.SystemProperties;
 import android.util.Log;
 import android.util.SparseArray;
 import android.util.Xml;
+
+import com.android.internal.os.AtomicFile;
+import com.android.internal.util.ArrayUtils;
+import com.android.internal.util.FastXmlSerializer;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -258,7 +257,9 @@ public class SyncStorageEngine extends Handler {
 
         mCal = Calendar.getInstance(TimeZone.getTimeZone("GMT+0"));
 
-        File dataDir = Environment.getDataDirectory();
+        // This call will return the correct directory whether Encrypted File Systems is
+        // enabled or not.
+        File dataDir = Environment.getSecureDataDirectory();
         File systemDir = new File(dataDir, "system");
         File syncDir = new File(systemDir, "sync");
         mAccountInfoFile = new AtomicFile(new File(syncDir, "accounts.xml"));

@@ -38,6 +38,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.os.Binder;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
@@ -52,6 +53,7 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.util.Pair;
 
+import java.io.File;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -1322,9 +1324,20 @@ public class AccountManagerService
         }
     }
 
+    private static String getDatabaseName() {
+        if(Environment.isEncryptedFilesystemEnabled()) {
+            // Hard-coded path in case of encrypted file system
+            return Environment.getSystemSecureDirectory().getPath() + File.separator + DATABASE_NAME;
+        } else {
+            // Regular path in case of non-encrypted file system
+            return DATABASE_NAME;
+        }
+    }
+
     private class DatabaseHelper extends SQLiteOpenHelper {
+
         public DatabaseHelper(Context context) {
-            super(context, DATABASE_NAME, null, DATABASE_VERSION);
+            super(context, AccountManagerService.getDatabaseName(), null, DATABASE_VERSION);
         }
 
         @Override
