@@ -179,8 +179,8 @@ mcc_table = [
   (455, 'mo', 2, '"Macao, China"'),
   (456, 'kh', 2, 'Cambodia (Kingdom of)'),
   (457, 'la', 2, "Lao People's Democratic Republic"),
-  (460, 'cn', 2, "China (People's Republic of)"),
-  (461, 'cn', 2, "China (People's Republic of)"),
+  (460, 'cn', 2, "Asia/Beijing", 'zh', 13, "China (People's Republic of)"),
+  (461, 'cn', 2, "Asia/Beijing", 'zh', 13, "China (People's Republic of)"),
   (466, 'tw', 2, "Taiwan (Republic of China)"),
   (467, 'kp', 2, "Democratic People's Republic of Korea"),
   (470, 'bd', 2, "Bangladesh (People's Republic of)"),
@@ -191,7 +191,7 @@ mcc_table = [
   (514, 'tl', 2, 'Democratic Republic of Timor-Leste'),
   (515, 'ph', 2, 'Philippines (Republic of the)'),
   (520, 'th', 2, 'Thailand'),
-  (525, 'sg', 2, 'Singapore', 'en', 11, 'Singapore (Republic of)'),
+  (525, 'sg', 2, 'Asia/Singapore', 'en', 11, 'Singapore (Republic of)'),
   (528, 'bn', 2, 'Brunei Darussalam'),
   (530, 'nz', 2, 'Pacific/Auckland', 'en', 'New Zealand'),
   (534, 'mp', 2, 'Northern Mariana Islands (Commonwealth of the)'),
@@ -371,11 +371,13 @@ for i in range(len(orig_table)):
 public final class MccTable
 {
     /**
-    * AUTO GENERATED (by the Python code above)
-    */
+     * AUTO GENERATED (by the Python code above)
+     */
     private static final String[] TZ_STRINGS = {
         "",
         "Africa/Johannesburg",
+        "Asia/Beijing",
+        "Asia/Singapore",
         "Asia/Tokyo",
         "Australia/Sydney",
         "Europe/Amsterdam",
@@ -389,23 +391,22 @@ public final class MccTable
         "Europe/Vienna",
         "Europe/Warsaw",
         "Europe/Zurich",
-        "Pacific/Auckland",
-        "Singapore"
+        "Pacific/Auckland"
     };
 
     /**
-    * AUTO GENERATED (by the Python code above)
-    */
+     * AUTO GENERATED (by the Python code above)
+     */
     private static final String[] LANG_STRINGS = {
-        "", "cs", "de", "en", "es", "fr", "it", "ja", "nl"
+        "", "cs", "de", "en", "es", "fr", "it", "ja", "nl", "zh"
     };
 
     /**
-    * AUTO GENERATED (by the Python code above)
-    * This table is a list of MCC codes.  The index in this table
-    * of a given MCC code is the index of extra information about
-    * that MCC in the IND_CODES table.
-    */
+     * AUTO GENERATED (by the Python code above)
+     * This table is a list of MCC codes.  The index in this table
+     * of a given MCC code is the index of extra information about
+     * that MCC in the IND_CODES table.
+     */
     private static final short[] MCC_CODES = {
         0x00ca, 0x00cc, 0x00ce, 0x00d0, 0x00d4, 0x00d5, 0x00d6, 0x00d8, 0x00da, 0x00db,
         0x00dc, 0x00de, 0x00e1, 0x00e2, 0x00e4, 0x00e6, 0x00e7, 0x00e8, 0x00ea, 0x00eb,
@@ -434,23 +435,23 @@ public final class MccTable
     };
 
     /**
-    * AUTO GENERATED (by the Python code above)
-    * The values in this table are broken down as follows (msb to lsb):
-    *     iso country code 16 bits
-    *     (unused)          1 bit
-    *     wifi channel      4 bits
-    *     smalled digit     2 bits
-    *     default timezone  5 bits
-    *     default language  4 bits
-    */
+     * AUTO GENERATED (by the Python code above)
+     * The values in this table are broken down as follows (msb to lsb):
+     *     iso country code 16 bits
+     *     (unused)          1 bit
+     *     wifi channel      4 bits
+     *     smalled digit     2 bits
+     *     default timezone  5 bits
+     *     default language  4 bits
+     */
     private static final int[] IND_CODES = {
-        0x67720400, 0x6e6c6c48, 0x62650400, 0x66720495, 0x6d630400, 0x61640400,
-        0x65730484, 0x68750400, 0x62610400, 0x68720400, 0x72730400, 0x697404b6,
-        0x766104b6, 0x726f0400, 0x636804e2, 0x637a6ca1, 0x736b0400, 0x61746cc2,
-        0x67626c73, 0x67626c73, 0x646b0400, 0x73650400, 0x6e6f0400, 0x66690400,
+        0x67720400, 0x6e6c6c68, 0x62650400, 0x667204b5, 0x6d630400, 0x61640400,
+        0x657304a4, 0x68750400, 0x62610400, 0x68720400, 0x72730400, 0x697404d6,
+        0x766104d6, 0x726f0400, 0x63680502, 0x637a6cc1, 0x736b0400, 0x61746ce2,
+        0x67626c93, 0x67626c93, 0x646b0400, 0x73650400, 0x6e6f0400, 0x66690400,
         0x6c740400, 0x6c760400, 0x65650400, 0x72750400, 0x75610400, 0x62790400,
-        0x6d640400, 0x706c04d0, 0x64656c52, 0x67690400, 0x70740400, 0x6c750400,
-        0x69650463, 0x69730400, 0x616c0400, 0x6d740400, 0x63790400, 0x67650400,
+        0x6d640400, 0x706c04f0, 0x64656c72, 0x67690400, 0x70740400, 0x6c750400,
+        0x69650483, 0x69730400, 0x616c0400, 0x6d740400, 0x63790400, 0x67650400,
         0x616d0400, 0x62670400, 0x74720400, 0x666f0400, 0x67650400, 0x676c0400,
         0x736d0400, 0x736c0400, 0x6d6b0400, 0x6c690400, 0x6d650400, 0x63615c00,
         0x706d0400, 0x75735e03, 0x75735e03, 0x75735e03, 0x75735e03, 0x75735e03,
@@ -463,11 +464,11 @@ public final class MccTable
         0x6c620400, 0x6a6f0400, 0x73790400, 0x69710400, 0x6b770400, 0x73610400,
         0x79650400, 0x6f6d0400, 0x70730400, 0x61650400, 0x696c0400, 0x62680400,
         0x71610400, 0x6d6e0400, 0x6e700400, 0x61650400, 0x61650400, 0x69720400,
-        0x757a0400, 0x746a0400, 0x6b670400, 0x746d0400, 0x6a707427, 0x6a707427,
+        0x757a0400, 0x746a0400, 0x6b670400, 0x746d0400, 0x6a707447, 0x6a707447,
         0x6b720400, 0x766e0400, 0x686b0400, 0x6d6f0400, 0x6b680400, 0x6c610400,
-        0x636e0400, 0x636e0400, 0x74770400, 0x6b700400, 0x62640400, 0x6d760400,
-        0x6d790400, 0x61755c33, 0x69640400, 0x746c0400, 0x70680400, 0x74680400,
-        0x73675d03, 0x626e0400, 0x6e7a04f3, 0x6d700400, 0x67750400, 0x6e720400,
+        0x636e6c29, 0x636e6c29, 0x74770400, 0x6b700400, 0x62640400, 0x6d760400,
+        0x6d790400, 0x61755c53, 0x69640400, 0x746c0400, 0x70680400, 0x74680400,
+        0x73675c33, 0x626e0400, 0x6e7a0513, 0x6d700400, 0x67750400, 0x6e720400,
         0x70670400, 0x746f0400, 0x73620400, 0x76750400, 0x666a0400, 0x77660400,
         0x61730400, 0x6b690400, 0x6e630400, 0x70660400, 0x636b0400, 0x77730400,
         0x666d0400, 0x6d680400, 0x70770400, 0x65670400, 0x647a0400, 0x6d610400,
