@@ -2476,6 +2476,11 @@ class PowerManagerService extends IPowerManager.Stub
         }
     }
 
+    public void setAttentionLight(boolean on, int color) {
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.DEVICE_POWER, null);
+        mLightsService.setAttentionLight(on, color);
+    }
+
     private void enableProximityLockLocked() {
         if (mDebugProximitySensor) {
             Log.d(TAG, "enableProximityLockLocked");
