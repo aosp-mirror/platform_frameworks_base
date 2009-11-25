@@ -4,10 +4,11 @@ include $(CLEAR_VARS)
 LOCAL_SRC_FILES:= \
     com_android_server_AlarmManagerService.cpp \
     com_android_server_BatteryService.cpp \
-    com_android_server_HardwareService.cpp \
     com_android_server_KeyInputQueue.cpp \
+    com_android_server_LightsService.cpp \
     com_android_server_SensorService.cpp \
     com_android_server_SystemServer.cpp \
+    com_android_server_VibratorService.cpp \
     onload.cpp
 
 LOCAL_C_INCLUDES += \

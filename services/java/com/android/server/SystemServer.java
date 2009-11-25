@@ -84,7 +84,7 @@ class ServerThread extends Thread {
         int factoryTest = "".equals(factoryTestStr) ? SystemServer.FACTORY_TEST_OFF
                 : Integer.parseInt(factoryTestStr);
 
-        HardwareService hardware = null;
+        LightsService lights = null;
         PowerManagerService power = null;
         BatteryService battery = null;
         ConnectivityService connectivity = null;
@@ -141,13 +141,15 @@ class ServerThread extends Thread {
             battery = new BatteryService(context);
             ServiceManager.addService("battery", battery);
 
-            Log.i(TAG, "Hardware Service");
-            hardware = new HardwareService(context);
-            ServiceManager.addService("hardware", hardware);
+            Log.i(TAG, "Lights Service");
+            lights = new LightsService(context);
+
+            Log.i(TAG, "Vibrator Service");
+            ServiceManager.addService("vibrator", new VibratorService(context));
 
             // only initialize the power service after we have started the
-            // hardware service, content providers and the battery service.
-            power.init(context, hardware, ActivityManagerService.getDefault(), battery);
+            // lights service, content providers and the battery service.
+            power.init(context, lights, ActivityManagerService.getDefault(), battery);
 
             Log.i(TAG, "Alarm Manager");
             AlarmManagerService alarm = new AlarmManagerService(context);
@@ -253,7 +255,7 @@ class ServerThread extends Thread {
 
             try {
                 Log.i(TAG, "Notification Manager");
-                notification = new NotificationManagerService(context, statusBar, hardware);
+                notification = new NotificationManagerService(context, statusBar, lights);
                 ServiceManager.addService(Context.NOTIFICATION_SERVICE, notification);
             } catch (Throwable e) {
                 Log.e(TAG, "Failure starting Notification Manager", e);
