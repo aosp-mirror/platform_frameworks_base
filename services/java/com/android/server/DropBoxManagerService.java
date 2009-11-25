@@ -46,7 +46,6 @@ import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.Formatter;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -260,7 +259,7 @@ public final class DropBoxManagerService extends IDropBoxManagerService.Stub {
 
         if (PROFILE_DUMP) Debug.startMethodTracing("/data/trace/dropbox.dump");
 
-        Formatter out = new Formatter();
+        StringBuilder out = new StringBuilder();
         boolean doPrint = false, doFile = false;
         ArrayList<String> searchArgs = new ArrayList<String>();
         for (int i = 0; args != null && i < args.length; i++) {
@@ -269,23 +268,23 @@ public final class DropBoxManagerService extends IDropBoxManagerService.Stub {
             } else if (args[i].equals("-f") || args[i].equals("--file")) {
                 doFile = true;
             } else if (args[i].startsWith("-")) {
-                out.format("Unknown argument: %s\n", args[i]);
+                out.append("Unknown argument: ").append(args[i]).append("\n");
             } else {
                 searchArgs.add(args[i]);
             }
         }
 
-        out.format("Drop box contents: %d entries\n", mAllFiles.contents.size());
+        out.append("Drop box contents: ").append(mAllFiles.contents.size()).append(" entries\n");
 
         if (!searchArgs.isEmpty()) {
-            out.format("Searching for:");
-            for (String a : searchArgs) out.format(" %s", a);
-            out.format("\n");
+            out.append("Searching for:");
+            for (String a : searchArgs) out.append(" ").append(a);
+            out.append("\n");
         }
 
         int numFound = 0, numArgs = searchArgs.size();
         Time time = new Time();
-        out.format("\n");
+        out.append("\n");
         for (EntryFile entry : mAllFiles.contents) {
             time.set(entry.timestampMillis);
             String date = time.format("%Y-%m-%d %H:%M:%S");
@@ -297,23 +296,23 @@ public final class DropBoxManagerService extends IDropBoxManagerService.Stub {
             if (!match) continue;
 
             numFound++;
-            out.format("%s.%03d %s", date, entry.timestampMillis % 1000,
-                     entry.tag == null ? "(no tag)" : entry.tag);
+            out.append(date).append(" ").append(entry.tag == null ? "(no tag)" : entry.tag);
             if (entry.file == null) {
-                out.format(" (no file)\n");
+                out.append(" (no file)\n");
                 continue;
             } else if ((entry.flags & DropBoxManager.IS_EMPTY) != 0) {
-                out.format(" (contents lost)\n");
+                out.append(" (contents lost)\n");
                 continue;
             } else {
-                out.format(" (%s%s, %d bytes)\n",
-                        (entry.flags & DropBoxManager.IS_GZIPPED) != 0 ? "compressed " : "",
-                        (entry.flags & DropBoxManager.IS_TEXT) != 0 ? "text" : "data",
-                        entry.file.length());
+                out.append(" (");
+                if ((entry.flags & DropBoxManager.IS_GZIPPED) != 0) out.append("compressed ");
+                out.append((entry.flags & DropBoxManager.IS_TEXT) != 0 ? "text" : "data");
+                out.append(", ").append(entry.file.length()).append(" bytes)\n");
             }
 
             if (doFile || (doPrint && (entry.flags & DropBoxManager.IS_TEXT) == 0)) {
-                out.format("%s%s\n", (doPrint ? "" : "    "), entry.file.getPath());
+                if (!doPrint) out.append("    ");
+                out.append(entry.file.getPath()).append("\n");
             }
 
             if ((entry.flags & DropBoxManager.IS_TEXT) != 0 && (doPrint || !doFile)) {
@@ -329,32 +328,33 @@ public final class DropBoxManagerService extends IDropBoxManagerService.Stub {
                         for (;;) {
                             int n = r.read(buf);
                             if (n <= 0) break;
-                            out.format("%s", new String(buf, 0, n));
+                            out.append(buf, 0, n);
                             newline = (buf[n - 1] == '\n');
                         }
-                        if (!newline) out.format("\n");
+                        if (!newline) out.append("\n");
                     } else {
                         String text = dbe.getText(70);
                         boolean truncated = (text.length() == 70);
-                        out.format("    %s%s\n", text.trim().replace('\n', '/'),
-                                truncated ? " ..." : "");
+                        out.append("    ").append(text.trim().replace('\n', '/'));
+                        if (truncated) out.append(" ...");
+                        out.append("\n");
                     }
                 } catch (IOException e) {
-                    out.format("*** %s\n", e.toString());
+                    out.append("*** ").append(e.toString()).append("\n");
                     Log.e(TAG, "Can't read: " + entry.file, e);
                 } finally {
                     if (dbe != null) dbe.close();
                 }
             }
 
-            if (doPrint) out.format("\n");
+            if (doPrint) out.append("\n");
         }
 
-        if (numFound == 0) out.format("(No entries found.)\n");
+        if (numFound == 0) out.append("(No entries found.)\n");
 
         if (args == null || args.length == 0) {
-            if (!doPrint) out.format("\n");
-            out.format("Usage: dumpsys dropbox [--print|--file] [YYYY-mm-dd] [HH:MM:SS] [tag]\n");
+            if (!doPrint) out.append("\n");
+            out.append("Usage: dumpsys dropbox [--print|--file] [YYYY-mm-dd] [HH:MM:SS] [tag]\n");
         }
 
         pw.write(out.toString());
