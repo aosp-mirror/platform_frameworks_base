@@ -935,7 +935,7 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
                     mEglDisplay, mEglConfig, holder);
 
             if (mEglSurface == null || mEglSurface == EGL10.EGL_NO_SURFACE) {
-                throw new RuntimeException("createWindowSurface failed");
+                throwEglException("createWindowSurface");
             }
 
             /*
@@ -943,7 +943,7 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
              * the context is current and bound to a surface.
              */
             if (!mEgl.eglMakeCurrent(mEglDisplay, mEglSurface, mEglSurface, mEglContext)) {
-                throw new RuntimeException("eglMakeCurrent failed.");
+                throwEglException("eglMakeCurrent");
             }
 
             GL gl = mEglContext.getGL();
@@ -1000,6 +1000,10 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
                 mEgl.eglTerminate(mEglDisplay);
                 mEglDisplay = null;
             }
+        }
+
+        private void throwEglException(String function) {
+            throw new RuntimeException(function + " failed: " + mEgl.eglGetError());
         }
 
         EGL10 mEgl;
