@@ -245,7 +245,7 @@ void Type::makeGLComponents()
     }
 }
 
-void Type::enableGLVertexBuffer() const
+void Type::enableGLVertexBuffer(VertexArray *va) const
 {
     // Note: We are only going to enable buffers and never disable them
     // here.  The reasonis more than one Allocation may be used as a vertex
@@ -254,49 +254,39 @@ void Type::enableGLVertexBuffer() const
 
     uint32_t stride = mElement->getSizeBytes();
     if (mGL.mVtx.size) {
-        //LOGE("va vtx %i %x, %i, %p", mGL.mVtx.size, mGL.mVtx.type, stride, (void *)mGL.mVtx.offset);
-        glEnableClientState(GL_VERTEX_ARRAY);
-        glVertexPointer(mGL.mVtx.size,
+        va->setPosition(mGL.mVtx.size,
                         mGL.mVtx.type,
                         stride,
-                        (void *)mGL.mVtx.offset);
+                        mGL.mVtx.offset);
     }
 
     if (mGL.mNorm.size) {
-        //LOGE("va norm %i %x, %i, %p", mGL.mNorm.size, mGL.mNorm.type, stride, (void *)mGL.mNorm.offset);
-        glEnableClientState(GL_NORMAL_ARRAY);
-        rsAssert(mGL.mNorm.size == 3);
-        glNormalPointer(mGL.mNorm.type,
-                        stride,
-                        (void *)mGL.mNorm.offset);
+        va->setNormal(mGL.mNorm.type,
+                      stride,
+                      mGL.mNorm.offset);
     }
 
     if (mGL.mColor.size) {
-        glEnableClientState(GL_COLOR_ARRAY);
-        glColorPointer(mGL.mColor.size,
-                       mGL.mColor.type,
-                       stride,
-                       (void *)mGL.mColor.offset);
+        va->setColor(mGL.mColor.size,
+                     mGL.mColor.type,
+                     stride,
+                     mGL.mColor.offset);
     }
 
     for (uint32_t ct=0; ct < RS_MAX_TEXTURE; ct++) {
         if (mGL.mTex[ct].size) {
-            //LOGE("va tex%i %i %x, %i, %p", ct, mGL.mTex[ct].size, mGL.mTex[ct].type, stride, (void *)mGL.mTex[ct].offset);
-            glClientActiveTexture(GL_TEXTURE0 + ct);
-            glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-            glTexCoordPointer(mGL.mTex[ct].size,
-                              mGL.mTex[ct].type,
-                              stride,
-                              (void *)mGL.mTex[ct].offset);
+            va->setTexture(mGL.mTex[ct].size,
+                           mGL.mTex[ct].type,
+                           stride,
+                           mGL.mTex[ct].offset,
+                           ct);
         }
     }
-    glClientActiveTexture(GL_TEXTURE0);
 
     if (mGL.mPointSize.size) {
-        glEnableClientState(GL_POINT_SIZE_ARRAY_OES);
-        glPointSizePointerOES(mGL.mPointSize.type,
-                              stride,
-                              (void *)mGL.mPointSize.offset);
+        va->setPointSize(mGL.mPointSize.type,
+                         stride,
+                         mGL.mPointSize.offset);
     }
 
 }

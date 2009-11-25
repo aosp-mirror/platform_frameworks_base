@@ -34,39 +34,36 @@ SimpleMesh::~SimpleMesh()
     delete[] mVertexBuffers;
 }
 
-void SimpleMesh::render() const
+void SimpleMesh::render(Context *rsc) const
 {
     if (mPrimitiveType.get()) {
-        renderRange(0, mPrimitiveType->getDimX());
+        renderRange(rsc, 0, mPrimitiveType->getDimX());
         return;
     }
 
     if (mIndexType.get()) {
-        renderRange(0, mIndexType->getDimX());
+        renderRange(rsc, 0, mIndexType->getDimX());
         return;
     }
 
-    renderRange(0, mVertexTypes[0]->getDimX());
+    renderRange(rsc, 0, mVertexTypes[0]->getDimX());
 }
 
-void SimpleMesh::renderRange(uint32_t start, uint32_t len) const
+void SimpleMesh::renderRange(Context *rsc, uint32_t start, uint32_t len) const
 {
     if (len < 1) {
         return;
     }
 
-    glDisableClientState(GL_VERTEX_ARRAY);
-    glDisableClientState(GL_NORMAL_ARRAY);
-    glDisableClientState(GL_COLOR_ARRAY);
-    for (uint32_t ct=0; ct < RS_MAX_TEXTURE; ct++) {
-        glClientActiveTexture(GL_TEXTURE0 + ct);
-        glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-    }
-    glClientActiveTexture(GL_TEXTURE0);
-
+    VertexArray va;
     for (uint32_t ct=0; ct < mVertexTypeCount; ct++) {
-        glBindBuffer(GL_ARRAY_BUFFER, mVertexBuffers[ct]->getBufferObjectID());
-        mVertexTypes[ct]->enableGLVertexBuffer();
+        va.setActiveBuffer(mVertexBuffers[ct]->getBufferObjectID());
+        mVertexTypes[ct]->enableGLVertexBuffer(&va);
+    }
+    if (rsc->checkVersion2_0()) {
+        va.setupGL2(0, &rsc->mShaderCache);
+    } else {
+        va.setupGL(0);
     }
 
     if (mIndexType.get()) {
@@ -77,7 +74,7 @@ void SimpleMesh::renderRange(uint32_t start, uint32_t len) const
     }
 }
 
-void SimpleMesh::uploadAll()
+void SimpleMesh::uploadAll(Context *rsc)
 {
     for (uint32_t ct=0; ct < mVertexTypeCount; ct++) {
         if (mVertexBuffers[ct].get()) {

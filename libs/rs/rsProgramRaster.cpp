@@ -86,6 +86,14 @@ void ProgramRaster::setupGL(const Context *rsc, ProgramRasterState *state)
     }
 }
 
+void ProgramRaster::setupGL2(const Context *rsc, ProgramRasterState *state)
+{
+    if (state->mLast.get() == this) {
+        return;
+    }
+    state->mLast.set(this);
+}
+
 
 
 ProgramRasterState::ProgramRasterState()

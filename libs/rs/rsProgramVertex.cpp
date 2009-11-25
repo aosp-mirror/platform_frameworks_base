@@ -19,6 +19,8 @@
 
 #include <GLES/gl.h>
 #include <GLES/glext.h>
+#include <GLES2/gl2.h>
+#include <GLES2/gl2ext.h>
 
 using namespace android;
 using namespace android::renderscript;
@@ -92,6 +94,68 @@ void ProgramVertex::setupGL(const Context *rsc, ProgramVertexState *state)
     mDirty = false;
 }
 
+void ProgramVertex::loadShader() {
+    Program::loadShader(GL_VERTEX_SHADER);
+}
+
+void ProgramVertex::createShader()
+{
+    mShader.setTo("");
+
+    for (uint32_t ct=0; ct < mAttribCount; ct++) {
+        mShader.append("attribute vec4 ");
+        mShader.append(mAttribNames[ct]);
+        mShader.append(";\n");
+    }
+
+    for (uint32_t ct=0; ct < mUniformCount; ct++) {
+        mShader.append("uniform mat4 ");
+        mShader.append(mUniformNames[ct]);
+        mShader.append(";\n");
+    }
+
+    mShader.append("varying vec4 varColor;\n");
+    mShader.append("varying vec4 varTex0;\n");
+
+    mShader.append("void main() {\n");
+    mShader.append("  gl_Position = uni_MVP * attrib_Position;\n");
+    mShader.append("  varColor = attrib_Color;\n");
+    if (mTextureMatrixEnable) {
+        mShader.append("  varTex0 = uni_TexMatrix * attrib_T0;\n");
+    } else {
+        mShader.append("  varTex0 = attrib_T0;\n");
+    }
+    //mShader.append("  pos.x = pos.x / 480.0;\n");
+    //mShader.append("  pos.y = pos.y / 800.0;\n");
+    //mShader.append("  gl_Position = pos;\n");
+    mShader.append("}\n");
+}
+
+void ProgramVertex::setupGL2(const Context *rsc, ProgramVertexState *state, ShaderCache *sc)
+{
+    //LOGE("sgl2 vtx1 %x", glGetError());
+    if ((state->mLast.get() == this) && !mDirty) {
+        //return;
+    }
+
+    const float *f = static_cast<const float *>(mConstants->getPtr());
+
+    Matrix mvp;
+    mvp.load(&f[RS_PROGRAM_VERTEX_PROJECTION_OFFSET]);
+    Matrix t;
+    t.load(&f[RS_PROGRAM_VERTEX_MODELVIEW_OFFSET]);
+    mvp.multiply(&t);
+
+    glUniformMatrix4fv(sc->vtxUniformSlot(0), 1, GL_FALSE, mvp.m);
+    if (mTextureMatrixEnable) {
+        glUniformMatrix4fv(sc->vtxUniformSlot(1), 1, GL_FALSE,
+                           &f[RS_PROGRAM_VERTEX_TEXTURE_OFFSET]);
+    }
+
+    state->mLast.set(this);
+    //LOGE("sgl2 vtx2 %x", glGetError());
+}
+
 void ProgramVertex::addLight(const Light *l)
 {
     if (mLightCount < MAX_LIGHTS) {
@@ -130,6 +194,26 @@ void ProgramVertex::transformToScreen(const Context *rsc, float *v4out, const fl
     mvp.vectorMultiply(v4out, v3in);
 }
 
+void ProgramVertex::init(Context *rsc)
+{
+    mAttribCount = 6;
+    mAttribNames[VertexArray::POSITION].setTo("attrib_Position");
+    mAttribNames[VertexArray::COLOR].setTo("attrib_Color");
+    mAttribNames[VertexArray::NORMAL].setTo("attrib_Normal");
+    mAttribNames[VertexArray::POINT_SIZE].setTo("attrib_PointSize");
+    mAttribNames[VertexArray::TEXTURE_0].setTo("attrib_T0");
+    mAttribNames[VertexArray::TEXTURE_1].setTo("attrib_T1");
+
+    mUniformCount = 2;
+    mUniformNames[0].setTo("uni_MVP");
+    mUniformNames[1].setTo("uni_TexMatrix");
+
+    createShader();
+}
+
+
+///////////////////////////////////////////////////////////////////////
+
 ProgramVertexState::ProgramVertexState()
 {
     mPV = NULL;
@@ -154,7 +238,7 @@ void ProgramVertexState::init(Context *rsc, int32_t w, int32_t h)
     Allocation *alloc = (Allocation *)rsi_AllocationCreateTyped(rsc, mAllocType.get());
     mDefaultAlloc.set(alloc);
     mDefault.set(pv);
-
+    pv->init(rsc);
     pv->bindAllocation(alloc);
 
     updateSize(rsc, w, h);
@@ -194,6 +278,7 @@ RsProgramVertex rsi_ProgramVertexCreate(Context *rsc)
 {
     ProgramVertex *pv = rsc->mStateVertex.mPV;
     pv->incUserRef();
+    pv->init(rsc);
     rsc->mStateVertex.mPV = 0;
     return pv;
 }

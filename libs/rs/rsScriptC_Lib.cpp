@@ -26,6 +26,8 @@
 
 #include <GLES/gl.h>
 #include <GLES/glext.h>
+#include <GLES2/gl2.h>
+#include <GLES2/gl2ext.h>
 
 #include <time.h>
 
@@ -102,8 +104,9 @@ static float* SC_loadSimpleMeshVerticesF(RsSimpleMesh mesh, uint32_t idx)
 
 static void SC_updateSimpleMesh(RsSimpleMesh mesh)
 {
+    GET_TLS();
     SimpleMesh *sm = static_cast<SimpleMesh *>(mesh);
-    sm->uploadAll();
+    sm->uploadAll(rsc);
 }
 
 static uint32_t SC_loadU32(uint32_t bank, uint32_t offset)
@@ -683,13 +686,13 @@ static void SC_drawLine(float x1, float y1, float z1,
     rsc->setupCheck();
 
     float vtx[] = { x1, y1, z1, x2, y2, z2 };
-
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glEnableClientState(GL_VERTEX_ARRAY);
-    glVertexPointer(3, GL_FLOAT, 0, vtx);
-
-    glDisableClientState(GL_NORMAL_ARRAY);
-    glDisableClientState(GL_COLOR_ARRAY);
+    VertexArray va;
+    va.setPosition(2, GL_FLOAT, 12, (uint32_t)&vtx);
+    if (rsc->checkVersion2_0()) {
+        va.setupGL2(&rsc->mStateVertexArray, &rsc->mShaderCache);
+    } else {
+        va.setupGL(&rsc->mStateVertexArray);
+    }
 
     glDrawArrays(GL_LINES, 0, 2);
 }
@@ -701,12 +704,13 @@ static void SC_drawPoint(float x, float y, float z)
 
     float vtx[] = { x, y, z };
 
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glEnableClientState(GL_VERTEX_ARRAY);
-    glVertexPointer(3, GL_FLOAT, 0, vtx);
-
-    glDisableClientState(GL_NORMAL_ARRAY);
-    glDisableClientState(GL_COLOR_ARRAY);
+    VertexArray va;
+    va.setPosition(1, GL_FLOAT, 12, (uint32_t)&vtx);
+    if (rsc->checkVersion2_0()) {
+        va.setupGL2(&rsc->mStateVertexArray, &rsc->mShaderCache);
+    } else {
+        va.setupGL(&rsc->mStateVertexArray);
+    }
 
     glDrawArrays(GL_POINTS, 0, 1);
 }
@@ -721,6 +725,7 @@ static void SC_drawQuadTexCoords(float x1, float y1, float z1,
                                  float u4, float v4)
 {
     GET_TLS();
+    rsc->setupCheck();
 
     //LOGE("Quad");
     //LOGE("%4.2f, %4.2f, %4.2f", x1, y1, z1);
@@ -731,26 +736,17 @@ static void SC_drawQuadTexCoords(float x1, float y1, float z1,
     float vtx[] = {x1,y1,z1, x2,y2,z2, x3,y3,z3, x4,y4,z4};
     const float tex[] = {u1,v1, u2,v2, u3,v3, u4,v4};
 
-    rsc->setupCheck();
+    VertexArray va;
+    va.setPosition(2, GL_FLOAT, 12, (uint32_t)&vtx);
+    va.setTexture(2, GL_FLOAT, 8, (uint32_t)&tex, 0);
+    //va.setTexture(2, GL_FLOAT, 8, (uint32_t)&tex, 1);
+    //
+    if (rsc->checkVersion2_0()) {
+        va.setupGL2(&rsc->mStateVertexArray, &rsc->mShaderCache);
+    } else {
+        va.setupGL(&rsc->mStateVertexArray);
+    }
 
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, tm->mBufferObjects[1]);
-
-    glEnableClientState(GL_VERTEX_ARRAY);
-    glVertexPointer(3, GL_FLOAT, 0, vtx);
-
-    glClientActiveTexture(GL_TEXTURE0);
-    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-    glTexCoordPointer(2, GL_FLOAT, 0, tex);
-    glClientActiveTexture(GL_TEXTURE1);
-    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-    glTexCoordPointer(2, GL_FLOAT, 0, tex);
-    glClientActiveTexture(GL_TEXTURE0);
-
-    glDisableClientState(GL_NORMAL_ARRAY);
-    glDisableClientState(GL_COLOR_ARRAY);
-
-    //glColorPointer(4, GL_UNSIGNED_BYTE, 12, ptr);
 
     glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 }
@@ -769,18 +765,24 @@ static void SC_drawQuad(float x1, float y1, float z1,
 static void SC_drawSpriteScreenspace(float x, float y, float z, float w, float h)
 {
     GET_TLS();
-    rsc->setupCheck();
+    ObjectBaseRef<const ProgramVertex> tmp(rsc->getVertex());
+    rsc->setVertex(rsc->getDefaultProgramVertex());
+    //rsc->setupCheck();
 
-    GLint crop[4] = {0, h, w, -h};
-    glTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_CROP_RECT_OES, crop);
-    glDrawTexfOES(x, y, z, w, h);
+    //GLint crop[4] = {0, h, w, -h};
+
+    float sh = rsc->getHeight();
+
+    SC_drawQuad(x,   sh - y,     z,
+                x+w, sh - y,     z,
+                x+w, sh - (y+h), z,
+                x,   sh - (y+h), z);
+    rsc->setVertex((ProgramVertex *)tmp.get());
 }
 
 static void SC_drawSprite(float x, float y, float z, float w, float h)
 {
     GET_TLS();
-    rsc->setupCheck();
-
     float vin[3] = {x, y, z};
     float vout[4];
 
@@ -802,9 +804,8 @@ static void SC_drawSprite(float x, float y, float z, float w, float h)
     //LOGE("ds  out2 %f %f %f", vout[0], vout[1], vout[2]);
 
     // U, V, W, H
-    GLint crop[4] = {0, h, w, -h};
-    glTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_CROP_RECT_OES, crop);
-    glDrawTexiOES(vout[0], vout[1], 0/*vout[2]*/, w, h);
+    SC_drawSpriteScreenspace(vout[0], vout[1], z, h, w);
+    //rsc->setupCheck();
 }
 
 
@@ -822,7 +823,7 @@ static void SC_drawSimpleMesh(RsSimpleMesh vsm)
     GET_TLS();
     SimpleMesh *sm = static_cast<SimpleMesh *>(vsm);
     rsc->setupCheck();
-    sm->render();
+    sm->render(rsc);
 }
 
 static void SC_drawSimpleMeshRange(RsSimpleMesh vsm, uint32_t start, uint32_t len)
@@ -830,7 +831,7 @@ static void SC_drawSimpleMeshRange(RsSimpleMesh vsm, uint32_t start, uint32_t le
     GET_TLS();
     SimpleMesh *sm = static_cast<SimpleMesh *>(vsm);
     rsc->setupCheck();
-    sm->renderRange(start, len);
+    sm->renderRange(rsc, start, len);
 }
 
 
@@ -840,7 +841,12 @@ static void SC_drawSimpleMeshRange(RsSimpleMesh vsm, uint32_t start, uint32_t le
 
 static void SC_color(float r, float g, float b, float a)
 {
-    glColor4f(r, g, b, a);
+    GET_TLS();
+    if (rsc->checkVersion2_0()) {
+        glVertexAttrib4f(1, r, g, b, a);
+    } else {
+        glColor4f(r, g, b, a);
+    }
 }
 
 static void SC_ambient(float r, float g, float b, float a)
@@ -945,9 +951,14 @@ static int SC_hsbToAbgr(float h, float s, float b, float a)
 
 static void SC_hsb(float h, float s, float b, float a)
 {
+    GET_TLS();
     float rgb[3];
     SC_hsbToRgb(h, s, b, rgb);
-    glColor4f(rgb[0], rgb[1], rgb[2], a);
+    if (rsc->checkVersion2_0()) {
+        glVertexAttrib4f(1, rgb[0], rgb[1], rgb[2], a);
+    } else {
+        glColor4f(rgb[0], rgb[1], rgb[2], a);
+    }
 }
 
 static void SC_uploadToTexture(RsAllocation va, uint32_t baseMipLevel)

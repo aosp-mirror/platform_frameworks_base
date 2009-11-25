@@ -67,7 +67,7 @@ public:
     void clear();
     void compute();
 
-    void enableGLVertexBuffer() const;
+    void enableGLVertexBuffer(class VertexArray *) const;
 
     void dumpLOGV(const char *prefix) const;
 

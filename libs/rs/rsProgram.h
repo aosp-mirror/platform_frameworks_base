@@ -25,14 +25,26 @@ namespace android {
 namespace renderscript {
 
 
+class ShaderCache;
 
 class Program : public ObjectBase
 {
 public:
+    const static uint32_t MAX_ATTRIBS = 8;
+    const static uint32_t MAX_UNIFORMS = 16;
+
     Program(Context *, Element *in, Element *out);
     virtual ~Program();
 
     void bindAllocation(Allocation *);
+    virtual void createShader();
+
+    uint32_t getShaderID() const {return mShaderID;}
+
+    uint32_t getAttribCount() const {return mAttribCount;}
+    uint32_t getUniformCount() const {return mUniformCount;}
+    const String8 & getAttribName(uint32_t i) const {return mAttribNames[i];}
+    const String8 & getUniformName(uint32_t i) const {return mUniformNames[i];}
 
 protected:
     // Components not listed in "in" will be passed though
@@ -43,7 +55,15 @@ protected:
     ObjectBaseRef<Allocation> mConstants;
 
     mutable bool mDirty;
+    String8 mShader;
+    uint32_t mShaderID;
 
+    uint32_t mAttribCount;
+    uint32_t mUniformCount;
+    String8 mAttribNames[MAX_ATTRIBS];
+    String8 mUniformNames[MAX_UNIFORMS];
+
+    bool loadShader(uint32_t type);
 
 public:
     void forceDirty() const {mDirty = true;}

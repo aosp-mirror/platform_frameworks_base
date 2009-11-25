@@ -83,9 +83,43 @@ void ProgramFragmentStore::setupGL(const Context *rsc, ProgramFragmentStoreState
     } else {
         glDisable(GL_DITHER);
     }
-
-
 }
+
+void ProgramFragmentStore::setupGL2(const Context *rsc, ProgramFragmentStoreState *state)
+{
+    if (state->mLast.get() == this) {
+        return;
+    }
+    state->mLast.set(this);
+
+    glColorMask(mColorRWriteEnable,
+                mColorGWriteEnable,
+                mColorBWriteEnable,
+                mColorAWriteEnable);
+    if (mBlendEnable) {
+        glEnable(GL_BLEND);
+        glBlendFunc(mBlendSrc, mBlendDst);
+    } else {
+        glDisable(GL_BLEND);
+    }
+
+    //LOGE("pfs  %i, %i, %x", mDepthWriteEnable, mDepthTestEnable, mDepthFunc);
+
+    glDepthMask(mDepthWriteEnable);
+    if(mDepthTestEnable || mDepthWriteEnable) {
+        glEnable(GL_DEPTH_TEST);
+        glDepthFunc(mDepthFunc);
+    } else {
+        glDisable(GL_DEPTH_TEST);
+    }
+
+    if (mDitherEnable) {
+        glEnable(GL_DITHER);
+    } else {
+        glDisable(GL_DITHER);
+    }
+}
+
 
 void ProgramFragmentStore::setDitherEnable(bool enable)
 {

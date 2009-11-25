@@ -50,17 +50,24 @@ static void checkEglError(const char* op, EGLBoolean returnVal = EGL_TRUE) {
     }
 }
 
-void Context::initEGL()
+void Context::initEGL(bool useGL2)
 {
     mEGL.mNumConfigs = -1;
     EGLint configAttribs[128];
     EGLint *configAttribsPtr = configAttribs;
+    EGLint context_attribs2[] = { EGL_CONTEXT_CLIENT_VERSION, 2, EGL_NONE };
 
     memset(configAttribs, 0, sizeof(configAttribs));
 
     configAttribsPtr[0] = EGL_SURFACE_TYPE;
     configAttribsPtr[1] = EGL_WINDOW_BIT;
     configAttribsPtr += 2;
+
+    if (useGL2) {
+        configAttribsPtr[0] = EGL_RENDERABLE_TYPE;
+        configAttribsPtr[1] = EGL_OPENGL_ES2_BIT;
+        configAttribsPtr += 2;
+    }
 
     if (mUseDepth) {
         configAttribsPtr[0] = EGL_DEPTH_SIZE;
@@ -91,7 +98,11 @@ void Context::initEGL()
     //eglChooseConfig(mEGL.mDisplay, configAttribs, &mEGL.mConfig, 1, &mEGL.mNumConfigs);
 
 
-    mEGL.mContext = eglCreateContext(mEGL.mDisplay, mEGL.mConfig, EGL_NO_CONTEXT, NULL);
+    if (useGL2) {
+        mEGL.mContext = eglCreateContext(mEGL.mDisplay, mEGL.mConfig, EGL_NO_CONTEXT, context_attribs2);
+    } else {
+        mEGL.mContext = eglCreateContext(mEGL.mDisplay, mEGL.mConfig, EGL_NO_CONTEXT, NULL);
+    }
     checkEglError("eglCreateContext");
     if (mEGL.mContext == EGL_NO_CONTEXT) {
         LOGE("eglCreateContext returned EGL_NO_CONTEXT");
@@ -223,10 +234,20 @@ void Context::timerPrint()
 
 void Context::setupCheck()
 {
-    mFragmentStore->setupGL(this, &mStateFragmentStore);
-    mFragment->setupGL(this, &mStateFragment);
-    mRaster->setupGL(this, &mStateRaster);
-    mVertex->setupGL(this, &mStateVertex);
+    if (checkVersion2_0()) {
+        mShaderCache.lookup(mVertex.get(), mFragment.get());
+
+        mFragmentStore->setupGL2(this, &mStateFragmentStore);
+        mFragment->setupGL2(this, &mStateFragment, &mShaderCache);
+        mRaster->setupGL2(this, &mStateRaster);
+        mVertex->setupGL2(this, &mStateVertex, &mShaderCache);
+
+    } else {
+        mFragmentStore->setupGL(this, &mStateFragmentStore);
+        mFragment->setupGL(this, &mStateFragment);
+        mRaster->setupGL(this, &mStateRaster);
+        mVertex->setupGL(this, &mStateVertex);
+    }
 }
 
 static bool getProp(const char *str)
@@ -246,10 +267,6 @@ void * Context::threadProc(void *vrsc)
      rsc->props.mLogTimes = getProp("debug.rs.profile");
      rsc->props.mLogScripts = getProp("debug.rs.script");
      rsc->props.mLogObjects = getProp("debug.rs.objects");
-
-     //pthread_mutex_lock(&gInitMutex);
-     //rsc->initEGL();
-     //pthread_mutex_unlock(&gInitMutex);
 
      ScriptTLSStruct *tlsStruct = new ScriptTLSStruct;
      if (!tlsStruct) {
@@ -271,6 +288,7 @@ void * Context::threadProc(void *vrsc)
      rsc->setFragment(NULL);
      rsc->mStateFragmentStore.init(rsc, rsc->mEGL.mWidth, rsc->mEGL.mHeight);
      rsc->setFragmentStore(NULL);
+     rsc->mStateVertexArray.init(rsc);
 
      rsc->mRunning = true;
      bool mDraw = true;
@@ -449,7 +467,7 @@ void Context::setSurface(uint32_t w, uint32_t h, Surface *sur)
         if (!mEGL.mContext) {
             first = true;
             pthread_mutex_lock(&gInitMutex);
-            initEGL();
+            initEGL(false);
             pthread_mutex_unlock(&gInitMutex);
         }
 
@@ -480,14 +498,24 @@ void Context::setSurface(uint32_t w, uint32_t h, Surface *sur)
 
             //LOGV("EGL Version %i %i", mEGL.mMajorVersion, mEGL.mMinorVersion);
             LOGV("GL Version %s", mGL.mVersion);
-            LOGV("GL Vendor %s", mGL.mVendor);
+            //LOGV("GL Vendor %s", mGL.mVendor);
             LOGV("GL Renderer %s", mGL.mRenderer);
             //LOGV("GL Extensions %s", mGL.mExtensions);
 
-            if ((strlen((const char *)mGL.mVersion) < 12) || memcmp(mGL.mVersion, "OpenGL ES-CM", 12)) {
+            const char *verptr = NULL;
+            if (strlen((const char *)mGL.mVersion) > 9) {
+                if (!memcmp(mGL.mVersion, "OpenGL ES-CM", 12)) {
+                    verptr = (const char *)mGL.mVersion + 12;
+                }
+                if (!memcmp(mGL.mVersion, "OpenGL ES ", 10)) {
+                    verptr = (const char *)mGL.mVersion + 9;
+                }
+            }
+
+            if (!verptr) {
                 LOGE("Error, OpenGL ES Lite not supported");
             } else {
-                sscanf((const char *)mGL.mVersion + 13, "%i.%i", &mGL.mMajorVersion, &mGL.mMinorVersion);
+                sscanf(verptr, " %i.%i", &mGL.mMajorVersion, &mGL.mMinorVersion);
             }
         }
 

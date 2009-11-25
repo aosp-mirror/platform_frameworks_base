@@ -36,7 +36,7 @@ public:
     virtual ~ProgramFragment();
 
     virtual void setupGL(const Context *, ProgramFragmentState *);
-
+    virtual void setupGL2(const Context *, ProgramFragmentState *, ShaderCache *sc);
 
 
     void bindTexture(uint32_t slot, Allocation *);
@@ -46,6 +46,9 @@ public:
     void setEnvMode(uint32_t slot, RsTexEnvMode);
     void setTexEnable(uint32_t slot, bool);
 
+    virtual void createShader();
+    virtual void loadShader();
+    virtual void init(Context *rsc);
 
 
 protected:

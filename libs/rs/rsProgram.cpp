@@ -17,6 +17,9 @@
 #include "rsContext.h"
 #include "rsProgram.h"
 
+#include <GLES2/gl2.h>
+#include <GLES2/gl2ext.h>
+
 using namespace android;
 using namespace android::renderscript;
 
@@ -25,6 +28,10 @@ Program::Program(Context *rsc, Element *in, Element *out) : ObjectBase(rsc)
 {
     mAllocFile = __FILE__;
     mAllocLine = __LINE__;
+    mDirty = true;
+    mShaderID = 0;
+    mAttribCount = 0;
+    mUniformCount = 0;
 
     mElementIn.set(in);
     mElementOut.set(out);
@@ -51,4 +58,41 @@ void Program::bindAllocation(Allocation *alloc)
     mDirty = true;
 }
 
+void Program::createShader()
+{
+}
 
+bool Program::loadShader(uint32_t type)
+{
+    mShaderID = glCreateShader(type);
+    rsAssert(mShaderID);
+
+    LOGV("Loading shader type %x", type);
+    LOGE(mShader.string());
+
+    if (mShaderID) {
+        const char * ss = mShader.string();
+        glShaderSource(mShaderID, 1, &ss, NULL);
+        glCompileShader(mShaderID);
+
+        GLint compiled = 0;
+        glGetShaderiv(mShaderID, GL_COMPILE_STATUS, &compiled);
+        if (!compiled) {
+            GLint infoLen = 0;
+            glGetShaderiv(mShaderID, GL_INFO_LOG_LENGTH, &infoLen);
+            if (infoLen) {
+                char* buf = (char*) malloc(infoLen);
+                if (buf) {
+                    glGetShaderInfoLog(mShaderID, infoLen, NULL, buf);
+                    LOGE("Could not compile shader \n%s\n", buf);
+                    free(buf);
+                }
+                glDeleteShader(mShaderID);
+                mShaderID = 0;
+                return false;
+            }
+        }
+    }
+    LOGV("--Shader load result %x ", glGetError());
+    return true;
+}
