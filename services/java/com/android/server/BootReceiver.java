@@ -101,8 +101,9 @@ public class BootReceiver extends BroadcastReceiver {
         long lastTime = Settings.Secure.getLong(cr, setting, 0);
         if (lastTime == fileTime) return;  // Already logged this particular file
 
-        db.addFile(tag,
-                ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY),
-                DropBoxManager.IS_TEXT);
+        ParcelFileDescriptor pfd =
+            ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY);
+        db.addFile(tag, pfd, DropBoxManager.IS_TEXT);
+        pfd.close();
     }
 }
