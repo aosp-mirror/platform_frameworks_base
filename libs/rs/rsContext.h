@@ -37,6 +37,8 @@
 #include "rsProgramFragmentStore.h"
 #include "rsProgramRaster.h"
 #include "rsProgramVertex.h"
+#include "rsShaderCache.h"
+#include "rsVertexArray.h"
 
 #include "rsgApiStructs.h"
 #include "rsLocklessFifo.h"
@@ -72,8 +74,10 @@ public:
     ProgramRasterState mStateRaster;
     ProgramVertexState mStateVertex;
     LightState mStateLight;
+    VertexArrayState mStateVertexArray;
 
     ScriptCState mScriptC;
+    ShaderCache mShaderCache;
 
     void swapBuffers();
     void setRootScript(Script *);
@@ -222,7 +226,7 @@ protected:
 private:
     Context();
 
-    void initEGL();
+    void initEGL(bool useGL2);
     void deinitEGL();
 
     bool runRootScript();

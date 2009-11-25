@@ -19,6 +19,8 @@
 
 #include <GLES/gl.h>
 #include <GLES/glext.h>
+#include <GLES2/gl2.h>
+#include <GLES2/gl2ext.h>
 
 using namespace android;
 using namespace android::renderscript;
@@ -109,6 +111,97 @@ void ProgramFragment::setupGL(const Context *rsc, ProgramFragmentState *state)
     mDirty = false;
 }
 
+void ProgramFragment::setupGL2(const Context *rsc, ProgramFragmentState *state, ShaderCache *sc)
+{
+    //LOGE("sgl2 frag1 %x", glGetError());
+    if ((state->mLast.get() == this) && !mDirty) {
+        //return;
+    }
+    state->mLast.set(this);
+
+    for (uint32_t ct=0; ct < MAX_TEXTURE; ct++) {
+        glActiveTexture(GL_TEXTURE0 + ct);
+        if (!(mTextureEnableMask & (1 << ct)) || !mTextures[ct].get()) {
+            glDisable(GL_TEXTURE_2D);
+            continue;
+        }
+
+        glBindTexture(GL_TEXTURE_2D, mTextures[ct]->getTextureID());
+        if (mSamplers[ct].get()) {
+            mSamplers[ct]->setupGL();
+        } else {
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        }
+
+        glEnable(GL_TEXTURE_2D);
+        glUniform1i(sc->fragUniformSlot(ct), ct);
+    }
+
+    glActiveTexture(GL_TEXTURE0);
+    mDirty = false;
+
+    //LOGE("sgl2 frag2 %x", glGetError());
+}
+
+void ProgramFragment::loadShader() {
+    Program::loadShader(GL_FRAGMENT_SHADER);
+}
+
+void ProgramFragment::createShader()
+{
+    mShader.setTo("precision mediump float;\n");
+    mShader.append("varying vec4 varColor;\n");
+    mShader.append("varying vec4 varTex0;\n");
+
+    uint32_t mask = mTextureEnableMask;
+    uint32_t texNum = 0;
+    while (mask) {
+        if (mask & 1) {
+            char buf[64];
+            mShader.append("uniform sampler2D uni_Tex");
+            sprintf(buf, "%i", texNum);
+            mShader.append(buf);
+            mShader.append(";\n");
+        }
+        mask >>= 1;
+        texNum++;
+    }
+
+
+    mShader.append("void main() {\n");
+    //mShader.append("  gl_FragColor = vec4(0.0, 1.0, 0.0, 1.0);\n");
+    mShader.append("  vec4 col = varColor;\n");
+
+    mask = mTextureEnableMask;
+    texNum = 0;
+    while (mask) {
+        if (mask & 1) {
+            switch(mEnvModes[texNum]) {
+            case RS_TEX_ENV_MODE_REPLACE:
+                mShader.append("  col = texture2D(uni_Tex0, varTex0.xy);\n");
+                break;
+            case RS_TEX_ENV_MODE_MODULATE:
+                mShader.append("  col *= texture2D(uni_Tex0, varTex0.xy);\n");
+                break;
+            case RS_TEX_ENV_MODE_DECAL:
+                mShader.append("  col = texture2D(uni_Tex0, varTex0.xy);\n");
+                break;
+            }
+
+        }
+        mask >>= 1;
+        texNum++;
+    }
+
+    //mShader.append("  col.a = 1.0;\n");
+    //mShader.append("  col.r = 0.5;\n");
+
+    mShader.append("  gl_FragColor = col;\n");
+    mShader.append("}\n");
+}
 
 void ProgramFragment::bindTexture(uint32_t slot, Allocation *a)
 {
@@ -173,7 +266,14 @@ void ProgramFragment::setTexEnable(uint32_t slot, bool enable)
     }
 }
 
+void ProgramFragment::init(Context *rsc)
+{
+    mUniformCount = 2;
+    mUniformNames[0].setTo("uni_Tex0");
+    mUniformNames[1].setTo("uni_Tex1");
 
+    createShader();
+}
 
 ProgramFragmentState::ProgramFragmentState()
 {
@@ -190,6 +290,7 @@ void ProgramFragmentState::init(Context *rsc, int32_t w, int32_t h)
 {
     ProgramFragment *pf = new ProgramFragment(rsc, NULL, NULL, false);
     mDefault.set(pf);
+    pf->init(rsc);
 }
 
 void ProgramFragmentState::deinit(Context *rsc)
@@ -241,6 +342,7 @@ RsProgramFragment rsi_ProgramFragmentCreate(Context *rsc)
 {
     ProgramFragment *pf = rsc->mStateFragment.mPF;
     pf->incUserRef();
+    pf->init(rsc);
     rsc->mStateFragment.mPF = 0;
     return pf;
 }

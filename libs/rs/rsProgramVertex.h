@@ -34,6 +34,7 @@ public:
     virtual ~ProgramVertex();
 
     virtual void setupGL(const Context *rsc, ProgramVertexState *state);
+    virtual void setupGL2(const Context *rsc, ProgramVertexState *state, ShaderCache *sc);
 
 
     void setTextureMatrixEnable(bool e) {mTextureMatrixEnable = e;}
@@ -44,6 +45,10 @@ public:
     void setTextureMatrix(const rsc_Matrix *) const;
 
     void transformToScreen(const Context *, float *v4out, const float *v3in) const;
+
+    virtual void createShader();
+    virtual void loadShader();
+    virtual void init(Context *);
 
 
 protected:

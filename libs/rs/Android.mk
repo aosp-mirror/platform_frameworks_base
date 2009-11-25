@@ -96,11 +96,14 @@ LOCAL_SRC_FILES:= \
 	rsScript.cpp \
 	rsScriptC.cpp \
 	rsScriptC_Lib.cpp \
+        rsShaderCache.cpp \
 	rsSimpleMesh.cpp \
 	rsThreadIO.cpp \
-	rsType.cpp
+	rsType.cpp \
+	rsVertexArray.cpp
 
-LOCAL_SHARED_LIBRARIES += libcutils libutils libEGL libGLESv1_CM libui libacc
+
+LOCAL_SHARED_LIBRARIES += libcutils libutils libEGL libGLESv1_CM libGLESv2 libui libacc
 LOCAL_LDLIBS := -lpthread -ldl
 LOCAL_MODULE:= libRS
 LOCAL_MODULE_TAGS := optional

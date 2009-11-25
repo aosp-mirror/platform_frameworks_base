@@ -51,7 +51,7 @@ public class FountainView extends RSSurfaceView {
     public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {
         super.surfaceChanged(holder, format, w, h);
         if (mRS == null) {
-            mRS = createRenderScript(false, true);
+            mRS = createRenderScript(false);
             mRS.contextSetSurface(w, h, holder.getSurface());
             mRender = new FountainRS();
             mRender.init(mRS, getResources(), w, h);
