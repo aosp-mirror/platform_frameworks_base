@@ -167,7 +167,7 @@ public class SignalToneUtil {
                 IS95_CONST_IR_SIG_TONE_ANSWER), ToneGenerator.TONE_CDMA_ANSWER);
 
         hm.put(signalParamHash(IS95_CONST_IR_SIGNAL_TONE, TAPIAMSSCDMA_SIGNAL_PITCH_UNKNOWN,
-                IS95_CONST_IR_SIG_TONE_ABB_RE), ToneGenerator.TONE_CDMA_NETWORK_CALLWAITING);
+                IS95_CONST_IR_SIG_TONE_CALL_W), ToneGenerator.TONE_CDMA_NETWORK_CALLWAITING);
 
         hm.put(signalParamHash(IS95_CONST_IR_SIGNAL_TONE, TAPIAMSSCDMA_SIGNAL_PITCH_UNKNOWN,
                 IS95_CONST_IR_SIG_TONE_PIP), ToneGenerator.TONE_CDMA_PIP);
