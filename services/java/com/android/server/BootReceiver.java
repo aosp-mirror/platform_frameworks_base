@@ -23,7 +23,6 @@ import android.content.Intent;
 import android.os.Build;
 import android.os.DropBoxManager;
 import android.os.FileUtils;
-import android.os.ParcelFileDescriptor;
 import android.os.SystemProperties;
 import android.provider.Settings;
 import android.util.Log;
@@ -100,10 +99,6 @@ public class BootReceiver extends BroadcastReceiver {
         String setting = "logfile:" + filename;
         long lastTime = Settings.Secure.getLong(cr, setting, 0);
         if (lastTime == fileTime) return;  // Already logged this particular file
-
-        ParcelFileDescriptor pfd =
-            ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY);
-        db.addFile(tag, pfd, DropBoxManager.IS_TEXT);
-        pfd.close();
+        db.addFile(tag, file, DropBoxManager.IS_TEXT);
     }
 }
