@@ -1897,7 +1897,7 @@ public class SQLiteDatabase extends SQLiteClosable {
             samplePercent = 100;
         } else {
             samplePercent = (int) (100 * nanos / QUERY_LOG_TIME_IN_NANOS) + 1;
-            if (mRandom.nextInt(100) < samplePercent) return;
+            if (mRandom.nextInt(100) >= samplePercent) return;
         }
 
         if (sql.length() > QUERY_LOG_SQL_LENGTH) sql = sql.substring(0, QUERY_LOG_SQL_LENGTH);
