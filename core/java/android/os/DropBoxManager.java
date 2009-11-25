@@ -230,17 +230,24 @@ public class DropBoxManager {
     }
 
     /**
-     * Stores data read from a file descriptor.  The data may be ignored or
-     * discarded as with {@link #addText}.  You must close your
-     * ParcelFileDescriptor object after calling this method!
+     * Stores the contents of a file, which may be ignored or discarded as with
+     * {@link #addText}.
      *
      * @param tag describing the type of entry being stored
-     * @param fd file descriptor to read from
+     * @param file to read from
      * @param flags describing the data
+     * @throws IOException if the file can't be opened
      */
-    public void addFile(String tag, ParcelFileDescriptor fd, int flags) {
-        if (fd == null) throw new NullPointerException();
-        try { mService.add(new Entry(tag, 0, fd, flags)); } catch (RemoteException e) {}
+    public void addFile(String tag, File file, int flags) throws IOException {
+        if (file == null) throw new NullPointerException();
+        Entry entry = new Entry(tag, 0, file, flags);
+        try {
+            mService.add(new Entry(tag, 0, file, flags));
+        } catch (RemoteException e) {
+            // ignore
+        } finally {
+            entry.close();
+        }
     }
 
     /**
