@@ -185,7 +185,9 @@ String8 A2dpAudioInterface::getParameters(const String8& keys)
     String8 keyValuePairs  = a2dpParam.toString();
 
     if (param.size()) {
-        keyValuePairs += ";";
+        if (keyValuePairs != "") {
+            keyValuePairs += ";";
+        }
         keyValuePairs += mHardwareInterface->getParameters(param.toString());
     }
 
