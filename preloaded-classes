@@ -258,11 +258,11 @@ android.os.FileUtils
 android.os.Handler
 android.os.HandlerThread
 android.os.IBinder
-android.os.IHardwareService$Stub
-android.os.IHardwareService$Stub$Proxy
 android.os.IPowerManager$Stub
 android.os.IPowerManager$Stub$Proxy
 android.os.IServiceManager
+android.os.IVibratorService$Stub
+android.os.IVibratorService$Stub$Proxy
 android.os.Looper
 android.os.Message
 android.os.Message$1

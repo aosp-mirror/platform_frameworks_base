@@ -108,13 +108,13 @@ LOCAL_SRC_FILES += \
 	core/java/android/hardware/ISensorService.aidl \
 	core/java/android/net/IConnectivityManager.aidl \
 	core/java/android/os/ICheckinService.aidl \
-	core/java/android/os/IHardwareService.aidl \
 	core/java/android/os/IMessenger.aidl \
 	core/java/android/os/IMountService.aidl \
 	core/java/android/os/INetStatService.aidl \
 	core/java/android/os/IParentalControlCallback.aidl \
 	core/java/android/os/IPermissionController.aidl \
 	core/java/android/os/IPowerManager.aidl \
+	core/java/android/os/IVibratorService.aidl \
     core/java/android/service/wallpaper/IWallpaperConnection.aidl \
     core/java/android/service/wallpaper/IWallpaperEngine.aidl \
     core/java/android/service/wallpaper/IWallpaperService.aidl \
