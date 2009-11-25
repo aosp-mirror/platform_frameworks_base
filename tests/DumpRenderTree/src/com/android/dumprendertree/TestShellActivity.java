@@ -638,7 +638,7 @@ public class TestShellActivity extends Activity implements LayoutTestController 
         }
 
         @Override
-        public void addMessageToConsole(String message, int lineNumber,
+        public void onConsoleMessage(String message, int lineNumber,
                 String sourceID) {
             if (mConsoleMessages == null) {
                 mConsoleMessages = new StringBuffer();
