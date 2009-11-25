@@ -20,7 +20,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.DropBoxManager;
-import android.os.ParcelFileDescriptor;
 import android.os.ServiceManager;
 import android.os.StatFs;
 import android.provider.Settings;
@@ -126,22 +125,11 @@ public class DropBoxTest extends AndroidTestCase {
 
         DropBoxManager dropbox = (DropBoxManager) getContext().getSystemService(
                 Context.DROPBOX_SERVICE);
-        int mode = ParcelFileDescriptor.MODE_READ_ONLY;
 
-        ParcelFileDescriptor pfd0 = ParcelFileDescriptor.open(f0, mode);
-        ParcelFileDescriptor pfd1 = ParcelFileDescriptor.open(f1, mode);
-        ParcelFileDescriptor pfd2 = ParcelFileDescriptor.open(f2, mode);
-        ParcelFileDescriptor pfd3 = ParcelFileDescriptor.open(f3, mode);
-
-        dropbox.addFile("DropBoxTest", pfd0, DropBoxManager.IS_TEXT);
-        dropbox.addFile("DropBoxTest", pfd1, DropBoxManager.IS_TEXT | DropBoxManager.IS_GZIPPED);
-        dropbox.addFile("DropBoxTest", pfd2, 0);
-        dropbox.addFile("DropBoxTest", pfd3, DropBoxManager.IS_GZIPPED);
-
-        pfd0.close();
-        pfd1.close();
-        pfd2.close();
-        pfd3.close();
+        dropbox.addFile("DropBoxTest", f0, DropBoxManager.IS_TEXT);
+        dropbox.addFile("DropBoxTest", f1, DropBoxManager.IS_TEXT | DropBoxManager.IS_GZIPPED);
+        dropbox.addFile("DropBoxTest", f2, 0);
+        dropbox.addFile("DropBoxTest", f3, DropBoxManager.IS_GZIPPED);
 
         DropBoxManager.Entry e0 = dropbox.getNextEntry("DropBoxTest", before);
         DropBoxManager.Entry e1 = dropbox.getNextEntry("DropBoxTest", e0.getTimeMillis());
@@ -506,9 +494,7 @@ public class DropBoxTest extends AndroidTestCase {
         os.write(bytes);
         os.close();
 
-        ParcelFileDescriptor fd = ParcelFileDescriptor.open(f, ParcelFileDescriptor.MODE_READ_ONLY);
-        dropbox.addFile(tag, fd, 0);
-        fd.close();
+        dropbox.addFile(tag, f, 0);
     }
 
     private int getEntrySize(DropBoxManager.Entry e) throws Exception {
