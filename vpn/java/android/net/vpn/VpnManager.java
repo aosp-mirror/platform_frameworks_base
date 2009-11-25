@@ -69,7 +69,7 @@ public class VpnManager {
     /** Error code to indicate a successful connection. */
     public static final int VPN_ERROR_NO_ERROR = 0;
 
-    private static final String PROFILES_PATH = "/misc/vpn/profiles";
+    public static final String PROFILES_PATH = "/misc/vpn/profiles";
 
     private static final String PACKAGE_PREFIX =
             VpnManager.class.getPackage().getName() + ".";
