@@ -501,10 +501,8 @@ android.os.FileUtils
 android.os.FileUtils$FileStatus
 android.os.Handler
 android.os.HandlerThread
-android.os.Hardware
 android.os.IBinder
 android.os.ICheckinService$Stub
-android.os.IHardwareService$Stub
 android.os.IInterface
 android.os.IMountService$Stub
 android.os.IMountService$Stub$Proxy
@@ -512,6 +510,7 @@ android.os.INetStatService$Stub
 android.os.IParentalControlCallback$Stub
 android.os.IPowerManager$Stub
 android.os.IPowerManager$Stub$Proxy
+android.os.IVibratorService$Stub
 android.os.Looper
 android.os.MemoryFile
 android.os.Message

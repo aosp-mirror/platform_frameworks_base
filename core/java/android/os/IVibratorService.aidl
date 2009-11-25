@@ -17,19 +17,10 @@
 package android.os;
 
 /** {@hide} */
-interface IHardwareService
+interface IVibratorService
 {
-    // Vibrator support
     void vibrate(long milliseconds, IBinder token);
     void vibratePattern(in long[] pattern, int repeat, IBinder token);
     void cancelVibrate(IBinder token);
-
-    // flashlight support
-    boolean getFlashlightEnabled();
-    void setFlashlightEnabled(boolean on);
-    void enableCameraFlash(int milliseconds);
-
-    // for the phone
-    void setAttentionLight(boolean on, int color);
 }
 
