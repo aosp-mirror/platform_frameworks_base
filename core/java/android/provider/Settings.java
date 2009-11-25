@@ -38,6 +38,7 @@ import android.os.*;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.AndroidException;
+import android.util.Config;
 import android.util.Log;
 
 import java.net.URISyntaxException;
@@ -442,6 +443,7 @@ public final class Settings {
     public static final String AUTHORITY = "settings";
 
     private static final String TAG = "Settings";
+    private static final boolean LOCAL_LOGV = Config.LOGV || false;
 
     public static class SettingNotFoundException extends AndroidException {
         public SettingNotFoundException(String msg) {
@@ -478,61 +480,60 @@ public final class Settings {
 
     private static class NameValueCache {
         private final String mVersionSystemProperty;
-        // the following needs synchronization because this structure is accessed from different
-        // threads and they could be performing clear(), get(), put() at the same time.
-        private final Map<String, String> mValues =
-            	Collections.synchronizedMap(new HashMap<String, String>());
-        private long mValuesVersion = 0;
         private final Uri mUri;
 
-        NameValueCache(String versionSystemProperty, Uri uri) {
+        // Must synchronize(mValues) to access mValues and mValuesVersion.
+        private final HashMap<String, String> mValues = new HashMap<String, String>();
+        private long mValuesVersion = 0;
+
+        public NameValueCache(String versionSystemProperty, Uri uri) {
             mVersionSystemProperty = versionSystemProperty;
             mUri = uri;
         }
 
-        String getString(ContentResolver cr, String name) {
+        public String getString(ContentResolver cr, String name) {
             long newValuesVersion = SystemProperties.getLong(mVersionSystemProperty, 0);
-            if (mValuesVersion != newValuesVersion) {
-                mValues.clear();
-                mValuesVersion = newValuesVersion;
-            }
-            /*
-             *  don't look for the key using containsKey() method because (key, object) mapping
-             *  could be removed from mValues before get() is done like so:
-             *
-             *      say, mValues contains mapping for "foo"
-             *      Thread# 1
-             *          performs containsKey("foo")
-             *          receives true
-             *      Thread #2
-             *          triggers mValues.clear()
-             *      Thread#1
-             *          since containsKey("foo") = true, performs get("foo")
-             *          receives null
-             *          thats incorrect!
-             *
-             *    to avoid the above, thread#1 should do get("foo") instead of containsKey("foo")
-             *    since mValues is synchronized, get() will get a consistent value.
-             *
-             *    we don't want to make this method synchronized tho - because
-             *    holding mutex is not desirable while a call could be made to database.
-             */
-            String value = mValues.get(name);
-            if (value == null) {
-                Cursor c = null;
-                try {
-                    c = cr.query(mUri, new String[] { Settings.NameValueTable.VALUE },
-                            Settings.NameValueTable.NAME + "=?", new String[]{name}, null);
-                    if (c != null && c.moveToNext()) value = c.getString(0);
-                    mValues.put(name, value);
-                } catch (SQLException e) {
-                    // SQL error: return null, but don't cache it.
-                    Log.w(TAG, "Can't get key " + name + " from " + mUri, e);
-                } finally {
-                    if (c != null) c.close();
+
+            synchronized (mValues) {
+                if (mValuesVersion != newValuesVersion) {
+                    if (LOCAL_LOGV) {
+                        Log.v(TAG, "invalidate [" + mUri.getLastPathSegment() + "]: current " +
+                                newValuesVersion + " != cached " + mValuesVersion);
+                    }
+
+                    mValues.clear();
+                    mValuesVersion = newValuesVersion;
+                }
+
+                if (mValues.containsKey(name)) {
+                    return mValues.get(name);  // Could be null, that's OK -- negative caching
                 }
             }
-            return value;
+
+            Cursor c = null;
+            try {
+                c = cr.query(mUri, new String[] { Settings.NameValueTable.VALUE },
+                        Settings.NameValueTable.NAME + "=?", new String[]{name}, null);
+                if (c == null) {
+                    Log.w(TAG, "Can't get key " + name + " from " + mUri);
+                    return null;
+                }
+
+                String value = c.moveToNext() ? c.getString(0) : null;
+                synchronized (mValues) {
+                    mValues.put(name, value);
+                }
+                if (LOCAL_LOGV) {
+                    Log.v(TAG, "cache miss [" + mUri.getLastPathSegment() + "]: " +
+                            name + " = " + (value == null ? "(null)" : value));
+                }
+                return value;
+            } catch (SQLException e) {
+                Log.w(TAG, "Can't get key " + name + " from " + mUri, e);
+                return null;  // Return null, but don't cache it.
+            } finally {
+                if (c != null) c.close();
+            }
         }
     }
 
