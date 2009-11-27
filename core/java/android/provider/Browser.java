@@ -108,7 +108,7 @@ public class Browser {
         BookmarkColumns._ID, BookmarkColumns.URL, BookmarkColumns.VISITS,
         BookmarkColumns.DATE, BookmarkColumns.BOOKMARK, BookmarkColumns.TITLE,
         BookmarkColumns.FAVICON, BookmarkColumns.THUMBNAIL,
-        BookmarkColumns.TOUCH_ICON };
+        BookmarkColumns.TOUCH_ICON, BookmarkColumns.USER_ENTERED };
 
     /* these indices dependent on HISTORY_PROJECTION */
     public static final int HISTORY_PROJECTION_ID_INDEX = 0;
@@ -232,8 +232,8 @@ public class Browser {
      *  Requires {@link android.Manifest.permission#WRITE_HISTORY_BOOKMARKS}
      *  @param cr   The ContentResolver used to access the database.
      *  @param url  The site being visited.
-     *  @param real Whether this is an actual visit, and should be added to the
-     *              number of visits.
+     *  @param real If true, this is an actual visit, and should add to the
+     *              number of visits.  If false, the user entered it manually.
      */
     public static final void updateVisitedHistory(ContentResolver cr,
                                                   String url, boolean real) {
@@ -253,18 +253,30 @@ public class Browser {
                 if (real) {
                     map.put(BookmarkColumns.VISITS, c
                             .getInt(HISTORY_PROJECTION_VISITS_INDEX) + 1);
+                } else {
+                    map.put(BookmarkColumns.USER_ENTERED, 1);
                 }
                 map.put(BookmarkColumns.DATE, now);
                 cr.update(BOOKMARKS_URI, map, "_id = " + c.getInt(0), null);
             } else {
                 truncateHistory(cr);
                 ContentValues map = new ContentValues();
+                int visits;
+                int user_entered;
+                if (real) {
+                    visits = 1;
+                    user_entered = 0;
+                } else {
+                    visits = 0;
+                    user_entered = 1;
+                }
                 map.put(BookmarkColumns.URL, url);
-                map.put(BookmarkColumns.VISITS, real ? 1 : 0);
+                map.put(BookmarkColumns.VISITS, visits);
                 map.put(BookmarkColumns.DATE, now);
                 map.put(BookmarkColumns.BOOKMARK, 0);
                 map.put(BookmarkColumns.TITLE, url);
                 map.put(BookmarkColumns.CREATED, 0);
+                map.put(BookmarkColumns.USER_ENTERED, user_entered);
                 cr.insert(BOOKMARKS_URI, map);
             }
             c.deactivate();
@@ -572,6 +584,10 @@ public class Browser {
          * @hide
          */
         public static final String TOUCH_ICON = "touch_icon";
+        /**
+         * @hide
+         */
+        public static final String USER_ENTERED = "user_entered";
     }
 
     public static class SearchColumns implements BaseColumns {
