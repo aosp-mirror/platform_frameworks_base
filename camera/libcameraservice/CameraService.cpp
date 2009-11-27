@@ -669,8 +669,14 @@ status_t CameraService::Client::startRecording()
     LOGD("startRecording (pid %d)", getCallingPid());
 
     if (mMediaPlayerBeep.get() != NULL) {
-        mMediaPlayerBeep->seekTo(0);
-        mMediaPlayerBeep->start();
+        // do not play record jingle if stream volume is 0
+        // (typically because ringer mode is silent).
+        int index;
+        AudioSystem::getStreamVolumeIndex(AudioSystem::ENFORCED_AUDIBLE, &index);
+        if (index != 0) {
+            mMediaPlayerBeep->seekTo(0);
+            mMediaPlayerBeep->start();
+        }
     }
 
     mHardware->enableMsgType(CAMERA_MSG_VIDEO_FRAME);
@@ -888,8 +894,14 @@ void CameraService::Client::handleShutter(
 {
     // Play shutter sound.
     if (mMediaPlayerClick.get() != NULL) {
-        mMediaPlayerClick->seekTo(0);
-        mMediaPlayerClick->start();
+        // do not play shutter sound if stream volume is 0
+        // (typically because ringer mode is silent).
+        int index;
+        AudioSystem::getStreamVolumeIndex(AudioSystem::ENFORCED_AUDIBLE, &index);
+        if (index != 0) {
+            mMediaPlayerClick->seekTo(0);
+            mMediaPlayerClick->start();
+        }
     }
 
     // Screen goes black after the buffer is unregistered.
