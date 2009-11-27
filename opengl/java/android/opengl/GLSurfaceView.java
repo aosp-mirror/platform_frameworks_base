@@ -398,7 +398,6 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
      * {@link #setEGLConfigChooser(EGLConfigChooser)} has been called, then the supplied
      * EGLConfigChooser is responsible for choosing an OpenGL ES 2.0-compatible config.
      * @param version The EGLContext client version to choose. Use 2 for OpenGL ES 2.0
-     * @hide
      */
     public void setEGLContextClientVersion(int version) {
         checkRenderThreadState();
