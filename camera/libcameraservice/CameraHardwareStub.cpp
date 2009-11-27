@@ -47,16 +47,18 @@ void CameraHardwareStub::initDefaultParameters()
 {
     CameraParameters p;
 
-    p.setPreviewSize(176, 144);
+    p.set("preview-size-values","320x240");
+    p.setPreviewSize(320, 240);
     p.setPreviewFrameRate(15);
     p.setPreviewFormat("yuv422sp");
 
-    p.setPictureSize(kCannedJpegWidth, kCannedJpegHeight);
+    p.set("picture-size-values", "320x240");
+    p.setPictureSize(320, 240);
     p.setPictureFormat("jpeg");
 
     if (setParameters(p) != NO_ERROR) {
         LOGE("Failed to set default parameters?!");
-    } 
+    }
 }
 
 void CameraHardwareStub::initHeapLocked()
@@ -80,14 +82,14 @@ void CameraHardwareStub::initHeapLocked()
 
     mPreviewFrameSize = how_big;
 
-    // Make a new mmap'ed heap that can be shared across processes. 
+    // Make a new mmap'ed heap that can be shared across processes.
     // use code below to test with pmem
     mPreviewHeap = new MemoryHeapBase(mPreviewFrameSize * kBufferCount);
     // Make an IMemory for each frame so that we can reuse them in callbacks.
     for (int i = 0; i < kBufferCount; i++) {
         mBuffers[i] = new MemoryBase(mPreviewHeap, i * mPreviewFrameSize, mPreviewFrameSize);
     }
-    
+
     // Recreate the fake camera to reflect the current size.
     delete mFakeCamera;
     mFakeCamera = new FakeCamera(preview_width, preview_height);
@@ -153,34 +155,34 @@ int CameraHardwareStub::previewThread()
         ssize_t offset = mCurrentPreviewFrame * mPreviewFrameSize;
 
         sp<MemoryHeapBase> heap = mPreviewHeap;
-    
+
         // this assumes the internal state of fake camera doesn't change
         // (or is thread safe)
         FakeCamera* fakeCamera = mFakeCamera;
-        
+
         sp<MemoryBase> buffer = mBuffers[mCurrentPreviewFrame];
-        
+
     mLock.unlock();
 
     // TODO: here check all the conditions that could go wrong
     if (buffer != 0) {
         // Calculate how long to wait between frames.
         int delay = (int)(1000000.0f / float(previewFrameRate));
-    
+
         // This is always valid, even if the client died -- the memory
         // is still mapped in our process.
         void *base = heap->base();
-    
+
         // Fill the current frame with the fake camera.
         uint8_t *frame = ((uint8_t *)base) + offset;
         fakeCamera->getNextFrameAsYuv422(frame);
-    
+
         //LOGV("previewThread: generated frame to buffer %d", mCurrentPreviewFrame);
-        
+
         // Notify the client of a new frame.
         if (mMsgEnabled & CAMERA_MSG_PREVIEW_FRAME)
             mDataCb(CAMERA_MSG_PREVIEW_FRAME, buffer, mCallbackCookie);
-    
+
         // Advance the buffer pointer.
         mCurrentPreviewFrame = (mCurrentPreviewFrame + 1) % kBufferCount;
 
@@ -205,7 +207,7 @@ status_t CameraHardwareStub::startPreview()
 void CameraHardwareStub::stopPreview()
 {
     sp<PreviewThread> previewThread;
-    
+
     { // scope for the lock
         Mutex::Autolock lock(mLock);
         previewThread = mPreviewThread;
@@ -356,7 +358,6 @@ status_t CameraHardwareStub::setParameters(const CameraParameters& params)
     }
 
     mParameters = params;
-
     initHeapLocked();
 
     return NO_ERROR;
