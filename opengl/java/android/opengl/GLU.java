@@ -72,60 +72,12 @@ public class GLU {
             float centerX, float centerY, float centerZ, float upX, float upY,
             float upZ) {
 
-        // See the OpenGL GLUT documentation for gluLookAt for a description
-        // of the algorithm. We implement it in a straightforward way:
-
-        float fx = centerX - eyeX;
-        float fy = centerY - eyeY;
-        float fz = centerZ - eyeZ;
-
-        // Normalize f
-        float rlf = 1.0f / Matrix.length(fx, fy, fz);
-        fx *= rlf;
-        fy *= rlf;
-        fz *= rlf;
-
-        // compute s = f x up (x means "cross product")
-        float sx = fy * upZ - fz * upY;
-        float sy = fz * upX - fx * upZ;
-        float sz = fx * upY - fy * upX;
-
-        // and normalize s
-        float rls = 1.0f / Matrix.length(sx, sy, sz);
-        sx *= rls;
-        sy *= rls;
-        sz *= rls;
-
-        // compute u = s x f
-        float ux = sy * fz - sz * fy;
-        float uy = sz * fx - sx * fz;
-        float uz = sx * fy - sy * fx;
-
         float[] scratch = sScratch;
         synchronized(scratch) {
-            scratch[0] = sx;
-            scratch[1] = ux;
-            scratch[2] = -fx;
-            scratch[3] = 0.0f;
-
-            scratch[4] = sy;
-            scratch[5] = uy;
-            scratch[6] = -fy;
-            scratch[7] = 0.0f;
-
-            scratch[8] = sz;
-            scratch[9] = uz;
-            scratch[10] = -fz;
-            scratch[11] = 0.0f;
-
-            scratch[12] = 0.0f;
-            scratch[13] = 0.0f;
-            scratch[14] = 0.0f;
-            scratch[15] = 1.0f;
-
+            Matrix.setLookAtM(scratch, 0, eyeX, eyeY, eyeZ, centerX, centerY, centerZ,
+                    upX, upY, upZ);
             gl.glMultMatrixf(scratch, 0);
         }
-        gl.glTranslatef(-eyeX, -eyeY, -eyeZ);
     }
 
     /**
