@@ -114,7 +114,7 @@ static void dumpstate(int full) {
         PRINT("------ PACKAGE UID ERRORS ------");
         DUMP("/data/system/uiderrors.txt");
 
-        dump_kernel_log("/data/dontpanic/last_kmsg", "LAST KMSG");
+        dump_kernel_log("/proc/last_kmsg", "LAST KMSG");
 
         PRINT("------ LAST RADIO LOG ------");
         EXEC1("parse_radio_log", "/proc/last_radio_log");
