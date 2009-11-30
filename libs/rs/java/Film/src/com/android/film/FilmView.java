@@ -52,7 +52,7 @@ public class FilmView extends RSSurfaceView {
     public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {
         super.surfaceChanged(holder, format, w, h);
         if (mRS == null) {
-            mRS = createRenderScript(false);
+            mRS = createRenderScript(true);
             mRS.contextSetSurface(w, h, holder.getSurface());
             mRender = new FilmRS();
             mRender.init(mRS, getResources(), w, h);
