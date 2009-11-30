@@ -38,7 +38,7 @@
 #include <ui/Rect.h>
 
 
-#define DEBUG_COPYBIT true
+#define DEBUG_COPYBIT false
 
 // ----------------------------------------------------------------------------
 
