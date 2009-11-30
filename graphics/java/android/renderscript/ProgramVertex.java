@@ -45,6 +45,7 @@ public class ProgramVertex extends BaseObj {
         Light[] mLights;
         int mLightCount;
         boolean mTextureMatrixEnable;
+        String mShader;
 
 
         public Builder(RenderScript rs, Element in, Element out) {
@@ -57,6 +58,10 @@ public class ProgramVertex extends BaseObj {
 
         public void setTextureMatrixEnable(boolean enable) {
             mTextureMatrixEnable = enable;
+        }
+
+        public void setShader(String s) {
+            mShader = s;
         }
 
         public void addLight(Light l) throws IllegalStateException {
@@ -79,10 +84,14 @@ public class ProgramVertex extends BaseObj {
                 outID = b.mOut.mID;
             }
             rs.nProgramVertexBegin(inID, outID);
-            for(int ct=0; ct < b.mLightCount; ct++) {
-                rs.nProgramVertexAddLight(b.mLights[ct].mID);
+            if (b.mShader != null) {
+                rs.nProgramVertexSetShader(b.mShader);
+            } else {
+                for(int ct=0; ct < b.mLightCount; ct++) {
+                    rs.nProgramVertexAddLight(b.mLights[ct].mID);
+                }
+                rs.nProgramVertexSetTextureMatrixEnable(b.mTextureMatrixEnable);
             }
-            rs.nProgramVertexSetTextureMatrixEnable(b.mTextureMatrixEnable);
             int id = rs.nProgramVertexCreate();
             return new ProgramVertex(id, rs);
         }

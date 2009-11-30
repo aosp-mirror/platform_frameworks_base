@@ -1053,7 +1053,18 @@ nProgramFragmentStoreCreate(JNIEnv *_env, jobject _this)
     return (jint)rsProgramFragmentStoreCreate(con);
 }
 
+
 // ---------------------------------------------------------------------------
+
+static void
+nProgramFragmentSetShader(JNIEnv *_env, jobject _this, jstring name)
+{
+    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
+    const char* n = _env->GetStringUTFChars(name, NULL);
+    LOG_API("nProgramFragmentSetShader, con(%p)", con);
+    rsProgramFragmentSetShader(con, n, _env->GetStringUTFLength(name));
+    _env->ReleaseStringUTFChars(name, n);
+}
 
 static void
 nProgramFragmentBegin(JNIEnv *_env, jobject _this, jint in, jint out, jboolean pointSpriteEnable)
@@ -1096,6 +1107,17 @@ nProgramFragmentCreate(JNIEnv *_env, jobject _this, jint slot, jboolean enable)
 }
 
 // ---------------------------------------------------------------------------
+
+static void
+nProgramVertexSetShader(JNIEnv *_env, jobject _this, jstring name)
+{
+    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
+    const char* n = _env->GetStringUTFChars(name, NULL);
+    LOG_API("nProgramVertexSetShader, con(%p)", con);
+    rsProgramVertexSetShader(con, n, _env->GetStringUTFLength(name));
+    _env->ReleaseStringUTFChars(name, n);
+}
+
 
 static void
 nProgramVertexBegin(JNIEnv *_env, jobject _this, jint in, jint out)
@@ -1436,6 +1458,7 @@ static JNINativeMethod methods[] = {
 {"nProgramFragmentBindTexture",    "(III)V",                               (void*)nProgramFragmentBindTexture },
 {"nProgramFragmentBindSampler",    "(III)V",                               (void*)nProgramFragmentBindSampler },
 {"nProgramFragmentSetSlot",        "(IZII)V",                              (void*)nProgramFragmentSetSlot },
+{"nProgramFragmentSetShader",      "(Ljava/lang/String;)V",                (void*)nProgramFragmentSetShader },
 {"nProgramFragmentCreate",         "()I",                                  (void*)nProgramFragmentCreate },
 
 {"nProgramRasterCreate",           "(IIZZZ)I",                             (void*)nProgramRasterCreate },
@@ -1446,6 +1469,7 @@ static JNINativeMethod methods[] = {
 {"nProgramVertexBegin",            "(II)V",                                (void*)nProgramVertexBegin },
 {"nProgramVertexSetTextureMatrixEnable",   "(Z)V",                         (void*)nProgramVertexSetTextureMatrixEnable },
 {"nProgramVertexAddLight",         "(I)V",                                 (void*)nProgramVertexAddLight },
+{"nProgramVertexSetShader",        "(Ljava/lang/String;)V",                (void*)nProgramVertexSetShader },
 {"nProgramVertexCreate",           "()I",                                  (void*)nProgramVertexCreate },
 
 {"nLightBegin",                    "()V",                                  (void*)nLightBegin },

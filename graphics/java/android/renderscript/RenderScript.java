@@ -171,12 +171,14 @@ public class RenderScript {
     native void nProgramFragmentBindTexture(int vpf, int slot, int a);
     native void nProgramFragmentBindSampler(int vpf, int slot, int s);
     native void nProgramFragmentSetSlot(int slot, boolean enable, int env, int vt);
+    native void nProgramFragmentSetShader(String txt);
     native int  nProgramFragmentCreate();
 
     native void nProgramVertexBindAllocation(int pv, int mID);
     native void nProgramVertexBegin(int inID, int outID);
     native void nProgramVertexSetTextureMatrixEnable(boolean enable);
     native void nProgramVertexAddLight(int id);
+    native void nProgramVertexSetShader(String txt);
     native int  nProgramVertexCreate();
 
     native void nLightBegin();

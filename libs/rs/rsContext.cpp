@@ -467,7 +467,7 @@ void Context::setSurface(uint32_t w, uint32_t h, Surface *sur)
         if (!mEGL.mContext) {
             first = true;
             pthread_mutex_lock(&gInitMutex);
-            initEGL(false);
+            initEGL(true);
             pthread_mutex_unlock(&gInitMutex);
         }
 

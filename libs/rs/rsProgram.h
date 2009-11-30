@@ -40,6 +40,7 @@ public:
     virtual void createShader();
 
     uint32_t getShaderID() const {return mShaderID;}
+    void setShader(const char *, uint32_t len);
 
     uint32_t getAttribCount() const {return mAttribCount;}
     uint32_t getUniformCount() const {return mUniformCount;}
@@ -56,6 +57,7 @@ protected:
 
     mutable bool mDirty;
     String8 mShader;
+    String8 mUserShader;
     uint32_t mShaderID;
 
     uint32_t mAttribCount;

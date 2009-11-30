@@ -69,6 +69,7 @@ public class ProgramFragment extends BaseObj {
         Element mIn;
         Element mOut;
         boolean mPointSpriteEnable;
+        String mShader;
 
         private class Slot {
             Type mType;
@@ -90,6 +91,10 @@ public class ProgramFragment extends BaseObj {
             for(int ct=0; ct < MAX_SLOT; ct++) {
                 mSlots[ct] = new Slot();
             }
+        }
+
+        public void setShader(String s) {
+            mShader = s;
         }
 
         public void setType(int slot, Type t)
@@ -142,6 +147,10 @@ public class ProgramFragment extends BaseObj {
                     }
                     rs.nProgramFragmentSetSlot(ct, true, s.mEnv.mID, typeID);
                 }
+            }
+
+            if (b.mShader != null) {
+                rs.nProgramFragmentSetShader(b.mShader);
             }
 
             int id = rs.nProgramFragmentCreate();
