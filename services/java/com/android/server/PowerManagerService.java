@@ -183,6 +183,10 @@ class PowerManagerService extends IPowerManager.Stub
     private Intent mScreenOnIntent;
     private LightsService mLightsService;
     private Context mContext;
+    private LightsService.Light mLcdLight;
+    private LightsService.Light mButtonLight;
+    private LightsService.Light mKeyboardLight;
+    private LightsService.Light mAttentionLight;
     private UnsynchronizedWakeLock mBroadcastWakeLock;
     private UnsynchronizedWakeLock mStayOnWhilePluggedInScreenDimLock;
     private UnsynchronizedWakeLock mStayOnWhilePluggedInPartialLock;
@@ -427,6 +431,11 @@ class PowerManagerService extends IPowerManager.Stub
         mActivityService = activity;
         mBatteryStats = BatteryStatsService.getService();
         mBatteryService = battery;
+
+        mLcdLight = lights.getLight(LightsService.LIGHT_ID_BACKLIGHT);
+        mButtonLight = lights.getLight(LightsService.LIGHT_ID_BUTTONS);
+        mKeyboardLight = lights.getLight(LightsService.LIGHT_ID_KEYBOARD);
+        mAttentionLight = lights.getLight(LightsService.LIGHT_ID_ATTENTION);
 
         mHandlerThread = new HandlerThread("PowerManagerService") {
             @Override
@@ -1362,13 +1371,8 @@ class PowerManagerService extends IPowerManager.Stub
                 enableLightSensor(on);
                 if (!on) {
                     // make sure button and key backlights are off too
-                    int brightnessMode = (mUseSoftwareAutoBrightness
-                            ? LightsService.BRIGHTNESS_MODE_SENSOR
-                            : LightsService.BRIGHTNESS_MODE_USER);
-                    mLightsService.setLightBrightness(LightsService.LIGHT_ID_BUTTONS, 0,
-                        brightnessMode);
-                    mLightsService.setLightBrightness(LightsService.LIGHT_ID_KEYBOARD, 0,
-                        brightnessMode);
+                    mButtonLight.turnOff();
+                    mKeyboardLight.turnOff();
                     // clear current value so we will update based on the new conditions
                     // when the sensor is reenabled.
                     mLightSensorValue = -1;
@@ -1723,19 +1727,13 @@ class PowerManagerService extends IPowerManager.Stub
                             ? LightsService.BRIGHTNESS_MODE_SENSOR
                             : LightsService.BRIGHTNESS_MODE_USER);
         if ((mask & SCREEN_BRIGHT_BIT) != 0) {
-            mLightsService.setLightBrightness(LightsService.LIGHT_ID_BACKLIGHT, value,
-                brightnessMode);
+            mLcdLight.setBrightness(value, brightnessMode);
         }
-        brightnessMode = (mUseSoftwareAutoBrightness
-                            ? LightsService.BRIGHTNESS_MODE_SENSOR
-                            : LightsService.BRIGHTNESS_MODE_USER);
         if ((mask & BUTTON_BRIGHT_BIT) != 0) {
-            mLightsService.setLightBrightness(LightsService.LIGHT_ID_BUTTONS, value,
-                brightnessMode);
+            mButtonLight.setBrightness(value);
         }
         if ((mask & KEYBOARD_BRIGHT_BIT) != 0) {
-            mLightsService.setLightBrightness(LightsService.LIGHT_ID_KEYBOARD, value,
-                brightnessMode);
+            mKeyboardLight.setBrightness(value);
         }
     }
 
@@ -2083,8 +2081,7 @@ class PowerManagerService extends IPowerManager.Stub
                         int brightnessMode = (mAutoBrightessEnabled
                                             ? LightsService.BRIGHTNESS_MODE_SENSOR
                                             : LightsService.BRIGHTNESS_MODE_USER);
-                        mLightsService.setLightBrightness(LightsService.LIGHT_ID_BACKLIGHT,
-                                lcdValue, brightnessMode);
+                        mLcdLight.setBrightness(lcdValue, brightnessMode);
                     }
                 }
                 if (mButtonBrightnessOverride < 0) {
@@ -2095,11 +2092,7 @@ class PowerManagerService extends IPowerManager.Stub
                             startAnimation = true;
                         }
                     } else {
-                        int brightnessMode = (mUseSoftwareAutoBrightness
-                                            ? LightsService.BRIGHTNESS_MODE_SENSOR
-                                            : LightsService.BRIGHTNESS_MODE_USER);
-                        mLightsService.setLightBrightness(LightsService.LIGHT_ID_BUTTONS,
-                                buttonValue, brightnessMode);
+                         mButtonLight.setBrightness(buttonValue);
                     }
                 }
                 if (mButtonBrightnessOverride < 0 || !mKeyboardVisible) {
@@ -2110,11 +2103,7 @@ class PowerManagerService extends IPowerManager.Stub
                             startAnimation = true;
                         }
                     } else {
-                        int brightnessMode = (mUseSoftwareAutoBrightness
-                                            ? LightsService.BRIGHTNESS_MODE_SENSOR
-                                            : LightsService.BRIGHTNESS_MODE_USER);
-                        mLightsService.setLightBrightness(LightsService.LIGHT_ID_KEYBOARD,
-                                keyboardValue, brightnessMode);
+                        mKeyboardLight.setBrightness(keyboardValue);
                     }
                 }
                 if (startAnimation) {
@@ -2443,12 +2432,9 @@ class PowerManagerService extends IPowerManager.Stub
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.DEVICE_POWER, null);
         // Don't let applications turn the screen all the way off
         brightness = Math.max(brightness, Power.BRIGHTNESS_DIM);
-        mLightsService.setLightBrightness(LightsService.LIGHT_ID_BACKLIGHT, brightness,
-                LightsService.BRIGHTNESS_MODE_USER);
-        mLightsService.setLightBrightness(LightsService.LIGHT_ID_KEYBOARD,
-            (mKeyboardVisible ? brightness : 0), LightsService.BRIGHTNESS_MODE_USER);
-        mLightsService.setLightBrightness(LightsService.LIGHT_ID_BUTTONS, brightness,
-            LightsService.BRIGHTNESS_MODE_USER);
+        mLcdLight.setBrightness(brightness);
+        mKeyboardLight.setBrightness(mKeyboardVisible ? brightness : 0);
+        mButtonLight.setBrightness(brightness);
         long identity = Binder.clearCallingIdentity();
         try {
             mBatteryStats.noteScreenBrightness(brightness);
@@ -2478,7 +2464,7 @@ class PowerManagerService extends IPowerManager.Stub
 
     public void setAttentionLight(boolean on, int color) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.DEVICE_POWER, null);
-        mLightsService.setAttentionLight(on, color);
+        mAttentionLight.setFlashing(color, LightsService.LIGHT_FLASH_HARDWARE, (on ? 3 : 0), 0);
     }
 
     private void enableProximityLockLocked() {
