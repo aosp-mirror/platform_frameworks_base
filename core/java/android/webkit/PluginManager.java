@@ -31,6 +31,8 @@ import android.content.pm.Signature;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.SystemProperties;
 import android.util.Log;
+import android.webkit.plugin.NativePlugin;
+import android.webkit.plugin.WebkitPlugin;
 
 /**
  * Class for managing the relationship between the {@link WebView} and installed
@@ -40,6 +42,12 @@ import android.util.Log;
  * @hide pending API solidification
  */
 public class PluginManager {
+
+    private class PluginInfo {
+        public PackageInfo packageInfo;
+        public boolean isNative;
+        public Class<? extends WebkitPlugin> pluginClass;
+    }
 
     /**
      * Service Action: A plugin wishes to be loaded in the WebView must provide
@@ -60,11 +68,14 @@ public class PluginManager {
 
     private static final String LOGTAG = "webkit";
 
+    private static final String PLUGIN_TYPE = "type";
+    private static final String TYPE_NATIVE = "native";
+
     private static PluginManager mInstance = null;
 
     private final Context mContext;
 
-    private ArrayList<PackageInfo> mPackageInfoCache;
+    private ArrayList<PluginInfo> mPluginInfoCache;
 
     // Only plugin matches one of the signatures in the list can be loaded
     // inside the WebView process
@@ -76,7 +87,7 @@ public class PluginManager {
 
     private PluginManager(Context context) {
         mContext = context;
-        mPackageInfoCache = new ArrayList<PackageInfo>();
+        mPluginInfoCache = new ArrayList<PluginInfo>();
     }
 
     public static synchronized PluginManager getInstance(Context context) {
@@ -108,35 +119,44 @@ public class PluginManager {
         ArrayList<String> directories = new ArrayList<String>();
         PackageManager pm = mContext.getPackageManager();
         List<ResolveInfo> plugins = pm.queryIntentServices(new Intent(
-                PLUGIN_ACTION), PackageManager.GET_SERVICES);
+                PLUGIN_ACTION), PackageManager.GET_SERVICES
+                | PackageManager.GET_META_DATA);
 
-        synchronized(mPackageInfoCache) {
+        synchronized(mPluginInfoCache) {
 
             // clear the list of existing packageInfo objects
-            mPackageInfoCache.clear();
+            mPluginInfoCache.clear();
 
             for (ResolveInfo info : plugins) {
+
+                // retrieve the plugin's service information
                 ServiceInfo serviceInfo = info.serviceInfo;
                 if (serviceInfo == null) {
                     Log.w(LOGTAG, "Ignore bad plugin");
                     continue;
                 }
+
+                // retrieve information from the plugin's manifest
                 PackageInfo pkgInfo;
                 try {
                     pkgInfo = pm.getPackageInfo(serviceInfo.packageName,
                                     PackageManager.GET_PERMISSIONS
                                     | PackageManager.GET_SIGNATURES);
                 } catch (NameNotFoundException e) {
-                    Log.w(LOGTAG, "Cant find plugin: " + serviceInfo.packageName);
+                    Log.w(LOGTAG, "Can't find plugin: " + serviceInfo.packageName);
                     continue;
                 }
                 if (pkgInfo == null) {
                     continue;
                 }
+
+                // check if their is a conflict in the lib directory names
                 String directory = pkgInfo.applicationInfo.dataDir + "/lib";
                 if (directories.contains(directory)) {
                     continue;
                 }
+
+                // check if the plugin has the required permissions
                 String permissions[] = pkgInfo.requestedPermissions;
                 if (permissions == null) {
                     continue;
@@ -151,6 +171,8 @@ public class PluginManager {
                 if (!permissionOk) {
                     continue;
                 }
+
+                // check to ensure the plugin is properly signed
                 Signature signatures[] = pkgInfo.signatures;
                 if (signatures == null) {
                     continue;
@@ -169,7 +191,51 @@ public class PluginManager {
                         continue;
                     }
                 }
-                mPackageInfoCache.add(pkgInfo);
+
+                PluginInfo pluginInfo = new PluginInfo();
+                pluginInfo.packageInfo = pkgInfo;
+
+                // determine the type of plugin from the manifest
+                if (serviceInfo.metaData == null) {
+                    Log.e(LOGTAG, "The plugin '" + serviceInfo.name + "' has no type defined");
+                    continue;
+                }
+
+                String pluginType = serviceInfo.metaData.getString(PLUGIN_TYPE);
+                if (TYPE_NATIVE.equals(pluginType)) {
+                    pluginInfo.isNative = true;
+                } else {
+                    Log.e(LOGTAG, "Unrecognized plugin type: " + pluginType);
+                    continue;
+                }
+
+                try {
+                    Class<?> cls = getPluginClass(serviceInfo.packageName, serviceInfo.name);
+
+                    boolean classFound = false;
+                    for(Class<?> implemented : cls.getInterfaces()) {
+                        if (pluginInfo.isNative && implemented.equals(NativePlugin.class)) {
+                            pluginInfo.pluginClass = cls.asSubclass(WebkitPlugin.class);
+                            classFound = true;
+                            break;
+                        }
+                    }
+
+                    if (!classFound) {
+                        Log.e(LOGTAG, "The plugin's class'" + serviceInfo.name + "' does not extend the appropriate interface.");
+                        continue;
+                    }
+
+                } catch (NameNotFoundException e) {
+                    Log.e(LOGTAG, "Can't find plugin: " + serviceInfo.packageName);
+                    continue;
+                } catch (ClassNotFoundException e) {
+                    Log.e(LOGTAG, "Can't find plugin's class: " + serviceInfo.name);
+                    continue;
+                }
+
+                // if all checks have passed then make the plugin available
+                mPluginInfoCache.add(pluginInfo);
                 directories.add(directory);
             }
         }
@@ -177,6 +243,7 @@ public class PluginManager {
         return directories.toArray(new String[directories.size()]);
     }
 
+    /* package */
     String getPluginsAPKName(String pluginLib) {
 
         // basic error checking on input params
@@ -185,8 +252,9 @@ public class PluginManager {
         }
 
         // must be synchronized to ensure the consistency of the cache
-        synchronized(mPackageInfoCache) {
-            for (PackageInfo pkgInfo : mPackageInfoCache) {
+        synchronized(mPluginInfoCache) {
+            for (PluginInfo pluginInfo : mPluginInfoCache) {
+                PackageInfo pkgInfo = pluginInfo.packageInfo;
                 if (pluginLib.startsWith(pkgInfo.applicationInfo.dataDir)) {
                     return pkgInfo.packageName;
                 }
@@ -199,5 +267,48 @@ public class PluginManager {
 
     String getPluginSharedDataDirectory() {
         return mContext.getDir("plugins", 0).getPath();
+    }
+
+    /* package */
+    WebkitPlugin getPluginInstance(String pkgName, int npp) {
+
+        // must be synchronized to ensure the consistency of the cache
+        synchronized(mPluginInfoCache) {
+
+            // lookup plugin based on pkgName and instantiate if possible.
+            for (PluginInfo pluginInfo : mPluginInfoCache) {
+
+                if (pluginInfo.packageInfo.packageName.equals(pkgName)) {
+
+                    try {
+                        WebkitPlugin webkitPlugin = pluginInfo.pluginClass.newInstance();
+
+                        if (pluginInfo.isNative) {
+                            NativePlugin nativePlugin = (NativePlugin) webkitPlugin;
+                            nativePlugin.initializePlugin(npp, mContext);
+                        }
+
+                        return webkitPlugin;
+                    } catch (Exception e) {
+                        // Any number of things could have happened. Log the exception and
+                        // return null. Careful not to use Log.e(LOGTAG, "String", e)
+                        // because that reports the exception to the checkin service.
+                        Log.e(LOGTAG, Log.getStackTraceString(e));
+                    }
+                    break;
+                }
+            }
+        }
+        return null;
+    }
+
+    /* package */
+    Class<?> getPluginClass(String packageName, String className)
+            throws NameNotFoundException, ClassNotFoundException {
+        Context pluginContext = mContext.createPackageContext(packageName,
+                Context.CONTEXT_INCLUDE_CODE |
+                Context.CONTEXT_IGNORE_SECURITY);
+        ClassLoader pluginCL = pluginContext.getClassLoader();
+        return pluginCL.loadClass(className);
     }
 }
