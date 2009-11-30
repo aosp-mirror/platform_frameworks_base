@@ -402,7 +402,7 @@
   <string-array name="emailAddressTypes">
     <item msgid="8073994352956129127">"Domů"</item>
     <item msgid="7084237356602625604">"Práce"</item>
-    <item msgid="1112044410659011023">"Ostatní"</item>
+    <item msgid="1112044410659011023">"(další)"</item>
     <item msgid="2374913952870110618">"Vlastní"</item>
   </string-array>
   <string-array name="postalAddressTypes">
