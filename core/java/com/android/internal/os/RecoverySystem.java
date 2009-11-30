@@ -75,6 +75,21 @@ public class RecoverySystem {
     }
 
     /**
+     * Reboot into the recovery system to wipe the /data partition and toggle
+     * Encrypted File Systems on/off.
+     * @param extras to add to the RECOVERY_COMPLETED intent after rebooting.
+     * @throws IOException if something goes wrong.
+     * @hide
+     */
+    public static void rebootAndToggleEFS(boolean efsEnabled) throws IOException {
+        if (efsEnabled) {
+            bootCommand("--set_encrypted_filesystem=on");
+        } else {
+            bootCommand("--set_encrypted_filesystem=off");
+        }
+    }
+
+    /**
      * Reboot into the recovery system with the supplied argument.
      * @param arg to pass to the recovery utility.
      * @throws IOException if something goes wrong.
