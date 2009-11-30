@@ -134,7 +134,7 @@ NPError NPP_New(NPMIMEType pluginType, NPP instance, uint16 mode, int16 argc,
 {
 
 
-    gLogI.log(instance, kDebug_ANPLogType, "creating plugin");
+    gLogI.log(kDebug_ANPLogType, "creating plugin");
 
     PluginObject *obj = NULL;
 
@@ -155,7 +155,7 @@ NPError NPP_New(NPMIMEType pluginType, NPP instance, uint16 mode, int16 argc,
     NPError err = browser->setvalue(instance, kRequestDrawingModel_ANPSetValue,
                             reinterpret_cast<void*>(model));
     if (err) {
-        gLogI.log(instance, kError_ANPLogType, "request model %d err %d", model, err);
+        gLogI.log(kError_ANPLogType, "request model %d err %d", model, err);
         return err;
     }
 
@@ -220,7 +220,7 @@ int16 NPP_HandleEvent(NPP instance, void* event)
     const ANPEvent* evt = reinterpret_cast<const ANPEvent*>(event);
 
     if(!obj->subPlugin) {
-        gLogI.log(instance, kError_ANPLogType, "the sub-plugin is null.");
+        gLogI.log(kError_ANPLogType, "the sub-plugin is null.");
         return 0; // unknown or unhandled event
     }
     else {
