@@ -63,11 +63,13 @@ public class Ringtone {
     private AssetFileDescriptor mAssetFileDescriptor;
 
     private int mStreamType = AudioManager.STREAM_RING;
+    private AudioManager mAudioManager;
 
     private Context mContext;
 
     Ringtone(Context context) {
         mContext = context;
+        mAudioManager = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
     }
 
     /**
@@ -209,7 +211,11 @@ public class Ringtone {
             }
         }
         if (mAudio != null) {
-            mAudio.start();
+            // do not ringtones if stream volume is 0
+            // (typically because ringer mode is silent).
+            if (mAudioManager.getStreamVolume(mStreamType) != 0) {
+                mAudio.start();
+            }
         }
     }
 
