@@ -237,25 +237,6 @@ public interface WindowManagerPolicy {
         public boolean hasAppShownWindows();
 
         /**
-         * Return true if the application token has been asked to display an 
-         * app starting icon as the application is starting up. 
-         * 
-         * @return Returns true if setAppStartingIcon() was called for this 
-         *         window's token.
-         */
-        public boolean hasAppStartingIcon();
-
-        /**
-         * Return the Window that is being displayed as this window's 
-         * application token is being started. 
-         * 
-         * @return Returns the currently displayed starting window, or null if 
-         *         it was not requested, has not yet been displayed, or has
-         *         been removed.
-         */
-        public WindowState getAppStartingWindow();
-
-        /**
          * Is this window visible?  It is not visible if there is no
          * surface, or we are in the process of running an exit animation
          * that will remove the surface.
@@ -791,11 +772,6 @@ public interface WindowManagerPolicy {
      * @see android.app.KeyguardManager#exitKeyguardSecurely(android.app.KeyguardManager.OnKeyguardExitResult)
      */
     void exitKeyguardSecurely(OnKeyguardExitResult callback);
-
-    /**
-     * Return if keyguard is currently showing.
-     */
-    public boolean keyguardIsShowingTq();
 
     /**
      * inKeyguardRestrictedKeyInputMode

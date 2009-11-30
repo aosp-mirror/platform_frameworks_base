@@ -7191,14 +7191,6 @@ public class WindowManagerService extends IWindowManager.Stub
             return mAppToken != null ? mAppToken.firstWindowDrawn : false;
         }
 
-        public boolean hasAppStartingIcon() {
-            return mAppToken != null ? (mAppToken.startingData != null) : false;
-        }
-
-        public WindowManagerPolicy.WindowState getAppStartingWindow() {
-            return mAppToken != null ? mAppToken.startingWindow : null;
-        }
-
         public void setAnimation(Animation anim) {
             if (localLOGV) Log.v(
                 TAG, "Setting animation in " + this + ": " + anim);
