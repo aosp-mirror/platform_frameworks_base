@@ -652,7 +652,7 @@ class CallbackProxy extends Handler {
                 String message = msg.getData().getString("message");
                 String sourceID = msg.getData().getString("sourceID");
                 int lineNumber = msg.getData().getInt("lineNumber");
-                mWebChromeClient.addMessageToConsole(message, lineNumber, sourceID);
+                mWebChromeClient.onConsoleMessage(message, lineNumber, sourceID);
                 break;
 
             case GET_VISITED_HISTORY:
