@@ -19,6 +19,8 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.webkit.plugin.SurfaceDrawingModel;
+import android.webkit.plugin.WebkitPlugin;
 
 /**
  * This activity  is invoked when a plugin elects to go into full screen mode.
@@ -28,8 +30,6 @@ public class PluginActivity extends Activity {
 
     /* package */ static final String INTENT_EXTRA_PACKAGE_NAME =
             "android.webkit.plugin.PACKAGE_NAME";
-    /* package */ static final String INTENT_EXTRA_CLASS_NAME =
-            "android.webkit.plugin.CLASS_NAME";
     /* package */ static final String INTENT_EXTRA_NPP_INSTANCE =
             "android.webkit.plugin.NPP_INSTANCE";
 
@@ -42,25 +42,31 @@ public class PluginActivity extends Activity {
         if (intent == null) {
             // No intent means no class to lookup.
             finish();
+            return;
         }
-        final String packageName =
-                intent.getStringExtra(INTENT_EXTRA_PACKAGE_NAME);
-        final String className = intent.getStringExtra(INTENT_EXTRA_CLASS_NAME);
+        final String pkgName = intent.getStringExtra(INTENT_EXTRA_PACKAGE_NAME);
         final int npp = intent.getIntExtra(INTENT_EXTRA_NPP_INSTANCE, -1);
-        // Retrieve the PluginStub implemented in packageName.className
-        PluginStub stub =
-                PluginUtil.getPluginStub(this, packageName, className);
 
-        if (stub != null) {
-            View pluginView = stub.getFullScreenView(npp, this);
-            if (pluginView != null) {
-                setContentView(pluginView);
-            } else {
-                // No custom full-sreen view returned by the plugin, odd but
-                // just in case, finish the activity.
-                finish();
-            }
+        // XXX retrieve the existing object instead of creating a new one
+        WebkitPlugin plugin = PluginManager.getInstance(null).getPluginInstance(pkgName, npp);
+
+        if (plugin == null) {
+            //TODO log error
+            finish();
+            return;
+        }
+        SurfaceDrawingModel fullScreenSurface = plugin.getFullScreenSurface();
+        if(fullScreenSurface == null) {
+            //TODO log error
+            finish();
+            return;
+        }
+        View pluginView = fullScreenSurface.getSurface();
+        if (pluginView != null) {
+            setContentView(pluginView);
         } else {
+            // No custom full-sreen view returned by the plugin, odd but
+            // just in case, finish the activity.
             finish();
         }
     }
