@@ -515,6 +515,11 @@ void Layer::unlockPageFlip(
         dirtyRegion.andSelf(visibleRegionScreen);
         outDirtyRegion.orSelf(dirtyRegion);
     }
+    if (visibleRegionScreen.isEmpty()) {
+        // an invisible layer should not hold a freeze-lock
+        // (because it may never be updated and thereore never release it)
+        mFreezeLock.clear();
+    }
 }
 
 void Layer::finishPageFlip()
