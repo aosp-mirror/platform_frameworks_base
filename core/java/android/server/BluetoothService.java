@@ -344,14 +344,14 @@ public class BluetoothService extends IBluetooth.Stub {
                 // records, use a DBUS call instead.
                 switch (msg.arg1) {
                 case 1:
-                    Log.d(TAG, "Registering hsag record");
-                    SystemService.start("hsag");
+                    Log.d(TAG, "Registering hfag record");
+                    SystemService.start("hfag");
                     mHandler.sendMessageDelayed(
                             mHandler.obtainMessage(MESSAGE_REGISTER_SDP_RECORDS, 2, -1), 500);
                     break;
                 case 2:
-                    Log.d(TAG, "Registering hfag record");
-                    SystemService.start("hfag");
+                    Log.d(TAG, "Registering hsag record");
+                    SystemService.start("hsag");
                     mHandler.sendMessageDelayed(
                             mHandler.obtainMessage(MESSAGE_REGISTER_SDP_RECORDS, 3, -1), 500);
                     break;

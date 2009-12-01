@@ -6397,7 +6397,9 @@ public class WindowManagerService extends IWindowManager.Stub
                             // Ignore
                         }
 
-                        if (eventType != TOUCH_EVENT
+                        if (ev.classType == RawInputEvent.CLASS_CONFIGURATION_CHANGED) {
+                            // do not wake screen in this case
+                        } else if (eventType != TOUCH_EVENT
                                 && eventType != LONG_TOUCH_EVENT
                                 && eventType != CHEEK_EVENT) {
                             mPowerManager.userActivity(curTime, false,
