@@ -287,8 +287,6 @@ deprecated) {@link android.provider.Contacts} APIs.</p>
 <h4>Other Framework fixes</h4>
 
 <ul>
-<li>{@link android.content.res.Resources#getDisplayMetrics()} now properly
-reports the screen DPI for the Verizon Droid.</li>
 <li>{@link android.app.Activity#getCallingPackage()} now properly reports the
 package name, rather than the process name.</li>
 </ul>
