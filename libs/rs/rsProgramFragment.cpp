@@ -175,19 +175,27 @@ void ProgramFragment::createShader()
     //mShader.append("  gl_FragColor = vec4(0.0, 1.0, 0.0, 1.0);\n");
     mShader.append("  vec4 col = varColor;\n");
 
+    if (mTextureEnableMask) {
+        if (mPointSpriteEnable) {
+            mShader.append("  vec2 tex0 = gl_PointCoord;\n");
+        } else {
+            mShader.append("  vec2 tex0 = varTex0.xy;\n");
+        }
+    }
+
     mask = mTextureEnableMask;
     texNum = 0;
     while (mask) {
         if (mask & 1) {
             switch(mEnvModes[texNum]) {
             case RS_TEX_ENV_MODE_REPLACE:
-                mShader.append("  col = texture2D(uni_Tex0, varTex0.xy);\n");
+                mShader.append("  col = texture2D(uni_Tex0, tex0);\n");
                 break;
             case RS_TEX_ENV_MODE_MODULATE:
-                mShader.append("  col *= texture2D(uni_Tex0, varTex0.xy);\n");
+                mShader.append("  col *= texture2D(uni_Tex0, tex0);\n");
                 break;
             case RS_TEX_ENV_MODE_DECAL:
-                mShader.append("  col = texture2D(uni_Tex0, varTex0.xy);\n");
+                mShader.append("  col = texture2D(uni_Tex0, tex0);\n");
                 break;
             }
 
@@ -336,6 +344,11 @@ void rsi_ProgramFragmentSetSlot(Context *rsc, uint32_t slot, bool enable, RsTexE
     }
     rsc->mStateFragment.mPF->setEnvMode(slot, env);
     rsc->mStateFragment.mPF->setTexEnable(slot, enable);
+}
+
+void rsi_ProgramFragmentSetShader(Context *rsc, const char *txt, uint32_t len)
+{
+    rsc->mStateFragment.mPF->setShader(txt, len);
 }
 
 RsProgramFragment rsi_ProgramFragmentCreate(Context *rsc)

@@ -372,6 +372,11 @@ ProgramFragmentBegin {
 	param bool pointSpriteEnable
 	}
 
+ProgramFragmentSetShader {
+	param const char * text
+	param uint32_t length
+	}
+
 ProgramFragmentBindTexture {
 	param RsProgramFragment pf
 	param uint32_t slot
@@ -412,6 +417,11 @@ ProgramVertexBindAllocation {
 
 ProgramVertexSetTextureMatrixEnable {
 	param bool enable
+	}
+
+ProgramVertexSetShader {
+	param const char * text
+	param uint32_t length
 	}
 
 ProgramVertexAddLight {

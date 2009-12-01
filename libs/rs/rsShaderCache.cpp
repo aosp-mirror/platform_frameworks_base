@@ -49,6 +49,7 @@ bool ShaderCache::lookup(ProgramVertex *vtx, ProgramFragment *frag)
     if (!frag->getShaderID()) {
         frag->loadShader();
     }
+    //LOGV("ShaderCache lookup  vtx %i, frag %i", vtx->getShaderID(), frag->getShaderID());
 
     for (uint32_t ct=0; ct < mEntryCount; ct++) {
         if ((mEntries[ct].vtx == vtx->getShaderID()) &&
@@ -57,6 +58,7 @@ bool ShaderCache::lookup(ProgramVertex *vtx, ProgramFragment *frag)
             //LOGV("SC using program %i", mEntries[ct].program);
             glUseProgram(mEntries[ct].program);
             mCurrent = &mEntries[ct];
+            //LOGV("ShaderCache hit, using %i", ct);
             return true;
         }
     }
@@ -75,8 +77,8 @@ bool ShaderCache::lookup(ProgramVertex *vtx, ProgramFragment *frag)
         mEntries = e;
     }
 
-    LOGV("vtx %i, frag %i", vtx->getShaderID(), frag->getShaderID());
-    LOGE("e0 %x", glGetError());
+    //LOGV("ShaderCache miss, using %i", mEntryCount);
+    //LOGE("e0 %x", glGetError());
 
     entry_t *e = &mEntries[mEntryCount];
     mCurrent = e;
@@ -125,7 +127,7 @@ bool ShaderCache::lookup(ProgramVertex *vtx, ProgramFragment *frag)
         }
     }
 
-    LOGV("SC made program %i", e->program);
+    //LOGV("SC made program %i", e->program);
     glUseProgram(e->program);
     mEntryCount++;
     return true;

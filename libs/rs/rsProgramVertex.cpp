@@ -117,18 +117,24 @@ void ProgramVertex::createShader()
     mShader.append("varying vec4 varColor;\n");
     mShader.append("varying vec4 varTex0;\n");
 
-    mShader.append("void main() {\n");
-    mShader.append("  gl_Position = uni_MVP * attrib_Position;\n");
-    mShader.append("  varColor = attrib_Color;\n");
-    if (mTextureMatrixEnable) {
-        mShader.append("  varTex0 = uni_TexMatrix * attrib_T0;\n");
+    if (mUserShader.length() > 1) {
+        mShader.append(mUserShader);
     } else {
-        mShader.append("  varTex0 = attrib_T0;\n");
+        mShader.append("void main() {\n");
+        mShader.append("  gl_Position = uni_MVP * attrib_Position;\n");
+        mShader.append("  gl_PointSize = attrib_PointSize.x;\n");
+
+        mShader.append("  varColor = attrib_Color;\n");
+        if (mTextureMatrixEnable) {
+            mShader.append("  varTex0 = uni_TexMatrix * attrib_T0;\n");
+        } else {
+            mShader.append("  varTex0 = attrib_T0;\n");
+        }
+        //mShader.append("  pos.x = pos.x / 480.0;\n");
+        //mShader.append("  pos.y = pos.y / 800.0;\n");
+        //mShader.append("  gl_Position = pos;\n");
+        mShader.append("}\n");
     }
-    //mShader.append("  pos.x = pos.x / 480.0;\n");
-    //mShader.append("  pos.y = pos.y / 800.0;\n");
-    //mShader.append("  gl_Position = pos;\n");
-    mShader.append("}\n");
 }
 
 void ProgramVertex::setupGL2(const Context *rsc, ProgramVertexState *state, ShaderCache *sc)
@@ -211,7 +217,6 @@ void ProgramVertex::init(Context *rsc)
     createShader();
 }
 
-
 ///////////////////////////////////////////////////////////////////////
 
 ProgramVertexState::ProgramVertexState()
@@ -292,6 +297,11 @@ void rsi_ProgramVertexBindAllocation(Context *rsc, RsProgramVertex vpgm, RsAlloc
 void rsi_ProgramVertexSetTextureMatrixEnable(Context *rsc, bool enable)
 {
     rsc->mStateVertex.mPV->setTextureMatrixEnable(enable);
+}
+
+void rsi_ProgramVertexSetShader(Context *rsc, const char *txt, uint32_t len)
+{
+    rsc->mStateVertex.mPV->setShader(txt, len);
 }
 
 void rsi_ProgramVertexAddLight(Context *rsc, RsLight light)

@@ -67,7 +67,7 @@ bool Program::loadShader(uint32_t type)
     mShaderID = glCreateShader(type);
     rsAssert(mShaderID);
 
-    LOGV("Loading shader type %x", type);
+    LOGV("Loading shader type %x, ID %i", type, mShaderID);
     LOGE(mShader.string());
 
     if (mShaderID) {
@@ -96,3 +96,9 @@ bool Program::loadShader(uint32_t type)
     LOGV("--Shader load result %x ", glGetError());
     return true;
 }
+
+void Program::setShader(const char *txt, uint32_t len)
+{
+    mUserShader.setTo(txt, len);
+}
+
