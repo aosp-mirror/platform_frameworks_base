@@ -2,16 +2,16 @@
 **
 ** Copyright 2007, The Android Open Source Project
 **
-** Licensed under the Apache License, Version 2.0 (the "License"); 
-** you may not use this file except in compliance with the License. 
-** You may obtain a copy of the License at 
+** Licensed under the Apache License, Version 2.0 (the "License");
+** you may not use this file except in compliance with the License.
+** You may obtain a copy of the License at
 **
-**     http://www.apache.org/licenses/LICENSE-2.0 
+**     http://www.apache.org/licenses/LICENSE-2.0
 **
-** Unless required by applicable law or agreed to in writing, software 
-** distributed under the License is distributed on an "AS IS" BASIS, 
-** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
-** See the License for the specific language governing permissions and 
+** Unless required by applicable law or agreed to in writing, software
+** distributed under the License is distributed on an "AS IS" BASIS,
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+** See the License for the specific language governing permissions and
 ** limitations under the License.
 */
 
@@ -125,6 +125,10 @@ public class Am {
                 String key = nextArgRequired();
                 String value = nextArgRequired();
                 intent.putExtra(key, value);
+                hasIntentInfo = true;
+            } else if (opt.equals("--esn")) {
+                String key = nextArgRequired();
+                intent.putExtra(key, (String) null);
                 hasIntentInfo = true;
             } else if (opt.equals("--ei")) {
                 String key = nextArgRequired();
@@ -364,7 +368,7 @@ public class Am {
         private boolean mRawMode = false;
 
         /**
-         * Set or reset "raw mode".  In "raw mode", all bundles are dumped.  In "pretty mode", 
+         * Set or reset "raw mode".  In "raw mode", all bundles are dumped.  In "pretty mode",
          * if a bundle includes Instrumentation.REPORT_KEY_STREAMRESULT, just print that.
          * @param rawMode true for raw mode, false for pretty mode.
          */
@@ -507,6 +511,7 @@ public class Am {
                 "        [-a <ACTION>] [-d <DATA_URI>] [-t <MIME_TYPE>]\n" +
                 "        [-c <CATEGORY> [-c <CATEGORY>] ...]\n" +
                 "        [-e|--es <EXTRA_KEY> <EXTRA_STRING_VALUE> ...]\n" +
+                "        [--esn <EXTRA_KEY> ...]\n" +
                 "        [--ez <EXTRA_KEY> <EXTRA_BOOLEAN_VALUE> ...]\n" +
                 "        [-e|--ei <EXTRA_KEY> <EXTRA_INT_VALUE> ...]\n" +
                 "        [-n <COMPONENT>] [-f <FLAGS>] [<URI>]\n"
