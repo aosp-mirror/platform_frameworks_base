@@ -2242,6 +2242,7 @@ final class WebViewCore {
         }
 
         View pluginView = embeddedSurface.getSurface();
+        pluginView.setWillNotDraw(false);
 
         ViewManager.ChildView view = mWebView.mViewManager.createView();
         view.mView = pluginView;
