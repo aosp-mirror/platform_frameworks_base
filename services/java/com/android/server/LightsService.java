@@ -30,6 +30,9 @@ public class LightsService {
     static final int LIGHT_ID_BATTERY = 3;
     static final int LIGHT_ID_NOTIFICATIONS = 4;
     static final int LIGHT_ID_ATTENTION = 5;
+    static final int LIGHT_ID_BLUETOOTH = 6;
+    static final int LIGHT_ID_WIFI = 7;
+    static final int LIGHT_ID_COUNT = 8;
 
     static final int LIGHT_FLASH_NONE = 0;
     static final int LIGHT_FLASH_TIMED = 1;
@@ -45,13 +48,85 @@ public class LightsService {
      */
     static final int BRIGHTNESS_MODE_SENSOR = 1;
 
-    private boolean mAttentionLightOn;
-    private boolean mPulsing;
+    private final Light mLights[] = new Light[LIGHT_ID_COUNT];
+
+    public final class Light {
+
+        private Light(int id) {
+            mId = id;
+        }
+
+        public void setBrightness(int brightness) {
+            setBrightness(brightness, BRIGHTNESS_MODE_USER);
+        }
+
+        public void setBrightness(int brightness, int brightnessMode) {
+            synchronized (this) {
+                int color = brightness & 0x000000ff;
+                color = 0xff000000 | (color << 16) | (color << 8) | color;
+                setLightLocked(color, LIGHT_FLASH_NONE, 0, 0, brightnessMode);
+            }
+        }
+
+        public void setColor(int color) {
+            synchronized (this) {
+                setLightLocked(color, LIGHT_FLASH_NONE, 0, 0, 0);
+            }
+        }
+
+        public void setFlashing(int color, int mode, int onMS, int offMS) {
+            synchronized (this) {
+                setLightLocked(color, mode, onMS, offMS, BRIGHTNESS_MODE_USER);
+            }
+        }
+
+        public void pulse() {
+            synchronized (this) {
+                if (mColor == 0 && !mFlashing) {
+                    setLightLocked(0x00ffffff, LIGHT_FLASH_HARDWARE, 7, 0, BRIGHTNESS_MODE_USER);
+                    mH.sendMessageDelayed(Message.obtain(mH, 1, this), 3000);
+                }
+            }
+        }
+
+        public void turnOff() {
+            synchronized (this) {
+                setLightLocked(0, LIGHT_FLASH_NONE, 0, 0, 0);
+            }
+        }
+
+        private void stopFlashing() {
+            synchronized (this) {
+                setLightLocked(mColor, LIGHT_FLASH_NONE, 0, 0, BRIGHTNESS_MODE_USER);
+            }
+        }
+
+        private void setLightLocked(int color, int mode, int onMS, int offMS, int brightnessMode) {
+            if (color != mColor || mode != mMode || onMS != mOnMS || offMS != mOffMS) {
+                mColor = color;
+                mMode = mode;
+                mOnMS = onMS;
+                mOffMS = offMS;
+                setLight_native(mNativePointer, mId, color, mode, onMS, offMS, brightnessMode);
+            }
+        }
+
+        private int mId;
+        private int mColor;
+        private int mMode;
+        private int mOnMS;
+        private int mOffMS;
+        private boolean mFlashing;
+    }
 
     LightsService(Context context) {
 
         mNativePointer = init_native();
         mContext = context;
+
+        for (int i = 0; i < LIGHT_ID_COUNT; i++) {
+            mLights[i] = new Light(i);
+        }
     }
 
     protected void finalize() throws Throwable {
@@ -59,65 +134,15 @@ public class LightsService {
         super.finalize();
     }
 
-    void setLightOff(int light) {
-        setLight_native(mNativePointer, light, 0, LIGHT_FLASH_NONE, 0, 0, 0);
-    }
-
-    void setLightBrightness(int light, int brightness, int brightnessMode) {
-        int b = brightness & 0x000000ff;
-        b = 0xff000000 | (b << 16) | (b << 8) | b;
-        setLight_native(mNativePointer, light, b, LIGHT_FLASH_NONE, 0, 0, brightnessMode);
-    }
-
-    void setLightColor(int light, int color) {
-        setLight_native(mNativePointer, light, color, LIGHT_FLASH_NONE, 0, 0, 0);
-    }
-
-    void setLightFlashing(int light, int color, int mode, int onMS, int offMS) {
-        setLight_native(mNativePointer, light, color, mode, onMS, offMS, 0);
-    }
-
-    public void setAttentionLight(boolean on, int color) {
-        // Not worthy of a permission.  We shouldn't have a flashlight permission.
-        synchronized (this) {
-            mAttentionLightOn = on;
-            mPulsing = false;
-            setLight_native(mNativePointer, LIGHT_ID_ATTENTION, color,
-                    LIGHT_FLASH_HARDWARE, on ? 3 : 0, 0, 0);
-        }
-    }
-
-    public void pulseBreathingLight() {
-        synchronized (this) {
-            // HACK: Added at the last minute of cupcake -- design this better;
-            // Don't reuse the attention light -- make another one.
-            if (false) {
-                Log.d(TAG, "pulseBreathingLight mAttentionLightOn=" + mAttentionLightOn
-                        + " mPulsing=" + mPulsing);
-            }
-            if (!mAttentionLightOn && !mPulsing) {
-                mPulsing = true;
-                setLight_native(mNativePointer, LIGHT_ID_ATTENTION, 0x00ffffff,
-                        LIGHT_FLASH_HARDWARE, 7, 0, 0);
-                mH.sendMessageDelayed(Message.obtain(mH, 1), 3000);
-            }
-        }
+    public Light getLight(int id) {
+        return mLights[id];
     }
 
     private Handler mH = new Handler() {
         @Override
         public void handleMessage(Message msg) {
-            synchronized (this) {
-                if (false) {
-                    Log.d(TAG, "pulse cleanup handler firing mPulsing=" + mPulsing);
-                }
-                if (mPulsing) {
-                    mPulsing = false;
-                    setLight_native(mNativePointer, LIGHT_ID_ATTENTION,
-                            mAttentionLightOn ? 0xffffffff : 0,
-                            LIGHT_FLASH_NONE, 0, 0, 0);
-                }
-            }
+            Light light = (Light)msg.obj;
+            light.stopFlashing();
         }
     };
 
