@@ -280,6 +280,7 @@ public class SmsMessage extends SmsMessageBase{
             // send it as a UCS-2 encoded message
             try {
                 userData = encodeUCS2(message, header);
+                encoding = ENCODING_16BIT;
             } catch(UnsupportedEncodingException uex) {
                 Log.e(LOG_TAG,
                         "Implausible UnsupportedEncodingException ",
