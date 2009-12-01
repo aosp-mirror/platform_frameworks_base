@@ -103,6 +103,9 @@ import java.util.ArrayList;
     // do not want to pass this change to webkit.
     private boolean         mFromSetInputType;
     private boolean         mGotTouchDown;
+    // Keep track of whether a long press has happened.  Only meaningful after
+    // an ACTION_DOWN MotionEvent
+    private boolean         mHasPerformedLongClick;
     private boolean         mInSetTextAndKeepSelection;
     // Array to store the final character added in onTextChanged, so that its
     // KeyEvents may be determined.
@@ -453,8 +456,13 @@ import java.util.ArrayList;
             mDragSent = false;
             mScrolled = false;
             mGotTouchDown = true;
+            mHasPerformedLongClick = false;
             break;
         case MotionEvent.ACTION_MOVE:
+            if (mHasPerformedLongClick) {
+                mGotTouchDown = false;
+                return false;
+            }
             int slop = ViewConfiguration.get(mContext).getScaledTouchSlop();
             Spannable buffer = getText();
             int initialScrollX = Touch.getInitialScrollX(this, buffer);
@@ -478,6 +486,7 @@ import java.util.ArrayList;
                             mScrollX / maxScrollX : 0, mScrollY);
                 }
                 mScrolled = true;
+                cancelLongPress();
                 return true;
             }
             if (Math.abs((int) event.getX() - mDragStartX) < slop
@@ -504,6 +513,10 @@ import java.util.ArrayList;
             return false;
         case MotionEvent.ACTION_UP:
         case MotionEvent.ACTION_CANCEL:
+            if (mHasPerformedLongClick) {
+                mGotTouchDown = false;
+                return false;
+            }
             if (!mScrolled) {
                 // If the page scrolled, or the TextView scrolled, we do not
                 // want to change the selection
@@ -545,6 +558,12 @@ import java.util.ArrayList;
             return true;
         }
         return false;
+    }
+
+    @Override
+    public boolean performLongClick() {
+        mHasPerformedLongClick = true;
+        return super.performLongClick();
     }
 
     /**
