@@ -1620,14 +1620,20 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     public int interceptKeyTq(RawInputEvent event, boolean screenIsOn) {
         int result = ACTION_PASS_TO_USER;
         final boolean isWakeKey = isWakeKeyTq(event);
-        final boolean keyguardShowing = keyguardIsShowingTq();
+        // If screen is off then we treat the case where the keyguard is open but hidden
+        // the same as if it were open and in front.
+        // This will prevent any keys other than the power button from waking the screen
+        // when the keyguard is hidden by another activity.
+        final boolean keyguardActive = (screenIsOn ?
+                                        mKeyguardMediator.isShowingAndNotHidden() :
+                                        mKeyguardMediator.isShowing());
 
         if (false) {
             Log.d(TAG, "interceptKeyTq event=" + event + " keycode=" + event.keycode
-                  + " screenIsOn=" + screenIsOn + " keyguardShowing=" + keyguardShowing);
+                  + " screenIsOn=" + screenIsOn + " keyguardActive=" + keyguardActive);
         }
 
-        if (keyguardShowing) {
+        if (keyguardActive) {
             if (screenIsOn) {
                 // when the screen is on, always give the event to the keyguard
                 result |= ACTION_PASS_TO_USER;
@@ -1721,7 +1727,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         mShouldTurnOffOnKeyUp = false;
                         boolean gohome = (mEndcallBehavior & ENDCALL_HOME) != 0;
                         boolean sleeps = (mEndcallBehavior & ENDCALL_SLEEPS) != 0;
-                        if (keyguardShowing
+                        if (keyguardActive
                                 || (sleeps && !gohome)
                                 || (gohome && !goHome() && sleeps)) {
                             // they must already be on the keyguad or home screen,
