@@ -2216,19 +2216,12 @@ final class WebViewCore {
 
     // called by JNI. PluginWidget function to launch an activity and overlays
     // the activity with the View provided by the plugin class.
-    private void startFullScreenPluginActivity(String libName, int npp) {
+    private void startFullScreenPluginActivity(int npp) {
         if (mWebView == null) {
             return;
         }
 
-        String pkgName = PluginManager.getInstance(null).getPluginsAPKName(libName);
-        if (pkgName == null) {
-            Log.w(LOGTAG, "Unable to resolve " + libName + " to a plugin APK");
-            return;
-        }
-
         Intent intent = new Intent("android.intent.webkit.PLUGIN");
-        intent.putExtra(PluginActivity.INTENT_EXTRA_PACKAGE_NAME, pkgName);
         intent.putExtra(PluginActivity.INTENT_EXTRA_NPP_INSTANCE, npp);
         mWebView.getContext().startActivity(intent);
     }
