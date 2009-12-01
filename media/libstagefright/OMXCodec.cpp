@@ -416,10 +416,10 @@ sp<OMXCodec> OMXCodec::Create(
     }
 
     if (!strcasecmp(MEDIA_MIMETYPE_AUDIO_AMR_NB, mime)) {
-        codec->setAMRFormat();
+        codec->setAMRFormat(false /* isWAMR */);
     }
     if (!strcasecmp(MEDIA_MIMETYPE_AUDIO_AMR_WB, mime)) {
-        codec->setAMRWBFormat();
+        codec->setAMRFormat(true /* isWAMR */);
     }
     if (!strcasecmp(MEDIA_MIMETYPE_AUDIO_AAC, mime)) {
         int32_t numChannels, sampleRate;
@@ -1900,54 +1900,24 @@ void OMXCodec::setRawAudioFormat(
     CHECK_EQ(err, OK);
 }
 
-void OMXCodec::setAMRFormat() {
-    if (!mIsEncoder) {
-        OMX_AUDIO_PARAM_AMRTYPE def;
-        InitOMXParams(&def);
-        def.nPortIndex = kPortIndexInput;
+void OMXCodec::setAMRFormat(bool isWAMR) {
+    OMX_U32 portIndex = mIsEncoder ? kPortIndexOutput : kPortIndexInput;
 
-        status_t err =
-            mOMX->getParameter(mNode, OMX_IndexParamAudioAmr, &def, sizeof(def));
+    OMX_AUDIO_PARAM_AMRTYPE def;
+    InitOMXParams(&def);
+    def.nPortIndex = portIndex;
 
-        CHECK_EQ(err, OK);
+    status_t err =
+        mOMX->getParameter(mNode, OMX_IndexParamAudioAmr, &def, sizeof(def));
 
-        def.eAMRFrameFormat = OMX_AUDIO_AMRFrameFormatFSF;
-        def.eAMRBandMode = OMX_AUDIO_AMRBandModeNB0;
+    CHECK_EQ(err, OK);
 
-        err = mOMX->setParameter(mNode, OMX_IndexParamAudioAmr, &def, sizeof(def));
-        CHECK_EQ(err, OK);
-    }
+    def.eAMRFrameFormat = OMX_AUDIO_AMRFrameFormatFSF;
+    def.eAMRBandMode =
+        isWAMR ? OMX_AUDIO_AMRBandModeWB0 : OMX_AUDIO_AMRBandModeNB0;
 
-    ////////////////////////
-
-    if (mIsEncoder) {
-        sp<MetaData> format = mSource->getFormat();
-        int32_t sampleRate;
-        int32_t numChannels;
-        CHECK(format->findInt32(kKeySampleRate, &sampleRate));
-        CHECK(format->findInt32(kKeyChannelCount, &numChannels));
-
-        setRawAudioFormat(kPortIndexInput, sampleRate, numChannels);
-    }
-}
-
-void OMXCodec::setAMRWBFormat() {
-    if (!mIsEncoder) {
-        OMX_AUDIO_PARAM_AMRTYPE def;
-        InitOMXParams(&def);
-        def.nPortIndex = kPortIndexInput;
-
-        status_t err =
-            mOMX->getParameter(mNode, OMX_IndexParamAudioAmr, &def, sizeof(def));
-
-        CHECK_EQ(err, OK);
-
-        def.eAMRFrameFormat = OMX_AUDIO_AMRFrameFormatFSF;
-        def.eAMRBandMode = OMX_AUDIO_AMRBandModeWB0;
-
-        err = mOMX->setParameter(mNode, OMX_IndexParamAudioAmr, &def, sizeof(def));
-        CHECK_EQ(err, OK);
-    }
+    err = mOMX->setParameter(mNode, OMX_IndexParamAudioAmr, &def, sizeof(def));
+    CHECK_EQ(err, OK);
 
     ////////////////////////
 
