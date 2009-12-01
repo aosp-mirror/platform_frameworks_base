@@ -328,9 +328,6 @@ public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
             return true;
         }
 
-        // Sink is being disconnected, downgrade priority from AUTO_CONNECT.
-        setSinkPriority(device, BluetoothA2dp.PRIORITY_ON);
-
         // State is CONNECTING or CONNECTED or PLAYING
         if (!disconnectSinkNative(path)) {
             return false;
