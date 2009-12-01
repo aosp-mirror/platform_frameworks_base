@@ -167,7 +167,7 @@ public final class CacheManager {
      * @param context The application context.
      */
     static void init(Context context) {
-        mDataBase = WebViewDatabase.getInstance(context);
+        mDataBase = WebViewDatabase.getInstance(context.getApplicationContext());
         mBaseDir = new File(context.getCacheDir(), "webviewCache");
         if (createCacheDirectory() && mClearCacheOnInit) {
             removeAllCacheFiles();

@@ -732,7 +732,7 @@ public class WebView extends AbsoluteLayout
     /**
      * Construct a new WebView with layout parameters, a default style and a set
      * of custom Javscript interfaces to be added to the WebView at initialization
-     * time. This guraratees that these interfaces will be available when the JS
+     * time. This guarantees that these interfaces will be available when the JS
      * context is initialized.
      * @param context A Context object used to access application assets.
      * @param attrs An AttributeSet passed to our parent.
