@@ -76,7 +76,7 @@ public abstract class SQLiteProgram extends SQLiteClosable {
     @Override
     protected void onAllReferencesReleased() {
         // release the compiled sql statement used by me if it is NOT in cache
-        if (!myCompiledSqlIsInCache) {
+        if (!myCompiledSqlIsInCache && compiledSql != null) {
             compiledSql.releaseSqlStatement();
             compiledSql = null; // so that GC doesn't call finalize() on it
         }
@@ -87,7 +87,7 @@ public abstract class SQLiteProgram extends SQLiteClosable {
     @Override
     protected void onAllReferencesReleasedFromContainer() {
         // release the compiled sql statement used by me if it is NOT in cache
-        if (!myCompiledSqlIsInCache) {
+      if (!myCompiledSqlIsInCache && compiledSql != null) {
             compiledSql.releaseSqlStatement();
             compiledSql = null; // so that GC doesn't call finalize() on it
         }
