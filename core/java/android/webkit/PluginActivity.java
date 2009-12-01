@@ -18,18 +18,19 @@ package android.webkit;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.webkit.plugin.SurfaceDrawingModel;
 import android.webkit.plugin.WebkitPlugin;
 
 /**
- * This activity  is invoked when a plugin elects to go into full screen mode.
+ * This activity is invoked when a plugin elects to go into full screen mode.
  * @hide
  */
 public class PluginActivity extends Activity {
 
-    /* package */ static final String INTENT_EXTRA_PACKAGE_NAME =
-            "android.webkit.plugin.PACKAGE_NAME";
+    private static final String LOGTAG = "PluginActivity";
+    
     /* package */ static final String INTENT_EXTRA_NPP_INSTANCE =
             "android.webkit.plugin.NPP_INSTANCE";
 
@@ -40,24 +41,30 @@ public class PluginActivity extends Activity {
 
         final Intent intent = getIntent();
         if (intent == null) {
-            // No intent means no class to lookup.
+            Log.e(LOGTAG, "Unable to retrieve the intent responsible for this activity");
             finish();
             return;
         }
-        final String pkgName = intent.getStringExtra(INTENT_EXTRA_PACKAGE_NAME);
+
         final int npp = intent.getIntExtra(INTENT_EXTRA_NPP_INSTANCE, -1);
 
-        // XXX retrieve the existing object instead of creating a new one
-        WebkitPlugin plugin = PluginManager.getInstance(null).getPluginInstance(pkgName, npp);
+        if (npp == -1) {
+            Log.e(LOGTAG, "The intent did not include the NPP pointer");
+            finish();
+            return;
+        }
+
+        // retrieve the plugin's existing java object instead of creating a new one
+        WebkitPlugin plugin = nativeGetWebkitPlugin(npp);
 
         if (plugin == null) {
-            //TODO log error
+            Log.e(LOGTAG, "Unable to retrieve the plugin's java interface");
             finish();
             return;
         }
         SurfaceDrawingModel fullScreenSurface = plugin.getFullScreenSurface();
-        if(fullScreenSurface == null) {
-            //TODO log error
+        if (fullScreenSurface == null) {
+            Log.e(LOGTAG, "The plugin returned a null value for the full-screen interface");
             finish();
             return;
         }
@@ -67,7 +74,10 @@ public class PluginActivity extends Activity {
         } else {
             // No custom full-sreen view returned by the plugin, odd but
             // just in case, finish the activity.
+            Log.e(LOGTAG, "The plugin's full-screen interface returned a null view");
             finish();
         }
     }
+
+    native WebkitPlugin nativeGetWebkitPlugin(int npp);
 }
