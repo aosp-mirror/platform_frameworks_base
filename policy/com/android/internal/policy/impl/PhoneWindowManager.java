@@ -1928,8 +1928,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mKeyguardMediator.verifyUnlock(callback);
     }
 
-    /** {@inheritDoc} */
-    public boolean keyguardIsShowingTq() {
+    private boolean keyguardIsShowingTq() {
         return mKeyguardMediator.isShowingAndNotHidden();
     }
 
