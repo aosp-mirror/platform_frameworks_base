@@ -46,7 +46,7 @@ EventPlugin::~EventPlugin() { }
 
 void EventPlugin::drawPlugin(const ANPBitmap& bitmap, const ANPRectI& clip) {
 
-    gLogI.log(inst(), kDebug_ANPLogType, " ------ %p drawing the plugin (%d,%d)",
+    gLogI.log(kDebug_ANPLogType, " ------ %p drawing the plugin (%d,%d)",
               inst(), bitmap.width, bitmap.height);
 
     // get the plugin's dimensions according to the DOM
@@ -60,7 +60,7 @@ void EventPlugin::drawPlugin(const ANPBitmap& bitmap, const ANPRectI& clip) {
 
     // check to make sure the zoom level is uniform
     if (zoomFactorW + .01 < zoomFactorH && zoomFactorW - .01 > zoomFactorH)
-        gLogI.log(inst(), kError_ANPLogType, " ------ %p zoom is out of sync (%f,%f)",
+        gLogI.log(kError_ANPLogType, " ------ %p zoom is out of sync (%f,%f)",
                   inst(), zoomFactorW, zoomFactorH);
 
     // scale the variables based on the zoom level
@@ -109,7 +109,7 @@ void EventPlugin::printToDiv(const char* text, int length) {
     browser->getvalue(inst(), NPNVWindowNPObject, &windowObject);
 
     if (!windowObject)
-        gLogI.log(inst(), kError_ANPLogType, " ------ %p Unable to retrieve DOM Window", inst());
+        gLogI.log(kError_ANPLogType, " ------ %p Unable to retrieve DOM Window", inst());
 
     // create a string (JS code) that is stored in memory allocated by the browser
     const char* jsBegin = "var outputDiv = document.getElementById('eventOutput'); outputDiv.innerHTML += ' ";
@@ -126,13 +126,13 @@ void EventPlugin::printToDiv(const char* text, int length) {
     memcpy(middleMem, text, length);
     memcpy(endMem, jsEnd, strlen(jsEnd));
 
-    gLogI.log(inst(), kError_ANPLogType, "text: %.*s\n", totalLength, (char*)beginMem);
+    gLogI.log(kDebug_ANPLogType, "text: %.*s\n", totalLength, (char*)beginMem);
 
     // execute the javascript in the plugin's DOM object
     NPString script = { (char*)beginMem, totalLength };
     NPVariant scriptVariant;
     if (!browser->evaluate(inst(), windowObject, &script, &scriptVariant))
-        gLogI.log(inst(), kError_ANPLogType, " ------ %p Unable to eval the JS.", inst());
+        gLogI.log(kError_ANPLogType, " ------ %p Unable to eval the JS.", inst());
 
     // free the memory allocated within the browser
     browser->memfree(beginMem);
@@ -170,10 +170,10 @@ int16 EventPlugin::handleEvent(const ANPEvent* evt) {
             }
             return 1;
         case kTouch_ANPEventType:
-            gLogI.log(inst(), kError_ANPLogType, " ------ %p the plugin did not request touch events", inst());
+            gLogI.log(kError_ANPLogType, " ------ %p the plugin did not request touch events", inst());
             break;
         case kKey_ANPEventType:
-            gLogI.log(inst(), kError_ANPLogType, " ------ %p the plugin did not request key events", inst());
+            gLogI.log(kError_ANPLogType, " ------ %p the plugin did not request key events", inst());
             break;
         default:
             break;
