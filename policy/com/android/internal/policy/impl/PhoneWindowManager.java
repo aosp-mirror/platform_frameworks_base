@@ -1651,14 +1651,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     if (!mKeyguardMediator.onWakeKeyWhenKeyguardShowingTq(event.keycode)
                             && (event.keycode == KeyEvent.KEYCODE_VOLUME_DOWN
                                 || event.keycode == KeyEvent.KEYCODE_VOLUME_UP)) {
+                        // when keyguard is showing and screen off, we need
+                        // to handle the volume key for calls and  music here
                         if (isInCall()) {
-                            // if the keyguard didn't wake the device, we are in call, and
-                            // it is a volume key, turn on the screen so that the user
-                            // can more easily adjust the in call volume.
-                            mKeyguardMediator.pokeWakelock();
+                            handleVolumeKey(AudioManager.STREAM_VOICE_CALL, event.keycode);
                         } else if (isMusicActive()) {
-                            // when keyguard is showing and screen off, we need
-                            // to handle the volume key for music here
                             handleVolumeKey(AudioManager.STREAM_MUSIC, event.keycode);
                         }
                     }
