@@ -644,7 +644,22 @@ import java.util.ArrayList;
     /* package */ void setDefaultSelection() {
         Spannable text = (Spannable) getText();
         int selection = mSingle ? text.length() : 0;
-        Selection. setSelection(text, selection, selection);
+        if (Selection.getSelectionStart(text) == selection
+                && Selection.getSelectionEnd(text) == selection) {
+            // The selection of the UI copy is set correctly, but the
+            // WebTextView still needs to inform the webkit thread to set the
+            // selection.  Normally that is done in onSelectionChanged, but
+            // onSelectionChanged will not be called because the UI copy is not
+            // changing.  (This can happen when the WebTextView takes focus.
+            // That onSelectionChanged was blocked because the selection set
+            // when focusing is not necessarily the desirable selection for
+            // WebTextView.)
+            if (mWebView != null) {
+                mWebView.setSelection(selection, selection);
+            }
+        } else {
+            Selection.setSelection(text, selection, selection);
+        }
     }
 
     /**
