@@ -74,6 +74,7 @@ public class BluetoothService extends IBluetooth.Stub {
     private int mNativeData;
     private BluetoothEventLoop mEventLoop;
     private boolean mIsAirplaneSensitive;
+    private boolean mIsAirplaneToggleable;
     private int mBluetoothState;
     private boolean mRestart = false;  // need to call enable() after disable()
     private boolean mIsDiscovering;
@@ -370,7 +371,7 @@ public class BluetoothService extends IBluetooth.Stub {
                                                 "Need BLUETOOTH_ADMIN permission");
 
         // Airplane mode can prevent Bluetooth radio from being turned on.
-        if (mIsAirplaneSensitive && isAirplaneModeOn()) {
+        if (mIsAirplaneSensitive && isAirplaneModeOn() && !mIsAirplaneToggleable) {
             return false;
         }
         if (mBluetoothState != BluetoothAdapter.STATE_OFF) {
@@ -545,7 +546,7 @@ public class BluetoothService extends IBluetooth.Stub {
                 mEventLoop.onPropertyChanged(propVal);
             }
 
-            if (mIsAirplaneSensitive && isAirplaneModeOn()) {
+            if (mIsAirplaneSensitive && isAirplaneModeOn() && !mIsAirplaneToggleable) {
                 disable(false);
             }
 
@@ -1597,10 +1598,17 @@ public class BluetoothService extends IBluetooth.Stub {
     };
 
     private void registerForAirplaneMode(IntentFilter filter) {
-        String airplaneModeRadios = Settings.System.getString(mContext.getContentResolver(),
+        final ContentResolver resolver = mContext.getContentResolver();
+        final String airplaneModeRadios = Settings.System.getString(resolver,
                 Settings.System.AIRPLANE_MODE_RADIOS);
-        mIsAirplaneSensitive = airplaneModeRadios == null
-                ? true : airplaneModeRadios.contains(Settings.System.RADIO_BLUETOOTH);
+        final String toggleableRadios = Settings.System.getString(resolver,
+                Settings.System.AIRPLANE_MODE_TOGGLEABLE_RADIOS);
+
+        mIsAirplaneSensitive = airplaneModeRadios == null ? true :
+                airplaneModeRadios.contains(Settings.System.RADIO_BLUETOOTH);
+        mIsAirplaneToggleable = toggleableRadios == null ? false :
+                toggleableRadios.contains(Settings.System.RADIO_BLUETOOTH);
+
         if (mIsAirplaneSensitive) {
             filter.addAction(Intent.ACTION_AIRPLANE_MODE_CHANGED);
         }
@@ -1661,6 +1669,7 @@ public class BluetoothService extends IBluetooth.Stub {
         }
 
         pw.println("mIsAirplaneSensitive = " + mIsAirplaneSensitive);
+        pw.println("mIsAirplaneToggleable = " + mIsAirplaneToggleable);
 
         pw.println("Local address = " + getAddress());
         pw.println("Local name = " + getName());
