@@ -152,6 +152,7 @@ public class WebSettings {
     private int             mMinimumLogicalFontSize = 8;
     private int             mDefaultFontSize = 16;
     private int             mDefaultFixedFontSize = 13;
+    private int             mPageCacheCapacity = 0;
     private boolean         mLoadsImagesAutomatically = true;
     private boolean         mBlockNetworkImage = false;
     private boolean         mBlockNetworkLoads;
@@ -876,6 +877,20 @@ public class WebSettings {
      */
     public synchronized int getDefaultFixedFontSize() {
         return mDefaultFixedFontSize;
+    }
+
+    /**
+     * Set the number of pages cached by the WebKit for the history navigation.
+     * @param size A non-negative integer between 0 (no cache) and 20 (max).
+     * @hide
+     */
+    public synchronized void setPageCacheCapacity(int size) {
+        if (size < 0) size = 0;
+        if (size > 20) size = 20;
+        if (mPageCacheCapacity != size) {
+            mPageCacheCapacity = size;
+            postSync();
+        }
     }
 
     /**
