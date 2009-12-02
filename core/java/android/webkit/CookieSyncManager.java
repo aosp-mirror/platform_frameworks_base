@@ -93,7 +93,7 @@ public final class CookieSyncManager extends WebSyncManager {
     public static synchronized CookieSyncManager createInstance(
             Context context) {
         if (sRef == null) {
-            sRef = new CookieSyncManager(context);
+            sRef = new CookieSyncManager(context.getApplicationContext());
         }
         return sRef;
     }
