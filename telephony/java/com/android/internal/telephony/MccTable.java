@@ -24,6 +24,7 @@ import android.net.wifi.WifiManager;
 import android.os.RemoteException;
 import android.os.SystemProperties;
 import android.provider.Settings;
+import android.text.TextUtils;
 import android.util.Log;
 
 import java.util.Arrays;
@@ -573,34 +574,36 @@ public final class MccTable
      * @param mccmnc truncated imsi with just the MCC and MNC - MNC assumed to be from 4th to end
      */
     public static void updateMccMncConfiguration(PhoneBase phone, String mccmnc) {
-        int mcc, mnc;
+        if (!TextUtils.isEmpty(mccmnc)) {
+            int mcc, mnc;
 
-        try {
-            mcc = Integer.parseInt(mccmnc.substring(0,3));
-            mnc = Integer.parseInt(mccmnc.substring(3));
-        } catch (NumberFormatException e) {
-            Log.e(LOG_TAG, "Error parsing IMSI");
-            return;
-        }
+            try {
+                mcc = Integer.parseInt(mccmnc.substring(0,3));
+                mnc = Integer.parseInt(mccmnc.substring(3));
+            } catch (NumberFormatException e) {
+                Log.e(LOG_TAG, "Error parsing IMSI");
+                return;
+            }
 
-        Log.d(LOG_TAG, "updateMccMncConfiguration: mcc=" + mcc + ", mnc=" + mnc);
+            Log.d(LOG_TAG, "updateMccMncConfiguration: mcc=" + mcc + ", mnc=" + mnc);
 
-        if (mcc != 0) {
-            setTimezoneFromMccIfNeeded(phone, mcc);
-            setLocaleFromMccIfNeeded(phone, mcc);
-            setWifiChannelsFromMccIfNeeded(phone, mcc);
-        }
-        try {
-            Configuration config = ActivityManagerNative.getDefault().getConfiguration();
             if (mcc != 0) {
-                config.mcc = mcc;
+                setTimezoneFromMccIfNeeded(phone, mcc);
+                setLocaleFromMccIfNeeded(phone, mcc);
+                setWifiChannelsFromMccIfNeeded(phone, mcc);
             }
-            if (mnc != 0) {
-                config.mnc = mnc;
+            try {
+                Configuration config = ActivityManagerNative.getDefault().getConfiguration();
+                if (mcc != 0) {
+                    config.mcc = mcc;
+                }
+                if (mnc != 0) {
+                    config.mnc = mnc;
+                }
+                ActivityManagerNative.getDefault().updateConfiguration(config);
+            } catch (RemoteException e) {
+                Log.e(LOG_TAG, "Can't update configuration", e);
             }
-            ActivityManagerNative.getDefault().updateConfiguration(config);
-        } catch (RemoteException e) {
-            Log.e(LOG_TAG, "Can't update configuration", e);
         }
     }
 
