@@ -96,7 +96,7 @@ public class PluginManager {
                 throw new IllegalStateException(
                         "First call to PluginManager need a valid context.");
             }
-            mInstance = new PluginManager(context);
+            mInstance = new PluginManager(context.getApplicationContext());
         }
         return mInstance;
     }
