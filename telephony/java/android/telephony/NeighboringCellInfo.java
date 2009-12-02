@@ -68,12 +68,13 @@ public class NeighboringCellInfo implements Parcelable
     private int mNetworkType;
 
     /**
-     * @deprecated
      * Empty constructor.  Initializes the RSSI and CID.
      *
      * NeighboringCellInfo is one time shot for the neighboring cells based on
      * the radio network type at that moment. Its constructor needs radio network
      * type.
+     *
+     * @deprecated by {@link #NeighboringCellInfo(int, String, int)}
      */
     @Deprecated
     public NeighboringCellInfo() {
@@ -85,12 +86,13 @@ public class NeighboringCellInfo implements Parcelable
     }
 
     /**
-     * @deprecated
      * Initialize the object from rssi and cid.
      *
      * NeighboringCellInfo is one time shot for the neighboring cells based on
      * the radio network type at that moment. Its constructor needs radio network
      * type.
+     *
+     * @deprecated by {@link #NeighboringCellInfo(int, String, int)}
      */
     @Deprecated
     public NeighboringCellInfo(int rssi, int cid) {
@@ -99,7 +101,6 @@ public class NeighboringCellInfo implements Parcelable
     }
 
     /**
-     * @hide
      * Initialize the object from rssi, location string, and radioType
      * radioType is one of following
      * {@link TelephonyManager#NETWORK_TYPE_GPRS TelephonyManager.NETWORK_TYPE_GPRS},
@@ -223,12 +224,14 @@ public class NeighboringCellInfo implements Parcelable
         return mNetworkType;
     }
     /**
-     * @deprecated
      * Set the cell id.
      *
      * NeighboringCellInfo is a one time shot for the neighboring cells based on
      * the radio network type at that moment. It shouldn't be changed after
      * creation.
+     *
+     * @deprecated cid value passed as in location parameter passed to constructor
+     *              {@link #NeighboringCellInfo(int, String, int)}
      */
     @Deprecated
     public void setCid(int cid) {
@@ -236,12 +239,14 @@ public class NeighboringCellInfo implements Parcelable
     }
 
     /**
-     * @deprecated
      * Set the signal strength of the cell.
      *
      * NeighboringCellInfo is a one time shot for the neighboring cells based on
      * the radio network type at that moment. It shouldn't be changed after
      * creation.
+     *
+     * @deprecated initial rssi value passed as parameter to constructor
+     *              {@link #NeighboringCellInfo(int, String, int)}
      */
     @Deprecated
     public void setRssi(int rssi) {
