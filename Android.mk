@@ -357,6 +357,8 @@ web_docs_sample_code_flags := \
 		-hdf android.hasSamples 1 \
 		-samplecode $(sample_dir)/ApiDemos \
 		            guide/samples/ApiDemos "API Demos" \
+    -samplecode $(sample_dir)/BluetoothChat \
+                guide/samples/BluetoothChat "Bluetooth Chat" \
 		-samplecode $(sample_dir)/Home \
 		            guide/samples/Home "Home" \
 		-samplecode $(sample_dir)/JetBoy \
