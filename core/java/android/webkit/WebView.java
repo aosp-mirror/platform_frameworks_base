@@ -3990,6 +3990,13 @@ public class WebView extends AbsoluteLayout
                     }
 
                     mTouchMode = TOUCH_DRAG_MODE;
+                    mLastTouchX = x;
+                    mLastTouchY = y;
+                    fDeltaX = 0.0f;
+                    fDeltaY = 0.0f;
+                    deltaX = 0;
+                    deltaY = 0;
+
                     WebViewCore.pauseUpdate(mWebViewCore);
                     if (!mDragFromTextInput) {
                         nativeHideCursor();
