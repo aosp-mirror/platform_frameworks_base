@@ -74,7 +74,7 @@ Android 1.6 platform.</p>
 
 <p>API related:</p>
 <ul>
-<li>Properly exposes CDMA-related constants {@link android.telephony.TelephonyManager}: <code>DATA_ACTIVITY_DORMANT</code>,
+<li>Properly exposes CDMA-related constants in {@link android.telephony.TelephonyManager android.telephony.TelephonyManager}: <code>DATA_ACTIVITY_DORMANT</code>,
 <code>PHONE_TYPE_CDMA</code>, <code>NETWORK_TYPE_CDMA</code>,
 <code>NETWORK_TYPE_EVDO_0</code>, <code>NETWORK_TYPE_EVDO_A</code>, and
 <code>NETWORK_TYPE_1xRTT</code>.</li>
@@ -362,15 +362,15 @@ determining the density of the current device screen.</li>
       <li>New attributes for the 
       <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html">{@code &lt;uses-sdk>}</a> element:
         <ul>
-          <li><code>maxSdkVersion</code>: This indicates the maximum API Level on which an application is 
-          designed to run. If an application declares this attribute, the Android system prevents the user 
-          from installing the application if the system's API Level is higher than the value specified in 
-          this attribute. </li>
-          <li><code>targetSdkVersion</code>: This indicates the API Level that the application is targeting. 
+          <li><code>targetSdkVersion</code>: Indicates the API Level that the application is targeting. 
           It is able to run on older versions (down to minSdkVersion), but was explicitly tested to 
           work with the version specified here. Specifying this version allows the platform to 
           disable compatibility code that is not required or enable newer features that are not 
           available to older applications. </li>
+          <li><code>maxSdkVersion</code>: Indicates the maximum API Level on which an application is 
+          designed to run. <strong>Important:</strong> Please read the <a
+          href="{@docRoot}guide/topics/manifest/uses-sdk-element.html"><code>&lt;uses-sdk&gt;</code></a>
+          documentation before using this attribute. </li>
         </ul>
       </li>
 
