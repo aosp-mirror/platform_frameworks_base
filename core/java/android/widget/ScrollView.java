@@ -51,8 +51,6 @@ import java.util.List;
  * <p>ScrollView only supports vertical scrolling.
  */
 public class ScrollView extends FrameLayout {
-    static final String TAG = "ScrollView";
-    
     static final int ANIMATED_SCROLL_GAP = 250;
 
     static final float MAX_SCROLL_FACTOR = 0.5f;
@@ -401,6 +399,7 @@ public class ScrollView extends FrameLayout {
                 final int yDiff = (int) Math.abs(y - mLastMotionY);
                 if (yDiff > mTouchSlop) {
                     mIsBeingDragged = true;
+                    mLastMotionY = y;
                 }
                 break;
 
