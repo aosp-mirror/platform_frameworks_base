@@ -3,15 +3,15 @@ sdk.redirect=0
 sdk.version=2.0.1
 sdk.date=December 2009
 
-sdk.win_download=android-sdk_r4-windows.zip
+sdk.win_download=android-sdk_r04-windows.zip
 sdk.win_bytes=23069119
 sdk.win_checksum=c48b407de852ba483869f17337e90997
 
-sdk.mac_download=android-sdk_r4-mac.zip
+sdk.mac_download=android-sdk_r04-mac_86.zip
 sdk.mac_bytes=19657927
 sdk.mac_checksum=b08512765aa9b0369bb9b8fecdf763e3
 
-sdk.linux_download=android-sdk_r4-linux.tgz
+sdk.linux_download=android-sdk_r04-linux_86.tgz
 sdk.linux_bytes=15984887
 sdk.linux_checksum=ef84b08fd9da84f4c4ae77564fe4eaee
 
