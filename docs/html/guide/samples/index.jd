@@ -33,6 +33,9 @@ platforms) and allow you to view the source files in your browser. </p>
  <dt><a href="ApiDemos/index.html">API Demos</a></dt>
   <dd>A variety of small applications that demonstrate an extensive collection of
   framework topics.</dd>
+
+ <dt><a href="BluetoothChat/index.html">Bluetooth Chat</a></dt>
+  <dd>An application for two-way text messaging over Bluetooth.</dd>
   
  <dt><a href="Home/index.html">Home</a></dt>
   <dd>An application for saving notes. Similar (but not identical) to the 
