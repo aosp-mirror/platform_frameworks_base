@@ -4621,6 +4621,7 @@ public class WebView extends AbsoluteLayout
             View v = mWebTextView;
             int x = viewToContentX((v.getLeft() + v.getRight()) >> 1);
             int y = viewToContentY((v.getTop() + v.getBottom()) >> 1);
+            displaySoftKeyboard(true);
             nativeTextInputMotionUp(x, y);
         }
     }
