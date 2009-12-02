@@ -2966,12 +2966,6 @@ class PackageManagerService extends IPackageManager.Stub {
             TAG, "Removing package " + pkg.applicationInfo.packageName );
 
         synchronized (mPackages) {
-            if (pkg.mPreferredOrder > 0) {
-                mSettings.mPreferredPackages.remove(pkg);
-                pkg.mPreferredOrder = 0;
-                updatePreferredIndicesLP();
-            }
-    
             clearPackagePreferredActivitiesLP(pkg.packageName);
     
             mPackages.remove(pkg.applicationInfo.packageName);
@@ -4938,62 +4932,17 @@ class PackageManagerService extends IPackageManager.Stub {
     public void addPackageToPreferred(String packageName) {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.SET_PREFERRED_APPLICATIONS, null);
-
-        synchronized (mPackages) {
-            PackageParser.Package p = mPackages.get(packageName);
-            if (p == null) {
-                return;
-            }
-            PackageSetting ps = (PackageSetting)p.mExtras;
-            if (ps != null) {
-                mSettings.mPreferredPackages.remove(ps);
-                mSettings.mPreferredPackages.add(0, ps);
-                updatePreferredIndicesLP();
-                mSettings.writeLP();
-            }
-        }
+        Log.w(TAG, "addPackageToPreferred: no longer implemented");
     }
 
     public void removePackageFromPreferred(String packageName) {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.SET_PREFERRED_APPLICATIONS, null);
-
-        synchronized (mPackages) {
-            PackageParser.Package p = mPackages.get(packageName);
-            if (p == null) {
-                return;
-            }
-            if (p.mPreferredOrder > 0) {
-                PackageSetting ps = (PackageSetting)p.mExtras;
-                if (ps != null) {
-                    mSettings.mPreferredPackages.remove(ps);
-                    p.mPreferredOrder = 0;
-                    updatePreferredIndicesLP();
-                    mSettings.writeLP();
-                }
-            }
-        }
-    }
-
-    private void updatePreferredIndicesLP() {
-        final ArrayList<PackageSetting> pkgs
-                = mSettings.mPreferredPackages;
-        final int N = pkgs.size();
-        for (int i=0; i<N; i++) {
-            pkgs.get(i).pkg.mPreferredOrder = N - i;
-        }
+        Log.w(TAG, "removePackageFromPreferred: no longer implemented");
     }
 
     public List<PackageInfo> getPreferredPackages(int flags) {
-        synchronized (mPackages) {
-            final ArrayList<PackageInfo> res = new ArrayList<PackageInfo>();
-            final ArrayList<PackageSetting> pref = mSettings.mPreferredPackages;
-            final int N = pref.size();
-            for (int i=0; i<N; i++) {
-                res.add(generatePackageInfo(pref.get(i).pkg, flags));
-            }
-            return res;
-        }
+        return new ArrayList<PackageInfo>();
     }
 
     public void addPreferredActivity(IntentFilter filter, int match,
@@ -5306,13 +5255,6 @@ class PackageManagerService extends IPackageManager.Stub {
             pw.println(" ");
             pw.println("Preferred Activities:");
             mSettings.mPreferredActivities.dump(pw, "  ");
-            pw.println(" ");
-            pw.println("Preferred Packages:");
-            {
-                for (PackageSetting ps : mSettings.mPreferredPackages) {
-                    pw.print("  "); pw.println(ps.name);
-                }
-            }
             pw.println(" ");
             pw.println("Permissions:");
             {
@@ -6064,10 +6006,6 @@ class PackageManagerService extends IPackageManager.Stub {
         private final File mBackupSettingsFilename;
         private final HashMap<String, PackageSetting> mPackages =
                 new HashMap<String, PackageSetting>();
-        // The user's preferred packages/applications, in order of preference.
-        // First is the most preferred.
-        private final ArrayList<PackageSetting> mPreferredPackages =
-                new ArrayList<PackageSetting>();
         // List of replaced system applications
         final HashMap<String, PackageSetting> mDisabledSysPackages =
             new HashMap<String, PackageSetting>();
@@ -6111,9 +6049,6 @@ class PackageManagerService extends IPackageManager.Stub {
         // Mapping from permission tree names to info about them.
         final HashMap<String, BasePermission> mPermissionTrees =
                 new HashMap<String, BasePermission>();
-
-        private final ArrayList<String> mPendingPreferredPackages
-                = new ArrayList<String>();
 
         private final StringBuilder mReadMessages = new StringBuilder();
 
@@ -6598,16 +6533,6 @@ class PackageManagerService extends IPackageManager.Stub {
                     writeDisabledSysPackage(serializer, pkg);
                 }
 
-                serializer.startTag(null, "preferred-packages");
-                int N = mPreferredPackages.size();
-                for (int i=0; i<N; i++) {
-                    PackageSetting pkg = mPreferredPackages.get(i);
-                    serializer.startTag(null, "item");
-                    serializer.attribute(null, "name", pkg.name);
-                    serializer.endTag(null, "item");
-                }
-                serializer.endTag(null, "preferred-packages");
-
                 serializer.startTag(null, "preferred-activities");
                 for (PreferredActivity pa : mPreferredActivities.filterSet()) {
                     serializer.startTag(null, "item");
@@ -6885,7 +6810,7 @@ class PackageManagerService extends IPackageManager.Stub {
                     } else if (tagName.equals("shared-user")) {
                         readSharedUserLP(parser);
                     } else if (tagName.equals("preferred-packages")) {
-                        readPreferredPackagesLP(parser);
+                        // no longer used.
                     } else if (tagName.equals("preferred-activities")) {
                         readPreferredActivitiesLP(parser);
                     } else if(tagName.equals("updated-package")) {
@@ -6938,19 +6863,6 @@ class PackageManagerService extends IPackageManager.Stub {
                 }
             }
             mPendingPackages.clear();
-
-            N = mPendingPreferredPackages.size();
-            mPreferredPackages.clear();
-            for (int i=0; i<N; i++) {
-                final String name = mPendingPreferredPackages.get(i);
-                final PackageSetting p = mPackages.get(name);
-                if (p != null) {
-                    mPreferredPackages.add(p);
-                } else {
-                    Log.w(TAG, "Unknown preferred package: " + name);
-                }
-            }
-            mPendingPreferredPackages.clear();
 
             mReadMessages.append("Read completed successfully: "
                     + mPackages.size() + " packages, "
@@ -7404,37 +7316,6 @@ class PackageManagerService extends IPackageManager.Stub {
                 } else {
                     reportSettingsProblem(Log.WARN,
                             "Unknown element under <perms>: "
-                            + parser.getName());
-                }
-                XmlUtils.skipCurrentTag(parser);
-            }
-        }
-
-        private void readPreferredPackagesLP(XmlPullParser parser)
-                throws XmlPullParserException, IOException {
-            int outerDepth = parser.getDepth();
-            int type;
-            while ((type=parser.next()) != XmlPullParser.END_DOCUMENT
-                   && (type != XmlPullParser.END_TAG
-                           || parser.getDepth() > outerDepth)) {
-                if (type == XmlPullParser.END_TAG
-                        || type == XmlPullParser.TEXT) {
-                    continue;
-                }
-
-                String tagName = parser.getName();
-                if (tagName.equals("item")) {
-                    String name = parser.getAttributeValue(null, "name");
-                    if (name != null) {
-                        mPendingPreferredPackages.add(name);
-                    } else {
-                        reportSettingsProblem(Log.WARN,
-                                "Error in package manager settings: <preferred-package> has no name at "
-                                + parser.getPositionDescription());
-                    }
-                } else {
-                    reportSettingsProblem(Log.WARN,
-                            "Unknown element under <preferred-packages>: "
                             + parser.getName());
                 }
                 XmlUtils.skipCurrentTag(parser);
