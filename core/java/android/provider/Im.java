@@ -879,7 +879,7 @@ public class Im {
          * The thread_id column stores the contact id of the contact the message belongs to.
          * For groupchat messages, the thread_id stores the group id, which is the contact id
          * of the temporary group contact created for the groupchat. So there should be no
-         * collision between groupchat message thread id and regular message thread id. 
+         * collision between groupchat message thread id and regular message thread id.
          */
         String THREAD_ID = "thread_id";
 
@@ -947,6 +947,12 @@ public class Im {
          * <P>Type: INTEGER</P>
          */
         String DISPLAY_SENT_TIME = "show_ts";
+
+        /*
+         * For rows which have been consolidated this is the row id of the
+         * row into which they have been consolidated.
+         */
+        String CONSOLIDATION_KEY = "consolidation_key";
     }
 
     /**
