@@ -711,6 +711,9 @@ class NotificationManagerService extends INotificationManager.Stub
                     && (!(old != null
                         && (notification.flags & Notification.FLAG_ONLY_ALERT_ONCE) != 0 ))
                     && mSystemReady) {
+
+                final AudioManager audioManager = (AudioManager) mContext
+                .getSystemService(Context.AUDIO_SERVICE);
                 // sound
                 final boolean useDefaultSound =
                     (notification.defaults & Notification.DEFAULT_SOUND) != 0; 
@@ -729,18 +732,20 @@ class NotificationManagerService extends INotificationManager.Stub
                         audioStreamType = DEFAULT_STREAM_TYPE;
                     }
                     mSoundNotification = r;
-                    long identity = Binder.clearCallingIdentity();
-                    try {
-                        mSound.play(mContext, uri, looping, audioStreamType);
-                    }
-                    finally {
-                        Binder.restoreCallingIdentity(identity);
+                    // do not play notifications if stream volume is 0
+                    // (typically because ringer mode is silent).
+                    if (audioManager.getStreamVolume(audioStreamType) != 0) {
+                        long identity = Binder.clearCallingIdentity();
+                        try {
+                            mSound.play(mContext, uri, looping, audioStreamType);
+                        }
+                        finally {
+                            Binder.restoreCallingIdentity(identity);
+                        }
                     }
                 }
 
                 // vibrate
-                final AudioManager audioManager = (AudioManager) mContext
-                        .getSystemService(Context.AUDIO_SERVICE);
                 final boolean useDefaultVibrate =
                     (notification.defaults & Notification.DEFAULT_VIBRATE) != 0; 
                 if ((useDefaultVibrate || notification.vibrate != null)
