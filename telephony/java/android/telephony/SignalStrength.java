@@ -24,8 +24,6 @@ import android.util.Log;
 
 /**
  * Contains phone signal strength related information.
- *
- * @hide
  */
 public class SignalStrength implements Parcelable {
 
@@ -50,6 +48,7 @@ public class SignalStrength implements Parcelable {
      * @param m Bundle from intent notifier
      * @return newly created SignalStrength
      *
+     * @hide
      */
     public static SignalStrength newFromBundle(Bundle m) {
         SignalStrength ret;
@@ -61,6 +60,7 @@ public class SignalStrength implements Parcelable {
     /**
      * Empty constructor
      *
+     * @hide
      */
     public SignalStrength() {
         mGsmSignalStrength = 99;
@@ -76,6 +76,7 @@ public class SignalStrength implements Parcelable {
     /**
      * Constructor
      *
+     * @hide
      */
     public SignalStrength(int gsmSignalStrength, int gsmBitErrorRate,
             int cdmaDbm, int cdmaEcio,
@@ -94,6 +95,8 @@ public class SignalStrength implements Parcelable {
      * Copy constructors
      *
      * @param s Source SignalStrength
+     *
+     * @hide
      */
     public SignalStrength(SignalStrength s) {
         copyFrom(s);
@@ -115,6 +118,8 @@ public class SignalStrength implements Parcelable {
 
     /**
      * Construct a SignalStrength object from the given parcel.
+     *
+     * @hide
      */
     public SignalStrength(Parcel in) {
         mGsmSignalStrength = in.readInt();
@@ -127,6 +132,9 @@ public class SignalStrength implements Parcelable {
         isGsm = (in.readInt() != 0);
     }
 
+    /**
+     * {@link Parcelable#writeToParcel}
+     */
     public void writeToParcel(Parcel out, int flags) {
         out.writeInt(mGsmSignalStrength);
         out.writeInt(mGsmBitErrorRate);
@@ -138,10 +146,18 @@ public class SignalStrength implements Parcelable {
         out.writeInt(isGsm ? 1 : 0);
     }
 
+    /**
+     * {@link Parcelable#describeContents}
+     */
     public int describeContents() {
         return 0;
     }
 
+    /**
+     * {@link Parcelable.Creator}
+     *
+     * @hide
+     */
     public static final Parcelable.Creator<SignalStrength> CREATOR = new Parcelable.Creator() {
         public SignalStrength createFromParcel(Parcel in) {
             return new SignalStrength(in);
@@ -202,14 +218,14 @@ public class SignalStrength implements Parcelable {
     }
 
     /**
-     * @hide
+     * @return true if this is for GSM
      */
     public boolean isGsm() {
         return this.isGsm;
     }
 
     /**
-     * @hide
+     * @return hash code
      */
     @Override
     public int hashCode() {
@@ -221,7 +237,7 @@ public class SignalStrength implements Parcelable {
     }
 
     /**
-     * @hide
+     * @return true if the signal strengths are the same
      */
     @Override
     public boolean equals (Object o) {
@@ -248,7 +264,7 @@ public class SignalStrength implements Parcelable {
     }
 
     /**
-     * @hide
+     * @return string representation.
      */
     @Override
     public String toString() {
