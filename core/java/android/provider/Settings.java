@@ -1434,6 +1434,13 @@ public final class Settings {
         public static final String SHOW_WEB_SUGGESTIONS = "show_web_suggestions";
 
         /**
+         * Whether the notification LED should repeatedly flash when a notification is
+         * pending. The value is boolean (1 or 0).
+         * @hide
+         */
+        public static final String NOTIFICATION_LIGHT_PULSE = "notification_light_pulse";
+
+        /**
          * Settings to backup. This is here so that it's in the same place as the settings
          * keys and easy to update.
          * @hide
@@ -1487,7 +1494,8 @@ public final class Settings {
             TTY_MODE,
             SOUND_EFFECTS_ENABLED,
             HAPTIC_FEEDBACK_ENABLED,
-            SHOW_WEB_SUGGESTIONS
+            SHOW_WEB_SUGGESTIONS,
+            NOTIFICATION_LIGHT_PULSE
         };
 
         // Settings moved to Settings.Secure
