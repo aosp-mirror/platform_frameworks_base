@@ -202,10 +202,6 @@ public class CDMAPhone extends PhoneBase {
         // Sets current entry in the telephony carrier table
         updateCurrentCarrierInProvider(operatorNumeric);
 
-        // Updates MCC MNC device configuration information
-        MccTable.updateMccMncConfiguration(this, operatorNumeric);
-
-
         // Notify voicemails.
         notifier.notifyMessageWaitingChanged(this);
     }
@@ -1401,20 +1397,22 @@ public class CDMAPhone extends PhoneBase {
     }
 
     /**
-     * Sets the "current" field in the telephony provider according to the build-time
-     * operator numeric property
+     * Sets the "current" field in the telephony provider according to the
+     * build-time operator numeric property
      *
      * @return true for success; false otherwise.
      */
-    // TODO(Moto): move this method into PhoneBase, since it looks identical to
-    // the one in GsmPhone
-    private boolean updateCurrentCarrierInProvider(String operatorNumeric) {
+    boolean updateCurrentCarrierInProvider(String operatorNumeric) {
         if (!TextUtils.isEmpty(operatorNumeric)) {
             try {
                 Uri uri = Uri.withAppendedPath(Telephony.Carriers.CONTENT_URI, "current");
                 ContentValues map = new ContentValues();
                 map.put(Telephony.Carriers.NUMERIC, operatorNumeric);
                 getContext().getContentResolver().insert(uri, map);
+
+                // Updates MCC MNC device configuration information
+                MccTable.updateMccMncConfiguration(this, operatorNumeric);
+
                 return true;
             } catch (SQLException e) {
                 Log.e(LOG_TAG, "Can't store current operator", e);
