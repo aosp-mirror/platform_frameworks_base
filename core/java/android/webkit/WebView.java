@@ -3241,24 +3241,29 @@ public class WebView extends AbsoluteLayout
             mWebTextView.setNodePointer(nodePointer);
             int maxLength = -1;
             boolean isTextField = nativeFocusCandidateIsTextField();
+            boolean isPassword;
             if (isTextField) {
                 maxLength = nativeFocusCandidateMaxLength();
                 String name = nativeFocusCandidateName();
-                if (mWebViewCore.getSettings().getSaveFormData()
-                        && name != null) {
+                isPassword = nativeFocusCandidateIsPassword();
+                if (!isPassword && mWebViewCore.getSettings().getSaveFormData()
+                        && name != null && name.length() > 0) {
                     Message update = mPrivateHandler.obtainMessage(
-                            REQUEST_FORM_DATA, nodePointer);
+                            REQUEST_FORM_DATA);
+                    update.arg1 = nodePointer;
                     RequestFormData updater = new RequestFormData(name,
                             getUrl(), update);
                     Thread t = new Thread(updater);
                     t.start();
                 }
+            } else {
+                isPassword = false;
             }
             mWebTextView.setMaxLength(maxLength);
             AutoCompleteAdapter adapter = null;
             mWebTextView.setAdapterCustom(adapter);
             mWebTextView.setSingleLine(isTextField);
-            mWebTextView.setInPassword(nativeFocusCandidateIsPassword());
+            mWebTextView.setInPassword(isPassword);
             if (null == text) {
                 if (DebugFlags.WEB_VIEW) {
                     Log.v(LOGTAG, "rebuildWebTextView null == text");
