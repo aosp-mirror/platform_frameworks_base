@@ -291,7 +291,11 @@ private:
 
             friend class FreezeLock;
             sp<FreezeLock> getFreezeLock() const;
-            inline void incFreezeCount() { mFreezeCount++; }
+            inline void incFreezeCount() {
+                if (mFreezeCount == 0)
+                    mFreezeDisplayTime = 0;
+                mFreezeCount++;
+            }
             inline void decFreezeCount() { if (mFreezeCount > 0) mFreezeCount--; }
             inline bool hasFreezeRequest() const { return mFreezeDisplay; }
             inline bool isFrozen() const { 

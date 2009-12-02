@@ -417,9 +417,9 @@ void SurfaceFlinger::waitForEvent()
 {
     while (true) {
         nsecs_t timeout = -1;
+        const nsecs_t freezeDisplayTimeout = ms2ns(5000);
         if (UNLIKELY(isFrozen())) {
             // wait 5 seconds
-            const nsecs_t freezeDisplayTimeout = ms2ns(5000);
             const nsecs_t now = systemTime();
             if (mFreezeDisplayTime == 0) {
                 mFreezeDisplayTime = now;
@@ -429,22 +429,26 @@ void SurfaceFlinger::waitForEvent()
         }
 
         MessageList::value_type msg = mEventQueue.waitMessage(timeout);
+
+        // see if we timed out
+        if (isFrozen()) {
+            const nsecs_t now = systemTime();
+            nsecs_t frozenTime = (now - mFreezeDisplayTime);
+            if (frozenTime >= freezeDisplayTimeout) {
+                // we timed out and are still frozen
+                LOGW("timeout expired mFreezeDisplay=%d, mFreezeCount=%d",
+                        mFreezeDisplay, mFreezeCount);
+                mFreezeDisplayTime = 0;
+                mFreezeCount = 0;
+                mFreezeDisplay = false;
+            }
+        }
+
         if (msg != 0) {
-            mFreezeDisplayTime = 0;
             switch (msg->what) {
                 case MessageQueue::INVALIDATE:
                     // invalidate message, just return to the main loop
                     return;
-            }
-        } else {
-            // we timed out
-            if (isFrozen()) {
-                // we timed out and are still frozen
-                LOGW("timeout expired mFreezeDisplay=%d, mFreezeCount=%d",
-                        mFreezeDisplay, mFreezeCount);
-                mFreezeCount = 0;
-                mFreezeDisplay = false;
-                return;
             }
         }
     }
@@ -1646,6 +1650,7 @@ status_t SurfaceFlinger::onTransact(
             }
             case 1007: // set mFreezeCount
                 mFreezeCount = data.readInt32();
+                mFreezeDisplayTime = 0;
                 return NO_ERROR;
             case 1010:  // interrogate.
                 reply->writeInt32(0);
