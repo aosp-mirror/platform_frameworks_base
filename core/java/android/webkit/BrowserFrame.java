@@ -105,10 +105,13 @@ class BrowserFrame extends Handler {
      */
     public BrowserFrame(Context context, WebViewCore w, CallbackProxy proxy,
             WebSettings settings, Map<String, Object> javascriptInterfaces) {
+
+        Context appContext = context.getApplicationContext();
+
         // Create a global JWebCoreJavaBridge to handle timers and
         // cookies in the WebCore thread.
         if (sJavaBridge == null) {
-            sJavaBridge = new JWebCoreJavaBridge(context);
+            sJavaBridge = new JWebCoreJavaBridge(appContext);
             // set WebCore native cache size
             ActivityManager am = (ActivityManager) context
                     .getSystemService(Context.ACTIVITY_SERVICE);
@@ -118,18 +121,18 @@ class BrowserFrame extends Handler {
                 sJavaBridge.setCacheSize(4 * 1024 * 1024);
             }
             // initialize CacheManager
-            CacheManager.init(context);
+            CacheManager.init(appContext);
             // create CookieSyncManager with current Context
-            CookieSyncManager.createInstance(context);
+            CookieSyncManager.createInstance(appContext);
             // create PluginManager with current Context
-            PluginManager.getInstance(context);
+            PluginManager.getInstance(appContext);
         }
         mJSInterfaceMap = javascriptInterfaces;
 
         mSettings = settings;
         mContext = context;
         mCallbackProxy = proxy;
-        mDatabase = WebViewDatabase.getInstance(context);
+        mDatabase = WebViewDatabase.getInstance(appContext);
         mWebViewCore = w;
 
         AssetManager am = context.getAssets();
@@ -496,7 +499,7 @@ class BrowserFrame extends Handler {
      * @param uri A String representing the URI of the desired file.
      * @param buffer The byte array to copy the data into.
      * @param offset The offet into buffer to place the data.
-     * @param expectSize The size that the buffer has allocated for this file.
+     * @param expectedSize The size that the buffer has allocated for this file.
      * @return int The size of the given file, or zero if it fails.
      */
     private int getFile(String uri, byte[] buffer, int offset,
