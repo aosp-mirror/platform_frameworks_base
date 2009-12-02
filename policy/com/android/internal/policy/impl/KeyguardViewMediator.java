@@ -170,7 +170,7 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
     // these are protected by synchronized (this)
 
     /**
-     * External apps (like the phone app) can tell us to disable the keygaurd.
+     * This is set to false if the keyguard is disabled via setKeyguardEnabled(false).
      */
     private boolean mExternallyEnabled = true;
 
@@ -398,15 +398,31 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
                 // don't allow this api when the device isn't provisioned
                 if (DEBUG) Log.d(TAG, "ignoring because device isn't provisioned");
                 callback.onKeyguardExitResult(false);
-            } else if (mExternallyEnabled) {
-                // this only applies when the user has externally disabled the
-                // keyguard.  this is unexpected and means the user is not
-                // using the api properly.
-                Log.w(TAG, "verifyUnlock called when not externally disabled");
-                callback.onKeyguardExitResult(false);
             } else if (mExitSecureCallback != null) {
                 // already in progress with someone else
                 callback.onKeyguardExitResult(false);
+            } else if (mExternallyEnabled) {
+                if (mHidden) {
+                    if (isSecure()) {
+                        // if the current activity is in front of the keyguard, then
+                        // pretend like we succeeded and we will hit the lock screen
+                        // when the activity is launched.
+                        // HACK ALERT - this is assuming that the callback will be used
+                        // to start a new activity (current usage by Phone app).
+                        callback.onKeyguardExitResult(true);
+                    } else {
+                        // call through to verifyUnlockLocked() so we can bypass
+                        // the insecure keyguard screen.
+                        mExitSecureCallback = callback;
+                        verifyUnlockLocked();
+                    }
+                } else {
+                    // this only applies when the user has externally disabled the keyguard
+                    // and no other activities are in front of the keyguard.
+                    // this is unexpected and means the user is not using the api properly.
+                    Log.w(TAG, "verifyUnlock called when not externally disabled");
+                    callback.onKeyguardExitResult(false);
+                }
             } else {
                 mExitSecureCallback = callback;
                 verifyUnlockLocked();
