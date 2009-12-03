@@ -227,6 +227,35 @@ public class AccountManagerService
 
         mSimWatcher = new SimWatcher(mContext);
         sThis.set(this);
+
+        validateAccounts();
+    }
+
+    private void validateAccounts() {
+        boolean accountDeleted = false;
+        SQLiteDatabase db = mOpenHelper.getWritableDatabase();
+        Cursor cursor = db.query(TABLE_ACCOUNTS,
+                new String[]{ACCOUNTS_ID, ACCOUNTS_TYPE, ACCOUNTS_NAME},
+                null, null, null, null, null);
+        try {
+            while (cursor.moveToNext()) {
+                final long accountId = cursor.getLong(0);
+                final String accountType = cursor.getString(1);
+                final String accountName = cursor.getString(2);
+                if (mAuthenticatorCache.getServiceInfo(AuthenticatorDescription.newKey(accountType))
+                        == null) {
+                    Log.d(TAG, "deleting account " + accountName + " because type "
+                            + accountType + " no longer has a registered authenticator");
+                    db.delete(TABLE_ACCOUNTS, ACCOUNTS_ID + "=" + accountId, null);
+                    accountDeleted = true;
+                }
+            }
+        } finally {
+            cursor.close();
+            if (accountDeleted) {
+                sendAccountsChangedBroadcast();
+            }
+        }
     }
 
     public void onServiceChanged(AuthenticatorDescription desc, boolean removed) {
