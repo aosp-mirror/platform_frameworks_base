@@ -1656,21 +1656,19 @@ public abstract class PackageManager {
             IPackageStatsObserver observer);
 
     /**
-     * Add a new package to the list of preferred packages.  This new package
-     * will be added to the front of the list (removed from its current location
-     * if already listed), meaning it will now be preferred over all other
-     * packages when resolving conflicts.
-     *
-     * @param packageName The package name of the new package to make preferred.
+     * @deprecated This function no longer does anything; it was an old
+     * approach to managing preferred activities, which has been superceeded
+     * (and conflicts with) the modern activity-based preferences.
      */
+    @Deprecated
     public abstract void addPackageToPreferred(String packageName);
 
     /**
-     * Remove a package from the list of preferred packages.  If it was on
-     * the list, it will no longer be preferred over other packages.
-     *
-     * @param packageName The package name to remove.
+     * @deprecated This function no longer does anything; it was an old
+     * approach to managing preferred activities, which has been superceeded
+     * (and conflicts with) the modern activity-based preferences.
      */
+    @Deprecated
     public abstract void removePackageFromPreferred(String packageName);
 
     /**
