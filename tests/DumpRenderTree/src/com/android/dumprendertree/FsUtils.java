@@ -25,6 +25,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.regex.Pattern;
 
@@ -154,6 +155,45 @@ public class FsUtils {
         br2.close();
 
         return same;
+    }
+
+    public static boolean isTestPageUrl(String url) {
+        int qmPostion = url.indexOf('?');
+        int slashPostion = url.lastIndexOf('/');
+        if (slashPostion < qmPostion) {
+            String fileName = url.substring(slashPostion + 1, qmPostion);
+            if ("index.html".equals(fileName)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static String getLastSegmentInPath(String path) {
+        int endPos = path.lastIndexOf('/');
+        path = path.substring(0, endPos);
+        endPos = path.lastIndexOf('/');
+        return path.substring(endPos + 1);
+    }
+
+    public static void writeDrawTime(String fileName, String url, long[] times) {
+        StringBuffer lineBuffer = new StringBuffer();
+        // grab the last segment of path in url
+        lineBuffer.append(getLastSegmentInPath(url));
+        for (long time : times) {
+            lineBuffer.append('\t');
+            lineBuffer.append(time);
+        }
+        lineBuffer.append('\n');
+        String line = lineBuffer.toString();
+        Log.v(LOGTAG, "logging draw times: " + line);
+        try {
+            FileWriter fw = new FileWriter(fileName, true);
+            fw.write(line);
+            fw.close();
+        } catch (IOException ioe) {
+            Log.e(LOGTAG, "Failed to log draw times", ioe);
+        }
     }
 
 }

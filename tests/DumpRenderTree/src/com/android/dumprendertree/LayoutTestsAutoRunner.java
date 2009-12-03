@@ -73,13 +73,20 @@ public class LayoutTestsAutoRunner extends InstrumentationTestRunner {
         this.mLogtime = (logtime != null
                 && logtime.toLowerCase().equals("true"));
 
+        String drawTime = (String) icicle.get("drawtime");
+        this.mGetDrawTime = (drawTime != null
+                && drawTime.toLowerCase().equals("true"));
+
+        mSaveImagePath = (String) icicle.get("saveimage");
+
         super.onCreate(icicle);
     }
     
     public String mTestPath = null;
+    public String mSaveImagePath = null;
     public int mTimeoutInMillis = 0;
     public int mDelay = 0;
     public boolean mRebaseline = false;
     public boolean mLogtime = false;
+    public boolean mGetDrawTime = false;
 }
-
