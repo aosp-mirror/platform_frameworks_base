@@ -23,6 +23,7 @@ import android.content.IntentSender;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.graphics.Bitmap;
 import android.graphics.PorterDuff;
+import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Parcel;
@@ -136,10 +137,15 @@ public class RemoteViews implements Parcelable, Filter {
             if (target != null && pendingIntent != null) {
                 OnClickListener listener = new OnClickListener() {
                     public void onClick(View v) {
+                        int[] pos = new int[2];
+                        v.getLocationOnScreen(pos);
+                        Intent intent = new Intent();
+                        intent.setSourceBounds(new Rect(pos[0], pos[1],
+                                    pos[0]+v.getWidth(), pos[1]+v.getHeight()));
                         try {
                             // TODO: Unregister this handler if PendingIntent.FLAG_ONE_SHOT?
                             v.getContext().startIntentSender(
-                                    pendingIntent.getIntentSender(), null,
+                                    pendingIntent.getIntentSender(), intent,
                                     Intent.FLAG_ACTIVITY_NEW_TASK,
                                     Intent.FLAG_ACTIVITY_NEW_TASK, 0);
                         } catch (IntentSender.SendIntentException e) {
