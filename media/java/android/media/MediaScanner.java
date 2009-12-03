@@ -640,13 +640,13 @@ public class MediaScanner
                 map.put(Video.Media.ARTIST, (mArtist != null && mArtist.length() > 0 ? mArtist : MediaFile.UNKNOWN_STRING));
                 map.put(Video.Media.ALBUM, (mAlbum != null && mAlbum.length() > 0 ? mAlbum : MediaFile.UNKNOWN_STRING));
                 map.put(Video.Media.DURATION, mDuration);
-                map.put(Video.Media.DATE_TAKEN, mLastModified);
+                map.put(Video.Media.DATE_TAKEN, mLastModified * 1000);
                 // FIXME - add RESOLUTION
             } else if (MediaFile.isImageFileType(mFileType)) {
                 // FIXME - add DESCRIPTION
                 // DATE_TAKEN will be overridden later if this is a JPEG image whose EXIF data
                 // contains date time information.
-                map.put(Images.Media.DATE_TAKEN, mLastModified);
+                map.put(Images.Media.DATE_TAKEN, mLastModified * 1000);
             } else if (MediaFile.isAudioFileType(mFileType)) {
                 map.put(Audio.Media.ARTIST, (mArtist != null && mArtist.length() > 0 ? mArtist : MediaFile.UNKNOWN_STRING));
                 map.put(Audio.Media.ALBUM, (mAlbum != null && mAlbum.length() > 0 ? mAlbum : MediaFile.UNKNOWN_STRING));
@@ -746,7 +746,7 @@ public class MediaScanner
 
                     long time = exif.getDateTime();
                     if (time != -1) {
-                        values.put(Images.Media.DATE_TAKEN, time);
+                        values.put(Images.Media.DATE_TAKEN, time * 1000);
                     }
 
                     int orientation = exif.getAttributeInt(
