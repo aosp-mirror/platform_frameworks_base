@@ -1501,6 +1501,28 @@ public class TextUtils {
     }
 
     /**
+     * @hide
+     */
+    public static boolean isPrintableAscii(final char c) {
+        final int asciiFirst = 0x20;
+        final int asciiLast = 0x7E;  // included
+        return (asciiFirst <= c && c <= asciiLast) || c == '\r' || c == '\n';
+    }
+
+    /**
+     * @hide
+     */
+    public static boolean isPrintableAsciiOnly(final CharSequence str) {
+        final int len = str.length();
+        for (int i = 0; i < len; i++) {
+            if (!isPrintableAscii(str.charAt(i))) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
      * Capitalization mode for {@link #getCapsMode}: capitalize all
      * characters.  This value is explicitly defined to be the same as
      * {@link InputType#TYPE_TEXT_FLAG_CAP_CHARACTERS}.
