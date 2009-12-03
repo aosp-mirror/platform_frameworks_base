@@ -6529,6 +6529,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             // Reset this state; it will be re-set if super.onTouchEvent
             // causes focus to move to the view.
             mTouchFocusSelected = false;
+            mScrolled = false;
         }
         
         final boolean superResult = super.onTouchEvent(event);
@@ -6544,10 +6545,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         if ((mMovement != null || onCheckIsTextEditor()) && mText instanceof Spannable && mLayout != null) {
-            
-            if (action == MotionEvent.ACTION_DOWN) {
-                mScrolled = false;
-            }
             
             boolean handled = false;
             
