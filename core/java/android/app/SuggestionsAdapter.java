@@ -31,7 +31,6 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.StateListDrawable;
 import android.net.Uri;
 import android.os.Bundle;
-import android.server.search.SearchableInfo;
 import android.text.Html;
 import android.text.TextUtils;
 import android.util.Log;

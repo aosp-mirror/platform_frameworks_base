@@ -26,7 +26,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.server.search.SearchableInfo;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.server.search;
+package android.app;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -37,6 +37,10 @@ import android.view.inputmethod.EditorInfo;
 import java.io.IOException;
 import java.util.HashMap;
 
+/**
+ * 
+ * @hide Pending API council approval
+ */
 public final class SearchableInfo implements Parcelable {
 
     // general debugging support
