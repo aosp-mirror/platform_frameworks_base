@@ -45,7 +45,7 @@ function check_exists
     fi
 }
 
-# run adb as root so we can poke at com.android.backuptest's data
+# Make sure adb is root so we can poke at com.android.backuptest's data
 adb_root
 
 # delete the old data
