@@ -237,6 +237,12 @@
         <item name="android:background">@android:drawable/button_inset</item>
     </style>
 
+    <style name="Widget.Button.Transparent">
+        <item name="android:background">@android:drawable/btn_default_transparent</item>
+        <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
+        <item name="android:textColor">@android:color/white</item>
+    </style>
+
     <style name="Widget.CompoundButton">
         <item name="android:focusable">true</item>
         <item name="android:clickable">true</item>

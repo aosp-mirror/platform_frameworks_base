@@ -71,7 +71,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // database gets upgraded properly. At a minimum, please confirm that 'upgradeVersion'
     // is properly propagated through your change.  Not doing so will result in a loss of user
     // settings.
-    private static final int DATABASE_VERSION = 42;
+    private static final int DATABASE_VERSION = 43;
 
     private Context mContext;
 
@@ -521,6 +521,24 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             upgradeVersion = 42;
         }
 
+        if (upgradeVersion == 42) {
+            /*
+             * Initialize new notification pulse setting
+             */
+            db.beginTransaction();
+            try {
+                SQLiteStatement stmt = db.compileStatement("INSERT INTO system(name,value)"
+                        + " VALUES(?,?);");
+                loadBooleanSetting(stmt, Settings.System.NOTIFICATION_LIGHT_PULSE,
+                        R.bool.def_notification_pulse);
+                stmt.close();
+                db.setTransactionSuccessful();
+            } finally {
+                db.endTransaction();
+            }
+            upgradeVersion = 43;
+        }
+
         if (upgradeVersion != currentVersion) {
             Log.w(TAG, "Got stuck trying to upgrade from version " + upgradeVersion
                     + ", must wipe the settings provider");
@@ -767,6 +785,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         loadDefaultHapticSettings(stmt);
 
+        loadBooleanSetting(stmt, Settings.System.NOTIFICATION_LIGHT_PULSE,
+                R.bool.def_notification_pulse);
         stmt.close();
     }
 

@@ -26,6 +26,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
+import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -2417,6 +2418,7 @@ public class Intent implements Parcelable {
     private int mFlags;
     private HashSet<String> mCategories;
     private Bundle mExtras;
+    private Rect mSourceBounds;
 
     // ---------------------------------------------------------------------
 
@@ -2441,6 +2443,9 @@ public class Intent implements Parcelable {
         }
         if (o.mExtras != null) {
             this.mExtras = new Bundle(o.mExtras);
+        }
+        if (o.mSourceBounds != null) {
+            this.mSourceBounds = new Rect(o.mSourceBounds);
         }
     }
 
@@ -2635,7 +2640,7 @@ public class Intent implements Parcelable {
                     intent.mType = value;
                 }
 
-                // launch  flags
+                // launch flags
                 else if (uri.startsWith("launchFlags=", i)) {
                     intent.mFlags = Integer.decode(value).intValue();
                 }
@@ -2653,6 +2658,11 @@ public class Intent implements Parcelable {
                 // scheme
                 else if (uri.startsWith("scheme=", i)) {
                     scheme = value;
+                }
+
+                // source bounds
+                else if (uri.startsWith("sourceBounds=", i)) {
+                    intent.mSourceBounds = Rect.unflattenFromString(value);
                 }
 
                 // extra
@@ -3544,6 +3554,15 @@ public class Intent implements Parcelable {
      */
     public ComponentName getComponent() {
         return mComponent;
+    }
+
+    /**
+     * Get the bounds of the sender of this intent, in screen coordinates.  This can be
+     * used as a hint to the receiver for animations and the like.  Null means that there
+     * is no source bounds.
+     */
+    public Rect getSourceBounds() {
+        return mSourceBounds;
     }
 
     /**
@@ -4648,6 +4667,19 @@ public class Intent implements Parcelable {
     }
 
     /**
+     * Set the bounds of the sender of this intent, in screen coordinates.  This can be
+     * used as a hint to the receiver for animations and the like.  Null means that there
+     * is no source bounds.
+     */
+    public void setSourceBounds(Rect r) {
+        if (r != null) {
+            mSourceBounds = new Rect(r);
+        } else {
+            r = null;
+        }
+    }
+
+    /**
      * Use with {@link #fillIn} to allow the current action value to be
      * overwritten, even if it is already set.
      */
@@ -4678,6 +4710,12 @@ public class Intent implements Parcelable {
     public static final int FILL_IN_PACKAGE = 1<<4;
 
     /**
+     * Use with {@link #fillIn} to allow the current package value to be
+     * overwritten, even if it is already set.
+     */
+    public static final int FILL_IN_SOURCE_BOUNDS = 1<<5;
+
+    /**
      * Copy the contents of <var>other</var> in to this object, but only
      * where fields are not defined by this object.  For purposes of a field
      * being defined, the following pieces of data in the Intent are
@@ -4691,6 +4729,7 @@ public class Intent implements Parcelable {
      * <li> package, as set by {@link #setPackage}.
      * <li> component, as set by {@link #setComponent(ComponentName)} or
      * related methods.
+     * <li> source bounds, as set by {@link #setSourceBounds}
      * <li> each top-level name in the associated extras.
      * </ul>
      *
@@ -4752,6 +4791,11 @@ public class Intent implements Parcelable {
             changes |= FILL_IN_COMPONENT;
         }
         mFlags |= other.mFlags;
+        if (other.mSourceBounds != null
+                && (mSourceBounds == null || (flags&FILL_IN_SOURCE_BOUNDS) != 0)) {
+            mSourceBounds = new Rect(other.mSourceBounds);
+            changes |= FILL_IN_SOURCE_BOUNDS;
+        }
         if (mExtras == null) {
             if (other.mExtras != null) {
                 mExtras = new Bundle(other.mExtras);
@@ -5005,6 +5049,13 @@ public class Intent implements Parcelable {
             first = false;
             b.append("cmp=").append(mComponent.flattenToShortString());
         }
+        if (mSourceBounds != null) {
+            if (!first) {
+                b.append(' ');
+            }
+            first = false;
+            b.append("bnds=").append(mSourceBounds.toShortString());
+        }
         if (extras && mExtras != null) {
             if (!first) {
                 b.append(' ');
@@ -5096,6 +5147,11 @@ public class Intent implements Parcelable {
             uri.append("component=").append(Uri.encode(
                     mComponent.flattenToShortString(), "/")).append(';');
         }
+        if (mSourceBounds != null) {
+            uri.append("sourceBounds=")
+                    .append(Uri.encode(mSourceBounds.flattenToString()))
+                    .append(';');
+        }
         if (mExtras != null) {
             for (String key : mExtras.keySet()) {
                 final Object value = mExtras.get(key);
@@ -5139,6 +5195,13 @@ public class Intent implements Parcelable {
         out.writeString(mPackage);
         ComponentName.writeToParcel(mComponent, out);
 
+        if (mSourceBounds != null) {
+            out.writeInt(1);
+            mSourceBounds.writeToParcel(out, flags);
+        } else {
+            out.writeInt(0);
+        }
+
         if (mCategories != null) {
             out.writeInt(mCategories.size());
             for (String category : mCategories) {
@@ -5173,6 +5236,10 @@ public class Intent implements Parcelable {
         mFlags = in.readInt();
         mPackage = in.readString();
         mComponent = ComponentName.readFromParcel(in);
+
+        if (in.readInt() != 0) {
+            mSourceBounds = Rect.CREATOR.createFromParcel(in);
+        }
 
         int N = in.readInt();
         if (N > 0) {
