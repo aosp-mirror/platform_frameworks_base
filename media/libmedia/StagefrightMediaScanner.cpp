@@ -32,13 +32,6 @@ status_t StagefrightMediaScanner::processFile(
     return OK;
 }
 
-void StagefrightMediaScanner::setLocale(const char *locale) {
-    if (mLocale) {
-        free(mLocale);
-    }
-    mLocale = strdup(locale);
-}
-
 char *StagefrightMediaScanner::extractAlbumArt(int fd) {
     return NULL;
 }
