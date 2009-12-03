@@ -160,7 +160,9 @@ class PowerManagerService extends IPowerManager.Stub
     private int[] mBroadcastWhy = new int[3];
     private int mPartialCount = 0;
     private int mPowerState;
-    private boolean mOffBecauseOfUser;
+    // mScreenOffReason can be WindowManagerPolicy.OFF_BECAUSE_OF_USER,
+    // WindowManagerPolicy.OFF_BECAUSE_OF_TIMEOUT or WindowManagerPolicy.OFF_BECAUSE_OF_PROX_SENSOR
+    private int mScreenOffReason;
     private int mUserState;
     private boolean mKeyboardVisible = false;
     private boolean mUserActivityAllowed = true;
@@ -911,7 +913,7 @@ class PowerManagerService extends IPowerManager.Stub
                 + " " + ((mNextTimeout-now)/1000) + "s from now");
         pw.println("  mDimScreen=" + mDimScreen
                 + " mStayOnConditions=" + mStayOnConditions);
-        pw.println("  mOffBecauseOfUser=" + mOffBecauseOfUser
+        pw.println("  mScreenOffReason=" + mScreenOffReason
                 + " mUserState=" + mUserState);
         pw.println("  mBroadcastQueue={" + mBroadcastQueue[0] + ',' + mBroadcastQueue[1]
                 + ',' + mBroadcastQueue[2] + "}");
@@ -1366,10 +1368,10 @@ class PowerManagerService extends IPowerManager.Stub
 
     private void setPowerState(int state)
     {
-        setPowerState(state, false, false);
+        setPowerState(state, false, WindowManagerPolicy.OFF_BECAUSE_OF_TIMEOUT);
     }
 
-    private void setPowerState(int newState, boolean noChangeLights, boolean becauseOfUser)
+    private void setPowerState(int newState, boolean noChangeLights, int reason)
     {
         synchronized (mLocks) {
             int err;
@@ -1377,7 +1379,8 @@ class PowerManagerService extends IPowerManager.Stub
             if (mSpew) {
                 Log.d(TAG, "setPowerState: mPowerState=0x" + Integer.toHexString(mPowerState)
                         + " newState=0x" + Integer.toHexString(newState)
-                        + " noChangeLights=" + noChangeLights);
+                        + " noChangeLights=" + noChangeLights
+                        + " reason=" + reason);
             }
 
             if (noChangeLights) {
@@ -1473,7 +1476,7 @@ class PowerManagerService extends IPowerManager.Stub
                     mLastTouchDown = 0;
                     mTotalTouchDownTime = 0;
                     mTouchCycles = 0;
-                    EventLog.writeEvent(LOG_POWER_SCREEN_STATE, 1, becauseOfUser ? 1 : 0,
+                    EventLog.writeEvent(LOG_POWER_SCREEN_STATE, 1, reason,
                             mTotalTouchDownTime, mTouchCycles);
                     if (err == 0) {
                         mPowerState |= SCREEN_ON_BIT;
@@ -1492,10 +1495,10 @@ class PowerManagerService extends IPowerManager.Stub
                         Binder.restoreCallingIdentity(identity);
                     }
                     mPowerState &= ~SCREEN_ON_BIT;
+                    mScreenOffReason = reason;
                     if (!mScreenBrightness.animating) {
-                        err = screenOffFinishedAnimatingLocked(becauseOfUser);
+                        err = screenOffFinishedAnimatingLocked(reason);
                     } else {
-                        mOffBecauseOfUser = becauseOfUser;
                         err = 0;
                         mLastTouchDown = 0;
                     }
@@ -1504,12 +1507,11 @@ class PowerManagerService extends IPowerManager.Stub
         }
     }
     
-    private int screenOffFinishedAnimatingLocked(boolean becauseOfUser) {
+    private int screenOffFinishedAnimatingLocked(int reason) {
         // I don't think we need to check the current state here because all of these
         // Power.setScreenState and sendNotificationLocked can both handle being 
         // called multiple times in the same state. -joeo
-        EventLog.writeEvent(LOG_POWER_SCREEN_STATE, 0, becauseOfUser ? 1 : 0,
-                mTotalTouchDownTime, mTouchCycles);
+        EventLog.writeEvent(LOG_POWER_SCREEN_STATE, 0, reason, mTotalTouchDownTime, mTouchCycles);
         mLastTouchDown = 0;
         int err = setScreenStateLocked(false);
         if (mScreenOnStartTime != 0) {
@@ -1517,10 +1519,8 @@ class PowerManagerService extends IPowerManager.Stub
             mScreenOnStartTime = 0;
         }
         if (err == 0) {
-            int why = becauseOfUser
-                    ? WindowManagerPolicy.OFF_BECAUSE_OF_USER
-                    : WindowManagerPolicy.OFF_BECAUSE_OF_TIMEOUT;
-            sendNotificationLocked(false, why);
+            mScreenOffReason = reason;
+            sendNotificationLocked(false, reason);
         }
         return err;
     }
@@ -1800,7 +1800,7 @@ class PowerManagerService extends IPowerManager.Stub
             animating = more;
             if (!more) {
                 if (mask == SCREEN_BRIGHT_BIT && curIntValue == Power.BRIGHTNESS_OFF) {
-                    screenOffFinishedAnimatingLocked(mOffBecauseOfUser);
+                    screenOffFinishedAnimatingLocked(mScreenOffReason);
                 }
             }
             return more;
@@ -1952,7 +1952,8 @@ class PowerManagerService extends IPowerManager.Stub
                     }
                     
                     mWakeLockState = mLocks.reactivateScreenLocksLocked();
-                    setPowerState(mUserState | mWakeLockState, noChangeLights, true);
+                    setPowerState(mUserState | mWakeLockState, noChangeLights,
+                            WindowManagerPolicy.OFF_BECAUSE_OF_USER);
                     setTimeoutLocked(time, SCREEN_BRIGHT);
                 }
             }
@@ -2086,7 +2087,7 @@ class PowerManagerService extends IPowerManager.Stub
     {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.DEVICE_POWER, null);
         synchronized (mLocks) {
-            goToSleepLocked(time);
+            goToSleepLocked(time, WindowManagerPolicy.OFF_BECAUSE_OF_USER);
         }
     }
     
@@ -2104,7 +2105,7 @@ class PowerManagerService extends IPowerManager.Stub
         }
     }
 
-    private void goToSleepLocked(long time) {
+    private void goToSleepLocked(long time, int reason) {
 
         if (mLastEventTime <= time) {
             mLastEventTime = time;
@@ -2122,7 +2123,7 @@ class PowerManagerService extends IPowerManager.Stub
             EventLog.writeEvent(LOG_POWER_SLEEP_REQUESTED, numCleared);
             mStillNeedSleepNotification = true;
             mUserState = SCREEN_OFF;
-            setPowerState(SCREEN_OFF, false, true);
+            setPowerState(SCREEN_OFF, false, reason);
             cancelTimerLocked();
         }
     }
@@ -2476,7 +2477,8 @@ class PowerManagerService extends IPowerManager.Stub
             return;
         }
         if (active) {
-            goToSleepLocked(SystemClock.uptimeMillis());
+            goToSleepLocked(SystemClock.uptimeMillis(),
+                    WindowManagerPolicy.OFF_BECAUSE_OF_PROX_SENSOR);
             mProximitySensorActive = true;
         } else {
             // proximity sensor negative events trigger as user activity.
