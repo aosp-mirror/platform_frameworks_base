@@ -624,6 +624,14 @@ public final class BluetoothDevice implements Parcelable {
         return false;
     }
 
+    /** @hide */
+    public boolean isBluetoothDock() {
+        try {
+            return sService.isBluetoothDock(mAddress);
+        } catch (RemoteException e) {Log.e(TAG, "", e);}
+        return false;
+    }
+
     /**
      * Create an RFCOMM {@link BluetoothSocket} ready to start a secure
      * outgoing connection to this remote device on given channel.
