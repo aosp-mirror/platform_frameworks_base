@@ -431,7 +431,7 @@ public final class ContactsContract {
      * </tr>
      * <tr>
      * <td>long</td>
-     * <td>{@link #NAME_RAW_CONTACT_ID}</td>
+     * <td>NAME_RAW_CONTACT_ID</td>
      * <td>read-only</td>
      * <td>The ID of the raw contact that contributes the display name
      * to the aggregate contact. During aggregation one of the constituent
@@ -443,7 +443,7 @@ public final class ContactsContract {
      * <td>{@link #DISPLAY_NAME}</td>
      * <td>read-only</td>
      * <td>The display name for the contact. It is the display name
-     * contributed by the raw contact referred to by the {@link #NAME_RAW_CONTACT_ID}
+     * contributed by the raw contact referred to by the NAME_RAW_CONTACT_ID
      * column.</td>
      * </tr>
      * <tr>
