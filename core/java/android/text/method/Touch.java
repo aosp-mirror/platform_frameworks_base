@@ -20,6 +20,7 @@ import android.text.Layout;
 import android.text.NoCopySpan;
 import android.text.Layout.Alignment;
 import android.text.Spannable;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.ViewConfiguration;
 import android.widget.TextView;
@@ -156,8 +157,17 @@ public class Touch {
                                                             padding));
                     ny = Math.max(ny, 0);
         
+                    int oldX = widget.getScrollX();
+                    int oldY = widget.getScrollY();
+
                     scrollTo(widget, layout, nx, ny);
-                    widget.cancelLongPress();
+
+                    // If we actually scrolled, then cancel the up action.
+                    if (oldX != widget.getScrollX()
+                            || oldY != widget.getScrollY()) {
+                        widget.cancelLongPress();
+                    }
+
                     return true;
                 }
             }
