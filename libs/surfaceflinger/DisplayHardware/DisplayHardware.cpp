@@ -246,8 +246,7 @@ void DisplayHardware::init(uint32_t dpy)
     LOGI("version   : %s", glGetString(GL_VERSION));
     LOGI("extensions: %s", gl_extensions);
 
-    if (strstr(gl_renderer, "PowerVR SGX 530") ||
-        strstr(gl_renderer, "Adreno")) {
+    if (strstr(gl_renderer, "Adreno")) {
         LOGD("Assuming uncached graphics buffers.");
         mFlags &= ~CACHED_BUFFERS;
     }
