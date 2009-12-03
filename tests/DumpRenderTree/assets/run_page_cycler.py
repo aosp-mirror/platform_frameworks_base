@@ -20,7 +20,7 @@ import time
 
 def main(options, args):
   """Run the tests. Will call sys.exit when complete.
-  
+
   """
 
   # Set up logging format.
@@ -56,7 +56,15 @@ def main(options, args):
   run_load_test_cmd_postfix = " -w com.android.dumprendertree/.LayoutTestsAutoRunner"
 
   # Call LoadTestsAutoTest::runTest.
-  run_load_test_cmd = run_load_test_cmd_prefix + " -e class com.android.dumprendertree.LoadTestsAutoTest#runPageCyclerTest -e path \"" + path + "\" -e timeout " + timeout_ms + run_load_test_cmd_postfix
+  run_load_test_cmd = run_load_test_cmd_prefix + " -e class com.android.dumprendertree.LoadTestsAutoTest#runPageCyclerTest -e path \"" + path + "\" -e timeout " + timeout_ms
+
+  if options.drawtime:
+    run_load_test_cmd += " -e drawtime true "
+
+  if options.save_image:
+    run_load_test_cmd += " -e saveimage \"%s\"" % options.save_image
+
+  run_load_test_cmd += run_load_test_cmd_postfix
 
   (adb_output, adb_error) = subprocess.Popen(run_load_test_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
   fail_flag = False
@@ -101,18 +109,26 @@ def main(options, args):
 
 if '__main__' == __name__:
   option_parser = optparse.OptionParser()
-  option_parser.add_option("", "--time-out-ms",
+  option_parser.add_option("-t", "--time-out-ms",
                            default=None,
                            help="set the timeout for each test")
-  option_parser.add_option("", "--verbose", action="store_true",
+  option_parser.add_option("-v", "--verbose", action="store_true",
                            default=False,
                            help="include debug-level logging")
-  option_parser.add_option("", "--adb-options",
+  option_parser.add_option("-a", "--adb-options",
                            default=None,
                            help="pass options to adb, such as -d -e, etc");
-  option_parser.add_option("", "--results-directory",
+  option_parser.add_option("-r", "--results-directory",
                            default="layout-test-results",
                            help="directory which results are stored.")
+
+  option_parser.add_option("-d", "--drawtime", action="store_true",
+                           default=False,
+                           help="log draw time for each page rendered.")
+
+  option_parser.add_option("-s", "--save-image",
+                           default=None,
+                           help="stores rendered page to a location on device.")
 
   options, args = option_parser.parse_args();
   main(options, args)
