@@ -2277,10 +2277,8 @@ AudioFlinger::PlaybackThread::Track::~Track()
     LOGV("PlaybackThread::Track destructor");
     sp<ThreadBase> thread = mThread.promote();
     if (thread != 0) {
-        thread->mLock.lock();
+        Mutex::Autolock _l(thread->mLock);
         mState = TERMINATED;
-        thread->mLock.unlock();
-        AudioSystem::releaseOutput(thread->id());
     }
 }
 
@@ -2298,8 +2296,11 @@ void AudioFlinger::PlaybackThread::Track::destroy()
     { // scope for mLock
         sp<ThreadBase> thread = mThread.promote();
         if (thread != 0) {
-            if (!isOutputTrack() && (mState == ACTIVE || mState == RESUMING)) {
-                AudioSystem::stopOutput(thread->id(), (AudioSystem::stream_type)mStreamType);
+            if (!isOutputTrack()) {
+                if (mState == ACTIVE || mState == RESUMING) {
+                    AudioSystem::stopOutput(thread->id(), (AudioSystem::stream_type)mStreamType);
+                }
+                AudioSystem::releaseOutput(thread->id());
             }
             Mutex::Autolock _l(thread->mLock);
             PlaybackThread *playbackThread = (PlaybackThread *)thread.get();
