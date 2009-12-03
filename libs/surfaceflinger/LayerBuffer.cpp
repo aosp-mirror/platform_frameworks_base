@@ -266,7 +266,16 @@ LayerBuffer::Buffer::Buffer(const ISurface::BufferHeap& buffers, ssize_t offset)
     : mBufferHeap(buffers)
 {
     NativeBuffer& src(mNativeBuffer);
-    src.img.handle = 0;
+    src.crop.l = 0;
+    src.crop.t = 0;
+    src.crop.r = buffers.w;
+    src.crop.b = buffers.h;
+
+    src.img.w       = buffers.hor_stride ?: buffers.w;
+    src.img.h       = buffers.ver_stride ?: buffers.h;
+    src.img.format  = buffers.format;
+    src.img.base    = (void*)(intptr_t(buffers.heap->base()) + offset);
+    src.img.handle  = 0;
 
     gralloc_module_t const * module = LayerBuffer::getGrallocModule();
     if (module && module->perform) {
@@ -276,19 +285,12 @@ LayerBuffer::Buffer::Buffer(const ISurface::BufferHeap& buffers, ssize_t offset)
                 offset, buffers.heap->base(),
                 &src.img.handle);
 
-        if (err == NO_ERROR) {
-            src.crop.l = 0;
-            src.crop.t = 0;
-            src.crop.r = buffers.w;
-            src.crop.b = buffers.h;
-
-            src.img.w       = buffers.hor_stride ?: buffers.w;
-            src.img.h       = buffers.ver_stride ?: buffers.h;
-            src.img.format  = buffers.format;
-            src.img.base    = (void*)(intptr_t(buffers.heap->base()) + offset);
-        }
+        LOGE_IF(err, "CREATE_HANDLE_FROM_BUFFER (heapId=%d, size=%d, "
+             "offset=%ld, base=%p) failed (%s)",
+                buffers.heap->heapID(), buffers.heap->getSize(),
+                offset, buffers.heap->base(), strerror(-err));
     }
-}
+ }
 
 LayerBuffer::Buffer::~Buffer()
 {
