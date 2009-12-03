@@ -31,6 +31,7 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.PixelFormat;
+import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.IBinder;
@@ -1277,8 +1278,13 @@ public class StatusBarService extends IStatusBar.Stub
                 ActivityManagerNative.getDefault().resumeAppSwitches();
             } catch (RemoteException e) {
             }
+            int[] pos = new int[2];
+            v.getLocationOnScreen(pos);
+            Intent overlay = new Intent();
+            overlay.setSourceBounds(
+                    new Rect(pos[0], pos[1], pos[0]+v.getWidth(), pos[1]+v.getHeight()));
             try {
-                mIntent.send();
+                mIntent.send(mContext, 0, overlay);
                 mNotificationCallbacks.onNotificationClick(mPkg, mTag, mId);
             } catch (PendingIntent.CanceledException e) {
                 // the stack trace isn't very helpful here.  Just log the exception message.
