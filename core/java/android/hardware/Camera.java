@@ -477,6 +477,10 @@ public class Camera {
      * application does not need a particular callback, a null can be passed
      * instead of a callback method.
      *
+     * This method will stop the preview. Applications should not call {@link
+     * #stopPreview()} before this. After jpeg callback is received,
+     * applications can call {@link #startPreview()} to restart the preview.
+     *
      * @param shutter   callback after the image is captured, may be null
      * @param raw       callback with raw image data, may be null
      * @param jpeg      callback with jpeg image data, may be null
@@ -499,6 +503,10 @@ public class Camera {
      * callback occurs when the compressed image is available. If the
      * application does not need a particular callback, a null can be passed
      * instead of a callback method.
+     *
+     * This method will stop the preview. Applications should not call {@link
+     * #stopPreview()} before this. After jpeg callback is received,
+     * applications can call {@link #startPreview()} to restart the preview.
      *
      * @param shutter   callback after the image is captured, may be null
      * @param raw       callback with raw image data, may be null
