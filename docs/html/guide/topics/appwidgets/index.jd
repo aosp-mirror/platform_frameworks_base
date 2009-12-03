@@ -124,9 +124,9 @@ folder.</p>
 
 <pre>
 &lt;appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
-    android:minWidth="294dp" &lt;!-- density-independent pixels --&gt;
+    android:minWidth="294dp"
     android:minHeight="72dp"
-    android:updatePeriodMillis="86400000" &lt;!-- once per day --&gt;
+    android:updatePeriodMillis="86400000"
     android:initialLayout="@layout/example_appwidget"
     android:configure="com.example.android.ExampleAppWidgetConfigure" >
 &lt;/appwidget-provider>
