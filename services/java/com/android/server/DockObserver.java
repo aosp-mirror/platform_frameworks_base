@@ -18,6 +18,8 @@ package com.android.server;
 
 import android.app.Activity;
 import android.app.KeyguardManager;
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
 import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -27,12 +29,13 @@ import android.os.Message;
 import android.os.SystemClock;
 import android.os.UEventObserver;
 import android.provider.Settings;
+import android.server.BluetoothService;
 import android.util.Log;
 
 import com.android.internal.widget.LockPatternUtils;
 
-import java.io.FileReader;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
 
 /**
  * <p>DockObserver monitors for a docking station.
@@ -65,7 +68,7 @@ class DockObserver extends UEventObserver {
             if (getResultCode() != Activity.RESULT_OK) {
                 return;
             }
-            
+
             // Launch a dock activity
             String category;
             switch (mDockState) {
@@ -177,7 +180,13 @@ class DockObserver extends UEventObserver {
                 // Pack up the values and broadcast them to everyone
                 Intent intent = new Intent(Intent.ACTION_DOCK_EVENT);
                 intent.putExtra(Intent.EXTRA_DOCK_STATE, mDockState);
-                
+
+                // Check if this is Bluetooth Dock
+                String address = BluetoothService.readDockBluetoothAddress();
+                if (address != null)
+                    intent.putExtra(BluetoothDevice.EXTRA_DEVICE,
+                            BluetoothAdapter.getDefaultAdapter().getRemoteDevice(address));
+
                 // Send the ordered broadcast; the result receiver will receive after all
                 // broadcasts have been sent. If any broadcast receiver changes the result
                 // code from the initial value of RESULT_OK, then the result receiver will
