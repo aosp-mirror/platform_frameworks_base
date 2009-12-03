@@ -109,6 +109,7 @@ public class WapPushOverSms {
         String mimeType = pduDecoder.getValueString();
         if (mimeType == null) {
             binaryContentType = (int)pduDecoder.getValue32();
+            // TODO we should have more generic way to map binaryContentType code to mimeType.
             switch (binaryContentType) {
                 case WspTypeDecoder.CONTENT_TYPE_B_DRM_RIGHTS_XML:
                     mimeType = WspTypeDecoder.CONTENT_MIME_TYPE_B_DRM_RIGHTS_XML;
@@ -127,6 +128,9 @@ public class WapPushOverSms {
                     break;
                 case WspTypeDecoder.CONTENT_TYPE_B_MMS:
                     mimeType = WspTypeDecoder.CONTENT_MIME_TYPE_B_MMS;
+                    break;
+                case WspTypeDecoder.CONTENT_TYPE_B_VND_DOCOMO_PF:
+                    mimeType = WspTypeDecoder.CONTENT_MIME_TYPE_B_VND_DOCOMO_PF;
                     break;
                 default:
                     if (Config.LOGD) {
@@ -148,6 +152,8 @@ public class WapPushOverSms {
                 binaryContentType = WspTypeDecoder.CONTENT_TYPE_B_PUSH_CO;
             } else if (mimeType.equals(WspTypeDecoder.CONTENT_MIME_TYPE_B_MMS)) {
                 binaryContentType = WspTypeDecoder.CONTENT_TYPE_B_MMS;
+            } else if (mimeType.equals(WspTypeDecoder.CONTENT_MIME_TYPE_B_VND_DOCOMO_PF)) {
+                binaryContentType = WspTypeDecoder.CONTENT_TYPE_B_VND_DOCOMO_PF;
             } else {
                 if (Config.LOGD) Log.w(LOG_TAG, "Received PDU. Unknown Content-Type = " + mimeType);
                 return Intents.RESULT_SMS_HANDLED;
