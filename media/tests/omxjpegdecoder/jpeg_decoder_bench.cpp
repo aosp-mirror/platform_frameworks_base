@@ -25,6 +25,17 @@
 #include "SkStream.h"
 #include "omx_jpeg_decoder.h"
 
+class SkJPEGImageDecoder : public SkImageDecoder {
+public:
+    virtual Format getFormat() const {
+        return kJPEG_Format;
+    }
+
+protected:
+    virtual bool onDecode(SkStream* stream, SkBitmap* bm,
+                          SkBitmap::Config pref, Mode);
+};
+
 int nullObjectReturn(const char msg[]) {
     if (msg) {
         SkDebugf("--- %s\n", msg);

@@ -31,8 +31,8 @@ class StreamSource : public DataSource {
 public:
     // Pass the ownership of SkStream to StreamSource.
     StreamSource(SkStream *SkStream);
-    status_t InitCheck() const;
-    virtual ssize_t read_at(off_t offset, void *data, size_t size);
+    virtual status_t initCheck() const;
+    virtual ssize_t readAt(off_t offset, void *data, size_t size);
     virtual status_t getSize(off_t *size);
 
 protected:

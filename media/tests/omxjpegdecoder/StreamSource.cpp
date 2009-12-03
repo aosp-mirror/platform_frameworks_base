@@ -31,11 +31,11 @@ StreamSource::~StreamSource() {
     mStream = NULL;
 }
 
-status_t StreamSource::InitCheck() const {
+status_t StreamSource::initCheck() const {
     return mStream != NULL ? OK : NO_INIT;
 }
 
-ssize_t StreamSource::read_at(off_t offset, void *data, size_t size) {
+ssize_t StreamSource::readAt(off_t offset, void *data, size_t size) {
     Mutex::Autolock autoLock(mLock);
 
     mStream->rewind();
