@@ -280,8 +280,9 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
 
     /**
      * Called to let us know the screen was turned off.
-     * @param why either {@link WindowManagerPolicy#OFF_BECAUSE_OF_USER} or
-     *   {@link WindowManagerPolicy#OFF_BECAUSE_OF_TIMEOUT}.
+     * @param why either {@link WindowManagerPolicy#OFF_BECAUSE_OF_USER},
+     *   {@link WindowManagerPolicy#OFF_BECAUSE_OF_TIMEOUT} or
+     *   {@link WindowManagerPolicy#OFF_BECAUSE_OF_PROX_SENSOR}.
      */
     public void onScreenTurnedOff(int why) {
         synchronized (this) {
@@ -312,6 +313,8 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
                         sender);
                 if (DEBUG) Log.d(TAG, "setting alarm to turn off keyguard, seq = " 
                                  + mDelayedShowingSequence);
+            } else if (why == WindowManagerPolicy.OFF_BECAUSE_OF_PROX_SENSOR) {
+                // Do not enable the keyguard if the prox sensor forced the screen off.
             } else {
                 doKeyguard();
             }
