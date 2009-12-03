@@ -32,16 +32,16 @@ import android.bluetooth.BluetoothSocket;
 import android.bluetooth.BluetoothUuid;
 import android.bluetooth.IBluetooth;
 import android.bluetooth.IBluetoothCallback;
-import android.os.ParcelUuid;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Binder;
-import android.os.IBinder;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Message;
+import android.os.ParcelUuid;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemService;
@@ -50,7 +50,13 @@ import android.util.Log;
 
 import com.android.internal.app.IBatteryStats;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedWriter;
 import java.io.FileDescriptor;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
@@ -58,6 +64,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Random;
 
 public class BluetoothService extends IBluetooth.Stub {
     private static final String TAG = "BluetoothService";
@@ -78,6 +85,9 @@ public class BluetoothService extends IBluetooth.Stub {
 
     private static final String BLUETOOTH_ADMIN_PERM = android.Manifest.permission.BLUETOOTH_ADMIN;
     private static final String BLUETOOTH_PERM = android.Manifest.permission.BLUETOOTH;
+
+    private static final String DOCK_ADDRESS_PATH = "/sys/class/switch/dock/bt_addr";
+    private static final String DOCK_PIN_PATH = "/sys/class/switch/dock/bt_pin";
 
     private static final int MESSAGE_REGISTER_SDP_RECORDS = 1;
     private static final int MESSAGE_FINISH_DISABLE = 2;
@@ -103,6 +113,9 @@ public class BluetoothService extends IBluetooth.Stub {
     private final HashMap<RemoteService, IBluetoothCallback> mUuidCallbackTracker;
 
     private final HashMap<Integer, Integer> mServiceRecordToPid;
+
+    private static String mDockAddress;
+    private String mDockPin;
 
     private static class RemoteService {
         public String address;
@@ -151,6 +164,96 @@ public class BluetoothService extends IBluetooth.Stub {
         mUuidCallbackTracker = new HashMap<RemoteService, IBluetoothCallback>();
         mServiceRecordToPid = new HashMap<Integer, Integer>();
         registerForAirplaneMode();
+
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(Intent.ACTION_DOCK_EVENT);
+        mContext.registerReceiver(mBroadcastReceiver, filter);
+    }
+
+    private BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent != null) {
+                String action = intent.getAction();
+
+                if (Intent.ACTION_DOCK_EVENT.equals(action)) {
+                    int state = intent.getIntExtra(Intent.EXTRA_DOCK_STATE,
+                            Intent.EXTRA_DOCK_STATE_UNDOCKED);
+                    if (DBG) Log.v(TAG, "Received ACTION_DOCK_EVENT with State:" + state);
+                    if (state == Intent.EXTRA_DOCK_STATE_UNDOCKED) {
+                        mDockAddress = null;
+                        mDockPin = null;
+                    }
+                }
+            }
+        }
+    };
+
+     public static synchronized String readDockBluetoothAddress() {
+        if (mDockAddress != null) return mDockAddress;
+
+        BufferedInputStream file = null;
+        String dockAddress;
+        try {
+            file = new BufferedInputStream(new FileInputStream(DOCK_ADDRESS_PATH));
+            byte[] address = new byte[17];
+            file.read(address);
+            dockAddress = new String(address);
+            dockAddress = dockAddress.toUpperCase();
+            if (BluetoothAdapter.checkBluetoothAddress(dockAddress)) {
+                mDockAddress = dockAddress;
+                return mDockAddress;
+            } else {
+                log("CheckBluetoothAddress failed for car dock address:" + dockAddress);
+            }
+        } catch (FileNotFoundException e) {
+            log("FileNotFoundException while trying to read dock address");
+        } catch (IOException e) {
+            log("IOException while trying to read dock address");
+        } finally {
+            if (file != null) {
+                try {
+                    file.close();
+                } catch (IOException e) {
+                    // Ignore
+                }
+            }
+        }
+        mDockAddress = null;
+        return null;
+    }
+
+    private synchronized boolean writeDockPin() {
+        BufferedWriter out = null;
+        try {
+            out = new BufferedWriter(new FileWriter(DOCK_PIN_PATH));
+
+            // Generate a random 4 digit pin between 0000 and 9999
+            // This is not truly random but good enough for our purposes.
+            int pin = (int) Math.floor(Math.random() * 10000);
+
+            mDockPin = String.format("%04d", pin);
+            out.write(mDockPin);
+            return true;
+        } catch (FileNotFoundException e) {
+            log("FileNotFoundException while trying to write dock pairing pin");
+        } catch (IOException e) {
+            log("IOException while while trying to write dock pairing pin");
+        } finally {
+            if (out != null) {
+                try {
+                    out.close();
+                } catch (IOException e) {
+                    // Ignore
+                }
+            }
+        }
+        mDockPin = null;
+        return false;
+    }
+
+    /*package*/ synchronized String getDockPin() {
+        return mDockPin;
     }
 
     public synchronized void initAfterRegistration() {
@@ -922,6 +1025,13 @@ public class BluetoothService extends IBluetooth.Stub {
             return false;
         }
 
+        if (address.equals(mDockAddress)) {
+            if (!writeDockPin()) {
+                log("Error while writing Pin for the dock");
+                return false;
+            }
+        }
+
         if (!createPairedDeviceNative(address, 60000 /* 1 minute */)) {
             return false;
         }
@@ -973,6 +1083,11 @@ public class BluetoothService extends IBluetooth.Stub {
             return BluetoothDevice.ERROR;
         }
         return mBondState.getBondState(address.toUpperCase());
+    }
+
+    public synchronized boolean isBluetoothDock(String address) {
+        if (address.equals(mDockAddress)) return true;
+        return false;
     }
 
     /*package*/ boolean isRemoteDeviceInCache(String address) {
