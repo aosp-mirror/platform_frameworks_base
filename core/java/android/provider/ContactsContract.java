@@ -293,6 +293,13 @@ public final class ContactsContract {
         public static final String DISPLAY_NAME = "display_name";
 
         /**
+         * Reference to the row in the RawContacts table holding the contact name.
+         * <P>Type: INTEGER REFERENCES raw_contacts(_id)</P>
+         * @hide
+         */
+        public static final String NAME_RAW_CONTACT_ID = "name_raw_contact_id";
+
+        /**
          * Reference to the row in the data table holding the photo.
          * <P>Type: INTEGER REFERENCES data(_id)</P>
          */
@@ -423,13 +430,21 @@ public final class ContactsContract {
      * row id changed as a result of a sync or aggregation.</td>
      * </tr>
      * <tr>
+     * <td>long</td>
+     * <td>{@link #NAME_RAW_CONTACT_ID}</td>
+     * <td>read-only</td>
+     * <td>The ID of the raw contact that contributes the display name
+     * to the aggregate contact. During aggregation one of the constituent
+     * raw contacts is chosen using a heuristic: a longer name or a name
+     * with more diacritic marks or more upper case characters is chosen.</td>
+     * </tr>
+     * <tr>
      * <td>String</td>
      * <td>{@link #DISPLAY_NAME}</td>
      * <td>read-only</td>
-     * <td>The display name for the contact. During aggregation display name is
-     * computed from display names of constituent raw contacts using a
-     * heuristic: a longer name or a name with more diacritic marks or more
-     * upper case characters is chosen.</td>
+     * <td>The display name for the contact. It is the display name
+     * contributed by the raw contact referred to by the {@link #NAME_RAW_CONTACT_ID}
+     * column.</td>
      * </tr>
      * <tr>
      * <td>long</td>
