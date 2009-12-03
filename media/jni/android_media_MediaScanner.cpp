@@ -30,6 +30,11 @@
 #include "JNIHelp.h"
 #include "android_runtime/AndroidRuntime.h"
 
+#ifndef NO_OPENCORE
+#include "pvmediascanner.h"
+#else
+#include "StagefrightMediaScanner.h"
+#endif
 
 // ----------------------------------------------------------------------------
 
@@ -281,7 +286,12 @@ android_media_MediaScanner_native_init(JNIEnv *env)
 static void
 android_media_MediaScanner_native_setup(JNIEnv *env, jobject thiz)
 {
-    MediaScanner *mp = new MediaScanner();
+#ifndef NO_OPENCORE
+    MediaScanner *mp = new PVMediaScanner();
+#else
+    MediaScanner *mp = new StagefrightMediaScanner();
+#endif
+
     if (mp == NULL) {
         jniThrowException(env, "java/lang/RuntimeException", "Out of memory");
         return;

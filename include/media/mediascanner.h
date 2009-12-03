@@ -28,33 +28,40 @@ namespace android {
 class MediaScannerClient;
 class StringArray;
 
-class MediaScanner 
-{
-public:
+struct MediaScanner {
     MediaScanner();
-    ~MediaScanner();
-    
-    typedef bool (*ExceptionCheck)(void* env);
+    virtual ~MediaScanner();
 
-    status_t processFile(const char *path, const char *mimeType, MediaScannerClient& client);
-    status_t processDirectory(const char *path, const char* extensions, 
-            MediaScannerClient& client, ExceptionCheck exceptionCheck, void* exceptionEnv);
-    void setLocale(const char* locale);
-    
+    virtual status_t processFile(
+            const char *path, const char *mimeType,
+            MediaScannerClient &client) = 0;
+
+    typedef bool (*ExceptionCheck)(void* env);
+    virtual status_t processDirectory(
+            const char *path, const char *extensions,
+            MediaScannerClient &client,
+            ExceptionCheck exceptionCheck, void *exceptionEnv);
+
+    void setLocale(const char *locale);
+
     // extracts album art as a block of data
-    char* extractAlbumArt(int fd);
-    
-    static void uninitializeForThread();
+    virtual char *extractAlbumArt(int fd) = 0;
+
+protected:
+    const char *locale() const;
 
 private:
-    status_t doProcessDirectory(char *path, int pathRemaining, const char* extensions, 
-            MediaScannerClient& client, ExceptionCheck exceptionCheck, void* exceptionEnv);
-    void initializeForThread();
-    
     // current locale (like "ja_JP"), created/destroyed with strdup()/free()
-    char* mLocale;
-};
+    char *mLocale;
 
+    status_t doProcessDirectory(
+            char *path, int pathRemaining, const char *extensions,
+            MediaScannerClient &client, ExceptionCheck exceptionCheck,
+            void *exceptionEnv);
+
+    MediaScanner(const MediaScanner &);
+    MediaScanner &operator=(const MediaScanner &);
+};
 
 class MediaScannerClient
 {
@@ -78,7 +85,7 @@ protected:
     // cached name and value strings, for native encoding support.
     StringArray*    mNames;
     StringArray*    mValues;
-    
+
     // default encoding based on MediaScanner::mLocale string
     uint32_t        mLocaleEncoding;
 };
