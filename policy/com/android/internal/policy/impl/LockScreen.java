@@ -488,7 +488,7 @@ class LockScreen extends LinearLayout implements KeyguardScreen, KeyguardUpdateM
                 mScreenLocked.setVisibility(View.INVISIBLE);
                 mSelector.setVisibility(View.VISIBLE);
                 mEmergencyCallButton.setVisibility(View.VISIBLE);
-                putEmergencyBelow(R.id.divider);
+                putEmergencyBelow(R.id.screenLocked);
                 break;
             case SimMissingLocked:
                 // text
