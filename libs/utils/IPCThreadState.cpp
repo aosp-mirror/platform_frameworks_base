@@ -18,6 +18,7 @@
 
 #include <utils/Binder.h>
 #include <utils/BpBinder.h>
+#include <cutils/sched_policy.h>
 #include <utils/Debug.h>
 #include <utils/Log.h>
 #include <utils/TextOutput.h>
@@ -426,6 +427,21 @@ void IPCThreadState::joinThreadPool(bool isMain)
             result = executeCommand(cmd);
         }
         
+        // After executing the command, ensure that the thread is returned to the
+        // default cgroup and priority before rejoining the pool.  This is a failsafe
+        // in case the command implementation failed to properly restore the thread's
+        // scheduling parameters upon completion.
+        int my_id;
+#ifdef HAVE_GETTID
+        my_id = gettid();
+#else
+        my_id = getpid();
+#endif
+        if (!set_sched_policy(my_id, SP_FOREGROUND)) {
+            // success; reset the priority as well
+            setpriority(PRIO_PROCESS, my_id, ANDROID_PRIORITY_NORMAL);
+        }
+
         // Let this thread exit the thread pool if it is no longer
         // needed and it is not the main process thread.
         if(result == TIMED_OUT && !isMain) {
