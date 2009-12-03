@@ -20,6 +20,8 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import java.io.PrintWriter;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Rect holds four integer coordinates for a rectangle. The rectangle is
@@ -33,6 +35,9 @@ public final class Rect implements Parcelable {
     public int top;
     public int right;
     public int bottom;
+
+    private static final Pattern FLATTENED_PATTERN = Pattern.compile(
+            "(-?\\d+) (-?\\d+) (-?\\d+) (-?\\d+)");
 
     /**
      * Create a new empty Rect. All coordinates are initialized to 0.
@@ -104,6 +109,43 @@ public final class Rect implements Parcelable {
         sb.append(top); sb.append("]["); sb.append(right);
         sb.append(','); sb.append(bottom); sb.append(']');
         return sb.toString();
+    }
+
+    /**
+     * Return a string representation of the rectangle in a well-defined format.
+     *
+     * <p>You can later recover the Rect from this string through
+     * {@link #unflattenFromString(String)}.
+     * 
+     * @return Returns a new String of the form "left top right bottom"
+     */
+    public String flattenToString() {
+        StringBuilder sb = new StringBuilder(32);
+        // WARNING: Do not change the format of this string, it must be
+        // preserved because Rects are saved in this flattened format.
+        sb.append(left);
+        sb.append(' ');
+        sb.append(top);
+        sb.append(' ');
+        sb.append(right);
+        sb.append(' ');
+        sb.append(bottom);
+        return sb.toString();
+    }
+
+    /**
+     * Returns a Rect from a string of the form returned by {@link #flattenToString},
+     * or null if the string is not of that form.
+     */
+    public static Rect unflattenFromString(String str) {
+        Matcher matcher = FLATTENED_PATTERN.matcher(str);
+        if (!matcher.matches()) {
+            return null;
+        }
+        return new Rect(Integer.parseInt(matcher.group(1)),
+                Integer.parseInt(matcher.group(2)),
+                Integer.parseInt(matcher.group(3)),
+                Integer.parseInt(matcher.group(4)));
     }
     
     /**
