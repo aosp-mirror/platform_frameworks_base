@@ -492,6 +492,14 @@ class BluetoothEventLoop {
                 mBluetoothService.getBondState().getPendingOutgoingBonding();
         if (address.equals(pendingOutgoingAddress)) {
             // we initiated the bonding
+
+            // Check if its a dock
+            if (mBluetoothService.isBluetoothDock(address)) {
+                String pin = mBluetoothService.getDockPin();
+                mBluetoothService.setPin(address, BluetoothDevice.convertPinToBytes(pin));
+                return;
+            }
+
             BluetoothClass btClass = new BluetoothClass(mBluetoothService.getRemoteClass(address));
 
             // try 0000 once if the device looks dumb
