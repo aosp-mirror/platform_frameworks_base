@@ -746,7 +746,7 @@ public class MediaScanner
 
                     long time = exif.getDateTime();
                     if (time != -1) {
-                        values.put(Images.Media.DATE_TAKEN, time * 1000);
+                        values.put(Images.Media.DATE_TAKEN, time);
                     }
 
                     int orientation = exif.getAttributeInt(
