@@ -395,6 +395,9 @@
           <li><a href="<?cs var:toroot ?>guide/samples/ApiDemos/index.html">
                 <span class="en">API Demos</span>
               </a></li>
+          <li><a href="<?cs var:toroot ?>guide/samples/BluetoothChat/index.html">
+                <span class="en">Bluetooth Chat</span>
+              </a></li>
           <li><a href="<?cs var:toroot ?>guide/samples/Home/index.html">
                 <span class="en">Home</span>
               </a></li>
