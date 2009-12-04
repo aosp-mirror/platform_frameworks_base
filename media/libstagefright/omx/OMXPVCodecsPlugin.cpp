@@ -35,20 +35,16 @@ OMX_ERRORTYPE OMXPVCodecsPlugin::makeComponentInstance(
         const OMX_CALLBACKTYPE *callbacks,
         OMX_PTR appData,
         OMX_COMPONENTTYPE **component) {
-    OMX_ERRORTYPE err = OMX_MasterGetHandle(
+    return OMX_MasterGetHandle(
             reinterpret_cast<OMX_HANDLETYPE *>(component),
             const_cast<char *>(name),
             appData,
             const_cast<OMX_CALLBACKTYPE *>(callbacks));
+}
 
-    if (err != OMX_ErrorNone) {
-        return err;
-    }
-
-    // PV is not even filling this in...
-    (*component)->ComponentDeInit = &OMX_MasterFreeHandle;
-
-    return OMX_ErrorNone;
+OMX_ERRORTYPE OMXPVCodecsPlugin::destroyComponentInstance(
+        OMX_COMPONENTTYPE *component) {
+    return OMX_MasterFreeHandle(component);
 }
 
 OMX_ERRORTYPE OMXPVCodecsPlugin::enumerateComponents(
