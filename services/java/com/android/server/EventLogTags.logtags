@@ -1,0 +1,139 @@
+# See system/core/logcat/event.logtags for a description of the format of this file.
+
+option java_package com.android.server
+
+# ---------------------------
+# BatteryService.java
+# ---------------------------
+2722 battery_level (level|1|6),(voltage|1|1),(temperature|1|1)
+2723 battery_status (status|1|5),(health|1|5),(present|1|5),(plugged|1|5),(technology|3)
+# This is logged when battery goes from discharging to charging.
+# It lets us count the total amount of time between charges and the discharge level
+2730 battery_discharge (duration|2|3),(minLevel|1|6),(maxLevel|1|6)
+
+
+# ---------------------------
+# PowerManagerService.java
+# ---------------------------
+# This is logged when the device is being forced to sleep (typically by
+# the user pressing the power button).
+2724 power_sleep_requested (wakeLocksCleared|1|1)
+# This is logged when the screen on broadcast has completed
+2725 power_screen_broadcast_send (wakelockCount|1|1)
+# This is logged when the screen broadcast has completed
+2726 power_screen_broadcast_done (on|1|5),(broadcastDuration|2|3),(wakelockCount|1|1)
+# This is logged when the screen on broadcast has completed
+2727 power_screen_broadcast_stop (which|1|5),(wakelockCount|1|1)
+# This is logged when the screen is turned on or off.
+2728 power_screen_state (offOrOn|1|5),(becauseOfUser|1|5),(totalTouchDownTime|2|3),(touchCycles|1|1)
+# This is logged when the partial wake lock (keeping the device awake
+# regardless of whether the screen is off) is acquired or released.
+2729 power_partial_wake_state (releasedorAcquired|1|5),(tag|3)
+
+#
+# Leave IDs through 2739 for more power logs (2730 used by battery_discharge above)
+#
+
+
+# ---------------------------
+# DeviceStorageMonitoryService.java
+# ---------------------------
+# The disk space free on the /data partition, in bytes
+2744 free_storage_changed (data|2|2)
+# Device low memory notification and disk space free on the /data partition, in bytes at that time
+2745 low_storage (data|2|2)
+# disk space free on the /data, /system, and /cache partitions in bytes
+2746 free_storage_left (data|2|2),(system|2|2),(cache|2|2)
+
+
+# ---------------------------
+# NotificationManagerService.java
+# ---------------------------
+# when a NotificationManager.notify is called
+2750 notification_enqueue (pkg|3),(id|1|5),(notification|3)
+# when someone tries to cancel a notification, the notification manager sometimes
+# calls this with flags too
+2751 notification_cancel (pkg|3),(id|1|5),(required_flags|1)
+# when someone tries to cancel all of the notifications for a particular package
+2752 notification_cancel_all (pkg|3),(required_flags|1)
+
+
+# ---------------------------
+# Watchdog.java
+# ---------------------------
+2802 watchdog (Service|3)
+2803 watchdog_proc_pss (Process|3),(Pid|1|5),(Pss|1|2)
+2804 watchdog_soft_reset (Process|3),(Pid|1|5),(MaxPss|1|2),(Pss|1|2),(Skip|3)
+2805 watchdog_hard_reset (Process|3),(Pid|1|5),(MaxPss|1|2),(Pss|1|2)
+2806 watchdog_pss_stats (EmptyPss|1|2),(EmptyCount|1|1),(BackgroundPss|1|2),(BackgroundCount|1|1),(ServicePss|1|2),(ServiceCount|1|1),(VisiblePss|1|2),(VisibleCount|1|1),(ForegroundPss|1|2),(ForegroundCount|1|1),(NoPssCount|1|1)
+2807 watchdog_proc_stats (DeathsInOne|1|1),(DeathsInTwo|1|1),(DeathsInThree|1|1),(DeathsInFour|1|1),(DeathsInFive|1|1)
+2808 watchdog_scheduled_reboot (Now|2|1),(Interval|1|3),(StartTime|1|3),(Window|1|3),(Skip|3)
+2809 watchdog_meminfo (MemFree|1|2),(Buffers|1|2),(Cached|1|2),(Active|1|2),(Inactive|1|2),(AnonPages|1|2),(Mapped|1|2),(Slab|1|2),(SReclaimable|1|2),(SUnreclaim|1|2),(PageTables|1|2)
+2810 watchdog_vmstat (runtime|2|3),(pgfree|1|1),(pgactivate|1|1),(pgdeactivate|1|1),(pgfault|1|1),(pgmajfault|1|1)
+2811 watchdog_requested_reboot (NoWait|1|1),(ScheduleInterval|1|3),(RecheckInterval|1|3),(StartTime|1|3),(Window|1|3),(MinScreenOff|1|3),(MinNextAlarm|1|3)
+
+
+# ---------------------------
+# BackupManagerService.java
+# ---------------------------
+2820 backup_data_changed (Package|3)
+2821 backup_start (Transport|3)
+2822 backup_transport_failure (Package|3)
+2823 backup_agent_failure (Package|3),(Message|3)
+2824 backup_package (Package|3),(Size|1|2)
+2825 backup_success (Packages|1|1),(Time|1|3)
+2826 backup_reset (Transport|3)
+2827 backup_initialize
+2830 restore_start (Transport|3),(Source|2|5)
+2831 restore_transport_failure
+2832 restore_agent_failure (Package|3),(Message|3)
+2833 restore_package (Package|3),(Size|1|2)
+2834 restore_success (Packages|1|1),(Time|1|3)
+
+
+# ---------------------------
+# SystemServer.java
+# ---------------------------
+# SystemServer.run() starts:
+3010 boot_progress_system_run (time|2|3)
+
+
+# ---------------------------
+# PackageManagerService.java
+# ---------------------------
+# Package Manager starts:
+3060 boot_progress_pms_start (time|2|3)
+# Package Manager .apk scan starts:
+3070 boot_progress_pms_system_scan_start (time|2|3)
+# Package Manager .apk scan starts:
+3080 boot_progress_pms_data_scan_start (time|2|3)
+# Package Manager .apk scan ends:
+3090 boot_progress_pms_scan_end (time|2|3)
+# Package Manager ready:
+3100 boot_progress_pms_ready (time|2|3)
+# + check activity_launch_time for Home app
+
+
+# ---------------------------
+# WindowManagerService.java
+# ---------------------------
+# Out of memory for surfaces.
+31000 wm_no_surface_memory (Window|3),(PID|1|5),(Operation|3)
+
+
+# ---------------------------
+# InputMethodManagerService.java
+# ---------------------------
+# Re-connecting to input method service because we haven't received its interface
+32000 imf_force_reconnect_ime (IME|4),(Time Since Connect|2|3),(Showing|1|1)
+
+
+# ---------------------------
+# ConnectivityService.java
+# ---------------------------
+# Connectivity state changed:
+# [31-13] Reserved for future use
+# [12- 9] Network subtype (for mobile network, as defined by TelephonyManager)
+# [ 8- 3] Detailed state ordinal (as defined by NetworkInfo.DetailedState)
+# [ 2- 0] Network type (as defined by ConnectivityManager)
+50020 connectivity_state_changed (custom|1|5)

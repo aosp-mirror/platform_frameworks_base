@@ -63,9 +63,6 @@ class DeviceStorageMonitorService extends Binder {
     private static final int LOW_MEMORY_NOTIFICATION_ID = 1;
     private static final int DEFAULT_THRESHOLD_PERCENTAGE = 10;
     private static final int DEFAULT_FREE_STORAGE_LOG_INTERVAL_IN_MINUTES = 12*60; //in minutes
-    private static final int EVENT_LOG_STORAGE_BELOW_THRESHOLD = 2744;
-    private static final int EVENT_LOG_LOW_STORAGE_NOTIFICATION = 2745;
-    private static final int EVENT_LOG_FREE_STORAGE_LEFT = 2746;
     private static final long DEFAULT_DISK_FREE_CHANGE_REPORTING_THRESHOLD = 2 * 1024 * 1024; // 2MB
     private static final long DEFAULT_CHECK_INTERVAL = MONITOR_INTERVAL*60*1000;
     private long mFreeMem;  // on /data
@@ -159,7 +156,7 @@ class DeviceStorageMonitorService extends Binder {
                 // ignore; report -1
             }
             mCacheFileStats.restat(CACHE_PATH);
-            EventLog.writeEvent(EVENT_LOG_FREE_STORAGE_LEFT,
+            EventLog.writeEvent(EventLogTags.FREE_STORAGE_LEFT,
                                 mFreeMem, mFreeSystem, mFreeCache);
         }
         // Read the reporting threshold from Gservices
@@ -170,7 +167,7 @@ class DeviceStorageMonitorService extends Binder {
         long delta = mFreeMem - mLastReportedFreeMem;
         if (delta > threshold || delta < -threshold) {
             mLastReportedFreeMem = mFreeMem;
-            EventLog.writeEvent(EVENT_LOG_STORAGE_BELOW_THRESHOLD, mFreeMem);
+            EventLog.writeEvent(EventLogTags.FREE_STORAGE_CHANGED, mFreeMem);
         }
     }
 
@@ -292,7 +289,7 @@ class DeviceStorageMonitorService extends Binder {
     private final void sendNotification() {
         if(localLOGV) Log.i(TAG, "Sending low memory notification");
         //log the event to event log with the amount of free storage(in bytes) left on the device
-        EventLog.writeEvent(EVENT_LOG_LOW_STORAGE_NOTIFICATION, mFreeMem);
+        EventLog.writeEvent(EventLogTags.LOW_STORAGE, mFreeMem);
         //  Pack up the values and broadcast them to everyone
         Intent lowMemIntent = new Intent(Intent.ACTION_MANAGE_PACKAGE_STORAGE);
         lowMemIntent.putExtra("memory", mFreeMem);
