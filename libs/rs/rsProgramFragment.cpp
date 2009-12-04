@@ -65,6 +65,20 @@ void ProgramFragment::setupGL(const Context *rsc, ProgramFragmentState *state)
             }
             glTexEnvi(GL_POINT_SPRITE_OES, GL_COORD_REPLACE_OES, mPointSpriteEnable);
         }
+
+        rsAssert(mTextures[ct]->getTextureID() != 0);
+        if (mTextures[ct]->getTextureID() == 0) {
+            // This is a hack for eclair to try to fix the white squares bug.
+            Allocation *a = (Allocation *)mTextures[ct].get();
+            a->uploadToTexture((Context *)rsc, 0);
+            if (mTextures[ct]->getTextureID() == 0) {
+                // At this point we are screwed.  Crash to restart the app.
+                rsc->dumpDebug();
+                LOGE("Multiple failures during texture upload.  Driver appears wedged.");
+                ((char *)0)[0] = 0;
+            }
+
+        }
         glBindTexture(GL_TEXTURE_2D, mTextures[ct]->getTextureID());
 
         switch(mEnvModes[ct]) {
