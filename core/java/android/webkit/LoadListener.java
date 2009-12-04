@@ -16,9 +16,14 @@
 
 package android.webkit;
 
+import android.content.ActivityNotFoundException;
 import android.content.Context;
-import android.net.WebAddress;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.net.ParseException;
+import android.net.Uri;
+import android.net.WebAddress;
 import android.net.http.EventHandler;
 import android.net.http.Headers;
 import android.net.http.HttpAuthHeader;
@@ -117,6 +122,8 @@ class LoadListener extends Handler implements EventHandler {
 
     // Does this loader correspond to the main-frame top-level page?
     private boolean mIsMainPageLoader;
+    private final boolean mIsMainResourceLoader;
+    private final boolean mUserGesture;
 
     private Headers mHeaders;
 
@@ -126,11 +133,12 @@ class LoadListener extends Handler implements EventHandler {
 
     public static LoadListener getLoadListener(Context context,
             BrowserFrame frame, String url, int nativeLoader,
-            boolean synchronous, boolean isMainPageLoader, long postIdentifier) {
+            boolean synchronous, boolean isMainPageLoader,
+            boolean isMainResource, boolean userGesture, long postIdentifier) {
 
         sNativeLoaderCount += 1;
         return new LoadListener(context, frame, url, nativeLoader, synchronous,
-                isMainPageLoader, postIdentifier);
+                isMainPageLoader, isMainResource, userGesture, postIdentifier);
     }
 
     public static int getNativeLoaderCount() {
@@ -139,7 +147,7 @@ class LoadListener extends Handler implements EventHandler {
 
     LoadListener(Context context, BrowserFrame frame, String url,
             int nativeLoader, boolean synchronous, boolean isMainPageLoader,
-            long postIdentifier) {
+            boolean isMainResource, boolean userGesture, long postIdentifier) {
         if (DebugFlags.LOAD_LISTENER) {
             Log.v(LOGTAG, "LoadListener constructor url=" + url);
         }
@@ -152,6 +160,8 @@ class LoadListener extends Handler implements EventHandler {
             mMessageQueue = new Vector<Message>();
         }
         mIsMainPageLoader = isMainPageLoader;
+        mIsMainResourceLoader = isMainResource;
+        mUserGesture = userGesture;
         mPostIdentifier = postIdentifier;
     }
 
@@ -294,6 +304,13 @@ class LoadListener extends Handler implements EventHandler {
         sendMessageInternal(obtainMessage(MSG_CONTENT_HEADERS, headers));
     }
 
+    // This is the same regex that DOMImplementation uses to check for xml
+    // content. Use this to check if another Activity wants to handle the
+    // content before giving it to webkit.
+    private static final String XML_MIME_TYPE =
+            "^[\\w_\\-+~!$\\^{}|.%'`#&*]+/" +
+            "[\\w_\\-+~!$\\^{}|.%'`#&*]+\\+xml$";
+
     // Does the header parsing work on the WebCore thread.
     private void handleHeaders(Headers headers) {
         if (mCancelled) return;
@@ -351,6 +368,25 @@ class LoadListener extends Handler implements EventHandler {
                304 Not Modified, the cached headers are used rather
                than the headers that are returned from the server. */
             guessMimeType();
+        }
+        // At this point, mMimeType has been set to non-null.
+        if (mIsMainPageLoader && mIsMainResourceLoader && mUserGesture &&
+                Pattern.matches(XML_MIME_TYPE, mMimeType)) {
+            Intent i = new Intent(Intent.ACTION_VIEW);
+            i.setDataAndType(Uri.parse(url()), mMimeType);
+            ResolveInfo info = mContext.getPackageManager().resolveActivity(i,
+                    PackageManager.MATCH_DEFAULT_ONLY);
+            if (info != null) {
+                // someone (other than the current activity) knows how to
+                // handle this mime type.
+                try {
+                    mContext.startActivity(i);
+                    mBrowserFrame.stopLoading();
+                    return;
+                } catch (ActivityNotFoundException ex) {
+                    // continue loading internally.
+                }
+            }
         }
 
         // is it an authentication request?
