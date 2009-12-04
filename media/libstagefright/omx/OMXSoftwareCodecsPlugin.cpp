@@ -74,7 +74,8 @@ OMX_ERRORTYPE OMXSoftwareCodecsPlugin::enumerateComponents(
         return OMX_ErrorNoMore;
     }
 
-    strlcpy(name, kComponentInfos[index].mName, size);
+    strncpy(name, kComponentInfos[index].mName, size - 1);
+    name[size - 1] = '\0';
 
     return OMX_ErrorNone;
 }
