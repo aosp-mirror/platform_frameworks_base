@@ -847,7 +847,7 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
             */
             mEglContext = mEGLContextFactory.createContext(mEgl, mEglDisplay, mEglConfig);
             if (mEglContext == null || mEglContext == EGL10.EGL_NO_CONTEXT) {
-                throw new RuntimeException("createContext failed");
+                throwEglException("createContext");
             }
 
             mEglSurface = null;
