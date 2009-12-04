@@ -49,11 +49,16 @@ int strzcmp16(const char16_t *s1, size_t n1, const char16_t *s2, size_t n2);
 // Version of strzcmp16 for comparing strings in different endianness.
 int strzcmp16_h_n(const char16_t *s1H, size_t n1, const char16_t *s2N, size_t n2);
 
+// Convert UTF-8 to UTF-16 including surrogate pairs
+void utf8_to_utf16(const uint8_t *src, size_t srcLen, char16_t* dst, const size_t dstLen);
+
 }
 
 // ---------------------------------------------------------------------------
 
 namespace android {
+
+// ---------------------------------------------------------------------------
 
 class String8;
 class TextOutput;

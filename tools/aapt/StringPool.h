@@ -68,8 +68,11 @@ public:
      * lookup with ResStringPool::indexOfString() (O(log n)), at the expense
      * of support for styled string entries (which requires the same string
      * be included multiple times in the pool).
+     *
+     * If 'utf8' is true, strings will be encoded with UTF-8 instead of
+     * left in Java's native UTF-16.
      */
-    explicit StringPool(bool sorted = false);
+    explicit StringPool(bool sorted = false, bool utf8 = false);
 
     /**
      * Add a new string to the pool.  If mergeDuplicates is true, thenif
@@ -123,6 +126,7 @@ public:
 
 private:
     const bool                              mSorted;
+    const bool                              mUTF8;
     // Raw array of unique strings, in some arbitrary order.
     Vector<entry>                           mEntries;
     // Array of indices into mEntries, in the order they were

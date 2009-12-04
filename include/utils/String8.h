@@ -60,6 +60,11 @@ size_t utf32_length(const char *src, size_t src_len);
 /*
  * Returns the UTF-8 length of "src".
  */
+size_t utf8_length_from_utf16(const char16_t *src, size_t src_len);
+
+/*
+ * Returns the UTF-8 length of "src".
+ */
 size_t utf8_length_from_utf32(const char32_t *src, size_t src_len);
 
 /*
@@ -118,6 +123,9 @@ size_t utf8_to_utf32(const char* src, size_t src_len,
  * (note that "dst" is NOT null-terminated, like strncpy)
  */
 size_t utf32_to_utf8(const char32_t* src, size_t src_len,
+                     char* dst, size_t dst_len);
+
+size_t utf16_to_utf8(const char16_t* src, size_t src_len,
                      char* dst, size_t dst_len);
 
 }

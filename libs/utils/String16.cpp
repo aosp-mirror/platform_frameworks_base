@@ -172,10 +172,6 @@ int strzcmp16_h_n(const char16_t *s1H, size_t n1, const char16_t *s2N, size_t n2
            : 0);
 }
 
-// ---------------------------------------------------------------------------
-
-namespace android {
-
 static inline size_t
 utf8_char_len(uint8_t ch)
 {
@@ -215,7 +211,37 @@ utf8_to_utf32(const uint8_t *src, size_t length)
     //printf("Char at %p: len=%d, utf-16=%p\n", src, length, (void*)result);
 }
 
+void
+utf8_to_utf16(const uint8_t *src, size_t srcLen,
+        char16_t* dst, const size_t dstLen)
+{
+    const uint8_t* const end = src + srcLen;
+    const char16_t* const dstEnd = dst + dstLen;
+    while (src < end && dst < dstEnd) {
+        size_t len = utf8_char_len(*src);
+        uint32_t codepoint = utf8_to_utf32((const uint8_t*)src, len);
+
+        // Convert the UTF32 codepoint to one or more UTF16 codepoints
+        if (codepoint <= 0xFFFF) {
+            // Single UTF16 character
+            *dst++ = (char16_t) codepoint;
+        } else {
+            // Multiple UTF16 characters with surrogates
+            codepoint = codepoint - 0x10000;
+            *dst++ = (char16_t) ((codepoint >> 10) + 0xD800);
+            *dst++ = (char16_t) ((codepoint & 0x3FF) + 0xDC00);
+        }
+
+        src += len;
+    }
+    if (dst < dstEnd) {
+        *dst = 0;
+    }
+}
+
 // ---------------------------------------------------------------------------
+
+namespace android {
 
 static SharedBuffer* gEmptyStringBuf = NULL;
 static char16_t* gEmptyString = NULL;
@@ -260,30 +286,14 @@ static char16_t* allocFromUTF8(const char* in, size_t len)
         p += utf8len;
     }
     
-    SharedBuffer* buf = SharedBuffer::alloc((chars+1)*sizeof(char16_t));
+    size_t bufSize = (chars+1)*sizeof(char16_t);
+    SharedBuffer* buf = SharedBuffer::alloc(bufSize);
     if (buf) {
         p = in;
         char16_t* str = (char16_t*)buf->data();
-        char16_t* d = str;
-        while (p < end) {
-            size_t len = utf8_char_len(*p);
-            uint32_t codepoint = utf8_to_utf32((const uint8_t*)p, len);
-
-            // Convert the UTF32 codepoint to one or more UTF16 codepoints
-            if (codepoint <= 0xFFFF) {
-                // Single UTF16 character
-                *d++ = (char16_t) codepoint;
-            } else {
-                // Multiple UTF16 characters with surrogates
-                codepoint = codepoint - 0x10000;
-                *d++ = (char16_t) ((codepoint >> 10) + 0xD800);
-                *d++ = (char16_t) ((codepoint & 0x3FF) + 0xDC00);
-            }
-
-            p += len;
-        }
-        *d = 0;
         
+        utf8_to_utf16((const uint8_t*)p, len, str, bufSize);
+
         //printf("Created UTF-16 string from UTF-8 \"%s\":", in);
         //printHexData(1, str, buf->size(), 16, 1);
         //printf("\n");
