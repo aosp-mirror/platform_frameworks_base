@@ -338,6 +338,7 @@ import java.util.ArrayList;
             super.onEditorAction(actionCode);
             break;
         case EditorInfo.IME_ACTION_GO:
+        case EditorInfo.IME_ACTION_SEARCH:
             // Send an enter and hide the soft keyboard
             InputMethodManager.getInstance(mContext)
                     .hideSoftInputFromWindow(getWindowToken(), 0);
@@ -826,6 +827,9 @@ import java.util.ArrayList;
             case -1: // FAILURE
             case 2: // DONE
                 setImeOptions(EditorInfo.IME_ACTION_DONE);
+                break;
+            case 3: // SEARCH
+                setImeOptions(EditorInfo.IME_ACTION_SEARCH);
                 break;
             }
         } else {
