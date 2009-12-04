@@ -68,23 +68,19 @@ import java.io.PrintWriter;
  */
 class BatteryService extends Binder {
     private static final String TAG = BatteryService.class.getSimpleName();
-    
+
     private static final boolean LOCAL_LOGV = false;
-    
-    static final int LOG_BATTERY_LEVEL = 2722;
-    static final int LOG_BATTERY_STATUS = 2723;
-    static final int LOG_BATTERY_DISCHARGE_STATUS = 2730;
-    
+
     static final int BATTERY_SCALE = 100;    // battery capacity is a percentage
 
     // Used locally for determining when to make a last ditch effort to log
     // discharge stats before the device dies.
-    private static final int CRITICAL_BATTERY_LEVEL = 4; 
+    private static final int CRITICAL_BATTERY_LEVEL = 4;
 
     private static final int DUMP_MAX_LENGTH = 24 * 1024;
     private static final String[] DUMPSYS_ARGS = new String[] { "--checkin", "-u" };
     private static final String BATTERY_STATS_SERVICE_NAME = "batteryinfo";
-    
+
     private static final String DUMPSYS_DATA_PATH = "/data/system/";
 
     // This should probably be exposed in the API, though it's not critical
@@ -92,7 +88,7 @@ class BatteryService extends Binder {
 
     private final Context mContext;
     private final IBatteryStats mBatteryStats;
-    
+
     private boolean mAcOnline;
     private boolean mUsbOnline;
     private int mBatteryStatus;
@@ -117,12 +113,12 @@ class BatteryService extends Binder {
 
     private int mPlugType;
     private int mLastPlugType = -1; // Extra state so we can detect first run
-    
+
     private long mDischargeStartTime;
     private int mDischargeStartLevel;
-    
+
     private boolean mSentLowBatteryBroadcast = false;
-    
+
     public BatteryService(Context context) {
         mContext = context;
         mBatteryStats = BatteryStatsService.getService();
@@ -219,20 +215,20 @@ class BatteryService extends Binder {
                 mPlugType != mLastPlugType ||
                 mBatteryVoltage != mLastBatteryVoltage ||
                 mBatteryTemperature != mLastBatteryTemperature) {
-            
+
             if (mPlugType != mLastPlugType) {
                 if (mLastPlugType == BATTERY_PLUGGED_NONE) {
                     // discharging -> charging
-                    
+
                     // There's no value in this data unless we've discharged at least once and the
                     // battery level has changed; so don't log until it does.
                     if (mDischargeStartTime != 0 && mDischargeStartLevel != mBatteryLevel) {
                         dischargeDuration = SystemClock.elapsedRealtime() - mDischargeStartTime;
                         logOutlier = true;
-                        EventLog.writeEvent(LOG_BATTERY_DISCHARGE_STATUS, dischargeDuration,
+                        EventLog.writeEvent(EventLogTags.BATTERY_DISCHARGE, dischargeDuration,
                                 mDischargeStartLevel, mBatteryLevel);
                         // make sure we see a discharge event before logging again
-                        mDischargeStartTime = 0; 
+                        mDischargeStartTime = 0;
                     }
                 } else if (mPlugType == BATTERY_PLUGGED_NONE) {
                     // charging -> discharging or we just powered up
@@ -244,19 +240,19 @@ class BatteryService extends Binder {
                     mBatteryHealth != mLastBatteryHealth ||
                     mBatteryPresent != mLastBatteryPresent ||
                     mPlugType != mLastPlugType) {
-                EventLog.writeEvent(LOG_BATTERY_STATUS,
+                EventLog.writeEvent(EventLogTags.BATTERY_STATUS,
                         mBatteryStatus, mBatteryHealth, mBatteryPresent ? 1 : 0,
                         mPlugType, mBatteryTechnology);
             }
             if (mBatteryLevel != mLastBatteryLevel ||
                     mBatteryVoltage != mLastBatteryVoltage ||
                     mBatteryTemperature != mLastBatteryTemperature) {
-                EventLog.writeEvent(LOG_BATTERY_LEVEL,
+                EventLog.writeEvent(EventLogTags.BATTERY_LEVEL,
                         mBatteryLevel, mBatteryVoltage, mBatteryTemperature);
             }
             if (mBatteryLevel != mLastBatteryLevel && mPlugType == BATTERY_PLUGGED_NONE) {
                 // If the battery level has changed and we are on battery, update the current level.
-                // This is used for discharge cycle tracking so this shouldn't be updated while the 
+                // This is used for discharge cycle tracking so this shouldn't be updated while the
                 // battery is charging.
                 try {
                     mBatteryStats.recordCurrentLevel(mBatteryLevel);
@@ -271,7 +267,7 @@ class BatteryService extends Binder {
                 dischargeDuration = SystemClock.elapsedRealtime() - mDischargeStartTime;
                 logOutlier = true;
             }
-            
+
             final boolean plugged = mPlugType != BATTERY_PLUGGED_NONE;
             final boolean oldPlugged = mLastPlugType != BATTERY_PLUGGED_NONE;
 
@@ -285,9 +281,9 @@ class BatteryService extends Binder {
                 && mBatteryStatus != BatteryManager.BATTERY_STATUS_UNKNOWN
                 && mBatteryLevel <= mLowBatteryWarningLevel
                 && (oldPlugged || mLastBatteryLevel > mLowBatteryWarningLevel);
-            
+
             sendIntent();
-            
+
             // Separate broadcast is sent for power connected / not connected
             // since the standard intent will not wake any applications and some
             // applications may want to have smart behavior based on this.
@@ -311,12 +307,12 @@ class BatteryService extends Binder {
                 statusIntent.setAction(Intent.ACTION_BATTERY_OKAY);
                 mContext.sendBroadcast(statusIntent);
             }
-            
+
             // This needs to be done after sendIntent() so that we get the lastest battery stats.
             if (logOutlier && dischargeDuration != 0) {
                 logOutlier(dischargeDuration);
             }
-            
+
             mLastBatteryStatus = mBatteryStatus;
             mLastBatteryHealth = mBatteryHealth;
             mLastBatteryPresent = mBatteryPresent;
@@ -337,7 +333,7 @@ class BatteryService extends Binder {
         } catch (RemoteException e) {
             // Should never happen.
         }
-        
+
         int icon = getIcon(mBatteryLevel);
 
         intent.putExtra(BatteryManager.EXTRA_STATUS, mBatteryStatus);
@@ -353,8 +349,8 @@ class BatteryService extends Binder {
 
         if (false) {
             Log.d(TAG, "updateBattery level:" + mBatteryLevel +
-                    " scale:" + BATTERY_SCALE + " status:" + mBatteryStatus + 
-                    " health:" + mBatteryHealth +  " present:" + mBatteryPresent + 
+                    " scale:" + BATTERY_SCALE + " status:" + mBatteryStatus +
+                    " health:" + mBatteryHealth +  " present:" + mBatteryPresent +
                     " voltage: " + mBatteryVoltage +
                     " temperature: " + mBatteryTemperature +
                     " technology: " + mBatteryTechnology +
@@ -366,7 +362,7 @@ class BatteryService extends Binder {
     }
 
     private final void logBatteryStats() {
-        
+
         IBinder batteryInfoService = ServiceManager.getService(BATTERY_STATS_SERVICE_NAME);
         if (batteryInfoService != null) {
             byte[] buffer = new byte[DUMP_MAX_LENGTH];
@@ -385,15 +381,15 @@ class BatteryService extends Binder {
                 FileInputStream fileInputStream = new FileInputStream(dumpFile);
                 int nread = fileInputStream.read(buffer, 0, length);
                 if (nread > 0) {
-                    Checkin.logEvent(mContext.getContentResolver(), 
-                            Checkin.Events.Tag.BATTERY_DISCHARGE_INFO, 
+                    Checkin.logEvent(mContext.getContentResolver(),
+                            Checkin.Events.Tag.BATTERY_DISCHARGE_INFO,
                             new String(buffer, 0, nread));
-                    if (LOCAL_LOGV) Log.v(TAG, "dumped " + nread + "b from " + 
+                    if (LOCAL_LOGV) Log.v(TAG, "dumped " + nread + "b from " +
                             batteryInfoService + "to log");
                     if (LOCAL_LOGV) Log.v(TAG, "actual dump:" + new String(buffer, 0, nread));
                 }
             } catch (RemoteException e) {
-                Log.e(TAG, "failed to dump service '" + BATTERY_STATS_SERVICE_NAME + 
+                Log.e(TAG, "failed to dump service '" + BATTERY_STATS_SERVICE_NAME +
                         "':" + e);
             } catch (IOException e) {
                 Log.e(TAG, "failed to write dumpsys file: " +  e);
@@ -413,29 +409,29 @@ class BatteryService extends Binder {
             }
         }
     }
-    
+
     private final void logOutlier(long duration) {
         ContentResolver cr = mContext.getContentResolver();
         String dischargeThresholdString = Settings.Gservices.getString(cr,
                 Settings.Gservices.BATTERY_DISCHARGE_THRESHOLD);
         String durationThresholdString = Settings.Gservices.getString(cr,
                 Settings.Gservices.BATTERY_DISCHARGE_DURATION_THRESHOLD);
-        
+
         if (dischargeThresholdString != null && durationThresholdString != null) {
             try {
                 long durationThreshold = Long.parseLong(durationThresholdString);
                 int dischargeThreshold = Integer.parseInt(dischargeThresholdString);
-                if (duration <= durationThreshold && 
+                if (duration <= durationThreshold &&
                         mDischargeStartLevel - mBatteryLevel >= dischargeThreshold) {
                     // If the discharge cycle is bad enough we want to know about it.
                     logBatteryStats();
                 }
-                if (LOCAL_LOGV) Log.v(TAG, "duration threshold: " + durationThreshold + 
+                if (LOCAL_LOGV) Log.v(TAG, "duration threshold: " + durationThreshold +
                         " discharge threshold: " + dischargeThreshold);
-                if (LOCAL_LOGV) Log.v(TAG, "duration: " + duration + " discharge: " + 
+                if (LOCAL_LOGV) Log.v(TAG, "duration: " + duration + " discharge: " +
                         (mDischargeStartLevel - mBatteryLevel));
             } catch (NumberFormatException e) {
-                Log.e(TAG, "Invalid DischargeThresholds GService string: " + 
+                Log.e(TAG, "Invalid DischargeThresholds GService string: " +
                         durationThresholdString + " or " + dischargeThresholdString);
                 return;
             }
@@ -458,7 +454,7 @@ class BatteryService extends Binder {
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.DUMP)
                 != PackageManager.PERMISSION_GRANTED) {
-            
+
             pw.println("Permission Denial: can't dump Battery service from from pid="
                     + Binder.getCallingPid()
                     + ", uid=" + Binder.getCallingUid());
