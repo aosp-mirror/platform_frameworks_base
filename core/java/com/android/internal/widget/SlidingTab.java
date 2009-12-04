@@ -433,9 +433,16 @@ public class SlidingTab extends ViewGroup {
             return tab.getMeasuredHeight();
         }
 
-        public void startAnimation(Animation animation) {
-            tab.startAnimation(animation);
-            text.startAnimation(animation);
+        /**
+         * Start animating the slider. Note we need two animations since an Animator
+         * keeps internal state of the invalidation region which is just the view being animated.
+         * 
+         * @param anim1
+         * @param anim2
+         */
+        public void startAnimation(Animation anim1, Animation anim2) {
+            tab.startAnimation(anim1);
+            text.startAnimation(anim2);
         }
 
         public void hideTarget() {
@@ -620,7 +627,8 @@ public class SlidingTab extends ViewGroup {
 
     void startAnimating(final boolean holdAfter) {
         mAnimating = true;
-        final Animation trans;
+        final Animation trans1;
+        final Animation trans2;
         final Slider slider = mCurrentSlider;
         final Slider other = mOtherSlider;
         final int dx;
@@ -644,12 +652,16 @@ public class SlidingTab extends ViewGroup {
             dy =  slider == mRightSlider ? (top + viewHeight - holdOffset)
                     : - ((viewHeight - bottom) + viewHeight - holdOffset);
         }
-        trans = new TranslateAnimation(0, dx, 0, dy);
-        trans.setDuration(ANIM_DURATION);
-        trans.setInterpolator(new LinearInterpolator());
-        trans.setFillAfter(true);
+        trans1 = new TranslateAnimation(0, dx, 0, dy);
+        trans1.setDuration(ANIM_DURATION);
+        trans1.setInterpolator(new LinearInterpolator());
+        trans1.setFillAfter(true);
+        trans2 = new TranslateAnimation(0, dx, 0, dy);
+        trans2.setDuration(ANIM_DURATION);
+        trans2.setInterpolator(new LinearInterpolator());
+        trans2.setFillAfter(true);
 
-        trans.setAnimationListener(new AnimationListener() {
+        trans1.setAnimationListener(new AnimationListener() {
             public void onAnimationEnd(Animation animation) {
                 Animation anim;
                 if (holdAfter) {
@@ -662,8 +674,10 @@ public class SlidingTab extends ViewGroup {
                     resetView();
                 }
                 anim.setAnimationListener(mAnimationDoneListener);
-                mLeftSlider.startAnimation(anim);
-                mRightSlider.startAnimation(anim);
+                
+                /* Animation can be the same for these since the animation just holds */
+                mLeftSlider.startAnimation(anim, anim);
+                mRightSlider.startAnimation(anim, anim);
             }
 
             public void onAnimationRepeat(Animation animation) {
@@ -677,7 +691,7 @@ public class SlidingTab extends ViewGroup {
         });
 
         slider.hideTarget();
-        slider.startAnimation(trans);
+        slider.startAnimation(trans1, trans2);
     }
 
     private void onAnimationDone() {
