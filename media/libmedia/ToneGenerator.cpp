@@ -224,7 +224,8 @@ const ToneGenerator::ToneDescriptor ToneGenerator::sToneDescriptors[] = {
                       { duration: 0 , waveFreq: { 0 }, 0, 0}},
           repeatCnt: 2,
           repeatSegment: 0 },                              // TONE_CDMA_CONFIRM
-        { segments: { { duration: 0, waveFreq: { 0 }, 0, 0 }},
+        { segments: { { duration: 500, waveFreq: { 660, 1000, 0 }, 0, 0 },
+                      { duration: 0 , waveFreq: { 0 }, 0, 0}},
           repeatCnt: 0,
           repeatSegment: 0 },                              // TONE_CDMA_ANSWER
         { segments: { { duration: 300, waveFreq: { 440, 0 }, 0, 0 },
