@@ -63,6 +63,11 @@ OMX_ERRORTYPE OMXSoftwareCodecsPlugin::makeComponentInstance(
     return OMX_ErrorInvalidComponentName;
 }
 
+OMX_ERRORTYPE OMXSoftwareCodecsPlugin::destroyComponentInstance(
+        OMX_COMPONENTTYPE *component) {
+    return (*component->ComponentDeInit)(component);
+}
+
 OMX_ERRORTYPE OMXSoftwareCodecsPlugin::enumerateComponents(
         OMX_STRING name,
         size_t size,
