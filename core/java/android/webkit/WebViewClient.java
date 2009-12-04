@@ -173,8 +173,6 @@ public class WebViewClient {
      * @param handler An SslErrorHandler object that will handle the user's
      *            response.
      * @param error The SSL error object.
-     * @hide - hide this because it contains a parameter of type SslError,
-     * which is located in a hidden package.
      */
     public void onReceivedSslError(WebView view, SslErrorHandler handler,
             SslError error) {
