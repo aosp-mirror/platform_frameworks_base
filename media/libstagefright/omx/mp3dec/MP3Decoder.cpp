@@ -51,7 +51,7 @@ void MP3Decoder::initPort(OMX_U32 portIndex) {
 
     if (portIndex == kPortIndexInput) {
         def->nBufferSize = 8192;
-        strlcpy(audioDef->cMIMEType, "audio/mpeg", 128);
+        strcpy(audioDef->cMIMEType, "audio/mpeg");
         audioDef->pNativeRender = NULL;
         audioDef->bFlagErrorConcealment = OMX_FALSE;
         audioDef->eEncoding = OMX_AUDIO_CodingMP3;
@@ -59,7 +59,7 @@ void MP3Decoder::initPort(OMX_U32 portIndex) {
         CHECK_EQ(portIndex, kPortIndexOutput);
 
         def->nBufferSize = 8192;
-        strlcpy(audioDef->cMIMEType, "audio/raw", 128);
+        strcpy(audioDef->cMIMEType, "audio/raw");
         audioDef->pNativeRender = NULL;
         audioDef->bFlagErrorConcealment = OMX_FALSE;
         audioDef->eEncoding = OMX_AUDIO_CodingPCM;
