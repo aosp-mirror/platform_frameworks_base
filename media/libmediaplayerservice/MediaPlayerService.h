@@ -108,8 +108,6 @@ class MediaPlayerService : public BnMediaPlayerService
         float                   mMsecsPerFrame;
         uint32_t                mLatency;
 
-        // TODO: Find real cause of Audio/Video delay in PV framework and remove this workaround
-        static const uint32_t   kAudioVideoDelayMs;
         static bool             mIsOnEmulator;
         static int              mMinBufferCount;  // 12 for emulator; otherwise 4
 
