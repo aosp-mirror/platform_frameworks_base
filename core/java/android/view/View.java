@@ -4324,8 +4324,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
             requestLayout();
             invalidate();
 
-            if (((mViewFlags & VISIBILITY_MASK) == GONE) && hasFocus()) {
-                clearFocus();
+            if (((mViewFlags & VISIBILITY_MASK) == GONE)) {
+                if (hasFocus()) clearFocus();
+                destroyDrawingCache();
             }
             if (mAttachInfo != null) {
                 mAttachInfo.mViewVisibilityChanged = true;
@@ -6283,6 +6284,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
             canvas.translate(-mScrollX, -mScrollY);
 
             mPrivateFlags |= DRAWN;
+            mPrivateFlags |= DRAWING_CACHE_VALID;
 
             // Fast path for layouts with no backgrounds
             if ((mPrivateFlags & SKIP_DRAW) == SKIP_DRAW) {
@@ -6301,7 +6303,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                 // Restore the cached Canvas for our siblings
                 attachInfo.mCanvas = canvas;
             }
-            mPrivateFlags |= DRAWING_CACHE_VALID;
         }
     }
 
