@@ -165,9 +165,7 @@
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true"
                 android:text="@string/lockscreen_emergency_call"
-                android:background="@drawable/btn_lock_normal"
-                android:textAppearance="?android:attr/textAppearanceSmall"
-                android:textColor="?android:attr/textColorPrimary"
+                style="@style/Widget.Button.Transparent"
                 android:drawableLeft="@drawable/ic_emergency"
                 android:drawablePadding="8dip"
                 />
@@ -190,9 +188,7 @@
                 android:layout_marginLeft="4dip"
                 android:layout_marginRight="2dip"
                 android:text="@string/lockscreen_emergency_call"
-                android:background="@drawable/btn_lock_normal"
-                android:textAppearance="?android:attr/textAppearanceSmall"
-                android:textColor="?android:attr/textColorPrimary"
+                style="@style/Widget.Button.Transparent"
                 android:drawableLeft="@drawable/ic_emergency"
                 android:drawablePadding="8dip"
                 />
@@ -204,9 +200,7 @@
                 android:layout_marginBottom="4dip"
                 android:layout_marginLeft="2dip"
                 android:layout_marginRight="4dip"
-                android:background="@drawable/btn_lock_normal"
-                android:textAppearance="?android:attr/textAppearanceSmall"
-                android:textColor="?android:attr/textColorPrimary"
+                style="@style/Widget.Button.Transparent"
                 android:visibility="invisible"
                 />
         </LinearLayout>
