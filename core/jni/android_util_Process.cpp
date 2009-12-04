@@ -285,6 +285,7 @@ void android_os_Process_setThreadPriority(JNIEnv* env, jobject clazz,
 
     if (rc) {
         signalExceptionForGroupError(env, clazz, errno);
+        return;
     }
 
     if (setpriority(PRIO_PROCESS, pid, pri) < 0) {
