@@ -37,12 +37,18 @@ LOCAL_SHARED_LIBRARIES :=     \
 	libbinder             \
 	libvorbisidec         \
 	libsonivox            \
-	libopencore_player    \
-	libopencore_author    \
 	libmedia              \
 	libandroid_runtime    \
 	libstagefright        \
 	libstagefright_omx
+
+ifneq ($(BUILD_WITHOUT_PV),true)
+LOCAL_SHARED_LIBRARIES += \
+	libopencore_player    \
+	libopencore_author
+else
+LOCAL_CFLAGS += -DNO_OPENCORE
+endif
 
 ifneq ($(TARGET_SIMULATOR),true)
 LOCAL_SHARED_LIBRARIES += libdl

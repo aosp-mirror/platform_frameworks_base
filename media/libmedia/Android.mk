@@ -21,10 +21,18 @@ LOCAL_SRC_FILES:= \
     ToneGenerator.cpp \
     JetPlayer.cpp \
     IOMX.cpp \
- 	IAudioPolicyService.cpp
+    IAudioPolicyService.cpp \
+    MediaScanner.cpp \
+    MediaScannerClient.cpp \
+    autodetect.cpp
+
+ifneq ($(BUILD_WITHOUT_PV),true)
+else
+LOCAL_SRC_FILES += StagefrightMediaScanner.cpp
+endif
 
 LOCAL_SHARED_LIBRARIES := \
-	libui libcutils libutils libbinder libsonivox
+	libui libcutils libutils libbinder libsonivox libicuuc
 
 LOCAL_MODULE:= libmedia
 
@@ -41,7 +49,8 @@ LOCAL_C_INCLUDES := \
     $(call include-path-for, graphics corecg) \
         $(TOP)/external/opencore/extern_libs_v2/khronos/openmax/include \
         external/speex/include \
-        external/speex/libspeex
+        external/speex/libspeex \
+        external/icu4c/common
 
 LOCAL_STATIC_LIBRARIES := libspeex
 

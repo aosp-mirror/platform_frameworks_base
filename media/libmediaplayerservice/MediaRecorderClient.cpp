@@ -30,7 +30,11 @@
 #include <binder/IServiceManager.h>
 #include <binder/MemoryHeapBase.h>
 #include <binder/MemoryBase.h>
+
+#ifndef NO_OPENCORE
 #include <media/PVMediaRecorder.h>
+#endif
+
 #include <utils/String16.h>
 
 #include <media/AudioTrack.h>
@@ -297,9 +301,15 @@ MediaRecorderClient::MediaRecorderClient(const sp<MediaPlayerService>& service, 
         mRecorder = new StagefrightRecorder;
     } else
 #endif
+#ifndef NO_OPENCORE
     {
         mRecorder = new PVMediaRecorder();
     }
+#else
+    {
+        mRecorder = NULL;
+    }
+#endif
 
     mMediaPlayerService = service;
 }
