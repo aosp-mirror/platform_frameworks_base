@@ -546,6 +546,8 @@ class BrowserFrame extends Handler {
                                               byte[] postData,
                                               long postDataIdentifier,
                                               int cacheMode,
+                                              boolean mainResource,
+                                              boolean userGesture,
                                               boolean synchronous) {
         PerfChecker checker = new PerfChecker();
 
@@ -612,13 +614,14 @@ class BrowserFrame extends Handler {
         if (DebugFlags.BROWSER_FRAME) {
             Log.v(LOGTAG, "startLoadingResource: url=" + url + ", method="
                     + method + ", postData=" + postData + ", isMainFramePage="
-                    + isMainFramePage);
+                    + isMainFramePage + ", mainResource=" + mainResource
+                    + ", userGesture=" + userGesture);
         }
 
         // Create a LoadListener
         LoadListener loadListener = LoadListener.getLoadListener(mContext,
                 this, url, loaderHandle, synchronous, isMainFramePage,
-                postDataIdentifier);
+                mainResource, userGesture, postDataIdentifier);
 
         mCallbackProxy.onLoadResource(url);
 
