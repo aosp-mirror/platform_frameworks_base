@@ -23,6 +23,7 @@
 
 namespace android {
 
+struct OMXMaster;
 class OMXNodeInstance;
 
 class OMX : public BnOMX,
@@ -108,8 +109,13 @@ public:
 
     void invalidateNodeID(node_id node);
 
+protected:
+    virtual ~OMX();
+
 private:
     Mutex mLock;
+
+    OMXMaster *mMaster;
 
     struct CallbackDispatcher;
     sp<CallbackDispatcher> mDispatcher;

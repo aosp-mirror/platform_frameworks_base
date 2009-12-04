@@ -18,10 +18,10 @@
 #define LOG_TAG "OMX"
 #include <utils/Log.h>
 
+#include <dlfcn.h>
+
 #include "../include/OMX.h"
 #include "OMXRenderer.h"
-
-#include "pv_omxcore.h"
 
 #include "../include/OMXNodeInstance.h"
 #include "../include/SoftwareRenderer.h"
@@ -29,6 +29,8 @@
 #include <binder/IMemory.h>
 #include <media/stagefright/MediaDebug.h>
 #include <media/stagefright/VideoRenderer.h>
+
+#include "OMXMaster.h"
 
 #include <OMX_Component.h>
 
@@ -178,8 +180,14 @@ private:
 };
 
 OMX::OMX()
-    : mDispatcher(new CallbackDispatcher(this)),
+    : mMaster(new OMXMaster),
+      mDispatcher(new CallbackDispatcher(this)),
       mNodeCounter(0) {
+}
+
+OMX::~OMX() {
+    delete mMaster;
+    mMaster = NULL;
 }
 
 void OMX::binderDied(const wp<IBinder> &the_late_who) {
@@ -201,14 +209,12 @@ void OMX::binderDied(const wp<IBinder> &the_late_who) {
 }
 
 status_t OMX::listNodes(List<String8> *list) {
-    OMX_MasterInit();  // XXX Put this somewhere else.
-
     list->clear();
 
     OMX_U32 index = 0;
     char componentName[256];
-    while (OMX_MasterComponentNameEnum(componentName, sizeof(componentName), index)
-               == OMX_ErrorNone) {
+    while (mMaster->enumerateComponents(
+                componentName, sizeof(componentName), index) == OMX_ErrorNone) {
         list->push_back(String8(componentName));
 
         ++index;
@@ -223,14 +229,12 @@ status_t OMX::allocateNode(
 
     *node = 0;
 
-    OMX_MasterInit();  // XXX Put this somewhere else.
-
     OMXNodeInstance *instance = new OMXNodeInstance(this, observer);
 
-    OMX_HANDLETYPE handle;
-    OMX_ERRORTYPE err = OMX_MasterGetHandle(
-            &handle, const_cast<char *>(name), instance,
-            &OMXNodeInstance::kCallbacks);
+    OMX_COMPONENTTYPE *handle;
+    OMX_ERRORTYPE err = mMaster->makeComponentInstance(
+            name, &OMXNodeInstance::kCallbacks,
+            instance, &handle);
 
     if (err != OMX_ErrorNone) {
         LOGV("FAILED to allocate omx component '%s'", name);

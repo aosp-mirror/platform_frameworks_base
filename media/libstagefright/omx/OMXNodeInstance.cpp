@@ -20,7 +20,7 @@
 
 #include "../include/OMXNodeInstance.h"
 
-#include "pv_omxcore.h"
+#include <OMX_Component.h>
 
 #include <binder/IMemory.h>
 #include <media/stagefright/MediaDebug.h>
@@ -157,7 +157,8 @@ status_t OMXNodeInstance::freeNode() {
             break;
     }
 
-    OMX_ERRORTYPE err = OMX_MasterFreeHandle(mHandle);
+    OMX_ERRORTYPE err =
+        (*static_cast<OMX_COMPONENTTYPE *>(mHandle)->ComponentDeInit)(mHandle);
     mHandle = NULL;
 
     if (err != OMX_ErrorNone) {

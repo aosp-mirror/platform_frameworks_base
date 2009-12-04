@@ -18,6 +18,7 @@
 
 #define HARDWARE_API_H_
 
+#include <media/stagefright/OMXPluginBase.h>
 #include <media/stagefright/VideoRenderer.h>
 #include <ui/ISurface.h>
 #include <utils/RefBase.h>
@@ -30,6 +31,8 @@ extern android::VideoRenderer *createRenderer(
         OMX_COLOR_FORMATTYPE colorFormat,
         size_t displayWidth, size_t displayHeight,
         size_t decodedWidth, size_t decodedHeight);
+
+extern android::OMXPluginBase *createOMXPlugin();
 
 #endif  // HARDWARE_API_H_
 
