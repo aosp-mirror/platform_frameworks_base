@@ -19,6 +19,7 @@
 #include <utils/Log.h>
 
 #include "../include/OMXNodeInstance.h"
+#include "OMXMaster.h"
 
 #include <OMX_Component.h>
 
@@ -106,7 +107,7 @@ static status_t StatusFromOMXError(OMX_ERRORTYPE err) {
     return (err == OMX_ErrorNone) ? OK : UNKNOWN_ERROR;
 }
 
-status_t OMXNodeInstance::freeNode() {
+status_t OMXNodeInstance::freeNode(OMXMaster *master) {
     // Transition the node from its current state all the way down
     // to "Loaded".
     // This ensures that all active buffers are properly freed even
@@ -157,8 +158,9 @@ status_t OMXNodeInstance::freeNode() {
             break;
     }
 
-    OMX_ERRORTYPE err =
-        (*static_cast<OMX_COMPONENTTYPE *>(mHandle)->ComponentDeInit)(mHandle);
+    OMX_ERRORTYPE err = master->destroyComponentInstance(
+            static_cast<OMX_COMPONENTTYPE *>(mHandle));
+
     mHandle = NULL;
 
     if (err != OMX_ErrorNone) {
@@ -384,11 +386,11 @@ void OMXNodeInstance::onMessage(const omx_message &msg) {
     mObserver->onMessage(msg);
 }
 
-void OMXNodeInstance::onObserverDied() {
+void OMXNodeInstance::onObserverDied(OMXMaster *master) {
     LOGE("!!! Observer died. Quickly, do something, ... anything...");
 
     // Try to force shutdown of the node and hope for the best.
-    freeNode();
+    freeNode(master);
 }
 
 void OMXNodeInstance::onGetHandleFailed() {

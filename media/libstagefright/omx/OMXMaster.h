@@ -37,6 +37,9 @@ struct OMXMaster : public OMXPluginBase {
             OMX_PTR appData,
             OMX_COMPONENTTYPE **component);
 
+    virtual OMX_ERRORTYPE destroyComponentInstance(
+            OMX_COMPONENTTYPE *component);
+
     virtual OMX_ERRORTYPE enumerateComponents(
             OMX_STRING name,
             size_t size,
@@ -46,6 +49,8 @@ private:
     Mutex mLock;
     List<OMXPluginBase *> mPlugins;
     KeyedVector<String8, OMXPluginBase *> mPluginByComponentName;
+    KeyedVector<OMX_COMPONENTTYPE *, OMXPluginBase *> mPluginByInstance;
+
     void *mVendorLibHandle;
 
     void addVendorPlugin();

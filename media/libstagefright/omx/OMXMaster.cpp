@@ -60,7 +60,9 @@ void OMXMaster::addVendorPlugin() {
         (CreateOMXPluginFunc)dlsym(
                 mVendorLibHandle, "_ZN7android15createOMXPluginEv");
 
-    addPlugin((*createOMXPlugin)());
+    if (createOMXPlugin) {
+        addPlugin((*createOMXPlugin)());
+    }
 }
 
 void OMXMaster::addPlugin(OMXPluginBase *plugin) {
@@ -118,7 +120,32 @@ OMX_ERRORTYPE OMXMaster::makeComponentInstance(
     }
 
     OMXPluginBase *plugin = mPluginByComponentName.valueAt(index);
-    return plugin->makeComponentInstance(name, callbacks, appData, component);
+    OMX_ERRORTYPE err =
+        plugin->makeComponentInstance(name, callbacks, appData, component);
+
+    if (err != OMX_ErrorNone) {
+        return err;
+    }
+
+    mPluginByInstance.add(*component, plugin);
+
+    return err;
+}
+
+OMX_ERRORTYPE OMXMaster::destroyComponentInstance(
+        OMX_COMPONENTTYPE *component) {
+    Mutex::Autolock autoLock(mLock);
+
+    ssize_t index = mPluginByInstance.indexOfKey(component);
+
+    if (index < 0) {
+        return OMX_ErrorBadParameter;
+    }
+
+    OMXPluginBase *plugin = mPluginByInstance.valueAt(index);
+    mPluginByInstance.removeItemsAt(index);
+
+    return plugin->destroyComponentInstance(component);
 }
 
 OMX_ERRORTYPE OMXMaster::enumerateComponents(
