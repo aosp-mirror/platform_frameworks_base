@@ -67,6 +67,11 @@ import java.util.ArrayList;
  * process a request is coming from.</p>
  */
 public abstract class ContentProvider implements ComponentCallbacks {
+    /*
+     * Note: if you add methods to ContentProvider, you must add similar methods to
+     *       MockContentProvider.
+     */
+
     private Context mContext = null;
     private int mMyUid;
     private String mReadPermission;
@@ -74,6 +79,33 @@ public abstract class ContentProvider implements ComponentCallbacks {
     private PathPermission[] mPathPermissions;
 
     private Transport mTransport = new Transport();
+
+    public ContentProvider() {
+    }
+
+    /**
+     * Constructor just for mocking.
+     *
+     * @param context A Context object which should be some mock instance (like the
+     * instance of {@link android.test.mock.MockContext}).
+     * @param readPermission The read permision you want this instance should have in the
+     * test, which is available via {@link #getReadPermission()}.
+     * @param writePermission The write permission you want this instance should have
+     * in the test, which is available via {@link #getWritePermission()}.
+     * @param pathPermissions The PathPermissions you want this instance should have
+     * in the test, which is available via {@link #getPathPermissions()}.
+     * @hide
+     */
+    public ContentProvider(
+            Context context,
+            String readPermission,
+            String writePermission,
+            PathPermission[] pathPermissions) {
+        mContext = context;
+        mReadPermission = readPermission;
+        mWritePermission = writePermission;
+        mPathPermissions = pathPermissions;
+    }
 
     /**
      * Given an IContentProvider, try to coerce it back to the real
