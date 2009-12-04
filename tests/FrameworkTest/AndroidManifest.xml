@@ -955,6 +955,14 @@
                 <action android:name="android.accessibilityservice.AccessibilityService" />
             </intent-filter>
         </service>
+        
+        <activity android:name=".radiogroup.RadioGroupActivity" android:label="RadioGroupActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
+            </intent-filter>            
+        </activity>
+        
 
     </application>
 

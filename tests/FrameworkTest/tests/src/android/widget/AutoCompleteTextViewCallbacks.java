@@ -42,6 +42,7 @@ public class AutoCompleteTextViewCallbacks
         textView.requestFocus();
         instrumentation.waitForIdleSync();
         sendKeys("A");
+        instrumentation.waitForIdleSync();
         // give UI time to settle
         Thread.sleep(WAIT_TIME);
 
@@ -58,7 +59,7 @@ public class AutoCompleteTextViewCallbacks
     /** Test that arrow-down into the popup calls the onSelected callback. */
     @FlakyTest(tolerance=3)
     public void testPopupEnterSelection() throws Exception {
-        AutoCompleteTextViewSimple theActivity = getActivity();
+        final AutoCompleteTextViewSimple theActivity = getActivity();
         AutoCompleteTextView textView = theActivity.getTextView();
         final Instrumentation instrumentation = getInstrumentation();
 
@@ -67,9 +68,15 @@ public class AutoCompleteTextViewCallbacks
         instrumentation.waitForIdleSync();
         sendKeys("A");
 
-        // prepare to move down into the popup
-        theActivity.resetItemListeners();
+        textView.post(new Runnable() {
+            public void run() {
+                // prepare to move down into the popup
+                theActivity.resetItemListeners();
+            }
+        });
+
         sendKeys("DPAD_DOWN");
+        instrumentation.waitForIdleSync();
         // give UI time to settle
         Thread.sleep(WAIT_TIME);
 
@@ -79,9 +86,15 @@ public class AutoCompleteTextViewCallbacks
         assertEquals("onItemSelected position", 0, theActivity.mItemSelectedPosition);
         assertFalse("onNothingSelected should not be called", theActivity.mNothingSelectedCalled);
 
-        // try one more time - should move from 0 to 1
-        theActivity.resetItemListeners();
+        textView.post(new Runnable() {
+            public void run() {
+                // try one more time - should move from 0 to 1
+                theActivity.resetItemListeners();
+            }
+        });
+
         sendKeys("DPAD_DOWN");
+        instrumentation.waitForIdleSync();        
         // give UI time to settle
         Thread.sleep(WAIT_TIME);
 
@@ -95,7 +108,7 @@ public class AutoCompleteTextViewCallbacks
     /** Test that arrow-up out of the popup calls the onNothingSelected callback */
     @FlakyTest(tolerance=3)
     public void testPopupLeaveSelection() {
-        AutoCompleteTextViewSimple theActivity = getActivity();
+        final AutoCompleteTextViewSimple theActivity = getActivity();
         AutoCompleteTextView textView = theActivity.getTextView();
         final Instrumentation instrumentation = getInstrumentation();
 
@@ -103,13 +116,21 @@ public class AutoCompleteTextViewCallbacks
         textView.requestFocus();
         instrumentation.waitForIdleSync();
         sendKeys("A");
+        instrumentation.waitForIdleSync();
 
         // move down into the popup
         sendKeys("DPAD_DOWN");
+        instrumentation.waitForIdleSync();
 
-        // now move back up out of the popup
-        theActivity.resetItemListeners();
+        textView.post(new Runnable() {
+            public void run() {
+                // prepare to move down into the popup
+                theActivity.resetItemListeners();
+            }
+        });
+
         sendKeys("DPAD_UP");
+        instrumentation.waitForIdleSync();
 
         // now check for selection callbacks.
         assertFalse("onItemClick should not be called", theActivity.mItemClickCalled);
