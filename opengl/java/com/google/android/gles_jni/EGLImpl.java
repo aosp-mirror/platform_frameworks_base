@@ -2,16 +2,16 @@
 **
 ** Copyright 2006, The Android Open Source Project
 **
-** Licensed under the Apache License, Version 2.0 (the "License"); 
-** you may not use this file except in compliance with the License. 
-** You may obtain a copy of the License at 
+** Licensed under the Apache License, Version 2.0 (the "License");
+** you may not use this file except in compliance with the License.
+** You may obtain a copy of the License at
 **
-**     http://www.apache.org/licenses/LICENSE-2.0 
+**     http://www.apache.org/licenses/LICENSE-2.0
 **
-** Unless required by applicable law or agreed to in writing, software 
-** distributed under the License is distributed on an "AS IS" BASIS, 
-** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
-** See the License for the specific language governing permissions and 
+** Unless required by applicable law or agreed to in writing, software
+** distributed under the License is distributed on an "AS IS" BASIS,
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+** See the License for the specific language governing permissions and
 ** limitations under the License.
 */
 
@@ -30,11 +30,11 @@ public class EGLImpl implements EGL10 {
     private EGLSurfaceImpl mSurface = new EGLSurfaceImpl(-1);
 
     public native boolean     eglInitialize(EGLDisplay display, int[] major_minor);
-    public native boolean     eglQueryContext(EGLDisplay display, EGLContext context, int attribute, int[] value);    
+    public native boolean     eglQueryContext(EGLDisplay display, EGLContext context, int attribute, int[] value);
     public native boolean     eglQuerySurface(EGLDisplay display, EGLSurface surface, int attribute, int[] value);
     public native boolean     eglChooseConfig(EGLDisplay display, int[] attrib_list, EGLConfig[] configs, int config_size, int[] num_config);
     public native boolean     eglGetConfigAttrib(EGLDisplay display, EGLConfig config, int attribute, int[] value);
-    public native boolean     eglGetConfigs(EGLDisplay display, EGLConfig[] configs, int config_size, int[] num_config);    
+    public native boolean     eglGetConfigs(EGLDisplay display, EGLConfig[] configs, int config_size, int[] num_config);
     public native int         eglGetError();
     public native boolean     eglDestroyContext(EGLDisplay display, EGLContext context);
     public native boolean     eglDestroySurface(EGLDisplay display, EGLSurface surface);
@@ -47,16 +47,27 @@ public class EGLImpl implements EGL10 {
     public native boolean     eglWaitNative(int engine, Object bindTarget);
 
     public EGLContext eglCreateContext(EGLDisplay display, EGLConfig config, EGLContext share_context, int[] attrib_list) {
-        return new EGLContextImpl( _eglCreateContext(display, config, share_context, attrib_list) );
+        int eglContextId = _eglCreateContext(display, config, share_context, attrib_list);
+        if (eglContextId == 0) {
+            return EGL10.EGL_NO_CONTEXT;
+        }
+        return new EGLContextImpl( eglContextId );
     }
 
     public EGLSurface eglCreatePbufferSurface(EGLDisplay display, EGLConfig config, int[] attrib_list) {
-        return new EGLSurfaceImpl( _eglCreatePbufferSurface(display, config, attrib_list) );
+        int eglSurfaceId = _eglCreatePbufferSurface(display, config, attrib_list);
+        if (eglSurfaceId == 0) {
+            return EGL10.EGL_NO_SURFACE;
+        }
+        return new EGLSurfaceImpl( eglSurfaceId );
     }
-    
+
     public EGLSurface eglCreatePixmapSurface(EGLDisplay display, EGLConfig config, Object native_pixmap, int[] attrib_list) {
         EGLSurfaceImpl sur = new EGLSurfaceImpl();
         _eglCreatePixmapSurface(sur, display, config, native_pixmap, attrib_list);
+        if (sur.mEGLSurface == 0) {
+            return EGL10.EGL_NO_SURFACE;
+        }
         return sur;
     }
 
@@ -73,11 +84,18 @@ public class EGLImpl implements EGL10 {
                 "eglCreateWindowSurface() can only be called with an instance of " +
                 "SurfaceView or SurfaceHolder at the moment, this will be fixed later.");
         }
-        return new EGLSurfaceImpl( _eglCreateWindowSurface(display, config, sur, attrib_list) );
+        int eglSurfaceId = _eglCreateWindowSurface(display, config, sur, attrib_list);
+        if (eglSurfaceId == 0) {
+            return EGL10.EGL_NO_SURFACE;
+        }
+        return new EGLSurfaceImpl( eglSurfaceId );
     }
-    
+
     public synchronized EGLDisplay eglGetDisplay(Object native_display) {
         int value = _eglGetDisplay(native_display);
+        if (value == 0) {
+            return EGL10.EGL_NO_DISPLAY;
+        }
         if (mDisplay.mEGLDisplay != value)
             mDisplay = new EGLDisplayImpl(value);
         return mDisplay;
@@ -85,13 +103,19 @@ public class EGLImpl implements EGL10 {
 
     public synchronized EGLContext eglGetCurrentContext() {
         int value = _eglGetCurrentContext();
+        if (value == 0) {
+            return EGL10.EGL_NO_CONTEXT;
+        }
         if (mContext.mEGLContext != value)
             mContext = new EGLContextImpl(value);
         return mContext;
     }
-    
+
     public synchronized EGLDisplay eglGetCurrentDisplay() {
         int value = _eglGetCurrentDisplay();
+        if (value == 0) {
+            return EGL10.EGL_NO_DISPLAY;
+        }
         if (mDisplay.mEGLDisplay != value)
             mDisplay = new EGLDisplayImpl(value);
         return mDisplay;
@@ -99,6 +123,9 @@ public class EGLImpl implements EGL10 {
 
     public synchronized EGLSurface eglGetCurrentSurface(int readdraw) {
         int value = _eglGetCurrentSurface(readdraw);
+        if (value == 0) {
+            return EGL10.EGL_NO_SURFACE;
+        }
         if (mSurface.mEGLSurface != value)
             mSurface = new EGLSurfaceImpl(value);
         return mSurface;
@@ -107,7 +134,7 @@ public class EGLImpl implements EGL10 {
     private native int _eglCreateContext(EGLDisplay display, EGLConfig config, EGLContext share_context, int[] attrib_list);
     private native int _eglCreatePbufferSurface(EGLDisplay display, EGLConfig config, int[] attrib_list);
     private native void _eglCreatePixmapSurface(EGLSurface sur, EGLDisplay display, EGLConfig config, Object native_pixmap, int[] attrib_list);
-    private native int _eglCreateWindowSurface(EGLDisplay display, EGLConfig config, Object native_window, int[] attrib_list);    
+    private native int _eglCreateWindowSurface(EGLDisplay display, EGLConfig config, Object native_window, int[] attrib_list);
     private native int _eglGetDisplay(Object native_display);
     private native int _eglGetCurrentContext();
     private native int _eglGetCurrentDisplay();
