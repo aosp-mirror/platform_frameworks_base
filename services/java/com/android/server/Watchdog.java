@@ -52,16 +52,6 @@ public class Watchdog extends Thread {
     static final int GLOBAL_PSS = 2719;
 
     static final int TIME_TO_WAIT = DB ? 15*1000 : 60*1000;
-    static final int EVENT_LOG_TAG = 2802;
-    static final int EVENT_LOG_PROC_PSS_TAG = 2803;
-    static final int EVENT_LOG_SOFT_RESET_TAG = 2804;
-    static final int EVENT_LOG_HARD_RESET_TAG = 2805;
-    static final int EVENT_LOG_PSS_STATS_TAG = 2806;
-    static final int EVENT_LOG_PROC_STATS_TAG = 2807;
-    static final int EVENT_LOG_SCHEDULED_REBOOT_TAG = 2808;
-    static final int EVENT_LOG_MEMINFO_TAG = 2809;
-    static final int EVENT_LOG_VMSTAT_TAG = 2810;
-    static final int EVENT_LOG_REQUESTED_REBOOT_TAG = 2811;
 
     static final int MEMCHECK_DEFAULT_INTERVAL = DB ? 30 : 30*60; // 30 minutes
     static final int MEMCHECK_DEFAULT_LOG_REALTIME_INTERVAL = DB ? 60 : 2*60*60;      // 2 hours
@@ -188,7 +178,7 @@ public class Watchdog extends Thread {
             } else {
                 mState = STATE_HARD;
             }
-            EventLog.writeEvent(EVENT_LOG_PROC_PSS_TAG, mProcessName, pid, mLastPss);
+            EventLog.writeEvent(EventLogTags.WATCHDOG_PROC_PSS, mProcessName, pid, mLastPss);
 
             if (mState == STATE_OK) {
                 // Memory is good, don't recover.
@@ -197,7 +187,7 @@ public class Watchdog extends Thread {
 
             if (mState == STATE_HARD) {
                 // Memory is really bad, kill right now.
-                EventLog.writeEvent(EVENT_LOG_HARD_RESET_TAG, mProcessName, pid,
+                EventLog.writeEvent(EventLogTags.WATCHDOG_HARD_RESET, mProcessName, pid,
                         mHardThreshold, mLastPss);
                 return mEnabled;
             }
@@ -212,7 +202,7 @@ public class Watchdog extends Thread {
             } else {
                 skipReason = shouldWeBeBrutalLocked(curTime);
             }
-            EventLog.writeEvent(EVENT_LOG_SOFT_RESET_TAG, mProcessName, pid,
+            EventLog.writeEvent(EventLogTags.WATCHDOG_SOFT_RESET, mProcessName, pid,
                     mSoftThreshold, mLastPss, skipReason != null ? skipReason : "");
             if (skipReason != null) {
                 mNeedScheduledCheck = true;
@@ -348,7 +338,7 @@ public class Watchdog extends Thread {
             mReqMinScreenOff = intent.getIntExtra("minScreenOff", -1);
             mReqMinNextAlarm = intent.getIntExtra("minNextAlarm", -1);
             mReqRecheckInterval = intent.getIntExtra("recheckInterval", -1);
-            EventLog.writeEvent(EVENT_LOG_REQUESTED_REBOOT_TAG,
+            EventLog.writeEvent(EventLogTags.WATCHDOG_REQUESTED_REBOOT,
                     mReqRebootNoWait ? 1 : 0, mReqRebootInterval,
                             mReqRecheckInterval, mReqRebootStartTime,
                     mReqRebootWindow, mReqMinScreenOff, mReqMinNextAlarm);
@@ -561,21 +551,21 @@ public class Watchdog extends Thread {
     void logGlobalMemory() {
         PssStats stats = mPssStats;
         mActivity.collectPss(stats);
-        EventLog.writeEvent(EVENT_LOG_PSS_STATS_TAG,
+        EventLog.writeEvent(EventLogTags.WATCHDOG_PSS_STATS,
                 stats.mEmptyPss, stats.mEmptyCount,
                 stats.mBackgroundPss, stats.mBackgroundCount,
                 stats.mServicePss, stats.mServiceCount,
                 stats.mVisiblePss, stats.mVisibleCount,
                 stats.mForegroundPss, stats.mForegroundCount,
                 stats.mNoPssCount);
-        EventLog.writeEvent(EVENT_LOG_PROC_STATS_TAG,
+        EventLog.writeEvent(EventLogTags.WATCHDOG_PROC_STATS,
                 stats.mProcDeaths[0], stats.mProcDeaths[1], stats.mProcDeaths[2],
                 stats.mProcDeaths[3], stats.mProcDeaths[4]);
         Process.readProcLines("/proc/meminfo", mMemInfoFields, mMemInfoSizes);
         for (int i=0; i<mMemInfoSizes.length; i++) {
             mMemInfoSizes[i] *= 1024;
         }
-        EventLog.writeEvent(EVENT_LOG_MEMINFO_TAG,
+        EventLog.writeEvent(EventLogTags.WATCHDOG_MEMINFO,
                 (int)mMemInfoSizes[0], (int)mMemInfoSizes[1], (int)mMemInfoSizes[2],
                 (int)mMemInfoSizes[3], (int)mMemInfoSizes[4],
                 (int)mMemInfoSizes[5], (int)mMemInfoSizes[6], (int)mMemInfoSizes[7],
@@ -589,7 +579,7 @@ public class Watchdog extends Thread {
             mVMStatSizes[i] -= mPrevVMStatSizes[i];
             mPrevVMStatSizes[i] = v;
         }
-        EventLog.writeEvent(EVENT_LOG_VMSTAT_TAG, dur,
+        EventLog.writeEvent(EventLogTags.WATCHDOG_VMSTAT, dur,
                 (int)mVMStatSizes[0], (int)mVMStatSizes[1], (int)mVMStatSizes[2],
                 (int)mVMStatSizes[3], (int)mVMStatSizes[4]);
     }
@@ -635,7 +625,7 @@ public class Watchdog extends Thread {
                     (now-mBootTime) >= (rebootIntervalMillis-rebootWindowMillis)) {
                 if (fromAlarm && rebootWindowMillis <= 0) {
                     // No reboot window -- just immediately reboot.
-                    EventLog.writeEvent(EVENT_LOG_SCHEDULED_REBOOT_TAG, now,
+                    EventLog.writeEvent(EventLogTags.WATCHDOG_SCHEDULED_REBOOT, now,
                             (int)rebootIntervalMillis, (int)rebootStartTime*1000,
                             (int)rebootWindowMillis, "");
                     rebootSystem("Checkin scheduled forced");
@@ -649,7 +639,7 @@ public class Watchdog extends Thread {
                             now, rebootStartTime);
                 } else if (now < (realStartTime+rebootWindowMillis)) {
                     String doit = shouldWeBeBrutalLocked(now);
-                    EventLog.writeEvent(EVENT_LOG_SCHEDULED_REBOOT_TAG, now,
+                    EventLog.writeEvent(EventLogTags.WATCHDOG_SCHEDULED_REBOOT, now,
                             (int)rebootInterval, (int)rebootStartTime*1000,
                             (int)rebootWindowMillis, doit != null ? doit : "");
                     if (doit == null) {
@@ -838,7 +828,7 @@ public class Watchdog extends Thread {
             // First send a SIGQUIT so that we can see where it was hung. Then
             // kill this process so that the system will restart.
             String name = (mCurrentMonitor != null) ? mCurrentMonitor.getClass().getName() : "null";
-            EventLog.writeEvent(EVENT_LOG_TAG, name);
+            EventLog.writeEvent(EventLogTags.WATCHDOG, name);
             Process.sendSignal(Process.myPid(), Process.SIGNAL_QUIT);
 
             // Wait a bit longer before killing so we can make sure that the stacks are captured.

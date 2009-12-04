@@ -70,7 +70,7 @@ class ServerThread extends Thread {
 
     @Override
     public void run() {
-        EventLog.writeEvent(LOG_BOOT_PROGRESS_SYSTEM_RUN,
+        EventLog.writeEvent(EventLogTags.BOOT_PROGRESS_SYSTEM_RUN,
             SystemClock.uptimeMillis());
 
         ActivityManagerService.prepareTraceFile(false);     // create dir
@@ -387,7 +387,7 @@ class ServerThread extends Thread {
             } catch (RemoteException e) {
             }
         }
-        
+
         // It is now time to start up the app processes...
 
         if (notification != null) {
@@ -411,7 +411,7 @@ class ServerThread extends Thread {
         final AppWidgetService appWidgetF = appWidget;
         final WallpaperManagerService wallpaperF = wallpaper;
         final InputMethodManagerService immF = imm;
-        
+
         // We now tell the activity manager it is okay to run third party
         // code.  It will call back into us once it has gotten to the state
         // where third party code can really run (but before it has actually
@@ -421,7 +421,7 @@ class ServerThread extends Thread {
                 .systemReady(new Runnable() {
             public void run() {
                 Log.i(TAG, "Making services ready");
-                
+
                 if (batteryF != null) batteryF.systemReady();
                 if (connectivityF != null) connectivityF.systemReady();
                 if (dockF != null) dockF.systemReady();
@@ -429,13 +429,13 @@ class ServerThread extends Thread {
 
                 // It is now okay to let the various system services start their
                 // third party code...
-                
+
                 if (appWidgetF != null) appWidgetF.systemReady(safeMode);
                 if (wallpaperF != null) wallpaperF.systemReady();
                 if (immF != null) immF.systemReady();
             }
         });
-        
+
         Looper.loop();
         Log.d(TAG, "System ServerThread is exiting!");
     }
