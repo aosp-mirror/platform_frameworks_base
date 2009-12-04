@@ -648,11 +648,14 @@ static int register_android_media_MediaPlayer(JNIEnv *env)
                 "android/media/MediaPlayer", gMethods, NELEM(gMethods));
 }
 
+extern int register_android_media_MediaMetadataRetriever(JNIEnv *env);
 extern int register_android_media_MediaRecorder(JNIEnv *env);
 extern int register_android_media_MediaScanner(JNIEnv *env);
-extern int register_android_media_MediaMetadataRetriever(JNIEnv *env);
-extern int register_android_media_AmrInputStream(JNIEnv *env);
 extern int register_android_media_ResampleInputStream(JNIEnv *env);
+
+#ifndef NO_OPENCORE
+extern int register_android_media_AmrInputStream(JNIEnv *env);
+#endif
 
 jint JNI_OnLoad(JavaVM* vm, void* reserved)
 {
@@ -685,10 +688,12 @@ jint JNI_OnLoad(JavaVM* vm, void* reserved)
         goto bail;
     }
 
+#ifndef NO_OPENCORE
     if (register_android_media_AmrInputStream(env) < 0) {
         LOGE("ERROR: AmrInputStream native registration failed\n");
         goto bail;
     }
+#endif
 
     if (register_android_media_ResampleInputStream(env) < 0) {
         LOGE("ERROR: ResampleInputStream native registration failed\n");
