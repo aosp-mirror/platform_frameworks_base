@@ -359,18 +359,12 @@ public class VCardUtils {
         if (values == null) {
             return true;
         }
-        final int asciiFirst = 0x20;
-        final int asciiLast = 0x7E;  // included
         for (final String value : values) {
             if (TextUtils.isEmpty(value)) {
                 continue;
             }
-            final int length = value.length();
-            for (int i = 0; i < length; i = value.offsetByCodePoints(i, 1)) {
-                final int c = value.codePointAt(i);
-                if (!((asciiFirst <= c && c <= asciiLast) || c == '\r' || c == '\n')) {
-                    return false;
-                }
+            if (!TextUtils.isPrintableAsciiOnly(value)) {
+                return false;
             }
         }
         return true;
