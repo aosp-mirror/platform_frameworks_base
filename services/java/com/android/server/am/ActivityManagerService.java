@@ -152,44 +152,6 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
     static final long MONITOR_CPU_MAX_TIME = 0x0fffffff;    // wait possibly forever for next cpu sample.
     static final boolean MONITOR_THREAD_CPU_USAGE = false;
 
-    // Event log tags
-    static final int LOG_CONFIGURATION_CHANGED = 2719;
-    static final int LOG_CPU = 2721;
-    static final int LOG_AM_FINISH_ACTIVITY = 30001;
-    static final int LOG_TASK_TO_FRONT = 30002;
-    static final int LOG_AM_NEW_INTENT = 30003;
-    static final int LOG_AM_CREATE_TASK = 30004;
-    static final int LOG_AM_CREATE_ACTIVITY = 30005;
-    static final int LOG_AM_RESTART_ACTIVITY = 30006;
-    static final int LOG_AM_RESUME_ACTIVITY = 30007;
-    static final int LOG_ANR = 30008;
-    static final int LOG_ACTIVITY_LAUNCH_TIME = 30009;
-    static final int LOG_AM_PROCESS_BOUND = 30010;
-    static final int LOG_AM_PROCESS_DIED = 30011;
-    static final int LOG_AM_FAILED_TO_PAUSE_ACTIVITY = 30012;
-    static final int LOG_AM_PAUSE_ACTIVITY = 30013;
-    static final int LOG_AM_PROCESS_START = 30014;
-    static final int LOG_AM_PROCESS_BAD = 30015;
-    static final int LOG_AM_PROCESS_GOOD = 30016;
-    static final int LOG_AM_LOW_MEMORY = 30017;
-    static final int LOG_AM_DESTROY_ACTIVITY = 30018;
-    static final int LOG_AM_RELAUNCH_RESUME_ACTIVITY = 30019;
-    static final int LOG_AM_RELAUNCH_ACTIVITY = 30020;
-    static final int LOG_AM_KILL_FOR_MEMORY = 30023;
-    static final int LOG_AM_BROADCAST_DISCARD_FILTER = 30024;
-    static final int LOG_AM_BROADCAST_DISCARD_APP = 30025;
-    static final int LOG_AM_CREATE_SERVICE = 30030;
-    static final int LOG_AM_DESTROY_SERVICE = 30031;
-    static final int LOG_AM_PROCESS_CRASHED_TOO_MUCH = 30032;
-    static final int LOG_AM_DROP_PROCESS = 30033;
-    static final int LOG_AM_SERVICE_CRASHED_TOO_MUCH = 30034;
-    static final int LOG_AM_SCHEDULE_SERVICE_RESTART = 30035;
-    static final int LOG_AM_PROVIDER_LOST_PROCESS = 30036;
-    static final int LOG_AM_PROCESS_START_TIMEOUT = 30037;
-    
-    static final int LOG_BOOT_PROGRESS_AMS_READY = 3040;
-    static final int LOG_BOOT_PROGRESS_ENABLE_SCREEN = 3050;
-
     // The flags that are set for all calls we make to the package manager.
     static final int STOCK_PM_FLAGS = PackageManager.GET_SHARED_LIBRARY_FILES;
     
@@ -1582,7 +1544,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                     int total = user + system + iowait + irq + softIrq + idle;
                     if (total == 0) total = 1;
 
-                    EventLog.writeEvent(LOG_CPU,
+                    EventLog.writeEvent(EventLogTags.CPU,
                             ((user+system+iowait+irq+softIrq) * 100) / total,
                             (user * 100) / total,
                             (system * 100) / total,
@@ -1793,7 +1755,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                     + " with results=" + results + " newIntents=" + newIntents
                     + " andResume=" + andResume);
             if (andResume) {
-                EventLog.writeEvent(LOG_AM_RESTART_ACTIVITY,
+                EventLog.writeEvent(EventLogTags.AM_RESTART_ACTIVITY,
                         System.identityHashCode(r),
                         r.task.taskId, r.shortComponentName);
             }
@@ -1926,7 +1888,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             // if it had been bad.
             mProcessCrashTimes.remove(info.processName, info.uid);
             if (mBadProcesses.get(info.processName, info.uid) != null) {
-                EventLog.writeEvent(LOG_AM_PROCESS_GOOD, info.uid,
+                EventLog.writeEvent(EventLogTags.AM_PROC_GOOD, info.uid,
                         info.processName);
                 mBadProcesses.remove(info.processName, info.uid);
                 if (app != null) {
@@ -2019,7 +1981,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 }
             }
             
-            EventLog.writeEvent(LOG_AM_PROCESS_START, pid, uid,
+            EventLog.writeEvent(EventLogTags.AM_PROC_START, pid, uid,
                     app.processName, hostingType,
                     hostingNameStr != null ? hostingNameStr : "");
             
@@ -2104,7 +2066,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         if (prev.app != null && prev.app.thread != null) {
             if (DEBUG_PAUSE) Log.v(TAG, "Enqueueing pending pause: " + prev);
             try {
-                EventLog.writeEvent(LOG_AM_PAUSE_ACTIVITY,
+                EventLog.writeEvent(EventLogTags.AM_PAUSE_ACTIVITY,
                         System.identityHashCode(prev),
                         prev.shortComponentName);
                 prev.app.thread.schedulePauseActivity(prev, prev.finishing, userLeaving,
@@ -2775,7 +2737,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                     next.app.thread.scheduleNewIntent(next.newIntents, next);
                 }
 
-                EventLog.writeEvent(LOG_AM_RESUME_ACTIVITY,
+                EventLog.writeEvent(EventLogTags.AM_RESUME_ACTIVITY,
                         System.identityHashCode(next),
                         next.task.taskId, next.shortComponentName);
                 
@@ -3436,7 +3398,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                                 // intent.
                                 top.task.setIntent(r.intent, r.info);
                             }
-                            logStartActivity(LOG_AM_NEW_INTENT, r, top.task);
+                            logStartActivity(EventLogTags.AM_NEW_INTENT, r, top.task);
                             deliverNewIntentLocked(top, r.intent);
                         } else {
                             // A special case: we need to
@@ -3458,7 +3420,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                         // desires.
                         if ((launchFlags&Intent.FLAG_ACTIVITY_SINGLE_TOP) != 0
                                 && taskTop.realActivity.equals(r.realActivity)) {
-                            logStartActivity(LOG_AM_NEW_INTENT, r, taskTop.task);
+                            logStartActivity(EventLogTags.AM_NEW_INTENT, r, taskTop.task);
                             if (taskTop.frontOfTask) {
                                 taskTop.task.setIntent(r.intent, r.info);
                             }
@@ -3518,7 +3480,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                         if ((launchFlags&Intent.FLAG_ACTIVITY_SINGLE_TOP) != 0
                             || r.launchMode == ActivityInfo.LAUNCH_SINGLE_TOP
                             || r.launchMode == ActivityInfo.LAUNCH_SINGLE_TASK) {
-                            logStartActivity(LOG_AM_NEW_INTENT, top, top.task);
+                            logStartActivity(EventLogTags.AM_NEW_INTENT, top, top.task);
                             // For paranoia, make sure we have correctly
                             // resumed the top activity.
                             if (doResume) {
@@ -3572,7 +3534,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 HistoryRecord top = performClearTaskLocked(
                         sourceRecord.task.taskId, r, launchFlags, true);
                 if (top != null) {
-                    logStartActivity(LOG_AM_NEW_INTENT, r, top.task);
+                    logStartActivity(EventLogTags.AM_NEW_INTENT, r, top.task);
                     deliverNewIntentLocked(top, r.intent);
                     // For paranoia, make sure we have correctly
                     // resumed the top activity.
@@ -3589,7 +3551,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 int where = findActivityInHistoryLocked(r, sourceRecord.task.taskId);
                 if (where >= 0) {
                     HistoryRecord top = moveActivityToFrontLocked(where);
-                    logStartActivity(LOG_AM_NEW_INTENT, r, top.task);
+                    logStartActivity(EventLogTags.AM_NEW_INTENT, r, top.task);
                     deliverNewIntentLocked(top, r.intent);
                     if (doResume) {
                         resumeTopActivityLocked(null);
@@ -3619,9 +3581,9 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                     + " in new guessed " + r.task);
         }
         if (newTask) {
-            EventLog.writeEvent(LOG_AM_CREATE_TASK, r.task.taskId);
+            EventLog.writeEvent(EventLogTags.AM_CREATE_TASK, r.task.taskId);
         }
-        logStartActivity(LOG_AM_CREATE_ACTIVITY, r, r.task);
+        logStartActivity(EventLogTags.AM_CREATE_ACTIVITY, r, r.task);
         startActivityLocked(r, newTask, doResume);
         return START_SUCCESS;
     }
@@ -3994,7 +3956,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         }
 
         r.finishing = true;
-        EventLog.writeEvent(LOG_AM_FINISH_ACTIVITY,
+        EventLog.writeEvent(EventLogTags.AM_FINISH_ACTIVITY,
                 System.identityHashCode(r),
                 r.task.taskId, r.shortComponentName, reason);
         r.task.numActivities--;
@@ -4339,7 +4301,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         if (DEBUG_SWITCH) Log.v(
             TAG, "Removing activity: token=" + r
               + ", app=" + (r.app != null ? r.app.processName : "(null)"));
-        EventLog.writeEvent(LOG_AM_DESTROY_ACTIVITY,
+        EventLog.writeEvent(EventLogTags.AM_DESTROY_ACTIVITY,
                 System.identityHashCode(r),
                 r.task.taskId, r.shortComponentName);
 
@@ -4556,7 +4518,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         if (app.thread != null && app.thread.asBinder() == thread.asBinder()) {
             Log.i(TAG, "Process " + app.processName + " (pid " + pid
                     + ") has died.");
-            EventLog.writeEvent(LOG_AM_PROCESS_DIED, app.pid, app.processName);
+            EventLog.writeEvent(EventLogTags.AM_PROC_DIED, app.pid, app.processName);
             if (localLOGV) Log.v(
                 TAG, "Dying app: " + app + ", pid: " + pid
                 + ", thread: " + thread.asBinder());
@@ -4580,7 +4542,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 
                 if (!haveBg) {
                     Log.i(TAG, "Low Memory: No more background processes.");
-                    EventLog.writeEvent(LOG_AM_LOW_MEMORY, mLRUProcesses.size());
+                    EventLog.writeEvent(EventLogTags.AM_LOW_MEMORY, mLRUProcesses.size());
                     long now = SystemClock.uptimeMillis();
                     for (i=0; i<count; i++) {
                         ProcessRecord rec = mLRUProcesses.get(i);
@@ -4628,7 +4590,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         }
         
         // Log the ANR to the event log.
-        EventLog.writeEvent(LOG_ANR, app.pid, app.processName, annotation);
+        EventLog.writeEvent(EventLogTags.ANR, app.pid, app.processName, annotation);
         
         // If we are on a secure build and the application is not interesting to the user (it is
         // not visible or in the background), just kill it instead of displaying a dialog.
@@ -5200,7 +5162,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         
         if (gone) {
             Log.w(TAG, "Process " + app + " failed to attach");
-            EventLog.writeEvent(LOG_AM_PROCESS_START_TIMEOUT, pid, app.info.uid,
+            EventLog.writeEvent(EventLogTags.AM_PROCESS_START_TIMEOUT, pid, app.info.uid,
                     app.processName);
             mProcessNames.remove(app.processName, app.info.uid);
             // Take care of any launching providers waiting for this process.
@@ -5258,7 +5220,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         if (app == null) {
             Log.w(TAG, "No pending application record for pid " + pid
                     + " (IApplicationThread " + thread + "); dropping process");
-            EventLog.writeEvent(LOG_AM_DROP_PROCESS, pid);
+            EventLog.writeEvent(EventLogTags.AM_DROP_PROCESS, pid);
             if (pid > 0 && pid != MY_PID) {
                 Process.killProcess(pid);
             } else {
@@ -5292,7 +5254,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             return false;
         }
 
-        EventLog.writeEvent(LOG_AM_PROCESS_BOUND, app.pid, app.processName);
+        EventLog.writeEvent(EventLogTags.AM_PROC_BOUND, app.pid, app.processName);
         
         app.thread = thread;
         app.curAdj = app.setAdj = -100;
@@ -5512,7 +5474,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
     }
 
     void enableScreenAfterBoot() {
-        EventLog.writeEvent(LOG_BOOT_PROGRESS_ENABLE_SCREEN,
+        EventLog.writeEvent(EventLogTags.BOOT_PROGRESS_ENABLE_SCREEN,
                 SystemClock.uptimeMillis());
         mWindowManager.enableScreenAfterBoot();
     }
@@ -5719,7 +5681,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                     r.state = ActivityState.PAUSED;
                     completePauseLocked();
                 } else {
-                	EventLog.writeEvent(LOG_AM_FAILED_TO_PAUSE_ACTIVITY,
+                	EventLog.writeEvent(EventLogTags.AM_FAILED_TO_PAUSE,
                 	        System.identityHashCode(r), r.shortComponentName, 
                 			mPausingActivity != null
                 			    ? mPausingActivity.shortComponentName : "(none)");
@@ -7121,7 +7083,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         }
 
         finishTaskMove(task);
-        EventLog.writeEvent(LOG_TASK_TO_FRONT, task);
+        EventLog.writeEvent(EventLogTags.AM_TASK_TO_FRONT, task);
     }
 
     private final void finishTaskMove(int task) {
@@ -7718,7 +7680,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                             + cpi.applicationInfo.packageName + "/"
                             + cpi.applicationInfo.uid + " for provider "
                             + name + ": launching app became null");
-                    EventLog.writeEvent(LOG_AM_PROVIDER_LOST_PROCESS,
+                    EventLog.writeEvent(EventLogTags.AM_PROVIDER_LOST_PROCESS,
                             cpi.applicationInfo.packageName,
                             cpi.applicationInfo.uid, name);
                     return null;
@@ -8231,7 +8193,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 if (adj >= worstType) {
                     Log.w(TAG, "Killing for memory: " + proc + " (adj "
                             + adj + ")");
-                    EventLog.writeEvent(LOG_AM_KILL_FOR_MEMORY, proc.pid,
+                    EventLog.writeEvent(EventLogTags.AM_KILL_FOR_MEMORY, proc.pid,
                             proc.processName, adj);
                     killed = true;
                     Process.killProcess(pids[i]);
@@ -8501,7 +8463,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         }
         
         Log.i(TAG, "System now ready");
-        EventLog.writeEvent(LOG_BOOT_PROGRESS_AMS_READY,
+        EventLog.writeEvent(EventLogTags.BOOT_PROGRESS_AMS_READY,
             SystemClock.uptimeMillis());
 
         synchronized(this) {
@@ -8733,7 +8695,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             // This process loses!
             Log.w(TAG, "Process " + app.info.processName
                     + " has crashed too many times: killing!");
-            EventLog.writeEvent(LOG_AM_PROCESS_CRASHED_TOO_MUCH,
+            EventLog.writeEvent(EventLogTags.AM_PROCESS_CRASHED_TOO_MUCH,
                     app.info.processName, app.info.uid);
             killServicesLocked(app, false);
             for (int i=mHistory.size()-1; i>=0; i--) {
@@ -8750,7 +8712,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 // explicitly does so...  but for persistent process, we really
                 // need to keep it running.  If a persistent process is actually
                 // repeatedly crashing, then badness for everyone.
-                EventLog.writeEvent(LOG_AM_PROCESS_BAD, app.info.uid,
+                EventLog.writeEvent(EventLogTags.AM_PROC_BAD, app.info.uid,
                         app.info.processName);
                 mBadProcesses.put(app.info.processName, app.info.uid, now);
                 app.bad = true;
@@ -9824,7 +9786,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 if (sr.crashCount >= 2) {
                     Log.w(TAG, "Service crashed " + sr.crashCount
                             + " times, stopping: " + sr);
-                    EventLog.writeEvent(LOG_AM_SERVICE_CRASHED_TOO_MUCH,
+                    EventLog.writeEvent(EventLogTags.AM_SERVICE_CRASHED_TOO_MUCH,
                             sr.crashCount, sr.shortName, app.pid);
                     bringDownServiceLocked(sr, true);
                 } else if (!allowRestart) {
@@ -10434,7 +10396,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                     + r.name + " " + r.intent);
             mStringBuilder.setLength(0);
             r.intent.getIntent().toShortString(mStringBuilder, false, true);
-            EventLog.writeEvent(LOG_AM_CREATE_SERVICE,
+            EventLog.writeEvent(EventLogTags.AM_CREATE_SERVICE,
                     System.identityHashCode(r), r.shortName,
                     mStringBuilder.toString(), r.app.pid);
             synchronized (r.stats.getBatteryStats()) {
@@ -10552,7 +10514,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         r.nextRestartTime = SystemClock.uptimeMillis() + r.restartDelay;
         Log.w(TAG, "Scheduling restart of crashed service "
                 + r.shortName + " in " + r.restartDelay + "ms");
-        EventLog.writeEvent(LOG_AM_SCHEDULE_SERVICE_RESTART,
+        EventLog.writeEvent(EventLogTags.AM_SCHEDULE_SERVICE_RESTART,
                 r.shortName, r.restartDelay);
 
         Message msg = Message.obtain();
@@ -10697,7 +10659,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
 
         if (DEBUG_SERVICE) Log.v(TAG, "Bringing down service " + r.name
                  + " " + r.intent);
-        EventLog.writeEvent(LOG_AM_DESTROY_SERVICE,
+        EventLog.writeEvent(EventLogTags.AM_DESTROY_SERVICE,
                 System.identityHashCode(r), r.shortName,
                 (r.app != null) ? r.app.pid : -1);
 
@@ -12148,13 +12110,13 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             Object curReceiver = r.receivers.get(r.nextReceiver-1);
             if (curReceiver instanceof BroadcastFilter) {
                 BroadcastFilter bf = (BroadcastFilter) curReceiver;
-                EventLog.writeEvent(LOG_AM_BROADCAST_DISCARD_FILTER,
+                EventLog.writeEvent(EventLogTags.AM_BROADCAST_DISCARD_FILTER,
                         System.identityHashCode(r),
                         r.intent.getAction(),
                         r.nextReceiver - 1,
                         System.identityHashCode(bf));
             } else {
-                EventLog.writeEvent(LOG_AM_BROADCAST_DISCARD_APP,
+                EventLog.writeEvent(EventLogTags.AM_BROADCAST_DISCARD_APP,
                         System.identityHashCode(r),
                         r.intent.getAction(),
                         r.nextReceiver - 1,
@@ -12163,7 +12125,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         } else {
             Log.w(TAG, "Discarding broadcast before first receiver is invoked: "
                     + r);
-            EventLog.writeEvent(LOG_AM_BROADCAST_DISCARD_APP,
+            EventLog.writeEvent(EventLogTags.AM_BROADCAST_DISCARD_APP,
                     System.identityHashCode(r),
                     r.intent.getAction(),
                     r.nextReceiver,
@@ -12833,7 +12795,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                     Log.i(TAG, "Updating configuration to: " + values);
                 }
                 
-                EventLog.writeEvent(LOG_CONFIGURATION_CHANGED, changes);
+                EventLog.writeEvent(EventLogTags.CONFIGURATION_CHANGED, changes);
 
                 if (values.locale != null) {
                     saveLocaleLocked(values.locale, 
@@ -12911,8 +12873,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         if (DEBUG_SWITCH) Log.v(TAG, "Relaunching: " + r
                 + " with results=" + results + " newIntents=" + newIntents
                 + " andResume=" + andResume);
-        EventLog.writeEvent(andResume ? LOG_AM_RELAUNCH_RESUME_ACTIVITY
-                : LOG_AM_RELAUNCH_ACTIVITY, System.identityHashCode(r),
+        EventLog.writeEvent(andResume ? EventLogTags.AM_RELAUNCH_RESUME_ACTIVITY
+                : EventLogTags.AM_RELAUNCH_ACTIVITY, System.identityHashCode(r),
                 r.task.taskId, r.shortComponentName);
         
         r.startFreezingScreenLocked(r.app, 0);

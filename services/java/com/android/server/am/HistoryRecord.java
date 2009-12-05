@@ -373,7 +373,7 @@ class HistoryRecord extends IApplicationToken.Stub {
                 final long totalTime = service.mInitialStartTime != 0
                         ? (curTime - service.mInitialStartTime) : thisTime;
                 if (ActivityManagerService.SHOW_ACTIVITY_START_TIME) {
-                    EventLog.writeEvent(ActivityManagerService.LOG_ACTIVITY_LAUNCH_TIME,
+                    EventLog.writeEvent(EventLogTags.ACTIVITY_LAUNCH_TIME,
                             System.identityHashCode(this), shortComponentName,
                             thisTime, totalTime);
                     StringBuilder sb = service.mStringBuilder;
