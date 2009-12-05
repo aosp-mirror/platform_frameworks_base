@@ -33,7 +33,6 @@ import android.view.ContextMenu;
 import android.view.SoundEffectConstants;
 import android.view.View;
 import android.view.ContextMenu.ContextMenuInfo;
-import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.ExpandableListConnector.PositionMetadata;
 
 /**
@@ -514,37 +513,36 @@ public class ExpandableListView extends ListView {
         boolean returnValue;
         if (posMetadata.position.type == ExpandableListPosition.GROUP) {
             /* It's a group, so handle collapsing/expanding */
-            
+
+            /* It's a group click, so pass on event */
+            if (mOnGroupClickListener != null) {
+                if (mOnGroupClickListener.onGroupClick(this, v,
+                        posMetadata.position.groupPos, id)) {
+                    posMetadata.recycle();
+                    return true;
+                }
+            }
+
             if (posMetadata.isExpanded()) {
                 /* Collapse it */
                 mConnector.collapseGroup(posMetadata);
 
                 playSoundEffect(SoundEffectConstants.CLICK);
-                
+
                 if (mOnGroupCollapseListener != null) {
                     mOnGroupCollapseListener.onGroupCollapse(posMetadata.position.groupPos);
                 }
-                
             } else {
-                /* It's a group click, so pass on event */
-                if (mOnGroupClickListener != null) {
-                    if (mOnGroupClickListener.onGroupClick(this, v,
-                            posMetadata.position.groupPos, id)) {
-                        posMetadata.recycle();
-                        return true;
-                    }
-                }
-
                 /* Expand it */
                 mConnector.expandGroup(posMetadata);
 
                 playSoundEffect(SoundEffectConstants.CLICK);
-                
+
                 if (mOnGroupExpandListener != null) {
                     mOnGroupExpandListener.onGroupExpand(posMetadata.position.groupPos);
                 }
             }
-            
+
             returnValue = true;
         } else {
             /* It's a child, so pass on event */
@@ -553,12 +551,12 @@ public class ExpandableListView extends ListView {
                 return mOnChildClickListener.onChildClick(this, v, posMetadata.position.groupPos,
                         posMetadata.position.childPos, id);
             }
-            
+
             returnValue = false;
         }
-        
+
         posMetadata.recycle();
-        
+
         return returnValue;
     }
 
