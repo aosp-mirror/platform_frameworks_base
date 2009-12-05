@@ -81,6 +81,7 @@ android.app.ReceiverRestrictedContext
 android.app.ResultInfo
 android.app.SearchManager$OnCancelListener
 android.app.SearchManager$SearchManagerCallback
+android.app.SearchableInfo
 android.app.Service
 android.app.TabActivity
 android.app.TimePickerDialog
@@ -649,7 +650,6 @@ android.server.BluetoothA2dpService
 android.server.BluetoothEventLoop
 android.server.BluetoothService
 android.server.data.CrashData
-android.server.search.SearchableInfo
 android.speech.IRecognitionListener$Stub
 android.speech.IRecognitionService$Stub
 android.speech.RecognitionResult
