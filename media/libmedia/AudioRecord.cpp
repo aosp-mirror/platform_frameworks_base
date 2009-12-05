@@ -125,7 +125,7 @@ status_t AudioRecord::set(
     audio_io_handle_t input = AudioSystem::getInput(inputSource,
                                     sampleRate, format, channels, (AudioSystem::audio_in_acoustics)flags);
     if (input == 0) {
-        LOGE("Could not get audio output for stream type %d", inputSource);
+        LOGE("Could not get audio input for record source %d", inputSource);
         return BAD_VALUE;
     }
 
@@ -539,7 +539,6 @@ ssize_t AudioRecord::read(void* buffer, size_t userSize)
         return BAD_VALUE;
     }
 
-    LOGV("read size: %d", userSize);
 
     do {
 
