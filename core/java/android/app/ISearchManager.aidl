@@ -16,11 +16,11 @@
 
 package android.app;
 
+import android.app.SearchableInfo;
 import android.app.ISearchManagerCallback;
 import android.content.ComponentName;
 import android.content.res.Configuration;
 import android.os.Bundle;
-import android.server.search.SearchableInfo;
 
 /** @hide */
 interface ISearchManager {

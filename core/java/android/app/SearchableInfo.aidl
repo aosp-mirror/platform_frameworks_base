@@ -14,6 +14,6 @@
  * limitations under the License.
  */
 
-package android.server.search;
+package android.app;
 
 parcelable SearchableInfo;

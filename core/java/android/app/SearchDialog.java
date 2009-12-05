@@ -37,7 +37,6 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.provider.Browser;
-import android.server.search.SearchableInfo;
 import android.speech.RecognizerIntent;
 import android.text.Editable;
 import android.text.InputType;
