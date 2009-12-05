@@ -21,6 +21,7 @@ import android.app.IActivityWatcher;
 import android.app.ISearchManager;
 import android.app.ISearchManagerCallback;
 import android.app.SearchManager;
+import android.app.SearchableInfo;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
