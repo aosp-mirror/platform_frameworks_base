@@ -18,9 +18,6 @@ package android.content;
 
 import android.os.RemoteException;
 
-/**
- * @hide
- */
 public interface EntityIterator {
     /**
      * Returns whether there are more elements to iterate, i.e. whether the

@@ -163,15 +163,6 @@ public abstract class ContentProvider implements ComponentCallbacks {
                     selectionArgs, sortOrder);
         }
 
-        /**
-         * @hide
-         */
-        public EntityIterator queryEntities(Uri uri, String selection, String[] selectionArgs,
-                String sortOrder) {
-            enforceReadPermission(uri);
-            return ContentProvider.this.queryEntities(uri, selection, selectionArgs, sortOrder);
-        }
-
         public String getType(Uri uri) {
             return ContentProvider.this.getType(uri);
         }
@@ -477,14 +468,6 @@ public abstract class ContentProvider implements ComponentCallbacks {
             String selection, String[] selectionArgs, String sortOrder);
 
     /**
-     * @hide
-     */
-    public EntityIterator queryEntities(Uri uri, String selection, String[] selectionArgs,
-            String sortOrder) {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
      * Return the MIME type of the data at the given URI. This should start with
      * <code>vnd.android.cursor.item</code> for a single record,
      * or <code>vnd.android.cursor.dir/</code> for multiple items.
@@ -581,7 +564,7 @@ public abstract class ContentProvider implements ComponentCallbacks {
     /**
      * Open a file blob associated with a content URI.
      * This method can be called from multiple
-     * threads, as described inentity
+     * threads, as described in
      * <a href="{@docRoot}guide/topics/fundamentals.html#procthread">Application Fundamentals:
      * Processes and Threads</a>.
      * 

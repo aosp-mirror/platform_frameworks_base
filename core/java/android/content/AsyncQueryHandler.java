@@ -38,7 +38,6 @@ public abstract class AsyncQueryHandler extends Handler {
     private static final int EVENT_ARG_INSERT = 2;
     private static final int EVENT_ARG_UPDATE = 3;
     private static final int EVENT_ARG_DELETE = 4;
-    private static final int EVENT_ARG_QUERY_ENTITIES = 5;
 
     /* package */ final WeakReference<ContentResolver> mResolver;
 
@@ -91,18 +90,6 @@ public abstract class AsyncQueryHandler extends Handler {
                     }
 
                     args.result = cursor;
-                    break;
-
-                case EVENT_ARG_QUERY_ENTITIES:
-                    EntityIterator iterator = null;
-                    try {
-                        iterator = resolver.queryEntities(args.uri, args.selection,
-                                args.selectionArgs, args.orderBy);
-                    } catch (Exception e) {
-                        Log.w(TAG, e.toString());
-                    }
-
-                    args.result = iterator;
                     break;
 
                 case EVENT_ARG_INSERT:
@@ -185,45 +172,6 @@ public abstract class AsyncQueryHandler extends Handler {
         args.handler = this;
         args.uri = uri;
         args.projection = projection;
-        args.selection = selection;
-        args.selectionArgs = selectionArgs;
-        args.orderBy = orderBy;
-        args.cookie = cookie;
-        msg.obj = args;
-
-        mWorkerThreadHandler.sendMessage(msg);
-    }
-
-    /**
-     * This method begins an asynchronous query for an {@link EntityIterator}.
-     * When the query is done {@link #onQueryEntitiesComplete} is called.
-     *
-     * @param token A token passed into {@link #onQueryComplete} to identify the
-     *            query.
-     * @param cookie An object that gets passed into {@link #onQueryComplete}
-     * @param uri The URI, using the content:// scheme, for the content to
-     *            retrieve.
-     * @param selection A filter declaring which rows to return, formatted as an
-     *            SQL WHERE clause (excluding the WHERE itself). Passing null
-     *            will return all rows for the given URI.
-     * @param selectionArgs You may include ?s in selection, which will be
-     *            replaced by the values from selectionArgs, in the order that
-     *            they appear in the selection. The values will be bound as
-     *            Strings.
-     * @param orderBy How to order the rows, formatted as an SQL ORDER BY clause
-     *            (excluding the ORDER BY itself). Passing null will use the
-     *            default sort order, which may be unordered.
-     * @hide
-     */
-    public void startQueryEntities(int token, Object cookie, Uri uri, String selection,
-            String[] selectionArgs, String orderBy) {
-        // Use the token as what so cancelOperations works properly
-        Message msg = mWorkerThreadHandler.obtainMessage(token);
-        msg.arg1 = EVENT_ARG_QUERY_ENTITIES;
-
-        WorkerArgs args = new WorkerArgs();
-        args.handler = this;
-        args.uri = uri;
         args.selection = selection;
         args.selectionArgs = selectionArgs;
         args.orderBy = orderBy;
@@ -340,18 +288,6 @@ public abstract class AsyncQueryHandler extends Handler {
     }
 
     /**
-     * Called when an asynchronous query is completed.
-     *
-     * @param token The token to identify the query.
-     * @param cookie The cookie object.
-     * @param iterator The iterator holding the query results.
-     * @hide
-     */
-    protected void onQueryEntitiesComplete(int token, Object cookie, EntityIterator iterator) {
-        // Empty
-    }
-
-    /**
      * Called when an asynchronous insert is completed.
      *
      * @param token the token to identify the query, passed in from
@@ -406,10 +342,6 @@ public abstract class AsyncQueryHandler extends Handler {
         switch (event) {
             case EVENT_ARG_QUERY:
                 onQueryComplete(token, args.cookie, (Cursor) args.result);
-                break;
-
-            case EVENT_ARG_QUERY_ENTITIES:
-                onQueryEntitiesComplete(token, args.cookie, (EntityIterator)args.result);
                 break;
 
             case EVENT_ARG_INSERT:

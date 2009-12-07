@@ -44,12 +44,6 @@ public interface IContentProvider extends IInterface {
             CursorWindow window) throws RemoteException;
     public Cursor query(Uri url, String[] projection, String selection,
             String[] selectionArgs, String sortOrder) throws RemoteException;
-    /**
-     * @hide
-     */
-    public EntityIterator queryEntities(Uri url, String selection,
-            String[] selectionArgs, String sortOrder)
-            throws RemoteException;
     public String getType(Uri url) throws RemoteException;
     public Uri insert(Uri url, ContentValues initialValues)
             throws RemoteException;
@@ -76,9 +70,5 @@ public interface IContentProvider extends IInterface {
     static final int BULK_INSERT_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 12;
     static final int OPEN_FILE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 13;
     static final int OPEN_ASSET_FILE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 14;
-    /**
-     * @hide
-     */
-    static final int QUERY_ENTITIES_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 18;
     static final int APPLY_BATCH_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 19;
 }
