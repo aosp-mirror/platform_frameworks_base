@@ -25,6 +25,7 @@ import static android.net.wifi.WifiManager.WIFI_STATE_UNKNOWN;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.bluetooth.BluetoothA2dp;
+import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -62,6 +63,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Pattern;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -109,7 +111,7 @@ public class WifiService extends IWifiManager.Stub {
     private int mMulticastDisabled;
 
     private final IBatteryStats mBatteryStats;
-    
+
     /**
      * See {@link Settings.Gservices#WIFI_IDLE_MS}. This is the default value if a
      * Settings.Gservices value is not present. This timeout value is chosen as
@@ -161,7 +163,7 @@ public class WifiService extends IWifiManager.Stub {
      * Last UID that asked to enable WIFI.
      */
     private int mLastEnableUid = Process.myUid();
-    
+
     /**
      * Number of allowed radio frequency channels in various regulatory domains.
      * This list is sufficient for 802.11b/g networks (2.4GHz range).
@@ -176,7 +178,7 @@ public class WifiService extends IWifiManager.Stub {
         mWifiStateTracker = tracker;
         mWifiStateTracker.enableRssiPolling(true);
         mBatteryStats = BatteryStatsService.getService();
-        
+
         mScanResultCache = new LinkedHashMap<String, ScanResult>(
             SCAN_RESULT_CACHE_SIZE, 0.75f, true) {
                 /*
@@ -395,7 +397,7 @@ public class WifiService extends IWifiManager.Stub {
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
-        
+
         // Update state
         mWifiState = wifiState;
 
@@ -1365,11 +1367,16 @@ public class WifiService extends IWifiManager.Stub {
                 }
                 mPluggedType = pluggedType;
             } else if (action.equals(BluetoothA2dp.ACTION_SINK_STATE_CHANGED)) {
-                boolean isBluetoothPlaying =
-                        intent.getIntExtra(
-                                BluetoothA2dp.EXTRA_SINK_STATE,
-                                BluetoothA2dp.STATE_DISCONNECTED) == BluetoothA2dp.STATE_PLAYING;
+                BluetoothA2dp a2dp = new BluetoothA2dp(mContext);
+                Set<BluetoothDevice> sinks = a2dp.getConnectedSinks();
+                boolean isBluetoothPlaying = false;
+                for (BluetoothDevice sink : sinks) {
+                    if (a2dp.getSinkState(sink) == BluetoothA2dp.STATE_PLAYING) {
+                        isBluetoothPlaying = true;
+                    }
+                }
                 mWifiStateTracker.setBluetoothScanMode(isBluetoothPlaying);
+
             } else {
                 return;
             }
@@ -1381,7 +1388,7 @@ public class WifiService extends IWifiManager.Stub {
          * Determines whether the Wi-Fi chipset should stay awake or be put to
          * sleep. Looks at the setting for the sleep policy and the current
          * conditions.
-         * 
+         *
          * @see #shouldDeviceStayAwake(int, int)
          */
         private boolean shouldWifiStayAwake(int stayAwakeConditions, int pluggedType) {
@@ -1400,7 +1407,7 @@ public class WifiService extends IWifiManager.Stub {
                 return shouldDeviceStayAwake(stayAwakeConditions, pluggedType);
             }
         }
-        
+
         /**
          * Determine whether the bit value corresponding to {@code pluggedType} is set in
          * the bit string {@code stayAwakeConditions}. Because a {@code pluggedType} value
@@ -1489,7 +1496,7 @@ public class WifiService extends IWifiManager.Stub {
         intentFilter.addAction(BluetoothA2dp.ACTION_SINK_STATE_CHANGED);
         mContext.registerReceiver(mReceiver, intentFilter);
     }
-    
+
     private boolean isAirplaneSensitive() {
         String airplaneModeRadios = Settings.System.getString(mContext.getContentResolver(),
                 Settings.System.AIRPLANE_MODE_RADIOS);
