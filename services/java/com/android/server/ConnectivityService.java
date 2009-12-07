@@ -103,7 +103,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     private boolean mSystemReady;
     private ArrayList<Intent> mDeferredBroadcasts;
 
-    private static class NetworkAttributes {
+    private class NetworkAttributes {
         /**
          * Class for holding settings read from resources.
          */
@@ -111,7 +111,6 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         public int mType;
         public int mRadio;
         public int mPriority;
-        public NetworkInfo.State mLastState;
         public NetworkAttributes(String init) {
             String fragments[] = init.split(",");
             mName = fragments[0].toLowerCase();
@@ -132,7 +131,6 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 mType = ConnectivityManager.TYPE_MOBILE_HIPRI;
             }
             mPriority = Integer.parseInt(fragments[2]);
-            mLastState = NetworkInfo.State.UNKNOWN;
         }
         public boolean isDefault() {
             return (mType == mRadio);
@@ -140,7 +138,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     }
     NetworkAttributes[] mNetAttributes;
 
-    private static class RadioAttributes {
+    private class RadioAttributes {
         public String mName;
         public int mPriority;
         public int mSimultaneity;
@@ -1216,22 +1214,9 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             switch (msg.what) {
                 case NetworkStateTracker.EVENT_STATE_CHANGED:
                     info = (NetworkInfo) msg.obj;
-                    int type = info.getType();
-                    NetworkInfo.State state = info.getState();
-                    if(mNetAttributes[type].mLastState == state) {
-                        if (DBG) {
-                            // TODO - remove this after we validate the dropping doesn't break anything
-                            Log.d(TAG, "Dropping ConnectivityChange for " +
-                                    info.getTypeName() +": " +
-                                    state + "/" + info.getDetailedState());
-                        }
-                        return;
-                    }
-                    mNetAttributes[type].mLastState = state;
-
                     if (DBG) Log.d(TAG, "ConnectivityChange for " +
                             info.getTypeName() + ": " +
-                            state + "/" + info.getDetailedState());
+                            info.getState() + "/" + info.getDetailedState());
 
                     // Connectivity state changed:
                     // [31-13] Reserved for future use
@@ -1249,9 +1234,10 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                     if (info.getDetailedState() ==
                             NetworkInfo.DetailedState.FAILED) {
                         handleConnectionFailure(info);
-                    } else if (state == NetworkInfo.State.DISCONNECTED) {
+                    } else if (info.getState() ==
+                            NetworkInfo.State.DISCONNECTED) {
                         handleDisconnect(info);
-                    } else if (state == NetworkInfo.State.SUSPENDED) {
+                    } else if (info.getState() == NetworkInfo.State.SUSPENDED) {
                         // TODO: need to think this over.
                         // the logic here is, handle SUSPENDED the same as
                         // DISCONNECTED. The only difference being we are
@@ -1260,7 +1246,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                         // opportunity to handle DISCONNECTED and SUSPENDED
                         // differently, or not.
                         handleDisconnect(info);
-                    } else if (state == NetworkInfo.State.CONNECTED) {
+                    } else if (info.getState() == NetworkInfo.State.CONNECTED) {
                         handleConnect(info);
                     }
                     break;
