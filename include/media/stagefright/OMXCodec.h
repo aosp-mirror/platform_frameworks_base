@@ -33,7 +33,7 @@ struct OMXCodec : public MediaSource,
     enum CreationFlags {
         kPreferSoftwareCodecs = 1,
     };
-    static sp<OMXCodec> Create(
+    static sp<MediaSource> Create(
             const sp<IOMX> &omx,
             const sp<MetaData> &meta, bool createEncoder,
             const sp<MediaSource> &source,
