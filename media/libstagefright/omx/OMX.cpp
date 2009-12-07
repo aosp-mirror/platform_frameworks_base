@@ -205,7 +205,7 @@ void OMX::binderDied(const wp<IBinder> &the_late_who) {
         invalidateNodeID_l(instance->nodeID());
     }
 
-    instance->onObserverDied();
+    instance->onObserverDied(mMaster);
 }
 
 status_t OMX::listNodes(List<String8> *list) {
@@ -262,7 +262,7 @@ status_t OMX::freeNode(node_id node) {
     mLiveNodes.removeItemsAt(index);
     instance->observer()->asBinder()->unlinkToDeath(this);
 
-    return instance->freeNode();
+    return instance->freeNode(mMaster);
 }
 
 status_t OMX::sendCommand(

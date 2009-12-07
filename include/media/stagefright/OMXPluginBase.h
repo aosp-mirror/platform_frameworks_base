@@ -36,6 +36,9 @@ struct OMXPluginBase {
             OMX_PTR appData,
             OMX_COMPONENTTYPE **component) = 0;
 
+    virtual OMX_ERRORTYPE destroyComponentInstance(
+            OMX_COMPONENTTYPE *component) = 0;
+
     virtual OMX_ERRORTYPE enumerateComponents(
             OMX_STRING name,
             size_t size,

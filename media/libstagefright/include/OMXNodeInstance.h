@@ -26,6 +26,7 @@
 namespace android {
 
 class IOMXObserver;
+struct OMXMaster;
 
 struct OMXNodeInstance {
     OMXNodeInstance(
@@ -37,7 +38,7 @@ struct OMXNodeInstance {
     sp<IOMXObserver> observer();
     OMX::node_id nodeID();
 
-    status_t freeNode();
+    status_t freeNode(OMXMaster *master);
 
     status_t sendCommand(OMX_COMMANDTYPE cmd, OMX_S32 param);
     status_t getParameter(OMX_INDEXTYPE index, void *params, size_t size);
@@ -72,7 +73,7 @@ struct OMXNodeInstance {
             const char *parameterName, OMX_INDEXTYPE *index);
 
     void onMessage(const omx_message &msg);
-    void onObserverDied();
+    void onObserverDied(OMXMaster *master);
     void onGetHandleFailed();
 
     static OMX_CALLBACKTYPE kCallbacks;
