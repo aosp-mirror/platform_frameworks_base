@@ -34,6 +34,7 @@ public class ProgramVertex extends BaseObj {
     }
 
     public void bindAllocation(MatrixAllocation va) {
+        mRS.validate();
         mRS.nProgramVertexBindAllocation(mID, va.mAlloc.mID);
     }
 
@@ -88,6 +89,7 @@ public class ProgramVertex extends BaseObj {
         }
 
         public ProgramVertex create() {
+            mRS.validate();
             return internalCreate(mRS, this);
         }
     }

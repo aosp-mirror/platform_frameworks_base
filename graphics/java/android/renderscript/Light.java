@@ -30,10 +30,12 @@ public class Light extends BaseObj {
     }
 
     public void setColor(float r, float g, float b) {
+        mRS.validate();
         mRS.nLightSetColor(mID, r, g, b);
     }
 
     public void setPosition(float x, float y, float z) {
+        mRS.validate();
         mRS.nLightSetPosition(mID, x, y, z);
     }
 
@@ -65,6 +67,7 @@ public class Light extends BaseObj {
         }
 
         public Light create() {
+            mRS.validate();
             return internalCreate(mRS, this);
         }
     }

@@ -284,6 +284,7 @@ public class Element extends BaseObj {
     }
 
     public static Element createFromClass(RenderScript rs, Class c) {
+        rs.validate();
         Field[] fields = c.getFields();
         Builder b = new Builder(rs);
 
@@ -322,6 +323,7 @@ public class Element extends BaseObj {
     }
 
     void init() {
+        mRS.validate();
         internalCreate(mRS, this);
     }
 
@@ -483,6 +485,7 @@ public class Element extends BaseObj {
         }
 
         public Element create() {
+            mRS.validate();
             Element e = new Element(mRS, mEntryCount);
             java.lang.System.arraycopy(mEntries, 0, e.mEntries, 0, mEntryCount);
             e.init();
