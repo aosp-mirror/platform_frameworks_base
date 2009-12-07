@@ -3086,23 +3086,34 @@ bool AudioFlinger::RecordThread::threadLoop()
             }
             if (mActiveTrack != 0) {
                 if (mActiveTrack->mState == TrackBase::PAUSING) {
+                    if (!mStandby) {
+                        mInput->standby();
+                        mStandby = true;
+                    }
                     mActiveTrack.clear();
                     mStartStopCond.broadcast();
                 } else if (mActiveTrack->mState == TrackBase::RESUMING) {
-                    mRsmpInIndex = mFrameCount;
                     if (mReqChannelCount != mActiveTrack->channelCount()) {
                         mActiveTrack.clear();
-                    } else {
-                        mActiveTrack->mState = TrackBase::ACTIVE;
+                        mStartStopCond.broadcast();
+                    } else if (mBytesRead != 0) {
+                        // record start succeeds only if first read from audio input
+                        // succeeds
+                        if (mBytesRead > 0) {
+                            mActiveTrack->mState = TrackBase::ACTIVE;
+                        } else {
+                            mActiveTrack.clear();
+                        }
+                        mStartStopCond.broadcast();
                     }
-                    mStartStopCond.broadcast();
+                    mStandby = false;
                 }
-                mStandby = false;
             }
         }
 
         if (mActiveTrack != 0) {
-            if (mActiveTrack->mState != TrackBase::ACTIVE) {
+            if (mActiveTrack->mState != TrackBase::ACTIVE &&
+                mActiveTrack->mState != TrackBase::RESUMING) {
                 usleep(5000);
                 continue;
             }
@@ -3140,18 +3151,19 @@ bool AudioFlinger::RecordThread::threadLoop()
                             }
                         }
                         if (framesOut && mFrameCount == mRsmpInIndex) {
-                            ssize_t bytesRead;
                             if (framesOut == mFrameCount &&
                                 (mChannelCount == mReqChannelCount || mFormat != AudioSystem::PCM_16_BIT)) {
-                                bytesRead = mInput->read(buffer.raw, mInputBytes);
+                                mBytesRead = mInput->read(buffer.raw, mInputBytes);
                                 framesOut = 0;
                             } else {
-                                bytesRead = mInput->read(mRsmpInBuffer, mInputBytes);
+                                mBytesRead = mInput->read(mRsmpInBuffer, mInputBytes);
                                 mRsmpInIndex = 0;
                             }
-                            if (bytesRead < 0) {
+                            if (mBytesRead < 0) {
                                 LOGE("Error reading audio input");
-                                sleep(1);
+                                if (mActiveTrack->mState == TrackBase::ACTIVE) {
+                                    sleep(1);
+                                }
                                 mRsmpInIndex = mFrameCount;
                                 framesOut = 0;
                                 buffer.frameCount = 0;
@@ -3220,7 +3232,7 @@ status_t AudioFlinger::RecordThread::start(RecordThread::RecordTrack* recordTrac
             if (recordTrack != mActiveTrack.get()) {
                 status = -EBUSY;
             } else if (mActiveTrack->mState == TrackBase::PAUSING) {
-                mActiveTrack->mState = TrackBase::RESUMING;
+                mActiveTrack->mState = TrackBase::ACTIVE;
             }
             return status;
         }
@@ -3235,6 +3247,8 @@ status_t AudioFlinger::RecordThread::start(RecordThread::RecordTrack* recordTrac
             return status;
         }
         mActiveTrack->mState = TrackBase::RESUMING;
+        mRsmpInIndex = mFrameCount;
+        mBytesRead = 0;
         // signal thread to start
         LOGV("Signal record thread");
         mWaitWorkCV.signal();
@@ -3275,6 +3289,7 @@ void AudioFlinger::RecordThread::stop(RecordThread::RecordTrack* recordTrack) {
                 mLock.unlock();
                 AudioSystem::stopInput(mId);
                 mLock.lock();
+                LOGV("Record stopped OK");
             }
         }
     }
@@ -3325,10 +3340,12 @@ status_t AudioFlinger::RecordThread::getNextBuffer(AudioBufferProvider::Buffer* 
     int channelCount;
 
     if (framesReady == 0) {
-        ssize_t bytesRead = mInput->read(mRsmpInBuffer, mInputBytes);
-        if (bytesRead < 0) {
+        mBytesRead = mInput->read(mRsmpInBuffer, mInputBytes);
+        if (mBytesRead < 0) {
             LOGE("RecordThread::getNextBuffer() Error reading audio input");
-            sleep(1);
+            if (mActiveTrack->mState == TrackBase::ACTIVE) {
+                sleep(1);
+            }
             buffer->raw = 0;
             buffer->frameCount = 0;
             return NOT_ENOUGH_DATA;
@@ -3546,9 +3563,11 @@ int AudioFlinger::openOutput(uint32_t *pDevices,
         if (pFormat) *pFormat = format;
         if (pChannels) *pChannels = channels;
         if (pLatencyMs) *pLatencyMs = thread->latency();
+
+        return mNextThreadId;
     }
 
-    return mNextThreadId;
+    return 0;
 }
 
 int AudioFlinger::openDuplicateOutput(int output1, int output2)
@@ -3694,9 +3713,11 @@ int AudioFlinger::openInput(uint32_t *pDevices,
         if (pChannels) *pChannels = reqChannels;
 
         input->standby();
+
+        return mNextThreadId;
     }
 
-    return mNextThreadId;
+    return 0;
 }
 
 status_t AudioFlinger::closeInput(int input)
