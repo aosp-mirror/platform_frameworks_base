@@ -744,6 +744,7 @@ private:
                 size_t                              mInputBytes;
                 int                                 mReqChannelCount;
                 uint32_t                            mReqSampleRate;
+                ssize_t                             mBytesRead;
     };
 
     class RecordHandle : public android::BnAudioRecord {
