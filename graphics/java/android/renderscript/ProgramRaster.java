@@ -46,11 +46,13 @@ public class ProgramRaster extends BaseObj {
     }
 
     public void setLineWidth(float w) {
+        mRS.validate();
         mLineWidth = w;
         mRS.nProgramRasterSetLineWidth(mID, w);
     }
 
     public void setPointSize(float s) {
+        mRS.validate();
         mPointSize = s;
         mRS.nProgramRasterSetPointSize(mID, s);
     }
@@ -98,6 +100,7 @@ public class ProgramRaster extends BaseObj {
         }
 
         public ProgramRaster create() {
+            mRS.validate();
             return internalCreate(mRS, this);
         }
     }

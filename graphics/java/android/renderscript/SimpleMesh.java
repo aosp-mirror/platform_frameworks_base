@@ -35,18 +35,22 @@ public class SimpleMesh extends BaseObj {
     }
 
     public void bindVertexAllocation(Allocation a, int slot) {
+        mRS.validate();
         mRS.nSimpleMeshBindVertex(mID, a.mID, slot);
     }
 
     public void bindIndexAllocation(Allocation a) {
+        mRS.validate();
         mRS.nSimpleMeshBindIndex(mID, a.mID);
     }
 
     public Allocation createVertexAllocation(int slot) {
+        mRS.validate();
         return Allocation.createTyped(mRS, mVertexTypes[slot]);
     }
 
     public Allocation createIndexAllocation() {
+        mRS.validate();
         return Allocation.createTyped(mRS, mIndexType);
     }
 
@@ -162,6 +166,7 @@ public class SimpleMesh extends BaseObj {
         }
 
         public SimpleMesh create() {
+            mRS.validate();
             SimpleMesh sm = internalCreate(mRS, this);
             sm.mVertexTypes = new Type[mVertexTypeCount];
             for(int ct=0; ct < mVertexTypeCount; ct++) {
