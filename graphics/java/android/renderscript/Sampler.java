@@ -100,6 +100,7 @@ public class Sampler extends BaseObj {
         }
 
         public Sampler create() {
+            mRS.validate();
             return internalCreate(mRS, this);
         }
     }
