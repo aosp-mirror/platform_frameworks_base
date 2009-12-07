@@ -3236,34 +3236,10 @@ public class WebView extends AbsoluteLayout
                     vBox.height());
             mWebTextView.setGravity(nativeFocusCandidateIsRtlText() ?
                     Gravity.RIGHT : Gravity.NO_GRAVITY);
-            // this needs to be called before update adapter thread starts to
-            // ensure the mWebTextView has the same node pointer
+            // This needs to be called before setType, which may call
+            // requestFormData, and it needs to have the correct nodePointer.
             mWebTextView.setNodePointer(nodePointer);
-            int maxLength = -1;
-            boolean isTextField = nativeFocusCandidateIsTextField();
-            boolean isPassword;
-            if (isTextField) {
-                maxLength = nativeFocusCandidateMaxLength();
-                String name = nativeFocusCandidateName();
-                isPassword = nativeFocusCandidateIsPassword();
-                if (!isPassword && mWebViewCore.getSettings().getSaveFormData()
-                        && name != null && name.length() > 0) {
-                    Message update = mPrivateHandler.obtainMessage(
-                            REQUEST_FORM_DATA);
-                    update.arg1 = nodePointer;
-                    RequestFormData updater = new RequestFormData(name,
-                            getUrl(), update);
-                    Thread t = new Thread(updater);
-                    t.start();
-                }
-            } else {
-                isPassword = false;
-            }
-            mWebTextView.setMaxLength(maxLength);
-            AutoCompleteAdapter adapter = null;
-            mWebTextView.setAdapterCustom(adapter);
-            mWebTextView.setSingleLine(isTextField);
-            mWebTextView.setInPassword(isPassword);
+            mWebTextView.setType(nativeFocusCandidateType());
             if (null == text) {
                 if (DebugFlags.WEB_VIEW) {
                     Log.v(LOGTAG, "rebuildWebTextView null == text");
@@ -3272,6 +3248,25 @@ public class WebView extends AbsoluteLayout
             }
             mWebTextView.setTextAndKeepSelection(text);
             mWebTextView.requestFocus();
+        }
+    }
+
+    /**
+     * Called by WebTextView to find saved form data associated with the
+     * textfield
+     * @param name Name of the textfield.
+     * @param nodePointer Pointer to the node of the textfield, so it can be
+     *          compared to the currently focused textfield when the data is
+     *          retrieved.
+     */
+    /* package */ void requestFormData(String name, int nodePointer) {
+        if (mWebViewCore.getSettings().getSaveFormData()) {
+            Message update = mPrivateHandler.obtainMessage(REQUEST_FORM_DATA);
+            update.arg1 = nodePointer;
+            RequestFormData updater = new RequestFormData(name, getUrl(),
+                    update);
+            Thread t = new Thread(updater);
+            t.start();
         }
     }
 
@@ -5914,14 +5909,18 @@ public class WebView extends AbsoluteLayout
     private native boolean  nativeFocusCandidateIsPassword();
     private native boolean  nativeFocusCandidateIsPlugin();
     private native boolean  nativeFocusCandidateIsRtlText();
-    private native boolean  nativeFocusCandidateIsTextField();
     private native boolean  nativeFocusCandidateIsTextInput();
-    private native int      nativeFocusCandidateMaxLength();
+    /* package */ native int      nativeFocusCandidateMaxLength();
     /* package */ native String   nativeFocusCandidateName();
     private native Rect     nativeFocusCandidateNodeBounds();
     /* package */ native int nativeFocusCandidatePointer();
     private native String   nativeFocusCandidateText();
     private native int      nativeFocusCandidateTextSize();
+    /**
+     * Returns an integer corresponding to WebView.cpp::type.
+     * See WebTextView.setType()
+     */
+    private native int      nativeFocusCandidateType();
     private native boolean  nativeFocusIsPlugin();
     /* package */ native int nativeFocusNodePointer();
     private native Rect     nativeGetCursorRingBounds();
