@@ -154,7 +154,7 @@ android_media_SoundPool_native_setup(JNIEnv *env, jobject thiz,
         jobject weak_this, jint maxChannels, jint streamType, jint srcQuality)
 {
     LOGV("android_media_SoundPool_native_setup");
-    SoundPool *ap = new SoundPool(weak_this, maxChannels, streamType, srcQuality);
+    SoundPool *ap = new SoundPool(maxChannels, streamType, srcQuality);
     if (ap == NULL) {
         jniThrowException(env, "java/lang/RuntimeException", "Out of memory");
         return;
