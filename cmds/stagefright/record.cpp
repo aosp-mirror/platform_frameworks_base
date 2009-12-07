@@ -154,7 +154,7 @@ int main(int argc, char **argv) {
 
     sp<MetaData> meta = source->getFormat();
 
-    sp<OMXCodec> decoder = OMXCodec::Create(
+    sp<MediaSource> decoder = OMXCodec::Create(
             client.interface(), meta, false /* createEncoder */, source);
 
     int width, height;
@@ -173,7 +173,7 @@ int main(int argc, char **argv) {
     enc_meta->setInt32(kKeyWidth, width);
     enc_meta->setInt32(kKeyHeight, height);
 
-    sp<OMXCodec> encoder =
+    sp<MediaSource> encoder =
         OMXCodec::Create(
                 client.interface(), enc_meta, true /* createEncoder */, decoder);
 
