@@ -38,12 +38,12 @@ int main() {
         meta->setInt32(kKeyMaxInputSize, maxInputSize);
     }
 
-    sp<OMXCodec> encoder = OMXCodec::Create(
+    sp<MediaSource> encoder = OMXCodec::Create(
             client.interface(),
             meta, true /* createEncoder */,
             source);
 
-    sp<OMXCodec> decoder = OMXCodec::Create(
+    sp<MediaSource> decoder = OMXCodec::Create(
             client.interface(),
             meta, false /* createEncoder */,
             encoder);
