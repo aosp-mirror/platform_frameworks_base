@@ -18,6 +18,7 @@
 #define LOG_TAG "OMXCodec"
 #include <utils/Log.h>
 
+#include "include/AACDecoder.h"
 #include "include/ESDS.h"
 
 #include <binder/IServiceManager.h>
@@ -283,6 +284,10 @@ sp<MediaSource> OMXCodec::Create(
     const char *mime;
     bool success = meta->findCString(kKeyMIMEType, &mime);
     CHECK(success);
+
+    if (!strcasecmp(mime, MEDIA_MIMETYPE_AUDIO_AAC)) {
+        return new AACDecoder(source);
+    }
 
     Vector<String8> matchingCodecs;
     findMatchingCodecs(
