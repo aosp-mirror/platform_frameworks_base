@@ -1592,9 +1592,6 @@ final class WebViewCore {
     // Used to avoid posting more than one split picture message.
     private boolean mSplitPictureIsScheduled;
 
-    // Used to suspend drawing.
-    private boolean mDrawIsPaused;
-
     // mRestoreState is set in didFirstLayout(), and reset in the next
     // webkitDraw after passing it to the UI thread.
     private RestoreState mRestoreState = null;
@@ -1713,17 +1710,6 @@ final class WebViewCore {
         sWebCoreHandler.removeMessages(WebCoreThread.RESUME_PRIORITY);
         sWebCoreHandler.sendMessageAtFrontOfQueue(sWebCoreHandler
                 .obtainMessage(WebCoreThread.REDUCE_PRIORITY));
-        // Note: there is one possible failure mode. If pauseUpdate() is called
-        // from UI thread while in webcore thread WEBKIT_DRAW is just pulled out
-        // of the queue and about to be executed. mDrawIsScheduled may be set to
-        // false in webkitDraw(). So update won't be blocked. But at least the
-        // webcore thread priority is still lowered.
-        if (core != null) {
-            synchronized (core) {
-                core.mDrawIsPaused = true;
-                core.mEventHub.removeMessages(EventHub.WEBKIT_DRAW);
-            }
-        }
     }
 
     static void resumeUpdate(WebViewCore core) {
@@ -1732,14 +1718,6 @@ final class WebViewCore {
         sWebCoreHandler.removeMessages(WebCoreThread.RESUME_PRIORITY);
         sWebCoreHandler.sendMessageAtFrontOfQueue(sWebCoreHandler
                 .obtainMessage(WebCoreThread.RESUME_PRIORITY));
-        if (core != null) {
-            synchronized (core) {
-                core.mDrawIsScheduled = false;
-                core.mDrawIsPaused = false;
-                if (DebugFlags.WEB_VIEW_CORE) Log.v(LOGTAG, "resumeUpdate");
-                core.contentDraw();
-            }
-        }
     }
 
     static void startCacheTransaction() {
@@ -1778,9 +1756,7 @@ final class WebViewCore {
         }
         // only fire an event if this is our first request
         synchronized (this) {
-            if (mDrawIsPaused || mDrawIsScheduled) {
-                return;
-            }
+            if (mDrawIsScheduled) return;
             mDrawIsScheduled = true;
             mEventHub.sendMessage(Message.obtain(null, EventHub.WEBKIT_DRAW));
         }
