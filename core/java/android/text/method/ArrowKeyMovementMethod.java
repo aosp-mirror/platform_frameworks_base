@@ -54,7 +54,7 @@ implements MovementMethod
                 Selection.setSelection(buffer, 0);
                 return true;
             } else {
-                return Selection.moveUp(buffer, layout); 
+                return Selection.moveUp(buffer, layout);
             }
         }
     }
@@ -80,7 +80,7 @@ implements MovementMethod
                 Selection.setSelection(buffer, buffer.length());
                 return true;
             } else {
-                return Selection.moveDown(buffer, layout); 
+                return Selection.moveDown(buffer, layout);
             }
         }
     }
@@ -131,6 +131,35 @@ implements MovementMethod
                 return Selection.moveRight(buffer, layout); 
             }
         }
+    }
+
+    private int getOffset(int x, int y, TextView widget){
+      // Converts the absolute X,Y coordinates to the character offset for the
+      // character whose position is closest to the specified
+      // horizontal position.
+      x -= widget.getTotalPaddingLeft();
+      y -= widget.getTotalPaddingTop();
+
+      // Clamp the position to inside of the view.
+      if (x < 0) {
+          x = 0;
+      } else if (x >= (widget.getWidth()-widget.getTotalPaddingRight())) {
+          x = widget.getWidth()-widget.getTotalPaddingRight() - 1;
+      }
+      if (y < 0) {
+          y = 0;
+      } else if (y >= (widget.getHeight()-widget.getTotalPaddingBottom())) {
+          y = widget.getHeight()-widget.getTotalPaddingBottom() - 1;
+      }
+
+      x += widget.getScrollX();
+      y += widget.getScrollY();
+
+      Layout layout = widget.getLayout();
+      int line = layout.getLineForVertical(y);
+
+      int offset = layout.getOffsetForHorizontal(line, x);
+      return offset;
     }
 
     public boolean onKeyDown(TextView widget, Spannable buffer, int keyCode, KeyEvent event) {
@@ -196,12 +225,12 @@ implements MovementMethod
         }
         return false;
     }
-    
+
     public boolean onTrackballEvent(TextView widget, Spannable text,
             MotionEvent event) {
         return false;
     }
-    
+
     public boolean onTouchEvent(TextView widget, Spannable buffer,
                                 MotionEvent event) {
         int initialScrollX = -1, initialScrollY = -1;
@@ -209,11 +238,63 @@ implements MovementMethod
             initialScrollX = Touch.getInitialScrollX(widget, buffer);
             initialScrollY = Touch.getInitialScrollY(widget, buffer);
         }
-        
+
         boolean handled = Touch.onTouchEvent(widget, buffer, event);
 
         if (widget.isFocused() && !widget.didTouchFocusSelect()) {
-            if (event.getAction() == MotionEvent.ACTION_UP) {
+            if (event.getAction() == MotionEvent.ACTION_DOWN) {
+              boolean cap = (MetaKeyKeyListener.getMetaState(buffer,
+                              KeyEvent.META_SHIFT_ON) == 1) ||
+                            (MetaKeyKeyListener.getMetaState(buffer,
+                              MetaKeyKeyListener.META_SELECTING) != 0);
+              if (cap) {
+                  int x = (int) event.getX();
+                  int y = (int) event.getY();
+                  int offset = getOffset(x, y, widget);
+
+                  buffer.setSpan(LAST_TAP_DOWN, offset, offset,
+                                 Spannable.SPAN_POINT_POINT);
+              }
+            } else if (event.getAction() == MotionEvent.ACTION_MOVE ) {
+              boolean cap = (MetaKeyKeyListener.getMetaState(buffer,
+                              KeyEvent.META_SHIFT_ON) == 1) ||
+                            (MetaKeyKeyListener.getMetaState(buffer,
+                              MetaKeyKeyListener.META_SELECTING) != 0);
+
+              if (cap) {
+                // Update selection as we're moving the selection area.
+
+                // Get the current touch position
+                int x = (int) event.getX();
+                int y = (int) event.getY();
+                int offset = getOffset(x, y, widget);
+
+                // Get the last down touch position (the position at which the
+                // user started the selection)
+                int lastDownOffset = buffer.getSpanStart(LAST_TAP_DOWN);
+
+                // Compute the selection boundries
+                int spanstart;
+                int spanend;
+                if (offset >= lastDownOffset) {
+                  // expand to from word start of the original tap to new word
+                  // end, since we are selecting "forwards"
+                  spanstart = findWordStart(buffer, lastDownOffset);
+                  spanend = findWordEnd(buffer, offset);
+                } else {
+                  // Expand to from new word start to word end of the original
+                  // tap since we are selecting "backwards".
+                  // The spanend will always need to be associated with the touch
+                  // up position, so that refining the selection with the
+                  // trackball will work as expected.
+                  spanstart = findWordEnd(buffer, lastDownOffset);
+                  spanend = findWordStart(buffer, offset);
+                }
+
+                Selection.setSelection(buffer, spanstart, spanend);
+                return true;
+              }
+            } else if (event.getAction() == MotionEvent.ACTION_UP) {
                 // If we have scrolled, then the up shouldn't move the cursor,
                 // but we do need to make sure the cursor is still visible at
                 // the current scroll offset to avoid the scroll jumping later
@@ -223,35 +304,13 @@ implements MovementMethod
                     widget.moveCursorToVisibleOffset();
                     return true;
                 }
-                
+
                 int x = (int) event.getX();
                 int y = (int) event.getY();
-
-                x -= widget.getTotalPaddingLeft();
-                y -= widget.getTotalPaddingTop();
-
-                // Clamp the position to inside of the view.
-                if (x < 0) {
-                    x = 0;
-                } else if (x >= (widget.getWidth()-widget.getTotalPaddingRight())) {
-                    x = widget.getWidth()-widget.getTotalPaddingRight() - 1;
-                }
-                if (y < 0) {
-                    y = 0;
-                } else if (y >= (widget.getHeight()-widget.getTotalPaddingBottom())) {
-                    y = widget.getHeight()-widget.getTotalPaddingBottom() - 1;
-                }
-                
-                x += widget.getScrollX();
-                y += widget.getScrollY();
-
-                Layout layout = widget.getLayout();
-                int line = layout.getLineForVertical(y);
-                
-                int off = layout.getOffsetForHorizontal(line, x);
+                int off = getOffset(x, y, widget);
 
                 // XXX should do the same adjust for x as we do for the line.
-                
+
                 boolean cap = (MetaKeyKeyListener.getMetaState(buffer,
                                 KeyEvent.META_SHIFT_ON) == 1) ||
                               (MetaKeyKeyListener.getMetaState(buffer,
@@ -278,7 +337,7 @@ implements MovementMethod
                 }
 
                 if (cap) {
-                    Selection.extendSelection(buffer, off);
+                    buffer.removeSpan(LAST_TAP_DOWN);
                 } else if (doubletap) {
                     Selection.setSelection(buffer,
                                            findWordStart(buffer, off),
@@ -395,5 +454,7 @@ implements MovementMethod
         return sInstance;
     }
 
+
+    private static final Object LAST_TAP_DOWN = new Object();
     private static ArrowKeyMovementMethod sInstance;
 }
