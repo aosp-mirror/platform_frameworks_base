@@ -54,7 +54,8 @@ LOCAL_SHARED_LIBRARIES := \
 ifeq ($(BUILD_WITH_FULL_STAGEFRIGHT),true)
 
 LOCAL_STATIC_LIBRARIES := \
-        libstagefright_aacdec
+        libstagefright_aacdec \
+        libstagefright_mp3dec
 
 endif
 
