@@ -159,7 +159,7 @@ class SoundPool {
     friend class SoundPoolThread;
     friend class SoundChannel;
 public:
-    SoundPool(jobject soundPoolRef, int maxChannels, int streamType, int srcQuality);
+    SoundPool(int maxChannels, int streamType, int srcQuality);
     ~SoundPool();
     int load(const char* url, int priority);
     int load(int fd, int64_t offset, int64_t length, int priority);

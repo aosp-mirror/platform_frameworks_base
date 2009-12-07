@@ -38,7 +38,7 @@ uint32_t kMaxSampleRate = 48000;
 uint32_t kDefaultSampleRate = 44100;
 uint32_t kDefaultFrameCount = 1200;
 
-SoundPool::SoundPool(jobject soundPoolRef, int maxChannels, int streamType, int srcQuality)
+SoundPool::SoundPool(int maxChannels, int streamType, int srcQuality)
 {
     LOGV("SoundPool constructor: maxChannels=%d, streamType=%d, srcQuality=%d",
             maxChannels, streamType, srcQuality);
@@ -54,7 +54,6 @@ SoundPool::SoundPool(jobject soundPoolRef, int maxChannels, int streamType, int 
     LOGW_IF(maxChannels != mMaxChannels, "App requested %d channels", maxChannels);
 
     mQuit = false;
-    mSoundPoolRef = soundPoolRef;
     mDecodeThread = 0;
     mStreamType = streamType;
     mSrcQuality = srcQuality;
