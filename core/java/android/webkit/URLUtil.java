@@ -28,8 +28,14 @@ import android.util.Log;
 public final class URLUtil {
 
     private static final String LOGTAG = "webkit";
-    
+
+    // to refer to bar.png under your package's asset/foo/ directory, use
+    // "file:///android_asset/foo/bar.png".
     static final String ASSET_BASE = "file:///android_asset/";
+    // to refer to bar.png under your package's res/drawable/ directory, use
+    // "file:///android_res/drawable/bar.png". Use "drawable" to refer to
+    // "drawable-hdpi" directory as well.
+    static final String RESOURCE_BASE = "file:///android_res/";
     static final String FILE_BASE = "file://";
     static final String PROXY_BASE = "file:///cookieless_proxy/";
 
@@ -166,7 +172,15 @@ public final class URLUtil {
     public static boolean isAssetUrl(String url) {
         return (null != url) && url.startsWith(ASSET_BASE);
     }
-    
+
+    /**
+     * @return True iff the url is a resource file.
+     * @hide
+     */
+    public static boolean isResourceUrl(String url) {
+        return (null != url) && url.startsWith(RESOURCE_BASE);
+    }
+
     /**
      * @return True iff the url is an proxy url to allow cookieless network 
      * requests from a file url.
@@ -251,6 +265,7 @@ public final class URLUtil {
         }
 
         return (isAssetUrl(url) ||
+                isResourceUrl(url) ||
                 isFileUrl(url) ||
                 isAboutUrl(url) ||
                 isHttpUrl(url) ||
