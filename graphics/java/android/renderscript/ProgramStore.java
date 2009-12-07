@@ -162,6 +162,7 @@ public class ProgramStore extends BaseObj {
         }
 
         public ProgramStore create() {
+            mRS.validate();
             return internalCreate(mRS, this);
         }
     }

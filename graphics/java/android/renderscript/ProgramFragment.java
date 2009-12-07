@@ -47,6 +47,7 @@ public class ProgramFragment extends BaseObj {
 
     public void bindTexture(Allocation va, int slot)
         throws IllegalArgumentException {
+        mRS.validate();
         if((slot < 0) || (slot >= MAX_SLOT)) {
             throw new IllegalArgumentException("Slot ID out of range.");
         }
@@ -56,6 +57,7 @@ public class ProgramFragment extends BaseObj {
 
     public void bindSampler(Sampler vs, int slot)
         throws IllegalArgumentException {
+        mRS.validate();
         if((slot < 0) || (slot >= MAX_SLOT)) {
             throw new IllegalArgumentException("Slot ID out of range.");
         }
@@ -149,6 +151,7 @@ public class ProgramFragment extends BaseObj {
         }
 
         public ProgramFragment create() {
+            mRS.validate();
             return internalCreate(mRS, this);
         }
     }
