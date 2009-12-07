@@ -28,9 +28,8 @@ package android.webkit.plugin;
  *
  * @hide pending API solidification
  */
-public interface WebkitPlugin {
+public interface FullScreenDrawingModel extends SurfaceDrawingModel {
 
-    SurfaceDrawingModel    getEmbeddedSurface();
-    FullScreenDrawingModel getFullScreenSurface();
+    public void onSurfaceRemoved();
 
 }
