@@ -546,12 +546,14 @@ class BluetoothEventLoop {
 
         boolean authorized = false;
         ParcelUuid uuid = ParcelUuid.fromString(deviceUuid);
+        BluetoothA2dp a2dp = new BluetoothA2dp(mContext);
+
         // Bluez sends the UUID of the local service being accessed, _not_ the
         // remote service
         if (mBluetoothService.isEnabled() &&
                 (BluetoothUuid.isAudioSource(uuid) || BluetoothUuid.isAvrcpTarget(uuid)
-                        || BluetoothUuid.isAdvAudioDist(uuid))) {
-            BluetoothA2dp a2dp = new BluetoothA2dp(mContext);
+                        || BluetoothUuid.isAdvAudioDist(uuid)) &&
+                        (a2dp.getNonDisconnectedSinks().size() == 0)) {
             BluetoothDevice device = mAdapter.getRemoteDevice(address);
             authorized = a2dp.getSinkPriority(device) > BluetoothA2dp.PRIORITY_OFF;
             if (authorized) {
