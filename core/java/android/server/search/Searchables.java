@@ -19,6 +19,7 @@ package android.server.search;
 import com.android.internal.app.ResolverActivity;
 
 import android.app.SearchManager;
+import android.app.SearchableInfo;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;

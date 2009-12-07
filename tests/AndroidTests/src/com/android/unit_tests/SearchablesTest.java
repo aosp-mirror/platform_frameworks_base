@@ -17,6 +17,8 @@
 package com.android.unit_tests;
 
 import android.app.SearchManager;
+import android.app.SearchableInfo;
+import android.app.SearchableInfo.ActionKeyInfo;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -28,9 +30,7 @@ import android.content.pm.ResolveInfo;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
 import android.os.RemoteException;
-import android.server.search.SearchableInfo;
 import android.server.search.Searchables;
-import android.server.search.SearchableInfo.ActionKeyInfo;
 import android.test.AndroidTestCase;
 import android.test.MoreAsserts;
 import android.test.mock.MockContext;
