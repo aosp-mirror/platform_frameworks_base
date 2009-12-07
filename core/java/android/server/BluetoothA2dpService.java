@@ -376,6 +376,16 @@ public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
         return sinks.toArray(new BluetoothDevice[sinks.size()]);
     }
 
+    public synchronized BluetoothDevice[] getNonDisconnectedSinks() {
+        mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
+        Set<BluetoothDevice> sinks = lookupSinksMatchingStates(
+                new int[] {BluetoothA2dp.STATE_CONNECTED,
+                           BluetoothA2dp.STATE_PLAYING,
+                           BluetoothA2dp.STATE_CONNECTING,
+                           BluetoothA2dp.STATE_DISCONNECTING});
+        return sinks.toArray(new BluetoothDevice[sinks.size()]);
+    }
+
     public synchronized int getSinkState(BluetoothDevice device) {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
         Integer state = mAudioDevices.get(device);
