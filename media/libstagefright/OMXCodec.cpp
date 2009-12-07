@@ -20,6 +20,7 @@
 
 #if BUILD_WITH_FULL_STAGEFRIGHT
 #include "include/AACDecoder.h"
+#include "include/MP3Decoder.h"
 #endif
 
 #include "include/ESDS.h"
@@ -291,6 +292,8 @@ sp<MediaSource> OMXCodec::Create(
 #if BUILD_WITH_FULL_STAGEFRIGHT
     if (!strcasecmp(mime, MEDIA_MIMETYPE_AUDIO_AAC)) {
         return new AACDecoder(source);
+    } else if (!strcasecmp(mime, MEDIA_MIMETYPE_AUDIO_MPEG)) {
+        return new MP3Decoder(source);
     }
 #endif
 

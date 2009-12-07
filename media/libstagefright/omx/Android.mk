@@ -36,9 +36,6 @@ LOCAL_SHARED_LIBRARIES += \
         libopencore_common
 endif
 
-LOCAL_STATIC_LIBRARIES :=       \
-        libstagefright_mp3
-
 ifeq ($(TARGET_OS)-$(TARGET_SIMULATOR),linux-true)
         LOCAL_LDLIBS += -lpthread -ldl
 endif
@@ -52,5 +49,3 @@ LOCAL_PRELINK_MODULE:= false
 LOCAL_MODULE:= libstagefright_omx
 
 include $(BUILD_SHARED_LIBRARY)
-
-include $(call all-makefiles-under,$(LOCAL_PATH))
