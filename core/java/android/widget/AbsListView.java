@@ -2109,6 +2109,9 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                             }
                             reportScrollStateChange(OnScrollListener.SCROLL_STATE_FLING);
                             mFlingRunnable.start(-initialVelocity);
+                        } else {
+                            mTouchMode = TOUCH_MODE_REST;
+                            reportScrollStateChange(OnScrollListener.SCROLL_STATE_IDLE);
                         }
                     }
                 } else {
