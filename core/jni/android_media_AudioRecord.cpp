@@ -224,17 +224,17 @@ native_track_failure:
 
 
 // ----------------------------------------------------------------------------
-static void
+static int
 android_media_AudioRecord_start(JNIEnv *env, jobject thiz)
 {
     AudioRecord *lpRecorder = 
             (AudioRecord *)env->GetIntField(thiz, javaAudioRecordFields.nativeRecorderInJavaObj);
     if (lpRecorder == NULL ) {
         jniThrowException(env, "java/lang/IllegalStateException", NULL);
-        return;
+        return AUDIORECORD_ERROR;
     }
     
-    lpRecorder->start();
+    return android_media_translateRecorderErrorCode(lpRecorder->start());
 }
 
 
@@ -482,7 +482,7 @@ static jint android_media_AudioRecord_get_min_buff_size(JNIEnv *env,  jobject th
 // ----------------------------------------------------------------------------
 static JNINativeMethod gMethods[] = {
     // name,               signature,  funcPtr
-    {"native_start",         "()V",    (void *)android_media_AudioRecord_start},
+    {"native_start",         "()I",    (void *)android_media_AudioRecord_start},
     {"native_stop",          "()V",    (void *)android_media_AudioRecord_stop},
     {"native_setup",         "(Ljava/lang/Object;IIIII)I",
                                        (void *)android_media_AudioRecord_setup},
