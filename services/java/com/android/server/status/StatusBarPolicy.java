@@ -283,7 +283,7 @@ public class StatusBarPolicy {
     private IBinder mBluetoothIcon;
     private IconData mBluetoothData;
     private int mBluetoothHeadsetState;
-    private int mBluetoothA2dpState;
+    private boolean mBluetoothA2dpConnected;
     private int mBluetoothPbapState;
     private boolean mBluetoothEnabled;
 
@@ -455,7 +455,7 @@ public class StatusBarPolicy {
         } else {
             mBluetoothEnabled = false;
         }
-        mBluetoothA2dpState = BluetoothA2dp.STATE_DISCONNECTED;
+        mBluetoothA2dpConnected = false;
         mBluetoothHeadsetState = BluetoothHeadset.STATE_DISCONNECTED;
         mBluetoothPbapState = BluetoothPbap.STATE_DISCONNECTED;
         mService.setIconVisibility(mBluetoothIcon, mBluetoothEnabled);
@@ -636,12 +636,12 @@ public class StatusBarPolicy {
         int flags =  WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
                 | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
                 | WindowManager.LayoutParams.FLAG_DIM_BEHIND;
-        
+
         if (!mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_sf_slowBlur)) {
             flags |= WindowManager.LayoutParams.FLAG_BLUR_BEHIND;
         }
-        
+
         WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
                 ViewGroup.LayoutParams.WRAP_CONTENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT,
@@ -1083,7 +1083,6 @@ public class StatusBarPolicy {
 
     private final void updateBluetooth(Intent intent) {
         int iconId = com.android.internal.R.drawable.stat_sys_data_bluetooth;
-
         String action = intent.getAction();
         if (action.equals(BluetoothAdapter.ACTION_STATE_CHANGED)) {
             int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, BluetoothAdapter.ERROR);
@@ -1092,8 +1091,12 @@ public class StatusBarPolicy {
             mBluetoothHeadsetState = intent.getIntExtra(BluetoothHeadset.EXTRA_STATE,
                     BluetoothHeadset.STATE_ERROR);
         } else if (action.equals(BluetoothA2dp.ACTION_SINK_STATE_CHANGED)) {
-            mBluetoothA2dpState = intent.getIntExtra(BluetoothA2dp.EXTRA_SINK_STATE,
-                    BluetoothA2dp.STATE_DISCONNECTED);
+            BluetoothA2dp a2dp = new BluetoothA2dp(mContext);
+            if (a2dp.getConnectedSinks().size() != 0) {
+                mBluetoothA2dpConnected = true;
+            } else {
+                mBluetoothA2dpConnected = false;
+            }
         } else if (action.equals(BluetoothPbap.PBAP_STATE_CHANGED_ACTION)) {
             mBluetoothPbapState = intent.getIntExtra(BluetoothPbap.PBAP_STATE,
                     BluetoothPbap.STATE_DISCONNECTED);
@@ -1101,9 +1104,7 @@ public class StatusBarPolicy {
             return;
         }
 
-        if (mBluetoothHeadsetState == BluetoothHeadset.STATE_CONNECTED ||
-                mBluetoothA2dpState == BluetoothA2dp.STATE_CONNECTED ||
-                mBluetoothA2dpState == BluetoothA2dp.STATE_PLAYING ||
+        if (mBluetoothHeadsetState == BluetoothHeadset.STATE_CONNECTED || mBluetoothA2dpConnected ||
                 mBluetoothPbapState == BluetoothPbap.STATE_CONNECTED) {
             iconId = com.android.internal.R.drawable.stat_sys_data_bluetooth_connected;
         }
