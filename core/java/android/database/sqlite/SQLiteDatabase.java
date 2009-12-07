@@ -827,21 +827,19 @@ public class SQLiteDatabase extends SQLiteClosable {
     }
 
     private void closeClosable() {
-        /* deallocate all compiled sql statement objects in compiledQueries cache.
-         * this should be done before de-referencing all {@link SQLiteClosable} objects
-         * from this database object because calling
-         * {@link SQLiteClosable#onAllReferencesReleasedFromContainer()} could cause the database
-         * to be closed. sqlite doesn't let a database close if there are
-         * any unfinalized statements - such as the compiled-sql objects in mCompiledQueries.
-         */
-        resetCompiledSqlCache();
- 
         Iterator<Map.Entry<SQLiteClosable, Object>> iter = mPrograms.entrySet().iterator();
         while (iter.hasNext()) {
             Map.Entry<SQLiteClosable, Object> entry = iter.next();
             SQLiteClosable program = entry.getKey();
             if (program != null) {
                 program.onAllReferencesReleasedFromContainer();
+            }
+        }
+
+        // finalize all compiled sql statement objects in compiledQueries cache
+        synchronized (mCompiledQueries) {
+            for (SQLiteCompiledSql compiledStatement : mCompiledQueries.values()) {
+                compiledStatement.releaseSqlStatement();
             }
         }
     }
@@ -1791,9 +1789,7 @@ public class SQLiteDatabase extends SQLiteClosable {
      */
     public void setMaxSqlCacheSize(int cacheSize) {
         synchronized(mCompiledQueries) {
-            if (mMaxSqlCacheSize > 0) {
-                resetCompiledSqlCache();
-            }
+            resetCompiledSqlCache();
             mMaxSqlCacheSize = (cacheSize > MAX_SQL_CACHE_SIZE) ? MAX_SQL_CACHE_SIZE
                     : (cacheSize < 0) ? 0 : cacheSize;
         }
@@ -1804,9 +1800,6 @@ public class SQLiteDatabase extends SQLiteClosable {
      */
     public void resetCompiledSqlCache() {
         synchronized(mCompiledQueries) {
-            for (SQLiteCompiledSql compiledStatement : mCompiledQueries.values()) {
-                compiledStatement.releaseSqlStatement();
-            }
             mCompiledQueries.clear();
         }
     }
@@ -1842,7 +1835,7 @@ public class SQLiteDatabase extends SQLiteClosable {
                 /* reached max cachesize. before adding new entry, remove an entry from the
                  * cache. we don't want to wipe out the entire cache because of this:
                  * GCing {@link SQLiteCompiledSql} requires call to sqlite3_finalize
-                 * JNI method. If entire cache is wiped out, it could cause a big GC activity
+                 * JNI method. If entire cache is wiped out, it could be cause a big GC activity
                  * just because a (rogue) process is using the cache incorrectly.
                  */
                 Set<String> keySet = mCompiledQueries.keySet();
@@ -1851,7 +1844,8 @@ public class SQLiteDatabase extends SQLiteClosable {
                     break;
                 }
             }
-            mCompiledQueries.put(sql, compiledStatement);
+            compiledSql = new SQLiteCompiledSql(this, sql);
+            mCompiledQueries.put(sql, compiledSql);
         }
         if (SQLiteDebug.DEBUG_SQL_CACHE) {
             Log.v(TAG, "|adding_sql_to_cache|" + getPath() + "|" + mCompiledQueries.size() + "|" +
