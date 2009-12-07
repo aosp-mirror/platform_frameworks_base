@@ -1111,7 +1111,6 @@ void AudioFlinger::PlaybackThread::destroyTrack_l(const sp<Track>& track)
 {
     track->mState = TrackBase::TERMINATED;
     if (mActiveTracks.indexOf(track) < 0) {
-        LOGV("remove track (%d) and delete from mixer", track->name());
         mTracks.remove(track);
         deleteTrackName_l(track->name());
     }
@@ -1511,6 +1510,7 @@ int AudioFlinger::MixerThread::getTrackName_l()
 // deleteTrackName_l() must be called with ThreadBase::mLock held
 void AudioFlinger::MixerThread::deleteTrackName_l(int name)
 {
+    LOGV("remove track (%d) and delete from mixer", name);
     mAudioMixer->deleteTrackName(name);
 }
 
@@ -1922,6 +1922,9 @@ AudioFlinger::DuplicatingThread::DuplicatingThread(const sp<AudioFlinger>& audio
 
 AudioFlinger::DuplicatingThread::~DuplicatingThread()
 {
+    for (size_t i = 0; i < mOutputTracks.size(); i++) {
+        mOutputTracks[i]->destroy();
+    }
     mOutputTracks.clear();
 }
 
@@ -2042,17 +2045,6 @@ bool AudioFlinger::DuplicatingThread::threadLoop()
         // same lock.
         tracksToRemove.clear();
         outputTracks.clear();
-    }
-
-    { // scope for the mLock
-
-        Mutex::Autolock _l(mLock);
-        if (!mStandby) {
-            LOGV("DuplicatingThread() exiting out of standby");
-            for (size_t i = 0; i < mOutputTracks.size(); i++) {
-                mOutputTracks[i]->destroy();
-            }
-        }
     }
 
     return false;
