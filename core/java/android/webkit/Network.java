@@ -163,10 +163,10 @@ class Network {
             return false;
         }
 
-        // asset, file system or data stream are handled in the other code path.
-        // This only handles network request.
-        if (URLUtil.isAssetUrl(url) || URLUtil.isFileUrl(url) ||
-                URLUtil.isDataUrl(url)) {
+        // asset, res, file system or data stream are handled in the other code
+        // path. This only handles network request.
+        if (URLUtil.isAssetUrl(url) || URLUtil.isResourceUrl(url)
+                || URLUtil.isFileUrl(url) || URLUtil.isDataUrl(url)) {
             return false;
         }
 

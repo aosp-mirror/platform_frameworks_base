@@ -23,9 +23,12 @@ import android.content.res.AssetManager;
 import android.net.http.EventHandler;
 import android.net.http.Headers;
 import android.os.Environment;
+import android.util.Log;
+import android.util.TypedValue;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.lang.reflect.Field;
 
 /**
  * This class is a concrete implementation of StreamLoader that uses a
@@ -35,9 +38,18 @@ import java.io.FileInputStream;
 class FileLoader extends StreamLoader {
 
     private String mPath;  // Full path to the file to load
-    private Context mContext;  // Application context, used for asset loads
-    private boolean mIsAsset;  // Indicates if the load is an asset or not
+    private Context mContext;  // Application context, used for asset/res loads
+    private int mType;  // Indicates the type of the load
     private boolean mAllowFileAccess; // Allow/block file system access
+
+    // used for files under asset directory
+    static final int TYPE_ASSET = 1;
+    // used for files under res directory
+    static final int TYPE_RES = 2;
+    // generic file
+    static final int TYPE_FILE = 3;
+
+    private static final String LOGTAG = "webkit";
 
     /**
      * Construct a FileLoader with the file URL specified as the content
@@ -51,19 +63,24 @@ class FileLoader extends StreamLoader {
      *                        on the file system.
      */
     FileLoader(String url, LoadListener loadListener, Context context,
-            boolean asset, boolean allowFileAccess) {
+            int type, boolean allowFileAccess) {
         super(loadListener);
-        mIsAsset = asset;
+        mType = type;
         mContext = context;
         mAllowFileAccess = allowFileAccess;
 
         // clean the Url
         int index = url.indexOf('?');
-        if (mIsAsset) {
+        if (mType == TYPE_ASSET) {
             mPath = index > 0 ? URLUtil.stripAnchor(
                     url.substring(URLUtil.ASSET_BASE.length(), index)) :
                     URLUtil.stripAnchor(url.substring(
                             URLUtil.ASSET_BASE.length()));
+        } else if (mType == TYPE_RES) {
+            mPath = index > 0 ? URLUtil.stripAnchor(
+                    url.substring(URLUtil.RESOURCE_BASE.length(), index)) :
+                    URLUtil.stripAnchor(url.substring(
+                            URLUtil.RESOURCE_BASE.length()));
         } else {
             mPath = index > 0 ? URLUtil.stripAnchor(
                     url.substring(URLUtil.FILE_BASE.length(), index)) :
@@ -84,12 +101,68 @@ class FileLoader extends StreamLoader {
     @Override
     protected boolean setupStreamAndSendStatus() {
         try {
-            if (mIsAsset) {
+            if (mType == TYPE_ASSET) {
                 try {
                     mDataStream = mContext.getAssets().open(mPath);
                 } catch (java.io.FileNotFoundException ex) {
                     // try the rest files included in the package
                     mDataStream = mContext.getAssets().openNonAsset(mPath);
+                }
+            } else if (mType == TYPE_RES) {
+                // get the resource id from the path. e.g. for the path like
+                // drawable/foo.png, the id is located at field "foo" of class
+                // "<package>.R$drawable"
+                if (mPath == null || mPath.length() == 0) {
+                    Log.e(LOGTAG, "Need a path to resolve the res file");
+                    mHandler.error(EventHandler.FILE_ERROR, mContext
+                            .getString(R.string.httpErrorFileNotFound));
+                    return false;
+
+                }
+                int slash = mPath.indexOf('/');
+                int dot = mPath.indexOf('.', slash);
+                if (slash == -1 || dot == -1) {
+                    Log.e(LOGTAG, "Incorrect res path: " + mPath);
+                    mHandler.error(EventHandler.FILE_ERROR, mContext
+                            .getString(R.string.httpErrorFileNotFound));
+                    return false;
+                }
+                String subClassName = mPath.substring(0, slash);
+                String fieldName = mPath.substring(slash + 1, dot);
+                String errorMsg = null;
+                try {
+                    final Class<?> d = mContext.getApplicationContext()
+                            .getClassLoader().loadClass(
+                                    mContext.getPackageName() + ".R$"
+                                            + subClassName);
+                    final Field field = d.getField(fieldName);
+                    final int id = field.getInt(null);
+                    TypedValue value = new TypedValue();
+                    mContext.getResources().getValue(id, value, true);
+                    if (value.type == TypedValue.TYPE_STRING) {
+                        mDataStream = mContext.getAssets().openNonAsset(
+                                value.assetCookie, value.string.toString(),
+                                AssetManager.ACCESS_STREAMING);
+                    } else {
+                        errorMsg = "Only support TYPE_STRING for the res files";
+                    }
+                } catch (ClassNotFoundException e) {
+                    errorMsg = "Can't find class:  "
+                            + mContext.getPackageName() + ".R$" + subClassName;
+                } catch (SecurityException e) {
+                    errorMsg = "Caught SecurityException: " + e;
+                } catch (NoSuchFieldException e) {
+                    errorMsg = "Can't find field:  " + fieldName + " in "
+                            + mContext.getPackageName() + ".R$" + subClassName;
+                } catch (IllegalArgumentException e) {
+                    errorMsg = "Caught IllegalArgumentException: " + e;
+                } catch (IllegalAccessException e) {
+                    errorMsg = "Caught IllegalAccessException: " + e;
+                }
+                if (errorMsg != null) {
+                    mHandler.error(EventHandler.FILE_ERROR, mContext
+                            .getString(R.string.httpErrorFileNotFound));
+                    return false;
                 }
             } else {
                 if (!mAllowFileAccess) {
@@ -131,8 +204,8 @@ class FileLoader extends StreamLoader {
      *                        file system.
      */
     public static void requestUrl(String url, LoadListener loadListener,
-            Context context, boolean asset, boolean allowFileAccess) {
-        FileLoader loader = new FileLoader(url, loadListener, context, asset,
+            Context context, int type, boolean allowFileAccess) {
+        FileLoader loader = new FileLoader(url, loadListener, context, type,
                 allowFileAccess);
         loader.load();
     }
