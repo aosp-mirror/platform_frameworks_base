@@ -62,7 +62,8 @@ public class ExifInterface {
     static {
         System.loadLibrary("exif");
         sFormatter = new SimpleDateFormat("yyyy:MM:dd HH:mm:ss");
-        sFormatter.setTimeZone(TimeZone.getTimeZone("UTC"));
+        //TODO: uncomment this when our EXIF datetime is encoded as UTC
+        //sFormatter.setTimeZone(TimeZone.getTimeZone("UTC"));
     }
 
     private String mFilename;
