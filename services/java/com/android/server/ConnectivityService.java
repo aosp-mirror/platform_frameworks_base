@@ -56,9 +56,6 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     private static final boolean DBG = true;
     private static final String TAG = "ConnectivityService";
 
-    // Event log tags (must be in sync with event-log-tags)
-    private static final int EVENTLOG_CONNECTIVITY_STATE_CHANGED = 50020;
-
     // how long to wait before switching back to a radio's default network
     private static final int RESTORE_DEFAULT_NETWORK_DELAY = 1 * 60 * 1000;
     // system property that can override the above value
@@ -1235,7 +1232,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                     int eventLogParam = (info.getType() & 0x7) |
                             ((info.getDetailedState().ordinal() & 0x3f) << 3) |
                             (info.getSubtype() << 9);
-                    EventLog.writeEvent(EVENTLOG_CONNECTIVITY_STATE_CHANGED,
+                    EventLog.writeEvent(EventLogTags.CONNECTIVITY_STATE_CHANGED,
                             eventLogParam);
 
                     if (info.getDetailedState() ==

@@ -99,22 +99,6 @@ class BackupManagerService extends IBackupManager.Stub {
     private static final int MSG_RUN_CLEAR = 4;
     private static final int MSG_RUN_INITIALIZE = 5;
 
-    // Event tags -- see system/core/logcat/event-log-tags
-    private static final int BACKUP_DATA_CHANGED_EVENT = 2820;
-    private static final int BACKUP_START_EVENT = 2821;
-    private static final int BACKUP_TRANSPORT_FAILURE_EVENT = 2822;
-    private static final int BACKUP_AGENT_FAILURE_EVENT = 2823;
-    private static final int BACKUP_PACKAGE_EVENT = 2824;
-    private static final int BACKUP_SUCCESS_EVENT = 2825;
-    private static final int BACKUP_RESET_EVENT = 2826;
-    private static final int BACKUP_INITIALIZE_EVENT = 2827;
-
-    private static final int RESTORE_START_EVENT = 2830;
-    private static final int RESTORE_TRANSPORT_FAILURE_EVENT = 2831;
-    private static final int RESTORE_AGENT_FAILURE_EVENT = 2832;
-    private static final int RESTORE_PACKAGE_EVENT = 2833;
-    private static final int RESTORE_SUCCESS_EVENT = 2834;
-
     // Timeout interval for deciding that a bind or clear-data has taken too long
     static final long TIMEOUT_INTERVAL = 10 * 1000;
 
@@ -1016,7 +1000,7 @@ class BackupManagerService extends IBackupManager.Stub {
             Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
 
             try {
-                EventLog.writeEvent(BACKUP_START_EVENT, mTransport.transportDirName());
+                EventLog.writeEvent(EventLogTags.BACKUP_START, mTransport.transportDirName());
 
                 // If we haven't stored package manager metadata yet, we must init the transport.
                 File pmState = new File(mStateDir, PACKAGE_MANAGER_SENTINEL);
@@ -1025,9 +1009,9 @@ class BackupManagerService extends IBackupManager.Stub {
                     resetBackupState(mStateDir);  // Just to make sure.
                     status = mTransport.initializeDevice();
                     if (status == BackupConstants.TRANSPORT_OK) {
-                        EventLog.writeEvent(BACKUP_INITIALIZE_EVENT);
+                        EventLog.writeEvent(EventLogTags.BACKUP_INITIALIZE);
                     } else {
-                        EventLog.writeEvent(BACKUP_TRANSPORT_FAILURE_EVENT, "(initialize)");
+                        EventLog.writeEvent(EventLogTags.BACKUP_TRANSPORT_FAILURE, "(initialize)");
                         Log.e(TAG, "Transport error in initializeDevice()");
                     }
                 }
@@ -1056,9 +1040,9 @@ class BackupManagerService extends IBackupManager.Stub {
                     status = mTransport.finishBackup();
                     if (status == BackupConstants.TRANSPORT_OK) {
                         int millis = (int) (SystemClock.elapsedRealtime() - startRealtime);
-                        EventLog.writeEvent(BACKUP_SUCCESS_EVENT, mQueue.size(), millis);
+                        EventLog.writeEvent(EventLogTags.BACKUP_SUCCESS, mQueue.size(), millis);
                     } else {
-                        EventLog.writeEvent(BACKUP_TRANSPORT_FAILURE_EVENT, "(finish)");
+                        EventLog.writeEvent(EventLogTags.BACKUP_TRANSPORT_FAILURE, "(finish)");
                         Log.e(TAG, "Transport error in finishBackup()");
                     }
                 }
@@ -1067,7 +1051,7 @@ class BackupManagerService extends IBackupManager.Stub {
                     // The backend reports that our dataset has been wiped.  We need to
                     // reset all of our bookkeeping and instead run a new backup pass for
                     // everything.  This must come after mBackupOrRestoreInProgress is cleared.
-                    EventLog.writeEvent(BACKUP_RESET_EVENT, mTransport.transportDirName());
+                    EventLog.writeEvent(EventLogTags.BACKUP_RESET, mTransport.transportDirName());
                     resetBackupState(mStateDir);
                 }
             } catch (Exception e) {
@@ -1201,7 +1185,7 @@ class BackupManagerService extends IBackupManager.Stub {
                 if (DEBUG) Log.v(TAG, "doBackup() success");
             } catch (Exception e) {
                 Log.e(TAG, "Error backing up " + packageName, e);
-                EventLog.writeEvent(BACKUP_AGENT_FAILURE_EVENT, packageName, e.toString());
+                EventLog.writeEvent(EventLogTags.BACKUP_AGENT_FAILURE, packageName, e.toString());
                 backupDataName.delete();
                 newStateName.delete();
                 return BackupConstants.TRANSPORT_ERROR;
@@ -1241,13 +1225,13 @@ class BackupManagerService extends IBackupManager.Stub {
                 if (result == BackupConstants.TRANSPORT_OK) {
                     backupDataName.delete();
                     newStateName.renameTo(savedStateName);
-                    EventLog.writeEvent(BACKUP_PACKAGE_EVENT, packageName, size);
+                    EventLog.writeEvent(EventLogTags.BACKUP_PACKAGE, packageName, size);
                 } else {
-                    EventLog.writeEvent(BACKUP_TRANSPORT_FAILURE_EVENT, packageName);
+                    EventLog.writeEvent(EventLogTags.BACKUP_TRANSPORT_FAILURE, packageName);
                 }
             } catch (Exception e) {
                 Log.e(TAG, "Transport error backing up " + packageName, e);
-                EventLog.writeEvent(BACKUP_TRANSPORT_FAILURE_EVENT, packageName);
+                EventLog.writeEvent(EventLogTags.BACKUP_TRANSPORT_FAILURE, packageName);
                 result = BackupConstants.TRANSPORT_ERROR;
             } finally {
                 try { if (backupData != null) backupData.close(); } catch (IOException e) {}
@@ -1364,7 +1348,7 @@ class BackupManagerService extends IBackupManager.Stub {
             // build the set of apps to restore
             try {
                 // TODO: Log this before getAvailableRestoreSets, somehow
-                EventLog.writeEvent(RESTORE_START_EVENT, mTransport.transportDirName(), mToken);
+                EventLog.writeEvent(EventLogTags.RESTORE_START, mTransport.transportDirName(), mToken);
 
                 // Get the list of all packages which have backup enabled.
                 // (Include the Package Manager metadata pseudo-package first.)
@@ -1391,24 +1375,24 @@ class BackupManagerService extends IBackupManager.Stub {
                 if (mTransport.startRestore(mToken, restorePackages.toArray(new PackageInfo[0])) !=
                         BackupConstants.TRANSPORT_OK) {
                     Log.e(TAG, "Error starting restore operation");
-                    EventLog.writeEvent(RESTORE_TRANSPORT_FAILURE_EVENT);
+                    EventLog.writeEvent(EventLogTags.RESTORE_TRANSPORT_FAILURE);
                     return;
                 }
 
                 String packageName = mTransport.nextRestorePackage();
                 if (packageName == null) {
                     Log.e(TAG, "Error getting first restore package");
-                    EventLog.writeEvent(RESTORE_TRANSPORT_FAILURE_EVENT);
+                    EventLog.writeEvent(EventLogTags.RESTORE_TRANSPORT_FAILURE);
                     return;
                 } else if (packageName.equals("")) {
                     Log.i(TAG, "No restore data available");
                     int millis = (int) (SystemClock.elapsedRealtime() - startRealtime);
-                    EventLog.writeEvent(RESTORE_SUCCESS_EVENT, 0, millis);
+                    EventLog.writeEvent(EventLogTags.RESTORE_SUCCESS, 0, millis);
                     return;
                 } else if (!packageName.equals(PACKAGE_MANAGER_SENTINEL)) {
                     Log.e(TAG, "Expected restore data for \"" + PACKAGE_MANAGER_SENTINEL
                           + "\", found only \"" + packageName + "\"");
-                    EventLog.writeEvent(RESTORE_AGENT_FAILURE_EVENT, PACKAGE_MANAGER_SENTINEL,
+                    EventLog.writeEvent(EventLogTags.RESTORE_AGENT_FAILURE, PACKAGE_MANAGER_SENTINEL,
                             "Package manager data missing");
                     return;
                 }
@@ -1423,7 +1407,7 @@ class BackupManagerService extends IBackupManager.Stub {
                 // the restore operation.
                 if (!pmAgent.hasMetadata()) {
                     Log.e(TAG, "No restore metadata available, so not restoring settings");
-                    EventLog.writeEvent(RESTORE_AGENT_FAILURE_EVENT, PACKAGE_MANAGER_SENTINEL,
+                    EventLog.writeEvent(EventLogTags.RESTORE_AGENT_FAILURE, PACKAGE_MANAGER_SENTINEL,
                             "Package manager restore metadata missing");
                     return;
                 }
@@ -1434,7 +1418,7 @@ class BackupManagerService extends IBackupManager.Stub {
 
                     if (packageName == null) {
                         Log.e(TAG, "Error getting next restore package");
-                        EventLog.writeEvent(RESTORE_TRANSPORT_FAILURE_EVENT);
+                        EventLog.writeEvent(EventLogTags.RESTORE_TRANSPORT_FAILURE);
                         return;
                     } else if (packageName.equals("")) {
                         break;
@@ -1452,7 +1436,7 @@ class BackupManagerService extends IBackupManager.Stub {
                     Metadata metaInfo = pmAgent.getRestoredMetadata(packageName);
                     if (metaInfo == null) {
                         Log.e(TAG, "Missing metadata for " + packageName);
-                        EventLog.writeEvent(RESTORE_AGENT_FAILURE_EVENT, packageName,
+                        EventLog.writeEvent(EventLogTags.RESTORE_AGENT_FAILURE, packageName,
                                 "Package metadata missing");
                         continue;
                     }
@@ -1463,7 +1447,7 @@ class BackupManagerService extends IBackupManager.Stub {
                         packageInfo = mPackageManager.getPackageInfo(packageName, flags);
                     } catch (NameNotFoundException e) {
                         Log.e(TAG, "Invalid package restoring data", e);
-                        EventLog.writeEvent(RESTORE_AGENT_FAILURE_EVENT, packageName,
+                        EventLog.writeEvent(EventLogTags.RESTORE_AGENT_FAILURE, packageName,
                                 "Package missing on device");
                         continue;
                     }
@@ -1472,13 +1456,13 @@ class BackupManagerService extends IBackupManager.Stub {
                         String message = "Version " + metaInfo.versionCode
                                 + " > installed version " + packageInfo.versionCode;
                         Log.w(TAG, "Package " + packageName + ": " + message);
-                        EventLog.writeEvent(RESTORE_AGENT_FAILURE_EVENT, packageName, message);
+                        EventLog.writeEvent(EventLogTags.RESTORE_AGENT_FAILURE, packageName, message);
                         continue;
                     }
 
                     if (!signaturesMatch(metaInfo.signatures, packageInfo)) {
                         Log.w(TAG, "Signature mismatch restoring " + packageName);
-                        EventLog.writeEvent(RESTORE_AGENT_FAILURE_EVENT, packageName,
+                        EventLog.writeEvent(EventLogTags.RESTORE_AGENT_FAILURE, packageName,
                                 "Signature mismatch");
                         continue;
                     }
@@ -1505,7 +1489,7 @@ class BackupManagerService extends IBackupManager.Stub {
                                     : IApplicationThread.BACKUP_MODE_RESTORE));
                     if (agent == null) {
                         Log.w(TAG, "Can't find backup agent for " + packageName);
-                        EventLog.writeEvent(RESTORE_AGENT_FAILURE_EVENT, packageName,
+                        EventLog.writeEvent(EventLogTags.RESTORE_AGENT_FAILURE, packageName,
                                 "Restore agent missing");
                         continue;
                     }
@@ -1536,7 +1520,7 @@ class BackupManagerService extends IBackupManager.Stub {
                 // if we get this far, report success to the observer
                 error = 0;
                 int millis = (int) (SystemClock.elapsedRealtime() - startRealtime);
-                EventLog.writeEvent(RESTORE_SUCCESS_EVENT, count, millis);
+                EventLog.writeEvent(EventLogTags.RESTORE_SUCCESS, count, millis);
             } catch (Exception e) {
                 Log.e(TAG, "Error in restore thread", e);
             } finally {
@@ -1594,7 +1578,7 @@ class BackupManagerService extends IBackupManager.Stub {
 
                 if (mTransport.getRestoreData(backupData) != BackupConstants.TRANSPORT_OK) {
                     Log.e(TAG, "Error getting restore data for " + packageName);
-                    EventLog.writeEvent(RESTORE_TRANSPORT_FAILURE_EVENT);
+                    EventLog.writeEvent(EventLogTags.RESTORE_TRANSPORT_FAILURE);
                     return;
                 }
 
@@ -1627,10 +1611,10 @@ class BackupManagerService extends IBackupManager.Stub {
                 //newStateName.renameTo(savedStateName);    // TODO: replace with this
 
                 int size = (int) backupDataName.length();
-                EventLog.writeEvent(RESTORE_PACKAGE_EVENT, packageName, size);
+                EventLog.writeEvent(EventLogTags.RESTORE_PACKAGE, packageName, size);
             } catch (Exception e) {
                 Log.e(TAG, "Error restoring data for " + packageName, e);
-                EventLog.writeEvent(RESTORE_AGENT_FAILURE_EVENT, packageName, e.toString());
+                EventLog.writeEvent(EventLogTags.RESTORE_AGENT_FAILURE, packageName, e.toString());
 
                 // If the agent fails restore, it might have put the app's data
                 // into an incoherent state.  For consistency we wipe its data
@@ -1702,7 +1686,7 @@ class BackupManagerService extends IBackupManager.Stub {
                     }
 
                     Log.i(TAG, "Initializing (wiping) backup transport storage: " + transportName);
-                    EventLog.writeEvent(BACKUP_START_EVENT, transport.transportDirName());
+                    EventLog.writeEvent(EventLogTags.BACKUP_START, transport.transportDirName());
                     long startRealtime = SystemClock.elapsedRealtime();
                     int status = transport.initializeDevice();
 
@@ -1714,9 +1698,9 @@ class BackupManagerService extends IBackupManager.Stub {
                     if (status == BackupConstants.TRANSPORT_OK) {
                         Log.i(TAG, "Device init successful");
                         int millis = (int) (SystemClock.elapsedRealtime() - startRealtime);
-                        EventLog.writeEvent(BACKUP_INITIALIZE_EVENT);
+                        EventLog.writeEvent(EventLogTags.BACKUP_INITIALIZE);
                         resetBackupState(new File(mBaseStateDir, transport.transportDirName()));
-                        EventLog.writeEvent(BACKUP_SUCCESS_EVENT, 0, millis);
+                        EventLog.writeEvent(EventLogTags.BACKUP_SUCCESS, 0, millis);
                         synchronized (mQueueLock) {
                             recordInitPendingLocked(false, transportName);
                         }
@@ -1724,7 +1708,7 @@ class BackupManagerService extends IBackupManager.Stub {
                         // If this didn't work, requeue this one and try again
                         // after a suitable interval
                         Log.e(TAG, "Transport error in initializeDevice()");
-                        EventLog.writeEvent(BACKUP_TRANSPORT_FAILURE_EVENT, "(initialize)");
+                        EventLog.writeEvent(EventLogTags.BACKUP_TRANSPORT_FAILURE, "(initialize)");
                         synchronized (mQueueLock) {
                             recordInitPendingLocked(true, transportName);
                         }
@@ -1757,7 +1741,7 @@ class BackupManagerService extends IBackupManager.Stub {
         // Record that we need a backup pass for the caller.  Since multiple callers
         // may share a uid, we need to note all candidates within that uid and schedule
         // a backup pass for each of them.
-        EventLog.writeEvent(BACKUP_DATA_CHANGED_EVENT, packageName);
+        EventLog.writeEvent(EventLogTags.BACKUP_DATA_CHANGED, packageName);
 
         // If the caller does not hold the BACKUP permission, it can only request a
         // backup of its own data.
@@ -2103,7 +2087,7 @@ class BackupManagerService extends IBackupManager.Stub {
                 }
                 if (mRestoreSets == null) { // valid transport; do the one-time fetch
                     mRestoreSets = mRestoreTransport.getAvailableRestoreSets();
-                    if (mRestoreSets == null) EventLog.writeEvent(RESTORE_TRANSPORT_FAILURE_EVENT);
+                    if (mRestoreSets == null) EventLog.writeEvent(EventLogTags.RESTORE_TRANSPORT_FAILURE);
                 }
                 return mRestoreSets;
             } catch (Exception e) {
