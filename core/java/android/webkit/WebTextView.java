@@ -599,7 +599,8 @@ import java.util.ArrayList;
      */
     public void setAdapterCustom(AutoCompleteAdapter adapter) {
         if (adapter != null) {
-            setInputType(EditorInfo.TYPE_TEXT_FLAG_AUTO_COMPLETE);
+            setInputType(getInputType()
+                    | EditorInfo.TYPE_TEXT_FLAG_AUTO_COMPLETE);
             adapter.setTextView(this);
         }
         super.setAdapter(adapter);
@@ -740,7 +741,7 @@ import java.util.ArrayList;
         mFromSetInputType = false;
     }
 
-    /* package */ void setMaxLength(int maxLength) {
+    private void setMaxLength(int maxLength) {
         mMaxLength = maxLength;
         if (-1 == maxLength) {
             setFilters(NO_FILTERS);
@@ -805,45 +806,6 @@ import java.util.ArrayList;
     }
 
     /**
-     * Set whether this is a single-line textfield or a multi-line textarea.
-     * Textfields scroll horizontally, and do not handle the enter key.
-     * Textareas behave oppositely.
-     * Do NOT call this after calling setInPassword(true).  This will result in
-     * removing the password input type.
-     */
-    public void setSingleLine(boolean single) {
-        int inputType = EditorInfo.TYPE_CLASS_TEXT
-                | EditorInfo.TYPE_TEXT_VARIATION_WEB_EDIT_TEXT;
-        if (single) {
-            int action = mWebView.nativeTextFieldAction();
-            switch (action) {
-            // Keep in sync with CachedRoot::ImeAction
-            case 0: // NEXT
-                setImeOptions(EditorInfo.IME_ACTION_NEXT);
-                break;
-            case 1: // GO
-                setImeOptions(EditorInfo.IME_ACTION_GO);
-                break;
-            case -1: // FAILURE
-            case 2: // DONE
-                setImeOptions(EditorInfo.IME_ACTION_DONE);
-                break;
-            case 3: // SEARCH
-                setImeOptions(EditorInfo.IME_ACTION_SEARCH);
-                break;
-            }
-        } else {
-            inputType |= EditorInfo.TYPE_TEXT_FLAG_MULTI_LINE
-                    | EditorInfo.TYPE_TEXT_FLAG_CAP_SENTENCES
-                    | EditorInfo.TYPE_TEXT_FLAG_AUTO_CORRECT;
-            setImeOptions(EditorInfo.IME_ACTION_NONE);
-        }
-        mSingle = single;
-        setHorizontallyScrolling(single);
-        setInputType(inputType);
-    }
-
-    /**
      * Set the text to the new string, but use the old selection, making sure
      * to keep it within the new string.
      * @param   text    The new text to place in the textfield.
@@ -855,6 +817,90 @@ import java.util.ArrayList;
         edit.replace(0, edit.length(), text);
         mInSetTextAndKeepSelection = false;
         updateCachedTextfield();
+    }
+
+    /**
+     * Called by WebView.rebuildWebTextView().  Based on the type of the <input>
+     * element, set up the WebTextView, its InputType, and IME Options properly.
+     * @param type int corresponding to enum "type" defined in WebView.cpp.
+     *              Does not correspond to HTMLInputElement::InputType so this
+     *              is unaffected if that changes, and also because that has no
+     *              type corresponding to textarea (which is its own tag).
+     */
+    /* package */ void setType(int type) {
+        if (mWebView == null) return;
+        boolean single = true;
+        boolean inPassword = false;
+        int maxLength = -1;
+        int inputType = EditorInfo.TYPE_CLASS_TEXT
+                | EditorInfo.TYPE_TEXT_VARIATION_WEB_EDIT_TEXT;
+        switch (type) {
+            case 1: // TEXT_AREA
+                single = false;
+                inputType |= EditorInfo.TYPE_TEXT_FLAG_MULTI_LINE
+                        | EditorInfo.TYPE_TEXT_FLAG_CAP_SENTENCES
+                        | EditorInfo.TYPE_TEXT_FLAG_AUTO_CORRECT;
+                setImeOptions(EditorInfo.IME_ACTION_NONE);
+                break;
+            case 2: // PASSWORD
+                inPassword = true;
+                break;
+            case 3: // SEARCH
+                setImeOptions(EditorInfo.IME_ACTION_SEARCH);
+                break;
+            case 4: // EMAIL
+                // TYPE_TEXT_VARIATION_WEB_EDIT_TEXT prevents EMAIL_ADDRESS
+                // from working, so exclude it for now.
+                inputType = EditorInfo.TYPE_CLASS_TEXT
+                        | EditorInfo.TYPE_TEXT_VARIATION_EMAIL_ADDRESS;
+                break;
+            case 5: // NUMBER
+                inputType = EditorInfo.TYPE_CLASS_NUMBER;
+                break;
+            case 6: // TELEPHONE
+                inputType = EditorInfo.TYPE_CLASS_PHONE;
+                break;
+            case 7: // URL
+                // TYPE_TEXT_VARIATION_WEB_EDIT_TEXT prevents URI
+                // from working, so exclude it for now.
+                inputType = EditorInfo.TYPE_CLASS_TEXT
+                        | EditorInfo.TYPE_TEXT_VARIATION_URI;
+                break;
+            default:
+                break;
+        }
+        if (single) {
+            maxLength = mWebView.nativeFocusCandidateMaxLength();
+            if (type != 2 /* PASSWORD */) {
+                String name = mWebView.nativeFocusCandidateName();
+                if (name != null && name.length() > 0) {
+                    mWebView.requestFormData(name, mNodePointer);
+                }
+            }
+            if (type != 3 /* SEARCH */) {
+                int action = mWebView.nativeTextFieldAction();
+                switch (action) {
+                    // Keep in sync with CachedRoot::ImeAction
+                    case 0: // NEXT
+                        setImeOptions(EditorInfo.IME_ACTION_NEXT);
+                        break;
+                    case 1: // GO
+                        setImeOptions(EditorInfo.IME_ACTION_GO);
+                        break;
+                    case -1: // FAILURE
+                    case 2: // DONE
+                        setImeOptions(EditorInfo.IME_ACTION_DONE);
+                        break;
+                }
+            }
+        }
+        mSingle = single;
+        setMaxLength(maxLength);
+        setHorizontallyScrolling(single);
+        setInputType(inputType);
+        setInPassword(inPassword);
+        AutoCompleteAdapter adapter = null;
+        setAdapterCustom(adapter);
     }
 
     /**
