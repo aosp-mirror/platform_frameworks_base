@@ -17,7 +17,7 @@ AACDecoder::AACDecoder(const sp<MediaSource> &source)
       mBufferGroup(NULL),
       mConfig(new tPVMP4AudioDecoderExternal),
       mDecoderBuf(NULL),
-      mLastSeekTimeUs(0),
+      mAnchorTimeUs(0),
       mNumSamplesOutput(0),
       mInputBuffer(NULL) {
 }
@@ -79,7 +79,7 @@ status_t AACDecoder::start(MetaData *params) {
 
     mSource->start();
 
-    mLastSeekTimeUs = 0;
+    mAnchorTimeUs = 0;
     mNumSamplesOutput = 0;
     mStarted = true;
 
@@ -112,13 +112,16 @@ sp<MetaData> AACDecoder::getFormat() {
 
     int32_t numChannels;
     int32_t sampleRate;
+    int64_t durationUs;
     CHECK(srcFormat->findInt32(kKeyChannelCount, &numChannels));
     CHECK(srcFormat->findInt32(kKeySampleRate, &sampleRate));
+    CHECK(srcFormat->findInt64(kKeyDuration, &durationUs));
 
     sp<MetaData> meta = new MetaData;
     meta->setCString(kKeyMIMEType, MEDIA_MIMETYPE_AUDIO_RAW);
     meta->setInt32(kKeyChannelCount, numChannels);
     meta->setInt32(kKeySampleRate, sampleRate);
+    meta->setInt64(kKeyDuration, durationUs);
 
     return meta;
 }
@@ -150,11 +153,13 @@ status_t AACDecoder::read(
             return err;
         }
 
-        if (seekTimeUs >= 0) {
-            CHECK(mInputBuffer->meta_data()->findInt64(
-                        kKeyTime, &mLastSeekTimeUs));
-
+        int64_t timeUs;
+        if (mInputBuffer->meta_data()->findInt64(kKeyTime, &timeUs)) {
+            mAnchorTimeUs = timeUs;
             mNumSamplesOutput = 0;
+        } else {
+            // We must have a new timestamp after seeking.
+            CHECK(seekTimeUs < 0);
         }
     }
 
@@ -189,7 +194,7 @@ status_t AACDecoder::read(
 
     buffer->meta_data()->setInt64(
             kKeyTime,
-            mLastSeekTimeUs
+            mAnchorTimeUs
                 + (mNumSamplesOutput * 1000000) / mConfig->samplingRate);
 
     mNumSamplesOutput += mConfig->frameLength;
