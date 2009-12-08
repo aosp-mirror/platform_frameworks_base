@@ -142,11 +142,15 @@ class FrameLoader {
         }
         if (URLUtil.isAssetUrl(url)) {
             FileLoader.requestUrl(url, loadListener, loadListener.getContext(),
-                    true, settings.getAllowFileAccess());
+                    FileLoader.TYPE_ASSET, true);
+            return true;
+        } else if (URLUtil.isResourceUrl(url)) {
+            FileLoader.requestUrl(url, loadListener, loadListener.getContext(),
+                    FileLoader.TYPE_RES, true);
             return true;
         } else if (URLUtil.isFileUrl(url)) {
             FileLoader.requestUrl(url, loadListener, loadListener.getContext(),
-                    false, settings.getAllowFileAccess());
+                    FileLoader.TYPE_FILE, settings.getAllowFileAccess());
             return true;
         } else if (URLUtil.isContentUrl(url)) {
             // Send the raw url to the ContentLoader because it will do a
