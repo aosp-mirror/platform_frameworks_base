@@ -70,7 +70,7 @@ status_t FileSource::getSize(off_t *size) {
         return OK;
     }
 
-    fseek(mFile, SEEK_END, 0);
+    fseek(mFile, 0, SEEK_END);
     *size = ftello(mFile);
 
     return OK;
