@@ -44,41 +44,50 @@ public class Sets {
         return new HashSet<K>();
     }
 
-   /**
-    * Creates a {@code HashSet} instance containing the given elements.
-    *
-    * <p><b>Note:</b> due to a bug in javac 1.5.0_06, we cannot support the
-    * following:
-    *
-    * <p>{@code Set<Base> set = Sets.newHashSet(sub1, sub2);}
-    *
-    * <p>where {@code sub1} and {@code sub2} are references to subtypes of {@code
-    * Base}, not of {@code Base} itself. To get around this, you must use:
-    *
-    * <p>{@code Set<Base> set = Sets.<Base>newHashSet(sub1, sub2);}
-    *
-    * @param elements the elements that the set should contain
-    * @return a newly-created {@code HashSet} containing those elements (minus
-    *     duplicates)
-    */
-   public static <E> HashSet<E> newHashSet(E... elements) {
-     int capacity = elements.length * 4 / 3 + 1;
-     HashSet<E> set = new HashSet<E>(capacity);
-     Collections.addAll(set, elements);
-     return set;
-   }
+    /**
+     * Creates a {@code HashSet} instance containing the given elements.
+     *
+     * <p><b>Note:</b> due to a bug in javac 1.5.0_06, we cannot support the
+     * following:
+     *
+     * <p>{@code Set<Base> set = Sets.newHashSet(sub1, sub2);}
+     *
+     * <p>where {@code sub1} and {@code sub2} are references to subtypes of {@code
+     * Base}, not of {@code Base} itself. To get around this, you must use:
+     *
+     * <p>{@code Set<Base> set = Sets.<Base>newHashSet(sub1, sub2);}
+     *
+     * @param elements the elements that the set should contain
+     * @return a newly-created {@code HashSet} containing those elements (minus
+     *     duplicates)
+     */
+    public static <E> HashSet<E> newHashSet(E... elements) {
+        int capacity = elements.length * 4 / 3 + 1;
+        HashSet<E> set = new HashSet<E>(capacity);
+        Collections.addAll(set, elements);
+        return set;
+    }
 
-   /**
-    * Creates a {@code SortedSet} instance containing the given elements.
-    *
-    * @param elements the elements that the set should contain
-    * @return a newly-created {@code SortedSet} containing those elements (minus
-    *     duplicates)
-    */
-   public static <E> SortedSet<E> newSortedSet(E... elements) {
-       SortedSet<E> set = new TreeSet<E>();
-       Collections.addAll(set, elements);
-       return set;
-     }
+    /**
+     * Creates an empty {@code SortedSet} instance.
+     *
+     * @return a newly-created, initially-empty {@code SortedSet}.
+     */
+    public static <E> SortedSet<E> newSortedSet() {
+        return new TreeSet<E>();
+    }
+
+    /**
+     * Creates a {@code SortedSet} instance containing the given elements.
+     *
+     * @param elements the elements that the set should contain
+     * @return a newly-created {@code SortedSet} containing those elements (minus
+     *     duplicates)
+     */
+    public static <E> SortedSet<E> newSortedSet(E... elements) {
+        SortedSet<E> set = new TreeSet<E>();
+        Collections.addAll(set, elements);
+        return set;
+    }
 
 }
