@@ -691,6 +691,20 @@ public final class ActivityThread {
                     if (rd != null) {
                         rd.performReceive(intent, resultCode, data, extras,
                                 ordered, sticky);
+                    } else {
+                        // The activity manager dispatched a broadcast to a registered
+                        // receiver in this process, but before it could be delivered the
+                        // receiver was unregistered.  Acknowledge the broadcast on its
+                        // behalf so that the system's broadcast sequence can continue.
+                        if (DEBUG_BROADCAST) {
+                            Log.i(TAG, "Broadcast to unregistered receiver");
+                        }
+                        IActivityManager mgr = ActivityManagerNative.getDefault();
+                        try {
+                            mgr.finishReceiver(this, resultCode, data, extras, false);
+                        } catch (RemoteException e) {
+                            Log.w(TAG, "Couldn't finish broadcast to unregistered receiver");
+                        }
                     }
                 }
             }
@@ -716,8 +730,8 @@ public final class ActivityThread {
                     BroadcastReceiver receiver = mReceiver;
                     if (DEBUG_BROADCAST) {
                         int seq = mCurIntent.getIntExtra("seq", -1);
-                        Log.i(TAG, "Dispathing broadcast " + mCurIntent.getAction() + " seq=" + seq
-                                + " to " + mReceiver);
+                        Log.i(TAG, "Dispatching broadcast " + mCurIntent.getAction()
+                                + " seq=" + seq + " to " + mReceiver);
                     }
                     if (receiver == null) {
                         return;
