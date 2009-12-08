@@ -274,7 +274,7 @@ void OMXCodec::findMatchingCodecs(
 }
 
 // static
-sp<OMXCodec> OMXCodec::Create(
+sp<MediaSource> OMXCodec::Create(
         const sp<IOMX> &omx,
         const sp<MetaData> &meta, bool createEncoder,
         const sp<MediaSource> &source,
