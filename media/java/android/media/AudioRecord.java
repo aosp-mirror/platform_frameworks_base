@@ -498,8 +498,9 @@ public class AudioRecord
 
         // start recording
         synchronized(mRecordingStateLock) {
-            native_start();
-            mRecordingState = RECORDSTATE_RECORDING;
+            if (native_start() == SUCCESS) {
+                mRecordingState = RECORDSTATE_RECORDING;
+            }
         }
     }
 
@@ -764,7 +765,7 @@ public class AudioRecord
     
     private native final void native_release();
 
-    private native final void native_start();  
+    private native final int native_start();
 
     private native final void native_stop();
 
