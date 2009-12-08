@@ -1300,7 +1300,7 @@ public class ViewDebug {
         }
     }
 
-    private static Object resolveId(Context context, int id) {
+    static Object resolveId(Context context, int id) {
         Object fieldValue;
         final Resources resources = context.getResources();
         if (id >= 0) {

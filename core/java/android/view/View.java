@@ -5961,7 +5961,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     protected void onRestoreInstanceState(Parcelable state) {
         mPrivateFlags |= SAVE_STATE_CALLED;
         if (state != BaseSavedState.EMPTY_STATE && state != null) {
-            throw new IllegalArgumentException("Wrong state class -- expecting View State");
+            throw new IllegalArgumentException("Wrong state class, expecting View State but "
+                    + "received " + state.getClass().toString() + " instead. This usually happens "
+                    + "when two views of different type have the same id in the same hierarchy. " 
+                    + "This view's id is " + ViewDebug.resolveId(mContext, getId()) + ". Make sure " 
+                    + "other views do not use the same id.");
         }
     }
 
