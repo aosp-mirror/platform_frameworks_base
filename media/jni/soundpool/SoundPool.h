@@ -186,9 +186,6 @@ private:
     SoundPool() {} // no default constructor
     bool startThreads();
     void doLoad(sp<Sample>& sample);
-    inline void notify(const SoundPoolEvent* event) {
-        android_soundpool_SoundPool_notify(mSoundPoolRef, event);
-    }
     sp<Sample> findSample(int sampleID) { return mSamples.valueFor(sampleID); }
     SoundChannel* findChannel (int channelID);
     SoundChannel* findNextChannel (int channelID);
@@ -202,7 +199,6 @@ private:
     int run();
     void quit();
 
-    jobject                 mSoundPoolRef;
     Mutex                   mLock;
     Mutex                   mRestartLock;
     Condition               mCondition;
