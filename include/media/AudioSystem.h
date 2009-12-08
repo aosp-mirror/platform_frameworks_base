@@ -282,6 +282,7 @@ public:
         FORCE_BT_SCO,
         FORCE_BT_A2DP,
         FORCE_WIRED_ACCESSORY,
+        FORCE_BT_DOCK,
         NUM_FORCE_CONFIG,
         FORCE_DEFAULT = FORCE_NONE
     };
@@ -291,6 +292,7 @@ public:
         FOR_COMMUNICATION,
         FOR_MEDIA,
         FOR_RECORD,
+        FOR_DOCK,
         NUM_FORCE_USE
     };
 
