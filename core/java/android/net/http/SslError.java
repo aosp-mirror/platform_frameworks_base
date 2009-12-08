@@ -20,8 +20,6 @@ import java.security.cert.X509Certificate;
 
 /**
  * One or more individual SSL errors and the associated SSL certificate
- * 
- * {@hide}
  */
 public class SslError {
 
