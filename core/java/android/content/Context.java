@@ -1142,7 +1142,6 @@ public abstract class Context {
      * Use with {@link #getSystemService} to retrieve a
      * {@link android.accounts.AccountManager} for receiving intents at a
      * time of your choosing.
-     * TODO STOPSHIP perform a final review of the the account apis before shipping
      *
      * @see #getSystemService
      * @see android.accounts.AccountManager

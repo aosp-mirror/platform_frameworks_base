@@ -199,6 +199,22 @@ public final class BluetoothA2dp {
         }
     }
 
+    /** Check if any A2DP sink is in Non Disconnected state
+     * i.e playing, connected, connecting, disconnecting.
+     * @return a unmodifiable set of connected A2DP sinks, or null on error.
+     * @hide
+     */
+    public Set<BluetoothDevice> getNonDisconnectedSinks() {
+        if (DBG) log("getNonDisconnectedSinks()");
+        try {
+            return Collections.unmodifiableSet(
+                    new HashSet<BluetoothDevice>(Arrays.asList(mService.getNonDisconnectedSinks())));
+        } catch (RemoteException e) {
+            Log.e(TAG, "", e);
+            return null;
+        }
+    }
+
     /** Get the state of an A2DP sink
      *  @param device Remote BT device.
      *  @return State code, one of STATE_
