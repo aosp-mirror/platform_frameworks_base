@@ -557,7 +557,7 @@ class SyncManager implements OnAccountsUpdateListener {
         intent.setAction("android.content.SyncAdapter");
         intent.setComponent(syncAdapterInfo.componentName);
         mContext.bindService(intent, new InitializerServiceConnection(account, authority),
-                Context.BIND_AUTO_CREATE);
+                Context.BIND_AUTO_CREATE | Context.BIND_NOT_FOREGROUND);
     }
 
     private class InitializerServiceConnection implements ServiceConnection {
@@ -1145,7 +1145,8 @@ class SyncManager implements OnAccountsUpdateListener {
                     com.android.internal.R.string.sync_binding_label);
             intent.putExtra(Intent.EXTRA_CLIENT_INTENT, PendingIntent.getActivity(
                     mContext, 0, new Intent(Settings.ACTION_SYNC_SETTINGS), 0));
-            return mContext.bindService(intent, this, Context.BIND_AUTO_CREATE);
+            return mContext.bindService(intent, this,
+                    Context.BIND_AUTO_CREATE | Context.BIND_NOT_FOREGROUND);
         }
 
         void unBindFromSyncAdapter() {
