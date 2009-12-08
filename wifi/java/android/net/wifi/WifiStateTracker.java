@@ -87,10 +87,17 @@ public class WifiStateTracker extends NetworkStateTracker {
     /**
      * The driver is started or stopped. The object will be the state: true for
      * started, false for stopped.
-     */ 
+     */
     private static final int EVENT_DRIVER_STATE_CHANGED              = 12;
     private static final int EVENT_PASSWORD_KEY_MAY_BE_INCORRECT     = 13;
     private static final int EVENT_MAYBE_START_SCAN_POST_DISCONNECT  = 14;
+
+    /**
+     * The driver state indication.
+     */
+    private static final int DRIVER_STARTED                          = 0;
+    private static final int DRIVER_STOPPED                          = 1;
+    private static final int DRIVER_HUNG                             = 2;
 
     /**
      * Interval in milliseconds between polling for connection
@@ -556,7 +563,7 @@ public class WifiStateTracker extends NetworkStateTracker {
         mRunState = RUN_STATE_STOPPED;
 
         // Send a driver stopped message to our handler
-        Message.obtain(this, EVENT_DRIVER_STATE_CHANGED, 0, 0).sendToTarget();
+        Message.obtain(this, EVENT_DRIVER_STATE_CHANGED, DRIVER_STOPPED, 0).sendToTarget();
     }
 
     /**
@@ -565,9 +572,17 @@ public class WifiStateTracker extends NetworkStateTracker {
      */
     void notifyDriverStarted() {
         // Send a driver started message to our handler
-        Message.obtain(this, EVENT_DRIVER_STATE_CHANGED, 1, 0).sendToTarget();
+        Message.obtain(this, EVENT_DRIVER_STATE_CHANGED, DRIVER_STARTED, 0).sendToTarget();
     }
-    
+
+    /**
+     * Send the tracker a notification that the Wi-Fi driver has hung and needs restarting.
+     */
+    void notifyDriverHung() {
+        // Send a driver hanged message to our handler
+        Message.obtain(this, EVENT_DRIVER_STATE_CHANGED, DRIVER_HUNG, 0).sendToTarget();
+    }
+
     /**
      * Set the interval timer for polling connection information
      * that is not delivered asynchronously.
@@ -1155,17 +1170,16 @@ public class WifiStateTracker extends NetworkStateTracker {
                     }
                 }
                 break;
-                
+
             case EVENT_DRIVER_STATE_CHANGED:
-                boolean driverStarted = msg.arg1 != 0;
-                
                 // Wi-Fi driver state changed:
-                // [31- 1] Reserved for future use
-                // [ 0- 0] Driver start (1) or stopped (0)   
-                eventLogParam = driverStarted ? 1 : 0;
-                EventLog.writeEvent(EVENTLOG_DRIVER_STATE_CHANGED, eventLogParam);
-                
-                if (driverStarted) {
+                // 0 STARTED
+                // 1 STOPPED
+                // 2 HUNG
+                EventLog.writeEvent(EVENTLOG_DRIVER_STATE_CHANGED, msg.arg1);
+
+                switch (msg.arg1) {
+                case DRIVER_STARTED:
                     /**
                      * Set the number of allowed radio channels according
                      * to the system setting, since it gets reset by the
@@ -1184,6 +1198,15 @@ public class WifiStateTracker extends NetworkStateTracker {
                             }
                         }
                     }
+                    break;
+                case DRIVER_HUNG:
+                    Log.e(TAG, "Wifi Driver reports HUNG - reloading.");
+                    /**
+                     * restart the driver - toggle off and on
+                     */
+                    mWM.setWifiEnabled(false);
+                    mWM.setWifiEnabled(true);
+                    break;
                 }
                 noteRunState();
                 break;
