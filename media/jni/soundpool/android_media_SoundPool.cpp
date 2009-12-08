@@ -17,7 +17,7 @@
 #include <stdio.h>
 
 //#define LOG_NDEBUG 0
-#define LOG_TAG "SoundPool"
+#define LOG_TAG "SoundPool-JNI"
 
 #include <utils/Log.h>
 #include <nativehelper/jni.h>
@@ -29,6 +29,7 @@ using namespace android;
 
 static struct fields_t {
     jfieldID    mNativeContext;
+    jmethodID   mPostEvent;
     jclass      mSoundPoolClass;
 } fields;
 
@@ -149,19 +150,29 @@ android_media_SoundPool_setRate(JNIEnv *env, jobject thiz, jint channelID,
     ap->setRate(channelID, rate);
 }
 
-static void
-android_media_SoundPool_native_setup(JNIEnv *env, jobject thiz,
-        jobject weak_this, jint maxChannels, jint streamType, jint srcQuality)
+static void android_media_callback(SoundPoolEvent event, SoundPool* soundPool, void* user)
+{
+    LOGV("callback: (%d, %d, %d, %p, %p)", event.mMsg, event.mArg1, event.mArg2, soundPool, user);
+    JNIEnv *env = AndroidRuntime::getJNIEnv();
+    env->CallStaticVoidMethod(fields.mSoundPoolClass, fields.mPostEvent, user, event.mMsg, event.mArg1, event.mArg2, NULL);
+}
+
+static jint
+android_media_SoundPool_native_setup(JNIEnv *env, jobject thiz, jobject weakRef, jint maxChannels, jint streamType, jint srcQuality)
 {
     LOGV("android_media_SoundPool_native_setup");
     SoundPool *ap = new SoundPool(maxChannels, streamType, srcQuality);
     if (ap == NULL) {
-        jniThrowException(env, "java/lang/RuntimeException", "Out of memory");
-        return;
+        return -1;
     }
 
     // save pointer to SoundPool C++ object in opaque field in Java object
     env->SetIntField(thiz, fields.mNativeContext, (int)ap);
+
+    // set callback with weak reference
+    jobject globalWeakRef = env->NewGlobalRef(weakRef);
+    ap->setCallback(android_media_callback, globalWeakRef);
+    return 0;
 }
 
 static void
@@ -170,6 +181,15 @@ android_media_SoundPool_release(JNIEnv *env, jobject thiz)
     LOGV("android_media_SoundPool_release");
     SoundPool *ap = MusterSoundPool(env, thiz);
     if (ap != NULL) {
+
+        // release weak reference
+        jobject weakRef = (jobject) ap->getUserData();
+        if (weakRef != NULL) {
+            env->DeleteGlobalRef(weakRef);
+        }
+
+        // clear callback and native context
+        ap->setCallback(NULL, NULL);
         env->SetIntField(thiz, fields.mNativeContext, 0);
         delete ap;
     }
@@ -224,7 +244,7 @@ static JNINativeMethod gMethods[] = {
         (void *)android_media_SoundPool_setRate
     },
     {   "native_setup",
-        "(Ljava/lang/Object;III)V",
+        "(Ljava/lang/Object;III)I",
         (void*)android_media_SoundPool_native_setup
     },
     {   "release",
@@ -257,6 +277,13 @@ jint JNI_OnLoad(JavaVM* vm, void* reserved)
     if (fields.mNativeContext == NULL) {
         LOGE("Can't find SoundPool.mNativeContext");
         goto bail;
+    }
+
+    fields.mPostEvent = env->GetStaticMethodID(clazz, "postEventFromNative",
+                                               "(Ljava/lang/Object;IIILjava/lang/Object;)V");
+    if (fields.mPostEvent == NULL) {
+        LOGE("Can't find android/media/SoundPool.postEventFromNative");
+        return -1;
     }
 
     if (AndroidRuntime::registerNativeMethods(env, kClassPathName, gMethods, NELEM(gMethods)) < 0)

@@ -24,8 +24,6 @@
 #include <media/AudioTrack.h>
 #include <cutils/atomic.h>
 
-#include <nativehelper/jni.h>
-
 namespace android {
 
 static const int IDLE_PRIORITY = -1;
@@ -43,10 +41,11 @@ public:
     int         mMsg;
     int         mArg1;
     int         mArg2;
+    enum MessageType { INVALID, SAMPLE_LOADED };
 };
 
-// JNI for calling back Java SoundPool object
-extern void android_soundpool_SoundPool_notify(jobject ref, const SoundPoolEvent *event);
+// callback function prototype
+typedef void SoundPoolCallback(SoundPoolEvent event, SoundPool* soundPool, void* user);
 
 // tracks samples used by application
 class Sample  : public RefBase {
@@ -62,7 +61,7 @@ public:
     size_t size() { return mSize; }
     int state() { return mState; }
     uint8_t* data() { return static_cast<uint8_t*>(mData->pointer()); }
-    void doLoad();
+    status_t doLoad();
     void startLoad() { mState = LOADING; }
     sp<IMemory> getIMemory() { return mData; }
 
@@ -182,6 +181,10 @@ public:
     // called from AudioTrack thread
     void done(SoundChannel* channel);
 
+    // callback function
+    void setCallback(SoundPoolCallback* callback, void* user);
+    void* getUserData() { return mUserData; }
+
 private:
     SoundPool() {} // no default constructor
     bool startThreads();
@@ -191,6 +194,7 @@ private:
     SoundChannel* findNextChannel (int channelID);
     SoundChannel* allocateChannel(int priority);
     void moveToFront(SoundChannel* channel);
+    void notify(SoundPoolEvent event);
     void dump();
 
     // restart thread
@@ -214,6 +218,11 @@ private:
     int                     mNextSampleID;
     int                     mNextChannelID;
     bool                    mQuit;
+
+    // callback
+    Mutex                   mCallbackLock;
+    SoundPoolCallback*      mCallback;
+    void*                   mUserData;
 };
 
 } // end namespace android

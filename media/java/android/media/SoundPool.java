@@ -26,6 +26,10 @@ import android.content.Context;
 import android.content.res.AssetFileDescriptor;
 import java.io.IOException;
 
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
+
 /**
  * The SoundPool class manages and plays audio resources for applications.
  *
@@ -103,8 +107,19 @@ public class SoundPool
     static { System.loadLibrary("soundpool"); }
 
     private final static String TAG = "SoundPool";
+    private final static boolean DEBUG = false;
 
     private int mNativeContext; // accessed by native methods
+
+    private EventHandler mEventHandler;
+    private OnLoadCompleteListener mOnLoadCompleteListener;
+
+    private final Object mLock;
+
+    // SoundPool messages
+    //
+    // must match SoundPool.h
+    private static final int SAMPLE_LOADED = 1;
 
     /**
      * Constructor. Constructs a SoundPool object with the following
@@ -120,7 +135,23 @@ public class SoundPool
      * @return a SoundPool object, or null if creation failed
      */
     public SoundPool(int maxStreams, int streamType, int srcQuality) {
-        native_setup(new WeakReference<SoundPool>(this), maxStreams, streamType, srcQuality);
+
+        // do native setup
+        if (native_setup(new WeakReference(this), maxStreams, streamType, srcQuality) != 0) {
+            throw new RuntimeException("Native setup failed");
+        }
+        mLock = new Object();
+
+        // setup message handler
+        Looper looper;
+        if ((looper = Looper.myLooper()) != null) {
+            mEventHandler = new EventHandler(this, looper);
+        } else if ((looper = Looper.getMainLooper()) != null) {
+            mEventHandler = new EventHandler(this, looper);
+        } else {
+            mEventHandler = null;
+        }
+
     }
 
     /**
@@ -145,12 +176,11 @@ public class SoundPool
                 ParcelFileDescriptor fd = ParcelFileDescriptor.open(f, ParcelFileDescriptor.MODE_READ_ONLY);
                 if (fd != null) {
                     id = _load(fd.getFileDescriptor(), 0, f.length(), priority);
-                    //Log.v(TAG, "close fd");
                     fd.close();
                 }
             }
         } catch (java.io.IOException e) {
-            Log.d(TAG, "error loading " + path);
+            Log.e(TAG, "error loading " + path);
         }
         return id;
     }
@@ -176,7 +206,6 @@ public class SoundPool
         if (afd != null) {
             id = _load(afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength(), priority);
             try {
-                //Log.v(TAG, "close fd");
                 afd.close();
             } catch (java.io.IOException ex) {
                 //Log.d(TAG, "close failed:", ex);
@@ -359,6 +388,76 @@ public class SoundPool
     public native final void setRate(int streamID, float rate);
 
     /**
+     * Interface definition for a callback to be invoked when all the
+     * sounds are loaded.
+     *
+     * @hide
+     */
+    public interface OnLoadCompleteListener
+    {
+        /**
+         * Called when a sound has completed loading.
+         *
+         * @param soundPool SoundPool object from the load() method
+         * @param soundPool the sample ID of the sound loaded.
+         * @param status the status of the load operation (0 = success)
+         */
+        public void onLoadComplete(SoundPool soundPool, int sampleId, int status);
+    }
+
+    /**
+     * Sets the callback hook for the OnLoadCompleteListener.
+     *
+     * @hide
+     */
+    public void setOnLoadCompleteListener(OnLoadCompleteListener listener)
+    {
+        synchronized(mLock) {
+            mOnLoadCompleteListener = listener;
+        }
+    }
+
+    private class EventHandler extends Handler
+    {
+        private SoundPool mSoundPool;
+
+        public EventHandler(SoundPool soundPool, Looper looper) {
+            super(looper);
+            mSoundPool = soundPool;
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            switch(msg.what) {
+            case SAMPLE_LOADED:
+                if (DEBUG) Log.d(TAG, "Sample " + msg.arg1 + " loaded");
+                synchronized(mLock) {
+                    if (mOnLoadCompleteListener != null) {
+                        mOnLoadCompleteListener.onLoadComplete(mSoundPool, msg.arg1, msg.arg2);
+                    }
+                }
+                break;
+            default:
+                Log.e(TAG, "Unknown message type " + msg.what);
+                return;
+            }
+        }
+    }
+
+    // post event from native code to message handler
+    private static void postEventFromNative(Object weakRef, int msg, int arg1, int arg2, Object obj)
+    {
+        SoundPool soundPool = (SoundPool)((WeakReference)weakRef).get();
+        if (soundPool == null)
+            return;
+
+        if (soundPool.mEventHandler != null) {
+            Message m = soundPool.mEventHandler.obtainMessage(msg, arg1, arg2, obj);
+            soundPool.mEventHandler.sendMessage(m);
+        }
+    }
+
+    /**
      * Release the SoundPool resources.
      *
      * Release all memory and native resources used by the SoundPool
@@ -367,8 +466,7 @@ public class SoundPool
      */
     public native final void release();
 
-    private native final void native_setup(Object mediaplayer_this,
-            int maxStreams, int streamType, int srcQuality);
+    private native final int native_setup(Object weakRef, int maxStreams, int streamType, int srcQuality);
 
     protected void finalize() { release(); }
 }
