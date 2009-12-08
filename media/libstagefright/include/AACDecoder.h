@@ -48,7 +48,7 @@ private:
 
     tPVMP4AudioDecoderExternal *mConfig;
     void *mDecoderBuf;
-    int64_t mLastSeekTimeUs;
+    int64_t mAnchorTimeUs;
     int64_t mNumSamplesOutput;
 
     MediaBuffer *mInputBuffer;

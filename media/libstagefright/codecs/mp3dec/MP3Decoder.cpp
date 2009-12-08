@@ -78,13 +78,16 @@ sp<MetaData> MP3Decoder::getFormat() {
 
     int32_t numChannels;
     int32_t sampleRate;
+    int64_t durationUs;
     CHECK(srcFormat->findInt32(kKeyChannelCount, &numChannels));
     CHECK(srcFormat->findInt32(kKeySampleRate, &sampleRate));
+    CHECK(srcFormat->findInt64(kKeyDuration, &durationUs));
 
     sp<MetaData> meta = new MetaData;
     meta->setCString(kKeyMIMEType, MEDIA_MIMETYPE_AUDIO_RAW);
     meta->setInt32(kKeyChannelCount, numChannels);
     meta->setInt32(kKeySampleRate, sampleRate);
+    meta->setInt64(kKeyDuration, durationUs);
 
     return meta;
 }
@@ -120,6 +123,9 @@ status_t MP3Decoder::read(
         if (mInputBuffer->meta_data()->findInt64(kKeyTime, &timeUs)) {
             mAnchorTimeUs = timeUs;
             mNumSamplesOutput = 0;
+        } else {
+            // We must have a new timestamp after seeking.
+            CHECK(seekTimeUs < 0);
         }
     }
 
