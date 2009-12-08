@@ -33,6 +33,10 @@
 
 namespace android {
 
+// Everything must match except for
+// protection, bitrate, padding, private bits and mode extension.
+static const uint32_t kMask = 0xfffe0ccf;
+
 static bool get_mp3_frame_size(
         uint32_t header, size_t *frame_size,
         int *out_sampling_rate = NULL, int *out_channels = NULL,
@@ -60,7 +64,7 @@ static bool get_mp3_frame_size(
     if (version == 0x01) {
         return false;
     }
-    
+
     unsigned layer = (header >> 17) & 3;
 
     if (layer == 0x00) {
@@ -199,13 +203,9 @@ static bool Resync(
         }
     }
 
-    // Everything must match except for
-    // protection, bitrate, padding, private bits and mode extension.
-    const uint32_t kMask = 0xfffe0ccf;
-
     const size_t kMaxFrameSize = 4096;
     uint8_t *buffer = new uint8_t[kMaxFrameSize];
-    
+
     off_t pos = *inout_pos - kMaxFrameSize;
     size_t buffer_offset = kMaxFrameSize;
     size_t buffer_length = kMaxFrameSize;
@@ -269,7 +269,7 @@ static bool Resync(
                 valid = false;
                 break;
             }
-            
+
             uint32_t test_header = U32_AT(tmp);
 
             LOGV("subsequent header is %08x", test_header);
@@ -489,8 +489,9 @@ status_t MP3Source::read(
         }
 
         uint32_t header = U32_AT((const uint8_t *)buffer->data());
-        
-        if (get_mp3_frame_size(header, &frame_size)) {
+
+        if ((header & kMask) == (mFixedHeader & kMask)
+            && get_mp3_frame_size(header, &frame_size)) {
             break;
         }
 
