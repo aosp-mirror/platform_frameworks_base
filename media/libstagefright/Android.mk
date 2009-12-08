@@ -36,6 +36,7 @@ LOCAL_SRC_FILES +=                \
         WAVExtractor.cpp          \
         string.cpp
 
+LOCAL_CFLAGS += -DBUILD_WITH_FULL_STAGEFRIGHT
 endif
 
 LOCAL_C_INCLUDES:= \
