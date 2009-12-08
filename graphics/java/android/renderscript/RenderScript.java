@@ -244,6 +244,18 @@ public class RenderScript {
         }
     }
 
+    void validate() {
+        if (mContext == 0) {
+            throw new IllegalStateException("Calling RS with no Context active.");
+        }
+    }
+
+    void validateSurface() {
+        if (mSurface == null) {
+            throw new IllegalStateException("Uploading data to GL with no surface.");
+        }
+    }
+
     public void contextSetPriority(Priority p) {
         nContextSetPriority(p.mID);
     }

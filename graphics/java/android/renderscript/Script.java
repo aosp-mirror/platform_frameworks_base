@@ -48,22 +48,27 @@ public class Script extends BaseObj {
     }
 
     public void bindAllocation(Allocation va, int slot) {
+        mRS.validate();
         mRS.nScriptBindAllocation(mID, va.mID, slot);
     }
 
     public void setClearColor(float r, float g, float b, float a) {
+        mRS.validate();
         mRS.nScriptSetClearColor(mID, r, g, b, a);
     }
 
     public void setClearDepth(float d) {
+        mRS.validate();
         mRS.nScriptSetClearDepth(mID, d);
     }
 
     public void setClearStencil(int stencil) {
+        mRS.validate();
         mRS.nScriptSetClearStencil(mID, stencil);
     }
 
     public void setTimeZone(String timeZone) {
+        mRS.validate();
         try {
             mRS.nScriptSetTimeZone(mID, timeZone.getBytes("UTF-8"));
         } catch (java.io.UnsupportedEncodingException e) {
