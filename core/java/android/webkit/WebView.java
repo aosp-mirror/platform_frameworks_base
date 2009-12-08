@@ -3205,6 +3205,8 @@ public class WebView extends AbsoluteLayout
         // Note that sendOurVisibleRect calls viewToContent, so the coordinates
         // should be in content coordinates.
         Rect bounds = nativeFocusCandidateNodeBounds();
+        Rect vBox = contentToViewRect(bounds);
+        mWebTextView.setRect(vBox.left, vBox.top, vBox.width(), vBox.height());
         if (!Rect.intersects(bounds, visibleRect)) {
             mWebTextView.bringIntoView();
         }
@@ -3215,25 +3217,14 @@ public class WebView extends AbsoluteLayout
             // i.e. In the case of opening/closing the screen.
             // In that case, we need to set the dimensions, but not the other
             // aspects.
-            // We also need to restore the selection, which gets wrecked by
-            // calling setTextEntryRect.
-            Spannable spannable = (Spannable) mWebTextView.getText();
-            int start = Selection.getSelectionStart(spannable);
-            int end = Selection.getSelectionEnd(spannable);
             // If the text has been changed by webkit, update it.  However, if
             // there has been more UI text input, ignore it.  We will receive
             // another update when that text is recognized.
-            if (text != null && !text.equals(spannable.toString())
+            if (text != null && !text.equals(mWebTextView.getText().toString())
                     && nativeTextGeneration() == mTextGeneration) {
                 mWebTextView.setTextAndKeepSelection(text);
-            } else {
-                // FIXME: Determine whether this is necessary.
-                Selection.setSelection(spannable, start, end);
             }
         } else {
-            Rect vBox = contentToViewRect(bounds);
-            mWebTextView.setRect(vBox.left, vBox.top, vBox.width(),
-                    vBox.height());
             mWebTextView.setGravity(nativeFocusCandidateIsRtlText() ?
                     Gravity.RIGHT : Gravity.NO_GRAVITY);
             // This needs to be called before setType, which may call
@@ -3247,8 +3238,8 @@ public class WebView extends AbsoluteLayout
                 text = "";
             }
             mWebTextView.setTextAndKeepSelection(text);
-            mWebTextView.requestFocus();
         }
+        mWebTextView.requestFocus();
     }
 
     /**
