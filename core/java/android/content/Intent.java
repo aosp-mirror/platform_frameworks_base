@@ -540,10 +540,33 @@ import java.util.Set;
  * {@link #putExtra}.
  *
  * <ul>
- *     <li> {@link #EXTRA_TEMPLATE}
+ *     <li> {@link #EXTRA_ALARM_COUNT}
+ *     <li> {@link #EXTRA_BCC}
+ *     <li> {@link #EXTRA_CC}
+ *     <li> {@link #EXTRA_CHANGED_COMPONENT_NAME}
+ *     <li> {@link #EXTRA_DATA_REMOVED}
+ *     <li> {@link #EXTRA_DOCK_STATE}
+ *     <li> {@link #EXTRA_DOCK_STATE_CAR}
+ *     <li> {@link #EXTRA_DOCK_STATE_DESK}
+ *     <li> {@link #EXTRA_DOCK_STATE_UNDOCKED}
+ *     <li> {@link #EXTRA_DONT_KILL_APP}
+ *     <li> {@link #EXTRA_EMAIL}
+ *     <li> {@link #EXTRA_INITIAL_INTENTS}
  *     <li> {@link #EXTRA_INTENT}
+ *     <li> {@link #EXTRA_KEY_EVENT}
+ *     <li> {@link #EXTRA_PHONE_NUMBER}
+ *     <li> {@link #EXTRA_REMOTE_INTENT_TOKEN}
+ *     <li> {@link #EXTRA_REPLACING}
+ *     <li> {@link #EXTRA_SHORTCUT_ICON}
+ *     <li> {@link #EXTRA_SHORTCUT_ICON_RESOURCE}
+ *     <li> {@link #EXTRA_SHORTCUT_INTENT}
  *     <li> {@link #EXTRA_STREAM}
+ *     <li> {@link #EXTRA_SHORTCUT_NAME}
+ *     <li> {@link #EXTRA_SUBJECT}
+ *     <li> {@link #EXTRA_TEMPLATE}
  *     <li> {@link #EXTRA_TEXT}
+ *     <li> {@link #EXTRA_TITLE}
+ *     <li> {@link #EXTRA_UID}
  * </ul>
  *
  * <h3>Flags</h3>
