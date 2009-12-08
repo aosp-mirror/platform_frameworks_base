@@ -19,6 +19,8 @@
 
 package android.opengl;
 
+import java.nio.Buffer;
+
 public class GLES11Ext {
     public static final int GL_BLEND_EQUATION_RGB_OES                               = 0x8009;
     public static final int GL_BLEND_EQUATION_ALPHA_OES                             = 0x883D;
@@ -129,6 +131,12 @@ public class GLES11Ext {
 	    _nativeClassInit();
     }
     
+    private static final int GL_BYTE = GLES10.GL_BYTE;
+    private static final int GL_FIXED = GLES10.GL_FIXED;
+    private static final int GL_FLOAT = GLES10.GL_FLOAT;
+    private static final int GL_SHORT = GLES10.GL_SHORT;
+    
+    private static Buffer _matrixIndexPointerOES;
     // C function void glBlendEquationSeparateOES ( GLenum modeRGB, GLenum modeAlpha )
 
     public static native void glBlendEquationSeparateOES(
@@ -866,21 +874,63 @@ public class GLES11Ext {
 
     // C function void glMatrixIndexPointerOES ( GLint size, GLenum type, GLsizei stride, const GLvoid *pointer )
 
-    public static native void glMatrixIndexPointerOES(
+    private static native void glMatrixIndexPointerOESBounds(
+        int size,
+        int type,
+        int stride,
+        java.nio.Buffer pointer,
+        int remaining
+    );
+
+    public static void glMatrixIndexPointerOES(
         int size,
         int type,
         int stride,
         java.nio.Buffer pointer
-    );
+    ) {
+        glMatrixIndexPointerOESBounds(
+            size,
+            type,
+            stride,
+            pointer,
+            pointer.remaining()
+        );
+        if (((size == 2) ||
+             (size == 3) ||
+             (size == 4)) &&
+            ((type == GL_FLOAT) ||
+             (type == GL_BYTE) ||
+             (type == GL_SHORT) ||
+             (type == GL_FIXED)) &&
+            (stride >= 0)) {
+            _matrixIndexPointerOES = pointer;
+        }
+    }
 
     // C function void glWeightPointerOES ( GLint size, GLenum type, GLsizei stride, const GLvoid *pointer )
 
-    public static native void glWeightPointerOES(
+    private static native void glWeightPointerOESBounds(
+        int size,
+        int type,
+        int stride,
+        java.nio.Buffer pointer,
+        int remaining
+    );
+
+    public static void glWeightPointerOES(
         int size,
         int type,
         int stride,
         java.nio.Buffer pointer
-    );
+    ) {
+        glWeightPointerOESBounds(
+            size,
+            type,
+            stride,
+            pointer,
+            pointer.remaining()
+        );
+    }
 
     // C function void glDepthRangefOES ( GLclampf zNear, GLclampf zFar )
 

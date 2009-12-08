@@ -18,6 +18,8 @@
 
 package android.opengl;
 
+import java.nio.Buffer;
+
 public class GLES11Ext {
     public static final int GL_BLEND_EQUATION_RGB_OES                               = 0x8009;
     public static final int GL_BLEND_EQUATION_ALPHA_OES                             = 0x883D;
@@ -128,3 +130,9 @@ public class GLES11Ext {
 	    _nativeClassInit();
     }
     
+    private static final int GL_BYTE = GLES10.GL_BYTE;
+    private static final int GL_FIXED = GLES10.GL_FIXED;
+    private static final int GL_FLOAT = GLES10.GL_FLOAT;
+    private static final int GL_SHORT = GLES10.GL_SHORT;
+    
+    private static Buffer _matrixIndexPointerOES;

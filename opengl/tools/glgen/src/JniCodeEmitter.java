@@ -119,10 +119,15 @@ public class JniCodeEmitter {
         emitFunction(jfunc, out, false, false);
     }
 
+    boolean isPointerFunc(JFunc jfunc) {
+        String name = jfunc.getName();
+        return (name.endsWith("Pointer") || name.endsWith("PointerOES"))
+            && jfunc.getCFunc().hasPointerArg();
+    }
+
     void emitFunctionCall(JFunc jfunc, PrintStream out, String iii, boolean grabArray) {
         boolean isVoid = jfunc.getType().isVoid();
-        boolean isPointerFunc = jfunc.getName().endsWith("Pointer") &&
-            jfunc.getCFunc().hasPointerArg();
+        boolean isPointerFunc = isPointerFunc(jfunc);
 
         if (!isVoid) {
             out.println(iii +
@@ -406,9 +411,7 @@ public class JniCodeEmitter {
      *   if !interfaceDecl: public <returntype> func(args) { body }
      */
     void emitFunction(JFunc jfunc, PrintStream out, boolean nativeDecl, boolean interfaceDecl) {
-        boolean isPointerFunc =
-            jfunc.getName().endsWith("Pointer") &&
-            jfunc.getCFunc().hasPointerArg();
+        boolean isPointerFunc = isPointerFunc(jfunc);
 
         if (!nativeDecl && !interfaceDecl && !isPointerFunc) {
             // If it's not a pointer function, we've already emitted it
@@ -510,6 +513,34 @@ public class JniCodeEmitter {
                     out.println(iii + "    (stride >= 0)) {");
                     out.println(iii + indent + "_vertexPointer = pointer;");
                     out.println(iii + "}");
+                } else if (fname.equals("glPointSizePointerOES")) {
+                    out.println(iii + "if (((type == GL_FLOAT) ||");
+                    out.println(iii + "     (type == GL_FIXED)) &&");
+                    out.println(iii + "    (stride >= 0)) {");
+                    out.println(iii + indent + "_pointSizePointerOES = pointer;");
+                    out.println(iii + "}");
+                } else if (fname.equals("glMatrixIndexPointerOES")) {
+                    out.println(iii + "if (((size == 2) ||");
+                    out.println(iii + "     (size == 3) ||");
+                    out.println(iii + "     (size == 4)) &&");
+                    out.println(iii + "    ((type == GL_FLOAT) ||");
+                    out.println(iii + "     (type == GL_BYTE) ||");
+                    out.println(iii + "     (type == GL_SHORT) ||");
+                    out.println(iii + "     (type == GL_FIXED)) &&");
+                    out.println(iii + "    (stride >= 0)) {");
+                    out.println(iii + indent + "_matrixIndexPointerOES = pointer;");
+                    out.println(iii + "}");
+                } else if (fname.equals("glWeightPointer")) {
+                    out.println(iii + "if (((size == 2) ||");
+                    out.println(iii + "     (size == 3) ||");
+                    out.println(iii + "     (size == 4)) &&");
+                    out.println(iii + "    ((type == GL_FLOAT) ||");
+                    out.println(iii + "     (type == GL_BYTE) ||");
+                    out.println(iii + "     (type == GL_SHORT) ||");
+                    out.println(iii + "     (type == GL_FIXED)) &&");
+                    out.println(iii + "    (stride >= 0)) {");
+                    out.println(iii + indent + "_weightPointerOES = pointer;");
+                    out.println(iii + "}");
                 }
             }
 
@@ -609,9 +640,9 @@ public class JniCodeEmitter {
         //
 
         String outName = "android_" + jfunc.getName();
-        boolean isPointerFunc = outName.endsWith("Pointer") &&
-            jfunc.getCFunc().hasPointerArg();
+        boolean isPointerFunc = isPointerFunc(jfunc);
         boolean isVBOPointerFunc = (outName.endsWith("Pointer") ||
+                outName.endsWith("PointerOES") ||
             outName.endsWith("DrawElements")) &&
             !jfunc.getCFunc().hasPointerArg();
         if (isPointerFunc) {
