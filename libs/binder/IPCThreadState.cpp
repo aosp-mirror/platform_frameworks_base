@@ -292,6 +292,7 @@ static pthread_mutex_t gTLSMutex = PTHREAD_MUTEX_INITIALIZER;
 static bool gHaveTLS = false;
 static pthread_key_t gTLS = 0;
 static bool gShutdown = false;
+static bool gDisableBackgroundScheduling = false;
 
 IPCThreadState* IPCThreadState::self()
 {
@@ -330,6 +331,11 @@ void IPCThreadState::shutdown()
         }
         gHaveTLS = false;
     }
+}
+
+void IPCThreadState::disableBackgroundScheduling(bool disable)
+{
+    gDisableBackgroundScheduling = disable;
 }
 
 sp<ProcessState> IPCThreadState::process()
@@ -386,6 +392,11 @@ void IPCThreadState::joinThreadPool(bool isMain)
 
     mOut.writeInt32(isMain ? BC_ENTER_LOOPER : BC_REGISTER_LOOPER);
     
+    // This thread may have been spawned by a thread that was in the background
+    // scheduling group, so first we will make sure it is in the default/foreground
+    // one to avoid performing an initial transaction in the background.
+    androidSetThreadSchedulingGroup(mMyThreadId, ANDROID_TGROUP_DEFAULT);
+        
     status_t result;
     do {
         int32_t cmd;
@@ -427,19 +438,13 @@ void IPCThreadState::joinThreadPool(bool isMain)
         }
         
         // After executing the command, ensure that the thread is returned to the
-        // default cgroup and priority before rejoining the pool.  This is a failsafe
-        // in case the command implementation failed to properly restore the thread's
-        // scheduling parameters upon completion.
-        int my_id;
-#ifdef HAVE_GETTID
-        my_id = gettid();
-#else
-        my_id = getpid();
-#endif
-        if (!set_sched_policy(my_id, SP_FOREGROUND)) {
-            // success; reset the priority as well
-            setpriority(PRIO_PROCESS, my_id, ANDROID_PRIORITY_NORMAL);
-        }
+        // default cgroup before rejoining the pool.  The driver takes care of
+        // restoring the priority, but doesn't do anything with cgroups so we
+        // need to take care of that here in userspace.  Note that we do make
+        // sure to go in the foreground after executing a transaction, but
+        // there are other callbacks into user code that could have changed
+        // our group so we want to make absolutely sure it is put back.
+        androidSetThreadSchedulingGroup(mMyThreadId, ANDROID_TGROUP_DEFAULT);
 
         // Let this thread exit the thread pool if it is no longer
         // needed and it is not the main process thread.
@@ -583,10 +588,10 @@ status_t IPCThreadState::clearDeathNotification(int32_t handle, BpBinder* proxy)
 }
 
 IPCThreadState::IPCThreadState()
-    : mProcess(ProcessState::self())
+    : mProcess(ProcessState::self()), mMyThreadId(androidGetTid())
 {
     pthread_setspecific(gTLS, this);
-        clearCaller();
+    clearCaller();
     mIn.setDataCapacity(256);
     mOut.setDataCapacity(256);
 }
@@ -930,6 +935,17 @@ status_t IPCThreadState::executeCommand(int32_t cmd)
             mCallingPid = tr.sender_pid;
             mCallingUid = tr.sender_euid;
             
+            bool doBackground = !gDisableBackgroundScheduling &&
+                    getpriority(PRIO_PROCESS, mMyThreadId)
+                            >= ANDROID_PRIORITY_BACKGROUND;
+            if (doBackground) {
+                // We have inherited a background priority from the caller.
+                // Ensure this thread is in the background scheduling class,
+                // since the driver won't modify scheduling classes for us.
+                androidSetThreadSchedulingGroup(mMyThreadId,
+                        ANDROID_TGROUP_BG_NONINTERACT);
+            }
+            
             //LOGI(">>>> TRANSACT from pid %d uid %d\n", mCallingPid, mCallingUid);
             
             Parcel reply;
@@ -966,6 +982,13 @@ status_t IPCThreadState::executeCommand(int32_t cmd)
             
             mCallingPid = origPid;
             mCallingUid = origUid;
+            
+            if (doBackground) {
+                // We moved to the background scheduling group to execute
+                // this transaction, so now that we are done go back in the
+                // foreground.
+                androidSetThreadSchedulingGroup(mMyThreadId, ANDROID_TGROUP_DEFAULT);
+            }
             
             IF_LOG_TRANSACTIONS() {
                 TextOutput::Bundle _b(alog);
