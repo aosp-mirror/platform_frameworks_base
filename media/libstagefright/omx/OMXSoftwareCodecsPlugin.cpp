@@ -16,7 +16,7 @@
 
 #include "OMXSoftwareCodecsPlugin.h"
 
-#include "mp3dec/MP3Decoder.h"
+#include <string.h>
 
 namespace android {
 
@@ -24,20 +24,10 @@ typedef OMX_ERRORTYPE (*ComponentFactory)(
         const OMX_CALLBACKTYPE *callbacks, OMX_PTR appData,
         OMX_COMPONENTTYPE **component);
 
-static OMX_ERRORTYPE MakeMP3Decoder(
-        const OMX_CALLBACKTYPE *callbacks, OMX_PTR appData,
-        OMX_COMPONENTTYPE **component) {
-    *component = OMXComponentBase::MakeComponent(
-            new MP3Decoder(callbacks, appData));
-
-    return OMX_ErrorNone;
-}
-
 static const struct ComponentInfo {
     const char *mName;
     ComponentFactory mFactory;
 } kComponentInfos[] = {
-    { "OMX.google.mp3dec", MakeMP3Decoder }
 };
 
 OMXSoftwareCodecsPlugin::OMXSoftwareCodecsPlugin() {
