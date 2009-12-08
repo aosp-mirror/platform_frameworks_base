@@ -24,6 +24,15 @@
 #include <GLES/gl.h>
 #include <GLES/glext.h>
 
+/* special calls implemented in Android's GLES wrapper used to more
+ * efficiently bound-check passed arrays */
+extern "C" {
+GL_API void GL_APIENTRY glMatrixIndexPointerOESBounds(GLint size, GLenum type, GLsizei stride,
+        const GLvoid *ptr, GLsizei count);
+GL_API void GL_APIENTRY glWeightPointerOESBounds(GLint size, GLenum type, GLsizei stride,
+        const GLvoid *ptr, GLsizei count);
+}
+
 static int initialized = 0;
 
 static jclass nioAccessClass;
@@ -122,6 +131,18 @@ releasePointer(JNIEnv *_env, jarray array, void *data, jboolean commit)
 					   commit ? 0 : JNI_ABORT);
 }
 
+static void *
+getDirectBufferPointer(JNIEnv *_env, jobject buffer) {
+    char* buf = (char*) _env->GetDirectBufferAddress(buffer);
+    if (buf) {
+        jint position = _env->GetIntField(buffer, positionID);
+        jint elementSizeShift = _env->GetIntField(buffer, elementSizeShiftID);
+        buf += position << elementSizeShift;
+    } else {
+        _env->ThrowNew(IAEClass, "Must use a native order direct Buffer");
+    }
+    return (void*) buf;
+}
 // --------------------------------------------------------------------------
 
 /* void glBlendEquationSeparateOES ( GLenum modeRGB, GLenum modeAlpha ) */
@@ -1771,32 +1792,62 @@ android_glGenerateMipmapOES__I
 static void
 android_glCurrentPaletteMatrixOES__I
   (JNIEnv *_env, jobject _this, jint matrixpaletteindex) {
-    _env->ThrowNew(UOEClass,
-        "glCurrentPaletteMatrixOES");
+    glCurrentPaletteMatrixOES(
+        (GLuint)matrixpaletteindex
+    );
 }
 
 /* void glLoadPaletteFromModelViewMatrixOES ( void ) */
 static void
 android_glLoadPaletteFromModelViewMatrixOES__
   (JNIEnv *_env, jobject _this) {
-    _env->ThrowNew(UOEClass,
-        "glLoadPaletteFromModelViewMatrixOES");
+    glLoadPaletteFromModelViewMatrixOES();
 }
 
 /* void glMatrixIndexPointerOES ( GLint size, GLenum type, GLsizei stride, const GLvoid *pointer ) */
 static void
-android_glMatrixIndexPointerOES__IIILjava_nio_Buffer_2
-  (JNIEnv *_env, jobject _this, jint size, jint type, jint stride, jobject pointer_buf) {
-    _env->ThrowNew(UOEClass,
-        "glMatrixIndexPointerOES");
+android_glMatrixIndexPointerOESBounds__IIILjava_nio_Buffer_2I
+  (JNIEnv *_env, jobject _this, jint size, jint type, jint stride, jobject pointer_buf, jint remaining) {
+    jarray _array = (jarray) 0;
+    jint _remaining;
+    GLvoid *pointer = (GLvoid *) 0;
+
+    if (pointer_buf) {
+        pointer = (GLvoid *) getDirectBufferPointer(_env, pointer_buf);
+        if ( ! pointer ) {
+            return;
+        }
+    }
+    glMatrixIndexPointerOESBounds(
+        (GLint)size,
+        (GLenum)type,
+        (GLsizei)stride,
+        (GLvoid *)pointer,
+        (GLsizei)remaining
+    );
 }
 
 /* void glWeightPointerOES ( GLint size, GLenum type, GLsizei stride, const GLvoid *pointer ) */
 static void
-android_glWeightPointerOES__IIILjava_nio_Buffer_2
-  (JNIEnv *_env, jobject _this, jint size, jint type, jint stride, jobject pointer_buf) {
-    _env->ThrowNew(UOEClass,
-        "glWeightPointerOES");
+android_glWeightPointerOESBounds__IIILjava_nio_Buffer_2I
+  (JNIEnv *_env, jobject _this, jint size, jint type, jint stride, jobject pointer_buf, jint remaining) {
+    jarray _array = (jarray) 0;
+    jint _remaining;
+    GLvoid *pointer = (GLvoid *) 0;
+
+    if (pointer_buf) {
+        pointer = (GLvoid *) getDirectBufferPointer(_env, pointer_buf);
+        if ( ! pointer ) {
+            return;
+        }
+    }
+    glWeightPointerOESBounds(
+        (GLint)size,
+        (GLenum)type,
+        (GLsizei)stride,
+        (GLvoid *)pointer,
+        (GLsizei)remaining
+    );
 }
 
 /* void glDepthRangefOES ( GLclampf zNear, GLclampf zFar ) */
@@ -2426,8 +2477,8 @@ static JNINativeMethod methods[] = {
 {"glGenerateMipmapOES", "(I)V", (void *) android_glGenerateMipmapOES__I },
 {"glCurrentPaletteMatrixOES", "(I)V", (void *) android_glCurrentPaletteMatrixOES__I },
 {"glLoadPaletteFromModelViewMatrixOES", "()V", (void *) android_glLoadPaletteFromModelViewMatrixOES__ },
-{"glMatrixIndexPointerOES", "(IIILjava/nio/Buffer;)V", (void *) android_glMatrixIndexPointerOES__IIILjava_nio_Buffer_2 },
-{"glWeightPointerOES", "(IIILjava/nio/Buffer;)V", (void *) android_glWeightPointerOES__IIILjava_nio_Buffer_2 },
+{"glMatrixIndexPointerOESBounds", "(IIILjava/nio/Buffer;I)V", (void *) android_glMatrixIndexPointerOESBounds__IIILjava_nio_Buffer_2I },
+{"glWeightPointerOESBounds", "(IIILjava/nio/Buffer;I)V", (void *) android_glWeightPointerOESBounds__IIILjava_nio_Buffer_2I },
 {"glDepthRangefOES", "(FF)V", (void *) android_glDepthRangefOES__FF },
 {"glFrustumfOES", "(FFFFFF)V", (void *) android_glFrustumfOES__FFFFFF },
 {"glOrthofOES", "(FFFFFF)V", (void *) android_glOrthofOES__FFFFFF },

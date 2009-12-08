@@ -149,3 +149,4 @@ public class GLES11 extends GLES10 {
 	    _nativeClassInit();
     }
 
+    private static Buffer _pointSizePointerOES;

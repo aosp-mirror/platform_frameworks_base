@@ -19,7 +19,6 @@
 package android.opengl;
 
 /** OpenGL ES 2.0
- * @hide
  */
 public class GLES20 {
     public static final int GL_ACTIVE_TEXTURE                          = 0x84E0;
