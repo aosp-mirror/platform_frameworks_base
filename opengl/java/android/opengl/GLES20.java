@@ -2,16 +2,16 @@
 **
 ** Copyright 2009, The Android Open Source Project
 **
-** Licensed under the Apache License, Version 2.0 (the "License");
-** you may not use this file except in compliance with the License.
-** You may obtain a copy of the License at
+** Licensed under the Apache License, Version 2.0 (the "License"); 
+** you may not use this file except in compliance with the License. 
+** You may obtain a copy of the License at 
 **
-**     http://www.apache.org/licenses/LICENSE-2.0
+**     http://www.apache.org/licenses/LICENSE-2.0 
 **
-** Unless required by applicable law or agreed to in writing, software
-** distributed under the License is distributed on an "AS IS" BASIS,
-** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-** See the License for the specific language governing permissions and
+** Unless required by applicable law or agreed to in writing, software 
+** distributed under the License is distributed on an "AS IS" BASIS, 
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
+** See the License for the specific language governing permissions and 
 ** limitations under the License.
 */
 
@@ -19,8 +19,7 @@
 
 package android.opengl;
 
-/** OpenGL ES 2.0. This class exposes the core OpenGL ES 2.0 APIs.
- * All the methods are static.
+/** OpenGL ES 2.0
  */
 public class GLES20 {
     public static final int GL_ACTIVE_TEXTURE                          = 0x84E0;
@@ -49,7 +48,7 @@ public class GLES20 {
     public static final int GL_SRC_ALPHA_SATURATE                      = 0x0308;
     public static final int GL_FUNC_ADD                                = 0x8006;
     public static final int GL_BLEND_EQUATION                          = 0x8009;
-    public static final int GL_BLEND_EQUATION_RGB                      = 0x8009;
+    public static final int GL_BLEND_EQUATION_RGB                      = 0x8009;   /* same as BLEND_EQUATION */
     public static final int GL_BLEND_EQUATION_ALPHA                    = 0x883D;
     public static final int GL_FUNC_SUBTRACT                           = 0x800A;
     public static final int GL_FUNC_REVERSE_SUBTRACT                   = 0x800B;
@@ -328,7 +327,7 @@ public class GLES20 {
 
     native private static void _nativeClassInit();
     static {
-        _nativeClassInit();
+	    _nativeClassInit();
     }
     // C function void glActiveTexture ( GLenum texture )
 
@@ -980,7 +979,7 @@ public class GLES20 {
     );
 
     // C function void glGetProgramInfoLog( GLuint program, GLsizei maxLength, GLsizei * length,
-     //     GLchar * infoLog);
+ 	//     GLchar * infoLog);
 
     public static native String glGetProgramInfoLog(
         int program
@@ -1020,7 +1019,7 @@ public class GLES20 {
     );
 
     // C function void glGetShaderInfoLog( GLuint shader, GLsizei maxLength, GLsizei * length,
-     //     GLchar * infoLog);
+ 	//     GLchar * infoLog);
 
     public static native String glGetShaderInfoLog(
         int shader

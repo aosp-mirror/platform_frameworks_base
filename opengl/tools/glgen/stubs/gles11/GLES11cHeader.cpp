@@ -23,6 +23,13 @@
 #include <GLES/gl.h>
 #include <GLES/glext.h>
 
+/* special calls implemented in Android's GLES wrapper used to more
+ * efficiently bound-check passed arrays */
+extern "C" {
+GL_API void GL_APIENTRY glPointSizePointerOESBounds(GLenum type, GLsizei stride,
+        const GLvoid *ptr, GLsizei count);
+}
+
 static int initialized = 0;
 
 static jclass nioAccessClass;
@@ -119,6 +126,19 @@ releasePointer(JNIEnv *_env, jarray array, void *data, jboolean commit)
 {
     _env->ReleasePrimitiveArrayCritical(array, data,
 					   commit ? 0 : JNI_ABORT);
+}
+
+static void *
+getDirectBufferPointer(JNIEnv *_env, jobject buffer) {
+    char* buf = (char*) _env->GetDirectBufferAddress(buffer);
+    if (buf) {
+        jint position = _env->GetIntField(buffer, positionID);
+        jint elementSizeShift = _env->GetIntField(buffer, elementSizeShiftID);
+        buf += position << elementSizeShift;
+    } else {
+        _env->ThrowNew(IAEClass, "Must use a native order direct Buffer");
+    }
+    return (void*) buf;
 }
 
 // --------------------------------------------------------------------------

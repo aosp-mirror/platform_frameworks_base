@@ -150,6 +150,7 @@ public class GLES11 extends GLES10 {
 	    _nativeClassInit();
     }
 
+    private static Buffer _pointSizePointerOES;
     // C function void glBindBuffer ( GLenum target, GLuint buffer )
 
     public static native void glBindBuffer(
@@ -596,11 +597,30 @@ public class GLES11 extends GLES10 {
 
     // C function void glPointSizePointerOES ( GLenum type, GLsizei stride, const GLvoid *pointer )
 
-    public static native void glPointSizePointerOES(
+    private static native void glPointSizePointerOESBounds(
+        int type,
+        int stride,
+        java.nio.Buffer pointer,
+        int remaining
+    );
+
+    public static void glPointSizePointerOES(
         int type,
         int stride,
         java.nio.Buffer pointer
-    );
+    ) {
+        glPointSizePointerOESBounds(
+            type,
+            stride,
+            pointer,
+            pointer.remaining()
+        );
+        if (((type == GL_FLOAT) ||
+             (type == GL_FIXED)) &&
+            (stride >= 0)) {
+            _pointSizePointerOES = pointer;
+        }
+    }
 
     // C function void glTexCoordPointer ( GLint size, GLenum type, GLsizei stride, GLint offset )
 

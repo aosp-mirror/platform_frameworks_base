@@ -24,6 +24,13 @@
 #include <GLES/gl.h>
 #include <GLES/glext.h>
 
+/* special calls implemented in Android's GLES wrapper used to more
+ * efficiently bound-check passed arrays */
+extern "C" {
+GL_API void GL_APIENTRY glPointSizePointerOESBounds(GLenum type, GLsizei stride,
+        const GLvoid *ptr, GLsizei count);
+}
+
 static int initialized = 0;
 
 static jclass nioAccessClass;
@@ -120,6 +127,19 @@ releasePointer(JNIEnv *_env, jarray array, void *data, jboolean commit)
 {
     _env->ReleasePrimitiveArrayCritical(array, data,
 					   commit ? 0 : JNI_ABORT);
+}
+
+static void *
+getDirectBufferPointer(JNIEnv *_env, jobject buffer) {
+    char* buf = (char*) _env->GetDirectBufferAddress(buffer);
+    if (buf) {
+        jint position = _env->GetIntField(buffer, positionID);
+        jint elementSizeShift = _env->GetIntField(buffer, elementSizeShiftID);
+        buf += position << elementSizeShift;
+    } else {
+        _env->ThrowNew(IAEClass, "Must use a native order direct Buffer");
+    }
+    return (void*) buf;
 }
 
 // --------------------------------------------------------------------------
@@ -2035,21 +2055,24 @@ exit:
 
 /* void glPointSizePointerOES ( GLenum type, GLsizei stride, const GLvoid *pointer ) */
 static void
-android_glPointSizePointerOES__IILjava_nio_Buffer_2
-  (JNIEnv *_env, jobject _this, jint type, jint stride, jobject pointer_buf) {
+android_glPointSizePointerOESBounds__IILjava_nio_Buffer_2I
+  (JNIEnv *_env, jobject _this, jint type, jint stride, jobject pointer_buf, jint remaining) {
     jarray _array = (jarray) 0;
     jint _remaining;
     GLvoid *pointer = (GLvoid *) 0;
 
-    pointer = (GLvoid *)getPointer(_env, pointer_buf, &_array, &_remaining);
-    glPointSizePointerOES(
+    if (pointer_buf) {
+        pointer = (GLvoid *) getDirectBufferPointer(_env, pointer_buf);
+        if ( ! pointer ) {
+            return;
+        }
+    }
+    glPointSizePointerOESBounds(
         (GLenum)type,
         (GLsizei)stride,
-        (GLvoid *)pointer
+        (GLvoid *)pointer,
+        (GLsizei)remaining
     );
-    if (_array) {
-        releasePointer(_env, _array, pointer, JNI_FALSE);
-    }
 }
 
 /* void glTexCoordPointer ( GLint size, GLenum type, GLsizei stride, GLint offset ) */
@@ -2454,7 +2477,7 @@ static JNINativeMethod methods[] = {
 {"glPointParameterx", "(II)V", (void *) android_glPointParameterx__II },
 {"glPointParameterxv", "(I[II)V", (void *) android_glPointParameterxv__I_3II },
 {"glPointParameterxv", "(ILjava/nio/IntBuffer;)V", (void *) android_glPointParameterxv__ILjava_nio_IntBuffer_2 },
-{"glPointSizePointerOES", "(IILjava/nio/Buffer;)V", (void *) android_glPointSizePointerOES__IILjava_nio_Buffer_2 },
+{"glPointSizePointerOESBounds", "(IILjava/nio/Buffer;I)V", (void *) android_glPointSizePointerOESBounds__IILjava_nio_Buffer_2I },
 {"glTexCoordPointer", "(IIII)V", (void *) android_glTexCoordPointer__IIII },
 {"glTexEnvi", "(III)V", (void *) android_glTexEnvi__III },
 {"glTexEnviv", "(II[II)V", (void *) android_glTexEnviv__II_3II },
