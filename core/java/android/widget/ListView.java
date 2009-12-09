@@ -1374,7 +1374,7 @@ public class ListView extends AbsListView {
             int childrenBottom = mBottom - mTop - mListPadding.bottom;
 
             int childCount = getChildCount();
-            int index;
+            int index = 0;
             int delta = 0;
 
             View sel;
