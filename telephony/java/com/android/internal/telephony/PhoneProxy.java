@@ -23,6 +23,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Handler;
 import android.os.Message;
+import android.os.SystemProperties;
 import android.preference.PreferenceManager;
 import android.telephony.CellLocation;
 import android.telephony.PhoneStateListener;
@@ -40,8 +41,6 @@ import java.util.List;
 
 public class PhoneProxy extends Handler implements Phone {
     public final static Object lockForRadioTechnologyChange = new Object();
-//    private static boolean radioTechnologyChangeGsmToCdma = false;
-//    private static boolean radioTechnologyChangeCdmaToGsm = false;
 
     private Phone mActivePhone;
     private String mOutgoingPhone;
@@ -50,12 +49,16 @@ public class PhoneProxy extends Handler implements Phone {
     private IccPhoneBookInterfaceManagerProxy mIccPhoneBookInterfaceManagerProxy;
     private PhoneSubInfoProxy mPhoneSubInfoProxy;
 
+    private boolean mResetModemOnRadioTechnologyChange = false;
+
     private static final int EVENT_RADIO_TECHNOLOGY_CHANGED = 1;
     private static final String LOG_TAG = "PHONE";
 
     //***** Class Methods
     public PhoneProxy(Phone phone) {
         mActivePhone = phone;
+        mResetModemOnRadioTechnologyChange = SystemProperties.getBoolean(
+                TelephonyProperties.PROPERTY_RESET_ON_RADIO_TECH_CHANGE, false);
         mIccSmsInterfaceManagerProxy = new IccSmsInterfaceManagerProxy(
                 phone.getIccSmsInterfaceManager());
         mIccPhoneBookInterfaceManagerProxy = new IccPhoneBookInterfaceManagerProxy(
@@ -74,12 +77,15 @@ public class PhoneProxy extends Handler implements Phone {
             mOutgoingPhone = ((PhoneBase)mActivePhone).getPhoneName();
             logd("Switching phone from " + mOutgoingPhone + "Phone to " +
                     (mOutgoingPhone.equals("GSM") ? "CDMAPhone" : "GSMPhone") );
-            boolean oldPowerState = false; //old power state to off
-            if (mCommandsInterface.getRadioState().isOn()) {
-                oldPowerState = true;
-                logd("Setting Radio Power to Off");
-                mCommandsInterface.setRadioPower(false, null);
+            boolean oldPowerState = false; // old power state to off
+            if (mResetModemOnRadioTechnologyChange) {
+                if (mCommandsInterface.getRadioState().isOn()) {
+                    oldPowerState = true;
+                    logd("Setting Radio Power to Off");
+                    mCommandsInterface.setRadioPower(false, null);
+                }
             }
+
             if(mOutgoingPhone.equals("GSM")) {
                 logd("Make a new CDMAPhone and destroy the old GSMPhone.");
 
@@ -93,8 +99,6 @@ public class PhoneProxy extends Handler implements Phone {
                 //System.gc();
 
                 mActivePhone = PhoneFactory.getCdmaPhone();
-                logd("Resetting Radio");
-                mCommandsInterface.setRadioPower(oldPowerState, null);
                 ((GSMPhone)oldPhone).removeReferences();
                 oldPhone = null;
             } else {
@@ -111,10 +115,13 @@ public class PhoneProxy extends Handler implements Phone {
                 //System.gc();
 
                 mActivePhone = PhoneFactory.getGsmPhone();
-                logd("Resetting Radio:");
-                mCommandsInterface.setRadioPower(oldPowerState, null);
                 ((CDMAPhone)oldPhone).removeReferences();
                 oldPhone = null;
+            }
+
+            if (mResetModemOnRadioTechnologyChange) {
+                logd("Resetting Radio");
+                mCommandsInterface.setRadioPower(oldPowerState, null);
             }
 
             //Set the new interfaces in the proxy's
