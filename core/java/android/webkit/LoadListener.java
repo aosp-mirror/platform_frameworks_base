@@ -376,8 +376,9 @@ class LoadListener extends Handler implements EventHandler {
             i.setDataAndType(Uri.parse(url()), mMimeType);
             ResolveInfo info = mContext.getPackageManager().resolveActivity(i,
                     PackageManager.MATCH_DEFAULT_ONLY);
-            if (info != null) {
-                // someone (other than the current activity) knows how to
+            if (info != null && !mContext.getPackageName().equals(
+                    info.activityInfo.packageName)) {
+                // someone (other than the current app) knows how to
                 // handle this mime type.
                 try {
                     mContext.startActivity(i);
