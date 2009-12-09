@@ -104,6 +104,18 @@ public abstract class Context {
      */
     public static final int BIND_DEBUG_UNBIND = 0x0002;
 
+    /**
+     * Flag for {@link #bindService}: don't allow this binding to raise
+     * the target service's process to the foreground scheduling priority.
+     * It will still be raised to the at least the same memory priority
+     * as the client (so that its process will not be killable in any
+     * situation where the client is not killable), but for CPU scheduling
+     * purposes it may be left in the background.  This only has an impact
+     * in the situation where the binding client is a foreground process
+     * and the target service is in a background process.
+     */
+    public static final int BIND_NOT_FOREGROUND = 0x0004;
+
     /** Return an AssetManager instance for your application's package. */
     public abstract AssetManager getAssets();
 
