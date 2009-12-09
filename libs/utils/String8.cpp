@@ -208,10 +208,23 @@ static char* allocFromUTF16OrUTF32(const T* in, L len)
     return getEmptyString();
 }
 
-// Note: not dealing with expanding surrogate pairs.
 static char* allocFromUTF16(const char16_t* in, size_t len)
 {
-    return allocFromUTF16OrUTF32<char16_t, size_t>(in, len);
+    if (len == 0) return getEmptyString();
+
+    const size_t bytes = utf8_length_from_utf16(in, len);
+
+    SharedBuffer* buf = SharedBuffer::alloc(bytes+1);
+    LOG_ASSERT(buf, "Unable to allocate shared buffer");
+    if (buf) {
+        char* str = (char*)buf->data();
+
+        utf16_to_utf8(in, len, str, bytes+1);
+
+        return str;
+    }
+
+    return getEmptyString();
 }
 
 static char* allocFromUTF32(const char32_t* in, size_t len)
@@ -762,6 +775,26 @@ size_t utf8_length_from_utf32(const char32_t *src, size_t src_len)
     return ret;
 }
 
+size_t utf8_length_from_utf16(const char16_t *src, size_t src_len)
+{
+    if (src == NULL || src_len == 0) {
+        return 0;
+    }
+    size_t ret = 0;
+    const char16_t* const end = src + src_len;
+    while (src < end) {
+        if ((*src & 0xFC00) == 0xD800 && (src + 1) < end
+                && (*++src & 0xFC00) == 0xDC00) {
+            // surrogate pairs are always 4 bytes.
+            ret += 4;
+            src++;
+        } else {
+            ret += android::utf32_to_utf8_bytes((char32_t) *src++);
+        }
+    }
+    return ret;
+}
+
 static int32_t utf32_at_internal(const char* cur, size_t *num_read)
 {
     const char first_char = *cur;
@@ -841,6 +874,36 @@ size_t utf32_to_utf8(const char32_t* src, size_t src_len,
     while (cur_utf32 < end_utf32 && cur < end) {
         size_t len = android::utf32_to_utf8_bytes(*cur_utf32);
         android::utf32_to_utf8((uint8_t *)cur, *cur_utf32++, len);
+        cur += len;
+    }
+    if (cur < end) {
+        *cur = '\0';
+    }
+    return cur - dst;
+}
+
+size_t utf16_to_utf8(const char16_t* src, size_t src_len,
+                     char* dst, size_t dst_len)
+{
+    if (src == NULL || src_len == 0 || dst == NULL || dst_len == 0) {
+        return 0;
+    }
+    const char16_t* cur_utf16 = src;
+    const char16_t* const end_utf16 = src + src_len;
+    char *cur = dst;
+    const char* const end = dst + dst_len;
+    while (cur_utf16 < end_utf16 && cur < end) {
+        char32_t utf32;
+        // surrogate pairs
+        if ((*cur_utf16 & 0xFC00) == 0xD800 && (cur_utf16 + 1) < end_utf16) {
+            utf32 = (*cur_utf16++ - 0xD800) << 10;
+            utf32 |= *cur_utf16++ - 0xDC00;
+            utf32 += 0x10000;
+        } else {
+            utf32 = (char32_t) *cur_utf16++;
+        }
+        size_t len = android::utf32_to_utf8_bytes(utf32);
+        android::utf32_to_utf8((uint8_t*)cur, utf32, len);
         cur += len;
     }
     if (cur < end) {
