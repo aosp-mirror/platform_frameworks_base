@@ -19,13 +19,14 @@ package com.google.android.net;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
+import android.net.TrafficStats;
 import android.net.http.AndroidHttpClient;
 import android.os.Build;
-import android.os.NetStat;
 import android.os.SystemClock;
 import android.provider.Checkin;
 import android.util.Config;
 import android.util.Log;
+import org.apache.harmony.xnet.provider.jsse.SSLClientSessionCache;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpEntityEnclosingRequest;
 import org.apache.http.HttpHost;
@@ -45,7 +46,6 @@ import org.apache.http.impl.client.EntityEnclosingRequestWrapper;
 import org.apache.http.impl.client.RequestWrapper;
 import org.apache.http.params.HttpParams;
 import org.apache.http.protocol.HttpContext;
-import org.apache.harmony.xnet.provider.jsse.SSLClientSessionCache;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -205,8 +205,8 @@ public class GoogleHttpClient implements HttpClient {
                 // to follow redirects, count each redirect as an additional round trip.
 
                 int uid = android.os.Process.myUid();
-                long startTx = NetStat.getUidTxBytes(uid);
-                long startRx = NetStat.getUidRxBytes(uid);
+                long startTx = TrafficStats.getUidTxBytes(uid);
+                long startRx = TrafficStats.getUidRxBytes(uid);
 
                 response = mClient.execute(request, context);
                 HttpEntity origEntity = response == null ? null : response.getEntity();

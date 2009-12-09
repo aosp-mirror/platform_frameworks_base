@@ -17,10 +17,10 @@
 package android.content;
 
 import android.accounts.Account;
+import android.net.TrafficStats;
 import android.os.Bundle;
-import android.os.Process;
-import android.os.NetStat;
 import android.os.IBinder;
+import android.os.Process;
 import android.os.RemoteException;
 import android.util.EventLog;
 
@@ -157,8 +157,8 @@ public abstract class AbstractThreadedSyncAdapter {
 
             SyncResult syncResult = new SyncResult();
             int uid = Process.myUid();
-            mInitialTxBytes = NetStat.getUidTxBytes(uid);
-            mInitialRxBytes = NetStat.getUidRxBytes(uid);
+            mInitialTxBytes = TrafficStats.getUidTxBytes(uid);
+            mInitialRxBytes = TrafficStats.getUidRxBytes(uid);
             ContentProviderClient provider = null;
             try {
                 provider = mContext.getContentResolver().acquireContentProviderClient(mAuthority);
@@ -175,8 +175,8 @@ public abstract class AbstractThreadedSyncAdapter {
                 if (!isCanceled()) {
                     mSyncContext.onFinished(syncResult);
                 }
-                onLogSyncDetails(NetStat.getUidTxBytes(uid) - mInitialTxBytes,
-                        NetStat.getUidRxBytes(uid) - mInitialRxBytes, syncResult);
+                onLogSyncDetails(TrafficStats.getUidTxBytes(uid) - mInitialTxBytes,
+                        TrafficStats.getUidRxBytes(uid) - mInitialRxBytes, syncResult);
                 // synchronize so that the assignment will be seen by other threads
                 // that also synchronize accesses to mSyncThread
                 synchronized (mSyncThreadLock) {
