@@ -1214,5 +1214,13 @@
 
   <public type="attr" name="author" id="0x010102b4" />
   <public type="attr" name="autoStart" id="0x010102b5" />
-  
+
+    
+<!-- ===============================================================
+     Resources added in version 8 of the platform (Eclair MR2).
+     =============================================================== -->
+  <eat-comment />
+    
+  <public type="attr" name="expandableListViewWhiteStyle" id="0x010102b6" />
+
 </resources>
