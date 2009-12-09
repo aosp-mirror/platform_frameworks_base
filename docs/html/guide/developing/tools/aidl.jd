@@ -297,9 +297,9 @@ on how to keep your application secure from malware.</p>
         as method arguments. </li>
 </ul>
 <p>Here is some sample code demonstrating calling an AIDL-created service, taken
-    from the Remote Activity sample in the ApiDemos project.</p>
-<p>{@sample development/samples/ApiDemos/src/com/example/android/apis/app/RemoteServiceBinding.java
-    exposing_a_service}</p>
+    from the Remote Service sample in the ApiDemos project.</p>
+<p>{@sample development/samples/ApiDemos/src/com/example/android/apis/app/RemoteService.java
+    calling_a_service}</p>
 
 
 
