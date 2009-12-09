@@ -949,6 +949,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
             if (ActivityManagerNative.isSystemReady()) {
                 Intent intent = new Intent(Intent.ACTION_INPUT_METHOD_CHANGED);
+                intent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING);
                 intent.putExtra("input_method_id", id);
                 mContext.sendBroadcast(intent);
             }

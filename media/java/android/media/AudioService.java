@@ -892,13 +892,13 @@ public class AudioService extends IAudioService.Stub {
 
     private void broadcastRingerMode() {
         // Send sticky broadcast
-        if (ActivityManagerNative.isSystemReady()) {
-            Intent broadcast = new Intent(AudioManager.RINGER_MODE_CHANGED_ACTION);
-            broadcast.putExtra(AudioManager.EXTRA_RINGER_MODE, mRingerMode);
-            long origCallerIdentityToken = Binder.clearCallingIdentity();
-            mContext.sendStickyBroadcast(broadcast);
-            Binder.restoreCallingIdentity(origCallerIdentityToken);
-        }
+        Intent broadcast = new Intent(AudioManager.RINGER_MODE_CHANGED_ACTION);
+        broadcast.putExtra(AudioManager.EXTRA_RINGER_MODE, mRingerMode);
+        broadcast.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT
+                | Intent.FLAG_RECEIVER_REPLACE_PENDING);
+        long origCallerIdentityToken = Binder.clearCallingIdentity();
+        mContext.sendStickyBroadcast(broadcast);
+        Binder.restoreCallingIdentity(origCallerIdentityToken);
     }
 
     private void broadcastVibrateSetting(int vibrateType) {

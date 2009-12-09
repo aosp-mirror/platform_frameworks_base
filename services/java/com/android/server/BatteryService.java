@@ -327,7 +327,8 @@ class BatteryService extends Binder {
     private final void sendIntent() {
         //  Pack up the values and broadcast them to everyone
         Intent intent = new Intent(Intent.ACTION_BATTERY_CHANGED);
-        intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
+        intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY
+                | Intent.FLAG_RECEIVER_REPLACE_PENDING);
         try {
             mBatteryStats.setOnBattery(mPlugType == BATTERY_PLUGGED_NONE, mBatteryLevel);
         } catch (RemoteException e) {

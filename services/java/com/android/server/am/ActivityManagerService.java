@@ -11844,6 +11844,12 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             // pm is in same process, this will never happen.
         }
 
+        final boolean replacePending =
+                (intent.getFlags()&Intent.FLAG_RECEIVER_REPLACE_PENDING) != 0;
+        
+        if (DEBUG_BROADCAST) Log.v(TAG, "Enqueing broadcast: " + intent.getAction()
+                + " replacePending=" + replacePending);
+        
         int NR = registeredReceivers != null ? registeredReceivers.size() : 0;
         if (!ordered && NR > 0) {
             // If we are not serializing this broadcast, then send the
@@ -11856,8 +11862,22 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             if (DEBUG_BROADCAST) Log.v(
                     TAG, "Enqueueing parallel broadcast " + r
                     + ": prev had " + mParallelBroadcasts.size());
-            mParallelBroadcasts.add(r);
-            scheduleBroadcastsLocked();
+            boolean replaced = false;
+            if (replacePending) {
+                for (int i=mParallelBroadcasts.size()-1; i>=0; i--) {
+                    if (intent.filterEquals(mParallelBroadcasts.get(i).intent)) {
+                        if (DEBUG_BROADCAST) Log.v(TAG,
+                                "***** DROPPING PARALLEL: " + intent);
+                        mParallelBroadcasts.set(i, r);
+                        replaced = true;
+                        break;
+                    }
+                }
+            }
+            if (!replaced) {
+                mParallelBroadcasts.add(r);
+                scheduleBroadcastsLocked();
+            }
             registeredReceivers = null;
             NR = 0;
         }
@@ -11940,8 +11960,22 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 int seq = r.intent.getIntExtra("seq", -1);
                 Log.i(TAG, "Enqueueing broadcast " + r.intent.getAction() + " seq=" + seq);
             }
-            mOrderedBroadcasts.add(r);
-            scheduleBroadcastsLocked();
+            boolean replaced = false;
+            if (replacePending) {
+                for (int i=mOrderedBroadcasts.size()-1; i>=0; i--) {
+                    if (intent.filterEquals(mOrderedBroadcasts.get(i).intent)) {
+                        if (DEBUG_BROADCAST) Log.v(TAG,
+                                "***** DROPPING ORDERED: " + intent);
+                        mOrderedBroadcasts.set(i, r);
+                        replaced = true;
+                        break;
+                    }
+                }
+            }
+            if (!replaced) {
+                mOrderedBroadcasts.add(r);
+                scheduleBroadcastsLocked();
+            }
         }
 
         return BROADCAST_SUCCESS;
@@ -12837,7 +12871,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                     }
                 }
                 Intent intent = new Intent(Intent.ACTION_CONFIGURATION_CHANGED);
-                intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
+                intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY
+                        | Intent.FLAG_RECEIVER_REPLACE_PENDING);
                 broadcastIntentLocked(null, null, intent, null, null, 0, null, null,
                         null, false, false, MY_PID, Process.SYSTEM_UID);
                 if ((changes&ActivityInfo.CONFIG_LOCALE) != 0) {
