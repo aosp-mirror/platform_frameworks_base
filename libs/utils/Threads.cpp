@@ -309,11 +309,13 @@ int androidSetThreadPriority(pid_t tid, int pri)
         lasterr = errno;
     }
 
+#if defined(HAVE_PTHREADS)
     if (setpriority(PRIO_PROCESS, tid, pri) < 0) {
         rc = INVALID_OPERATION;
     } else {
         errno = lasterr;
     }
+#endif
     
     return rc;
 }
