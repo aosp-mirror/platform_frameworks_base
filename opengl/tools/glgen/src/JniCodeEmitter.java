@@ -37,6 +37,12 @@ public class JniCodeEmitter {
             jniName += "L";
         } else if (baseType.equals("byte")) {
             jniName += "B";
+        } else if (baseType.equals("String")) {
+            jniName += "Ljava/lang/String;";
+        } else if (baseType.equals("void")) {
+            // nothing.
+        } else {
+            throw new RuntimeException("Uknown primitive basetype " + baseType);
         }
         return jniName;
     }
@@ -629,7 +635,7 @@ public class JniCodeEmitter {
         }
 
         // Append signature to function name
-        String sig = getJniMangledName(signature).replace('.', '_');
+        String sig = getJniMangledName(signature).replace('.', '_').replace('/', '_');
         out.print("__" + sig);
         outName += "__" + sig;
 
@@ -652,6 +658,7 @@ public class JniCodeEmitter {
         nativeRegistrations.add(s);
 
         List<Integer> nonPrimitiveArgs = new ArrayList<Integer>();
+        List<Integer> stringArgs = new ArrayList<Integer>();
         int numBufferArgs = 0;
         List<String> bufferArgNames = new ArrayList<String>();
 
@@ -682,6 +689,9 @@ public class JniCodeEmitter {
             } else {
                 suffix = "";
             }
+            if (argType.isString()) {
+                stringArgs.add(new Integer(i));
+            }
 
             out.print(getJniType(argType) + " " + jfunc.getArgName(i) + suffix);
         }
@@ -692,13 +702,18 @@ public class JniCodeEmitter {
 
         int numArrays = 0;
         int numBuffers = 0;
+        int numStrings = 0;
         for (int i = 0; i < nonPrimitiveArgs.size(); i++) {
             int idx = nonPrimitiveArgs.get(i).intValue();
-            if (jfunc.getArgType(idx).isArray()) {
+            JType argType = jfunc.getArgType(idx);
+            if (argType.isArray()) {
                 ++numArrays;
             }
-            if (jfunc.getArgType(idx).isBuffer()) {
+            if (argType.isBuffer()) {
                 ++numBuffers;
+            }
+            if (argType.isString()) {
+                ++numStrings;
             }
         }
 
@@ -736,7 +751,9 @@ public class JniCodeEmitter {
                 "android::gl::ogles_context_t *ctx = getContext(_env, _this);");
         }
 
-        boolean emitExceptionCheck = (numArrays > 0 || numBuffers > 0) &&
+        boolean initializeReturnValue = stringArgs.size() > 0;
+
+        boolean emitExceptionCheck = (numArrays > 0 || numBuffers > 0 || numStrings > 0) &&
             hasNonConstArg(jfunc, cfunc, nonPrimitiveArgs);
         // mChecker.getChecks(cfunc.getName()) != null
 
@@ -759,6 +776,9 @@ public class JniCodeEmitter {
             if (retval != null) {
                 out.println(indent + returnType.getDeclaration() +
                             " _returnValue = " + retval + ";");
+            } else if (initializeReturnValue) {
+                out.println(indent + returnType.getDeclaration() +
+                " _returnValue = 0;");
             } else {
                 out.println(indent + returnType.getDeclaration() +
                             " _returnValue;");
@@ -789,7 +809,7 @@ public class JniCodeEmitter {
                                 jfunc.getArgName(idx) +
                                 "_base = (" + decl + ") 0;");
                 }
-                remaining = (numArrays <= 1 && numBuffers <= 1) ? "_remaining" :
+                remaining = ((numArrays + numBuffers) <= 1) ? "_remaining" :
                     "_" + cname + "Remaining";
                 out.println(indent +
                             "jint " + remaining + ";");
@@ -798,6 +818,40 @@ public class JniCodeEmitter {
                             (decl.endsWith("*") ? "" : " ") +
                             jfunc.getArgName(idx) +
                             " = (" + decl + ") 0;");
+            }
+
+            out.println();
+        }
+
+        // Emit local variable declaration for strings
+        if (stringArgs.size() > 0) {
+            for (int i = 0; i < stringArgs.size(); i++) {
+                int idx = stringArgs.get(i).intValue();
+                int cIndex = jfunc.getArgCIndex(idx);
+                String cname = cfunc.getArgName(cIndex);
+
+                out.println(indent + "const char* _native" + cname + " = 0;");
+            }
+
+            out.println();
+        }
+
+        // Null pointer checks and GetStringUTFChars
+        if (stringArgs.size() > 0) {
+            for (int i = 0; i < stringArgs.size(); i++) {
+                int idx = stringArgs.get(i).intValue();
+                int cIndex = jfunc.getArgCIndex(idx);
+                String cname = cfunc.getArgName(cIndex);
+
+                CType type = cfunc.getArgType(jfunc.getArgCIndex(idx));
+                String decl = type.getDeclaration();
+                out.println(indent + "if (!" + cname + ") {");
+                out.println(indent + "    _env->ThrowNew(IAEClass, \"" + cname + " == null\");");
+                out.println(indent + "    goto exit;");
+                needsExit = true;
+                out.println(indent + "}");
+
+                out.println(indent + "_native" + cname + " = _env->GetStringUTFChars(" + cname + ", 0);");
             }
 
             out.println();
@@ -814,7 +868,7 @@ public class JniCodeEmitter {
                 String cname = cfunc.getArgName(cIndex);
                 offset = numArrays <= 1 ? "offset" :
                     cname + "Offset";
-                remaining = (numArrays <= 1 && numBuffers <= 1) ? "_remaining" :
+                remaining = ((numArrays + numBuffers) <= 1) ? "_remaining" :
                     "_" + cname + "Remaining";
 
                 if (jfunc.getArgType(idx).isArray()) {
@@ -957,8 +1011,11 @@ public class JniCodeEmitter {
                 out.print(indent + indent +
                           "(" +
                           typecast +
-                          ")" +
-                          cfunc.getArgName(i));
+                          ")");
+                if (cfunc.getArgType(i).isConstCharPointer()) {
+                    out.print("_native");
+                }
+                out.print(cfunc.getArgName(i));
 
                 if (i == numArgs - 1) {
                     if (isPointerFunc) {
@@ -1024,6 +1081,22 @@ public class JniCodeEmitter {
                 }
             }
         }
+
+        // Emit local variable declaration for strings
+        if (stringArgs.size() > 0) {
+            for (int i = 0; i < stringArgs.size(); i++) {
+                int idx = stringArgs.get(i).intValue();
+                int cIndex = jfunc.getArgCIndex(idx);
+                String cname = cfunc.getArgName(cIndex);
+
+                out.println(indent + "if (_native" + cname + ") {");
+                out.println(indent + "    _env->ReleaseStringUTFChars(" + cname + ", _native" + cname + ");");
+                out.println(indent + "}");
+            }
+
+            out.println();
+        }
+
 
         if (!isVoid) {
             out.println(indent + "return _returnValue;");
