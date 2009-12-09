@@ -130,13 +130,14 @@ private:
         virtual bool transformed() const;
         virtual void destroy() { }
     private:
+        status_t initTempBuffer() const;
         mutable Mutex                   mBufferSourceLock;
         sp<Buffer>                      mBuffer;
         status_t                        mStatus;
         ISurface::BufferHeap            mBufferHeap;
         size_t                          mBufferSize;
         mutable LayerBase::Texture      mTexture;
-        NativeBuffer                    mTempBuffer;
+        mutable NativeBuffer            mTempBuffer;
         mutable sp<GraphicBuffer>       mTempGraphicBuffer;
     };
     

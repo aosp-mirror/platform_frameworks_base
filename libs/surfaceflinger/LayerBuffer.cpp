@@ -364,43 +364,6 @@ LayerBuffer::BufferSource::BufferSource(LayerBuffer& layer,
         return;
     }
 
-    if (mLayer.mBlitEngine) {
-        // create our temporary buffer and corresponding EGLImageKHR.
-        // note that the size of this buffer doesn't really matter,
-        // the final image will always be drawn with proper aspect ratio.
-
-        int w = layer.mTransformedBounds.width();
-        int h = layer.mTransformedBounds.height();
-        if (buffers.w * h != buffers.h * w) {
-            int t = w; w = h; h = t;
-        }
-        if (buffers.w * h == buffers.h * w) {
-            // same pixel area, don't use filtering
-            layer.mUseLinearFiltering = false;
-        }
-
-        mTempGraphicBuffer.clear();
-        mTempGraphicBuffer = new GraphicBuffer(
-                w, h, HAL_PIXEL_FORMAT_RGB_565,
-                GraphicBuffer::USAGE_HW_TEXTURE |
-                GraphicBuffer::USAGE_HW_2D);
-
-        if (mTempGraphicBuffer->initCheck() == NO_ERROR) {
-            NativeBuffer& dst(mTempBuffer);
-            dst.img.w = mTempGraphicBuffer->getStride();
-            dst.img.h = h;
-            dst.img.format = mTempGraphicBuffer->getPixelFormat();
-            dst.img.handle = (native_handle_t *)mTempGraphicBuffer->handle;
-            dst.img.base = 0;
-            dst.crop.l = 0;
-            dst.crop.t = 0;
-            dst.crop.r = w;
-            dst.crop.b = h;
-        } else {
-            mTempGraphicBuffer.clear();
-        }
-    }
-
     mBufferHeap = buffers;
     mLayer.setNeedsBlending((info.h_alpha - info.l_alpha) > 0);    
     mBufferSize = info.getScanlineSize(buffers.hor_stride)*buffers.ver_stride;
@@ -492,18 +455,7 @@ void LayerBuffer::BufferSource::onDraw(const Region& clip) const
         copybit_device_t* copybit = mLayer.mBlitEngine;
         if (copybit) {
             // create our EGLImageKHR the first time
-            if (mTexture.image == EGL_NO_IMAGE_KHR) {
-                err = NO_MEMORY;
-                if (mTempGraphicBuffer!=0) {
-                    err = mLayer.initializeEglImage(
-                            mTempGraphicBuffer, &mTexture);
-                    // once the EGLImage has been created (whether it fails
-                    // or not) we don't need the graphic buffer reference
-                    // anymore.
-                    mTempGraphicBuffer.clear();
-                }
-            }
-
+            err = initTempBuffer();
             if (err == NO_ERROR) {
                 // NOTE: Assume the buffer is allocated with the proper USAGE flags
                 const NativeBuffer& dst(mTempBuffer);
@@ -540,6 +492,72 @@ void LayerBuffer::BufferSource::onDraw(const Region& clip) const
 
     mTexture.transform = mBufferHeap.transform;
     mLayer.drawWithOpenGL(clip, mTexture);
+}
+
+status_t LayerBuffer::BufferSource::initTempBuffer() const
+{
+    // figure out the size we need now
+    const ISurface::BufferHeap& buffers(mBufferHeap);
+    uint32_t w = mLayer.mTransformedBounds.width();
+    uint32_t h = mLayer.mTransformedBounds.height();
+    if (buffers.w * h != buffers.h * w) {
+        int t = w; w = h; h = t;
+    }
+
+    if (mTexture.image != EGL_NO_IMAGE_KHR) {
+        // we have an EGLImage, make sure the needed size didn't change
+        if (w!=mTexture.width || h!= mTexture.height) {
+            // delete the EGLImage and texture
+            EGLDisplay dpy(mLayer.mFlinger->graphicPlane(0).getEGLDisplay());
+            glDeleteTextures(1, &mTexture.name);
+            eglDestroyImageKHR(dpy, mTexture.image);
+            Texture defaultTexture;
+            mTexture = defaultTexture;
+            mTempGraphicBuffer.clear();
+        } else {
+            // we're good, we have an EGLImageKHR and it's (still) the
+            // right size
+            return NO_ERROR;
+        }
+    }
+
+    // figure out if we need linear filtering
+    if (buffers.w * h == buffers.h * w) {
+        // same pixel area, don't use filtering
+        mLayer.mUseLinearFiltering = false;
+    }
+
+    // Allocate a temporary buffer and create the corresponding EGLImageKHR
+
+    status_t err;
+    mTempGraphicBuffer.clear();
+    mTempGraphicBuffer = new GraphicBuffer(
+            w, h, HAL_PIXEL_FORMAT_RGB_565,
+            GraphicBuffer::USAGE_HW_TEXTURE |
+            GraphicBuffer::USAGE_HW_2D);
+
+    err = mTempGraphicBuffer->initCheck();
+    if (err == NO_ERROR) {
+        NativeBuffer& dst(mTempBuffer);
+        dst.img.w = mTempGraphicBuffer->getStride();
+        dst.img.h = h;
+        dst.img.format = mTempGraphicBuffer->getPixelFormat();
+        dst.img.handle = (native_handle_t *)mTempGraphicBuffer->handle;
+        dst.img.base = 0;
+        dst.crop.l = 0;
+        dst.crop.t = 0;
+        dst.crop.r = w;
+        dst.crop.b = h;
+
+        err = mLayer.initializeEglImage(
+                mTempGraphicBuffer, &mTexture);
+        // once the EGLImage has been created (whether it fails
+        // or not) we don't need the graphic buffer reference
+        // anymore.
+        mTempGraphicBuffer.clear();
+    }
+
+    return err;
 }
 
 // ---------------------------------------------------------------------------
