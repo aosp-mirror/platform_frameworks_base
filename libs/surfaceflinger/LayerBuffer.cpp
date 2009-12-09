@@ -120,9 +120,7 @@ uint32_t LayerBuffer::doTransaction(uint32_t flags)
         source->onTransaction(flags);
     uint32_t res = LayerBase::doTransaction(flags);
     // we always want filtering for these surfaces
-    if (!(mFlags & DisplayHardware::SLOW_CONFIG)) {
-        mUseLinearFiltering = true;
-    }
+    mUseLinearFiltering = !(mFlags & DisplayHardware::SLOW_CONFIG);
     return res;
 }
 
@@ -371,25 +369,33 @@ LayerBuffer::BufferSource::BufferSource(LayerBuffer& layer,
         // note that the size of this buffer doesn't really matter,
         // the final image will always be drawn with proper aspect ratio.
 
-        int w = buffers.w;
-        int h = buffers.h;
+        int w = layer.mTransformedBounds.width();
+        int h = layer.mTransformedBounds.height();
+        if (buffers.w * h != buffers.h * w) {
+            int t = w; w = h; h = t;
+        }
+        if (buffers.w * h == buffers.h * w) {
+            // same pixel area, don't use filtering
+            layer.mUseLinearFiltering = false;
+        }
+
         mTempGraphicBuffer.clear();
         mTempGraphicBuffer = new GraphicBuffer(
-                w, h, HAL_PIXEL_FORMAT_RGBX_8888,
+                w, h, HAL_PIXEL_FORMAT_RGB_565,
                 GraphicBuffer::USAGE_HW_TEXTURE |
                 GraphicBuffer::USAGE_HW_2D);
 
         if (mTempGraphicBuffer->initCheck() == NO_ERROR) {
             NativeBuffer& dst(mTempBuffer);
             dst.img.w = mTempGraphicBuffer->getStride();
-            dst.img.h = mTempGraphicBuffer->getHeight();
+            dst.img.h = h;
             dst.img.format = mTempGraphicBuffer->getPixelFormat();
             dst.img.handle = (native_handle_t *)mTempGraphicBuffer->handle;
             dst.img.base = 0;
             dst.crop.l = 0;
             dst.crop.t = 0;
-            dst.crop.r = mTempGraphicBuffer->getWidth();
-            dst.crop.b = mTempGraphicBuffer->getHeight();
+            dst.crop.r = w;
+            dst.crop.b = h;
         } else {
             mTempGraphicBuffer.clear();
         }
