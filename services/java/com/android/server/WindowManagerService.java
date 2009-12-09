@@ -6014,7 +6014,9 @@ public class WindowManagerService extends IWindowManager.Stub
                 
                 if (res != null && returnWhat == RETURN_PENDING_POINTER) {
                     synchronized (mWindowMap) {
-                        if (mWallpaperTarget == win || mSendingPointersToWallpaper) {
+                        if ((mWallpaperTarget == win &&
+                                win.mAttrs.type != WindowManager.LayoutParams.TYPE_KEYGUARD)
+                                || mSendingPointersToWallpaper) {
                             sendPointerToWallpaperLocked(win, res, res.getEventTime());
                         }
                     }
