@@ -35,6 +35,12 @@ GL_API void GL_APIENTRY glTexCoordPointerBounds(GLint size, GLenum type,
         GLsizei stride, const GLvoid *pointer, GLsizei count);
 GL_API void GL_APIENTRY glVertexPointerBounds(GLint size, GLenum type,
         GLsizei stride, const GLvoid *pointer, GLsizei count);
+GL_API void GL_APIENTRY glPointSizePointerOESBounds(GLenum type,
+        GLsizei stride, const GLvoid *pointer, GLsizei count);
+GL_API void GL_APIENTRY glMatrixIndexPointerOESBounds(GLint size, GLenum type,
+        GLsizei stride, const GLvoid *pointer, GLsizei count);
+GL_API void GL_APIENTRY glWeightPointerOESBounds(GLint size, GLenum type,
+        GLsizei stride, const GLvoid *pointer, GLsizei count);
 }
 
 static int initialized = 0;
@@ -5391,21 +5397,24 @@ exit:
 
 /* void glPointSizePointerOES ( GLenum type, GLsizei stride, const GLvoid *pointer ) */
 static void
-android_glPointSizePointerOES__IILjava_nio_Buffer_2
-  (JNIEnv *_env, jobject _this, jint type, jint stride, jobject pointer_buf) {
+android_glPointSizePointerOESBounds__IILjava_nio_Buffer_2I
+  (JNIEnv *_env, jobject _this, jint type, jint stride, jobject pointer_buf, jint remaining) {
     jarray _array = (jarray) 0;
     jint _remaining;
     GLvoid *pointer = (GLvoid *) 0;
 
-    pointer = (GLvoid *)getPointer(_env, pointer_buf, &_array, &_remaining);
-    glPointSizePointerOES(
+    if (pointer_buf) {
+        pointer = (GLvoid *) getDirectBufferPointer(_env, pointer_buf);
+        if ( ! pointer ) {
+            return;
+        }
+    }
+    glPointSizePointerOESBounds(
         (GLenum)type,
         (GLsizei)stride,
-        (GLvoid *)pointer
+        (GLvoid *)pointer,
+        (GLsizei)remaining
     );
-    if (_array) {
-        releasePointer(_env, _array, pointer, JNI_FALSE);
-    }
 }
 
 /* void glTexCoordPointer ( GLint size, GLenum type, GLsizei stride, GLint offset ) */
@@ -5754,8 +5763,9 @@ android_glVertexPointer__IIII
 static void
 android_glCurrentPaletteMatrixOES__I
   (JNIEnv *_env, jobject _this, jint matrixpaletteindex) {
-    _env->ThrowNew(UOEClass,
-        "glCurrentPaletteMatrixOES");
+    glCurrentPaletteMatrixOES(
+        (GLuint)matrixpaletteindex
+    );
 }
 
 /* void glDrawTexfOES ( GLfloat x, GLfloat y, GLfloat z, GLfloat width, GLfloat height ) */
@@ -6050,40 +6060,77 @@ exit:
 static void
 android_glLoadPaletteFromModelViewMatrixOES__
   (JNIEnv *_env, jobject _this) {
-    _env->ThrowNew(UOEClass,
-        "glLoadPaletteFromModelViewMatrixOES");
+    glLoadPaletteFromModelViewMatrixOES();
 }
 
 /* void glMatrixIndexPointerOES ( GLint size, GLenum type, GLsizei stride, const GLvoid *pointer ) */
 static void
-android_glMatrixIndexPointerOES__IIILjava_nio_Buffer_2
-  (JNIEnv *_env, jobject _this, jint size, jint type, jint stride, jobject pointer_buf) {
-    _env->ThrowNew(UOEClass,
-        "glMatrixIndexPointerOES");
+android_glMatrixIndexPointerOESBounds__IIILjava_nio_Buffer_2I
+  (JNIEnv *_env, jobject _this, jint size, jint type, jint stride, jobject pointer_buf, jint remaining) {
+    jarray _array = (jarray) 0;
+    jint _remaining;
+    GLvoid *pointer = (GLvoid *) 0;
+
+    if (pointer_buf) {
+        pointer = (GLvoid *) getDirectBufferPointer(_env, pointer_buf);
+        if ( ! pointer ) {
+            return;
+        }
+    }
+    glMatrixIndexPointerOESBounds(
+        (GLint)size,
+        (GLenum)type,
+        (GLsizei)stride,
+        (GLvoid *)pointer,
+        (GLsizei)remaining
+    );
 }
 
 /* void glMatrixIndexPointerOES ( GLint size, GLenum type, GLsizei stride, GLint offset ) */
 static void
 android_glMatrixIndexPointerOES__IIII
   (JNIEnv *_env, jobject _this, jint size, jint type, jint stride, jint offset) {
-    _env->ThrowNew(UOEClass,
-        "glMatrixIndexPointerOES");
+    glMatrixIndexPointerOES(
+        (GLint)size,
+        (GLenum)type,
+        (GLsizei)stride,
+        (const GLvoid *)offset
+    );
 }
 
 /* void glWeightPointerOES ( GLint size, GLenum type, GLsizei stride, const GLvoid *pointer ) */
 static void
-android_glWeightPointerOES__IIILjava_nio_Buffer_2
-  (JNIEnv *_env, jobject _this, jint size, jint type, jint stride, jobject pointer_buf) {
-    _env->ThrowNew(UOEClass,
-        "glWeightPointerOES");
+android_glWeightPointerOESBounds__IIILjava_nio_Buffer_2I
+  (JNIEnv *_env, jobject _this, jint size, jint type, jint stride, jobject pointer_buf, jint remaining) {
+    jarray _array = (jarray) 0;
+    jint _remaining;
+    GLvoid *pointer = (GLvoid *) 0;
+
+    if (pointer_buf) {
+        pointer = (GLvoid *) getDirectBufferPointer(_env, pointer_buf);
+        if ( ! pointer ) {
+            return;
+        }
+    }
+    glWeightPointerOESBounds(
+        (GLint)size,
+        (GLenum)type,
+        (GLsizei)stride,
+        (GLvoid *)pointer,
+        (GLsizei)remaining
+    );
 }
 
 /* void glWeightPointerOES ( GLint size, GLenum type, GLsizei stride, GLint offset ) */
 static void
 android_glWeightPointerOES__IIII
   (JNIEnv *_env, jobject _this, jint size, jint type, jint stride, jint offset) {
-    _env->ThrowNew(UOEClass,
-        "glWeightPointerOES");
+    glWeightPointerOES(
+        (GLint)size,
+        (GLenum)type,
+        (GLsizei)stride,
+        (const GLvoid *)offset
+    );
 }
 
 /* void glBindFramebufferOES ( GLint target, GLint framebuffer ) */
@@ -6584,7 +6631,7 @@ static JNINativeMethod methods[] = {
 {"glPointParameterx", "(II)V", (void *) android_glPointParameterx__II },
 {"glPointParameterxv", "(I[II)V", (void *) android_glPointParameterxv__I_3II },
 {"glPointParameterxv", "(ILjava/nio/IntBuffer;)V", (void *) android_glPointParameterxv__ILjava_nio_IntBuffer_2 },
-{"glPointSizePointerOES", "(IILjava/nio/Buffer;)V", (void *) android_glPointSizePointerOES__IILjava_nio_Buffer_2 },
+{"glPointSizePointerOESBounds", "(IILjava/nio/Buffer;I)V", (void *) android_glPointSizePointerOESBounds__IILjava_nio_Buffer_2I },
 {"glTexCoordPointer", "(IIII)V", (void *) android_glTexCoordPointer__IIII },
 {"glTexEnvi", "(III)V", (void *) android_glTexEnvi__III },
 {"glTexEnviv", "(II[II)V", (void *) android_glTexEnviv__II_3II },
@@ -6611,9 +6658,9 @@ static JNINativeMethod methods[] = {
 {"glDrawTexxvOES", "([II)V", (void *) android_glDrawTexxvOES___3II },
 {"glDrawTexxvOES", "(Ljava/nio/IntBuffer;)V", (void *) android_glDrawTexxvOES__Ljava_nio_IntBuffer_2 },
 {"glLoadPaletteFromModelViewMatrixOES", "()V", (void *) android_glLoadPaletteFromModelViewMatrixOES__ },
-{"glMatrixIndexPointerOES", "(IIILjava/nio/Buffer;)V", (void *) android_glMatrixIndexPointerOES__IIILjava_nio_Buffer_2 },
+{"glMatrixIndexPointerOESBounds", "(IIILjava/nio/Buffer;I)V", (void *) android_glMatrixIndexPointerOESBounds__IIILjava_nio_Buffer_2I },
 {"glMatrixIndexPointerOES", "(IIII)V", (void *) android_glMatrixIndexPointerOES__IIII },
-{"glWeightPointerOES", "(IIILjava/nio/Buffer;)V", (void *) android_glWeightPointerOES__IIILjava_nio_Buffer_2 },
+{"glWeightPointerOESBounds", "(IIILjava/nio/Buffer;I)V", (void *) android_glWeightPointerOESBounds__IIILjava_nio_Buffer_2I },
 {"glWeightPointerOES", "(IIII)V", (void *) android_glWeightPointerOES__IIII },
 {"glBindFramebufferOES", "(II)V", (void *) android_glBindFramebufferOES__II },
 {"glBindRenderbufferOES", "(II)V", (void *) android_glBindRenderbufferOES__II },

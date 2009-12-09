@@ -37,7 +37,6 @@ glBlendEquation unsupported
 glBlendEquationSeparate unsupported
 glBlendFuncSeparate unsupported
 glCheckFramebufferStatusOES unsupported return 0
-glCurrentPaletteMatrixOES unsupported
 glDeleteFramebuffersOES unsupported
 glDeleteRenderbuffersOES unsupported
 glFramebufferRenderbufferOES unsupported
@@ -52,11 +51,8 @@ glGetRenderbufferParameterivOES unsupported
 glGetTexGen unsupported
 glIsFramebufferOES unsupported return JNI_FALSE
 glIsRenderbufferOES unsupported return JNI_FALSE
-glLoadPaletteFromModelViewMatrixOES unsupported
-glMatrixIndexPointerOES unsupported
 glRenderbufferStorageOES unsupported return false
 glTexGen unsupported
 glTexGenf unsupported
 glTexGeni unsupported
 glTexGenx unsupported
-glWeightPointerOES unsupported

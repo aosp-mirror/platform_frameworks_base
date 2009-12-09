@@ -34,6 +34,12 @@ GL_API void GL_APIENTRY glTexCoordPointerBounds(GLint size, GLenum type,
         GLsizei stride, const GLvoid *pointer, GLsizei count);
 GL_API void GL_APIENTRY glVertexPointerBounds(GLint size, GLenum type,
         GLsizei stride, const GLvoid *pointer, GLsizei count);
+GL_API void GL_APIENTRY glPointSizePointerOESBounds(GLenum type,
+        GLsizei stride, const GLvoid *pointer, GLsizei count);
+GL_API void GL_APIENTRY glMatrixIndexPointerOESBounds(GLint size, GLenum type,
+        GLsizei stride, const GLvoid *pointer, GLsizei count);
+GL_API void GL_APIENTRY glWeightPointerOESBounds(GLint size, GLenum type,
+        GLsizei stride, const GLvoid *pointer, GLsizei count);
 }
 
 static int initialized = 0;

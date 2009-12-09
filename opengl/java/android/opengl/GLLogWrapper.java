@@ -932,83 +932,83 @@ class GLLogWrapper extends GLWrapperBase {
         boolean convertWholeBuffer = (byteCount < 0);
         if (input instanceof ByteBuffer) {
             ByteBuffer input2 = (ByteBuffer) input;
+            int position = input2.position();
             if (convertWholeBuffer) {
-                byteCount = input2.limit();
+                byteCount = input2.limit() - position;
             }
             result = ByteBuffer.allocate(byteCount).order(input2.order());
-            int position = input2.position();
             for (int i = 0; i < byteCount; i++) {
                 result.put(input2.get());
             }
             input2.position(position);
         } else if (input instanceof CharBuffer) {
             CharBuffer input2 = (CharBuffer) input;
+            int position = input2.position();
             if (convertWholeBuffer) {
-                byteCount = input2.limit() * 2;
+                byteCount = (input2.limit() - position) * 2;
             }
             result = ByteBuffer.allocate(byteCount).order(input2.order());
             CharBuffer result2 = result.asCharBuffer();
-            int position = input2.position();
             for (int i = 0; i < byteCount / 2; i++) {
                 result2.put(input2.get());
             }
             input2.position(position);
         } else if (input instanceof ShortBuffer) {
             ShortBuffer input2 = (ShortBuffer) input;
+            int position = input2.position();
             if (convertWholeBuffer) {
-                byteCount = input2.limit() * 2;
+                byteCount = (input2.limit() - position)* 2;
             }
             result = ByteBuffer.allocate(byteCount).order(input2.order());
             ShortBuffer result2 = result.asShortBuffer();
-            int position = input2.position();
             for (int i = 0; i < byteCount / 2; i++) {
                 result2.put(input2.get());
             }
             input2.position(position);
         } else if (input instanceof IntBuffer) {
             IntBuffer input2 = (IntBuffer) input;
+            int position = input2.position();
             if (convertWholeBuffer) {
-                byteCount = input2.limit() * 4;
+                byteCount = (input2.limit() - position) * 4;
             }
             result = ByteBuffer.allocate(byteCount).order(input2.order());
             IntBuffer result2 = result.asIntBuffer();
-            int position = input2.position();
             for (int i = 0; i < byteCount / 4; i++) {
                 result2.put(input2.get());
             }
             input2.position(position);
         } else if (input instanceof FloatBuffer) {
             FloatBuffer input2 = (FloatBuffer) input;
+            int position = input2.position();
             if (convertWholeBuffer) {
-                byteCount = input2.limit() * 4;
+                byteCount = (input2.limit() - position) * 4;
             }
             result = ByteBuffer.allocate(byteCount).order(input2.order());
             FloatBuffer result2 = result.asFloatBuffer();
-            int position = input2.position();
             for (int i = 0; i < byteCount / 4; i++) {
                 result2.put(input2.get());
             }
             input2.position(position);
         } else if (input instanceof DoubleBuffer) {
             DoubleBuffer input2 = (DoubleBuffer) input;
+            int position = input2.position();
             if (convertWholeBuffer) {
-                byteCount = input2.limit() * 8;
+                byteCount = (input2.limit() - position) * 8;
             }
             result = ByteBuffer.allocate(byteCount).order(input2.order());
             DoubleBuffer result2 = result.asDoubleBuffer();
-            int position = input2.position();
             for (int i = 0; i < byteCount / 8; i++) {
                 result2.put(input2.get());
             }
             input2.position(position);
         } else if (input instanceof LongBuffer) {
             LongBuffer input2 = (LongBuffer) input;
+            int position = input2.position();
             if (convertWholeBuffer) {
-                byteCount = input2.limit() * 8;
+                byteCount = (input2.limit() - position) * 8;
             }
             result = ByteBuffer.allocate(byteCount).order(input2.order());
             LongBuffer result2 = result.asLongBuffer();
-            int position = input2.position();
             for (int i = 0; i < byteCount / 8; i++) {
                 result2.put(input2.get());
             }
@@ -1064,8 +1064,8 @@ class GLLogWrapper extends GLWrapperBase {
         }
         builder.append(" ");
         builder.append(name + ":{");
-        if (pointer == null) {
-            builder.append("undefined");
+        if (pointer == null || pointer.mTempByteBuffer == null ) {
+            builder.append("undefined }");
             return;
         }
         if (pointer.mStride < 0) {
@@ -3464,6 +3464,9 @@ class GLLogWrapper extends GLWrapperBase {
         public Buffer mPointer;
         public ByteBuffer mTempByteBuffer; // Only valid during glDrawXXX calls
 
+        public PointerInfo() {
+        }
+
         public PointerInfo(int size, int type, int stride, Buffer pointer) {
             mSize = size;
             mType = type;
@@ -3493,7 +3496,7 @@ class GLLogWrapper extends GLWrapperBase {
         }
 
         public void bindByteBuffer() {
-            mTempByteBuffer = toByteBuffer(-1, mPointer);
+            mTempByteBuffer = mPointer == null ? null : toByteBuffer(-1, mPointer);
         }
 
         public void unbindByteBuffer() {
@@ -3505,10 +3508,10 @@ class GLLogWrapper extends GLWrapperBase {
     private boolean mLogArgumentNames;
     private int mArgCount;
 
-    private PointerInfo mColorPointer;
-    private PointerInfo mNormalPointer;
-    private PointerInfo mTexCoordPointer;
-    private PointerInfo mVertexPointer;
+    private PointerInfo mColorPointer = new PointerInfo();
+    private PointerInfo mNormalPointer = new PointerInfo();
+    private PointerInfo mTexCoordPointer = new PointerInfo();
+    private PointerInfo mVertexPointer = new PointerInfo();
 
     boolean mColorArrayEnabled;
     boolean mNormalArrayEnabled;

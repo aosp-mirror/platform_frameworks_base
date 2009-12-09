@@ -47,6 +47,12 @@ GL_API void GL_APIENTRY glTexCoordPointerBounds(GLint size, GLenum type,
         GLsizei stride, const GLvoid *pointer, GLsizei count);
 GL_API void GL_APIENTRY glVertexPointerBounds(GLint size, GLenum type,
         GLsizei stride, const GLvoid *pointer, GLsizei count);
+GL_API void GL_APIENTRY glPointSizePointerOESBounds(GLenum type,
+        GLsizei stride, const GLvoid *pointer, GLsizei count);
+GL_API void GL_APIENTRY glMatrixIndexPointerOESBounds(GLint size, GLenum type,
+        GLsizei stride, const GLvoid *pointer, GLsizei count);
+GL_API void GL_APIENTRY glWeightPointerOESBounds(GLint size, GLenum type,
+        GLsizei stride, const GLvoid *pointer, GLsizei count);
 }
 
 void glColorPointerBounds(GLint size, GLenum type, GLsizei stride,
@@ -64,6 +70,21 @@ void glTexCoordPointerBounds(GLint size, GLenum type,
 void glVertexPointerBounds(GLint size, GLenum type,
         GLsizei stride, const GLvoid *pointer, GLsizei count) {
     glVertexPointer(size, type, stride, pointer);
+}
+
+void GL_APIENTRY glPointSizePointerOESBounds(GLenum type,
+        GLsizei stride, const GLvoid *pointer, GLsizei count) {
+    glPointSizePointerOES(type, stride, pointer);
+}
+
+GL_API void GL_APIENTRY glMatrixIndexPointerOESBounds(GLint size, GLenum type,
+        GLsizei stride, const GLvoid *pointer, GLsizei count) {
+    glMatrixIndexPointerOES(size, type, stride, pointer);
+}
+
+GL_API void GL_APIENTRY glWeightPointerOESBounds(GLint size, GLenum type,
+        GLsizei stride, const GLvoid *pointer, GLsizei count) {
+    glWeightPointerOES(size, type, stride, pointer);
 }
 
 // ----------------------------------------------------------------------------

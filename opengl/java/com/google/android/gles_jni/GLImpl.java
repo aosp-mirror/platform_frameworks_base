@@ -45,6 +45,9 @@ public class GLImpl implements GL10, GL10Ext, GL11, GL11Ext, GL11ExtensionPack {
     Buffer _normalPointer = null;
     Buffer _texCoordPointer = null;
     Buffer _vertexPointer = null;
+    Buffer _pointSizePointerOES = null;
+    Buffer _matrixIndexPointerOES = null;
+    Buffer _weightPointerOES = null;
 
     public GLImpl() {
     }
@@ -1582,11 +1585,30 @@ public class GLImpl implements GL10, GL10Ext, GL11, GL11Ext, GL11ExtensionPack {
 
     // C function void glPointSizePointerOES ( GLenum type, GLsizei stride, const GLvoid *pointer )
 
-    public native void glPointSizePointerOES(
+    private native void glPointSizePointerOESBounds(
+        int type,
+        int stride,
+        java.nio.Buffer pointer,
+        int remaining
+    );
+
+    public void glPointSizePointerOES(
         int type,
         int stride,
         java.nio.Buffer pointer
-    );
+    ) {
+        glPointSizePointerOESBounds(
+            type,
+            stride,
+            pointer,
+            pointer.remaining()
+        );
+        if (((type == GL_FLOAT) ||
+             (type == GL_FIXED)) &&
+            (stride >= 0)) {
+            _pointSizePointerOES = pointer;
+        }
+    }
 
     // C function void glTexCoordPointer ( GLint size, GLenum type, GLsizei stride, GLint offset )
 
@@ -1795,12 +1817,38 @@ public class GLImpl implements GL10, GL10Ext, GL11, GL11Ext, GL11ExtensionPack {
 
     // C function void glMatrixIndexPointerOES ( GLint size, GLenum type, GLsizei stride, const GLvoid *pointer )
 
-    public native void glMatrixIndexPointerOES(
+    private native void glMatrixIndexPointerOESBounds(
+        int size,
+        int type,
+        int stride,
+        java.nio.Buffer pointer,
+        int remaining
+    );
+
+    public void glMatrixIndexPointerOES(
         int size,
         int type,
         int stride,
         java.nio.Buffer pointer
-    );
+    ) {
+        glMatrixIndexPointerOESBounds(
+            size,
+            type,
+            stride,
+            pointer,
+            pointer.remaining()
+        );
+        if (((size == 2) ||
+             (size == 3) ||
+             (size == 4)) &&
+            ((type == GL_FLOAT) ||
+             (type == GL_BYTE) ||
+             (type == GL_SHORT) ||
+             (type == GL_FIXED)) &&
+            (stride >= 0)) {
+            _matrixIndexPointerOES = pointer;
+        }
+    }
 
     // C function void glMatrixIndexPointerOES ( GLint size, GLenum type, GLsizei stride, GLint offset )
 
@@ -1813,12 +1861,28 @@ public class GLImpl implements GL10, GL10Ext, GL11, GL11Ext, GL11ExtensionPack {
 
     // C function void glWeightPointerOES ( GLint size, GLenum type, GLsizei stride, const GLvoid *pointer )
 
-    public native void glWeightPointerOES(
+    private native void glWeightPointerOESBounds(
+        int size,
+        int type,
+        int stride,
+        java.nio.Buffer pointer,
+        int remaining
+    );
+
+    public void glWeightPointerOES(
         int size,
         int type,
         int stride,
         java.nio.Buffer pointer
-    );
+    ) {
+        glWeightPointerOESBounds(
+            size,
+            type,
+            stride,
+            pointer,
+            pointer.remaining()
+        );
+    }
 
     // C function void glWeightPointerOES ( GLint size, GLenum type, GLsizei stride, GLint offset )
 
