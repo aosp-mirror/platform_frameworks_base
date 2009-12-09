@@ -871,7 +871,7 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
         EventLog.writeEvent(TelephonyEventLog.EVENT_LOG_CDMA_DATA_DROP, val);
     }
 
-    protected void onDataStateChanged (AsyncResult ar) {
+    protected void onDataStateChanged(AsyncResult ar) {
         ArrayList<DataCallState> dataCallStates = (ArrayList<DataCallState>)(ar.result);
 
         if (ar.exception != null) {
@@ -882,32 +882,46 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
         }
 
         if (state == State.CONNECTED) {
-            if (dataCallStates.size() >= 1) {
-                switch (dataCallStates.get(0).active) {
+            boolean isActiveOrDormantConnectionPresent = false;
+            int connectionState = DATA_CONNECTION_ACTIVE_PH_LINK_INACTIVE;
+
+            // Check for an active or dormant connection element in
+            // the DATA_CALL_LIST array
+            for (int index = 0; index < dataCallStates.size(); index++) {
+                connectionState = dataCallStates.get(index).active;
+                if (connectionState != DATA_CONNECTION_ACTIVE_PH_LINK_INACTIVE) {
+                    isActiveOrDormantConnectionPresent = true;
+                    break;
+                }
+            }
+
+            if (!isActiveOrDormantConnectionPresent) {
+                // No active or dormant connection
+                Log.i(LOG_TAG, "onDataStateChanged: No active connection"
+                        + "state is CONNECTED, disconnecting/cleanup");
+                writeEventLogCdmaDataDrop();
+                cleanUpConnection(true, null);
+                return;
+            }
+
+            switch (connectionState) {
                 case DATA_CONNECTION_ACTIVE_PH_LINK_UP:
                     Log.v(LOG_TAG, "onDataStateChanged: active=LINK_ACTIVE && CONNECTED, ignore");
                     activity = Activity.NONE;
                     phone.notifyDataActivity();
+                    startNetStatPoll();
                     break;
-                case DATA_CONNECTION_ACTIVE_PH_LINK_INACTIVE:
-                    Log.v(LOG_TAG,
-                    "onDataStateChanged active=LINK_INACTIVE && CONNECTED, disconnecting/cleanup");
-                    writeEventLogCdmaDataDrop();
-                    cleanUpConnection(true, null);
-                    break;
+
                 case DATA_CONNECTION_ACTIVE_PH_LINK_DOWN:
                     Log.v(LOG_TAG, "onDataStateChanged active=LINK_DOWN && CONNECTED, dormant");
                     activity = Activity.DORMANT;
                     phone.notifyDataActivity();
+                    stopNetStatPoll();
                     break;
+
                 default:
                     Log.v(LOG_TAG, "onDataStateChanged: IGNORE unexpected DataCallState.active="
-                            + dataCallStates.get(0).active);
-                }
-            } else {
-                Log.v(LOG_TAG, "onDataStateChanged: network disconnected, clean up");
-                writeEventLogCdmaDataDrop();
-                cleanUpConnection(true, null);
+                            + connectionState);
             }
         } else {
             // TODO: Do we need to do anything?
@@ -953,6 +967,11 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
     }
 
     public void handleMessage (Message msg) {
+
+        if (!phone.mIsTheCurrentActivePhone) {
+            Log.d(LOG_TAG, "Ignore CDMA msgs since CDMA phone is inactive");
+            return;
+        }
 
         switch (msg.what) {
             case EVENT_RECORDS_LOADED:

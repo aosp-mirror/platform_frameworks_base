@@ -141,4 +141,10 @@ public interface TelephonyProperties
      * Property to override DEFAULT_WAKE_LOCK_TIMEOUT
      */
     static final String PROPERTY_WAKE_LOCK_TIMEOUT = "ro.ril.wake_lock_timeout";
+
+    /**
+     * Set to true to indicate that the modem needs to be reset
+     * when there is a radio technology change.
+     */
+    static final String PROPERTY_RESET_ON_RADIO_TECH_CHANGE = "persist.radio.reset_on_switch";
 }
