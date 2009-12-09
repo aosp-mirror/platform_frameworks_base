@@ -23,6 +23,7 @@ import com.android.internal.widget.SlidingTab;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.content.res.ColorStateList;
 import android.text.format.DateFormat;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -274,9 +275,14 @@ class LockScreen extends LinearLayout implements KeyguardScreen, KeyguardUpdateM
                     getContext().getString(R.string.global_action_silent_mode_on_status) :
                     getContext().getString(R.string.global_action_silent_mode_off_status);
 
-            final int toastIcon = mSilentMode ? R.drawable.ic_lock_ringer_off
-                    : R.drawable.ic_lock_ringer_on;
-            toastMessage(mScreenLocked, message, toastIcon);
+            final int toastIcon = mSilentMode
+                ? R.drawable.ic_lock_ringer_off
+                : R.drawable.ic_lock_ringer_on;
+
+            final int toastColor = mSilentMode
+                ? getContext().getResources().getColor(R.color.keyguard_text_color_soundoff)
+                : getContext().getResources().getColor(R.color.keyguard_text_color_soundon);
+            toastMessage(mScreenLocked, message, toastColor, toastIcon);
             mCallback.pokeWakelock();
         }
     }
@@ -292,32 +298,43 @@ class LockScreen extends LinearLayout implements KeyguardScreen, KeyguardUpdateM
     }
 
     /**
-     * Displays a message in a text view and then removes it.
+     * Displays a message in a text view and then restores the previous text.
      * @param textView The text view.
      * @param text The text.
+     * @param color The color to apply to the text, or 0 if the existing color should be used.
      * @param iconResourceId The left hand icon.
      */
-    private void toastMessage(final TextView textView, final String text, final int iconResourceId) {
+    private void toastMessage(final TextView textView, final String text, final int color, final int iconResourceId) {
+        if (DBG) android.util.Log.d("LockScreen", "toastMessage(text=" + text +", color=" + color + ")");
+
         if (mPendingR1 != null) {
             textView.removeCallbacks(mPendingR1);
             mPendingR1 = null;
         }
         if (mPendingR2 != null) {
+            mPendingR2.run(); // fire immediately, restoring non-toasted appearance
             textView.removeCallbacks(mPendingR2);
             mPendingR2 = null;
         }
 
+        final String oldText = textView.getText().toString();
+        final ColorStateList oldColors = textView.getTextColors();
+
         mPendingR1 = new Runnable() {
             public void run() {
                 textView.setText(text);
+                if (color != 0) {
+                    textView.setTextColor(color);
+                }
                 textView.setCompoundDrawablesWithIntrinsicBounds(iconResourceId, 0, 0, 0);
-                textView.setCompoundDrawablePadding(4);
             }
         };
+
         textView.postDelayed(mPendingR1, 0);
         mPendingR2 = new Runnable() {
             public void run() {
-                textView.setText("");
+                textView.setText(oldText);
+                textView.setTextColor(oldColors);
                 textView.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
             }
         };
@@ -415,11 +432,11 @@ class LockScreen extends LinearLayout implements KeyguardScreen, KeyguardUpdateM
         updateLayout(mStatus);
     }
 
-    private void putEmergencyBelow(int viewId) {
+    private void addRelativeLayoutRule(View view, int rule, int viewId) {
         final RelativeLayout.LayoutParams layoutParams =
-                (RelativeLayout.LayoutParams) mEmergencyCallButton.getLayoutParams();
-        layoutParams.addRule(RelativeLayout.BELOW, viewId);
-        mEmergencyCallButton.setLayoutParams(layoutParams);
+                (RelativeLayout.LayoutParams) view.getLayoutParams();
+        layoutParams.addRule(rule, viewId);
+        view.setLayoutParams(layoutParams);
     }
 
     /**
@@ -455,6 +472,9 @@ class LockScreen extends LinearLayout implements KeyguardScreen, KeyguardUpdateM
      * Update the layout to match the current status.
      */
     private void updateLayout(Status status) {
+        // The emergency call button appears where the carrier would
+        // ordinarily be shown, so if one is VISIBLE the other must be
+        // INVISIBLE.
         switch (status) {
             case Normal:
                 // text
@@ -481,25 +501,25 @@ class LockScreen extends LinearLayout implements KeyguardScreen, KeyguardUpdateM
                 break;
             case SimMissing:
                 // text
-                mCarrier.setText(R.string.lockscreen_missing_sim_message_short);
-                mScreenLocked.setText(R.string.lockscreen_instructions_when_pattern_disabled);
+                mCarrier.setText("");
+                mScreenLocked.setText(R.string.lockscreen_missing_sim_message_short);
+                // previously shown here: lockscreen_instructions_when_pattern_disabled
 
                 // layout
-                mScreenLocked.setVisibility(View.INVISIBLE);
+                mScreenLocked.setVisibility(View.VISIBLE);
                 mSelector.setVisibility(View.VISIBLE);
                 mEmergencyCallButton.setVisibility(View.VISIBLE);
-                putEmergencyBelow(R.id.screenLocked);
                 break;
             case SimMissingLocked:
                 // text
-                mCarrier.setText(R.string.lockscreen_missing_sim_message_short);
-                mScreenLocked.setText(R.string.lockscreen_missing_sim_instructions);
+                mCarrier.setText("");
+                mScreenLocked.setText(R.string.lockscreen_missing_sim_message_short);
+                // previously shown here: lockscreen_missing_sim_instructions
 
                 // layout
                 mScreenLocked.setVisibility(View.VISIBLE);
                 mSelector.setVisibility(View.GONE);
                 mEmergencyCallButton.setVisibility(View.VISIBLE);
-                putEmergencyBelow(R.id.screenLocked);
                 break;
             case SimLocked:
                 // text
@@ -512,14 +532,14 @@ class LockScreen extends LinearLayout implements KeyguardScreen, KeyguardUpdateM
                 break;
             case SimPukLocked:
                 // text
-                mCarrier.setText(R.string.lockscreen_sim_puk_locked_message);
-                mScreenLocked.setText(R.string.lockscreen_sim_puk_locked_instructions);
+                mCarrier.setText("");
+                mScreenLocked.setText(R.string.lockscreen_sim_puk_locked_message);
+                // previously shown here: lockscreen_sim_puk_locked_instructions);
 
                 // layout
                 mScreenLocked.setVisibility(View.VISIBLE);
                 mSelector.setVisibility(View.GONE);
                 mEmergencyCallButton.setVisibility(View.VISIBLE);
-                putEmergencyBelow(R.id.screenLocked);
                 break;
         }
     }
