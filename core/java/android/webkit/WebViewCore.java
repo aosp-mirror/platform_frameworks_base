@@ -503,6 +503,7 @@ final class WebViewCore {
 
     private native void nativeSaveDocumentState(int frame);
 
+    private native void nativeMoveFocus(int framePtr, int nodePointer);
     private native void nativeMoveMouse(int framePtr, int x, int y);
 
     private native void nativeMoveMouseIfLatest(int moveGeneration,
@@ -661,11 +662,13 @@ final class WebViewCore {
         CursorData() {}
         CursorData(int frame, int node, int x, int y) {
             mFrame = frame;
+            mNode = node;
             mX = x;
             mY = y;
         }
         int mMoveGeneration;
         int mFrame;
+        int mNode;
         int mX;
         int mY;
     }
@@ -751,7 +754,7 @@ final class WebViewCore {
             "SINGLE_LISTBOX_CHOICE", // = 124;
             "MESSAGE_RELAY", // = 125;
             "SET_BACKGROUND_COLOR", // = 126;
-            "127", // = 127
+            "SET_MOVE_FOCUS", // = 127
             "SAVE_DOCUMENT_STATE", // = 128;
             "GET_SELECTION", // = 129;
             "WEBKIT_DRAW", // = 130;
@@ -802,6 +805,7 @@ final class WebViewCore {
         static final int SINGLE_LISTBOX_CHOICE = 124;
         static final int MESSAGE_RELAY = 125;
         static final int SET_BACKGROUND_COLOR = 126;
+        static final int SET_MOVE_FOCUS = 127;
         static final int SAVE_DOCUMENT_STATE = 128;
         static final int GET_SELECTION = 129;
         static final int WEBKIT_DRAW = 130;
@@ -1147,6 +1151,11 @@ final class WebViewCore {
 
                         case REQUEST_DOC_AS_TEXT:
                             mBrowserFrame.documentAsText((Message) msg.obj);
+                            break;
+
+                        case SET_MOVE_FOCUS:
+                            CursorData focusData = (CursorData) msg.obj;
+                            nativeMoveFocus(focusData.mFrame, focusData.mNode);
                             break;
 
                         case SET_MOVE_MOUSE:

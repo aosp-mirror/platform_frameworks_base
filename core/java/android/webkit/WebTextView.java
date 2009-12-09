@@ -325,9 +325,6 @@ import java.util.ArrayList;
             mWebView.setFocusControllerInactive();
             mWebView.nativeMoveCursorToNextTextInput();
             mOkayForFocusNotToMatch = true;
-            // Pass the click to set the focus to the textfield which will now
-            // have the cursor.
-            mWebView.centerKeyPressOnTextField();
             // Preemptively rebuild the WebTextView, so that the action will
             // be set properly.
             mWebView.rebuildWebTextView();
