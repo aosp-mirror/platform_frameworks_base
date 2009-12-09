@@ -90,5 +90,12 @@
     <color name="sliding_tab_text_color_active">@android:color/black</color>
     <color name="sliding_tab_text_color_shadow">@android:color/black</color>
 
+    <!-- keyguard tab -->
+    <color name="keyguard_text_color_normal">#ffffff</color>
+    <color name="keyguard_text_color_unlock">#a7d84c</color>
+    <color name="keyguard_text_color_soundoff">#ffffff</color>
+    <color name="keyguard_text_color_soundon">#e69310</color>
+    <color name="keyguard_text_color_decline">#fe0a5a</color>
+
 </resources>
 
