@@ -70,7 +70,7 @@ public:
 
 
     virtual void setupScript() = 0;
-    virtual bool run(Context *, uint32_t launchID) = 0;
+    virtual uint32_t run(Context *, uint32_t launchID) = 0;
 };
 
 
