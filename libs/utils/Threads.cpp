@@ -286,10 +286,12 @@ int androidSetThreadSchedulingGroup(pid_t tid, int grp)
         return BAD_VALUE;
     }
 
+#if defined(HAVE_PTHREADS)
     if (set_sched_policy(tid, (grp == ANDROID_TGROUP_BG_NONINTERACT) ?
                                       SP_BACKGROUND : SP_FOREGROUND)) {
         return PERMISSION_DENIED;
     }
+#endif
     
     return NO_ERROR;
 }
@@ -297,6 +299,8 @@ int androidSetThreadSchedulingGroup(pid_t tid, int grp)
 int androidSetThreadPriority(pid_t tid, int pri)
 {
     int rc = 0;
+    
+#if defined(HAVE_PTHREADS)
     int lasterr = 0;
 
     if (pri >= ANDROID_PRIORITY_BACKGROUND) {
@@ -309,7 +313,6 @@ int androidSetThreadPriority(pid_t tid, int pri)
         lasterr = errno;
     }
 
-#if defined(HAVE_PTHREADS)
     if (setpriority(PRIO_PROCESS, tid, pri) < 0) {
         rc = INVALID_OPERATION;
     } else {
