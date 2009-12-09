@@ -600,16 +600,6 @@ android.provider.ContactsContract$Presence
 android.provider.ContactsContract$RawContacts
 android.provider.Downloads
 android.provider.DrmStore$Audio
-android.provider.Gmail
-android.provider.Gmail$AttachmentOrigin
-android.provider.Gmail$AttachmentRendition
-android.provider.Gmail$BecomeActiveNetworkCursor
-android.provider.Gmail$ConversationCursor
-android.provider.Gmail$CursorStatus
-android.provider.Gmail$LabelMap
-android.provider.Gmail$MailCursor
-android.provider.Gmail$MessageCursor
-android.provider.Gmail$PersonalLevel
 android.provider.Im$Account
 android.provider.Im$Avatars
 android.provider.Im$Chats
