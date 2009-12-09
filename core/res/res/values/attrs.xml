@@ -340,6 +340,8 @@
         <attr name="editTextStyle" format="reference" />
         <!-- Default ExpandableListView style. -->
         <attr name="expandableListViewStyle" format="reference" />
+        <!-- ExpandableListView with white background. -->
+        <attr name="expandableListViewWhiteStyle" format="reference" />
         <!-- Default Gallery style. -->
         <attr name="galleryStyle" format="reference" />
         <!-- Default GestureOverlayView style. -->
