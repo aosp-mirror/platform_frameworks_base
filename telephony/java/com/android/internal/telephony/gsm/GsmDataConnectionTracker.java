@@ -1454,6 +1454,12 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
 
     public void handleMessage (Message msg) {
         if (DBG) Log.d(LOG_TAG,"GSMDataConnTrack handleMessage "+msg);
+
+        if (!mGsmPhone.mIsTheCurrentActivePhone) {
+            Log.d(LOG_TAG, "Ignore GSM msgs since GSM phone is inactive");
+            return;
+        }
+
         switch (msg.what) {
             case EVENT_RECORDS_LOADED:
                 onRecordsLoaded();
