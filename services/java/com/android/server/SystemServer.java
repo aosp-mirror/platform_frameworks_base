@@ -18,6 +18,7 @@ package com.android.server;
 
 import com.android.server.am.ActivityManagerService;
 import com.android.server.status.StatusBarService;
+import com.android.internal.os.BinderInternal;
 import com.android.internal.os.SamplingProfilerIntegration;
 
 import dalvik.system.VMRuntime;
@@ -80,6 +81,8 @@ class ServerThread extends Thread {
         android.os.Process.setThreadPriority(
                 android.os.Process.THREAD_PRIORITY_FOREGROUND);
 
+        BinderInternal.disableBackgroundScheduling(true);
+        
         String factoryTestStr = SystemProperties.get("ro.factorytest");
         int factoryTest = "".equals(factoryTestStr) ? SystemServer.FACTORY_TEST_OFF
                 : Integer.parseInt(factoryTestStr);
