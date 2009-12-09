@@ -55,7 +55,7 @@ public:
     ACCscript*    mAccScript;
 
     virtual void setupScript();
-    virtual bool run(Context *, uint32_t launchID);
+    virtual uint32_t run(Context *, uint32_t launchID);
 };
 
 class ScriptCState
