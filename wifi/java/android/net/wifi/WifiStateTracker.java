@@ -1162,7 +1162,7 @@ public class WifiStateTracker extends NetworkStateTracker {
                     }
                 }
                 break;
-                
+
             case EVENT_DRIVER_STATE_CHANGED:
                 // Wi-Fi driver state changed:
                 // 0 STARTED
