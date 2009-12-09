@@ -35,6 +35,7 @@ import android.graphics.Rect;
 import android.net.Uri;
 import android.os.RemoteException;
 import android.text.TextUtils;
+import android.util.DisplayMetrics;
 import android.util.Pair;
 import android.view.View;
 
@@ -4896,8 +4897,10 @@ public final class ContactsContract {
 
         /**
          * Extra used to specify pivot dialog location in screen coordinates.
+         * @deprecated Use {@link Intent#setSourceBounds(Rect)} instead.
          * @hide
          */
+        @Deprecated
         public static final String EXTRA_TARGET_RECT = "target_rect";
 
         /**
@@ -4957,15 +4960,17 @@ public final class ContactsContract {
          */
         public static void showQuickContact(Context context, View target, Uri lookupUri, int mode,
                 String[] excludeMimes) {
-            // Find location and bounds of target view
-            final int[] location = new int[2];
-            target.getLocationOnScreen(location);
+            // Find location and bounds of target view, adjusting based on the
+            // assumed local density.
+            final float appScale = context.getResources().getCompatibilityInfo().applicationScale;
+            final int[] pos = new int[2];
+            target.getLocationOnScreen(pos);
 
             final Rect rect = new Rect();
-            rect.left = location[0];
-            rect.top = location[1];
-            rect.right = rect.left + target.getWidth();
-            rect.bottom = rect.top + target.getHeight();
+            rect.left = (int) (pos[0] * appScale + 0.5f);
+            rect.top = (int) (pos[1] * appScale + 0.5f);
+            rect.right = (int) ((pos[0] + target.getWidth()) * appScale + 0.5f);
+            rect.bottom = (int) ((pos[1] + target.getHeight()) * appScale + 0.5f);
 
             // Trigger with obtained rectangle
             showQuickContact(context, rect, lookupUri, mode, excludeMimes);
@@ -4982,8 +4987,10 @@ public final class ContactsContract {
          * @param target Specific {@link Rect} that this dialog should be
          *            centered around, in screen coordinates. In particular, if
          *            the dialog has a "callout" arrow, it will be pointed and
-         *            centered around this {@link Rect}.
-         * @param lookupUri A {@link ContactsContract.Contacts#CONTENT_LOOKUP_URI} style
+         *            centered around this {@link Rect}. If you are running at a
+         *            non-native density, you need to manually adjust using
+         *            {@link DisplayMetrics#density} before calling.
+         * @param lookupUri A {@link Contacts#CONTENT_LOOKUP_URI} style
          *            {@link Uri} that describes a specific contact to feature
          *            in this dialog.
          * @param mode Any of {@link #MODE_SMALL}, {@link #MODE_MEDIUM}, or
@@ -5002,7 +5009,7 @@ public final class ContactsContract {
                     | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
 
             intent.setData(lookupUri);
-            intent.putExtra(EXTRA_TARGET_RECT, target);
+            intent.setSourceBounds(target);
             intent.putExtra(EXTRA_MODE, mode);
             intent.putExtra(EXTRA_EXCLUDE_MIMES, excludeMimes);
             context.startActivity(intent);

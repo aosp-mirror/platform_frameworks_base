@@ -137,11 +137,21 @@ public class RemoteViews implements Parcelable, Filter {
             if (target != null && pendingIntent != null) {
                 OnClickListener listener = new OnClickListener() {
                     public void onClick(View v) {
-                        int[] pos = new int[2];
+                        // Find target view location in screen coordinates and
+                        // fill into PendingIntent before sending.
+                        final float appScale = v.getContext().getResources()
+                                .getCompatibilityInfo().applicationScale;
+                        final int[] pos = new int[2];
                         v.getLocationOnScreen(pos);
-                        Intent intent = new Intent();
-                        intent.setSourceBounds(new Rect(pos[0], pos[1],
-                                    pos[0]+v.getWidth(), pos[1]+v.getHeight()));
+
+                        final Rect rect = new Rect();
+                        rect.left = (int) (pos[0] * appScale + 0.5f);
+                        rect.top = (int) (pos[1] * appScale + 0.5f);
+                        rect.right = (int) ((pos[0] + v.getWidth()) * appScale + 0.5f);
+                        rect.bottom = (int) ((pos[1] + v.getHeight()) * appScale + 0.5f);
+
+                        final Intent intent = new Intent();
+                        intent.setSourceBounds(rect);
                         try {
                             // TODO: Unregister this handler if PendingIntent.FLAG_ONE_SHOT?
                             v.getContext().startIntentSender(
