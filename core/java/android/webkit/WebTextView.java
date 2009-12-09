@@ -789,7 +789,6 @@ import java.util.ArrayList;
         // Set up a measure spec so a layout can always be recreated.
         mWidthSpec = MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY);
         mHeightSpec = MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY);
-        requestFocus();
     }
 
     /**
