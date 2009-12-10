@@ -30,6 +30,8 @@ import android.os.Message;
 import android.provider.OpenableColumns;
 import android.util.Log;
 import android.util.TypedValue;
+import android.view.Surface;
+import android.view.WindowOrientationListener;
 
 import junit.framework.Assert;
 
@@ -67,9 +69,14 @@ class BrowserFrame extends Handler {
     // Attached Javascript interfaces
     private Map<String, Object> mJSInterfaceMap;
 
+    // Orientation listener
+    private WindowOrientationListener mOrientationListener;
+
     // message ids
     // a message posted when a frame loading is completed
     static final int FRAME_COMPLETED = 1001;
+    // orientation change message
+    static final int ORIENTATION_CHANGED = 1002;
     // a message posted when the user decides the policy
     static final int POLICY_FUNCTION = 1003;
 
@@ -141,6 +148,31 @@ class BrowserFrame extends Handler {
         if (DebugFlags.BROWSER_FRAME) {
             Log.v(LOGTAG, "BrowserFrame constructor: this=" + this);
         }
+
+        mOrientationListener = new WindowOrientationListener(context) {
+                @Override
+                public void onOrientationChanged(int orientation) {
+                    switch (orientation) {
+                        case Surface.ROTATION_90:
+                            orientation = 90;
+                            break;
+                        case Surface.ROTATION_180:
+                            orientation = 180;
+                            break;
+                        case Surface.ROTATION_270:
+                            orientation = -90;
+                            break;
+                        case Surface.ROTATION_0:
+                            orientation = 0;
+                            break;
+                        default:
+                            break;
+                    }
+                    sendMessage(
+                            obtainMessage(ORIENTATION_CHANGED, orientation, 0));
+                }
+        };
+        mOrientationListener.enable();
     }
 
     /**
@@ -345,6 +377,7 @@ class BrowserFrame extends Handler {
      * Destroy all native components of the BrowserFrame.
      */
     public void destroy() {
+        mOrientationListener.disable();
         nativeDestroyFrame();
         removeCallbacksAndMessages(null);
     }
@@ -376,6 +409,11 @@ class BrowserFrame extends Handler {
 
             case POLICY_FUNCTION: {
                 nativeCallPolicyFunction(msg.arg1, msg.arg2);
+                break;
+            }
+
+            case ORIENTATION_CHANGED: {
+                nativeOrientationChanged(msg.arg1);
                 break;
             }
 
@@ -899,4 +937,6 @@ class BrowserFrame extends Handler {
      *         returns null.
      */
     private native HashMap getFormTextData();
+
+    private native void nativeOrientationChanged(int orientation);
 }
