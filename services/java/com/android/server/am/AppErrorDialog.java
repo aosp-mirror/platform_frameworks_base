@@ -33,15 +33,12 @@ class AppErrorDialog extends BaseErrorDialog {
 
     // Event 'what' codes
     static final int FORCE_QUIT = 0;
-    static final int DEBUG = 1;
-    static final int FORCE_QUIT_AND_REPORT = 2;
+    static final int FORCE_QUIT_AND_REPORT = 1;
 
     // 5-minute timeout, then we automatically dismiss the crash dialog
     static final long DISMISS_TIMEOUT = 1000 * 60 * 5;
     
-    public AppErrorDialog(Context context, AppErrorResult result,
-            ProcessRecord app, int flags,
-            String shortMsg, String longMsg) {
+    public AppErrorDialog(Context context, AppErrorResult result, ProcessRecord app) {
         super(context);
         
         Resources res = context.getResources();
@@ -67,12 +64,6 @@ class AppErrorDialog extends BaseErrorDialog {
                 res.getText(com.android.internal.R.string.force_close),
                 mHandler.obtainMessage(FORCE_QUIT));
 
-        if ((flags&1) != 0) {
-            setButton(DialogInterface.BUTTON_NEUTRAL,
-                    res.getText(com.android.internal.R.string.debug),
-                    mHandler.obtainMessage(DEBUG));
-        }
-
         if (app.errorReportReceiver != null) {
             setButton(DialogInterface.BUTTON_NEGATIVE,
                     res.getText(com.android.internal.R.string.report),
@@ -88,7 +79,7 @@ class AppErrorDialog extends BaseErrorDialog {
                 mHandler.obtainMessage(FORCE_QUIT),
                 DISMISS_TIMEOUT);
     }
-    
+
     public void onStop() {
     }
 

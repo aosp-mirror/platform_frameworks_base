@@ -20,7 +20,6 @@ import com.android.internal.os.RuntimeInit;
 
 import android.app.ActivityManager;
 import android.content.Context;
-import android.server.data.CrashData;
 import android.test.AndroidTestCase;
 import android.util.Log;
 
@@ -91,25 +90,12 @@ public class ProcessErrorsTest extends AndroidTestCase {
                 break;
             default:
                 condition = "<unknown>";
-            break;
+                break;
             }
 
-            String stackTrace = null;
-            try {
-                if (entry.crashData != null) {
-                    CrashData cd = RuntimeInit.unmarshallException(entry.crashData);
-                    stackTrace = cd.toString();
-                }
-            } catch (RuntimeException e) { }
-            if (stackTrace == null) {
-                stackTrace = "<no stack trace>";
-            }
-
-            final String entryReport = "Process error " + condition + " " + entry.shortMsg +
-                                        " detected in " + entry.processName + " " + entry.tag + 
-                                        ". \n" + stackTrace;
-
-            builder.append(entryReport).append("  ");
+            builder.append("Process error ").append(condition).append(" ");
+            builder.append(" ").append(entry.shortMsg);
+            builder.append(" detected in ").append(entry.processName).append(" ").append(entry.tag);
         }
         return builder.toString();
     }

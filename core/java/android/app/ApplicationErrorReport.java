@@ -19,6 +19,8 @@ package android.app;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Printer;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 
 /**
  * Describes an application error.
@@ -184,6 +186,31 @@ public class ApplicationErrorReport implements Parcelable {
          * Create an uninitialized instance of CrashInfo.
          */
         public CrashInfo() {
+        }
+
+        /**
+         * Create an instance of CrashInfo initialized from an exception.
+         */
+        public CrashInfo(Throwable tr) {
+            StringWriter sw = new StringWriter();
+            tr.printStackTrace(new PrintWriter(sw));
+            stackTrace = sw.toString();
+
+            // Populate fields with the "root cause" exception
+            while (tr.getCause() != null) {
+                tr = tr.getCause();
+                String msg = tr.getMessage();
+                if (msg != null && msg.length() > 0) {
+                    exceptionMessage = msg;
+                }
+            }
+
+            exceptionClassName = tr.getClass().getName();
+            StackTraceElement trace = tr.getStackTrace()[0];
+            throwFileName = trace.getFileName();
+            throwClassName = trace.getClassName();
+            throwMethodName = trace.getMethodName();
+            throwLineNumber = trace.getLineNumber();
         }
 
         /**

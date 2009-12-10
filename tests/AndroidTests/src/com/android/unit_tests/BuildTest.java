@@ -17,15 +17,14 @@
 package com.android.unit_tests;
 
 import android.os.Build;
-import android.server.data.BuildData;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.util.Log;
 import junit.framework.Assert;
 import junit.framework.TestCase;
 
 /**
- * Provides test cases for android.os.Build and android.server.data.BuildData,
- * and, in turn, many of the system properties set by the build system.
+ * Provides test cases for android.os.Build and, in turn, many of the
+ * system properties set by the build system.
  */
 public class BuildTest extends TestCase {
 
@@ -73,59 +72,5 @@ public class BuildTest extends TestCase {
         // TODO: if any of the android.os.Build fields have additional constraints
         // (e.g., must be a C identifier, must be a valid filename, must not contain any spaces)
         // add tests for them.
-    }
-
-    /**
-     * Asserts that android.server.data.BuildData behaves as expected.
-     */
-    @SmallTest
-    public void testBuildData() throws Exception {
-        BuildData bd;
-
-        /*
-         * Default constructor
-         */
-        bd = new BuildData();
-        assertNotEmpty(bd.getFingerprint());
-        assertNotEmpty(bd.getIncrementalVersion());
-        Assert.assertTrue(bd.getTime() > 0);
-
-        /*
-         * Explicit constructor
-         */
-        final String FINGERPRINT = "fingerprint";
-        final String INCREMENTAL_VERSION = "74321";  // a valid long, for the serialization test
-        final long TIME = 12345;
-        bd = new BuildData(FINGERPRINT, INCREMENTAL_VERSION, TIME);
-        Assert.assertEquals(FINGERPRINT, bd.getFingerprint());
-        Assert.assertEquals(INCREMENTAL_VERSION, bd.getIncrementalVersion());
-        Assert.assertTrue(bd.getTime() == TIME);
-
-// The serialization methods are package-private.
-//
-// import java.io.ByteArrayInputStream;
-// import java.io.ByteArrayOutputStream;
-// import java.io.DataInputStream;
-// import java.io.DataOutputStream;
-//
-//        /*
-//         * Serialization
-//         */
-//        ByteArrayOutputStream out = new ByteArrayOutputStream();
-//        bd.write(new DataOutputStream(out));
-//        Assert.assertTrue(out.size() > 0);
-//
-//        /*
-//         * Deserialization
-//         *
-//         * The current version of BuildData converts the incremental version to
-//         * and from a long when serializing/deserializing.  Future versions should
-//         * treat it as a string.
-//         */
-//        BuildData bd2 =
-//                new BuildData(new DataInputStream(new ByteArrayInputStream(out.toByteArray())));
-//        Assert.assertEquals(bd.getFingerprint(), bd2.getFingerprint());
-//        Assert.assertEquals(bd.getIncrementalVersion(), bd2.getIncrementalVersion());
-//        Assert.assertTrue(bd.getTime() == bd2.getTime());
     }
 }

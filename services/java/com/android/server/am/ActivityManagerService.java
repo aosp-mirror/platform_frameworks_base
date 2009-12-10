@@ -88,9 +88,6 @@ import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.provider.Checkin;
 import android.provider.Settings;
-import android.server.data.CrashData;
-import android.server.data.StackTraceElementData;
-import android.server.data.ThrowableData;
 import android.text.TextUtils;
 import android.util.Config;
 import android.util.EventLog;
@@ -944,12 +941,6 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             switch (msg.what) {
             case SHOW_ERROR_MSG: {
                 HashMap data = (HashMap) msg.obj;
-                byte[] crashData = (byte[])data.get("crashData");
-                if (crashData != null) {
-                    // This needs to be *un*synchronized to avoid deadlock.
-                    ContentResolver resolver = mContext.getContentResolver();
-                    Checkin.reportCrash(resolver, crashData);
-                }
                 synchronized (ActivityManagerService.this) {
                     ProcessRecord proc = (ProcessRecord)data.get("app");
                     if (proc != null && proc.crashDialog != null) {
@@ -958,11 +949,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                     }
                     AppErrorResult res = (AppErrorResult) data.get("result");
                     if (!mSleeping && !mShuttingDown) {
-                        Dialog d = new AppErrorDialog(
-                                mContext, res, proc,
-                                (Integer)data.get("flags"),
-                                (String)data.get("shortMsg"),
-                                (String)data.get("longMsg"));
+                        Dialog d = new AppErrorDialog(mContext, res, proc);
                         d.show();
                         proc.crashDialog = d;
                     } else {
@@ -4706,7 +4693,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         makeAppNotRespondingLocked(app,
                 activity != null ? activity.shortComponentName : null,
                 annotation != null ? "ANR " + annotation : "ANR",
-                info.toString(), null);
+                info.toString());
         Message msg = Message.obtain();
         HashMap map = new HashMap();
         msg.what = SHOW_NOT_RESPONDING_MSG;
@@ -8544,11 +8531,12 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         }
     }
 
-    boolean makeAppCrashingLocked(ProcessRecord app,
-            String tag, String shortMsg, String longMsg, byte[] crashData) {
+    private boolean makeAppCrashingLocked(ProcessRecord app,
+            String tag, String shortMsg, String longMsg, String stackTrace) {
         app.crashing = true;
-        app.crashingReport = generateProcessError(app, 
-                ActivityManager.ProcessErrorStateInfo.CRASHED, tag, shortMsg, longMsg, crashData);
+        app.crashingReport = generateProcessError(app,
+                ActivityManager.ProcessErrorStateInfo.CRASHED, tag, shortMsg, longMsg,
+                stackTrace);
         startAppProblemLocked(app);
         app.stopFreezingAllLocked();
         return handleAppCrashLocked(app);
@@ -8621,12 +8609,11 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         return new ComponentName(receiverPackage, info.activityInfo.name);
     }
 
-    void makeAppNotRespondingLocked(ProcessRecord app,
-            String tag, String shortMsg, String longMsg, byte[] crashData) {
+    private void makeAppNotRespondingLocked(ProcessRecord app,
+            String tag, String shortMsg, String longMsg) {
         app.notResponding = true;
-        app.notRespondingReport = generateProcessError(app, 
-                ActivityManager.ProcessErrorStateInfo.NOT_RESPONDING, tag, shortMsg, longMsg, 
-                crashData);
+        app.notRespondingReport = generateProcessError(app,
+                ActivityManager.ProcessErrorStateInfo.NOT_RESPONDING, tag, shortMsg, longMsg, null);
         startAppProblemLocked(app);
         app.stopFreezingAllLocked();
     }
@@ -8640,14 +8627,14 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
      * @param tag The tag that was passed into handleApplicationError().  Typically the classname.
      * @param shortMsg Short message describing the crash.
      * @param longMsg Long message describing the crash.
-     * @param crashData Raw data passed into handleApplicationError().  Typically a stack trace.
-     * 
+     * @param stackTrace Full crash stack trace, may be null.
+     *
      * @return Returns a fully-formed AppErrorStateInfo record.
      */
     private ActivityManager.ProcessErrorStateInfo generateProcessError(ProcessRecord app, 
-            int condition, String tag, String shortMsg, String longMsg, byte[] crashData) {
+            int condition, String tag, String shortMsg, String longMsg, String stackTrace) {
         ActivityManager.ProcessErrorStateInfo report = new ActivityManager.ProcessErrorStateInfo();
-        
+
         report.condition = condition;
         report.processName = app.processName;
         report.pid = app.pid;
@@ -8655,7 +8642,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         report.tag = tag;
         report.shortMsg = shortMsg;
         report.longMsg = longMsg;
-        report.crashData = crashData;
+        report.stackTrace = stackTrace;
 
         return report;
     }
@@ -8686,7 +8673,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         }
     }
     
-    boolean handleAppCrashLocked(ProcessRecord app) {
+    private boolean handleAppCrashLocked(ProcessRecord app) {
         long now = SystemClock.uptimeMillis();
 
         Long crashTime = mProcessCrashTimes.get(app.info.processName,
@@ -8769,10 +8756,20 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         }
     }
 
-    public int handleApplicationError(IBinder app, int flags,
-            String tag, String shortMsg, String longMsg, byte[] crashData) {
+    public void handleApplicationError(IBinder app, String tag,
+            ApplicationErrorReport.CrashInfo crashInfo) {
         AppErrorResult result = new AppErrorResult();
         ProcessRecord r = null;
+        long timeMillis = System.currentTimeMillis();
+        String shortMsg = crashInfo.exceptionClassName;
+        String longMsg = crashInfo.exceptionMessage;
+        String stackTrace = crashInfo.stackTrace;
+        if (shortMsg != null && longMsg != null) {
+            longMsg = shortMsg + ": " + longMsg;
+        } else if (shortMsg != null) {
+            longMsg = shortMsg;
+        }
+
         synchronized (this) {
             if (app != null) {
                 for (SparseArray<ProcessRecord> apps : mProcessNames.getMap().values()) {
@@ -8799,12 +8796,12 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 try {
                     String name = r != null ? r.processName : null;
                     int pid = r != null ? r.pid : Binder.getCallingPid();
-                    if (!mController.appCrashed(name, pid,
-                            shortMsg, longMsg, crashData)) {
+                    if (!mController.appCrashed(name, pid, tag,
+                            shortMsg, longMsg, timeMillis, crashInfo.stackTrace)) {
                         Log.w(TAG, "Force-killing crashed app " + name
                                 + " at watcher's request");
                         Process.killProcess(pid);
-                        return 0;
+                        return;
                     }
                 } catch (RemoteException e) {
                     mController = null;
@@ -8824,12 +8821,12 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 info.putString("longMsg", longMsg);
                 finishInstrumentationLocked(r, Activity.RESULT_CANCELED, info);
                 Binder.restoreCallingIdentity(origId);
-                return 0;
+                return;
             }
 
             if (r != null) {
-                if (!makeAppCrashingLocked(r, tag, shortMsg, longMsg, crashData)) {
-                    return 0;
+                if (!makeAppCrashingLocked(r, tag, shortMsg, longMsg, stackTrace)) {
+                    return;
                 }
             } else {
                 Log.w(TAG, "Some application object " + app + " tag " + tag
@@ -8837,7 +8834,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 Log.w(TAG, "ShortMsg:" + shortMsg);
                 Log.w(TAG, "LongMsg:" + longMsg);
                 Binder.restoreCallingIdentity(origId);
-                return 0;
+                return;
             }
 
             Message msg = Message.obtain();
@@ -8845,13 +8842,6 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             HashMap data = new HashMap();
             data.put("result", result);
             data.put("app", r);
-            data.put("flags", flags);
-            data.put("shortMsg", shortMsg);
-            data.put("longMsg", longMsg);
-            if (r != null && (r.info.flags&ApplicationInfo.FLAG_SYSTEM) != 0) {
-                // For system processes, submit crash data to the server.
-                data.put("crashData", crashData);
-            }
             msg.obj = data;
             mHandler.sendMessage(msg);
 
@@ -8867,8 +8857,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                         SystemClock.uptimeMillis());
             }
             if (res == AppErrorDialog.FORCE_QUIT_AND_REPORT) {
-                appErrorIntent = createAppErrorIntentLocked(r);
-                res = AppErrorDialog.FORCE_QUIT;
+                appErrorIntent = createAppErrorIntentLocked(r, timeMillis, crashInfo);
             }
         }
 
@@ -8879,12 +8868,11 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 Log.w(TAG, "bug report receiver dissappeared", e);
             }
         }
-
-        return res;
     }
-    
-    Intent createAppErrorIntentLocked(ProcessRecord r) {
-        ApplicationErrorReport report = createAppErrorReportLocked(r);
+
+    Intent createAppErrorIntentLocked(ProcessRecord r,
+            long timeMillis, ApplicationErrorReport.CrashInfo crashInfo) {
+        ApplicationErrorReport report = createAppErrorReportLocked(r, timeMillis, crashInfo);
         if (report == null) {
             return null;
         }
@@ -8895,7 +8883,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         return result;
     }
 
-    ApplicationErrorReport createAppErrorReportLocked(ProcessRecord r) {
+    private ApplicationErrorReport createAppErrorReportLocked(ProcessRecord r,
+            long timeMillis, ApplicationErrorReport.CrashInfo crashInfo) {
         if (r.errorReportReceiver == null) {
             return null;
         }
@@ -8904,58 +8893,25 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             return null;
         }
 
-        try {
-            ApplicationErrorReport report = new ApplicationErrorReport();
-            report.packageName = r.info.packageName;
-            report.installerPackageName = r.errorReportReceiver.getPackageName();
-            report.processName = r.processName;
+        ApplicationErrorReport report = new ApplicationErrorReport();
+        report.packageName = r.info.packageName;
+        report.installerPackageName = r.errorReportReceiver.getPackageName();
+        report.processName = r.processName;
+        report.time = timeMillis;
 
-            if (r.crashing) {
-                report.type = ApplicationErrorReport.TYPE_CRASH;
-                report.crashInfo = new ApplicationErrorReport.CrashInfo();
+        if (r.crashing) {
+            report.type = ApplicationErrorReport.TYPE_CRASH;
+            report.crashInfo = crashInfo;
+        } else if (r.notResponding) {
+            report.type = ApplicationErrorReport.TYPE_ANR;
+            report.anrInfo = new ApplicationErrorReport.AnrInfo();
 
-                ByteArrayInputStream byteStream = new ByteArrayInputStream(
-                        r.crashingReport.crashData);
-                DataInputStream dataStream = new DataInputStream(byteStream);
-                CrashData crashData = new CrashData(dataStream);
-                ThrowableData throwData = crashData.getThrowableData();
-
-                report.time = crashData.getTime();
-                report.crashInfo.stackTrace = throwData.toString();
-
-                // Extract the source of the exception, useful for report
-                // clustering. Also extract the "deepest" non-null exception
-                // message.
-                String exceptionMessage = throwData.getMessage();
-                while (throwData.getCause() != null) {
-                    throwData = throwData.getCause();
-                    String msg = throwData.getMessage();
-                    if (msg != null && msg.length() > 0) {
-                       exceptionMessage = msg;
-                    }
-                }
-                StackTraceElementData trace = throwData.getStackTrace()[0];
-                report.crashInfo.exceptionMessage = exceptionMessage;
-                report.crashInfo.exceptionClassName = throwData.getType();
-                report.crashInfo.throwFileName = trace.getFileName();
-                report.crashInfo.throwClassName = trace.getClassName();
-                report.crashInfo.throwMethodName = trace.getMethodName();
-                report.crashInfo.throwLineNumber = trace.getLineNumber();
-            } else if (r.notResponding) {
-                report.type = ApplicationErrorReport.TYPE_ANR;
-                report.anrInfo = new ApplicationErrorReport.AnrInfo();
-
-                report.anrInfo.activity = r.notRespondingReport.tag;
-                report.anrInfo.cause = r.notRespondingReport.shortMsg;
-                report.anrInfo.info = r.notRespondingReport.longMsg;
-            }
-
-            return report;
-        } catch (IOException e) {
-            // we don't send it
+            report.anrInfo.activity = r.notRespondingReport.tag;
+            report.anrInfo.cause = r.notRespondingReport.shortMsg;
+            report.anrInfo.info = r.notRespondingReport.longMsg;
         }
 
-        return null;
+        return report;
     }
 
     public List<ActivityManager.ProcessErrorStateInfo> getProcessesInErrorState() {
@@ -11432,8 +11388,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             }
             if (timeout != null && mLRUProcesses.contains(proc)) {
                 Log.w(TAG, "Timeout executing service: " + timeout);
-                appNotRespondingLocked(proc, null, null, "Executing service "
-                        + timeout.name);
+                appNotRespondingLocked(proc, null, null, "Executing service " + timeout.name);
             } else {
                 Message msg = mHandler.obtainMessage(SERVICE_TIMEOUT_MSG);
                 msg.obj = proc;
@@ -12233,8 +12188,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             }
             
             if (app != null) {
-                appNotRespondingLocked(app, null, null,
-                        "Broadcast of " + r.intent.toString());
+                appNotRespondingLocked(app, null, null, "Broadcast of " + r.intent.toString());
             }
 
             if (mPendingBroadcast == r) {

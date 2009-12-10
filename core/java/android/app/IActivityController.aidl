@@ -43,8 +43,9 @@ interface IActivityController
      * normal error recovery (app crash dialog) to occur, false to kill
      * it immediately.
      */
-    boolean appCrashed(String processName, int pid, String shortMsg,
-            String longMsg, in byte[] crashData);
+    boolean appCrashed(String processName, int pid,
+            String tag, String shortMsg, String longMsg,
+            long timeMillis, String stackTrace);
     
     /**
      * An application process is not responding.  Return 0 to show the "app

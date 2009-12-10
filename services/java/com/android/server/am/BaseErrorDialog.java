@@ -61,6 +61,10 @@ class BaseErrorDialog extends AlertDialog {
         if (b != null) {
             b.setEnabled(enabled);
         }
+        b = (Button)findViewById(R.id.button3);
+        if (b != null) {
+            b.setEnabled(enabled);
+        }
     }
 
     private Handler mHandler = new Handler() {
