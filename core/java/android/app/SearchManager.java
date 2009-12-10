@@ -16,10 +16,16 @@
 
 package android.app;
 
+import android.Manifest;
+import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.pm.ActivityInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -1326,6 +1332,21 @@ public class SearchManager
     public final static String EXTRA_DATA_KEY = "intent_extra_data_key";
 
     /**
+     * String extra data key for {@link Intent#ACTION_GLOBAL_SEARCH} intents. Contains the initial
+     * query to show in the global search activity.
+     *
+     * @hide Pending API council approval
+     */
+    public final static String INITIAL_QUERY = "initial_query";
+
+    /**
+     * Boolean extra data key for {@link Intent#ACTION_GLOBAL_SEARCH} intents. If {@code true},
+     * the initial query should be selected.
+     *
+     * @hide Pending API council approval
+     */
+    public final static String SELECT_INITIAL_QUERY = "select_initial_query";
+    /**
      * Defines the constants used in the communication between {@link android.app.SearchDialog} and
      * the global search provider via {@link Cursor#respond(android.os.Bundle)}.
      *
@@ -1756,7 +1777,13 @@ public class SearchManager
                             boolean globalSearch) {
         if (mIdent == 0) throw new IllegalArgumentException(
                 "Called from outside of an Activity context");
-        if (!globalSearch && !mAssociatedPackage.equals(launchActivity.getPackageName())) {
+
+        if (globalSearch) {
+            startGlobalSearch(initialQuery, selectInitialQuery, appSearchData);
+            return;
+        }
+
+        if (!mAssociatedPackage.equals(launchActivity.getPackageName())) {
             Log.w(TAG, "invoking app search on a different package " +
                     "not associated with this search manager");
         }
@@ -1767,6 +1794,65 @@ public class SearchManager
         } catch (RemoteException ex) {
             Log.e(TAG, "startSearch() failed.", ex);
         }
+    }
+
+    /**
+     * Starts the global search activity.
+     */
+    private void startGlobalSearch(String initialQuery, boolean selectInitialQuery,
+            Bundle appSearchData) {
+        ComponentName globalSearchActivity = getGlobalSearchActivity();
+        if (globalSearchActivity == null) {
+            Log.w(TAG, "No global search activity found.");
+            return;
+        }
+        Intent intent = new Intent(Intent.ACTION_GLOBAL_SEARCH);
+        intent.setComponent(globalSearchActivity);
+        // TODO: Always pass name of calling package as an extra?
+        if (appSearchData != null) {
+            intent.putExtra(APP_DATA, appSearchData);
+        }
+        if (!TextUtils.isEmpty(initialQuery)) {
+            intent.putExtra(INITIAL_QUERY, initialQuery);
+        }
+        if (selectInitialQuery) {
+            intent.putExtra(SELECT_INITIAL_QUERY, selectInitialQuery);
+        }
+        try {
+            if (DBG) Log.d(TAG, "Starting global search: " + intent.toUri(0));
+            mContext.startActivity(intent);
+        } catch (ActivityNotFoundException ex) {
+            Log.e(TAG, "Global search activity not found: " + globalSearchActivity);
+        }
+    }
+
+    /**
+     * Gets the name of the global search activity.
+     *
+     * This is currently implemented by returning the first activity that handles
+     * the GLOBAL_SEARCH intent and has the GLOBAL_SEARCH permission. If we allow
+     * more than one global search acitivity to be installed, this code must be changed.
+     *
+     * TODO: Doing this every time we start global search is inefficient. Will fix that once
+     * we have settled on the right mechanism for finding the global search activity.
+     */
+    private ComponentName getGlobalSearchActivity() {
+        Intent intent = new Intent(Intent.ACTION_GLOBAL_SEARCH);
+        PackageManager pm = mContext.getPackageManager();
+        List<ResolveInfo> activities =
+                pm.queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY);
+        int count = activities.size();
+        for (int i = 0; i < count; i++) {
+            ActivityInfo ai = activities.get(i).activityInfo;
+            if (pm.checkPermission(Manifest.permission.GLOBAL_SEARCH,
+                    ai.packageName) == PackageManager.PERMISSION_GRANTED) {
+                return new ComponentName(ai.packageName, ai.name);
+            } else {
+                Log.w(TAG, "Package " + ai.packageName + " wants to handle GLOBAL_SEARCH, "
+                        + "but does not have the GLOBAL_SEARCH permission.");
+            }
+        }
+        return null;
     }
 
     /**
