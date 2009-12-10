@@ -279,6 +279,7 @@ mTabHost.addTab(TAB_TAG_1, "Hello, world!", "Tab 1");
         if (!handled
                 && (event.getAction() == KeyEvent.ACTION_DOWN)
                 && (event.getKeyCode() == KeyEvent.KEYCODE_DPAD_UP)
+                && (mCurrentView != null)
                 && (mCurrentView.isRootNamespace())
                 && (mCurrentView.hasFocus())
                 && (mCurrentView.findFocus().focusSearch(View.FOCUS_UP) == null)) {
@@ -292,7 +293,9 @@ mTabHost.addTab(TAB_TAG_1, "Hello, world!", "Tab 1");
 
     @Override
     public void dispatchWindowFocusChanged(boolean hasFocus) {
-        mCurrentView.dispatchWindowFocusChanged(hasFocus);
+        if (mCurrentView != null){
+            mCurrentView.dispatchWindowFocusChanged(hasFocus);
+        }
     }
 
     public void setCurrentTab(int index) {
