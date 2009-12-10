@@ -147,6 +147,42 @@ public class InstrumentationTestCase extends TestCase {
         }
     }
 
+    @Override
+    public void runBare() throws Throwable {
+        runMethod("setUp");
+
+        try {
+            runTest();
+        } finally {
+            runMethod("tearDown");            
+        }
+    }
+
+    private Throwable[] runMethod(String name) throws Throwable {
+        final Throwable[] exceptions = new Throwable[1];
+        final Method m = getClass().getMethod(name, (Class[]) null);
+
+        if (m.isAnnotationPresent(UiThreadTest.class)) {
+            getInstrumentation().runOnMainSync(new Runnable() {
+                public void run() {
+                    try {
+                        m.invoke(this);                        
+                    } catch (Throwable throwable) {
+                        exceptions[0] = throwable;
+                    }
+                }
+            });
+            if (exceptions[0] != null) {
+                throw exceptions[0];
+            }
+            exceptions[0] = null;
+        } else {
+            m.invoke(this);
+        }
+
+        return exceptions;
+    }
+
     /**
      * Runs the current unit test. If the unit test is annotated with
      * {@link android.test.UiThreadTest}, the test is run on the UI thread.
