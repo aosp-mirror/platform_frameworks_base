@@ -221,6 +221,7 @@ android.net.NetworkConnectivityListener$State
 android.net.NetworkInfo
 android.net.NetworkInfo$DetailedState
 android.net.SSLCertificateSocketFactory
+android.net.TrafficStats
 android.net.Uri
 android.net.Uri$1
 android.net.Uri$AbstractHierarchicalUri
