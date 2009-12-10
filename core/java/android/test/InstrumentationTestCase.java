@@ -166,7 +166,7 @@ public class InstrumentationTestCase extends TestCase {
             getInstrumentation().runOnMainSync(new Runnable() {
                 public void run() {
                     try {
-                        m.invoke(this);                        
+                        m.invoke(InstrumentationTestCase.this);                        
                     } catch (Throwable throwable) {
                         exceptions[0] = throwable;
                     }
