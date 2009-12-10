@@ -40,6 +40,20 @@
         android:textAppearance="?android:attr/textAppearanceMedium"
         />
 
+    <!-- emergency call button shown when sim is missing or PUKd -->
+    <Button
+        android:id="@+id/emergencyCallButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentRight="true"
+        android:layout_marginTop="10dip"
+        android:layout_marginRight="8dip"
+        android:drawableLeft="@drawable/ic_emergency"
+        style="@style/Widget.Button.Transparent"
+        android:drawablePadding="8dip"
+       />
+
     <!-- time and date -->
     <com.android.internal.widget.DigitalClock android:id="@+id/time"
         android:layout_width="wrap_content"
@@ -121,6 +135,7 @@
         android:layout_marginLeft="24dip"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:layout_marginTop="12dip"
+        android:drawablePadding="4dip"
         />
 
     <com.android.internal.widget.SlidingTab
@@ -131,19 +146,6 @@
         android:layout_alignParentBottom="true"
         android:layout_marginBottom="80dip" 
         />
-
-    <!-- emergency call button shown when sim is missing or PUKd -->
-    <Button
-        android:id="@+id/emergencyCallButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/screenLocked"
-        android:layout_marginTop="8dip"
-        android:layout_marginLeft="24dip"
-        android:drawableLeft="@drawable/ic_emergency"
-        style="@style/Widget.Button.Transparent"
-        android:drawablePadding="8dip"
-       />
 
 </RelativeLayout>
 
