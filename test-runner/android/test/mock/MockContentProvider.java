@@ -108,13 +108,6 @@ public class MockContentProvider extends ContentProvider {
         }
 
         @SuppressWarnings("unused")
-        public EntityIterator queryEntities(Uri url, String selection, String[] selectionArgs,
-                String sortOrder) throws RemoteException {
-            return MockContentProvider.this.queryEntities(
-                    url, selection, selectionArgs, sortOrder);
-        }
-
-        @SuppressWarnings("unused")
         public int update(Uri url, ContentValues values, String selection, String[] selectionArgs)
                 throws RemoteException {
             return MockContentProvider.this.update(url, values, selection, selectionArgs);
