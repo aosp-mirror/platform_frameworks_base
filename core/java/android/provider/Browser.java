@@ -173,9 +173,32 @@ public class Browser {
         c.startActivity(i);
     }
 
+    /**
+     * Stores a String extra in an {@link Intent} representing the title of a
+     * page to share.  When receiving an {@link Intent#ACTION_SEND} from the
+     * Browser, use this to access the title.
+     * @hide
+     */
+    public final static String EXTRA_SHARE_TITLE = "share_title";
+
+    /**
+     * Stores a Bitmap extra in an {@link Intent} representing the screenshot of
+     * a page to share.  When receiving an {@link Intent#ACTION_SEND} from the
+     * Browser, use this to access the screenshot.
+     * @hide
+     */
+    public final static String EXTRA_SHARE_SCREENSHOT = "share_screenshot";
+
+    /**
+     * Stores a Bitmap extra in an {@link Intent} representing the favicon of a
+     * page to share.  When receiving an {@link Intent#ACTION_SEND} from the
+     * Browser, use this to access the favicon.
+     * @hide
+     */
+    public final static String EXTRA_SHARE_FAVICON = "share_favicon";
+
     public static final void sendString(Context c, String s) {
-        sendString(c, s,
-                c.getText(com.android.internal.R.string.sendText).toString());
+        sendString(c, s, c.getString(com.android.internal.R.string.sendText));
     }
 
     /**
