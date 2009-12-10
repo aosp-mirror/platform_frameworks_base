@@ -3586,59 +3586,6 @@ public final class Settings {
         public static final String USE_LOCATION_FOR_SERVICES = "use_location";
 
         /**
-         * The number of entries to fetch from the feed at a time for calendar sync.
-         */
-        public static final String GOOGLE_CALENDAR_SYNC_ENTRY_FETCH_QUEUE_SIZE =
-                "google_calendar_sync_entry_fetch_queue_size";
-
-        /**
-         * The number of entities to fetch from the provider at a time for calendar sync.
-         */
-        public static final String GOOGLE_CALENDAR_SYNC_ENTITY_FETCH_QUEUE_SIZE =
-                "google_calendar_sync_entity_fetch_queue_size";
-
-        /**
-         * The maximum number of simultaneous changes to allow before alerting the user for
-         *  calendar sync.
-         */
-        public static final String GOOGLE_CALENDAR_SYNC_NUM_ALLOWED_SIMULTANEOUS_CHANGES =
-                "google_calendar_sync_num_allowed_simultaneous changes";
-
-        /**
-         * The maximum percentage of simultaneous changes to allow before alerting the user for
-         *  calendar sync.
-         */
-        public static final String GOOGLE_CALENDAR_SYNC_PERCENT_ALLOWED_SIMULTANEOUS_CHANGES =
-                "google_calendar_sync_percent_allowed_simultaneous_changes";
-
-        /**
-         * The number of times to apply local changes in calendar sync before stopping.
-         */
-        public static final String GOOGLE_CALENDAR_SYNC_MAX_LOOP_ATTEMPTS =
-                "google_calendar_sync_max_loop_attempts";
-
-        /**
-         * The batch size for applying server changes to the provider for calendar sync.
-         */
-        public static final String GOOGLE_CALENDAR_SYNC_NUM_APPLICATIONS_PER_BATCH =
-                "google_calendar_sync_num_applications_per_batch";
-
-        /**
-         * The length of the calendar sync window into the future.
-         * This specifies the number of days into the future for the sliding window sync.
-         * Setting this to zero will disable sliding sync.
-         */
-        public static final String GOOGLE_CALENDAR_SYNC_WINDOW_DAYS =
-                "google_calendar_sync_window_days";
-
-        /**
-         * How often to update the calendar sync window.
-         * The window will be advanced every n days.
-         */
-        public static final String GOOGLE_CALENDAR_SYNC_WINDOW_UPDATE_DAYS =
-                "google_calendar_sync_window_update_days";
-
-        /**
          * The number of promoted sources in GlobalSearch.
          */
         public static final String SEARCH_NUM_PROMOTED_SOURCES = "search_num_promoted_sources";
