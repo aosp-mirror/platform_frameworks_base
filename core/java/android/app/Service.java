@@ -287,6 +287,14 @@ public abstract class Service extends ContextWrapper implements ComponentCallbac
      * {@link #onStart} and returns either {@link #START_STICKY}
      * or {@link #START_STICKY_COMPATIBILITY}.
      * 
+     * <p>If you need your application to run on platform versions prior to API
+     * level 5, you can use the following model to handle the older {@link #onStart}
+     * callback in that case.  The <code>handleCommand</code> method is implemented by
+     * you as appropriate:
+     * 
+     * <pre>{@include development/samples/ApiDemos/src/com/example/android/apis/app/ForegroundService.java
+     *   start_compatibility}</pre>
+     * 
      * @param intent The Intent supplied to {@link android.content.Context#startService}, 
      * as given.  This may be null if the service is being restarted after
      * its process has gone away, and it had previously returned anything
@@ -461,6 +469,13 @@ public abstract class Service extends ContextWrapper implements ComponentCallbac
      * flag if killing your service would be disruptive to the user, such as
      * if your service is performing background music playback, so the user
      * would notice if their music stopped playing.
+     * 
+     * <p>If you need your application to run on platform versions prior to API
+     * level 5, you can use the following model to call the the older {@link #setForeground}
+     * or this modern method as appropriate:
+     * 
+     * <pre>{@include development/samples/ApiDemos/src/com/example/android/apis/app/ForegroundService.java
+     *   foreground_compatibility}</pre>
      * 
      * @param id The identifier for this notification as per
      * {@link NotificationManager#notify(int, Notification)
