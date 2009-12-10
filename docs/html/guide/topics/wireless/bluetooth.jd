@@ -428,6 +428,11 @@ android.bluetooth.BluetoothSocket} in different ways. The server will receive it
 when an incoming connection is accepted. The client will receive it when it
 opens an RFCOMM channel to the server.</p>
 
+<div class="figure" style="width:200px">
+<img src="{@docRoot}images/bt_pairing_request.png" />
+<strong>Figure 3:</strong> The Bluetooth pairing dialog.
+</div>
+
 <p>One implementation technique is to automatically prepare each device as a
 server, so that each one has a server socket open and listening for connections.
 Then either device can initiate a connection with the other and become the
@@ -435,14 +440,10 @@ client. Alternatively, one device can explicitly "host" the connection and open
 a server socket on demand and the other device can simply initiate the
 connection.</p>
 
-<div class="figure" style="width:200px">
-<img src="{@docRoot}images/bt_pairing_request.png" />
-<strong>Figure 3:</strong> The Bluetooth pairing dialog.
-</div>
-
 <p class="note"><strong>Note:</strong> If the two devices have not been previously paired,
 then the Android framework will automatically show a pairing request notification or
-dialog to the user during the connection procedure. So when attempting to connect devices,
+dialog to the user during the connection procedure, as shown in Figure 3. So
+when attempting to connect devices,
 your application does not need to be concerned about whether or not the devices are
 paired. Your RFCOMM connection attempt will block until the user has successfully paired,
 or will fail if the user rejects pairing, or if pairing fails or times out. </p>
