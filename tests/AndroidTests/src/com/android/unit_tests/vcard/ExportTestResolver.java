@@ -111,21 +111,6 @@ import java.util.List;
     }
 
     @Override
-    public EntityIterator queryEntities(Uri uri, String selection, String[] selectionArgs,
-            String sortOrder) {
-        mTestCase.assertTrue(uri != null);
-        mTestCase.assertTrue(ContentResolver.SCHEME_CONTENT.equals(uri.getScheme()));
-        final String authority = uri.getAuthority();
-        mTestCase.assertTrue(RawContacts.CONTENT_URI.getAuthority().equals(authority));
-        mTestCase.assertTrue((Data.CONTACT_ID + "=?").equals(selection));
-        mTestCase.assertEquals(1, selectionArgs.length);
-        int id = Integer.parseInt(selectionArgs[0]);
-        mTestCase.assertTrue(id >= 0 && id < mContactEntryList.size());
-
-        return new MockEntityIterator(mContactEntryList.get(id).getList());
-    }
-
-    @Override
     public Cursor query(Uri uri, String[] projection,
             String selection, String[] selectionArgs, String sortOrder) {
         mTestCase.assertTrue(VCardComposer.CONTACTS_TEST_CONTENT_URI.equals(uri));

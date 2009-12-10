@@ -136,7 +136,6 @@ android.content.ContentProvider
 android.content.ContentProvider$Transport
 android.content.ContentProviderClient
 android.content.ContentProviderNative
-android.content.ContentProviderNative$IEntityIteratorImpl
 android.content.ContentProviderOperation
 android.content.ContentProviderProxy
 android.content.ContentProviderResult
@@ -151,7 +150,6 @@ android.content.Entity
 android.content.IContentProvider
 android.content.IContentService$Stub
 android.content.IContentService$Stub$Proxy
-android.content.IEntityIterator$Stub
 android.content.IIntentReceiver$Stub
 android.content.IIntentSender$Stub
 android.content.ISyncAdapter$Stub

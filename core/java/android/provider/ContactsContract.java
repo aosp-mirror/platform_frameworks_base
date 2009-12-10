@@ -24,12 +24,15 @@ import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.content.CursorEntityIterator;
+import android.content.EntityIterator;
+import android.content.Entity;
 import android.content.res.Resources;
 import android.database.Cursor;
+import android.database.DatabaseUtils;
 import android.graphics.Rect;
 import android.net.Uri;
 import android.os.RemoteException;
-import android.provider.ContactsContract.CommonDataKinds.Email;
 import android.text.TextUtils;
 import android.util.Pair;
 import android.view.View;
@@ -984,7 +987,7 @@ public final class ContactsContract {
      * removes the raw contact from its aggregate contact.
      * The sync adapter then deletes the raw contact from the server and
      * finalizes phone-side deletion by calling {@code resolver.delete(...)}
-     * again and passing the {@link #CALLER_IS_SYNCADAPTER} query parameter.<p>
+     * again and passing the {@link ContactsContract#CALLER_IS_SYNCADAPTER} query parameter.<p>
      * <p>Some sync adapters are read-only, meaning that they only sync server-side
      * changes to the phone, but not the reverse.  If one of those raw contacts
      * is marked for deletion, it will remain on the phone.  However it will be
@@ -1365,6 +1368,107 @@ public final class ContactsContract {
              * <P>Type: INTEGER</P>
              */
             public static final String DATA_ID = "data_id";
+        }
+
+        public static EntityIterator newEntityIterator(Cursor cursor) {
+            return new EntityIteratorImpl(cursor);
+        }
+
+        private static class EntityIteratorImpl extends CursorEntityIterator {
+            private static final String[] DATA_KEYS = new String[]{
+                    Data.DATA1,
+                    Data.DATA2,
+                    Data.DATA3,
+                    Data.DATA4,
+                    Data.DATA5,
+                    Data.DATA6,
+                    Data.DATA7,
+                    Data.DATA8,
+                    Data.DATA9,
+                    Data.DATA10,
+                    Data.DATA11,
+                    Data.DATA12,
+                    Data.DATA13,
+                    Data.DATA14,
+                    Data.DATA15,
+                    Data.SYNC1,
+                    Data.SYNC2,
+                    Data.SYNC3,
+                    Data.SYNC4};
+
+            public EntityIteratorImpl(Cursor cursor) {
+                super(cursor);
+            }
+
+            public android.content.Entity getEntityAndIncrementCursor(Cursor cursor)
+                    throws RemoteException {
+                final int columnRawContactId = cursor.getColumnIndexOrThrow(RawContacts._ID);
+                final long rawContactId = cursor.getLong(columnRawContactId);
+
+                // we expect the cursor is already at the row we need to read from
+                ContentValues cv = new ContentValues();
+                DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, ACCOUNT_NAME);
+                DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, ACCOUNT_TYPE);
+                DatabaseUtils.cursorLongToContentValuesIfPresent(cursor, cv, _ID);
+                DatabaseUtils.cursorLongToContentValuesIfPresent(cursor, cv, DIRTY);
+                DatabaseUtils.cursorLongToContentValuesIfPresent(cursor, cv, VERSION);
+                DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, SOURCE_ID);
+                DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, SYNC1);
+                DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, SYNC2);
+                DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, SYNC3);
+                DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, SYNC4);
+                DatabaseUtils.cursorLongToContentValuesIfPresent(cursor, cv, DELETED);
+                DatabaseUtils.cursorLongToContentValuesIfPresent(cursor, cv, CONTACT_ID);
+                DatabaseUtils.cursorLongToContentValuesIfPresent(cursor, cv, STARRED);
+                DatabaseUtils.cursorIntToContentValuesIfPresent(cursor, cv, IS_RESTRICTED);
+                android.content.Entity contact = new android.content.Entity(cv);
+
+                // read data rows until the contact id changes
+                do {
+                    if (rawContactId != cursor.getLong(columnRawContactId)) {
+                        break;
+                    }
+                    // add the data to to the contact
+                    cv = new ContentValues();
+                    cv.put(Data._ID, cursor.getLong(cursor.getColumnIndexOrThrow(Entity.DATA_ID)));
+                    DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv,
+                            Data.RES_PACKAGE);
+                    DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, Data.MIMETYPE);
+                    DatabaseUtils.cursorLongToContentValuesIfPresent(cursor, cv, Data.IS_PRIMARY);
+                    DatabaseUtils.cursorLongToContentValuesIfPresent(cursor, cv,
+                            Data.IS_SUPER_PRIMARY);
+                    DatabaseUtils.cursorLongToContentValuesIfPresent(cursor, cv, Data.DATA_VERSION);
+                    DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv,
+                            CommonDataKinds.GroupMembership.GROUP_SOURCE_ID);
+                    DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv,
+                            Data.DATA_VERSION);
+                    for (String key : DATA_KEYS) {
+                        final int columnIndex = cursor.getColumnIndexOrThrow(key);
+                        if (cursor.isNull(columnIndex)) {
+                            // don't put anything
+                        } else {
+                            cv.put(key, cursor.getString(columnIndex));
+                        }
+                        // TODO: go back to this version of the code when bug
+                        // http://b/issue?id=2306370 is fixed.
+//                        if (cursor.isNull(columnIndex)) {
+//                            // don't put anything
+//                        } else if (cursor.isLong(columnIndex)) {
+//                            values.put(key, cursor.getLong(columnIndex));
+//                        } else if (cursor.isFloat(columnIndex)) {
+//                            values.put(key, cursor.getFloat(columnIndex));
+//                        } else if (cursor.isString(columnIndex)) {
+//                            values.put(key, cursor.getString(columnIndex));
+//                        } else if (cursor.isBlob(columnIndex)) {
+//                            values.put(key, cursor.getBlob(columnIndex));
+//                        }
+                    }
+                    contact.addSubValue(ContactsContract.Data.CONTENT_URI, cv);
+                } while (cursor.moveToNext());
+
+                return contact;
+            }
+
         }
     }
 
@@ -4326,6 +4430,41 @@ public final class ContactsContract {
          * The MIME type of a single group.
          */
         public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/group";
+
+        public static EntityIterator newEntityIterator(Cursor cursor) {
+            return new EntityIteratorImpl(cursor);
+        }
+
+        private static class EntityIteratorImpl extends CursorEntityIterator {
+            public EntityIteratorImpl(Cursor cursor) {
+                super(cursor);
+            }
+
+            public Entity getEntityAndIncrementCursor(Cursor cursor) throws RemoteException {
+                // we expect the cursor is already at the row we need to read from
+                final ContentValues values = new ContentValues();
+                DatabaseUtils.cursorLongToContentValuesIfPresent(cursor, values, _ID);
+                DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, values, ACCOUNT_NAME);
+                DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, values, ACCOUNT_TYPE);
+                DatabaseUtils.cursorLongToContentValuesIfPresent(cursor, values, DIRTY);
+                DatabaseUtils.cursorLongToContentValuesIfPresent(cursor, values, VERSION);
+                DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, values, SOURCE_ID);
+                DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, values, RES_PACKAGE);
+                DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, values, TITLE);
+                DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, values, TITLE_RES);
+                DatabaseUtils.cursorLongToContentValuesIfPresent(cursor, values, GROUP_VISIBLE);
+                DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, values, SYNC1);
+                DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, values, SYNC2);
+                DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, values, SYNC3);
+                DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, values, SYNC4);
+                DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, values, SYSTEM_ID);
+                DatabaseUtils.cursorLongToContentValuesIfPresent(cursor, values, DELETED);
+                DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, values, NOTES);
+                DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, values, SHOULD_SYNC);
+                cursor.moveToNext();
+                return new Entity(values);
+            }
+        }
     }
 
     /**

@@ -96,15 +96,6 @@ class MockContentProvider extends ContentProvider {
         throw new UnsupportedOperationException("unimplemented mock method");
     }
 
-    /**
-     * @hide
-     */
-    @Override
-    public EntityIterator queryEntities(Uri url, String selection, String[] selectionArgs,
-            String sortOrder) {
-        throw new UnsupportedOperationException("unimplemented mock method");
-    }
-
     @Override
     public int update(Uri url, ContentValues values, String selection, String[] selectionArgs) {
         throw new UnsupportedOperationException("unimplemented mock method");

@@ -139,13 +139,9 @@ public class VCardComposer {
     public static final Uri CONTACTS_TEST_CONTENT_URI =
         Uri.withAppendedPath(VCARD_TEST_AUTHORITY_URI, "contacts");
 
-    private static final Uri sDataRequestUri;
     private static final Map<Integer, String> sImMap;
 
     static {
-        Uri.Builder builder = RawContacts.CONTENT_URI.buildUpon();
-        builder.appendQueryParameter(Data.FOR_EXPORT_ONLY, "1");
-        sDataRequestUri = builder.build();
         sImMap = new HashMap<Integer, String>();
         sImMap.put(Im.PROTOCOL_AIM, VCardConstants.PROPERTY_X_AIM);
         sImMap.put(Im.PROTOCOL_MSN, VCardConstants.PROPERTY_X_MSN);
@@ -482,16 +478,19 @@ public class VCardComposer {
     private String createOneEntryInternal(final String contactId) {
         final Map<String, List<ContentValues>> contentValuesListMap =
                 new HashMap<String, List<ContentValues>>();
-        final String selection = Data.CONTACT_ID + "=?";
-        final String[] selectionArgs = new String[] {contactId};
         // The resolver may return the entity iterator with no data. It is possiible.
         // e.g. If all the data in the contact of the given contact id are not exportable ones,
         //      they are hidden from the view of this method, though contact id itself exists.
         boolean dataExists = false;
         EntityIterator entityIterator = null;
         try {
-            entityIterator = mContentResolver.queryEntities(
-                    sDataRequestUri, selection, selectionArgs, null);
+            final Uri uri = RawContacts.CONTENT_URI.buildUpon()
+                    .appendEncodedPath(contactId)
+                    .appendEncodedPath(RawContacts.Entity.CONTENT_DIRECTORY)
+                    .appendQueryParameter(Data.FOR_EXPORT_ONLY, "1")
+                    .build();
+            entityIterator = RawContacts.newEntityIterator(mContentResolver.query(
+                    uri, null, null, null, null));
             dataExists = entityIterator.hasNext();
             while (entityIterator.hasNext()) {
                 Entity entity = entityIterator.next();
