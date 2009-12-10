@@ -38,8 +38,9 @@ import java.io.IOException;
 import java.util.HashMap;
 
 /**
- * 
- * @hide Pending API council approval
+ * Searchability meta-data for an activity.
+ * See <a href="SearchManager.html#SearchabilityMetadata">Searchability meta-data</a>
+ * for more information.
  */
 public final class SearchableInfo implements Parcelable {
 
@@ -87,9 +88,9 @@ public final class SearchableInfo implements Parcelable {
     private final String mSuggestProviderPackage;
     
     // Flag values for Searchable_voiceSearchMode
-    private static int VOICE_SEARCH_SHOW_BUTTON = 1;
-    private static int VOICE_SEARCH_LAUNCH_WEB_SEARCH = 2;
-    private static int VOICE_SEARCH_LAUNCH_RECOGNIZER = 4;
+    private static final int VOICE_SEARCH_SHOW_BUTTON = 1;
+    private static final int VOICE_SEARCH_LAUNCH_WEB_SEARCH = 2;
+    private static final int VOICE_SEARCH_LAUNCH_RECOGNIZER = 4;
     private final int mVoiceSearchMode;
     private final int mVoiceLanguageModeId;       // voiceLanguageModel
     private final int mVoicePromptTextId;         // voicePromptText
@@ -123,6 +124,8 @@ public final class SearchableInfo implements Parcelable {
 
     /**
      * Checks whether the badge should be a text label.
+     *
+     * @hide This feature is deprecated, no need to add it to the API.
      */
     public boolean useBadgeLabel() {
         return 0 != (mSearchMode & SEARCH_MODE_BADGE_LABEL);
@@ -130,6 +133,8 @@ public final class SearchableInfo implements Parcelable {
 
     /**
      * Checks whether the badge should be an icon.
+     *
+     * @hide This feature is deprecated, no need to add it to the API.
      */
     public boolean useBadgeIcon() {
         return (0 != (mSearchMode & SEARCH_MODE_BADGE_ICON)) && (mIconId != 0);
@@ -220,6 +225,7 @@ public final class SearchableInfo implements Parcelable {
      * 
      * @param context You need to supply a context to start with
      * @return Returns a context related to the searchable activity
+     * @hide
      */
     public Context getActivityContext(Context context) {
         return createActivityContext(context, mSearchActivity);
@@ -251,6 +257,7 @@ public final class SearchableInfo implements Parcelable {
      * @param activityContext If we can determine that the provider and the activity are the
      * same, we'll just return this one.
      * @return Returns a context related to the context provider
+     * @hide
      */
     public Context getProviderContext(Context context, Context activityContext) {
         Context theirContext = null;
@@ -351,7 +358,11 @@ public final class SearchableInfo implements Parcelable {
     }
     
     /**
-     * Private class used to hold the "action key" configuration
+     * Information about an action key in searchability meta-data.
+     * See <a href="SearchManager.html#SearchabilityMetadata">Searchability meta-data</a>
+     * for more information.
+     *
+     * @see SearchableInfo#findActionKey(int)
      */
     public static class ActionKeyInfo implements Parcelable {
         
@@ -368,7 +379,7 @@ public final class SearchableInfo implements Parcelable {
          * construct the object.
          * @throws IllegalArgumentException if the action key configuration is invalid
          */
-        public ActionKeyInfo(Context activityContext, AttributeSet attr) {
+        ActionKeyInfo(Context activityContext, AttributeSet attr) {
             TypedArray a = activityContext.obtainStyledAttributes(attr,
                     com.android.internal.R.styleable.SearchableActionKey);
 
@@ -399,7 +410,7 @@ public final class SearchableInfo implements Parcelable {
          * @param in The Parcel containing the previously written ActionKeyInfo,
          * positioned at the location in the buffer where it was written.
          */
-        public ActionKeyInfo(Parcel in) {
+        private ActionKeyInfo(Parcel in) {
             mKeyCode = in.readInt();
             mQueryActionMsg = in.readString();
             mSuggestActionMsg = in.readString();
@@ -461,6 +472,8 @@ public final class SearchableInfo implements Parcelable {
      * @param activityInfo Activity to get search information from.
      * @return Search information about the given activity, or {@code null} if
      *         the activity has no or invalid searchability meta-data.
+     *
+     * @hide For use by SearchManagerService.
      */
     public static SearchableInfo getActivityMetaData(Context context, ActivityInfo activityInfo) {
         // for each component, try to find metadata
@@ -720,7 +733,7 @@ public final class SearchableInfo implements Parcelable {
      * @param in The Parcel containing the previously written SearchableInfo,
      * positioned at the location in the buffer where it was written.
      */
-    public SearchableInfo(Parcel in) {
+    SearchableInfo(Parcel in) {
         mLabelId = in.readInt();
         mSearchActivity = ComponentName.readFromParcel(in);
         mHintId = in.readInt();
