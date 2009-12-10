@@ -222,13 +222,4 @@ public class MockContentProvider extends ContentProvider {
     public final IContentProvider getIContentProvider() {
         return mIContentProvider;
     }
-
-    /**
-     * @hide
-     */
-    @Override
-    public EntityIterator queryEntities(Uri uri, String selection, String[] selectionArgs,
-            String sortOrder) {
-        throw new UnsupportedOperationException("unimplemented mock method");
-    }
 }
