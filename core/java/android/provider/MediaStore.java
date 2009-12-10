@@ -1252,6 +1252,28 @@ public final class MediaStore {
                 }
 
                 /**
+                 * Convenience method to move a playlist item to a new location
+                 * @param res The content resolver to use
+                 * @param playlistId The numeric id of the playlist
+                 * @param from The position of the item to move
+                 * @param to The position to move the item to
+                 * @return true on success
+                 * @hide
+                 */
+                public static final boolean moveItem(ContentResolver res,
+                        long playlistId, int from, int to) {
+                    Uri uri = MediaStore.Audio.Playlists.Members.getContentUri("external",
+                            playlistId)
+                            .buildUpon()
+                            .appendEncodedPath(String.valueOf(from))
+                            .appendQueryParameter("move", "true")
+                            .build();
+                    ContentValues values = new ContentValues();
+                    values.put(MediaStore.Audio.Playlists.Members.PLAY_ORDER, to);
+                    return res.update(uri, values, null, null) != 0;
+                }
+
+                /**
                  * The ID within the playlist.
                  */
                 public static final String _ID = "_id";
