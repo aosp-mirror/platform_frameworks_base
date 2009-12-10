@@ -20,7 +20,9 @@
     .align
     
     .global gglFloatToFixed
+    .type gglFloatToFixed, %function
     .global gglFloatToFixedFast
+    .type gglFloatToFixedFast, %function
 
 
 /*
