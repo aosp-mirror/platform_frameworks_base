@@ -515,7 +515,7 @@ final class WebViewCore {
     private native void nativeTouchUp(int touchGeneration,
             int framePtr, int nodePtr, int x, int y);
 
-    private native boolean nativeHandleTouchEvent(int action, int x, int y);
+    private native int nativeHandleTouchEvent(int action, int x, int y);
 
     private native void nativeUpdateFrameCache();
 
@@ -712,8 +712,13 @@ final class WebViewCore {
         int mY;
     }
 
+    // mAction of TouchEventData can be MotionEvent.getAction() which uses the
+    // last two bytes or one of the following values
+    static final int ACTION_LONGPRESS = 0x100;
+    static final int ACTION_DOUBLETAP = 0x200;
+
     static class TouchEventData {
-        int mAction;    // MotionEvent.getAction()
+        int mAction;
         int mX;
         int mY;
     }
@@ -1130,7 +1135,7 @@ final class WebViewCore {
                                     mWebView.mPrivateHandler,
                                     WebView.PREVENT_TOUCH_ID, ted.mAction,
                                     nativeHandleTouchEvent(ted.mAction, ted.mX,
-                                            ted.mY) ? 1 : 0).sendToTarget();
+                                            ted.mY)).sendToTarget();
                             break;
                         }
 
