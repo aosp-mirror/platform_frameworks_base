@@ -254,6 +254,12 @@ implements MovementMethod
 
                   buffer.setSpan(LAST_TAP_DOWN, offset, offset,
                                  Spannable.SPAN_POINT_POINT);
+
+                  // Disallow intercepting of the touch events, so that
+                  // users can scroll and select at the same time.
+                  // without this, users would get booted out of select
+                  // mode once the view detected it needed to scroll.
+                  widget.getParent().requestDisallowInterceptTouchEvent(true);
               }
             } else if (event.getAction() == MotionEvent.ACTION_MOVE ) {
               boolean cap = (MetaKeyKeyListener.getMetaState(buffer,
@@ -277,7 +283,7 @@ implements MovementMethod
                 int spanstart;
                 int spanend;
                 if (offset >= lastDownOffset) {
-                  // expand to from word start of the original tap to new word
+                  // Expand from word start of the original tap to new word
                   // end, since we are selecting "forwards"
                   spanstart = findWordStart(buffer, lastDownOffset);
                   spanend = findWordEnd(buffer, offset);
