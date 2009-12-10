@@ -5258,7 +5258,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         
         app.thread = thread;
         app.curAdj = app.setAdj = -100;
-        app.curSchedGroup = app.setSchedGroup = Process.THREAD_GROUP_DEFAULT;
+        app.curSchedGroup = Process.THREAD_GROUP_DEFAULT;
+        app.setSchedGroup = Process.THREAD_GROUP_BG_NONINTERACTIVE;
         app.forcingToForeground = null;
         app.foregroundServices = false;
         app.debugging = false;
@@ -9134,7 +9135,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 if (needSep) pw.println(" ");
                 needSep = true;
                 pw.println("  Running processes (most recent first):");
-                dumpProcessList(pw, mLRUProcesses, "    ",
+                dumpProcessList(pw, this, mLRUProcesses, "    ",
                         "App ", "PERS", true);
                 needSep = true;
             }
@@ -9165,7 +9166,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 if (needSep) pw.println(" ");
                 needSep = true;
                 pw.println("  Persisent processes that are starting:");
-                dumpProcessList(pw, mPersistentStartingProcesses, "    ",
+                dumpProcessList(pw, this, mPersistentStartingProcesses, "    ",
                         "Starting Norm", "Restarting PERS", false);
             }
 
@@ -9173,7 +9174,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 if (needSep) pw.println(" ");
                 needSep = true;
                 pw.println("  Processes that are starting:");
-                dumpProcessList(pw, mStartingProcesses, "    ",
+                dumpProcessList(pw, this, mStartingProcesses, "    ",
                         "Starting Norm", "Starting PERS", false);
             }
 
@@ -9181,7 +9182,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 if (needSep) pw.println(" ");
                 needSep = true;
                 pw.println("  Processes that are being removed:");
-                dumpProcessList(pw, mRemovedProcesses, "    ",
+                dumpProcessList(pw, this, mRemovedProcesses, "    ",
                         "Removed Norm", "Removed PERS", false);
             }
             
@@ -9189,7 +9190,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 if (needSep) pw.println(" ");
                 needSep = true;
                 pw.println("  Processes that are on old until the system is ready:");
-                dumpProcessList(pw, mProcessesOnHold, "    ",
+                dumpProcessList(pw, this, mProcessesOnHold, "    ",
                         "OnHold Norm", "OnHold PERS", false);
             }
 
@@ -9618,7 +9619,16 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         }
     }
 
-    private static final int dumpProcessList(PrintWriter pw, List list,
+    private static String buildOomTag(String prefix, String space, int val, int base) {
+        if (val == base) {
+            if (space == null) return prefix;
+            return prefix + "  ";
+        }
+        return prefix + "+" + Integer.toString(val-base);
+    }
+    
+    private static final int dumpProcessList(PrintWriter pw,
+            ActivityManagerService service, List list,
             String prefix, String normalLabel, String persistentLabel,
             boolean inclOomAdj) {
         int numPers = 0;
@@ -9629,9 +9639,55 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                       + " #" + i + ":");
                 r.dump(pw, prefix + "  ");
             } else if (inclOomAdj) {
-                pw.println(String.format("%s%s #%2d: adj=%4d/%d %s (%s)",
+                String oomAdj;
+                if (r.setAdj >= EMPTY_APP_ADJ) {
+                    oomAdj = buildOomTag("empty", null, r.setAdj,
+                            EMPTY_APP_ADJ);
+                } else if (r.setAdj >= CONTENT_PROVIDER_ADJ) {
+                    oomAdj = buildOomTag("cprov", null, r.setAdj,
+                            CONTENT_PROVIDER_ADJ);
+                } else if (r.setAdj >= HIDDEN_APP_MIN_ADJ) {
+                    oomAdj = buildOomTag("hid", "  ", r.setAdj,
+                            HIDDEN_APP_MIN_ADJ);
+                } else if (r.setAdj >= service.HOME_APP_ADJ) {
+                    oomAdj = buildOomTag("home ", null, r.setAdj,
+                            service.HOME_APP_ADJ);
+                } else if (r.setAdj >= service.SECONDARY_SERVER_ADJ) {
+                    oomAdj = buildOomTag("svc", "  ", r.setAdj,
+                            service.SECONDARY_SERVER_ADJ);
+                } else if (r.setAdj >= service.BACKUP_APP_ADJ) {
+                    oomAdj = buildOomTag("bckup", null, r.setAdj,
+                            service.BACKUP_APP_ADJ);
+                } else if (r.setAdj >= service.VISIBLE_APP_ADJ) {
+                    oomAdj = buildOomTag("vis  ", null, r.setAdj,
+                            service.VISIBLE_APP_ADJ);
+                } else if (r.setAdj >= service.FOREGROUND_APP_ADJ) {
+                    oomAdj = buildOomTag("fore ", null, r.setAdj,
+                            service.FOREGROUND_APP_ADJ);
+                } else if (r.setAdj >= CORE_SERVER_ADJ) {
+                    oomAdj = buildOomTag("core ", null, r.setAdj,
+                            CORE_SERVER_ADJ);
+                } else if (r.setAdj >= SYSTEM_ADJ) {
+                    oomAdj = buildOomTag("sys  ", null, r.setAdj,
+                            SYSTEM_ADJ);
+                } else {
+                    oomAdj = Integer.toString(r.setAdj);
+                }
+                String schedGroup;
+                switch (r.setSchedGroup) {
+                    case Process.THREAD_GROUP_BG_NONINTERACTIVE:
+                        schedGroup = "B";
+                        break;
+                    case Process.THREAD_GROUP_DEFAULT:
+                        schedGroup = "F";
+                        break;
+                    default:
+                        schedGroup = Integer.toString(r.setSchedGroup);
+                        break;
+                }
+                pw.println(String.format("%s%s #%2d: adj=%s/%s %s (%s)",
                         prefix, (r.persistent ? persistentLabel : normalLabel),
-                        i, r.setAdj, r.setSchedGroup, r.toString(), r.adjType));
+                        i, oomAdj, schedGroup, r.toString(), r.adjType));
                 if (r.adjSource != null || r.adjTarget != null) {
                     pw.println(prefix + "          " + r.adjTarget
                             + " used by " + r.adjSource);
@@ -13039,6 +13095,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
 
         if (app.thread == null) {
             app.adjSeq = mAdjSeq;
+            app.curSchedGroup = Process.THREAD_GROUP_BG_NONINTERACTIVE;
             return (app.curAdj=EMPTY_APP_ADJ);
         }
 
@@ -13059,52 +13116,63 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         // Determine the importance of the process, starting with most
         // important to least, and assign an appropriate OOM adjustment.
         int adj;
+        int schedGroup;
         int N;
         if (app == TOP_APP) {
             // The last app on the list is the foreground app.
             adj = FOREGROUND_APP_ADJ;
+            schedGroup = Process.THREAD_GROUP_DEFAULT;
             app.adjType = "top-activity";
         } else if (app.instrumentationClass != null) {
             // Don't want to kill running instrumentation.
             adj = FOREGROUND_APP_ADJ;
+            schedGroup = Process.THREAD_GROUP_DEFAULT;
             app.adjType = "instrumentation";
         } else if (app.persistentActivities > 0) {
             // Special persistent activities...  shouldn't be used these days.
             adj = FOREGROUND_APP_ADJ;
+            schedGroup = Process.THREAD_GROUP_DEFAULT;
             app.adjType = "persistent";
         } else if (app.curReceiver != null ||
                 (mPendingBroadcast != null && mPendingBroadcast.curApp == app)) {
             // An app that is currently receiving a broadcast also
             // counts as being in the foreground.
             adj = FOREGROUND_APP_ADJ;
+            schedGroup = Process.THREAD_GROUP_DEFAULT;
             app.adjType = "broadcast";
         } else if (app.executingServices.size() > 0) {
             // An app that is currently executing a service callback also
             // counts as being in the foreground.
             adj = FOREGROUND_APP_ADJ;
+            schedGroup = Process.THREAD_GROUP_DEFAULT;
             app.adjType = "exec-service";
         } else if (app.foregroundServices) {
             // The user is aware of this app, so make it visible.
             adj = VISIBLE_APP_ADJ;
+            schedGroup = Process.THREAD_GROUP_DEFAULT;
             app.adjType = "foreground-service";
         } else if (app.forcingToForeground != null) {
             // The user is aware of this app, so make it visible.
             adj = VISIBLE_APP_ADJ;
+            schedGroup = Process.THREAD_GROUP_DEFAULT;
             app.adjType = "force-foreground";
             app.adjSource = app.forcingToForeground;
         } else if (app == mHomeProcess) {
             // This process is hosting what we currently consider to be the
             // home app, so we don't want to let it go into the background.
             adj = HOME_APP_ADJ;
+            schedGroup = Process.THREAD_GROUP_BG_NONINTERACTIVE;
             app.adjType = "home";
         } else if ((N=app.activities.size()) != 0) {
             // This app is in the background with paused activities.
             adj = hiddenAdj;
+            schedGroup = Process.THREAD_GROUP_BG_NONINTERACTIVE;
             app.adjType = "bg-activities";
             for (int j=0; j<N; j++) {
                 if (((HistoryRecord)app.activities.get(j)).visible) {
                     // This app has a visible activity!
                     adj = VISIBLE_APP_ADJ;
+                    schedGroup = Process.THREAD_GROUP_DEFAULT;
                     app.adjType = "visible";
                     break;
                 }
@@ -13112,6 +13180,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         } else {
             // A very not-needed process.
             adj = EMPTY_APP_ADJ;
+            schedGroup = Process.THREAD_GROUP_BG_NONINTERACTIVE;
             app.adjType = "empty";
         }
 
@@ -13121,7 +13190,6 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         // infinite recursion.
         app.adjSeq = mAdjSeq;
         app.curRawAdj = adj;
-        app.curAdj = adj <= app.maxAdj ? adj : app.maxAdj;
 
         if (mBackupTarget != null && app == mBackupTarget.app) {
             // If possible we want to avoid killing apps while they're being backed up
@@ -13132,7 +13200,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             }
         }
 
-        if (app.services.size() != 0 && adj > FOREGROUND_APP_ADJ) {
+        if (app.services.size() != 0 && (adj > FOREGROUND_APP_ADJ
+                || schedGroup == Process.THREAD_GROUP_BG_NONINTERACTIVE)) {
             final long now = SystemClock.uptimeMillis();
             // This process is more important if the top activity is
             // bound to the service.
@@ -13150,7 +13219,8 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                         }
                     }
                 }
-                if (s.connections.size() > 0 && adj > FOREGROUND_APP_ADJ) {
+                if (s.connections.size() > 0 && (adj > FOREGROUND_APP_ADJ
+                        || schedGroup == Process.THREAD_GROUP_BG_NONINTERACTIVE)) {
                     Iterator<ConnectionRecord> kt
                             = s.connections.values().iterator();
                     while (kt.hasNext() && adj > FOREGROUND_APP_ADJ) {
@@ -13182,6 +13252,11 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                                 app.adjSource = cr.binding.client;
                                 app.adjTarget = s.serviceInfo.name;
                             }
+                            if ((cr.flags&Context.BIND_NOT_FOREGROUND) == 0) {
+                                if (client.curSchedGroup == Process.THREAD_GROUP_DEFAULT) {
+                                    schedGroup = Process.THREAD_GROUP_DEFAULT;
+                                }
+                            }
                         }
                         HistoryRecord a = cr.activity;
                         //if (a != null) {
@@ -13191,6 +13266,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                                 (a.state == ActivityState.RESUMED
                                  || a.state == ActivityState.PAUSING)) {
                             adj = FOREGROUND_APP_ADJ;
+                            schedGroup = Process.THREAD_GROUP_DEFAULT;
                             app.adjType = "service";
                             app.adjTypeCode = ActivityManager.RunningAppProcessInfo
                                     .REASON_SERVICE_IN_USE;
@@ -13212,9 +13288,11 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
             }
         }
 
-        if (app.pubProviders.size() != 0 && adj > FOREGROUND_APP_ADJ) {
+        if (app.pubProviders.size() != 0 && (adj > FOREGROUND_APP_ADJ
+                || schedGroup == Process.THREAD_GROUP_BG_NONINTERACTIVE)) {
             Iterator jt = app.pubProviders.values().iterator();
-            while (jt.hasNext() && adj > FOREGROUND_APP_ADJ) {
+            while (jt.hasNext() && (adj > FOREGROUND_APP_ADJ
+                    || schedGroup == Process.THREAD_GROUP_BG_NONINTERACTIVE)) {
                 ContentProviderRecord cpr = (ContentProviderRecord)jt.next();
                 if (cpr.clients.size() != 0) {
                     Iterator<ProcessRecord> kt = cpr.clients.iterator();
@@ -13243,6 +13321,9 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                             app.adjSource = client;
                             app.adjTarget = cpr.info.name;
                         }
+                        if (client.curSchedGroup == Process.THREAD_GROUP_DEFAULT) {
+                            schedGroup = Process.THREAD_GROUP_DEFAULT;
+                        }
                     }
                 }
                 // If the provider has external (non-framework) process
@@ -13251,6 +13332,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
                 if (cpr.externals != 0) {
                     if (adj > FOREGROUND_APP_ADJ) {
                         adj = FOREGROUND_APP_ADJ;
+                        schedGroup = Process.THREAD_GROUP_DEFAULT;
                         app.adjType = "provider";
                         app.adjTarget = cpr.info.name;
                     }
@@ -13273,12 +13355,13 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         //      " adj=" + adj + " curAdj=" + app.curAdj + " maxAdj=" + app.maxAdj);
         if (adj > app.maxAdj) {
             adj = app.maxAdj;
+            if (app.maxAdj <= VISIBLE_APP_ADJ) {
+                schedGroup = Process.THREAD_GROUP_DEFAULT;
+            }
         }
 
         app.curAdj = adj;
-        app.curSchedGroup = adj > VISIBLE_APP_ADJ
-                ? Process.THREAD_GROUP_BG_NONINTERACTIVE
-                : Process.THREAD_GROUP_DEFAULT;
+        app.curSchedGroup = schedGroup;
         
         return adj;
     }
@@ -13423,7 +13506,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
 
         int adj = computeOomAdjLocked(app, hiddenAdj, TOP_APP);
 
-        if (app.pid != 0 && app.pid != MY_PID) {
+        if ((app.pid != 0 && app.pid != MY_PID) || Process.supportsProcesses()) {
             if (app.curRawAdj != app.setRawAdj) {
                 if (app.curRawAdj > FOREGROUND_APP_ADJ
                         && app.setRawAdj <= FOREGROUND_APP_ADJ) {
