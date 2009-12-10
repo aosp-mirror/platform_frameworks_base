@@ -292,8 +292,6 @@ android.preference.PreferenceManager
 android.preference.PreferenceScreen
 android.preference.RingtonePreference
 android.sax.RootElement
-android.server.search.SearchableInfo
-android.server.search.SearchableInfo$1
 android.telephony.PhoneNumberUtils
 android.telephony.PhoneStateListener
 android.telephony.ServiceState
