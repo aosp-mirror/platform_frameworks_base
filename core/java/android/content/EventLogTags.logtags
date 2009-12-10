@@ -1,0 +1,10 @@
+# See system/core/logcat/event.logtags for a description of the format of this file.
+
+option java_package android.content
+
+# ---------------------------
+# SyncAdapter.java
+# ---------------------------
+# What happens in a sync operation (bytes sent and received, and
+# operation details)
+2743 sync_details (authority|3),(send|1|2),(recv|1|2),(details|3)
