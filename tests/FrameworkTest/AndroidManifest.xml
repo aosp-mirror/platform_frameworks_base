@@ -377,6 +377,13 @@
             </intent-filter>
         </activity>
 
+        <activity android:name=".view.VisibilityCallback" android:label="VisibilityCallback">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
+            </intent-filter>
+        </activity>
+
         <activity android:name=".view.BigCache" android:label="BigCache">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
