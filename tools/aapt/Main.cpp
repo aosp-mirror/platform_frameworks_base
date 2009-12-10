@@ -118,6 +118,7 @@ void usage(void)
         "   -P  specify where to output public resource definitions\n"
         "   -S  directory in which to find resources.  Multiple directories will be scanned"
         "       and the first match found (left to right) will take precedence."
+        "   -8  Encode string resources in UTF-8.\n"
         "   -0  specifies an additional extension for which such files will not\n"
         "       be stored compressed in the .apk.  An empty string means to not\n"
         "       compress any files at all.\n"
@@ -369,6 +370,9 @@ int main(int argc, char* const argv[])
                 } else {
                     bundle.setCompressionMethod(ZipEntry::kCompressStored);
                 }
+                break;
+            case '8':
+                bundle.setUTF8(true);
                 break;
             case '-':
                 if (strcmp(cp, "-min-sdk-version") == 0) {

@@ -229,12 +229,12 @@ Res_png_9patch* Res_png_9patch::deserialize(const void* inData)
 // --------------------------------------------------------------------
 
 ResStringPool::ResStringPool()
-    : mError(NO_INIT), mOwnedData(NULL)
+    : mError(NO_INIT), mOwnedData(NULL), mHeader(NULL), mCache(NULL)
 {
 }
 
 ResStringPool::ResStringPool(const void* data, size_t size, bool copyData)
-    : mError(NO_INIT), mOwnedData(NULL)
+    : mError(NO_INIT), mOwnedData(NULL), mHeader(NULL), mCache(NULL)
 {
     setTo(data, size, copyData);
 }
@@ -296,7 +296,17 @@ status_t ResStringPool::setTo(const void* data, size_t size, bool copyData)
                     (int)size);
             return (mError=BAD_TYPE);
         }
-        mStrings = (const char16_t*)
+
+        size_t charSize;
+        if (mHeader->flags&ResStringPool_header::UTF8_FLAG) {
+            charSize = sizeof(uint8_t);
+            mCache = (char16_t**)malloc(sizeof(char16_t**)*mHeader->stringCount);
+            memset(mCache, 0, sizeof(char16_t**)*mHeader->stringCount);
+        } else {
+            charSize = sizeof(char16_t);
+        }
+
+        mStrings = (const void*)
             (((const uint8_t*)data)+mHeader->stringsStart);
         if (mHeader->stringsStart >= (mHeader->header.size-sizeof(uint16_t))) {
             LOGW("Bad string block: string pool starts at %d, after total size %d\n",
@@ -305,7 +315,7 @@ status_t ResStringPool::setTo(const void* data, size_t size, bool copyData)
         }
         if (mHeader->styleCount == 0) {
             mStringPoolSize =
-                (mHeader->header.size-mHeader->stringsStart)/sizeof(uint16_t);
+                (mHeader->header.size-mHeader->stringsStart)/charSize;
         } else {
             // check invariant: styles follow the strings
             if (mHeader->stylesStart <= mHeader->stringsStart) {
@@ -314,7 +324,7 @@ status_t ResStringPool::setTo(const void* data, size_t size, bool copyData)
                 return (mError=BAD_TYPE);
             }
             mStringPoolSize =
-                (mHeader->stylesStart-mHeader->stringsStart)/sizeof(uint16_t);
+                (mHeader->stylesStart-mHeader->stringsStart)/charSize;
         }
 
         // check invariant: stringCount > 0 requires a string pool to exist
@@ -329,13 +339,19 @@ status_t ResStringPool::setTo(const void* data, size_t size, bool copyData)
             for (i=0; i<mHeader->stringCount; i++) {
                 e[i] = dtohl(mEntries[i]);
             }
-            char16_t* s = const_cast<char16_t*>(mStrings);
-            for (i=0; i<mStringPoolSize; i++) {
-                s[i] = dtohs(mStrings[i]);
+            if (!(mHeader->flags&ResStringPool_header::UTF8_FLAG)) {
+                const char16_t* strings = (const char16_t*)mStrings;
+                char16_t* s = const_cast<char16_t*>(strings);
+                for (i=0; i<mStringPoolSize; i++) {
+                    s[i] = dtohs(strings[i]);
+                }
             }
         }
 
-        if (mStrings[mStringPoolSize-1] != 0) {
+        if ((mHeader->flags&ResStringPool_header::UTF8_FLAG &&
+                ((uint8_t*)mStrings)[mStringPoolSize-1] != 0) ||
+                (!mHeader->flags&ResStringPool_header::UTF8_FLAG &&
+                ((char16_t*)mStrings)[mStringPoolSize-1] != 0)) {
             LOGW("Bad string block: last string is not 0-terminated\n");
             return (mError=BAD_TYPE);
         }
@@ -410,24 +426,67 @@ void ResStringPool::uninit()
         free(mOwnedData);
         mOwnedData = NULL;
     }
+    if (mHeader != NULL && mCache != NULL) {
+        for (size_t x = 0; x < mHeader->stringCount; x++) {
+            if (mCache[x] != NULL) {
+                free(mCache[x]);
+                mCache[x] = NULL;
+            }
+        }
+        free(mCache);
+        mCache = NULL;
+    }
 }
+
+#define DECODE_LENGTH(str, chrsz, len) \
+    len = *(str); \
+    if (*(str)&(1<<(chrsz*8-1))) { \
+        (str)++; \
+        len = (((len)&((1<<(chrsz*8-1))-1))<<(chrsz*8)) + *(str); \
+    } \
+    (str)++;
 
 const uint16_t* ResStringPool::stringAt(size_t idx, size_t* outLen) const
 {
     if (mError == NO_ERROR && idx < mHeader->stringCount) {
-        const uint32_t off = (mEntries[idx]/sizeof(uint16_t));
+        const bool isUTF8 = (mHeader->flags&ResStringPool_header::UTF8_FLAG) != 0;
+        const uint32_t off = mEntries[idx]/(isUTF8?sizeof(char):sizeof(char16_t));
         if (off < (mStringPoolSize-1)) {
-            const char16_t* str = mStrings+off;
-            *outLen = *str;
-            if ((*str)&0x8000) {
-                str++;
-                *outLen = (((*outLen)&0x7fff)<<16) + *str;
-            }
-            if ((uint32_t)(str+1+*outLen-mStrings) < mStringPoolSize) {
-                return str+1;
+            if (!isUTF8) {
+                const char16_t* strings = (char16_t*)mStrings;
+                const char16_t* str = strings+off;
+                DECODE_LENGTH(str, sizeof(char16_t), *outLen)
+                if ((uint32_t)(str+*outLen-strings) < mStringPoolSize) {
+                    return str;
+                } else {
+                    LOGW("Bad string block: string #%d extends to %d, past end at %d\n",
+                            (int)idx, (int)(str+*outLen-strings), (int)mStringPoolSize);
+                }
             } else {
-                LOGW("Bad string block: string #%d extends to %d, past end at %d\n",
-                        (int)idx, (int)(str+1+*outLen-mStrings), (int)mStringPoolSize);
+                const uint8_t* strings = (uint8_t*)mStrings;
+                const uint8_t* str = strings+off;
+                DECODE_LENGTH(str, sizeof(uint8_t), *outLen)
+                size_t encLen;
+                DECODE_LENGTH(str, sizeof(uint8_t), encLen)
+                if ((uint32_t)(str+encLen-strings) < mStringPoolSize) {
+                    AutoMutex lock(mDecodeLock);
+                    if (mCache[idx] != NULL) {
+                        return mCache[idx];
+                    }
+                    char16_t *u16str = (char16_t *)calloc(*outLen+1, sizeof(char16_t));
+                    if (!u16str) {
+                        LOGW("No memory when trying to allocate decode cache for string #%d\n",
+                                (int)idx);
+                        return NULL;
+                    }
+                    const unsigned char *u8src = reinterpret_cast<const unsigned char *>(str);
+                    utf8_to_utf16(u8src, encLen, u16str, *outLen);
+                    mCache[idx] = u16str;
+                    return u16str;
+                } else {
+                    LOGW("Bad string block: string #%d extends to %d, past end at %d\n",
+                            (int)idx, (int)(str+encLen-strings), (int)mStringPoolSize);
+                }
             }
         } else {
             LOGW("Bad string block: string #%d entry is at %d, past end at %d\n",
@@ -465,6 +524,10 @@ ssize_t ResStringPool::indexOfString(const char16_t* str, size_t strLen) const
     }
 
     size_t len;
+
+    // TODO optimize searching for UTF-8 strings taking into account
+    // the cache fill to determine when to convert the searched-for
+    // string key to UTF-8.
 
     if (mHeader->flags&ResStringPool_header::SORTED_FLAG) {
         // Do a binary search for the string...
@@ -1043,6 +1106,7 @@ status_t ResXMLTree::getError() const
 void ResXMLTree::uninit()
 {
     mError = NO_INIT;
+    mStrings.uninit();
     if (mOwnedData) {
         free(mOwnedData);
         mOwnedData = NULL;
