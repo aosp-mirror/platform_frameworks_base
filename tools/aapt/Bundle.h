@@ -114,7 +114,10 @@ public:
     void addNoCompressExtension(const char* ext) { mNoCompressExtensions.add(ext); }
 
     const char*  getMinSdkVersion() const { return mMinSdkVersion; }
-    void setMinSdkVersion(const char*  val) { mMinSdkVersion = val; }
+    void setMinSdkVersion(const char*  val) {
+        mMinSdkVersion = val;
+        setUTF8(isUTF8Available());
+    }
     const char*  getTargetSdkVersion() const { return mTargetSdkVersion; }
     void setTargetSdkVersion(const char*  val) { mTargetSdkVersion = val; }
     const char*  getMaxSdkVersion() const { return mMaxSdkVersion; }
@@ -197,6 +200,20 @@ private:
     /* misc stuff */
     int         mPackageCount;
 #endif
+
+    /* UTF-8 is only available on APIs 7 or above or
+     * SDK levels that have code names.
+     */
+    bool isUTF8Available() {
+        char *end;
+        int minSdkNum = (int)strtol(mMinSdkVersion, &end, 0);
+        if (*end == '\0') {
+            if (minSdkNum < 7) {
+                return false;
+            }
+        }
+        return true;
+    }
 };
 
 #endif // __BUNDLE_H
