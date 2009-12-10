@@ -76,6 +76,13 @@ public class BinderInternal {
      */
     public static final native IBinder getContextObject();
     
+    /**
+     * Special for system process to not allow incoming calls to run at
+     * background scheduling priority.
+     * @hide
+     */
+    public static final native void disableBackgroundScheduling(boolean disable);
+    
     static native final void handleGc();
     
     public static void forceGc(String reason) {

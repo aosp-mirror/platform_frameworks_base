@@ -52,7 +52,7 @@ public:
         DUMP_TRANSACTION        = B_PACK_CHARS('_','D','M','P'),
         INTERFACE_TRANSACTION   = B_PACK_CHARS('_', 'N', 'T', 'F'),
 
-        // Corresponds to tfOneWay -- an asynchronous call.
+        // Corresponds to TF_ONE_WAY -- an asynchronous call.
         FLAG_ONEWAY             = 0x00000001
     };
 

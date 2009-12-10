@@ -120,11 +120,7 @@ jint android_os_Process_myUid(JNIEnv* env, jobject clazz)
 
 jint android_os_Process_myTid(JNIEnv* env, jobject clazz)
 {
-#ifdef HAVE_GETTID
-    return gettid();
-#else
-    return getpid();
-#endif
+    return androidGetTid();
 }
 
 jint android_os_Process_getUidForName(JNIEnv* env, jobject clazz, jstring name)
@@ -191,14 +187,10 @@ jint android_os_Process_getGidForName(JNIEnv* env, jobject clazz, jstring name)
 
 void android_os_Process_setThreadGroup(JNIEnv* env, jobject clazz, int pid, jint grp)
 {
-    if (grp > ANDROID_TGROUP_MAX || grp < 0) { 
-        signalExceptionForGroupError(env, clazz, EINVAL);
+    int res = androidSetThreadSchedulingGroup(pid, grp);
+    if (res != NO_ERROR) {
+        signalExceptionForGroupError(env, clazz, res == BAD_VALUE ? EINVAL : errno);
         return;
-    }
-
-    if (set_sched_policy(pid, (grp == ANDROID_TGROUP_BG_NONINTERACT) ?
-                                      SP_BACKGROUND : SP_FOREGROUND)) {
-        signalExceptionForGroupError(env, clazz, errno);
     }
 }
 
@@ -275,22 +267,15 @@ void android_os_Process_setProcessGroup(JNIEnv* env, jobject clazz, int pid, jin
 void android_os_Process_setThreadPriority(JNIEnv* env, jobject clazz,
                                               jint pid, jint pri)
 {
-    int rc = 0;
-
-    if (pri >= ANDROID_PRIORITY_BACKGROUND) {
-        rc = set_sched_policy(pid, SP_BACKGROUND);
-    } else if (getpriority(PRIO_PROCESS, pid) >= ANDROID_PRIORITY_BACKGROUND) {
-        rc = set_sched_policy(pid, SP_FOREGROUND);
+    int rc = androidSetThreadPriority(pid, pri);
+    if (rc != 0) {
+        if (rc == INVALID_OPERATION) {
+            signalExceptionForPriorityError(env, clazz, errno);
+        } else {
+            signalExceptionForGroupError(env, clazz, errno);
+        }
     }
-
-    if (rc) {
-        signalExceptionForGroupError(env, clazz, errno);
-        return;
-    }
-
-    if (setpriority(PRIO_PROCESS, pid, pri) < 0) {
-        signalExceptionForPriorityError(env, clazz, errno);
-    }
+    
     //LOGI("Setting priority of %d: %d, getpriority returns %d\n",
     //     pid, pri, getpriority(PRIO_PROCESS, pid));
 }

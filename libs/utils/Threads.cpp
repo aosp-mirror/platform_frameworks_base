@@ -20,6 +20,8 @@
 #include <utils/threads.h>
 #include <utils/Log.h>
 
+#include <cutils/sched_policy.h>
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <memory.h>
@@ -267,6 +269,53 @@ int androidCreateThreadEtc(android_thread_func_t entryFunction,
 void androidSetCreateThreadFunc(android_create_thread_fn func)
 {
     gCreateThreadFn = func;
+}
+
+pid_t androidGetTid()
+{
+#ifdef HAVE_GETTID
+    return gettid();
+#else
+    return getpid();
+#endif
+}
+
+int androidSetThreadSchedulingGroup(pid_t tid, int grp)
+{
+    if (grp > ANDROID_TGROUP_MAX || grp < 0) { 
+        return BAD_VALUE;
+    }
+
+    if (set_sched_policy(tid, (grp == ANDROID_TGROUP_BG_NONINTERACT) ?
+                                      SP_BACKGROUND : SP_FOREGROUND)) {
+        return PERMISSION_DENIED;
+    }
+    
+    return NO_ERROR;
+}
+
+int androidSetThreadPriority(pid_t tid, int pri)
+{
+    int rc = 0;
+    int lasterr = 0;
+
+    if (pri >= ANDROID_PRIORITY_BACKGROUND) {
+        rc = set_sched_policy(tid, SP_BACKGROUND);
+    } else if (getpriority(PRIO_PROCESS, tid) >= ANDROID_PRIORITY_BACKGROUND) {
+        rc = set_sched_policy(tid, SP_FOREGROUND);
+    }
+
+    if (rc) {
+        lasterr = errno;
+    }
+
+    if (setpriority(PRIO_PROCESS, tid, pri) < 0) {
+        rc = INVALID_OPERATION;
+    } else {
+        errno = lasterr;
+    }
+    
+    return rc;
 }
 
 namespace android {

@@ -68,6 +68,13 @@ public:
 
     static  void                shutdown();
     
+    // Call this to disable switching threads to background scheduling when
+    // receiving incoming IPC calls.  This is specifically here for the
+    // Android system process, since it expects to have background apps calling
+    // in to it but doesn't want to acquire locks in its services while in
+    // the background.
+    static  void                disableBackgroundScheduling(bool disable);
+    
 private:
                                 IPCThreadState();
                                 ~IPCThreadState();
@@ -93,9 +100,10 @@ private:
                                            void* cookie);
     
     const   sp<ProcessState>    mProcess;
+    const   pid_t               mMyThreadId;
             Vector<BBinder*>    mPendingStrongDerefs;
             Vector<RefBase::weakref_type*> mPendingWeakDerefs;
-                                
+            
             Parcel              mIn;
             Parcel              mOut;
             status_t            mLastError;
