@@ -14,6 +14,7 @@ LOCAL_C_INCLUDES += \
 LOCAL_CFLAGS :=
 
 LOCAL_SHARED_LIBRARIES += \
+		libbinder \
                 libcutils \
                 libutils \
                 libui
