@@ -576,6 +576,13 @@ size_t ResStringPool::size() const
     return (mError == NO_ERROR) ? mHeader->stringCount : 0;
 }
 
+#ifndef HAVE_ANDROID_OS
+bool ResStringPool::isUTF8() const
+{
+    return (mHeader->flags&ResStringPool_header::UTF8_FLAG)!=0;
+}
+#endif
+
 // --------------------------------------------------------------------
 // --------------------------------------------------------------------
 // --------------------------------------------------------------------
@@ -4016,7 +4023,8 @@ void ResTable::print_value(const Package* pkg, const Res_value& value) const
         if (str == NULL) {
             printf("(string) null\n");
         } else {
-            printf("(string) \"%s\"\n",
+            printf("(string%d) \"%s\"\n",
+                    pkg->header->values.isUTF8()?8:16,
                     String8(str, len).string());
         } 
     } else if (value.dataType == Res_value::TYPE_FLOAT) {
