@@ -1227,6 +1227,6 @@
      Resources proposed for Flan.
      =============================================================== -->
   <eat-comment />
-  <public type="attr" name="neverEncrypt" />
+  <public type="attr" name="neverEncrypt" id="0x010102b7" />
     
 </resources>
