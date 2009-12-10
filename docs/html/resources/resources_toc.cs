@@ -20,6 +20,16 @@
   </li>
 
   <li>
+    <h2><span class="en">Device Dashboard</span>
+    </h2>
+    <ul>
+      <li><a href="<?cs var:toroot ?>resources/dashboard/platform-versions.html">
+            <span class="en">Platform Versions</span>
+          </a>  <span class="new">new!</span></li>
+    </ul>
+  </li>
+
+  <li>
     <h2><span class="en">Technical Articles</span>
     </h2>
     <ul>
