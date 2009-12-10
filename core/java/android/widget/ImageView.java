@@ -16,6 +16,7 @@
 
 package android.widget;
 
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
@@ -489,7 +490,10 @@ public class ImageView extends View {
                 mUri = null;
             }
         } else if (mUri != null) {
-            if ("content".equals(mUri.getScheme())) {
+            String scheme = mUri.getScheme();
+            if (ContentResolver.SCHEME_CONTENT.equals(scheme)
+                    || ContentResolver.SCHEME_ANDROID_RESOURCE.equals(scheme)
+                    || ContentResolver.SCHEME_FILE.equals(scheme)) {
                 try {
                     d = Drawable.createFromStream(
                         mContext.getContentResolver().openInputStream(mUri),
