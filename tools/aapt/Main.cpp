@@ -59,7 +59,7 @@ void usage(void)
         "        [-0 extension [-0 extension ...]] [-g tolerance] [-j jarfile] \\\n"
         "        [--min-sdk-version VAL] [--target-sdk-version VAL] \\\n"
         "        [--max-sdk-version VAL] [--app-version VAL] \\\n"
-        "        [--app-version-name TEXT]\\\n"
+        "        [--app-version-name TEXT] [--custom-package VAL] \\\n"
         "        [-I base-package [-I base-package ...]] \\\n"
         "        [-A asset-source-dir]  [-G class-list-file] [-P public-definitions-file] \\\n"
         "        [-S resource-sources [-S resource-sources ...]] "
@@ -116,8 +116,8 @@ void usage(void)
         "   -J  specify where to output R.java resource constant definitions\n"
         "   -M  specify full path to AndroidManifest.xml to include in zip\n"
         "   -P  specify where to output public resource definitions\n"
-        "   -S  directory in which to find resources.  Multiple directories will be scanned"
-        "       and the first match found (left to right) will take precedence."
+        "   -S  directory in which to find resources.  Multiple directories will be scanned\n"
+        "       and the first match found (left to right) will take precedence.\n"
         "   -0  specifies an additional extension for which such files will not\n"
         "       be stored compressed in the .apk.  An empty string means to not\n"
         "       compress any files at all.\n"
@@ -132,7 +132,9 @@ void usage(void)
         "   --version-code\n"
         "       inserts android:versionCode in to manifest.\n"
         "   --version-name\n"
-        "       inserts android:versionName in to manifest.\n");
+        "       inserts android:versionName in to manifest.\n"
+        "   --custom-package\n"
+        "       generates R.java into a different package.\n");
 }
 
 /*
@@ -418,6 +420,15 @@ int main(int argc, char* const argv[])
                     bundle.setVersionName(argv[0]);
                 } else if (strcmp(cp, "-values") == 0) {
                     bundle.setValues(true);
+                } else if (strcmp(cp, "-custom-package") == 0) {
+                    argc--;
+                    argv++;
+                    if (!argc) {
+                        fprintf(stderr, "ERROR: No argument supplied for '--custom-package' option\n");
+                        wantUsage = true;
+                        goto bail;
+                    }
+                    bundle.setCustomPackage(argv[0]);
                 } else {
                     fprintf(stderr, "ERROR: Unknown option '-%s'\n", cp);
                     wantUsage = true;
