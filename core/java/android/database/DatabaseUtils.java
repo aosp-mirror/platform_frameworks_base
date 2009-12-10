@@ -671,6 +671,102 @@ public class DatabaseUtils {
     }
 
     /**
+     * Reads a String out of a column in a Cursor and writes it to a ContentValues.
+     * Adds nothing to the ContentValues if the column isn't present or if its value is null.
+     *
+     * @param cursor The cursor to read from
+     * @param column The column to read
+     * @param values The {@link ContentValues} to put the value into
+     */
+    public static void cursorStringToContentValuesIfPresent(Cursor cursor, ContentValues values,
+            String column) {
+        final int index = cursor.getColumnIndexOrThrow(column);
+        if (!cursor.isNull(index)) {
+            values.put(column, cursor.getString(index));
+        }
+    }
+
+    /**
+     * Reads a Long out of a column in a Cursor and writes it to a ContentValues.
+     * Adds nothing to the ContentValues if the column isn't present or if its value is null.
+     *
+     * @param cursor The cursor to read from
+     * @param column The column to read
+     * @param values The {@link ContentValues} to put the value into
+     */
+    public static void cursorLongToContentValuesIfPresent(Cursor cursor, ContentValues values,
+            String column) {
+        final int index = cursor.getColumnIndexOrThrow(column);
+        if (!cursor.isNull(index)) {
+            values.put(column, cursor.getLong(index));
+        }
+    }
+
+    /**
+     * Reads a Short out of a column in a Cursor and writes it to a ContentValues.
+     * Adds nothing to the ContentValues if the column isn't present or if its value is null.
+     *
+     * @param cursor The cursor to read from
+     * @param column The column to read
+     * @param values The {@link ContentValues} to put the value into
+     */
+    public static void cursorShortToContentValuesIfPresent(Cursor cursor, ContentValues values,
+            String column) {
+        final int index = cursor.getColumnIndexOrThrow(column);
+        if (!cursor.isNull(index)) {
+            values.put(column, cursor.getShort(index));
+        }
+    }
+
+    /**
+     * Reads a Integer out of a column in a Cursor and writes it to a ContentValues.
+     * Adds nothing to the ContentValues if the column isn't present or if its value is null.
+     *
+     * @param cursor The cursor to read from
+     * @param column The column to read
+     * @param values The {@link ContentValues} to put the value into
+     */
+    public static void cursorIntToContentValuesIfPresent(Cursor cursor, ContentValues values,
+            String column) {
+        final int index = cursor.getColumnIndexOrThrow(column);
+        if (!cursor.isNull(index)) {
+            values.put(column, cursor.getInt(index));
+        }
+    }
+
+    /**
+     * Reads a Float out of a column in a Cursor and writes it to a ContentValues.
+     * Adds nothing to the ContentValues if the column isn't present or if its value is null.
+     *
+     * @param cursor The cursor to read from
+     * @param column The column to read
+     * @param values The {@link ContentValues} to put the value into
+     */
+    public static void cursorFloatToContentValuesIfPresent(Cursor cursor, ContentValues values,
+            String column) {
+        final int index = cursor.getColumnIndexOrThrow(column);
+        if (!cursor.isNull(index)) {
+            values.put(column, cursor.getFloat(index));
+        }
+    }
+
+    /**
+     * Reads a Double out of a column in a Cursor and writes it to a ContentValues.
+     * Adds nothing to the ContentValues if the column isn't present or if its value is null.
+     *
+     * @param cursor The cursor to read from
+     * @param column The column to read
+     * @param values The {@link ContentValues} to put the value into
+     */
+    public static void cursorDoubleToContentValuesIfPresent(Cursor cursor, ContentValues values,
+            String column) {
+        final int index = cursor.getColumnIndexOrThrow(column);
+        if (!cursor.isNull(index)) {
+            values.put(column, cursor.getDouble(index));
+        }
+    }
+
+    /**
      * This class allows users to do multiple inserts into a table but
      * compile the SQL insert statement only once, which may increase
      * performance.

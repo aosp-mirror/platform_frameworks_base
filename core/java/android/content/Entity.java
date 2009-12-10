@@ -24,11 +24,13 @@ import android.util.Log;
 import java.util.ArrayList;
 
 /**
- * Objects that pass through the ContentProvider and ContentResolver's methods that deal with
- * Entities must implement this abstract base class and thus themselves be Parcelable.
- * @hide
+ * A representation of a item using ContentValues. It contains one top level ContentValue
+ * plus a collection of Uri, ContentValues tuples as subvalues. One example of its use
+ * is in Contacts, where the top level ContentValue contains the columns from the RawContacts
+ * table and the subvalues contain a ContentValues object for each row from the Data table that
+ * corresponds to that RawContact. The uri refers to the Data table uri for each row.
  */
-public final class Entity implements Parcelable {
+public final class Entity {
     final private ContentValues mValues;
     final private ArrayList<NamedContentValues> mSubValues;
 
@@ -48,40 +50,6 @@ public final class Entity implements Parcelable {
     public void addSubValue(Uri uri, ContentValues values) {
         mSubValues.add(new Entity.NamedContentValues(uri, values));
     }
-
-    public int describeContents() {
-        return 0;
-    }
-
-    public void writeToParcel(Parcel dest, int flags) {
-        mValues.writeToParcel(dest, 0);
-        dest.writeInt(mSubValues.size());
-        for (NamedContentValues value : mSubValues) {
-            value.uri.writeToParcel(dest, 0);
-            value.values.writeToParcel(dest, 0);
-        }
-    }
-
-    private Entity(Parcel source) {
-        mValues = ContentValues.CREATOR.createFromParcel(source);
-        final int numValues = source.readInt();
-        mSubValues = new ArrayList<NamedContentValues>(numValues);
-        for (int i = 0; i < numValues; i++) {
-            final Uri uri = Uri.CREATOR.createFromParcel(source);
-            final ContentValues values = ContentValues.CREATOR.createFromParcel(source);
-            mSubValues.add(new NamedContentValues(uri, values));
-        }
-    }
-
-    public static final Creator<Entity> CREATOR = new Creator<Entity>() {
-        public Entity createFromParcel(Parcel source) {
-            return new Entity(source);
-        }
-
-        public Entity[] newArray(int size) {
-            return new Entity[size];
-        }
-    };
 
     public static class NamedContentValues {
         public final Uri uri;

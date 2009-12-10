@@ -23,7 +23,12 @@ import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.content.EntityIterator;
+import android.content.CursorEntityIterator;
+import android.content.Entity;
+import android.content.ContentProviderClient;
 import android.database.Cursor;
+import android.database.DatabaseUtils;
 import android.net.Uri;
 import android.pim.ICalendar;
 import android.pim.RecurrenceSet;
@@ -33,6 +38,7 @@ import android.text.format.Time;
 import android.util.Config;
 import android.util.Log;
 import android.accounts.Account;
+import android.os.RemoteException;
 
 /**
  * The Calendar provider contains all calendar events.
@@ -135,12 +141,60 @@ public final class Calendar {
          * <p>Type: String (blob)</p>
          */
         public static final String SYNC_STATE = "sync_state";
+
+        /**
+         * The account that was used to sync the entry to the device.
+         * <P>Type: TEXT</P>
+         */
+        public static final String _SYNC_ACCOUNT = "_sync_account";
+
+        /**
+         * The type of the account that was used to sync the entry to the device.
+         * <P>Type: TEXT</P>
+         */
+        public static final String _SYNC_ACCOUNT_TYPE = "_sync_account_type";
+
+        /**
+         * The unique ID for a row assigned by the sync source. NULL if the row has never been synced.
+         * <P>Type: TEXT</P>
+         */
+        public static final String _SYNC_ID = "_sync_id";
+
+        /**
+         * The last time, from the sync source's point of view, that this row has been synchronized.
+         * <P>Type: INTEGER (long)</P>
+         */
+        public static final String _SYNC_TIME = "_sync_time";
+
+        /**
+         * The version of the row, as assigned by the server.
+         * <P>Type: TEXT</P>
+         */
+        public static final String _SYNC_VERSION = "_sync_version";
+
+        /**
+         * Used in temporary provider while syncing, always NULL for rows in persistent providers.
+         * <P>Type: INTEGER (long)</P>
+         */
+        public static final String _SYNC_LOCAL_ID = "_sync_local_id";
+
+        /**
+         * Used only in persistent providers, and only during merging.
+         * <P>Type: INTEGER (long)</P>
+         */
+        public static final String _SYNC_MARK = "_sync_mark";
+
+        /**
+         * Used to indicate that local, unsynced, changes are present.
+         * <P>Type: INTEGER (long)</P>
+         */
+        public static final String _SYNC_DIRTY = "_sync_dirty";
     }
 
     /**
      * Contains a list of available calendars.
      */
-    public static class Calendars implements BaseColumns, SyncConstValue, CalendarsColumns
+    public static class Calendars implements BaseColumns, CalendarsColumns
     {
         public static final Cursor query(ContentResolver cr, String[] projection,
                                        String where, String orderBy)
@@ -523,8 +577,182 @@ public final class Calendar {
     /**
      * Contains one entry per calendar event. Recurring events show up as a single entry.
      */
-    public static final class Events implements BaseColumns, SyncConstValue,
-                                                EventsColumns, CalendarsColumns {
+    public static final class EventsEntity implements BaseColumns, EventsColumns, CalendarsColumns {
+        /**
+         * The content:// style URL for this table
+         */
+        public static final Uri CONTENT_URI = Uri.parse("content://calendar/event_entities");
+
+        public static EntityIterator newEntityIterator(Cursor cursor, ContentResolver resolver) {
+            return new EntityIteratorImpl(cursor, resolver);
+        }
+
+        public static EntityIterator newEntityIterator(Cursor cursor,
+                ContentProviderClient provider) {
+            return new EntityIteratorImpl(cursor, provider);
+        }
+
+        private static class EntityIteratorImpl extends CursorEntityIterator {
+            private final ContentResolver mResolver;
+            private final ContentProviderClient mProvider;
+
+            private static final String[] REMINDERS_PROJECTION = new String[] {
+                    Reminders.MINUTES,
+                    Reminders.METHOD,
+            };
+            private static final int COLUMN_MINUTES = 0;
+            private static final int COLUMN_METHOD = 1;
+
+            private static final String[] ATTENDEES_PROJECTION = new String[] {
+                    Attendees.ATTENDEE_NAME,
+                    Attendees.ATTENDEE_EMAIL,
+                    Attendees.ATTENDEE_RELATIONSHIP,
+                    Attendees.ATTENDEE_TYPE,
+                    Attendees.ATTENDEE_STATUS,
+            };
+            private static final int COLUMN_ATTENDEE_NAME = 0;
+            private static final int COLUMN_ATTENDEE_EMAIL = 1;
+            private static final int COLUMN_ATTENDEE_RELATIONSHIP = 2;
+            private static final int COLUMN_ATTENDEE_TYPE = 3;
+            private static final int COLUMN_ATTENDEE_STATUS = 4;
+            private static final String[] EXTENDED_PROJECTION = new String[] {
+                    ExtendedProperties.NAME,
+                    ExtendedProperties.VALUE,
+            };
+            private static final int COLUMN_NAME = 0;
+            private static final int COLUMN_VALUE = 1;
+
+            public EntityIteratorImpl(Cursor cursor, ContentResolver resolver) {
+                super(cursor);
+                mResolver = resolver;
+                mProvider = null;
+            }
+
+            public EntityIteratorImpl(Cursor cursor, ContentProviderClient provider) {
+                super(cursor);
+                mResolver = null;
+                mProvider = provider;
+            }
+
+            public Entity getEntityAndIncrementCursor(Cursor cursor) throws RemoteException {
+                // we expect the cursor is already at the row we need to read from
+                final long eventId = cursor.getLong(cursor.getColumnIndexOrThrow(Events._ID));
+                ContentValues cv = new ContentValues();
+                cv.put(Events._ID, eventId);
+                DatabaseUtils.cursorIntToContentValuesIfPresent(cursor, cv, CALENDAR_ID);
+                DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, HTML_URI);
+                DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, TITLE);
+                DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, DESCRIPTION);
+                DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, EVENT_LOCATION);
+                DatabaseUtils.cursorIntToContentValuesIfPresent(cursor, cv, STATUS);
+                DatabaseUtils.cursorIntToContentValuesIfPresent(cursor, cv, SELF_ATTENDEE_STATUS);
+                DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, COMMENTS_URI);
+                DatabaseUtils.cursorLongToContentValuesIfPresent(cursor, cv, DTSTART);
+                DatabaseUtils.cursorLongToContentValuesIfPresent(cursor, cv, DTEND);
+                DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, DURATION);
+                DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, EVENT_TIMEZONE);
+                DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, ALL_DAY);
+                DatabaseUtils.cursorIntToContentValuesIfPresent(cursor, cv, VISIBILITY);
+                DatabaseUtils.cursorIntToContentValuesIfPresent(cursor, cv, TRANSPARENCY);
+                DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, HAS_ALARM);
+                DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv,
+                        HAS_EXTENDED_PROPERTIES);
+                DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, RRULE);
+                DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, RDATE);
+                DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, EXRULE);
+                DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, EXDATE);
+                DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, ORIGINAL_EVENT);
+                DatabaseUtils.cursorLongToContentValuesIfPresent(cursor, cv,
+                        ORIGINAL_INSTANCE_TIME);
+                DatabaseUtils.cursorIntToContentValuesIfPresent(cursor, cv, ORIGINAL_ALL_DAY);
+                DatabaseUtils.cursorLongToContentValuesIfPresent(cursor, cv, LAST_DATE);
+                DatabaseUtils.cursorIntToContentValuesIfPresent(cursor, cv, HAS_ATTENDEE_DATA);
+                DatabaseUtils.cursorIntToContentValuesIfPresent(cursor, cv,
+                        GUESTS_CAN_INVITE_OTHERS);
+                DatabaseUtils.cursorIntToContentValuesIfPresent(cursor, cv, GUESTS_CAN_MODIFY);
+                DatabaseUtils.cursorIntToContentValuesIfPresent(cursor, cv, GUESTS_CAN_SEE_GUESTS);
+                DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, ORGANIZER);
+                DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, _SYNC_ID);
+                DatabaseUtils.cursorLongToContentValuesIfPresent(cursor, cv, _SYNC_DIRTY);
+                DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, _SYNC_VERSION);
+                DatabaseUtils.cursorIntToContentValuesIfPresent(cursor, cv, DELETED);
+                DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, Calendars.URL);
+
+                Entity entity = new Entity(cv);
+                Cursor subCursor;
+                if (mResolver != null) {
+                    subCursor = mResolver.query(Reminders.CONTENT_URI, REMINDERS_PROJECTION,
+                            "event_id=" + eventId, null, null);
+                } else {
+                    subCursor = mProvider.query(Reminders.CONTENT_URI, REMINDERS_PROJECTION,
+                            "event_id=" + eventId, null, null);
+                }
+                try {
+                    while (subCursor.moveToNext()) {
+                        ContentValues reminderValues = new ContentValues();
+                        reminderValues.put(Reminders.MINUTES, subCursor.getInt(COLUMN_MINUTES));
+                        reminderValues.put(Reminders.METHOD, subCursor.getInt(COLUMN_METHOD));
+                        entity.addSubValue(Reminders.CONTENT_URI, reminderValues);
+                    }
+                } finally {
+                    subCursor.close();
+                }
+
+                if (mResolver != null) {
+                    subCursor = mResolver.query(Attendees.CONTENT_URI, ATTENDEES_PROJECTION,
+                            "event_id=" + eventId, null /* selectionArgs */, null /* sortOrder */);
+                } else {
+                    subCursor = mProvider.query(Attendees.CONTENT_URI, ATTENDEES_PROJECTION,
+                            "event_id=" + eventId, null /* selectionArgs */, null /* sortOrder */);
+                }
+                try {
+                    while (subCursor.moveToNext()) {
+                        ContentValues attendeeValues = new ContentValues();
+                        attendeeValues.put(Attendees.ATTENDEE_NAME,
+                                subCursor.getString(COLUMN_ATTENDEE_NAME));
+                        attendeeValues.put(Attendees.ATTENDEE_EMAIL,
+                                subCursor.getString(COLUMN_ATTENDEE_EMAIL));
+                        attendeeValues.put(Attendees.ATTENDEE_RELATIONSHIP,
+                                subCursor.getInt(COLUMN_ATTENDEE_RELATIONSHIP));
+                        attendeeValues.put(Attendees.ATTENDEE_TYPE,
+                                subCursor.getInt(COLUMN_ATTENDEE_TYPE));
+                        attendeeValues.put(Attendees.ATTENDEE_STATUS,
+                                subCursor.getInt(COLUMN_ATTENDEE_STATUS));
+                        entity.addSubValue(Attendees.CONTENT_URI, attendeeValues);
+                    }
+                } finally {
+                    subCursor.close();
+                }
+
+                if (mResolver != null) {
+                    subCursor = mResolver.query(ExtendedProperties.CONTENT_URI, EXTENDED_PROJECTION,
+                            "event_id=" + eventId, null /* selectionArgs */, null /* sortOrder */);
+                } else {
+                    subCursor = mProvider.query(ExtendedProperties.CONTENT_URI, EXTENDED_PROJECTION,
+                            "event_id=" + eventId, null /* selectionArgs */, null /* sortOrder */);
+                }
+                try {
+                    while (subCursor.moveToNext()) {
+                        ContentValues extendedValues = new ContentValues();
+                        extendedValues.put(ExtendedProperties.NAME, cursor.getString(COLUMN_NAME));
+                        extendedValues.put(ExtendedProperties.VALUE,
+                                cursor.getString(COLUMN_VALUE));
+                        entity.addSubValue(ExtendedProperties.CONTENT_URI, extendedValues);
+                    }
+                } finally {
+                    subCursor.close();
+                }
+
+                cursor.moveToNext();
+                return entity;
+            }
+        }
+    }
+
+    /**
+     * Contains one entry per calendar event. Recurring events show up as a single entry.
+     */
+    public static final class Events implements BaseColumns, EventsColumns, CalendarsColumns {
 
         private static final String[] FETCH_ENTRY_COLUMNS =
                 new String[] { Events._SYNC_ACCOUNT, Events._SYNC_ID };
