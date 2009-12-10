@@ -1127,7 +1127,7 @@ public class KeyboardView extends View implements View.OnClickListener {
         
         // Needs to be called after the gesture detector gets a turn, as it may have
         // displayed the mini keyboard
-        if (mMiniKeyboardOnScreen) {
+        if (mMiniKeyboardOnScreen && action != MotionEvent.ACTION_CANCEL) {
             return true;
         }
 
@@ -1222,6 +1222,7 @@ public class KeyboardView extends View implements View.OnClickListener {
                 break;
             case MotionEvent.ACTION_CANCEL:
                 removeMessages();
+                dismissPopupKeyboard();
                 mAbortKey = true;
                 showPreview(NOT_A_KEY);
                 invalidateKey(mCurrentKey);
