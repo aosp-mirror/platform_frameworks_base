@@ -37,6 +37,12 @@ import java.util.concurrent.atomic.AtomicInteger;
  * that the sync has been canceled.
  */
 public abstract class AbstractThreadedSyncAdapter {
+    /**
+     * Kernel event log tag.  Also listed in data/etc/event-log-tags.
+     * @Deprecated
+     */
+    public static final int LOG_SYNC_DETAILS = 2743;
+
     private final Context mContext;
     private final AtomicInteger mNumSyncStarts;
     private final ISyncAdapterImpl mISyncAdapterImpl;
@@ -45,9 +51,6 @@ public abstract class AbstractThreadedSyncAdapter {
     private SyncThread mSyncThread;
     private final Object mSyncThreadLock = new Object();
 
-    /** Kernel event log tag.  Also listed in data/etc/event-log-tags. */
-    public static final int LOG_SYNC_DETAILS = 2743;
-    private static final String TAG = "Sync";
     private final boolean mAutoInitialize;
 
     /**
@@ -136,8 +139,6 @@ public abstract class AbstractThreadedSyncAdapter {
         private final String mAuthority;
         private final Account mAccount;
         private final Bundle mExtras;
-        private long mInitialTxBytes;
-        private long mInitialRxBytes;
 
         private SyncThread(String name, SyncContext syncContext, String authority,
                 Account account, Bundle extras) {
@@ -156,9 +157,6 @@ public abstract class AbstractThreadedSyncAdapter {
             }
 
             SyncResult syncResult = new SyncResult();
-            int uid = Process.myUid();
-            mInitialTxBytes = TrafficStats.getUidTxBytes(uid);
-            mInitialRxBytes = TrafficStats.getUidRxBytes(uid);
             ContentProviderClient provider = null;
             try {
                 provider = mContext.getContentResolver().acquireContentProviderClient(mAuthority);
@@ -175,8 +173,6 @@ public abstract class AbstractThreadedSyncAdapter {
                 if (!isCanceled()) {
                     mSyncContext.onFinished(syncResult);
                 }
-                onLogSyncDetails(TrafficStats.getUidTxBytes(uid) - mInitialTxBytes,
-                        TrafficStats.getUidRxBytes(uid) - mInitialRxBytes, syncResult);
                 // synchronize so that the assignment will be seen by other threads
                 // that also synchronize accesses to mSyncThread
                 synchronized (mSyncThreadLock) {
@@ -211,18 +207,4 @@ public abstract class AbstractThreadedSyncAdapter {
      */
     public abstract void onPerformSync(Account account, Bundle extras,
             String authority, ContentProviderClient provider, SyncResult syncResult);
-
-    /**
-     * Logs details on the sync.
-     * Normally this will be overridden by a subclass that will provide
-     * provider-specific details.
-     *
-     * @param bytesSent number of bytes the sync sent over the network
-     * @param bytesReceived number of bytes the sync received over the network
-     * @param result The SyncResult object holding info on the sync
-     * @hide
-     */
-    protected void onLogSyncDetails(long bytesSent, long bytesReceived, SyncResult result) {
-        EventLog.writeEvent(SyncAdapter.LOG_SYNC_DETAILS, TAG, bytesSent, bytesReceived, "");
-    }
 }
