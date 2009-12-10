@@ -26,8 +26,8 @@ import android.accounts.Account;
 public abstract class SyncAdapter {
     private static final String TAG = "SyncAdapter";
 
-    /** Kernel event log tag.  Also listed in data/etc/event-log-tags. */
-    public static final int LOG_SYNC_DETAILS = 2743;
+    /** Kernel event log tag. */
+    public static final int LOG_SYNC_DETAILS = EventLogTags.SYNC_DETAILS;
 
     class Transport extends ISyncAdapter.Stub {
         public void startSync(ISyncContext syncContext, String authority, Account account,
