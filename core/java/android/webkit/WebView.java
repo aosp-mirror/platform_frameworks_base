@@ -5696,6 +5696,12 @@ public class WebView extends AbsoluteLayout
     }
 
     // called by JNI
+    private void sendMoveFocus(int frame, int node) {
+        mWebViewCore.sendMessage(EventHub.SET_MOVE_FOCUS,
+                new WebViewCore.CursorData(frame, node, 0, 0));
+    }
+
+    // called by JNI
     private void sendMoveMouse(int frame, int node, int x, int y) {
         mWebViewCore.sendMessage(EventHub.SET_MOVE_MOUSE,
                 new WebViewCore.CursorData(frame, node, x, y));
