@@ -110,8 +110,11 @@ public class RecentApplicationsDialog extends Dialog implements OnClickListener 
             if (b == v) {
                 // prepare a launch intent and send it
                 Intent intent = (Intent)b.getTag();
-                intent.addFlags(Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY);
-                getContext().startActivity(intent);
+                if (intent != null) {
+                    intent.addFlags(Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY);
+                    getContext().startActivity(intent);
+                }
+                break;
             }
         }
         dismiss();
