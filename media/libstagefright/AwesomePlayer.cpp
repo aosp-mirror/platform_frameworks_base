@@ -261,6 +261,8 @@ status_t AwesomePlayer::play() {
     mFlags |= PLAYING;
     mFlags |= FIRST_FRAME;
 
+    bool deferredAudioSeek = false;
+
     if (mAudioSource != NULL) {
         if (mAudioPlayer == NULL) {
             if (mAudioSink != NULL) {
@@ -275,9 +277,7 @@ status_t AwesomePlayer::play() {
                 delete mTimeSource;
                 mTimeSource = mAudioPlayer;
 
-                // If there was a seek request while we were paused
-                // and we're just starting up again, honor the request now.
-                seekAudioIfNecessary_l();
+                deferredAudioSeek = true;
             }
         } else {
             mAudioPlayer->resume();
@@ -297,6 +297,12 @@ status_t AwesomePlayer::play() {
             // Kick off video playback
             postVideoEvent_l();
         }
+    }
+
+    if (deferredAudioSeek) {
+        // If there was a seek request while we were paused
+        // and we're just starting up again, honor the request now.
+        seekAudioIfNecessary_l();
     }
 
     return OK;
