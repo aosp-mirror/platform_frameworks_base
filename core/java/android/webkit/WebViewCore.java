@@ -41,6 +41,7 @@ import android.view.KeyEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
+import android.webkit.plugin.FullScreenDrawingModel;
 import android.webkit.plugin.SurfaceDrawingModel;
 import android.webkit.plugin.WebkitPlugin;
 
@@ -2214,16 +2215,36 @@ final class WebViewCore {
         return pluginManager.getPluginInstance(pkgName, npp);
     }
 
-    // called by JNI. PluginWidget function to launch an activity and overlays
-    // the activity with the View provided by the plugin class.
-    private void startFullScreenPluginActivity(int npp) {
+    // called by JNI. PluginWidget function to launch a full-screen view using a
+    // View object provided by the plugin class.
+    private void showFullScreenPlugin(WebkitPlugin webkitPlugin) {
         if (mWebView == null) {
             return;
         }
 
-        Intent intent = new Intent("android.intent.webkit.PLUGIN");
-        intent.putExtra(PluginActivity.INTENT_EXTRA_NPP_INSTANCE, npp);
-        mWebView.getContext().startActivity(intent);
+        final FullScreenDrawingModel surface = webkitPlugin.getFullScreenSurface();
+        if(surface == null) {
+            Log.e(LOGTAG, "Attempted to create an full-screen surface with a null drawing model");
+            return;
+        }
+
+        WebChromeClient.CustomViewCallback callback = new WebChromeClient.CustomViewCallback() {
+            public void onCustomViewHidden() {
+                if (surface != null) {
+                    surface.onSurfaceRemoved();
+                }
+            }
+        };
+
+        mCallbackProxy.showCustomView(surface.getSurface(), callback);
+    }
+
+    private void hideFullScreenPlugin() {
+        if (mWebView == null) {
+            return;
+        }
+
+        mCallbackProxy.hideCustomView();
     }
 
     // called by JNI.  PluginWidget functions for creating an embedded View for
