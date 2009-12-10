@@ -365,6 +365,19 @@ public class WebView extends AbsoluteLayout
     private static final int PREVENT_DRAG_YES = 2;
     private int mPreventDrag = PREVENT_DRAG_NO;
 
+    // by default mPreventLongPress is false. If it is true, long press event
+    // will be handled by WebKit instead of UI.
+    private boolean mPreventLongPress = false;
+    // by default mPreventDoubleTap is false. If it is true, double tap event
+    // will be handled by WebKit instead of UI.
+    private boolean mPreventDoubleTap = false;
+
+    // this needs to be in sync with the logic in WebKit's
+    // EventHandler::handleTouchEvent()
+    private static final int TOUCH_PREVENT_DRAG         = 0x1;
+    private static final int TOUCH_PREVENT_LONGPRESS    = 0x2;
+    private static final int TOUCH_PREVENT_DOUBLETAP    = 0x4;
+
     // To keep track of whether the current drag was initiated by a WebTextView,
     // so that we know not to hide the cursor
     boolean mDragFromTextInput;
@@ -3044,8 +3057,8 @@ public class WebView extends AbsoluteLayout
             if (mTouchMode == TOUCH_SHORTPRESS_START_MODE) {
                 mTouchMode = TOUCH_SHORTPRESS_MODE;
                 HitTestResult hitTest = getHitTestResult();
-                if (hitTest != null &&
-                        hitTest.mType != HitTestResult.UNKNOWN_TYPE) {
+                if (mPreventLongPress || (hitTest != null &&
+                        hitTest.mType != HitTestResult.UNKNOWN_TYPE)) {
                     mPrivateHandler.sendMessageDelayed(mPrivateHandler
                             .obtainMessage(SWITCH_TO_LONGPRESS),
                             LONG_PRESS_TIMEOUT);
@@ -3912,6 +3925,8 @@ public class WebView extends AbsoluteLayout
                     mTouchMode = TOUCH_INIT_MODE;
                     mPreventDrag = mForwardTouchEvents ? PREVENT_DRAG_MAYBE_YES
                             : PREVENT_DRAG_NO;
+                    mPreventLongPress = false;
+                    mPreventDoubleTap = false;
                     mWebViewCore.sendMessage(
                             EventHub.UPDATE_FRAME_CACHE_IF_LOADING);
                     if (mLogEvent && eventTime - mLastTouchUpTime < 1000) {
@@ -4115,7 +4130,16 @@ public class WebView extends AbsoluteLayout
                     case TOUCH_DOUBLE_TAP_MODE: // double tap
                         mPrivateHandler.removeMessages(SWITCH_TO_SHORTPRESS);
                         mTouchMode = TOUCH_DONE_MODE;
-                        doDoubleTap();
+                        if (mPreventDoubleTap) {
+                            WebViewCore.TouchEventData ted
+                                    = new WebViewCore.TouchEventData();
+                            ted.mAction = WebViewCore.ACTION_DOUBLETAP;
+                            ted.mX = viewToContentX((int) x + mScrollX);
+                            ted.mY = viewToContentY((int) y + mScrollY);
+                            mWebViewCore.sendMessage(EventHub.TOUCH_EVENT, ted);
+                        } else {
+                            doDoubleTap();
+                        }
                         break;
                     case TOUCH_SELECT_MODE:
                         commitCopy();
@@ -4143,6 +4167,8 @@ public class WebView extends AbsoluteLayout
                                 // if mPreventDrag is not confirmed, treat it as
                                 // no so that it won't block tap or double tap.
                                 mPreventDrag = PREVENT_DRAG_NO;
+                                mPreventLongPress = false;
+                                mPreventDoubleTap = false;
                             }
                             if (mPreventDrag == PREVENT_DRAG_NO) {
                                 if (mTouchMode == TOUCH_INIT_MODE) {
@@ -5090,6 +5116,8 @@ public class WebView extends AbsoluteLayout
                     // it won't block panning the page.
                     if (mPreventDrag == PREVENT_DRAG_MAYBE_YES) {
                         mPreventDrag = PREVENT_DRAG_NO;
+                        mPreventLongPress = false;
+                        mPreventDoubleTap = false;
                     }
                     if (mTouchMode == TOUCH_INIT_MODE) {
                         mTouchMode = TOUCH_SHORTPRESS_START_MODE;
@@ -5100,7 +5128,15 @@ public class WebView extends AbsoluteLayout
                     break;
                 }
                 case SWITCH_TO_LONGPRESS: {
-                    if (mPreventDrag == PREVENT_DRAG_NO) {
+                    if (mPreventLongPress) {
+                        mTouchMode = TOUCH_DONE_MODE;
+                        WebViewCore.TouchEventData ted
+                                = new WebViewCore.TouchEventData();
+                        ted.mAction = WebViewCore.ACTION_LONGPRESS;
+                        ted.mX = viewToContentX((int) mLastTouchX + mScrollX);
+                        ted.mY = viewToContentY((int) mLastTouchY + mScrollY);
+                        mWebViewCore.sendMessage(EventHub.TOUCH_EVENT, ted);
+                    } else if (mPreventDrag == PREVENT_DRAG_NO) {
                         mTouchMode = TOUCH_DONE_MODE;
                         performLongClick();
                         rebuildWebTextView();
@@ -5343,10 +5379,18 @@ public class WebView extends AbsoluteLayout
                         // dont override if mPreventDrag has been set to no due
                         // to time out
                         if (mPreventDrag == PREVENT_DRAG_MAYBE_YES) {
-                            mPreventDrag = msg.arg2 == 1 ? PREVENT_DRAG_YES
+                            mPreventDrag = (msg.arg2 & TOUCH_PREVENT_DRAG)
+                                    == TOUCH_PREVENT_DRAG ? PREVENT_DRAG_YES
                                     : PREVENT_DRAG_NO;
                             if (mPreventDrag == PREVENT_DRAG_YES) {
                                 mTouchMode = TOUCH_DONE_MODE;
+                            } else {
+                                mPreventLongPress =
+                                        (msg.arg2 & TOUCH_PREVENT_LONGPRESS)
+                                        == TOUCH_PREVENT_LONGPRESS;
+                                mPreventDoubleTap =
+                                        (msg.arg2 & TOUCH_PREVENT_DOUBLETAP)
+                                        == TOUCH_PREVENT_DOUBLETAP;
                             }
                         }
                     }
