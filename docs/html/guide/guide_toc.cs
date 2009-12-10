@@ -191,13 +191,15 @@
         <div><a style="color:gray;">Wireless Controls</a></div>
           <ul>
             <li><a style="color:gray;">Wi-Fi</a></li>
-            <li><a style="color:gray;">Bluetooth</a></li>
           </ul>
       </li> -->
   <!--<li><a style="color:gray;">Localization</a></li>  -->
       <li><a href="<?cs var:toroot ?>guide/topics/appwidgets/index.html">
             <span class="en">App Widgets</span>
           </a></li>
+      <li><a href="<?cs var:toroot?>guide/topics/wireless/bluetooth.html">
+            <span class="en">Bluetooth</span>
+          </a> <span class="new">new!</span></li>
     </ul>
   </li>
   
