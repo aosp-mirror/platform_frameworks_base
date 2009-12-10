@@ -173,7 +173,7 @@ static void playSource(OMXClient *client, const sp<MediaSource> &source) {
                 break;
             }
 
-            if ((n++ % 16) == 0) {
+            if (buffer->range_length() > 0 && (n++ % 16) == 0) {
                 printf(".");
                 fflush(stdout);
             }
