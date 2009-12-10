@@ -22,7 +22,10 @@ parent.link=index.html
     <li><a href="#eclipse">Eclipse isn't talking to the emulator</a></li>
     <li><a href="#majorminor">When I go to preferences in Eclipse and select "Android", I get the following error message: Unsupported major.minor version 49.0.</a></li>
     <li><a href="#apidemosreinstall">I can't install ApiDemos apps in my IDE because of a signing error</a></li>
+    <li><a href="#gesturebuilderinstall">I can't install the GestureBuilder sample
+app in the emulator</a></li>
     <li><a href="#signingcalendar">I can't compile my app because the build tools generated an expired debug certificate</a></li>
+    <li><a href="#manifestfiles">Unable to view manifest files from within Eclipse</a></li>
 </ul>
 
 <a name="installeclipsecomponents" id="installeclipsecomponents"></a><h2>ADT Installation Error: "requires plug-in org.eclipse.wst.sse.ui".</h2>
@@ -201,17 +204,17 @@ compiled and signed with a private key.</p>
 
 If you want to modify or run one of the ApiDemos apps from Eclipse/ADT or other IDE, you can do so 
 so only after you uninstall the <em>preinstalled</em> version of the app from the emulator. If 
-you try to run an ApiDemos apps from your IDE without removing the preinstalled version first, 
-you will get errors similar to: </p>
+you try to run an ApiDemos app from your IDE without removing the preinstalled version first, 
+you will get errors similar to these: </p>
 
 <pre>[2008-08-13 15:14:15 - ApiDemos] Re-installation failed due to different application signatures.
 [2008-08-13 15:14:15 - ApiDemos] You must perform a full uninstall of the application. WARNING: ...This will remove the application data!
 [2008-08-13 15:14:15 - ApiDemos] Please execute 'adb uninstall com.android.samples' in a shell.</pre>
 
 <p>The error occurs because, in this case, you are attempting to install another copy of ApiDemos 
-onto the emulator, a copy that is signed with a different certificate (the Android IDE tools will 
+onto the emulator, a copy that is signed with a different certificate. (The Android IDE tools will 
 have signed the app with a debug certificate, where the existing version was already signed with 
-a private certificate). The system does not allow this type of reinstallation.  </p>
+a private certificate.) The system does not allow this type of reinstallation.  </p>
 
 <p>To resolve the issue, you need to fully uninstall the preinstalled and then reinstall it using 
 the adb tool. Here's how to do that:</p>
@@ -233,6 +236,55 @@ commands to the emulator instance that you are targeting. To do that you can add
 <p>For more information about adb, see the <a href="{@docRoot}guide/developing/tools/adb.html">Android Debug Bridge</a> 
 documentation.</p>
 
+<h2 id="gesturebuilderinstall">I can't install the GestureBuilder sample 
+app in the emulator</a></h2>
+
+<p>This is similar to the ApiDemos problem described above, except that
+you cannot fix it by uninstalling GestureBuilder from the emulator. The 
+GestureBuilder app cannot be uninstalled because it is currently installed 
+within the system files themselves.</p>
+
+<p><strong>Symptoms</strong></p>
+
+<ul><li><p>You cannot run GestureBuilder in the emulator:</p>
+
+<pre>[2009-12-10 14:57:19 - GestureBuilderActivity]Re-installation failed due to different application signatures.
+[2009-12-10 14:57:19 - GestureBuilderActivity]You must perform a full uninstall of the application. WARNING: This will remove the application data!
+[2009-12-10 14:57:19 - GestureBuilderActivity]Please execute 'adb uninstall com.android.gesture.builder' in a shell.</pre>
+</li>
+
+<li><p>Running <code>adb uninstall com.android.gesture.builder</code> fails:</p>
+<pre>$ adb uninstall com.android.gesture.builder
+	Failure</pre>
+</li></ul>
+
+<p>For now, the work-around is to change the sample's package name
+so that the system can install it as a new app rather than as a 
+replacement for the existing GestureBuilder app. To change the 
+package name, open the manifest file and modify the package attribute 
+of the manifest element. Next, update imports and other references to 
+the package name, rebuild the app, and run it in an AVD.</p>
+
+<p>For example, here's how you could do this in Eclipse:</p>
+
+<ol>
+  <li>Right-click on the package name
+(<code>src/com.android.gesture.builder</code>).</li>
+  <li>Select <strong>Refactor &gt; Rename</strong> and change the name, for example to
+<code>com.android.gestureNEW.builder</code>. </li>
+  <li>Open the manifest file. Inside the <code>&lt;manifest&gt;</code>
+tag, change the package name to
+<code>com.android.gestureNEW.builder</code>.</li>
+  <li>Open each of the two Activity files and do Ctrl-Shift-O to add
+missing import packages, then save each file.</li>
+<li>Run the GestureBuilder application on the emulator.</li>
+</ol>
+
+<p>If you get an error message such as "Could not load /sdcard/gestures. 
+Make sure you have a mounted SD card," be sure that your target AVD has an 
+SD card. To create an AVD that has an SD card, use the
+<a href="{@docRoot}guide/developing/tools/avd.html#options"><code>-c</code> 
+option</a> in the <code>android create avd</code> command.</p> 
 
 <h2 id="signingcalendar">I can't compile my app because the build tools generated an expired debug certificate</h2>
 
@@ -259,3 +311,25 @@ C:\Users\&lt;user&gt;\.android</code></li>
 <p>For general information about signing Android applications, see 
 <a href="{@docRoot}guide/publishing/app-signing.html">Signing Your Applications</a>. </p>
 
+<h2 id="manifestfiles">Unable to view manifest files from within
+Eclipse</a></h2>
+
+<p>When you try to open an application's manifest file from within
+Eclipse, you might get an error such as this one:</p>
+<pre>An error has occurred. See error log for more details.
+org.eclipse.wst.sse.ui.StructuredTextEditor.isBlockSelectionModeEnabled()Z</pre>
+
+<p>Try reverting to the 3.0 version of the Eclipse XML Editors and
+Tools. If this does not work, remove the 3.1 version of the tool. To do
+this in Eclipse 3.4:</p>
+
+<ol>
+	<li>Select <strong>Help > Software Updates...</strong></li>
+	<li>Select the <strong>Installed Software</strong> tab.</li>
+	<li>Select <strong>Eclipse XML Editors and Tools</strong>.</li>
+	<li>Click <strong>Uninstall</strong>.</li>
+	<li>Click <strong>Finish</strong>.</li>
+</ol>
+
+<p>When you restart Eclipse, you should be able to view the manifest
+files. </p>
