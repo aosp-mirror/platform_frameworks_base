@@ -16,11 +16,10 @@
 
 package com.google.android.net;
 
-import android.os.NetStat;
+import android.net.TrafficStats;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.util.EventLog;
-
 import org.apache.http.HttpEntity;
 import org.apache.http.entity.HttpEntityWrapper;
 
@@ -45,8 +44,8 @@ public class NetworkStatsEntity extends HttpEntityWrapper {
                 super.close();
             } finally {
                 long processingTime = SystemClock.elapsedRealtime() - mProcessingStartTime;
-                long tx = NetStat.getUidTxBytes(mUid);
-                long rx = NetStat.getUidRxBytes(mUid);
+                long tx = TrafficStats.getUidTxBytes(mUid);
+                long rx = TrafficStats.getUidRxBytes(mUid);
 
                 EventLog.writeEvent(HTTP_STATS_EVENT, mUa, mResponseLatency, processingTime,
                         tx - mStartTx, rx - mStartRx);

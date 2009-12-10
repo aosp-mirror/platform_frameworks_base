@@ -17,8 +17,8 @@
 package com.android.internal.os;
 
 import android.bluetooth.BluetoothHeadset;
+import android.net.TrafficStats;
 import android.os.BatteryStats;
-import android.os.NetStat;
 import android.os.Parcel;
 import android.os.ParcelFormatException;
 import android.os.Parcelable;
@@ -1022,8 +1022,8 @@ public final class BatteryStatsImpl extends BatteryStats {
     public void doUnplug(long batteryUptime, long batteryRealtime) {
         for (int iu = mUidStats.size() - 1; iu >= 0; iu--) {
             Uid u = mUidStats.valueAt(iu);
-            u.mStartedTcpBytesReceived = NetStat.getUidRxBytes(u.mUid);
-            u.mStartedTcpBytesSent = NetStat.getUidTxBytes(u.mUid);
+            u.mStartedTcpBytesReceived = TrafficStats.getUidRxBytes(u.mUid);
+            u.mStartedTcpBytesSent = TrafficStats.getUidTxBytes(u.mUid);
             u.mTcpBytesReceivedAtLastUnplug = u.mCurrentTcpBytesReceived;
             u.mTcpBytesSentAtLastUnplug = u.mCurrentTcpBytesSent;
         }
@@ -1031,10 +1031,10 @@ public final class BatteryStatsImpl extends BatteryStats {
             mUnpluggables.get(i).unplug(batteryUptime, batteryRealtime);
         }
         // Track total mobile data
-        doDataUnplug(mMobileDataRx, NetStat.getMobileRxBytes());
-        doDataUnplug(mMobileDataTx, NetStat.getMobileTxBytes());
-        doDataUnplug(mTotalDataRx, NetStat.getTotalRxBytes());
-        doDataUnplug(mTotalDataTx, NetStat.getTotalTxBytes());
+        doDataUnplug(mMobileDataRx, TrafficStats.getMobileRxBytes());
+        doDataUnplug(mMobileDataTx, TrafficStats.getMobileTxBytes());
+        doDataUnplug(mTotalDataRx, TrafficStats.getTotalRxBytes());
+        doDataUnplug(mTotalDataTx, TrafficStats.getTotalTxBytes());
         // Track radio awake time
         mRadioDataStart = getCurrentRadioDataUptime();
         mRadioDataUptime = 0;
@@ -1058,10 +1058,10 @@ public final class BatteryStatsImpl extends BatteryStats {
         for (int i = mUnpluggables.size() - 1; i >= 0; i--) {
             mUnpluggables.get(i).plug(batteryUptime, batteryRealtime);
         }
-        doDataPlug(mMobileDataRx, NetStat.getMobileRxBytes());
-        doDataPlug(mMobileDataTx, NetStat.getMobileTxBytes());
-        doDataPlug(mTotalDataRx, NetStat.getTotalRxBytes());
-        doDataPlug(mTotalDataTx, NetStat.getTotalTxBytes());
+        doDataPlug(mMobileDataRx, TrafficStats.getMobileRxBytes());
+        doDataPlug(mMobileDataTx, TrafficStats.getMobileTxBytes());
+        doDataPlug(mTotalDataRx, TrafficStats.getTotalRxBytes());
+        doDataPlug(mTotalDataTx, TrafficStats.getTotalTxBytes());
         // Track radio awake time
         mRadioDataUptime = getRadioDataUptime();
         mRadioDataStart = -1;
@@ -1519,7 +1519,7 @@ public final class BatteryStatsImpl extends BatteryStats {
         
         public long computeCurrentTcpBytesReceived() {
             return mCurrentTcpBytesReceived + (mStartedTcpBytesReceived >= 0
-                    ? (NetStat.getUidRxBytes(mUid) - mStartedTcpBytesReceived) : 0);
+                    ? (TrafficStats.getUidRxBytes(mUid) - mStartedTcpBytesReceived) : 0);
         }
 
         @Override
@@ -1696,7 +1696,7 @@ public final class BatteryStatsImpl extends BatteryStats {
         
         public long computeCurrentTcpBytesSent() {
             return mCurrentTcpBytesSent + (mStartedTcpBytesSent >= 0
-                    ? (NetStat.getUidTxBytes(mUid) - mStartedTcpBytesSent) : 0);
+                    ? (TrafficStats.getUidTxBytes(mUid) - mStartedTcpBytesSent) : 0);
         }
 
         void writeToParcelLocked(Parcel out, long batteryRealtime) {
@@ -2919,22 +2919,22 @@ public final class BatteryStatsImpl extends BatteryStats {
 
     /** Only STATS_UNPLUGGED works properly */
     public long getMobileTcpBytesSent(int which) {
-        return getTcpBytes(NetStat.getMobileTxBytes(), mMobileDataTx, which);
+        return getTcpBytes(TrafficStats.getMobileTxBytes(), mMobileDataTx, which);
     }
 
     /** Only STATS_UNPLUGGED works properly */
     public long getMobileTcpBytesReceived(int which) {
-        return getTcpBytes(NetStat.getMobileRxBytes(), mMobileDataRx, which);
+        return getTcpBytes(TrafficStats.getMobileRxBytes(), mMobileDataRx, which);
     }
 
     /** Only STATS_UNPLUGGED works properly */
     public long getTotalTcpBytesSent(int which) {
-        return getTcpBytes(NetStat.getTotalTxBytes(), mTotalDataTx, which);
+        return getTcpBytes(TrafficStats.getTotalTxBytes(), mTotalDataTx, which);
     }
 
     /** Only STATS_UNPLUGGED works properly */
     public long getTotalTcpBytesReceived(int which) {
-        return getTcpBytes(NetStat.getTotalRxBytes(), mTotalDataRx, which);
+        return getTcpBytes(TrafficStats.getTotalRxBytes(), mTotalDataRx, which);
     }
 
     @Override

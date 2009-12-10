@@ -17,8 +17,8 @@
 package com.android.server;
 
 import android.content.Context;
+import android.net.TrafficStats;
 import android.os.INetStatService;
-import android.os.NetStat;
 
 public class NetStatService extends INetStatService.Stub {
 
@@ -27,34 +27,34 @@ public class NetStatService extends INetStatService.Stub {
     }
 
     public long getMobileTxPackets() {
-        return NetStat.getMobileTxPkts();
+        return TrafficStats.getMobileTxPkts();
     }
 
     public long getMobileRxPackets() {
-        return NetStat.getMobileRxPkts();
+        return TrafficStats.getMobileRxPkts();
     }
 
     public long getMobileTxBytes() {
-        return NetStat.getMobileTxBytes();
+        return TrafficStats.getMobileTxBytes();
     }
 
     public long getMobileRxBytes() {
-        return NetStat.getMobileRxBytes();
+        return TrafficStats.getMobileRxBytes();
     }
 
     public long getTotalTxPackets() {
-        return NetStat.getTotalTxPkts();
+        return TrafficStats.getTotalTxPkts();
     }
 
     public long getTotalRxPackets() {
-        return NetStat.getTotalRxPkts();
+        return TrafficStats.getTotalRxPkts();
     }
 
     public long getTotalTxBytes() {
-        return NetStat.getTotalTxBytes();
+        return TrafficStats.getTotalTxBytes();
     }
 
     public long getTotalRxBytes() {
-        return NetStat.getTotalRxBytes();
+        return TrafficStats.getTotalRxBytes();
     }
 }

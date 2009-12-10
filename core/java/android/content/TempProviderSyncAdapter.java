@@ -1,9 +1,12 @@
 package android.content;
 
+import android.accounts.Account;
+import android.accounts.AuthenticatorException;
+import android.accounts.OperationCanceledException;
 import android.database.SQLException;
+import android.net.TrafficStats;
 import android.os.Bundle;
 import android.os.Debug;
-import android.os.NetStat;
 import android.os.Parcelable;
 import android.os.Process;
 import android.os.SystemProperties;
@@ -12,9 +15,6 @@ import android.util.Config;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.TimingLogger;
-import android.accounts.Account;
-import android.accounts.AuthenticatorException;
-import android.accounts.OperationCanceledException;
 
 import java.io.IOException;
 
@@ -203,8 +203,8 @@ public abstract class TempProviderSyncAdapter extends SyncAdapter {
             if (mProviderSyncStarted) mProvider.onSyncCanceled();
             // We may lose the last few sync events when canceling.  Oh well.
             int uid = Process.myUid();
-            logSyncDetails(NetStat.getUidTxBytes(uid) - mInitialTxBytes,
-                    NetStat.getUidRxBytes(uid) - mInitialRxBytes, mResult);
+            logSyncDetails(TrafficStats.getUidTxBytes(uid) - mInitialTxBytes,
+                    TrafficStats.getUidRxBytes(uid) - mInitialRxBytes, mResult);
         }
         
         @Override
@@ -212,8 +212,8 @@ public abstract class TempProviderSyncAdapter extends SyncAdapter {
             Process.setThreadPriority(Process.myTid(),
                     Process.THREAD_PRIORITY_BACKGROUND);
             int uid = Process.myUid();
-            mInitialTxBytes = NetStat.getUidTxBytes(uid);
-            mInitialRxBytes = NetStat.getUidRxBytes(uid);
+            mInitialTxBytes = TrafficStats.getUidTxBytes(uid);
+            mInitialRxBytes = TrafficStats.getUidRxBytes(uid);
             try {
                 sync(mSyncContext, mAccount, mAuthority, mExtras);
             } catch (SQLException e) {
@@ -222,8 +222,8 @@ public abstract class TempProviderSyncAdapter extends SyncAdapter {
             } finally {
                 mSyncThread = null;
                 if (!mIsCanceled) {
-                    logSyncDetails(NetStat.getUidTxBytes(uid) - mInitialTxBytes,
-                    NetStat.getUidRxBytes(uid) - mInitialRxBytes, mResult);
+                    logSyncDetails(TrafficStats.getUidTxBytes(uid) - mInitialTxBytes,
+                    TrafficStats.getUidRxBytes(uid) - mInitialRxBytes, mResult);
                     mSyncContext.onFinished(mResult);
                 }
             }
