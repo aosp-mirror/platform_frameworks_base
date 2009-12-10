@@ -90,7 +90,7 @@
     <string name="roamingTextSearching" msgid="8360141885972279963">"正在搜索服务"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>：无法转接"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>：<xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
-    <string name="cfTemplateForwardedTime" msgid="9206251736527085256">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>：<xliff:g id="TIME_DELAY">{2}</xliff:g> 秒后转接 <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
+    <string name="cfTemplateForwardedTime" msgid="9206251736527085256">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>：<xliff:g id="TIME_DELAY">{2}</xliff:g> 秒后<xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateRegistered" msgid="5073237827620166285">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>：无法转接"</string>
     <string name="cfTemplateRegisteredTime" msgid="6781621964320635172">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>：无法转接"</string>
     <string name="fcComplete" msgid="3118848230966886575">"功能代码已拨完。"</string>
@@ -163,8 +163,8 @@
     <string name="permdesc_statusBar" msgid="1365473595331989732">"允许应用程序停用状态栏或者增删系统图标。"</string>
     <string name="permlab_expandStatusBar" msgid="1148198785937489264">"展开/收拢状态栏"</string>
     <string name="permdesc_expandStatusBar" msgid="7088604400110768665">"允许应用程序展开或收拢状态栏。"</string>
-    <string name="permlab_processOutgoingCalls" msgid="1136262550878335980">"拦截去电"</string>
-    <string name="permdesc_processOutgoingCalls" msgid="2228988201852654461">"允许应用程序处理去电或更改要拨打的号码。恶意应用程序可能会借此监视、另行转接甚至阻止去电。"</string>
+    <string name="permlab_processOutgoingCalls" msgid="1136262550878335980">"拦截外拨电话"</string>
+    <string name="permdesc_processOutgoingCalls" msgid="2228988201852654461">"允许应用程序处理外拨电话或更改要拨打的号码。恶意应用程序可能会借此监视、另行转接甚至阻止外拨电话。"</string>
     <string name="permlab_receiveSms" msgid="2697628268086208535">"接收短信"</string>
     <string name="permdesc_receiveSms" msgid="6298292335965966117">"允许应用程序接收和处理短信。恶意应用程序可借此监视您的信息，或者将信息删除而不向您显示。"</string>
     <string name="permlab_receiveMms" msgid="8894700916188083287">"接收彩信"</string>
@@ -301,8 +301,8 @@
     <string name="permdesc_brick" msgid="5569526552607599221">"允许应用程序永久停用整个手机，这非常危险。"</string>
     <string name="permlab_reboot" msgid="2898560872462638242">"强行重新启动手机"</string>
     <string name="permdesc_reboot" msgid="7914933292815491782">"允许应用程序强行重新启动手机。"</string>
-    <string name="permlab_mount_unmount_filesystems" msgid="1761023272170956541">"安装和卸载文件系统"</string>
-    <string name="permdesc_mount_unmount_filesystems" msgid="6253263792535859767">"允许应用程序安装和卸载可移动存储器的文件系统。"</string>
+    <string name="permlab_mount_unmount_filesystems" msgid="1761023272170956541">"装载和卸载文件系统"</string>
+    <string name="permdesc_mount_unmount_filesystems" msgid="6253263792535859767">"允许应用程序装载和卸载可移动存储器的文件系统。"</string>
     <string name="permlab_mount_format_filesystems" msgid="5523285143576718981">"格式化外部存储设备"</string>
     <string name="permdesc_mount_format_filesystems" msgid="574060044906047386">"允许应用程序格式化可移除的存储设备。"</string>
     <string name="permlab_vibrate" msgid="7768356019980849603">"控制振动器"</string>
@@ -312,9 +312,9 @@
     <string name="permlab_hardware_test" msgid="4148290860400659146">"测试硬件"</string>
     <string name="permdesc_hardware_test" msgid="3668894686500081699">"允许应用程序控制各外围设备以进行硬件测试。"</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"直接拨打电话号码"</string>
-    <string name="permdesc_callPhone" msgid="3369867353692722456">"允许应用程序在您不介入的情况下拨打电话。恶意应用程序可借此在您的话费单上产生意外通话费。请注意，此权限不允许应用程序进行紧急呼叫。"</string>
+    <string name="permdesc_callPhone" msgid="3369867353692722456">"允许应用程序在您不介入的情况下拨打电话。恶意应用程序可借此在您的话费单上产生意外通话费。请注意，此权限不允许应用程序拨打紧急呼救电话。"</string>
     <string name="permlab_callPrivileged" msgid="4198349211108497879">"直接呼叫任何电话号码"</string>
-    <string name="permdesc_callPrivileged" msgid="244405067160028452">"允许应用程序在您不介入的情况下拨打任何电话（包括紧急呼叫）。恶意应用程序可借此向应急服务机构拨打骚扰电话甚至非法电话。"</string>
+    <string name="permdesc_callPrivileged" msgid="244405067160028452">"允许应用程序在您不介入的情况下拨打任何电话（包括紧急呼救）。恶意应用程序可借此向应急服务机构拨打骚扰电话甚至非法电话。"</string>
     <string name="permlab_performCdmaProvisioning" msgid="5604848095315421425">"直接启动 CDMA 电话设置"</string>
     <string name="permdesc_performCdmaProvisioning" msgid="6457447676108355905">"允许应用程序启动 CDMA 服务。恶意应用程序可能会无端启动 CDMA 服务"</string>
     <string name="permlab_locationUpdates" msgid="7785408253364335740">"控制位置更新通知"</string>
@@ -324,7 +324,7 @@
     <string name="permlab_bindGadget" msgid="776905339015863471">"选择窗口小部件"</string>
     <string name="permdesc_bindGadget" msgid="2098697834497452046">"允许应用程序告诉系统哪个应用程序可以使用哪些窗口小部件。具有该权限的应用程序可以允许其他应用程序访问个人数据。普通应用程序不能使用此权限。"</string>
     <string name="permlab_modifyPhoneState" msgid="8423923777659292228">"修改手机状态"</string>
-    <string name="permdesc_modifyPhoneState" msgid="3302284561346956587">"允许应用程序控制设备的电话功能。拥有此权限的应用程序可自行切换网络、打开和关闭无线通信等。"</string>
+    <string name="permdesc_modifyPhoneState" msgid="3302284561346956587">"允许应用程序控制设备的电话功能。拥有此权限的应用程序可自行切换网络、打开和关闭无线通信等，而不会通知您。"</string>
     <string name="permlab_readPhoneState" msgid="2326172951448691631">"读取手机状态和身份"</string>
     <string name="permdesc_readPhoneState" msgid="188877305147626781">"允许应用程序访问设备的手机功能。有此权限的应用程序可确定此手机的号码和序列号，是否正在通话，以及对方的号码等。"</string>
     <string name="permlab_wakeLock" msgid="573480187941496130">"防止手机休眠"</string>
@@ -490,10 +490,10 @@
     <string name="emergency_call_dialog_number_for_display" msgid="696192103195090970">"急救或报警电话"</string>
     <string name="lockscreen_carrier_default" msgid="8812714795156374435">"（无服务）"</string>
     <string name="lockscreen_screen_locked" msgid="7288443074806832904">"屏幕已锁定。"</string>
-    <string name="lockscreen_instructions_when_pattern_enabled" msgid="46154051614126049">"按 Menu 解锁或进行紧急呼叫。"</string>
+    <string name="lockscreen_instructions_when_pattern_enabled" msgid="46154051614126049">"按 Menu 解锁或进行紧急呼救。"</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="686260028797158364">"按 MENU 解锁。"</string>
     <string name="lockscreen_pattern_instructions" msgid="7478703254964810302">"绘制解锁图案"</string>
-    <string name="lockscreen_emergency_call" msgid="5347633784401285225">"紧急呼叫"</string>
+    <string name="lockscreen_emergency_call" msgid="5347633784401285225">"紧急呼救"</string>
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"正确！"</string>
     <string name="lockscreen_pattern_wrong" msgid="4817583279053112312">"很抱歉，请重试"</string>
     <string name="lockscreen_plugged_in" msgid="613343852842944435">"正在充电 (<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>)"</string>
@@ -532,7 +532,7 @@
     <string name="battery_status_text_percent_format" msgid="7660311274698797147">"<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="battery_status_charging" msgid="756617993998772213">"正在充电..."</string>
     <string name="battery_low_title" msgid="7923774589611311406">"请连接充电器"</string>
-    <string name="battery_low_subtitle" msgid="7388781709819722764">"电量在减少："</string>
+    <string name="battery_low_subtitle" msgid="7388781709819722764">"电量所剩不多："</string>
     <string name="battery_low_percent_format" msgid="696154104579022959">"电量剩余 <xliff:g id="NUMBER">%d%%</xliff:g> 或更少。"</string>
     <string name="battery_low_why" msgid="7279169609518386372">"电量使用情况"</string>
     <string name="factorytest_failed" msgid="5410270329114212041">"出厂测试失败"</string>
@@ -658,8 +658,8 @@
     <string name="elapsed_time_short_format_mm_ss" msgid="4431555943828711473">"<xliff:g id="MINUTES">%1$02d</xliff:g>:<xliff:g id="SECONDS">%2$02d</xliff:g>"</string>
     <string name="elapsed_time_short_format_h_mm_ss" msgid="1846071997616654124">"<xliff:g id="HOURS">%1$d</xliff:g>:<xliff:g id="MINUTES">%2$02d</xliff:g>:<xliff:g id="SECONDS">%3$02d</xliff:g>"</string>
     <string name="selectAll" msgid="6876518925844129331">"全选"</string>
-    <string name="selectText" msgid="3889149123626888637">"选择文本"</string>
-    <string name="stopSelectingText" msgid="4157931463872320996">"停止选择文本"</string>
+    <string name="selectText" msgid="3889149123626888637">"选择文字"</string>
+    <string name="stopSelectingText" msgid="4157931463872320996">"停止选择文字"</string>
     <string name="cut" msgid="3092569408438626261">"剪切"</string>
     <string name="cutAll" msgid="2436383270024931639">"全部剪切"</string>
     <string name="copy" msgid="2681946229533511987">"复制"</string>
@@ -669,8 +669,8 @@
     <string name="inputMethod" msgid="1653630062304567879">"输入法"</string>
     <string name="addToDictionary" msgid="8793624991686948709">"将“<xliff:g id="WORD">%s</xliff:g>”添加到词典"</string>
     <string name="editTextMenuTitle" msgid="1672989176958581452">"编辑文字"</string>
-    <string name="low_internal_storage_view_title" msgid="1399732408701697546">"空间不足"</string>
-    <string name="low_internal_storage_view_text" msgid="635106544616378836">"手机内存空间正在减少。"</string>
+    <string name="low_internal_storage_view_title" msgid="1399732408701697546">"存储空间不足"</string>
+    <string name="low_internal_storage_view_text" msgid="635106544616378836">"手机内存空间所剩不多了。"</string>
     <string name="ok" msgid="5970060430562524910">"确定"</string>
     <string name="cancel" msgid="6442560571259935130">"取消"</string>
     <string name="yes" msgid="5362982303337969312">"确定"</string>
@@ -680,11 +680,11 @@
     <string name="capital_off" msgid="6815870386972805832">"关闭"</string>
     <string name="whichApplication" msgid="4533185947064773386">"使用以下方式发送"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"默认使用此方式发送。"</string>
-    <string name="clearDefaultHintMsg" msgid="4815455344600932173">"清除“主屏幕设置”&gt;“应用程序”&gt;“管理应用程序”中的默认设置。"</string>
+    <string name="clearDefaultHintMsg" msgid="4815455344600932173">"通过主屏幕上的“设置”&gt;“应用程序”&gt;“管理应用程序”清除默认设置。"</string>
     <string name="chooseActivity" msgid="1009246475582238425">"选择一项操作"</string>
     <string name="noApplications" msgid="1691104391758345586">"没有应用程序可执行此操作。"</string>
     <string name="aerr_title" msgid="653922989522758100">"很抱歉！"</string>
-    <string name="aerr_application" msgid="4683614104336409186">"“<xliff:g id="APPLICATION">%1$s</xliff:g>”应用程序（“<xliff:g id="PROCESS">%2$s</xliff:g>”进程）意外停止，请重试。"</string>
+    <string name="aerr_application" msgid="4683614104336409186">"“<xliff:g id="APPLICATION">%1$s</xliff:g>”应用程序（在“<xliff:g id="PROCESS">%2$s</xliff:g>”进程中）意外停止，请重试。"</string>
     <string name="aerr_process" msgid="1551785535966089511">"“<xliff:g id="PROCESS">%1$s</xliff:g>”进程意外停止，请重试。"</string>
     <string name="anr_title" msgid="3100070910664756057">"很抱歉！"</string>
     <string name="anr_activity_application" msgid="3538242413112507636">"“<xliff:g id="ACTIVITY">%1$s</xliff:g>”活动（在“<xliff:g id="APPLICATION">%2$s</xliff:g>”应用程序中）无响应。"</string>
@@ -695,10 +695,10 @@
     <string name="report" msgid="4060218260984795706">"报告"</string>
     <string name="wait" msgid="7147118217226317732">"等待"</string>
     <string name="debug" msgid="9103374629678531849">"调试"</string>
-    <string name="sendText" msgid="5132506121645618310">"选择要对文本执行的操作"</string>
+    <string name="sendText" msgid="5132506121645618310">"选择要对文字执行的操作"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"铃声音量"</string>
     <string name="volume_music" msgid="5421651157138628171">"媒体音量"</string>
-    <string name="volume_music_hint_playing_through_bluetooth" msgid="9165984379394601533">"通过蓝牙播放"</string>
+    <string name="volume_music_hint_playing_through_bluetooth" msgid="9165984379394601533">"正通过蓝牙播放"</string>
     <string name="volume_music_hint_silent_ringtone_selected" msgid="6158339745293431194">"选择的是静音铃声"</string>
     <string name="volume_call" msgid="3941680041282788711">"通话音量"</string>
     <string name="volume_bluetooth_call" msgid="2002891926351151534">"使用蓝牙时的通话音量"</string>
@@ -731,12 +731,12 @@
     <string name="perms_show_all" msgid="2671791163933091180"><b>"全部显示"</b></string>
     <string name="googlewebcontenthelper_loading" msgid="4722128368651947186">"正在载入..."</string>
     <string name="usb_storage_title" msgid="5901459041398751495">"USB 已连接"</string>
-    <string name="usb_storage_message" msgid="2759542180575016871">"已通过 USB 连接与计算机。若要在计算机和手机 SD 卡之间复制文件，请选择“安装”。"</string>
-    <string name="usb_storage_button_mount" msgid="8063426289195405456">"安装"</string>
-    <string name="usb_storage_button_unmount" msgid="6092146330053864766">"不安装"</string>
+    <string name="usb_storage_message" msgid="2759542180575016871">"已通过 USB 连接与计算机。若要在计算机和手机 SD 卡之间复制文件，请选择“装载”。"</string>
+    <string name="usb_storage_button_mount" msgid="8063426289195405456">"装载"</string>
+    <string name="usb_storage_button_unmount" msgid="6092146330053864766">"不装载"</string>
     <string name="usb_storage_error_message" msgid="2534784751603345363">"使用 SD 卡进行 USB 存储时出现问题。"</string>
     <string name="usb_storage_notification_title" msgid="8175892554757216525">"USB 已连接"</string>
-    <string name="usb_storage_notification_message" msgid="7380082404288219341">"选择将文件复制到计算机/从计算机复制到存储设备。"</string>
+    <string name="usb_storage_notification_message" msgid="7380082404288219341">"选择将文件复制到计算机或从计算机复制到存储设备。"</string>
     <string name="usb_storage_stop_notification_title" msgid="2336058396663516017">"关闭 USB 存储设备"</string>
     <string name="usb_storage_stop_notification_message" msgid="2591813490269841539">"选中以关闭 USB 存储设备。"</string>
     <string name="usb_storage_stop_title" msgid="6014127947456185321">"关闭 USB 存储设备"</string>
