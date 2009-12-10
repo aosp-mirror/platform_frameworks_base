@@ -3771,6 +3771,26 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     }
 
     /**
+     * Dispatch a view visibility change down the view hierarchy.
+     * ViewGroups should override to route to their children.
+     * @param changedView The view whose visibility changed. Could be 'this' or
+     * an ancestor view.
+     * @param visibility The new visibility of changedView.
+     */
+    protected void dispatchVisibilityChanged(View changedView, int visibility) {
+        onVisibilityChanged(changedView, visibility);
+    }
+
+    /**
+     * Called when the visibility of the view or an ancestor of the view is changed.
+     * @param changedView The view whose visibility changed. Could be 'this' or
+     * an ancestor view.
+     * @param visibility The new visibility of changedView.
+     */
+    protected void onVisibilityChanged(View changedView, int visibility) {
+    }
+
+    /**
      * Dispatch a window visibility change down the view hierarchy.
      * ViewGroups should override to route to their children.
      *
@@ -4347,6 +4367,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
             if (mAttachInfo != null) {
                 mAttachInfo.mViewVisibilityChanged = true;
             }
+        }
+
+        if ((changed & VISIBILITY_MASK) != 0) {
+            dispatchVisibilityChanged(this, (flags & VISIBILITY_MASK));
         }
 
         if ((changed & WILL_NOT_CACHE_DRAWING) != 0) {

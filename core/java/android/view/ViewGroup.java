@@ -684,6 +684,19 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * {@inheritDoc}
      */
     @Override
+    protected void dispatchVisibilityChanged(View changedView, int visibility) {
+        super.dispatchVisibilityChanged(changedView, visibility);
+        final int count = mChildrenCount;
+        final View[] children = mChildren;
+        for (int i = 0; i < count; i++) {
+            children[i].dispatchVisibilityChanged(changedView, visibility);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public void dispatchWindowVisibilityChanged(int visibility) {
         super.dispatchWindowVisibilityChanged(visibility);
         final int count = mChildrenCount;
