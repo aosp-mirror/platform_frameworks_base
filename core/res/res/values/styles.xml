@@ -401,6 +401,10 @@
         <item name="android:childDivider">@android:drawable/divider_horizontal_dark_opaque</item>
     </style>
 
+    <style name="Widget.ExpandableListView.White">
+        <item name="android:childDivider">@android:drawable/divider_horizontal_bright_opaque</item>
+    </style>
+
     <style name="Widget.ImageWell">
         <item name="android:background">@android:drawable/panel_picture_frame_background</item>
     </style>

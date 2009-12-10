@@ -142,6 +142,7 @@
         <item name="dropDownListViewStyle">@android:style/Widget.ListView.DropDown</item>
         <item name="editTextStyle">@android:style/Widget.EditText</item>
         <item name="expandableListViewStyle">@android:style/Widget.ExpandableListView</item>
+        <item name="expandableListViewWhiteStyle">@android:style/Widget.ExpandableListView.White</item>
         <item name="galleryStyle">@android:style/Widget.Gallery</item>
         <item name="gestureOverlayViewStyle">@android:style/Widget.GestureOverlayView</item>
         <item name="gridViewStyle">@android:style/Widget.GridView</item>
@@ -241,6 +242,7 @@
         <item name="textCheckMarkInverse">@android:drawable/indicator_check_mark_dark</item>
 
         <item name="gestureOverlayViewStyle">@android:style/Widget.GestureOverlayView.White</item>
+        <item name="expandableListViewStyle">@android:style/Widget.ExpandableListView.White</item>
         <item name="listViewStyle">@android:style/Widget.ListView.White</item>
         <item name="listDivider">@drawable/divider_horizontal_bright</item>
         <item name="listSeparatorTextViewStyle">@android:style/Widget.TextView.ListSeparator.White</item>
