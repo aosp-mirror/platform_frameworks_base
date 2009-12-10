@@ -930,8 +930,8 @@ public class Camera {
         /**
          * Gets the supported preview sizes.
          *
-         * @return a List of Size object. null if preview size setting is not
-         *         supported.
+         * @return a List of Size object. This method will always return a list
+         *         with at least one element.
          */
         public List<Size> getSupportedPreviewSizes() {
             String str = get(KEY_PREVIEW_SIZE + SUPPORTED_VALUES_SUFFIX);
@@ -1065,8 +1065,8 @@ public class Camera {
         /**
          * Gets the supported preview formats.
          *
-         * @return a List of Integer objects. null if preview format setting is
-         *         not supported.
+         * @return a List of Integer objects. This method will always return a
+         *         list with at least one element.
          */
         public List<Integer> getSupportedPreviewFormats() {
             String str = get(KEY_PREVIEW_FORMAT + SUPPORTED_VALUES_SUFFIX);
@@ -1104,8 +1104,8 @@ public class Camera {
         /**
          * Gets the supported picture sizes.
          *
-         * @return a List of Size objects. null if picture size setting is not
-         *         supported.
+         * @return a List of Size objects. This method will always return a list
+         *         with at least one element.
          */
         public List<Size> getSupportedPictureSizes() {
             String str = get(KEY_PICTURE_SIZE + SUPPORTED_VALUES_SUFFIX);
@@ -1143,12 +1143,18 @@ public class Camera {
         /**
          * Gets the supported picture formats.
          *
-         * @return a List of Integer objects (values are PixelFormat.XXX). null
-         *         if picture setting is not supported.
+         * @return a List of Integer objects (values are PixelFormat.XXX). This
+         *         method will always return a list with at least one element.
          */
         public List<Integer> getSupportedPictureFormats() {
-            String str = get(KEY_PICTURE_SIZE + SUPPORTED_VALUES_SUFFIX);
-            return splitInt(str);
+            String str = get(KEY_PICTURE_FORMAT + SUPPORTED_VALUES_SUFFIX);
+            ArrayList<Integer> formats = new ArrayList<Integer>();
+            for (String s : split(str)) {
+                int f = pixelFormatForCameraFormat(s);
+                if (f == PixelFormat.UNKNOWN) continue;
+                formats.add(f);
+            }
+            return formats;
         }
 
         private String cameraFormatForPixelFormat(int pixel_format) {
@@ -1443,8 +1449,8 @@ public class Camera {
         /**
          * Gets the supported focus modes.
          *
-         * @return a List of FOCUS_MODE_XXX string constants. null if focus mode
-         *         setting is not supported.
+         * @return a List of FOCUS_MODE_XXX string constants. This method will
+         *         always return a list with at least one element.
          */
         public List<String> getSupportedFocusModes() {
             String str = get(KEY_FOCUS_MODE + SUPPORTED_VALUES_SUFFIX);
