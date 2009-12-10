@@ -55,6 +55,9 @@ ifeq ($(BUILD_WITH_FULL_STAGEFRIGHT),true)
 
 LOCAL_STATIC_LIBRARIES := \
         libstagefright_aacdec \
+        libstagefright_amrnbdec \
+        libstagefright_amrnb_common \
+        libstagefright_amrwbdec \
         libstagefright_mp3dec
 
 endif
