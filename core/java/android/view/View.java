@@ -2589,8 +2589,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * @param gainFocus True if the View has focus; false otherwise.
      * @param direction The direction focus has moved when requestFocus()
      *                  is called to give this view focus. Values are
-     *                  View.FOCUS_UP, View.FOCUS_DOWN, View.FOCUS_LEFT or
-     *                  View.FOCUS_RIGHT. It may not always apply, in which
+     *                  {@link #FOCUS_UP}, {@link #FOCUS_DOWN}, {@link #FOCUS_LEFT} or
+     *                  {@link #FOCUS_RIGHT}. It may not always apply, in which
      *                  case use the default.
      * @param previouslyFocusedRect The rectangle, in this view's coordinate
      *        system, of the previously focused view.  If applicable, this will be
