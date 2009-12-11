@@ -267,6 +267,7 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
                 mKeyguardViewProperties, mUpdateMonitor);
 
         mUserPresentIntent = new Intent(Intent.ACTION_USER_PRESENT);
+        mUserPresentIntent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING);
     }
 
     /**
