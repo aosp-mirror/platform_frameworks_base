@@ -126,9 +126,6 @@ android.bluetooth.IBluetoothHeadset$Stub
 android.bluetooth.IBluetoothHeadset$Stub$Proxy
 android.bluetooth.IBluetoothPbap$Stub
 android.bluetooth.ScoSocket
-android.content.AbstractSyncableContentProvider
-android.content.AbstractSyncableContentProvider$DatabaseHelper
-android.content.AbstractTableMerger
 android.content.AsyncQueryHandler
 android.content.BroadcastReceiver
 android.content.ComponentName
@@ -161,15 +158,9 @@ android.content.IntentSender
 android.content.IntentSender$1
 android.content.SearchRecentSuggestionsProvider
 android.content.SearchRecentSuggestionsProvider$DatabaseHelper
-android.content.SyncAdapter
-android.content.SyncAdapter$Transport
 android.content.SyncAdapterType
 android.content.SyncResult
-android.content.SyncStateContentProviderHelper
 android.content.SyncStats
-android.content.SyncableContentProvider
-android.content.TempProviderSyncAdapter
-android.content.TempProviderSyncAdapter$SyncThread
 android.content.UriMatcher
 android.content.pm.ActivityInfo
 android.content.pm.ApplicationInfo
