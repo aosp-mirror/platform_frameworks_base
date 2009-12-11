@@ -63,6 +63,11 @@ AVCDecoder::AVCDecoder(const sp<MediaSource> &source)
     mFormat->setInt32(kKeyHeight, height);
     mFormat->setInt32(kKeyColorFormat, OMX_COLOR_FormatYUV420Planar);
     mFormat->setCString(kKeyDecoderComponent, "AVCDecoder");
+
+    int64_t durationUs;
+    if (mSource->getFormat()->findInt64(kKeyDuration, &durationUs)) {
+        mFormat->setInt64(kKeyDuration, durationUs);
+    }
 }
 
 AVCDecoder::~AVCDecoder() {
