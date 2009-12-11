@@ -171,7 +171,8 @@ static sp<AaptFile> getResourceFile(const sp<AaptAssets>& assets, bool makeIfNec
                             NULL, String8());
 }
 
-static status_t parsePackage(const sp<AaptAssets>& assets, const sp<AaptGroup>& grp)
+static status_t parsePackage(Bundle* bundle, const sp<AaptAssets>& assets,
+    const sp<AaptGroup>& grp)
 {
     if (grp->getFiles().size() != 1) {
         fprintf(stderr, "warning: Multiple AndroidManifest.xml files found, using %s\n",
@@ -214,6 +215,22 @@ static status_t parsePackage(const sp<AaptAssets>& assets, const sp<AaptGroup>& 
     }
 
     assets->setPackage(String8(block.getAttributeStringValue(nameIndex, &len)));
+
+    String16 uses_sdk16("uses-sdk");
+    while ((code=block.next()) != ResXMLTree::END_DOCUMENT
+           && code != ResXMLTree::BAD_DOCUMENT) {
+        if (code == ResXMLTree::START_TAG) {
+            if (strcmp16(block.getElementName(&len), uses_sdk16.string()) == 0) {
+                ssize_t minSdkIndex = block.indexOfAttribute("android",
+                                                             "minSdkVersion");
+                if (minSdkIndex >= 0) {
+                    String8 minSdkString = String8(
+                        block.getAttributeStringValue(minSdkIndex, &len));
+		    bundle->setMinSdkVersion(minSdkString.string());
+                }
+            }
+        }
+    }
 
     return NO_ERROR;
 }
@@ -597,7 +614,7 @@ status_t buildResources(Bundle* bundle, const sp<AaptAssets>& assets)
         return UNKNOWN_ERROR;
     }
 
-    status_t err = parsePackage(assets, androidManifestFile);
+    status_t err = parsePackage(bundle, assets, androidManifestFile);
     if (err != NO_ERROR) {
         return err;
     }
