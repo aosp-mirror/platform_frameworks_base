@@ -454,6 +454,10 @@ public:
 
     size_t size() const;
 
+#ifndef HAVE_ANDROID_OS
+    bool isUTF8() const;
+#endif
+
 private:
     status_t                    mError;
     void*                       mOwnedData;
