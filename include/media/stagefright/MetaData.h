@@ -34,7 +34,7 @@ enum {
     kKeyHeight            = 'heig',
     kKeyChannelCount      = '#chn',
     kKeySampleRate        = 'srte',
-    kKeyBitRate           = 'brte',
+    kKeyBitRate           = 'brte',  // int32_t (bps)
     kKeyESDS              = 'esds',  // raw data
     kKeyAVCC              = 'avcc',  // raw data
     kKeyWantsNALFragments = 'NALf',

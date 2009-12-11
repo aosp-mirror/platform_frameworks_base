@@ -366,7 +366,7 @@ MP3Extractor::MP3Extractor(const sp<DataSource> &source)
 
         mMeta->setCString(kKeyMIMEType, MEDIA_MIMETYPE_AUDIO_MPEG);
         mMeta->setInt32(kKeySampleRate, sample_rate);
-        mMeta->setInt32(kKeyBitRate, bitrate);
+        mMeta->setInt32(kKeyBitRate, bitrate * 1000);
         mMeta->setInt32(kKeyChannelCount, num_channels);
 
         off_t fileSize;
@@ -462,14 +462,14 @@ status_t MP3Source::read(
     if (options != NULL && options->getSeekTo(&seekTimeUs)) {
         int32_t bitrate;
         if (!mMeta->findInt32(kKeyBitRate, &bitrate)) {
-            // bitrate is in kbits/sec.
+            // bitrate is in bits/sec.
             LOGI("no bitrate");
 
             return ERROR_UNSUPPORTED;
         }
 
         mCurrentTimeUs = seekTimeUs;
-        mCurrentPos = mFirstFramePos + seekTimeUs * bitrate / 1000000 * 125;
+        mCurrentPos = mFirstFramePos + seekTimeUs * bitrate / 8000000;
     }
 
     MediaBuffer *buffer;
