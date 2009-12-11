@@ -700,6 +700,9 @@ public class WebView extends AbsoluteLayout
         public void onVisibilityChanged(boolean visible) {
             if (visible) {
                 switchOutDrawHistory();
+                // Bring back the hidden zoom controls.
+                mZoomButtonsController.getZoomControls().setVisibility(
+                        View.VISIBLE);
                 updateZoomButtonsEnabled();
             }
         }
@@ -788,9 +791,6 @@ public class WebView extends AbsoluteLayout
             // button, if the page cannot zoom
             mZoomButtonsController.getZoomControls().setVisibility(View.GONE);
         } else {
-            // Bring back the hidden zoom controls.
-            mZoomButtonsController.getZoomControls()
-                    .setVisibility(View.VISIBLE);
             // Set each one individually, as a page may be able to zoom in
             // or out.
             mZoomButtonsController.setZoomInEnabled(canZoomIn);
@@ -5228,6 +5228,10 @@ public class WebView extends AbsoluteLayout
                         // particular when the user was on a password field, so
                         // the WebTextView was visible.
                         clearTextEntry();
+                        // update the zoom buttons as the scale can be changed
+                        if (getSettings().getBuiltInZoomControls()) {
+                            updateZoomButtonsEnabled();
+                        }
                     }
                     // We update the layout (i.e. request a layout from the
                     // view system) if the last view size that we sent to
