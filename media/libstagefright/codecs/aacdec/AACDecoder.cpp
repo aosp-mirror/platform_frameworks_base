@@ -128,16 +128,18 @@ sp<MetaData> AACDecoder::getFormat() {
 
     int32_t numChannels;
     int32_t sampleRate;
-    int64_t durationUs;
     CHECK(srcFormat->findInt32(kKeyChannelCount, &numChannels));
     CHECK(srcFormat->findInt32(kKeySampleRate, &sampleRate));
-    CHECK(srcFormat->findInt64(kKeyDuration, &durationUs));
 
     sp<MetaData> meta = new MetaData;
     meta->setCString(kKeyMIMEType, MEDIA_MIMETYPE_AUDIO_RAW);
     meta->setInt32(kKeyChannelCount, numChannels);
     meta->setInt32(kKeySampleRate, sampleRate);
-    meta->setInt64(kKeyDuration, durationUs);
+
+    int64_t durationUs;
+    if (srcFormat->findInt64(kKeyDuration, &durationUs)) {
+        meta->setInt64(kKeyDuration, durationUs);
+    }
 
     return meta;
 }
