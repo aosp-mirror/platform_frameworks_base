@@ -271,12 +271,14 @@ public class AudioSystem
     public static final int FORCE_BT_SCO = 3;
     public static final int FORCE_BT_A2DP = 4;
     public static final int FORCE_WIRED_ACCESSORY = 5;
+    public static final int FORCE_BT_DOCK = 6;
     public static final int FORCE_DEFAULT = FORCE_NONE;
 
     // usage for serForceUse
     public static final int FOR_COMMUNICATION = 0;
     public static final int FOR_MEDIA = 1;
     public static final int FOR_RECORD = 2;
+    public static final int FOR_DOCK = 3;
 
     public static native int setDeviceConnectionState(int device, int state, String device_address);
     public static native int getDeviceConnectionState(int device, String device_address);
