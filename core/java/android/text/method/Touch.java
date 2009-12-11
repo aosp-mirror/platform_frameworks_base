@@ -24,6 +24,7 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.ViewConfiguration;
 import android.widget.TextView;
+import android.view.KeyEvent;
 
 public class Touch {
     private Touch() { }
@@ -139,10 +140,21 @@ public class Touch {
 
                 if (ds[0].mFarEnough) {
                     ds[0].mUsed = true;
-
-                    float dx = ds[0].mX - event.getX();
-                    float dy = ds[0].mY - event.getY();
-
+                    boolean cap = (MetaKeyKeyListener.getMetaState(buffer,
+                                   KeyEvent.META_SHIFT_ON) == 1) ||
+                                   (MetaKeyKeyListener.getMetaState(buffer,
+                                    MetaKeyKeyListener.META_SELECTING) != 0);
+                    float dx;
+                    float dy;
+                    if (cap) {
+                        // if we're selecting, we want the scroll to go in
+                        // the direction of the drag
+                        dx = event.getX() - ds[0].mX;
+                        dy = event.getY() - ds[0].mY;
+                    } else {
+                        dx = ds[0].mX - event.getX();
+                        dy = ds[0].mY - event.getY();
+                    }
                     ds[0].mX = event.getX();
                     ds[0].mY = event.getY();
 
