@@ -108,7 +108,7 @@ public:
 
     uint32_t getMessageToClient(void *data, size_t *receiveLen, size_t bufferLen, bool wait);
     bool sendMessageToClient(void *data, uint32_t cmdID, size_t len, bool waitForSpace);
-    bool runScript(Script *s, uint32_t launchID);
+    uint32_t runScript(Script *s, uint32_t launchID);
 
     void initToClient();
     void deinitToClient();
@@ -197,6 +197,7 @@ protected:
 
     uint32_t mWidth;
     uint32_t mHeight;
+    int32_t mThreadPriority;
 
     bool mRunning;
     bool mExit;
@@ -229,7 +230,7 @@ private:
     void initEGL(bool useGL2);
     void deinitEGL();
 
-    bool runRootScript();
+    uint32_t runRootScript();
 
     static void * threadProc(void *);
 
@@ -244,6 +245,9 @@ private:
     uint64_t mTimeLast;
     uint64_t mTimeFrame;
     uint64_t mTimeLastFrame;
+    uint32_t mTimeMSLastFrame;
+    uint32_t mTimeMSLastScript;
+    uint32_t mTimeMSLastSwap;
 };
 
 }
