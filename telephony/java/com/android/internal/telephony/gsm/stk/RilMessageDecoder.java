@@ -20,18 +20,18 @@ import com.android.internal.telephony.gsm.SIMFileHandler;
 import com.android.internal.telephony.IccUtils;
 
 import android.os.Handler;
-import android.os.HandlerState;
-import android.os.HandlerStateMachine;
+import com.android.internal.util.HierarchicalState;
+import com.android.internal.util.HierarchicalStateMachine;
 import android.os.Message;
 
 /**
  * Class used for queuing raw ril messages, decoding them into CommanParams
  * objects and sending the result back to the STK Service.
  */
-class RilMessageDecoder extends HandlerStateMachine {
+class RilMessageDecoder extends HierarchicalStateMachine {
 
     // constants
-    private static final int START = 1;
+    private static final int CMD_START = 1;
     private static final int CMD_PARAMS_READY = 2;
 
     // members
@@ -54,6 +54,7 @@ class RilMessageDecoder extends HandlerStateMachine {
     public static synchronized RilMessageDecoder getInstance(Handler caller, SIMFileHandler fh) {
         if (sInstance == null) {
             sInstance = new RilMessageDecoder(caller, fh);
+            sInstance.start();
         }
         return sInstance;
     }
@@ -65,7 +66,7 @@ class RilMessageDecoder extends HandlerStateMachine {
      * @param rilMsg
      */
     public void sendStartDecodingMessageParams(RilMessage rilMsg) {
-        Message msg = obtainMessage(START);
+        Message msg = obtainMessage(CMD_START);
         msg.obj = rilMsg;
         sendMessage(msg);
     }
@@ -76,7 +77,7 @@ class RilMessageDecoder extends HandlerStateMachine {
      * @param resCode
      * @param cmdParams
      */
-    public void sendMessageParamsDecoded(ResultCode resCode, CommandParams cmdParams) {
+    public void sendMsgParamsDecoded(ResultCode resCode, CommandParams cmdParams) {
         Message msg = obtainMessage(RilMessageDecoder.CMD_PARAMS_READY);
         msg.arg1 = resCode.value();
         msg.obj = cmdParams;
@@ -91,28 +92,31 @@ class RilMessageDecoder extends HandlerStateMachine {
 
     private RilMessageDecoder(Handler caller, SIMFileHandler fh) {
         super("RilMessageDecoder");
-        setDbg(false);
+
+        addState(mStateStart);
+        addState(mStateCmdParamsReady);
         setInitialState(mStateStart);
 
         mCaller = caller;
         mCmdParamsFactory = CommandParamsFactory.getInstance(this, fh);
     }
 
-    private class StateStart extends HandlerState {
-        @Override public void processMessage(Message msg) {
-            if (msg.what == START) {
+    private class StateStart extends HierarchicalState {
+        @Override protected boolean processMessage(Message msg) {
+            if (msg.what == CMD_START) {
                 if (decodeMessageParams((RilMessage)msg.obj)) {
                     transitionTo(mStateCmdParamsReady);
                 }
             } else {
                 StkLog.d(this, "StateStart unexpected expecting START=" +
-                         START + " got " + msg.what);
+                         CMD_START + " got " + msg.what);
             }
+            return true;
         }
     }
 
-    private class StateCmdParamsReady extends HandlerState {
-        @Override public void processMessage(Message msg) {
+    private class StateCmdParamsReady extends HierarchicalState {
+        @Override protected boolean processMessage(Message msg) {
             if (msg.what == CMD_PARAMS_READY) {
                 mCurrentRilMessage.mResCode = ResultCode.fromInt(msg.arg1);
                 mCurrentRilMessage.mData = msg.obj;
@@ -123,6 +127,7 @@ class RilMessageDecoder extends HandlerStateMachine {
                          + CMD_PARAMS_READY + " got " + msg.what);
                 deferMessage(msg);
             }
+            return true;
         }
     }
 

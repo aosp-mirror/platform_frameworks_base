@@ -203,7 +203,7 @@ class CommandParamsFactory extends Handler {
     }
 
     private void sendCmdParams(ResultCode resCode) {
-        mCaller.sendMessageParamsDecoded(resCode, mCmdParams);
+        mCaller.sendMsgParamsDecoded(resCode, mCmdParams);
     }
 
     /**
