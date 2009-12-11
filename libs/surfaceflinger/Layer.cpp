@@ -93,6 +93,7 @@ sp<LayerBaseClient::Surface> Layer::createSurface() const
 status_t Layer::ditch()
 {
     // the layer is not on screen anymore. free as much resources as possible
+    mFreezeLock.clear();
     destroy();
     return NO_ERROR;
 }
@@ -134,7 +135,14 @@ void Layer::reloadTexture(const Region& dirty)
 {
     Mutex::Autolock _l(mLock);
     sp<GraphicBuffer> buffer(getFrontBufferLocked());
-    int index = mFrontBufferIndex;
+    if (buffer == NULL) {
+        // this situation can happen if we ran out of memory for instance.
+        // not much we can do. continue to use whatever texture was bound
+        // to this context.
+        return;
+    }
+
+    const int index = mFrontBufferIndex;
 
     // create the new texture name if needed
     if (UNLIKELY(mTextures[index].name == -1U)) {
