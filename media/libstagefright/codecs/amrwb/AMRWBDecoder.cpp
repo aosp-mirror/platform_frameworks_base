@@ -93,7 +93,6 @@ sp<MetaData> AMRWBDecoder::getFormat() {
 
     int32_t numChannels;
     int32_t sampleRate;
-    int64_t durationUs;
 
     CHECK(srcFormat->findInt32(kKeyChannelCount, &numChannels));
     CHECK_EQ(numChannels, 1);
@@ -101,13 +100,15 @@ sp<MetaData> AMRWBDecoder::getFormat() {
     CHECK(srcFormat->findInt32(kKeySampleRate, &sampleRate));
     CHECK_EQ(sampleRate, kSampleRate);
 
-    CHECK(srcFormat->findInt64(kKeyDuration, &durationUs));
-
     sp<MetaData> meta = new MetaData;
     meta->setCString(kKeyMIMEType, MEDIA_MIMETYPE_AUDIO_RAW);
     meta->setInt32(kKeyChannelCount, numChannels);
     meta->setInt32(kKeySampleRate, sampleRate);
-    meta->setInt64(kKeyDuration, durationUs);
+
+    int64_t durationUs;
+    if (srcFormat->findInt64(kKeyDuration, &durationUs)) {
+        meta->setInt64(kKeyDuration, durationUs);
+    }
 
     return meta;
 }
@@ -170,7 +171,7 @@ status_t AMRWBDecoder::read(
 
     int16 mode = ((inputPtr[0] >> 3) & 0x0f);
     size_t frameSize = getFrameSize(mode);
-    CHECK_EQ(mInputBuffer->range_length(), frameSize);
+    CHECK(mInputBuffer->range_length() >= frameSize);
 
     int16 frameType;
     RX_State rx_state;
@@ -197,8 +198,14 @@ status_t AMRWBDecoder::read(
 
     buffer->set_range(0, numSamplesOutput * sizeof(int16_t));
 
-    mInputBuffer->release();
-    mInputBuffer = NULL;
+    mInputBuffer->set_range(
+            mInputBuffer->range_offset() + frameSize,
+            mInputBuffer->range_length() - frameSize);
+
+    if (mInputBuffer->range_length() == 0) {
+        mInputBuffer->release();
+        mInputBuffer = NULL;
+    }
 
     buffer->meta_data()->setInt64(
             kKeyTime,

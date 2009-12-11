@@ -293,17 +293,19 @@ sp<MediaSource> OMXCodec::Create(
     CHECK(success);
 
 #if BUILD_WITH_FULL_STAGEFRIGHT
-    if (!strcasecmp(mime, MEDIA_MIMETYPE_AUDIO_AAC)) {
-        return new AACDecoder(source);
-    } else if (!strcasecmp(mime, MEDIA_MIMETYPE_AUDIO_AMR_NB)) {
-        return new AMRNBDecoder(source);
-    } else if (!strcasecmp(mime, MEDIA_MIMETYPE_AUDIO_AMR_WB)) {
-        return new AMRWBDecoder(source);
-    } else if (!strcasecmp(mime, MEDIA_MIMETYPE_AUDIO_MPEG)) {
-        return new MP3Decoder(source);
-    } else if (!strcasecmp(mime, MEDIA_MIMETYPE_VIDEO_AVC)
-                && (flags & kPreferSoftwareCodecs)) {
-        return new AVCDecoder(source);
+    if (!createEncoder) {
+        if (!strcasecmp(mime, MEDIA_MIMETYPE_AUDIO_AAC)) {
+            return new AACDecoder(source);
+        } else if (!strcasecmp(mime, MEDIA_MIMETYPE_AUDIO_AMR_NB)) {
+            return new AMRNBDecoder(source);
+        } else if (!strcasecmp(mime, MEDIA_MIMETYPE_AUDIO_AMR_WB)) {
+            return new AMRWBDecoder(source);
+        } else if (!strcasecmp(mime, MEDIA_MIMETYPE_AUDIO_MPEG)) {
+            return new MP3Decoder(source);
+        } else if (!strcasecmp(mime, MEDIA_MIMETYPE_VIDEO_AVC)
+                    && (flags & kPreferSoftwareCodecs)) {
+            return new AVCDecoder(source);
+        }
     }
 #endif
 
