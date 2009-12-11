@@ -370,9 +370,17 @@ public final class BluetoothAdapter {
     }
 
     /**
-     * Turn on the local Bluetooth adapter.
+     * Turn on the local Bluetooth adapter&mdash;do not use without explicit
+     * user action to turn on Bluetooth.
      * <p>This powers on the underlying Bluetooth hardware, and starts all
      * Bluetooth system services.
+     * <p class="caution"><strong>Bluetooth should never be enabled without
+     * direct user consent</strong>. If you want to turn on Bluetooth in order
+     * to create a wireless connection, you should use the {@link
+     * #ACTION_REQUEST_ENABLE} Intent, which will raise a dialog that requests
+     * user permission to turn on Bluetooth. The {@link #enable()} method is
+     * provided only for applications that include a user interface for changing
+     * system settings, such as a "power manager" app.</p>
      * <p>This is an asynchronous call: it will return immediately, and
      * clients should listen for {@link #ACTION_STATE_CHANGED}
      * to be notified of subsequent adapter state changes. If this call returns
@@ -382,7 +390,8 @@ public final class BluetoothAdapter {
      * #STATE_ON}. If this call returns false then there was an
      * immediate problem that will prevent the adapter from being turned on -
      * such as Airplane mode, or the adapter is already turned on.
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN}
+     * <p>Requires the {@link android.Manifest.permission#BLUETOOTH_ADMIN}
+     * permission
      *
      * @return true to indicate adapter startup has begun, or false on
      *         immediate error
@@ -395,9 +404,14 @@ public final class BluetoothAdapter {
     }
 
     /**
-     * Turn off the local Bluetooth adapter.
+     * Turn off the local Bluetooth adapter&mdash;do not use without explicit
+     * user action to turn off Bluetooth.
      * <p>This gracefully shuts down all Bluetooth connections, stops Bluetooth
      * system services, and powers down the underlying Bluetooth hardware.
+     * <p class="caution"><strong>Bluetooth should never be disbled without
+     * direct user consent</strong>. The {@link #disable()} method is
+     * provided only for applications that include a user interface for changing
+     * system settings, such as a "power manager" app.</p>
      * <p>This is an asynchronous call: it will return immediately, and
      * clients should listen for {@link #ACTION_STATE_CHANGED}
      * to be notified of subsequent adapter state changes. If this call returns
@@ -407,7 +421,8 @@ public final class BluetoothAdapter {
      * #STATE_ON}. If this call returns false then there was an
      * immediate problem that will prevent the adapter from being turned off -
      * such as the adapter already being turned off.
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN}
+     * <p>Requires the {@link android.Manifest.permission#BLUETOOTH_ADMIN}
+     * permission
      *
      * @return true to indicate adapter shutdown has begun, or false on
      *         immediate error
