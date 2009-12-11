@@ -4299,7 +4299,7 @@ public class WindowManagerService extends IWindowManager.Stub
             final int N = mWindows.size();
             for (int i=0; i<N; i++) {
                 WindowState w = (WindowState)mWindows.get(i);
-                if (w.isVisibleLw() && !w.isDrawnLw()) {
+                if (w.isVisibleLw() && !w.mObscured && !w.isDrawnLw()) {
                     return;
                 }
             }
@@ -7553,6 +7553,12 @@ public class WindowManagerService extends IWindowManager.Stub
             mHasTransformation = false;
             mHasLocalTransformation = false;
             mPolicyVisibility = mPolicyVisibilityAfterAnim;
+            if (!mPolicyVisibility) {
+                // Window is no longer visible -- make sure if we were waiting
+                // for it to be displayed before enabling the display, that
+                // we allow the display to be enabled now.
+                enableScreenIfNeededLocked();
+            }
             mTransformation.clear();
             if (mHasDrawn
                     && mAttrs.type == WindowManager.LayoutParams.TYPE_APPLICATION_STARTING
@@ -8010,6 +8016,10 @@ public class WindowManagerService extends IWindowManager.Stub
             } else {
                 mPolicyVisibilityAfterAnim = false;
                 mPolicyVisibility = false;
+                // Window is no longer visible -- make sure if we were waiting
+                // for it to be displayed before enabling the display, that
+                // we allow the display to be enabled now.
+                enableScreenIfNeededLocked();
             }
             if (requestAnim) {
                 requestAnimationLocked(0);
@@ -10345,6 +10355,10 @@ public class WindowManagerService extends IWindowManager.Stub
                     LocalPowerManager.BUTTON_EVENT, true);
             mTurnOnScreen = false;
         }
+        
+        // Check to see if we are now in a state where the screen should
+        // be enabled, because the window obscured flags have changed.
+        enableScreenIfNeededLocked();
     }
 
     void requestAnimationLocked(long delay) {
