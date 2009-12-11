@@ -64,7 +64,7 @@ to be replaced by the user.</p>
 <p>Underlying all applications is a set of services and systems, including:
 <ul>
     <li>A rich and extensible set of <a
-    href="{@docRoot}guide/tutorials/views/index.html">Views</a> that can be used to
+    href="{@docRoot}resources/tutorials/views/index.html">Views</a> that can be used to
     build an application, including lists, grids, text boxes, buttons, and even
     an embeddable web browser</li>
     <li><a href="{@docRoot}guide/topics/providers/content-providers.html">Content
@@ -80,7 +80,7 @@ to be replaced by the user.</p>
 </ul>
 
 <p>For more details and a walkthrough of an application, see the <a
-href="{@docRoot}guide/tutorials/notepad/index.html">Notepad Tutorial</a>.</p>
+href="{@docRoot}resources/tutorials/notepad/index.html">Notepad Tutorial</a>.</p>
     
 <a name="libraries" id="libraries"></a>
 <h2>Libraries</h2>

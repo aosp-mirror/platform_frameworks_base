@@ -297,9 +297,8 @@ package name, rather than the process name.</li>
 <p>For a detailed view of API changes in Android {@sdkPlatformVersion} (API Level {@sdkPlatformApiLevel}), as compared to 
 API Level 5, see the <a
 href="{@docRoot}sdk/api_diff/{@sdkPlatformApiLevel}/changes.html">API
-Differences Report</a>. Note that this difference report compares only to
-the most recent API Level, and there are few changes, so to see changes
-introduces in Android 2.0 (API Level 5), see the <a
+Differences Report</a>. There are very few API changes in API Level 6, 
+so you might also be interested in reviewing the <a
 href="{@docRoot}sdk/api_diff/5/changes.html">API
-Differences between 4 and 5</a>.</p>
+differences between 4 and 5</a>.</p>
 

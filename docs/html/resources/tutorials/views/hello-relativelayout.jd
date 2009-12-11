@@ -1,0 +1,75 @@
+page.title=Hello, RelativeLayout
+parent.title=Hello, Views
+parent.link=index.html
+@jd:body
+
+<p>A {@link android.widget.RelativeLayout} is a ViewGroup that allows you to layout child elements
+in positions relative to the parent or siblings elements.</p>
+
+<ol>
+  <li>Start a new project/Activity called HelloRelativeLayout.</li>
+  <li>Open the layout file. Make it like so:
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent">
+
+    &lt;TextView
+        android:id="@+id/label"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="Type here:"/>
+
+    &lt;EditText
+        android:id="@+id/entry"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:background="@android:drawable/editbox_background"
+        android:layout_below="@id/label"/>
+
+    &lt;Button
+        android:id="@+id/ok"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/entry"
+        android:layout_alignParentRight="true"
+        android:layout_marginLeft="10dip"
+        android:text="OK" />
+
+    &lt;Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toLeftOf="@id/ok"
+        android:layout_alignTop="@id/ok"
+        android:text="Cancel" />
+
+&lt;/RelativeLayout>
+</pre>
+<p>Pay attention to each of the additional <code>layout_*</code> attributes (besides the 
+usual width and height, which are required for all elements). When using relative layout,
+we use attributes like <code>layout_below</code> and <code>layout_toLeftOf</code> to describe
+how we'd like to position each View. Naturally, these are different relative positions, and the
+value of the attribute is the id of the element we want the position relative to.</p>
+</li>
+<li>Make sure your Activity loads this layout in the <code>onCreate()</code> method:</p>
+<pre>
+public void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    setContentView(R.layout.main);
+}
+</pre>
+<p><code>R.layout.main</code> refers to the <code>main.xml</code> layout file.</p>
+</li>
+<li>Run it.</li>
+</ol>
+<p>You should see the following:</p>
+<img src="images/hello-relativelayout.png" width="150px" />
+
+<h3>Resources</h3>
+<ul>
+  <li>{@link android.widget.RelativeLayout}</li>
+  <li>{@link android.widget.TextView}</li>
+  <li>{@link android.widget.EditText}</li>
+  <li>{@link android.widget.Button}</li>
+</ul>

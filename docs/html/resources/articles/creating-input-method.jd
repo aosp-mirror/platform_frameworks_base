@@ -1,0 +1,235 @@
+page.title=Creating an Input Method
+@jd:body
+
+
+<p>To create an input method (IME) for entering text into text fields 
+and other Views, you need to extend the {@link android.inputmethodservice.InputMethodService}.
+class. This class provides much of the basic implementation for an input 
+method, in terms of managing the state and visibility of the input method and
+communicating with the currently visible activity.</p>
+
+<p>A good starting point would be the SoftKeyboard sample code provided as part
+of the SDK. You can modify the sample code to start building your own input
+method.</p>
+
+<p>An input method is packaged like any other application or service. In the 
+<code>AndroidManifest.xml</code> file, you declare the input method as a
+service, with the appropriate intent filter and any associated meta data:</p>
+
+<pre>&lt;manifest xmlns:android="http://schemas.android.com/apk/res/android"
+        package="com.example.fastinput"&gt;
+
+    &lt;application android:label="@string/app_label"&gt;<br>
+        &lt;!-- Declares the input method service --&gt;
+        &lt;service android:name="FastInputIME"
+            android:label="@string/fast_input_label"
+            android:permission="android.permission.BIND_INPUT_METHOD"&gt;
+            &lt;intent-filter&gt;
+                &lt;action android:name="android.view.InputMethod" /&gt;
+            &lt;/intent-filter&gt;
+            &lt;meta-data android:name="android.view.im" android:resource="@xml/method" /&gt;
+        &lt;/service&gt;
+
+        &lt;!-- Optional activities. A good idea to have some user settings. --&gt;
+        &lt;activity android:name="FastInputIMESettings" android:label="@string/fast_input_settings"&gt;
+            &lt;intent-filter&gt;
+                &lt;action android:name="android.intent.action.MAIN"/&gt;
+            &lt;/intent-filter&gt;
+        &lt;/activity&gt; 
+    &lt;/application&gt;
+&lt;/manifest&gt;</pre>
+
+<p>If your input method allows the user to tweak some settings, you should
+provide a settings activity that can be launched from the Settings application.
+This is optional and you may choose to provide all user settings directly in
+your IME's UI.</p>
+
+<p>The typical life-cycle of an <code>InputMethodService</code> looks like 
+this:</p>
+
+<p><img src="images/ime_003.png" style="border: medium none ; width: 374px; height: 871px;"></p>
+
+<h3>Visual Elements</h3>
+
+<p>There are two main visual elements for an input method—the input view and the
+candidates view. You don't have to follow this style though, if one of them is
+not relevant to your input method experience.</p>
+
+<h4>Input View</h4>
+
+<p>This is where the user can input text either in the form of keypresses,
+handwriting or other gestures. When the input method is displayed for the first
+time, <code>InputMethodService.onCreateInputView()</code> will be called. Create
+and return the view hierarchy that you would like to display in the input method
+window.</p>
+
+<h4>Candidates View</h4>
+
+<p>This is where potential word corrections or completions are presented to the
+user for selection. Again, this may or may not be relevant to your input method
+and you can return <code>null</code> from calls to
+<code>InputMethodService.onCreateCandidatesView()</code>, which is the default
+behavior.</p>
+
+<h3>Designing for the different Input Types</h3>
+
+<p>An application's text fields can have different input types specified on
+them, such as free form text, numeric, URL, email address and search. When you
+implement a new input method, you need to be aware of the different input types.
+Input methods are not automatically switched for different input types and so
+you need to support all types in your IME. However, the IME is not responsible
+for validating the input sent to the application. That's the responsibility of
+the application.</p>
+
+<p>For example, the LatinIME provided with the Android platform provides 
+different layouts for text and phone number entry:</p>
+
+<p><img style="margin: 0pt 10px 0pt 0pt; width: 319px; height: 198px;" src="images/ime_002.png"><img style="width: 320px; height: 199px;" src="images/ime.png"></p>
+
+<p><code>InputMethodService.onStartInputView()</code> is called with an<code> 
+EditorInfo</code> object that contains details about the input type and other 
+attributes of the application's text field.</p><p>(<code>EditorInfo.inputType 
+&amp; EditorInfo.TYPE_CLASS_MASK</code>) can be one of many different values, 
+including:</p>
+
+<ul>
+<li><code>TYPE_CLASS_NUMBER</code></li>
+<li><code>TYPE_CLASS_DATETIME</code></li>
+<li><code>TYPE_CLASS_PHONE</code></li>
+<li><code>TYPE_CLASS_TEXT</code></li>
+</ul>
+
+<p>See <code>android.text.InputType</code> for more details.</p>
+
+<p><code>EditorInfo.inputType</code> can contain other masked bits that 
+indicate the class variation and other flags. For example, 
+<code>TYPE_TEXT_VARIATION_PASSWORD</code> or <code>TYPE_TEXT_VARIATION_URI</code> 
+or <code>TYPE_TEXT_FLAG_AUTO_COMPLETE</code>.</p>
+
+<h4>Password fields</h4>
+
+<p>Pay
+specific attention when sending text to password fields. Make sure that
+the password is not visible within your UI &mdash; neither in the input
+view or the candidates view. Also, do not save the password anywhere without
+explicitly informing the user.</p>
+
+<h3>Landscape vs. portrait</h3>
+
+<p>The UI needs to be able to scale between landscape and portrait orientations.
+In non-fullscreen IME mode, leave sufficient space for the application to show
+the text field and any associated context. Preferably, no more than half the
+screen should be occupied by the IME. In fullscreen IME mode this is not an
+issue.</p>
+
+<h3>Sending text to the application</h3>
+
+<p>There are two ways to send text to the application. You can either send
+individual key events or you can edit the text around the cursor in the
+application's text field.</p>
+
+<p>To send a key event, you can simply construct KeyEvent objects and call 
+<code>InputConnection.sendKeyEvent()</code>. Here are some examples:</p>
+
+<pre>InputConnection ic = getCurrentInputConnection();
+long eventTime = SystemClock.uptimeMillis();
+ic.sendKeyEvent(new KeyEvent(eventTime, eventTime,
+    KeyEvent.ACTION_DOWN, keyEventCode, 0, 0, 0, 0,
+    KeyEvent.FLAG_SOFT_KEYBOARD|KeyEvent.FLAG_KEEP_TOUCH_MODE));
+ic.sendKeyEvent(new KeyEvent(SystemClock.uptimeMillis(), eventTime,
+    KeyEvent.ACTION_UP, keyEventCode, 0, 0, 0, 0,
+    KeyEvent.FLAG_SOFT_KEYBOARD|KeyEvent.FLAG_KEEP_TOUCH_MODE));</pre>
+
+<p>Or use the convenience method:</p>
+
+<pre>InputMethodService.sendDownUpKeyEvents(keyEventCode);</pre>
+
+<p class="note"><strong>Note</strong>:
+It is recommended to use the above method for certain fields such as
+phone number fields because of filters that may be applied to the text
+after each key press. Return key and delete key should also be sent as
+raw key events for certain input types, as applications may be watching
+for specific key events in order to perform an action.</p>
+
+<p>When editing text in a text field, some of the more useful methods on 
+<code>android.view.inputmethod.InputConnection</code> are:</p>
+
+<ul>
+<li><code>getTextBeforeCursor()</code></li>
+<li><code>getTextAfterCursor()</code></li>
+<li><code>deleteSurroundingText()</code></li>
+<li><code>commitText()</code></li>
+</ul>
+
+<p>For example, let's say the text "Fell" is to the left of the cursor
+and you want to replace it with "Hello!":</p>
+
+<pre>InputConnection ic = getCurrentInputConnection();
+ic.deleteSurroundingText(4, 0);
+ic.commitText("Hello", 1);
+ic.commitText("!", 1);</pre>
+
+<h4>Composing text before committing</h4>
+
+<p>If your input method does some kind of text prediction or requires multiple
+steps to compose a word or glyph, you can show the progress in the text field
+until the user commits the word and then you can replace the partial composition
+with the completed text. The text that is being composed will be highlighted in
+the text field in some fashion, such as an underline.</p>
+
+<pre>InputConnection ic = getCurrentInputConnection();
+ic.setComposingText("Composi", 1);
+...
+ic.setComposingText("Composin", 1);
+...
+ic.commitText("Composing ", 1);</pre>
+
+<p><img style="width: 320px; height: 98px; margin-bottom: 10px;" src="images/ime_006.png">
+<img style="width: 320px; height: 97px; margin-bottom: 10px;" src="images/ime_005.png">
+<img style="width: 320px; height: 97px;" src="images/ime_004.png"></p>
+
+<h3>Intercepting hard key events</h3>
+
+<p>Even though the input method window doesn't have explicit focus, it receives
+hard key events first and can choose to consume them or forward them along to
+the application. For instance, you may want to consume the directional keys to
+navigate within your UI for candidate selection during composition. Or you may
+want to trap the back key to dismiss any popups originating from the input
+method window. To intercept hard keys, override
+<code>InputMethodService.onKeyDown()</code> and
+<code>InputMethodService.onKeyUp().</code> Remember to call
+<code>super.onKey</code>* if you don't want to consume a certain key
+yourself.</p>
+
+<h3>Other considerations</h3>
+
+<ul>
+<li>Provide a way for the user to easily bring up any associated settings 
+directly from the input method UI</li>
+<li>Provide
+a way for the user to switch to a different input method (multiple
+input methods may be installed) directly from the input method UI.</li>
+<li>Bring
+up the UI quickly - preload or lazy-load any large resources so that
+the user sees the input method quickly on tapping on a text field. And
+cache any resources and views for subsequent invocations of the input
+method.</li>
+<li>On the flip side, any large memory allocations should
+be released soon after the input method window is hidden so that
+applications can have sufficient memory to run. Consider using a
+delayed message to release resources if the input method is in a hidden
+state for a few seconds.</li>
+<li>Make sure that most common characters
+can be entered using the input method, as users may use punctuation in
+passwords or user names and they shouldn't be stuck in a situation
+where they can't enter a certain character in order to gain access into
+a password-locked device.</li>
+</ul>
+
+<h3>Samples</h3>
+
+<p>For a real world example, with support for multiple input types and text
+prediction, see the <a id="ccpb"
+href="http://android.git.kernel.org/?p=platform/packages/inputmethods/LatinIME.
+git;a=tree" title="LatinIME source code online">LatinIME source code</a>. The
+Android SDK also includes a SoftKeyboard sample as well.</p>

@@ -47,10 +47,10 @@ for notifications and short activities that directly relate to the application i
     See <a href="#ProgressDialog">Creating a ProgressDialog</a> below.</dd>
   <dt>{@link android.app.DatePickerDialog}</dt>
   <dd>A dialog that allows the user to select a date. See the 
-    <a href="{@docRoot}guide/tutorials/views/hello-datepicker.html">Hello DatePicker</a> tutorial.</dd>
+    <a href="{@docRoot}resources/tutorials/views/hello-datepicker.html">Hello DatePicker</a> tutorial.</dd>
   <dt>{@link android.app.TimePickerDialog}</dt>
   <dd>A dialog that allows the user to select a time. See the 
-    <a href="{@docRoot}guide/tutorials/views/hello-timepicker.html">Hello TimePicker</a> tutorial.</dd>
+    <a href="{@docRoot}resources/tutorials/views/hello-timepicker.html">Hello TimePicker</a> tutorial.</dd>
 </dl>
 
 <p>If you would like to customize your own dialog, you can extend the

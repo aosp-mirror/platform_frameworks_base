@@ -268,7 +268,7 @@ in <code>C:\Documents and Settings\<user>\.android\</code> on Windows XP, and in
 <p>Note that, if your development machine is using a non-Gregorian locale, the build 
 tools may erroneously generate an already-expired debug certificate, so that you get an 
 error when trying to compile your application. For workaround information, see the 
-troubleshooting topic <a href="{@docRoot}guide/appendix/faq/troubleshooting.html#signingcalendar">
+troubleshooting topic <a href="{@docRoot}resources/faq/troubleshooting.html#signingcalendar">
 I&nbsp;can't&nbsp;compile my app because the build tools generated an expired debug 
 certificate</a>. </p>
 
