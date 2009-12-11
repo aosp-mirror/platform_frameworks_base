@@ -111,6 +111,9 @@ public class AudioService extends IAudioService.Stub {
     private Object mSettingsLock = new Object();
     private boolean mMediaServerOk;
 
+    /** cached value of the BT dock address to recognize undocking events */
+    private static String sBtDockAddress;
+
     private SoundPool mSoundPool;
     private Object mSoundEffectsLock = new Object();
     private static final int NUM_SOUNDPOOL_CHANNELS = 4;
@@ -1399,6 +1402,10 @@ public class AudioService extends IAudioService.Stub {
 
                 if (isConnected &&
                     state != BluetoothA2dp.STATE_CONNECTED && state != BluetoothA2dp.STATE_PLAYING) {
+                    if (address.equals(sBtDockAddress)) {
+                        Log.v(TAG, "Recognized undocking from BT dock");
+                        AudioSystem.setForceUse(AudioSystem.FOR_DOCK, AudioSystem.FORCE_NONE);
+                    }
                     AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP,
                             AudioSystem.DEVICE_STATE_UNAVAILABLE,
                             address);
@@ -1406,6 +1413,11 @@ public class AudioService extends IAudioService.Stub {
                 } else if (!isConnected &&
                              (state == BluetoothA2dp.STATE_CONNECTED ||
                               state == BluetoothA2dp.STATE_PLAYING)) {
+                    if (btDevice.isBluetoothDock()) {
+                        Log.v(TAG, "Recognized docking to BT dock");
+                        sBtDockAddress = address;
+                        AudioSystem.setForceUse(AudioSystem.FOR_DOCK, AudioSystem.FORCE_BT_DOCK);
+                    }
                     AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP,
                                                          AudioSystem.DEVICE_STATE_AVAILABLE,
                                                          address);
