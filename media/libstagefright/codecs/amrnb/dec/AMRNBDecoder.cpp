@@ -87,7 +87,6 @@ sp<MetaData> AMRNBDecoder::getFormat() {
 
     int32_t numChannels;
     int32_t sampleRate;
-    int64_t durationUs;
 
     CHECK(srcFormat->findInt32(kKeyChannelCount, &numChannels));
     CHECK_EQ(numChannels, 1);
@@ -95,13 +94,15 @@ sp<MetaData> AMRNBDecoder::getFormat() {
     CHECK(srcFormat->findInt32(kKeySampleRate, &sampleRate));
     CHECK_EQ(sampleRate, kSampleRate);
 
-    CHECK(srcFormat->findInt64(kKeyDuration, &durationUs));
-
     sp<MetaData> meta = new MetaData;
     meta->setCString(kKeyMIMEType, MEDIA_MIMETYPE_AUDIO_RAW);
     meta->setInt32(kKeyChannelCount, numChannels);
     meta->setInt32(kKeySampleRate, sampleRate);
-    meta->setInt64(kKeyDuration, durationUs);
+
+    int64_t durationUs;
+    if (srcFormat->findInt64(kKeyDuration, &durationUs)) {
+        meta->setInt64(kKeyDuration, durationUs);
+    }
 
     return meta;
 }
@@ -160,10 +161,16 @@ status_t AMRNBDecoder::read(
 
     buffer->set_range(0, kNumSamplesPerFrame * sizeof(int16_t));
 
-    CHECK_EQ(numBytesRead, mInputBuffer->range_length());
+    CHECK(numBytesRead <= mInputBuffer->range_length());
 
-    mInputBuffer->release();
-    mInputBuffer = NULL;
+    mInputBuffer->set_range(
+            mInputBuffer->range_offset() + numBytesRead,
+            mInputBuffer->range_length() - numBytesRead);
+
+    if (mInputBuffer->range_length() == 0) {
+        mInputBuffer->release();
+        mInputBuffer = NULL;
+    }
 
     buffer->meta_data()->setInt64(
             kKeyTime,
