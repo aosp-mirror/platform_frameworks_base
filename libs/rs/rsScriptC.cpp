@@ -60,7 +60,7 @@ void ScriptC::setupScript()
 }
 
 
-bool ScriptC::run(Context *rsc, uint32_t launchIndex)
+uint32_t ScriptC::run(Context *rsc, uint32_t launchIndex)
 {
     Context::ScriptTLSStruct * tls =
     (Context::ScriptTLSStruct *)pthread_getspecific(Context::gThreadTLSKey);
@@ -85,9 +85,9 @@ bool ScriptC::run(Context *rsc, uint32_t launchIndex)
     }
     setupScript();
 
-    bool ret = false;
+    uint32_t ret = 0;
     tls->mScript = this;
-    ret = mProgram.mScript(launchIndex) != 0;
+    ret = mProgram.mScript(launchIndex);
     tls->mScript = NULL;
     return ret;
 }
