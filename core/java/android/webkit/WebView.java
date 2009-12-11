@@ -486,6 +486,7 @@ public class WebView extends AbsoluteLayout
     // obj=Rect in doc coordinates
     static final int INVAL_RECT_MSG_ID                  = 26;
     static final int REQUEST_KEYBOARD                   = 27;
+    static final int DO_MOTION_UP                       = 28;
 
     static final String[] HandlerDebugString = {
         "REMEMBER_PASSWORD", //              = 1;
@@ -514,7 +515,8 @@ public class WebView extends AbsoluteLayout
         "PREVENT_TOUCH_ID", //               = 24;
         "WEBCORE_NEED_TOUCH_EVENTS", //      = 25;
         "INVAL_RECT_MSG_ID", //              = 26;
-        "REQUEST_KEYBOARD" //                = 27;
+        "REQUEST_KEYBOARD", //               = 27;
+        "DO_MOTION_UP" //                    = 28;
     };
 
     // If the site doesn't use the viewport meta tag to specify the viewport,
@@ -4852,7 +4854,23 @@ public class WebView extends AbsoluteLayout
         // mLastTouchX and mLastTouchY are the point in the current viewport
         int contentX = viewToContentX((int) mLastTouchX + mScrollX);
         int contentY = viewToContentY((int) mLastTouchY + mScrollY);
-        if (nativeMotionUp(contentX, contentY, mNavSlop)) {
+        if (nativePointInNavCache(contentX, contentY, mNavSlop)) {
+            WebViewCore.MotionUpData motionUpData = new WebViewCore
+                    .MotionUpData();
+            motionUpData.mFrame = nativeCacheHitFramePointer();
+            motionUpData.mNode = nativeCacheHitNodePointer();
+            motionUpData.mBounds = nativeCacheHitNodeBounds();
+            motionUpData.mX = contentX;
+            motionUpData.mY = contentY;
+            mWebViewCore.sendMessageAtFrontOfQueue(EventHub.VALID_NODE_BOUNDS,
+                    motionUpData);
+        } else {
+            doMotionUp(contentX, contentY, false);
+        }
+    }
+
+    private void doMotionUp(int contentX, int contentY, boolean useNavCache) {
+        if (nativeMotionUp(contentX, contentY, useNavCache ? mNavSlop : 0)) {
             if (mLogEvent) {
                 Checkin.updateStats(mContext.getContentResolver(),
                         Checkin.Stats.Tag.BROWSER_SNAP_CENTER, 1, 0.0);
@@ -5097,7 +5115,7 @@ public class WebView extends AbsoluteLayout
             // exclude INVAL_RECT_MSG_ID since it is frequently output
             if (DebugFlags.WEB_VIEW && msg.what != INVAL_RECT_MSG_ID) {
                 Log.v(LOGTAG, msg.what < REMEMBER_PASSWORD || msg.what
-                        > REQUEST_KEYBOARD ? Integer.toString(msg.what)
+                        > DO_MOTION_UP ? Integer.toString(msg.what)
                         : HandlerDebugString[msg.what - REMEMBER_PASSWORD]);
             }
             if (mWebViewCore == null) {
@@ -5443,6 +5461,11 @@ public class WebView extends AbsoluteLayout
                                 ViewConfiguration.getScrollDefaultDelay());
                     }
                     break;
+
+                case DO_MOTION_UP:
+                    doMotionUp(msg.arg1, msg.arg2, (Boolean) msg.obj);
+                    break;
+
                 default:
                     super.handleMessage(msg);
                     break;
@@ -5931,6 +5954,9 @@ public class WebView extends AbsoluteLayout
         nativeUpdateCachedTextfield(updatedText, mTextGeneration);
     }
 
+    private native int nativeCacheHitFramePointer();
+    private native Rect nativeCacheHitNodeBounds();
+    private native int nativeCacheHitNodePointer();
     /* package */ native void nativeClearCursor();
     private native void     nativeCreate(int ptr);
     private native int      nativeCursorFramePointer();
@@ -5992,6 +6018,7 @@ public class WebView extends AbsoluteLayout
     private native int      nativeMoveGeneration();
     private native void     nativeMoveSelection(int x, int y,
             boolean extendSelection);
+    private native boolean  nativePointInNavCache(int x, int y, int slop);
     // Like many other of our native methods, you must make sure that
     // mNativeClass is not null before calling this method.
     private native void     nativeRecordButtons(boolean focused,
