@@ -60,7 +60,7 @@ D/ActivityManager( 763): Stopping: HistoryRecord{409dbb20 com.android.home.AllAp
         that expose useful information such as CPU usage and frame rate. See <a href="#additionaldebugging">Debug
         and Test Settings on the Emulator</a> below. </li>
 </ul>
-<p>Also, see the <a href="{@docRoot}guide/appendix/faq/troubleshooting.html">Troubleshooting</a> section
+<p>Also, see the <a href="{@docRoot}resources/faq/troubleshooting.html">Troubleshooting</a> section
     of the doc to figure out why your application isn't appearing on the emulator,
     or why it's not starting. </p>
 

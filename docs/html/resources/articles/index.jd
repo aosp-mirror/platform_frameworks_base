@@ -1,0 +1,9 @@
+page.title=Technical Articles
+@jd:body
+
+
+<dl>
+  <dt><a href="{@docRoot}resources/articles/tts.html">Using Text-to-Speech</a></dt>
+  <dd>The text-to-speech API lets your application "speak" to users, in any of several languages. This article provides an overview of the TTS API and how you use to add speech capabilities to your application.</dd>
+</dl>
+

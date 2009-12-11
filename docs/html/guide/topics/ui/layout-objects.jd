@@ -19,7 +19,7 @@ parent.link=index.html
 <p>This section describes some of the more common types of layout objects
 to use in your applications. Like all layouts, they are subclasses of {@link android.view.ViewGroup ViewGroup}.</p>
 
-<p>Also see the <a href="{@docRoot}guide/tutorials/views/index.html">Hello Views</a> tutorials for
+<p>Also see the <a href="{@docRoot}resources/tutorials/views/index.html">Hello Views</a> tutorials for
 some guidance on using more Android View layouts.</p>
 
 <h2 id="framelayout">FrameLayout</h2>
@@ -83,7 +83,7 @@ neighboring elements. This can be turned off by setting
 <code>android:baselineAligned=&quot;false&quot;</code> in the layout XML. </p>
 
 <p>To view other sample code, see the 
-<a href="{@docRoot}guide/tutorials/views/hello-linearlayout.html">Hello LinearLayout</a> tutorial.</p>
+<a href="{@docRoot}resources/tutorials/views/hello-linearlayout.html">Hello LinearLayout</a> tutorial.</p>
 
 
 <h2 id="tablelayout">TableLayout</h2>
@@ -138,7 +138,7 @@ result, with cell borders displayed as dotted lines (added for visual effect). <
     fits the screen. See the {@link android.widget.TableLayout TableLayout reference} 
 documentation for more details. </p>
 
-<p>To view sample code, see the <a href="{@docRoot}guide/tutorials/views/hello-tablelayout.html">Hello
+<p>To view sample code, see the <a href="{@docRoot}resources/tutorials/views/hello-tablelayout.html">Hello
 TableLayout</a> tutorial.</p>
 
 
@@ -208,7 +208,7 @@ refer to the ID using the syntax of a relative resource
     For example, assigning the parameter <code>toLeft="my_button"</code> to a TextView would place the TextView to 
     the left of the View with the ID <var>my_button</var> (which must be written in the XML <em>before</em> the TextView). </p>
 
-<p>To view this sample code, see the <a href="{@docRoot}guide/tutorials/views/hello-relativelayout.html">Hello
+<p>To view this sample code, see the <a href="{@docRoot}resources/tutorials/views/hello-relativelayout.html">Hello
 RelativeLayout</a> tutorial.</p>
 
 

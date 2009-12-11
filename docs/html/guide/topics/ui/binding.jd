@@ -13,9 +13,9 @@ parent.link=index.html
   
   <h2>See also</h2>
   <ol>
-    <li><a href="{@docRoot}guide/tutorials/views/hello-spinner.html">Hello Spinner tutorial</a></li>
-    <li><a href="{@docRoot}guide/tutorials/views/hello-listview.html">Hello ListView tutorial</a></li>
-    <li><a href="{@docRoot}guide/tutorials/views/hello-gridview.html">Hello GridView tutorial</a></li>
+    <li><a href="{@docRoot}resources/tutorials/views/hello-spinner.html">Hello Spinner tutorial</a></li>
+    <li><a href="{@docRoot}resources/tutorials/views/hello-listview.html">Hello ListView tutorial</a></li>
+    <li><a href="{@docRoot}resources/tutorials/views/hello-gridview.html">Hello GridView tutorial</a></li>
   </ol>
 </div>
 </div>
@@ -107,7 +107,7 @@ mHistoryView.setOnItemClickListener(mMessageClickedHandler);
 
 <div class="special">
 <p>For more discussion on how to create different AdapterViews, read the following tutorials:
-<a href="{@docRoot}guide/tutorials/views/hello-spinner.html">Hello Spinner</a>,
-<a href="{@docRoot}guide/tutorials/views/hello-listview.html">Hello ListView</a>, and
-<a href="{@docRoot}guide/tutorials/views/hello-gridview.html">Hello GridView</a>.
+<a href="{@docRoot}resources/tutorials/views/hello-spinner.html">Hello Spinner</a>,
+<a href="{@docRoot}resources/tutorials/views/hello-listview.html">Hello ListView</a>, and
+<a href="{@docRoot}resources/tutorials/views/hello-gridview.html">Hello GridView</a>.
 </div>

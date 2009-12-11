@@ -364,81 +364,6 @@
           </a></li>
     </ul>
   </li>
-  
-  <li>
-    <h2><span class="en">Tutorials and Sample Code</span>
-               <span class="de" style="display:none">Lernprogramme und Beispielcode</span>
-               <span class="es" style="display:none">Tutoriales y código de ejemplo</span>
-               <span class="fr" style="display:none">Didacticiels et exemple de code</span>
-               <span class="it" style="display:none">Esercitazioni e codice di esempio</span>
-               <span class="ja" style="display:none">チュートリアルとサンプル コード</span>
-               <span class="zh-CN" style="display:none">辅导手册和示例代码</span>
-               <span class="zh-TW" style="display:none">教學課程與程式碼範例</span>
-    </h2>
-    <ul>
-      <li><a href="<?cs var:toroot ?>guide/tutorials/hello-world.html">
-            <span class="en">Hello World</span>
-          </a></li>
-      <li><a href="<?cs var:toroot ?>guide/tutorials/views/index.html">
-            <span class="en">Hello Views</span>
-          </a></li>
-      <li><a href="<?cs var:toroot ?>guide/tutorials/localization/index.html">
-            <span class="en">Hello Localization</span>
-          </a></li>
-      <li><a href="<?cs var:toroot ?>guide/tutorials/notepad/index.html">
-            <span class="en">Notepad Tutorial</span>
-          </a></li>
-    </ul>
-    <ul>
-      <li class="toggle-list">
-        <div><a href="<?cs var:toroot ?>guide/samples/index.html">
-               <span class="en">Sample Code</span>
-             </a></div>
-        <ul>
-          <li><a href="<?cs var:toroot ?>guide/samples/ApiDemos/index.html">
-                <span class="en">API Demos</span>
-              </a></li>
-          <li><a href="<?cs var:toroot ?>guide/samples/BluetoothChat/index.html">
-                <span class="en">Bluetooth Chat</span>
-              </a></li>
-          <li><a href="<?cs var:toroot ?>guide/samples/ContactManager/index.html">
-                <span class="en">Contact Manager</span>
-              </a></li>
-          <li><a href="<?cs var:toroot ?>guide/samples/Home/index.html">
-                <span class="en">Home</span>
-              </a></li>
-          <li><a href="<?cs var:toroot ?>guide/samples/JetBoy/index.html">
-                <span class="en">JetBoy</span>
-              </a></li>
-          <li><a href="<?cs var:toroot ?>guide/samples/LunarLander/index.html">
-                <span class="en">Lunar Lander</span>
-              </a></li>
-          <li><a href="<?cs var:toroot ?>guide/samples/MultiResolution/index.html">
-                <span class="en">Multiple Resolutions</span>
-              </a></li>
-          <li><a href="<?cs var:toroot ?>guide/samples/NotePad/index.html">
-                <span class="en">Note Pad</span>
-              </a></li>
-          <li><a href="<?cs var:toroot ?>guide/samples/SearchableDictionary/index.html">
-                <span class="en">Searchable Dictionary</span>
-              </a></li>
-          <li><a href="<?cs var:toroot ?>guide/samples/Snake/index.html">
-                <span class="en">Snake</span>
-              </a></li>
-          <li><a href="<?cs var:toroot ?>guide/samples/SoftKeyboard/index.html">
-                <span class="en">Soft Keyboard</span>
-              </a></li>
-          <li><a href="<?cs var:toroot ?>guide/samples/Wiktionary/index.html">
-                <span class="en">Wiktionary</span>
-              </a></li>
-          <li><a href="<?cs var:toroot ?>guide/samples/WiktionarySimple/index.html">
-                <span class="en">Wiktionary (Simplified)</span>
-              </a></li>
-        </ul>
-      </li>
-    </ul>
-  </li>
-  
 
   <li>
     <h2><span class="en">Appendix</span>
@@ -462,9 +387,6 @@
           </a></li>
       <li><a href="<?cs var:toroot ?>guide/appendix/glossary.html">
             <span class="en">Glossary</span>
-          </a></li>
-      <li><a href="<?cs var:toroot ?>guide/appendix/faq/index.html">
-            <span class="en">FAQ</span>
           </a></li>
     </ul>
   </li>

@@ -1,0 +1,91 @@
+page.title=Drawable Mutations
+@jd:body
+
+<p>Android's drawables are extremely useful to easily build applications. A
+{@link android.graphics.drawable.Drawable Drawable} is a pluggable drawing
+container that is usually associated with a View. For instance, a 
+{@link android.graphics.drawable.BitmapDrawable BitmapDrawable} is used to display
+images, a {@link android.graphics.drawable.ShapeDrawable ShapeDrawable} to draw
+shapes and gradients, and so on. You can even combine them to create complex
+renderings.</p>
+
+<p>Drawables allow you to easily customize the rendering of the widgets without
+subclassing them. As a matter of fact, they are so convenient that most of the
+default Android apps and widgets are built using drawables; there are about 700
+drawables used in the core Android framework. Because drawables are used so
+extensively throughout the system, Android optimizes them when they are loaded
+from resources. For instance, every time you create a 
+{@link android.widget.Button Button}, a new drawable is loaded from the framework
+resources (<code>android.R.drawable.btn_default</code>). This means all buttons
+across all the apps use a different drawable instance as their background.
+However, all these drawables share a common state, called the "constant state."
+The content of this state varies according to the type of drawable you are
+using, but it usually contains all the properties that can be defined by a
+resource. In the case of a button, the constant state contains a bitmap image.
+This way, all buttons across all applications share the same bitmap, which saves
+a lot of memory.</p>
+
+<p>The following diagram shows what entities are
+created when you assign the same image resource as the background of
+two different views. As you can see, two drawables are created but they
+both share the same constant state, hence the same bitmap:</p>
+
+<img style="margin: 0px auto 10px; display: block; text-align: center; cursor: pointer; width: 307px; height: 400px;" src="images/shared_states.png" alt="" id="BLOGGER_PHOTO_ID_5331437883277472082" border="0">
+
+<p>This state sharing feature is great to avoid wasting memory but it can cause
+problems when you try to modify the properties of a drawable. Imagine an
+application with a list of books. Each book has a star next to its name, totally
+opaque when the user marks the book as a favorite, and translucent when the book
+is not a favorite. To achieve this effect, you would probably write the
+following code in your list adapter's <code>getView()</code> method:</p>
+
+<pre>Book book = ...;
+TextView listItem = ...;
+
+listItem.setText(book.getTitle());
+
+Drawable star = context.getResources().getDrawable(R.drawable.star);
+if (book.isFavorite()) {
+  star.setAlpha(255); // opaque
+} else {
+  star.setAlpha(70); // translucent
+}</pre>
+
+<p>Unfortunately, this piece of code yields a rather strange result: 
+all of the drawables have the same opacity:</p>
+
+<img style="margin: 0px auto 10px; display: block; text-align: center; cursor: pointer; width: 267px; height: 400px;" src="images/all_drawables_changed.png" alt="" id="BLOGGER_PHOTO_ID_5331438978390342066" border="0">
+
+<p>This
+result is explained by the constant state. Even though we are getting a
+new drawable instance for each list item, the constant state remains
+the same and, in the case of BitmapDrawable, the opacity is part of the
+constant state. Thus, changing the opacity of one drawable instance
+changes the opacity of all the other instances. Even worse, working
+around this issue was not easy with Android 1.0 and 1.1.</p>
+
+<p>Android 1.5 and higher offers a very easy way to solve this issue 
+with the new {@link android.graphics.drawable.Drawable#mutate()} method</a>.
+When you invoke this method on a drawable, the constant state of the
+drawable is duplicated to allow you to change any property without
+affecting other drawables. Note that bitmaps are still shared, even
+after mutating a drawable. The diagram below shows what happens when
+you invoke <code>mutate()</code> on a drawable:</p>
+
+<img style="margin: 0px auto 10px; display: block; text-align: center; cursor: pointer; width: 307px; height: 400px;" src="images/mutated_states.png" alt="" id="BLOGGER_PHOTO_ID_5331440144116345074" border="0">
+
+<p>Let's update our previous piece of code to make use of <code>mutate()</code>:</p>
+
+<pre>Drawable star = context.getResources().getDrawable(R.drawable.star);
+if (book.isFavorite()) {
+  star.mutate().setAlpha(255); // opaque
+} else {
+  star. mutate().setAlpha(70); // translucent
+}</pre>
+
+<p>For convenience, <code>mutate()</code>
+returns the drawable itself, which allows to chain method calls. It
+does not however create a new drawable instance. With this new piece of
+code, our application now behaves correctly:</p>
+
+<img style="margin: 0px auto 10px; display: block; text-align: center; cursor: pointer; width: 267px; height: 400px;" src="images/correct_drawables.png" alt="" id="BLOGGER_PHOTO_ID_5331440757515573842" border="0">

@@ -1,0 +1,86 @@
+page.title=ListView Backgrounds: An Optimization
+@jd:body
+
+<p>{@link android.widget.ListView} is one of Android's most widely used widgets.
+It is rather easy to use, very flexible, and incredibly powerful. 
+<code>ListView</code> can also be difficult to understand at times.</p>
+
+<p>One of the most common issues with <code>ListView</code> happens when you try
+to use a custom background. By default, like many Android widgets,
+<code>ListView</code> has a transparent background which means that you can see
+through the default window's background, a very dark gray
+(<code>#FF191919</code> with the current <code>dark</code> theme.) Additionally,
+<code>ListView</code> enables the <em>fading edges</em> by default, as you can
+see at the top of the following screenshot &mdash; the first text item gradually
+fades to black. This technique is used throughout the system to indicate that
+the container can be scrolled.</p>
+
+<div style="text-align: center;"><img src="images/list_fade_1.png" alt="Android's default ListView"></div>
+
+<p>The fade effect is implemented using a combination of 
+{@link android.graphics.Canvas#saveLayerAlpha(float, float, float, float, int, int) Canvas.saveLayerAlpha()} 
+and the {@link android.graphics.PorterDuff.Mode#DST_OUT Porter-Duff Destination Out blending mode}. </p>
+
+<p>Unfortunately, things start to get ugly when you try to use a custom
+background on the <code>ListView</code> or when you change the window's
+background. The following two screenshots show what happens in an application
+when you change the window's background. The left image shows what the list
+looks like by default and the right image shows what the list looks like during
+a scroll initiated with a touch gesture:</p>
+
+<div style="text-align: center;">
+<img style="margin-right: 12px;" src="images/list_fade_2.png" alt="Dark fade">
+<img src="images/list_fade_3.png" alt="Dark list"></div>
+
+<p>This rendering issue is caused by an optimization of the Android framework
+enabled by default on all instances of <code>ListView</code>. I mentioned
+earlier that the fade effect is implemented using a Porter-Duff blending mode.
+This implementation works really well but is unfortunately very costly and can
+bring down drawing performance by quite a bit as it requires to capture a
+portion of the rendering in an offscreen bitmap and then requires extra blending
+(which implies readbacks from memory.)</p>
+
+<p>Since <code>ListView</code> is most of the time displayed on a solid
+background, there is no reason to go down that expensive route. That's why we
+introduced an optimization called the "cache color hint." The cache color hint
+is an RGB color set by default to the window's background color, that is #191919
+in Android's dark theme. When this hint is set, <code>ListView</code> (actually,
+its base class <code>View</code>) knows it will draw on a solid background and
+therefore replaces th expensive <code>saveLayerAlpha()/Porter-Duff</code>
+rendering with a simple gradient. This gradient goes from fully transparent to
+the cache color hint value and this is exactly what you see on the image above,
+with the dark gradient at the bottom of the list. However, this still does not
+explain why the entire list turns black during a scroll.</p>
+
+<p>As mentioned before, <code>ListView</code> has a transparent/translucent
+background by default, and so all default widgets in the Android UI toolkit.
+This implies that when <code>ListView</code> redraws its children, it has to
+blend the children with the window's background. Once again, this requires
+costly readbacks from memory that are particularly painful during a scroll or a
+fling when drawing happens dozen of times per second. </p>
+
+<p>To improve drawing performance during scrolling operations, the Android
+framework reuses the cache color hint. When this hint is set, the framework
+copies each child of the list in a <code>Bitmap</code> filled with the hint
+value (assuming that another optimization, called <em>scrolling cache</em>, is
+not turned off). <code>ListView</code> then blits these bitmaps directly on
+screen and because these bitmaps are known to be opaque, no blending is
+required. Also, since the default cache color hint is <code>#191919</code>, you
+get a dark background behind each item during a scroll.</p>
+
+<p>To fix this issue, all you have to do is either disable the cache color hint
+optimization, if you use a non-solid color background, or set the hint to the
+appropriate solid color value. You can do this from code (see
+{@link android.widget.AbsListView#setCacheColorHint(int)}) or preferably from
+XML, by using the <code>android:cacheColorHint</code> attribute. To disable the
+optimization, simply use the transparent color <code>#00000000</code>. The
+following screenshot shows a list with
+<code>android:cacheColorHint="#00000000"</code> set in the XML layout file:</p>
+
+<div style="text-align: center;"><img src="images/list_fade_4.png" alt="Fade on a custom background"></div>
+
+<p>As you can see, the fade works perfectly against the custom wooden
+background. The cache color hint feature is interesting because it
+shows how optimizations can make your life more difficult in
+some situations. In this particular case, however, the benefit of the
+default behavior outweighs the added complexity..</p>

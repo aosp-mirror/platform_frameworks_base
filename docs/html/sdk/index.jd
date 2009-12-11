@@ -84,6 +84,6 @@ Google Maps external library. </p>
 project or move existing applications into the new SDK.</p>
 
 <p>If you are new to Android, you can use the <a
-href="{@docRoot}guide/tutorials/hello-world.html">Hello World</a> tutorial to
+href="{@docRoot}resources/tutorials/hello-world.html">Hello World</a> tutorial to
 get started quickly. <a href="{@docRoot}sdk/installing.html#NextSteps">Next
 Steps</a> offers other suggestions of how to begin. Welcome!</p>

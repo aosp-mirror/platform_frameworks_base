@@ -1,0 +1,130 @@
+page.title=Hello, LinearLayout
+parent.title=Hello, Views
+parent.link=index.html
+@jd:body
+
+<p>A {@link android.widget.LinearLayout} is a GroupView that will lay child View elements
+vertically or horizontally.</p>
+
+
+<ol>
+  <li>Start a new project/Activity called HelloLinearLayout.</li>
+  <li>Open the layout file.
+    Make it like so:
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent">
+
+    &lt;LinearLayout
+	android:orientation="horizontal"
+	android:layout_width="fill_parent"
+	android:layout_height="fill_parent"
+	android:layout_weight="1">
+	
+	&lt;TextView
+	    android:text="red"
+	    android:gravity="center_horizontal"
+	    android:background="#aa0000"
+	    android:layout_width="wrap_content"
+	    android:layout_height="fill_parent"
+	    android:layout_weight="1"/>
+	
+	&lt;TextView
+	    android:text="green"
+	    android:gravity="center_horizontal"
+	    android:background="#00aa00"
+	    android:layout_width="wrap_content"
+	    android:layout_height="fill_parent"
+	    android:layout_weight="1"/>
+	
+	&lt;TextView
+	    android:text="blue"
+	    android:gravity="center_horizontal"
+	    android:background="#0000aa"
+	    android:layout_width="wrap_content"
+	    android:layout_height="fill_parent"
+	    android:layout_weight="1"/>
+	
+	&lt;TextView
+	    android:text="yellow"
+	    android:gravity="center_horizontal"
+	    android:background="#aaaa00"
+	    android:layout_width="wrap_content"
+	    android:layout_height="fill_parent"
+	    android:layout_weight="1"/>
+		
+    &lt;/LinearLayout>
+	
+    &lt;LinearLayout
+	android:orientation="vertical"
+	android:layout_width="fill_parent"
+	android:layout_height="fill_parent"
+	android:layout_weight="1">
+	
+	&lt;TextView
+	    android:text="row one"
+	    android:textSize="15pt"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+	    android:layout_weight="1"/>
+	
+	&lt;TextView
+	    android:text="row two"
+	    android:textSize="15pt"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+	    android:layout_weight="1"/>
+	
+	&lt;TextView
+	    android:text="row three"
+	    android:textSize="15pt"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+	    android:layout_weight="1"/>
+	
+	&lt;TextView
+	    android:text="row four"
+	    android:textSize="15pt"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+	    android:layout_weight="1"/>
+        
+    &lt;/LinearLayout>
+        
+&lt;/LinearLayout>
+</pre>
+        <p>Carefully inspect the XML. You'll notice how this layout works a lot like
+        an HTML layout. There is one parent LinearLayout that is defined to lay
+        its child elements vertically. The first child is another LinearLayout that uses a horizontal layout
+        and the second uses a vertical layout. Each LinearLayout contains several {@link android.widget.TextView}
+        elements.</p>
+</li>
+<li>Now open the HelloLinearLayout Activity and be sure it loads this layout in the <code>onCreate()</code> method:</p>
+<pre>
+public void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    setContentView(R.layout.main);
+}
+</pre>
+<p><code>R.layout.main</code> refers to the <code>main.xml</code> layout file.</p>
+</li>
+<li>Run it.</li>
+</ol>
+<p>You should see the following:</p>
+<img src="images/hello-linearlayout.png" width="150px" />
+
+<p>Notice how the various XML attributes define the View's behavior.
+Pay attention to the effect of the <code>layout_weight</code>. Try 
+	experimenting with different values to see how the screen real estate is 
+	distributed based on the weight of each element.</p>
+
+<h3>References</h3>
+<ul>
+	<li>{@link android.widget.LinearLayout}</li>
+<li>{@link android.widget.TextView}</li>
+</ul>
+
+
