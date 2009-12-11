@@ -21,6 +21,7 @@
 #if BUILD_WITH_FULL_STAGEFRIGHT
 #include "include/AACDecoder.h"
 #include "include/AMRNBDecoder.h"
+#include "include/AMRNBEncoder.h"
 #include "include/AMRWBDecoder.h"
 #include "include/AVCDecoder.h"
 #include "include/MP3Decoder.h"
@@ -305,6 +306,10 @@ sp<MediaSource> OMXCodec::Create(
         } else if (!strcasecmp(mime, MEDIA_MIMETYPE_VIDEO_AVC)
                     && (flags & kPreferSoftwareCodecs)) {
             return new AVCDecoder(source);
+        }
+    } else {
+        if (!strcasecmp(mime, MEDIA_MIMETYPE_AUDIO_AMR_NB)) {
+            return new AMRNBEncoder(source);
         }
     }
 #endif
