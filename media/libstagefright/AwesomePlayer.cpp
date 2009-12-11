@@ -544,6 +544,9 @@ void AwesomePlayer::onEvent(int32_t code) {
             }
 
             if (mVideoBuffer->range_length() == 0) {
+                // Some decoders, notably the PV AVC software decoder
+                // return spurious empty buffers that we just want to ignore.
+
                 mVideoBuffer->release();
                 mVideoBuffer = NULL;
                 continue;
