@@ -26,8 +26,6 @@ struct tagAVCHandle;
 
 namespace android {
 
-struct MediaBufferGroup;
-
 struct AVCDecoder : public MediaSource,
                     public MediaBufferObserver {
     AVCDecoder(const sp<MediaSource> &source);

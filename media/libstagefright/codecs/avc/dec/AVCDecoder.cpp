@@ -364,6 +364,13 @@ status_t AVCDecoder::read(
             return OK;
         }
 
+        case AVC_NALTYPE_AUD:
+        {
+            *out = new MediaBuffer(0);
+
+            return OK;
+        }
+
         default:
         {
             LOGE("Should not be here, unknown nalType %d", nalType);
