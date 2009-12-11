@@ -114,7 +114,7 @@ class AppNotRespondingDialog extends BaseErrorDialog {
                         ProcessRecord app = mProc;
 
                         if (msg.what == WAIT_AND_REPORT) {
-                            appErrorIntent = mService.createAppErrorIntentLocked(app);
+                            appErrorIntent = mService.createAppErrorIntentLocked(app, 0, null);
                         }
 
                         app.notResponding = false;

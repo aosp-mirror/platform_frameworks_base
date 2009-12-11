@@ -26,21 +26,6 @@ import android.os.IParentalControlCallback;
  * {@hide}
  */
 interface ICheckinService {
-    /** Synchronously attempt a checkin with the server, return true
-      * on success.
-      * @throws IllegalStateException whenever an error occurs.  The
-      * cause of the exception will be the real exception:
-      * IOException for network errors, JSONException for invalid
-      * server responses, etc.
-      */
-    boolean checkin();
-
-    /** Direct submission of crash data; returns after writing the crash. */
-    void reportCrashSync(in byte[] crashData);
-
-    /** Asynchronous "fire and forget" version of crash reporting. */
-    oneway void reportCrashAsync(in byte[] crashData);
-
     /** Reboot into the recovery system and wipe all user data. */
     void masterClear();
 

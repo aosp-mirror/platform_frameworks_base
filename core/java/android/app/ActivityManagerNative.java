@@ -982,18 +982,13 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
         case HANDLE_APPLICATION_ERROR_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             IBinder app = data.readStrongBinder();
-            int fl = data.readInt();
             String tag = data.readString();
-            String shortMsg = data.readString();
-            String longMsg = data.readString();
-            byte[] crashData = data.createByteArray();
-            int res = handleApplicationError(app, fl, tag, shortMsg, longMsg,
-                    crashData);
+            ApplicationErrorReport.CrashInfo ci = new ApplicationErrorReport.CrashInfo(data);
+            handleApplicationError(app, tag, ci);
             reply.writeNoException();
-            reply.writeInt(res);
             return true;
         }
-        
+
         case SIGNAL_PERSISTENT_PROCESSES_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             int sig = data.readInt();
@@ -2342,27 +2337,21 @@ class ActivityManagerProxy implements IActivityManager
         /* this base class version is never called */
         return true;
     }
-    public int handleApplicationError(IBinder app, int flags,
-            String tag, String shortMsg, String longMsg,
-            byte[] crashData) throws RemoteException
+    public void handleApplicationError(IBinder app, String tag,
+            ApplicationErrorReport.CrashInfo crashInfo) throws RemoteException
     {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IActivityManager.descriptor);
         data.writeStrongBinder(app);
-        data.writeInt(flags);
         data.writeString(tag);
-        data.writeString(shortMsg);
-        data.writeString(longMsg);
-        data.writeByteArray(crashData);
+        crashInfo.writeToParcel(data, 0);
         mRemote.transact(HANDLE_APPLICATION_ERROR_TRANSACTION, data, reply, 0);
         reply.readException();
-        int res = reply.readInt();
         reply.recycle();
         data.recycle();
-        return res;
     }
-    
+
     public void signalPersistentProcesses(int sig) throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();

@@ -23,7 +23,6 @@ import android.content.ContentValues;
 import android.database.SQLException;
 import android.net.Uri;
 import android.os.SystemClock;
-import android.server.data.CrashData;
 import android.util.Log;
 
 import java.io.ByteArrayOutputStream;
@@ -267,59 +266,4 @@ public final class Checkin {
 
     /** {@link SystemClock#elapsedRealtime} of the last time a crash report failed. */
     static private volatile long sLastCrashFailureRealtime = -MIN_CRASH_FAILURE_RETRY;
-
-    /**
-     * Helper function to report a crash.
-     *
-     * @param resolver from {@link android.content.Context#getContentResolver}
-     * @param crash data from {@link android.server.data.CrashData}
-     * @return URI of the crash report that was added
-     */
-    static public Uri reportCrash(ContentResolver resolver, byte[] crash) {
-        try {
-            // If we are in a situation where crash reports fail (such as a full disk),
-            // it's important that we don't get into a loop trying to report failures.
-            // So discard all crash reports for a few seconds after reporting fails.
-            long realtime = SystemClock.elapsedRealtime();
-            if (realtime - sLastCrashFailureRealtime < MIN_CRASH_FAILURE_RETRY) {
-                Log.e(TAG, "Crash logging skipped, too soon after logging failure");
-                return null;
-            }
-
-            // HACK: we don't support BLOB values, so base64 encode it.
-            byte[] encoded = Base64.encodeBase64(crash);
-            ContentValues values = new ContentValues();
-            values.put(Crashes.DATA, new String(encoded));
-            Uri uri = resolver.insert(Crashes.CONTENT_URI, values);
-            if (uri == null) {
-                Log.e(TAG, "Error reporting crash");
-                sLastCrashFailureRealtime = SystemClock.elapsedRealtime();
-            }
-            return uri;
-        } catch (Throwable t) {
-            // To avoid an infinite crash-reporting loop, swallow all errors and exceptions.
-            Log.e(TAG, "Error reporting crash: " + t);
-            sLastCrashFailureRealtime = SystemClock.elapsedRealtime();
-            return null;
-        }
-    }
-
-    /**
-     * Report a crash in CrashData format.
-     *
-     * @param resolver from {@link android.content.Context#getContentResolver}
-     * @param crash data to report
-     * @return URI of the crash report that was added
-     */
-    static public Uri reportCrash(ContentResolver resolver, CrashData crash) {
-        try {
-            ByteArrayOutputStream data = new ByteArrayOutputStream();
-            crash.write(new DataOutputStream(data));
-            return reportCrash(resolver, data.toByteArray());
-        } catch (Throwable t) {
-            // Swallow all errors and exceptions when writing crash report
-            Log.e(TAG, "Error writing crash: " + t);
-            return null;
-        }
-    }
 }

@@ -242,11 +242,9 @@ public interface IActivityManager extends IInterface {
     // Special low-level communication with activity manager.
     public void startRunning(String pkg, String cls, String action,
             String data) throws RemoteException;
-    // Returns 1 if the user wants to debug.
-    public int handleApplicationError(IBinder app,
-            int flags,    /* 1 == can debug */
-            String tag, String shortMsg, String longMsg,
-            byte[] crashData) throws RemoteException;
+
+    public void handleApplicationError(IBinder app, String tag,
+            ApplicationErrorReport.CrashInfo crashInfo) throws RemoteException;
     
     /*
      * This will deliver the specified signal to all the persistent processes. Currently only 

@@ -216,9 +216,7 @@ public final class Log {
      * @param tr An exception to log
      */
     public static int e(String tag, String msg, Throwable tr) {
-        int r = println(ERROR, tag, msg + '\n' + getStackTraceString(tr));
-        RuntimeInit.reportException(tag, tr, false);  // asynchronous
-        return r;
+        return println(ERROR, tag, msg + '\n' + getStackTraceString(tr));
     }
 
     /**

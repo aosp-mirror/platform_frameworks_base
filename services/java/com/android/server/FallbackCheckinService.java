@@ -34,19 +34,9 @@ import com.google.android.net.ParentalControlState;
 public final class FallbackCheckinService extends ICheckinService.Stub {
     static final String TAG = "FallbackCheckinService";
     final Context mContext;
-    
+
     public FallbackCheckinService(Context context) {
         mContext = context;
-    }
-
-    public boolean checkin() {
-        return false;  // failure, because not implemented
-    }
-
-    public void reportCrashSync(byte[] crashData) {
-    }
-
-    public void reportCrashAsync(byte[] crashData) {
     }
 
     public void masterClear() {
