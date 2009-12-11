@@ -20,6 +20,7 @@
 
 #include "include/AwesomePlayer.h"
 
+#include <binder/IPCThreadState.h>
 #include <media/stagefright/AudioPlayer.h>
 #include <media/stagefright/DataSource.h>
 #include <media/stagefright/FileSource.h>
@@ -313,6 +314,12 @@ void AwesomePlayer::initRenderer_l() {
         CHECK(meta->findInt32(kKeyWidth, &decodedWidth));
         CHECK(meta->findInt32(kKeyHeight, &decodedHeight));
 
+        mVideoRenderer.clear();
+
+        // Must ensure that mVideoRenderer's destructor is actually executed
+        // before creating a new one.
+        IPCThreadState::self()->flushCommands();
+
         mVideoRenderer =
             mClient.interface()->createRenderer(
                     mISurface, component,
@@ -528,6 +535,12 @@ void AwesomePlayer::onEvent(int32_t code) {
 
                 postStreamDoneEvent_l();
                 return;
+            }
+
+            if (mVideoBuffer->range_length() == 0) {
+                mVideoBuffer->release();
+                mVideoBuffer = NULL;
+                continue;
             }
 
             break;
