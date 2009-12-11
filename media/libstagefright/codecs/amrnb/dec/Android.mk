@@ -49,10 +49,6 @@ LOCAL_C_INCLUDES := \
 LOCAL_CFLAGS := \
         -DOSCL_UNUSED_ARG= -DOSCL_IMPORT_REF=
 
-LOCAL_SHARED_LIBRARIES := \
-        libstagefright \
-        libutils
-
 LOCAL_MODULE := libstagefright_amrnbdec
 
 include $(BUILD_STATIC_LIBRARY)
