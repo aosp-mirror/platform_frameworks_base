@@ -37,6 +37,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
@@ -72,7 +73,6 @@ public class BluetoothService extends IBluetooth.Stub {
 
     private int mNativeData;
     private BluetoothEventLoop mEventLoop;
-    private IntentFilter mIntentFilter;
     private boolean mIsAirplaneSensitive;
     private int mBluetoothState;
     private boolean mRestart = false;  // need to call enable() after disable()
@@ -88,6 +88,9 @@ public class BluetoothService extends IBluetooth.Stub {
 
     private static final String DOCK_ADDRESS_PATH = "/sys/class/switch/dock/bt_addr";
     private static final String DOCK_PIN_PATH = "/sys/class/switch/dock/bt_pin";
+
+    private static final String SHARED_PREFERENCE_DOCK_ADDRESS = "dock_bluetooth_address";
+    private static final String SHARED_PREFERENCES_NAME = "bluetooth_service_settings";
 
     private static final int MESSAGE_REGISTER_SDP_RECORDS = 1;
     private static final int MESSAGE_FINISH_DISABLE = 2;
@@ -163,31 +166,13 @@ public class BluetoothService extends IBluetooth.Stub {
         mUuidIntentTracker = new ArrayList<String>();
         mUuidCallbackTracker = new HashMap<RemoteService, IBluetoothCallback>();
         mServiceRecordToPid = new HashMap<Integer, Integer>();
-        registerForAirplaneMode();
 
         IntentFilter filter = new IntentFilter();
+        registerForAirplaneMode(filter);
+
         filter.addAction(Intent.ACTION_DOCK_EVENT);
-        mContext.registerReceiver(mBroadcastReceiver, filter);
+        mContext.registerReceiver(mReceiver, filter);
     }
-
-    private BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if (intent != null) {
-                String action = intent.getAction();
-
-                if (Intent.ACTION_DOCK_EVENT.equals(action)) {
-                    int state = intent.getIntExtra(Intent.EXTRA_DOCK_STATE,
-                            Intent.EXTRA_DOCK_STATE_UNDOCKED);
-                    if (DBG) Log.v(TAG, "Received ACTION_DOCK_EVENT with State:" + state);
-                    if (state == Intent.EXTRA_DOCK_STATE_UNDOCKED) {
-                        mDockAddress = null;
-                        mDockPin = null;
-                    }
-                }
-            }
-        }
-    };
 
      public static synchronized String readDockBluetoothAddress() {
         if (mDockAddress != null) return mDockAddress;
@@ -263,9 +248,7 @@ public class BluetoothService extends IBluetooth.Stub {
 
     @Override
     protected void finalize() throws Throwable {
-        if (mIsAirplaneSensitive) {
-            mContext.unregisterReceiver(mReceiver);
-        }
+        mContext.unregisterReceiver(mReceiver);
         try {
             cleanupNativeDataNative();
         } finally {
@@ -1086,8 +1069,10 @@ public class BluetoothService extends IBluetooth.Stub {
     }
 
     public synchronized boolean isBluetoothDock(String address) {
-        if (address.equals(mDockAddress)) return true;
-        return false;
+        SharedPreferences sp = mContext.getSharedPreferences(SHARED_PREFERENCES_NAME,
+                mContext.MODE_PRIVATE);
+
+        return sp.contains(SHARED_PREFERENCE_DOCK_ADDRESS + address);
     }
 
     /*package*/ boolean isRemoteDeviceInCache(String address) {
@@ -1577,6 +1562,8 @@ public class BluetoothService extends IBluetooth.Stub {
     private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
+            if (intent == null) return;
+
             String action = intent.getAction();
             if (action.equals(Intent.ACTION_AIRPLANE_MODE_CHANGED)) {
                 ContentResolver resolver = context.getContentResolver();
@@ -1591,18 +1578,31 @@ public class BluetoothService extends IBluetooth.Stub {
                         disable(false);
                     }
                 }
+            } else if (Intent.ACTION_DOCK_EVENT.equals(action)) {
+                int state = intent.getIntExtra(Intent.EXTRA_DOCK_STATE,
+                        Intent.EXTRA_DOCK_STATE_UNDOCKED);
+                if (DBG) Log.v(TAG, "Received ACTION_DOCK_EVENT with State:" + state);
+                if (state == Intent.EXTRA_DOCK_STATE_UNDOCKED) {
+                    mDockAddress = null;
+                    mDockPin = null;
+                } else {
+                    SharedPreferences.Editor editor =
+                        mContext.getSharedPreferences(SHARED_PREFERENCES_NAME,
+                                mContext.MODE_PRIVATE).edit();
+                    editor.putBoolean(SHARED_PREFERENCE_DOCK_ADDRESS + mDockAddress, true);
+                    editor.commit();
+                }
             }
         }
     };
 
-    private void registerForAirplaneMode() {
+    private void registerForAirplaneMode(IntentFilter filter) {
         String airplaneModeRadios = Settings.System.getString(mContext.getContentResolver(),
                 Settings.System.AIRPLANE_MODE_RADIOS);
         mIsAirplaneSensitive = airplaneModeRadios == null
                 ? true : airplaneModeRadios.contains(Settings.System.RADIO_BLUETOOTH);
         if (mIsAirplaneSensitive) {
-            mIntentFilter = new IntentFilter(Intent.ACTION_AIRPLANE_MODE_CHANGED);
-            mContext.registerReceiver(mReceiver, mIntentFilter);
+            filter.addAction(Intent.ACTION_AIRPLANE_MODE_CHANGED);
         }
     }
 
