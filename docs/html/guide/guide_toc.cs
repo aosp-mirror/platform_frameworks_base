@@ -401,6 +401,9 @@
           <li><a href="<?cs var:toroot ?>guide/samples/BluetoothChat/index.html">
                 <span class="en">Bluetooth Chat</span>
               </a></li>
+          <li><a href="<?cs var:toroot ?>guide/samples/ContactManager/index.html">
+                <span class="en">Contact Manager</span>
+              </a></li>
           <li><a href="<?cs var:toroot ?>guide/samples/Home/index.html">
                 <span class="en">Home</span>
               </a></li>
@@ -409,6 +412,9 @@
               </a></li>
           <li><a href="<?cs var:toroot ?>guide/samples/LunarLander/index.html">
                 <span class="en">Lunar Lander</span>
+              </a></li>
+          <li><a href="<?cs var:toroot ?>guide/samples/MultiResolution/index.html">
+                <span class="en">Multiple Resolutions</span>
               </a></li>
           <li><a href="<?cs var:toroot ?>guide/samples/NotePad/index.html">
                 <span class="en">Note Pad</span>
@@ -421,6 +427,12 @@
               </a></li>
           <li><a href="<?cs var:toroot ?>guide/samples/SoftKeyboard/index.html">
                 <span class="en">Soft Keyboard</span>
+              </a></li>
+          <li><a href="<?cs var:toroot ?>guide/samples/Wiktionary/index.html">
+                <span class="en">Wiktionary</span>
+              </a></li>
+          <li><a href="<?cs var:toroot ?>guide/samples/WiktionarySimple/index.html">
+                <span class="en">Wiktionary (Simplified)</span>
               </a></li>
         </ul>
       </li>
