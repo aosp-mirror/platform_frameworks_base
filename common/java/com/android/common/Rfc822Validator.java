@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-package android.text.util;
+package com.android.common;
 
 import android.text.TextUtils;
+import android.text.util.Rfc822Token;
+import android.text.util.Rfc822Tokenizer;
 import android.widget.AutoCompleteTextView;
 
 import java.util.regex.Pattern;
@@ -65,7 +67,7 @@ public class Rfc822Validator implements AutoCompleteTextView.Validator {
                EMAIL_ADDRESS_PATTERN.
                    matcher(tokens[0].getAddress()).matches();
     }
-    
+
     /**
      * @return a string in which all the characters that are illegal for the username
      * or the domain name part of the email address have been removed.
@@ -82,7 +84,7 @@ public class Rfc822Validator implements AutoCompleteTextView.Validator {
              * A local-part can contain multiple atoms, concatenated by
              * periods, so do allow periods here.
              */
-    
+
             if (c <= ' ' || c > '~') {
                 continue;
             }

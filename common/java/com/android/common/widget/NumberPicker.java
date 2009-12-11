@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.internal.widget;
+package com.android.common.widget;
 
 import android.content.Context;
 import android.os.Handler;
@@ -104,7 +104,8 @@ public class NumberPicker extends LinearLayout implements OnClickListener,
     public NumberPicker(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs);
         setOrientation(VERTICAL);
-        LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        LayoutInflater inflater =
+                (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         inflater.inflate(R.layout.number_picker, this, true);
         mHandler = new Handler();
         InputFilter inputFilter = new NumberPickerInputFilter();

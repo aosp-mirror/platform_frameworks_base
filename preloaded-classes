@@ -441,10 +441,6 @@ android.net.Uri$Part
 android.net.Uri$PathSegments
 android.net.Uri$StringUri
 android.net.WebAddress
-android.net.http.AndroidHttpClient
-android.net.http.AndroidHttpClient$1
-android.net.http.AndroidHttpClient$2
-android.net.http.AndroidHttpClientConnection
 android.net.http.CertificateChainValidator
 android.net.http.Connection
 android.net.http.ConnectionThread
@@ -718,7 +714,6 @@ android.text.util.Linkify
 android.text.util.Linkify$1
 android.text.util.Linkify$4
 android.text.util.Rfc822Tokenizer
-android.text.util.Rfc822Validator
 android.util.AttributeSet
 android.util.DayOfMonthCursor
 android.util.DisplayMetrics
@@ -1077,10 +1072,6 @@ com.android.internal.widget.ContactHeaderWidget
 com.android.internal.widget.DialogTitle
 com.android.internal.widget.EditableInputConnection
 com.android.internal.widget.LockPatternUtils
-com.android.internal.widget.NumberPicker
-com.android.internal.widget.NumberPicker$1
-com.android.internal.widget.NumberPicker$NumberRangeKeyListener
-com.android.internal.widget.NumberPickerButton
 com.android.internal.widget.RotarySelector
 com.android.internal.widget.Smileys
 com.google.android.gles_jni.EGLDisplayImpl

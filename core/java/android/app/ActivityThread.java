@@ -40,7 +40,6 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteDebug;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.net.http.AndroidHttpClient;
 import android.os.Bundle;
 import android.os.Debug;
 import android.os.Handler;
@@ -4303,7 +4302,6 @@ public final class ActivityThread {
     private final void attach(boolean system) {
         sThreadLocal.set(this);
         mSystemThread = system;
-        AndroidHttpClient.setThreadBlocked(true);
         if (!system) {
             android.ddm.DdmHandleAppName.setAppName("<pre-initialized>");
             RuntimeInit.setApplicationObject(mAppThread.asBinder());
@@ -4333,7 +4331,6 @@ public final class ActivityThread {
 
     private final void detach()
     {
-        AndroidHttpClient.setThreadBlocked(false);
         sThreadLocal.set(null);
     }
 
