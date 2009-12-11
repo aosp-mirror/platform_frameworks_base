@@ -37,7 +37,7 @@ public:
           mForce(false), mGrayscaleTolerance(0), mMakePackageDirs(false),
           mUpdate(false), mExtending(false),
           mRequireLocalization(false), mPseudolocalize(false),
-          mUTF8(false), mValues(false),
+          mUTF8(false), mEncodingSpecified(false), mValues(false),
           mCompressionMethod(0), mOutputAPKFile(NULL),
           mAssetSourceDir(NULL), mProguardFile(NULL),
           mAndroidManifestFile(NULL), mPublicOutputFile(NULL),
@@ -78,6 +78,8 @@ public:
     void setPseudolocalize(bool val) { mPseudolocalize = val; }
     bool getUTF8(void) const { return mUTF8; }
     void setUTF8(bool val) { mUTF8 = val; }
+    bool getEncodingSpecified(void) const { return mEncodingSpecified; }
+    void setEncodingSpecified(bool val) { mEncodingSpecified = val; }
     bool getValues(void) const { return mValues; }
     void setValues(bool val) { mValues = val; }
     int getCompressionMethod(void) const { return mCompressionMethod; }
@@ -116,7 +118,9 @@ public:
     const char*  getMinSdkVersion() const { return mMinSdkVersion; }
     void setMinSdkVersion(const char*  val) {
         mMinSdkVersion = val;
-        setUTF8(isUTF8Available());
+        if (!mEncodingSpecified) {
+            setUTF8(isUTF8Available());
+        }
     }
     const char*  getTargetSdkVersion() const { return mTargetSdkVersion; }
     void setTargetSdkVersion(const char*  val) { mTargetSdkVersion = val; }
@@ -169,6 +173,7 @@ private:
     bool        mRequireLocalization;
     bool        mPseudolocalize;
     bool        mUTF8;
+    bool        mEncodingSpecified;
     bool        mValues;
     int         mCompressionMethod;
     bool        mJunkPath;
