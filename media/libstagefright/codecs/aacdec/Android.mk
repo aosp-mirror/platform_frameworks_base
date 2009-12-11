@@ -149,10 +149,6 @@ LOCAL_CFLAGS := -DAAC_PLUS -DHQ_SBR -DPARAMETRICSTEREO -DOSCL_IMPORT_REF= -DOSCL
 
 LOCAL_C_INCLUDES := frameworks/base/media/libstagefright/include
 
-LOCAL_SHARED_LIBRARIES := \
-        libstagefright \
-        libutils
-
 LOCAL_MODULE := libstagefright_aacdec
 
 include $(BUILD_STATIC_LIBRARY)
