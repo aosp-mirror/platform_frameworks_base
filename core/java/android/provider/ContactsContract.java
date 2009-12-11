@@ -1331,7 +1331,7 @@ public final class ContactsContract {
          * <p>
          * A sub-directory of a single raw contact that contains all of their
          * {@link ContactsContract.Data} rows. To access this directory append
-         * {@link Entity#CONTENT_DIRECTORY} to the contact URI. See
+         * {@link #CONTENT_DIRECTORY} to the contact URI. See
          * {@link RawContactsEntity} for a stand-alone table containing the same
          * data.
          * </p>
