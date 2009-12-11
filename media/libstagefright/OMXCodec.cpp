@@ -22,6 +22,7 @@
 #include "include/AACDecoder.h"
 #include "include/AMRNBDecoder.h"
 #include "include/AMRWBDecoder.h"
+#include "include/AVCDecoder.h"
 #include "include/MP3Decoder.h"
 #endif
 
@@ -300,6 +301,9 @@ sp<MediaSource> OMXCodec::Create(
         return new AMRWBDecoder(source);
     } else if (!strcasecmp(mime, MEDIA_MIMETYPE_AUDIO_MPEG)) {
         return new MP3Decoder(source);
+    } else if (!strcasecmp(mime, MEDIA_MIMETYPE_VIDEO_AVC)
+                && (flags & kPreferSoftwareCodecs)) {
+        return new AVCDecoder(source);
     }
 #endif
 
