@@ -56,7 +56,7 @@ public interface IApplicationThread extends IInterface {
     		throws RemoteException;
     void scheduleRelaunchActivity(IBinder token, List<ResultInfo> pendingResults,
             List<Intent> pendingNewIntents, int configChanges,
-            boolean notResumed) throws RemoteException;
+            boolean notResumed, Configuration config) throws RemoteException;
     void scheduleNewIntent(List<Intent> intent, IBinder token) throws RemoteException;
     void scheduleDestroyActivity(IBinder token, boolean finished,
             int configChanges) throws RemoteException;
