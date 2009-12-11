@@ -621,9 +621,15 @@ public class ActivityManager {
         public String longMsg;
 
         /**
-         * Raw data about the crash (typically a stack trace).
+         * The stack trace where the error originated.  May be null.
+         * @pending
          */
-        public byte[] crashData;
+        public String stackTrace;
+
+        /**
+         * to be deprecated: This value will always be null.
+         */
+        public byte[] crashData = null;
 
         public ProcessErrorStateInfo() {
         }
@@ -640,8 +646,7 @@ public class ActivityManager {
             dest.writeString(tag);
             dest.writeString(shortMsg);
             dest.writeString(longMsg);
-            dest.writeInt(crashData == null ? -1 : crashData.length);
-            dest.writeByteArray(crashData);
+            dest.writeString(stackTrace);
         }
         
         public void readFromParcel(Parcel source) {
@@ -652,13 +657,7 @@ public class ActivityManager {
             tag = source.readString();
             shortMsg = source.readString();
             longMsg = source.readString();
-            int cdLen = source.readInt();
-            if (cdLen == -1) {
-                crashData = null;
-            } else {
-                crashData = new byte[cdLen];
-                source.readByteArray(crashData);
-            }
+            stackTrace = source.readString();
         }
         
         public static final Creator<ProcessErrorStateInfo> CREATOR = 

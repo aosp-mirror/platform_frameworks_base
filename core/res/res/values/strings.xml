@@ -1844,8 +1844,6 @@
     <string name="report">Report</string>
     <!-- Button allowing the user to choose to wait for an application that is not responding to become responsive again. -->
     <string name="wait">Wait</string>
-    <!-- Button allowing a developer to connect a debugger to an application that is not responding. -->
-    <string name="debug">Debug</string>
 
     <!-- Displayed in the title of the chooser for things to do with text that
          is to be sent to another application. For example, I can send text through SMS or IM.  A dialog with those choices would be shown, and this would be the title. -->
