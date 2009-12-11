@@ -93,6 +93,7 @@ sp<LayerBaseClient::Surface> Layer::createSurface() const
 status_t Layer::ditch()
 {
     // the layer is not on screen anymore. free as much resources as possible
+    mFreezeLock.clear();
     destroy();
     return NO_ERROR;
 }
