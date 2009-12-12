@@ -3798,9 +3798,17 @@ public class WebView extends AbsoluteLayout
             }
         }
 
-        // we always force, in case our height changed, in which case we still
-        // want to send the notification over to webkit
-        setNewZoomScale(mActualScale, true);
+        // onSizeChanged() is called during WebView layout. And any
+        // requestLayout() is blocked during layout. As setNewZoomScale() will
+        // call its child View to reposition itself through ViewManager's
+        // scaleAll(), we need to post a Runnable to ensure requestLayout().
+        post(new Runnable() {
+            public void run() {
+                // we always force, in case our height changed, in which case we
+                // still want to send the notification over to webkit
+                setNewZoomScale(mActualScale, true);
+            }
+        });
     }
 
     @Override
