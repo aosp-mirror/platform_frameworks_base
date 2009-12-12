@@ -12919,7 +12919,7 @@ public final class ActivityManagerService extends ActivityManagerNative implemen
         try {
             if (DEBUG_SWITCH) Log.i(TAG, "Switch is restarting resumed " + r);
             r.app.thread.scheduleRelaunchActivity(r, results, newIntents,
-                    changes, !andResume);
+                    changes, !andResume, mConfiguration);
             // Note: don't need to call pauseIfSleepingLocked() here, because
             // the caller will only pass in 'andResume' if this activity is
             // currently resumed, which implies we aren't sleeping.
