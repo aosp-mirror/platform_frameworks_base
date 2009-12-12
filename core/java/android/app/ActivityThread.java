@@ -1383,13 +1383,14 @@ public final class ActivityThread {
 
         public final void scheduleRelaunchActivity(IBinder token,
                 List<ResultInfo> pendingResults, List<Intent> pendingNewIntents,
-                int configChanges, boolean notResumed) {
+                int configChanges, boolean notResumed, Configuration config) {
             ActivityRecord r = new ActivityRecord();
 
             r.token = token;
             r.pendingResults = pendingResults;
             r.pendingIntents = pendingNewIntents;
             r.startsNotResumed = notResumed;
+            r.createdConfig = config;
 
             synchronized (mRelaunchingActivities) {
                 mRelaunchingActivities.add(r);
@@ -2511,7 +2512,7 @@ public final class ActivityThread {
         Activity a = performLaunchActivity(r, customIntent);
 
         if (a != null) {
-            r.createdConfig = new Configuration(a.getResources().getConfiguration());
+            r.createdConfig = new Configuration(mConfiguration);
             handleResumeActivity(r.token, false, r.isForward);
 
             if (!r.activity.mFinished && r.startsNotResumed) {
@@ -3563,6 +3564,16 @@ public final class ActivityThread {
             }
         }
 
+        if (tmp.createdConfig != null) {
+            // If the activity manager is passing us its current config,
+            // assume that is really what we want regardless of what we
+            // may have pending.
+            if (mConfiguration == null
+                    || mConfiguration.diff(tmp.createdConfig) != 0) {
+                changedConfig = tmp.createdConfig;
+            }
+        }
+        
         if (DEBUG_CONFIGURATION) Log.v(TAG, "Relaunching activity "
                 + tmp.token + ": changedConfig=" + changedConfig);
         
