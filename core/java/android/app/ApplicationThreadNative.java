@@ -140,7 +140,11 @@ public abstract class ApplicationThreadNative extends Binder
             List<Intent> pi = data.createTypedArrayList(Intent.CREATOR);
             int configChanges = data.readInt();
             boolean notResumed = data.readInt() != 0;
-            scheduleRelaunchActivity(b, ri, pi, configChanges, notResumed);
+            Configuration config = null;
+            if (data.readInt() != 0) {
+                config = Configuration.CREATOR.createFromParcel(data);
+            }
+            scheduleRelaunchActivity(b, ri, pi, configChanges, notResumed, config);
             return true;
         }
         
@@ -491,7 +495,8 @@ class ApplicationThreadProxy implements IApplicationThread {
 
     public final void scheduleRelaunchActivity(IBinder token,
             List<ResultInfo> pendingResults, List<Intent> pendingNewIntents,
-            int configChanges, boolean notResumed) throws RemoteException {
+            int configChanges, boolean notResumed, Configuration config)
+            throws RemoteException {
         Parcel data = Parcel.obtain();
         data.writeInterfaceToken(IApplicationThread.descriptor);
         data.writeStrongBinder(token);
@@ -499,6 +504,12 @@ class ApplicationThreadProxy implements IApplicationThread {
         data.writeTypedList(pendingNewIntents);
         data.writeInt(configChanges);
         data.writeInt(notResumed ? 1 : 0);
+        if (config != null) {
+            data.writeInt(1);
+            config.writeToParcel(data, 0);
+        } else {
+            data.writeInt(0);
+        }
         mRemote.transact(SCHEDULE_RELAUNCH_ACTIVITY_TRANSACTION, data, null,
                 IBinder.FLAG_ONEWAY);
         data.recycle();
