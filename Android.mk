@@ -338,6 +338,7 @@ framework_docs_LOCAL_INTERMEDIATE_SOURCES := \
 framework_docs_LOCAL_JAVA_LIBRARIES := \
 			core \
 			ext \
+			framework \
 
 framework_docs_LOCAL_MODULE_CLASS := JAVA_LIBRARIES
 framework_docs_LOCAL_DROIDDOC_HTML_DIR := docs/html
