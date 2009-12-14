@@ -46,10 +46,12 @@ public:
     void * getPtr() const {return mPtr;}
     const Type * getType() const {return mType.get();}
 
-    void uploadToTexture(Context *rsc, uint32_t lodOffset = 0);
+    void deferedUploadToTexture(const Context *rsc, uint32_t lodOffset);
+    void uploadToTexture(const Context *rsc);
     uint32_t getTextureID() const {return mTextureID;}
 
-    void uploadToBufferObject();
+    void deferedUploadToBufferObject(const Context *rsc);
+    void uploadToBufferObject(const Context *rsc);
     uint32_t getBufferObjectID() const {return mBufferID;}
 
 
@@ -69,6 +71,8 @@ public:
     void removeProgramToDirty(const Program *);
 
     virtual void dumpLOGV(const char *prefix) const;
+
+    virtual void uploadCheck(const Context *rsc);
 
 protected:
     void sendDirty() const;
@@ -94,6 +98,7 @@ protected:
     // Is this a legal structure to be used as a texture source.
     // Initially this will require 1D or 2D and color data
     bool mIsTexture;
+    uint32_t mTextureLOD;
     uint32_t mTextureID;
 
     // Is this a legal structure to be used as a vertex source.
@@ -101,6 +106,8 @@ protected:
     // is allowed.
     bool mIsVertexBuffer;
     uint32_t mBufferID;
+
+    bool mUploadDefered;
 };
 
 }

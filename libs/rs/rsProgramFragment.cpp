@@ -67,6 +67,7 @@ void ProgramFragment::setupGL(const Context *rsc, ProgramFragmentState *state)
             }
             glTexEnvi(GL_POINT_SPRITE_OES, GL_COORD_REPLACE_OES, mPointSpriteEnable);
         }
+        mTextures[ct]->uploadCheck(rsc);
         glBindTexture(GL_TEXTURE_2D, mTextures[ct]->getTextureID());
 
         switch(mEnvModes[ct]) {
@@ -126,6 +127,7 @@ void ProgramFragment::setupGL2(const Context *rsc, ProgramFragmentState *state, 
             continue;
         }
 
+        mTextures[ct]->uploadCheck(rsc);
         glBindTexture(GL_TEXTURE_2D, mTextures[ct]->getTextureID());
         if (mSamplers[ct].get()) {
             mSamplers[ct]->setupGL();
