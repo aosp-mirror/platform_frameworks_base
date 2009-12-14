@@ -1,0 +1,62 @@
+page.title=Tracking Memory Allocations
+@jd:body
+
+<p>Writing efficient mobile applications is not always straightforward. In
+particular, Android applications rely on automatic memory management handled by
+Dalvik's garbage collector, which can sometimes cause performance issues if you
+are not careful with memory allocations.</p>
+
+<p>In a performance-sensitive code path, such as the layout or drawing method of
+a view or the logic code of a game, any allocation comes at a price. After too
+many allocations, the garbage collector will kick in and stop your application
+to let it free some memory. Most of the time, garbage collections happen fast
+enough for you not to notice. However, if a collection happens while you are
+scrolling through a list of items or while you are trying to defeat a foe in a
+game, you may suddenly see a drop in performance/responsiveness of the
+application. It's not unusual for a garbage collection to take 100 to 200 ms.
+For comparison, a smooth animation needs to draw each frame in 16 to 33 ms. If
+the animation is suddenly interrupted for 10 frames, you can be certain that
+your users will notice.</p>
+
+<p>Most of the time, garbage collection occurs because of tons of small,
+short-lived objects and some garbage collectors, like generational garbage
+collectors, can optimize the collection of these objects so that the application
+does not get interrupted too often. The Android garbage collector is
+unfortunately not able to perform such optimizations and the creation of
+short-lived objects in performance critical code paths is thus very costly for
+your application.</p>
+
+<p>To help you avoid frequent garbage collections, the Android SDK ships with a
+very useful tool called <em>allocation tracker</em>. This tool is part of DDMS,
+which you must have already used for debugging purposes. To start using the
+allocation tracker, you must first launch the standalone version of DDMS, which
+can be found in the <code>tools/</code> directory of the SDK. The version of
+DDMS included in the Eclipse plugin does not offer you ability to use the
+allocation tracker yet.</p>
+
+<p>Once DDMS is running, simply select your application process and then click
+the <em>Allocation Tracker</em> tab. In the new view, click <em>Start
+Tracking</em> and then use your application to make it execute the code paths
+you want to analyze. When you are ready, click <em>Get Allocations</em>. A list
+of allocated objects will be shown in the first table. By clicking on a line you
+can see, in the second table, the stack trace that led to the allocation. Not
+only you will know what type of object was allocated, but also in which thread,
+in which class, in which file and at which line. The following screenshot shows
+the allocations performed by <a
+href="http://code.google.com/p/shelves">Shelves</a> while scrolling a
+ListView.</p>
+
+<a href="images/ddms_allocation_trackerl.png">
+
+<img style="cursor:hand;width: 320px; height: 250px;" src="images/ddms_allocation_tracker.png" border="0" alt="" />
+</a>
+
+<p>Even though it is not necessary &mdash; and sometimes not possible &mdash; to
+remove all allocations for your performance critical code paths. the allocation
+tracker will help you identify important issues in your code. For instance, a
+common mistake I have seen in many applications is to create a new
+<code>Paint</code> object on every draw. Moving the paint into an instance field
+is a simple fix that helps performance a lot. I highly encourage you to peruse
+the <a href="http://source.android.com/">Android source code</a> to see how we
+reduce allocations in performance-critical code paths. You will also thus
+discover the APIs Android provide to help you reuse objects.</p>

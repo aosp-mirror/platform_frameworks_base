@@ -1,0 +1,113 @@
+page.title=WikiNotes: Linkify your Text!
+@jd:body
+
+<img style="margin-left: 1.5em; margin-bottom:1.5em; float: right;" 
+src="images/WikiNotes.png" alt="Linkify example" border="0">
+
+<p>This article introduces <a
+href="http://android-developers.blogspot.com/2008/03/announcing-apps-for-android
+.html">WikiNotes for Android</a>, part of the <a
+href="http://code.google.com/p/apps-for-android/">Apps for Android</a>
+project. It covers the use of Linkify to turn ordinary text views
+into richer, link-oriented content that causes Android intents to fire
+when a link is selected.</p>
+
+<p><strong>Linkify</strong>: The {@link android.text.util.Linkify} class in the
+framework is perfect for creating a wiki note pad. It lets you specify a <a
+title="regular expression"
+href="http://en.wikipedia.org/wiki/Regular_expression">regular expression
+&raquo;</a>
+to match, and a scheme to prepend. The scheme is a string that, when
+the matched text is added, forms a Content URI to allow the correct
+data to be looked up.</p>
+
+<p>For example, in our case we want to look for a regular expression match for a
+WikiWord (that is, a word with <a title="word with camel case"
+href="http://en.wikipedia.org/wiki/CamelCase">camel case &raquo;</a> and no
+spaces). Linkify can then turn this into a Content URI &mdash; something like
+<code>content://com.google.android.wikinotes.db.wikinotes/wikinotes/WikiWord</code>, 
+which can then be used to locate the correct wiki page from a 
+{@link android.content.ContentProvider}.</p>
+
+<p>As a bonus, the Linkify class also defines several default matches,
+in particular it is able to turn web URLs, email addresses and
+telephone numbers into active links which fire Android intents
+automatically.</p>
+
+<p>Linkify can be passed any TextView in your application, and will
+take care of creating the links and enabling their "clickability" for
+you.</p>
+
+<p><strong>Default Linkify</strong>: Using the set of default active
+link options is very straightforward. Simply pass it a handle to a
+TextView with content in it, and the <code>Linkify.ALL</code> flag:</p>
+
+<pre>TextView noteView = (TextView) findViewById(R.id.noteview);
+noteView.setText(someContent);
+Linkify.addLinks(noteView, Linkify.ALL);</pre>
+
+<p>and that's it. The <code>Linkify.ALL</code> flag applies all of the predefined
+link actions, and the TextView will be immediately updated with a set
+of active links which, if you select them, fire default intents for the
+actions (e.g. a web URL will start the browser with that URL, a
+telephone number will bring up the phone dialer with that number ready
+to call, etc.).</p>
+
+<p><strong>Custom Linkify</strong>: So what about our WikiWord? There is no
+pre-defined action for that, so it needs to be defined and associated with a
+scheme.</p>
+
+<p>The first task is to define a regular expression that matches the kind of
+WikiWords we want to find. The regex in this case is:</p>
+
+<pre>\b[A-Z]+[a-z0-9]+[A-Z][A-Za-z0-9]+\b</pre>
+
+<p>Obvious, no? Well actually this is equivalent to the following
+description: "Starting with a word boundary (the \b) find at least one
+upper case letter, followed by at least one lower case letter or a
+numeric digit, followed by another upper case letter, and then any mix
+of upper case, lower case or numeric until the next word boundary (the
+final \b)". Regular expressions are not very pretty, but they are an
+extremely concise and accurate way of specifying a search pattern.</p>
+
+<p>We also need to tell Linkify what to do with a match to the
+WikiWord. Linkify will automatically append whatever is matched to a
+scheme that is supplied to it, so for the sake of argument let's assume
+we have a {@link android.content.ContentProvider} that matches the 
+following content URI:</p>
+
+<pre>content://com.google.android.wikinotes.db.wikinotes/wikinotes/WikiWord</pre>
+
+<p>The WikiWord part will be appended by Linkify when it finds a match, so we
+just need the part before that as our scheme.</p>
+
+<p>Now that we have these two things, we use Linkify to connect them up:</p>
+
+<pre>Pattern wikiWordMatcher = Pattern.compile("\\b[A-Z]+[a-z0-9]+[A-Z][A-Za-z0-9]+\\b");
+String wikiViewURL =    "content://com.google.android.wikinotes.db.wikinotes/wikinotes/";
+Linkify.addLinks(noteView, wikiWordMatcher, wikiViewURL);</pre>
+
+<p>Note that the \b's had to be escaped with double backslashes for the Java
+Pattern.compile line.</p>
+
+<p>Linkify can be used multiple times on the same view to add more
+links, so using this after the Default Linkify call means that the
+existing active links will be maintained and the new WikiWords will be
+added. You could define more Linkify actions and keep applying them to
+the same TextView if you wanted to.</p>
+
+<p>Now, if we have a WikiWord in the TextView, let's say
+<code>MyToDoList</code>, Linkify will turn it into an active link with the
+content URI:</p>
+
+<pre>content://com.google.android.wikinotes.db.wikinotes/wikinotes/MyToDoList</pre> 
+
+<p>and if you click on it, Android will fire the default intent for that content
+URI.</p>
+
+<p>For this to all work, you will need a ContentProvider that
+understands that Content URI, and you will need a default activity
+capable of doing something with the resulting data. I plan to cover
+these in future blog entries (and soon). In fact, the whole Wiki Note
+Pad application is currently undergoing some clean up and review, and
+will then hopefully be released as a sample application.</p>

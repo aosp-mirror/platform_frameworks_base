@@ -145,6 +145,6 @@ to seek help from other Android developers.</p>
 to the new SDK, note that you will need to uninstall the version of ApiDemos that comes 
 preinstalled in the emulator. For more information, or if you encounter an "reinstallation" 
 error when running or installing ApiDemos, see the troubleshooting topic 
-<a href="{@docRoot}guide/appendix/faq/troubleshooting.html#apidemosreinstall">I can't install ApiDemos 
+<a href="{@docRoot}resources/faq/troubleshooting.html#apidemosreinstall">I can't install ApiDemos 
 apps in my IDE because of a signing error</a> for information about how to solve the problem.</p>
 

@@ -1,0 +1,138 @@
+page.title=Touch Mode
+@jd:body
+
+<p>This article explains the <em>touch mode</em>, one of the most 
+important principles of Android's UI toolkit.</p>
+
+<p>The touch mode is a state of the view hierarchy that depends solely on the
+user interaction with the phone. By itself, the touch mode is something very
+easy to understand as it simply indicates whether the last user interaction was
+performed with the touch screen. For example, if you are using an
+Android-powered device, selecting a widget with the trackball will take you out
+of touch mode; however, if you touch a button on the screen with your finger,
+you will enter touch mode. When the user is not in touch mode, we talk about the
+trackball mode, navigation mode or keyboard navigation, so do not be surprised
+if you encounter these terms. </p>
+
+<p>There is only one API directly related to touch mode, 
+{@link android.view.View#isInTouchMode() View.isInTouchMode()}.</p>
+
+<p>Sounds easy enough, right? Oddly enough, touch mode is deceivingly simple and
+the consequences of entering touch mode are far greater than you might
+think. Let's look at some of the reasons why.</p>
+
+<h4>Touch Mode, Selection, and Focus</h4>
+
+<p>Designing a UI toolkit for mobile devices is difficult because of the various
+interaction mechanisms they provide. Some devices offer only 12 keys, some have
+a touch screen, some require a stylus, some have both a touch screen and a
+keyboard. Based on the hardware capabilities of the he user can interact with
+your application using different mechanisms, so we had to think very hard about
+all the possible issues that could arise. One issue led us to create the touch
+mode.</p>
+
+<p>Imagine a simple application, <a href="{@docRoot}resources/samples/index.html">ApiDemos</a>
+for example, that shows a list of text items. The user can freely
+navigate through the list using the trackball but also, alternatively, scroll
+and fling the list using the touch screen. The issue in this scenario is
+how to handle the selection properly when the user manipulates the list 
+through the touch screen. </p>
+
+<p>In this case, if the user selects an item at the top of the list and then
+flings the list towards the bottom, what should happen to the selection? Should
+it remain on the item and scroll off the screen? What should happen if the user
+then decided to move the selection with the trackball? Or worse, what should
+happen if the user presses the trackball to act upon the currently selected
+item, which is not shown on screen anymore? </p>
+
+<p>After careful consideration, we decided to remove the selection altogether,
+when the user manipulates the UI through the touch screen.</p>
+
+<p>In touch mode, there is no focus and no selection. Any selected item in a
+list of in a grid becomes unselected as soon as the user enters touch
+mode. Similarly, any focused widgets become unfocused when the user
+enters touch mode. The image below illustrates what happens when the
+user touches a list after selecting an item with the trackball.</p>
+
+<img style="margin: 0px 7px;" src="images/list02.png" alt="" id="BLOGGER_PHOTO_ID_5272753165743060962" border="0">
+<img style="margin: 0px 7px;" src="images/list01.png" alt="" id="BLOGGER_PHOTO_ID_5272753357441963442" border="0">
+
+<p>To
+make things more natural for the user, the framework knows how to
+resurrect the selection/focus whenever the user leaves touch mode. For
+instance, in the example above, if the user were to use the trackball
+again, the selection would reappear on the previously-selected item.
+This is why some developers are confused when they create a custom view
+and start receiving key events only after moving the trackball once:
+their application is in touch mode, and they need to use the trackball
+to exit touch mode and resurrect the focus.</p>
+
+<p>The relationship between touch mode, selection, and focus means you must not
+rely on selection and/or focus to exist in your application. A very common
+problem with new Android developers is to rely on 
+{@link android.widget.AdapterView#getSelectedItemPosition() ListView.getSelectedItemPosition()}.
+In touch mode, this method will return
+{@link android.widget.AdapterView#INVALID_POSITION INVALID_POSITION}.
+ You should instead use click listeners (see 
+{@link android.widget.AdapterView#setOnItemClickListener(android.widget.AdapterView.OnItemClickListener)})
+or the choice mode (see 
+{@link android.widget.ListView#setChoiceMode(int)}).</p>
+
+<h4>Focusable in Touch Mode</h4>
+
+<p>In general, focus doesn't exist in touch mode. However, focus can exist in
+touch mode in a very special way called <em>focusable</em>. This special mode
+was created for widgets that receive text input, such as 
+{@link android.widget.EditText} or, when filtering is enabled, 
+{@link android.widget.ListView}. The focusable mode is what lets the user enter text
+inside a text field on the screen, without first selecting it with the trackball
+or their finger.</p>
+
+<p>When a user
+touches the screen, the application will enter touch mode if it wasn't
+in touch mode already. What happens during the transition to
+touch mode depends on what the user touched, and what currently has
+focus. If the user touches a widget that is focusable in touch
+mode, that widget will receive focus. Otherwise, any currently
+focused widget will not retain focus unless it is focusable in touch
+mode. For instance, in the picture below, when the user touches
+the screen, the input text field receives the focus.</p>
+
+<img style="margin: 0px 7px;" src="images/text_field.png" alt="" id="BLOGGER_PHOTO_ID_5272755475757779154" border="0">
+
+<p>Fousable in touch mode (see 
+{@link android.view.View#setFocusableInTouchMode(boolean) View.setFocusableInTouchMode})
+ is a property that you can set yourself, either from code or from XML.
+However, you should use it sparingly and only in very specific situations,
+because it breaks consistency with the normal behavior of the Android UI. A game
+is a good example of an application that could make good use of the focusable in
+touch mode property. MapView, if used in fullscreen as in Google Maps, is
+another good example of where you can use focusable in touch mode correctly.</p>
+
+<p>Below is another example of a focusable in touch mode widget. When the user
+taps an <code>AutoCompleteTextView</code> suggestion with his finger, the focus
+remains on the input text field:</p>
+
+<img style="margin: 0px 7px;" src="images/search01.png" alt="" id="BLOGGER_PHOTO_ID_5272756689821626962" border="0">
+<img style="margin: 0px 7px;" src="images/search02.png" alt="" id="BLOGGER_PHOTO_ID_5272756246104676754" border="0">
+
+<p>Developers new to Android often think that focusable in touch mode is the
+solution they need to "fix" the problem of "disappearing" selection/focus. We
+really encourage you to think very hard before using it. If used incorrectly, it
+can make your application behave differently from the rest of the system and
+simply throw off the user's habits. The Android framework contains all the tools
+you need to handle user interactions without using focusable in touch mode. For
+example, instead of trying to make <code>ListView</code> always keep its
+selection, simply use the appropriate choice mode, as shown in
+{@link android.widget.ListView#setChoiceMode(int)}. 
+
+<h4>Touch Mode Cheat Sheet</h4>
+
+<p>Do:</p>
+<ul>
+<li>Remain consistent with the core applications</li><li>Use the appropriate feature if you need persistent selection (radio button, check box, the <code>ListView</code> choice mode, etc.)</li>
+<li>Use focusable in touch mode if you write a game</li>
+</ul>
+
+<p>Don't:</p>
+<ul><li>Do not try to keep the focus or selection in touch mode</li></ul>

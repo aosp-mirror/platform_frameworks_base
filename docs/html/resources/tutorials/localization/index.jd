@@ -1,0 +1,593 @@
+page.title=Hello, L10N
+@jd:body
+
+<div id="qv-wrapper">
+  <div id="qv">
+    <h2>In this document</h2>
+    <ol>
+      <li><a href="#unlocalized">Create an Unlocalized App</a>
+        <ol>
+          <li><a href="#create">Create the Project and Layout</a></li>
+          <li><a href="#default">Create Default Resources</a></li>
+        </ol>
+      </li>
+      <li><a href="#run">Run the Unlocalized App</a></li>
+      <li><a href="#plan">Plan the Localization</a></li>
+      <li><a href="#localize">Localize the App</a>
+        <ol>
+          <li><a href="#localize_strings">Localize the Strings</a></li>
+          <li><a href="#localize_images">Localize the Images</a></li>
+        </ol>
+      </li>
+      <li><a href="#test_localized">Run and Test the Localized App</a></li>
+    </ol>
+    <h2>See also</h2>
+    <ol>
+<li>{@link android.widget.Button}</li>
+<li>{@link android.widget.TextView}</li>
+<li>{@link android.app.AlertDialog}</li>
+</ol>
+  </div>
+</div>
+
+<p>In this tutorial, we will create a Hello, L10N application that uses the
+Android framework to selectively load resources. Then we will localize the
+application by adding resources to the <code>res/</code> directory. </p>
+
+<p>This tutorial uses the practices described in the <a
+href="{@docRoot}guide/topics/resources/localization.html">Localization</a>
+document. </p>
+
+
+<h2 id="unlocalized">Create an Unlocalized Application</h2>
+
+<p>The first version of the Hello, L10N application will use only the default
+resource directories (<code>res/drawable</code>, <code>res/layout</code>, and
+<code>res/values</code>). These resources are not localized &#8212; they are the
+graphics, layout, and strings  that we expect the application to use most often.
+When a user runs the application in the default locale, or in a locale that the
+application does not specifically support, the application will load resources
+from these default directories.</p>
+
+<p>The application consists of a simple user interface that displays two
+{@link android.widget.TextView} objects and a {@link android.widget.Button} image with a
+  background image of a national flag. When clicked, the button displays an
+{@link android.app.AlertDialog} object that shows additional text. </p>
+
+<h3 id="create">Create the Project and Layout</h3>
+
+<p>For this application, the default language will be British English and the
+default location the United Kingdom. </p>
+
+<ol>
+  <li>Start a new project and Activity called &quot;HelloL10N.&quot; If you are
+using Eclipse, fill out these values in the New Android Project wizard:
+    <ul>
+      <li><em>Project name:</em> HelloL10N</li>
+      <li><em>Application name:</em> Hello, L10N</li>
+      <li><em>Package name:</em> com.example.hellol10n (or your own private
+namespace)</li>
+      <li><em>Create Activity:</em> HelloL10N</li>
+      <li><em>Min SDK Version:</em> 3</li>
+    </ul>
+    <p>The basic  project contains a <code>res/</code> directory with
+subdirectories for the three most common types of resources: graphics
+(<code>res/drawable/</code>), layouts (<code>res/layout/</code>) and strings
+(<code>res/values/</code>). Most of the localization work you do later in this
+tutorial will involve adding more subdirectories to the <code>res/</code>
+directory.</p>
+    <img src="{@docRoot}images/hello_l10n/plain_project.png" alt="plain project" width="194"
+height="229">
+  </li>
+  <li>Open the <code>res/layout/main.xml</code> file and replace it with the
+following code:
+    <pre>&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+&lt;LinearLayout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+    android:orientation=&quot;vertical&quot;
+    android:layout_width=&quot;fill_parent&quot;
+    android:layout_height=&quot;fill_parent&quot;
+    &gt;
+&lt;TextView
+    android:layout_width=&quot;fill_parent&quot; 
+    android:layout_height=&quot;wrap_content&quot;
+    android:gravity=&quot;center_horizontal&quot;
+    android:text=&quot;@string/text_a&quot;
+    /&gt;
+&lt;TextView
+    android:layout_width=&quot;fill_parent&quot;
+    android:layout_height=&quot;wrap_content&quot;
+    android:gravity=&quot;center_horizontal&quot;
+    android:text=&quot;@string/text_b&quot;
+    /&gt;
+&lt;Button
+    android:id=&quot;@+id/flag_button&quot;
+    android:layout_width=&quot;wrap_content&quot;
+    android:layout_height=&quot;wrap_content&quot;
+    android:layout_gravity=&quot;center&quot;
+    /&gt;
+&lt;/LinearLayout&gt;
+    </pre>
+
+  <p>The LinearLayout has two {@link android.widget.TextView} objects that will
+display localized text and one  {@link android.widget.Button} that shows a flag.
+</p>
+  </li>
+</ol>
+
+<h3 id="default">Create Default Resources</h3>
+
+<p>The layout refers to resources that need to be defined. </p>
+
+<ol>
+  <li>Create default text strings. To do this, open the <code>res/values/strings.xml</code> file and replace it with the following code:<br>
+    <pre>&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+&lt;resources&gt;
+    &lt;string name=&quot;app_name&quot;&gt;Hello, L10N&lt;/string&gt;
+    &lt;string name=&quot;text_a&quot;&gt;Shall I compare thee to a summer&quot;'&quot;s day?&lt;/string&gt;
+    &lt;string name=&quot;text_b&quot;&gt;Thou art more lovely and more temperate.&lt;/string&gt;
+    &lt;string name=&quot;dialog_title&quot;&gt;No Localisation&lt;/string&gt;
+    &lt;string name=&quot;dialog_text&quot;&gt;This dialog box&quot;'&quot;s strings are not localised. For every locale, the text here will come from values/strings.xml.&lt;/string&gt;
+&lt;/resources&gt;</pre>
+
+  <p>This code provides British English text for each string that the application
+will use. When we localize this application, we will provide alternate text in
+German, French, and Japanese for some of the strings.</p>
+  </li>
+  <li>Add a default flag graphic to the <code>res/drawable</code> folder by
+saving <a href="../../../images/hello_l10n/flag.png">flag.png</a> as
+<code>res/drawable/flag.png</code>.  When the application is not localized, it
+will show a British flag.<br>
+    
+  </li>
+  <li>Open HelloL10N.java (in the <code>src/</code> directory) and add the
+following code inside the <code>onCreate()</code> method (after
+<code>setContentView</code>).
+
+    <pre>// assign flag.png to the button, loading correct flag image for current locale
+Button b;
+(b = (Button)findViewById(R.id.flag_button)).setBackgroundDrawable(this.getResources().getDrawable(R.drawable.flag));
+
+// build dialog box to display when user clicks the flag
+AlertDialog.Builder builder = new AlertDialog.Builder(this);
+builder.setMessage(R.string.dialog_text)
+    .setCancelable(false)
+    .setTitle(R.string.dialog_title)
+    .setPositiveButton("Done", new DialogInterface.OnClickListener() {
+        public void onClick(DialogInterface dialog, int id) {
+        dialog.dismiss();
+        }
+    });
+final AlertDialog alert = builder.create();
+
+// set click listener on the flag to show the dialog box 
+b.setOnClickListener(new View.OnClickListener() {
+    public void onClick(View v) {
+	alert.show();
+    }
+    });</pre>
+
+    <p class="note"><strong>Tip:</strong> In Eclipse, use
+<strong>Ctrl-Shift-O</strong> (<strong>Cmd-Shift-O</strong>, on Mac) to find and
+add missing import packages to your project, then save the HelloL10N.java
+file.</p>
+
+    <p>The code that you added does the following:</p>
+
+    <ul>
+      <li>It assigns the correct flag icon to the button. 
+        For now, no resources are defined other than the default, so this code
+will always assign the contents of <code>res/drawable/flag.png</code> (the
+British flag) as the flag icon, no matter what the locale. Once we add more
+flags for different locales, this code will sometimes assign a different flag.
+</li>
+      <li>It creates an {@link android.app.AlertDialog} object and sets a click listener so that when the
+user clicks the button, the AlertDialog will display. 
+        We will not localize the dialog text; 
+the AlertDialog will always display the <code>dialog_text</code> that is located
+within <code>res/values/strings.xml</code>. </li>
+    </ul>
+
+  </li>
+</ol>
+
+<p>The project structure now looks like this:</p>
+
+  <img src="{@docRoot}images/hello_l10n/nonlocalized_project.png" alt="nonlocalized" width="394"
+height="320">
+
+<p class="note"><strong>Tip:</strong> If you will want to run the application on
+a device and not just on an emulator, open <code>AndroidManifest.xml</code> and
+add <code>android:debuggable="true"</code> inside the
+<code>&lt;application&gt;</code> element. For information about setting up the
+device itself so it can run applications from your system, see <a
+href="{@docRoot}guide/developing/device.html">Developing on a Device</a>.</p>
+
+
+<h2 id="run">Run the Unlocalized Application</h2>
+
+<p>Save the project and run the application to see how it works. No matter what
+locale your device or emulator is set to, the application runs the same way. It
+should look something like this:</p>
+
+<table border="0" cellspacing="0" cellpadding="30">
+  <tr>
+    <th scope="col">The unlocalized application, running in any locale:</th>
+    <th scope="col">After clicking the flag, in any locale:</th>
+  </tr>
+  <tr>
+    <td valign="top"><img src="{@docRoot}images/hello_l10n/nonlocalized_screenshot1.png"
+alt="nonlocalized" width="321" height="366"></td>
+    <td><img src="{@docRoot}images/hello_l10n/nonlocalized_screenshot2.png" alt="nonlocalized2"
+width="321" height="366"></td>
+  </tr>
+</table>
+<h2 id="plan">Plan the Localization</h2>
+<p>The first step in localizing an application is to plan how the application
+will render differently in different locales. In this application, the default 
+locale will be the United Kingdom. We will add some locale-specific information
+for Germany, France, Canada, Japan, and the United States. Table 1 shows the
+plan for how the application will appear in different locales.</p>
+
+<p class="caption">Table 1</p>
+
+<table border="0" cellspacing="0" cellpadding="10">
+  <tr>
+    <th scope="col" valign="bottom">Region /<br />
+    Language</th>
+    <th scope="col">United Kingdom</th>
+    <th scope="col">Germany</th>
+    <th scope="col">France</th>
+    <th scope="col">Canada</th>
+    <th scope="col">Japan</th>
+    <th scope="col">United States</th>
+    <th scope="col">Other Location</th>
+  </tr>
+  <tr>
+    <th scope="row"><br>
+    English</th>
+    <td> British English text; British flag <em>(default)</em></td>
+    <td><em>-</em></td>
+    <td><em>-</em></td>
+    <td> British English text; Canadian flag</td>
+    <td>-</td>
+    <td> British English text; U.S. flag</td>
+    <td> British English text; British flag <em>(default)</em></td>
+  </tr>
+  <tr>
+    <th scope="row">German</th>
+    <td>-</td>
+    <td>German text for <code>app_name</code>, <code>text_a</code> and
+<code>text_b</code>; German flag</td>
+    <td>-</td>
+    <td>-</td>
+    <td>-</td>
+    <td>-</td>
+    <td>German text for <code>app_name</code>, <code>text_a</code> and
+<code>text_b</code>; British flag</td>
+  </tr>
+  <tr>
+    <th scope="row">French</th>
+    <td>-</td>
+    <td>-</td>
+    <td>French text for <code>app_name</code>, <code>text_a</code> and
+<code>text_b</code>; French flag</td>
+    <td>French text for <code>app_name</code>, <code>text_a</code> and
+<code>text_b</code>; Canadian flag</td>
+    <td>-</td>
+    <td>-</td>
+    <td>French text for <code>app_name</code>, <code>text_a</code> and
+<code>text_b</code>; British flag</td>
+  </tr>
+  <tr>
+    <th scope="row">Japanese</th>
+    <td>-</td>
+    <td>-</td>
+    <td>-</td>
+    <td>-</td>
+    <td>Japanese text for <code>text_a</code> and <code>text_b</code>; Japanese
+flag</td>
+    <td>-</td>
+    <td>Japanese text for <code>text_a</code> and <code>text_b</code>; British
+flag</td>
+  </tr>
+  <tr>
+    <th scope="row">Other Language</th>
+    <td>-</td>
+    <td>-</td>
+    <td>-</td>
+    <td>-</td>
+    <td>-</td>
+    <td>-</td>
+    <td> British English text; British flag <em>(default)</em></td>
+  </tr>
+</table>
+
+<p class="note"> Note that other behaviors are possible; for example, the
+application could support Canadian English or U.S. English text. But given the
+small amount of text involved, adding more versions of English  would not  make
+this application  more useful.</p>
+
+<p>As shown in the table above, the plan calls for five flag icons in addition
+to the British flag that is already in the <code>res/drawable/</code> folder. It
+also calls for three  sets of text strings other than the text  that is in
+<code>res/values/strings.xml</code>.</p>
+
+<p>Table 2 shows where the needed text strings and  flag icons will go, and
+specifies which ones will be loaded for which locales. (For more about the
+locale codes, <em></em>see <a
+href="{@docRoot}guide/topics/resources/resources-i18n.html#AlternateResources">
+Alternate Resources</a>.)</p>
+<p class="caption" id="table2">Table 2</p>
+
+<table border="1" cellspacing="0" cellpadding="5">
+  <tr>
+    <th scope="col">Locale Code</th>
+    <th scope="col">Language / Country</th>
+    <th scope="col">Location of strings.xml</th>
+    <th scope="col">Location of flag.png</th>
+  </tr>
+  <tr>
+    <td><em>Default</em></td>
+    <td>English / United Kingdom</td>
+    <td>res/values/</td>
+    <td>res/drawable/</td>
+  </tr>
+  <tr>
+    <td>de-rDE</td>
+    <td>German / Germany</td>
+    <td>res/values-de/</td>
+    <td>res/drawable-de-rDE/</td>
+  </tr>
+  <tr>
+    <td>fr-rFR</td>
+    <td>French / France</td>
+    <td>res/values-fr/</td>
+    <td>res/drawable-fr-rFR/</td>
+  </tr>
+  <tr>
+    <td>fr-rCA</td>
+    <td>French / Canada</td>
+    <td>res/values-fr/</td>
+    <td>res/drawable-fr-rCA/</td>
+  </tr>
+  <tr>
+    <td>en-rCA</td>
+    <td>English / Canada</td>
+    <td><em>(res/values/)</em></td>
+    <td>res/drawable-en-rCA/</td>
+  </tr>
+  <tr>
+    <td>ja-rJP</td>
+    <td>Japanese / Japan</td>
+    <td>res/values-ja/</td>
+    <td>res/drawable-ja-rJP/</td>
+  </tr>
+  <tr>
+    <td>en-rUS</td>
+    <td>English / United States</td>
+    <td><em>(res/values/)</em></td>
+    <td>res/drawable-en-rUS/</td>
+  </tr>
+</table>
+
+<p class="note"><strong>Tip: </strong>A folder qualifer cannot specify a region
+without a language. Having a folder named <code>res/drawable-rCA/</code>, 
+for example, will prevent the application from compiling. </p>
+
+<p>At run time, the application will select a set of resources to load based on the locale
+that is set in the user's device. In cases where no locale-specific resources
+are available, the application will fall back on the defaults. </p>
+
+<p>For example,   assume that the device's language is set to German and its
+location  to Switzerland. Because this application does not have a
+<code>res/drawable-de-rCH/</code> directory with a <code>flag.png</code> file in it, the system
+will fall back on the default, which is the UK flag located in
+<code>res/drawable/flag.png</code>. The language used will be German. Showing a
+British flag to German speakers in Switzerland is not ideal, but for now we will
+just leave the behavior as it is. There are several  ways you could improve this
+application's behavior if you wanted to:</p>
+
+<ul>
+  <li>Use a  generic default icon. In this application, it might be something
+that represents Shakespeare. </li>
+  <li>Create a <code>res/drawable-de/</code> folder that includes an icon that
+the application will use whenever the language is set to German but the location
+is not Germany. </li>
+</ul>
+
+
+<h2 id="localize">Localize the Application</h2>
+
+<h3 id="localize_strings">Localize the Strings</h3>
+
+<p>The application requires three more <code>strings.xml</code> files, one 
+each for German, French, and Japanese. To create these resource files within 
+Eclipse:</p>
+
+<ol>
+<li>Select <strong>File</strong> &gt; <strong>New</strong> &gt; <strong>Android 
+XML File</strong> to open the New Android XML File wizard. You can also open 
+the wizard by clicking its icon in the toolbar:<br />
+<img src="{@docRoot}images/hello_l10n/xml_file_wizard_shortcut.png" 
+alt="file_wizard_shortcut" width="297"
+height="90" style="margin:15px"></li>
+  <li>Select L10N for the Project field, and type <code>strings.xml</code> into 
+the File field. In the left-hand list, select Language, then click the right arrow.<br>
+<img src="{@docRoot}images/hello_l10n/xml_wizard1.png" alt="res_file_copy" width="335"
+height="406" style="margin:15px"></li>
+  <li>Type <code>de</code> in the Language box and click Finish.<br>
+    <img src="{@docRoot}images/hello_l10n/xml_wizard2.png" alt="res_file_copy" width="306"
+height="179">
+<p>A new file, <code>res/values-de/strings.xml</code>, now appears among the project 
+files.</p></li>
+<li>Repeat the steps twice more, for the language codes <code>fr</code> and	
+	<code>ja</code>.
+Now the project includes these new skeleton files: <br />
+    <code>res/<strong>values-de</strong>/strings.xml</code><br />
+    <code>res/<strong>values-fr</strong>/strings.xml</code><br />
+    <code>res/<strong>values-ja</strong>/strings.xml</code><br />
+  </li>
+  <li>Add localized text to the new files. To do
+this, open the <code>res/values-<em>&lt;qualifier&gt;</em>/strings.xml</code> files and
+replace the code as follows:</li>
+</ol>
+
+<table border="0" cellspacing="0" cellpadding="0">
+  <tr>
+    <th scope="col">File</th>
+    <th scope="col">Replace the contents with the following code:</th>
+  </tr>
+  <tr>
+    <td><code>res/values-de/strings.xml</code></td>
+    <td><pre>&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+&lt;resources&gt;
+    &lt;string name=&quot;app_name&quot;&gt;Hallo, Lokalisierung&lt;/string&gt;
+    &lt;string name=&quot;text_a&quot;&gt;Soll ich dich einem Sommertag vergleichen,&lt;/string&gt;
+    &lt;string name=&quot;text_b&quot;&gt;Der du viel lieblicher und sanfter bist?&lt;/string&gt;
+&lt;/resources&gt;</pre></td>
+  </tr>
+  <tr>
+    <td><code>res/values-fr/strings.xml</code></td>
+    <td><pre>&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+&lt;resources&gt;
+    &lt;string name=&quot;app_name&quot;&gt;Bonjour, Localisation&lt;/string&gt;
+    &lt;string name=&quot;text_a&quot;&gt;Irai-je te comparer au jour d'été?&lt;/string&gt;
+    &lt;string name=&quot;text_b&quot;&gt;Tu es plus tendre et bien plus tempéré.&lt;/string&gt;
+&lt;/resources&gt; </pre></td>
+  </tr>
+  <tr>
+    <td><code>res/values-ja/strings.xml</code></td>
+    <td>
+<pre>&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+&lt;resources&gt;
+    &lt;string name=&quot;text_a&quot;&gt;あなたをなにかにたとえるとしたら夏の一日でしょうか？&lt;/string&gt;
+    &lt;string name=&quot;text_b&quot;&gt;だがあなたはもっと美しく、もっとおだやかです。&lt;/string&gt;
+&lt;/resources&gt;</pre></td>
+  </tr>
+</table>
+
+<p class="note"><b>Tip:</b> In the
+<code>values-<em>&lt;qualifier&gt;</em>/strings.xml</code> files, you only need to
+include text for strings that are different from the default strings. For
+example, when the application runs on a device that is configured for Japanese,
+the plan is for <code>text_a</code> and <code>text_b</code> to be in Japanese
+while all the other text is in English, so
+<code>res/values-ja/strings.xml</code> only needs to include <code>text_a</code>
+and <code>text_b</code>.</p>
+
+<h3 id="localize_images">Localize the Images</h3>
+
+<p>As shown in <a href="#table2">Table 2</a>, the application needs six more
+drawable folders, each containing a <code>flag.png</code> icon. Add the needed
+icons and folders to your project:</p>
+
+<ol>
+  <li>Save this <a href="../../../images/hello_l10n/drawable-de-rDE/flag.png">German flag icon</a>
+as <code>res/drawable-de-rDE/flag.png</code> in the application's project
+workspace. 
+    <p>For example:</p>
+    <ol>
+      <li>Click the link to open the flag image.</li>
+      <li>Save the image in
+<code><em>your-workspace</em>/HelloL10N/res/drawable-de-rDE/</code> .</li>
+    </ol>
+  </li>
+  <li>Save this <a href="../../../images/hello_l10n/drawable-fr-rFR/flag.png">French flag icon</a>
+as <code>res/drawable-fr-rFR/flag.png</code> in the application's project
+workspace. </li>
+  <li>Save this <a href="../../../images/hello_l10n/drawable-fr-rCA/flag.png">Canadian flag icon</a>
+as <code>res/drawable-fr-rCA/flag.png</code> in the project workspace. </li>
+  <li>Save the <a href="../../../images/hello_l10n/drawable-en-rCA/flag.png">Canadian flag icon</a>
+again, this time as <code>res/drawable-en-rCA/flag.png</code> in the project
+workspace.  (Why not have just <em>one</em> folder that contains the Canadian
+flag? Because a folder qualifer cannot specify a region without a language. 
+You cannot have a folder named <code>drawable-rCA/</code>; instead you must 
+create two separate folders, one for each of the Canadian languages represented 
+in the application.)</li>
+  <li>Save this <a href="../../../images/hello_l10n/drawable-ja-rJP/flag.png">Japanese flag icon</a>
+as <code>res/drawable-ja-rJP/flag.png</code> in the project workspace. </li>
+  <li>Save this <a href="../../../images/hello_l10n/drawable-en-rUS/flag.png">United States flag
+icon</a> as <code>res/drawable-en-rUS/flag.png</code> in the project workspace.
+  </li>
+</ol>
+
+<p>If you are using Eclipse, refresh the project (F5). The new
+<code>res/drawable-<em>&lt;qualifier&gt;</em>/</code> folders should appear in the
+project view. </p>
+
+
+<h2 id="test_localized">Run and Test the Localized Application</h2>
+
+<p>Once you've added the localized string and image resources, you are ready to 
+	run the application and test its handling of them. To change the locale 
+	on a device or in the emulator, use  the Settings
+application  (Home &gt; Menu &gt; Settings &gt; Locale &amp; text &gt; Select
+locale). Depending on how a device was configured, it might not offer any
+alternate locales via the Settings application, or might offer only a few. The
+emulator, on the other hand, will offer a selection of all the locales that are
+available in the Android system image. </p>
+
+<p>To set the emulator to a locale that is not available in the system image,
+use the  Custom Locale application, which is available in the Application
+tab:</p>
+
+<p><img src="{@docRoot}images/hello_l10n/custom_locale_app.png" alt="custom locale app" width="163"
+height="158" style="margin-left:15px"></p>
+
+<p>To switch to a new locale, long-press a  locale name:</p>
+
+<p><img src="{@docRoot}images/hello_l10n/using_custom_locale.png" alt="using custom locale"
+width="512" height="299" style="margin-left:15px"></p>
+
+<p>For a list of locales available on different versions of the Android platform,
+refer to the platform notes documents, listed under "Downloadable SDK Components"
+in the "SDK" tab. For example, <a 
+href="{@docRoot}sdk/android-2.0.html#locs">Android 2.0 locales</a>.</p>
+
+<p>Run the application for each of the expected locales, plus one unexpected
+locale. Here are some of the results you should see:</p>
+
+<table border="0" cellspacing="0" cellpadding="05">
+  <tr>
+    <th scope="col">Locale</th>
+    <th scope="col">Opening screen of application</th>
+  </tr>
+  <tr>
+    <td>German / Germany
+    	<br />Specifically supported by the Hello, L10N application.</td>
+    <td><img src="{@docRoot}images/hello_l10n/german_screenshot.png" alt="custom locale app"
+width="321" height="175" align="right"
+style="margin-left:10px;margin-right:20px"></td>
+  </tr>
+  <tr>
+    <td>French / Canada
+    	<br />Specifically supported by the Hello, L10N application.</td>
+    <td><img src="{@docRoot}images/hello_l10n/frenchCA_screenshot.png" alt="custom locale app"
+width="321" height="175" align="right"
+style="margin-left:10px;margin-right:20px"></td>
+  </tr>
+  <tr>
+    <td>German / Switzerland
+    	<br />Only the language is specifically supported by 
+the Hello, L10N  application.</td>
+    <td><img src="{@docRoot}images/hello_l10n/germanCH_screenshot.png" alt="custom locale app"
+width="321" height="175" align="right"
+style="margin-left:10px;margin-right:20px">`</td>
+  </tr>
+  <tr>
+    <td>Japanese
+    	<br />Specifically supported by  the Hello, L10N  application. 
+	</td>
+    <td><img src="{@docRoot}images/hello_l10n/japanese_screenshot.png" alt="custom locale app"
+width="321" height="220" align="right"
+style="margin-left:10px;margin-right:20px">`</td>
+  </tr>
+  <tr>
+    <td>Romansh / Switzerland (custom locale <code>rm_CH</code>)
+    	<br />Not specifically supported  by  the Hello, L10N 
+application, so the application uses the default resources.</td>
+    <td><img src="{@docRoot}images/hello_l10n/romanshCH_screenshot.png" alt="custom locale app"
+width="321" height="175" align="right"
+style="margin-left:10px;margin-right:20px"></td>
+  </tr>
+</table>

@@ -1,0 +1,268 @@
+page.title=Introducing GLSurfaceView
+@jd:body
+
+
+<p>The {@link android android.opengl.GLSurfaceView} class makes it 
+easier for you to use OpenGL ES rendering in your applications by:</p>
+
+<ul>
+<li>Providing the glue code to connect OpenGL ES to the {@link
+android.view.View} system.</li>
+<li>Providing the glue code to make OpenGL ES work with the {@link
+android.app.Activity} life-cycle.</li>
+<li>Making it easy to choose an appropriate frame buffer pixel format.</li>
+<li>Creating and managing a separate rendering thread, to enable smooth
+animation.</li>
+<li>Providing easy-to-use debugging tools for tracing OpenGL ES API calls and
+checking for errors.</li>
+</ul>
+
+<p>GLSurfaceView is a good base for building an application that uses OpenGL ES
+for part or all of its rendering. A 2D or 3D action game would be a good
+candidate, as would a 2D or 3D data visualization application such as <a
+href="http://www.youtube.com/watch?v=4PRfVKzuUJ4&amp;fmt=18" title="Google Maps
+StreetView">Google Maps StreetView</a>.</p>
+
+<h3>A simple GLSurfaceView application</h3>
+
+<p>Here's the source code to the simplest possible OpenGL ES application:</p>
+
+<pre>package com.example.android.apis.graphics;
+
+import javax.microedition.khronos.egl.EGLConfig;
+import javax.microedition.khronos.opengles.GL10;
+
+import android.app.Activity;
+import android.opengl.GLSurfaceView;
+import android.os.Bundle;
+
+public class ClearActivity extends Activity {
+    &#64;Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        mGLView = new GLSurfaceView(this);
+        mGLView.setRenderer(new ClearRenderer());
+        setContentView(mGLView);
+    }
+
+    &#64;Override
+    protected void onPause() {
+        super.onPause();
+        mGLView.onPause();
+    }
+
+    &#64;Override
+    protected void onResume() {
+        super.onResume();
+        mGLView.onResume();
+    }
+
+    private GLSurfaceView mGLView;
+}
+
+class ClearRenderer implements GLSurfaceView.Renderer {
+    public void onSurfaceCreated(GL10 gl, EGLConfig config) {
+        // Do nothing special.
+    }
+
+    public void onSurfaceChanged(GL10 gl, int w, int h) {
+        gl.glViewport(0, 0, w, h);
+    }
+
+    public void onDrawFrame(GL10 gl) {
+        gl.glClear(GL10.GL_COLOR_BUFFER_BIT | GL10.GL_DEPTH_BUFFER_BIT);
+    }
+}</pre>
+
+<p>This program doesn't do much: it clears the screen to black on every frame.
+But it is a complete OpenGL application that correctly implements the
+Android activity life-cycle. It pauses rendering when the activity is
+paused, and resumes it when the activity is resumed. You could use this
+application as the basis for non-interactive demonstration programs.
+Just add more OpenGL calls to the <code>ClearRenderer.onDrawFrame()</code> method.
+Notice that you don't even need to subclass the <code>GLSurfaceView</code> view.</p>
+
+<p>The {@link android.opengl.GLSurfaceView.Renderer} interface has three methods:</p>
+
+<ul>
+<li>The
+<code>onSurfaceCreated()</code> method is called at the start of rendering, and
+whenever the OpenGL ES drawing context has to be recreated. (The
+drawing context is typically lost and recreated when the activity is
+paused and resumed.) <code>OnSurfaceCreated()</code> is a good place to create
+long-lived OpenGL resources such as textures.</li>
+<li>The <code>onSurfaceChanged()</code>
+method is called when the surface changes size. It's a good place to
+set your OpenGL viewport. You may also want to set your camera here, if
+it's a fixed camera that doesn't move around the scene.</li>
+<li>The <code>onDrawFrame()</code> method is called every frame, and is
+responsible for drawing the scene. You would typically start by calling
+<code>glClear</code> to clear the framebuffer, followed by other OpenGL ES calls
+to draw the current scene.</li>
+</ul>
+
+<h3>How about user input?</h3>
+
+<p>If you want an interactive application (such as a game), you will typically
+subclass <code>GLSurfaceView</code>, because that's an easy way of obtaining
+input events. Here's a slightly longer example showing how to do that:</p>
+
+<pre>package com.google.android.ClearTest;
+
+import javax.microedition.khronos.egl.EGLConfig;
+import javax.microedition.khronos.opengles.GL10;
+
+import android.app.Activity;
+import android.content.Context;
+import android.opengl.GLSurfaceView;
+import android.os.Bundle;
+import android.view.MotionEvent;
+
+public class ClearActivity extends Activity {
+    &#64;Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        mGLView = new ClearGLSurfaceView(this);
+        setContentView(mGLView);
+    }
+
+    &#64;Override
+    protected void onPause() {
+        super.onPause();
+        mGLView.onPause();
+    }
+
+    &#64;Override
+    protected void onResume() {
+        super.onResume();
+        mGLView.onResume();
+    }
+
+    private GLSurfaceView mGLView;
+}
+
+class ClearGLSurfaceView extends GLSurfaceView {
+    public ClearGLSurfaceView(Context context) {
+        super(context);
+        mRenderer = new ClearRenderer();
+        setRenderer(mRenderer);
+    }
+
+    public boolean onTouchEvent(final MotionEvent event) {
+        queueEvent(new Runnable(){
+            public void run() {
+                mRenderer.setColor(event.getX() / getWidth(),
+                        event.getY() / getHeight(), 1.0f);
+            }});
+            return true;
+        }
+
+        ClearRenderer mRenderer;
+}
+
+class ClearRenderer implements GLSurfaceView.Renderer {
+    public void onSurfaceCreated(GL10 gl, EGLConfig config) {
+        // Do nothing special.
+    }
+
+    public void onSurfaceChanged(GL10 gl, int w, int h) {
+        gl.glViewport(0, 0, w, h);
+    }
+
+    public void onDrawFrame(GL10 gl) {
+        gl.glClearColor(mRed, mGreen, mBlue, 1.0f);
+        gl.glClear(GL10.GL_COLOR_BUFFER_BIT | GL10.GL_DEPTH_BUFFER_BIT);
+    }
+
+    public void setColor(float r, float g, float b) {
+        mRed = r;
+        mGreen = g;
+        mBlue = b;
+    }
+
+    private float mRed;
+    private float mGreen;
+    private float mBlue;
+}</pre>
+
+<p>This application clears the screen for every frame. When you tap on the
+screen, it sets the clear color based on the (x,y) coordinates of your touch
+event. Note the use of <code>queueEvent()</code> in
+<code>ClearGLSurfaceView.onTouchEvent()</code>. The <code>queueEvent()</code>
+method is used to safely communicate between the UI thread and the rendering
+thread. If you prefer, you can use some other Java cross-thread communication
+technique, such as synchronized methods on the <code>Renderer</code> class 
+itself. However, queueing events is often the simplest way of dealing with 
+cross-thread communication.</p>
+
+<h3>Other GLSurfaceView samples</h3>
+
+<p>Tired
+of just clearing the screen? You can find more interesting samples in
+the API Demos sample included in the Android SDK. All the OpenGL ES samples have been
+converted to use the <code>GLSurfaceView</code> view:</p>
+
+<ul>
+<li>GLSurfaceView - a spinning triangle</li>
+<li>Kube - a cube puzzle demo</li>
+<li>Translucent GLSurfaceView - shows how to display 3D graphics on a translucent background</li>
+<li>Textured Triangle - shows how to draw a textured 3D triangle</li>
+<li>Sprite Text - shows how to draw text into a texture and then composite it into a 3D scene</li>
+<li>Touch Rotate - shows how to rotate a 3D object in response to user input.</li>
+</ul>
+
+<h3>Choosing a surface</h3>
+
+<p><code>GLSurfaceView</code>
+helps you choose the type of surface to render to. Different Android
+devices support different types of surfaces, with no common subset.
+This makes it tricky problem to choose the best available surface on
+each device. </p>
+
+<p>By default, <code>GLSurfaceView</code> tries to find a surface that's as
+close as possible to a 16-bit RGB frame buffer with a 16-bit depth
+buffer. Depending upon your application's needs you may want to change
+this behavior. For example, the Translucent GLSurfaceView sample needs
+an Alpha channel in order to render translucent data. <code>GLSurfaceView</code>
+provides an overloaded <code>setEGLSurfaceChooser()</code> method to give 
+you control over which surface type is chosen:</p>
+
+<dl>
+<dt><code>setEGLConfigChooser(boolean needDepth)</code></dt>
+<dd>Choose a config that's closest to R5G6B5 with or without a 16-bit framebuffer</dd>
+<dt><code>setEGLConfigChooser(int redSize, int greenSize,int blueSize, 
+int alphaSize,int depthSize, int stencilSize)</code></dt>
+<dd>Choose the config with the fewest number of bits per pixel that has at least
+as many bits-per-channel as specified in the constructor.</dd>
+<dt><code>setEGLConfigChooser(EGLConfigChooser configChooser)</code></dt>
+<dd>Allow total control over choosing a configuration. You pass in your own
+implementation of <code>EGLConfigChooser</code>, which gets to inspect the
+device's capabilities and choose a configuration.</dd>
+</dl>
+
+<h3>Continuous rendering versus render-when-dirty</h3>
+
+<p>Most 3D applications, such as games or simulations, are continuously
+animated. But some 3D applications are more reactive: they wait passively until
+the user does something, and then react to it. For those types of applications,
+the default <code>GLSurfaceView</code> behavior of continuously redrawing the
+screen is a waste of time. If you are developing a reactive application, you can
+call <code>GLSurfaceView.setRenderMode(RENDERMODE_WHEN_DIRTY)</code>, which
+turns off the continuous animation. Then you call
+<code>GLSurfaceView.requestRender()</code> whenever you want to re-render.</p>
+
+<h3>Help With debugging</h3>
+
+<p><code>GLSurfaceView</code> has a handy built-in feature for debugging OpenGL ES
+applications: the <code>GLSurfaceView.setDebugFlags()</code> method can be used
+to enable logging and/or error checking your OpenGL ES calls. Call this method
+in your <code>GLSurfaceView</code>'s constructor, before calling
+<code>setRenderer()</code>:</p>
+
+<pre>public ClearGLSurfaceView(Context context) {
+    super(context);
+    // Turn on error-checking and logging
+    setDebugFlags(DEBUG_CHECK_GL_ERROR | DEBUG_LOG_GL_CALLS);
+    mRenderer = new ClearRenderer();
+    setRenderer(mRenderer);
+}</pre>
