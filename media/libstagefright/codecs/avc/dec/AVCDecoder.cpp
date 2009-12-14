@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 
+//#define LOG_NDEBUG 0
+#define LOG_TAG "AVCDecoder"
+#include <utils/Log.h>
+
 #include "AVCDecoder.h"
 
 #include "avcdec_api.h"
@@ -44,7 +48,8 @@ AVCDecoder::AVCDecoder(const sp<MediaSource> &source)
       mHandle(new tagAVCHandle),
       mInputBuffer(NULL),
       mAnchorTimeUs(0),
-      mNumSamplesOutput(0) {
+      mNumSamplesOutput(0),
+      mPendingSeekTimeUs(-1) {
     memset(mHandle, 0, sizeof(tagAVCHandle));
     mHandle->AVCObject = NULL;
     mHandle->userData = this;
@@ -152,6 +157,7 @@ status_t AVCDecoder::start(MetaData *) {
 
     mAnchorTimeUs = 0;
     mNumSamplesOutput = 0;
+    mPendingSeekTimeUs = -1;
     mStarted = true;
 
     return OK;
@@ -195,6 +201,21 @@ status_t AVCDecoder::read(
         MediaBuffer **out, const ReadOptions *options) {
     *out = NULL;
 
+    int64_t seekTimeUs;
+    if (options && options->getSeekTo(&seekTimeUs)) {
+        LOGV("seek requested to %lld us (%.2f secs)", seekTimeUs, seekTimeUs / 1E6);
+
+        CHECK(seekTimeUs >= 0);
+        mPendingSeekTimeUs = seekTimeUs;
+
+        if (mInputBuffer) {
+            mInputBuffer->release();
+            mInputBuffer = NULL;
+        }
+
+        PVAVCDecReset(mHandle);
+    }
+
     if (mInputBuffer == NULL) {
         LOGV("fetching new input buffer.");
 
@@ -203,7 +224,19 @@ status_t AVCDecoder::read(
             mCodecSpecificData.removeAt(0);
         } else {
             for (;;) {
-                status_t err = mSource->read(&mInputBuffer);
+                if (mPendingSeekTimeUs >= 0) {
+                    LOGV("reading data from timestamp %lld (%.2f secs)",
+                         mPendingSeekTimeUs, mPendingSeekTimeUs / 1E6);
+                }
+
+                ReadOptions seekOptions;
+                if (mPendingSeekTimeUs >= 0) {
+                    seekOptions.setSeekTo(mPendingSeekTimeUs);
+                    mPendingSeekTimeUs = -1;
+                }
+                status_t err = mSource->read(&mInputBuffer, &seekOptions);
+                seekOptions.clearSeekTo();
+
                 if (err != OK) {
                     return err;
                 }
