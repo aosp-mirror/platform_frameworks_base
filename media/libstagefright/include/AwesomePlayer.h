@@ -32,6 +32,16 @@ struct MediaSource;
 struct AudioPlayer;
 struct TimeSource;
 
+struct AwesomeRenderer : public RefBase {
+    AwesomeRenderer() {}
+
+    virtual void render(MediaBuffer *buffer) = 0;
+
+private:
+    AwesomeRenderer(const AwesomeRenderer &);
+    AwesomeRenderer &operator=(const AwesomeRenderer &);
+};
+
 struct AwesomePlayer {
     AwesomePlayer();
     ~AwesomePlayer();
@@ -80,7 +90,7 @@ private:
     TimeSource *mTimeSource;
 
     sp<MediaSource> mVideoSource;
-    sp<IOMXRenderer> mVideoRenderer;
+    sp<AwesomeRenderer> mVideoRenderer;
 
     sp<MediaSource> mAudioSource;
     AudioPlayer *mAudioPlayer;

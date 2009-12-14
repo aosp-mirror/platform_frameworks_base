@@ -9,13 +9,11 @@ LOCAL_CFLAGS := $(PV_CFLAGS_MINUS_VISIBILITY)
 LOCAL_C_INCLUDES += $(JNI_H_INCLUDE)
 
 LOCAL_SRC_FILES:=                     \
-        ColorConverter.cpp            \
 	OMX.cpp                       \
         OMXComponentBase.cpp          \
         OMXNodeInstance.cpp           \
         OMXMaster.cpp                 \
         OMXSoftwareCodecsPlugin.cpp   \
-        SoftwareRenderer.cpp
 
 ifneq ($(BUILD_WITHOUT_PV),true)
 LOCAL_SRC_FILES += \
@@ -29,7 +27,8 @@ LOCAL_SHARED_LIBRARIES :=       \
         libmedia                \
         libutils                \
         libui                   \
-        libcutils
+        libcutils               \
+        libstagefright_color_conversion
 
 ifneq ($(BUILD_WITHOUT_PV),true)
 LOCAL_SHARED_LIBRARIES += \
