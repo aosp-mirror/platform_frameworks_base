@@ -40,7 +40,8 @@ LOCAL_SHARED_LIBRARIES :=     \
 	libmedia              \
 	libandroid_runtime    \
 	libstagefright        \
-	libstagefright_omx
+	libstagefright_omx    \
+	libstagefright_color_conversion
 
 ifneq ($(BUILD_WITHOUT_PV),true)
 LOCAL_SHARED_LIBRARIES += \
