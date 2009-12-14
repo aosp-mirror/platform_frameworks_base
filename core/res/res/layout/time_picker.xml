@@ -26,7 +26,7 @@
     android:layout_height="wrap_content">
 
     <!-- hour -->
-    <com.android.internal.widget.NumberPicker
+    <com.android.common.widget.NumberPicker
         android:id="@+id/hour"
         android:layout_width="70dip"
         android:layout_height="wrap_content"
@@ -35,7 +35,7 @@
         />
     
     <!-- minute -->
-    <com.android.internal.widget.NumberPicker
+    <com.android.common.widget.NumberPicker
         android:id="@+id/minute"
         android:layout_width="70dip"
         android:layout_height="wrap_content"
