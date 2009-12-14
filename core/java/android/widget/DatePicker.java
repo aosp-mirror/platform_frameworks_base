@@ -26,9 +26,9 @@ import android.util.AttributeSet;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
 
+import com.android.common.widget.NumberPicker;
+import com.android.common.widget.NumberPicker.OnChangedListener;
 import com.android.internal.R;
-import com.android.internal.widget.NumberPicker;
-import com.android.internal.widget.NumberPicker.OnChangedListener;
 
 import java.text.DateFormatSymbols;
 import java.text.SimpleDateFormat;
