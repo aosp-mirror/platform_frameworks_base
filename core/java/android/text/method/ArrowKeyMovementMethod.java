@@ -262,44 +262,51 @@ implements MovementMethod
                   widget.getParent().requestDisallowInterceptTouchEvent(true);
               }
             } else if (event.getAction() == MotionEvent.ACTION_MOVE ) {
-              boolean cap = (MetaKeyKeyListener.getMetaState(buffer,
-                              KeyEvent.META_SHIFT_ON) == 1) ||
-                            (MetaKeyKeyListener.getMetaState(buffer,
-                              MetaKeyKeyListener.META_SELECTING) != 0);
+                boolean cap = (MetaKeyKeyListener.getMetaState(buffer,
+                                KeyEvent.META_SHIFT_ON) == 1) ||
+                              (MetaKeyKeyListener.getMetaState(buffer,
+                                MetaKeyKeyListener.META_SELECTING) != 0);
 
-              if (cap) {
-                // Update selection as we're moving the selection area.
+                if (cap & handled) {
+                    // Before selecting, make sure we've moved out of the "slop".
+                    // handled will be true, if we're in select mode AND we're
+                    // OUT of the slop
 
-                // Get the current touch position
-                int x = (int) event.getX();
-                int y = (int) event.getY();
-                int offset = getOffset(x, y, widget);
+                    // Turn long press off while we're selecting. User needs to
+                    // re-tap on the selection to enable longpress
+                    widget.cancelLongPress();
 
-                // Get the last down touch position (the position at which the
-                // user started the selection)
-                int lastDownOffset = buffer.getSpanStart(LAST_TAP_DOWN);
+                    // Update selection as we're moving the selection area.
 
-                // Compute the selection boundries
-                int spanstart;
-                int spanend;
-                if (offset >= lastDownOffset) {
-                  // Expand from word start of the original tap to new word
-                  // end, since we are selecting "forwards"
-                  spanstart = findWordStart(buffer, lastDownOffset);
-                  spanend = findWordEnd(buffer, offset);
-                } else {
-                  // Expand to from new word start to word end of the original
-                  // tap since we are selecting "backwards".
-                  // The spanend will always need to be associated with the touch
-                  // up position, so that refining the selection with the
-                  // trackball will work as expected.
-                  spanstart = findWordEnd(buffer, lastDownOffset);
-                  spanend = findWordStart(buffer, offset);
+                    // Get the current touch position
+                    int x = (int) event.getX();
+                    int y = (int) event.getY();
+                    int offset = getOffset(x, y, widget);
+
+                    // Get the last down touch position (the position at which the
+                    // user started the selection)
+                    int lastDownOffset = buffer.getSpanStart(LAST_TAP_DOWN);
+
+                    // Compute the selection boundries
+                    int spanstart;
+                    int spanend;
+                    if (offset >= lastDownOffset) {
+                        // Expand from word start of the original tap to new word
+                        // end, since we are selecting "forwards"
+                        spanstart = findWordStart(buffer, lastDownOffset);
+                        spanend = findWordEnd(buffer, offset);
+                    } else {
+                        // Expand to from new word start to word end of the original
+                        // tap since we are selecting "backwards".
+                        // The spanend will always need to be associated with the touch
+                        // up position, so that refining the selection with the
+                        // trackball will work as expected.
+                        spanstart = findWordEnd(buffer, lastDownOffset);
+                        spanend = findWordStart(buffer, offset);
+                    }
+                    Selection.setSelection(buffer, spanstart, spanend);
+                    return true;
                 }
-
-                Selection.setSelection(buffer, spanstart, spanend);
-                return true;
-              }
             } else if (event.getAction() == MotionEvent.ACTION_UP) {
                 // If we have scrolled, then the up shouldn't move the cursor,
                 // but we do need to make sure the cursor is still visible at
