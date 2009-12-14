@@ -85,11 +85,6 @@ public final class Calendar {
     public interface CalendarsColumns
     {
         /**
-         * A string that uniquely identifies this contact to its source
-         */
-        public static final String SOURCE_ID = "sourceid";
-
-        /**
          * The color of the calendar
          * <P>Type: INTEGER (color value)</P>
          */
