@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.net.http;
+package com.android.common;
 
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
@@ -59,11 +59,12 @@ import java.util.zip.GZIPOutputStream;
 import java.net.URI;
 import java.security.KeyManagementException;
 
-import android.util.Log;
 import android.content.ContentResolver;
+import android.os.Looper;
+import android.os.SystemProperties;
 import android.provider.Settings;
 import android.text.TextUtils;
-import android.os.SystemProperties;
+import android.util.Log;
 
 /**
  * Subclass of the Apache {@link DefaultHttpClient} that is configured with
@@ -86,15 +87,12 @@ public final class AndroidHttpClient implements HttpClient {
     private static final String TAG = "AndroidHttpClient";
 
 
-    /** Set if HTTP requests are blocked from being executed on this thread */
-    private static final ThreadLocal<Boolean> sThreadBlocked =
-            new ThreadLocal<Boolean>();
-
     /** Interceptor throws an exception if the executing thread is blocked */
     private static final HttpRequestInterceptor sThreadCheckInterceptor =
             new HttpRequestInterceptor() {
         public void process(HttpRequest request, HttpContext context) {
-            if (sThreadBlocked.get() != null && sThreadBlocked.get()) {
+            // Prevent the HttpRequest from being sent on the main thread
+            if (Looper.myLooper() != null && Looper.myLooper() == Looper.getMainLooper() ) {
                 throw new RuntimeException("This thread forbids HTTP requests");
             }
         }
@@ -218,15 +216,6 @@ public final class AndroidHttpClient implements HttpClient {
             Log.e(TAG, "Leak found", mLeakedException);
             mLeakedException = null;
         }
-    }
-
-    /**
-     * Block this thread from executing HTTP requests.
-     * Used to guard against HTTP requests blocking the main application thread.
-     * @param blocked if HTTP requests run on this thread should be denied
-     */
-    public static void setThreadBlocked(boolean blocked) {
-        sThreadBlocked.set(blocked);
     }
 
     /**

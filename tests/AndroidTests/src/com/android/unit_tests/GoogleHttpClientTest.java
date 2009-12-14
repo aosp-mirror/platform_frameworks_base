@@ -17,7 +17,6 @@
 package com.android.unit_tests;
 
 import android.content.ContentResolver;
-import android.net.http.AndroidHttpClient;
 import android.provider.Checkin;
 import android.provider.Settings;
 import android.test.AndroidTestCase;
@@ -64,6 +63,10 @@ public class GoogleHttpClientTest extends AndroidTestCase {
         if (mServer != null) mServer.shutdown();
     }
 
+    //
+    // Fix this test to use the new mechanism to indicate that the
+    // Http client is running in the UI thread
+    // bug: http://b/2322326
     @LargeTest
     public void testThreadCheck() throws Exception {
         ContentResolver resolver = getContext().getContentResolver();
@@ -77,7 +80,9 @@ public class GoogleHttpClientTest extends AndroidTestCase {
 
             // This is actually an AndroidHttpClient feature...
             // TODO: somehow test that Activity threads have the flag set?
-            AndroidHttpClient.setThreadBlocked(true);
+            // Thus now uses the looper state to determine if it is in a UI 
+            // thread
+            //AndroidHttpClient.setThreadBlocked(true);
 
             try {
                 client.execute(method);
@@ -85,7 +90,7 @@ public class GoogleHttpClientTest extends AndroidTestCase {
             } catch (RuntimeException e) {
                 if (!e.toString().contains("forbids HTTP requests")) throw e;
             } finally {
-                AndroidHttpClient.setThreadBlocked(false);
+              // AndroidHttpClient.setThreadBlocked(false);
             }
 
             HttpResponse response = client.execute(method);

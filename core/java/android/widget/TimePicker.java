@@ -25,7 +25,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 
 import com.android.internal.R;
-import com.android.internal.widget.NumberPicker;
+import com.android.common.widget.NumberPicker;
 
 import java.text.DateFormatSymbols;
 import java.util.Calendar;
@@ -357,4 +357,3 @@ public class TimePicker extends FrameLayout {
         mOnTimeChangedListener.onTimeChanged(this, getCurrentHour(), getCurrentMinute());
     }
 }
-

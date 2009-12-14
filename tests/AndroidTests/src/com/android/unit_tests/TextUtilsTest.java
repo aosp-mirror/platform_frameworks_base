@@ -16,9 +16,6 @@
 
 package com.android.unit_tests;
 
-import com.google.android.collect.Lists;
-import com.google.android.collect.Maps;
-
 import android.graphics.Paint;
 import android.test.suitebuilder.annotation.LargeTest;
 import android.test.suitebuilder.annotation.SmallTest;
@@ -29,8 +26,11 @@ import android.text.SpannedString;
 import android.text.TextPaint;
 import android.text.TextUtils;
 import android.text.style.StyleSpan;
-import android.text.util.Rfc822Validator;
 import android.test.MoreAsserts;
+
+import com.android.common.Rfc822Validator;
+import com.google.android.collect.Lists;
+import com.google.android.collect.Maps;
 
 import junit.framework.TestCase;
 
