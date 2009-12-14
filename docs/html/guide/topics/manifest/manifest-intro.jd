@@ -445,7 +445,7 @@ element.  For example, an activity could be protected as follows:
     &lt;permission android:name="com.example.project.DEBIT_ACCT" . . . /&gt;
     . . .
     &lt;application . . .&gt;
-        &lt;activity android:name="com.example.project.FreneticActivity" . . . &gt;
+        &lt;activity android:name="com.example.project.FreneticActivity"
                   android:permission="com.example.project.DEBIT_ACCT"
                   . . . &gt;
             . . .
