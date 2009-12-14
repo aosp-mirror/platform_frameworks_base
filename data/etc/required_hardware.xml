@@ -18,6 +18,9 @@
      These are always added for you by the build system, you do not need
      to add them yourself. -->
 <permissions>
+    <feature name="android.hardware.location" />
+    <feature name="android.hardware.location.network" />
+    <feature name="android.hardware.location.gps" />
     <feature name="android.hardware.sensor.compass" />
     <feature name="android.hardware.sensor.accelerometer" />
     <feature name="android.hardware.bluetooth" />
