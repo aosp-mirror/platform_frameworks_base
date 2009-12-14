@@ -65,7 +65,12 @@ public class GestureStore {
 
     // ORIENTATION_SENSITIVE and ORIENTATION_INVARIANT are only for SEQUENCE_SENSITIVE gestures
     public static final int ORIENTATION_INVARIANT = 1;
+    // at most 2 directions can be recognized
     public static final int ORIENTATION_SENSITIVE = 2;
+    // at most 4 directions can be recognized
+    static final int ORIENTATION_SENSITIVE_4 = 4;
+    // at most 8 directions can be recognized
+    static final int ORIENTATION_SENSITIVE_8 = 8;
 
     private static final short FILE_FORMAT_VERSION = 1;
 
@@ -131,7 +136,7 @@ public class GestureStore {
     public ArrayList<Prediction> recognize(Gesture gesture) {
         Instance instance = Instance.createInstance(mSequenceType,
                 mOrientationStyle, gesture, null);
-        return mClassifier.classify(mSequenceType, instance.vector);
+        return mClassifier.classify(mSequenceType, mOrientationStyle, instance.vector);
     }
 
     /**
