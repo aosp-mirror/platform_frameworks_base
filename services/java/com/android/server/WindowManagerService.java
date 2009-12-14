@@ -4642,7 +4642,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 index = parameters.length();
             }
             final String code = parameters.substring(0, index);
-            int hashCode = "ffffffff".equals(code) ? -1 : Integer.parseInt(code, 16);
+            int hashCode = (int) Long.parseLong(code, 16);
 
             // Extract the command's parameter after the window description
             if (index < parameters.length()) {
