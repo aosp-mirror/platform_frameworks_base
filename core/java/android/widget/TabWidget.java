@@ -183,7 +183,7 @@ public class TabWidget extends LinearLayout implements OnFocusChangeListener {
 
     @Override
     public void childDrawableStateChanged(View child) {
-        if (child == getChildTabViewAt(mSelectedTab)) {
+        if (getTabCount() > 0 && child == getChildTabViewAt(mSelectedTab)) {
             // To make sure that the bottom strip is redrawn
             invalidate();
         }
@@ -193,6 +193,9 @@ public class TabWidget extends LinearLayout implements OnFocusChangeListener {
     @Override
     public void dispatchDraw(Canvas canvas) {
         super.dispatchDraw(canvas);
+
+        // Do nothing if there are no tabs.
+        if (getTabCount() == 0) return;
 
         // If the user specified a custom view for the tab indicators, then
         // do not draw the bottom strips.
@@ -347,7 +350,7 @@ public class TabWidget extends LinearLayout implements OnFocusChangeListener {
     }
 
     public void onFocusChange(View v, boolean hasFocus) {
-        if (v == this && hasFocus) {
+        if (v == this && hasFocus && getTabCount() > 0) {
             getChildTabViewAt(mSelectedTab).requestFocus();
             return;
         }
