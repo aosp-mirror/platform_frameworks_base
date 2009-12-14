@@ -2207,7 +2207,7 @@ final class WebViewCore {
 
     // called by JNI. PluginWidget function to launch a full-screen view using a
     // View object provided by the plugin class.
-    private void showFullScreenPlugin(WebkitPlugin webkitPlugin) {
+    private void showFullScreenPlugin(WebkitPlugin webkitPlugin, final int npp) {
         if (mWebView == null) {
             return;
         }
@@ -2222,6 +2222,7 @@ final class WebViewCore {
             public void onCustomViewHidden() {
                 if (surface != null) {
                     surface.onSurfaceRemoved();
+                    nativeFullScreenPluginHidden(npp);
                 }
             }
         };
@@ -2273,4 +2274,5 @@ final class WebViewCore {
     private native void nativePause();
     private native void nativeResume();
     private native void nativeFreeMemory();
+    private native void nativeFullScreenPluginHidden(int npp);
 }

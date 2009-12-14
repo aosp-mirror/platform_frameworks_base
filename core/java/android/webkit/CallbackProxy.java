@@ -1410,7 +1410,7 @@ class CallbackProxy extends Handler {
             return;
         }
         Message msg = obtainMessage(SHOW_CUSTOM_VIEW);
-        HashMap<String, Object> map = new HashMap();
+        HashMap<String, Object> map = new HashMap<String, Object>();
         map.put("view", view);
         map.put("callback", callback);
         msg.obj = map;
