@@ -29,7 +29,7 @@
     android:layout_height="wrap_content">
 
     <!-- Month -->
-    <com.android.internal.widget.NumberPicker
+    <com.android.common.widget.NumberPicker
         android:id="@+id/month"
         android:layout_width="80dip"
         android:layout_height="wrap_content"
@@ -40,7 +40,7 @@
         />
 
     <!-- Day -->
-    <com.android.internal.widget.NumberPicker
+    <com.android.common.widget.NumberPicker
         android:id="@+id/day"
         android:layout_width="80dip"
         android:layout_height="wrap_content"
@@ -51,7 +51,7 @@
         />
 
     <!-- Year -->
-    <com.android.internal.widget.NumberPicker
+    <com.android.common.widget.NumberPicker
         android:id="@+id/year"
         android:layout_width="95dip"
         android:layout_height="wrap_content"
