@@ -590,6 +590,7 @@ void AwesomePlayer::onEvent(int32_t code) {
         }
         for (;;) {
             status_t err = mVideoSource->read(&mVideoBuffer, &options);
+            options.clearSeekTo();
 
             if (err != OK) {
                 CHECK_EQ(mVideoBuffer, NULL);
