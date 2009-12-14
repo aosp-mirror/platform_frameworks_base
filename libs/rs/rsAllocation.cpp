@@ -38,9 +38,9 @@ Allocation::Allocation(Context *rsc, const Type *type) : ObjectBase(rsc)
 
     mIsTexture = false;
     mTextureID = 0;
-
     mIsVertexBuffer = false;
     mBufferID = 0;
+    mUploadDefered = false;
 
     mType.set(type);
     rsAssert(type);
@@ -88,10 +88,23 @@ bool Allocation::fixAllocation()
     return false;
 }
 
-void Allocation::uploadToTexture(Context *rsc, uint32_t lodOffset)
+void Allocation::deferedUploadToTexture(const Context *rsc, uint32_t lodOffset)
+{
+    rsAssert(lodOffset < mType->getLODCount());
+    mIsTexture = true;
+    mTextureLOD = lodOffset;
+    mUploadDefered = true;
+}
+
+void Allocation::uploadToTexture(const Context *rsc)
 {
     //rsAssert(!mTextureId);
-    rsAssert(lodOffset < mType->getLODCount());
+
+    mIsTexture = true;
+    if (!rsc->checkDriver()) {
+        mUploadDefered = true;
+        return;
+    }
 
     GLenum type = mType->getElement()->getGLType();
     GLenum format = mType->getElement()->getGLFormat();
@@ -109,15 +122,16 @@ void Allocation::uploadToTexture(Context *rsc, uint32_t lodOffset)
             // Force a crash to 1: restart the app, 2: make sure we get a bugreport.
             LOGE("Upload to texture failed to gen mTextureID");
             rsc->dumpDebug();
-            ((char *)0)[0] = 0;
+            mUploadDefered = true;
+            return;
         }
     }
     glBindTexture(GL_TEXTURE_2D, mTextureID);
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
     Adapter2D adapt(getContext(), this);
-    for(uint32_t lod = 0; (lod + lodOffset) < mType->getLODCount(); lod++) {
-        adapt.setLOD(lod+lodOffset);
+    for(uint32_t lod = 0; (lod + mTextureLOD) < mType->getLODCount(); lod++) {
+        adapt.setLOD(lod+mTextureLOD);
 
         uint16_t * ptr = static_cast<uint16_t *>(adapt.getElement(0,0));
         glTexImage2D(GL_TEXTURE_2D, lod, format,
@@ -126,17 +140,48 @@ void Allocation::uploadToTexture(Context *rsc, uint32_t lodOffset)
     }
 }
 
-void Allocation::uploadToBufferObject()
+void Allocation::deferedUploadToBufferObject(const Context *rsc)
+{
+    mIsVertexBuffer = true;
+    mUploadDefered = true;
+}
+
+void Allocation::uploadToBufferObject(const Context *rsc)
 {
     rsAssert(!mType->getDimY());
     rsAssert(!mType->getDimZ());
 
+    mIsVertexBuffer = true;
+    if (!rsc->checkDriver()) {
+        mUploadDefered = true;
+        return;
+    }
+
     if (!mBufferID) {
         glGenBuffers(1, &mBufferID);
     }
+    if (!mBufferID) {
+        LOGE("Upload to buffer object failed");
+        mUploadDefered = true;
+        return;
+    }
+
     glBindBuffer(GL_ARRAY_BUFFER, mBufferID);
     glBufferData(GL_ARRAY_BUFFER, mType->getSizeBytes(), getPtr(), GL_DYNAMIC_DRAW);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
+}
+
+void Allocation::uploadCheck(const Context *rsc)
+{
+    if (mUploadDefered) {
+        mUploadDefered = false;
+        if (mIsVertexBuffer) {
+            uploadToBufferObject(rsc);
+        }
+        if (mIsTexture) {
+            uploadToTexture(rsc);
+        }
+    }
 }
 
 
@@ -149,6 +194,7 @@ void Allocation::data(const void *data, uint32_t sizeBytes)
     }
     memcpy(mPtr, data, size);
     sendDirty();
+    mUploadDefered = true;
 }
 
 void Allocation::read(void *data)
@@ -170,6 +216,7 @@ void Allocation::subData(uint32_t xoff, uint32_t count, const void *data, uint32
     }
     memcpy(ptr, data, size);
     sendDirty();
+    mUploadDefered = true;
 }
 
 void Allocation::subData(uint32_t xoff, uint32_t yoff,
@@ -195,6 +242,7 @@ void Allocation::subData(uint32_t xoff, uint32_t yoff,
         dst += destW * eSize;
     }
     sendDirty();
+    mUploadDefered = true;
 }
 
 void Allocation::subData(uint32_t xoff, uint32_t yoff, uint32_t zoff,
@@ -271,13 +319,13 @@ RsAllocation rsi_AllocationCreateSized(Context *rsc, RsElement e, size_t count)
 void rsi_AllocationUploadToTexture(Context *rsc, RsAllocation va, uint32_t baseMipLevel)
 {
     Allocation *alloc = static_cast<Allocation *>(va);
-    alloc->uploadToTexture(rsc, baseMipLevel);
+    alloc->deferedUploadToTexture(rsc, baseMipLevel);
 }
 
 void rsi_AllocationUploadToBufferObject(Context *rsc, RsAllocation va)
 {
     Allocation *alloc = static_cast<Allocation *>(va);
-    alloc->uploadToBufferObject();
+    alloc->deferedUploadToBufferObject(rsc);
 }
 
 static void mip565(const Adapter2D &out, const Adapter2D &in)

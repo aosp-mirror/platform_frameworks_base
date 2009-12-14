@@ -57,6 +57,7 @@ void SimpleMesh::renderRange(Context *rsc, uint32_t start, uint32_t len) const
 
     VertexArray va;
     for (uint32_t ct=0; ct < mVertexTypeCount; ct++) {
+        mVertexBuffers[ct]->uploadCheck(rsc);
         va.setActiveBuffer(mVertexBuffers[ct]->getBufferObjectID());
         mVertexTypes[ct]->enableGLVertexBuffer(&va);
     }
@@ -67,6 +68,7 @@ void SimpleMesh::renderRange(Context *rsc, uint32_t start, uint32_t len) const
     }
 
     if (mIndexType.get()) {
+        mIndexBuffer->uploadCheck(rsc);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mIndexBuffer->getBufferObjectID());
         glDrawElements(mGLPrimitive, len, GL_UNSIGNED_SHORT, (uint16_t *)(start * 2));
     } else {
@@ -78,14 +80,14 @@ void SimpleMesh::uploadAll(Context *rsc)
 {
     for (uint32_t ct=0; ct < mVertexTypeCount; ct++) {
         if (mVertexBuffers[ct].get()) {
-            mVertexBuffers[ct]->uploadToBufferObject();
+            mVertexBuffers[ct]->deferedUploadToBufferObject(rsc);
         }
     }
     if (mIndexBuffer.get()) {
-        mIndexBuffer->uploadToBufferObject();
+        mIndexBuffer->deferedUploadToBufferObject(rsc);
     }
     if (mPrimitiveBuffer.get()) {
-        mPrimitiveBuffer->uploadToBufferObject();
+        mPrimitiveBuffer->deferedUploadToBufferObject(rsc);
     }
 }
 

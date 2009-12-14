@@ -94,6 +94,7 @@ public:
     const ProgramVertex * getVertex() {return mVertex.get();}
 
     void setupCheck();
+    bool checkDriver() const {return mEGL.mSurface != 0;}
 
     void pause();
     void resume();
