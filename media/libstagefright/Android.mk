@@ -63,7 +63,8 @@ LOCAL_STATIC_LIBRARIES := \
 
 LOCAL_SHARED_LIBRARIES += \
         libstagefright_amrnb_common \
-        libstagefright_avc_common
+        libstagefright_avc_common \
+        libstagefright_color_conversion
 
 endif
 

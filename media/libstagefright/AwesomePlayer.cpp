@@ -19,6 +19,7 @@
 #include <utils/Log.h>
 
 #include "include/AwesomePlayer.h"
+#include "include/SoftwareRenderer.h"
 
 #include <binder/IPCThreadState.h>
 #include <media/stagefright/AudioPlayer.h>
@@ -30,7 +31,6 @@
 #include <media/stagefright/MediaSource.h>
 #include <media/stagefright/MetaData.h>
 #include <media/stagefright/OMXCodec.h>
-
 namespace android {
 
 struct AwesomeEvent : public TimedEventQueue::Event {
@@ -52,6 +52,55 @@ private:
 
     AwesomeEvent(const AwesomeEvent &);
     AwesomeEvent &operator=(const AwesomeEvent &);
+};
+
+struct AwesomeRemoteRenderer : public AwesomeRenderer {
+    AwesomeRemoteRenderer(const sp<IOMXRenderer> &target)
+        : mTarget(target) {
+    }
+
+    virtual void render(MediaBuffer *buffer) {
+        void *id;
+        if (buffer->meta_data()->findPointer(kKeyBufferID, &id)) {
+            mTarget->render((IOMX::buffer_id)id);
+        }
+    }
+
+private:
+    sp<IOMXRenderer> mTarget;
+
+    AwesomeRemoteRenderer(const AwesomeRemoteRenderer &);
+    AwesomeRemoteRenderer &operator=(const AwesomeRemoteRenderer &);
+};
+
+struct AwesomeLocalRenderer : public AwesomeRenderer {
+    AwesomeLocalRenderer(
+            OMX_COLOR_FORMATTYPE colorFormat,
+            const sp<ISurface> &surface,
+            size_t displayWidth, size_t displayHeight,
+            size_t decodedWidth, size_t decodedHeight)
+        : mTarget(new SoftwareRenderer(
+                    colorFormat, surface, displayWidth, displayHeight,
+                    decodedWidth, decodedHeight)) {
+    }
+
+    virtual void render(MediaBuffer *buffer) {
+        mTarget->render(
+                (const uint8_t *)buffer->data() + buffer->range_offset(),
+                buffer->range_length(), NULL);
+    }
+
+protected:
+    virtual ~AwesomeLocalRenderer() {
+        delete mTarget;
+        mTarget = NULL;
+    }
+
+private:
+    SoftwareRenderer *mTarget;
+
+    AwesomeLocalRenderer(const AwesomeLocalRenderer &);
+    AwesomeLocalRenderer &operator=(const AwesomeLocalRenderer &);;
 };
 
 AwesomePlayer::AwesomePlayer()
@@ -326,12 +375,25 @@ void AwesomePlayer::initRenderer_l() {
         // before creating a new one.
         IPCThreadState::self()->flushCommands();
 
-        mVideoRenderer =
-            mClient.interface()->createRenderer(
-                    mISurface, component,
-                    (OMX_COLOR_FORMATTYPE)format,
-                    decodedWidth, decodedHeight,
-                    mVideoWidth, mVideoHeight);
+        if (!strncmp("OMX.", component, 4)) {
+            // Our OMX codecs allocate buffers on the media_server side
+            // therefore they require a remote IOMXRenderer that knows how
+            // to display them.
+            mVideoRenderer = new AwesomeRemoteRenderer(
+                mClient.interface()->createRenderer(
+                        mISurface, component,
+                        (OMX_COLOR_FORMATTYPE)format,
+                        decodedWidth, decodedHeight,
+                        mVideoWidth, mVideoHeight));
+        } else {
+            // Other decoders are instantiated locally and as a consequence
+            // allocate their buffers in local address space.
+            mVideoRenderer = new AwesomeLocalRenderer(
+                (OMX_COLOR_FORMATTYPE)format,
+                mISurface,
+                mVideoWidth, mVideoHeight,
+                decodedWidth, decodedHeight);
+        }
     }
 }
 
@@ -612,10 +674,7 @@ void AwesomePlayer::onEvent(int32_t code) {
         return;
     }
 
-    void *id;
-    if (mVideoBuffer->meta_data()->findPointer(kKeyBufferID, &id)) {
-        mVideoRenderer->render((IOMX::buffer_id)id);
-    }
+    mVideoRenderer->render(mVideoBuffer);
 
     if (mLastVideoBuffer) {
         mLastVideoBuffer->release();
