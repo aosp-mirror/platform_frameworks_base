@@ -49,7 +49,6 @@ class HeadsetObserver extends UEventObserver {
     private int mHeadsetState;
     private int mPrevHeadsetState;
     private String mHeadsetName;
-    private boolean mPendingIntent;
 
     private final Context mContext;
     private final WakeLock mWakeLock;  // held while there is a pending route change
@@ -114,7 +113,6 @@ class HeadsetObserver extends UEventObserver {
         mHeadsetName = newName;
         mPrevHeadsetState = mHeadsetState;
         mHeadsetState = headsetState;
-        mPendingIntent = true;
 
         if (headsetState == 0) {
             Intent intent = new Intent(AudioManager.ACTION_AUDIO_BECOMING_NOISY);
@@ -126,25 +124,28 @@ class HeadsetObserver extends UEventObserver {
             // This could be improved once the audio sub-system provides an
             // interface to clear the audio pipeline.
             mWakeLock.acquire();
-            mHandler.sendEmptyMessageDelayed(0, 1000);
+            mHandler.sendMessageDelayed(mHandler.obtainMessage(0,
+                                                               mHeadsetState,
+                                                               mPrevHeadsetState,
+                                                               mHeadsetName),
+                                        1000);
         } else {
-            sendIntents();
-            mPendingIntent = false;
+            sendIntents(mHeadsetState, mPrevHeadsetState, mHeadsetName);
         }
     }
 
-    private synchronized final void sendIntents() {
+    private synchronized final void sendIntents(int headsetState, int prevHeadsetState, String headsetName) {
         int allHeadsets = SUPPORTED_HEADSETS;
         for (int curHeadset = 1; allHeadsets != 0; curHeadset <<= 1) {
             if ((curHeadset & allHeadsets) != 0) {
-                sendIntent(curHeadset);
+                sendIntent(curHeadset, headsetState, prevHeadsetState, headsetName);
                 allHeadsets &= ~curHeadset;
             }
         }
     }
 
-    private final void sendIntent(int headset) {
-        if ((mHeadsetState & headset) != (mPrevHeadsetState & headset)) {
+    private final void sendIntent(int headset, int headsetState, int prevHeadsetState, String headsetName) {
+        if ((headsetState & headset) != (prevHeadsetState & headset)) {
             //  Pack up the values and broadcast them to everyone
             Intent intent = new Intent(Intent.ACTION_HEADSET_PLUG);
             intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
@@ -154,14 +155,14 @@ class HeadsetObserver extends UEventObserver {
             if ((headset & HEADSETS_WITH_MIC) != 0) {
                 microphone = 1;
             }
-            if ((mHeadsetState & headset) != 0) {
+            if ((headsetState & headset) != 0) {
                 state = 1;
             }
             intent.putExtra("state", state);
-            intent.putExtra("name", mHeadsetName);
+            intent.putExtra("name", headsetName);
             intent.putExtra("microphone", microphone);
 
-            if (LOG) Log.v(TAG, "Intent.ACTION_HEADSET_PLUG: state: "+state+" name: "+mHeadsetName+" mic: "+microphone);
+            if (LOG) Log.v(TAG, "Intent.ACTION_HEADSET_PLUG: state: "+state+" name: "+headsetName+" mic: "+microphone);
             // TODO: Should we require a permission?
             ActivityManagerNative.broadcastStickyIntent(intent, null);
         }
@@ -170,12 +171,8 @@ class HeadsetObserver extends UEventObserver {
     private final Handler mHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
-            if (mPendingIntent) {
-                sendIntents();
-                mPendingIntent = false;
-            }
+            sendIntents(msg.arg1, msg.arg2, (String)msg.obj);
             mWakeLock.release();
         }
     };
-
 }
