@@ -4531,6 +4531,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     // Now use the delta to determine the actual amount of text
                     // we need.
                     partialEndOffset += delta;
+                    if (partialStartOffset > N) {
+                        partialStartOffset = N;
+                    } else if (partialStartOffset < 0) {
+                        partialStartOffset = 0;
+                    }
                     if (partialEndOffset > N) {
                         partialEndOffset = N;
                     } else if (partialEndOffset < 0) {
