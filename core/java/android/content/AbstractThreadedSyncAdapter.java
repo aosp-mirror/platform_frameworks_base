@@ -117,7 +117,7 @@ public abstract class AbstractThreadedSyncAdapter {
                 if (mSyncThread != null
                         && mSyncThread.mSyncContext.getSyncContextBinder()
                         == syncContext.asBinder()) {
-                    mSyncThread.interrupt();
+                    onSyncCanceled(mSyncThread);
                 }
             }
         }
@@ -207,4 +207,15 @@ public abstract class AbstractThreadedSyncAdapter {
      */
     public abstract void onPerformSync(Account account, Bundle extras,
             String authority, ContentProviderClient provider, SyncResult syncResult);
+
+    /**
+     * Indicates that a sync operation has been canceled. This will be invoked on a separate
+     * thread than the sync thread and so you must consider the multi-threaded implications
+     * of the work that you do in this method.
+     *
+     * @param thread the thread that is running the sync operation to cancel
+     */
+    public void onSyncCanceled(Thread thread) {
+        thread.interrupt();
+    }
 }
