@@ -29,10 +29,12 @@ public class Program extends BaseObj {
     public static final int MAX_INPUT = 8;
     public static final int MAX_OUTPUT = 8;
     public static final int MAX_CONSTANT = 8;
+    public static final int MAX_TEXTURE = 8;
 
     Element mInputs[];
     Element mOutputs[];
     Type mConstants[];
+    int mTextureCount;
     String mShader;
 
     Program(int id, RenderScript rs) {
@@ -65,6 +67,7 @@ public class Program extends BaseObj {
             mInputCount = 0;
             mOutputCount = 0;
             mConstantCount = 0;
+            mTextureCount = 0;
         }
 
         public void setShader(String s) {
@@ -95,12 +98,12 @@ public class Program extends BaseObj {
             mConstants[mConstantCount++] = t;
         }
 
-        public void addTexture(Type t) throws IllegalStateException {
+        public void setTextureCount(int count) throws IllegalArgumentException {
             // Should check for consistant and non-conflicting names...
-            if(mTextureCount >= MAX_CONSTANT) {
-                throw new IllegalArgumentException("Max input count exceeded.");
+            if(count >= MAX_CONSTANT) {
+                throw new IllegalArgumentException("Max texture count exceeded.");
             }
-            mTextures[mTextureCount++] = t;
+            mTextureCount = count;
         }
 
         protected void initProgram(Program p) {
@@ -110,8 +113,7 @@ public class Program extends BaseObj {
             System.arraycopy(mOutputs, 0, p.mOutputs, 0, mOutputCount);
             p.mConstants = new Type[mConstantCount];
             System.arraycopy(mConstants, 0, p.mConstants, 0, mConstantCount);
-            p.mTextures = new Type[mTextureCount];
-            System.arraycopy(mTextures, 0, p.mTextures, 0, mTextureCount);
+            p.mTextureCount = mTextureCount;
         }
     }
 

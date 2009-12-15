@@ -406,6 +406,14 @@ ProgramFragmentCreate {
 	ret RsProgramFragment
 	}
 
+ProgramFragmentCreate2 {
+	param const char * shaderText
+	param uint32_t shaderLength
+	param const uint32_t * params
+	param uint32_t paramLength
+	ret RsProgramFragment
+	}
+
 ProgramVertexCreate {
 	param bool texMat
 	ret RsProgramVertex
@@ -416,7 +424,7 @@ ProgramVertexCreate2 {
 	param uint32_t shaderLength
 	param const uint32_t * params
 	param uint32_t paramLength
-	ret RsProgramFragment
+	ret RsProgramVertex
 	}
 
 LightBegin {

@@ -79,10 +79,8 @@ public class ProgramVertex extends Program {
                 tmp[idx++] = 2;
                 tmp[idx++] = mConstants[i].mID;
             }
-            for (int i=0; i < mTextureCount; i++) {
-                tmp[idx++] = 3;
-                tmp[idx++] = mTextures[i].mID;
-            }
+            tmp[idx++] = 3;
+            tmp[idx++] = mTextureCount;
 
             int id = mRS.nProgramVertexCreate2(mShader, tmp);
             ProgramVertex pv = new ProgramVertex(id, mRS);

@@ -1115,6 +1115,24 @@ nProgramFragmentCreate(JNIEnv *_env, jobject _this, jint slot, jboolean enable)
     return (jint)rsProgramFragmentCreate(con);
 }
 
+static jint
+nProgramFragmentCreate2(JNIEnv *_env, jobject _this, jstring shader, jintArray params)
+{
+    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
+    const char* shaderUTF = _env->GetStringUTFChars(shader, NULL);
+    jint shaderLen = _env->GetStringUTFLength(shader);
+    jint *paramPtr = _env->GetIntArrayElements(params, NULL);
+    jint paramLen = _env->GetArrayLength(params);
+
+    LOG_API("nProgramFragmentCreate2, con(%p), shaderLen(%i), paramLen(%i)", con, shaderLen, paramLen);
+
+    jint ret = (jint)rsProgramFragmentCreate2(con, shaderUTF, shaderLen, (uint32_t *)paramPtr, paramLen);
+    _env->ReleaseStringUTFChars(shader, shaderUTF);
+    _env->ReleaseIntArrayElements(params, paramPtr, JNI_ABORT);
+    return ret;
+}
+
+
 // ---------------------------------------------------------------------------
 
 static jint
@@ -1444,6 +1462,7 @@ static JNINativeMethod methods[] = {
 {"nProgramFragmentSetSlot",        "(IZII)V",                              (void*)nProgramFragmentSetSlot },
 {"nProgramFragmentSetShader",      "(Ljava/lang/String;)V",                (void*)nProgramFragmentSetShader },
 {"nProgramFragmentCreate",         "()I",                                  (void*)nProgramFragmentCreate },
+{"nProgramFragmentCreate2",        "(Ljava/lang/String;[I)I",              (void*)nProgramFragmentCreate2 },
 
 {"nProgramRasterCreate",           "(IIZZZ)I",                             (void*)nProgramRasterCreate },
 {"nProgramRasterSetPointSize",     "(IF)V",                                (void*)nProgramRasterSetPointSize },

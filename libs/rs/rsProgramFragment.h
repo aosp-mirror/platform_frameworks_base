@@ -33,6 +33,9 @@ public:
 
 
     ProgramFragment(Context *, Element *in, Element *out, bool pointSpriteEnable);
+    ProgramFragment(Context *rsc, const char * shaderText,
+                             uint32_t shaderLength, const uint32_t * params,
+                             uint32_t paramLength);
     virtual ~ProgramFragment();
 
     virtual void setupGL(const Context *, ProgramFragmentState *);
