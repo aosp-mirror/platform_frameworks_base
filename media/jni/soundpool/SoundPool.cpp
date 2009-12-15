@@ -501,7 +501,8 @@ void SoundChannel::play(const sp<Sample>& sample, int nextChannelID, float leftV
     }
     int numChannels = sample->numChannels();
     uint32_t sampleRate = uint32_t(float(sample->sampleRate()) * rate + 0.5);
-    uint32_t bufferFrames = (afFrameCount * sampleRate) / afSampleRate;
+    uint32_t totalFrames = (kDefaultBufferCount * afFrameCount * sampleRate) / afSampleRate;
+    uint32_t bufferFrames = (totalFrames + (kDefaultBufferCount - 1)) / kDefaultBufferCount;
     uint32_t frameCount = 0;
 
     if (loop) {
@@ -510,13 +511,13 @@ void SoundChannel::play(const sp<Sample>& sample, int nextChannelID, float leftV
 
 #ifndef USE_SHARED_MEM_BUFFER
     // Ensure minimum audio buffer size in case of short looped sample
-    if(frameCount < kDefaultBufferCount * bufferFrames) {
-        frameCount = kDefaultBufferCount * bufferFrames;
+    if(frameCount < totalFrames) {
+        frameCount = totalFrames;
     }
 #endif
 
     AudioTrack* newTrack;
-    
+
     // mToggle toggles each time a track is started on a given channel.
     // The toggle is concatenated with the SoundChannel address and passed to AudioTrack
     // as callback user data. This enables the detection of callbacks received from the old
@@ -525,7 +526,7 @@ void SoundChannel::play(const sp<Sample>& sample, int nextChannelID, float leftV
     unsigned long toggle = mToggle ^ 1;
     void *userData = (void *)((unsigned long)this | toggle);
     uint32_t channels = (numChannels == 2) ? AudioSystem::CHANNEL_OUT_STEREO : AudioSystem::CHANNEL_OUT_MONO;
-    
+
 #ifdef USE_SHARED_MEM_BUFFER
     newTrack = new AudioTrack(streamType, sampleRate, sample->format(),
             channels, sample->getIMemory(), 0, callback, userData);
