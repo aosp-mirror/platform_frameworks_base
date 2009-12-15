@@ -493,6 +493,7 @@ public class WebView extends AbsoluteLayout
     static final int DO_MOTION_UP                       = 28;
     static final int SHOW_FULLSCREEN                    = 29;
     static final int HIDE_FULLSCREEN                    = 30;
+    static final int DOM_FOCUS_CHANGED                  = 31;
 
     static final String[] HandlerDebugString = {
         "REMEMBER_PASSWORD", //              = 1;
@@ -524,7 +525,8 @@ public class WebView extends AbsoluteLayout
         "REQUEST_KEYBOARD", //               = 27;
         "DO_MOTION_UP", //                   = 28;
         "SHOW_FULLSCREEN", //                = 29;
-        "HIDE_FULLSCREEN" //                 = 30;
+        "HIDE_FULLSCREEN", //                = 30;
+        "DOM_FOCUS_CHANGED" //               = 31;
     };
 
     // If the site doesn't use the viewport meta tag to specify the viewport,
@@ -1726,6 +1728,13 @@ public class WebView extends AbsoluteLayout
         return result;
     }
 
+    // Called by JNI when the DOM has changed the focus.  Clear the focus so
+    // that new keys will go to the newly focused field
+    private void domChangedFocus() {
+        if (inEditingMode()) {
+            mPrivateHandler.obtainMessage(DOM_FOCUS_CHANGED).sendToTarget();
+        }
+    }
     /**
      * Request the href of an anchor element due to getFocusNodePath returning
      * "href." If hrefMsg is null, this method returns immediately and does not
@@ -3191,16 +3200,6 @@ public class WebView extends AbsoluteLayout
         imm.hideSoftInputFromWindow(this.getWindowToken(), 0);
     }
 
-    /**
-     * Only for calling from JNI.  Allows a click on an unfocused textfield to
-     * put the textfield in focus.
-     */
-    private void setOkayNotToMatch() {
-        if (inEditingMode()) {
-            mWebTextView.mOkayForFocusNotToMatch = true;
-        }
-    }
-
     /*
      * This method checks the current focus and cursor and potentially rebuilds
      * mWebTextView to have the appropriate properties, such as password,
@@ -3462,7 +3461,6 @@ public class WebView extends AbsoluteLayout
             // Now we need to pass the event to it
             if (inEditingMode()) {
                 mWebTextView.setDefaultSelection();
-                mWebTextView.mOkayForFocusNotToMatch = true;
                 return mWebTextView.dispatchKeyEvent(event);
             }
         } else if (nativeHasFocusNode()) {
@@ -3559,7 +3557,6 @@ public class WebView extends AbsoluteLayout
                 centerKeyPressOnTextField();
                 if (inEditingMode()) {
                     mWebTextView.setDefaultSelection();
-                    mWebTextView.mOkayForFocusNotToMatch = true;
                 }
                 return true;
             }
@@ -5311,7 +5308,7 @@ public class WebView extends AbsoluteLayout
             // exclude INVAL_RECT_MSG_ID since it is frequently output
             if (DebugFlags.WEB_VIEW && msg.what != INVAL_RECT_MSG_ID) {
                 Log.v(LOGTAG, msg.what < REMEMBER_PASSWORD || msg.what
-                        > HIDE_FULLSCREEN ? Integer.toString(msg.what)
+                        > DOM_FOCUS_CHANGED ? Integer.toString(msg.what)
                         : HandlerDebugString[msg.what - REMEMBER_PASSWORD]);
             }
             if (mWebViewCore == null) {
@@ -5733,6 +5730,13 @@ public class WebView extends AbsoluteLayout
                     if (mFullScreenHolder != null) {
                         mFullScreenHolder.dismiss();
                         mFullScreenHolder = null;
+                    }
+                    break;
+
+                case DOM_FOCUS_CHANGED:
+                    if (inEditingMode()) {
+                        nativeClearCursor();
+                        rebuildWebTextView();
                     }
                     break;
 
