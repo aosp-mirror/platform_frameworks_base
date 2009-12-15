@@ -697,7 +697,6 @@ com.google.android.mms.ContentType
 com.google.android.mms.pdu.CharacterSets
 com.google.android.mms.pdu.PduPart
 com.google.android.mms.pdu.PduPersister
-com.google.android.net.GoogleHttpClient
 com.google.android.net.UrlRules
 com.google.android.net.UrlRules$Rule
 com.ibm.icu4jni.charset.CharsetDecoderICU
