@@ -448,7 +448,7 @@ public final class ContactsContract {
 
         /**
          * The kind of data that is used as the display name for the contact, see
-         * {@link DisplayNameSources}.
+         * DisplayNameSources.
          */
         public static final String DISPLAY_NAME_SOURCE = "display_name_source";
 
@@ -468,12 +468,12 @@ public final class ContactsContract {
 
         /**
          * The type of alphabet used to capture the phonetic name.  See
-         * {@link PhoneticNameStyle}.
+         * PhoneticNameStyle.
          */
         public static final String PHONETIC_NAME_STYLE = "phonetic_name_style";
 
         /**
-         * Pronunciation of the full name. See {@link PhoneticNameStyle}.
+         * Pronunciation of the full name. See PhoneticNameStyle.
          */
         public static final String PHONETIC_NAME = "phonetic_name";
 
