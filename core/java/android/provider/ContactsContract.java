@@ -376,6 +376,124 @@ public final class ContactsContract {
     }
 
     /**
+     * Constants for various styles of combining given name, family name etc into
+     * a full name.  For example, the western tradition follows the pattern
+     * 'given name' 'middle name' 'family name' with the alternative pattern being
+     * 'family name', 'given name' 'middle name'.  The CJK tradition is
+     * 'family name' 'middle name' 'given name', with Japanese favoring a space between
+     * the names and Chinese omitting the space.
+     * @hide
+     */
+    public interface FullNameStyle {
+        public static final int UNDEFINED = 0;
+        public static final int WESTERN = 1;
+
+        /**
+         * Used if the name is written in Hanzi/Kanji/Hanja and we could not determine
+         * which specific language it belongs to: Chinese, Japanese or Korean.
+         */
+        public static final int CJK = 2;
+
+        public static final int CHINESE = 3;
+        public static final int JAPANESE = 4;
+        public static final int KOREAN = 5;
+    }
+
+    /**
+     * Constants for various styles of capturing the pronunciation of a person's name.
+     * @hide
+     */
+    public interface PhoneticNameStyle {
+        public static final int UNDEFINED = 0;
+
+        /**
+         * Pinyin is a phonetic method of entering Chinese characters. Typically not explicitly
+         * shown in UIs, but used for searches and sorting.
+         */
+        public static final int PINYIN = 3;
+
+        /**
+         * Hiragana and Katakana are two common styles of writing out the pronunciation
+         * of a Japanese names.
+         */
+        public static final int JAPANESE = 4;
+
+        /**
+         * Hangul is the Korean phonetic alphabet.
+         */
+        public static final int KOREAN = 5;
+    }
+
+    /**
+     * Types of data used to produce the display name for a contact. Listed in the order
+     * of increasing priority.
+     *
+     * @hide
+     */
+    public interface DisplayNameSources {
+        public static final int UNDEFINED = 0;
+        public static final int EMAIL = 10;
+        public static final int PHONE = 20;
+        public static final int ORGANIZATION = 30;
+        public static final int NICKNAME = 35;
+        public static final int STRUCTURED_NAME = 40;
+    }
+
+    /**
+     * @see Contacts
+     * @see RawContacts
+     * @hide
+     */
+    protected interface ContactNameColumns {
+
+        /**
+         * The kind of data that is used as the display name for the contact, see
+         * {@link DisplayNameSources}.
+         */
+        public static final String DISPLAY_NAME_SOURCE = "display_name_source";
+
+        /**
+         * The default text shown as the contact's display name.  It is based on
+         * available data, see {@link #DISPLAY_NAME_SOURCE}.
+         */
+        public static final String DISPLAY_NAME = "display_name";
+
+        /**
+         * Alternative representation of the display name.  If display name is
+         * based on the structured name and the structured name follows
+         * the Western full name style, then this field contains the "family name first"
+         * version of the full name.  Otherwise, it is the same as {@link #DISPLAY_NAME}.
+         */
+        public static final String DISPLAY_NAME_ALTERNATIVE = "display_name_alt";
+
+        /**
+         * The type of alphabet used to capture the phonetic name.  See
+         * {@link PhoneticNameStyle}.
+         */
+        public static final String PHONETIC_NAME_STYLE = "phonetic_name_style";
+
+        /**
+         * Pronunciation of the full name. See {@link PhoneticNameStyle}.
+         */
+        public static final String PHONETIC_NAME = "phonetic_name";
+
+        /**
+         * Sort key that takes into account locale-based traditions for sorting
+         * names in address books.  More specifically, for Chinese names
+         * the sort key is the name's Pinyin spelling; for Japanese names
+         * it is the Hiragana version of the phonetic name.
+         */
+        public static final String SORT_KEY = "sort_key";
+
+        /**
+         * Sort key based on the alternative representation of the full name,
+         * specifically the one using the 'family name first' format for
+         * Western names.
+         */
+        public static final String SORT_KEY_ALTERNATIVE = "sort_key_alt";
+    }
+
+    /**
      * Constants for the contacts table, which contains a record per aggregate
      * of raw contacts representing the same person.
      * <h3>Operations</h3>
@@ -1234,7 +1352,7 @@ public final class ContactsContract {
      * </table>
      */
     public static final class RawContacts implements BaseColumns, RawContactsColumns,
-            ContactOptionsColumns, SyncColumns  {
+            ContactOptionsColumns, ContactNameColumns, SyncColumns  {
         /**
          * This utility class cannot be instantiated
          */
@@ -2889,6 +3007,21 @@ public final class ContactsContract {
              * <P>Type: TEXT</P>
              */
             public static final String PHONETIC_FAMILY_NAME = DATA9;
+
+            /**
+             * The style used for combining given/middle/family name into a full name.
+             * See {@link ContactsContract.FullNameStyle}.
+             *
+             * @hide
+             */
+            public static final String FULL_NAME_STYLE = DATA10;
+
+            /**
+             * The alphabet used for capturing the phonetic name.
+             * See {@link ContactsContract.PhoneticNameStyle}.
+             * @hide
+             */
+            public static final String PHONETIC_NAME_STYLE = DATA11;
         }
 
         /**
