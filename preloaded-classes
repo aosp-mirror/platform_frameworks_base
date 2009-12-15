@@ -364,13 +364,6 @@ android.text.style.UpdateAppearance
 android.text.style.UpdateLayout
 android.text.style.WrapTogetherSpan
 android.text.util.Linkify
-<<<<<<< HEAD
-android.util.AndroidRuntimeException
-=======
-android.text.util.Linkify$1
-android.text.util.Linkify$4
-android.text.util.Rfc822Tokenizer
->>>>>>> 15d3bb2c
 android.util.AttributeSet
 android.util.DisplayMetrics
 android.util.FloatMath
@@ -695,17 +688,6 @@ com.android.internal.view.menu.MenuBuilder$Callback
 com.android.internal.view.menu.MenuDialogHelper
 com.android.internal.view.menu.MenuItemImpl
 com.android.internal.view.menu.SubMenuBuilder
-<<<<<<< HEAD
-com.android.internal.widget.LinearLayoutWithDefaultTouchRecepient
-com.android.internal.widget.LockPatternView
-com.android.internal.widget.NumberPicker
-com.android.internal.widget.NumberPickerButton
-=======
-com.android.internal.widget.ContactHeaderWidget
-com.android.internal.widget.DialogTitle
-com.android.internal.widget.EditableInputConnection
-com.android.internal.widget.LockPatternUtils
->>>>>>> 15d3bb2c
 com.android.internal.widget.RotarySelector
 com.android.internal.widget.Smileys
 com.google.android.gles_jni.EGLDisplayImpl
