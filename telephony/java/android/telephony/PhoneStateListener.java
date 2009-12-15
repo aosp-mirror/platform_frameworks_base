@@ -153,7 +153,7 @@ public class PhoneStateListener {
      * @see ServiceState#STATE_IN_SERVICE
      * @see ServiceState#STATE_OUT_OF_SERVICE
      * @see ServiceState#STATE_POWER_OFF
-     * @deprecated see #onSignalStrengthsChanged
+     * @deprecated Use {@link #onSignalStrengthsChanged(SignalStrength)}
      */
     @Deprecated
     public void onSignalStrengthChanged(int asu) {
