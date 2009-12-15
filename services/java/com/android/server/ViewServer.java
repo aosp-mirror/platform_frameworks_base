@@ -45,7 +45,7 @@ class ViewServer implements Runnable {
     private static final String LOG_TAG = "ViewServer";
 
     private static final String VALUE_PROTOCOL_VERSION = "2";
-    private static final String VALUE_SERVER_VERSION = "2";
+    private static final String VALUE_SERVER_VERSION = "3";
 
     // Protocol commands
     // Returns the protocol version
