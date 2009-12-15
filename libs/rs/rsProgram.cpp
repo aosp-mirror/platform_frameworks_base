@@ -51,6 +51,7 @@ Program::Program(Context *rsc, const char * shaderText, uint32_t shaderLength,
     mShaderID = 0;
     mAttribCount = 0;
     mUniformCount = 0;
+    mTextureCount = 0;
 
     mInputCount = 0;
     mOutputCount = 0;
@@ -65,6 +66,9 @@ Program::Program(Context *rsc, const char * shaderText, uint32_t shaderLength,
         }
         if (params[ct] == RS_PROGRAM_PARAM_CONSTANT) {
             mConstantCount++;
+        }
+        if (params[ct] == RS_PROGRAM_PARAM_TEXTURE_COUNT) {
+            mTextureCount = params[ct+1];
         }
     }
 

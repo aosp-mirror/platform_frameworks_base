@@ -25,7 +25,7 @@ import android.util.Log;
  * @hide
  *
  **/
-public class ProgramFragment extends BaseObj {
+public class ProgramFragment extends Program {
     public static final int MAX_SLOT = 2;
 
     public enum EnvMode {
@@ -41,8 +41,7 @@ public class ProgramFragment extends BaseObj {
 
 
     ProgramFragment(int id, RenderScript rs) {
-        super(rs);
-        mID = id;
+        super(id, rs);
     }
 
     public void bindTexture(Allocation va, int slot)
@@ -65,6 +64,37 @@ public class ProgramFragment extends BaseObj {
         mRS.nProgramFragmentBindSampler(mID, slot, vs.mID);
     }
 
+    public static class ShaderBuilder extends BaseProgramBuilder {
+        public ShaderBuilder(RenderScript rs) {
+            super(rs);
+        }
+
+        public ProgramFragment create() {
+            mRS.validate();
+            int[] tmp = new int[(mInputCount + mOutputCount + mConstantCount + 1) * 2];
+            int idx = 0;
+
+            for (int i=0; i < mInputCount; i++) {
+                tmp[idx++] = 0;
+                tmp[idx++] = mInputs[i].mID;
+            }
+            for (int i=0; i < mOutputCount; i++) {
+                tmp[idx++] = 1;
+                tmp[idx++] = mOutputs[i].mID;
+            }
+            for (int i=0; i < mConstantCount; i++) {
+                tmp[idx++] = 2;
+                tmp[idx++] = mConstants[i].mID;
+            }
+            tmp[idx++] = 3;
+            tmp[idx++] = mTextureCount;
+
+            int id = mRS.nProgramFragmentCreate2(mShader, tmp);
+            ProgramFragment pf = new ProgramFragment(id, mRS);
+            initProgram(pf);
+            return pf;
+        }
+    }
 
     public static class Builder {
         RenderScript mRS;

@@ -175,6 +175,7 @@ public class RenderScript {
     native void nProgramFragmentSetSlot(int slot, boolean enable, int env, int vt);
     native void nProgramFragmentSetShader(String txt);
     native int  nProgramFragmentCreate();
+    native int  nProgramFragmentCreate2(String shader, int[] params);
 
     native int  nProgramVertexCreate(boolean texMat);
     native int  nProgramVertexCreate2(String shader, int[] params);

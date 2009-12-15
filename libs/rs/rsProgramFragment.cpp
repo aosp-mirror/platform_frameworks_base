@@ -40,6 +40,19 @@ ProgramFragment::ProgramFragment(Context *rsc, Element *in, Element *out, bool p
     mEnvModes[1] = RS_TEX_ENV_MODE_DECAL;
 }
 
+ProgramFragment::ProgramFragment(Context *rsc, const char * shaderText,
+                                 uint32_t shaderLength, const uint32_t * params,
+                                 uint32_t paramLength) :
+    Program(rsc, shaderText, shaderLength, params, paramLength)
+{
+    mAllocFile = __FILE__;
+    mAllocLine = __LINE__;
+
+    init(rsc);
+    mTextureEnableMask = (1 << mTextureCount) -1;
+}
+
+
 ProgramFragment::~ProgramFragment()
 {
 }
@@ -158,58 +171,68 @@ void ProgramFragment::createShader()
     mShader.append("varying vec4 varColor;\n");
     mShader.append("varying vec4 varTex0;\n");
 
-    uint32_t mask = mTextureEnableMask;
-    uint32_t texNum = 0;
-    while (mask) {
-        if (mask & 1) {
-            char buf[64];
-            mShader.append("uniform sampler2D uni_Tex");
-            sprintf(buf, "%i", texNum);
+    if (mUserShader.length() > 1) {
+        for (uint32_t ct=0; ct < mTextureCount; ct++) {
+            char buf[256];
+            sprintf(buf, "uniform sampler2D uni_Tex%i;\n", ct);
             mShader.append(buf);
-            mShader.append(";\n");
         }
-        mask >>= 1;
-        texNum++;
-    }
 
-
-    mShader.append("void main() {\n");
-    mShader.append("  vec4 col = varColor;\n");
-
-    if (mTextureEnableMask) {
-        if (mPointSpriteEnable) {
-            mShader.append("  vec2 tex0 = gl_PointCoord;\n");
-        } else {
-            mShader.append("  vec2 tex0 = varTex0.xy;\n");
-        }
-    }
-
-    mask = mTextureEnableMask;
-    texNum = 0;
-    while (mask) {
-        if (mask & 1) {
-            switch(mEnvModes[texNum]) {
-            case RS_TEX_ENV_MODE_REPLACE:
-                mShader.append("  col = texture2D(uni_Tex0, tex0);\n");
-                break;
-            case RS_TEX_ENV_MODE_MODULATE:
-                mShader.append("  col *= texture2D(uni_Tex0, tex0);\n");
-                break;
-            case RS_TEX_ENV_MODE_DECAL:
-                mShader.append("  col = texture2D(uni_Tex0, tex0);\n");
-                break;
+        mShader.append(mUserShader);
+    } else {
+        uint32_t mask = mTextureEnableMask;
+        uint32_t texNum = 0;
+        while (mask) {
+            if (mask & 1) {
+                char buf[64];
+                mShader.append("uniform sampler2D uni_Tex");
+                sprintf(buf, "%i", texNum);
+                mShader.append(buf);
+                mShader.append(";\n");
             }
-
+            mask >>= 1;
+            texNum++;
         }
-        mask >>= 1;
-        texNum++;
+
+
+        mShader.append("void main() {\n");
+        mShader.append("  vec4 col = varColor;\n");
+
+        if (mTextureEnableMask) {
+            if (mPointSpriteEnable) {
+                mShader.append("  vec2 tex0 = gl_PointCoord;\n");
+            } else {
+                mShader.append("  vec2 tex0 = varTex0.xy;\n");
+            }
+        }
+
+        mask = mTextureEnableMask;
+        texNum = 0;
+        while (mask) {
+            if (mask & 1) {
+                switch(mEnvModes[texNum]) {
+                case RS_TEX_ENV_MODE_REPLACE:
+                    mShader.append("  col = texture2D(uni_Tex0, tex0);\n");
+                    break;
+                case RS_TEX_ENV_MODE_MODULATE:
+                    mShader.append("  col *= texture2D(uni_Tex0, tex0);\n");
+                    break;
+                case RS_TEX_ENV_MODE_DECAL:
+                    mShader.append("  col = texture2D(uni_Tex0, tex0);\n");
+                    break;
+                }
+
+            }
+            mask >>= 1;
+            texNum++;
+        }
+
+        //mShader.append("  col.a = 1.0;\n");
+        //mShader.append("  col.r = 0.5;\n");
+
+        mShader.append("  gl_FragColor = col;\n");
+        mShader.append("}\n");
     }
-
-    //mShader.append("  col.a = 1.0;\n");
-    //mShader.append("  col.r = 0.5;\n");
-
-    mShader.append("  gl_FragColor = col;\n");
-    mShader.append("}\n");
 }
 
 void ProgramFragment::bindTexture(uint32_t slot, Allocation *a)
@@ -361,6 +384,14 @@ RsProgramFragment rsi_ProgramFragmentCreate(Context *rsc)
     return pf;
 }
 
+RsProgramFragment rsi_ProgramFragmentCreate2(Context *rsc, const char * shaderText,
+                             uint32_t shaderLength, const uint32_t * params,
+                             uint32_t paramLength)
+{
+    ProgramFragment *pf = new ProgramFragment(rsc, shaderText, shaderLength, params, paramLength);
+    pf->incUserRef();
+    return pf;
+}
 
 }
 }

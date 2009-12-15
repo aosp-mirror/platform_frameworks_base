@@ -66,6 +66,7 @@ protected:
     String8 mUserShader;
     uint32_t mShaderID;
 
+    uint32_t mTextureCount;
     uint32_t mAttribCount;
     uint32_t mUniformCount;
     String8 mAttribNames[MAX_ATTRIBS];
