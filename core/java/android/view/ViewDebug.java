@@ -702,7 +702,7 @@ public class ViewDebug {
         if (parameter.indexOf('@') != -1) {
             final String[] ids = parameter.split("@");
             final String className = ids[0];
-            final int hashCode = Integer.parseInt(ids[1], 16);
+            final int hashCode = (int) Long.parseLong(ids[1], 16);
 
             View view = root.getRootView();
             if (view instanceof ViewGroup) {
