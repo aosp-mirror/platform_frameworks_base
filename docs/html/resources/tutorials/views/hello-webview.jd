@@ -1,0 +1,118 @@
+page.title=Hello, WebView 
+parent.title=Hello, Views
+parent.link=index.html
+@jd:body
+
+<p>A {@link android.webkit.WebView} allows you to create your own web browser Activity. In this tutorial, 
+we'll create a simple Activity that can view web pages.</p>
+
+<ol>
+   <li>Create a new project/Activity called HelloWebView.</li>
+   <li>Open the layout file. Insert a WebView so it looks like so:
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    &lt;WebView 
+        android:id="@+id/webview"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+    />
+
+&lt;/LinearLayout>
+</pre></li>
+
+   <li>Now open the HelloWebView.java file.
+      At the top of the class, instantiate a WebView object:
+<pre>WebView webview;</pre>
+  <p> Then add the following  at the end of the <code>onCreate()</code> method:</p>
+<pre>
+webview = (WebView) findViewById(R.id.webview);
+webview.getSettings().setJavaScriptEnabled(true);
+webview.loadUrl("http://www.google.com");
+</pre>
+
+      <p>This captures the WebView we created in our layout, then requests a 
+	{@link android.webkit.WebSettings} object and enables JavaScript.
+	Then we load a URL.</p></li>
+
+   <li>Because we're accessing the internet, we need to add the appropriate 
+   permissions to the Android manifest file. So open the AndroidManifest.xml file 
+   and, add the following as a child of the <code>&lt;manifest></code> element:
+
+      <pre>&lt;uses-permission android:name="android.permission.INTERNET" /></pre></li>
+
+   <li>Now run it.</li>
+</ol>
+<p> You now have the world's simplest web page viewer.
+   It's not quite a browser yet. It only loads the page we've requested.</p>
+
+<hr/>
+
+<p>We can load a page, but as soon as we click a link, the default Android web browser 
+handles the Intent, instead of our own WebView handling the action. So now we'll 
+override the {@link android.webkit.WebViewClient} to enable us to handle our own URL loading.</p>
+
+<ol>
+   <li>In the HelloAndroid Activity, add this nested private class:
+<pre>
+private class HelloWebViewClient extends WebViewClient {
+    &#64;Override
+    public boolean shouldOverrideUrlLoading(WebView view, String url) {
+        view.loadUrl(url);
+        return true;
+    }
+}</pre></li>
+
+   <li>Now, in the <code>onCreate()</code> method, set an instance of the <code>HelloWebViewClient</code>
+   as our WebViewClient:
+      <pre>webview.setWebViewClient(new WebViewClientDemo());</pre>
+
+      <p>This line should immediately follow the initialization of our WebView object.</p>
+      <p>What we've done is create a WebViewClient that will load any URL selected in our
+WebView in the same WebView. You can see this in the <code>shouldOverrideUrlLoading()</code>
+method, above&mdash;it is passed the current WebView and the URL, so all we do
+is load the URL in the given view. Returning <var>true</var> says that we've handled the URL
+ourselves and the event should not bubble-up.</p>
+      <p>If you try it again, new pages will now load in the HelloWebView Activity. However, you'll notice that 
+we can't navigate back. We need to handle the back button 
+on the device, so that it will return to the previous page, rather than exit the application.</p>
+    </li>
+
+   <li>To handle the back button key press, add the following method inside the HelloWebView 
+Activity:
+<pre> 
+&#64;Override
+public boolean onKeyDown(int keyCode, KeyEvent event) {
+    if ((keyCode == KeyEvent.KEYCODE_BACK) && webview.canGoBack()) {
+        webview.goBack();
+        return true;
+    }
+    return super.onKeyDown(keyCode, event);
+}</pre>
+      <p>The condition uses a {@link android.view.KeyEvent} to check
+      whether the key pressed is the BACK button and whether the 
+      WebView is actually capable of navigating back (if it has a history). If both are 
+      <em>not</em> true, then we send the event up the chain (and the Activity will close). 
+      But if both <em>are</em> true, then we call <code>goBack()</code>, 
+      which will navigate back one step in the history. We then return true to indicate 
+      that we've handled the event.</p>
+</li>
+</ol>
+<p>When you open the application, it should look like this:</p>
+<img src="images/hello-webview.png" width="150px" />
+
+<h3>Resource</h3>
+<ul>
+<li>{@link android.webkit.WebView}</li>
+<li>{@link android.webkit.WebViewClient}</li>
+<li>{@link android.view.KeyEvent}</li>
+</ul>
+
+      
+
+
+

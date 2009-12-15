@@ -1,0 +1,48 @@
+page.title=UI Framework Changes in Android 1.5
+@jd:body
+
+
+<p>Android 1.5 offers a different default look for
+the Android UI framework, in relation to Android 1.0 and 1.1. The
+screenshots below show the same activity (creating a new contact) on
+Android 1.1 and Android 1.5:</p>
+
+<img style="margin: 0px auto 10px; display: block; text-align: center; cursor: pointer; width: 400px; height: 277px;" src="images/android.png" alt="" id="BLOGGER_PHOTO_ID_5323141124169754690" border="0">
+
+<p>You
+can see in this example that the buttons and checkboxes have a new
+appearance. Even though these changes do not affect binary nor source
+compatibility, they might still break the UI of your apps. As part of
+the UI refresh, the minimum size of some of the widgets has changed.
+For instance, Android 1.1 buttons have a minimum size of 44x48 pixels
+whereas Android 1.5 buttons now have a minimum size of 24x48 pixels.
+The image below compares the sizes of Android 1.1 buttons with Android
+1.5 buttons:</p>
+
+<img style="margin: 0px auto 10px; display: block; text-align: center; cursor: pointer; width: 100px; height: 130px;" src="images/buttons.png" alt="" border="0">
+
+<p>If you rely on the button's minimum size, then the layout of your application
+may not be the same in Android 1.5 as it was in Android 1.1 because of this
+change. This would happen for instance if you created a grid of buttons using
+<code>LinearLayout</code> and relying on the minimum size yielded by
+<code>wrap_content</code> to align the buttons properly:</p>
+
+<img style="margin: 0px auto 10px; display: block; text-align: center; cursor: pointer; width: 400px; height: 277px;" src="images/grid.png" alt="" id="BLOGGER_PHOTO_ID_5323147943613255250" border="0">
+
+<p>This layout could easily be fixed by using the
+<code>android:layout_weight</code> attribute or by replacing the
+<code>LinearLayout</code> containers with a <code>TableLayout</code>.</p>
+
+<p>This example is probably the worst-case UI issue you may encounter when
+running your application on Android 1.5. Other changes introduced in Android
+1.5, especially bug fixes in the layout views, may also impact your
+application—especially if it is relying on faulty/buggy behavior of the UI
+framework.</p>
+
+<p>If you encounter issues when running your application on Android 1.5, please
+join us on the <a href="{@docRoot}resources/community-groups.html">Android
+developer groups</a> or <a
+href="{@docRoot}resources/community-more.html">IRC</a> so that we and the
+Android community can help you fix your application.</p>
+
+<p>Happy coding!</p>

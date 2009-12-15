@@ -105,7 +105,7 @@ Eclipse components (for example, WST). If you encounter an error when
 installing ADT, your Eclipse installion might not include those components. 
 For information about how to quickly add the necessary components to your 
 Eclipse installation, see the troubleshooting topic 
-<a href="{@docRoot}guide/appendix/faq/troubleshooting.html#installeclipsecomponents">ADT Installation Error: "requires plug-in org.eclipse.wst.sse.ui"</a>.</p>
+<a href="{@docRoot}resources/faq/troubleshooting.html#installeclipsecomponents">ADT Installation Error: "requires plug-in org.eclipse.wst.sse.ui"</a>.</p>
 
 <h4>For Linux users</h4>
 <p>If you encounter this error when installing the ADT Plugin for Eclipse: 

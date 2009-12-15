@@ -1,0 +1,106 @@
+page.title=Hello, Spinner
+parent.title=Hello, Views
+parent.link=index.html
+@jd:body
+
+<p>A {@link android.widget.Spinner} is a widget that allows the user to select an item from a group.
+It is similar to a dropdown list and will allow scrolling when the 
+list exceeds the available vertical space on the screen.</p>
+
+
+<ol>
+  <li>Start a new project/Activity called HelloSpinner.</li>
+  <li>Open the layout file.
+    Make it like so:
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:padding="10dip"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content">
+
+    &lt;TextView
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dip"
+        android:text="Please select a planet:"
+    />
+
+    &lt;Spinner 
+        android:id="@+id/spinner"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:drawSelectorOnTop="true"
+        android:prompt="@string/planet_prompt"
+    />
+
+&lt;/LinearLayout>
+</pre>
+	<p>Notice that the Spinner's <code>android:prompt</code> is a string resource. In
+        this case, Android does not allow it to be a string, it must be a reference to a resource. 
+        So...</p>
+</li>
+
+<li>Open the strings.xml file in res/values/ and add the following <code>&lt;string></code> 
+element inside the <code>&lt;resources></code> element:
+<pre>
+&lt;string name="planet_prompt">Choose a planet&lt;/string>
+</pre>
+</li>
+
+<li>Create a new XML file in res/values/ called arrays.xml. Insert the following:
+<pre>
+&lt;resources>
+
+    &lt;string-array name="planets">
+        &lt;item>Mercury&lt;/item>
+        &lt;item>Venus&lt;/item>
+        &lt;item>Earth&lt;/item>
+        &lt;item>Mars&lt;/item>
+        &lt;item>Jupiter&lt;/item>
+        &lt;item>Saturn&lt;/item>
+        &lt;item>Uranus&lt;/item>
+        &lt;item>Neptune&lt;/item>
+    &lt;/string-array>
+    
+&lt;/resources>
+</pre>
+	<p>This is the list of items (planets) that the user can select from in the Spinner widget.</p>
+</li>
+
+<li>Now open the HelloSpinner.java file. Insert the following code into the HelloSpinner class:
+<pre>
+&#64;Override
+public void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    setContentView(R.layout.main);
+
+    Spinner s = (Spinner) findViewById(R.id.spinner);
+    ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(
+            this, R.array.planets, android.R.layout.simple_spinner_item);
+    adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+    s.setAdapter(adapter);
+}
+</pre>
+	<p>That's it. We start by creating a Spinner from our layout. We then create an {@link android.widget.ArrayAdapter} 
+	that binds each element of our string array to a layout view&mdash;we pass <code>createFromResource</code> our Context, 
+	the array of selectable items and the type of layout we'd like each one bound to. We then call
+	<code>setDropDownViewResource()</code> to define the type of layout in which to present the 
+	entire collection. Finally, we set this Adapter to associate with our Spinner, 
+        so the string items have a place to go.</p>
+</li>
+
+<li>Now run it.</li>
+</ol>
+<p>It should look like this:</p>
+<img src="images/hello-spinner.png" width="150px" />
+
+
+<h3>Resources</h3>
+<ul>
+	<li>{@link android.R.layout}</li>
+	<li>{@link android.widget.ArrayAdapter}</li>
+	<li>{@link android.widget.Spinner}</li>
+</ul>
+

@@ -39,7 +39,7 @@ page.title=Android とは
 <p>アプリケーションの基盤となるのは、次のサービスとシステムのセットです:
 <ul>
     <li>アプリケーションの構築を可能にする、拡張可能で豊富な<a
-    href="{@docRoot}guide/tutorials/views/index.html">ビュー</a>のセット。ビューには、リスト、グリッド、テキスト ボックス、ボタンだけでなく、埋め込み可能なウェブブラウザも含まれます。</li>
+    href="{@docRoot}resources/tutorials/views/index.html">ビュー</a>のセット。ビューには、リスト、グリッド、テキスト ボックス、ボタンだけでなく、埋め込み可能なウェブブラウザも含まれます。</li>
     <li><a href="{@docRoot}guide/topics/providers/content-providers.html">コンテンツ プロバイダ</a>を使用すると、アプリケーションのデータ（たとえば、連絡先アプリケーション）に、別のアプリケーションからアクセスしたり、データを共有させることができます。</li> <li><a
     href="{@docRoot}guide/topics/resources/resources-i18n.html">リソース マネージャ</a>は、ローカライズされた文字列、グラフィックス、レイアウト ファイルなどのコード以外のリソースへのアクセスを提供します。</li>
     <li>{@link android.app.NotificationManager 通知マネージャ}を使用すると、すべてのアプリケーションからステータス バーにカスタマイズした警告を表示することができます。</li>
@@ -47,7 +47,7 @@ page.title=Android とは
 </ul>
 
 <p>アプリケーションの簡単な説明と詳細については、<a
-href="{@docRoot}guide/tutorials/notepad/index.html">Notepad チュートリアル</a>をご覧ください。</p>
+href="{@docRoot}resources/tutorials/notepad/index.html">Notepad チュートリアル</a>をご覧ください。</p>
     
 <a name="libraries" id="libraries"></a>
 <h2>ライブラリ</h2>

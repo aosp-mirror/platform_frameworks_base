@@ -1,0 +1,89 @@
+page.title=Future-Proofing Your Apps
+@jd:body
+
+<p>It's important to implement your application so that it will not break as new
+versions of the Android platform are loaded onto the users device. The list
+below is based on our observations of five ways that we've seen bad apps fail.
+You can think of these as "anti-patterns" (that is, techniques to avoid) for
+Android development.</p>
+
+<p>If your application uses any of the dubious techniques below, break out 
+your IDE and duct tape, spackle, and patch up the app.</p>
+
+<p><b>Technique to Avoid, #1: Using Internal APIs</b></p>
+
+<p>Even
+though we've always strongly advised against doing so, some developers
+have chosen to use unsupported or internal APIs. For instance, many
+developers are using the internal brightness control and bluetooth
+toggle APIs that were present in 1.0 and 1.1. A bug -- which was
+fixed in Android 1.5 -- allowed apps to use those APIs without
+requesting permission. As a result, apps that used those APIs broke
+on 1.5. If you've used internal APIs in your apps, you need to update
+your apps to stop doing so. </p>
+
+<p><b>Technique to Avoid, #2: Directly Manipulating Settings</b></p>
+
+<p>Strictly speaking this one isn't evil, since this is a change in
+behavior that we made to Android itself. But we made it because some
+developers were doing naughty things: a number of apps were changing
+system settings silently without even notifying the user. For instance,
+some apps turn on GPS without asking the user, and others might turn on
+data roaming.</p>
+
+<p>As a result, applications can no longer directly
+manipulate the values of certain system Settings, even if they
+previously had permission to do so. For instance, apps can no longer
+directly turn on or off GPS. These apps won't crash, but the APIs in
+question now have no effect, and do nothing. Instead, apps will need to
+issue an Intent to launch the appropriate Settings configuration
+screen, so that the user can change these settings manually. For
+details, see the android.provider.Settings.Secure class, which you can
+find in the 1.5_pre SDK documentation (and later). Note that only
+Settings that were moved to the Settings.Secure class are affected.
+Other, less sensitive, settings will continue to have the same behavior
+as in Android 1.1.</p>
+
+<p><b>Technique to Avoid, #3: Going Overboard with Layouts</b></p>
+
+<p>Due to changes in the View rendering infrastructure, unreasonably deep
+(more than 10 or so) or broad (more than 30 total) View hierarchies in
+layouts are now likely to cause crashes. This was always a risk for
+excessively complex layouts, but you can think of Android 1.5 as being
+better than 1.1 at exposing this problem. Most developers won't need to
+worry about this, but if your app has very complicated layouts, you'll
+need to put it on a diet. You can simplify your layouts using the more
+advanced layout classes like FrameLayout and TableLayout.</p>
+
+<p><b>Technique to Avoid, #4: Bad Hardware Assumptions</b></p>
+
+<p>Android 1.5 includes support for soft keyboards, and there will soon be many
+devices that run Android but do not have physical keyboards. If your
+application assumes the presence of a physical keyboard (such as if you
+have created a custom View that sinks keypress events) you should make
+sure it degrades gracefully on devices that only have soft keyboards.
+For more information on this, keep on eye on this blog as we'll be
+posting more detailed information about handling the new soft keyboards.</p>
+
+<p><b>Technique to Avoid, #5: Incautious Rotations </b></p>
+
+<p>Devices running Android 1.5 and later can automatically rotate the screen,
+depending on how the user orients the device. Some 1.5 devices will do
+this by default, and on all others it can be turned on by the user.
+This can sometimes result in unpredictable behavior from applications
+that do their own reorientations (whether using the accelerometer, or
+something else.) This often happens when applications assume that the
+screen can only rotate if the physical keyboard is exposed; if the
+device lacks a physical keyboard, these apps do not expect to be
+reoriented, which is a coding error. Developers should be sure that
+their applications can gracefully handle being reoriented at any time.</p>
+
+<p>Also, apps that use the accelerometer directly to reorient themselves
+sometimes compete with the system doing the same thing, with odd
+results. And finally, some apps that use the accelerometer to detect
+things like shaking motions and that don't lock their orientation to
+portrait or landscape, often end up flipping back and forth between
+orientations. This can be irritating to the user. (You can lock your
+app's orientation to portrait or landscape using the
+<code>android:screenOrientation</code> attribute in the manifest file.)</p>
+
