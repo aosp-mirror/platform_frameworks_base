@@ -59,7 +59,7 @@ void usage(void)
         "        [-0 extension [-0 extension ...]] [-g tolerance] [-j jarfile] \\\n"
         "        [--min-sdk-version VAL] [--target-sdk-version VAL] \\\n"
         "        [--max-sdk-version VAL] [--app-version VAL] \\\n"
-        "        [--app-version-name TEXT] [--custom-package VAL] \\\n"
+        "        [--app-version-name TEXT] [--custom-package VAL] [--utf16] \\\n"
         "        [-I base-package [-I base-package ...]] \\\n"
         "        [-A asset-source-dir]  [-G class-list-file] [-P public-definitions-file] \\\n"
         "        [-S resource-sources [-S resource-sources ...]] "
@@ -118,12 +118,12 @@ void usage(void)
         "   -P  specify where to output public resource definitions\n"
         "   -S  directory in which to find resources.  Multiple directories will be scanned\n"
         "       and the first match found (left to right) will take precedence.\n"
-        "   -8  Encode string resources in UTF-8.\n"
         "   -0  specifies an additional extension for which such files will not\n"
         "       be stored compressed in the .apk.  An empty string means to not\n"
         "       compress any files at all.\n"
         "   --min-sdk-version\n"
-        "       inserts android:minSdkVersion in to manifest.\n"
+        "       inserts android:minSdkVersion in to manifest.  If the version is 7 or\n"
+        "       higher, the default encoding for resources will be in UTF-8.\n"
         "   --target-sdk-version\n"
         "       inserts android:targetSdkVersion in to manifest.\n"
         "   --max-sdk-version\n"
@@ -135,7 +135,10 @@ void usage(void)
         "   --version-name\n"
         "       inserts android:versionName in to manifest.\n"
         "   --custom-package\n"
-        "       generates R.java into a different package.\n");
+        "       generates R.java into a different package.\n"
+        "   --utf16\n"
+        "       changes default encoding for resources to UTF-16.  Only useful when API\n"
+        "       level is set to 7 or higher where the default encoding is UTF-8.\n");
 }
 
 /*
@@ -373,9 +376,6 @@ int main(int argc, char* const argv[])
                     bundle.setCompressionMethod(ZipEntry::kCompressStored);
                 }
                 break;
-            case '8':
-                bundle.setUTF8(true);
-                break;
             case '-':
                 if (strcmp(cp, "-min-sdk-version") == 0) {
                     argc--;
@@ -433,6 +433,9 @@ int main(int argc, char* const argv[])
                         goto bail;
                     }
                     bundle.setCustomPackage(argv[0]);
+                } else if (strcmp(cp, "-utf16") == 0) {
+                    bundle.setEncodingSpecified(true);
+                    bundle.setUTF8(false);
                 } else {
                     fprintf(stderr, "ERROR: Unknown option '-%s'\n", cp);
                     wantUsage = true;
