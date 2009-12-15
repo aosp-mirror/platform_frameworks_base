@@ -98,7 +98,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     private List mFeatureUsers;
 
     private boolean mSystemReady;
-    private ArrayList<Intent> mDeferredBroadcasts;
+    private Intent mInitialBroadcast;
 
     private static class NetworkAttributes {
         /**
@@ -786,6 +786,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         }
 
         Intent intent = new Intent(ConnectivityManager.CONNECTIVITY_ACTION);
+        intent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING);
         intent.putExtra(ConnectivityManager.EXTRA_NETWORK_INFO, info);
         if (info.isFailover()) {
             intent.putExtra(ConnectivityManager.EXTRA_IS_FAILOVER, true);
@@ -885,6 +886,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
     private void sendConnectedBroadcast(NetworkInfo info) {
         Intent intent = new Intent(ConnectivityManager.CONNECTIVITY_ACTION);
+        intent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING);
         intent.putExtra(ConnectivityManager.EXTRA_NETWORK_INFO, info);
         if (info.isFailover()) {
             intent.putExtra(ConnectivityManager.EXTRA_IS_FAILOVER, true);
@@ -922,6 +924,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         }
 
         Intent intent = new Intent(ConnectivityManager.CONNECTIVITY_ACTION);
+        intent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING);
         intent.putExtra(ConnectivityManager.EXTRA_NETWORK_INFO, info);
         if (getActiveNetworkInfo() == null) {
             intent.putExtra(ConnectivityManager.EXTRA_NO_CONNECTIVITY, true);
@@ -941,26 +944,20 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
     private void sendStickyBroadcast(Intent intent) {
         synchronized(this) {
-            if (mSystemReady) {
-                mContext.sendStickyBroadcast(intent);
-            } else {
-                if (mDeferredBroadcasts == null) {
-                    mDeferredBroadcasts = new ArrayList<Intent>();
-                }
-                mDeferredBroadcasts.add(intent);
+            if (!mSystemReady) {
+                mInitialBroadcast = new Intent(intent);
             }
+            intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
+            mContext.sendStickyBroadcast(intent);
         }
     }
 
     void systemReady() {
         synchronized(this) {
             mSystemReady = true;
-            if (mDeferredBroadcasts != null) {
-                int count = mDeferredBroadcasts.size();
-                for (int i = 0; i < count; i++) {
-                    mContext.sendStickyBroadcast(mDeferredBroadcasts.get(i));
-                }
-                mDeferredBroadcasts = null;
+            if (mInitialBroadcast != null) {
+                mContext.sendStickyBroadcast(mInitialBroadcast);
+                mInitialBroadcast = null;
             }
         }
     }

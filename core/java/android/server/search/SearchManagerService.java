@@ -150,8 +150,9 @@ public class SearchManagerService extends ISearchManager.Stub {
      * Informs all listeners that the list of searchables has been updated.
      */
     void broadcastSearchablesChanged() {
-        mContext.sendBroadcast(
-                new Intent(SearchManager.INTENT_ACTION_SEARCHABLES_CHANGED));
+        Intent intent = new Intent(SearchManager.INTENT_ACTION_SEARCHABLES_CHANGED);
+        intent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING);
+        mContext.sendBroadcast(intent);
     }
 
     //

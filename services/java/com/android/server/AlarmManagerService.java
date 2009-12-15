@@ -127,8 +127,9 @@ class AlarmManagerService extends IAlarmManager.Stub {
         mTimeTickSender = PendingIntent.getBroadcast(context, 0,
                 new Intent(Intent.ACTION_TIME_TICK).addFlags(
                         Intent.FLAG_RECEIVER_REGISTERED_ONLY), 0);
-        mDateChangeSender = PendingIntent.getBroadcast(context, 0,
-                new Intent(Intent.ACTION_DATE_CHANGED), 0);
+        Intent intent = new Intent(Intent.ACTION_DATE_CHANGED);
+        intent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING);
+        mDateChangeSender = PendingIntent.getBroadcast(context, 0, intent, 0);
         
         // now that we have initied the driver schedule the alarm
         mClockReceiver= new ClockReceiver();
@@ -272,6 +273,7 @@ class AlarmManagerService extends IAlarmManager.Stub {
         
         if (timeZoneWasChanged) {
             Intent intent = new Intent(Intent.ACTION_TIMEZONE_CHANGED);
+            intent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING);
             intent.putExtra("time-zone", zone.getID());
             mContext.sendBroadcast(intent);
         }
@@ -609,7 +611,9 @@ class AlarmManagerService extends IAlarmManager.Stub {
                 if ((result & TIME_CHANGED_MASK) != 0) {
                     remove(mTimeTickSender);
                     mClockReceiver.scheduleTimeTickEvent();
-                    mContext.sendBroadcast(new Intent(Intent.ACTION_TIME_CHANGED));
+                    Intent intent = new Intent(Intent.ACTION_TIME_CHANGED);
+                    intent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING);
+                    mContext.sendBroadcast(intent);
                 }
                 
                 synchronized (mLock) {
