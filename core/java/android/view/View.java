@@ -2726,7 +2726,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
             setPressed(false);
 
             if (!mHasPerformedLongPress) {
-                cancelLongPress();
+                removeLongPressCallback();
             }
         }
     }
@@ -3748,7 +3748,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
             if (imm != null && (mPrivateFlags & FOCUSED) != 0) {
                 imm.focusOut(this);
             }
-            cancelLongPress();
+            removeLongPressCallback();
             onFocusLost();
         } else if (imm != null && (mPrivateFlags & FOCUSED) != 0) {
             imm.focusIn(this);
@@ -3994,7 +3994,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
 
                     if (!mHasPerformedLongPress) {
                         // This is a tap, so remove the longpress check
-                        cancelLongPress();
+                        removeLongPressCallback();
 
                         result = performClick();
                     }
@@ -4184,7 +4184,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
 
                         if (!mHasPerformedLongPress) {
                             // This is a tap, so remove the longpress check
-                            cancelLongPress();
+                            removeLongPressCallback();
 
                             // Only perform take click actions if we were in the pressed state
                             if (!focusTaken) {
@@ -4227,7 +4227,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                         // Outside button
                         if ((mPrivateFlags & PRESSED) != 0) {
                             // Remove any future long press checks
-                            cancelLongPress();
+                            removeLongPressCallback();
 
                             // Need to switch from pressed to not pressed
                             mPrivateFlags &= ~PRESSED;
@@ -4250,15 +4250,22 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     }
 
     /**
+     * Remove the longpress detection timer.
+     */
+    private void removeLongPressCallback() {
+        if (mPendingCheckForLongPress != null) {
+          removeCallbacks(mPendingCheckForLongPress);
+        }
+    }
+
+    /**
      * Cancels a pending long press.  Your subclass can use this if you
      * want the context menu to come up if the user presses and holds
      * at the same place, but you don't want it to come up if they press
      * and then move around enough to cause scrolling.
      */
     public void cancelLongPress() {
-        if (mPendingCheckForLongPress != null) {
-            removeCallbacks(mPendingCheckForLongPress);
-        }
+        removeLongPressCallback();
     }
 
     /**
@@ -5759,7 +5766,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * @see #onAttachedToWindow()
      */
     protected void onDetachedFromWindow() {
-        cancelLongPress();
+        removeLongPressCallback();
         destroyDrawingCache();
     }
 
