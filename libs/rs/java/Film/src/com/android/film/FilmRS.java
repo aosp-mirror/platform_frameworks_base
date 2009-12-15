@@ -138,7 +138,7 @@ public class FilmRS {
         mLight.setPosition(0, -0.5f, -1.0f);
 
         ProgramVertex.Builder pvb = new ProgramVertex.Builder(mRS, null, null);
-        pvb.addLight(mLight);
+        //pvb.addLight(mLight);
         mPVBackground = pvb.create();
         mPVBackground.setName("PVBackground");
 

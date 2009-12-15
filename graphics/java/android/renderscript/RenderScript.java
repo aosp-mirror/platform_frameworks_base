@@ -167,6 +167,8 @@ public class RenderScript {
     native void nProgramRasterSetLineWidth(int pr, float v);
     native void nProgramRasterSetPointSize(int pr, float v);
 
+    native void nProgramBindConstants(int pv, int slot, int mID);
+
     native void nProgramFragmentBegin(int in, int out, boolean pointSpriteEnable);
     native void nProgramFragmentBindTexture(int vpf, int slot, int a);
     native void nProgramFragmentBindSampler(int vpf, int slot, int s);
@@ -174,12 +176,8 @@ public class RenderScript {
     native void nProgramFragmentSetShader(String txt);
     native int  nProgramFragmentCreate();
 
-    native void nProgramVertexBindAllocation(int pv, int mID);
-    native void nProgramVertexBegin(int inID, int outID);
-    native void nProgramVertexSetTextureMatrixEnable(boolean enable);
-    native void nProgramVertexAddLight(int id);
-    native void nProgramVertexSetShader(String txt);
-    native int  nProgramVertexCreate();
+    native int  nProgramVertexCreate(boolean texMat);
+    native int  nProgramVertexCreate2(String shader, int[] params);
 
     native void nLightBegin();
     native void nLightSetIsMono(boolean isMono);

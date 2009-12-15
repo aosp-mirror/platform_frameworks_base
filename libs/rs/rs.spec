@@ -366,6 +366,12 @@ ProgramRasterSetPointSize{
 }
 
 
+ProgramBindConstants {
+	param RsProgram vp
+	param uint32_t slot
+	param RsAllocation constants
+	}
+
 ProgramFragmentBegin {
 	param RsElement in
 	param RsElement out
@@ -400,32 +406,17 @@ ProgramFragmentCreate {
 	ret RsProgramFragment
 	}
 
-
-ProgramVertexBegin {
-	param RsElement in
-	param RsElement out
-	}
-
 ProgramVertexCreate {
+	param bool texMat
 	ret RsProgramVertex
 	}
 
-ProgramVertexBindAllocation {
-	param RsProgramVertex vpgm
-	param RsAllocation constants
-	}
-
-ProgramVertexSetTextureMatrixEnable {
-	param bool enable
-	}
-
-ProgramVertexSetShader {
-	param const char * text
-	param uint32_t length
-	}
-
-ProgramVertexAddLight {
-	param RsLight light
+ProgramVertexCreate2 {
+	param const char * shaderText
+	param uint32_t shaderLength
+	param const uint32_t * params
+	param uint32_t paramLength
+	ret RsProgramFragment
 	}
 
 LightBegin {

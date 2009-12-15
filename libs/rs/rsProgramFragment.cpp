@@ -27,7 +27,7 @@ using namespace android::renderscript;
 
 
 ProgramFragment::ProgramFragment(Context *rsc, Element *in, Element *out, bool pointSpriteEnable) :
-    Program(rsc, in, out)
+    Program(rsc)
 {
     mAllocFile = __FILE__;
     mAllocLine = __LINE__;
@@ -174,7 +174,6 @@ void ProgramFragment::createShader()
 
 
     mShader.append("void main() {\n");
-    //mShader.append("  gl_FragColor = vec4(0.0, 1.0, 0.0, 1.0);\n");
     mShader.append("  vec4 col = varColor;\n");
 
     if (mTextureEnableMask) {

@@ -1053,6 +1053,15 @@ nProgramFragmentStoreCreate(JNIEnv *_env, jobject _this)
     return (jint)rsProgramFragmentStoreCreate(con);
 }
 
+// ---------------------------------------------------------------------------
+
+static void
+nProgramBindConstants(JNIEnv *_env, jobject _this, jint vpv, jint slot, jint a)
+{
+    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
+    LOG_API("nProgramBindConstants, con(%p), vpf(%p), sloat(%i), a(%p)", con, (RsProgramVertex)vpv, slot, (RsAllocation)a);
+    rsProgramBindConstants(con, (RsProgram)vpv, slot, (RsAllocation)a);
+}
 
 // ---------------------------------------------------------------------------
 
@@ -1108,57 +1117,30 @@ nProgramFragmentCreate(JNIEnv *_env, jobject _this, jint slot, jboolean enable)
 
 // ---------------------------------------------------------------------------
 
-static void
-nProgramVertexSetShader(JNIEnv *_env, jobject _this, jstring name)
+static jint
+nProgramVertexCreate(JNIEnv *_env, jobject _this, jboolean texMat)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
-    const char* n = _env->GetStringUTFChars(name, NULL);
-    LOG_API("nProgramVertexSetShader, con(%p)", con);
-    rsProgramVertexSetShader(con, n, _env->GetStringUTFLength(name));
-    _env->ReleaseStringUTFChars(name, n);
-}
-
-
-static void
-nProgramVertexBegin(JNIEnv *_env, jobject _this, jint in, jint out)
-{
-    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
-    LOG_API("nProgramVertexBegin, con(%p), in(%p), out(%p)", con, (RsElement)in, (RsElement)out);
-    rsProgramVertexBegin(con, (RsElement)in, (RsElement)out);
-}
-
-static void
-nProgramVertexBindAllocation(JNIEnv *_env, jobject _this, jint vpv, jint a)
-{
-    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
-    LOG_API("nProgramVertexBindAllocation, con(%p), vpf(%p), a(%p)", con, (RsProgramVertex)vpv, (RsAllocation)a);
-    rsProgramVertexBindAllocation(con, (RsProgramFragment)vpv, (RsAllocation)a);
-}
-
-static void
-nProgramVertexSetTextureMatrixEnable(JNIEnv *_env, jobject _this, jboolean enable)
-{
-    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
-    LOG_API("nProgramVertexSetTextureMatrixEnable, con(%p), enable(%i)", con, enable);
-    rsProgramVertexSetTextureMatrixEnable(con, enable);
-}
-
-static void
-nProgramVertexAddLight(JNIEnv *_env, jobject _this, jint light)
-{
-    RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
-    LOG_API("nProgramVertexAddLight, con(%p), light(%p)", con, (RsLight)light);
-    rsProgramVertexAddLight(con, (RsLight)light);
+    LOG_API("nProgramVertexCreate, con(%p), texMat(%i)", con, texMat);
+    return (jint)rsProgramVertexCreate(con, texMat);
 }
 
 static jint
-nProgramVertexCreate(JNIEnv *_env, jobject _this)
+nProgramVertexCreate2(JNIEnv *_env, jobject _this, jstring shader, jintArray params)
 {
     RsContext con = (RsContext)(_env->GetIntField(_this, gContextId));
-    LOG_API("nProgramVertexCreate, con(%p)", con);
-    return (jint)rsProgramVertexCreate(con);
-}
+    const char* shaderUTF = _env->GetStringUTFChars(shader, NULL);
+    jint shaderLen = _env->GetStringUTFLength(shader);
+    jint *paramPtr = _env->GetIntArrayElements(params, NULL);
+    jint paramLen = _env->GetArrayLength(params);
 
+    LOG_API("nProgramVertexCreate2, con(%p), shaderLen(%i), paramLen(%i)", con, shaderLen, paramLen);
+
+    jint ret = (jint)rsProgramVertexCreate2(con, shaderUTF, shaderLen, (uint32_t *)paramPtr, paramLen);
+    _env->ReleaseStringUTFChars(shader, shaderUTF);
+    _env->ReleaseIntArrayElements(params, paramPtr, JNI_ABORT);
+    return ret;
+}
 
 // ---------------------------------------------------------------------------
 
@@ -1454,6 +1436,8 @@ static JNINativeMethod methods[] = {
 {"nProgramFragmentStoreDither",    "(Z)V",                                 (void*)nProgramFragmentStoreDither },
 {"nProgramFragmentStoreCreate",    "()I",                                  (void*)nProgramFragmentStoreCreate },
 
+{"nProgramBindConstants",          "(III)V",                               (void*)nProgramBindConstants },
+
 {"nProgramFragmentBegin",          "(IIZ)V",                               (void*)nProgramFragmentBegin },
 {"nProgramFragmentBindTexture",    "(III)V",                               (void*)nProgramFragmentBindTexture },
 {"nProgramFragmentBindSampler",    "(III)V",                               (void*)nProgramFragmentBindSampler },
@@ -1465,12 +1449,8 @@ static JNINativeMethod methods[] = {
 {"nProgramRasterSetPointSize",     "(IF)V",                                (void*)nProgramRasterSetPointSize },
 {"nProgramRasterSetLineWidth",     "(IF)V",                                (void*)nProgramRasterSetLineWidth },
 
-{"nProgramVertexBindAllocation",   "(II)V",                                (void*)nProgramVertexBindAllocation },
-{"nProgramVertexBegin",            "(II)V",                                (void*)nProgramVertexBegin },
-{"nProgramVertexSetTextureMatrixEnable",   "(Z)V",                         (void*)nProgramVertexSetTextureMatrixEnable },
-{"nProgramVertexAddLight",         "(I)V",                                 (void*)nProgramVertexAddLight },
-{"nProgramVertexSetShader",        "(Ljava/lang/String;)V",                (void*)nProgramVertexSetShader },
-{"nProgramVertexCreate",           "()I",                                  (void*)nProgramVertexCreate },
+{"nProgramVertexCreate",           "(Z)I",                                 (void*)nProgramVertexCreate },
+{"nProgramVertexCreate2",          "(Ljava/lang/String;[I)I",              (void*)nProgramVertexCreate2 },
 
 {"nLightBegin",                    "()V",                                  (void*)nLightBegin },
 {"nLightSetIsMono",                "(Z)V",                                 (void*)nLightSetIsMono },

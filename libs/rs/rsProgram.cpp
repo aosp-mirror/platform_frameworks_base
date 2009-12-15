@@ -24,7 +24,7 @@ using namespace android;
 using namespace android::renderscript;
 
 
-Program::Program(Context *rsc, Element *in, Element *out) : ObjectBase(rsc)
+Program::Program(Context *rsc) : ObjectBase(rsc)
 {
     mAllocFile = __FILE__;
     mAllocLine = __LINE__;
@@ -33,13 +33,72 @@ Program::Program(Context *rsc, Element *in, Element *out) : ObjectBase(rsc)
     mAttribCount = 0;
     mUniformCount = 0;
 
-    mElementIn.set(in);
-    mElementOut.set(out);
+    mInputElements = NULL;
+    mOutputElements = NULL;
+    mConstantTypes = NULL;
+    mInputCount = 0;
+    mOutputCount = 0;
+    mConstantCount = 0;
+}
+
+Program::Program(Context *rsc, const char * shaderText, uint32_t shaderLength,
+                 const uint32_t * params, uint32_t paramLength) :
+    ObjectBase(rsc)
+{
+    mAllocFile = __FILE__;
+    mAllocLine = __LINE__;
+    mDirty = true;
+    mShaderID = 0;
+    mAttribCount = 0;
+    mUniformCount = 0;
+
+    mInputCount = 0;
+    mOutputCount = 0;
+    mConstantCount = 0;
+
+    for (uint32_t ct=0; ct < paramLength; ct+=2) {
+        if (params[ct] == RS_PROGRAM_PARAM_INPUT) {
+            mInputCount++;
+        }
+        if (params[ct] == RS_PROGRAM_PARAM_OUTPUT) {
+            mOutputCount++;
+        }
+        if (params[ct] == RS_PROGRAM_PARAM_CONSTANT) {
+            mConstantCount++;
+        }
+    }
+
+    mInputElements = new ObjectBaseRef<Element>[mInputCount];
+    mOutputElements = new ObjectBaseRef<Element>[mOutputCount];
+    mConstantTypes = new ObjectBaseRef<Type>[mConstantCount];
+
+    uint32_t input = 0;
+    uint32_t output = 0;
+    uint32_t constant = 0;
+    for (uint32_t ct=0; ct < paramLength; ct+=2) {
+        if (params[ct] == RS_PROGRAM_PARAM_INPUT) {
+            mInputElements[input++].set(reinterpret_cast<Element *>(params[ct+1]));
+        }
+        if (params[ct] == RS_PROGRAM_PARAM_OUTPUT) {
+            mOutputElements[output++].set(reinterpret_cast<Element *>(params[ct+1]));
+        }
+        if (params[ct] == RS_PROGRAM_PARAM_CONSTANT) {
+            mConstantTypes[constant++].set(reinterpret_cast<Type *>(params[ct+1]));
+        }
+    }
+    mUserShader.setTo(shaderText, shaderLength);
 }
 
 Program::~Program()
 {
     bindAllocation(NULL);
+
+    delete[] mInputElements;
+    delete[] mOutputElements;
+    delete[] mConstantTypes;
+    mInputCount = 0;
+    mOutputCount = 0;
+    mConstantCount = 0;
 }
 
 
@@ -100,5 +159,21 @@ bool Program::loadShader(uint32_t type)
 void Program::setShader(const char *txt, uint32_t len)
 {
     mUserShader.setTo(txt, len);
+}
+
+
+
+namespace android {
+namespace renderscript {
+
+
+void rsi_ProgramBindConstants(Context *rsc, RsProgram vp, uint32_t slot, RsAllocation constants)
+{
+    Program *p = static_cast<Program *>(vp);
+    p->bindAllocation(static_cast<Allocation *>(constants));
+}
+
+
+}
 }
 

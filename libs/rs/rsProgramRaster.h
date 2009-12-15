@@ -29,8 +29,6 @@ class ProgramRaster : public Program
 {
 public:
     ProgramRaster(Context *rsc,
-                  Element *in,
-                  Element *out,
                   bool pointSmooth,
                   bool lineSmooth,
                   bool pointSprite);

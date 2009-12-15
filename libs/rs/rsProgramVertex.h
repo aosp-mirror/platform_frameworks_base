@@ -30,7 +30,9 @@ class ProgramVertex : public Program
 public:
     const static uint32_t MAX_LIGHTS = 8;
 
-    ProgramVertex(Context *, Element *in, Element *out);
+    ProgramVertex(Context *,const char * shaderText, uint32_t shaderLength,
+                  const uint32_t * params, uint32_t paramLength);
+    ProgramVertex(Context *, bool texMat);
     virtual ~ProgramVertex();
 
     virtual void setupGL(const Context *rsc, ProgramVertexState *state);
@@ -75,10 +77,6 @@ public:
     ObjectBaseRef<Allocation> mDefaultAlloc;
 
     ObjectBaseRef<Type> mAllocType;
-
-    ProgramVertex *mPV;
-
-    //ObjectBaseRef<Type> mTextureTypes[ProgramFragment::MAX_TEXTURE];
 
 
 };

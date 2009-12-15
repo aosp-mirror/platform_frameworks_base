@@ -26,13 +26,27 @@ using namespace android;
 using namespace android::renderscript;
 
 
-ProgramVertex::ProgramVertex(Context *rsc, Element *in, Element *out) :
-    Program(rsc, in, out)
+ProgramVertex::ProgramVertex(Context *rsc, bool texMat) :
+    Program(rsc)
+{
+    mAllocFile = __FILE__;
+    mAllocLine = __LINE__;
+    mTextureMatrixEnable = texMat;
+    mLightCount = 0;
+    init(rsc);
+}
+
+ProgramVertex::ProgramVertex(Context *rsc, const char * shaderText,
+                             uint32_t shaderLength, const uint32_t * params,
+                             uint32_t paramLength) :
+    Program(rsc, shaderText, shaderLength, params, paramLength)
 {
     mAllocFile = __FILE__;
     mAllocLine = __LINE__;
     mTextureMatrixEnable = false;
     mLightCount = 0;
+
+    init(rsc);
 }
 
 ProgramVertex::~ProgramVertex()
@@ -217,16 +231,15 @@ void ProgramVertex::init(Context *rsc)
     createShader();
 }
 
+
 ///////////////////////////////////////////////////////////////////////
 
 ProgramVertexState::ProgramVertexState()
 {
-    mPV = NULL;
 }
 
 ProgramVertexState::~ProgramVertexState()
 {
-    delete mPV;
 }
 
 void ProgramVertexState::init(Context *rsc, int32_t w, int32_t h)
@@ -239,7 +252,7 @@ void ProgramVertexState::init(Context *rsc, int32_t w, int32_t h)
     rsi_TypeAdd(rsc, RS_DIMENSION_X, 48);
     mAllocType.set((Type *)rsi_TypeCreate(rsc));
 
-    ProgramVertex *pv = new ProgramVertex(rsc, NULL, NULL);
+    ProgramVertex *pv = new ProgramVertex(rsc, false);
     Allocation *alloc = (Allocation *)rsi_AllocationCreateTyped(rsc, mAllocType.get());
     mDefaultAlloc.set(alloc);
     mDefault.set(pv);
@@ -265,48 +278,27 @@ void ProgramVertexState::deinit(Context *rsc)
     mDefault.clear();
     mAllocType.clear();
     mLast.clear();
-    delete mPV;
-    mPV = NULL;
 }
 
 
 namespace android {
 namespace renderscript {
 
-void rsi_ProgramVertexBegin(Context *rsc, RsElement in, RsElement out)
-{
-    delete rsc->mStateVertex.mPV;
-    rsc->mStateVertex.mPV = new ProgramVertex(rsc, (Element *)in, (Element *)out);
-}
 
-RsProgramVertex rsi_ProgramVertexCreate(Context *rsc)
+RsProgramVertex rsi_ProgramVertexCreate(Context *rsc, bool texMat)
 {
-    ProgramVertex *pv = rsc->mStateVertex.mPV;
+    ProgramVertex *pv = new ProgramVertex(rsc, texMat);
     pv->incUserRef();
-    pv->init(rsc);
-    rsc->mStateVertex.mPV = 0;
     return pv;
 }
 
-void rsi_ProgramVertexBindAllocation(Context *rsc, RsProgramVertex vpgm, RsAllocation constants)
+RsProgramVertex rsi_ProgramVertexCreate2(Context *rsc, const char * shaderText,
+                             uint32_t shaderLength, const uint32_t * params,
+                             uint32_t paramLength)
 {
-    ProgramVertex *pv = static_cast<ProgramVertex *>(vpgm);
-    pv->bindAllocation(static_cast<Allocation *>(constants));
-}
-
-void rsi_ProgramVertexSetTextureMatrixEnable(Context *rsc, bool enable)
-{
-    rsc->mStateVertex.mPV->setTextureMatrixEnable(enable);
-}
-
-void rsi_ProgramVertexSetShader(Context *rsc, const char *txt, uint32_t len)
-{
-    rsc->mStateVertex.mPV->setShader(txt, len);
-}
-
-void rsi_ProgramVertexAddLight(Context *rsc, RsLight light)
-{
-    rsc->mStateVertex.mPV->addLight(static_cast<const Light *>(light));
+    ProgramVertex *pv = new ProgramVertex(rsc, shaderText, shaderLength, params, paramLength);
+    pv->incUserRef();
+    return pv;
 }
 
 
