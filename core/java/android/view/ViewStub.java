@@ -207,9 +207,11 @@ public final class ViewStub extends View {
             } else {
                 throw new IllegalStateException("setVisibility called on un-referenced view");
             }
-        } else if (visibility == VISIBLE || visibility == INVISIBLE) {
+        } else {
             super.setVisibility(visibility);
-            inflate();
+            if (visibility == VISIBLE || visibility == INVISIBLE) {
+                inflate();
+            }
         }
     }
 
@@ -244,7 +246,7 @@ public final class ViewStub extends View {
                     parent.addView(view, index);
                 }
 
-                mInflatedViewRef = new WeakReference(view);
+                mInflatedViewRef = new WeakReference<View>(view);
 
                 if (mInflateListener != null) {
                     mInflateListener.onInflate(this, view);
