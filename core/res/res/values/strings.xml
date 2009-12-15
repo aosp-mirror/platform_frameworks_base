@@ -2097,6 +2097,12 @@
     <string name="l2tp_vpn_description">Layer 2 Tunneling Protocol</string>
     <string name="l2tp_ipsec_psk_vpn_description">Pre-shared key based L2TP/IPSec VPN</string>
     <string name="l2tp_ipsec_crt_vpn_description">Certificate based L2TP/IPSec VPN</string>
+
+    <!-- Localized strings for WebView -->
     <!-- Label for button in a WebView that will open a chooser to choose a file to upload -->
     <string name="upload_file">Choose file</string>
+    <!-- Label for <input type="reset"> button in html -->
+    <string name="reset">Reset</string>
+    <!-- Label for <input type="submit"> button in html -->
+    <string name="submit">Submit</string>
 </resources>

@@ -782,10 +782,13 @@ class BrowserFrame extends Handler {
         return mSettings.getUserAgentString();
     }
 
-    // these ids need to be in sync with enum RAW_RES_ID in WebFrame
+    // These ids need to be in sync with enum rawResId in PlatformBridge.h
     private static final int NODOMAIN = 1;
     private static final int LOADERROR = 2;
     private static final int DRAWABLEDIR = 3;
+    private static final int FILE_UPLOAD_LABEL = 4;
+    private static final int RESET_LABEL = 5;
+    private static final int SUBMIT_LABEL = 6;
 
     String getRawResFilename(int id) {
         int resid;
@@ -802,6 +805,18 @@ class BrowserFrame extends Handler {
                 // use one known resource to find the drawable directory
                 resid = com.android.internal.R.drawable.btn_check_off;
                 break;
+
+            case FILE_UPLOAD_LABEL:
+                return mContext.getResources().getString(
+                        com.android.internal.R.string.upload_file);
+
+            case RESET_LABEL:
+                return mContext.getResources().getString(
+                        com.android.internal.R.string.reset);
+
+            case SUBMIT_LABEL:
+                return mContext.getResources().getString(
+                        com.android.internal.R.string.submit);
 
             default:
                 Log.e(LOGTAG, "getRawResFilename got incompatible resource ID");
