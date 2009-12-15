@@ -55,15 +55,68 @@ struct CodecInfo {
     const char *codec;
 };
 
+#if BUILD_WITH_FULL_STAGEFRIGHT
+#define OPTIONAL(x,y) { x, y },
+
+#define FACTORY_CREATE(name) \
+static sp<MediaSource> Make##name(const sp<MediaSource> &source) { \
+    return new name(source); \
+}
+
+#define FACTORY_REF(name) { #name, Make##name },
+
+FACTORY_CREATE(MP3Decoder)
+FACTORY_CREATE(AMRNBDecoder)
+FACTORY_CREATE(AMRWBDecoder)
+FACTORY_CREATE(AACDecoder)
+FACTORY_CREATE(AVCDecoder)
+FACTORY_CREATE(AMRNBEncoder)
+
+static sp<MediaSource> InstantiateSoftwareCodec(
+        const char *name, const sp<MediaSource> &source) {
+    struct FactoryInfo {
+        const char *name;
+        sp<MediaSource> (*CreateFunc)(const sp<MediaSource> &);
+    };
+
+    static const FactoryInfo kFactoryInfo[] = {
+        FACTORY_REF(MP3Decoder)
+        FACTORY_REF(AMRNBDecoder)
+        FACTORY_REF(AMRWBDecoder)
+        FACTORY_REF(AACDecoder)
+        FACTORY_REF(AVCDecoder)
+        FACTORY_REF(AMRNBEncoder)
+    };
+    for (size_t i = 0;
+         i < sizeof(kFactoryInfo) / sizeof(kFactoryInfo[0]); ++i) {
+        if (!strcmp(name, kFactoryInfo[i].name)) {
+            return (*kFactoryInfo[i].CreateFunc)(source);
+        }
+    }
+
+    return NULL;
+}
+
+#undef FACTORY_REF
+#undef FACTORY_CREATE
+
+#else
+#define OPTIONAL(x,y)
+#endif
+
 static const CodecInfo kDecoderInfo[] = {
     { MEDIA_MIMETYPE_IMAGE_JPEG, "OMX.TI.JPEG.decode" },
     { MEDIA_MIMETYPE_AUDIO_MPEG, "OMX.TI.MP3.decode" },
+    OPTIONAL(MEDIA_MIMETYPE_AUDIO_MPEG, "MP3Decoder")
     { MEDIA_MIMETYPE_AUDIO_MPEG, "OMX.PV.mp3dec" },
     { MEDIA_MIMETYPE_AUDIO_AMR_NB, "OMX.TI.AMR.decode" },
+    OPTIONAL(MEDIA_MIMETYPE_AUDIO_AMR_NB, "AMRNBDecoder")
     { MEDIA_MIMETYPE_AUDIO_AMR_NB, "OMX.PV.amrdec" },
     { MEDIA_MIMETYPE_AUDIO_AMR_WB, "OMX.TI.WBAMR.decode" },
+    OPTIONAL(MEDIA_MIMETYPE_AUDIO_AMR_WB, "AMRWBDecoder")
     { MEDIA_MIMETYPE_AUDIO_AMR_WB, "OMX.PV.amrdec" },
     { MEDIA_MIMETYPE_AUDIO_AAC, "OMX.TI.AAC.decode" },
+    OPTIONAL(MEDIA_MIMETYPE_AUDIO_AAC, "AACDecoder")
     { MEDIA_MIMETYPE_AUDIO_AAC, "OMX.PV.aacdec" },
     { MEDIA_MIMETYPE_VIDEO_MPEG4, "OMX.qcom.video.decoder.mpeg4" },
     { MEDIA_MIMETYPE_VIDEO_MPEG4, "OMX.TI.Video.Decoder" },
@@ -73,11 +126,13 @@ static const CodecInfo kDecoderInfo[] = {
     { MEDIA_MIMETYPE_VIDEO_H263, "OMX.PV.h263dec" },
     { MEDIA_MIMETYPE_VIDEO_AVC, "OMX.qcom.video.decoder.avc" },
     { MEDIA_MIMETYPE_VIDEO_AVC, "OMX.TI.Video.Decoder" },
+    OPTIONAL(MEDIA_MIMETYPE_VIDEO_AVC, "AVCDecoder")
     { MEDIA_MIMETYPE_VIDEO_AVC, "OMX.PV.avcdec" },
 };
 
 static const CodecInfo kEncoderInfo[] = {
     { MEDIA_MIMETYPE_AUDIO_AMR_NB, "OMX.TI.AMR.encode" },
+    OPTIONAL(MEDIA_MIMETYPE_AUDIO_AMR_NB, "AMRNBEncoder")
     { MEDIA_MIMETYPE_AUDIO_AMR_NB, "OMX.PV.amrencnb" },
     { MEDIA_MIMETYPE_AUDIO_AMR_WB, "OMX.TI.WBAMR.encode" },
     { MEDIA_MIMETYPE_AUDIO_AAC, "OMX.TI.AAC.encode" },
@@ -91,6 +146,8 @@ static const CodecInfo kEncoderInfo[] = {
     { MEDIA_MIMETYPE_VIDEO_AVC, "OMX.TI.Video.encoder" },
     { MEDIA_MIMETYPE_VIDEO_AVC, "OMX.PV.avcenc" },
 };
+
+#undef OPTIONAL
 
 #define CODEC_LOGI(x, ...) LOGI("[%s] "x, mComponentName, ##__VA_ARGS__)
 #define CODEC_LOGV(x, ...) LOGV("[%s] "x, mComponentName, ##__VA_ARGS__)
@@ -188,8 +245,22 @@ static bool IsSoftwareCodec(const char *componentName) {
     return false;
 }
 
+// A sort order in which non-OMX components are first,
+// followed by software codecs, i.e. OMX.PV.*, followed
+// by all the others.
 static int CompareSoftwareCodecsFirst(
         const String8 *elem1, const String8 *elem2) {
+    bool isNotOMX1 = strncmp(elem1->string(), "OMX.", 4);
+    bool isNotOMX2 = strncmp(elem2->string(), "OMX.", 4);
+
+    if (isNotOMX1) {
+        if (isNotOMX2) { return 0; }
+        return -1;
+    }
+    if (isNotOMX2) {
+        return 1;
+    }
+
     bool isSoftwareCodec1 = IsSoftwareCodec(elem1->string());
     bool isSoftwareCodec2 = IsSoftwareCodec(elem2->string());
 
@@ -293,27 +364,6 @@ sp<MediaSource> OMXCodec::Create(
     bool success = meta->findCString(kKeyMIMEType, &mime);
     CHECK(success);
 
-#if BUILD_WITH_FULL_STAGEFRIGHT
-    if (!createEncoder) {
-        if (!strcasecmp(mime, MEDIA_MIMETYPE_AUDIO_AAC)) {
-            return new AACDecoder(source);
-        } else if (!strcasecmp(mime, MEDIA_MIMETYPE_AUDIO_AMR_NB)) {
-            return new AMRNBDecoder(source);
-        } else if (!strcasecmp(mime, MEDIA_MIMETYPE_AUDIO_AMR_WB)) {
-            return new AMRWBDecoder(source);
-        } else if (!strcasecmp(mime, MEDIA_MIMETYPE_AUDIO_MPEG)) {
-            return new MP3Decoder(source);
-        } else if (!strcasecmp(mime, MEDIA_MIMETYPE_VIDEO_AVC)
-                    && (flags & kPreferSoftwareCodecs)) {
-            return new AVCDecoder(source);
-        }
-    } else {
-        if (!strcasecmp(mime, MEDIA_MIMETYPE_AUDIO_AMR_NB)) {
-            return new AMRNBEncoder(source);
-        }
-    }
-#endif
-
     Vector<String8> matchingCodecs;
     findMatchingCodecs(
             mime, createEncoder, matchComponentName, flags, &matchingCodecs);
@@ -329,6 +379,17 @@ sp<MediaSource> OMXCodec::Create(
     const char *componentName;
     for (size_t i = 0; i < matchingCodecs.size(); ++i) {
         componentName = matchingCodecs[i].string();
+
+#if BUILD_WITH_FULL_STAGEFRIGHT
+        sp<MediaSource> softwareCodec =
+            InstantiateSoftwareCodec(componentName, source);
+
+        if (softwareCodec != NULL) {
+            LOGV("Successfully allocated software codec '%s'", componentName);
+
+            return softwareCodec;
+        }
+#endif
 
         LOGV("Attempting to allocate OMX node '%s'", componentName);
 
