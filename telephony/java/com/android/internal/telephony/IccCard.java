@@ -468,6 +468,7 @@ public abstract class IccCard {
 
     public void broadcastIccStateChangedIntent(String value, String reason) {
         Intent intent = new Intent(TelephonyIntents.ACTION_SIM_STATE_CHANGED);
+        intent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING);
         intent.putExtra(Phone.PHONE_NAME_KEY, mPhone.getPhoneName());
         intent.putExtra(INTENT_KEY_ICC_STATE, value);
         intent.putExtra(INTENT_KEY_LOCKED_REASON, reason);
