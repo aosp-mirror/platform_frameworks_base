@@ -40,6 +40,10 @@ struct OMXPVCodecsPlugin : public OMXPluginBase {
             size_t size,
             OMX_U32 index);
 
+    virtual OMX_ERRORTYPE getRolesOfComponent(
+            const char *name,
+            Vector<String8> *roles);
+
 private:
     OMXPVCodecsPlugin(const OMXPVCodecsPlugin &);
     OMXPVCodecsPlugin &operator=(const OMXPVCodecsPlugin &);
