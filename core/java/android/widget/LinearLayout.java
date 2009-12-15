@@ -991,6 +991,9 @@ public class LinearLayout extends ViewGroup {
                     case Gravity.RIGHT:
                         childLeft = childRight - childWidth - lp.rightMargin;
                         break;
+                    default:
+                        childLeft = paddingLeft;
+                        break;
                 }
                 
                 
@@ -1101,6 +1104,9 @@ public class LinearLayout extends ViewGroup {
                             int descent = child.getMeasuredHeight() - childBaseline;
                             childTop -= (maxDescent[INDEX_BOTTOM] - descent);
                         }
+                        break;
+                    default:
+                        childTop = paddingTop;
                         break;
                 }
 
