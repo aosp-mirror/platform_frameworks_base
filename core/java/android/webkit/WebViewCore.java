@@ -683,6 +683,14 @@ final class WebViewCore {
         KeyEvent mEvent;
     }
 
+    static class MotionUpData {
+        int mFrame;
+        int mNode;
+        Rect mBounds;
+        int mX;
+        int mY;
+    }
+
     static class PostUrlData {
         String mUrl;
         byte[] mPostData;
@@ -778,6 +786,7 @@ final class WebViewCore {
             "ON_PAUSE",     // = 143
             "ON_RESUME",    // = 144
             "FREE_MEMORY",  // = 145
+            "VALID_NODE_BOUNDS", // = 146
         };
 
     class EventHub {
@@ -841,6 +850,7 @@ final class WebViewCore {
         static final int ON_PAUSE = 143;
         static final int ON_RESUME = 144;
         static final int FREE_MEMORY = 145;
+        static final int VALID_NODE_BOUNDS = 146;
 
         // Network-based messaging
         static final int CLEAR_SSL_PREF_TABLE = 150;
@@ -893,7 +903,7 @@ final class WebViewCore {
                     if (DebugFlags.WEB_VIEW_CORE) {
                         Log.v(LOGTAG, (msg.what < UPDATE_FRAME_CACHE_IF_LOADING
                                 || msg.what
-                                > FREE_MEMORY ? Integer.toString(msg.what)
+                                > VALID_NODE_BOUNDS ? Integer.toString(msg.what)
                                 : HandlerDebugString[msg.what
                                         - UPDATE_FRAME_CACHE_IF_LOADING])
                                 + " arg1=" + msg.arg1 + " arg2=" + msg.arg2
@@ -1289,6 +1299,20 @@ final class WebViewCore {
                         case POPULATE_VISITED_LINKS:
                             nativeProvideVisitedHistory((String[])msg.obj);
                             break;
+
+                        case VALID_NODE_BOUNDS: {
+                            MotionUpData motionUpData = (MotionUpData) msg.obj;
+                            boolean result = nativeValidNodeAndBounds(
+                                    motionUpData.mFrame, motionUpData.mNode,
+                                    motionUpData.mBounds);
+                            Message message = mWebView.mPrivateHandler
+                                    .obtainMessage(WebView.DO_MOTION_UP,
+                                    motionUpData.mX, motionUpData.mY,
+                                    new Boolean(result));
+                            mWebView.mPrivateHandler.sendMessageAtFrontOfQueue(
+                                    message);
+                            break;
+                        }
                     }
                 }
             };
@@ -1430,6 +1454,11 @@ final class WebViewCore {
 
     void sendMessage(int what, int arg1, int arg2, Object obj) {
         mEventHub.sendMessage(Message.obtain(null, what, arg1, arg2, obj));
+    }
+
+    void sendMessageAtFrontOfQueue(int what, Object obj) {
+        mEventHub.sendMessageAtFrontOfQueue(Message.obtain(
+                null, what, obj));
     }
 
     void sendMessageDelayed(int what, Object obj, long delay) {
@@ -2275,4 +2304,7 @@ final class WebViewCore {
     private native void nativeResume();
     private native void nativeFreeMemory();
     private native void nativeFullScreenPluginHidden(int npp);
+    private native boolean nativeValidNodeAndBounds(int frame, int node,
+            Rect bounds);
+
 }
