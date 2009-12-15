@@ -54,4 +54,48 @@ OMX_ERRORTYPE OMXPVCodecsPlugin::enumerateComponents(
     return OMX_MasterComponentNameEnum(name, size, index);
 }
 
+OMX_ERRORTYPE OMXPVCodecsPlugin::getRolesOfComponent(
+        const char *name,
+        Vector<String8> *roles) {
+    roles->clear();
+
+    OMX_U32 numRoles;
+    OMX_ERRORTYPE err =
+        OMX_MasterGetRolesOfComponent(
+                const_cast<char *>(name),
+                &numRoles,
+                NULL);
+
+    if (err != OMX_ErrorNone) {
+        return err;
+    }
+
+    if (numRoles > 0) {
+        OMX_U8 **array = new OMX_U8 *[numRoles];
+        for (OMX_U32 i = 0; i < numRoles; ++i) {
+            array[i] = new OMX_U8[OMX_MAX_STRINGNAME_SIZE];
+        }
+
+        OMX_U32 numRoles2;
+        err = OMX_MasterGetRolesOfComponent(
+                const_cast<char *>(name), &numRoles2, array);
+
+        CHECK_EQ(err, OMX_ErrorNone);
+        CHECK_EQ(numRoles, numRoles2);
+
+        for (OMX_U32 i = 0; i < numRoles; ++i) {
+            String8 s((const char *)array[i]);
+            roles->push(s);
+
+            delete[] array[i];
+            array[i] = NULL;
+        }
+
+        delete[] array;
+        array = NULL;
+    }
+
+    return OMX_ErrorNone;
+}
+
 }  // namespace android

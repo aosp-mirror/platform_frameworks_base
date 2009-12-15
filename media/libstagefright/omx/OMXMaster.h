@@ -45,6 +45,10 @@ struct OMXMaster : public OMXPluginBase {
             size_t size,
             OMX_U32 index);
 
+    virtual OMX_ERRORTYPE getRolesOfComponent(
+            const char *name,
+            Vector<String8> *roles);
+
 private:
     Mutex mLock;
     List<OMXPluginBase *> mPlugins;

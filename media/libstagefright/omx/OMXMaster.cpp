@@ -24,14 +24,10 @@
 #include "OMXPVCodecsPlugin.h"
 #endif
 
-#include "OMXSoftwareCodecsPlugin.h"
-
 namespace android {
 
 OMXMaster::OMXMaster()
     : mVendorLibHandle(NULL) {
-    addPlugin(new OMXSoftwareCodecsPlugin);
-
     addVendorPlugin();
 
 #ifndef NO_OPENCORE
@@ -166,6 +162,23 @@ OMX_ERRORTYPE OMXMaster::enumerateComponents(
     strcpy(name, name8.string());
 
     return OMX_ErrorNone;
+}
+
+OMX_ERRORTYPE OMXMaster::getRolesOfComponent(
+        const char *name,
+        Vector<String8> *roles) {
+    Mutex::Autolock autoLock(mLock);
+
+    roles->clear();
+
+    ssize_t index = mPluginByComponentName.indexOfKey(String8(name));
+
+    if (index < 0) {
+        return OMX_ErrorInvalidComponentName;
+    }
+
+    OMXPluginBase *plugin = mPluginByComponentName.valueAt(index);
+    return plugin->getRolesOfComponent(name, roles);
 }
 
 }  // namespace android
