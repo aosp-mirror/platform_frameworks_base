@@ -28,7 +28,7 @@ ES API. However, it may not be identical, so watch out for deviations.</p>
 
 <p>For an example of this usage model (based on the classic GL ColorCube), showing how to use
 it with threads can be found in 
-<a href="{@docRoot}guide/samples/ApiDemos/src/com/example/android/apis/graphics/GLSurfaceViewActivity.html">com.android.samples.graphics.GLSurfaceViewActivity.java</a>.
+<a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/graphics/GLSurfaceViewActivity.html">com.android.samples.graphics.GLSurfaceViewActivity.java</a>.
 </p>
 
 <p>Writing a summary of how to actually write 3D applications using OpenGL is

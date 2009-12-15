@@ -1,0 +1,130 @@
+page.title=UI Framework Changes in Android 1.6
+@jd:body
+
+<p>Android 1.6 introduces numerous enhancements and bug fixes in the UI
+framework. This article highlights two improvements in particular: more flexible
+and robust RelativeLayout and easier click listeners. </p>
+
+<h3>More flexible, more robust RelativeLayout</h3>
+
+<p>RelativeLayout is the most versatile layout offered by the Android UI toolkit
+and can be successfully used to reduce the number of views created by your
+applications. This layout used to suffer from various bugs and limitations,
+sometimes making it difficult to use without having some knowledge of its
+implementation. To make your life easier, Android 1.6 comes with a revamped
+RelativeLayout. </p>
+
+<p>This new implementation not only fixes all known bugs in 
+RelativeLayout but also addresses its major limitation: the
+fact that views had to be declared in a particular order. Consider the following
+XML layout:</p>
+
+<pre>&lt;?xml version="1.0" encoding="utf-8"?&gt;
+
+&lt;RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="64dip"
+    android:padding="6dip"&gt;
+
+    &lt;TextView
+        android:id="@+id/band"  
+        android:layout_width="fill_parent" 
+        android:layout_height="26dip" 
+
+        android:layout_below="@+id/track"
+        android:layout_alignLeft="@id/track"
+        android:layout_alignParentBottom="true"
+
+        android:gravity="top"
+        android:text="The Airborne Toxic Event" /&gt;
+
+    &lt;TextView
+        android:id="@id/track"  
+        android:layout_marginLeft="6dip"
+        android:layout_width="fill_parent"
+        android:layout_height="26dip"
+
+        android:layout_toRightOf="@+id/artwork"
+
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:gravity="bottom"
+        android:text="Sometime Around Midnight" /&gt;
+        
+    &lt;ImageView
+        android:id="@id/artwork"
+        android:layout_width="56dip"
+        android:layout_height="56dip"
+        android:layout_gravity="center_vertical"
+
+        android:src="@drawable/artwork" /&gt;
+        
+&lt;/RelativeLayout&gt;</pre>
+
+<p>This code builds a very simple layout—an image on the left with two lines of
+text stacked vertically. This XML layout is perfectly fine and contains no
+errors. Unfortunately, Android 1.5's RelativeLayout is incapable of rendering it
+correctly, as shown in the screenshot below.</p>
+
+<img src="images/ui-1.6_002.png" style="width: 320px; height: 480px;">
+
+<p>The problem is that this layout uses forward references. For instance, the
+"band" TextView is positioned below the "track" TextView but "track" is declared
+after "band" and, in Android 1.5, RelativeLayout does not know how to handle
+this case. Now look at the exact same layout running on Android 1.6:</p>
+
+<img src="images/ui-1.6.png" style="width: 320px; height: 480px;">
+
+<p>As you can see Android 1.6 is now better able to handle forward reference.
+The result on screen is exactly what you would expect when writing the
+layout.</p>
+
+<h3>Easier click listeners</h3>
+
+<p>Setting up a click listener on a button is very common task, but 
+it requires quite a bit of boilerplate code:</p>
+
+<pre>findViewById(R.id.myButton).setOnClickListener(new View.OnClickListener() {
+    public void onClick(View v) {
+        // Do stuff
+    }
+});</pre>
+
+<p>One way to reduce the amount of boilerplate is to share a single click
+listener between several buttons. While this technique reduces the
+number of classes, it still requires a fair amount of code and it still
+requires giving each button an id in your XML layout file:</p>
+
+<pre>View.OnClickListener handler = View.OnClickListener() {
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.myButton: // doStuff
+                break;
+            case R.id.myOtherButton: // doStuff
+                break;
+        }
+    }
+}
+
+findViewById(R.id.myButton).setOnClickListener(handler);
+findViewById(R.id.myOtherButton).setOnClickListener(handler);</pre>
+
+<p>With Android 1.6, none of this is necessary. All you have to do is 
+declare a public method in your Activity to handle the click 
+(the method <i>must</i> have one View argument):</p>
+
+<pre>class MyActivity extends Activity {
+    public void myClickHandler(View target) {
+        // Do stuff
+    }
+}</pre>
+
+<p>And then reference this method from your XML layout:</p>
+
+<pre>&lt;Button android:onClick="myClickHandler" /&gt;</pre>
+
+<p>This new feature reduces both the amount of Java and XML you have to write,
+leaving you more time to concentrate on your application.</p>
+
+<p>The Android team is committed to helping you write applications in the
+easiest and most efficient way possible. We hope you find these improvements
+useful and we're excited to see your applications on Android Market.</p>

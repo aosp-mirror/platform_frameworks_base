@@ -15,7 +15,7 @@ parent.link=index.html
 
   <h2>See also</h2>
   <ol>
-    <li><a href="{@docRoot}guide/tutorials/views/hello-formstuff.html">Hello Form Stuff tutorial</a></li>
+    <li><a href="{@docRoot}resources/tutorials/views/hello-formstuff.html">Hello Form Stuff tutorial</a></li>
   </ol>
 </div>
 </div>

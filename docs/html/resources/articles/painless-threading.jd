@@ -1,0 +1,147 @@
+page.title=Painless Threading
+@jd:body
+
+<p>This article discusses the threading model used by Android applications and how applications can ensure best UI performance by spawning worker threads to handle long-running operations, rather than handling them in the main thread. The article also explains the API that your application can use to interact with Android UI toolkit components running on the main thread and spawn managed worker threads.  </p>
+
+<h3>The UI thread</h3>
+
+<p>When an application is launched, the system creates a thread called
+"main" for the application. The main thread, also called the <em>UI
+thread</em>, is very important because it is in charge of dispatching the
+events to the appropriate widgets, including drawing events.
+It is also the thread where your application interacts with running 
+components of the Android UI toolkit. </p>
+
+<p>For instance, if you touch the a button on screen, the UI thread dispatches
+the touch event to the widget, which in turn sets its pressed state and
+posts an invalidate request to the event queue. The UI thread dequeues
+the request and notifies the widget to redraw itself.</p>
+
+<p>This single-thread model can yield poor performance unless your application 
+is implemented properly. Specifically, if everything is happening in a single 
+thread, performing long operations such as network access or database
+queries on the UI thread will block the whole user interface. No event
+can be dispatched, including drawing events, while the long operation
+is underway. From the user's perspective, the application appears hung.
+Even worse, if the UI thread is blocked for more than a few seconds
+(about 5 seconds currently) the user is presented with the infamous "<a href="http://developer.android.com/guide/practices/design/responsiveness.html">application not responding</a>" (ANR) dialog.</p>
+
+<p>If you want to see how bad this can look, write a simple application 
+with a button that invokes <code>Thread.sleep(2000)</code> in its 
+<a href="http://developer.android.com/reference/android/view/View.OnClickListener.html">OnClickListener</a>.
+The button will remain in its pressed state for about 2 seconds before
+going back to its normal state. When this happens, it is very easy for
+the user to <em>perceive</em> the application as slow.</p>
+
+<p>To summarize, it's vital to the responsiveness of your application's UI to
+keep the UI thread unblocked. If you have long operations to perform, you should
+make sure to do them in extra threads (<em>background</em> or <em>worker</em>
+threads). </p>
+
+<p>Here's an example of a click listener downloading an image over the 
+network and displaying it in an <a href="http://developer.android.com/reference/android/widget/ImageView.html">ImageView</a>:</p>
+
+<pre class="prettyprint">public void onClick(View v) {
+  new Thread(new Runnable() {
+    public void run() {
+      Bitmap b = loadImageFromNetwork();
+      mImageView.setImageBitmap(b);
+    }
+  }).start();
+}</pre>
+
+<p>At first, this code seems to be a good solution to your problem, as it does
+not block the UI thread. Unfortunately, it violates the single-threaded model
+for the UI: the Android UI toolkit is <em>not thread-safe</em> and must always
+be manipulated on the UI thread. In this piece of code above, the
+<code>ImageView</code> is manipulated on a worker thread, which can cause really
+weird problems. Tracking down and fixing such bugs can be difficult and
+time-consuming.</p>
+
+<p>Android offers several ways to access the UI
+thread from other threads. You may already be familiar with some of
+them but here is a comprehensive list:</p>
+
+<ul>
+<li>{@link android.app.Activity#runOnUiThread(java.lang.Runnable) Activity.runOnUiThread(Runnable)}</li>
+<li>{@link android.view.View#post(java.lang.Runnable) View.post(Runnable)}</li>
+<li>{@link android.view.View#postDelayed(java.lang.Runnable, long) View.postDelayed(Runnable, long)}</li>
+<li>{@link android.os.Handler}</li>
+</ul>
+
+<p>You can use any of these classes and methods to correct the previous code example:</p>
+
+<pre class="prettyprint">public void onClick(View v) {
+  new Thread(new Runnable() {
+    public void run() {
+      final Bitmap b = loadImageFromNetwork();
+      mImageView.post(new Runnable() {
+        public void run() {
+          mImageView.setImageBitmap(b);
+        }
+      });
+    }
+  }).start();
+}</pre>
+
+<p>Unfortunately,
+these classes and methods could also tend to make your code more complicated
+and more difficult to read. It becomes even worse when your implement
+complex operations that require frequent UI updates. </p>
+
+<p>To remedy this problem, Android 1.5 and later platforms offer a utility class
+called {@link android.os.AsyncTask}, that simplifies the creation of
+long-running tasks that need to communicate with the user interface.</p>
+
+<p>An <code>AsyncTask</code> equivalent is also available for applications that
+will run on Android 1.0 and 1.1. The name of the class is <a
+href="http://code.google.com/p/shelves/source/browse/trunk/Shelves/src/org/
+curiouscreature/android/shelves/util/UserTask.java">UserTask</a>. It offers the
+exact same API and all you have to do is copy its source code in your
+application.</p>
+
+<p>The goal of <code>AsyncTask</code> is to take care of thread management for
+you. Our previous example can easily be rewritten with
+<code>AsyncTask</code>:</p>
+
+<pre class="prettyprint">public void onClick(View v) {
+  new DownloadImageTask().execute("http://example.com/image.png");
+}
+
+private class DownloadImageTask extends AsyncTask&lt;string, void,="" bitmap=""&gt; {
+     protected Bitmap doInBackground(String... urls) {
+         return loadImageFromNetwork(urls[0]);
+     }
+
+     protected void onPostExecute(Bitmap result) {
+         mImageView.setImageBitmap(result);
+     }
+ }</pre>
+
+<p>As you can see, <code>AsyncTask</code> <em>must</em> be used by subclassing
+it. It is also very important to remember that an <code>AsyncTask</code>
+instance has to be created on the UI thread and can be executed only once. You
+can read the <a
+href="http://developer.android.com/reference/android/os/AsyncTask.html">
+AsyncTask documentation</a> for a full understanding on how to use this class,
+but here is a quick overview of how it works:</p>
+
+<ul>
+<li>You can specify the type, using generics, of the parameters, the progress values and the final value of the task</li>
+<li>The method <a href="http://developer.android.com/reference/android/os/AsyncTask.html#doInBackground%28Params...%29">doInBackground()</a> executes automatically on a worker thread</li>
+<li><a href="http://developer.android.com/reference/android/os/AsyncTask.html#onPreExecute%28%29">onPreExecute()</a>, <a href="http://developer.android.com/reference/android/os/AsyncTask.html#onPostExecute%28Result%29">onPostExecute()</a> and <a href="http://developer.android.com/reference/android/os/AsyncTask.html#onProgressUpdate%28Progress...%29">onProgressUpdate()</a> are all invoked on the UI thread</li>
+<li>The value returned by <a href="http://developer.android.com/reference/android/os/AsyncTask.html#doInBackground%28Params...%29">doInBackground()</a> is sent to <a href="http://developer.android.com/reference/android/os/AsyncTask.html#onPostExecute%28Result%29">onPostExecute()</a></li>
+<li>You can call <a href="http://developer.android.com/reference/android/os/AsyncTask.html#publishProgress%28Progress...%29">publishProgress()</a> at anytime in <a href="http://developer.android.com/reference/android/os/AsyncTask.html#doInBackground%28Params...%29">doInBackground()</a> to execute <a href="http://developer.android.com/reference/android/os/AsyncTask.html#onProgressUpdate%28Progress...%29">onProgressUpdate()</a> on the UI thread</li><li>You can cancel the task at any time, from any thread</li>
+</ul>
+
+<p>In addition to the official documentation, you can read several complex examples in the source code of Shelves (<a href="http://code.google.com/p/shelves/source/browse/trunk/Shelves/src/org/curiouscreature/android/shelves/activity/ShelvesActivity.java">ShelvesActivity.java</a> and <a href="http://code.google.com/p/shelves/source/browse/trunk/Shelves/src/org/curiouscreature/android/shelves/activity/AddBookActivity.java">AddBookActivity.java</a>) and Photostream (<a href="http://code.google.com/p/apps-for-android/source/browse/trunk/Photostream/src/com/google/android/photostream/LoginActivity.java">LoginActivity.java</a>, <a href="http://code.google.com/p/apps-for-android/source/browse/trunk/Photostream/src/com/google/android/photostream/PhotostreamActivity.java">PhotostreamActivity.java</a> and <a href="http://code.google.com/p/apps-for-android/source/browse/trunk/Photostream/src/com/google/android/photostream/ViewPhotoActivity.java">ViewPhotoActivity.java</a>). We highly recommend reading the source code of <a href="http://code.google.com/p/shelves/">Shelves</a> to see how to persist tasks across configuration changes and how to cancel them properly when the activity is destroyed.</p>
+
+<p>Regardless of whether or not you use <a href="http://developer.android.com/reference/android/os/AsyncTask.html">AsyncTask</a>,
+always remember these two rules about the single thread model: </p>
+
+<ol>
+<li>Do not block the UI thread, and 
+<li>Make sure that you access the Android UI toolkit <em>only</em> on the UI thread. 
+</ol>
+
+<p><code>AsyncTask</code> just makes it easier to do both of these things.</p>

@@ -53,6 +53,11 @@ Android &mdash; make sure that you have a suitable version of Eclipse
 installed on your computer (3.4 or newer is recommended). If you need 
 to install Eclipse, you can download it from this location: </p>
 
+<p style="margin-left:2em;"><a href=
+"http://www.eclipse.org/downloads/">http://www.eclipse.org/downloads/</a>
+</p>
+
+<p>A Java or RCP version of Eclipse is recommended. </p>
 
 <h2 id="installing">Installing the ADT Plugin</h2>
 
@@ -196,7 +201,7 @@ Eclipse components (for example, WST). If you encounter an error when
 installing ADT, your Eclipse installion might not include these components. 
 For information about how to quickly add the necessary components to your 
 Eclipse installation, see the troubleshooting topic 
-<a href="{@docRoot}guide/appendix/faq/troubleshooting.html#installeclipsecomponents">ADT 
+<a href="{@docRoot}resources/faq/troubleshooting.html#installeclipsecomponents">ADT 
 Installation Error: "requires plug-in org.eclipse.wst.sse.ui"</a>.</p>
 
 <h4>For Linux users</h4>
@@ -263,9 +268,10 @@ href="{@docRoot}sdk/adt-notes.html">ADT Plugin Notes</a> document. </p>
 
 <p>If you encounter problems during the update of ADT, you 
 can try removing the existing ADT plugin and then performing a fresh
-installation. Fully remove your existing ADT Plugin as described in <a
-href="#uninstalling">Uninstalling the ADT Plugin</a>, below, and then follow the guide to <a
-href="#installing">Installing the ADT Plugin</a>.</p>
+installation. To remove the plugin, follow the instructions in <a
+href="#uninstalling">Uninstalling the ADT Plugin</a>, below. To reinstall 
+the plugin, follow the instructions in <a
+href="#installing">Installing the ADT Plugin</a>, above.</p>
 
 
 <h2 id="uninstalling">Uninstalling the ADT plugin</h2>

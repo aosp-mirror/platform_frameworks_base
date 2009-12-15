@@ -40,7 +40,7 @@ parent.link=index.html
   </li>
   <li>
     You could override the way that an EditText component is rendered on the screen
-    (the <a href="{@docRoot}guide/samples/NotePad/">Notepad sample</a> uses this to good effect, 
+    (the <a href="{@docRoot}resources/samples/NotePad/">Notepad sample</a> uses this to good effect, 
     to create a lined-notepad page).
   </li>
   <li>

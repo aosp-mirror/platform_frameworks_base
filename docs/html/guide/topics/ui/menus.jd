@@ -180,7 +180,7 @@ Then, register a {@link android.view.ContextMenu} for the View, with
 <code>{@link android.app.Activity#registerForContextMenu(View) registerForContextMenu()}</code>.</p>
 
 <p>For example, here is some code that can be used with the 
-<a href="{@docRoot}guide/tutorials/notepad/index.html">Notepad application</a>
+<a href="{@docRoot}resources/tutorials/notepad/index.html">Notepad application</a>
 to add a context menu for each note in the list:</p>
 <pre>
 public void onCreateContextMenu(ContextMenu menu, View v,
@@ -518,5 +518,5 @@ a <code>&lt;category></code> element in the intent filter. For example:</p>
 <a href="/guide/topics/intents/intents-filters.html">Intents and Intent Filters</a> document.</p>
 
 <p>For a sample application using this technique, see the 
-<a href="{@docRoot}guide/samples/NotePad/index.html">Note Pad</a>
+<a href="{@docRoot}resources/samples/NotePad/index.html">Note Pad</a>
 sample code.</p>

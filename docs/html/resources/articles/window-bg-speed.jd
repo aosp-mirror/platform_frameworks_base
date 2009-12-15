@@ -1,0 +1,125 @@
+page.title=Window Backgrounds &amp; UI Speed
+@jd:body
+
+<p>Some Android applications require to squeeze every bit of performance out of
+the UI toolkit and there are many ways to do so. In this article, you will
+discover how to speed up the drawing and the <em>perceived</em> startup time of
+your activities. Both these techniques rely on a single feature, the window's
+background drawable.</p>
+
+<p>The term <em>window background</em> is a bit misleading, however. When you
+setup your user interface by calling <code>setContentView()</code> on an 
+{@link android.app.Activity}, Android adds your views to the <code>Activity</code>'s
+window. The window however does not contain only your views, but a few others
+created for you. The most important one is, in the current implementation used
+on the T-Mobile G1, the <code>DecorView</code>, highlighted in the view
+hierarchy below:</p>
+
+<div style="text-align: center;"><img src="images/window_background_root.png" alt="A typical Android view hierarchy"></div>
+
+<p>The <code>DecorView</code> is the view that actually holds the 
+window's background drawable. Calling 
+{@link android.view.Window#setBackgroundDrawable(android.graphics.drawable.Drawable) getWindow().setBackgroundDrawable()} 
+from your <code>Activity</code> changes the background of the window by changing
+the <code>DecorView</code>'s background drawable. As mentioned before, this
+setup is very specific to the current implementation of Android and can change
+in a future version or even on another device.</p>
+
+<p>If you are using the standard Android themes, a default background drawable
+is set on your activities. The standard theme currently used on the T-Mobile G1
+uses for instance a {@link android.graphics.drawable.ColorDrawable}. For most
+applications, this background drawable works just fine and can be left alone. It
+can however impacts your application's drawing performance. Let's take the
+example of an application that always draws a full screen opaque picture:</p>
+
+<div style="text-align: center;"><img src="images/window_background.png" alt="An opaque user interface doesn't need a window background"></div>
+
+<p>You can see on this screenshot that the window's background is invisible,
+entirely covered by an <code>ImageView</code>. This application is setup to
+redraw as fast as it can and draws at about 44 frames per second, or 22
+milliseconds per frame (<strong>note:</strong> the number of frames per second
+used in this article were obtained on a T-Mobile G1 with my finger on the screen
+so as to reduce the drawing speed which would otherwise be capped at 60 fps.) An
+easy way to make such an application draw faster is to <em>remove</em> the
+background drawable. Since the user interface is entirely opaque, drawing the
+background is simply wasteful. Removing the background improves the performance
+quite nicely:</p>
+
+<div style="text-align: center;"><img src="images/window_background_null.png" alt="Remove the background for faster drawing"></div>
+
+<p>In this new version of the application, the drawing speed went up to 51
+frames per second, or 19 milliseconds per frame. The difference of 3
+milliseconds per is easily explained by the speed of the memory bus on the
+T-Mobile G1: it is exactly the time it takes to move the equivalent of a
+screenful of pixels on the bus. The difference could be even greater if the
+default background was using a more expensive drawable.</p>
+
+<p>Removing the window's background can be achieved very easily by using 
+a custom theme. To do so, first create a file called 
+<code>res/values/theme.xml</code> containing the following:</p>
+
+<pre class="prettyprint">&lt;resources&gt;
+    &lt;style name="Theme.NoBackground" parent="android:Theme"&gt;
+        &lt;item name="android:windowBackground"&gt;@null&lt;/item&gt;
+    &lt;/style&gt;
+&lt;/resources&gt;</pre>
+
+<p>You then need to apply the theme to your activity by adding the attribute
+<code>android:theme="@style/Theme.NoBackground"</code> to your
+<code>&lt;activity /&gt;</code> or <code>&lt;application /&gt;</code> tag. This
+trick comes in very handy for any app that uses a <code>MapView</code>, a
+<code>WebView</code> or any other full screen opaque view.</p>
+
+<p><strong>Opaque views and Android</strong>: this optimization is currently
+necessary because the Android UI toolkit is not smart enough to prevent the
+drawing of views hidden by opaque children. The main reason why this
+optimization was not implemented is simply because there are usually very few
+opaque views in Android applications. This is however something that I
+definitely plan on implementing as soon as possible and I can only apologize for
+not having been able to do this earlier.</p><p>Using a theme to change the
+window's background is also a fantastic way to improve the <em>perceived</em>
+startup performance of some of your activities. This particular trick can only
+be applied to activities that use a custom background, like a texture or a logo.
+The <a href="http://code.google.com/p/shelves">Shelves</a> application is a good
+example:</p>
+
+<div style="text-align: center;"><img src="images/shelves2.png" alt="Textured backgrounds are good candidates for window's background"></div>
+
+<p>If this application simply set the wooden background in the XML layout or in
+<code>onCreate()</code> the user would see the application startup with the
+default theme and its dark background. The wooden texture would only appear
+after the inflation of the content view and the first layout/drawing pass. This
+causes a jarring effect and gives the user the impression that the application
+takes time to load (which can actually be the case.) Instead, the application
+defines the wooden background in a theme, picked up by the system as soon as the
+application starts. The user never sees the default theme and gets the
+impression that the application is up and running right away. To limit the
+memory and disk usage, the background is a tiled texture defined in
+<code>res/drawable/background_shelf.xml</code>:</p>
+
+<pre class="prettyprint">&lt;bitmap xmlns:android="http://schemas.android.com/apk/res/android"
+    android:src="@drawable/shelf_panel"
+    android:tileMode="repeat" /&gt;</pre><p>This drawable is simply referenced by the theme:</p>
+
+<pre class="prettyprint">&lt;resources&gt;
+    &lt;style name="Theme.Shelves" parent="android:Theme"&gt;
+        &lt;item name="android:windowBackground"&gt;@drawable/background_shelf&lt;/item&gt;
+        &lt;item name="android:windowNoTitle"&gt;true&lt;/item&gt;
+    &lt;/style&gt;
+&lt;/resources&gt;</pre>
+
+<p>The same exact trick is used in the <em>Google Maps application that ships
+with the T-Mobile G1. When the application is launched, the user immediately
+sees the loading tiles of <code>MapView</code>. This is only a trick, the theme
+is simply using a tiled background that looks exactly like the loading tiles of
+<code>MapView</code>.</em></p>
+
+<p>Sometimes the best tricks are also the simplest, so the next time you create
+an activity with an opaque UI or a custom background, remember to change the
+window's background.</p>
+
+<p><a href="http://progx.org/users/Gfx/android/WindowBackground">Download the source code of the first example</a>.</p>
+
+<p><a href="http://code.google.com/p/shelves/">Download the source code of Shelves</a>.</p>
+
+

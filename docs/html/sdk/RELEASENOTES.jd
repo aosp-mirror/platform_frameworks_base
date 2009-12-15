@@ -604,7 +604,7 @@ Device for Development</a>.</p>
 classes, you can do so. However, you need to set up a custom JUnit configuration
 before your tests will run properly. For detailed information about how to set
 up the JUnit configuration, see the troubleshooting topic <a
-href="{@docRoot}guide/appendix/faq/troubleshooting.html#addjunit">Running a Junit test class
+href="{@docRoot}resources/faq/troubleshooting.html#addjunit">Running a Junit test class
 in Eclipse</a>.</li>
 </ul>
 

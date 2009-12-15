@@ -1754,7 +1754,7 @@ to the current working directory): </p>
 <p>For emulators running on Mac OS X, if you see an error &quot;Warning: No DNS servers found&quot; when starting the emulator, check to see whether you have an <code>/etc/resolv.conf</code> file. If not, please run the following line in a command window:</p>
     <pre>ln -s /private/var/run/resolv.conf /etc/resolv.conf</pre>
 
-<p>See <a href="{@docRoot}guide/appendix/faq/index.html">Frequently Asked Questions</a> for more troubleshooting information. </p>
+<p>See <a href="{@docRoot}resources/faq/index.html">Frequently Asked Questions</a> for more troubleshooting information. </p>
 
 <a name="limitations"></a>
     <h2>Emulator Limitations</h2>
