@@ -251,9 +251,9 @@ public class RenderScript {
     }
 
     void validateSurface() {
-        if (mSurface == null) {
-            throw new IllegalStateException("Uploading data to GL with no surface.");
-        }
+        //if (mSurface == null) {
+            //throw new IllegalStateException("Uploading data to GL with no surface.");
+        //}
     }
 
     public void contextSetPriority(Priority p) {
