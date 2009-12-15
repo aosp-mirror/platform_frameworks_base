@@ -179,6 +179,7 @@ class DockObserver extends UEventObserver {
                 }
                 // Pack up the values and broadcast them to everyone
                 Intent intent = new Intent(Intent.ACTION_DOCK_EVENT);
+                intent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING);
                 intent.putExtra(Intent.EXTRA_DOCK_STATE, mDockState);
 
                 // Check if this is Bluetooth Dock

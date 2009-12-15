@@ -1181,7 +1181,7 @@ public class Intent implements Parcelable {
      * by the system.
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    public static final String ACTION_USER_PRESENT= "android.intent.action.USER_PRESENT";
+    public static final String ACTION_USER_PRESENT = "android.intent.action.USER_PRESENT";
 
     /**
      * Broadcast Action: The current time has changed.  Sent every
@@ -2399,6 +2399,20 @@ public class Intent implements Parcelable {
      */
     public static final int FLAG_RECEIVER_REGISTERED_ONLY = 0x40000000;
     /**
+     * If set, when sending a broadcast the new broadcast will replace
+     * any existing pending broadcast that matches it.  Matching is defined
+     * by {@link Intent#filterEquals(Intent) Intent.filterEquals} returning
+     * true for the intents of the two broadcasts.  When a match is found,
+     * the new broadcast (and receivers associated with it) will replace the
+     * existing one in the pending broadcast list, remaining at the same
+     * position in the list.
+     * 
+     * <p>This flag is most typically used with sticky broadcasts, which
+     * only care about delivering the most recent values of the broadcast
+     * to their receivers.
+     */
+    public static final int FLAG_RECEIVER_REPLACE_PENDING = 0x20000000;
+    /**
      * If set, when sending a broadcast <i>before boot has completed</i> only
      * registered receivers will be called -- no BroadcastReceiver components
      * will be launched.  Sticky intent state will be recorded properly even
@@ -2411,14 +2425,14 @@ public class Intent implements Parcelable {
      *
      * @hide
      */
-    public static final int FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT = 0x20000000;
+    public static final int FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT = 0x10000000;
     /**
      * Set when this broadcast is for a boot upgrade, a special mode that
      * allows the broadcast to be sent before the system is ready and launches
      * the app process with no providers running in it.
      * @hide
      */
-    public static final int FLAG_RECEIVER_BOOT_UPGRADE = 0x10000000;
+    public static final int FLAG_RECEIVER_BOOT_UPGRADE = 0x08000000;
 
     /**
      * @hide Flags that can't be changed with PendingIntent.

@@ -134,6 +134,7 @@ public class PhoneProxy extends Handler implements Phone {
 
             //Send an Intent to the PhoneApp that we had a radio technology change
             Intent intent = new Intent(TelephonyIntents.ACTION_RADIO_TECHNOLOGY_CHANGED);
+            intent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING);
             intent.putExtra(Phone.PHONE_NAME_KEY, mActivePhone.getPhoneName());
             ActivityManagerNative.broadcastStickyIntent(intent, null);
             break;

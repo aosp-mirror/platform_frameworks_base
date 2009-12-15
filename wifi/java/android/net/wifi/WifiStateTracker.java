@@ -973,7 +973,8 @@ public class WifiStateTracker extends NetworkStateTracker {
 
                     mDisconnectExpected = false;
                     intent = new Intent(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION);
-                    intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
+                    intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT
+                            | Intent.FLAG_RECEIVER_REPLACE_PENDING);
                     intent.putExtra(WifiManager.EXTRA_NEW_STATE, (Parcelable)newState);
                     if (failedToAuthenticate) {
                         if (LOCAL_LOGD) Log.d(TAG, "Failed to authenticate, disabling network " + networkId);
@@ -1443,7 +1444,8 @@ public class WifiStateTracker extends NetworkStateTracker {
 
     private void sendNetworkStateChangeBroadcast(String bssid) {
         Intent intent = new Intent(WifiManager.NETWORK_STATE_CHANGED_ACTION);
-        intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
+        intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT
+                | Intent.FLAG_RECEIVER_REPLACE_PENDING);
         intent.putExtra(WifiManager.EXTRA_NETWORK_INFO, mNetworkInfo);
         if (bssid != null)
             intent.putExtra(WifiManager.EXTRA_BSSID, bssid);
