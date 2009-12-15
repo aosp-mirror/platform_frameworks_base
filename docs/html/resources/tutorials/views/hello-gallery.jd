@@ -1,0 +1,135 @@
+page.title=Hello, Gallery
+parent.title=Hello, Views
+parent.link=index.html
+@jd:body
+
+<p>A {@link android.widget.Gallery} is a View commonly used to display items in a horizontally scrolling list
+that locks the current selection at the center. When one is selected, we'll show a message.</p>
+
+
+<ol>
+  <li>Start a new project/Activity called HelloGallery.</li>
+  <li>Add some images to your res/drawable/ directory.</li>
+  <li>Open the layout file and make it like so:
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;Gallery xmlns:android="http://schemas.android.com/apk/res/android" 
+    android:id="@+id/gallery"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+/>
+</pre>
+</li>
+
+
+<li>Open the HelloGallery.java file. Insert the following for the <code>onCreate()</code> method:
+<pre>
+&#64;Override
+public void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    setContentView(R.layout.main);
+
+    Gallery g = (Gallery) findViewById(R.id.gallery);
+    g.setAdapter(new ImageAdapter(this));
+
+    g.setOnItemClickListener(new OnItemClickListener() {
+        public void onItemClick(AdapterView parent, View v, int position, long id) {
+            Toast.makeText(HelloGallery.this, "" + position, Toast.LENGTH_SHORT).show();
+        }
+    });
+}
+</pre>
+	<p>We start as usual: set the layout and capture the View we want (our Gallery). 
+We then set an Adapter, called ImageAdapter for the Gallery&mdash;this is a new class that
+we'll create next. Then we create an item click listener for the Gallery. This is like a normal
+on-click listener (which you might be familiar with for buttons), but it listens to each item
+that we've added to the Gallery. The <code>onItemClick()</code> callback method 
+receives the AdapterView where the click occurred, the specific View that received the click, the 
+position of the View clicked (zero-based), and the row id of the item clicked (if applicable). All
+that we care about is the position, so that we can pop up a {@link android.widget.Toast} message that 
+tells us the index position of the item clicked. We do this with <code>Toast.makeText().show()</code>.
+</p>
+</li>
+
+<li>After the <code>onCreate()</code> method, add the <code>ImageAdapter</code> class:
+<pre>
+public class ImageAdapter extends BaseAdapter {
+    int mGalleryItemBackground;
+    private Context mContext;
+
+    private Integer[] mImageIds = {
+            R.drawable.sample_1,
+            R.drawable.sample_2,
+            R.drawable.sample_3,
+            R.drawable.sample_4,
+            R.drawable.sample_5,
+            R.drawable.sample_6,
+            R.drawable.sample_7
+    };
+
+    public ImageAdapter(Context c) {
+        mContext = c;
+        TypedArray a = obtainStyledAttributes(android.R.styleable.Theme);
+        mGalleryItemBackground = a.getResourceId(
+                android.R.styleable.Theme_galleryItemBackground, 0);
+        a.recycle();
+    }
+
+    public int getCount() {
+        return mImageIds.length;
+    }
+
+    public Object getItem(int position) {
+        return position;
+    }
+
+    public long getItemId(int position) {
+        return position;
+    }
+
+    public View getView(int position, View convertView, ViewGroup parent) {
+        ImageView i = new ImageView(mContext);
+
+        i.setImageResource(mImageIds[position]);
+        i.setLayoutParams(new Gallery.LayoutParams(150, 100));
+        i.setScaleType(ImageView.ScaleType.FIT_XY);
+        i.setBackgroundResource(mGalleryItemBackground);
+
+        return i;
+    }
+}
+</pre>
+<p>First, there are a few member variables, including an array of IDs that reference
+the images we placed in our drawable resources directory.</p>
+<p>Next is the constructor, where we define the member Context. The rest of the constructor
+sets up a reference for our Gallery them, which adds the nice framing for each Gallery item.
+Once we have our <code>mGalleryItemBackground</code>, it's important to recycle the 
+StyledAttribute for later re-use.</p>
+<p>The next three methods are required for basic member queries. 
+But then we have the <code>getView()</code> method, which is called
+for each item read by our ImageAdapter, when the Gallery is being built. Here, we 
+use our member Context to create a new {@link android.widget.ImageView}. We then define
+the image resource with the current position of the Gallery items (corresponding to our
+array of drawables), set the dimensions for the ImageView, 
+set the image scaling to fit the ImageView dimensions, then finally set the 
+background theme for the ImageView.</p>
+
+<p>See {@link android.widget.ImageView.ScaleType}
+for other image scaling options, in case you want to avoid stretching images that don't 
+exactly match the ImageView dimensions.</p>
+
+<li>Now run it.</li>
+</ol>
+<p>You should see something like this:</p>
+<img src="images/hello-gallery.png" width="150px" />
+
+
+<h3>References</h3>
+<ul>
+	<li>{@link android.widget.BaseAdapter}</li>
+	<li>{@link android.widget.Gallery}</li>
+	<li>{@link android.widget.ImageView}</li>
+	<li>{@link android.widget.Toast}</li>
+</ul>
+
+

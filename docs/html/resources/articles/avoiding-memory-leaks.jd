@@ -1,0 +1,109 @@
+page.title=Avoiding Memory Leaks
+@jd:body
+
+
+<p>Android applications are, at least on the T-Mobile G1, limited
+to 16 MB of heap. It's both a lot of memory for a phone and yet very
+little for what some developers want to achieve. Even if you do not
+plan on using all of this memory, you should use as little as possible
+to let other applications run without getting them killed. The more
+applications Android can keep in memory, the faster it will be for the
+user to switch between his apps. As part of my job, I ran into memory
+leaks issues in Android applications and they are most of the time due
+to the same mistake: keeping a long-lived reference to a 
+{@link android.content.Context Context}.</p>
+
+<p>On Android, a <code>Context</code> is used for many operations
+ but mostly to load and access resources. This is why all the widgets 
+receive a <code>Context</code> parameter in their constructor. In a 
+regular Android application, you usually have two kinds of 
+<code>Context</code>, {@link android.app.Activity} and 
+{@link android.app.Application}. It's usually the first one that 
+the developer passes to classes and methods that need a <code>Context</code>:</p>
+
+<pre class="prettyprint">&#64;Override
+protected void onCreate(Bundle state) {
+  super.onCreate(state);
+  
+  TextView label = new TextView(this);
+  label.setText("Leaks are bad");
+  
+  setContentView(label);
+}
+</pre>
+
+<p>This means that views have a reference to the entire activity and
+therefore to anything your activity is holding onto; usually the entire
+View hierarchy and all its resources. Therefore, if you leak the <code>Context</code>
+("leak" meaning you keep a reference to it thus preventing the GC from
+collecting it), you leak a lot of memory. Leaking an entire activity
+can be really easy if you're not careful.</p>
+
+<p>When the screen orientation changes the system will, by default,
+destroy the current activity and create a new one while preserving its
+state. In doing so, Android will reload the application's UI from the
+resources. Now imagine you wrote an application with a large bitmap
+that you don't want to load on every rotation. The easiest way to keep
+it around and not having to reload it on every rotation is to keep in a
+static field:</p>
+
+<pre class="prettyprint">private static Drawable sBackground;
+  
+&#64;Override
+protected void onCreate(Bundle state) {
+  super.onCreate(state);
+  
+  TextView label = new TextView(this);
+  label.setText("Leaks are bad");
+  
+  if (sBackground == null) {
+    sBackground = getDrawable(R.drawable.large_bitmap);
+  }
+  label.setBackgroundDrawable(sBackground);
+  
+  setContentView(label);
+}
+</pre> 
+
+<p>This code is very fast and also very wrong; it leaks the first activity 
+created upon the first screen orientation change. When a 
+{@link android.graphics.drawable.Drawable Drawable} is attached to a view, the view is set as a 
+{@link android.graphics.drawable.Drawable#setCallback(android.graphics.drawable.Drawable.Callback) callback} 
+on the drawable. In the code snippet above, this means the drawable has a 
+reference to the <code>TextView</code> which itself has a reference to the 
+activity (the <code>Context</code>) which in turns has references to 
+pretty much anything (depending on your code.)</p> 
+ 
+<p>This example is one of the simplest cases of leaking the 
+<code>Context</code> and you can see how we worked around it in the 
+<a href="http://android.git.kernel.org/?p=platform/packages/apps/Launcher.git;a=blob;f=src/com/android/launcher/LauncherModel.java;h=0ef2a806b767142b28b2ff3b37f21f4ca16c355d;hb=cupcake">Home screen's source code</a>
+(look for the <code>unbindDrawables()</code> method) by setting the stored 
+drawables' callbacks to null when the activity is destroyed. Interestingly 
+enough, there are cases where you can create a chain of leaked contexts, 
+and they are bad. They make you run out of memory rather quickly.</p> 
+ 
+<p>There are two easy ways to avoid context-related memory leaks. The most 
+obvious one is to avoid escaping the context outside of its own scope. The 
+example above showed the case of a static reference but inner classes and 
+their implicit reference to the outer class can be equally dangerous. The 
+second solution is to use the <code>Application</code> context. This 
+context will live as long as your application is alive and does not depend 
+on the activities life cycle. If you plan on keeping long-lived objects 
+that need a context, remember the application object. You can obtain it 
+easily by calling 
+{@link android.content.Context#getApplicationContext() Context.getApplicationContext()} 
+or {@link android.app.Activity#getApplication() Activity.getApplication()}.</p> 
+ 
+<p>In summary, to avoid context-related memory leaks, remember the following:</p> 
+<ul> 
+<li>Do not keep long-lived references to a context-activity (a reference 
+to an activity should have the same life cycle as the activity itself)</li> 
+<li>Try using the context-application instead of a context-activity</li> 
+<li>Avoid non-static inner classes in an activity if you don't control 
+their life cycle, use a static inner class and make a weak reference to 
+the activity inside. The solution to this issue is to use a static inner 
+class with a {@link java.lang.ref.WeakReference WeakReference} to the 
+outer class, as done in <a href="http://android.git.kernel.org/?p=platform/frameworks/base.git;a=blob;f=core/java/android/view/ViewRoot.java;h=9d7a124cb01ab94bf53e34f6e5e8a07f81e2423c;hb=master">ViewRoot</a>
+and its W inner class for instance</li> 
+<li>A garbage collector is not an insurance against memory leaks</li> 
+</ul> 

@@ -1,0 +1,147 @@
+page.title=Technical Articles
+@jd:body
+
+<dl>
+  <dt><a href="{@docRoot}resources/articles/avoiding-memory-leaks.html">Avoiding Memory Leaks</a></dt>
+  <dd>Mobile devices often have limited memory, and memory leaks can cause your application to waste this valuable resource without your knowledge. This article provides tips to help you avoid common causes of memory leaks on the Android platform.</dd>
+</dl>
+
+<dl>
+  <dt><a href="{@docRoot}resources/articles/backward-compatibility.html">Backward Compatibility</a></dt>
+  <dd>The Android platform strives to ensure backwards compatibility. However, sometimes you want to use new features which aren't supported on older platforms. This article discusses strategies for selectively using these features based on availability, allowing you to keep your applications portable across a wide range of devices.</dd>
+</dl>
+
+<dl>
+  <dt><a href="{@docRoot}resources/articles/can-i-use-this-intent.html">Can I Use this Intent?</a></dt>
+  <dd>Android offers a very powerful and yet easy-to-use message type called an intent. You can use intents to turn applications into high-level libraries and make code modular and reusable. While it is nice to be able to make use of a loosely coupled API, there is no guarantee that the intent you send will be received by another application. This article describes a technique you can use to find out whether the system contains any application capable of responding to the intent you want to use.</dd>
+</dl>
+
+<dl>
+  <dt><a href="{@docRoot}resources/articles/creating-input-method.html">Creating an Input Method</a></dt>
+  <dd>Input Method Editors (IMEs) provide the mechanism for entering text into text fields and other Views. Android devices come bundled with at least one IME, but users can install additional IMEs. This article covers the basics of developing an IME for the Android platform.</dd>
+</dl>
+
+<dl>
+  <dt><a href="{@docRoot}resources/articles/drawable-mutations.html">Drawable Mutations</a></dt>
+  <dd>Drawables are pluggable drawing containers that allow applications to display graphics. This article explains some common pitfalls when trying to modify the properties of multiple Drawables.</dd>
+</dl>
+
+<dl>
+  <dt><a href="{@docRoot}resources/articles/faster-screen-orientation-change.html">Faster Screen Orientation Change</a></dt>
+  <dd>When an Android device changes its orientation, the default behavior is to automatically restart the current activity with a new configuration. However, this can become a bottleneck in applications that access a large amount of external data. This article discusses how to gracefully handle this situation without resorting to manually processing configuration changes.</dd>
+</dl>
+
+<dl>
+  <dt><a href="{@docRoot}resources/articles/future-proofing.html">Future-Proofing Your Apps</a></dt>
+  <dd>A collection of common sense advice to help you ensure that your applications don't break when new versions of the Android platform are released.</dd>
+</dl>
+
+<dl>
+  <dt><a href="{@docRoot}resources/articles/gestures.html">Gestures</a></dt>
+  <dd>Touch screens allow users to perform gestures, such as tapping, dragging, flinging, or sliding, to perform various actions. The gestures API enables your application to recognize even complicated gestures with ease. This article explains how to integrate this API into an application.</dd>
+</dl>
+
+<dl>
+  <dt><a href="{@docRoot}resources/articles/glsurfaceview.html">Introducing GLSurfaceView</a></dt>
+  <dd>This article provides an overview of GLSurfaceView, a class that makes it easy to implement 2D or 3D OpenGL rendering inside of an Android application.</dd>
+</dl>
+
+<dl>
+  <dt><a href="{@docRoot}resources/articles/layout-tricks-reuse.html">Layout Tricks: Creating Reusable UI Components</a></dt>
+  <dd>Learn how to combine multiple standard UI widgets into a single high-level component, which can be reused throughout your application.</dd>
+</dl>
+
+<dl>
+  <dt><a href="{@docRoot}resources/articles/layout-tricks-efficiency.html">Layout Tricks: Creating Efficient Layouts</a></dt>
+  <dd>Learn how to optimize application layouts as this article walks you through converting a LinearLayout into a RelativeLayout, and analyzes the resulting implications on performance.</dd>
+</dl>
+
+<dl>
+  <dt><a href="{@docRoot}resources/articles/layout-tricks-stubs.html">Layout Tricks: Using ViewStubs</a></dt>
+  <dd>Learn about using ViewStubs inside an application's layout in order to inflate rarely used UI elements, without the performance implications which would otherwise be caused by using the <code>&lt;include&gt;</code> tag.</dd>
+</dl>
+
+<dl>
+  <dt><a href="{@docRoot}resources/articles/layout-tricks-merge.html">Layout Tricks: Merging Layouts</a></dt>
+  <dd>Learn how to use the <code>&lt;merge&gt;</code> tag in your XML layouts in order to avoid unnecessary levels of hierarchy within an application's view tree.</dd>
+</dl>
+
+<dl>
+  <dt><a href="{@docRoot}resources/articles/listview-backgrounds.html">ListView Backgrounds: An Optimization</a></dt>
+  <dd>ListViews are very popular widgets within the Android framework. This article describes some of the optimizations used by the ListView widget, and how to avoid some common issues that this causes when trying to use a custom background.</dd>
+</dl>
+
+<dl>
+  <dt><a href="{@docRoot}resources/articles/live-folders.html">Live Folders</a></dt>
+  <dd>Live Folders allow users to display any source of data on their home screen without launching an application. This article discusses how to export an application's data in a format suitable for display inside of a live folder.</dd>
+</dl>
+
+<dl>
+  <dt><a href="{@docRoot}resources/articles/on-screen-inputs.html">Onscreen Input Methods</a></dt>
+  <dd>The Input Method Framework (IMF) allows users to take advantage of on-screen input methods, such as software keyboards. This article provides an overview of Input Method Editors (IMEs) and how applications interact with them.</dd>
+</dl>
+
+<dl>
+  <dt><a href="{@docRoot}resources/articles/painless-threading.html">Painless Threading</a></dt>
+  <dd>This article discusses the threading model used by Android applications and how applications can ensure best UI performance by spawning worker threads to handle long-running operations, rather than handling them in the main thread. The article also explains the API that your application can use to interact with Android UI toolkit components running on the main thread and spawn managed worker threads.</dd>
+</dl>
+
+<dl>
+  <dt><a href="{@docRoot}resources/articles/qsb.html">Quick Search Box</a></dt>
+  <dd>Quick Search Box (QSB) is a powerful, system-wide search framework. QSB makes it possible for users to quickly and easily find what they're looking for, both on their devices and on the web. This article discusses how to work with the QSB framework to add new search results for an installed application.</dd>
+</dl>
+
+<dl>
+  <dt><a href="{@docRoot}resources/articles/touch-mode.html">Touch Mode</a></dt>
+  <dd>This article explains the touch mode, one of the most important principles of Android's UI toolkit. Whenever a user interacts with a device's touch screen, the system enters touch mode. While simple in concept, there are important implications touch mode that are often overlooked.</dd>
+</dl>
+
+<dl>
+  <dt><a href="{@docRoot}resources/articles/track-mem.html">Tracking Memory Allocations</a></dt>
+  <dd>This article discusses how to use the Allocation Tracker tool to observe memory allocations and avoid performance problems that would otherwise be caused by ignoring the effect of Dalvik's garbage collector.</dd>
+</dl>
+
+<dl>
+  <dt><a href="{@docRoot}resources/articles/ui-1.5.html">UI Framework Changes in Android 1.5</a></dt>
+  <dd>Explore the UI changes that were introduced in Android 1.5, compared with the UI provided in Android 1.0 and 1.1.</dd>
+</dl>
+
+<dl>
+  <dt><a href="{@docRoot}resources/articles/ui-1.6.html">UI Framework Changes in Android 1.6</a></dt>
+  <dd>Explore the UI changes that were introduced in Android 1.6, compared with the UI provided in Android 1.5. In particular, this article discusses changes to RelativeLayouts and click listeners.</dd>
+</dl>
+
+<dl>
+  <dt><a href="{@docRoot}resources/articles/timed-ui-updates.html">Updating the UI from a Timer</a></dt>
+  <dd>Learn about how to use Handlers as a more efficient replacement for java.util.Timer on the Android platform.</dd>
+</dl>
+
+<dl>
+  <dt><a href="{@docRoot}resources/articles/tts.html">Using Text-to-Speech</a></dt>
+  <dd>The text-to-speech API lets your application "speak" to users, in any of several languages. This article provides an overview of the TTS API and how you use to add speech capabilities to your application.</dd>
+</dl>
+
+<dl>
+  <dt><a href="{@docRoot}resources/articles/using-webviews.html">Using WebViews</a></dt>
+  <dd>WebViews allow an application to dynamically display HTML and execute JavaScript, without relinquishing control to a separate browser application. This article introduces the WebView classes and provides a sample application that demonstrates its use.</dd>
+</dl>
+
+<dl>
+  <dt><a href="{@docRoot}resources/articles/wikinotes-linkify.html">WikiNotes: Linkify your Text!</a></dt>
+  <dd>This article introduces WikiNotes for Android, part of the Apps for Android project. It covers the use of Linkify to turn ordinary text views into richer, link-oriented content that causes Android intents to fire when a link is selected.</dd>
+</dl>
+
+<dl>
+  <dt><a href="{@docRoot}resources/articles/wikinotes-intents.html">WikiNotes: Routing Intents</a></dt>
+  <dd>This article illustrates how an application, in this case the WikiNotes sample app, can use intents to route various types of linked text to the application that handles that type of data. For example, an app can use intents to route a linked telephone number to a dialer app and a web URL to a browser.</dd>
+</dl>
+
+<dl>
+  <dt><a href="{@docRoot}resources/articles/window-bg-speed.html">Window Backgrounds & UI Speed</a></dt>
+  <dd>Some Android applications need to squeeze every bit of performance out of the UI toolkit and there are many ways to do so. In this article, you will discover how to speed up the drawing and the perceived startup time of your activities. Both of these techniques rely on a single feature, the window's background drawable.</dd>
+</dl>
+
+<dl>
+  <dt><a href="{@docRoot}resources/articles/zipalign.html">Zipalign: an Easy Optimization</a></dt>
+  <dd>The Android SDK includes a tool called zipalign that optimizes the way an application is packaged. Running zipalign against your application enables Android to interact with it more efficiently at run time and thus has the potential to make it and the overall system run faster. This article provides a high-level overview of the zipalign tool and its use.</dd>
+</dl>

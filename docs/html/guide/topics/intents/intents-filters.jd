@@ -702,8 +702,8 @@ declared in its manifest file.  (If you're working offline in the SDK, you
 can find all the source files for this sample application, including its 
 manifest file, at {@code &lt;sdk&gt;/samples/NotePad/index.html}.  
 If you're viewing the documentation online, the source files are in the 
-<a href="{@docRoot}guide/samples/index.html">Tutorials and Sample Code</a> 
-section <a href="{@docRoot}guide/samples/NotePad/index.html">here</a>.)
+<a href="{@docRoot}resources/samples/index.html">Tutorials and Sample Code</a> 
+section <a href="{@docRoot}resources/samples/NotePad/index.html">here</a>.)
 </p>
 
 <p>

@@ -186,7 +186,7 @@ multiversion documentation for the Android framework API.
 </ul>
 
 <p>To develop <em>any</em> Android application, even if you are following the <a
-href="{@docRoot}guide/tutorials/hello-world.html">Hello World</a> tutorial, you
+href="{@docRoot}resources/tutorials/hello-world.html">Hello World</a> tutorial, you
 <strong>must download at least one Android platform</strong> into your SDK.
 Typically, you will want to download multiple platforms, so that you can build
 your application on the lowest version you want to support, but test against
@@ -342,9 +342,9 @@ begin developing applications. Here are a few ways you can get started: </p>
 
 <p><strong>Explore some code</strong></p>
 <ul>
-  <li>Set up a <a href="{@docRoot}guide/tutorials/hello-world.html">Hello
+  <li>Set up a <a href="{@docRoot}resources/tutorials/hello-world.html">Hello
   World application</a> (highly recommended, especially for Eclipse users)</li>
-  <li>Follow the <a href="{@docRoot}guide/tutorials/notepad/index.html">
+  <li>Follow the <a href="{@docRoot}resources/tutorials/notepad/index.html">
   Notepad Tutorial</a> to build a full Android application </li>
   <li>Create a new project for one of the other sample applications
   included in <code><em>&lt;sdk&gt;</em>/platforms/<em>&lt;platform&gt;</em>/samples</code>, 
@@ -354,7 +354,7 @@ begin developing applications. Here are a few ways you can get started: </p>
 <p><strong>Visit the Android developer groups</strong></p>
 <ul>
   <li>Take a look at the <a
-  href="{@docRoot}community/index.html">Community</a> tab to see a list of
+  href="{@docRoot}resources/community-groups.html">Community</a> pages to see a list of
   Android developers groups. In particular, you might want to look at the
   <a href="http://groups.google.com/group/android-developers">Android
   Developers</a> group to get a sense for what the Android developer

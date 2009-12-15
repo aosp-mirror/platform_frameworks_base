@@ -1,0 +1,255 @@
+page.title=WikiNotes: Routing Intents
+@jd:body
+
+
+<p>In <a href="wikinotes-linkify.html">the Linkify! article</a>, we talked about
+using Linkify to turn wiki words (those that match a regular expression that we
+have defined) into a <code>content:</code> URI and defining a path to data that
+matched a note belonging to that wiki word. As an example, a matching word like
+<code>ToDoList</code> would be turned into a URI such as
+<code>content://com.google.android.wikinotes.db.wikinotes/wikinotes/ToDoList
+</code> and then acted upon using the VIEW action from the Linkify class.</p>
+
+<p>This article examines how the Android system takes this combination of
+<code>VIEW</code> action and <code>content:</code> URI and finds the correct
+activity to fire in order to do something with the data. It will also explain
+how the other default links created by Linkify, such as web URLs and telephone
+numbers, also result in the correct activity to handle that data type being
+fired. Finally, this article will start to examine the custom
+<code>ContentProvider</code> that has been created to handle WikiNotes data. The
+full description of the ContentProvider and what it does will span a couple more
+articles as well, because there is a lot to cover.</p>
+
+<h3>The Linkify-calls-intent Workflow</h3>
+
+<p>At a high level, the steps for Linkify to invoke an intent, and for the 
+resulting activity (if any) to handle it, look like this:</p>
+
+<ol>
+ <li>Linkify is invoked on a TextView to turn matching text patterns into Intent links.</li>
+ <li>Linkify takes over monitoring for those Intent links being selected by the user.</li>
+ <li>When the user selects a link, Linkify calls the VIEW action using the content: URI associated with the link.</li>
+ <li>Android takes the content: URI that represents the data, and looks for a
+ContentProvider registered in the system that matches the URI.</li>
+ <li>If a match is found, Android queries the ContentProvider using the URI,
+and asks what MIME type the data that will be returned from the URI is.</li>
+ <li>Android then looks for an activity registered in the system with an
+intent-filter that matches both the VIEW action, and the MIME type for
+the data represented by the content: URI.</li>
+ <li>Assuming a match is found, Linkify then invokes the intent for 
+the URI, at which point the activity takes over, and is handed 
+the content: URI.</li>
+ <li>The activity can then use the URI to retrieve the data and act on 
+it.</li>
+</ol>
+
+<p>This is actually a simpler process than it
+sounds, and it is quite lightweight as well. Perhaps a more
+understandable statement about how it works might be:</p>
+
+<p>Linkify is used to turn matching text into hot-links. When the user
+selects a hot-link, Android takes the data locator represented by the
+hot-link and looks for a data handler for that data locator. If it
+finds one, it asks for what type of data is returned for that locator.
+It then looks for something registered with the system that handles
+that type of data for the VIEW action, and starts it, including the
+data locator in the request.</p>
+
+<p>The real key here is the MIME type. MIME stands for <a
+href="http://en.wikipedia.org/wiki/MIME">Multipurpose Internet Mail
+Extensions</a> &mdash; a standard for sending attachments over email. The MIME
+type (which is the part Android uses) is a way of describing certain kinds of
+data. That type is then used to look for an Activity that can do something with
+that data type. In this way, ContentProviders and Activities (or other
+IntentReceivers) are decoupled, meaning that a given Content URI might have a
+different ContentProvider to handle it, but could still use the same MIME type
+meaning that the same activity could be called upon to handle the resulting
+data.</p>
+
+<h3>Linkify on a wiki word</h3>
+
+<p>Using the above workflow, let's take a look at exactly how the process 
+works in WikiNotes for Android:</p>
+
+<p>First, Linkify is used to turn text matching the wiki word regular expression
+into a link that provides a Content URI for that wiki word, for example
+<code>content://com.google.android.wikinotes.db.wikinotes/wikinotes/ToDoList</code>.</p>
+
+<p>When the user clicks on the wiki word link, Linkify invokes the VIEW
+action on the Content URI. At this point, the Android system takes over
+getting the Intent request to the correct activity.</p>
+
+<p>Next, Android looks for a ContentProvider that has been registered
+with the system to handle URIs matching our Content URI format.</p>
+
+<p>In our case, we have a definition inside 
+<a href="http://code.google.com/p/apps-for-android/source/browse/trunk/WikiNotes/AndroidManifest.xml">our application's AndroidManifest.xml</a>
+file that reads:</p>
+
+<pre>&lt;provider name="com.google.android.wikinotes.db.WikiNotesProvider" 
+    android:authorities="com.google.android.wikinotes.db.wikinotes" /&gt;</pre>
+
+<p>This establishes that we have a ContentProvider defined in our application
+that provides the "root authority":
+<code>com.google.android.wikinotes.db.wikinotes</code>. This is the first part
+of the Content URI that we create for a wiki word link. Root Authority is just
+another way of thinking about a descriptor that is registered with Android to
+allow requests for certain URLs to be routed to the correct class.</p>
+
+<p>So, the whole definition is that a class called
+<code>com.google.android.wikinotes.db.WikiNotesProvider</code> is registered
+with the system as able to handle the
+<code>com.google.android.wikinotes.db.wikinotes</code> root authority (i.e. URIs
+starting with that identifier).</p>
+
+<p>From here, Android takes the rest of the URI and presents it to that
+ContentProvider. If you look at the 
+<a href="http://code.google.com/p/apps-for-android/source/browse/trunk/WikiNotes/src/com/google/android/wikinotes/db/WikiNotesProvider.java">WikiNotesProvider
+class</a> and scroll to the very bottom, in the static block there, you can see
+the pattern definitions to match the rest of the URL.</p>
+
+<p>In particular, take a look at the two lines:</p>
+
+<pre>URI_MATCHER.addURI(WikiNote.WIKINOTES_AUTHORITY, "wikinotes", NOTES);
+URI_MATCHER.addURI(WikiNote.WIKINOTES_AUTHORITY, "wikinotes/*", NOTE_NAME);</pre>
+
+<p>These are the definitions of URIs that our ContentProvider recognizes and can
+handle. The first recognizes a full URI of
+<code>content://com.google.android.wikinotes.db.wikinotes/wikinotes</code> and
+associates that with a constant called NOTES. This is used elsewhere in the
+ContentProvider to provide a list of all of the wiki notes in the database when
+the URI is requested.</p>
+
+<p>The second line uses a wildcard &mdash; '*' &mdash; to match a request of the
+form that Linkify will create, e.g.
+<code>content://com.google.android.wikinotes.db.wikinotes/wikinotes/ToDoList
+</code>. In this example, the * matches the ToDoList part of the URI and is
+available to the handler of the request, so that it can fish out the matching
+note for ToDoList and return it as the data. This also associates that match
+with a constant called NOTE_NAME, which again is used as an identifier elsewhere
+in the ContentProvider.</p>
+
+<p>The other matches in this static block are related to forms of
+searching that have been implemented in the WikiNotes for Android
+application, and will be covered in later articles. Likewise, how the
+data is obtained from this matching pattern will be the subject of the
+next article.</p>
+
+<p>For right now we are concerned with the MIME type for the URI. This is
+defined in the <code>getType()</code> method also in the 
+<a href="http://code.google.com/p/apps-for-android/source/browse/trunk/WikiNotes/src/com/google/android/wikinotes/db/WikiNotesProvider.java">WikiNotesProvider
+class</a> (about halfway through the file). Take a quick look at this. The key
+parts for now are:</p>
+
+<pre>case NOTES:
+    return "vnd.android.cursor.<b>dir</b>/vnd.google.wikinote";</pre>
+
+<p>and</p>
+
+<pre>case NOTE_NAME:
+    return "vnd.android.cursor.<b>item</b>/vnd.google.wikinote";</pre>
+
+<p>These are the same constant names we defined in our pattern
+matchers. In the first case, that of the all notes URI, the MIME type
+returned is <code>vnd.android.cursor.dir/vnd.google.wikinote</code>
+which is like saying an Android list (dir) of Google wiki notes (the
+vnd bit is MIME-speak for "vendor specific definition"). Likewise, in
+the case of a NOTE_NAME match, the MIME type returned is 
+<code>vnd.android.cursor.item/vnd.google.wikinote</code> which is 
+like saying an Android item of Google wiki notes.</p>
+
+<p>Note that if you define your own MIME data types like this, the 
+<code>vnd.android.cursor.dir</code> and <code>vnd.android.cursor.item</code>
+categories should be retained, since they have meaning to the Android
+system, but the actual item types should be changed to reflect your
+particular data type.</p>
+
+<p>So far Android has been able to find a ContentProvider that handles
+the Content URI supplied by the Linkify Intent call, and has queried
+the ContentProvider to find out the MIME types for that URI. The final
+step is to find an activity that can handle the VIEW action for that
+MIME type. Take a look in the the 
+<a href="http://code.google.com/p/apps-for-android/source/browse/trunk/WikiNotes/AndroidManifest.xml">AndroidManifest.xml file</a>
+again. Inside the WikiNotes activity definition, you will see:</p>
+
+<pre>&lt;intent-filter&gt;
+    &lt;action name="android.intent.action.VIEW"/&gt;
+    &lt;category name="android.intent.category.DEFAULT"/&gt;
+    &lt;category name="android.intent.category.BROWSABLE"/&gt;
+    &lt;data mimetype="vnd.android.cursor.item/vnd.google.wikinote"/&gt;
+&lt;/intent-filter&gt;</pre>
+
+<p>This is the correct combination of matches for the VIEW action on a
+WikiNote type that is requested from the LINKIFY class. The DEFAULT
+category indicates that the WikiNotes activity should be treated as a
+default handler (a primary choice) for this kind of data, and the
+BROWSABLE category means it can be invoked from a "browser", in this
+case the marked-up Linkified text.</p>
+
+<p>Using this information, Android can match up the VIEW action request
+for the WikiNotes data type with the WikiNotes activity, and can then
+use the WikiNotes activity to handle the request.</p>
+
+<h3>Why do it like this?</h3>
+
+<p>It's quite a trip through the system, and there is a lot to absorb
+here, but this is one of the main reasons I wanted to write WikiNotes
+in the first place. If you follow and understand the steps here, you'll
+have a good grasp of the whole Intents mechanism in Android, and how it
+helps loosely coupled activities cooperate to get things done.</p>
+
+<p>In this case, we could have found another way to detect wiki words
+based on a regular expression, and maybe written our own handler to
+intercept clicks within the TextView and dig out the right data and
+display it. This would seem to accomplish the same functionality just
+as easily as using intents, so what is the advantage to using the full
+Intents mechanism?</p>
+
+<p>In fact there are several advantages:</p>
+
+<p>The most obvious is that because we are using the standard Intent
+based approach, we are not limited to just linking and navigating to
+other wiki notes. We get similar behavior to a number of other data
+types as well. For example, a telephone number or web URL in a wiki
+note will be marked up by Linkify, and using this same mechanism (VIEW
+action on the linked data type) the browser or dialer activities will
+be automatically fired.</p>
+
+<p>It also means that each operation on a wiki note can be treated as a
+separate life cycle by our activity. We are not dealing with swapping
+data in and out of an existing activity - each activity works on a
+particular wiki note and that's all you have to worry about.</p>
+
+<p>Another advantage is that we now have a public activity to handle
+VIEW actions in WikiNotes no matter where the request comes from.
+Another application could request to view a wiki note (perhaps without
+even knowing what kind of data it is) and our activity could start up
+and handle it.</p>
+
+<p>The backstack is automatically maintained for you too. As you
+forward navigate through WikiNotes, Android maintains the history of
+notes visited, and so when you hit the back button you go back to the
+last note you were on. All this is free because we rely on the Android
+intents mechanism.</p>
+
+<p>Finally, if you run WikiNotes for Android and then start DDMS to
+take a look at the Activity threads in the WikiNotes application while
+it is running, you can see that despite what you might think, letting
+Android manage the navigation is very efficient. Create a few linked
+notes, as many links deep as you like, and then follow them. If you
+follow links hundreds of notes deep, you will still only see a handful
+of WikiNotes activities. Android is managing the activities, closing
+the older ones as necessary and using the life cycle to swap data in
+and out.</p>
+
+<h3>Next Time</h3>
+
+<p>This was a long article, but necessarily so. It demonstrates the
+importance of the Intents mechanism and to reinforce the notion that it
+should be used whenever possible for forward navigation, even within a
+single application. Illustrating this is one of the primary reasons I
+wrote WikiNotes for Android in the first place.</p>
+
+<p>In the next article we will look deeper into the ContentProvider and
+examine how it turns a Content URI into a row (or several rows) of data
+that can be used by an activity.</p>

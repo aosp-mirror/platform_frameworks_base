@@ -20,11 +20,14 @@ package com.android.layoutlib.api;
  * Represents an Android Resources that has a density info attached to it.
  */
 public interface IDensityBasedResourceValue extends IResourceValue {
+
     public static enum Density {
         HIGH(240),
         MEDIUM(160),
         LOW(120),
         NODPI(0);
+
+        public final static int DEFAULT_DENSITY = 160;
 
         private final int mValue;
 

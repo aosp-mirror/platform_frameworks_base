@@ -130,7 +130,7 @@ page.title=Android SDK のインストール
 
 <h4>その他のインストール エラー</h4>
 
-<p>オプションの Eclipse コンポーネント（WST など）を必要とする ADT の機能があります。ADT のインストール時にエラーが発生した場合、お使いの Eclipse インストール環境にこうしたコンポーネントが含まれていない可能性があります。必要なコンポーネントを Eclipse インストール環境に簡単に追加する方法について詳しくは、トラブルシューティング トピック <a href="{@docRoot}guide/appendix/faq/troubleshooting.html#installeclipsecomponents">ADT インストールエラー: "requires plug-in org.eclipse.wst.sse.ui"</a> をご覧ください。</p>
+<p>オプションの Eclipse コンポーネント（WST など）を必要とする ADT の機能があります。ADT のインストール時にエラーが発生した場合、お使いの Eclipse インストール環境にこうしたコンポーネントが含まれていない可能性があります。必要なコンポーネントを Eclipse インストール環境に簡単に追加する方法について詳しくは、トラブルシューティング トピック <a href="{@docRoot}resources/faq/troubleshooting.html#installeclipsecomponents">ADT インストールエラー: "requires plug-in org.eclipse.wst.sse.ui"</a> をご覧ください。</p>
 
 <h4>Linux ユーザーの場合</h4>
 <p>Eclipse 用 ADT プラグインのインストール時に、次のエラーが発生する場合があります。 
@@ -166,15 +166,15 @@ JKS</pre>
 
 <p><strong>サンプル コードの参照</strong></p>
 <ul>
-  <li><a href="{@docRoot}guide/tutorials/hello-world.html">Hello World アプリケーション</a>を構築します（特に Eclipse ユーザーにおすすめです）。</li>
-  <li><a href="{@docRoot}guide/tutorials/notepad/index.html">Notepad チュートリアル</a>に沿って Android アプリケーションを完全に構築します。 </li>
+  <li><a href="{@docRoot}resources/tutorials/hello-world.html">Hello World アプリケーション</a>を構築します（特に Eclipse ユーザーにおすすめです）。</li>
+  <li><a href="{@docRoot}resources/tutorials/notepad/index.html">Notepad チュートリアル</a>に沿って Android アプリケーションを完全に構築します。 </li>
   <li><code><em>&lt;sdk&gt;</em>/platforms/<em>&lt;platfrom&gt;</em>/samples</code> に収められている他のサンプル アプリケーションのいずれかを新しいプロジェクトとして作成し、自分の開発環境でコンパイルし、実行します。</li>
 </ul>
 
 <p><strong>Android デベロッパー グループへのアクセス</strong></p>
 <ul>
   <li>[<a
-  href="{@docRoot}community/index.html">コミュニティ</a>] タブで、Android デベロッパー グループの一覧を参照します。特に <a href="http://groups.google.com/group/android-developers">Android Developers</a> グループは、Android デベロッパー コミュニティがどういうものかを知るのに参考になります。</li>
+  href="{@docRoot}resources/community-groups.html">コミュニティ</a>] タブで、Android デベロッパー グループの一覧を参照します。特に <a href="http://groups.google.com/group/android-developers">Android Developers</a> グループは、Android デベロッパー コミュニティがどういうものかを知るのに参考になります。</li>
 </ul>
 
 

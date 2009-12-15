@@ -133,6 +133,7 @@ public class WindowManagerService extends IWindowManager.Stub
     static final boolean DEBUG = false;
     static final boolean DEBUG_FOCUS = false;
     static final boolean DEBUG_ANIM = false;
+    static final boolean DEBUG_LAYOUT = false;
     static final boolean DEBUG_LAYERS = false;
     static final boolean DEBUG_INPUT = false;
     static final boolean DEBUG_INPUT_METHOD = false;
@@ -2288,10 +2289,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 attrChanges = win.mAttrs.copyFrom(attrs);
             }
 
-            if (localLOGV) Log.v(
-                TAG, "Relayout given client " + client.asBinder()
-                + " (" + win.mAttrs.getTitle() + ")");
-
+            if (DEBUG_LAYOUT) Log.v(TAG, "Relayout " + win + ": " + win.mAttrs);
 
             if ((attrChanges & WindowManager.LayoutParams.ALPHA_CHANGED) != 0) {
                 win.mAlpha = attrs.alpha;
@@ -2307,6 +2305,8 @@ public class WindowManagerService extends IWindowManager.Stub
                         (attrs.width  / (float)requestedWidth) : 1.0f;
                 win.mVScale = (attrs.height != requestedHeight) ?
                         (attrs.height / (float)requestedHeight) : 1.0f;
+            } else {
+                win.mHScale = win.mVScale = 1;
             }
 
             boolean imMayMove = (flagChanges&(
@@ -3485,10 +3485,12 @@ public class WindowManagerService extends IWindowManager.Stub
                       + ": hidden=" + wtoken.hidden + " hiddenRequested="
                       + wtoken.hiddenRequested);
 
-            if (changed && performLayout) {
+            if (changed) {
                 mLayoutNeeded = true;
-                updateFocusedWindowLocked(UPDATE_FOCUS_WILL_PLACE_SURFACES);
-                performLayoutAndPlaceSurfacesLocked();
+                if (performLayout) {
+                    updateFocusedWindowLocked(UPDATE_FOCUS_WILL_PLACE_SURFACES);
+                    performLayoutAndPlaceSurfacesLocked();
+                }
             }
         }
 
@@ -5082,7 +5084,9 @@ public class WindowManagerService extends IWindowManager.Stub
                 
                 // If we are on top of the wallpaper, then the wallpaper also
                 // gets to see this movement.
-                if (mWallpaperTarget == target || mSendingPointersToWallpaper) {
+                if ((mWallpaperTarget == target &&
+                        target.mAttrs.type != WindowManager.LayoutParams.TYPE_KEYGUARD)
+                        || mSendingPointersToWallpaper) {
                     sendPointerToWallpaperLocked(null, ev, eventTime);
                 }
                 
@@ -7447,6 +7451,12 @@ public class WindowManagerService extends IWindowManager.Stub
                     if (c.mSurface != null && c.mAttachedHidden) {
                         c.mAttachedHidden = false;
                         c.performShowLocked();
+                        // It hadn't been shown, which means layout not
+                        // performed on it, so now we want to make sure to
+                        // do a layout.  If called from within the transaction
+                        // loop, this will cause it to restart with a new
+                        // layout.
+                        mLayoutNeeded = true;
                     }
                 }
 
@@ -8082,6 +8092,9 @@ public class WindowManagerService extends IWindowManager.Stub
                         pw.print(" mPolicyVisibilityAfterAnim=");
                         pw.print(mPolicyVisibilityAfterAnim);
                         pw.print(" mAttachedHidden="); pw.println(mAttachedHidden);
+            }
+            if (!mRelayoutCalled) {
+                pw.print(prefix); pw.print("mRelayoutCalled="); pw.println(mRelayoutCalled);
             }
             pw.print(prefix); pw.print("Requested w="); pw.print(mRequestedWidth);
                     pw.print(" h="); pw.println(mRequestedHeight);
@@ -9219,6 +9232,9 @@ public class WindowManagerService extends IWindowManager.Stub
         int repeats = 0;
         int i;
 
+        if (DEBUG_LAYOUT) Log.v(TAG, "performLayout: needed="
+                + mLayoutNeeded + " dw=" + dw + " dh=" + dh);
+        
         // FIRST LOOP: Perform a layout, if needed.
 
         while (mLayoutNeeded) {
@@ -9241,6 +9257,18 @@ public class WindowManagerService extends IWindowManager.Stub
                         || win.mAttachedHidden
                         || win.mExiting || win.mDestroying;
 
+                if (win.mLayoutAttached) {
+                    if (DEBUG_LAYOUT) Log.v(TAG, "First pass " + win
+                            + ": gone=" + gone + " mHaveFrame=" + win.mHaveFrame
+                            + " mLayoutAttached=" + win.mLayoutAttached);
+                    if (DEBUG_LAYOUT && gone) Log.v(TAG, "  (mViewVisibility="
+                            + win.mViewVisibility + " mRelayoutCalled="
+                            + win.mRelayoutCalled + " hidden="
+                            + win.mRootToken.hidden + " hiddenRequested="
+                            + (atoken != null && atoken.hiddenRequested)
+                            + " mAttachedHidden=" + win.mAttachedHidden);
+                }
+                
                 // If this view is GONE, then skip it -- keep the current
                 // frame, and let the caller know so they can ignore it
                 // if they want.  (We do the normal layout for INVISIBLE
@@ -9249,6 +9277,10 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (!gone || !win.mHaveFrame) {
                     if (!win.mLayoutAttached) {
                         mPolicy.layoutWindowLw(win, win.mAttrs, null);
+                        if (DEBUG_LAYOUT) Log.v(TAG, "-> mFrame="
+                                + win.mFrame + " mContainingFrame="
+                                + win.mContainingFrame + " mDisplayFrame="
+                                + win.mDisplayFrame);
                     } else {
                         if (topAttached < 0) topAttached = i;
                     }
@@ -9268,9 +9300,17 @@ public class WindowManagerService extends IWindowManager.Stub
                 // windows, since that means "perform layout as normal,
                 // just don't display").
                 if (win.mLayoutAttached) {
+                    if (DEBUG_LAYOUT) Log.v(TAG, "Second pass " + win
+                            + " mHaveFrame=" + win.mHaveFrame
+                            + " mViewVisibility=" + win.mViewVisibility
+                            + " mRelayoutCalled=" + win.mRelayoutCalled);
                     if ((win.mViewVisibility != View.GONE && win.mRelayoutCalled)
                             || !win.mHaveFrame) {
                         mPolicy.layoutWindowLw(win, win.mAttrs, win.mAttachedWindow);
+                        if (DEBUG_LAYOUT) Log.v(TAG, "-> mFrame="
+                                + win.mFrame + " mContainingFrame="
+                                + win.mContainingFrame + " mDisplayFrame="
+                                + win.mDisplayFrame);
                     }
                 }
             }
@@ -9295,8 +9335,11 @@ public class WindowManagerService extends IWindowManager.Stub
                     }
                 }
             } else {
+                if (DEBUG_LAYOUT) Log.v(TAG, "Repeating layout because changes=0x"
+                        + Integer.toHexString(changes));
                 repeats++;
                 if ((changes&WindowManagerPolicy.FINISH_LAYOUT_REDO_CONFIG) != 0) {
+                    if (DEBUG_LAYOUT) Log.v(TAG, "Computing new config from layout");
                     Configuration newConfig = updateOrientationFromAppTokensLocked(
                             null, null);
                     if (newConfig != null) {

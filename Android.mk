@@ -334,6 +334,7 @@ framework_docs_LOCAL_INTERMEDIATE_SOURCES := \
 framework_docs_LOCAL_JAVA_LIBRARIES := \
 			core \
 			ext \
+			framework \
 
 framework_docs_LOCAL_MODULE_CLASS := JAVA_LIBRARIES
 framework_docs_LOCAL_DROIDDOC_HTML_DIR := docs/html
@@ -356,33 +357,31 @@ sample_dir := development/samples
 web_docs_sample_code_flags := \
 		-hdf android.hasSamples 1 \
 		-samplecode $(sample_dir)/ApiDemos \
-		            guide/samples/ApiDemos "API Demos" \
-	        -samplecode $(sample_dir)/BluetoothChat \
-	                    guide/samples/BluetoothChat "Bluetooth Chat" \
-	        -samplecode $(sample_dir)/ContactManager \
-	                    guide/samples/ContactManager "Contact Manager" \
+		            resources/samples/ApiDemos "API Demos" \
+		-samplecode $(sample_dir)/BluetoothChat \
+		            resources/samples/BluetoothChat "Bluetooth Chat" \
+		-samplecode $(sample_dir)/ContactManager \
+		            resources/samples/ContactManager "Contact Manager" \
 		-samplecode $(sample_dir)/Home \
-		            guide/samples/Home "Home" \
+		            resources/samples/Home "Home" \
 		-samplecode $(sample_dir)/JetBoy \
-		            guide/samples/JetBoy "JetBoy" \
+		            resources/samples/JetBoy "JetBoy" \
 		-samplecode $(sample_dir)/LunarLander \
-		            guide/samples/LunarLander "Lunar Lander" \
-	        -samplecode $(sample_dir)/MultiResolution \
-	                    guide/samples/MultiResolution "Multiple Resolutions" \
+		            resources/samples/LunarLander "Lunar Lander" \
+		-samplecode $(sample_dir)/MultiResolution \
+		            resources/samples/MultiResolution "Multiple Resolutions" \
 		-samplecode $(sample_dir)/NotePad \
-		            guide/samples/NotePad "Note Pad" \
+		            resources/samples/NotePad "Note Pad" \
 		-samplecode $(sample_dir)/SearchableDictionary \
-		            guide/samples/SearchableDictionary "Searchable Dictionary" \
+		            resources/samples/SearchableDictionary "Searchable Dictionary" \
 		-samplecode $(sample_dir)/Snake \
-		            guide/samples/Snake "Snake" \
+		            resources/samples/Snake "Snake" \
 		-samplecode $(sample_dir)/SoftKeyboard \
-		            guide/samples/SoftKeyboard "Soft Keyboard" \
-	        -samplecode $(sample_dir)/Wiktionary \
-	                    guide/samples/Wiktionary "Wiktionary" \
-	        -samplecode $(sample_dir)/WiktionarySimple \
-	                    guide/samples/WiktionarySimple "Wiktionary (Simplified)"
-
-
+		            resources/samples/SoftKeyboard "Soft Keyboard" \
+		-samplecode $(sample_dir)/Wiktionary \
+		            resources/samples/Wiktionary "Wiktionary" \
+		-samplecode $(sample_dir)/WiktionarySimple \
+		            resources/samples/WiktionarySimple "Wiktionary (Simplified)"
 
 ## SDK version identifiers used in the published docs
   # major[.minor] version for current SDK. (full releases only)
