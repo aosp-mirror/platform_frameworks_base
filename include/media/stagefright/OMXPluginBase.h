@@ -22,6 +22,9 @@
 
 #include <OMX_Component.h>
 
+#include <utils/String8.h>
+#include <utils/Vector.h>
+
 namespace android {
 
 struct OMXComponentBase;
@@ -43,6 +46,10 @@ struct OMXPluginBase {
             OMX_STRING name,
             size_t size,
             OMX_U32 index) = 0;
+
+    virtual OMX_ERRORTYPE getRolesOfComponent(
+            const char *name,
+            Vector<String8> *roles) = 0;
 
 private:
     OMXPluginBase(const OMXPluginBase &);
