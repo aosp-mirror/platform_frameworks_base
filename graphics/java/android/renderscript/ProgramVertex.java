@@ -25,81 +25,69 @@ import android.util.Log;
  * @hide
  *
  **/
-public class ProgramVertex extends BaseObj {
+public class ProgramVertex extends Program {
     public static final int MAX_LIGHT = 8;
 
+
     ProgramVertex(int id, RenderScript rs) {
-        super(rs);
-        mID = id;
+        super(id, rs);
     }
 
     public void bindAllocation(MatrixAllocation va) {
         mRS.validate();
-        mRS.nProgramVertexBindAllocation(mID, va.mAlloc.mID);
+        bindConstants(va.mAlloc, 0);
     }
 
 
     public static class Builder {
         RenderScript mRS;
-        Element mIn;
-        Element mOut;
-        Light[] mLights;
-        int mLightCount;
         boolean mTextureMatrixEnable;
-        String mShader;
-
 
         public Builder(RenderScript rs, Element in, Element out) {
             mRS = rs;
-            mIn = in;
-            mOut = out;
-            mLights = new Light[MAX_LIGHT];
-            mLightCount = 0;
         }
 
         public void setTextureMatrixEnable(boolean enable) {
             mTextureMatrixEnable = enable;
         }
 
-        public void setShader(String s) {
-            mShader = s;
+        public ProgramVertex create() {
+            int id = mRS.nProgramVertexCreate(mTextureMatrixEnable);
+            return new ProgramVertex(id, mRS);
         }
+    }
 
-        public void addLight(Light l) throws IllegalStateException {
-            if(mLightCount >= MAX_LIGHT) {
-                throw new IllegalArgumentException("Max light count exceeded.");
-            }
-            mLights[mLightCount] = l;
-            mLightCount++;
-        }
-
-
-
-        static synchronized ProgramVertex internalCreate(RenderScript rs, Builder b) {
-            int inID = 0;
-            int outID = 0;
-            if (b.mIn != null) {
-                inID = b.mIn.mID;
-            }
-            if (b.mOut != null) {
-                outID = b.mOut.mID;
-            }
-            rs.nProgramVertexBegin(inID, outID);
-            if (b.mShader != null) {
-                rs.nProgramVertexSetShader(b.mShader);
-            } else {
-                for(int ct=0; ct < b.mLightCount; ct++) {
-                    rs.nProgramVertexAddLight(b.mLights[ct].mID);
-                }
-                rs.nProgramVertexSetTextureMatrixEnable(b.mTextureMatrixEnable);
-            }
-            int id = rs.nProgramVertexCreate();
-            return new ProgramVertex(id, rs);
+    public static class ShaderBuilder extends BaseProgramBuilder {
+        public ShaderBuilder(RenderScript rs) {
+            super(rs);
         }
 
         public ProgramVertex create() {
             mRS.validate();
-            return internalCreate(mRS, this);
+            int[] tmp = new int[(mInputCount + mOutputCount + mConstantCount +1) * 2];
+            int idx = 0;
+
+            for (int i=0; i < mInputCount; i++) {
+                tmp[idx++] = 0;
+                tmp[idx++] = mInputs[i].mID;
+            }
+            for (int i=0; i < mOutputCount; i++) {
+                tmp[idx++] = 1;
+                tmp[idx++] = mOutputs[i].mID;
+            }
+            for (int i=0; i < mConstantCount; i++) {
+                tmp[idx++] = 2;
+                tmp[idx++] = mConstants[i].mID;
+            }
+            for (int i=0; i < mTextureCount; i++) {
+                tmp[idx++] = 3;
+                tmp[idx++] = mTextures[i].mID;
+            }
+
+            int id = mRS.nProgramVertexCreate2(mShader, tmp);
+            ProgramVertex pv = new ProgramVertex(id, mRS);
+            initProgram(pv);
+            return pv;
         }
     }
 

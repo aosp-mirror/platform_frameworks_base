@@ -194,6 +194,15 @@ protected:
         uint32_t mMajorVersion;
         uint32_t mMinorVersion;
 
+        int32_t mMaxVaryingVectors;
+        int32_t mMaxTextureImageUnits;
+
+        int32_t mMaxFragmentTextureImageUnits;
+        int32_t mMaxFragmentUniformVectors;
+
+        int32_t mMaxVertexAttribs;
+        int32_t mMaxVertexUniformVectors;
+        int32_t mMaxVertexTextureUnits;
     } mGL;
 
     uint32_t mWidth;

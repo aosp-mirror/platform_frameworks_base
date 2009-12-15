@@ -24,8 +24,8 @@ using namespace android;
 using namespace android::renderscript;
 
 
-ProgramFragmentStore::ProgramFragmentStore(Context *rsc, Element *in, Element *out) :
-    Program(rsc, in, out)
+ProgramFragmentStore::ProgramFragmentStore(Context *rsc) :
+    Program(rsc)
 {
     mAllocFile = __FILE__;
     mAllocLine = __LINE__;
@@ -249,7 +249,7 @@ ProgramFragmentStoreState::~ProgramFragmentStoreState()
 
 void ProgramFragmentStoreState::init(Context *rsc, int32_t w, int32_t h)
 {
-    ProgramFragmentStore *pfs = new ProgramFragmentStore(rsc, NULL, NULL);
+    ProgramFragmentStore *pfs = new ProgramFragmentStore(rsc);
     mDefault.set(pfs);
 }
 
@@ -266,7 +266,7 @@ namespace renderscript {
 void rsi_ProgramFragmentStoreBegin(Context * rsc, RsElement in, RsElement out)
 {
     delete rsc->mStateFragmentStore.mPFS;
-    rsc->mStateFragmentStore.mPFS = new ProgramFragmentStore(rsc, (Element *)in, (Element *)out);
+    rsc->mStateFragmentStore.mPFS = new ProgramFragmentStore(rsc);
 
 }
 

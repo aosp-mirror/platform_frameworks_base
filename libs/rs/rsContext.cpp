@@ -27,6 +27,8 @@
 
 #include <GLES/gl.h>
 #include <GLES/glext.h>
+#include <GLES2/gl2.h>
+#include <GLES2/gl2ext.h>
 
 #include <cutils/sched_policy.h>
 
@@ -525,6 +527,16 @@ void Context::setSurface(uint32_t w, uint32_t h, Surface *sur)
             } else {
                 sscanf(verptr, " %i.%i", &mGL.mMajorVersion, &mGL.mMinorVersion);
             }
+
+            glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &mGL.mMaxVertexAttribs);
+            glGetIntegerv(GL_MAX_VERTEX_UNIFORM_VECTORS, &mGL.mMaxVertexUniformVectors);
+            glGetIntegerv(GL_MAX_VERTEX_TEXTURE_IMAGE_UNITS, &mGL.mMaxVertexTextureUnits);
+
+            glGetIntegerv(GL_MAX_VARYING_VECTORS, &mGL.mMaxVaryingVectors);
+            glGetIntegerv(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, &mGL.mMaxTextureImageUnits);
+
+            glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &mGL.mMaxFragmentTextureImageUnits);
+            glGetIntegerv(GL_MAX_FRAGMENT_UNIFORM_VECTORS, &mGL.mMaxFragmentUniformVectors);
         }
 
     }
@@ -771,6 +783,10 @@ void Context::dumpDebug() const
     LOGE(" RS running %i, exit %i, useDepth %i, paused %i", mRunning, mExit, mUseDepth, mPaused);
     LOGE(" RS pThreadID %li, nativeThreadID %i", mThreadId, mNativeThreadId);
 
+    LOGV("MAX Textures %i, %i  %i", mGL.mMaxVertexTextureUnits, mGL.mMaxFragmentTextureImageUnits, mGL.mMaxTextureImageUnits);
+    LOGV("MAX Attribs %i", mGL.mMaxVertexAttribs);
+    LOGV("MAX Uniforms %i, %i", mGL.mMaxVertexUniformVectors, mGL.mMaxFragmentUniformVectors);
+    LOGV("MAX Varyings %i", mGL.mMaxVaryingVectors);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////

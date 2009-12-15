@@ -36,11 +36,11 @@ typedef void * RsElement;
 typedef void * RsFile;
 typedef void * RsSampler;
 typedef void * RsScript;
-typedef void * RsScriptBasicTemp;
 typedef void * RsSimpleMesh;
 typedef void * RsType;
 typedef void * RsLight;
 
+typedef void * RsProgram;
 typedef void * RsProgramVertex;
 typedef void * RsProgramFragment;
 typedef void * RsProgramFragmentStore;
@@ -161,6 +161,12 @@ enum RsTexEnvMode {
     RS_TEX_ENV_MODE_REPLACE,
     RS_TEX_ENV_MODE_MODULATE,
     RS_TEX_ENV_MODE_DECAL
+};
+
+enum RsProgramParam {
+    RS_PROGRAM_PARAM_INPUT,
+    RS_PROGRAM_PARAM_OUTPUT,
+    RS_PROGRAM_PARAM_CONSTANT,
 };
 
 enum RsPrimitive {

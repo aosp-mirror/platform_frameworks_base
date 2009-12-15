@@ -270,12 +270,12 @@ void ScriptCState::runCompiler(Context *rsc, ScriptC *s)
 static void appendElementBody(String8 *s, const Element *e)
 {
     s->append(" {\n");
-    for (size_t ct2=0; ct2 < e->getComponentCount(); ct2++) {
-        const Component *c = e->getComponent(ct2);
+    for (size_t ct2=0; ct2 < e->getFieldCount(); ct2++) {
+        const Element *c = e->getField(ct2);
         s->append("    ");
         s->append(c->getCType());
         s->append(" ");
-        s->append(c->getComponentName());
+        s->append(e->getFieldName(ct2));
         s->append(";\n");
     }
     s->append("}");
@@ -321,7 +321,7 @@ void ScriptCState::appendTypes(const Context *rsc, String8 *str)
             continue;
         }
         const Element *e = t->getElement();
-        if (e->getName() && (e->getComponentCount() > 1)) {
+        if (e->getName() && (e->getFieldCount() > 1)) {
             String8 s("struct struct_");
             s.append(e->getName());
             appendElementBody(&s, e);
@@ -338,12 +338,12 @@ void ScriptCState::appendTypes(const Context *rsc, String8 *str)
         }
 
         if (t->getName()) {
-            for (size_t ct2=0; ct2 < e->getComponentCount(); ct2++) {
-                const Component *c = e->getComponent(ct2);
+            for (size_t ct2=0; ct2 < e->getFieldCount(); ct2++) {
+                const Element *c = e->getField(ct2);
                 tmp.setTo("#define OFFSETOF_");
                 tmp.append(t->getName());
                 tmp.append("_");
-                tmp.append(c->getComponentName());
+                tmp.append(e->getFieldName(ct2));
                 sprintf(buf, " %i\n", ct2);
                 tmp.append(buf);
                 if (rsc->props.mLogScripts) {
@@ -355,7 +355,7 @@ void ScriptCState::appendTypes(const Context *rsc, String8 *str)
 
         if (mSlotNames[ct].length() > 0) {
             String8 s;
-            if (e->getComponentCount() > 1) {
+            if (e->getFieldCount() > 1) {
                 if (e->getName()) {
                     // Use the named struct
                     s.setTo(e->getName());
@@ -373,7 +373,7 @@ void ScriptCState::appendTypes(const Context *rsc, String8 *str)
                 }
             } else {
                 // Just make an array
-                s.setTo(e->getComponent(0)->getCType());
+                s.setTo(e->getField(0)->getCType());
                 s.append("_t *");
             }
             s.append(mSlotNames[ct]);

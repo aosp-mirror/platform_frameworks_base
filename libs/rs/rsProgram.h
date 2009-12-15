@@ -33,7 +33,9 @@ public:
     const static uint32_t MAX_ATTRIBS = 8;
     const static uint32_t MAX_UNIFORMS = 16;
 
-    Program(Context *, Element *in, Element *out);
+    Program(Context *);
+    Program(Context *, const char * shaderText, uint32_t shaderLength,
+                       const uint32_t * params, uint32_t paramLength);
     virtual ~Program();
 
     void bindAllocation(Allocation *);
@@ -50,8 +52,12 @@ public:
 protected:
     // Components not listed in "in" will be passed though
     // unless overwritten by components in out.
-    ObjectBaseRef<Element> mElementIn;
-    ObjectBaseRef<Element> mElementOut;
+    ObjectBaseRef<Element> *mInputElements;
+    ObjectBaseRef<Element> *mOutputElements;
+    ObjectBaseRef<Type> *mConstantTypes;
+    uint32_t mInputCount;
+    uint32_t mOutputCount;
+    uint32_t mConstantCount;
 
     ObjectBaseRef<Allocation> mConstants;
 
