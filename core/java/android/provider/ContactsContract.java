@@ -30,6 +30,7 @@ import android.content.Entity;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
+import android.database.sqlite.SQLiteException;
 import android.graphics.Rect;
 import android.net.Uri;
 import android.os.RemoteException;
@@ -1447,7 +1448,11 @@ public final class ContactsContract {
                         if (cursor.isNull(columnIndex)) {
                             // don't put anything
                         } else {
-                            cv.put(key, cursor.getString(columnIndex));
+                            try {
+                                cv.put(key, cursor.getString(columnIndex));
+                            } catch (SQLiteException e) {
+                                cv.put(key, cursor.getBlob(columnIndex));
+                            }
                         }
                         // TODO: go back to this version of the code when bug
                         // http://b/issue?id=2306370 is fixed.

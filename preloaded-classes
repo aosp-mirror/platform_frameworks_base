@@ -61,9 +61,6 @@ android.app.SearchDialog$SearchAutoComplete
 android.app.Service
 android.app.ServiceConnectionLeaked
 android.app.TabActivity
-android.content.AbstractSyncableContentProvider
-android.content.AbstractTableMerger
-android.content.AsyncQueryHandler$WorkerHandler
 android.content.BroadcastReceiver
 android.content.ComponentCallbacks
 android.content.ComponentName
@@ -87,13 +84,8 @@ android.content.Intent
 android.content.Intent$1
 android.content.IntentFilter
 android.content.SearchRecentSuggestionsProvider
-android.content.ServiceConnection
-android.content.SharedPreferences
 android.content.SyncResult
-android.content.SyncResult$1
 android.content.SyncStats
-android.content.SyncStats$1
-android.content.SyncableContentProvider
 android.content.UriMatcher
 android.content.pm.ActivityInfo
 android.content.pm.ActivityInfo$1
