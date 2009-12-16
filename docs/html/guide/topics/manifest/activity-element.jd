@@ -5,17 +5,17 @@ page.title=&lt;activity&gt;
 <dt>syntax:</dt>
 <dd><pre class="stx">&lt;activity android:<a href="#reparent">allowTaskReparenting</a>=["true" | "false"]
           android:<a href="#always">alwaysRetainTaskState</a>=["true" | "false"]
-          android:<a href="#clear">clearTaskOnLaunch</a>=["true"" | "false"]
-          android:<a href="#config">configChanges</a>=[<i>one or more of</i>: "mcc" "mnc" "locale" 
-                                 "touchscreen" "keyboard" "keyboardHidden" 
-                                 "navigation" "orientation" "fontScale"]
+          android:<a href="#clear">clearTaskOnLaunch</a>=["true" | "false"]
+          android:<a href="#config">configChanges</a>=["mcc", "mnc", "locale",
+                                 "touchscreen", "keyboard", "keyboardHidden",
+                                 "navigation", "orientation", "fontScale"]
           android:<a href="#enabled">enabled</a>=["true" | "false"]
           android:<a href="#exclude">excludeFromRecents</a>=["true" | "false"]
           android:<a href="#exported">exported</a>=["true" | "false"]
           android:<a href="#finish">finishOnTaskLaunch</a>=["true" | "false"]
           android:<a href="#icon">icon</a>="<i>drawable resource</i>"
           android:<a href="#label">label</a>="<i>string resource</i>"
-          android:<a href="#lmode">launchMode</a>=["multiple" | "singleTop" | 
+          android:<a href="#lmode">launchMode</a>=["multiple" | "singleTop" |
                               "singleTask" | "singleInstance"]
           android:<a href="#multi">multiprocess</a>=["true" | "false"]
           android:<a href="#nm">name</a>="<i>string</i>"
@@ -23,16 +23,16 @@ page.title=&lt;activity&gt;
           android:<a href="#prmsn">permission</a>="<i>string</i>"
           android:<a href="#proc">process</a>="<i>string</i>"
           android:<a href="#screen">screenOrientation</a>=["unspecified" | "user" | "behind" |
-                                     "landscape" | "portrait" | 
-                                     "sensor" | "nonsensor"]
+                                     "landscape" | "portrait" |
+                                     "sensor" | "nosensor"]
           android:<a href="#state">stateNotNeeded</a>=["true" | "false"]
           android:<a href="#aff">taskAffinity</a>="<i>string</i>"
-          android:<a href="#theme">theme</a>="<i>resource or theme</i>" 
-          android:<a href="#wsoft">windowSoftInputMode</a>=[<i>one or more of</i>: "stateUnspecified" 
-                                       "stateUnchanged" "stateHidden" 
-                                       "stateAlwaysHidden" "stateVisible" 
-                                       "stateAlwaysVisible" "adjustUnspecified" 
-                                       "adjustResize" "adjustPan"] &gt;   <!-- ##api level 3## -->
+          android:<a href="#theme">theme</a>="<i>resource or theme</i>"
+          android:<a href="#wsoft">windowSoftInputMode</a>=["stateUnspecified",
+                                       "stateUnchanged", "stateHidden",
+                                       "stateAlwaysHidden", "stateVisible",
+                                       "stateAlwaysVisible", "adjustUnspecified",
+                                       "adjustResize", "adjustPan"] &gt;   <!-- ##api level 3## -->
     . . .
 &lt;/activity&gt;</pre></dd>
 

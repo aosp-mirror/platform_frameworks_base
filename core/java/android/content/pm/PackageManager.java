@@ -16,6 +16,8 @@
 
 package android.content.pm;
 
+import android.annotation.SdkConstant;
+import android.annotation.SdkConstant.SdkConstantType;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -518,30 +520,35 @@ public abstract class PackageManager {
      * {@link #hasSystemFeature}: The device has a camera facing away
      * from the screen.
      */
+    @SdkConstant(SdkConstantType.FEATURE)
     public static final String FEATURE_CAMERA = "android.hardware.camera";
     
     /**
      * Feature for {@link #getSystemAvailableFeatures} and
      * {@link #hasSystemFeature}: The device's camera supports auto-focus.
      */
+    @SdkConstant(SdkConstantType.FEATURE)
     public static final String FEATURE_CAMERA_AUTOFOCUS = "android.hardware.camera.autofocus";
     
     /**
      * Feature for {@link #getSystemAvailableFeatures} and
      * {@link #hasSystemFeature}: The device's camera supports flash.
      */
+    @SdkConstant(SdkConstantType.FEATURE)
     public static final String FEATURE_CAMERA_FLASH = "android.hardware.camera.flash";
     
     /**
      * Feature for {@link #getSystemAvailableFeatures} and
      * {@link #hasSystemFeature}: The device includes a light sensor.
      */
+    @SdkConstant(SdkConstantType.FEATURE)
     public static final String FEATURE_SENSOR_LIGHT = "android.hardware.sensor.light";
     
     /**
      * Feature for {@link #getSystemAvailableFeatures} and
      * {@link #hasSystemFeature}: The device includes a proximity sensor.
      */
+    @SdkConstant(SdkConstantType.FEATURE)
     public static final String FEATURE_SENSOR_PROXIMITY = "android.hardware.sensor.proximity";
     
     /**
@@ -549,30 +556,35 @@ public abstract class PackageManager {
      * {@link #hasSystemFeature}: The device has a telephony radio with data
      * communication support.
      */
+    @SdkConstant(SdkConstantType.FEATURE)
     public static final String FEATURE_TELEPHONY = "android.hardware.telephony";
     
     /**
      * Feature for {@link #getSystemAvailableFeatures} and
      * {@link #hasSystemFeature}: The device has a CDMA telephony stack.
      */
+    @SdkConstant(SdkConstantType.FEATURE)
     public static final String FEATURE_TELEPHONY_CDMA = "android.hardware.telephony.cdma";
     
     /**
      * Feature for {@link #getSystemAvailableFeatures} and
      * {@link #hasSystemFeature}: The device has a GSM telephony stack.
      */
+    @SdkConstant(SdkConstantType.FEATURE)
     public static final String FEATURE_TELEPHONY_GSM = "android.hardware.telephony.gsm";
     
     /**
      * Feature for {@link #getSystemAvailableFeatures} and
      * {@link #hasSystemFeature}: The device's touch screen supports multitouch.
      */
+    @SdkConstant(SdkConstantType.FEATURE)
     public static final String FEATURE_TOUCHSCREEN_MULTITOUCH = "android.hardware.touchscreen.multitouch";
     
     /**
      * Feature for {@link #getSystemAvailableFeatures} and
      * {@link #hasSystemFeature}: The device supports live wallpapers.
      */
+    @SdkConstant(SdkConstantType.FEATURE)
     public static final String FEATURE_LIVE_WALLPAPER = "android.software.live_wallpaper";
     
     /**
