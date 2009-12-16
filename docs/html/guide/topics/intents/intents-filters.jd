@@ -968,7 +968,7 @@ NoteEditor activity:
 <dd>Asks the activity to display the content of the note identified 
 by {@code <var>ID</var>}. (For details on how {@code content:} URIs
 specify individual members of a group, see 
-<a href="{@docRoot}guide/topics/provider/content-providers.html">Content Providers</a>.)
+<a href="{@docRoot}guide/topics/providers/content-providers.html">Content Providers</a>.)
 
 <dt>action: <code>android.intent.action.EDIT</code>
 <br/>data: <code>content://com.google.provider.NotePad/notes/<var>ID</var></code></dt>
