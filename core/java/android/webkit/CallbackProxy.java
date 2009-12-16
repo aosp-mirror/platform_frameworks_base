@@ -108,8 +108,6 @@ class CallbackProxy extends Handler {
     private static final int RECEIVED_TOUCH_ICON_URL             = 132;
     private static final int GET_VISITED_HISTORY                 = 133;
     private static final int OPEN_FILE_CHOOSER                   = 134;
-    private static final int SHOW_CUSTOM_VIEW                    = 135;
-    private static final int HIDE_CUSTOM_VIEW                    = 136;
 
     // Message triggered by the client to resume execution
     private static final int NOTIFY                              = 200;
@@ -679,23 +677,6 @@ class CallbackProxy extends Handler {
             case OPEN_FILE_CHOOSER:
                 if (mWebChromeClient != null) {
                     mWebChromeClient.openFileChooser((UploadFile) msg.obj);
-                }
-                break;
-
-            case SHOW_CUSTOM_VIEW:
-                if (mWebChromeClient != null) {
-                    HashMap<String, Object> map =
-                            (HashMap<String, Object>) msg.obj;
-                    View view = (View) map.get("view");
-                    WebChromeClient.CustomViewCallback callback =
-                            (WebChromeClient.CustomViewCallback) map.get("callback");
-                    mWebChromeClient.onShowCustomView(view, callback);
-                }
-                break;
-
-            case HIDE_CUSTOM_VIEW:
-                if (mWebChromeClient != null) {
-                    mWebChromeClient.onHideCustomView();
                 }
                 break;
         }
@@ -1403,25 +1384,5 @@ class CallbackProxy extends Handler {
             }
         }
         return uploadFile.getResult();
-    }
-
-    /* package */ void showCustomView(View view, WebChromeClient.CustomViewCallback callback) {
-        if (mWebChromeClient == null) {
-            return;
-        }
-        Message msg = obtainMessage(SHOW_CUSTOM_VIEW);
-        HashMap<String, Object> map = new HashMap<String, Object>();
-        map.put("view", view);
-        map.put("callback", callback);
-        msg.obj = map;
-        sendMessage(msg);
-    }
-
-    /* package */ void hideCustomView() {
-        if (mWebChromeClient == null) {
-            return;
-        }
-        Message msg = obtainMessage(HIDE_CUSTOM_VIEW);
-        sendMessage(msg);
     }
 }
