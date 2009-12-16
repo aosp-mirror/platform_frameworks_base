@@ -301,6 +301,9 @@ public class WebView extends AbsoluteLayout
     // Used by WebViewCore to create child views.
     /* package */ final ViewManager mViewManager;
 
+    // Used to display in full screen mode
+    PluginFullScreenHolder mFullScreenHolder;
+
     /**
      * Position of the last touch event.
      */
@@ -487,6 +490,8 @@ public class WebView extends AbsoluteLayout
     static final int INVAL_RECT_MSG_ID                  = 26;
     static final int REQUEST_KEYBOARD                   = 27;
     static final int DO_MOTION_UP                       = 28;
+    static final int SHOW_FULLSCREEN                    = 29;
+    static final int HIDE_FULLSCREEN                    = 30;
 
     static final String[] HandlerDebugString = {
         "REMEMBER_PASSWORD", //              = 1;
@@ -516,7 +521,9 @@ public class WebView extends AbsoluteLayout
         "WEBCORE_NEED_TOUCH_EVENTS", //      = 25;
         "INVAL_RECT_MSG_ID", //              = 26;
         "REQUEST_KEYBOARD", //               = 27;
-        "DO_MOTION_UP" //                    = 28;
+        "DO_MOTION_UP", //                   = 28;
+        "SHOW_FULLSCREEN", //                = 29;
+        "HIDE_FULLSCREEN" //                 = 30;
     };
 
     // If the site doesn't use the viewport meta tag to specify the viewport,
@@ -3993,6 +4000,11 @@ public class WebView extends AbsoluteLayout
                             || mTouchMode == TOUCH_DOUBLE_TAP_MODE) {
                         mPrivateHandler.removeMessages(SWITCH_TO_SHORTPRESS);
                     }
+                    if (mFullScreenHolder != null) {
+                        // in full screen mode, the WebView can't be panned.
+                        mTouchMode = TOUCH_DONE_MODE;
+                        break;
+                    }
 
                     // if it starts nearly horizontal or vertical, enforce it
                     int ax = Math.abs(deltaX);
@@ -4147,7 +4159,7 @@ public class WebView extends AbsoluteLayout
                             ted.mX = viewToContentX((int) x + mScrollX);
                             ted.mY = viewToContentY((int) y + mScrollY);
                             mWebViewCore.sendMessage(EventHub.TOUCH_EVENT, ted);
-                        } else {
+                        } else if (mFullScreenHolder == null) {
                             doDoubleTap();
                         }
                         break;
@@ -4163,8 +4175,9 @@ public class WebView extends AbsoluteLayout
                         if ((deltaX * deltaX + deltaY * deltaY) > mTouchSlopSquare) {
                             Log.w(LOGTAG, "Miss a drag as we are waiting for" +
                                     " WebCore's response for touch down.");
-                            if (computeHorizontalScrollExtent() < computeHorizontalScrollRange()
-                                    || computeVerticalScrollExtent() < computeVerticalScrollRange()) {
+                            if (mFullScreenHolder == null
+                                    && (computeHorizontalScrollExtent() < computeHorizontalScrollRange()
+                                    || computeVerticalScrollExtent() < computeVerticalScrollRange())) {
                                 // we will not rewrite drag code here, but we
                                 // will try fling if it applies.
                                 WebViewCore.pauseUpdate(mWebViewCore);
@@ -5115,7 +5128,7 @@ public class WebView extends AbsoluteLayout
             // exclude INVAL_RECT_MSG_ID since it is frequently output
             if (DebugFlags.WEB_VIEW && msg.what != INVAL_RECT_MSG_ID) {
                 Log.v(LOGTAG, msg.what < REMEMBER_PASSWORD || msg.what
-                        > DO_MOTION_UP ? Integer.toString(msg.what)
+                        > HIDE_FULLSCREEN ? Integer.toString(msg.what)
                         : HandlerDebugString[msg.what - REMEMBER_PASSWORD]);
             }
             if (mWebViewCore == null) {
@@ -5146,7 +5159,9 @@ public class WebView extends AbsoluteLayout
                         mPreventDoubleTap = false;
                     }
                     if (mTouchMode == TOUCH_INIT_MODE) {
-                        mTouchMode = TOUCH_SHORTPRESS_START_MODE;
+                        mTouchMode = mFullScreenHolder == null
+                                ? TOUCH_SHORTPRESS_START_MODE
+                                        : TOUCH_SHORTPRESS_MODE;
                         updateSelection();
                     } else if (mTouchMode == TOUCH_DOUBLE_TAP_MODE) {
                         mTouchMode = TOUCH_DONE_MODE;
@@ -5164,8 +5179,10 @@ public class WebView extends AbsoluteLayout
                         mWebViewCore.sendMessage(EventHub.TOUCH_EVENT, ted);
                     } else if (mPreventDrag == PREVENT_DRAG_NO) {
                         mTouchMode = TOUCH_DONE_MODE;
-                        performLongClick();
-                        rebuildWebTextView();
+                        if (mFullScreenHolder == null) {
+                            performLongClick();
+                            rebuildWebTextView();
+                        }
                     }
                     break;
                 }
@@ -5464,6 +5481,35 @@ public class WebView extends AbsoluteLayout
 
                 case DO_MOTION_UP:
                     doMotionUp(msg.arg1, msg.arg2, (Boolean) msg.obj);
+                    break;
+
+                case SHOW_FULLSCREEN:
+                    WebViewCore.PluginFullScreenData data
+                            = (WebViewCore.PluginFullScreenData) msg.obj;
+                    if (data.mNpp != 0 && data.mView != null) {
+                        if (mFullScreenHolder != null) {
+                            Log.w(LOGTAG,
+                                    "Should not have another full screen.");
+                            mFullScreenHolder.dismiss();
+                        }
+                        mFullScreenHolder = new PluginFullScreenHolder(
+                                WebView.this, data.mNpp);
+                        mFullScreenHolder.setContentView(data.mView);
+                        mFullScreenHolder.setCancelable(false);
+                        mFullScreenHolder.setCanceledOnTouchOutside(false);
+                    }
+                    mFullScreenHolder.updateBound(contentToViewX(data.mDocX)
+                            - mScrollX, contentToViewY(data.mDocY) - mScrollY,
+                            contentToViewDimension(data.mDocWidth),
+                            contentToViewDimension(data.mDocHeight));
+                    mFullScreenHolder.show();
+                    break;
+
+                case HIDE_FULLSCREEN:
+                    if (mFullScreenHolder != null) {
+                        mFullScreenHolder.dismiss();
+                        mFullScreenHolder = null;
+                    }
                     break;
 
                 default:
