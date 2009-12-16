@@ -120,6 +120,7 @@ public class MediaFile {
         addFileType("RTX", FILE_TYPE_MID, "audio/midi");
         addFileType("OTA", FILE_TYPE_MID, "audio/midi");
         
+        addFileType("MPEG", FILE_TYPE_MP4, "video/mpeg");
         addFileType("MP4", FILE_TYPE_MP4, "video/mp4");
         addFileType("M4V", FILE_TYPE_M4V, "video/mp4");
         addFileType("3GP", FILE_TYPE_3GPP, "video/3gpp");
