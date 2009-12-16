@@ -76,11 +76,17 @@ home=true
                                       <td colspan="2"><div class="seperator">&nbsp;</div></td>
                               </tr>
                               <tr>
-                                      <td class="imageCell"><a href="http://www.youtube.com/user/androiddevelopers"><img src="{@docRoot}assets/images/video-droid.png" style="padding:0" /></a></td>
+                                      <td class="imageCell"><a
+href="{@docRoot}resources/dashboard/platform-versions.html"><img
+src="{@docRoot}images/icon_dashboard.png" style="padding:0" /></a></td>
                                       <td>
-                                              <h2 class="green">Watch</h2>
-                                              <object width="150" height="140"><param name="movie" value="http://www.youtube.com/v/N6YdwzAvwOA&hl=en&fs=1"></param><param name="allowFullScreen" value="true"></param><param name="allowscriptaccess" value="always"></param><embed src="http://www.youtube.com/v/N6YdwzAvwOA&hl=en&fs=1" type="application/x-shockwave-flash" allowscriptaccess="always" allowfullscreen="true" width="150" height="140"></embed></object>
-                                              <p style="margin-top:1em"><a href="{@docRoot}videos/index.html">More Android videos &raquo;</a></p>
+                                              <h2 class="green">Target Devices</h2>
+                                              <p>The Device Dashboard
+provides information about deployed Android devices to
+help you target suitable device configurations as you build and update your
+apps.</p>
+                                              <p><a
+href="{@docRoot}resources/dashboard/platform-versions.html">Learn more &raquo;</a></p>
                                       </td>
                               </tr>
 
