@@ -12,8 +12,7 @@ LOCAL_SRC_FILES:=                     \
 	OMX.cpp                       \
         OMXComponentBase.cpp          \
         OMXNodeInstance.cpp           \
-        OMXMaster.cpp                 \
-        OMXSoftwareCodecsPlugin.cpp   \
+        OMXMaster.cpp
 
 ifneq ($(BUILD_WITHOUT_PV),true)
 LOCAL_SRC_FILES += \

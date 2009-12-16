@@ -208,6 +208,29 @@ void OMX::binderDied(const wp<IBinder> &the_late_who) {
     instance->onObserverDied(mMaster);
 }
 
+#if 0
+static void dumpRoles(OMXMaster *master, const char *name) {
+    Vector<String8> roles;
+    OMX_ERRORTYPE err = master->getRolesOfComponent(name, &roles);
+
+    if (err != OMX_ErrorNone) {
+        LOGE("Could not get roles for component '%s'.", name);
+        return;
+    }
+
+    if (roles.isEmpty()) {
+        LOGE("Component '%s' has NO roles!", name);
+        return;
+    }
+
+    LOGI("Component '%s' has the following roles:", name);
+
+    for (size_t i = 0; i < roles.size(); ++i) {
+        LOGI("%d) %s", i + 1, roles[i].string());
+    }
+}
+#endif
+
 status_t OMX::listNodes(List<String8> *list) {
     list->clear();
 
@@ -216,6 +239,8 @@ status_t OMX::listNodes(List<String8> *list) {
     while (mMaster->enumerateComponents(
                 componentName, sizeof(componentName), index) == OMX_ErrorNone) {
         list->push_back(String8(componentName));
+
+        // dumpRoles(mMaster, componentName);
 
         ++index;
     }
