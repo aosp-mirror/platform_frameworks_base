@@ -158,6 +158,8 @@ void ProgramVertex::setupGL2(const Context *rsc, ProgramVertexState *state, Shad
         //return;
     }
 
+    glVertexAttrib4f(1, state->color[0], state->color[1], state->color[2], state->color[3]);
+
     const float *f = static_cast<const float *>(mConstants->getPtr());
 
     Matrix mvp;
@@ -258,6 +260,11 @@ void ProgramVertexState::init(Context *rsc, int32_t w, int32_t h)
     mDefault.set(pv);
     pv->init(rsc);
     pv->bindAllocation(alloc);
+
+    color[0] = 1.f;
+    color[1] = 1.f;
+    color[2] = 1.f;
+    color[3] = 1.f;
 
     updateSize(rsc, w, h);
 }

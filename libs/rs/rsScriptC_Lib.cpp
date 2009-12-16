@@ -842,6 +842,10 @@ static void SC_drawSimpleMeshRange(RsSimpleMesh vsm, uint32_t start, uint32_t le
 static void SC_color(float r, float g, float b, float a)
 {
     GET_TLS();
+    rsc->mStateVertex.color[0] = r;
+    rsc->mStateVertex.color[1] = g;
+    rsc->mStateVertex.color[2] = b;
+    rsc->mStateVertex.color[3] = a;
     if (rsc->checkVersion2_0()) {
         glVertexAttrib4f(1, r, g, b, a);
     } else {
