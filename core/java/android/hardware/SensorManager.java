@@ -364,7 +364,7 @@ public class SensorManager
                 final float[] values = new float[3];
                 final int[] status = new int[1];
                 final long timestamp[] = new long[1];
-                Process.setThreadPriority(Process.THREAD_PRIORITY_DISPLAY);
+                Process.setThreadPriority(Process.THREAD_PRIORITY_URGENT_DISPLAY);
 
                 if (!open()) {
                     return;
