@@ -164,6 +164,7 @@ public:
         bool mLogTimes;
         bool mLogScripts;
         bool mLogObjects;
+        bool mLogShaders;
     } props;
 
     void dumpDebug() const;

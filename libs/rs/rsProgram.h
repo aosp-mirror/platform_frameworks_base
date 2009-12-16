@@ -72,7 +72,7 @@ protected:
     String8 mAttribNames[MAX_ATTRIBS];
     String8 mUniformNames[MAX_UNIFORMS];
 
-    bool loadShader(uint32_t type);
+    bool loadShader(Context *, uint32_t type);
 
 public:
     void forceDirty() const {mDirty = true;}

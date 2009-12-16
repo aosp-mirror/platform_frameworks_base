@@ -41,13 +41,13 @@ ShaderCache::~ShaderCache()
     free(mEntries);
 }
 
-bool ShaderCache::lookup(ProgramVertex *vtx, ProgramFragment *frag)
+bool ShaderCache::lookup(Context *rsc, ProgramVertex *vtx, ProgramFragment *frag)
 {
     if (!vtx->getShaderID()) {
-        vtx->loadShader();
+        vtx->loadShader(rsc);
     }
     if (!frag->getShaderID()) {
-        frag->loadShader();
+        frag->loadShader(rsc);
     }
     //LOGV("ShaderCache lookup  vtx %i, frag %i", vtx->getShaderID(), frag->getShaderID());
 
@@ -115,15 +115,21 @@ bool ShaderCache::lookup(ProgramVertex *vtx, ProgramFragment *frag)
         }
         for (uint32_t ct=0; ct < vtx->getAttribCount(); ct++) {
             e->mVtxAttribSlots[ct] = glGetAttribLocation(pgm, vtx->getAttribName(ct));
-            LOGV("vtx A, %s = %d\n", vtx->getAttribName(ct).string(), e->mVtxAttribSlots[ct]);
+            if (rsc->props.mLogShaders) {
+                LOGV("vtx A, %s = %d\n", vtx->getAttribName(ct).string(), e->mVtxAttribSlots[ct]);
+            }
         }
         for (uint32_t ct=0; ct < vtx->getUniformCount(); ct++) {
             e->mVtxUniformSlots[ct] = glGetUniformLocation(pgm, vtx->getUniformName(ct));
-            LOGV("vtx U, %s = %d\n", vtx->getUniformName(ct).string(), e->mVtxUniformSlots[ct]);
+            if (rsc->props.mLogShaders) {
+                LOGV("vtx U, %s = %d\n", vtx->getUniformName(ct).string(), e->mVtxUniformSlots[ct]);
+            }
         }
         for (uint32_t ct=0; ct < vtx->getUniformCount(); ct++) {
             e->mFragUniformSlots[ct] = glGetUniformLocation(pgm, frag->getUniformName(ct));
-            LOGV("frag U, %s = %d\n", frag->getUniformName(ct).string(), e->mFragUniformSlots[ct]);
+            if (rsc->props.mLogShaders) {
+                LOGV("frag U, %s = %d\n", frag->getUniformName(ct).string(), e->mFragUniformSlots[ct]);
+            }
         }
     }
 

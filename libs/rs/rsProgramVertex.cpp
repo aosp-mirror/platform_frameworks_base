@@ -108,8 +108,8 @@ void ProgramVertex::setupGL(const Context *rsc, ProgramVertexState *state)
     mDirty = false;
 }
 
-void ProgramVertex::loadShader() {
-    Program::loadShader(GL_VERTEX_SHADER);
+void ProgramVertex::loadShader(Context *rsc) {
+    Program::loadShader(rsc, GL_VERTEX_SHADER);
 }
 
 void ProgramVertex::createShader()
