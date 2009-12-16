@@ -6,7 +6,7 @@ page.title=Android API Levels
 
   <h2>In this document</h2>
 <ol>
-  <li><a href="intro">What is API Level?</a></li>
+  <li><a href="#intro">What is API Level?</a></li>
   <li><a href="#uses">Uses of API Level in Android</a></li>
   <li><a href="#considerations">Development Considerations</a>
     <ol>

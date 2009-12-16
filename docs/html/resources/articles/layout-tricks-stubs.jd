@@ -2,7 +2,7 @@ page.title=Layout Tricks: Using ViewStubs
 @jd:body
 
 <p>Sharing and reusing UI components is very easy with Android, thanks to the <a
-href="layout-tricks-include.html">&lt;include /&gt;</a> tag. Sometimes it's so
+href="layout-tricks-reuse.html">&lt;include /&gt;</a> tag. Sometimes it's so
 easy to create complex UI constructs that your UI ends up with a large number of
 views, some of which are rarely used. Thankfully, Android offers a very special
 widget called {@link android.view.ViewStub}, which brings you all the benefits
