@@ -85,6 +85,7 @@ private:
     OMX::node_id mNodeID;
     OMX_HANDLETYPE mHandle;
     sp<IOMXObserver> mObserver;
+    bool mDying;
 
     struct ActiveBuffer {
         OMX_U32 mPortIndex;
