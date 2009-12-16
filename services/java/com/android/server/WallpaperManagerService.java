@@ -394,7 +394,7 @@ class WallpaperManagerService extends IWallpaperManager.Stub {
                 if (defaultComponent != null) {
                     // See if there is a default wallpaper component specified
                     componentName = ComponentName.unflattenFromString(defaultComponent);
-                    if (DEBUG) Log.v(TAG, "Use default component walpaper:" + componentName);
+                    if (DEBUG) Log.v(TAG, "Use default component wallpaper:" + componentName);
                 }
                 if (componentName == null) {
                     // Fall back to static image wallpaper
@@ -635,8 +635,14 @@ class WallpaperManagerService extends IWallpaperManager.Stub {
             loadSettingsLocked();
             if (mNextWallpaperComponent != null && 
                     !mNextWallpaperComponent.equals(mImageWallpaperComponent)) {
-                // We can't restore live wallpapers, so just go with the default
-                bindWallpaperComponentLocked(null);
+                try {
+                    bindWallpaperComponentLocked(mNextWallpaperComponent);
+                } catch (IllegalArgumentException e) {
+                    // No such live wallpaper or other failure; fall back to the default
+                    // live wallpaper (since the profile being restored indicated that the
+                    // user had selected a live rather than static one).
+                    bindWallpaperComponentLocked(null);
+                }
                 success = true;
             } else {
                 // If there's a wallpaper name, we use that.  If that can't be loaded, then we
