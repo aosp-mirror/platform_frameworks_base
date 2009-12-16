@@ -3080,13 +3080,19 @@ public class ListView extends AbsListView {
         if (gainFocus && previouslyFocusedRect != null) {
             previouslyFocusedRect.offset(mScrollX, mScrollY);
 
+            final ListAdapter adapter = mAdapter;
+            final int firstPosition = mFirstPosition;
+            // Don't cache the result of getChildCount here, it could change in layoutChildren.
+            if (adapter.getCount() < getChildCount() + firstPosition) {
+                mLayoutMode = LAYOUT_NORMAL;
+                layoutChildren();
+            }
+
             // figure out which item should be selected based on previously
             // focused rect
             Rect otherRect = mTempRect;
             int minDistance = Integer.MAX_VALUE;
             final int childCount = getChildCount();
-            final int firstPosition = mFirstPosition;
-            final ListAdapter adapter = mAdapter;
 
             for (int i = 0; i < childCount; i++) {
                 // only consider selectable views
