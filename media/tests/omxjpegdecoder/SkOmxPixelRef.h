@@ -27,7 +27,7 @@ namespace android {
 class SkOmxPixelRef : public SkPixelRef {
 public:
     SkOmxPixelRef(SkColorTable* ctable, MediaBuffer* buffer,
-            sp<OMXCodec> decoder);
+            sp<MediaSource> decoder);
     virtual ~SkOmxPixelRef();
 
      //! Return the allocation size for the pixels
@@ -40,7 +40,7 @@ protected:
 
 private:
     MediaBuffer* mBuffer;
-    sp<OMXCodec> mDecoder;
+    sp<MediaSource> mDecoder;
     size_t          mSize;
     SkColorTable*   mCTable;
 

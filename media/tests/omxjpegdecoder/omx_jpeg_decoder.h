@@ -30,7 +30,7 @@
 
 using namespace android;
 
-extern int storeBitmapToFile(SkBitmap* bitmap, char* filename);
+extern int storeBitmapToFile(SkBitmap* bitmap, const char* filename);
 
 class OmxJpegImageDecoder : public SkImageDecoder {
 public:
@@ -47,10 +47,10 @@ protected:
 
 private:
     JPEGSource* prepareMediaSource(SkStream* stream);
-    sp<OMXCodec> getDecoder(OMXClient* client, const sp<MediaSource>& source);
-    bool decodeSource(sp<OMXCodec> decoder, const sp<MediaSource>& source,
+    sp<MediaSource> getDecoder(OMXClient* client, const sp<MediaSource>& source);
+    bool decodeSource(sp<MediaSource> decoder, const sp<MediaSource>& source,
             SkBitmap* bm);
-    void installPixelRef(MediaBuffer* buffer, sp<OMXCodec> decoder,
+    void installPixelRef(MediaBuffer* buffer, sp<MediaSource> decoder,
             SkBitmap* bm);
     void configBitmapSize(SkBitmap* bm, SkBitmap::Config pref, int width,
             int height);
