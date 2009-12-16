@@ -36,6 +36,9 @@ Device</a> to start development with a device.</p>
 
 <h2 id="RevisionNotes">Revision Notes</h2>
 
+<h4>Revision 3</h4>
+<p>Adds support for the Nexus One. Released January 2010.</p>
+
 <h4>Revision 2</h4>
 <p>Adds support for the Verizon Droid (or similar hardware on
 other carriers). Released November 2009.</p>
@@ -55,6 +58,7 @@ devices:</p>
     <li>T-Mobile G1* / ADP1</li>
     <li>T-Mobile myTouch 3G* / Google Ion</li>
     <li>Verizon Droid*</li>
+    <li>Nexus One</li>
   </ul>
   <p>* <em>Or similar hardware on other carriers</em></p>
   <p>Any additional devices will require Windows drivers provided by
