@@ -24,7 +24,7 @@ page.title=&lt;activity&gt;
           android:<a href="#proc">process</a>="<i>string</i>"
           android:<a href="#screen">screenOrientation</a>=["unspecified" | "user" | "behind" |
                                      "landscape" | "portrait" |
-                                     "sensor" | "nonsensor"]
+                                     "sensor" | "nosensor"]
           android:<a href="#state">stateNotNeeded</a>=["true" | "false"]
           android:<a href="#aff">taskAffinity</a>="<i>string</i>"
           android:<a href="#theme">theme</a>="<i>resource or theme</i>"
