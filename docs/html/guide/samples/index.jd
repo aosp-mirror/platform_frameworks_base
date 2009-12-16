@@ -31,56 +31,57 @@ platforms) and allow you to view the source files in your browser. </p>
 <div class="special">
   <p>Some of the samples in this listing are not yet available in the
   SDK. While we work to update the SDK, you can
-  <a href="../../shareables/latest_samples.zip">download the latest samples</a> as a ZIP
-  file here.</p>
+  <a href="{@docRoot}shareables/latest_samples.zip">download the latest samples</a> as a ZIP
+  archive.</p>
 </div>
 
 <dl>
 
- <dt><a href="ApiDemos/index.html">API Demos</a></dt>
+ <dt><a href="{@docRoot}resources/samples/ApiDemos/index.html">API Demos</a></dt>
   <dd>A variety of small applications that demonstrate an extensive collection of
   framework topics.</dd>
 
- <dt><a href="BluetoothChat/index.html">Bluetooth Chat</a></dt>
+ <dt><a href="{@docRoot}resources/samples/BluetoothChat/index.html">Bluetooth Chat</a></dt>
   <dd>An application for two-way text messaging over Bluetooth.</dd>
 
- <dt><a href="ContactManager/index.html">Contact Manager</a></dt>
-  <dd>An application that demonstrates how to query the system contacts provider, as
-  well as insert contacts into a specific account.</p>
+ <dt><a href="{@docRoot}resources/samples/ContactManager/index.html">Contact Manager</a></dt>
+  <dd>An application that demonstrates how to query the system contacts provider 
+  using the <code>ContactsContract</code> API, as
+  well as insert contacts into a specific account.</dd>
   
- <dt><a href="Home/index.html">Home</a></dt>
+ <dt><a href="{@docRoot}resources/samples/Home/index.html">Home</a></dt>
   <dd>A home screen replacement application.</dd>
   
- <dt><a href="JetBoy/index.html">JetBoy</a></dt>
+ <dt><a href="{@docRoot}resources/samples/JetBoy/index.html">JetBoy</a></dt>
   <dd>JetBoy is a game that demonstrates the SONiVOX JET interactive music technology,
   with {@link android.media.JetPlayer}.</dd>
     
- <dt><a href="LunarLander/index.html">Lunar Lander</a></dt>
+ <dt><a href="{@docRoot}resources/samples/LunarLander/index.html">Lunar Lander</a></dt>
   <dd>A classic Lunar Lander game.</dd>
 
- <dt><a href="MultiResolution/index.html">Multiple Resolutions</a></dt>
+ <dt><a href="{@docRoot}resources/samples/MultiResolution/index.html">Multiple Resolutions</a></dt>
   <dd>A sample application that shows how to use resource directory qualifiers to
   provide different resources for different screen configurations.</dd>
   
- <dt><a href="NotePad/index.html">Note Pad</a></dt>
+ <dt><a href="{@docRoot}resources/samples/NotePad/index.html">Note Pad</a></dt>
   <dd>An application for saving notes. Similar (but not identical) to the 
-    <a href="{@docRoot}guide/tutorials/notepad/index.html">Notepad tutorial</a>.</dd>
+    <a href="{@docRoot}resources/tutorials/notepad/index.html">Notepad tutorial</a>.</dd>
   
- <dt><a href="SearchableDictionary/index.html">Searchable Dictionary</a></dt>
+ <dt><a href="{@docRoot}resources/samples/SearchableDictionary/index.html">Searchable Dictionary</a></dt>
   <dd>A sample application that demonstrates Android's search framework, 
   including how to provide search suggestions for Quick Search Box.</dd>
   
- <dt><a href="Snake/index.html">Snake</a></dt>
+ <dt><a href="{@docRoot}resources/samples/Snake/index.html">Snake</a></dt>
   <dd>An implementation of the classic game "Snake."</dd>
   
- <dt><a href="SoftKeyboard/index.html">Soft Keyboard</a></dt>
+ <dt><a href="{@docRoot}resources/samples/SoftKeyboard/index.html">Soft Keyboard</a></dt>
   <dd>An example of writing an input method for a software keyboard.</dd>
 
- <dt><a href="Wiktionary/index.html">Wiktionary</a></dt>
+ <dt><a href={@docRoot}resources/samples/Wiktionary/index.html">Wiktionary</a></dt>
   <dd>An example of creating interactive widgets for display on the Android
   home screen.</dd>
 
- <dt><a href="WiktionarySimple/index.html">Wiktionary (Simplified)</a></dt>
+ <dt><a href="{@docRoot}resources/samples/WiktionarySimple/index.html">Wiktionary (Simplified)</a></dt>
   <dd>A simple Android home screen widgets example.</dd>
     
 </dl>

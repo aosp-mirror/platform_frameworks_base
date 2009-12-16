@@ -157,6 +157,11 @@
                <span class="zh-CN" style="display:none"></span>
                <span class="zh-TW" style="display:none"></span>
     </h2>
+    <ul>
+      <li class="toggle-list">
+        <div><a href="<?cs var:toroot ?>resources/samples/index.html">
+               <span class="en">List of Sample Apps</span>
+             </a> <span class="new">new!</span></div>
         <ul>
           <li><a href="<?cs var:toroot ?>resources/samples/ApiDemos/index.html">
                 <span class="en">API Demos</span>
@@ -198,6 +203,8 @@
                 <span class="en">Wiktionary (Simplified)</span>
               </a> <span class="new">new!</span></li>
         </ul>
+      </li>
+    </ul>
   </li>
 
 
