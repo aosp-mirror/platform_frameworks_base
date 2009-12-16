@@ -50,7 +50,7 @@ public:
     void setTexEnable(uint32_t slot, bool);
 
     virtual void createShader();
-    virtual void loadShader();
+    virtual void loadShader(Context *rsc);
     virtual void init(Context *rsc);
 
 

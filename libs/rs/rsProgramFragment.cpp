@@ -161,8 +161,8 @@ void ProgramFragment::setupGL2(const Context *rsc, ProgramFragmentState *state, 
     //LOGE("sgl2 frag2 %x", glGetError());
 }
 
-void ProgramFragment::loadShader() {
-    Program::loadShader(GL_FRAGMENT_SHADER);
+void ProgramFragment::loadShader(Context *rsc) {
+    Program::loadShader(rsc, GL_FRAGMENT_SHADER);
 }
 
 void ProgramFragment::createShader()

@@ -33,7 +33,7 @@ public:
     ShaderCache();
     virtual ~ShaderCache();
 
-    bool lookup(ProgramVertex *, ProgramFragment *);
+    bool lookup(Context *rsc, ProgramVertex *, ProgramFragment *);
 
     void cleanupVertex(uint32_t id);
     void cleanupFragment(uint32_t id);

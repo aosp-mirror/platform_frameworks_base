@@ -49,7 +49,7 @@ public:
     void transformToScreen(const Context *, float *v4out, const float *v3in) const;
 
     virtual void createShader();
-    virtual void loadShader();
+    virtual void loadShader(Context *);
     virtual void init(Context *);
 
 

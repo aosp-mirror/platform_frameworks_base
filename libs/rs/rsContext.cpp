@@ -239,7 +239,7 @@ void Context::timerPrint()
 void Context::setupCheck()
 {
     if (checkVersion2_0()) {
-        mShaderCache.lookup(mVertex.get(), mFragment.get());
+        mShaderCache.lookup(this, mVertex.get(), mFragment.get());
 
         mFragmentStore->setupGL2(this, &mStateFragmentStore);
         mFragment->setupGL2(this, &mStateFragment, &mShaderCache);
@@ -272,6 +272,7 @@ void * Context::threadProc(void *vrsc)
      rsc->props.mLogTimes = getProp("debug.rs.profile");
      rsc->props.mLogScripts = getProp("debug.rs.script");
      rsc->props.mLogObjects = getProp("debug.rs.objects");
+     rsc->props.mLogShaders = getProp("debug.rs.shaders");
 
      ScriptTLSStruct *tlsStruct = new ScriptTLSStruct;
      if (!tlsStruct) {

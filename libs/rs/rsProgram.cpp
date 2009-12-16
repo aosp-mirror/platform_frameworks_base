@@ -125,13 +125,15 @@ void Program::createShader()
 {
 }
 
-bool Program::loadShader(uint32_t type)
+bool Program::loadShader(Context *rsc, uint32_t type)
 {
     mShaderID = glCreateShader(type);
     rsAssert(mShaderID);
 
-    LOGV("Loading shader type %x, ID %i", type, mShaderID);
-    LOGE(mShader.string());
+    if (rsc->props.mLogShaders) {
+        LOGV("Loading shader type %x, ID %i", type, mShaderID);
+        LOGV(mShader.string());
+    }
 
     if (mShaderID) {
         const char * ss = mShader.string();
@@ -156,7 +158,10 @@ bool Program::loadShader(uint32_t type)
             }
         }
     }
-    LOGV("--Shader load result %x ", glGetError());
+
+    if (rsc->props.mLogShaders) {
+        LOGV("--Shader load result %x ", glGetError());
+    }
     return true;
 }
 
