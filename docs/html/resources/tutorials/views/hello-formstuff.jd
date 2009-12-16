@@ -1,58 +1,99 @@
-page.title=Hello, Form Stuff
+page.title=Form Stuff
 parent.title=Hello, Views
 parent.link=index.html
 @jd:body
 
-<p>This page introduces a variety of widgets, like image buttons,
-text fields, checkboxes and radio buttons.</p>
+<p>This tutorial introduces a variety of widgets that are useful when creating forms, such as
+image buttons, text fields, checkboxes and radio buttons.</p>
 
 
 <ol>
-  <li>Start a new project/Activity called HelloFormStuff.</li>
-  <li>Your layout file should have a basic LinearLayout:
-    <pre>
+  <li>Start a new project named <em>HelloFormStuff</em>.</li>
+  <li>Your <code>res/layout/main.xml</code> file should already have a basic {@link
+android.widget.LinearLayout}:
+<pre>
 &lt;?xml version="1.0" encoding="utf-8"?>
 &lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent" >
-    	
 &lt;/LinearLayout>
 </pre>
-    <p>For each widget you want to add, just put the respective View inside here.</p>
-</li>
+    <p>For each widget you want to add, just put the respective View inside this {@link
+android.widget.LinearLayout}.</p>
+  </li>
 </ol>
-<p class="note"><strong>Tip:</strong> As you add new Android code, press Ctrl(or Cmd) + Shift + O 
-to import all needed packages.</p>
-
-
-<h2>ImageButton</h2>
-<p>A button with a custom image on it. 
-We'll make it display a message when pressed.</p>
-<ol>
-  <li><img src="images/android.png" align="right"/>
-	Drag the Android image on the right (or your own image) into the
-	res/drawable/ directory of your project. 
-        We'll use this for the button.</li>
-  <li>Open the layout file and, inside the LinearLayout, add the {@link android.widget.ImageButton} element:
+<p>Each section below also assumes that your <code>HelloFormStuff</code> Activity has the following
+default implementation of the {@link android.app.Activity#onCreate(Bundle) onCreate()} method:</p>
 <pre>
-&lt;ImageButton
-    android:id="@+id/android_button"
-    android:layout_width="100dip"
-    android:layout_height="wrap_content"
-    android:src="@drawable/android" />	
+public void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    setContentView(R.layout.main);
+}
 </pre>
-	<p>The source of the button
-	is from the res/drawable/ directory, where we've placed the android.png.</p>
-        <p class="note"><strong>Tip:</strong> You can also reference some of the many built-in
-        images from the Android {@link android.R.drawable} resources, 
-        like <code>ic_media_play</code>, for a "play" button image. To do so, change the source
-        attribute to <code>android:src="@android:drawable/ic_media_play"</code>.</p>
-</li>
-<li>To make the button to actually do something, add the following
-code at the end of the <code>onCreate()</code> method:
+
+
+
+<h2>Custom Button</h2>
+
+<p>In this section, you will create a button with a custom image instead of text, using the {@link
+android.widget.Button} widget and an XML file that defines three different images to use for the
+different button states. When the button is pressed, a short message will be displayed.</p>
+
+<img src="images/android_pressed.png" style="float:right;" title="android_pressed.png"/>
+<img src="images/android_focused.png" style="float:right;clear:right;" title="android_focused.png"/>
+<img src="images/android_normal.png" style="float:right;clear:right;" title="android_normal.png"/>
+<ol>
+  <li>Copy the images on the right into the <code>res/drawable/</code> directory of
+your project. These will be used for the different button states.</li>
+  <li>Create a new file in the <code>res/drawable/</code> directory named
+<code>android_button.xml</code>.
+Insert the following XML:
 <pre>
-final ImageButton button = (ImageButton) findViewById(R.id.android_button);
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;selector xmlns:android="http://schemas.android.com/apk/res/android">
+    &lt;item android:drawable="@drawable/android_pressed"
+          android:state_pressed="true" />
+    &lt;item android:drawable="@drawable/android_focused"
+          android:state_focused="true" />
+    &lt;item android:drawable="@drawable/android_normal" />
+&lt;/selector>
+</pre>
+  <p>This defines a single drawable resource, which will change its image based on the current
+state of the button. The first <code>&lt;item></code> defines
+<code>android_pressed.png</code> as the image when the button is pressed (it's been
+activated); the second <code>&lt;item></code> defines <code>android_focused.png</code> as the image
+when the button is focused (when the button is highlighted using the trackball or directional
+pad); and the third <code>&lt;item></code> defines <code>android_normal.png</code> as the image
+for the normal state (when neither pressed nor focused). This XML file now represents a single
+drawable resource and when referenced by a {@link android.widget.Button} for its background,
+the image displayed will change based on these three states.</p>
+  <p class="note"><strong>Note:</strong> The order of the <code>&lt;item></code> elements is
+important. When this drawable is referenced, the  <code>&lt;item></code>s are traversed in-order to
+determine which one is appropriate for the current button state. Because the "normal" image is last,
+it is only applied when the conditions <code>android:state_pressed</code> and
+<code>android:state_focused</code> have both evaluated false.</li>
+  <li>Open the <code>res/layout/main.xml</code> file and add the {@link
+android.widget.Button} element:
+<pre>
+    &lt;Button
+        android:id="@+id/button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="10dp"
+        android:background="@drawable/android_button" />
+</pre>
+	<p>The <code>android:background</code> attribute specifies the drawable resource to use for the
+button background (which, when saved at <code>res/drawable/android.xml</code>, is
+referenced as <code>@drawable/android</code>). This replaces the normal background image
+used for buttons throughout the system. In order for the drawable to change its image based on
+the button state, the image must be applied to the background.</p>
+</li>
+
+<li>To make the button do something when pressed, add the following
+code at the end of the {@link android.app.Activity#onCreate(Bundle) onCreate()} method:
+<pre>
+final Button button = (Button) findViewById(R.id.button);
 button.setOnClickListener(new OnClickListener() {
     public void onClick(View v) {
         // Perform action on clicks
@@ -60,34 +101,41 @@ button.setOnClickListener(new OnClickListener() {
     }
 });
 </pre>
-<p>This captures our ImageButton from the layout, then adds an on-click listener to it.
-The {@link android.view.View.OnClickListener} must define the <code>onClick()</code> method, which
-defines the action to be made when the button is clicked. Here, we show a 
-{@link android.widget.Toast} message when clicked.</p>
+<p>This captures the {@link android.widget.Button} from the layout, then adds an {@link
+android.view.View.OnClickListener}. The {@link android.view.View.OnClickListener}
+must implement the {@link android.view.View.OnClickListener#onClick(View)} callback method, which
+defines the action to be made when the button is clicked. In this example, a
+{@link android.widget.Toast} message will be displayed.</p>
 </li>
-<li>Run it.</li>
+<li>Now run the application.</li>
 </ol>
 
 
 <h2>EditText</h2>
-<p>A text field for user input. We'll make it display the text entered so far when the "Enter" key is pressed.</p>
+
+<p>In this section, you will create a text field for user input, using the {@link
+android.widget.EditText} widget. Once text has been entered into the field, the "Enter" key will
+display the text in a toast message.</p>
 
 <ol>
-  <li>Open the layout file and, inside the LinearLayout, add the {@link android.widget.EditText} element:
+  <li>Open the <code>res/layout/main.xml</code> file and add the {@link android.widget.EditText}
+element (inside the {@link android.widget.LinearLayout}):
 <pre>
-&lt;EditText
-    android:id="@+id/edittext"
-    android:layout_width="fill_parent"
-    android:layout_height="wrap_content"/>
+    &lt;EditText
+        android:id="@+id/edittext"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"/>
 </pre>
 </li>
-<li>To do something with the text that the user enters, add the following code
-to the end of the <code>onCreate()</code> method:
+<li>To do something with the text that the user types, add the following code
+to the end of the {@link android.app.Activity#onCreate(Bundle) onCreate()} method:
 <pre>
 final EditText edittext = (EditText) findViewById(R.id.edittext);
 edittext.setOnKeyListener(new OnKeyListener() {
     public boolean onKey(View v, int keyCode, KeyEvent event) {
-        if ((event.getAction() == KeyEvent.ACTION_DOWN) && (keyCode == KeyEvent.KEYCODE_ENTER)) {
+        // If the event is a key-down event on the "enter" button
+        if ((event.getAction() == KeyEvent.ACTION_DOWN) &amp;&amp;
+            (keyCode == KeyEvent.KEYCODE_ENTER)) {
           // Perform action on key press
           Toast.makeText(HelloFormStuff.this, edittext.getText(), Toast.LENGTH_SHORT).show();
           return true;
@@ -96,37 +144,44 @@ edittext.setOnKeyListener(new OnKeyListener() {
     }
 });
 </pre>
-<p>This captures our EditText element from the layout, then adds an on-key listener to it.
-The {@link android.view.View.OnKeyListener} must define the <code>onKey()</code> method, which
-defines the action to be made when a key is pressed. In this case, we want to listen for the
-Enter key (when pressed down), then pop up a {@link android.widget.Toast} message with the 
-text from the EditText field. Be sure to return <var>true</var> after the event is handled, 
-so that the event doesn't bubble-up and get handled by the View (which would result in a
-carriage return in the text field).</p>
-<li>Run it.</li>
+<p>This captures the {@link android.widget.EditText} element from the layout and adds an {@link
+android.view.View.OnKeyListener}. The {@link android.view.View.OnKeyListener} must implement the
+{@link android.view.View.OnKeyListener#onKey(View,int,KeyEvent)} method, which
+defines the action to be made when a key is pressed while the widget has focus. In this case, the
+method is defined to listen for the Enter key (when pressed down), then pop up a {@link
+android.widget.Toast} message with the text that has been entered. The {@link
+android.view.View.OnKeyListener#onKey(View,int,KeyEvent)} method should always return
+<code>true</code> if the event has been handled, so that the event doesn't bubble-up (which would
+result in a carriage return in the text field).</p>
+</li>
+<li>Run the application.</li>
 </ol>
 
 
 <h2>CheckBox</h2>
-<p>A checkbox for selecting items. We'll make it display the the current state when pressed.</p>
+
+<p>In this section, you will create a checkbox for selecting items, using the {@link
+android.widget.CheckBox} widget. When the checkbox is pressed, a toast message will
+indicate the current state of the checkbox.</p>
 
 <ol>
-  <li>Open the layout file and, inside the LinearLayout, add the {@link android.widget.CheckBox} element:
+  <li>Open the <code>res/layout/main.xml</code> file and add the {@link android.widget.CheckBox}
+element (inside the {@link android.widget.LinearLayout}):
 <pre>
-&lt;CheckBox android:id="@+id/checkbox"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:text="check it out" />
+    &lt;CheckBox android:id="@+id/checkbox"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="check it out" />
 </pre>
 </li>
 <li>To do something when the state is changed, add the following code
-to the end of the <code>onCreate()</code> method:
+to the end of the {@link android.app.Activity#onCreate(Bundle) onCreate()} method:
 <pre>
 final CheckBox checkbox = (CheckBox) findViewById(R.id.checkbox);
 checkbox.setOnClickListener(new OnClickListener() {
     public void onClick(View v) {
-        // Perform action on clicks
-        if (checkbox.isChecked()) {
+        // Perform action on clicks, depending on whether it's now checked
+        if (((CheckBox) v).isChecked()) {
             Toast.makeText(HelloFormStuff.this, "Selected", Toast.LENGTH_SHORT).show();
         } else {
             Toast.makeText(HelloFormStuff.this, "Not selected", Toast.LENGTH_SHORT).show();
@@ -134,52 +189,62 @@ checkbox.setOnClickListener(new OnClickListener() {
     }
 });
 </pre>
-<p>This captures our CheckBox element from the layout, then adds an on-click listener to it.
-The {@link android.view.View.OnClickListener} must define the <code>onClick()</code> method, which
-defines the action to be made when the checkbox is clicked. Here, we query the current state of the
-checkbox, then pop up a {@link android.widget.Toast} message that displays the current state. 
-Notice that the CheckBox handles its own state change between checked and un-checked, so we just
-ask which it currently is.</p>
+<p>This captures the {@link android.widget.CheckBox} element from the layout, then adds an {@link
+android.view.View.OnClickListener}. The {@link android.view.View.OnClickListener} must implement the
+{@link android.view.View.OnClickListener#onClick(View)} callback method, which
+defines the action to be made when the checkbox is clicked. When clicked, {@link
+android.widget.CompoundButton#isChecked()} is called to check the new state of the check box. If it
+has been checked, then a {@link android.widget.Toast} displays the message "Selected", otherwise it
+displays "Not selected". Note that the {@link android.view.View} object that is passed in the {@link
+android.view.View.OnClickListener#onClick(View)} callback must be cast to a {@link
+android.widget.CheckBox} because the {@link android.widget.CompoundButton#isChecked()} method is
+not defined by the parent {@link android.view.View} class. The {@link android.widget.CheckBox}
+handles its own state changes, so you only need to query the current state.</p>
+</li>
 <li>Run it.</li>
 </ol>
-<p class="note"><strong>Tip:</strong> If you find that you need to change the state
-in another way (such as when loading a saved {@link android.preference.CheckBoxPreference}),
-use <code>setChecked(true)</code> or <code>toggle()</code>.</p>
+<p class="note"><strong>Tip:</strong> If you need to change the state
+yourself (such as when loading a saved {@link android.preference.CheckBoxPreference}),
+use the {@link android.widget.CompoundButton#setChecked(boolean)} or {@link
+android.widget.CompoundButton#toggle()} method.</p>
 
 
 <h2>RadioButton</h2>
-<p>Two mutually-exclusive radio buttons&mdash;enabling one disables the other. 
-When each is pressed, we'll pop up a message.</p>
+
+<p>In this section, you will create two mutually-exclusive radio buttons (enabling one disables
+the other), using the {@link android.widget.RadioGroup} and {@link android.widget.RadioButton}
+widgets. When either radio button is pressed, a toast message will be displayed.</p>
 
 <ol>
-  <li>Open the layout file and, inside the LinearLayout, add two {@link android.widget.RadioButton}s,
-inside a {@link android.widget.RadioGroup}:
+  <li>Open the <code>res/layout/main.xml</code> file and add two {@link
+android.widget.RadioButton}s, nested in a {@link android.widget.RadioGroup} (inside the {@link
+android.widget.LinearLayout}):
 <pre>
-&lt;RadioGroup
-  android:layout_width="fill_parent"
-  android:layout_height="wrap_content"
-  android:orientation="vertical">
-  
-  &lt;RadioButton android:id="@+id/radio_red"
-      android:layout_width="wrap_content"
+    &lt;RadioGroup
+      android:layout_width="fill_parent"
       android:layout_height="wrap_content"
-      android:text="Red" />
-  
-  &lt;RadioButton android:id="@+id/radio_blue"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:text="Blue" />
-  
-&lt;/RadioGroup>
+      android:orientation="vertical">
+      &lt;RadioButton android:id="@+id/radio_red"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:text="Red" />
+      &lt;RadioButton android:id="@+id/radio_blue"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:text="Blue" />
+    &lt;/RadioGroup>
 </pre>
+<p>It's important that the {@link android.widget.RadioButton}s are grouped together by the {@link
+android.widget.RadioGroup} element so that no more than one can be selected at a time. This logic
+is automatically handled by the Android system. When one {@link android.widget.RadioButton} within
+a group is selected, all others are automatically deselected.</p>
 </li>
-<li>To do something when each is selected, we'll need an OnClickListener. Unlike the other 
-listeners we've created, instead of creating this one as an anonymous inner class, 
-we'll create it as a new object. This way, we can re-use the OnClickLIstener for 
-both RadioButtons. So, add the following code in the HelloFormStuff Activity
-(<em>outside</em> the <code>onCreate()</code> method):
+
+<li>To do something when each {@link android.widget.RadioButton} is selected, you need an
+{@link android.view.View.OnClickListener}. In this case, you want the listener to be re-usable, so
+add the following code to create a new member in the <code>HelloFormStuff</code> Activity:
 <pre>
-OnClickListener radio_listener = new OnClickListener() {
+private OnClickListener radio_listener = new OnClickListener() {
     public void onClick(View v) {
         // Perform action on clicks
         RadioButton rb = (RadioButton) v;
@@ -187,68 +252,124 @@ OnClickListener radio_listener = new OnClickListener() {
     }
 };
 </pre>
-<p>Our <code>onClick()</code> method will be handed the View clicked, so the first thing to do
-is cast it into a RadioButton. Then we pop up a 
-{@link android.widget.Toast} message that displays the selection.</p>
-<li>Now, at the bottom of the <code>onCreate()</code> method, add the following:
+<p>First, the {@link android.view.View} that is passed to the {@link
+android.view.View.OnClickListener#onClick(View)} method is cast into a RadioButton. Then a
+{@link android.widget.Toast} message displays the selected radio button's text.</p>
+<li>Now, at the bottom of the {@link android.app.Activity#onCreate(Bundle) onCreate()} method, add
+the following:
 <pre>
   final RadioButton radio_red = (RadioButton) findViewById(R.id.radio_red);
   final RadioButton radio_blue = (RadioButton) findViewById(R.id.radio_blue);
   radio_red.setOnClickListener(radio_listener);
   radio_blue.setOnClickListener(radio_listener);
 </pre>
-<p>This captures each of the RadioButtons from our layout and adds the newly-created 
-OnClickListener to each.</p>
-<li>Run it.</li>
+<p>This captures each of the {@link android.widget.RadioButton}s from the layout and adds the
+newly-created {@link android.view.View.OnClickListener} to each.</p>
+<li>Run the application.</li>
 </ol>
-<p class="note"><strong>Tip:</strong> If you find that you need to change the state of a
-RadioButton in another way (such as when loading a saved {@link android.preference.CheckBoxPreference}),
-use <code>setChecked(true)</code> or <code>toggle()</code>.</p>
+
+<p class="note"><strong>Tip:</strong> If you need to change the state
+yourself (such as when loading a saved {@link android.preference.CheckBoxPreference}),
+use the {@link android.widget.CompoundButton#setChecked(boolean)} or {@link
+android.widget.CompoundButton#toggle()} method.</p>
 
 
 <h2>ToggleButton</h2>
-<p>A button used specifically for toggling something on and off.</p>
+
+<p>In this section, you'll create a button used specifically for toggling between two
+states, using the {@link android.widget.ToggleButton} widget. This widget is an excellent
+alternative to radio buttons if you have two simple states that are mutually exclusive ("on" and
+"off", for example).</p>
 
 <ol>
-  <li>Open the layout file and, inside the LinearLayout, add the {@link android.widget.ToggleButton} element:
+  <li>Open the <code>res/layout/main.xml</code> file and add the {@link android.widget.ToggleButton}
+element (inside the {@link android.widget.LinearLayout}):
 <pre>
-&lt;ToggleButton android:id="@+id/togglebutton"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content" />
+    &lt;ToggleButton android:id="@+id/togglebutton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textOn="Vibrate on"
+        android:textOff="Vibrate off"/>
 </pre>
+  <p>The attributes <code>android:textOn</code> and <code>android:textOff</code> specify the text
+for the button when the button has been toggled on or off. The default values are "ON" and
+"OFF".</p>
 </li>
 <li>To do something when the state is changed, add the following code
-to the end of the <code>onCreate()</code> method:
+to the end of the {@link android.app.Activity#onCreate(Bundle) onCreate()} method:
 <pre>
 final ToggleButton togglebutton = (ToggleButton) findViewById(R.id.togglebutton);
 togglebutton.setOnClickListener(new OnClickListener() {
     public void onClick(View v) {
         // Perform action on clicks
         if (togglebutton.isChecked()) {
-            Toast.makeText(HelloFormStuff.this, "ON", Toast.LENGTH_SHORT).show();
+            Toast.makeText(HelloFormStuff.this, "Checked", Toast.LENGTH_SHORT).show();
         } else {
-            Toast.makeText(HelloFormStuff.this, "OFF", Toast.LENGTH_SHORT).show();
+            Toast.makeText(HelloFormStuff.this, "Not checked", Toast.LENGTH_SHORT).show();
         }
     }
 });
 </pre>
-<p>This captures our ToggleButton element from the layout, then adds an on-click listener to it.
-The {@link android.view.View.OnClickListener} must define the <code>onClick()</code> method, which
-defines the action to be made when the button is clicked. Here, we query the current state of the
-ToggleButton, then pop up a {@link android.widget.Toast} message that displays the current state. 
-Notice that the ToggleButton handles its own state change between checked and un-checked, so we just
-ask which it is.</p>
-<li>Run it.</li>
+<p>This captures the {@link android.widget.ToggleButton} element from the layout, then adds an
+{@link android.view.View.OnClickListener}. The {@link android.view.View.OnClickListener} must
+implement the {@link android.view.View.OnClickListener#onClick(View)} callback method, which
+defines the action to perform when the button is clicked. In this example, the callback
+method checks the new state of the button, then shows a {@link android.widget.Toast} message that
+indicates the current state.</p>
+
+<p>Notice that the {@link android.widget.ToggleButton} handles its own state change between checked
+and unchecked, so you just ask which it is.</p>
+<li>Run the application.</li>
 </ol>
 
-<p class="note"><strong>Tip:</strong> By default, the text on the button is "ON" and "OFF", but 
-you can change each of these with <code>setTextOn(<var>CharSequence</var>)</code> and 
-<code>setTextOff(<var>CharSequence</var>)</code>. And, if you find that you need to change the state
-in another way (such as when loading a saved {@link android.preference.CheckBoxPreference}),
-use <code>setChecked(true)</code> or <code>toggle()</code>. </p>
+<p class="note"><strong>Tip:</strong> If you need to change the state
+yourself (such as when loading a saved {@link android.preference.CheckBoxPreference}),
+use the {@link android.widget.CompoundButton#setChecked(boolean)} or {@link
+android.widget.CompoundButton#toggle()} method.</p>
 
 
-<p>If you've added all the form items above, your application should look something like this:</p>
+
+
+<h2>RatingBar</h2>
+
+<p>In this section, you'll create a widget that allows the user to provide a rating,
+with the {@link android.widget.RatingBar} widget.</p>
+
+<ol>
+  <li>Open the <code>res/layout/main.xml</code> file and add the {@link android.widget.RatingBar}
+element (inside the {@link android.widget.LinearLayout}):
+<pre>
+    &lt;RatingBar android:id="@+id/ratingbar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:numStars="5"
+        android:stepSize="1.0"/>
+</pre>
+  <p>The <code>android:numStars</code> attribute defines how many stars to display for the rating
+bar. The <code>android:stepSize</code> attribute defines the granularity for each
+star (for example, a value of <code>0.5</code> would allow half-star ratings). </p>
+</li>
+<li>To do something when a new rating has been set, add the following code
+to the end of the {@link android.app.Activity#onCreate(Bundle) onCreate()} method:
+<pre>
+final RatingBar ratingbar = (RatingBar) findViewById(R.id.ratingbar);
+ratingbar.setOnRatingBarChangeListener(new OnRatingBarChangeListener() {
+    public void onRatingChanged(RatingBar ratingBar, float rating, boolean fromUser) {
+        Toast.makeText(HelloFormStuff.this, "New Rating: " + rating, Toast.LENGTH_SHORT).show();
+    }
+});
+</pre>
+<p>This captures the {@link android.widget.RatingBar} widget from the layout with {@link
+android.app.Activity#findViewById(int)} and then sets an {@link
+android.widget.RatingBar.OnRatingBarChangeListener}. The {@link
+android.widget.RatingBar.OnRatingBarChangeListener#onRatingChanged(RatingBar,float,boolean)
+onRatingChanged()} callback method then defines the action to perform when the user sets a rating.
+In this case, a simple {@link android.widget.Toast} message displays the new rating.</p>
+
+<li>Run the application.</li>
+</ol>
+
+<p>If you've added all the form widgets above, your application should look like this:</p>
 <img src="images/hello-formstuff.png" width="150px" />
 
 <h3>References</h3>
@@ -258,5 +379,6 @@ use <code>setChecked(true)</code> or <code>toggle()</code>. </p>
 	<li>{@link android.widget.CheckBox}</li>
 	<li>{@link android.widget.RadioButton}</li>
 	<li>{@link android.widget.ToggleButton}</li>
+  <li>{@link android.widget.RatingBar}</li>
 </ul>
 
