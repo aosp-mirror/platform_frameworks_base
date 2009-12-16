@@ -211,8 +211,7 @@ href="{@docRoot}guide/appendix/api-levels.html">API Levels</a> document. </p>
 
 <h4>Live Wallpapers</h4>
 
-<p>The following additions provide APIs for you to develop active (and
-interactive) wallpapers:</p>
+<p>The following additions provide APIs for you to develop animated wallpapers:</p>
 <ul>
 <li>New {@link android.service.wallpaper} package.</li>
 <li>New {@link android.app.WallpaperInfo} class.</li>
