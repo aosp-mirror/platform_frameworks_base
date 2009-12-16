@@ -79,6 +79,7 @@ public:
     ObjectBaseRef<Type> mAllocType;
 
 
+    float color[4];
 };
 
 
