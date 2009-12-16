@@ -16,6 +16,7 @@
 
 package com.android.frameworktest.gridview.touch;
 
+import android.content.Context;
 import android.test.ActivityInstrumentationTestCase;
 import android.test.suitebuilder.annotation.LargeTest;
 import android.test.suitebuilder.annotation.MediumTest;
@@ -30,6 +31,7 @@ import com.android.frameworktest.gridview.GridVerticalSpacingStackFromBottom;
 public class GridTouchVerticalSpacingStackFromBottomTest extends ActivityInstrumentationTestCase<GridVerticalSpacingStackFromBottom> {
     private GridVerticalSpacingStackFromBottom mActivity;
     private GridView mGridView;
+    private ViewConfiguration mViewConfig;
 
     public GridTouchVerticalSpacingStackFromBottomTest() {
         super("com.android.frameworktest", GridVerticalSpacingStackFromBottom.class);
@@ -41,6 +43,8 @@ public class GridTouchVerticalSpacingStackFromBottomTest extends ActivityInstrum
 
         mActivity = getActivity();
         mGridView = getActivity().getGridView();
+        final Context context = mActivity.getApplicationContext();
+        mViewConfig = ViewConfiguration.get(context);
     }
 
     @MediumTest
@@ -83,7 +87,7 @@ public class GridTouchVerticalSpacingStackFromBottomTest extends ActivityInstrum
         int lastTop = lastChild.getTop();
         
         TouchUtils.dragViewBy(this, firstChild, Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL, 0,
-                ViewConfiguration.getTouchSlop() + 1 + 10);
+                mViewConfig.getScaledTouchSlop() + 1 + 10);
         
         View newLastChild = mGridView.getChildAt(mGridView.getChildCount() - 1);
         
@@ -107,7 +111,7 @@ public class GridTouchVerticalSpacingStackFromBottomTest extends ActivityInstrum
                 (int) (mActivity.getWindowManager().getDefaultDisplay().getHeight() * 0.75f));
         
         assertEquals("View scrolled to wrong position", firstTop
-                + (distance - ViewConfiguration.getTouchSlop() - 1), firstChild.getTop());
+                + (distance - mViewConfig.getScaledTouchSlop() - 1), firstChild.getTop());
     } 
     
     @LargeTest
