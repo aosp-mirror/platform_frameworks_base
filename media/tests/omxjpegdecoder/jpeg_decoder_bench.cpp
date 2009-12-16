@@ -79,7 +79,7 @@ int testDecodePixels(SkImageDecoder* decoder, SkStream* stream,
     } else {
         int64_t delay = getNowUs() - startTime;
         printf("Decoding Time in PixelsMode %.1f msec.\n", delay / 1000.0f);
-        char* filename = "/sdcard/omxJpegDecodedBitmap.rgba";
+        const char* filename = "/sdcard/omxJpegDecodedBitmap.rgba";
         return storeBitmapToFile(bitmap, filename);
     }
 }

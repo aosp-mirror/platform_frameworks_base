@@ -38,7 +38,7 @@
 
 using namespace android;
 
-static void getJpegOutput(MediaBuffer* buffer, char* filename) {
+static void getJpegOutput(MediaBuffer* buffer, const char* filename) {
     int size = buffer->range_length();
     int offset = buffer->range_offset();
     FILE *pFile = fopen(filename, "w+");
@@ -59,9 +59,9 @@ static void getJpegOutput(MediaBuffer* buffer, char* filename) {
     return;
 }
 
-extern int storeBitmapToFile(SkBitmap* bitmap, char* filename) {
+extern int storeBitmapToFile(SkBitmap* bitmap, const char* filename) {
     bitmap->lockPixels();
-    void* data = bitmap->getPixels();
+    uint8_t* data = (uint8_t *)bitmap->getPixels();
     int size = bitmap->getSize();
     FILE* fp = fopen(filename, "w+");
 
@@ -113,11 +113,11 @@ bool OmxJpegImageDecoder::onDecode(SkStream* stream,
 
     // mode == DecodePixels
     if (!this->allocPixelRef(bm, NULL)) {
-        LOGI(LOG_TAG, "Cannot allocPixelRef()!");
+        LOGI("Cannot allocPixelRef()!");
         return false;
     }
 
-    sp<OMXCodec> decoder = getDecoder(&mClient, source);
+    sp<MediaSource> decoder = getDecoder(&mClient, source);
     return decodeSource(decoder, source, bm);
 }
 
@@ -127,21 +127,21 @@ JPEGSource* OmxJpegImageDecoder::prepareMediaSource(SkStream* stream) {
     return new JPEGSource(dataSource);
 }
 
-sp<OMXCodec> OmxJpegImageDecoder::getDecoder(
+sp<MediaSource> OmxJpegImageDecoder::getDecoder(
         OMXClient *client, const sp<MediaSource>& source) {
     sp<MetaData> meta = source->getFormat();
-    sp<OMXCodec> decoder = OMXCodec::Create(
+    sp<MediaSource> decoder = OMXCodec::Create(
             client->interface(), meta, false /* createEncoder */, source);
 
     CHECK(decoder != NULL);
     return decoder;
 }
 
-bool OmxJpegImageDecoder::decodeSource(sp<OMXCodec> decoder,
+bool OmxJpegImageDecoder::decodeSource(sp<MediaSource> decoder,
         const sp<MediaSource>& source, SkBitmap* bm) {
     status_t rt = decoder->start();
     if (rt != OK) {
-        LOGE(LOG_TAG, "Cannot start OMX Decoder!");
+        LOGE("Cannot start OMX Decoder!");
         return false;
     }
     int64_t startTime = getNowUs();
@@ -171,7 +171,7 @@ bool OmxJpegImageDecoder::decodeSource(sp<OMXCodec> decoder,
     return true;
 }
 
-void OmxJpegImageDecoder::installPixelRef(MediaBuffer *buffer, sp<OMXCodec> decoder,
+void OmxJpegImageDecoder::installPixelRef(MediaBuffer *buffer, sp<MediaSource> decoder,
         SkBitmap* bm) {
 
     // set bm's pixelref based on the data in buffer.

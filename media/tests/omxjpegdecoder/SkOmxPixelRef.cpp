@@ -22,7 +22,7 @@
 using namespace android;
 
 SkOmxPixelRef::SkOmxPixelRef(SkColorTable* ctable, MediaBuffer* buffer,
-        sp<OMXCodec> decoder)  {
+        sp<MediaSource> decoder)  {
     mBuffer = buffer;
     mDecoder = decoder;
     mSize = buffer->size();
