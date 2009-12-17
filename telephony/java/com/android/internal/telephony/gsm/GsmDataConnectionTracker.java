@@ -748,49 +748,12 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
     }
 
     private void notifyDefaultData(String reason) {
-        setupDnsProperties();
         setState(State.CONNECTED);
         phone.notifyDataConnection(reason);
         startNetStatPoll();
         // reset reconnect timer
         mRetryMgr.resetRetryCount();
         mReregisterOnReconnectFailure = false;
-    }
-
-    private void setupDnsProperties() {
-        int mypid = android.os.Process.myPid();
-        String[] servers = getDnsServers(null);
-        String propName;
-        String propVal;
-        int count;
-
-        count = 0;
-        for (int i = 0; i < servers.length; i++) {
-            String serverAddr = servers[i];
-            if (!TextUtils.equals(serverAddr, "0.0.0.0")) {
-                SystemProperties.set("net.dns" + (i+1) + "." + mypid, serverAddr);
-                count++;
-            }
-        }
-        for (int i = count+1; i <= 4; i++) {
-            propName = "net.dns" + i + "." + mypid;
-            propVal = SystemProperties.get(propName);
-            if (propVal.length() != 0) {
-                SystemProperties.set(propName, "");
-            }
-        }
-        /*
-         * Bump the property that tells the name resolver library
-         * to reread the DNS server list from the properties.
-         */
-        propVal = SystemProperties.get("net.dnschange");
-        if (propVal.length() != 0) {
-            try {
-                int n = Integer.parseInt(propVal);
-                SystemProperties.set("net.dnschange", "" + (n+1));
-            } catch (NumberFormatException e) {
-            }
-        }
     }
 
     /**
