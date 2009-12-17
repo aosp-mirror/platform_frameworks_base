@@ -720,6 +720,12 @@ player_type getPlayerType(const char* url)
         }
     }
 
+    if (!strncasecmp(url, "http://", 7)) {
+        // For now, we're going to use PV for http-based playback,
+        // until we can clear up a few more issues.
+        return PV_PLAYER;
+    }
+
     return getDefaultPlayerType();
 }
 
