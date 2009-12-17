@@ -143,6 +143,9 @@ public class Typeface {
 
     // don't allow clients to call this directly
     private Typeface(int ni) {
+        if (0 == ni) {
+            throw new RuntimeException("native typeface cannot be made");
+        }
         native_instance = ni;
     }
     
