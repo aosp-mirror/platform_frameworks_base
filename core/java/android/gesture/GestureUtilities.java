@@ -366,6 +366,38 @@ final class GestureUtilities {
         }
         return Math.acos(sum);
     }
+    
+    /**
+     * Calculate the "minimum" cosine distance between two instances
+     * 
+     * @param vector1
+     * @param vector2
+     * @param numOrientations the maximum number of orientation allowed
+     * @return the distance between the two instances (between 0 and Math.PI)
+     */
+    static double minimumCosineDistance(float[] vector1, float[] vector2, int numOrientations) {
+        final int len = vector1.length;
+        double a = 0;
+        double b = 0;
+        for (int i = 0; i < len; i += 2) {
+            a += vector1[i] * vector2[i] + vector1[i + 1] * vector2[i + 1];
+            b += vector1[i] * vector2[i + 1] - vector1[i + 1] * vector2[i];
+        }
+        if (a != 0) {
+            final double tan = b/a;
+            final double angle = Math.atan(tan);
+            if (numOrientations > 2 && Math.abs(angle) >= Math.PI / numOrientations) {
+                return Math.acos(a);
+            } else {
+                final double cosine = Math.cos(angle);
+                final double sine = cosine * tan; 
+                return Math.acos(a * cosine + b * sine);
+            }
+        } else {
+            return Math.PI / 2;
+        }
+    }
+
 
     static OrientedBoundingBox computeOrientedBoundingBox(ArrayList<GesturePoint> pts) {
         GestureStroke stroke = new GestureStroke(pts);

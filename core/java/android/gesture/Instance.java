@@ -94,7 +94,7 @@ class Instance {
         float orientation = (float)Math.atan2(pts[1] - center[1], pts[0] - center[0]);
 
         float adjustment = -orientation;
-        if (orientationType == GestureStore.ORIENTATION_SENSITIVE) {
+        if (orientationType != GestureStore.ORIENTATION_INVARIANT) {
             int count = ORIENTATIONS.length;
             for (int i = 0; i < count; i++) {
                 float delta = ORIENTATIONS[i] - orientation;
