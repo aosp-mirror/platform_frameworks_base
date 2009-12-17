@@ -124,6 +124,15 @@
     run_command(&c, TIMEOUT);                       \
 }
 
+#define EXEC_XBIN6(cmd, a1, a2, a3, a4, a5, a6)  \
+{                                           \
+    static struct Command c = {             \
+        "/system/xbin/" cmd,                \
+        { cmd, a1, a2, a3, a4, a5, a6, 0 }  \
+    };                                      \
+    run_command(&c, TIMEOUT);               \
+}
+
 #define PROPERTY(name) print_property(name)
 
 struct Command {
